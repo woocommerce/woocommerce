@@ -33,13 +33,21 @@ use WP_User;
 class Capabilities {
 
 	/**
-	 * Default WP role for brand-new POS-only accounts.
+	 * Dedicated WP role for brand-new POS-only accounts.
 	 *
 	 * POS access is keyed on `woocommerce_pos_*` capabilities, not this role (see
-	 * has_pos_access()), so new POS-only accounts use the stock `subscriber` role.
-	 * A dedicated `pos_staff` role is planned for a later iteration.
+	 * has_pos_access()). New POS-only accounts are created with the dedicated
+	 * `pos_staff` role (registered in WC_Install::create_roles()), which holds only
+	 * `read` — the customer/subscriber shape — so a POS-only user can manage their
+	 * own profile without gaining any non-POS capability. It is a label/default for
+	 * new accounts, never the authorization signal.
 	 */
-	public const DEFAULT_STAFF_ROLE = 'subscriber';
+	public const POS_STAFF_ROLE = 'pos_staff';
+
+	/**
+	 * Default WP role for brand-new POS-only accounts. Alias of POS_STAFF_ROLE.
+	 */
+	public const DEFAULT_STAFF_ROLE = self::POS_STAFF_ROLE;
 
 	/**
 	 * POS capability identifiers.
@@ -80,6 +88,16 @@ class Capabilities {
 	public const POS_PRESET_META_KEY = 'woocommerce_pos_preset';
 
 	/**
+	 * Preset identifier aliases.
+	 *
+	 * The canonical preset constants live on POSPreset; these aliases let callers
+	 * reference a preset as Capabilities::POS_PRESET_* alongside the cap constants.
+	 */
+	public const POS_PRESET_CASHIER = POSPreset::CASHIER;
+	public const POS_PRESET_MANAGER = POSPreset::MANAGER;
+	public const POS_PRESET_ADMIN   = POSPreset::ADMIN;
+
+	/**
 	 * All known POS capability identifiers.
 	 *
 	 * The canonical list of `woocommerce_pos_*` caps — used to test for POS access and, by the
@@ -99,6 +117,18 @@ class Capabilities {
 			self::CAP_MANAGE_STAFF,
 			self::CAP_EXIT_POS,
 		);
+	}
+
+	/**
+	 * All assignable POS presets, in ascending capability order.
+	 *
+	 * Convenience alias for POSPreset::get_all() so callers can resolve the preset
+	 * list through Capabilities alongside the cap/preset constants.
+	 *
+	 * @return string[]
+	 */
+	public static function assignable_pos_presets(): array {
+		return POSPreset::get_all();
 	}
 
 	/**
@@ -138,11 +168,50 @@ class Capabilities {
 		}
 
 		foreach ( self::all_pos_capabilities() as $cap ) {
-			if ( ! empty( $user->allcaps[ $cap ] ) ) {
+			if ( self::user_holds_pos_capability( $user, $cap ) ) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Whether a user holds a specific known POS capability.
+	 *
+	 * Reads the user's stored grants (WP_User::$allcaps) directly — the same
+	 * primitive has_pos_access() uses — rather than user_can(). It therefore does
+	 * not honor the multisite super-admin runtime grant: a super admin needs an
+	 * explicit `woocommerce_pos_*` cap like anyone else. Capabilities outside
+	 * all_pos_capabilities() always return false, keeping this scoped to the POS
+	 * model.
+	 *
+	 * @param int    $user_id    Target user.
+	 * @param string $capability One of the self::CAP_* values.
+	 * @return bool
+	 *
+	 * @since 11.0.0
+	 */
+	public static function user_has_pos_capability( int $user_id, string $capability ): bool {
+		if ( ! in_array( $capability, self::all_pos_capabilities(), true ) ) {
+			return false;
+		}
+
+		$user = get_userdata( $user_id );
+		return $user instanceof WP_User && self::user_holds_pos_capability( $user, $capability );
+	}
+
+	/**
+	 * Whether a resolved user holds a POS capability per their stored `$allcaps`.
+	 *
+	 * The single place the `$allcaps` lookup lives, shared by has_pos_access() and
+	 * user_has_pos_capability() so both resolve POS caps identically.
+	 *
+	 * @param WP_User $user       Resolved user.
+	 * @param string  $capability Capability identifier.
+	 * @return bool
+	 */
+	private static function user_holds_pos_capability( WP_User $user, string $capability ): bool {
+		return ! empty( $user->allcaps[ $capability ] );
 	}
 
 	/**
