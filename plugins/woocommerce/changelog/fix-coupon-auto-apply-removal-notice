@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Explain why an auto-applied coupon cannot be removed on the shortcode cart, instead of reporting a generic problem over AJAX and doing nothing at all for a direct removal link.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make the cart coupon is_removable response field optional so adding it does not break consumers that construct CartResponseCouponItem.

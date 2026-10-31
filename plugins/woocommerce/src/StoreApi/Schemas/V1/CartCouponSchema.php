@@ -45,6 +45,12 @@ class CartCouponSchema extends AbstractSchema {
 					'validate_callback' => [ $this, 'coupon_exists' ],
 				],
 			],
+			'is_removable'  => [
+				'description' => __( 'Whether the coupon can be removed from the cart. Coupons applied automatically cannot be removed directly, since they would just be re-added.', 'woocommerce' ),
+				'type'        => 'boolean',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+			],
 			'totals'        => [
 				'description' => __( 'Total amounts provided using the smallest unit of the currency.', 'woocommerce' ),
 				'type'        => 'object',
@@ -95,6 +101,7 @@ class CartCouponSchema extends AbstractSchema {
 		return [
 			'code'          => $coupon->get_code(),
 			'discount_type' => $coupon->get_discount_type(),
+			'is_removable'  => ! $coupon->get_auto_apply(),
 			'totals'        => (object) $this->prepare_currency_response(
 				[
 					'total_discount'     => $this->prepare_money_response( $cart->get_coupon_discount_amount( $coupon_code ), wc_get_price_decimals() ),

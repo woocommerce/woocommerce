@@ -80,7 +80,10 @@ class CartRemoveCoupon extends AbstractCartRoute {
 			throw new RouteException( 'woocommerce_rest_cart_coupon_invalid_code', esc_html__( 'Coupon cannot be removed because it is not already applied to the cart.', 'woocommerce' ), 409 );
 		}
 
-		$cart = $this->cart_controller->get_cart_instance();
+		if ( $coupon->get_auto_apply() ) {
+			throw new RouteException( 'woocommerce_rest_cart_coupon_not_removable', esc_html__( 'This coupon is applied automatically and cannot be removed.', 'woocommerce' ), 403 );
+		}
+
 		$cart->remove_coupon( $coupon_code );
 
 		return rest_ensure_response( $this->schema->get_item_response( $cart ) );
