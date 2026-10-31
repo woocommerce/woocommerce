@@ -57,6 +57,51 @@ class WC_Admin_Assets_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The order refund script receives the precision the order total was stored at.
+	 * @param string $store Store currency.
+	 * @param int    $decimals Store decimals.
+	 * @param string $currency Order currency.
+	 * @param float  $total Stored order total for a 9.00 line with a 0.747 tax.
+	 * @param int    $expected Expected refund script precision.
+	 * @testWith ["JPY", 0, "USD", 9.75, 2]
+	 *           ["JPY", 0, "USD", 10.0, 0]
+	 *           ["JPY", 0, "JPY", 10.0, 0]
+	 *           ["USD", 2, "USD", 9.75, 2]
+	 */
+	public function test_refund_currency_precision_localization( string $store, int $decimals, string $currency, float $total, int $expected ): void {
+		global $theorder;
+		$previous_order = $theorder;
+		update_option( 'woocommerce_currency', $store );
+		update_option( 'woocommerce_price_num_decimals', $decimals );
+		$theorder = wc_create_order();
+		$theorder->set_currency( $currency );
+		$item = new WC_Order_Item_Product();
+		$item->set_quantity( 1 );
+		$item->set_subtotal( 9 );
+		$item->set_total( 9 );
+		$item->set_taxes(
+			array(
+				'total'    => array( 1 => 0.747 ),
+				'subtotal' => array( 1 => 0.747 ),
+			)
+		);
+		$theorder->add_item( $item );
+		$theorder->set_total( $total );
+		set_current_screen( wc_get_page_screen_id( 'shop_order' ) );
+		wp_scripts()->add_data( 'wc-admin-meta-boxes', 'data', '' );
+		try {
+			$this->sut->admin_scripts();
+			$data     = wp_scripts()->get_data( 'wc-admin-meta-boxes', 'data' );
+			$settings = json_decode( substr( $data, strpos( $data, '{' ), strrpos( $data, '}' ) - strpos( $data, '{' ) + 1 ), true );
+			$this->assertSame( $expected, (int) $settings['currency_format_num_decimals'] );
+		} finally {
+			$theorder = $previous_order;
+			wp_scripts()->add_data( 'wc-admin-meta-boxes', 'data', '' );
+			set_current_screen();
+		}
+	}
+
+	/**
 	 * @testdox Quick Edit remains loadable when the optional datepicker is unavailable.
 	 */
 	public function test_quick_edit_does_not_depend_on_datepicker(): void {

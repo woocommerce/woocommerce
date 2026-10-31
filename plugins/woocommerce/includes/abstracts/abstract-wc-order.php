@@ -10,6 +10,7 @@
  * @package     WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Internal\Utilities\CurrencyUtil;
 use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
@@ -1099,7 +1100,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$value = (float) $value;
 		}
 
-		$this->set_prop( 'total', wc_format_decimal( $value, wc_get_price_decimals() ) );
+		$this->set_prop( 'total', wc_format_decimal( $value, CurrencyUtil::get_price_decimals( $this->get_currency( 'edit' ) ) ) );
 	}
 
 	/**
