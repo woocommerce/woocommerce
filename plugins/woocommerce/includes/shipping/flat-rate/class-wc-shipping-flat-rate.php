@@ -8,6 +8,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\ShippingClassCostBehavior;
 use Automattic\WooCommerce\Internal\Shipping\FlatRate\WeightPlaceholder;
 
 /**
@@ -65,6 +66,27 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		$this->tax_status           = $this->get_option( 'tax_status' );
 		$this->cost                 = $this->get_option( 'cost' );
 		$this->type                 = $this->get_option( 'type', 'class' );
+	}
+
+	/**
+	 * Get an option, deriving unset class behavior from its effective cost.
+	 *
+	 * @since 11.3.0
+	 * @param string $key Option key.
+	 * @param mixed  $empty_value Value to use when the option is empty.
+	 * @return mixed
+	 */
+	public function get_option( $key, $empty_value = null ) {
+		$value = parent::get_option( $key, $empty_value );
+		if ( '' !== $value || ( 'no_class_cost_behavior' !== $key && 0 !== strpos( $key, 'class_cost_behavior_' ) ) ) {
+			return $value;
+		}
+
+		$cost_key = 'no_class_cost_behavior' === $key ? 'no_class_cost' : str_replace( 'class_cost_behavior_', 'class_cost_', $key );
+		$fields   = $this->get_instance_form_fields();
+		$cost     = $this->get_option( $cost_key, $fields[ $cost_key ]['default'] ?? '' );
+
+		return '' === $cost ? ShippingClassCostBehavior::NONE : ShippingClassCostBehavior::ADD;
 	}
 
 	/**
@@ -219,8 +241,14 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				// Also handles BW compatibility when slugs were used instead of ids.
 				$shipping_class_term = get_term_by( 'slug', $shipping_class, 'product_shipping_class' );
 				$class_cost_string   = $shipping_class_term && $shipping_class_term->term_id ? $this->get_option( 'class_cost_' . $shipping_class_term->term_id, $this->get_option( 'class_cost_' . $shipping_class, '' ) ) : $this->get_option( 'no_class_cost', '' );
+				$behavior_key        = $shipping_class_term && $shipping_class_term->term_id ? 'class_cost_behavior_' . $shipping_class_term->term_id : 'no_class_cost_behavior';
+				$behavior            = $this->get_option( $behavior_key );
 
-				if ( '' === $class_cost_string ) {
+				if ( ShippingClassCostBehavior::UNAVAILABLE === $behavior ) {
+					return;
+				}
+
+				if ( ShippingClassCostBehavior::NONE === $behavior || '' === $class_cost_string ) {
 					continue;
 				}
 
@@ -373,5 +401,17 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		}
 
 		return $value;
+	}
+
+	/**
+	 * Validate the shipping class behavior selected in method settings.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param mixed $value Submitted behavior.
+	 * @return string
+	 */
+	public function sanitize_class_cost_behavior( $value ) {
+		return in_array( $value, array( ShippingClassCostBehavior::ADD, ShippingClassCostBehavior::NONE, ShippingClassCostBehavior::UNAVAILABLE ), true ) ? $value : ShippingClassCostBehavior::ADD;
 	}
 }

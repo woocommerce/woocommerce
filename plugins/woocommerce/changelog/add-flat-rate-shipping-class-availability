@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add an option to exclude a flat rate when the cart contains products in a selected shipping class.
