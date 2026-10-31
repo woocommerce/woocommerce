@@ -9755,6 +9755,29 @@ body.woocommerce-settings-payments-section_legacy {
 	margin-block-end: 16px;
 }
 
+.wc-agentic-commerce-summary {
+	max-inline-size: 900px;
+
+	li {
+		display: flex;
+		justify-content: space-between;
+		padding: 8px 12px;
+		margin: 0;
+		background: #fff;
+		border: 1px solid #dcdcde;
+		border-block-end-width: 0;
+
+		&:last-child {
+			border-block-end-width: 1px;
+		}
+	}
+}
+
+.wc-agentic-commerce-checks + details,
+.wc-agentic-commerce-checks ~ h4 {
+	margin-block-start: 12px;
+}
+
 .wc-agentic-commerce-ucp-switch {
 	vertical-align: middle;
 }

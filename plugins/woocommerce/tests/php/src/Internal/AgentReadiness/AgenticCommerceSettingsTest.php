@@ -193,10 +193,10 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_coming_soon', 'yes' );
 		$coming_soon = $this->render_page();
 
-		$this->assertStringContainsString( 'could not load its own page', $live );
+		$this->assertStringContainsString( 'This couldn&#039;t be checked.', $live );
 		$this->assertStringNotContainsString( 'Launch your store', $live );
 		$this->assertStringContainsString( 'Launch your store to run this check.', $coming_soon );
-		$this->assertStringNotContainsString( 'could not load its own page', $coming_soon );
+		$this->assertStringNotContainsString( 'This couldn&#039;t be checked.', $coming_soon );
 	}
 
 	/**
@@ -213,6 +213,45 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'aria-checked="true"', $html );
 		$this->assertStringContainsString( 'required setup checks below still need fixing.', $html );
 		$this->assertStringNotContainsString( 'AI agents can now find and shop your store.</span>', $html );
+	}
+
+	/**
+	 * @testdox The page answers each merchant question, marks a likely conflict, hides checks whose prerequisite failed, and folds passed checks away.
+	 */
+	public function test_output_groups_summary_and_conflict(): void {
+		$row = static fn( string $id, ?bool $ok, bool $conflict = false ): array => array(
+			'id'       => $id,
+			'ok'       => $ok,
+			'blocks'   => 'discovery',
+			'name'     => $id . ' name',
+			'label'    => $id . ' label',
+			'why'      => $id . ' why',
+			'fix'      => $id . ' fix',
+			'fix_url'  => '',
+			'conflict' => $conflict,
+		);
+		update_option(
+			'woocommerce_agent_readiness_report',
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(
+					$row( 'product_jsonld_present', false, true ),
+					$row( 'product_offer_jsonld', null ),
+					$row( 'sitemap_lists_products', true ),
+				),
+			)
+		);
+
+		$html = $this->render_page();
+
+		foreach ( array( 'Can agents get in?', 'Can they find your store?', 'Do they understand your products?', 'Can they buy?' ) as $question ) {
+			$this->assertStringContainsString( $question, $html );
+		}
+		$this->assertStringContainsString( 'Agent shopping is off', $html, 'UCP is off in this test' );
+		$this->assertStringContainsString( 'Likely conflict', $html );
+		$this->assertStringContainsString( 'Something on your store may be replacing this.', $html );
+		$this->assertStringNotContainsString( 'product_offer_jsonld name', $html, 'Its prerequisite failed' );
+		$this->assertMatchesRegularExpression( '#<details>.*sitemap_lists_products name.*</details>#s', $html );
 	}
 
 	/**

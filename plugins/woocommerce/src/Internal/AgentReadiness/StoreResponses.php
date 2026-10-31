@@ -105,8 +105,9 @@ class StoreResponses {
 
 	/**
 	 * The newest published product of a type the report checks that shoppers can find, or null when there is none.
-	 * Password protected products are skipped, since their page shows a form instead of the product; only the five
-	 * newest are looked at.
+	 * Password protected products are skipped, since their page shows a form instead of the product. A product with
+	 * a price comes first, so one unfinished product doesn't decide a check for the whole store; only the five newest
+	 * are looked at.
 	 */
 	public function product(): ?\WC_Product {
 		if ( null === $this->product ) {
@@ -122,7 +123,13 @@ class StoreResponses {
 				)
 			);
 			foreach ( is_array( $products ) ? $products : array() as $product ) {
-				if ( $product instanceof \WC_Product && '' === $product->get_post_password() ) {
+				if ( ! $product instanceof \WC_Product || '' !== $product->get_post_password() ) {
+					continue;
+				}
+				if ( false === $this->product ) {
+					$this->product = $product;
+				}
+				if ( '' !== $product->get_price() ) {
 					$this->product = $product;
 					break;
 				}

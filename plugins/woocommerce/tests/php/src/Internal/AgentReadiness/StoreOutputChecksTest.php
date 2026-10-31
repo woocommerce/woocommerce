@@ -306,6 +306,56 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The product checks read the newest product with a price, so an unfinished newer product doesn't decide them.
+	 */
+	public function test_product_checks_prefer_a_priced_product(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( self::factory()->attachment->create_object( array( 'file' => 'image.jpg' ) ) );
+		$product->set_date_created( time() - HOUR_IN_SECONDS );
+		$product->save();
+		$product = wc_get_product( $product->get_id() );
+		$this->serve( array( self::path_of( $product ) => array( 200, self::page_with( array( self::core_product_jsonld( $product ) ) ) ) ) );
+		$unpriced = WC_Helper_Product::create_simple_product();
+		$unpriced->set_regular_price( '' );
+		$unpriced->save();
+
+		$this->assertSame( array( true, true, true ), $this->product_results() );
+	}
+
+	/**
+	 * @testdox WooCommerce's own product JSON-LD is no conflict. One from another source, or a second one beside it, is, and the first failure says so.
+	 */
+	public function test_product_jsonld_conflict(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$path    = self::path_of( $product );
+		$core    = self::core_product_jsonld( $product );
+		$other   = array(
+			'@type' => 'Product',
+			'name'  => 'Dummy Product',
+		);
+
+		$this->serve( array( $path => array( 200, self::page_with( array( $core ) ) ) ) );
+		$this->assertTrue( $this->results()['product_jsonld_from_core'] );
+
+		remove_all_filters( 'pre_http_request' );
+		$https = str_replace( 'http:', 'https:', $core );
+		$this->serve( array( $path => array( 200, self::page_with( array( $https ) ) ) ) );
+		$this->assertTrue( $this->results()['product_jsonld_from_core'], 'Only the scheme differs' );
+
+		remove_all_filters( 'pre_http_request' );
+		$this->serve( array( $path => array( 200, self::page_with( array( $other ) ) ) ) );
+		$this->assertFalse( $this->results()['product_jsonld_from_core'], 'Replaced' );
+
+		remove_all_filters( 'pre_http_request' );
+		$this->serve( array( $path => array( 200, self::page_with( array( $core, $other ) ) ) ) );
+		$this->assertFalse( $this->results()['product_jsonld_from_core'], 'Repeated' );
+
+		$conflicts = array_column( $this->sut->all(), 'conflict', 'id' );
+		$this->assertTrue( $conflicts['product_jsonld_from_core'] );
+		$this->assertFalse( $conflicts['sitemap_lists_products'] );
+	}
+
+	/**
 	 * @testdox Product JSON-LD from an SEO plugin, in a @graph with its own types and offer list, passes in place of core's.
 	 */
 	public function test_seo_plugin_product_jsonld_passes(): void {
