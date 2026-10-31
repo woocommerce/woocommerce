@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Split the Blocks e2e parallel CI jobs that run on PRs into 2 shards; no production change.
+
