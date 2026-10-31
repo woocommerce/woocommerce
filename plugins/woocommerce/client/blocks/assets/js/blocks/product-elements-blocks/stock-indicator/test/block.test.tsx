@@ -118,6 +118,7 @@ jest.mock( '@woocommerce/block-settings', () => ( {
 		country: 'US',
 		locale: 'en_US',
 	},
+	DEFAULT_LOCALE: {},
 	blocksConfig: {
 		defaultAvatar: 'test-avatar-url',
 	},
