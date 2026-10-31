@@ -1,4 +1,4 @@
 Significance: minor
 Type: update
 
-Update react-router-dom from 6.3 to 7.18 to fix reported security issues.
+Remove the react-router-dom dependency; useConfirmUnsavedChanges now types its location with history.
