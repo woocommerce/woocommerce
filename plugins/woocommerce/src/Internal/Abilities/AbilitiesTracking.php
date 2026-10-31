@@ -942,6 +942,7 @@ class AbilitiesTracking {
 		$ability          = wp_get_ability( $ability_name );
 		$meta             = null === $ability ? array() : $ability->get_meta();
 		$woocommerce_meta = $meta['woocommerce'] ?? null;
+
 		return is_array( $woocommerce_meta ) && true === ( $woocommerce_meta['track_usage'] ?? false );
 	}
 
