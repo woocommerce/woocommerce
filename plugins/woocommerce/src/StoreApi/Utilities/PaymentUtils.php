@@ -92,7 +92,7 @@ class PaymentUtils {
 	 * @return string
 	 */
 	public static function get_checkout_payment_method(): string {
-		$chosen_payment_method = (string) WC()->session->get( 'chosen_payment_method' );
+		$chosen_payment_method = self::get_session_payment_method();
 
 		if ( '' !== $chosen_payment_method && isset( WC()->payment_gateways()->get_available_payment_gateways()[ $chosen_payment_method ] ) ) {
 			return $chosen_payment_method;
@@ -113,7 +113,8 @@ class PaymentUtils {
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 
 		/**
-		 * Filters the payment method the Checkout block starts with.
+		 * Filters the payment method the checkout starts with: the Checkout block, the classic checkout
+		 * shortcode and the pay-for-order page all ask it.
 		 *
 		 * Return a gateway id from `$available_gateways` to preselect it, or an empty string to select nothing;
 		 * any other value selects nothing. Attach the callback by `init` at the latest.
@@ -148,10 +149,10 @@ class PaymentUtils {
 			return $saved_payment_methods['default']['method']['gateway'] ?? '';
 		}
 
-		$chosen_payment_method = WC()->session->get( 'chosen_payment_method' );
+		$chosen_payment_method = self::get_session_payment_method();
 
 		// If payment method is already stored in session, use it.
-		if ( $chosen_payment_method ) {
+		if ( '' !== $chosen_payment_method ) {
 			return $chosen_payment_method;
 		}
 
@@ -165,5 +166,19 @@ class PaymentUtils {
 		$first_key            = array_key_first( $enabled_payment_gateways );
 		$first_payment_method = $enabled_payment_gateways[ $first_key ];
 		return $first_payment_method->id ?? '';
+	}
+
+	/**
+	 * The payment method remembered in the session, or '' when there is none or no session, as in
+	 * WP-CLI, cron and REST requests outside the checkout.
+	 *
+	 * @return string
+	 */
+	private static function get_session_payment_method(): string {
+		if ( ! WC()->session instanceof \WC_Session ) {
+			return '';
+		}
+
+		return (string) WC()->session->get( 'chosen_payment_method' );
 	}
 }
