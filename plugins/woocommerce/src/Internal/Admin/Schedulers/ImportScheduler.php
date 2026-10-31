@@ -138,12 +138,17 @@ abstract class ImportScheduler implements ImportInterface {
 		);
 		wc_admin_record_tracks_event( 'import_job_start', $properties );
 
-		// When we are skipping already imported items, the table of items to import gets smaller in
-		// every batch, so we want to always import the first page.
-		$page  = $skip_existing ? 1 : $batch_number;
-		$items = static::get_items( $batch_size, $page, $days, $skip_existing );
+		if ( $skip_existing ) {
+			// Imported items drop out of the query, so always read from its start. Items import() leaves
+			// out (test orders, for example) stay there, so pass over the ones earlier batches left out.
+			$import_stats = get_option( self::IMPORT_STATS_OPTION, array() );
+			$skipped      = (array) ( $import_stats[ static::$name ]['skipped'] ?? array() );
+			$ids          = array_slice( array_diff( static::get_items( $batch_size + count( $skipped ), 1, $days, true )->ids, $skipped ), 0, $batch_size );
+		} else {
+			$ids = static::get_items( $batch_size, $batch_number, $days, false )->ids;
+		}
 
-		foreach ( $items->ids as $id ) {
+		foreach ( $ids as $id ) {
 			try {
 				static::import( $id );
 			} catch ( \Throwable $e ) {
@@ -153,13 +158,32 @@ abstract class ImportScheduler implements ImportInterface {
 		}
 
 		$import_stats                              = get_option( self::IMPORT_STATS_OPTION, array() );
-		$imported_count                            = absint( $import_stats[ static::$name ]['imported'] ) + count( $items->ids );
+		$imported_count                            = absint( $import_stats[ static::$name ]['imported'] ) + count( $ids );
 		$import_stats[ static::$name ]['imported'] = $imported_count;
+		$left_out                                  = $skip_existing ? static::get_skipped_import_ids( $ids ) : array();
+		if ( $left_out ) {
+			// IDs rather than a count, so a stale copy of this option can only pass over items import() leaves out.
+			$import_stats[ static::$name ]['skipped'] = array_values( array_unique( array_merge( (array) ( $import_stats[ static::$name ]['skipped'] ?? array() ), $left_out ) ) );
+		}
 		update_option( self::IMPORT_STATS_OPTION, $import_stats );
 
 		$properties['imported_count'] = $imported_count;
 
 		wc_admin_record_tracks_event( 'import_job_complete', $properties );
+	}
+
+	/**
+	 * Of the items a batch just imported, the ones import() left out, so later batches pass over them.
+	 *
+	 * Schedulers whose import() can leave an item without a record override this. By default none is left out.
+	 *
+	 * @since 11.3.0
+	 * @param array $ids Item IDs from the batch.
+	 * @return int[]
+	 */
+	protected static function get_skipped_import_ids( array $ids ): array {
+		unset( $ids ); // Avoid parameter not used PHPCS errors.
+		return array();
 	}
 
 	/**

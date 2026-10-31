@@ -123,6 +123,7 @@ class ReportsSync {
 
 		foreach ( self::get_schedulers() as $scheduler ) {
 			$import_stats[ $scheduler::$name ]['imported'] = 0;
+			$import_stats[ $scheduler::$name ]['skipped']  = array();
 			$import_stats[ $scheduler::$name ]['total']    = $totals[ $scheduler::$name ];
 		}
 
