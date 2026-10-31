@@ -135,10 +135,11 @@ class SessionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A registered customer cart token loads the session it names.
+	 * @testdox A registered customer cart token loads the session it names while that customer is logged in.
 	 */
 	public function test_customer_token_loads_the_session_it_names(): void {
 		$customer_id = (string) $this->factory->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( (int) $customer_id );
 
 		$_SERVER['HTTP_CART_TOKEN'] = CartTokenUtils::get_cart_token( $customer_id );
 
@@ -146,5 +147,32 @@ class SessionHandlerTest extends WC_Unit_Test_Case {
 		$handler->init();
 
 		$this->assertSame( $customer_id, $handler->get_customer_id(), 'A customer token should address its own session' );
+	}
+
+	/**
+	 * @testdox A registered customer cart token does not load their session for a logged-out or different user.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $log_in_other_user Whether another customer is logged in when the token is used.
+	 */
+	public function test_customer_token_does_not_load_the_session_for_another_user( bool $log_in_other_user ): void {
+		$customer_id = (string) $this->factory->user->create( array( 'role' => 'customer' ) );
+		$token       = CartTokenUtils::get_cart_token( $customer_id );
+
+		wp_set_current_user( (int) $customer_id );
+		$_SERVER['HTTP_CART_TOKEN'] = $token;
+		$customer_session           = new SessionHandler();
+		$customer_session->init();
+		$customer_session->set( 'customer_note', 'Leave at the back door' );
+		$customer_session->save_data();
+
+		wp_set_current_user( $log_in_other_user ? $this->factory->user->create( array( 'role' => 'customer' ) ) : 0 );
+
+		$handler = new SessionHandler();
+		$handler->init();
+
+		$this->assertNotSame( $customer_id, $handler->get_customer_id(), 'The token should not address the customer session' );
+		$this->assertNull( $handler->get( 'customer_note' ), 'The customer session data should not be loaded' );
 	}
 }

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop a Store API Cart-Token issued to a logged-in customer from loading their cart after they log out.
