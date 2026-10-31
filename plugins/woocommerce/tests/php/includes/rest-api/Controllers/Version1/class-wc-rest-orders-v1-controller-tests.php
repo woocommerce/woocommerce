@@ -214,8 +214,40 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$reloaded = new WC_Order_Item_Product( $item->get_id() );
 		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'The existing variation ID should be preserved.' );
 		$this->assertSame( $variation->get_id(), $reloaded->get_product()->get_id(), 'The line item should continue to resolve to the variation.' );
-		$this->assertSame( $parent->get_name(), $reloaded->get_name(), 'The line-item name should retain its pre-regression resynchronization behavior.' );
-		$this->assertSame( $parent->get_tax_class(), $reloaded->get_tax_class(), 'The line-item tax class should retain its pre-regression resynchronization behavior.' );
+		$this->assertSame( 'Historical line item name', $reloaded->get_name(), 'Naming the line\'s own parent should leave the name it was sold under alone.' );
+		$this->assertSame( '', $reloaded->get_tax_class(), 'Naming the line\'s own parent should leave the tax class it was sold under alone.' );
+	}
+
+	/**
+	 * @testdox Updating a line with its own product keeps the name and tax class it was sold with.
+	 */
+	public function test_update_line_item_with_unchanged_product_keeps_name_and_tax_class(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = WC_Helper_Order::create_order( 1, $product );
+		$item    = current( $order->get_items() );
+		$product->set_name( 'Renamed after the sale' );
+		$product->set_tax_class( 'reduced-rate' );
+		$product->save();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'         => $item->get_id(),
+						'product_id' => $product->get_id(),
+						'quantity'   => 3,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), 'An update naming the line\'s own product should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item->get_id() );
+		$this->assertSame( 3, $reloaded->get_quantity(), 'The posted quantity should be applied.' );
+		$this->assertSame( $item->get_name(), $reloaded->get_name(), 'The line should keep the name it was sold under.' );
+		$this->assertSame( $item->get_tax_class(), $reloaded->get_tax_class(), 'The line should keep the tax class it was sold under.' );
 	}
 
 	/**
