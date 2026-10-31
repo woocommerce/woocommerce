@@ -20,10 +20,12 @@ const {
 /**
  * Internal dependencies
  */
+const {
+	sharedOptimizationConfig,
+} = require( '@woocommerce/internal-build/webpack-optimization' );
 const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
 const { getAlias, getResolve } = require( './webpack-helpers' );
 const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
-const { sharedOptimizationConfig } = require( './webpack-shared-config' );
 const {
 	scriptModuleEntries,
 	styleEntries,
