@@ -1679,6 +1679,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			remove_action( 'woocommerce_extensible_abilities_init', $register );
 		}
 
+		$this->assertSame( 'Applies to: simple.', $schema['properties']['extensions']['properties']['test-ext']['properties']['plan']['description'] );
 		$this->assertArrayHasKey( 'plan', $schema['properties']['extensions']['properties']['test-ext']['properties'] );
 		$this->assertSame( 400, $rejected->get_status() );
 		$this->assertSame( 'woocommerce_ability_field_object_type', $rejected->get_data()['code'] );

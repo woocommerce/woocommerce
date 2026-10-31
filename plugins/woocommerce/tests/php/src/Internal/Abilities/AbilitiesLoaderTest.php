@@ -341,7 +341,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should list every field in the flat create and update schemas.
+	 * @testdox Should list every field in the flat create and update schemas, and the fields of each type in the type description.
 	 */
 	public function test_product_mutation_schemas_list_every_field(): void {
 		$create_schema = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
@@ -353,6 +353,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			foreach ( array( 'type', 'virtual', 'downloadable', 'regular_price', 'external_url', 'grouped_products', 'manage_stock' ) as $field ) {
 				$this->assertArrayHasKey( $field, $schema['properties'] );
 			}
+			$description = $schema['properties']['type']['description'];
+			$this->assertStringContainsString( 'Fields each type takes.', $description );
+			$this->assertStringContainsString( 'external: name, sku, regular_price, sale_price, description, short_description, status, external_url, button_text', $description );
+			$this->assertStringContainsString( 'grouped: name, sku, description, short_description, status, grouped_products', $description );
 		}
 
 		$this->assertSame( array( 'name' ), $create_schema['required'] );

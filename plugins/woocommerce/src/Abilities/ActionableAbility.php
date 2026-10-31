@@ -277,8 +277,8 @@ abstract class ActionableAbility extends \WP_Ability {
 
 	/**
 	 * Add the `extensions` property one time, at the top level of the input
-	 * schema. It lists the fields that have an update_callback, and allows null
-	 * for each one. Each `oneOf`, `anyOf` and `allOf` branch only accepts the
+	 * schema. It lists the fields that have an update_callback, allows null for
+	 * each one, and says which object types a field with `object_types` applies to. Each `oneOf`, `anyOf` and `allOf` branch only accepts the
 	 * key, so a branch with `additionalProperties` set to false does not reject
 	 * it, and the schema does not grow with the number of branches.
 	 *
@@ -311,6 +311,11 @@ abstract class ActionableAbility extends \WP_Ability {
 						}
 						if ( isset( $field_schema['enum'] ) && ! in_array( null, $field_schema['enum'], true ) ) {
 							$field_schema['enum'][] = null;
+						}
+						if ( ! empty( $args['object_types'] ) ) {
+							/* translators: %s: Comma-separated list of object types. */
+							$applies_to                  = sprintf( __( 'Applies to: %s.', 'woocommerce' ), implode( ', ', $args['object_types'] ) );
+							$field_schema['description'] = trim( ( $field_schema['description'] ?? '' ) . ' ' . $applies_to );
 						}
 						return $field_schema;
 					},
