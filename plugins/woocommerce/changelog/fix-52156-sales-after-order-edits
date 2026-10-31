@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update product sales counts when products or quantities in an existing order are edited.
