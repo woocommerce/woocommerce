@@ -106,7 +106,7 @@ class Text extends Abstract_Block_Renderer {
 	private function has_personalization_tag( string $block_content ): bool {
 		$html = new \WP_HTML_Tag_Processor( $block_content );
 		while ( $html->next_token() ) {
-			if ( '#comment' === $html->get_token_type() && preg_match( '/^\[[a-zA-Z0-9\-\/]+(?:\s+[^\]]*)?\]$/', trim( $html->get_modifiable_text() ) ) ) {
+			if ( '#comment' === $html->get_token_type() && preg_match( '/^\[[a-zA-Z0-9\-\/]+(?:\s+.*)?\]$/s', trim( $html->get_modifiable_text() ) ) ) {
 				return true;
 			}
 		}

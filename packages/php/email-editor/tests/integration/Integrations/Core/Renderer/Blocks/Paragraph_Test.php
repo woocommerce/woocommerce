@@ -85,6 +85,10 @@ class Paragraph_Test extends \Email_Editor_Integration_Test_Case {
 		$content  = "<p>\n\t<!--[woocommerce/customer-first-name default=\"there\"]--> </p>";
 		$rendered = $this->paragraph_renderer->render( $content, $this->parsed_paragraph, $this->rendering_context );
 		$this->assertStringContainsString( '<!--[woocommerce/customer-first-name default="there"]-->', $rendered );
+
+		$content  = '<p><!--[woocommerce/customer-first-name default="[guest]"]--></p>';
+		$rendered = $this->paragraph_renderer->render( $content, $this->parsed_paragraph, $this->rendering_context );
+		$this->assertStringContainsString( '<!--[woocommerce/customer-first-name default="[guest]"]-->', $rendered );
 	}
 
 	/**
