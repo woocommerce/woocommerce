@@ -38,6 +38,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/product-update',
 		'woocommerce/product-delete',
 		'woocommerce/orders-query',
+		'woocommerce/order-send-email',
 		'woocommerce/order-update',
 		'woocommerce/order-update-status',
 		'woocommerce/order-add-note',
@@ -287,6 +288,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'woocommerce/orders-query'           => array(
 				'readonly'    => true,
 				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/order-send-email'    => array(
+				'readonly'    => false,
+				'idempotent'  => false,
 				'destructive' => false,
 			),
 			'woocommerce/order-update'        => array(
@@ -961,6 +967,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'id' => 1,
 				),
 			),
+			'order-send-email'    => array(
+				'woocommerce/order-send-email',
+				array(
+					'id'    => 1,
+					'email' => 'invoice',
+				),
+			),
 			'order-update'        => array(
 				'woocommerce/order-update',
 				array(
@@ -1046,6 +1059,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		wp_set_current_user( $limited_order_manager_id );
 
 		$cases = array(
+			'woocommerce/order-send-email'    => array(
+				'id'    => $order->get_id(),
+				'email' => 'invoice',
+			),
 			'woocommerce/order-update'        => array(
 				'id'       => $order->get_id(),
 				'shipping' => array( 'city' => 'Unauthorized city' ),
@@ -1364,6 +1381,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'orders-query'        => array(
 				'woocommerce/orders-query',
 				array( 'id' => -123 ),
+			),
+			'order-send-email'    => array(
+				'woocommerce/order-send-email',
+				array(
+					'id'    => -123,
+					'email' => 'invoice',
+				),
 			),
 			'order-update'        => array(
 				'woocommerce/order-update',
@@ -3930,7 +3954,532 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$result = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'id' => 999999 ) );
 
 		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_order_not_found', $result->get_error_code() );
+		$this->assertSame( 'woocommerce_ability_order_not_found', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should change addresses and the customer note of a completed order, keep other fields and the status, and leave addresses out of the output.
+	 */
+	public function test_order_update_changes_addresses_and_customer_note(): void {
+		$order = $this->create_order_for_update( 'completed' );
+		$order->set_shipping_address_1( 'Keep this street' );
+		$order->save();
+		$total = $order->get_total();
+
+		$result = wp_get_ability( 'woocommerce/order-update' )->execute(
+			array(
+				'id'            => $order->get_id(),
+				'billing'       => array(
+					'city'  => 'Porto',
+					'email' => 'new@example.com',
+				),
+				'shipping'      => array(
+					'country'  => 'PT',
+					'state'    => '',
+					'postcode' => '1000-001',
+					'city'     => 'Lisbon',
+				),
+				'customer_note' => 'Leave at the door.',
+			)
+		);
+
+		$this->assertIsArray( $result );
+		$saved = wc_get_order( $order->get_id() );
+		$this->assertSame( 'Porto', $saved->get_billing_city() );
+		$this->assertSame( 'new@example.com', $saved->get_billing_email() );
+		$this->assertSame( 'Lisbon', $saved->get_shipping_city() );
+		$this->assertSame( 'Keep this street', $saved->get_shipping_address_1() );
+		$this->assertSame( 'Leave at the door.', $saved->get_customer_note() );
+		$this->assertSame( 'completed', $saved->get_status() );
+		$this->assertSame( $total, $saved->get_total() );
+		$this->assertArrayNotHasKey( 'shipping', $result['order'] );
+		$this->assertArrayNotHasKey( 'billing', $result['order'] );
+		$this->assertArrayNotHasKey( 'customer_note', $result['order'] );
+	}
+
+	/**
+	 * @testdox Should refuse an invalid order update with a code in the convention, and save nothing.
+	 *
+	 * @dataProvider provider_invalid_order_updates
+	 *
+	 * @param array  $input Input without the order ID.
+	 * @param string $code  Expected error code.
+	 * @param string $hint  Text that the message must have.
+	 */
+	public function test_order_update_refuses_invalid_input( array $input, string $code, string $hint ): void {
+		$order = $this->create_order_for_update( 'pending' );
+		$order->set_shipping_country( 'US' );
+		$order->set_shipping_state( 'CA' );
+		$order->set_shipping_city( 'Before' );
+		$order->save();
+
+		$result = wp_get_ability( 'woocommerce/order-update' )->execute( array( 'id' => $order->get_id() ) + $input );
+
+		$this->assertWPError( $result );
+		$this->assertSame( $code, $result->get_error_code() );
+		$this->assertStringContainsString( $hint, $result->get_error_message() );
+		$this->assertSame( 'Before', wc_get_order( $order->get_id() )->get_shipping_city() );
+	}
+
+	/**
+	 * Invalid inputs for the order update ability.
+	 *
+	 * @return array<string, array{0: array, 1: string, 2: string}>
+	 */
+	public function provider_invalid_order_updates(): array {
+		return array(
+			'no fields'           => array( array(), 'woocommerce_ability_order_no_fields', 'Send at least one' ),
+			'country'             => array(
+				array(
+					'shipping' => array(
+						'city'    => 'After',
+						'country' => 'XX',
+					),
+				),
+				'woocommerce_ability_order_shipping_country_invalid',
+				'ISO 3166-1',
+			),
+			'state kept from old' => array(
+				array(
+					'shipping' => array(
+						'city'    => 'After',
+						'country' => 'CA',
+					),
+				),
+				'woocommerce_ability_order_shipping_state_invalid',
+				'ON',
+			),
+			'postcode'            => array(
+				array(
+					'shipping' => array(
+						'city'     => 'After',
+						'postcode' => 'not a zip',
+					),
+				),
+				'woocommerce_ability_order_shipping_postcode_invalid',
+				'format of that country',
+			),
+			'billing email'       => array(
+				array(
+					'shipping' => array( 'city' => 'After' ),
+					'billing'  => array( 'email' => 'not-an-email' ),
+				),
+				'woocommerce_ability_order_billing_email_invalid',
+				'valid address',
+			),
+			'unknown line'        => array(
+				array(
+					'shipping'     => array( 'city' => 'After' ),
+					'remove_items' => array( 999999 ),
+				),
+				'woocommerce_ability_order_line_not_found',
+				'include_line_items',
+			),
+			'no line target'      => array(
+				array(
+					'shipping'   => array( 'city' => 'After' ),
+					'line_items' => array( array( 'quantity' => 2 ) ),
+				),
+				'woocommerce_ability_order_line_item_target_invalid',
+				'product_id',
+			),
+			'unknown product'     => array(
+				array(
+					'shipping'   => array( 'city' => 'After' ),
+					'line_items' => array( array( 'product_id' => 999999 ) ),
+				),
+				'woocommerce_ability_order_product_not_found',
+				'woocommerce/products-query',
+			),
+			'bad shipping total'  => array(
+				array(
+					'shipping'       => array( 'city' => 'After' ),
+					'shipping_lines' => array(
+						array(
+							'method_title' => 'Courier',
+							'total'        => 'free',
+						),
+					),
+				),
+				'woocommerce_ability_order_shipping_line_total_invalid',
+				'9.99',
+			),
+			'no method title'     => array(
+				array(
+					'shipping'       => array( 'city' => 'After' ),
+					'shipping_lines' => array( array( 'total' => '1.00' ) ),
+				),
+				'woocommerce_ability_order_shipping_line_method_title_required',
+				'method_title',
+			),
+		);
+	}
+
+	/**
+	 * @testdox Should add, change and remove product lines, recalculate totals, and save the order once.
+	 */
+	public function test_order_update_writes_product_lines(): void {
+		$order   = $this->create_order_for_update( 'pending' );
+		$kept    = current( $order->get_items() );
+		$removed = new \WC_Order_Item_Product();
+		$removed->set_props(
+			array(
+				'name'     => 'Removed',
+				'quantity' => 1,
+				'subtotal' => 50,
+				'total'    => 50,
+			)
+		);
+		$order->add_item( $removed );
+		$order->calculate_totals( false );
+		$order->save();
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 30 ) );
+		$saves   = 0;
+		$count   = static function () use ( &$saves ) {
+			++$saves;
+		};
+		add_action( 'woocommerce_update_order', $count );
+		$old_quantity = $kept->get_quantity();
+		$old_total    = (float) $kept->get_total();
+
+		$result = wp_get_ability( 'woocommerce/order-update' )->execute(
+			array(
+				'id'           => $order->get_id(),
+				'line_items'   => array(
+					array(
+						'id'       => $kept->get_id(),
+						'quantity' => $old_quantity * 2,
+					),
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 2,
+					),
+				),
+				'remove_items' => array( $removed->get_id() ),
+			)
+		);
+		remove_action( 'woocommerce_update_order', $count );
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 1, $saves );
+		$saved = wc_get_order( $order->get_id() );
+		$items = array_values( $saved->get_items() );
+		$this->assertCount( 2, $items );
+		$this->assertSame( $old_quantity * 2, $items[0]->get_quantity() );
+		$this->assertEqualsWithDelta( $old_total * 2, (float) $items[0]->get_total(), 0.001 );
+		$this->assertSame( $product->get_id(), $items[1]->get_product_id() );
+		$this->assertEqualsWithDelta( 60.0, (float) $items[1]->get_total(), 0.001 );
+		$expected = $old_total * 2 + 60 + (float) $saved->get_shipping_total();
+		$this->assertEqualsWithDelta( $expected, (float) $saved->get_total(), 0.001 );
+		$this->assertSame( $items[1]->get_id(), $result['order']['line_items'][1]['id'] );
+	}
+
+	/**
+	 * @testdox Should add, change and remove shipping lines, include them in the output, and return them from the orders query.
+	 */
+	public function test_order_update_writes_shipping_lines(): void {
+		$order       = $this->create_order_for_update( 'pending' );
+		$existing_id = array_key_first( $order->get_shipping_methods() );
+
+		$result = wp_get_ability( 'woocommerce/order-update' )->execute(
+			array(
+				'id'             => $order->get_id(),
+				'shipping_lines' => array(
+					array(
+						'method_id'    => 'courier',
+						'method_title' => 'Courier',
+						'total'        => '7.50',
+					),
+					array(
+						'method_id'    => 'pickup',
+						'method_title' => 'Pickup',
+						'total'        => '2.50',
+					),
+				),
+				'remove_items'   => array( $existing_id ),
+			)
+		);
+
+		$this->assertIsArray( $result );
+		$this->assertCount( 2, $result['order']['shipping_lines'] );
+		$saved = wc_get_order( $order->get_id() );
+		$this->assertEqualsWithDelta( 10.0, (float) $saved->get_shipping_total(), 0.001 );
+		$this->assertArrayNotHasKey( $existing_id, $saved->get_shipping_methods() );
+
+		$change_id = $result['order']['shipping_lines'][1]['id'];
+		$result    = wp_get_ability( 'woocommerce/order-update' )->execute(
+			array(
+				'id'             => $order->get_id(),
+				'shipping_lines' => array(
+					array(
+						'id'    => $change_id,
+						'total' => '3.00',
+					),
+				),
+			)
+		);
+
+		$this->assertIsArray( $result );
+		$this->assertEqualsWithDelta( 10.5, (float) wc_get_order( $order->get_id() )->get_shipping_total(), 0.001 );
+
+		$query = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'id'                 => $order->get_id(),
+				'include_line_items' => true,
+			)
+		);
+		$this->assertSame( 'Pickup', $query['orders'][0]['shipping_lines'][1]['method_title'] );
+	}
+
+	/**
+	 * @testdox Should refuse a line change on an order status that does not allow editing, and name the fix.
+	 */
+	public function test_order_update_refuses_line_change_on_order_that_is_not_editable(): void {
+		$order       = $this->create_order_for_update( 'completed' );
+		$shipping_id = array_key_first( $order->get_shipping_methods() );
+
+		$result = wp_get_ability( 'woocommerce/order-update' )->execute(
+			array(
+				'id'           => $order->get_id(),
+				'remove_items' => array( $shipping_id ),
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_order_not_editable', $result->get_error_code() );
+		$this->assertStringContainsString( 'woocommerce/order-update-status', $result->get_error_message() );
+		$this->assertArrayHasKey( $shipping_id, wc_get_order( $order->get_id() )->get_shipping_methods() );
+	}
+
+	/**
+	 * @testdox Should refuse a line ID of another type or another order.
+	 */
+	public function test_order_update_refuses_line_of_another_type_or_order(): void {
+		$order = $this->create_order_for_update( 'pending' );
+		$other = $this->create_order_for_update( 'pending' );
+		$fee   = new \WC_Order_Item_Fee();
+		$fee->set_total( 5 );
+		$order->add_item( $fee );
+		$order->save();
+
+		foreach ( array( $fee->get_id(), array_key_first( $other->get_items() ) ) as $item_id ) {
+			$result = wp_get_ability( 'woocommerce/order-update' )->execute(
+				array(
+					'id'           => $order->get_id(),
+					'remove_items' => array( $item_id ),
+				)
+			);
+
+			$this->assertWPError( $result );
+			$this->assertSame( 'woocommerce_ability_order_line_not_found', $result->get_error_code() );
+		}
+	}
+
+	/**
+	 * @testdox Should apply coupons again to two added products.
+	 */
+	public function test_order_update_applies_coupons_to_added_products(): void {
+		$order  = $this->create_order_for_update( 'pending' );
+		$coupon = \WC_Helper_Coupon::create_coupon(
+			'tenpercent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$order->apply_coupon( $coupon );
+		$order->save();
+		$discount_before = (float) $order->get_discount_total();
+		$first           = \WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+		$second          = \WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 200 ) );
+
+		$result = wp_get_ability( 'woocommerce/order-update' )->execute(
+			array(
+				'id'         => $order->get_id(),
+				'line_items' => array(
+					array( 'product_id' => $first->get_id() ),
+					array( 'product_id' => $second->get_id() ),
+				),
+			)
+		);
+
+		$this->assertIsArray( $result );
+		$saved = wc_get_order( $order->get_id() );
+		$items = array_values( $saved->get_items() );
+		$this->assertEqualsWithDelta( 90.0, (float) $items[ count( $items ) - 2 ]->get_total(), 0.001 );
+		$this->assertEqualsWithDelta( 180.0, (float) $items[ count( $items ) - 1 ]->get_total(), 0.001 );
+		$this->assertEqualsWithDelta( $discount_before + 30, (float) $saved->get_discount_total(), 0.001 );
+	}
+
+	/**
+	 * @testdox Should change product stock when a line of an order with reduced stock changes quantity or is removed.
+	 */
+	public function test_order_update_adjusts_stock_of_changed_and_removed_lines(): void {
+		$changed = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 10,
+			)
+		);
+		$removed = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 10,
+			)
+		);
+		$order   = new \WC_Order();
+		$order->add_product( $changed, 2 );
+		$order->add_product( $removed, 3 );
+		$order->set_status( 'on-hold' );
+		$order->save();
+		wc_reduce_stock_levels( $order->get_id() );
+		$order = wc_get_order( $order->get_id() );
+		$items = array_values( $order->get_items() );
+
+		$result = wp_get_ability( 'woocommerce/order-update' )->execute(
+			array(
+				'id'           => $order->get_id(),
+				'line_items'   => array(
+					array(
+						'id'       => $items[0]->get_id(),
+						'quantity' => 5,
+					),
+				),
+				'remove_items' => array( $items[1]->get_id() ),
+			)
+		);
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 5, wc_get_product( $changed->get_id() )->get_stock_quantity() );
+		$this->assertSame( 10, wc_get_product( $removed->get_id() )->get_stock_quantity() );
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_items() );
+	}
+
+	/**
+	 * @testdox Should send the named email to the billing email and keep the status.
+	 *
+	 * @dataProvider provider_order_emails
+	 *
+	 * @param string $email  Email name.
+	 * @param string $status Order status.
+	 */
+	public function test_order_send_email_sends_named_email( string $email, string $status ): void {
+		$order = $this->create_order_for_update( $status );
+		$order->set_billing_email( 'customer@example.com' );
+		$order->save();
+		$mails   = array();
+		$capture = static function ( $short_circuit, $atts ) use ( &$mails ) {
+			$mails[] = $atts;
+			return true;
+		};
+		add_filter( 'pre_wp_mail', $capture, 10, 2 );
+
+		$result = wp_get_ability( 'woocommerce/order-send-email' )->execute(
+			array(
+				'id'    => $order->get_id(),
+				'email' => $email,
+			)
+		);
+		remove_filter( 'pre_wp_mail', $capture );
+
+		$this->assertSame(
+			array(
+				'order_id' => $order->get_id(),
+				'email'    => $email,
+			),
+			$result
+		);
+		$this->assertCount( 1, $mails );
+		$this->assertSame( 'customer@example.com', $mails[0]['to'] );
+		$this->assertSame( $status, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * The emails that the order send email ability sends.
+	 *
+	 * @return array<string, array{0: string, 1: string}>
+	 */
+	public function provider_order_emails(): array {
+		return array(
+			'invoice'    => array( 'invoice', 'pending' ),
+			'processing' => array( 'processing', 'processing' ),
+			'completed'  => array( 'completed', 'completed' ),
+		);
+	}
+
+	/**
+	 * @testdox Should refuse to send an order email that does not apply, and send nothing.
+	 */
+	public function test_order_send_email_refusals(): void {
+		$mails   = 0;
+		$capture = static function () use ( &$mails ) {
+			++$mails;
+			return true;
+		};
+		add_filter( 'pre_wp_mail', $capture );
+		$ability = wp_get_ability( 'woocommerce/order-send-email' );
+		$order   = $this->create_order_for_update( 'pending' );
+
+		$mismatch = $ability->execute(
+			array(
+				'id'    => $order->get_id(),
+				'email' => 'completed',
+			)
+		);
+
+		add_filter( 'woocommerce_order_get_billing_email', '__return_empty_string' );
+		$no_recipient = $ability->execute(
+			array(
+				'id'    => $order->get_id(),
+				'email' => 'invoice',
+			)
+		);
+
+		remove_filter( 'woocommerce_order_get_billing_email', '__return_empty_string' );
+
+		$order = $this->create_order_for_update( 'processing' );
+		add_filter( 'woocommerce_email_enabled_customer_processing_order', '__return_false' );
+		$disabled = $ability->execute(
+			array(
+				'id'    => $order->get_id(),
+				'email' => 'processing',
+			)
+		);
+		remove_filter( 'woocommerce_email_enabled_customer_processing_order', '__return_false' );
+		remove_filter( 'pre_wp_mail', $capture );
+
+		$this->assertSame( 'woocommerce_ability_order_email_status_mismatch', $mismatch->get_error_code() );
+		$this->assertSame( 'woocommerce_ability_order_email_no_recipient', $no_recipient->get_error_code() );
+		$this->assertSame( 'woocommerce_ability_order_email_disabled', $disabled->get_error_code() );
+		$this->assertSame( 0, $mails );
+
+		add_filter( 'pre_wp_mail', '__return_false' );
+		$failed = $ability->execute(
+			array(
+				'id'    => $order->get_id(),
+				'email' => 'invoice',
+			)
+		);
+		remove_filter( 'pre_wp_mail', '__return_false' );
+
+		$this->assertSame( 'woocommerce_ability_order_email_send_failed', $failed->get_error_code() );
+	}
+
+	/**
+	 * Create an order with a product line and a shipping line, for the order write tests.
+	 *
+	 * @param string $status Order status.
+	 * @return \WC_Order
+	 */
+	private function create_order_for_update( string $status ): \WC_Order {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( $status );
+		$order->save();
+		$this->created_order_ids[] = $order->get_id();
+
+		return wc_get_order( $order->get_id() );
 	}
 
 	/**
@@ -4005,7 +4554,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$result = wp_get_ability( 'woocommerce/order-notes-query' )->execute( array( 'id' => 999999 ) );
 
 		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_order_not_found', $result->get_error_code() );
+		$this->assertSame( 'woocommerce_ability_order_not_found', $result->get_error_code() );
 	}
 
 	/**

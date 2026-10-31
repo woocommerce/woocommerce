@@ -3837,11 +3837,108 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$saved = wc_get_order( $order->get_id() );
 		$this->assertSame( 1, $saves );
 		$this->assertSame( 'high', $output['order']['extensions']['test-ext']['priority'] );
-		$this->assertSame( 'Lisbon', $output['order']['shipping']['city'] );
 		$this->assertSame( 400, $refused->get_status() );
 		$this->assertSame( 'test_refused', $refused->get_data()['code'] );
 		$this->assertSame( 'Lisbon', $saved->get_shipping_city() );
 		$this->assertSame( 'high', $saved->get_meta( '_test_priority' ) );
+	}
+
+	/**
+	 * @testdox Should save no line change and fire no totals action when a validator refuses, and fire it staged once when the change saves.
+	 */
+	public function test_order_update_refusal_saves_no_line_change(): void {
+		$this->register_validator(
+			'order',
+			'test-ext',
+			static function ( \WC_Order $order ) {
+				return count( $order->get_shipping_methods() ) === 0 ? new \WP_Error( 'test_refused', 'Keep one shipping line.' ) : null;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'pending' );
+		$order->save();
+		$shipping_id = array_key_first( $order->get_shipping_methods() );
+		$total       = $order->get_total();
+		$staged      = array();
+		$record      = static function ( $and_taxes, $order, $is_staged = false ) use ( &$staged ) {
+			$staged[] = $is_staged;
+		};
+		add_action( 'woocommerce_order_after_calculate_totals', $record, 10, 3 );
+
+		$refused = $this->run_ability_response(
+			'woocommerce/order-update',
+			array(
+				'id'           => $order->get_id(),
+				'remove_items' => array( $shipping_id ),
+			)
+		);
+
+		wp_cache_flush();
+		$saved = wc_get_order( $order->get_id() );
+		$this->assertSame( 'test_refused', $refused->get_data()['code'] );
+		$this->assertArrayHasKey( $shipping_id, $saved->get_shipping_methods() );
+		$this->assertSame( $total, $saved->get_total() );
+		$this->assertSame( array(), $staged );
+
+		$output = $this->run_ability(
+			'woocommerce/order-update',
+			array(
+				'id'             => $order->get_id(),
+				'shipping_lines' => array(
+					array(
+						'id'    => $shipping_id,
+						'total' => '25.00',
+					),
+				),
+			)
+		);
+
+		remove_action( 'woocommerce_order_after_calculate_totals', $record, 10 );
+		$this->assertSame( array( true ), $staged );
+		$this->assertSame( '25.00', wc_format_decimal( $output['order']['shipping_lines'][0]['total'], 2 ) );
+	}
+
+	/**
+	 * @testdox Should refuse a line change, and save nothing, when the order class overrides add_product() without its twin.
+	 */
+	public function test_order_update_refuses_class_without_stage_twin(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'pending' );
+		$order->save();
+		$order_class  = get_class(
+			new class() extends \WC_Order {
+				/**
+				 * Add a product with a rule of this class.
+				 *
+				 * @param \WC_Product $product Product.
+				 * @param int         $qty     Quantity.
+				 * @param array       $args    Arguments.
+				 * @return int
+				 */
+				public function add_product( $product, $qty = 1, $args = array() ) {
+					return parent::add_product( $product, $qty, $args );
+				}
+			}
+		);
+		$filter_class = static fn() => $order_class;
+		add_filter( 'woocommerce_order_class', $filter_class, 100 );
+		$product      = \WC_Helper_Product::create_simple_product();
+		$count        = count( $order->get_items() );
+
+		$refused = $this->run_ability_response(
+			'woocommerce/order-update',
+			array(
+				'id'         => $order->get_id(),
+				'line_items' => array( array( 'product_id' => $product->get_id() ) ),
+			)
+		);
+
+		remove_filter( 'woocommerce_order_class', $filter_class, 100 );
+		$this->assertSame( 'woocommerce_ability_order_staging_unsupported', $refused->get_data()['code'] );
+		$this->assertStringContainsString( 'stage_product_item', $refused->get_data()['message'] );
+		$this->assertCount( $count, ( new \WC_Order( $order->get_id() ) )->get_items() );
 	}
 
 	/**

@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderNotesQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderSendEmail;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
@@ -45,6 +46,7 @@ class AbilitiesLoader {
 		OrdersQuery::class,
 		OrderAddNote::class,
 		OrderNotesQuery::class,
+		OrderSendEmail::class,
 		OrderUpdate::class,
 		OrderUpdateStatus::class,
 		PaymentGatewaysQuery::class,
