@@ -2,7 +2,7 @@
   {
 	"id": "woocommerce_payments:woopay",
 	"title": "WooPayments",
-	"content": "Payments made simple — including WooPay, a new express checkout feature.<br/><br/>By using WooPayments you agree to the <a href=\"https://wordpress.com/tos/\" target=\"_blank\">Terms of Service</a> (including WooPay <a href=\"https://wordpress.com/tos/#more-woopay-specifically\" target=\"_blank\">merchant terms</a>) and <a href=\"https://automattic.com/privacy/\" target=\"_blank\">Privacy Policy</a>.",
+	"content": "Payments made simple — including WooPay, a new express checkout feature.<br/><br/>By using WooPayments you agree to the <a href=\"https://automattic.com/tos/\" target=\"_blank\">Terms of Service</a> (including WooPay <a href=\"https://automattic.com/tos/#more-woopay-specifically\" target=\"_blank\">merchant terms</a>) and <a href=\"https://automattic.com/privacy/\" target=\"_blank\">Privacy Policy</a>.",
 	"image": "https://woocommerce.com/wp-content/plugins/wccom-plugins/payment-gateway-suggestions/images/wcpay.svg",
 	"plugins": [
 	  "woocommerce-payments"

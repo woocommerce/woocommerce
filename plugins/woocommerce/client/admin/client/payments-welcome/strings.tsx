@@ -29,7 +29,7 @@ export default {
 			a1: (
 				// eslint-disable-next-line jsx-a11y/anchor-has-content
 				<a
-					href="https://wordpress.com/tos"
+					href="https://automattic.com/tos"
 					target="_blank"
 					rel="noopener noreferrer"
 				/>
@@ -57,7 +57,7 @@ export default {
 			a1: (
 				// eslint-disable-next-line jsx-a11y/anchor-has-content
 				<a
-					href="https://wordpress.com/tos"
+					href="https://automattic.com/tos"
 					target="_blank"
 					rel="noopener noreferrer"
 				/>
@@ -73,7 +73,7 @@ export default {
 			a3: (
 				// eslint-disable-next-line jsx-a11y/anchor-has-content
 				<a
-					href="https://wordpress.com/tos/#more-woopay-specifically"
+					href="https://automattic.com/tos/#more-woopay-specifically"
 					target="_blank"
 					rel="noopener noreferrer"
 				/>

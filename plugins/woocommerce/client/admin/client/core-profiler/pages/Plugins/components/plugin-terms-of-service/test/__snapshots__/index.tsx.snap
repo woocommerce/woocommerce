@@ -11,7 +11,7 @@ exports[`PluginsTermsOfService should render TOS message when Jetpack is selecte
    plugin for free you agree to our 
   <a
     data-link-type="external"
-    href="https://wordpress.com/tos/"
+    href="https://automattic.com/tos/"
     target="_blank"
   >
     Terms of Service
@@ -39,7 +39,7 @@ exports[`PluginsTermsOfService should render TOS message with multiple plugins w
    plugins for free you agree to our 
   <a
     data-link-type="external"
-    href="https://wordpress.com/tos/"
+    href="https://automattic.com/tos/"
     target="_blank"
   >
     Terms of Service
@@ -67,7 +67,7 @@ exports[`PluginsTermsOfService should render TOS message with multiple plugins w
    plugins for free you agree to our 
   <a
     data-link-type="external"
-    href="https://wordpress.com/tos/"
+    href="https://automattic.com/tos/"
     target="_blank"
   >
     Terms of Service
