@@ -274,15 +274,16 @@ class AgentReadiness {
 				continue;
 			}
 			$checks[] = array(
-				'id'      => (string) $check['id'],
-				'ok'      => isset( $check['ok'] ) ? (bool) $check['ok'] : null,
-				'blocks'  => (string) ( $check['blocks'] ?? '' ),
-				'level'   => StoreConditions::LEVEL_RECOMMENDED,
-				'name'    => (string) $check['name'],
-				'label'   => (string) ( $check['label'] ?? '' ),
-				'why'     => (string) ( $check['why'] ?? '' ),
-				'fix'     => (string) ( $check['fix'] ?? '' ),
-				'fix_url' => (string) ( $check['fix_url'] ?? '' ),
+				'id'       => (string) $check['id'],
+				'ok'       => isset( $check['ok'] ) ? (bool) $check['ok'] : null,
+				'blocks'   => (string) ( $check['blocks'] ?? '' ),
+				'level'    => StoreConditions::LEVEL_RECOMMENDED,
+				'name'     => (string) $check['name'],
+				'label'    => (string) ( $check['label'] ?? '' ),
+				'why'      => (string) ( $check['why'] ?? '' ),
+				'fix'      => (string) ( $check['fix'] ?? '' ),
+				'fix_url'  => (string) ( $check['fix_url'] ?? '' ),
+				'conflict' => ! empty( $check['conflict'] ),
 			);
 		}
 		return $checks;

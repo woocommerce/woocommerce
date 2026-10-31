@@ -62,15 +62,16 @@ class StoreOutputChecks {
 				);
 			}
 			$results[] = array(
-				'id'      => $check['id'],
-				'ok'      => $ok,
-				'blocks'  => $check['blocks'],
-				'level'   => StoreConditions::LEVEL_RECOMMENDED,
-				'name'    => $check['name'],
-				'label'   => $check['label'],
-				'why'     => $check['why'],
-				'fix'     => $check['fix'],
-				'fix_url' => $check['fix_url'],
+				'id'       => $check['id'],
+				'ok'       => $ok,
+				'blocks'   => $check['blocks'],
+				'level'    => StoreConditions::LEVEL_RECOMMENDED,
+				'name'     => $check['name'],
+				'label'    => $check['label'],
+				'why'      => $check['why'],
+				'fix'      => $check['fix'],
+				'fix_url'  => $check['fix_url'],
+				'conflict' => ! empty( $check['conflict'] ),
 			);
 		}
 		return $results;
@@ -103,7 +104,7 @@ class StoreOutputChecks {
 			array(
 				'id'      => 'robots_txt_present',
 				'test'    => fn( StoreResponses $responses ): ?bool => $this->robots_present( $responses ),
-				'blocks'  => 'listing',
+				'blocks'  => 'discovery',
 				'name'    => __( 'Store serves a robots.txt file', 'woocommerce' ),
 				'label'   => __( 'No robots.txt file', 'woocommerce' ),
 				'why'     => __( 'Crawlers, including AI shopping crawlers, read robots.txt to find your sitemap.', 'woocommerce' ),
@@ -123,7 +124,7 @@ class StoreOutputChecks {
 			array(
 				'id'      => 'robots_not_blocking_llms_txt',
 				'test'    => fn( StoreResponses $responses ): ?bool => $this->robots_allows( $responses, '/llms.txt' ),
-				'blocks'  => 'listing',
+				'blocks'  => 'discovery',
 				'name'    => __( 'robots.txt lets AI crawlers read llms.txt', 'woocommerce' ),
 				'label'   => __( 'robots.txt blocks llms.txt', 'woocommerce' ),
 				'why'     => __( 'llms.txt tells AI agents what your store sells; a Disallow rule that covers it hides it from them.', 'woocommerce' ),
@@ -133,7 +134,7 @@ class StoreOutputChecks {
 			array(
 				'id'      => 'sitemap_lists_products',
 				'test'    => fn( StoreResponses $responses ): ?bool => $this->sitemap_lists_products( $responses ),
-				'blocks'  => 'listing',
+				'blocks'  => 'discovery',
 				'name'    => __( 'A sitemap lists your products', 'woocommerce' ),
 				'label'   => __( 'No sitemap lists your products', 'woocommerce' ),
 				'why'     => __( 'Crawlers use the sitemap to find new and changed products.', 'woocommerce' ),
@@ -141,19 +142,31 @@ class StoreOutputChecks {
 				'fix_url' => '',
 			),
 			array(
-				'id'      => 'product_jsonld_present',
-				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): bool => array() !== $products ),
-				'blocks'  => 'listing',
-				'name'    => __( 'The newest product page has product structured data', 'woocommerce' ),
-				'label'   => __( 'The newest product page has no product structured data', 'woocommerce' ),
-				'why'     => __( 'Shopping crawlers and search engines read the product\'s JSON-LD to get its name, price and stock without guessing from the page.', 'woocommerce' ),
-				'fix'     => __( 'WooCommerce adds it to the product page. Check whether your theme or an SEO plugin removes it, or turn on product schema in your SEO plugin.', 'woocommerce' ),
-				'fix_url' => '',
+				'id'       => 'product_jsonld_present',
+				'test'     => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): bool => array() !== $products ),
+				'blocks'   => 'discovery',
+				'name'     => __( 'The newest product page has product structured data', 'woocommerce' ),
+				'label'    => __( 'The newest product page has no product structured data', 'woocommerce' ),
+				'why'      => __( 'Shopping crawlers and search engines read the product\'s JSON-LD to get its name, price and stock without guessing from the page.', 'woocommerce' ),
+				'fix'      => __( 'WooCommerce adds it to the product page. Check whether your theme or an SEO plugin removes it, or turn on product schema in your SEO plugin.', 'woocommerce' ),
+				'fix_url'  => '',
+				'conflict' => true,
+			),
+			array(
+				'id'       => 'product_jsonld_from_core',
+				'test'     => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): ?bool => array() === $products ? null : self::has_only_core_product( $products, $responses ) ),
+				'blocks'   => 'discovery',
+				'name'     => __( 'Product structured data comes from WooCommerce, once', 'woocommerce' ),
+				'label'    => __( 'Something replaces or repeats WooCommerce\'s product structured data', 'woocommerce' ),
+				'why'      => __( 'Seen on the newest product page. Agents may read values that differ from your product, or two versions of it.', 'woocommerce' ),
+				'fix'      => __( 'Usually an SEO plugin or your theme. Check its schema settings; if you chose this, you can ignore it.', 'woocommerce' ),
+				'fix_url'  => '',
+				'conflict' => true,
 			),
 			array(
 				'id'      => 'product_jsonld_required_fields',
 				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): ?bool => array() === $products ? null : self::has_required_fields( $products ) ),
-				'blocks'  => 'listing',
+				'blocks'  => 'discovery',
 				'name'    => __( 'Product structured data has a name, image and offer', 'woocommerce' ),
 				'label'   => __( 'Product structured data is missing a name, image or offer', 'woocommerce' ),
 				'why'     => __( 'Without these, agents and search engines can\'t show the product as something to buy.', 'woocommerce' ),
@@ -163,7 +176,7 @@ class StoreOutputChecks {
 			array(
 				'id'      => 'product_offer_jsonld',
 				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): ?bool => array() === $products ? null : self::has_priced_offer( $products ) ),
-				'blocks'  => 'listing',
+				'blocks'  => 'discovery',
 				'name'    => __( 'Product offer has a price and stock status', 'woocommerce' ),
 				'label'   => __( 'Product offer is missing a price or stock status', 'woocommerce' ),
 				'why'     => __( 'Agents compare price and availability before they suggest a product.', 'woocommerce' ),
@@ -173,7 +186,7 @@ class StoreOutputChecks {
 			array(
 				'id'      => 'llms_txt_present',
 				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_llms_txt( $responses, '__return_true' ),
-				'blocks'  => 'listing',
+				'blocks'  => 'discovery',
 				'name'    => __( 'Store serves an llms.txt file', 'woocommerce' ),
 				'label'   => __( 'No llms.txt file', 'woocommerce' ),
 				'why'     => __( 'llms.txt gives AI agents a short summary of your store and links to its main pages.', 'woocommerce' ),
@@ -183,7 +196,7 @@ class StoreOutputChecks {
 			array(
 				'id'      => 'llms_txt_valid',
 				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_llms_txt( $responses, static fn( string $llms_txt ): bool => 1 === preg_match( '/\A\s*#[ \t]+\S/', $llms_txt ) ),
-				'blocks'  => 'listing',
+				'blocks'  => 'discovery',
 				'name'    => __( 'llms.txt starts with the store\'s name as a heading', 'woocommerce' ),
 				'label'   => __( 'llms.txt doesn\'t follow the format', 'woocommerce' ),
 				'why'     => __( 'The format asks for a "# Name" heading first; agents use it to know whose file they read.', 'woocommerce' ),
@@ -193,7 +206,7 @@ class StoreOutputChecks {
 			array(
 				'id'      => 'llms_txt_links_resolve',
 				'test'    => fn( StoreResponses $responses ): ?bool => $this->llms_txt_links_resolve( $responses ),
-				'blocks'  => 'listing',
+				'blocks'  => 'discovery',
 				'name'    => __( 'Links in llms.txt open', 'woocommerce' ),
 				'label'   => __( 'llms.txt links to pages that don\'t open', 'woocommerce' ),
 				'why'     => __( 'Agents follow the links in llms.txt to read your store; a broken link wastes the visit.', 'woocommerce' ),
@@ -203,7 +216,7 @@ class StoreOutputChecks {
 			array(
 				'id'      => 'open_graph_tags',
 				'test'    => fn( StoreResponses $responses ): ?bool => $this->on_pages( $responses, static fn( string $html ): bool => self::has_open_graph( $html, 'og:title' ) && self::has_open_graph( $html, 'og:image' ) ),
-				'blocks'  => 'listing',
+				'blocks'  => 'discovery',
 				'name'    => __( 'Pages have Open Graph tags', 'woocommerce' ),
 				'label'   => __( 'Pages are missing Open Graph tags', 'woocommerce' ),
 				'why'     => __( 'Agents and social apps use og:title and og:image to show a page as a card with a picture.', 'woocommerce' ),
@@ -213,7 +226,7 @@ class StoreOutputChecks {
 			array(
 				'id'      => 'meta_description',
 				'test'    => fn( StoreResponses $responses ): ?bool => $this->on_pages( $responses, static fn( string $html ): bool => PageMarkup::has_meta( $html, 'name', 'description' ) ),
-				'blocks'  => 'listing',
+				'blocks'  => 'discovery',
 				'name'    => __( 'Pages have a meta description', 'woocommerce' ),
 				'label'   => __( 'Pages are missing a meta description', 'woocommerce' ),
 				'why'     => __( 'Search and AI answers often quote the meta description to say what a page is about.', 'woocommerce' ),
@@ -223,7 +236,7 @@ class StoreOutputChecks {
 			array(
 				'id'      => 'canonical_url',
 				'test'    => fn( StoreResponses $responses ): ?bool => $this->on_product_page( $responses, static fn( string $html ): bool => '' !== PageMarkup::canonical( $html ) ),
-				'blocks'  => 'listing',
+				'blocks'  => 'discovery',
 				'name'    => __( 'Product pages name their canonical URL', 'woocommerce' ),
 				'label'   => __( 'Product pages don\'t name a canonical URL', 'woocommerce' ),
 				'why'     => __( 'A product can be reached by several URLs; the canonical link tells agents which one to show.', 'woocommerce' ),
@@ -233,7 +246,7 @@ class StoreOutputChecks {
 			array(
 				'id'      => 'organization_schema',
 				'test'    => fn( StoreResponses $responses ): ?bool => $this->on_home_page( $responses, static fn( string $html ): bool => array() !== JsonLd::items( $html, ...self::ORGANIZATION_TYPES ) ),
-				'blocks'  => 'listing',
+				'blocks'  => 'discovery',
 				'name'    => __( 'Home page describes the store as an organization', 'woocommerce' ),
 				'label'   => __( 'Home page has no organization structured data', 'woocommerce' ),
 				'why'     => __( 'Organization JSON-LD gives agents your store\'s name, logo and contact details in one place.', 'woocommerce' ),
@@ -243,7 +256,7 @@ class StoreOutputChecks {
 			array(
 				'id'      => 'ai_snippet_directives',
 				'test'    => fn( StoreResponses $responses ): ?bool => $this->snippets_allowed( $responses ),
-				'blocks'  => 'listing',
+				'blocks'  => 'discovery',
 				'name'    => __( 'Pages let search and AI answers quote them', 'woocommerce' ),
 				'label'   => __( 'Pages ask search and AI answers not to quote them', 'woocommerce' ),
 				'why'     => __( 'A nosnippet or max-snippet robots rule keeps AI answers from quoting your pages, so your products get left out.', 'woocommerce' ),
@@ -253,7 +266,7 @@ class StoreOutputChecks {
 			array(
 				'id'      => 'content_in_raw_html',
 				'test'    => fn( StoreResponses $responses ): ?bool => $this->product_in_raw_html( $responses ),
-				'blocks'  => 'listing',
+				'blocks'  => 'discovery',
 				'name'    => __( 'Product name and price are in the page without JavaScript', 'woocommerce' ),
 				'label'   => __( 'Product name or price only shows with JavaScript', 'woocommerce' ),
 				'why'     => __( 'Most AI crawlers don\'t run JavaScript, so they miss what only appears after it runs.', 'woocommerce' ),
@@ -266,14 +279,15 @@ class StoreOutputChecks {
 		}
 		// With UCP off nothing is served, which the ucp_on store condition reports already.
 		$checks[] = array(
-			'id'      => 'ucp_profile',
-			'test'    => fn( StoreResponses $responses ): ?bool => ( $responses->get( '/.well-known/ucp' )['status'] ?? 500 ) >= 500 ? null : null !== self::ucp_endpoint( $responses ),
-			'blocks'  => 'ucp',
-			'name'    => __( 'Store serves its UCP profile', 'woocommerce' ),
-			'label'   => __( 'UCP profile isn\'t served', 'woocommerce' ),
-			'why'     => __( 'Agents read /.well-known/ucp to find your catalog. UCP is on, but visitors don\'t get the profile.', 'woocommerce' ),
-			'fix'     => __( 'Save Settings > Permalinks to refresh the rules. If it still fails, ask your host whether caching or a firewall blocks /.well-known/ucp.', 'woocommerce' ),
-			'fix_url' => admin_url( 'options-permalink.php' ),
+			'id'       => 'ucp_profile',
+			'test'     => fn( StoreResponses $responses ): ?bool => ( $responses->get( '/.well-known/ucp' )['status'] ?? 500 ) >= 500 ? null : null !== self::ucp_endpoint( $responses ),
+			'blocks'   => 'ucp',
+			'name'     => __( 'Store serves its UCP profile', 'woocommerce' ),
+			'label'    => __( 'UCP profile isn\'t served', 'woocommerce' ),
+			'why'      => __( 'Agents read /.well-known/ucp to find your catalog. UCP is on, but visitors don\'t get the profile.', 'woocommerce' ),
+			'fix'      => __( 'Save Settings > Permalinks to refresh the rules. If it still fails, ask your host whether caching or a firewall blocks /.well-known/ucp.', 'woocommerce' ),
+			'fix_url'  => admin_url( 'options-permalink.php' ),
+			'conflict' => true,
 		);
 		$checks[] = array(
 			'id'      => 'ucp_endpoints_live',
@@ -403,6 +417,21 @@ class StoreOutputChecks {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Whether the page has one Product item and it is WooCommerce's, which it marks with the @id
+	 * `<permalink>#product`. Values aren't compared: tax, currency and formatting differ without a conflict.
+	 *
+	 * @param array<int, array<string, mixed>> $products  Product items.
+	 * @param StoreResponses                   $responses Store responses.
+	 */
+	private static function has_only_core_product( array $products, StoreResponses $responses ): ?bool {
+		$product = $responses->product();
+		if ( null === $product ) {
+			return null;
+		}
+		return 1 === count( $products ) && $product->get_permalink() . '#product' === ( $products[0]['@id'] ?? '' );
 	}
 
 	/**
