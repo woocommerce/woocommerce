@@ -165,7 +165,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * is, to delete the value.
 	 *
 	 * @param array<string, mixed> $values Values keyed by namespace, then field.
-	 * @return array|\WP_Error A list of update_callback and value pairs, or a WP_Error when a value is rejected.
+	 * @return array|\WP_Error A list of field arguments and value pairs, or a WP_Error when a value is rejected.
 	 */
 	private function prepare_fields( array $values ) {
 		$registered = ExtensibleAbilities::get_fields( $this->get_resource() );
@@ -192,7 +192,7 @@ abstract class ActionableAbility extends \WP_Ability {
 						return self::with_data( $value, array( 'field' => $param ) );
 					}
 				}
-				$updates[ 'extensions.' . $namespace . '.' . $field ] = array( $args['update_callback'], $value );
+				$updates[ 'extensions.' . $namespace . '.' . $field ] = array( $args, $value );
 			}
 		}
 		return $updates;
@@ -203,12 +203,25 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * of each field.
 	 *
 	 * @param \WC_Data $subject Object to change.
-	 * @param array    $updates Pairs of update_callback and value from prepare_fields().
-	 * @return \WP_Error|null A WP_Error when a callback rejects a value or throws.
+	 * @param array    $updates Pairs of field arguments and value from prepare_fields().
+	 * @return \WP_Error|null A WP_Error when the field does not apply to the object, or a callback rejects a value or throws.
 	 */
 	private function apply_fields( $subject, array $updates ): ?\WP_Error {
-		foreach ( $updates as $param => list( $callback, $value ) ) {
-			$rejected = self::run_callback( $callback, array( $subject, $value ), array( 'field' => $param ) );
+		foreach ( $updates as $param => list( $args, $value ) ) {
+			if ( ! ExtensibleAbilities::field_applies_to( $args, $subject ) ) {
+				return new \WP_Error(
+					'woocommerce_ability_field_object_type',
+					sprintf(
+						/* translators: 1: extension field, 2: object type, 3: comma-separated list of object types. */
+						__( 'The %1$s field does not apply to the %2$s type. It applies to %3$s.', 'woocommerce' ),
+						$param,
+						ExtensibleAbilities::get_object_type( $subject ) ?? 'unknown',
+						implode( ', ', $args['object_types'] )
+					),
+					array( 'status' => 400 )
+				);
+			}
+			$rejected = self::run_callback( $args['update_callback'], array( $subject, $value ), array( 'field' => $param ) );
 			if ( null !== $rejected ) {
 				return $rejected;
 			}

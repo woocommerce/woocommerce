@@ -318,22 +318,20 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should expose agent-friendly product type alias inputs for product operations.
+	 * @testdox Should expose registered product types as inputs for product operations.
 	 */
-	public function test_product_schema_uses_agent_friendly_product_types(): void {
+	public function test_product_schema_uses_registered_product_types(): void {
 		$query_schema  = wp_get_ability( 'woocommerce/products-query' )->get_input_schema();
 		$create_schema = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
 		$update_schema = wp_get_ability( 'woocommerce/product-update' )->get_input_schema();
 
-		$expected_aliases = array( 'physical', 'virtual', 'digital', 'affiliate', 'grouped' );
+		$expected_types = array( 'simple', 'grouped', 'external' );
 
-		$this->assertSame( $expected_aliases, $query_schema['properties']['product_type_alias']['enum'] ?? array() );
-		$this->assertSame( $expected_aliases, $this->get_product_type_aliases_from_schema_branches( $create_schema ) );
-		$this->assertSame( $expected_aliases, $this->get_product_type_aliases_from_schema_branches( $update_schema ) );
-		$this->assertSame( 'physical', $this->get_product_type_alias_schema_branch( $create_schema, 'physical' )['properties']['product_type_alias']['default'] ?? null );
-		$this->assertArrayNotHasKey( 'default', $this->get_product_type_alias_schema_branch( $update_schema, 'physical' )['properties']['product_type_alias'] ?? array() );
-		$this->assertNotContains( 'variable', $query_schema['properties']['product_type_alias']['enum'] ?? array() );
-		$this->assertNotContains( 'variable', $this->get_product_type_aliases_from_schema_branches( $create_schema ) );
+		$this->assertSame( array( 'simple', 'grouped', 'external', 'variable' ), $query_schema['properties']['type']['enum'] ?? array() );
+		$this->assertSame( $expected_types, $create_schema['properties']['type']['enum'] ?? array() );
+		$this->assertSame( $expected_types, $update_schema['properties']['type']['enum'] ?? array() );
+		$this->assertSame( 'simple', $create_schema['properties']['type']['default'] ?? null );
+		$this->assertArrayNotHasKey( 'default', $update_schema['properties']['type'] ?? array() );
 		$this->assertArrayNotHasKey(
 			'product_type_alias',
 			wp_get_ability( 'woocommerce/product-create' )->get_output_schema()['properties']['product']['properties'] ?? array()
@@ -343,33 +341,25 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should expose only alias-relevant product fields in mutation schema branches.
+	 * @testdox Should list every field in the flat create and update schemas.
 	 */
-	public function test_product_mutation_schema_branches_only_include_alias_relevant_fields(): void {
+	public function test_product_mutation_schemas_list_every_field(): void {
 		$create_schema = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
 		$update_schema = wp_get_ability( 'woocommerce/product-update' )->get_input_schema();
 
-		$physical_properties  = $this->get_product_type_alias_schema_branch( $create_schema, 'physical' )['properties'];
-		$affiliate_properties = $this->get_product_type_alias_schema_branch( $create_schema, 'affiliate' )['properties'];
-		$grouped_properties   = $this->get_product_type_alias_schema_branch( $create_schema, 'grouped' )['properties'];
-		$common_properties    = $update_schema['oneOf'][0]['properties'];
+		foreach ( array( $create_schema, $update_schema ) as $schema ) {
+			$this->assertArrayNotHasKey( 'oneOf', $schema );
+			$this->assertFalse( $schema['additionalProperties'] );
+			foreach ( array( 'type', 'virtual', 'downloadable', 'regular_price', 'external_url', 'grouped_products', 'manage_stock' ) as $field ) {
+				$this->assertArrayHasKey( $field, $schema['properties'] );
+			}
+		}
 
-		$this->assertArrayNotHasKey( 'external_url', $physical_properties );
-		$this->assertArrayNotHasKey( 'button_text', $physical_properties );
-		$this->assertArrayNotHasKey( 'grouped_products', $physical_properties );
-
-		$this->assertArrayNotHasKey( 'manage_stock', $affiliate_properties );
-		$this->assertArrayNotHasKey( 'stock_quantity', $affiliate_properties );
-		$this->assertArrayNotHasKey( 'grouped_products', $affiliate_properties );
-
-		$this->assertArrayNotHasKey( 'regular_price', $grouped_properties );
-		$this->assertArrayNotHasKey( 'sale_price', $grouped_properties );
-		$this->assertArrayNotHasKey( 'stock_status', $grouped_properties );
-
-		$this->assertArrayNotHasKey( 'product_type_alias', $common_properties );
-		$this->assertArrayNotHasKey( 'regular_price', $common_properties );
-		$this->assertArrayNotHasKey( 'external_url', $common_properties );
-		$this->assertArrayNotHasKey( 'grouped_products', $common_properties );
+		$this->assertSame( array( 'name' ), $create_schema['required'] );
+		$this->assertArrayNotHasKey( 'id', $create_schema['properties'] );
+		$this->assertStringContainsString( 'A product without a type is simple.', $create_schema['properties']['type']['description'] );
+		$this->assertSame( array( 'id' ), $update_schema['required'] );
+		$this->assertStringNotContainsString( 'without a type', $update_schema['properties']['type']['description'] );
 	}
 
 	/**
@@ -1443,12 +1433,14 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Should map digital products to simple virtual downloadable products.
 	 */
-	public function test_product_create_maps_digital_product_type_to_simple_downloadable_product(): void {
+	public function test_product_create_sets_virtual_and_downloadable_on_a_simple_product(): void {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
-				'name'               => 'Digital Product',
-				'product_type_alias' => 'digital',
-				'regular_price'      => '19.99',
+				'name'          => 'Digital Product',
+				'type'          => 'simple',
+				'virtual'       => true,
+				'downloadable'  => true,
+				'regular_price' => '19.99',
 			)
 		);
 
@@ -1462,12 +1454,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Should map virtual products to simple virtual non-downloadable products.
 	 */
-	public function test_product_create_maps_virtual_product_type_alias_to_simple_virtual_product(): void {
+	public function test_product_create_sets_virtual_on_a_simple_product(): void {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
-				'name'               => 'Virtual Product',
-				'product_type_alias' => 'virtual',
-				'regular_price'      => '29.99',
+				'name'          => 'Virtual Product',
+				'type'          => 'simple',
+				'virtual'       => true,
+				'regular_price' => '29.99',
 			)
 		);
 
@@ -1479,9 +1472,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should query simple products by agent-friendly physical, virtual, and digital product type aliases.
+	 * @testdox Should query simple products by type, virtual and downloadable.
 	 */
-	public function test_products_query_maps_agent_friendly_product_types_to_product_fields(): void {
+	public function test_products_query_filters_by_type_virtual_and_downloadable(): void {
 		$physical_sku = wp_unique_id( 'abilities-physical-' );
 		$virtual_sku  = wp_unique_id( 'abilities-virtual-' );
 		$digital_sku  = wp_unique_id( 'abilities-digital-' );
@@ -1489,9 +1482,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$physical = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
-				'name'               => 'Physical Query Product',
-				'product_type_alias' => 'physical',
-				'sku'                => $physical_sku,
+				'name' => 'Physical Query Product',
+				'type' => 'simple',
+				'sku'  => $physical_sku,
 			)
 		);
 
@@ -1500,9 +1493,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$virtual = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
-				'name'               => 'Virtual Query Product',
-				'product_type_alias' => 'virtual',
-				'sku'                => $virtual_sku,
+				'name'    => 'Virtual Query Product',
+				'type'    => 'simple',
+				'virtual' => true,
+				'sku'     => $virtual_sku,
 			)
 		);
 
@@ -1511,9 +1505,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$digital = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
-				'name'               => 'Digital Query Product',
-				'product_type_alias' => 'digital',
-				'sku'                => $digital_sku,
+				'name'         => 'Digital Query Product',
+				'type'         => 'simple',
+				'virtual'      => true,
+				'downloadable' => true,
+				'sku'          => $digital_sku,
 			)
 		);
 
@@ -1529,8 +1525,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$physical_result = wp_get_ability( 'woocommerce/products-query' )->execute(
 			array(
-				'product_type_alias' => 'physical',
-				'sku'                => $physical_sku,
+				'type'         => 'simple',
+				'virtual'      => false,
+				'downloadable' => false,
+				'sku'          => $physical_sku,
 			)
 		);
 
@@ -1538,10 +1536,23 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 1, $physical_result['total_pages'] );
 		$this->assertSame( $physical['product']['id'], $physical_result['products'][0]['id'] );
 
+		$string_booleans_result = wp_get_ability( 'woocommerce/products-query' )->execute(
+			array(
+				'virtual'      => 'false',
+				'downloadable' => 'false',
+				'sku'          => $physical_sku,
+			)
+		);
+
+		$this->assertNotWPError( $string_booleans_result );
+		$this->assertSame( array( $physical['product']['id'] ), array_column( $string_booleans_result['products'], 'id' ) );
+
 		$virtual_result = wp_get_ability( 'woocommerce/products-query' )->execute(
 			array(
-				'product_type_alias' => 'virtual',
-				'sku'                => $virtual_sku,
+				'type'         => 'simple',
+				'virtual'      => true,
+				'downloadable' => false,
+				'sku'          => $virtual_sku,
 			)
 		);
 
@@ -1551,8 +1562,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$digital_result = wp_get_ability( 'woocommerce/products-query' )->execute(
 			array(
-				'product_type_alias' => 'digital',
-				'sku'                => $digital_sku,
+				'type'         => 'simple',
+				'virtual'      => true,
+				'downloadable' => true,
+				'sku'          => $digital_sku,
 			)
 		);
 
@@ -1562,8 +1575,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$mismatched_result = wp_get_ability( 'woocommerce/products-query' )->execute(
 			array(
-				'product_type_alias' => 'physical',
-				'sku'                => $digital_sku,
+				'type'         => 'simple',
+				'virtual'      => false,
+				'downloadable' => false,
+				'sku'          => $digital_sku,
 			)
 		);
 
@@ -1581,8 +1596,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$physical_hybrid_result = wp_get_ability( 'woocommerce/products-query' )->execute(
 			array(
-				'product_type_alias' => 'physical',
-				'sku'                => $hybrid_sku,
+				'type'         => 'simple',
+				'virtual'      => false,
+				'downloadable' => false,
+				'sku'          => $hybrid_sku,
 			)
 		);
 
@@ -1591,16 +1608,16 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should map affiliate products to external products.
+	 * @testdox Should create external products.
 	 */
-	public function test_product_create_maps_affiliate_product_type_to_external_product(): void {
+	public function test_product_create_creates_external_product(): void {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
-				'name'               => 'Affiliate Product',
-				'product_type_alias' => 'affiliate',
-				'regular_price'      => '49.99',
-				'external_url'       => 'https://example.com/buy',
-				'button_text'        => 'Buy elsewhere',
+				'name'          => 'Affiliate Product',
+				'type'          => 'external',
+				'regular_price' => '49.99',
+				'external_url'  => 'https://example.com/buy',
+				'button_text'   => 'Buy elsewhere',
 			)
 		);
 
@@ -1612,17 +1629,17 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should map grouped products to grouped WooCommerce products with children.
+	 * @testdox Should create grouped products with children.
 	 */
-	public function test_product_create_maps_grouped_product_type_to_grouped_product(): void {
+	public function test_product_create_creates_grouped_product(): void {
 		$child                       = \WC_Helper_Product::create_simple_product();
 		$this->created_product_ids[] = $child->get_id();
 
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
-				'name'               => 'Grouped Product',
-				'product_type_alias' => 'grouped',
-				'grouped_products'   => array( $child->get_id() ),
+				'name'             => 'Grouped Product',
+				'type'             => 'grouped',
+				'grouped_products' => array( $child->get_id() ),
 			)
 		);
 
@@ -1630,6 +1647,213 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->created_product_ids[] = $created['product']['id'];
 		$this->assertSame( 'grouped', $created['product']['type'] );
 		$this->assertSame( array( $child->get_id() ), $created['product']['grouped_products'] );
+	}
+
+	/**
+	 * @testdox Should create products of a type that an extension registers, with the Core fields of its class.
+	 */
+	public function test_product_create_accepts_a_registered_product_type(): void {
+		$this->unregister_domain_abilities();
+		add_filter( 'product_type_selector', array( $this, 'add_test_product_types' ) );
+		add_filter( 'woocommerce_product_class', array( $this, 'get_test_product_class' ), 10, 2 );
+
+		try {
+			$this->register_domain_abilities();
+
+			$create_schema = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
+			$update_schema = wp_get_ability( 'woocommerce/product-update' )->get_input_schema();
+			$bundle        = wp_get_ability( 'woocommerce/product-create' )->execute(
+				array(
+					'name'         => 'Bundle',
+					'type'         => 'test-bundle',
+					'virtual'      => true,
+					'downloadable' => true,
+				)
+			);
+			$subscription  = wp_get_ability( 'woocommerce/product-create' )->execute(
+				array(
+					'name'          => 'Subscription',
+					'type'          => 'test-subscription',
+					'regular_price' => '9.00',
+				)
+			);
+			$bundle_price  = wp_get_ability( 'woocommerce/product-create' )->execute_change(
+				array(
+					'name'          => 'Bundle with price',
+					'type'          => 'test-bundle',
+					'regular_price' => '9.00',
+				)
+			);
+			$missing_class = wp_get_ability( 'woocommerce/product-create' )->execute_change(
+				array(
+					'name' => 'No class',
+					'type' => 'test-missing',
+				)
+			);
+		} finally {
+			remove_filter( 'product_type_selector', array( $this, 'add_test_product_types' ) );
+			remove_filter( 'woocommerce_product_class', array( $this, 'get_test_product_class' ), 10 );
+			$this->unregister_domain_abilities();
+			$this->register_domain_abilities();
+		}
+
+		$this->assertNotWPError( $bundle );
+		$this->created_product_ids[] = $bundle['product']['id'];
+		$this->assertNotWPError( $subscription );
+		$this->created_product_ids[] = $subscription['product']['id'];
+
+		$this->assertContains( 'test-bundle', $create_schema['properties']['type']['enum'] );
+		$this->assertNotContains( 'test-missing', $create_schema['properties']['type']['enum'] );
+		$this->assertContains( 'test-bundle', $update_schema['properties']['type']['enum'] );
+		$this->assertContains( 'test-subscription', $update_schema['properties']['type']['enum'] );
+		$this->assertNotContains( 'test-missing', $update_schema['properties']['type']['enum'] );
+		$this->assertSame( 'test-bundle', $bundle['product']['type'] );
+		$this->assertTrue( $bundle['product']['virtual'] );
+		$this->assertTrue( $bundle['product']['downloadable'] );
+		$this->assertSame( 'test-subscription', $subscription['product']['type'] );
+		$this->assertSame( '9.00', $subscription['product']['regular_price'] );
+		$this->assertWPError( $bundle_price );
+		$this->assertSame( 'woocommerce_product_field_unsupported', $bundle_price->get_error_code() );
+		$this->assertSame( 'The test-bundle product type does not take regular_price. It takes name, sku, description, short_description, status, virtual, downloadable.', $bundle_price->get_error_message() );
+		$this->assertWPError( $missing_class );
+		$this->assertSame( 'woocommerce_invalid_product_type', $missing_class->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should change a product to a type that an extension registers, refuse a type without a class, and query by the type.
+	 */
+	public function test_product_update_changes_the_type_to_a_registered_product_type(): void {
+		$product                     = \WC_Helper_Product::create_simple_product();
+		$this->created_product_ids[] = $product->get_id();
+
+		$this->unregister_domain_abilities();
+		add_filter( 'product_type_selector', array( $this, 'add_test_product_types' ) );
+		add_filter( 'woocommerce_product_class', array( $this, 'get_test_product_class' ), 10, 2 );
+
+		try {
+			$this->register_domain_abilities();
+
+			$subscription  = wp_get_ability( 'woocommerce/product-update' )->execute(
+				array(
+					'id'            => $product->get_id(),
+					'type'          => 'test-subscription',
+					'regular_price' => '12.00',
+				)
+			);
+			$missing_class = wp_get_ability( 'woocommerce/product-update' )->execute_change(
+				array(
+					'id'   => $product->get_id(),
+					'type' => 'test-missing',
+				)
+			);
+			$bundle        = wp_get_ability( 'woocommerce/product-create' )->execute(
+				array(
+					'name' => 'Bundle',
+					'type' => 'test-bundle',
+				)
+			);
+			$bundles       = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'type' => 'test-bundle' ) );
+		} finally {
+			remove_filter( 'product_type_selector', array( $this, 'add_test_product_types' ) );
+			remove_filter( 'woocommerce_product_class', array( $this, 'get_test_product_class' ), 10 );
+			$this->unregister_domain_abilities();
+			$this->register_domain_abilities();
+		}
+
+		$this->assertNotWPError( $bundle );
+		$this->created_product_ids[] = $bundle['product']['id'];
+
+		$this->assertNotWPError( $subscription );
+		$this->assertSame( 'test-subscription', $subscription['product']['type'] );
+		$this->assertSame( '12.00', $subscription['product']['regular_price'] );
+		$this->assertWPError( $missing_class );
+		$this->assertSame( 'woocommerce_invalid_product_type', $missing_class->get_error_code() );
+		$this->assertNotWPError( $bundles );
+		$this->assertSame( array( $bundle['product']['id'] ), array_column( $bundles['products'], 'id' ) );
+	}
+
+	/**
+	 * @testdox Should let the owner of a product type add a Core field to it with the woocommerce_ability_product_type_fields filter.
+	 */
+	public function test_product_type_fields_filter_adds_a_core_field_to_a_registered_product_type(): void {
+		$this->unregister_domain_abilities();
+		add_filter( 'product_type_selector', array( $this, 'add_test_product_types' ) );
+		add_filter( 'woocommerce_product_class', array( $this, 'get_test_product_class' ), 10, 2 );
+		add_filter( 'woocommerce_ability_product_type_fields', array( $this, 'add_price_to_test_bundle' ), 10, 2 );
+
+		try {
+			$this->register_domain_abilities();
+
+			$create_schema = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
+			$bundle        = wp_get_ability( 'woocommerce/product-create' )->execute(
+				array(
+					'name'          => 'Bundle with price',
+					'type'          => 'test-bundle',
+					'regular_price' => '9.00',
+				)
+			);
+		} finally {
+			remove_filter( 'product_type_selector', array( $this, 'add_test_product_types' ) );
+			remove_filter( 'woocommerce_product_class', array( $this, 'get_test_product_class' ), 10 );
+			remove_filter( 'woocommerce_ability_product_type_fields', array( $this, 'add_price_to_test_bundle' ), 10 );
+			$this->unregister_domain_abilities();
+			$this->register_domain_abilities();
+		}
+
+		$this->assertNotWPError( $bundle );
+		$this->created_product_ids[] = $bundle['product']['id'];
+
+		$this->assertSame( '9.00', $bundle['product']['regular_price'] );
+		$this->assertArrayNotHasKey( 'not-a-core-field', $create_schema['properties'] );
+	}
+
+	/**
+	 * Give the test bundle type a regular price, and ignore a name that is not a Core field.
+	 *
+	 * @internal
+	 *
+	 * @param array  $fields       Field names.
+	 * @param string $product_type Product type.
+	 * @return array
+	 */
+	public function add_price_to_test_bundle( array $fields, string $product_type ): array {
+		if ( 'test-bundle' === $product_type ) {
+			$fields[] = 'regular_price';
+			$fields[] = 'not-a-core-field';
+		}
+		return $fields;
+	}
+
+	/**
+	 * Add test product types to the product type registry.
+	 *
+	 * @internal
+	 *
+	 * @param array $types Product types.
+	 * @return array
+	 */
+	public function add_test_product_types( array $types ): array {
+		$types['test-bundle']       = 'Test bundle';
+		$types['test-subscription'] = 'Test subscription';
+		$types['test-missing']      = 'Test type without a class';
+		return $types;
+	}
+
+	/**
+	 * Map the test product types to their classes.
+	 *
+	 * @internal
+	 *
+	 * @param string $classname    Product class name.
+	 * @param string $product_type Product type.
+	 * @return string
+	 */
+	public function get_test_product_class( $classname, $product_type ) {
+		$classes = array(
+			'test-bundle'       => TestBundleProduct::class,
+			'test-subscription' => TestSubscriptionProduct::class,
+		);
+		return $classes[ $product_type ] ?? $classname;
 	}
 
 	/**
@@ -1675,9 +1899,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_product_create_rejects_invalid_grouped_product_ids(): void {
 		$result = wp_get_ability( 'woocommerce/product-create' )->execute_change(
 			array(
-				'name'               => 'Invalid Grouped Product',
-				'product_type_alias' => 'grouped',
-				'grouped_products'   => array( -12 ),
+				'name'             => 'Invalid Grouped Product',
+				'type'             => 'grouped',
+				'grouped_products' => array( -12 ),
 			)
 		);
 
@@ -1686,19 +1910,20 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should reject fields that are unsupported by the selected product type alias.
+	 * @testdox Should reject fields that are unsupported by the selected product type.
 	 */
-	public function test_product_create_rejects_fields_not_supported_by_product_type_alias(): void {
+	public function test_product_create_rejects_fields_not_supported_by_product_type(): void {
 		$result = wp_get_ability( 'woocommerce/product-create' )->execute_change(
 			array(
-				'name'               => 'Invalid Grouped Product',
-				'product_type_alias' => 'grouped',
-				'regular_price'      => '19.99',
+				'name'          => 'Invalid Grouped Product',
+				'type'          => 'grouped',
+				'regular_price' => '19.99',
 			)
 		);
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_product_field_unsupported', $result->get_error_code() );
+		$this->assertSame( 'The grouped product type does not take regular_price. It takes name, sku, description, short_description, status, grouped_products.', $result->get_error_message() );
 	}
 
 	/**
@@ -1735,7 +1960,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$input_schema  = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
 			$output_schema = wp_get_ability( 'woocommerce/product-create' )->get_output_schema();
 
-			$this->assertSame( 'number', $this->get_product_type_alias_schema_branch( $input_schema, 'physical' )['properties']['stock_quantity']['type'] ?? null );
+			$this->assertSame( 'number', $input_schema['properties']['stock_quantity']['type'] ?? null );
 			$this->assertSame(
 				array( 'number', 'null' ),
 				$output_schema['properties']['product']['properties']['stock_quantity']['type'] ?? null
@@ -1759,7 +1984,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should update product properties and reflect changes in the response.
+	 * @testdox Should update a per-type field such as regular_price without a type in the input.
 	 */
 	public function test_product_update_changes_props_and_returns_updated_response(): void {
 		$product                     = \WC_Helper_Product::create_simple_product();
@@ -1767,16 +1992,34 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
-				'id'                 => $product->get_id(),
-				'product_type_alias' => 'physical',
-				'name'               => 'Updated Name',
-				'regular_price'      => '99.00',
+				'id'            => $product->get_id(),
+				'name'          => 'Updated Name',
+				'regular_price' => '99.00',
 			)
 		);
 
 		$this->assertNotWPError( $result );
 		$this->assertSame( 'Updated Name', $result['product']['name'] );
 		$this->assertSame( '99.00', $result['product']['regular_price'] );
+	}
+
+	/**
+	 * @testdox Should refuse an update field that the type of the loaded product does not support.
+	 */
+	public function test_product_update_rejects_fields_not_supported_by_loaded_product_type(): void {
+		$product                     = \WC_Helper_Product::create_grouped_product();
+		$this->created_product_ids[] = $product->get_id();
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'            => $product->get_id(),
+				'regular_price' => '19.99',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_field_unsupported', $result->get_error_code() );
+		$this->assertSame( '', wc_get_product( $product->get_id() )->get_regular_price() );
 	}
 
 	/**
@@ -1832,7 +2075,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should apply product type configuration when updating a product type alias.
+	 * @testdox Should apply product type configuration when updating a product type.
 	 */
 	public function test_product_update_applies_product_type_configuration(): void {
 		$product                     = \WC_Helper_Product::create_simple_product();
@@ -1840,8 +2083,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
-				'id'                 => $product->get_id(),
-				'product_type_alias' => 'digital',
+				'id'           => $product->get_id(),
+				'type'         => 'simple',
+				'virtual'      => true,
+				'downloadable' => true,
 			)
 		);
 
@@ -1849,6 +2094,45 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'simple', $result['product']['type'] );
 		$this->assertTrue( $result['product']['virtual'] );
 		$this->assertTrue( $result['product']['downloadable'] );
+	}
+
+	/**
+	 * @testdox Should apply the forced properties of a product type only when the type changes.
+	 */
+	public function test_product_update_applies_forced_properties_only_on_a_type_change(): void {
+		$grouped = new \WC_Product_Grouped();
+		$grouped->set_name( 'Grouped' );
+		$grouped->set_manage_stock( true );
+		$grouped->set_stock_quantity( 5 );
+		$grouped->save();
+		$this->created_product_ids[] = $grouped->get_id();
+
+		$simple                      = \WC_Helper_Product::create_simple_product();
+		$this->created_product_ids[] = $simple->get_id();
+		$simple->set_manage_stock( true );
+		$simple->set_stock_quantity( 5 );
+		$simple->save();
+
+		$repeated = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $grouped->get_id(),
+				'type' => 'grouped',
+				'name' => 'Renamed',
+			)
+		);
+		$changed  = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $simple->get_id(),
+				'type' => 'grouped',
+			)
+		);
+
+		$this->assertNotWPError( $repeated );
+		$this->assertSame( 'yes', get_post_meta( $grouped->get_id(), '_manage_stock', true ) );
+		$this->assertSame( '5', get_post_meta( $grouped->get_id(), '_stock', true ) );
+		$this->assertNotWPError( $changed );
+		$this->assertSame( 'no', get_post_meta( $simple->get_id(), '_manage_stock', true ) );
+		$this->assertSame( '', get_post_meta( $simple->get_id(), '_stock', true ) );
 	}
 
 	/**
@@ -1903,6 +2187,51 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_product_type_unsupported', $result->get_error_code() );
 		$this->assertNotNull( wc_get_product( $variation_id ) );
+	}
+
+	/**
+	 * @testdox Should refuse a type change on a variable product, because WooCommerce would delete its variations.
+	 */
+	public function test_product_update_rejects_a_type_change_on_a_variable_product(): void {
+		$variable                    = \WC_Helper_Product::create_variation_product();
+		$this->created_product_ids[] = $variable->get_id();
+		$children                    = $variable->get_children();
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $variable->get_id(),
+				'type' => 'simple',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_type_unsupported', $result->get_error_code() );
+		$this->assertSame( 'variable', wc_get_product( $variable->get_id() )->get_type() );
+		$this->assertSame( $children, wc_get_product( $variable->get_id() )->get_children() );
+	}
+
+	/**
+	 * @testdox Should reject product variation IDs when updating products, with and without a type.
+	 */
+	public function test_product_update_rejects_variation_ids(): void {
+		$variation_id = $this->create_variation_product_id_for_test();
+
+		foreach ( array( array(), array( 'type' => 'simple' ) ) as $type_input ) {
+			$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+				array_merge(
+					array(
+						'id'   => $variation_id,
+						'name' => 'Changed variation',
+					),
+					$type_input
+				)
+			);
+
+			$this->assertWPError( $result );
+			$this->assertSame( 'woocommerce_product_type_unsupported', $result->get_error_code() );
+		}
+
+		$this->assertSame( 'variation', wc_get_product( $variation_id )->get_type() );
 	}
 
 	/**
@@ -2758,44 +3087,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $registration_args['category'], $ability->get_category() );
 		$this->assertSame( $registration_args['input_schema'], $ability->get_input_schema() );
 		$this->assertSame( $registration_args['output_schema'], $ability->get_output_schema() );
-	}
-
-	/**
-	 * Get product type aliases from a branched product input schema.
-	 *
-	 * @param array $schema Input schema.
-	 * @return array<int, string>
-	 */
-	private function get_product_type_aliases_from_schema_branches( array $schema ): array {
-		$aliases = array();
-
-		foreach ( $schema['oneOf'] ?? array() as $branch ) {
-			$alias = $branch['properties']['product_type_alias']['enum'][0] ?? null;
-
-			if ( is_string( $alias ) ) {
-				$aliases[] = $alias;
-			}
-		}
-
-		return array_values( array_unique( $aliases ) );
-	}
-
-	/**
-	 * Get a product input schema branch for a product type alias.
-	 *
-	 * @param array  $schema             Input schema.
-	 * @param string $product_type_alias Product type alias.
-	 * @return array
-	 */
-	private function get_product_type_alias_schema_branch( array $schema, string $product_type_alias ): array {
-		foreach ( $schema['oneOf'] ?? array() as $branch ) {
-			if ( in_array( $product_type_alias, $branch['properties']['product_type_alias']['enum'] ?? array(), true ) ) {
-				return $branch;
-			}
-		}
-
-		$this->fail( "Missing product type alias schema branch: {$product_type_alias}" );
-		return array();
 	}
 
 	/**

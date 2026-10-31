@@ -127,6 +127,13 @@ class ExtensibleAbilities {
 	 *     @type array    $schema       JSON schema of the value. It needs a `type`. Its `title` is the label clients show.
 	 *                                  It cannot set `required`, because a value that fails its schema is
 	 *                                  left out. For a field that is always present, allow null and return null.
+	 *                                  For a field that applies only to some objects, set `object_types`, or do not
+	 *                                  allow null and return null for the other objects. The field is then left
+	 *                                  out of them, with no error.
+	 *     @type string[] $object_types Optional. The object types the field applies to, as `get_type()` of the
+	 *                                  object returns them, such as `simple` and `subscription` for a product or
+	 *                                  `line_item` for an order item. The abilities leave the field out of the
+	 *                                  other objects and refuse a write to them. Omit it for every type.
 	 *     @type callable $get_callback Receives the object and returns the value. A value that the schema
 	 *                                  does not allow is left out, so return null when the object has no
 	 *                                  value. A schema that allows null, such as `array( 'integer', 'null' )`,
@@ -188,6 +195,10 @@ class ExtensibleAbilities {
 		}
 		if ( isset( $args['update_callback'] ) && ! is_callable( $args['update_callback'] ) ) {
 			wc_doing_it_wrong( __METHOD__, 'The "update_callback" argument must be callable.', '11.3.0' );
+			return;
+		}
+		if ( isset( $args['object_types'] ) && ( ! is_array( $args['object_types'] ) || empty( $args['object_types'] ) || array_filter( $args['object_types'], static fn( $type ) => ! is_string( $type ) ) ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The "object_types" argument must be a list of object types.', '11.4.0' );
 			return;
 		}
 		if ( isset( self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] ) ) {
@@ -544,6 +555,9 @@ class ExtensibleAbilities {
 		$extensions = array();
 		foreach ( self::$fields[ $resource_name ] as $namespace => $fields ) {
 			foreach ( $fields as $field => $args ) {
+				if ( ! self::field_applies_to( $args, $subject ) ) {
+					continue;
+				}
 				try {
 					$value = call_user_func( $args['get_callback'], $subject );
 				} catch ( \Throwable $e ) {
@@ -566,6 +580,38 @@ class ExtensibleAbilities {
 			$output['extensions'] = $extensions;
 		}
 		return $output;
+	}
+
+	/**
+	 * Whether a field applies to an object, from the `object_types` of the field.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array<string, mixed> $args    Field arguments from `register_field()`.
+	 * @param mixed                $subject The object.
+	 * @return bool
+	 */
+	public static function field_applies_to( array $args, $subject ): bool {
+		if ( empty( $args['object_types'] ) ) {
+			return true;
+		}
+		$type = self::get_object_type( $subject );
+		return null !== $type && in_array( $type, $args['object_types'], true );
+	}
+
+	/**
+	 * The type of an object, from its `get_type()` method.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param mixed $subject The object.
+	 * @return string|null Null when the object has no callable `get_type()` method.
+	 */
+	public static function get_object_type( $subject ): ?string {
+		if ( ! is_object( $subject ) || ! is_callable( array( $subject, 'get_type' ) ) ) {
+			return null;
+		}
+		return (string) call_user_func( array( $subject, 'get_type' ) );
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Product abilities: accept the product types that extensions register, and let extension fields apply to some product types only.

@@ -351,8 +351,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$output = $this->run_ability(
 			'woocommerce/products-query',
 			array(
-				'product_type_alias' => 'affiliate',
-				'filters'            => array( 'extensions' => array( 'test-ext' => array( 'category' => 'gifts' ) ) ),
+				'type'    => 'external',
+				'filters' => array( 'extensions' => array( 'test-ext' => array( 'category' => 'gifts' ) ) ),
 			)
 		);
 
@@ -1629,13 +1629,88 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$this->assertSame( array( 'integer', 'null' ), $extensions['other_ext']['properties']['count']['type'] );
 			$this->assertArrayNotHasKey( 'code', $extensions['test-ext']['properties'] );
 			$this->assertSame( 1, substr_count( wp_json_encode( $schema ), '"color"' ) );
-			foreach ( $schema['oneOf'] as $branch ) {
-				$this->assertSame( 'object', $branch['properties']['extensions']['type'] );
-				$this->assertArrayNotHasKey( 'properties', $branch['properties']['extensions'] );
-			}
+			$this->assertArrayNotHasKey( 'oneOf', $schema );
 		}
 		$order = $this->get_ability( 'woocommerce/order-update-status' )['input_schema'];
 		$this->assertArrayNotHasKey( 'extensions', $order['properties'] );
+	}
+
+	/**
+	 * @testdox Should leave a field with object_types out of the other objects and refuse a write to them.
+	 */
+	public function test_object_types_limit_a_field_to_some_objects(): void {
+		$register = static function () {
+			ExtensibleAbilities::register_field(
+				array(
+					'resource'        => 'product',
+					'namespace'       => 'test-ext',
+					'field'           => 'plan',
+					'schema'          => array( 'type' => 'string' ),
+					'object_types'    => array( 'simple' ),
+					'get_callback'    => static fn() => 'monthly',
+					'update_callback' => static function ( \WC_Product $product, $value ) {
+						$product->update_meta_data( '_test_plan', $value );
+					},
+				)
+			);
+		};
+		add_action( 'woocommerce_extensible_abilities_init', $register );
+		$simple  = \WC_Helper_Product::create_simple_product();
+		$grouped = \WC_Helper_Product::create_grouped_product();
+
+		try {
+			$schema   = $this->get_ability( 'woocommerce/product-create' )['input_schema'];
+			$rejected = $this->run_ability_response(
+				'woocommerce/product-update',
+				array(
+					'id'         => $grouped->get_id(),
+					'extensions' => array( 'test-ext' => array( 'plan' => 'yearly' ) ),
+				)
+			);
+			$updated  = $this->run_ability(
+				'woocommerce/product-update',
+				array(
+					'id'         => $simple->get_id(),
+					'extensions' => array( 'test-ext' => array( 'plan' => 'yearly' ) ),
+				)
+			);
+			$read     = $this->run_ability( 'woocommerce/products-query', array( 'id' => $grouped->get_id() ) );
+		} finally {
+			remove_action( 'woocommerce_extensible_abilities_init', $register );
+		}
+
+		$this->assertArrayHasKey( 'plan', $schema['properties']['extensions']['properties']['test-ext']['properties'] );
+		$this->assertSame( 400, $rejected->get_status() );
+		$this->assertSame( 'woocommerce_ability_field_object_type', $rejected->get_data()['code'] );
+		$this->assertSame( 'The extensions.test-ext.plan field does not apply to the grouped type. It applies to simple.', $rejected->get_data()['message'] );
+		$this->assertSame( '', wc_get_product( $grouped->get_id() )->get_meta( '_test_plan' ) );
+		$this->assertSame( 'monthly', $updated['product']['extensions']['test-ext']['plan'] );
+		$this->assertSame( 'yearly', wc_get_product( $simple->get_id() )->get_meta( '_test_plan' ) );
+		$this->assertArrayNotHasKey( 'plan', $read['products'][0]['extensions']['test-ext'] ?? array() );
+	}
+
+	/**
+	 * @testdox Should not apply a field with object_types to an object without a callable get_type().
+	 */
+	public function test_a_field_with_object_types_does_not_apply_to_an_object_of_unknown_type(): void {
+		$restricted   = array( 'object_types' => array( 'simple' ) );
+		$unrestricted = array();
+		$untyped      = new \stdClass();
+		$hidden_type  = new class() {
+			/**
+			 * A type that callers cannot read.
+			 *
+			 * @return string
+			 */
+			private function get_type(): string {
+				return 'simple';
+			}
+		};
+
+		$this->assertFalse( ExtensibleAbilities::field_applies_to( $restricted, $untyped ) );
+		$this->assertFalse( ExtensibleAbilities::field_applies_to( $restricted, $hidden_type ) );
+		$this->assertTrue( ExtensibleAbilities::field_applies_to( $unrestricted, $untyped ) );
+		$this->assertTrue( ExtensibleAbilities::field_applies_to( $unrestricted, $hidden_type ) );
 	}
 
 	/**
@@ -1663,7 +1738,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$this->assertInstanceOf( ActionableAbility::class, wp_get_ability( 'woocommerce/product-update' ) );
 		$this->assertArrayNotHasKey( 'extensions', $schema['properties'] ?? array() );
-		$this->assertArrayNotHasKey( 'extensions', $schema['oneOf'][0]['properties'] );
 		$this->assertSame( 400, $rejected->get_status() );
 		$this->assertSame( 'Pencil', $output['product']['name'] );
 		$this->assertFalse( wc_get_product( $product->get_id() )->meta_exists( '_test_color' ) );

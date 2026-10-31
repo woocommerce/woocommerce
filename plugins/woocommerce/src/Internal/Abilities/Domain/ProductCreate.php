@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
 
@@ -75,23 +76,14 @@ class ProductCreate extends ActionableAbility {
 	 * @return \WC_Product|\WP_Error
 	 */
 	public function load( array $input ) {
-		$product_config = self::get_product_config_for_alias( $input['product_type_alias'] ?? 'physical' );
+		$product_type   = (string) ( $input['type'] ?? ProductType::SIMPLE );
+		$product_config = self::get_product_type_config( $product_type );
 
 		if ( is_wp_error( $product_config ) ) {
 			return $product_config;
 		}
 
-		$product = wc_get_product_object( $product_config['wc_type'] );
-
-		if ( ! $product ) {
-			return new \WP_Error(
-				'woocommerce_invalid_product_type',
-				__( 'Invalid product type.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		return $product;
+		return self::get_product_object_for_type( $product_type );
 	}
 
 	/**
@@ -102,7 +94,7 @@ class ProductCreate extends ActionableAbility {
 	 * @return null|\WP_Error
 	 */
 	public function change( $subject, array $input ) {
-		$product_config = self::get_product_config_for_alias( $input['product_type_alias'] ?? 'physical' );
+		$product_config = self::get_product_config_for_product( $subject );
 
 		if ( is_wp_error( $product_config ) ) {
 			return $product_config;
