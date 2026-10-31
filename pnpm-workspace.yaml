@@ -83,7 +83,7 @@ catalogs:
         '@wordpress/env': 12.0.0
         '@wordpress/prettier-config': 4.56.0
         '@wordpress/postcss-plugins-preset': 5.56.0
-        '@wordpress/scripts': 32.6.0
+        '@wordpress/scripts': 35.0.0
         '@wordpress/stylelint-config': ^23.14.0
         postcss: ^8.5.26
         prettier: npm:wp-prettier@3.9.6
@@ -191,3 +191,7 @@ trustPolicyExclude:
     # Release automations broke (https://github.com/nodejs/undici/issues/4666)
     - 'undici@5.29.0'
     - 'undici-types@6.21.0'
+    # Published by the Chrome for Testing pipeline without provenance since the move into Chromium (https://github.com/GoogleChromeLabs/chromium-bidi#publish-new-npm-release)
+    - 'chromium-bidi@157.0.8090-0'
+    # Released without provenance, unlike 7.4.3-7.4.5 (https://github.com/webpack/webpack-dev-middleware/releases/tag/v7.4.6)
+    - 'webpack-dev-middleware@7.4.6'
