@@ -581,6 +581,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					/* translators: %d: Number of variations */
 					'i18n_link_all_variations'            => esc_js( sprintf( __( 'Do you want to generate all variations? This will create a new variation for each and every possible combination of variation attributes (max %d per run).', 'woocommerce' ), Constants::is_defined( 'WC_MAX_LINKED_VARIATIONS' ) ? Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ) : 50 ) ),
 					'i18n_enter_a_value'                  => esc_js( __( 'Enter a value', 'woocommerce' ) ),
+					'i18n_enable_manage_stock'            => 'yes' === get_option( 'woocommerce_manage_stock' ) ? esc_js( __( 'Also enable stock management for variations that do not manage stock yet? Select Cancel to only update variations that already manage stock.', 'woocommerce' ) ) : '',
 					'i18n_enter_menu_order'               => esc_js( __( 'Variation menu order (determines position in the list of variations)', 'woocommerce' ) ),
 					'i18n_enter_a_value_fixed_or_percent' => esc_js( __( 'Enter a value (fixed or %)', 'woocommerce' ) ),
 					'i18n_sale_price_warning'            => esc_js( __( 'Warning: Sale prices will be removed if they are not lower than regular prices.', 'woocommerce' ) ),

@@ -1330,7 +1330,6 @@ jQuery( function ( $ ) {
 					break;
 				case 'variable_regular_price':
 				case 'variable_sale_price':
-				case 'variable_stock':
 				case 'variable_low_stock_amount':
 				case 'variable_weight':
 				case 'variable_length':
@@ -1344,6 +1343,25 @@ jQuery( function ( $ ) {
 
 					if ( value != null ) {
 						data.value = value;
+					} else {
+						cancel = true;
+					}
+					break;
+				case 'variable_stock':
+					value = window.prompt(
+						woocommerce_admin_meta_boxes_variations.i18n_enter_a_value
+					);
+
+					if ( value != null ) {
+						data.value = value;
+						if (
+							woocommerce_admin_meta_boxes_variations.i18n_enable_manage_stock &&
+							window.confirm(
+								woocommerce_admin_meta_boxes_variations.i18n_enable_manage_stock
+							)
+						) {
+							data.manage_stock = 'yes';
+						}
 					} else {
 						cancel = true;
 					}
