@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Sync variable product variation trash state when product status changes through the REST API.
