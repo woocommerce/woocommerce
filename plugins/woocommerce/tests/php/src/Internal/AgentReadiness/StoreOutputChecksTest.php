@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreOutputChecks;
+use WC_Helper_Product;
+use WC_Structured_Data;
 use WC_Unit_Test_Case;
 
 /**
@@ -217,5 +219,167 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		remove_all_filters( 'pre_http_request' );
 		$this->serve( array() );
 		$this->assertNull( $this->results()['sitemap_lists_products'] );
+	}
+
+	/**
+	 * Path of a product's page from the home URL.
+	 *
+	 * @param \WC_Product $product Product.
+	 */
+	private static function path_of( \WC_Product $product ): string {
+		return substr( (string) $product->get_permalink(), strlen( untrailingslashit( home_url() ) ) );
+	}
+
+	/**
+	 * A page with a JSON-LD block for each item.
+	 *
+	 * @param array<int, array|string> $blocks Decoded JSON-LD, or a raw block body.
+	 */
+	private static function page_with( array $blocks ): string {
+		$html = '<!doctype html><html><head><title>Product</title>';
+		foreach ( $blocks as $block ) {
+			$html .= '<script type="application/ld+json">' . ( is_string( $block ) ? $block : wp_json_encode( $block ) ) . '</script>';
+		}
+		return $html . '</head><body></body></html>';
+	}
+
+	/**
+	 * The JSON-LD WooCommerce prints on a product's page.
+	 *
+	 * @param \WC_Product $product Product.
+	 */
+	private static function core_product_jsonld( \WC_Product $product ): string {
+		$structured_data = new WC_Structured_Data();
+		$structured_data->generate_product_data( $product );
+		return wc_esc_json( (string) wp_json_encode( $structured_data->get_structured_data( array() ), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ), true );
+	}
+
+	/**
+	 * Results of the three product structured data checks.
+	 *
+	 * @return array<int, bool|null>
+	 */
+	private function product_results(): array {
+		$results = $this->results();
+		return array( $results['product_jsonld_present'], $results['product_jsonld_required_fields'], $results['product_offer_jsonld'] );
+	}
+
+	/**
+	 * @testdox The JSON-LD WooCommerce prints for a simple and a variable product passes all three product checks.
+	 *
+	 * @testWith ["simple"]
+	 *           ["variable"]
+	 *
+	 * @param string $type Product type.
+	 */
+	public function test_core_product_jsonld_passes( string $type ): void {
+		$product = 'simple' === $type ? WC_Helper_Product::create_simple_product() : WC_Helper_Product::create_variation_product();
+		$product->set_image_id( self::factory()->attachment->create_object( array( 'file' => 'image.jpg' ) ) );
+		$product->save();
+		if ( $product instanceof \WC_Product_Variable ) {
+			\WC_Product_Variable::sync( $product );
+		}
+		$product = wc_get_product( $product->get_id() );
+		$this->serve( array( self::path_of( $product ) => array( 200, self::page_with( array( self::core_product_jsonld( $product ) ) ) ) ) );
+
+		$this->assertSame( array( true, true, true ), $this->product_results() );
+	}
+
+	/**
+	 * @testdox Product JSON-LD from an SEO plugin, in a @graph with its own types and offer list, passes in place of core's.
+	 */
+	public function test_seo_plugin_product_jsonld_passes(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$graph   = array(
+			'@context' => 'https://schema.org',
+			'@graph'   => array(
+				array(
+					'@type' => 'WebPage',
+					'name'  => 'Dummy Product',
+				),
+				array(
+					'@type'  => array( 'schema:Product' ),
+					'name'   => 'Dummy Product',
+					'image'  => array( 'https://example.org/image.jpg' ),
+					'offers' => array(
+						'@type'  => 'AggregateOffer',
+						'offers' => array(
+							array(
+								'@type'              => 'Offer',
+								'priceSpecification' => array( 'price' => '10.00' ),
+								'availability'       => 'https://schema.org/InStock',
+							),
+						),
+					),
+				),
+			),
+		);
+		$this->serve( array( self::path_of( $product ) => array( 200, self::page_with( array( '{ not json', $graph ) ) ) ) );
+
+		$this->assertSame( array( true, true, true ), $this->product_results() );
+	}
+
+	/**
+	 * @testdox A product page without Product JSON-LD fails only the presence check. One without a price fails only the offer check. A price written with a currency still counts.
+	 */
+	public function test_missing_product_jsonld(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$path    = self::path_of( $product );
+		$this->serve( array( $path => array( 200, self::page_with( array( array( '@type' => 'BreadcrumbList' ) ) ) ) ) );
+		$this->assertSame( array( false, null, null ), $this->product_results() );
+
+		remove_all_filters( 'pre_http_request' );
+		$no_price = array(
+			'@type'  => 'Product',
+			'name'   => 'Dummy Product',
+			'image'  => 'https://example.org/image.jpg',
+			'offers' => array(
+				'@type'        => 'Offer',
+				'availability' => 'https://schema.org/InStock',
+			),
+		);
+		$this->serve( array( $path => array( 200, self::page_with( array( $no_price ) ) ) ) );
+		$this->assertSame( array( true, true, false ), $this->product_results() );
+
+		remove_all_filters( 'pre_http_request' );
+		$no_price['offers']['price'] = '10.00 USD';
+		$this->serve( array( $path => array( 200, self::page_with( array( $no_price ) ) ) ) );
+		$this->assertSame( array( true, true, true ), $this->product_results(), 'A price with a currency code counts' );
+	}
+
+	/**
+	 * @testdox With no product, an unreachable product page or an error page, the product checks are couldn't check.
+	 */
+	public function test_product_checks_couldnt_check(): void {
+		$this->serve( array() );
+		$this->assertSame( array( null, null, null ), $this->product_results(), 'No product' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$this->assertSame( array( null, null, null ), $this->product_results(), 'Unreachable' );
+
+		remove_all_filters( 'pre_http_request' );
+		$this->serve( array( self::path_of( $product ) => array( 503, self::page_with( array( self::core_product_jsonld( $product ) ) ) ) ) );
+		$this->assertSame( array( null, null, null ), $this->product_results(), 'Error page' );
+	}
+
+	/**
+	 * @testdox A password protected product is skipped for the newest product shoppers can open.
+	 */
+	public function test_password_protected_product_skipped(): void {
+		$open = WC_Helper_Product::create_simple_product();
+		$open->set_date_created( time() - HOUR_IN_SECONDS );
+		$open->set_image_id( self::factory()->attachment->create_object( array( 'file' => 'image.jpg' ) ) );
+		$open->save();
+		$locked = WC_Helper_Product::create_simple_product();
+		$locked->set_post_password( 'secret' );
+		$locked->save();
+		$this->serve(
+			array(
+				self::path_of( $open )   => array( 200, self::page_with( array( self::core_product_jsonld( $open ) ) ) ),
+				self::path_of( $locked ) => array( 200, self::page_with( array() ) ),
+			)
+		);
+
+		$this->assertSame( array( true, true, true ), $this->product_results() );
 	}
 }

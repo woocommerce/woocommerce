@@ -130,6 +130,36 @@ class StoreOutputChecks {
 				'fix'     => __( 'Turn on the sitemap in your SEO plugin, or remove the code that turns off the WordPress sitemap, and include products in it.', 'woocommerce' ),
 				'fix_url' => '',
 			),
+			array(
+				'id'      => 'product_jsonld_present',
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): bool => array() !== $products ),
+				'blocks'  => 'listing',
+				'name'    => __( 'The newest product page has product structured data', 'woocommerce' ),
+				'label'   => __( 'The newest product page has no product structured data', 'woocommerce' ),
+				'why'     => __( 'Shopping crawlers and search engines read the product\'s JSON-LD to get its name, price and stock without guessing from the page.', 'woocommerce' ),
+				'fix'     => __( 'WooCommerce adds it to the product page. Check whether your theme or an SEO plugin removes it, or turn on product schema in your SEO plugin.', 'woocommerce' ),
+				'fix_url' => '',
+			),
+			array(
+				'id'      => 'product_jsonld_required_fields',
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): ?bool => array() === $products ? null : self::has_required_fields( $products ) ),
+				'blocks'  => 'listing',
+				'name'    => __( 'Product structured data has a name, image and offer', 'woocommerce' ),
+				'label'   => __( 'Product structured data is missing a name, image or offer', 'woocommerce' ),
+				'why'     => __( 'Without these, agents and search engines can\'t show the product as something to buy.', 'woocommerce' ),
+				'fix'     => __( 'Give the product a name, an image and a price. If it has them, check the product schema settings in your SEO plugin.', 'woocommerce' ),
+				'fix_url' => '',
+			),
+			array(
+				'id'      => 'product_offer_jsonld',
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): ?bool => array() === $products ? null : self::has_priced_offer( $products ) ),
+				'blocks'  => 'listing',
+				'name'    => __( 'Product offer has a price and stock status', 'woocommerce' ),
+				'label'   => __( 'Product offer is missing a price or stock status', 'woocommerce' ),
+				'why'     => __( 'Agents compare price and availability before they suggest a product.', 'woocommerce' ),
+				'fix'     => __( 'Set a price and stock status on the product. If they\'re set, check the product schema settings in your SEO plugin.', 'woocommerce' ),
+				'fix_url' => '',
+			),
 		);
 	}
 
@@ -210,6 +240,89 @@ class StoreOutputChecks {
 			}
 		}
 		return $unknown ? null : false;
+	}
+
+	/**
+	 * Run a test on the Product items in a product page's JSON-LD, or null when no product page could be loaded.
+	 *
+	 * @param StoreResponses $responses Store responses.
+	 * @param callable       $test      Test, given the Product items.
+	 */
+	private function with_products( StoreResponses $responses, callable $test ): ?bool {
+		$page = $responses->product_page();
+		if ( null === $page ) {
+			return null;
+		}
+		$result = $test( JsonLd::items( $page['body'], 'Product', 'ProductGroup' ) );
+		return null === $result ? null : (bool) $result;
+	}
+
+	/**
+	 * Whether the Product items give a name, an image and an offer, from one source or several.
+	 *
+	 * @param array<int, array<string, mixed>> $products Product items.
+	 */
+	private static function has_required_fields( array $products ): bool {
+		foreach ( array( 'name', 'image', 'offers' ) as $field ) {
+			if ( array() === array_filter( $products, static fn( array $product ): bool => ! empty( $product[ $field ] ) ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Whether one offer of the Product items has both a price and an availability. A price
+	 * can be the offer's price, an AggregateOffer's lowPrice or a price specification's price.
+	 *
+	 * @param array<int, array<string, mixed>> $products Product items.
+	 */
+	private static function has_priced_offer( array $products ): bool {
+		$offers = array();
+		foreach ( $products as $product ) {
+			array_push( $offers, ...self::as_list( $product['offers'] ?? null ) );
+		}
+		// An AggregateOffer can list its offers; read them too, one level down.
+		$nested = array();
+		foreach ( $offers as $offer ) {
+			array_push( $nested, ...self::as_list( $offer['offers'] ?? null ) );
+		}
+		foreach ( array_merge( $offers, $nested ) as $offer ) {
+			$prices = array_merge( array( $offer['price'] ?? null, $offer['lowPrice'] ?? null ), array_column( self::as_list( $offer['priceSpecification'] ?? null ), 'price' ) );
+			if ( ! empty( $offer['availability'] ) && array() !== array_filter( $prices, array( self::class, 'has_price_amount' ) ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Whether a JSON-LD price is a number, or text that contains one (`10.00`, `10,00`, `10.00 USD`).
+	 *
+	 * @param mixed $value Price value.
+	 */
+	private static function has_price_amount( $value ): bool {
+		if ( is_int( $value ) || is_float( $value ) ) {
+			return is_finite( $value );
+		}
+		if ( ! is_string( $value ) ) {
+			return false;
+		}
+		$normalized = str_replace( array( ',', ' ', "\u{00A0}" ), array( '.', '', '' ), $value );
+		return 1 === preg_match( '/-?\d+(?:\.\d+)?/', $normalized );
+	}
+
+	/**
+	 * A JSON-LD value that may be one object or a list of them, as a list of objects.
+	 *
+	 * @param mixed $value Value.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function as_list( $value ): array {
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+		return array_values( array_filter( wp_is_numeric_array( $value ) ? $value : array( $value ), 'is_array' ) );
 	}
 
 	/**
