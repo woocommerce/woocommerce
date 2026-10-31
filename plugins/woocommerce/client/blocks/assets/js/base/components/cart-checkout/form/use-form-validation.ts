@@ -6,6 +6,7 @@ import {
 	usePrevious,
 	useSchemaParser,
 } from '@woocommerce/base-hooks';
+import { formatPostcode } from '@woocommerce/base-utils';
 import { getFieldLabel, isPostcode } from '@woocommerce/blocks-checkout';
 import {
 	AddressFormValues,
@@ -235,7 +236,8 @@ export const useFormValidation = (
 				field.key === 'postcode' &&
 				'country' in values &&
 				! isPostcode( {
-					postcode: values.postcode,
+					// The Store API formats the postcode before validating it.
+					postcode: formatPostcode( values.postcode, values.country ),
 					country: values.country,
 				} )
 			) {
