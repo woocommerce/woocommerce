@@ -89,25 +89,37 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test clear_transients with valid product ID.
+	 * @testdox clear_transients updates review count and rating data when a new review is added.
 	 */
-	public function test_clear_transients_with_valid_product() {
+	public function test_clear_transients_with_valid_product(): void {
 		$product    = WC_Helper_Product::create_simple_product();
 		$product_id = $product->get_id();
+		$review_id  = ProductHelper::create_product_review( $product_id, 'Great product!' );
 
-		// Add a review to the product.
-		$review_id = ProductHelper::create_product_review( $product_id, 'Great product!' );
-
-		// Add rating meta to the review.
 		update_comment_meta( $review_id, 'rating', 5 );
-
-		// Clear transients and verify no fatal error occurs.
 		WC_Comments::clear_transients( $product_id );
 
-		// Verify the product still exists and has been updated.
-		$updated_product = wc_get_product( $product_id );
-		$this->assertInstanceOf( 'WC_Product', $updated_product );
-		$this->assertEquals( 1, $updated_product->get_review_count() );
+		$this->assertSame( 1, wc_get_product( $product_id )->get_review_count() );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox clear_transients skips product save when review count has not changed.
+	 */
+	public function test_clear_transients_skips_save_when_review_count_unchanged(): void {
+		$product    = WC_Helper_Product::create_simple_product();
+		$product_id = $product->get_id();
+		$review_id  = ProductHelper::create_product_review( $product_id, 'Great product!' );
+
+		update_comment_meta( $review_id, 'rating', 5 );
+		WC_Comments::clear_transients( $product_id );
+
+		$save_count = did_action( 'woocommerce_update_product' );
+		WC_Comments::clear_transients( $product_id );
+		$this->assertSame( $save_count, did_action( 'woocommerce_update_product' ), 'Product save should not fire when review count is unchanged.' );
+
+		$product->delete( true );
 	}
 
 	/**
