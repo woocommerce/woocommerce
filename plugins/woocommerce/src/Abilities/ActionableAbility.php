@@ -268,7 +268,7 @@ abstract class ActionableAbility extends \WP_Ability {
 			foreach ( ExtensibleAbilities::get_syncs( $resource_name ) as $args ) {
 				$rejected = self::run_callback( $args['callback'], array( $saved, $this, $context ), array( 'namespace' => $args['namespace'] ) );
 				if ( null !== $rejected ) {
-					return $rejected;
+					return self::with_namespaced_codes( $rejected, $args['namespace'] );
 				}
 			}
 		}
@@ -446,6 +446,25 @@ abstract class ActionableAbility extends \WP_Ability {
 			);
 		}
 		return is_wp_error( $result ) ? self::with_data( $result, $data ) : null;
+	}
+
+	/**
+	 * Copy an error with each code as `<namespace>:<code>`, the format that
+	 * tells apart the same code from two extensions.
+	 *
+	 * @param \WP_Error $error     Error from an extension callback.
+	 * @param string    $namespace Extension that owns the callback.
+	 * @return \WP_Error
+	 */
+	private static function with_namespaced_codes( \WP_Error $error, string $namespace ): \WP_Error {
+		$namespaced = new \WP_Error();
+		foreach ( $error->get_error_codes() as $code ) {
+			foreach ( $error->get_error_messages( $code ) as $message ) {
+				$namespaced->add( $namespace . ':' . $code, $message );
+			}
+			$namespaced->add_data( $error->get_error_data( $code ), $namespace . ':' . $code );
+		}
+		return $namespaced;
 	}
 
 	/**
