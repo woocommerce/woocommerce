@@ -55,6 +55,13 @@ class ExtensibleAbilities {
 	private static array $validators = array();
 
 	/**
+	 * Syncs keyed by resource.
+	 *
+	 * @var array<string, array<int, array<string, mixed>>>
+	 */
+	private static array $syncs = array();
+
+	/**
 	 * Fields already reported for a value that does not match the schema, keyed by resource, namespace and field.
 	 *
 	 * @var array<string, bool>
@@ -146,6 +153,12 @@ class ExtensibleAbilities {
 	 *                                        or make HTTP requests.
 	 *                                     2. It receives the value already cast to the field schema.
 	 *                                     3. A null value deletes the value of the field.
+	 *                                     4. It writes one object: the one it receives. Data that a
+	 *                                        write must keep on another object, such as a price range
+	 *                                        that a variable parent derives from its variations, is
+	 *                                        written by a sync that register_sync() adds. A sync runs
+	 *                                        once per call after every object is saved and inside the
+	 *                                        transaction of the ability.
 	 * }
 	 */
 	public static function register_field( array $args ): void {
@@ -490,8 +503,16 @@ class ExtensibleAbilities {
 	 *
 	 *     @type string   $resource  Resource that an ActionableAbility changes, such as `product`.
 	 *     @type string   $namespace Slug of the extension that owns the validator, such as `subscriptions`.
-	 *     @type callable $callback  Receives the changed object and the ability, after Core's changes and the
-	 *                               field callbacks, before the one save. It returns a WP_Error to refuse the
+	 *     @type callable $callback  Receives the changed object, the ability and `array $context`, after Core's
+	 *                               changes and the field callbacks, before the one save. A callback that only
+	 *                               needs the object or the ability can take fewer arguments.
+	 *                               `$context['primary']` is the primary object of the call. It differs from the
+	 *                               changed object when the object is a variation that the call saves through
+	 *                               its parent. On product-create that parent is not saved yet, so the variation
+	 *                               has no parent ID and a rule reads the parent from here.
+	 *                               `$context['deleting']` is true when the call deletes or trashes the object,
+	 *                               such as a variation of a deleted parent, or an item with `delete` in the
+	 *                               `variations` input. It returns a WP_Error to refuse the
 	 *                               change, and then nothing is saved. The error gets the namespace in its
 	 *                               data, and the 400 status when it has no status. Its message can name the
 	 *                               ability or screen to use instead. Rules:
@@ -538,6 +559,83 @@ class ExtensibleAbilities {
 		}
 
 		self::$validators[ $args['resource'] ][] = $args;
+	}
+
+	/**
+	 * Register a sync on a resource. A sync runs once per ability call, after
+	 * every object of the call is saved, and writes what the saved objects imply
+	 * elsewhere, such as the price range a variable parent derives from its
+	 * variations, or a row in a table of the extension.
+	 *
+	 * Call it inside the `woocommerce_extensible_abilities_init` action. Syncs
+	 * run only when the `extensible_abilities` feature is on, inside the
+	 * transaction of the ActionableAbility.
+	 *
+	 * A sync registered for a resource runs only when an object of that resource
+	 * was saved, deleted or trashed in the call. It runs once per call, not once per
+	 * object. The saved objects can belong to more than one resource, so a sync
+	 * reads the objects it owns and ignores the rest.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array $args {
+	 *     Sync arguments.
+	 *
+	 *     @type string   $resource  Resource that an ActionableAbility saves, such as `product`.
+	 *     @type string   $namespace Slug of the extension that owns the sync, such as `subscriptions`.
+	 *     @type callable $callback  Receives `\WC_Data[] $saved`, the ActionableAbility and `array $context`.
+	 *                               `$saved` is every saved object of the call, the primary object first
+	 *                               unless the call deleted it.
+	 *                               `$context['deleted']` is every object the call deleted for good, as it
+	 *                               was before the delete, with its ID. `$context['trashed']` is every object
+	 *                               the call moved to the trash; it can be restored, so a sync keeps what a
+	 *                               restore needs. And
+	 *                               `$context['input']` is the input of the call, so a sync can skip work
+	 *                               when the call did not write its fields. It returns a WP_Error to
+	 *                               refuse, and then every save of the call is undone. A thrown exception
+	 *                               refuses it too. The client sees the code prefixed with the namespace, as
+	 *                               `<namespace>:<code>`, and the error gets the namespace in its data. A sync must not
+	 *                               send email or make HTTP requests, because an undo does not reach outside
+	 *                               the database.
+	 * }
+	 */
+	public static function register_sync( array $args ): void {
+		if ( did_action( 'woocommerce_extensible_abilities_init' ) && ! doing_action( 'woocommerce_extensible_abilities_init' ) ) {
+			wc_doing_it_wrong( __METHOD__, __( 'Register a sync inside the woocommerce_extensible_abilities_init action.', 'woocommerce' ), '11.4.0' );
+			return;
+		}
+		foreach ( array( 'resource', 'namespace' ) as $key ) {
+			if ( ! is_string( $args[ $key ] ?? null ) || '' === $args[ $key ] || sanitize_key( $args[ $key ] ) !== $args[ $key ] ) {
+				wc_doing_it_wrong(
+					__METHOD__,
+					sprintf(
+						/* translators: %s: argument name. */
+						__( 'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores.', 'woocommerce' ),
+						$key
+					),
+					'11.4.0'
+				);
+				return;
+			}
+		}
+		if ( ! is_callable( $args['callback'] ?? null ) ) {
+			wc_doing_it_wrong( __METHOD__, __( 'The "callback" argument must be callable.', 'woocommerce' ), '11.4.0' );
+			return;
+		}
+		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					/* translators: %s: resource name. */
+					__( 'The "%s" resource is not registered. Call ExtensibleAbilities::register_resource() first.', 'woocommerce' ),
+					$args['resource']
+				),
+				'11.4.0'
+			);
+			return;
+		}
+
+		self::$syncs[ $args['resource'] ][] = $args;
 	}
 
 	/**
@@ -630,11 +728,12 @@ class ExtensibleAbilities {
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param array<string, mixed> $schema   Object schema.
+	 * @param array<string, mixed> $schema        Object schema.
 	 * @param string               $resource_name Resource.
+	 * @param callable|null        $field_filter  Optional. Gets the arguments of a field and returns whether the schema lists it.
 	 * @return array<string, mixed>
 	 */
-	public static function add_fields_schema( array $schema, string $resource_name ): array {
+	public static function add_fields_schema( array $schema, string $resource_name, ?callable $field_filter = null ): array {
 		if ( ! self::is_enabled() || empty( self::$fields[ $resource_name ] ) ) {
 			return $schema;
 		}
@@ -645,19 +744,73 @@ class ExtensibleAbilities {
 			'additionalProperties' => false,
 		);
 		foreach ( self::$fields[ $resource_name ] ?? array() as $namespace => $fields ) {
+			$listed = null === $field_filter ? $fields : array_filter( $fields, $field_filter );
+			if ( empty( $listed ) ) {
+				continue;
+			}
 			$extensions['properties'][ $namespace ] = array(
 				'type'                 => 'object',
 				'properties'           => array_map(
 					static function ( array $args ): array {
 						return $args['schema'];
 					},
-					$fields
+					$listed
 				),
 				'additionalProperties' => false,
 			);
 		}
 		$schema['properties']['extensions'] = $extensions;
 		return $schema;
+	}
+
+	/**
+	 * The schema of the `extensions` input of a resource. It lists the fields
+	 * that have an update_callback, and allows null for each one, because null
+	 * deletes the value. ActionableAbility adds it to the input schema of every
+	 * ability. An ability that writes other objects of the resource in the same
+	 * call, such as the variations of a product, adds it to their input too.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string        $resource_name Resource.
+	 * @param callable|null $field_filter  Optional. Gets the arguments of a field and returns whether the schema lists it.
+	 * @return array<string, mixed>
+	 */
+	public static function get_input_schema( string $resource_name, ?callable $field_filter = null ): array {
+		$extensions = array(
+			'type'                 => 'object',
+			'description'          => __( 'Values to write to the fields that extensions add, keyed by extension namespace, then field. A null value deletes the value.', 'woocommerce' ),
+			'additionalProperties' => false,
+		);
+		foreach ( self::get_fields( $resource_name ) as $namespace => $fields ) {
+			$writable = array_filter(
+				null === $field_filter ? $fields : array_filter( $fields, $field_filter ),
+				static function ( array $args ): bool {
+					return isset( $args['update_callback'] );
+				}
+			);
+			if ( empty( $writable ) ) {
+				continue;
+			}
+			$extensions['properties'][ $namespace ] = array(
+				'type'                 => 'object',
+				'properties'           => array_map(
+					static function ( array $args ): array {
+						$field_schema = $args['schema'];
+						if ( isset( $field_schema['type'] ) ) {
+							$field_schema['type'] = array_values( array_unique( array_merge( (array) $field_schema['type'], array( 'null' ) ) ) );
+						}
+						if ( isset( $field_schema['enum'] ) && ! in_array( null, $field_schema['enum'], true ) ) {
+							$field_schema['enum'][] = null;
+						}
+						return $field_schema;
+					},
+					$writable
+				),
+				'additionalProperties' => false,
+			);
+		}
+		return $extensions;
 	}
 
 	/**
@@ -684,6 +837,32 @@ class ExtensibleAbilities {
 	 */
 	public static function get_validators( string $resource_name ): array {
 		return self::$validators[ $resource_name ] ?? array();
+	}
+
+	/**
+	 * Whether a resource is registered.
+	 *
+	 * @internal
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string $resource_name Resource.
+	 * @return bool
+	 */
+	public static function is_resource_registered( string $resource_name ): bool {
+		return isset( self::$resources[ $resource_name ] );
+	}
+
+	/**
+	 * Syncs of a resource.
+	 *
+	 * @internal
+	 *
+	 * @param string $resource_name Resource.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public static function get_syncs( string $resource_name ): array {
+		return self::$syncs[ $resource_name ] ?? array();
 	}
 
 	/**

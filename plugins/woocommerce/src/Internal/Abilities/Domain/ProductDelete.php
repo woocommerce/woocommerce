@@ -7,29 +7,71 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
-use Automattic\WooCommerce\Abilities\AbilityDefinition;
-use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Registers the WooCommerce product delete ability.
+ *
+ * The delete runs on the write pipeline of ActionableAbility, so the
+ * validators of the product resource can refuse it, the syncs see the deleted
+ * objects, and a failure rolls everything back. A deleted variable product
+ * deletes its variations, and a deleted variation syncs its parent.
  */
-class ProductDelete extends AbstractDomainAbility implements AbilityDefinition {
+class ProductDelete extends ActionableAbility {
 
+	use DomainAbilityHelpers;
 	use ProductAbilityTrait;
 
 	/**
-	 * Get the ability name.
-	 *
-	 * @return string
-	 *
-	 * @since 10.9.0
+	 * Ability name.
 	 */
-	public static function get_name(): string {
-		return 'woocommerce/product-delete';
-	}
+	public const ABILITY_NAME = 'woocommerce/product-delete';
+
+	/**
+	 * ID of the product the call deletes, kept because a forced delete clears the object's ID.
+	 *
+	 * @var int
+	 */
+	private int $product_id = 0;
+
+	/**
+	 * Whether the call deletes for good instead of trashing.
+	 *
+	 * @var bool
+	 */
+	private bool $force = false;
+
+	/**
+	 * The parent of a deleted variation, synced after the delete.
+	 *
+	 * @var \WC_Product_Variable|null
+	 */
+	private ?\WC_Product_Variable $parent = null;
+
+	/**
+	 * The product and, for a variable product, its variations, which the call will delete or trash.
+	 *
+	 * @var \WC_Product[]
+	 */
+	private array $deleting = array();
+
+	/**
+	 * The objects the call deleted for good.
+	 *
+	 * @var \WC_Product[]
+	 */
+	private array $deleted = array();
+
+	/**
+	 * The objects the call moved to the trash.
+	 *
+	 * @var \WC_Product[]
+	 */
+	private array $trashed = array();
 
 	/**
 	 * Get the ability registration arguments.
@@ -46,9 +88,8 @@ class ProductDelete extends AbstractDomainAbility implements AbilityDefinition {
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',
-			'input_schema'        => self::get_input_schema(),
+			'input_schema'        => self::build_input_schema(),
 			'output_schema'       => self::get_delete_output_schema(),
-			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_delete_product' ),
 			'meta'                => array(
 				'show_in_rest' => true,
@@ -66,30 +107,42 @@ class ProductDelete extends AbstractDomainAbility implements AbilityDefinition {
 	}
 
 	/**
-	 * Delete a product.
+	 * The resource the ability changes.
+	 *
+	 * @return string
+	 */
+	public function get_resource(): string {
+		return 'product';
+	}
+
+	/**
+	 * A delete writes no extension fields.
+	 *
+	 * @return bool
+	 */
+	protected function writes_extension_fields(): bool {
+		return false;
+	}
+
+	/**
+	 * Load the product and check that it can be trashed when the call does not force a delete.
 	 *
 	 * @param array $input Ability input.
-	 * @return array|\WP_Error
-	 *
-	 * @since 10.9.0
+	 * @return \WC_Product|\WP_Error
 	 */
-	public static function execute( array $input ) {
+	public function load( array $input ) {
+		$this->product_id = 0;
+		$this->force      = ! empty( $input['force'] );
+		$this->parent     = null;
+		$this->deleting   = array();
+		$this->deleted    = array();
+		$this->trashed    = array();
+
 		$product = self::get_product_from_input( $input );
 
 		if ( is_wp_error( $product ) ) {
 			return $product;
 		}
-
-		if ( $product->is_type( ProductType::VARIATION ) ) {
-			return new \WP_Error(
-				'woocommerce_product_type_unsupported',
-				__( 'Product type is not supported by this ability.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		$product_id = $product->get_id();
-		$force      = (bool) ( $input['force'] ?? false );
 
 		/**
 		 * Filter whether a product supports trashing in WooCommerce domain abilities.
@@ -101,7 +154,7 @@ class ProductDelete extends AbstractDomainAbility implements AbilityDefinition {
 		 */
 		$supports_trash = apply_filters( 'woocommerce_product_object_trashable', EMPTY_TRASH_DAYS > 0, $product );
 
-		if ( ! $force && ! $supports_trash ) {
+		if ( ! $this->force && ! $supports_trash ) {
 			return new \WP_Error(
 				'woocommerce_trash_not_supported',
 				__( 'Trash is disabled on this site. Pass force: true to permanently delete.', 'woocommerce' ),
@@ -109,7 +162,48 @@ class ProductDelete extends AbstractDomainAbility implements AbilityDefinition {
 			);
 		}
 
-		$deleted = $product->delete( $force );
+		$this->product_id = $product->get_id();
+
+		return $product;
+	}
+
+	/**
+	 * Nothing changes in memory. The parent of a variation is a secondary
+	 * object, because the delete syncs and saves it.
+	 *
+	 * @param \WC_Product $subject Product to delete.
+	 * @param array       $input   Ability input.
+	 * @return null|array<int, array{0: \WC_Product_Variable, 1: array}>
+	 */
+	public function change( $subject, array $input ) {
+		unset( $input );
+
+		$this->deleting = array_merge( array( $subject ), $subject instanceof \WC_Product_Variable ? self::get_variations_to_delete( $subject ) : array() );
+
+		if ( $subject instanceof \WC_Product_Variation && $subject->get_parent_id() > 0 ) {
+			$parent = wc_get_product( $subject->get_parent_id() );
+			if ( $parent instanceof \WC_Product_Variable ) {
+				$this->parent = $parent;
+				return array( array( $parent, array() ) );
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Delete or trash the product, with the variations of a variable product,
+	 * then sync the parent of a deleted variation.
+	 *
+	 * @param \WC_Product $subject Product to delete.
+	 * @return null|\WP_Error
+	 */
+	public function save( $subject ) {
+		$force      = $this->force;
+		$product_id = $this->product_id;
+
+		$removed = array_map( static fn( \WC_Product $product ) => clone $product, $this->deleting );
+		$deleted = $subject->delete( $force );
 
 		if (
 			! $deleted
@@ -123,32 +217,105 @@ class ProductDelete extends AbstractDomainAbility implements AbilityDefinition {
 			);
 		}
 
-		return array(
-			'deleted' => (bool) $deleted,
-			'id'      => $product_id,
+		if ( $force ) {
+			$this->deleted = $removed;
+		} else {
+			$this->trashed = $removed;
+		}
+
+		if ( null !== $this->parent ) {
+			self::sync_variable_parent( $this->parent );
+		}
+
+		return null;
+	}
+
+	/**
+	 * Every variation of a variable product, in any status.
+	 *
+	 * @param \WC_Product_Variable $subject Variable product.
+	 * @return \WC_Product_Variation[]
+	 */
+	private static function get_variations_to_delete( \WC_Product_Variable $subject ): array {
+		$variation_ids = get_posts(
+			array(
+				'post_parent' => $subject->get_id(),
+				'post_type'   => 'product_variation',
+				'post_status' => array( 'any', 'trash', 'auto-draft' ),
+				'fields'      => 'ids',
+				'numberposts' => -1, // phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_numberposts -- Every variation of one product.
+			)
+		);
+
+		return array_values(
+			array_filter(
+				array_map( 'wc_get_product', $variation_ids ),
+				static fn( $variation ) => $variation instanceof \WC_Product_Variation
+			)
 		);
 	}
 
 	/**
-	 * Check product deletion access.
+	 * The product and, for a variable product, its variations, for the validators.
 	 *
-	 * @param mixed $input Ability input.
+	 * @return \WC_Product[]
+	 */
+	protected function get_objects_to_delete(): array {
+		return $this->deleting;
+	}
+
+	/**
+	 * The product and, for a variable product, its variations, as they were
+	 * before a forced delete, which clears the ID of the live object.
+	 *
+	 * @return \WC_Product[]
+	 */
+	protected function get_deleted_objects(): array {
+		return $this->deleted;
+	}
+
+	/**
+	 * The product and, for a variable product, its variations, when the call trashed them.
+	 *
+	 * @return \WC_Product[]
+	 */
+	protected function get_trashed_objects(): array {
+		return $this->trashed;
+	}
+
+	/**
+	 * The response of a delete.
+	 *
+	 * @param \WC_Product $subject Deleted product.
+	 * @return array
+	 */
+	public function prepare_response( $subject ): array {
+		unset( $subject );
+
+		return array(
+			'deleted' => true,
+			'id'      => $this->product_id,
+		);
+	}
+
+	/**
+	 * Check whether the current user can delete the product.
+	 *
+	 * @param array $input Ability input.
 	 * @return bool
-	 *
-	 * @since 10.9.0
 	 */
 	public static function can_delete_product( $input = array() ): bool {
-		$product_id = self::get_id_from_input( $input );
+		$product_id = self::get_product_permission_id( self::get_id_from_input( $input ) );
 
 		return $product_id > 0 && wc_rest_check_post_permissions( 'product', 'delete', $product_id );
 	}
 
 	/**
-	 * Get the ability input schema.
+	 * Get the input schema.
 	 *
 	 * @return array
 	 */
-	private static function get_input_schema(): array {
+	private static function build_input_schema(): array {
 		return array(
 			'type'                 => 'object',
 			'properties'           => array(

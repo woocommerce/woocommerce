@@ -23,6 +23,11 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 	use ProductAbilityTrait;
 
 	/**
+	 * Query var that limits a query to the children of these product types.
+	 */
+	private const PARENT_TYPES_QUERY_VAR = 'woocommerce_ability_parent_types';
+
+	/**
 	 * Get the ability name.
 	 *
 	 * @return string
@@ -91,14 +96,6 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 				return $product;
 			}
 
-			if ( $product->is_type( ProductType::VARIATION ) ) {
-				return new \WP_Error(
-					'woocommerce_product_type_unsupported',
-					__( 'Product type is not supported by this ability.', 'woocommerce' ),
-					array( 'status' => 400 )
-				);
-			}
-
 			return array(
 				'products'    => array( self::format_product_for_response( $product ) ),
 				'total_pages' => 1,
@@ -124,6 +121,17 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 		if ( isset( $input['type'] ) ) {
 			$args['type'] = $input['type'];
+			$parent_types = self::get_variation_subclass_parent_types()[ $input['type'] ] ?? array();
+
+			if ( ! empty( $parent_types ) ) {
+				$args['type']                         = ProductType::VARIATION;
+				$args[ self::PARENT_TYPES_QUERY_VAR ] = $parent_types;
+			}
+		}
+
+		if ( ! empty( $input['parent_id'] ) ) {
+			$args['parent'] = (int) $input['parent_id'];
+			$args['type']   = $args['type'] ?? ProductType::VARIATION;
 		}
 
 		foreach ( array( 'virtual', 'downloadable' ) as $field ) {
@@ -143,7 +151,10 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 		$args[ AbilitiesLoader::EXTENSION_QUERY_VAR ] = $extension_args;
 
-		$results  = wc_get_products( $args );
+		add_filter( 'posts_where', array( __CLASS__, 'limit_to_parent_types' ), 10, 2 );
+		$results = wc_get_products( $args );
+		remove_filter( 'posts_where', array( __CLASS__, 'limit_to_parent_types' ) );
+
 		$products = is_object( $results ) && isset( $results->products ) ? $results->products : array();
 		$pages    = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : ( count( $products ) > 0 ? 1 : 0 );
 
@@ -161,6 +172,45 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 	}
 
 	/**
+	 * Limit a query to the children of the product types in its query var.
+	 *
+	 * The limit is a subquery, so paging counts the right rows and no parent IDs
+	 * load into memory. Other queries do not have the query var, so a query that a
+	 * hook runs inside this ability's query stays the same.
+	 *
+	 * @internal
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string    $where WHERE clause.
+	 * @param \WP_Query $query Query.
+	 * @return string
+	 */
+	public static function limit_to_parent_types( $where, $query ) {
+		global $wpdb;
+
+		$parent_types = $query->get( self::PARENT_TYPES_QUERY_VAR );
+
+		if ( empty( $parent_types ) ) {
+			return $where;
+		}
+
+		$placeholders = implode( ', ', array_fill( 0, count( $parent_types ), '%s' ) );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		return $where . $wpdb->prepare(
+			" AND {$wpdb->posts}.post_parent IN (
+				SELECT tr.object_id FROM {$wpdb->term_relationships} tr
+				INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+				INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
+				WHERE tt.taxonomy = 'product_type' AND t.slug IN ( {$placeholders} )
+			)",
+			$parent_types
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+	}
+
+	/**
 	 * Check product read access.
 	 *
 	 * @param mixed $input Ability input.
@@ -169,7 +219,7 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function can_query_products( $input = array() ): bool {
-		$product_id = self::get_id_from_input( $input );
+		$product_id = self::get_product_permission_id( self::get_id_from_input( $input ) );
 
 		return wc_rest_check_post_permissions( 'product', 'read', $product_id );
 	}
@@ -196,7 +246,12 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 					'type' => 'string',
 					'enum' => self::get_product_query_status_slugs(),
 				),
-				'type'         => self::get_product_type_schema( array_map( 'strval', array_keys( wc_get_product_types() ) ) ),
+				'type'         => self::get_product_type_schema( array_values( array_unique( array_merge( self::get_supported_product_types(), array_keys( self::get_variation_subclass_parent_types() ) ) ) ) ),
+				'parent_id'    => array(
+					'type'        => 'integer',
+					'description' => __( 'Limit results to the variations of this variable product.', 'woocommerce' ),
+					'minimum'     => 1,
+				),
 				'virtual'      => array(
 					'type'        => 'boolean',
 					'description' => __( 'Limit results to products that are not shipped (true) or that are shipped (false).', 'woocommerce' ),
