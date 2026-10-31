@@ -104,8 +104,9 @@ class StoreResponses {
 	}
 
 	/**
-	 * The newest published product shoppers can find, or null when there is none. Password protected
-	 * products are skipped, since their page shows a form instead of the product; only the five newest are looked at.
+	 * The newest published product of a type the report checks that shoppers can find, or null when there is none.
+	 * Password protected products are skipped, since their page shows a form instead of the product; only the five
+	 * newest are looked at.
 	 */
 	public function product(): ?\WC_Product {
 		if ( null === $this->product ) {
@@ -114,6 +115,7 @@ class StoreResponses {
 				array(
 					'status'     => ProductStatus::PUBLISH,
 					'visibility' => CatalogVisibility::VISIBLE,
+					'type'       => ProductScan::SUPPORTED_TYPES,
 					'limit'      => 5,
 					'orderby'    => 'date',
 					'order'      => 'DESC',

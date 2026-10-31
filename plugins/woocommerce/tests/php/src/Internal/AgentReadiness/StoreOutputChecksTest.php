@@ -289,6 +289,26 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The product page checks skip a newer product of a type the report doesn't check.
+	 */
+	public function test_product_checks_skip_unchecked_types(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( self::factory()->attachment->create_object( array( 'file' => 'image.jpg' ) ) );
+		$product->save();
+		$this->serve( array( self::path_of( $product ) => array( 200, self::page_with( array( self::core_product_jsonld( $product ) ) ) ) ) );
+		$grouped = WC_Helper_Product::create_grouped_product();
+		wp_update_post(
+			array(
+				'ID'            => $grouped->get_id(),
+				'post_date'     => gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ),
+				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ),
+			)
+		);
+
+		$this->assertSame( array( true, true, true ), $this->product_results() );
+	}
+
+	/**
 	 * @testdox Product JSON-LD from an SEO plugin, in a @graph with its own types and offer list, passes in place of core's.
 	 */
 	public function test_seo_plugin_product_jsonld_passes(): void {
