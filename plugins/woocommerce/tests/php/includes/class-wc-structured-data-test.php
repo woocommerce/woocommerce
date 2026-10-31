@@ -350,6 +350,70 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product schema includes unique gallery images after the featured image.
+	 */
+	public function test_product_schema_includes_gallery_images(): void {
+		$featured  = $this->create_schema_attachment( 'featured.jpg' );
+		$gallery   = $this->create_schema_attachment( 'gallery.jpg' );
+		$duplicate = $this->create_schema_attachment( 'gallery.jpg' );
+		$pdf       = $this->create_schema_attachment( 'document.pdf', 'application/pdf' );
+		$invalid   = self::factory()->post->create();
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( $featured );
+		$product->set_gallery_image_ids( array( $gallery, $featured, $duplicate, $pdf, $invalid ) );
+		$this->structured_data->generate_product_data( $product );
+
+		$this->assertSame(
+			array( wp_get_attachment_url( $featured ), wp_get_attachment_url( $gallery ) ),
+			$this->structured_data->get_data()[0]['image'],
+			'The featured image should precede unique, valid gallery URLs.'
+		);
+	}
+
+	/**
+	 * @testdox Product schema preserves single-image output and supports a gallery without a featured image.
+	 * @testWith [true, false]
+	 *           [false, true]
+	 *           [false, false]
+	 *
+	 * @param bool $featured Whether to set a featured image.
+	 * @param bool $gallery Whether to set a gallery image.
+	 */
+	public function test_product_schema_with_one_or_no_image( bool $featured, bool $gallery ): void {
+		$image   = $this->create_schema_attachment( 'product.jpg' );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( $featured ? $image : 0 );
+		$product->set_gallery_image_ids( $gallery ? array( $image ) : array() );
+		$this->structured_data->generate_product_data( $product );
+
+		$data = $this->structured_data->get_data()[0];
+		if ( $featured || $gallery ) {
+			$this->assertSame( wp_get_attachment_url( $image ), $data['image'] );
+		} else {
+			$this->assertArrayNotHasKey( 'image', $data );
+		}
+	}
+
+	/**
+	 * Create an attachment for product schema tests.
+	 *
+	 * @param string $file Attachment file name.
+	 * @param string $mime_type Attachment MIME type.
+	 * @return int Attachment ID.
+	 */
+	private function create_schema_attachment( string $file, string $mime_type = 'image/jpeg' ): int {
+		$id = self::factory()->post->create(
+			array(
+				'post_type'      => 'attachment',
+				'post_mime_type' => $mime_type,
+			)
+		);
+		update_post_meta( $id, '_wp_attached_file', $file );
+		return $id;
+	}
+
+	/**
 	 * @testdox Product schema includes zero MPNs, omits empty values, and preserves extension filters.
 	 * @testWith ["0"]
 	 *           [""]
