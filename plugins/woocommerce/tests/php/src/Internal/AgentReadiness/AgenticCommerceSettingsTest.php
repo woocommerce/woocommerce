@@ -109,7 +109,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$html = $this->render_page();
 
 		$this->assertStringContainsString( '<strong>1</strong> <span>Available to agents</span>', $html );
-		$this->assertStringContainsString( '<strong>1</strong> <span>Product type agents can&#039;t sell yet</span>', $html );
+		$this->assertStringContainsString( '<strong>1</strong> <span>Not supported yet</span>', $html );
 		$this->assertStringContainsString( 'product_type=simple,variable', $html );
 		$this->assertStringContainsString( 'required setup checks below to turn this on.', $html );
 		$this->assertStringContainsString( 'aria-checked="false"', $html );
