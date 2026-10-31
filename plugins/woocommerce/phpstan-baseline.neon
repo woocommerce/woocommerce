@@ -11881,12 +11881,6 @@ parameters:
 			path: includes/class-wc-install.php
 
 		-
-			message: '#^Parameter \#4 \$autoload of function add_option expects bool\|null, string given\.$#'
-			identifier: argument.type
-			count: 5
-			path: includes/class-wc-install.php
-
-		-
 			message: '#^Parameter \#5 \$post_parent of function wc_create_page expects int, int\|string given\.$#'
 			identifier: argument.type
 			count: 1
