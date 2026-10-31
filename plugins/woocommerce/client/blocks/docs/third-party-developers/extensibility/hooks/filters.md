@@ -47,6 +47,7 @@
 - [`woocommerce_get_default_value_for_{$missing_field}`](#woocommerce_get_default_value_for_missing_field)
 - [woocommerce_get_item_data](#woocommerce_get_item_data)
 - [woocommerce_hooked_blocks_pattern_exclude_list](#woocommerce_hooked_blocks_pattern_exclude_list)
+- [woocommerce_hydration_api_request_path](#woocommerce_hydration_api_request_path)
 - [woocommerce_hydration_dispatch_request](#woocommerce_hydration_dispatch_request)
 - [woocommerce_hydration_request_after_callbacks](#woocommerce_hydration_request_after_callbacks)
 - [woocommerce_loop_add_to_cart_args](#woocommerce_loop_add_to_cart_args)
@@ -1150,6 +1151,27 @@ apply_filters( 'woocommerce_hooked_blocks_pattern_exclude_list' )
 ### Source
 
 - [Blocks/Utils/BlockHooksTrait.php](../../../../../../src/Blocks/Utils/BlockHooksTrait.php)
+
+---
+
+## woocommerce_hydration_api_request_path
+
+
+Filters a REST API path before it is hydrated, e.g. to add the language a multilingual plugin adds on the client.
+
+```php
+apply_filters( 'woocommerce_hydration_api_request_path', string $path )
+```
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $path | string | REST API path to preload, e.g. '/wc/store/v1/cart'. |
+
+### Source
+
+- [Blocks/Assets/AssetDataRegistry.php](../../../../../../src/Blocks/Assets/AssetDataRegistry.php)
 
 ---
 
