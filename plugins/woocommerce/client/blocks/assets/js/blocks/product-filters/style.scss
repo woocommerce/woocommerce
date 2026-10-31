@@ -8,13 +8,9 @@
 
 	.wc-block-product-filters__open-overlay,
 	.wc-block-product-filters__close-overlay {
-		color: inherit;
-		background: transparent;
-		border: transparent;
 		display: flex;
 		align-items: center;
 		font-size: inherit;
-		padding: 0;
 		svg {
 			fill: currentColor;
 		}
@@ -23,11 +19,26 @@
 		}
 	}
 
-	.wc-block-product-filters__open-overlay {
+	:where(.wc-block-product-filters__open-overlay) {
+		box-sizing: border-box;
+		align-self: flex-start;
+		min-height: 44px;
+		padding: 0.5em 0.75em;
+		color: ButtonText;
+		background-color: ButtonFace;
+		border: 1px solid ButtonBorder;
+
 		svg {
 			width: var(--wc-product-filters-overlay-icon-size, 1.5em);
 			height: var(--wc-product-filters-overlay-icon-size, 1.5em);
 		}
+	}
+
+	.wc-block-product-filters__close-overlay {
+		padding: 0;
+		color: inherit;
+		background: transparent;
+		border: transparent;
 	}
 
 	.wc-block-product-filters__overlay {

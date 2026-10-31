@@ -96,6 +96,17 @@ class ProductFilters extends AbstractBlock {
 		$overlay_breakpoint = $this->get_overlay_breakpoint();
 
 		return <<<CSS
+@media (width <= {$overlay_breakpoint}) {
+	:where(.wc-block-product-filters).is-full-width-overlay-button {
+		width: 100%;
+	}
+
+	:where(.wc-block-product-filters).is-full-width-overlay-button .wc-block-product-filters__open-overlay {
+		width: 100%;
+		justify-content: center;
+	}
+}
+
 @media (width > {$overlay_breakpoint}) {
 	:where(.wc-block-product-filters).is-mobile-overlay {
 		display: flex;
@@ -247,6 +258,9 @@ CSS;
 		if ( 'mobile' === $overlay_mode ) {
 			$wrapper_classes[] = 'is-mobile-overlay';
 		}
+		if ( $has_overlay && ! empty( $attributes['overlayButtonFullWidth'] ) ) {
+			$wrapper_classes[] = 'is-full-width-overlay-button';
+		}
 		if ( $has_overlay && 'right' === $overlay_position ) {
 			$wrapper_classes[] = 'is-overlay-right';
 		}
@@ -272,7 +286,7 @@ CSS;
 			<?php if ( $has_overlay ) : ?>
 				<button
 					type="button"
-					class="wc-block-product-filters__open-overlay"
+					class="wc-block-product-filters__open-overlay wp-element-button"
 					data-wp-init="callbacks.initOverlay"
 					data-wp-on--click="actions.openOverlay"
 				>
