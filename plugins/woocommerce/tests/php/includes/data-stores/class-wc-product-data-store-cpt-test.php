@@ -858,4 +858,38 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$store->update_product_sales( $product_id, 30.5, 'set' );
 		$this->assertSame( '30.500000', get_post_meta( $product_id, 'total_sales', true ) );
 	}
+
+	/**
+	 * @testdox Sale date query vars keep the other meta query filters.
+	 */
+	public function test_date_on_sale_query_keeps_other_meta_queries(): void {
+		$sale_from = gmdate( 'Y-m-d', time() + DAY_IN_SECONDS );
+
+		$product_abc = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'sku'               => 'ABC',
+				'sale_price'        => 5,
+				'date_on_sale_from' => $sale_from,
+			)
+		);
+		WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'sku'               => 'XYZ',
+				'sale_price'        => 5,
+				'date_on_sale_from' => $sale_from,
+			)
+		);
+
+		$results = wc_get_products(
+			array(
+				'sku'               => 'ABC',
+				'date_on_sale_from' => $sale_from,
+				'return'            => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $product_abc->get_id() ), $results );
+	}
 }
