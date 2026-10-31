@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Abilities;
 
+use Automattic\WooCommerce\Internal\Utilities\StagedMethod;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -448,6 +449,39 @@ class ExtensibleAbilities {
 			);
 		}
 		return array_values( array_unique( $valid ) );
+	}
+
+	/**
+	 * Refuse a direct call of a stage method when a class overrides its saving
+	 * method without overriding the stage method too, because staging would skip
+	 * the rules of that override. WC_Data classes use
+	 * WC_Data::refuse_unstaged_override(). Another class calls this method at the
+	 * start of its stage method, unless its saving method runs the stage method.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param object $subject      Object that gets the change.
+	 * @param string $method       Saving method, for example add_tracking_item.
+	 * @param string $stage_method Stage method, for example stage_tracking_item.
+	 * @throws \WC_Data_Exception When a class has not adopted the stage method.
+	 */
+	public static function refuse_unstaged_override( object $subject, string $method, string $stage_method ): void {
+		$class_name = StagedMethod::unstaged_class( $subject, $method, $stage_method );
+		if ( null !== $class_name ) {
+			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- A plain text message for a client, built from PHP names.
+			throw new \WC_Data_Exception(
+				'woocommerce_data_staging_unsupported',
+				sprintf(
+					/* translators: 1: PHP class name of the object, 2: method that the class overrides, 3: method that the class needs to override. */
+					__( 'This object does not support this change yet. The class %1$s overrides %2$s() and needs to override %3$s() too.', 'woocommerce' ),
+					$class_name,
+					$method,
+					$stage_method
+				),
+				400
+			);
+			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		}
 	}
 
 	/**

@@ -2146,6 +2146,36 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse a class outside WC_Data that overrides a saving method without its stage method.
+	 */
+	public function test_refuse_unstaged_override_works_for_a_class_outside_wc_data(): void {
+		$adopted   = new class() extends TestStagedService {
+			/**
+			 * Save an item.
+			 */
+			public function add_item(): void {}
+
+			/**
+			 * Stage an item.
+			 */
+			public function stage_item(): void {}
+		};
+		$unadopted = new class() extends TestStagedService {
+			/**
+			 * Save an item.
+			 */
+			public function add_item(): void {}
+		};
+
+		ExtensibleAbilities::refuse_unstaged_override( new TestStagedService(), 'add_item', 'stage_item' );
+		ExtensibleAbilities::refuse_unstaged_override( $adopted, 'add_item', 'stage_item' );
+
+		$this->expectException( \WC_Data_Exception::class );
+		$this->expectExceptionMessage( 'overrides add_item() and needs to override stage_item() too' );
+		ExtensibleAbilities::refuse_unstaged_override( $unadopted, 'add_item', 'stage_item' );
+	}
+
+	/**
 	 * @testdox Should not run validators with the feature off.
 	 */
 	public function test_validators_do_not_run_with_the_feature_off(): void {
