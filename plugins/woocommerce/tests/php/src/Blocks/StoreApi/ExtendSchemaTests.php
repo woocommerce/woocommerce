@@ -198,6 +198,45 @@ class ExtendSchemaTests extends TestCase {
 	}
 
 	/**
+	 * @testdox Data callbacks receive the current request after the schema's own arguments.
+	 */
+	public function test_get_endpoint_data_passes_the_current_request_to_data_callbacks() {
+		$received_args = null;
+		$this->register_endpoint_data(
+			'test-plugin',
+			function ( ...$args ) use ( &$received_args ) {
+				$received_args = $args;
+				return array();
+			}
+		);
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/cart' );
+
+		$previous_request = $this->mock_extend->set_request( $request );
+		$this->mock_extend->get_endpoint_data( 'cart', array( 'cart-item' ) );
+
+		$this->assertNull( $previous_request );
+		$this->assertSame( array( 'cart-item', $request ), $received_args );
+	}
+
+	/**
+	 * @testdox Data callbacks receive null for the request when no Store API request is being responded to.
+	 */
+	public function test_get_endpoint_data_passes_null_when_there_is_no_request() {
+		$received_args = null;
+		$this->register_endpoint_data(
+			'test-plugin',
+			function ( ...$args ) use ( &$received_args ) {
+				$received_args = $args;
+				return array();
+			}
+		);
+
+		$this->mock_extend->get_endpoint_data( 'cart' );
+
+		$this->assertSame( array( null ), $received_args );
+	}
+
+	/**
 	 * Registers cart endpoint data for a namespace.
 	 *
 	 * @param string        $plugin_namespace Plugin namespace.

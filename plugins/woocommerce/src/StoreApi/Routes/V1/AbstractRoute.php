@@ -117,16 +117,23 @@ abstract class AbstractRoute implements RouteInterface {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_response_by_request_method( \WP_REST_Request $request ) {
-		switch ( $request->get_method() ) {
-			case 'POST':
-				return $this->get_route_post_response( $request );
-			case 'PUT':
-			case 'PATCH':
-				return $this->get_route_update_response( $request );
-			case 'DELETE':
-				return $this->get_route_delete_response( $request );
+		// Restore the previous request afterwards, since a Store API request can be dispatched while another is being responded to.
+		$previous_request = $this->schema_controller->set_request( $request );
+
+		try {
+			switch ( $request->get_method() ) {
+				case 'POST':
+					return $this->get_route_post_response( $request );
+				case 'PUT':
+				case 'PATCH':
+					return $this->get_route_update_response( $request );
+				case 'DELETE':
+					return $this->get_route_delete_response( $request );
+			}
+			return $this->get_route_response( $request );
+		} finally {
+			$this->schema_controller->set_request( $previous_request );
 		}
-		return $this->get_route_response( $request );
 	}
 
 	/**

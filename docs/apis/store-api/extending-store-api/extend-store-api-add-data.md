@@ -65,6 +65,17 @@ $product = $cart_item['data'];
 
 ```
 
+Data callbacks also receive the current `WP_REST_Request` as their last parameter, after any endpoint specific parameters. It is `null` when the data is built outside a Store API request.
+
+```php
+function my_cart_item_callback( $cart_item, $request ) {
+	$context = $request ? ( $request->get_query_params()['my-context'] ?? '' ) : '';
+	// ...
+}
+```
+
+Product responses can be cached by a CDN for guests, so only vary your data on the request's URL query parameters (`get_query_params()`), not on its headers, cookies or body. Any query parameter your data depends on must also be part of the CDN's cache key, since some CDNs ignore or strip query strings.
+
 ## Things To Consider
 
 ### ExtendSchema is a shared instance
