@@ -85,6 +85,9 @@ class ProductCacheController {
 		// Handle direct WordPress post updates (bypassing CRUD).
 		add_action( 'clean_post_cache', array( $this, 'invalidate_product_cache_on_clean' ), 10, 2 );
 
+		// Handle visibility changes made directly through the WordPress terms API.
+		add_action( 'set_object_terms', array( $this, 'invalidate_product_cache_by_terms' ), 10, 4 );
+
 		// Handle post meta updates (third-party plugins updating via postmeta API).
 		add_action( 'updated_post_meta', array( $this, 'invalidate_product_cache_by_meta' ), 10, 2 );
 		add_action( 'added_post_meta', array( $this, 'invalidate_product_cache_by_meta' ), 10, 2 );
@@ -154,6 +157,24 @@ class ProductCacheController {
 		}
 
 		$this->product_cache->remove( $post_id );
+	}
+
+	/**
+	 * Invalidate the product cache when visibility terms are set directly.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param int    $object_id The post ID.
+	 * @param array  $terms     The assigned terms.
+	 * @param array  $tt_ids    The assigned term taxonomy IDs.
+	 * @param string $taxonomy  The taxonomy slug.
+	 *
+	 * @return void
+	 */
+	public function invalidate_product_cache_by_terms( $object_id, $terms, $tt_ids, $taxonomy ): void {
+		if ( 'product_visibility' === $taxonomy ) {
+			$this->invalidate_product_cache( $object_id );
+		}
 	}
 
 	/**
