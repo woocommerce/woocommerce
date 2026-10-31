@@ -137,7 +137,7 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 				return $rules;
 			}
 		);
-		$this->assertArrayNotHasKey( 'image_alt_text', ( new AgentReadiness() )->get_channel_rules() );
+		$this->assertArrayNotHasKey( 'image_alt_text', wc_get_container()->get( AgentReadiness::class )->get_channel_rules() );
 	}
 
 	/**
