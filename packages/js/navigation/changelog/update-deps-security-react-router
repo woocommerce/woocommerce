@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Remove the react-router-dom dependency; useConfirmUnsavedChanges now types its location with history.

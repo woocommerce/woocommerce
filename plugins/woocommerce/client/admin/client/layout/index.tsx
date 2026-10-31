@@ -5,10 +5,10 @@ import { compose } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
 import {
 	unstable_HistoryRouter as HistoryRouter,
+	type HistoryRouterProps,
 	Route,
 	Routes,
 	useLocation,
-	useMatch,
 	useParams,
 } from 'react-router-dom';
 import { identity, isFunction } from 'lodash';
@@ -68,9 +68,8 @@ const BaseLayout = ( { page }: { page: Page } ) => {
 		[]
 	);
 	const location = useLocation();
-	const matchFromRouter = useMatch( location.pathname );
 	const params = useParams();
-	const match = { params, url: matchFromRouter?.pathname };
+	const match = { params, url: location.pathname };
 	const isMarketplacePage = location.pathname.includes( '/extensions' );
 
 	usePageClasses( page );
@@ -196,7 +195,14 @@ export const _Layout = () => {
 	const basename = path.substring( 0, path.lastIndexOf( '/' ) );
 
 	return (
-		<HistoryRouter history={ getHistory() }>
+		<HistoryRouter
+			// The `history` v5 object provides what HistoryRouter uses at runtime; only the types differ.
+			history={
+				getHistory() as unknown as HistoryRouterProps[ 'history' ]
+			}
+			// Render route changes synchronously, as v6 did, so routes stay in step with getQuery().
+			useTransitions={ false }
+		>
 			{ /* @ts-expect-error basename is not typed */ }
 			<Routes basename={ basename }>
 				{ pages
