@@ -72,11 +72,19 @@ test.describe.serial(
 			).toBeVisible();
 			await expect(
 				page.locator( '#restock_refunded_items' )
-			).toBeChecked();
+			).toBeDisabled();
 
 			// Initiate a refund
 			await page.locator( '.refund_order_item_qty' ).fill( '1' );
 			await page.locator( '#refund_reason' ).fill( 'No longer wanted' );
+
+			// The product does not manage stock, so a quantity can't enable restocking.
+			await expect(
+				page.locator( '#restock_refunded_items' )
+			).toBeDisabled();
+			await expect(
+				page.locator( '#restock_refunded_items_description' )
+			).toHaveText( 'Stock was not reduced for this order.' );
 
 			// Confirm values
 			await expect( page.locator( '.refund_line_total' ) ).toHaveValue(
@@ -234,11 +242,22 @@ test.describe(
 			).toBeVisible();
 			await expect(
 				page.locator( '#restock_refunded_items' )
-			).toBeChecked();
+			).toBeDisabled();
+			await expect(
+				page.locator( '#restock_refunded_items' )
+			).not.toBeChecked();
 
 			// Initiate a refund
 			await page.locator( '.refund_order_item_qty >> nth=1' ).fill( '2' );
 			await page.locator( '#refund_reason' ).fill( 'No longer wanted' );
+
+			// A quantity on a line holding stock enables restocking and ticks it.
+			await expect(
+				page.locator( '#restock_refunded_items' )
+			).toBeChecked();
+			await expect(
+				page.locator( '#restock_refunded_items_description' )
+			).toHaveText( '2 items will be restocked.' );
 			page.on( 'dialog', ( dialog ) => dialog.accept() );
 			await page.locator( '.do-manual-refund' ).click();
 

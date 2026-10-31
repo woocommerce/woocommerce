@@ -198,6 +198,56 @@ class WC_Admin_Meta_Box_Order_Items_View_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Refund quantity inputs flag only the lines that refunding can return to stock.
+	 */
+	public function test_refund_quantity_inputs_flag_restockable_lines(): void {
+		update_option( 'woocommerce_manage_stock', 'yes' );
+
+		$reduced_product   = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 10,
+			)
+		);
+		$unmanaged_product = WC_Helper_Product::create_simple_product( true, array( 'manage_stock' => false ) );
+		$order             = wc_create_order();
+		$reduced_item_id   = $order->add_product( $reduced_product, 2 );
+		$unmanaged_item_id = $order->add_product( $unmanaged_product, 1 );
+		$order->calculate_totals();
+		$order->save();
+		wc_reduce_stock_levels( $order );
+
+		// Added after stock was reduced, so this line holds no stock to give back.
+		$not_reduced_item_id = $order->add_product( $reduced_product, 1 );
+		$order->save();
+		$order = wc_get_order( $order->get_id() );
+
+		ob_start();
+		include WC_ABSPATH . 'includes/admin/meta-boxes/views/html-order-items.php';
+		$order_items_html = ob_get_clean();
+
+		$xpath = $this->get_xpath_for_html( $order_items_html );
+
+		foreach (
+			array(
+				$reduced_item_id     => 'yes',
+				$unmanaged_item_id   => 'no',
+				$not_reduced_item_id => 'no',
+			) as $item_id => $expected
+		) {
+			$inputs = $xpath->query( "//input[@name='refund_order_item_qty[{$item_id}]']" );
+			$this->assertSame( 1, $inputs->length, "Line {$item_id} should render a refund quantity input." );
+			$this->assertSame( $expected, $inputs->item( 0 )->getAttribute( 'data-can-restock' ), "Line {$item_id} should flag whether it can be restocked." );
+		}
+
+		$checkbox = $xpath->query( "//input[@id='restock_refunded_items']" )->item( 0 );
+		$this->assertNotNull( $checkbox, 'The refund panel should render the restock checkbox.' );
+		$this->assertSame( 'restock_refunded_items_description', $checkbox->getAttribute( 'aria-describedby' ), 'The restock checkbox should point to its help text.' );
+		$this->assertSame( 1, $xpath->query( "//*[@id='restock_refunded_items_description']" )->length, 'The restock help text element should exist.' );
+	}
+
+	/**
 	 * Parses an HTML fragment and returns an XPath object for it.
 	 *
 	 * @param string $html The HTML fragment.

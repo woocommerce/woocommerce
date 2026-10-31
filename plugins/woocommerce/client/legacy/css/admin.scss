@@ -1630,6 +1630,19 @@ body.woocommerce_page_wc-customer-stock-notifications {
 		.label-highlight {
 			font-weight: 700;
 		}
+
+		.restock-refunded-items {
+
+			.total {
+				vertical-align: top;
+			}
+
+			.description {
+				margin: 0;
+				font-size: 12px;
+				line-height: 1.5;
+			}
+		}
 	}
 
 	// Stack the coupons/totals columns full width once the admin sidebar hides.
