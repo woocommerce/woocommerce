@@ -1446,7 +1446,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should need get_callback and output_schema, a complete write pair, and refuse the old arguments.
+	 * @testdox Should need at least one complete pair of callback and schema, and refuse the old arguments.
 	 */
 	public function test_a_field_needs_complete_arguments(): void {
 		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
@@ -1468,8 +1468,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				'get_callback' => '__return_null',
 				'schema'       => array( 'type' => 'string' ),
 			),
+			array( 'set_callback' => '__return_null' ),
+			array( 'input_schema' => array( 'type' => 'string' ) ),
 			array(
-				'set_callback' => '__return_null',
+				'set_callback' => 'not_a_function',
 				'input_schema' => array( 'type' => 'string' ),
 			),
 			$read + array( 'set_callback' => '__return_null' ),
@@ -1506,6 +1508,76 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 400, $response->get_status() );
 		$this->assertArrayNotHasKey( 'code', $input_schema['test-ext']['properties'] );
 		$this->assertArrayHasKey( 'code', $this->get_output_schema( 'woocommerce/product-update' )['properties']['product']['properties']['extensions']['properties']['test-ext']['properties'] );
+	}
+
+	/**
+	 * @testdox Should accept a write-only field in the input and leave it out of the output and its schema.
+	 */
+	public function test_a_write_only_field_is_only_in_the_input(): void {
+		$received = array();
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( &$received ) {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'product',
+						'namespace'    => 'write-ext',
+						'field'        => 'secret',
+						'input_schema' => array( 'type' => 'string' ),
+						'set_callback' => static function ( $product, $value ) use ( &$received ) {
+							$received[] = $value;
+						},
+					)
+				);
+			}
+		);
+		$this->reset_registries();
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$output = $this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'write-ext' => array( 'secret' => 'x' ) ),
+			)
+		);
+
+		$input_schema = $this->get_ability( 'woocommerce/product-update' )['input_schema']['properties']['extensions']['properties'];
+		$this->assertSame( array( 'x' ), $received );
+		$this->assertArrayNotHasKey( 'write-ext', $output['product']['extensions'] ?? array() );
+		$this->assertArrayHasKey( 'secret', $input_schema['write-ext']['properties'] );
+		$this->assertArrayNotHasKey( 'write-ext', $this->get_output_schema( 'woocommerce/product-update' )['properties']['product']['properties']['extensions']['properties'] );
+	}
+
+	/**
+	 * @testdox Should leave a namespace with no readable field out of the output schema, and keep the schema when no namespace has one.
+	 */
+	public function test_a_namespace_with_only_write_only_fields_is_not_in_the_output_schema(): void {
+		AbilitiesLoader::register_core_resources();
+		$schema = array( 'type' => 'object' );
+		ExtensibleAbilities::register_field(
+			array(
+				'resource'     => 'order',
+				'namespace'    => 'write-ext',
+				'field'        => 'secret',
+				'input_schema' => array( 'type' => 'string' ),
+				'set_callback' => '__return_null',
+			)
+		);
+
+		$this->assertSame( $schema, ExtensibleAbilities::add_fields_schema( $schema, 'order' ) );
+
+		ExtensibleAbilities::register_field(
+			array(
+				'resource'      => 'order',
+				'namespace'     => 'read-ext',
+				'field'         => 'code',
+				'output_schema' => array( 'type' => 'string' ),
+				'get_callback'  => '__return_null',
+			)
+		);
+
+		$this->assertSame( array( 'read-ext' ), array_keys( ExtensibleAbilities::add_fields_schema( $schema, 'order' )['properties']['extensions']['properties'] ) );
 	}
 
 	/**
