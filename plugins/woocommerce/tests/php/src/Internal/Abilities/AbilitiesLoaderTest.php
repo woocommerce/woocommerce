@@ -1759,6 +1759,73 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @dataProvider provider_output_date_timezones
+	 * @param string $timezone Store timezone.
+	 * @param string $created Creation date in store time.
+	 * @param string $expected Expected date with offset.
+	 */
+	public function test_product_output_dates_have_offsets( string $timezone, string $created, string $expected ): void {
+		update_option( 'timezone_string', $timezone );
+		update_option( 'gmt_offset', 5.75 );
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_date_created( $created );
+		$product->save();
+		$this->created_product_ids[] = $product->get_id();
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Date output regression',
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( $expected, $result['product']['date_created'] );
+		$this->assertSame( 'Date output regression', wc_get_product( $product->get_id() )->get_name() );
+		foreach ( array( 'date_created', 'date_modified' ) as $field ) {
+			$this->assertMatchesRegularExpression( '/[+-]\\d{2}:\\d{2}$/', $result['product'][ $field ] );
+			$this->assertStringEndsWith( '+00:00', $result['product'][ $field . '_gmt' ] );
+			$this->assertSame( strtotime( $result['product'][ $field ] ), strtotime( $result['product'][ $field . '_gmt' ] ) );
+		}
+	}
+
+	/**
+	 * @dataProvider provider_output_date_timezones
+	 * @param string $timezone Store timezone.
+	 * @param string $created Creation date in store time.
+	 * @param string $expected Expected date with offset.
+	 */
+	public function test_order_output_dates_have_offsets( string $timezone, string $created, string $expected ): void {
+		update_option( 'timezone_string', $timezone );
+		update_option( 'gmt_offset', 5.75 );
+		$order = $this->create_order_for_query_sorting( 'dates@example.test', $created, $created );
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'id' => $order->get_id() ) );
+
+		$this->assertNotWPError( $result );
+		foreach ( array( 'date_created', 'date_modified' ) as $field ) {
+			$this->assertSame( $expected, $result['orders'][0][ $field ] );
+			$this->assertStringEndsWith( '+00:00', $result['orders'][0][ $field . '_gmt' ] );
+			$this->assertSame( strtotime( $expected ), strtotime( $result['orders'][0][ $field . '_gmt' ] ) );
+		}
+	}
+
+	/**
+	 * Store timezones and dates, including daylight saving and fractional offsets.
+	 *
+	 * @return array
+	 */
+	public function provider_output_date_timezones(): array {
+		return array(
+			'UTC'        => array( 'UTC', '2026-07-15T12:00:00', '2026-07-15T12:00:00+00:00' ),
+			'summer'     => array( 'Europe/Amsterdam', '2026-07-15T12:00:00', '2026-07-15T12:00:00+02:00' ),
+			'winter'     => array( 'Europe/Amsterdam', '2026-01-15T12:00:00', '2026-01-15T12:00:00+01:00' ),
+			'negative'   => array( 'America/New_York', '2026-07-15T12:00:00', '2026-07-15T12:00:00-04:00' ),
+			'fractional' => array( '', '2026-07-15T12:00:00', '2026-07-15T12:00:00+05:45' ),
+		);
+	}
+
+	/**
 	 * @testdox Should update product properties and reflect changes in the response.
 	 */
 	public function test_product_update_changes_props_and_returns_updated_response(): void {

@@ -295,10 +295,10 @@ trait OrderAbilityTrait {
 			'billing_email'        => '' === $billing_email ? null : $billing_email,
 			'payment_method'       => $order->get_payment_method(),
 			'payment_method_title' => $order->get_payment_method_title(),
-			'date_created'         => wc_rest_prepare_date_response( $order->get_date_created(), false ),
-			'date_created_gmt'     => wc_rest_prepare_date_response( $order->get_date_created() ),
-			'date_modified'        => wc_rest_prepare_date_response( $order->get_date_modified(), false ),
-			'date_modified_gmt'    => wc_rest_prepare_date_response( $order->get_date_modified() ),
+			'date_created'         => self::format_date_for_response( $order->get_date_created(), false ),
+			'date_created_gmt'     => self::format_date_for_response( $order->get_date_created() ),
+			'date_modified'        => self::format_date_for_response( $order->get_date_modified(), false ),
+			'date_modified_gmt'    => self::format_date_for_response( $order->get_date_modified() ),
 		);
 
 		if ( $include_line_items ) {
