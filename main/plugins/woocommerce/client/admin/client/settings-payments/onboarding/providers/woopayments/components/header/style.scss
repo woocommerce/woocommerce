@@ -1,0 +1,25 @@
+.settings-payments-onboarding-modal {
+	&__header {
+		position: sticky;
+		top: 0;
+		z-index: 10;
+		background-color: $white;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: $gap 32px;
+		border-bottom: 1px solid $gray-200;
+
+		&--logo {
+			width: 64px;
+		}
+
+		&--close {
+			padding: 6px;
+
+			@media screen and (max-width: $break-medium) {
+				padding: 6px 0;
+			}
+		}
+	}
+}

@@ -1,0 +1,93 @@
+@import "../../stylesheets/_variables.scss";
+
+.woocommerce-marketplace {
+	&__tabs {
+		box-sizing: content-box;
+		display: flex;
+		gap: 24px;
+		overflow-y: auto;
+	}
+
+	&__tab-button {
+		border-bottom: 1.5px solid transparent;
+		border-radius: 0;
+		color: $mauve-light-12;
+		font-size: 13px;
+		font-style: normal;
+		font-weight: 600;
+		height: 48px;
+		line-height: 16px;
+		padding: 0;
+		white-space: nowrap;
+
+		// WordPress 7.1 moved Button focus indication from box-shadow to a real
+		// outline, so suppressing box-shadow alone no longer hides it. Scope the
+		// suppression to pointer focus; keyboard focus keeps core's ring.
+		&:focus:not(:disabled):not(:focus-visible) {
+			box-shadow: none;
+			outline: none;
+		}
+
+		// The tab strip clips its overflow, which cuts the top and bottom off a
+		// ring drawn outside the button. Pull core's ring inside instead.
+		&:focus:not(:disabled):focus-visible {
+			outline-offset: -2px;
+		}
+
+		// Only the bottom edge is the active indicator. WordPress 7.1 gives
+		// .components-button a 1px transparent border on all four sides, so the
+		// border-color shorthand would paint a full box around the active tab.
+		&.is-active {
+			border-bottom-color: var(--wp-admin-theme-color);
+		}
+	}
+
+	&__update-count {
+		display: inline-block;
+		vertical-align: top;
+		box-sizing: border-box;
+		margin: 1px 0 -1px 4px;
+		padding: 0 5px;
+		min-width: 16px;
+		height: 16px;
+		border-radius: 9px;
+		background-color: #d63638;
+		color: #fff;
+		font-size: 10px;
+		line-height: 1.6;
+		text-align: center;
+		z-index: 26;
+	}
+
+	&__update-count-extensions,
+	&__update-count-themes,
+	&__update-count-business-services {
+		background-color: $gutenberg-gray-300;
+		color: $gutenberg-gray-700;
+
+		&.is-active {
+			background-color: #000;
+			color: #fff;
+		}
+	}
+}
+
+@media screen and (max-width: $breakpoint-large) {
+	.woocommerce-marketplace__tabs {
+		border-bottom: 1px solid $gutenberg-gray-300;
+
+		&::after {
+			content: "";
+			position: fixed;
+			right: 0;
+			width: 4.5em;
+			height: 48px;
+			background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.5) 25%, rgba(255, 255, 255, 1) 100%);
+			pointer-events: none;
+		}
+
+		.woocommerce-marketplace__tab-my-subscriptions {
+			padding-right: 2.5em;
+		}
+	}
+}

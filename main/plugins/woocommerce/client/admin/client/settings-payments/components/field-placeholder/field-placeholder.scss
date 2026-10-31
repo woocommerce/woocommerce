@@ -1,0 +1,30 @@
+.woocommerce-field-placeholder {
+	margin-bottom: 32px;
+
+	.components-placeholder {
+		background-color: $gray-100;
+		border: none;
+		border-radius: 4px;
+		display: flex;
+		align-items: center;
+		padding: 0 12px;
+		box-shadow: none;
+
+		.components-placeholder__label,
+		.components-placeholder__instructions {
+			display: none;
+		}
+	}
+
+	&--small .components-placeholder {
+		min-height: 32px;
+	}
+
+	&--medium .components-placeholder {
+		min-height: 96px;
+	}
+
+	&--large .components-placeholder {
+		min-height: 160px;
+	}
+}
