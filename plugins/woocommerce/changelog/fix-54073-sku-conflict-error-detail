@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Name the specific product a SKU conflict is with, and whether it's in the Trash, a draft, or published, instead of a generic "already in use" message.
