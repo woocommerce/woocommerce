@@ -1611,7 +1611,8 @@ trait ProductAbilityTrait {
 
 	/**
 	 * The error for a `variations` item that writes a field that cannot apply to
-	 * a variation. The input schema would refuse it too, with a generic error.
+	 * a variation or that cannot be written. The input schema would refuse it
+	 * too, with a generic error.
 	 *
 	 * @param mixed $input Ability input.
 	 * @return \WP_Error|null
@@ -1629,6 +1630,10 @@ trait ProductAbilityTrait {
 						return self::field_object_type_refusal( 'extensions.' . $namespace . '.' . $field, ProductType::VARIATION, $args['object_types'] );
 					}
 				}
+			}
+			$refusal = self::field_names_refusal( (array) ( $item['extensions'] ?? array() ), 'product', array( self::class, 'field_applies_to_variations' ) );
+			if ( null !== $refusal ) {
+				return $refusal;
 			}
 		}
 		return null;
