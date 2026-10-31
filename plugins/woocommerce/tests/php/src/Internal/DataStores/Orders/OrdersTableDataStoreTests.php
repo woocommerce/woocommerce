@@ -3715,6 +3715,308 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * Creates an order whose `$key` holds `$values` in the orders table, with sync on, and returns it
+	 * with the meta IDs loaded.
+	 *
+	 * @param string $key    Meta key.
+	 * @param array  $values Values to add, in order.
+	 * @return \WC_Order
+	 */
+	private function create_synced_order_with_meta_values( string $key, array $values ): \WC_Order {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$order = WC_Helper_Order::create_order();
+		foreach ( $values as $value ) {
+			$order->add_meta_data( $key, $value );
+		}
+		$order->save();
+		$this->assertEqualsCanonicalizing( $values, get_post_meta( $order->get_id(), $key, false ), 'Precondition: post meta mirrors the orders table.' );
+
+		return wc_get_order( $order->get_id() );
+	}
+
+	/**
+	 * Updates, by meta ID, the first `$key` row of `$order` that holds `$from` to `$to`, taking the
+	 * backfill path rather than a full order save, as a meta change right after a save does.
+	 *
+	 * @param \WC_Order $order Order.
+	 * @param string    $key   Meta key.
+	 * @param mixed     $from  Current value of the row to update.
+	 * @param mixed     $to    New value.
+	 */
+	private function update_meta_row_by_id( \WC_Order $order, string $key, $from, $to ): void {
+		$row = current(
+			array_filter(
+				$order->get_meta_data(),
+				function ( $meta ) use ( $key, $from ) {
+					return $key === $meta->key && $from === $meta->value;
+				}
+			)
+		);
+		$this->assertNotEmpty( $row->id, 'Precondition: the row to update is known by its meta ID.' );
+
+		add_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', '__return_false' );
+		try {
+			$order->update_meta_data( $key, $to, $row->id );
+			$order->save_meta_data();
+		} finally {
+			remove_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', '__return_false' );
+		}
+	}
+
+	/**
+	 * Values of `$key` as the orders table holds them.
+	 *
+	 * @param int    $order_id Order ID.
+	 * @param string $key      Meta key.
+	 * @return array
+	 */
+	private function hpos_meta_values( int $order_id, string $key ): array {
+		$values = array();
+		foreach ( wc_get_order( $order_id )->get_meta_data() as $meta ) {
+			if ( $key === $meta->key ) {
+				$values[] = $meta->value;
+			}
+		}
+		return $values;
+	}
+
+	/**
+	 * @testdox Updating one value of a multi-value meta key by its meta ID syncs only that post meta row.
+	 */
+	public function test_updating_one_value_of_a_multi_value_meta_syncs_only_that_row(): void {
+		$order      = $this->create_synced_order_with_meta_values( 'multi_key', array( 'a', 'b' ) );
+		$ids_before = $this->post_meta_ids( $order->get_id(), 'multi_key' );
+
+		$this->update_meta_row_by_id( $order, 'multi_key', 'a', 'c' );
+
+		$this->assertEqualsCanonicalizing( array( 'b', 'c' ), get_post_meta( $order->get_id(), 'multi_key', false ), 'Only the updated row changed in post meta.' );
+		$this->assertEqualsCanonicalizing( array( 'b', 'c' ), $this->hpos_meta_values( $order->get_id(), 'multi_key' ), 'The orders table holds the same two values.' );
+		$this->assertSame( $ids_before, $this->post_meta_ids( $order->get_id(), 'multi_key' ), 'Both post meta rows kept their meta IDs.' );
+	}
+
+	/**
+	 * @testdox Updating a single-value meta key updates its post meta row in place and fires updated_post_meta, as before.
+	 */
+	public function test_updating_a_single_value_meta_updates_the_post_meta_row_in_place(): void {
+		$order     = $this->create_synced_order_with_meta_values( 'single_key', array( 'a' ) );
+		$id_before = $this->post_meta_ids( $order->get_id(), 'single_key' );
+		$fired     = array();
+		$listener  = function ( $meta_id, $object_id, $key ) use ( &$fired ) {
+			if ( 'single_key' === $key ) {
+				$fired[] = current_action();
+			}
+		};
+		foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $hook ) {
+			add_action( $hook, $listener, 10, 3 );
+		}
+		try {
+			$this->update_meta_row_by_id( $order, 'single_key', 'a', 'c' );
+		} finally {
+			foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $hook ) {
+				remove_action( $hook, $listener, 10 );
+			}
+		}
+
+		$this->assertSame( array( 'c' ), get_post_meta( $order->get_id(), 'single_key', false ) );
+		$this->assertSame( $id_before, $this->post_meta_ids( $order->get_id(), 'single_key' ), 'The row kept its meta ID.' );
+		$this->assertSame( array( 'updated_post_meta' ), $fired, 'Listeners saw an update, not a delete and an add.' );
+	}
+
+	/**
+	 * @testdox Updating a meta value WordPress treats as empty, such as '0', still leaves the other rows alone.
+	 */
+	public function test_updating_an_empty_like_meta_value_leaves_the_other_rows_alone(): void {
+		$order = $this->create_synced_order_with_meta_values( 'zero_key', array( '0', 'b' ) );
+
+		$this->update_meta_row_by_id( $order, 'zero_key', '0', 'c' );
+
+		$this->assertEqualsCanonicalizing( array( 'b', 'c' ), get_post_meta( $order->get_id(), 'zero_key', false ) );
+		$this->assertEqualsCanonicalizing( array( 'b', 'c' ), $this->hpos_meta_values( $order->get_id(), 'zero_key' ) );
+	}
+
+	/**
+	 * @testdox Updating one of two rows that hold the same value changes one post meta row, not both.
+	 */
+	public function test_updating_one_of_two_equal_meta_values_changes_one_row(): void {
+		$order = $this->create_synced_order_with_meta_values( 'twin_key', array( 'a', 'a' ) );
+
+		$this->update_meta_row_by_id( $order, 'twin_key', 'a', 'c' );
+
+		$this->assertEqualsCanonicalizing( array( 'a', 'c' ), get_post_meta( $order->get_id(), 'twin_key', false ) );
+		$this->assertEqualsCanonicalizing( array( 'a', 'c' ), $this->hpos_meta_values( $order->get_id(), 'twin_key' ) );
+	}
+
+	/**
+	 * @testdox Updating a meta value when post meta has drifted brings the whole key back in line without touching the other rows' values.
+	 */
+	public function test_updating_a_meta_value_on_a_drifted_key_reconciles_the_key(): void {
+		$order = $this->create_synced_order_with_meta_values( 'drift_key', array( 'a', 'b' ) );
+		// Post meta drifted away from the orders table on the row about to change.
+		update_post_meta( $order->get_id(), 'drift_key', 'stale', 'a' );
+		$this->assertEqualsCanonicalizing( array( 'stale', 'b' ), get_post_meta( $order->get_id(), 'drift_key', false ) );
+
+		$this->update_meta_row_by_id( $order, 'drift_key', 'a', 'c' );
+
+		$this->assertEqualsCanonicalizing( array( 'b', 'c' ), get_post_meta( $order->get_id(), 'drift_key', false ), 'The stale row follows the orders table and b is kept.' );
+		$this->assertEqualsCanonicalizing( array( 'b', 'c' ), $this->hpos_meta_values( $order->get_id(), 'drift_key' ) );
+	}
+
+	/**
+	 * @testdox Syncing a meta key leaves post meta untouched when both sides already agree.
+	 */
+	public function test_meta_sync_does_not_rewrite_post_meta_that_already_agrees(): void {
+		$order = $this->create_synced_order_with_meta_values( 'same_key', array( 'a', 'b' ) );
+		// Post meta already holds what the orders table is about to hold.
+		update_post_meta( $order->get_id(), 'same_key', 'c', 'a' );
+		$ids_before = $this->post_meta_ids( $order->get_id(), 'same_key' );
+		$fired      = 0;
+		$listener   = function ( $meta_id, $object_id, $key ) use ( &$fired ) {
+			if ( 'same_key' === $key ) {
+				++$fired;
+			}
+		};
+		foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $hook ) {
+			add_action( $hook, $listener, 10, 3 );
+		}
+		try {
+			$this->update_meta_row_by_id( $order, 'same_key', 'a', 'c' );
+		} finally {
+			foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $hook ) {
+				remove_action( $hook, $listener, 10 );
+			}
+		}
+
+		$this->assertSame( $ids_before, $this->post_meta_ids( $order->get_id(), 'same_key' ), 'The post meta rows were not rewritten.' );
+		$this->assertSame( 0, $fired, 'No post meta hook fired.' );
+	}
+
+	/**
+	 * @testdox When post meta lacks rows of the key, the sync updates the rows it has and adds the rest.
+	 */
+	public function test_meta_sync_adds_the_rows_post_meta_lacks(): void {
+		$order = $this->create_synced_order_with_meta_values( 'short_key', array( 'a', 'b' ) );
+		delete_post_meta( $order->get_id(), 'short_key', 'b' );
+		$ids_before = $this->post_meta_ids( $order->get_id(), 'short_key' );
+		$this->assertCount( 1, $ids_before, 'Precondition: post meta holds one row.' );
+
+		$this->update_meta_row_by_id( $order, 'short_key', 'a', 'c' );
+
+		$ids_after = $this->post_meta_ids( $order->get_id(), 'short_key' );
+		$this->assertEqualsCanonicalizing( array( 'b', 'c' ), get_post_meta( $order->get_id(), 'short_key', false ) );
+		$this->assertCount( 2, $ids_after );
+		$this->assertContains( $ids_before[0], $ids_after, 'The existing row was reused, not replaced.' );
+	}
+
+	/**
+	 * @testdox When post meta holds rows the orders table lacks, the sync deletes only those rows.
+	 */
+	public function test_meta_sync_deletes_the_rows_the_orders_table_lacks(): void {
+		$order      = $this->create_synced_order_with_meta_values( 'long_key', array( 'a', 'b' ) );
+		$ids_before = $this->post_meta_ids( $order->get_id(), 'long_key' );
+		add_post_meta( $order->get_id(), 'long_key', 'extra', false );
+
+		$this->update_meta_row_by_id( $order, 'long_key', 'a', 'c' );
+
+		$this->assertEqualsCanonicalizing( array( 'b', 'c' ), get_post_meta( $order->get_id(), 'long_key', false ) );
+		$this->assertSame( $ids_before, $this->post_meta_ids( $order->get_id(), 'long_key' ), 'The two original rows stayed, the extra one went.' );
+	}
+
+	/**
+	 * @testdox A value of a class that no longer exists is inserted directly when no post meta row is left over.
+	 */
+	public function test_meta_sync_inserts_an_incomplete_class_value_directly(): void {
+		$order = $this->create_synced_order_with_meta_values( 'ic_key', array( 'a' ) );
+		$this->add_incomplete_class_value_to_orders_table_only( $order->get_id(), 'ic_key' );
+		$order      = wc_get_order( $order->get_id() );
+		$ids_before = $this->post_meta_ids( $order->get_id(), 'ic_key' );
+		$this->assertCount( 1, $ids_before, 'Precondition: post meta holds the plain row only.' );
+
+		$this->update_meta_row_by_id( $order, 'ic_key', 'a', 'c' );
+
+		$this->assertSame( array( 'c', self::INCOMPLETE_CLASS_VALUE ), $this->post_meta_raw_values( $order->get_id(), 'ic_key' ) );
+		$this->assertContains( $ids_before[0], $this->post_meta_ids( $order->get_id(), 'ic_key' ), 'The plain row was updated in place.' );
+		$post_meta = get_post_meta( $order->get_id(), 'ic_key', false );
+		$this->assertCount( 2, $post_meta, 'The meta API sees the inserted row: the post meta cache was invalidated.' );
+		$this->assertSame( 'c', $post_meta[0] );
+		$this->assertInstanceOf( \__PHP_Incomplete_Class::class, $post_meta[1] );
+	}
+
+	/**
+	 * @testdox A value of a class that no longer exists replaces a left-over post meta row by delete and direct insert.
+	 */
+	public function test_meta_sync_replaces_a_left_over_row_by_an_incomplete_class_value(): void {
+		$order = $this->create_synced_order_with_meta_values( 'ic_extra_key', array( 'a' ) );
+		$this->add_incomplete_class_value_to_orders_table_only( $order->get_id(), 'ic_extra_key' );
+		add_post_meta( $order->get_id(), 'ic_extra_key', 'extra', false );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertCount( 2, $this->post_meta_ids( $order->get_id(), 'ic_extra_key' ), 'Precondition: post meta holds the plain row and an extra one.' );
+
+		$this->update_meta_row_by_id( $order, 'ic_extra_key', 'a', 'c' );
+
+		$this->assertSame( array( 'c', self::INCOMPLETE_CLASS_VALUE ), $this->post_meta_raw_values( $order->get_id(), 'ic_extra_key' ) );
+		$this->assertCount( 2, $this->post_meta_ids( $order->get_id(), 'ic_extra_key' ) );
+		$post_meta = get_post_meta( $order->get_id(), 'ic_extra_key', false );
+		$this->assertCount( 2, $post_meta, 'The meta API sees the inserted row: the post meta cache was invalidated.' );
+		$this->assertSame( 'c', $post_meta[0] );
+		$this->assertInstanceOf( \__PHP_Incomplete_Class::class, $post_meta[1] );
+	}
+
+	/**
+	 * A serialized object of a class that does not exist, as a plugin that was removed leaves behind.
+	 */
+	private const INCOMPLETE_CLASS_VALUE = 'O:11:"geoiprecord":2:{s:12:"country_code";s:2:"BE";s:4:"city";s:8:"Brussels";}';
+
+	/**
+	 * Writes an incomplete-class value for `$key` into the orders meta table only, so that post meta lacks it.
+	 *
+	 * @param int    $order_id Order ID.
+	 * @param string $key      Meta key.
+	 */
+	private function add_incomplete_class_value_to_orders_table_only( int $order_id, string $key ): void {
+		global $wpdb;
+		$wpdb->insert(
+			$this->sut::get_meta_table_name(),
+			array(
+				'order_id'   => $order_id,
+				'meta_key'   => $key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_value' => self::INCOMPLETE_CLASS_VALUE, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			),
+			array( '%d', '%s', '%s' )
+		);
+		wc_get_container()->get( OrderCache::class )->remove( $order_id );
+		$this->sut->clear_cached_data( array( $order_id ) );
+	}
+
+	/**
+	 * Values of the `$key` rows of `$order_id` in post meta, as stored, in meta ID order.
+	 *
+	 * @param int    $order_id Order ID.
+	 * @param string $key      Meta key.
+	 * @return string[]
+	 */
+	private function post_meta_raw_values( int $order_id, string $key ): array {
+		global $wpdb;
+		return $wpdb->get_col( $wpdb->prepare( "SELECT meta_value FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s ORDER BY meta_id ASC", $order_id, $key ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+	}
+
+	/**
+	 * Meta IDs of the `$key` rows of `$order_id` in post meta, in order.
+	 *
+	 * @param int    $order_id Order ID.
+	 * @param string $key      Meta key.
+	 * @return int[]
+	 */
+	private function post_meta_ids( int $order_id, string $key ): array {
+		global $wpdb;
+		return array_map(
+			'intval',
+			$wpdb->get_col( $wpdb->prepare( "SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s ORDER BY meta_id ASC", $order_id, $key ) ) // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		);
+	}
+
+	/**
 	 * @testDox Test that date queries correctly handle timezones.
 	 */
 	public function test_timezone_date_query_support() {

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+With HPOS and sync on, updating one value of a multi-value order meta key no longer overwrites the other values of that key in post meta.
