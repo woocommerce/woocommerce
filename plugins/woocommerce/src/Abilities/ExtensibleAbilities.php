@@ -126,11 +126,11 @@ class ExtensibleAbilities {
 	 *     @type string   $field        Field name inside the namespace, such as `trial_length`.
 	 *     @type array    $schema       JSON schema of the value. It needs a `type`. Its `title` is the label clients show.
 	 *                                  It cannot set `required`, because a value that fails its schema is
-	 *                                  left out. For a field that is always present, allow null and return null.
+	 *                                  left out. A null value is also left out, even when the schema allows it.
 	 *     @type callable $get_callback Receives the object and returns the value. A value that the schema
 	 *                                  does not allow is left out, so return null when the object has no
-	 *                                  value. A schema that allows null, such as `array( 'integer', 'null' )`,
-	 *                                  keeps it. It reads the object it is given, not the database,
+	 *                                  value. Output omits nulls, including nested values, without changing the input schema.
+	 *                                  It reads the object it is given, not the database,
 	 *                                  because an ability can format an object before it is saved.
 	 *     @type callable $update_callback Optional. Receives the object and the value, and changes the object
 	 *                                     in memory. It returns a WP_Error to reject the value, and then
@@ -179,7 +179,7 @@ class ExtensibleAbilities {
 			return;
 		}
 		if ( true === ( $args['schema']['required'] ?? null ) ) {
-			wc_doing_it_wrong( __METHOD__, 'The "schema" argument cannot set "required". A value that fails its schema is left out, so allow null for a field that is always present.', '11.3.0' );
+			wc_doing_it_wrong( __METHOD__, 'The "schema" argument cannot set "required". A null value or a value that fails its schema is left out.', '11.3.0' );
 			return;
 		}
 		if ( ! is_callable( $args['get_callback'] ?? null ) ) {
@@ -523,7 +523,7 @@ class ExtensibleAbilities {
 
 	/**
 	 * Add the field values of an object to its formatted output, under
-	 * `extensions.<namespace>.<field>`. A value is cast to its schema type, so
+	 * `extensions.<namespace>.<field>`. A null value is left out. Other values are cast to their schema type, so
 	 * `'12'` becomes `12` for an integer field. A field that throws or returns a
 	 * value that its schema does not allow is left out. A namespace with no
 	 * values is left out, and `extensions` is left out when no namespace has
@@ -553,11 +553,16 @@ class ExtensibleAbilities {
 					);
 					continue;
 				}
-				if ( ! self::matches_schema( $args, $value ) ) {
+				if ( null === $value || ! self::matches_schema( $args, $value ) ) {
 					continue;
 				}
 				$sanitized = rest_sanitize_value_from_schema( $value, $args['schema'], $field );
-				if ( ! is_wp_error( $sanitized ) ) {
+				if ( is_wp_error( $sanitized ) ) {
+					continue;
+				}
+				$sanitized     = self::omit_null_values( $sanitized, $args['schema'] );
+				$output_schema = self::get_output_field_schema( $args['schema'] );
+				if ( null !== $sanitized && null !== $output_schema && true === rest_validate_value_from_schema( $sanitized, $output_schema, $field ) ) {
 					$extensions[ $namespace ][ $field ] = $sanitized;
 				}
 			}
@@ -590,20 +595,129 @@ class ExtensibleAbilities {
 			'description'          => __( 'Values that extensions add, keyed by extension namespace, then field.', 'woocommerce' ),
 			'additionalProperties' => false,
 		);
-		foreach ( self::$fields[ $resource_name ] ?? array() as $namespace => $fields ) {
-			$extensions['properties'][ $namespace ] = array(
-				'type'                 => 'object',
-				'properties'           => array_map(
-					static function ( array $args ): array {
-						return $args['schema'];
-					},
-					$fields
-				),
-				'additionalProperties' => false,
-			);
+		foreach ( self::$fields[ $resource_name ] as $namespace => $fields ) {
+			$properties = array();
+			foreach ( $fields as $field => $args ) {
+				$field_schema = self::get_output_field_schema( $args['schema'] );
+				if ( null !== $field_schema ) {
+					$properties[ $field ] = $field_schema;
+				}
+			}
+			if ( $properties ) {
+				$extensions['properties'][ $namespace ] = array(
+					'type'                 => 'object',
+					'properties'           => $properties,
+					'additionalProperties' => false,
+				);
+			}
 		}
-		$schema['properties']['extensions'] = $extensions;
+		if ( ! empty( $extensions['properties'] ) ) {
+			$schema['properties']['extensions'] = $extensions;
+		}
 		return $schema;
+	}
+
+	/**
+	 * Derive the output schema without changing the registered input contract.
+	 *
+	 * @param array $schema Registered field schema.
+	 * @return array|null Null when the field cannot have a non-null value.
+	 */
+	private static function get_output_field_schema( array $schema ): ?array {
+		if ( isset( $schema['type'] ) ) {
+			$types = array_values( array_diff( (array) $schema['type'], array( 'null' ) ) );
+			if ( ! $types ) {
+				return null;
+			}
+			$schema['type'] = 1 === count( $types ) ? $types[0] : $types;
+		}
+		if ( isset( $schema['enum'] ) ) {
+			$schema['enum'] = array_values( array_filter( $schema['enum'], static fn( $value ) => null !== $value ) );
+			if ( ! $schema['enum'] ) {
+				return null;
+			}
+		}
+		foreach ( array( 'anyOf', 'oneOf' ) as $keyword ) {
+			if ( isset( $schema[ $keyword ] ) ) {
+				$schema[ $keyword ] = array_values( array_filter( array_map( array( self::class, 'get_output_field_schema' ), $schema[ $keyword ] ) ) );
+				if ( ! $schema[ $keyword ] ) {
+					return null;
+				}
+			}
+		}
+		if ( array_key_exists( 'default', $schema ) && null === $schema['default'] ) {
+			unset( $schema['default'] );
+		}
+		foreach ( array( 'properties', 'patternProperties' ) as $keyword ) {
+			foreach ( $schema[ $keyword ] ?? array() as $name => $property ) {
+				$normalized = self::get_output_field_schema( $property );
+				if ( is_array( $schema['required'] ?? null ) && ( null === $normalized || true === rest_validate_value_from_schema( null, $property ) ) ) {
+					$schema['required'] = array_values( array_diff( $schema['required'], array( $name ) ) );
+				}
+				if ( null === $normalized ) {
+					unset( $schema[ $keyword ][ $name ] );
+				} else {
+					$schema[ $keyword ][ $name ] = $normalized;
+				}
+			}
+			if ( array() === ( $schema[ $keyword ] ?? null ) ) {
+				unset( $schema[ $keyword ] );
+			}
+		}
+		if ( array() === ( $schema['required'] ?? null ) ) {
+			unset( $schema['required'] );
+		}
+		foreach ( array( 'items', 'additionalProperties' ) as $keyword ) {
+			if ( isset( $schema[ $keyword ] ) && is_array( $schema[ $keyword ] ) ) {
+				$normalized = self::get_output_field_schema( $schema[ $keyword ] );
+				if ( 'items' === $keyword && null === $normalized ) {
+					unset( $schema['items'] );
+					$schema['maxItems'] = 0;
+				} else {
+					$schema[ $keyword ] = $normalized ?? false;
+				}
+			}
+		}
+		return $schema;
+	}
+
+	/**
+	 * Omit absent values while preserving the JSON shape of objects and lists.
+	 *
+	 * @param mixed $value  Sanitized value.
+	 * @param array $schema Registered field schema.
+	 * @return mixed
+	 */
+	private static function omit_null_values( $value, array $schema ) {
+		if ( ! is_array( $value ) && ! is_object( $value ) ) {
+			return $value;
+		}
+		foreach ( array( 'anyOf', 'oneOf' ) as $keyword ) {
+			if ( isset( $schema[ $keyword ] ) ) {
+				$matching = 'anyOf' === $keyword ? rest_find_any_matching_schema( $value, $schema, '' ) : rest_find_one_matching_schema( $value, $schema, '' );
+				if ( ! is_wp_error( $matching ) ) {
+					$value = self::omit_null_values( $value, $matching );
+				}
+			}
+		}
+		$type = $schema['type'] ?? null;
+		if ( is_array( $type ) ) {
+			$type = rest_handle_multi_type_schema( $value, $schema );
+		}
+		$result = array();
+		foreach ( (array) $value as $key => $item ) {
+			if ( null === $item ) {
+				continue;
+			}
+			$item_schema    = 'array' === $type
+				? ( $schema['items'] ?? array() )
+				: ( $schema['properties'][ $key ] ?? rest_find_matching_pattern_property_schema( (string) $key, $schema ) ?? $schema['additionalProperties'] ?? array() );
+			$result[ $key ] = self::omit_null_values( $item, is_array( $item_schema ) ? $item_schema : array() );
+		}
+		if ( 'array' === $type ) {
+			return array_values( $result );
+		}
+		return is_object( $value ) || ( 'object' === $type && ( array() === $result || wp_is_numeric_array( $result ) ) ) ? (object) $result : $result;
 	}
 
 	/**

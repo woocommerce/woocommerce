@@ -142,25 +142,25 @@ trait OrderAbilityTrait {
 				'total'                => array( 'type' => 'string' ),
 				'customer_id'          => array( 'type' => 'integer' ),
 				'billing_email'        => array(
-					'type'   => array( 'string', 'null' ),
+					'type'   => 'string',
 					'format' => 'email',
 				),
 				'payment_method'       => array( 'type' => 'string' ),
 				'payment_method_title' => array( 'type' => 'string' ),
 				'date_created'         => array(
-					'type'   => array( 'string', 'null' ),
+					'type'   => 'string',
 					'format' => 'date-time',
 				),
 				'date_created_gmt'     => array(
-					'type'   => array( 'string', 'null' ),
+					'type'   => 'string',
 					'format' => 'date-time',
 				),
 				'date_modified'        => array(
-					'type'   => array( 'string', 'null' ),
+					'type'   => 'string',
 					'format' => 'date-time',
 				),
 				'date_modified_gmt'    => array(
-					'type'   => array( 'string', 'null' ),
+					'type'   => 'string',
 					'format' => 'date-time',
 				),
 				'line_items'           => array(
@@ -325,6 +325,6 @@ trait OrderAbilityTrait {
 			}
 		}
 
-		return ExtensibleAbilities::add_fields_to_object( $data, 'order', $order );
+		return ExtensibleAbilities::add_fields_to_object( array_filter( $data, static fn( $value ) => null !== $value ), 'order', $order );
 	}
 }

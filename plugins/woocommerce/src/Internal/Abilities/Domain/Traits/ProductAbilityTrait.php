@@ -815,7 +815,7 @@ trait ProductAbilityTrait {
 			'date_modified_gmt' => wc_rest_prepare_date_response( $product->get_date_modified() ),
 		);
 
-		return ExtensibleAbilities::add_fields_to_object( $data, 'product', $product );
+		return ExtensibleAbilities::add_fields_to_object( array_filter( $data, static fn( $value ) => null !== $value ), 'product', $product );
 	}
 
 	/**
@@ -832,8 +832,8 @@ trait ProductAbilityTrait {
 					'name'              => array( 'type' => 'string' ),
 					'slug'              => array( 'type' => 'string' ),
 					'permalink'         => array(
-						'type'        => array( 'string', 'null' ),
-						'description' => __( 'Product permalink, or null when no public permalink is available.', 'woocommerce' ),
+						'type'        => 'string',
+						'description' => __( 'Product permalink. Omitted when no public permalink is available.', 'woocommerce' ),
 						'format'      => 'uri',
 					),
 					'type'              => array(
@@ -868,19 +868,19 @@ trait ProductAbilityTrait {
 						'enum' => array_keys( wc_get_product_stock_status_options() ),
 					),
 					'stock_quantity'    => array(
-						'type'        => array( self::get_product_stock_quantity_schema_type(), 'null' ),
-						'description' => __( 'Current stock quantity, or null when no stock quantity is set.', 'woocommerce' ),
+						'type'        => self::get_product_stock_quantity_schema_type(),
+						'description' => __( 'Current stock quantity. Omitted when no stock quantity is set.', 'woocommerce' ),
 					),
 					'manage_stock'      => array( 'type' => 'boolean' ),
 					'virtual'           => array( 'type' => 'boolean' ),
 					'downloadable'      => array( 'type' => 'boolean' ),
 					'external_url'      => array(
-						'type'        => array( 'string', 'null' ),
+						'type'        => 'string',
 						'description' => __( 'External product URL for external products.', 'woocommerce' ),
 						'format'      => 'uri',
 					),
 					'button_text'       => array(
-						'type'        => array( 'string', 'null' ),
+						'type'        => 'string',
 						'description' => __( 'Button text for external products.', 'woocommerce' ),
 					),
 					'grouped_products'  => array(
@@ -889,19 +889,19 @@ trait ProductAbilityTrait {
 						'items'       => array( 'type' => 'integer' ),
 					),
 					'date_created'      => array(
-						'type'   => array( 'string', 'null' ),
+						'type'   => 'string',
 						'format' => 'date-time',
 					),
 					'date_created_gmt'  => array(
-						'type'   => array( 'string', 'null' ),
+						'type'   => 'string',
 						'format' => 'date-time',
 					),
 					'date_modified'     => array(
-						'type'   => array( 'string', 'null' ),
+						'type'   => 'string',
 						'format' => 'date-time',
 					),
 					'date_modified_gmt' => array(
-						'type'   => array( 'string', 'null' ),
+						'type'   => 'string',
 						'format' => 'date-time',
 					),
 				),
