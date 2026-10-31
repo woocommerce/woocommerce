@@ -354,6 +354,12 @@ class WC_Data_Store_WP {
 		$raw_start = '';
 		$raw_end   = '';
 
+		// These raise a TypeError below, which the catch ( Exception ) does not handle.
+		if ( is_array( $query_var ) || ( is_object( $query_var ) && ! method_exists( $query_var, '__toString' ) ) ) {
+			$wp_query_args['errors'][] = new WP_Error( 'woocommerce_query_invalid', __( 'Invalid date query.', 'woocommerce' ) );
+			return $wp_query_args;
+		}
+
 		try {
 			// Specific time query with a WC_DateTime.
 			if ( is_a( $query_var, 'WC_DateTime' ) ) {
