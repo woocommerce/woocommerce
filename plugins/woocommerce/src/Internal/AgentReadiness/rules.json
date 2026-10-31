@@ -1,0 +1,89 @@
+{
+	"version": "1",
+	"checks": {
+		"missing_regular_price": {
+			"channels": {
+				"chatgpt": { "field": "price", "effect": "not_listable" },
+				"google": { "field": "price", "effect": "not_listable" },
+				"copilot": { "field": "price", "effect": "not_listable" }
+			}
+		},
+		"missing_images": {
+			"channels": {
+				"chatgpt": { "field": "image_url", "effect": "not_listable" },
+				"google": { "field": "image_link", "effect": "not_listable" },
+				"copilot": { "field": "imageLink", "effect": "not_listable" }
+			}
+		},
+		"missing_product_text": {
+			"channels": {
+				"chatgpt": { "field": "description", "effect": "not_listable" },
+				"google": { "field": "description", "effect": "gaps" },
+				"copilot": { "field": "description", "effect": "gaps" }
+			}
+		},
+		"missing_brand": {
+			"channels": {
+				"chatgpt": { "field": "brand", "effect": "not_listable" },
+				"google": { "field": "brand", "effect": "gaps" },
+				"copilot": { "field": "brand", "effect": "gaps" }
+			}
+		},
+		"invalid_gtin": {
+			"channels": {
+				"chatgpt": { "field": "gtin", "effect": "gaps" },
+				"google": { "field": "gtin", "effect": "not_listable" },
+				"copilot": { "field": "gtin", "effect": "gaps" }
+			}
+		},
+		"missing_gtin": {
+			"channels": {
+				"chatgpt": { "field": "gtin", "effect": "gaps" },
+				"google": { "field": "gtin", "effect": "gaps" },
+				"copilot": { "field": "gtin", "effect": "gaps" }
+			}
+		},
+		"duplicate_gtin": {
+			"channels": {
+				"google": { "field": "gtin", "effect": "gaps" }
+			}
+		},
+		"image_too_small": {
+			"channels": {
+				"google": {
+					"field": "image_link",
+					"effect": "gaps",
+					"effect_from": { "2027-01-31": "not_listable" }
+				}
+			}
+		},
+		"uncategorised": {
+			"channels": {
+				"chatgpt": { "field": "product_category", "effect": "gaps" },
+				"google": { "field": "product_type", "effect": "gaps" },
+				"copilot": { "field": "productType", "effect": "gaps" }
+			}
+		},
+		"variation_attributes_not_set": {
+			"channels": {
+				"chatgpt": { "field": "variant_dict", "effect": "gaps" },
+				"google": { "field": "color, size", "effect": "gaps" },
+				"copilot": { "field": "color, sizes", "effect": "gaps" }
+			}
+		},
+		"missing_variation_images": {
+			"channels": {
+				"chatgpt": { "field": "image_url", "effect": "gaps" },
+				"google": { "field": "image_link", "effect": "gaps" },
+				"copilot": { "field": "imageLink", "effect": "gaps" }
+			}
+		},
+		"title_too_long": {
+			"channels": {
+				"chatgpt": { "field": "title", "effect": "gaps" },
+				"google": { "field": "title", "effect": "gaps" },
+				"copilot": { "field": "title", "effect": "gaps" }
+			}
+		}
+	}
+}

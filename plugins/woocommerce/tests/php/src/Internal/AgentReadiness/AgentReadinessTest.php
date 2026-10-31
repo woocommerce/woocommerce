@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRule;
+use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreOutputChecks;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreResponses;
@@ -34,7 +35,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$output_checks = new StoreOutputChecks();
 		$output_checks->init( new ComingSoonHelper() );
 		$this->sut = new AgentReadiness();
-		$this->sut->init( $store_conditions, $output_checks );
+		$this->sut->init( $store_conditions, $output_checks, new RemoteRules() );
 	}
 
 	/**
@@ -70,7 +71,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$output_checks->init( new ComingSoonHelper() );
 		$store_conditions = new StoreConditions();
 		$store_conditions->init( new ComingSoonHelper() );
-		$this->sut->init( $store_conditions, $output_checks );
+		$this->sut->init( $store_conditions, $output_checks, new RemoteRules() );
 		add_filter( 'pre_http_request', static fn() => new \WP_Error( 'http_request_failed', 'Timed out' ) );
 
 		$checks = array_column( $this->sut->get_report()['store_checks'], null, 'id' );
