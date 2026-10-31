@@ -23,6 +23,15 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 	use ProductAbilityTrait;
 
 	/**
+	 * Taxonomies of the term filters, keyed by input property.
+	 */
+	private const TERM_FILTERS = array(
+		'category' => 'product_cat',
+		'tag'      => 'product_tag',
+		'brand'    => 'product_brand',
+	);
+
+	/**
 	 * Get the ability name.
 	 *
 	 * @return string
@@ -142,11 +151,27 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			return $extension_args;
 		}
 
+		foreach ( self::TERM_FILTERS as $field => $taxonomy ) {
+			if ( ! empty( $input[ $field ] ) && is_array( $input[ $field ] ) ) {
+				$extension_args['tax_query'][] = array(
+					'taxonomy' => $taxonomy,
+					'field'    => 'term_id',
+					'terms'    => array_map( 'absint', $input[ $field ] ),
+				);
+			}
+		}
+
 		$args[ AbilitiesLoader::EXTENSION_QUERY_VAR ] = $extension_args;
 
 		$results  = wc_get_products( $args );
 		$products = is_object( $results ) && isset( $results->products ) ? $results->products : array();
 		$pages    = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : ( count( $products ) > 0 ? 1 : 0 );
+
+		$image_ids = array_unique( array_merge( array(), ...array_map( array( __CLASS__, 'get_product_image_ids' ), $products ) ) );
+		if ( ! empty( $image_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $image_ids );
+		}
 
 		return array(
 			'products'    => array_map(
@@ -209,6 +234,9 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 					'type' => 'string',
 					'enum' => array_keys( wc_get_product_stock_status_options() ),
 				),
+				'category'           => self::get_term_filter_input_schema( __( 'Only products in any of these product category IDs, including their child categories.', 'woocommerce' ) ),
+				'tag'                => self::get_term_filter_input_schema( __( 'Only products with any of these product tag IDs.', 'woocommerce' ) ),
+				'brand'              => self::get_term_filter_input_schema( __( 'Only products of any of these brand IDs.', 'woocommerce' ) ),
 				'page'               => array(
 					'type'    => 'integer',
 					'default' => 1,
@@ -225,5 +253,22 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'default'              => array(),
 		);
 		return ExtensibleAbilities::add_query_filters_schema( $schema, 'product' );
+	}
+
+	/**
+	 * Schema of a filter that takes term IDs.
+	 *
+	 * @param string $description Filter description.
+	 * @return array
+	 */
+	private static function get_term_filter_input_schema( string $description ): array {
+		return array(
+			'type'        => 'array',
+			'description' => $description,
+			'items'       => array(
+				'type'    => 'integer',
+				'minimum' => 1,
+			),
+		);
 	}
 }
