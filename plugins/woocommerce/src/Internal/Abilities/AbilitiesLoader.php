@@ -301,8 +301,9 @@ class AbilitiesLoader {
 		 * get_registration_args() on each definition class and register the ability on the
 		 * Abilities API init hook. Returning a subset will not unregister core abilities;
 		 * core classes are always retained.
-		 * Successfully registered abilities are eligible for WooCommerce usage tracking
-		 * when the store has opted in, including abilities in extension namespaces.
+		 * Since 11.4.0, extensions can opt individual abilities into WooCommerce usage tracking
+		 * with `meta['woocommerce']['track_usage'] = true`. Registration alone does not opt in;
+		 * the store must also have enabled usage tracking.
 		 *
 		 * @since 10.9.0
 		 *

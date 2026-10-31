@@ -226,6 +226,34 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not track loader-registered extensions without an explicit boolean opt-in.
+	 * @testWith [null]
+	 *           [{"track_usage":false}]
+	 *           [{"track_usage":"true"}]
+	 *           [{"track_usage":1}]
+	 *           [{"track_usage":null}]
+	 *           [true]
+	 *           ["true"]
+	 *
+	 * @param mixed $tracking_meta WooCommerce metadata, or null to omit it.
+	 */
+	public function test_does_not_track_extensions_without_explicit_opt_in( $tracking_meta ): void {
+		$this->register_extension_ability( true, $tracking_meta );
+		$this->start_mcp_tool_call();
+
+		$result = wp_get_ability( TestExtensionAbilityDefinition::ABILITY_ID )->execute();
+		wp_get_ability( 'mcp-adapter/get-ability-info' )->execute( array( 'ability_name' => TestExtensionAbilityDefinition::ABILITY_ID ) );
+		$subscriber_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		wp_set_current_user( $subscriber_id );
+		$response = rest_do_request( new WP_REST_Request( 'GET', '/wp-abilities/v1/abilities/' . TestExtensionAbilityDefinition::ABILITY_ID . '/run' ) );
+		$this->sut->handle_shutdown();
+
+		$this->assertNotWPError( $result, 'The extension remains usable without tracking opt-in' );
+		$this->assertSame( 403, $response->get_status() );
+		$this->assertCount( 0, $this->sut->recorded, 'Registration, public discovery, and merchant consent do not opt an extension into tracking' );
+	}
+
+	/**
 	 * @testdox Should record a loader-registered extension's REST permission rejection before execution.
 	 */
 	public function test_records_extension_rest_rejection_before_execution(): void {
@@ -1279,12 +1307,23 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	/**
 	 * Register the extension fixture through the WooCommerce loader or directly with WordPress.
 	 *
-	 * @param bool $through_loader Whether to use the WooCommerce loader.
+	 * @param bool  $through_loader Whether to use the WooCommerce loader.
+	 * @param mixed $tracking_meta  WooCommerce metadata, or null to omit it.
 	 */
-	private function register_extension_ability( bool $through_loader = true ): void {
+	private function register_extension_ability( bool $through_loader = true, $tracking_meta = array( 'track_usage' => true ) ): void {
 		$definitions = static function ( $classes ) {
 			$classes[] = TestExtensionAbilityDefinition::class;
 			return $classes;
+		};
+		$arguments   = static function ( $args, $name ) use ( $tracking_meta ) {
+			if ( TestExtensionAbilityDefinition::ABILITY_ID === $name ) {
+				if ( null === $tracking_meta ) {
+					unset( $args['meta']['woocommerce'] );
+				} else {
+					$args['meta']['woocommerce'] = $tracking_meta;
+				}
+			}
+			return $args;
 		};
 		$register    = $through_loader ? array( AbilitiesLoader::class, 'register_abilities' ) : static function (): void {
 			wp_register_ability( TestExtensionAbilityDefinition::ABILITY_ID, TestExtensionAbilityDefinition::get_registration_args() );
@@ -1293,11 +1332,13 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		if ( $through_loader ) {
 			add_filter( 'woocommerce_ability_definition_classes', $definitions );
 		}
+		add_filter( 'wp_register_ability_args', $arguments, 10, 2 );
 		add_action( 'wp_abilities_api_init', $register );
 		try {
 			do_action( 'wp_abilities_api_init' );
 		} finally {
 			remove_action( 'wp_abilities_api_init', $register );
+			remove_filter( 'wp_register_ability_args', $arguments, 10 );
 			remove_filter( 'woocommerce_ability_definition_classes', $definitions );
 		}
 	}

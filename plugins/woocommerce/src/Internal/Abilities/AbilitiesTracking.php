@@ -14,7 +14,7 @@ use WP_REST_Request;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Records Tracks events for WooCommerce abilities and extensions registered through its loader.
+ * Records Tracks events for WooCommerce abilities and opted-in extensions registered through its loader.
  *
  * Hooks only collect data in memory. Events are sent once per request on shutdown through the batched
  * Tracks client. Ability input and output are never recorded, except the name of a registered ability an agent
@@ -918,14 +918,28 @@ class AbilitiesTracking {
 	}
 
 	/**
-	 * Whether an ability belongs to WooCommerce or was registered through its loader.
+	 * Whether an ability belongs to WooCommerce or explicitly opts in through its loader.
 	 *
 	 * @param mixed $ability_name The ability name.
 	 * @return bool
 	 */
 	private static function is_tracked_ability( $ability_name ): bool {
-		return is_string( $ability_name )
-			&& ( 0 === strpos( $ability_name, self::ABILITY_PREFIX ) || AbilitiesLoader::is_registered_ability( $ability_name ) );
+		if ( ! is_string( $ability_name ) ) {
+			return false;
+		}
+
+		if ( 0 === strpos( $ability_name, self::ABILITY_PREFIX ) ) {
+			return true;
+		}
+
+		if ( ! AbilitiesLoader::is_registered_ability( $ability_name ) ) {
+			return false;
+		}
+
+		$ability          = wp_get_ability( $ability_name );
+		$meta             = null === $ability ? array() : $ability->get_meta();
+		$woocommerce_meta = $meta['woocommerce'] ?? null;
+		return is_array( $woocommerce_meta ) && true === ( $woocommerce_meta['track_usage'] ?? false );
 	}
 
 	/**
