@@ -346,6 +346,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			UcpSwitch::STATUS_OFF             => array( 'off', __( 'Off', 'woocommerce' ) ),
 			UcpSwitch::STATUS_NEEDS_ATTENTION => array( 'fix', __( 'Needs attention', 'woocommerce' ) ),
 		);
+		$launched = array_column( $checks, 'ok', 'id' )['launched'] ?? true;
 		$checks   = array_filter( $checks, static fn( array $check ): bool => 'ucp_on' !== $check['id'] );
 		?>
 		<h2><?php esc_html_e( 'Status', 'woocommerce' ); ?></h2>
@@ -382,7 +383,13 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 						<td><?php echo esc_html( $check['name'] ); ?></td>
 						<td>
 							<?php if ( null === $check['ok'] ) : ?>
-								<?php esc_html_e( 'Your store could not load its own page. The next check tries again.', 'woocommerce' ); ?>
+								<?php
+								if ( $launched ) {
+									esc_html_e( 'Your store could not load its own page. The next check tries again.', 'woocommerce' );
+								} else {
+									esc_html_e( 'Launch your store to run this check.', 'woocommerce' );
+								}
+								?>
 							<?php elseif ( ! $check['ok'] ) : ?>
 								<a href="<?php echo esc_url( $check['fix_url'] ); ?>"><?php echo esc_html( $this->fix_link_text( $check['fix_url'] ) ); ?></a>
 							<?php endif; ?>

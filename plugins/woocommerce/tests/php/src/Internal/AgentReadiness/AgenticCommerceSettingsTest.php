@@ -166,6 +166,37 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A check that couldn't run says why: launch the store in coming soon mode, otherwise the store couldn't load its page.
+	 */
+	public function test_output_couldnt_check_message_follows_coming_soon(): void {
+		StoreConditionsTest::make_store_ready( $this );
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'store_checks' => array(
+					array(
+						'id'      => 'sitemap_xml',
+						'ok'      => null,
+						'level'   => 'recommended',
+						'name'    => 'Sitemap lists your products',
+						'fix_url' => '',
+					),
+				),
+			),
+			false
+		);
+
+		$live = $this->render_page();
+		update_option( 'woocommerce_coming_soon', 'yes' );
+		$coming_soon = $this->render_page();
+
+		$this->assertStringContainsString( 'could not load its own page', $live );
+		$this->assertStringNotContainsString( 'Launch your store', $live );
+		$this->assertStringContainsString( 'Launch your store to run this check.', $coming_soon );
+		$this->assertStringNotContainsString( 'could not load its own page', $coming_soon );
+	}
+
+	/**
 	 * @testdox With UCP already on and a required check failing, the switch says the checks still need fixing.
 	 */
 	public function test_output_switch_on_with_failing_checks(): void {
