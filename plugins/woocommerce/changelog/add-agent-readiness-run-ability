@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+Comment: Agent readiness: ability that checks a product again or queues a store check, behind an experimental flag.
+

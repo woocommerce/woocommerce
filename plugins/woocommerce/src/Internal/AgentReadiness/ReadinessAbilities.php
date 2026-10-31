@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Abilities that let an agent connected to the store (over MCP) read the
- * readiness report. Registered only while the agent_readiness feature is
+ * readiness report and check again after a fix. Registered only while the agent_readiness feature is
  * enabled, and only for users who can manage WooCommerce.
  *
  * @since 11.4.0
@@ -18,6 +18,8 @@ defined( 'ABSPATH' ) || exit;
 class ReadinessAbilities implements RegisterHooksInterface {
 
 	public const GET_REPORT = 'woocommerce/get-agent-readiness';
+
+	public const RUN_CHECK = 'woocommerce/run-agent-readiness-check';
 
 	/**
 	 * Features controller.
@@ -103,6 +105,43 @@ class ReadinessAbilities implements RegisterHooksInterface {
 				)
 			);
 		}
+		if ( ! wp_has_ability( self::RUN_CHECK ) ) {
+			wp_register_ability(
+				self::RUN_CHECK,
+				array(
+					'label'               => __( 'Run agent readiness check', 'woocommerce' ),
+					'description'         => __( 'Check one product again now, after fixing it, and get its failing checks and status per channel. Without a product id, queue a check of the whole store in the background; read the result with woocommerce/get-agent-readiness once scan_pending is false.', 'woocommerce' ),
+					'category'            => 'woocommerce',
+					'input_schema'        => array(
+						'type'                 => 'object',
+						'properties'           => array(
+							'product_id' => array(
+								'type'        => 'integer',
+								'description' => __( 'Product or variation to check now. A variation is checked as its parent product.', 'woocommerce' ),
+								'minimum'     => 1,
+							),
+						),
+						'additionalProperties' => false,
+						'default'              => array(),
+					),
+					'output_schema'       => self::run_schema(),
+					'execute_callback'    => array( $this, 'run_check' ),
+					'permission_callback' => array( $this, 'can_manage' ),
+					'meta'                => array(
+						'show_in_rest' => true,
+						'mcp'          => array(
+							'public' => true,
+							'type'   => 'tool',
+						),
+						'annotations'  => array(
+							'readonly'    => false,
+							'idempotent'  => true,
+							'destructive' => false,
+						),
+					),
+				)
+			);
+		}
 	}
 
 	/**
@@ -135,12 +174,108 @@ class ReadinessAbilities implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Output schema of the report ability, following the report format in this directory's README.
+	 * Check one product now, or queue a check of the whole store.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $input Ability input.
+	 * @return array<string, mixed>|\WP_Error
+	 */
+	public function run_check( $input = null ) {
+		$product_id = is_array( $input ) ? absint( $input['product_id'] ?? 0 ) : 0;
+		if ( 0 === $product_id ) {
+			$this->scheduled_scan->queue();
+			$report = $this->agent_readiness->get_cached_report();
+			return array(
+				'scan_pending'        => $this->scheduled_scan->is_pending(),
+				'report_generated_at' => is_string( $report['generated_at'] ?? null ) ? $report['generated_at'] : null,
+			);
+		}
+
+		$product = wc_get_product( $product_id );
+		if ( ! $product instanceof \WC_Product ) {
+			return new \WP_Error( 'woocommerce_agent_readiness_product_not_found', __( 'Product not found.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+		$result = $this->agent_readiness->check_product( $product );
+		if ( null === $result ) {
+			return new \WP_Error( 'woocommerce_agent_readiness_product_not_checked', __( 'Only published simple and variable products shown in the shop catalog are checked.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$rules  = $this->agent_readiness->get_default_rules();
+		$checks = array();
+		foreach ( $result['checks'] as $id => $channels ) {
+			$checks[] = array(
+				'id'       => (string) $id,
+				'label'    => isset( $rules[ $id ] ) ? $rules[ $id ]->label() : '',
+				'fix'      => isset( $rules[ $id ] ) ? $rules[ $id ]->fix() : '',
+				'channels' => $channels,
+			);
+		}
+		return array(
+			'product' => array(
+				'product_id' => $result['product_id'],
+				'edit_url'   => admin_url( 'post.php?post=' . $result['product_id'] . '&action=edit' ),
+				'statuses'   => $result['statuses'],
+				'checks'     => $checks,
+			),
+		);
+	}
+
+	/**
+	 * Output schema of the run ability.
 	 *
 	 * @return array<string, mixed>
 	 */
-	private static function report_schema(): array {
-		$channel_map = array(
+	private static function run_schema(): array {
+		return array(
+			'type'       => 'object',
+			'properties' => array(
+				'scan_pending'        => array(
+					'type'        => 'boolean',
+					'description' => __( 'Whole store: whether the queued check has not finished yet.', 'woocommerce' ),
+				),
+				'report_generated_at' => array(
+					'type'        => array( 'string', 'null' ),
+					'description' => __( 'Whole store: when the report agents can read now was made; it changes when the queued check finishes.', 'woocommerce' ),
+				),
+				'product'             => array(
+					'type'       => 'object',
+					'properties' => array(
+						'product_id' => array( 'type' => 'integer' ),
+						'edit_url'   => array( 'type' => 'string' ),
+						'statuses'   => array(
+							'type'                 => 'object',
+							'description'          => __( 'Status by channel id: not_listable, with_gaps or complete.', 'woocommerce' ),
+							'additionalProperties' => array(
+								'type' => 'string',
+								'enum' => array( ProductScan::NOT_LISTABLE, ProductScan::WITH_GAPS, ProductScan::COMPLETE ),
+							),
+						),
+						'checks'     => array(
+							'type'  => 'array',
+							'items' => array(
+								'type'       => 'object',
+								'properties' => array(
+									'id'       => array( 'type' => 'string' ),
+									'label'    => array( 'type' => 'string' ),
+									'fix'      => array( 'type' => 'string' ),
+									'channels' => self::channel_map_schema(),
+								),
+							),
+						),
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Schema of a check's field and effect by channel.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private static function channel_map_schema(): array {
+		return array(
 			'type'                 => 'object',
 			'description'          => __( 'Feed field and effect by channel id: not_listable when the channel requires the field, gaps when the product lists with a gap. Empty for checks about the product page.', 'woocommerce' ),
 			'additionalProperties' => array(
@@ -154,6 +289,15 @@ class ReadinessAbilities implements RegisterHooksInterface {
 				),
 			),
 		);
+	}
+
+	/**
+	 * Output schema of the report ability, following the report format in this directory's README.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private static function report_schema(): array {
+		$channel_map = self::channel_map_schema();
 		return array(
 			'type'       => 'object',
 			'properties' => array(
