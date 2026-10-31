@@ -292,18 +292,21 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	 * @testdox The product page checks skip a newer product of a type the report doesn't check.
 	 */
 	public function test_product_checks_skip_unchecked_types(): void {
+		// The grouped product's children are simple too, so the date puts the served product after them and before the group.
+		$set_date = static fn( int $id, int $offset ) => wp_update_post(
+			array(
+				'ID'            => $id,
+				'post_date'     => gmdate( 'Y-m-d H:i:s', time() + $offset ),
+				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', time() + $offset ),
+			)
+		);
+		$set_date( WC_Helper_Product::create_grouped_product()->get_id(), 2 * HOUR_IN_SECONDS );
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_image_id( self::factory()->attachment->create_object( array( 'file' => 'image.jpg' ) ) );
 		$product->save();
+		$set_date( $product->get_id(), HOUR_IN_SECONDS );
+		$product = wc_get_product( $product->get_id() );
 		$this->serve( array( self::path_of( $product ) => array( 200, self::page_with( array( self::core_product_jsonld( $product ) ) ) ) ) );
-		$grouped = WC_Helper_Product::create_grouped_product();
-		wp_update_post(
-			array(
-				'ID'            => $grouped->get_id(),
-				'post_date'     => gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ),
-				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ),
-			)
-		);
 
 		$this->assertSame( array( true, true, true ), $this->product_results() );
 	}
