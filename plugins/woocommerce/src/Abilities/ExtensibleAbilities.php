@@ -273,38 +273,31 @@ class ExtensibleAbilities {
 	 */
 	private static function get_schema_error( $schema, string $path, bool $is_output ): ?string {
 		if ( ! is_array( $schema ) ) {
-			/* translators: %s: path of the schema. */
-			return sprintf( __( '"%s" must be a schema, as an array.', 'woocommerce' ), $path );
+			return sprintf( '"%s" must be a schema, as an array.', $path );
 		}
 
 		$combinators = array_values( array_intersect( self::SCHEMA_COMBINATORS, array_keys( $schema ) ) );
 		if ( $is_output && ( ! empty( $combinators ) || ! empty( $schema['nullable'] ) || ! is_string( $schema['type'] ?? null ) || 'null' === $schema['type'] ) ) {
-			/* translators: %s: path of the schema. */
-			return sprintf( __( '"%s" must declare one "type" that is not null, with no "nullable", "anyOf", "oneOf" or "allOf". Return null from the get_callback to leave the field out.', 'woocommerce' ), $path );
+			return sprintf( '"%s" must declare one "type" that is not null, with no "nullable", "anyOf", "oneOf" or "allOf". Return null from the get_callback to leave the field out.', $path );
 		}
 		if ( ! isset( $schema['type'] ) && empty( $combinators ) ) {
-			/* translators: %s: path of the schema. */
-			return sprintf( __( '"%s" must declare a "type".', 'woocommerce' ), $path );
+			return sprintf( '"%s" must declare a "type".', $path );
 		}
 
 		$types = (array) ( $schema['type'] ?? array() );
 		if ( isset( $schema['type'] ) && ( empty( $types ) || ! wp_is_numeric_array( $types ) || ! empty( array_filter( $types, static fn( $type ) => ! in_array( $type, array_keys( self::SCHEMA_TYPES ), true ) ) ) ) ) {
-			/* translators: %s: path of the schema. */
-			return sprintf( __( '"%s" declares an unknown "type".', 'woocommerce' ), $path );
+			return sprintf( '"%s" declares an unknown "type".', $path );
 		}
 		if ( array_key_exists( 'required', $schema ) && ! is_array( $schema['required'] ) ) {
-			/* translators: %s: path of the schema. */
-			return sprintf( __( 'The "required" of "%s" must be a list of property names.', 'woocommerce' ), $path );
+			return sprintf( 'The "required" of "%s" must be a list of property names.', $path );
 		}
 		if ( array_key_exists( 'enum', $schema ) ) {
 			if ( ! is_array( $schema['enum'] ) || empty( $schema['enum'] ) || ! wp_is_numeric_array( $schema['enum'] ) ) {
-				/* translators: %s: path of the schema. */
-				return sprintf( __( 'The "enum" of "%s" must be a list of values.', 'woocommerce' ), $path );
+				return sprintf( 'The "enum" of "%s" must be a list of values.', $path );
 			}
 			$enum_types = array_merge( array(), ...array_map( static fn( $type ) => self::SCHEMA_TYPES[ $type ], $types ) );
 			if ( ! empty( $types ) && ! empty( array_diff( array_map( 'gettype', $schema['enum'] ), $enum_types ) ) ) {
-				/* translators: %s: path of the schema. */
-				return sprintf( __( 'The "enum" of "%s" has a value that its "type" does not allow.', 'woocommerce' ), $path );
+				return sprintf( 'The "enum" of "%s" has a value that its "type" does not allow.', $path );
 			}
 		}
 
@@ -312,8 +305,7 @@ class ExtensibleAbilities {
 		foreach ( array( 'properties', 'patternProperties' ) as $keyword ) {
 			if ( array_key_exists( $keyword, $schema ) ) {
 				if ( ! is_array( $schema[ $keyword ] ) || wp_is_numeric_array( $schema[ $keyword ] ) ) {
-					/* translators: 1: schema keyword, 2: path of the schema. */
-					return sprintf( __( 'The "%1$s" of "%2$s" must be a map of schemas with at least one key.', 'woocommerce' ), $keyword, $path );
+					return sprintf( 'The "%1$s" of "%2$s" must be a map of schemas with at least one key.', $keyword, $path );
 				}
 				foreach ( $schema[ $keyword ] as $key => $child ) {
 					$children[ $path . '.' . $keyword . '.' . $key ] = $child;
@@ -328,8 +320,7 @@ class ExtensibleAbilities {
 		}
 		foreach ( $combinators as $keyword ) {
 			if ( ! is_array( $schema[ $keyword ] ) || empty( $schema[ $keyword ] ) || ! wp_is_numeric_array( $schema[ $keyword ] ) ) {
-				/* translators: 1: schema keyword, 2: path of the schema. */
-				return sprintf( __( 'The "%1$s" of "%2$s" must be a list of schemas.', 'woocommerce' ), $keyword, $path );
+				return sprintf( 'The "%1$s" of "%2$s" must be a list of schemas.', $keyword, $path );
 			}
 			foreach ( $schema[ $keyword ] as $index => $child ) {
 				$children[ $path . '.' . $keyword . '.' . $index ] = is_array( $child ) && isset( $schema['type'] ) ? $child + array( 'type' => $schema['type'] ) : $child;
