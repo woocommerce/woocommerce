@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add the woocommerce/order-update ability, which changes the shipping address of an order and writes extension fields in the same save.
