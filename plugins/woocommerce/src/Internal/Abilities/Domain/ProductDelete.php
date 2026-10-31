@@ -53,6 +53,13 @@ class ProductDelete extends ActionableAbility {
 	private ?\WC_Product_Variable $parent = null;
 
 	/**
+	 * The product and, for a variable product, its variations, which the call will delete or trash.
+	 *
+	 * @var \WC_Product[]
+	 */
+	private array $deleting = array();
+
+	/**
 	 * The objects the call deleted for good.
 	 *
 	 * @var \WC_Product[]
@@ -127,6 +134,7 @@ class ProductDelete extends ActionableAbility {
 		$this->product_id = 0;
 		$this->force      = ! empty( $input['force'] );
 		$this->parent     = null;
+		$this->deleting   = array();
 		$this->deleted    = array();
 		$this->trashed    = array();
 
@@ -170,6 +178,8 @@ class ProductDelete extends ActionableAbility {
 	public function change( $subject, array $input ) {
 		unset( $input );
 
+		$this->deleting = array_merge( array( $subject ), $subject instanceof \WC_Product_Variable ? self::get_variations_to_delete( $subject ) : array() );
+
 		if ( $subject instanceof \WC_Product_Variation && $subject->get_parent_id() > 0 ) {
 			$parent = wc_get_product( $subject->get_parent_id() );
 			if ( $parent instanceof \WC_Product_Variable ) {
@@ -191,27 +201,8 @@ class ProductDelete extends ActionableAbility {
 	public function save( $subject ) {
 		$force      = $this->force;
 		$product_id = $this->product_id;
-		$variations = array();
 
-		if ( $subject instanceof \WC_Product_Variable ) {
-			$variation_ids = get_posts(
-				array(
-					'post_parent' => $product_id,
-					'post_type'   => 'product_variation',
-					'post_status' => array( 'any', 'trash', 'auto-draft' ),
-					'fields'      => 'ids',
-					'numberposts' => -1, // phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_numberposts -- Every variation of one product.
-				)
-			);
-			foreach ( $variation_ids as $variation_id ) {
-				$variation = wc_get_product( $variation_id );
-				if ( $variation instanceof \WC_Product_Variation ) {
-					$variations[] = $variation;
-				}
-			}
-		}
-
-		$removed = array_merge( array( clone $subject ), $variations );
+		$removed = array_map( static fn( \WC_Product $product ) => clone $product, $this->deleting );
 		$deleted = $subject->delete( $force );
 
 		if (
@@ -237,6 +228,40 @@ class ProductDelete extends ActionableAbility {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Every variation of a variable product, in any status.
+	 *
+	 * @param \WC_Product_Variable $subject Variable product.
+	 * @return \WC_Product_Variation[]
+	 */
+	private static function get_variations_to_delete( \WC_Product_Variable $subject ): array {
+		$variation_ids = get_posts(
+			array(
+				'post_parent' => $subject->get_id(),
+				'post_type'   => 'product_variation',
+				'post_status' => array( 'any', 'trash', 'auto-draft' ),
+				'fields'      => 'ids',
+				'numberposts' => -1, // phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_numberposts -- Every variation of one product.
+			)
+		);
+
+		return array_values(
+			array_filter(
+				array_map( 'wc_get_product', $variation_ids ),
+				static fn( $variation ) => $variation instanceof \WC_Product_Variation
+			)
+		);
+	}
+
+	/**
+	 * The product and, for a variable product, its variations, for the validators.
+	 *
+	 * @return \WC_Product[]
+	 */
+	protected function get_objects_to_delete(): array {
+		return $this->deleting;
 	}
 
 	/**

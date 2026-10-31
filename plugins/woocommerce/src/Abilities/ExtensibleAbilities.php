@@ -503,8 +503,16 @@ class ExtensibleAbilities {
 	 *
 	 *     @type string   $resource  Resource that an ActionableAbility changes, such as `product`.
 	 *     @type string   $namespace Slug of the extension that owns the validator, such as `subscriptions`.
-	 *     @type callable $callback  Receives the changed object and the ability, after Core's changes and the
-	 *                               field callbacks, before the one save. It returns a WP_Error to refuse the
+	 *     @type callable $callback  Receives the changed object, the ability and `array $context`, after Core's
+	 *                               changes and the field callbacks, before the one save. A callback that only
+	 *                               needs the object or the ability can take fewer arguments.
+	 *                               `$context['primary']` is the primary object of the call. It differs from the
+	 *                               changed object when the object is a variation that the call saves through
+	 *                               its parent. On product-create that parent is not saved yet, so the variation
+	 *                               has no parent ID and a rule reads the parent from here.
+	 *                               `$context['deleting']` is true when the call deletes or trashes the object,
+	 *                               such as a variation of a deleted parent, or an item with `delete` in the
+	 *                               `variations` input. It returns a WP_Error to refuse the
 	 *                               change, and then nothing is saved. The error gets the namespace in its
 	 *                               data, and the 400 status when it has no status. Its message can name the
 	 *                               ability or screen to use instead. Rules:

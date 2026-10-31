@@ -209,6 +209,15 @@ class ProductUpdate extends ActionableAbility {
 	}
 
 	/**
+	 * The variations that the `variations` input marked for deletion, for the validators.
+	 *
+	 * @return \WC_Product_Variation[]
+	 */
+	protected function get_objects_to_delete(): array {
+		return $this->variations['delete'];
+	}
+
+	/**
 	 * Save the product, then the variations that the input names.
 	 *
 	 * @param \WC_Product $subject Changed product.
