@@ -890,7 +890,52 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( array( $product_abc->get_id() ), $results );
+		$this->assertSame( array( $product_abc->get_id() ), $results, 'Only the product matching both the SKU and the sale date should be returned' );
+
+		$results = wc_get_products(
+			array(
+				'sku'          => 'ABC',
+				'date_created' => '>=' . gmdate( 'Y-m-d', time() - DAY_IN_SECONDS ),
+				'return'       => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $product_abc->get_id() ), $results, 'Only the product matching both the SKU and the created date should be returned' );
+	}
+
+	/**
+	 * @testdox Sale start and end date query vars are both applied.
+	 */
+	public function test_date_on_sale_from_and_to_query_applies_both_dates(): void {
+		$sale_from = gmdate( 'Y-m-d', time() + DAY_IN_SECONDS );
+		$sale_to   = gmdate( 'Y-m-d', time() + 10 * DAY_IN_SECONDS );
+
+		$product_matching = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'sale_price'        => 5,
+				'date_on_sale_from' => $sale_from,
+				'date_on_sale_to'   => $sale_to,
+			)
+		);
+		WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'sale_price'        => 5,
+				'date_on_sale_from' => gmdate( 'Y-m-d', time() + 2 * DAY_IN_SECONDS ),
+				'date_on_sale_to'   => $sale_to,
+			)
+		);
+
+		$results = wc_get_products(
+			array(
+				'date_on_sale_from' => $sale_from,
+				'date_on_sale_to'   => $sale_to,
+				'return'            => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $product_matching->get_id() ), $results, 'Only the product matching both the sale start and end dates should be returned' );
 	}
 
 	/**
@@ -924,6 +969,6 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( array( $product_with_sku->get_id() ), $results );
+		$this->assertSame( array( $product_with_sku->get_id() ), $results, 'Only the product with a SKU should be returned' );
 	}
 }

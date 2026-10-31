@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Keep SKU, price and other meta filters in product queries that also filter by sale dates.
+Keep SKU, price and other meta filters in product queries that also filter by created, modified or sale dates.
