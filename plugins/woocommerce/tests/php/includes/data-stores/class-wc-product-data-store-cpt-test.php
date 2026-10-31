@@ -926,6 +926,14 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 				'date_on_sale_to'   => $sale_to,
 			)
 		);
+		WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'sale_price'        => 5,
+				'date_on_sale_from' => $sale_from,
+				'date_on_sale_to'   => gmdate( 'Y-m-d', time() + 11 * DAY_IN_SECONDS ),
+			)
+		);
 
 		$results = wc_get_products(
 			array(
