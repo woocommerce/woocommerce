@@ -128,6 +128,8 @@ class AgentReadiness {
 			$from_file = $this->without_empty( $this->sanitize_channel_rules( $this->remote_rules->channel_rules(), $bundled ) );
 			// A file with no check this code can run does not turn the bundled checks off.
 			$defaults = array() !== $from_file ? $from_file : $bundled;
+			// The file lists channel requirements, so a check no channel asks for stays.
+			$defaults += array_filter( $bundled, static fn( array $channels ): bool => array() === $channels );
 		} else {
 			$defaults = $bundled;
 		}
