@@ -1587,16 +1587,25 @@ trait ProductAbilityTrait {
 	}
 
 	/**
-	 * Build the response of product-create and product-update.
+	 * Build the response of product-create and product-update. The slug comes
+	 * from the stored post, because the data store does not set the slug that
+	 * WordPress generates back on the object.
 	 *
 	 * @param \WC_Product             $product    Saved product.
 	 * @param \WC_Product_Variation[] $variations Variations the call saved, in input order.
 	 * @return array
 	 */
 	protected static function format_product_mutation_response( \WC_Product $product, array $variations ): array {
+		$format = static function ( \WC_Product $saved ): array {
+			return array_merge(
+				self::format_product_for_response( $saved ),
+				array( 'slug' => (string) get_post_field( 'post_name', $saved->get_id() ) )
+			);
+		};
+
 		return array(
-			'product'    => self::format_product_for_response( $product ),
-			'variations' => array_map( array( self::class, 'format_product_for_response' ), array_values( $variations ) ),
+			'product'    => $format( $product ),
+			'variations' => array_map( $format, array_values( $variations ) ),
 		);
 	}
 

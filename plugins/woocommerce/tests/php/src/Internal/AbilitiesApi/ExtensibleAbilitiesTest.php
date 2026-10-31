@@ -1664,6 +1664,19 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return the stored slug from product-create, for the product and its variations.
+	 */
+	public function test_product_create_returns_the_stored_slug(): void {
+		$created = $this->run_ability(
+			'woocommerce/product-create',
+			array_merge( $this->get_shirt_input(), array( 'status' => 'publish' ) )
+		);
+
+		$this->assertSame( 'shirt', $created['product']['slug'] );
+		$this->assertSame( get_post_field( 'post_name', $created['variations'][0]['id'] ), $created['variations'][0]['slug'] );
+	}
+
+	/**
 	 * @testdox Should undo every save of the call when a sync returns a WP_Error.
 	 */
 	public function test_a_refusal_in_a_sync_rolls_back_the_call(): void {
@@ -2241,7 +2254,11 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	public function test_variation_schemas_list_only_the_fields_that_apply_to_a_variation(): void {
 		$register = static function () {
-			foreach ( array( 'simple_only' => array( 'simple' ), 'variation_only' => array( 'variation' ) ) as $field => $object_types ) {
+			$fields = array(
+				'simple_only'    => array( 'simple' ),
+				'variation_only' => array( 'variation' ),
+			);
+			foreach ( $fields as $field => $object_types ) {
 				ExtensibleAbilities::register_field(
 					array(
 						'resource'        => 'product',
