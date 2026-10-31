@@ -2231,5 +2231,52 @@ describe( 'getDateFormatsForIntervalPhp', () => {
 				false
 			);
 		} );
+
+		test( 'uses the written calendar years in any timezone', () => {
+			// Date-only strings are parsed as UTC midnight, so west of UTC
+			// the local year of a Jan-1 date is the previous one. Simulate
+			// a UTC-5 local time so this fails without the fix no matter
+			// which timezone the test suite runs in.
+			const RealDate = Date;
+			const WEST_OF_UTC_MS = 5 * 60 * 60 * 1000;
+			class MockDate extends RealDate {
+				getFullYear() {
+					return new RealDate(
+						this.getTime() - WEST_OF_UTC_MS
+					).getUTCFullYear();
+				}
+			}
+			globalThis.Date = MockDate as DateConstructor;
+			try {
+				// A single day inside 2024, a leap year.
+				expect( containsLeapYear( '2024-01-01', '2024-01-01' ) ).toBe(
+					true
+				);
+				// A range entirely inside 2025, not a leap year.
+				expect( containsLeapYear( '2025-01-01', '2025-12-31' ) ).toBe(
+					false
+				);
+				// A bare year is also a date-only (UTC) parse.
+				expect( containsLeapYear( '2024', '2024' ) ).toBe( true );
+			} finally {
+				globalThis.Date = RealDate;
+			}
+		} );
+
+		test( 'accepts Date object and timestamp inputs as before', () => {
+			const midYear2024 = new Date( '2024-06-15T12:00:00Z' );
+			expect(
+				containsLeapYear(
+					midYear2024 as unknown as string,
+					midYear2024 as unknown as string
+				)
+			).toBe( true );
+			expect(
+				containsLeapYear(
+					0 as unknown as string,
+					0 as unknown as string
+				)
+			).toBe( false );
+		} );
 	} );
 } );

@@ -1401,9 +1401,51 @@ export function isLeapYear( year: number ) {
  * @return {boolean} True if date range contains a leap year
  */
 export function containsLeapYear( startDate: string, endDate: string ) {
-	// Parse the input dates to get the years
-	const startYear = new Date( startDate ).getFullYear();
-	const endYear = new Date( endDate ).getFullYear();
+	// Parse the input dates to get the years. Date-only ISO 8601 strings
+	// (YYYY, YYYY-MM, YYYY-MM-DD) are parsed as UTC midnight, so
+	// getFullYear() would return the previous year in timezones west of
+	// UTC; use the written year for those. Date-time strings keep
+	// local-time interpretation.
+	const isAsciiDigits = ( value: string ): boolean => {
+		if ( ! value.length ) {
+			return false;
+		}
+		for ( let i = 0; i < value.length; i++ ) {
+			const code = value.charCodeAt( i );
+			if ( code < 48 || code > 57 ) {
+				return false;
+			}
+		}
+		return true;
+	};
+	const isDateOnlyString = ( value: string ): boolean => {
+		// YYYY, YYYY-MM or YYYY-MM-DD with ASCII digits only.
+		const parts = value.split( '-' );
+		return (
+			parts.length >= 1 &&
+			parts.length <= 3 &&
+			parts[ 0 ].length === 4 &&
+			isAsciiDigits( parts[ 0 ] ) &&
+			parts
+				.slice( 1 )
+				.every( ( part ) => part.length === 2 && isAsciiDigits( part ) )
+		);
+	};
+	const yearOf = ( dateString: string ): number => {
+		const parsed = new Date( dateString );
+		if ( isNaN( parsed.getTime() ) ) {
+			return NaN;
+		}
+		if ( typeof dateString === 'string' ) {
+			const trimmed = dateString.trim();
+			if ( isDateOnlyString( trimmed ) ) {
+				return parseInt( trimmed.slice( 0, 4 ), 10 );
+			}
+		}
+		return parsed.getFullYear();
+	};
+	const startYear = yearOf( startDate );
+	const endYear = yearOf( endDate );
 
 	if ( ! isNaN( startYear ) && ! isNaN( endYear ) ) {
 		// Check each year in the range

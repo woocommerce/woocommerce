@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix `containsLeapYear` returning the wrong answer for date-only strings (e.g. `2024-01-01`) in timezones west of UTC by using the written calendar year instead of the locally parsed one. (#70210)
