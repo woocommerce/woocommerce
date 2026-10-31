@@ -9,6 +9,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
 /**
  * Widget products.
@@ -226,15 +227,11 @@ class WC_Widget_Products extends WC_Widget {
 		$products = new WP_Query();
 
 		$order_by_total_sales = static function ( $clauses, $query ) use ( $products, $order ) {
-			global $wpdb;
-
 			if ( $query !== $products ) {
 				return $clauses;
 			}
 
-			if ( ! strstr( $clauses['join'], 'wc_product_meta_lookup' ) ) {
-				$clauses['join'] .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON {$wpdb->posts}.ID = wc_product_meta_lookup.product_id ";
-			}
+			$clauses['join'] = wc_get_container()->get( ProductUtil::class )->append_product_sorting_table_join( $clauses['join'] );
 
 			// The IS NULL term sorts ascending in both directions, so products that have no lookup row
 			// (a partly regenerated table, say) always land last instead of leading an ascending list.
