@@ -63,10 +63,10 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 | `robots_txt_present` | `/robots.txt` is served as text. |
 | `robots_allows_ai_search_bots` | No robots.txt rule keeps OAI-SearchBot, ChatGPT-User, Claude-User or PerplexityBot from the home page. |
 | `robots_not_blocking_llms_txt` | No robots.txt rule keeps those crawlers from `/llms.txt`. |
-| `sitemap_lists_products` | The WordPress sitemap includes products, or a sitemap listed in robots.txt or at `/sitemap_index.xml` or `/sitemap.xml` names a product sitemap or product pages. |
-| `product_jsonld_present` | The newest published product's page has Product (or ProductGroup) JSON-LD that parses, from WooCommerce, an SEO plugin or the theme. |
-| `product_jsonld_required_fields` | That JSON-LD gives a name, an image and an offer, from one block or several. |
-| `product_offer_jsonld` | One of its offers has a price (`price`, `lowPrice` or a price specification) and an availability. |
+| `sitemap_lists_products` | A sitemap listed in robots.txt, or `/wp-sitemap.xml`, `/sitemap_index.xml` or `/sitemap.xml`, names a product sitemap or product pages. |
+| `product_jsonld_present` | The newest product page has Product (or ProductGroup) JSON-LD that parses, from WooCommerce, an SEO plugin or the theme. |
+| `product_jsonld_required_fields` | That JSON-LD gives a name, an image and an offer, from one block or several. Skipped when the page has no Product JSON-LD. |
+| `product_offer_jsonld` | One of its offers has a price (`price`, `lowPrice` or a price specification, as a number or with a currency) and an availability. Skipped when the page has no Product JSON-LD. |
 | `llms_txt_present` | `/llms.txt` is served as text. |
 | `llms_txt_valid` | It starts with a `# Name` heading. |
 | `llms_txt_links_resolve` | The first five links in it to the store's own pages open (no 4xx). Links to other sites, or with a query string, aren't loaded. |
@@ -79,7 +79,7 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 | `ucp_profile` | With UCP on: `/.well-known/ucp` is served and names a REST endpoint. |
 | `ucp_endpoints_live` | With UCP on: a catalog search POSTed to that endpoint, or WooCommerce's when there is no profile, answers with a product list. |
 
-robots.txt is loaded from the store, so a file at the site root and a host's changes count. When the store can't load it, or answers with an error or a login page, it is read as WordPress serves it: the file at the site root, or the `robots_txt` filter output with pretty permalinks. So the robots.txt checks always give an answer; the other checks can be "couldn't check". Checks on the home and product page read the ones that loaded. The home page loads first; when it can't be reached, the scan makes no more requests, so a store that can't reach itself waits for one timeout. The product checks load one product page: the newest published, visible product without a password, among the five newest. With no such product, or when its page doesn't answer 200, they are "couldn't check".
+robots.txt is loaded from the host root, so a file at the site root and a host's changes count. A timeout, an error status, or an HTML page is "couldn't check" for the robots.txt checks. The sitemap check is "couldn't check" when robots.txt could not be read, or a candidate sitemap could not be loaded, and no fetched sitemap names products. A category sitemap does not count. Checks on the home and product page read the ones that loaded. The home page loads first; when it can't be reached, the scan makes no more requests, so a store that can't reach itself waits for one timeout. The product checks load one product page: the newest published, visible product without a password, among the five newest. With no such product, or when its page doesn't answer 200, they are "couldn't check".
 
 ## Report format
 

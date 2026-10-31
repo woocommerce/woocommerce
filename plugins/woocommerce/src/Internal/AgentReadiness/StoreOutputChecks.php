@@ -96,21 +96,23 @@ class StoreOutputChecks {
 	 * @return array<int, array{id:string,test:callable(StoreResponses):(bool|null),blocks:string,name:string,label:string,why:string,fix:string,fix_url:string}>
 	 */
 	protected function checks(): array {
+		global $wp_rewrite;
 		$robots_fix = __( 'Edit robots.txt in your SEO plugin, or ask your host to change the robots.txt file in your site\'s root folder.', 'woocommerce' );
+		$plain      = ! $wp_rewrite->using_permalinks();
 		$checks     = array(
 			array(
 				'id'      => 'robots_txt_present',
-				'test'    => fn( StoreResponses $responses ): bool => '' !== $this->robots_txt( $responses ),
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->robots_present( $responses ),
 				'blocks'  => 'listing',
 				'name'    => __( 'Store serves a robots.txt file', 'woocommerce' ),
 				'label'   => __( 'No robots.txt file', 'woocommerce' ),
 				'why'     => __( 'Crawlers, including AI shopping crawlers, read robots.txt to find your sitemap.', 'woocommerce' ),
-				'fix'     => __( 'Choose any permalink structure other than Plain under Settings > Permalinks, so WordPress serves robots.txt.', 'woocommerce' ),
-				'fix_url' => admin_url( 'options-permalink.php' ),
+				'fix'     => $plain ? __( 'Choose any permalink structure other than Plain under Settings > Permalinks, so WordPress serves robots.txt.', 'woocommerce' ) : $robots_fix,
+				'fix_url' => $plain ? admin_url( 'options-permalink.php' ) : '',
 			),
 			array(
 				'id'      => 'robots_allows_ai_search_bots',
-				'test'    => fn( StoreResponses $responses ): bool => $this->robots_allows( $responses, '/' ),
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->robots_allows( $responses, '/' ),
 				'blocks'  => 'listing',
 				'name'    => __( 'robots.txt lets AI search crawlers in', 'woocommerce' ),
 				'label'   => __( 'robots.txt blocks AI search crawlers', 'woocommerce' ),
@@ -120,7 +122,7 @@ class StoreOutputChecks {
 			),
 			array(
 				'id'      => 'robots_not_blocking_llms_txt',
-				'test'    => fn( StoreResponses $responses ): bool => $this->robots_allows( $responses, '/llms.txt' ),
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->robots_allows( $responses, '/llms.txt' ),
 				'blocks'  => 'listing',
 				'name'    => __( 'robots.txt lets AI crawlers read llms.txt', 'woocommerce' ),
 				'label'   => __( 'robots.txt blocks llms.txt', 'woocommerce' ),
@@ -142,15 +144,15 @@ class StoreOutputChecks {
 				'id'      => 'product_jsonld_present',
 				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): bool => array() !== $products ),
 				'blocks'  => 'listing',
-				'name'    => __( 'Product pages have product structured data', 'woocommerce' ),
-				'label'   => __( 'No product structured data on product pages', 'woocommerce' ),
-				'why'     => __( 'AI shopping agents and search engines read the product\'s JSON-LD to get its name, price and stock without guessing from the page.', 'woocommerce' ),
-				'fix'     => __( 'WooCommerce adds it to product pages. Check whether your theme or an SEO plugin removes it, or turn on product schema in your SEO plugin.', 'woocommerce' ),
+				'name'    => __( 'The newest product page has product structured data', 'woocommerce' ),
+				'label'   => __( 'The newest product page has no product structured data', 'woocommerce' ),
+				'why'     => __( 'Shopping crawlers and search engines read the product\'s JSON-LD to get its name, price and stock without guessing from the page.', 'woocommerce' ),
+				'fix'     => __( 'WooCommerce adds it to the product page. Check whether your theme or an SEO plugin removes it, or turn on product schema in your SEO plugin.', 'woocommerce' ),
 				'fix_url' => '',
 			),
 			array(
 				'id'      => 'product_jsonld_required_fields',
-				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): bool => self::has_required_fields( $products ) ),
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): ?bool => array() === $products ? null : self::has_required_fields( $products ) ),
 				'blocks'  => 'listing',
 				'name'    => __( 'Product structured data has a name, image and offer', 'woocommerce' ),
 				'label'   => __( 'Product structured data is missing a name, image or offer', 'woocommerce' ),
@@ -160,7 +162,7 @@ class StoreOutputChecks {
 			),
 			array(
 				'id'      => 'product_offer_jsonld',
-				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): bool => self::has_priced_offer( $products ) ),
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): ?bool => array() === $products ? null : self::has_priced_offer( $products ) ),
 				'blocks'  => 'listing',
 				'name'    => __( 'Product offer has a price and stock status', 'woocommerce' ),
 				'label'   => __( 'Product offer is missing a price or stock status', 'woocommerce' ),
@@ -287,49 +289,49 @@ class StoreOutputChecks {
 	}
 
 	/**
-	 * The robots.txt crawlers get, or '' when there is none.
+	 * The robots.txt crawlers get. '' when the store answered that there is none.
+	 * Null when it could not be read: the request failed, or the body is a page.
 	 *
-	 * Loaded from the store first, so a file at the site root and a host's or plugin's
-	 * changes count. When the store can't load it, or answers with an error or a login,
-	 * it is read the way WordPress serves it.
+	 * Loaded from the host root, also when WordPress is in a subdirectory.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 */
-	private function robots_txt( StoreResponses $responses ): string {
-		// Crawlers read robots.txt at the host root, also when WordPress is in a subdirectory.
+	private function robots_txt( StoreResponses $responses ): ?string {
 		$home     = (array) wp_parse_url( home_url() );
 		$response = $responses->get( ( $home['scheme'] ?? 'http' ) . '://' . ( $home['host'] ?? '' ) . ( isset( $home['port'] ) ? ':' . $home['port'] : '' ) . '/robots.txt' );
-		if ( null !== $response && 200 === $response['status'] ) {
-			// A theme that answers every URL with a page has no robots.txt.
-			return str_starts_with( ltrim( $response['body'] ), '<' ) ? '' : $response['body'];
+		if ( null === $response || ! in_array( $response['status'], array( 200, 404, 410 ), true ) ) {
+			return null;
 		}
-		if ( null !== $response && in_array( $response['status'], array( 404, 410 ), true ) ) {
+		if ( in_array( $response['status'], array( 404, 410 ), true ) ) {
 			return '';
 		}
-		if ( ! function_exists( 'get_home_path' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-		}
-		$file = get_home_path() . 'robots.txt';
-		if ( is_readable( $file ) ) {
-			return (string) file_get_contents( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- A local file.
-		}
-		global $wp_rewrite;
-		if ( ! $wp_rewrite->using_permalinks() ) {
-			return '';
-		}
-		$public = (string) get_option( 'blog_public' );
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Core's hook, documented in do_robots().
-		return (string) apply_filters( 'robots_txt', "User-agent: *\n" . ( '0' === $public ? "Disallow: /\n" : '' ), $public );
+		// A theme or a login wall that answers every URL with a page is not a robots.txt.
+		return str_starts_with( ltrim( $response['body'] ), '<' ) ? null : $response['body'];
+	}
+
+	/**
+	 * Whether a robots.txt was served, or null when it could not be read.
+	 *
+	 * @param StoreResponses $responses Store responses.
+	 */
+	private function robots_present( StoreResponses $responses ): ?bool {
+		$text = $this->robots_txt( $responses );
+		return null === $text ? null : '' !== $text;
 	}
 
 	/**
 	 * Whether every AI search crawler may load a path under the home URL.
+	 * Null when robots.txt could not be read.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 * @param string         $path      Path from the home URL.
 	 */
-	private function robots_allows( StoreResponses $responses, string $path ): bool {
-		$robots = new RobotsTxt( $this->robots_txt( $responses ) );
+	private function robots_allows( StoreResponses $responses, string $path ): ?bool {
+		$text = $this->robots_txt( $responses );
+		if ( null === $text ) {
+			return null;
+		}
+		$robots = new RobotsTxt( $text );
 		$path   = (string) wp_parse_url( home_url( $path ), PHP_URL_PATH );
 		foreach ( self::AI_SEARCH_BOTS as $bot ) {
 			if ( ! $robots->allows( $bot, $path ) ) {
@@ -340,23 +342,20 @@ class StoreOutputChecks {
 	}
 
 	/**
-	 * Whether the WordPress sitemap includes products, or a sitemap the store serves names them.
-	 * Null when no sitemap was found and one of the candidates couldn't be loaded.
+	 * Whether a sitemap the store serves names products. Null when robots.txt
+	 * or one of the candidate sitemaps could not be loaded and none named products.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 */
 	private function sitemap_lists_products( StoreResponses $responses ): ?bool {
+		$robots     = $this->robots_txt( $responses );
+		$listed     = null === $robots ? array() : array_slice( ( new RobotsTxt( $robots ) )->sitemaps(), 0, self::MAX_LISTED_SITEMAPS );
+		$defaults   = array( '/sitemap_index.xml', '/sitemap.xml' );
 		if ( function_exists( 'wp_sitemaps_get_server' ) && wp_sitemaps_get_server()->sitemaps_enabled() ) {
-			$provider = wp_sitemaps_get_server()->registry->get_provider( 'posts' );
-			if ( $provider && array_key_exists( 'product', $provider->get_object_subtypes() ) ) {
-				return true;
-			}
+			$defaults[] = '/wp-sitemap.xml';
 		}
-
-		// A few sitemaps from robots.txt at most, so a long list can't hold up the scan.
-		$listed     = array_slice( ( new RobotsTxt( $this->robots_txt( $responses ) ) )->sitemaps(), 0, self::MAX_LISTED_SITEMAPS );
-		$candidates = array_unique( array_merge( $listed, array( '/sitemap_index.xml', '/sitemap.xml' ) ) );
-		$unknown    = false;
+		$candidates = array_unique( array_merge( $listed, $defaults ) );
+		$unknown    = null === $robots;
 		foreach ( $candidates as $url ) {
 			$response = $responses->get( $url );
 			if ( null === $response ) {
@@ -376,7 +375,11 @@ class StoreOutputChecks {
 	 */
 	private function with_products( StoreResponses $responses, callable $test ): ?bool {
 		$page = $responses->product_page();
-		return null === $page ? null : (bool) $test( JsonLd::items( $page['body'], 'Product', 'ProductGroup' ) );
+		if ( null === $page ) {
+			return null;
+		}
+		$result = $test( JsonLd::items( $page['body'], 'Product', 'ProductGroup' ) );
+		return null === $result ? null : (bool) $result;
 	}
 
 	/**
@@ -411,7 +414,7 @@ class StoreOutputChecks {
 		}
 		foreach ( array_merge( $offers, $nested ) as $offer ) {
 			$prices = array_merge( array( $offer['price'] ?? null, $offer['lowPrice'] ?? null ), array_column( self::as_list( $offer['priceSpecification'] ?? null ), 'price' ) );
-			if ( ! empty( $offer['availability'] ) && array() !== array_filter( $prices, 'is_numeric' ) ) {
+			if ( ! empty( $offer['availability'] ) && array() !== array_filter( $prices, array( self::class, 'has_price_amount' ) ) ) {
 				return true;
 			}
 		}
@@ -609,6 +612,22 @@ class StoreOutputChecks {
 	}
 
 	/**
+	 * Whether a JSON-LD price is a number, or text that contains one (`10.00`, `10,00`, `10.00 USD`).
+	 *
+	 * @param mixed $value Price value.
+	 */
+	private static function has_price_amount( $value ): bool {
+		if ( is_int( $value ) || is_float( $value ) ) {
+			return is_finite( $value );
+		}
+		if ( ! is_string( $value ) ) {
+			return false;
+		}
+		$normalized = str_replace( array( ',', ' ', "\u{00A0}" ), array( '.', '', '' ), $value );
+		return 1 === preg_match( '/-?\d+(?:\.\d+)?/', $normalized );
+	}
+
+	/**
 	 * A JSON-LD value that may be one object or a list of them, as a list of objects.
 	 *
 	 * @param mixed $value Value.
@@ -623,8 +642,8 @@ class StoreOutputChecks {
 
 	/**
 	 * Whether a sitemap index names a product sitemap (product-sitemap.xml,
-	 * wp-sitemap-posts-product-1.xml), or a sitemap lists a product page. A page
-	 * that isn't a sitemap, such as a theme's page for any URL, never counts.
+	 * wp-sitemap-posts-product-1.xml), or a urlset lists a product page. A category
+	 * sitemap and a page that isn't a sitemap never count.
 	 *
 	 * @param string $xml Sitemap body.
 	 */
@@ -632,8 +651,11 @@ class StoreOutputChecks {
 		if ( ! preg_match( '#<(urlset|sitemapindex)[\s>]#i', $xml ) ) {
 			return false;
 		}
+		if ( 1 === preg_match( '#<loc>[^<]*(?:product-sitemap|wp-sitemap-posts-product-)[^<]*\.xml\s*</loc>#i', $xml ) ) {
+			return true;
+		}
 		// The fixed part of the product base, before a tag such as %product_cat%.
 		$base = trim( (string) strtok( (string) ( wc_get_permalink_structure()['product_base'] ?? '' ), '%' ), '/' );
-		return 1 === preg_match( '#<loc>[^<]*product[^<]*\.xml\s*</loc>#i', $xml ) || ( '' !== $base && str_contains( $xml, '/' . $base . '/' ) );
+		return '' !== $base && 1 === preg_match( '#<loc>[^<]*/' . preg_quote( $base, '#' ) . '/[^<]*</loc>#i', $xml );
 	}
 }
