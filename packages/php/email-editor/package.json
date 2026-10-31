@@ -62,7 +62,9 @@
 					"testType": "static:analysis",
 					"command": "phpstan:php7",
 					"changes": [
-						"**/*.php"
+						"**/*.php",
+						"**/*.neon",
+						"tasks/phpstan/**"
 					],
 					"events": [
 						"pull_request",
@@ -74,7 +76,9 @@
 					"testType": "static:analysis",
 					"command": "phpstan:php8",
 					"changes": [
-						"**/*.php"
+						"**/*.php",
+						"**/*.neon",
+						"tasks/phpstan/**"
 					],
 					"events": [
 						"pull_request",

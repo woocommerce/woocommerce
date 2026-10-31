@@ -33,5 +33,6 @@ parameters:
 			- vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
 
 includes:
+	- phpstan-baseline.neon
 	- vendor/szepeviktor/phpstan-wordpress/extension.neon
 	- vendor/phpstan/phpstan-phpunit/extension.neon
