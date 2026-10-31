@@ -163,3 +163,51 @@ If you're looking to add _new routes and endpoints_, rather than extending the S
 
 * [`register_rest_route()`](https://developer.wordpress.org/reference/functions/register_rest_route/)
 * [Rest API Permissions Callbacks](https://developer.wordpress.org/rest-api/extending-the-rest-api/adding-custom-endpoints/#permissions-callback)
+
+### Accessing the customer's cart from a custom route
+
+WooCommerce doesn't load the cart for REST requests outside the Store API, so `WC()->cart` is `null` in a route registered with `register_rest_route()`. Load it in your callback before using it:
+
+```php
+register_rest_route(
+	'my-extension/v1',
+	'/cart-summary',
+	array(
+		'methods'             => 'GET',
+		'permission_callback' => '__return_true',
+		'callback'            => function () {
+			if ( ! function_exists( 'wc_load_cart' ) ) {
+				return new WP_Error( 'cart_unavailable', 'WooCommerce is not active.', array( 'status' => 503 ) );
+			}
+
+			wc_load_cart();
+
+			return array( 'items_count' => WC()->cart->get_cart_contents_count() );
+		},
+	)
+);
+```
+
+`wc_load_cart()` reads the session from the customer's cookies, so call the route from the browser with `credentials: 'same-origin'`. Also send an `X-WP-Nonce` header created with `wp_create_nonce( 'wp_rest' )`. Without it, WordPress treats a logged-in customer as a guest on custom routes, and their cart session can't be loaded. The Store API `Nonce` header and [Cart Tokens](/docs/apis/store-api/cart-tokens) only work on Store API routes.
+
+Pass both values to your script from PHP, so the URL works on any install layout:
+
+```php
+wp_add_inline_script(
+	'my-extension-script',
+	'const myExtension = ' . wp_json_encode(
+		array(
+			'cartSummaryUrl' => esc_url_raw( rest_url( 'my-extension/v1/cart-summary' ) ),
+			'restNonce'      => wp_create_nonce( 'wp_rest' ),
+		)
+	) . ';',
+	'before'
+);
+```
+
+```js
+const response = await fetch( myExtension.cartSummaryUrl, {
+	credentials: 'same-origin',
+	headers: { 'X-WP-Nonce': myExtension.restNonce },
+} );
+```

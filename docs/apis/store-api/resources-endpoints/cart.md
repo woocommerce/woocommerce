@@ -601,6 +601,33 @@ POST /cart/update-customer
 | `shipping_address.postcode`   | string |    no    | Zip or Postcode of the address being shipped to.                                         |
 | `shipping_address.country`    | string |    no    | ISO code for the country of the address being shipped to.                                |
 
+Send the addresses as a JSON body. Only the fields you include are updated.
+
+```sh
+curl --header "Nonce: 12345" --header "Content-Type: application/json" --request POST https://example-store.com/wp-json/wc/store/v1/cart/update-customer   --data '{
+    "billing_address": {
+      "first_name": "Jane",
+      "last_name": "Doe",
+      "address_1": "123 Main Street",
+      "city": "San Francisco",
+      "state": "CA",
+      "postcode": "94107",
+      "country": "US",
+      "email": "jane@example.com",
+      "phone": "555-0100"
+    },
+    "shipping_address": {
+      "first_name": "Jane",
+      "last_name": "Doe",
+      "address_1": "123 Main Street",
+      "city": "San Francisco",
+      "state": "CA",
+      "postcode": "94107",
+      "country": "US"
+    }
+  }'
+```
+
 Returns the full [Cart Response](#cart-response) on success, or an [Error Response](#error-response) on failure.
 
 ## Select Shipping Rate

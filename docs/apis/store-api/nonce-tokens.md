@@ -22,6 +22,43 @@ curl --header "Nonce: 12345" --request GET https://example-store.com/wp-json/wc/
 
 After making a successful request, an updated `Nonce` header will be sent back--this needs to be stored and updated by the client to make subsequent requests.
 
+### Sending the nonce from JavaScript
+
+Pass a nonce and the Store API URL to your script from PHP:
+
+```php
+wp_add_inline_script(
+	'my-store-script',
+	'const myStoreApi = ' . wp_json_encode(
+		array(
+			'nonce' => wp_create_nonce( 'wc_store_api' ),
+			'root'  => esc_url_raw( rest_url( 'wc/store/v1/' ) ),
+		)
+	) . ';',
+	'before'
+);
+```
+
+Then send it in the `Nonce` header, and keep the updated value the response returns:
+
+```js
+let nonce = myStoreApi.nonce;
+
+const response = await fetch( `${ myStoreApi.root }cart/add-item`, {
+	method: 'POST',
+	credentials: 'same-origin',
+	headers: {
+		'Content-Type': 'application/json',
+		Nonce: nonce,
+	},
+	body: JSON.stringify( { id: 100, quantity: 1 } ),
+} );
+
+nonce = response.headers.get( 'Nonce' ) || nonce;
+```
+
+`credentials: 'same-origin'` sends the cookies that identify the customer's cart session.
+
 ## Generating security nonces from WordPress
 
 Nonces must be created using the [`wp_create_nonce` function](https://developer.wordpress.org/reference/functions/wp_create_nonce/) with the key `wc_store_api`.
