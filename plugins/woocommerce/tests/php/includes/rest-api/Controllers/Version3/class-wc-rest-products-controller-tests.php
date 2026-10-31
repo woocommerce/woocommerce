@@ -393,6 +393,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	 *           [{"max_price": "30"}, ["cheap"]]
 	 *           [{"min_price": "15", "max_price": "25"}, ["cheap"]]
 	 *           [{"min_price": "60"}, []]
+	 *           [{"min_price": "30", "max_price": ""}, ["expensive"]]
 	 *
 	 * @param array    $params   Price filter query params.
 	 * @param string[] $expected Keys of the products expected in the response.
