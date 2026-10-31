@@ -77,7 +77,7 @@ class Marketing {
 				'manage_woocommerce',
 				'woocommerce-marketing',
 				null,
-				'dashicons-megaphone',
+				MenuIcons::get( 'woocommerce/megaphone', 'dashicons-megaphone' ), // TODO(WOOPLUG-7938): prototype guard.
 				58
 			);
 		}
