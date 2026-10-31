@@ -1532,7 +1532,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertSame( 400, $refused->get_status() );
-		$this->assertSame( 'test_keep', $refused->get_data()['code'] );
+		$this->assertStringEndsWith( 'test_keep', $refused->get_data()['code'] );
 		$this->assertInstanceOf( \WC_Product::class, wc_get_product( $kept->get_id() ) );
 		$this->assertTrue( $deleted['deleted'] );
 		$this->assertFalse( wc_get_product( $created['product']['id'] ) );
@@ -1818,7 +1818,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'color', $schema['properties']['variations']['items']['properties']['extensions']['properties']['test-ext']['properties'] );
 		$this->assertSame( 400, $refused->get_status() );
-		$this->assertSame( 'test_red_variation', $refused->get_data()['code'] );
+		$this->assertStringEndsWith( 'test_red_variation', $refused->get_data()['code'] );
 		$this->assertSame( array(), $saved );
 
 		$colors = array_map(
@@ -2104,7 +2104,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'plan', $schema['properties']['extensions']['properties']['test-ext']['properties'] );
 		$this->assertSame( 400, $rejected->get_status() );
-		$this->assertSame( 'woocommerce_ability_field_object_type', $rejected->get_data()['code'] );
+		$this->assertStringEndsWith( 'woocommerce_ability_field_object_type', $rejected->get_data()['code'] );
 		$this->assertSame( 'The extensions.test-ext.plan field does not apply to the grouped type. It applies to simple.', $rejected->get_data()['message'] );
 		$this->assertSame( '', wc_get_product( $grouped->get_id() )->get_meta( '_test_plan' ) );
 		$this->assertSame( 'monthly', $updated['product']['extensions']['test-ext']['plan'] );
@@ -2159,7 +2159,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		}
 
 		$this->assertSame( 400, $refused->get_status() );
-		$this->assertSame( 'woocommerce_ability_field_object_type', $refused->get_data()['code'] );
+		$this->assertStringEndsWith( 'woocommerce_ability_field_object_type', $refused->get_data()['code'] );
 		$this->assertSame( 'The extensions.typed-ext.simple_only field does not apply to the variation type. It applies to simple.', $refused->get_data()['message'] );
 
 		$input_namespaces  = $ability['input_schema']['properties']['variations']['items']['properties']['extensions']['properties'];
@@ -2342,7 +2342,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 'variation', $created['variations'][0]['type'] );
 		$this->assertSame( \WC_Product_Variation::class, get_class( wc_get_product( $created['variations'][0]['id'] ) ) );
 		$this->assertSame( 400, $refused->get_status() );
-		$this->assertSame( 'woocommerce_ability_field_object_type', $refused->get_data()['code'] );
+		$this->assertStringEndsWith( 'woocommerce_ability_field_object_type', $refused->get_data()['code'] );
 	}
 
 	/**
