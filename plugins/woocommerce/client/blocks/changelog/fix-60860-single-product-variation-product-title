@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent selecting a product variation in the Single Product block, which caused the Product Title block to render empty in the editor.
