@@ -15,6 +15,9 @@ import {
 	useForcedLayout,
 	getAllowedBlocks,
 } from '../../../cart-checkout-shared';
+import newArrivals from '../../../product-collection/collections/new-arrivals';
+import { INNER_BLOCKS_PRODUCT_TEMPLATE } from '../../../product-collection/constants';
+import { CoreCollectionNames } from '../../../product-collection/types';
 
 const returnToShopTemplate = SHOP_URL
 	? [
@@ -66,11 +69,26 @@ const defaultTemplate = [
 		},
 	],
 	[
-		'woocommerce/product-new',
+		'woocommerce/product-collection',
 		{
-			columns: 4,
-			rows: 1,
+			...newArrivals.attributes,
+			displayLayout: {
+				...newArrivals.attributes.displayLayout,
+				columns: 4,
+			},
+			query: {
+				// Copy all properties from newArrivals.attributes.query except timeFrame
+				...( ( { timeFrame, ...rest } ) => rest )(
+					newArrivals.attributes.query
+				),
+				isProductCollectionBlock: true,
+				postType: 'product',
+				perPage: 4,
+				woocommerceStockStatus: [ 'instock' ],
+			},
+			collection: CoreCollectionNames.NEW_ARRIVALS,
 		},
+		[ INNER_BLOCKS_PRODUCT_TEMPLATE ],
 	],
 ].filter( Boolean ) as unknown as TemplateArray;
 
@@ -78,6 +96,10 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 	const blockProps = useBlockProps();
 	const { currentView } = useEditorContext();
 	const allowedBlocks = getAllowedBlocks( innerBlockAreas.EMPTY_CART );
+	// Product Collection is used for the New Arrivals block.
+	// We don't want to set a parent on the Product Collection block
+	// so we add it here manually.
+	allowedBlocks.push( 'woocommerce/product-collection' );
 
 	useForcedLayout( {
 		clientId,
