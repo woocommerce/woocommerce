@@ -49,7 +49,7 @@ Only published simple and variable products are checked, the types agents suppor
 - Products hidden from the shop catalog (catalog visibility "Search results only" or "Hidden"). Agents see the products shoppers see in the shop, so hiding one is the merchant's choice, not a problem.
 - Products of any other type: grouped, external, subscription, booking, bundle and so on. A product keeps its stored type when its plugin is inactive, so it stays in this group.
 
-Store-wide conditions (`StoreConditions`) are reported first because they affect every product: coming soon mode and "Discourage search engines" hide the products, UCP off and Plain permalinks (no `/.well-known/ucp`) hide the catalog from UCP agents, and guest checkout off stops agents placing orders. Each condition's `blocks` says which, so a reader can tell a hidden store from one agents can't buy from.
+Store-wide conditions (`StoreConditions`) are reported first because they affect every product: coming soon mode and "Discourage search engines" hide the products, UCP off, no HTTPS and Plain permalinks (no `/.well-known/ucp`) hide the catalog from UCP agents, and guest checkout off stops agents placing orders. Missing policy pages and order emails off weaken agent orders. Each condition's `blocks` says which, so a reader can tell a hidden store from one agents can't buy from.
 
 ## Report format
 
@@ -60,10 +60,10 @@ array(
 	'generated_at' => '2026-10-28T12:00:00+00:00',
 	'products'            => 120,  // Published simple and variable products checked.
 	'hidden_from_catalog' => 4,    // Not checked: catalog visibility "Search results only" or "Hidden", the merchant's choice.
-	'unsupported_types'   => 6,    // Not checked: grouped, external, subscription, bundle and other types agents don't support yet.
+	'unsupported_types'   => 6,    // Not checked: grouped, external, subscription, bundle and other types agents can find but can't add to a cart yet.
 	'store_checks' => array(
 		// blocks: 'listing' (every product on every channel), 'ucp' (the catalog for UCP agents) or 'checkout' (agent orders).
-		array( 'id' => 'launched', 'ok' => true, 'blocks' => 'listing', 'label' => '…', 'why' => '…', 'fix' => '…' ),
+		array( 'id' => 'launched', 'ok' => true, 'blocks' => 'listing', 'level' => 'required', 'name' => '…', 'label' => '…', 'why' => '…', 'fix' => '…', 'fix_url' => '…' ),
 	),
 	'channels'     => array(
 		'chatgpt' => array(
@@ -96,6 +96,16 @@ array(
 
 `AgentReadiness::check_product( $product )` judges one product as the scan does: each failing check with its field and effect per channel for that product (after per-product exceptions such as a partly priced variable product), and the product's status per channel (`not_listable`, `with_gaps`, `complete`). It returns null for products the scan leaves out, and judges a variation by its parent. Extensions that rank or fix products one at a time use it, since the stored report keeps only counts and up to 10 example ids per check.
 
+## Rules file
+
+Channel specs change faster than WooCommerce releases, so each background scan first fetches a published rules file (`RemoteRules`). Only a GET of the file is made; no store data is sent. The `woocommerce_agent_readiness_rules_url` filter changes the URL; an empty URL turns the fetch off. With no stored file, or a failed fetch, the bundled checks run.
+
+The file has a `version` and a `checks` object. The ids in `checks` are the checks that run, and each one has to match a check shipped in code. An id the file leaves out does not run. An id code does not know, an unknown channel, or an effect other than `not_listable` or `gaps` is dropped. A check left with no valid channel does not run. With no stored file, or a file that names nothing this code can run, the bundled checks run. A failed or malformed fetch keeps the last good copy (option `woocommerce_agent_readiness_remote_rules`).
+
+Per check, `channels` maps a channel id to the feed field and the effect, the same shape as the `woocommerce_agent_readiness_rules` filter. A channel entry may carry `effect_from` (`{ "2027-01-31": "not_listable" }`) for a spec change announced ahead. The filter runs last, so it can still drop a check or put a bundled one back. The file cannot add a check the code has never seen: that still needs a class.
+
+`rules.json` in this directory is the file to publish. It lists every check the code has today, so the first publish changes nothing. Removing an id there turns that check off without a WooCommerce release. It will be served from `https://woocommerce.com/wp-json/wccom/agent-readiness/1.0/rules.json`, the same host as the payment gateway suggestions (`wccom-plugins` on WooCommerce.com).
+
 ## Background scan and REST
 
 "Run check" on the tab, or `POST wc/v3/agent-readiness/scan`, queues the scan in Action Scheduler (`ScheduledScan`). The report is stored in the `woocommerce_agent_readiness_report` option (not autoloaded). Each run schedules the next one a day later, before scanning, so a failed scan doesn't stop the daily refresh; a run that finds the feature disabled does. If a queued scan still hasn't started 10 minutes after it was due and no other scheduled action has finished in that time (Action Scheduler isn't running), the next "Run check" or `POST` runs the scan in that request.
@@ -108,11 +118,20 @@ The same shape is meant for every consumer: this Status tab, an outside scan of 
 
 The scan walks published simple and variable products shown in the shop catalog in batches of 200, most recently modified first, primes meta, terms, images and variations per batch, and stops at 5,000 products.
 
+## Agentic commerce settings page
+
+WooCommerce > Settings > Agentic commerce (`AgenticCommerceSettings`, `AgenticCommerceSettingsPage`) shows while the feature is enabled:
+
+- Product counts from the stored report (`products`, `hidden_from_catalog`, `unsupported_types`), each linking to a filtered product list.
+- The UCP switch. It saves through `POST wc/v3/agent-readiness/ucp` (`{ "enabled": true }`), which answers 409 while a required setup check fails. Turning it off always works.
+- One row per store condition from `StoreConditions`, the same list the readiness report shows, named by its passing state (`name`). A failing `required` condition (coming soon mode, HTTPS, permalinks) blocks the switch; a failing `recommended` one, such as a missing policy page, is a warning.
+- Store policy pages and a return policy summary. Refund and returns, privacy and terms are the existing options, so they stay in sync with Advanced > Page setup and Settings > Privacy; shipping policy and FAQ are new. The dropdowns list published pages only, and saving leaves a stored draft page in place. The summary (`woocommerce_return_policy_summary`, 300 characters) is stored only; UCP has no field for it yet.
+
+Tracks events: `agentic_commerce_ucp_toggled` (`enabled`) and `agentic_commerce_ucp_blocked` (`failing_checks`), sent only when the store allows tracking.
+
 ## Updating rules
 
-The per-channel field and effect live in each check's `channels()`. The final map passes through the `woocommerce_agent_readiness_rules` filter, keyed by check id, so it can change without a release. Removing a check id stops that check. Unknown channels and effects are dropped.
-
-Next step, out of scope here: fetch the rules map from a remote JSON spec with the bundled `channels()` as the fallback, the way core polls remote specs for payment and marketing suggestions with bundled defaults.
+The per-channel field and effect live in each check's `channels()`, and that is what runs until a rules file is stored. After that, `rules.json` is the list. The `woocommerce_agent_readiness_rules` filter still runs last. Unknown channels and effects are dropped.
 
 ## Product feeds
 

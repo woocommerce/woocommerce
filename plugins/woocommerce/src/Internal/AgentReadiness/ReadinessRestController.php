@@ -13,7 +13,9 @@ defined( 'ABSPATH' ) || exit;
  * GET wc/v3/agent-readiness returns the stored report; POST
  * wc/v3/agent-readiness/scan queues a new scan. Both answer with the report
  * (null before the first scan) and whether a scan is pending, so a settings
- * page can show the last result and poll while a scan runs.
+ * page can show the last result and poll while a scan runs. POST
+ * wc/v3/agent-readiness/ucp turns UCP on or off for the Agentic commerce
+ * settings page.
  *
  * Registered only while the agent_readiness feature is enabled.
  *
@@ -43,6 +45,13 @@ class ReadinessRestController extends RestApiControllerBase {
 	private ScheduledScan $scheduled_scan;
 
 	/**
+	 * UCP switch.
+	 *
+	 * @var UcpSwitch
+	 */
+	private UcpSwitch $ucp_switch;
+
+	/**
 	 * Initialize dependencies.
 	 *
 	 * @internal
@@ -50,11 +59,13 @@ class ReadinessRestController extends RestApiControllerBase {
 	 * @param FeaturesController $features_controller Features controller.
 	 * @param AgentReadiness     $agent_readiness     Readiness service.
 	 * @param ScheduledScan      $scheduled_scan      Background scan.
+	 * @param UcpSwitch          $ucp_switch          UCP switch.
 	 */
-	final public function init( FeaturesController $features_controller, AgentReadiness $agent_readiness, ScheduledScan $scheduled_scan ): void {
+	final public function init( FeaturesController $features_controller, AgentReadiness $agent_readiness, ScheduledScan $scheduled_scan, UcpSwitch $ucp_switch ): void {
 		$this->features_controller = $features_controller;
 		$this->agent_readiness     = $agent_readiness;
 		$this->scheduled_scan      = $scheduled_scan;
+		$this->ucp_switch          = $ucp_switch;
 	}
 
 	/**
@@ -95,6 +106,24 @@ class ReadinessRestController extends RestApiControllerBase {
 				'schema' => array( $this, 'get_status_schema' ),
 			)
 		);
+		register_rest_route(
+			$this->route_namespace,
+			'/agent-readiness/ucp',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'set_ucp_enabled' ),
+					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'manage_woocommerce' ),
+					'args'                => array(
+						'enabled' => array(
+							'description' => __( 'Whether AI agents can shop the store through UCP.', 'woocommerce' ),
+							'type'        => 'boolean',
+							'required'    => true,
+						),
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -121,6 +150,17 @@ class ReadinessRestController extends RestApiControllerBase {
 	protected function queue_scan( WP_REST_Request $request ): \WP_REST_Response {
 		$this->scheduled_scan->queue();
 		return new \WP_REST_Response( $this->get_status( $request ), 202 );
+	}
+
+	/**
+	 * Turn UCP on or off. Turning it on fails with a 409 while a required setup check fails.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return array{enabled:bool,status:string,failing_checks:array<int,string>}|\WP_Error
+	 */
+	protected function set_ucp_enabled( WP_REST_Request $request ) {
+		return $this->ucp_switch->set_enabled( (bool) $request->get_param( 'enabled' ) );
 	}
 
 	/**

@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan;
+use Automattic\WooCommerce\Internal\AgentReadiness\UcpSwitch;
 use WC_REST_Unit_Test_Case;
 use WP_REST_Request;
 
@@ -32,6 +33,7 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 		as_unschedule_all_actions( ScheduledScan::DAILY_HOOK );
 		remove_filter( 'pre_option_woocommerce_feature_agent_readiness_enabled', array( __CLASS__, 'enabled' ) );
+		$this->set_permalink_structure( '' );
 		parent::tearDown();
 	}
 
@@ -94,5 +96,74 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 		do_action( 'rest_api_init', $wp_rest_server );
 
 		$this->assertSame( 404, $wp_rest_server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness' ) )->get_status() );
+	}
+
+	/**
+	 * @testdox POST ucp refuses to turn UCP on while a required setup check fails.
+	 */
+	public function test_ucp_switch_blocked_by_failing_check(): void {
+		StoreConditionsTest::make_store_ready( $this );
+		update_option( 'woocommerce_coming_soon', 'yes' );
+		update_option( 'woocommerce_feature_ucp_enabled', 'no' );
+
+		$response = $this->dispatch_ucp( true );
+
+		$this->assertSame( 409, $response->get_status() );
+		$this->assertSame( 'woocommerce_agentic_commerce_setup_incomplete', $response->get_data()['code'] );
+		$this->assertSame( array( 'launched' ), $response->get_data()['data']['failing_checks'] );
+		$this->assertSame( 'no', get_option( 'woocommerce_feature_ucp_enabled' ) );
+	}
+
+	/**
+	 * @testdox POST ucp turns UCP on once the required checks pass, and off again.
+	 */
+	public function test_ucp_switch_on_and_off(): void {
+		StoreConditionsTest::make_store_ready( $this );
+
+		$response = $this->dispatch_ucp( true );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertTrue( $response->get_data()['enabled'] );
+		$this->assertSame( UcpSwitch::STATUS_ACTIVE, $response->get_data()['status'] );
+		$this->assertSame( 'yes', get_option( 'woocommerce_feature_ucp_enabled' ) );
+
+		$response = $this->dispatch_ucp( false );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( UcpSwitch::STATUS_OFF, $response->get_data()['status'] );
+		$this->assertSame( 'no', get_option( 'woocommerce_feature_ucp_enabled' ) );
+	}
+
+	/**
+	 * @testdox Turning UCP off works while a required check fails.
+	 */
+	public function test_ucp_switch_off_with_failing_check(): void {
+		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
+
+		$response = $this->dispatch_ucp( false );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'no', get_option( 'woocommerce_feature_ucp_enabled' ) );
+	}
+
+	/**
+	 * @testdox A user without manage_woocommerce can't switch UCP.
+	 */
+	public function test_ucp_switch_requires_manage_woocommerce(): void {
+		StoreConditionsTest::make_store_ready( $this );
+		update_option( 'woocommerce_feature_ucp_enabled', 'no' );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+
+		$this->assertSame( 403, $this->dispatch_ucp( true )->get_status() );
+		$this->assertSame( 'no', get_option( 'woocommerce_feature_ucp_enabled' ) );
+	}
+
+	/**
+	 * Send POST wc/v3/agent-readiness/ucp.
+	 *
+	 * @param bool $enabled Whether to turn UCP on.
+	 */
+	private function dispatch_ucp( bool $enabled ): \WP_REST_Response {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/agent-readiness/ucp' );
+		$request->set_param( 'enabled', $enabled );
+		return $this->server->dispatch( $request );
 	}
 }
