@@ -1,4 +1,4 @@
 Significance: patch
 Type: update
 
-Extensible abilities: run every validator on a change and return all refusals in one error.
+Extensible abilities: run every field callback and validator on a change and return all refusals in one error.
