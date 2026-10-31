@@ -10,6 +10,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\StructuredData;
 
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
 use WC_Product;
 
 defined( 'ABSPATH' ) || exit;
@@ -59,6 +60,10 @@ class OpenGraph {
 			return;
 		}
 
+		if ( ComingSoonRequestHandler::is_showing_coming_soon() ) {
+			return;
+		}
+
 		$page = $this->get_page_data();
 		if ( null === $page ) {
 			return;
@@ -81,7 +86,7 @@ class OpenGraph {
 		$this->default_card = array_column( $tags, 'twitter:card' )[0] ?? null;
 
 		/**
-		 * Filters Open Graph metadata before output. Currently applied only to product pages.
+		 * Filters Open Graph metadata before output. Applied to product and shop pages.
 		 * Other page types may be supported later; callbacks must check the object type.
 		 * The first tag in each group is its root; details follow it. Remove or replace an entire group to omit or replace its details.
 		 *
@@ -135,6 +140,10 @@ class OpenGraph {
 			return $this->get_product_page_data();
 		}
 
+		if ( is_shop() && ! is_search() && ! is_paged() ) {
+			return $this->get_shop_page_data();
+		}
+
 		return null;
 	}
 
@@ -160,6 +169,23 @@ class OpenGraph {
 	}
 
 	/**
+	 * Build metadata for the configured shop page.
+	 *
+	 * @return array{tags: array<array<string, string>>, context: \WP_Post}|null
+	 */
+	private function get_shop_page_data(): ?array {
+		$page = get_post( wc_get_page_id( 'shop' ) );
+		if ( ! $page instanceof \WP_Post || 'publish' !== $page->post_status || '' !== $page->post_password ) {
+			return null;
+		}
+
+		return array(
+			'tags'    => wc_get_container()->get( ShopOpenGraphTags::class )->get_tags( $page ),
+			'context' => $page,
+		);
+	}
+
+	/**
 	 * Add metadata after the complete document is available.
 	 *
 	 * @internal
@@ -168,7 +194,7 @@ class OpenGraph {
 	 * @return mixed
 	 */
 	public function handle_wp_template_enhancement_output_buffer( $html ) {
-		if ( ! is_string( $html ) || ! $this->tags ) {
+		if ( ! is_string( $html ) || ! $this->tags || ComingSoonRequestHandler::is_showing_coming_soon() ) {
 			return $html;
 		}
 
