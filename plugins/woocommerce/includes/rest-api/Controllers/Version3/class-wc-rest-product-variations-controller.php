@@ -216,6 +216,10 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			$variation = new WC_Product_Variation();
 		}
 
+		if ( ! $variation instanceof WC_Product_Variation ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
 		$variation->set_parent_id( absint( $request['product_id'] ) );
 
 		foreach ( $customs as $property => $value ) {
@@ -238,7 +242,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		}
 
 		// MPN.
-		if ( $variation instanceof WC_Product && isset( $request['mpn'] ) ) {
+		if ( isset( $request['mpn'] ) ) {
 			$variation->set_mpn( sanitize_text_field( $request['mpn'] ) );
 		}
 

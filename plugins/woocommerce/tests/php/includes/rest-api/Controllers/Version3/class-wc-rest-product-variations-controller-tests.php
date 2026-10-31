@@ -1130,6 +1130,40 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Preparing an update for a variation deleted mid-request returns an invalid ID error instead of a fatal error.
+	 *
+	 * @testWith ["WC_REST_Product_Variations_Controller"]
+	 *           ["WC_REST_Product_Variations_V2_Controller"]
+	 *
+	 * @param string $controller_class The variations controller class under test.
+	 */
+	public function test_prepare_object_returns_error_when_variation_deleted( string $controller_class ): void {
+		$parent       = WC_Helper_Product::create_variation_product();
+		$variation_id = (int) $parent->get_children()[0];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $parent->get_id() . '/variations/' . $variation_id );
+		$request->set_url_params(
+			array(
+				'product_id' => $parent->get_id(),
+				'id'         => $variation_id,
+			)
+		);
+		$request->set_body_params( array( 'regular_price' => '9.99' ) );
+
+		// Simulate a concurrent deletion between the update_item() guard and preparation.
+		wp_delete_post( $variation_id, true );
+
+		$controller     = new $controller_class();
+		$prepare_method = new ReflectionMethod( $controller, 'prepare_object_for_database' );
+		$prepare_method->setAccessible( true );
+		$result = $prepare_method->invoke( $controller, $request, false );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_rest_product_variation_invalid_id', $result->get_error_code() );
+		$this->assertSame( 404, $result->get_error_data()['status'] );
+	}
+
+	/**
 	 * @testdox Creating a variation normalizes customs values.
 	 */
 	public function test_create_variation_normalizes_customs_values(): void {
