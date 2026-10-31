@@ -631,7 +631,7 @@ function wc_create_refund( $args = array() ) {
 				if ( $item->is_type( 'line_item' ) ) {
 					$refunded_order_and_products[ $item_id ] = array(
 						'order_id'   => $order->get_id(),
-						'product_id' => $item->get_product_id(),
+						'product_id' => $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id(),
 					);
 				}
 
