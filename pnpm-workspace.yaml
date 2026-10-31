@@ -116,6 +116,8 @@ overrides:
     '@wordpress/data-controls>@wordpress/api-fetch': 'catalog:wp-min'
     '@wordpress/private-apis': 'catalog:wp-min'
     'minimatch@<3.1.4': 3.1.5
+    # @automattic/components 2.x lists react-router-dom but never imports it; drop once it is on 5.x.
+    '@automattic/components>react-router-dom': ~7.18.5
     react-resize-aware: 3.1.1
     sass: 1.69.5
 
