@@ -1346,8 +1346,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	public function test_an_update_callback_that_throws_saves_nothing(): void {
 		$product  = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
 		$expected = array(
-			'throw' => array( 400, 'test_thrown' ),
-			'crash' => array( 500, 'woocommerce_ability_extension_failed' ),
+			'throw' => array( 400, 'test-ext:test_thrown' ),
+			'crash' => array( 500, 'test-ext:woocommerce_ability_extension_failed' ),
 		);
 
 		foreach ( $expected as $value => list( $status, $code ) ) {
@@ -1684,9 +1684,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertSame( 400, $response->get_status() );
-		$this->assertSame( 'test_rejected', $response->get_data()['code'] );
+		$this->assertSame( 'other_ext:test_rejected', $response->get_data()['code'] );
 		$this->assertSame( 'Rejected.', $response->get_data()['message'] );
 		$this->assertSame( 'extensions.other_ext.count', $response->get_data()['data']['field'] );
+		$this->assertSame( 'other_ext', $response->get_data()['data']['namespace'] );
 	}
 
 	/**
@@ -2037,13 +2038,95 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertSame( 500, $field->get_status() );
-		$this->assertSame( 'woocommerce_ability_extension_failed', $field->get_data()['code'] );
+		$this->assertSame( 'test-ext:woocommerce_ability_extension_failed', $field->get_data()['code'] );
 		$this->assertSame( 'An extension failed while checking this change.', $field->get_data()['message'] );
 		$this->assertSame( 'extensions.test-ext.broken', $field->get_data()['data']['field'] );
 		$this->assertSame( 500, $validator->get_status() );
 		$this->assertSame( 'An extension failed while checking this change.', $validator->get_data()['message'] );
 		$this->assertSame( 'other_ext', $validator->get_data()['data']['namespace'] );
 		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * @testdox Should return every field refusal and the validator refusals in one error, and save nothing.
+	 */
+	public function test_field_and_validator_refusals_come_together(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				foreach ( array( 'first', 'second' ) as $field ) {
+					ExtensibleAbilities::register_field(
+						array(
+							'resource'        => 'product',
+							'namespace'       => 'test-ext',
+							'field'           => $field,
+							'schema'          => array( 'type' => 'string' ),
+							'get_callback'    => '__return_null',
+							'update_callback' => static function () use ( $field ) {
+								return new \WP_Error( 'test_bad_value', $field . ' refused.', array( 'status' => 422 ) );
+							},
+						)
+					);
+				}
+			}
+		);
+		$this->register_validator(
+			'product',
+			'other_ext',
+			static fn() => new \WP_Error( 'test_bad_size', 'Size refused.' )
+		);
+
+		$response = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'name'       => 'Pencil',
+				'extensions' => array(
+					'test-ext' => array(
+						'first'  => 'x',
+						'second' => 'y',
+					),
+				),
+			)
+		);
+
+		$data = $response->get_data();
+		$this->assertSame( 422, $response->get_status() );
+		$this->assertSame( 'test-ext:test_bad_value', $data['code'] );
+		$this->assertSame( 'extensions.test-ext.first', $data['data']['field'] );
+		$this->assertArrayNotHasKey( 'unconfirmed', $data['data'] );
+		$this->assertSame( 'test-ext:test_bad_value:2', $data['additional_errors'][0]['code'] );
+		$this->assertSame( 'extensions.test-ext.second', $data['additional_errors'][0]['data']['field'] );
+		$this->assertSame( 'other_ext:test_bad_size', $data['additional_errors'][1]['code'] );
+		$this->assertTrue( $data['additional_errors'][1]['data']['unconfirmed'] );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * @testdox Should not return a validator crash after a field refusal, because the object lacks the refused value.
+	 */
+	public function test_a_validator_crash_after_a_field_refusal_is_not_returned(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$this->register_validator(
+			'product',
+			'test-ext',
+			static function () {
+				throw new \RuntimeException( 'Validator broke.' );
+			}
+		);
+
+		$response = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'other_ext' => array( 'count' => -1 ) ),
+			)
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'other_ext:test_rejected', $response->get_data()['code'] );
+		$this->assertArrayNotHasKey( 'additional_errors', $response->get_data() );
 	}
 
 	/**

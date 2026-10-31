@@ -481,7 +481,11 @@ class ExtensibleAbilities {
 	 *                               validator in the same namespace already used gets a numeric suffix, as
 	 *                               `<namespace>:<code>:2`. The error gets the
 	 *                               namespace in its data, and the 400 status when it has no status. Its
-	 *                               message can name the ability or screen to use instead. Rules:
+	 *                               message can name the ability or screen to use instead. Validators also
+	 *                               run after a field callback refuses a value, so the client gets the field
+	 *                               refusals and the validator refusals together. The object then does not
+	 *                               have that value. A refusal from that run gets `unconfirmed` in its data,
+	 *                               because it can disappear when the client fixes the field. Rules:
 	 *                               1. It only reads. It does not change the object, save, send email or
 	 *                                  make HTTP requests.
 	 *                               2. It checks the ability name when the extension's own abilities
