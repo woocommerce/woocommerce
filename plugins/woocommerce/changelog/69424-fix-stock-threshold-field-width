@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Widen the stock threshold and number of decimals fields so their values are no longer cut off on WordPress 7.0+.
