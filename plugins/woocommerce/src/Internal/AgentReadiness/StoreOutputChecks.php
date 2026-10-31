@@ -145,8 +145,8 @@ class StoreOutputChecks {
 				'id'       => 'product_jsonld_present',
 				'test'     => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): bool => array() !== $products ),
 				'blocks'   => 'discovery',
-				'name'     => __( 'The newest product page has product structured data', 'woocommerce' ),
-				'label'    => __( 'The newest product page has no product structured data', 'woocommerce' ),
+				'name'     => __( 'A recent product page has product structured data', 'woocommerce' ),
+				'label'    => __( 'A recent product page has no product structured data', 'woocommerce' ),
 				'why'      => __( 'Shopping crawlers and search engines read the product\'s JSON-LD to get its name, price and stock without guessing from the page.', 'woocommerce' ),
 				'fix'      => __( 'WooCommerce adds it to the product page. Check whether your theme or an SEO plugin removes it, or turn on product schema in your SEO plugin.', 'woocommerce' ),
 				'fix_url'  => '',
@@ -158,7 +158,7 @@ class StoreOutputChecks {
 				'blocks'   => 'discovery',
 				'name'     => __( 'Product structured data comes from WooCommerce, once', 'woocommerce' ),
 				'label'    => __( 'Something replaces or repeats WooCommerce\'s product structured data', 'woocommerce' ),
-				'why'      => __( 'Seen on the newest product page. Agents may read values that differ from your product, or two versions of it.', 'woocommerce' ),
+				'why'      => __( 'Seen on a recent product page. Agents may read values that differ from your product, or two versions of it.', 'woocommerce' ),
 				'fix'      => __( 'Usually an SEO plugin or your theme. Check its schema settings; if you chose this, you can ignore it.', 'woocommerce' ),
 				'fix_url'  => '',
 				'conflict' => true,
@@ -431,7 +431,8 @@ class StoreOutputChecks {
 		if ( null === $product ) {
 			return null;
 		}
-		return 1 === count( $products ) && $product->get_permalink() . '#product' === ( $products[0]['@id'] ?? '' );
+		$schemeless = static fn( string $url ): string => (string) preg_replace( '#^https?:#i', '', html_entity_decode( $url, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+		return 1 === count( $products ) && $schemeless( $product->get_permalink() . '#product' ) === $schemeless( (string) ( $products[0]['@id'] ?? '' ) );
 	}
 
 	/**

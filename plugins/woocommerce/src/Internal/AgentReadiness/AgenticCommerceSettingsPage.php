@@ -517,7 +517,10 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			$checks,
 			static function ( array $check ) use ( $results ): bool {
 				$needs = self::CHECK_NEEDS[ $check['id'] ] ?? null;
-				return 'ucp_on' !== $check['id'] && ( null === $needs || false !== ( $results[ $needs ] ?? null ) );
+				if ( 'ucp_on' === $check['id'] || ( ! UcpUtils::is_enabled() && in_array( $check['id'], array( 'ucp_profile', 'ucp_endpoints_live' ), true ) ) ) {
+					return false;
+				}
+				return null === $needs || false !== ( $results[ $needs ] ?? null );
 			}
 		);
 		$groups   = array(
@@ -553,7 +556,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			<?php foreach ( $groups as $id => $group ) : ?>
 				<li>
 					<a href="#wc-agentic-commerce-group-<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $group[0] ); ?></a>
-					<?php echo esc_html( self::group_summary( $group[1], null !== $report, 'understand' === $id ? $product_problems : 0 ) ); ?>
+					<?php echo esc_html( self::group_summary( $id, $group[1], null !== $report, 'understand' === $id ? $product_problems : 0, array_key_exists( 'ucp_profile', $results ) ) ); ?>
 				</li>
 			<?php endforeach; ?>
 		</ul>
@@ -578,11 +581,13 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	/**
 	 * One line on where a question stands.
 	 *
+	 * @param string                                       $group            Question id.
 	 * @param array<int, array{ok:bool|null,level:string}> $checks           The question's checks.
 	 * @param bool                                         $scanned          Whether a scan has run.
 	 * @param int                                          $product_problems Failing product checks under the question.
+	 * @param bool                                         $ucp_scanned      Whether the last scan checked UCP.
 	 */
-	private static function group_summary( array $checks, bool $scanned, int $product_problems ): string {
+	private static function group_summary( string $group, array $checks, bool $scanned, int $product_problems, bool $ucp_scanned ): string {
 		$fix     = count( array_filter( $checks, static fn( array $check ): bool => false === $check['ok'] && StoreConditions::LEVEL_REQUIRED === $check['level'] ) );
 		$check   = $product_problems + count( array_filter( $checks, static fn( array $check ): bool => false === $check['ok'] && StoreConditions::LEVEL_REQUIRED !== $check['level'] ) );
 		$unknown = count( array_filter( $checks, static fn( array $check ): bool => null === $check['ok'] ) );
@@ -599,10 +604,15 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			/* translators: %d: number of checks. */
 			$parts[] = sprintf( _n( '%d couldn\'t be checked', '%d couldn\'t be checked', $unknown, 'woocommerce' ), $unknown );
 		}
+		if ( 'access' === $group && ! UcpUtils::is_enabled() ) {
+			array_unshift( $parts, __( 'Agent shopping is off', 'woocommerce' ) );
+		}
 		if ( array() !== $parts ) {
 			return implode( ', ', $parts );
 		}
-		return $scanned ? __( 'Yes', 'woocommerce' ) : __( 'Run check to find out', 'woocommerce' );
+		// Rows from before UCP was turned on, or a report without store checks, don't answer the question.
+		$answered = $scanned && array() !== $checks && ( 'access' !== $group || $ucp_scanned );
+		return $answered ? __( 'Yes', 'woocommerce' ) : __( 'Run check to find out', 'woocommerce' );
 	}
 
 	/**
@@ -638,14 +648,14 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 						<td>
 							<?php echo esc_html( $check['name'] ); ?>
 							<?php if ( false === $check['ok'] ) : ?>
-								<br /><span class="description"><?php echo esc_html( trim( ( $conflict ? __( 'Something on your store is replacing this. If you just changed it, a page cache may show the old page for a while.', 'woocommerce' ) . ' ' : '' ) . $check['why'] . ' ' . self::blocks_text( $check['blocks'] ) ) ); ?></span>
+								<br /><span class="description"><?php echo esc_html( trim( ( $conflict ? __( 'Something on your store may be replacing this. If you just changed it, a page cache may show the old page for a while.', 'woocommerce' ) . ' ' : '' ) . $check['why'] . ' ' . self::blocks_text( $check['blocks'] ) ) ); ?></span>
 							<?php endif; ?>
 						</td>
 						<td>
 							<?php if ( null === $check['ok'] ) : ?>
 								<?php
 								if ( $launched ) {
-									esc_html_e( 'Your store did not answer this check. The next check tries again.', 'woocommerce' );
+									esc_html_e( 'This couldn\'t be checked. The next check tries again.', 'woocommerce' );
 								} else {
 									esc_html_e( 'Launch your store to run this check.', 'woocommerce' );
 								}

@@ -193,10 +193,10 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_coming_soon', 'yes' );
 		$coming_soon = $this->render_page();
 
-		$this->assertStringContainsString( 'did not answer this check', $live );
+		$this->assertStringContainsString( 'This couldn&#039;t be checked.', $live );
 		$this->assertStringNotContainsString( 'Launch your store', $live );
 		$this->assertStringContainsString( 'Launch your store to run this check.', $coming_soon );
-		$this->assertStringNotContainsString( 'did not answer this check', $coming_soon );
+		$this->assertStringNotContainsString( 'This couldn&#039;t be checked.', $coming_soon );
 	}
 
 	/**
@@ -247,8 +247,9 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		foreach ( array( 'Can agents get in?', 'Can they find your store?', 'Do they understand your products?', 'Can they buy?' ) as $question ) {
 			$this->assertStringContainsString( $question, $html );
 		}
+		$this->assertStringContainsString( 'Agent shopping is off', $html, 'UCP is off in this test' );
 		$this->assertStringContainsString( 'Likely conflict', $html );
-		$this->assertStringContainsString( 'Something on your store is replacing this.', $html );
+		$this->assertStringContainsString( 'Something on your store may be replacing this.', $html );
 		$this->assertStringNotContainsString( 'product_offer_jsonld name', $html, 'Its prerequisite failed' );
 		$this->assertMatchesRegularExpression( '#<details>.*sitemap_lists_products name.*</details>#s', $html );
 	}

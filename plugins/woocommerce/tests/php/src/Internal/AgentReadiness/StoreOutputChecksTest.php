@@ -338,6 +338,11 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $this->results()['product_jsonld_from_core'] );
 
 		remove_all_filters( 'pre_http_request' );
+		$https = str_replace( 'http:', 'https:', $core );
+		$this->serve( array( $path => array( 200, self::page_with( array( $https ) ) ) ) );
+		$this->assertTrue( $this->results()['product_jsonld_from_core'], 'Only the scheme differs' );
+
+		remove_all_filters( 'pre_http_request' );
 		$this->serve( array( $path => array( 200, self::page_with( array( $other ) ) ) ) );
 		$this->assertFalse( $this->results()['product_jsonld_from_core'], 'Replaced' );
 
