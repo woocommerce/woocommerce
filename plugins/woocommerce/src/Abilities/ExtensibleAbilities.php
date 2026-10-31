@@ -133,6 +133,8 @@ class ExtensibleAbilities {
 	 *
 	 * Call it inside the `woocommerce_extensible_abilities_init` action. A call after that action is refused.
 	 * The resource must be registered with `register_resource()` in the earlier `woocommerce_extensible_abilities_resources_init` action.
+	 * A field declares `get_callback` and `output_schema`, `set_callback` and `input_schema`, or both pairs. The
+	 * first pair makes it readable and the second makes it writable. An incomplete pair is refused.
 	 * A malformed `output_schema` or `input_schema` is refused. At every depth a schema declares a `type`, `required`
 	 * is a list, and `properties` is a map of schemas with at least one key.
 	 *
@@ -144,19 +146,20 @@ class ExtensibleAbilities {
 	 *     @type string   $resource     Resource that an ability formats, for example `product`, `order` or `order_item`.
 	 *     @type string   $namespace    Slug of the extension that owns the field, such as `subscriptions`.
 	 *     @type string   $field        Field name inside the namespace, such as `trial_length`.
-	 *     @type array    $output_schema JSON schema of the value that `get_callback` returns. Core publishes it
-	 *                                  as declared. At every depth it declares one `type` that is not null, so it
+	 *     @type array    $output_schema Optional. JSON schema of the value that `get_callback` returns. Required
+	 *                                  with `get_callback`. Core publishes it as declared. At every depth it declares one `type` that is not null, so it
 	 *                                  cannot use a type list, `nullable`, `anyOf`, `oneOf` or `allOf`, or an
 	 *                                  `enum` with a value of another type. Its `title` is the label clients show.
 	 *     @type string[] $object_types Optional. The object types the field applies to, as `get_type()` of the
 	 *                                  object returns them, such as `simple` and `subscription` for a product or
 	 *                                  `line_item` for an order item. The abilities leave the field out of the
 	 *                                  other objects and refuse a write to them. Omit it for every type.
-	 *     @type callable $get_callback Receives the object and returns the value. Return null when the object has
-	 *                                  no value, and the field is left out with no error. Any other value that
-	 *                                  `output_schema` does not allow is left out and logged. It reads the object
-	 *                                  it is given, not the database, because an ability can format an object
-	 *                                  before it is saved.
+	 *     @type callable $get_callback Optional. Receives the object and returns the value. A field without it
+	 *                                  is not in the output. Required with `output_schema`. Return null when the
+	 *                                  object has no value, and the field is left out with no error. Any other
+	 *                                  value that `output_schema` does not allow is left out and logged. It reads
+	 *                                  the object it is given, not the database, because an ability can format
+	 *                                  an object before it is saved.
 	 *     @type array    $input_schema Optional. JSON schema of the value that `set_callback` receives. Core
 	 *                                  publishes it as declared. A value can be null only where it declares null.
 	 *                                  Required with `set_callback`.
@@ -206,16 +209,24 @@ class ExtensibleAbilities {
 			);
 			return;
 		}
-		if ( ! is_callable( $args['get_callback'] ?? null ) ) {
-			wc_doing_it_wrong( __METHOD__, __( 'The "get_callback" argument must be callable.', 'woocommerce' ), '11.3.0' );
+		$readable = isset( $args['get_callback'] ) || isset( $args['output_schema'] );
+		$writable = isset( $args['set_callback'] ) || isset( $args['input_schema'] );
+		if ( ! $readable && ! $writable ) {
+			wc_doing_it_wrong( __METHOD__, __( 'A field needs "get_callback" and "output_schema", "set_callback" and "input_schema", or both pairs.', 'woocommerce' ), '11.4.0' );
 			return;
 		}
-		$error = self::get_schema_error( $args['output_schema'] ?? null, 'output_schema', true );
-		if ( null !== $error ) {
-			wc_doing_it_wrong( __METHOD__, $error, '11.4.0' );
-			return;
+		if ( $readable ) {
+			if ( ! is_callable( $args['get_callback'] ?? null ) ) {
+				wc_doing_it_wrong( __METHOD__, __( 'The "get_callback" argument must be callable, and a field with an "output_schema" needs it.', 'woocommerce' ), '11.3.0' );
+				return;
+			}
+			$error = self::get_schema_error( $args['output_schema'] ?? null, 'output_schema', true );
+			if ( null !== $error ) {
+				wc_doing_it_wrong( __METHOD__, $error, '11.4.0' );
+				return;
+			}
 		}
-		if ( isset( $args['set_callback'] ) || isset( $args['input_schema'] ) ) {
+		if ( $writable ) {
 			if ( ! is_callable( $args['set_callback'] ?? null ) ) {
 				wc_doing_it_wrong( __METHOD__, __( 'The "set_callback" argument must be callable, and a field with an "input_schema" needs it.', 'woocommerce' ), '11.4.0' );
 				return;
@@ -681,7 +692,7 @@ class ExtensibleAbilities {
 		$extensions = array();
 		foreach ( self::$fields[ $resource_name ] as $namespace => $fields ) {
 			foreach ( $fields as $field => $args ) {
-				if ( ! self::field_applies_to( $args, $subject ) ) {
+				if ( ! isset( $args['get_callback'] ) || ! self::field_applies_to( $args, $subject ) ) {
 					continue;
 				}
 				try {
@@ -744,7 +755,7 @@ class ExtensibleAbilities {
 	 * Add the `extensions` property to an object schema when the feature is on.
 	 * It lists each namespace with its fields. Call it after the
 	 * `woocommerce_extensible_abilities_init` action, when the ability builds its
-	 * schema. The schema stays unchanged when no field is registered for the resource.
+	 * schema. The schema stays unchanged when the resource has no readable field.
 	 *
 	 * @since 11.3.0
 	 *
@@ -763,16 +774,28 @@ class ExtensibleAbilities {
 			'additionalProperties' => false,
 		);
 		foreach ( self::$fields[ $resource_name ] ?? array() as $namespace => $fields ) {
+			$readable = array_filter(
+				$fields,
+				static function ( array $args ): bool {
+					return isset( $args['get_callback'] );
+				}
+			);
+			if ( empty( $readable ) ) {
+				continue;
+			}
 			$extensions['properties'][ $namespace ] = array(
 				'type'                 => 'object',
 				'properties'           => array_map(
 					static function ( array $args ): array {
 						return $args['output_schema'];
 					},
-					$fields
+					$readable
 				),
 				'additionalProperties' => false,
 			);
+		}
+		if ( empty( $extensions['properties'] ) ) {
+			return $schema;
 		}
 		$schema['properties']['extensions'] = $extensions;
 		return $schema;
