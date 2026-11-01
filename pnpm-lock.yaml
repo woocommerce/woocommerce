@@ -2418,15 +2418,9 @@ importers:
         specifier: workspace:*
         version: link:client/legacy
     devDependencies:
-      '@babel/cli':
-        specifier: catalog:tooling
-        version: 7.25.7(@babel/core@7.25.7)
       '@babel/core':
         specifier: catalog:tooling
         version: 7.25.7
-      '@babel/preset-env':
-        specifier: catalog:tooling
-        version: 7.25.7(@babel/core@7.25.7)
       '@faker-js/faker':
         specifier: ^9.3.0
         version: 9.9.0
@@ -2499,9 +2493,6 @@ importers:
       playwright-ctrf-json-reporter:
         specifier: 0.0.27
         version: 0.0.27
-      prettier:
-        specifier: catalog:tooling
-        version: wp-prettier@3.9.6
       rimraf:
         specifier: 5.0.5
         version: 5.0.5
