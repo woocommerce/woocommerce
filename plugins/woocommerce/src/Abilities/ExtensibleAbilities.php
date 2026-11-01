@@ -85,22 +85,9 @@ class ExtensibleAbilities {
 	private const QUERY_ARG_KEYS = array( 'meta_query', 'tax_query', 'include_ids', 'exclude_ids' );
 
 	/**
-	 * JSON schema types, with the PHP types of the `enum` values that each one allows.
+	 * JSON schema types.
 	 */
-	private const SCHEMA_TYPES = array(
-		'array'   => array( 'array' ),
-		'object'  => array( 'array' ),
-		'string'  => array( 'string' ),
-		'number'  => array( 'integer', 'double' ),
-		'integer' => array( 'integer' ),
-		'boolean' => array( 'boolean' ),
-		'null'    => array( 'NULL' ),
-	);
-
-	/**
-	 * Schema keywords that hold a list of schemas.
-	 */
-	private const SCHEMA_COMBINATORS = array( 'anyOf', 'oneOf' );
+	private const SCHEMA_TYPES = array( 'array', 'object', 'string', 'number', 'integer', 'boolean', 'null' );
 
 	/**
 	 * Register a resource that abilities format, so extensions can register fields on it.
@@ -148,8 +135,8 @@ class ExtensibleAbilities {
 	 *     @type string   $field        Field name inside the namespace, such as `trial_length`.
 	 *     @type array    $output_schema Optional. JSON schema of the value that `get_callback` returns. Required
 	 *                                  with `get_callback`. Core publishes it as declared. At every depth it declares one `type` that is not null, so it
-	 *                                  cannot use a type list, `nullable`, `anyOf`, `oneOf` or `allOf`, or an
-	 *                                  `enum` with a value of another type. Its `title` is the label clients show.
+	 *                                  cannot use a type list, `nullable`, `anyOf`, `oneOf` or `allOf`. Its `title`
+	 *                                  is the label clients show.
 	 *     @type string[] $object_types Optional. The object types the field applies to, as `get_type()` of the
 	 *                                  object returns them, such as `simple` and `subscription` for a product or
 	 *                                  `line_item` for an order item. The object must have a `get_type()` method.
@@ -266,15 +253,17 @@ class ExtensibleAbilities {
 	 * a schema as declared, and the MCP SDK client compiles every output schema when
 	 * it lists the tools, so one malformed schema stops that client from listing any
 	 * tool. A `type` is required at every depth, because rest_validate_value_from_schema()
-	 * needs it. A branch of a combinator can inherit it from its parent, as that function
+	 * needs it. The top-level schema always declares it. A nested schema with `anyOf` or
+	 * `oneOf` can omit it, and a branch inherits it from its parent, as that function
 	 * allows. `allOf` is refused, because that function does not run it.
 	 *
 	 * @param mixed  $schema    Schema to check, of any type until this method checks it.
 	 * @param string $path      Path of the schema, used in the message.
 	 * @param bool   $is_output Whether the schema must declare one type that is not null.
+	 * @param bool   $is_nested Whether the schema is inside another schema.
 	 * @return string|null The problem, or null when the schema is valid.
 	 */
-	private static function get_schema_error( $schema, string $path, bool $is_output ): ?string {
+	private static function get_schema_error( $schema, string $path, bool $is_output, bool $is_nested = false ): ?string {
 		if ( ! is_array( $schema ) ) {
 			return sprintf( '"%s" must be a schema, as an array.', $path );
 		}
@@ -283,28 +272,23 @@ class ExtensibleAbilities {
 			return sprintf( '"%s" cannot use "allOf", because WordPress does not run it. Declare the rules in one schema.', $path );
 		}
 
-		$combinators = array_values( array_intersect( self::SCHEMA_COMBINATORS, array_keys( $schema ) ) );
+		$combinators = array_values( array_intersect( array( 'anyOf', 'oneOf' ), array_keys( $schema ) ) );
 		if ( $is_output && ( ! empty( $combinators ) || ! empty( $schema['nullable'] ) || ! is_string( $schema['type'] ?? null ) || 'null' === $schema['type'] ) ) {
 			return sprintf( '"%s" must declare one "type" that is not null, with no "nullable", "anyOf" or "oneOf". Return null from the get_callback to leave the field out.', $path );
 		}
-		if ( ! isset( $schema['type'] ) && empty( $combinators ) ) {
+		if ( ! isset( $schema['type'] ) && ( empty( $combinators ) || ! $is_nested ) ) {
 			return sprintf( '"%s" must declare a "type".', $path );
 		}
 
 		$types = (array) ( $schema['type'] ?? array() );
-		if ( isset( $schema['type'] ) && ( empty( $types ) || ! wp_is_numeric_array( $types ) || ! empty( array_filter( $types, static fn( $type ) => ! in_array( $type, array_keys( self::SCHEMA_TYPES ), true ) ) ) ) ) {
+		if ( isset( $schema['type'] ) && ( empty( $types ) || ! wp_is_numeric_array( $types ) || ! empty( array_filter( $types, static fn( $type ) => ! in_array( $type, self::SCHEMA_TYPES, true ) ) ) ) ) {
 			return sprintf( '"%s" declares an unknown "type".', $path );
 		}
 		if ( array_key_exists( 'required', $schema ) && ! is_array( $schema['required'] ) ) {
 			return sprintf( 'The "required" of "%s" must be a list of property names.', $path );
 		}
-		if ( array_key_exists( 'enum', $schema ) ) {
-			if ( ! is_array( $schema['enum'] ) || empty( $schema['enum'] ) || ! wp_is_numeric_array( $schema['enum'] ) ) {
-				return sprintf( 'The "enum" of "%s" must be a list of values.', $path );
-			}
-			if ( $is_output && ! empty( array_diff( array_map( 'gettype', $schema['enum'] ), self::SCHEMA_TYPES[ $schema['type'] ] ) ) ) {
-				return sprintf( 'The "enum" of "%s" has a value that its "type" does not allow.', $path );
-			}
+		if ( array_key_exists( 'enum', $schema ) && ( ! is_array( $schema['enum'] ) || empty( $schema['enum'] ) || ! wp_is_numeric_array( $schema['enum'] ) ) ) {
+			return sprintf( 'The "enum" of "%s" must be a list of values.', $path );
 		}
 
 		$children = array();
@@ -334,7 +318,7 @@ class ExtensibleAbilities {
 		}
 
 		foreach ( $children as $child_path => $child ) {
-			$error = self::get_schema_error( $child, $child_path, $is_output );
+			$error = self::get_schema_error( $child, $child_path, $is_output, true );
 			if ( null !== $error ) {
 				return $error;
 			}
@@ -403,11 +387,7 @@ class ExtensibleAbilities {
 			);
 			return;
 		}
-		if ( ! is_array( $args['schema'] ?? null ) || ! isset( $args['schema']['type'] ) ) {
-			wc_doing_it_wrong( __METHOD__, __( 'The "schema" argument must be an array with a "type".', 'woocommerce' ), '11.3.0' );
-			return;
-		}
-		$error = self::get_schema_error( $args['schema'], 'schema', false );
+		$error = self::get_schema_error( $args['schema'] ?? null, 'schema', false );
 		if ( null !== $error ) {
 			wc_doing_it_wrong( __METHOD__, $error, '11.4.0' );
 			return;
@@ -755,7 +735,7 @@ class ExtensibleAbilities {
 	 * @return array<string, mixed>
 	 */
 	public static function add_fields_schema( array $schema, string $resource_name ): array {
-		if ( ! self::is_enabled() || empty( self::$fields[ $resource_name ] ) ) {
+		if ( ! self::is_enabled() ) {
 			return $schema;
 		}
 

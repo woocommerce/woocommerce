@@ -1252,28 +1252,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 					'nullable' => true,
 				),
 			),
-			'nested enum with null' => array(
-				array(
-					'type'  => 'array',
-					'items' => array(
-						'type' => 'string',
-						'enum' => array( 'a', null ),
-					),
-				),
-			),
 			'type list of one'      => array( array( 'type' => array( 'string' ) ) ),
-			'enum with null'        => array(
-				array(
-					'type' => 'string',
-					'enum' => array( 'a', null ),
-				),
-			),
-			'enum with two types'   => array(
-				array(
-					'type' => 'string',
-					'enum' => array( 'a', 1 ),
-				),
-			),
 			'string or integer'     => array( array( 'type' => array( 'string', 'integer' ) ) ),
 			'object or array'       => array( array( 'type' => array( 'object', 'array' ) ) ),
 			'unknown type'          => array( array( 'type' => 'text' ) ),
@@ -1324,7 +1303,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				'resource'  => 'order',
 				'namespace' => 'refused',
 				'filter'    => 'value',
-				'schema'    => $schema + array( 'type' => 'object' ),
+				'schema'    => $schema,
 				'callback'  => '__return_empty_array',
 			)
 		);
@@ -1377,6 +1356,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			'anyOf with a bad branch'     => array( $object + array( 'anyOf' => array( array( 'properties' => array( 'a' => true ) ) ) ) ),
 			'allOf'                       => array( $object + array( 'allOf' => array( array( 'required' => array( 'a' ) ) ) ) ),
 			'allOf inside anyOf'          => array( $object + array( 'anyOf' => array( array( 'allOf' => array( array( 'required' => array( 'a' ) ) ) ) ) ) ),
+			'anyOf without type'          => array( array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ),
 		);
 	}
 
@@ -1386,7 +1366,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	public function test_valid_schemas_are_published_as_declared(): void {
 		$input_schemas = array(
 			'type_list'   => array( 'type' => array( 'string', 'null' ) ),
-			'any_of'      => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ),
+			'any_of'      => array(
+				'type'       => 'object',
+				'properties' => array( 'a' => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ),
+			),
 			'enum_null'   => array(
 				'type' => array( 'string', 'null' ),
 				'enum' => array( 'a', null ),
