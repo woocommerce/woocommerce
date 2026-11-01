@@ -280,9 +280,10 @@ export async function merge( source, requestedDestination, { branch } ) {
 	const stopped = Boolean( failure ) && interrupted;
 
 	// The merge only needs the fetched objects, so the clone and remote can go even after a conflict.
-	// Cleanup commands run in their own process group and are never sent signals, so Ctrl+C cannot stop them.
+	// Signals are no longer passed on once cleanup starts. A terminal Ctrl+C can still hit these quick git commands,
+	// and if that strands the remote, the next run removes it as a leftover.
 	cleaningUp = true;
-	const cleanupOptions = { ...inMonorepo, detached: true };
+	const cleanupOptions = inMonorepo;
 	const problems = [];
 	try {
 		// Checked by URL rather than a flag, because an interrupted `git remote add` can still have written the remote.

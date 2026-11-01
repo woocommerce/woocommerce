@@ -255,6 +255,10 @@ async function restoreProjectFields( graphql, issue ) {
 			console.log( `Restored ${ name } for "${ issue.title }"` );
 		} catch ( error ) {
 			problems.push( `restoring ${ name } failed: ${ error.message }` );
+			// Every later request would fail the same way, so hand the problems so far to the caller and stop.
+			if ( error.requestFailed ) {
+				throw Object.assign( error, { problems } );
+			}
 		}
 	}
 
@@ -428,11 +432,16 @@ export async function transferIssues(
 				failures.push( `${ issue.title }: ${ problem }` );
 			}
 		} catch ( error ) {
-			failures.push(
-				`${ issue.title }: restoring project fields failed: ${ error.message }`
-			);
+			const problems = error.problems ?? [
+				`restoring project fields failed: ${ error.message }`,
+			];
+			for ( const problem of problems ) {
+				failures.push( `${ issue.title }: ${ problem }` );
+			}
 			requestFailure = error.requestFailed ? error : undefined;
 		}
+		// Labels for this issue are skipped too when its project restore hit a request-level failure.
+		const labelsSkipped = labelIds.length > 0 && Boolean( requestFailure );
 
 		if ( labelIds.length > 0 && ! requestFailure ) {
 			try {
@@ -455,7 +464,7 @@ export async function transferIssues(
 		}
 
 		if ( requestFailure ) {
-			const skipped = moved.slice( index + 1 );
+			const skipped = moved.slice( labelsSkipped ? index : index + 1 );
 			if ( skipped.length > 0 ) {
 				failures.push(
 					`Stopped post-transfer tasks, so these transferred issues still need their project fields and labels checked: ${ skipped
