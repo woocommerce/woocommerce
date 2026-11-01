@@ -1,10 +1,93 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
+import { closePrompts } from '../src/confirm.mjs';
 import {
 	findFieldsToRestore,
 	readProjectFields,
+	transferIssues,
 } from '../src/transfer-issues.mjs';
+
+describe( 'transferIssues dry run', () => {
+	// A prompt would wait on stdin forever, so the timeout turns one into a failure.
+	it(
+		'lists the issues without prompting or sending mutations',
+		{
+			timeout: 5000,
+		},
+		async ( t ) => {
+			const previousToken = process.env.GH_TOKEN;
+			process.env.GH_TOKEN = 'token';
+			t.after( () => {
+				closePrompts();
+				if ( previousToken === undefined ) {
+					delete process.env.GH_TOKEN;
+				} else {
+					process.env.GH_TOKEN = previousToken;
+				}
+			} );
+			const queries = [];
+			t.mock.method( globalThis, 'fetch', async ( url, { body } ) => {
+				const { query } = JSON.parse( body );
+				queries.push( query );
+
+				let data = { viewer: { id: 'viewer' } };
+				if ( query.includes( 'issueCount' ) ) {
+					data = { search: { issueCount: 1 } };
+				} else if ( query.includes( 'labels(' ) ) {
+					data = {
+						repository: {
+							labels: {
+								nodes: [ { id: 'label-id', name: 'migrated' } ],
+								pageInfo: { hasNextPage: false },
+							},
+						},
+					};
+				} else if ( query.includes( 'search(' ) ) {
+					data = {
+						search: {
+							nodes: [
+								{
+									id: 'issue-id',
+									title: 'An issue',
+									projectItems: { nodes: [] },
+								},
+							],
+							pageInfo: { hasNextPage: false },
+						},
+					};
+				} else if ( query.includes( 'repository(' ) ) {
+					data = { repository: { id: 'repo-id' } };
+				}
+
+				return Response.json( { data } );
+			} );
+			const log = t.mock.method( console, 'log', () => {} );
+
+			await transferIssues( 'woocommerce/example', {
+				destination: 'woocommerce/woocommerce',
+				searchFilter: 'is:open',
+				labels: 'migrated',
+				dryRun: true,
+			} );
+
+			assert.equal(
+				queries.filter( ( query ) => /^\s*mutation/.test( query ) )
+					.length,
+				0
+			);
+			assert.deepEqual(
+				log.mock.calls.map( ( call ) => call.arguments[ 0 ] ),
+				[
+					'Dry run: would transfer 1 issue(s) into woocommerce/woocommerce:',
+					'- "An issue" (0 project field value(s) to check)',
+					'Would then add the labels: migrated',
+					'No changes were made.',
+				]
+			);
+		}
+	);
+} );
 
 // Mirrors the live API: value types without a fragment come back as `{}`, and Title has its own data type.
 function projectItem( itemId, projectId, optionId ) {

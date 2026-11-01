@@ -18,7 +18,7 @@ Start from an up-to-date branch off `trunk`, then run:
 tools/monorepo-merge/bin/monorepo-merge.mjs merge woocommerce/example-repo packages/js/example --branch trunk
 ```
 
-The command clones the repository into a temporary directory, rewrites its history so every file lives under the destination path, and merges it into your current branch with `git merge --allow-unrelated-histories`. In commit messages, `(#123)` becomes a link to the source repository's pull request and a bare `#123` becomes `woocommerce/example-repo#123`, so old references keep pointing at the right place. `--branch` is the source branch to import and defaults to `main`.
+The command clones the repository into a temporary directory, rewrites its history so every file lives under the destination path, and merges it with `git merge --allow-unrelated-histories` into the current branch of the checkout that contains this tool, wherever you run it from. To try it without touching your monorepo checkout, copy `tools/monorepo-merge` into a scratch git repository and run it from there. In commit messages, `(#123)` becomes a link to the source repository's pull request and a bare `#123` becomes `woocommerce/example-repo#123`, so old references keep pointing at the right place. `--branch` is the source branch to import and defaults to `main`.
 
 Merge the resulting pull request with a merge commit. Squashing it discards the imported history.
 
@@ -30,7 +30,7 @@ tools/monorepo-merge/bin/monorepo-merge.mjs transfer-issues woocommerce/example-
 
 Transfers the issues matching `--searchFilter` (default `is:open`) into `--destination` (default `woocommerce/woocommerce`). Both repositories must have the same owner. After the transfer it restores any GitHub Projects field values that did not carry over and adds the `--labels` you list, which must already exist in the destination.
 
-Transfers cannot be undone, and the command asks for confirmation twice. GitHub search returns at most 1,000 issues per query, so run the command again to move the rest. Transferred issues no longer match the search. A `--searchFilter` value that starts with `-` must use the `--searchFilter=-label:example` form.
+Transfers cannot be undone, and the command asks for confirmation twice. Add `--dry-run` first to run every lookup and list the issues it would transfer, without prompting or changing anything. GitHub search returns at most 1,000 issues per query, so run the command again to move the rest. Transferred issues no longer match the search. A `--searchFilter` value that starts with `-` must use the `--searchFilter=-label:example` form.
 
 ## Development
 

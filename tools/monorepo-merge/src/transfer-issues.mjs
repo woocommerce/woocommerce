@@ -242,15 +242,16 @@ async function restoreProjectFields( graphql, issue ) {
 /**
  * Transfers issues from another repository into the destination repository.
  *
- * @param {string} source               The repository to transfer from, in "owner/repo" format.
- * @param {Object} options
- * @param {string} options.destination  The repository to transfer into, in "owner/repo" format.
- * @param {string} options.searchFilter GitHub search filters for the issues to transfer.
- * @param {string} [options.labels]     A comma-separated list of labels to add after the transfer.
+ * @param {string}  source               The repository to transfer from, in "owner/repo" format.
+ * @param {Object}  options
+ * @param {string}  options.destination  The repository to transfer into, in "owner/repo" format.
+ * @param {string}  options.searchFilter GitHub search filters for the issues to transfer.
+ * @param {string}  [options.labels]     A comma-separated list of labels to add after the transfer.
+ * @param {boolean} [options.dryRun]     Run every lookup and print the plan without prompting or changing anything.
  */
 export async function transferIssues(
 	source,
-	{ destination, searchFilter, labels }
+	{ destination, searchFilter, labels, dryRun = false }
 ) {
 	const [ , owner, name ] = destination.match( /^([^/]+)\/([^/]+)$/ ) ?? [];
 	if ( ! owner ) {
@@ -265,6 +266,7 @@ export async function transferIssues(
 	}
 
 	if (
+		! dryRun &&
 		! ( await confirm(
 			`Are you sure you want to transfer issues from ${ source } into ${ destination }?`
 		) )
@@ -298,6 +300,7 @@ export async function transferIssues(
 		);
 	}
 	if (
+		! dryRun &&
 		! ( await confirm(
 			`This will transfer ${ issueCount } issue(s). There is no command to reverse this, are you sure?`
 		) )
@@ -319,6 +322,22 @@ export async function transferIssues(
 	);
 	const labelIds = await getLabelIds( graphql, owner, name, labels );
 	const issues = await getIssues( graphql, searchQuery );
+
+	if ( dryRun ) {
+		console.log(
+			`Dry run: would transfer ${ issues.length } issue(s) into ${ destination }:`
+		);
+		for ( const { title, projectFields } of issues ) {
+			console.log(
+				`- "${ title }" (${ projectFields.length } project field value(s) to check)`
+			);
+		}
+		if ( labels ) {
+			console.log( `Would then add the labels: ${ labels }` );
+		}
+		console.log( 'No changes were made.' );
+		return;
+	}
 
 	let transferred = 0;
 	for ( const issue of issues ) {
