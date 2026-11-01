@@ -3,7 +3,7 @@ name: 'PR experiment: Browser dependency closure'
 on:
   pull_request:
     # Rerun the original Actions run explicitly to repeat this trial.
-    types: [opened]
+    types: [opened, synchronize]
     paths:
       - '.github/workflows/pr-ci-dependency-experiment.yml'
 
@@ -25,7 +25,7 @@ env:
 
 jobs:
   plugin-build:
-    name: 'Build shared ZIP and reference test manifest'
+    name: 'Record full-install discovery reference'
     if: ${{ github.repository == 'woocommerce/woocommerce' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'research/pr-ci-speedups' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -127,30 +127,17 @@ jobs:
           console.log(`Discovered ${tests.length} tests with ${manifest.workers} configured workers`);
           NODE
 
-      - name: 'Build the real WooCommerce plugin ZIP'
-        env:
-          BUILD_ZIP_WITH_MAKEPOT: '0'
-          SKIP_INSTALL: '1'
-          ZIP_COMPRESSION_LEVEL: '1'
-        run: |
-          pnpm --filter='@woocommerce/plugin-woocommerce' build:zip
-          test -s plugins/woocommerce/woocommerce.zip
-          mkdir -p "$RUNNER_TEMP/e2e-plugin-artifact"
-          cp plugins/woocommerce/woocommerce.zip "$RUNNER_TEMP/e2e-plugin-artifact/"
-          cp "$RUNNER_TEMP/e2e-setup/discovery.json" "$RUNNER_TEMP/e2e-plugin-artifact/reference-discovery.json"
-
-      - name: 'Upload ZIP and reference within this run'
+      - name: 'Upload the reference within this run'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: dependency-plugin-${{ github.run_id }}
-          path: ${{ runner.temp }}/e2e-plugin-artifact/
+          name: dependency-reference-${{ github.run_id }}
+          path: ${{ runner.temp }}/e2e-setup/discovery.json
           if-no-files-found: error
           retention-days: 3
-          compression-level: 0
           overwrite: true
 
   e2e:
-    name: 'Blocks shard 1/2: ${{ matrix.arm }}'
+    name: 'Install repetition ${{ matrix.trial }}: ${{ matrix.arm }}'
     needs: plugin-build
     if: ${{ github.repository == 'woocommerce/woocommerce' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'research/pr-ci-speedups' }}
     runs-on: ubuntu-latest
@@ -159,9 +146,8 @@ jobs:
       fail-fast: false
       max-parallel: 2
       matrix:
-        include:
-          - arm: baseline
-          - arm: fixture-closure
+        arm: [baseline, fixture-closure]
+        trial: [1, 2, 3]
     steps:
       - name: 'Checkout identical source'
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -248,48 +234,18 @@ jobs:
           print('Selected workspaces:', names)
           PY
 
-      - name: 'Download the identical shared ZIP and reference'
+      - name: 'Download the full-install discovery reference'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: dependency-plugin-${{ github.run_id }}
-          path: ${{ github.workspace }}/woocommerce-plugin-artifact
+          name: dependency-reference-${{ github.run_id }}
+          path: ${{ github.workspace }}/dependency-reference
 
       - *discover-shard
 
       - name: 'Require identical discovery and execution settings'
         run: |
-          cmp "$RUNNER_TEMP/e2e-setup/discovery.json" "$GITHUB_WORKSPACE/woocommerce-plugin-artifact/reference-discovery.json"
+          cmp "$RUNNER_TEMP/e2e-setup/discovery.json" "$GITHUB_WORKSPACE/dependency-reference/discovery.json"
           sha256sum "$RUNNER_TEMP/e2e-setup/discovery.json"
-
-      - name: 'Prepare WooCommerce plugin artifact'
-        run: |
-          unzip -q "$GITHUB_WORKSPACE/woocommerce-plugin-artifact/woocommerce.zip" -d "$GITHUB_WORKSPACE/woocommerce-plugin-artifact"
-          test -f "$GITHUB_WORKSPACE/woocommerce-plugin-artifact/woocommerce/woocommerce.php"
-
-      - name: 'Use WooCommerce plugin artifact in wp-env'
-        env:
-          PLUGIN_PATH: ${{ github.workspace }}/woocommerce-plugin-artifact/woocommerce
-          WP_ENV_CONFIG_PATH: ${{ github.workspace }}/plugins/woocommerce
-        run: |
-          node .github/workflows/scripts/override-wp-env-plugins.js
-          echo "WC_SHARED_PLUGIN_BUILD_PATH=$PLUGIN_PATH" >> "$GITHUB_ENV"
-
-      - name: 'Configure Docker as in CI'
-        uses: docker/setup-docker-action@6d7cfa65f60a9dda7b46e5513fa982536f3c9877 # v5.3.0
-        with:
-          daemon-config: |
-            {
-              "max-download-attempts": 10,
-              "max-concurrent-downloads": 3
-            }
-
-      - name: 'Start the normal Blocks environment, seeds and browser installation'
-        id: environment
-        run: pnpm --filter='@woocommerce/plugin-woocommerce' env:start:blocks
-
-      - name: 'Run the unchanged full Blocks parallel shard'
-        id: tests
-        run: pnpm --filter='@woocommerce/plugin-woocommerce' test:e2e:blocks:parallel --shard=1/2
 
       - name: 'Record arm outcome'
         if: ${{ always() }}
@@ -297,8 +253,8 @@ jobs:
           ARM: ${{ matrix.arm }}
           RESULT: ${{ job.status }}
           DISCOVERY_RESULT: ${{ steps.discovery.outcome }}
-          ENVIRONMENT_RESULT: ${{ steps.environment.outcome }}
-          TEST_RESULT: ${{ steps.tests.outcome }}
+          PNPM_MATCH: ${{ steps.pnpm-cache.outputs.cache-matched-key }}
+          COMPOSER_MATCH: ${{ steps.composer-cache.outputs.cache-matched-key }}
           PNPM_HIT: ${{ steps.pnpm-cache.outputs.cache-hit }}
           NODE_HIT: ${{ steps.node-cache.outputs.cache-hit }}
           COMPOSER_HIT: ${{ steps.composer-cache.outputs.cache-hit }}
@@ -307,16 +263,17 @@ jobs:
           {
             echo "Arm: $ARM; result: $RESULT; source: $SOURCE_SHA"
             echo "PHP: $WP_ENV_PHP_VERSION; WordPress: $WP_VERSION"
-            echo "Discovery: $DISCOVERY_RESULT; environment: $ENVIRONMENT_RESULT; tests: $TEST_RESULT"
+            echo "Discovery: $DISCOVERY_RESULT; installation-only timing repetition"
             echo "Exact cache hits: pnpm=$PNPM_HIT node=$NODE_HIT composer=$COMPOSER_HIT browser=$BROWSER_HIT"
-            echo 'Project blocks-parallel; shard 1/2; worker/retry configuration unchanged.'
+            echo "Matched cache keys: pnpm=$PNPM_MATCH composer=$COMPOSER_MATCH"
+            echo 'Project blocks-parallel; shard 1/2 discovery unchanged. Full browser validation: run 41322899450.'
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: 'Upload only the small discovery manifest'
         if: ${{ !cancelled() && steps.discovery.outcome == 'success' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: dependency-discovery-${{ matrix.arm }}-${{ github.run_id }}
+          name: dependency-discovery-${{ matrix.arm }}-${{ matrix.trial }}-${{ github.run_id }}
           path: |
             ${{ runner.temp }}/e2e-setup/discovery.json
             ${{ runner.temp }}/dependency-install.json
