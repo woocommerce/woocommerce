@@ -3,7 +3,7 @@ name: 'PR experiment: read-only seed lookup batching'
 on:
   pull_request:
     # Repeat the original Actions run explicitly; later PR pushes do not rerun it.
-    types: [opened]
+    types: [opened, synchronize]
     paths:
       - '.github/workflows/pr-ci-seed-experiment.yml'
 
@@ -201,7 +201,7 @@ jobs:
               if ($entry['group'] !== $group) {
                   continue;
               }
-              $result = WP_CLI::runcommand($entry['command'], ['launch' => false, 'return' => 'all', 'exit_error' => false]);
+              $result = WP_CLI::runcommand($entry['canonical'], ['launch' => false, 'return' => 'all', 'exit_error' => false]);
               if (!is_object($result) || !isset($result->return_code, $result->stdout, $result->stderr)) {
                   throw new RuntimeException('Unexpected runcommand response for ' . $key);
               }
@@ -213,6 +213,22 @@ jobs:
           }
           WP_CLI::line(json_encode(['user_before' => $before, 'user_after' => get_current_user_id(), 'results' => $results], JSON_THROW_ON_ERROR));
           SEED_HELPER_BATCH
+          cat > "$RUNNER_TEMP/seed-experiment/argv.php" <<'SEED_HELPER_ARGV'
+          <?php
+          echo json_encode(array_slice($argv, 1), JSON_THROW_ON_ERROR);
+          SEED_HELPER_ARGV
+          cat > "$RUNNER_TEMP/seed-experiment/parser.php" <<'SEED_HELPER_PARSER'
+          <?php
+          $commands = json_decode(file_get_contents(__DIR__ . '/commands.json'), true, 512, JSON_THROW_ON_ERROR);
+          $proof = [];
+          foreach ($commands as $key => $entry) {
+              $proof[$key] = [
+                  'original_parsed' => \WP_CLI\Utils\parse_str_to_argv($entry['command']),
+                  'canonical_parsed' => \WP_CLI\Utils\parse_str_to_argv($entry['canonical']),
+              ];
+          }
+          WP_CLI::line(json_encode($proof, JSON_THROW_ON_ERROR));
+          SEED_HELPER_PARSER
           cat > "$RUNNER_TEMP/seed-experiment/common.php" <<'SEED_HELPER_COMMON'
           <?php
           function execute_lookup_process($command) {
@@ -392,6 +408,7 @@ jobs:
           from pathlib import Path
           import re
           import shutil
+          import shlex
 
           workspace = Path(os.environ['GITHUB_WORKSPACE'])
           runtime = Path(os.environ['RUNNER_TEMP']) / 'seed-experiment'
@@ -404,7 +421,7 @@ jobs:
           matches = list(pattern.finditer(source))
           expected_keys = ['clothing_category_id', 'tshirts_category_id', 'hoodies_category_id', 'hoodie_product_id', 'image1', 'image2', 'image3', 'beanie_product_id', 'album_product_id', 'cap_product_id', 'tshirt_with_logo_product_id', 'sunglasses_product_id', 'attribute_ids']
           assert [match[1] for match in matches] == expected_keys, 'Unexpected lookup assignment sites'
-          commands = {match[1]: {'command': match[2], 'group': 'admin' if '--user=1' in match[2] else 'default'} for match in matches}
+          commands = {match[1]: {'command': match[2], 'argv': shlex.split(match[2]), 'canonical': shlex.join(shlex.split(match[2])), 'group': 'admin' if '--user=1' in match[2] else 'default'} for match in matches}
           assert sum(entry['group'] == 'admin' for entry in commands.values()) == 4
           assert sum(entry['group'] == 'default' for entry in commands.values()) == 9
           runtime.mkdir(exist_ok=True)
@@ -444,6 +461,30 @@ jobs:
           $commands = json_decode(file_get_contents(__DIR__ . '/commands.json'), true, 512, JSON_THROW_ON_ERROR);
           $report = ['checkpoint' => 'Immediately after original product import and lookup-table regeneration', 'cache_note' => 'OS and database caches may be warm; the identical raw input with a cold term-count transient is restored before every arm. Pair order alternates.', 'pairs' => []];
           try {
+              $version = execute_lookup_process('wp --version');
+              if ($version['return_code'] !== 0 || $version['stderr'] !== '') {
+                  throw new RuntimeException('Could not identify WP-CLI version');
+              }
+              $parser = execute_lookup_process('wp eval-file ' . escapeshellarg(__DIR__ . '/parser.php'));
+              if ($parser['return_code'] !== 0 || $parser['stderr'] !== '') {
+                  throw new RuntimeException('Could not capture WP-CLI parser arguments');
+              }
+              $parsed = json_decode($parser['stdout'], true, 512, JSON_THROW_ON_ERROR);
+              $proof = ['wp_cli_version' => $version['stdout'], 'commands' => [], 'accepted' => true];
+              foreach ($commands as $key => $entry) {
+                  $shell = execute_lookup_process('php ' . escapeshellarg(__DIR__ . '/argv.php') . ' ' . $entry['command']);
+                  if ($shell['return_code'] !== 0 || $shell['stderr'] !== '') {
+                      throw new RuntimeException('Could not capture shell arguments for ' . $key);
+                  }
+                  $actual = json_decode($shell['stdout'], true, 512, JSON_THROW_ON_ERROR);
+                  $valid = isset($parsed[$key]['original_parsed'], $parsed[$key]['canonical_parsed']) && $actual === $entry['argv'] && $parsed[$key]['canonical_parsed'] === $actual;
+                  $proof['commands'][$key] = ['shell_argv' => $actual, 'expected_argv' => $entry['argv'], 'original_parsed' => $parsed[$key]['original_parsed'] ?? null, 'canonical_parsed' => $parsed[$key]['canonical_parsed'] ?? null, 'accepted' => $valid];
+                  $proof['accepted'] = $proof['accepted'] && $valid;
+              }
+              save_seed_evidence('argument-proof.json', $proof);
+              if (!$proof['accepted']) {
+                  throw new RuntimeException('Shell and in-process arguments do not match');
+              }
               foreach (['default' => '', 'admin' => '--user=1 '] as $group => $outer) {
                   $context = execute_lookup_process('wp ' . $outer . 'eval ' . escapeshellarg('echo get_current_user_id();'));
                   $expected = $group === 'admin' ? '1' : '0';
