@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { Octokit } from '@octokit/rest';
-import shuffle from 'lodash.shuffle';
 import { getEnvVar } from '@woocommerce/monorepo-utils/src/core/environment';
 
 export type ContributorData = {
@@ -24,6 +23,15 @@ const filterUniqBy = ( arr: Record< string, unknown >[], key: string ) => {
 		seen.add( k );
 		return true;
 	} );
+};
+
+const shuffle = < T >( items: T[] ): T[] => {
+	const result = [ ...items ];
+	for ( let i = result.length - 1; i > 0; i-- ) {
+		const j = Math.floor( Math.random() * ( i + 1 ) );
+		[ result[ i ], result[ j ] ] = [ result[ j ], result[ i ] ];
+	}
+	return result;
 };
 
 const PAGE_SIZE = 100;
