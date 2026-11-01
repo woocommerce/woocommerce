@@ -75,7 +75,9 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * `extensions` input and, when it differs from get_resource(), the name of
 	 * its resource. The field writes and the validators of that resource run on
 	 * each one after the primary object, before save(). An ability that saves
-	 * only the primary object returns null.
+	 * only the primary object returns null. The resource must be registered,
+	 * otherwise the call is refused with `woocommerce_ability_resource_unknown`
+	 * and nothing is saved.
 	 *
 	 * @since 11.3.0
 	 *
@@ -206,10 +208,24 @@ abstract class ActionableAbility extends \WP_Ability {
 				wc_doing_it_wrong(
 					get_class( $this ) . '::change',
 					sprintf(
-						'The "%s" resource of a secondary object is not registered, so no extension field or validator runs on it. Call ExtensibleAbilities::register_resource() first.',
+						'The "%s" resource of a secondary object is not registered, so the call is refused. Call ExtensibleAbilities::register_resource() first.',
 						$resource_name
 					),
 					'11.4.0'
+				);
+				return new \WP_Error(
+					'woocommerce_ability_resource_unknown',
+					sprintf(
+						/* translators: 1: resource name, 2: ability name. */
+						__( 'The "%1$s" resource is not registered, so the "%2$s" ability cannot save the change.', 'woocommerce' ),
+						$resource_name,
+						$this->get_name()
+					),
+					array(
+						'status'   => 500,
+						'resource' => $resource_name,
+						'ability'  => $this->get_name(),
+					)
 				);
 			}
 			$fields = $writes ? $this->prepare_fields( $secondary[1], $resource_name ) : array();

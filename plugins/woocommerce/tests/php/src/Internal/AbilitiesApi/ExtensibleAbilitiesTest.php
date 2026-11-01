@@ -1802,16 +1802,16 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should warn when a secondary object names a resource that is not registered, and still run the call.
+	 * @testdox Should refuse the call and save nothing when a secondary object names a resource that is not registered.
 	 */
-	public function test_a_secondary_object_with_an_unregistered_resource_warns(): void {
+	public function test_a_secondary_object_with_an_unregistered_resource_is_refused(): void {
 		$this->setExpectedIncorrectUsage( TestProductWithItemAbility::class . '::change' );
 		$this->register_product_with_item_ability();
 		TestProductWithItemAbility::$item_resource = 'refund';
 		$product                                   = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
 
 		try {
-			$this->run_ability(
+			$response = $this->run_ability_response(
 				'test-ext/product-with-item',
 				array(
 					'id'   => $product->get_id(),
@@ -1822,7 +1822,11 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			TestProductWithItemAbility::$item_resource = 'order_item';
 		}
 
-		$this->assertSame( 'Pencil', wc_get_product( $product->get_id() )->get_name() );
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_ability_resource_unknown', $response->get_data()['code'] );
+		$this->assertSame( 'refund', $response->get_data()['data']['resource'] );
+		$this->assertSame( 'test-ext/product-with-item', $response->get_data()['data']['ability'] );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
 	}
 
 	/**
