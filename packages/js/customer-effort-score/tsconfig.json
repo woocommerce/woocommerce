@@ -21,7 +21,16 @@
 	],
 	"references": [
 		{
+			"path": "../data"
+		},
+		{
 			"path": "../experimental"
+		},
+		{
+			"path": "../navigation"
+		},
+		{
+			"path": "../tracks"
 		}
 	]
 }
