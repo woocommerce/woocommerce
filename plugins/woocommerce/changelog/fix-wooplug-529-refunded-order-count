@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Customers report aggregates and numeric filters for refunds and parented orders.

@@ -44,6 +44,13 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	protected $controller;
 
 	/**
+	 * Detail appended to the name the export is downloaded as.
+	 *
+	 * @var string
+	 */
+	protected $download_suffix = '';
+
+	/**
 	 * Constructor.
 	 *
 	 * @param string $type Report type. E.g. 'customers'.
@@ -114,6 +121,56 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	 */
 	protected function get_file_path() {
 		return self::get_reports_directory() . $this->get_filename();
+	}
+
+	/**
+	 * Get the name the export is downloaded as.
+	 *
+	 * The stored file keeps get_filename(), which only has to identify the export.
+	 *
+	 * @since 11.2.0
+	 * @return string
+	 */
+	public function get_download_filename() {
+		$filename = $this->get_filename();
+
+		if ( '' === $this->download_suffix ) {
+			return $filename;
+		}
+
+		// Stripped and restored the way set_filename() does it, so the name keeps a single .csv.
+		return sanitize_file_name( str_replace( '.csv', '', $filename ) . '-' . $this->download_suffix . '.csv' );
+	}
+
+	/**
+	 * Set the export headers.
+	 *
+	 * Re-sends the parent's Content-Disposition so the download is named after what the report
+	 * covers, leaving the stored file's name alone.
+	 *
+	 * @since 11.2.0
+	 * @return void
+	 */
+	public function send_headers() {
+		parent::send_headers();
+
+		if ( '' !== $this->download_suffix ) {
+			header( 'Content-Disposition: attachment; filename=' . $this->get_download_filename() );
+		}
+	}
+
+	/**
+	 * Add detail to the name the export is downloaded as, leaving the stored file's name alone.
+	 *
+	 * Lets a download say what the report covers, such as the date range, when the stored name
+	 * only identifies the export.
+	 *
+	 * @since 11.2.0
+	 * @param string $suffix Detail to append to the download's name, e.g. a date range.
+	 * @return void
+	 */
+	public function set_download_suffix( $suffix ) {
+		$this->download_suffix = sanitize_file_name( $suffix );
 	}
 
 	/**
@@ -298,6 +355,61 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 	}
 
 	/**
+	 * Write one page of an export that write_headers_row_file() finishes.
+	 *
+	 * @internal
+	 * @since 11.3.0
+	 * @return bool Whether the page's rows were written.
+	 */
+	public function write_page() {
+		$written = $this->generate_file();
+
+		$this->delete_headers_row_file();
+
+		return $written;
+	}
+
+	/**
+	 * Write the headers row file, which is what marks an export complete and downloadable.
+	 *
+	 * Not written when the export file is missing or not writable, since the parent skips a page's rows on the same check.
+	 *
+	 * @internal
+	 * @since 11.3.0
+	 * @return bool Whether the headers row file was written.
+	 */
+	public function write_headers_row_file() {
+		$file_path = $this->get_file_path();
+
+		if ( ! file_exists( $file_path ) || ! wp_is_writable( $file_path ) ) {
+			return false;
+		}
+
+		$header = chr( 239 ) . chr( 187 ) . chr( 191 ) . $this->export_column_headers();
+
+		if ( strlen( $header ) !== @file_put_contents( $this->get_headers_row_file_path(), $header ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			$this->delete_headers_row_file();
+
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Delete the headers row file, so the export is not downloadable.
+	 *
+	 * @return void
+	 */
+	private function delete_headers_row_file() {
+		$headers_path = $this->get_headers_row_file_path();
+
+		if ( file_exists( $headers_path ) ) {
+			wp_delete_file( $headers_path );
+		}
+	}
+
+	/**
 	 * Get total number of rows in export.
 	 *
 	 * @return int Number of rows to export.
@@ -313,7 +425,7 @@ class ReportCSVExporter extends \WC_CSV_Batch_Exporter {
 		/**
 		 * Used to add/overwrite report data endpoint.
 		 *
-		 * @since x.x.x
+		 * @since 9.8.0
 		 *
 		 * @param string $endpoint The report's data endpoint.
 		 * @param string $type     The report's type.

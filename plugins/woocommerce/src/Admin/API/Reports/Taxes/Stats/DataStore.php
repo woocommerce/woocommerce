@@ -125,6 +125,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			/* phpcs:enable */
 		}
 
+		$location_filter = TaxesDataStore::get_location_filter_subquery( $query_args );
+
+		if ( '' !== $location_filter ) {
+			$taxes_where_clause .= " AND {$location_filter}";
+		}
+
 		if ( $order_status_filter ) {
 			$taxes_where_clause .= " AND ( {$order_status_filter} )";
 		}
@@ -173,9 +179,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return array Query parameters.
 	 */
 	public function get_default_query_vars() {
-		$defaults            = parent::get_default_query_vars();
-		$defaults['orderby'] = 'tax_rate_id';
-		$defaults['taxes']   = array();
+		$defaults                      = parent::get_default_query_vars();
+		$defaults['orderby']           = 'tax_rate_id';
+		$defaults['taxes']             = array();
+		$defaults['location_includes'] = '';
+		$defaults['location_excludes'] = '';
 
 		return $defaults;
 	}
@@ -188,11 +196,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 *
 	 * @see get_data
 	 * @see get_noncached_stats_data
-	 * @param array    $query_args Query parameters.
-	 * @param array    $params                  Query limit parameters.
-	 * @param stdClass $data                    Reference to the data object to fill.
-	 * @param int      $expected_interval_count Number of expected intervals.
-	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
+	 * @param array     $query_args Query parameters.
+	 * @param array     $params                  Query limit parameters.
+	 * @param \stdClass $data                    Reference to the data object to fill.
+	 * @param int       $expected_interval_count Number of expected intervals.
+	 * @return \stdClass|\WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
 	 */
 	public function get_noncached_stats_data( $query_args, $params, &$data, $expected_interval_count ) {
 		global $wpdb;

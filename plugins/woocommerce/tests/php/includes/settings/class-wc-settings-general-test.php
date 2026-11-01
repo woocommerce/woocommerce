@@ -15,6 +15,86 @@ require_once __DIR__ . '/class-wc-settings-unit-test-case.php';
 class WC_Settings_General_Test extends WC_Settings_Unit_Test_Case {
 
 	/**
+	 * @testdox The real General settings save path persists the form values.
+	 */
+	public function test_save_persists_general_setting_values() {
+		$sut                      = new WC_Settings_General();
+		$had_current_section      = array_key_exists( 'current_section', $GLOBALS );
+		$original_current_section = $had_current_section ? $GLOBALS['current_section'] : null;
+
+		try {
+			// Post what a browser submits: '1' for a ticked checkbox and nothing for an
+			// unticked one, so woocommerce_enable_coupons is left out on purpose.
+			$_POST                      = array(
+				'woocommerce_store_address'               => '5th Avenue',
+				'woocommerce_store_address_2'             => 'Suite 4',
+				'woocommerce_store_city'                  => 'New York',
+				'woocommerce_default_country'             => 'US:NY',
+				'woocommerce_store_postcode'              => '10010',
+				'woocommerce_allowed_countries'           => 'specific',
+				'woocommerce_all_except_countries'        => array( 'CA', 'FR' ),
+				'woocommerce_specific_allowed_countries'  => array( 'US', 'CA' ),
+				'woocommerce_ship_to_countries'           => 'specific',
+				'woocommerce_specific_ship_to_countries'  => array( 'US' ),
+				'woocommerce_default_customer_address'    => 'geolocation',
+				'woocommerce_calc_taxes'                  => '1',
+				'woocommerce_calc_discounts_sequentially' => '1',
+				'woocommerce_currency'                    => 'CAD',
+				'woocommerce_currency_pos'                => 'left_space',
+				'woocommerce_price_thousand_sep'          => '.',
+				'woocommerce_price_decimal_sep'           => ',',
+				'woocommerce_price_num_decimals'          => '1',
+			);
+			$GLOBALS['current_section'] = '';
+
+			$sut->save();
+
+			$expected_values = array(
+				'woocommerce_store_address'               => '5th Avenue',
+				'woocommerce_store_address_2'             => 'Suite 4',
+				'woocommerce_store_city'                  => 'New York',
+				'woocommerce_default_country'             => 'US:NY',
+				'woocommerce_store_postcode'              => '10010',
+				'woocommerce_allowed_countries'           => 'specific',
+				'woocommerce_all_except_countries'        => array( 'CA', 'FR' ),
+				'woocommerce_specific_allowed_countries'  => array( 'US', 'CA' ),
+				'woocommerce_ship_to_countries'           => 'specific',
+				'woocommerce_specific_ship_to_countries'  => array( 'US' ),
+				'woocommerce_default_customer_address'    => 'geolocation',
+				'woocommerce_calc_taxes'                  => 'yes',
+				'woocommerce_enable_coupons'              => 'no',
+				'woocommerce_calc_discounts_sequentially' => 'yes',
+				'woocommerce_currency'                    => 'CAD',
+				'woocommerce_currency_pos'                => 'left_space',
+				'woocommerce_price_thousand_sep'          => '.',
+				'woocommerce_price_decimal_sep'           => ',',
+				// A string, not an int. save() runs the value through absint(), so
+				// update_option() leaves an int in the cache while the row holds '1'.
+				// Asserting the int only passes on a cache hit.
+				'woocommerce_price_num_decimals'          => '1',
+			);
+
+			foreach ( $expected_values as $option_name => $expected_value ) {
+				// Autoloaded options are served from the 'alloptions' blob, so deleting
+				// the per-option key alone still reads back what update_option() cached
+				// rather than what was written. Drop both to reach the row.
+				wp_cache_delete( $option_name, 'options' );
+				wp_cache_delete( 'alloptions', 'options' );
+				$this->assertSame( $expected_value, get_option( $option_name ), "Unexpected persisted value for {$option_name}." );
+			}
+		} finally {
+			// The option rows and $_POST go back with the rollback and the next
+			// clean_up_global_scope(); current_section is the one the base class
+			// does not touch.
+			if ( $had_current_section ) {
+				$GLOBALS['current_section'] = $original_current_section;
+			} else {
+				unset( $GLOBALS['current_section'] );
+			}
+		}
+	}
+
+	/**
 	 * Test for get_settings (triggers the woocommerce_general_settings filter).
 	 */
 	public function test_get_settings__triggers_filter() {

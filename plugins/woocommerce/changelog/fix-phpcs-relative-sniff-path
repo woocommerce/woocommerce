@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Resolve custom PHPCS sniff paths relative to the WooCommerce ruleset.

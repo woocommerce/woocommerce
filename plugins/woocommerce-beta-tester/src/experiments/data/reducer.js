@@ -42,7 +42,7 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 								name: action.experimentName,
 								variation: action.variation,
 							},
-					  ];
+						];
 
 			return {
 				...state,

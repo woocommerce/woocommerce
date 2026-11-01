@@ -130,6 +130,34 @@ class WC_Tests_User_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A shop manager cannot edit a customer who also has a custom role.
+	 */
+	public function test_shop_manager_cannot_edit_customer_with_extra_custom_role() {
+		$options_role = 'test_manage_options_role';
+		add_role(
+			$options_role,
+			'Test manage options role',
+			array(
+				'manage_options' => true,
+			)
+		);
+
+		try {
+			$manager_id       = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
+			$customer_id      = self::factory()->user->create( array( 'role' => 'customer' ) );
+			$customer_only_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+			$customer         = new WP_User( $customer_id );
+			$customer->add_role( $options_role );
+			wp_set_current_user( $manager_id );
+
+			$this->assertTrue( current_user_can( 'edit_user', $customer_only_id ), 'A shop manager can edit a customer-only user.' );
+			$this->assertFalse( current_user_can( 'edit_user', $customer_id ), 'A shop manager cannot edit a customer with a custom role.' );
+		} finally {
+			remove_role( $options_role );
+		}
+	}
+
+	/**
 	 * Data provider for test_wc_modify_map_meta_cap_invalid_user_id.
 	 *
 	 * @return array[]

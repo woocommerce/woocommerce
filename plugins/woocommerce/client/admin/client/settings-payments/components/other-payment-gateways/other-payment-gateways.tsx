@@ -294,11 +294,11 @@ export const OtherPaymentGateways = ( {
 										? __< string >(
 												'Installing',
 												'woocommerce'
-										  )
+											)
 										: __< string >(
 												'Install',
 												'woocommerce'
-										  );
+											);
 
 									// If the plugin is already installed, the CTA is to activate it.
 									if ( isPluginAlreadyInstalled ) {
@@ -306,11 +306,11 @@ export const OtherPaymentGateways = ( {
 											? __< string >(
 													'Activating',
 													'woocommerce'
-											  )
+												)
 											: __< string >(
 													'Activate',
 													'woocommerce'
-											  );
+												);
 									}
 
 									return (
@@ -361,11 +361,11 @@ export const OtherPaymentGateways = ( {
 																extension.plugin
 																	.status ===
 																	'not_installed'
-																	? extension
+																	? ( extension
 																			._links
 																			?.attach
 																			?.href ??
-																			null
+																			null )
 																	: null,
 																'wc_settings_payments__other_payment_options'
 															)

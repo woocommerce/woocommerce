@@ -3,7 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
-import { VARIATION_NAME as PRODUCT_TITLE_VARIATION_NAME } from '@woocommerce/blocks/product-query/variations/elements/product-title';
+import { PRODUCT_TITLE_VARIATION_NAME } from '@woocommerce/product-elements/variations/constants';
 import {
 	INNER_BLOCKS_PRODUCT_TEMPLATE as productCollectionInnerBlocksTemplate,
 	DEFAULT_ATTRIBUTES as productCollectionDefaultAttributes,
@@ -48,9 +48,7 @@ const getBlockifiedTemplate = () =>
 					createBlock( 'woocommerce/product-price', {
 						fontSize: 'large',
 					} ),
-					createBlock( 'woocommerce/product-summary', {
-						isDescendentOfSingleProductTemplate: true,
-					} ),
+					createBlock( 'woocommerce/product-summary' ),
 					createBlock(
 						getSetting( 'isBlockTheme', false )
 							? 'woocommerce/add-to-cart-with-options'
@@ -79,7 +77,6 @@ const getBlockifiedTemplate = () =>
 					perPage: 5,
 					pages: 1,
 					woocommerceStockStatus: [ 'instock', 'onbackorder' ],
-					filterable: false,
 				},
 				displayLayout: {
 					type: 'flex',

@@ -11,6 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Internal\Admin\Settings;
 
 /**
  * Common parent for custom report data stores.
@@ -285,7 +286,7 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	 *
 	 * @see get_data
 	 * @param array $query_args Query parameters.
-	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
+	 * @return \stdClass|\WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
 	 */
 	public function get_noncached_data( $query_args ) {
 		/* translators: %s: Method name */
@@ -489,9 +490,9 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	 *
 	 * They are pre-sorted in SQL, but after adding gaps, they need to be sorted including the added ones.
 	 *
-	 * @param stdClass $data      Data object, must contain an array under $data->intervals.
-	 * @param string   $sort_by   Ordering property.
-	 * @param string   $direction DESC/ASC.
+	 * @param \stdClass $data      Data object, must contain an array under $data->intervals.
+	 * @param string    $sort_by   Ordering property.
+	 * @param string    $direction DESC/ASC.
 	 */
 	protected function sort_intervals( &$data, $sort_by, $direction ) {
 		$this->sort_array( $data->intervals, $sort_by, $direction );
@@ -513,12 +514,12 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	/**
 	 * Fills in interval gaps from DB with 0-filled objects.
 	 *
-	 * @param array    $db_intervals   Array of all intervals present in the db.
-	 * @param DateTime $start_datetime Start date.
-	 * @param DateTime $end_datetime   End date.
-	 * @param string   $time_interval  Time interval, e.g. day, week, month.
-	 * @param stdClass $data           Data with SQL extracted intervals.
-	 * @return stdClass
+	 * @param array     $db_intervals   Array of all intervals present in the db.
+	 * @param \DateTime $start_datetime Start date.
+	 * @param \DateTime $end_datetime   End date.
+	 * @param string    $time_interval  Time interval, e.g. day, week, month.
+	 * @param \stdClass $data           Data with SQL extracted intervals.
+	 * @return \stdClass
 	 */
 	protected function fill_in_missing_intervals( $db_intervals, $start_datetime, $end_datetime, $time_interval, &$data ) {
 		// @todo This is ugly and messy.
@@ -593,13 +594,13 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	/**
 	 * Removes extra records from intervals so that only requested number of records get returned.
 	 *
-	 * @param stdClass $data           Data from whose intervals the records get removed.
-	 * @param int      $page_no        Offset requested by the user.
-	 * @param int      $items_per_page Number of records requested by the user.
-	 * @param int      $db_interval_count Database interval count.
-	 * @param int      $expected_interval_count Expected interval count on the output.
-	 * @param string   $order_by Order by field.
-	 * @param string   $order ASC or DESC.
+	 * @param \stdClass $data           Data from whose intervals the records get removed.
+	 * @param int       $page_no        Offset requested by the user.
+	 * @param int       $items_per_page Number of records requested by the user.
+	 * @param int       $db_interval_count Database interval count.
+	 * @param int       $expected_interval_count Expected interval count on the output.
+	 * @param string    $order_by Order by field.
+	 * @param string    $order ASC or DESC.
 	 */
 	protected function remove_extra_records( &$data, $page_no, $items_per_page, $db_interval_count, $expected_interval_count, $order_by, $order ) {
 		if ( 'date' === strtolower( $order_by ) ) {
@@ -697,9 +698,11 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 			$end_iteration   = 0;
 			if ( 'asc' === strtolower( $query_args['order'] ) ) {
 				// ORDER BY date ASC.
+				/** @var \DateTime $new_start_date */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 				$new_start_date    = $query_args['after'];
 				$intervals_to_skip = ( $query_args['page'] - 1 ) * $params['per_page'];
-				$latest_end_date   = $query_args['before'];
+				/** @var \DateTime $latest_end_date */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+				$latest_end_date = $query_args['before'];
 				for ( $i = 0; $i < $intervals_to_skip; $i++ ) {
 					if ( $new_start_date > $latest_end_date ) {
 						$new_start_date  = $latest_end_date;
@@ -728,8 +731,10 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 				}
 			} else {
 				// ORDER BY date DESC.
-				$new_end_date        = $query_args['before'];
-				$intervals_to_skip   = ( $query_args['page'] - 1 ) * $params['per_page'];
+				/** @var \DateTime $new_end_date */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+				$new_end_date      = $query_args['before'];
+				$intervals_to_skip = ( $query_args['page'] - 1 ) * $params['per_page'];
+				/** @var \DateTime $earliest_start_date */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 				$earliest_start_date = $query_args['after'];
 				for ( $i = 0; $i < $intervals_to_skip; $i++ ) {
 					if ( $new_end_date < $earliest_start_date ) {
@@ -842,9 +847,27 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	 * @return array
 	 */
 	protected static function get_excluded_report_order_statuses() {
-		$excluded_statuses = \WC_Admin_Settings::get_option( 'woocommerce_excluded_report_order_statuses', array( 'pending', 'failed', 'cancelled' ) );
-		$excluded_statuses = array_merge( array( 'auto-draft', 'trash' ), array_map( 'esc_sql', $excluded_statuses ) );
-		return apply_filters( 'woocommerce_analytics_excluded_order_statuses', $excluded_statuses );
+		$default_excluded_statuses = Settings::get_default_excluded_order_statuses();
+		$excluded_statuses         = \WC_Admin_Settings::get_option( 'woocommerce_excluded_report_order_statuses', $default_excluded_statuses );
+		$excluded_statuses         = Settings::get_valid_order_statuses_or_default( $excluded_statuses, $default_excluded_statuses );
+		$excluded_statuses         = array_merge( array( 'auto-draft', 'trash' ), array_map( 'esc_sql', $excluded_statuses ) );
+
+		// Keep the value a broken filter would otherwise replace, so the merchant's saved
+		// selection survives it.
+		$pre_filter_statuses = $excluded_statuses;
+
+		/**
+		 * Filter the list of excluded order statuses for customer history and analytics reports.
+		 *
+		 * @since 4.0.0
+		 * @param array $excluded_statuses Order statuses to exclude.
+		 */
+		$excluded_statuses = apply_filters( 'woocommerce_analytics_excluded_order_statuses', $excluded_statuses );
+		if ( ! is_array( $excluded_statuses ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The woocommerce_analytics_excluded_order_statuses filter must return an array.', '11.2.0' );
+			$excluded_statuses = $pre_filter_statuses;
+		}
+		return $excluded_statuses;
 	}
 
 	/**
@@ -879,10 +902,10 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	 *
 	 * E.g. if there are db records for only Tuesday and Thursday this week, the actual week interval is [Mon, Sun], not [Tue, Thu].
 	 *
-	 * @param DateTime $start_datetime Start date.
-	 * @param DateTime $end_datetime End date.
-	 * @param string   $time_interval Time interval, e.g. day, week, month.
-	 * @param array    $intervals Array of intervals extracted from SQL db.
+	 * @param \DateTime $start_datetime Start date.
+	 * @param \DateTime $end_datetime End date.
+	 * @param string    $time_interval Time interval, e.g. day, week, month.
+	 * @param array     $intervals Array of intervals extracted from SQL db.
 	 */
 	protected function update_interval_boundary_dates( $start_datetime, $end_datetime, $time_interval, &$intervals ) {
 		$local_tz = new \DateTimeZone( wc_timezone_string() );
@@ -1467,6 +1490,60 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 		} else {
 			$sql_query->add_sql_clause( 'order_by', 'DESC' );
 		}
+	}
+
+	/**
+	 * Returns payment gateway subquery to be used in WHERE SQL query, based on query arguments from the user.
+	 *
+	 * The include and exclude clauses are always joined with AND, so that "is bacs" and "is not cheque"
+	 * narrow the result together even under `match=any`.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return string
+	 */
+	protected function get_payment_method_subquery( $query_args ) {
+		global $wpdb;
+
+		$table      = $wpdb->prefix . 'wc_order_stats';
+		$subqueries = array();
+
+		$included = $this->get_payment_method_list( $query_args, 'payment_method_is' );
+		if ( $included ) {
+			$subqueries[] = "{$table}.payment_method IN ( {$included} )";
+		}
+
+		$excluded = $this->get_payment_method_list( $query_args, 'payment_method_is_not' );
+		if ( $excluded ) {
+			// NOT IN would drop the NULL rows, which are not the excluded gateway either.
+			$subqueries[] = "( {$table}.payment_method IS NULL OR {$table}.payment_method NOT IN ( {$excluded} ) )";
+		}
+
+		return implode( ' AND ', $subqueries );
+	}
+
+	/**
+	 * Build a quoted SQL list from the payment gateway ids held in a query argument.
+	 *
+	 * @param array  $query_args Parameters supplied by the user.
+	 * @param string $field      Query argument holding the ids.
+	 * @return string Comma separated list of quoted ids, empty when there is nothing to filter on.
+	 */
+	private function get_payment_method_list( $query_args, $field ) {
+		$payment_methods = isset( $query_args[ $field ] ) && is_array( $query_args[ $field ] ) ? $query_args[ $field ] : array();
+		$payment_methods = array_filter(
+			array_map( 'strval', $payment_methods ),
+			function ( $payment_method ) {
+				return '' !== $payment_method;
+			}
+		);
+
+		if ( ! $payment_methods ) {
+			return '';
+		}
+
+		return "'" . implode( "','", array_map( 'esc_sql', $payment_methods ) ) . "'";
 	}
 
 	/**

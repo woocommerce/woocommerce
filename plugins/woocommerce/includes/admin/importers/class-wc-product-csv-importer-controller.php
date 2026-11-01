@@ -346,8 +346,7 @@ class WC_Product_CSV_Importer_Controller {
 		global $wpdb;
 
 		if ( 0 === $cursor ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- The importer requires one uncached cleanup of its temporary mapping markers.
-			$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_original_id' ) );
+			self::delete_original_id_markers();
 		}
 
 		/** This filter is documented in includes/import/abstract-wc-product-importer.php */
@@ -447,6 +446,20 @@ class WC_Product_CSV_Importer_Controller {
 		);
 
 		wp_cache_delete_multiple( array_map( 'absint', $post_ids ), 'posts' );
+	}
+
+	/**
+	 * Remove temporary mappings between CSV IDs and imported products.
+	 *
+	 * The last import batch clears them so a run abandoned during cleanup leaves none behind.
+	 * Markers from a run abandoned earlier are kept so a retry of the same file skips rows already imported.
+	 * Concurrent imports are unsupported: markers and placeholder cleanup are shared site-wide.
+	 */
+	private static function delete_original_id_markers(): void {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- The importer requires one uncached cleanup of its temporary mapping markers.
+		$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_original_id' ) );
 	}
 
 	/**
@@ -560,6 +573,10 @@ class WC_Product_CSV_Importer_Controller {
 			$percent_complete = $importer->get_percent_complete();
 			$error_log        = array_merge( $error_log, $results['failed'], $results['skipped'] );
 
+			if ( 100 === $percent_complete ) {
+				self::delete_original_id_markers();
+			}
+
 			update_user_option( get_current_user_id(), 'product_import_error_log', $error_log );
 
 			// The last row hands over to the cleanup phase rather than running it in this request.
@@ -620,10 +637,13 @@ class WC_Product_CSV_Importer_Controller {
 	public function handle_upload() {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce already verified in WC_Product_CSV_Importer_Controller::upload_form_handler()
 		$file_url = isset( $_POST['file_url'] ) ? wc_clean( wp_unslash( $_POST['file_url'] ) ) : '';
+		if ( ! is_string( $file_url ) ) {
+			$file_url = '';
+		}
 
 		try {
 			if ( ! empty( $file_url ) ) {
-				$path = ABSPATH . $file_url;
+				$path = FilesystemUtil::resolve_upload_file_path( $file_url );
 				self::validate_file_path( $path );
 			} else {
 				$csv_import_util = wc_get_container()->get( Automattic\WooCommerce\Internal\Admin\ImportExport\CSVUploadHelper::class );
@@ -761,6 +781,8 @@ class WC_Product_CSV_Importer_Controller {
 			__( 'ID', 'woocommerce' )                      => 'id',
 			__( 'Type', 'woocommerce' )                    => 'type',
 			__( 'SKU', 'woocommerce' )                     => 'sku',
+			__( 'GTIN, UPC, EAN, or ISBN', 'woocommerce' ) => 'global_unique_id',
+			__( 'MPN', 'woocommerce' )                     => 'mpn',
 			__( 'Name', 'woocommerce' )                    => 'name',
 			__( 'Published', 'woocommerce' )               => 'published',
 			__( 'Is featured?', 'woocommerce' )            => 'featured',
@@ -801,6 +823,9 @@ class WC_Product_CSV_Importer_Controller {
 			__( 'External URL', 'woocommerce' )            => 'product_url',
 			__( 'Button text', 'woocommerce' )             => 'button_text',
 			__( 'Position', 'woocommerce' )                => 'menu_order',
+			__( 'Commodity code (HS code)', 'woocommerce' ) => 'customs_commodity_code',
+			__( 'Country of origin', 'woocommerce' )       => 'customs_country_of_origin',
+			__( 'Customs description', 'woocommerce' )     => 'customs_description',
 		);
 
 		if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) {
@@ -940,6 +965,7 @@ class WC_Product_CSV_Importer_Controller {
 			'type'               => __( 'Type', 'woocommerce' ),
 			'sku'                => __( 'SKU', 'woocommerce' ),
 			'global_unique_id'   => __( 'GTIN, UPC, EAN, or ISBN', 'woocommerce' ),
+			'mpn'                => __( 'MPN', 'woocommerce' ),
 			'name'               => __( 'Name', 'woocommerce' ),
 			'published'          => __( 'Published', 'woocommerce' ),
 			'featured'           => __( 'Is featured?', 'woocommerce' ),
@@ -1016,6 +1042,10 @@ class WC_Product_CSV_Importer_Controller {
 			'meta:' . $meta      => __( 'Import as meta data', 'woocommerce' ),
 			'menu_order'         => __( 'Position', 'woocommerce' ),
 		);
+
+		$options['customs_commodity_code']    = __( 'Commodity code (HS code)', 'woocommerce' );
+		$options['customs_country_of_origin'] = __( 'Country of origin', 'woocommerce' );
+		$options['customs_description']       = __( 'Customs description', 'woocommerce' );
 
 		if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) {
 			$options['cogs_value'] = __( 'Cost of goods', 'woocommerce' );

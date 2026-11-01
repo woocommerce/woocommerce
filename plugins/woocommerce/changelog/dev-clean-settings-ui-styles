@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Remove obsolete Settings UI renderer styles and duplicate DataViews CSS; no merchant-facing change.

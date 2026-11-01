@@ -119,6 +119,8 @@ class Assets_Manager {
 
 		// Load CSS from Post Editor.
 		wp_enqueue_style( 'wp-edit-post' );
+		// Print the personalization tag chip styles right after core's editor styles by attaching them to the wp-edit-post handle.
+		wp_add_inline_style( 'wp-edit-post', (string) file_get_contents( __DIR__ . '/rich-text-comment.css' ) );
 		// Load CSS for the format library - used for example in popover.
 		wp_enqueue_style( 'wp-format-library' );
 		// Enqueue CSS containing --wp--preset variables.

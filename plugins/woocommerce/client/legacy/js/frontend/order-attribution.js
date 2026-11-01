@@ -112,6 +112,8 @@
 				session_length: Number( params.session ),
 				base64: Boolean( params.base64 ),
 				timezone_offset: '0', // utc
+				// Only store the fields WooCommerce reads. An empty list stores every field.
+				fields: params.cookieFields,
 			} );
 		}
 		const values = wc_order_attribution.getAttributionData();
@@ -179,12 +181,12 @@
 			super();
 			// Cache fieldNames available at the construction time, to avoid malformed behavior if they change in runtime.
 			this._fieldNames = Object.keys( wc_order_attribution.fields );
-			// Allow values to be lazily set before CE upgrade.
-			if ( this.hasOwnProperty( '_values' ) ) {
-				let values = this.values;
-				// Restore the setter.
+			// Copy any existing `values` into `_values`, they might have been set before the setter was defined.
+			if ( this.hasOwnProperty( 'values' ) ) {
+				const values = this.values;
+				// Delete `values` so later assignments use the setter.
 				delete this.values;
-				this.values = values || {};
+				this._values = values || {};
 			}
 		}
 		/**

@@ -52,7 +52,9 @@ class WC_Post_Data {
 		add_action( 'edited_term', array( __CLASS__, 'edited_term' ), 10, 3 );
 		add_filter( 'update_order_item_metadata', array( __CLASS__, 'update_order_item_metadata' ), 10, 5 );
 		add_filter( 'update_post_metadata', array( __CLASS__, 'update_post_metadata' ), 10, 5 );
+		add_filter( 'wp_insert_post_data', array( __CLASS__, 'sanitize_coupon_code_on_save' ), 5, 3 );
 		add_filter( 'wp_insert_post_data', array( __CLASS__, 'wp_insert_post_data' ) );
+		add_filter( 'edit_post_title', array( __CLASS__, 'decode_coupon_code_for_editing' ), 10, 2 );
 		add_filter( 'oembed_response_data', array( __CLASS__, 'filter_oembed_response_data' ), 10, 2 );
 		add_filter( 'wp_untrash_post_status', array( __CLASS__, 'wp_untrash_post_status' ), 10, 3 );
 
@@ -370,12 +372,61 @@ class WC_Post_Data {
 			}
 		} elseif ( 'product' === $data['post_type'] && ProductStatus::AUTO_DRAFT === $data['post_status'] ) {
 			$data['post_title'] = 'AUTO-DRAFT';
-		} elseif ( 'shop_coupon' === $data['post_type'] ) {
-			// Coupons should never allow unfiltered HTML.
-			$data['post_title'] = wp_filter_kses( $data['post_title'] );
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Sanitize coupon codes with wc_sanitize_coupon_code() when coupons are saved, so they're stored the same way for every user.
+	 *
+	 * Uses the title passed to wp_insert_post(), because WordPress has already run kses on `$data` for some users.
+	 *
+	 * @since 11.3.0
+	 * @internal
+	 *
+	 * @param array $data                An array of slashed, sanitized post data.
+	 * @param array $postarr             An array of sanitized post data.
+	 * @param array $unsanitized_postarr An array of slashed post data as passed to wp_insert_post().
+	 * @return array
+	 */
+	public static function sanitize_coupon_code_on_save( $data, $postarr, $unsanitized_postarr ) {
+		global $wpdb;
+
+		if ( ! is_array( $data ) || 'shop_coupon' !== ( $data['post_type'] ?? '' ) ) {
+			return $data;
+		}
+
+		$title = wc_sanitize_coupon_code( wp_unslash( $unsanitized_postarr['post_title'] ?? $data['post_title'] ) );
+
+		// Like wp_insert_post(), encode emoji when the column can't store them.
+		if ( in_array( $wpdb->get_col_charset( $wpdb->posts, 'post_title' ), array( 'utf8', 'utf8mb3' ), true ) ) {
+			$title = wp_encode_emoji( $title );
+		}
+
+		$data['post_title'] = wp_slash( $title );
+
+		return $data;
+	}
+
+	/**
+	 * Decode coupon codes for the title field on the coupon edit screen.
+	 *
+	 * WordPress encodes titles again for editing, so the field would otherwise show `&amp;` instead of `&`.
+	 *
+	 * @since 11.3.0
+	 * @internal
+	 *
+	 * @param string $title   Post title.
+	 * @param int    $post_id Post ID.
+	 * @return string
+	 */
+	public static function decode_coupon_code_for_editing( $title, $post_id ) {
+		if ( ! is_string( $title ) || 'shop_coupon' !== get_post_type( $post_id ) ) {
+			return $title;
+		}
+
+		return html_entity_decode( $title, ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) );
 	}
 
 	/**

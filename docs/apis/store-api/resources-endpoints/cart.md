@@ -29,6 +29,7 @@ All endpoints under `/cart` (listed in this doc) return responses in the same fo
 	"items": [
 		{
 			"key": "a5771bce93e200c36f7cd9dfd0e5deaa",
+			"parent_item_key": null,
 			"id": 38,
 			"quantity": 1,
 			"quantity_limits": {
@@ -96,6 +97,7 @@ All endpoints under `/cart` (listed in this doc) return responses in the same fo
 		},
 		{
 			"key": "b6d767d2f8ed5d21a44b0e5886680cb9",
+			"parent_item_key": null,
 			"id": 22,
 			"quantity": 1,
 			"quantity_limits": {
@@ -482,6 +484,8 @@ The JSON payload for adding multiple items to the cart would look like this:
 	]
 }
 ```
+
+If a cart subrequest fails while loading its session, it returns a `500` response with the `woocommerce_rest_unknown_server_error` error code. Later cart subrequests in the same batch also return `500` instead of using the incomplete cart, while non-cart subrequests continue normally. These failed cart responses do not include `Cart-Token` or `Cart-Hash` headers.
 
 ## Remove Item
 

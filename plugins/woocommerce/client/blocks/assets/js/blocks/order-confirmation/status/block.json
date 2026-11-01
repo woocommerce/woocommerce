@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/order-confirmation-status",
-	"version": "1.0.0",
 	"title": "Order Status",
 	"description": "Display a \"thank you\" message, or a sentence regarding the current order status.",
 	"category": "woocommerce",

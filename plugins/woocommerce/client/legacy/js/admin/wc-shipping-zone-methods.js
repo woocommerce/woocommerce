@@ -517,7 +517,13 @@
 							// There was an error modifying the decimal, so we leave the original value as-is.
 							return;
 						}
-						const formattedValue = window.wc.currency.localiseMonetaryValue( config, value );
+						// Keep any decimals beyond the store precision, so the stored cost is not rounded on display.
+						// Cap at 15, the digits a double holds exactly. The formatter returns NaN above 20 decimals.
+						const decimals = Math.min( WCNumberValidation.getDecimalCount( value, config ), 15 );
+						const formatConfig = decimals > config.precision
+							? Object.assign( {}, config, { precision: decimals } )
+							: config;
+						const formattedValue = window.wc.currency.localiseMonetaryValue( formatConfig, value );
 						priceInput.attr( 'value', formattedValue );
 					} );
 
@@ -649,8 +655,15 @@
 
 								shippingMethodView.highlightOnFocus( '.wc-shipping-modal-price' );
 							} else {
-								shippingMethodView.model.trigger( 'change:methods' );
-								shippingMethodView.model.trigger( 'saved:methods' );
+								// Non-modal methods are already added server-side; flush any pending zone edits and
+								// re-render, mirroring the modal settings-save path so new zones keep their locations.
+								if ( _.size( shippingMethodView.model.changes ) ) {
+									// Block the methods table across the async save, as the modal path does.
+									shippingMethodView.block();
+									shippingMethodView.model.save();
+								} else {
+									shippingMethodView.model.onSaveResponse( response, textStatus );
+								}
 							}
 
 							$( document.body ).trigger( 'init_tooltips' );
@@ -708,7 +721,13 @@
 
 							$('.wc-shipping-modal-price').on('blur', function() {
 								const value = $(this).val();
-								const formattedValue = window.wc.currency.localiseMonetaryValue( config, value );
+								// Keep any decimals beyond the store precision, so the typed cost is not rounded on blur.
+								// Cap at 15, the digits a double holds exactly. The formatter returns NaN above 20 decimals.
+								const decimals = Math.min( WCNumberValidation.getDecimalCount( value, config ), 15 );
+								const formatConfig = decimals > config.precision
+									? Object.assign( {}, config, { precision: decimals } )
+									: config;
+								const formattedValue = window.wc.currency.localiseMonetaryValue( formatConfig, value );
 								$(this).val( formattedValue );
 							});
 						}

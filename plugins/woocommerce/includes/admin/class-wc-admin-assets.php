@@ -499,6 +499,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_remove_personal_data_notice'  => __( 'This action cannot be reversed. Are you sure you wish to erase personal data from the selected orders?', 'woocommerce' ),
 					'i18n_confirm_delete'               => __( 'Are you sure you wish to delete this item?', 'woocommerce' ),
 					'i18n_global_unique_id_error'       => __( 'Enter only numbers and hyphens (-). The letter X is allowed only as the final ISBN-10 check digit.', 'woocommerce' ),
+					'i18n_commodity_code_error'         => __( 'Enter a commodity code of 6–14 digits. Spaces and punctuation are removed.', 'woocommerce' ),
+					'i18n_customs_description_error'    => __( 'Enter up to 35 characters, without emoji or special symbols such as ™.', 'woocommerce' ),
 					'decimal_point'                     => $decimal,
 					'mon_decimal_point'                 => wc_get_price_decimal_separator(),
 					'ajax_url'                          => admin_url( 'admin-ajax.php' ),
@@ -698,6 +700,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'grant_access_nonce'                              => wp_create_nonce( 'grant-access' ),
 					'revoke_access_nonce'                             => wp_create_nonce( 'revoke-access' ),
 					'add_order_note_nonce'                            => wp_create_nonce( 'add-order-note' ),
+					'get_order_notes_nonce'                           => wp_create_nonce( 'get-order-notes' ),
 					'delete_order_note_nonce'                         => wp_create_nonce( 'delete-order-note' ),
 					'calendar_image'                                  => WC()->plugin_url() . '/assets/images/calendar.png',
 					'post_id'                                         => $this->is_order_meta_box_screen( $screen_id ) && isset( $order_or_post_object ) ? \Automattic\WooCommerce\Utilities\OrderUtil::get_post_or_order_id( $order_or_post_object ) : $post_id,
@@ -719,7 +722,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_order_note_added'                           => __( 'Order note added.', 'woocommerce' ),
 					'i18n_customer_order_note_added'                  => __( 'Order note added and emailed to the customer.', 'woocommerce' ),
 					'i18n_apply_coupon'                               => __( 'Enter a coupon code to apply. Discounts are applied to line totals, before taxes.', 'woocommerce' ),
-					'i18n_add_fee'                                    => __( 'Enter a fixed amount or percentage to apply as a fee.', 'woocommerce' ),
+					'i18n_add_fee'                                    => __( 'Enter a fixed amount or percentage to apply as a fee.', 'woocommerce' ) . ' ' . __( 'Amounts are before tax, and percentages apply to the order items after discounts.', 'woocommerce' ),
 					'i18n_attribute_name_placeholder'                 => __( 'New attribute', 'woocommerce' ),
 					'i18n_product_simple_tip'                         => __( '<b>Simple –</b> covers the vast majority of any products you may sell. Simple products are shipped and have no options. For example, a book.', 'woocommerce' ),
 					'i18n_product_grouped_tip'                        => __( '<b>Grouped –</b> a collection of related products that can be purchased individually and only consist of simple products. For example, a set of six drinking glasses.', 'woocommerce' ),
@@ -921,24 +924,24 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			if ( ! $admin_features_disabled ) {
 				$analytics_reports = Analytics::get_report_pages();
 				if ( is_array( $analytics_reports ) && count( $analytics_reports ) > 0 ) {
-					$formatted_analytics_reports = array_map( function( $report ) {
+					// Append so the reports stay a sequential list; wp_localize_script() encodes a gapped array as a JSON object the command palette ignores.
+					$formatted_analytics_reports = array();
+					foreach ( $analytics_reports as $report ) {
 						if ( ! is_array( $report ) ) {
-							return null;
+							continue;
 						}
-						$title = array_key_exists( 'title', $report ) ? $report['title'] : '';
-						$path = array_key_exists( 'path', $report ) ? $report['path'] : '';
-						if (
-							is_string( $title ) && $title !== "" &&
-							is_string( $path ) && $path !== ""
-						) {
-							return array(
-								'title' => wp_strip_all_tags( $title ),
-								'path' => $path,
-							);
+
+						$title = $report['title'] ?? '';
+						$path  = $report['path'] ?? '';
+						if ( ! is_string( $title ) || '' === $title || ! is_string( $path ) || '' === $path ) {
+							continue;
 						}
-						return null;
-					}, $analytics_reports );
-					$formatted_analytics_reports = array_filter( $formatted_analytics_reports, 'is_array' );
+
+						$formatted_analytics_reports[] = array(
+							'title' => wp_strip_all_tags( $title ),
+							'path'  => $path,
+						);
+					}
 
 					$this->enqueue_script( 'wp-admin-scripts', 'command-palette-analytics' );
 					wp_localize_script(

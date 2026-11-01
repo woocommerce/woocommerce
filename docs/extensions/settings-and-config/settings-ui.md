@@ -204,6 +204,12 @@ For legacy country and page selectors, the adapter creates the same option list 
 
 The default save adapter is `form_post`, which serializes hidden inputs so `WC_Admin_Settings::save_fields()` continues to save the submitted values.
 
+## Extension registration and saving
+
+Repeated extension registrations replace only matching entries. Registering a replacement control preserves unrelated controls, visibility predicates, save handlers, and regions in the same scope.
+
+Use `form_post` for the existing PHP settings save flow. Integrations with separate persistence requirements can continue using the experimental `custom` save adapter and registered save handlers. The settings page owns the Save button, busy and error states, dirty-state reset, and navigation protection; the handler supplies the persistence operation. Both paths use DataForm for field rendering and editing.
+
 ## Custom component migration
 
 If a field needs a custom React UI, declare a component name in the PHP field schema:

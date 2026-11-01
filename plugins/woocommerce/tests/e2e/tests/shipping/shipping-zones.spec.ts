@@ -191,3 +191,198 @@ test( 'saves an unsaved shipping zone when adding a method', async ( {
 		await deleteZoneById( restApi, createdZoneId );
 	}
 } );
+
+// Regression: a method that has instance settings but no settings modal (UPS/USPS
+// style; here the "E2E Non-Modal Method" registered by the E2E test helper) must still
+// mark the form dirty and persist the new zone's name and region. The old flow lost both,
+// so the zone silently reverted to "Everywhere" on reload.
+test( 'saves an unsaved shipping zone when adding a non-modal method', async ( {
+	page,
+	restApi,
+} ) => {
+	const zoneName = `Unsaved non-modal zone ${ rand() }`;
+	let createdZoneId: number | undefined;
+
+	try {
+		await page.goto(
+			'wp-admin/admin.php?page=wc-settings&tab=shipping&zone_id=new'
+		);
+
+		// Register before any interaction so an unexpected onbeforeunload prompt is caught.
+		const dialogMessages: string[] = [];
+		page.on( 'dialog', async ( dialog ) => {
+			dialogMessages.push( dialog.message() );
+			await dialog.accept();
+		} );
+
+		await page.getByLabel( 'Zone name' ).fill( zoneName );
+		await page
+			.getByRole( 'combobox', { name: 'Start typing to filter zones' } )
+			.fill( 'United States' );
+		await page
+			.getByRole( 'checkbox', {
+				name: 'United States (US)',
+				exact: true,
+			} )
+			.click();
+		await page.keyboard.press( 'Escape' );
+		await expect( page.locator( '.select2-container--open' ) ).toBeHidden();
+
+		await expect( page.locator( '#submit' ) ).toBeEnabled();
+
+		await page
+			.getByRole( 'button', { name: 'Add shipping method' } )
+			.click();
+		await page.getByText( 'E2E Non-Modal Method' ).click();
+
+		const addMethodResponsePromise = page.waitForResponse( ( response ) =>
+			response
+				.url()
+				.includes( 'action=woocommerce_shipping_zone_add_method' )
+		);
+		const saveChangesResponsePromise = page.waitForResponse( ( response ) =>
+			response
+				.url()
+				.includes(
+					'action=woocommerce_shipping_zone_methods_save_changes'
+				)
+		);
+		await page.getByRole( 'button', { name: 'Continue' } ).click();
+
+		const addMethodResponse = await addMethodResponsePromise;
+		createdZoneId = ( await addMethodResponse.json() ).data.zone_id;
+		// A non-modal method has no settings modal, so the add itself must flush the
+		// pending zone edits via save_changes.
+		await saveChangesResponsePromise;
+
+		await expect(
+			page.locator( '.wc-shipping-zone-method-title', {
+				hasText: 'E2E Non-Modal Method',
+			} )
+		).toBeVisible();
+		await expect( page.locator( '#submit' ) ).toBeDisabled();
+		await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
+
+		await page.reload();
+		await expect( page.getByLabel( 'Zone name' ) ).toHaveValue( zoneName );
+		await expect(
+			page.locator( '.wc-shipping-zone-method-title', {
+				hasText: 'E2E Non-Modal Method',
+			} )
+		).toBeVisible();
+		expect( dialogMessages ).toEqual( [] );
+
+		// The region must survive instead of reverting to "Everywhere".
+		const locations = await restApi.get(
+			`${ WC_API_PATH }/shipping/zones/${ createdZoneId }/locations`
+		);
+		expect( locations.data ).toContainEqual(
+			expect.objectContaining( { code: 'US', type: 'country' } )
+		);
+	} finally {
+		await deleteZoneById( restApi, createdZoneId );
+	}
+} );
+
+// Regression: adding a non-modal method to an existing zone must flush the zone's
+// pending edits and re-render without dropping its other methods. The old flow kept
+// the unsaved name only in the browser, so it was lost on the next load.
+test( 'persists pending zone edits when adding a non-modal method to an existing zone', async ( {
+	page,
+	restApi,
+	zone,
+} ) => {
+	const renamedZone = `Renamed zone ${ rand() }`;
+
+	await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
+	await page
+		.getByText( zone.name )
+		.locator(
+			'~ td.wc-shipping-zone-actions a.wc-shipping-zone-action-edit'
+		)
+		.click();
+
+	// The edit screen binds the add-method modal after its methods table renders, so
+	// wait for the existing method, then retry opening the modal in case the first
+	// click lands before the handler is bound.
+	await expect(
+		page.locator( '.wc-shipping-zone-method-title', {
+			hasText: 'Flat rate',
+		} )
+	).toBeVisible();
+
+	// Register before the edit so an unexpected onbeforeunload prompt is caught.
+	const dialogMessages: string[] = [];
+	page.on( 'dialog', async ( dialog ) => {
+		dialogMessages.push( dialog.message() );
+		await dialog.accept();
+	} );
+
+	// Leave the rename unsaved, so adding the method is what has to persist it.
+	await page.getByLabel( 'Zone name' ).fill( renamedZone );
+	await expect( page.locator( '#submit' ) ).toBeEnabled();
+
+	const addMethodButton = page.getByRole( 'button', {
+		name: 'Add shipping method',
+	} );
+	const createMethodHeading = page.getByRole( 'heading', {
+		name: 'Create shipping method',
+	} );
+	await expect( async () => {
+		if ( ! ( await createMethodHeading.isVisible() ) ) {
+			await addMethodButton.click();
+		}
+		await expect( createMethodHeading ).toBeVisible( { timeout: 3000 } );
+	} ).toPass( { timeout: 20000 } );
+	await page.getByText( 'E2E Non-Modal Method' ).click();
+
+	const addMethodResponsePromise = page.waitForResponse( ( response ) =>
+		response.url().includes( 'action=woocommerce_shipping_zone_add_method' )
+	);
+	const saveChangesResponsePromise = page.waitForResponse( ( response ) =>
+		response
+			.url()
+			.includes( 'action=woocommerce_shipping_zone_methods_save_changes' )
+	);
+	await page.getByRole( 'button', { name: 'Continue' } ).click();
+	await addMethodResponsePromise;
+	// A non-modal method has no settings modal, so the add itself must flush the
+	// pending zone edits via save_changes.
+	await saveChangesResponsePromise;
+
+	await expect(
+		page.locator( '.wc-shipping-zone-method-title', {
+			hasText: 'E2E Non-Modal Method',
+		} )
+	).toBeVisible();
+	await expect( page.locator( '#submit' ) ).toBeDisabled();
+	await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
+
+	await page.reload();
+	await expect( page.getByLabel( 'Zone name' ) ).toHaveValue( renamedZone );
+	await expect(
+		page.locator( '.wc-shipping-zone-method-title', {
+			hasText: 'Flat rate',
+		} )
+	).toBeVisible();
+	await expect(
+		page.locator( '.wc-shipping-zone-method-title', {
+			hasText: 'E2E Non-Modal Method',
+		} )
+	).toBeVisible();
+	expect( dialogMessages ).toEqual( [] );
+
+	const methods = await restApi.get(
+		`${ WC_API_PATH }/shipping/zones/${ zone.id }/methods`
+	);
+	expect(
+		methods.data.map(
+			( method: { method_id: string } ) => method.method_id
+		)
+	).toContain( 'e2e_nonmodal' );
+
+	const savedZone = await restApi.get(
+		`${ WC_API_PATH }/shipping/zones/${ zone.id }`
+	);
+	expect( savedZone.data.name ).toBe( renamedZone );
+} );

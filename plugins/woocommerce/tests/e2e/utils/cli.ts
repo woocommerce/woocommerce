@@ -9,6 +9,8 @@ const execFileAsync = promisify( execFile );
 
 /**
  * Runs a command in the E2E CLI container. Use an argument array when the command contains dynamic values.
+ *
+ * Await each call before starting the next, never through `Promise.all`: wp-env rewrites its cache file without locking, and two overlapping calls can drop its `runtime` key so every later wp-env command fails with "Environment not initialized".
  */
 const wpCLI = async ( command: string | string[] ) => {
 	const { stdout, stderr } = Array.isArray( command )

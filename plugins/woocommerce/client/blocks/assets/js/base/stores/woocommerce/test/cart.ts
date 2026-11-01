@@ -88,7 +88,6 @@ async function runAction( action: unknown ): Promise< unknown > {
 	let next = iterator.next();
 	while ( ! next.done ) {
 		try {
-			// eslint-disable-next-line no-await-in-loop
 			const resolved = await next.value;
 			next = iterator.next( resolved );
 		} catch ( error ) {
@@ -530,6 +529,52 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		);
 	} );
 
+	describe( 'refreshCartItems without restUrl in the interactivity state', () => {
+		const originalRestUrl = mockState.restUrl;
+
+		afterEach( () => {
+			mockState.restUrl = originalRestUrl;
+		} );
+
+		it( 'skips the cart fetch instead of requesting a malformed URL', async () => {
+			mockState.restUrl = '';
+			const mockFetch = jest.fn();
+			global.fetch = mockFetch;
+
+			jest.isolateModules( () => require( '../cart' ) );
+			await runAction( mockRegisteredStore?.actions.refreshCartItems() );
+
+			expect( mockFetch ).not.toHaveBeenCalled();
+		} );
+
+		it( 'lets a queued mutation settle instead of waiting forever for a nonce', async () => {
+			mockState.restUrl = '';
+			global.fetch = jest
+				.fn()
+				.mockRejectedValue( new TypeError( 'Failed to fetch' ) );
+
+			jest.isolateModules( () => require( '../cart' ) );
+			const actions = mockRegisteredStore?.actions as Store[ 'actions' ];
+			await runAction( actions.refreshCartItems() );
+			seedCart( [] );
+
+			const outcome = await Promise.race( [
+				runAction(
+					actions.addCartItem( {
+						id: 42,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				).then( () => 'settled' ),
+				new Promise( ( resolve ) =>
+					setTimeout( () => resolve( 'pending' ), 500 )
+				),
+			] );
+
+			expect( outcome ).toBe( 'settled' );
+		} );
+	} );
+
 	describe( 'addCartItem endpoint selection', () => {
 		it( 'issues add-item (never update-item) for a keyless add that matches a keyed line by product id', async () => {
 			const captured = mockBatchFetch();
@@ -720,6 +765,38 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( captured[ 0 ].path ).toBe( '/wc/store/v1/cart/add-item' );
 			expect( captured[ 1 ].path ).toBe( captured[ 0 ].path );
 			expect( captured[ 1 ].body ).toEqual( captured[ 0 ].body );
+		} );
+	} );
+
+	describe( 'isCartUpdating', () => {
+		it( 'is true while a cart update request is in progress and false once it settles', async () => {
+			mockBatchFetch();
+			const batchFetch = global.fetch;
+			const duringRequest: Array< boolean | undefined > = [];
+			global.fetch = jest.fn(
+				async ( url: RequestInfo | URL, init?: RequestInit ) => {
+					if ( init?.body ) {
+						duringRequest.push( mockState.isCartUpdating );
+					}
+					return batchFetch( url, init );
+				}
+			) as typeof fetch;
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( { id: 42, quantity: 3, key: 'server-key-abc' } ),
+			] );
+
+			await runAction(
+				actions.addCartItem( {
+					id: 42,
+					key: 'server-key-abc',
+					quantity: 5,
+					type: 'simple',
+				} )
+			);
+
+			expect( duringRequest ).toEqual( [ true ] );
+			expect( mockState.isCartUpdating ).toBe( false );
 		} );
 	} );
 

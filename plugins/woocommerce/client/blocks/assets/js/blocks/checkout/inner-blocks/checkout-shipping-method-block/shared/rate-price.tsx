@@ -1,4 +1,3 @@
-/* eslint-disable no-nested-ternary */
 /**
  * External dependencies
  */
@@ -48,7 +47,7 @@ export const RatePrice = ( {
 						{
 							price: priceElement,
 						}
-				  ) }
+					) }
 		</span>
 	);
 };

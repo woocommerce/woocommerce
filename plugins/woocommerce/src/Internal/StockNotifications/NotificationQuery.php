@@ -36,6 +36,24 @@ class NotificationQuery {
 	}
 
 	/**
+	 * Load the stock notification data store, or null while the feature is off.
+	 *
+	 * The data store is only registered while the feature is enabled, so
+	 * `WC_Data_Store::load()` throws when it is off. Every query in this class
+	 * goes through here so all of them fail soft instead of fataling.
+	 *
+	 * @return \WC_Data_Store|null
+	 */
+	private static function load_data_store(): ?\WC_Data_Store {
+		try {
+			return \WC_Data_Store::load( 'stock_notification' );
+		} catch ( \Exception $e ) {
+			\wc_caught_exception( $e, __METHOD__ );
+			return null;
+		}
+	}
+
+	/**
 	 * Single dispatch site to the underlying data store's `query()` method.
 	 *
 	 * Centralised so the `WC_Data_Store::query()` PHPStan suppression in
@@ -43,10 +61,12 @@ class NotificationQuery {
 	 *
 	 * @param array $args Query args.
 	 * @return mixed Whatever the data store returns for the requested `return` mode
-	 *               (array of objects/ids, int for `count`).
+	 *               (array of objects/ids, int for `count`), or null while the feature is off.
 	 */
 	private static function run_query( array $args ) {
-		return \WC_Data_Store::load( 'stock_notification' )->query( $args );
+		$data_store = self::load_data_store();
+
+		return $data_store ? $data_store->query( $args ) : null;
 	}
 
 	/**
@@ -56,7 +76,9 @@ class NotificationQuery {
 	 * @return bool True if the product has active notifications, false otherwise.
 	 */
 	public static function product_has_active_notifications( array $product_ids ): bool {
-		return \WC_Data_Store::load( 'stock_notification' )->product_has_active_notifications( $product_ids );
+		$data_store = self::load_data_store();
+
+		return $data_store ? $data_store->product_has_active_notifications( $product_ids ) : false;
 	}
 
 	/**
@@ -67,7 +89,26 @@ class NotificationQuery {
 	 * @return bool True if the notification exists, false otherwise.
 	 */
 	public static function notification_exists_by_email( int $product_id, string $email ): bool {
-		return \WC_Data_Store::load( 'stock_notification' )->notification_exists_by_email( $product_id, $email );
+		$data_store = self::load_data_store();
+
+		return $data_store ? $data_store->notification_exists_by_email( $product_id, $email ) : false;
+	}
+
+	/**
+	 * Get the ID of the active or pending notification matching an identity, product and posted
+	 * attribute set.
+	 *
+	 * @param int    $product_id The product ID.
+	 * @param int    $user_id The user ID, or 0 to match on the email instead.
+	 * @param string $user_email The email address, used when no user ID is given.
+	 * @param array  $posted_attributes The posted attributes to match.
+	 * @return int The notification ID, or 0 when nothing matches.
+	 */
+	public static function get_matching_notification_id( int $product_id, int $user_id, string $user_email, array $posted_attributes = array() ): int {
+		$data_store = self::load_data_store();
+
+		// @phpstan-ignore method.notFound (the call is proxied by WC_Data_Store::__call())
+		return $data_store ? absint( $data_store->get_matching_notification_id( $product_id, $user_id, $user_email, $posted_attributes ) ) : 0;
 	}
 
 	/**
@@ -78,6 +119,8 @@ class NotificationQuery {
 	 * @return bool True if the notification exists, false otherwise.
 	 */
 	public static function notification_exists_by_user_id( int $product_id, int $user_id ): bool {
-		return \WC_Data_Store::load( 'stock_notification' )->notification_exists_by_user_id( $product_id, $user_id );
+		$data_store = self::load_data_store();
+
+		return $data_store ? $data_store->notification_exists_by_user_id( $product_id, $user_id ) : false;
 	}
 }

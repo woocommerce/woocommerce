@@ -35,8 +35,8 @@ const recordCompatibilityFailure = (
 	}
 };
 
-const getUpdatedWeightUnit = ( originalUnit: string ): string =>
-	originalUnit === 'kg' ? 'g' : 'kg';
+const getUpdatedStockFormat = ( originalFormat: string ): string =>
+	originalFormat === 'no_amount' ? 'low_amount' : 'no_amount';
 
 const getBaseURL = ( baseURL: string | undefined ): string => {
 	if ( ! baseURL ) {
@@ -125,7 +125,9 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 			recordCompatibilityFailure( compatibilityFailures, message.text() );
 		} );
 
-		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=products' );
+		await page.goto(
+			'wp-admin/admin.php?page=wc-settings&tab=products&section=inventory'
+		);
 		await expect( page.locator( '[data-wc-settings-ui]' ) ).toBeVisible();
 		await expect(
 			page.locator( 'link[href*="/settings-ui/style.css"]' )
@@ -144,15 +146,14 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 			settingsUI.locator( '.wc-settings-ui__section-card' )
 		).toHaveCount( 0 );
 
-		const weightUnit = settingsUI.getByLabel( 'Weight unit' );
-		expect( [ 'kg', 'g', 'lbs', 'oz' ] ).toContain(
-			await weightUnit.inputValue()
+		const stockFormat = settingsUI.getByLabel( 'Stock display format' );
+		expect( [ '', 'low_amount', 'no_amount' ] ).toContain(
+			await stockFormat.inputValue()
 		);
-		await expect( weightUnit.locator( 'option' ) ).toHaveText( [
-			'kg',
-			'g',
-			'lbs',
-			'oz',
+		await expect( stockFormat.locator( 'option' ) ).toHaveText( [
+			'Always show quantity remaining in stock e.g. "12 in stock"',
+			'Only show quantity remaining in stock when low e.g. "Only 2 left in stock"',
+			'Never show quantity remaining in stock',
 		] );
 
 		const dataFormGlobalType = await page.evaluate( () => {
@@ -170,18 +171,20 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 	test( 'saves a DataForm edit through the form post round-trip', async ( {
 		page,
 	} ) => {
-		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=products' );
+		await page.goto(
+			'wp-admin/admin.php?page=wc-settings&tab=products&section=inventory'
+		);
 		const settingsUI = page.locator( '[data-wc-settings-ui]' );
 		await expect( settingsUI ).toBeVisible();
 
-		const weightUnit = settingsUI.getByLabel( 'Weight unit' );
-		const originalUnit = await weightUnit.inputValue();
-		const updatedUnit = getUpdatedWeightUnit( originalUnit );
+		const stockFormat = settingsUI.getByLabel( 'Stock display format' );
+		const originalFormat = await stockFormat.inputValue();
+		const updatedFormat = getUpdatedStockFormat( originalFormat );
 		const saveButton = settingsUI.getByRole( 'button', { name: 'Save' } );
 
 		try {
 			await expect( saveButton ).toBeDisabled();
-			await weightUnit.selectOption( updatedUnit );
+			await stockFormat.selectOption( updatedFormat );
 			await expect( saveButton ).toBeEnabled();
 			await saveButton.click();
 
@@ -189,48 +192,54 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 				page.getByText( 'Your settings have been saved.' )
 			).toBeVisible();
 			await page.reload();
-			await expect( settingsUI.getByLabel( 'Weight unit' ) ).toHaveValue(
-				updatedUnit
-			);
+			await expect(
+				settingsUI.getByLabel( 'Stock display format' )
+			).toHaveValue( updatedFormat );
 		} finally {
 			// The save persists a site-wide option, so restore it even when an
 			// assertion fails. Plugins and themes are skipped because booting
 			// the extensions earlier specs install can exhaust the CLI
 			// container's memory before the command runs.
-			await wpCLI(
-				`wp option update woocommerce_weight_unit ${ originalUnit } --skip-plugins --skip-themes`
-			);
+			await wpCLI( [
+				'wp',
+				'option',
+				'update',
+				'woocommerce_stock_format',
+				originalFormat,
+				'--skip-plugins',
+				'--skip-themes',
+			] );
 		}
 	} );
 
 	test( 'toggles dependent fields with a visibility rule', async ( {
 		page,
 	} ) => {
-		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=products' );
+		await page.goto(
+			'wp-admin/admin.php?page=wc-settings&tab=products&section=inventory'
+		);
 		const settingsUI = page.locator( '[data-wc-settings-ui]' );
 		await expect( settingsUI ).toBeVisible();
 
-		const enableReviews = settingsUI.getByLabel( 'Enable product reviews' );
-		const verifiedOwnerLabel = settingsUI.getByLabel(
-			'Show "verified owner" label on customer reviews'
-		);
-		const verifiedOwnersOnly = settingsUI.getByLabel(
-			'Reviews can only be left by "verified owners"'
+		const manageStock = settingsUI.getByLabel( 'Enable stock management' );
+		const holdStock = settingsUI.getByLabel( 'Hold stock (minutes)' );
+		const lowStockNotifications = settingsUI.getByLabel(
+			'Enable low stock notifications'
 		);
 		const saveButton = settingsUI.getByRole( 'button', { name: 'Save' } );
 
-		await expect( enableReviews ).toBeChecked();
-		await expect( verifiedOwnerLabel ).toBeVisible();
-		await expect( verifiedOwnersOnly ).toBeVisible();
+		await expect( manageStock ).toBeChecked();
+		await expect( holdStock ).toBeVisible();
+		await expect( lowStockNotifications ).toBeVisible();
 
-		await enableReviews.uncheck();
-		await expect( verifiedOwnerLabel ).toHaveCount( 0 );
-		await expect( verifiedOwnersOnly ).toHaveCount( 0 );
+		await manageStock.uncheck();
+		await expect( holdStock ).toHaveCount( 0 );
+		await expect( lowStockNotifications ).toHaveCount( 0 );
 		await expect( saveButton ).toBeEnabled();
 
-		await enableReviews.check();
-		await expect( verifiedOwnerLabel ).toBeVisible();
-		await expect( verifiedOwnersOnly ).toBeVisible();
+		await manageStock.check();
+		await expect( holdStock ).toBeVisible();
+		await expect( lowStockNotifications ).toBeVisible();
 		// Restoring the original value leaves nothing to save.
 		await expect( saveButton ).toBeDisabled();
 	} );
@@ -301,14 +310,13 @@ test.describe( 'Settings UI feature flag', { tag: [ tags.NOT_E2E ] }, () => {
 		await expect( preservedLowStock ).toHaveValue( '2' );
 		await expect( editedHoldStock ).toHaveValue( '61' );
 
-		const [ holdStockOption, lowStockOption ] = await Promise.all( [
-			wpCLI(
-				'wp option get woocommerce_hold_stock_minutes --skip-plugins'
-			),
-			wpCLI(
-				'wp option get woocommerce_notify_low_stock_amount --skip-plugins'
-			),
-		] );
+		// One at a time: overlapping wp-env processes can corrupt its cache (see `wpCLI`).
+		const holdStockOption = await wpCLI(
+			'wp option get woocommerce_hold_stock_minutes --skip-plugins'
+		);
+		const lowStockOption = await wpCLI(
+			'wp option get woocommerce_notify_low_stock_amount --skip-plugins'
+		);
 		expect( holdStockOption.stdout.trim() ).toBe( '61' );
 		expect( lowStockOption.stdout.trim() ).toBe( '2' );
 	} );

@@ -91,7 +91,7 @@ async function placeOrder( page: Page ) {
 		// this helps with flakiness on clicking the Place order button
 		await page
 			.getByPlaceholder( 'Notes about your order' )
-			.fill( 'This order was created by an end-to-end test.' );
+			.fill( 'Test note' );
 	}
 
 	await page.getByRole( 'button', { name: 'Place order' } ).click();
@@ -279,7 +279,7 @@ checkoutPages.forEach( ( { name, slug } ) => {
 			);
 			const newCustomer = getFakeCustomer();
 			await fillBillingDetails( page, newCustomer.billing, false );
-			await page.getByText( 'Cash on delivery' ).click();
+			await page.getByText( 'Cash on delivery', { exact: true } ).click();
 			await placeOrder( page );
 			await page.goto( 'my-account/' );
 			await expect( page.locator( '#username' ) ).toBeVisible();
@@ -301,7 +301,9 @@ checkoutPages.forEach( ( { name, slug } ) => {
 			);
 			const newCustomer = getFakeCustomer();
 			await fillBillingDetails( page, newCustomer.billing, true );
-			await page.getByText( 'Direct bank transfer' ).click();
+			await page
+				.getByText( 'Direct bank transfer', { exact: true } )
+				.click();
 			await placeOrder( page );
 			await page.goto( 'my-account/' );
 			await expect(
@@ -328,7 +330,9 @@ checkoutPages.forEach( ( { name, slug } ) => {
 				tax
 			);
 
-			await page.getByText( 'Direct bank transfer' ).click();
+			await page
+				.getByText( 'Direct bank transfer', { exact: true } )
+				.click();
 			await placeOrder( page );
 		}
 	);
@@ -426,7 +430,7 @@ checkoutPages.forEach( ( { name, slug } ) => {
 				await fillShippingCheckoutBlocks( page, shippingAddress );
 			}
 
-			await page.getByText( 'Cash on delivery' ).click();
+			await page.getByText( 'Cash on delivery', { exact: true } ).click();
 			await placeOrder( page );
 		}
 	);
@@ -476,7 +480,9 @@ checkoutPages.forEach( ( { name, slug } ) => {
 				} );
 			}
 
-			await page.getByText( 'Direct bank transfer' ).click();
+			await page
+				.getByText( 'Direct bank transfer', { exact: true } )
+				.click();
 			await placeOrder( page );
 		}
 	);

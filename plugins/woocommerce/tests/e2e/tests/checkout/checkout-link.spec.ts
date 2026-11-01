@@ -14,6 +14,7 @@ import {
 	guestFile,
 } from '../../fixtures/fixtures';
 import { getFakeProduct } from '../../utils/data';
+import { quotedPattern } from '../../utils/helpers';
 
 const test = baseTest.extend( {
 	products: async ( { restApi }, use ) => {
@@ -116,7 +117,12 @@ test.describe( 'Checkout Link Endpoint', () => {
 				// Assert error notice is shown for invalid coupon
 				await expect(
 					page.getByText(
-						'Coupon "INVALID_COUPON" cannot be applied because it does not exist.'
+						new RegExp(
+							`Coupon ${ quotedPattern(
+								'INVALID_COUPON'
+							) } cannot be applied because it does not exist\\.`,
+							'i'
+						)
 					)
 				).toBeVisible();
 			}
@@ -136,7 +142,11 @@ test.describe( 'Checkout Link Endpoint', () => {
 				// Assert error notice is shown for invalid product
 				await expect(
 					page.getByText(
-						'Product with ID "999999" was not found and cannot be added to the cart.'
+						new RegExp(
+							`Product with ID ${ quotedPattern(
+								'999999'
+							) } was not found and cannot be added to the cart\\.`
+						)
 					)
 				).toBeVisible();
 			}
@@ -156,13 +166,17 @@ test.describe( 'Checkout Link Endpoint', () => {
 				// Assert error notice is shown for invalid product
 				await expect(
 					page.getByText(
-						'Product with ID "999999" was not found and cannot be added to the cart.'
+						new RegExp(
+							`Product with ID ${ quotedPattern(
+								'999999'
+							) } was not found and cannot be added to the cart\\.`
+						)
 					)
 				).toBeVisible();
 
 				// Cart should be empty
 				await expect(
-					page.getByText( 'Your cart is currently empty!' )
+					page.getByText( 'Your cart is empty' )
 				).toBeVisible();
 			}
 		);
@@ -187,7 +201,7 @@ test.describe( 'Checkout Link Endpoint', () => {
 
 				// Cart should be empty
 				await expect(
-					page.getByText( 'Your cart is currently empty!' )
+					page.getByText( 'Your cart is empty' )
 				).toBeVisible();
 			}
 		);

@@ -432,6 +432,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'city',
 			'state',
 			'postcode',
+			'username',
 		);
 
 		if ( ! empty( $query_args['filter_empty'] ) ) {
@@ -614,7 +615,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 *
 	 * @see get_data
 	 * @param array $query_args Query parameters.
-	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
+	 * @return \stdClass|\WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
 	 */
 	public function get_noncached_data( $query_args ) {
 		global $wpdb;
@@ -726,6 +727,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		/**
 		 * Fires when a new report customer is created.
+		 *
+		 * This includes customers created during Analytics import. Rendering the order-edit
+		 * customer history panel uses a read-only lookup and does not fire this action.
 		 *
 		 * @param int $customer_id Customer ID.
 		 * @since 4.0.0

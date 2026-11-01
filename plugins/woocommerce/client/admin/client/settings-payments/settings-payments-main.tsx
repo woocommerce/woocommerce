@@ -18,7 +18,7 @@ import {
 import React, { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { Button } from '@wordpress/components';
+import { Link } from '@wordpress/ui';
 
 /**
  * Internal dependencies
@@ -44,10 +44,10 @@ import {
 	recordPaymentsOnboardingEvent,
 	getPluginActionErrorMessage,
 	getFailedPluginAction,
+	getMorePaymentOptionsUrl,
 } from '~/settings-payments/utils';
 import { WooPaymentsPostSandboxAccountSetupModal } from '~/settings-payments/components/modals';
 import WooPaymentsModal from '~/settings-payments/onboarding/providers/woopayments';
-import { getAdminSetting } from '~/utils/admin-settings';
 import { wooPaymentsOnboardingSessionEntrySettings } from '~/settings-payments/constants';
 
 /**
@@ -79,8 +79,6 @@ export const SettingsPaymentsMain = () => {
 
 	const [ isOnboardingModalOpen, setIsOnboardingModalOpen ] =
 		useState( false );
-
-	const assetUrl = getAdminSetting( 'wcAdminAssetUrl' );
 
 	useEffect( () => {
 		// Record the page view event.
@@ -498,17 +496,14 @@ export const SettingsPaymentsMain = () => {
 	};
 
 	const morePaymentOptionsLink = (
-		<Button
-			variant={ 'link' }
-			target="_blank"
-			rel="noopener noreferrer"
-			href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations"
-			className="more-payment-options-link"
+		<Link
+			href={ getMorePaymentOptionsUrl( businessCountry ) }
 			onClick={ trackMorePaymentsOptionsClicked }
+			rel="noopener noreferrer"
+			openInNewTab
 		>
-			<img src={ assetUrl + '/icons/external-link.svg' } alt="" />
 			{ __( 'More payment options', 'woocommerce' ) }
-		</Button>
+		</Link>
 	);
 
 	return (
