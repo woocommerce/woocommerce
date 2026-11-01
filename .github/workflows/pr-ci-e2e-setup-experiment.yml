@@ -2,7 +2,8 @@ name: 'PR experiment: Blocks E2E setup'
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    # Repeat measurements through the original Actions runs when needed.
+    types: [opened]
     paths:
       - '.github/workflows/pr-ci-e2e-setup-experiment.yml'
 
