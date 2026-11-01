@@ -2,7 +2,8 @@ name: 'PR experiment: Blocks E2E setup'
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    # Later experiment commits must not interrupt this trial.
+    types: [opened]
     paths:
       - '.github/workflows/pr-ci-e2e-setup-experiment.yml'
 
