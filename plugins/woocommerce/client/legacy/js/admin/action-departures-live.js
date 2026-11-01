@@ -32,7 +32,7 @@
 					{ transform: 'perspective(240px) rotateX(90deg)', opacity: 0 },
 					{ transform: 'perspective(240px) rotateX(0)', opacity: 1 }
 				],
-			{ duration: leaving ? 180 : 420, delay, easing: 'ease-out' }
+			{ duration: leaving ? 180 : 420, delay, easing: 'ease-out', fill: 'backwards' }
 		).finished.catch( function () {} );
 	}
 
@@ -56,7 +56,6 @@
 			const row = oldRows.get( nextRow.dataset.actionId );
 			if ( ! row ) {
 				tbody.insertBefore( nextRow, tbody.rows[ index ] || null );
-				flipTiles( nextRow );
 				return;
 			}
 			Array.from( nextRow.cells ).forEach( function ( nextCell, cellIndex ) {
@@ -64,7 +63,6 @@
 				if ( cell.innerHTML !== nextCell.innerHTML || cell.className !== nextCell.className ) {
 					cell.className = nextCell.className;
 					cell.replaceChildren( ...Array.from( nextCell.childNodes ) );
-					flipTiles( cell );
 				}
 			} );
 			if ( tbody.rows[ index ] !== row ) {
@@ -114,6 +112,7 @@
 				throw new Error( 'Board unavailable' );
 			}
 			await update( next );
+			flipTiles( board );
 			message.textContent = board.dataset.messageUpdated;
 		} catch ( error ) {
 			message.textContent = board.dataset.messageFailed;

@@ -15,6 +15,7 @@ describe( 'Live departures board', () => {
 	function html( rows, stamp = '10:00' ) {
 		return `<div class="wc-departures" data-refresh-url="/wp-admin/admin-ajax.php?nonce=fresh"
 			data-message-refreshing="Updating" data-message-updated="Updated" data-message-failed="Failed">
+			<h1><span class="wc-departures__flap">D</span></h1>
 			<div class="wc-departures__snapshot">${ stamp }</div>
 			<p class="wc-departures__live-message"></p><a class="wc-departures__refresh" href="#refresh">Refresh</a>
 			<table><tbody>${ rows }</tbody></table><div class="wc-departures__empty" ${ rows ? 'hidden' : '' }>Empty</div>
@@ -56,7 +57,7 @@ describe( 'Live departures board', () => {
 		}
 	} );
 
-	test( 'polls after five minutes and flips only changed or arriving content', async () => {
+	test( 'polls after five minutes and flips the whole board after every successful refresh', async () => {
 		start( html( row( 1, 'Scheduled' ) + row( 2, 'Scheduled' ) + row( 3, 'Scheduled' ) ) );
 		const unchanged = document.querySelector( '[data-action-id="1"]' );
 		const link = unchanged.querySelector( 'a' );
@@ -70,12 +71,13 @@ describe( 'Live departures board', () => {
 		expect( document.querySelector( '[data-action-id="2"]' ).textContent ).toContain( 'Awaiting run' );
 		expect( document.querySelector( '[data-action-id="3"]' ) ).toBeNull();
 		expect( document.querySelector( '[data-action-id="4"]' ) ).not.toBeNull();
-		expect( animate.mock.instances ).not.toContain( unchanged.querySelector( 'span' ) );
-		expect( animate ).toHaveBeenCalledTimes( 3 );
+		expect( animate.mock.instances ).toContain( unchanged.querySelector( 'span' ) );
+		expect( animate.mock.instances ).toContain( document.querySelector( 'h1 span' ) );
+		expect( animate ).toHaveBeenCalledTimes( 5 );
 		expect( document.querySelector( '.wc-departures__snapshot' ).textContent ).toBe( '10:05' );
 		animate.mockClear();
 		await jest.advanceTimersByTimeAsync( 300000 );
-		expect( animate ).not.toHaveBeenCalled();
+		expect( animate ).toHaveBeenCalledTimes( 4 );
 	} );
 
 	test( 'pauses when hidden and refreshes once when an overdue tab becomes visible', async () => {

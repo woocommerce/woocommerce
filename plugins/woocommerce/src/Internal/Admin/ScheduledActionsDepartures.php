@@ -48,12 +48,29 @@ final class ScheduledActionsDepartures {
 	 * @internal
 	 */
 	public function enqueue_assets(): void {
-		wp_enqueue_style( 'woocommerce-action-departures', WC()->plugin_url() . '/assets/css/action-departures.css', array(), WC_VERSION );
+		$style = 'assets/css/action-departures.css';
+		wp_enqueue_style( 'woocommerce-action-departures', WC()->plugin_url() . '/' . $style, array(), $this->asset_version( $style ) );
 		add_filter( 'admin_title', array( $this, 'page_title' ) );
 		if ( $this->is_live() ) {
 			$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
-			wp_enqueue_script( 'woocommerce-action-departures-live', WC()->plugin_url() . '/assets/js/admin/action-departures-live' . $suffix . '.js', array(), WC_VERSION, true );
+			$script = 'assets/js/admin/action-departures-live' . $suffix . '.js';
+			wp_enqueue_script( 'woocommerce-action-departures-live', WC()->plugin_url() . '/' . $script, array(), $this->asset_version( $script ), true );
 		}
+	}
+
+	/**
+	 * Avoid stale development assets while retaining release versioning.
+	 *
+	 * @param string $asset Plugin-relative asset path.
+	 * @return string
+	 */
+	private function asset_version( string $asset ): string {
+		if ( ! defined( 'SCRIPT_DEBUG' ) || ! SCRIPT_DEBUG ) {
+			return WC_VERSION;
+		}
+		$path     = WC_ABSPATH . $asset;
+		$modified = is_file( $path ) ? filemtime( $path ) : false;
+		return false === $modified ? WC_VERSION : WC_VERSION . '-' . $modified;
 	}
 
 	/**

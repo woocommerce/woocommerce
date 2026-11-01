@@ -180,7 +180,13 @@
 		text-align: center;
 		text-transform: uppercase;
 		white-space: pre-wrap;
-		animation: wc-departures-arrive 0.35s ease-out both;
+		animation: wc-departures-arrive 0.42s ease-out backwards;
+
+		@for $tile from 1 through 12 {
+			&:nth-child(12n + #{$tile}) {
+				animation-delay: ($tile - 1) * 18ms;
+			}
+		}
 	}
 
 	&__time {
@@ -298,11 +304,11 @@
 
 	from {
 		opacity: 0;
-		transform: rotateX(-35deg);
+		transform: perspective(240px) rotateX(90deg);
 	}
 
 	to {
 		opacity: 1;
-		transform: rotateX(0);
+		transform: none;
 	}
 }
