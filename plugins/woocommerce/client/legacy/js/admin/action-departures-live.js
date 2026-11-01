@@ -28,6 +28,7 @@
 
 	function flipTiles( container, previous = new Map(), departing = false ) {
 		const reduced = window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches;
+		const duration = 320;
 		return Promise.all( Array.from( container.querySelectorAll( '.wc-departures__flap' ) ).map( function ( tile, index ) {
 			const before = previous.has( tile ) ? previous.get( tile ) : ( departing ? tile.dataset.character : ' ' );
 			const after = departing ? ' ' : tile.dataset.character;
@@ -46,11 +47,11 @@
 			const delay = ( index % 12 ) * 18;
 			const fold = top.animate(
 				[ { transform: 'rotateX(0)', opacity: 1 }, { transform: 'rotateX(-90deg)', opacity: 1 } ],
-				{ duration: 260, delay, easing: 'ease-in', fill: 'backwards' }
+				{ duration, delay, easing: 'ease-in', fill: 'backwards' }
 			);
 			const unfold = bottom.animate(
 				[ { transform: 'rotateX(90deg)' }, { transform: 'rotateX(0)' } ],
-				{ duration: 260, delay: delay + 260, easing: 'ease-out', fill: 'backwards' }
+				{ duration, delay: delay + duration, easing: 'ease-out', fill: 'backwards' }
 			);
 			return Promise.all( [ fold.finished, unfold.finished ].map( finished => finished.catch( function () {} ) ) )
 				.then( function () { tile.dataset.before = after; } );
@@ -101,6 +102,11 @@
 		const nextMore = next.querySelector( '.wc-departures__footer a' );
 		more.textContent = nextMore.textContent;
 		more.href = nextMore.href;
+		const pagination = board.querySelector( '.wc-departures__pagination' );
+		const nextPagination = next.querySelector( '.wc-departures__pagination' );
+		if ( pagination.innerHTML !== nextPagination.innerHTML ) {
+			pagination.replaceChildren( ...Array.from( nextPagination.childNodes ) );
+		}
 		refreshUrl = next.dataset.refreshUrl;
 		if ( hadFocus ) {
 			const target = focused.isConnected ? focused : board.querySelector( '.wc-departures__refresh' );

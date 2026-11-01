@@ -13,16 +13,18 @@ defined( 'ABSPATH' ) || exit;
  * Variables supplied by the board controller.
  *
  * @var string $list_url
+ * @var string $action_list_url
  * @var string $snapshot_url
  * @var string $live_url
  * @var string $board_url
  * @var string $refresh_url
  * @var bool $is_live
  * @var int $now
+ * @var int $page_number
  * @var array<string, string> $statuses
  * @var string $status
  * @var bool $has_more
- * @var array<array{id: int|string, hook: string, group: string, date: DateTimeInterface|null, label: string}> $rows
+ * @var array<array{id: int|string, hook: string, group: string, date: DateTimeInterface|null, status: string, label: string}> $rows
  * @var callable(string): void $render_flaps
  */
 ?>
@@ -57,12 +59,16 @@ defined( 'ABSPATH' ) || exit;
 			<noscript><p><?php esc_html_e( 'Live updates need JavaScript. Use Refresh board to update manually.', 'woocommerce' ); ?></p></noscript>
 		<?php endif; ?>
 		<div class="wc-departures__toolbar">
-			<nav aria-label="<?php esc_attr_e( 'Action status', 'woocommerce' ); ?>">
-				<?php foreach ( $statuses as $key => $name ) : ?>
-					<a href="<?php echo esc_url( add_query_arg( 'status', $key, $board_url ) ); ?>" <?php echo $key === $status ? 'aria-current="page"' : ''; ?>><?php echo esc_html( $name ); ?></a>
-				<?php endforeach; ?>
-			</nav>
-			<a class="wc-departures__refresh" href="<?php echo esc_url( add_query_arg( 'status', $status, $board_url ) ); ?>"><?php esc_html_e( 'Refresh board ↻', 'woocommerce' ); ?></a>
+			<?php if ( $is_live ) : ?>
+				<p class="wc-departures__scope"><?php esc_html_e( 'All actions · Newest first', 'woocommerce' ); ?></p>
+			<?php else : ?>
+				<nav aria-label="<?php esc_attr_e( 'Action status', 'woocommerce' ); ?>">
+					<?php foreach ( $statuses as $key => $name ) : ?>
+						<a href="<?php echo esc_url( add_query_arg( 'status', $key, $board_url ) ); ?>" <?php echo $key === $status ? 'aria-current="page"' : ''; ?>><?php echo esc_html( $name ); ?></a>
+					<?php endforeach; ?>
+				</nav>
+			<?php endif; ?>
+			<a class="wc-departures__refresh" href="<?php echo esc_url( $board_url ); ?>"><?php esc_html_e( 'Refresh board ↻', 'woocommerce' ); ?></a>
 		</div>
 		<div class="wc-departures__table-wrap" role="region" aria-label="<?php esc_attr_e( 'Scheduled action departures', 'woocommerce' ); ?>" tabindex="0">
 			<table class="wc-departures__table">
@@ -91,7 +97,7 @@ defined( 'ABSPATH' ) || exit;
 								<a href="<?php echo esc_url( add_query_arg( 's', $row['hook'], $list_url ) ); ?>"><code><?php echo esc_html( $row['hook'] ); ?></code></a>
 								<span class="wc-departures__group"><?php echo esc_html( $row['group'] ? $row['group'] : __( 'No group', 'woocommerce' ) ); ?></span>
 							</td>
-							<td class="wc-departures__status wc-departures__status--<?php echo esc_attr( $status ); ?>"><?php $render_flaps( $row['label'] ); ?></td>
+							<td class="wc-departures__status wc-departures__status--<?php echo esc_attr( $row['status'] ); ?>"><?php $render_flaps( $row['label'] ); ?></td>
 						</tr>
 					<?php endforeach; ?>
 				</tbody>
@@ -100,12 +106,28 @@ defined( 'ABSPATH' ) || exit;
 			<div class="wc-departures__empty" <?php echo empty( $rows ) ? '' : 'hidden'; ?>>
 				<span aria-hidden="true">✈</span>
 				<h2><?php esc_html_e( 'A quiet terminal.', 'woocommerce' ); ?></h2>
-				<p><?php esc_html_e( 'No actions with this status. Enjoy the moment.', 'woocommerce' ); ?></p>
+				<p><?php echo esc_html( $is_live ? __( 'No actions on this page.', 'woocommerce' ) : __( 'No actions with this status. Enjoy the moment.', 'woocommerce' ) ); ?></p>
 			</div>
+		<?php if ( $is_live ) : ?>
+			<nav class="wc-departures__pagination" aria-label="<?php esc_attr_e( 'Actions pagination', 'woocommerce' ); ?>">
+				<?php if ( $page_number > 1 ) : ?>
+					<a href="<?php echo esc_url( add_query_arg( 'paged', $page_number - 1, $live_url ) ); ?>" rel="prev"><?php esc_html_e( '← Previous', 'woocommerce' ); ?></a>
+				<?php endif; ?>
+				<span>
+					<?php
+					/* translators: %s: Current page number. */
+					echo esc_html( sprintf( __( 'Page %s', 'woocommerce' ), number_format_i18n( $page_number ) ) );
+					?>
+				</span>
+				<?php if ( $has_more ) : ?>
+					<a href="<?php echo esc_url( add_query_arg( 'paged', $page_number + 1, $live_url ) ); ?>" rel="next"><?php esc_html_e( 'Next →', 'woocommerce' ); ?></a>
+				<?php endif; ?>
+			</nav>
+		<?php endif; ?>
 		<footer class="wc-departures__footer">
 			<p><?php esc_html_e( 'A snapshot, not a timetable guarantee. All times use your site timezone.', 'woocommerce' ); ?></p>
-			<a href="<?php echo esc_url( add_query_arg( 'status', $status, $list_url ) ); ?>">
-				<?php echo esc_html( $has_more ? __( 'More departures in the action list →', 'woocommerce' ) : __( 'Open the action list →', 'woocommerce' ) ); ?>
+			<a href="<?php echo esc_url( $action_list_url ); ?>">
+				<?php echo esc_html( ! $is_live && $has_more ? __( 'More departures in the action list →', 'woocommerce' ) : __( 'Open the action list →', 'woocommerce' ) ); ?>
 			</a>
 		</footer>
 	</div>

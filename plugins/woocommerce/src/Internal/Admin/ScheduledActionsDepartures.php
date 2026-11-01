@@ -146,15 +146,33 @@ final class ScheduledActionsDepartures {
 		);
 		// This query parameter selects a read-only view, so no nonce is needed.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$status   = isset( $_GET['status'] ) && is_string( $_GET['status'] ) ? sanitize_key( wp_unslash( $_GET['status'] ) ) : '';
-		$status   = isset( $statuses[ $status ] ) ? $status : ActionScheduler_Store::STATUS_PENDING;
+		$status      = isset( $_GET['status'] ) && is_string( $_GET['status'] ) ? sanitize_key( wp_unslash( $_GET['status'] ) ) : '';
+		$status      = isset( $statuses[ $status ] ) ? $status : ActionScheduler_Store::STATUS_PENDING;
+		$is_live     = $this->is_live();
+		$page_number = 1;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Selects a read-only page of actions.
+		if ( $is_live && isset( $_GET['paged'] ) && is_string( $_GET['paged'] ) ) {
+			$requested_page = filter_var(
+				// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Validate the pagination offset without changing state.
+				wp_unslash( $_GET['paged'] ),
+				FILTER_VALIDATE_INT,
+				array(
+					'options' => array(
+						'min_range' => 1,
+						'max_range' => intdiv( PHP_INT_MAX, 16 ),
+					),
+				)
+			);
+			$page_number = false === $requested_page ? 1 : $requested_page;
+		}
 		$store    = ActionScheduler::store();
 		$ids      = $store->query_actions(
 			array(
-				'status'   => $status,
+				'status'   => $is_live ? '' : $status,
 				'per_page' => 17,
-				'orderby'  => 'date',
-				'order'    => in_array( $status, array( ActionScheduler_Store::STATUS_PENDING, ActionScheduler_Store::STATUS_RUNNING ), true ) ? 'ASC' : 'DESC',
+				'offset'   => ( $page_number - 1 ) * 16,
+				'orderby'  => $is_live ? 'action_id' : 'date',
+				'order'    => ! $is_live && in_array( $status, array( ActionScheduler_Store::STATUS_PENDING, ActionScheduler_Store::STATUS_RUNNING ), true ) ? 'ASC' : 'DESC',
 			)
 		);
 		$has_more = count( $ids ) > 16;
@@ -162,38 +180,46 @@ final class ScheduledActionsDepartures {
 		$now      = time();
 		$labels   = $store->get_status_labels();
 		foreach ( array_slice( $ids, 0, 16 ) as $id ) {
-			$action = $store->fetch_action( $id );
-			if ( $action instanceof ActionScheduler_NullAction ) {
+			try {
+				$action = $store->fetch_action( $id );
+				if ( $action instanceof ActionScheduler_NullAction ) {
+					continue;
+				}
+				$action_status = $is_live ? $store->get_status( $id ) : $status;
+			} catch ( \Exception $exception ) {
+				// Actions can disappear while the board refreshes.
 				continue;
 			}
 			$date  = $action->get_schedule()->get_date();
-			$label = $labels[ $status ];
-			if ( ActionScheduler_Store::STATUS_PENDING === $status ) {
+			$label = $labels[ $action_status ] ?? $action_status;
+			if ( ActionScheduler_Store::STATUS_PENDING === $action_status ) {
 				$label = $date && $date->getTimestamp() > $now ? __( 'Scheduled', 'woocommerce' ) : __( 'Awaiting run', 'woocommerce' );
 			}
 			$rows[] = array(
-				'id'    => $id,
-				'hook'  => $action->get_hook(),
-				'group' => $action->get_group(),
-				'date'  => $date,
-				'label' => $label,
+				'id'     => $id,
+				'hook'   => $action->get_hook(),
+				'group'  => $action->get_group(),
+				'date'   => $date,
+				'status' => $action_status,
+				'label'  => $label,
 			);
 		}
-		$is_live      = $this->is_live();
-		$snapshot_url = add_query_arg( 'status', $status, admin_url( 'admin.php?page=wc-action-scheduler-departures' ) );
-		$live_url     = add_query_arg( 'live', '1', $snapshot_url );
-		$board_url    = $is_live ? $live_url : $snapshot_url;
-		$list_url     = admin_url( 'admin.php?page=wc-status&tab=action-scheduler' );
-		$refresh_url  = $is_live ? add_query_arg(
+		$base_url        = admin_url( 'admin.php?page=wc-action-scheduler-departures' );
+		$snapshot_url    = add_query_arg( 'status', $status, $base_url );
+		$live_url        = add_query_arg( 'live', '1', $base_url );
+		$board_url       = $is_live ? add_query_arg( 'paged', $page_number, $live_url ) : $snapshot_url;
+		$list_url        = admin_url( 'admin.php?page=wc-status&tab=action-scheduler' );
+		$action_list_url = $is_live ? $list_url : add_query_arg( 'status', $status, $list_url );
+		$refresh_url     = $is_live ? add_query_arg(
 			array(
 				'action' => 'woocommerce_action_departures',
-				'status' => $status,
 				'live'   => '1',
+				'paged'  => $page_number,
 				'nonce'  => wp_create_nonce( 'wc-action-departures' ),
 			),
 			admin_url( 'admin-ajax.php' )
 		) : '';
-		$render_flaps = static function ( string $text ): void {
+		$render_flaps    = static function ( string $text ): void {
 			self::render_flaps( $text );
 		};
 		include __DIR__ . '/views/html-admin-action-departures.php';

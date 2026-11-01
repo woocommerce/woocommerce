@@ -111,6 +111,23 @@
 		font-size: 12px;
 	}
 
+	&__scope {
+		margin: 0;
+		color: var(--board-muted);
+		font-size: 12px;
+	}
+
+	&__pagination {
+		display: flex;
+		justify-content: flex-end;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 20px;
+		padding-block: 20px;
+		color: var(--board-muted);
+		font-size: 12px;
+	}
+
 	&__live-message {
 		color: var(--board-accent);
 		font-size: 12px;
@@ -239,12 +256,12 @@
 	&__leaf--top {
 		z-index: 2;
 		opacity: 0;
-		animation: wc-departures-fold 0.26s ease-in var(--wc-departures-delay) backwards;
+		animation: wc-departures-fold 0.32s ease-in var(--wc-departures-delay) backwards;
 	}
 
 	&__leaf--bottom {
 		z-index: 1;
-		animation: wc-departures-unfold 0.26s ease-out calc(var(--wc-departures-delay) + 260ms) backwards;
+		animation: wc-departures-unfold 0.32s ease-out calc(var(--wc-departures-delay) + 320ms) backwards;
 	}
 
 	&__time {

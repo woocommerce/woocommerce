@@ -19,18 +19,20 @@ describe( 'Live departures board', () => {
 			`<td>${ tile( label ) }</td></tr>`;
 	}
 
-	function html( rows, stamp = '10:00' ) {
-		return `<div class="wc-departures" data-refresh-url="/wp-admin/admin-ajax.php?nonce=fresh"
+	function html( rows, stamp = '10:00', page = 1, hasMore = true ) {
+		return `<div class="wc-departures" data-refresh-url="/wp-admin/admin-ajax.php?nonce=fresh&paged=${ page }"
 			data-message-refreshing="Updating" data-message-updated="Updated" data-message-failed="Failed">
 			<h1>${ tile( 'D' ) }</h1>
 			<div class="wc-departures__snapshot">${ stamp }</div>
 			<p class="wc-departures__live-message"></p><a class="wc-departures__refresh" href="#refresh">Refresh</a>
 			<table><tbody>${ rows }</tbody></table><div class="wc-departures__empty" ${ rows ? 'hidden' : '' }>Empty</div>
+			<nav class="wc-departures__pagination">${ page > 1 ? `<a href="?live=1&paged=${ page - 1 }" rel="prev">Previous</a>` : '' }
+			<span>Page ${ page }</span>${ hasMore ? `<a href="?live=1&paged=${ page + 1 }" rel="next">Next</a>` : '' }</nav>
 			<footer class="wc-departures__footer"><a href="#list">Action list</a></footer></div>`;
 	}
 
-	function response( rows, stamp ) {
-		return { ok: true, json: async () => ( { success: true, data: { html: html( rows, stamp ) } } ) };
+	function response( rows, stamp, page, hasMore ) {
+		return { ok: true, json: async () => ( { success: true, data: { html: html( rows, stamp, page, hasMore ) } } ) };
 	}
 
 	function start( markup = html( row( 1, 'Scheduled' ) ) ) {
@@ -47,6 +49,19 @@ describe( 'Live departures board', () => {
 		animate = jest.fn( () => ( { finished: Promise.resolve() } ) );
 		Element.prototype.animate = animate;
 		global.fetch = jest.fn().mockResolvedValue( response( row( 1, 'Scheduled' ), '10:05' ) );
+	} );
+
+	test( 'refreshes the selected page and updates navigation when the next page disappears', async () => {
+		start( html( row( 17, 'Complete' ), '10:00', 2 ) );
+		document.querySelector( '[rel="next"]' ).focus();
+		global.fetch.mockResolvedValue( response( row( 17, 'Complete' ), '10:05', 2, false ) );
+		await jest.advanceTimersByTimeAsync( 300000 );
+
+		expect( global.fetch ).toHaveBeenCalledWith( expect.stringContaining( 'paged=2' ), expect.any( Object ) );
+		expect( document.querySelector( '.wc-departures__pagination' ).textContent ).toContain( 'Page 2' );
+		expect( document.querySelector( '[rel="prev"]' ).getAttribute( 'href' ) ).toContain( 'paged=1' );
+		expect( document.querySelector( '[rel="next"]' ) ).toBeNull();
+		expect( document.activeElement ).toBe( document.querySelector( '.wc-departures__refresh' ) );
 	} );
 
 	afterEach( () => {
