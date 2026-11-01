@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Declare `uuid` as a dependency so the `Sortable` component can load when the package is installed from npm.
