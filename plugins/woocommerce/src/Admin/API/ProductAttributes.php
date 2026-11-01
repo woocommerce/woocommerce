@@ -144,14 +144,30 @@ class ProductAttributes extends \WC_REST_Product_Attributes_Controller {
 			return parent::get_items( $request );
 		}
 
-		$search_string       = $request['search'];
-		$custom_attributes   = $this->get_custom_attributes( array( 'name' => $search_string ) );
+		$search_string     = $request['search'];
+		$taxonomy_names    = $this->get_requested_taxonomy_names( $request );
+		$custom_attributes = $this->get_custom_attributes( array( 'name' => $search_string ) );
+
+		if ( ! empty( $taxonomy_names ) ) {
+			$custom_attributes = array_filter(
+				$custom_attributes,
+				static function ( $slug ) use ( $taxonomy_names ) {
+					return in_array( wc_attribute_taxonomy_name( wc_attribute_taxonomy_slug( $slug ) ), $taxonomy_names, true );
+				},
+				ARRAY_FILTER_USE_KEY
+			);
+		}
+
 		$matching_attributes = $this->format_custom_attribute_items_for_response( $custom_attributes );
 		$taxonomy_attributes = wc_get_attribute_taxonomies();
 
 		foreach ( $taxonomy_attributes as $attribute_obj ) {
 			// Skip taxonomy attributes that didn't match the query.
 			if ( false === stripos( $attribute_obj->attribute_label, $search_string ) ) {
+				continue;
+			}
+
+			if ( ! empty( $taxonomy_names ) && ! in_array( wc_attribute_taxonomy_name( $attribute_obj->attribute_name ), $taxonomy_names, true ) ) {
 				continue;
 			}
 

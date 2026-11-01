@@ -93,10 +93,12 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Product_Attributes_V
 	 *
 	 * Slugs are normalized the same way as on create, so `pa_color`, `color` and `Color` all become `pa_color`.
 	 *
+	 * @since 11.3.0
+	 *
 	 * @param WP_REST_Request<array<string, mixed>> $request Full details about the request.
 	 * @return string[] Taxonomy names, or an empty array when no slug was requested.
 	 */
-	private function get_requested_taxonomy_names( $request ) {
+	protected function get_requested_taxonomy_names( $request ) {
 		$taxonomy_names = array();
 
 		foreach ( (array) $request['slug'] as $slug ) {

@@ -217,6 +217,38 @@ class WC_Admin_Tests_API_Product_Attributes extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Search intersects global and custom attribute matches with the requested slugs.
+	 * @testWith ["pa_number", ["pa_number"]]
+	 *           ["NUMBER", ["pa_number"]]
+	 *           ["numeric-size", ["numeric-size"]]
+	 *           [["PA_Number", "numeric-size"], ["numeric-size", "pa_number"]]
+	 *           ["pa_color", []]
+	 *           ["does-not-exist", []]
+	 *           ["", ["numeric-size", "pa_number"]]
+	 *           [[], ["numeric-size", "pa_number"]]
+	 *
+	 * @param string|string[] $slug Requested slugs.
+	 * @param string[]        $expected_slugs Expected response slugs.
+	 */
+	public function test_search_with_slug( $slug, array $expected_slugs ): void {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'search' => 'num',
+				'slug'   => $slug,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $expected_slugs, wp_list_pluck( $response->get_data(), 'slug' ) );
+		$this->assertSame( count( $expected_slugs ), $response->get_headers()['X-WP-Total'] );
+		$this->assertSame( 1, $response->get_headers()['X-WP-TotalPages'] );
+	}
+
+	/**
 	 * Test getting a single attribute by slug.
 	 */
 	public function test_by_slug() {
