@@ -46,7 +46,7 @@ pnpm exec wp-env run cli wp mcp-adapter list
 
 The output lists `mcp-adapter-default-server`, which is the server that exposes WooCommerce abilities.
 
-Use `pnpm exec wp-env` rather than `pnpm wp-env` for every command on this page. Running wp-env as a package script makes `pnpm` print the command to stdout, which corrupts the MCP stream. `wp-env` itself writes its status messages to stderr.
+Use `pnpm exec wp-env` rather than `pnpm wp-env` whenever a command runs `mcp-adapter serve`. Running wp-env as a package script makes `pnpm` print the command to stdout, which corrupts the MCP stream. `wp-env` itself writes its status messages to stderr.
 
 ## Connect MCP Inspector
 
