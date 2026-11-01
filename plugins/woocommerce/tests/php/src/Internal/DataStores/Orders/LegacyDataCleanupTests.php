@@ -35,9 +35,12 @@ class LegacyDataCleanupTests extends \WC_Unit_Test_Case {
 	 * Destroys system under test.
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
-		$this->clean_up_cot_setup();
-		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
+		try {
+			$this->clean_up_cot_setup();
+			remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**
