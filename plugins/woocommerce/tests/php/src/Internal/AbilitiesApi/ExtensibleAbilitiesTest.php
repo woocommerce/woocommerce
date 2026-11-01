@@ -3868,7 +3868,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$order->save();
 
 		$calls  = array();
-		$record = static function ( $and_taxes, $listened, $staged = null ) use ( &$calls ) {
+		$record = static function ( $and_taxes, $listened, $staged ) use ( &$calls ) {
 			$calls[] = array(
 				'staged'   => $staged,
 				'quantity' => array_sum( array_map( static fn( $item ) => $item->get_quantity(), wc_get_order( $listened->get_id() )->get_items() ) ),
@@ -3893,7 +3893,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$this->assertNotWPError( $result );
 		$this->assertCount( 1, $calls );
-		$this->assertNull( $calls[0]['staged'] );
+		$this->assertFalse( $calls[0]['staged'] );
 		$this->assertSame( 3, $calls[0]['quantity'] );
 		$this->assertGreaterThan( 0, $calls[0]['tax_ids'][0] );
 		$this->assertSame( '33.00', wc_get_order( $order->get_id() )->get_total() );
