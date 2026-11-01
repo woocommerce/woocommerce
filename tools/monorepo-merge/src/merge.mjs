@@ -140,7 +140,7 @@ export async function merge( source, requestedDestination, { branch } ) {
 
 	// Ask git from the tool's own directory, so a copy outside tools/monorepo-merge cannot target an enclosing repository.
 	const inMonorepo = { cwd: MONOREPO_ROOT };
-	const notARepository = `This tool must sit at tools/monorepo-merge in the git checkout you merge into, but ${ MONOREPO_ROOT } is not that checkout's root`;
+	const notARepository = `The checkout to merge into must be two directories above this tool, at ${ MONOREPO_ROOT }, but that is not the root of the git checkout containing it`;
 	const topLevel = await run(
 		'git',
 		[ 'rev-parse', '--show-toplevel' ],
@@ -188,7 +188,7 @@ export async function merge( source, requestedDestination, { branch } ) {
 			} of ${ MONOREPO_ROOT }. Continue?`
 		) )
 	) {
-		throw new Error( 'Cancelled. Nothing was changed.' );
+		throw new Error( 'Cancelled.' );
 	}
 
 	const cloneDir = await mkdtemp( clonePrefix );
@@ -197,10 +197,13 @@ export async function merge( source, requestedDestination, { branch } ) {
 	// but a signal sent to this process alone has to be passed on to the running command.
 	let interrupted = false;
 	let mergeStarted = false;
+	let cleaningUp = false;
 	const onInterrupt = ( signal ) => {
 		interrupted = true;
 		closePrompts();
-		activeChild?.kill( signal );
+		if ( ! cleaningUp ) {
+			activeChild?.kill( signal );
+		}
 	};
 	for ( const signal of SIGNALS ) {
 		process.on( signal, onInterrupt );
@@ -277,16 +280,37 @@ export async function merge( source, requestedDestination, { branch } ) {
 	const stopped = Boolean( failure ) && interrupted;
 
 	// The merge only needs the fetched objects, so the clone and remote can go even after a conflict.
+	// Cleanup commands run in their own process group and are never sent signals, so Ctrl+C cannot stop them.
+	cleaningUp = true;
+	const cleanupOptions = { ...inMonorepo, detached: true };
 	const problems = [];
 	try {
 		// Checked by URL rather than a flag, because an interrupted `git remote add` can still have written the remote.
-		if ( ( await remoteUrl() ) === cloneDir ) {
-			await run(
+		try {
+			const remotes = await run(
 				'git',
-				[ 'remote', 'remove', REMOTE ],
-				`Failed to remove the temporary remote "${ REMOTE }"`,
-				inMonorepo
-			).catch( ( error ) => problems.push( error.message ) );
+				[ 'remote' ],
+				'Failed to list the remotes',
+				cleanupOptions
+			);
+			if (
+				remotes.split( '\n' ).includes( REMOTE ) &&
+				( await run(
+					'git',
+					[ 'remote', 'get-url', REMOTE ],
+					`Failed to read the temporary remote "${ REMOTE }"`,
+					cleanupOptions
+				) ) === cloneDir
+			) {
+				await run(
+					'git',
+					[ 'remote', 'remove', REMOTE ],
+					`Failed to remove the temporary remote "${ REMOTE }"`,
+					cleanupOptions
+				);
+			}
+		} catch ( error ) {
+			problems.push( error.message );
 		}
 		await rm( cloneDir, { recursive: true, force: true } ).catch(
 			( error ) =>

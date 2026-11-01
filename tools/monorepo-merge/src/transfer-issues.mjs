@@ -415,8 +415,11 @@ export async function transferIssues(
 
 		console.log( 'Running post-transfer tasks' );
 	}
-	// Each step is tried on its own, so one failure does not skip the other or the remaining issues.
-	for ( const issue of issues.filter( ( { newId } ) => newId ) ) {
+	// Each step is tried on its own, so one failure does not skip the other or the remaining issues,
+	// unless the failure is one that every later request would hit too.
+	const moved = issues.filter( ( { newId } ) => newId );
+	for ( const [ index, issue ] of moved.entries() ) {
+		let requestFailure;
 		try {
 			for ( const problem of await restoreProjectFields(
 				graphql,
@@ -428,9 +431,10 @@ export async function transferIssues(
 			failures.push(
 				`${ issue.title }: restoring project fields failed: ${ error.message }`
 			);
+			requestFailure = error.requestFailed ? error : undefined;
 		}
 
-		if ( labelIds.length > 0 ) {
+		if ( labelIds.length > 0 && ! requestFailure ) {
 			try {
 				await graphql(
 					`
@@ -446,7 +450,20 @@ export async function transferIssues(
 				failures.push(
 					`${ issue.title }: adding labels failed: ${ error.message }`
 				);
+				requestFailure = error.requestFailed ? error : undefined;
 			}
+		}
+
+		if ( requestFailure ) {
+			const skipped = moved.slice( index + 1 );
+			if ( skipped.length > 0 ) {
+				failures.push(
+					`Stopped post-transfer tasks, so these transferred issues still need their project fields and labels checked: ${ skipped
+						.map( ( { title } ) => `"${ title }"` )
+						.join( ', ' ) }`
+				);
+			}
+			break;
 		}
 	}
 
