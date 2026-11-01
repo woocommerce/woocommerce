@@ -2,8 +2,8 @@ name: 'PR experiment: Browser dependency closure'
 
 on:
   pull_request:
-    # This temporary workflow runs only when its own file changes.
-    types: [opened, synchronize]
+    # Rerun the original Actions run explicitly to repeat this trial.
+    types: [opened]
     paths:
       - '.github/workflows/pr-ci-dependency-experiment.yml'
 

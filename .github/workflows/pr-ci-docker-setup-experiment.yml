@@ -2,7 +2,7 @@ name: 'PR experiment: Docker E2E setup'
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened]
     paths:
       - '.github/workflows/pr-ci-docker-setup-experiment.yml'
 
