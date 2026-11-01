@@ -3,7 +3,7 @@ name: 'PR experiment: read-only seed lookup batching'
 on:
   pull_request:
     # Repeat the original Actions run explicitly; later PR pushes do not rerun it.
-    types: [opened]
+    types: [opened, synchronize]
     paths:
       - '.github/workflows/pr-ci-seed-experiment.yml'
 
@@ -301,6 +301,89 @@ jobs:
               ksort($files);
               return ['database_sha256' => hash('sha256', $dump['stdout']), 'database_bytes' => strlen($dump['stdout']), 'table_insert_sha256' => $tableRows, 'uploads' => $files];
           }
+          function seed_db_query($sql) {
+              $result = execute_lookup_process('wp db query --batch --skip-column-names ' . escapeshellarg($sql));
+              if ($result['return_code'] !== 0 || $result['stderr'] !== '') {
+                  throw new RuntimeException('Database query failed');
+              }
+              return $result['stdout'];
+          }
+
+          function seed_options_table() {
+              $prefix = execute_lookup_process('wp config get table_prefix');
+              if ($prefix['return_code'] !== 0 || $prefix['stderr'] !== '' || !preg_match('/^[A-Za-z0-9_$]+$/D', $prefix['stdout'])) {
+                  throw new RuntimeException('Could not determine a safe database prefix');
+              }
+              return '`' . $prefix['stdout'] . 'options`';
+          }
+
+          function seed_timeout() {
+              $value = seed_db_query("SELECT CONCAT('present:', HEX(option_value)) FROM " . seed_options_table() . " WHERE BINARY option_name = BINARY '_transient_timeout_wc_term_counts'");
+              if ($value === '') {
+                  return null;
+              }
+              if (!preg_match('/^present:([0-9A-F]*)$/D', $value, $match)) {
+                  throw new RuntimeException('Invalid term-count timeout result');
+              }
+              return hex2bin($match[1]);
+          }
+
+          function restore_seed_checkpoint($label, $expected, $verifyLabel) {
+              if (!preg_match('/^[a-z0-9-]+$/D', $label)) {
+                  throw new RuntimeException('Invalid restore label');
+              }
+              $path = __DIR__ . '/private-dumps/' . $label . '.sql';
+              if (!is_file($path) || hash_file('sha256', $path) !== $expected['database_sha256']) {
+                  throw new RuntimeException('Private restore checkpoint missing or corrupt');
+              }
+              $result = execute_lookup_process('wp db import ' . escapeshellarg($path) . ' --quiet');
+              if ($result['return_code'] !== 0 || $result['stderr'] !== '') {
+                  throw new RuntimeException('Database checkpoint restore failed');
+              }
+              $actual = capture_seed_checkpoint($verifyLabel);
+              if ($actual !== $expected) {
+                  throw new RuntimeException('Restored database or uploads do not match checkpoint');
+              }
+          }
+
+          function seed_validate_expiry($expiry, $start, $end) {
+              if (!preg_match('/^[1-9][0-9]*$/D', $expiry) || strlen($expiry) > 10) {
+                  throw new RuntimeException('Invalid term-count timeout');
+              }
+              $expiry = (int) $expiry;
+              $month = 30 * 24 * 60 * 60;
+              if ($expiry < $start + $month || $expiry > $end + $month) {
+                  throw new RuntimeException('Term-count timeout outside arm bounds');
+              }
+              return $expiry;
+          }
+
+          function seed_comparison_state($label, $raw, $start, $end) {
+              $expiry = seed_timeout();
+              if ($expiry === null) {
+                  return ['state' => $raw, 'expiry' => null, 'normalized' => false];
+              }
+              $expiry = seed_validate_expiry($expiry, $start, $end);
+              $table = seed_options_table();
+              $where = " WHERE BINARY option_name = BINARY '_transient_timeout_wc_term_counts'";
+              try {
+                  seed_db_query("UPDATE $table SET option_value = '1000000000'" . $where);
+                  if (seed_timeout() !== '1000000000') {
+                      throw new RuntimeException('Could not set comparison timeout');
+                  }
+                  $comparison = capture_seed_checkpoint($label . '-comparison');
+              } finally {
+                  seed_db_query("UPDATE $table SET option_value = '" . $expiry . "'" . $where);
+                  if (seed_timeout() !== (string) $expiry) {
+                      throw new RuntimeException('Could not restore original timeout');
+                  }
+              }
+              $restored = capture_seed_checkpoint($label . '-raw-restored');
+              if ($restored !== $raw) {
+                  throw new RuntimeException('Raw after-state changed during comparison');
+              }
+              return ['state' => $comparison, 'expiry' => $expiry, 'normalized' => true];
+          }
           SEED_HELPER_COMMON
           cat > "$RUNNER_TEMP/seed-experiment/prepare.py" <<'SEED_HELPER_PREPARE'
           import hashlib
@@ -359,7 +442,7 @@ jobs:
           <?php
           require __DIR__ . '/common.php';
           $commands = json_decode(file_get_contents(__DIR__ . '/commands.json'), true, 512, JSON_THROW_ON_ERROR);
-          $report = ['checkpoint' => 'Immediately after original product import and lookup-table regeneration', 'cache_note' => 'Database and OS caches already warmed by import; no cache flushes. Pair order alternates.', 'pairs' => []];
+          $report = ['checkpoint' => 'Immediately after original product import and lookup-table regeneration', 'cache_note' => 'OS and database caches may be warm; the identical raw input with a cold term-count transient is restored before every arm. Pair order alternates.', 'pairs' => []];
           try {
               foreach (['default' => '', 'admin' => '--user=1 '] as $group => $outer) {
                   $context = execute_lookup_process('wp ' . $outer . 'eval ' . escapeshellarg('echo get_current_user_id();'));
@@ -369,12 +452,19 @@ jobs:
                   }
                   $report['original_contexts'][$group] = $context;
               }
+              $checkpoint = capture_seed_checkpoint('input');
+              if (seed_timeout() !== null) {
+                  throw new RuntimeException('Expected a cold term-count timeout at the input checkpoint');
+              }
               $reference = null;
+              $lastOriginal = null;
               for ($pair = 0; $pair < 3; $pair++) {
                   $sample = ['pair' => $pair + 1, 'order' => $pair % 2 === 0 ? ['original', 'batch'] : ['batch', 'original']];
                   foreach ($sample['order'] as $mode) {
                       $label = 'pair-' . ($pair + 1) . '-' . $mode;
-                      $before = capture_seed_checkpoint($label . '-before');
+                      restore_seed_checkpoint('input', $checkpoint, $label . '-before');
+                      $before = $checkpoint;
+                      $armStart = time();
                       $started = hrtime(true);
                       $values = [];
                       $processes = [];
@@ -404,11 +494,14 @@ jobs:
                           }
                       }
                       $seconds = (hrtime(true) - $started) / 1e9;
+                      $armEnd = time();
                       $after = capture_seed_checkpoint($label . '-after');
-                      if ($before !== $after) {
-                          $report['outcome'] = 'inconclusive-' . $mode . '-state-change';
-                          save_seed_evidence('state-mismatch.json', ['before' => $before, 'after' => $after, 'pair' => $pair + 1, 'mode' => $mode]);
-                          throw new RuntimeException('Read-only lookup mode changed raw database or uploads; no normalization applied');
+                      if ($before['uploads'] !== $after['uploads']) {
+                          throw new RuntimeException('Lookup arm changed uploads');
+                      }
+                      $comparison = seed_comparison_state($label, $after, $armStart, $armEnd);
+                      if ($mode === 'original') {
+                          $lastOriginal = ['label' => $label . '-after', 'state' => $after];
                       }
                       ksort($values);
                       $expectedKeys = array_keys($commands);
@@ -422,12 +515,20 @@ jobs:
                           throw new RuntimeException('Lookup stdout/stderr/status changed');
                       }
                       $reference = $values;
-                      $sample[$mode] = ['seconds' => $seconds, 'process_count' => count($processes), 'processes' => $processes, 'checkpoint_before' => $before, 'checkpoint_after' => $after];
+                      $sample[$mode] = ['seconds' => $seconds, 'process_count' => count($processes), 'processes' => $processes, 'checkpoint_before' => $before, 'checkpoint_after' => $after, 'comparison' => $comparison, 'arm_start' => $armStart, 'arm_end' => $armEnd];
                       echo 'seed-lookup-sample ' . json_encode(['pair' => $pair + 1, 'mode' => $mode, 'seconds' => $seconds, 'process_count' => count($processes)]) . "\n";
+                  }
+                  $sample['raw_after_equal'] = $sample['original']['checkpoint_after'] === $sample['batch']['checkpoint_after'];
+                  $sample['allowed_normalization'] = '_transient_timeout_wc_term_counts value only; fixed comparison value 1000000000; expiry must lie within arm start/end plus 30 days';
+                  if ($sample['original']['comparison']['normalized'] !== $sample['batch']['comparison']['normalized'] || $sample['original']['comparison']['state'] !== $sample['batch']['comparison']['state']) {
+                      $report['outcome'] = 'rejected-post-state-difference';
+                      save_seed_evidence('state-mismatch.json', ['original' => $sample['original'], 'batch' => $sample['batch'], 'pair' => $pair + 1]);
+                      throw new RuntimeException('Original and batch post-states differ');
                   }
                   $sample['saved_seconds'] = $sample['original']['seconds'] - $sample['batch']['seconds'];
                   $report['pairs'][] = $sample;
               }
+              restore_seed_checkpoint($lastOriginal['label'], $lastOriginal['state'], 'continuation-restored');
               $report['lookup_values'] = $reference;
               $report['accepted'] = true;
               $report['outcome'] = 'accepted-screen-only';
