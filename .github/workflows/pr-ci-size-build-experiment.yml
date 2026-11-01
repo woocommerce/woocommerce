@@ -2,7 +2,7 @@ name: 'PR experiment: Compressed Size duplicate build'
 
 on:
   pull_request:
-    types: [opened]
+    types: [opened, synchronize]
     paths:
       - '.github/workflows/pr-ci-size-build-experiment.yml'
 
@@ -31,7 +31,7 @@ jobs:
       fail-fast: false
       max-parallel: 2
       matrix:
-        arm: [baseline, skip-setup-build]
+        arm: [baseline, skip-setup-build, skip-setup-build-blobless]
     env:
       ARM: ${{ matrix.arm }}
     steps:
@@ -125,6 +125,7 @@ jobs:
           import {SizePlugin} from '@rschristian/size-plugin';
           import {getPackageManagerAndInstallScript, diffTable, toBool, stripHash, getSortOrder} from './utils.mjs';
           import {capture} from './capture.mjs';
+          import {beforeCommand, afterCommand, finishGitObservation} from './git-observe.mjs';
           const inputs = JSON.parse(fs.readFileSync(new URL('./inputs.json', import.meta.url)));
           const getInput = name => inputs[name] || '';
           const baseSha = process.env.BASE_SHA;
@@ -132,10 +133,22 @@ jobs:
           const timings = [];
           const actionStarted = performance.now();
           async function exec(command) {
+            const outerStart = performance.now();
+            const prepared = beforeCommand(command);
             const start = performance.now();
-            try { return await actionExec(command); }
+            const startedAt = Date.now();
+            let succeeded = false;
+            try {
+              const result = await actionExec(prepared.command);
+              succeeded = true;
+              return result;
+            }
             finally {
-              timings.push({command, seconds: (performance.now() - start) / 1000});
+              const endedAt = Date.now();
+              const seconds = (performance.now() - start) / 1000;
+              afterCommand(prepared, succeeded);
+              timings.push({command: prepared.command, phase: prepared.phase, seconds, startedAt, endedAt,
+                observationAndConfigSeconds: (performance.now() - outerStart) / 1000 - seconds});
               fs.writeFileSync(process.env.TRIAL + '/results/action-timings.json', JSON.stringify(timings, null, 2));
             }
           }
@@ -143,6 +156,7 @@ jobs:
           const epilogue = `
           fs.writeFileSync(process.env.TRIAL + '/results/diff.json', JSON.stringify(diff.sort((a,b) => a.filename.localeCompare(b.filename)), null, 2));
           fs.writeFileSync(process.env.TRIAL + '/results/size-report.md', markdownDiff + '\\n');
+          finishGitObservation(timings);
           fs.writeFileSync(process.env.TRIAL + '/results/action-total.json', JSON.stringify({seconds: (performance.now() - actionStarted) / 1000}));
           `;
           fs.writeFileSync(root + 'measure.mjs', prelude + body + epilogue);
@@ -184,6 +198,122 @@ jobs:
           node --check "$TRIAL/action/measure.mjs"
           node --check "$TRIAL/action/initial.mjs"
           node --check "$TRIAL/action/capture.mjs"
+
+      - name: 'Prepare local Git history and deferred-fetch observation'
+        shell: bash
+        run: |
+          cat > "$TRIAL/action/git-observe.mjs" <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import crypto from 'node:crypto';
+          import {execFileSync} from 'node:child_process';
+          const trial = process.env.TRIAL;
+          const base = process.env.BASE_SHA;
+          const ref = 'size-experiment-base';
+          const blobless = process.env.ARM === 'skip-setup-build-blobless';
+          const trace = path.join(trial, 'git-trace.json');
+          process.env.GIT_TRACE2_EVENT = trace;
+          const samples = [];
+          let baseCheckout = false;
+          let fetched = false;
+          function git(...args) {
+            const env = {...process.env, GIT_NO_LAZY_FETCH: '1'};
+            delete env.GIT_TRACE2_EVENT;
+            return execFileSync('git', args, {encoding: 'utf8', env, maxBuffer: 64 * 1024 * 1024}).trim();
+          }
+          function config(key) {
+            try { return git('config', '--local', '--get', key); }
+            catch (error) { if (error.status === 1) return null; throw error; }
+          }
+          function sample(label) {
+            const pack = path.resolve(git('rev-parse', '--git-path', 'objects/pack'));
+            const files = fs.readdirSync(pack);
+            const shallowPath = path.resolve(git('rev-parse', '--git-path', 'shallow'));
+            const entry = {
+              label, gitVersion: git('--version'), head: git('rev-parse', 'HEAD'), tree: git('rev-parse', 'HEAD^{tree}'),
+              shallow: fs.existsSync(shallowPath) ? fs.readFileSync(shallowPath, 'utf8') : '',
+              packBytes: files.filter(name => name.endsWith('.pack')).reduce((sum, name) => sum + fs.statSync(path.join(pack, name)).size, 0),
+              packs: files.filter(name => name.endsWith('.pack')).length,
+              promisorMarkers: files.filter(name => name.endsWith('.promisor')).length,
+              objects: git('count-objects', '-v'),
+              promisor: config('remote.origin.promisor'), filter: config('remote.origin.partialclonefilter'),
+            };
+            samples.push(entry);
+            fs.writeFileSync(path.join(trial, 'results/git-observations.json'), JSON.stringify(samples, null, 2));
+            if (entry.shallow !== samples[0].shallow) throw new Error('Shallow boundary changed: ' + label);
+            return entry;
+          }
+          export function beforeCommand(command) {
+            let phase = 'reset';
+            const isBaseFetch = command === `git fetch -n origin ${base}:${ref}`;
+            if (isBaseFetch) {
+              phase = 'base-fetch';
+              sample('before-fetch');
+              if (blobless) {
+                git('config', '--local', 'remote.origin.promisor', 'true');
+                git('config', '--local', 'remote.origin.partialclonefilter', 'blob:none');
+                command = `git fetch -n --filter=blob:none origin ${base}:${ref}`;
+              }
+            } else if (command === `git reset --hard ${ref}`) phase = 'base-checkout';
+            else if (command.includes('clean:build')) phase = 'base-clean';
+            else if (command.startsWith('pnpm install ')) phase = baseCheckout ? 'base-install' : 'head-install';
+            else if (command.startsWith('pnpm run ')) phase = baseCheckout ? 'base-build' : 'head-build';
+            return {command, phase, isBaseFetch};
+          }
+          export function afterCommand(prepared, succeeded) {
+            if (!succeeded) return;
+            if (prepared.isBaseFetch) {
+              const state = sample('after-fetch');
+              const parents = git('rev-list', '--parents', base).split('\n').filter(Boolean).sort();
+              if (!parents.length) throw new Error('Empty base commit-parent manifest');
+              const history = {
+                base: git('rev-parse', `${base}^{commit}`), tree: git('rev-parse', `${base}^{tree}`),
+                commits: parents.length, parentsSha256: crypto.createHash('sha256').update(parents.join('\n') + '\n').digest('hex'),
+                shallowBefore: samples[0].shallow, shallowAfter: state.shallow,
+              };
+              if (history.base !== base) throw new Error('Incorrect fetched base');
+              fs.writeFileSync(path.join(trial, 'results/base-history.json'), JSON.stringify(history, null, 2));
+              fetched = true;
+            } else if (prepared.phase === 'base-checkout') {
+              baseCheckout = true;
+              if (sample('after-base-checkout').head !== base) throw new Error('Incorrect checked-out base');
+            } else if (prepared.phase === 'base-build') {
+              if (sample('after-base-build').head !== base) throw new Error('Build moved the base commit');
+            }
+          }
+          export function finishGitObservation(timings) {
+            const finishStarted = performance.now();
+            if (!fetched || !baseCheckout) throw new Error('Exact base fetch/checkout was not observed');
+            if (sample('after-measurement').head !== base) throw new Error('Measurement moved the base commit');
+            if (!fs.existsSync(trace)) throw new Error('Missing Git trace evidence');
+            const processes = new Map();
+            for (const line of fs.readFileSync(trace, 'utf8').trim().split('\n')) {
+              const event = JSON.parse(line);
+              if (event.event === 'start') {
+                const phase = timings.find(item => Date.parse(event.time) >= item.startedAt && Date.parse(event.time) <= item.endedAt)?.phase || 'outside-command';
+                const verb = ['fetch', 'reset', 'clean', 'log', 'diff', 'show', 'describe', 'rev-list', 'rev-parse'].find(value => event.argv?.includes(value)) || 'other';
+                const promisorLazy = verb === 'fetch' && event.argv.includes('--no-write-fetch-head') && event.argv.includes('--stdin');
+                processes.set(event.sid, {phase, verb, promisorLazy});
+              } else if (event.event === 'exit' && processes.has(event.sid)) {
+                Object.assign(processes.get(event.sid), {seconds: event.t_abs, code: event.code});
+              }
+            }
+            const safeProcesses = [...processes.values()];
+            const fetches = safeProcesses.filter(item => item.verb === 'fetch');
+            if (!fetches.some(item => item.phase === 'base-fetch')) throw new Error('Missing explicit fetch trace');
+            const basePhases = ['base-fetch', 'base-clean', 'base-checkout', 'base-install', 'base-build'];
+            const summary = {
+              filtered: blobless, fetches, processes: safeProcesses,
+              lazyFetches: fetches.filter(item => item.promisorLazy),
+              otherFetches: fetches.filter(item => !item.promisorLazy && item.phase !== 'base-fetch'),
+              baseCommandSeconds: timings.filter(item => basePhases.includes(item.phase)).reduce((sum, item) => sum + item.seconds, 0),
+              observationAndConfigSeconds: timings.reduce((sum, item) => sum + item.observationAndConfigSeconds, 0) + (performance.now() - finishStarted) / 1000,
+              basePackGrowthBytes: samples.at(-1).packBytes - samples[0].packBytes,
+            };
+            fs.writeFileSync(path.join(trial, 'results/git-costs.json'), JSON.stringify(summary, null, 2));
+          }
+          NODE
+          node --check "$TRIAL/action/git-observe.mjs"
 
       - name: 'Install initial dependencies in both arms'
         shell: bash
@@ -278,7 +408,8 @@ jobs:
           import json, os, pathlib
           root = pathlib.Path(os.environ['RESULTS'])
           baseline = root / ('size-build-baseline-' + os.environ['GITHUB_RUN_ID'])
-          candidate = root / ('size-build-skip-setup-build-' + os.environ['GITHUB_RUN_ID'])
+          arms = ['baseline', 'skip-setup-build', 'skip-setup-build-blobless']
+          folders = {arm: root / ('size-build-' + arm + '-' + os.environ['GITHUB_RUN_ID']) for arm in arms}
           failures = []
           lines = []
           def compare(left, right, name):
@@ -294,14 +425,40 @@ jobs:
                       lines.append(name + ': differing files=' + str(len(differences)) + '; first 25=' + repr(differences[:25]))
               else:
                   lines.append(name + ': exact equality')
-          for name in ['head', 'base', 'diff']:
-              compare(baseline / (name + '.json'), candidate / (name + '.json'), name)
+          for arm in arms[1:]:
+              for name in ['head', 'base', 'diff', 'base-history']:
+                  compare(baseline / (name + '.json'), folders[arm] / (name + '.json'), arm + ' ' + name)
           compare(baseline / 'setup-head.json', baseline / 'head.json', 'Control first versus repeated head build')
-          for name in ['size-report.md', 'action-source-sha256.txt']:
-              a, b = baseline / name, candidate / name
-              if not a.is_file() or not b.is_file() or a.read_bytes() != b.read_bytes():
-                  failures.append(name + ': missing or different')
-          for arm, folder in [('baseline', baseline), ('skip-setup-build', candidate)]:
+          for arm, folder in folders.items():
+              for name in ['size-report.md', 'action-source-sha256.txt']:
+                  a, b = baseline / name, folder / name
+                  if not a.is_file() or not b.is_file() or a.read_bytes() != b.read_bytes():
+                      failures.append(arm + ' ' + name + ': missing or different')
+              for name in ['head', 'base']:
+                  target = folder / (name + '.json')
+                  if not target.is_file() or not json.loads(target.read_text()):
+                      failures.append(arm + ' ' + name + ': missing or empty assets')
+              history_path, costs_path, observations_path = [folder / name for name in ['base-history.json', 'git-costs.json', 'git-observations.json']]
+              if not all(target.is_file() for target in [history_path, costs_path, observations_path]):
+                  failures.append(arm + ': missing Git evidence')
+              else:
+                  history, costs, observations = [json.loads(target.read_text()) for target in [history_path, costs_path, observations_path]]
+                  if history.get('base') != os.environ['BASE_SHA'] or not history.get('tree') or history.get('commits', 0) < 2 or len(history.get('parentsSha256', '')) != 64:
+                      failures.append(arm + ': invalid base commit-parent manifest')
+                  if history.get('shallowBefore') != history.get('shallowAfter') or history.get('shallowBefore', '').strip() != os.environ['HEAD_SHA']:
+                      failures.append(arm + ': changed or unexpected shallow boundary')
+                  if not any(item.get('phase') == 'base-fetch' for item in costs.get('fetches', [])):
+                      failures.append(arm + ': missing explicit-fetch trace')
+                  if costs.get('filtered') != (arm == 'skip-setup-build-blobless'):
+                      failures.append(arm + ': incorrect filtering policy')
+                  expected_labels = ['before-fetch', 'after-fetch', 'after-base-checkout', 'after-base-build', 'after-measurement']
+                  if [item.get('label') for item in observations] != expected_labels:
+                      failures.append(arm + ': missing Git phase samples')
+                  elif any(item.get('shallow') != history['shallowBefore'] for item in observations):
+                      failures.append(arm + ': shallow boundary changed during measurement')
+                  elif arm == 'skip-setup-build-blobless' and (observations[1].get('promisor') != 'true' or observations[1].get('filter') != 'blob:none'):
+                      failures.append(arm + ': missing persistent promisor configuration')
+                  lines.append(arm + ' Git costs: ' + json.dumps(costs, sort_keys=True))
               for name in ['setup-install-seconds.txt', 'setup-build-seconds.txt', 'setup-snapshot-seconds.txt', 'trial-wall-seconds.txt', 'trial-seconds.txt', 'action-total.json']:
                   target = folder / name
                   if target.exists():
