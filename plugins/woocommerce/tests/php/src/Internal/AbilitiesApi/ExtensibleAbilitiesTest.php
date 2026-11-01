@@ -1876,7 +1876,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should give a crash the suffix when a refusal in the same namespace already uses its code.
+	 * @testdox Should give a refusal the suffix when a crash in the same namespace already uses its code.
 	 */
 	public function test_a_crash_does_not_share_a_code_with_a_refusal_in_the_same_namespace(): void {
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
@@ -1904,18 +1904,18 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 		$data     = $response->get_data();
 
-		$this->assertSame( 400, $response->get_status() );
-		$this->assertSame( 'ns:woocommerce_ability_extension_failed:2', $data['code'] );
-		$this->assertSame( 'Name refused.', $data['message'] );
-		$this->assertSame( 400, $data['data']['status'] );
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'ns:woocommerce_ability_extension_failed', $data['code'] );
+		$this->assertSame( 500, $data['data']['status'] );
 		$this->assertCount( 1, $data['additional_errors'] );
-		$this->assertSame( 'ns:woocommerce_ability_extension_failed', $data['additional_errors'][0]['code'] );
-		$this->assertSame( 500, $data['additional_errors'][0]['data']['status'] );
+		$this->assertSame( 'ns:woocommerce_ability_extension_failed:2', $data['additional_errors'][0]['code'] );
+		$this->assertSame( 'Name refused.', $data['additional_errors'][0]['message'] );
+		$this->assertSame( 400, $data['additional_errors'][0]['data']['status'] );
 		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
 	}
 
 	/**
-	 * @testdox Should run the other validators after one throws, list the crash last, and give every code of a refusal its namespace and status.
+	 * @testdox Should run the other validators after one throws, keep the run order, and give every code of a refusal its namespace and status.
 	 */
 	public function test_validators_run_after_a_throw_and_every_code_gets_its_namespace(): void {
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
@@ -1945,16 +1945,17 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 		$data     = $response->get_data();
 
-		$this->assertSame( 400, $response->get_status() );
-		$this->assertSame( 'second_ext:test_name_refused', $data['code'] );
-		$this->assertSame( 'second_ext', $data['data']['namespace'] );
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'first_ext:woocommerce_ability_extension_failed', $data['code'] );
+		$this->assertSame( 'first_ext', $data['data']['namespace'] );
+		$this->assertSame( 500, $data['data']['status'] );
 		$this->assertCount( 2, $data['additional_errors'] );
-		$this->assertSame( 'second_ext:test_price_refused', $data['additional_errors'][0]['code'] );
+		$this->assertSame( 'second_ext:test_name_refused', $data['additional_errors'][0]['code'] );
 		$this->assertSame( 'second_ext', $data['additional_errors'][0]['data']['namespace'] );
 		$this->assertSame( 400, $data['additional_errors'][0]['data']['status'] );
-		$this->assertSame( 'first_ext:woocommerce_ability_extension_failed', $data['additional_errors'][1]['code'] );
-		$this->assertSame( 'first_ext', $data['additional_errors'][1]['data']['namespace'] );
-		$this->assertSame( 500, $data['additional_errors'][1]['data']['status'] );
+		$this->assertSame( 'second_ext:test_price_refused', $data['additional_errors'][1]['code'] );
+		$this->assertSame( 'second_ext', $data['additional_errors'][1]['data']['namespace'] );
+		$this->assertSame( 400, $data['additional_errors'][1]['data']['status'] );
 		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
 	}
 
@@ -2095,38 +2096,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 422, $response->get_status() );
 		$this->assertSame( 'test-ext:test_bad_value', $data['code'] );
 		$this->assertSame( 'extensions.test-ext.first', $data['data']['field'] );
-		$this->assertArrayNotHasKey( 'unconfirmed', $data['data'] );
 		$this->assertSame( 'test-ext:test_bad_value:2', $data['additional_errors'][0]['code'] );
 		$this->assertSame( 'extensions.test-ext.second', $data['additional_errors'][0]['data']['field'] );
 		$this->assertSame( 'other_ext:test_bad_size', $data['additional_errors'][1]['code'] );
-		$this->assertTrue( $data['additional_errors'][1]['data']['unconfirmed'] );
 		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
-	}
-
-	/**
-	 * @testdox Should not return a validator crash after a field refusal, because the object lacks the refused value.
-	 */
-	public function test_a_validator_crash_after_a_field_refusal_is_not_returned(): void {
-		$product = \WC_Helper_Product::create_simple_product();
-		$this->register_validator(
-			'product',
-			'test-ext',
-			static function () {
-				throw new \RuntimeException( 'Validator broke.' );
-			}
-		);
-
-		$response = $this->run_ability_response(
-			'woocommerce/product-update',
-			array(
-				'id'         => $product->get_id(),
-				'extensions' => array( 'other_ext' => array( 'count' => -1 ) ),
-			)
-		);
-
-		$this->assertSame( 400, $response->get_status() );
-		$this->assertSame( 'other_ext:test_rejected', $response->get_data()['code'] );
-		$this->assertArrayNotHasKey( 'additional_errors', $response->get_data() );
 	}
 
 	/**

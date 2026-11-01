@@ -129,12 +129,10 @@ abstract class ActionableAbility extends \WP_Ability {
 		}
 
 		$refused = new \WP_Error();
-		$failed  = new \WP_Error();
-		$this->apply_fields( $subject, $updates, $refused, $failed );
+		$this->apply_fields( $subject, $updates, $refused );
 		if ( ExtensibleAbilities::is_enabled() ) {
-			$this->validate( $subject, $refused, $failed );
+			$this->validate( $subject, $refused );
 		}
-		$refused->merge_from( $failed );
 		if ( $refused->has_errors() ) {
 			return $refused;
 		}
@@ -209,35 +207,28 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * @param \WC_Data  $subject Object to change.
 	 * @param array     $updates Pairs of update_callback and value from prepare_fields().
 	 * @param \WP_Error $refused Collects the refusals.
-	 * @param \WP_Error $failed  Collects the callbacks that crashed.
 	 */
-	private function apply_fields( $subject, array $updates, \WP_Error $refused, \WP_Error $failed ): void {
+	private function apply_fields( $subject, array $updates, \WP_Error $refused ): void {
 		foreach ( $updates as $param => list( $callback, $value ) ) {
 			$rejected = self::run_callback( $callback, array( $subject, $value ), array( 'field' => $param ) );
 			if ( null !== $rejected ) {
-				self::add_refusal( $rejected, explode( '.', $param )[1], $refused, $failed );
+				self::add_refusal( $rejected, explode( '.', $param )[1], $refused );
 			}
 		}
 	}
 
 	/**
 	 * Run every validator of the resource on the changed object, also after a
-	 * field or another validator refuses. When a field refused, the object does
-	 * not have that value, so a validator can refuse only because of that. Its
-	 * refusal then gets `unconfirmed` in its data. A validator that crashes on
-	 * such an object is logged and not returned. The next call shows it again
-	 * if it is real.
+	 * field or another validator refuses.
 	 *
 	 * @param \WC_Data  $subject Changed object.
 	 * @param \WP_Error $refused Collects the refusals.
-	 * @param \WP_Error $failed  Collects the callbacks that crashed.
 	 */
-	private function validate( $subject, \WP_Error $refused, \WP_Error $failed ): void {
-		$unconfirmed = $refused->has_errors() || $failed->has_errors();
+	private function validate( $subject, \WP_Error $refused ): void {
 		foreach ( ExtensibleAbilities::get_validators( $this->get_resource() ) as $args ) {
 			$rejected = self::run_callback( $args['callback'], array( $subject, $this ), array( 'namespace' => $args['namespace'] ) );
 			if ( null !== $rejected ) {
-				self::add_refusal( $rejected, $args['namespace'], $refused, $failed, $unconfirmed );
+				self::add_refusal( $rejected, $args['namespace'], $refused );
 			}
 		}
 	}
@@ -245,37 +236,25 @@ abstract class ActionableAbility extends \WP_Ability {
 	/**
 	 * Add the codes of a rejection to the errors of the call. Each code becomes
 	 * `<namespace>:<code>`, so refusals with the same code keep their own data.
-	 * When the code is already taken in the same namespace, by a refusal or by a
-	 * crash, it gets a numeric suffix, as `<namespace>:<code>:2`. A crash goes
-	 * after the refusals, so the response status comes from a refusal when there
-	 * is one.
+	 * When the code is already taken in the same namespace, it gets a numeric
+	 * suffix, as `<namespace>:<code>:2`. The errors keep the run order, so the
+	 * first rejection gives the response its code, message and status.
 	 *
-	 * @param \WP_Error $rejected    Rejection from run_callback().
-	 * @param string    $namespace   Extension that owns the callback.
-	 * @param \WP_Error $refused     Collects the refusals.
-	 * @param \WP_Error $failed      Collects the callbacks that crashed.
-	 * @param bool      $unconfirmed Whether a field refusal left the checked object without a value.
+	 * @param \WP_Error $rejected  Rejection from run_callback().
+	 * @param string    $namespace Extension that owns the callback.
+	 * @param \WP_Error $refused   Collects the refusals.
 	 */
-	private static function add_refusal( \WP_Error $rejected, string $namespace, \WP_Error $refused, \WP_Error $failed, bool $unconfirmed = false ): void {
+	private static function add_refusal( \WP_Error $rejected, string $namespace, \WP_Error $refused ): void {
 		foreach ( $rejected->get_error_codes() as $code ) {
-			$data     = array_merge( $rejected->get_error_data( $code ), array( 'namespace' => $namespace ) );
-			$is_crash = 500 === ( $data['status'] ?? null );
-			if ( $unconfirmed && $is_crash ) {
-				continue;
-			}
-			if ( $unconfirmed ) {
-				$data['unconfirmed'] = true;
-			}
-			$target = $is_crash ? $failed : $refused;
-			$key    = $namespace . ':' . $code;
-			$n      = 1;
-			while ( in_array( $key, array_merge( $refused->get_error_codes(), $failed->get_error_codes() ), true ) ) {
+			$key = $namespace . ':' . $code;
+			$n   = 1;
+			while ( in_array( $key, $refused->get_error_codes(), true ) ) {
 				$key = $namespace . ':' . $code . ':' . ( ++$n );
 			}
 			foreach ( $rejected->get_error_messages( $code ) as $message ) {
-				$target->add( $key, $message );
+				$refused->add( $key, $message );
 			}
-			$target->add_data( $data, $key );
+			$refused->add_data( array_merge( $rejected->get_error_data( $code ), array( 'namespace' => $namespace ) ), $key );
 		}
 	}
 
