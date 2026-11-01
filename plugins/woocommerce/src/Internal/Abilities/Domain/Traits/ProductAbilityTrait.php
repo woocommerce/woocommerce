@@ -211,16 +211,6 @@ trait ProductAbilityTrait {
 	}
 
 	/**
-	 * Product types that the mutation abilities support: every registered type
-	 * with a class of its own, except the variable ones.
-	 *
-	 * @return array<int, string>
-	 */
-	protected static function get_supported_product_types(): array {
-		return array_keys( self::get_supported_product_type_configs() );
-	}
-
-	/**
 	 * Get the configuration of every supported product type, keyed by type.
 	 *
 	 * @return array<string, array{fields: array<int, string>, product_props: array<string, mixed>}>
@@ -229,8 +219,7 @@ trait ProductAbilityTrait {
 		$configs = array();
 
 		foreach ( array_keys( wc_get_product_types() ) as $product_type ) {
-			$product_type = (string) $product_type;
-			$config       = self::get_product_class_config( \WC_Product_Factory::get_product_classname( 0, $product_type ), $product_type );
+			$config = self::get_product_class_config( \WC_Product_Factory::get_product_classname( 0, $product_type ), $product_type );
 
 			if ( ! is_wp_error( $config ) ) {
 				$configs[ $product_type ] = $config;
@@ -238,20 +227,6 @@ trait ProductAbilityTrait {
 		}
 
 		return $configs;
-	}
-
-	/**
-	 * Get the configuration of a product type.
-	 *
-	 * @param string $product_type Product type.
-	 * @return array{fields: array<int, string>, product_props: array<string, mixed>}|\WP_Error
-	 */
-	protected static function get_product_type_config( string $product_type ) {
-		if ( ! isset( wc_get_product_types()[ $product_type ] ) ) {
-			return self::get_unsupported_product_type_error();
-		}
-
-		return self::get_product_class_config( \WC_Product_Factory::get_product_classname( 0, $product_type ), $product_type );
 	}
 
 	/**
@@ -273,7 +248,6 @@ trait ProductAbilityTrait {
 		if (
 			is_a( $classname, \WC_Product_Variable::class, true )
 			|| is_a( $classname, \WC_Product_Variation::class, true )
-			|| ProductType::VARIATION === $product_type
 		) {
 			return self::get_unsupported_product_type_error();
 		}
@@ -314,19 +288,18 @@ trait ProductAbilityTrait {
 		 *
 		 * WooCommerce picks the fields from the product class. The owner of a
 		 * type adds a Core field that its type needs, such as a price for a
-		 * bundle, or removes one. A name that is not a Core field is ignored.
-		 * An extension field names its types in `object_types` of
-		 * `ExtensibleAbilities::register_field()`.
+		 * bundle, or removes one. An extension field names its types in
+		 * `object_types` of `ExtensibleAbilities::register_field()`.
 		 *
 		 * @since 11.4.0
 		 *
 		 * @param array<int, string> $fields       Field names.
 		 * @param string             $product_type Product type.
 		 */
-		$fields = (array) apply_filters( 'woocommerce_ability_product_type_fields', $fields, $product_type );
+		$fields = apply_filters( 'woocommerce_ability_product_type_fields', $fields, $product_type );
 
 		return array(
-			'fields'        => array_values( array_intersect( array_keys( self::get_product_mutation_field_schemas() ), $fields ) ),
+			'fields'        => $fields,
 			'product_props' => $product_props,
 		);
 	}
@@ -367,7 +340,7 @@ trait ProductAbilityTrait {
 	protected static function get_product_object_for_type( string $product_type, int $product_id = 0 ) {
 		$product = wc_get_product_object( $product_type, $product_id );
 
-		if ( ! $product || $product->get_type() !== $product_type ) {
+		if ( $product->get_type() !== $product_type ) {
 			return self::get_invalid_product_type_error();
 		}
 

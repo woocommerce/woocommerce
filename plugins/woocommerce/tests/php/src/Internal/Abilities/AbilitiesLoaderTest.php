@@ -355,7 +355,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			}
 			$description = $schema['properties']['type']['description'];
 			$this->assertStringContainsString( 'Fields each type takes.', $description );
-			$this->assertStringContainsString( 'external: name, sku, regular_price, sale_price, description, short_description, status, external_url, button_text', $description );
+			$this->assertStringContainsString( 'external: name, sku, description, short_description, status, regular_price, sale_price, external_url, button_text', $description );
 			$this->assertStringContainsString( 'grouped: name, sku, description, short_description, status, grouped_products', $description );
 			$this->assertStringEndsWith( 'Applies to: grouped.', $schema['properties']['grouped_products']['description'] );
 			$this->assertStringContainsString( 'Applies to: ', $schema['properties']['regular_price']['description'] );
@@ -1691,12 +1691,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'regular_price' => '9.00',
 				)
 			);
-			$missing_class = wp_get_ability( 'woocommerce/product-create' )->execute_change(
-				array(
-					'name' => 'No class',
-					'type' => 'test-missing',
-				)
-			);
 		} finally {
 			remove_filter( 'product_type_selector', array( $this, 'add_test_product_types' ) );
 			remove_filter( 'woocommerce_product_class', array( $this, 'get_test_product_class' ), 10 );
@@ -1722,12 +1716,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertWPError( $bundle_price );
 		$this->assertSame( 'woocommerce_product_field_unsupported', $bundle_price->get_error_code() );
 		$this->assertSame( 'The test-bundle product type does not take regular_price. It takes name, sku, description, short_description, status, virtual, downloadable.', $bundle_price->get_error_message() );
-		$this->assertWPError( $missing_class );
-		$this->assertSame( 'woocommerce_invalid_product_type', $missing_class->get_error_code() );
 	}
 
 	/**
-	 * @testdox Should change a product to a type that an extension registers, refuse a type without a class, and query by the type.
+	 * @testdox Should change a product to a type that an extension registers, and query by the type.
 	 */
 	public function test_product_update_changes_the_type_to_a_registered_product_type(): void {
 		$product                     = \WC_Helper_Product::create_simple_product();
@@ -1740,26 +1732,20 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		try {
 			$this->register_domain_abilities();
 
-			$subscription  = wp_get_ability( 'woocommerce/product-update' )->execute(
+			$subscription = wp_get_ability( 'woocommerce/product-update' )->execute(
 				array(
 					'id'            => $product->get_id(),
 					'type'          => 'test-subscription',
 					'regular_price' => '12.00',
 				)
 			);
-			$missing_class = wp_get_ability( 'woocommerce/product-update' )->execute_change(
-				array(
-					'id'   => $product->get_id(),
-					'type' => 'test-missing',
-				)
-			);
-			$bundle        = wp_get_ability( 'woocommerce/product-create' )->execute(
+			$bundle       = wp_get_ability( 'woocommerce/product-create' )->execute(
 				array(
 					'name' => 'Bundle',
 					'type' => 'test-bundle',
 				)
 			);
-			$bundles       = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'type' => 'test-bundle' ) );
+			$bundles      = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'type' => 'test-bundle' ) );
 		} finally {
 			remove_filter( 'product_type_selector', array( $this, 'add_test_product_types' ) );
 			remove_filter( 'woocommerce_product_class', array( $this, 'get_test_product_class' ), 10 );
@@ -1773,8 +1759,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertNotWPError( $subscription );
 		$this->assertSame( 'test-subscription', $subscription['product']['type'] );
 		$this->assertSame( '12.00', $subscription['product']['regular_price'] );
-		$this->assertWPError( $missing_class );
-		$this->assertSame( 'woocommerce_invalid_product_type', $missing_class->get_error_code() );
 		$this->assertNotWPError( $bundles );
 		$this->assertSame( array( $bundle['product']['id'] ), array_column( $bundles['products'], 'id' ) );
 	}
@@ -1791,8 +1775,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		try {
 			$this->register_domain_abilities();
 
-			$create_schema = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
-			$bundle        = wp_get_ability( 'woocommerce/product-create' )->execute(
+			$bundle = wp_get_ability( 'woocommerce/product-create' )->execute(
 				array(
 					'name'          => 'Bundle with price',
 					'type'          => 'test-bundle',
@@ -1811,11 +1794,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->created_product_ids[] = $bundle['product']['id'];
 
 		$this->assertSame( '9.00', $bundle['product']['regular_price'] );
-		$this->assertArrayNotHasKey( 'not-a-core-field', $create_schema['properties'] );
 	}
 
 	/**
-	 * Give the test bundle type a regular price, and ignore a name that is not a Core field.
+	 * Give the test bundle type a regular price.
 	 *
 	 * @internal
 	 *
@@ -1826,7 +1808,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function add_price_to_test_bundle( array $fields, string $product_type ): array {
 		if ( 'test-bundle' === $product_type ) {
 			$fields[] = 'regular_price';
-			$fields[] = 'not-a-core-field';
 		}
 		return $fields;
 	}

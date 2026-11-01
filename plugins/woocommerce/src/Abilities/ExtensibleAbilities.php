@@ -132,8 +132,9 @@ class ExtensibleAbilities {
 	 *                                  out of them, with no error.
 	 *     @type string[] $object_types Optional. The object types the field applies to, as `get_type()` of the
 	 *                                  object returns them, such as `simple` and `subscription` for a product or
-	 *                                  `line_item` for an order item. The abilities leave the field out of the
-	 *                                  other objects and refuse a write to them. Omit it for every type.
+	 *                                  `line_item` for an order item. The object must have a `get_type()` method.
+	 *                                  The abilities leave the field out of the other objects and refuse a write
+	 *                                  to them. Omit it for every type.
 	 *     @type callable $get_callback Receives the object and returns the value. A value that the schema
 	 *                                  does not allow is left out, so return null when the object has no
 	 *                                  value. A schema that allows null, such as `array( 'integer', 'null' )`,
@@ -200,7 +201,7 @@ class ExtensibleAbilities {
 			return;
 		}
 		if ( isset( $args['object_types'] ) && ( ! is_array( $args['object_types'] ) || empty( $args['object_types'] ) || array_filter( $args['object_types'], static fn( $type ) => ! is_string( $type ) ) ) ) {
-			wc_doing_it_wrong( __METHOD__, 'The "object_types" argument must be a list of object types.', '11.4.0' );
+			wc_doing_it_wrong( __METHOD__, __( 'The "object_types" argument must be a list of object types.', 'woocommerce' ), '11.4.0' );
 			return;
 		}
 		if ( isset( self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] ) ) {
@@ -596,15 +597,11 @@ class ExtensibleAbilities {
 	 * @since 11.4.0
 	 *
 	 * @param array<string, mixed> $args    Field arguments from `register_field()`.
-	 * @param mixed                $subject The object.
+	 * @param mixed                $subject The object. It must have a `get_type()` method.
 	 * @return bool
 	 */
 	public static function field_applies_to( array $args, $subject ): bool {
-		if ( empty( $args['object_types'] ) ) {
-			return true;
-		}
-		$type = self::get_object_type( $subject );
-		return null !== $type && in_array( $type, $args['object_types'], true );
+		return empty( $args['object_types'] ) || in_array( $subject->get_type(), $args['object_types'], true );
 	}
 
 	/**
@@ -612,14 +609,11 @@ class ExtensibleAbilities {
 	 *
 	 * @since 11.4.0
 	 *
-	 * @param mixed $subject The object.
-	 * @return string|null Null when the object has no callable `get_type()` method.
+	 * @param mixed $subject The object. It must have a `get_type()` method.
+	 * @return string
 	 */
-	public static function get_object_type( $subject ): ?string {
-		if ( ! is_object( $subject ) || ! is_callable( array( $subject, 'get_type' ) ) ) {
-			return null;
-		}
-		return (string) call_user_func( array( $subject, 'get_type' ) );
+	public static function get_object_type( $subject ): string {
+		return $subject->get_type();
 	}
 
 	/**

@@ -196,7 +196,7 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 					'type' => 'string',
 					'enum' => self::get_product_query_status_slugs(),
 				),
-				'type'         => self::get_product_type_schema( array_map( 'strval', array_keys( wc_get_product_types() ) ) ),
+				'type'         => self::get_product_type_schema( array_keys( wc_get_product_types() ) ),
 				'virtual'      => array(
 					'type'        => 'boolean',
 					'description' => __( 'Limit results to products that are not shipped (true) or that are shipped (false).', 'woocommerce' ),

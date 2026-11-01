@@ -116,7 +116,7 @@ class ProductUpdate extends ActionableAbility {
 			if ( is_wp_error( $current_config ) ) {
 				return $current_config;
 			}
-			return self::get_product_object_for_type( (string) $input['type'], $product->get_id() );
+			return self::get_product_object_for_type( $input['type'], $product->get_id() );
 		}
 
 		return $product;

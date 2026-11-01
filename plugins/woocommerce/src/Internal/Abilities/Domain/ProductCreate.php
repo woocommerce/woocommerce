@@ -76,14 +76,7 @@ class ProductCreate extends ActionableAbility {
 	 * @return \WC_Product|\WP_Error
 	 */
 	public function load( array $input ) {
-		$product_type   = (string) ( $input['type'] ?? ProductType::SIMPLE );
-		$product_config = self::get_product_type_config( $product_type );
-
-		if ( is_wp_error( $product_config ) ) {
-			return $product_config;
-		}
-
-		return self::get_product_object_for_type( $product_type );
+		return self::get_product_object_for_type( $input['type'] ?? ProductType::SIMPLE );
 	}
 
 	/**
@@ -94,11 +87,7 @@ class ProductCreate extends ActionableAbility {
 	 * @return null|\WP_Error
 	 */
 	public function change( $subject, array $input ) {
-		$product_config = self::get_product_config_for_product( $subject );
-
-		if ( is_wp_error( $product_config ) ) {
-			return $product_config;
-		}
+		$product_config = self::get_supported_product_type_configs()[ $subject->get_type() ];
 
 		try {
 			self::apply_product_type_config( $subject, $product_config );
