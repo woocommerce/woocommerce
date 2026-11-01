@@ -2,8 +2,8 @@ name: 'PR experiment: read-only seed lookup batching'
 
 on:
   pull_request:
-    # Repeat measurements through the original Actions runs when needed.
-    types: [opened]
+    # Allow this isolated experiment to rerun on updates to its workflow.
+    types: [opened, synchronize]
     paths:
       - '.github/workflows/pr-ci-seed-experiment.yml'
 
@@ -160,8 +160,6 @@ jobs:
       max-parallel: 2
       matrix:
         include:
-          - arm: baseline
-            seed: original
           - arm: lookup-screen
             seed: instrumented
     env:
@@ -321,10 +319,24 @@ jobs:
               file_put_contents(__DIR__ . '/results/' . $name, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . "\n");
           }
 
-          function capture_seed_checkpoint() {
+          function capture_seed_checkpoint($label) {
               $dump = execute_lookup_process('wp db export - --skip-comments --skip-dump-date --order-by-primary --quiet');
               if ($dump['return_code'] !== 0 || $dump['stderr'] !== '') {
                   throw new RuntimeException('Could not fingerprint database; export status=' . $dump['return_code'] . ' stderr=' . $dump['stderr']);
+              }
+              if (!preg_match('/^[a-z0-9-]+$/D', $label)) {
+                  throw new RuntimeException('Invalid private checkpoint label');
+              }
+              $privateDirectory = __DIR__ . '/private-dumps';
+              if (!is_dir($privateDirectory) && !mkdir($privateDirectory, 0700)) {
+                  throw new RuntimeException('Could not create private checkpoint directory');
+              }
+              $privatePath = $privateDirectory . '/' . $label . '.sql';
+              $previousUmask = umask(0077);
+              $written = file_put_contents($privatePath, $dump['stdout']);
+              umask($previousUmask);
+              if ($written !== strlen($dump['stdout']) || !chmod($privatePath, 0600)) {
+                  throw new RuntimeException('Could not retain private checkpoint');
               }
               $tableRows = [];
               if (preg_match_all('/^INSERT INTO `([^`]+)`.*$/m', $dump['stdout'], $matches, PREG_SET_ORDER)) {
@@ -419,7 +431,8 @@ jobs:
               for ($pair = 0; $pair < 3; $pair++) {
                   $sample = ['pair' => $pair + 1, 'order' => $pair % 2 === 0 ? ['original', 'batch'] : ['batch', 'original']];
                   foreach ($sample['order'] as $mode) {
-                      $before = capture_seed_checkpoint();
+                      $label = 'pair-' . ($pair + 1) . '-' . $mode;
+                      $before = capture_seed_checkpoint($label . '-before');
                       $started = hrtime(true);
                       $values = [];
                       $processes = [];
@@ -449,7 +462,7 @@ jobs:
                           }
                       }
                       $seconds = (hrtime(true) - $started) / 1e9;
-                      $after = capture_seed_checkpoint();
+                      $after = capture_seed_checkpoint($label . '-after');
                       if ($before !== $after) {
                           $report['outcome'] = 'inconclusive-' . $mode . '-state-change';
                           save_seed_evidence('state-mismatch.json', ['before' => $before, 'after' => $after, 'pair' => $pair + 1, 'mode' => $mode]);
@@ -522,6 +535,120 @@ jobs:
       - name: 'Start the normal Blocks environment, seeds and browser installation'
         id: environment
         run: pnpm --filter='@woocommerce/plugin-woocommerce' env:start:blocks
+
+      - name: 'Diagnose checkpoint changes without publishing SQL'
+        if: ${{ !cancelled() && steps.environment.outcome == 'failure' && matrix.seed == 'instrumented' }}
+        shell: bash
+        run: |
+          sudo --preserve-env=RUNNER_TEMP python3 <<'PYTHON'
+          import difflib
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import re
+
+          root = Path(os.environ['RUNNER_TEMP']) / 'seed-experiment'
+
+          def digest(data):
+              return hashlib.sha256(data).hexdigest()
+
+          def describe(data):
+              lines = data.splitlines(keepends=True)
+              metadata = []
+              sections = {}
+              table = None
+              kind = 'other'
+              quote = None
+              block_comment = False
+              statement = False
+              for index, line in enumerate(lines):
+                  # Only recognize headers outside a previous SQL statement or literal.
+                  if not statement and quote is None and not block_comment:
+                      create = re.match(rb'^CREATE TABLE `([A-Za-z0-9_$]+)`', line)
+                      insert = re.match(rb'^INSERT INTO `([A-Za-z0-9_$]+)`', line)
+                      if create or insert:
+                          table = (create or insert)[1].decode('ascii')
+                          kind = 'schema' if create else 'insert'
+                          statement = True
+                      elif line.startswith((b'--', b'/*', b'#')):
+                          kind = 'directive-or-comment'
+                      else:
+                          kind = 'other'
+                  info = {'line': index + 1, 'table': table, 'kind': kind,
+                          'bytes': len(line), 'sha256': digest(line)}
+                  if kind == 'schema' and quote is None and not block_comment:
+                      field = re.match(rb'^\s+`([A-Za-z0-9_$]+)`', line)
+                      if field:
+                          info['field'] = field[1].decode('ascii')
+                      counter = re.match(rb'^\)\s+ENGINE=[A-Za-z0-9_]+\s+AUTO_INCREMENT=(\d+)(?:\s|;)', line)
+                      if counter:
+                          info['auto_increment'] = int(counter[1])
+                  metadata.append(info)
+                  sections.setdefault(table, []).append(line)
+                  if not statement:
+                      continue
+                  i = 0
+                  while i < len(line):
+                      char = line[i]
+                      following = line[i + 1] if i + 1 < len(line) else None
+                      if block_comment:
+                          if char == 42 and following == 47:
+                              block_comment = False
+                              i += 2
+                              continue
+                      elif quote is not None:
+                          if char == 92:
+                              i += 2
+                              continue
+                          if char == quote:
+                              if following == quote:
+                                  i += 2
+                                  continue
+                              quote = None
+                      elif char in (39, 34, 96):
+                          quote = char
+                      elif char == 47 and following == 42:
+                          block_comment = True
+                          i += 2
+                          continue
+                      elif char == 35 or (char == 45 and following == 45 and (i + 2 == len(line) or line[i + 2] in b' \t\r\n')):
+                          break
+                      elif char == 59:
+                          statement = False
+                      i += 1
+              section_hashes = [
+                  {'table': name, 'bytes': sum(map(len, chunks)),
+                   'lines': len(chunks), 'sha256': digest(b''.join(chunks))}
+                  for name, chunks in sections.items()
+              ]
+              return lines, metadata, section_hashes
+
+          report = {'raw_sql_uploaded': False, 'normalization_applied': False, 'comparisons': []}
+          for before_path in sorted((root / 'private-dumps').glob('*-before.sql')):
+              after_path = before_path.with_name(before_path.name.replace('-before.sql', '-after.sql'))
+              if not after_path.exists():
+                  continue
+              before = before_path.read_bytes()
+              after = after_path.read_bytes()
+              before_lines, before_meta, before_sections = describe(before)
+              after_lines, after_meta, after_sections = describe(after)
+              changes = []
+              for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(None, before_lines, after_lines, autojunk=False).get_opcodes():
+                  if tag != 'equal':
+                      changes.append({'operation': tag, 'before': before_meta[i1:i2], 'after': after_meta[j1:j2]})
+              report['comparisons'].append({
+                  'checkpoint': before_path.stem.removesuffix('-before'),
+                  'before_bytes': len(before), 'after_bytes': len(after),
+                  'before_sha256': digest(before), 'after_sha256': digest(after),
+                  'before_table_sections': before_sections, 'after_table_sections': after_sections,
+                  'changed_line_metadata': changes,
+              })
+          result_path = root / 'results' / 'checkpoint-diagnostics.json'
+          result_path.parent.mkdir(parents=True, exist_ok=True)
+          result_path.write_text(json.dumps(report, indent=2) + '\n')
+          print(json.dumps(report, indent=2))
+          PYTHON
 
       - name: 'Require all original-position lookup checks before browser tests'
         if: ${{ matrix.seed == 'instrumented' }}
