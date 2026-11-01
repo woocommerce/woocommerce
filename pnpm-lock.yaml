@@ -1755,9 +1755,6 @@ importers:
       esbuild:
         specifier: ^0.24.0
         version: 0.24.2
-      glob:
-        specifier: ^10.3.10
-        version: 10.5.0
       json2php:
         specifier: ^0.0.7
         version: 0.0.7

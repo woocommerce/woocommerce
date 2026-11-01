@@ -3,7 +3,7 @@
  */
 import { build, context } from 'esbuild';
 import type { BuildResult } from 'esbuild';
-import { glob } from 'glob';
+import { globSync } from 'node:fs';
 import { rm } from 'node:fs/promises';
 import chokidar from 'chokidar';
 
@@ -31,12 +31,10 @@ async function resolveEntryPoints(
 	const patterns = Array.isArray( entryPoints )
 		? entryPoints
 		: [ entryPoints ];
-	const results = await Promise.all(
-		patterns.map( ( pattern ) =>
-			glob( pattern, { ignore: [ ...ignore ] } )
-		)
+	const results = patterns.flatMap( ( pattern ) =>
+		globSync( pattern, { exclude: ignore } )
 	);
-	return Array.from( new Set( results.flat() ) ).sort();
+	return Array.from( new Set( results ) ).sort();
 }
 
 function summarize( result: BuildResult ): string {
