@@ -3997,9 +3997,6 @@ importers:
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)
-      tslib:
-        specifier: ^2.6.2
-        version: 2.8.1
       typescript:
         specifier: 5.7.x
         version: 5.7.3
@@ -4338,9 +4335,6 @@ importers:
       '@woocommerce/block-library':
         specifier: workspace:*
         version: link:../../plugins/woocommerce/client/blocks
-      '@woocommerce/eslint-plugin':
-        specifier: workspace:*
-        version: link:../../packages/js/eslint-plugin
       '@woocommerce/internal-build':
         specifier: workspace:*
         version: link:../../packages/js/internal-build
