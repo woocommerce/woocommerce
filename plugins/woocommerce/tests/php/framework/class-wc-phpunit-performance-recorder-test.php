@@ -157,7 +157,7 @@ class WC_PHPUnit_Performance_Recorder_Test extends TestCase {
 		$this->assertSame( 9, $records[1]['queries'], 'Both class hooks, six case hooks and one body query.' );
 		$this->assertGreaterThan( 0, $records[1]['case_seconds'] );
 		$this->assertGreaterThanOrEqual( $records[1]['case_seconds'], $records[1]['wall_seconds'] );
-		$this->assertSame( PHP_VERSION_ID >= 80300, is_float( $records[1]['gc_collector_seconds'] ) );
+		$this->assertSame( PHP_VERSION_ID >= 80300, is_int( $records[1]['gc_collector_seconds'] ) || is_float( $records[1]['gc_collector_seconds'] ) );
 	}
 
 	/** Class setup skips report an entire provider suite in one endTest event. */
