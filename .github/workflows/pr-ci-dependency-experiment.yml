@@ -3,7 +3,7 @@ name: 'PR experiment: Browser dependency closure'
 on:
   pull_request:
     # Rerun the original Actions run explicitly to repeat this trial.
-    types: [opened, synchronize]
+    types: [opened]
     paths:
       - '.github/workflows/pr-ci-dependency-experiment.yml'
 

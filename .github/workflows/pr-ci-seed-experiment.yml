@@ -3,7 +3,7 @@ name: 'PR experiment: read-only seed lookup batching'
 on:
   pull_request:
     # Allow this isolated experiment to rerun on updates to its workflow.
-    types: [opened, synchronize]
+    types: [opened]
     paths:
       - '.github/workflows/pr-ci-seed-experiment.yml'
 

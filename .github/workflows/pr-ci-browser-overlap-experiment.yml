@@ -3,7 +3,7 @@ name: 'PR experiment: browser setup overlaps ZIP build'
 on:
   pull_request:
     # Repeat measurements through the original Actions runs when needed.
-    types: [opened, synchronize, reopened]
+    types: [opened]
     paths:
       - '.github/workflows/pr-ci-browser-overlap-experiment.yml'
 
