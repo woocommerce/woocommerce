@@ -10,7 +10,7 @@ import {
 	assign,
 	spawnChild,
 	enqueueActions,
-} from 'xstate5';
+} from 'xstate';
 import clsx from 'clsx';
 import { getQuery, navigateTo } from '@woocommerce/navigation';
 import {

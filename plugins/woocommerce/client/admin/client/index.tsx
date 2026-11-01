@@ -18,7 +18,6 @@ initRemoteLogging();
  * Internal dependencies
  */
 import './stylesheets/_index.scss';
-import './xstate.js';
 
 import { renderCustomerEffortScoreTracks } from './shared';
 import { Layout } from './layout';

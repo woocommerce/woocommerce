@@ -19,7 +19,7 @@ The Core Profiler is gated behind the `core-profiler` feature flag, but is enabl
 
 This feature is the first feature in WooCommerce to use XState for state management, and so naming and organisational conventions will be developed as the team's experience with XState grows.
 
-Refer to the [XState Dev Tooling](xstate.md) documentation for information on how to use the XState visualizer to debug the state machines.
+Refer to the [XState Dev Tooling](xstate.md) documentation for information on how to inspect and debug the state machines.
 
 The state machine for the Core Profiler is centrally located at `./client/core-profiler/index.tsx`, and is responsible for managing the state of the entire feature. It is responsible for rendering the correct page based on the current state, handling events that are triggered by the user, triggering side effects such as API calls and handling the responses. It also handles updating the browser URL state as well as responding to changes in it.
 

@@ -13,8 +13,8 @@ import {
 	ErrorActorEvent,
 	fromCallback,
 	or,
-} from 'xstate5';
-import { useMachine, useSelector } from '@xstate5/react';
+} from 'xstate';
+import { useMachine, useSelector } from '@xstate/react';
 import { useMemo } from '@wordpress/element';
 import { resolveSelect, dispatch } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
@@ -79,7 +79,6 @@ import { ProfileSpinner } from './components/profile-spinner/profile-spinner';
 import recordTracksActions from './actions/tracks';
 import { ComponentMeta } from './types';
 import { getCountryCode } from '~/dashboard/utils';
-import { useXStateInspect } from '~/xstate';
 import { useComponentFromXStateService } from '~/utils/xstate/useComponentFromService';
 import {
 	CoreProfilerEvents,
@@ -1962,11 +1961,7 @@ export const CoreProfilerController = ( {
 		} );
 	}, [ actionOverrides, servicesOverrides ] );
 
-	const { xstateV5Inspector } = useXStateInspect( 'V5' );
-
-	const [ state, send, service ] = useMachine( augmentedStateMachine, {
-		inspect: xstateV5Inspector,
-	} );
+	const [ state, send, service ] = useMachine( augmentedStateMachine );
 
 	const currentNodeMeta = useSelector( service, ( currentState ) =>
 		findComponentMeta< ComponentMeta >(

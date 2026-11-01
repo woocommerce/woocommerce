@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { recordEvent } from '@woocommerce/tracks';
-import { createActor, fromPromise, waitFor } from 'xstate5';
+import { createActor, fromPromise, waitFor } from 'xstate';
 
 /**
  * Internal dependencies

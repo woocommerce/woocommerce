@@ -6,7 +6,7 @@ import {
 	getQuery,
 	updateQueryString,
 } from '@woocommerce/navigation';
-import { AnyEventObject } from 'xstate5';
+import { AnyEventObject } from 'xstate';
 
 /**
  * This seemingly complex piece of code is just a function that creates a listener that

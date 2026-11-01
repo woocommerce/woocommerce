@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { assertEvent, assign, fromCallback, fromPromise, setup } from 'xstate5';
+import { assertEvent, assign, fromCallback, fromPromise, setup } from 'xstate';
 import { getQuery, navigateTo } from '@woocommerce/navigation';
 import { onboardingStore, type TaskListType } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
