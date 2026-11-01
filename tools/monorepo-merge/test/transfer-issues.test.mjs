@@ -182,4 +182,11 @@ describe( 'findFieldsToRestore', () => {
 			{ missingProjects: [ 'Project B' ], fieldsToRestore: [] }
 		);
 	} );
+
+	it( 'reports a lost project that had no values to restore', () => {
+		assert.deepEqual(
+			findFieldsToRestore( [], [], [ { id: 'C', title: 'Project C' } ] ),
+			{ missingProjects: [ 'Project C' ], fieldsToRestore: [] }
+		);
+	} );
 } );

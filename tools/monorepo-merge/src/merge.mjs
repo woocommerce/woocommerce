@@ -51,6 +51,7 @@ async function run( command, args, failureMessage, options ) {
  *
  * @param {string} source      The GitHub repository we are merging, in "organization/repository" format.
  * @param {string} destination The monorepo path to merge the repository into.
+ * @return {Promise<string>} The destination relative to the monorepo root, without `./` or a trailing slash.
  */
 export async function validateArgs( source, destination ) {
 	// We only support pulling from GitHub so the format needs to match that.
@@ -83,6 +84,8 @@ export async function validateArgs( source, destination ) {
 			'The "destination" argument points to a directory that already exists'
 		);
 	}
+
+	return relativeDestination;
 }
 
 /**
@@ -108,12 +111,12 @@ export function createMessageCallback( source ) {
 /**
  * Merges a GitHub repository into the current branch with its history, moved under `destination`.
  *
- * @param {string} source         The GitHub repository to merge, in "organization/repository" format.
- * @param {string} destination    The monorepo path to merge the repository into.
+ * @param {string} source               The GitHub repository to merge, in "organization/repository" format.
+ * @param {string} requestedDestination The monorepo path to merge the repository into.
  * @param {Object} options
- * @param {string} options.branch The source branch to merge.
+ * @param {string} options.branch       The source branch to merge.
  */
-export async function merge( source, destination, { branch } ) {
+export async function merge( source, requestedDestination, { branch } ) {
 	for ( const command of [ 'git', 'git-filter-repo' ] ) {
 		await run(
 			command,
@@ -121,7 +124,7 @@ export async function merge( source, destination, { branch } ) {
 			`"${ command }" must be installed`
 		);
 	}
-	await validateArgs( source, destination );
+	const destination = await validateArgs( source, requestedDestination );
 
 	// Ask git from the tool's own directory, so a copy outside tools/monorepo-merge cannot target an enclosing repository.
 	const inMonorepo = { cwd: MONOREPO_ROOT };
@@ -235,6 +238,8 @@ export async function merge( source, destination, { branch } ) {
 	} catch ( error ) {
 		failure = error;
 	}
+	// Read before cleanup: a Ctrl+C during cleanup did not stop any step.
+	const stopped = Boolean( failure ) && interrupted;
 
 	// The merge only needs the fetched objects, so the clone and remote can go even after a conflict.
 	const problems = [];
@@ -247,20 +252,34 @@ export async function merge( source, destination, { branch } ) {
 				inMonorepo
 			).catch( ( error ) => problems.push( error.message ) );
 		}
-		await rm( cloneDir, { recursive: true, force: true } );
+		await rm( cloneDir, { recursive: true, force: true } ).catch(
+			( error ) =>
+				problems.push(
+					`Failed to remove the temporary clone ${ cloneDir }: ${ error.message }`
+				)
+		);
 	} finally {
 		process.off( 'SIGINT', onInterrupt );
 	}
 
-	// The handler holds off Ctrl+C until cleanup is done, so an interrupt only matters if it stopped a step.
-	const stopped = failure && interrupted;
-	const message = [ stopped ? 'Interrupted' : failure?.message, ...problems ]
-		.filter( Boolean )
-		.join( '\n' );
-	if ( message ) {
-		throw Object.assign( new Error( message ), {
-			exitCode: stopped ? 130 : 1,
-		} );
+	if ( ! failure ) {
+		console.log( `Successfully merged ${ source } into ${ destination }` );
+		if ( problems.length > 0 ) {
+			throw new Error(
+				`The merge succeeded, but cleanup failed:\n${ problems.join(
+					'\n'
+				) }`
+			);
+		}
+		return;
 	}
-	console.log( `Successfully merged ${ source } into ${ destination }` );
+
+	throw Object.assign(
+		new Error(
+			[ stopped ? 'Interrupted' : failure.message, ...problems ].join(
+				'\n'
+			)
+		),
+		{ exitCode: stopped ? 130 : 1 }
+	);
 }

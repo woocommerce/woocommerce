@@ -50,9 +50,10 @@ describe( 'source validation', () => {
 } );
 
 describe( 'destination validation', () => {
-	it( 'accepts a nested path inside the monorepo', async () => {
-		await assert.doesNotReject( () =>
-			validateArgs( SOURCE, 'tools/__monorepo_merge_test__' )
+	it( 'accepts a nested path and returns it relative to the monorepo', async () => {
+		assert.equal(
+			await validateArgs( SOURCE, './tools/__monorepo_merge_test__/' ),
+			'tools/__monorepo_merge_test__'
 		);
 	} );
 

@@ -66,13 +66,23 @@ export function readProjectFields( projectItems ) {
 /**
  * Compares the field values an issue had before the transfer with its project items after it.
  *
- * @param {Object[]} expectedFields The fields read from the issue before the transfer.
- * @param {Object[]} projectItems   The `projectItems.nodes` of the issue after the transfer.
+ * @param {Object[]} expectedFields   The fields read from the issue before the transfer.
+ * @param {Object[]} projectItems     The `projectItems.nodes` of the issue after the transfer.
+ * @param {Object[]} expectedProjects The `{ id, title }` of every project the issue was in, including ones with no field values to restore.
  * @return {{missingProjects: string[], fieldsToRestore: Object[]}} Titles of projects the issue is no longer in, and the fields to set again with the new item IDs.
  */
-export function findFieldsToRestore( expectedFields, projectItems ) {
+export function findFieldsToRestore(
+	expectedFields,
+	projectItems,
+	expectedProjects = []
+) {
 	const itemIds = new Map(
 		projectItems.map( ( item ) => [ item.project.id, item.id ] )
+	);
+	const missingProjects = new Set(
+		expectedProjects
+			.filter( ( project ) => ! itemIds.has( project.id ) )
+			.map( ( project ) => project.title )
 	);
 	const actualValues = new Map(
 		readProjectFields( projectItems ).map( ( field ) => [
@@ -81,7 +91,6 @@ export function findFieldsToRestore( expectedFields, projectItems ) {
 		] )
 	);
 
-	const missingProjects = new Set();
 	const fieldsToRestore = [];
 	for ( const field of expectedFields ) {
 		const itemId = itemIds.get( field.projectId );
@@ -179,6 +188,9 @@ async function getIssues( graphql, searchQuery ) {
 			issues.push( {
 				id: issue.id,
 				title: issue.title,
+				projects: issue.projectItems.nodes.map(
+					( item ) => item.project
+				),
 				projectFields: readProjectFields( issue.projectItems.nodes ),
 			} );
 		}
@@ -198,7 +210,7 @@ async function getIssues( graphql, searchQuery ) {
  * @return {Promise<string[]>} Titles of projects the transferred issue is no longer in.
  */
 async function restoreProjectFields( graphql, issue ) {
-	if ( issue.projectFields.length === 0 ) {
+	if ( issue.projects.length === 0 ) {
 		return [];
 	}
 
@@ -211,7 +223,8 @@ async function restoreProjectFields( graphql, issue ) {
 	}
 	const { missingProjects, fieldsToRestore } = findFieldsToRestore(
 		issue.projectFields,
-		node.projectItems.nodes
+		node.projectItems.nodes,
+		issue.projects
 	);
 
 	for ( const field of fieldsToRestore ) {
@@ -262,7 +275,8 @@ export async function transferIssues(
 			'The destination repository must be in the format "owner/repo"!'
 		);
 	}
-	if ( ! source.startsWith( owner + '/' ) ) {
+	// GitHub owner names are case-insensitive.
+	if ( ! source.toLowerCase().startsWith( owner.toLowerCase() + '/' ) ) {
 		throw new Error(
 			'The source and target repository must have the same owner!'
 		);
