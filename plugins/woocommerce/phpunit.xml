@@ -36,6 +36,7 @@
                 </array>
             </arguments>
 		</listener>
+		<listener class="WC_PHPUnit_Performance_Recorder" file="tests/legacy/framework/class-wc-phpunit-performance-recorder.php" />
 	</listeners>
 	<coverage includeUncoveredFiles="true">
 		<include>
