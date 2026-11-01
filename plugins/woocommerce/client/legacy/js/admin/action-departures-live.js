@@ -22,14 +22,20 @@
 		}
 	}
 
+	function cellContent( cell ) {
+		const content = cell.cloneNode( true );
+		// Random load timing must not replace otherwise unchanged cells.
+		content.querySelectorAll( '.wc-departures__flap' ).forEach( tile => tile.removeAttribute( 'style' ) );
+		return content.innerHTML;
+	}
+
 	function rememberCells( container ) {
-		container.querySelectorAll( 'td' ).forEach( cell => cellMarkup.set( cell, cell.innerHTML ) );
+		container.querySelectorAll( 'td' ).forEach( cell => cellMarkup.set( cell, cellContent( cell ) ) );
 	}
 
 	function flipTiles( container, previous = new Map(), departing = false ) {
 		const reduced = window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches;
-		const duration = 320;
-		return Promise.all( Array.from( container.querySelectorAll( '.wc-departures__flap' ) ).map( function ( tile, index ) {
+		return Promise.all( Array.from( container.querySelectorAll( '.wc-departures__flap' ) ).map( function ( tile ) {
 			const before = previous.has( tile ) ? previous.get( tile ) : ( departing ? tile.dataset.character : ' ' );
 			const after = departing ? ' ' : tile.dataset.character;
 			const top = tile.querySelector( '.wc-departures__leaf--top' );
@@ -44,7 +50,8 @@
 				tile.dataset.before = after;
 				return Promise.resolve();
 			}
-			const delay = ( index % 12 ) * 18;
+			const delay = Math.round( Math.random() * 1100 );
+			const duration = 90 + Math.round( Math.random() * 90 );
 			const fold = top.animate(
 				[ { transform: 'rotateX(0)', opacity: 1 }, { transform: 'rotateX(-90deg)', opacity: 1 } ],
 				{ duration, delay, easing: 'ease-in', fill: 'backwards' }
@@ -79,9 +86,10 @@
 			}
 			Array.from( nextRow.cells ).forEach( function ( nextCell, cellIndex ) {
 				const cell = row.cells[ cellIndex ];
-				if ( cellMarkup.get( cell ) !== nextCell.innerHTML || cell.className !== nextCell.className ) {
+				const content = cellContent( nextCell );
+				if ( cellMarkup.get( cell ) !== content || cell.className !== nextCell.className ) {
 					const before = Array.from( cell.querySelectorAll( '.wc-departures__flap' ) ).map( tile => tile.dataset.character );
-					cellMarkup.set( cell, nextCell.innerHTML );
+					cellMarkup.set( cell, content );
 					cell.className = nextCell.className;
 					cell.replaceChildren( ...Array.from( nextCell.childNodes ) );
 					cell.querySelectorAll( '.wc-departures__flap' ).forEach( function ( tile, tileIndex ) {

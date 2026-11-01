@@ -235,7 +235,8 @@ final class ScheduledActionsDepartures {
 		// Keep joined scripts and combining characters together in translations.
 		$characters = 1 === preg_match( '/^[\x20-\x7E]+$/D', $text ) ? str_split( $text ) : array( $text );
 		foreach ( $characters as $character ) {
-			echo '<span class="wc-departures__flap" data-character="' . esc_attr( $character ) . '" data-before=" ">';
+			$timing = sprintf( '--wc-departures-delay: %dms; --wc-departures-duration: %dms', wp_rand( 0, 1100 ), wp_rand( 90, 180 ) );
+			echo '<span class="wc-departures__flap" style="' . esc_attr( $timing ) . '" data-character="' . esc_attr( $character ) . '" data-before=" ">';
 			echo '<span class="wc-departures__value">' . esc_html( $character ) . '</span>';
 			echo '<span class="wc-departures__leaf wc-departures__leaf--top"> </span>';
 			echo '<span class="wc-departures__leaf wc-departures__leaf--bottom">' . esc_html( $character ) . '</span></span>';

@@ -7,16 +7,17 @@ describe( 'Live departures board', () => {
 	const originalMatchMedia = window.matchMedia;
 	const originalAnimate = Element.prototype.animate;
 
-	function tile( character ) {
-		return `<span class="wc-departures__flap" data-character="${ character }" data-before=" ">` +
+	function tile( character, delay = 0 ) {
+		return `<span class="wc-departures__flap" data-character="${ character }" data-before=" "` +
+			` style="--wc-departures-delay: ${ delay }ms; --wc-departures-duration: 120ms">` +
 			`<span class="wc-departures__value">${ character }</span>` +
 			'<span class="wc-departures__leaf wc-departures__leaf--top"> </span>' +
 			`<span class="wc-departures__leaf wc-departures__leaf--bottom">${ character }</span></span>`;
 	}
 
-	function row( id, label ) {
+	function row( id, label, delay ) {
 		return `<tr data-action-id="${ id }"><td><a href="#action-${ id }">Action ${ id }</a></td>` +
-			`<td>${ tile( label ) }</td></tr>`;
+			`<td>${ tile( label, delay ) }</td></tr>`;
 	}
 
 	function html( rows, stamp = '10:00', page = 1, hasMore = true ) {
@@ -69,6 +70,7 @@ describe( 'Live departures board', () => {
 		document.body.innerHTML = '';
 		jest.clearAllTimers();
 		jest.useRealTimers();
+		jest.restoreAllMocks();
 		global.fetch = originalFetch;
 		window.matchMedia = originalMatchMedia;
 		Element.prototype.animate = originalAnimate;
@@ -85,7 +87,9 @@ describe( 'Live departures board', () => {
 		const unchangedTile = unchanged.querySelector( '.wc-departures__flap' );
 		const link = unchanged.querySelector( 'a' );
 		link.focus();
-		global.fetch.mockResolvedValue( response( row( 1, 'Scheduled' ) + row( 2, 'Awaiting run' ) + row( 4, 'Scheduled' ), '10:05' ) );
+		global.fetch.mockResolvedValue( response(
+			row( 1, 'Scheduled', 900 ) + row( 2, 'Awaiting run' ) + row( 4, 'Scheduled' ), '10:05'
+		) );
 		await jest.advanceTimersByTimeAsync( 299999 );
 		expect( global.fetch ).not.toHaveBeenCalled();
 		await jest.advanceTimersByTimeAsync( 1 );
@@ -104,6 +108,30 @@ describe( 'Live departures board', () => {
 		await jest.advanceTimersByTimeAsync( 300000 );
 		document.querySelectorAll( '.wc-departures__leaf' ).forEach( leaf => expect( animate.mock.instances ).toContain( leaf ) );
 		expect( unchanged.querySelector( '.wc-departures__flap' ) ).toBe( unchangedTile );
+	} );
+
+	test( 'scatters individual characters across the board with independent, brisk flip speeds', async () => {
+		jest.spyOn( Math, 'random' )
+			.mockReturnValueOnce( 0.8 ).mockReturnValueOnce( 0.1 )
+			.mockReturnValueOnce( 0.2 ).mockReturnValueOnce( 0.9 )
+			.mockReturnValue( 0.5 );
+		const characters = `<tr data-action-id="1"><td>${ tile( '1' ) }${ tile( '2' ) }</td></tr>`;
+		start( html( characters ) );
+		global.fetch.mockResolvedValue( response( characters, '10:05' ) );
+		await jest.advanceTimersByTimeAsync( 300000 );
+
+		const timings = animate.mock.calls
+			.filter( ( call, index ) => animate.mock.instances[ index ].classList.contains( 'wc-departures__leaf--top' ) )
+			.map( call => call[ 1 ] );
+		expect( timings[ 0 ].delay ).toBeGreaterThan( timings[ 1 ].delay );
+		expect( timings[ 2 ].delay ).toBeGreaterThan( timings[ 1 ].delay );
+		expect( new Set( timings.map( timing => timing.duration ) ).size ).toBeGreaterThan( 1 );
+		timings.forEach( timing => {
+			expect( timing.delay ).toBeGreaterThanOrEqual( 0 );
+			expect( timing.delay ).toBeLessThanOrEqual( 1100 );
+			expect( timing.duration ).toBeGreaterThanOrEqual( 90 );
+			expect( timing.duration ).toBeLessThanOrEqual( 180 );
+		} );
 	} );
 
 	test( 'folds the old upper half before unfolding the new lower half around the center hinge', async () => {
