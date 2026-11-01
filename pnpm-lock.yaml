@@ -3787,9 +3787,6 @@ importers:
       lint-staged:
         specifier: 13.2.0
         version: 13.2.0(enquirer@2.4.1)
-      lodash:
-        specifier: 4.18.1
-        version: 4.18.1
       mini-css-extract-plugin:
         specifier: 2.9.x
         version: 2.9.4(webpack@5.97.1)

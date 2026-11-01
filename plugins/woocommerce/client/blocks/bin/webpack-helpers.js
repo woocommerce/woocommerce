@@ -201,6 +201,13 @@ const getProgressBarPluginConfig = ( name ) => {
 	};
 };
 
+const omit = ( object, keys ) =>
+	Object.fromEntries(
+		Object.entries( object ?? {} ).filter(
+			( [ key ] ) => ! keys.includes( key )
+		)
+	);
+
 const getCacheGroups = () => ( {
 	'base-components': {
 		test: /\/assets\/js\/base\/components\//,
@@ -266,4 +273,5 @@ module.exports = {
 	requestToExternal,
 	getProgressBarPluginConfig,
 	getCacheGroups,
+	omit,
 };
