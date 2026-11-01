@@ -20,6 +20,7 @@ final class ScheduledActionsDepartures {
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'register_page' ), 99 );
 		add_action( 'woocommerce_admin_status_content_action-scheduler', array( $this, 'render_link' ), 5 );
+		add_action( 'wp_ajax_woocommerce_action_departures', array( $this, 'handle_live_refresh' ) );
 	}
 
 	/**
@@ -49,6 +50,37 @@ final class ScheduledActionsDepartures {
 	public function enqueue_assets(): void {
 		wp_enqueue_style( 'woocommerce-action-departures', WC()->plugin_url() . '/assets/css/action-departures.css', array(), WC_VERSION );
 		add_filter( 'admin_title', array( $this, 'page_title' ) );
+		if ( $this->is_live() ) {
+			$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+			wp_enqueue_script( 'woocommerce-action-departures-live', WC()->plugin_url() . '/assets/js/admin/action-departures-live' . $suffix . '.js', array(), WC_VERSION, true );
+		}
+	}
+
+	/**
+	 * Return a fresh board only to an authorized, nonce-verified viewer.
+	 *
+	 * @internal
+	 */
+	public function handle_live_refresh(): void {
+		if ( ! current_user_can( 'manage_options' ) || ! check_ajax_referer( 'wc-action-departures', 'nonce', false ) ) {
+			wp_send_json_error( null, 403 );
+		}
+		if ( ! class_exists( ActionScheduler::class ) || ! ActionScheduler::is_initialized() ) {
+			wp_send_json_error( null, 503 );
+		}
+		ob_start();
+		$this->render();
+		wp_send_json_success( array( 'html' => ob_get_clean() ) );
+	}
+
+	/**
+	 * Check the read-only live-view selector.
+	 *
+	 * @return bool
+	 */
+	private function is_live(): bool {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Selects a display mode without changing state.
+		return isset( $_GET['live'] ) && '1' === $_GET['live'];
 	}
 
 	/**
@@ -75,7 +107,7 @@ final class ScheduledActionsDepartures {
 	}
 
 	/**
-	 * Render a bounded snapshot; no action management or background refresh.
+	 * Render a bounded, read-only board.
 	 *
 	 * @internal
 	 */
@@ -130,8 +162,23 @@ final class ScheduledActionsDepartures {
 				'label' => $label,
 			);
 		}
-		$board_url = admin_url( 'admin.php?page=wc-action-scheduler-departures' );
-		$list_url  = admin_url( 'admin.php?page=wc-status&tab=action-scheduler' );
+		$is_live      = $this->is_live();
+		$snapshot_url = add_query_arg( 'status', $status, admin_url( 'admin.php?page=wc-action-scheduler-departures' ) );
+		$live_url     = add_query_arg( 'live', '1', $snapshot_url );
+		$board_url    = $is_live ? $live_url : $snapshot_url;
+		$list_url     = admin_url( 'admin.php?page=wc-status&tab=action-scheduler' );
+		$refresh_url  = $is_live ? add_query_arg(
+			array(
+				'action' => 'woocommerce_action_departures',
+				'status' => $status,
+				'live'   => '1',
+				'nonce'  => wp_create_nonce( 'wc-action-departures' ),
+			),
+			admin_url( 'admin-ajax.php' )
+		) : '';
+		$render_flaps = static function ( string $text ): void {
+			self::render_flaps( $text );
+		};
 		include __DIR__ . '/views/html-admin-action-departures.php';
 	}
 
@@ -139,7 +186,6 @@ final class ScheduledActionsDepartures {
 	 * Render decorative split-flap tiles with one accessible text equivalent.
 	 *
 	 * @param string $text The text to display.
-	 * @phpstan-ignore method.unused (Called from the included view in this class's scope.)
 	 */
 	private static function render_flaps( string $text ): void {
 		echo '<span class="screen-reader-text">' . esc_html( $text ) . '</span><span class="wc-departures__flaps" aria-hidden="true" dir="auto">';

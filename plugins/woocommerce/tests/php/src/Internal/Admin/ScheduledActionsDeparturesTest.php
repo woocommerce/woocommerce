@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin;
 
 use ActionScheduler;
+use DOMDocument;
+use DOMXPath;
 use Automattic\WooCommerce\Internal\Admin\ScheduledActionsDepartures;
 use WC_Unit_Test_Case;
 
@@ -92,7 +94,9 @@ class ScheduledActionsDeparturesTest extends WC_Unit_Test_Case {
 		$_GET['status'] = 'failed';
 		$html           = $this->render_board();
 
-		$this->assertSame( 16, substr_count( $html, '<tr>' ) - 1 );
+		$document = new DOMDocument();
+		$document->loadHTML( $html, LIBXML_NOERROR | LIBXML_NOWARNING );
+		$this->assertSame( 16, ( new DOMXPath( $document ) )->query( '//tbody/tr' )->length );
 		$this->assertStringNotContainsString( 'departures_pending', $html );
 		$this->assertStringContainsString( 'More departures in the action list', $html );
 		$this->assertSame( 'pending', $store->get_status( $pending_id ) );
