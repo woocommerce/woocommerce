@@ -188,6 +188,15 @@ trait OrderAbilityTrait {
 						'order_item'
 					),
 				),
+				'shipping'             => array(
+					'type'                 => 'object',
+					'description'          => __( 'Order shipping address. Countries use ISO 3166-1 alpha-2 codes, and states use WooCommerce state codes.', 'woocommerce' ),
+					'properties'           => array_fill_keys(
+						array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'state', 'postcode', 'country', 'phone' ),
+						array( 'type' => 'string' )
+					),
+					'additionalProperties' => false,
+				),
 				'shipping_lines'       => array(
 					'type'        => 'array',
 					'description' => __( 'Order shipping lines. Present together with line_items.', 'woocommerce' ),
@@ -344,6 +353,7 @@ trait OrderAbilityTrait {
 			'customer_id'          => $order->get_customer_id(),
 			'payment_method'       => $order->get_payment_method(),
 			'payment_method_title' => $order->get_payment_method_title(),
+			'shipping'             => $order->get_address( 'shipping' ),
 		);
 
 		if ( $include_line_items ) {

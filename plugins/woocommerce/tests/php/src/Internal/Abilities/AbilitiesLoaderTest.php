@@ -3992,7 +3992,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'Leave at the door.', $saved->get_customer_note() );
 		$this->assertSame( 'completed', $saved->get_status() );
 		$this->assertSame( $total, $saved->get_total() );
-		$this->assertArrayNotHasKey( 'shipping', $result['order'] );
+		$this->assertSame( 'Lisbon', $result['order']['shipping']['city'] );
 		$this->assertArrayNotHasKey( 'billing', $result['order'] );
 		$this->assertArrayNotHasKey( 'customer_note', $result['order'] );
 	}
