@@ -100,7 +100,7 @@ class ExtensibleAbilities {
 	/**
 	 * Schema keywords that hold a list of schemas.
 	 */
-	private const SCHEMA_COMBINATORS = array( 'anyOf', 'oneOf', 'allOf' );
+	private const SCHEMA_COMBINATORS = array( 'anyOf', 'oneOf' );
 
 	/**
 	 * Register a resource that abilities format, so extensions can register fields on it.
@@ -163,6 +163,7 @@ class ExtensibleAbilities {
 	 *                                  an object before it is saved.
 	 *     @type array    $input_schema Optional. JSON schema of the value that `set_callback` receives. Core
 	 *                                  publishes it as declared. A value can be null only where it declares null.
+	 *                                  It cannot use `allOf`, because WordPress does not run it.
 	 *                                  Required with `set_callback`.
 	 *     @type callable $set_callback Optional. Receives the object and the value, and changes the object
 	 *                                  in memory, when an ability creates or updates the object. It returns a
@@ -261,10 +262,12 @@ class ExtensibleAbilities {
 	}
 
 	/**
-	 * Find the first problem in a schema and in the schemas inside it. A `type`
-	 * is required at every depth, because rest_validate_value_from_schema() needs
-	 * it. A branch of a combinator can inherit it from its parent, as that function
-	 * allows.
+	 * Find the first problem in a schema and in the schemas inside it. Core publishes
+	 * a schema as declared, and the MCP SDK client compiles every output schema when
+	 * it lists the tools, so one malformed schema stops that client from listing any
+	 * tool. A `type` is required at every depth, because rest_validate_value_from_schema()
+	 * needs it. A branch of a combinator can inherit it from its parent, as that function
+	 * allows. `allOf` is refused, because that function does not run it.
 	 *
 	 * @param mixed  $schema    Schema to check, of any type until this method checks it.
 	 * @param string $path      Path of the schema, used in the message.
@@ -276,9 +279,13 @@ class ExtensibleAbilities {
 			return sprintf( '"%s" must be a schema, as an array.', $path );
 		}
 
+		if ( array_key_exists( 'allOf', $schema ) ) {
+			return sprintf( '"%s" cannot use "allOf", because WordPress does not run it. Declare the rules in one schema.', $path );
+		}
+
 		$combinators = array_values( array_intersect( self::SCHEMA_COMBINATORS, array_keys( $schema ) ) );
 		if ( $is_output && ( ! empty( $combinators ) || ! empty( $schema['nullable'] ) || ! is_string( $schema['type'] ?? null ) || 'null' === $schema['type'] ) ) {
-			return sprintf( '"%s" must declare one "type" that is not null, with no "nullable", "anyOf", "oneOf" or "allOf". Return null from the get_callback to leave the field out.', $path );
+			return sprintf( '"%s" must declare one "type" that is not null, with no "nullable", "anyOf" or "oneOf". Return null from the get_callback to leave the field out.', $path );
 		}
 		if ( ! isset( $schema['type'] ) && empty( $combinators ) ) {
 			return sprintf( '"%s" must declare a "type".', $path );
@@ -295,8 +302,7 @@ class ExtensibleAbilities {
 			if ( ! is_array( $schema['enum'] ) || empty( $schema['enum'] ) || ! wp_is_numeric_array( $schema['enum'] ) ) {
 				return sprintf( 'The "enum" of "%s" must be a list of values.', $path );
 			}
-			$enum_types = array_merge( array(), ...array_map( static fn( $type ) => self::SCHEMA_TYPES[ $type ], $types ) );
-			if ( ! empty( $types ) && ! empty( array_diff( array_map( 'gettype', $schema['enum'] ), $enum_types ) ) ) {
+			if ( $is_output && ! empty( array_diff( array_map( 'gettype', $schema['enum'] ), self::SCHEMA_TYPES[ $schema['type'] ] ) ) ) {
 				return sprintf( 'The "enum" of "%s" has a value that its "type" does not allow.', $path );
 			}
 		}

@@ -1370,12 +1370,13 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				),
 			),
 			'empty enum'                  => array( $object + array( 'enum' => array() ) ),
-			'enum of another type'        => array( $object + array( 'enum' => array( 'a' ) ) ),
 			'empty type list'             => array( array( 'type' => array() ) ),
 			'unknown type in a list'      => array( array( 'type' => array( 'string', 'text' ) ) ),
 			'empty anyOf'                 => array( $object + array( 'anyOf' => array() ) ),
 			'anyOf not a list'            => array( $object + array( 'anyOf' => array( 'type' => 'string' ) ) ),
 			'anyOf with a bad branch'     => array( $object + array( 'anyOf' => array( array( 'properties' => array( 'a' => true ) ) ) ) ),
+			'allOf'                       => array( $object + array( 'allOf' => array( array( 'required' => array( 'a' ) ) ) ) ),
+			'allOf inside anyOf'          => array( $object + array( 'anyOf' => array( array( 'allOf' => array( array( 'required' => array( 'a' ) ) ) ) ) ) ),
 		);
 	}
 
@@ -1389,6 +1390,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			'enum_null'   => array(
 				'type' => array( 'string', 'null' ),
 				'enum' => array( 'a', null ),
+			),
+			'enum_mixed'  => array(
+				'type' => 'string',
+				'enum' => array( 'a', 1 ),
 			),
 			'branch'      => array(
 				'type'  => 'object',
