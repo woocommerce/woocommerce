@@ -2595,9 +2595,6 @@ importers:
       config:
         specifier: 3.3.7
         version: 3.3.7
-      dotenv:
-        specifier: ^10.0.0
-        version: 10.0.0
       eslint:
         specifier: ^10.0.0
         version: 10.7.0(jiti@2.6.1)
@@ -3966,9 +3963,6 @@ importers:
       commander:
         specifier: ^9.5.0
         version: 9.5.0
-      dotenv:
-        specifier: ^10.0.0
-        version: 10.0.0
       simple-git:
         specifier: ^3.21.0
         version: 3.36.0
@@ -4131,9 +4125,6 @@ importers:
       commander:
         specifier: ^10.0.1
         version: 10.0.1
-      dotenv:
-        specifier: ^10.0.0
-        version: 10.0.0
       figlet:
         specifier: ^1.7.0
         version: 1.11.0
@@ -4271,9 +4262,6 @@ importers:
       commander:
         specifier: 9.4.0
         version: 9.4.0
-      dotenv:
-        specifier: ^15.0.1
-        version: 15.0.1
       ejs:
         specifier: ^3.1.9
         version: 3.1.10
@@ -12800,14 +12788,6 @@ packages:
   dot-prop@9.0.0:
     resolution: {integrity: sha512-1gxPBJpI/pcjQhKgIU91II6Wkay+dLcN3M6rf2uwP8hRur3HtQXjVrdAK3sjC0piaEuxzMwjXChcETiJl47lAQ==}
     engines: {node: '>=18'}
-
-  dotenv@10.0.0:
-    resolution: {integrity: sha512-rlBi9d8jpv9Sf1klPjNfFAuWDjKLwTIJJ/VxtoTwIR6hnZxcEOQCZg2oIL3MWBYw5GpUDKOEnND7LXTbIpQ03Q==}
-    engines: {node: '>=10'}
-
-  dotenv@15.0.1:
-    resolution: {integrity: sha512-4OnbwRfzR+xQThp7uq1xpUS9fmgZ//njexOtPjPSbK3yHGrSHSJnaJRsXderSSm2elfvVj+Y5awDC0I8Oy8rkA==}
-    engines: {node: '>=12'}
 
   dotenv@16.6.1:
     resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
@@ -34699,10 +34679,6 @@ snapshots:
   dot-prop@9.0.0:
     dependencies:
       type-fest: 4.41.0
-
-  dotenv@10.0.0: {}
-
-  dotenv@15.0.1: {}
 
   dotenv@16.6.1: {}
 
