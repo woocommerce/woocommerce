@@ -411,7 +411,7 @@ class OrderUpdate extends ActionableAbility {
 		}
 
 		if ( isset( $line['total'] ) ) {
-			$item->set_total( $line['total'] );
+			$item->set_total( wc_format_decimal( $line['total'] ) );
 		}
 
 		if ( empty( $line['id'] ) ) {
