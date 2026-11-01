@@ -155,12 +155,6 @@ class OrderUpdateStatus extends ActionableAbility {
 			$subject->stage_status( $status, self::get_note( $input ), true );
 		} catch ( \WC_Data_Exception $e ) {
 			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
-		} catch ( \Exception $e ) {
-			return new \WP_Error(
-				'woocommerce_order_status_update_failed',
-				$e->getMessage(),
-				array( 'status' => 400 )
-			);
 		}
 
 		return null;
