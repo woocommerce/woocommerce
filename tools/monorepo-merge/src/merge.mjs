@@ -11,12 +11,16 @@ import { promisify } from 'node:util';
  * Internal dependencies
  */
 import { closePrompts, confirm } from './confirm.mjs';
+import { REPOSITORY_PATTERN } from './github.mjs';
 
 const execFileAsync = promisify( execFile );
 
 export const MONOREPO_ROOT = resolve( import.meta.dirname, '../../..' );
 
 const REMOTE = 'monorepo-merge-import';
+
+// Signals that stop the merge but still let it remove the temporary clone and remote.
+const SIGNALS = [ 'SIGINT', 'SIGTERM', 'SIGHUP' ];
 
 /**
  * Runs a command and replaces any failure with a readable error.
@@ -55,7 +59,7 @@ async function run( command, args, failureMessage, options ) {
  */
 export async function validateArgs( source, destination ) {
 	// We only support pulling from GitHub so the format needs to match that.
-	if ( ! source.match( /^[a-zA-Z0-9\-_]+\/(?!\.+$)[a-zA-Z0-9\-_.]+$/ ) ) {
+	if ( ! REPOSITORY_PATTERN.test( source ) ) {
 		throw new Error(
 			'The "source" argument must be in "organization/repository" format'
 		);
@@ -81,7 +85,7 @@ export async function validateArgs( source, destination ) {
 	);
 	if ( exists ) {
 		throw new Error(
-			'The "destination" argument points to a directory that already exists'
+			'The "destination" argument points to a file or directory that already exists'
 		);
 	}
 
@@ -159,8 +163,12 @@ export async function merge( source, requestedDestination, { branch } ) {
 		throw new Error( 'Cancelled. Nothing was changed.' );
 	}
 
-	const cloneDir = await mkdtemp( join( tmpdir(), 'monorepo-merge-' ) );
-	let remoteAdded = false;
+	const clonePrefix = join( tmpdir(), 'monorepo-merge-' );
+	const cloneDir = await mkdtemp( clonePrefix );
+	const remoteUrl = () =>
+		run( 'git', [ 'remote', 'get-url', REMOTE ], '', inMonorepo ).catch(
+			() => null
+		);
 
 	// Git receives Ctrl+C from the terminal and stops; catching it here lets the cleanup below still run.
 	let interrupted = false;
@@ -168,7 +176,9 @@ export async function merge( source, requestedDestination, { branch } ) {
 		interrupted = true;
 		closePrompts();
 	};
-	process.on( 'SIGINT', onInterrupt );
+	for ( const signal of SIGNALS ) {
+		process.on( signal, onInterrupt );
+	}
 	const step = ( ...args ) => {
 		if ( interrupted ) {
 			throw new Error( 'Interrupted' );
@@ -190,8 +200,7 @@ export async function merge( source, requestedDestination, { branch } ) {
 		await step(
 			'git-filter-repo',
 			[
-				'--to-subdirectory-filter',
-				destination,
+				'--to-subdirectory-filter=' + destination,
 				'--message-callback=' + createMessageCallback( source ),
 			],
 			'Failed to alter the repository history',
@@ -207,6 +216,20 @@ export async function merge( source, requestedDestination, { branch } ) {
 		}
 
 		console.log( 'Merging repositories' );
+		// A run that was killed outright leaves its remote behind; remove it only if it points at one of our clones.
+		const leftover = await remoteUrl();
+		if ( leftover?.startsWith( clonePrefix ) ) {
+			await step(
+				'git',
+				[ 'remote', 'remove', REMOTE ],
+				`Failed to remove the leftover remote "${ REMOTE }"`,
+				inMonorepo
+			);
+		} else if ( leftover ) {
+			throw new Error(
+				`A "${ REMOTE }" remote already exists and points at ${ leftover }. Remove it, then run the command again.`
+			);
+		}
 		// A fixed remote name, because names such as "org/.github" are valid repositories but invalid remotes.
 		await step(
 			'git',
@@ -214,7 +237,6 @@ export async function merge( source, requestedDestination, { branch } ) {
 			'Failed to add the cloned repository as a remote',
 			inMonorepo
 		);
-		remoteAdded = true;
 		// Without --no-tags the source repository's tags would stay in the monorepo after the remote is removed.
 		await step(
 			'git',
@@ -244,7 +266,8 @@ export async function merge( source, requestedDestination, { branch } ) {
 	// The merge only needs the fetched objects, so the clone and remote can go even after a conflict.
 	const problems = [];
 	try {
-		if ( remoteAdded ) {
+		// Checked by URL rather than a flag, because an interrupted `git remote add` can still have written the remote.
+		if ( ( await remoteUrl() ) === cloneDir ) {
 			await run(
 				'git',
 				[ 'remote', 'remove', REMOTE ],
@@ -259,7 +282,9 @@ export async function merge( source, requestedDestination, { branch } ) {
 				)
 		);
 	} finally {
-		process.off( 'SIGINT', onInterrupt );
+		for ( const signal of SIGNALS ) {
+			process.off( signal, onInterrupt );
+		}
 	}
 
 	if ( ! failure ) {

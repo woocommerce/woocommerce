@@ -4,7 +4,7 @@ Brings another GitHub repository into the WooCommerce monorepo: `merge` imports 
 
 ## Requirements
 
-- Node 24. The tool has no runtime dependencies; `pnpm install` is only needed to run its tests.
+- macOS or Linux with Node 24. The tool has no runtime dependencies; `pnpm install` is only needed to run its tests.
 - For `merge`: `git` and [`git-filter-repo`](https://github.com/newren/git-filter-repo) (for example, `brew install git-filter-repo`).
 - For `transfer-issues`: a GitHub token with the `repo` and `project` scopes, read from `GH_TOKEN`, `GITHUB_TOKEN`, or `gh auth token`. Add the `project` scope to a `gh` login with `gh auth refresh -s project`.
 

@@ -4,6 +4,9 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
+// "owner/repo", where a repository name may contain dots but cannot be only dots.
+export const REPOSITORY_PATTERN = /^[a-zA-Z0-9\-_]+\/(?!\.+$)[a-zA-Z0-9\-_.]+$/;
+
 /**
  * Gets a GitHub API token from GH_TOKEN, GITHUB_TOKEN, or the GitHub CLI.
  *
@@ -36,7 +39,7 @@ export async function getToken() {
  * Creates a function that sends GraphQL requests to the GitHub API.
  *
  * @param {string} rawToken The GitHub API token; surrounding whitespace is ignored.
- * @return {(query: string, variables?: Object) => Promise<Object>} Resolves with the response data and rejects on HTTP or GraphQL errors.
+ * @return {(query: string, variables?: Object) => Promise<Object>} Resolves with the response data and rejects on HTTP or GraphQL errors. Network and HTTP failures have `requestFailed: true`.
  */
 export function createGraphQL( rawToken ) {
 	const token = rawToken.trim();
@@ -47,24 +50,35 @@ export function createGraphQL( rawToken ) {
 		);
 	}
 
+	// Failures of the request itself, as opposed to GraphQL errors about one query, will fail every later request too.
+	const requestFailure = ( message ) =>
+		Object.assign( new Error( message ), { requestFailed: true } );
+
 	return async ( query, variables = {} ) => {
-		const response = await fetch( 'https://api.github.com/graphql', {
-			method: 'POST',
-			headers: {
-				authorization: `bearer ${ token }`,
-				'content-type': 'application/json',
-			},
-			body: JSON.stringify( { query, variables } ),
-		} );
+		let response;
+		try {
+			response = await fetch( 'https://api.github.com/graphql', {
+				method: 'POST',
+				headers: {
+					authorization: `bearer ${ token }`,
+					'content-type': 'application/json',
+				},
+				body: JSON.stringify( { query, variables } ),
+			} );
+		} catch ( error ) {
+			throw requestFailure(
+				`Could not reach GitHub: ${ error.message }`
+			);
+		}
 
 		if ( response.status === 401 ) {
-			throw new Error( 'The given token is invalid' );
+			throw requestFailure( 'The given token is invalid' );
 		}
 		if ( ! response.ok ) {
 			// GitHub explains failures such as SAML enforcement or rate limits in the body's message.
 			const { message } =
 				( await response.json().catch( () => null ) ) ?? {};
-			throw new Error(
+			throw requestFailure(
 				`GitHub API request failed with HTTP ${ response.status }${
 					message ? `: ${ message }` : ''
 				}`

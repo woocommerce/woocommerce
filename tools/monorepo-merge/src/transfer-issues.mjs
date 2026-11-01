@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { confirm } from './confirm.mjs';
-import { createGraphQL, getToken } from './github.mjs';
+import { REPOSITORY_PATTERN, createGraphQL, getToken } from './github.mjs';
 
 // GitHub search never returns more than this many results for one query.
 export const SEARCH_LIMIT = 1000;
@@ -207,7 +207,7 @@ async function getIssues( graphql, searchQuery ) {
  *
  * @param {Function} graphql The GraphQL request function.
  * @param {Object}   issue   The transferred issue.
- * @return {Promise<string[]>} Titles of projects the transferred issue is no longer in.
+ * @return {Promise<string[]>} Problems to report: projects the issue is no longer in, and fields that could not be set. Each field is tried even if another fails.
  */
 async function restoreProjectFields( graphql, issue ) {
 	if ( issue.projects.length === 0 ) {
@@ -227,32 +227,38 @@ async function restoreProjectFields( graphql, issue ) {
 		issue.projects
 	);
 
+	const problems = missingProjects.map(
+		( title ) => `no longer in project "${ title }"`
+	);
 	for ( const field of fieldsToRestore ) {
-		await graphql(
-			`
-				mutation ($input: UpdateProjectV2ItemFieldValueInput!) {
-					updateProjectV2ItemFieldValue(input: $input) {
-						projectV2Item {
-							id
+		const name = `"${ field.fieldName }" in project "${ field.projectTitle }"`;
+		try {
+			await graphql(
+				`
+					mutation ($input: UpdateProjectV2ItemFieldValueInput!) {
+						updateProjectV2ItemFieldValue(input: $input) {
+							projectV2Item {
+								id
+							}
 						}
 					}
+				`,
+				{
+					input: {
+						projectId: field.projectId,
+						fieldId: field.fieldId,
+						itemId: field.itemId,
+						value: field.value,
+					},
 				}
-			`,
-			{
-				input: {
-					projectId: field.projectId,
-					fieldId: field.fieldId,
-					itemId: field.itemId,
-					value: field.value,
-				},
-			}
-		);
-		console.log(
-			`Restored "${ field.fieldName }" in project "${ field.projectTitle }" for "${ issue.title }"`
-		);
+			);
+			console.log( `Restored ${ name } for "${ issue.title }"` );
+		} catch ( error ) {
+			problems.push( `restoring ${ name } failed: ${ error.message }` );
+		}
 	}
 
-	return missingProjects;
+	return problems;
 }
 
 /**
@@ -273,6 +279,11 @@ export async function transferIssues(
 	if ( ! owner ) {
 		throw new Error(
 			'The destination repository must be in the format "owner/repo"!'
+		);
+	}
+	if ( ! REPOSITORY_PATTERN.test( source ) ) {
+		throw new Error(
+			'The source repository must be in the format "owner/repo"!'
 		);
 	}
 	// GitHub owner names are case-insensitive.
@@ -384,6 +395,13 @@ export async function transferIssues(
 			console.log(
 				`Failed to transfer "${ issue.title }": ${ error.message }`
 			);
+			// A rejected token, a rate limit, or a lost connection would fail every remaining transfer too.
+			if ( error.requestFailed ) {
+				console.log(
+					'Stopping the transfer; running post-transfer tasks for the issues already moved.'
+				);
+				break;
+			}
 		}
 	}
 
@@ -398,14 +416,11 @@ export async function transferIssues(
 	// Each step is tried on its own, so one failure does not skip the other or the remaining issues.
 	for ( const issue of issues.filter( ( { newId } ) => newId ) ) {
 		try {
-			const missingProjects = await restoreProjectFields(
+			for ( const problem of await restoreProjectFields(
 				graphql,
 				issue
-			);
-			if ( missingProjects.length > 0 ) {
-				failures.push(
-					`${ issue.title }: not in project(s) ${ missingProjects.join( ', ' ) }`
-				);
+			) ) {
+				failures.push( `${ issue.title }: ${ problem }` );
 			}
 		} catch ( error ) {
 			failures.push(
