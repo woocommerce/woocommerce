@@ -56,7 +56,6 @@ class EditLockTest extends \WC_Unit_Test_Case {
 		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
 		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 		$this->toggle_cot_feature_and_usage( true );
-		$this->toggle_cot_feature_and_usage( true );
 
 		$order = new \WC_Order();
 

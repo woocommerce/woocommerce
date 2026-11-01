@@ -51,7 +51,6 @@ class OrdersTableDataStoreCachePrimingTest extends \HposTestCase {
 		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 		$this->toggle_cot_feature_and_usage( true );
 		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
-		$this->toggle_cot_feature_and_usage( true );
 
 		$container = wc_get_container();
 		$container->reset_all_resolved();
