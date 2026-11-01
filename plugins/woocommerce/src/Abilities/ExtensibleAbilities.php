@@ -749,8 +749,9 @@ class ExtensibleAbilities {
 
 	/**
 	 * The schema of the `extensions` input of a resource. It lists the fields
-	 * that have an update_callback, and allows null for each one, because null
-	 * deletes the value. ActionableAbility adds it to the input schema of every
+	 * that have an update_callback, allows null for each one, because null
+	 * deletes the value, and says which object types a field with `object_types`
+	 * applies to. ActionableAbility adds it to the input schema of every
 	 * ability. An ability that writes other objects of the resource in the same
 	 * call, such as the variations of a product, adds it to their input too.
 	 *
@@ -786,6 +787,11 @@ class ExtensibleAbilities {
 						}
 						if ( isset( $field_schema['enum'] ) && ! in_array( null, $field_schema['enum'], true ) ) {
 							$field_schema['enum'][] = null;
+						}
+						if ( ! empty( $args['object_types'] ) ) {
+							/* translators: %s: Comma-separated list of object types. */
+							$applies_to                  = sprintf( __( 'Applies to: %s.', 'woocommerce' ), implode( ', ', $args['object_types'] ) );
+							$field_schema['description'] = trim( ( $field_schema['description'] ?? '' ) . ' ' . $applies_to );
 						}
 						return $field_schema;
 					},

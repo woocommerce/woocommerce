@@ -246,7 +246,7 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 					'type' => 'string',
 					'enum' => self::get_product_query_status_slugs(),
 				),
-				'type'         => self::get_product_type_schema( array_values( array_unique( array_merge( self::get_supported_product_types(), array_keys( self::get_variation_subclass_parent_types() ) ) ) ) ),
+				'type'         => self::get_product_type_schema( array_values( array_unique( array_merge( array_keys( self::get_supported_product_type_configs() ), array_keys( self::get_variation_subclass_parent_types() ) ) ) ) ),
 				'parent_id'    => array(
 					'type'        => 'integer',
 					'description' => __( 'Limit results to the variations of this variable product.', 'woocommerce' ),

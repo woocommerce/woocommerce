@@ -430,7 +430,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	private function apply_fields( $subject, array $updates ): ?\WP_Error {
 		foreach ( $updates as $param => list( $args, $value ) ) {
 			if ( ! ExtensibleAbilities::field_applies_to( $args, $subject ) ) {
-				return self::field_object_type_refusal( $param, ExtensibleAbilities::get_object_type( $subject ) ?? 'unknown', $args['object_types'] );
+				return self::field_object_type_refusal( $param, ExtensibleAbilities::get_object_type( $subject ), $args['object_types'] );
 			}
 			$rejected = self::run_callback( $args['update_callback'], array( $subject, $value ), array( 'field' => $param ) );
 			if ( null !== $rejected ) {

@@ -77,8 +77,13 @@ trait ProductAbilityTrait {
 			'properties'           => array_merge(
 				$properties,
 				array( 'type' => $type_schema ),
-				self::get_product_mutation_field_schemas_for_fields( $fields, false, $creating ),
-				$creating && in_array( 'attributes', $fields, true ) ? array( 'attributes' => self::get_product_create_attributes_schema() ) : array()
+				self::add_product_type_notes(
+					array_merge(
+						self::get_product_mutation_field_schemas_for_fields( $fields, false, $creating ),
+						$creating && in_array( 'attributes', $fields, true ) ? array( 'attributes' => self::get_product_create_attributes_schema() ) : array()
+					),
+					$configs
+				)
 			),
 			'additionalProperties' => false,
 		) + ( $creating ? array() : array( 'required' => array( 'id' ) ) );
@@ -224,6 +229,31 @@ trait ProductAbilityTrait {
 	}
 
 	/**
+	 * Say in the description of a field which product types take it, when not
+	 * every type does.
+	 *
+	 * @param array<string, array> $field_schemas Field schemas keyed by field.
+	 * @param array<string, array> $configs       Product type configurations keyed by type.
+	 * @return array<string, array>
+	 */
+	private static function add_product_type_notes( array $field_schemas, array $configs ): array {
+		foreach ( $field_schemas as $field => $field_schema ) {
+			$product_types = array_keys(
+				array_filter(
+					$configs,
+					static fn( array $config ): bool => in_array( $field, $config['fields'], true )
+				)
+			);
+			if ( count( $product_types ) < count( $configs ) ) {
+				/* translators: %s: Comma-separated list of product types. */
+				$applies_to                             = sprintf( __( 'Applies to: %s.', 'woocommerce' ), implode( ', ', $product_types ) );
+				$field_schemas[ $field ]['description'] = trim( ( $field_schema['description'] ?? '' ) . ' ' . $applies_to );
+			}
+		}
+		return $field_schemas;
+	}
+
+	/**
 	 * Get the product type schema.
 	 *
 	 * @param array<int, string> $product_types Product types to allow.
@@ -338,17 +368,6 @@ trait ProductAbilityTrait {
 	}
 
 	/**
-	 * Product types that the mutation abilities support: every registered type
-	 * with a class of its own, and `variation`, which WooCommerce does not list
-	 * as a type.
-	 *
-	 * @return array<int, string>
-	 */
-	protected static function get_supported_product_types(): array {
-		return array_keys( self::get_supported_product_type_configs() );
-	}
-
-	/**
 	 * Get the configuration of every supported product type, keyed by type.
 	 *
 	 * @param bool $creating Whether the fields are for a create.
@@ -358,8 +377,7 @@ trait ProductAbilityTrait {
 		$configs = array();
 
 		foreach ( array_merge( array_keys( wc_get_product_types() ), array( ProductType::VARIATION ) ) as $product_type ) {
-			$product_type = (string) $product_type;
-			$config       = self::get_product_class_config( \WC_Product_Factory::get_product_classname( 0, $product_type ), $product_type, $creating );
+			$config = self::get_product_class_config( \WC_Product_Factory::get_product_classname( 0, $product_type ), $product_type, $creating );
 
 			if ( ! is_wp_error( $config ) ) {
 				$configs[ $product_type ] = $config;
@@ -380,21 +398,6 @@ trait ProductAbilityTrait {
 			'fields'        => array( 'sku', 'description', 'status', 'virtual', 'downloadable', 'attributes', 'regular_price', 'sale_price', 'manage_stock', 'stock_quantity', 'stock_status' ),
 			'product_props' => array(),
 		);
-	}
-
-	/**
-	 * Get the configuration of a product type.
-	 *
-	 * @param string $product_type Product type.
-	 * @param bool   $creating     Whether the fields are for a create.
-	 * @return array{fields: array<int, string>, product_props: array<string, mixed>}|\WP_Error
-	 */
-	protected static function get_product_type_config( string $product_type, bool $creating = false ) {
-		if ( ProductType::VARIATION !== $product_type && ! isset( wc_get_product_types()[ $product_type ] ) ) {
-			return self::get_unsupported_product_type_error();
-		}
-
-		return self::get_product_class_config( \WC_Product_Factory::get_product_classname( 0, $product_type ), $product_type, $creating );
 	}
 
 	/**

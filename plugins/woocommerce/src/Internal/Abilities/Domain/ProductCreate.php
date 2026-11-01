@@ -105,12 +105,7 @@ class ProductCreate extends ActionableAbility {
 			'extensions' => array(),
 		);
 
-		$product_type   = (string) ( $input['type'] ?? ProductType::SIMPLE );
-		$product_config = self::get_product_type_config( $product_type, true );
-
-		if ( is_wp_error( $product_config ) ) {
-			return $product_config;
-		}
+		$product_type = $input['type'] ?? ProductType::SIMPLE;
 
 		if ( ProductType::VARIATION !== $product_type && '' === trim( (string) ( $input['name'] ?? '' ) ) ) {
 			return new \WP_Error(
