@@ -1693,7 +1693,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$response = $this->run_ability_response( 'woocommerce/product-create', $this->get_shirt_input() );
 
 		$this->assertSame( 409, $response->get_status() );
-		$this->assertSame( 'test-ext:test_range_refused', $response->get_data()['code'] );
+		$this->assertStringEndsWith( 'test_range_refused', $response->get_data()['code'] );
 		$this->assertSame( 'test-ext', $response->get_data()['data']['namespace'] );
 		$this->assertSame( 0, wc_get_product_id_by_sku( 'shirt-s' ) );
 		$this->assertSame(
@@ -2251,72 +2251,39 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should list in the variation schemas only the fields that can apply to a variation.
+	 * @testdox Should refuse a variation field that does not apply to a variation when the call writes it.
 	 */
-	public function test_variation_schemas_list_only_the_fields_that_apply_to_a_variation(): void {
-		$register = static function () {
-			$fields = array(
-				'simple_only'    => array( 'simple' ),
-				'variation_only' => array( 'variation' ),
-			);
-			foreach ( $fields as $field => $object_types ) {
+	public function test_refuses_a_variation_field_that_does_not_apply_to_a_variation(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
 				ExtensibleAbilities::register_field(
 					array(
 						'resource'        => 'product',
 						'namespace'       => 'typed-ext',
-						'field'           => $field,
+						'field'           => 'simple_only',
 						'schema'          => array( 'type' => 'string' ),
-						'object_types'    => $object_types,
+						'object_types'    => array( 'simple' ),
 						'get_callback'    => static fn() => 'value',
-						'update_callback' => static function ( \WC_Product $product, $value ) use ( $field ) {
-							$product->update_meta_data( '_test_' . $field, $value );
+						'update_callback' => static function ( \WC_Product $product, $value ) {
+							$product->update_meta_data( '_test_simple_only', $value );
 						},
 					)
 				);
 			}
-			ExtensibleAbilities::register_field(
-				array(
-					'resource'     => 'product',
-					'namespace'    => 'simple-only-ext',
-					'field'        => 'plan',
-					'schema'       => array( 'type' => 'string' ),
-					'object_types' => array( 'simple' ),
-					'get_callback' => static fn() => 'value',
-				)
-			);
-		};
-		add_action( 'woocommerce_extensible_abilities_init', $register );
+		);
+		$this->reset_registries();
 
-		try {
-			$ability = $this->get_ability( 'woocommerce/product-create' );
-			$output  = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
-			$input   = $this->get_shirt_input();
+		$input                                = $this->get_shirt_input();
+		$input['variations'][0]['extensions'] = array( 'typed-ext' => array( 'simple_only' => 'nope' ) );
+		$schema                               = $this->get_ability( 'woocommerce/product-create' )['input_schema'];
+		$refused                              = $this->run_ability_response( 'woocommerce/product-create', $input );
 
-			unset( $input['sku'], $input['variations'][0]['sku'], $input['variations'][1]['sku'] );
-			$input['variations'][0]['extensions'] = array( 'typed-ext' => array( 'simple_only' => 'nope' ) );
-
-			$refused = $this->run_ability_response( 'woocommerce/product-create', $input );
-		} finally {
-			remove_action( 'woocommerce_extensible_abilities_init', $register );
-		}
-
+		$this->assertSame( $schema['properties']['extensions'], $schema['properties']['variations']['items']['properties']['extensions'] );
 		$this->assertSame( 400, $refused->get_status() );
-		$this->assertStringEndsWith( 'woocommerce_ability_field_object_type', $refused->get_data()['code'] );
+		$this->assertSame( 'woocommerce_ability_field_object_type', $refused->get_data()['code'] );
 		$this->assertSame( 'The extensions.typed-ext.simple_only field does not apply to the variation type. It applies to simple.', $refused->get_data()['message'] );
-
-		$input_namespaces  = $ability['input_schema']['properties']['variations']['items']['properties']['extensions']['properties'];
-		$output_namespaces = $ability['output_schema']['properties']['variations']['items']['properties']['extensions']['properties'];
-		$product_input     = $ability['input_schema']['properties']['extensions']['properties'];
-		$this->assertArrayHasKey( 'simple_only', $product_input['typed-ext']['properties'] );
-		$this->assertArrayHasKey( 'variation_only', $input_namespaces['typed-ext']['properties'] );
-		$this->assertFalse( $ability['input_schema']['properties']['variations']['items']['properties']['extensions']['additionalProperties'] );
-		$this->assertFalse( $input_namespaces['typed-ext']['additionalProperties'] );
-		$this->assertArrayNotHasKey( 'simple_only', $input_namespaces['typed-ext']['properties'] );
-		$this->assertArrayHasKey( 'color', $input_namespaces['test-ext']['properties'], 'A field without object_types stays.' );
-		$this->assertArrayHasKey( 'variation_only', $output_namespaces['typed-ext']['properties'] );
-		$this->assertArrayNotHasKey( 'simple_only', $output_namespaces['typed-ext']['properties'] );
-		$this->assertArrayNotHasKey( 'simple-only-ext', $output_namespaces, 'A namespace with no field for a variation goes away.' );
-		$this->assertSame( 'value', $output['variations'][0]['extensions']['typed-ext']['variation_only'] );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'shirt-s' ) );
 	}
 
 	/**

@@ -189,7 +189,7 @@ abstract class ActionableAbility extends \WP_Ability {
 
 		$enabled = ExtensibleAbilities::is_enabled();
 		$writes  = $enabled && $this->writes_extension_fields();
-		$updates = $writes ? $this->prepare_fields( $input['extensions'] ?? null, $this->get_resource() ) : array();
+		$updates = $writes ? $this->prepare_fields( $input['extensions'] ?? array(), $this->get_resource() ) : array();
 		if ( is_wp_error( $updates ) ) {
 			return $updates;
 		}
@@ -200,7 +200,7 @@ abstract class ActionableAbility extends \WP_Ability {
 		}
 
 		$objects = array( array( $subject, $updates, $this->get_resource() ) );
-		foreach ( is_array( $changed ) ? $changed : array() as $secondary ) {
+		foreach ( (array) $changed as $secondary ) {
 			$resource_name = $secondary[2] ?? $this->get_resource();
 			if ( $enabled && ! ExtensibleAbilities::is_resource_registered( $resource_name ) ) {
 				wc_doing_it_wrong(
@@ -307,7 +307,7 @@ abstract class ActionableAbility extends \WP_Ability {
 			foreach ( ExtensibleAbilities::get_syncs( $resource_name ) as $args ) {
 				$rejected = self::run_callback( $args['callback'], array( $saved, $this, $context ), array( 'namespace' => $args['namespace'] ) );
 				if ( null !== $rejected ) {
-					return self::with_namespaced_codes( $rejected, $args['namespace'] );
+					return $rejected;
 				}
 			}
 		}
@@ -324,20 +324,14 @@ abstract class ActionableAbility extends \WP_Ability {
 	 */
 	private static function forget_rolled_back_objects( array $objects, array $deleted = array() ): void {
 		foreach ( array_merge( $objects, array_map( static fn( $item ) => array( $item ), $deleted ) ) as list( $object ) ) {
-			$id = $object instanceof \WC_Data ? $object->get_id() : 0;
-			if ( $id <= 0 ) {
-				continue;
-			}
-			if ( $object instanceof \WC_Product ) {
+			$id = $object->get_id();
+			if ( $id > 0 && $object instanceof \WC_Product ) {
 				clean_post_cache( $id );
 				wc_delete_product_transients( $id );
 				if ( $object->get_parent_id() > 0 ) {
 					clean_post_cache( $object->get_parent_id() );
 					wc_delete_product_transients( $object->get_parent_id() );
 				}
-			} elseif ( $object instanceof \WC_Abstract_Order ) {
-				wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class )->remove( $id );
-				clean_post_cache( $id );
 			}
 		}
 	}
@@ -362,14 +356,14 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * each field, and cast them. No callback runs here. A null value is kept as
 	 * is, to delete the value.
 	 *
-	 * @param mixed  $values        Values keyed by namespace, then field. Anything but an array is ignored.
+	 * @param array  $values        Values keyed by namespace, then field.
 	 * @param string $resource_name Resource of the object that gets the values.
 	 * @return array|\WP_Error A list of field arguments and value pairs, or a WP_Error when a value is rejected.
 	 */
-	private function prepare_fields( $values, string $resource_name ) {
+	private function prepare_fields( array $values, string $resource_name ) {
 		$registered = ExtensibleAbilities::get_fields( $resource_name );
 		$updates    = array();
-		foreach ( is_array( $values ) ? $values : array() as $namespace => $fields ) {
+		foreach ( $values as $namespace => $fields ) {
 			foreach ( (array) $fields as $field => $value ) {
 				$args = $registered[ $namespace ][ $field ] ?? array();
 				if ( ! isset( $args['update_callback'] ) ) {
@@ -398,28 +392,6 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
-	 * The error for a field that does not apply to the type of an object.
-	 *
-	 * @param string   $param        Field, as `extensions.<namespace>.<field>`.
-	 * @param string   $object_type  Type of the object.
-	 * @param string[] $object_types Types that the field applies to.
-	 * @return \WP_Error
-	 */
-	protected static function field_object_type_refusal( string $param, string $object_type, array $object_types ): \WP_Error {
-		return new \WP_Error(
-			'woocommerce_ability_field_object_type',
-			sprintf(
-				/* translators: 1: extension field, 2: object type, 3: comma-separated list of object types. */
-				__( 'The %1$s field does not apply to the %2$s type. It applies to %3$s.', 'woocommerce' ),
-				$param,
-				$object_type,
-				implode( ', ', $object_types )
-			),
-			array( 'status' => 400 )
-		);
-	}
-
-	/**
 	 * Write the checked values to the object in memory with the update_callback
 	 * of each field.
 	 *
@@ -430,7 +402,17 @@ abstract class ActionableAbility extends \WP_Ability {
 	private function apply_fields( $subject, array $updates ): ?\WP_Error {
 		foreach ( $updates as $param => list( $args, $value ) ) {
 			if ( ! ExtensibleAbilities::field_applies_to( $args, $subject ) ) {
-				return self::field_object_type_refusal( $param, ExtensibleAbilities::get_object_type( $subject ), $args['object_types'] );
+				return new \WP_Error(
+					'woocommerce_ability_field_object_type',
+					sprintf(
+						/* translators: 1: extension field, 2: object type, 3: comma-separated list of object types. */
+						__( 'The %1$s field does not apply to the %2$s type. It applies to %3$s.', 'woocommerce' ),
+						$param,
+						ExtensibleAbilities::get_object_type( $subject ),
+						implode( ', ', $args['object_types'] )
+					),
+					array( 'status' => 400 )
+				);
 			}
 			$rejected = self::run_callback( $args['update_callback'], array( $subject, $value ), array( 'field' => $param ) );
 			if ( null !== $rejected ) {
@@ -486,25 +468,6 @@ abstract class ActionableAbility extends \WP_Ability {
 			);
 		}
 		return is_wp_error( $result ) ? self::with_data( $result, $data ) : null;
-	}
-
-	/**
-	 * Copy an error with each code as `<namespace>:<code>`, the format that
-	 * tells apart the same code from two extensions.
-	 *
-	 * @param \WP_Error $error     Error from an extension callback.
-	 * @param string    $namespace Extension that owns the callback.
-	 * @return \WP_Error
-	 */
-	private static function with_namespaced_codes( \WP_Error $error, string $namespace ): \WP_Error {
-		$namespaced = new \WP_Error();
-		foreach ( $error->get_error_codes() as $code ) {
-			foreach ( $error->get_error_messages( $code ) as $message ) {
-				$namespaced->add( $namespace . ':' . $code, $message );
-			}
-			$namespaced->add_data( $error->get_error_data( $code ), $namespace . ':' . $code );
-		}
-		return $namespaced;
 	}
 
 	/**

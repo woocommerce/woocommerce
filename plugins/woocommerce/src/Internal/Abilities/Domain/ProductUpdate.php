@@ -31,12 +31,11 @@ class ProductUpdate extends ActionableAbility {
 	/**
 	 * The variations that change() planned, saved after their parent by save().
 	 *
-	 * @var array{save: \WC_Product_Variation[], delete: \WC_Product_Variation[], extensions: array<int, array>}
+	 * @var array{save: array<int, array{0: \WC_Product_Variation, 1: array}>, delete: \WC_Product_Variation[]}
 	 */
 	private array $variations = array(
-		'save'       => array(),
-		'delete'     => array(),
-		'extensions' => array(),
+		'save'   => array(),
+		'delete' => array(),
 	);
 
 	/**
@@ -73,17 +72,6 @@ class ProductUpdate extends ActionableAbility {
 	}
 
 	/**
-	 * Refuse a `variations` item that writes a field that cannot apply to a
-	 * variation, then check the input schema.
-	 *
-	 * @param mixed $input Ability input.
-	 * @return true|\WP_Error
-	 */
-	public function validate_input( $input = null ) {
-		return self::variation_fields_refusal( $input ) ?? parent::validate_input( $input );
-	}
-
-	/**
 	 * Resource that the ability changes.
 	 *
 	 * @return string
@@ -100,9 +88,8 @@ class ProductUpdate extends ActionableAbility {
 	 */
 	protected function load( array $input ) {
 		$this->variations = array(
-			'save'       => array(),
-			'delete'     => array(),
-			'extensions' => array(),
+			'save'   => array(),
+			'delete' => array(),
 		);
 		$this->deleted    = array();
 
@@ -177,12 +164,12 @@ class ProductUpdate extends ActionableAbility {
 			}
 
 			if ( $subject instanceof \WC_Product_Variable && isset( $input['variations'] ) ) {
-				$plan = self::plan_variations( $subject, is_array( $input['variations'] ) ? $input['variations'] : array() );
+				$plan = self::plan_variations( $subject, $input['variations'] );
 				if ( is_wp_error( $plan ) ) {
 					return $plan;
 				}
 				$this->variations = $plan;
-				return self::get_variation_objects( $plan );
+				return $plan['save'];
 			}
 
 			return null;
@@ -246,7 +233,7 @@ class ProductUpdate extends ActionableAbility {
 	 * @return array
 	 */
 	protected function prepare_response( $subject ): array {
-		return self::format_product_mutation_response( $subject, $this->variations['save'] );
+		return self::format_product_mutation_response( $subject, array_column( $this->variations['save'], 0 ) );
 	}
 
 	/**

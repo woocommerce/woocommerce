@@ -210,7 +210,7 @@ trait ProductAbilityTrait {
 		$properties = array_merge( $properties, self::get_product_mutation_field_schemas_for_fields( self::get_variation_config()['fields'], true ) );
 
 		if ( ExtensibleAbilities::is_enabled() ) {
-			$properties['extensions'] = ExtensibleAbilities::get_input_schema( 'product', array( self::class, 'field_applies_to_variations' ) );
+			$properties['extensions'] = ExtensibleAbilities::get_input_schema( 'product' );
 		}
 
 		return array(
@@ -516,11 +516,7 @@ trait ProductAbilityTrait {
 	 * @return \WC_Product|\WP_Error
 	 */
 	protected static function get_product_object_for_type( string $product_type, int $product_id = 0 ) {
-		try {
-			$product = wc_get_product_object( $product_type, $product_id );
-		} catch ( \WC_Data_Exception $exception ) {
-			return self::get_invalid_product_type_error();
-		}
+		$product = wc_get_product_object( $product_type, $product_id );
 
 		if ( $product->get_type() !== $product_type ) {
 			return self::get_invalid_product_type_error();
@@ -795,21 +791,19 @@ trait ProductAbilityTrait {
 	 *
 	 * @param \WC_Product_Variable $parent_product Parent, with its attributes set. Saved or not.
 	 * @param array                $items          Items of the `variations` input.
-	 * @return array{save: \WC_Product_Variation[], delete: \WC_Product_Variation[], extensions: array<int, array>}|\WP_Error
+	 * @return array{save: array<int, array{0: \WC_Product_Variation, 1: array}>, delete: \WC_Product_Variation[]}|\WP_Error A variation to save comes with the `extensions` input of its item.
 	 * @throws \WC_Data_Exception When a variation setter rejects a value.
 	 */
 	protected static function plan_variations( \WC_Product_Variable $parent_product, array $items ) {
 		$config = self::get_variation_config();
 		$plan   = array(
-			'save'       => array(),
-			'delete'     => array(),
-			'extensions' => array(),
+			'save'   => array(),
+			'delete' => array(),
 		);
 		$named  = array();
 
 		foreach ( array_values( $items ) as $index => $item ) {
 			$position = $index + 1;
-			$item     = is_array( $item ) ? $item : array();
 			$id       = (int) ( $item['id'] ?? 0 );
 
 			if ( array_key_exists( 'delete', $item ) && ( $id <= 0 || count( $item ) > 2 ) ) {
@@ -867,11 +861,10 @@ trait ProductAbilityTrait {
 				return $error;
 			}
 
-			$plan['save'][]       = $variation;
-			$plan['extensions'][] = is_array( $item['extensions'] ?? null ) ? $item['extensions'] : array();
+			$plan['save'][] = array( $variation, $item['extensions'] ?? array() );
 		}
 
-		$error = self::check_variation_siblings( $parent_product, $plan['save'], $named );
+		$error = self::check_variation_siblings( $parent_product, array_column( $plan['save'], 0 ), $named );
 		if ( is_wp_error( $error ) ) {
 			return $error;
 		}
@@ -889,43 +882,15 @@ trait ProductAbilityTrait {
 	 * @return array{all: array<int, int>, visible: array<int, int>}
 	 */
 	private static function read_variation_children( \WC_Product_Variable $parent_product, bool $force_read ): array {
-		$children = $parent_product->get_data_store()->read_children( $parent_product, $force_read ); // @phpstan-ignore method.notFound (WC_Data_Store forwards the call to the variable product data store)
-		return array(
-			'all'     => array_map( 'intval', (array) ( $children['all'] ?? array() ) ),
-			'visible' => array_map( 'intval', (array) ( $children['visible'] ?? array() ) ),
-		);
+		return $parent_product->get_data_store()->read_children( $parent_product, $force_read ); // @phpstan-ignore method.notFound (WC_Data_Store forwards the call to the variable product data store)
 	}
 
 	/**
-	 * The IDs of every variation of a parent, from the data store.
-	 *
-	 * @param \WC_Product_Variable $parent_product Parent product.
-	 * @param bool                 $force_read     Whether to skip the children cache.
-	 * @return array<int, int>
-	 */
-	protected static function get_variation_ids( \WC_Product_Variable $parent_product, bool $force_read ): array {
-		return self::read_variation_children( $parent_product, $force_read )['all'];
-	}
-
-	/**
-	 * Pair each variation of a plan with the `extensions` input of its item, for change().
-	 *
-	 * @param array{save: \WC_Product_Variation[], extensions: array<int, array>} $plan Plan from plan_variations().
-	 * @return array<int, array{0: \WC_Product_Variation, 1: array}>
-	 */
-	protected static function get_variation_objects( array $plan ): array {
-		$objects = array();
-		foreach ( $plan['save'] as $index => $variation ) {
-			$objects[] = array( $variation, $plan['extensions'][ $index ] ?? array() );
-		}
-		return $objects;
-	}
-
-	/**
-	 * Check that no variation picks the same options or carries the same SKU
-	 * as another variation in the list, or as a saved variation of the parent.
-	 * A saved variation that the input names is left out, because the input
-	 * changes or deletes it.
+	 * Check that no variation picks the same options as another variation in
+	 * the list or a saved variation of the parent, and that no two variations
+	 * in the list carry the same SKU. A saved variation that the input names is
+	 * left out, because the input changes or deletes it. `set_sku()` already
+	 * checks a SKU against the saved products.
 	 *
 	 * @param \WC_Product_Variable    $parent_product Parent product.
 	 * @param \WC_Product_Variation[] $variations     Variations to save, in input order.
@@ -935,11 +900,10 @@ trait ProductAbilityTrait {
 	protected static function check_variation_siblings( \WC_Product_Variable $parent_product, array $variations, array $named = array() ) {
 		$combinations = array();
 		$skus         = array();
-		foreach ( $parent_product->get_id() > 0 ? self::get_variation_ids( $parent_product, true ) : array() as $child_id ) {
+		foreach ( $parent_product->get_id() > 0 ? self::read_variation_children( $parent_product, true )['all'] : array() as $child_id ) {
 			$child = isset( $named[ $child_id ] ) ? null : wc_get_product( $child_id );
 			if ( $child instanceof \WC_Product_Variation ) {
 				$combinations[ self::get_variation_combination( $child ) ] = true;
-				$skus[ $child->get_sku( 'edit' ) ]                         = true;
 			}
 		}
 		foreach ( array_values( $variations ) as $index => $variation ) {
@@ -994,7 +958,7 @@ trait ProductAbilityTrait {
 	 * @return null|\WP_Error
 	 */
 	protected static function save_variations( \WC_Product_Variable $parent_product, array $plan, string $failure_code ) {
-		foreach ( $plan['save'] as $variation ) {
+		foreach ( $plan['save'] as list( $variation ) ) {
 			$variation->set_parent_id( $parent_product->get_id() );
 			$error = self::save_product( $variation, $failure_code );
 			if ( is_wp_error( $error ) ) {
@@ -1040,18 +1004,14 @@ trait ProductAbilityTrait {
 	 * attribute slug, or by the taxonomy for a global attribute id.
 	 *
 	 * @param \WC_Product $product Product object.
-	 * @param mixed       $value   The `attributes` input.
+	 * @param array       $value   The `attributes` input.
 	 * @return array|\WP_Error
 	 */
-	private static function prepare_product_attributes( \WC_Product $product, $value ) {
-		if ( ! is_array( $value ) ) {
-			return self::get_invalid_product_attributes_error();
-		}
-
+	private static function prepare_product_attributes( \WC_Product $product, array $value ) {
 		if ( $product instanceof \WC_Product_Variation ) {
 			$attributes = array();
 			foreach ( $value as $item ) {
-				if ( ! is_array( $item ) || ! ( ! isset( $item['option'] ) || is_scalar( $item['option'] ) ) ) {
+				if ( isset( $item['options'] ) ) {
 					return self::get_invalid_product_attributes_error();
 				}
 				$key = empty( $item['id'] ) ? sanitize_title( (string) ( $item['name'] ?? '' ) ) : wc_attribute_taxonomy_name_by_id( (int) $item['id'] );
@@ -1065,10 +1025,7 @@ trait ProductAbilityTrait {
 
 		$attributes = array();
 		foreach ( $value as $position => $item ) {
-			if ( ! is_array( $item ) ) {
-				return self::get_invalid_product_attributes_error();
-			}
-			$options  = is_array( $item['options'] ?? null ) ? array_values( array_filter( array_map( 'wc_clean', $item['options'] ), 'is_string' ) ) : array();
+			$options  = array_map( 'sanitize_text_field', $item['options'] ?? array() );
 			$taxonomy = self::get_global_attribute_taxonomy( $item );
 			$name     = '' === $taxonomy ? sanitize_text_field( trim( (string) ( $item['name'] ?? '' ) ) ) : $taxonomy;
 			if ( '' === $taxonomy && ( ! empty( $item['id'] ) || ! empty( $item['global'] ) ) ) {
@@ -1127,7 +1084,7 @@ trait ProductAbilityTrait {
 			return wc_attribute_taxonomy_name_by_id( (int) $item['id'] );
 		}
 
-		$name = is_string( $item['name'] ?? null ) ? trim( $item['name'] ) : '';
+		$name = trim( $item['name'] ?? '' );
 		if ( empty( $item['global'] ) || '' === $name ) {
 			return '';
 		}
@@ -1175,14 +1132,14 @@ trait ProductAbilityTrait {
 	 * attribute, as `WC_Product_Variation` stores it.
 	 *
 	 * @param \WC_Product_Variation $variation      Variation, with its attributes set from input.
-	 * @param \WC_Product           $parent_product Parent product, saved or not.
+	 * @param \WC_Product_Variable  $parent_product Parent product, saved or not.
 	 * @param int                   $position       Position of the variation in the input, for the message. 0 for a single variation.
 	 * @return null|\WP_Error
 	 */
-	protected static function check_variation_attributes( \WC_Product_Variation $variation, \WC_Product $parent_product, int $position = 0 ) {
+	protected static function check_variation_attributes( \WC_Product_Variation $variation, \WC_Product_Variable $parent_product, int $position = 0 ) {
 		$options = array();
 		foreach ( $parent_product->get_attributes() as $slug => $attribute ) {
-			if ( $attribute instanceof \WC_Product_Attribute && $attribute->get_variation() ) {
+			if ( $attribute->get_variation() ) {
 				$options[ $slug ] = self::get_attribute_option_slugs( $attribute );
 			}
 		}
@@ -1536,7 +1493,7 @@ trait ProductAbilityTrait {
 			'grouped_products'  => $product instanceof \WC_Product_Grouped ? array_map( 'absint', $product->get_children( 'edit' ) ) : array(),
 			'parent_id'         => (int) $product->get_parent_id(),
 			'attributes'        => self::format_product_attributes( $product ),
-			'variation_ids'     => $product instanceof \WC_Product_Variable ? self::get_variation_ids( $product, false ) : array(),
+			'variation_ids'     => $product instanceof \WC_Product_Variable ? self::read_variation_children( $product, false )['all'] : array(),
 			'date_created'      => wc_rest_prepare_date_response( $product->get_date_created(), false ),
 			'date_created_gmt'  => wc_rest_prepare_date_response( $product->get_date_created() ),
 			'date_modified'     => wc_rest_prepare_date_response( $product->get_date_modified(), false ),
@@ -1589,7 +1546,7 @@ trait ProductAbilityTrait {
 		$schema['properties']['variations'] = array(
 			'type'        => 'array',
 			'description' => __( 'The variations the call created or changed, in input order. Deleted variations are not listed.', 'woocommerce' ),
-			'items'       => ExtensibleAbilities::add_fields_schema( self::get_single_product_output_schema(), 'product', array( self::class, 'field_applies_to_variations' ) ),
+			'items'       => self::get_product_output_schema(),
 		);
 
 		return $schema;
@@ -1616,49 +1573,6 @@ trait ProductAbilityTrait {
 			'product'    => $format( $product ),
 			'variations' => array_map( $format, array_values( $variations ) ),
 		);
-	}
-
-	/**
-	 * The error for a `variations` item that writes a field that cannot apply to
-	 * a variation. The input schema would refuse it too, with a generic error.
-	 *
-	 * @param mixed $input Ability input.
-	 * @return \WP_Error|null
-	 */
-	private static function variation_fields_refusal( $input ): ?\WP_Error {
-		if ( ! ExtensibleAbilities::is_enabled() || ! is_array( $input['variations'] ?? null ) ) {
-			return null;
-		}
-		$registered = ExtensibleAbilities::get_fields( 'product' );
-		foreach ( $input['variations'] as $item ) {
-			foreach ( (array) ( $item['extensions'] ?? array() ) as $namespace => $fields ) {
-				foreach ( array_keys( (array) $fields ) as $field ) {
-					$args = $registered[ $namespace ][ $field ] ?? null;
-					if ( null !== $args && ! self::field_applies_to_variations( $args ) ) {
-						return self::field_object_type_refusal( 'extensions.' . $namespace . '.' . $field, ProductType::VARIATION, $args['object_types'] );
-					}
-				}
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Whether a product field can apply to a variation, from its `object_types`.
-	 *
-	 * @param array<string, mixed> $args Field arguments from `register_field()`.
-	 * @return bool
-	 */
-	public static function field_applies_to_variations( array $args ): bool {
-		if ( empty( $args['object_types'] ) ) {
-			return true;
-		}
-		foreach ( $args['object_types'] as $object_type ) {
-			if ( is_a( \WC_Product_Factory::get_product_classname( 0, $object_type ), \WC_Product_Variation::class, true ) ) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	/**

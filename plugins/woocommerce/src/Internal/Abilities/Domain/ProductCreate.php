@@ -31,13 +31,19 @@ class ProductCreate extends ActionableAbility {
 	/**
 	 * The variations that change() planned, saved after their parent by save().
 	 *
-	 * @var array{save: \WC_Product_Variation[], delete: \WC_Product_Variation[], extensions: array<int, array>}
+	 * @var array{save: array<int, array{0: \WC_Product_Variation, 1: array}>, delete: \WC_Product_Variation[]}
 	 */
 	private array $variations = array(
-		'save'       => array(),
-		'delete'     => array(),
-		'extensions' => array(),
+		'save'   => array(),
+		'delete' => array(),
 	);
+
+	/**
+	 * The parent of a variation that the call creates on its own, loaded by load().
+	 *
+	 * @var \WC_Product_Variable|null
+	 */
+	private ?\WC_Product_Variable $variation_parent = null;
 
 	/**
 	 * Get the ability registration arguments.
@@ -73,17 +79,6 @@ class ProductCreate extends ActionableAbility {
 	}
 
 	/**
-	 * Refuse a `variations` item that writes a field that cannot apply to a
-	 * variation, then check the input schema.
-	 *
-	 * @param mixed $input Ability input.
-	 * @return true|\WP_Error
-	 */
-	public function validate_input( $input = null ) {
-		return self::variation_fields_refusal( $input ) ?? parent::validate_input( $input );
-	}
-
-	/**
 	 * Resource that the ability changes.
 	 *
 	 * @return string
@@ -100,10 +95,11 @@ class ProductCreate extends ActionableAbility {
 	 */
 	protected function load( array $input ) {
 		$this->variations = array(
-			'save'       => array(),
-			'delete'     => array(),
-			'extensions' => array(),
+			'save'   => array(),
+			'delete' => array(),
 		);
+
+		$this->variation_parent = null;
 
 		$product_type = $input['type'] ?? ProductType::SIMPLE;
 
@@ -117,9 +113,15 @@ class ProductCreate extends ActionableAbility {
 
 		if ( ProductType::VARIATION === $product_type ) {
 			$parent = wc_get_product( (int) ( $input['parent_id'] ?? 0 ) );
-			if ( $parent instanceof \WC_Product_Variable ) {
-				return self::get_new_variation( $parent );
+			if ( ! $parent instanceof \WC_Product_Variable ) {
+				return new \WP_Error(
+					'woocommerce_product_parent_invalid',
+					__( 'The parent must be a variable product.', 'woocommerce' ),
+					array( 'status' => 400 )
+				);
 			}
+			$this->variation_parent = $parent;
+			return self::get_new_variation( $parent );
 		}
 
 		return self::get_product_object_for_type( $product_type );
@@ -149,32 +151,24 @@ class ProductCreate extends ActionableAbility {
 				return $error;
 			}
 
-			if ( $subject instanceof \WC_Product_Variation ) {
-				$parent = wc_get_product( $subject->get_parent_id() );
-				if ( ! $parent instanceof \WC_Product_Variable ) {
-					return new \WP_Error(
-						'woocommerce_product_parent_invalid',
-						__( 'The parent must be a variable product.', 'woocommerce' ),
-						array( 'status' => 400 )
-					);
-				}
+			if ( $subject instanceof \WC_Product_Variation && null !== $this->variation_parent ) {
 				if ( ! $subject->get_status( 'edit' ) ) {
 					$subject->set_status( ProductStatus::PUBLISH );
 				}
-				$error = self::check_variation_attributes( $subject, $parent );
+				$error = self::check_variation_attributes( $subject, $this->variation_parent );
 				if ( is_wp_error( $error ) ) {
 					return $error;
 				}
-				return self::check_variation_siblings( $parent, array( $subject ) );
+				return self::check_variation_siblings( $this->variation_parent, array( $subject ) );
 			}
 
 			if ( $subject instanceof \WC_Product_Variable ) {
-				$plan = self::plan_variations( $subject, is_array( $input['variations'] ?? null ) ? $input['variations'] : array() );
+				$plan = self::plan_variations( $subject, $input['variations'] ?? array() );
 				if ( is_wp_error( $plan ) ) {
 					return $plan;
 				}
 				$this->variations = $plan;
-				return self::get_variation_objects( $plan );
+				return $plan['save'];
 			}
 
 			return null;
@@ -211,7 +205,7 @@ class ProductCreate extends ActionableAbility {
 	 * @return array
 	 */
 	protected function prepare_response( $subject ): array {
-		return self::format_product_mutation_response( $subject, $this->variations['save'] );
+		return self::format_product_mutation_response( $subject, array_column( $this->variations['save'], 0 ) );
 	}
 
 	/**

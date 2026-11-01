@@ -247,12 +247,10 @@ class ProductDelete extends ActionableAbility {
 			)
 		);
 
-		return array_values(
-			array_filter(
-				array_map( 'wc_get_product', $variation_ids ),
-				static fn( $variation ) => $variation instanceof \WC_Product_Variation
-			)
-		);
+		/** @var \WC_Product_Variation[] $variations */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+		$variations = array_map( 'wc_get_product', $variation_ids );
+
+		return $variations;
 	}
 
 	/**

@@ -518,36 +518,7 @@ class ExtensibleAbilities {
 	 * }
 	 */
 	public static function register_validator( array $args ): void {
-		if ( did_action( 'woocommerce_extensible_abilities_init' ) && ! doing_action( 'woocommerce_extensible_abilities_init' ) ) {
-			wc_doing_it_wrong( __METHOD__, 'Register a validator inside the woocommerce_extensible_abilities_init action.', '11.3.0' );
-			return;
-		}
-		foreach ( array( 'resource', 'namespace' ) as $key ) {
-			if ( ! is_string( $args[ $key ] ?? null ) || '' === $args[ $key ] || sanitize_key( $args[ $key ] ) !== $args[ $key ] ) {
-				wc_doing_it_wrong(
-					__METHOD__,
-					sprintf(
-						'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores.',
-						$key
-					),
-					'11.3.0'
-				);
-				return;
-			}
-		}
-		if ( ! is_callable( $args['callback'] ?? null ) ) {
-			wc_doing_it_wrong( __METHOD__, 'The "callback" argument must be callable.', '11.3.0' );
-			return;
-		}
-		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
-			wc_doing_it_wrong(
-				__METHOD__,
-				sprintf(
-					'The "%s" resource is not registered. Call ExtensibleAbilities::register_resource() first.',
-					$args['resource']
-				),
-				'11.3.0'
-			);
+		if ( ! self::check_callback_args( $args, __METHOD__, 'validator', '11.3.0' ) ) {
 			return;
 		}
 
@@ -586,47 +557,50 @@ class ExtensibleAbilities {
 	 *                               `$context['input']` is the input of the call, so a sync can skip work
 	 *                               when the call did not write its fields. It returns a WP_Error to
 	 *                               refuse, and then every save of the call is undone. A thrown exception
-	 *                               refuses it too. The client sees the code prefixed with the namespace, as
-	 *                               `<namespace>:<code>`, and the error gets the namespace in its data. A sync must not
+	 *                               refuses it too. The error gets the namespace in its data, and the 400
+	 *                               status when it has no status, as a validator's error does. A sync must not
 	 *                               send email or make HTTP requests, because an undo does not reach outside
 	 *                               the database.
 	 * }
 	 */
 	public static function register_sync( array $args ): void {
-		if ( did_action( 'woocommerce_extensible_abilities_init' ) && ! doing_action( 'woocommerce_extensible_abilities_init' ) ) {
-			wc_doing_it_wrong( __METHOD__, 'Register a sync inside the woocommerce_extensible_abilities_init action.', '11.4.0' );
-			return;
-		}
-		foreach ( array( 'resource', 'namespace' ) as $key ) {
-			if ( ! is_string( $args[ $key ] ?? null ) || '' === $args[ $key ] || sanitize_key( $args[ $key ] ) !== $args[ $key ] ) {
-				wc_doing_it_wrong(
-					__METHOD__,
-					sprintf(
-						'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores.',
-						$key
-					),
-					'11.4.0'
-				);
-				return;
-			}
-		}
-		if ( ! is_callable( $args['callback'] ?? null ) ) {
-			wc_doing_it_wrong( __METHOD__, 'The "callback" argument must be callable.', '11.4.0' );
-			return;
-		}
-		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
-			wc_doing_it_wrong(
-				__METHOD__,
-				sprintf(
-					'The "%s" resource is not registered. Call ExtensibleAbilities::register_resource() first.',
-					$args['resource']
-				),
-				'11.4.0'
-			);
+		if ( ! self::check_callback_args( $args, __METHOD__, 'sync', '11.4.0' ) ) {
 			return;
 		}
 
 		self::$syncs[ $args['resource'] ][] = $args;
+	}
+
+	/**
+	 * Check the arguments of a validator or a sync, and report the first
+	 * problem with wc_doing_it_wrong().
+	 *
+	 * @param array  $args    Validator or sync arguments.
+	 * @param string $method  Method that registers the callback.
+	 * @param string $kind    `validator` or `sync`, for the message.
+	 * @param string $version Version that added the method.
+	 * @return bool Whether the arguments are valid.
+	 */
+	private static function check_callback_args( array $args, string $method, string $kind, string $version ): bool {
+		if ( did_action( 'woocommerce_extensible_abilities_init' ) && ! doing_action( 'woocommerce_extensible_abilities_init' ) ) {
+			wc_doing_it_wrong( $method, sprintf( 'Register a %s inside the woocommerce_extensible_abilities_init action.', $kind ), $version );
+			return false;
+		}
+		foreach ( array( 'resource', 'namespace' ) as $key ) {
+			if ( ! is_string( $args[ $key ] ?? null ) || '' === $args[ $key ] || sanitize_key( $args[ $key ] ) !== $args[ $key ] ) {
+				wc_doing_it_wrong( $method, sprintf( 'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores.', $key ), $version );
+				return false;
+			}
+		}
+		if ( ! is_callable( $args['callback'] ?? null ) ) {
+			wc_doing_it_wrong( $method, 'The "callback" argument must be callable.', $version );
+			return false;
+		}
+		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
+			wc_doing_it_wrong( $method, sprintf( 'The "%s" resource is not registered. Call ExtensibleAbilities::register_resource() first.', $args['resource'] ), $version );
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -712,12 +686,11 @@ class ExtensibleAbilities {
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param array<string, mixed> $schema        Object schema.
+	 * @param array<string, mixed> $schema   Object schema.
 	 * @param string               $resource_name Resource.
-	 * @param callable|null        $field_filter  Optional. Gets the arguments of a field and returns whether the schema lists it.
 	 * @return array<string, mixed>
 	 */
-	public static function add_fields_schema( array $schema, string $resource_name, ?callable $field_filter = null ): array {
+	public static function add_fields_schema( array $schema, string $resource_name ): array {
 		if ( ! self::is_enabled() || empty( self::$fields[ $resource_name ] ) ) {
 			return $schema;
 		}
@@ -728,17 +701,13 @@ class ExtensibleAbilities {
 			'additionalProperties' => false,
 		);
 		foreach ( self::$fields[ $resource_name ] ?? array() as $namespace => $fields ) {
-			$listed = null === $field_filter ? $fields : array_filter( $fields, $field_filter );
-			if ( empty( $listed ) ) {
-				continue;
-			}
 			$extensions['properties'][ $namespace ] = array(
 				'type'                 => 'object',
 				'properties'           => array_map(
 					static function ( array $args ): array {
 						return $args['schema'];
 					},
-					$listed
+					$fields
 				),
 				'additionalProperties' => false,
 			);
@@ -757,11 +726,10 @@ class ExtensibleAbilities {
 	 *
 	 * @since 11.4.0
 	 *
-	 * @param string        $resource_name Resource.
-	 * @param callable|null $field_filter  Optional. Gets the arguments of a field and returns whether the schema lists it.
+	 * @param string $resource_name Resource.
 	 * @return array<string, mixed>
 	 */
-	public static function get_input_schema( string $resource_name, ?callable $field_filter = null ): array {
+	public static function get_input_schema( string $resource_name ): array {
 		$extensions = array(
 			'type'                 => 'object',
 			'description'          => __( 'Values to write to the fields that extensions add, keyed by extension namespace, then field. A null value deletes the value.', 'woocommerce' ),
@@ -769,7 +737,7 @@ class ExtensibleAbilities {
 		);
 		foreach ( self::get_fields( $resource_name ) as $namespace => $fields ) {
 			$writable = array_filter(
-				null === $field_filter ? $fields : array_filter( $fields, $field_filter ),
+				$fields,
 				static function ( array $args ): bool {
 					return isset( $args['update_callback'] );
 				}
