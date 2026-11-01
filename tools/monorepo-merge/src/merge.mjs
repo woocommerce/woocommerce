@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { execFile } from 'node:child_process';
-import { access, rm } from 'node:fs/promises';
+import { access, mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { promisify } from 'node:util';
@@ -118,8 +118,7 @@ export async function merge( source, destination, { branch } ) {
 	}
 
 	const gitPath = 'https://github.com/' + source;
-	const cloneDir = join( tmpdir(), 'monorepo-merge', source );
-	await rm( cloneDir, { recursive: true, force: true } );
+	const cloneDir = await mkdtemp( join( tmpdir(), 'monorepo-merge-' ) );
 
 	console.log( `Cloning ${ gitPath }` );
 	await run(
@@ -150,15 +149,18 @@ export async function merge( source, destination, { branch } ) {
 	}
 
 	console.log( 'Merging repositories' );
+	const inMonorepo = { cwd: MONOREPO_ROOT };
 	await run(
 		'git',
 		[ 'remote', 'add', source, cloneDir ],
-		'Failed to add the cloned repository as a remote'
+		'Failed to add the cloned repository as a remote',
+		inMonorepo
 	);
 	await run(
 		'git',
 		[ 'fetch', source ],
-		'Failed to fetch the cloned repository'
+		'Failed to fetch the cloned repository',
+		inMonorepo
 	);
 	await run(
 		'git',
@@ -168,12 +170,14 @@ export async function merge( source, destination, { branch } ) {
 			'--',
 			`${ source }/${ branch }`,
 		],
-		'Failed to merge the repositories'
+		'Failed to merge the repositories',
+		inMonorepo
 	);
 	await run(
 		'git',
 		[ 'remote', 'remove', source ],
-		'Failed to remove the cloned repository remote'
+		'Failed to remove the cloned repository remote',
+		inMonorepo
 	);
 	await rm( cloneDir, { recursive: true, force: true } );
 

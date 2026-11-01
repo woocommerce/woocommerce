@@ -305,23 +305,18 @@ export async function transferIssues(
 		return;
 	}
 
-	let repositoryId;
-	try {
-		( {
-			repository: { id: repositoryId },
-		} = await graphql(
-			`
-				query ($owner: String!, $name: String!) {
-					repository(owner: $owner, name: $name) {
-						id
-					}
+	const {
+		repository: { id: repositoryId },
+	} = await graphql(
+		`
+			query ($owner: String!, $name: String!) {
+				repository(owner: $owner, name: $name) {
+					id
 				}
-			`,
-			{ owner, name }
-		) );
-	} catch {
-		throw new Error( `Could not find the repository "${ destination }"` );
-	}
+			}
+		`,
+		{ owner, name }
+	);
 	const labelIds = await getLabelIds( graphql, owner, name, labels );
 	const issues = await getIssues( graphql, searchQuery );
 

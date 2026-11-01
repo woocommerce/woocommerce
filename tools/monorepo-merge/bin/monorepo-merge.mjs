@@ -7,6 +7,7 @@ import { parseArgs } from 'node:util';
 /**
  * Internal dependencies
  */
+import { closePrompts } from '../src/confirm.mjs';
 import { merge } from '../src/merge.mjs';
 import { transferIssues } from '../src/transfer-issues.mjs';
 
@@ -70,4 +71,6 @@ try {
 } catch ( error ) {
 	console.error( `Error: ${ error.message }` );
 	process.exitCode = 1;
+} finally {
+	closePrompts();
 }

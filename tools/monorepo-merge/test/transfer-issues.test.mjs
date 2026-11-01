@@ -6,24 +6,34 @@ import {
 	readProjectFields,
 } from '../src/transfer-issues.mjs';
 
+// Mirrors the live API: value types without a fragment come back as `{}`, and Title has its own data type.
 function projectItem( itemId, projectId, optionId ) {
+	const fieldValues = [
+		{},
+		{
+			field: {
+				id: `${ projectId }-title`,
+				name: 'Title',
+				dataType: 'TITLE',
+			},
+			text: 'Issue title',
+		},
+	];
+	if ( optionId ) {
+		fieldValues.push( {
+			field: {
+				id: `${ projectId }-status`,
+				name: 'Status',
+				dataType: 'SINGLE_SELECT',
+			},
+			optionId,
+		} );
+	}
+
 	return {
 		id: itemId,
 		project: { id: projectId, title: `Project ${ projectId }` },
-		fieldValues: {
-			nodes: optionId
-				? [
-						{
-							field: {
-								id: `${ projectId }-status`,
-								name: 'Status',
-								dataType: 'SINGLE_SELECT',
-							},
-							optionId,
-						},
-					]
-				: [],
-		},
+		fieldValues: { nodes: fieldValues },
 	};
 }
 
@@ -56,6 +66,21 @@ describe( 'findFieldsToRestore', () => {
 				value,
 			} ) ),
 			[ { itemId: 'new-b', value: { singleSelectOptionId: 'done' } } ]
+		);
+	} );
+
+	it( 'restores values that changed during the transfer', () => {
+		const { fieldsToRestore } = findFieldsToRestore( before, [
+			projectItem( 'new-a', 'A', 'in-progress' ),
+			projectItem( 'new-b', 'B', 'done' ),
+		] );
+
+		assert.deepEqual(
+			fieldsToRestore.map( ( { itemId, value } ) => ( {
+				itemId,
+				value,
+			} ) ),
+			[ { itemId: 'new-a', value: { singleSelectOptionId: 'todo' } } ]
 		);
 	} );
 
