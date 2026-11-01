@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a fatal error when shipping tax rates are calculated outside a front-end request, such as during scheduled tasks or REST API requests.
