@@ -107,6 +107,13 @@ describe( 'commit message rewriting', () => {
 		);
 	} );
 
+	it( 'qualifies every reference in a parenthesized list', () => {
+		assert.equal(
+			rewriteMessage( 'Fix widget (#12, #34)' ),
+			'Fix widget (woocommerce/example#12, woocommerce/example#34)'
+		);
+	} );
+
 	it( 'qualifies references inside parenthesized text', () => {
 		assert.equal(
 			rewriteMessage( 'Tidy up (see #12).' ),
@@ -122,7 +129,7 @@ describe( 'commit message rewriting', () => {
 	} );
 
 	it( 'leaves malformed references unchanged', () => {
-		const message = 'Malformed: (#), (#abc), (#12, and #.';
+		const message = 'Malformed: (#), (#abc), # 12, and #.';
 
 		assert.equal( rewriteMessage( message ), message );
 	} );

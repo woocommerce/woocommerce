@@ -22,6 +22,9 @@ const REMOTE = 'monorepo-merge-import';
 // Signals that stop the merge but still let it remove the temporary clone and remote.
 const SIGNALS = [ 'SIGINT', 'SIGTERM', 'SIGHUP' ];
 
+// The command `run` is waiting on, so a signal sent to this process alone can be passed on to it.
+let activeChild;
+
 /**
  * Runs a command and replaces any failure with a readable error.
  *
@@ -32,12 +35,14 @@ const SIGNALS = [ 'SIGINT', 'SIGTERM', 'SIGHUP' ];
  * @return {Promise<string>} The command's trimmed standard output.
  */
 async function run( command, args, failureMessage, options ) {
+	// git merge prints a line per imported file, which can exceed the default 1 MiB buffer.
+	const pending = execFileAsync( command, args, {
+		maxBuffer: Infinity,
+		...options,
+	} );
+	activeChild = pending.child;
 	try {
-		// git merge prints a line per imported file, which can exceed the default 1 MiB buffer.
-		const { stdout } = await execFileAsync( command, args, {
-			maxBuffer: Infinity,
-			...options,
-		} );
+		const { stdout } = await pending;
 
 		return stdout.trim();
 	} catch ( error ) {
@@ -47,6 +52,8 @@ async function run( command, args, failureMessage, options ) {
 				.filter( Boolean )
 				.join( '\n' ) || error.message;
 		throw new Error( `${ failureMessage }: ${ detail }` );
+	} finally {
+		activeChild = undefined;
 	}
 }
 
@@ -95,9 +102,10 @@ export async function validateArgs( source, destination ) {
 /**
  * Builds the git-filter-repo callback that updates imported references.
  *
- * Parenthesized references such as `(#123)` become pull request links.
- * Standalone references such as `#123` are qualified with the source repository. A `#` that follows
- * a word character or `/`, as in `other/repo#12` or a URL fragment, is not a reference and is left alone.
+ * A reference alone in parentheses, such as `(#123)`, becomes a pull request link first.
+ * Every other standalone reference, such as `#123` or the ones in `(#12, #34)`, is then qualified with the
+ * source repository. A `#` that follows a word character or `/`, as in `other/repo#12` or a URL fragment,
+ * is not a reference and is left alone.
  *
  * @param {string} source The GitHub repository we are merging.
  * @return {string} The Python body of the message callback.
@@ -105,11 +113,11 @@ export async function validateArgs( source, destination ) {
 export function createMessageCallback( source ) {
 	const pullRequestPattern = String.raw`rb"\(#(?P<pull_request_number>\d+)\)"`;
 	const pullRequestReplacement = String.raw`rb"(https://github.com/${ source }/pull/\g<pull_request_number>)"`;
-	const issuePattern = String.raw`rb"(?<![\w/(])#(?P<issue_number>\d+)(?!\w)"`;
+	const issuePattern = String.raw`rb"(?<![\w/])#(?P<issue_number>\d+)(?!\w)"`;
 	const issueReplacement = String.raw`rb"${ source }#\g<issue_number>"`;
-	const issueCallback = `re.sub(${ issuePattern }, ${ issueReplacement }, message)`;
+	const pullRequestCallback = `re.sub(${ pullRequestPattern }, ${ pullRequestReplacement }, message)`;
 
-	return `return re.sub(${ pullRequestPattern }, ${ pullRequestReplacement }, ${ issueCallback })`;
+	return `return re.sub(${ issuePattern }, ${ issueReplacement }, ${ pullRequestCallback })`;
 }
 
 /**
@@ -151,6 +159,26 @@ export async function merge( source, requestedDestination, { branch } ) {
 		inMonorepo
 	);
 
+	const clonePrefix = join( tmpdir(), 'monorepo-merge-' );
+	const remoteUrl = () =>
+		run( 'git', [ 'remote', 'get-url', REMOTE ], '', inMonorepo ).catch(
+			() => null
+		);
+	// A run that was killed outright leaves its remote behind; remove it only if it points at one of our clones.
+	const leftover = await remoteUrl();
+	if ( leftover?.startsWith( clonePrefix ) ) {
+		await run(
+			'git',
+			[ 'remote', 'remove', REMOTE ],
+			`Failed to remove the leftover remote "${ REMOTE }"`,
+			inMonorepo
+		);
+	} else if ( leftover ) {
+		throw new Error(
+			`A "${ REMOTE }" remote already exists and points at ${ leftover }. Remove it, then run the command again.`
+		);
+	}
+
 	if (
 		! ( await confirm(
 			`This merges ${ source } and its history into ${ destination } on ${
@@ -163,18 +191,16 @@ export async function merge( source, requestedDestination, { branch } ) {
 		throw new Error( 'Cancelled. Nothing was changed.' );
 	}
 
-	const clonePrefix = join( tmpdir(), 'monorepo-merge-' );
 	const cloneDir = await mkdtemp( clonePrefix );
-	const remoteUrl = () =>
-		run( 'git', [ 'remote', 'get-url', REMOTE ], '', inMonorepo ).catch(
-			() => null
-		);
 
-	// Git receives Ctrl+C from the terminal and stops; catching it here lets the cleanup below still run.
+	// Catching these signals lets the cleanup below still run. Ctrl+C from a terminal already reaches git,
+	// but a signal sent to this process alone has to be passed on to the running command.
 	let interrupted = false;
-	const onInterrupt = () => {
+	let mergeStarted = false;
+	const onInterrupt = ( signal ) => {
 		interrupted = true;
 		closePrompts();
+		activeChild?.kill( signal );
 	};
 	for ( const signal of SIGNALS ) {
 		process.on( signal, onInterrupt );
@@ -216,20 +242,6 @@ export async function merge( source, requestedDestination, { branch } ) {
 		}
 
 		console.log( 'Merging repositories' );
-		// A run that was killed outright leaves its remote behind; remove it only if it points at one of our clones.
-		const leftover = await remoteUrl();
-		if ( leftover?.startsWith( clonePrefix ) ) {
-			await step(
-				'git',
-				[ 'remote', 'remove', REMOTE ],
-				`Failed to remove the leftover remote "${ REMOTE }"`,
-				inMonorepo
-			);
-		} else if ( leftover ) {
-			throw new Error(
-				`A "${ REMOTE }" remote already exists and points at ${ leftover }. Remove it, then run the command again.`
-			);
-		}
 		// A fixed remote name, because names such as "org/.github" are valid repositories but invalid remotes.
 		await step(
 			'git',
@@ -244,6 +256,7 @@ export async function merge( source, requestedDestination, { branch } ) {
 			'Failed to fetch the cloned repository',
 			inMonorepo
 		);
+		mergeStarted = true;
 		await step(
 			'git',
 			[
@@ -299,12 +312,13 @@ export async function merge( source, requestedDestination, { branch } ) {
 		return;
 	}
 
-	throw Object.assign(
-		new Error(
-			[ stopped ? 'Interrupted' : failure.message, ...problems ].join(
-				'\n'
-			)
-		),
-		{ exitCode: stopped ? 130 : 1 }
-	);
+	let reason = failure.message;
+	if ( stopped ) {
+		reason = mergeStarted
+			? 'Interrupted during git merge. The checkout may be mid-merge; run "git merge --abort" to undo it.'
+			: 'Interrupted';
+	}
+	throw Object.assign( new Error( [ reason, ...problems ].join( '\n' ) ), {
+		exitCode: stopped ? 130 : 1,
+	} );
 }

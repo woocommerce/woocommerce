@@ -12,7 +12,8 @@ function askTwice( input ) {
 	const { stdout, status } = spawnSync(
 		process.execPath,
 		[ '--input-type=module', '-e', script ],
-		{ input, encoding: 'utf8' }
+		// A prompt that never resolves should fail the test rather than hang the suite.
+		{ input, encoding: 'utf8', timeout: 10000 }
 	);
 	assert.equal( status, 0 );
 
@@ -38,7 +39,7 @@ describe( 'confirm', () => {
 		const { stderr, status } = spawnSync(
 			process.execPath,
 			[ BIN, 'transfer-issues', 'woocommerce/example' ],
-			{ input: '', encoding: 'utf8' }
+			{ input: '', encoding: 'utf8', timeout: 10000 }
 		);
 
 		assert.equal( status, 1 );

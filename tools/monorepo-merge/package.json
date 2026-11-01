@@ -29,7 +29,9 @@
 				"changes": [
 					"bin/**",
 					"src/**",
-					"test/**"
+					"test/**",
+					"eslint.config.mjs",
+					"package.json"
 				]
 			},
 			"tests": [
@@ -39,7 +41,8 @@
 					"changes": [
 						"bin/**",
 						"src/**",
-						"test/**"
+						"test/**",
+						"package.json"
 					],
 					"events": [
 						"pull_request",

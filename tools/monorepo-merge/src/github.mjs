@@ -85,11 +85,24 @@ export function createGraphQL( rawToken ) {
 			);
 		}
 
-		const { data, errors } = await response.json();
-		if ( errors?.length ) {
-			throw new Error(
-				errors.map( ( error ) => error.message ).join( '\n' )
+		let body;
+		try {
+			body = await response.json();
+		} catch ( error ) {
+			throw requestFailure(
+				`Could not read GitHub's response: ${ error.message }`
 			);
+		}
+
+		const { data, errors } = body ?? {};
+		if ( errors?.length ) {
+			const message = errors
+				.map( ( error ) => error.message )
+				.join( '\n' );
+			// GitHub reports GraphQL rate limits with HTTP 200 and a RATE_LIMITED error.
+			throw errors.some( ( error ) => error.type === 'RATE_LIMITED' )
+				? requestFailure( message )
+				: new Error( message );
 		}
 
 		return data;

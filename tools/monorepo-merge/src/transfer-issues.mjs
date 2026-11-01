@@ -327,15 +327,7 @@ export async function transferIssues(
 			`${ search.issueCount } issues match, but GitHub search returns at most ${ SEARCH_LIMIT }. Run the command again afterward to transfer the rest.`
 		);
 	}
-	if (
-		! dryRun &&
-		! ( await confirm(
-			`This will transfer ${ issueCount } issue(s). There is no command to reverse this, are you sure?`
-		) )
-	) {
-		throw new Error( 'Cancelled. Nothing was transferred.' );
-	}
-
+	// Look up the destination and labels before the final prompt, so a typo fails before the scary question.
 	const {
 		repository: { id: repositoryId },
 	} = await graphql(
@@ -353,6 +345,16 @@ export async function transferIssues(
 		.map( ( label ) => label.trim() )
 		.filter( Boolean );
 	const labelIds = await getLabelIds( graphql, owner, name, labelNames );
+
+	if (
+		! dryRun &&
+		! ( await confirm(
+			`This will transfer ${ issueCount } issue(s). There is no command to reverse this, are you sure?`
+		) )
+	) {
+		throw new Error( 'Cancelled. Nothing was transferred.' );
+	}
+
 	const issues = await getIssues( graphql, searchQuery );
 
 	if ( dryRun ) {

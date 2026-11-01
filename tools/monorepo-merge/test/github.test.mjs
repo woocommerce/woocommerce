@@ -39,6 +39,24 @@ describe( 'createGraphQL', () => {
 		} );
 	} );
 
+	it( 'marks a GraphQL rate limit as a failure of every request', async ( t ) => {
+		t.mock.method( globalThis, 'fetch', async () =>
+			Response.json( {
+				errors: [
+					{
+						type: 'RATE_LIMITED',
+						message: 'API rate limit exceeded',
+					},
+				],
+			} )
+		);
+
+		await assert.rejects( createGraphQL( 'token' )( '{ viewer { id } }' ), {
+			message: 'API rate limit exceeded',
+			requestFailed: true,
+		} );
+	} );
+
 	it( 'rejects with the GraphQL error messages', async ( t ) => {
 		t.mock.method( globalThis, 'fetch', async () =>
 			Response.json( {
