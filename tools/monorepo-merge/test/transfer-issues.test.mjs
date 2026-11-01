@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { join } from 'node:path';
 import { describe, it } from 'node:test';
 
 import { closePrompts } from '../src/confirm.mjs';
@@ -7,6 +9,36 @@ import {
 	readProjectFields,
 	transferIssues,
 } from '../src/transfer-issues.mjs';
+
+describe( 'transferIssues after a request-level failure', () => {
+	it( 'stops post-transfer tasks and lists the issues still to check', () => {
+		const { stdout, stderr, status } = spawnSync(
+			process.execPath,
+			[
+				'--import',
+				join( import.meta.dirname, 'fixtures/rate-limited-github.mjs' ),
+				join( import.meta.dirname, '../bin/monorepo-merge.mjs' ),
+				'transfer-issues',
+				'woocommerce/example',
+			],
+			{
+				input: 'y\ny\n',
+				encoding: 'utf8',
+				env: { ...process.env, GH_TOKEN: 'token' },
+				timeout: 20000,
+			}
+		);
+
+		assert.equal( status, 1 );
+		assert.equal( stderr.match( /MOCK field update/g )?.length, 1 );
+		assert.ok(
+			stdout.includes(
+				'Stopped post-transfer tasks, so these transferred issues still need their project fields checked: "Issue 1", "Issue 2", "Issue 3"'
+			),
+			stdout
+		);
+	} );
+} );
 
 describe( 'transferIssues dry run', () => {
 	// A prompt writes "(y/N)" and, with stdin held open, waits forever, so the spy and the timeout each catch one.

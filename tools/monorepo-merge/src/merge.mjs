@@ -283,7 +283,6 @@ export async function merge( source, requestedDestination, { branch } ) {
 	// Signals are no longer passed on once cleanup starts. A terminal Ctrl+C can still hit these quick git commands,
 	// and if that strands the remote, the next run removes it as a leftover.
 	cleaningUp = true;
-	const cleanupOptions = inMonorepo;
 	const problems = [];
 	try {
 		// Checked by URL rather than a flag, because an interrupted `git remote add` can still have written the remote.
@@ -292,7 +291,7 @@ export async function merge( source, requestedDestination, { branch } ) {
 				'git',
 				[ 'remote' ],
 				'Failed to list the remotes',
-				cleanupOptions
+				inMonorepo
 			);
 			if (
 				remotes.split( '\n' ).includes( REMOTE ) &&
@@ -300,14 +299,14 @@ export async function merge( source, requestedDestination, { branch } ) {
 					'git',
 					[ 'remote', 'get-url', REMOTE ],
 					`Failed to read the temporary remote "${ REMOTE }"`,
-					cleanupOptions
+					inMonorepo
 				) ) === cloneDir
 			) {
 				await run(
 					'git',
 					[ 'remote', 'remove', REMOTE ],
 					`Failed to remove the temporary remote "${ REMOTE }"`,
-					cleanupOptions
+					inMonorepo
 				);
 			}
 		} catch ( error ) {

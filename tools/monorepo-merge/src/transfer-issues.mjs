@@ -207,7 +207,7 @@ async function getIssues( graphql, searchQuery ) {
  *
  * @param {Function} graphql The GraphQL request function.
  * @param {Object}   issue   The transferred issue.
- * @return {Promise<string[]>} Problems to report: projects the issue is no longer in, and fields that could not be set. Each field is tried even if another fails.
+ * @return {Promise<string[]>} Problems to report: projects the issue is no longer in, and fields that could not be set. Each field is tried even if another fails, unless a request-level failure stops the rest; that error is rethrown with these problems in `problems`.
  */
 async function restoreProjectFields( graphql, issue ) {
 	if ( issue.projects.length === 0 ) {
@@ -440,8 +440,8 @@ export async function transferIssues(
 			}
 			requestFailure = error.requestFailed ? error : undefined;
 		}
-		// Labels for this issue are skipped too when its project restore hit a request-level failure.
-		const labelsSkipped = labelIds.length > 0 && Boolean( requestFailure );
+		// When the project restore is what stopped, this issue's remaining fields and labels were never tried.
+		const currentIssueUnfinished = Boolean( requestFailure );
 
 		if ( labelIds.length > 0 && ! requestFailure ) {
 			try {
@@ -464,10 +464,16 @@ export async function transferIssues(
 		}
 
 		if ( requestFailure ) {
-			const skipped = moved.slice( labelsSkipped ? index : index + 1 );
+			const skipped = moved.slice(
+				currentIssueUnfinished ? index : index + 1
+			);
+			const tasks =
+				labelIds.length > 0
+					? 'project fields and labels'
+					: 'project fields';
 			if ( skipped.length > 0 ) {
 				failures.push(
-					`Stopped post-transfer tasks, so these transferred issues still need their project fields and labels checked: ${ skipped
+					`Stopped post-transfer tasks, so these transferred issues still need their ${ tasks } checked: ${ skipped
 						.map( ( { title } ) => `"${ title }"` )
 						.join( ', ' ) }`
 				);
