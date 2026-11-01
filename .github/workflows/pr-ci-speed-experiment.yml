@@ -2,7 +2,8 @@ name: '[WIP] PR CI speed experiment'
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    # Repeat this trial through Actions reruns, not later experiment commits.
+    types: [opened]
     paths:
       - '.github/workflows/pr-ci-speed-experiment.yml'
 

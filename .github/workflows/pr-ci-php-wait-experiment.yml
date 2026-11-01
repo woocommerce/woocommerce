@@ -2,7 +2,8 @@ name: 'PR experiment: PHP dependency wait'
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    # Repeat this trial through Actions reruns, not later experiment commits.
+    types: [opened]
     paths:
       - '.github/workflows/pr-ci-php-wait-experiment.yml'
 
