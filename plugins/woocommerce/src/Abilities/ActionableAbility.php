@@ -24,8 +24,7 @@ defined( 'ABSPATH' ) || exit;
  * input is ignored. An ability whose own input schema sets
  * `additionalProperties` to false rejects it instead.
  *
- * The steps are protected, so only execute_change() runs them. Only save()
- * saves. The other steps must not save, send email or make HTTP
+ * Only save() saves. The other steps must not save, send email or make HTTP
  * requests.
  *
  * The API is experimental while the `extensible_abilities` feature exists.
