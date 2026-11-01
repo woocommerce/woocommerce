@@ -120,7 +120,7 @@ trait ProductAbilityTrait {
 		if ( $for_variation ) {
 			return array(
 				'type'        => 'array',
-				'description' => __( 'The option this variation picks for each attribute of its parent, by attribute name or global attribute id. For a global attribute the option is the term slug. A null option matches any option of the attribute.', 'woocommerce' ),
+				'description' => __( 'The option this variation picks for each attribute of its parent, by attribute name or global attribute id. For a global attribute the option is the term slug. An attribute with no option, or a null option, matches any option of the attribute.', 'woocommerce' ),
 				'items'       => array(
 					'type'                 => 'object',
 					'properties'           => array(
@@ -128,7 +128,6 @@ trait ProductAbilityTrait {
 						'name'   => array( 'type' => 'string' ),
 						'option' => array( 'type' => array( 'string', 'null' ) ),
 					),
-					'required'             => array( 'option' ),
 					'additionalProperties' => false,
 				),
 			);
@@ -1049,14 +1048,14 @@ trait ProductAbilityTrait {
 		if ( $product instanceof \WC_Product_Variation ) {
 			$attributes = array();
 			foreach ( $value as $item ) {
-				if ( ! is_array( $item ) || ! array_key_exists( 'option', $item ) || ! ( null === $item['option'] || is_scalar( $item['option'] ) ) ) {
+				if ( ! is_array( $item ) || ! ( ! isset( $item['option'] ) || is_scalar( $item['option'] ) ) ) {
 					return self::get_invalid_product_attributes_error();
 				}
 				$key = empty( $item['id'] ) ? sanitize_title( (string) ( $item['name'] ?? '' ) ) : wc_attribute_taxonomy_name_by_id( (int) $item['id'] );
 				if ( '' === $key ) {
 					return self::get_invalid_product_attributes_error();
 				}
-				$attributes[ $key ] = null === $item['option'] ? '' : wc_clean( (string) $item['option'] );
+				$attributes[ $key ] = isset( $item['option'] ) ? wc_clean( (string) $item['option'] ) : '';
 			}
 			return $attributes;
 		}
@@ -1251,7 +1250,7 @@ trait ProductAbilityTrait {
 	private static function get_invalid_product_attributes_error(): \WP_Error {
 		return new \WP_Error(
 			'woocommerce_product_attributes_invalid',
-			__( 'Each attribute needs a name and, on a parent product, at least one option, or, on a variation, one option.', 'woocommerce' ),
+			__( 'Each attribute needs a name and, on a parent product, at least one option. On a variation, the option is a single value, and no option matches any option.', 'woocommerce' ),
 			array( 'status' => 400 )
 		);
 	}

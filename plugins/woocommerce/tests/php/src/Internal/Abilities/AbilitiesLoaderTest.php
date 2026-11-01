@@ -2364,6 +2364,28 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should treat a variation attribute with no option as any option.
+	 */
+	public function test_a_variation_attribute_with_no_option_matches_any_option(): void {
+		$input                                  = $this->get_shirt_input();
+		$input['attributes'][]                  = array(
+			'name'    => 'Color',
+			'options' => array( 'Red', 'Blue' ),
+		);
+		$input['variations'][0]['attributes'][] = array( 'name' => 'Color' );
+		$input['variations'][1]['attributes'][] = array(
+			'name'   => 'Color',
+			'option' => 'Red',
+		);
+
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $input );
+
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[] = $created['product']['id'];
+		$this->assertSame( '', wc_get_product( $created['product']['variation_ids'][0] )->get_attributes()['color'] );
+	}
+
+	/**
 	 * @testdox Should let a variation match any option with a null option, and show null in the output.
 	 */
 	public function test_product_create_accepts_any_option_variations(): void {
