@@ -1321,8 +1321,15 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$coupon->set_amount( 10 );
 		$coupon->save();
 
-		$saves = static function () {
-			return did_action( 'woocommerce_after_order_object_save' );
+		$count       = 0;
+		$count_saves = static function ( $saved ) use ( $order, &$count ) {
+			if ( $saved === $order ) {
+				++$count;
+			}
+		};
+		add_action( 'woocommerce_after_order_object_save', $count_saves );
+		$saves = static function () use ( &$count ) {
+			return $count;
 		};
 
 		$before = $saves();
@@ -1335,7 +1342,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		$before = $saves();
 		$order->apply_coupon( 'saves' );
-		$this->assertSame( 4, $saves() - $before );
+		$this->assertSame( 3, $saves() - $before );
 
 		$item_ids = array();
 		$listener = static function ( $and_taxes, $listened_order ) use ( &$item_ids ) {
@@ -1350,6 +1357,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$before = $saves();
 		$order->stage_totals( true );
 		$order->stage_coupon_removal( 'saves' );
+		remove_action( 'woocommerce_after_order_object_save', $count_saves );
 		$this->assertSame( 0, $saves() - $before );
 	}
 
