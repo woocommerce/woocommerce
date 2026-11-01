@@ -3,11 +3,12 @@ name: 'PR experiment: read-only seed lookup batching'
 on:
   pull_request:
     # Allow this isolated experiment to rerun on updates to its workflow.
-    types: [opened]
+    types: [opened, synchronize]
     paths:
       - '.github/workflows/pr-ci-seed-experiment.yml'
 
 permissions:
+  actions: read
   contents: read
 
 concurrency:
@@ -24,134 +25,8 @@ env:
   FORCE_COLOR: '1'
 
 jobs:
-  plugin-build:
-    name: 'Build shared ZIP and reference test manifest'
-    if: ${{ github.repository == 'woocommerce/woocommerce' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'research/pr-ci-speedups' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: 'Checkout identical source'
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          ref: ${{ env.SOURCE_SHA }}
-          persist-credentials: false
-
-      - name: 'Setup pnpm'
-        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
-        with:
-          cache: false
-
-      - name: 'Setup Node'
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
-        with:
-          node-version-file: .nvmrc
-          cache: ''
-          package-manager-cache: false
-
-      - name: 'Setup PHP (normal build host)'
-        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
-        with:
-          php-version: '7.4'
-          coverage: none
-
-      - name: 'Identify pnpm store'
-        run: echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
-
-      - name: 'Restore pnpm downloads (no save)'
-        id: pnpm-cache
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ${{ env.PNPM_STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-
-
-      - name: 'Restore Node build cache (no save)'
-        id: node-cache
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ./node_modules/.cache
-          key: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-
-
-      - name: 'Restore Composer downloads (no save)'
-        id: composer-cache
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/composer/files
-          key: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('packages/*/*/composer.lock', 'plugins/*/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-
-
-      - name: 'Install normal full-build dependencies'
-        run: pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile
-
-      - &discover-shard
-        name: 'Discover the unchanged Blocks shard'
-        id: discovery
-        env:
-          PLAYWRIGHT_JSON_OUTPUT_FILE: ${{ runner.temp }}/e2e-setup/discovery-raw.json
-          DISCOVERY_DIRECTORY: ${{ runner.temp }}/e2e-setup
-        shell: bash
-        run: |
-          mkdir -p "$DISCOVERY_DIRECTORY"
-          NODE_OPTIONS="${NODE_OPTIONS:-} --conditions=wc-source" pnpm --filter='@woocommerce/plugin-woocommerce' exec playwright test --config=tests/e2e/playwright.config.ts --project=blocks-parallel --shard=1/2 --list --reporter=json
-          node <<'NODE'
-          const fs = require('node:fs');
-          const path = require('node:path');
-          const report = JSON.parse(fs.readFileSync(process.env.PLAYWRIGHT_JSON_OUTPUT_FILE, 'utf8'));
-          if (report.errors?.length) throw new Error(JSON.stringify(report.errors));
-          const tests = [];
-          function visit(suites, parents = []) {
-            for (const suite of suites || []) {
-              const titles = [...parents, suite.title];
-              for (const spec of suite.specs || []) {
-                for (const test of spec.tests || []) {
-                  tests.push({
-                    title: [...titles, spec.title], file: spec.file,
-                    line: spec.line, column: spec.column,
-                    projectName: test.projectName, projectId: test.projectId,
-                  });
-                }
-              }
-              visit(suite.suites, titles);
-            }
-          }
-          visit(report.suites);
-          if (!tests.length) throw new Error('No tests were discovered');
-          tests.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
-          const manifest = {
-            workers: report.config.workers,
-            projects: report.config.projects.map(({name, retries, repeatEach}) => ({name, retries, repeatEach})),
-            tests,
-          };
-          fs.writeFileSync(path.join(process.env.DISCOVERY_DIRECTORY, 'discovery.json'), JSON.stringify(manifest, null, 2) + '\n');
-          console.log(`Discovered ${tests.length} tests with ${manifest.workers} configured workers`);
-          NODE
-
-      - name: 'Build the real WooCommerce plugin ZIP'
-        env:
-          BUILD_ZIP_WITH_MAKEPOT: '0'
-          SKIP_INSTALL: '1'
-          ZIP_COMPRESSION_LEVEL: '1'
-        run: |
-          pnpm --filter='@woocommerce/plugin-woocommerce' build:zip
-          test -s plugins/woocommerce/woocommerce.zip
-          mkdir -p "$RUNNER_TEMP/e2e-plugin-artifact"
-          cp plugins/woocommerce/woocommerce.zip "$RUNNER_TEMP/e2e-plugin-artifact/"
-          cp "$RUNNER_TEMP/e2e-setup/discovery.json" "$RUNNER_TEMP/e2e-plugin-artifact/reference-discovery.json"
-
-      - name: 'Upload ZIP and reference within this run'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: seed-lookup-plugin-${{ github.run_id }}
-          path: ${{ runner.temp }}/e2e-plugin-artifact/
-          if-no-files-found: error
-          retention-days: 3
-          compression-level: 0
-          overwrite: true
-
   e2e:
     name: 'Blocks shard 1/2: ${{ matrix.arm }}'
-    needs: plugin-build
     if: ${{ github.repository == 'woocommerce/woocommerce' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'research/pr-ci-speedups' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -227,13 +102,64 @@ jobs:
       - name: 'Install the same full browser dependencies'
         run: pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile
 
-      - name: 'Download the identical shared ZIP and reference'
+      - name: 'Download the pinned prior ZIP and reference'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: seed-lookup-plugin-${{ github.run_id }}
+          artifact-ids: '13091420550'
+          run-id: '41325210761'
+          github-token: ${{ github.token }}
+          digest-mismatch: error
+          merge-multiple: true
           path: ${{ github.workspace }}/woocommerce-plugin-artifact
 
-      - *discover-shard
+      - name: 'Verify the pinned ZIP and reference hashes'
+        working-directory: ${{ github.workspace }}/woocommerce-plugin-artifact
+        run: |
+          echo 'f76b05633fd4f00eedda134de830bc2e2142c5eaee0883a86ef8ea449271fe47  woocommerce.zip' | sha256sum --check
+          echo 'aef6b245e1cf3f6d787329873e0a30c4b54a59125e2c960adb85deaad9f1774b  reference-discovery.json' | sha256sum --check
+
+      - name: 'Discover the unchanged Blocks shard'
+        id: discovery
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: ${{ runner.temp }}/e2e-setup/discovery-raw.json
+          DISCOVERY_DIRECTORY: ${{ runner.temp }}/e2e-setup
+        shell: bash
+        run: |
+          mkdir -p "$DISCOVERY_DIRECTORY"
+          NODE_OPTIONS="${NODE_OPTIONS:-} --conditions=wc-source" pnpm --filter='@woocommerce/plugin-woocommerce' exec playwright test --config=tests/e2e/playwright.config.ts --project=blocks-parallel --shard=1/2 --list --reporter=json
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const report = JSON.parse(fs.readFileSync(process.env.PLAYWRIGHT_JSON_OUTPUT_FILE, 'utf8'));
+          if (report.errors?.length) throw new Error(JSON.stringify(report.errors));
+          const tests = [];
+          function visit(suites, parents = []) {
+            for (const suite of suites || []) {
+              const titles = [...parents, suite.title];
+              for (const spec of suite.specs || []) {
+                for (const test of spec.tests || []) {
+                  tests.push({
+                    title: [...titles, spec.title], file: spec.file,
+                    line: spec.line, column: spec.column,
+                    projectName: test.projectName, projectId: test.projectId,
+                  });
+                }
+              }
+              visit(suite.suites, titles);
+            }
+          }
+          visit(report.suites);
+          if (!tests.length) throw new Error('No tests were discovered');
+          tests.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+          const manifest = {
+            workers: report.config.workers,
+            projects: report.config.projects.map(({name, retries, repeatEach}) => ({name, retries, repeatEach})),
+            tests,
+          };
+          fs.writeFileSync(path.join(process.env.DISCOVERY_DIRECTORY, 'discovery.json'), JSON.stringify(manifest, null, 2) + '\n');
+          console.log(`Discovered ${tests.length} tests with ${manifest.workers} configured workers`);
+          NODE
+
 
       - name: 'Require identical discovery and execution settings'
         run: |
@@ -337,6 +263,22 @@ jobs:
               umask($previousUmask);
               if ($written !== strlen($dump['stdout']) || !chmod($privatePath, 0600)) {
                   throw new RuntimeException('Could not retain private checkpoint');
+              }
+              $prefix = execute_lookup_process('wp config get table_prefix');
+              if ($prefix['return_code'] !== 0 || $prefix['stderr'] !== '' || !preg_match('/^[A-Za-z0-9_$]+$/D', $prefix['stdout'])) {
+                  throw new RuntimeException('Could not determine a safe database prefix');
+              }
+              $query = 'SELECT option_id, HEX(option_name), HEX(autoload), SHA2(option_value, 256) FROM `' . $prefix['stdout'] . 'options` ORDER BY option_id';
+              $options = execute_lookup_process('wp db query --batch --skip-column-names ' . escapeshellarg($query));
+              if ($options['return_code'] !== 0 || $options['stderr'] !== '') {
+                  throw new RuntimeException('Could not capture option metadata');
+              }
+              $privateOptionsPath = $privateDirectory . '/' . $label . '.options';
+              $previousUmask = umask(0077);
+              $written = file_put_contents($privateOptionsPath, $options['stdout']);
+              umask($previousUmask);
+              if ($written !== strlen($options['stdout']) || !chmod($privateOptionsPath, 0600)) {
+                  throw new RuntimeException('Could not retain private option metadata');
               }
               $tableRows = [];
               if (preg_match_all('/^INSERT INTO `([^`]+)`.*$/m', $dump['stdout'], $matches, PREG_SET_ORDER)) {
@@ -624,6 +566,28 @@ jobs:
               ]
               return lines, metadata, section_hashes
 
+          def option_inventory(path):
+              entries = {}
+              for line in path.read_bytes().splitlines():
+                  columns = line.split(b'\t')
+                  if len(columns) != 4 or not re.fullmatch(rb'[1-9][0-9]*', columns[0]) or not re.fullmatch(rb'[0-9A-Fa-f]{64}', columns[3]):
+                      raise ValueError('Invalid private option metadata')
+                  option_id = int(columns[0])
+                  if option_id in entries:
+                      raise ValueError('Duplicate option ID')
+                  entries[option_id] = {
+                      'id': option_id,
+                      'name': bytes.fromhex(columns[1].decode('ascii')).decode('utf-8'),
+                      'autoload': bytes.fromhex(columns[2].decode('ascii')).decode('utf-8'),
+                      'value_sha256': columns[3].decode('ascii').lower(),
+                  }
+              return entries
+
+          def changed_options(before, after):
+              return [{'before': before.get(key), 'after': after.get(key)}
+                      for key in sorted(before.keys() | after.keys())
+                      if before.get(key) != after.get(key)]
+
           report = {'raw_sql_uploaded': False, 'normalization_applied': False, 'comparisons': []}
           for before_path in sorted((root / 'private-dumps').glob('*-before.sql')):
               after_path = before_path.with_name(before_path.name.replace('-before.sql', '-after.sql'))
@@ -643,6 +607,10 @@ jobs:
                   'before_sha256': digest(before), 'after_sha256': digest(after),
                   'before_table_sections': before_sections, 'after_table_sections': after_sections,
                   'changed_line_metadata': changes,
+                  'changed_options': changed_options(
+                      option_inventory(before_path.with_suffix('.options')),
+                      option_inventory(after_path.with_suffix('.options')),
+                  ),
               })
           result_path = root / 'results' / 'checkpoint-diagnostics.json'
           result_path.parent.mkdir(parents=True, exist_ok=True)
