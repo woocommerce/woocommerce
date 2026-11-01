@@ -2,7 +2,7 @@ name: 'PR experiment: Compressed Size duplicate build'
 
 on:
   pull_request:
-    types: [opened]
+    types: [opened, synchronize]
     paths:
       - '.github/workflows/pr-ci-size-build-experiment.yml'
 
@@ -110,7 +110,7 @@ jobs:
           replaceOnce('const oldSizes = await plugin.readFromDisk(cwd);', "const oldSizes = await plugin.readFromDisk(cwd);\nawait capture(plugin, cwd, oldSizes, 'base');");
           const inputs = {
             compression: 'gzip',
-            pattern: './{packages/js/!(*e2e*|*internal*|*test*|*plugin*|*create*),plugins/woocommerce/client/blocks,plugins/woocommerce/client/admin,plugins/woocommerce/client/legacy}/{build,build-style}/**/*.{js,css}',
+            pattern: './{packages/js/!(*e2e*|*internal*|*test*|*plugin*|*create*)/{build,build-style},plugins/woocommerce/assets/{client/{admin,blocks,routes},js,css}}/**/*.{js,css}',
             'install-script': 'pnpm install --filter="@woocommerce/plugin-woocommerce..." --frozen-lockfile',
             'build-script': '--filter="@woocommerce/plugin-woocommerce" build',
             'clean-script': '--if-present clean:build',
@@ -157,10 +157,11 @@ jobs:
           import crypto from 'node:crypto';
           export async function capture(plugin, cwd, sizes, label) {
             const entries = Object.entries(sizes).sort(([a], [b]) => a.localeCompare(b));
-            if (!entries.length) throw new Error('Empty size measurement: ' + label);
             const matched = [...fs.globSync(plugin.options.pattern, {
               cwd, exclude: plugin.options.exclude ? [plugin.options.exclude] : undefined,
             })].sort();
+            console.log(JSON.stringify({label, cwd, pattern: plugin.options.pattern, matched: matched.length, measured: entries.length}));
+            if (!entries.length) throw new Error('Empty size measurement: ' + label);
             if (JSON.stringify(matched) !== JSON.stringify(entries.map(([name]) => name).sort())) {
               throw new Error('The size plugin omitted matched files: ' + label);
             }
