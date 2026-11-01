@@ -22,6 +22,23 @@ describe( 'createGraphQL', () => {
 		);
 	} );
 
+	it( "includes GitHub's explanation for other HTTP failures", async ( t ) => {
+		t.mock.method( globalThis, 'fetch', async () =>
+			Response.json(
+				{
+					message:
+						'Resource protected by organization SAML enforcement',
+				},
+				{ status: 403 }
+			)
+		);
+
+		await assert.rejects( createGraphQL( 'token' )( '{ viewer { id } }' ), {
+			message:
+				'GitHub API request failed with HTTP 403: Resource protected by organization SAML enforcement',
+		} );
+	} );
+
 	it( 'rejects with the GraphQL error messages', async ( t ) => {
 		t.mock.method( globalThis, 'fetch', async () =>
 			Response.json( {

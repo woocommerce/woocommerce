@@ -28,6 +28,27 @@ function rewriteMessage( message ) {
 	} );
 }
 
+describe( 'source validation', () => {
+	it( 'accepts a repository name with dots', async () => {
+		await assert.doesNotReject( () =>
+			validateArgs(
+				'woocommerce/example.com',
+				'tools/__monorepo_merge_test__'
+			)
+		);
+	} );
+
+	it( 'rejects a repository name made only of dots', async () => {
+		await assert.rejects(
+			validateArgs( 'woocommerce/..', 'tools/__monorepo_merge_test__' ),
+			{
+				message:
+					'The "source" argument must be in "organization/repository" format',
+			}
+		);
+	} );
+} );
+
 describe( 'destination validation', () => {
 	it( 'accepts a nested path inside the monorepo', async () => {
 		await assert.doesNotReject( () =>
@@ -78,11 +99,18 @@ describe( 'commit message rewriting', () => {
 
 	it( 'rewrites adjacent valid references', () => {
 		assert.equal(
-			rewriteMessage( '(#12)(#34) #56#78' ),
+			rewriteMessage( '(#12)(#34) #56 #78' ),
 			'(https://github.com/woocommerce/example/pull/12)' +
 				'(https://github.com/woocommerce/example/pull/34) ' +
-				'woocommerce/example#56woocommerce/example#78'
+				'woocommerce/example#56 woocommerce/example#78'
 		);
+	} );
+
+	it( 'leaves qualified references and URL fragments unchanged', () => {
+		const message =
+			'See other/repo#12, https://example.com/page#5 and abc#7.';
+
+		assert.equal( rewriteMessage( message ), message );
 	} );
 
 	it( 'leaves malformed references unchanged', () => {

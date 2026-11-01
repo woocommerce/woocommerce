@@ -143,8 +143,12 @@ async function getLabelIds( graphql, owner, name, labelList ) {
 		cursor = hasNextPage ? endCursor : null;
 	} while ( cursor !== null );
 
-	return labelList.split( ',' ).map( ( rawLabel ) => {
-		const label = rawLabel.trim();
+	const names = labelList
+		.split( ',' )
+		.map( ( label ) => label.trim() )
+		.filter( Boolean );
+
+	return names.map( ( label ) => {
 		if ( ! allLabels.has( label ) ) {
 			throw new Error(
 				`The target repository does not have the label ${ label }.`
@@ -207,6 +211,9 @@ async function restoreProjectFields( graphql, issue ) {
 		`query ( $id: ID! ) { node( id: $id ) { ... on Issue { ${ PROJECT_ITEMS } } } }`,
 		{ id: issue.newId }
 	);
+	if ( ! node ) {
+		throw new Error( 'Could not read the transferred issue' );
+	}
 	const { missingProjects, fieldsToRestore } = findFieldsToRestore(
 		issue.projectFields,
 		node.projectItems.nodes
@@ -272,7 +279,7 @@ export async function transferIssues(
 			`Are you sure you want to transfer issues from ${ source } into ${ destination }?`
 		) )
 	) {
-		return;
+		throw new Error( 'Cancelled. Nothing was transferred.' );
 	}
 
 	const graphql = createGraphQL( await getToken() );
@@ -306,7 +313,7 @@ export async function transferIssues(
 			`This will transfer ${ issueCount } issue(s). There is no command to reverse this, are you sure?`
 		) )
 	) {
-		return;
+		throw new Error( 'Cancelled. Nothing was transferred.' );
 	}
 
 	const {
@@ -365,19 +372,16 @@ export async function transferIssues(
 		}
 	}
 
-	if ( transferred === 0 ) {
-		console.log( `Transferred 0/${ issues.length } issues.` );
-		return;
-	}
-
-	// Give GitHub time to finish moving labels and project items before we touch the new issues.
-	console.log( 'Waiting for GitHub to process transfers' );
-	await new Promise( ( resolve ) => setTimeout( resolve, 25000 ) );
-
-	console.log( 'Running post-transfer tasks' );
 	const failures = [];
+	if ( transferred > 0 ) {
+		// Give GitHub time to finish moving labels and project items before we touch the new issues.
+		console.log( 'Waiting for GitHub to process transfers' );
+		await new Promise( ( resolve ) => setTimeout( resolve, 25000 ) );
+
+		console.log( 'Running post-transfer tasks' );
+	}
+	// Each step is tried on its own, so one failure does not skip the other or the remaining issues.
 	for ( const issue of issues.filter( ( { newId } ) => newId ) ) {
-		// One issue failing must not leave the remaining transferred issues unprocessed.
 		try {
 			const missingProjects = await restoreProjectFields(
 				graphql,
@@ -388,8 +392,14 @@ export async function transferIssues(
 					`${ issue.title }: not in project(s) ${ missingProjects.join( ', ' ) }`
 				);
 			}
+		} catch ( error ) {
+			failures.push(
+				`${ issue.title }: restoring project fields failed: ${ error.message }`
+			);
+		}
 
-			if ( labelIds.length > 0 ) {
+		if ( labelIds.length > 0 ) {
+			try {
 				await graphql(
 					`
 						mutation ($input: AddLabelsToLabelableInput!) {
@@ -400,9 +410,11 @@ export async function transferIssues(
 					`,
 					{ input: { labelableId: issue.newId, labelIds } }
 				);
+			} catch ( error ) {
+				failures.push(
+					`${ issue.title }: adding labels failed: ${ error.message }`
+				);
 			}
-		} catch ( error ) {
-			failures.push( `${ issue.title }: ${ error.message }` );
 		}
 	}
 
@@ -411,7 +423,9 @@ export async function transferIssues(
 			'Post-transfer tasks failed for:\n' + failures.join( '\n' )
 		);
 	}
-	console.log(
-		`Successfully transferred ${ transferred }/${ issues.length } issues.`
-	);
+	const count = `${ transferred }/${ issues.length } issues`;
+	if ( transferred < issues.length || failures.length > 0 ) {
+		throw new Error( `Transferred ${ count }. See the failures above.` );
+	}
+	console.log( `Successfully transferred ${ count }.` );
 }

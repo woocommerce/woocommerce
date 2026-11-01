@@ -10,7 +10,7 @@ import { promisify } from 'node:util';
  * @return {Promise<string>} The token.
  */
 export async function getToken() {
-	const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
+	const token = ( process.env.GH_TOKEN || process.env.GITHUB_TOKEN )?.trim();
 	if ( token ) {
 		return token;
 	}
@@ -61,8 +61,12 @@ export function createGraphQL( rawToken ) {
 			throw new Error( 'The given token is invalid' );
 		}
 		if ( ! response.ok ) {
+			// GitHub explains failures such as SAML enforcement or rate limits in the body's message.
+			const { message } = await response.json().catch( () => ( {} ) );
 			throw new Error(
-				`GitHub API request failed with HTTP ${ response.status }`
+				`GitHub API request failed with HTTP ${ response.status }${
+					message ? `: ${ message }` : ''
+				}`
 			);
 		}
 

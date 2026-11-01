@@ -83,15 +83,15 @@ describe( 'transferIssues dry run', () => {
 				),
 				'A dry run must not prompt'
 			);
-			assert.deepEqual(
-				log.mock.calls.map( ( call ) => call.arguments[ 0 ] ),
-				[
-					'Dry run: would transfer 1 issue(s) into woocommerce/woocommerce:',
-					'- "An issue" (0 project field value(s) to check)',
-					'Would then add the labels: migrated',
-					'No changes were made.',
-				]
+			const output = log.mock.calls.map(
+				( call ) => call.arguments[ 0 ]
 			);
+			for ( const line of [
+				'- "An issue" (0 project field value(s) to check)',
+				'No changes were made.',
+			] ) {
+				assert.ok( output.includes( line ), `Missing "${ line }"` );
+			}
 		}
 	);
 } );

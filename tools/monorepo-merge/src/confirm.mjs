@@ -22,7 +22,13 @@ export async function confirm( message ) {
 	}
 
 	output.write( `${ message } (y/N) ` );
+	readline.resume();
 	const { value, done } = await lines.next();
+	// Stop reading between prompts so input meant for git, such as a credential prompt, reaches git.
+	readline.pause();
+	if ( done ) {
+		output.write( '\n' );
+	}
 
 	return ! done && /^y(es)?$/i.test( value.trim() );
 }

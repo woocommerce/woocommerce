@@ -10,7 +10,7 @@ import { promisify } from 'node:util';
 /**
  * Internal dependencies
  */
-import { confirm } from './confirm.mjs';
+import { closePrompts, confirm } from './confirm.mjs';
 
 const execFileAsync = promisify( execFile );
 
@@ -52,7 +52,7 @@ async function run( command, args, failureMessage, options ) {
  */
 export async function validateArgs( source, destination ) {
 	// We only support pulling from GitHub so the format needs to match that.
-	if ( ! source.match( /^[a-zA-Z0-9\-_]+\/[a-zA-Z0-9\-_]+$/ ) ) {
+	if ( ! source.match( /^[a-zA-Z0-9\-_]+\/(?!\.+$)[a-zA-Z0-9\-_.]+$/ ) ) {
 		throw new Error(
 			'The "source" argument must be in "organization/repository" format'
 		);
@@ -87,7 +87,8 @@ export async function validateArgs( source, destination ) {
  * Builds the git-filter-repo callback that updates imported references.
  *
  * Parenthesized references such as `(#123)` become pull request links.
- * Bare references such as `#123` are qualified with the source repository.
+ * Standalone references such as `#123` are qualified with the source repository. A `#` that follows
+ * a word character or `/`, as in `other/repo#12` or a URL fragment, is not a reference and is left alone.
  *
  * @param {string} source The GitHub repository we are merging.
  * @return {string} The Python body of the message callback.
@@ -95,7 +96,7 @@ export async function validateArgs( source, destination ) {
 export function createMessageCallback( source ) {
 	const pullRequestPattern = String.raw`rb"\(#(?P<pull_request_number>\d+)\)"`;
 	const pullRequestReplacement = String.raw`rb"(https://github.com/${ source }/pull/\g<pull_request_number>)"`;
-	const issuePattern = String.raw`rb"(?<!\()#(?P<issue_number>\d+)(?!\))"`;
+	const issuePattern = String.raw`rb"(?<![\w/(])#(?P<issue_number>\d+)(?![\w)])"`;
 	const issueReplacement = String.raw`rb"${ source }#\g<issue_number>"`;
 	const issueCallback = `re.sub(${ issuePattern }, ${ issueReplacement }, message)`;
 
@@ -150,22 +151,38 @@ export async function merge( source, destination, { branch } ) {
 			} of ${ MONOREPO_ROOT }. Continue?`
 		) )
 	) {
-		return;
+		throw new Error( 'Cancelled. Nothing was changed.' );
 	}
 
 	const cloneDir = await mkdtemp( join( tmpdir(), 'monorepo-merge-' ) );
 	let remoteAdded = false;
+
+	// Git receives Ctrl+C from the terminal and stops; catching it here lets the cleanup below still run.
+	let interrupted = false;
+	const onInterrupt = () => {
+		interrupted = true;
+		closePrompts();
+	};
+	process.on( 'SIGINT', onInterrupt );
+	const step = ( ...args ) => {
+		if ( interrupted ) {
+			throw new Error( 'Interrupted' );
+		}
+		return run( ...args );
+	};
+
+	let failure;
 	try {
 		const gitPath = 'https://github.com/' + source;
 		console.log( `Cloning ${ gitPath }` );
-		await run(
+		await step(
 			'git',
 			[ 'clone', gitPath, cloneDir ],
 			'Failed to clone the repository'
 		);
 
 		console.log( 'Rewriting the repository history' );
-		await run(
+		await step(
 			'git-filter-repo',
 			[
 				'--to-subdirectory-filter',
@@ -181,24 +198,25 @@ export async function merge( source, destination, { branch } ) {
 				`Are you ready to merge ${ source } from ${ cloneDir }?`
 			) )
 		) {
-			return;
+			throw new Error( 'Cancelled. Nothing was merged.' );
 		}
 
 		console.log( 'Merging repositories' );
-		await run(
+		await step(
 			'git',
 			[ 'remote', 'add', source, cloneDir ],
 			'Failed to add the cloned repository as a remote',
 			inMonorepo
 		);
 		remoteAdded = true;
-		await run(
+		// Without --no-tags the source repository's tags would stay in the monorepo after the remote is removed.
+		await step(
 			'git',
-			[ 'fetch', source ],
+			[ 'fetch', '--no-tags', source ],
 			'Failed to fetch the cloned repository',
 			inMonorepo
 		);
-		await run(
+		await step(
 			'git',
 			[
 				'merge',
@@ -209,18 +227,28 @@ export async function merge( source, destination, { branch } ) {
 			'Failed to merge the repositories',
 			inMonorepo
 		);
-
-		console.log( `Successfully merged ${ source } into ${ destination }` );
-	} finally {
-		// The merge only needs the fetched objects, so the clone and remote can go even after a conflict.
-		if ( remoteAdded ) {
-			await run(
-				'git',
-				[ 'remote', 'remove', source ],
-				'Failed to remove the cloned repository remote',
-				inMonorepo
-			).catch( ( error ) => console.error( error.message ) );
-		}
-		await rm( cloneDir, { recursive: true, force: true } );
+	} catch ( error ) {
+		failure = error;
 	}
+
+	// The merge only needs the fetched objects, so the clone and remote can go even after a conflict.
+	const problems = [ interrupted ? 'Interrupted' : failure?.message ];
+	if ( remoteAdded ) {
+		await run(
+			'git',
+			[ 'remote', 'remove', source ],
+			`Failed to remove the temporary remote "${ source }"`,
+			inMonorepo
+		).catch( ( error ) => problems.push( error.message ) );
+	}
+	await rm( cloneDir, { recursive: true, force: true } );
+	process.off( 'SIGINT', onInterrupt );
+
+	const message = problems.filter( Boolean ).join( '\n' );
+	if ( message ) {
+		throw Object.assign( new Error( message ), {
+			exitCode: interrupted ? 130 : 1,
+		} );
+	}
+	console.log( `Successfully merged ${ source } into ${ destination }` );
 }

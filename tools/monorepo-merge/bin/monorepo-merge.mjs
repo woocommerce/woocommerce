@@ -76,7 +76,7 @@ try {
 	}
 } catch ( error ) {
 	console.error( `Error: ${ error.message }` );
-	process.exitCode = 1;
+	process.exitCode = error.exitCode ?? 1;
 } finally {
 	closePrompts();
 }
