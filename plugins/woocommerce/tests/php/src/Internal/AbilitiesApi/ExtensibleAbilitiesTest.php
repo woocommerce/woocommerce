@@ -4000,7 +4000,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		remove_filter( 'woocommerce_order_class', $filter_class, 100 );
-		$this->assertSame( 'woocommerce_ability_order_staging_unsupported', $refused->get_data()['code'] );
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'woocommerce_data_staging_unsupported', $refused->get_data()['code'] );
 		$this->assertStringContainsString( 'stage_product_item', $refused->get_data()['message'] );
 		$this->assertCount( $count, ( new \WC_Order( $order->get_id() ) )->get_items() );
 	}

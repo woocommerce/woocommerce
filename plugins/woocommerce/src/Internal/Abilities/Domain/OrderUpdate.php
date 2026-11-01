@@ -131,6 +131,7 @@ class OrderUpdate extends ActionableAbility {
 	 * @param \WC_Order $subject Order.
 	 * @param array     $input   Ability input.
 	 * @return null|\WP_Error
+	 * @throws \WC_Data_Exception When the order class has not adopted a stage method.
 	 */
 	public function change( $subject, array $input ) {
 		$this->removed_product_lines  = array();
@@ -164,11 +165,7 @@ class OrderUpdate extends ActionableAbility {
 			);
 		}
 
-		try {
-			return $this->change_lines( $subject, $input );
-		} catch ( \WC_Data_Exception $exception ) {
-			return new \WP_Error( 'woocommerce_ability_order_staging_unsupported', $exception->getMessage(), array( 'status' => 400 ) );
-		}
+		return $this->change_lines( $subject, $input );
 	}
 
 	/**
@@ -181,9 +178,7 @@ class OrderUpdate extends ActionableAbility {
 	 * @return null|\WP_Error
 	 */
 	public function save( $subject ) {
-		if ( ! empty( $this->removed_product_lines ) || ! empty( $this->changed_product_lines ) ) {
-			require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
-		}
+		require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
 
 		foreach ( $this->removed_product_lines as $item ) {
 			wc_maybe_adjust_line_item_product_stock( $item, 0 );
@@ -247,7 +242,7 @@ class OrderUpdate extends ActionableAbility {
 			$order->{"set_{$type}_{$key}"}( wc_clean( $value ) );
 		}
 
-		$country  = (string) $order->{"get_{$type}_country"}();
+		$country  = $order->{"get_{$type}_country"}();
 		$state    = $order->{"get_{$type}_state"}();
 		$postcode = $order->{"get_{$type}_postcode"}();
 
@@ -260,9 +255,9 @@ class OrderUpdate extends ActionableAbility {
 			);
 		}
 
-		$states = '' === $country ? array() : WC()->countries->get_states( $country );
+		$states = WC()->countries->get_states( $country );
 
-		if ( '' !== $state && is_array( $states ) && ! empty( $states ) && ! array_key_exists( $state, $states ) ) {
+		if ( '' !== $state && ! empty( $states ) && ! array_key_exists( $state, $states ) ) {
 			return self::address_error(
 				$type,
 				'state',
@@ -457,7 +452,7 @@ class OrderUpdate extends ActionableAbility {
 		}
 
 		try {
-			wc_get_container()->get( ItemQuantityLimits::class )->validate_new_item_quantity( (float) $quantity, $product );
+			wc_get_container()->get( ItemQuantityLimits::class )->validate_new_item_quantity( $quantity, $product );
 		} catch ( \Exception $exception ) {
 			return self::quantity_error( $exception );
 		}

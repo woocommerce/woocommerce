@@ -97,7 +97,7 @@ class OrderSendEmail extends AbstractDomainAbility implements AbilityDefinition 
 			return $order;
 		}
 
-		$email_name = (string) ( $input['email'] ?? '' );
+		$email_name = $input['email'];
 		$refusal    = self::get_status_refusal( $order, $email_name );
 
 		if ( is_wp_error( $refusal ) ) {
@@ -120,7 +120,7 @@ class OrderSendEmail extends AbstractDomainAbility implements AbilityDefinition 
 		 *
 		 * @var \WC_Email_Customer_Invoice|\WC_Email_Customer_Processing_Order|\WC_Email_Customer_Completed_Order|null $email
 		 */
-		$email = WC()->mailer()->get_emails()[ self::EMAIL_CLASSES[ $email_name ] ?? '' ] ?? null;
+		$email = WC()->mailer()->get_emails()[ self::EMAIL_CLASSES[ $email_name ] ] ?? null;
 
 		if ( ! $email instanceof \WC_Email || ( ! $email->is_manual() && ! $email->is_enabled() ) ) {
 			return new \WP_Error(
