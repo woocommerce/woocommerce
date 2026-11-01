@@ -168,25 +168,83 @@
 	&__flap {
 		display: inline-block;
 		position: relative;
+		perspective: 300px;
+		isolation: isolate;
 		min-inline-size: 0.78em;
-		padding: 0.14em 0.08em;
+		padding-inline: 0.08em;
 		border: 1px solid #0c0e0c;
 		border-radius: 2px;
-		background: linear-gradient(#272a27 49%, #0b0d0b 49%, #0b0d0b 52%, #212421 52%);
+		background: #0c0e0c;
 		box-shadow: 0 1px 1px #000;
 		font-family: monospace;
 		font-weight: 700;
-		line-height: 1.25;
+		line-height: 1.53;
 		text-align: center;
 		text-transform: uppercase;
 		white-space: pre-wrap;
-		animation: wc-departures-arrive 0.42s ease-out backwards;
+		--wc-departures-delay: 0ms;
 
 		@for $tile from 1 through 12 {
 			&:nth-child(12n + #{$tile}) {
-				animation-delay: ($tile - 1) * 18ms;
+				--wc-departures-delay: #{($tile - 1) * 18ms};
 			}
 		}
+
+		&::before,
+		&::after,
+		.wc-departures__leaf {
+			position: absolute;
+			inset-inline: 0;
+			block-size: 50%;
+			display: flex;
+			justify-content: center;
+			overflow: hidden;
+			box-sizing: border-box;
+			backface-visibility: hidden;
+		}
+
+		&::before,
+		.wc-departures__leaf--top {
+			inset-block-start: 0;
+			align-items: flex-start;
+			background: #272a27;
+			border-block-end: 1px solid #0c0e0c;
+			border-radius: 2px 2px 0 0;
+			transform-origin: center bottom;
+		}
+
+		&::after,
+		.wc-departures__leaf--bottom {
+			inset-block-end: 0;
+			align-items: flex-end;
+			background: #212421;
+			border-block-start: 1px solid #0c0e0c;
+			border-radius: 0 0 2px 2px;
+			transform-origin: center top;
+		}
+
+		&::before {
+			content: attr(data-character);
+		}
+
+		&::after {
+			content: attr(data-before);
+		}
+	}
+
+	&__value {
+		visibility: hidden;
+	}
+
+	&__leaf--top {
+		z-index: 2;
+		opacity: 0;
+		animation: wc-departures-fold 0.26s ease-in var(--wc-departures-delay) backwards;
+	}
+
+	&__leaf--bottom {
+		z-index: 1;
+		animation: wc-departures-unfold 0.26s ease-out calc(var(--wc-departures-delay) + 260ms) backwards;
 	}
 
 	&__time {
@@ -294,21 +352,33 @@
 
 	@media (prefers-reduced-motion: reduce) {
 
-		&__flap {
+		&__leaf--top,
+		&__leaf--bottom {
 			animation: none;
 		}
 	}
 }
 
-@keyframes wc-departures-arrive {
+@keyframes wc-departures-fold {
 
 	from {
-		opacity: 0;
-		transform: perspective(240px) rotateX(90deg);
+		opacity: 1;
+		transform: rotateX(0);
 	}
 
 	to {
 		opacity: 1;
-		transform: none;
+		transform: rotateX(-90deg);
+	}
+}
+
+@keyframes wc-departures-unfold {
+
+	from {
+		transform: rotateX(90deg);
+	}
+
+	to {
+		transform: rotateX(0);
 	}
 }

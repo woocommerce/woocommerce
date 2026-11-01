@@ -7,15 +7,22 @@ describe( 'Live departures board', () => {
 	const originalMatchMedia = window.matchMedia;
 	const originalAnimate = Element.prototype.animate;
 
+	function tile( character ) {
+		return `<span class="wc-departures__flap" data-character="${ character }" data-before=" ">` +
+			`<span class="wc-departures__value">${ character }</span>` +
+			'<span class="wc-departures__leaf wc-departures__leaf--top"> </span>' +
+			`<span class="wc-departures__leaf wc-departures__leaf--bottom">${ character }</span></span>`;
+	}
+
 	function row( id, label ) {
 		return `<tr data-action-id="${ id }"><td><a href="#action-${ id }">Action ${ id }</a></td>` +
-			`<td><span class="wc-departures__flap">${ label }</span></td></tr>`;
+			`<td>${ tile( label ) }</td></tr>`;
 	}
 
 	function html( rows, stamp = '10:00' ) {
 		return `<div class="wc-departures" data-refresh-url="/wp-admin/admin-ajax.php?nonce=fresh"
 			data-message-refreshing="Updating" data-message-updated="Updated" data-message-failed="Failed">
-			<h1><span class="wc-departures__flap">D</span></h1>
+			<h1>${ tile( 'D' ) }</h1>
 			<div class="wc-departures__snapshot">${ stamp }</div>
 			<p class="wc-departures__live-message"></p><a class="wc-departures__refresh" href="#refresh">Refresh</a>
 			<table><tbody>${ rows }</tbody></table><div class="wc-departures__empty" ${ rows ? 'hidden' : '' }>Empty</div>
@@ -57,9 +64,10 @@ describe( 'Live departures board', () => {
 		}
 	} );
 
-	test( 'polls after five minutes and flips the whole board after every successful refresh', async () => {
+	test( 'polls after five minutes and flips each character half after every successful refresh', async () => {
 		start( html( row( 1, 'Scheduled' ) + row( 2, 'Scheduled' ) + row( 3, 'Scheduled' ) ) );
 		const unchanged = document.querySelector( '[data-action-id="1"]' );
+		const unchangedTile = unchanged.querySelector( '.wc-departures__flap' );
 		const link = unchanged.querySelector( 'a' );
 		link.focus();
 		global.fetch.mockResolvedValue( response( row( 1, 'Scheduled' ) + row( 2, 'Awaiting run' ) + row( 4, 'Scheduled' ), '10:05' ) );
@@ -71,13 +79,40 @@ describe( 'Live departures board', () => {
 		expect( document.querySelector( '[data-action-id="2"]' ).textContent ).toContain( 'Awaiting run' );
 		expect( document.querySelector( '[data-action-id="3"]' ) ).toBeNull();
 		expect( document.querySelector( '[data-action-id="4"]' ) ).not.toBeNull();
-		expect( animate.mock.instances ).toContain( unchanged.querySelector( 'span' ) );
-		expect( animate.mock.instances ).toContain( document.querySelector( 'h1 span' ) );
-		expect( animate ).toHaveBeenCalledTimes( 5 );
+		expect( animate.mock.instances ).toContain( unchangedTile.querySelector( '.wc-departures__leaf--top' ) );
+		expect( animate.mock.instances ).toContain( unchangedTile.querySelector( '.wc-departures__leaf--bottom' ) );
+		expect( animate.mock.instances ).toContain( document.querySelector( 'h1 .wc-departures__leaf--top' ) );
+		expect( animate.mock.instances.every( element => element.classList.contains( 'wc-departures__leaf' ) ) ).toBe( true );
+		document.querySelectorAll( '.wc-departures__leaf' ).forEach( leaf => expect( animate.mock.instances ).toContain( leaf ) );
 		expect( document.querySelector( '.wc-departures__snapshot' ).textContent ).toBe( '10:05' );
 		animate.mockClear();
 		await jest.advanceTimersByTimeAsync( 300000 );
-		expect( animate ).toHaveBeenCalledTimes( 4 );
+		document.querySelectorAll( '.wc-departures__leaf' ).forEach( leaf => expect( animate.mock.instances ).toContain( leaf ) );
+		expect( unchanged.querySelector( '.wc-departures__flap' ) ).toBe( unchangedTile );
+	} );
+
+	test( 'folds the old upper half before unfolding the new lower half around the center hinge', async () => {
+		const finish = [];
+		animate.mockImplementation( () => ( { finished: new Promise( resolve => finish.push( resolve ) ) } ) );
+		start( html( row( 1, '1' ) ) );
+		global.fetch.mockResolvedValue( response( row( 1, '2' ), '10:05' ) );
+		document.querySelector( '.wc-departures__refresh' ).click();
+		await jest.advanceTimersByTimeAsync( 1 );
+		const character = document.querySelector( 'tbody .wc-departures__flap' );
+		expect( character.dataset.before ).toBe( '1' );
+		expect( character.dataset.character ).toBe( '2' );
+		expect( character.querySelector( '.wc-departures__leaf--top' ).textContent ).toBe( '1' );
+		expect( character.querySelector( '.wc-departures__leaf--bottom' ).textContent ).toBe( '2' );
+		const top = animate.mock.calls[ animate.mock.instances.indexOf( character.querySelector( '.wc-departures__leaf--top' ) ) ];
+		const bottom = animate.mock.calls[ animate.mock.instances.indexOf( character.querySelector( '.wc-departures__leaf--bottom' ) ) ];
+		expect( top[ 0 ].map( frame => frame.transform ) ).toEqual( [ 'rotateX(0)', 'rotateX(-90deg)' ] );
+		expect( bottom[ 0 ].map( frame => frame.transform ) ).toEqual( [ 'rotateX(90deg)', 'rotateX(0)' ] );
+		expect( bottom[ 1 ].delay ).toBeGreaterThanOrEqual( top[ 1 ].delay + top[ 1 ].duration );
+		expect( document.querySelector( 'tbody' ).getAttribute( 'aria-busy' ) ).toBe( 'true' );
+		finish.forEach( resolve => resolve() );
+		await jest.advanceTimersByTimeAsync( 1 );
+		expect( character.dataset.before ).toBe( '2' );
+		expect( document.querySelector( '.wc-departures__live-message' ).textContent ).toBe( 'Updated' );
 	} );
 
 	test( 'pauses when hidden and refreshes once when an overdue tab becomes visible', async () => {

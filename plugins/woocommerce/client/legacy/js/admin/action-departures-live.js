@@ -9,6 +9,7 @@
 	const interval = 5 * 60 * 1000;
 	const tbody = board.querySelector( 'tbody' );
 	const message = board.querySelector( '.wc-departures__live-message' );
+	const cellMarkup = new WeakMap();
 	let refreshUrl = board.dataset.refreshUrl;
 	let lastAttempt = Date.now();
 	let timer;
@@ -21,33 +22,49 @@
 		}
 	}
 
-	function flip( element, leaving, delay = 0 ) {
-		if ( window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches || ! element.animate ) {
-			return Promise.resolve();
-		}
-		return element.animate(
-			leaving
-				? [ { transform: 'perspective(240px) rotateX(0)' }, { transform: 'perspective(240px) rotateX(-90deg)', opacity: 0 } ]
-				: [
-					{ transform: 'perspective(240px) rotateX(90deg)', opacity: 0 },
-					{ transform: 'perspective(240px) rotateX(0)', opacity: 1 }
-				],
-			{ duration: leaving ? 180 : 420, delay, easing: 'ease-out', fill: 'backwards' }
-		).finished.catch( function () {} );
+	function rememberCells( container ) {
+		container.querySelectorAll( 'td' ).forEach( cell => cellMarkup.set( cell, cell.innerHTML ) );
 	}
 
-	function flipTiles( container ) {
-		container.querySelectorAll( '.wc-departures__flap' ).forEach( function ( tile, index ) {
-			flip( tile, false, ( index % 12 ) * 18 );
-		} );
+	function flipTiles( container, previous = new Map(), departing = false ) {
+		const reduced = window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches;
+		return Promise.all( Array.from( container.querySelectorAll( '.wc-departures__flap' ) ).map( function ( tile, index ) {
+			const before = previous.has( tile ) ? previous.get( tile ) : ( departing ? tile.dataset.character : ' ' );
+			const after = departing ? ' ' : tile.dataset.character;
+			const top = tile.querySelector( '.wc-departures__leaf--top' );
+			const bottom = tile.querySelector( '.wc-departures__leaf--bottom' );
+			tile.dataset.before = before;
+			tile.dataset.character = after;
+			top.textContent = before;
+			bottom.textContent = after;
+			top.style.animation = 'none';
+			bottom.style.animation = 'none';
+			if ( reduced || ! top.animate ) {
+				tile.dataset.before = after;
+				return Promise.resolve();
+			}
+			const delay = ( index % 12 ) * 18;
+			const fold = top.animate(
+				[ { transform: 'rotateX(0)', opacity: 1 }, { transform: 'rotateX(-90deg)', opacity: 1 } ],
+				{ duration: 260, delay, easing: 'ease-in', fill: 'backwards' }
+			);
+			const unfold = bottom.animate(
+				[ { transform: 'rotateX(90deg)' }, { transform: 'rotateX(0)' } ],
+				{ duration: 260, delay: delay + 260, easing: 'ease-out', fill: 'backwards' }
+			);
+			return Promise.all( [ fold.finished, unfold.finished ].map( finished => finished.catch( function () {} ) ) )
+				.then( function () { tile.dataset.before = after; } );
+		} ) );
 	}
 
 	async function update( next ) {
+		const previous = new Map( Array.from( board.querySelectorAll( '.wc-departures__flap' ) )
+			.map( tile => [ tile, tile.dataset.character ] ) );
 		const nextRows = Array.from( next.querySelectorAll( 'tbody tr' ) );
 		const ids = new Set( nextRows.map( row => row.dataset.actionId ) );
 		const oldRows = new Map( Array.from( tbody.rows ).map( row => [ row.dataset.actionId, row ] ) );
 		const removed = Array.from( tbody.rows ).filter( row => ! ids.has( row.dataset.actionId ) );
-		await Promise.all( removed.map( row => flip( row, true ) ) );
+		await Promise.all( removed.map( row => flipTiles( row, previous, true ) ) );
 		const focused = document.activeElement;
 		const hadFocus = board.contains( focused );
 		removed.forEach( row => row.remove() );
@@ -55,14 +72,20 @@
 		nextRows.forEach( function ( nextRow, index ) {
 			const row = oldRows.get( nextRow.dataset.actionId );
 			if ( ! row ) {
+				rememberCells( nextRow );
 				tbody.insertBefore( nextRow, tbody.rows[ index ] || null );
 				return;
 			}
 			Array.from( nextRow.cells ).forEach( function ( nextCell, cellIndex ) {
 				const cell = row.cells[ cellIndex ];
-				if ( cell.innerHTML !== nextCell.innerHTML || cell.className !== nextCell.className ) {
+				if ( cellMarkup.get( cell ) !== nextCell.innerHTML || cell.className !== nextCell.className ) {
+					const before = Array.from( cell.querySelectorAll( '.wc-departures__flap' ) ).map( tile => tile.dataset.character );
+					cellMarkup.set( cell, nextCell.innerHTML );
 					cell.className = nextCell.className;
 					cell.replaceChildren( ...Array.from( nextCell.childNodes ) );
+					cell.querySelectorAll( '.wc-departures__flap' ).forEach( function ( tile, tileIndex ) {
+						previous.set( tile, before[ tileIndex ] || ' ' );
+					} );
 				}
 			} );
 			if ( tbody.rows[ index ] !== row ) {
@@ -85,6 +108,7 @@
 				target.focus( { preventScroll: true } );
 			}
 		}
+		return previous;
 	}
 
 	async function refresh() {
@@ -111,8 +135,8 @@
 			if ( ! next || document.hidden ) {
 				throw new Error( 'Board unavailable' );
 			}
-			await update( next );
-			flipTiles( board );
+			const previous = await update( next );
+			await flipTiles( board, previous );
 			message.textContent = board.dataset.messageUpdated;
 		} catch ( error ) {
 			message.textContent = board.dataset.messageFailed;
@@ -141,5 +165,6 @@
 		}
 	} );
 	window.addEventListener( 'pageshow', schedule );
+	rememberCells( tbody );
 	schedule();
 } )();
