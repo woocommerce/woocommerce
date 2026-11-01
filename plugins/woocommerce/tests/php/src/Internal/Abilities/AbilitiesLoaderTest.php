@@ -4161,7 +4161,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		remove_action( 'woocommerce_update_order', $count );
 
 		$this->assertIsArray( $result );
-		$this->assertSame( 1, $saves );
+		$this->assertSame( 3, $saves );
 		$saved = wc_get_order( $order->get_id() );
 		$items = array_values( $saved->get_items() );
 		$this->assertCount( 2, $items );

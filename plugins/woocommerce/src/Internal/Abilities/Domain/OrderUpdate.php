@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
@@ -49,6 +50,14 @@ class OrderUpdate extends ActionableAbility {
 	 * @var array<int, \WC_Order_Item_Product>
 	 */
 	private array $changed_product_lines = array();
+
+	/**
+	 * Whether save() recalculates the order with the methods that save, and which ones.
+	 * Only with the feature off, when no validator needs to see the new totals.
+	 *
+	 * @var string|null `coupons`, `totals` or null.
+	 */
+	private ?string $recalculate_after_save = null;
 
 	/**
 	 * Get the ability registration arguments.
@@ -124,8 +133,9 @@ class OrderUpdate extends ActionableAbility {
 	 * @return null|\WP_Error
 	 */
 	public function change( $subject, array $input ) {
-		$this->removed_product_lines = array();
-		$this->changed_product_lines = array();
+		$this->removed_product_lines  = array();
+		$this->changed_product_lines  = array();
+		$this->recalculate_after_save = null;
 
 		foreach ( array( 'billing', 'shipping' ) as $address_type ) {
 			$error = isset( $input[ $address_type ] ) ? self::set_address( $subject, $address_type, $input[ $address_type ] ) : null;
@@ -162,8 +172,8 @@ class OrderUpdate extends ActionableAbility {
 	}
 
 	/**
-	 * Save the order, and change the product stock of the changed lines in the
-	 * same way as the order screen. Validators have already run, so a refused
+	 * Save the order, recalculate it with the feature off, and change the product
+	 * stock of the changed lines in the same way as the order screen. Validators have already run, so a refused
 	 * change never reaches the stock. A removed line restores its stock before
 	 * the save, because the save deletes the line that holds the reduced amount.
 	 *
@@ -183,6 +193,15 @@ class OrderUpdate extends ActionableAbility {
 
 		if ( is_wp_error( $saved ) ) {
 			return $saved;
+		}
+
+		if ( 'coupons' === $this->recalculate_after_save ) {
+			if ( $subject->get_prices_include_tax() ) {
+				$subject->calculate_taxes();
+			}
+			$subject->recalculate_coupons();
+		} elseif ( 'totals' === $this->recalculate_after_save ) {
+			$subject->calculate_totals();
 		}
 
 		if ( in_array( $subject->get_status(), array( OrderStatus::PROCESSING, OrderStatus::COMPLETED, OrderStatus::ON_HOLD ), true ) ) {
@@ -331,7 +350,14 @@ class OrderUpdate extends ActionableAbility {
 			$product_added = $product_added || empty( $line['id'] );
 		}
 
-		if ( $product_added && ! empty( $order->get_items( 'coupon' ) ) ) {
+		$recalculate_coupons = $product_added && ! empty( $order->get_items( 'coupon' ) );
+
+		if ( ! ExtensibleAbilities::is_enabled() ) {
+			$this->recalculate_after_save = $recalculate_coupons ? 'coupons' : 'totals';
+			return null;
+		}
+
+		if ( $recalculate_coupons ) {
 			if ( $order->get_prices_include_tax() ) {
 				$order->stage_taxes();
 			}

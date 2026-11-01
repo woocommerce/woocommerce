@@ -3844,6 +3844,62 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should recalculate with calculate_totals() after the save when the feature is off.
+	 */
+	public function test_order_update_uses_the_saving_totals_with_the_feature_off(): void {
+		$this->set_feature( false );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		\WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate'          => '10',
+				'tax_rate_name'     => 'Tax',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '10' ) );
+		$order   = wc_create_order();
+		$order->add_product( $product, 1 );
+		$order->set_status( 'pending' );
+		$order->save();
+
+		$calls  = array();
+		$record = static function ( $and_taxes, $listened, $staged = null ) use ( &$calls ) {
+			$calls[] = array(
+				'staged'   => $staged,
+				'quantity' => array_sum( array_map( static fn( $item ) => $item->get_quantity(), wc_get_order( $listened->get_id() )->get_items() ) ),
+				'tax_ids'  => array_map( static fn( $tax ) => $tax->get_id(), array_values( $listened->get_taxes() ) ),
+			);
+		};
+		add_action( 'woocommerce_order_after_calculate_totals', $record, 10, 3 );
+
+		$result = wp_get_ability( 'woocommerce/order-update' )->execute(
+			array(
+				'id'         => $order->get_id(),
+				'line_items' => array(
+					array(
+						'id'       => array_key_first( $order->get_items() ),
+						'quantity' => 3,
+					),
+				),
+			)
+		);
+		remove_action( 'woocommerce_order_after_calculate_totals', $record, 10 );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+
+		$this->assertNotWPError( $result );
+		$this->assertCount( 1, $calls );
+		$this->assertNull( $calls[0]['staged'] );
+		$this->assertSame( 3, $calls[0]['quantity'] );
+		$this->assertGreaterThan( 0, $calls[0]['tax_ids'][0] );
+		$this->assertSame( '33.00', wc_get_order( $order->get_id() )->get_total() );
+	}
+
+	/**
 	 * @testdox Should save no line change and fire no totals action when a validator refuses, and fire it staged once when the change saves.
 	 */
 	public function test_order_update_refusal_saves_no_line_change(): void {
@@ -3882,6 +3938,12 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( $total, $saved->get_total() );
 		$this->assertSame( array(), $staged );
 
+		$saves = 0;
+		$count = static function () use ( &$saves ) {
+			++$saves;
+		};
+		add_action( 'woocommerce_update_order', $count );
+
 		$output = $this->run_ability(
 			'woocommerce/order-update',
 			array(
@@ -3895,7 +3957,9 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
+		remove_action( 'woocommerce_update_order', $count );
 		remove_action( 'woocommerce_order_after_calculate_totals', $record, 10 );
+		$this->assertSame( 1, $saves );
 		$this->assertSame( array( true ), $staged );
 		$this->assertSame( '25.00', wc_format_decimal( $output['order']['shipping_lines'][0]['total'], 2 ) );
 	}
