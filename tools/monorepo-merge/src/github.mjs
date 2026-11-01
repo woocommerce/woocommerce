@@ -35,10 +35,18 @@ export async function getToken() {
 /**
  * Creates a function that sends GraphQL requests to the GitHub API.
  *
- * @param {string} token The GitHub API token.
+ * @param {string} rawToken The GitHub API token; surrounding whitespace is ignored.
  * @return {(query: string, variables?: Object) => Promise<Object>} Resolves with the response data and rejects on HTTP or GraphQL errors.
  */
-export function createGraphQL( token ) {
+export function createGraphQL( rawToken ) {
+	const token = rawToken.trim();
+	// Node's header validation error would print the token, so reject bad characters with a fixed message.
+	if ( ! /^[\x21-\x7E]+$/.test( token ) ) {
+		throw new Error(
+			'The GitHub API token contains characters a token cannot have'
+		);
+	}
+
 	return async ( query, variables = {} ) => {
 		const response = await fetch( 'https://api.github.com/graphql', {
 			method: 'POST',

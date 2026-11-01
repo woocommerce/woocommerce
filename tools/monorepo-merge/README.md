@@ -18,7 +18,7 @@ Start from an up-to-date branch off `trunk`, then run:
 tools/monorepo-merge/bin/monorepo-merge.mjs merge woocommerce/example-repo packages/js/example --branch trunk
 ```
 
-The command clones the repository into a temporary directory, rewrites its history so every file lives under the destination path, and merges it with `git merge --allow-unrelated-histories` into the current branch of the checkout that contains this tool, wherever you run it from. To try it without touching your monorepo checkout, copy `tools/monorepo-merge` into a scratch git repository and run it from there. In commit messages, `(#123)` becomes a link to the source repository's pull request and a bare `#123` becomes `woocommerce/example-repo#123`, so old references keep pointing at the right place. `--branch` is the source branch to import and defaults to `main`.
+The command clones the repository into a temporary directory, rewrites its history so every file lives under the destination path, and merges it with `git merge --allow-unrelated-histories` into the current branch of the checkout that contains this tool, wherever you run it from. It stops unless that checkout's root is two directories above `tools/monorepo-merge`. To try it without touching your monorepo checkout, copy the tool to `tools/monorepo-merge` inside a scratch git repository, so the scratch repository becomes the target, and run it from there. In commit messages, `(#123)` becomes a link to the source repository's pull request and a bare `#123` becomes `woocommerce/example-repo#123`, so old references keep pointing at the right place. `--branch` is the source branch to import and defaults to `main`.
 
 Merge the resulting pull request with a merge commit. Squashing it discards the imported history.
 

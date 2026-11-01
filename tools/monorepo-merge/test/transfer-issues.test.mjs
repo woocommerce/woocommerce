@@ -9,7 +9,7 @@ import {
 } from '../src/transfer-issues.mjs';
 
 describe( 'transferIssues dry run', () => {
-	// A prompt would wait on stdin forever, so the timeout turns one into a failure.
+	// A prompt writes "(y/N)" and, with stdin held open, waits forever, so the spy and the timeout each catch one.
 	it(
 		'lists the issues without prompting or sending mutations',
 		{
@@ -26,6 +26,7 @@ describe( 'transferIssues dry run', () => {
 					process.env.GH_TOKEN = previousToken;
 				}
 			} );
+			const writes = t.mock.method( process.stdout, 'write' );
 			const queries = [];
 			t.mock.method( globalThis, 'fetch', async ( url, { body } ) => {
 				const { query } = JSON.parse( body );
@@ -75,6 +76,12 @@ describe( 'transferIssues dry run', () => {
 				queries.filter( ( query ) => /^\s*mutation/.test( query ) )
 					.length,
 				0
+			);
+			assert.ok(
+				! writes.mock.calls.some( ( call ) =>
+					String( call.arguments[ 0 ] ).includes( '(y/N)' )
+				),
+				'A dry run must not prompt'
 			);
 			assert.deepEqual(
 				log.mock.calls.map( ( call ) => call.arguments[ 0 ] ),

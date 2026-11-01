@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { execFile } from 'node:child_process';
-import { access, mkdtemp, rm } from 'node:fs/promises';
+import { access, mkdtemp, realpath, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { promisify } from 'node:util';
@@ -23,12 +23,23 @@ export const MONOREPO_ROOT = resolve( import.meta.dirname, '../../..' );
  * @param {string[]} args           The command arguments.
  * @param {string}   failureMessage The error message to show when the command fails.
  * @param {Object}   [options]      Options for `child_process.execFile`.
+ * @return {Promise<string>} The command's trimmed standard output.
  */
 async function run( command, args, failureMessage, options ) {
 	try {
-		await execFileAsync( command, args, options );
+		// git merge prints a line per imported file, which can exceed the default 1 MiB buffer.
+		const { stdout } = await execFileAsync( command, args, {
+			maxBuffer: Infinity,
+			...options,
+		} );
+
+		return stdout.trim();
 	} catch ( error ) {
-		const detail = error.stderr?.trim() || error.message;
+		// Merge conflicts are listed on stdout, so include it alongside stderr.
+		const detail =
+			[ error.stdout?.trim(), error.stderr?.trim() ]
+				.filter( Boolean )
+				.join( '\n' ) || error.message;
 		throw new Error( `${ failureMessage }: ${ detail }` );
 	}
 }
@@ -109,77 +120,107 @@ export async function merge( source, destination, { branch } ) {
 	}
 	await validateArgs( source, destination );
 
-	if (
-		! ( await confirm(
-			`This merges ${ source } and its history into ${ destination } on your current branch. Continue?`
-		) )
-	) {
-		return;
-	}
-
-	const gitPath = 'https://github.com/' + source;
-	const cloneDir = await mkdtemp( join( tmpdir(), 'monorepo-merge-' ) );
-
-	console.log( `Cloning ${ gitPath }` );
-	await run(
-		'git',
-		[ 'clone', gitPath, cloneDir ],
-		'Failed to clone the repository'
-	);
-
-	console.log( 'Rewriting the repository history' );
-	await run(
-		'git-filter-repo',
-		[
-			'--to-subdirectory-filter',
-			destination,
-			'--message-callback=' + createMessageCallback( source ),
-		],
-		'Failed to alter the repository history',
-		{ cwd: cloneDir }
-	);
-
-	if (
-		! ( await confirm(
-			`Are you ready to merge ${ source } from ${ cloneDir }?`
-		) )
-	) {
-		await rm( cloneDir, { recursive: true, force: true } );
-		return;
-	}
-
-	console.log( 'Merging repositories' );
+	// Ask git from the tool's own directory, so a copy outside tools/monorepo-merge cannot target an enclosing repository.
 	const inMonorepo = { cwd: MONOREPO_ROOT };
-	await run(
+	const notARepository = `This tool must sit at tools/monorepo-merge in the git checkout you merge into, but ${ MONOREPO_ROOT } is not that checkout's root`;
+	const topLevel = await run(
 		'git',
-		[ 'remote', 'add', source, cloneDir ],
-		'Failed to add the cloned repository as a remote',
+		[ 'rev-parse', '--show-toplevel' ],
+		notARepository,
+		{ cwd: import.meta.dirname }
+	);
+	if (
+		( await realpath( topLevel ) ) !== ( await realpath( MONOREPO_ROOT ) )
+	) {
+		throw new Error( notARepository );
+	}
+	const currentBranch = await run(
+		'git',
+		[ 'branch', '--show-current' ],
+		'Failed to read the current branch',
 		inMonorepo
 	);
-	await run(
-		'git',
-		[ 'fetch', source ],
-		'Failed to fetch the cloned repository',
-		inMonorepo
-	);
-	await run(
-		'git',
-		[
-			'merge',
-			'--allow-unrelated-histories',
-			'--',
-			`${ source }/${ branch }`,
-		],
-		'Failed to merge the repositories',
-		inMonorepo
-	);
-	await run(
-		'git',
-		[ 'remote', 'remove', source ],
-		'Failed to remove the cloned repository remote',
-		inMonorepo
-	);
-	await rm( cloneDir, { recursive: true, force: true } );
 
-	console.log( `Successfully merged ${ source } into ${ destination }` );
+	if (
+		! ( await confirm(
+			`This merges ${ source } and its history into ${ destination } on ${
+				currentBranch
+					? `branch "${ currentBranch }"`
+					: 'a detached HEAD'
+			} of ${ MONOREPO_ROOT }. Continue?`
+		) )
+	) {
+		return;
+	}
+
+	const cloneDir = await mkdtemp( join( tmpdir(), 'monorepo-merge-' ) );
+	let remoteAdded = false;
+	try {
+		const gitPath = 'https://github.com/' + source;
+		console.log( `Cloning ${ gitPath }` );
+		await run(
+			'git',
+			[ 'clone', gitPath, cloneDir ],
+			'Failed to clone the repository'
+		);
+
+		console.log( 'Rewriting the repository history' );
+		await run(
+			'git-filter-repo',
+			[
+				'--to-subdirectory-filter',
+				destination,
+				'--message-callback=' + createMessageCallback( source ),
+			],
+			'Failed to alter the repository history',
+			{ cwd: cloneDir }
+		);
+
+		if (
+			! ( await confirm(
+				`Are you ready to merge ${ source } from ${ cloneDir }?`
+			) )
+		) {
+			return;
+		}
+
+		console.log( 'Merging repositories' );
+		await run(
+			'git',
+			[ 'remote', 'add', source, cloneDir ],
+			'Failed to add the cloned repository as a remote',
+			inMonorepo
+		);
+		remoteAdded = true;
+		await run(
+			'git',
+			[ 'fetch', source ],
+			'Failed to fetch the cloned repository',
+			inMonorepo
+		);
+		await run(
+			'git',
+			[
+				'merge',
+				'--allow-unrelated-histories',
+				'--',
+				`${ source }/${ branch }`,
+			],
+			'Failed to merge the repositories',
+			inMonorepo
+		);
+
+		console.log( `Successfully merged ${ source } into ${ destination }` );
+	} finally {
+		// The merge only needs the fetched objects, so the clone and remote can go even after a conflict.
+		if ( remoteAdded ) {
+			await run(
+				'git',
+				[ 'remote', 'remove', source ],
+				'Failed to remove the cloned repository remote',
+				inMonorepo
+			).catch( ( error ) => console.error( error.message ) );
+		}
+		await rm( cloneDir, { recursive: true, force: true } );
+	}
 }

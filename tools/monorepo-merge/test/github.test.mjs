@@ -14,6 +14,14 @@ describe( 'createGraphQL', () => {
 		} );
 	} );
 
+	it( 'keeps a malformed token out of error messages', async () => {
+		await assert.rejects(
+			async () =>
+				createGraphQL( 'ghp_secret\nvalue' )( '{ viewer { id } }' ),
+			( error ) => ! error.message.includes( 'ghp_secret' )
+		);
+	} );
+
 	it( 'rejects with the GraphQL error messages', async ( t ) => {
 		t.mock.method( globalThis, 'fetch', async () =>
 			Response.json( {

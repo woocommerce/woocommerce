@@ -143,7 +143,8 @@ async function getLabelIds( graphql, owner, name, labelList ) {
 		cursor = hasNextPage ? endCursor : null;
 	} while ( cursor !== null );
 
-	return labelList.split( ',' ).map( ( label ) => {
+	return labelList.split( ',' ).map( ( rawLabel ) => {
+		const label = rawLabel.trim();
 		if ( ! allLabels.has( label ) ) {
 			throw new Error(
 				`The target repository does not have the label ${ label }.`
@@ -364,6 +365,11 @@ export async function transferIssues(
 		}
 	}
 
+	if ( transferred === 0 ) {
+		console.log( `Transferred 0/${ issues.length } issues.` );
+		return;
+	}
+
 	// Give GitHub time to finish moving labels and project items before we touch the new issues.
 	console.log( 'Waiting for GitHub to process transfers' );
 	await new Promise( ( resolve ) => setTimeout( resolve, 25000 ) );
@@ -406,6 +412,6 @@ export async function transferIssues(
 		);
 	}
 	console.log(
-		`Successfully transferred ${ transferred }/${ issueCount } issues.`
+		`Successfully transferred ${ transferred }/${ issues.length } issues.`
 	);
 }
