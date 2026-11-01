@@ -2958,16 +2958,10 @@ importers:
       '@automattic/color-studio':
         specifier: ^4.0.0
         version: 4.0.0
-      '@babel/cli':
-        specifier: catalog:tooling
-        version: 7.25.7(@babel/core@7.25.7)
       '@babel/core':
         specifier: catalog:tooling
         version: 7.25.7
       '@babel/preset-env':
-        specifier: catalog:tooling
-        version: 7.25.7(@babel/core@7.25.7)
-      '@babel/preset-typescript':
         specifier: catalog:tooling
         version: 7.25.7(@babel/core@7.25.7)
       '@babel/runtime':
@@ -3060,30 +3054,18 @@ importers:
       '@wordpress/babel-preset-default':
         specifier: next
         version: 8.43.1-next.v.202604091042.0
-      '@wordpress/block-editor':
-        specifier: catalog:wp-min
-        version: 15.6.9(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.27.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
       '@wordpress/browserslist-config':
         specifier: next
         version: 6.43.1-next.v.202604091042.0
-      '@wordpress/jest-preset-default':
-        specifier: next
-        version: 12.43.1-next.v.202604091042.0(@babel/core@7.25.7)(jest@29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))
       '@wordpress/postcss-plugins-preset':
         specifier: catalog:tooling
         version: 5.56.0(postcss@8.5.26)
-      '@wordpress/postcss-themes':
-        specifier: next
-        version: 6.43.1-next.v.202604091042.0(postcss@8.5.26)
       '@xstate/inspect':
         specifier: 0.8.0
         version: 0.8.0(@types/ws@8.18.1)(ws@8.21.3)(xstate@4.37.1)
       '@xstate/test':
         specifier: 0.5.1
         version: 0.5.1(xstate@4.37.1)
-      autoprefixer:
-        specifier: ^10.4.16
-        version: 10.5.0(postcss@8.5.26)
       await-exec:
         specifier: ^0.1.2
         version: 0.1.2
@@ -3132,9 +3114,6 @@ importers:
       jest-environment-node:
         specifier: 29.5.x
         version: 29.5.0
-      md5:
-        specifier: ^2.3.0
-        version: 2.3.0
       mini-css-extract-plugin:
         specifier: 2.9.x
         version: 2.9.4(webpack@5.97.1)
@@ -3144,24 +3123,12 @@ importers:
       moment-timezone:
         specifier: ^0.5.43
         version: 0.5.48
-      node-watch:
-        specifier: ^0.7.4
-        version: 0.7.4
       postcss:
         specifier: catalog:tooling
         version: 8.5.26
-      postcss-color-function:
-        specifier: ^4.1.0
-        version: 4.1.0
       postcss-loader:
         specifier: 4.3.x
         version: 4.3.0(postcss@8.5.26)(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7))
-      prettier:
-        specifier: catalog:tooling
-        version: wp-prettier@3.9.6
-      promptly:
-        specifier: ^3.2.0
-        version: 3.2.0
       prop-types:
         specifier: ^15.8.1
         version: 15.8.1
@@ -3171,15 +3138,6 @@ importers:
       react-refresh:
         specifier: ^0.14.0
         version: 0.14.2
-      readline-sync:
-        specifier: ^1.4.10
-        version: 1.4.10
-      replace:
-        specifier: ^1.2.2
-        version: 1.2.2
-      rimraf:
-        specifier: 5.0.5
-        version: 5.0.5
       rtlcss:
         specifier: 4.3.x
         version: 4.3.0
@@ -3207,9 +3165,6 @@ importers:
       webpack-cli:
         specifier: 5.1.x
         version: 5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.2)(webpack@5.97.1)
-      webpack-fix-style-only-entries:
-        specifier: ^0.6.1
-        version: 0.6.1
       whatwg-fetch:
         specifier: ^3.6.20
         version: 3.6.20
@@ -15866,10 +15821,6 @@ packages:
     resolution: {integrity: sha512-kQK9LGGFiHtrWiNhZtA7Qbw17AQz+dmsEKODRIVTXA9+e5MS/2gZEBhYJt13GrAz5/IOZKddH/0Z3TP/Zgo+yw==}
     engines: {node: '>=18'}
 
-  node-watch@0.7.4:
-    resolution: {integrity: sha512-RinNxoz4W1cep1b928fuFhvAQ5ag/+1UlMDV7rbyGthBIgsiEouS4kvRayvvboxii4m8eolKOIBo3OjDqbc+uQ==}
-    engines: {node: '>=6'}
-
   nopt@5.0.0:
     resolution: {integrity: sha512-Tbj67rffqceeLpcRXrT7vKAN8CwfPeIBgM7E6iBkmKLV7bEMwpGgYLGv0jACUsECaa/vuxP0IjEont6umdMgtQ==}
     engines: {node: '>=6'}
@@ -17507,10 +17458,6 @@ packages:
   readdirp@4.1.2:
     resolution: {integrity: sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg==}
     engines: {node: '>= 14.18.0'}
-
-  readline-sync@1.4.10:
-    resolution: {integrity: sha512-gNva8/6UAe8QYepIQH/jQ2qn91Qj0B9sYjMBBs3QOB8F2CXcKgLxQaJRP76sWVRQt+QU+8fAkCbCvjjMFu7Ycw==}
-    engines: {node: '>= 0.8.0'}
 
   reakit-system@0.15.2:
     resolution: {integrity: sha512-TvRthEz0DmD0rcJkGamMYx+bATwnGNWJpe/lc8UV2Js8nnPvkaxrHk5fX9cVASFrWbaIyegZHCWUBfxr30bmmA==}
@@ -19522,9 +19469,6 @@ packages:
         optional: true
       webpack-cli:
         optional: true
-
-  webpack-fix-style-only-entries@0.6.1:
-    resolution: {integrity: sha512-wyIhoxS3DD3Fr9JA8hQPA+ZmaWnqPxx12Nv166wcsI/0fbReqyEtiIk2llOFYIg57WVS3XX5cZJxw2ji70R0sA==}
 
   webpack-hot-middleware@2.26.1:
     resolution: {integrity: sha512-khZGfAeJx6I8K9zKohEWWYN6KDlVw2DHownoe+6Vtwj1LP9WFgegXnVMSkZ/dBEBtXFwrkkydsaPFlB7f8wU2A==}
@@ -30096,12 +30040,6 @@ snapshots:
       jest: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-matcher-utils: 27.5.1
 
-  '@wordpress/jest-console@8.51.0(jest@29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))':
-    dependencies:
-      jest: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-matcher-utils: 29.7.0
-      jest-mock: 29.7.0
-
   '@wordpress/jest-console@8.51.0(jest@29.5.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))':
     dependencies:
       jest: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
@@ -30113,15 +30051,6 @@ snapshots:
       jest: 29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-matcher-utils: 29.7.0
       jest-mock: 29.7.0
-
-  '@wordpress/jest-preset-default@12.43.1-next.v.202604091042.0(@babel/core@7.25.7)(jest@29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))':
-    dependencies:
-      '@babel/core': 7.25.7
-      '@wordpress/jest-console': 8.51.0(jest@29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))
-      babel-jest: 29.7.0(@babel/core@7.25.7)
-      jest: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-    transitivePeerDependencies:
-      - supports-color
 
   '@wordpress/jest-preset-default@12.43.1-next.v.202604091042.0(@babel/core@7.25.7)(jest@29.5.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))':
     dependencies:
@@ -38493,8 +38422,6 @@ snapshots:
 
   node-releases@2.0.57: {}
 
-  node-watch@0.7.4: {}
-
   nopt@5.0.0:
     dependencies:
       abbrev: 1.1.1
@@ -40308,8 +40235,6 @@ snapshots:
       picomatch: 2.3.2
 
   readdirp@4.1.2: {}
-
-  readline-sync@1.4.10: {}
 
   reakit-system@0.15.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
@@ -42653,8 +42578,6 @@ snapshots:
       - debug
       - supports-color
       - utf-8-validate
-
-  webpack-fix-style-only-entries@0.6.1: {}
 
   webpack-hot-middleware@2.26.1:
     dependencies:
