@@ -3101,40 +3101,19 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->calculate_cogs_total_value();
 		}
 
-		$this->write_or_defer( 'after_calculate_totals', array( $this, 'fire_after_calculate_totals_action' ), array( $and_taxes, ! $this->writing_through ) );
+		/**
+		 * Fires after the order totals are calculated.
+		 *
+		 * @param bool              $and_taxes Whether the taxes were calculated too.
+		 * @param WC_Abstract_Order $order     Order object.
+		 * @param bool              $staged    Whether the totals were staged and are not yet saved. Always passed; a listener that wants it declares it with a default. When true, the order and its tax items are in memory and have no IDs yet; use the $order object, not the database. @since 11.4.0
+		 * @since 3.3.0
+		 */
+		$this->write_or_defer( 'after_calculate_totals', 'do_action', array( 'woocommerce_order_after_calculate_totals', $and_taxes, $this, ! $this->writing_through ) );
 
 		$this->save_if_writing_through();
 
 		return $this->get_total();
-	}
-
-	/**
-	 * Fire woocommerce_order_after_calculate_totals. A direct calculate_totals() call passes two arguments, as
-	 * it always did; a staged call adds a third.
-	 *
-	 * @param bool $and_taxes Whether the taxes were calculated too.
-	 * @param bool $staged    Whether the totals were staged and are not yet saved.
-	 */
-	private function fire_after_calculate_totals_action( $and_taxes, bool $staged ): void {
-		if ( ! $staged ) {
-			/**
-			 * This action is documented below.
-			 *
-			 * @since 3.3.0
-			 */
-			do_action( 'woocommerce_order_after_calculate_totals', $and_taxes, $this );
-			return;
-		}
-
-		/**
-		 * Fires after the order totals are calculated, before they are saved.
-		 *
-		 * @param bool              $and_taxes Whether the taxes were calculated too.
-		 * @param WC_Abstract_Order $order     Order object.
-		 * @param bool              $staged    Whether the totals were staged and are not yet saved. Absent on a direct calculate_totals() call. When true, the order and its tax items are in memory and have no IDs yet; use the $order object, not the database. @since 11.4.0
-		 * @since 3.3.0
-		 */
-		do_action( 'woocommerce_order_after_calculate_totals', $and_taxes, $this, true );
 	}
 
 	/**

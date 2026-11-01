@@ -12745,7 +12745,7 @@ parameters:
 			path: includes/class-wc-order.php
 
 		-
-			message: '#^Method WC_Order\:\:insert_order_note\(\) should return int but returns int\|false\.$#'
+			message: '#^Method WC_Order\:\:add_order_note\(\) should return int but returns int\|false\.$#'
 			identifier: return.type
 			count: 1
 			path: includes/class-wc-order.php

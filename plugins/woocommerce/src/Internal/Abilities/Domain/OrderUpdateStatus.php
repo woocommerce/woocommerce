@@ -137,11 +137,7 @@ class OrderUpdateStatus extends ActionableAbility {
 			return self::update_status( $subject, $status, self::get_note( $input ) );
 		}
 
-		try {
-			$subject->stage_status( $status, self::get_note( $input ), true );
-		} catch ( \WC_Data_Exception $e ) {
-			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
-		}
+		$subject->stage_status( $status, self::get_note( $input ), true );
 
 		return null;
 	}

@@ -2182,33 +2182,6 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return int                       Comment ID.
 	 */
 	public function add_order_note( $note, $is_customer_note = 0, $added_by_user = false, $meta_data = array() ) {
-		return $this->insert_order_note( $note, $is_customer_note, $added_by_user, $meta_data );
-	}
-
-	/**
-	 * Queue a note for the order in memory. The next save() adds it with add_order_note() after the write, so
-	 * the note sees the saved order and woocommerce_order_note_added fires after the write.
-	 *
-	 * @since 11.4.0
-	 * @param  string $note              Note to add.
-	 * @param  int    $is_customer_note  Is this a note for the customer?.
-	 * @param  bool   $added_by_user     Was the note added by a user?.
-	 * @param  array  $meta_data         Optional meta data to add to the note. Key value pairs.
-	 */
-	public function stage_order_note( $note, $is_customer_note = 0, $added_by_user = false, $meta_data = array() ): void {
-		$this->defer_to_save( uniqid( 'order_note_', true ), array( $this, 'add_order_note' ), array( $note, $is_customer_note, $added_by_user, $meta_data ), true );
-	}
-
-	/**
-	 * Insert a note (comment) for the order. add_order_note() calls it.
-	 *
-	 * @param  string $note              Note to add.
-	 * @param  int    $is_customer_note  Is this a note for the customer?.
-	 * @param  bool   $added_by_user     Was the note added by a user?.
-	 * @param  array  $meta_data         Optional meta data to add to the note. Key value pairs.
-	 * @return int                       Comment ID.
-	 */
-	private function insert_order_note( $note, $is_customer_note, $added_by_user, $meta_data ) {
 		if ( ! $this->get_id() ) {
 			return 0;
 		}
@@ -2275,6 +2248,20 @@ class WC_Order extends WC_Abstract_Order {
 		do_action( 'woocommerce_order_note_added', $comment_id, $this );
 
 		return $comment_id;
+	}
+
+	/**
+	 * Queue a note for the order in memory. The next save() adds it with add_order_note() after the write, so
+	 * the note sees the saved order and woocommerce_order_note_added fires after the write.
+	 *
+	 * @since 11.4.0
+	 * @param  string $note              Note to add.
+	 * @param  int    $is_customer_note  Is this a note for the customer?.
+	 * @param  bool   $added_by_user     Was the note added by a user?.
+	 * @param  array  $meta_data         Optional meta data to add to the note. Key value pairs.
+	 */
+	public function stage_order_note( $note, $is_customer_note = 0, $added_by_user = false, $meta_data = array() ): void {
+		$this->defer_to_save( uniqid( 'order_note_', true ), array( $this, 'add_order_note' ), array( $note, $is_customer_note, $added_by_user, $meta_data ), true );
 	}
 
 	/**

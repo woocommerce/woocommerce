@@ -63,10 +63,10 @@ parameters:
 			identifier: woocommerce.stagedWrite
 			message: '#^Method WC_Abstract_Order::add_payment_token\(\) writes outside save\(\)\.#'
 			path: includes/abstracts/abstract-wc-order.php
-		# The one place that inserts a note row: add_order_note() calls it, and save() runs add_order_note() for notes that stage_order_note() queued.
+		# The one place that inserts a note row: save() runs add_order_note() for notes that stage_order_note() queued.
 		-
 			identifier: woocommerce.stagedWrite
-			message: '#^Method WC_Order::insert_order_note\(\) writes outside save\(\)\.#'
+			message: '#^Method WC_Order::add_order_note\(\) writes outside save\(\)\.#'
 			path: includes/class-wc-order.php
 		# Usage counts change through atomic data store updates; a save would rewrite them from stale values.
 		-

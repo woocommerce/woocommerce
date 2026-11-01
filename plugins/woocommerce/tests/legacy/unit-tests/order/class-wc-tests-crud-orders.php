@@ -1292,9 +1292,9 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	public function test_staged_after_calculate_totals_fires_on_save() {
 		$order    = WC_Helper_Order::create_order();
 		$calls    = array();
-		$listener = static function ( ...$args ) use ( &$calls ) {
-			$calls[] = count( $args ) > 2 ? $args[2] : null;
-			$args[1]->set_total( 99 );
+		$listener = static function ( $and_taxes, $listened_order, $staged ) use ( &$calls ) {
+			$calls[] = $staged;
+			$listened_order->set_total( 99 );
 		};
 		add_action( 'woocommerce_order_after_calculate_totals', $listener, 10, 3 );
 
@@ -1307,7 +1307,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		$order->calculate_totals( false );
 		remove_action( 'woocommerce_order_after_calculate_totals', $listener, 10 );
-		$this->assertSame( array( true, null ), $calls );
+		$this->assertSame( array( true, false ), $calls );
 	}
 
 	/**
