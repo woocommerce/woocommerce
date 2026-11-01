@@ -570,6 +570,8 @@ class WC_Tax {
 	 * 1. Uses the explicitly configured shipping tax class from WooCommerce settings if not set to 'inherit'
 	 * 2. If tax_class is provided (per-item shipping), uses that specific class
 	 * 3. If no tax_class provided (per-order shipping), analyzes cart items to determine the appropriate class:
+	 *    - Uses the standard tax class when the cart is not loaded, which is the case outside front-end
+	 *      requests (WP-Cron, REST API, non-AJAX admin)
 	 *    - Returns empty array if cart has no taxable items
 	 *    - For multiple tax classes: prioritizes standard rate, then uses first class found in tax class hierarchy
 	 *    - For single tax class: uses that class directly
@@ -648,14 +650,15 @@ class WC_Tax {
 	 * Standard tax class takes priority, followed by the first non-standard class
 	 * found in the configured tax class hierarchy.
 	 *
-	 * @return string|null The shipping tax class slug, or null if no taxable items are found.
+	 * @return string|null The shipping tax class slug, the standard tax class if the cart is empty
+	 *                     or not loaded, or null if no taxable items are found.
 	 */
 	private static function get_shipping_tax_class_from_cart_items() {
 		$standard_tax_class = '';
 		$cart               = WC()->cart;
 
-		// Check if cart has items before proceeding.
-		if ( ! $cart->get_cart() ) {
+		// A cart that is missing (cron, REST, non-AJAX admin) behaves like an empty one.
+		if ( ! $cart instanceof WC_Cart || ! $cart->get_cart() ) {
 			return $standard_tax_class;
 		}
 
