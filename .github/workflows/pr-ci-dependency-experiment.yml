@@ -2,8 +2,8 @@ name: 'PR experiment: Browser dependency closure'
 
 on:
   pull_request:
-    # Only changes to this branch-confined experiment schedule new trials.
-    types: [opened, synchronize]
+    # Repeat the original Actions run explicitly; later PR pushes do not rerun it.
+    types: [opened]
     paths:
       - '.github/workflows/pr-ci-dependency-experiment.yml'
 
