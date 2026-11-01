@@ -8,11 +8,12 @@ import { existsSync } from 'fs';
  * Internal dependencies
  */
 import { adminFile as BLOCKS_ADMIN_STATE } from './utils/blocks/constants';
+import { loadEnvFile } from './utils/env-file';
 
 // __dirname is not natively available in ESM, but Playwright's config loader shims it.
 const ENV_FILE = __dirname + '/.env';
 if ( existsSync( ENV_FILE ) ) {
-	process.loadEnvFile( ENV_FILE );
+	loadEnvFile( ENV_FILE );
 }
 
 if ( ! process.env.BASE_URL ) {
