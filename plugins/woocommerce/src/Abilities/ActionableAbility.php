@@ -373,6 +373,101 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
+	 * Check the input schema. When it refuses the input, name every bad extension
+	 * field in one message, because an MCP client gets only the first message of an
+	 * error. A failure with no bad extension field keeps the error of the schema.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param mixed $input Ability input.
+	 * @return true|\WP_Error
+	 */
+	public function validate_input( $input = null ) {
+		$result = parent::validate_input( $input );
+		if ( ! is_wp_error( $result ) || ! is_array( $input ) ) {
+			return $result;
+		}
+		$refusals = $this->get_field_refusals( $input );
+		if ( empty( $refusals ) ) {
+			return $result;
+		}
+		return new \WP_Error( 'woocommerce_ability_invalid_fields', implode( ' ', $refusals ), array( 'status' => 400 ) );
+	}
+
+	/**
+	 * Say what is wrong with each bad extension field of the input. An ability
+	 * whose input has more `extensions`, such as one per item, adds those here.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array $input Ability input that the schema refused.
+	 * @return string[]
+	 */
+	protected function get_field_refusals( array $input ): array {
+		if ( ! isset( $this->get_input_schema()['properties']['extensions'] ) ) {
+			return array();
+		}
+		return self::describe_bad_fields( $input['extensions'] ?? null, $this->get_resource() );
+	}
+
+	/**
+	 * Say what is wrong with each unknown namespace, unknown field, read-only field
+	 * and bad value. A value of the wrong shape is left to the input schema.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param mixed         $values        Values keyed by namespace, then field.
+	 * @param string        $resource_name Resource of the object that gets the values.
+	 * @param callable|null $field_filter  Optional. Gets the arguments of a field and returns whether the object can take it. A field it refuses counts as unknown.
+	 * @return string[]
+	 */
+	protected static function describe_bad_fields( $values, string $resource_name, ?callable $field_filter = null ): array {
+		$registered = ExtensibleAbilities::get_fields( $resource_name );
+		$refusals   = array();
+		foreach ( is_array( $values ) ? $values : array() as $namespace => $fields ) {
+			if ( ! isset( $registered[ $namespace ] ) ) {
+				/* translators: %s: Extension namespace. */
+				$refusals[] = sprintf( __( 'No extension registered the namespace "%s" for this ability. Remove it from the input, or use a namespace from the input schema.', 'woocommerce' ), $namespace );
+				continue;
+			}
+			$candidates = null === $field_filter ? $registered[ $namespace ] : array_filter( $registered[ $namespace ], $field_filter );
+			foreach ( is_array( $fields ) ? $fields : array() as $field => $value ) {
+				$args = $candidates[ $field ] ?? null;
+				if ( null === $args ) {
+					$refusals[] = self::describe_unknown_field( $candidates, (string) $namespace, (string) $field );
+				} elseif ( ! isset( $args['set_callback'] ) ) {
+					/* translators: 1: Extension namespace. 2: Field name. */
+					$refusals[] = sprintf( __( 'The extension field "%1$s.%2$s" is read-only. Remove it from the input.', 'woocommerce' ), $namespace, $field );
+				} else {
+					$valid = rest_validate_value_from_schema( $value, $args['input_schema'], 'extensions.' . $namespace . '.' . $field );
+					if ( is_wp_error( $valid ) ) {
+						$refusals[] = $valid->get_error_message();
+					}
+				}
+			}
+		}
+		return $refusals;
+	}
+
+	/**
+	 * Say that a namespace has no such field, and list the fields that the agent can write.
+	 *
+	 * @param array<string, array> $fields              Fields of the namespace that the object can take.
+	 * @param string               $extension_namespace Extension namespace from the input.
+	 * @param string               $field               Field name from the input.
+	 * @return string
+	 */
+	private static function describe_unknown_field( array $fields, string $extension_namespace, string $field ): string {
+		$writable = array_keys( array_filter( $fields, static fn( array $args ): bool => isset( $args['set_callback'] ) ) );
+		if ( empty( $writable ) ) {
+			/* translators: 1: Extension namespace. 2: Field name. */
+			return sprintf( __( 'The extension namespace "%1$s" has no field "%2$s", and it has no fields you can write. Remove "%1$s.%2$s" from the input.', 'woocommerce' ), $extension_namespace, $field );
+		}
+		/* translators: 1: Extension namespace. 2: Field name. 3: Comma-separated list of field names. */
+		return sprintf( __( 'The extension namespace "%1$s" has no field "%2$s". The fields you can write in this namespace are: %3$s. Use one of them, or remove "%1$s.%2$s" from the input.', 'woocommerce' ), $extension_namespace, $field, implode( ', ', $writable ) );
+	}
+
+	/**
 	 * Use the change as the execute callback, and add the `extensions` input
 	 * when the feature is on.
 	 *
