@@ -2,8 +2,7 @@ name: 'PR experiment: Blocks E2E setup'
 
 on:
   pull_request:
-    # Later experiment commits must not interrupt this trial.
-    types: [opened]
+    types: [opened, synchronize, reopened]
     paths:
       - '.github/workflows/pr-ci-e2e-setup-experiment.yml'
 
@@ -161,16 +160,10 @@ jobs:
       matrix:
         include:
           - arm: baseline
-            install: full
-            flush: default
-          - arm: lean-install
-            install: lean
             flush: default
           - arm: flush2
-            install: full
             flush: '2'
     env:
-      INSTALL_POLICY: ${{ matrix.install }}
       FLUSH_POLICY: ${{ matrix.flush }}
     steps:
       - name: 'Checkout identical source'
@@ -232,13 +225,8 @@ jobs:
           key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: ${{ runner.os }}-playwright-
 
-      - name: 'Install dependencies for the selected arm'
-        run: |
-          if [[ "$INSTALL_POLICY" == 'lean' ]]; then
-            pnpm install --filter='@woocommerce/plugin-woocommerce' --frozen-lockfile --ignore-scripts
-          else
-            pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile
-          fi
+      - name: 'Install the same full browser dependencies'
+        run: pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile
 
       - name: 'Download the identical shared ZIP and reference'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -272,6 +260,7 @@ jobs:
           cat > "$RUNNER_TEMP/e2e-after-start.sh" <<'SH'
           #!/usr/bin/env bash
           set -euo pipefail
+          exec > >(tee "$RUNNER_TEMP/e2e-db-policy.log") 2>&1
           pnpm wp-env:e2e run cli wp db query 'SELECT @@GLOBAL.innodb_flush_log_at_trx_commit AS flush_before'
           expected=''
           if [[ "$FLUSH_POLICY" == '2' ]]; then
@@ -317,6 +306,13 @@ jobs:
         id: environment
         run: pnpm --filter='@woocommerce/plugin-woocommerce' env:start:blocks
 
+      - name: 'Verify the measured database policy before tests'
+        run: |
+          cat "$RUNNER_TEMP/e2e-db-policy.log"
+          expected=1
+          if [[ "$FLUSH_POLICY" == '2' ]]; then expected=2; fi
+          grep -Fx "flush_after=$expected" "$RUNNER_TEMP/e2e-db-policy.log"
+
       - name: 'Run the unchanged full Blocks parallel shard'
         id: tests
         run: pnpm --filter='@woocommerce/plugin-woocommerce' test:e2e:blocks:parallel --shard=1/2
@@ -348,7 +344,9 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: e2e-setup-discovery-${{ matrix.arm }}-${{ github.run_id }}
-          path: ${{ runner.temp }}/e2e-setup/discovery.json
+          path: |
+            ${{ runner.temp }}/e2e-setup/discovery.json
+            ${{ runner.temp }}/e2e-db-policy.log
           if-no-files-found: error
           retention-days: 3
           overwrite: true

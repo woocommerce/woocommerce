@@ -2,7 +2,7 @@ name: 'PR experiment: PHP UTC validation'
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened]
     paths:
       - '.github/workflows/pr-ci-php-utc-validation.yml'
 
