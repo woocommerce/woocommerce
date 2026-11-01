@@ -46,7 +46,7 @@ const COMMANDS = {
 };
 
 const [ name, ...args ] = process.argv.slice( 2 );
-const command = COMMANDS[ name ];
+const command = Object.hasOwn( COMMANDS, name ) ? COMMANDS[ name ] : undefined;
 
 try {
 	if ( ! command ) {

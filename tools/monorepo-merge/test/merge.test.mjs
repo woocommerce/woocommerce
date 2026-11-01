@@ -106,6 +106,13 @@ describe( 'commit message rewriting', () => {
 		);
 	} );
 
+	it( 'qualifies references inside parenthesized text', () => {
+		assert.equal(
+			rewriteMessage( 'Tidy up (see #12).' ),
+			'Tidy up (see woocommerce/example#12).'
+		);
+	} );
+
 	it( 'leaves qualified references and URL fragments unchanged', () => {
 		const message =
 			'See other/repo#12, https://example.com/page#5 and abc#7.';

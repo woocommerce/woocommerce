@@ -101,14 +101,14 @@ export function findFieldsToRestore( expectedFields, projectItems ) {
 /**
  * Gets the IDs of the labels to add after the transfer, failing if the destination lacks any of them.
  *
- * @param {Function} graphql     The GraphQL request function.
- * @param {string}   owner       The destination repository owner.
- * @param {string}   name        The destination repository name.
- * @param {string}   [labelList] A comma-separated list of label names.
+ * @param {Function} graphql The GraphQL request function.
+ * @param {string}   owner   The destination repository owner.
+ * @param {string}   name    The destination repository name.
+ * @param {string[]} names   The label names.
  * @return {Promise<string[]>} The label IDs.
  */
-async function getLabelIds( graphql, owner, name, labelList ) {
-	if ( ! labelList ) {
+async function getLabelIds( graphql, owner, name, names ) {
+	if ( names.length === 0 ) {
 		return [];
 	}
 
@@ -142,11 +142,6 @@ async function getLabelIds( graphql, owner, name, labelList ) {
 		const { hasNextPage, endCursor } = repository.labels.pageInfo;
 		cursor = hasNextPage ? endCursor : null;
 	} while ( cursor !== null );
-
-	const names = labelList
-		.split( ',' )
-		.map( ( label ) => label.trim() )
-		.filter( Boolean );
 
 	return names.map( ( label ) => {
 		if ( ! allLabels.has( label ) ) {
@@ -328,7 +323,11 @@ export async function transferIssues(
 		`,
 		{ owner, name }
 	);
-	const labelIds = await getLabelIds( graphql, owner, name, labels );
+	const labelNames = ( labels ?? '' )
+		.split( ',' )
+		.map( ( label ) => label.trim() )
+		.filter( Boolean );
+	const labelIds = await getLabelIds( graphql, owner, name, labelNames );
 	const issues = await getIssues( graphql, searchQuery );
 
 	if ( dryRun ) {
@@ -340,8 +339,10 @@ export async function transferIssues(
 				`- "${ title }" (${ projectFields.length } project field value(s) to check)`
 			);
 		}
-		if ( labels ) {
-			console.log( `Would then add the labels: ${ labels }` );
+		if ( labelNames.length > 0 ) {
+			console.log(
+				`Would then add the labels: ${ labelNames.join( ', ' ) }`
+			);
 		}
 		console.log( 'No changes were made.' );
 		return;

@@ -62,7 +62,8 @@ export function createGraphQL( rawToken ) {
 		}
 		if ( ! response.ok ) {
 			// GitHub explains failures such as SAML enforcement or rate limits in the body's message.
-			const { message } = await response.json().catch( () => ( {} ) );
+			const { message } =
+				( await response.json().catch( () => null ) ) ?? {};
 			throw new Error(
 				`GitHub API request failed with HTTP ${ response.status }${
 					message ? `: ${ message }` : ''
