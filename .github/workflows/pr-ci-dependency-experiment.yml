@@ -2,8 +2,8 @@ name: 'PR experiment: Browser dependency closure'
 
 on:
   pull_request:
-    # Rerun the original Actions run explicitly to repeat this trial.
-    types: [opened]
+    # Only changes to this branch-confined experiment schedule new trials.
+    types: [opened, synchronize]
     paths:
       - '.github/workflows/pr-ci-dependency-experiment.yml'
 
@@ -247,12 +247,159 @@ jobs:
           cmp "$RUNNER_TEMP/e2e-setup/discovery.json" "$GITHUB_WORKSPACE/dependency-reference/discovery.json"
           sha256sum "$RUNNER_TEMP/e2e-setup/discovery.json"
 
+      - name: 'Create an empty detached worktree with the populated pnpm store'
+        id: warm-worktree
+        run: |
+          mkdir -p "$RUNNER_TEMP/dependency-warm"
+          warm_tree=$(mktemp -d "$RUNNER_TEMP/dependency-warm-worktree.XXXXXX")
+          printf '%s\n' "$warm_tree" > "$RUNNER_TEMP/dependency-warm/worktree-path.txt"
+          git worktree add --detach "$warm_tree" "$SOURCE_SHA"
+          echo "WARM_WORKTREE=$warm_tree" >> "$GITHUB_ENV"
+          WARM_WORKTREE="$warm_tree" python3 <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          original = pathlib.Path(os.environ['GITHUB_WORKSPACE']).resolve()
+          tree = pathlib.Path(os.environ['WARM_WORKTREE']).resolve()
+          evidence = pathlib.Path(os.environ['RUNNER_TEMP']) / 'dependency-warm'
+          def output(cwd, *command):
+              return subprocess.check_output(command, cwd=cwd, text=True).strip()
+          def identity(cwd):
+              return {
+                  'source': output(cwd, 'git', 'rev-parse', 'HEAD'),
+                  'lock_sha256': hashlib.sha256((cwd / 'pnpm-lock.yaml').read_bytes()).hexdigest(),
+                  'pnpm': output(cwd, 'pnpm', '--version'),
+                  'node': output(cwd, 'node', '--version'),
+                  'php': output(cwd, 'php', '-r', 'echo PHP_VERSION;'),
+                  'composer': output(cwd, 'composer', '--version', '--no-ansi'),
+                  'store': str(pathlib.Path(output(cwd, 'pnpm', 'store', 'path', '--silent')).resolve()),
+              }
+          cold = identity(original)
+          warm = identity(tree)
+          if cold != warm or warm['source'] != os.environ['SOURCE_SHA']:
+              raise RuntimeError('Warm worktree changed source, lock, toolchain or global pnpm store')
+          if pathlib.Path(os.environ['PNPM_STORE_PATH']).resolve() != pathlib.Path(warm['store']):
+              raise RuntimeError('Warm worktree does not use the restored/populated pnpm store')
+          status = output(tree, 'git', 'status', '--porcelain=v1', '--untracked-files=all', '--ignored=matching')
+          if status:
+              raise RuntimeError('Fresh worktree has tracked changes or generated/untracked files: ' + status)
+          for directory, subdirs, files in os.walk(tree):
+              if 'node_modules' in subdirs:
+                  raise RuntimeError('Fresh worktree already contains node_modules: ' + directory)
+          store = pathlib.Path(warm['store'])
+          if not store.is_dir() or not any(files for _, _, files in os.walk(store)):
+              raise RuntimeError('The pnpm store is empty after the cold install')
+          if (tree / 'node_modules/.cache').exists():
+              raise RuntimeError('Fresh worktree already has a workspace build cache')
+          (evidence / 'identity.json').write_text(json.dumps({
+              'cold': cold, 'warm': warm, 'fresh_status': status,
+              'node_modules_present_before_install': False,
+              'workspace_build_cache_present_before_install': False,
+              'store_populated_before_install': True,
+              'measurement': 'fresh workspace install with warm global store; cache restoration excluded',
+          }, indent=2) + '\n')
+          PY
+
+      - name: 'Install into the fresh worktree using only the warm global store'
+        id: warm-install
+        working-directory: ${{ env.WARM_WORKTREE }}
+        env:
+          ARM: ${{ matrix.arm }}
+        run: |
+          set -o pipefail
+          if [[ "$ARM" == 'baseline' ]]; then
+            pnpm --filter='@woocommerce/plugin-woocommerce...' list --depth=-1 --json > "$RUNNER_TEMP/dependency-warm/workspaces.json"
+            /usr/bin/time -f '{"seconds":%e,"rss_kb":%M}' -o "$RUNNER_TEMP/dependency-warm/install.json" pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile 2>&1 | tee "$RUNNER_TEMP/dependency-warm/install.log"
+          elif [[ "$ARM" == 'fixture-closure' ]]; then
+            pnpm --filter='@woocommerce/plugin-woocommerce' --filter='@woocommerce/e2e-utils-playwright...' list --depth=-1 --json > "$RUNNER_TEMP/dependency-warm/workspaces.json"
+            /usr/bin/time -f '{"seconds":%e,"rss_kb":%M}' -o "$RUNNER_TEMP/dependency-warm/install.json" pnpm install --filter='@woocommerce/plugin-woocommerce' --filter='@woocommerce/e2e-utils-playwright...' --frozen-lockfile 2>&1 | tee "$RUNNER_TEMP/dependency-warm/install.log"
+          else
+            exit 1
+          fi
+          cat "$RUNNER_TEMP/dependency-warm/install.json"
+
+      - name: 'Require actual package reuse in the fresh worktree'
+        id: warm-reuse
+        run: |
+          python3 <<'PY'
+          import json, os, pathlib, re
+          root = pathlib.Path(os.environ['RUNNER_TEMP'])
+          evidence = root / 'dependency-warm'
+          log = (evidence / 'install.log').read_text()
+          log = re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]', '', log)
+          progress = re.findall(r'^Progress: resolved (\d+), reused (\d+), downloaded (\d+), added (\d+)(, done)?\s*$', log, re.MULTILINE)
+          if not progress or not progress[-1][4]:
+              raise RuntimeError('No completed root-install progress counters; warm-store reuse is unverified')
+          resolved, reused, downloaded, added = map(int, progress[-1][:4])
+          metrics = {'resolved': resolved, 'reused': reused, 'downloaded': downloaded, 'added': added}
+          (evidence / 'reuse.json').write_text(json.dumps(metrics, indent=2) + '\n')
+          if not (resolved > 0 and reused > 0 and added > 0 and downloaded == 0):
+              raise RuntimeError('Fresh warm-store install did not reuse packages without downloads: ' + str(metrics))
+          cold = sorted(package['name'] for package in json.loads((root / 'dependency-workspaces.json').read_text()))
+          warm = sorted(package['name'] for package in json.loads((evidence / 'workspaces.json').read_text()))
+          if cold != warm:
+              raise RuntimeError('Warm install selected different workspaces')
+          print(json.dumps(metrics))
+          PY
+
+      - name: 'Discover the unchanged Blocks shard in the warm worktree'
+        id: warm-discovery
+        working-directory: ${{ env.WARM_WORKTREE }}
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: ${{ runner.temp }}/dependency-warm/discovery-raw.json
+          DISCOVERY_DIRECTORY: ${{ runner.temp }}/dependency-warm
+        shell: bash
+        run: |
+          mkdir -p "$DISCOVERY_DIRECTORY"
+          NODE_OPTIONS="${NODE_OPTIONS:-} --conditions=wc-source" pnpm --filter='@woocommerce/plugin-woocommerce' exec playwright test --config=tests/e2e/playwright.config.ts --project=blocks-parallel --shard=1/2 --list --reporter=json
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const report = JSON.parse(fs.readFileSync(process.env.PLAYWRIGHT_JSON_OUTPUT_FILE, 'utf8'));
+          if (report.errors?.length) throw new Error(JSON.stringify(report.errors));
+          const tests = [];
+          function visit(suites, parents = []) {
+            for (const suite of suites || []) {
+              const titles = [...parents, suite.title];
+              for (const spec of suite.specs || []) {
+                for (const test of spec.tests || []) {
+                  tests.push({
+                    title: [...titles, spec.title], file: spec.file,
+                    line: spec.line, column: spec.column,
+                    projectName: test.projectName, projectId: test.projectId,
+                  });
+                }
+              }
+              visit(suite.suites, titles);
+            }
+          }
+          visit(report.suites);
+          if (!tests.length) throw new Error('No tests were discovered');
+          tests.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+          const manifest = {
+            workers: report.config.workers,
+            projects: report.config.projects.map(({name, retries, repeatEach}) => ({name, retries, repeatEach})),
+            tests,
+          };
+          fs.writeFileSync(path.join(process.env.DISCOVERY_DIRECTORY, 'discovery.json'), JSON.stringify(manifest, null, 2) + '\n');
+          console.log(`Discovered ${tests.length} tests with ${manifest.workers} configured workers`);
+          NODE
+
+      - name: 'Require warm discovery to match the same full-install reference'
+        id: warm-parity
+        run: |
+          cmp "$RUNNER_TEMP/dependency-warm/discovery.json" "$GITHUB_WORKSPACE/dependency-reference/discovery.json"
+          sha256sum "$RUNNER_TEMP/dependency-warm/discovery.json"
+
       - name: 'Record arm outcome'
         if: ${{ always() }}
         env:
           ARM: ${{ matrix.arm }}
           RESULT: ${{ job.status }}
           DISCOVERY_RESULT: ${{ steps.discovery.outcome }}
+          WARM_WORKTREE_RESULT: ${{ steps.warm-worktree.outcome }}
+          WARM_INSTALL_RESULT: ${{ steps.warm-install.outcome }}
+          WARM_REUSE_RESULT: ${{ steps.warm-reuse.outcome }}
+          WARM_DISCOVERY_RESULT: ${{ steps.warm-discovery.outcome }}
+          WARM_PARITY_RESULT: ${{ steps.warm-parity.outcome }}
           PNPM_MATCH: ${{ steps.pnpm-cache.outputs.cache-matched-key }}
           COMPOSER_MATCH: ${{ steps.composer-cache.outputs.cache-matched-key }}
           PNPM_HIT: ${{ steps.pnpm-cache.outputs.cache-hit }}
@@ -263,7 +410,11 @@ jobs:
           {
             echo "Arm: $ARM; result: $RESULT; source: $SOURCE_SHA"
             echo "PHP: $WP_ENV_PHP_VERSION; WordPress: $WP_VERSION"
-            echo "Discovery: $DISCOVERY_RESULT; installation-only timing repetition"
+            echo "Cold discovery: $DISCOVERY_RESULT; installation-only timing repetition"
+            echo "Warm worktree: $WARM_WORKTREE_RESULT; install: $WARM_INSTALL_RESULT; reuse: $WARM_REUSE_RESULT; discovery: $WARM_DISCOVERY_RESULT; parity: $WARM_PARITY_RESULT"
+            echo 'Warm timing measures fresh-workspace install with warm global store; excludes cache download/extraction.'
+            if [[ -f "$RUNNER_TEMP/dependency-warm/install.json" ]]; then cat "$RUNNER_TEMP/dependency-warm/install.json"; fi
+            if [[ -f "$RUNNER_TEMP/dependency-warm/reuse.json" ]]; then cat "$RUNNER_TEMP/dependency-warm/reuse.json"; fi
             echo "Exact cache hits: pnpm=$PNPM_HIT node=$NODE_HIT composer=$COMPOSER_HIT browser=$BROWSER_HIT"
             echo "Matched cache keys: pnpm=$PNPM_MATCH composer=$COMPOSER_MATCH"
             echo 'Project blocks-parallel; shard 1/2 discovery unchanged. Full browser validation: run 41322899450.'
@@ -281,3 +432,40 @@ jobs:
           if-no-files-found: error
           retention-days: 3
           overwrite: true
+
+      - name: 'Upload distinct warm-store evidence'
+        if: ${{ !cancelled() && steps.warm-worktree.outcome == 'success' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dependency-warm-${{ matrix.arm }}-${{ matrix.trial }}-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/dependency-warm/identity.json
+            ${{ runner.temp }}/dependency-warm/workspaces.json
+            ${{ runner.temp }}/dependency-warm/install.json
+            ${{ runner.temp }}/dependency-warm/install.log
+            ${{ runner.temp }}/dependency-warm/reuse.json
+            ${{ runner.temp }}/dependency-warm/discovery.json
+          if-no-files-found: error
+          retention-days: 3
+          overwrite: true
+
+      - name: 'Remove only this trial’s detached worktree after evidence capture'
+        if: ${{ always() }}
+        run: |
+          python3 <<'PY'
+          import os, pathlib, subprocess
+          root = pathlib.Path(os.environ['RUNNER_TEMP']).resolve()
+          record = root / 'dependency-warm/worktree-path.txt'
+          if not record.is_file():
+              raise SystemExit(0)
+          tree = pathlib.Path(record.read_text().strip()).resolve()
+          if tree.parent != root or not tree.name.startswith('dependency-warm-worktree.'):
+              raise RuntimeError('Refusing cleanup outside this trial’s temporary worktree')
+          entries = subprocess.check_output(['git', 'worktree', 'list', '--porcelain'], text=True).split('\n\n')
+          entry = next((value for value in entries if value and value.splitlines()[0] == 'worktree ' + str(tree)), None)
+          if entry is None:
+              raise SystemExit(0)
+          if 'detached' not in entry.splitlines() or 'HEAD ' + os.environ['SOURCE_SHA'] not in entry.splitlines():
+              raise RuntimeError('Refusing cleanup of a worktree with a different source or branch')
+          subprocess.run(['git', 'worktree', 'remove', '--force', str(tree)], check=True)
+          PY
