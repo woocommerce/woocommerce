@@ -10,14 +10,12 @@ import { useShippingData } from '@woocommerce/base-context';
 import clsx from 'clsx';
 import { sanitizeHTML } from '@woocommerce/sanitize';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
-import {
-	PackageItems,
-	ShippingPackageItemIcon,
-} from '@woocommerce/base-components/cart-checkout';
 
 /**
  * Internal dependencies
  */
+import PackageItems from '../package-items';
+import ShippingPackageItemIcon from '../shipping-package-item-icon';
 import type { PackageData } from '../shipping-rates-control-package/types';
 
 import './style.scss';
