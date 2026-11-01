@@ -3,11 +3,11 @@ import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 import { describe, it } from 'node:test';
 
-import mergeModule from '../dist/commands/merge/index.js';
-import constants from '../dist/const.js';
-
-const { default: Merge } = mergeModule;
-const { MONOREPO_ROOT } = constants;
+import {
+	MONOREPO_ROOT,
+	createMessageCallback,
+	validateArgs,
+} from '../src/merge.mjs';
 
 const SOURCE = 'woocommerce/example';
 const DESTINATION_ERROR =
@@ -18,7 +18,7 @@ function rewriteMessage( message ) {
 		'import re',
 		'import sys',
 		'def rewrite(message):',
-		`    ${ Merge.createMessageCallback( SOURCE ) }`,
+		`    ${ createMessageCallback( SOURCE ) }`,
 		'sys.stdout.buffer.write(rewrite(sys.stdin.buffer.read()))',
 	].join( '\n' );
 
@@ -28,53 +28,36 @@ function rewriteMessage( message ) {
 	} );
 }
 
-function createCommand() {
-	const command = Object.create( Merge.prototype );
-	command.error = ( message ) => {
-		throw new Error( message );
-	};
-
-	return command;
-}
-
 describe( 'destination validation', () => {
 	it( 'accepts a nested path inside the monorepo', async () => {
 		await assert.doesNotReject( () =>
-			createCommand().validateArgs(
-				SOURCE,
-				'tools/__monorepo_merge_test__'
-			)
+			validateArgs( SOURCE, 'tools/__monorepo_merge_test__' )
 		);
 	} );
 
 	it( 'rejects an absolute path', async () => {
 		await assert.rejects(
-			createCommand().validateArgs(
-				SOURCE,
-				join( MONOREPO_ROOT, 'tools/example' )
-			),
+			validateArgs( SOURCE, join( MONOREPO_ROOT, 'tools/example' ) ),
 			{ message: DESTINATION_ERROR }
 		);
 	} );
 
 	it( 'rejects the monorepo root', async () => {
-		await assert.rejects( createCommand().validateArgs( SOURCE, '.' ), {
+		await assert.rejects( validateArgs( SOURCE, '.' ), {
 			message: DESTINATION_ERROR,
 		} );
 	} );
 
 	it( 'rejects a path that traverses outside the monorepo', async () => {
-		await assert.rejects(
-			createCommand().validateArgs( SOURCE, '../outside' ),
-			{ message: DESTINATION_ERROR }
-		);
+		await assert.rejects( validateArgs( SOURCE, '../outside' ), {
+			message: DESTINATION_ERROR,
+		} );
 	} );
 
 	it( 'rejects a sibling path with the monorepo name as its prefix', async () => {
-		await assert.rejects(
-			createCommand().validateArgs( SOURCE, '../woocommerce-copy' ),
-			{ message: DESTINATION_ERROR }
-		);
+		await assert.rejects( validateArgs( SOURCE, '../woocommerce-copy' ), {
+			message: DESTINATION_ERROR,
+		} );
 	} );
 } );
 

@@ -1,0 +1,397 @@
+/**
+ * Internal dependencies
+ */
+import { confirm } from './confirm.mjs';
+import { createGraphQL, getToken } from './github.mjs';
+
+// GitHub search never returns more than this many results for one query.
+export const SEARCH_LIMIT = 1000;
+
+const FIELD = `field { ... on ProjectV2FieldCommon { id name dataType } }`;
+const PROJECT_ITEMS = `
+	projectItems( first: 50 ) {
+		nodes {
+			id
+			project { id title }
+			fieldValues( first: 50 ) {
+				nodes {
+					... on ProjectV2ItemFieldTextValue { ${ FIELD } text }
+					... on ProjectV2ItemFieldNumberValue { ${ FIELD } number }
+					... on ProjectV2ItemFieldDateValue { ${ FIELD } date }
+					... on ProjectV2ItemFieldSingleSelectValue { ${ FIELD } optionId }
+					... on ProjectV2ItemFieldIterationValue { ${ FIELD } iterationId }
+				}
+			}
+		}
+	}
+`;
+
+// Maps each project field data type to the value property in the API response and in UpdateProjectV2ItemFieldValueInput.
+const FIELD_VALUE_KEYS = {
+	TEXT: [ 'text', 'text' ],
+	NUMBER: [ 'number', 'number' ],
+	DATE: [ 'date', 'date' ],
+	SINGLE_SELECT: [ 'optionId', 'singleSelectOptionId' ],
+	ITERATION: [ 'iterationId', 'iterationId' ],
+};
+
+/**
+ * Reads the project field values from an issue's `projectItems` nodes.
+ *
+ * @param {Object[]} projectItems The `projectItems.nodes` of an issue.
+ * @return {Object[]} The field values, shaped for UpdateProjectV2ItemFieldValueInput.
+ */
+export function readProjectFields( projectItems ) {
+	const fields = [];
+	for ( const item of projectItems ) {
+		for ( const fieldValue of item.fieldValues.nodes ) {
+			const keys = FIELD_VALUE_KEYS[ fieldValue.field?.dataType ];
+			if ( ! keys ) {
+				continue;
+			}
+
+			fields.push( {
+				projectId: item.project.id,
+				projectTitle: item.project.title,
+				fieldId: fieldValue.field.id,
+				fieldName: fieldValue.field.name,
+				value: { [ keys[ 1 ] ]: fieldValue[ keys[ 0 ] ] },
+			} );
+		}
+	}
+
+	return fields;
+}
+
+/**
+ * Compares the field values an issue had before the transfer with its project items after it.
+ *
+ * @param {Object[]} expectedFields The fields read from the issue before the transfer.
+ * @param {Object[]} projectItems   The `projectItems.nodes` of the issue after the transfer.
+ * @return {{missingProjects: string[], fieldsToRestore: Object[]}} Titles of projects the issue is no longer in, and the fields to set again with the new item IDs.
+ */
+export function findFieldsToRestore( expectedFields, projectItems ) {
+	const itemIds = new Map(
+		projectItems.map( ( item ) => [ item.project.id, item.id ] )
+	);
+	const actualValues = new Map(
+		readProjectFields( projectItems ).map( ( field ) => [
+			`${ field.projectId }:${ field.fieldId }`,
+			JSON.stringify( field.value ),
+		] )
+	);
+
+	const missingProjects = new Set();
+	const fieldsToRestore = [];
+	for ( const field of expectedFields ) {
+		const itemId = itemIds.get( field.projectId );
+		if ( ! itemId ) {
+			missingProjects.add( field.projectTitle );
+		} else if (
+			actualValues.get( `${ field.projectId }:${ field.fieldId }` ) !==
+			JSON.stringify( field.value )
+		) {
+			fieldsToRestore.push( { ...field, itemId } );
+		}
+	}
+
+	return { missingProjects: [ ...missingProjects ], fieldsToRestore };
+}
+
+/**
+ * Gets the IDs of the labels to add after the transfer, failing if the destination lacks any of them.
+ *
+ * @param {Function} graphql     The GraphQL request function.
+ * @param {string}   owner       The destination repository owner.
+ * @param {string}   name        The destination repository name.
+ * @param {string}   [labelList] A comma-separated list of label names.
+ * @return {Promise<string[]>} The label IDs.
+ */
+async function getLabelIds( graphql, owner, name, labelList ) {
+	if ( ! labelList ) {
+		return [];
+	}
+
+	const allLabels = new Map();
+	let cursor = null;
+	do {
+		const { repository } = await graphql(
+			`
+				query ($owner: String!, $name: String!, $cursor: String) {
+					repository(owner: $owner, name: $name) {
+						labels(first: 100, after: $cursor) {
+							nodes {
+								id
+								name
+							}
+							pageInfo {
+								hasNextPage
+								endCursor
+							}
+						}
+					}
+				}
+			`,
+			{ owner, name, cursor }
+		);
+
+		for ( const label of repository.labels.nodes ) {
+			allLabels.set( label.name, label.id );
+		}
+
+		const { hasNextPage, endCursor } = repository.labels.pageInfo;
+		cursor = hasNextPage ? endCursor : null;
+	} while ( cursor !== null );
+
+	return labelList.split( ',' ).map( ( label ) => {
+		if ( ! allLabels.has( label ) ) {
+			throw new Error(
+				`The target repository does not have the label ${ label }.`
+			);
+		}
+
+		return allLabels.get( label );
+	} );
+}
+
+/**
+ * Gets the issues matching the search query, with their project field values.
+ *
+ * @param {Function} graphql     The GraphQL request function.
+ * @param {string}   searchQuery The GitHub search query.
+ * @return {Promise<Object[]>} The issues.
+ */
+async function getIssues( graphql, searchQuery ) {
+	const issues = [];
+	let cursor = null;
+	do {
+		const { search } = await graphql(
+			`query ( $searchQuery: String!, $cursor: String ) {
+				search( type: ISSUE, query: $searchQuery, first: 100, after: $cursor ) {
+					nodes { ... on Issue { id title ${ PROJECT_ITEMS } } }
+					pageInfo { hasNextPage endCursor }
+				}
+			}`,
+			{ searchQuery, cursor }
+		);
+
+		for ( const issue of search.nodes ) {
+			issues.push( {
+				id: issue.id,
+				title: issue.title,
+				projectFields: readProjectFields( issue.projectItems.nodes ),
+			} );
+		}
+
+		const { hasNextPage, endCursor } = search.pageInfo;
+		cursor = hasNextPage ? endCursor : null;
+	} while ( cursor !== null );
+
+	return issues;
+}
+
+/**
+ * Sets project field values that did not survive the transfer.
+ *
+ * @param {Function} graphql The GraphQL request function.
+ * @param {Object}   issue   The transferred issue.
+ * @return {Promise<string[]>} Titles of projects the transferred issue is no longer in.
+ */
+async function restoreProjectFields( graphql, issue ) {
+	if ( issue.projectFields.length === 0 ) {
+		return [];
+	}
+
+	const { node } = await graphql(
+		`query ( $id: ID! ) { node( id: $id ) { ... on Issue { ${ PROJECT_ITEMS } } } }`,
+		{ id: issue.newId }
+	);
+	const { missingProjects, fieldsToRestore } = findFieldsToRestore(
+		issue.projectFields,
+		node.projectItems.nodes
+	);
+
+	for ( const field of fieldsToRestore ) {
+		await graphql(
+			`
+				mutation ($input: UpdateProjectV2ItemFieldValueInput!) {
+					updateProjectV2ItemFieldValue(input: $input) {
+						projectV2Item {
+							id
+						}
+					}
+				}
+			`,
+			{
+				input: {
+					projectId: field.projectId,
+					fieldId: field.fieldId,
+					itemId: field.itemId,
+					value: field.value,
+				},
+			}
+		);
+		console.log(
+			`Restored "${ field.fieldName }" in project "${ field.projectTitle }" for "${ issue.title }"`
+		);
+	}
+
+	return missingProjects;
+}
+
+/**
+ * Transfers issues from another repository into the destination repository.
+ *
+ * @param {string} source               The repository to transfer from, in "owner/repo" format.
+ * @param {Object} options
+ * @param {string} options.destination  The repository to transfer into, in "owner/repo" format.
+ * @param {string} options.searchFilter GitHub search filters for the issues to transfer.
+ * @param {string} [options.labels]     A comma-separated list of labels to add after the transfer.
+ */
+export async function transferIssues(
+	source,
+	{ destination, searchFilter, labels }
+) {
+	const [ , owner, name ] = destination.match( /^([^/]+)\/([^/]+)$/ ) ?? [];
+	if ( ! owner ) {
+		throw new Error(
+			'The destination repository must be in the format "owner/repo"!'
+		);
+	}
+	if ( ! source.startsWith( owner + '/' ) ) {
+		throw new Error(
+			'The source and target repository must have the same owner!'
+		);
+	}
+
+	if (
+		! ( await confirm(
+			`Are you sure you want to transfer issues from ${ source } into ${ destination }?`
+		) )
+	) {
+		return;
+	}
+
+	const graphql = createGraphQL( await getToken() );
+	await graphql( '{ viewer { id } }' );
+
+	const searchQuery = `repo:${ source } is:issue ${ searchFilter }`;
+	const { search } = await graphql(
+		`
+			query ($searchQuery: String!) {
+				search(type: ISSUE, query: $searchQuery, first: 0) {
+					issueCount
+				}
+			}
+		`,
+		{ searchQuery }
+	);
+	if ( search.issueCount === 0 ) {
+		console.log( 'There are no issues to transfer that match this query!' );
+		return;
+	}
+
+	const issueCount = Math.min( search.issueCount, SEARCH_LIMIT );
+	if ( search.issueCount > SEARCH_LIMIT ) {
+		console.log(
+			`${ search.issueCount } issues match, but GitHub search returns at most ${ SEARCH_LIMIT }. Run the command again afterward to transfer the rest.`
+		);
+	}
+	if (
+		! ( await confirm(
+			`This will transfer ${ issueCount } issue(s). There is no command to reverse this, are you sure?`
+		) )
+	) {
+		return;
+	}
+
+	let repositoryId;
+	try {
+		( {
+			repository: { id: repositoryId },
+		} = await graphql(
+			`
+				query ($owner: String!, $name: String!) {
+					repository(owner: $owner, name: $name) {
+						id
+					}
+				}
+			`,
+			{ owner, name }
+		) );
+	} catch {
+		throw new Error( `Could not find the repository "${ destination }"` );
+	}
+	const labelIds = await getLabelIds( graphql, owner, name, labels );
+	const issues = await getIssues( graphql, searchQuery );
+
+	let transferred = 0;
+	for ( const issue of issues ) {
+		console.log( `Transferring "${ issue.title }"` );
+		try {
+			const { transferIssue } = await graphql(
+				`
+					mutation ($input: TransferIssueInput!) {
+						transferIssue(input: $input) {
+							issue {
+								id
+							}
+						}
+					}
+				`,
+				{ input: { issueId: issue.id, repositoryId } }
+			);
+			issue.newId = transferIssue.issue.id;
+			transferred++;
+		} catch ( error ) {
+			console.log(
+				`Failed to transfer "${ issue.title }": ${ error.message }`
+			);
+		}
+	}
+
+	// Give GitHub time to finish moving labels and project items before we touch the new issues.
+	console.log( 'Waiting for GitHub to process transfers' );
+	await new Promise( ( resolve ) => setTimeout( resolve, 25000 ) );
+
+	console.log( 'Running post-transfer tasks' );
+	const failures = [];
+	for ( const issue of issues.filter( ( { newId } ) => newId ) ) {
+		// One issue failing must not leave the remaining transferred issues unprocessed.
+		try {
+			const missingProjects = await restoreProjectFields(
+				graphql,
+				issue
+			);
+			if ( missingProjects.length > 0 ) {
+				failures.push(
+					`${ issue.title }: not in project(s) ${ missingProjects.join( ', ' ) }`
+				);
+			}
+
+			if ( labelIds.length > 0 ) {
+				await graphql(
+					`
+						mutation ($input: AddLabelsToLabelableInput!) {
+							addLabelsToLabelable(input: $input) {
+								clientMutationId
+							}
+						}
+					`,
+					{ input: { labelableId: issue.newId, labelIds } }
+				);
+			}
+		} catch ( error ) {
+			failures.push( `${ issue.title }: ${ error.message }` );
+		}
+	}
+
+	if ( failures.length > 0 ) {
+		console.log(
+			'Post-transfer tasks failed for:\n' + failures.join( '\n' )
+		);
+	}
+	console.log(
+		`Successfully transferred ${ transferred }/${ issueCount } issues.`
+	);
+}
