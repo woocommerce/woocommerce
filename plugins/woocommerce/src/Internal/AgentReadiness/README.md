@@ -137,6 +137,7 @@ The scan walks published simple and variable products shown in the shop catalog 
 While the feature is enabled, `AbilitiesLoader` registers these abilities in the WordPress Abilities API with the `Ability` class, which converts their input to the schema types. Their definition classes in this directory read the arguments from `ReadinessAbilities::registration_args()`. They show in REST and to MCP clients, for users with `manage_woocommerce`:
 
 - `woocommerce/get-agent-readiness` and `GET wc/v3/agent-readiness` both return `{ report, scan_pending, scan_stalled }` with `store_checks` read now (`AgentReadiness::get_store_checks()`): settings changed since the scan show their current state, and store output checks come from the stored report.
+- `woocommerce/run-agent-readiness-check` with `product_id` checks that product now (`check_product()`) and returns its failing checks with label and fix, and its status per channel. Without one it queues the background scan, like `POST wc/v3/agent-readiness/scan`, and returns `scan_pending` and the current report's `generated_at`, so the agent knows when to read the report again.
 
 ## Agentic commerce settings page
 
