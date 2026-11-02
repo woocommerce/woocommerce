@@ -142,8 +142,9 @@ trait OrderAbilityTrait {
 				'total'                => array( 'type' => 'string' ),
 				'customer_id'          => array( 'type' => 'integer' ),
 				'billing_email'        => array(
-					'type'   => 'string',
-					'format' => 'email',
+					'type'        => 'string',
+					'format'      => 'email',
+					'description' => __( 'Billing email. Omitted when no billing email is set.', 'woocommerce' ),
 				),
 				'payment_method'       => array( 'type' => 'string' ),
 				'payment_method_title' => array( 'type' => 'string' ),
@@ -292,7 +293,6 @@ trait OrderAbilityTrait {
 			),
 			'total'                => $order->get_total(),
 			'customer_id'          => $order->get_customer_id(),
-			'billing_email'        => '' === $billing_email ? null : $billing_email,
 			'payment_method'       => $order->get_payment_method(),
 			'payment_method_title' => $order->get_payment_method_title(),
 			'date_created'         => self::format_date_for_response( $order->get_date_created(), false ),
@@ -325,10 +325,8 @@ trait OrderAbilityTrait {
 			}
 		}
 
-		foreach ( array( 'billing_email', 'date_created', 'date_created_gmt', 'date_modified', 'date_modified_gmt' ) as $field ) {
-			if ( ! isset( $data[ $field ] ) ) {
-				unset( $data[ $field ] );
-			}
+		if ( '' !== $billing_email ) {
+			$data['billing_email'] = $billing_email;
 		}
 
 		return ExtensibleAbilities::add_fields_to_object( $data, 'order', $order );

@@ -2132,28 +2132,97 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return saved product values and dates after a write.
+	 * @testWith ["product-create"]
+	 *           ["product-update"]
+	 *
+	 * @param string $ability_name Product write ability.
+	 */
+	public function test_product_write_returns_saved_state( string $ability_name ): void {
+		$input = array( 'name' => 'Saved name' );
+		if ( 'product-update' === $ability_name ) {
+			$input['id'] = \WC_Helper_Product::create_simple_product()->get_id();
+		}
+		$change_in_memory = static function ( $product ) {
+			$product->set_name( 'Unsaved name' );
+		};
+		add_action( 'woocommerce_after_product_object_save', $change_in_memory );
+		try {
+			$result = wp_get_ability( 'woocommerce/' . $ability_name )->execute( $input );
+		} finally {
+			remove_action( 'woocommerce_after_product_object_save', $change_in_memory );
+		}
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'Saved name', $result['product']['name'] );
+		foreach ( array( 'date_created', 'date_created_gmt', 'date_modified', 'date_modified_gmt' ) as $field ) {
+			$this->assertNotEmpty( $result['product'][ $field ] ?? null, $field );
+		}
+	}
+
+	/**
+	 * @testdox Should return saved order values after a status change or note.
+	 * @testWith ["order-update-status"]
+	 *           ["order-add-note"]
+	 *
+	 * @param string $ability_name Order write ability.
+	 */
+	public function test_order_write_returns_saved_state( string $ability_name ): void {
+		$order = wc_create_order( array( 'status' => 'pending' ) );
+		$order->set_payment_method( 'bacs' );
+		$order->save();
+		$change_in_memory = static function ( $value, $subject ) {
+			$subject->set_payment_method( 'unsaved' );
+			return $value;
+		};
+		$hook             = 'order-update-status' === $ability_name ? 'woocommerce_valid_order_statuses_for_payment' : 'woocommerce_order_note_added';
+		add_filter( $hook, $change_in_memory, PHP_INT_MAX, 2 );
+		$input = array( 'id' => $order->get_id() );
+		if ( 'order-update-status' === $ability_name ) {
+			$input['status'] = 'on-hold';
+		} else {
+			$input['note'] = 'Test note';
+		}
+		try {
+			$result = wp_get_ability( 'woocommerce/' . $ability_name )->execute( $input );
+		} finally {
+			remove_filter( $hook, $change_in_memory, PHP_INT_MAX );
+		}
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'bacs', $result['order']['payment_method'] );
+	}
+
+	/**
 	 * @testdox Should omit absent product values while keeping zero and false.
 	 */
 	public function test_product_output_omits_null_values(): void {
-		$product = new \WC_Product_Simple();
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_sale_price( '' );
+		$product->set_manage_stock( true );
 		$product->set_stock_quantity( 0 );
-		$result = wp_get_ability( 'woocommerce/product-create' )->prepare_response( $product )['product'];
+		$product->save();
+		$result = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'id' => $product->get_id() ) )['products'][0];
 
-		foreach ( array( 'date_created', 'date_created_gmt', 'date_modified', 'date_modified_gmt', 'external_url', 'button_text' ) as $field ) {
+		foreach ( array( 'external_url', 'button_text' ) as $field ) {
 			$this->assertArrayNotHasKey( $field, $result );
 		}
 		$this->assertSame( 0, $result['stock_quantity'] );
 		$this->assertFalse( $result['virtual'] );
 		$this->assertSame( '', $result['sale_price'] );
 
+		$product->set_manage_stock( false );
 		$product->set_stock_quantity( '' );
-		$this->assertArrayNotHasKey( 'stock_quantity', wp_get_ability( 'woocommerce/product-create' )->prepare_response( $product )['product'] );
+		$product->save();
+		$this->assertArrayNotHasKey( 'stock_quantity', wp_get_ability( 'woocommerce/products-query' )->execute( array( 'id' => $product->get_id() ) )['products'][0] );
 	}
 
 	/**
 	 * @testdox Should reject unexpected null output instead of hiding the invalid field.
 	 * @testWith ["product", "woocommerce_product_get_name", "name"]
 	 *           ["order", "woocommerce_order_get_payment_method", "payment_method"]
+	 *           ["product", "woocommerce_product_get_date_created", "date_created"]
+	 *           ["product", "woocommerce_product_get_date_modified", "date_modified"]
 	 *
 	 * @param string $resource_name Resource to query.
 	 * @param string $hook     Getter filter to return null.
@@ -2175,9 +2244,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should omit absent order dates while keeping other output fields.
+	 * @testdox Should reject null dates on a saved order.
 	 */
-	public function test_order_output_omits_absent_dates(): void {
+	public function test_order_output_rejects_null_dates(): void {
 		$order = \WC_Helper_Order::create_order();
 		add_filter( 'woocommerce_order_get_date_created', '__return_null' );
 		add_filter( 'woocommerce_order_get_date_modified', '__return_null' );
@@ -2189,11 +2258,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			remove_filter( 'woocommerce_order_get_date_modified', '__return_null' );
 		}
 
-		$this->assertNotWPError( $result );
-		foreach ( array( 'date_created', 'date_created_gmt', 'date_modified', 'date_modified_gmt' ) as $field ) {
-			$this->assertArrayNotHasKey( $field, $result['orders'][0] );
-		}
-		$this->assertSame( $order->get_id(), $result['orders'][0]['id'] );
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_output', $result->get_error_code() );
+		$this->assertStringContainsString( 'date_created', $result->get_error_message() );
 	}
 
 	/**

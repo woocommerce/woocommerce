@@ -754,7 +754,6 @@ trait ProductAbilityTrait {
 			'id'                => $product->get_id(),
 			'name'              => $product->get_name(),
 			'slug'              => $product->get_slug(),
-			'permalink'         => false === $permalink ? null : $permalink,
 			'type'              => $product->get_type(),
 			'status'            => $product->get_status(),
 			'sku'               => $product->get_sku(),
@@ -767,12 +766,9 @@ trait ProductAbilityTrait {
 			'regular_price'     => $product->get_regular_price(),
 			'sale_price'        => $product->get_sale_price(),
 			'stock_status'      => $product->get_stock_status(),
-			'stock_quantity'    => null === $stock_quantity ? null : wc_stock_amount( $stock_quantity ),
 			'manage_stock'      => (bool) $product->get_manage_stock(),
 			'virtual'           => (bool) $product->get_virtual(),
 			'downloadable'      => (bool) $product->get_downloadable(),
-			'external_url'      => $product instanceof \WC_Product_External ? $product->get_product_url() : null,
-			'button_text'       => $product instanceof \WC_Product_External ? $product->get_button_text() : null,
 			'grouped_products'  => $product instanceof \WC_Product_Grouped ? array_map( 'absint', $product->get_children( 'edit' ) ) : array(),
 			'date_created'      => self::format_date_for_response( $product->get_date_created(), false ),
 			'date_created_gmt'  => self::format_date_for_response( $product->get_date_created() ),
@@ -780,10 +776,15 @@ trait ProductAbilityTrait {
 			'date_modified_gmt' => self::format_date_for_response( $product->get_date_modified() ),
 		);
 
-		foreach ( array( 'permalink', 'stock_quantity', 'external_url', 'button_text', 'date_created', 'date_created_gmt', 'date_modified', 'date_modified_gmt' ) as $field ) {
-			if ( ! isset( $data[ $field ] ) ) {
-				unset( $data[ $field ] );
-			}
+		if ( false !== $permalink ) {
+			$data['permalink'] = $permalink;
+		}
+		if ( null !== $stock_quantity ) {
+			$data['stock_quantity'] = wc_stock_amount( $stock_quantity );
+		}
+		if ( $product instanceof \WC_Product_External ) {
+			$data['external_url'] = $product->get_product_url();
+			$data['button_text']  = $product->get_button_text();
 		}
 
 		return ExtensibleAbilities::add_fields_to_object( $data, 'product', $product );

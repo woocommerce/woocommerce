@@ -103,9 +103,10 @@ class OrderAddNote extends AbstractDomainAbility implements AbilityDefinition {
 			);
 		}
 
+		$order = wc_get_order( $order->get_id() );
 		return array(
 			'note_id' => (int) $note_id,
-			'order'   => self::format_order_for_response( $order, false ),
+			'order'   => $order instanceof \WC_Order ? self::format_order_for_response( $order, false ) : null,
 		);
 	}
 

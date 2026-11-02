@@ -209,8 +209,9 @@ class OrderUpdateStatus extends ActionableAbility {
 	 * @return array
 	 */
 	public function prepare_response( $subject ): array {
+		$order = wc_get_order( $subject->get_id() );
 		return array(
-			'order' => self::format_order_for_response( $subject, false ),
+			'order' => $order instanceof \WC_Order ? self::format_order_for_response( $order, false ) : null,
 		);
 	}
 
