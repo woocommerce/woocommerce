@@ -390,3 +390,5 @@ class WC_Unit_Tests_Bootstrap {
 }
 
 WC_Unit_Tests_Bootstrap::instance();
+
+require_once __DIR__ . '/upload-probe.php';
