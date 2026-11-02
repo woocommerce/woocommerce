@@ -86,6 +86,7 @@ catalogs:
         '@wordpress/scripts': 35.0.0
         '@wordpress/stylelint-config': ^23.14.0
         copy-webpack-plugin: 14.0.x
+        markdownlint-cli: 0.50.0
         postcss: ^8.5.26
         prettier: npm:wp-prettier@3.9.6
         simple-git: ^4.0.2
@@ -120,6 +121,8 @@ overrides:
     'express@4.22.2>qs': 6.16.2
     '@wordpress/data-controls>@wordpress/api-fetch': 'catalog:wp-min'
     '@wordpress/private-apis': 'catalog:wp-min'
+    '@wordpress/scripts>markdownlint-cli': 'catalog:tooling'
+    'markdownlint>re2js': 2.8.7
     'minimatch@<3.1.4': 3.1.5
     # @automattic/components 2.x lists react-router-dom but never imports it; drop once it is on 5.x.
     '@automattic/components>react-router-dom': ~7.18.5
