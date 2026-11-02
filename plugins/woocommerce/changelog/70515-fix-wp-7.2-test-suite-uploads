@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Fix the PHPUnit suite on WordPress 7.2's isolated test upload directory; test-only, no production change.
+
+
