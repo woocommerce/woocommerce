@@ -168,13 +168,13 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	public function test_downloads_remaining_count(): void {
 		self::remove_download_handlers();
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Ok for unit tests.
-		file_put_contents( WP_CONTENT_DIR . '/uploads/woocommerce_uploads/supersheet-123.ods', str_pad( '', 100 ) );
+		file_put_contents( trailingslashit( wp_upload_dir()['basedir'] ) . 'woocommerce_uploads/supersheet-123.ods', str_pad( '', 100 ) );
 
 		list( $product, $order ) = $this->build_downloadable_product_and_order_one(
 			array(
 				array(
 					'name' => 'Supersheet 123',
-					'file' => content_url( 'uploads/woocommerce_uploads/supersheet-123.ods' ),
+					'file' => trailingslashit( wp_upload_dir()['baseurl'] ) . 'woocommerce_uploads/supersheet-123.ods',
 				),
 			)
 		);
@@ -948,7 +948,7 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 				array(
 					array(
 						'name' => 'Protected download',
-						'file' => content_url( 'uploads/woocommerce_uploads/protected-download.pdf' ),
+						'file' => trailingslashit( wp_upload_dir()['baseurl'] ) . 'woocommerce_uploads/protected-download.pdf',
 					),
 				)
 			);
@@ -993,7 +993,7 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 			array(
 				array(
 					'name' => 'Protected download',
-					'file' => content_url( 'uploads/woocommerce_uploads/protected-download.pdf' ),
+					'file' => trailingslashit( wp_upload_dir()['baseurl'] ) . 'woocommerce_uploads/protected-download.pdf',
 				),
 			)
 		);
@@ -1018,7 +1018,7 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 			array(
 				array(
 					'name' => 'Protected download',
-					'file' => content_url( 'uploads/woocommerce_uploads/protected-download.pdf' ),
+					'file' => trailingslashit( wp_upload_dir()['baseurl'] ) . 'woocommerce_uploads/protected-download.pdf',
 				),
 			)
 		);
@@ -1045,7 +1045,7 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 				array(
 					array(
 						'name' => 'Protected download',
-						'file' => content_url( 'uploads/woocommerce_uploads/protected-download.pdf' ),
+						'file' => trailingslashit( wp_upload_dir()['baseurl'] ) . 'woocommerce_uploads/protected-download.pdf',
 					),
 				)
 			);
