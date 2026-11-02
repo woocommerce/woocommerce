@@ -75,7 +75,7 @@ class ProductUpdate extends ActionableAbility {
 	 * @param array $input Ability input.
 	 * @return \WC_Product|\WP_Error
 	 */
-	public function load( array $input ) {
+	protected function load( array $input ) {
 		$product = self::get_product_from_input( $input );
 
 		if ( is_wp_error( $product ) ) {
@@ -141,7 +141,7 @@ class ProductUpdate extends ActionableAbility {
 	 * @param array       $input   Ability input.
 	 * @return null|\WP_Error
 	 */
-	public function change( $subject, array $input ) {
+	protected function change( $subject, array $input ) {
 		$product_config = isset( $input['product_type_alias'] )
 			? self::get_product_config_for_alias( $input['product_type_alias'] )
 			: self::get_product_config_for_product( $subject );
@@ -167,7 +167,7 @@ class ProductUpdate extends ActionableAbility {
 	 * @param \WC_Product $subject Changed product.
 	 * @return null|\WP_Error
 	 */
-	public function save( $subject ) {
+	protected function save( $subject ) {
 		return self::save_product( $subject, 'woocommerce_product_update_failed' );
 	}
 
@@ -177,7 +177,7 @@ class ProductUpdate extends ActionableAbility {
 	 * @param \WC_Product $subject Saved product.
 	 * @return array
 	 */
-	public function prepare_response( $subject ): array {
+	protected function prepare_response( $subject ): array {
 		return array(
 			'product' => self::format_product_for_response( $subject ),
 		);

@@ -210,6 +210,29 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not save the notification while sending the stock email, leaving the unsubscribe key to the caller's save.
+	 */
+	public function test_send_stock_notification_email_leaves_saving_the_unsubscribe_key_to_the_caller() {
+		$notification = $this->build_notification();
+		$updates      = 0;
+		$count        = function () use ( &$updates ) {
+			++$updates;
+		};
+		add_action( 'woocommerce_update_stock_notification', $count );
+
+		$this->sut->send_stock_notification_email( $notification );
+
+		remove_action( 'woocommerce_update_stock_notification', $count );
+		$this->assertSame( 0, $updates );
+		$this->assertCount( 1, $this->sent_messages );
+		$this->assertSame( 1, preg_match( '/email_link_action_key=([A-Za-z0-9]+)/', $this->sent_messages[0], $matches ) );
+
+		$notification->save();
+		$notification = new Notification( $notification->get_id() );
+		$this->assertTrue( $notification->check_unsubscribe_key( $matches[1] ) );
+	}
+
+	/**
 	 * @testdox Should build the $email_method action link on home_url() when WordPress core lives in a subdirectory.
 	 * @dataProvider provider_email_send_methods
 	 *

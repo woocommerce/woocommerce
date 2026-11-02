@@ -59041,18 +59041,6 @@ parameters:
 			path: src/Internal/DataStores/StockNotifications/StockNotificationsDataStore.php
 
 		-
-			message: '#^Parameter \#1 \$notification of method Automattic\\WooCommerce\\Internal\\DataStores\\StockNotifications\\StockNotificationsDataStore\:\:after_meta_change\(\) expects Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification, Automattic\\WooCommerce\\Internal\\DataStores\\WC_Data given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/DataStores/StockNotifications/StockNotificationsDataStore.php
-
-		-
-			message: '#^Parameter \#1 \$notification of method Automattic\\WooCommerce\\Internal\\DataStores\\StockNotifications\\StockNotificationsDataStore\:\:after_meta_change\(\) expects Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification, WC_Data given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Internal/DataStores/StockNotifications/StockNotificationsDataStore.php
-
-		-
 			message: '#^Parameter \#1 \$notification of method Automattic\\WooCommerce\\Internal\\DataStores\\StockNotifications\\StockNotificationsDataStore\:\:filter_raw_meta_data\(\) expects Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification, WC_Data given\.$#'
 			identifier: argument.type
 			count: 1
@@ -64118,12 +64106,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method get_product_permalink\(\) on bool\|object\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Emails/CustomerStockNotificationEmail.php
-
-		-
-			message: '#^Cannot call method get_unsubscribe_key\(\) on bool\|object\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: src/Internal/StockNotifications/Emails/CustomerStockNotificationEmail.php
