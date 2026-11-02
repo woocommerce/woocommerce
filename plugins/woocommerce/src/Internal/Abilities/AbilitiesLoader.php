@@ -14,10 +14,12 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderNotesQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\PaymentGatewaysQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -43,7 +45,9 @@ class AbilitiesLoader {
 		OrderAddNote::class,
 		OrderNotesQuery::class,
 		OrderUpdateStatus::class,
+		PaymentGatewaysQuery::class,
 		ProductsQuery::class,
+		ProductTermsQuery::class,
 		ProductCreate::class,
 		ProductDelete::class,
 		ProductUpdate::class,
@@ -77,7 +81,7 @@ class AbilitiesLoader {
 	 *
 	 * @since 10.9.0
 	 */
-	final public static function init(): void {
+	final public function init(): void {
 		if ( self::$initialized ) {
 			return;
 		}
@@ -100,7 +104,7 @@ class AbilitiesLoader {
 	 * @since 11.3.0
 	 */
 	public static function register_core_resources(): void {
-		foreach ( array( 'product', 'order', 'order_item' ) as $resource_name ) {
+		foreach ( array( 'product', 'order', 'order_item', 'product_term' ) as $resource_name ) {
 			ExtensibleAbilities::register_resource( $resource_name );
 		}
 	}
@@ -167,10 +171,6 @@ class AbilitiesLoader {
 	 * @since 10.9.0
 	 */
 	public static function register_abilities(): void {
-		if ( ! function_exists( 'wp_register_ability' ) ) {
-			return;
-		}
-
 		foreach ( self::get_ability_definition_classes() as $class_name ) {
 			if ( ! is_string( $class_name ) || ! class_exists( $class_name ) ) {
 				continue;
@@ -195,8 +195,8 @@ class AbilitiesLoader {
 				continue;
 			}
 
-			if ( function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_name ) ) {
-				$existing_ability = function_exists( 'wp_get_ability' ) ? wp_get_ability( $ability_name ) : null;
+			if ( wp_has_ability( $ability_name ) ) {
+				$existing_ability = wp_get_ability( $ability_name );
 
 				if (
 					$is_core_ability
@@ -206,7 +206,7 @@ class AbilitiesLoader {
 					continue;
 				}
 
-				if ( ! $is_core_ability || ! function_exists( 'wp_unregister_ability' ) ) {
+				if ( ! $is_core_ability ) {
 					continue;
 				}
 
@@ -240,9 +240,6 @@ class AbilitiesLoader {
 	 */
 	public static function is_registered_ability( string $ability_name ): bool {
 		if ( ! isset( self::$registered_abilities[ $ability_name ] ) ) {
-			return false;
-		}
-		if ( ! function_exists( 'wp_has_ability' ) ) {
 			return false;
 		}
 		if ( ! wp_has_ability( $ability_name ) ) {
@@ -309,7 +306,7 @@ class AbilitiesLoader {
 		 * Abilities API init hook. Returning a subset will not unregister core abilities;
 		 * core classes are always retained.
 		 * Since 11.4.0, abilities registered through this loader, including extension abilities,
-		 * share WooCommerce's usage tracking when the store allows it. No tracking metadata is required.
+		 * share WooCommerce's usage tracking when the store allows it.
 		 *
 		 * @since 10.9.0
 		 *
