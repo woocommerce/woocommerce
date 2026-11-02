@@ -15,8 +15,8 @@ defined( 'ABSPATH' ) || exit;
  * An ability that changes a primary object, and optionally secondary objects,
  * and saves them in one call. Register it with a subclass as the
  * `ability_class`. The execute callback loads the primary object, checks the
- * `extensions` input against the field schemas, changes the objects in memory,
- * writes the fields with their `update_callback`, runs the validators that
+ * `extensions` input against the field input schemas, changes the objects in memory,
+ * writes the fields with their `set_callback`, runs the validators that
  * ExtensibleAbilities::register_validator() adds, and then saves. A rejection
  * from any step saves nothing.
  *
@@ -366,9 +366,9 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
-	 * Check `extensions.<namespace>.<field>` input values against the schema of
-	 * each field, and cast them. No callback runs here. A null value is kept as
-	 * is, to delete the value.
+	 * Check `extensions.<namespace>.<field>` input values against the input
+	 * schema of each field, and cast them. No callback runs here. A null value
+	 * passes only where the input schema declares null.
 	 *
 	 * @param array  $values        Values keyed by namespace, then field.
 	 * @param string $resource_name Resource of the object that gets the values.
@@ -380,7 +380,7 @@ abstract class ActionableAbility extends \WP_Ability {
 		foreach ( $values as $namespace => $fields ) {
 			foreach ( (array) $fields as $field => $value ) {
 				$args = $registered[ $namespace ][ $field ] ?? array();
-				if ( ! isset( $args['update_callback'] ) ) {
+				if ( ! isset( $args['set_callback'] ) ) {
 					return new \WP_Error(
 						'woocommerce_ability_field_not_writable',
 						/* translators: 1: Extension namespace. 2: Field name. */
@@ -388,25 +388,23 @@ abstract class ActionableAbility extends \WP_Ability {
 						array( 'status' => 400 )
 					);
 				}
-				if ( null !== $value ) {
-					$param = 'extensions.' . $namespace . '.' . $field;
-					$valid = rest_validate_value_from_schema( $value, $args['schema'], $param );
-					if ( is_wp_error( $valid ) ) {
-						return self::with_data( $valid, array( 'field' => $param ) );
-					}
-					$value = rest_sanitize_value_from_schema( $value, $args['schema'], $param );
-					if ( is_wp_error( $value ) ) {
-						return self::with_data( $value, array( 'field' => $param ) );
-					}
+				$param = 'extensions.' . $namespace . '.' . $field;
+				$valid = rest_validate_value_from_schema( $value, $args['input_schema'], $param );
+				if ( is_wp_error( $valid ) ) {
+					return self::with_data( $valid, array( 'field' => $param ) );
 				}
-				$updates[ 'extensions.' . $namespace . '.' . $field ] = array( $args, $value );
+				$value = rest_sanitize_value_from_schema( $value, $args['input_schema'], $param );
+				if ( is_wp_error( $value ) ) {
+					return self::with_data( $value, array( 'field' => $param ) );
+				}
+				$updates[ $param ] = array( $args, $value );
 			}
 		}
 		return $updates;
 	}
 
 	/**
-	 * Write the checked values to the object in memory with the update_callback
+	 * Write the checked values to the object in memory with the set_callback
 	 * of each field, also after one rejects its value. Each rejection goes into
 	 * the given errors, as add_refusal() describes.
 	 *
@@ -429,7 +427,7 @@ abstract class ActionableAbility extends \WP_Ability {
 					array( 'status' => 400 )
 				);
 			} else {
-				$rejected = self::run_callback( $args['update_callback'], array( $subject, $value ), array( 'field' => $param ) );
+				$rejected = self::run_callback( $args['set_callback'], array( $subject, $value ), array( 'field' => $param ) );
 			}
 			if ( null !== $rejected ) {
 				self::add_refusal( $rejected, explode( '.', $param )[1], $refused );
@@ -486,7 +484,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * logged and becomes a 500 with a fixed message, so its text never reaches
 	 * the client.
 	 *
-	 * @param callable             $callback Field update_callback, validator or sync.
+	 * @param callable             $callback Field set_callback, validator or sync.
 	 * @param array                $args     Callback arguments.
 	 * @param array<string, mixed> $data     Data that names the field or the namespace.
 	 * @return \WP_Error|null

@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
  * object of that resource returns the field values under
  * `extensions.<namespace>.<field>`, and lists the fields in its output schema.
  * An ActionableAbility writes the same `extensions` input to the fields that
- * have an `update_callback`, runs the validators of the resource, and saves
+ * have a `set_callback`, runs the validators of the resource, and saves
  * the object one time.
  * An extension also registers a query filter, which the list ability of the
  * resource accepts under `filters.extensions.<namespace>.<filter>`.
@@ -122,6 +122,8 @@ class ExtensibleAbilities {
 	 *
 	 * Call it inside the `woocommerce_extensible_abilities_init` action. A call after that action is refused.
 	 * The resource must be registered with `register_resource()` in the earlier `woocommerce_extensible_abilities_resources_init` action.
+	 * A field declares `get_callback` and `output_schema`, `set_callback` and `input_schema`, or both pairs. The
+	 * first pair makes it readable and the second makes it writable. An incomplete pair is refused.
 	 *
 	 * @since 11.3.0
 	 *
@@ -131,35 +133,38 @@ class ExtensibleAbilities {
 	 *     @type string   $resource     Resource that an ability formats, for example `product`, `order` or `order_item`.
 	 *     @type string   $namespace    Slug of the extension that owns the field, such as `subscriptions`.
 	 *     @type string   $field        Field name inside the namespace, such as `trial_length`.
-	 *     @type array    $schema       JSON schema of the value. It needs a `type`. Its `title` is the label clients show.
-	 *                                  It cannot set `required`, because a value that fails its schema is
-	 *                                  left out. For a field that is always present, allow null and return null.
-	 *                                  For a field that applies only to some objects, set `object_types`, or do not
-	 *                                  allow null and return null for the other objects. The field is then left
-	 *                                  out of them, with no error.
+	 *     @type array    $output_schema Optional. JSON schema of the value that `get_callback` returns. Required
+	 *                                  with `get_callback`. It needs a `type`. Core publishes it as declared. Its
+	 *                                  `title` is the label clients show.
 	 *     @type string[] $object_types Optional. The object types the field applies to, as `get_type()` of the
 	 *                                  object returns them, such as `simple` and `subscription` for a product or
 	 *                                  `line_item` for an order item. The object must have a `get_type()` method.
 	 *                                  The abilities leave the field out of the other objects and refuse a write
 	 *                                  to them. Omit it for every type.
-	 *     @type callable $get_callback Receives the object and returns the value. A value that the schema
-	 *                                  does not allow is left out, so return null when the object has no
-	 *                                  value. A schema that allows null, such as `array( 'integer', 'null' )`,
-	 *                                  keeps it. It reads the object it is given, not the database,
-	 *                                  because an ability can format an object before it is saved.
-	 *     @type callable $update_callback Optional. Receives the object and the value, and changes the object
-	 *                                     in memory. It returns a WP_Error to reject the value, and then
-	 *                                     nothing is saved. A field without it cannot be written. Rules:
-	 *                                     1. It only sets values in memory. It does not save, send email
-	 *                                        or make HTTP requests.
-	 *                                     2. It receives the value already cast to the field schema.
-	 *                                     3. A null value deletes the value of the field.
-	 *                                     4. It writes one object: the one it receives. Data that a
-	 *                                        write must keep on another object, such as a price range
-	 *                                        that a variable parent derives from its variations, is
-	 *                                        written by a sync that register_sync() adds. A sync runs
-	 *                                        once per call after every object is saved and inside the
-	 *                                        transaction of the ability.
+	 *     @type callable $get_callback Optional. Receives the object and returns the value. A field without it
+	 *                                  is not in the output. Required with `output_schema`. Return null when the
+	 *                                  object has no value, and the field is left out with no error. Any other
+	 *                                  value that `output_schema` does not allow is left out and logged. It reads
+	 *                                  the object it is given, not the database, because an ability can format
+	 *                                  an object before it is saved.
+	 *     @type array    $input_schema Optional. JSON schema of the value that `set_callback` receives. It needs
+	 *                                  a `type`. Core publishes it as declared. A value can be null only where it
+	 *                                  declares null. Required with `set_callback`.
+	 *     @type callable $set_callback Optional. Receives the object and the value, and changes the object
+	 *                                  in memory, when an ability creates or updates the object. It returns a
+	 *                                  WP_Error to reject the value, and then nothing is saved. A field without
+	 *                                  it cannot be written. Required with `input_schema`. Rules:
+	 *                                  1. It only sets values in memory. It does not save, send email
+	 *                                     or make HTTP requests.
+	 *                                  2. It receives the value already cast to `input_schema`.
+	 *                                  3. A null value, where `input_schema` declares null, deletes the value
+	 *                                     of the field.
+	 *                                  4. It writes one object: the one it receives. Data that a
+	 *                                     write must keep on another object, such as a price range
+	 *                                     that a variable parent derives from its variations, is
+	 *                                     written by a sync that register_sync() adds. A sync runs
+	 *                                     once per call after every object is saved and inside the
+	 *                                     transaction of the ability.
 	 * }
 	 */
 	public static function register_field( array $args ): void {
@@ -195,21 +200,31 @@ class ExtensibleAbilities {
 			);
 			return;
 		}
-		if ( ! is_array( $args['schema'] ?? null ) || ! isset( $args['schema']['type'] ) ) {
-			wc_doing_it_wrong( __METHOD__, 'The "schema" argument must be an array with a "type".', '11.3.0' );
+		$readable = isset( $args['get_callback'] ) || isset( $args['output_schema'] );
+		$writable = isset( $args['set_callback'] ) || isset( $args['input_schema'] );
+		if ( ! $readable && ! $writable ) {
+			wc_doing_it_wrong( __METHOD__, 'A field needs "get_callback" and "output_schema", "set_callback" and "input_schema", or both pairs.', '11.4.0' );
 			return;
 		}
-		if ( true === ( $args['schema']['required'] ?? null ) ) {
-			wc_doing_it_wrong( __METHOD__, 'The "schema" argument cannot set "required". A value that fails its schema is left out, so allow null for a field that is always present.', '11.3.0' );
-			return;
+		if ( $readable ) {
+			if ( ! is_callable( $args['get_callback'] ?? null ) ) {
+				wc_doing_it_wrong( __METHOD__, 'The "get_callback" argument must be callable, and a field with an "output_schema" needs it.', '11.3.0' );
+				return;
+			}
+			if ( ! is_array( $args['output_schema'] ?? null ) || ! isset( $args['output_schema']['type'] ) ) {
+				wc_doing_it_wrong( __METHOD__, 'The "output_schema" argument must be an array with a "type".', '11.4.0' );
+				return;
+			}
 		}
-		if ( ! is_callable( $args['get_callback'] ?? null ) ) {
-			wc_doing_it_wrong( __METHOD__, 'The "get_callback" argument must be callable.', '11.3.0' );
-			return;
-		}
-		if ( isset( $args['update_callback'] ) && ! is_callable( $args['update_callback'] ) ) {
-			wc_doing_it_wrong( __METHOD__, 'The "update_callback" argument must be callable.', '11.3.0' );
-			return;
+		if ( $writable ) {
+			if ( ! is_callable( $args['set_callback'] ?? null ) ) {
+				wc_doing_it_wrong( __METHOD__, 'The "set_callback" argument must be callable, and a field with an "input_schema" needs it.', '11.4.0' );
+				return;
+			}
+			if ( ! is_array( $args['input_schema'] ?? null ) || ! isset( $args['input_schema']['type'] ) ) {
+				wc_doing_it_wrong( __METHOD__, 'The "input_schema" argument must be an array with a "type".', '11.4.0' );
+				return;
+			}
 		}
 		if ( isset( $args['object_types'] ) && ( ! is_array( $args['object_types'] ) || empty( $args['object_types'] ) || array_filter( $args['object_types'], static fn( $type ) => ! is_string( $type ) ) ) ) {
 			wc_doing_it_wrong( __METHOD__, 'The "object_types" argument must be a list of object types.', '11.4.0' );
@@ -481,7 +496,7 @@ class ExtensibleAbilities {
 	 * Call it inside the `woocommerce_extensible_abilities_init` action. Validators
 	 * run only when the `extensible_abilities` feature is on.
 	 *
-	 * Use a field `update_callback` to refuse a bad value of one field. It runs
+	 * Use a field `set_callback` to refuse a bad value of one field. It runs
 	 * only when the input sends that field. Use a validator to refuse a change as
 	 * a whole. It runs on every change of the resource, also when the input sends
 	 * no extension fields. For example, a validator refuses a product change that
@@ -615,8 +630,8 @@ class ExtensibleAbilities {
 	/**
 	 * Add the field values of an object to its formatted output, under
 	 * `extensions.<namespace>.<field>`. A value is cast to its schema type, so
-	 * `'12'` becomes `12` for an integer field. A field that throws or returns a
-	 * value that its schema does not allow is left out. A namespace with no
+	 * `'12'` becomes `12` for an integer field. A field that throws, returns null
+	 * or returns a value that its schema does not allow is left out. A namespace with no
 	 * values is left out, and `extensions` is left out when no namespace has
 	 * values or the feature is off.
 	 *
@@ -635,7 +650,7 @@ class ExtensibleAbilities {
 		$extensions = array();
 		foreach ( self::$fields[ $resource_name ] as $namespace => $fields ) {
 			foreach ( $fields as $field => $args ) {
-				if ( ! self::field_applies_to( $args, $subject ) ) {
+				if ( ! isset( $args['get_callback'] ) || ! self::field_applies_to( $args, $subject ) ) {
 					continue;
 				}
 				try {
@@ -647,10 +662,10 @@ class ExtensibleAbilities {
 					);
 					continue;
 				}
-				if ( ! self::matches_schema( $args, $value ) ) {
+				if ( null === $value || ! self::matches_schema( $args, $value ) ) {
 					continue;
 				}
-				$sanitized = rest_sanitize_value_from_schema( $value, $args['schema'], $field );
+				$sanitized = rest_sanitize_value_from_schema( $value, $args['output_schema'], $field );
 				if ( ! is_wp_error( $sanitized ) ) {
 					$extensions[ $namespace ][ $field ] = $sanitized;
 				}
@@ -691,7 +706,7 @@ class ExtensibleAbilities {
 	 * Add the `extensions` property to an object schema when the feature is on.
 	 * It lists each namespace with its fields. Call it after the
 	 * `woocommerce_extensible_abilities_init` action, when the ability builds its
-	 * schema. The schema stays unchanged when no field is registered for the resource.
+	 * schema. The schema stays unchanged when the resource has no readable field.
 	 *
 	 * @since 11.3.0
 	 *
@@ -701,7 +716,7 @@ class ExtensibleAbilities {
 	 * @return array<string, mixed>
 	 */
 	public static function add_fields_schema( array $schema, string $resource_name, ?callable $field_filter = null ): array {
-		if ( ! self::is_enabled() || empty( self::$fields[ $resource_name ] ) ) {
+		if ( ! self::is_enabled() ) {
 			return $schema;
 		}
 
@@ -711,7 +726,15 @@ class ExtensibleAbilities {
 			'additionalProperties' => false,
 		);
 		foreach ( self::$fields[ $resource_name ] ?? array() as $namespace => $fields ) {
-			$listed = null === $field_filter ? $fields : array_filter( $fields, $field_filter );
+			$listed = array_filter(
+				$fields,
+				static function ( array $args ): bool {
+					return isset( $args['get_callback'] );
+				}
+			);
+			if ( null !== $field_filter ) {
+				$listed = array_filter( $listed, $field_filter );
+			}
 			if ( empty( $listed ) ) {
 				continue;
 			}
@@ -719,12 +742,15 @@ class ExtensibleAbilities {
 				'type'                 => 'object',
 				'properties'           => array_map(
 					static function ( array $args ): array {
-						return $args['schema'];
+						return $args['output_schema'];
 					},
 					$listed
 				),
 				'additionalProperties' => false,
 			);
+		}
+		if ( empty( $extensions['properties'] ) ) {
+			return $schema;
 		}
 		$schema['properties']['extensions'] = $extensions;
 		return $schema;
@@ -732,9 +758,8 @@ class ExtensibleAbilities {
 
 	/**
 	 * The schema of the `extensions` input of a resource. It lists the fields
-	 * that have an update_callback, allows null for each one, because null
-	 * deletes the value, and says which object types a field with `object_types`
-	 * applies to. ActionableAbility adds it to the input schema of every
+	 * that have a set_callback, each with its input schema as declared, and says
+	 * which object types a field with `object_types` applies to. ActionableAbility adds it to the input schema of every
 	 * ability. An ability that writes other objects of the resource in the same
 	 * call, such as the variations of a product, adds it to their input too.
 	 *
@@ -747,14 +772,14 @@ class ExtensibleAbilities {
 	public static function get_input_schema( string $resource_name, ?callable $field_filter = null ): array {
 		$extensions = array(
 			'type'                 => 'object',
-			'description'          => __( 'Values to write to the fields that extensions add, keyed by extension namespace, then field. A null value deletes the value.', 'woocommerce' ),
+			'description'          => __( 'Values to write to the fields that extensions add, keyed by extension namespace, then field.', 'woocommerce' ),
 			'additionalProperties' => false,
 		);
 		foreach ( self::get_fields( $resource_name ) as $namespace => $fields ) {
 			$writable = array_filter(
 				null === $field_filter ? $fields : array_filter( $fields, $field_filter ),
 				static function ( array $args ): bool {
-					return isset( $args['update_callback'] );
+					return isset( $args['set_callback'] );
 				}
 			);
 			if ( empty( $writable ) ) {
@@ -764,13 +789,7 @@ class ExtensibleAbilities {
 				'type'                 => 'object',
 				'properties'           => array_map(
 					static function ( array $args ): array {
-						$field_schema = $args['schema'];
-						if ( isset( $field_schema['type'] ) ) {
-							$field_schema['type'] = array_values( array_unique( array_merge( (array) $field_schema['type'], array( 'null' ) ) ) );
-						}
-						if ( isset( $field_schema['enum'] ) && ! in_array( null, $field_schema['enum'], true ) ) {
-							$field_schema['enum'][] = null;
-						}
+						$field_schema = $args['input_schema'];
 						if ( ! empty( $args['object_types'] ) ) {
 							/* translators: %s: Comma-separated list of object types. */
 							$applies_to                  = sprintf( __( 'Applies to: %s.', 'woocommerce' ), implode( ', ', $args['object_types'] ) );
@@ -839,7 +858,7 @@ class ExtensibleAbilities {
 	}
 
 	/**
-	 * Whether a value matches its field schema. A value other than null that
+	 * Whether a value matches the output schema of its field. A value other than null that
 	 * does not match is logged and reported one time for each field.
 	 *
 	 * @param array<string, mixed> $args  Field arguments.
@@ -847,7 +866,7 @@ class ExtensibleAbilities {
 	 * @return bool
 	 */
 	private static function matches_schema( array $args, $value ): bool {
-		$valid = rest_validate_value_from_schema( $value, $args['schema'], $args['field'] );
+		$valid = rest_validate_value_from_schema( $value, $args['output_schema'], $args['field'] );
 		if ( true === $valid ) {
 			return true;
 		}
