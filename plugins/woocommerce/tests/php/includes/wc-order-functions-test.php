@@ -1138,4 +1138,66 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( array(), array_values( $coupon->get_used_by() ) );
 		$this->assertEquals( 0, $coupon->get_usage_count() );
 	}
+
+	/**
+	 * @testdox Download permissions are not granted, or regenerated, for lines refunded before the order was completed.
+	 */
+	public function test_wc_downloadable_product_permissions_skips_refunded_lines() {
+		wc_get_container()->get( Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register::class )->add_approved_directory( 'https://always.trusted' );
+		$products = array();
+		foreach ( array( 'qty-refunded', 'amount-refunded', 'kept' ) as $name ) {
+			$products[ $name ] = WC_Helper_Product::create_downloadable_product(
+				array(
+					array(
+						'name' => $name,
+						'file' => "https://always.trusted/$name.pdf",
+					),
+				)
+			);
+		}
+
+		$order = new WC_Order();
+		foreach ( $products as $product ) {
+			$order->add_product( $product );
+		}
+		$order->calculate_totals();
+		$order->set_status( OrderStatus::ON_HOLD );
+		$order->save();
+
+		$items = array_values( $order->get_items() );
+		wc_create_refund(
+			array(
+				'amount'     => $items[0]->get_total() + 1,
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					$items[0]->get_id() => array(
+						'qty'          => 1,
+						'refund_total' => $items[0]->get_total(),
+					),
+					$items[1]->get_id() => array(
+						'qty'          => 0,
+						'refund_total' => 1,
+					),
+				),
+			)
+		);
+
+		wc_get_order( $order->get_id() )->update_status( OrderStatus::COMPLETED );
+		$this->assertSame( array( $products['kept']->get_id() ), $this->get_download_permission_product_ids( $order ), 'Completing the order grants only the line that was not refunded.' );
+
+		WC_Data_Store::load( 'customer-download' )->delete_by_order_id( $order->get_id() );
+		wc_downloadable_product_permissions( $order->get_id(), true );
+		$this->assertSame( array( $products['kept']->get_id() ), $this->get_download_permission_product_ids( $order ), 'Regenerating the permissions grants only the line that was not refunded.' );
+	}
+
+	/**
+	 * Get the product IDs of an order's download permissions.
+	 *
+	 * @param WC_Order $order The order.
+	 * @return int[]
+	 */
+	private function get_download_permission_product_ids( WC_Order $order ): array {
+		$downloads = WC_Data_Store::load( 'customer-download' )->get_downloads( array( 'order_id' => $order->get_id() ) );
+		return array_map( fn( $download ) => (int) $download->get_product_id(), $downloads );
+	}
 }
