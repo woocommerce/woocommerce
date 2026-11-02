@@ -566,6 +566,37 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
+	 * Protocols and files the store declares to agents, as information: found or not found, never pass or fail.
+	 *
+	 * @param array $items Items from the report.
+	 */
+	private function render_declared( array $items ): void {
+		$items = array_filter( $items, 'is_array' );
+		if ( array() === $items ) {
+			return;
+		}
+		$found   = count( array_filter( $items, static fn( array $item ): bool => true === ( $item['found'] ?? null ) ) );
+		$unknown = count( array_filter( $items, static fn( array $item ): bool => null === ( $item['found'] ?? null ) ) );
+		if ( count( $items ) === $unknown ) {
+			$summary = __( 'Not checked', 'woocommerce' );
+		} elseif ( $unknown > 0 ) {
+			/* translators: 1: number found, 2: number looked for, 3: number that could not be checked. */
+			$summary = sprintf( __( '%1$d of %2$d found, %3$d not checked', 'woocommerce' ), $found, count( $items ), $unknown );
+		} else {
+			/* translators: 1: number found, 2: number looked for. */
+			$summary = sprintf( __( '%1$d of %2$d found', 'woocommerce' ), $found, count( $items ) );
+		}
+		echo '<div class="wc-agentic-commerce-card__section wc-agentic-commerce-declared-section"><h3>' . esc_html__( 'What this store declares to agents', 'woocommerce' ) . '</h3>';
+		echo '<p>' . esc_html__( 'For information. Most stores don\'t need these, and none of them counts as a problem.', 'woocommerce' ) . '</p>';
+		echo '<details><summary>' . esc_html( $summary ) . '</summary><table class="widefat striped wc-agentic-commerce-declared"><tbody>';
+		foreach ( $items as $item ) {
+			$state = null !== ( $item['found'] ?? null ) ? ( $item['found'] ? __( 'Found', 'woocommerce' ) : __( 'Not found', 'woocommerce' ) ) : __( 'Not checked', 'woocommerce' );
+			echo '<tr><td>' . esc_html( (string) ( $item['name'] ?? '' ) ) . '</td><td>' . esc_html( $state ) . '</td></tr>';
+		}
+		echo '</tbody></table></details></div>';
+	}
+
+	/**
 	 * One line on where a question stands.
 	 *
 	 * @param string                                                       $group            Question id.
@@ -770,6 +801,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 					}
 					?>
 				<?php endforeach; ?>
+				<?php $this->render_declared( is_array( $report['declared'] ?? null ) ? $report['declared'] : array() ); ?>
 			<?php endif; ?>
 		</div>
 		<?php

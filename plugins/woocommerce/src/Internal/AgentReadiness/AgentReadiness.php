@@ -45,6 +45,13 @@ class AgentReadiness {
 	private StoreOutputChecks $store_output_checks;
 
 	/**
+	 * What the store declares to agents.
+	 *
+	 * @var DeclaredToAgents
+	 */
+	private DeclaredToAgents $declared_to_agents;
+
+	/**
 	 * Rules from the published rules file.
 	 *
 	 * @var RemoteRules
@@ -73,10 +80,12 @@ class AgentReadiness {
 	 * @param StoreConditions   $store_conditions    Store-wide conditions.
 	 * @param StoreOutputChecks $store_output_checks Store checks that read what the store returns.
 	 * @param RemoteRules       $remote_rules        Rules from the published rules file.
+	 * @param DeclaredToAgents  $declared_to_agents  What the store declares to agents.
 	 */
-	final public function init( StoreConditions $store_conditions, StoreOutputChecks $store_output_checks, RemoteRules $remote_rules ): void {
+	final public function init( StoreConditions $store_conditions, StoreOutputChecks $store_output_checks, RemoteRules $remote_rules, DeclaredToAgents $declared_to_agents ): void {
 		$this->store_conditions    = $store_conditions;
 		$this->store_output_checks = $store_output_checks;
+		$this->declared_to_agents  = $declared_to_agents;
 		$this->remote_rules        = $remote_rules;
 	}
 
@@ -207,7 +216,7 @@ class AgentReadiness {
 	/**
 	 * Run every check over the catalog.
 	 *
-	 * @return array{generated_at:string,products:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool}
+	 * @return array{generated_at:string,products:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool}
 	 */
 	public function get_report(): array {
 		// Rebuild the rules and the scan for each report: a long-running process may have fetched a new rules file or changed GTINs since.
@@ -235,12 +244,15 @@ class AgentReadiness {
 			);
 		}
 
+		$responses = $this->store_output_checks->responses();
+
 		return array(
 			'generated_at'        => gmdate( 'c' ),
 			'products'            => $scan->products(),
 			'hidden_from_catalog' => $scan->hidden_from_catalog(),
 			'unsupported_types'   => $scan->unsupported_types(),
-			'store_checks'        => array_merge( $this->store_conditions->all(), $this->store_output_checks->all() ),
+			'store_checks'        => array_merge( $this->store_conditions->all(), $this->store_output_checks->all( $responses ) ),
+			'declared'            => $this->declared_to_agents->all( $responses ),
 			'channels'            => $scan->channel_totals(),
 			'checks'              => $checks,
 			'truncated'           => $scan->truncated(),
