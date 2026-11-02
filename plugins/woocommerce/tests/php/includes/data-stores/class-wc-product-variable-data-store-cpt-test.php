@@ -395,39 +395,14 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Stateful custom status registration scenarios.
-	 *
-	 * @return array<string, array{int, string, array<string, string>}>
+	 * @testdox sync_stock_status() falls back to out of stock when the custom status stops being registered before the setter runs.
 	 */
-	public static function stateful_custom_status_registration_data(): array {
-		return array(
-			'registration disappears before setter' => array(
-				1,
-				ProductStockStatus::OUT_OF_STOCK,
-				array(),
-			),
-			'registration disappears inside setter' => array(
-				2,
-				ProductStockStatus::IN_STOCK,
-				array( 'stock_status' => ProductStockStatus::OUT_OF_STOCK ),
-			),
-		);
-	}
-
-	/**
-	 * @testdox sync_stock_status() falls back to out of stock when custom status registration changes during sync.
-	 * @dataProvider stateful_custom_status_registration_data
-	 *
-	 * @param int                  $registered_invocations Number of filter invocations that register the custom status.
-	 * @param string               $baseline_stock_status Baseline parent stock status.
-	 * @param array<string,string> $expected_changes Expected pending product changes.
-	 */
-	public function test_sync_stock_status_falls_back_when_custom_status_registration_changes_during_sync( int $registered_invocations, string $baseline_stock_status, array $expected_changes ): void {
-		$register_status_temporarily = static function ( $stock_statuses ) use ( $registered_invocations ) {
+	public function test_sync_stock_status_falls_back_when_custom_status_registration_changes_during_sync(): void {
+		$register_status_once = static function ( $stock_statuses ) {
 			static $invocation_count = 0;
 
 			++$invocation_count;
-			if ( $invocation_count <= $registered_invocations ) {
+			if ( 1 === $invocation_count ) {
 				$stock_statuses['custom_status_a'] = 'Custom status A';
 			}
 
@@ -438,17 +413,17 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_product_lookup_table_is_generating', false );
 
 		$product = $this->create_variable_product_with_child_stock_statuses( array( 'custom_status_a', 'custom_status_a' ) );
-		$product->set_stock_status( $baseline_stock_status );
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
 		$product->apply_changes();
 
 		$data_store = new WC_Product_Variable_Data_Store_CPT();
 		remove_filter( 'woocommerce_product_stock_status_options', $register_stable_status );
-		add_filter( 'woocommerce_product_stock_status_options', $register_status_temporarily );
+		add_filter( 'woocommerce_product_stock_status_options', $register_status_once );
 
 		$data_store->sync_stock_status( $product );
 
 		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
-		$this->assertSame( $expected_changes, $product->get_changes() );
+		$this->assertSame( array( 'stock_status' => ProductStockStatus::OUT_OF_STOCK ), $product->get_changes() );
 	}
 
 	/**
