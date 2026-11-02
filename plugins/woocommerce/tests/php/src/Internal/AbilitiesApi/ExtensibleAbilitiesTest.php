@@ -2542,6 +2542,39 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse a type change into or out of a variable product type that an extension registers.
+	 */
+	public function test_refuses_a_type_change_into_or_out_of_a_variable_subclass(): void {
+		$this->register_variation_subclass();
+
+		$input         = $this->get_shirt_input();
+		$input['type'] = 'test-variable';
+		$created       = $this->run_ability( 'woocommerce/product-create', $input );
+		$simple        = \WC_Helper_Product::create_simple_product();
+
+		$out_of = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'   => $created['product']['id'],
+				'type' => 'simple',
+			)
+		);
+		$into   = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'   => $simple->get_id(),
+				'type' => 'test-variable',
+			)
+		);
+
+		$this->assertSame( 'woocommerce_product_type_unsupported', $out_of->get_data()['code'] );
+		$this->assertSame( 'woocommerce_product_type_unsupported', $into->get_data()['code'] );
+		$this->assertInstanceOf( TestVariableProduct::class, wc_get_product( $created['product']['id'] ) );
+		$this->assertCount( 2, wc_get_product( $created['product']['id'] )->get_children() );
+		$this->assertSame( 'simple', wc_get_product( $simple->get_id() )->get_type() );
+	}
+
+	/**
 	 * @testdox Should build a new variation with the class that the parent type asks for, and write a field limited to it.
 	 */
 	public function test_creates_variations_of_a_subclass_with_their_fields(): void {

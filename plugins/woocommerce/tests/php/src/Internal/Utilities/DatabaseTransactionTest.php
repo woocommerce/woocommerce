@@ -54,9 +54,11 @@ class DatabaseTransactionTest extends WC_Unit_Test_Case {
 	 * @return string
 	 */
 	public function record_statement( $query ) {
-		if ( preg_match( '/^(START TRANSACTION|COMMIT|ROLLBACK|SAVEPOINT|RELEASE SAVEPOINT)/', $query ) ) {
-			$this->statements[] = $query;
-			return 'SELECT 1';
+		foreach ( array( 'START TRANSACTION', 'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'RELEASE SAVEPOINT' ) as $prefix ) {
+			if ( 0 === strpos( $query, $prefix ) ) {
+				$this->statements[] = $query;
+				return 'SELECT 1';
+			}
 		}
 		return $query;
 	}

@@ -9,7 +9,6 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Enums\ProductStatus;
-use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
 
@@ -126,8 +125,10 @@ class ProductUpdate extends ActionableAbility {
 		}
 
 		if ( isset( $input['type'] ) && (string) $input['type'] !== $product->get_type() ) {
-			$variable_types = array( ProductType::VARIABLE, ProductType::VARIATION );
-			if ( in_array( (string) $input['type'], $variable_types, true ) || $product->is_type( $variable_types ) ) {
+			$is_variable = static function ( $class_or_object ): bool {
+				return is_a( $class_or_object, \WC_Product_Variable::class, true ) || is_a( $class_or_object, \WC_Product_Variation::class, true );
+			};
+			if ( $is_variable( \WC_Product_Factory::get_product_classname( 0, (string) $input['type'] ) ) || $is_variable( $product ) ) {
 				return new \WP_Error(
 					'woocommerce_product_type_unsupported',
 					__( 'A product cannot change into or out of a variable product or a variation through this ability. WooCommerce would delete its variations.', 'woocommerce' ),
