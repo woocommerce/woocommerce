@@ -54,7 +54,7 @@ final class ChequeSettings {
 								'type'          => 'card',
 								'isCollapsible' => false,
 							),
-							'children' => array( 'enabled', 'title', 'description', 'instructions' ),
+							'children' => array( 'enabled', 'title', 'description', 'instructions', 'enable_for_methods', 'enable_for_virtual' ),
 						),
 					),
 				),
