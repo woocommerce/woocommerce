@@ -1,0 +1,3 @@
+Significance: minor
+Type: dev
+Comment: Agent readiness: move the check from the Status tab to Agentic commerce settings, behind an experimental flag.
