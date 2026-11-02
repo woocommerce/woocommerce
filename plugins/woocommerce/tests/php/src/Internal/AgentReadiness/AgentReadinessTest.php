@@ -7,6 +7,8 @@ use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRule;
 use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
+use Automattic\WooCommerce\Internal\AgentReadiness\StoreOutputChecks;
+use Automattic\WooCommerce\Internal\AgentReadiness\StoreResponses;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
@@ -30,8 +32,57 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		parent::setUp();
 		$store_conditions = new StoreConditions();
 		$store_conditions->init( new ComingSoonHelper() );
+		$output_checks = new StoreOutputChecks();
+		$output_checks->init( new ComingSoonHelper() );
 		$this->sut = new AgentReadiness();
-		$this->sut->init( $store_conditions, new RemoteRules() );
+		$this->sut->init( $store_conditions, $output_checks, new RemoteRules() );
+	}
+
+	/**
+	 * @testdox Store output checks follow the store conditions in the report, recommended, with null for couldn't check or a check that throws.
+	 */
+	public function test_report_includes_store_output_checks(): void {
+		$output_checks = new class() extends StoreOutputChecks {
+			/**
+			 * Two checks: one the store couldn't load, one that throws.
+			 */
+			protected function checks(): array {
+				$check = static fn( string $id, callable $test ): array => array(
+					'id'      => $id,
+					'test'    => $test,
+					'blocks'  => 'listing',
+					'name'    => $id,
+					'label'   => $id,
+					'why'     => '',
+					'fix'     => '',
+					'fix_url' => '',
+				);
+				return array(
+					$check( 'unreachable', static fn( StoreResponses $responses ): ?bool => null === $responses->get( '/robots.txt' ) ? null : true ),
+					$check(
+						'throws',
+						static function (): bool {
+							throw new \RuntimeException( 'Broken plugin output' );
+						}
+					),
+				);
+			}
+		};
+		$output_checks->init( new ComingSoonHelper() );
+		$store_conditions = new StoreConditions();
+		$store_conditions->init( new ComingSoonHelper() );
+		$this->sut->init( $store_conditions, $output_checks, new RemoteRules() );
+		add_filter( 'pre_http_request', static fn() => new \WP_Error( 'http_request_failed', 'Timed out' ) );
+
+		$checks = array_column( $this->sut->get_report()['store_checks'], null, 'id' );
+
+		$this->assertSame( 'launched', array_key_first( $checks ) );
+		foreach ( array( 'unreachable', 'throws' ) as $id ) {
+			$this->assertArrayHasKey( 'ok', $checks[ $id ] );
+			$this->assertNull( $checks[ $id ]['ok'] );
+			$this->assertSame( StoreConditions::LEVEL_RECOMMENDED, $checks[ $id ]['level'] );
+		}
+		$this->assertNotContains( 'unreachable', $store_conditions->failing_required( array_values( $checks ) ) );
 	}
 
 	/**
