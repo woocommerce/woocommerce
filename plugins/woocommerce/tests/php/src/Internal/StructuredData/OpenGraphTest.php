@@ -118,6 +118,12 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 	 * @testdox Should collect up to six distinct valid product image URLs.
 	 */
 	public function test_collects_six_distinct_valid_images(): void {
+		$deleted_id = self::factory()->attachment->create(
+			array(
+				'file'           => 'deleted.jpg',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
 		$invalid_id = self::factory()->attachment->create(
 			array(
 				'file'           => 'document.pdf',
@@ -140,8 +146,9 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 			)
 		);
 		$this->product->set_image_id( $invalid_id );
-		$this->product->set_gallery_image_ids( array_merge( array( $image_ids[0], $duplicate_id ), array_slice( $image_ids, 1 ) ) );
+		$this->product->set_gallery_image_ids( array_merge( array( $deleted_id, $image_ids[0], $duplicate_id ), array_slice( $image_ids, 1 ) ) );
 		$this->product->save();
+		wp_delete_attachment( $deleted_id, true );
 
 		$tags = $this->render_meta_tags( '' );
 
