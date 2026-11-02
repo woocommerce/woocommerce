@@ -515,7 +515,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Supply captured public-service responses while retaining real parsers and rules.
+	 * Keep dashboard incentive requests local while retaining real response parsing.
 	 *
 	 * @param mixed  $preempt Existing HTTP preemption.
 	 * @param array  $request HTTP request arguments.
@@ -542,20 +542,6 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 				'response' => array(
 					'code' => 200,
 				),
-			);
-		}
-
-		if ( 'woocommerce.com' === $host && '/wp-json/wccom/inbox-notifications/2.0/notifications.json' === $path ) {
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Read a local test fixture.
-			$body = file_get_contents( __DIR__ . '/fixtures/dashboard-remote-inbox-notifications.json' );
-			if ( false === $body ) {
-				throw new RuntimeException( 'The dashboard remote inbox fixture could not be read.' );
-			}
-
-			return array(
-				'headers'  => array( 'content-type' => 'application/json; charset=UTF-8' ),
-				'body'     => $body,
-				'response' => array( 'code' => 200 ),
 			);
 		}
 
