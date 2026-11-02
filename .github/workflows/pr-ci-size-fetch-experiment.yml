@@ -2,7 +2,7 @@ name: 'PR experiment: Compressed Size blobless fetch'
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened]
     paths:
       - '.github/workflows/pr-ci-size-fetch-experiment.yml'
 

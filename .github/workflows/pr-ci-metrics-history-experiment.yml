@@ -1,7 +1,7 @@
 name: 'PR experiment: Metrics history retrieval'
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened]
     paths:
       - '.github/workflows/pr-ci-metrics-history-experiment.yml'
       - '.github/experiments/metrics-history/**'

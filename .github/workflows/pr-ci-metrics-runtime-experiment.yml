@@ -2,7 +2,7 @@ name: Metrics runtime experiment
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened]
     paths:
       - '.github/workflows/pr-ci-metrics-runtime-experiment.yml'
       - '.github/experiments/metrics-runtime/**'
