@@ -127,6 +127,7 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 		$this->product->save();
 
 		$tags = $this->render_meta_tags( '' );
+		$this->assertSame( array( '8.00' ), $tags['product:price:amount'] );
 		$this->assertSame( array( '8.00' ), $tags['product:sale_price:amount'] );
 		$this->assertSame( array( 'USD' ), $tags['product:sale_price:currency'] );
 		$this->assertSame( array( '10.00' ), $tags['og:price:amount'] );
