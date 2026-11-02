@@ -1,6 +1,6 @@
 <?php
 /**
- * Product Open Graph metadata.
+ * Open Graph metadata.
  *
  * @package WooCommerce
  */
@@ -16,7 +16,7 @@ use WC_Product;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Provides product link previews and fills missing Open Graph metadata.
+ * Provides link previews and fills missing Open Graph metadata.
  */
 class OpenGraph {
 
@@ -44,7 +44,7 @@ class OpenGraph {
 	}
 
 	/**
-	 * Prepare metadata for a public, unprotected product before rendering the template.
+	 * Prepare metadata for a public, unprotected page before rendering the template.
 	 *
 	 * @internal
 	 */

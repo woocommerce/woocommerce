@@ -20,6 +20,8 @@ class OpenGraphDescription {
 	/**
 	 * Remove markup and normalize whitespace.
 	 *
+	 * @since 11.4.0
+	 *
 	 * @param string $description Source text.
 	 * @return string
 	 */
