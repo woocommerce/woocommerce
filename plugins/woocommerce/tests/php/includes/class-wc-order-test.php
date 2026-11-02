@@ -2,6 +2,8 @@
 declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Enums\PaymentMode;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Tests for the WC_Order class.
@@ -84,6 +86,47 @@ class WC_Order_Test extends WC_Unit_Test_Case {
 		$order->save();
 
 		$this->assertSame( PaymentMode::TEST, wc_get_order( $order->get_id() )->get_payment_mode(), 'A mode set before the gateway switch should be kept' );
+
+		$order->set_payment_method( WC_Gateway_BACS::ID );
+		$order->save();
+
+		$this->assertSame( '', wc_get_order( $order->get_id() )->get_payment_mode(), 'A second gateway switch should clear the mode' );
+	}
+
+	/**
+	 * @testdox Should keep the payment mode in the posts copy when HPOS syncs a gateway switch the gateway recorded a mode for.
+	 */
+	public function test_payment_mode_set_before_gateway_switch_reaches_synced_posts(): void {
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'Needs HPOS to be authoritative.' );
+		}
+
+		$sync_option_filter = 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION;
+		add_filter( $sync_option_filter, array( $this, 'return_yes' ) );
+
+		try {
+			$order = wc_create_order();
+			$order->set_payment_method( WC_Gateway_BACS::ID );
+			$order->save();
+
+			$order = wc_get_order( $order->get_id() );
+			$order->set_payment_mode( PaymentMode::TEST );
+			$order->set_payment_method( WC_Gateway_COD::ID );
+			$order->save();
+
+			$this->assertSame( PaymentMode::TEST, get_post_meta( $order->get_id(), '_wc_payment_mode', true ), 'The posts copy should keep the payment mode' );
+		} finally {
+			remove_filter( $sync_option_filter, array( $this, 'return_yes' ) );
+		}
+	}
+
+	/**
+	 * Filter callback that returns 'yes'.
+	 *
+	 * @return string
+	 */
+	public function return_yes(): string {
+		return 'yes';
 	}
 
 	/**

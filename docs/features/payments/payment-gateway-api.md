@@ -235,7 +235,7 @@ if ( method_exists( $order, 'set_payment_mode' ) ) {
 $order->save();
 ```
 
-When a loaded order moves to another payment method ID, WooCommerce clears the stored mode, so a mode from a failed attempt doesn't carry over to a retry with another gateway. A mode set on the same order object before the switch is kept. If your gateway changes the order's payment method ID in a later request, such as a redirect return or a webhook, call `set_payment_mode()` again in that request.
+When an order is saved with another payment method ID, WooCommerce clears its mode, so a mode from a failed attempt doesn't carry over to a retry with another gateway. A mode set on the same order object before the switch is kept. If your gateway changes the order's payment method ID in a later request, such as a redirect return or a webhook, call `set_payment_mode()` again in that request before saving.
 
 ## Notes on Direct Gateways
 
