@@ -71,6 +71,22 @@ class WC_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep a payment mode the gateway set on the loaded order when it then switches the gateway ID.
+	 */
+	public function test_set_payment_method_keeps_payment_mode_set_on_the_loaded_order(): void {
+		$order = wc_create_order();
+		$order->set_payment_method( WC_Gateway_BACS::ID );
+		$order->save();
+
+		$order = wc_get_order( $order->get_id() );
+		$order->set_payment_mode( PaymentMode::TEST );
+		$order->set_payment_method( WC_Gateway_COD::ID );
+		$order->save();
+
+		$this->assertSame( PaymentMode::TEST, wc_get_order( $order->get_id() )->get_payment_mode(), 'A mode set before the gateway switch should be kept' );
+	}
+
+	/**
 	 * @testdox Should reject an unknown payment mode and keep the existing one.
 	 */
 	public function test_set_payment_mode_rejects_unknown_value(): void {

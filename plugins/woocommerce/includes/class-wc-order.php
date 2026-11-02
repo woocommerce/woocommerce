@@ -31,6 +31,13 @@ class WC_Order extends WC_Abstract_Order {
 	protected $status_transition = false;
 
 	/**
+	 * Whether set_payment_mode() was called on this object, so the mode describes the current gateway.
+	 *
+	 * @var bool
+	 */
+	private $payment_mode_recorded = false;
+
+	/**
 	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
 	 *
 	 * @since 3.0.0
@@ -1529,8 +1536,9 @@ class WC_Order extends WC_Abstract_Order {
 			$this->set_prop( 'payment_method', $payment_method );
 		}
 
-		// A mode recorded by the previous gateway doesn't describe the new one.
-		if ( true === $this->object_read && $previous_payment_method !== $this->get_payment_method( 'edit' ) ) {
+		// A stored mode from the previous gateway doesn't describe the new one. A mode the gateway set on this object
+		// is kept, since gateways such as WooPayments move the order to another of their own IDs after charging.
+		if ( true === $this->object_read && ! $this->payment_mode_recorded && $previous_payment_method !== $this->get_payment_method( 'edit' ) ) {
 			$this->delete_meta_data( '_wc_payment_mode' );
 		}
 	}
@@ -2616,7 +2624,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * Record whether the order is paid in test or live mode.
 	 *
 	 * Payment gateways should call this when they choose test or live credentials for a charge, before saving the order.
-	 * WooCommerce never sets it, so an order whose gateway doesn't call it has no payment mode.
+	 * WooCommerce never sets it, so an order whose gateway doesn't call it has no payment mode. A stored mode is
+	 * cleared when the order is later loaded and moved to another gateway, unless this is called again first.
 	 *
 	 * @since 11.4.0
 	 * @param string $mode One of the PaymentMode constants, or an empty string to clear it.
@@ -2626,12 +2635,14 @@ class WC_Order extends WC_Abstract_Order {
 	public function set_payment_mode( $mode ) {
 		if ( '' === $mode ) {
 			$this->delete_meta_data( '_wc_payment_mode' );
+			$this->payment_mode_recorded = true;
 			return;
 		}
 		if ( ! in_array( $mode, array( PaymentMode::TEST, PaymentMode::LIVE ), true ) ) {
 			$this->error( 'order_invalid_payment_mode', __( 'Invalid payment mode.', 'woocommerce' ) );
 		}
 		$this->update_meta_data( '_wc_payment_mode', $mode );
+		$this->payment_mode_recorded = true;
 	}
 
 	/**
