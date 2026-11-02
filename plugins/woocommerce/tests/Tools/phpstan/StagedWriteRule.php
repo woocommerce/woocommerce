@@ -158,7 +158,21 @@ final class StagedWriteRule implements Rule {
 		}
 
 		$source = implode( '', array_slice( $lines, $reflection->getStartLine() - 1, $reflection->getEndLine() - $reflection->getStartLine() + 1 ) );
-		return preg_match( "/refuse_unstaged_override\\(\\s*['\"](\\w+)['\"]/", $source, $matches ) ? strtolower( $matches[1] ) : null;
+		$tokens = array_values(
+			array_filter(
+				token_get_all( '<?php ' . $source ),
+				fn( $token ) => ! is_array( $token ) || ! in_array( $token[0], array( T_WHITESPACE, T_COMMENT, T_DOC_COMMENT ), true )
+			)
+		);
+
+		foreach ( $tokens as $i => $token ) {
+			if ( is_array( $token ) && T_STRING === $token[0] && 'refuse_unstaged_override' === $token[1] && '(' === ( $tokens[ $i + 1 ] ?? null ) ) {
+				$argument = $tokens[ $i + 2 ] ?? null;
+				return is_array( $argument ) && T_CONSTANT_ENCAPSED_STRING === $argument[0] ? strtolower( substr( $argument[1], 1, -1 ) ) : null;
+			}
+		}
+
+		return null;
 	}
 
 	/**
