@@ -1759,18 +1759,17 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should preserve valid filtered dates and ignore invalid values after saving a product.
-	 * @testWith ["2026-07-15T10:00:00", "2026-07-15T12:00:00+02:00"]
-	 *           [1784109600, "2026-07-15T12:00:00+02:00"]
-	 *           ["1784109600", "2026-07-15T12:00:00+02:00"]
-	 *           ["invalid date", null]
-	 *           [[], null]
-	 *           [false, null]
-	 *           [null, null]
-	 * @param mixed       $date     Filtered date.
-	 * @param string|null $expected Expected store-local date.
+	 * @testdox Should return null for non-date filter values without failing a product update.
+	 * @testWith ["2026-07-15T10:00:00"]
+	 *           [1784109600]
+	 *           ["1784109600"]
+	 *           ["invalid date"]
+	 *           [[]]
+	 *           [false]
+	 *           [null]
+	 * @param mixed $date Filtered date.
 	 */
-	public function test_product_output_handles_filtered_dates( $date, ?string $expected ): void {
+	public function test_product_output_handles_filtered_dates( $date ): void {
 		update_option( 'timezone_string', 'Europe/Amsterdam' );
 		$product                     = \WC_Helper_Product::create_simple_product();
 		$this->created_product_ids[] = $product->get_id();
@@ -1789,8 +1788,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $result );
-		$this->assertSame( $expected, $result['product']['date_created'] );
-		$this->assertSame( null === $expected ? null : '2026-07-15T10:00:00+00:00', $result['product']['date_created_gmt'] );
+		$this->assertNull( $result['product']['date_created'] );
+		$this->assertNull( $result['product']['date_created_gmt'] );
 		$this->assertSame( 'Filtered date update', wc_get_product( $product->get_id() )->get_name() );
 	}
 

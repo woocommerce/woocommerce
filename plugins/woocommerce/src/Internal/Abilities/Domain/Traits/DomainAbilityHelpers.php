@@ -24,16 +24,6 @@ trait DomainAbilityHelpers {
 	 * @return string|null
 	 */
 	protected static function format_date_for_response( $date, bool $utc = true ): ?string {
-		try {
-			if ( is_numeric( $date ) ) {
-				$date = new \WC_DateTime( "@$date", new \DateTimeZone( 'UTC' ) );
-			} elseif ( is_string( $date ) ) {
-				$date = new \WC_DateTime( $date, new \DateTimeZone( 'UTC' ) );
-			}
-		} catch ( \Exception $e ) {
-			return null;
-		}
-
 		if ( ! $date instanceof \WC_DateTime ) {
 			return null;
 		}
