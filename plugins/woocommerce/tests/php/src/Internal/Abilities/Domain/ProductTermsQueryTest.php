@@ -242,6 +242,23 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should publish the slug filter as a list, so the input schema has one type.
+	 */
+	public function test_slug_filter_is_a_list(): void {
+		$ability = new \WP_Ability( ProductTermsQuery::get_name(), ProductTermsQuery::get_registration_args() );
+
+		$this->assertSame( 'array', $ability->get_input_schema()['properties']['slug']['type'] );
+		$this->assertTrue(
+			$ability->validate_input(
+				array(
+					'taxonomy' => 'product_tag',
+					'slug'     => array( 'beta' ),
+				)
+			)
+		);
+	}
+
+	/**
 	 * @testdox Should support product, slug, exclude and offset filters.
 	 */
 	public function test_remaining_filters(): void {
@@ -265,7 +282,7 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 			array(
 				'taxonomy' => 'product_tag',
 				'product'  => $product->get_id(),
-				'slug'     => 'beta',
+				'slug'     => array( 'beta' ),
 			)
 		);
 		$this->assertSame( array( $second ), array_column( $result['terms'], 'id' ) );

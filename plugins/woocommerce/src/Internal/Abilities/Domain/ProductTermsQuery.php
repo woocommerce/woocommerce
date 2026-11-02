@@ -215,8 +215,8 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 				),
 				'search'     => array( 'type' => 'string' ),
 				'slug'       => array(
-					'description' => __( 'Limit results to these slugs. An empty string or list applies no slug filter.', 'woocommerce' ),
-					'type'        => array( 'string', 'array' ),
+					'description' => __( 'Limit results to these slugs. Send one slug as a list of one. An empty list applies no slug filter.', 'woocommerce' ),
+					'type'        => 'array',
 					'items'       => array( 'type' => 'string' ),
 				),
 				'parent'     => array(
