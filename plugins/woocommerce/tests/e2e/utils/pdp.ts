@@ -22,7 +22,9 @@ export async function addProductsToCart(
 	await expect(
 		await page.getByRole( 'heading', { name: productName } ).count()
 	).toBeGreaterThan( 0 );
-	await page.getByLabel( 'Product quantity' ).fill( quantityCount );
+	await page
+		.getByLabel( `${ productName } quantity`, { exact: true } )
+		.fill( quantityCount );
 	await page.locator( 'button[name="add-to-cart"]' ).click();
 	await expect(
 		page.getByText(

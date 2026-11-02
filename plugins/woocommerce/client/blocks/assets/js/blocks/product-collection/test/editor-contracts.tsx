@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
 	createBlock,
@@ -37,6 +37,7 @@ import {
 import {
 	addProductCollectionToQueryPaginationParentOrAncestor,
 	getDefaultValueOfInherit,
+	sanitizeDisplayLayout,
 } from '../utils';
 import {
 	CoreCollectionNames,
@@ -182,6 +183,52 @@ describe( 'Product Collection editor contracts', () => {
 			expect( serialized ).not.toContain( '__privatePreviewState' );
 		}
 	);
+
+	it.each( [
+		{
+			layout: LayoutOptions.STACK,
+			saved: { type: LayoutOptions.STACK },
+		},
+		{
+			layout: LayoutOptions.CAROUSEL,
+			saved: { type: LayoutOptions.CAROUSEL },
+		},
+	] )(
+		'omits column settings from the saved $layout markup',
+		( { layout, saved } ) => {
+			const block = createBlock( PRODUCT_COLLECTION_BLOCK_NAME, {
+				displayLayout: sanitizeDisplayLayout( {
+					type: layout,
+					columns: 4,
+					shrinkColumns: true,
+				} ),
+			} );
+			const serialized = serialize( block );
+
+			expect( serialized ).toContain(
+				`"displayLayout":${ JSON.stringify( saved ) }`
+			);
+		}
+	);
+
+	it( 'keeps column settings in the saved Grid markup', () => {
+		const block = createBlock( PRODUCT_COLLECTION_BLOCK_NAME, {
+			displayLayout: sanitizeDisplayLayout( {
+				type: LayoutOptions.GRID,
+				columns: 4,
+				shrinkColumns: false,
+			} ),
+		} );
+		const serialized = serialize( block );
+
+		expect( serialized ).toContain(
+			`"displayLayout":${ JSON.stringify( {
+				type: LayoutOptions.GRID,
+				columns: 4,
+				shrinkColumns: false,
+			} ) }`
+		);
+	} );
 
 	it( 'adds Product Collection to the real Pagination metadata filter', () => {
 		addProductCollectionToQueryPaginationParentOrAncestor();
@@ -391,14 +438,12 @@ describe( 'default catalog order control', () => {
 					trackInteraction={ trackInteraction }
 				/>
 			);
-			await act( async () => {
-				await user.selectOptions(
-					screen.getByRole( 'combobox', {
-						name: 'Default sort by',
-					} ),
-					'price-desc'
-				);
-			} );
+			await user.selectOptions(
+				screen.getByRole( 'combobox', {
+					name: 'Default sort by',
+				} ),
+				'price-desc'
+			);
 
 			expect( editEntityRecord ).toHaveBeenCalledWith(
 				'root',
