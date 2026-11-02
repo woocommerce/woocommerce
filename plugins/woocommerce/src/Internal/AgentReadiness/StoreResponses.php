@@ -3,6 +3,9 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
+use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Enums\ProductStatus;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -39,6 +42,13 @@ class StoreResponses {
 	private array $responses = array();
 
 	/**
+	 * URL of the product page checks read, '' when there is none, null until looked up.
+	 *
+	 * @var string|null
+	 */
+	private ?string $product_url = null;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param bool $site_live Whether visitors get the real store, not a coming soon page.
@@ -61,6 +71,39 @@ class StoreResponses {
 			$this->responses[ $url ] = $this->site_live ? $this->fetch( $url ) : null;
 		}
 		return $this->responses[ $url ];
+	}
+
+	/**
+	 * The page of the newest published product shoppers can find, or null when there is
+	 * none or it could not be loaded. Password protected products are skipped, since
+	 * their page shows a form instead of the product; only the five newest are looked at.
+	 *
+	 * @return array{status:int,body:string}|null
+	 */
+	public function product_page(): ?array {
+		if ( null === $this->product_url ) {
+			$this->product_url = '';
+			$products          = wc_get_products(
+				array(
+					'status'     => ProductStatus::PUBLISH,
+					'visibility' => CatalogVisibility::VISIBLE,
+					'limit'      => 5,
+					'orderby'    => 'date',
+					'order'      => 'DESC',
+				)
+			);
+			foreach ( is_array( $products ) ? $products : array() as $product ) {
+				if ( $product instanceof \WC_Product && '' === $product->get_post_password() ) {
+					$this->product_url = (string) $product->get_permalink();
+					break;
+				}
+			}
+		}
+		if ( '' === $this->product_url ) {
+			return null;
+		}
+		$response = $this->get( $this->product_url );
+		return null !== $response && 200 === $response['status'] ? $response : null;
 	}
 
 	/**
