@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
 use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
 
@@ -50,8 +51,11 @@ class StoreOutputChecks {
 	/**
 	 * Run every check. Each URL is requested at most once per set of responses.
 	 *
+	 * A likely conflict also names the address where it was seen and the active plugins known to
+	 * output the same thing, as a hint for the merchant.
+	 *
 	 * @param StoreResponses|null $responses Responses of the scan, or null for new ones.
-	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict:bool,pending:string}>
+	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict:bool,pending:string,seen_at:string,plugins:array<int,string>}>
 	 */
 	public function all( ?StoreResponses $responses = null ): array {
 		$responses = $responses ?? $this->responses();
@@ -70,6 +74,7 @@ class StoreOutputChecks {
 					array( 'source' => 'agent-readiness' )
 				);
 			}
+			$conflict  = false === $ok && ! empty( $check['conflict'] );
 			$results[] = array(
 				'id'       => $check['id'],
 				'ok'       => $ok,
@@ -83,6 +88,8 @@ class StoreOutputChecks {
 				'fix_url'  => $check['fix_url'],
 				'conflict' => ! empty( $check['conflict'] ),
 				'pending'  => $pending,
+				'seen_at'  => $conflict ? self::seen_at( (string) ( $check['seen_at'] ?? '' ), $responses ) : '',
+				'plugins'  => $conflict ? self::active_output_plugins( (string) ( $check['plugins'] ?? '' ) ) : array(),
 			);
 		}
 		return $results;
@@ -99,6 +106,31 @@ class StoreOutputChecks {
 		'ucp_checkout'                 => 'WOOAI-1435',
 	);
 
+	/**
+	 * SEO plugins that write both product structured data and Open Graph tags, keyed by plugin file.
+	 */
+	private const SEO_PLUGINS = array(
+		'wordpress-seo/wp-seo.php'                    => 'Yoast SEO',
+		'wordpress-seo-premium/wp-seo-premium.php'    => 'Yoast SEO Premium',
+		'seo-by-rank-math/rank-math.php'              => 'Rank Math SEO',
+		'all-in-one-seo-pack/all_in_one_seo_pack.php' => 'All in One SEO',
+		'autodescription/autodescription.php'         => 'The SEO Framework',
+		'wp-seopress/seopress.php'                    => 'SEOPress',
+		'slim-seo/slim-seo.php'                       => 'Slim SEO',
+	);
+
+	/**
+	 * Plugins known to output the same thing a conflict check reads, by output, keyed by plugin file.
+	 * Shown next to a likely conflict as a hint, not as the cause.
+	 */
+	private const OUTPUT_PLUGINS = array(
+		'schema'     => self::SEO_PLUGINS + array(
+			'wp-schema-pro/wp-schema-pro.php' => 'Schema Pro',
+			'schema-and-structured-data-for-wp/structured-data-for-wp.php' => 'Schema & Structured Data for WP',
+		),
+		'open_graph' => self::SEO_PLUGINS + array( 'jetpack/jetpack.php' => 'Jetpack' ),
+	);
+
 	private const MAX_LISTED_SITEMAPS = 5;
 
 	private const MAX_LLMS_TXT_LINKS = 5;
@@ -111,7 +143,7 @@ class StoreOutputChecks {
 	/**
 	 * The checks, each with a test that returns true, false, or null for couldn't check.
 	 *
-	 * @return array<int, array{id:string,test:callable(StoreResponses):(bool|null),blocks:string,group:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict?:bool}>
+	 * @return array<int, array{id:string,test:callable(StoreResponses):(bool|null),blocks:string,group:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict?:bool,seen_at?:string,plugins?:string}>
 	 */
 	protected function checks(): array {
 		$checks = array(
@@ -137,6 +169,8 @@ class StoreOutputChecks {
 				'fix'      => __( 'WooCommerce adds it to the product page. Check whether your theme or an SEO plugin removes it, or turn on product schema in your SEO plugin.', 'woocommerce' ),
 				'fix_url'  => '',
 				'conflict' => true,
+				'seen_at'  => 'product',
+				'plugins'  => 'schema',
 			),
 			array(
 				'id'       => 'product_jsonld_from_core',
@@ -145,10 +179,12 @@ class StoreOutputChecks {
 				'blocks'   => 'discovery',
 				'name'     => __( 'Product structured data comes from WooCommerce, once', 'woocommerce' ),
 				'label'    => __( 'Something replaces or repeats WooCommerce\'s product structured data', 'woocommerce' ),
-				'why'      => __( 'Seen on a recent product page. Agents may read values that differ from your product, or two versions of it.', 'woocommerce' ),
+				'why'      => __( 'Agents may read values that differ from your product, or two versions of it.', 'woocommerce' ),
 				'fix'      => __( 'Usually an SEO plugin or your theme. Check its schema settings; if you chose this, you can ignore it.', 'woocommerce' ),
 				'fix_url'  => '',
 				'conflict' => true,
+				'seen_at'  => 'product',
+				'plugins'  => 'schema',
 			),
 			array(
 				'id'      => 'product_jsonld_required_fields',
@@ -213,29 +249,29 @@ class StoreOutputChecks {
 				'name'    => __( 'Pages have Open Graph tags', 'woocommerce' ),
 				'label'   => __( 'Pages are missing Open Graph tags', 'woocommerce' ),
 				'why'     => __( 'Agents and social apps use og:title and og:image to show a page as a card with a picture.', 'woocommerce' ),
-				'fix'     => __( 'Turn on Open Graph or social tags in your SEO plugin, or in Jetpack.', 'woocommerce' ),
+				'fix'     => __( 'WooCommerce adds them to product pages. For your home page, turn on Open Graph or social tags in your SEO plugin, or in Jetpack.', 'woocommerce' ),
 				'fix_url' => '',
 			),
 			array(
 				'id'      => 'meta_description',
 				'group'   => 'find',
-				'test'    => fn( StoreResponses $responses ): ?bool => $this->on_pages( $responses, static fn( string $html ): bool => PageMarkup::has_meta( $html, 'name', 'description' ) ),
+				'test'    => fn( StoreResponses $responses ): ?bool => self::on_loaded( array( $responses->home_page(), $responses->product_page(), $responses->shop_page(), $responses->category_page() ), static fn( string $html ): bool => PageMarkup::has_meta( $html, 'name', 'description' ) ),
 				'blocks'  => 'discovery',
-				'name'    => __( 'Pages have a meta description', 'woocommerce' ),
-				'label'   => __( 'Pages are missing a meta description', 'woocommerce' ),
+				'name'    => __( 'Home, product, shop and category pages have a meta description', 'woocommerce' ),
+				'label'   => __( 'Some store pages are missing a meta description', 'woocommerce' ),
 				'why'     => __( 'Search and AI answers often quote the meta description to say what a page is about.', 'woocommerce' ),
-				'fix'     => __( 'Add a meta description for your home page and products in your SEO plugin.', 'woocommerce' ),
+				'fix'     => __( 'Add meta descriptions for your home page, shop, categories and products in your SEO plugin.', 'woocommerce' ),
 				'fix_url' => '',
 			),
 			array(
 				'id'      => 'canonical_url',
 				'group'   => 'find',
-				'test'    => fn( StoreResponses $responses ): ?bool => $this->on_product_page( $responses, static fn( string $html ): bool => '' !== PageMarkup::canonical( $html ) ),
+				'test'    => fn( StoreResponses $responses ): ?bool => self::on_loaded( array( $responses->product_page(), $responses->shop_page(), $responses->category_page() ), static fn( string $html ): bool => '' !== PageMarkup::canonical( $html ) ),
 				'blocks'  => 'discovery',
-				'name'    => __( 'Product pages name their canonical URL', 'woocommerce' ),
-				'label'   => __( 'Product pages don\'t name a canonical URL', 'woocommerce' ),
-				'why'     => __( 'A product can be reached by several URLs; the canonical link tells agents which one to show.', 'woocommerce' ),
-				'fix'     => __( 'WordPress adds it to product pages. Check whether your theme or a plugin removes it.', 'woocommerce' ),
+				'name'    => __( 'Product, shop and category pages name their canonical URL', 'woocommerce' ),
+				'label'   => __( 'Some store pages don\'t name a canonical URL', 'woocommerce' ),
+				'why'     => __( 'A page can be reached by several URLs, such as the shop sorted by price; the canonical link tells agents which one to show.', 'woocommerce' ),
+				'fix'     => __( 'Turn on canonical URLs in your SEO plugin. WordPress adds them to product pages only.', 'woocommerce' ),
 				'fix_url' => '',
 			),
 			array(
@@ -272,6 +308,130 @@ class StoreOutputChecks {
 				'fix_url' => '',
 			),
 			array(
+				'id'      => 'no_noindex_directives',
+				'group'   => 'access',
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->on_pages( $responses, static fn( string $html, array $headers ): bool => 1 !== preg_match( '/(?<![\w-])(noindex|none|noai|noimageai)(?![\w-])/', self::robots_rules( $html, $headers ) ) ),
+				'blocks'  => 'listing',
+				'name'    => __( 'Pages let search and AI crawlers index them', 'woocommerce' ),
+				'label'   => __( 'Pages ask search and AI crawlers not to index them', 'woocommerce' ),
+				'why'     => __( 'A noindex, noai or noimageai robots rule keeps your pages and products out of search and AI answers.', 'woocommerce' ),
+				'fix'     => __( 'Remove noindex, noai and noimageai from the robots settings in your SEO plugin, or ask your host about an X-Robots-Tag header.', 'woocommerce' ),
+				'fix_url' => '',
+			),
+			array(
+				'id'      => 'pages_public',
+				'group'   => 'access',
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->pages_public( $responses ),
+				'blocks'  => 'listing',
+				'name'    => __( 'Store pages open without signing in', 'woocommerce' ),
+				'label'   => __( 'Store pages ask visitors to sign in', 'woocommerce' ),
+				'why'     => __( 'Agents don\'t sign in, so they can\'t read your home, shop or product pages.', 'woocommerce' ),
+				'fix'     => __( 'Check the membership, private store or maintenance plugin that asks visitors to sign in.', 'woocommerce' ),
+				'fix_url' => '',
+			),
+			array(
+				'id'      => 'sitemap_lastmod',
+				'group'   => 'find',
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->sitemap_has_lastmod( $responses ),
+				'blocks'  => 'discovery',
+				'name'    => __( 'Sitemap says when pages changed', 'woocommerce' ),
+				'label'   => __( 'Sitemap has no lastmod dates', 'woocommerce' ),
+				'why'     => __( 'Crawlers use lastmod dates to come back for changed prices and stock first.', 'woocommerce' ),
+				'fix'     => __( 'Turn on lastmod dates in your SEO plugin\'s sitemap settings.', 'woocommerce' ),
+				'fix_url' => '',
+			),
+			array(
+				'id'      => 'rss_feed',
+				'group'   => 'find',
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->on_home_page( $responses, static fn( string $html ): bool => self::has_feed_link( $html ) ),
+				'blocks'  => 'discovery',
+				'name'    => __( 'Home page links to a feed', 'woocommerce' ),
+				'label'   => __( 'Home page doesn\'t link to a feed', 'woocommerce' ),
+				'why'     => __( 'Some agents follow your RSS or Atom feed to see what is new.', 'woocommerce' ),
+				'fix'     => __( 'Check whether your theme or a plugin removes the feed links WordPress adds.', 'woocommerce' ),
+				'fix_url' => '',
+			),
+			array(
+				'id'      => 'viewport_meta',
+				'group'   => 'understand',
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->on_home_page( $responses, static fn( string $html ): bool => PageMarkup::has_meta( $html, 'name', 'viewport' ) ),
+				'blocks'  => 'discovery',
+				'name'    => __( 'Home page sets a viewport', 'woocommerce' ),
+				'label'   => __( 'Home page has no viewport tag', 'woocommerce' ),
+				'why'     => __( 'Browser agents load your pages at a phone or desktop size; without a viewport tag the layout can break.', 'woocommerce' ),
+				'fix'     => __( 'Use a theme that adds a viewport meta tag, or ask its developer.', 'woocommerce' ),
+				'fix_url' => '',
+			),
+			array(
+				'id'      => 'html_lang_and_charset',
+				'group'   => 'understand',
+				'test'    => fn( StoreResponses $responses ): ?bool => self::has_lang_and_charset( $responses->home_page() ),
+				'blocks'  => 'discovery',
+				'name'    => __( 'Home page declares its language and encoding', 'woocommerce' ),
+				'label'   => __( 'Home page doesn\'t declare its language or encoding', 'woocommerce' ),
+				'why'     => __( 'Agents use the language to answer shoppers in theirs, and the encoding to read names and prices without garbled text.', 'woocommerce' ),
+				'fix'     => __( 'Use a theme that sets the lang attribute and a charset meta tag, or ask its developer.', 'woocommerce' ),
+				'fix_url' => '',
+			),
+			array(
+				'id'      => 'images_have_alt',
+				'group'   => 'understand',
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->on_pages( $responses, static fn( string $html ): bool => self::images_have_alt( $html ) ),
+				'blocks'  => 'discovery',
+				'name'    => __( 'Images have alt text', 'woocommerce' ),
+				'label'   => __( 'Some images have no alt text', 'woocommerce' ),
+				'why'     => __( 'Agents that can\'t see images rely on alt text to know what a picture shows.', 'woocommerce' ),
+				'fix'     => __( 'Add alt text to images in the media library and to product images. Images your theme adds need its developer.', 'woocommerce' ),
+				'fix_url' => admin_url( 'upload.php' ),
+			),
+			array(
+				'id'      => 'single_h1',
+				'group'   => 'understand',
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->on_product_page( $responses, static fn( string $html ): bool => 1 === self::count_tags( $html, 'h1' ) ),
+				'blocks'  => 'discovery',
+				'name'    => __( 'Product pages have one main heading', 'woocommerce' ),
+				'label'   => __( 'Product pages have no main heading, or more than one', 'woocommerce' ),
+				'why'     => __( 'Agents read the H1 heading as the name of the product the page is about.', 'woocommerce' ),
+				'fix'     => __( 'Check the product template of your theme or page builder: the product title should be the only H1.', 'woocommerce' ),
+				'fix_url' => '',
+			),
+			array(
+				'id'       => 'schema_matches_product',
+				'group'    => 'understand',
+				'test'     => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): ?bool => array() === $products ? null : self::schema_matches( $products, $responses->product() ) ),
+				'blocks'   => 'discovery',
+				'name'     => __( 'Product structured data matches the product', 'woocommerce' ),
+				'label'    => __( 'Product structured data shows a different name or price', 'woocommerce' ),
+				'why'      => __( 'Agents quote the structured data, so shoppers may see a name or price your store doesn\'t charge.', 'woocommerce' ),
+				'fix'      => __( 'Usually an SEO plugin or your theme. Check its schema settings, or clear your page cache.', 'woocommerce' ),
+				'fix_url'  => '',
+				'conflict' => true,
+				'seen_at'  => 'product',
+				'plugins'  => 'schema',
+			),
+			array(
+				'id'      => 'product_review_markup',
+				'group'   => 'understand',
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->reviews_marked_up( $responses ),
+				'blocks'  => 'discovery',
+				'name'    => __( 'Product reviews are in structured data', 'woocommerce' ),
+				'label'   => __( 'Product reviews are missing from structured data', 'woocommerce' ),
+				'why'     => __( 'Agents compare ratings between stores; reviews only on the page are easy to miss.', 'woocommerce' ),
+				'fix'     => __( 'WooCommerce adds the rating to product structured data. Check whether your theme or an SEO plugin removes it.', 'woocommerce' ),
+				'fix_url' => '',
+			),
+			array(
+				'id'      => 'policy_pages_linked',
+				'group'   => 'buy',
+				'test'    => fn( StoreResponses $responses ): ?bool => self::links_policy_pages( $responses->home_page() ),
+				'blocks'  => 'checkout',
+				'name'    => __( 'Home page links to your privacy and returns pages', 'woocommerce' ),
+				'label'   => __( 'Home page doesn\'t link to your privacy or returns page', 'woocommerce' ),
+				'why'     => __( 'Agents look for policy links on the home page before they send a shopper to your checkout.', 'woocommerce' ),
+				'fix'     => __( 'Add your privacy policy and refund and returns pages to the footer or a menu.', 'woocommerce' ),
+				'fix_url' => '',
+			),
+			array(
 				'id'      => 'product_return_policy_schema',
 				'group'   => 'buy',
 				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): bool => self::offer_has( $products, 'hasMerchantReturnPolicy' ) ),
@@ -285,7 +445,7 @@ class StoreOutputChecks {
 			array(
 				'id'      => 'product_shipping_schema',
 				'group'   => 'buy',
-				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): bool => self::offer_has( $products, 'shippingDetails' ) ),
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): ?bool => self::ships( $responses ) ? self::offer_has( $products, 'shippingDetails' ) : null ),
 				'blocks'  => 'listing',
 				'name'    => __( 'Product structured data gives shipping details', 'woocommerce' ),
 				'label'   => __( 'Product structured data has no shipping details', 'woocommerce' ),
@@ -296,7 +456,7 @@ class StoreOutputChecks {
 			array(
 				'id'      => 'product_buy_action_schema',
 				'group'   => 'buy',
-				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): bool => self::has_buy_action( $products ) ),
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): ?bool => self::has_buy_action( $products, $responses->product() ) ),
 				'blocks'  => 'listing',
 				'name'    => __( 'Product structured data says how to buy', 'woocommerce' ),
 				'label'   => __( 'Product structured data has no buy action', 'woocommerce' ),
@@ -305,6 +465,22 @@ class StoreOutputChecks {
 				'fix_url' => '',
 			),
 		);
+		if ( self::core_open_graph_on() ) {
+			$checks[] = array(
+				'id'       => 'open_graph_from_core',
+				'group'    => 'find',
+				'test'     => fn( StoreResponses $responses ): ?bool => $this->on_product_page( $responses, static fn( string $html ): bool => self::has_open_graph( $html, 'og:title' ) ),
+				'blocks'   => 'discovery',
+				'name'     => __( 'Product pages keep WooCommerce\'s Open Graph tags', 'woocommerce' ),
+				'label'    => __( 'Product pages are missing WooCommerce\'s Open Graph tags', 'woocommerce' ),
+				'why'      => __( 'WooCommerce adds og:title and og:image to product pages, so agents and social apps can show the product as a card.', 'woocommerce' ),
+				'fix'      => __( 'Usually an SEO, social or caching plugin, or your theme, rewrites the page. Check their Open Graph settings.', 'woocommerce' ),
+				'fix_url'  => '',
+				'conflict' => true,
+				'seen_at'  => 'product',
+				'plugins'  => 'open_graph',
+			);
+		}
 		if ( ! UcpUtils::is_enabled() ) {
 			return $checks;
 		}
@@ -320,6 +496,7 @@ class StoreOutputChecks {
 			'fix'      => __( 'Save Settings > Permalinks to refresh the rules. If it still fails, ask your host whether caching or a firewall blocks /.well-known/ucp.', 'woocommerce' ),
 			'fix_url'  => admin_url( 'options-permalink.php' ),
 			'conflict' => true,
+			'seen_at'  => home_url( '/.well-known/ucp' ),
 		);
 		$checks[] = array(
 			'id'       => 'ucp_profile_version',
@@ -333,15 +510,16 @@ class StoreOutputChecks {
 			'fix'      => __( 'Look for another plugin that adds UCP or agentic commerce, and turn off its UCP profile.', 'woocommerce' ),
 			'fix_url'  => admin_url( 'plugins.php' ),
 			'conflict' => true,
+			'seen_at'  => home_url( '/.well-known/ucp' ),
 		);
 		$checks[] = array(
 			'id'      => 'ucp_endpoints_live',
 			'group'   => 'access',
-			'test'    => fn( StoreResponses $responses ): ?bool => self::catalog_search_answers( $responses ),
+			'test'    => fn( StoreResponses $responses ): ?bool => self::ucp_endpoint_answers( $responses ),
 			'blocks'  => 'ucp',
-			'name'    => __( 'UCP catalog search answers', 'woocommerce' ),
-			'label'   => __( 'UCP catalog search doesn\'t answer', 'woocommerce' ),
-			'why'     => __( 'Agents search your catalog through UCP; when it fails they can\'t find your products.', 'woocommerce' ),
+			'name'    => __( 'UCP endpoint answers', 'woocommerce' ),
+			'label'   => __( 'UCP endpoint is blocked or doesn\'t answer', 'woocommerce' ),
+			'why'     => __( 'Agents search your catalog and build carts through this endpoint; when it\'s blocked they can\'t find your products.', 'woocommerce' ),
 			'fix'     => __( 'Ask your host or security plugin to allow requests to the WordPress REST API under /wp-json/wc/ucp/.', 'woocommerce' ),
 			'fix_url' => '',
 		);
@@ -370,6 +548,41 @@ class StoreOutputChecks {
 	}
 
 	/**
+	 * The address a conflict was seen at: 'product' for the product page the scan read, else the address itself.
+	 *
+	 * @param string         $seen_at   'product' or an address.
+	 * @param StoreResponses $responses Store responses.
+	 */
+	private static function seen_at( string $seen_at, StoreResponses $responses ): string {
+		if ( 'product' !== $seen_at ) {
+			return $seen_at;
+		}
+		$product = $responses->product();
+		return null === $product ? '' : (string) $product->get_permalink();
+	}
+
+	/**
+	 * Names of the active plugins known to output something, in the order of OUTPUT_PLUGINS.
+	 *
+	 * @param string $output Key of OUTPUT_PLUGINS.
+	 * @return array<int, string>
+	 */
+	private static function active_output_plugins( string $output ): array {
+		if ( ! function_exists( 'is_plugin_active' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+		return array_values( array_filter( self::OUTPUT_PLUGINS[ $output ] ?? array(), 'is_plugin_active', ARRAY_FILTER_USE_KEY ) );
+	}
+
+	/**
+	 * Whether WooCommerce adds Open Graph tags to product pages. It needs WordPress's template output buffer.
+	 */
+	private static function core_open_graph_on(): bool {
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in StructuredData\OpenGraph.
+		return function_exists( 'wp_start_template_enhancement_output_buffer' ) && (bool) apply_filters( 'woocommerce_enable_open_graph', true );
+	}
+
+	/**
 	 * The robots.txt crawlers get. '' when the store answered that there is none.
 	 * Null when it could not be read: the request failed, or the body is a page.
 	 *
@@ -395,7 +608,7 @@ class StoreOutputChecks {
 	 * @param string $robots The robots.txt text.
 	 * @return string[]
 	 */
-	public static function sitemap_urls( string $robots ): array {
+	private static function sitemap_urls( string $robots ): array {
 		$listed   = array_slice( ( new RobotsTxt( $robots ) )->sitemaps(), 0, self::MAX_LISTED_SITEMAPS );
 		$defaults = array( '/sitemap_index.xml', '/sitemap.xml' );
 		if ( function_exists( 'wp_sitemaps_get_server' ) && wp_sitemaps_get_server()->sitemaps_enabled() ) {
@@ -445,6 +658,7 @@ class StoreOutputChecks {
 	 * @param array<int, array<string, mixed>> $products Product items.
 	 */
 	private static function has_required_fields( array $products ): bool {
+		$products = self::with_variants( $products );
 		foreach ( array( 'name', 'image', 'offers' ) as $field ) {
 			if ( array() === array_filter( $products, static fn( array $product ): bool => ! empty( $product[ $field ] ) ) ) {
 				return false;
@@ -476,16 +690,7 @@ class StoreOutputChecks {
 	 * @param array<int, array<string, mixed>> $products Product items.
 	 */
 	private static function has_priced_offer( array $products ): bool {
-		$offers = array();
-		foreach ( $products as $product ) {
-			array_push( $offers, ...self::as_list( $product['offers'] ?? null ) );
-		}
-		// An AggregateOffer can list its offers; read them too, one level down.
-		$nested = array();
-		foreach ( $offers as $offer ) {
-			array_push( $nested, ...self::as_list( $offer['offers'] ?? null ) );
-		}
-		foreach ( array_merge( $offers, $nested ) as $offer ) {
+		foreach ( self::offers( $products ) as $offer ) {
 			$prices = array_merge( array( $offer['price'] ?? null, $offer['lowPrice'] ?? null ), array_column( self::as_list( $offer['priceSpecification'] ?? null ), 'price' ) );
 			if ( ! empty( $offer['availability'] ) && array() !== array_filter( $prices, array( self::class, 'has_price_amount' ) ) ) {
 				return true;
@@ -524,7 +729,17 @@ class StoreOutputChecks {
 	 * @param callable       $test      Test, given the HTML and the response headers.
 	 */
 	private function on_pages( StoreResponses $responses, callable $test ): ?bool {
-		$pages = array_filter( array( $responses->home_page(), $responses->product_page() ) );
+		return self::on_loaded( array( $responses->home_page(), $responses->product_page() ), $test );
+	}
+
+	/**
+	 * Whether a test passes on each page that loaded. Null when none loaded.
+	 *
+	 * @param array<int, array{status:int,body:string,headers:array<string,string>}|null> $pages Pages, null for one that didn't load.
+	 * @param callable                                                                    $test  Test, given the HTML and the response headers.
+	 */
+	private static function on_loaded( array $pages, callable $test ): ?bool {
+		$pages = array_filter( $pages );
 		if ( array() === $pages ) {
 			return null;
 		}
@@ -609,9 +824,7 @@ class StoreOutputChecks {
 		return $this->on_pages(
 			$responses,
 			static function ( string $html, array $headers ): bool {
-				$rules   = PageMarkup::meta( $html, 'name', static fn( string $name ): bool => 'robots' === $name || str_ends_with( $name, 'bot' ) );
-				$rules[] = $headers['x-robots-tag'] ?? '';
-				$rules   = strtolower( implode( ', ', $rules ) );
+				$rules = self::robots_rules( $html, $headers );
 				if ( preg_match( '/(?<![\w-])nosnippet\b/', $rules ) ) {
 					return false;
 				}
@@ -705,7 +918,7 @@ class StoreOutputChecks {
 	 * @param string                           $property Offer property.
 	 */
 	private static function offer_has( array $products, string $property ): bool {
-		foreach ( $products as $product ) {
+		foreach ( self::with_variants( $products ) as $product ) {
 			foreach ( self::as_list( $product['offers'] ?? null ) as $offer ) {
 				if ( ! empty( $offer[ $property ] ) ) {
 					return true;
@@ -716,12 +929,40 @@ class StoreOutputChecks {
 	}
 
 	/**
-	 * Whether a Product item or one of its offers has a BuyAction potentialAction.
+	 * Whether the scanned product needs shipping. A product that doesn't ship has no shipping details to give.
+	 *
+	 * @param StoreResponses $responses Store responses.
+	 */
+	private static function ships( StoreResponses $responses ): bool {
+		$product = $responses->product();
+		return null === $product || $product->needs_shipping();
+	}
+
+	/**
+	 * The Product items and the variants a ProductGroup lists in hasVariant. A variable product
+	 * printed as a ProductGroup carries its offers and buy actions on the variants, not the group.
 	 *
 	 * @param array<int, array<string, mixed>> $products Product items.
+	 * @return array<int, array<string, mixed>>
 	 */
-	private static function has_buy_action( array $products ): bool {
+	private static function with_variants( array $products ): array {
+		$items = $products;
 		foreach ( $products as $product ) {
+			array_push( $items, ...self::as_list( $product['hasVariant'] ?? null ) );
+		}
+		return $items;
+	}
+
+	/**
+	 * Whether a Product item, a variant or one of their offers has a BuyAction potentialAction.
+	 * Null for a variable product without one: WooCommerce doesn't link a variable product's
+	 * page to checkout, only a chosen variation.
+	 *
+	 * @param array<int, array<string, mixed>> $products Product items.
+	 * @param \WC_Product|null                 $scanned  The scanned product.
+	 */
+	private static function has_buy_action( array $products, ?\WC_Product $scanned = null ): ?bool {
+		foreach ( self::with_variants( $products ) as $product ) {
 			$items = array_merge( array( $product ), self::as_list( $product['offers'] ?? null ) );
 			foreach ( $items as $item ) {
 				foreach ( self::as_list( $item['potentialAction'] ?? null ) as $action ) {
@@ -731,29 +972,22 @@ class StoreOutputChecks {
 				}
 			}
 		}
-		return false;
+		return null !== $scanned && $scanned->is_type( 'variable' ) ? null : false;
 	}
 
 	/**
-	 * Whether a catalog search through the UCP endpoint answers with a product list, using
-	 * the endpoint in the served profile, or WooCommerce's when the profile isn't served.
+	 * Whether the UCP endpoint the served profile names, or WooCommerce's when the profile isn't served,
+	 * answers a plain GET with JSON. Nothing is searched, so the check doesn't count as agent traffic;
+	 * a firewall or plugin that blocks agents blocks this request too.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 */
-	private static function catalog_search_answers( StoreResponses $responses ): ?bool {
-		$endpoint = self::ucp_endpoint( $responses ) ?? rest_url( 'wc/ucp/v1' );
-		$response = $responses->post_json(
-			untrailingslashit( $endpoint ) . '/catalog/search',
-			array(
-				'filters'    => array( 'price' => array( 'min' => 0 ) ),
-				'pagination' => array( 'limit' => 1 ),
-			)
-		);
+	private static function ucp_endpoint_answers( StoreResponses $responses ): ?bool {
+		$response = $responses->get( untrailingslashit( self::ucp_endpoint( $responses ) ?? rest_url( 'wc/ucp/v1' ) ) );
 		if ( null === $response || $response['status'] >= 500 ) {
 			return null;
 		}
-		$body = json_decode( $response['body'], true );
-		return 200 === $response['status'] && is_array( $body['products'] ?? null );
+		return 200 === $response['status'] && is_array( json_decode( $response['body'], true ) );
 	}
 
 	/**
@@ -802,5 +1036,296 @@ class StoreOutputChecks {
 		// The fixed part of the product base, before a tag such as %product_cat%.
 		$base = trim( (string) strtok( (string) ( wc_get_permalink_structure()['product_base'] ?? '' ), '%' ), '/' );
 		return '' !== $base && 1 === preg_match( '#<loc>[^<]*/' . preg_quote( $base, '#' ) . '/[^<]*</loc>#i', $xml );
+	}
+
+	/**
+	 * The page's robots meta tags and X-Robots-Tag header in lowercase, rules for one crawler included.
+	 *
+	 * @param string                $html    Page HTML.
+	 * @param array<string, string> $headers Response headers.
+	 */
+	private static function robots_rules( string $html, array $headers ): string {
+		$rules   = PageMarkup::meta( $html, 'name', static fn( string $name ): bool => 'robots' === $name || str_ends_with( $name, 'bot' ) );
+		$rules[] = $headers['x-robots-tag'] ?? '';
+		return strtolower( implode( ', ', $rules ) );
+	}
+
+	/**
+	 * The home, shop and product page URLs a visitor would open first; shop and product only when the store has them.
+	 *
+	 * @param StoreResponses $responses Store responses.
+	 * @return string[]
+	 */
+	private static function store_page_urls( StoreResponses $responses ): array {
+		$product = $responses->product();
+		return array_values( array_filter( array( home_url( '/' ), wc_get_page_permalink( 'shop', '' ), null === $product ? '' : (string) $product->get_permalink() ) ) );
+	}
+
+	/**
+	 * Whether the home, shop and product page open without signing in. False on a 401 or 403, or a
+	 * redirect to the sign-in page. Null when one couldn't be loaded and none asked to sign in.
+	 *
+	 * @param StoreResponses $responses Store responses.
+	 */
+	private function pages_public( StoreResponses $responses ): ?bool {
+		$unknown = false;
+		$account = (string) wp_parse_url( wc_get_page_permalink( 'myaccount', '' ), PHP_URL_PATH );
+		foreach ( self::store_page_urls( $responses ) as $url ) {
+			$response = $responses->get( $url );
+			if ( null === $response ) {
+				$path = (string) wp_parse_url( $responses->redirects( $url )['stopped_at'], PHP_URL_PATH );
+				if ( '' !== $path && ( str_ends_with( $path, '/wp-login.php' ) || ( '' !== $account && '/' !== $account && untrailingslashit( $path ) === untrailingslashit( $account ) ) ) ) {
+					return false;
+				}
+				$unknown = true;
+			} elseif ( in_array( $response['status'], array( 401, 403 ), true ) ) {
+				return false;
+			}
+		}
+		return $unknown ? null : true;
+	}
+
+	/**
+	 * Whether the store's first sitemap has lastmod dates, in a sitemap index or in the first sitemap it lists.
+	 *
+	 * @param StoreResponses $responses Store responses.
+	 */
+	private function sitemap_has_lastmod( StoreResponses $responses ): ?bool {
+		$robots = $this->robots_txt( $responses );
+		// Without robots.txt the store's own sitemap list isn't known.
+		$unknown = null === $robots;
+		foreach ( self::sitemap_urls( (string) $robots ) as $url ) {
+			$response = $responses->get( $url );
+			if ( null === $response || $response['status'] >= 500 ) {
+				$unknown = true;
+				continue;
+			}
+			if ( 200 !== $response['status'] || 1 !== preg_match( '/<(urlset|sitemapindex)[\s>]/i', $response['body'] ) ) {
+				continue;
+			}
+			if ( false !== stripos( $response['body'], '<lastmod' ) ) {
+				return true;
+			}
+			if ( 1 !== preg_match( '#<sitemapindex.*?<loc>\s*(.+?)\s*</loc>#is', $response['body'], $first ) ) {
+				return false;
+			}
+			$child = $responses->get( html_entity_decode( $first[1], ENT_QUOTES | ENT_XML1 ) );
+			return null === $child || $child['status'] >= 500 ? null : 200 === $child['status'] && false !== stripos( $child['body'], '<lastmod' );
+		}
+		return $unknown ? null : false;
+	}
+
+	/**
+	 * Whether the page links to an RSS or Atom feed with a link tag.
+	 *
+	 * @param string $html Page HTML.
+	 */
+	private static function has_feed_link( string $html ): bool {
+		$tags = new \WP_HTML_Tag_Processor( $html );
+		while ( $tags->next_tag( array( 'tag_name' => 'link' ) ) ) {
+			$rel  = strtolower( (string) $tags->get_attribute( 'rel' ) );
+			$type = strtolower( trim( (string) $tags->get_attribute( 'type' ) ) );
+			if ( in_array( 'alternate', explode( ' ', (string) preg_replace( '/\s+/', ' ', $rel ) ), true ) && in_array( $type, array( 'application/rss+xml', 'application/atom+xml' ), true ) && '' !== trim( (string) $tags->get_attribute( 'href' ) ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Whether the page's html element has a lang attribute and the page declares its encoding,
+	 * in a meta tag or the Content-Type header. Null when the page didn't load.
+	 *
+	 * @param array{status:int,body:string,headers:array<string,string>}|null $page Page.
+	 */
+	private static function has_lang_and_charset( ?array $page ): ?bool {
+		if ( null === $page ) {
+			return null;
+		}
+		$tags    = new \WP_HTML_Tag_Processor( $page['body'] );
+		$lang    = $tags->next_tag( array( 'tag_name' => 'html' ) ) && '' !== trim( (string) $tags->get_attribute( 'lang' ) );
+		$charset = false !== stripos( $page['headers']['content-type'] ?? '', 'charset=' );
+		$tags    = new \WP_HTML_Tag_Processor( $page['body'] );
+		while ( ! $charset && $tags->next_tag( array( 'tag_name' => 'meta' ) ) ) {
+			$charset = null !== $tags->get_attribute( 'charset' ) || false !== stripos( (string) $tags->get_attribute( 'content' ), 'charset=' );
+		}
+		return $lang && $charset;
+	}
+
+	/**
+	 * Whether every image has an alt attribute. An empty alt marks a decorative image and counts;
+	 * images hidden from assistive technology don't need one.
+	 *
+	 * @param string $html Page HTML.
+	 */
+	private static function images_have_alt( string $html ): bool {
+		$tags = new \WP_HTML_Tag_Processor( $html );
+		while ( $tags->next_tag( array( 'tag_name' => 'img' ) ) ) {
+			$hidden = 'true' === strtolower( (string) $tags->get_attribute( 'aria-hidden' ) ) || in_array( strtolower( (string) $tags->get_attribute( 'role' ) ), array( 'presentation', 'none' ), true );
+			if ( ! $hidden && null === $tags->get_attribute( 'alt' ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * How many tags of a name the page has.
+	 *
+	 * @param string $html Page HTML.
+	 * @param string $name Tag name.
+	 */
+	private static function count_tags( string $html, string $name ): int {
+		$tags  = new \WP_HTML_Tag_Processor( $html );
+		$count = 0;
+		while ( $tags->next_tag( array( 'tag_name' => $name ) ) ) {
+			++$count;
+		}
+		return $count;
+	}
+
+	/**
+	 * Whether a Product item names the product, and, for a product with one price, an offer has that price
+	 * with or without tax. Offers without a price aren't judged here: product_offer_jsonld reports them.
+	 *
+	 * @param array<int, array<string, mixed>> $products Product items.
+	 * @param \WC_Product|null                 $product  The product of the page.
+	 */
+	private static function schema_matches( array $products, ?\WC_Product $product ): ?bool {
+		if ( null === $product ) {
+			return null;
+		}
+		$name  = strtolower( trim( html_entity_decode( $product->get_name(), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) );
+		$named = array_filter( $products, static fn( array $item ): bool => is_string( $item['name'] ?? null ) && strtolower( trim( html_entity_decode( $item['name'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) ) === $name );
+		if ( array() === $named ) {
+			return false;
+		}
+		if ( '' === $product->get_price() || $product->is_type( 'variable' ) ) {
+			return true;
+		}
+		$prices = array();
+		foreach ( self::offers( $products ) as $offer ) {
+			foreach ( array_merge( array( $offer['price'] ?? null ), array_column( self::as_list( $offer['priceSpecification'] ?? null ), 'price' ) ) as $price ) {
+				if ( is_numeric( $price ) ) {
+					$prices[] = (float) $price;
+				}
+			}
+		}
+		if ( array() === $prices ) {
+			return true;
+		}
+		$expected = array( (float) $product->get_price(), (float) wc_get_price_including_tax( $product ), (float) wc_get_price_excluding_tax( $product ) );
+		foreach ( $prices as $price ) {
+			foreach ( $expected as $amount ) {
+				if ( abs( $price - $amount ) < 0.01 ) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Whether the page of a published product with reviews has a rating in its JSON-LD. True when
+	 * reviews are off or no product has any, since there is nothing to mark up.
+	 *
+	 * @param StoreResponses $responses Store responses.
+	 */
+	private function reviews_marked_up( StoreResponses $responses ): ?bool {
+		if ( 'yes' !== get_option( 'woocommerce_enable_reviews', 'yes' ) ) {
+			return true;
+		}
+		// wc_get_products() ignores meta_query, so the reviewed product is looked up as a post.
+		$ids     = get_posts(
+			array(
+				'post_type'        => 'product',
+				'post_status'      => ProductStatus::PUBLISH,
+				'has_password'     => false,
+				'posts_per_page'   => 5,
+				'fields'           => 'ids',
+				'orderby'          => 'date',
+				'order'            => 'DESC',
+				'suppress_filters' => false,
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Five rows, once per background scan.
+				'meta_query'       => array(
+					array(
+						'key'     => '_wc_review_count',
+						'value'   => 0,
+						'compare' => '>',
+						'type'    => 'NUMERIC',
+					),
+				),
+			)
+		);
+		$product = null;
+		foreach ( $ids as $id ) {
+			$candidate = wc_get_product( (int) $id );
+			if ( $candidate instanceof \WC_Product && $candidate->is_visible() ) {
+				$product = $candidate;
+				break;
+			}
+		}
+		if ( null === $product ) {
+			return true;
+		}
+		$page = $responses->get( (string) $product->get_permalink() );
+		if ( null === $page || 200 !== $page['status'] ) {
+			return null;
+		}
+		foreach ( JsonLd::items( $page['body'], 'Product', 'ProductGroup' ) as $item ) {
+			if ( ! empty( $item['aggregateRating'] ) || ! empty( $item['review'] ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Whether the home page links to the privacy policy and refund and returns pages the store set.
+	 * Null when the page didn't load or neither page is set: the page checks report a missing page.
+	 *
+	 * @param array{status:int,body:string,headers:array<string,string>}|null $home Home page.
+	 */
+	private static function links_policy_pages( ?array $home ): ?bool {
+		$pages = array_filter(
+			array_map(
+				static fn( string $option ): int => (int) get_option( $option ),
+				array( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION )
+			),
+			static fn( int $id ): bool => $id > 0 && 'publish' === get_post_status( $id )
+		);
+		if ( null === $home || array() === $pages ) {
+			return null;
+		}
+		$normalize = static fn( string $url ): string => untrailingslashit( (string) preg_replace( '#^https?:#i', '', html_entity_decode( $url, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) );
+		$links     = array();
+		$tags      = new \WP_HTML_Tag_Processor( $home['body'] );
+		while ( $tags->next_tag( array( 'tag_name' => 'a' ) ) ) {
+			$links[] = $normalize( (string) \WP_Http::make_absolute_url( (string) $tags->get_attribute( 'href' ), home_url( '/' ) ) );
+		}
+		foreach ( $pages as $id ) {
+			if ( ! in_array( $normalize( (string) get_permalink( $id ) ), $links, true ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * The offers of the Product items, with those an AggregateOffer lists, one level down.
+	 *
+	 * @param array<int, array<string, mixed>> $products Product items.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function offers( array $products ): array {
+		$offers = array();
+		foreach ( self::with_variants( $products ) as $product ) {
+			array_push( $offers, ...self::as_list( $product['offers'] ?? null ) );
+		}
+		$nested = array();
+		foreach ( $offers as $offer ) {
+			array_push( $nested, ...self::as_list( $offer['offers'] ?? null ) );
+		}
+		return array_merge( $offers, $nested );
 	}
 }

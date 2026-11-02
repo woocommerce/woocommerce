@@ -405,6 +405,39 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A ProductGroup whose offers sit on its variants passes the product checks. One whose variants have no offer fails the required fields and offer checks.
+	 */
+	public function test_product_group_offers_on_variants(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$path    = self::path_of( $product );
+		$group   = array(
+			'@context'   => 'https://schema.org',
+			'@type'      => 'ProductGroup',
+			'name'       => 'Dummy Product',
+			'image'      => 'https://example.org/image.jpg',
+			'variesBy'   => 'https://schema.org/color',
+			'hasVariant' => array(
+				array(
+					'@type'  => 'Product',
+					'name'   => 'Dummy Product - Red',
+					'offers' => array(
+						'@type'        => 'Offer',
+						'price'        => '10.00',
+						'availability' => 'https://schema.org/InStock',
+					),
+				),
+			),
+		);
+		$this->serve( array( $path => array( 200, self::page_with( array( $group ) ) ) ) );
+		$this->assertSame( array( true, true, true ), $this->product_results() );
+
+		remove_all_filters( 'pre_http_request' );
+		unset( $group['hasVariant'][0]['offers'] );
+		$this->serve( array( $path => array( 200, self::page_with( array( $group ) ) ) ) );
+		$this->assertSame( array( true, false, false ), $this->product_results() );
+	}
+
+	/**
 	 * @testdox A product page without Product JSON-LD fails only the presence check. One without a price fails only the offer check. A price written with a currency still counts.
 	 */
 	public function test_missing_product_jsonld(): void {
