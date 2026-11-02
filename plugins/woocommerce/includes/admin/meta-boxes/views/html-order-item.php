@@ -119,7 +119,6 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 			* @param   string      $context The context in which the quantity editor is shown, 'edit', 'refund' or 'add'.
 			*/
 			$step_refund = apply_filters( 'woocommerce_quantity_input_step_admin', $step, $product, 'refund' );
-			$step_edit   = wc_get_container()->get( ItemQuantityLimits::class )->get_quantity_input_step( $item, $product );
 
 			/**
 			* Filter to change the product quantity minimum in the order editor of the admin area.
@@ -136,6 +135,7 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 			*/
 			$min_refund = apply_filters( 'woocommerce_quantity_input_min_admin', '0', $product, 'refund' );
 			$min_edit   = wc_get_container()->get( ItemQuantityLimits::class )->get_quantity_input_min( $item, $product );
+			$step_edit  = wc_get_container()->get( ItemQuantityLimits::class )->get_quantity_input_step( $item, $product, (float) $min_edit );
 		?>
 		<div class="edit" style="display: none;">
 			<input type="number" step="<?php echo esc_attr( $step_edit ); ?>" min="<?php echo esc_attr( $min_edit ); ?>" autocomplete="off" name="order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" value="<?php echo esc_attr( $item->get_quantity() ); ?>" data-qty="<?php echo esc_attr( $item->get_quantity() ); ?>" size="4" class="quantity" />

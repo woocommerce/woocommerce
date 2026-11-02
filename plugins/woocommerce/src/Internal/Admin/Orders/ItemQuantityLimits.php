@@ -27,9 +27,9 @@ class ItemQuantityLimits {
 	 * Get the minimum quantity accepted for an existing order item in the admin editor.
 	 *
 	 * @since 11.2.0
-	 * @param WC_Order_Item         $item    Line item being edited.
-	 * @param WC_Product|false|null $product The item's product when the caller already
-	 *                                       resolved it; null to resolve it here.
+	 * @param WC_Order_Item        $item    Line item being edited.
+	 * @param WC_Product|bool|null $product The item's product when the caller already
+	 *                                      resolved it; null to resolve it here.
 	 * @return string Numeric string, filtered through 'woocommerce_quantity_input_min_admin'.
 	 */
 	public function get_quantity_input_min( WC_Order_Item $item, $product = null ): string {
@@ -53,34 +53,46 @@ class ItemQuantityLimits {
 	/**
 	 * Get the quantity stepping accepted for an existing order item in the admin editor.
 	 *
-	 * When an existing item has a stored quantity that does not align with the product's
-	 * step (e.g. decimal quantities placed through the REST API or extensions), the default
-	 * step is 'any' to keep those orders editable.
+	 * When the store supports decimal quantities (e.g. via the woocommerce_stock_amount
+	 * filter set to floatval), stepping defaults to 'any' on every order so merchants can
+	 * enter decimals freely. On integer stores, stepping defaults to 1 (or the product's step),
+	 * falling back to 'any' when an existing item has a stored quantity that does not align
+	 * with the product's step (e.g. decimal quantities placed through the REST API or
+	 * extensions) to keep those orders editable.
+	 *
+	 * Plugins can still narrow the step with 'woocommerce_quantity_input_step_admin'.
 	 *
 	 * @since 11.2.0
-	 * @param WC_Order_Item         $item    Line item being edited.
-	 * @param WC_Product|false|null $product The item's product when the caller already
-	 *                                       resolved it; null to resolve it here.
+	 * @param WC_Order_Item        $item    Line item being edited.
+	 * @param WC_Product|bool|null $product The item's product when the caller already
+	 *                                      resolved it; null to resolve it here.
+	 * @param float|null           $min     The item's minimum quantity when the caller already
+	 *                                      resolved it; null to resolve it here.
 	 * @return string Numeric string or 'any', filtered through 'woocommerce_quantity_input_step_admin'.
 	 */
-	public function get_quantity_input_step( WC_Order_Item $item, $product = null ): string {
+	public function get_quantity_input_step( WC_Order_Item $item, $product = null, ?float $min = null ): string {
 		if ( null === $product ) {
 			$product = $item instanceof WC_Order_Item_Product ? $item->get_product() : false;
 		}
 
-		$base_step = $product ? $product->get_purchase_quantity_step() : 1;
-		$base_step = is_numeric( $base_step ) && (float) $base_step > 0 ? (float) $base_step : 1.0;
+		$product_obj = $product instanceof WC_Product ? $product : null;
+		$base_step   = $product_obj ? $product_obj->get_purchase_quantity_step() : 1;
+		$base_step   = is_numeric( $base_step ) && (float) $base_step > 0 ? (float) $base_step : 1.0;
 
 		$stored_qty = (float) $item->get_quantity();
-		$min        = (float) $this->get_quantity_input_min( $item, $product );
+		$min_val    = null !== $min ? $min : (float) $this->get_quantity_input_min( $item, $product );
 
-		// If the stored quantity does not align with the step, default to 'any'
-		// so existing orders remain editable and do not block the admin form submission.
-		$division = ( $stored_qty - $min ) / $base_step;
-		if ( abs( $division - round( $division ) ) > 0.000001 ) {
+		if ( ! wc_is_stock_amount_integer() ) {
 			$default = 'any';
 		} else {
-			$default = (string) $base_step;
+			// On integer stores, if the stored quantity does not align with the step, default to 'any'
+			// so existing orders remain editable and do not block the admin form submission.
+			$division = ( $stored_qty - $min_val ) / $base_step;
+			if ( abs( $division - round( $division ) ) > 0.000001 ) {
+				$default = 'any';
+			} else {
+				$default = (string) $base_step;
+			}
 		}
 
 		/**
@@ -122,8 +134,12 @@ class ItemQuantityLimits {
 			throw $this->below_min_exception( $product->get_name(), $min );
 		}
 
-		$base_step = $product->get_purchase_quantity_step();
-		$base_step = is_numeric( $base_step ) && (float) $base_step > 0 ? (string) $base_step : '1';
+		if ( ! wc_is_stock_amount_integer() ) {
+			$base_step = 'any';
+		} else {
+			$product_step = $product->get_purchase_quantity_step();
+			$base_step    = is_numeric( $product_step ) && (float) $product_step > 0 ? (string) $product_step : '1';
+		}
 
 		/**
 		 * This filter is documented in includes/admin/meta-boxes/views/html-order-item.php
@@ -133,7 +149,7 @@ class ItemQuantityLimits {
 		$step = apply_filters( 'woocommerce_quantity_input_step_admin', $base_step, $product, 'add' );
 
 		if ( 'any' !== $step ) {
-			$step_num = is_numeric( $step ) && (float) $step > 0 ? (float) $step : (float) $base_step;
+			$step_num = is_numeric( $step ) && (float) $step > 0 ? (float) $step : (float) ( is_numeric( $base_step ) ? $base_step : 1.0 );
 			$division = ( $qty - $min ) / $step_num;
 			if ( abs( $division - round( $division ) ) > 0.000001 ) {
 				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- step_mismatch_exception() strips and decodes the message for a JS alert.
@@ -159,18 +175,22 @@ class ItemQuantityLimits {
 			return;
 		}
 
-		$has_min_filter  = has_filter( 'woocommerce_quantity_input_min_admin' );
-		$has_step_filter = has_filter( 'woocommerce_quantity_input_step_admin' ) || has_filter( 'woocommerce_quantity_input_step' );
-		$order_items     = null;
+		$has_min_filter   = has_filter( 'woocommerce_quantity_input_min_admin' );
+		$has_step_filter  = has_filter( 'woocommerce_quantity_input_step_admin' ) || has_filter( 'woocommerce_quantity_input_step' );
+		$is_decimal_store = ! wc_is_stock_amount_integer();
+		$order_items      = null;
 
 		foreach ( $items['order_item_qty'] as $item_id => $posted_qty ) {
 			$raw_qty = wc_format_decimal( wp_unslash( $posted_qty ) );
 			$qty     = is_numeric( $raw_qty ) ? (float) $raw_qty : (float) wc_stock_amount( wp_unslash( $posted_qty ) );
 
-			// Fast path: when a non-negative integer quantity is posted and no filters
+			// Fast path:
+			// - On integer stores, when a non-negative integer quantity is posted and no filters
 			// are attached, it can neither violate the default minimum (0 or negative)
 			// nor the default step (1), so skip per-item and product lookups.
-			if ( $qty >= 0 && ! $has_min_filter && ! $has_step_filter && abs( $qty - round( $qty ) ) < 0.000001 ) {
+			// - On decimal stores, when a non-negative quantity is posted and no filters
+			// are attached, default min is 0 and step is 'any', so skip lookups.
+			if ( $qty >= 0 && ! $has_min_filter && ! $has_step_filter && ( $is_decimal_store || abs( $qty - round( $qty ) ) < 0.000001 ) ) {
 				continue;
 			}
 
@@ -184,14 +204,15 @@ class ItemQuantityLimits {
 				continue;
 			}
 
-			$min = (float) $this->get_quantity_input_min( $item );
+			$product = $item->get_product();
+			$min     = (float) $this->get_quantity_input_min( $item, $product );
 
 			if ( $qty < $min ) {
 				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- below_min_exception() strips and decodes the message for a JS alert.
 				throw $this->below_min_exception( $item->get_name(), $min );
 			}
 
-			$step = $this->get_quantity_input_step( $item );
+			$step = $this->get_quantity_input_step( $item, $product, $min );
 
 			if ( 'any' !== $step ) {
 				$step_num = (float) $step;

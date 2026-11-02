@@ -1272,6 +1272,8 @@ class WC_AJAX {
 					continue;
 				}
 				$product_id = absint( $item['id'] );
+				$raw_qty    = wc_format_decimal( wp_unslash( $item['qty'] ) );
+				$check_qty  = is_numeric( $raw_qty ) ? (float) $raw_qty : (float) wc_stock_amount( $item['qty'] );
 				$qty        = wc_stock_amount( $item['qty'] );
 				$product    = wc_get_product( $product_id );
 
@@ -1286,7 +1288,7 @@ class WC_AJAX {
 					throw new Exception( wp_strip_all_tags( html_entity_decode( $message, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) ) );
 				}
 
-				wc_get_container()->get( ItemQuantityLimits::class )->validate_new_item_quantity( (float) $qty, $product );
+				wc_get_container()->get( ItemQuantityLimits::class )->validate_new_item_quantity( $check_qty, $product );
 
 				$validation_error = new WP_Error();
 				$validation_error = apply_filters( 'woocommerce_ajax_add_order_item_validation', $validation_error, $product, $order, $qty );
