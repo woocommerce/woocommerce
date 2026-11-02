@@ -4,7 +4,7 @@ Checks published simple and variable products against the product data specs of 
 
 ## What the checks read
 
-The checks read product data and store settings, because most gaps are empty fields only the merchant can fill, and a check can name the product and field. When data is filled in but a store output (UCP catalog, product structured data) doesn't send it, that is a bug fixed in that output's code, not a check. What a store can't see from its own data, such as crawler blocks at a CDN, `llms.txt` or page markup from themes and plugins, is left to an outside scan of the store's public pages.
+The checks read product data and store settings, because most gaps are empty fields only the merchant can fill, and a check can name the product and field. When data is filled in but a store output (UCP catalog, product structured data) doesn't send it, that is a bug fixed in that output's code, not a check. Where a plugin can add or replace what core builds (robots.txt, sitemaps, `llms.txt`, page markup), store checks read what the store returns instead (`StoreOutputChecks`), and pass when any source provides the item. What the store can't see from inside, such as crawler blocks at a CDN, is left to an outside scan of the store's public pages.
 
 ## Channels
 
@@ -51,6 +51,10 @@ Only published simple and variable products are checked, the types agents suppor
 
 Store-wide conditions (`StoreConditions`) are reported first because they affect every product: coming soon mode and "Discourage search engines" hide the products, UCP off and no HTTPS hide the catalog from UCP agents, and guest checkout off stops agents placing orders. Missing policy pages and order emails off weaken agent orders. Each condition's `blocks` says which, so a reader can tell a hidden store from one agents can't buy from.
 
+## Store output checks
+
+`StoreOutputChecks` runs in the background scan only. It loads the store's own pages as a logged-out visitor (`StoreResponses`): only URLs on the store's host, redirects followed on that host only, a 5 second timeout and 512 KB per response, each URL once per scan, nothing at all in coming soon mode. Its results go into the report's `store_checks` with the same keys, with `ok` set to `null` when the store couldn't load its own page ("Couldn't check"). They are always `recommended`, so they never block the UCP switch.
+
 ## Report format
 
 `AgentReadiness::get_report()` returns:
@@ -63,6 +67,7 @@ array(
 	'unsupported_types'   => 6,    // Not checked: grouped, external, subscription, bundle and other types agents can find but can't add to a cart yet.
 	'store_checks' => array(
 		// blocks: 'listing' (every product on every channel), 'ucp' (the catalog for UCP agents) or 'checkout' (agent orders).
+		// ok: true, false, or null when a store output check couldn't load the page.
 		array( 'id' => 'launched', 'ok' => true, 'blocks' => 'listing', 'level' => 'required', 'name' => '…', 'label' => '…', 'why' => '…', 'fix' => '…', 'fix_url' => '…' ),
 	),
 	'channels'     => array(
@@ -125,6 +130,7 @@ WooCommerce > Settings > Agentic commerce (`AgenticCommerceSettings`, `AgenticCo
 - The UCP switch, first. It saves through `POST wc/v3/agent-readiness/ucp` (`{ "enabled": true }`). A failing required check keeps it from being turned on, and that POST answers 409; turning it off still works. In coming soon mode the card says agents can't shop the store yet and links to Site visibility.
 - Product counts from the stored report (`products`, `hidden_from_catalog`, `unsupported_types`), each linking to a filtered product list.
 - Status: the store conditions from `StoreConditions`, the same list the readiness report shows, in three groups. Required lists failing `required` conditions (coming soon mode and HTTPS) and puts the status at Action needed; Recommended lists failing `recommended` ones, such as a missing privacy, terms, refund and returns, or shipping policy page (policy pages are not required by the UCP spec); Done lists the passing ones by their passing state (`name`). Each open condition says what to do and links to it; a chosen policy page that isn't published links to its editor.
+- Agent readiness: the store output checks from the stored report, since they only run in the scan. They are never required, so they don't affect the switch or Status.
 - Store policy pages. Refund and returns, privacy and terms are the existing options, so they stay in sync with Advanced > Page setup and Settings > Privacy; shipping policy, FAQ and warranty are new. They are for the policy links a UCP checkout can carry (`links`); the UCP endpoints don't send them yet. The dropdowns list published pages other than the cart, checkout, shop and My account pages, and saving leaves a stored page in place even when it's a draft or one of those store pages, which then fails its check.
 - The store address agents start from (`/.well-known/ucp`), with Copy.
 - Placeholders for parts that aren't built yet: Test your setup (WOOAI-1619) and Security (WOOAI-1620).
