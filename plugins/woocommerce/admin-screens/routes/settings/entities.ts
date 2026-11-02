@@ -70,13 +70,17 @@ function getPaymentGatewayEntity(
 }
 
 /**
- * Describe Core's example page, which uses the existing v3 payment gateways endpoint.
+ * Describe Core's offline payment method pages.
  */
 export function getCoreEntities(): SettingsEntityConfig[] {
 	return [
 		getPaymentGatewayEntity(
 			'cheque',
 			__( 'Check payments', 'woocommerce' )
+		),
+		getPaymentGatewayEntity(
+			'cod',
+			__( 'Cash on delivery', 'woocommerce' )
 		),
 	];
 }

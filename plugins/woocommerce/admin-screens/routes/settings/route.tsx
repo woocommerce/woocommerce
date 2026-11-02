@@ -9,6 +9,7 @@ import { notFound } from '@wordpress/route';
  * Internal dependencies
  */
 import getChequeFields from '../../entity-fields/cheque';
+import getCodFields from '../../entity-fields/cod';
 import { ENTITY_KIND, getCoreEntities } from './entities';
 import { registerEntityFields } from './entity-fields';
 
@@ -20,6 +21,7 @@ export const route = {
 			'cheque',
 			getChequeFields( ENTITY_KIND )
 		);
+		registerEntityFields( ENTITY_KIND, 'cod', getCodFields( ENTITY_KIND ) );
 		if (
 			! params.page ||
 			! select( coreStore ).getEntityConfig( ENTITY_KIND, params.page )
