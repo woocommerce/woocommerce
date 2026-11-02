@@ -73,14 +73,19 @@
 					// Nothing was saved, so redraw from the model, which releases the table.
 					shippingMethod.trigger( 'rerender' );
 
-					// A row delete leaves a methods entry behind while marking the form clean, so
-					// ignore methods here exactly as the response does.
-					if ( _.isEmpty( _.omit( shippingMethod.changes, 'methods' ) ) ) {
+					// A delete leaves a methods entry on a clean form and a toggle leaves the same
+					// entry on a dirty one, so take either signal, but never an empty change set.
+					var retryable = ! _.isEmpty( shippingMethod.changes ) && (
+						! _.isEmpty( _.omit( shippingMethod.changes, 'methods' ) ) ||
+						shippingMethodView.needsUnloadConfirm
+					);
+
+					if ( retryable ) {
+						shippingMethod.trigger( 'change:methods' );
+					} else {
 						// Saving an empty change set would just fail again, so clear the busy
 						// state without marking the form dirty.
 						$save_button.removeClass( 'is-busy' );
-					} else {
-						shippingMethod.trigger( 'change:methods' );
 					}
 				},
 				onSaveResponse: function( response, textStatus, snapshot ) {
@@ -698,6 +703,10 @@
 							// in the table in case merchant doesn't finish flow.
 
 							shippingMethodView.model.set( 'methods', response.data.methods );
+
+							// That server list replaces what the table shows, so a pending method edit
+							// now describes a row nobody can see and must not ride along on the next save.
+							shippingMethodView.model.changes = _.omit( shippingMethodView.model.changes, 'methods' );
 
 							// Close original modal
 							closeModal();

@@ -442,6 +442,191 @@ test( 'surfaces a failed zone save and releases the methods table', async ( {
 	expect( dialogMessages ).toHaveLength( 1 );
 } );
 
+// Regression: a failed save left Save changes disabled when the only pending change was a
+// method toggle or reorder, which both log a methods-only change set, so no retry was possible.
+test( 'retries a failed save whose only pending change is a method toggle', async ( {
+	page,
+	restApi,
+	zone,
+} ) => {
+	await openZone( page, zone.name );
+
+	const dialogMessages: string[] = [];
+	page.on( 'dialog', async ( dialog ) => {
+		dialogMessages.push( dialog.message() );
+		await dialog.accept();
+	} );
+
+	await page.route( isSaveChanges, ( route ) =>
+		route.fulfill( {
+			status: 500,
+			contentType: 'text/plain',
+			body: 'Injected save failure',
+		} )
+	);
+
+	const toggle = page.locator( '.wc-shipping-zone-method-enabled a' ).first();
+
+	await expect( toggle ).toHaveText( 'Yes' );
+	await toggle.click();
+	await expect(
+		page.locator( '.wc-shipping-zone-method-enabled a' ).first()
+	).toHaveText( 'No' );
+	await expect( page.locator( '#submit' ) ).toBeEnabled();
+
+	await page.locator( '#submit' ).click();
+
+	await expect
+		.poll( () => dialogMessages )
+		.toContain( 'Your changes were not saved. Please retry.' );
+
+	// The toggle is still pending and the page still warns about it on unload, so the button
+	// has to stay clickable for the retry the alert asks for.
+	await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
+	await expect( page.locator( '#submit' ) ).toBeEnabled();
+	await expect( page.locator( '#submit' ) ).not.toHaveClass( /is-busy/ );
+	await expect(
+		page.locator( '.wc-shipping-zone-method-enabled a' ).first()
+	).toHaveText( 'No' );
+
+	// A clickable button is only worth having if the retry it allows actually saves, so let
+	// the next request through and check the toggle reaches the database.
+	await page.unroute( isSaveChanges );
+	const retry = page.waitForResponse( ( response ) =>
+		isSaveChanges( new URL( response.url() ) )
+	);
+	await page.locator( '#submit' ).click();
+	expect( ( await ( await retry ).json() ).success ).toBe( true );
+
+	await expect( page.locator( '#submit' ) ).toBeDisabled();
+	expect( dialogMessages ).toHaveLength( 1 );
+
+	const methods = await restApi.get(
+		`${ WC_API_PATH }/shipping/zones/${ zone.id }/methods`
+	);
+	expect( methods.data[ 0 ].enabled ).toBe( false );
+} );
+
+// Regression: adding a method replaces the table from the server, so an unsaved toggle described
+// a row nobody could see and the add's own save wrote it to the database without being asked.
+test( 'does not apply an unsaved method toggle when a method is added', async ( {
+	page,
+	restApi,
+	zone,
+} ) => {
+	await openZone( page, zone.name );
+
+	const dialogMessages: string[] = [];
+	page.on( 'dialog', async ( dialog ) => {
+		dialogMessages.push( dialog.message() );
+		await dialog.accept();
+	} );
+
+	const toggle = page.locator( '.wc-shipping-zone-method-enabled a' ).first();
+
+	await expect( toggle ).toHaveText( 'Yes' );
+	await toggle.click();
+	await expect(
+		page.locator( '.wc-shipping-zone-method-enabled a' ).first()
+	).toHaveText( 'No' );
+
+	await openAddMethodModal( page );
+	await page.getByText( 'E2E Non-Modal Method' ).click();
+	await page.getByRole( 'button', { name: 'Continue' } ).click();
+
+	await expect(
+		page.locator( '.wc-shipping-zone-method-title', {
+			hasText: 'E2E Non-Modal Method',
+		} )
+	).toBeVisible();
+
+	const methods = await restApi.get(
+		`${ WC_API_PATH }/shipping/zones/${ zone.id }/methods`
+	);
+	const flatRate = methods.data.find(
+		( method: { method_id: string } ) => method.method_id === 'flat_rate'
+	);
+
+	expect( flatRate.enabled ).toBe( true );
+	expect( dialogMessages ).toEqual( [] );
+} );
+
+// Guards the other half of the branch, not the toggle fix: a delete marks the form clean while
+// a zone edit is still pending. Simplifying down to the unload flag alone would drop this case.
+test( 'keeps Save changes clickable when a failed save carries a zone edit made before a delete', async ( {
+	page,
+	restApi,
+	zone,
+} ) => {
+	// The delete only leaves that entry behind when another method remains.
+	await restApi.post(
+		`${ WC_API_PATH }/shipping/zones/${ zone.id }/methods`,
+		{
+			method_id: 'free_shipping',
+		}
+	);
+
+	await openZone( page, zone.name );
+
+	const dialogMessages: string[] = [];
+	page.on( 'dialog', async ( dialog ) => {
+		dialogMessages.push( dialog.message() );
+		await dialog.accept();
+	} );
+
+	// Editing the name re-renders the rows and rebinds their handlers, so hold on to a row
+	// and wait for it to leave the document before clicking a row action.
+	const staleRow = await page
+		.locator( '.wc-shipping-zone-method-rows tr' )
+		.first()
+		.elementHandle();
+
+	// The screen re-renders on both `input` and `change`, so set the value with a single
+	// event to keep the row this test clicks from being replaced underneath it.
+	await page.getByLabel( 'Zone name' ).evaluate( ( input, value ) => {
+		( input as HTMLInputElement ).value = value;
+		input.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+	}, `Failed save ${ rand() }` );
+	await expect( page.locator( '#submit' ) ).toBeEnabled();
+	await page.waitForFunction( ( row ) => ! row.isConnected, staleRow );
+
+	await page
+		.locator(
+			'.wc-shipping-zone-method-rows .wc-shipping-zone-method-delete'
+		)
+		.first()
+		.click();
+	await expect
+		.poll( () => dialogMessages )
+		.toContain( 'Are you sure you want to delete this shipping method?' );
+	await expect(
+		page.locator(
+			'.wc-shipping-zone-method-rows .wc-shipping-zone-method-title'
+		)
+	).toHaveCount( 1 );
+
+	await page.route( isSaveChanges, ( route ) =>
+		route.fulfill( {
+			status: 500,
+			contentType: 'text/plain',
+			body: 'Injected save failure',
+		} )
+	);
+
+	// A successful settings save flushes the pending zone edit through save_changes without
+	// logging a change of its own, so the form is still marked clean when that save fails.
+	await page.locator( 'a.wc-shipping-zone-method-settings' ).first().click();
+	await page.locator( '#btn-ok' ).click();
+
+	await expect
+		.poll( () => dialogMessages )
+		.toContain( 'Your changes were not saved. Please retry.' );
+
+	await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
+	await expect( page.locator( '#submit' ) ).toBeEnabled();
+	await expect( page.locator( '#submit' ) ).not.toHaveClass( /is-busy/ );
+} );
+
 // Regression: an edit typed while a save is in flight must stay unsaved instead of being
 // cleared when that response lands, so the next save still carries it.
 test( 'keeps a zone edit made while an earlier save is in flight', async ( {
