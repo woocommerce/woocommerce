@@ -194,18 +194,24 @@ class OrderUpdate extends ActionableAbility {
 			wc_maybe_adjust_line_item_product_stock( $item, 0 );
 		}
 
+		$added = array();
 		foreach ( $this->products_to_add as list( $product, $quantity ) ) {
 			$item = $subject->get_item( $subject->add_product( $product, $quantity, array( 'order' => $subject ) ), false );
 			if ( $item instanceof \WC_Order_Item_Product ) {
-				$this->changed_product_lines[] = $item;
+				$added[] = $item;
 			}
 		}
 
 		$saved = parent::save( $subject );
 
 		if ( is_wp_error( $saved ) ) {
+			foreach ( $added as $item ) {
+				$item->delete();
+			}
 			return $saved;
 		}
+
+		$this->changed_product_lines = array_merge( $this->changed_product_lines, $added );
 
 		if ( 'coupons' === $this->recalculate_after_save ) {
 			if ( $subject->get_prices_include_tax() ) {

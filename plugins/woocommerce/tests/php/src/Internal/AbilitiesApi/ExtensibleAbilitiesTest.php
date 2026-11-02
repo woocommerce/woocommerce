@@ -4071,6 +4071,37 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should delete the product line that add_product() wrote when the order save fails with the feature off.
+	 */
+	public function test_order_update_deletes_the_added_line_when_the_save_fails_with_the_feature_off(): void {
+		$this->set_feature( false );
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'pending' );
+		$order->save();
+		$product = \WC_Helper_Product::create_simple_product();
+		$count   = count( $order->get_items() );
+		$fail    = static function () {
+			throw new \Exception( 'Disk full.' );
+		};
+
+		add_action( 'woocommerce_before_order_object_save', $fail );
+		try {
+			$refused = $this->run_ability_response(
+				'woocommerce/order-update',
+				array(
+					'id'         => $order->get_id(),
+					'line_items' => array( array( 'product_id' => $product->get_id() ) ),
+				)
+			);
+		} finally {
+			remove_action( 'woocommerce_before_order_object_save', $fail );
+		}
+
+		$this->assertGreaterThanOrEqual( 400, $refused->get_status() );
+		$this->assertCount( $count, ( new \WC_Order( $order->get_id() ) )->get_items() );
+	}
+
+	/**
 	 * @testdox Should not accept extension fields in the write abilities with the feature off.
 	 */
 	public function test_writes_do_not_change_with_the_feature_off(): void {
