@@ -53,6 +53,30 @@
 		} );
 	}
 
+	const run = document.querySelector( '.wc-agentic-commerce-run' );
+	const runMessage = document.querySelector( '.wc-agentic-commerce-run-message' );
+	if ( run && runMessage ) {
+		run.addEventListener( 'click', async () => {
+			run.disabled = true;
+			try {
+				const response = await window.wp.apiFetch( {
+					path: settings.scanPath,
+					method: 'POST',
+				} );
+				// A stalled queue scans in the request, so the new report is already stored.
+				if ( ! response.scan_pending ) {
+					// Not reload(): after Save changes, that would post the settings form again.
+					window.location.assign( window.location.href.split( '#' )[ 0 ] );
+					return;
+				}
+				runMessage.textContent = settings.i18n.running;
+			} catch ( error ) {
+				run.disabled = false;
+				runMessage.textContent = ( error && error.message ) || settings.i18n.error;
+			}
+		} );
+	}
+
 	document.querySelectorAll( '.wc-agentic-commerce-copy' ).forEach( ( button ) => {
 		button.addEventListener( 'click', async () => {
 			const input = document.getElementById( button.dataset.copyTarget );
