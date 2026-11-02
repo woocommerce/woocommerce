@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Eliminated duplicate variation price aggregation on tax-enabled stores in read_price_data method of variable data store.

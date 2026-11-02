@@ -700,6 +700,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'grant_access_nonce'                              => wp_create_nonce( 'grant-access' ),
 					'revoke_access_nonce'                             => wp_create_nonce( 'revoke-access' ),
 					'add_order_note_nonce'                            => wp_create_nonce( 'add-order-note' ),
+					'get_order_notes_nonce'                           => wp_create_nonce( 'get-order-notes' ),
 					'delete_order_note_nonce'                         => wp_create_nonce( 'delete-order-note' ),
 					'calendar_image'                                  => WC()->plugin_url() . '/assets/images/calendar.png',
 					'post_id'                                         => $this->is_order_meta_box_screen( $screen_id ) && isset( $order_or_post_object ) ? \Automattic\WooCommerce\Utilities\OrderUtil::get_post_or_order_id( $order_or_post_object ) : $post_id,
@@ -729,7 +730,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_product_variable_tip'                       => __( '<b>Variable –</b> a product with variations, each of which may have a different SKU, price, stock option, etc. For example, a t-shirt available in different colors and/or sizes.', 'woocommerce' ),
 					'i18n_product_other_tip'                          => __( 'Product types define available product details and attributes, such as downloadable files and variations. They’re also used for analytics and inventory management.', 'woocommerce' ),
 					'i18n_product_description_tip'                    => __( 'Describe this product. What makes it unique? What are its most important features?', 'woocommerce' ),
-					'i18n_product_short_description_tip'              => __( 'Summarize this product in 1-2 short sentences. We’ll show it at the top of the page.', 'woocommerce' ),
+					'i18n_product_short_description_tip'              => __( 'Summarize this product in 1-2 short sentences.', 'woocommerce' ),
 					'i18n_save_attribute_variation_tip'               => __( 'Make sure you enter the name and values for each attribute.', 'woocommerce' ),
 					/* translators: %1$s: maximum file size */
 					'i18n_product_image_tip'                          => sprintf( __( 'For best results, upload JPEG or PNG files that are 1000 by 1000 pixels or larger. Maximum upload file size: %1$s.', 'woocommerce' ), size_format( wp_max_upload_size() ) ),

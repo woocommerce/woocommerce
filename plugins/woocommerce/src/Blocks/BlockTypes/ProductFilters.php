@@ -51,7 +51,7 @@ class ProductFilters extends AbstractBlock {
 		);
 
 		if ( is_admin() ) {
-			$this->asset_data_registry->add( 'globalStylesColors', wp_get_global_styles( array( 'color' ) ) );
+			$this->asset_data_registry->add( 'globalStylesColors', StyleAttributesUtils::get_global_styles( array( 'color' ) ) );
 		}
 
 		BlocksSharedState::load_store_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
@@ -285,9 +285,9 @@ CSS;
 					<div class="wc-block-product-filters__overlay-wrapper" data-wp-on--click="actions.closeOverlayOnBackdrop">
 						<section
 							class="wc-block-product-filters__overlay-dialog"
-							role="dialog"
+							data-wp-bind--role="state.overlayDialogRole"
 							aria-label="<?php echo esc_attr__( 'Product Filters', 'woocommerce' ); ?>"
-							data-wp-bind--aria-modal="context.isOverlayOpened"
+							data-wp-bind--aria-modal="state.overlayDialogAriaModal"
 							data-wp-on-document--keydown="actions.handleOverlayKeydown"
 							data-wp-watch="callbacks.focusOverlay"
 						>
