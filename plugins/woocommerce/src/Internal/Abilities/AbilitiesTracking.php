@@ -818,7 +818,11 @@ class AbilitiesTracking {
 	 */
 	private static function get_error_code( WP_Error $error ): string {
 		$code = (string) $error->get_error_code();
-		return 1 === preg_match( '/^[A-Za-z0-9_:-]{1,64}$/', $code ) ? self::normalize_value( $code ) : 'other';
+		if ( 1 !== preg_match( '/^[A-Za-z0-9_:-]{1,64}$/', $code ) ) {
+			return 'other';
+		}
+		$normalized = self::normalize_value( $code );
+		return self::NONE === $normalized ? 'other' : $normalized;
 	}
 
 	/**

@@ -568,6 +568,9 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	 *           ["first_ext:order 1234", "other"]
 	 *           ["customer@example.com", "other"]
 	 *           ["order 1234 for Jane", "other"]
+	 *           [":", "other"]
+	 *           ["::", "other"]
+	 *           ["-_", "other"]
 	 *
 	 * @param string $code     Error code returned by the ability.
 	 * @param string $expected Recorded error code.
