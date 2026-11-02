@@ -2575,6 +2575,55 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse a type change into a variable class that a class filter returns only for a saved product.
+	 */
+	public function test_refuses_a_type_change_when_the_class_filter_depends_on_the_product_id(): void {
+		$this->add_test_action(
+			'product_type_selector',
+			static fn( array $types ): array => $types + array( 'test-variable' => 'Test variable' )
+		);
+		$this->add_test_action(
+			'woocommerce_data_stores',
+			static fn( array $stores ): array => $stores + array( 'product-test-variable' => 'WC_Product_Variable_Data_Store_CPT' )
+		);
+		$unsaved_class = get_class(
+			new class() extends \WC_Product_Simple {
+				/**
+				 * Get the product type.
+				 *
+				 * @return string
+				 */
+				public function get_type() {
+					return 'test-variable';
+				}
+			}
+		);
+		$this->add_test_action(
+			'woocommerce_product_class',
+			static function ( $classname, $product_type, $post_type, $product_id ) use ( $unsaved_class ) {
+				if ( 'test-variable' !== $product_type ) {
+					return $classname;
+				}
+				return $product_id > 0 ? TestVariableProduct::class : $unsaved_class;
+			},
+			10,
+			4
+		);
+		$simple = \WC_Helper_Product::create_simple_product();
+
+		$refused = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'   => $simple->get_id(),
+				'type' => 'test-variable',
+			)
+		);
+
+		$this->assertSame( 'woocommerce_product_type_unsupported', $refused->get_data()['code'] ?? null );
+		$this->assertSame( 'simple', wc_get_product( $simple->get_id() )->get_type() );
+	}
+
+	/**
 	 * @testdox Should build a new variation with the class that the parent type asks for, and write a field limited to it.
 	 */
 	public function test_creates_variations_of_a_subclass_with_their_fields(): void {
