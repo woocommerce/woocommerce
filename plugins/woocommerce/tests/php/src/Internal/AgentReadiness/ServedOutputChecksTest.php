@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreOutputChecks;
+use Automattic\WooCommerce\Internal\AgentReadiness\StoreResponses;
 use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
@@ -254,7 +255,7 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox With UCP on, the profile and catalog search checks read the served profile and POST to the endpoint it names.
+	 * @testdox With UCP on, the profile check reads the served profile, and the endpoint check asks the endpoint it names with a plain GET.
 	 */
 	public function test_ucp_checks(): void {
 		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
@@ -272,11 +273,10 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 				),
 			)
 		);
-		$search   = 'POST ' . $path . '/catalog/search';
 
 		$responses                     = $this->good_store();
 		$responses['/.well-known/ucp'] = array( 200, (string) $profile );
-		$responses[ $search ]          = array( 200, '{"ucp":{},"products":[]}' );
+		$responses[ $path ]            = array( 200, '{"namespace":"wc/ucp/v1","routes":{}}' );
 		$this->serve( $responses );
 		$results = $this->results();
 		$this->assertTrue( $results['ucp_profile'] );
@@ -288,12 +288,17 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $this->results()['ucp_profile_version'], 'A profile for another UCP version is likely another plugin\'s' );
 
 		$responses['/.well-known/ucp'] = array( 404, '' );
-		$responses[ $search ]          = array( 403, '<html>Blocked</html>' );
+		$responses[ $path ]            = array( 403, '<html>Blocked</html>' );
 		$this->serve( $responses );
 		$results = $this->results();
 		$this->assertFalse( $results['ucp_profile'] );
 		$this->assertNull( $results['ucp_profile_version'], 'No profile is reported by ucp_profile alone' );
 		$this->assertFalse( $results['ucp_endpoints_live'], 'Without a profile, WooCommerce\'s endpoint is tried' );
+		$this->assertNotContains( 'POST', array_map( static fn( string $request ): string => strtok( $request, ' ' ), $this->requested ), 'Nothing is searched' );
+
+		$responses[ $path ] = array( 200, '<html>Checking your browser</html>' );
+		$this->serve( $responses );
+		$this->assertFalse( $this->results()['ucp_endpoints_live'], 'A challenge page is not the endpoint' );
 	}
 
 	/**
@@ -349,5 +354,72 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		foreach ( $checks as $check ) {
 			$this->assertContains( $check['group'], array( 'access', 'find', 'understand', 'buy' ), $check['id'] );
 		}
+	}
+
+	/**
+	 * @testdox The pending product checks read the variants of a ProductGroup, and don't fail a variable product, which WooCommerce gives no buy action, or a product that doesn't ship.
+	 */
+	public function test_pending_product_detectors_read_variants(): void {
+		$offer_has  = new \ReflectionMethod( StoreOutputChecks::class, 'offer_has' );
+		$buy_action = new \ReflectionMethod( StoreOutputChecks::class, 'has_buy_action' );
+		$ships      = new \ReflectionMethod( StoreOutputChecks::class, 'ships' );
+		$offer_has->setAccessible( true );
+		$buy_action->setAccessible( true );
+		$ships->setAccessible( true );
+		$group       = array(
+			'@type'      => 'ProductGroup',
+			'hasVariant' => array(
+				array(
+					'@type'           => 'Product',
+					'offers'          => array(
+						'@type'           => 'Offer',
+						'shippingDetails' => array( '@type' => 'OfferShippingDetails' ),
+					),
+					'potentialAction' => array( '@type' => 'BuyAction' ),
+				),
+			),
+		);
+		$empty_group = array(
+			'@type'      => 'ProductGroup',
+			'hasVariant' => array( array( '@type' => 'Product' ) ),
+		);
+		$variable    = WC_Helper_Product::create_variation_product();
+
+		$this->assertTrue( $offer_has->invoke( null, array( $group ), 'shippingDetails' ), 'Shipping details on a variant\'s offer' );
+		$this->assertFalse( $offer_has->invoke( null, array( $group ), 'hasMerchantReturnPolicy' ) );
+		$this->assertTrue( $buy_action->invoke( null, array( $group ), $variable ), 'A BuyAction on a variant' );
+		$this->assertNull( $buy_action->invoke( null, array( $empty_group ), $variable ), 'A variable product without one' );
+		$this->assertFalse( $buy_action->invoke( null, array( $empty_group ), $this->product ), 'A simple product without one' );
+
+		$this->assertTrue( $ships->invoke( null, new StoreResponses( true ) ) );
+		$this->product->set_virtual( true );
+		$this->product->save();
+		$variable->delete( true );
+		$this->assertFalse( $ships->invoke( null, new StoreResponses( true ) ), 'A virtual product has no shipping details to give' );
+	}
+
+	/**
+	 * @testdox When something strips WooCommerce's Open Graph tags from the product page, the check flags a likely conflict, names the page and the active SEO plugin; with WooCommerce's tags turned off, the check isn't run.
+	 */
+	public function test_open_graph_conflict(): void {
+		$responses                          = $this->good_store();
+		$responses[ $this->product_path() ] = array( 200, self::page( '', '<h1>Blue &amp; Gold Mug</h1>', false ) );
+		$this->serve( $responses );
+		update_option( 'active_plugins', array( 'wordpress-seo/wp-seo.php', 'hello.php' ) );
+
+		$checks = array_column( $this->sut->all(), null, 'id' );
+
+		$this->assertFalse( $checks['open_graph_from_core']['ok'] );
+		$this->assertTrue( $checks['open_graph_from_core']['conflict'] );
+		$this->assertSame( (string) $this->product->get_permalink(), $checks['open_graph_from_core']['seen_at'] );
+		$this->assertSame( array( 'Yoast SEO' ), $checks['open_graph_from_core']['plugins'], 'Only plugins known to output Open Graph are named' );
+		$this->assertSame( '', $checks['open_graph_tags']['seen_at'], 'Checks that are not conflicts carry no address' );
+
+		$this->serve( $this->good_store() );
+		$this->assertTrue( array_column( $this->sut->all(), 'ok', 'id' )['open_graph_from_core'] );
+
+		add_filter( 'woocommerce_enable_open_graph', '__return_false' );
+		$this->assertArrayNotHasKey( 'open_graph_from_core', array_column( $this->sut->all(), 'ok', 'id' ) );
+		remove_filter( 'woocommerce_enable_open_graph', '__return_false' );
 	}
 }
