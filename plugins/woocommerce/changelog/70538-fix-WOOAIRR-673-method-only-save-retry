@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Let merchants retry a failed shipping zone save, and stop an unsaved method toggle being applied when a method is added.
