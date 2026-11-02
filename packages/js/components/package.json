@@ -188,7 +188,7 @@
 		"sass-loader": "10.5.x",
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
-		"uuid": "^9.0.1",
+		"uuid": "^11.1.1",
 		"webpack": "catalog:tooling",
 		"webpack-cli": "5.1.x"
 	},

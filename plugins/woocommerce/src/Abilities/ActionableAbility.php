@@ -237,11 +237,9 @@ abstract class ActionableAbility extends \WP_Ability {
 			$objects[] = array( $secondary[0], $fields, $resource_name );
 		}
 
+		$refused = new \WP_Error();
 		foreach ( $objects as list( $object, $fields ) ) {
-			$rejected = $this->apply_fields( $object, $fields );
-			if ( null !== $rejected ) {
-				return $rejected;
-			}
+			$this->apply_fields( $object, $fields, $refused );
 		}
 
 		$deleting = $this->get_objects_to_delete();
@@ -253,7 +251,7 @@ abstract class ActionableAbility extends \WP_Ability {
 			}
 		}
 		foreach ( $enabled ? $to_check : array() as list( $object, , $resource_name ) ) {
-			$rejected = $this->validate(
+			$this->validate(
 				$object,
 				$resource_name,
 				array(
@@ -261,11 +259,12 @@ abstract class ActionableAbility extends \WP_Ability {
 					'deleting'          => in_array( $object, $deleting, true ),
 					'objects'           => $staged,
 					'objects_to_delete' => $deleting,
-				)
+				),
+				$refused
 			);
-			if ( null !== $rejected ) {
-				return $rejected;
-			}
+		}
+		if ( $refused->has_errors() ) {
+			return $refused;
 		}
 
 		try {
@@ -408,16 +407,17 @@ abstract class ActionableAbility extends \WP_Ability {
 
 	/**
 	 * Write the checked values to the object in memory with the update_callback
-	 * of each field.
+	 * of each field, also after one rejects its value. Each rejection goes into
+	 * the given errors, as add_refusal() describes.
 	 *
-	 * @param \WC_Data $subject Object to change.
-	 * @param array    $updates Pairs of field arguments and value from prepare_fields().
-	 * @return \WP_Error|null A WP_Error when the field does not apply to the object, or a callback rejects a value or throws.
+	 * @param \WC_Data  $subject Object to change.
+	 * @param array     $updates Pairs of field arguments and value from prepare_fields().
+	 * @param \WP_Error $refused Collects the refusals, including a field that does not apply to the object.
 	 */
-	private function apply_fields( $subject, array $updates ): ?\WP_Error {
+	private function apply_fields( $subject, array $updates, \WP_Error $refused ): void {
 		foreach ( $updates as $param => list( $args, $value ) ) {
 			if ( ! ExtensibleAbilities::field_applies_to( $args, $subject ) ) {
-				return new \WP_Error(
+				$rejected = new \WP_Error(
 					'woocommerce_ability_field_object_type',
 					sprintf(
 						/* translators: 1: extension field, 2: object type, 3: comma-separated list of object types. */
@@ -428,31 +428,56 @@ abstract class ActionableAbility extends \WP_Ability {
 					),
 					array( 'status' => 400 )
 				);
+			} else {
+				$rejected = self::run_callback( $args['update_callback'], array( $subject, $value ), array( 'field' => $param ) );
 			}
-			$rejected = self::run_callback( $args['update_callback'], array( $subject, $value ), array( 'field' => $param ) );
 			if ( null !== $rejected ) {
-				return $rejected;
+				self::add_refusal( $rejected, explode( '.', $param )[1], $refused );
 			}
 		}
-		return null;
 	}
 
 	/**
-	 * Run the validators of a resource on the changed object.
+	 * Run every validator of a resource on the changed object, also after a
+	 * field or another validator refuses.
 	 *
-	 * @param \WC_Data $subject       Changed object.
-	 * @param string   $resource_name Resource of the object.
-	 * @param array    $context       The primary object of the call, whether the call deletes or trashes the object, the objects the call saves, and the objects it deletes or trashes.
-	 * @return \WP_Error|null A WP_Error when a validator refuses the change.
+	 * @param \WC_Data  $subject       Changed object.
+	 * @param string    $resource_name Resource of the object.
+	 * @param array     $context       The primary object of the call, whether the call deletes or trashes the object, the objects the call saves, and the objects it deletes or trashes.
+	 * @param \WP_Error $refused       Collects the refusals.
 	 */
-	private function validate( $subject, string $resource_name, array $context ): ?\WP_Error {
+	private function validate( $subject, string $resource_name, array $context, \WP_Error $refused ): void {
 		foreach ( ExtensibleAbilities::get_validators( $resource_name ) as $args ) {
 			$rejected = self::run_callback( $args['callback'], array( $subject, $this, $context ), array( 'namespace' => $args['namespace'] ) );
 			if ( null !== $rejected ) {
-				return $rejected;
+				self::add_refusal( $rejected, $args['namespace'], $refused );
 			}
 		}
-		return null;
+	}
+
+	/**
+	 * Add the codes of a rejection to the errors of the call. Each code becomes
+	 * `<namespace>:<code>`, so refusals with the same code keep their own data.
+	 * When the code is already taken in the same namespace, it gets a numeric
+	 * suffix, as `<namespace>:<code>:2`. The errors keep the run order, so the
+	 * first rejection gives the response its code, message and status.
+	 *
+	 * @param \WP_Error $rejected  Rejection from run_callback().
+	 * @param string    $extension Extension that owns the callback.
+	 * @param \WP_Error $refused   Collects the refusals.
+	 */
+	private static function add_refusal( \WP_Error $rejected, string $extension, \WP_Error $refused ): void {
+		foreach ( $rejected->get_error_codes() as $code ) {
+			$key = $extension . ':' . $code;
+			$n   = 1;
+			while ( in_array( $key, $refused->get_error_codes(), true ) ) {
+				$key = $extension . ':' . $code . ':' . ( ++$n );
+			}
+			foreach ( $rejected->get_error_messages( $code ) as $message ) {
+				$refused->add( $key, $message );
+			}
+			$refused->add_data( array_merge( $rejected->get_error_data( $code ), array( 'namespace' => $extension ) ), $key );
+		}
 	}
 
 	/**
@@ -521,15 +546,19 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
-	 * Add data to an error, and the 400 status when it has none.
+	 * Add data to every code of an error, and the 400 status to a code that has
+	 * none. It replaces the data of the code, because WP_Error::add_data() would
+	 * also keep the old data, and the client would see it in `additional_data`.
 	 *
 	 * @param \WP_Error            $error Error.
 	 * @param array<string, mixed> $data  Data to add.
 	 * @return \WP_Error
 	 */
 	private static function with_data( \WP_Error $error, array $data ): \WP_Error {
-		$current = $error->get_error_data();
-		$error->add_data( array_merge( array( 'status' => 400 ), is_array( $current ) ? $current : array(), $data ) );
+		foreach ( $error->get_error_codes() as $code ) {
+			$current                    = $error->get_error_data( $code );
+			$error->error_data[ $code ] = array_merge( array( 'status' => 400 ), is_array( $current ) ? $current : array(), $data );
+		}
 		return $error;
 	}
 }
