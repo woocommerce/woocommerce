@@ -138,7 +138,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			// Performance note: post caches has been already primed, hence the loop operates on in-memory data.
 			foreach ( $posts as $post ) {
 				$terms = $post instanceof \WP_Post ? get_object_term_cache( $post->ID, 'product_type' ) : null;
-				$terms = array_filter( is_array( $terms ) ? $terms : array(), static fn ( $term ) => $term instanceof \WP_Term ); // @phpstan-ignore instanceof.alwaysTrue (defensive checks against filters)
+				$terms = array_filter( is_array( $terms ) ? $terms : array(), static fn ( $term ) => $term instanceof \WP_Term );
 				if ( ! empty( $terms ) && ProductType::VARIABLE === current( $terms )->slug ) {
 					$product_id = $post->ID;
 

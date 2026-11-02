@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Skip client-side Tracks events recorded without a valid event name instead of sending them as `wcadmin_undefined`.
