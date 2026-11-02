@@ -60,10 +60,6 @@ class OpenGraph {
 			return;
 		}
 
-		if ( ComingSoonRequestHandler::is_showing_coming_soon() ) {
-			return;
-		}
-
 		$page = $this->get_page_data();
 		if ( null === $page ) {
 			return;

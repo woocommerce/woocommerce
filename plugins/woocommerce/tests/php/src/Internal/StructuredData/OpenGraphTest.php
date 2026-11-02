@@ -368,6 +368,50 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not add shop metadata for excluded views.
+	 * @testWith ["search"]
+	 *           ["pagination"]
+	 *           ["protected"]
+	 *           ["unpublished"]
+	 *
+	 * @param string $view Excluded shop view.
+	 */
+	public function test_excludes_shop_views( string $view ): void {
+		$shop_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_title'  => 'Shop',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'woocommerce_shop_page_id', $shop_id );
+		$this->go_to( get_permalink( $shop_id ) );
+		$this->assertTrue( is_shop(), 'The request must be recognized as a shop view.' );
+
+		if ( 'search' === $view ) {
+			$GLOBALS['wp_query']->is_search = true;
+		} elseif ( 'pagination' === $view ) {
+			$GLOBALS['wp_query']->is_paged = true;
+		} elseif ( 'protected' === $view ) {
+			wp_update_post(
+				array(
+					'ID'            => $shop_id,
+					'post_password' => 'secret',
+				)
+			);
+		} else {
+			wp_update_post(
+				array(
+					'ID'          => $shop_id,
+					'post_status' => 'draft',
+				)
+			);
+		}
+
+		$this->assertSame( array(), $this->render_meta_tags( '' ), "The $view shop view must not output metadata." );
+	}
+
+	/**
 	 * @testdox Should add shop metadata regardless of query parameters.
 	 * @testWith ["woo-share"]
 	 *           ["min_price"]
