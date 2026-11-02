@@ -250,8 +250,8 @@ class Settings {
 			return $value;
 		}
 
-		// The page shows the built-in default when a filter returns only statuses it cannot display.
-		// Deleting the option then would switch reports to the filter's list, so store what was shown.
+		// The page shows the built-in default when a filter returns only statuses it cannot display. Deleting the option
+		// then would switch reports to the filter's list, so store what was shown. Extra undisplayable statuses still delete it.
 		$runtime_default = 'woocommerce_excluded_report_order_statuses' === $option['id']
 			? self::get_default_excluded_order_statuses()
 			: self::get_default_actionable_order_statuses();

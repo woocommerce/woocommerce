@@ -55,7 +55,6 @@
 				"@typescript-eslint/*",
 				"@wordpress/autop",
 				"@wordpress/private-apis",
-				"@wordpress/scripts",
 				"@wordpress/style-engine",
 				"eslint*"
 			],
@@ -122,7 +121,11 @@
 				"@wordpress/env",
 				"@wordpress/prettier-config",
 				"@wordpress/postcss-plugins-preset",
+				"@wordpress/scripts",
+				"copy-webpack-plugin",
 				"postcss",
+				"prettier",
+				"simple-git",
 				"webpack"
 			],
 			"packages": [
@@ -223,15 +226,6 @@
 		},
 		{
 			"dependencies": [
-				"webpack-dev-server"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "4.15.x"
-		},
-		{
-			"dependencies": [
 				"babel-loader"
 			],
 			"packages": [
@@ -274,15 +268,6 @@
 				"**"
 			],
 			"pinVersion": "9.0.x"
-		},
-		{
-			"dependencies": [
-				"copy-webpack-plugin"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "13.0.x"
 		},
 		{
 			"dependencies": [
@@ -367,7 +352,6 @@
 		},
 		{
 			"dependencies": [
-				"@wordpress/scripts",
 				"@wordpress/jest-console",
 				"@wordpress/e2e-test-utils"
 			],
@@ -547,15 +531,6 @@
 			"pinVersion": "10.5.x"
 		},
 		{
-			"dependencies": [
-				"simple-git"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^3.21.0"
-		},
-		{
 			"dependencyTypes": [
 				"prod",
 				"dev"
@@ -576,7 +551,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^9.0.1"
+			"pinVersion": "^11.1.1"
 		},
 		{
 			"label": "Testing related dependencies: React 18",
@@ -640,7 +615,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "3.4.14"
+			"pinVersion": "3.4.17"
 		},
 		{
 			"dependencies": [

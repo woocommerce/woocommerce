@@ -180,6 +180,9 @@ abstract class WC_Data {
 	 * - CLONE_MODE_DUPLICATE (default): Forces reading of Meta and clears meta IDs for duplication (backward compatible).
 	 * - CLONE_MODE_CACHE: Preserves meta IDs for caching purposes.
 	 *
+	 * The clone also gets its own date objects, because DateTime::modify() changes the object in place.
+	 * The clone is not fully isolated: an object stored as a meta value stays shared with the original.
+	 *
 	 * @since 3.0.2
 	 */
 	public function __clone() {
@@ -193,6 +196,13 @@ abstract class WC_Data {
 				// Only clear meta IDs in duplicate mode (maintains backward compatibility).
 				if ( self::CLONE_MODE_DUPLICATE === $this->clone_mode && ! empty( $meta->id ) ) {
 					$this->meta_data[ $array_key ]->id = null;
+				}
+			}
+		}
+		foreach ( array( 'data', 'changes' ) as $set ) {
+			foreach ( $this->{$set} as $prop => $value ) {
+				if ( $value instanceof DateTime ) {
+					$this->{$set}[ $prop ] = clone $value;
 				}
 			}
 		}
@@ -397,8 +407,7 @@ abstract class WC_Data {
 			return true; // return without warning because we don't want to break legacy code which was calling add/get/update/delete meta.
 		}
 
-		/* translators: %s: $key Key to check */
-		wc_doing_it_wrong( __FUNCTION__, sprintf( __( 'Generic add/update/get meta methods should not be used for internal meta data, including "%s". Use getters and setters.', 'woocommerce' ), $key ), '3.2.0' );
+		wc_doing_it_wrong( __FUNCTION__, sprintf( 'Generic add/update/get meta methods should not be used for internal meta data, including "%s". Use getters and setters.', $key ), '3.2.0' );
 
 		return true;
 	}

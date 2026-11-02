@@ -759,17 +759,26 @@ class WC_Helper_Updater {
 		}
 
 		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_installed() ) {
+			if ( WC_Woo_Update_Manager_Plugin::needs_manual_install() ) {
+				/* translators: 1: Woo Update Manager plugin download URL */
+				$message = __( ' <a href="%1$s">Download the WooCommerce.com Update Manager</a> and upload it to update.', 'woocommerce' );
+				$url     = WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_DOWNLOAD_URL;
+			} else {
+				/* translators: 1: Woo Update Manager plugin install URL */
+				$message = __( ' <a href="%1$s">Install WooCommerce.com Update Manager</a> to update.', 'woocommerce' );
+				$url     = WC_Woo_Update_Manager_Plugin::generate_install_url();
+			}
+
 			printf(
 				wp_kses(
-					/* translators: 1: Woo Update Manager plugin install URL */
-					__( ' <a href="%1$s">Install WooCommerce.com Update Manager</a> to update.', 'woocommerce' ),
+					$message,
 					array(
 						'a' => array(
 							'href' => array(),
 						),
 					)
 				),
-				esc_url( WC_Woo_Update_Manager_Plugin::generate_install_url() ),
+				esc_url( $url ),
 			);
 			return;
 		}

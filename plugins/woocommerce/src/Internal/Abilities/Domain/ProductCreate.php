@@ -1,34 +1,31 @@
 <?php
 /**
- * Product create ability definition file.
+ * Product create ability class file.
  */
 
 declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
-use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Registers the WooCommerce product create ability.
+ * The WooCommerce product create ability. It runs the steps of ActionableAbility.
  */
-class ProductCreate extends AbstractDomainAbility implements AbilityDefinition {
+class ProductCreate extends ActionableAbility {
 
+	use DomainAbilityHelpers;
 	use ProductAbilityTrait;
 
 	/**
-	 * Get the ability name.
-	 *
-	 * @return string
-	 *
-	 * @since 10.9.0
+	 * Ability name.
 	 */
-	public static function get_name(): string {
-		return 'woocommerce/product-create';
-	}
+	public const ABILITY_NAME = 'woocommerce/product-create';
 
 	/**
 	 * Get the ability registration arguments.
@@ -45,9 +42,8 @@ class ProductCreate extends AbstractDomainAbility implements AbilityDefinition {
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',
-			'input_schema'        => self::get_input_schema(),
+			'input_schema'        => self::build_input_schema(),
 			'output_schema'       => self::get_entity_output_schema( 'product', self::get_product_output_schema() ),
-			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_create_product' ),
 			'meta'                => array(
 				'show_in_rest' => true,
@@ -65,48 +61,62 @@ class ProductCreate extends AbstractDomainAbility implements AbilityDefinition {
 	}
 
 	/**
-	 * Create a product.
+	 * Resource that the ability changes.
+	 *
+	 * @return string
+	 */
+	public function get_resource(): string {
+		return 'product';
+	}
+
+	/**
+	 * Create the product object of the input type, without saving it.
 	 *
 	 * @param array $input Ability input.
-	 * @return array|\WP_Error
-	 *
-	 * @since 10.9.0
+	 * @return \WC_Product|\WP_Error
 	 */
-	public static function execute( array $input ) {
-		$product_config = self::get_product_config_for_alias( $input['product_type_alias'] ?? 'physical' );
+	protected function load( array $input ) {
+		return self::get_product_object_for_type( $input['type'] ?? ProductType::SIMPLE );
+	}
 
-		if ( is_wp_error( $product_config ) ) {
-			return $product_config;
-		}
-
-		$product = wc_get_product_object( $product_config['wc_type'] );
-
-		if ( ! $product ) {
-			return new \WP_Error(
-				'woocommerce_invalid_product_type',
-				__( 'Invalid product type.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
+	/**
+	 * Set the product properties in memory.
+	 *
+	 * @param \WC_Product $subject Product.
+	 * @param array       $input   Ability input.
+	 * @return null|\WP_Error
+	 */
+	protected function change( $subject, array $input ) {
+		$product_config = self::get_supported_product_type_configs()[ $subject->get_type() ];
 
 		try {
-			self::apply_product_type_config( $product, $product_config );
+			self::apply_product_type_config( $subject, $product_config );
 
-			$validation_error = self::set_product_props_from_input( $product, $input, $product_config );
-			if ( is_wp_error( $validation_error ) ) {
-				return $validation_error;
-			}
+			return self::set_product_props_from_input( $subject, $input, $product_config );
 		} catch ( \WC_Data_Exception $exception ) {
 			return self::get_product_data_exception_error( $exception );
 		}
+	}
 
-		$save_error = self::save_product( $product, 'woocommerce_product_create_failed' );
-		if ( is_wp_error( $save_error ) ) {
-			return $save_error;
-		}
+	/**
+	 * Save the product.
+	 *
+	 * @param \WC_Product $subject Changed product.
+	 * @return null|\WP_Error
+	 */
+	protected function save( $subject ) {
+		return self::save_product( $subject, 'woocommerce_product_create_failed' );
+	}
 
+	/**
+	 * The ability output for the saved product.
+	 *
+	 * @param \WC_Product $subject Saved product.
+	 * @return array
+	 */
+	protected function prepare_response( $subject ): array {
 		return array(
-			'product' => self::format_product_for_response( $product ),
+			'product' => self::format_product_for_response( $subject ),
 		);
 	}
 
@@ -130,7 +140,7 @@ class ProductCreate extends AbstractDomainAbility implements AbilityDefinition {
 	 *
 	 * @return array
 	 */
-	private static function get_input_schema(): array {
+	private static function build_input_schema(): array {
 		return self::get_product_create_input_schema();
 	}
 }

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add woocommerce_checkout_after_cart_item_meta action hook to the checkout review-order template.
