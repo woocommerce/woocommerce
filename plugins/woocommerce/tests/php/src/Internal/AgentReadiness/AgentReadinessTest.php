@@ -53,6 +53,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 					'id'      => $id,
 					'test'    => $test,
 					'blocks'  => 'listing',
+					'group'   => 'find',
 					'name'    => $id,
 					'label'   => $id,
 					'why'     => '',

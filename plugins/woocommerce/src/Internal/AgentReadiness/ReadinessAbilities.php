@@ -326,24 +326,32 @@ class ReadinessAbilities implements RegisterHooksInterface {
 							'items' => array(
 								'type'       => 'object',
 								'properties' => array(
-									'id'      => array( 'type' => 'string' ),
-									'ok'      => array(
+									'id'       => array( 'type' => 'string' ),
+									'ok'       => array(
 										'type'        => array( 'boolean', 'null' ),
 										'description' => __( 'True when the store passes, false when it fails, null when the check could not run.', 'woocommerce' ),
 									),
-									'blocks'  => array(
+									'blocks'   => array(
 										'type'        => 'string',
-										'description' => __( 'What a failure stops: listing (every product everywhere), ucp (agents using UCP) or checkout (agent orders).', 'woocommerce' ),
+										'description' => __( 'What a failure stops: listing (every product everywhere), discovery (harder for agents to find and read the store), ucp (agents using UCP) or checkout (agent orders).', 'woocommerce' ),
 									),
-									'level'   => array(
+									'level'    => array(
 										'type' => 'string',
 										'enum' => array( StoreConditions::LEVEL_REQUIRED, StoreConditions::LEVEL_RECOMMENDED ),
 									),
-									'name'    => array( 'type' => 'string' ),
-									'label'   => array( 'type' => 'string' ),
-									'why'     => array( 'type' => 'string' ),
-									'fix'     => array( 'type' => 'string' ),
-									'fix_url' => array( 'type' => 'string' ),
+									'name'     => array( 'type' => 'string' ),
+									'label'    => array( 'type' => 'string' ),
+									'why'      => array( 'type' => 'string' ),
+									'fix'      => array( 'type' => 'string' ),
+									'fix_url'  => array( 'type' => 'string' ),
+									'conflict' => array(
+										'type'        => 'boolean',
+										'description' => __( 'On output checks: the store is set to send this, but what it returns differs, so something else is likely replacing it.', 'woocommerce' ),
+									),
+									'pending'  => array(
+										'type'        => 'string',
+										'description' => __( 'On output checks: the issue whose feature this check waits for. Pending checks are not run.', 'woocommerce' ),
+									),
 								),
 							),
 						),
