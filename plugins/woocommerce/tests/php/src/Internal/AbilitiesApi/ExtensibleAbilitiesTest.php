@@ -1674,6 +1674,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				'output_schema' => array( 'type' => 'string' ),
 				'get_callback'  => '__return_null',
 			),
+			'none'   => array(
+				'output_schema' => array( 'type' => array( 'string', 'null' ) ),
+				'get_callback'  => '__return_null',
+			),
 			'dupes'  => array(
 				'output_schema' => array(
 					'type'        => 'array',

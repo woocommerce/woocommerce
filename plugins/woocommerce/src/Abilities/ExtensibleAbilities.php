@@ -594,7 +594,7 @@ class ExtensibleAbilities {
 					);
 					continue;
 				}
-				if ( ! self::matches_schema( $args, $value ) ) {
+				if ( null === $value || ! self::matches_schema( $args, $value ) ) {
 					continue;
 				}
 				$sanitized = rest_sanitize_value_from_schema( $value, $args['output_schema'], $field );
