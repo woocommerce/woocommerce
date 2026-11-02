@@ -268,12 +268,6 @@ WooCommerce Core
 
 ### Core Components
 
-**Abilities Loader** ([`AbilitiesLoader.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/Abilities/AbilitiesLoader.php))
-
-- Registers WooCommerce ability categories and abilities when the Abilities API initializes
-- Bridges WordPress Abilities API with WooCommerce operations
-- Enables ability discovery for MCP servers and other Abilities API consumers
-
 **Purpose-Built Domain Abilities** ([`Domain`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/src/Internal/Abilities/Domain))
 
 - Provide WooCommerce product and order abilities backed by domain APIs
