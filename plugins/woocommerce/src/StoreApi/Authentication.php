@@ -14,6 +14,9 @@ class Authentication {
 	 * Hook into WP lifecycle events. This is hooked by the StoreAPI class on `rest_api_init`.
 	 */
 	public function init() {
+		// Core's /batch/v1 also reaches Store API routes, so this runs for every REST request.
+		add_filter( 'rest_request_before_callbacks', array( $this, 'sanitize_batch_request' ), 10, 3 );
+
 		if ( ! $this->is_request_to_store_api() ) {
 			return;
 		}
@@ -26,6 +29,59 @@ class Authentication {
 
 		// Remove the default CORS headers--we will add our own.
 		remove_filter( 'rest_pre_serve_request', 'rest_send_cors_headers' );
+	}
+
+	/**
+	 * Stop batch requests from passing untrusted nonces to Store API routes.
+	 *
+	 * Core's /batch/v1 can't run Store API requests. The Store API batch keeps sub-request nonces, which come from
+	 * request data, only when it was sent as JSON or with its own Nonce header. A link or cross-site form can't do either.
+	 *
+	 * @since 11.4.0
+	 * @param mixed            $result  Response to replace the requested version with.
+	 * @param array            $handler Route handler used for the request.
+	 * @param \WP_REST_Request $request Request used to generate the response.
+	 * @phpstan-param mixed            $handler
+	 * @phpstan-param mixed            $request
+	 * @return mixed
+	 */
+	public function sanitize_batch_request( $result, $handler, $request ) {
+		$callback = is_array( $handler ) ? ( $handler['callback'] ?? null ) : null;
+		$requests = $request instanceof \WP_REST_Request ? $request->get_param( 'requests' ) : null;
+
+		if ( ! is_array( $callback ) || ! is_array( $requests ) ) {
+			return $result;
+		}
+
+		if ( $callback[0] instanceof \WP_REST_Server && 'serve_batch_request_v1' === ( $callback[1] ?? '' ) ) {
+			foreach ( $requests as $sub_request ) {
+				$path = isset( $sub_request['path'] ) && is_string( $sub_request['path'] ) ? wp_parse_url( $sub_request['path'], PHP_URL_PATH ) : null;
+
+				if ( is_string( $path ) && 0 === stripos( $path, '/wc/store/' ) ) {
+					return new \WP_Error( 'woocommerce_rest_invalid_path', __( 'Store API requests must use the Store API batch endpoint.', 'woocommerce' ), array( 'status' => 400 ) );
+				}
+			}
+
+			return $result;
+		}
+
+		$content_type = $request->get_content_type();
+
+		if ( ! $callback[0] instanceof Routes\V1\Batch || $request->get_header( 'Nonce' ) || 'application/json' === trim( $content_type['value'] ?? '' ) ) {
+			return $result;
+		}
+
+		foreach ( $requests as $index => $sub_request ) {
+			foreach ( array_keys( (array) ( $sub_request['headers'] ?? array() ) ) as $name ) {
+				if ( 'nonce' === \WP_REST_Request::canonicalize_header_name( (string) $name ) ) {
+					unset( $requests[ $index ]['headers'][ $name ] );
+				}
+			}
+		}
+
+		$request->set_param( 'requests', $requests );
+
+		return $result;
 	}
 
 	/**
@@ -132,7 +188,7 @@ class Authentication {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Store API context check.
 		$rest_route = rawurldecode( esc_url_raw( wp_unslash( $_GET['rest_route'] ) ) );
-		return 0 === strpos( $rest_route, '/wc/store/' );
+		return 0 === stripos( $rest_route, '/wc/store/' );
 	}
 
 	/**
@@ -193,7 +249,7 @@ class Authentication {
 		if (
 			FeaturesUtil::feature_is_enabled( 'rate_limit_checkout' )
 			&& $this->is_request_to_store_api()
-			&& preg_match( '#/wc/store(?:/v\d+)?/checkout#', $GLOBALS['wp']->query_vars['rest_route'] )
+			&& preg_match( '#/wc/store(?:/v\d+)?/checkout#i', $GLOBALS['wp']->query_vars['rest_route'] )
 			&& $this->is_only_post_request()
 		) {
 			add_filter(
@@ -300,7 +356,7 @@ class Authentication {
 		if ( empty( $GLOBALS['wp']->query_vars['rest_route'] ) ) {
 			return false;
 		}
-		return 0 === strpos( $GLOBALS['wp']->query_vars['rest_route'], '/wc/store/' );
+		return 0 === stripos( $GLOBALS['wp']->query_vars['rest_route'], '/wc/store/' );
 	}
 
 	/**

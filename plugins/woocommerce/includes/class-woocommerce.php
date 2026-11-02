@@ -686,10 +686,11 @@ final class WooCommerce {
 
 		// Pretty permalinks: the Store API namespace is part of the path, e.g. /wp-json/wc/store/v1/cart. Match the
 		// path only (a leading slash anchors the prefix) so a REST-like query argument such as
-		// /some-page/?arg=/wp-json/wc/store/ is not mistaken for a Store API request.
+		// /some-page/?arg=/wp-json/wc/store/ is not mistaken for a Store API request. Decode the path because WordPress
+		// also matches rewrite rules against the decoded path, so /wp%2Djson/wc/store/v1/cart reaches the Store API.
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$path = wp_parse_url( '/' . ltrim( (string) wp_unslash( $_SERVER['REQUEST_URI'] ), '/' ), PHP_URL_PATH );
-		if ( is_string( $path ) && false !== strpos( $path, '/' . trailingslashit( rest_get_url_prefix() ) . 'wc/store/' ) ) {
+		if ( is_string( $path ) && false !== stripos( rawurldecode( $path ), '/' . trailingslashit( rest_get_url_prefix() ) . 'wc/store/' ) ) {
 			return true;
 		}
 
@@ -698,7 +699,7 @@ final class WooCommerce {
 		if ( isset( $_GET['rest_route'] ) && is_string( $_GET['rest_route'] ) ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading the route only, no state change.
 			$rest_route = '/' . ltrim( rawurldecode( sanitize_text_field( wp_unslash( $_GET['rest_route'] ) ) ), '/' );
-			if ( 0 === strpos( $rest_route, '/wc/store/' ) ) {
+			if ( 0 === stripos( $rest_route, '/wc/store/' ) ) {
 				return true;
 			}
 		}

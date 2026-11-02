@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Strengthen security checks for Store API cart and checkout requests.
