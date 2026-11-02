@@ -560,4 +560,37 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 		$this->expectException( InvalidArgumentException::class );
 		$this->call_sanitize_cost->call( $this->sut, $value );
 	}
+
+	/**
+	 * @testDox Per-item shipping tax does not fatal when the cart is not loaded.
+	 */
+	public function test_add_rate_per_item_tax_without_cart(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		$this->sut->tax_status = 'taxable';
+
+		// WooCommerce only loads the cart on front-end requests, so WC()->cart is null
+		// during WP-Cron, REST API and non-AJAX admin requests, while an integration may still set a customer.
+		$cart          = WC()->cart;
+		$customer      = WC()->customer;
+		WC()->cart     = null;
+		WC()->customer = new WC_Customer();
+
+		try {
+			$this->sut->add_rate(
+				array(
+					'id'       => 'flat_rate_no_cart',
+					'label'    => 'Flat rate',
+					'cost'     => array( 'item_key' => 10 ),
+					'calc_tax' => 'per_item',
+				)
+			);
+		} finally {
+			WC()->cart     = $cart;
+			WC()->customer = $customer;
+			update_option( 'woocommerce_calc_taxes', 'no' );
+		}
+
+		$this->assertArrayHasKey( 'flat_rate_no_cart', $this->sut->rates, 'The rate should be added without a cart' );
+		$this->assertSame( array(), $this->sut->rates['flat_rate_no_cart']->get_taxes(), 'With no cart items there is nothing to tax per item' );
+	}
 }
