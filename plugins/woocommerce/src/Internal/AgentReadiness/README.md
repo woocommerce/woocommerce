@@ -61,8 +61,11 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 | Id | Passes when |
 | --- | --- |
 | `sitemap_lists_products` | A sitemap listed in robots.txt, or `/wp-sitemap.xml`, `/sitemap_index.xml` or `/sitemap.xml`, names a product sitemap or product pages. |
+| `product_jsonld_present` | The newest product page has Product (or ProductGroup) JSON-LD that parses, from WooCommerce, an SEO plugin or the theme. |
+| `product_jsonld_required_fields` | That JSON-LD gives a name, an image and an offer, from one block or several. Skipped when the page has no Product JSON-LD. |
+| `product_offer_jsonld` | One of its offers has a price (`price`, `lowPrice` or a price specification, as a number or with a currency) and an availability. Skipped when the page has no Product JSON-LD. |
 
-robots.txt is loaded from the host root, only to find the sitemaps it lists. Its crawler rules aren't checked: a host or CDN can rewrite the file or block crawlers without it, and the store's request to itself skips both, so they wait for an outside view of the store (WOOPRD-3953). The sitemap check is "couldn't check" when robots.txt could not be read, or a candidate sitemap could not be loaded, and no fetched sitemap names products. A category sitemap does not count.
+robots.txt is loaded from the host root, only to find the sitemaps it lists. Its crawler rules aren't checked: a host or CDN can rewrite the file or block crawlers without it, and the store's request to itself skips both, so they wait for an outside view of the store (WOOPRD-3953). The sitemap check is "couldn't check" when robots.txt could not be read, or a candidate sitemap could not be loaded, and no fetched sitemap names products. A category sitemap does not count. The product checks load one product page: the newest published, visible product without a password, among the five newest. With no such product, or when its page doesn't answer 200, they are "couldn't check".
 
 ## Report format
 
