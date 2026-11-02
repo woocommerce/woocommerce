@@ -231,8 +231,3 @@ If you don't have shell access to the environment, the Site Editor covers the sa
 - **Look for a Customized label** next to a template's name in the list. It means a merchant has edited the template directly from the Site Editor and that saved version in the database is what's rendering rather than your theme's file or WooCommerce's default.
 
 These checks ultimately give you a reliable path from a bare Block theme to a fully customized WooCommerce store: knowing the relationship between template rendering for a given page and understanding its fallback chain, then overriding it.
-
-## References
-
-- [WordPress template parts](https://developer.wordpress.org/themes/templates/template-parts/)
-- [WP-CLI: wp block template](https://developer.wordpress.org/cli/commands/block/template/)

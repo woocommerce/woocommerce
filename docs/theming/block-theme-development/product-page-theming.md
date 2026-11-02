@@ -14,11 +14,9 @@ This guide covers Blockified templates. It builds on the [Template hierarchy ref
 
 Before you begin, make sure you have the following in place:
 
-- **A current version of WooCommerce.** This guide covers the Add to Cart \+ Options Block, which is in WooCommerce 10.0 and later.
 - **A Block theme.** Every Block discussed here renders on the Blockified Single Product template, which only Block themes use by default.
 - **Familiarity with the [Template hierarchy reference](/docs/theming/block-theme-development/template-hierarchy/).** You should understand how single-product.html resolves and how theme overrides take priority.
 - **Familiarity with the Site Editor's List View and Code editor.** Several examples in this guide need you to inspect Block markup directly rather than relying on what's visible in the canvas.
-- **Familiarity with WordPress' actions and filters.** You'll still sometimes need to extend a page from PHP rather than the Site Editor.
 - **Knowledge of Global styles for WooCommerce.** You use theme.json to style Blocks, so understanding this aspect is vital.
 - **An understanding of your catalog's product types.** Simple, variable, grouped, and external products each render a different add-to-cart form.
 
@@ -31,7 +29,7 @@ Locating single-product.html can be confusing, since WooCommerce's own classic t
 
 WooCommerce chooses the correct template and a theme can override it with its own copy stored under the /templates folder. It's also editable through the Site Editor:
 
-\[DIAGRAM PLACEHOLDER *Showing the header template part, a breadcrumb and notices row, a two-column section (gallery on the left; title, rating, price, summary, add-to-cart, and meta stacked on the right), a full-width Product Details block, the Related Products pattern, then the footer template part.*\]
+![The Iris & Co. Single Product template open in the Site Editor with List View showing its block structure.](./_media/product-page-layout-iris-and-co.png)
 
 :::tip
 Open **Templates \> Single Product** within the Site Editor and check for a single woocommerce/legacy-template Block. This means WooCommerce is using the classic PHP template. The Blockified versions use Blocks such as woocommerce/product-image-gallery and woocommerce/add-to-cart-form.
@@ -419,27 +417,3 @@ You can replace this in place of the woocommerce-blocks/related-products pattern
 :::note
 If you like to extract reusable sections of a template into a custom Block pattern, verify your WooCommerce version's behavior first. WooCommerce currently detects whether a template contains product Blocks by parsing the template's raw content. This can affect certain behavior, such as the product class WooCommerce normally adds to the page wrapper.
 :::
-
-## References
-
-- [Theming WooCommerce Blocks](https://developer.woocommerce.com/docs/theming/block-theme-development/theming-woo-blocks/)
-- [WooCommerce Blocks reference](https://developer.woocommerce.com/docs/block-development/reference/block-references/)
-- [Single Product Block](https://woocommerce.com/document/single-product-block/)
-- [Add to Cart \+ Options Block](https://woocommerce.com/document/add-to-cart-options-block/)
-- [Accordion Block](https://wordpress.org/documentation/article/accordion-block/)
-- [Product Collection Block](https://woocommerce.com/document/woocommerce-store-editing/customizing-shop-page-catalog/product-collection-block/)
-- [Template hierarchy reference](/docs/theming/block-theme-development/template-hierarchy/)
-- [Global styles for WooCommerce](/docs/theming/block-theme-development/global-styles/)
-- [WooCommerce Code Reference: ProductDetails.php](https://woocommerce.github.io/code-reference/files/woocommerce-src-blocks-blocktypes-productdetails.html)
-- [WooCommerce Code Reference: content-single-product.php](https://woocommerce.github.io/code-reference/files/woocommerce-templates-content-single-product.html)
-
-## Next steps
-
-This guide covers the Single Product template Block by Block. The rest of the section builds outward to listing pages, Cart and Checkout, and CSS:
-
-1. [Global styles for WooCommerce](/docs/theming/block-theme-development/global-styles/). Using theme.json to style WooCommerce Blocks.
-2. [Template hierarchy reference](/docs/theming/block-theme-development/template-hierarchy/). All WooCommerce Block templates and how to override them.
-3. [Shop and archive page theming](/docs/theming/block-theme-development/shop-and-archive-page-theming/). The same Block-by-Block treatment applied to the Product Catalog and taxonomy templates.
-4. [Cart and Checkout theming](https://developer.woocommerce.com/docs/theming/block-theme-development/cart-and-checkout/). Styling the Cart and Checkout Blocks, including buttons and the mobile submit container.
-5. [CSS styling](https://developer.woocommerce.com/docs/theming/block-theme-development/css-styling/). CSS approaches and class name conventions for what theme.json doesn't cover.
-6. [Theming WooCommerce Blocks](https://developer.woocommerce.com/docs/theming/block-theme-development/theming-woo-blocks/). An overview of core concepts, Block templates, and template structure.

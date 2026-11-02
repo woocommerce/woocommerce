@@ -373,9 +373,3 @@ Before relying on any selector in production, look to confirm it against your ow
 - **View the available style variations** in the Site Editor's Block toolbar before writing `theme.json` rules against them, since some depend on the active theme rather than WooCommerce.
 
 With those checks in place, you can move through a complete path from a bare Block theme to a fully styled WooCommerce store: typography, color, and spacing through `theme.json`, style variations for consistent visual choices across related Blocks, and the Site Editor for building and exporting the result.
-
-## References
-
-- WordPress' [Global settings and styles: Styles](https://developer.wordpress.org/themes/global-settings-and-styles/styles/).
-- WordPress' [Block style variations](https://developer.wordpress.org/themes/features/block-style-variations/).
-- WordPress' [Block Types REST API endpoint](https://developer.wordpress.org/rest-api/reference/block-types/).

@@ -14,7 +14,6 @@ This guide walks through the Product Catalog template to show you its structure,
 
 Before you begin, make sure you have the following in place:
 
-- **A current version of WooCommerce.** This guide covers the Product Filters Block (introduced in WooCommerce 9.9) and the Products by Brand template (introduced in WooCommerce 9.6).
 - **A Block theme.** Every Block discussed here renders on the Blockified Product Catalog template, which only Block themes use by default.
 - **Familiarity with the Template hierarchy reference.** You should understand how archive-product.html resolves and how the taxonomy templates fall back to it.
 - **Familiarity with Global styles for WooCommerce.** Several Blocks on this template style through theme.json.
@@ -26,7 +25,7 @@ WooCommerce's own classic template for this page is archive-product.php, so the 
 
 WooCommerce ships a default archive-product.html inside its own plugin folder, which a Block theme falls back to unless the theme provides its own copy at the same path:
 
-\[DIAGRAM PLACEHOLDER *Showing the header template part, a breadcrumb row, a query title and term description, a store notices row, a flex row containing the results count and sorting control, the Product Collection grid with its Product Template, pagination, and no-results state, then the footer template part.*\]
+![The Iris & Co. Product Catalog template open in the Site Editor with List View showing its archive and product-grid block structure.](./_media/shop-and-archive-page-layout-iris-and-co.png)
 
 ```html
 <!-- wp:template-part {"slug":"header"} /-->
@@ -415,27 +414,3 @@ Product Collection's Custom query type replaces its default template-driven beha
 Setting query.inherit to false breaks the connection to the template or page the Block is on. Without it, you wouldn't see the fixed on-sale set of products.
 
 woocommerceOnSale is one of several filter attributes the Custom query type exposes. However, unlike the example of a single row of category-based products, you don't need a matching collection value.
-
-## References
-
-- [Theming WooCommerce Blocks](https://developer.woocommerce.com/docs/theming/block-theme-development/theming-woo-blocks/)
-- [WooCommerce Blocks reference](https://developer.woocommerce.com/docs/block-development/reference/block-references/)
-- [Template hierarchy reference](/docs/theming/block-theme-development/template-hierarchy/)
-- [WordPress Interactivity API reference](https://developer.wordpress.org/block-editor/reference-guides/interactivity-api/)
-- [Understanding the Interactivity API-driven future for WooCommerce Blocks](https://developer.woocommerce.com/2025/10/30/understanding-the-interactivity-api-driven-future-for-woocommerce-blocks/)
-- [Global styles for WooCommerce](/docs/theming/block-theme-development/global-styles/)
-- [Product page theming](/docs/theming/block-theme-development/product-page-theming/)
-- [Product Collection Block documentation](https://woocommerce.com/document/woocommerce-store-editing/customizing-shop-page-catalog/product-collection-block/)
-- [Product Filters Block documentation](https://woocommerce.com/document/woocommerce-store-editing/customizing-shop-page-catalog/filter-products/)
-- [Introducing Brands](https://developer.woocommerce.com/2024/10/01/introducing-brands/)
-
-## Next steps
-
-This guide covers the Product Catalog template. The rest of the section builds outward to Cart and Checkout and CSS:
-
-1. [Global styles for WooCommerce](/docs/theming/block-theme-development/global-styles/). How to use theme.json to style WooCommerce Blocks.
-2. [Template hierarchy reference](/docs/theming/block-theme-development/template-hierarchy/). The structure and hierarchy of WooCommerce Block templates.
-3. [Product page theming](/docs/theming/block-theme-development/product-page-theming/). The same Block-by-Block treatment applied to the Single Product template.
-4. [Cart and Checkout theming](https://developer.woocommerce.com/docs/theming/block-theme-development/cart-and-checkout/). Styling the Cart and Checkout Blocks, buttons, and mobile submit container.
-5. [CSS styling](https://developer.woocommerce.com/docs/theming/block-theme-development/css-styling/). CSS approaches and class name conventions outside of theme.json.
-6. [Theming WooCommerce Blocks](https://developer.woocommerce.com/docs/theming/block-theme-development/theming-woo-blocks/). An overview of core concepts, Block templates, and template structure.

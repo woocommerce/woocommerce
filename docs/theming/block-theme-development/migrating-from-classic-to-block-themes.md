@@ -112,7 +112,3 @@ If you are converting an existing classic theme, the [Create Block Theme plugin]
 [Purple](https://wordpress.org/themes/purple/) is a WooCommerce starter Block theme available in the WordPress.org theme directory. Its commerce-ready templates and patterns provide a working reference or starting point for a new theme.
 
 Once the base structure is in place, you can apply the WooCommerce-specific customizations covered in this section directly. The [Develop Your First Low-Code Block Theme](https://learn.wordpress.org/course/develop-your-first-low-code-block-theme/) course on Learn WordPress is a great way to establish that foundational structure.
-
-## References
-
-- [Global settings and styles](https://developer.wordpress.org/themes/global-settings-and-styles/styles/). WordPress documentation on `theme.json` and the global styles system.
