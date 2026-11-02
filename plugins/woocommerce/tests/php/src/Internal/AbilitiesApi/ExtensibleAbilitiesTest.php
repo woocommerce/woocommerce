@@ -86,7 +86,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		parent::setUp();
 
-		AbilitiesLoader::init();
+		wc_get_container()->get( AbilitiesLoader::class );
 		$this->reset_registries();
 		self::$received = array();
 		wp_set_current_user( self::$administrator_id );

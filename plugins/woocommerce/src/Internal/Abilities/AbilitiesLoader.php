@@ -81,7 +81,7 @@ class AbilitiesLoader {
 	 *
 	 * @since 10.9.0
 	 */
-	final public static function init(): void {
+	final public function init(): void {
 		if ( self::$initialized ) {
 			return;
 		}
