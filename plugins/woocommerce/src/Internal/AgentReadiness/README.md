@@ -86,6 +86,12 @@ A check listed in `StoreOutputChecks::PENDING` tests output WooCommerce doesn't 
 
 robots.txt is loaded from the host root, only to find the sitemaps it lists. Its crawler rules aren't checked: a host or CDN can rewrite the file or block crawlers without it, and the store's request to itself skips both, so they wait for an outside view of the store (WOOPRD-3953). The sitemap check is "couldn't check" when robots.txt could not be read, or a candidate sitemap could not be loaded, and no fetched sitemap names products. A category sitemap does not count. Checks on the home and product page read the ones that loaded. The home page loads first; when it can't be reached, the scan makes no more requests, so a store that can't reach itself waits for one timeout. The product checks load one product page: among the five newest published simple or variable products in the shop catalog, the newest with a price and no password, or the newest without a password when none of them has a price. With no such product, or when its page doesn't answer 200, they are "couldn't check".
 
+## What the store declares to agents
+
+`DeclaredToAgents` lists protocols and files as found or not found, for information. Each has a path or signal from its spec, and a JSON document has to have the fields its spec requires. Its results go into the report's `declared` and never count as a problem.
+
+Markdown is asked for on the product page, or the home page without a product: with `Accept: text/markdown`. An HTML answer doesn't count. A copy at the page's `.md` address isn't requested: each declared item reads a response the scan already loads. `Vary: Accept` isn't listed: hosts and CDNs set it, and the store's request to itself skips them.
+
 ## Report format
 
 `AgentReadiness::get_report()` returns:
@@ -100,6 +106,10 @@ array(
 		// blocks: 'listing' (every product on every channel), 'discovery' (harder to find and read), 'ucp' (the catalog for UCP agents) or 'checkout' (agent orders).
 		// ok: true, false, or null when a store output check could not run.
 		array( 'id' => 'launched', 'ok' => true, 'blocks' => 'listing', 'level' => 'required', 'name' => '…', 'label' => '…', 'why' => '…', 'fix' => '…', 'fix_url' => '…' ),
+	),
+	// What the store declares to agents, for information: found is true, false, or null when it couldn't be checked.
+	'declared' => array(
+		array( 'id' => 'security-txt', 'name' => '…', 'found' => false ),
 	),
 	'channels'     => array(
 		'chatgpt' => array(

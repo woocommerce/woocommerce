@@ -37,7 +37,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$output_checks = new StoreOutputChecks();
 		$output_checks->init( new ComingSoonHelper() );
 		$this->sut = new AgentReadiness();
-		$this->sut->init( $store_conditions, $output_checks, new RemoteRules() );
+		$this->sut->init( $store_conditions, $output_checks, new RemoteRules(), wc_get_container()->get( \Automattic\WooCommerce\Internal\AgentReadiness\DeclaredToAgents::class ) );
 	}
 
 	/**
@@ -74,7 +74,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$output_checks->init( new ComingSoonHelper() );
 		$store_conditions = new StoreConditions();
 		$store_conditions->init( new ComingSoonHelper() );
-		$this->sut->init( $store_conditions, $output_checks, new RemoteRules() );
+		$this->sut->init( $store_conditions, $output_checks, new RemoteRules(), wc_get_container()->get( \Automattic\WooCommerce\Internal\AgentReadiness\DeclaredToAgents::class ) );
 		add_filter( 'pre_http_request', static fn() => new \WP_Error( 'http_request_failed', 'Timed out' ) );
 
 		$checks = array_column( $this->sut->get_report()['store_checks'], null, 'id' );
@@ -96,7 +96,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 
 		$report = $this->sut->get_report();
 
-		$this->assertSame( array( 'generated_at', 'products', 'hidden_from_catalog', 'unsupported_types', 'store_checks', 'channels', 'checks', 'truncated' ), array_keys( $report ) );
+		$this->assertSame( array( 'generated_at', 'products', 'hidden_from_catalog', 'unsupported_types', 'store_checks', 'declared', 'channels', 'checks', 'truncated' ), array_keys( $report ) );
 		$this->assertFalse( $report['truncated'] );
 		$this->assertSame( array( 'id', 'ok', 'blocks', 'level', 'name', 'label', 'why', 'fix', 'fix_url' ), array_keys( $report['store_checks'][0] ) );
 		$this->assertSame( array( 'chatgpt', 'google', 'copilot' ), array_keys( $report['channels'] ) );
