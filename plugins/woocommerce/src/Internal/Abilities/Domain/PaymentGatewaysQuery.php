@@ -153,7 +153,7 @@ class PaymentGatewaysQuery extends AbstractDomainAbility implements AbilityDefin
 					'id'           => array( 'type' => 'string' ),
 					'title'        => array(
 						'type'        => 'string',
-						'description' => __( 'Title shown to customers at checkout. Empty when the gateway sets it in code.', 'woocommerce' ),
+						'description' => __( 'Title shown to customers at checkout. Can be empty.', 'woocommerce' ),
 					),
 					'method_title' => array(
 						'type'        => 'string',
@@ -161,7 +161,7 @@ class PaymentGatewaysQuery extends AbstractDomainAbility implements AbilityDefin
 					),
 					'description'  => array(
 						'type'        => 'string',
-						'description' => __( 'Description shown to customers at checkout. Empty when the gateway sets it in code.', 'woocommerce' ),
+						'description' => __( 'Description shown to customers at checkout. Can be empty.', 'woocommerce' ),
 					),
 					'enabled'      => array( 'type' => 'boolean' ),
 				),
