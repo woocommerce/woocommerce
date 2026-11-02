@@ -86,6 +86,10 @@ A check listed in `StoreOutputChecks::PENDING` tests output WooCommerce doesn't 
 
 robots.txt is loaded from the host root, only to find the sitemaps it lists. Its crawler rules aren't checked: a host or CDN can rewrite the file or block crawlers without it, and the store's request to itself skips both, so they wait for an outside view of the store (WOOPRD-3953). The sitemap check is "couldn't check" when robots.txt could not be read, or a candidate sitemap could not be loaded, and no fetched sitemap names products. A category sitemap does not count. Checks on the home and product page read the ones that loaded. The home page loads first; when it can't be reached, the scan makes no more requests, so a store that can't reach itself waits for one timeout. The product checks load one product page: among the five newest published simple or variable products in the shop catalog, the newest with a price and no password, or the newest without a password when none of them has a price. With no such product, or when its page doesn't answer 200, they are "couldn't check".
 
+## Failures per product
+
+`refresh_report()` stores what each product fails in product meta (`ProductFailures`), one row per check and per channel status, plus a `checked` row on every product the checks cover, passing ones included. `ProductsList` updates a product's rows when it is saved, except for a save that changes only stock, and adds the Products list filter and column. The stored report's product counts are read from these rows, the total from the `checked` rows, so a product fixed, added or removed since the scan counts now. The example products per check can be out of date; the count links to the filtered Products list. A change to one product's GTIN can change another product's duplicate GTIN result; that one waits for the next scan.
+
 ## What the store declares to agents
 
 `DeclaredToAgents` lists protocols and files as found or not found, for information. Each has a path or signal from its spec, and a JSON document has to have the fields its spec requires. Its results go into the report's `declared` and never count as a problem.
@@ -156,7 +160,7 @@ Per check, `channels` maps a channel id to the feed field and the effect, the sa
 
 "Run check" on the Agentic commerce settings page, or `POST wc/v3/agent-readiness/scan`, queues the scan in Action Scheduler (`ScheduledScan`). The report is stored in the `woocommerce_agent_readiness_report` option (not autoloaded). Each run schedules the next one a day later, before scanning, so a failed scan doesn't stop the daily refresh; a run that finds the feature disabled does. If a queued scan still hasn't started 10 minutes after it was due and no other scheduled action has finished in that time (Action Scheduler isn't running), the next "Run check" or `POST` runs the scan in that request.
 
-Product changes don't update the stored report: a fixed product leaves it at the next daily scan or "Run check". On a store with 11,000 products, a scan (stopping at 5,000) took about 4 seconds and 144 MB.
+On a store with 11,000 products, a scan (stopping at 5,000) took about 4 seconds and 144 MB. A product saved since the scan is already reflected in the counts, as described under Failures per product.
 
 `GET wc/v3/agent-readiness` returns `{ "report": <report or null>, "scan_pending": <bool> }`, with `store_checks` read now. Both routes need `manage_woocommerce` and exist only while the feature is enabled.
 

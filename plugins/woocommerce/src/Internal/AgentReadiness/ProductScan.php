@@ -107,8 +107,9 @@ class ProductScan {
 	 * @param array<string, ReadinessRule>                                    $rules         Rules by id.
 	 * @param array<string, array<string, array{field:string,effect:string}>> $channel_rules Channel map by rule id.
 	 * @param int                                                             $ids_limit     Product ids kept per rule.
+	 * @param callable|null                                                   $on_tested     Called with each product id and its failures.
 	 */
-	public function evaluate( array $rules, array $channel_rules, int $ids_limit ): void {
+	public function evaluate( array $rules, array $channel_rules, int $ids_limit, ?callable $on_tested = null ): void {
 		$this->results             = array_fill_keys(
 			array_keys( $rules ),
 			array(
@@ -172,7 +173,7 @@ class ProductScan {
 				}
 				$product = wc_get_product( $product_id );
 				if ( $product ) {
-					$this->record( $product, $rules, $channel_rules, $ids_limit );
+					$this->record( $product, $rules, $channel_rules, $ids_limit, $on_tested );
 				}
 			}
 
@@ -453,9 +454,13 @@ class ProductScan {
 	 * @param array<string, ReadinessRule>                                    $rules         Rules by id.
 	 * @param array<string, array<string, array{field:string,effect:string}>> $channel_rules Channel map by rule id.
 	 * @param int                                                             $ids_limit     Product ids kept per rule.
+	 * @param callable|null                                                   $on_tested     Called with the product id and its failures.
 	 */
-	private function record( \WC_Product $product, array $rules, array $channel_rules, int $ids_limit ): void {
+	private function record( \WC_Product $product, array $rules, array $channel_rules, int $ids_limit, ?callable $on_tested ): void {
 		$failures = $this->failures( $product, $rules, $channel_rules );
+		if ( null !== $on_tested ) {
+			$on_tested( $product->get_id(), $failures );
+		}
 		foreach ( array_keys( $failures ) as $id ) {
 			$result = $this->result( $id );
 			++$result['count'];
