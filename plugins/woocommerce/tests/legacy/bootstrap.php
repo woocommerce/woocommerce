@@ -93,10 +93,12 @@ class WC_Unit_Tests_Bootstrap {
 		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
 
 		/*
-		 * The WordPress bootstrap deletes its isolated upload directory after loading, by which
-		 * point wp_upload_dir() has memoised the path as created, so nothing recreates it.
+		 * WordPress 7.2's test bootstrap deletes its isolated upload directory after loading, by
+		 * which point wp_upload_dir() has memoised the path as created, so nothing recreates it.
 		 */
-		wp_mkdir_p( wp_upload_dir()['path'] );
+		if ( version_compare( $GLOBALS['wp_version'], '7.2-alpha', '>=' ) ) {
+			wp_mkdir_p( wp_upload_dir()['path'] );
+		}
 
 		// Ensure theme install tests use direct filesystem method.
 		if ( ! defined( 'FS_METHOD' ) ) {
