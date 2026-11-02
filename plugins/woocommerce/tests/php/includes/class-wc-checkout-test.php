@@ -78,6 +78,130 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Classic checkout enforces the merchant's account policy before creating a customer, order or payment.
+	 *
+	 * @testWith ["no", "no", false, false]
+	 *           ["no", "yes", false, true]
+	 *           ["yes", "no", false, true]
+	 *           ["yes", "yes", false, true]
+	 *           ["no", "no", true, true]
+	 *           ["no", "no", false, true, true, null]
+	 *           ["no", "no", false, true, null, false]
+	 *           ["yes", "no", false, false, false, null]
+	 *           ["no", "yes", false, false, null, true]
+	 *
+	 * @param string    $registration_enabled Whether checkout registration is enabled.
+	 * @param string    $guest_checkout_enabled Whether guest checkout is enabled.
+	 * @param bool      $logged_in Whether the customer is signed in.
+	 * @param bool      $allowed Whether checkout can reach customer, order and payment processing.
+	 * @param bool|null $filtered_registration_enabled Optional extension override for registration.
+	 * @param bool|null $filtered_registration_required Optional extension override for requiring registration.
+	 */
+	public function test_process_checkout_registration_policy( string $registration_enabled, string $guest_checkout_enabled, bool $logged_in, bool $allowed, ?bool $filtered_registration_enabled = null, ?bool $filtered_registration_required = null ): void {
+		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', $registration_enabled );
+		update_option( 'woocommerce_enable_guest_checkout', $guest_checkout_enabled );
+		if ( null !== $filtered_registration_enabled ) {
+			add_filter( 'woocommerce_checkout_registration_enabled', $filtered_registration_enabled ? '__return_true' : '__return_false' );
+		}
+		if ( null !== $filtered_registration_required ) {
+			add_filter( 'woocommerce_checkout_registration_required', $filtered_registration_required ? '__return_true' : '__return_false' );
+		}
+		wp_set_current_user( $logged_in ? self::factory()->user->create( array( 'role' => 'customer' ) ) : 0 );
+		wc_clear_notices();
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+		$order = WC_Helper_Order::create_order();
+		$order->set_total( 10 );
+		$order->save();
+		$posted_data = array( 'payment_method' => 'test_gateway' );
+
+		// Isolate this checkout policy from address validation and payment-provider side effects.
+		$sut = $this->getMockBuilder( WC_Checkout::class )->onlyMethods(
+			array( 'get_posted_data', 'update_session', 'validate_checkout', 'process_customer', 'create_order', 'process_order_payment', 'process_order_without_payment', 'send_ajax_failure_response' )
+		)->getMock();
+		$sut->expects( $this->exactly( $allowed ? 1 : 0 ) )->method( 'get_posted_data' )->willReturn( $posted_data );
+		$sut->expects( $this->exactly( $allowed ? 1 : 0 ) )->method( 'update_session' );
+		$sut->expects( $this->exactly( $allowed ? 1 : 0 ) )->method( 'validate_checkout' );
+		$sut->expects( $this->exactly( $allowed ? 1 : 0 ) )->method( 'process_customer' )->with( $posted_data );
+		$sut->expects( $this->exactly( $allowed ? 1 : 0 ) )->method( 'create_order' )->with( $posted_data )->willReturn( $order->get_id() );
+		$sut->expects( $this->exactly( $allowed ? 1 : 0 ) )->method( 'process_order_payment' )->with( $order->get_id(), 'test_gateway' );
+		$sut->expects( $this->never() )->method( 'process_order_without_payment' );
+
+		$before_process   = did_action( 'woocommerce_before_checkout_process' );
+		$process          = did_action( 'woocommerce_checkout_process' );
+		$original_request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserve the test request.
+		$_REQUEST         = array( 'woocommerce-process-checkout-nonce' => wp_create_nonce( 'woocommerce-process_checkout' ) );
+		try {
+			$sut->process_checkout();
+		} finally {
+			$_REQUEST = $original_request;
+		}
+
+		$this->assertSame( $before_process + 1, did_action( 'woocommerce_before_checkout_process' ), 'Extensions must still see the checkout attempt.' );
+		$this->assertSame( $process + ( $allowed ? 1 : 0 ), did_action( 'woocommerce_checkout_process' ), 'Denied checkout must not dispatch processing hooks.' );
+		$this->assertSame( $allowed ? 0 : 1, wc_notice_count( 'error' ), 'Only a guest who cannot register or use guest checkout should be denied.' );
+		if ( ! $allowed ) {
+			$this->assertTrue( wc_has_notice( 'You must be logged in to checkout.', 'error' ), 'The customer should receive the account-policy error.' );
+		}
+	}
+
+	/**
+	 * @testdox Empty-cart requests fire the attempt hook, and forbidden ones get the account-policy error.
+	 * @testWith ["yes", true]
+	 *           ["no", false]
+	 * @param string $guest_checkout Whether guest checkout is enabled.
+	 * @param bool   $allowed Whether the account policy allows this request.
+	 */
+	public function test_empty_cart_preparation_hook_policy( string $guest_checkout, bool $allowed ): void {
+		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'no' );
+		update_option( 'woocommerce_enable_guest_checkout', $guest_checkout );
+		wp_set_current_user( 0 );
+		wc_clear_notices();
+		WC()->cart->empty_cart();
+		$sut = $this->getMockBuilder( WC_Checkout::class )->onlyMethods( array( 'get_posted_data', 'send_ajax_failure_response' ) )->getMock();
+		$sut->expects( $this->never() )->method( 'get_posted_data' );
+		$before_process   = did_action( 'woocommerce_before_checkout_process' );
+		$original_request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserve the test request.
+		$_REQUEST         = array( 'woocommerce-process-checkout-nonce' => wp_create_nonce( 'woocommerce-process_checkout' ) );
+		try {
+			$sut->process_checkout();
+		} finally {
+			$_REQUEST = $original_request;
+		}
+		$this->assertSame( $before_process + 1, did_action( 'woocommerce_before_checkout_process' ) );
+		$this->assertSame( ! $allowed, wc_has_notice( 'You must be logged in to checkout.', 'error' ) );
+	}
+
+	/**
+	 * @testdox Posted createaccount cannot enable registration when the merchant has disabled it.
+	 *
+	 * @testWith ["no", 0]
+	 *           ["yes", 1]
+	 *
+	 * @param string $registration_enabled Whether checkout registration is enabled.
+	 * @param int    $expected_createaccount Expected sanitized account-creation choice.
+	 */
+	public function test_get_posted_data_honors_registration_setting( string $registration_enabled, int $expected_createaccount ): void {
+		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', $registration_enabled );
+		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
+		wp_set_current_user( 0 );
+
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve the test request.
+		$_POST         = array( 'createaccount' => '1' );
+		try {
+			$posted_data = $this->sut->get_posted_data();
+		} finally {
+			$_POST = $original_post;
+		}
+
+		$this->assertSame( $expected_createaccount, $posted_data['createaccount'], 'Submitted form data must respect the effective registration setting.' );
+	}
+
+	/**
 	 * Re-type the billing country field, the way a checkout field editor plugin can.
 	 *
 	 * The filter is tracked with the extra field filters, so tear down removes it.
