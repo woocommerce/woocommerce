@@ -3981,7 +3981,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				 * @param array       $args    Arguments.
 				 * @return int
 				 */
-				public function add_product( $product, $qty = 1, $args = array() ) {
+				public function add_product( $product, $qty = 1, $args = array() ) { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found -- The test needs an add_product() override without a stage_product_item() twin.
 					return parent::add_product( $product, $qty, $args );
 				}
 			}
