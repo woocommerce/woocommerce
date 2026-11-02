@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+WC_Order::update_status() with a manual change now fires woocommerce_order_edit_status from save(), just before the order is written, so a listener sees the paid and completed dates already set on the order. A direct set_status() call still fires the action right away.
