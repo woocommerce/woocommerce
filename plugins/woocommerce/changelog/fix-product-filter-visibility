@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Improve the consistency of Product Filters prices and counts across user roles.

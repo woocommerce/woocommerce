@@ -382,6 +382,27 @@ class CartItems extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Cart item prices do not expose a sale price before the scheduled sale starts.
+	 */
+	public function test_cart_item_sale_price_is_hidden_until_scheduled_sale_starts(): void {
+		$product = ( new FixtureData() )->get_simple_product(
+			array(
+				'regular_price'     => 100,
+				'sale_price'        => 63.45,
+				'date_on_sale_from' => strtotime( '+1 year' ),
+			)
+		);
+		wc_empty_cart();
+		$key = wc()->cart->add_to_cart( $product->get_id() );
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart/items/' . $key ) );
+		$prices   = $response->get_data()['prices'];
+
+		$this->assertSame( '10000', $prices->sale_price );
+		$this->assertSame( $prices->raw_prices['price'], $prices->raw_prices['sale_price'] );
+	}
+
+	/**
 	 * @testdox Cart lines include a null parent item key by default, declared in the schema as a readonly string or null.
 	 */
 	public function test_parent_item_key_is_null_by_default() {

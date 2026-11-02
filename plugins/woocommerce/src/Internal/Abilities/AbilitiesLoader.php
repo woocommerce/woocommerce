@@ -82,15 +82,9 @@ class AbilitiesLoader {
 			return;
 		}
 
-		/*
-		 * Register abilities when Abilities API is ready.
-		 * Support both old (pre-6.9) and new (6.9+) action names.
-		 */
 		AbilitiesCategories::init();
 		add_action( 'woocommerce_extensible_abilities_resources_init', array( __CLASS__, 'register_core_resources' ), 0 );
-		add_action( 'abilities_api_init', array( __CLASS__, 'init_extensions' ), 0 );
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'init_extensions' ), 0 );
-		add_action( 'abilities_api_init', array( __CLASS__, 'register_abilities' ) );
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'register_abilities' ) );
 		add_filter( 'woocommerce_product_data_store_cpt_get_products_query', array( __CLASS__, 'add_extension_query_args' ), 10, 2 );
 		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( __CLASS__, 'add_extension_query_args' ), 10, 2 );
@@ -173,10 +167,6 @@ class AbilitiesLoader {
 	 * @since 10.9.0
 	 */
 	public static function register_abilities(): void {
-		if ( ! function_exists( 'wp_register_ability' ) ) {
-			return;
-		}
-
 		foreach ( self::get_ability_definition_classes() as $class_name ) {
 			if ( ! is_string( $class_name ) || ! class_exists( $class_name ) ) {
 				continue;
@@ -201,8 +191,8 @@ class AbilitiesLoader {
 				continue;
 			}
 
-			if ( function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_name ) ) {
-				$existing_ability = function_exists( 'wp_get_ability' ) ? wp_get_ability( $ability_name ) : null;
+			if ( wp_has_ability( $ability_name ) ) {
+				$existing_ability = wp_get_ability( $ability_name );
 
 				if (
 					$is_core_ability
@@ -212,7 +202,7 @@ class AbilitiesLoader {
 					continue;
 				}
 
-				if ( ! $is_core_ability || ! function_exists( 'wp_unregister_ability' ) ) {
+				if ( ! $is_core_ability ) {
 					continue;
 				}
 

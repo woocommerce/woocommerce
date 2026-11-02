@@ -34,13 +34,6 @@ class AbilitiesRegistry {
 	 * @return array Array of all ability IDs.
 	 */
 	public function get_abilities_ids(): array {
-		// Check if the abilities API is available.
-		if ( ! function_exists( 'wp_get_abilities' ) ) {
-			return array();
-		}
-
-		$all_abilities = wp_get_abilities();
-
-		return array_keys( $all_abilities );
+		return array_keys( wp_get_abilities() );
 	}
 }
