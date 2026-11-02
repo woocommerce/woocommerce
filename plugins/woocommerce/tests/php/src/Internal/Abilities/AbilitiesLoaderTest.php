@@ -403,7 +403,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$query_schema  = wp_get_ability( 'woocommerce/orders-query' )->get_input_schema();
 		$update_schema = wp_get_ability( 'woocommerce/order-update-status' )->get_input_schema();
 
-		$this->assertNotContains( 'checkout-draft', $query_schema['properties']['status']['anyOf'][0]['enum'] ?? array() );
+		$this->assertNotContains( 'checkout-draft', $query_schema['properties']['status']['items']['enum'] );
 		$this->assertNotContains( 'checkout-draft', $update_schema['properties']['status']['enum'] ?? array() );
 	}
 
@@ -456,7 +456,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$output  = $ability->get_output_schema()['properties']['orders']['items']['properties'];
 
 			$this->assertContains( 'shop_test_contract', $input['type']['enum'] );
-			$this->assertContains( 'test-active', $input['status']['anyOf'][0]['enum'] );
+			$this->assertSame( 'array', $input['status']['type'] );
+			$this->assertContains( 'test-active', $input['status']['items']['enum'] );
 			$this->assertContains( 'test-active', $output['status']['enum'] );
 
 			$query_args = $this->capture_order_query_args(
@@ -524,7 +525,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$input   = $ability->get_input_schema()['properties'];
 			$output  = $ability->get_output_schema()['properties']['orders']['items']['properties'];
 
-			$this->assertNotContains( 'test-hidden', $input['status']['anyOf'][0]['enum'] );
+			$this->assertNotContains( 'test-hidden', $input['status']['items']['enum'] );
 			$this->assertContains( 'test-hidden', $output['status']['enum'] );
 
 			$query_args = $this->capture_order_query_args( array( 'type' => 'shop_test_contract' ) );
