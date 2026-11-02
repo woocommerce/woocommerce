@@ -258,6 +258,7 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 		try {
 			$sut = new StoreConditions();
 			$sut->init( new ComingSoonHelper() );
+			$ok = static fn(): array => array_intersect_key( array_column( $sut->all(), 'ok', 'id' ), array_flip( array( 'launched', 'search_visible', 'ucp_on', 'pretty_permalinks', 'guest_checkout' ) ) );
 
 			update_option( 'woocommerce_coming_soon', 'no' );
 			update_option( 'blog_public', '1' );
@@ -272,7 +273,7 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 					'pretty_permalinks' => true,
 					'guest_checkout'    => true,
 				),
-				array_column( $sut->all(), 'ok', 'id' )
+				$ok()
 			);
 
 			update_option( 'woocommerce_coming_soon', 'yes' );
@@ -289,7 +290,7 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 					'pretty_permalinks' => false,
 					'guest_checkout'    => false,
 				),
-				array_column( $sut->all(), 'ok', 'id' )
+				$ok()
 			);
 
 			update_option( 'woocommerce_enable_guest_checkout', 'yes' );
@@ -300,11 +301,17 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 
 			$this->assertSame(
 				array(
-					'launched'          => 'listing',
-					'search_visible'    => 'listing',
-					'ucp_on'            => 'ucp',
-					'pretty_permalinks' => 'ucp',
-					'guest_checkout'    => 'checkout',
+					'launched'             => 'listing',
+					'search_visible'       => 'listing',
+					'ucp_on'               => 'ucp',
+					'https'                => 'ucp',
+					'pretty_permalinks'    => 'ucp',
+					'privacy_page'         => 'checkout',
+					'terms_page'           => 'checkout',
+					'refund_returns_page'  => 'checkout',
+					'shipping_policy_page' => 'checkout',
+					'guest_checkout'       => 'checkout',
+					'order_emails'         => 'checkout',
 				),
 				array_column( $sut->all(), 'blocks', 'id' )
 			);

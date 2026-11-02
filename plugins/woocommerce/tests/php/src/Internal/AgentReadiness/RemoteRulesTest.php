@@ -159,7 +159,7 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox An effect_from date switches the effect from that day on.
+	 * @testdox An effect_from date switches the effect from that day on, and with several dates the latest one already reached wins.
 	 */
 	public function test_effect_from_date(): void {
 		$this->serve(
@@ -168,15 +168,21 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 					'google' => array(
 						'field'       => 'image_link',
 						'effect'      => 'gaps',
-						'effect_from' => array( '2027-01-31' => 'not_listable' ),
+						'effect_from' => array(
+							'2027-06-01' => 'rejected',
+							'2027-01-31' => 'not_listable',
+						),
 					),
 				),
 			)
 		);
 		$this->sut->refresh();
 
-		$this->assertSame( 'gaps', $this->sut->channel_rules( strtotime( '2027-01-30' ) )['image_too_small']['google']['effect'] );
-		$this->assertSame( 'not_listable', $this->sut->channel_rules( strtotime( '2027-01-31' ) )['image_too_small']['google']['effect'] );
+		$effect = fn( string $day ): string => $this->sut->channel_rules( strtotime( $day ) )['image_too_small']['google']['effect'];
+		$this->assertSame( 'gaps', $effect( '2027-01-30' ) );
+		$this->assertSame( 'not_listable', $effect( '2027-01-31' ) );
+		$this->assertSame( 'not_listable', $effect( '2027-05-31' ) );
+		$this->assertSame( 'rejected', $effect( '2027-06-01' ), 'Dates are applied in order, not file order' );
 	}
 
 	/**
