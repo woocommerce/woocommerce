@@ -41,12 +41,20 @@ class StoreOutputChecks {
 	}
 
 	/**
-	 * Run every check. Each URL is requested at most once per call.
+	 * The responses of one scan, shared by everything that reads the store during it.
+	 */
+	public function responses(): StoreResponses {
+		return new StoreResponses( $this->coming_soon_helper->is_site_live() );
+	}
+
+	/**
+	 * Run every check. Each URL is requested at most once per set of responses.
 	 *
+	 * @param StoreResponses|null $responses Responses of the scan, or null for new ones.
 	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict:bool,pending:bool}>
 	 */
-	public function all(): array {
-		$responses = new StoreResponses( $this->coming_soon_helper->is_site_live() );
+	public function all( ?StoreResponses $responses = null ): array {
+		$responses = $responses ?? $this->responses();
 		// The home page first: when it can't be reached, no other request is made.
 		$responses->home_page();
 		$results = array();
@@ -100,7 +108,7 @@ class StoreOutputChecks {
 	/**
 	 * Organization and the subtypes stores use for themselves.
 	 */
-	private const ORGANIZATION_TYPES = array( 'Organization', 'OnlineStore', 'OnlineBusiness', 'Corporation', 'LocalBusiness', 'Store' );
+	public const ORGANIZATION_TYPES = array( 'Organization', 'OnlineStore', 'OnlineBusiness', 'Corporation', 'LocalBusiness', 'Store' );
 
 	/**
 	 * The checks, each with a test that returns true, false, or null for couldn't check.
@@ -357,7 +365,7 @@ class StoreOutputChecks {
 	 *
 	 * @param string $path Path from the host root, such as /llms.txt.
 	 */
-	private static function host_root( string $path ): string {
+	public static function host_root( string $path ): string {
 		$home = (array) wp_parse_url( home_url() );
 		return ( $home['scheme'] ?? 'http' ) . '://' . ( $home['host'] ?? '' ) . ( isset( $home['port'] ) ? ':' . $home['port'] : '' ) . $path;
 	}
@@ -383,14 +391,13 @@ class StoreOutputChecks {
 	}
 
 	/**
-	 * Whether a sitemap the store serves names products. Null when robots.txt
-	 * or one of the candidate sitemaps could not be loaded and none named products.
+	 * Where a store's sitemaps may be: those robots.txt lists, then the usual paths.
 	 *
-	 * @param StoreResponses $responses Store responses.
+	 * @param string $robots The robots.txt text.
+	 * @return string[]
 	 */
-	private function sitemap_lists_products( StoreResponses $responses ): ?bool {
-		$robots   = $this->robots_txt( $responses );
-		$listed   = null === $robots ? array() : array_values(
+	public static function sitemap_urls( string $robots ): array {
+		$listed   = array_values(
 			array_filter(
 				array_slice( ( new RobotsTxt( $robots ) )->sitemaps(), 0, self::MAX_LISTED_SITEMAPS ),
 				array( StoreResponses::class, 'is_store_url' )
@@ -400,9 +407,19 @@ class StoreOutputChecks {
 		if ( function_exists( 'wp_sitemaps_get_server' ) && wp_sitemaps_get_server()->sitemaps_enabled() ) {
 			$defaults[] = '/wp-sitemap.xml';
 		}
-		$candidates = array_unique( array_merge( $listed, $defaults ) );
-		$unknown    = null === $robots;
-		foreach ( $candidates as $url ) {
+		return array_unique( array_merge( $listed, $defaults ) );
+	}
+
+	/**
+	 * Whether a sitemap the store serves names products. Null when robots.txt
+	 * or one of the candidate sitemaps could not be loaded and none named products.
+	 *
+	 * @param StoreResponses $responses Store responses.
+	 */
+	private function sitemap_lists_products( StoreResponses $responses ): ?bool {
+		$robots  = $this->robots_txt( $responses );
+		$unknown = null === $robots;
+		foreach ( self::sitemap_urls( (string) $robots ) as $url ) {
 			$response = $responses->get( $url );
 			if ( null === $response ) {
 				$unknown = true;
