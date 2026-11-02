@@ -60,7 +60,7 @@ if ( $who_refunded->exists() ) {
 
 	<?php do_action( 'woocommerce_admin_order_item_values', null, $refund, $refund->get_id() ); ?>
 
-	<?php if ( $cogs_is_enabled ) : ?>
+	<?php if ( $cogs_is_enabled && $show_cost_total ) : ?>
 	<td class="item_cost_of_goods"></td>
 	<?php endif; ?>
 

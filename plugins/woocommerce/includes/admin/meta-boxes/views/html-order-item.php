@@ -19,6 +19,7 @@ $thumbnail    = $product ? apply_filters( 'woocommerce_admin_order_item_thumbnai
 $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empty( $class ) ? $class : '', $item, $order );
 $wc_price_arg = array( 'currency' => $order->get_currency() );
 $is_visible   = $product && $product->is_visible();
+$show_cost_total     = apply_filters( 'woocommerce_show_cost_total_on_order_page', current_user_can( 'manage_woocommerce' ) );
 
 /**
  * Filter the order item name.
@@ -64,7 +65,7 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 
 	<?php do_action( 'woocommerce_admin_order_item_values', $product, $item, absint( $item_id ) ); ?>
 
-	<?php if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) : ?>
+	<?php if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() && $show_cost_total ) : ?>
 		<td class="item_cost_of_goods" width="1%" data-sort-value="<?php echo esc_attr( $item->get_cogs_value() ); ?>">
 			<?php $tooltip_text = $item->get_cogs_value_per_unit_tooltip_text(); ?>
 			<div class="view"

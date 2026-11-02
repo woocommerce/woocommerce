@@ -46,6 +46,7 @@ $discounts           = $order->get_items( 'discount' );
 $line_items_fee      = $order->get_items( 'fee' );
 $line_items_shipping = $order->get_items( 'shipping' );
 $cogs_is_enabled     = wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled();
+$show_cost_total     = apply_filters( 'woocommerce_show_cost_total_on_order_page', current_user_can( 'manage_woocommerce' ) );
 
 if ( wc_tax_enabled() ) {
 	$order_taxes      = $order->get_taxes();
@@ -60,7 +61,7 @@ if ( wc_tax_enabled() ) {
 			<tr>
 				<th class="item sortable" colspan="2" data-sort="string-ins"><?php esc_html_e( 'Item', 'woocommerce' ); ?></th>
 				<?php do_action( 'woocommerce_admin_order_item_headers', $order ); ?>
-				<?php if ( $cogs_is_enabled ) : ?>
+				<?php if ( $cogs_is_enabled && $show_cost_total ) : ?>
 					<th class="item_cost_of_goods sortable" data-sort="float"><?php esc_html_e( 'Cost', 'woocommerce' ); ?></th>
 				<?php endif; ?>
 				<th class="item_cost sortable" data-sort="float"><?php esc_html_e( 'Price', 'woocommerce' ); ?></th>
@@ -305,7 +306,7 @@ if ( wc_tax_enabled() ) {
 		</table>
 	<?php endif; ?>
 
-	<?php if ( $cogs_is_enabled ) : ?>
+	<?php if ( $cogs_is_enabled && $show_cost_total ) : ?>
 		<div class="clear"></div>
 
 		<table class="wc-order-totals">
