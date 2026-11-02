@@ -2,8 +2,7 @@
  * External dependencies
  */
 import { createElement, Fragment, useState } from '@wordpress/element';
-import { withConsole } from '@storybook/addon-console';
-import { Meta, Story } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react-webpack5';
 
 /**
  * Internal dependencies
@@ -17,7 +16,6 @@ import './style.scss';
 export default {
 	title: 'Experimental/VerticalCSSTransition',
 	component: VerticalCSSTransition,
-	decorators: [ ( storyFn, context ) => withConsole()( storyFn )( context ) ],
 } as Meta;
 
 const Parent = ( args: VerticalCSSTransitionProps ) => {
@@ -39,7 +37,7 @@ const Parent = ( args: VerticalCSSTransitionProps ) => {
 	);
 };
 
-const Template: Story< VerticalCSSTransitionProps > = ( args ) => (
+const Template: StoryFn< VerticalCSSTransitionProps > = ( args ) => (
 	<Parent { ...args } />
 );
 

@@ -3,18 +3,17 @@
  */
 import { createElement } from 'react';
 import { Notice } from '@wordpress/components';
-import { MediaItem } from '@wordpress/media-utils';
 import { useState } from '@wordpress/element';
 import { cloudUpload } from '@wordpress/icons';
+import type { Attachment } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies
  */
 import { MediaUploader } from '../';
-import { File } from '../types';
 import { MockMediaUpload } from './mock-media-uploader';
 
-const ImageGallery = ( { images }: { images: File[] } ) => {
+const ImageGallery = ( { images }: { images: Attachment[] } ) => {
 	return (
 		<div style={ { marginBottom: '16px' } }>
 			{ images.map( ( image, index ) => {
@@ -35,51 +34,63 @@ const ImageGallery = ( { images }: { images: File[] } ) => {
 };
 
 const readImage = ( file: Blob ) => {
-	return new Promise< MediaItem >( ( resolve ) => {
+	return new Promise< Attachment >( ( resolve ) => {
 		const fileReader = new FileReader();
 		fileReader.onload = function ( event ) {
 			const image = {
 				alt: 'Temporary image',
 				url: event?.target?.result,
-			} as MediaItem;
+			} as Attachment;
 			resolve( image );
 		};
 		fileReader.readAsDataURL( file );
 	} );
 };
 
-const mockUploadMedia = async ( { filesList, onFileChange } ) => {
+const mockUploadMedia = async ( {
+	filesList,
+	onFileChange,
+}: {
+	filesList: File[];
+	onFileChange?: ( files: Partial< Attachment >[] ) => void;
+} ) => {
 	// The values sent by the FormFileUpload and the DropZone components are different.
 	// This is why we need to transform everything into an array.
-	const list = await Object.keys( filesList ).map(
-		( key ) => filesList[ key ]
-	);
-
 	const images = await Promise.all(
-		list.map( ( file ) => {
+		filesList.map( ( file ) => {
 			if ( typeof file === 'object' ) {
 				return readImage( file );
 			}
 			return {};
 		} )
 	);
-	onFileChange( images );
+	onFileChange?.( images as Partial< Attachment >[] );
 };
 
 export const Basic = () => {
-	const [ images, setImages ] = useState< File[] >( [] );
+	const [ images, setImages ] = useState< Attachment[] >( [] );
 
 	return (
 		<>
 			<ImageGallery images={ images } />
 			<MediaUploader
 				MediaUploadComponent={ MockMediaUpload }
-				onSelect={ ( file ) => setImages( [ ...images, file ] ) }
+				onSelect={ ( file ) =>
+					setImages( [ ...images, file as Attachment ] )
+				}
 				onError={ () => null }
 				onFileUploadChange={ ( files ) =>
-					setImages( [ ...images, ...files ] )
+					setImages( [
+						...images,
+						...( Array.isArray( files ) ? files : [ files ] ),
+					] )
 				}
-				onUpload={ ( files ) => setImages( [ ...images, ...files ] ) }
+				onUpload={ ( files ) =>
+					setImages( [
+						...images,
+						...( Array.isArray( files ) ? files : [ files ] ),
+					] )
+				}
 				uploadMedia={ mockUploadMedia }
 			/>
 		</>
@@ -87,7 +98,7 @@ export const Basic = () => {
 };
 
 export const DisabledDropZone = () => {
-	const [ images, setImages ] = useState< File[] >( [] );
+	const [ images, setImages ] = useState< Attachment[] >( [] );
 
 	return (
 		<>
@@ -97,9 +108,14 @@ export const DisabledDropZone = () => {
 				label={ 'Click the button below to upload' }
 				MediaUploadComponent={ MockMediaUpload }
 				onFileUploadChange={ ( files ) =>
-					setImages( [ ...images, ...files ] )
+					setImages( [
+						...images,
+						...( Array.isArray( files ) ? files : [ files ] ),
+					] )
 				}
-				onSelect={ ( file ) => setImages( [ ...images, file ] ) }
+				onSelect={ ( file ) =>
+					setImages( [ ...images, file as Attachment ] )
+				}
 				onError={ () => null }
 				uploadMedia={ mockUploadMedia }
 			/>

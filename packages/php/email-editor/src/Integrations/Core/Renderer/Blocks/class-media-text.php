@@ -79,7 +79,7 @@ class Media_Text extends Abstract_Block_Renderer {
 		$original_wrapper_classname = ( new Dom_Document_Helper( $block_content ) )->get_attribute_value_by_tag_name( 'div', 'class' ) ?? '';
 
 		// Get layout attributes.
-		$media_position     = $block_attrs['mediaPosition'] ?? 'left';
+		$media_position     = $block_attrs['mediaPosition'] ?? $rendering_context->get_start_side();
 		$vertical_alignment = $this->get_vertical_alignment_from_attributes( $block_attrs );
 		$media_width        = $this->get_media_width_from_attributes( $block_attrs );
 		$text_width         = 100 - $media_width; // Text takes the remaining width.
@@ -96,15 +96,21 @@ class Media_Text extends Abstract_Block_Renderer {
 			array(
 				'width'           => '100%',
 				'border-collapse' => 'collapse',
-				'text-align'      => 'left',
+				'text-align'      => $rendering_context->get_default_text_align(),
 			)
 		);
 
 		// Apply class and style attributes to the wrapper table.
+		//
+		// Intentionally omit the `align` attribute. `align="left"` (or "right") on a table renders as
+		// `float: left` in email clients, taking the block out of normal flow — the block that follows
+		// then fails to clear it and overlaps it, so a following button paints its background across
+		// the media & text block above. Horizontal alignment is already carried by the `text-align`
+		// declaration in $block_styles['css'], so dropping the attribute preserves alignment while
+		// keeping the block in normal flow. Same fix as the gallery wrapper.
 		$table_attrs = array(
 			'class' => 'email-block-media-text ' . $original_wrapper_classname,
 			'style' => $block_styles['css'],
-			'align' => 'left',
 			'width' => '100%',
 		);
 

@@ -3,12 +3,12 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import {
-	__experimentalItemGroup as ItemGroup, // eslint-disable-line
-	__experimentalItem as Item, // eslint-disable-line
-	__experimentalVStack as VStack, // eslint-disable-line
-	__experimentalHStack as HStack, // eslint-disable-line
-	__experimentalHeading as Heading, // eslint-disable-line
-	__experimentalNavigatorButton as NavigatorButton, // eslint-disable-line
+	__experimentalItemGroup as ItemGroup,
+	__experimentalItem as Item,
+	__experimentalVStack as VStack,
+	__experimentalHStack as HStack,
+	__experimentalHeading as Heading,
+	__experimentalNavigatorButton as NavigatorButton,
 	FlexItem,
 	Card,
 	CardBody,
@@ -38,7 +38,7 @@ function ElementItem( { element, label }: { element: string; label: string } ) {
 	const background = elementStyles.color?.background || '#f0f0f0';
 	const navigationButtonLabel = sprintf(
 		// translators: %s: is a subset of Typography, e.g., 'text' or 'links'.
-		__( 'Typography %s styles', 'woocommerce' ),
+		__( 'Typography %s styles', __i18n_text_domain__ ),
 		label
 	);
 
@@ -92,24 +92,24 @@ export function TypographyPanel() {
 						level={ 3 }
 						className="edit-site-global-styles-subtitle"
 					>
-						{ __( 'Elements', 'woocommerce' ) }
+						{ __( 'Elements', __i18n_text_domain__ ) }
 					</Heading>
 					<ItemGroup isBordered isSeparated size="small">
 						<ElementItem
 							element="text"
-							label={ __( 'Text', 'woocommerce' ) }
+							label={ __( 'Text', __i18n_text_domain__ ) }
 						/>
 						<ElementItem
 							element="link"
-							label={ __( 'Links', 'woocommerce' ) }
+							label={ __( 'Links', __i18n_text_domain__ ) }
 						/>
 						<ElementItem
 							element="heading"
-							label={ __( 'Headings', 'woocommerce' ) }
+							label={ __( 'Headings', __i18n_text_domain__ ) }
 						/>
 						<ElementItem
 							element="button"
-							label={ __( 'Buttons', 'woocommerce' ) }
+							label={ __( 'Buttons', __i18n_text_domain__ ) }
 						/>
 					</ItemGroup>
 				</VStack>

@@ -53,7 +53,7 @@ export default function FulfillItemsButton( {
 		if ( error ) {
 			setError( error );
 		} else {
-			refreshOrderFulfillmentStatus( order.id );
+			void refreshOrderFulfillmentStatus( order.id );
 			setIsEditing( false );
 		}
 

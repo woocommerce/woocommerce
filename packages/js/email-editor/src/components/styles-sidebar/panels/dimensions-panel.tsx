@@ -6,14 +6,14 @@ import { isEqual } from 'lodash';
 import {
 	// We can remove the ts-expect-error comments once the types are available.
 	// @ts-expect-error TS7016: Could not find a declaration file for module '@wordpress/block-editor'.
-	__experimentalSpacingSizesControl as SpacingSizesControl, // eslint-disable-line
+	__experimentalSpacingSizesControl as SpacingSizesControl,
 	useSettings,
 } from '@wordpress/block-editor';
-// eslint-disable-next-line
+
 import {
-	__experimentalToolsPanel as ToolsPanel, // eslint-disable-line
-	__experimentalToolsPanelItem as ToolsPanelItem, // eslint-disable-line
-	__experimentalUseCustomUnits as useCustomUnits, // eslint-disable-line
+	__experimentalToolsPanel as ToolsPanel,
+	__experimentalToolsPanelItem as ToolsPanelItem,
+	__experimentalUseCustomUnits as useCustomUnits,
 } from '@wordpress/components';
 
 /**
@@ -31,7 +31,7 @@ export function DimensionsPanel() {
 
 	return (
 		<ToolsPanel
-			label={ __( 'Dimensions', 'woocommerce' ) }
+			label={ __( 'Dimensions', __i18n_text_domain__ ) }
 			resetAll={ () => {
 				updateStyleProp( [ 'spacing' ], defaultStyles.spacing );
 				recordEvent(
@@ -47,7 +47,7 @@ export function DimensionsPanel() {
 						defaultStyles.spacing.padding
 					)
 				}
-				label={ __( 'Padding', 'woocommerce' ) }
+				label={ __( 'Padding', __i18n_text_domain__ ) }
 				onDeselect={ () => {
 					updateStyleProp(
 						[ 'spacing', 'padding' ],
@@ -69,7 +69,7 @@ export function DimensionsPanel() {
 							{ value }
 						);
 					} }
-					label={ __( 'Padding', 'woocommerce' ) }
+					label={ __( 'Padding', __i18n_text_domain__ ) }
 					sides={ [
 						'horizontal',
 						'vertical',
@@ -83,7 +83,7 @@ export function DimensionsPanel() {
 			</ToolsPanelItem>
 			<ToolsPanelItem
 				isShownByDefault
-				label={ __( 'Block spacing', 'woocommerce' ) }
+				label={ __( 'Block spacing', __i18n_text_domain__ ) }
 				hasValue={ () =>
 					styles.spacing.blockGap !== defaultStyles.spacing.blockGap
 				}
@@ -99,7 +99,7 @@ export function DimensionsPanel() {
 				className="tools-panel-item-spacing"
 			>
 				<SpacingSizesControl
-					label={ __( 'Block spacing', 'woocommerce' ) }
+					label={ __( 'Block spacing', __i18n_text_domain__ ) }
 					min={ 0 }
 					onChange={ ( value ) => {
 						updateStyleProp( [ 'spacing', 'blockGap' ], value.top );

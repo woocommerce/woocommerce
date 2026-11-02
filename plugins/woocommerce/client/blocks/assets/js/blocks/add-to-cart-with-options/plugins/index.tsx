@@ -5,10 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { SelectControl } from '@wordpress/components';
 import { recordEvent } from '@woocommerce/tracks';
-import {
-	// @ts-expect-error no exported member.
-	PluginDocumentSettingPanel,
-} from '@wordpress/editor';
+import { PluginDocumentSettingPanel } from '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -47,12 +44,20 @@ function ProductTypeSwitcher() {
 
 export default function ProductTypeSelectorPlugin() {
 	const { slug, type } = useSelect( ( select ) => {
-		const { slug: currentPostSlug, type: currentPostType } = select(
-			'core/editor'
-		).getCurrentPost< {
-			slug: string;
-			type: string;
-		} >();
+		const editorStore = select( 'core/editor' );
+		// The widget editor does not load wp-editor, so the core/editor store may be unavailable.
+		if ( ! editorStore ) {
+			return {
+				slug: '',
+				type: '',
+			};
+		}
+
+		const { slug: currentPostSlug, type: currentPostType } =
+			editorStore.getCurrentPost< {
+				slug: string;
+				type: string;
+			} >();
 
 		return {
 			slug: currentPostSlug,

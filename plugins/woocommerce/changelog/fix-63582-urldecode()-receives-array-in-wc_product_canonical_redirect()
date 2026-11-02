@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixed a fatal error where urldecode() received an array in wc_product_canonical_redirect() when running on PHP 8 or higher.

@@ -1,0 +1,246 @@
+<?php
+/**
+ * Tests for the reports sales REST API.
+ *
+ * @package WooCommerce\Tests\API
+ */
+
+declare( strict_types=1 );
+
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
+/**
+ * WC_Tests_API_Reports_Sales.
+ */
+class WC_Tests_API_Reports_Sales extends WC_REST_Unit_Test_Case {
+
+	use HPOSToggleTrait;
+
+	/**
+	 * Original HPOS usage state.
+	 *
+	 * @var bool
+	 */
+	private $original_hpos_usage;
+
+	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 *
+	 * Creating them here keeps the DDL, and its implicit commit, outside the
+	 * transaction the parent opens for each test.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		$previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		try {
+			self::setup_cot_tables();
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() !== $previous_hpos_state ) {
+				OrderHelper::toggle_cot_feature_and_usage( $previous_hpos_state );
+			}
+		} finally {
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
+
+	/**
+	 * Setup our test server, endpoints, and user info.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->original_hpos_usage = OrderUtil::custom_orders_table_usage_is_enabled();
+
+		// The HPOS title leaves orders only in the orders tables, so switching back
+		// counts as switching with orders out of sync. The parent rollback discards
+		// those rows straight after, so allow it.
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->user = $this->factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+		$this->clear_sales_report_cache();
+	}
+
+	/**
+	 * Restore HPOS state and clear report caches.
+	 */
+	public function tearDown(): void {
+		remove_all_actions( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
+		OrderHelper::toggle_cot_feature_and_usage( $this->original_hpos_usage );
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+
+		$this->clear_sales_report_cache();
+		parent::tearDown();
+	}
+
+	/**
+	 * Clear the sales report transient and in-memory cache.
+	 */
+	private function clear_sales_report_cache(): void {
+		delete_transient( 'wc_report_sales_by_date' );
+
+		if ( ! class_exists( 'WC_Admin_Report' ) ) {
+			return;
+		}
+
+		$reflection = new ReflectionClass( WC_Admin_Report::class );
+		$property   = $reflection->getProperty( 'cached_results' );
+		$property->setAccessible( true );
+		$property->setValue( array() );
+	}
+
+	/**
+	 * @testdox Should expose a stable V3 sales response shape for an empty day.
+	 */
+	public function test_sales_response_contract(): void {
+		wp_set_current_user( $this->user );
+
+		$date    = wp_date( 'Y-m-d' );
+		$request = new WP_REST_Request( 'GET', '/wc/v3/reports/sales' );
+		$request->set_query_params(
+			array(
+				'date_min' => $date,
+				'date_max' => $date,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertCount( 1, $reports );
+
+		$report = $reports[0];
+		$this->assertSame(
+			array(
+				'total_sales',
+				'net_sales',
+				'average_sales',
+				'total_orders',
+				'total_items',
+				'total_tax',
+				'total_shipping',
+				'total_refunds',
+				'total_discount',
+				'totals_grouped_by',
+				'totals',
+				'total_customers',
+				'_links',
+			),
+			array_keys( $report )
+		);
+
+		foreach ( array( 'total_sales', 'net_sales', 'average_sales', 'total_tax', 'total_shipping', 'total_discount' ) as $key ) {
+			$this->assertIsString( $report[ $key ], $key . ' should be serialized as a decimal string.' );
+		}
+		foreach ( array( 'total_orders', 'total_items', 'total_customers' ) as $key ) {
+			$this->assertIsInt( $report[ $key ], $key . ' should be serialized as an integer.' );
+		}
+		// Kept out of the loop above because total_refunds is an integer only while it is
+		// zero. test_sales_refund_totals_contract() covers what a real refund returns.
+		$this->assertSame( 0, $report['total_refunds'] );
+
+		$this->assertSame( 'day', $report['totals_grouped_by'] );
+		$this->assertArrayHasKey( $date, $report['totals'] );
+
+		$period = $report['totals'][ $date ];
+		$this->assertSame( array( 'sales', 'orders', 'items', 'tax', 'shipping', 'discount', 'customers', 'refunds' ), array_keys( $period ) );
+		foreach ( array( 'sales', 'tax', 'shipping', 'discount', 'refunds' ) as $key ) {
+			$this->assertIsString( $period[ $key ], $key . ' should be serialized as a decimal string.' );
+		}
+		foreach ( array( 'orders', 'items', 'customers' ) as $key ) {
+			$this->assertIsInt( $period[ $key ], $key . ' should be serialized as an integer.' );
+		}
+	}
+
+	/**
+	 * @testdox A refund is subtracted from sales totals and comes back as a float, not the integer the schema declares.
+	 */
+	public function test_sales_refund_totals_contract(): void {
+		wp_set_current_user( $this->user );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '10.50' );
+		$product->save();
+
+		$order = wc_create_order();
+		$order->add_product( $product, 1 );
+		$order->calculate_totals();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 3.25,
+			)
+		);
+
+		$this->clear_sales_report_cache();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/reports/sales' );
+		$request->set_query_params(
+			array(
+				'date_min' => gmdate( 'Y-m-d', strtotime( '-1 day' ) ),
+				'date_max' => gmdate( 'Y-m-d', strtotime( '+1 day' ) ),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$report   = $response->get_data()[0];
+
+		$this->assertSame( 200, $response->get_status() );
+
+		// The inherited V1 schema declares total_refunds an integer, but the report
+		// accumulates it with floatval() and subtracts it from total_sales, so a real
+		// refund reports a decimal amount. Assert the amount, not the serialized type:
+		// the schema and the implementation disagree about the type, and settling that
+		// is a production change this PR does not make.
+		$this->assertEquals( 3.25, $report['total_refunds'] );
+
+		$this->assertSame( wc_format_decimal( 7.25, 2 ), $report['total_sales'], 'Sales totals should be net of the refund.' );
+	}
+
+	/**
+	 * @testdox Should return sales totals from HPOS data when sync is disabled.
+	 */
+	public function test_get_sales_report_with_hpos_enabled_and_sync_off(): void {
+		$this->toggle_cot_feature_and_usage( true );
+		$this->disable_cot_sync();
+
+		wp_set_current_user( $this->user );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '100' );
+		$product->save();
+
+		for ( $i = 0; $i < 2; $i++ ) {
+			$order = wc_create_order();
+			$order->add_product( $product, 1 );
+			$order->calculate_totals();
+			$order->set_status( OrderStatus::COMPLETED );
+			$order->save();
+		}
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/reports/sales' );
+		$request->set_query_params(
+			array(
+				'date_min' => gmdate( 'Y-m-d', strtotime( '-1 day' ) ),
+				'date_max' => gmdate( 'Y-m-d', strtotime( '+1 day' ) ),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$report   = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $report );
+		$this->assertSame( 2, $report[0]['total_orders'], 'Sales report should count HPOS orders when sync is disabled.' );
+		$this->assertSame( 2, $report[0]['total_items'], 'Sales report should count HPOS order items when sync is disabled.' );
+		$this->assertSame( wc_format_decimal( 200, 2 ), $report[0]['total_sales'], 'Sales report total should come from HPOS order totals.' );
+	}
+}

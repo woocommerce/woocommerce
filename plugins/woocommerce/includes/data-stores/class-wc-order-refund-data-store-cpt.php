@@ -53,7 +53,7 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 		}
 
 		$parent_order_id  = $order->get_parent_id();
-		$refund_cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $parent_order_id;
+		$refund_cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refund_ids' . $parent_order_id;
 		wp_delete_post( $id );
 		wp_cache_delete( $refund_cache_key, 'orders' );
 		$order->set_id( 0 );
@@ -65,6 +65,20 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 		 * @since 3.0.0
 		 */
 		do_action( 'woocommerce_delete_order_refund', $id );
+
+		if ( ! $parent_order_id || isset( self::$orders_being_deleted[ $parent_order_id ] ) ) {
+			return;
+		}
+
+		/**
+		 * Fires after a refund is deleted from an order, unless the order itself is being deleted.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param int $order_id  The ID of the order the refund belonged to.
+		 * @param int $refund_id The ID of the deleted refund.
+		 */
+		do_action( 'woocommerce_order_refund_deleted', $parent_order_id, $id );
 	}
 
 	/**

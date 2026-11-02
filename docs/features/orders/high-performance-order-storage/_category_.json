@@ -1,0 +1,11 @@
+{
+    "position": 90,
+    "label": "High Performance Order Storage",
+    "description": "High Performance Order Storage (HPOS) is a new way to store orders in WooCommerce. It is designed to improve performance and scalability for stores with large numbers of orders.",
+    "collapsible": true,
+    "collapsed": true,
+    "link": {
+        "type": "doc",
+        "id": "README"
+    }
+}

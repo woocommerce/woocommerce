@@ -47,6 +47,7 @@ dist/
 oclif.manifest.json
 
 # Project files
+.pnpm-store/
 node_modules/
 vendor/
 
@@ -58,6 +59,8 @@ package-lock.json
 
 # wp-env config
 .wp-env.override.json
+.wp-env.test.override.json
+.wp-env.e2e.override.json
 
 # Unit tests
 tmp/
@@ -88,10 +91,6 @@ phpcs-report.xml
 #PHP Unit
 .phpunit.result.cache
 
-# Allure directories
-allure-report
-allure-results
-
 # Code analyzer output and env
 changes.json
 .env
@@ -113,6 +112,7 @@ changes.json
 
 # Claude related files
 **/.claude/**/*.local.*
+**/.claude/launch.json
 .claude/docs/plans/
 .claude/docs/analysis/
 .claude/docs/research/
@@ -126,3 +126,5 @@ CLAUDE.local.md
 
 # Docusaurus
 .docusaurus
+
+.mcp.json

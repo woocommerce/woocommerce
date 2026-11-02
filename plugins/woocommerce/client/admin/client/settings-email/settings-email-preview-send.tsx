@@ -1,66 +1,47 @@
 /**
  * External dependencies
  */
-import { Button, Modal, TextControl } from '@wordpress/components';
-import { Icon, check, warning } from '@wordpress/icons';
-import apiFetch from '@wordpress/api-fetch';
+import { Button, Modal } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { recordEvent } from '@woocommerce/tracks';
-import { isValidEmail } from '@woocommerce/product-editor/build/utils/validate-email'; // Import from the build directory so we don't load the entire product editor since we only need this one function.
 
 /**
  * Internal dependencies
  */
-import { emailPreviewNonce } from './settings-email-preview-nonce';
+import {
+	SendTestEmailForm,
+	useSendTestEmail,
+} from './settings-email-send-test';
+
+// Re-exported so existing consumers (and tests) keep working after the send
+// logic moved to settings-email-send-test.tsx.
+export {
+	friendlyEmailSendError,
+	isValidEmail,
+	type WPError,
+} from './settings-email-send-test';
 
 type EmailPreviewSendProps = {
 	type: string;
 };
 
-type EmailPreviewSendResponse = {
-	message: string;
-};
-
-type WPError = {
-	message: string;
-	code: string;
-	data: {
-		status: number;
-	};
-};
-
 export const EmailPreviewSend = ( { type }: EmailPreviewSendProps ) => {
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
-	const [ email, setEmail ] = useState( '' );
-	const [ isSending, setIsSending ] = useState( false );
-	const [ notice, setNotice ] = useState( '' );
-	const [ noticeType, setNoticeType ] = useState( '' );
-	const nonce = emailPreviewNonce();
+	const {
+		email,
+		setEmail,
+		isSending,
+		setIsSending,
+		notice,
+		noticeType,
+		sendEmail,
+	} = useSendTestEmail(
+		{ endpoint: 'settings', emailType: type },
+		'email_preview'
+	);
 
-	const handleSendEmail = async () => {
-		setIsSending( true );
-		setNotice( '' );
-		try {
-			const response: EmailPreviewSendResponse = await apiFetch( {
-				path: `wc-admin-email/settings/email/send-preview?nonce=${ nonce }`,
-				method: 'POST',
-				data: { email, type },
-			} );
-			setNotice( response.message );
-			setNoticeType( 'success' );
-			recordEvent( 'settings_emails_preview_test_sent_successful', {
-				email_type: type,
-			} );
-		} catch ( e ) {
-			const wpError = e as WPError;
-			setNotice( wpError.message );
-			setNoticeType( 'error' );
-			recordEvent( 'settings_emails_preview_test_sent_failed', {
-				email_type: type,
-				error: wpError.message,
-			} );
-		}
+	const closeModal = () => {
+		setIsModalOpen( false );
 		setIsSending( false );
 	};
 
@@ -76,57 +57,18 @@ export const EmailPreviewSend = ( { type }: EmailPreviewSendProps ) => {
 			{ isModalOpen && (
 				<Modal
 					title={ __( 'Send a test email', 'woocommerce' ) }
-					onRequestClose={ () => {
-						setIsModalOpen( false );
-						setIsSending( false );
-					} }
+					onRequestClose={ closeModal }
 					className="wc-settings-email-preview-send-modal"
 				>
-					<p>
-						{ __(
-							'Send yourself a test email to check how your email looks in different email apps.',
-							'woocommerce'
-						) }
-					</p>
-
-					<TextControl
-						label={ __( 'Send to', 'woocommerce' ) }
-						type="email"
-						value={ email }
-						placeholder={ __( 'Enter an email', 'woocommerce' ) }
-						onChange={ setEmail }
+					<SendTestEmailForm
+						email={ email }
+						onEmailChange={ setEmail }
+						isSending={ isSending }
+						notice={ notice }
+						noticeType={ noticeType }
+						onSend={ sendEmail }
+						onCancel={ closeModal }
 					/>
-					{ notice && (
-						<div
-							className={ `wc-settings-email-preview-send-modal-notice wc-settings-email-preview-send-modal-notice-${ noticeType }` }
-						>
-							<Icon
-								icon={
-									noticeType === 'success' ? check : warning
-								}
-							/>
-							<span>{ notice }</span>
-						</div>
-					) }
-
-					<div className="wc-settings-email-preview-send-modal-buttons">
-						<Button
-							variant="tertiary"
-							onClick={ () => setIsModalOpen( false ) }
-						>
-							{ __( 'Cancel', 'woocommerce' ) }
-						</Button>
-						<Button
-							variant="primary"
-							onClick={ handleSendEmail }
-							isBusy={ isSending }
-							disabled={ ! isValidEmail( email ) || isSending }
-						>
-							{ isSending
-								? __( 'Sending…', 'woocommerce' )
-								: __( 'Send test email', 'woocommerce' ) }
-						</Button>
-					</div>
 				</Modal>
 			) }
 		</div>

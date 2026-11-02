@@ -19,13 +19,13 @@ trait BlockHooksTrait {
 	 */
 	public function register_hooked_block( $hooked_blocks, $position, $anchor_block, $context ) {
 		// If the block has no hook placements, return early.
-		if ( ! isset( $this->hooked_block_placements ) || empty( $this->hooked_block_placements ) ) {
+		if ( empty( $this->hooked_block_placements ) ) {
 			return $hooked_blocks;
 		}
 
 		// Cache the block hooks version.
 		static $block_hooks_version = null;
-		if ( defined( 'WP_RUN_CORE_TESTS' ) || is_null( $block_hooks_version ) ) {
+		if ( defined( 'WP_RUN_CORE_TESTS' ) || null === $block_hooks_version ) {
 			$block_hooks_version = get_option( 'woocommerce_hooked_blocks_version' );
 		}
 
@@ -39,8 +39,8 @@ trait BlockHooksTrait {
 		$valid_placements = array_filter(
 			$this->hooked_block_placements,
 			function ( $placement ) use ( $block_hooks_version ) {
-				$placement_version = isset( $placement['version'] ) ? $placement['version'] : null;
-				return is_null( $placement_version ) || ! is_null( $placement_version ) && version_compare( $block_hooks_version, $placement_version, '>=' );
+				$placement_version = $placement['version'] ?? null;
+				return null === $placement_version || version_compare( $block_hooks_version, $placement_version, '>=' );
 			}
 		);
 
@@ -161,7 +161,7 @@ trait BlockHooksTrait {
 		$pattern_slug = is_array( $context ) && isset( $context['slug'] ) ? $context['slug'] : '';
 		if ( ! $pattern_slug ) {
 			/**
-			 * Woo patterns have a slug property in $context, but core/theme patterns dont.
+			 * Woo patterns have a slug property in $context, but core/theme patterns don't.
 			 * In that case, we fallback to the name property, as they're the same.
 			 */
 			$pattern_slug = is_array( $context ) && isset( $context['name'] ) ? $context['name'] : '';

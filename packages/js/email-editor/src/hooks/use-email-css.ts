@@ -21,11 +21,7 @@ export function useEmailCss() {
 	const { userTheme } = useUserTheme();
 	const { editorTheme, layout, deviceType, initialEditorSettingsStyles } =
 		useSelect( ( select ) => {
-			const {
-				getEditorSettings,
-				// @ts-expect-error getDeviceType is not in types.
-				getDeviceType,
-			} = select( editorStore );
+			const { getEditorSettings, getDeviceType } = select( editorStore );
 
 			const editorSettings = getEditorSettings();
 
@@ -37,7 +33,7 @@ export function useEmailCss() {
 			return {
 				editorTheme: select( storeName ).getTheme(),
 				// @ts-expect-error There are no types for the experimental features settings.
-				// eslint-disable-next-line no-underscore-dangle
+
 				layout: editorSettings?.__experimentalFeatures?.layout,
 				deviceType: getDeviceType(),
 				initialEditorSettingsStyles: initialSettings?.styles,
@@ -86,6 +82,5 @@ export function useEmailCss() {
 		];
 	}, [ styles, initialEditorSettingsStyles, rootContainerStyles ] );
 
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 	return [ finalStyles || EMPTY_ARRAY ];
 }

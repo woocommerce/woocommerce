@@ -53,12 +53,12 @@ class Notices {
 				 */
 				if ( wp_is_block_theme() || apply_filters( 'woocommerce_use_block_notices_in_classic_theme', false ) ) {
 					add_filter( 'wc_get_template', [ $this, 'get_notices_template' ], 10, 5 );
+					add_action( 'wp_head', [ $this, 'enqueue_notice_styles' ] );
 				}
 			}
 		);
 
 		add_filter( 'woocommerce_kses_notice_allowed_tags', [ $this, 'add_kses_notice_allowed_tags' ] );
-		add_action( 'wp_head', [ $this, 'enqueue_notice_styles' ] );
 	}
 
 	/**

@@ -13,9 +13,9 @@ import { store as editorStore } from '@wordpress/editor';
  *
  * Used to control displaying UI elements like the back button.
  *
- * @param {number|string} initialPostId The post id of the post when the editor loaded.
- * @param {string} initialPostType      The post type of the post when the editor loaded.
- * @param {string} defaultRenderingMode The rendering mode to switch to when navigating.
+ * @param {number|string} initialPostId        The post id of the post when the editor loaded.
+ * @param {string}        initialPostType      The post type of the post when the editor loaded.
+ * @param {string}        defaultRenderingMode The rendering mode to switch to when navigating.
  *
  * @return {Object} An object containing the `currentPost` variable and
  *                 `onNavigateToEntityRecord` and `onNavigateToPreviousEntityRecord` functions.

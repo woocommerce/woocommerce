@@ -18,7 +18,7 @@ function DropdownContent( props: {
 	readonly categories: Category[];
 	readonly selected?: Category;
 	readonly onClick: () => void;
-} ): JSX.Element {
+} ): React.JSX.Element {
 	function updateCategorySelection(
 		event: React.MouseEvent< HTMLButtonElement >
 	) {
@@ -78,7 +78,7 @@ type CategoryDropdownProps = {
 
 export default function CategoryDropdown(
 	props: CategoryDropdownProps
-): JSX.Element {
+): React.JSX.Element {
 	function dropDownTracksEvent() {
 		recordEvent( 'marketplace_category_dropdown_opened', {
 			type: props.type,

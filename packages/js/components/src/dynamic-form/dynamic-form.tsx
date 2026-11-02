@@ -8,7 +8,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { Form } from '../index';
+import { Form } from '../form';
 import {
 	TextField,
 	PasswordField,

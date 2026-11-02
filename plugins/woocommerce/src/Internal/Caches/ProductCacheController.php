@@ -90,10 +90,10 @@ class ProductCacheController {
 		add_action( 'added_post_meta', array( $this, 'invalidate_product_cache_by_meta' ), 10, 2 );
 		add_action( 'deleted_post_meta', array( $this, 'invalidate_product_cache_by_meta' ), 10, 2 );
 
-		// Handle direct stock/sales updates (which uses direct SQL and cache manipulation, bypassing standard meta hooks)
-		// In the future, update WC_Product_Data_Store_CPT::update_product_stock() and
-		// update_product_sales() to trigger standard WordPress updated_post_meta hooks instead
-		// of requiring specific hooks here.
+		// Handle direct stock/sales updates (which use direct SQL and cache manipulation, bypassing standard meta hooks)
+		// In the future, update WC_Product_Data_Store_CPT::update_product_stock() and update_product_sales() to trigger
+		// standard WordPress updated_post_meta hooks instead of requiring specific hooks here.
+		// We also skip 'woocommerce_updated_product_price' due to metas update in the corresponding methods.
 		add_action( 'woocommerce_updated_product_stock', array( $this, 'invalidate_product_cache' ), 10, 1 );
 		add_action( 'woocommerce_updated_product_sales', array( $this, 'invalidate_product_cache' ), 10, 1 );
 	}

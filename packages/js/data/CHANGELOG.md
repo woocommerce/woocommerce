@@ -2,6 +2,26 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.0.0](https://www.npmjs.com/package/@woocommerce/data/v/7.0.0) - 2026-06-11 
+
+-   Major - Update @wordpress/* dependencies to WordPress 6.8 minimum. [#64114]
+-   Minor - Add notice property to RecommendedPaymentMethod type for payment method warnings. [#63776]
+-   Minor - Add ShipStation and Packlink as shipping extension options in the Core Profiler for supported countries (ShipStation: CA, DE, GB, AU, NZ; Packlink: FR, ES, IT, NL, AT, BE). [#63385]
+-   Minor - Navigation store: don't call deprecated onHistoryChange. [#62049]
+-   Minor - Update the payments settings types to support payment provider onboarding supported details. [#61574]
+-   Patch - Add row layout data to the WooCommerce Shipping partner suggestion so the card renders correctly in row / vertical placements. [#64523]
+-   Patch - Allow product queries to type multiple stock statuses. [#65155]
+-   Patch - Monorepo: address circular dependencies surfaced by SWC TDZ. [#64797]
+-   Patch - Move the CommonJS build to prepack so day-to-day development only builds the ESM output. [#64876]
+-   Patch - Move TypeScript type-checking from the build to a new `lint:lang:types` script. Builds now emit types and JS without type-checking. [#65168]
+-   Patch - Replaced patched `@wordpress/data` types with opt-in internal package types. [#63483]
+-   Patch - Replaced wireit + tsc package build pipeline with a per-package esbuild script. [#65210]
+-   Patch - Setting options: register the core-data store in tests. [#65375]
+-   Patch - Show a clear permission error message when users without install_plugins capability attempt to install plugins. [#64187]
+-   Patch - Update @wordpress/* peerDependencies from dist-tags to semver ranges for pnpm 10 compatibility. [#63964]
+-   Patch - Update UserPreferences type to include scheduled_updates_promotion_notice_dismissed field. [#62225]
+-   Patch - Updates internal references to REST API documentation. [#64720]
+
 ## [6.0.0](https://www.npmjs.com/package/@woocommerce/data/v/6.0.0) - 2025-10-27 
 
 -   Minor - Added pre-API call permission checks for some API calls that were being called on non-admin accessible screens [#51406]

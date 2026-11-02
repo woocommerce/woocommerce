@@ -58,6 +58,7 @@ const EditorContainerBlock = ( {
 					debounce( callback, 400 )
 				}
 				noReviewsPlaceholder={ noReviewsPlaceholder }
+				offset={ attributes.offset ?? 0 }
 				orderby={ orderby }
 				order={ order }
 				productId={ productId }

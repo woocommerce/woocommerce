@@ -23,7 +23,7 @@ final class FeaturePluginCompatibility {
 	public const INCOMPATIBLE = 'incompatible';
 
 	/**
-	 * Plugin compatibility with the feautre is yet to be determined. Internal use only.
+	 * Plugin compatibility with the feature is yet to be determined. Internal use only.
 	 *
 	 * @internal
 	 * @var string

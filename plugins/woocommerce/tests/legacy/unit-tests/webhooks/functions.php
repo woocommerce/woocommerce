@@ -4,6 +4,8 @@
  * @package WooCommerce\Tests\Webhook
  */
 
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
+
 /**
  * Class Functions.
  * @package WooCommerce\Tests\Webhook
@@ -18,6 +20,15 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 	public $delivery_counter = array();
 
 	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		$this->reset_legacy_proxy_mocks();
+		ActionSchedulerUtil::reset_cache();
+		parent::tearDown();
+	}
+
+	/**
 	 * Data provider for test_wc_is_webhook_valid_topic.
 	 *
 	 * @since 3.2.0
@@ -30,6 +41,7 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 			array( true, wc_is_webhook_valid_topic( 'product.updated' ) ),
 			array( true, wc_is_webhook_valid_topic( 'product.deleted' ) ),
 			array( true, wc_is_webhook_valid_topic( 'product.restored' ) ),
+			array( true, wc_is_webhook_valid_topic( 'product.published' ) ),
 			array( true, wc_is_webhook_valid_topic( 'order.created' ) ),
 			array( true, wc_is_webhook_valid_topic( 'order.updated' ) ),
 			array( true, wc_is_webhook_valid_topic( 'order.deleted' ) ),
@@ -59,6 +71,113 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_is_webhook_valid_topic( $assert, $values ) {
 		$this->assertEquals( $assert, $values );
+	}
+
+	/**
+	 * Default-resource + default-event topics with no registered hook are rejected,
+	 * to prevent ghost webhooks that save as Active and never deliver (issue #64502).
+	 */
+	public function test_wc_is_webhook_valid_topic_rejects_unregistered_pairs() {
+		$this->assertFalse( wc_is_webhook_valid_topic( 'order.published' ) );
+		$this->assertFalse( wc_is_webhook_valid_topic( 'coupon.published' ) );
+		$this->assertFalse( wc_is_webhook_valid_topic( 'customer.published' ) );
+		$this->assertFalse( wc_is_webhook_valid_topic( 'customer.restored' ) );
+	}
+
+	/**
+	 * The default-pair allowlist is derived from `WC_Webhook::get_default_topic_hooks()`,
+	 * so the validator and the topic-hooks map cannot drift. Any default-pair
+	 * topic the map registers a hook for must validate; any that the map leaves
+	 * empty must be rejected.
+	 */
+	public function test_wc_is_webhook_valid_topic_matches_topic_hooks_map() {
+		$topic_hooks       = WC_Webhook::get_default_topic_hooks();
+		$default_resources = array( 'coupon', 'customer', 'order', 'product' );
+		$default_events    = array( 'created', 'updated', 'deleted', 'restored', 'published' );
+
+		foreach ( $default_resources as $resource ) {
+			foreach ( $default_events as $event ) {
+				$topic    = "{$resource}.{$event}";
+				$expected = ! empty( $topic_hooks[ $topic ] );
+				$this->assertSame(
+					$expected,
+					wc_is_webhook_valid_topic( $topic ),
+					"Validator out of sync with WC_Webhook::get_default_topic_hooks() for `{$topic}`."
+				);
+			}
+		}
+	}
+
+	/**
+	 * Plugins extending the default-pair allowlist via `woocommerce_webhook_topic_hooks`
+	 * (e.g. wiring `untrashed_post` to fire `customer.restored`) are honored: the
+	 * validator accepts the topic so the webhook can save and deliver.
+	 */
+	public function test_wc_is_webhook_valid_topic_passes_filter_extended_default_pair() {
+		$this->assertFalse( wc_is_webhook_valid_topic( 'customer.restored' ) );
+
+		$add_default_pair_hook = function ( $hooks ) {
+			$hooks['customer.restored'] = array( 'untrashed_post' );
+			return $hooks;
+		};
+
+		try {
+			add_filter( 'woocommerce_webhook_topic_hooks', $add_default_pair_hook );
+			$this->assertTrue( wc_is_webhook_valid_topic( 'customer.restored' ) );
+		} finally {
+			remove_filter( 'woocommerce_webhook_topic_hooks', $add_default_pair_hook );
+		}
+
+		$this->assertFalse( wc_is_webhook_valid_topic( 'customer.restored' ) );
+	}
+
+	/**
+	 * Inverse of the filter-extended case: a plugin that empties a previously-valid
+	 * default pair via `woocommerce_webhook_topic_hooks` causes the validator to
+	 * reject that topic, since there are no hooks left to deliver it.
+	 */
+	public function test_wc_is_webhook_valid_topic_rejects_filter_emptied_default_pair() {
+		$this->assertTrue( wc_is_webhook_valid_topic( 'order.created' ) );
+
+		$empty_default_pair_hooks = function ( $hooks ) {
+			$hooks['order.created'] = array();
+			return $hooks;
+		};
+
+		try {
+			add_filter( 'woocommerce_webhook_topic_hooks', $empty_default_pair_hooks );
+			$this->assertFalse( wc_is_webhook_valid_topic( 'order.created' ) );
+		} finally {
+			remove_filter( 'woocommerce_webhook_topic_hooks', $empty_default_pair_hooks );
+		}
+
+		$this->assertTrue( wc_is_webhook_valid_topic( 'order.created' ) );
+	}
+
+	/**
+	 * Plugins extending the resource/event lists via the marginal-set filters keep
+	 * working: their topics include a custom resource or event, which skips the
+	 * default-pair check.
+	 */
+	public function test_wc_is_webhook_valid_topic_passes_filter_extended_resource_or_event() {
+		$add_event    = function ( $events ) {
+			$events[] = 'refunded';
+			return $events;
+		};
+		$add_resource = function ( $resources ) {
+			$resources[] = 'subscription';
+			return $resources;
+		};
+		add_filter( 'woocommerce_valid_webhook_events', $add_event );
+		add_filter( 'woocommerce_valid_webhook_resources', $add_resource );
+
+		try {
+			$this->assertTrue( wc_is_webhook_valid_topic( 'order.refunded' ) );
+			$this->assertTrue( wc_is_webhook_valid_topic( 'subscription.created' ) );
+		} finally {
+			remove_filter( 'woocommerce_valid_webhook_events', $add_event );
+			remove_filter( 'woocommerce_valid_webhook_resources', $add_resource );
+		}
 	}
 
 	/**
@@ -214,6 +333,171 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 
 		$webhook_one->delete( true );
 		$this->assertFalse( wc_load_webhooks( $status, 1 ) );
+	}
+
+	/**
+	 * An overflowing value lands at 255, the lowest priority, not at 0, the highest.
+	 *
+	 * @testdox Should schedule webhook deliveries at the priority returned by woocommerce_webhook_delivery_priority, clamped to 0-255, defaulting to 10 when unfiltered, non-numeric or non-finite.
+	 * @testWith ["unhooked", 10]
+	 *           [3, 3]
+	 *           ["7", 7]
+	 *           [-5, 0]
+	 *           [300, 255]
+	 *           [9223372036854775808, 255]
+	 *           ["1e309", 10]
+	 *           [null, 10]
+	 *           ["high", 10]
+	 *
+	 * @param mixed $filtered_priority Value returned by the filter, or "unhooked" to leave the filter unhooked.
+	 * @param int   $expected_priority Priority Action Scheduler is expected to store.
+	 */
+	public function test_wc_webhook_execute_queue_schedules_at_filtered_priority( $filtered_priority, $expected_priority ) {
+		$webhook = $this->create_webhook( 'action.wc_test_webhook_priority' );
+		$arg     = 123;
+
+		if ( 'unhooked' !== $filtered_priority ) {
+			add_filter(
+				'woocommerce_webhook_delivery_priority',
+				function ( $priority, $filtered_webhook, $filtered_arg ) use ( $webhook, $arg, $filtered_priority ) {
+					return $webhook->get_id() === $filtered_webhook->get_id() && $arg === $filtered_arg ? $filtered_priority : $priority;
+				},
+				10,
+				3
+			);
+		}
+
+		$action_id = $this->execute_webhook_queue_for( $webhook, $arg );
+
+		$this->assertSame( $expected_priority, ActionScheduler::store()->fetch_action( (string) $action_id )->get_priority() );
+	}
+
+	/**
+	 * @testdox Should keep one pending delivery per webhook and argument, and schedule a new one while a delivery is in progress.
+	 */
+	public function test_wc_webhook_execute_queue_keeps_one_pending_delivery_per_webhook_and_argument() {
+		$webhook = $this->create_webhook( 'action.wc_test_webhook_dedupe' );
+
+		$first = $this->execute_webhook_queue_for( $webhook, 123 );
+		$this->assertSame( $first, $this->execute_webhook_queue_for( $webhook, 123 ), 'A second event for the same resource should reuse the pending delivery' );
+		$this->assertNotSame( $first, $this->execute_webhook_queue_for( $webhook, 456 ), 'A different argument should get its own delivery' );
+
+		ActionScheduler::store()->log_execution( $first );
+		$this->assertNotSame( $first, $this->execute_webhook_queue_for( $webhook, 123 ), 'An in-progress delivery should not block a new one' );
+	}
+
+	/**
+	 * @testdox Should still schedule the delivery, at the default priority, on a loaded Action Scheduler without priority support.
+	 */
+	public function test_wc_webhook_execute_queue_schedules_at_default_priority_on_a_copy_without_priority_support() {
+		$webhook     = $this->create_webhook( 'action.wc_test_webhook_priority_legacy' );
+		$filter_runs = 0;
+		add_filter(
+			'woocommerce_webhook_delivery_priority',
+			function () use ( &$filter_runs ) {
+				++$filter_runs;
+				return 1;
+			}
+		);
+
+		// The util probes priority support by counting the parameters of as_schedule_single_action(); four is a copy before 3.5.0.
+		$this->register_legacy_proxy_class_mocks(
+			array(
+				ReflectionFunction::class => fn() => new class() {
+					/**
+					 * Mirror of ReflectionFunction::getNumberOfParameters().
+					 *
+					 * @return int
+					 */
+					public function getNumberOfParameters(): int { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
+						return 4;
+					}
+				},
+			)
+		);
+		ActionSchedulerUtil::reset_cache();
+
+		$action_id = $this->execute_webhook_queue_for( $webhook, 123 );
+
+		$this->assertSame( 1, $filter_runs, 'The filter should run regardless of the loaded copy' );
+		$this->assertSame( 10, ActionScheduler::store()->fetch_action( (string) $action_id )->get_priority() );
+	}
+
+	/**
+	 * @testdox Should schedule a new delivery when the pending one is more than 10 minutes away.
+	 */
+	public function test_wc_webhook_execute_queue_schedules_a_new_delivery_when_the_pending_one_is_far_off() {
+		$webhook = $this->create_webhook( 'action.wc_test_webhook_far_off' );
+		$arg     = 123;
+		as_schedule_single_action(
+			time() + HOUR_IN_SECONDS,
+			'woocommerce_deliver_webhook_async',
+			array(
+				'webhook_id' => $webhook->get_id(),
+				'arg'        => $arg,
+			),
+			'woocommerce-webhooks'
+		);
+
+		$this->queue_webhook_delivery( $webhook, $arg );
+
+		$this->assertCount( 2, $this->get_pending_delivery_ids( $webhook, $arg ), 'A pending delivery more than 10 minutes away should not be reused' );
+	}
+
+	/**
+	 * Run wc_webhook_execute_queue() for one queued webhook and return the ID of its single pending delivery.
+	 *
+	 * @param WC_Webhook $webhook The webhook to queue.
+	 * @param mixed      $arg     The delivery argument.
+	 * @return int
+	 */
+	private function execute_webhook_queue_for( $webhook, $arg ) {
+		$this->queue_webhook_delivery( $webhook, $arg );
+
+		$action_ids = $this->get_pending_delivery_ids( $webhook, $arg );
+		$this->assertCount( 1, $action_ids, 'Exactly one pending delivery should exist for the webhook and argument' );
+
+		return (int) reset( $action_ids );
+	}
+
+	/**
+	 * Run wc_webhook_execute_queue() for one queued webhook.
+	 *
+	 * @param WC_Webhook $webhook The webhook to queue.
+	 * @param mixed      $arg     The delivery argument.
+	 */
+	private function queue_webhook_delivery( $webhook, $arg ) {
+		global $wc_queued_webhooks;
+		$wc_queued_webhooks = array(
+			array(
+				'webhook' => $webhook,
+				'arg'     => $arg,
+			),
+		);
+		wc_webhook_execute_queue();
+		$wc_queued_webhooks = null;
+	}
+
+	/**
+	 * Get the IDs of the pending deliveries scheduled for a webhook and argument.
+	 *
+	 * @param WC_Webhook $webhook The webhook.
+	 * @param mixed      $arg     The delivery argument.
+	 * @return int[]
+	 */
+	private function get_pending_delivery_ids( $webhook, $arg ) {
+		return as_get_scheduled_actions(
+			array(
+				'hook'   => 'woocommerce_deliver_webhook_async',
+				'args'   => array(
+					'webhook_id' => $webhook->get_id(),
+					'arg'        => $arg,
+				),
+				'group'  => 'woocommerce-webhooks',
+				'status' => ActionScheduler_Store::STATUS_PENDING,
+			),
+			'ids'
+		);
 	}
 
 	/**

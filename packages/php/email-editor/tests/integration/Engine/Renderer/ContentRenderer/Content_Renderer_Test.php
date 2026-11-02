@@ -9,6 +9,7 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer as Core_Initializer;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
 
 require_once __DIR__ . '/Dummy_Block_Renderer.php';
@@ -64,6 +65,108 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test a caption color saved in the email's design reaches the rendered caption.
+	 *
+	 * The stylesheet holding the rule is not enough. The rule has to survive CSS inlining and land on
+	 * the caption element itself.
+	 */
+	public function testItAppliesASavedCaptionColorToAnImageCaption(): void {
+		$email_post_id = $this->factory->post->create(
+			array(
+				'post_content' => '<!-- wp:image {"id":1,"sizeSlug":"full","linkDestination":"none"} -->
+<figure class="wp-block-image size-full"><img src="https://example.com/image.jpg" alt=""/><figcaption class="wp-element-caption">Caption text</figcaption></figure>
+<!-- /wp:image -->',
+			)
+		);
+		$this->assertIsInt( $email_post_id );
+		update_post_meta(
+			$email_post_id,
+			'woocommerce_email_theme',
+			array(
+				'styles' => array(
+					'elements' => array(
+						'caption' => array(
+							'color' => array( 'text' => '#f78da7' ),
+						),
+					),
+				),
+			)
+		);
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( \WP_Post::class, $email_post );
+
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+
+		// Re-register the core image block with the email renderer the Core integration gives it, the same
+		// way Renderer_Test does. Restore the original registration afterwards, since this class's other
+		// tests expect the block core registered.
+		$core_integration = $this->di_container->get( Core_Initializer::class );
+		$core_integration->initialize();
+		$registry       = \WP_Block_Type_Registry::get_instance();
+		$original_block = $registry->get_registered( 'core/image' );
+		$this->assertInstanceOf( \WP_Block_Type::class, $original_block );
+
+		$registry->unregister( 'core/image' );
+		register_block_type(
+			'core/image',
+			$core_integration->update_block_settings(
+				array(
+					'title'    => $original_block->title,
+					'name'     => $original_block->name,
+					'category' => $original_block->category,
+					'supports' => $original_block->supports ?? array(),
+				)
+			)
+		);
+
+		try {
+			$content = $this->renderer->render( $email_post, $template );
+		} finally {
+			$registry->unregister( 'core/image' );
+			$registry->register( $original_block );
+		}
+
+		$this->assertStringContainsString( 'Caption text', $content );
+		$this->assertSame( 1, preg_match( '/<span[^>]*class="[^"]*wp-element-caption[^"]*"[^>]*>/', $content, $caption_span ) );
+		$this->assertStringContainsString( '#f78da7', $caption_span[0] );
+	}
+
+	/**
+	 * Test render() uses a synthetic post's own content and never leaks other published posts.
+	 */
+	public function testItRendersSyntheticPostWithoutLeakingOtherPosts(): void {
+		// A published decoy: if the synthetic post (ID 0) triggered a real
+		// "latest posts" query, this is the content that would leak.
+		$decoy_id = $this->factory->post->create(
+			array(
+				'post_status'  => 'publish',
+				'post_content' => '<!-- wp:paragraph --><p>DECOY_PUBLISHED_POST_MARKER</p><!-- /wp:paragraph -->',
+			)
+		);
+		$this->assertIsInt( $decoy_id );
+
+		$synthetic_post = new \WP_Post(
+			(object) array(
+				'ID'           => 0,
+				'post_type'    => 'post',
+				'post_status'  => 'publish',
+				'post_content' => '<!-- wp:paragraph --><p>SYNTHETIC_POST_MARKER</p><!-- /wp:paragraph -->',
+			)
+		);
+
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+
+		$content = $this->renderer->render( $synthetic_post, $template );
+
+		$this->assertStringContainsString( 'SYNTHETIC_POST_MARKER', $content );
+		$this->assertStringNotContainsString( 'DECOY_PUBLISHED_POST_MARKER', $content );
+	}
+
+	/**
 	 * Test render() inlines content styles into the HTML.
 	 */
 	public function testRenderInlinesContentStyles(): void {
@@ -88,6 +191,174 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertArrayHasKey( 'html', $result );
 		$this->assertArrayHasKey( 'styles', $result );
 		$this->assertStringContainsString( 'Hello!', $result['html'] );
+	}
+
+	/**
+	 * Test the render start and end actions fire once each, in order, per content render.
+	 */
+	public function testItFiresRenderStartAndEndActionsOncePerRender(): void {
+		$fired = array();
+		$track = function () use ( &$fired ) {
+			$fired[] = current_action();
+		};
+		add_action( 'woocommerce_email_editor_render_start', $track );
+		add_action( 'woocommerce_email_editor_render_end', $track );
+
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+		$this->renderer->render_without_css_inline( $this->email_post, $template );
+
+		remove_action( 'woocommerce_email_editor_render_start', $track );
+		remove_action( 'woocommerce_email_editor_render_end', $track );
+
+		$this->assertSame(
+			array( 'woocommerce_email_editor_render_start', 'woocommerce_email_editor_render_end' ),
+			$fired,
+			'Each render should fire the start action and then the end action, once each.'
+		);
+	}
+
+	/**
+	 * Test the render end action fires when the render throws, so integrations can restore what they changed.
+	 */
+	public function testItFiresTheRenderEndActionWhenTheRenderThrows(): void {
+		$ended = 0;
+		$count = function () use ( &$ended ) {
+			++$ended;
+		};
+		$fail  = function (): void {
+			throw new \RuntimeException( 'Rendering failed' );
+		};
+		add_action( 'woocommerce_email_editor_render_end', $count );
+		add_action( 'woocommerce_email_editor_render_start', $fail );
+
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+		try {
+			$this->renderer->render_without_css_inline( $this->email_post, $template );
+			$this->fail( 'The render should have thrown.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertSame( 'Rendering failed', $e->getMessage() );
+		} finally {
+			remove_action( 'woocommerce_email_editor_render_start', $fail );
+			remove_action( 'woocommerce_email_editor_render_end', $count );
+		}
+
+		$this->assertSame( 1, $ended, 'The end action should fire even when the render throws.' );
+	}
+
+	/**
+	 * Test render_without_css_inline applies email context once per content render.
+	 */
+	public function testRenderWithoutCssInlineAppliesEmailContextOnce(): void {
+		$email_post_id = $this->factory->post->create(
+			array(
+				'post_content' => '<!-- wp:test/context-block /--><!-- wp:test/context-block /-->',
+			)
+		);
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( \WP_Post::class, $email_post );
+
+		$seen_contexts = array();
+		register_block_type(
+			'test/context-block',
+			array(
+				'render_email_callback' => function ( $block_content, $parsed_block, Rendering_Context $context ) use ( &$seen_contexts ) {
+					$seen_contexts[] = array(
+						'direction' => $context->get_text_direction(),
+						'custom'    => $context->get( 'custom_key' ),
+					);
+					return '<p>' . esc_html( $context->get_text_direction() ) . '</p>';
+				},
+			)
+		);
+		$filter_calls   = 0;
+		$context_filter = function () use ( &$filter_calls ) {
+			++$filter_calls;
+			return array(
+				'is_rtl'     => true,
+				'custom_key' => 'preserved',
+			);
+		};
+		add_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter );
+
+		try {
+			$template          = new \WP_Block_Template();
+			$template->id      = 'template-id';
+			$template->content = '<!-- wp:post-content /-->';
+			$this->renderer->render_without_css_inline( $email_post, $template );
+		} finally {
+			remove_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter );
+			\WP_Block_Type_Registry::get_instance()->unregister( 'test/context-block' );
+		}
+
+		$this->assertSame( 1, $filter_calls );
+		$this->assertCount( 2, $seen_contexts );
+		$this->assertSame(
+			array(
+				array(
+					'direction' => 'rtl',
+					'custom'    => 'preserved',
+				),
+				array(
+					'direction' => 'rtl',
+					'custom'    => 'preserved',
+				),
+			),
+			$seen_contexts
+		);
+	}
+
+	/**
+	 * Test render applies email context once per content render.
+	 */
+	public function testRenderAppliesEmailContextOnce(): void {
+		$filter_calls   = 0;
+		$context_filter = function () use ( &$filter_calls ) {
+			++$filter_calls;
+			return array( 'is_rtl' => true );
+		};
+		add_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter );
+
+		try {
+			$template          = new \WP_Block_Template();
+			$template->id      = 'template-id';
+			$template->content = '<!-- wp:post-content /-->';
+			$this->renderer->render( $this->email_post, $template );
+		} finally {
+			remove_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter );
+		}
+
+		$this->assertSame( 1, $filter_calls );
+	}
+
+	/**
+	 * Test render_without_css_inline passes current post and template to email context filter.
+	 */
+	public function testRenderWithoutCssInlinePassesPostAndTemplateToContextFilter(): void {
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+
+		$filter_calls   = 0;
+		$context_filter = function ( array $email_context, ?\WP_Post $post, ?\WP_Block_Template $received_template ) use ( &$filter_calls, $template ): array {
+			++$filter_calls;
+			$this->assertSame( $this->email_post->ID, $post instanceof \WP_Post ? $post->ID : null );
+			$this->assertSame( $template, $received_template );
+			return $email_context;
+		};
+		add_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter, 10, 3 );
+
+		try {
+			$this->renderer->render_without_css_inline( $this->email_post, $template );
+		} finally {
+			remove_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter );
+		}
+
+		$this->assertSame( 1, $filter_calls );
 	}
 
 	/**
@@ -209,14 +480,14 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test preprocess_parsed_blocks distributes both root and container padding
-	 * in second pass when a container above post-content has own padding
-	 * (WooCommerce template pattern).
+	 * Test preprocess_parsed_blocks treats a group with its own padding wrapping
+	 * post-content as a box (WooCommerce template pattern): the box takes the root
+	 * inset itself and distributes its own padding to the user blocks as container
+	 * padding in the second pass — so root and container padding nest (30 outer +
+	 * 20 own) instead of stacking to 50 on every block.
 	 */
-	public function testItDistributesBothPaddingsInSecondPassWhenContainerHasPadding(): void {
-		// First pass: template blocks with a group wrapping post-content.
-		// The group has own padding — it distributes both root padding and
-		// container padding per-block to user blocks.
+	public function testItTreatsGroupWithPaddingWrappingPostContentAsBoxAcrossPasses(): void {
+		// First pass: template blocks with a group (own padding) wrapping post-content.
 		$template_blocks = array(
 			array(
 				'blockName'   => 'core/group',
@@ -241,39 +512,52 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		);
 
 		$first_result = $this->renderer->preprocess_parsed_blocks( $template_blocks );
+		$box_group    = $first_result[0];
 
-		// Root group should have suppress-horizontal-padding flag.
-		$root_group = $first_result[0];
-		$this->assertTrue( $root_group['email_attrs']['suppress-horizontal-padding'] );
+		// The box suppresses its own padding and takes the root inset itself.
+		$this->assertTrue( $box_group['email_attrs']['suppress-horizontal-padding'] );
+		$this->assertArrayHasKey( 'root-padding-left', $box_group['email_attrs'] );
 
-		// post-content should have full contentSize width (padding is distributed
-		// per-block, not subtracted from the group).
-		$post_content = $root_group['innerBlocks'][0];
-		$this->assertArrayHasKey( 'width', $post_content['email_attrs'] );
+		// Because the box is inset, post-content is narrower than contentSize —
+		// the signal the second pass uses to drop root padding for user blocks.
+		$post_content     = $box_group['innerBlocks'][0];
+		$post_content_num = (float) str_replace( 'px', '', $post_content['email_attrs']['width'] );
+		$theme_controller = $this->di_container->get( \Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller::class );
+		$content_size_num = (float) str_replace( 'px', '', $theme_controller->get_layout_settings()['contentSize'] );
+		$this->assertLessThan( $content_size_num, $post_content_num );
 
-		// Second pass: user blocks (simulating post-content rendering).
-		$user_blocks = array(
+		// Second pass: user blocks (simulating post-content rendering) — a normal
+		// block and a full-width block.
+		$user_blocks   = array(
 			array(
 				'blockName'   => 'core/paragraph',
 				'attrs'       => array(),
 				'innerBlocks' => array(),
 			),
+			array(
+				'blockName'   => 'core/group',
+				'attrs'       => array( 'align' => 'full' ),
+				'innerBlocks' => array(),
+			),
 		);
-
 		$second_result = $this->renderer->preprocess_parsed_blocks( $user_blocks );
 
-		// User blocks should have root padding (delegated, not absorbed).
-		$this->assertArrayHasKey( 'root-padding-left', $second_result[0]['email_attrs'] );
-		$this->assertArrayHasKey( 'root-padding-right', $second_result[0]['email_attrs'] );
-
-		// User blocks should also have container padding from the template group.
-		$this->assertArrayHasKey( 'container-padding-left', $second_result[0]['email_attrs'] );
-		$this->assertArrayHasKey( 'container-padding-right', $second_result[0]['email_attrs'] );
+		// Normal block gets only the container padding (not root), so it does not
+		// stack on top of the box's root inset.
+		$this->assertArrayNotHasKey( 'root-padding-left', $second_result[0]['email_attrs'] );
 		$this->assertEquals( '20px', $second_result[0]['email_attrs']['container-padding-left'] );
 		$this->assertEquals( '20px', $second_result[0]['email_attrs']['container-padding-right'] );
 
-		// Width should account for both root and container padding.
-		$this->assertArrayHasKey( 'width', $second_result[0]['email_attrs'] );
+		// Normal block width is the box content width minus the distributed
+		// container padding (20px + 20px), so it fits inside the box's inner padding.
+		$normal_width_num = (float) str_replace( 'px', '', $second_result[0]['email_attrs']['width'] );
+		$this->assertEqualsWithDelta( $post_content_num - 40, $normal_width_num, 1.0 );
+
+		// Full-width block skips the container padding and spans the full box width,
+		// so it breaks out of the box's inner padding (full-width still works).
+		$this->assertArrayNotHasKey( 'container-padding-left', $second_result[1]['email_attrs'] );
+		$full_width_num = (float) str_replace( 'px', '', $second_result[1]['email_attrs']['width'] );
+		$this->assertEqualsWithDelta( $post_content_num, $full_width_num, 1.0 );
 	}
 
 	/**

@@ -409,7 +409,10 @@ class FulfillmentUtils {
 	 * This method retrieves the shipping providers registered in the WooCommerce Fulfillments system.
 	 * It can be filtered using the `woocommerce_fulfillment_shipping_providers` filter.
 	 *
-	 * @return array An associative array of shipping providers with their details.
+	 * Any class name strings in the filter result are resolved into AbstractShippingProvider instances
+	 * via the DI container. Invalid entries are silently skipped.
+	 *
+	 * @return AbstractShippingProvider[] An associative array of shipping provider instances keyed by provider key.
 	 */
 	public static function get_shipping_providers(): array {
 		/**
@@ -421,52 +424,33 @@ class FulfillmentUtils {
 		 *
 		 * @param array $shipping_providers The default list of shipping providers.
 		 */
-		return apply_filters(
+		$raw_providers = apply_filters(
 			'woocommerce_fulfillment_shipping_providers',
 			array()
 		);
-	}
 
-	/**
-	 * Get the shipping providers as an array of JS objects, for use in the fulfillment UI.
-	 *
-	 * @return array An associative array of shipping providers with their details.
-	 */
-	public static function get_shipping_providers_object(): array {
-		$shipping_providers = self::get_shipping_providers();
-		if ( ! is_array( $shipping_providers ) ) {
+		if ( ! is_array( $raw_providers ) ) {
 			return array();
 		}
-		$shipping_providers_object = array();
-		foreach ( $shipping_providers as $shipping_provider ) {
-			if ( is_string( $shipping_provider )
-			&& class_exists( $shipping_provider )
-			&& is_subclass_of( $shipping_provider, AbstractShippingProvider::class )
+
+		$resolved = array();
+		foreach ( $raw_providers as $provider ) {
+			if ( $provider instanceof AbstractShippingProvider ) {
+				$resolved[ $provider->get_key() ] = $provider;
+			} elseif ( is_string( $provider )
+				&& class_exists( $provider )
+				&& is_subclass_of( $provider, AbstractShippingProvider::class )
 			) {
 				try {
-					// Instantiate the shipping provider class.
-					$shipping_provider_instance = wc_get_container()->get( $shipping_provider );
+					$instance = wc_get_container()->get( $provider );
 				} catch ( \Throwable $e ) {
-					continue; // Skip if instantiation fails.
+					continue;
 				}
-				$shipping_providers_object[ $shipping_provider_instance->get_key() ] = array(
-					'label' => $shipping_provider_instance->get_name(),
-					'icon'  => $shipping_provider_instance->get_icon(),
-					'value' => $shipping_provider_instance->get_key(),
-					'url'   => $shipping_provider_instance->get_tracking_url( '__PLACEHOLDER__' ),
-				);
-			}
-			if ( is_object( $shipping_provider ) && $shipping_provider instanceof AbstractShippingProvider ) {
-				$shipping_providers_object[ $shipping_provider->get_key() ] = array(
-					'label' => $shipping_provider->get_name(),
-					'icon'  => $shipping_provider->get_icon(),
-					'value' => $shipping_provider->get_key(),
-					'url'   => $shipping_provider->get_tracking_url( '__PLACEHOLDER__' ),
-				);
+				$resolved[ $instance->get_key() ] = $instance;
 			}
 		}
 
-		return $shipping_providers_object;
+		return $resolved;
 	}
 
 	/**
@@ -754,5 +738,51 @@ class FulfillmentUtils {
 		}
 
 		return ! empty( $shipment_provider ) ? $shipment_provider : $provider_name;
+	}
+
+	/**
+	 * Resolve the human-readable provider label for display.
+	 *
+	 * Unlike {@see self::resolve_provider_name()}, which returns the stable slug for
+	 * known providers, this returns the provider's display name (e.g. "DHL" for "dhl")
+	 * so it can be shown to customers. Custom providers use the merchant-entered name,
+	 * and an unknown slug falls back to that name or the slug itself.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param Fulfillment $fulfillment The fulfillment object.
+	 *
+	 * @return string The provider label to display.
+	 */
+	public static function get_provider_display_name( Fulfillment $fulfillment ): string {
+		$provider_slug     = $fulfillment->get_shipment_provider() ?? '';
+		$provider_name_raw = $fulfillment->get_meta( '_provider_name', true );
+		$provider_name     = is_scalar( $provider_name_raw ) ? (string) $provider_name_raw : '';
+
+		// 'other' is the reserved sentinel for a merchant-entered custom provider, so its
+		// name always comes from meta, never from a provider that happens to share the key.
+		if ( 'other' === $provider_slug ) {
+			$label = '' !== $provider_name ? $provider_name : $provider_slug;
+		} else {
+			$known_providers = self::get_shipping_providers();
+			if ( isset( $known_providers[ $provider_slug ] ) ) {
+				$label = $known_providers[ $provider_slug ]->get_name();
+			} else {
+				$label = '' !== $provider_name ? $provider_name : $provider_slug;
+			}
+		}
+
+		/**
+		 * Filters the shipment provider label shown to customers.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param string      $label       The resolved provider label.
+		 * @param Fulfillment $fulfillment The fulfillment object.
+		 */
+		$filtered_label = apply_filters( 'woocommerce_fulfillment_shipment_provider_label', $label, $fulfillment );
+
+		// Keep the resolved label if a callback returns something that can't be rendered as text.
+		return is_scalar( $filtered_label ) ? (string) $filtered_label : $label;
 	}
 }

@@ -11,7 +11,6 @@ module.exports = function ( api ) {
 					},
 				},
 			],
-			'@babel/preset-typescript',
 			'@wordpress/babel-preset-default',
 		],
 		sourceType: 'unambiguous',

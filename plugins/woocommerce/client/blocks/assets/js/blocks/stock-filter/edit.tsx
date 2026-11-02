@@ -15,6 +15,10 @@ import {
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanel as ToolsPanel,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
 
 /**
@@ -50,84 +54,139 @@ const Edit = ( {
 				<PanelBody>
 					<UpgradeNotice clientId={ clientId } />
 				</PanelBody>
-				<PanelBody title={ __( 'Display Settings', 'woocommerce' ) }>
-					<ToggleControl
+				<ToolsPanel
+					label={ __( 'Display Settings', 'woocommerce' ) }
+					resetAll={ () =>
+						setAttributes( {
+							showCounts: false,
+							showFilterButton: false,
+							displayStyle: 'list',
+							selectType: 'multiple',
+						} )
+					}
+				>
+					<ToolsPanelItem
 						label={ __( 'Display product count', 'woocommerce' ) }
-						checked={ showCounts }
-						onChange={ () =>
-							setAttributes( {
-								showCounts: ! showCounts,
-							} )
+						hasValue={ () => showCounts !== false }
+						onDeselect={ () =>
+							setAttributes( { showCounts: false } )
 						}
-					/>
-					<ToggleGroupControl
+						isShownByDefault
+					>
+						<ToggleControl
+							label={ __(
+								'Display product count',
+								'woocommerce'
+							) }
+							checked={ showCounts }
+							onChange={ () =>
+								setAttributes( {
+									showCounts: ! showCounts,
+								} )
+							}
+						/>
+					</ToolsPanelItem>
+					<ToolsPanelItem
 						label={ __(
 							'Allow selecting multiple options?',
 							'woocommerce'
 						) }
-						isBlock
-						value={ selectType || 'multiple' }
-						onChange={ ( value: string ) =>
-							setAttributes( {
-								selectType: value,
-							} )
+						hasValue={ () => selectType !== 'multiple' }
+						onDeselect={ () =>
+							setAttributes( { selectType: 'multiple' } )
 						}
-						className="wc-block-attribute-filter__multiple-toggle"
+						isShownByDefault
 					>
-						<ToggleGroupControlOption
-							value="multiple"
-							label={ _x(
-								'Multiple',
-								'Number of filters',
+						<ToggleGroupControl
+							label={ __(
+								'Allow selecting multiple options?',
 								'woocommerce'
 							) }
-						/>
-						<ToggleGroupControlOption
-							value="single"
-							label={ _x(
-								'Single',
-								'Number of filters',
-								'woocommerce'
-							) }
-						/>
-					</ToggleGroupControl>
-					<ToggleGroupControl
+							isBlock
+							value={ selectType || 'multiple' }
+							onChange={ ( value: string ) =>
+								setAttributes( {
+									selectType: value,
+								} )
+							}
+							className="wc-block-attribute-filter__multiple-toggle"
+						>
+							<ToggleGroupControlOption
+								value="multiple"
+								label={ _x(
+									'Multiple',
+									'Number of filters',
+									'woocommerce'
+								) }
+							/>
+							<ToggleGroupControlOption
+								value="single"
+								label={ _x(
+									'Single',
+									'Number of filters',
+									'woocommerce'
+								) }
+							/>
+						</ToggleGroupControl>
+					</ToolsPanelItem>
+					<ToolsPanelItem
 						label={ __( 'Display Style', 'woocommerce' ) }
-						isBlock
-						value={ displayStyle }
-						onChange={ ( value ) =>
-							setAttributes( {
-								displayStyle: value,
-							} )
+						hasValue={ () => displayStyle !== 'list' }
+						onDeselect={ () =>
+							setAttributes( { displayStyle: 'list' } )
 						}
-						className="wc-block-attribute-filter__display-toggle"
+						isShownByDefault
 					>
-						<ToggleGroupControlOption
-							value="list"
-							label={ __( 'List', 'woocommerce' ) }
-						/>
-						<ToggleGroupControlOption
-							value="dropdown"
-							label={ __( 'Dropdown', 'woocommerce' ) }
-						/>
-					</ToggleGroupControl>
-					<ToggleControl
+						<ToggleGroupControl
+							label={ __( 'Display Style', 'woocommerce' ) }
+							isBlock
+							value={ displayStyle }
+							onChange={ ( value ) =>
+								setAttributes( {
+									displayStyle: value,
+								} )
+							}
+							className="wc-block-attribute-filter__display-toggle"
+						>
+							<ToggleGroupControlOption
+								value="list"
+								label={ __( 'List', 'woocommerce' ) }
+							/>
+							<ToggleGroupControlOption
+								value="dropdown"
+								label={ __( 'Dropdown', 'woocommerce' ) }
+							/>
+						</ToggleGroupControl>
+					</ToolsPanelItem>
+					<ToolsPanelItem
 						label={ __(
 							"Show 'Apply filters' button",
 							'woocommerce'
 						) }
-						help={ __(
-							'Products will update when the button is clicked.',
-							'woocommerce'
-						) }
-						checked={ showFilterButton }
-						onChange={ ( value ) =>
-							setAttributes( {
-								showFilterButton: value,
-							} )
+						hasValue={ () => showFilterButton !== false }
+						onDeselect={ () =>
+							setAttributes( { showFilterButton: false } )
 						}
-					/>
-				</PanelBody>
+						isShownByDefault
+					>
+						<ToggleControl
+							label={ __(
+								"Show 'Apply filters' button",
+								'woocommerce'
+							) }
+							help={ __(
+								'Products will update when the button is clicked.',
+								'woocommerce'
+							) }
+							checked={ showFilterButton }
+							onChange={ ( value ) =>
+								setAttributes( {
+									showFilterButton: value,
+								} )
+							}
+						/>
+					</ToolsPanelItem>
+				</ToolsPanel>
 			</InspectorControls>
 		);
 	};

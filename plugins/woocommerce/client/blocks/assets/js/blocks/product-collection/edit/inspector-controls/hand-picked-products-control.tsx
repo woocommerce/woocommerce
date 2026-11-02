@@ -10,7 +10,6 @@ import { __ } from '@wordpress/i18n';
 import { blocksConfig } from '@woocommerce/block-settings';
 import {
 	FormTokenField,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
@@ -62,13 +61,13 @@ function useProducts(
 						// user needs to type more characters to get closer to actual
 						// product name.
 						per_page: 40,
-				  }
+					}
 				: {
 						// For a small catalog we fetch all the products.
 						per_page: 100,
-				  },
+					},
 		};
-		getProducts( query ).then( ( results ) => {
+		void getProducts( query ).then( ( results ) => {
 			const newProductsMap = new Map();
 			( results as ProductResponseItem[] ).forEach( ( product ) => {
 				newProductsMap.set( product.id, product );
@@ -101,8 +100,9 @@ export const HandPickedProductsControlField = ( {
 
 	// Filter out any selected product IDs that no longer exist
 	const validSelectedProductIds = useMemo( () => {
-		if ( ! selectedProductIds?.length || ! productsMap.size )
+		if ( ! selectedProductIds?.length || ! productsMap.size ) {
 			return selectedProductIds || [];
+		}
 		return selectedProductIds.filter( ( id ) => {
 			const product = productsMap.get( Number( id ) );
 			return !! product;
@@ -126,7 +126,9 @@ export const HandPickedProductsControlField = ( {
 					const product =
 						productsMap.get( nameOrId ) ||
 						productsMap.get( Number( nameOrId ) );
-					if ( product ) acc.add( String( product.id ) );
+					if ( product ) {
+						acc.add( String( product.id ) );
+					}
 					return acc;
 				},
 				new Set< string >()
@@ -182,7 +184,6 @@ export const HandPickedProductsControlField = ( {
 			onChange={ onTokenChange }
 			onInputChange={ isLargeCatalog ? handleSearch : undefined }
 			suggestions={ suggestions }
-			// @ts-expect-error Using experimental features
 			__experimentalValidateInput={ ( value: string ) =>
 				productsMap.has( value )
 			}

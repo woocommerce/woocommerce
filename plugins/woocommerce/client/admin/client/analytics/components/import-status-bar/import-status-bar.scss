@@ -16,7 +16,9 @@
 		font-weight: 400;
 	}
 
-	@media screen and ( max-width: $break-large ) {
+	// Match the filters' breakpoint so label/gap shrink in lockstep with
+	// .woocommerce-filters-filter — keeps Date Range and Data Status boxes aligned.
+	@media screen and ( max-width: $break-wide ) {
 		gap: 5px;
 
 		&__label {
@@ -29,18 +31,20 @@
 .woocommerce-analytics-import-status-bar {
 	display: flex;
 	align-items: center;
-	border: 1px solid $gray-400;
+	border: 1px solid $gray-300;
 	border-radius: 4px;
-	padding: 16px 12px;
-	font-size: 11px;
+	padding: 6px 12px;
+	font-size: 13px;
 	line-height: 20px;
 	font-weight: 400;
 	height: 50px;
+	color: var(--wp-components-color-foreground, #1e1e1e);
 
 	&__content {
 		display: flex;
 		align-items: center;
 		gap: 32px;
+		flex: 1;
 
 
 		@media screen and ( max-width: $break-wide ) {
@@ -58,24 +62,36 @@
 	}
 
 	&__label {
-		color: $gray-700;
+		color: var(--wp-components-color-foreground-muted, $gray-700);
 		white-space: nowrap;
 	}
 
 	&__value {
-		color: $gray-900;
+		color: var(--wp-components-color-foreground, $gray-900);
+		white-space: nowrap;
 	}
 
 	&__trigger {
-		font-size: 11px;
-		font-weight: 500;
-		line-height: 20px;
 		// Set a fixed width to prevent layout shift during loading
-		width: 88px;
+		width: 100px;
+		// Right-align so flexible whitespace sits between the columns and the button.
+		margin-left: auto;
 	}
 
 	.components-spinner {
 		height: 8px;
 		width: 8px;
+	}
+
+	// At very narrow widths the row can't fit; let the trigger wrap below the values.
+	@media screen and ( max-width: $break-mobile ) {
+		height: auto;
+		min-height: 50px;
+		padding: 8px 12px;
+
+		&__content {
+			flex-wrap: wrap;
+			row-gap: 8px;
+		}
 	}
 }

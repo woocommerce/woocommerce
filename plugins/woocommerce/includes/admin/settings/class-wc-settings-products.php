@@ -6,6 +6,8 @@
  * @version 2.4.0
  */
 
+use Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface;
+use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIPages\ProductsSettingsPageAdapter;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -39,6 +41,16 @@ class WC_Settings_Products extends WC_Settings_Page {
 	public $icon = 'box';
 
 	/**
+	 * Get the settings UI page adapter for this settings page.
+	 *
+	 * @since 10.9.0
+	 * @return SettingsUIPageInterface|null
+	 */
+	public function get_settings_ui_page(): ?SettingsUIPageInterface {
+		return new ProductsSettingsPageAdapter( $this );
+	}
+
+	/**
 	 * Get own sections.
 	 *
 	 * @return array
@@ -70,15 +82,19 @@ class WC_Settings_Products extends WC_Settings_Page {
 					'id'    => 'catalog_options',
 				),
 				array(
-					'title'    => __( 'Shop page', 'woocommerce' ),
+					'title'             => __( 'Shop page', 'woocommerce' ),
 					/* translators: %s: URL to settings. */
-					'desc'     => sprintf( __( 'The base page can also be used in your <a href="%s">product permalinks</a>.', 'woocommerce' ), admin_url( 'options-permalink.php' ) ),
-					'id'       => 'woocommerce_shop_page_id',
-					'type'     => 'single_select_page',
-					'default'  => '',
-					'class'    => 'wc-enhanced-select-nostd',
-					'css'      => 'min-width:300px;',
-					'desc_tip' => __( 'This sets the base page of your shop - this is where your product archive will be.', 'woocommerce' ),
+					'desc'              => sprintf( __( 'The base page can also be used in your <a href="%s">product permalinks</a>.', 'woocommerce' ), admin_url( 'options-permalink.php' ) ),
+					'id'                => 'woocommerce_shop_page_id',
+					'type'              => 'single_select_page_with_search',
+					'default'           => '',
+					'class'             => 'wc-page-search',
+					'custom_attributes' => array(
+						'data-limit'                => 20,
+						'data-minimum_input_length' => 0,
+					),
+					'css'               => 'min-width:300px;',
+					'desc_tip'          => __( 'This sets the base page of your shop - this is where your product archive will be.', 'woocommerce' ),
 				),
 				array(
 					'title'         => __( 'Add to cart behaviour', 'woocommerce' ),
@@ -275,6 +291,16 @@ class WC_Settings_Products extends WC_Settings_Page {
 				array(
 					'desc'          => __( 'Enable out of stock notifications', 'woocommerce' ),
 					'id'            => 'woocommerce_notify_no_stock',
+					'default'       => 'yes',
+					'type'          => 'checkbox',
+					'checkboxgroup' => '',
+					'autoload'      => false,
+					'class'         => 'manage_stock_field',
+				),
+
+				array(
+					'desc'          => __( 'Enable backorder notifications', 'woocommerce' ),
+					'id'            => 'woocommerce_notify_backorder',
 					'default'       => 'yes',
 					'type'          => 'checkbox',
 					'checkboxgroup' => 'end',

@@ -4,7 +4,10 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Notifications;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Enums\SuppressionReason;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNotification;
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
@@ -12,6 +15,15 @@ use WC_Unit_Test_Case;
  * Tests for the NewReviewNotification class.
  */
 class NewReviewNotificationTest extends WC_Unit_Test_Case {
+
+	/**
+	 * A fixed trigger time and its expected ISO 8601 rendering. Asserting
+	 * against a literal keeps the test from recomputing the expected value with
+	 * the same `gmdate()` call the payload uses.
+	 */
+	private const TRIGGERED_AT     = 1700000000;
+	private const TRIGGERED_AT_ISO = '2023-11-14T22:13:20+00:00';
+
 	/**
 	 * @testdox Should return a payload with all required keys for an existing review.
 	 */
@@ -27,6 +39,7 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'resource_id', $payload );
 		$this->assertArrayHasKey( 'title', $payload );
 		$this->assertArrayHasKey( 'format', $payload['title'] );
+		$this->assertArrayHasKey( 'args', $payload['title'] );
 		$this->assertArrayHasKey( 'message', $payload );
 		$this->assertArrayHasKey( 'format', $payload['message'] );
 		$this->assertArrayHasKey( 'args', $payload['message'] );
@@ -54,10 +67,10 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should include the reviewer name, product name, and review
-	 * content in the message args.
+	 * @testdox Should include the reviewer name and product name in the title args,
+	 * and the review content in the message args.
 	 */
-	public function test_to_payload_message_args_contains_expected_values(): void {
+	public function test_to_payload_splits_review_details_between_title_and_message(): void {
 		$product    = WC_Helper_Product::create_simple_product();
 		$comment_id = WC_Helper_Product::create_product_review( $product->get_id() );
 		$comment    = get_comment( $comment_id );
@@ -65,14 +78,14 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 		$notification = new NewReviewNotification( $comment_id );
 		$payload      = $notification->to_payload();
 
-		$this->assertSame( $comment->comment_author, $payload['message']['args'][0] );
-		$this->assertSame( $product->get_name(), $payload['message']['args'][1] );
-		$this->assertSame( $comment->comment_content, $payload['message']['args'][2] );
+		$this->assertSame( $comment->comment_author, $payload['title']['args'][0] );
+		$this->assertSame( $product->get_name(), $payload['title']['args'][1] );
+		$this->assertSame( $comment->comment_content, $payload['message']['args'][0] );
 	}
 
 	/**
 	 * @testdox Should strip HTML tags, and script tags including content, from
-	 * reviewer name in message args.
+	 * reviewer name in title args.
 	 */
 	public function test_to_payload_strips_html_and_script_content_from_comment_author(): void {
 		$product    = WC_Helper_Product::create_simple_product();
@@ -90,12 +103,12 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 		$notification = new NewReviewNotification( $comment_id );
 		$payload      = $notification->to_payload();
 
-		$this->assertSame( 'Evil Author', $payload['message']['args'][0] );
+		$this->assertSame( 'Evil Author', $payload['title']['args'][0] );
 	}
 
 	/**
 	 * @testdox Should strip HTML tags, and script tags including content, from
-	 * review content in message args.
+	 * review content in the message args.
 	 */
 	public function test_to_payload_strips_html_and_script_content_from_comment_content(): void {
 		$product    = WC_Helper_Product::create_simple_product();
@@ -113,7 +126,37 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 		$notification = new NewReviewNotification( $comment_id );
 		$payload      = $notification->to_payload();
 
-		$this->assertSame( 'Great product!', $payload['message']['args'][2] );
+		$this->assertSame( 'Great product!', $payload['message']['args'][0] );
+	}
+
+	/**
+	 * @testdox Should preserve percent signs in review content so downstream
+	 * sprintf-style formatting doesn't break.
+	 */
+	public function test_to_payload_preserves_percent_signs_in_review_content(): void {
+		$product    = WC_Helper_Product::create_simple_product();
+		$content    = 'Works 100% great %1$s';
+		$comment_id = wp_insert_comment(
+			array(
+				'comment_post_ID'      => $product->get_id(),
+				'comment_author'       => 'Reviewer',
+				'comment_author_email' => 'test@test.local',
+				'comment_content'      => $content,
+				'comment_approved'     => 1,
+				'comment_type'         => 'review',
+			)
+		);
+
+		$notification = new NewReviewNotification( $comment_id );
+		$payload      = $notification->to_payload();
+
+		$this->assertSame( $content, $payload['message']['args'][0] );
+		$this->assertSame(
+			$content,
+			vsprintf( $payload['message']['format'], $payload['message']['args'] )
+		);
+		$this->assertSame( 'Reviewer', $payload['title']['args'][0] );
+		$this->assertSame( $product->get_name(), $payload['title']['args'][1] );
 	}
 
 	/**
@@ -123,5 +166,235 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 		$notification = new NewReviewNotification( 999999 );
 
 		$this->assertNull( $notification->to_payload() );
+	}
+
+	/**
+	 * @testdox get_suppression_reason should return null when rating is below max_rating.
+	 */
+	public function test_suppression_reason_when_rating_below_max(): void {
+		$comment_id = $this->create_review_with_rating( 3 );
+
+		$notification = new NewReviewNotification( $comment_id );
+
+		$this->assertNull(
+			$notification->get_suppression_reason(
+				array(
+					'enabled'    => true,
+					'max_rating' => 4,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox get_suppression_reason should return null when rating equals max_rating.
+	 */
+	public function test_suppression_reason_when_rating_equals_max(): void {
+		$comment_id = $this->create_review_with_rating( 3 );
+
+		$notification = new NewReviewNotification( $comment_id );
+
+		$this->assertNull(
+			$notification->get_suppression_reason(
+				array(
+					'enabled'    => true,
+					'max_rating' => 3,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox get_suppression_reason should return a reason when rating is above max_rating.
+	 */
+	public function test_should_not_send_to_user_when_rating_above_max(): void {
+		$comment_id = $this->create_review_with_rating( 5 );
+
+		$notification = new NewReviewNotification( $comment_id );
+
+		$this->assertNotNull(
+			$notification->get_suppression_reason(
+				array(
+					'enabled'    => true,
+					'max_rating' => 3,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox get_suppression_reason should return null when max_rating key is missing (backwards compat).
+	 */
+	public function test_suppression_reason_when_max_rating_missing(): void {
+		$comment_id = $this->create_review_with_rating( 5 );
+
+		$notification = new NewReviewNotification( $comment_id );
+
+		$this->assertNull(
+			$notification->get_suppression_reason( array( 'enabled' => true ) )
+		);
+	}
+
+	/**
+	 * @testdox get_suppression_reason should return null when max_rating is null (threshold disabled).
+	 */
+	public function test_suppression_reason_when_max_rating_null(): void {
+		$comment_id = $this->create_review_with_rating( 5 );
+
+		$notification = new NewReviewNotification( $comment_id );
+
+		$this->assertNull(
+			$notification->get_suppression_reason(
+				array(
+					'enabled'    => true,
+					'max_rating' => null,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox get_suppression_reason should return a reason when notification is disabled, regardless of rating.
+	 */
+	public function test_should_not_send_to_user_when_disabled(): void {
+		$comment_id = $this->create_review_with_rating( 1 );
+
+		$notification = new NewReviewNotification( $comment_id );
+
+		$this->assertNotNull(
+			$notification->get_suppression_reason(
+				array(
+					'enabled'    => false,
+					'max_rating' => null,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox get_suppression_reason should return a reason when the comment no longer exists.
+	 */
+	public function test_should_not_send_to_user_when_comment_deleted(): void {
+		$notification = new NewReviewNotification( 999999 );
+
+		$this->assertNotNull(
+			$notification->get_suppression_reason(
+				array(
+					'enabled'    => true,
+					'max_rating' => 3,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox get_suppression_reason should return null when the review has no rating meta.
+	 */
+	public function test_suppression_reason_when_no_rating_meta(): void {
+		$product    = WC_Helper_Product::create_simple_product();
+		$comment_id = WC_Helper_Product::create_product_review( $product->get_id() );
+
+		// Ensure no rating meta is present, in case the helper changes to set one by default.
+		delete_comment_meta( $comment_id, 'rating' );
+
+		$notification = new NewReviewNotification( $comment_id );
+
+		$this->assertNull(
+			$notification->get_suppression_reason(
+				array(
+					'enabled'    => true,
+					'max_rating' => 3,
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox Should use the recorded trigger time for the payload timestamp.
+	 */
+	public function test_to_payload_timestamp_uses_recorded_trigger_time(): void {
+		$product      = WC_Helper_Product::create_simple_product();
+		$comment_id   = WC_Helper_Product::create_product_review( $product->get_id() );
+		$notification = new NewReviewNotification( $comment_id );
+
+		update_comment_meta( $comment_id, NotificationProcessor::TRIGGERED_META_KEY, (string) self::TRIGGERED_AT );
+
+		$payload = $notification->to_payload();
+
+		$this->assertSame( self::TRIGGERED_AT_ISO, $payload['timestamp'] );
+	}
+
+	/**
+	 * @testdox Should fall back to the current time when no trigger time is recorded.
+	 */
+	public function test_to_payload_timestamp_falls_back_to_current_time(): void {
+		$product      = WC_Helper_Product::create_simple_product();
+		$comment_id   = WC_Helper_Product::create_product_review( $product->get_id() );
+		$notification = new NewReviewNotification( $comment_id );
+
+		$payload = $notification->to_payload();
+
+		$this->assertEqualsWithDelta( time(), strtotime( $payload['timestamp'] ), 5 );
+	}
+
+	/**
+	 * @testdox get_suppression_reason should name the type toggle when it is off, before any rating check.
+	 */
+	public function test_get_suppression_reason_type_disabled_wins(): void {
+		$notification = new NewReviewNotification( $this->create_review_with_rating( 5 ) );
+
+		$reason = $notification->get_suppression_reason(
+			array(
+				'enabled'    => false,
+				'max_rating' => 3,
+			)
+		);
+
+		$this->assertSame( SuppressionReason::NOTIFICATIONS_OFF, $reason );
+	}
+
+	/**
+	 * @testdox get_suppression_reason should name the maximum rating when the review is above it.
+	 */
+	public function test_get_suppression_reason_above_max_rating(): void {
+		$notification = new NewReviewNotification( $this->create_review_with_rating( 5 ) );
+
+		$reason = $notification->get_suppression_reason(
+			array(
+				'enabled'    => true,
+				'max_rating' => 3,
+			)
+		);
+
+		$this->assertSame( SuppressionReason::ABOVE_MAX_RATING, $reason );
+	}
+
+	/**
+	 * @testdox get_suppression_reason should report a missing comment when it cannot be loaded.
+	 */
+	public function test_get_suppression_reason_review_missing(): void {
+		$notification = new NewReviewNotification( 999999 );
+
+		$reason = $notification->get_suppression_reason(
+			array(
+				'enabled'    => true,
+				'max_rating' => 3,
+			)
+		);
+
+		$this->assertSame( SuppressionReason::REVIEW_MISSING, $reason );
+	}
+
+	/**
+	 * Creates a product review with a specific rating stored in comment meta.
+	 *
+	 * @param int $rating The star rating (1–5).
+	 * @return int The new comment ID.
+	 */
+	private function create_review_with_rating( int $rating ): int {
+		$product    = WC_Helper_Product::create_simple_product();
+		$comment_id = WC_Helper_Product::create_product_review( $product->get_id() );
+		update_comment_meta( $comment_id, 'rating', $rating );
+		return (int) $comment_id;
 	}
 }

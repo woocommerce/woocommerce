@@ -1,26 +1,35 @@
 /**
  * External dependencies
  */
+import { speak } from '@wordpress/a11y';
 import { useDispatch } from '@wordpress/data';
+import { __ } from '@wordpress/i18n';
 import { itemsStore } from '@woocommerce/data';
 import { navigateTo } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/settings';
-import { loadExperimentAssignment } from '@woocommerce/explat';
-import { useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { ProductTypeKey } from './constants';
 import { createNoticesFromResponse } from '../../../lib/notices';
-import { getAdminSetting } from '~/utils/admin-settings';
-
-const EXPERIMENT_NAME =
-	'woocommerce_product_creation_experience_pricing_to_general_202406';
 
 export const useCreateProductByType = () => {
 	const { createProductFromTemplate } = useDispatch( itemsStore );
-	const [ isRequesting, setIsRequesting ] = useState< boolean >( false );
+	const [ requestingType, setRequestingType ] =
+		useState< ProductTypeKey | null >( null );
+
+	// A page restored from the back/forward cache keeps its last state, so clear the spinner.
+	useEffect( () => {
+		const onPageShow = ( event: PageTransitionEvent ) => {
+			if ( event.persisted ) {
+				setRequestingType( null );
+			}
+		};
+		window.addEventListener( 'pageshow', onPageShow );
+		return () => window.removeEventListener( 'pageshow', onPageShow );
+	}, [] );
 
 	const getProductEditPageLink = async ( type: ProductTypeKey ) => {
 		try {
@@ -45,37 +54,20 @@ export const useCreateProductByType = () => {
 	};
 
 	const createProductByType = async ( type: ProductTypeKey ) => {
-		setIsRequesting( true );
-
-		if (
-			type === 'physical' ||
-			type === 'variable' ||
-			type === 'digital' ||
-			type === 'grouped' ||
-			type === 'external'
-		) {
-			const assignment = await loadExperimentAssignment(
-				EXPERIMENT_NAME
-			);
-			if ( assignment.variationName === 'treatment' ) {
-				const url = await getProductEditPageLink( type );
-				const _feature_nonce = getAdminSetting( '_feature_nonce' );
-				window.location.href =
-					url +
-					`&product_block_editor=1&_feature_nonce=${ _feature_nonce }`;
-				return;
-			}
-		}
+		setRequestingType( type );
+		speak( __( 'Creating your product…', 'woocommerce' ) );
 
 		const url = await getProductEditPageLink( type );
 		if ( url ) {
+			// No reset on success: the page stays busy until the editor loads.
 			navigateTo( { url } );
+		} else {
+			setRequestingType( null );
 		}
-		setIsRequesting( false );
 	};
 
 	return {
 		createProductByType,
-		isRequesting,
+		requestingType,
 	};
 };

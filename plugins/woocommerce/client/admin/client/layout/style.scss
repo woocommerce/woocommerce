@@ -78,8 +78,16 @@
 .woocommerce-admin-full-screen {
 	background: $studio-gray-0;
 	color: $studio-gray-60;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-		Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	font-family:
+		-apple-system,
+		BlinkMacSystemFont,
+		"Segoe UI",
+		Roboto,
+		Oxygen-Sans,
+		Ubuntu,
+		Cantarell,
+		"Helvetica Neue",
+		sans-serif;
 
 	#wpwrap {
 		top: 0;
@@ -154,39 +162,6 @@
 // @todo Remove this after https://github.com/WordPress/gutenberg/issues/28311 is fixed
 .components-modal__header .components-button svg + span {
 	display: none;
-}
-
-.components-modal__frame.woocommerce-usage-modal {
-	width: 600px;
-	max-width: 100%;
-
-	.components-modal__header {
-		margin-bottom: 0;
-	}
-
-	.woocommerce-usage-modal__wrapper {
-		flex-grow: 1;
-		display: flex;
-		flex-direction: column;
-
-		a {
-			color: $studio-gray-60;
-		}
-
-		button.is-primary {
-			align-self: flex-end;
-		}
-	}
-
-	.woocommerce-usage-modal__actions {
-		display: flex;
-		justify-content: flex-end;
-		margin-top: $gap;
-
-		button {
-			margin-left: $gap;
-		}
-	}
 }
 
 .woocommerce-payments__usage-modal {

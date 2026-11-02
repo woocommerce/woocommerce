@@ -13,6 +13,7 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Products\Sc
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\WeightUnit;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
 use WP_REST_Request;
 
@@ -252,10 +253,10 @@ class ProductSettingsSchema extends AbstractSchema {
 		switch ( $field_id ) {
 			case 'woocommerce_weight_unit':
 				return array(
-					'kg'  => __( 'kg', 'woocommerce' ),
-					'g'   => __( 'g', 'woocommerce' ),
-					'lbs' => __( 'lbs', 'woocommerce' ),
-					'oz'  => __( 'oz', 'woocommerce' ),
+					WeightUnit::KILOGRAM => __( 'kg', 'woocommerce' ),
+					WeightUnit::GRAM     => __( 'g', 'woocommerce' ),
+					WeightUnit::POUND    => __( 'lbs', 'woocommerce' ),
+					WeightUnit::OUNCE    => __( 'oz', 'woocommerce' ),
 				);
 
 			case 'woocommerce_dimension_unit':

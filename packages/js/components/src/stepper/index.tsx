@@ -109,9 +109,9 @@ export const Stepper = ( {
 											{ label }
 										</span>
 										{ description && (
-											<span className="woocommerce-stepper__step-description">
+											<p className="woocommerce-stepper__step-description">
 												{ description }
-											</span>
+											</p>
 										) }
 									</div>
 								</LabelWrapper>

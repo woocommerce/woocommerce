@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Post } from '@wordpress/core-data';
+import { Context, Post } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -10,12 +10,15 @@ import { ProductCategory } from '../product-categories/types';
 import { ProductTag } from '../product-tags/types';
 import { BaseQueryParams } from '../types';
 
+declare module '@wordpress/core-data' {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	interface PerPackageEntityRecords< C extends Context > {
+		woocommerce: Product;
+	}
+}
+
 export type ProductType =
-	| 'simple'
-	| 'grouped'
-	| 'external'
-	| 'variable'
-	| 'variation';
+	'simple' | 'grouped' | 'external' | 'variable' | 'variation';
 export type ProductStatus =
 	| 'auto-draft'
 	| 'deleted'
@@ -68,10 +71,7 @@ export type ProductDimensions = {
 };
 
 export type ProductCatalogVisibility =
-	| 'visible'
-	| 'catalog'
-	| 'search'
-	| 'hidden';
+	'visible' | 'catalog' | 'search' | 'hidden';
 
 export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	Post,
@@ -130,10 +130,10 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	slug: string;
 	sku: string;
 	status: Status;
-	stock_quantity: number;
+	stock_quantity: number | null;
 	stock_status: 'instock' | 'outofstock' | 'onbackorder';
 	tags: Pick< ProductTag, 'id' | 'name' >[];
-	tax_class: 'standard' | 'reduced-rate' | 'zero-rate' | undefined;
+	tax_class: 'standard' | 'reduced-rate' | 'zero-rate' | '' | undefined;
 	tax_status: 'taxable' | 'shipping' | 'none';
 	total_sales: number;
 	type: Type;
@@ -173,7 +173,7 @@ export type PartialProduct = Partial< Product > & Pick< Product, 'id' >;
 
 export type ProductQuery<
 	Status = ProductStatus,
-	Type = ProductType
+	Type = ProductType,
 > = BaseQueryParams< keyof Product > & {
 	orderby?:
 		| 'date'
@@ -195,11 +195,15 @@ export type ProductQuery<
 	shipping_class?: string;
 	attribute?: string;
 	attribute_term?: string;
-	tax_class?: 'standard' | 'reduced-rate' | 'zero-rate';
+	tax_class?: 'standard' | 'reduced-rate' | 'zero-rate' | '';
 	on_sale?: boolean;
 	min_price?: string;
 	max_price?: string;
-	stock_status?: 'instock' | 'outofstock' | 'onbackorder';
+	stock_status?:
+		| 'instock'
+		| 'outofstock'
+		| 'onbackorder'
+		| Array< 'instock' | 'outofstock' | 'onbackorder' >;
 };
 
 export type SuggestedProductOptionsKey = string;

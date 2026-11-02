@@ -45,7 +45,7 @@ export function TemplateSelection() {
 				<PanelRow>
 					<Flex justify={ 'start' }>
 						<FlexItem className="editor-post-panel__row-label">
-							{ __( 'Template', 'woocommerce' ) }
+							{ __( 'Template', __i18n_text_domain__ ) }
 						</FlexItem>
 						<FlexItem>
 							{ ! (
@@ -61,7 +61,7 @@ export function TemplateSelection() {
 									} }
 									label={ __(
 										'Template actions',
-										'woocommerce'
+										__i18n_text_domain__
 									) }
 									onToggle={ ( isOpen ) =>
 										recordEvent(
@@ -90,7 +90,7 @@ export function TemplateSelection() {
 												>
 													{ __(
 														'Edit template',
-														'woocommerce'
+														__i18n_text_domain__
 													) }
 												</MenuItem>
 											) }
@@ -109,7 +109,7 @@ export function TemplateSelection() {
 												>
 													{ __(
 														'Swap template',
-														'woocommerce'
+														__i18n_text_domain__
 													) }
 												</MenuItem>
 											) }

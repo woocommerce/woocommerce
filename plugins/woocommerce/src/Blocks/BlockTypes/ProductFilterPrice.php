@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
+use WP_Block;
 
 /**
  * Product Filter: Price Block.
@@ -112,13 +113,10 @@ final class ProductFilterPrice extends AbstractBlock {
 		$formatted_max_price = html_entity_decode( wp_strip_all_tags( wc_price( $max_price, array( 'decimals' => 0 ) ) ) );
 
 		$filter_context = array(
-			'price'      => array(
-				'minPrice' => $min_price,
-				'maxPrice' => $max_price,
-				'minRange' => $min_range,
-				'maxRange' => $max_range,
-			),
-			'groupLabel' => __( 'Price', 'woocommerce' ),
+			'currentMin' => $min_price,
+			'currentMax' => $max_price,
+			'min'        => $min_range,
+			'max'        => $max_range,
 		);
 
 		$wrapper_attributes = array(
@@ -158,7 +156,15 @@ final class ProductFilterPrice extends AbstractBlock {
 			)
 		);
 
-		if ( $min_range === $max_range || ! $max_range ) {
+		$is_empty            = $min_range === $max_range || ! $max_range;
+		$product_filters_key = $block->context['productFiltersKey'] ?? '';
+		if ( is_string( $product_filters_key ) && '' !== $product_filters_key ) {
+			$state = wp_interactivity_state( 'woocommerce/product-filters' );
+			$state['filterEmptyStates'][ $product_filters_key ][] = $is_empty;
+			wp_interactivity_state( 'woocommerce/product-filters', $state );
+		}
+
+		if ( $is_empty ) {
 			$wrapper_attributes['hidden'] = true;
 			$wrapper_attributes['class']  = 'wc-block-product-filter--hidden';
 			return sprintf(
@@ -181,7 +187,7 @@ final class ProductFilterPrice extends AbstractBlock {
 			array_reduce(
 				$block->parsed_block['innerBlocks'],
 				function ( $carry, $parsed_block ) use ( $filter_context ) {
-					$carry .= ( new \WP_Block( $parsed_block, array( 'filterData' => $filter_context ) ) )->render();
+					$carry .= ( new \WP_Block( $parsed_block, array( 'woocommerce/rangeInput' => $filter_context ) ) )->render();
 					return $carry;
 				},
 				''

@@ -56,8 +56,12 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			$sections['rest_api_caching'] = __( 'REST API caching', 'woocommerce' );
 		}
 
-		$sections['webhooks']        = __( 'Webhooks', 'woocommerce' );
-		$sections['legacy_api']      = __( 'Legacy API', 'woocommerce' );
+		$sections['webhooks'] = __( 'Webhooks', 'woocommerce' );
+
+		if ( has_filter( 'woocommerce_settings_rest_api' ) ) {
+			$sections['legacy_api'] = __( 'Legacy API', 'woocommerce' );
+		}
+
 		$sections['woocommerce_com'] = __( 'WooCommerce.com', 'woocommerce' );
 
 		if ( FeaturesUtil::feature_is_enabled( 'blueprint' ) ) {
@@ -77,7 +81,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			array(
 				array(
 					'title' => __( 'Page setup', 'woocommerce' ),
-					'desc'  => __( 'These pages need to be set so that WooCommerce knows where to send users to checkout.', 'woocommerce' ),
+					'desc'  => __( 'Select the pages WooCommerce uses for the cart, checkout, accounts, and store policies.', 'woocommerce' ),
 					'type'  => 'title',
 					'id'    => 'advanced_page_options',
 				),
@@ -99,7 +103,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 							),
 					),
 					'desc_tip' => true,
-					'autoload' => false,
+					'autoload' => true,
 				),
 
 				array(
@@ -119,7 +123,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 							),
 					),
 					'desc_tip' => true,
-					'autoload' => false,
+					'autoload' => true,
 				),
 
 				array(
@@ -139,7 +143,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 							),
 					),
 					'desc_tip' => true,
-					'autoload' => false,
+					'autoload' => true,
 				),
 
 				array(
@@ -151,6 +155,31 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					'css'      => 'min-width:300px;',
 					'type'     => 'single_select_page_with_search',
 					'args'     => array( 'exclude' => wc_get_page_id( 'checkout' ) ),
+					'desc_tip' => true,
+					'autoload' => true,
+				),
+
+				array(
+					'title'    => __( 'Refund and returns policy', 'woocommerce' ),
+					'desc'     => __( 'Select the page describing your store\'s refund and returns policy. WooCommerce shares it with search engines once it is publicly available.', 'woocommerce' ),
+					'id'       => 'woocommerce_refund_returns_page_id',
+					'default'  => '',
+					'class'    => 'wc-page-search',
+					'css'      => 'min-width:300px;',
+					'type'     => 'single_select_page_with_search',
+					'args'     => array(
+						'exclude' => array_values(
+							array_filter(
+								array(
+									wc_get_page_id( 'cart' ),
+									wc_get_page_id( 'checkout' ),
+									wc_get_page_id( 'shop' ),
+									wc_get_page_id( 'myaccount' ),
+								),
+								static fn ( $page_id ) => $page_id > 0
+							)
+						),
+					),
 					'desc_tip' => true,
 					'autoload' => false,
 				),
@@ -388,7 +417,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					'type'          => 'checkbox',
 					'checkboxgroup' => 'start',
 					'default'       => 'yes',
-					'autoload'      => false,
+					'autoload'      => true,
 				),
 				array(
 					'type' => 'sectionend',
@@ -402,48 +431,23 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	/**
 	 * Get settings for the legacy API section.
 	 *
+	 * The section is only registered when an extension has hooked into the
+	 * `woocommerce_settings_rest_api` filter, so this acts purely as an
+	 * extension point — core no longer ships any settings of its own here.
+	 *
 	 * @return array
 	 */
 	protected function get_settings_for_legacy_api_section() {
-		$legacy_api_setting_desc =
-			'yes' === get_option( 'woocommerce_api_enabled' ) ?
-			__( 'The legacy REST API is enabled', 'woocommerce' ) :
-			__( 'The legacy REST API is NOT enabled', 'woocommerce' );
-
-		$legacy_api_setting_tip =
-			WC()->legacy_rest_api_is_available() ?
-			__( 'ℹ️️ The WooCommerce Legacy REST API extension is installed and active.', 'woocommerce' ) :
-			sprintf(
-				/* translators: placeholders are URLs */
-				__( '⚠️ The WooCommerce Legacy REST API has been moved to <a target=”_blank” href="%1$s">a dedicated extension</a>. <b><a target=”_blank” href="%2$s">Learn more about this change</a></b>', 'woocommerce' ),
-				'https://wordpress.org/plugins/woocommerce-legacy-rest-api/',
-				'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
-			);
-
-		$settings =
-			array(
-				array(
-					'title' => '',
-					'type'  => 'title',
-					'desc'  => '',
-					'id'    => 'legacy_api_options',
-				),
-				array(
-					'title'    => __( 'Legacy API', 'woocommerce' ),
-					'desc'     => $legacy_api_setting_desc,
-					'id'       => 'woocommerce_api_enabled',
-					'type'     => 'checkbox',
-					'default'  => 'no',
-					'disabled' => true,
-					'desc_tip' => $legacy_api_setting_tip,
-				),
-				array(
-					'type' => 'sectionend',
-					'id'   => 'legacy_api_options',
-				),
-			);
-
-		return apply_filters( 'woocommerce_settings_rest_api', $settings );
+		/**
+		 * Filter the settings rendered in the Legacy API section of the Advanced settings tab.
+		 *
+		 * Core no longer ships any settings in this section; the section itself is only
+		 * registered when at least one callback is hooked into this filter.
+		 *
+		 * @since 3.4.0
+		 * @param array $settings Settings array. Empty by default.
+		 */
+		return apply_filters( 'woocommerce_settings_rest_api', array() );
 	}
 
 	/**

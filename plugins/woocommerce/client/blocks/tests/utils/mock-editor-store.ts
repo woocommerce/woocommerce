@@ -15,9 +15,10 @@
  * ```
  */
 export const mockWordPressDataWithEditorStore = () => {
-	// Use require to avoid issues with Jest's module system
-	// eslint-disable-next-line @typescript-eslint/no-var-requires
-	const wpData = require( 'wordpress-data-wp-6-7' );
+	// `jest.requireActual` bypasses the mock and loads the real module,
+	// avoiding the circular dependency that would occur with a plain
+	// `require( '@wordpress/data' )` inside a jest.mock factory.
+	const wpData = jest.requireActual( '@wordpress/data' );
 	const mockEditorStore = wpData.createReduxStore( 'core/editor', {
 		reducer: () => ( {} ),
 		selectors: {
@@ -25,6 +26,15 @@ export const mockWordPressDataWithEditorStore = () => {
 			getCurrentPostType: () => null,
 			getCurrentPost: () => null,
 			isCurrentPostPublished: () => false,
+			// wp-6.8: additional selectors that @wordpress/block-editor and
+			// @wordpress/editor components may call during inner-block
+			// rendering. Without these, inner blocks silently fail to render.
+			getEditorSettings: () => ( {} ),
+			getEditedPostAttribute: () => undefined,
+			getEditedPostSlug: () => '',
+			getEditorMode: () => 'visual',
+			getRenderingMode: () => 'all',
+			getPostTypeLabel: () => '',
 		},
 	} );
 	wpData.register( mockEditorStore );

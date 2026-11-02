@@ -50,6 +50,18 @@ const reducer: Reducer< SettingsState, Actions > = ( state = {}, action ) => {
 				},
 			};
 			break;
+		case TYPES.CLEAR_ERROR_FOR_GROUP:
+			if ( ! state[ action.group ] ) {
+				break;
+			}
+			state = {
+				...state,
+				[ action.group ]: {
+					...state[ action.group ],
+					error: null,
+				},
+			};
+			break;
 		case TYPES.CLEAR_IS_DIRTY:
 			state = {
 				...state,
@@ -72,6 +84,12 @@ const reducer: Reducer< SettingsState, Actions > = ( state = {}, action ) => {
 					...state,
 					[ group ]: {
 						data: state[ group ] ? state[ group ].data : [],
+						// Keep the dirty keys so a failed save can be retried.
+						// Nothing else is carried over on purpose: the getSettings
+						// resolver sets isRequesting and never resets it, so
+						// preserving it here would leave the group stuck in a
+						// requesting state after a failed fetch.
+						dirty: state[ group ]?.dirty,
 						error,
 						lastReceived: time,
 					},

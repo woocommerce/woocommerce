@@ -35,11 +35,9 @@ export function EmailStatus( {
 	className,
 	recordEvent,
 }: EmailStatusProps ): JSX.Element {
-	const [ woocommerce_email_data ] = useEntityProp(
-		'postType',
-		'woo_email',
-		'woocommerce_data'
-	);
+	const [ woocommerce_email_data ] = useEntityProp<
+		EmailWooCommerceData | undefined
+	>( 'postType', 'woo_email', 'woocommerce_data' );
 
 	const isManual = woocommerce_email_data?.is_manual;
 	let statusValue = 'enabled';

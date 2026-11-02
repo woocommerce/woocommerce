@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use WP_Block;
+
 /**
  * Product Filter: Active Block.
  */
@@ -24,15 +26,55 @@ final class ProductFilterActive extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( ! isset( $block->context['activeFilters'] ) ) {
+		$active_filters = $block->context['activeFilters'] ?? array();
+
+		if ( ! is_array( $active_filters ) ) {
 			return $content;
 		}
 
-		$active_filters = $block->context['activeFilters'];
+		$removable_items = array_values(
+			array_filter(
+				array_map(
+					function ( $item ) {
+						if ( ! is_array( $item ) ) {
+							return null;
+						}
+						$raw_type  = $item['type'] ?? '';
+						$raw_value = $item['value'] ?? '';
+						$raw_label = $item['activeLabel'] ?? ( $item['label'] ?? '' );
+						if ( ! is_scalar( $raw_type ) || ! is_scalar( $raw_value ) || ! is_scalar( $raw_label ) ) {
+							return null;
+						}
+						$type  = (string) $raw_type;
+						$value = (string) $raw_value;
+						$label = (string) $raw_label;
+						if ( '' === $type || '' === $value ) {
+							return null;
+						}
+						return array(
+							'id'    => $type . '_' . $value,
+							'type'  => $type,
+							'value' => $value,
+							'label' => $label,
+						);
+					},
+					$active_filters
+				)
+			)
+		);
 
 		$filter_context = array(
-			'items' => $active_filters,
+			'items'          => $removable_items,
+			'storeNamespace' => 'woocommerce/product-filters',
 		);
+
+		$is_empty            = empty( $removable_items );
+		$product_filters_key = $block->context['productFiltersKey'] ?? '';
+		if ( is_string( $product_filters_key ) && '' !== $product_filters_key ) {
+			$state = wp_interactivity_state( 'woocommerce/product-filters' );
+			$state['filterEmptyStates'][ $product_filters_key ][] = $is_empty;
+			wp_interactivity_state( 'woocommerce/product-filters', $state );
+		}
 
 		$wrapper_attributes = array(
 			'data-wp-interactive'  => 'woocommerce/product-filters',
@@ -50,7 +92,7 @@ final class ProductFilterActive extends AbstractBlock {
 		wp_interactivity_state(
 			'woocommerce/product-filters',
 			array(
-				'hasActiveFilters' => ! empty( $active_filters ),
+				'hasActiveFilters' => ! empty( $removable_items ),
 			),
 		);
 
@@ -68,7 +110,7 @@ final class ProductFilterActive extends AbstractBlock {
 			array_reduce(
 				$block->parsed_block['innerBlocks'],
 				function ( $carry, $parsed_block ) use ( $filter_context ) {
-					$carry .= ( new \WP_Block( $parsed_block, array( 'filterData' => $filter_context ) ) )->render();
+					$carry .= ( new \WP_Block( $parsed_block, array( 'woocommerce/removableItems' => $filter_context ) ) )->render();
 					return $carry;
 				},
 				''

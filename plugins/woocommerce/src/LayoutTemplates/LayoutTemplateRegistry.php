@@ -1,63 +1,76 @@
 <?php
+/**
+ * WooCommerce Layout Template Registry compatibility shim.
+ */
 
 namespace Automattic\WooCommerce\LayoutTemplates;
 
-use Automattic\WooCommerce\Admin\BlockTemplates\BlockTemplateInterface;
-
-use Automattic\WooCommerce\Internal\Admin\BlockTemplates\BlockTemplateLogger;
-
 /**
- * Layout template registry.
+ * Removed layout template registry.
+ *
+ * @deprecated 10.9.0 Block template extension APIs were deprecated. The block templates API was removed in 11.0.0 with no replacement.
  */
 final class LayoutTemplateRegistry {
-
 	/**
-	 * Class instance.
+	 * Singleton instance.
 	 *
 	 * @var LayoutTemplateRegistry|null
 	 */
 	private static $instance = null;
 
 	/**
-	 * Layout templates info.
+	 * Whether the removal warning has already been logged for the current request.
 	 *
-	 * @var array
+	 * @var bool
 	 */
-	protected $layout_templates_info = array();
+	private static $removal_warning_logged = false;
 
 	/**
-	 * Layout template instances.
-	 *
-	 * @var array
+	 * Constructor.
 	 */
-	protected $layout_template_instances = array();
+	public function __construct() {
+		self::maybe_log_removal_warning();
+	}
 
 	/**
-	 * Get the instance of the class.
+	 * Get the singleton instance.
+	 *
+	 * @return LayoutTemplateRegistry
 	 */
 	public static function get_instance(): LayoutTemplateRegistry {
-		if ( null === self::$instance ) {
-			self::$instance = new self();
+		$instance = self::$instance;
+
+		if ( null === $instance ) {
+			$instance       = new self();
+			self::$instance = $instance;
 		}
 
-		return self::$instance;
+		self::maybe_log_removal_warning();
+
+		return $instance;
 	}
 
 	/**
 	 * Unregister all layout templates.
+	 *
+	 * @return void
 	 */
 	public function unregister_all() {
-		$this->layout_templates_info     = array();
-		$this->layout_template_instances = array();
+		self::maybe_log_removal_warning();
 	}
 
 	/**
 	 * Check if a layout template is registered.
 	 *
 	 * @param string $layout_template_id Layout template ID.
+	 * @return bool
 	 */
 	public function is_registered( $layout_template_id ): bool {
-		return isset( $this->layout_templates_info[ $layout_template_id ] );
+		unset( $layout_template_id );
+
+		self::maybe_log_removal_warning();
+
+		return false;
 	}
 
 	/**
@@ -66,127 +79,41 @@ final class LayoutTemplateRegistry {
 	 * @param string $layout_template_id         Layout template ID.
 	 * @param string $layout_template_area       Layout template area.
 	 * @param string $layout_template_class_name Layout template class to register.
-	 *
-	 * @throws \ValueError If a layout template with the same ID already exists.
-	 * @throws \ValueError If the specified layout template area is empty.
-	 * @throws \ValueError If the specified layout template class does not exist.
-	 * @throws \ValueError If the specified layout template class does not implement the BlockTemplateInterface.
+	 * @return void
 	 */
 	public function register( $layout_template_id, $layout_template_area, $layout_template_class_name ) {
-		if ( $this->is_registered( $layout_template_id ) ) {
-			throw new \ValueError( 'A layout template with the specified ID already exists in the registry.' );
-		}
+		unset( $layout_template_id, $layout_template_area, $layout_template_class_name );
 
-		if ( empty( $layout_template_area ) ) {
-			throw new \ValueError( 'The specified layout template area is empty.' );
-		}
-
-		if ( ! class_exists( $layout_template_class_name ) ) {
-			throw new \ValueError( 'The specified layout template class does not exist.' );
-		}
-
-		if ( ! is_subclass_of( $layout_template_class_name, BlockTemplateInterface::class ) ) {
-			throw new \ValueError( 'The specified layout template class does not implement the BlockTemplateInterface.' );
-		}
-
-		$this->layout_templates_info[ $layout_template_id ] = array(
-			'id'         => $layout_template_id,
-			'area'       => $layout_template_area,
-			'class_name' => $layout_template_class_name,
-		);
+		self::maybe_log_removal_warning();
 	}
 
 	/**
 	 * Instantiate the matching layout templates and return them.
 	 *
 	 * @param array $query_params Query params.
+	 * @return array
 	 */
 	public function instantiate_layout_templates( array $query_params = array() ): array {
-		// Make sure the block template logger is initialized before the templates are created,
-		// so that the logger will collect the template events.
-		$logger = BlockTemplateLogger::get_instance();
+		unset( $query_params );
 
-		$layout_templates = array();
+		self::maybe_log_removal_warning();
 
-		$layout_templates_info = $this->get_matching_layout_templates_info( $query_params );
-		foreach ( $layout_templates_info as $layout_template_info ) {
-			$layout_template = $this->get_layout_template_instance( $layout_template_info );
-
-			$layout_template_id = $layout_template->get_id();
-
-			$layout_templates[ $layout_template_id ] = $layout_template;
-
-			$logger->log_template_events_to_file( $layout_template_id );
-		}
-
-		return $layout_templates;
+		return array();
 	}
 
 	/**
-	 * Instantiate a single layout template and return it.
-	 *
-	 * @param array $layout_template_info Layout template info.
+	 * Log a warning about the removed compatibility class.
 	 */
-	private function get_layout_template_instance( $layout_template_info ): BlockTemplateInterface {
-		$class_name = $layout_template_info['class_name'];
-
-		// Return the instance if it already exists.
-
-		$layout_template_instance = isset( $this->layout_template_instances[ $class_name ] )
-			? $this->layout_template_instances[ $class_name ]
-			: null;
-
-		if ( ! empty( $layout_template_instance ) ) {
-			return $layout_template_instance;
+	private static function maybe_log_removal_warning(): void {
+		if ( self::$removal_warning_logged || ! function_exists( 'wc_get_logger' ) ) {
+			return;
 		}
 
-		// Instantiate the layout template.
+		self::$removal_warning_logged = true;
 
-		$layout_template_instance                       = new $class_name();
-		$this->layout_template_instances[ $class_name ] = $layout_template_instance;
-
-		// Call the after instantiation hooks.
-
-		/**
-		 * Fires after a layout template is instantiated.
-		 *
-		 * @param string $layout_template_id Layout template ID.
-		 * @param string $layout_template_area Layout template area.
-		 * @param BlockTemplateInterface $layout_template Layout template instance.
-		 *
-		 * @since 8.6.0
-		 */
-		do_action( 'woocommerce_layout_template_after_instantiation', $layout_template_info['id'], $layout_template_info['area'], $layout_template_instance );
-
-		// Call the old, deprecated, register hook.
-		wc_do_deprecated_action( 'woocommerce_block_template_register', array( $layout_template_instance ), '8.6.0', 'woocommerce_layout_template_after_instantiation' );
-
-		return $layout_template_instance;
-	}
-
-	/**
-	 * Get matching layout templates info.
-	 *
-	 * @param array $query_params Query params.
-	 */
-	private function get_matching_layout_templates_info( array $query_params = array() ): array {
-		$area_to_match = isset( $query_params['area'] ) ? $query_params['area'] : null;
-		$id_to_match   = isset( $query_params['id'] ) ? $query_params['id'] : null;
-
-		$matching_layout_templates_info = array();
-
-		foreach ( $this->layout_templates_info as $layout_template_info ) {
-			if ( ! empty( $area_to_match ) && $layout_template_info['area'] !== $area_to_match ) {
-				continue;
-			}
-
-			if ( ! empty( $id_to_match ) && $layout_template_info['id'] !== $id_to_match ) {
-				continue;
-			}
-
-			$matching_layout_templates_info[] = $layout_template_info;
-		}
-
-		return $matching_layout_templates_info;
+		wc_get_logger()->warning(
+			'Automattic\WooCommerce\LayoutTemplates\LayoutTemplateRegistry is a temporary compatibility shim and will be removed soon. Block template extension APIs were deprecated in WooCommerce 10.9.0, and the block templates API was removed in WooCommerce 11.0.0 with no replacement.',
+			array( 'source' => 'block-templates' )
+		);
 	}
 }

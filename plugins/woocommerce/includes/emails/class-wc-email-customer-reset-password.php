@@ -52,12 +52,20 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 		public $reset_key;
 
 		/**
+		 * User display name (first name, or login as fallback).
+		 *
+		 * @var string
+		 */
+		public $user_display_name;
+
+		/**
 		 * Constructor.
 		 */
 		public function __construct() {
 
-			$this->id             = 'customer_reset_password';
-			$this->customer_email = true;
+			$this->id              = 'customer_reset_password';
+			$this->customer_email  = true;
+			$this->supports_cc_bcc = false;
 
 			$this->title       = __( 'Reset password', 'woocommerce' );
 			$this->description = __( 'Send an email to customers notifying them that their password has been reset', 'woocommerce' );
@@ -114,17 +122,22 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 			$this->setup_locale();
 
 			if ( $user_login && $reset_key ) {
-				$this->object     = get_user_by( 'login', $user_login );
-				$this->user_id    = $this->object->ID;
-				$this->user_login = $user_login;
-				$this->reset_key  = $reset_key;
-				$this->user_email = stripslashes( $this->object->user_email );
-				$this->recipient  = $this->user_email;
+				$this->object = get_user_by( 'login', $user_login );
+				if ( ! $this->object ) {
+					$this->restore_locale();
+					return;
+				}
+				$this->user_id           = $this->object->ID;
+				$this->user_login        = $user_login;
+				$this->reset_key         = $reset_key;
+				$this->user_email        = stripslashes( $this->object->user_email );
+				$this->recipient         = $this->user_email;
+				$customer                = new WC_Customer( $this->object->ID );
+				$first_name              = ! empty( $customer->get_billing_first_name() ) ? $customer->get_billing_first_name() : $this->object->first_name;
+				$this->user_display_name = ! empty( $first_name ) ? $first_name : $this->user_login;
 			}
 
-			if ( $this->is_enabled() && $this->get_recipient() ) {
-				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-			}
+			$this->send_notification();
 
 			$this->restore_locale();
 		}
@@ -141,6 +154,7 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 					'email_heading'      => $this->get_heading(),
 					'user_id'            => $this->user_id,
 					'user_login'         => $this->user_login,
+					'user_display_name'  => $this->user_display_name,
 					'reset_key'          => $this->reset_key,
 					'blogname'           => $this->get_blogname(),
 					'additional_content' => $this->get_additional_content(),
@@ -163,6 +177,7 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 					'email_heading'      => $this->get_heading(),
 					'user_id'            => $this->user_id,
 					'user_login'         => $this->user_login,
+					'user_display_name'  => $this->user_display_name,
 					'reset_key'          => $this->reset_key,
 					'blogname'           => $this->get_blogname(),
 					'additional_content' => $this->get_additional_content(),
@@ -183,12 +198,13 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 			return wc_get_template_html(
 				$this->template_block_content,
 				array(
-					'user_id'       => $this->user_id,
-					'user_login'    => $this->user_login,
-					'reset_key'     => $this->reset_key,
-					'sent_to_admin' => false,
-					'plain_text'    => false,
-					'email'         => $this,
+					'user_id'           => $this->user_id,
+					'user_login'        => $this->user_login,
+					'user_display_name' => $this->user_display_name,
+					'reset_key'         => $this->reset_key,
+					'sent_to_admin'     => false,
+					'plain_text'        => false,
+					'email'             => $this,
 				)
 			);
 		}

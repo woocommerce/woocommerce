@@ -5,6 +5,8 @@
  * @package WooCommerce\Emails
  */
 
+use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
+use Automattic\WooCommerce\Internal\Email\EmailHeaders;
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
 use Automattic\WooCommerce\Internal\EmailEditor\TransactionalEmailPersonalizer;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -31,6 +33,20 @@ if ( class_exists( 'WC_Email', false ) ) {
  * @extends     WC_Settings_API
  */
 class WC_Email extends WC_Settings_API {
+
+	/**
+	 * Skip-reason identifier used when the email has no recipient address.
+	 *
+	 * @since 10.9.0
+	 */
+	public const SKIP_REASON_NO_RECIPIENT = 'no_recipient';
+
+	/**
+	 * Skip-reason identifier used when the unpaid order timer cancelled the order and the email is set not to send for those.
+	 *
+	 * @since 11.4.0
+	 */
+	public const SKIP_REASON_UNPAID_TIMEOUT = 'unpaid_timeout_notifications_disabled';
 
 	/**
 	 * Email method ID.
@@ -280,6 +296,18 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public $block_email_editor_enabled;
 
+	/**
+	 * Whether Cc/Bcc recipients can be configured for this email.
+	 *
+	 * False for emails that carry a credential such as a password reset key.
+	 * The Cc/Bcc settings are then hidden and stored values are ignored.
+	 * The Cc/Bcc recipient filters still apply.
+	 *
+	 * @since 11.2.0
+	 * @var bool
+	 */
+	protected $supports_cc_bcc = true;
+
 
 
 	/**
@@ -325,7 +353,7 @@ class WC_Email extends WC_Settings_API {
 
 		$this->email_type = $this->get_option( 'email_type' );
 		$this->enabled    = $this->get_option( 'enabled' );
-		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
+		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) && $this->supports_cc_bcc() ) {
 			$this->cc  = $this->get_option( 'cc', '' );
 			$this->bcc = $this->get_option( 'bcc', '' );
 		}
@@ -559,7 +587,7 @@ class WC_Email extends WC_Settings_API {
 		$subject = apply_filters( 'woocommerce_email_subject_' . $this->id, $this->format_string( $this->get_option_or_transient( 'subject', $this->get_default_subject() ) ), $this->object, $this );
 		if ( $this->block_email_editor_enabled ) {
 			// Because the new email editor uses rich-text component for subject editing, to be ensure that the subject is always in plain text, we need to strip all tags.
-			$subject = wp_strip_all_tags( $this->personalizer->personalize_transactional_content( $subject, $this ) );
+			$subject = wp_strip_all_tags( $this->personalizer->personalize_transactional_content( $subject, $this, Personalizer::RENDERING_CONTEXT_TEXT ) );
 		}
 		return $subject;
 	}
@@ -583,7 +611,7 @@ class WC_Email extends WC_Settings_API {
 		 */
 		$preheader = apply_filters( 'woocommerce_email_preheader' . $this->id, $this->format_string( $this->get_option_or_transient( 'preheader', '' ) ), $this->object, $this );
 		if ( $this->block_email_editor_enabled ) {
-			$preheader = $this->personalizer->personalize_transactional_content( $preheader, $this );
+			$preheader = $this->personalizer->personalize_transactional_content( $preheader, $this, Personalizer::RENDERING_CONTEXT_TEXT );
 		}
 		return $preheader;
 	}
@@ -628,6 +656,17 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
+	 * Whether Cc/Bcc recipients can be configured for this email.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return bool
+	 */
+	public function supports_cc_bcc() {
+		return $this->supports_cc_bcc;
+	}
+
+	/**
 	 * Get valid Cc recipients.
 	 *
 	 * @return string
@@ -637,11 +676,12 @@ class WC_Email extends WC_Settings_API {
 		 * Filter the Cc recipient for the email.
 		 *
 		 * @since 9.8.0
+		 * @since 11.2.0 The base value is empty when the email does not support Cc/Bcc.
 		 * @param string   $cc     Cc recipient.
 		 * @param object   $object The object (ie, product or order) this email relates to, if any.
 		 * @param WC_Email $email  WC_Email instance managing the email.
 		 */
-		$cc  = apply_filters( 'woocommerce_email_cc_recipient_' . $this->id, $this->cc, $this->object, $this );
+		$cc  = apply_filters( 'woocommerce_email_cc_recipient_' . $this->id, $this->supports_cc_bcc() ? $this->cc : '', $this->object, $this );
 		$ccs = array_map( 'trim', explode( ',', $cc ?? '' ) );
 		$ccs = array_filter( $ccs, 'is_email' );
 		$ccs = array_map( 'sanitize_email', $ccs );
@@ -658,11 +698,12 @@ class WC_Email extends WC_Settings_API {
 		 * Filter the Bcc recipient for the email.
 		 *
 		 * @since 9.8.0
+		 * @since 11.2.0 The base value is empty when the email does not support Cc/Bcc.
 		 * @param string   $bcc    Bcc recipient.
 		 * @param object   $object The object (ie, product or order) this email relates to, if any.
 		 * @param WC_Email $email  WC_Email instance managing the email.
 		 */
-		$bcc  = apply_filters( 'woocommerce_email_bcc_recipient_' . $this->id, $this->bcc, $this->object, $this );
+		$bcc  = apply_filters( 'woocommerce_email_bcc_recipient_' . $this->id, $this->supports_cc_bcc() ? $this->bcc : '', $this->object, $this );
 		$bccs = array_map( 'trim', explode( ',', $bcc ?? '' ) );
 		$bccs = array_filter( $bccs, 'is_email' );
 		$bccs = array_map( 'sanitize_email', $bccs );
@@ -679,8 +720,13 @@ class WC_Email extends WC_Settings_API {
 
 		// For order notification emails sent to admin, always use customer's billing email as reply-to.
 		if ( in_array( $this->id, array( 'new_order', 'cancelled_order', 'failed_order' ), true ) ) {
-			if ( $this->object && $this->object->get_billing_email() && ( $this->object->get_billing_first_name() || $this->object->get_billing_last_name() ) ) {
-				$header .= 'Reply-to: ' . $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() . ' <' . $this->object->get_billing_email() . ">\r\n";
+			if ( $this->object instanceof WC_Order ) {
+				$reply_to_name  = EmailHeaders::sanitize_reply_to_name( $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() );
+				$reply_to_email = sanitize_email( $this->object->get_billing_email() );
+
+				if ( '' !== $reply_to_name && is_email( $reply_to_email ) ) {
+					$header .= 'Reply-to: ' . $reply_to_name . ' <' . $reply_to_email . ">\r\n";
+				}
 			}
 		} else {
 			// Check if custom reply-to is enabled and configured for non-admin notification emails.
@@ -689,10 +735,20 @@ class WC_Email extends WC_Settings_API {
 			$reply_to_name    = $this->get_reply_to_name();
 
 			if ( $reply_to_enabled && ! empty( $reply_to_address ) && is_email( $reply_to_address ) ) {
-				$reply_to_name = ! empty( $reply_to_name ) ? $reply_to_name : $this->get_from_name();
-				$header       .= 'Reply-to: ' . $reply_to_name . ' <' . $reply_to_address . ">\r\n";
-			} elseif ( $this->get_from_address() && $this->get_from_name() ) {
-				$header .= 'Reply-to: ' . $this->get_from_name() . ' <' . $this->get_from_address() . ">\r\n";
+				$reply_to_name = EmailHeaders::sanitize_reply_to_name( $reply_to_name );
+
+				if ( '' === $reply_to_name ) {
+					$reply_to_name = EmailHeaders::sanitize_reply_to_name( $this->get_from_name() );
+				}
+
+				$header .= 'Reply-to: ' . $reply_to_name . ' <' . $reply_to_address . ">\r\n";
+			} else {
+				$from_address = $this->get_from_address();
+				$from_name    = EmailHeaders::sanitize_reply_to_name( $this->get_from_name() );
+
+				if ( $from_address && '' !== $from_name ) {
+					$header .= 'Reply-to: ' . $from_name . ' <' . $from_address . ">\r\n";
+				}
 			}
 		}
 
@@ -1116,6 +1172,100 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
+	 * Send the email notification when enabled and a recipient is available.
+	 *
+	 * This is the standard helper used by trigger() methods. It checks whether the email
+	 * is enabled and whether a recipient address exists, fires appropriate action hooks for
+	 * the disabled or skipped outcome, and otherwise delegates to send() with the
+	 * standard content parameters.
+	 *
+	 * Subclasses that intentionally bypass the enabled check (e.g. manually-triggered invoice
+	 * emails, POS receipts) should NOT call this method and should continue to call send()
+	 * directly.
+	 *
+	 * @since 10.9.0
+	 * @return bool Whether the email was sent successfully.
+	 */
+	protected function send_notification(): bool {
+		if ( ! $this->is_enabled() ) {
+			/**
+			 * Fires when a transactional email is not sent because the email type is disabled.
+			 *
+			 * @since 10.9.0
+			 *
+			 * @param string   $email_id The email type ID (e.g. `customer_processing_order`).
+			 * @param WC_Email $email    The WC_Email instance.
+			 */
+			do_action( 'woocommerce_email_disabled', $this->id, $this );
+			return false;
+		}
+
+		$recipient = $this->get_recipient();
+
+		if ( ! $recipient ) {
+			/**
+			 * Fires when a transactional email is not sent for a reason other than being disabled.
+			 *
+			 * The $reason parameter identifies why the email was not sent:
+			 * - WC_Email::SKIP_REASON_NO_RECIPIENT: No recipient address was available at send time.
+			 * - WC_Email::SKIP_REASON_UNPAID_TIMEOUT: The unpaid order timer cancelled the order and the email is set not to send for those.
+			 *
+			 * @since 10.9.0
+			 *
+			 * @param string   $reason   Short identifier for why the email was skipped.
+			 * @param string   $email_id The email type ID.
+			 * @param WC_Email $email    The WC_Email instance.
+			 */
+			do_action( 'woocommerce_email_skipped', self::SKIP_REASON_NO_RECIPIENT, $this->id, $this );
+			return false;
+		}
+
+		return $this->send(
+			$recipient,
+			$this->get_subject(),
+			$this->get_content(),
+			$this->get_headers(),
+			$this->get_attachments()
+		);
+	}
+
+	/**
+	 * Send the email when a recipient is available, regardless of the enabled setting.
+	 *
+	 * This helper is intended for manually-triggered emails (e.g. invoice resend, POS receipts)
+	 * that intentionally bypass the enabled/disabled check. It fires
+	 * `woocommerce_email_skipped` with reason {@see WC_Email::SKIP_REASON_NO_RECIPIENT} when
+	 * no recipient is available so the outcome is still observable via the EmailLogger, and
+	 * otherwise delegates to send().
+	 *
+	 * @since 10.9.0
+	 * @return bool Whether the email was sent successfully.
+	 */
+	protected function send_if_recipient(): bool {
+		$recipient = $this->get_recipient();
+
+		if ( ! $recipient ) {
+			/**
+			 * Fires when a transactional email is not sent for a reason other than being disabled.
+			 *
+			 * This action is documented in includes/emails/class-wc-email.php
+			 *
+			 * @since 10.9.0
+			 */
+			do_action( 'woocommerce_email_skipped', self::SKIP_REASON_NO_RECIPIENT, $this->id, $this );
+			return false;
+		}
+
+		return $this->send(
+			$recipient,
+			$this->get_subject(),
+			$this->get_content(),
+			$this->get_headers(),
+			$this->get_attachments()
+		);
+	}
+
+	/**
 	 * Send an email.
 	 *
 	 * @param string $to Email to.
@@ -1134,6 +1284,20 @@ class WC_Email extends WC_Settings_API {
 		$mail_callback        = apply_filters( 'woocommerce_mail_callback', 'wp_mail', $this );
 		$mail_callback_params = apply_filters( 'woocommerce_mail_callback_params', array( $to, wp_specialchars_decode( $subject ), $message, $headers, $attachments ), $this );
 		$return               = $mail_callback( ...$mail_callback_params );
+		if ( ! is_bool( $return ) ) {
+			$original_type = gettype( $return );
+
+			$return = is_scalar( $return ) ? wc_string_to_bool( (string) $return ) : false;
+
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					'The callback registered to the woocommerce_mail_callback filter should return a boolean; %s returned.',
+					$original_type
+				),
+				'11.1.0'
+			);
+		}
 
 		remove_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
 		remove_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
@@ -1203,7 +1367,7 @@ class WC_Email extends WC_Settings_API {
 				'desc_tip'    => true,
 			),
 		);
-		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
+		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) && $this->supports_cc_bcc() ) {
 			$this->form_fields['cc']  = $this->get_cc_field();
 			$this->form_fields['bcc'] = $this->get_bcc_field();
 		}
@@ -1471,7 +1635,7 @@ class WC_Email extends WC_Settings_API {
 		?>
 		<?php wc_back_header( $this->get_title(), __( 'Return to emails', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=email' ) ); ?>
 
-		<?php echo wpautop( wp_kses_post( $this->get_description() ) ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+		<?php echo wpautop( wp_kses_post( $this->get_description() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_kses_post() sanitizes the description before wpautop() formats it. ?>
 
 		<?php
 		/**

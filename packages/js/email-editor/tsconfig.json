@@ -1,5 +1,5 @@
 {
-	"extends": "../tsconfig",
+	"extends": "@woocommerce/internal-build/configs/tsconfig.json",
 	"compilerOptions": {
 		"rootDir": "src",
 		"outDir": "build-module",
@@ -11,8 +11,6 @@
 		"jsx": "react-jsx",
 		"jsxFactory": null,
 		"jsxFragmentFactory": null,
-
-		// strict checks
 		"alwaysStrict": true,
 		"strictBindCallApply": false,
 		"strictFunctionTypes": false,
@@ -21,13 +19,14 @@
 		"noImplicitAny": false,
 		"noImplicitThis": false,
 		"forceConsistentCasingInFileNames": true,
-
-		// additional checks
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitReturns": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
-		"typeRoots": [ "./node_modules/@types" ]
+		"typeRoots": [
+			"./node_modules/@types"
+		],
+		"composite": true
 	},
 	"include": [
 		"typings/**/*",
@@ -35,5 +34,6 @@
 	],
 	"exclude": [
 		"**/test/**"
-	]
+	],
+	"references": []
 }

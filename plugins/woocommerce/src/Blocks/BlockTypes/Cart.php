@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 /**
  * Cart class.
@@ -32,6 +33,26 @@ class Cart extends AbstractBlock {
 	protected function initialize() {
 		parent::initialize();
 		add_action( 'wp_loaded', array( $this, 'register_patterns' ) );
+		add_action( 'wp', array( $this, 'disable_wp_emoji' ) );
+	}
+
+	/**
+	 * Remove WordPress emoji detection script on pages containing this block.
+	 *
+	 * The wp-emoji MutationObserver converts emoji text nodes to <img> elements
+	 * when React hydrates or re-renders, corrupting the DOM tree and crashing the block.
+	 * The wp-exclude-emoji class on the wrapper only prevents the initial parse, not the
+	 * MutationObserver, so the script must be removed entirely.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @return void
+	 */
+	public function disable_wp_emoji() {
+		if ( has_block( $this->get_full_block_name() ) ) {
+			remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+			remove_action( 'wp_print_styles', 'print_emoji_styles' );
+		}
 	}
 
 	/**
@@ -47,11 +68,13 @@ class Cart extends AbstractBlock {
 	}
 
 	/**
-	 * Register block pattern for Empty Cart Message to make it translatable.
+	 * Register the Cart heading block pattern.
+	 *
+	 * The patterns the default Cart page references are registered in
+	 * BlockTypesController::register_block_patterns() instead, so they resolve even when the
+	 * Cart block type is not registered.
 	 */
 	public function register_patterns() {
-		$shop_permalink = wc_get_page_permalink( 'shop' );
-
 		register_block_pattern(
 			'woocommerce/cart-heading',
 			array(
@@ -60,48 +83,6 @@ class Cart extends AbstractBlock {
 				'content'  => '<!-- wp:heading {"align":"wide", "level":1} --><h1 class="wp-block-heading alignwide">' . esc_html__( 'Cart', 'woocommerce' ) . '</h1><!-- /wp:heading -->',
 			)
 		);
-		register_block_pattern(
-			'woocommerce/cart-cross-sells-message',
-			array(
-				'title'    => '',
-				'inserter' => false,
-				'content'  => '<!-- wp:heading {"fontSize":"large"} --><h2 class="wp-block-heading has-large-font-size">' . esc_html__( 'You may be interested in…', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
-			)
-		);
-		register_block_pattern(
-			'woocommerce/cart-empty-message',
-			array(
-				'title'    => '',
-				'inserter' => false,
-				'content'  => '
-					<!-- wp:heading {"textAlign":"center","className":"with-empty-cart-icon wc-block-cart__empty-cart__title"} --><h2 class="wp-block-heading has-text-align-center with-empty-cart-icon wc-block-cart__empty-cart__title">' . esc_html__( 'Your cart is currently empty!', 'woocommerce' ) . '</h2><!-- /wp:heading -->
-					<!-- wp:paragraph {"align":"center"} --><p class="has-text-align-center"><a href="' . esc_attr( esc_url( $shop_permalink ) ) . '">' . esc_html__( 'Browse store', 'woocommerce' ) . '</a></p><!-- /wp:paragraph -->
-				',
-			)
-		);
-		register_block_pattern(
-			'woocommerce/cart-new-in-store-message',
-			array(
-				'title'    => '',
-				'inserter' => false,
-				'content'  => '<!-- wp:heading {"textAlign":"center"} --><h2 class="wp-block-heading has-text-align-center">' . esc_html__( 'New in store', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
-			)
-		);
-	}
-
-	/**
-	 * Get the editor script handle for this block type.
-	 *
-	 * @param string $key Data to get, or default to everything.
-	 * @return array|string;
-	 */
-	protected function get_block_type_editor_script( $key = null ) {
-		$script = [
-			'handle'       => 'wc-' . $this->block_name . '-block',
-			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name ),
-			'dependencies' => [ 'wc-blocks' ],
-		];
-		return $key ? $script[ $key ] : $script;
 	}
 
 	/**
@@ -235,7 +216,7 @@ class Cart extends AbstractBlock {
 
 		$this->asset_data_registry->add( 'countryData', CartCheckoutUtils::get_country_data() );
 		$this->asset_data_registry->add( 'displayItemizedTaxes', 'itemized' === get_option( 'woocommerce_tax_total_display' ) );
-		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', 'incl' === get_option( 'woocommerce_tax_display_cart' ) );
+		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', TaxDisplayMode::INCLUSIVE === get_option( 'woocommerce_tax_display_cart' ) );
 		$this->asset_data_registry->add( 'taxesEnabled', wc_tax_enabled() );
 		$this->asset_data_registry->add( 'couponsEnabled', wc_coupons_enabled() );
 		$this->asset_data_registry->add( 'shippingEnabled', wc_shipping_enabled() );

@@ -235,18 +235,50 @@ pnpm run test:js                            # runs JS component test using Jest
 
 ### Dependencies
 
-#### Global Styles Engine
+#### Text domain
 
-A of 1.4.3 the email editor package depends on `@wordpress/global-styles-engine`, which is **not enqueued by WordPress core**. Unlike most `@wordpress/*` packages, this package is not available globally in WordPress environments and must be bundled.
+Translation function calls (`__()`, `_x()`, `_n()`, `_nx()`) in this package use the `__i18n_text_domain__` identifier as their text domain argument rather than a hardcoded string literal, so each consumer plugin can extract and translate strings under its own text domain.
 
-**Impact**: If your build configuration marks all `@wordpress/*` packages as externals (common in webpack configs), you will encounter runtime errors: `"Cannot find module '@wordpress/global-styles-engine'"`.
+If the identifier is not substituted at bundle time, the package falls back to `'woocommerce'` at runtime so the editor still loads — strings then resolve under the `woocommerce` text domain (matching the package's pre-1.11 behaviour, where the domain was hardcoded). To extract and translate strings under a different text domain, consumers should substitute the identifier at bundle time, typically with [`webpack.DefinePlugin`](https://webpack.js.org/plugins/define-plugin/):
 
-**Solution**: Configure your webpack dependency extraction plugin to bundle this package instead of treating it as an external:
+```js
+// consumer webpack.config.js
+const webpack = require( 'webpack' );
+
+module.exports = {
+    // …
+    plugins: [
+        new webpack.DefinePlugin( {
+            __i18n_text_domain__: JSON.stringify( 'your-text-domain' ),
+        } ),
+    ],
+};
+```
+
+For Jest (or any non-webpack test runner), the runtime fallback applies, so unit tests will see strings under the `woocommerce` domain by default. Set the identifier on the global in the consumer's test setup file to override:
+
+```js
+globalThis.__i18n_text_domain__ = 'your-text-domain';
+```
+
+#### Packages that must be bundled
+
+The email editor package depends on a few `@wordpress/*` packages that are **not enqueued by WordPress core**. Unlike most `@wordpress/*` packages, they are not available globally in WordPress environments and must be bundled:
+
+-   `@wordpress/global-styles-engine` (since 1.4.3)
+-   `@wordpress/ui` (since 2.5.0)
+
+**Impact**: If your build configuration marks all `@wordpress/*` packages as externals (common in webpack configs), you will encounter runtime errors such as `"Cannot find module '@wordpress/global-styles-engine'"`.
+
+**Solution**: Configure your webpack dependency extraction plugin to bundle these packages instead of treating them as externals:
 
 ```javascript
 new DependencyExtractionWebpackPlugin( {
     requestToExternal( request ) {
-        if ( request === '@wordpress/global-styles-engine' ) {
+        if (
+            request === '@wordpress/global-styles-engine' ||
+            request === '@wordpress/ui'
+        ) {
             // Return null to bundle this package instead of treating it as external
             return null;
         }
@@ -326,7 +358,9 @@ We may add, update and delete any of them.
 | `woocommerce_email_editor_sidebar_email_type_info_icon`            | none                                                  | `JSX.Element` icon component               | Return an icon from @wordpress/icons e.g. () => <Icon icon={ postContent } />                                                  |
 | `woocommerce_email_editor_sidebar_email_type_info_content`         | none                                                  | `JSX.Element` info content                 | Return a React component containing information about the current template or content                                          |
 | `woocommerce_email_editor_trash_modal_should_permanently_delete`   | `boolean` (false-default)                             | `boolean`                                  | Controls the action of the trash modal. Returning `true` will ensure the modal permanently deletes the email (skipping trash). |
+| `woocommerce_email_editor_entity_actions`                          | `Record< string, object >` actions (`{}` default)     | `Record< string, object >` actions         | WordPress 7.2+: JS parts (`RenderModal`, `isEligible`, …) of entity actions registered in PHP, keyed by action id              |
 | `woocommerce_email_editor_iframe_stylesheet_should_remove`         | `boolean` (false-default), `CSSStyleSheet` stylesheet | `boolean`                                  | Controls whether the iframe stylesheet should be removed. Returning `true` will remove the iframe stylesheet.                  |
 | `woocommerce_email_editor_close_action_callback`                   | `function` backAction                                 | `function` backAction                      | Action to perform when the close (back) button is clicked                                                                      |
 | `woocommerce_email_editor_close_content`                           | `React.ComponentType` DefaultBackButtonContent        | `React.ComponentType` Back button content  | Custom component for the back button content in the editor header                                                              |
 | `woocommerce_email_editor_create_coupon_handler`                   | `() => void` handler                                  | `() => void` handler                       | Handler function called when user clicks "Create new coupon". Should open the coupon creation UI.                              |
+| `woocommerce_email_editor_recent_emails_query`                     | `RecentEmailsQuery` query, `string` postType          | `RecentEmailsQuery` query                  | Query used to load the emails listed in the `Recent` category of the template selection modal. Statuses must be registered.    |

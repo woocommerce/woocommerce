@@ -3,7 +3,7 @@
  */
 import { join } from 'path';
 import { readFile } from 'fs/promises';
-import simpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 import { cloneRepo } from '@woocommerce/monorepo-utils/src/core/git';
 import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
 import { Command } from '@commander-js/extra-typings';
@@ -23,6 +23,9 @@ const getPluginData = async (
 ): Promise< string | void > => {
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
+		unsafe: {
+			allowUnsafeHooksPath: true,
+		},
 		config: [ 'core.hooksPath=/dev/null' ],
 	} );
 	await git.checkout( [ hashOrBranch ] );

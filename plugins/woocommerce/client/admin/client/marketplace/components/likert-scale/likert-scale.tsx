@@ -22,7 +22,9 @@ export interface LikertChangeEvent {
 	};
 }
 
-export default function LikertScale( props: LikertScaleProps ): JSX.Element {
+export default function LikertScale(
+	props: LikertScaleProps
+): React.JSX.Element {
 	const { title, fieldName, onValueChange, validationFailed } = props;
 	const scaleOptions = [
 		{

@@ -5,12 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import { useMemo } from '@wordpress/element';
 import { createSlotFill } from '@wordpress/components';
-// eslint-disable-next-line @woocommerce/dependency-group
-import {
-	ErrorBoundary,
-	// @ts-expect-error Type for PluginDocumentSettingPanel is missing in @types/wordpress__editor
-	PluginDocumentSettingPanel,
-} from '@wordpress/editor';
+import { ErrorBoundary, PluginDocumentSettingPanel } from '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -53,11 +48,10 @@ export function SettingsPanel() {
 	return (
 		<PluginDocumentSettingPanel
 			name="email-settings-panel"
-			title={ __( 'Settings', 'woocommerce' ) }
+			title={ __( 'Settings', __i18n_text_domain__ ) }
 			className="woocommerce-email-editor__settings-panel"
 		>
 			<Slot />
-			{ /* @ts-expect-error canCopyContent is missing in @types/wordpress__editor */ }
 			<ErrorBoundary canCopyContent>
 				{ <SidebarExtensionComponent /> }
 			</ErrorBoundary>

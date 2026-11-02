@@ -17,11 +17,11 @@ declare(strict_types=1);
 class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 
 	/**
-	 * User ID.
+	 * Shared shop_manager user used for REST auth.
 	 *
 	 * @var int
 	 */
-	private $user_id;
+	protected static $user_id;
 
 	/**
 	 * @var callable
@@ -31,6 +31,15 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 	 * @var string|false
 	 */
 	private $prev_default_country;
+
+	/**
+	 * Create the shared shop manager user once for the whole class.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$user_id = $factory->user->create( array( 'role' => 'shop_manager' ) );
+	}
 
 	/**
 	 * Setup.
@@ -48,13 +57,6 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 
 		// This is to reset the country after the test.
 		$this->prev_default_country = get_option( 'woocommerce_default_country' );
-
-		// Create a user with permissions.
-		$this->user_id = $this->factory->user->create(
-			array(
-				'role' => 'shop_manager',
-			)
-		);
 	}
 
 	/**
@@ -86,7 +88,7 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 	 * Test getting general settings.
 	 */
 	public function test_get_item() {
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$user_id );
 		$request  = new WP_REST_Request( 'GET', '/wc/v4/settings/general' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
@@ -107,7 +109,7 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 	 * Test updating general settings with new values format.
 	 */
 	public function test_update_item() {
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$user_id );
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/general' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body(
@@ -145,7 +147,7 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 	 * Test updating general settings with backward compatibility (old format).
 	 */
 	public function test_update_item_backward_compatibility() {
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$user_id );
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/general' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body(
@@ -195,7 +197,7 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 		$initial_value = 'initial_value';
 		update_option( 'woocommerce_share_key_display', $initial_value );
 
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$user_id );
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/general' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body(
@@ -227,7 +229,7 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 	 * State codes in WooCommerce include the country prefix (e.g., "DE-BY" for Bavaria).
 	 */
 	public function test_update_country_with_state() {
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$user_id );
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/general' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body(
@@ -252,7 +254,7 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 	 * Test updating country with invalid state code returns error.
 	 */
 	public function test_update_country_with_invalid_state() {
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$user_id );
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/general' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body(
@@ -275,7 +277,7 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 	 * Test updating country without state (country only).
 	 */
 	public function test_update_country_only() {
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$user_id );
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/general' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body(
@@ -310,7 +312,7 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 		update_option( 'woocommerce_price_num_decimals', 2 );
 		update_option( 'woocommerce_share_key_display', 'no' ); // Initial value, should not be updated.
 
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$user_id );
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/general' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body(

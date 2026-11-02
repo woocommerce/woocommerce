@@ -244,12 +244,13 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	}
 
 	/**
-	 * Set properties based on passed in product object.
+	 * Aggregate and set properties based on passed in product object.
 	 *
 	 * @param WC_Product $product Product instance.
+	 * @return void
 	 */
 	public function set_product( $product ) {
-		if ( ! is_a( $product, 'WC_Product' ) ) {
+		if ( ! ( $product instanceof \WC_Product ) ) {
 			$this->error( 'order_item_product_invalid_product', __( 'Invalid product', 'woocommerce' ) );
 		}
 		if ( $product->is_type( ProductType::VARIATION ) ) {
@@ -258,6 +259,11 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			$this->set_variation( is_callable( array( $product, 'get_variation_attributes' ) ) ? $product->get_variation_attributes() : array() );
 		} else {
 			$this->set_product_id( $product->get_id() );
+			$this->set_variation_id( 0 );
+			// Any variation attribute meta written by a previous set_variation() call is left in
+			// place on purpose: it is stored with the `attribute_` prefix stripped, so a key like
+			// `color` is indistinguishable from a merchant's own custom meta and clearing it here
+			// risks deleting real data. Removing that stale display meta is tracked in #66733.
 		}
 		$this->set_name( $product->get_name() );
 		$this->set_tax_class( $product->get_tax_class() );
@@ -386,18 +392,34 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @return WC_Product|bool
 	 */
 	public function get_product() {
-		if ( $this->get_variation_id() ) {
-			$product = wc_get_product( $this->get_variation_id() );
-		} else {
-			$product = wc_get_product( $this->get_product_id() );
-		}
+		$product_id = $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id();
+		$product    = wc_get_product( $product_id );
 
 		// Backwards compatible filter from WC_Order::get_product_from_item().
+		/** @var WC_Product|false $product */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 		if ( has_filter( 'woocommerce_get_product_from_item' ) ) {
+			/**
+			 * Modifies the product object returned by \WC_Order_Item_Product::get_product.
+			 *
+			 * @since 2.7.0 filter introduction.
+			 *
+			 * @param WC_Product|false      $product   Product instance.
+			 * @param WC_Order_Item_Product $line_item Line item instance.
+			 * @param WC_Order              $order     Order Instance.
+			 */
 			$product = apply_filters( 'woocommerce_get_product_from_item', $product, $this, $this->get_order() );
 		}
+		/**
+		 * Modifies the product object returned by \WC_Order_Item_Product::get_product.
+		 *
+		 * @since 2.7.0 filter introduction.
+		 *
+		 * @param WC_Product|false      $product   Product instance.
+		 * @param WC_Order_Item_Product $line_item Line item instance.
+		 */
+		$product = apply_filters( 'woocommerce_order_item_product', $product, $this );
 
-		return apply_filters( 'woocommerce_order_item_product', $product, $this );
+		return $product;
 	}
 
 	/**

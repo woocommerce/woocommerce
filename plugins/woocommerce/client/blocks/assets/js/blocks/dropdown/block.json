@@ -1,0 +1,42 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "woocommerce/dropdown",
+	"title": "Dropdown",
+	"description": "Display options in a dropdown.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"ancestor": [
+		"woocommerce/add-to-cart-with-options-variation-selector-attribute",
+		"woocommerce/product-filter-attribute",
+		"woocommerce/product-filter-taxonomy",
+		"woocommerce/product-filter-status"
+	],
+	"supports": {
+		"interactivity": true,
+		"woocommerce": {
+			"innerBlockDisplayStyle": true
+		},
+		"color": {
+			"text": true,
+			"background": true,
+			"__experimentalSkipSerialization": true
+		},
+		"__experimentalBorder": {
+			"color": true,
+			"width": true,
+			"style": true,
+			"radius": true,
+			"__experimentalSkipSerialization": true
+		}
+	},
+	"selectors": {
+		"root": ".wp-block-woocommerce-dropdown :is(.wc-block-dropdown__select, .wc-block-dropdown__trigger, .wc-block-dropdown__panel)"
+	},
+	"usesContext": [ "woocommerce/selectableItems", "woocommerce/attributeId" ],
+	"attributes": {},
+	"viewScriptModule": "woocommerce/dropdown",
+	"style": "file:../woocommerce/dropdown-style.css",
+	"editorStyle": "file:../woocommerce/dropdown-editor.css"
+}

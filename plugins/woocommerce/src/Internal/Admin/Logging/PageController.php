@@ -720,18 +720,18 @@ class PageController {
 			$message_chunks = explode( 'CONTEXT:', $segments[2], 2 );
 			if ( isset( $message_chunks[1] ) ) {
 				try {
-					$maybe_json = html_entity_decode( addslashes( trim( $message_chunks[1] ) ) );
+					$maybe_json = html_entity_decode( trim( $message_chunks[1] ), ENT_QUOTES | ENT_HTML401 );
 
 					// Decode for validation.
 					$context = json_decode( $maybe_json, false, 512, JSON_THROW_ON_ERROR );
 
-					// Re-encode to make it pretty.
-					$context = wp_json_encode( $context, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE );
+					// Re-encode to make it pretty. Keep the JSON flags in sync with LogHandlerFileV2::format_entry().
+					$context = wp_json_encode( $context, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
 
 					$message_chunks[1] = sprintf(
 						'<details><summary>%1$s</summary>%2$s</details>',
 						esc_html__( 'Additional context', 'woocommerce' ),
-						stripslashes( $context )
+						esc_html( (string) $context )
 					);
 
 					$segments[2] = implode( ' ', $message_chunks );

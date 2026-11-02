@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.4.0
+ * @version 10.9.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -31,8 +31,8 @@ $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improveme
 do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
 <?php echo $email_improvements_enabled ? '<div class="email-introduction">' : ''; ?>
-<?php /* translators: %s: Customer username */ ?>
-<p><?php printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $user_login ) ); ?></p>
+<?php /* translators: %s: Customer first name, or username if name is not available */ ?>
+<p><?php printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $user_display_name ) ); ?></p>
 <?php if ( $email_improvements_enabled ) : ?>
 	<?php /* translators: %s: Site title */ ?>
 	<p><?php printf( esc_html__( 'Thanks for creating an account on %s. Here’s a copy of your user details.', 'woocommerce' ), esc_html( $blogname ) ); ?></p>

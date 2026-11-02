@@ -1,4 +1,49 @@
 /* global Cookies */
+
+/**
+ * Encode the body of requests that opt in with the `wc_form_encoding` option
+ * the way a browser form submission would.
+ *
+ * jQuery serializes with encodeURIComponent(), which leaves !'()~ literal,
+ * while a browser's form serializer percent-encodes them, and some WAF rules
+ * reject bodies with the literal characters. jQuery 1.x and 3.x serialize the
+ * data before prefilters run; jQuery 4 runs prefilters first, so plain object
+ * data is serialized here from the copy jQuery already made, which has removed
+ * (undefined) fields dropped. `originalOptions.data` stays the object the
+ * caller passed, and only form-encoded bodies are touched.
+ */
+if ( 'function' === typeof jQuery.ajaxPrefilter ) {
+	jQuery.ajaxPrefilter( function ( options ) {
+		if (
+			! options.wc_form_encoding ||
+			! options.processData ||
+			0 !==
+				( options.contentType || '' ).indexOf(
+					'application/x-www-form-urlencoded'
+				)
+		) {
+			return;
+		}
+		if (
+			jQuery.isPlainObject( options.data ) ||
+			Array.isArray( options.data )
+		) {
+			options.data = jQuery.param( options.data, options.traditional );
+		}
+		if ( 'string' === typeof options.data ) {
+			options.data = options.data.replace(
+				/[!'()~]/g,
+				function ( character ) {
+					return (
+						'%' +
+						character.charCodeAt( 0 ).toString( 16 ).toUpperCase()
+					);
+				}
+			);
+		}
+	} );
+}
+
 jQuery( function ( $ ) {
 	// Orderby
 	$( '.woocommerce-ordering' ).on( 'change', 'select.orderby', function () {
@@ -28,7 +73,7 @@ jQuery( function ( $ ) {
 		 * we need to add the keydown event listener to it.
 		 */
 		function store_notice_keydown_handler( event ) {
-			if ( ['Enter', ' '].includes( event.key ) ) {
+			if ( [ 'Enter', ' ' ].includes( event.key ) ) {
 				event.preventDefault();
 				$( '.woocommerce-store-notice__dismiss-link' ).click();
 			}
@@ -122,13 +167,14 @@ jQuery( function ( $ ) {
 
 	$( '.password-input' ).each( function () {
 		const describedBy = $( this ).find( 'input' ).attr( 'id' );
-		$( this ).append(
-			'<button type="button" class="show-password-input" aria-label="' +
-				woocommerce_params.i18n_password_show +
-				'" aria-describedBy="' +
-				describedBy +
-				'"></button>'
-		);
+		const $button = $( '<button>', {
+			type: 'button',
+			class: 'show-password-input',
+			'aria-label': woocommerce_params.i18n_password_show,
+		} );
+
+		$button.attr( 'aria-describedby', describedBy );
+		$( this ).append( $button );
 	} );
 
 	$( '.show-password-input' ).on( 'click', function ( event ) {
@@ -157,7 +203,7 @@ jQuery( function ( $ ) {
 				.prop( 'type', 'password' );
 		}
 
-		$( this ).siblings( 'input' ).focus();
+		$( this ).siblings( 'input' ).trigger( 'focus' );
 	} );
 
 	$( 'a.coming-soon-footer-banner-dismiss' ).on( 'click', function ( e ) {
@@ -184,11 +230,18 @@ jQuery( function ( $ ) {
 
 	// If the "Enable AJAX add to cart buttons on archives" setting is disabled
 	// the add-to-cart.js file won't be loaded, so we need to add the event listener here.
-	if ( typeof wc_add_to_cart_params === 'undefined') {
-		$( document.body ).on( 'keydown', '.remove_from_cart_button', on_keydown_remove_from_cart );
+	if ( typeof wc_add_to_cart_params === 'undefined' ) {
+		$( document.body ).on(
+			'keydown',
+			'.remove_from_cart_button',
+			on_keydown_remove_from_cart
+		);
 	}
 
-	$( document.body ).on( 'item_removed_from_classic_cart updated_wc_div', focus_populate_live_region );
+	$( document.body ).on(
+		'item_removed_from_classic_cart updated_wc_div',
+		focus_populate_live_region
+	);
 } );
 
 /**
@@ -240,23 +293,36 @@ function focus_populate_live_region() {
 
 /**
  * Refresh the sorted by live region.
+ *
+ * Skips when the Interactivity API product filters are present on the page,
+ * as those manage the result count updates themselves.
  */
 function refresh_sorted_by_live_region() {
 	var sorted_by_live_region = document.querySelector(
 		'.woocommerce-result-count'
 	);
+	var hasInteractivityFilters = document.querySelector(
+		'[data-wp-interactive="woocommerce/product-filters"]'
+	);
 
-	if ( sorted_by_live_region ) {
-		var text = sorted_by_live_region.innerHTML;
-		sorted_by_live_region.setAttribute('aria-hidden', 'true');
-
-		var sorted_by_live_region_id = setTimeout( function () {
-			sorted_by_live_region.setAttribute('aria-hidden', 'false');
-			sorted_by_live_region.innerHTML = '';
-			sorted_by_live_region.innerHTML = text;
-			clearTimeout( sorted_by_live_region_id );
-		}, 2000 );
+	if (
+		! sorted_by_live_region ||
+		! window.location.search ||
+		hasInteractivityFilters
+	) {
+		return;
 	}
+
+	var text = sorted_by_live_region.innerHTML;
+	sorted_by_live_region.setAttribute( 'role', 'alert' );
+	sorted_by_live_region.setAttribute( 'aria-hidden', 'true' );
+
+	var sorted_by_live_region_id = setTimeout( function () {
+		sorted_by_live_region.setAttribute( 'aria-hidden', 'false' );
+		sorted_by_live_region.innerHTML = '';
+		sorted_by_live_region.innerHTML = text;
+		clearTimeout( sorted_by_live_region_id );
+	}, 2000 );
 }
 
 function on_document_ready() {

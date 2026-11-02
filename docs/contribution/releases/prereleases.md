@@ -10,13 +10,14 @@ WooCommerce pre-releases provide early access to upcoming features and improveme
 
 This document outlines the different types of pre-releases available, their timing, and how they fit into the overall release cycle.
 
-| Release Name      | Estimated Timing                                     |
-|-------------------|------------------------------------------------------|
-| `nightly`         | Every night                                          |
-| `-dev`            | At feature freeze                                    |
-| `-beta.1`         | 1 week after feature freeze                          |
-| `-beta.2`, ...    | At least 1 more, as needed before `-rc.1`            |
-| `-rc.1`           | Shortly (~1 day) before final release                |
+| Release Name      | Estimated Timing                                                |
+|-------------------|-----------------------------------------------------------------|
+| `nightly`         | Every night                                                     |
+| `-dev`            | At feature freeze                                               |
+| `-beta.1`         | 1 week after feature freeze                                     |
+| `-beta.2`, ...    | At least 1 more, as needed before `-rc.1`                       |
+| `-rc.1`           | Shortly (~1 day) before final release                           |
+| `-rc.2`, ...      | As needed, when a critical bug is detected during RC monitoring |
 
 ## Nightlies
 
@@ -55,3 +56,5 @@ These are pre-release versions that are feature-complete and considered stable e
 They are versioned incrementally as `-rc.1`, `-rc.2`, and so on.
 
 We aim to release at least one RC before the final release, which will not be publicly announced but will be tagged and available for download on both GitHub and WordPress.org.
+
+Additional RCs (`-rc.2` onwards) are only cut when monitoring uncovers a critical bug. Their tracking issues are not created by the regular release-assignment automation; they are created on demand by running [`Release: Create Tracking Issue`](https://github.com/woocommerce/woocommerce/actions/workflows/release-create-tracking-issue.yml). See the [troubleshooting guide](/docs/contribution/releases/troubleshooting#a-serious-bug-was-detected-during-internal-checks--monitoring) for the full recovery procedure.

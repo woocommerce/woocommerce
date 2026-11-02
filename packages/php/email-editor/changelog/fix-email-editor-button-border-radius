@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix button border-radius mismatch between email editor preview and rendered output.

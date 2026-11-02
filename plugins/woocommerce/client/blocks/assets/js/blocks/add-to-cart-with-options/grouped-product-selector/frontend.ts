@@ -6,6 +6,8 @@ import type {
 	ClientCartItem,
 	Store as WooCommerce,
 } from '@woocommerce/stores/woocommerce/cart';
+import '@woocommerce/stores/woocommerce/products';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Internal dependencies
@@ -14,11 +16,16 @@ import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
 } from '../frontend';
-import { getProductData } from '../frontend';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
+	{},
+	{ lock: universalLock }
+);
 
 export type GroupedProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
@@ -63,17 +70,15 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				const hasInvalidQuantity = Object.entries(
 					context.quantity
 				).some( ( [ id, qty ] ) => {
-					const productObject = getProductData(
-						Number( id ),
-						context.selectedAttributes
-					);
-					if ( ! productObject ) {
+					const product = productsState.findProduct( {
+						id: Number( id ),
+						selectedAttributes: context.selectedAttributes,
+					} );
+					if ( ! product ) {
 						return false;
 					}
-					return (
-						qty !== 0 &&
-						( qty < productObject.min || qty > productObject.max )
-					);
+					const { minimum, maximum } = product.add_to_cart;
+					return qty !== 0 && ( qty < minimum || qty > maximum );
 				} );
 
 				if ( hasInvalidQuantity ) {
@@ -99,12 +104,12 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 						continue;
 					}
 
-					const productObject = getProductData(
-						Number( childProductId ),
-						selectedAttributes
-					);
+					const product = productsState.findProduct( {
+						id: Number( childProductId ),
+						selectedAttributes,
+					} );
 
-					if ( ! productObject ) {
+					if ( ! product ) {
 						continue;
 					}
 
@@ -112,7 +117,7 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 						id: Number( childProductId ),
 						quantityToAdd: quantity[ childProductId ],
 						variation: selectedAttributes,
-						type: productObject.type,
+						type: product.type,
 					} );
 				}
 

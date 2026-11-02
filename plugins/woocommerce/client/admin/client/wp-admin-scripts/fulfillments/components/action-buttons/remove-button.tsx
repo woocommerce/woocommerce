@@ -45,7 +45,7 @@ export default function RemoveButton( {
 		if ( error ) {
 			setError( error );
 		} else {
-			refreshOrderFulfillmentStatus( order.id );
+			void refreshOrderFulfillmentStatus( order.id );
 			setOpenSection( 'order' );
 			setIsEditing( false );
 		}
@@ -62,7 +62,7 @@ export default function RemoveButton( {
 		if ( fulfillment.is_fulfilled ) {
 			openModal();
 		} else {
-			handleDeleteFulfillment();
+			void handleDeleteFulfillment();
 		}
 	};
 
@@ -113,7 +113,7 @@ export default function RemoveButton( {
 						<Button
 							variant="primary"
 							onClick={ () => {
-								handleDeleteFulfillment();
+								void handleDeleteFulfillment();
 								closeModal();
 							} }
 							isBusy={ isExecuting }

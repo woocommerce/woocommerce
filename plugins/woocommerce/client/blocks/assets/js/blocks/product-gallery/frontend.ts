@@ -6,17 +6,23 @@ import {
 	getContext as getContextFn,
 	getElement,
 	withScope,
-	getConfig,
 	withSyncEvent,
+	getConfig,
 } from '@wordpress/interactivity';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
-import type { WooCommerceConfig } from '@woocommerce/stores/woocommerce/cart';
+import '@woocommerce/stores/woocommerce/products';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Internal dependencies
  */
-import type { ProductGalleryContext } from './types';
+import type {
+	ProductGalleryContext,
+	ProductGalleryConfig,
+	ProductImageSet,
+} from './types';
 import { checkOverflow } from './utils';
+import { subscribeLegacyJQueryFormVariations } from './legacy-jquery-form';
+import { SELECTORS, CLASSES } from './constants';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -30,66 +36,324 @@ const getArrowsState = ( imageIndex: number, totalImages: number ) => ( {
 	isDisabledNext: imageIndex === totalImages - 1,
 } );
 
+const DIALOG_VIDEO_INTERSECTION_HEIGHT_RATIO = 0.25;
+const pendingViewerImages = new WeakMap< HTMLElement, number >();
+
+const getVerticalIntersectionRatio = ( rect: DOMRect, rootRect: DOMRect ) => {
+	const height =
+		Math.min( rect.bottom, rootRect.bottom ) -
+		Math.max( rect.top, rootRect.top );
+	const referenceHeight = Math.min( rect.height, rootRect.height );
+
+	return referenceHeight ? Math.max( 0, height ) / referenceHeight : 0;
+};
+
+const isDialogVideoInView = ( video: HTMLVideoElement ) => {
+	const scrollableContainer = video.closest( SELECTORS.dialogContent );
+
+	if ( ! scrollableContainer ) {
+		return false;
+	}
+
+	const videoRect = video.getBoundingClientRect();
+	const containerRect = scrollableContainer.getBoundingClientRect();
+
+	return (
+		getVerticalIntersectionRatio( videoRect, containerRect ) >=
+		DIALOG_VIDEO_INTERSECTION_HEIGHT_RATIO
+	);
+};
+
+const isDialogVideoIntersectionInView = (
+	entry: IntersectionObserverEntry
+) => {
+	if ( ! entry.rootBounds || ! entry.boundingClientRect.height ) {
+		return false;
+	}
+
+	return (
+		getVerticalIntersectionRatio(
+			entry.boundingClientRect,
+			entry.rootBounds
+		) >= DIALOG_VIDEO_INTERSECTION_HEIGHT_RATIO
+	);
+};
+
+const syncVideoPlaybackState = (
+	video: HTMLVideoElement,
+	shouldPlay: boolean
+) => {
+	if ( shouldPlay && video.paused ) {
+		void video.play().catch( () => undefined );
+	} else if ( ! shouldPlay && ! video.paused ) {
+		video.pause();
+	}
+};
+
+const syncVideoElementPlayback = (
+	video: HTMLVideoElement,
+	selectedImageId: number,
+	isDialogOpen: boolean,
+	videoLocation?: ProductGalleryContext[ 'videoLocation' ]
+) => {
+	const imageId = Number( video.getAttribute( 'data-image-id' ) ?? 0 );
+	const shouldPlayInDialog =
+		videoLocation === 'dialog' &&
+		isDialogOpen &&
+		isDialogVideoInView( video );
+	const shouldPlayInGallery =
+		videoLocation === 'gallery' &&
+		selectedImageId === imageId &&
+		! isDialogOpen;
+	const shouldPlay = shouldPlayInDialog || shouldPlayInGallery;
+
+	syncVideoPlaybackState( video, shouldPlay );
+};
+
+const syncScopedVideoElementPlayback = ( video: HTMLVideoElement ) => {
+	const { selectedImageId, isDialogOpen, videoLocation } = getContext();
+	syncVideoElementPlayback(
+		video,
+		selectedImageId,
+		isDialogOpen,
+		videoLocation
+	);
+};
+
+/** Read the `products` map from the WooCommerce iAPI config (or `{}`). */
+const getConfiguredProducts = () =>
+	( getConfig( 'woocommerce' ) as ProductGalleryConfig )?.products || {};
+
+const getProductImageSet = ( productId: string | number ) =>
+	getConfiguredProducts()?.[ String( productId ) ];
+
 /**
- * Scrolls the image into view for the main image.
- *
- * We use getElement to get the current element that triggered the action
- * to find the closest gallery container and scroll the image into view.
- * This is necessary because if you have two galleries on the same page with the same image IDs,
- * then we need to query the image in the correct gallery to avoid scrolling the wrong image into view.
- *
- * @param {string} imageId - The ID of the image to scroll into view.
+ * Find a variation by matching its featured `image_id` against the given
+ * `currentImageId`. Used as a fallback when the form doesn't expose a
+ * `variation_id` directly (early stages of legacy form lifecycle).
  */
-const scrollImageIntoView = ( imageId: number ) => {
+const getVariationImageSetByCurrentImage = (
+	productImageSet: ProductImageSet,
+	currentImageId: number
+) =>
+	Object.values( productImageSet.variations || {} ).find(
+		( variation ) => variation.image_id === currentImageId
+	);
+
+/**
+ * Pick the image to surface as selected after a visible-set change.
+ * Prefers the caller's request when it's still in the new set; otherwise
+ * falls back to the first image, or `-1` when the set is empty.
+ */
+const pickSelectedImageId = (
+	imageData: number[],
+	requestedId: number | undefined
+): number => {
+	if ( requestedId !== undefined && imageData.includes( requestedId ) ) {
+		return requestedId;
+	}
+	return imageData[ 0 ] ?? -1;
+};
+
+/** Recompute arrow disabled flags for an image set + selected slot. */
+const computeArrowsState = ( imageData: number[], selectedImageId: number ) => {
+	const index = imageData.indexOf( selectedImageId );
+	if ( index < 0 ) {
+		return { isDisabledPrevious: true, isDisabledNext: true };
+	}
+	return getArrowsState( index, imageData.length );
+};
+
+/** Update the selected image and arrow states without scrolling. */
+const updateSelectedImage = ( imageId: number ) => {
+	const context = getContext();
+	Object.assign( context, {
+		selectedImageId: imageId,
+		...computeArrowsState( context.imageData, imageId ),
+	} );
+};
+
+/** Observe every slide and return a function to refresh their visibility. */
+const initSlidesObservers = (
+	container: HTMLElement,
+	observer: IntersectionObserver
+) => {
+	const slides = container.querySelectorAll( SELECTORS.largeImageWrapper );
+	const resetSlidesObservers = () => {
+		observer.disconnect();
+		slides.forEach( ( slide ) => observer.observe( slide ) );
+	};
+	resetSlidesObservers();
+	return resetSlidesObservers;
+};
+
+/** Resume visible-slide selection when user input interrupts navigation. */
+const initInterruptionEvents = (
+	container: HTMLElement,
+	resetSlidesObservers: () => void
+) => {
+	const onUserInput = () => {
+		if ( pendingViewerImages.delete( container ) ) {
+			// The visible slide may have crossed the threshold before the interruption.
+			resetSlidesObservers();
+		}
+	};
+	const events = [ 'pointerdown', 'wheel', 'keydown' ];
+	for ( const event of events ) {
+		container.addEventListener( event, onUserInput, {
+			capture: true,
+			passive: true,
+		} );
+	}
+	return () => {
+		for ( const event of events ) {
+			container.removeEventListener( event, onUserInput, true );
+		}
+	};
+};
+
+/** Reset viewer alignment when its width changes. */
+const initViewerResizeObserver = (
+	container: HTMLElement,
+	resetAlignment: () => void
+) => {
+	let width = container.clientWidth;
+	const observer = new ResizeObserver( () => {
+		if ( width !== container.clientWidth ) {
+			width = container.clientWidth;
+			resetAlignment();
+		}
+	} );
+	observer.observe( container );
+	return () => observer.disconnect();
+};
+
+/**
+ * Update the image set, selection, arrows and thumbnail position.
+ * Empty input restores the parent gallery from the iAPI config.
+ * The viewer watcher resets alignment after the slide layout updates.
+ */
+const updateVisibleImageSet = (
+	imageIds: number[],
+	selectedImageId?: number
+) => {
+	const context = getContext();
+	const nextImageData = imageIds.length
+		? imageIds
+		: getProductImageSet( context.productId )?.image_ids || [];
+	const nextSelectedImageId = pickSelectedImageId(
+		nextImageData,
+		selectedImageId
+	);
+	// A reset must rerun the viewer watcher even when the image list is unchanged.
+	context.imageData = [ ...nextImageData ];
+	context.hideNextPreviousButtons = nextImageData.length <= 1;
+	updateSelectedImage( nextSelectedImageId );
+
+	if ( nextSelectedImageId === -1 ) {
+		return;
+	}
+
+	scrollThumbnailIntoView( nextSelectedImageId );
+};
+
+/**
+ * Toggle the `hidden` attribute on the closest gallery wrapper based on
+ * whether the element's `data-image-id` is in the current `imageData`.
+ * Bound via `data-wp-watch` so it re-runs reactively on context change.
+ */
+const toggleImageVisibility = ( element: HTMLElement ) => {
+	const imageIdValue = element.getAttribute( 'data-image-id' );
+	if ( ! imageIdValue ) {
+		return;
+	}
+
+	const imageId = Number.parseInt( imageIdValue, 10 );
+	const { imageData } = getContext();
+	const visibleIndex = imageData.indexOf( imageId );
+	const isVisible = visibleIndex >= 0;
+	const closestWrapper = element.closest(
+		`${ SELECTORS.largeImageWrapper }, ${ SELECTORS.thumbnail }`
+	) as HTMLElement | null;
+	const visibilityTarget = closestWrapper || element;
+
+	visibilityTarget.hidden = ! isVisible;
+	visibilityTarget.style.order = isVisible ? String( visibleIndex ) : '';
+	element.setAttribute( 'aria-hidden', isVisible ? 'false' : 'true' );
+};
+
+/**
+ * Apply the active-thumbnail class and tabIndex when the element's
+ * image is both visible and the currently selected image; otherwise
+ * remove them.
+ */
+const toggleActiveThumbnailAttributes = ( element: HTMLElement ) => {
+	const imageIdValue = element.getAttribute( 'data-image-id' );
+	if ( ! imageIdValue ) {
+		return;
+	}
+
+	const { imageData, selectedImageId } = getContext();
+	const imageId = Number.parseInt( imageIdValue, 10 );
+	const isVisible = imageData.includes( imageId );
+
+	if ( isVisible && selectedImageId === imageId ) {
+		element.classList.add( CLASSES.activeThumbnail );
+		element.setAttribute( 'tabIndex', '0' );
+		return;
+	}
+
+	element.classList.remove( CLASSES.activeThumbnail );
+	element.setAttribute( 'tabIndex', '-1' );
+};
+
+const scrollImageIntoView = (
+	imageId: number,
+	behavior: ScrollBehavior = 'smooth'
+) => {
 	if ( ! imageId ) {
 		return;
 	}
 
-	// Get the current element that triggered the action
 	const element = getElement()?.ref as HTMLElement;
-
 	if ( ! element ) {
 		return;
 	}
 
-	const galleryContainer = element.closest(
-		'.wp-block-woocommerce-product-gallery'
-	);
-
+	const galleryContainer = element.closest( SELECTORS.galleryContainer );
 	if ( ! galleryContainer ) {
 		return;
 	}
 
-	// Find the scrollable container for the viewer gallery
 	const scrollableContainer = galleryContainer.querySelector(
-		'.wc-block-product-gallery-large-image__container'
-	);
-
+		SELECTORS.largeImageContainer
+	) as HTMLElement | null;
 	if ( ! scrollableContainer ) {
 		return;
 	}
 
-	const imageElement = scrollableContainer.querySelector(
-		`img[data-image-id="${ imageId }"]`
-	);
-
-	if ( imageElement ) {
-		// Calculate the scroll position to center the image horizontally
-		const containerRect = scrollableContainer.getBoundingClientRect();
-		const imageRect = imageElement.getBoundingClientRect();
-
-		const scrollLeft =
-			scrollableContainer.scrollLeft +
-			( imageRect.left - containerRect.left ) -
-			( containerRect.width - imageRect.width ) / 2;
-
-		// Use scrollTo as scrollIntoView with inline: 'center'
-		// is not supported in iOS (Safari and Chrome).
-		scrollableContainer.scrollTo( {
-			left: scrollLeft,
-			behavior: 'smooth',
-		} );
+	const { imageData } = getContext();
+	const imageIndex = imageData.indexOf( imageId );
+	if ( imageIndex < 0 ) {
+		return;
 	}
+
+	const direction =
+		getComputedStyle( scrollableContainer ).direction === 'rtl' ? -1 : 1;
+	const left = imageIndex * scrollableContainer.clientWidth * direction;
+	if ( Math.abs( scrollableContainer.scrollLeft - left ) > 1 ) {
+		pendingViewerImages.set( scrollableContainer, imageId );
+	} else {
+		pendingViewerImages.delete( scrollableContainer );
+	}
+
+	scrollableContainer.scrollTo( {
+		left,
+		behavior: window.matchMedia( '(prefers-reduced-motion: reduce)' )
+			.matches
+			? 'instant'
+			: behavior,
+	} );
 };
 
 /**
@@ -110,16 +374,14 @@ const scrollThumbnailIntoView = ( imageId: number ) => {
 	}
 
 	// Find the closest gallery container
-	const galleryContainer = element.closest(
-		'.wp-block-woocommerce-product-gallery'
-	);
+	const galleryContainer = element.closest( SELECTORS.galleryContainer );
 
 	if ( ! galleryContainer ) {
 		return;
 	}
 
 	const thumbnailElement = galleryContainer.querySelector(
-		`.wc-block-product-gallery-thumbnails__thumbnail img[data-image-id="${ imageId }"]`
+		`${ SELECTORS.thumbnail } ${ SELECTORS.elementByImageId( imageId ) }`
 	);
 
 	if ( ! thumbnailElement ) {
@@ -128,16 +390,14 @@ const scrollThumbnailIntoView = ( imageId: number ) => {
 
 	// Find the thumbnail scrollable container
 	const scrollContainer = thumbnailElement.closest(
-		'.wc-block-product-gallery-thumbnails__scrollable'
+		SELECTORS.thumbnailsScrollable
 	);
 
 	if ( ! scrollContainer ) {
 		return;
 	}
 
-	const thumbnail = thumbnailElement.closest(
-		'.wc-block-product-gallery-thumbnails__thumbnail'
-	);
+	const thumbnail = thumbnailElement.closest( SELECTORS.thumbnail );
 
 	if ( ! thumbnail ) {
 		return;
@@ -165,11 +425,13 @@ const scrollThumbnailIntoView = ( imageId: number ) => {
 	} );
 };
 
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
 	{},
 	{ lock: universalLock }
 );
+
+const lastSeenVariationId = new Map< string, number | null | undefined >();
 
 const productGallery = {
 	state: {
@@ -187,21 +449,23 @@ const productGallery = {
 		selectImage: ( newImageIndex: number ) => {
 			const context = getContext();
 			const { imageData } = context;
+			if ( newImageIndex < 0 || newImageIndex >= imageData.length ) {
+				return;
+			}
 
 			const imageId = imageData[ newImageIndex ];
-			const { isDisabledPrevious, isDisabledNext } = getArrowsState(
-				newImageIndex,
-				imageData.length
-			);
-
-			context.isDisabledPrevious = isDisabledPrevious;
-			context.isDisabledNext = isDisabledNext;
-			context.selectedImageId = imageId;
+			updateSelectedImage( imageId );
 
 			if ( imageId !== -1 ) {
 				scrollImageIntoView( imageId );
 				scrollThumbnailIntoView( imageId );
 			}
+		},
+		setImageData: ( imageIds: number[], selectedImageId?: number ) => {
+			updateVisibleImageSet( imageIds, selectedImageId );
+		},
+		resetImageData: () => {
+			updateVisibleImageSet( [] );
 		},
 		selectCurrentImage: ( event?: MouseEvent ) => {
 			if ( event ) {
@@ -215,10 +479,15 @@ const productGallery = {
 			if ( ! imageIdValue ) {
 				return;
 			}
+
 			const imageId = parseInt( imageIdValue, 10 );
-			const { imageData } = getContext();
-			const newImageIndex = imageData.indexOf( imageId );
-			actions.selectImage( newImageIndex );
+			if ( Number.isNaN( imageId ) ) {
+				return;
+			}
+			updateSelectedImage( imageId );
+
+			scrollImageIntoView( imageId );
+			scrollThumbnailIntoView( imageId );
 		},
 		selectNextImage: ( event?: MouseEvent ) => {
 			if ( event ) {
@@ -245,7 +514,7 @@ const productGallery = {
 
 			actions.selectImage( newImageIndex );
 		},
-		onViewerImageKeyDown: ( event: KeyboardEvent ) => {
+		onViewerImageKeyDown: withSyncEvent( ( event: KeyboardEvent ) => {
 			if ( event.key === 'Enter' || event.key === ' ' ) {
 				if ( event.key === ' ' ) {
 					event.preventDefault();
@@ -254,13 +523,15 @@ const productGallery = {
 			}
 
 			if ( event.key === 'ArrowRight' ) {
+				event.preventDefault();
 				actions.selectNextImage();
 			}
 
 			if ( event.key === 'ArrowLeft' ) {
+				event.preventDefault();
 				actions.selectPreviousImage();
 			}
-		},
+		} ),
 		onDialogKeyDown: ( event: KeyboardEvent ) => {
 			if ( event.key === 'Escape' ) {
 				actions.closeDialog();
@@ -313,62 +584,12 @@ const productGallery = {
 			event?.preventDefault();
 			const context = getContext();
 			context.isDialogOpen = true;
-			document.body.classList.add(
-				'wc-block-product-gallery-dialog-open'
-			);
+			document.body.classList.add( CLASSES.dialogOpenBody );
 		} ),
 		closeDialog: () => {
 			const context = getContext();
 			context.isDialogOpen = false;
-			document.body.classList.remove(
-				'wc-block-product-gallery-dialog-open'
-			);
-		},
-		onTouchStart: ( event: TouchEvent ) => {
-			const context = getContext();
-			const { clientX } = event.touches[ 0 ];
-			context.touchStartX = clientX;
-			context.touchCurrentX = clientX;
-			context.isDragging = true;
-		},
-		onTouchMove: ( event: TouchEvent ) => {
-			const context = getContext();
-			if ( ! context.isDragging ) {
-				return;
-			}
-			const { clientX } = event.touches[ 0 ];
-			context.touchCurrentX = clientX;
-
-			// Only prevent default if there's significant horizontal movement
-			const delta = clientX - context.touchStartX;
-			if ( Math.abs( delta ) > 10 ) {
-				event.preventDefault();
-			}
-		},
-		onTouchEnd: () => {
-			const context = getContext();
-			if ( ! context.isDragging ) {
-				return;
-			}
-
-			const SNAP_THRESHOLD = 0.2;
-			const delta = context.touchCurrentX - context.touchStartX;
-			const element = getElement()?.ref as HTMLElement;
-			const imageWidth = element?.offsetWidth || 0;
-
-			// Only trigger swipe actions if there was significant movement
-			if ( Math.abs( delta ) > imageWidth * SNAP_THRESHOLD ) {
-				if ( delta > 0 && ! context.isDisabledPrevious ) {
-					actions.selectPreviousImage();
-				} else if ( delta < 0 && ! context.isDisabledNext ) {
-					actions.selectNextImage();
-				}
-			}
-
-			// Reset touch state
-			context.isDragging = false;
-			context.touchStartX = 0;
-			context.touchCurrentX = 0;
+			document.body.classList.remove( CLASSES.dialogOpenBody );
 		},
 		onScroll: () => {
 			const scrollableElement = getElement()?.ref;
@@ -400,11 +621,11 @@ const productGallery = {
 
 			if ( element ) {
 				const galleryContainer = element.closest(
-					'.wp-block-woocommerce-product-gallery'
+					SELECTORS.galleryContainer
 				);
 				if ( galleryContainer ) {
 					const selectedImage = galleryContainer.querySelector(
-						`img[data-image-id="${ selectedImageId }"]`
+						SELECTORS.elementByImageId( selectedImageId )
 					) as HTMLElement;
 					if ( selectedImage ) {
 						selectedImage.focus( { preventScroll: true } );
@@ -427,101 +648,262 @@ const productGallery = {
 		},
 	},
 	callbacks: {
-		listenToProductDataChanges: () => {
-			const productId = productDataState?.productId;
-			if ( ! productId ) {
+		/**
+		 * Keep thumbnails and arrows in sync with the visible slide:
+		 * - Update thumbnail selection during native swipes and trackpad scrolling.
+		 * - Keep the thumbnail clicked by the user selected unless interrupted by another user input.
+		 * - Reset the selected image's alignment after variation or gallery width changes.
+		 */
+		watchViewerScroll: () => {
+			const container = getElement()?.ref;
+			if ( ! ( container instanceof HTMLElement ) ) {
 				return;
 			}
 
-			const { products } = getConfig(
-				'woocommerce'
-			) as WooCommerceConfig;
-
-			const productData =
-				products?.[ productId ]?.variations?.[
-					productDataState?.variationId || 0
-				] || products?.[ productId ];
-
-			const imageId = productData?.image_id;
-			if ( ! imageId ) {
-				return;
-			}
-
+			// Reset alignment after variation changes, once slide visibility and order have updated.
 			const { imageData } = getContext();
-			const imageIndex = imageData.indexOf( imageId );
-
-			if ( imageIndex >= 0 ) {
-				actions.selectImage( imageIndex );
-			}
-		},
-		watchForChangesOnAddToCartForm: () => {
-			const context = getContext();
-			const variableProductCartForm = document.querySelector(
-				`form[data-product_id="${ context.productId }"]`
-			);
-
-			if ( ! variableProductCartForm ) {
-				return;
-			}
-
-			const selectFirstImage = () =>
-				withScope( () => actions.selectImage( 0 ) );
-
-			const observer = new MutationObserver(
-				withScope( function ( mutations ) {
-					for ( const mutation of mutations ) {
-						const { imageData } = getContext();
-
-						const mutationTarget = mutation.target as HTMLElement;
-						const currentImageAttribute =
-							mutationTarget.getAttribute( 'current-image' );
-						const currentImageId = currentImageAttribute
-							? parseInt( currentImageAttribute, 10 )
-							: null;
-						if (
-							mutation.type === 'attributes' &&
-							currentImageId &&
-							imageData.includes( currentImageId )
-						) {
-							const nextImageIndex =
-								imageData.indexOf( currentImageId );
-
-							actions.selectImage( nextImageIndex );
-						} else {
-							actions.selectImage( 0 );
-						}
-					}
-				} )
-			);
-
-			observer.observe( variableProductCartForm, {
-				attributes: true,
+			let frame = 0;
+			const alignSelectedImage = withScope( () => {
+				scrollImageIntoView( getContext().selectedImageId, 'instant' );
+				frame = 0;
 			} );
+			const resetAlignment = () => {
+				cancelAnimationFrame( frame );
+				frame = requestAnimationFrame( alignSelectedImage );
+			};
+			// Avoid two slides qualifying when both are exactly half visible.
+			const visibilityThreshold = 0.51;
+			const observer = new IntersectionObserver(
+				withScope( ( entries: IntersectionObserverEntry[] ) => {
+					const context = getContext();
+					if ( frame || context.imageData !== imageData ) {
+						return;
+					}
 
-			const clearVariationsLink = document.querySelector(
-				'.wp-block-add-to-cart-form .reset_variations'
+					const visibleSlide = entries.find(
+						( entry ) =>
+							entry.intersectionRatio >= visibilityThreshold
+					);
+					const image =
+						visibleSlide?.target.querySelector< HTMLElement >(
+							'[data-image-id]'
+						);
+					const imageId = Number( image?.dataset.imageId );
+					const index = imageData.indexOf( imageId );
+					if ( index < 0 ) {
+						return;
+					}
+
+					const pendingImage = pendingViewerImages.get( container );
+					// Keep the clicked thumbnail selected while scrolling past intermediate images.
+					if (
+						pendingImage !== undefined &&
+						imageId !== pendingImage
+					) {
+						return;
+					}
+					pendingViewerImages.delete( container );
+					if ( imageId === context.selectedImageId ) {
+						return;
+					}
+
+					updateSelectedImage( imageId );
+					scrollThumbnailIntoView( imageId );
+				} ),
+				{ root: container, threshold: visibilityThreshold }
 			);
-
-			if ( clearVariationsLink ) {
-				clearVariationsLink.addEventListener(
-					'click',
-					selectFirstImage
-				);
-			}
+			const resetSlidesObservers = initSlidesObservers(
+				container,
+				observer
+			);
+			const removeInterruptionEvents = initInterruptionEvents(
+				container,
+				resetSlidesObservers
+			);
+			const disconnectResizeObserver = initViewerResizeObserver(
+				container,
+				resetAlignment
+			);
+			resetAlignment();
 
 			return () => {
 				observer.disconnect();
-				document.removeEventListener( 'click', selectFirstImage );
+				removeInterruptionEvents();
+				pendingViewerImages.delete( container );
+				disconnectResizeObserver();
+				cancelAnimationFrame( frame );
 			};
 		},
+		/**
+		 * Sync the gallery to the blockified Add to Cart + Options block's
+		 * variation state. Bound via `data-wp-watch`, so it re-runs whenever
+		 * `productsState.variationId` changes.
+		 */
+		listenToProductDataChanges: () => {
+			const context = getContext();
+			const variationId = productsState.variationId;
+			const prevVariationId = lastSeenVariationId.get(
+				context.productId
+			);
+
+			if ( prevVariationId === variationId ) {
+				return;
+			}
+
+			if ( prevVariationId === undefined && ! variationId ) {
+				lastSeenVariationId.set( context.productId, variationId );
+				return;
+			}
+
+			lastSeenVariationId.set( context.productId, variationId );
+
+			const product = productsState.mainProductInContext;
+			if ( ! product ) {
+				return;
+			}
+
+			const productImageSet = getProductImageSet( product.id );
+			if ( ! productImageSet ) {
+				return;
+			}
+
+			if ( ! variationId ) {
+				actions.resetImageData();
+				return;
+			}
+
+			const variationImageSet =
+				productImageSet.variations?.[ variationId ];
+
+			if ( variationImageSet?.image_ids?.length ) {
+				actions.setImageData(
+					variationImageSet.image_ids,
+					variationImageSet.image_id
+				);
+				return;
+			}
+
+			actions.resetImageData();
+		},
+		/**
+		 * Subscribe the gallery to the legacy classic Add to Cart form's
+		 * variation events. Prefers jQuery `found_variation` / `reset_data`
+		 * when jQuery is present; falls back to a MutationObserver on the
+		 * form's `current-image` attribute. Returns a teardown function.
+		 */
+		watchForChangesOnAddToCartForm: () => {
+			const context = getContext();
+			const $form = document.querySelector(
+				SELECTORS.cartFormForProduct( context.productId )
+			) as HTMLElement | null;
+
+			if ( ! $form ) {
+				return;
+			}
+
+			const productImageSet = getProductImageSet( context.productId );
+			const syncFormVariationGallery = withScope(
+				( variationId?: number, featuredImageId?: number ) => {
+					if ( ! productImageSet ) {
+						actions.resetImageData();
+						return;
+					}
+
+					const $variationIdInput = $form.querySelector(
+						SELECTORS.legacyVariationIdInput
+					) as HTMLInputElement | null;
+					const hasVariationIdInput = !! $variationIdInput;
+					const currentVariationId =
+						variationId ??
+						Number.parseInt( $variationIdInput?.value || '0', 10 );
+
+					// When the form exposes a variation_id input but it's empty,
+					// the merchant cleared the variation — restore the parent
+					// gallery instead of guessing from `current-image`.
+					if ( hasVariationIdInput && ! currentVariationId ) {
+						actions.resetImageData();
+						return;
+					}
+
+					const currentImageId =
+						featuredImageId ??
+						Number.parseInt(
+							$form.getAttribute( 'current-image' ) || '0',
+							10
+						);
+					const variationImageSet = currentVariationId
+						? productImageSet.variations?.[ currentVariationId ]
+						: getVariationImageSetByCurrentImage(
+								productImageSet,
+								currentImageId
+							);
+
+					if ( variationImageSet?.image_ids?.length ) {
+						actions.setImageData(
+							variationImageSet.image_ids,
+							currentImageId || variationImageSet.image_id
+						);
+						return;
+					}
+
+					actions.resetImageData();
+				}
+			);
+
+			const teardownJQuery = subscribeLegacyJQueryFormVariations( $form, {
+				// `found_variation` fires before the classic form updates its DOM.
+				// Pass its fresh IDs into the config-based gallery sync.
+				onVariationFound: ( variationId, featuredImageId ) =>
+					syncFormVariationGallery( variationId, featuredImageId ),
+				onVariationReset: () => actions.resetImageData(),
+			} );
+
+			if ( teardownJQuery ) {
+				syncFormVariationGallery();
+				return teardownJQuery;
+			}
+
+			// MutationObserver fallback for environments without jQuery.
+			const observer = new MutationObserver(
+				withScope( () => syncFormVariationGallery() )
+			);
+			const $clearVariationsLink = $form.querySelector(
+				SELECTORS.legacyResetVariations
+			);
+			const syncOnChange = withScope( () => syncFormVariationGallery() );
+			const resetGallery = withScope( () => actions.resetImageData() );
+
+			observer.observe( $form, {
+				attributes: true,
+				attributeFilter: [ 'current-image' ],
+			} );
+			$form.addEventListener( 'change', syncOnChange );
+			$clearVariationsLink?.addEventListener( 'click', resetGallery );
+
+			syncFormVariationGallery();
+
+			return () => {
+				observer.disconnect();
+				$form.removeEventListener( 'change', syncOnChange );
+				$clearVariationsLink?.removeEventListener(
+					'click',
+					resetGallery
+				);
+			};
+		},
+		/** When the dialog opens, focus it and center the active image vertically. */
 		dialogStateChange: () => {
 			const { selectedImageId, isDialogOpen } = getContext();
 			const { ref: dialogRef } = getElement() || {};
 
-			if ( isDialogOpen && dialogRef instanceof HTMLElement ) {
+			if ( ! ( dialogRef instanceof HTMLElement ) ) {
+				return;
+			}
+
+			if ( isDialogOpen ) {
 				dialogRef.focus();
 				const selectedImage = dialogRef.querySelector(
-					`[data-image-id="${ selectedImageId }"]`
+					SELECTORS.elementByImageId( selectedImageId )
 				);
 
 				if (
@@ -538,28 +920,81 @@ const productGallery = {
 				}
 			}
 		},
-		toggleActiveThumbnailAttributes: () => {
-			const element = getElement()?.ref as HTMLElement;
-			if ( ! element ) return false;
+		initDialogVideoPlayback: () => {
+			const element = getElement()?.ref;
 
-			const imageIdValue = element.getAttribute( 'data-image-id' );
-			if ( ! imageIdValue ) return false;
-
-			const { selectedImageId } = getContext();
-			const imageId = Number( imageIdValue );
-
-			if ( selectedImageId === imageId ) {
-				element.classList.add(
-					'wc-block-product-gallery-thumbnails__thumbnail__image--is-active'
-				);
-				element.setAttribute( 'tabIndex', '0' );
-			} else {
-				element.classList.remove(
-					'wc-block-product-gallery-thumbnails__thumbnail__image--is-active'
-				);
-				element.setAttribute( 'tabIndex', '-1' );
+			if ( ! ( element instanceof HTMLVideoElement ) ) {
+				return;
 			}
+
+			const scrollableContainer = element.closest(
+				SELECTORS.dialogContent
+			);
+
+			if ( ! scrollableContainer || ! window.IntersectionObserver ) {
+				return () => element.pause();
+			}
+
+			const observer = new IntersectionObserver(
+				( entries: IntersectionObserverEntry[] ) => {
+					entries.forEach( ( entry ) => {
+						if ( entry.target !== element ) {
+							return;
+						}
+
+						const isDialogOpen = document.body.classList.contains(
+							CLASSES.dialogOpenBody
+						);
+						const shouldPlay =
+							isDialogOpen &&
+							isDialogVideoIntersectionInView( entry );
+
+						syncVideoPlaybackState( element, shouldPlay );
+					} );
+				},
+				{
+					root: scrollableContainer,
+					threshold: [ 0, DIALOG_VIDEO_INTERSECTION_HEIGHT_RATIO, 1 ],
+				}
+			);
+
+			observer.observe( element );
+
+			return () => {
+				observer.disconnect();
+				element.pause();
+			};
 		},
+		syncVideoPlayback: () => {
+			const element = getElement()?.ref;
+
+			if ( ! ( element instanceof HTMLVideoElement ) ) {
+				return;
+			}
+
+			toggleImageVisibility( element );
+			syncScopedVideoElementPlayback( element );
+		},
+		/** Per-image `data-wp-watch` callback that toggles visibility from `imageData`. */
+		toggleImageVisibility: () => {
+			const element = getElement()?.ref as HTMLElement;
+			if ( ! element ) {
+				return false;
+			}
+
+			toggleImageVisibility( element );
+		},
+		/** Per-thumbnail callback that updates both visibility and the active-state class. */
+		syncThumbnailState: () => {
+			const element = getElement()?.ref as HTMLElement;
+			if ( ! element ) {
+				return false;
+			}
+
+			toggleImageVisibility( element );
+			toggleActiveThumbnailAttributes( element );
+		},
+		/** Set up a ResizeObserver on the thumbnails strip so overflow flags stay in sync. */
 		initResizeObserver: () => {
 			const scrollableElement = getElement()?.ref;
 			if ( ! scrollableElement ) {
@@ -591,7 +1026,9 @@ const productGallery = {
 		// See https://github.com/woocommerce/woocommerce/issues/59810.
 		hideGhostOverflow: () => {
 			const element = getElement()?.ref as HTMLElement;
-			if ( ! element ) return;
+			if ( ! element ) {
+				return;
+			}
 
 			const { clientWidth, scrollWidth } = element;
 

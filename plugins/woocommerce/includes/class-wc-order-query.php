@@ -1,7 +1,7 @@
 <?php
 /**
  * Parameter-based Order querying
- * Args and usage: https://developer.woocommerce.com/docs/extensions/core-concepts/wc-get-orders/
+ * Args and usage: https://developer.woocommerce.com/docs/features/orders/wc-get-orders/
  *
  * @package WooCommerce\Classes
  * @version 3.1.0
@@ -70,7 +70,6 @@ class WC_Order_Query extends WC_Object_Query {
 				'customer_ip_address'  => '',
 				'customer_user_agent'  => '',
 				'created_via'          => '',
-				'customer_note'        => '',
 			)
 		);
 	}

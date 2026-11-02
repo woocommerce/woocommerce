@@ -36,7 +36,7 @@ class Packages {
 	/**
 	 * Array of package names and their main package classes.
 	 *
-	 * One a package has been merged into WooCommerce Core it should be moved from the package list and placed in
+	 * Once a package has been merged into WooCommerce Core it should be moved from the package list and placed in
 	 * this list. This will ensure that the feature plugin is disabled as well as provide the class to handle
 	 * initialization for the now-merged feature plugin.
 	 *
@@ -60,7 +60,8 @@ class Packages {
 	 * @var array Key is the package name/directory, value is the main package class which handles init.
 	 */
 	protected static $merged_packages = array(
-		'woocommerce-brands' => '\\Automattic\\WooCommerce\\Internal\\Brands',
+		'woocommerce-brands'                      => '\\Automattic\\WooCommerce\\Internal\\Brands',
+		'woocommerce-additional-variation-images' => '\\Automattic\\WooCommerce\\Internal\\VariationGallery\\Package',
 	);
 
 
@@ -90,7 +91,7 @@ class Packages {
 	}
 
 	/**
-	 * Checks a package exists by looking for it's directory.
+	 * Checks a package exists by looking for its directory.
 	 *
 	 * @param string $package Package name.
 	 * @return boolean
@@ -100,7 +101,7 @@ class Packages {
 	}
 
 	/**
-	 * Checks a package exists by looking for it's directory.
+	 * Checks if a class name corresponds to a merged package and should be loaded.
 	 *
 	 * @param string $class_name Class name.
 	 * @return boolean
@@ -123,6 +124,14 @@ class Packages {
 	 */
 	protected static function get_enabled_packages() {
 		$enabled_packages = array();
+
+		// Preload option caches to minimize future queries for options that do not yet exist or are not set to autoload.
+		wp_prime_option_caches(
+			array_map(
+				static fn( $name ) => 'wc_feature_' . str_replace( '-', '_', $name ) . '_enabled',
+				array_keys( self::$merged_packages )
+			)
+		);
 
 		foreach ( self::$merged_packages as $merged_package_name => $package_class ) {
 
@@ -192,7 +201,16 @@ class Packages {
 		}
 
 		// Scroll through all of the active plugins and disable them if they're merged packages.
-		$active_plugins = get_option( 'active_plugins', array() );
+		$active_plugins = (array) get_option( 'active_plugins', array() );
+		if ( is_multisite() ) {
+			$active_plugins = array_unique(
+				array_merge(
+					$active_plugins,
+					array_keys( (array) get_site_option( 'active_sitewide_plugins', array() ) )
+				)
+			);
+		}
+
 		// Deactivate the plugin if possible so that there are no conflicts.
 		foreach ( $active_plugins as $active_plugin_path ) {
 			$plugin_file = basename( plugin_basename( $active_plugin_path ), '.php' );
@@ -327,10 +345,9 @@ class Packages {
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			error_log(  // phpcs:ignore
 				sprintf(
-					/* Translators: %s package name. */
-					esc_html__( 'Missing the WooCommerce %s package', 'woocommerce' ),
+					esc_html( 'Missing the WooCommerce %s package' ),
 					'<code>' . esc_html( $package ) . '</code>'
-				) . ' - ' . esc_html__( 'Your installation of WooCommerce is incomplete. If you installed WooCommerce from GitHub, please refer to this document to set up your development environment: https://developer.woocommerce.com/docs/contribution/contributing/#setting-up-your-development-environment', 'woocommerce' )
+				) . ' - ' . esc_html( 'Your installation of WooCommerce is incomplete. If you installed WooCommerce from GitHub, please refer to this document to set up your development environment: https://developer.woocommerce.com/docs/contribution/contributing/#setting-up-your-development-environment' )
 			);
 		}
 		add_action(

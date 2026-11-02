@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { store, getElement, getContext } from '@wordpress/interactivity';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Internal dependencies
@@ -13,9 +14,17 @@ import {
 import { CoreCollectionNames } from './types';
 import './style.scss';
 
+// Stores are locked to prevent 3PD usage until the API is stable.
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
+	{},
+	{ lock: universalLock }
+);
+
 export type ProductCollectionStoreContext = {
-	// Available on the <li/> product element and deeper
-	productId?: number;
 	isPrefetchNextOrPreviousLink: string;
 	collection: CoreCollectionNames;
 	// Next/Previous Buttons block context
@@ -160,9 +169,8 @@ const productCollectionStore = {
 					.closest( '[data-wp-router-region]' )
 					?.getAttribute( 'data-wp-router-region' );
 
-				const { actions } = yield import(
-					'@wordpress/interactivity-router'
-				);
+				const { actions } =
+					yield import( '@wordpress/interactivity-router' );
 
 				yield actions.navigate( ref.href );
 
@@ -188,16 +196,17 @@ const productCollectionStore = {
 			const { ref } = getElement();
 
 			if ( isValidLink( ref ) ) {
-				const { actions } = yield import(
-					'@wordpress/interactivity-router'
-				);
+				const { actions } =
+					yield import( '@wordpress/interactivity-router' );
 
 				yield actions.prefetch( ref.href );
 			}
 		},
 		*viewProduct() {
-			const { collection, productId } =
+			const { collection } =
 				getContext< ProductCollectionStoreContext >();
+
+			const productId = productsState.productInContext?.id;
 
 			if ( productId ) {
 				triggerViewedProductEvent( { collection, productId } );
@@ -238,9 +247,8 @@ const productCollectionStore = {
 			const context = getContext< ProductCollectionStoreContext >();
 
 			if ( isValidLink( ref ) && context.isPrefetchNextOrPreviousLink ) {
-				const { actions } = yield import(
-					'@wordpress/interactivity-router'
-				);
+				const { actions } =
+					yield import( '@wordpress/interactivity-router' );
 
 				yield actions.prefetch( ref.href );
 			}
@@ -271,5 +279,5 @@ const productCollectionStore = {
 };
 
 store( 'woocommerce/product-collection', productCollectionStore, {
-	lock: true,
+	lock: universalLock,
 } );

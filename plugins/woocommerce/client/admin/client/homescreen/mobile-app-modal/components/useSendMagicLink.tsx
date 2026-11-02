@@ -57,14 +57,27 @@ export const useSendMagicLink = () => {
 					error: response.message,
 					code: response.code,
 				} );
+				// Log the full response so the actual Jetpack / backend error
+				// is visible in the browser console for debugging. The
+				// user-facing notice is intentionally friendlier below.
+				// eslint-disable-next-line no-console
+				console.error( 'Send magic link failed:', response );
+
+				const genericRetry = __(
+					'We couldn’t send the link. Try again in a few seconds.',
+					'woocommerce'
+				);
+
 				if ( response.code === 'error_sending_mobile_magic_link' ) {
-					createNotice(
-						'error',
-						__(
-							'We couldn’t send the link. Try again in a few seconds.',
-							'woocommerce'
-						)
-					);
+					// The backend embeds the Jetpack error as
+					// "<code>: <message>" in response.message. Surface it
+					// alongside the retry guidance so merchants and support
+					// can distinguish a transient hiccup from a real
+					// configuration problem.
+					const detail = response.message
+						? ` (${ response.message })`
+						: '';
+					createNotice( 'error', `${ genericRetry }${ detail }` );
 				} else if (
 					response.code === 'invalid_user_permission_view_admin'
 				) {
@@ -78,10 +91,7 @@ export const useSendMagicLink = () => {
 				} else if ( response.code === 'jetpack_not_connected' ) {
 					createNotice( 'error', response.message );
 				} else {
-					createNotice(
-						'error',
-						'We couldn’t send the link. Try again in a few seconds.'
-					);
+					createNotice( 'error', genericRetry );
 				}
 			} );
 	}, [ createNotice ] );

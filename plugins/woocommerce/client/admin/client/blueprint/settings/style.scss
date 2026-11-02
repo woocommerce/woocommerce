@@ -196,7 +196,7 @@
 	}
 
 	.components-notice.is-error {
-		background: #fce2e4;
+		background: #fcf0f0;
 		border-left-color: #cc1818;
 	}
 }
@@ -233,6 +233,22 @@
 		font-weight: 400;
 		line-height: 20px; /* 153.846% */
 		margin: 0 0 8px;
+	}
+
+	.woocommerce-blueprint-overwrite-modal__description--actions {
+		margin-top: 16px;
+	}
+
+	.woocommerce-blueprint-overwrite-modal__trust-notice {
+		margin: 24px 0 0;
+
+		.components-notice__content {
+			color: $gray-900;
+			font-size: 13px;
+			font-weight: 400;
+			line-height: 20px; /* 153.846% */
+			margin: 0;
+		}
 	}
 
 	ul {

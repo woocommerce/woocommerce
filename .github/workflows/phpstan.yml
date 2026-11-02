@@ -1,27 +1,12 @@
 name: 'PHPStan Analysis'
 
 on:
-    pull_request:
-        paths:
-            - 'plugins/woocommerce/**/*.php'
-            - 'plugins/woocommerce/composer.json'
-            - 'plugins/woocommerce/composer.lock'
-            - 'plugins/woocommerce/phpstan.neon'
-            - 'plugins/woocommerce/phpstan-baseline.neon'
-    push:
-        paths:
-            - 'plugins/woocommerce/**/*.php'
-            - 'plugins/woocommerce/composer.json'
-            - 'plugins/woocommerce/composer.lock'
-            - 'plugins/woocommerce/phpstan.neon'
-            - 'plugins/woocommerce/phpstan-baseline.neon'
-        branches:
-            - 'trunk'
-            - 'release/*'
-
-concurrency:
-    group: phpstan-${{ github.event_name == 'push' && github.run_id || github.event_name }}-${{ github.ref }}
-    cancel-in-progress: true
+    workflow_call:
+        inputs:
+            refName:
+                description: 'The ref to analyze. Defaults to the caller workflow ref.'
+                required: false
+                type: string
 
 env:
     FORCE_COLOR: 1
@@ -30,9 +15,12 @@ jobs:
     phpstan:
         name: 'PHPStan Analysis'
         runs-on: ubuntu-latest
+        timeout-minutes: 15
         steps:
-            - uses: 'actions/checkout@v4'
+            - uses: 'actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0' # v7.0.0
               name: 'Checkout'
+              with:
+                  ref: ${{ inputs.refName }}
 
             - uses: './.github/actions/setup-woocommerce-monorepo'
               id: 'setup-monorepo'
@@ -46,7 +34,7 @@ jobs:
               run: mkdir -p tmp
 
             - name: 'Restore PHPStan result cache'
-              uses: actions/cache/restore@v4
+              uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: plugins/woocommerce/tmp
                   key: phpstan-result-cache-${{ github.run_id }}
@@ -58,7 +46,18 @@ jobs:
               run: |
                   set +e  # Don't exit immediately on error
                   set -o pipefail  # But do capture pipeline exit codes
-                  pnpm --filter='@woocommerce/plugin-woocommerce' phpstan 2>&1 | tee /tmp/phpstan-output.txt
+                  # PHPStan detects GitHub Actions and emits '::error file=,line=,col=::' workflow
+                  # commands on its own, but its paths are relative to this working directory while
+                  # GitHub resolves annotation paths from the repo root. Without this rewrite the
+                  # annotations are emitted and then silently dropped, never showing up on the diff.
+                  #
+                  # The pattern is anchored so it only ever touches the path of a file-scoped error.
+                  # PHPStan's other two output shapes - '::error ::message' for errors that belong to
+                  # no file, and '::warning ::message' - carry no path, and a stray 'file=' inside one
+                  # of their messages must not be rewritten into a bogus path.
+                  pnpm --filter='@woocommerce/plugin-woocommerce' phpstan 2>&1 \
+                      | sed -u 's|^::error file=|::error file=plugins/woocommerce/|' \
+                      | tee /tmp/phpstan-output.txt
                   PHPSTAN_EXIT=${PIPESTATUS[0]}
                   if [[ $PHPSTAN_EXIT -ne 0 ]]; then
                       if grep -q "was not matched in reported errors" /tmp/phpstan-output.txt; then
@@ -143,7 +142,7 @@ jobs:
                   fi
 
             - name: 'Save PHPStan result cache'
-              uses: actions/cache/save@v4
+              uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               if: ${{ !cancelled() }}
               with:
                   path: plugins/woocommerce/tmp

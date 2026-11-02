@@ -51,7 +51,7 @@ class FileExporter {
 	 */
 	public function emit_file() {
 		try {
-			$filesystem  = FilesystemUtil::get_wp_filesystem();
+			$filesystem  = FilesystemUtil::get_wp_filesystem_direct();
 			$is_readable = $filesystem->is_file( $this->path ) && $filesystem->is_readable( $this->path );
 		} catch ( Exception $exception ) {
 			$is_readable = false;

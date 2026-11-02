@@ -22,9 +22,9 @@ import {
 } from './utils';
 
 declare global {
-	// eslint-disable-next-line no-var, @typescript-eslint/naming-convention
+	// eslint-disable-next-line @typescript-eslint/naming-convention
 	var __WC_GLOBAL_EXPORTS_PLACEHOLDER__: WcGlobalExportsMap;
-	// eslint-disable-next-line no-var, @typescript-eslint/naming-convention
+	// eslint-disable-next-line @typescript-eslint/naming-convention
 	var __WC_PLUGIN_URL_PLACEHOLDER__: string;
 }
 
@@ -48,7 +48,7 @@ interface PendingCheck {
 
 	// Maps window.wc.* property names to their required script handles.
 	// Injected by PHP from DependencyDetection::WC_GLOBAL_EXPORTS (source of truth).
-	// eslint-disable-next-line no-undef
+
 	const WC_GLOBAL_EXPORTS: WcGlobalExportsMap =
 		__WC_GLOBAL_EXPORTS_PLACEHOLDER__;
 

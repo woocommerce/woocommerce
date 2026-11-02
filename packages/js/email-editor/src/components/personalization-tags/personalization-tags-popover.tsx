@@ -7,7 +7,11 @@ import { __ } from '@wordpress/i18n';
 
 type PersonalizationTagsPopoverProps = {
 	contentRef: React.RefObject< HTMLElement >;
-	onUpdate: ( originalValue: string, updatedValue: string ) => void;
+	onUpdate: (
+		originalValue: string,
+		updatedValue: string,
+		anchor?: HTMLElement
+	) => void;
 };
 
 /**
@@ -74,7 +78,10 @@ const PersonalizationTagsPopover = ( {
 				>
 					<div className="woocommerce-personalization-tag-popover-content">
 						<TextControl
-							label={ __( 'Personalization Tag', 'woocommerce' ) }
+							label={ __(
+								'Personalization Tag',
+								__i18n_text_domain__
+							) }
 							value={ updatedValue }
 							onChange={ ( value ) => setUpdatedValue( value ) }
 							__nextHasNoMarginBottom // To avoid warning about deprecation in console
@@ -87,16 +94,20 @@ const PersonalizationTagsPopover = ( {
 									setIsPopoverVisible( false );
 								} }
 							>
-								{ __( 'Cancel', 'woocommerce' ) }
+								{ __( 'Cancel', __i18n_text_domain__ ) }
 							</Button>
 							<Button
 								isPrimary
 								onClick={ () => {
-									onUpdate( originalValue, updatedValue );
+									onUpdate(
+										originalValue,
+										updatedValue,
+										anchor
+									);
 									setIsPopoverVisible( false );
 								} }
 							>
-								{ __( 'Update', 'woocommerce' ) }
+								{ __( 'Update', __i18n_text_domain__ ) }
 							</Button>
 						</div>
 					</div>

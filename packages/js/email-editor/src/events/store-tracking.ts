@@ -8,7 +8,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { recordEvent, isEventTrackingEnabled } from '.';
+import { recordEvent, isEventTrackingEnabled } from './event-pipeline';
 
 /**
  * Handler functions for tracking individual events recorder by the listening to store actions.
@@ -36,7 +36,6 @@ const trackSetPreference = ( scope, name, value ) => {
 };
 
 const trackBlockAndPatternInsertion = ( ...args ) => {
-	// @ts-expect-error - isInserterOpened is not in editor types
 	const inserterPanelOpened = select( editorStore ).isInserterOpened();
 	const insQuickInsertOpened = !! document.getElementsByClassName(
 		'block-editor-inserter__quick-inserter'
@@ -71,13 +70,11 @@ const trackBlockAndPatternInsertion = ( ...args ) => {
 };
 
 const trackSetRenderingMode = ( renderingMode: string ) => {
-	// @ts-expect-error - getRenderingMode is not in editor types
 	const currentRenderingMode = select( editorStore ).getRenderingMode();
 	if ( currentRenderingMode === renderingMode ) {
 		return;
 	}
 	const isPreviewDropdownOpened = !! document.querySelector(
-		// eslint-disable-next-line @wordpress/i18n-text-domain
 		`[aria-label="${ __( 'View options' ) }"]`
 	);
 	// We want to track the event only from the dropdown.

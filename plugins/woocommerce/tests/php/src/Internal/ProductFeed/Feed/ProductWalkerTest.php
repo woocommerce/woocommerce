@@ -3,8 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductFeed\Feed;
 
-use WC_Helper_Product;
 use WC_Product;
+use WC_Product_Simple;
 use Automattic\WooCommerce\Internal\ProductFeed\Integrations\IntegrationInterface;
 use Automattic\WooCommerce\Internal\ProductFeed\Utils\MemoryManager;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\ProductLoader;
@@ -40,6 +40,19 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 		parent::tearDown();
 		remove_all_filters( 'woocommerce_product_feed_args' );
 		$this->test_container->reset_all_replacements();
+	}
+
+	/**
+	 * Create a product object without persisting data that the walker never reads.
+	 *
+	 * @param int $id Product ID.
+	 * @return WC_Product
+	 */
+	private function create_in_memory_product( int $id ): WC_Product {
+		$product = new WC_Product_Simple();
+		$product->set_id( $id );
+
+		return $product;
 	}
 
 	/**
@@ -100,7 +113,7 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 		for ( $i = 0; $i < $expected_iterations; $i++ ) {
 			$page = array();
 			for ( $j = 1; $j <= $batch_size && $generated_products++ < $number_of_products; $j++ ) {
-				$page[] = WC_Helper_Product::create_simple_product();
+				$page[] = $this->create_in_memory_product( $generated_products );
 			}
 
 			$loader_results[] = (object) array(
@@ -152,9 +165,12 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 			->with(
 				$this->callback(
 					function ( $args ) use ( &$loaded_page, $batch_size, $add_args_filter, $parent_exclude ) {
-						// Check pagination.
-						$this->assertEquals( ++$loaded_page, $args['page'] );
+						// Each batch resumes after the last product ID of the previous one.
+						$this->assertSame( $loaded_page * $batch_size, $args['wc_product_feed_after_id'] );
+						++$loaded_page;
 						$this->assertEquals( $batch_size, $args['limit'] );
+						$this->assertSame( 'ID', $args['orderby'] );
+						$this->assertSame( 'ASC', $args['order'] );
 
 						// The argument coming from the factory method should be here.
 						$this->assertEquals( $parent_exclude, $args['parent_exclude'] );
@@ -206,7 +222,7 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 				}
 			);
 
-		// Make sure that the field is initiated, added to, and ended.
+		// walk() owns the feed lifecycle: it starts the feed once, adds entries, and ends it once.
 		$mock_feed->expects( $this->once() )->method( 'start' );
 		$mock_feed->expects( $this->once() )->method( 'end' );
 		$mock_feed->expects( $this->exactly( $number_of_products - $validation_compensation ) )
@@ -234,6 +250,9 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 				function ( $args, $integration ) use ( $mock_integration ) {
 					$this->assertSame( $mock_integration, $integration );
 					unset( $args['category'] );
+					// The walker must keep its ID order even if a filter changes it.
+					$args['orderby'] = 'date';
+					$args['order']   = 'DESC';
 					return $args;
 				},
 				10,
@@ -241,7 +260,7 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 			);
 		}
 
-		// Memory management: Always start with 90%. Eatch batch takes up 20%.
+		// Memory management: Always start with 90%. Each batch takes up 20%.
 		$available_memory = 90;
 		$mock_memory_manager->expects( $this->exactly( $expected_iterations + 1 ) )
 			->method( 'get_available_memory' )
@@ -272,5 +291,112 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 
 		$walker->set_batch_size( $batch_size );
 		$walker->walk( $walker_callback );
+	}
+
+	/**
+	 * @testdox Should walk a bounded chunk, resume after the last walked ID, stop at the last page, and never manage the feed lifecycle.
+	 */
+	public function test_walk_processes_bounded_pages_and_resumes(): void {
+		$batch_size  = 2;
+		$total       = 6;
+		$total_pages = 3;
+
+		// Products have IDs 1 to $total; the loader returns the first batch after the requested ID.
+		$mock_loader = $this->createMock( ProductLoader::class );
+		$this->test_container->replace( ProductLoader::class, $mock_loader );
+		$mock_loader->method( 'get_products' )->willReturnCallback(
+			function ( $args ) use ( $total, $batch_size ) {
+				$after_id  = $args['wc_product_feed_after_id'];
+				$remaining = $total - $after_id;
+				$products  = $remaining > 0 ? array_map(
+					fn( $id ) => $this->create_in_memory_product( $id ),
+					range( $after_id + 1, min( $total, $after_id + $batch_size ) )
+				) : array();
+
+				return (object) array(
+					'products'      => $products,
+					'total'         => $remaining,
+					'max_num_pages' => (int) ceil( $remaining / $batch_size ),
+				);
+			}
+		);
+
+		$mock_memory_manager = $this->createMock( MemoryManager::class );
+		$this->test_container->replace( MemoryManager::class, $mock_memory_manager );
+		$mock_memory_manager->method( 'get_available_memory' )->willReturn( 90 );
+
+		// The chunked walk must NOT own the feed lifecycle.
+		$mock_feed = $this->createMock( FeedInterface::class );
+		$mock_feed->expects( $this->never() )->method( 'start' );
+		$mock_feed->expects( $this->never() )->method( 'end' );
+
+		$mock_mapper = $this->createMock( ProductMapperInterface::class );
+		$mock_mapper->method( 'map_product' )->willReturnCallback(
+			fn( WC_Product $product ) => array( 'id' => $product->get_id() )
+		);
+		$mock_validator = $this->createMock( FeedValidatorInterface::class );
+		$mock_validator->method( 'validate_entry' )->willReturn( array() );
+
+		$mock_integration = $this->createMock( IntegrationInterface::class );
+		$mock_integration->method( 'get_product_mapper' )->willReturn( $mock_mapper );
+		$mock_integration->method( 'get_feed_validator' )->willReturn( $mock_validator );
+		$mock_integration->method( 'get_product_feed_query_args' )->willReturn( array() );
+
+		$sut = ProductWalker::from_integration( $mock_integration, $mock_feed );
+		$sut->set_batch_size( $batch_size );
+
+		// First chunk: products 1-4 (allotment of 2 batches reached).
+		$progress = $sut->walk_chunk( null, 0, 2 );
+		$this->assertSame( $total, $progress->total_count );
+		$this->assertSame( $total_pages, $progress->total_batch_count );
+		$this->assertSame( 2, $progress->processed_batches );
+		$this->assertSame( 4, $progress->processed_items );
+		$this->assertSame( 4, $progress->last_product_id );
+
+		// Final chunk: resumes after product 4 and stops at the last page even though 2 batches were allowed.
+		$progress = $sut->walk_chunk( null, $progress->last_product_id, 2 );
+		$this->assertSame( 2, $progress->total_count );
+		$this->assertSame( 1, $progress->total_batch_count );
+		$this->assertSame( 1, $progress->processed_batches );
+		$this->assertSame( 2, $progress->processed_items );
+		$this->assertSame( 6, $progress->last_product_id );
+	}
+
+	/**
+	 * @testdox Should export every product exactly once when products share a date and a newer one is created mid-walk.
+	 */
+	public function test_walk_pages_are_stable_for_products_with_the_same_date(): void {
+		$product_ids = array();
+		for ( $i = 0; $i < 3; $i++ ) {
+			$product_ids[] = \WC_Helper_Product::create_simple_product( true, array( 'date_created' => '2026-01-01 00:00:00' ) )->get_id();
+		}
+
+		$exported_ids = array();
+		$mock_feed    = $this->createMock( FeedInterface::class );
+		$mock_feed->method( 'add_entry' )->willReturnCallback(
+			function ( array $entry ) use ( &$exported_ids ) {
+				$exported_ids[] = $entry['id'];
+			}
+		);
+
+		$mock_mapper = $this->createMock( ProductMapperInterface::class );
+		$mock_mapper->method( 'map_product' )->willReturnCallback(
+			fn( WC_Product $product ) => array( 'id' => $product->get_id() )
+		);
+
+		$mock_integration = $this->createMock( IntegrationInterface::class );
+		$mock_integration->method( 'get_product_mapper' )->willReturn( $mock_mapper );
+		$mock_integration->method( 'get_feed_validator' )->willReturn( $this->createMock( FeedValidatorInterface::class ) );
+		$mock_integration->method( 'get_product_feed_query_args' )->willReturn( array() );
+
+		$sut = ProductWalker::from_integration( $mock_integration, $mock_feed );
+		$sut->set_batch_size( 1 );
+		$progress = $sut->walk_chunk( null, 0, 2 );
+
+		$product_ids[] = \WC_Helper_Product::create_simple_product( true, array( 'date_created' => '2026-01-02 00:00:00' ) )->get_id();
+
+		$sut->walk_chunk( null, $progress->last_product_id );
+
+		$this->assertSame( $product_ids, $exported_ids, 'Each product should be exported once, in ID order, with the new product last' );
 	}
 }

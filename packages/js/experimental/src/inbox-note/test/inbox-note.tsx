@@ -59,8 +59,6 @@ describe( 'InboxNoteCard', () => {
 				url: 'http://test.com',
 			},
 		],
-		layout: 'plain',
-		image: '',
 		date_created_gmt: '2020-05-10T16:57:31',
 		is_deleted: false,
 		is_read: false,
@@ -152,15 +150,6 @@ describe( 'InboxNoteCard', () => {
 		expect( queryByText( 'Dismiss' ) ).toBeInTheDocument();
 	} );
 
-	it( 'should render a notification type thumbnail', () => {
-		const thumbnailNote = { ...note, layout: 'thumbnail' };
-		const { container } = render(
-			<InboxNoteCard key={ thumbnailNote.id } note={ thumbnailNote } />
-		);
-		const listNoteWithThumbnail = container.querySelector( '.thumbnail' );
-		expect( listNoteWithThumbnail ).not.toBeNull();
-	} );
-
 	it( 'should render a read notification', () => {
 		const noteWithoutActions = {
 			...{ ...note, is_read: true },
@@ -201,7 +190,7 @@ describe( 'InboxNoteCard', () => {
 	} );
 
 	describe( 'callbacks', () => {
-		it( 'should call onDismiss with note when "Dismiss this message" is clicked', () => {
+		it( 'should call onDismiss with note when "Dismiss this message" is clicked', async () => {
 			const onDismiss = jest.fn();
 			const { getByText } = render(
 				<InboxNoteCard
@@ -210,11 +199,11 @@ describe( 'InboxNoteCard', () => {
 					onDismiss={ onDismiss }
 				/>
 			);
-			userEvent.click( getByText( 'Dismiss' ) );
+			await userEvent.click( getByText( 'Dismiss' ) );
 			expect( onDismiss ).toHaveBeenCalledWith( note );
 		} );
 
-		it( 'should call onNoteActionClick with specific action when action is clicked', () => {
+		it( 'should call onNoteActionClick with specific action when action is clicked', async () => {
 			const onNoteActionClick = jest.fn();
 			const { getByText } = render(
 				<InboxNoteCard
@@ -223,14 +212,14 @@ describe( 'InboxNoteCard', () => {
 					onNoteActionClick={ onNoteActionClick }
 				/>
 			);
-			userEvent.click( getByText( 'Learn More' ) );
+			await userEvent.click( getByText( 'Learn More' ) );
 			expect( onNoteActionClick ).toHaveBeenCalledWith(
 				note,
 				note.actions[ 1 ]
 			);
 		} );
 
-		it( 'should call onBodyLinkClick with innerLink if link within content is clicked', () => {
+		it( 'should call onBodyLinkClick with innerLink if link within content is clicked', async () => {
 			const onBodyLinkClick = jest.fn();
 			const noteWithInnerLink = {
 				...note,
@@ -245,7 +234,7 @@ describe( 'InboxNoteCard', () => {
 					onBodyLinkClick={ onBodyLinkClick }
 				/>
 			);
-			userEvent.click( getByText( 'Somewhere' ) );
+			await userEvent.click( getByText( 'Somewhere' ) );
 			expect( onBodyLinkClick ).toHaveBeenCalledWith(
 				noteWithInnerLink,
 				'http://somewhere.com/'

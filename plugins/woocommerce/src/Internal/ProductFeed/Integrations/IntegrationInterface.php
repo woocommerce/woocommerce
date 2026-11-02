@@ -11,7 +11,7 @@ namespace Automattic\WooCommerce\Internal\ProductFeed\Integrations;
 
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedInterface;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedValidatorInterface;
-use Automattic\WooCommerce\Internal\ProductFeed\Feed\ProductMapperInterface;
+use Automattic\WooCommerce\Internal\ProductFeed\Mapping\ProductShapeMapperInterface;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -77,9 +77,14 @@ interface IntegrationInterface {
 	/**
 	 * Get the product mapper for the provider.
 	 *
-	 * @return ProductMapperInterface The product mapper.
+	 * Implementations may narrow the return type to a concrete mapper class
+	 * (or, during its deprecation window, the deprecated ProductMapperInterface)
+	 * thanks to return type covariance.
+	 *
+	 * @since 11.0.0 Return type widened from ProductMapperInterface to ProductShapeMapperInterface.
+	 * @return ProductShapeMapperInterface The product mapper.
 	 */
-	public function get_product_mapper(): ProductMapperInterface;
+	public function get_product_mapper(): ProductShapeMapperInterface;
 
 	/**
 	 * Get the feed validator for the provider.

@@ -16,6 +16,17 @@ import { URL } from 'node:url';
 import { getEnvVar } from './environment';
 
 /**
+ * Commit identity variables set by CI workflows. simple-git removes `GIT_*`
+ * variables from the git environment unless they are listed in `allowEnvironment`.
+ */
+export const GIT_IDENTITY_ENVIRONMENT = [
+	'GIT_AUTHOR_NAME',
+	'GIT_AUTHOR_EMAIL',
+	'GIT_COMMITTER_NAME',
+	'GIT_COMMITTER_EMAIL',
+];
+
+/**
  * Get filename from patch
  *
  * @param {string} str String to extract filename from.
@@ -219,6 +230,9 @@ export const sparseCheckoutRepoShallow = async (
 export const checkoutRef = ( pathToRepo: string, ref: string ) => {
 	const git = simpleGit( {
 		baseDir: pathToRepo,
+		unsafe: {
+			allowUnsafeHooksPath: true,
+		},
 		config: [ 'core.hooksPath=/dev/null' ],
 	} );
 	return git.checkout( ref );
@@ -342,6 +356,9 @@ export const getPullRequestNumberFromHash = async (
 	try {
 		const git = await simpleGit( {
 			baseDir,
+			unsafe: {
+				allowUnsafeHooksPath: true,
+			},
 			config: [ 'core.hooksPath=/dev/null' ],
 		} );
 		const formerHead = await git.revparse( 'HEAD' );
@@ -387,6 +404,9 @@ export const generateDiff = async (
 	try {
 		const git = simpleGit( {
 			baseDir: tmpRepoPath,
+			unsafe: {
+				allowUnsafeHooksPath: true,
+			},
 			config: [ 'core.hooksPath=/dev/null' ],
 		} );
 
@@ -448,6 +468,9 @@ export const checkoutRemoteBranch = async (
 ): Promise< void > => {
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
+		unsafe: {
+			allowUnsafeHooksPath: true,
+		},
 		config: [ 'core.hooksPath=/dev/null' ],
 	} );
 

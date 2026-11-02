@@ -1,5 +1,5 @@
 {
-	"extends": "@woocommerce/internal-ts-config/tsconfig.json",
+	"extends": "@woocommerce/internal-build/configs/tsconfig.json",
 	"compilerOptions": {
 		"rootDir": "src",
 		"noCheck": false,
@@ -10,7 +10,8 @@
 		"typeRoots": [
 			"./typings",
 			"./node_modules/@types"
-		]
+		],
+		"composite": true
 	},
 	"include": [
 		"typings/**/*",
@@ -18,5 +19,6 @@
 	],
 	"exclude": [
 		"**/test/**"
-	]
+	],
+	"references": []
 }

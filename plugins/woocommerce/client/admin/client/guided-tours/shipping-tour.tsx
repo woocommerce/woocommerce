@@ -70,7 +70,6 @@ const useShowShippingTour = () => {
 	return {
 		isLoading,
 		show:
-			window.wcAdminFeatures[ 'shipping-setting-tour' ] &&
 			! isLoading &&
 			hasCreatedDefaultShippingZones &&
 			! hasReviewedDefaultShippingOptions,
@@ -218,7 +217,6 @@ export const ShippingTour = ( {
 	const { updateOptions } = useDispatch( optionsStore );
 	const { show: showTour, isUspsDhlEligible } = useShowShippingTour();
 	const [ step, setStepNumber ] = useState( 0 );
-	const { createNotice } = useDispatch( 'core/notices' );
 
 	const tourConfig: TourKitTypes.WooConfig = {
 		placement: 'auto',
@@ -316,16 +314,21 @@ export const ShippingTour = ( {
 			} );
 
 			if ( ! update.success ) {
-				createNotice(
-					'error',
-					__(
-						'There was a problem marking the shipping tour as completed.',
-						'woocommerce'
-					)
-				);
+				const { message, code } = update as {
+					message?: string;
+					code?: string;
+				};
 				recordEvent(
-					'walkthrough_settings_shipping_updated_option_error'
+					'walkthrough_settings_shipping_updated_option_error',
+					{
+						error_message: message,
+						error_code: code,
+					}
 				);
+				// Fire-and-forget retry — failure only means the tour replays next visit.
+				void updateOptions( {
+					[ REVIEWED_DEFAULTS_OPTION ]: 'yes',
+				} );
 			}
 
 			if ( source === 'close-btn' ) {
@@ -369,6 +372,7 @@ export const ShippingTour = ( {
 				name: 'shipping-recommendations',
 				heading: __( 'WooCommerce Shipping', 'woocommerce' ),
 				descriptions: {
+					// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
 					desktop: __(
 						'If you’d like to speed up your process and print your shipping label straight from your Woo dashboard, WooCommerce Shipping may be for you! ',
 						'woocommerce'

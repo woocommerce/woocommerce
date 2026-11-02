@@ -21,6 +21,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * This is an experimental API and may change in future versions.
  *
+ * @see plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/README.md
+ *
  * @param string $consent_statement The consent statement acknowledging this is an experimental API.
  * @param int    $product_id        The product ID to load.
  * @return array The product data.
@@ -35,6 +37,8 @@ function wc_interactivity_api_load_product( string $consent_statement, int $prod
  *
  * This is an experimental API and may change in future versions.
  *
+ * @see plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/README.md
+ *
  * @param string $consent_statement The consent statement acknowledging this is an experimental API.
  * @param int    $parent_id         The parent product ID.
  * @return array The purchasable child products keyed by ID.
@@ -48,6 +52,8 @@ function wc_interactivity_api_load_purchasable_child_products( string $consent_s
  * Load all variations of a variable product into the interactivity API state.
  *
  * This is an experimental API and may change in future versions.
+ *
+ * @see plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/README.md
  *
  * @param string $consent_statement The consent statement acknowledging this is an experimental API.
  * @param int    $parent_id         The parent product ID.

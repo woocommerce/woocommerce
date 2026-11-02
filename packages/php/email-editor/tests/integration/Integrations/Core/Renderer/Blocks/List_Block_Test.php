@@ -115,6 +115,23 @@ class List_Block_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test outer spacer uses RTL alignment.
+	 */
+	public function testItUsesRtlOuterSpacerAlignment(): void {
+		$theme_controller = $this->di_container->get( Theme_Controller::class );
+		$rtl_context      = new Rendering_Context( $theme_controller->get_theme(), array( 'is_rtl' => true ) );
+
+		$rendered = $this->list_renderer->render( '<ul><li>Item 1</li></ul>', $this->parsed_list, $rtl_context );
+
+		$right_aligned_table_position = strpos( $rendered, 'align="right"' );
+		$layout_class_position        = strpos( $rendered, 'email-block-layout' );
+
+		$this->assertNotFalse( $right_aligned_table_position );
+		$this->assertNotFalse( $layout_class_position );
+		$this->assertGreaterThan( $right_aligned_table_position, $layout_class_position );
+	}
+
+	/**
 	 * Test it preserves custom set colors
 	 */
 	public function testItPreservesCustomSetColors(): void {

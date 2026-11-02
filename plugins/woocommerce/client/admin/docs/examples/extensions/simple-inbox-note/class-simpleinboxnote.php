@@ -82,14 +82,6 @@ class SimpleInboxNote {
 		// error, warning, update, info, marketing.
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 
-		// Set the type of layout the note uses. Supported layout types are:
-		// 'plain', 'thumbnail'.
-		$note->set_layout( 'plain' );
-
-		// Set the image for the note. This property renders as the src
-		// attribute for an img tag, so use a string here.
-		$note->set_image( '' );
-
 		// Set the note name and source. You should store your extension's
 		// name (slug) in the source property of the note. You can use
 		// the name property of the note to support multiple sub-types of

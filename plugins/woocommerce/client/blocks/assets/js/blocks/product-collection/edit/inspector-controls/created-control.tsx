@@ -14,7 +14,6 @@ import {
 	// @ts-ignore - Ignoring because `__experimentalToggleGroupControlOption` is not yet in the type definitions.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';

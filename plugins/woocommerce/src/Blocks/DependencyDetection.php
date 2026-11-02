@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks;
 
+use Automattic\WooCommerce\Blocks\Utils\Utils;
 use Automattic\WooCommerce\Internal\Utilities\BlocksUtil;
 
 /**
@@ -52,6 +53,7 @@ final class DependencyDetection {
 		'blocksComponents'      => 'wc-blocks-components',
 		'wcTypes'               => 'wc-types',
 		'sanitize'              => 'wc-sanitize',
+		'wcEntities'            => 'wc-entities',
 	);
 
 	/**
@@ -194,10 +196,8 @@ final class DependencyDetection {
 				// Skip malformed src.
 				continue;
 			}
-			if ( ! preg_match( '|^(https?:)?//|', $src ) ) {
-				// Relative URL - make it absolute.
-				$src = $wp_scripts->base_url . $src;
-			}
+			// Resolve relative URLs to absolute the same way WordPress core does.
+			$src = Utils::get_absolute_script_url( $src );
 
 			// Skip WooCommerce's own scripts - we don't need to check those.
 			if ( $this->is_woocommerce_script( $src ) ) {
@@ -232,18 +232,16 @@ final class DependencyDetection {
 	 */
 	private function is_woocommerce_script( string $url ): bool {
 		// Get the WooCommerce plugin URL (accounts for custom plugin directories).
-		$wc_plugin_url = \plugins_url( '/', WC_PLUGIN_FILE );
+		static $wc_plugin_url = null;
+		$wc_plugin_url        = $wc_plugin_url ?? \plugins_url( '/', WC_PLUGIN_FILE );
 
 		// Check if the URL starts with the WooCommerce plugin URL and is in a known subdirectory.
 		if ( strpos( $url, $wc_plugin_url ) !== 0 ) {
 			return false;
 		}
 
-		// Get the path after the WooCommerce plugin URL.
-		$relative_path = substr( $url, strlen( $wc_plugin_url ) );
-
-		// Check if it's in one of the known WooCommerce asset directories.
-		return (bool) preg_match( '#^(client|assets|build|vendor)/#', $relative_path );
+		// Check if it's in one of the known WooCommerce asset directories (requires normalization to relative path).
+		return (bool) preg_match( '#^(client|assets|build|vendor)/#', substr( $url, strlen( $wc_plugin_url ) ) );
 	}
 
 	/**

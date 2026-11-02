@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix tracking number lookup breaking when custom shipping provider definitions contain non-string values.

@@ -2,14 +2,14 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Location } from 'react-router-dom';
+import { Location } from 'history';
 import { useEffect, useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { getHistory } from '../history';
-import { parseAdminUrl } from '../';
+import { parseAdminUrl } from '../url';
 
 export const useConfirmUnsavedChanges = (
 	hasUnsavedChanges: boolean,

@@ -4,11 +4,11 @@
 import { __ } from '@wordpress/i18n';
 import { chevronLeft } from '@wordpress/icons';
 import {
-	__experimentalHStack as HStack, // eslint-disable-line
-	__experimentalVStack as VStack, // eslint-disable-line
-	__experimentalSpacer as Spacer, // eslint-disable-line
-	__experimentalHeading as Heading, // eslint-disable-line
-	__experimentalView as View, // eslint-disable-line
+	__experimentalHStack as HStack,
+	__experimentalVStack as VStack,
+	__experimentalSpacer as Spacer,
+	__experimentalHeading as Heading,
+	__experimentalView as View,
 } from '@wordpress/components';
 
 /**
@@ -43,12 +43,11 @@ export function ScreenHeader( { title, description, onBack }: Props ) {
 							size="small"
 							aria-label={ __(
 								'Navigate to the previous view',
-								'woocommerce'
+								__i18n_text_domain__
 							) }
 							onClick={ onBack }
 						/>
 						<Spacer>
-							{ /* @ts-expect-error Heading component it's not typed properly in the current components version. */ }
 							<Heading
 								className="woocommerce-email-editor-styles-header"
 								level={ 2 }

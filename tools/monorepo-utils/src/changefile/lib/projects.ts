@@ -5,7 +5,7 @@ import { existsSync, readFileSync } from 'fs';
 import { readFile } from 'fs/promises';
 import path from 'path';
 import { glob } from 'glob';
-import simpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 
 /**
  * Internal dependencies
@@ -91,6 +91,9 @@ export const getTouchedFilePaths = async (
 ) => {
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
+		unsafe: {
+			allowUnsafeHooksPath: true,
+		},
 		config: [ 'core.hooksPath=/dev/null' ],
 	} );
 

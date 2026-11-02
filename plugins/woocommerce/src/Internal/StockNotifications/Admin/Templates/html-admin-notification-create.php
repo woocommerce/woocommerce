@@ -100,7 +100,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 							?>
 							<select class="wc-customer-search" name="user_id" data-placeholder="<?php esc_attr_e( 'Search for a customer&hellip;', 'woocommerce' ); ?>" data-allow_clear="true">
 								<?php if ( $user_string && $user_id ) { ?>
-									<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo wp_kses_post( htmlspecialchars( $user_string, ENT_COMPAT ) ); ?><option>
+									<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo wp_kses_post( htmlspecialchars( $user_string, ENT_COMPAT ) ); ?></option>
 								<?php } ?>
 							</select>
 							<div class="divider"></div>
@@ -136,9 +136,9 @@ use Automattic\WooCommerce\Internal\StockNotifications\Admin\NotificationsPage;
 							// phpcs:enable WordPress.Security.NonceVerification.Recommended
 							$excluded_product_types = array_diff( array_keys( wc_get_product_types() ), array( 'simple', 'variable' ) );
 							?>
-							<select class="wc-product-search" name="product_id" data-action="woocommerce_json_search_products_and_variations" data-exclude_type="<?php echo esc_attr( implode( ',', $excluded_product_types ) ); ?>" data-display_stock="true"data-placeholder="<?php esc_attr_e( 'Select product&hellip;', 'woocommerce' ); ?>" data-allow_clear="true">
+							<select class="wc-product-search" name="product_id" data-action="woocommerce_json_search_products_and_variations" data-exclude_type="<?php echo esc_attr( implode( ',', $excluded_product_types ) ); ?>" data-display_stock="true" data-placeholder="<?php esc_attr_e( 'Select product&hellip;', 'woocommerce' ); ?>" data-allow_clear="true">
 								<?php if ( $product_string && $product_id ) { ?>
-									<option value="<?php echo esc_attr( $product_id ); ?>" selected="selected"><?php echo wp_kses_post( htmlspecialchars( $product_string, ENT_COMPAT ) ); ?><option>
+									<option value="<?php echo esc_attr( $product_id ); ?>" selected="selected"><?php echo wp_kses_post( htmlspecialchars( $product_string, ENT_COMPAT ) ); ?></option>
 								<?php } ?>
 							</select>
 						</div>

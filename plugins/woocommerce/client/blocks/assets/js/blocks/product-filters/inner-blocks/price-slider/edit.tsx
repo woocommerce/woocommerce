@@ -15,7 +15,6 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalUseMultipleOriginColorsAndGradients as useMultipleOriginColorsAndGradients,
 } from '@wordpress/block-editor';
-// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	ToggleControl,
 	Disabled,
@@ -56,7 +55,8 @@ const PriceSliderEdit = ( {
 		customSlider,
 	} = attributes;
 
-	const { isLoading, price } = context.filterData;
+	const rangeInput = context[ 'woocommerce/rangeInput' ];
+	const { isLoading } = rangeInput ?? {};
 
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filter-price-slider', {
@@ -72,22 +72,18 @@ const PriceSliderEdit = ( {
 
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
 
-	if ( isLoading ) {
+	if ( isLoading || ! rangeInput ) {
 		return <>{ __( 'Loading…', 'woocommerce' ) }</>;
 	}
 
-	if ( ! price ) {
-		return null;
-	}
-
-	const { minPrice, maxPrice, minRange, maxRange } = price;
+	const { min, max, currentMin, currentMax } = rangeInput;
 	const formattedMinPrice = formatPrice(
-		minPrice,
+		currentMin,
 		getCurrency( { minorUnit: 0 } )
 	);
 
 	const formattedMaxPrice = formatPrice(
-		maxPrice,
+		currentMax,
 		getCurrency( { minorUnit: 0 } )
 	);
 
@@ -253,16 +249,16 @@ const PriceSliderEdit = ( {
 							<input
 								type="range"
 								className="min"
-								min={ minRange }
-								max={ maxRange }
-								defaultValue={ minPrice }
+								min={ min }
+								max={ max }
+								defaultValue={ currentMin }
 							/>
 							<input
 								type="range"
 								className="max"
-								min={ minRange }
-								max={ maxRange }
-								defaultValue={ maxPrice }
+								min={ min }
+								max={ max }
+								defaultValue={ currentMax }
 							/>
 						</div>
 						<div className="wc-block-product-filter-price-slider__right text">

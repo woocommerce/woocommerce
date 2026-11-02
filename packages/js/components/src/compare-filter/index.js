@@ -10,8 +10,9 @@ import {
 	CardFooter,
 	CardHeader,
 } from '@wordpress/components';
-import { isEqual, isFunction } from 'lodash';
+import { isEqual, isFunction, omitBy, isUndefined } from 'lodash';
 import PropTypes from 'prop-types';
+import deprecated from '@wordpress/deprecated';
 import { getIdsFromQuery, updateQueryString } from '@woocommerce/navigation';
 
 /**
@@ -90,8 +91,32 @@ export class CompareFilter extends Component {
 		}
 	}
 
+	getSearchProps() {
+		const { labels, type, autocompleter, searchProps } = this.props;
+		const legacySearchProps = omitBy(
+			{ type, autocompleter, placeholder: labels.placeholder },
+			isUndefined
+		);
+
+		if ( Object.keys( legacySearchProps ).length > 0 ) {
+			deprecated(
+				'Passing `type`, `autocompleter`, or `labels.placeholder` to CompareFilter',
+				{
+					since: '14.2.0',
+					version: '15.0.0',
+					alternative: 'the `searchProps` prop',
+					link: 'https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/components/src/compare-filter/README.md',
+					plugin: '@woocommerce/components',
+				}
+			);
+		}
+
+		// The deprecated props win, so older code that changes them keeps working.
+		return { ...searchProps, ...legacySearchProps };
+	}
+
 	render() {
-		const { labels, type, autocompleter } = this.props;
+		const { labels } = this.props;
 		const { selected } = this.state;
 		return (
 			<Card className="woocommerce-filters__compare">
@@ -107,10 +132,8 @@ export class CompareFilter extends Component {
 				</CardHeader>
 				<CardBody>
 					<Search
-						autocompleter={ autocompleter }
-						type={ type }
+						{ ...this.getSearchProps() }
 						selected={ selected }
-						placeholder={ labels.placeholder }
 						onChange={ ( value ) => {
 							this.setState( { selected: value } );
 						} }
@@ -146,6 +169,8 @@ CompareFilter.propTypes = {
 	labels: PropTypes.shape( {
 		/**
 		 * Label for the search placeholder.
+		 *
+		 * @deprecated Use `searchProps.placeholder` instead.
 		 */
 		placeholder: PropTypes.string,
 		/**
@@ -170,11 +195,32 @@ CompareFilter.propTypes = {
 	 */
 	query: PropTypes.object,
 	/**
-	 * Which type of autocompleter should be used in the Search
+	 * Props forwarded to the `Search` component, except `selected` and `onChange`.
 	 */
-	type: PropTypes.string.isRequired,
+	searchProps: PropTypes.shape( {
+		/**
+		 * Which type of autocompleter should be used in the Search.
+		 */
+		type: PropTypes.string,
+		/**
+		 * The custom autocompleter to use when `type` is `'custom'`.
+		 */
+		autocompleter: PropTypes.object,
+		/**
+		 * Label for the search placeholder.
+		 */
+		placeholder: PropTypes.string,
+	} ),
+	/**
+	 * Which type of autocompleter should be used in the Search.
+	 *
+	 * @deprecated Use `searchProps.type` instead.
+	 */
+	type: PropTypes.string,
 	/**
 	 * The custom autocompleter to be forwarded to the `Search` component.
+	 *
+	 * @deprecated Use `searchProps.autocompleter` instead.
 	 */
 	autocompleter: PropTypes.object,
 };
@@ -182,4 +228,5 @@ CompareFilter.propTypes = {
 CompareFilter.defaultProps = {
 	labels: {},
 	query: {},
+	searchProps: {},
 };

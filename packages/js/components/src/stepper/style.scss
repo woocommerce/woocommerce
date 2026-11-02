@@ -44,7 +44,7 @@
 			font-size: 14px;
 			color: $gray-700;
 			font-weight: 400;
-			margin-top: 2px;
+			margin: 2px 0 0;
 		}
 
 		.woocommerce-stepper__step-icon svg {
@@ -122,7 +122,7 @@
 		}
 	}
 
-	@include breakpoint( '<782px' ) {
+	@include breakpoint( "<782px" ) {
 		.woocommerce-stepper__step-label {
 			display: none;
 			padding-top: 24px;
@@ -144,7 +144,7 @@
 		}
 
 		.woocommerce-stepper__step::after {
-			content: '';
+			content: "";
 			position: absolute;
 			left: math.div($step-icon-size, 2) + $gap-smaller;
 			top: $step-icon-size + ( $gap-smaller * 2 );

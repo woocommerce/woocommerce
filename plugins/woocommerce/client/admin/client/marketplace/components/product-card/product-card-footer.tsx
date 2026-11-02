@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Button, Icon } from '@wordpress/components';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { useContext } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
@@ -76,7 +76,31 @@ function ProductCardFooter( props: { product: Product } ) {
 		return currencyFormats[ currencyCode ] || '%s';
 	};
 
+	// The trial replaces only a paid price, so free and freemium cards keep their label. Anything but a positive day count means no trial.
+	const freeTrialDays = product.freeTrialLengthDays;
+	const freeTrialLabel =
+		product.price > 0 &&
+		product.freemium_type !== 'primary' &&
+		typeof freeTrialDays === 'number' &&
+		Number.isInteger( freeTrialDays ) &&
+		freeTrialDays > 0
+			? sprintf(
+					/* translators: %d: free trial length in days. English uses the same form for singular and plural. */
+					_n(
+						'%d day free trial',
+						'%d day free trial',
+						freeTrialDays,
+						'woocommerce'
+					),
+					freeTrialDays
+				)
+			: '';
+
 	function getPriceLabel(): string {
+		if ( freeTrialLabel ) {
+			return freeTrialLabel;
+		}
+
 		if ( product.price === 0 ) {
 			return __( 'Free download', 'woocommerce' );
 		}
@@ -85,6 +109,7 @@ function ProductCardFooter( props: { product: Product } ) {
 			return __( 'Free plan available', 'woocommerce' );
 		}
 
+		// @ts-expect-error The type isn't correct. We need to update @wordpress/i18n to a newer version to fix it.
 		return sprintf( getCurrencyFormat( product.currency ), product.price );
 	}
 
@@ -127,13 +152,13 @@ function ProductCardFooter( props: { product: Product } ) {
 		return sprintf(
 			// translators: %1$d: billing period interval, %2$s: billing period (e.g. days, weeks, months, years)
 			__( 'every %1$d %2$s', 'woocommerce' ),
-			product.billingPeriodInterval,
+			product.billingPeriodInterval ?? 0,
 			period
 		);
 	}
 
 	function getBillingText(): string {
-		if ( product.freemium_type === 'primary' ) {
+		if ( freeTrialLabel || product.freemium_type === 'primary' ) {
 			return '';
 		}
 
@@ -145,6 +170,10 @@ function ProductCardFooter( props: { product: Product } ) {
 	}
 
 	const getReaderPriceLabel = () => {
+		if ( freeTrialLabel ) {
+			return freeTrialLabel;
+		}
+
 		if ( product.isOnSale ) {
 			return sprintf(
 				//translators: %1$s is the sale price of the product, %2$s is the regular price of the product, %3$s is the billing period
@@ -155,6 +184,7 @@ function ProductCardFooter( props: { product: Product } ) {
 				getPriceLabel(),
 				sprintf(
 					getCurrencyFormat( product.currency ),
+					// @ts-expect-error The type isn't correct. We need to update @wordpress/i18n to a newer version to fix it.
 					product.regularPrice
 				),
 				getBillingText()
@@ -163,7 +193,7 @@ function ProductCardFooter( props: { product: Product } ) {
 
 		if ( product.price !== 0 && product.freemium_type !== 'primary' ) {
 			return sprintf(
-				//translators: %1$s is the price of the product, %2$s is the billing period
+				/* eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace */ /* translators: %1$s is the price of the product, %2$s is the billing period */
 				__( ' %1$s, %2$s ', 'woocommerce' ),
 				getPriceLabel(),
 				getBillingText()
@@ -197,6 +227,9 @@ function ProductCardFooter( props: { product: Product } ) {
 		);
 	}
 
+	// Ratings run 1-5, so 0 -- like a missing value -- means "no rating".
+	const averageRating = product.averageRating ?? 0;
+
 	return (
 		<>
 			<div className="woocommerce-marketplace__product-card__price">
@@ -207,13 +240,14 @@ function ProductCardFooter( props: { product: Product } ) {
 					<span aria-hidden>{ getPriceLabel() }</span>
 				</span>
 
-				{ product.isOnSale && (
+				{ product.isOnSale && ! freeTrialLabel && (
 					<span
 						className="woocommerce-marketplace__product-card__on-sale"
 						aria-hidden
 					>
 						{ sprintf(
 							getCurrencyFormat( product.currency ),
+							// @ts-expect-error The type isn't correct. We need to update @wordpress/i18n to a newer version to fix it.
 							product.regularPrice
 						) }
 					</span>
@@ -227,18 +261,18 @@ function ProductCardFooter( props: { product: Product } ) {
 				</span>
 			</div>
 			<div className="woocommerce-marketplace__product-card__rating">
-				{ product.averageRating !== null && (
+				{ Number.isFinite( averageRating ) && averageRating > 0 && (
 					<>
 						<span className="woocommerce-marketplace__product-card__rating-icon">
 							<Icon icon={ 'star-filled' } size={ 16 } />
 						</span>
 						<span className="woocommerce-marketplace__product-card__rating-average">
-							<span aria-hidden>{ product.averageRating }</span>
+							<span aria-hidden>{ averageRating }</span>
 							<span className="screen-reader-text">
 								{ sprintf(
 									// translators: %.1f: average rating
 									__( '%.1f stars', 'woocommerce' ),
-									product.averageRating
+									averageRating
 								) }
 							</span>
 						</span>
@@ -248,7 +282,7 @@ function ProductCardFooter( props: { product: Product } ) {
 								{ sprintf(
 									// translators: %d: rating count
 									__( 'from %d reviews', 'woocommerce' ),
-									product.reviewsCount
+									product.reviewsCount ?? 0
 								) }
 							</span>
 						</span>

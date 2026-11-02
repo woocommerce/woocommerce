@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Internal\StockNotifications;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
-use Automattic\WooCommerce\Internal\StockNotifications\Utilities\HasherHelper;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EmailNormalizer;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -237,10 +237,12 @@ class Notification extends \WC_Data {
 	/**
 	 * Set the user email.
 	 *
+	 * The value is stored in canonical form (trimmed, lowercased).
+	 *
 	 * @param string $user_email User email.
 	 */
 	public function set_user_email( string $user_email ) {
-		$this->set_prop( 'user_email', $user_email );
+		$this->set_prop( 'user_email', EmailNormalizer::normalize( $user_email ) );
 	}
 
 	/**
@@ -387,16 +389,11 @@ class Notification extends \WC_Data {
 	public function get_product_formatted_variation_list( bool $flat = false ) {
 
 		$product = $this->get_product();
-		if ( ! $product || ! $product->is_type( array( 'variation' ) ) ) {
+		if ( ! $product instanceof \WC_Product_Variation ) {
 			return '';
 		}
 
-		// Replace list with custom data.
-		$attributes = $this->get_meta( 'posted_attributes' );
-		if ( ! $attributes ) {
-			$attributes = $product->get_attributes();
-		}
-
+		$attributes = $this->get_variation_attributes_with_posted_data( $product );
 		if ( empty( $attributes ) ) {
 			return '';
 		}
@@ -425,15 +422,42 @@ class Notification extends \WC_Data {
 	public function get_product_permalink() {
 
 		$product = $this->get_product();
-		if ( ! $product ) {
+		if ( ! $product || ! $product->get_id() ) {
 			return '';
 		}
 
-		if ( $product->is_type( 'variation' ) && ! empty( $this->get_meta( 'posted_attributes' ) ) ) {
-			return $product->get_permalink( array( 'item_meta_array' => $this->get_meta( 'posted_attributes' ) ) );
-		} else {
-			return $product->get_permalink();
+		$posted_attributes = $this->get_meta( 'posted_attributes' );
+		if ( ! $product instanceof \WC_Product_Variation || empty( $posted_attributes ) || ! is_array( $posted_attributes ) ) {
+			return (string) $product->get_permalink();
 		}
+
+		return (string) $product->get_permalink( array( 'variation' => $this->get_variation_attributes_with_posted_data( $product ) ) );
+	}
+
+	/**
+	 * Get the variation's attributes, with the shopper's posted values filled in.
+	 *
+	 * Posted values only fill the variation's "Any" attributes (empty values); the variation's fixed values always win.
+	 * Keys that no longer belong to the variation (e.g. a removed attribute) are dropped.
+	 *
+	 * @param \WC_Product_Variation $product The notification's variation.
+	 * @return array
+	 */
+	private function get_variation_attributes_with_posted_data( \WC_Product_Variation $product ): array {
+		$variation_attributes = $product->get_variation_attributes();
+		$posted_attributes    = $this->get_meta( 'posted_attributes' );
+		if ( empty( $posted_attributes ) || ! is_array( $posted_attributes ) ) {
+			return $variation_attributes;
+		}
+
+		$any_attributes = array_filter(
+			$variation_attributes,
+			static function ( $value ) {
+				return '' === $value;
+			}
+		);
+
+		return array_merge( $variation_attributes, array_intersect_key( $posted_attributes, $any_attributes ) );
 	}
 
 	/**
@@ -459,33 +483,59 @@ class Notification extends \WC_Data {
 	 * @return bool True if the key is valid, false otherwise.
 	 */
 	public function check_verification_key( string $key ): bool {
-		$action_key = $this->get_meta( 'email_link_action_key' );
+		return $this->verification_key_matches( $key ) && ! $this->is_verification_key_expired();
+	}
+
+	/**
+	 * Check whether the given key matches the stored verification key hash, ignoring expiration.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $key The key to check.
+	 * @return bool True if a verification key is stored and the given key matches it, false otherwise.
+	 */
+	public function verification_key_matches( string $key ): bool {
+		$action_key = (string) $this->get_meta( 'verification_action_key' );
 
 		if ( ! str_contains( $action_key, ':' ) ) {
 			return false;
 		}
 
-		list( $timestamp, $hash ) = explode( ':', $action_key, 2 );
+		list( , $hash ) = explode( ':', $action_key, 2 );
 
-		$threshold = Config::get_verification_expiration_time_threshold();
-		if ( time() - (int) $timestamp > $threshold ) {
-			return false;
-		}
-
-		return HasherHelper::wp_verify_fast_hash( $key, $hash );
+		return wp_verify_fast_hash( $key, $hash );
 	}
 
 	/**
-	 * Maybe setup verification data for the notification.
+	 * Check whether the stored verification key is past its expiration time.
 	 *
-	 * This is used to ensure that the notification has valid verification data.
+	 * A missing or malformed key is not reported as expired.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return bool True if a verification key is stored and has expired, false otherwise.
+	 */
+	public function is_verification_key_expired(): bool {
+		$action_key = (string) $this->get_meta( 'verification_action_key' );
+
+		if ( ! str_contains( $action_key, ':' ) ) {
+			return false;
+		}
+
+		list( $timestamp ) = explode( ':', $action_key, 2 );
+
+		return time() - (int) $timestamp > Config::get_verification_expiration_time_threshold();
+	}
+
+	/**
+	 * Generate a verification key and store its hash.
 	 *
 	 * @param bool $persist If true, save the changes to the database.
 	 * @return string The generated verification key.
 	 */
 	public function get_verification_key( bool $persist ): string {
 		$key = wp_generate_password( 20, false );
-		$this->update_meta_data( 'email_link_action_key', time() . ':' . HasherHelper::wp_fast_hash( $key ) );
+		$this->update_meta_data( 'verification_action_key', time() . ':' . wp_fast_hash( $key ) );
 
 		if ( $persist ) {
 			$this->save();
@@ -501,26 +551,55 @@ class Notification extends \WC_Data {
 	 * @return bool True if the key is valid, false otherwise.
 	 */
 	public function check_unsubscribe_key( string $key ): bool {
-		return HasherHelper::wp_verify_fast_hash( $key, $this->get_meta( 'email_link_action_key' ) );
+		$stored = (string) $this->get_meta( 'unsubscribe_action_key' );
+		if ( '' === $stored ) {
+			return false;
+		}
+		return wp_verify_fast_hash( $key, $stored );
 	}
 
 	/**
-	 * Maybe setup verification data for the notification.
-	 *
-	 * This is used to ensure that the notification has valid verification data.
+	 * Generate an unsubscribe key and store its hash.
 	 *
 	 * @param bool $persist If true, save the changes to the database.
 	 * @return string The generated unsubscribe key.
 	 */
 	public function get_unsubscribe_key( bool $persist ): string {
-		$key  = wp_generate_password( 20, false );
-		$hash = HasherHelper::wp_fast_hash( $key );
-		$this->update_meta_data( 'email_link_action_key', $hash );
+		$key = wp_generate_password( 20, false );
+		$this->update_meta_data( 'unsubscribe_action_key', wp_fast_hash( $key ) );
 
 		if ( $persist ) {
 			$this->save();
 		}
 
 		return $key;
+	}
+
+	/**
+	 * Whether any meta changes are pending a save.
+	 *
+	 * Mirrors the checks in `save_meta_data()`, so meta marked for deletion counts,
+	 * unlike `get_meta_data()`.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return bool
+	 */
+	public function has_meta_changes(): bool {
+		if ( is_null( $this->meta_data ) ) {
+			return false;
+		}
+
+		foreach ( $this->meta_data as $meta ) {
+			if ( is_null( $meta->value ) ) {
+				if ( ! empty( $meta->id ) ) {
+					return true;
+				}
+			} elseif ( empty( $meta->id ) || $meta->get_changes() ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

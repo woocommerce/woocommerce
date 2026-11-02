@@ -3,13 +3,13 @@
  */
 import { __, sprintf, _n } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
-import type { Options as NoticeOptions } from 'wordpress__notices';
 
 /**
  * Internal dependencies
  */
+import type { NoticeAction } from '~/lib/notices/types';
 import {
-	MARKETPLACE_RENEW_SUBSCRIPTON_PATH,
+	MARKETPLACE_RENEW_SUBSCRIPTION_PATH,
 	MARKETPLACE_SUPPORT_PATH,
 } from '../constants';
 import { ERROR_CODES_WITH_MESSAGES } from './constants';
@@ -25,7 +25,7 @@ type ConnectError = {
 	};
 };
 
-type StoreAction = NonNullable< NoticeOptions[ 'actions' ] >[ number ];
+type StoreAction = NoticeAction;
 
 function trackConnectErrorActionClicked(
 	action: 'manage_subscriptions' | 'contact_support' | 'try_again',
@@ -129,7 +129,7 @@ function getConnectionErrorAction( error: ConnectError ): StoreAction | null {
 			label: __( 'Manage subscriptions', 'woocommerce' ),
 			onClick: () => {
 				trackConnectErrorActionClicked( 'manage_subscriptions', code );
-				window.location.assign( MARKETPLACE_RENEW_SUBSCRIPTON_PATH );
+				window.location.assign( MARKETPLACE_RENEW_SUBSCRIPTION_PATH );
 			},
 		};
 	}

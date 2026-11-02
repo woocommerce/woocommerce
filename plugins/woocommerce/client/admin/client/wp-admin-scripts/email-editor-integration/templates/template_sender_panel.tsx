@@ -17,7 +17,11 @@ function TemplateSenderPanel( {
 	debouncedRecordEvent,
 }: TemplateSenderPanelProps ) {
 	const [ woocommerce_template_data, setWoocommerceTemplateData ] =
-		useEntityProp( 'postType', 'wp_template', 'woocommerce_data' );
+		useEntityProp< TemplateWooCommerceData | undefined >(
+			'postType',
+			'wp_template',
+			'woocommerce_data'
+		);
 	const emailInputRef = useRef< HTMLInputElement >( null );
 
 	const handleFromNameChange = useCallback(

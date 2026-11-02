@@ -24,7 +24,6 @@ function wc_beta_tester_setting_list() {
 		'timezone_string',
 		'woocommerce_all_except_countries',
 		'woocommerce_allowed_countries',
-		'woocommerce_api_enabled',
 		'woocommerce_calc_discounts_sequentially',
 		'woocommerce_calc_shipping',
 		'woocommerce_calc_taxes',

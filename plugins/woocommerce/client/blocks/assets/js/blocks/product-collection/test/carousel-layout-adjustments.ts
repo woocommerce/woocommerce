@@ -17,6 +17,12 @@ import {
 	initializeEditor,
 	selectBlock,
 } from '../../../../../tests/integration/helpers/integration-test-editor';
+import {
+	DEFAULT_QUERY,
+	headingBlockName,
+	INNER_BLOCKS_PAGINATION_TEMPLATE,
+	productTemplateBlockName,
+} from '../constants';
 import { LayoutOptions } from '../types';
 import '../';
 import '../../next-previous-buttons';
@@ -30,7 +36,7 @@ jest.mock( '@woocommerce/block-settings', () => ( {
 type SetupAttributes = {
 	query?: {
 		inherit?: boolean;
-		__woocommerceOnSale?: boolean;
+		woocommerceOnSale?: boolean;
 	};
 };
 
@@ -45,21 +51,24 @@ async function setup( {
 		name: 'woocommerce/product-collection',
 		attributes: {
 			query: {
-				type: 'product',
+				...DEFAULT_QUERY,
 				...attributes.query,
 			},
 			displayLayout: {
 				type: LayoutOptions.GRID,
 				columns: 3,
 			},
-			...attributes,
 		},
 		innerBlocks: withHeading
 			? [
-					{ name: 'core/heading' },
-					{ name: 'woocommerce/product-template' },
-			  ]
-			: [ { name: 'woocommerce/product-template' } ],
+					[ headingBlockName ],
+					[ productTemplateBlockName ],
+					INNER_BLOCKS_PAGINATION_TEMPLATE,
+				]
+			: [
+					[ productTemplateBlockName ],
+					INNER_BLOCKS_PAGINATION_TEMPLATE,
+				],
 	};
 	return initializeEditor( [ productCollectionBlock ] );
 }
@@ -73,7 +82,7 @@ describe( 'Product Collection Block - Carousel Layout Adjustments', () => {
 				attributes: {
 					query: {
 						inherit: false,
-						__woocommerceOnSale: true,
+						woocommerceOnSale: true,
 					},
 				},
 			} );
@@ -190,7 +199,6 @@ describe( 'Product Collection Block - Carousel Layout Adjustments', () => {
 				screen.queryByRole( 'document', { name: /Block: Row/i } )
 			).not.toBeInTheDocument();
 
-			// Verify pagination is restored
 			expect(
 				screen.getByRole( 'document', {
 					name: /Block: Pagination/i,

@@ -9,12 +9,13 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preset_Variable_Resolver;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 
 /**
  * This preprocessor is responsible for setting default spacing values for blocks.
  * In the early development phase, we are setting only margin-top for blocks that are not first or last in the columns block.
  */
-class Spacing_Preprocessor implements Preprocessor {
+class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 	/**
 	 * Cached post-content block names to avoid repeated apply_filters calls.
 	 *
@@ -31,10 +32,33 @@ class Spacing_Preprocessor implements Preprocessor {
 	 * @return array
 	 */
 	public function preprocess( array $parsed_blocks, array $layout, array $styles ): array {
+		return $this->preprocess_with_context( $parsed_blocks, $layout, $styles );
+	}
+
+	/**
+	 * Preprocesses the parsed blocks with rendering context.
+	 *
+	 * @param array                  $parsed_blocks Parsed blocks.
+	 * @param array                  $layout Layout.
+	 * @param array                  $styles Styles.
+	 * @param Rendering_Context|null $rendering_context Rendering context.
+	 * @return array
+	 */
+	public function preprocess_with_context( array $parsed_blocks, array $layout, array $styles, ?Rendering_Context $rendering_context = null ): array {
 		$root_padding      = $this->get_root_padding( $styles );
 		$container_padding = $styles['__container_padding'] ?? array();
 		$variables_map     = $styles['__variables_map'] ?? array();
-		$parsed_blocks     = $this->add_block_gaps( $parsed_blocks, $styles['spacing']['blockGap'] ?? '', null, $root_padding, false, $container_padding, $variables_map );
+		$gap_padding_side  = $rendering_context && $rendering_context->is_rtl() ? 'padding-right' : 'padding-left';
+		$parsed_blocks     = $this->add_block_gaps(
+			$parsed_blocks,
+			$styles['spacing']['blockGap'] ?? '',
+			null,
+			$root_padding,
+			false,
+			$container_padding,
+			$variables_map,
+			$gap_padding_side
+		);
 		return $parsed_blocks;
 	}
 
@@ -90,22 +114,16 @@ class Spacing_Preprocessor implements Preprocessor {
 	 * column gaps, and root padding for children of root-level containers.
 	 *
 	 * Root padding is distributed from the outer email wrapper to individual block
-	 * wrappers. Container blocks (groups, post-content) at the root level delegate
-	 * padding to their children instead of taking it themselves. This enables
-	 * alignfull blocks to skip root padding and span the full email width.
+	 * wrappers. Plain root-level containers (groups without post-content) delegate
+	 * padding to their children instead of taking it themselves, so alignfull
+	 * children can skip root padding and span the full email width.
 	 *
-	 * Container padding works similarly: when a template group wrapping post-content
-	 * has its own horizontal padding, that padding is distributed per-block alongside
-	 * root padding. Alignfull blocks skip both padding types and span the full
-	 * contentSize. The template group gets a suppress-horizontal-padding flag so its
-	 * renderer omits horizontal padding from its own CSS output.
-	 *
-	 * Blocks fall into three categories for root padding:
-	 * - Zero padding (has_zero_padding): skip root padding entirely — edge-to-edge intent.
-	 * - Non-zero explicit padding (has_own_padding, !has_zero_padding): receive root padding
-	 *   on top of their own padding. Their own padding is internal content spacing; root
-	 *   padding ensures inset from the email edge. These blocks also stop delegation.
-	 * - No explicit padding: receive root padding if delegated, or delegate if a container.
+	 * A container that wraps post-content and has its own horizontal padding is a
+	 * self-contained box: it takes the root padding as an inset itself, and its own
+	 * padding is suppressed on the box and distributed to descendants as container
+	 * padding (via a suppress-horizontal-padding flag). This lets full-width children
+	 * break out of the box, and keeps the two paddings nesting (e.g. 30px outer +
+	 * 24px own) instead of stacking on every block.
 	 *
 	 * @param array      $parsed_blocks Parsed blocks.
 	 * @param string     $gap Gap.
@@ -114,9 +132,10 @@ class Spacing_Preprocessor implements Preprocessor {
 	 * @param bool       $apply_root_padding Whether this block should receive root padding (delegated by parent container).
 	 * @param array      $container_padding Container horizontal padding with 'left' and 'right' keys.
 	 * @param array      $variables_map Map of CSS variable names to resolved values for preset resolution.
+	 * @param string     $gap_padding_side Physical padding side for generated column gaps.
 	 * @return array
 	 */
-	private function add_block_gaps( array $parsed_blocks, string $gap = '', $parent_block = null, array $root_padding = array(), bool $apply_root_padding = false, array $container_padding = array(), array $variables_map = array() ): array {
+	private function add_block_gaps( array $parsed_blocks, string $gap = '', $parent_block = null, array $root_padding = array(), bool $apply_root_padding = false, array $container_padding = array(), array $variables_map = array(), string $gap_padding_side = 'padding-left' ): array {
 		foreach ( $parsed_blocks as $key => $block ) {
 			$block_name        = $block['blockName'] ?? '';
 			$parent_block_name = $parent_block['blockName'] ?? '';
@@ -132,85 +151,72 @@ class Spacing_Preprocessor implements Preprocessor {
 				$block['email_attrs']['margin-top'] = $gap;
 			}
 
-			// Handle horizontal gap for columns: apply padding-left to column children (except the first).
+			// Handle horizontal gap for columns: apply physical padding to column children (except the first).
+			// Only an explicitly defined column blockGap is applied. We intentionally do not
+			// derive it from the global (vertical) block spacing.
 			if ( 'core/columns' === $parent_block_name && 0 !== $key && null !== $parent_block ) {
-				$columns_gap = $this->get_columns_block_gap( $parent_block, $gap );
+				$columns_gap = $this->get_columns_block_gap( $parent_block );
 				if ( $columns_gap ) {
-					$block['email_attrs']['padding-left'] = $columns_gap;
+					$block['email_attrs'][ $gap_padding_side ] = $columns_gap;
 				}
 			}
 
-			// Distribute root horizontal padding.
-			// Container blocks (group, post-content) at root level do NOT get padding;
-			// they delegate it to their children. Non-container blocks at root level
-			// (e.g., columns, paragraph) get padding directly.
-			// Blocks flagged with $apply_root_padding (children of root containers)
-			// also get padding, unless they are post-content or a container wrapping
-			// post-content (both delegate further down the tree).
-			// Blocks that explicitly define their own horizontal padding are managing
-			// their own layout and skip root padding entirely. Containers with explicit
-			// padding also stop delegation so their children follow the container's padding.
-			$is_root_level      = null === $parent_block;
-			$is_container       = in_array( $block_name, self::CONTAINER_BLOCKS, true );
-			$alignment          = $block['attrs']['align'] ?? null;
-			$has_zero_padding   = $this->has_zero_horizontal_padding( $block );
-			$has_own_padding    = $this->has_explicit_horizontal_padding( $block );
-			$wraps_post_content = $apply_root_padding && $is_container && $this->contains_post_content( $block );
-			$should_apply       = $apply_root_padding || ( $is_root_level && ! $is_container ) || ( $is_root_level && $is_container && $has_own_padding );
-
+			// Distribute horizontal padding.
+			//
+			// A container that wraps post-content AND has its own horizontal padding
+			// is a self-contained box: it takes the root padding as an inset itself,
+			// while its own padding is suppressed on the box and distributed to
+			// descendants as container padding (so full-width children can still
+			// break out of it). Because the box is inset, post-content ends up
+			// narrower than contentSize — the signal Content_Renderer uses to drop
+			// root padding for the user blocks in the second pass. Without the inset,
+			// the two paddings would stack on every block (e.g. 30px + 24px = 54px).
+			$is_root_level            = null === $parent_block;
+			$is_container             = in_array( $block_name, self::CONTAINER_BLOCKS, true );
+			$alignment                = $block['attrs']['align'] ?? null;
+			$has_zero_padding         = $this->has_zero_horizontal_padding( $block );
+			$has_own_padding          = $this->has_explicit_horizontal_padding( $block );
 			$post_content_block_names = $this->get_post_content_block_names();
-			if ( $should_apply && ! $has_zero_padding && 'full' !== $alignment && ! in_array( $block_name, $post_content_block_names, true ) && ! $wraps_post_content && ! empty( $root_padding ) ) {
+			$is_post_content          = in_array( $block_name, $post_content_block_names, true );
+			$wraps_post_content       = $is_container && $this->contains_post_content( $block );
+			$is_box                   = $wraps_post_content && $has_own_padding && ! $has_zero_padding;
+
+			// A delegator passes padding down to its children instead of taking it,
+			// so each child is inset on its own and full-width children can break out.
+			$delegates = ! $is_box && (
+				( $is_root_level && $is_container && ! $has_own_padding )
+				|| ( $apply_root_padding && $is_post_content )
+				|| $wraps_post_content
+			);
+
+			// Everything else applies the padding to itself, except full-width and
+			// explicitly zero-padded blocks.
+			$is_recipient = ! $delegates && ! $is_post_content && ! $has_zero_padding && 'full' !== $alignment;
+
+			if ( $is_recipient && ( $apply_root_padding || $is_root_level ) && ! empty( $root_padding ) ) {
 				$block['email_attrs']['root-padding-left']  = $root_padding['left'];
 				$block['email_attrs']['root-padding-right'] = $root_padding['right'];
 			}
 
-			// Apply container padding (from template group wrapping post-content).
-			// Alignfull blocks skip both root and container padding.
-			if ( $should_apply && ! $has_zero_padding && 'full' !== $alignment && ! in_array( $block_name, $post_content_block_names, true ) && ! $wraps_post_content && ! empty( $container_padding ) ) {
+			$applied_container = $is_recipient && ! empty( $container_padding );
+			if ( $applied_container ) {
 				$block['email_attrs']['container-padding-left']  = $container_padding['left'];
 				$block['email_attrs']['container-padding-right'] = $container_padding['right'];
 			}
 
-			// Determine whether children should receive root padding delegation.
-			// Root-level containers delegate to their children.
-			// Post-content blocks that received delegation also pass it through.
-			// Containers wrapping post-content that received delegation also delegate,
-			// so that user blocks inside post-content get padding individually.
-			// Containers with explicit horizontal padding stop delegation — they
-			// manage their own layout.
-			$children_apply         = false;
-			$children_container_pad = $container_padding;
-			if ( $is_root_level && $is_container && ! $has_own_padding ) {
-				$children_apply = true;
-			} elseif ( $apply_root_padding && in_array( $block_name, $post_content_block_names, true ) ) {
-				$children_apply = true;
-			} elseif ( $wraps_post_content ) {
-				$children_apply = true;
-
-				// When a container wrapping post-content has its own non-zero
-				// horizontal padding, distribute it as container-padding to
-				// descendant blocks and suppress the container's own CSS padding.
+			// Pass padding on to the children. Container padding keeps flowing down
+			// until a block applies it, then stops — so a nested block (e.g. an image
+			// inside a column) doesn't get it a second time.
+			$children_container_pad = $applied_container ? array() : $container_padding;
+			if ( $is_box ) {
 				$block_padding = $this->get_block_horizontal_padding( $block, $variables_map );
 				if ( ! empty( $block_padding ) ) {
 					$children_container_pad                              = $block_padding;
 					$block['email_attrs']['suppress-horizontal-padding'] = true;
 				}
-			} elseif ( $is_root_level && $is_container && $has_own_padding && ! $has_zero_padding && $this->contains_post_content( $block ) ) {
-				// Root-level container with own padding that wraps post-content:
-				// distribute its padding as container-padding and suppress its own CSS.
-				$children_apply = true;
-				$block_padding  = $this->get_block_horizontal_padding( $block, $variables_map );
-				if ( ! empty( $block_padding ) ) {
-					$children_container_pad                              = $block_padding;
-					$block['email_attrs']['suppress-horizontal-padding'] = true;
-				}
-
-				// This container also should not receive root padding itself
-				// (it delegates everything to children).
-				unset( $block['email_attrs']['root-padding-left'], $block['email_attrs']['root-padding-right'] );
 			}
 
-			$block['innerBlocks']  = $this->add_block_gaps( $block['innerBlocks'] ?? array(), $gap, $block, $root_padding, $children_apply, $children_container_pad, $variables_map );
+			$block['innerBlocks']  = $this->add_block_gaps( $block['innerBlocks'] ?? array(), $gap, $block, $root_padding, $delegates, $children_container_pad, $variables_map, $gap_padding_side );
 			$parsed_blocks[ $key ] = $block;
 		}
 
@@ -343,15 +349,18 @@ class Spacing_Preprocessor implements Preprocessor {
 	/**
 	 * Extracts the horizontal blockGap from a columns block.
 	 *
-	 * @param array  $columns_block The columns block.
-	 * @param string $default_gap Default gap value to use if blockGap is not set on the columns block.
-	 * @return string|null The horizontal gap value (e.g., "30px" or "var:preset|spacing|30") or null if not set.
+	 * Only an explicitly defined horizontal gap (blockGap.left) is honored; we do
+	 * not fall back to the global block spacing, which is vertical-only in the
+	 * editor and would otherwise add a gap that widens the rendered email.
+	 *
+	 * @param array $columns_block The columns block.
+	 * @return string|null The horizontal gap value (e.g., "30px" or "var:preset|spacing|30") or null if not explicitly set.
 	 */
-	private function get_columns_block_gap( array $columns_block, string $default_gap = '' ): ?string {
+	private function get_columns_block_gap( array $columns_block ): ?string {
 		$block_gap = $columns_block['attrs']['style']['spacing']['blockGap'] ?? null;
 
 		// Columns block uses object format: { "top": "...", "left": "..." }.
-		// If blockGap.left is explicitly set, use it.
+		// Only apply a horizontal gap when blockGap.left is explicitly set.
 		if ( is_array( $block_gap ) && isset( $block_gap['left'] ) && is_string( $block_gap['left'] ) ) {
 			$gap_value = $block_gap['left'];
 
@@ -362,11 +371,6 @@ class Spacing_Preprocessor implements Preprocessor {
 
 			// Return the value as-is. WP's styles engine will handle transformation of preset variables.
 			return $gap_value;
-		}
-
-		// If blockGap.left is not set, use the default gap value if provided.
-		if ( $default_gap ) {
-			return $default_gap;
 		}
 
 		return null;

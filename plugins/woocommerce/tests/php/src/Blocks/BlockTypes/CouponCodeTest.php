@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Tests\Blocks\Helpers\BlockTypeRegistryTrait;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\CouponCodeMock;
 use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
@@ -12,6 +13,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering
  * Tests for the CouponCode block type.
  */
 class CouponCodeTest extends \WP_UnitTestCase {
+	use BlockTypeRegistryTrait;
 
 	/**
 	 * Mock instance of the CouponCode block.
@@ -28,57 +30,30 @@ class CouponCodeTest extends \WP_UnitTestCase {
 	private Rendering_Context $rendering_context;
 
 	/**
-	 * The original block type registry entry for the CouponCode block.
-	 *
-	 * @var \WP_Block_Type|null
-	 */
-	private $original_block_type;
-
-	/**
 	 * Setup test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		$registry = \WP_Block_Type_Registry::get_instance();
-
-		$this->original_block_type = null;
-		if ( $registry->is_registered( 'woocommerce/coupon-code' ) ) {
-			$this->original_block_type = $registry->get_registered( 'woocommerce/coupon-code' );
-			$registry->unregister( 'woocommerce/coupon-code' );
-		}
-
-		$this->mock = new CouponCodeMock();
+		$this->mock = $this->replace_block_type( 'woocommerce/coupon-code', static fn () => new CouponCodeMock() );
 
 		$theme_controller        = Email_Editor_Container::container()->get( Theme_Controller::class );
 		$this->rendering_context = new Rendering_Context( $theme_controller->get_theme(), array() );
 	}
 
 	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		$registry = \WP_Block_Type_Registry::get_instance();
-
-		if ( $registry->is_registered( 'woocommerce/coupon-code' ) ) {
-			$registry->unregister( 'woocommerce/coupon-code' );
-		}
-
-		if ( $this->original_block_type ) {
-			$registry->register( $this->original_block_type );
-		}
-
-		parent::tearDown();
-	}
-
-	/**
 	 * Test that render returns empty string when no coupon code is provided.
 	 */
 	public function test_render_returns_empty_when_no_coupon_code(): void {
-		$result = $this->mock->call_render( array() );
+		$result = $this->mock->call_render( array( 'source' => 'existing' ) );
 		$this->assertSame( '', $result );
 
-		$result = $this->mock->call_render( array( 'couponCode' => '' ) );
+		$result = $this->mock->call_render(
+			array(
+				'source'     => 'existing',
+				'couponCode' => '',
+			)
+		);
 		$this->assertSame( '', $result );
 	}
 
@@ -86,7 +61,12 @@ class CouponCodeTest extends \WP_UnitTestCase {
 	 * Test that render returns HTML when coupon code is provided.
 	 */
 	public function test_render_returns_html_with_coupon_code(): void {
-		$result = $this->mock->call_render( array( 'couponCode' => 'TESTCODE' ) );
+		$result = $this->mock->call_render(
+			array(
+				'source'     => 'existing',
+				'couponCode' => 'TESTCODE',
+			)
+		);
 
 		$this->assertStringContainsString( 'TESTCODE', $result );
 		$this->assertStringContainsString( 'woocommerce-coupon-code', $result );
@@ -97,7 +77,12 @@ class CouponCodeTest extends \WP_UnitTestCase {
 	 * Test that coupon code is properly escaped in output.
 	 */
 	public function test_render_escapes_coupon_code(): void {
-		$result = $this->mock->call_render( array( 'couponCode' => '<script>alert("xss")</script>' ) );
+		$result = $this->mock->call_render(
+			array(
+				'source'     => 'existing',
+				'couponCode' => '<script>alert("xss")</script>',
+			)
+		);
 
 		$this->assertStringNotContainsString( '<script>', $result );
 		$this->assertStringContainsString( '&lt;script&gt;', $result );
@@ -222,7 +207,12 @@ class CouponCodeTest extends \WP_UnitTestCase {
 	 * Test render output contains proper table structure for email compatibility.
 	 */
 	public function test_render_contains_email_table_structure(): void {
-		$result = $this->mock->call_render( array( 'couponCode' => 'TESTCODE' ) );
+		$result = $this->mock->call_render(
+			array(
+				'source'     => 'existing',
+				'couponCode' => 'TESTCODE',
+			)
+		);
 
 		$this->assertStringContainsString( '<table', $result );
 		$this->assertStringContainsString( '</table>', $result );
@@ -231,13 +221,42 @@ class CouponCodeTest extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that render shows placeholder for createNew source.
+	 */
+	public function test_render_shows_placeholder_for_create_new_source(): void {
+		$result = $this->mock->call_render( array( 'source' => 'createNew' ) );
+
+		$this->assertStringContainsString( 'XXXX-XXXXXX-XXXX', $result );
+		$this->assertStringContainsString( 'woocommerce-coupon-code', $result );
+	}
+
+	/**
+	 * Test that render defaults to createNew when no source specified.
+	 */
+	public function test_render_defaults_to_create_new_source(): void {
+		$result = $this->mock->call_render( array() );
+
+		$this->assertStringContainsString( 'XXXX-XXXXXX-XXXX', $result );
+	}
+
+	/**
 	 * Test that non-string coupon code values are handled.
 	 */
 	public function test_render_handles_non_string_coupon_code(): void {
-		$result = $this->mock->call_render( array( 'couponCode' => 12345 ) );
+		$result = $this->mock->call_render(
+			array(
+				'source'     => 'existing',
+				'couponCode' => 12345,
+			)
+		);
 		$this->assertSame( '', $result );
 
-		$result = $this->mock->call_render( array( 'couponCode' => array( 'code' ) ) );
+		$result = $this->mock->call_render(
+			array(
+				'source'     => 'existing',
+				'couponCode' => array( 'code' ),
+			)
+		);
 		$this->assertSame( '', $result );
 	}
 

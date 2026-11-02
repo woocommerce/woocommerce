@@ -1,6 +1,3 @@
-#!/usr/bin/env bash
-. "$(dirname "$0")/_/husky.sh"
-
 # The hook documentation: https://git-scm.com/docs/githooks.html#_post_merge
 
 # Auto-switch pnpm versions when pulled changes include pnpm version change.
@@ -20,20 +17,11 @@ if [ -n "$changedManifests" ]; then
 	pnpm install --frozen-lockfile
 fi
 
-# Cleanup .wireit cache that is older than 2 weeks (14 days); otherwise, the repository directory size keeps growing and growing.
-staleWireitDirectories=$(( \
-	$( find plugins/*/.wireit/*/cache/* -maxdepth 0 -type d -ctime +14 -print 2>/dev/null | wc -l ) + \
-	$( find packages/js/*/.wireit/*/cache/* -maxdepth 0 -type d -ctime +14 -print 2>/dev/null | wc -l ) + \
-	$( find plugins/woocommerce/client/*/.wireit/*/cache/* -maxdepth 0 -type d -ctime +14 -print 2>/dev/null | wc -l ) \
-))
-if [ $staleWireitDirectories -gt 0 ]; then
-	echo "Cleaning up stale wireit-cache ($staleWireitDirectories directories)"
-	# Main cleanup step - disk space usage reduction
-	find plugins/*/.wireit/*/cache/* -maxdepth 0 -type d -ctime +14 -exec rm -rf {} \; 2>/dev/null
-	find packages/js/*/.wireit/*/cache/* -maxdepth 0 -type d -ctime +14 -exec rm -rf {} \; 2>/dev/null
-	find plugins/woocommerce/client/*/.wireit/*/cache/* -maxdepth 0 -type d -ctime +14 -exec rm -rf {} \; 2>/dev/null
-	# Extra cleanup step - housekeeping `.wireit` directories
-	find plugins/*/.wireit/* -maxdepth 0 -type d -ctime +14 -exec rm -rf {} \; 2>/dev/null
-	find packages/js/*/.wireit/* -maxdepth 0 -type d -ctime +14 -exec rm -rf {} \; 2>/dev/null
-	find plugins/woocommerce/client/*/.wireit/* -maxdepth 0 -type d -ctime +14 -exec rm -rf {} \; 2>/dev/null
+# Wireit has been removed from the monorepo. Tear down any leftover .wireit
+# directories so they stop occupying disk space on machines that built with it
+# previously.
+leftoverWireitDirectories=$(find . -type d -name .wireit -not -path '*/node_modules/*' 2>/dev/null)
+if [ -n "$leftoverWireitDirectories" ]; then
+	echo "Removing leftover .wireit directories"
+	echo "$leftoverWireitDirectories" | xargs rm -rf
 fi

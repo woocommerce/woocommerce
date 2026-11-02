@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Remove use of __experimentalWooProductFieldItem from @woocommerce/components

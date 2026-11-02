@@ -79,7 +79,7 @@ const DeprecatedBlockEdit = ( { clientId }: { clientId: string } ) => {
 	);
 
 	const updateBlock = () => {
-		replaceBlocks(
+		void replaceBlocks(
 			clientId,
 			createBlock( 'core/search', {
 				label:
@@ -170,7 +170,7 @@ registerBlockType( SEARCH_VARIATION_NAME, {
 function registerProductSearchNamespace( props: BlockType, blockName: string ) {
 	if ( blockName === 'core/search' ) {
 		// Gracefully handle if settings.attributes is undefined.
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
 		// @ts-ignore -- We need this because `attributes` is marked as `readonly`
 		props.attributes = {
 			...props.attributes,

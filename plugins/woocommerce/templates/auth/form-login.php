@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Auth
- * @version 10.5.0
+ * @version 11.3.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -26,7 +26,7 @@ do_action( 'woocommerce_auth_page_header' ); ?>
 	?>
 </h1>
 
-<?php wc_print_notices(); ?>
+<?php woocommerce_output_all_notices(); ?>
 
 <p>
 	<?php

@@ -2,6 +2,10 @@
 	margin-bottom: 0;
 }
 
+.woocommerce-homescreen .woocommerce-task-dashboard__container.setup-task-list {
+	margin-bottom: 0;
+}
+
 .woocommerce-task-dashboard__container {
 	.woocommerce-homescreen-card {
 		max-width: none;
@@ -117,6 +121,9 @@
 				border-right: none;
 				border-bottom: 1px solid #e0e0e0;
 			}
+			li:last-child {
+				border-bottom: none;
+			}
 			li.is-active {
 				box-shadow: inset 5px 0 0 0 var(--wp-admin-theme-color);
 				transition: box-shadow 0.1s linear;
@@ -221,6 +228,7 @@
 	@for $i from 1 through 10 {
 		.woocommerce-task-list__item:not(.in_progress):not(.complete).index-#{$i} .woocommerce-task__icon::after {
 			content: "#{$i}";
+			/* stylelint-disable-next-line scss/at-extend-no-missing-placeholder */
 			@extend .numbered-circle;
 			color: var(--wp-admin-theme-color);
 			font-weight: bold;
@@ -233,6 +241,12 @@
 
 	@at-root .woocommerce-setup-panel & .woocommerce-task-header__contents-container {
 		padding: 16px;
+	}
+
+	@at-root .woocommerce-setup-panel .woocommerce-homescreen-card,
+	.woocommerce-setup-panel .woocommerce-homescreen-card > .components-card__header,
+	.woocommerce-setup-panel .woocommerce-homescreen-card > .components-card__footer {
+		border-radius: 0;
 	}
 
 	.woocommerce-task-header__contents-container {

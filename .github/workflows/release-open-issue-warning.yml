@@ -8,10 +8,14 @@ permissions:
   pull-requests: read
   issues: read
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
 jobs:
   check-upcoming-release-events:
     name: Check for upcoming release events
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       version: ${{ steps.check-upcoming-release-build.outputs.version }}
       milestone: ${{ steps.check-upcoming-release-build.outputs.milestone }}
@@ -23,7 +27,7 @@ jobs:
         run: npm install node-ical@0.23.1 rrule-temporal@1.4.1
       - name: Check for release events
         id: check-upcoming-release-build
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const ical = require('node-ical');
@@ -77,10 +81,11 @@ jobs:
     name: Check all open milestones
     needs: check-upcoming-release-events
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Get and process open milestones
         id: process-milestones
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             /**

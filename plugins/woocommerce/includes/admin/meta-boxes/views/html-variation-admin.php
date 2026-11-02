@@ -9,6 +9,7 @@
  * @var array $variation_data array of variation data @deprecated 4.4.0.
  */
 
+use Automattic\WooCommerce\Internal\ProductCustoms\ClassicEditorFields;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -37,7 +38,7 @@ defined( 'ABSPATH' ) || exit;
 					?>
 				</option>
 				<?php if ( $attribute->is_taxonomy() ) : ?>
-					<?php foreach ( $attribute->get_terms() as $option ) : ?>
+					<?php foreach ( (array) $attribute->get_terms() as $option ) : ?>
 						<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 						<option <?php selected( $selected_value, $option->slug ); ?> value="<?php echo esc_attr( $option->slug ); ?>"><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option->name, $option, $attribute->get_name(), $product_object ) ); ?></option>
 						<?php /* phpcs:enable */ ?>
@@ -71,11 +72,23 @@ defined( 'ABSPATH' ) || exit;
 	<div class="woocommerce_variable_attributes wc-metabox-content" style="display: none;">
 		<div class="data">
 			<div class="form-flex-box">
-				<p class="form-row upload_image">
+				<div class="form-row upload_image">
 					<a href="#" class="upload_image_button tips <?php echo $variation_object->get_image_id( 'edit' ) ? 'remove' : ''; ?>" data-tip="<?php echo $variation_object->get_image_id( 'edit' ) ? esc_attr__( 'Remove this image', 'woocommerce' ) : esc_attr__( 'Upload an image', 'woocommerce' ); ?>" rel="<?php echo esc_attr( $variation_id ); ?>">
-						<img src="<?php echo $variation_object->get_image_id( 'edit' ) ? esc_url( wp_get_attachment_thumb_url( $variation_object->get_image_id( 'edit' ) ) ) : esc_url( wc_placeholder_img_src() ); ?>" /><input type="hidden" name="upload_image_id[<?php echo esc_attr( $loop ); ?>]" class="upload_image_id" value="<?php echo esc_attr( $variation_object->get_image_id( 'edit' ) ); ?>" />
+						<img src="<?php echo $variation_object->get_image_id( 'edit' ) ? esc_url( wp_get_attachment_thumb_url( (int) $variation_object->get_image_id( 'edit' ) ) ) : esc_url( wc_placeholder_img_src() ); ?>" /><input type="hidden" name="upload_image_id[<?php echo esc_attr( $loop ); ?>]" class="upload_image_id" value="<?php echo esc_attr( $variation_object->get_image_id( 'edit' ) ); ?>" />
 					</a>
-				</p>
+					<?php
+					/**
+					 * Variation upload image action.
+					 *
+					 * @since 10.8.0
+					 *
+					 * @param int     $loop           Position in the loop.
+					 * @param array   $variation_data Variation data.
+					 * @param WP_Post $variation      Post data.
+					 */
+					do_action( 'woocommerce_variation_after_upload_image', $loop, $variation_data, $variation );
+					?>
+				</div>
 				<div class="form-row form-row-last">
 				<?php
 				if ( wc_product_sku_enabled() ) {
@@ -102,6 +115,18 @@ defined( 'ABSPATH' ) || exit;
 						'label'         => sprintf( __( '%1$s, %2$s, %3$s, or %4$s', 'woocommerce' ), '<abbr title="' . esc_attr__( 'Global Trade Item Number', 'woocommerce' ) . '">' . esc_html__( 'GTIN', 'woocommerce' ) . '</abbr>', '<abbr title="' . esc_attr__( 'Universal Product Code', 'woocommerce' ) . '">' . esc_html__( 'UPC', 'woocommerce' ) . '</abbr>', '<abbr title="' . esc_attr__( 'European Article Number', 'woocommerce' ) . '">' . esc_html__( 'EAN', 'woocommerce' ) . '</abbr>', '<abbr title="' . esc_attr__( 'International Standard Book Number', 'woocommerce' ) . '">' . esc_html__( 'ISBN', 'woocommerce' ) . '</abbr>' ),
 						'desc_tip'      => true,
 						'description'   => __( 'Enter a barcode or any other identifier unique to this product. It can help you list this product on other channels or marketplaces.', 'woocommerce' ),
+						'wrapper_class' => 'form-row',
+					)
+				);
+
+				woocommerce_wp_text_input(
+					array(
+						'id'            => "variable_mpn{$loop}", // @phpstan-ignore variable.undefined (The including meta box supplies $loop.)
+						'name'          => "variable_mpn[{$loop}]", // @phpstan-ignore variable.undefined (The including meta box supplies $loop.)
+						'value'         => $variation_object->get_mpn( 'edit' ),
+						'label'         => '<abbr title="' . esc_attr__( 'Manufacturer part number', 'woocommerce' ) . '">' . esc_html__( 'MPN', 'woocommerce' ) . '</abbr>',
+						'desc_tip'      => true,
+						'description'   => __( 'Enter the manufacturer part number for this variation.', 'woocommerce' ),
 						'wrapper_class' => 'form-row',
 					)
 				);
@@ -136,10 +161,20 @@ defined( 'ABSPATH' ) || exit;
 
 			<div class="variable_pricing">
 				<?php
+
+				$tax_label = '';
+				if ( wc_tax_enabled() ) {
+					$tax_text  = wc_prices_include_tax()
+						? __( 'incl. tax', 'woocommerce' )
+						: __( 'ex. tax', 'woocommerce' );
+					$tax_label = ' (' . $tax_text . ')';
+				}
+
 				$label = sprintf(
-					/* translators: %s: currency symbol */
-					__( 'Regular price (%s)', 'woocommerce' ),
-					get_woocommerce_currency_symbol()
+					/* translators: 1: currency symbol, 2: tax label (prefixed with space if present) */
+					__( 'Regular price (%1$s%2$s)', 'woocommerce' ),
+					get_woocommerce_currency_symbol(),
+					$tax_label ? ' ' . $tax_label : ''
 				);
 
 				woocommerce_wp_text_input(
@@ -155,9 +190,10 @@ defined( 'ABSPATH' ) || exit;
 				);
 
 				$label = sprintf(
-					/* translators: %s: currency symbol */
-					__( 'Sale price (%s)', 'woocommerce' ),
-					get_woocommerce_currency_symbol()
+					/* translators: 1: currency symbol, 2: tax label (prefixed with space if present) */
+					__( 'Sale price (%1$s%2$s)', 'woocommerce' ),
+					get_woocommerce_currency_symbol(),
+					$tax_label ? ' ' . $tax_label : ''
 				);
 
 				woocommerce_wp_text_input(
@@ -408,6 +444,10 @@ defined( 'ABSPATH' ) || exit;
 				</p>
 
 				<?php
+				if ( isset( $product_object, $loop ) ) {
+					wc_get_container()->get( ClassicEditorFields::class )->render_fields( $variation_object, $product_object, $loop );
+				}
+
 				if ( wc_tax_enabled() ) {
 					woocommerce_wp_select(
 						array(

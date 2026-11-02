@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Admin\API;
 
 use AllowDynamicProperties;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -66,11 +67,9 @@ class Init {
 		$rest_api_util = wc_get_container()->get( RestApiUtil::class );
 		$rest_api_util->lazy_load_namespace( 'wc-analytics', array( $this, 'rest_api_init_wc_analytics' ) );
 
-		if ( Features::is_enabled( 'launch-your-store' ) ) {
-			$controller        = 'Automattic\WooCommerce\Admin\API\LaunchYourStore';
-			$this->$controller = new $controller();
-			$this->$controller->register_routes();
-		}
+		$controller        = 'Automattic\WooCommerce\Admin\API\LaunchYourStore';
+		$this->$controller = new $controller();
+		$this->$controller->register_routes();
 	}
 
 	/**
@@ -90,7 +89,6 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\MarketingCampaigns',
 			'Automattic\WooCommerce\Admin\API\MarketingCampaignTypes',
 			'Automattic\WooCommerce\Admin\API\Options',
-			'Automattic\WooCommerce\Admin\API\Settings',
 			'Automattic\WooCommerce\Admin\API\PaymentGatewaySuggestions',
 			'Automattic\WooCommerce\Admin\API\Themes',
 			'Automattic\WooCommerce\Admin\API\Plugins',
@@ -102,6 +100,7 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\OnboardingPlugins',
 			'Automattic\WooCommerce\Admin\API\OnboardingProducts',
 			'Automattic\WooCommerce\Admin\API\MobileAppMagicLink',
+			'Automattic\WooCommerce\Admin\API\MobileAppQRLogin',
 			'Automattic\WooCommerce\Admin\API\ShippingPartnerSuggestions',
 		);
 
@@ -154,12 +153,13 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\ProductVariations',
 			'Automattic\WooCommerce\Admin\API\ProductReviews',
 			'Automattic\WooCommerce\Admin\API\ProductsLowInStock',
+			'Automattic\WooCommerce\Admin\API\ActivityPanelCounts',
 			'Automattic\WooCommerce\Admin\API\SettingOptions',
 			'Automattic\WooCommerce\Admin\API\Taxes',
 		);
 
 		$analytics_controllers = array();
-		if ( Features::is_enabled( 'analytics' ) ) {
+		if ( FeaturesUtil::feature_is_enabled( 'analytics' ) ) {
 			$analytics_controllers = array(
 				'Automattic\WooCommerce\Admin\API\Customers',
 				'Automattic\WooCommerce\Admin\API\Leaderboards',
@@ -186,11 +186,12 @@ class Init {
 				'Automattic\WooCommerce\Admin\API\Reports\Customers\Stats\Controller',
 			);
 
-			if ( Features::is_enabled( 'analytics-scheduled-import' ) ) {
-				$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\AnalyticsImports';
-			}
+			// Registered whenever analytics is enabled (not gated on the
+			// scheduled-import feature): the status endpoint reports failed
+			// order imports in both immediate and scheduled modes.
+			$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\AnalyticsImports';
 
-			// The performance indicators controllerq must be registered last, after other /stats endpoints have been registered.
+			// The performance indicators controller must be registered last, after other /stats endpoints have been registered.
 			$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators\Controller';
 		}
 

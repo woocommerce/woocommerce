@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Monorepo: refresh DependencyExtractionWebpackPlugin for compatibility with filesystem cache, admin build cleanup.

@@ -53,8 +53,20 @@ class WC_Order_Factory {
 			return $order;
 		} catch ( Exception $e ) {
 			wc_caught_exception( $e, __FUNCTION__, array( $order_id ) );
+			wc_get_logger()->error(
+				sprintf(
+					'Exception caught in %s: %s',
+					__FUNCTION__,
+					$e->getMessage()
+				),
+				array(
+					'source'    => 'get_order',
+					'order_id'  => $order_id,
+					'exception' => $e,
+				)
+			);
 			return false;
-		}
+		}//end try
 	}
 
 	/**
@@ -154,7 +166,7 @@ class WC_Order_Factory {
 	/**
 	 * Get order item.
 	 *
-	 * @param int $item_id Order item ID to get.
+	 * @param int|string $item_id Order item ID, or numeric string ID, to get.
 	 * @return WC_Order_Item|false if not found
 	 */
 	public static function get_order_item( $item_id = 0 ) {

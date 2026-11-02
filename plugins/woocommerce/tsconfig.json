@@ -1,7 +1,18 @@
 {
 	"extends": "../../tsconfig.base.json",
 	"references": [
-		{ "path": "../../packages/js/api" }
+		{
+			"path": "admin-screens"
+		},
+		{
+			"path": "client/admin"
+		},
+		{
+			"path": "client/blocks"
+		}
 	],
-	"files": []
+	"files": [],
+	"compilerOptions": {
+		"composite": true
+	}
 }

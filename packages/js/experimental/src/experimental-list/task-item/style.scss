@@ -13,7 +13,7 @@ $task-alert-yellow: #f0b849;
 	}
 
 	&::before {
-		content: '';
+		content: "";
 		position: absolute;
 		top: 0;
 		left: 0;
@@ -61,6 +61,10 @@ $task-alert-yellow: #f0b849;
 		color: $gray-700;
 		font-weight: 400;
 		font-size: 12px;
+	}
+
+	.woocommerce-task__additional-info {
+		text-wrap: pretty;
 	}
 
 	.woocommerce-task__estimated-time {
@@ -138,15 +142,15 @@ $task-alert-yellow: #f0b849;
 
 	.woocommerce-task-list__item-before .woocommerce-task__icon {
 		border-radius: 50%;
-		width: 32px;
-		height: 32px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
 	}
 
 	.woocommerce-task-list__item-before .woocommerce-task__icon svg {
 		fill: $white;
-		position: relative;
-		top: 4px;
-		left: 5px;
 	}
 
 	&.complete {

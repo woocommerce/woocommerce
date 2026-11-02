@@ -29,7 +29,7 @@ Possible uses of the Store API include:
 * All API responses return JSON-formatted data.
 * Data returned from the API is reflective of the current user (customer). Customer sessions in WooCommerce are cookie-based.
 * Store API cannot be used to look up other customers and orders by ID; only data belonging to the current user.
-* Likewise, Store API cannot be used to write store data e.g. settings. For more extensive access, use the authenticated [WC REST API.](https://woocommerce.github.io/woocommerce-rest-api-docs/#introduction)
+* Likewise, Store API cannot be used to write store data e.g. settings. For more extensive access, use the authenticated [WC REST API.](/docs/apis/rest-api/)
 * Endpoints that do allow writes, for example, updating the current customer address, require a [nonce-token](https://developer.wordpress.org/plugins/security/nonces/).
 * Store API is render-target agnostic and should not make assumptions about where content will be displayed. For example, returning HTML would be discouraged unless the data type itself is HTML.
 
@@ -50,33 +50,33 @@ The API uses JSON to serialize data. You don’t need to specify `.json` at the 
 
 Available resources in the Store API are listed below, with links to more detailed documentation.
 
-| Resource                                                     | Methods                        | Endpoints                                                                                     |
-| :----------------------------------------------------------- | :----------------------------- | --------------------------------------------------------------------------------------------- |
-| [`Cart`](/docs/apis/store-api/resources-endpoints/cart)                                       | `GET`                          | [`/wc/store/v1/cart`](/docs/apis/store-api/resources-endpoints/cart#get-cart)                                                  |
-|                                                              | `POST`                         | [`/wc/store/v1/cart/add-item`](/docs/apis/store-api/resources-endpoints/cart#add-item)                                         |
-|                                                              | `POST`                         | [`/wc/store/v1/cart/remove-item`](/docs/apis/store-api/resources-endpoints/cart#remove-item)                                   |
-|                                                              | `POST`                         | [`/wc/store/v1/cart/update-item`](/docs/apis/store-api/resources-endpoints/cart#update-item)                                   |
-|                                                              | `POST`                         | [`/wc/store/v1/cart/apply-coupon`](/docs/apis/store-api/resources-endpoints/cart#apply-coupon)                                 |
-|                                                              | `POST`                         | [`/wc/store/v1/cart/remove-coupon`](/docs/apis/store-api/resources-endpoints/cart#remove-coupon)                               |
-|                                                              | `POST`                         | [`/wc/store/v1/cart/update-customer`](/docs/apis/store-api/resources-endpoints/cart#update-customer)                           |
-|                                                              | `POST`                         | [`/wc/store/v1/cart/select-shipping-rate`](/docs/apis/store-api/resources-endpoints/cart#select-shipping-rate)                 |
-| [`Cart Items`](/docs/apis/store-api/resources-endpoints/cart-items)                           | `GET`, `POST`, `DELETE`        | [`/wc/store/v1/cart/items`](/docs/apis/store-api/resources-endpoints/cart-items#list-cart-items)                               |
-|                                                              | `GET`, `POST`, `PUT`, `DELETE` | [`/wc/store/v1/cart/items/:key`](/docs/apis/store-api/resources-endpoints/cart-items#single-cart-item)                         |
-| [`Cart Coupons`](/docs/apis/store-api/resources-endpoints/cart-coupons)                       | `GET`, `POST`, `DELETE`        | [`/wc/store/v1/cart/coupons`](/docs/apis/store-api/resources-endpoints/cart-coupons#list-cart-coupons)                         |
-|                                                              | `GET`, `DELETE`                | [`/wc/store/v1/cart/coupon/:code`](/docs/apis/store-api/resources-endpoints/cart-coupons#single-cart-coupon)                   |
-| [`Checkout`](/docs/apis/store-api/resources-endpoints/checkout)                               | `GET`, `POST`, `PUT`           | [`/wc/store/v1/checkout`](/docs/apis/store-api/resources-endpoints/checkout)                                                   |
-| [`Checkout order`](/docs/apis/store-api/resources-endpoints/checkout-order)                   | `POST`                         | [`/wc/store/v1/checkout/:id`](/docs/apis/store-api/resources-endpoints/checkout-order)                                         |
-| [`Order`](/docs/apis/store-api/resources-endpoints/order)                                     | `GET`                          | [`/wc/store/v1/order/:id`](/docs/apis/store-api/resources-endpoints/order)                                                     |
-| [`Products`](/docs/apis/store-api/resources-endpoints/products)                               | `GET`                          | [`/wc/store/v1/products`](/docs/apis/store-api/resources-endpoints/products#list-products)                                     |
-|                                                              | `GET`                          | [`/wc/store/v1/products/:id`](/docs/apis/store-api/resources-endpoints/products#single-product-by-id)                                |
-| [`Product Collection Data`](/docs/apis/store-api/resources-endpoints/product-collection-data) | `GET`                          | [`/wc/store/v1/products/collection-data`](/docs/apis/store-api/resources-endpoints/product-collection-data)                    |
-| [`Product Attributes`](/docs/apis/store-api/resources-endpoints/product-attributes)           | `GET`                          | [`/wc/store/v1/products/attributes`](/docs/apis/store-api/resources-endpoints/product-attributes#list-product-attributes)      |
-|                                                              | `GET`                          | [`/wc/store/v1/products/attributes/:id`](/docs/apis/store-api/resources-endpoints/product-attributes#single-product-attribute) |
-| [`Product Attribute Terms`](/docs/apis/store-api/resources-endpoints/product-attribute-terms) | `GET`                          | [`/wc/store/v1/products/attributes/:id/terms`](/docs/apis/store-api/resources-endpoints/product-attribute-terms)               |
-| [`Product Categories`](/docs/apis/store-api/resources-endpoints/product-categories)           | `GET`                          | [`/wc/store/v1/products/categories`](/docs/apis/store-api/resources-endpoints/product-categories)                              |
-| [`Product Brands`](/docs/apis/store-api/resources-endpoints/product-brands)                   | `GET`                          | [`/wc/store/v1/products/brands`](/docs/apis/store-api/resources-endpoints/product-brands)                                      |
-| [`Product Reviews`](/docs/apis/store-api/resources-endpoints/product-reviews)                 | `GET`                          | [`/wc/store/v1/products/reviews`](/docs/apis/store-api/resources-endpoints/product-reviews)                                    |
-| [`Product Tags`](/docs/apis/store-api/resources-endpoints/product-tags)                       | `GET`                          | [`/wc/store/v1/products/tags`](/docs/apis/store-api/resources-endpoints/product-tags)                                          |
+| Resource | Methods | Endpoints |
+| --- | --- | --- |
+| [`Cart`](/docs/apis/store-api/resources-endpoints/cart) | `GET` | [`/wc/store/v1/cart`](/docs/apis/store-api/resources-endpoints/cart#get-cart) |
+| | `POST` | [`/wc/store/v1/cart/add-item`](/docs/apis/store-api/resources-endpoints/cart#add-item) |
+| | `POST` | [`/wc/store/v1/cart/remove-item`](/docs/apis/store-api/resources-endpoints/cart#remove-item) |
+| | `POST` | [`/wc/store/v1/cart/update-item`](/docs/apis/store-api/resources-endpoints/cart#update-item) |
+| | `POST` | [`/wc/store/v1/cart/apply-coupon`](/docs/apis/store-api/resources-endpoints/cart#apply-coupon) |
+| | `POST` | [`/wc/store/v1/cart/remove-coupon`](/docs/apis/store-api/resources-endpoints/cart#remove-coupon) |
+| | `POST` | [`/wc/store/v1/cart/update-customer`](/docs/apis/store-api/resources-endpoints/cart#update-customer) |
+| | `POST` | [`/wc/store/v1/cart/select-shipping-rate`](/docs/apis/store-api/resources-endpoints/cart#select-shipping-rate) |
+| [`Cart Items`](/docs/apis/store-api/resources-endpoints/cart-items) | `GET`, `POST`, `DELETE` | [`/wc/store/v1/cart/items`](/docs/apis/store-api/resources-endpoints/cart-items#list-cart-items) |
+| | `GET`, `POST`, `PUT`, `DELETE` | [`/wc/store/v1/cart/items/:key`](/docs/apis/store-api/resources-endpoints/cart-items#single-cart-item) |
+| [`Cart Coupons`](/docs/apis/store-api/resources-endpoints/cart-coupons) | `GET`, `POST`, `DELETE` | [`/wc/store/v1/cart/coupons`](/docs/apis/store-api/resources-endpoints/cart-coupons#list-cart-coupons) |
+| | `GET`, `DELETE` | [`/wc/store/v1/cart/coupon/:code`](/docs/apis/store-api/resources-endpoints/cart-coupons#single-cart-coupon) |
+| [`Checkout`](/docs/apis/store-api/resources-endpoints/checkout) | `GET`, `POST`, `PUT` | [`/wc/store/v1/checkout`](/docs/apis/store-api/resources-endpoints/checkout) |
+| [`Checkout order`](/docs/apis/store-api/resources-endpoints/checkout-order) | `POST` | [`/wc/store/v1/checkout/:id`](/docs/apis/store-api/resources-endpoints/checkout-order) |
+| [`Order`](/docs/apis/store-api/resources-endpoints/order) | `GET` | [`/wc/store/v1/order/:id`](/docs/apis/store-api/resources-endpoints/order) |
+| [`Products`](/docs/apis/store-api/resources-endpoints/products) | `GET` | [`/wc/store/v1/products`](/docs/apis/store-api/resources-endpoints/products#list-products) |
+| | `GET` | [`/wc/store/v1/products/:id`](/docs/apis/store-api/resources-endpoints/products#single-product-by-id) |
+| [`Product Collection Data`](/docs/apis/store-api/resources-endpoints/product-collection-data) | `GET` | [`/wc/store/v1/products/collection-data`](/docs/apis/store-api/resources-endpoints/product-collection-data) |
+| [`Product Attributes`](/docs/apis/store-api/resources-endpoints/product-attributes) | `GET` | [`/wc/store/v1/products/attributes`](/docs/apis/store-api/resources-endpoints/product-attributes#list-product-attributes) |
+| | `GET` | [`/wc/store/v1/products/attributes/:id`](/docs/apis/store-api/resources-endpoints/product-attributes#single-product-attribute) |
+| [`Product Attribute Terms`](/docs/apis/store-api/resources-endpoints/product-attribute-terms) | `GET` | [`/wc/store/v1/products/attributes/:id/terms`](/docs/apis/store-api/resources-endpoints/product-attribute-terms) |
+| [`Product Categories`](/docs/apis/store-api/resources-endpoints/product-categories) | `GET` | [`/wc/store/v1/products/categories`](/docs/apis/store-api/resources-endpoints/product-categories) |
+| [`Product Brands`](/docs/apis/store-api/resources-endpoints/product-brands) | `GET` | [`/wc/store/v1/products/brands`](/docs/apis/store-api/resources-endpoints/product-brands) |
+| [`Product Reviews`](/docs/apis/store-api/resources-endpoints/product-reviews) | `GET` | [`/wc/store/v1/products/reviews`](/docs/apis/store-api/resources-endpoints/product-reviews) |
+| [`Product Tags`](/docs/apis/store-api/resources-endpoints/product-tags) | `GET` | [`/wc/store/v1/products/tags`](/docs/apis/store-api/resources-endpoints/product-tags) |
 
 ## Pagination
 
@@ -157,7 +157,7 @@ If new schema is required, and any of the following statements are true, choose 
 * The data is related to a resource, but not technically part of it
 * The data is difficult to query (performance wise) or has a very narrow or niche use-case
 
-If the data is sensitive (for example, a core setting that should be private), or not related to the current user (for example, looking up an order by order ID), [choose to use the authenticated WC REST API](https://woocommerce.github.io/woocommerce-rest-api-docs/#introduction).
+If the data is sensitive (for example, a core setting that should be private), or not related to the current user (for example, looking up an order by order ID), [choose to use the authenticated WC REST API](/docs/apis/rest-api/).
 
 If you're looking to add _new routes and endpoints_, rather than extending the Store API _schema_, extending the Store API is not necessary. You can instead utilize core WordPress functionality to create new routes, choosing to use the same pattern of Store API if you wish. See:
 

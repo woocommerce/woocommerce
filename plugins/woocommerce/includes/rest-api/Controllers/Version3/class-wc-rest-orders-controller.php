@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\MetaDataUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -114,8 +115,10 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		$schema    = $this->get_item_schema();
 		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
 
+		$item_types = array( 'shipping_lines', 'line_items', 'fee_lines' );
+
 		// Handle all writable props.
-		foreach ( $data_keys as $key ) {
+		foreach ( array_diff( $data_keys, $item_types ) as $key ) {
 			$value = $request[ $key ];
 
 			if ( ! is_null( $value ) ) {
@@ -134,33 +137,31 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 					case 'shipping':
 						$this->update_address( $order, $value, $key );
 						break;
-					case 'line_items':
-					case 'shipping_lines':
-					case 'fee_lines':
-						if ( is_array( $value ) ) {
-							foreach ( $value as $item ) {
-								if ( is_array( $item ) ) {
-									if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
-										$this->remove_item( $order, $key, $item['id'] );
-									} else {
-										$this->set_item( $order, $key, $item );
-									}
-								}
-							}
-						}
-						break;
 					case 'meta_data':
-						if ( is_array( $value ) ) {
-							foreach ( $value as $meta ) {
-								$order->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
-							}
-						}
+						MetaDataUtil::update( $value, $order );
 						break;
 					default:
 						if ( is_callable( array( $order, "set_{$key}" ) ) ) {
 							$order->{"set_{$key}"}( $value );
 						}
 						break;
+				}
+			}
+		}
+
+		// Set items once the address is known, shipping lines first, so new line items are priced at the order's tax location (the base address for local pickup).
+		foreach ( array_intersect( $item_types, $data_keys ) as $key ) {
+			if ( ! is_array( $request[ $key ] ) ) {
+				continue;
+			}
+
+			foreach ( $request[ $key ] as $item ) {
+				if ( is_array( $item ) ) {
+					if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
+						$this->remove_item( $order, $key, $item['id'] );
+					} else {
+						$this->set_item( $order, $key, $item );
+					}
 				}
 			}
 		}
@@ -279,7 +280,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 			if ( $creating ) {
 				$object->set_created_via( ! empty( $request['created_via'] ) ? sanitize_text_field( wp_unslash( $request['created_via'] ) ) : 'rest-api' );
-				$object->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+				$object->set_prices_include_tax( wc_prices_include_tax() );
 				$object->save();
 				$object->calculate_totals();
 			} else {

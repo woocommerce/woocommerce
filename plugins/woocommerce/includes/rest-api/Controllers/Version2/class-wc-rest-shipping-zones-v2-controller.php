@@ -244,7 +244,16 @@ class WC_REST_Shipping_Zones_V2_Controller extends WC_REST_Shipping_Zones_Contro
 
 		$response->add_links( $this->prepare_links( $data['id'] ) );
 
-		return $response;
+		/**
+		 * Filter shipping zone objects returned from the REST API.
+		 *
+		 * @param WP_REST_Response   $response The response object.
+		 * @param array              $item  The shipping zone data.
+		 * @param WP_REST_Request    $request  Request object.
+		 *
+		 * @since 10.9.0
+		 */
+		return apply_filters( 'woocommerce_rest_prepare_shipping_zone', $response, $item, $request );
 	}
 
 	/**

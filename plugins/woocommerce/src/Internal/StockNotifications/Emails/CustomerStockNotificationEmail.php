@@ -6,12 +6,20 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Emails;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\UtmHelper;
 use WC_Email;
 
 /**
  * Back in stock notification email class.
  */
 class CustomerStockNotificationEmail extends WC_Email {
+
+	/**
+	 * Unsubscribe key for the email being sent. The caller's save persists its hash.
+	 *
+	 * @var string
+	 */
+	private $unsubscribe_key = '';
 
 	/**
 	 * Constructor.
@@ -153,11 +161,6 @@ class CustomerStockNotificationEmail extends WC_Email {
 		 */
 		$button_text = apply_filters( 'woocommerce_email_stock_notification_button_text', _x( 'Shop Now', 'Email notification', 'woocommerce' ), $notification, $product );
 
-		$query_args = array(
-			'utm_source' => 'back-in-stock-notifications',
-			'utm_medium' => 'email',
-		);
-
 		/**
 		 * Filter the button href.
 		 *
@@ -169,27 +172,26 @@ class CustomerStockNotificationEmail extends WC_Email {
 		 */
 		$button_link = apply_filters(
 			'woocommerce_email_stock_notification_button_link',
-			add_query_arg(
-				$query_args,
-				$notification->get_product_permalink()
-			),
+			UtmHelper::add_email_utm_params( $notification->get_product_permalink() ),
 			$notification,
 			$product
 		);
 
-		$unsubscribe_key = $notification->get_unsubscribe_key( true );
-		$user            = get_user_by( 'email', $notification->get_user_email() );
-		$is_guest        = ! is_a( $user, 'WP_User' );
+		$user     = $notification instanceof Notification && $notification->get_user_id() ? get_user_by( 'id', $notification->get_user_id() ) : false;
+		$is_guest = ! is_a( $user, 'WP_User' );
 
 		return array(
 			'button_text'      => $button_text,
 			'button_link'      => $button_link,
-			'unsubscribe_link' => add_query_arg(
-				array(
-					'email_link_action_key' => $unsubscribe_key,
-					'notification_id'       => $notification->get_id(),
-				),
-				get_option( 'siteurl' )
+			'unsubscribe_link' => UtmHelper::add_email_utm_params(
+				add_query_arg(
+					array(
+						'email_link_action'     => EmailActionController::ACTION_UNSUBSCRIBE,
+						'email_link_action_key' => $this->unsubscribe_key,
+						'notification_id'       => $notification->get_id(),
+					),
+					home_url( '/' )
+				)
 			),
 			'is_guest'         => $is_guest,
 		);
@@ -199,6 +201,7 @@ class CustomerStockNotificationEmail extends WC_Email {
 	 * Trigger the sending of this email.
 	 *
 	 * @param Notification|int $notification The notification object or ID.
+	 * @return bool Whether the email was sent. False when the email is disabled, has no recipient, or the mail callback failed.
 	 */
 	public function trigger( $notification ) {
 		$this->setup_locale();
@@ -208,25 +211,26 @@ class CustomerStockNotificationEmail extends WC_Email {
 		}
 
 		if ( ! $notification instanceof Notification ) {
-			return;
+			return false;
 		}
 
 		$product = $notification->get_product();
 		if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
-			return;
+			return false;
 		}
 
 		$this->maybe_setup_notification_locale( $notification );
 		$this->prepare_email( $notification );
 
+		$sent = false;
 		if ( $this->is_enabled() && $this->get_recipient() ) {
-
-			$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-
+			$sent = (bool) $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 		}
 
 		$this->maybe_restore_notification_locale( $notification );
 		$this->restore_locale();
+
+		return $sent;
 	}
 
 	/**
@@ -238,6 +242,7 @@ class CustomerStockNotificationEmail extends WC_Email {
 	public function prepare_email( Notification $notification ): void {
 		$this->object                         = $notification;
 		$this->recipient                      = $notification->get_user_email();
+		$this->unsubscribe_key                = $notification->get_unsubscribe_key( false );
 		$product                              = $notification->get_product();
 		$this->placeholders['{product_name}'] = preg_replace( $this->plain_search, $this->plain_replace, $product->get_name() );
 		$this->placeholders['{site_title}']   = preg_replace( $this->plain_search, $this->plain_replace, $this->get_blogname() );

@@ -2,14 +2,13 @@
  * External dependencies
  */
 import { render, fireEvent } from '@testing-library/react';
-import { recordEvent } from '@woocommerce/tracks';
+import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { Tabs } from '../';
 
-jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 const generateTabs = () => {
 	return [ '0', '1', '2', '3' ].map( ( name ) => ( {
 		name,
@@ -23,35 +22,47 @@ const CustomTab = () => {
 	return <div>Custom Tab</div>;
 };
 
+// Test wrapper that mirrors the parent ActivityPanel's open/close/switch
+// intent decisions. Tabs is now a controlled component — selection state
+// lives in the parent — so its rendered selection class is only correct
+// when the parent updates `selectedTab` / `tabOpen` in response to clicks.
+const ControlledTabs = ( { initialSelected = '', tabs } ) => {
+	const [ selected, setSelected ] = useState( initialSelected );
+	const [ open, setOpen ] = useState( !! initialSelected );
+	return (
+		<Tabs
+			selectedTab={ selected }
+			tabOpen={ open }
+			tabs={ tabs }
+			onTabClick={ ( tab ) => {
+				const isSameTab = tab.name === selected;
+				const isClosing = isSameTab && open;
+				setSelected( tab.name );
+				setOpen( ! isClosing );
+			} }
+		/>
+	);
+};
+
 describe( 'Activity Panel Tabs', () => {
-	it( 'correctly tracks the selected tab', () => {
+	it( 'renders the selected tab as active when both selectedTab and tabOpen prop in', () => {
 		const { getAllByRole } = render(
-			<Tabs
-				selectedTab={ '3' }
-				tabs={ generateTabs() }
-				onTabClick={ () => {} }
-			/>
+			<ControlledTabs initialSelected="3" tabs={ generateTabs() } />
 		);
 
 		const tabs = getAllByRole( 'tab' );
 
 		fireEvent.click( tabs[ 2 ] );
-
 		expect( tabs[ 2 ] ).toHaveClass( 'is-active' );
 
 		fireEvent.click( tabs[ 3 ] );
-
 		expect( tabs[ 2 ] ).not.toHaveClass( 'is-active' );
 		expect( tabs[ 3 ] ).toHaveClass( 'is-active' );
 	} );
 
-	it( 'closes a tab if its the same one last opened', () => {
+	it( 'unsets is-active when the same tab is clicked twice in a row', () => {
 		const { getAllByRole } = render(
-			<Tabs
-				selectedTab={ '3' }
-				tabs={ generateTabs() }
-				onTabClick={ () => {} }
-			/>
+			<ControlledTabs initialSelected="3" tabs={ generateTabs() } />
 		);
 
 		const tabs = getAllByRole( 'tab' );
@@ -62,7 +73,7 @@ describe( 'Activity Panel Tabs', () => {
 		expect( tabs[ 2 ] ).not.toHaveClass( 'is-active' );
 	} );
 
-	it( 'triggers onTabClick with the selected when a tab is clicked', () => {
+	it( 'forwards the clicked tab to onTabClick', () => {
 		const tabClickSpy = jest.fn();
 		const generatedTabs = generateTabs();
 
@@ -78,27 +89,7 @@ describe( 'Activity Panel Tabs', () => {
 
 		fireEvent.click( tabs[ 3 ] );
 
-		expect( tabClickSpy ).toHaveBeenCalledWith( generatedTabs[ 3 ], true );
-	} );
-
-	it( 'records an event when panels are being opened and when the open panel changes', () => {
-		const generatedTabs = generateTabs();
-
-		const { getAllByRole } = render(
-			<Tabs
-				selectedTab={ '3' }
-				tabs={ generatedTabs }
-				onTabClick={ () => {} }
-			/>
-		);
-
-		const tabs = getAllByRole( 'tab' );
-
-		fireEvent.click( tabs[ 3 ] );
-
-		expect( recordEvent ).toHaveBeenCalledWith( 'activity_panel_open', {
-			tab: generatedTabs[ 3 ].name,
-		} );
+		expect( tabClickSpy ).toHaveBeenCalledWith( generatedTabs[ 3 ] );
 	} );
 
 	it( 'should render tabs with a custom component defined in tab config', () => {

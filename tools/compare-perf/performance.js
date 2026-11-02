@@ -2,7 +2,7 @@
 const os = require( 'os' );
 const fs = require( 'fs' );
 const path = require( 'path' );
-const SimpleGit = require( 'simple-git' );
+const { simpleGit: SimpleGit } = require( 'simple-git' );
 const chalk = require( 'chalk' );
 
 const formats = {
@@ -24,6 +24,29 @@ const { processPerformanceReports } = require( './process-reports.ts' );
 
 const ARTIFACTS_PATH =
 	process.env.WP_ARTIFACTS_PATH || path.join( process.cwd(), 'artifacts' );
+
+/**
+ * Wraps a setup/build command so it runs under bash and, when nvm happens to be
+ * installed, aligns Node with the checked-out ref's `.nvmrc`.
+ *
+ * nvm is no longer required: refs built here pin their Node version through
+ * pnpm's `useNodeVersion` setting (pnpm-workspace.yaml), so pnpm provisions and
+ * uses the correct runtime for every pnpm invocation on its own. Sourcing nvm is
+ * kept only as a best-effort fallback for older refs that predate
+ * `useNodeVersion`, and is skipped silently when nvm isn't present so the tool
+ * works without it. The first `npm`/`pnpm` call still needs a base Node on PATH,
+ * which the caller's environment provides (in CI via actions/setup-node).
+ *
+ * @param {string} command Setup/build command to run.
+ *
+ * @return {string} A `bash -c` invocation wrapping the command.
+ */
+function withNodeVersion( command ) {
+	const alignNodeWithNvm =
+		'{ [ -s "$HOME/.nvm/nvm.sh" ] && . "$HOME/.nvm/nvm.sh" && nvm install > /dev/null 2>&1; } || true';
+
+	return `bash -c '${ alignNodeWithNvm } && ${ command }'`;
+}
 
 /**
  * @typedef WPPerformanceCommandOptions
@@ -187,9 +210,7 @@ async function runPerformanceTests( branches, options ) {
 
 	logAtIndent( 2, 'Installing dependencies and building' );
 	await runShellScript(
-		`bash -c "source $HOME/.nvm/nvm.sh && nvm install && ${ config.getSetupTestRunner(
-			testRunnerDir
-		) }"`,
+		withNodeVersion( config.getSetupTestRunner( testRunnerDir ) ),
 		testRunnerDir
 	);
 
@@ -230,9 +251,7 @@ async function runPerformanceTests( branches, options ) {
 
 		logAtIndent( 3, 'Installing dependencies and building' );
 		await runShellScript(
-			`bash -c "source $HOME/.nvm/nvm.sh && nvm install && ${ config.getSetupCommand(
-				buildDir
-			) }"`,
+			withNodeVersion( config.getSetupCommand( buildDir ) ),
 			buildDir
 		);
 

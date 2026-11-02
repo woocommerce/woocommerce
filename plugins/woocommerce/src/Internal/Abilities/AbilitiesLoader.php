@@ -1,0 +1,308 @@
+<?php
+/**
+ * Abilities loader class file.
+ */
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\Internal\Abilities;
+
+use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderNotesQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\PaymentGatewaysQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Hooks WooCommerce ability definitions into the WordPress Abilities API.
+ */
+class AbilitiesLoader {
+
+	/**
+	 * Whether the loader hooks have been registered.
+	 *
+	 * @var bool
+	 */
+	private static bool $initialized = false;
+
+	/**
+	 * Canonical WooCommerce domain ability definition classes.
+	 *
+	 * @var array<int, class-string>
+	 */
+	private const CORE_ABILITY_DEFINITION_CLASSES = array(
+		OrdersQuery::class,
+		OrderAddNote::class,
+		OrderNotesQuery::class,
+		OrderUpdateStatus::class,
+		PaymentGatewaysQuery::class,
+		ProductsQuery::class,
+		ProductTermsQuery::class,
+		ProductCreate::class,
+		ProductDelete::class,
+		ProductUpdate::class,
+	);
+
+	/**
+	 * Log source for ability registration notices.
+	 *
+	 * @var string
+	 */
+	private const LOG_SOURCE = 'woocommerce-abilities';
+
+	/**
+	 * Core ability instances registered by this loader in the current request.
+	 *
+	 * @var array<string, object>
+	 */
+	private static array $registered_core_abilities = array();
+
+	/**
+	 * Query var that holds the extension filter clauses of a list ability.
+	 *
+	 * @internal
+	 */
+	public const EXTENSION_QUERY_VAR = 'woocommerce_extensible_abilities_query_args';
+
+	/**
+	 * Initialize ability registration hooks.
+	 *
+	 * @internal
+	 *
+	 * @since 10.9.0
+	 */
+	final public function init(): void {
+		if ( self::$initialized ) {
+			return;
+		}
+
+		AbilitiesCategories::init();
+		add_action( 'woocommerce_extensible_abilities_resources_init', array( __CLASS__, 'register_core_resources' ), 0 );
+		add_action( 'wp_abilities_api_init', array( __CLASS__, 'init_extensions' ), 0 );
+		add_action( 'wp_abilities_api_init', array( __CLASS__, 'register_abilities' ) );
+		add_filter( 'woocommerce_product_data_store_cpt_get_products_query', array( __CLASS__, 'add_extension_query_args' ), 10, 2 );
+		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( __CLASS__, 'add_extension_query_args' ), 10, 2 );
+
+		self::$initialized = true;
+	}
+
+	/**
+	 * Register the resources that Core's abilities format, so extensions can register fields on them.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 */
+	public static function register_core_resources(): void {
+		foreach ( array( 'product', 'order', 'order_item', 'product_term' ) as $resource_name ) {
+			ExtensibleAbilities::register_resource( $resource_name );
+		}
+	}
+
+	/**
+	 * Add the extension filter clauses of a list ability to its WP_Query arguments.
+	 *
+	 * The posts storage ignores a meta_query argument, so a list ability puts the
+	 * clauses in the EXTENSION_QUERY_VAR query var. Other queries do not have it,
+	 * so a query that a hook runs inside the ability's query stays the same.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array $wp_query_args WP_Query arguments.
+	 * @param array $query_vars    Query vars of wc_get_products() or wc_get_orders().
+	 * @return array
+	 */
+	public static function add_extension_query_args( $wp_query_args, $query_vars ) {
+		if ( empty( $query_vars[ self::EXTENSION_QUERY_VAR ] ) || ! is_array( $wp_query_args ) ) {
+			return $wp_query_args;
+		}
+
+		unset( $wp_query_args[ self::EXTENSION_QUERY_VAR ] );
+		return array_merge_recursive( $wp_query_args, $query_vars[ self::EXTENSION_QUERY_VAR ] );
+	}
+
+	/**
+	 * Let extensions register their resources, then their ability fields, before the abilities build their schemas.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 */
+	public static function init_extensions(): void {
+		if ( did_action( 'woocommerce_extensible_abilities_init' ) || ! ExtensibleAbilities::is_enabled() ) {
+			return;
+		}
+
+		/**
+		 * Fires when extensions can register their resources with ExtensibleAbilities.
+		 *
+		 * Fires one time, before `woocommerce_extensible_abilities_init`, only when the
+		 * experimental `extensible_abilities` feature is on.
+		 *
+		 * @since 11.3.0
+		 */
+		do_action( 'woocommerce_extensible_abilities_resources_init' );
+
+		/**
+		 * Fires when extensions can register their fields with ExtensibleAbilities.
+		 *
+		 * Fires one time, only when the experimental `extensible_abilities` feature is on.
+		 *
+		 * @since 11.3.0
+		 */
+		do_action( 'woocommerce_extensible_abilities_init' );
+	}
+
+	/**
+	 * Register all configured ability definitions.
+	 *
+	 * @since 10.9.0
+	 */
+	public static function register_abilities(): void {
+		foreach ( self::get_ability_definition_classes() as $class_name ) {
+			if ( ! is_string( $class_name ) || ! class_exists( $class_name ) ) {
+				continue;
+			}
+
+			// Core's product write abilities extend ActionableAbility, so WordPress builds them from their own class.
+			$is_actionable = is_a( $class_name, ActionableAbility::class, true ) && self::is_core_ability_definition_class( $class_name );
+
+			if ( ! $is_actionable && ! is_a( $class_name, AbilityDefinition::class, true ) ) {
+				continue;
+			}
+
+			$ability_name = $is_actionable ? $class_name::ABILITY_NAME : $class_name::get_name();
+
+			if ( '' === $ability_name ) {
+				continue;
+			}
+
+			$is_core_ability = self::is_core_ability_definition_class( $class_name );
+
+			if ( self::is_reserved_woocommerce_ability_name( $ability_name ) && ! $is_core_ability ) {
+				continue;
+			}
+
+			if ( wp_has_ability( $ability_name ) ) {
+				$existing_ability = wp_get_ability( $ability_name );
+
+				if (
+					$is_core_ability
+					&& isset( self::$registered_core_abilities[ $ability_name ] )
+					&& $existing_ability === self::$registered_core_abilities[ $ability_name ]
+				) {
+					continue;
+				}
+
+				if ( ! $is_core_ability ) {
+					continue;
+				}
+
+				// Drop stale instance tracking before replacing a shadowed registration.
+				unset( self::$registered_core_abilities[ $ability_name ] );
+				wp_unregister_ability( $ability_name );
+				self::log_replaced_reserved_ability( $ability_name, $class_name );
+			}
+
+			$args = $class_name::get_registration_args();
+			if ( $is_actionable ) {
+				$args['ability_class'] = $class_name;
+			}
+
+			$registered_ability = wp_register_ability( $ability_name, $args );
+
+			if ( $is_core_ability && null !== $registered_ability ) {
+				self::$registered_core_abilities[ $ability_name ] = $registered_ability;
+			}
+		}
+	}
+
+	/**
+	 * Log when WooCommerce replaces a pre-existing registration in its reserved namespace.
+	 *
+	 * @param string       $ability_name Ability name.
+	 * @param class-string $class_name Ability definition class name.
+	 */
+	private static function log_replaced_reserved_ability( string $ability_name, string $class_name ): void {
+		if ( ! function_exists( 'wc_get_logger' ) ) {
+			return;
+		}
+
+		wc_get_logger()->warning(
+			'WooCommerce unregistered a previously registered ability before registering its canonical definition.',
+			array(
+				'source'           => self::LOG_SOURCE,
+				'ability_name'     => $ability_name,
+				'definition_class' => $class_name,
+				'reserved_prefix'  => 'woocommerce/',
+			)
+		);
+	}
+
+	/**
+	 * Check whether an ability definition class is provided by WooCommerce core.
+	 *
+	 * @param class-string $class_name Ability definition class name.
+	 * @return bool
+	 */
+	private static function is_core_ability_definition_class( string $class_name ): bool {
+		return in_array( $class_name, self::CORE_ABILITY_DEFINITION_CLASSES, true );
+	}
+
+	/**
+	 * Check whether an ability name uses WooCommerce's reserved namespace.
+	 *
+	 * @param string $ability_name Ability name.
+	 * @return bool
+	 */
+	private static function is_reserved_woocommerce_ability_name( string $ability_name ): bool {
+		return 0 === strpos( $ability_name, 'woocommerce/' );
+	}
+
+	/**
+	 * Get all ability definition classes that should be loaded.
+	 *
+	 * @return array<int, class-string>
+	 */
+	private static function get_ability_definition_classes(): array {
+		/**
+		 * Filter WooCommerce ability definition classes.
+		 *
+		 * Extensions can append autoloadable classes that implement
+		 * {@see AbilityDefinition}. The loader will call get_name() and
+		 * get_registration_args() on each definition class and register the ability on the
+		 * Abilities API init hook. Returning a subset will not unregister core abilities;
+		 * core classes are always retained.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param array<int, class-string> $classes Ability definition class names.
+		 */
+		$classes = apply_filters( 'woocommerce_ability_definition_classes', self::CORE_ABILITY_DEFINITION_CLASSES );
+
+		if ( ! is_array( $classes ) ) {
+			$classes = array();
+		}
+
+		return array_values(
+			array_unique(
+				array_filter(
+					array_merge( self::CORE_ABILITY_DEFINITION_CLASSES, $classes ),
+					'is_string'
+				)
+			)
+		);
+	}
+}

@@ -86,9 +86,12 @@ class WC_Product_Grouped_Data_Store_CPT extends WC_Product_Data_Store_CPT implem
 			$child_prices = array_filter( $child_prices );
 		}
 
-		delete_post_meta( $product_id, '_price' );
-		delete_post_meta( $product_id, '_sale_price' );
-		delete_post_meta( $product_id, '_regular_price' );
+		// Performance note: prefilter with metadata_exists, to avoid unnecessary meta cache invalidations and SQLs.
+		$price_metas = array_filter(
+			array( '_price', '_sale_price', '_regular_price' ),
+			static fn( $meta_key ) => metadata_exists( 'post', $product_id, $meta_key )
+		);
+		array_walk( $price_metas, static fn( $meta_key ) => delete_post_meta( $product_id, $meta_key ) );
 
 		if ( ! empty( $child_prices ) ) {
 			add_post_meta( $product_id, '_price', min( $child_prices ) );

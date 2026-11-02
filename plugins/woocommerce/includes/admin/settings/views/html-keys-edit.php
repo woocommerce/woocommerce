@@ -129,7 +129,7 @@ defined( 'ABSPATH' ) || exit;
 		?>
 		<p class="submit">
 			<?php submit_button( __( 'Save changes', 'woocommerce' ), 'primary', 'update_api_key', false ); ?>
-			<a style="color: #a00; text-decoration: none; margin-left: 10px;" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key_id ), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' ) ), 'revoke' ) ); ?>"><?php esc_html_e( 'Revoke key', 'woocommerce' ); ?></a>
+			<a style="color: var(--wc-destructive, #cc1818); text-decoration: none; margin-left: 10px;" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key_id ), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' ) ), 'revoke' ) ); ?>"><?php esc_html_e( 'Revoke key', 'woocommerce' ); ?></a>
 		</p>
 		<?php
 	}

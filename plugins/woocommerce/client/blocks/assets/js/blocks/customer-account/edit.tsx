@@ -18,9 +18,11 @@ const Edit = ( {
 	attributes,
 	setAttributes,
 }: BlockEditProps< Attributes > ) => {
-	const { className } = attributes;
+	const { className, hasDropdownNavigation } = attributes;
 	const blockProps = useBlockProps( {
-		className: clsx( 'wc-block-editor-customer-account', className ),
+		className: clsx( 'wc-block-editor-customer-account', className, {
+			'wc-block-customer-account--has-dropdown': hasDropdownNavigation,
+		} ),
 	} );
 
 	return (

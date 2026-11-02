@@ -140,11 +140,11 @@ class DataStore extends CouponsDataStore implements DataStoreInterface {
 	 *
 	 * @see get_data
 	 * @see get_noncached_stats_data
-	 * @param array    $query_args Query parameters.
-	 * @param array    $params            Query limit parameters.
-	 * @param stdClass $data                    Reference to the data object to fill.
-	 * @param int      $expected_interval_count Number of expected intervals.
-	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
+	 * @param array     $query_args Query parameters.
+	 * @param array     $params            Query limit parameters.
+	 * @param \stdClass $data                    Reference to the data object to fill.
+	 * @param int       $expected_interval_count Number of expected intervals.
+	 * @return \stdClass|\WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
 	 */
 	public function get_noncached_stats_data( $query_args, $params, &$data, $expected_interval_count ) {
 		global $wpdb;
@@ -178,7 +178,7 @@ class DataStore extends CouponsDataStore implements DataStoreInterface {
 		}
 
 		// phpcs:ignore Generic.Commenting.Todo.TaskFound
-		// @todo remove these assignements when refactoring segmenter classes to use query objects.
+		// @todo remove these assignments when refactoring segmenter classes to use query objects.
 		$totals_query          = array(
 			'from_clause'       => $this->total_query->get_sql_clause( 'join' ),
 			'where_time_clause' => $this->total_query->get_sql_clause( 'where_time' ),

@@ -9,7 +9,7 @@ import { UpgradeDowngradeNotice } from '@woocommerce/editor-components/upgrade-d
 export const UpgradeNotice = ( props: { upgradeBlock: () => void } ) => {
 	const notice = createInterpolateElement(
 		__(
-			'Upgrade all Products (Beta) blocks on this page to <strongText /> for more features!',
+			'Upgrade all Products blocks on this page to <strongText /> for more features!',
 			'woocommerce'
 		),
 		{

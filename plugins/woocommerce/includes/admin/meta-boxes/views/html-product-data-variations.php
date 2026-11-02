@@ -50,7 +50,7 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 							<?php /* translators: WooCommerce attribute label */ ?>
 							<option value=""><?php echo esc_html( sprintf( __( 'No default %s&hellip;', 'woocommerce' ), wc_attribute_label( $attribute->get_name() ) ) ); ?></option>
 							<?php if ( $attribute->is_taxonomy() ) : ?>
-								<?php foreach ( $attribute->get_terms() as $option ) : ?>
+								<?php foreach ( (array) $attribute->get_terms() as $option ) : ?>
 									<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
 									<option <?php selected( $selected_value, $option->slug ); ?> value="<?php echo esc_attr( $option->slug ); ?>"><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option->name, $option, $attribute->get_name(), $product_object ) ); ?></option>
 									<?php /* phpcs:enable */ ?>
@@ -90,6 +90,7 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 						<option value="variable_regular_price_increase"><?php esc_html_e( 'Increase regular prices (fixed amount or percentage)', 'woocommerce' ); ?></option>
 						<option value="variable_regular_price_decrease"><?php esc_html_e( 'Decrease regular prices (fixed amount or percentage)', 'woocommerce' ); ?></option>
 						<option value="variable_sale_price"><?php esc_html_e( 'Set sale prices', 'woocommerce' ); ?></option>
+						<option value="variable_sale_price_from_regular_price"><?php esc_html_e( 'Set sale prices to regular prices decreased by (fixed amount or percentage)', 'woocommerce' ); ?></option>
 						<option value="variable_sale_price_increase"><?php esc_html_e( 'Increase sale prices (fixed amount or percentage)', 'woocommerce' ); ?></option>
 						<option value="variable_sale_price_decrease"><?php esc_html_e( 'Decrease sale prices (fixed amount or percentage)', 'woocommerce' ); ?></option>
 						<option value="variable_sale_schedule"><?php esc_html_e( 'Set scheduled sale dates', 'woocommerce' ); ?></option>
@@ -136,7 +137,7 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 							<select class="page-selector" id="current-page-selector-1" title="<?php esc_attr_e( 'Current page', 'woocommerce' ); ?>">
 								<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
 									<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
-									<option value="<?php echo $i; // WPCS: XSS ok. ?>"><?php echo $i; // WPCS: XSS ok. ?></option>
+									<option value="<?php echo $i; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $i is a bounded integer pagination index. ?>"><?php echo $i; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $i is a bounded integer pagination index. ?></option>
 									<?php /* phpcs:enable */ ?>
 								<?php endfor; ?>
 							</select>
@@ -165,7 +166,7 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 			</div>
 
 			<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
-			<div class="woocommerce_variations wc-metaboxes" data-attributes="<?php echo wc_esc_json( wp_json_encode( wc_list_pluck( $variation_attributes, 'get_data' ) ) ); // WPCS: XSS ok. ?>" data-total="<?php echo esc_attr( $variations_count ); ?>" data-total_pages="<?php echo esc_attr( $variations_total_pages ); ?>" data-page="1" data-edited="false"></div>
+			<div class="woocommerce_variations wc-metaboxes" data-attributes="<?php echo wc_esc_json( wp_json_encode( wc_list_pluck( $variation_attributes, 'get_data' ) ) ); ?>" data-total="<?php echo esc_attr( $variations_count ); ?>" data-total_pages="<?php echo esc_attr( $variations_total_pages ); ?>" data-page="1" data-edited="false"></div>
 			<?php /* phpcs:enable */ ?>
 
 			<div class="toolbar">
@@ -186,7 +187,7 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 							<select class="page-selector" id="current-page-selector-1" title="<?php esc_attr_e( 'Current page', 'woocommerce' ); ?>">
 								<?php for ( $i = 1; $i <= $variations_total_pages; $i++ ) : ?>
 									<?php /* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */ ?>
-									<option value="<?php echo $i; // WPCS: XSS ok. ?>"><?php echo $i; // WPCS: XSS ok. ?></option>
+									<option value="<?php echo $i; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $i is a bounded integer pagination index. ?>"><?php echo $i; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $i is a bounded integer pagination index. ?></option>
 									<?php /* phpcs:enable */ ?>
 								<?php endfor; ?>
 							</select>
@@ -203,23 +204,28 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 	</div>
 </div>
 <script type="text/template" id="tmpl-wc-modal-set-price-variations">
-	<div class="wc-backbone-modal">
+	<div class="wc-backbone-modal wc-backbone-modal-set-price-variations">
 		<div class="wc-backbone-modal-content">
-			<div class="components-modal__content woocommerce-set-price-variations" role="document">
-				<div class="components-modal__header">
-					<h2><?php echo esc_attr( $modal_title ); ?></h2>
-				</div>
-				<div class="woocommerce-usage-modal__wrapper">
-					<div class="woocommerce-usage-modal__message">
+			<section class="wc-backbone-modal-main" role="main">
+				<header class="wc-backbone-modal-header">
+					<h1><?php esc_html_e( 'Set variation prices', 'woocommerce' ); ?></h1>
+					<button class="modal-close modal-close-link dashicons dashicons-no-alt">
+						<span class="screen-reader-text"><?php esc_html_e( 'Close modal panel', 'woocommerce' ); ?></span>
+					</button>
+				</header>
+				<article>
+					<div>
 						<span><?php esc_html_e( 'Add price to all variations that don\'t have a price', 'woocommerce' ); ?> (<?php echo esc_attr( get_woocommerce_currency_symbol() ); ?> <?php echo esc_textarea( get_woocommerce_currency() ); ?>)</span>
 						<input type="text" class="components-text-control__input wc_input_variations_price"/>
 					</div>
-					<div class="woocommerce-usage-modal__actions">
-						<button class="modal-close components-button is-secondary"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
+				</article>
+				<footer>
+					<div class="wc-backbone-modal-buttons">
+						<button class="modal-close button components-button is-secondary"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
 						<button class="modal-close button components-button add_variations_price_button button-primary" disabled><?php esc_html_e( 'Add prices', 'woocommerce' ); ?></button>
 					</div>
-				</div>
-			</div>
+				</footer>
+			</section>
 		</div>
 	</div>
 	<div class="wc-backbone-modal-backdrop modal-close"></div>

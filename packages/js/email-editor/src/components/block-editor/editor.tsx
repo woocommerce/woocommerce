@@ -2,23 +2,31 @@
  * External dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-import { useMemo, useEffect } from '@wordpress/element';
+import { useCallback, useMemo, useEffect } from '@wordpress/element';
 import { SlotFillProvider, ProgressBar } from '@wordpress/components';
 import { store as coreStore, Post } from '@wordpress/core-data';
 import { CommandMenu, store as commandsStore } from '@wordpress/commands';
 import { PluginArea } from '@wordpress/plugins';
-// eslint-disable-next-line @woocommerce/dependency-group
 import {
-	AutosaveMonitor,
-	// @ts-expect-error Type is missing in @types/wordpress__editor
+	AutosaveMonitor as _AutosaveMonitor,
 	LocalAutosaveMonitor,
 	UnsavedChangesWarning,
-	// @ts-expect-error Type is missing in @types/wordpress__editor
-	EditorKeyboardShortcutsRegister,
+	EditorKeyboardShortcutsRegister as _EditorKeyboardShortcutsRegister,
 	ErrorBoundary,
 	PostLockedModal,
 	store as editorStore,
 } from '@wordpress/editor';
+
+// Upstream types are inaccurate: AutosaveMonitor's default export is typed as
+// `unknown` and EditorKeyboardShortcutsRegister returns DOM `Element` instead
+// of `JSX.Element`. Cast them so they are usable as JSX components.
+const AutosaveMonitor = _AutosaveMonitor as unknown as React.ComponentType<
+	Record< string, never >
+>;
+const EditorKeyboardShortcutsRegister =
+	_EditorKeyboardShortcutsRegister as unknown as React.ComponentType<
+		Record< string, never >
+	>;
 
 /**
  * Internal dependencies
@@ -38,6 +46,7 @@ import { PublishSave } from '../../hacks/publish-save';
 import { EditorNotices } from '../notices';
 import { BlockCompatibilityWarnings } from '../sidebar';
 import { BackButtonContent } from '../header/back-button-content';
+import { TemplateCanvasAffordance } from '../template-canvas-affordance';
 import { recordEventOnce } from '../../events';
 
 export function InnerEditor( {
@@ -46,21 +55,21 @@ export function InnerEditor( {
 	settings,
 	contentRef,
 	customSavePanel,
+	customSaveButton,
 }: {
 	postId: number | string;
 	postType: string;
 	settings: Record< string, unknown >;
 	contentRef?: React.Ref< HTMLDivElement > | null;
 	customSavePanel?: React.ReactElement;
+	customSaveButton?: React.ReactElement;
 } ) {
 	const {
 		currentPost,
 		onNavigateToEntityRecord,
 		onNavigateToPreviousEntityRecord,
 	} = useNavigateToEntityRecord(
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		initialPostId,
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		initialPostType,
 		'post-only'
 	);
@@ -99,13 +108,32 @@ export function InnerEditor( {
 
 	// isFullScreenForced – comes from settings and cannot be changed by the user
 	// isFullscreenEnabled – indicates if a user has enabled fullscreen mode
-	const { isFullscreenEnabled, allCommands } = useSelect( ( select ) => {
-		return {
-			isFullscreenEnabled:
-				select( storeName ).isFeatureActive( 'fullscreenMode' ),
-			allCommands: select( commandsStore ).getCommands(),
-		};
-	}, [] );
+	const { isFullscreenEnabled, allCommands, listingsUrl } = useSelect(
+		( select ) => {
+			return {
+				isFullscreenEnabled:
+					select( storeName ).isFeatureActive( 'fullscreenMode' ),
+				allCommands: select( commandsStore ).getCommands(),
+				listingsUrl: select( storeName ).getUrls()?.listings,
+			};
+		},
+		[]
+	);
+
+	// From WordPress 7.2 emails whose post type doesn't opt in to the email editor's delete action
+	// (`woocommerce_email_editor_replace_trash_action`) get core's, which leave it to the editor
+	// screen to move away from the deleted post. Go back to the email list.
+	const onActionPerformed = useCallback(
+		( actionId: string ) => {
+			if (
+				listingsUrl &&
+				[ 'move-to-trash', 'permanently-delete' ].includes( actionId )
+			) {
+				window.location.href = listingsUrl;
+			}
+		},
+		[ listingsUrl ]
+	);
 
 	const {
 		isFullScreenForced,
@@ -113,16 +141,14 @@ export function InnerEditor( {
 		disableSnackbarNotices,
 	} = settings;
 
-	// @ts-expect-error Type is missing in @types/wordpress__editor
 	const { removeEditorPanel } = useDispatch( editorStore );
 	useEffect( () => {
-		removeEditorPanel( 'post-status' );
+		void removeEditorPanel( 'post-status' );
 	}, [ removeEditorPanel ] );
 
 	const [ styles ] = useEmailCss();
 
 	const editorSettings = useMemo(
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 		() => ( {
 			...settings,
 			onNavigateToEntityRecord,
@@ -155,24 +181,33 @@ export function InnerEditor( {
 			</div>
 		);
 	}
+	// In WordPress 6.8 WooCommerce commands are registered because Core does
+	// not mount the global CommandMenu. Use that as a signal to render our own
+	// CommandMenu fallback. Core loads it starting in WordPress 6.9.
+	const isWordPress68 = allCommands.every( ( { name } ) =>
+		name.includes( 'woocommerce' )
+	);
 
 	recordEventOnce( 'editor_layout_loaded' );
 	return (
 		<SlotFillProvider>
-			{ /* @ts-expect-error canCopyContent is missing in @types/wordpress__editor */ }
 			<ErrorBoundary canCopyContent>
-				{ /* The CommandMenu is not needed if the commands are registered. The CommandMenu can be removed after we drop support for WP 6.8. */ }
-				{ ( ! allCommands || allCommands.length === 0 ) && (
-					<CommandMenu />
-				) }
+				{ /* Keep this fallback only for WordPress 6.8. Core mounts the CommandMenu in 6.9+. */ }
+				{ isWordPress68 && <CommandMenu /> }
 				<Editor
 					postId={ currentPost.postId }
 					postType={ currentPost.postType }
 					settings={ editorSettings }
 					templateId={ template && template.id }
+					onActionPerformed={ onActionPerformed }
 					contentRef={ contentRef }
 					styles={ styles } // This is needed for BC for Gutenberg below v22
 					customSavePanel={ customSavePanel }
+					customSaveButton={
+						currentPost.postType === 'wp_template'
+							? undefined
+							: customSaveButton
+					}
 				>
 					<AutosaveMonitor />
 					<LocalAutosaveMonitor />
@@ -180,6 +215,7 @@ export function InnerEditor( {
 					<EditorKeyboardShortcutsRegister />
 					<PostLockedModal />
 					<TemplateSelection />
+					<TemplateCanvasAffordance />
 					<StylesSidebar />
 					<SendPreview />
 					<PreviewSaveGuard />

@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Document that the runSql step's query checks are not a security boundary, and warn WP-CLI users before a Blueprint is imported.

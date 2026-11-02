@@ -5,6 +5,8 @@
  * @package WooCommerce\Admin
  */
 
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermAdmin;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -32,8 +34,12 @@ $product_attributes = $product_object->get_attributes( 'edit' );
 			<a href="#" class="expand_all"><?php esc_html_e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php esc_html_e( 'Close', 'woocommerce' ); ?></a>
 		</span>
 		<div class="actions">
+			<?php
+			/* translators: 'Global' refers to 'global attribute'. */
+			$add_global_attribute_placeholder = __( 'Add global', 'woocommerce' );
+			?>
 			<button type="button" class="button add_custom_attribute"><?php esc_html_e( 'Add new', 'woocommerce' ); ?></button>
-			<select class="wc-attribute-search" data-placeholder="<?php esc_attr_e( 'Add existing', 'woocommerce' ); ?>" data-minimum-input-length="0">
+			<select class="wc-attribute-search" data-placeholder="<?php echo esc_attr( $add_global_attribute_placeholder ); ?>" data-minimum-input-length="0">
 			</select>
 		</div>
 	</div>
@@ -42,7 +48,7 @@ $product_attributes = $product_object->get_attributes( 'edit' );
 		$i = -1;
 
 		foreach ( $product_attributes as $attribute ) {
-			$i++;
+			++$i;
 			$metabox_class = array();
 
 			if ( $attribute->is_taxonomy() ) {
@@ -62,3 +68,34 @@ $product_attributes = $product_object->get_attributes( 'edit' );
 	</div>
 	<?php do_action( 'woocommerce_product_options_attributes' ); ?>
 </div>
+
+<script type="text/template" id="tmpl-wc-modal-add-attribute-term">
+	<div class="wc-backbone-modal wc-backbone-modal-add-attribute-term">
+		<div class="wc-backbone-modal-content">
+			<section class="wc-backbone-modal-main" role="main">
+				<header class="wc-backbone-modal-header">
+					<h1><?php esc_html_e( 'Create value', 'woocommerce' ); ?></h1>
+					<button class="modal-close modal-close-link dashicons dashicons-no-alt">
+						<span class="screen-reader-text"><?php esc_html_e( 'Close modal panel', 'woocommerce' ); ?></span>
+					</button>
+				</header>
+				<article>
+					<form class="wc-add-attribute-term-fields" action="" method="post">
+						<label for="wc-modal-add-attribute-term-input"><?php esc_html_e( 'Name', 'woocommerce' ); ?></label>
+						<input id="wc-modal-add-attribute-term-input" type="text" name="term" value="" />
+						<# if ( data.isVisualAttribute ) { #>
+							<?php VisualAttributeTermAdmin::render_add_attribute_term_modal_fields(); ?>
+						<# } #>
+					</form>
+				</article>
+				<footer>
+					<div class="wc-backbone-modal-buttons">
+						<button class="modal-close button button-large"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
+						<button id="btn-ok" disabled class="button button-primary button-large"><?php esc_html_e( 'OK', 'woocommerce' ); ?></button>
+					</div>
+				</footer>
+			</section>
+		</div>
+	</div>
+	<div class="wc-backbone-modal-backdrop modal-close"></div>
+</script>

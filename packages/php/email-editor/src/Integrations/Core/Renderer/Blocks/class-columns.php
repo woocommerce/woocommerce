@@ -19,7 +19,7 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 class Columns extends Abstract_Block_Renderer {
 	/**
 	 * Renders the block content.
-	 * BlockGap spacing is handled by Spacing_Preprocessor which sets padding-left on column children.
+	 * BlockGap spacing is handled by Spacing_Preprocessor which sets physical padding on column children.
 	 *
 	 * @param string            $block_content Block content.
 	 * @param array             $parsed_block Parsed block.
@@ -58,7 +58,7 @@ class Columns extends Abstract_Block_Renderer {
 			array(
 				'width'           => '100%',
 				'border-collapse' => 'separate',
-				'text-align'      => 'left',
+				'text-align'      => $rendering_context->get_default_text_align(),
 				'background-size' => $columns_styles['declarations']['background-size'] ?? 'cover',
 			)
 		);
@@ -82,7 +82,7 @@ class Columns extends Abstract_Block_Renderer {
 				array(
 					'width'           => '100%',
 					'border-collapse' => 'separate',
-					'text-align'      => 'left',
+					'text-align'      => $rendering_context->get_default_text_align(),
 				)
 			);
 

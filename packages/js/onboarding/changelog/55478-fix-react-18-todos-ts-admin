@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fix react-18-upgrade TODOs (@ts-expect-error) in WC Admin

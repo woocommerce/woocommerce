@@ -1,6 +1,11 @@
 {
-    "position": 4,
+    "position": 5,
     "label": "Email",
     "collapsible": true,
-    "collapsed": true
+    "collapsed": true,
+    "link": {
+        "type": "generated-index",
+        "title": "Email",
+        "slug": "/features/email"
+    }
 }

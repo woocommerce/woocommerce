@@ -28,6 +28,8 @@ interface FulfillmentContextProps {
 	setSelectedItems: ( items: ItemSelection[] ) => void;
 	notifyCustomer: boolean;
 	setNotifyCustomer: ( notifyCustomer: boolean ) => void;
+	customerNote: string;
+	setCustomerNote: ( customerNote: string ) => void;
 }
 
 const defaultContextProps: FulfillmentContextProps = {
@@ -38,6 +40,8 @@ const defaultContextProps: FulfillmentContextProps = {
 	setSelectedItems: () => {},
 	notifyCustomer: true,
 	setNotifyCustomer: () => {},
+	customerNote: '',
+	setCustomerNote: () => {},
 };
 
 const FulfillmentContextValue =
@@ -67,6 +71,7 @@ export const FulfillmentProvider = ( {
 	const [ _fulfillment, _setFulfillment ] =
 		React.useState< Fulfillment | null >( fulfillment ?? null );
 	const [ notifyCustomer, setNotifyCustomer ] = React.useState( true );
+	const [ customerNote, setCustomerNote ] = React.useState( '' );
 
 	const {
 		selectedOption,
@@ -171,6 +176,8 @@ export const FulfillmentProvider = ( {
 			setSelectedItems,
 			notifyCustomer,
 			setNotifyCustomer,
+			customerNote,
+			setCustomerNote,
 		} ),
 		[
 			order,
@@ -180,6 +187,8 @@ export const FulfillmentProvider = ( {
 			setSelectedItems,
 			notifyCustomer,
 			setNotifyCustomer,
+			customerNote,
+			setCustomerNote,
 		]
 	);
 

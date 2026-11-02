@@ -16,7 +16,7 @@ import {
 	productPriceValidation,
 } from '@woocommerce/blocks-checkout';
 import { getSetting } from '@woocommerce/settings';
-import { createInterpolateElement, useMemo } from '@wordpress/element';
+import { useMemo } from '@wordpress/element';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { CartItem, isString } from '@woocommerce/types';
 import { calculateSaleAmount } from '@woocommerce/base-utils';
@@ -57,7 +57,7 @@ const OrderSummaryItem = ( {
 
 	// Prepare props to pass to the applyCheckoutFilter filter.
 	// We need to pluck out receiveCart.
-	// eslint-disable-next-line no-unused-vars
+
 	const { receiveCart, ...cart } = useStoreCart();
 
 	const arg = useMemo(
@@ -162,13 +162,22 @@ const OrderSummaryItem = ( {
 		validation: productPriceScreenReaderValidation,
 	} );
 
-	const ProductPriceScreenReaderOutput = () => {
-		return createInterpolateElement( productPriceScreenReaderFormat, {
-			quantity: <>{ quantity }</>,
-			productName: <>{ name }</>,
-			price: <>{ formatPrice( subtotalPrice, totalsCurrency ) }</>,
-		} );
-	};
+	// Build as one string (not React nodes) so screen readers announce the
+	// full sentence as a single unit rather than separate sibling text nodes.
+	const productPriceScreenReaderText = productPriceScreenReaderFormat.replace(
+		/<(quantity|productName|price)\/>/g,
+		( _match, key ) => {
+			switch ( key ) {
+				case 'quantity':
+					return String( quantity );
+				case 'productName':
+					return name;
+				case 'price':
+					return formatPrice( subtotalPrice, totalsCurrency );
+			}
+			return '';
+		}
+	);
 
 	const cartItemClassNameFilter = applyCheckoutFilter( {
 		filterName: 'cartItemClass',
@@ -181,13 +190,13 @@ const OrderSummaryItem = ( {
 		? {
 				itemData,
 				variation,
-		  }
+			}
 		: {
 				itemData,
 				variation,
 				shortDescription,
 				fullDescription,
-		  };
+			};
 
 	return (
 		<div
@@ -241,7 +250,7 @@ const OrderSummaryItem = ( {
 				<ProductMetadata { ...productMetaProps } />
 			</div>
 			<span className="screen-reader-text">
-				<ProductPriceScreenReaderOutput />
+				{ productPriceScreenReaderText }
 			</span>
 			<div
 				className="wc-block-components-order-summary-item__total-price"

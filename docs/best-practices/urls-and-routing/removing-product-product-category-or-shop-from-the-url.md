@@ -1,7 +1,7 @@
 ---
 post_title: Understanding the risks of removing URL bases in WooCommerce
 sidebar_label: Risks of removing URL bases
-
+description: An explanation of the risks and potential issues associated with removing `/product/`, `/product-category/`, or `/shop/` from WooCommerce URLs, including performance and SEO concerns.
 ---
 
 # Understanding the risks of removing URL bases in WooCommerce

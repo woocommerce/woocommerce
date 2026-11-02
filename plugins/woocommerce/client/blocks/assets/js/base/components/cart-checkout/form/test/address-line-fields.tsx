@@ -42,7 +42,6 @@ describe( 'AddressLineFields', () => {
 	it( 'should show the AddressAutocomplete component when providers are available', () => {
 		jest.isolateModules( () => {
 			const AddressLineFields =
-				// eslint-disable-next-line @typescript-eslint/no-var-requires
 				require( '../address-line-fields' ).default;
 			render(
 				<AddressLineFields
@@ -86,7 +85,6 @@ describe( 'AddressLineFields', () => {
 	it( 'should show the ValidatedTextInput component when no providers are available', () => {
 		jest.isolateModules( () => {
 			const AddressLineFields =
-				// eslint-disable-next-line @typescript-eslint/no-var-requires
 				require( '../address-line-fields' ).default;
 			jest.mock( '@woocommerce/settings', () => ( {
 				...jest.requireActual( '@woocommerce/settings' ),
@@ -111,7 +109,6 @@ describe( 'AddressLineFields', () => {
 				<AddressLineFields
 					formId="a"
 					address1={ {
-						// @ts-expect-error -- No need to pass validation for this test
 						field: {
 							index: 0,
 							key: 'address_1',
@@ -125,7 +122,6 @@ describe( 'AddressLineFields', () => {
 						value: '',
 					} }
 					address2={ {
-						// @ts-expect-error -- No need to pass validation for this test
 						field: {
 							index: 1,
 							key: 'address_2',

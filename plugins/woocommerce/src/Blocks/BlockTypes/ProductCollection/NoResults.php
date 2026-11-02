@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
+use WP_Block;
 
 /**
  * NoResults class.

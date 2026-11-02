@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Command } from '@commander-js/extra-typings';
-import simpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 import nodePath from 'path';
 import { existsSync, readFileSync, rmSync, writeFileSync } from 'fs';
 
@@ -10,7 +10,11 @@ import { existsSync, readFileSync, rmSync, writeFileSync } from 'fs';
  * Internal dependencies
  */
 import { Logger } from '../core/logger';
-import { cloneAuthenticatedRepo, checkoutRemoteBranch } from '../core/git';
+import {
+	cloneAuthenticatedRepo,
+	checkoutRemoteBranch,
+	GIT_IDENTITY_ENVIRONMENT,
+} from '../core/git';
 import {
 	getPullRequestData,
 	shouldAutomateChangelog,
@@ -91,7 +95,7 @@ const program = new Command( 'changefile' )
 				: await cloneAuthenticatedRepo(
 						{ owner: headOwner, name },
 						false
-				  );
+					);
 
 			Logger.endTask();
 
@@ -195,7 +199,9 @@ const program = new Command( 'changefile' )
 					if ( comment ) {
 						fileContent += `Comment: ${ comment }\n`;
 					}
-					fileContent += `\n${ message }`;
+					// Terminate with a trailing newline to match `changelogger add`
+					// output and satisfy .editorconfig's insert_final_newline rule.
+					fileContent += `\n${ message }\n`;
 					writeFileSync( changelogFilePath, fileContent );
 				}
 			} catch ( e ) {
@@ -212,6 +218,10 @@ const program = new Command( 'changefile' )
 
 			const git = simpleGit( {
 				baseDir: tmpRepoPath,
+				allowEnvironment: GIT_IDENTITY_ENVIRONMENT,
+				unsafe: {
+					allowUnsafeHooksPath: true,
+				},
 				config: [ 'core.hooksPath=/dev/null' ],
 			} );
 

@@ -3,12 +3,15 @@
  */
 import type { HTMLElementEvent } from '@woocommerce/types';
 import * as iAPI from '@wordpress/interactivity';
+import type { RangeInputParentStore } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
-import { ProductFiltersContext, ProductFiltersStore } from '../../frontend';
+import type { ProductFiltersContext } from '../../types';
+import type { ProductFiltersStore } from '../../frontend';
 import { formatPrice, getCurrency } from '../../utils/price-currency';
+import { PRODUCT_FILTERS_STORE_NAME } from '../../constants';
 
 const { store, getContext, getServerContext, getConfig } = iAPI;
 
@@ -23,12 +26,11 @@ export type ProductFilterPriceContext = {
 
 const productFilterPriceStore = {
 	state: {
-		get minPrice() {
-			const { activeFilters } = getContext< ProductFiltersContext >();
+		get minPrice(): number {
 			const { minRange } = getServerContext
 				? getServerContext< ProductFilterPriceContext >()
 				: getContext< ProductFilterPriceContext >();
-			const priceFilter = activeFilters.find(
+			const priceFilter = state.activeFilters.find(
 				( filter ) => filter.type === 'price'
 			);
 			if ( priceFilter ) {
@@ -37,12 +39,11 @@ const productFilterPriceStore = {
 			}
 			return minRange;
 		},
-		get maxPrice() {
-			const { activeFilters } = getContext< ProductFiltersContext >();
+		get maxPrice(): number {
 			const { maxRange } = getServerContext
 				? getServerContext< ProductFilterPriceContext >()
 				: getContext< ProductFilterPriceContext >();
-			const priceFilter = activeFilters.find(
+			const priceFilter = state.activeFilters.find(
 				( filter ) => filter.type === 'price'
 			);
 			if ( priceFilter ) {
@@ -70,7 +71,7 @@ const productFilterPriceStore = {
 				? getServerContext< ProductFilterPriceContext >()
 				: getContext< ProductFilterPriceContext >();
 			const { activePriceLabelTemplates } = getConfig();
-			if ( min && min > minRange && max && max < maxRange )
+			if ( min && min > minRange && max && max < maxRange ) {
 				return {
 					activeValue: `${ min }|${ max }`,
 					activeLabel: activePriceLabelTemplates.minAndMax
@@ -83,6 +84,7 @@ const productFilterPriceStore = {
 							formatPrice( max, getCurrency( { minorUnit: 0 } ) )
 						),
 				};
+			}
 
 			if ( min && min > minRange ) {
 				return {
@@ -139,8 +141,12 @@ const productFilterPriceStore = {
 				price.max = value;
 			}
 
-			if ( price.min === minRange ) price.min = 0;
-			if ( price.max === maxRange ) price.max = 0;
+			if ( price.min === minRange ) {
+				price.min = 0;
+			}
+			if ( price.max === maxRange ) {
+				price.max = 0;
+			}
 
 			context.activeFilters = context.activeFilters.filter(
 				( item ) => item.type !== 'price'
@@ -160,19 +166,23 @@ const productFilterPriceStore = {
 				context.activeFilters.push( newActivePriceFilter );
 			}
 		},
-		setMinPrice: ( e: HTMLElementEvent< HTMLInputElement > ) => {
+		setMin: ( e: HTMLElementEvent< HTMLInputElement > ) => {
 			const price = parseInt( e.target.value, 10 );
 			actions.setPrice( 'min', price );
 		},
-		setMaxPrice: ( e: HTMLElementEvent< HTMLInputElement > ) => {
+		setMax: ( e: HTMLElementEvent< HTMLInputElement > ) => {
 			const price = parseInt( e.target.value, 10 );
 			actions.setPrice( 'max', price );
 		},
 	},
 };
 
+// Compile-time protocol conformance check.
+
+productFilterPriceStore satisfies RangeInputParentStore;
+
 export type ProductFilterPriceStore = typeof productFilterPriceStore;
 
 const { state, actions } = store<
 	ProductFiltersStore & ProductFilterPriceStore
->( 'woocommerce/product-filters', productFilterPriceStore );
+>( PRODUCT_FILTERS_STORE_NAME, productFilterPriceStore );

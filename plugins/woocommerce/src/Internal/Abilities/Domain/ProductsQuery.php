@@ -1,0 +1,229 @@
+<?php
+/**
+ * Products query ability definition file.
+ */
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\Internal\Abilities\Domain;
+
+use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
+use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Registers the WooCommerce products query ability.
+ */
+class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
+
+	use ProductAbilityTrait;
+
+	/**
+	 * Get the ability name.
+	 *
+	 * @return string
+	 *
+	 * @since 10.9.0
+	 */
+	public static function get_name(): string {
+		return 'woocommerce/products-query';
+	}
+
+	/**
+	 * Get the ability registration arguments.
+	 *
+	 * @return array
+	 *
+	 * @since 10.9.0
+	 */
+	public static function get_registration_args(): array {
+		return array(
+			'label'               => __( 'Query products', 'woocommerce' ),
+			'description'         => __(
+				'Find products by ID or common catalog filters.',
+				'woocommerce'
+			),
+			'category'            => 'woocommerce',
+			'input_schema'        => self::get_input_schema(),
+			'output_schema'       => self::get_collection_output_schema( 'products', self::get_product_output_schema() ),
+			'execute_callback'    => array( __CLASS__, 'execute' ),
+			'permission_callback' => array( __CLASS__, 'can_query_products' ),
+			'meta'                => array(
+				'show_in_rest' => true,
+				'mcp'          => array(
+					'public' => true,
+					'type'   => 'tool',
+				),
+				'annotations'  => array(
+					'readonly'    => true,
+					'idempotent'  => true,
+					'destructive' => false,
+				),
+			),
+		);
+	}
+
+	/**
+	 * Query products.
+	 *
+	 * @param array $input Ability input.
+	 * @return array|\WP_Error
+	 *
+	 * @since 10.9.0
+	 */
+	public static function execute( array $input ) {
+		if ( ! empty( $input['id'] ) && ! empty( $input['filters'] ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_filters_with_id',
+				__( 'Send either an id or filters, not both.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( ! empty( $input['id'] ) ) {
+			$product = self::get_product_from_input( $input );
+
+			if ( is_wp_error( $product ) ) {
+				return $product;
+			}
+
+			if ( $product->is_type( ProductType::VARIATION ) ) {
+				return new \WP_Error(
+					'woocommerce_product_type_unsupported',
+					__( 'Product type is not supported by this ability.', 'woocommerce' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			return array(
+				'products'    => array( self::format_product_for_response( $product ) ),
+				'total_pages' => 1,
+				'page'        => 1,
+				'per_page'    => 1,
+			);
+		}
+
+		$page     = (int) ( $input['page'] ?? 1 );
+		$per_page = (int) ( $input['per_page'] ?? 10 );
+		$args     = array(
+			'limit'    => $per_page,
+			'page'     => $page,
+			'paginate' => true,
+			'return'   => 'objects',
+		);
+
+		foreach ( array( 'status', 'sku', 'stock_status' ) as $field ) {
+			if ( ! empty( $input[ $field ] ) ) {
+				$args[ $field ] = wc_clean( $input[ $field ] );
+			}
+		}
+
+		if ( isset( $input['type'] ) ) {
+			$args['type'] = $input['type'];
+		}
+
+		foreach ( array( 'virtual', 'downloadable' ) as $field ) {
+			if ( isset( $input[ $field ] ) ) {
+				$args[ $field ] = wc_string_to_bool( $input[ $field ] );
+			}
+		}
+
+		if ( ! empty( $input['search'] ) ) {
+			$args['s'] = wc_clean( $input['search'] );
+		}
+
+		$extension_args = ExtensibleAbilities::get_query_args( 'product', $input );
+		if ( is_wp_error( $extension_args ) ) {
+			return $extension_args;
+		}
+
+		$args[ AbilitiesLoader::EXTENSION_QUERY_VAR ] = $extension_args;
+
+		$results  = wc_get_products( $args );
+		$products = is_object( $results ) && isset( $results->products ) ? $results->products : array();
+		$pages    = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : ( count( $products ) > 0 ? 1 : 0 );
+
+		return array(
+			'products'    => array_map(
+				static function ( $product ) {
+					return self::format_product_for_response( $product );
+				},
+				$products
+			),
+			'total_pages' => $pages,
+			'page'        => $page,
+			'per_page'    => $per_page,
+		);
+	}
+
+	/**
+	 * Check product read access.
+	 *
+	 * @param mixed $input Ability input.
+	 * @return bool
+	 *
+	 * @since 10.9.0
+	 */
+	public static function can_query_products( $input = array() ): bool {
+		$product_id = self::get_id_from_input( $input );
+
+		return wc_rest_check_post_permissions( 'product', 'read', $product_id );
+	}
+
+	/**
+	 * Get the ability input schema.
+	 *
+	 * @return array
+	 */
+	private static function get_input_schema(): array {
+		$schema = array(
+			'type'                 => 'object',
+			'properties'           => array(
+				'id'           => array(
+					'type'    => 'integer',
+					'minimum' => 1,
+				),
+				'search'       => array( 'type' => 'string' ),
+				'sku'          => array(
+					'type'        => 'string',
+					'description' => __( 'Limit results to products with SKUs that partially match this string. Use * to match products with any non-empty SKU.', 'woocommerce' ),
+				),
+				'status'       => array(
+					'type' => 'string',
+					'enum' => self::get_product_query_status_slugs(),
+				),
+				'type'         => self::get_product_type_schema( array_keys( wc_get_product_types() ) ),
+				'virtual'      => array(
+					'type'        => 'boolean',
+					'description' => __( 'Limit results to products that are not shipped (true) or that are shipped (false).', 'woocommerce' ),
+				),
+				'downloadable' => array(
+					'type'        => 'boolean',
+					'description' => __( 'Limit results to products that have files to download (true) or that do not (false).', 'woocommerce' ),
+				),
+				'stock_status' => array(
+					'type' => 'string',
+					'enum' => array_keys( wc_get_product_stock_status_options() ),
+				),
+				'page'         => array(
+					'type'    => 'integer',
+					'default' => 1,
+					'minimum' => 1,
+				),
+				'per_page'     => array(
+					'type'    => 'integer',
+					'default' => 10,
+					'minimum' => 1,
+					'maximum' => 100,
+				),
+			),
+			'additionalProperties' => false,
+			'default'              => array(),
+		);
+		return ExtensibleAbilities::add_query_filters_schema( $schema, 'product' );
+	}
+}

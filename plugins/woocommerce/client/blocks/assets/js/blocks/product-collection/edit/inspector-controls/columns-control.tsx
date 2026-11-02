@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 import {
 	RangeControl,
 	ToggleControl,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
@@ -13,8 +12,8 @@ import {
 /**
  * Internal dependencies
  */
-import { DisplayLayoutControlProps } from '../../types';
-import { getDefaultDisplayLayout } from '../../utils';
+import { DisplayLayoutControlProps, LayoutOptions } from '../../types';
+import { getDefaultDisplayLayout, sanitizeDisplayLayout } from '../../utils';
 
 const columnsLabel = __( 'Columns', 'woocommerce' );
 const toggleLabel = __( 'Responsive', 'woocommerce' );
@@ -31,22 +30,23 @@ interface ColumnsControlProps extends DisplayLayoutControlProps {
 const ColumnsControl = ( props: ColumnsControlProps ) => {
 	const { maxColumns, hideResponsiveToggle } = props;
 	const { type, columns, shrinkColumns } = props.displayLayout;
-	const showColumnsControl = type === 'flex';
+	const showColumnsControl = type === LayoutOptions.GRID;
 
 	const defaultLayout = getDefaultDisplayLayout();
+	const columnCount = columns ?? defaultLayout.columns;
 
 	const onShrinkColumnsToggleChange = ( value: boolean ) => {
 		props.setAttributes( {
-			displayLayout: {
+			displayLayout: sanitizeDisplayLayout( {
 				...props.displayLayout,
 				shrinkColumns: value,
-			},
+			} ),
 		} );
 	};
 
 	const onPanelDeselect = () => {
 		props.setAttributes( {
-			displayLayout: defaultLayout,
+			displayLayout: sanitizeDisplayLayout( defaultLayout ),
 		} );
 	};
 
@@ -55,10 +55,10 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 			return;
 		}
 		props.setAttributes( {
-			displayLayout: {
+			displayLayout: sanitizeDisplayLayout( {
 				...props.displayLayout,
 				columns: value,
-			},
+			} ),
 		} );
 	};
 
@@ -69,7 +69,7 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 		<>
 			<ToolsPanelItem
 				label={ columnsLabel }
-				hasValue={ () => defaultLayout?.columns !== columns }
+				hasValue={ () => defaultLayout.columns !== columnCount }
 				isShownByDefault
 				onDeselect={ onPanelDeselect }
 			>
@@ -78,9 +78,9 @@ const ColumnsControl = ( props: ColumnsControlProps ) => {
 					__nextHasNoMarginBottom
 					label={ columnsLabel }
 					onChange={ onColumnsChange }
-					value={ columns }
+					value={ columnCount }
 					min={ 1 }
-					max={ Math.max( effectiveMaxColumns, columns ) }
+					max={ Math.max( effectiveMaxColumns, columnCount ) }
 				/>
 			</ToolsPanelItem>
 			{ ! hideResponsiveToggle && (

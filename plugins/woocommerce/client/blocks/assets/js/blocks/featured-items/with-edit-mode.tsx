@@ -1,7 +1,9 @@
 /**
  * External dependencies
  */
+import type { useBlockProps } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
+import { usePreviewMode } from '@woocommerce/base-hooks';
 import type { ComponentType } from 'react';
 import { useEffect, useState } from '@wordpress/element';
 import { info } from '@wordpress/icons';
@@ -42,8 +44,10 @@ type EditModeRequiredAttributes = {
 };
 
 interface EditModeRequiredProps< T > {
+	blockProps: ReturnType< typeof useBlockProps >;
 	attributes: EditModeRequiredAttributes & EditorBlock< T >[ 'attributes' ];
 	clientId: string;
+	effectiveCategoryId?: number;
 	debouncedSpeak: ( label: string ) => void;
 	setAttributes: ( attrs: Partial< EditModeRequiredAttributes > ) => void;
 	triggerUrlUpdate: () => void;
@@ -60,11 +64,13 @@ export const withEditMode =
 	( props: EditModeProps< T > ) => {
 		const {
 			attributes,
+			effectiveCategoryId,
 			debouncedSpeak,
 			name,
 			setAttributes,
 			triggerUrlUpdate = () => void null,
 			error,
+			isLoading: isItemLoading,
 		} = props;
 
 		const className = getClassPrefixFromName( name );
@@ -77,12 +83,17 @@ export const withEditMode =
 
 		const hasFeaturedItemId =
 			( name === BLOCK_NAMES.featuredProduct && attributes.productId ) ||
-			( name === BLOCK_NAMES.featuredCategory && attributes.categoryId );
+			( name === BLOCK_NAMES.featuredCategory &&
+				( attributes.categoryId || effectiveCategoryId ) );
+		const canEditItem = ! (
+			name === BLOCK_NAMES.featuredCategory &&
+			! attributes.categoryId &&
+			effectiveCategoryId
+		);
 
 		// Only show edit mode for newly inserted blocks without existing selection
-		const [ editMode, setEditMode ] = useState< boolean >(
-			! hasFeaturedItemId
-		);
+		const [ editMode, setEditMode ] =
+			useState< boolean >( ! hasFeaturedItemId );
 
 		const onDone = () => {
 			if ( selectedOptions ) {
@@ -95,14 +106,25 @@ export const withEditMode =
 		const itemId =
 			name === BLOCK_NAMES.featuredProduct
 				? attributes?.productId
-				: attributes?.categoryId;
+				: attributes?.categoryId || effectiveCategoryId;
 
-		const { status, isDeleted, isLoading } = useFeaturedItemStatus( {
+		const {
+			status,
+			isDeleted,
+			isLoading: isStatusLoading,
+		} = useFeaturedItemStatus( {
 			itemId,
 			itemType: name,
 		} );
+		const isLoading = isItemLoading || isStatusLoading;
+
+		const isPreviewMode = usePreviewMode();
 
 		useEffect( () => {
+			if ( isPreviewMode || ! canEditItem ) {
+				return;
+			}
+
 			if ( ! isLoading ) {
 				const currEditModeValue =
 					( name === BLOCK_NAMES.featuredProduct &&
@@ -113,84 +135,91 @@ export const withEditMode =
 					setEditMode( currEditModeValue );
 				}
 			}
-		}, [ status, isDeleted, name, isLoading ] );
+		}, [ status, isDeleted, name, isLoading, isPreviewMode, canEditItem ] );
 
-		if ( editMode ) {
+		if ( editMode && canEditItem ) {
 			return (
-				<Placeholder
-					icon={ <Icon icon={ icon } /> }
-					label={ label }
-					className={ className }
-				>
-					<HStack alignment="center">
-						{ isDeleted ? (
-							<Icon
-								icon={ info }
-								className="wc-blocks-featured-items__orange-info-icon"
-							/>
-						) : (
-							<Icon icon={ info } />
-						) }
-						<Text>
-							{ isDeleted
-								? getInvalidItemDescription( name )
-								: description }
-						</Text>
-					</HStack>
-					<div className={ `${ className }__selection` }>
-						{ name === BLOCK_NAMES.featuredCategory && (
-							<ProductCategoryControl
-								selected={
-									selectedOptions?.categoryId
-										? [ selectedOptions.categoryId ]
-										: []
-								}
-								onChange={ (
-									value: ProductCategoryResponseItem[] = []
-								) => {
-									const id = value[ 0 ] ? value[ 0 ].id : 0;
-									setSelectedOptions( {
-										categoryId: id,
-										mediaId: 0,
-										mediaSrc: '',
-									} );
-									triggerUrlUpdate();
-								} }
-								isSingle
-							/>
-						) }
-						{ name === BLOCK_NAMES.featuredProduct && (
-							<ProductControl
-								selected={
-									selectedOptions?.productId
-										? [ selectedOptions.productId ]
-										: []
-								}
-								showVariations
-								onChange={ (
-									value: ProductResponseItem[] = []
-								) => {
-									const id = value[ 0 ] ? value[ 0 ].id : 0;
-									setSelectedOptions( {
-										productId: id,
-										mediaId: 0,
-										mediaSrc: '',
-									} );
-									triggerUrlUpdate();
-								} }
-							/>
-						) }
-						<Button variant="primary" onClick={ onDone }>
-							{ __( 'Done', 'woocommerce' ) }
-						</Button>
-					</div>
-				</Placeholder>
+				<div { ...props.blockProps }>
+					<Placeholder
+						icon={ <Icon icon={ icon } /> }
+						label={ label }
+						className={ className }
+					>
+						<HStack alignment="center">
+							{ isDeleted ? (
+								<Icon
+									icon={ info }
+									className="wc-blocks-featured-items__orange-info-icon"
+								/>
+							) : (
+								<Icon icon={ info } />
+							) }
+							<Text>
+								{ isDeleted
+									? getInvalidItemDescription( name )
+									: description }
+							</Text>
+						</HStack>
+						<div className={ `${ className }__selection` }>
+							{ name === BLOCK_NAMES.featuredCategory && (
+								<ProductCategoryControl
+									selected={
+										selectedOptions?.categoryId
+											? [ selectedOptions.categoryId ]
+											: []
+									}
+									onChange={ (
+										value: ProductCategoryResponseItem[] = []
+									) => {
+										const id = value[ 0 ]
+											? value[ 0 ].id
+											: 0;
+										setSelectedOptions( {
+											categoryId: id,
+											mediaId: 0,
+											mediaSrc: '',
+										} );
+										triggerUrlUpdate();
+									} }
+									isSingle
+								/>
+							) }
+							{ name === BLOCK_NAMES.featuredProduct && (
+								<ProductControl
+									selected={
+										selectedOptions?.productId
+											? [ selectedOptions.productId ]
+											: []
+									}
+									showVariations
+									onChange={ (
+										value: ProductResponseItem[] = []
+									) => {
+										const id = value[ 0 ]
+											? value[ 0 ].id
+											: 0;
+										setSelectedOptions( {
+											productId: id,
+											mediaId: 0,
+											mediaSrc: '',
+										} );
+										triggerUrlUpdate();
+									} }
+								/>
+							) }
+							<Button variant="primary" onClick={ onDone }>
+								{ __( 'Done', 'woocommerce' ) }
+							</Button>
+						</div>
+					</Placeholder>
+				</div>
 			);
 		}
 
 		return (
 			<Component
 				{ ...props }
+				canEditItem={ canEditItem }
 				isLoading={ isLoading }
 				error={ isLoading ? null : error }
 				useEditMode={ [ editMode, setEditMode ] }

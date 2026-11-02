@@ -20,6 +20,13 @@ abstract class ImportScheduler implements ImportInterface {
 	const IMPORT_STATS_OPTION = 'woocommerce_admin_import_stats';
 
 	/**
+	 * Scheduler name. Subclasses must override this with a concrete value.
+	 *
+	 * @var string
+	 */
+	public static $name = '';
+
+	/**
 	 * Scheduler traits.
 	 */
 	use SchedulerTraits {
@@ -119,6 +126,7 @@ abstract class ImportScheduler implements ImportInterface {
 	 * @param int|bool $days Number of days to import.
 	 * @param bool     $skip_existing Skip existing records.
 	 * @return void
+	 * @throws \Throwable Re-throws any error from a failed item import after logging diagnostics.
 	 */
 	public static function import_batch( $batch_number, $days, $skip_existing ) {
 		$batch_size = static::get_batch_size( 'import' );
@@ -136,7 +144,12 @@ abstract class ImportScheduler implements ImportInterface {
 		$items = static::get_items( $batch_size, $page, $days, $skip_existing );
 
 		foreach ( $items->ids as $id ) {
-			static::import( $id );
+			try {
+				static::import( $id );
+			} catch ( \Throwable $e ) {
+				static::log_import_error( $id, $e );
+				throw $e;
+			}
 		}
 
 		$import_stats                              = get_option( self::IMPORT_STATS_OPTION, array() );
@@ -147,6 +160,46 @@ abstract class ImportScheduler implements ImportInterface {
 		$properties['imported_count'] = $imported_count;
 
 		wc_admin_record_tracks_event( 'import_job_complete', $properties );
+	}
+
+	/**
+	 * Log details for an item that failed analytics import.
+	 *
+	 * @internal
+	 * @param int        $item_id Import item ID.
+	 * @param \Throwable $error   Error thrown during import.
+	 * @param array      $context Additional logger context.
+	 * @return void
+	 */
+	final protected static function log_import_error( $item_id, \Throwable $error, array $context = array() ) {
+		$logger      = wc_get_logger();
+		$log_context = array_merge(
+			array(
+				'source' => 'wc-analytics-import',
+			),
+			$context,
+			array(
+				'scheduler'       => static::$name,
+				'item_id'         => (int) $item_id,
+				'exception_class' => get_class( $error ),
+				'exception_file'  => $error->getFile(),
+				'exception_line'  => $error->getLine(),
+				'trace'           => $error->getTraceAsString(),
+			)
+		);
+
+		$logger->error(
+			sprintf(
+				'Failed to import analytics item %1$d for %2$s: [%3$s] %4$s in %5$s:%6$d',
+				$item_id,
+				static::$name,
+				get_class( $error ),
+				$error->getMessage(),
+				$error->getFile(),
+				$error->getLine()
+			),
+			$log_context
+		);
 	}
 
 	/**

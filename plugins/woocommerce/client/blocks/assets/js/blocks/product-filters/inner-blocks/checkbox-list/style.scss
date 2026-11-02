@@ -64,6 +64,22 @@ input[type="checkbox"].wc-block-product-filter-checkbox-list__input:focus {
 	);
 }
 
+input[type="checkbox"].wc-block-product-filter-checkbox-list__input:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+
+	+ .wc-block-product-filter-checkbox-list__mark {
+		opacity: 0.5;
+	}
+}
+
+.wc-block-product-filter-checkbox-list__label:has(
+		input.wc-block-product-filter-checkbox-list__input:disabled
+	) {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
 svg.wc-block-product-filter-checkbox-list__mark {
 	box-sizing: border-box;
 	display: none;
@@ -100,22 +116,64 @@ input[type="checkbox"].wc-block-product-filter-checkbox-list__input:checked {
 
 .wc-block-product-filter-checkbox-list__text {
 	display: contents;
-	color: var(
-		--wc-product-filter-checkbox-list-label-element,
-		currentColor
-	);
+	color: var(--wc-product-filter-checkbox-list-label-element, currentColor);
 }
 
 .wc-block-product-filter-checkbox-list__count {
-	display: contents;
 	white-space: nowrap;
 }
 
-.wc-block-product-filter-checkbox-list__show-more {
-	text-decoration: underline;
+.wc-block-product-filter-checkbox-list__color-swatch {
+	border-radius: 50%;
+	border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+	display: inline-block;
+	flex-shrink: 0;
+	height: 1em;
+	margin-right: 0.25em;
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+	overflow: hidden;
+	width: 1em;
+
+	&.is-empty {
+		background: linear-gradient(
+			to bottom right,
+			transparent calc(50% - 0.5px),
+			color-mix(in srgb, currentColor 20%, transparent) calc(50% - 0.5px),
+			color-mix(in srgb, currentColor 20%, transparent) calc(50% + 0.5px),
+			transparent calc(50% + 0.5px)
+		);
+	}
+}
+
+.wc-block-product-filter-checkbox-list__stars {
+	display: inline-block;
+	height: 1.55em;
+	line-height: 0;
+	overflow: hidden;
+	color: var(--wc-product-filter-checkbox-list-label-element, currentColor);
+}
+
+.wc-block-product-filter-checkbox-list__stars-svg {
+	display: block;
+	width: auto;
+	height: 1.55em;
+}
+
+.wc-block-product-filter-checkbox-list__show-more-button {
 	appearance: none;
-	font-family: inherit;
 	background: transparent;
-	border: none;
+	border: 0;
 	padding: 0;
+	font: inherit;
+	font-size: 0.875em;
+	color: inherit;
+	text-decoration: underline;
+	cursor: pointer;
+
+	&:hover,
+	&:focus {
+		text-decoration: none;
+	}
 }

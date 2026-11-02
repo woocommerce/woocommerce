@@ -2,16 +2,16 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { typography, color, layout } from '@wordpress/icons';
+import { typography, color, background, layout } from '@wordpress/icons';
 import {
-	__experimentalVStack as VStack, // eslint-disable-line
+	__experimentalVStack as VStack,
 	Card,
 	CardBody,
 	CardMedia,
-	__experimentalItemGroup as ItemGroup, // eslint-disable-line
-	__experimentalItem as Item, // eslint-disable-line
-	__experimentalHStack as HStack, // eslint-disable-line
-	__experimentalNavigatorButton as NavigatorButton, // eslint-disable-line
+	__experimentalItemGroup as ItemGroup,
+	__experimentalItem as Item,
+	__experimentalHStack as HStack,
+	__experimentalNavigatorButton as NavigatorButton,
 	Icon,
 	FlexItem,
 } from '@wordpress/components';
@@ -20,9 +20,11 @@ import {
  * Internal dependencies
  */
 import { Preview } from './preview';
+import { useHasBackgroundScreen } from '../hooks';
 import { recordEvent } from '../../../events';
 
 export function ScreenRoot(): JSX.Element {
+	const hasBackgroundScreen = useHasBackgroundScreen();
 	return (
 		<Card
 			size="small"
@@ -50,7 +52,10 @@ export function ScreenRoot(): JSX.Element {
 								<HStack justify="flex-start">
 									<Icon icon={ typography } size={ 24 } />
 									<FlexItem>
-										{ __( 'Typography', 'woocommerce' ) }
+										{ __(
+											'Typography',
+											__i18n_text_domain__
+										) }
 									</FlexItem>
 								</HStack>
 							</Item>
@@ -68,11 +73,34 @@ export function ScreenRoot(): JSX.Element {
 								<HStack justify="flex-start">
 									<Icon icon={ color } size={ 24 } />
 									<FlexItem>
-										{ __( 'Colors', 'woocommerce' ) }
+										{ __( 'Colors', __i18n_text_domain__ ) }
 									</FlexItem>
 								</HStack>
 							</Item>
 						</NavigatorButton>
+						{ hasBackgroundScreen && (
+							<NavigatorButton
+								path="/background"
+								onClick={ () =>
+									recordEvent(
+										'styles_sidebar_navigation_click',
+										{ path: 'background' }
+									)
+								}
+							>
+								<Item>
+									<HStack justify="flex-start">
+										<Icon icon={ background } size={ 24 } />
+										<FlexItem>
+											{ __(
+												'Background',
+												__i18n_text_domain__
+											) }
+										</FlexItem>
+									</HStack>
+								</Item>
+							</NavigatorButton>
+						) }
 						<NavigatorButton
 							path="/layout"
 							onClick={ () =>
@@ -86,7 +114,7 @@ export function ScreenRoot(): JSX.Element {
 								<HStack justify="flex-start">
 									<Icon icon={ layout } size={ 24 } />
 									<FlexItem>
-										{ __( 'Layout', 'woocommerce' ) }
+										{ __( 'Layout', __i18n_text_domain__ ) }
 									</FlexItem>
 								</HStack>
 							</Item>
