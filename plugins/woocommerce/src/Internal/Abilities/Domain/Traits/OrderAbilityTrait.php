@@ -175,7 +175,7 @@ trait OrderAbilityTrait {
 								'name'         => array( 'type' => 'string' ),
 								'product_id'   => array( 'type' => 'integer' ),
 								'variation_id' => array( 'type' => 'integer' ),
-								'quantity'     => array( 'type' => 'integer' ),
+								'quantity'     => array( 'type' => wc_is_stock_amount_integer() ? 'integer' : 'number' ),
 								'subtotal'     => array( 'type' => 'string' ),
 								'total'        => array( 'type' => 'string' ),
 							),

@@ -2132,6 +2132,37 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return fractional order quantities when the store supports them.
+	 */
+	public function test_order_output_allows_fractional_quantities(): void {
+		$this->unregister_domain_abilities();
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', array( $this, 'preserve_fractional_stock_amount' ) );
+
+		try {
+			$this->register_domain_abilities();
+			$order                     = \WC_Helper_Order::create_order();
+			$this->created_order_ids[] = $order->get_id();
+			foreach ( $order->get_items() as $item ) {
+				$item->set_quantity( 1.5 );
+				$item->save();
+			}
+
+			$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
+				array(
+					'id'                 => $order->get_id(),
+					'include_line_items' => true,
+				)
+			);
+			$this->assertNotWPError( $result );
+			$this->assertSame( 1.5, $result['orders'][0]['line_items'][0]['quantity'] );
+		} finally {
+			remove_filter( 'woocommerce_stock_amount', array( $this, 'preserve_fractional_stock_amount' ) );
+			add_filter( 'woocommerce_stock_amount', 'intval' );
+		}
+	}
+
+	/**
 	 * @testdox Should omit empty external product fields and preserve configured values.
 	 */
 	public function test_external_product_output_omits_empty_fields(): void {
