@@ -793,6 +793,12 @@ trait ProductAbilityTrait {
 			}
 		}
 
+		foreach ( array( 'date_created', 'date_created_gmt', 'date_modified', 'date_modified_gmt' ) as $key ) {
+			if ( ! isset( $data[ $key ] ) ) {
+				unset( $data[ $key ] );
+			}
+		}
+
 		return ExtensibleAbilities::add_fields_to_object( $data, 'product', $product );
 	}
 

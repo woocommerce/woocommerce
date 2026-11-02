@@ -1980,7 +1980,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return null for non-date filter values without failing a product update.
+	 * @testdox Should omit non-date filter values without failing a product update.
 	 * @testWith ["2026-07-15T10:00:00"]
 	 *           [1784109600]
 	 *           ["1784109600"]
@@ -1994,12 +1994,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		update_option( 'timezone_string', 'Europe/Amsterdam' );
 		$product                     = \WC_Helper_Product::create_simple_product();
 		$this->created_product_ids[] = $product->get_id();
-		add_filter(
-			'woocommerce_product_get_date_created',
-			static function () use ( $date ) {
-				return $date;
-			}
-		);
+		$filter                      = static function () use ( $date ) {
+			return $date;
+		};
+		add_filter( 'woocommerce_product_get_date_created', $filter );
+		add_filter( 'woocommerce_product_get_date_modified', $filter );
 
 		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
@@ -2009,8 +2008,12 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $result );
-		$this->assertNull( $result['product']['date_created'] );
-		$this->assertNull( $result['product']['date_created_gmt'] );
+		$query = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'id' => $product->get_id() ) );
+		$this->assertNotWPError( $query );
+		foreach ( array( 'date_created', 'date_created_gmt', 'date_modified', 'date_modified_gmt' ) as $field ) {
+			$this->assertArrayNotHasKey( $field, $result['product'] );
+			$this->assertArrayNotHasKey( $field, $query['products'][0] );
+		}
 		$this->assertSame( 'Filtered date update', wc_get_product( $product->get_id() )->get_name() );
 	}
 
@@ -2275,8 +2278,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should reject unexpected null output instead of hiding the invalid field.
 	 * @testWith ["product", "woocommerce_product_get_name", "name"]
 	 *           ["order", "woocommerce_order_get_payment_method", "payment_method"]
-	 *           ["product", "woocommerce_product_get_date_created", "date_created"]
-	 *           ["product", "woocommerce_product_get_date_modified", "date_modified"]
 	 *
 	 * @param string $resource_name Resource to query.
 	 * @param string $hook     Getter filter to return null.
@@ -2298,23 +2299,38 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should reject null dates on a saved order.
+	 * @testdox Should omit non-date filter values without failing an order note write.
+	 * @testWith ["2026-07-15T10:00:00"]
+	 *           [1784109600]
+	 *           ["1784109600"]
+	 *           ["invalid date"]
+	 *           [[]]
+	 *           [false]
+	 *           [null]
+	 * @param mixed $date Filtered date.
 	 */
-	public function test_order_output_rejects_null_dates(): void {
-		$order = \WC_Helper_Order::create_order();
-		add_filter( 'woocommerce_order_get_date_created', '__return_null' );
-		add_filter( 'woocommerce_order_get_date_modified', '__return_null' );
+	public function test_order_output_handles_filtered_dates( $date ): void {
+		$order  = \WC_Helper_Order::create_order();
+		$filter = static function () use ( $date ) {
+			return $date;
+		};
+		add_filter( 'woocommerce_order_get_date_created', $filter );
+		add_filter( 'woocommerce_order_get_date_modified', $filter );
 
-		try {
-			$result = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'id' => $order->get_id() ) );
-		} finally {
-			remove_filter( 'woocommerce_order_get_date_created', '__return_null' );
-			remove_filter( 'woocommerce_order_get_date_modified', '__return_null' );
+		$result = wp_get_ability( 'woocommerce/order-add-note' )->execute(
+			array(
+				'id'   => $order->get_id(),
+				'note' => 'Filtered date note',
+			)
+		);
+		$this->assertNotWPError( $result );
+		$query = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'id' => $order->get_id() ) );
+		$this->assertNotWPError( $query );
+		foreach ( array( 'date_created', 'date_created_gmt', 'date_modified', 'date_modified_gmt' ) as $field ) {
+			$this->assertArrayNotHasKey( $field, $result['order'] );
+			$this->assertArrayNotHasKey( $field, $query['orders'][0] );
 		}
-
-		$this->assertWPError( $result );
-		$this->assertSame( 'ability_invalid_output', $result->get_error_code() );
-		$this->assertStringContainsString( 'date_created', $result->get_error_message() );
+		$this->assertSame( 'Filtered date note', wc_get_order_note( $result['note_id'] )->content );
 	}
 
 	/**
