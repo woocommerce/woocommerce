@@ -379,14 +379,17 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should only render shop metadata when coming-soon access is allowed.
-	 * @testWith ["", false]
-	 *           ["invalid", false]
-	 *           ["secret", true]
+	 * @testWith ["", "", false]
+	 *           ["invalid", "", false]
+	 *           ["secret", "", true]
+	 *           ["", "invalid", false]
+	 *           ["", "secret", true]
 	 *
-	 * @param string $cookie Share cookie value.
+	 * @param string $cookie  Share cookie value.
+	 * @param string $key     Share link key.
 	 * @param bool   $allowed Whether access is allowed.
 	 */
-	public function test_shop_metadata_respects_coming_soon_access( string $cookie, bool $allowed ): void {
+	public function test_shop_metadata_respects_coming_soon_access( string $cookie, string $key, bool $allowed ): void {
 		$visibility = new \ReflectionProperty( ComingSoonRequestHandler::class, 'show_coming_soon' );
 		$visibility->setAccessible( true );
 		$original_visibility = $visibility->getValue();
@@ -411,15 +414,27 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 			update_option( 'woocommerce_store_pages_only', 'no' );
 			update_option( 'woocommerce_private_link', 'yes' );
 			update_option( 'woocommerce_share_key', 'secret' );
-			unset( $_GET['woo-share'] );
 			$_COOKIE['woo-share'] = $cookie;
-			$this->go_to( get_permalink( $shop_id ) );
+			$shop_url             = get_permalink( $shop_id );
+			$this->go_to( $key ? add_query_arg( 'woo-share', $key, $shop_url ) : $shop_url );
+			$_GET['woo-share'] = $key;
 			$this->sut->handle_template_redirect();
-			wc_get_container()->get( ComingSoonRequestHandler::class )->handle_classic_template_include( '/original.php' );
+			// PHPUnit has already sent output when the valid share link sets its cookie.
+			set_error_handler( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Suppress the expected cookie header warning in PHPUnit.
+				static function ( $severity, $message ) {
+					return E_WARNING === $severity && 0 === strpos( $message, 'Cannot modify header information' );
+				}
+			);
+			try {
+				wc_get_container()->get( ComingSoonRequestHandler::class )->handle_classic_template_include( '/original.php' );
+			} finally {
+				restore_error_handler();
+			}
 			$tags = $this->render_meta_tags( '' );
 
 			if ( $allowed ) {
 				$this->assertSame( array( 'Private shop' ), $tags['og:title'] ?? array() );
+				$this->assertSame( array( $shop_url ), $tags['og:url'] ?? array() );
 			} else {
 				$this->assertSame( array(), $tags, 'Blocked requests must not expose shop metadata.' );
 			}
