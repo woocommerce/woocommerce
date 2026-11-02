@@ -117,7 +117,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			}
 		}
 
-		$args['status'] = array_map( 'wc_clean', wp_parse_list( $input['status'] ?? array() ) );
+		$args['status'] = array_map( 'wc_clean', array_map( 'strval', wp_parse_list( $input['status'] ?? array() ) ) );
 
 		if ( empty( $args['status'] ) ) {
 			$args['status'] = 'shop_order' === $args['type'] ? self::get_allowed_order_status_slugs() : self::get_query_order_status_slugs();
