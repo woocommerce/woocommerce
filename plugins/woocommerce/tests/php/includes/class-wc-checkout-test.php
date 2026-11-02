@@ -952,6 +952,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @testdox Resuming a pending order with an unchanged cart keeps its item IDs.
 	 */
 	public function test_create_order_resume_keeps_item_ids_when_cart_is_unchanged(): void {
+		$this->assertNotFalse(
+			has_action( 'woocommerce_new_order_item', array( WC()->deprecated_hook_handlers['actions'], 'maybe_handle_deprecated_hook' ) ),
+			'The core legacy hook forwarder must not prevent item reuse.'
+		);
 		$order_id        = $this->create_order_with_line_item_and_fee();
 		$before          = $this->get_order_item_ids_by_type( $order_id );
 		$line_item_calls = did_action( 'woocommerce_checkout_create_order_line_item' );
@@ -967,7 +971,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Resuming a pending order whose $item_type cart section changed replaces only those items, and fires woocommerce_remove_order_items once for them.
+	 * @testdox Resuming a pending order whose $item_type cart section changed replaces only those items.
 	 * @testWith ["fee"]
 	 *           ["shipping"]
 	 *           ["tax"]
@@ -980,20 +984,11 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$before   = $this->get_order_item_ids_by_type( $order_id );
 		$this->change_cart_section( $order_id, $item_type );
 		$line_item_calls = did_action( 'woocommerce_checkout_create_order_line_item' );
-		$removed_types   = array();
-		add_action(
-			'woocommerce_remove_order_items',
-			function ( $order, $type ) use ( &$removed_types ) {
-				unset( $order );
-				$removed_types[] = $type;
-			},
-			10,
-			2
-		);
+		$removal_calls   = did_action( 'woocommerce_remove_order_items' );
 
 		$this->resume_order( $order_id );
 
-		$this->assertSame( array( $item_type ), $removed_types, 'Only the changed type should be removed, once.' );
+		$this->assertSame( $removal_calls + 1, did_action( 'woocommerce_remove_order_items' ), 'Only the changed type should be removed, once.' );
 		$this->assert_items_replaced( $before, $this->get_order_item_ids_by_type( $order_id ), array( $item_type ) );
 		$this->assertSame( $line_item_calls, did_action( 'woocommerce_checkout_create_order_line_item' ), 'Kept line items should not be created again.' );
 		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) wc_get_order( $order_id )->get_total(), 'The order total should match the cart.' );
@@ -1353,6 +1348,221 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Resuming an order rebuilds every item when $hook has a callback, even if the callback does not change items.
+	 * @testWith ["woocommerce_checkout_create_order_line_item"]
+	 *           ["woocommerce_checkout_create_order_fee_item"]
+	 *           ["woocommerce_checkout_create_order_shipping_item"]
+	 *           ["woocommerce_checkout_create_order_tax_item"]
+	 *           ["woocommerce_checkout_create_order_coupon_item"]
+	 *           ["woocommerce_checkout_create_order_line_item_object"]
+	 *           ["woocommerce_new_order_item"]
+	 *
+	 * @param string $hook The creation hook to register after the first checkout.
+	 */
+	public function test_create_order_resume_rebuilds_items_with_creation_callbacks( string $hook ): void {
+		$order_id = $this->create_order_with_shipping_taxes_and_coupon();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$calls    = 0;
+		add_filter(
+			$hook,
+			function ( $value ) use ( &$calls ) {
+				++$calls;
+				return $value;
+			},
+			0
+		);
+		add_filter( 'woocommerce_checkout_keep_order_items_on_resume', '__return_true' );
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id ) );
+		$after = $this->get_order_item_ids_by_type( $order_id );
+		$this->assert_items_replaced( $before, $after, array_keys( $before ) );
+		$this->assertGreaterThan( 0, $calls, 'The newly registered callback must run on retry.' );
+
+		$calls = 0;
+		$this->assertSame( $order_id, $this->resume_order( $order_id ) );
+		$this->assert_items_replaced( $after, $this->get_order_item_ids_by_type( $order_id ), array_keys( $after ) );
+		$this->assertGreaterThan( 0, $calls, 'The callback must also run on subsequent retries.' );
+		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) wc_get_order( $order_id )->get_total() );
+	}
+
+	/**
+	 * @testdox Resuming an order calls $hook once for all items when it has a callback.
+	 * @testWith ["woocommerce_remove_order_items"]
+	 *           ["woocommerce_removed_order_items"]
+	 *
+	 * @param string $hook The removal hook.
+	 */
+	public function test_create_order_resume_rebuilds_items_with_removal_callbacks( string $hook ): void {
+		$order_id = $this->create_order_with_shipping_taxes_and_coupon();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$types    = array();
+		add_action(
+			$hook,
+			function ( $order, $type ) use ( &$types ) {
+				$types[] = $type;
+			},
+			10,
+			2
+		);
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id ) );
+
+		$this->assertSame( array( null ), $types, 'The removal callback must receive the original whole-order call.' );
+		$this->assert_items_replaced( $before, $this->get_order_item_ids_by_type( $order_id ), array_keys( $before ) );
+	}
+
+	/**
+	 * @testdox Resuming an order rebuilds items when the core forwarder has a listener on $hook.
+	 * @testWith ["woocommerce_order_add_shipping"]
+	 *           ["woocommerce_order_add_coupon"]
+	 *           ["woocommerce_order_add_tax"]
+	 *           ["woocommerce_order_add_fee"]
+	 *           ["woocommerce_add_shipping_order_item"]
+	 *           ["woocommerce_add_order_item_meta"]
+	 *           ["woocommerce_add_order_fee_meta"]
+	 *
+	 * @param string $hook The deprecated creation hook.
+	 */
+	public function test_create_order_resume_rebuilds_items_with_legacy_callbacks( string $hook ): void {
+		$this->setExpectedDeprecated( $hook );
+		$order_id = $this->create_order_with_shipping_taxes_and_coupon();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$calls    = 0;
+		add_action(
+			$hook,
+			function () use ( &$calls ) {
+				++$calls;
+			}
+		);
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id ) );
+
+		$this->assertGreaterThan( 0, $calls, 'The core forwarder must call the legacy listener on retry.' );
+		$this->assert_items_replaced( $before, $this->get_order_item_ids_by_type( $order_id ), array_keys( $before ) );
+	}
+
+	/**
+	 * @testdox Resuming an order refreshes derived item data through $hook, including a callback that initially writes nothing.
+	 * @testWith ["woocommerce_checkout_create_order_line_item", "old@example.com"]
+	 *           ["woocommerce_checkout_create_order_line_item", ""]
+	 *           ["woocommerce_checkout_create_order_line_item_object", "old@example.com"]
+	 *
+	 * @param string $hook The item creation hook.
+	 * @param string $email The billing email on the first checkout.
+	 */
+	public function test_create_order_resume_refreshes_item_data_from_order( string $hook, string $email ): void {
+		add_filter(
+			$hook,
+			function ( $item, $cart_item_key, $values, $order ) {
+				if ( '' !== $order->get_billing_email() ) {
+					$item->add_meta_data( '_recipient', $order->get_billing_email(), true );
+				}
+				return $item;
+			},
+			10,
+			4
+		);
+		$order_id = $this->create_order_with_line_item_and_fee( array( 'billing_email' => $email ) );
+		$items    = wc_get_order( $order_id )->get_items();
+		$this->assertSame( $email, current( $items )->get_meta( '_recipient' ) );
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id, array( 'billing_email' => 'new@example.com' ) ) );
+		$items = wc_get_order( $order_id )->get_items();
+
+		$this->assertSame( 'new@example.com', current( $items )->get_meta( '_recipient' ) );
+	}
+
+	/**
+	 * @testdox Resuming an order refreshes item metadata written directly to the database during item creation.
+	 */
+	public function test_create_order_resume_refreshes_item_data_written_during_save(): void {
+		add_action(
+			'woocommerce_new_order_item',
+			function ( $item_id, $item, $order_id ) {
+				wc_update_order_item_meta( $item_id, '_recipient', wc_get_order( $order_id )->get_billing_email() );
+			},
+			10,
+			3
+		);
+		$order_id = $this->create_order_with_line_item_and_fee( array( 'billing_email' => 'old@example.com' ) );
+		$items    = wc_get_order( $order_id )->get_items();
+		$this->assertSame( 'old@example.com', current( $items )->get_meta( '_recipient' ) );
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id, array( 'billing_email' => 'new@example.com' ) ) );
+		$items = wc_get_order( $order_id )->get_items();
+
+		$this->assertSame( 'new@example.com', current( $items )->get_meta( '_recipient' ) );
+	}
+
+	/**
+	 * @testdox Resuming an order keeps item IDs after its item creation callback is removed.
+	 */
+	public function test_create_order_resume_keeps_items_after_callback_is_removed(): void {
+		add_action( 'woocommerce_checkout_create_order_line_item', '__return_null' );
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		remove_action( 'woocommerce_checkout_create_order_line_item', '__return_null' );
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id ) );
+
+		$this->assertSame( $before, $this->get_order_item_ids_by_type( $order_id ) );
+	}
+
+	/**
+	 * @testdox Resuming a failed order detects item callbacks registered by $hook during the retry.
+	 * @testWith ["woocommerce_resume_order"]
+	 *           ["woocommerce_checkout_keep_order_items_on_resume"]
+	 *
+	 * @param string $hook The hook that registers the item callback.
+	 */
+	public function test_create_order_resume_detects_callbacks_registered_during_retry( string $hook ): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$order    = wc_get_order( $order_id );
+		$order->set_status( OrderStatus::FAILED );
+		$order->save();
+		$before = $this->get_order_item_ids_by_type( $order_id );
+		add_filter(
+			$hook,
+			function ( $value ) {
+				add_action( 'woocommerce_checkout_create_order_line_item', '__return_null' );
+				return $value;
+			}
+		);
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id ) );
+
+		$this->assert_items_replaced( $before, $this->get_order_item_ids_by_type( $order_id ), array_keys( $before ) );
+	}
+
+	/**
+	 * @testdox Resuming an order treats an overridden legacy forwarder as an extension callback.
+	 */
+	public function test_create_order_resume_rebuilds_items_with_custom_legacy_forwarder(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$handler  = new class() extends WC_Deprecated_Action_Hooks {
+			/**
+			 * Number of callback invocations.
+			 *
+			 * @var int
+			 */
+			public $calls = 0;
+
+			/**
+			 * Record invocations instead of forwarding legacy hooks.
+			 */
+			public function maybe_handle_deprecated_hook() {
+				++$this->calls;
+			}
+		};
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id ) );
+
+		$this->assertGreaterThan( 0, $handler->calls );
+		$this->assert_items_replaced( $before, $this->get_order_item_ids_by_type( $order_id ), array_keys( $before ) );
+	}
+
+	/**
 	 * @testdox Resuming a pending order replaces line items that no longer match the cart, even when the cart hash still matches.
 	 */
 	public function test_create_order_resume_replaces_line_items_when_cart_hash_misses_a_quantity_change(): void {
@@ -1427,9 +1637,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Creates an order from a cart with one product and one fee.
 	 *
+	 * @param array $data Posted checkout data to add.
 	 * @return int The order ID.
 	 */
-	private function create_order_with_line_item_and_fee(): int {
+	private function create_order_with_line_item_and_fee( array $data = array() ): int {
 		$product = WC_Helper_Product::create_simple_product();
 		add_action(
 			'woocommerce_cart_calculate_fees',
@@ -1440,7 +1651,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->calculate_totals();
 
-		$order_id = $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+		$order_id = $this->sut->create_order( array_merge( array( 'payment_method' => WC_Gateway_BACS::ID ), $data ) );
 		$this->assertIsInt( $order_id );
 
 		return $order_id;
@@ -1667,14 +1878,15 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Runs checkout again with the order set as awaiting payment, as when a shopper retries a failed payment.
 	 *
-	 * @param int $order_id The order awaiting payment.
+	 * @param int   $order_id The order awaiting payment.
+	 * @param array $data     Posted checkout data to add.
 	 * @return int|WP_Error The order ID returned by create_order().
 	 */
-	private function resume_order( int $order_id ) {
+	private function resume_order( int $order_id, array $data = array() ) {
 		$original = WC()->session->get( 'order_awaiting_payment' );
 		WC()->session->set( 'order_awaiting_payment', $order_id );
 		try {
-			return $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+			return $this->sut->create_order( array_merge( array( 'payment_method' => WC_Gateway_BACS::ID ), $data ) );
 		} finally {
 			WC()->session->set( 'order_awaiting_payment', $original );
 		}
