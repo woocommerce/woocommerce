@@ -90,7 +90,7 @@ catalogs:
         prettier: npm:wp-prettier@3.9.6
         simple-git: ^4.0.2
         stylelint: ^16.9.0
-        webpack: 5.97.x
+        webpack: 5.112.2
 
 packages:
     - 'packages/js/*'
