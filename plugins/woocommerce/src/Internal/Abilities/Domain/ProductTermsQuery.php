@@ -152,10 +152,11 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 			$output['menu_order'] = (int) get_term_meta( $term->term_id, 'order', true );
 			$image_id             = (int) get_term_meta( $term->term_id, 'thumbnail_id', true );
 			$image                = $image_id ? get_post( $image_id ) : null;
-			if ( $image && 'attachment' === $image->post_type ) {
+			$image_url            = $image ? wp_get_attachment_url( $image->ID ) : false;
+			if ( $image && 'attachment' === $image->post_type && $image_url ) {
 				$output['image'] = array(
 					'id'   => $image->ID,
-					'src'  => wp_get_attachment_url( $image->ID ),
+					'src'  => $image_url,
 					'name' => get_the_title( $image ),
 					'alt'  => get_post_meta( $image->ID, '_wp_attachment_image_alt', true ),
 				);

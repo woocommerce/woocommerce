@@ -323,8 +323,18 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'Summer products', $image['alt'] );
 		$this->assertSame( wp_get_attachment_url( $image_id ), $image['src'] );
 		foreach ( array( 'date_created', 'date_created_gmt', 'date_modified', 'date_modified_gmt' ) as $field ) {
-			$this->assertMatchesRegularExpression( '/(?:Z|[+-]\\d{2}:\\d{2})$/', $image[ $field ] );
+			$this->assertInstanceOf( \DateTimeImmutable::class, \DateTimeImmutable::createFromFormat( DATE_RFC3339, $image[ $field ] ) );
 		}
+		add_filter( 'wp_get_attachment_url', '__return_false' );
+		$result = $ability->execute(
+			array(
+				'taxonomy' => $taxonomy,
+				'include'  => array( $id ),
+			)
+		);
+		remove_filter( 'wp_get_attachment_url', '__return_false' );
+		$this->assertIsArray( $result );
+		$this->assertArrayNotHasKey( 'image', $result['terms'][0] );
 		update_term_meta( $id, 'thumbnail_id', 99999999 );
 		$result = $ability->execute(
 			array(
