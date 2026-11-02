@@ -41,7 +41,7 @@ test.describe( 'WooCommerce General Settings', { tag: tags.SERVICES }, () => {
 	} );
 
 	test(
-		'Save Changes button enables on change and the selling location and store address settings persist.',
+		'Save Changes button stays disabled until a change, and the selling location and base location settings persist.',
 		{
 			tag: [ tags.NON_CRITICAL, tags.NOT_E2E ],
 		},
