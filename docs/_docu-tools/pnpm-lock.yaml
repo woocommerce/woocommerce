@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  markdownlint>re2js: 2.8.7
+
 importers:
 
   .:
@@ -4763,9 +4766,9 @@ packages:
     resolution: {integrity: sha512-y3bGgqKj3QBdxLbLkomlohkvsA8gdAiUQlSBJnBhfn+BPxg4bc62d8TcBW15wavDfgexCgccckhcZvywyQYPOw==}
     hasBin: true
 
-  re2js@2.8.6:
-    resolution: {integrity: sha512-xLgQil4kIUCrAzVk9fRSkxkFNwmygLFjVxXrLc65aE1F0+Zsb8rxumFBy4XKyvgMCTL6kilDq3EZ0piE2dP/Dg==}
-    engines: {node: '>=18.0.0'}
+  re2js@2.8.7:
+    resolution: {integrity: sha512-bRSL/vn3KAmlGfGNoVpcsBXLaVvl6AbuvMMWbz0m3vBj60nj+p2/biozfBUOSBP+5XTduF6mr6IO/ZVjmqqkVQ==}
+    engines: {node: '>=20.0.0'}
 
   react-dom@19.2.8:
     resolution: {integrity: sha512-rVprimfGBG3DR+Tq0IQG2DT5PxKth1WIGDmj5yPmlzr4YBe7uyE+Du4oVqTDXZSHGGGXRtTJEGSSePyQCMBglQ==}
@@ -10581,7 +10584,7 @@ snapshots:
       micromark-extension-gfm-table: 2.1.2
       micromark-extension-math: 3.1.0
       micromark-util-types: 2.0.3
-      re2js: 2.8.6
+      re2js: 2.8.7
       string-width: 8.3.0
     transitivePeerDependencies:
       - supports-color
@@ -12012,7 +12015,7 @@ snapshots:
       minimist: 1.2.8
       strip-json-comments: 2.0.1
 
-  re2js@2.8.6: {}
+  re2js@2.8.7: {}
 
   react-dom@19.2.8(react@19.2.8):
     dependencies:
