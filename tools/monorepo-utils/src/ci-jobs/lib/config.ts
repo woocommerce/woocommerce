@@ -378,9 +378,9 @@ interface ReportConfig {
 	resultsPath: string;
 
 	/**
-	 * Whether Allure results exists and an Allure report should be generated and possibly published.
+	 * Whether the results should be passed to the CI step that publishes test reports.
 	 */
-	allure: boolean;
+	publish: boolean;
 }
 
 /**
@@ -513,6 +513,13 @@ function parseTestJobConfig(
 			throw new ConfigError( 'The "report" option must be an object.' );
 		}
 
+		// Without this, a job still using the old key would silently stop publishing its report.
+		if ( 'allure' in raw.report ) {
+			throw new ConfigError(
+				'The "allure" report option was renamed to "publish".'
+			);
+		}
+
 		if (
 			! raw.report.resultsBlobName ||
 			typeof raw.report.resultsBlobName !== 'string'
@@ -531,16 +538,16 @@ function parseTestJobConfig(
 			);
 		}
 
-		if ( raw.report.allure && typeof raw.report.allure !== 'boolean' ) {
+		if ( raw.report.publish && typeof raw.report.publish !== 'boolean' ) {
 			throw new ConfigError(
-				'A boolean "allure" option is required for report.'
+				'A boolean "publish" option is required for report.'
 			);
 		}
 
 		config.report = {
 			resultsBlobName: raw.report.resultsBlobName,
 			resultsPath: raw.report.resultsPath,
-			allure: raw.report.allure,
+			publish: raw.report.publish,
 		};
 	}
 
