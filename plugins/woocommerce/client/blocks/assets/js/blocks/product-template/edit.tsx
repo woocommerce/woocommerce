@@ -222,11 +222,11 @@ const ProductTemplateEdit = (
 			},
 			queryContext = [ { page: 1 } ],
 			templateSlug,
-			displayLayout: { type: layoutType, columns, shrinkColumns } = {
-				type: 'flex',
-				columns: 3,
-				shrinkColumns: false,
-			},
+			displayLayout: {
+				type: layoutType = 'flex',
+				columns = 3,
+				shrinkColumns = false,
+			} = {},
 			queryContextIncludes = [],
 			__privateProductCollectionPreviewState,
 		},

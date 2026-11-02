@@ -91,10 +91,6 @@ phpcs-report.xml
 #PHP Unit
 .phpunit.result.cache
 
-# Allure directories
-allure-report
-allure-results
-
 # Code analyzer output and env
 changes.json
 .env
