@@ -175,7 +175,8 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 			),
 			'analytics feature turned off'      => array(
 				function () {
-					update_option( 'woocommerce_analytics_enabled', 'no' );
+					// A filter, not update_option(): saving the option makes Analytics redirect on the next settings save.
+					add_filter( 'pre_option_woocommerce_analytics_enabled', fn() => 'no' );
 				},
 			),
 		);
