@@ -64,8 +64,26 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 | `product_jsonld_present` | The newest product page has Product (or ProductGroup) JSON-LD that parses, from WooCommerce, an SEO plugin or the theme. |
 | `product_jsonld_required_fields` | That JSON-LD gives a name, an image and an offer, from one block or several. Skipped when the page has no Product JSON-LD. |
 | `product_offer_jsonld` | One of its offers has a price (`price`, `lowPrice` or a price specification, as a number or with a currency) and an availability. Skipped when the page has no Product JSON-LD. |
+| `llms_txt_present` | `/llms.txt` at the host root is served as text. |
+| `llms_txt_valid` | It starts with a `# Name` heading. |
+| `llms_txt_links_resolve` | The first five links in it to the store's own pages open (no 4xx). Links to other sites, or with a query string, aren't loaded. |
+| `open_graph_tags` | The home and product page have `og:title` and `og:image`. |
+| `meta_description` | The home and product page have a meta description. |
+| `canonical_url` | The product page has a canonical link. |
+| `organization_schema` | The home page's JSON-LD has an Organization, or a type stores use for themselves such as OnlineStore. |
+| `ai_snippet_directives` | No robots meta tag or `X-Robots-Tag` header on the home or product page sets `nosnippet` or a `max-snippet` limit. |
+| `content_in_raw_html` | The product page's text, without scripts or comments, has the product's name and its price as a whole amount. |
+| `ucp_profile` | With UCP on: `/.well-known/ucp` is served and names a REST endpoint. |
+| `ucp_endpoints_live` | With UCP on: a catalog search POSTed to that endpoint, or WooCommerce's when there is no profile, answers with a product list. |
+| `ucp_profile_version` | With UCP on: the served profile declares the UCP version WooCommerce implements (`UcpUtils::VERSION`). A different version usually means another plugin serves its own profile. |
+| `ucp_checkout` | With UCP on: the served profile declares `dev.ucp.shopping.checkout`. Pending (WOOAI-1435). |
+| `product_return_policy_schema` | A product offer in the product page's JSON-LD has `hasMerchantReturnPolicy`. Pending (WOOPRD-3912). |
+| `product_shipping_schema` | A product offer has `shippingDetails`. Pending (WOOPRD-3908). |
+| `product_buy_action_schema` | The product or an offer has a `BuyAction` in `potentialAction`. Pending (WOOPRD-3918). |
 
-robots.txt is loaded from the host root, only to find the sitemaps it lists. Its crawler rules aren't checked: a host or CDN can rewrite the file or block crawlers without it, and the store's request to itself skips both, so they wait for an outside view of the store (WOOPRD-3953). The sitemap check is "couldn't check" when robots.txt could not be read, or a candidate sitemap could not be loaded, and no fetched sitemap names products. A category sitemap does not count. The product checks load one product page: the newest published, visible product without a password, among the five newest. With no such product, or when its page doesn't answer 200, they are "couldn't check".
+A check listed in `StoreOutputChecks::PENDING` tests output WooCommerce doesn't build yet. It doesn't run: it's reported with `ok` null and `pending` set to the issue that builds the output, so it reads as coming soon, not as failed or couldn't check. Remove its entry when that output ships.
+
+robots.txt is loaded from the host root, only to find the sitemaps it lists. Its crawler rules aren't checked: a host or CDN can rewrite the file or block crawlers without it, and the store's request to itself skips both, so they wait for an outside view of the store (WOOPRD-3953). The sitemap check is "couldn't check" when robots.txt could not be read, or a candidate sitemap could not be loaded, and no fetched sitemap names products. A category sitemap does not count. Checks on the home and product page read the ones that loaded. The home page loads first; when it can't be reached, the scan makes no more requests, so a store that can't reach itself waits for one timeout. The product checks load one product page: the newest published, visible product without a password, among the five newest. With no such product, or when its page doesn't answer 200, they are "couldn't check".
 
 ## Report format
 
