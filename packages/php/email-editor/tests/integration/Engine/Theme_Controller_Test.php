@@ -256,6 +256,55 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test that every email font family has a list of font weights
+	 */
+	public function testItProvidesFontWeightsForEveryFontFamily(): void {
+		$settings     = $this->theme_controller->get_settings();
+		$font_weights = $settings['custom']['fontWeights'] ?? array();
+
+		foreach ( $settings['typography']['fontFamilies']['default'] as $font_family ) {
+			$this->assertNotEmpty( $font_weights[ $font_family['slug'] ] ?? array(), $font_family['slug'] );
+		}
+		$this->assertSame( '400, 700', $font_weights['arial'] );
+		$this->assertSame( '300, 400, 500, 700', $font_weights['open-sans'] );
+	}
+
+	/**
+	 * Test that a caption color saved in a design reaches the email as a rule for core's caption class.
+	 *
+	 * A bare `caption` selector targets the `<caption>` table tag, which the rendered email never contains.
+	 */
+	public function testItMapsTheCaptionElementToTheCaptionClass(): void {
+		$add_caption_color = static function ( $theme ) {
+			$theme->merge(
+				new \WP_Theme_JSON(
+					array(
+						'version' => 3,
+						'styles'  => array(
+							'elements' => array(
+								'caption' => array(
+									'color' => array( 'text' => '#f78da7' ),
+								),
+							),
+						),
+					),
+					'custom'
+				)
+			);
+			return $theme;
+		};
+		add_filter( 'woocommerce_email_editor_theme_json', $add_caption_color, 20 );
+
+		$stylesheet = $this->di_container->get( Theme_Controller::class )->get_stylesheet_for_rendering();
+
+		$this->assertStringContainsString( '.wp-element-caption', $stylesheet );
+		$this->assertMatchesRegularExpression( '/\.wp-element-caption\s*\{[^}]*#f78da7/', $stylesheet );
+		$this->assertDoesNotMatchRegularExpression( '/(^|[\s,}])caption\s*\{/', $stylesheet );
+
+		remove_filter( 'woocommerce_email_editor_theme_json', $add_caption_color, 20 );
+	}
+
+	/**
 	 * Test if the theme controller returns correct preset variables map
 	 */
 	public function testItReturnsCorrectPresetVariablesMap(): void {

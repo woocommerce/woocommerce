@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add the experimental extensible abilities feature. With it on, extensions register fields with ExtensibleAbilities::register_field(), and the abilities return their values under extensions.<namespace>.<field>.

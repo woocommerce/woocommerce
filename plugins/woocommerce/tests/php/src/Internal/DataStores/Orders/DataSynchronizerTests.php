@@ -100,6 +100,50 @@ class DataSynchronizerTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox Should count and detect missing and changed orders when HPOS uses a temporary table.
+	 * @testWith [false, true]
+	 *           [true, true]
+	 *           [false, false]
+	 *           [true, false]
+	 *
+	 * @param bool $hpos_is_authoritative Whether HPOS is authoritative.
+	 * @param bool $full_count Whether to request the count or check for pending orders.
+	 */
+	public function test_pending_sync_with_temporary_orders_table( bool $hpos_is_authoritative, bool $full_count ): void {
+		global $wpdb;
+
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, $hpos_is_authoritative ? 'yes' : 'no' );
+		update_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
+
+		$changed_order = OrderHelper::create_order();
+		$this->sut->process_batch( array( $changed_order->get_id() ) );
+		OrderHelper::create_order();
+
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		$wpdb->update( $orders_table, array( 'date_updated_gmt' => $hpos_is_authoritative ? '2025-01-02 00:00:00' : '2025-01-01 00:00:00' ), array( 'id' => $changed_order->get_id() ) );
+		$wpdb->update( $wpdb->posts, array( 'post_modified_gmt' => $hpos_is_authoritative ? '2025-01-01 00:00:00' : '2025-01-02 00:00:00' ), array( 'ID' => $changed_order->get_id() ) );
+
+		$orders = $wpdb->get_results( "SELECT * FROM $orders_table", ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Internal table name.
+		$schema = $wpdb->get_row( "SHOW CREATE TABLE $orders_table", ARRAY_N ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Internal table name.
+
+		// Shadow the permanent table without committing the test transaction.
+		$this->assertNotFalse( $wpdb->query( str_replace( 'CREATE TABLE', 'CREATE TEMPORARY TABLE', $schema[1] ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Schema returned by the database.
+		try {
+			foreach ( $orders as $order ) {
+				$wpdb->insert( $orders_table, $order );
+			}
+
+			if ( $full_count ) {
+				$this->assertSame( 2, $this->sut->get_current_orders_pending_sync_count(), 'Both the missing order and the changed order should be counted.' );
+			} else {
+				$this->assertTrue( $this->sut->has_orders_pending_sync(), 'Temporary tables must not hide pending orders.' );
+			}
+		} finally {
+			$wpdb->query( "DROP TEMPORARY TABLE $orders_table" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Internal table name.
+		}
+	}
+
+	/**
 	 * Test that orders are synced properly where there are orders to migrate from posts table.
 	 */
 	public function test_get_ids_orders_pending_sync_migration() {

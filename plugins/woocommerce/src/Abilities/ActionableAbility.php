@@ -50,7 +50,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * @param array $input Ability input.
 	 * @return \WC_Data|\WP_Error
 	 */
-	abstract public function load( array $input );
+	abstract protected function load( array $input );
 
 	/**
 	 * Change the object in memory.
@@ -61,7 +61,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * @param array    $input   Ability input.
 	 * @return null|\WP_Error A WP_Error rejects the change, and nothing is saved.
 	 */
-	abstract public function change( $subject, array $input );
+	abstract protected function change( $subject, array $input );
 
 	/**
 	 * The ability output for the saved object. It must match the output schema
@@ -72,7 +72,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * @param \WC_Data $subject Saved object.
 	 * @return mixed
 	 */
-	abstract public function prepare_response( $subject );
+	abstract protected function prepare_response( $subject );
 
 	/**
 	 * Save the changed object. The default calls WC_Data::save(). When the save
@@ -85,7 +85,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * @param \WC_Data $subject Changed object.
 	 * @return null|\WP_Error Null when the object was saved, a WP_Error when it was not.
 	 */
-	public function save( $subject ) {
+	protected function save( $subject ) {
 		try {
 			$subject->save();
 		} catch ( \Exception $e ) {

@@ -3,8 +3,10 @@
  * Tests for WC_Webhook class.
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Tests for WC_Webhook class.
@@ -17,6 +19,27 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	 */
 	public static function wpSetUpBeforeClass(): void {
 		self::setup_cot_tables();
+	}
+
+	/**
+	 * Whether HPOS was in use before a test changed the order storage, or null if it did not.
+	 *
+	 * @var bool|null
+	 */
+	private $prev_hpos_enabled = null;
+
+	/**
+	 * Restore the order storage a test switched with use_order_storage().
+	 */
+	public function tearDown(): void {
+		try {
+			if ( null !== $this->prev_hpos_enabled ) {
+				$this->toggle_cot_authoritative( $this->prev_hpos_enabled );
+				$this->prev_hpos_enabled = null;
+			}
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**
@@ -415,6 +438,70 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Order updated webhooks are not delivered while the order is a checkout draft.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_enabled Whether orders are stored in the HPOS tables.
+	 */
+	public function test_order_updated_webhook_skips_checkout_draft_orders( bool $hpos_enabled ): void {
+		$this->use_order_storage( $hpos_enabled );
+		$order = new WC_Order();
+		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+		$updated_ids = array();
+		$created_ids = array();
+		$this->record_deliveries( $this->create_active_webhook( 'order.updated' ), $updated_ids );
+		$this->record_deliveries( $this->create_active_webhook( 'order.created' ), $created_ids );
+
+		$order->set_billing_email( 'customer@example.com' );
+		$order->save();
+		$order->update_status( OrderStatus::PENDING );
+
+		$this->assertSame( array(), $updated_ids, 'Saving a checkout draft should not deliver order.updated' );
+		$this->assertSame( array( $order->get_id() ), $created_ids, 'Leaving checkout draft should deliver order.created' );
+	}
+
+	/**
+	 * @testdox Order updated webhooks skipped for a checkout draft are still delivered once the order leaves draft.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_enabled Whether orders are stored in the HPOS tables.
+	 */
+	public function test_order_updated_webhook_delivers_after_checkout_draft( bool $hpos_enabled ): void {
+		$this->use_order_storage( $hpos_enabled );
+		$order = new WC_Order();
+		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+		$updated_ids = array();
+		$this->record_deliveries( $this->create_active_webhook( 'order.updated' ), $updated_ids );
+
+		$order->set_billing_email( 'draft@example.com' );
+		$order->save();
+		$order->update_status( OrderStatus::PENDING );
+		$order->set_billing_email( 'customer@example.com' );
+		$order->save();
+
+		$this->assertSame( array( $order->get_id() ), $updated_ids, 'The first save after leaving draft should deliver order.updated once' );
+	}
+
+	/**
+	 * Store orders in the HPOS tables or in posts for the current test.
+	 *
+	 * @param bool $hpos_enabled Whether orders are stored in the HPOS tables.
+	 */
+	private function use_order_storage( bool $hpos_enabled ): void {
+		if ( null === $this->prev_hpos_enabled ) {
+			$this->prev_hpos_enabled = OrderUtil::custom_orders_table_usage_is_enabled();
+		}
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->toggle_cot_authoritative( $hpos_enabled );
+	}
+
+	/**
 	 * Enqueue a webhook and record the resource IDs it would deliver, without sending them.
 	 *
 	 * @param WC_Webhook   $webhook       Webhook to enqueue.
@@ -604,6 +691,86 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		// Confirm user_id has been updated to zero for the first webhook only.
 		$this->assertSame( 0, $webhook1->get_user_id() );
 		$this->assertSame( 999, $webhook2->get_user_id() );
+	}
+
+	/**
+	 * @testdox A successful delivery clears the pending ping, so no ping follows it.
+	 */
+	public function test_successful_delivery_clears_pending_ping(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$webhook = $this->create_active_webhook( 'product.updated' );
+		$webhook->set_user_id( 1 );
+		$webhook->save();
+
+		$requests = array();
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args ) use ( &$requests ) {
+				$is_ping    = 0 === strpos( (string) $args['body'], 'webhook_id=' );
+				$requests[] = $is_ping ? 'ping' : 'delivery';
+
+				// Like an endpoint that verifies signatures: the unsigned ping is rejected, the delivery accepted.
+				return $this->mock_http_response( $is_ping ? 401 : 200 );
+			},
+			10,
+			2
+		);
+
+		$webhook->deliver( $product->get_id() );
+
+		$this->assertSame( array( 'delivery' ), $requests, 'A successful delivery should not be followed by a ping.' );
+		$this->assertFalse( wc_get_webhook( $webhook->get_id() )->get_pending_delivery(), 'A successful delivery should clear the pending ping.' );
+	}
+
+	/**
+	 * @testdox The ping counts any 2xx response as success, like deliveries do.
+	 *
+	 * @testWith [200, true]
+	 *           [202, true]
+	 *           [204, true]
+	 *           [302, false]
+	 *           [401, false]
+	 *           [500, false]
+	 *
+	 * @param int  $response_code  HTTP status code the delivery URL answers with.
+	 * @param bool $expect_success Whether the ping should succeed.
+	 */
+	public function test_ping_succeeds_on_any_2xx_response( int $response_code, bool $expect_success ): void {
+		$webhook = $this->create_active_webhook( 'product.updated' );
+		$webhook->save();
+
+		add_filter(
+			'pre_http_request',
+			function () use ( $response_code ) {
+				return $this->mock_http_response( $response_code );
+			}
+		);
+
+		$result = $webhook->deliver_ping();
+
+		if ( $expect_success ) {
+			$this->assertTrue( $result, "A ping answered with {$response_code} should succeed." );
+		} else {
+			$this->assertInstanceOf( WP_Error::class, $result, "A ping answered with {$response_code} should fail with an error." );
+		}
+		$this->assertSame( ! $expect_success, wc_get_webhook( $webhook->get_id() )->get_pending_delivery(), 'Only a successful ping should clear the pending ping.' );
+	}
+
+	/**
+	 * Build a pre_http_request response with the given status code.
+	 *
+	 * @param int $response_code HTTP status code.
+	 * @return array
+	 */
+	private function mock_http_response( int $response_code ): array {
+		return array(
+			'response' => array(
+				'code'    => $response_code,
+				'message' => get_status_header_desc( $response_code ),
+			),
+			'headers'  => array(),
+			'body'     => '',
+		);
 	}
 
 	/**

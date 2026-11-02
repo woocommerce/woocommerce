@@ -75,7 +75,7 @@ class ProductCreate extends ActionableAbility {
 	 * @param array $input Ability input.
 	 * @return \WC_Product|\WP_Error
 	 */
-	public function load( array $input ) {
+	protected function load( array $input ) {
 		return self::get_product_object_for_type( $input['type'] ?? ProductType::SIMPLE );
 	}
 
@@ -86,7 +86,7 @@ class ProductCreate extends ActionableAbility {
 	 * @param array       $input   Ability input.
 	 * @return null|\WP_Error
 	 */
-	public function change( $subject, array $input ) {
+	protected function change( $subject, array $input ) {
 		$product_config = self::get_supported_product_type_configs()[ $subject->get_type() ];
 
 		try {
@@ -104,7 +104,7 @@ class ProductCreate extends ActionableAbility {
 	 * @param \WC_Product $subject Changed product.
 	 * @return null|\WP_Error
 	 */
-	public function save( $subject ) {
+	protected function save( $subject ) {
 		return self::save_product( $subject, 'woocommerce_product_create_failed' );
 	}
 
@@ -114,7 +114,7 @@ class ProductCreate extends ActionableAbility {
 	 * @param \WC_Product $subject Saved product.
 	 * @return array
 	 */
-	public function prepare_response( $subject ): array {
+	protected function prepare_response( $subject ): array {
 		return array(
 			'product' => self::format_product_for_response( $subject ),
 		);

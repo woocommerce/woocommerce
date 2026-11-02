@@ -553,6 +553,29 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_starting_sales() returns a started sale only when the cron can apply its price: '$sale_price'.
+	 *
+	 * @testWith ["", false]
+	 *           ["0", false]
+	 *           ["0.00", true]
+	 *
+	 * @param string $sale_price Stored `_sale_price` value.
+	 * @param bool   $expected   Whether the product should be queued.
+	 */
+	public function test_get_starting_sales_only_returns_sale_prices_the_cron_applies( string $sale_price, bool $expected ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+		update_post_meta( $product->get_id(), '_price', 100 );
+		update_post_meta( $product->get_id(), '_sale_price', $sale_price );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+
+		$queued = in_array( (string) $product->get_id(), WC_Data_Store::load( 'product' )->get_starting_sales(), true );
+
+		$this->assertSame( $expected, $queued, 'The cron skips falsy sale prices, so queuing them repeats every run. \'0.00\' is applied and must stay queued.' );
+	}
+
+	/**
 	 * @testdox A product left at an expired sale price is repaired once and then goes inert.
 	 */
 	public function test_wc_scheduled_sales_repairs_expired_price_once(): void {
@@ -1736,9 +1759,18 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Product category list warns about an unsupported ordering mode and still falls back to WordPress order.
+	 * @testdox Product category list warns in English about an unsupported ordering mode and still falls back to WordPress order.
 	 */
 	public function test_wc_get_product_category_list_warns_on_unsupported_orderby(): void {
+		$messages = array();
+		add_action(
+			'doing_it_wrong_run',
+			function ( $function_name, $message ) use ( &$messages ) {
+				$messages[ $function_name ] = $message;
+			},
+			10,
+			2
+		);
 		$suffix   = wp_unique_id();
 		$category = wp_insert_term( 'Unsupported orderby ' . $suffix, 'product_cat' );
 		$product  = WC_Helper_Product::create_simple_product();
@@ -1749,12 +1781,22 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			$expected = get_the_term_list( $product->get_id(), 'product_cat', '', ', ', '' );
 
 			$this->setExpectedIncorrectUsage( 'wc_get_product_category_list' );
+			add_filter(
+				'gettext',
+				function ( $translation, $text, $domain ) {
+					return 'woocommerce' === $domain ? 'Übersetzt: ' . $text : $translation;
+				},
+				10,
+				3
+			);
 
 			$this->assertSame(
 				$expected,
 				wc_get_product_category_list( $product->get_id(), ', ', '', '', 'menu_order' ),
 				'An unsupported ordering mode should still return the WordPress term-list output.'
 			);
+			$this->assertArrayHasKey( 'wc_get_product_category_list', $messages, 'An unsupported ordering mode should raise a notice.' );
+			$this->assertStringStartsWith( 'Unsupported $orderby value "menu_order". Use "name", "breadcrumb", or an empty string for WordPress term-list order.', $messages['wc_get_product_category_list'], 'The notice should be the English message.' );
 		} finally {
 			WC_Helper_Product::delete_product( $product->get_id() );
 			wp_delete_term( $category['term_id'], 'product_cat' );

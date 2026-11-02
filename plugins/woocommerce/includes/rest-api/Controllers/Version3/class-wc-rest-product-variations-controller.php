@@ -128,6 +128,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'permalink'             => $object->get_permalink(),
 			'sku'                   => $object->get_sku(),
 			'global_unique_id'      => $object->get_global_unique_id(),
+			'mpn'                   => $object->get_mpn(), // @phpstan-ignore method.notFound (This endpoint receives a variation; the generic WC_Data annotation is broader.)
 			'price'                 => $object->get_price(),
 			'regular_price'         => $object->get_regular_price(),
 			'sale_price'            => $object->get_sale_price(),
@@ -234,6 +235,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		// Unique ID.
 		if ( isset( $request['global_unique_id'] ) ) {
 			$variation->set_global_unique_id( wc_clean( $request['global_unique_id'] ) );
+		}
+
+		// MPN.
+		if ( $variation instanceof WC_Product && isset( $request['mpn'] ) ) {
+			$variation->set_mpn( sanitize_text_field( $request['mpn'] ) );
 		}
 
 		// Thumbnail.
@@ -621,6 +627,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
+				'mpn'                   => array(
+					'description' => __( 'Manufacturer part number.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
 				'price'                 => array(
 					'description' => __( 'Current variation price.', 'woocommerce' ),
 					'type'        => 'string',
@@ -984,6 +995,17 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	protected function prepare_objects_query( $request ) {
 		$args = WC_REST_CRUD_Controller::prepare_objects_query( $request );
 
+		// Break orderby ties by ID so pages don't overlap. menu_order ties always go newest first, like the admin
+		// variations list (WC_AJAX::load_variations). The 'slug' orderby arrives here as 'name', mapped by prepare_items_query().
+		if ( 'menu_order' === $args['orderby'] ) {
+			$args['orderby'] = array(
+				'menu_order' => $args['order'] ?? '',
+				'ID'         => 'DESC',
+			);
+		} elseif ( in_array( $args['orderby'], array( 'title', 'name' ), true ) ) {
+			$args['orderby'] .= ' ID';
+		}
+
 		// Set post_status.
 		$args['post_status'] = $request['status'];
 
@@ -1081,6 +1103,19 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				array(
 					'key'     => '_global_unique_id',
 					'value'   => $global_unique_ids,
+					'compare' => 'IN',
+				)
+			);
+		}
+
+		// Filter by mpn.
+		if ( '' !== ( $request['mpn'] ?? '' ) ) {
+			$mpns               = array_map( 'trim', explode( ',', $request['mpn'] ) );
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Match the full MPN; the lookup column only stores its first 100 characters.
+				$args,
+				array(
+					'key'     => '_mpn',
+					'value'   => $mpns,
 					'compare' => 'IN',
 				)
 			);
@@ -1326,6 +1361,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				'enum' => array_merge( array( 'future', 'trash' ), array_keys( get_post_statuses() ) ),
 			),
 			'sanitize_callback' => 'wp_parse_list',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['mpn'] = array(
+			'description'       => __( 'Limit result set to product variations with specified MPN(s).', 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 

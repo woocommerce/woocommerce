@@ -124,11 +124,11 @@ class ExtensibleAbilities {
 	 */
 	public static function register_resource( string $resource_name ): void {
 		if ( did_action( 'woocommerce_extensible_abilities_resources_init' ) && ! doing_action( 'woocommerce_extensible_abilities_resources_init' ) ) {
-			wc_doing_it_wrong( __METHOD__, __( 'Register a resource inside the woocommerce_extensible_abilities_resources_init action, before the fields are registered.', 'woocommerce' ), '11.3.0' );
+			wc_doing_it_wrong( __METHOD__, 'Register a resource inside the woocommerce_extensible_abilities_resources_init action, before the fields are registered.', '11.3.0' );
 			return;
 		}
 		if ( '' === $resource_name || sanitize_key( $resource_name ) !== $resource_name || ctype_digit( $resource_name ) ) {
-			wc_doing_it_wrong( __METHOD__, __( 'The resource name must be a slug of lowercase letters, numbers, dashes and underscores, not only numbers.', 'woocommerce' ), '11.3.0' );
+			wc_doing_it_wrong( __METHOD__, 'The resource name must be a slug of lowercase letters, numbers, dashes and underscores, not only numbers.', '11.3.0' );
 			return;
 		}
 
@@ -187,7 +187,7 @@ class ExtensibleAbilities {
 	 */
 	public static function register_field( array $args ): void {
 		if ( did_action( 'woocommerce_extensible_abilities_init' ) && ! doing_action( 'woocommerce_extensible_abilities_init' ) ) {
-			wc_doing_it_wrong( __METHOD__, __( 'Register a field inside the woocommerce_extensible_abilities_init action, before the abilities build their schemas.', 'woocommerce' ), '11.3.0' );
+			wc_doing_it_wrong( __METHOD__, 'Register a field inside the woocommerce_extensible_abilities_init action, before the abilities build their schemas.', '11.3.0' );
 			return;
 		}
 		foreach ( array( 'resource', 'namespace', 'field' ) as $key ) {
@@ -195,8 +195,7 @@ class ExtensibleAbilities {
 				wc_doing_it_wrong(
 					__METHOD__,
 					sprintf(
-						/* translators: %s: argument name. */
-						__( 'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores, not only numbers.', 'woocommerce' ),
+						'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores, not only numbers.',
 						$key
 					),
 					'11.3.0'
@@ -205,15 +204,14 @@ class ExtensibleAbilities {
 			}
 		}
 		if ( ! isset( self::$resources[ $args['resource'] ] ) && ! did_action( 'woocommerce_extensible_abilities_resources_init' ) ) {
-			wc_doing_it_wrong( __METHOD__, __( 'Register a field inside the woocommerce_extensible_abilities_init action. The resources are not registered yet.', 'woocommerce' ), '11.3.0' );
+			wc_doing_it_wrong( __METHOD__, 'Register a field inside the woocommerce_extensible_abilities_init action. The resources are not registered yet.', '11.3.0' );
 			return;
 		}
 		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
 			wc_doing_it_wrong(
 				__METHOD__,
 				sprintf(
-					/* translators: %s: resource name. */
-					__( 'The "%s" resource is not registered. Call ExtensibleAbilities::register_resource() first.', 'woocommerce' ),
+					'The "%s" resource is not registered. Call ExtensibleAbilities::register_resource() first.',
 					$args['resource']
 				),
 				'11.3.0'
@@ -249,15 +247,14 @@ class ExtensibleAbilities {
 			}
 		}
 		if ( isset( $args['object_types'] ) && ( ! is_array( $args['object_types'] ) || empty( $args['object_types'] ) || array_filter( $args['object_types'], static fn( $type ) => ! is_string( $type ) ) ) ) {
-			wc_doing_it_wrong( __METHOD__, __( 'The "object_types" argument must be a list of object types.', 'woocommerce' ), '11.4.0' );
+			wc_doing_it_wrong( __METHOD__, 'The "object_types" argument must be a list of object types.', '11.4.0' );
 			return;
 		}
 		if ( isset( self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] ) ) {
 			wc_doing_it_wrong(
 				__METHOD__,
 				sprintf(
-					/* translators: 1: extension namespace, 2: field name, 3: resource name. */
-					__( 'The field "%1$s.%2$s" of "%3$s" is already registered.', 'woocommerce' ),
+					'The field "%1$s.%2$s" of "%3$s" is already registered.',
 					$args['namespace'],
 					$args['field'],
 					$args['resource']
@@ -411,7 +408,7 @@ class ExtensibleAbilities {
 	 */
 	public static function register_query_filter( array $args ): void {
 		if ( did_action( 'woocommerce_extensible_abilities_init' ) && ! doing_action( 'woocommerce_extensible_abilities_init' ) ) {
-			wc_doing_it_wrong( __METHOD__, __( 'Register a filter inside the woocommerce_extensible_abilities_init action, before the abilities build their schemas.', 'woocommerce' ), '11.3.0' );
+			wc_doing_it_wrong( __METHOD__, 'Register a filter inside the woocommerce_extensible_abilities_init action, before the abilities build their schemas.', '11.3.0' );
 			return;
 		}
 		foreach ( array( 'resource', 'namespace', 'filter' ) as $key ) {
@@ -419,8 +416,7 @@ class ExtensibleAbilities {
 				wc_doing_it_wrong(
 					__METHOD__,
 					sprintf(
-						/* translators: %s: argument name. */
-						__( 'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores, not only numbers.', 'woocommerce' ),
+						'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores, not only numbers.',
 						$key
 					),
 					'11.3.0'
@@ -432,8 +428,7 @@ class ExtensibleAbilities {
 			wc_doing_it_wrong(
 				__METHOD__,
 				sprintf(
-					/* translators: %s: resource name. */
-					__( 'The "%s" resource is not registered. Call ExtensibleAbilities::register_resource() first.', 'woocommerce' ),
+					'The "%s" resource is not registered. Call ExtensibleAbilities::register_resource() first.',
 					$args['resource']
 				),
 				'11.3.0'
@@ -446,15 +441,14 @@ class ExtensibleAbilities {
 			return;
 		}
 		if ( ! is_callable( $args['callback'] ?? null ) ) {
-			wc_doing_it_wrong( __METHOD__, __( 'The "callback" argument must be callable.', 'woocommerce' ), '11.3.0' );
+			wc_doing_it_wrong( __METHOD__, 'The "callback" argument must be callable.', '11.3.0' );
 			return;
 		}
 		if ( isset( self::$filters[ $args['resource'] ][ $args['namespace'] ][ $args['filter'] ] ) ) {
 			wc_doing_it_wrong(
 				__METHOD__,
 				sprintf(
-					/* translators: 1: extension namespace, 2: filter name, 3: resource name. */
-					__( 'The filter "%1$s.%2$s" of "%3$s" is already registered.', 'woocommerce' ),
+					'The filter "%1$s.%2$s" of "%3$s" is already registered.',
 					$args['namespace'],
 					$args['filter'],
 					$args['resource']
@@ -663,7 +657,7 @@ class ExtensibleAbilities {
 	 */
 	public static function register_validator( array $args ): void {
 		if ( did_action( 'woocommerce_extensible_abilities_init' ) && ! doing_action( 'woocommerce_extensible_abilities_init' ) ) {
-			wc_doing_it_wrong( __METHOD__, __( 'Register a validator inside the woocommerce_extensible_abilities_init action.', 'woocommerce' ), '11.3.0' );
+			wc_doing_it_wrong( __METHOD__, 'Register a validator inside the woocommerce_extensible_abilities_init action.', '11.3.0' );
 			return;
 		}
 		foreach ( array( 'resource', 'namespace' ) as $key ) {
@@ -671,8 +665,7 @@ class ExtensibleAbilities {
 				wc_doing_it_wrong(
 					__METHOD__,
 					sprintf(
-						/* translators: %s: argument name. */
-						__( 'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores.', 'woocommerce' ),
+						'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores.',
 						$key
 					),
 					'11.3.0'
@@ -681,15 +674,14 @@ class ExtensibleAbilities {
 			}
 		}
 		if ( ! is_callable( $args['callback'] ?? null ) ) {
-			wc_doing_it_wrong( __METHOD__, __( 'The "callback" argument must be callable.', 'woocommerce' ), '11.3.0' );
+			wc_doing_it_wrong( __METHOD__, 'The "callback" argument must be callable.', '11.3.0' );
 			return;
 		}
 		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
 			wc_doing_it_wrong(
 				__METHOD__,
 				sprintf(
-					/* translators: %s: resource name. */
-					__( 'The "%s" resource is not registered. Call ExtensibleAbilities::register_resource() first.', 'woocommerce' ),
+					'The "%s" resource is not registered. Call ExtensibleAbilities::register_resource() first.',
 					$args['resource']
 				),
 				'11.3.0'
@@ -878,8 +870,7 @@ class ExtensibleAbilities {
 		wc_doing_it_wrong(
 			__CLASS__ . '::register_field',
 			sprintf(
-				/* translators: 1: extension namespace, 2: field name, 3: resource name, 4: validation error. */
-				__( 'Ability field "%1$s.%2$s" of "%3$s" was left out because its value does not match its schema: %4$s', 'woocommerce' ),
+				'Ability field "%1$s.%2$s" of "%3$s" was left out because its value does not match its schema: %4$s',
 				$args['namespace'],
 				$args['field'],
 				$args['resource'],
