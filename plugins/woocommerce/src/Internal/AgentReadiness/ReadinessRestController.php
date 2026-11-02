@@ -134,8 +134,12 @@ class ReadinessRestController extends RestApiControllerBase {
 	 * @return array{report:array<string,mixed>|null,scan_pending:bool}
 	 */
 	protected function get_status( WP_REST_Request $request ): array {
+		$report = $this->agent_readiness->get_cached_report();
+		if ( null !== $report ) {
+			$report['store_checks'] = $this->agent_readiness->get_store_checks( $report );
+		}
 		return array(
-			'report'       => $this->agent_readiness->get_cached_report(),
+			'report'       => $report,
 			'scan_pending' => $this->scheduled_scan->is_pending(),
 		);
 	}

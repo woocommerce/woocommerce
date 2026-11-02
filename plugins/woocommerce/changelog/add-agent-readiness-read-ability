@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+Comment: Agent readiness: ability that reads the report over MCP, behind an experimental flag; nothing ships to merchants.
+

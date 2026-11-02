@@ -145,7 +145,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		$this->render_switch( $checks, count( $failing ) );
 		$this->render_visibility( $report );
 		$this->render_status( $checks, $this->ucp_switch->status( $failing ), count( $failing ) );
-		$this->render_readiness( self::scanned_checks( $report, $checks ), (bool) ( array_column( $checks, 'ok', 'id' )['launched'] ?? true ) );
+		$this->render_readiness( array_slice( $this->agent_readiness->get_store_checks( $report, $checks ), count( $checks ) ), (bool) ( array_column( $checks, 'ok', 'id' )['launched'] ?? true ) );
 
 		echo '<div class="wc-agentic-commerce-card wc-agentic-commerce-policies">';
 		parent::output();
@@ -154,33 +154,6 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		$this->render_address_and_test();
 		$this->render_security();
 		echo '</div>';
-	}
-
-	/**
-	 * Store checks the last scan ran that aren't read live here: the ones that
-	 * read what the store returns. Never required, so they don't affect the switch.
-	 *
-	 * @param array<string, mixed>|null    $report Stored report.
-	 * @param array<int, array{id:string}> $live   Store conditions read now.
-	 * @return array<int, array{id:string,level:string,ok:bool|null,name:string,fix:string,fix_url:string}>
-	 */
-	private static function scanned_checks( ?array $report, array $live ): array {
-		$live_ids = array_column( $live, 'id' );
-		$scanned  = array();
-		foreach ( is_array( $report['store_checks'] ?? null ) ? $report['store_checks'] : array() as $check ) {
-			if ( ! is_array( $check ) || ! isset( $check['id'], $check['name'] ) || in_array( $check['id'], $live_ids, true ) ) {
-				continue;
-			}
-			$scanned[] = array(
-				'id'      => (string) $check['id'],
-				'level'   => StoreConditions::LEVEL_RECOMMENDED,
-				'ok'      => isset( $check['ok'] ) ? (bool) $check['ok'] : null,
-				'name'    => (string) $check['name'],
-				'fix'     => (string) ( $check['fix'] ?? '' ),
-				'fix_url' => (string) ( $check['fix_url'] ?? '' ),
-			);
-		}
-		return $scanned;
 	}
 
 	/**
