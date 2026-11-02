@@ -19,8 +19,9 @@ The fulfillment system is built with several key components working together to 
 - **FulfillmentsManager**: Core manager class handling lifecycle hooks and business logic for fulfillment operations.
 - **Fulfillment**: The main data object representing a fulfillment with methods for accessing and modifying fulfillment state.
 - **FulfillmentsDataStore**: Data persistence layer that handles reading and writing fulfillment data to the custom database tables.
+- **FulfillmentUtils**: Static helpers for the provider registry, the status vocabularies, provider display labels, and tracking number validation.
 - **FulfillmentsSettings**: Handles WooCommerce settings integration including auto-fulfill options and the shipping providers admin page.
-- **OrderFulfillmentsRestController**: REST API endpoints for v3 order-scoped routes, allowing client access to fulfillments under the `/wp-json/wc/v3/orders/{order_id}/fulfillments` namespace.
+- **OrderFulfillmentsRestController**: REST API endpoints for v3 order-scoped routes, allowing client access to fulfillments under the `/wp-json/wc/v3/orders/{order_id}/fulfillments` namespace. See the [order fulfillments REST API reference](/docs/apis/rest-api/v3/order-fulfillments) for endpoints, request bodies, and error responses.
 
 ### Frontend components
 
@@ -72,7 +73,29 @@ The associated metadata table stores the fulfillment payload that developers usu
 | `_is_locked` | Internal flag used to prevent edits in specific workflows. |
 | `_lock_message` | Optional message shown when a fulfillment is locked. |
 
+The metadata table itself has these columns:
+
+| Field | Description |
+| --- | --- |
+| `meta_id` | Auto-incrementing primary key. |
+| `fulfillment_id` | The fulfillment the value belongs to. |
+| `meta_key` | Metadata key. |
+| `meta_value` | Metadata value, stored as `longtext`. |
+| `date_updated` | Last update timestamp. |
+| `date_deleted` | Soft-delete timestamp. Adding, updating, or deleting metadata on a soft-deleted fulfillment throws an exception. |
+
 The `Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment` object wraps these values with helper methods such as `get_items()`, `set_items()`, `get_tracking_number()`, and `set_tracking_url()`.
+
+### Statuses
+
+Fulfillment records and orders use separate status vocabularies.
+
+| Scope | Default statuses | Filter |
+| --- | --- | --- |
+| Fulfillment record | `unfulfilled`, `fulfilled` | `woocommerce_fulfillment_fulfillment_statuses` |
+| Order | `unfulfilled`, `partially_fulfilled`, `fulfilled` | `woocommerce_fulfillment_order_fulfillment_statuses` |
+
+Each entry is keyed by the status slug and holds a `label`, `background_color`, and `text_color`. Fulfillment record statuses also carry `is_fulfilled`, which is what fills the `is_fulfilled` column.
 
 ## PHP class reference
 
@@ -94,7 +117,7 @@ The main data object representing a fulfillment. The `Automattic\WooCommerce\Adm
 - `get_status()`: Get fulfillment status
 - `set_status( $status )`: Set fulfillment status
 - `get_is_fulfilled()`: Check if fulfillment is completed
-- **Note**: There is no `set_is_fulfilled()` method; the fulfilled state is calculated automatically when you set the fulfillment status via `set_status()`.
+- **Note**: `set_is_fulfilled()` is private and internal to the class; the fulfilled state follows the status you pass to `set_status()`.
 
 #### Items management
 
@@ -269,7 +292,7 @@ To extend fulfillment functionality, you can register custom shipping providers 
 
 #### Option 1: Via the admin UI
 
-Navigate to **WooCommerce → Settings → Shipping → Shipping providers** to add a provider name, icon, and tracking URL template through the admin interface. Providers added this way appear immediately in the fulfillment tracking provider selector.
+Navigate to **WooCommerce → Settings → Shipping → Shipping providers** to add a provider name, icon, and tracking URL template through the admin interface. Providers added this way appear immediately in the fulfillment tracking provider selector. They are stored as terms in the `wc_fulfillment_shipping_provider` taxonomy, with the icon and tracking URL template in the `icon` and `tracking_url_template` term meta.
 
 > **Note**: Providers added through the UI do not support automatic tracking number parsing. If you need to detect a specific tracking number format and auto-select the correct provider, you must register the provider in code (Option 2) and implement `try_parse_tracking_number()`.
 
@@ -295,7 +318,19 @@ class My_Custom_Shipping_Provider extends AbstractShippingProvider {
         return 'https://mycarrier.com/track/' . rawurlencode( $tracking_number );
     }
 
+    public function get_shipping_from_countries(): array {
+        return [ 'US', 'CA' ];
+    }
+
+    public function get_shipping_to_countries(): array {
+        return [ 'US', 'CA' ];
+    }
+
     public function try_parse_tracking_number( string $tracking_number, string $shipping_from, string $shipping_to ): ?array {
+        if ( ! $this->can_ship_from_to( $shipping_from, $shipping_to ) ) {
+            return null;
+        }
+
         if ( 1 === preg_match( '/^MC[0-9]{10}$/', $tracking_number ) ) {
             return [
                 'url'             => $this->get_tracking_url( $tracking_number ),
@@ -312,6 +347,10 @@ add_filter( 'woocommerce_fulfillment_shipping_providers', function( $providers )
     return $providers;
 } );
 ```
+
+`AbstractShippingProvider` also provides `can_ship_from()`, `can_ship_to()`, and `can_ship_from_to()`, which the built-in providers check before parsing so that a tracking number only matches on routes the carrier serves. They read the two country lists above, which default to empty arrays, so `can_ship_from_to()` returns `false` until you override them.
+
+WooCommerce fills this filter itself, adding the built-in providers at priority 10 and the providers added through the admin UI at priority 20. Both callbacks merge into the array they receive, so a callback at the default priority sees the built-in list and can append to it.
 
 ## Frontend integration
 
@@ -339,12 +378,13 @@ function MyComponent({ orderId }) {
 ### Available actions
 
 - `saveFulfillment( orderId, fulfillment, notifyCustomer )`: Create or save a fulfillment
-- `updateFulfillment( orderId, fulfillment, notifyCustomer )`: Update an existing fulfillment
+- `updateFulfillment( orderId, fulfillment, notifyCustomer, customerNote )`: Update an existing fulfillment. `customerNote` is sent as `customer_note` and used in the update notification email.
 - `deleteFulfillment( orderId, fulfillmentId, notifyCustomer )`: Delete a fulfillment
 
 ### Available selectors
 
 - `getOrder( orderId )`: Get order details
+- `getRefunds( orderId )`: Get the refunds recorded for the order
 - `readFulfillments( orderId )`: Get all fulfillments for an order
 - `readFulfillment( orderId, fulfillmentId )`: Get a specific fulfillment
 - `isLoading( orderId )`: Check if data is currently loading
