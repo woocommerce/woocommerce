@@ -60,6 +60,15 @@ class OrderUpdate extends ActionableAbility {
 	private ?string $recalculate_after_save = null;
 
 	/**
+	 * Product lines to add with WC_Order::add_product() in save(), with the feature off. The saving method
+	 * runs the rules of an order class that has not adopted stage_product_item(), as order-update-status does
+	 * with update_status().
+	 *
+	 * @var array<int, array{0: \WC_Product, 1: int}>
+	 */
+	private array $products_to_add = array();
+
+	/**
 	 * Get the ability registration arguments.
 	 *
 	 * @return array
@@ -137,6 +146,7 @@ class OrderUpdate extends ActionableAbility {
 		$this->removed_product_lines  = array();
 		$this->changed_product_lines  = array();
 		$this->recalculate_after_save = null;
+		$this->products_to_add        = array();
 
 		foreach ( array( 'billing', 'shipping' ) as $address_type ) {
 			$error = isset( $input[ $address_type ] ) ? self::set_address( $subject, $address_type, $input[ $address_type ] ) : null;
@@ -182,6 +192,13 @@ class OrderUpdate extends ActionableAbility {
 
 		foreach ( $this->removed_product_lines as $item ) {
 			wc_maybe_adjust_line_item_product_stock( $item, 0 );
+		}
+
+		foreach ( $this->products_to_add as list( $product, $quantity ) ) {
+			$item = $subject->get_item( $subject->add_product( $product, $quantity, array( 'order' => $subject ) ), false );
+			if ( $item instanceof \WC_Order_Item_Product ) {
+				$this->changed_product_lines[] = $item;
+			}
 		}
 
 		$saved = parent::save( $subject );
@@ -422,12 +439,13 @@ class OrderUpdate extends ActionableAbility {
 	}
 
 	/**
-	 * Add a product line in memory. save() reduces its stock.
+	 * Add a product line in memory. save() reduces its stock. With the feature off, save() adds the line with
+	 * WC_Order::add_product(), so an order class that has not adopted stage_product_item() keeps working.
 	 *
 	 * @param \WC_Order $order Order.
 	 * @param array     $line  Product line input.
 	 * @return null|\WP_Error
-	 * @throws \WC_Data_Exception When the order class has not adopted stage_product_item().
+	 * @throws \WC_Data_Exception With the feature on, when the order class has not adopted stage_product_item().
 	 */
 	private function add_product_line( \WC_Order $order, array $line ): ?\WP_Error {
 		$product  = wc_get_product( $line['product_id'] );
@@ -455,6 +473,11 @@ class OrderUpdate extends ActionableAbility {
 			wc_get_container()->get( ItemQuantityLimits::class )->validate_new_item_quantity( $quantity, $product );
 		} catch ( \Exception $exception ) {
 			return self::quantity_error( $exception );
+		}
+
+		if ( ! ExtensibleAbilities::is_enabled() ) {
+			$this->products_to_add[] = array( $product, $quantity );
+			return null;
 		}
 
 		$this->changed_product_lines[] = $order->stage_product_item( $product, $quantity, array( 'order' => $order ) );

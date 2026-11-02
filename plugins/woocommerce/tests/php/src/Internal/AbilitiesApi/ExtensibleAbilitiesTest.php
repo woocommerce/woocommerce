@@ -4007,6 +4007,70 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should add a product line through add_product() of a class without the stage twin when the feature is off, and save nothing when a later line is refused.
+	 */
+	public function test_order_update_falls_back_to_add_product_with_the_feature_off(): void {
+		$this->set_feature( false );
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'pending' );
+		$order->save();
+		$order_class  = get_class(
+			new class() extends \WC_Order {
+				/**
+				 * Calls of add_product().
+				 *
+				 * @var int
+				 */
+				public static $calls = 0;
+
+				/**
+				 * Add a product with a rule of this class.
+				 *
+				 * @param \WC_Product $product Product.
+				 * @param int         $qty     Quantity.
+				 * @param array       $args    Arguments.
+				 * @return int
+				 */
+				public function add_product( $product, $qty = 1, $args = array() ) {
+					++self::$calls;
+					return parent::add_product( $product, $qty, $args );
+				}
+			}
+		);
+		$filter_class = static fn() => $order_class;
+		add_filter( 'woocommerce_order_class', $filter_class, 100 );
+		$product      = \WC_Helper_Product::create_simple_product();
+		$count        = count( $order->get_items() );
+
+		try {
+			$refused = $this->run_ability_response(
+				'woocommerce/order-update',
+				array(
+					'id'         => $order->get_id(),
+					'line_items' => array(
+						array( 'product_id' => $product->get_id() ),
+						array( 'product_id' => 999999 ),
+					),
+				)
+			);
+			$updated = $this->run_ability(
+				'woocommerce/order-update',
+				array(
+					'id'         => $order->get_id(),
+					'line_items' => array( array( 'product_id' => $product->get_id() ) ),
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_order_class', $filter_class, 100 );
+		}
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 1, $order_class::$calls );
+		$this->assertCount( $count + 1, $updated['order']['line_items'] );
+		$this->assertCount( $count + 1, ( new \WC_Order( $order->get_id() ) )->get_items() );
+	}
+
+	/**
 	 * @testdox Should not accept extension fields in the write abilities with the feature off.
 	 */
 	public function test_writes_do_not_change_with_the_feature_off(): void {
