@@ -1,0 +1,229 @@
+name: Shallow blobless checkout experiment
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - .github/workflows/pr-ci-shallow-blobless-experiment.yml
+
+permissions:
+  contents: read
+
+jobs:
+  checkout:
+    if: github.repository == 'woocommerce/woocommerce' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'research/shallow-blobless-checkout'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - pair: 1
+            first: shallow
+            second: blobless
+          - pair: 2
+            first: blobless
+            second: shallow
+          - pair: 3
+            first: shallow
+            second: blobless
+          - pair: 4
+            first: blobless
+            second: shallow
+    steps:
+      - name: Prepare snapshot helper
+        shell: bash
+        run: |
+          cat > "$RUNNER_TEMP/snapshot.py" <<'PY'
+          import hashlib
+          import json
+          import os
+          import pathlib
+          import subprocess
+          import sys
+          import time
+
+          arm = sys.argv[1]
+          root = pathlib.Path(os.environ['GITHUB_WORKSPACE']) / arm
+          temp = pathlib.Path(os.environ['RUNNER_TEMP'])
+          if sys.argv[2] == 'start':
+              (temp / (arm + '.start')).write_text(str(time.monotonic_ns()))
+              sys.exit()
+          duration = (time.monotonic_ns() - int((temp / (arm + '.start')).read_text())) / 1e9
+          def git(*args):
+              return subprocess.check_output(['git', '-C', str(root), *args])
+          trace = [json.loads(line) for line in (temp / (arm + '.trace')).read_text().splitlines()]
+          fetches = [e for e in trace if e.get('event') == 'start' and 'fetch' in e.get('argv', [])]
+          lazy_fetches = [e for e in trace if e.get('event') == 'child_start' and 'fetch' in e.get('argv', []) and '--stdin' in e.get('argv', [])]
+          entries = git('ls-files', '--stage', '-z').split(b'\0')
+          digest = hashlib.sha256()
+          blobs = set()
+          count = 0
+          for entry in entries:
+              if not entry:
+                  continue
+              metadata, name = entry.split(b'\t', 1)
+              mode, oid, stage = metadata.split(b' ')
+              if stage != b'0' or mode not in (b'100644', b'100755', b'120000'):
+                  raise ValueError('Unexpected index entry')
+              path = os.fsencode(root) + b'/' + name
+              content = os.readlink(path) if mode == b'120000' else pathlib.Path(os.fsdecode(path)).read_bytes()
+              actual_mode = b'120000' if os.path.islink(path) else (b'100755' if os.stat(path).st_mode & 0o111 else b'100644')
+              if actual_mode != mode:
+                  raise ValueError('Working tree mode differs from index')
+              for part in (name, mode, content):
+                  digest.update(len(part).to_bytes(8, 'big'))
+                  digest.update(part)
+              blobs.add(oid)
+              count += 1
+          original_remote = git('remote', 'get-url', 'origin').decode().strip()
+          try:
+              git('remote', 'set-url', 'origin', str(temp / 'nonexistent-origin'))
+              checks = subprocess.check_output(['git', '-C', str(root), 'cat-file', '--batch-check'], input=b'\n'.join(sorted(blobs)) + b'\n').splitlines()
+              if len(checks) != len(blobs) or any(len(line.split()) != 3 or line.split()[1] != b'blob' for line in checks):
+                  raise ValueError('A tracked blob is unavailable')
+              with open(os.devnull, 'wb') as sink:
+                  subprocess.run(['git', '-C', str(root), 'cat-file', '--batch'], input=b'\n'.join(sorted(blobs)) + b'\n', stdout=sink, check=True)
+          finally:
+              git('remote', 'set-url', 'origin', original_remote)
+          result = {
+              'arm': arm,
+              'pair': int(os.environ['PAIR']),
+              'order': os.environ['ORDER'],
+              'sha': git('rev-parse', 'HEAD').decode().strip(),
+              'tree': git('rev-parse', 'HEAD^{tree}').decode().strip(),
+              'shallow': git('rev-parse', '--is-shallow-repository').decode().strip(),
+              'boundary': (root / '.git/shallow').read_text().splitlines(),
+              'status': git('status', '--porcelain=v1', '--untracked-files=all').decode(),
+              'tracked_files': count,
+              'unique_blobs': len(blobs),
+              'content_mode_hash': digest.hexdigest(),
+              'fetch_count': len(fetches),
+              'lazy_fetch_count': len(lazy_fetches),
+              'seconds': duration,
+              'git_version': git('--version').decode().strip(),
+              'runner_image': os.environ.get('ImageOS', '') + ' ' + os.environ.get('ImageVersion', ''),
+          }
+          (temp / (arm + '.json')).write_text(json.dumps(result, indent=2) + '\n')
+          PY
+      - name: Start first checkout timer
+        run: python3 "$RUNNER_TEMP/snapshot.py" '${{ matrix.first }}' start
+      - name: Checkout shallow first
+        if: matrix.first == 'shallow'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        env:
+          GIT_TRACE2_EVENT: ${{ runner.temp }}/shallow.trace
+        with:
+          ref: 850558b68c0cb2b6220cd5344b80f7f3ddfb4530
+          path: shallow
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Checkout blobless first
+        if: matrix.first == 'blobless'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        env:
+          GIT_TRACE2_EVENT: ${{ runner.temp }}/blobless.trace
+        with:
+          ref: 850558b68c0cb2b6220cd5344b80f7f3ddfb4530
+          path: blobless
+          fetch-depth: 1
+          filter: blob:none
+          persist-credentials: false
+      - name: Snapshot first checkout
+        env:
+          PAIR: ${{ matrix.pair }}
+          ORDER: ${{ matrix.first }}-first
+        run: python3 "$RUNNER_TEMP/snapshot.py" '${{ matrix.first }}' snapshot
+      - name: Start second checkout timer
+        run: python3 "$RUNNER_TEMP/snapshot.py" '${{ matrix.second }}' start
+      - name: Checkout shallow second
+        if: matrix.second == 'shallow'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        env:
+          GIT_TRACE2_EVENT: ${{ runner.temp }}/shallow.trace
+        with:
+          ref: 850558b68c0cb2b6220cd5344b80f7f3ddfb4530
+          path: shallow
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Checkout blobless second
+        if: matrix.second == 'blobless'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        env:
+          GIT_TRACE2_EVENT: ${{ runner.temp }}/blobless.trace
+        with:
+          ref: 850558b68c0cb2b6220cd5344b80f7f3ddfb4530
+          path: blobless
+          fetch-depth: 1
+          filter: blob:none
+          persist-credentials: false
+      - name: Snapshot second checkout
+        env:
+          PAIR: ${{ matrix.pair }}
+          ORDER: ${{ matrix.first }}-first
+        run: python3 "$RUNNER_TEMP/snapshot.py" '${{ matrix.second }}' snapshot
+      - name: Upload pair
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: checkout-pair-${{ matrix.pair }}
+          path: |
+            ${{ runner.temp }}/shallow.json
+            ${{ runner.temp }}/blobless.json
+          if-no-files-found: error
+          retention-days: 3
+
+  compare:
+    needs: checkout
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Download pairs
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: checkout-pair-*
+          path: results
+      - name: Check parity and summarize timing
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import pathlib
+          import statistics
+          import os
+
+          root = pathlib.Path('results')
+          records = []
+          sha = '850558b68c0cb2b6220cd5344b80f7f3ddfb4530'
+          tree = '0605c49f05e45112a081c1673dc35ecbdc793ceb'
+          expected_orders = {1: 'shallow-first', 2: 'blobless-first', 3: 'shallow-first', 4: 'blobless-first'}
+          lines = ['## Checkout experiment', '', 'Action durations include step orchestration and deferred blob fetching; these results do not test the lint matrix.', '', '| Pair | Order | Shallow (s) | Blobless (s) | Difference (s) |', '| --- | --- | ---: | ---: | ---: |']
+          for pair in range(1, 5):
+              row = {}
+              for arm in ('shallow', 'blobless'):
+                  path = root / f'checkout-pair-{pair}' / f'{arm}.json'
+                  if not path.is_file() or not path.stat().st_size:
+                      raise ValueError(f'Missing or empty artifact: {path}')
+                  data = json.loads(path.read_text())
+                  assert data['pair'] == pair and data['arm'] == arm and data['order'] == expected_orders[pair]
+                  assert data['sha'] == sha and data['tree'] == tree
+                  assert data['shallow'] == 'true' and data['boundary'] == [sha] and data['status'] == ''
+                  assert data['tracked_files'] == 14000 and data['unique_blobs'] == 13531
+                  assert data['lazy_fetch_count'] == (1 if arm == 'blobless' else 0)
+                  assert data['fetch_count'] == (2 if arm == 'blobless' else 1)
+                  assert data['seconds'] > 0 and data['git_version'] and data['runner_image'].strip()
+                  records.append(data)
+                  row[arm] = data['seconds']
+              lines.append(f"| {pair} | {expected_orders[pair]} | {row['shallow']:.3f} | {row['blobless']:.3f} | {row['blobless'] - row['shallow']:+.3f} |")
+          assert len({r['content_mode_hash'] for r in records}) == 1
+          assert len({r['git_version'] for r in records}) == 1
+          assert len({r['runner_image'] for r in records}) == 1
+          for arm in ('shallow', 'blobless'):
+              median = statistics.median(r['seconds'] for r in records if r['arm'] == arm)
+              lines.append(f'\nMedian {arm}: {median:.3f} s.')
+          lines.append('\nAll eight snapshots match on commit, tree, shallow boundary, tracked content and modes; all current blobs were readable with the remote unavailable.')
+          summary = '\n'.join(lines) + '\n'
+          print(summary)
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as output:
+              output.write(summary)
+          PY
