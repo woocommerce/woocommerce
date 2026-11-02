@@ -37,10 +37,7 @@ Component to display a searchable, selectable list of items.
 | `onSearch`       | Function | `null`  | Callback fired when the search field is used                                                                                                                                  |
 | `renderItem`     | Function | `null`  | Callback to render each item in the selection list, allows any custom object-type rendering                                                                                   |
 | `selected`       | Array    | `null`  | (required) The list of currently selected items                                                                                                                               |
-| `search`         | String   | `null`  |                                                                                                                                                                               |
-| `setState`       | Function | `null`  |                                                                                                                                                                               |
-| `debouncedSpeak` | Function | `null`  |                                                                                                                                                                               |
-| `instanceId`     | Number   | `null`  |                                                                                                                                                                               |
+| `debouncedSpeak` | Function | `null`  | Announces `messages.updated` to screen reader users. Supplied by `withSpokenMessages`.                                                                                        |
 
 ### `list` item structure
 
