@@ -29,7 +29,7 @@ class ShopOpenGraphTags {
 	public function get_tags( WP_Post $page ): array {
 		$description = wc_get_container()->get( OpenGraphDescription::class )->clean( get_the_excerpt( $page ) );
 		$tags        = array(
-			array( 'og:title' => get_the_title( $page ) ),
+			array( 'og:title' => wp_strip_all_tags( get_the_title( $page ) ) ),
 			array( 'og:type' => 'website' ),
 			array( 'og:url' => get_permalink( $page ) ),
 			array( 'og:description' => wc_trim_string( $description ) ),
