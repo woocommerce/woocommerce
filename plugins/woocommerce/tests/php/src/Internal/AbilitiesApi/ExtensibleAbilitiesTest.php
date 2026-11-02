@@ -3838,7 +3838,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 1, $saves );
 		$this->assertSame( 'high', $output['order']['extensions']['test-ext']['priority'] );
 		$this->assertSame( 400, $refused->get_status() );
-		$this->assertSame( 'test_refused', $refused->get_data()['code'] );
+		$this->assertSame( 'test-ext:test_refused', $refused->get_data()['code'] );
 		$this->assertSame( 'Lisbon', $saved->get_shipping_city() );
 		$this->assertSame( 'high', $saved->get_meta( '_test_priority' ) );
 	}
@@ -3933,7 +3933,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		wp_cache_flush();
 		$saved = wc_get_order( $order->get_id() );
-		$this->assertSame( 'test_refused', $refused->get_data()['code'] );
+		$this->assertSame( 'test-ext:test_refused', $refused->get_data()['code'] );
 		$this->assertArrayHasKey( $shipping_id, $saved->get_shipping_methods() );
 		$this->assertSame( $total, $saved->get_total() );
 		$this->assertSame( array(), $staged );
