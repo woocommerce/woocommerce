@@ -1964,6 +1964,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		/**
 		 * Action to signal that a coupon has been applied to an order.
 		 *
+		 * Fires before the order is saved and before the coupon totals are recalculated. A listener can change
+		 * the order in memory, for example add a line item, and the new totals include that change. After
+		 * stage_coupon(), the order might never be saved: a validator can refuse the change, or
+		 * stage_coupon_removal() can remove the coupon before the save. Keep the listener to in-memory changes,
+		 * and do not write to the database from it.
+		 *
 		 * @param  WC_Coupon $coupon The applied coupon object.
 		 * @param  WC_Order  $order  The current order object.
 		 *
@@ -2272,6 +2278,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	private function fire_removed_coupon_action( WC_Coupon $coupon_object ): void {
 		/**
 		 * Action hook fired when a coupon is removed from an order.
+		 *
+		 * Fires after the order is saved. After stage_coupon_removal(), it fires from the next save(). It also
+		 * fires for a coupon that stage_coupon() applied and that was removed before any save, so a listener
+		 * can undo what it did on woocommerce_order_applied_coupon.
 		 *
 		 * @param  WC_Coupon $coupon_object The removed coupon object.
 		 * @param  WC_Order  $order         The current order object.
