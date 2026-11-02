@@ -17,12 +17,22 @@ trait DomainAbilityHelpers {
 	/**
 	 * Format an ability date with its store or UTC offset without changing the object.
 	 *
-	 * @param \WC_DateTime|null $date Date to format.
-	 * @param bool              $utc  Whether to use UTC instead of the store timezone.
+	 * @param mixed $date Date to format.
+	 * @param bool  $utc  Whether to use UTC instead of the store timezone.
 	 * @return string|null
 	 */
-	protected static function format_date_for_response( ?\WC_DateTime $date, bool $utc = true ): ?string {
-		if ( null === $date ) {
+	protected static function format_date_for_response( $date, bool $utc = true ): ?string {
+		try {
+			if ( is_numeric( $date ) ) {
+				$date = new \WC_DateTime( "@$date", new \DateTimeZone( 'UTC' ) );
+			} elseif ( is_string( $date ) ) {
+				$date = new \WC_DateTime( $date, new \DateTimeZone( 'UTC' ) );
+			}
+		} catch ( \Exception $e ) {
+			return null;
+		}
+
+		if ( ! $date instanceof \WC_DateTime ) {
 			return null;
 		}
 
