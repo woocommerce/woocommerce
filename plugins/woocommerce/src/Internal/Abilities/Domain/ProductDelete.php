@@ -130,7 +130,7 @@ class ProductDelete extends ActionableAbility {
 	 * @param array $input Ability input.
 	 * @return \WC_Product|\WP_Error
 	 */
-	public function load( array $input ) {
+	protected function load( array $input ) {
 		$this->product_id = 0;
 		$this->force      = ! empty( $input['force'] );
 		$this->parent     = null;
@@ -175,7 +175,7 @@ class ProductDelete extends ActionableAbility {
 	 * @param array       $input   Ability input.
 	 * @return null|array<int, array{0: \WC_Product_Variable, 1: array}>
 	 */
-	public function change( $subject, array $input ) {
+	protected function change( $subject, array $input ) {
 		unset( $input );
 
 		$this->deleting = array_merge( array( $subject ), $subject instanceof \WC_Product_Variable ? self::get_variations_to_delete( $subject ) : array() );
@@ -192,7 +192,7 @@ class ProductDelete extends ActionableAbility {
 	 * @param \WC_Product $subject Product to delete.
 	 * @return null|\WP_Error
 	 */
-	public function save( $subject ) {
+	protected function save( $subject ) {
 		$force      = $this->force;
 		$product_id = $this->product_id;
 
@@ -281,7 +281,7 @@ class ProductDelete extends ActionableAbility {
 	 * @param \WC_Product $subject Deleted product.
 	 * @return array
 	 */
-	public function prepare_response( $subject ): array {
+	protected function prepare_response( $subject ): array {
 		unset( $subject );
 
 		return array(
