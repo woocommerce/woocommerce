@@ -2,6 +2,8 @@
 
 Brings another GitHub repository into the WooCommerce monorepo: `merge` imports its code with full history, and `transfer-issues` moves its issues across. It is rarely needed, so read this before running it.
 
+Because it can go years between runs, have an LLM review `bin/` and `src/` before you use it. Ask it to check for changes to the GitHub GraphQL API, `git`, or `git-filter-repo` that affect the import or the issue transfer, and for improvements worth making first. Then run `transfer-issues` with `--dry-run` before the real transfer.
+
 ## Requirements
 
 - macOS or Linux with Node 24. The tool has no runtime dependencies; `pnpm install` is only needed to run its tests.
