@@ -561,6 +561,35 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A throwing `woocommerce_customer_stock_notification_pre_send` callback is logged, cancels the sign-up and does not stop the batch.
+	 */
+	public function test_process_batch_logs_throwing_pre_send_callback(): void {
+		add_filter(
+			'woocommerce_customer_stock_notification_pre_send',
+			function () {
+				throw new \RuntimeException( 'Provider exploded.' );
+			}
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$ids     = array();
+		foreach ( array( 'first@test.com', 'second@test.com' ) as $email ) {
+			$notification = new Notification();
+			$notification->set_product_id( $product->get_id() );
+			$notification->set_user_email( $email );
+			$notification->set_status( NotificationStatus::ACTIVE );
+			$ids[] = $notification->save();
+		}
+
+		$this->sut->process_batch( $product->get_id() );
+
+		foreach ( $ids as $id ) {
+			$this->assertSame( NotificationStatus::CANCELLED, ( new Notification( $id ) )->get_status() );
+			$this->assertLogged( 'error', sprintf( 'Delivery of notification %d failed: Provider exploded.', $id ) );
+		}
+	}
+
+	/**
 	 * @testdox The sent action does not fire for a sign-up that could not be saved as sent.
 	 */
 	public function test_process_batch_skips_sent_action_when_save_fails(): void {

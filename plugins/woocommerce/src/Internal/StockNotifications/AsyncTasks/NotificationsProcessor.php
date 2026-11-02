@@ -233,6 +233,10 @@ class NotificationsProcessor {
 				$is_sent = $this->email_manager->deliver_stock_notification( $notification );
 			} catch ( \Throwable $e ) {
 				$is_sent = false;
+				$this->logger->error(
+					sprintf( 'Delivery of notification %d failed: %s', $notification->get_id(), $e->getMessage() ),
+					array( 'source' => 'wc-customer-stock-notifications' )
+				);
 			}
 
 			if ( $is_sent ) {
