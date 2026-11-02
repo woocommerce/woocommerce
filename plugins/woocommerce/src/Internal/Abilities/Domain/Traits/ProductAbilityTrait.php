@@ -125,13 +125,13 @@ trait ProductAbilityTrait {
 		if ( $for_variation ) {
 			return array(
 				'type'        => 'array',
-				'description' => __( 'The option this variation picks for each attribute of its parent, by attribute name or global attribute id. For a global attribute the option is the term slug. An attribute with no option, or a null option, matches any option of the attribute.', 'woocommerce' ),
+				'description' => __( 'The option this variation picks for each attribute of its parent, by attribute name or global attribute id. For a global attribute the option is the term slug. An attribute with no option matches any option of the attribute.', 'woocommerce' ),
 				'items'       => array(
 					'type'                 => 'object',
 					'properties'           => array(
 						'id'     => self::get_global_attribute_id_schema(),
 						'name'   => array( 'type' => 'string' ),
-						'option' => array( 'type' => array( 'string', 'null' ) ),
+						'option' => array( 'type' => 'string' ),
 					),
 					'additionalProperties' => false,
 				),
@@ -1524,11 +1524,14 @@ trait ProductAbilityTrait {
 					'variation' => (bool) $attribute->get_variation(),
 				);
 			} else {
-				$output[] = array(
-					'id'     => taxonomy_is_product_attribute( (string) $slug ) ? wc_attribute_taxonomy_id_by_name( (string) $slug ) : 0,
-					'name'   => wc_attribute_label( (string) $slug, $product ),
-					'option' => '' === (string) $attribute ? null : (string) $attribute,
+				$picked = array(
+					'id'   => taxonomy_is_product_attribute( (string) $slug ) ? wc_attribute_taxonomy_id_by_name( (string) $slug ) : 0,
+					'name' => wc_attribute_label( (string) $slug, $product ),
 				);
+				if ( '' !== (string) $attribute ) {
+					$picked['option'] = (string) $attribute;
+				}
+				$output[] = $picked;
 			}
 		}
 
@@ -1696,8 +1699,8 @@ trait ProductAbilityTrait {
 								'items' => array( 'type' => 'string' ),
 							),
 							'option'    => array(
-								'type'        => array( 'string', 'null' ),
-								'description' => __( 'The option a variation picks. Null matches any option.', 'woocommerce' ),
+								'type'        => 'string',
+								'description' => __( 'The option a variation picks. Omitted when the variation matches any option.', 'woocommerce' ),
 							),
 							'visible'   => array( 'type' => 'boolean' ),
 							'variation' => array(

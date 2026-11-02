@@ -2406,7 +2406,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should let a variation match any option with a null option, and show null in the output.
+	 * @testdox Should let a variation match any option when it sends no option, leave the option out of the output, and refuse a null option.
 	 */
 	public function test_product_create_accepts_any_option_variations(): void {
 		$input                                  = $this->get_shirt_input();
@@ -2414,10 +2414,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'name'    => 'Color',
 			'options' => array( 'Red', 'Blue' ),
 		);
-		$input['variations'][0]['attributes'][] = array(
-			'name'   => 'Color',
-			'option' => null,
-		);
+		$input['variations'][0]['attributes'][] = array( 'name' => 'Color' );
 		$input['variations'][1]['attributes'][] = array(
 			'name'   => 'Color',
 			'option' => 'Red',
@@ -2437,14 +2434,19 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'option' => 'S',
 				),
 				array(
-					'id'     => 0,
-					'name'   => 'Color',
-					'option' => null,
+					'id'   => 0,
+					'name' => 'Color',
 				),
 			),
 			$small['products'][0]['attributes']
 		);
 		$this->assertSame( '', wc_get_product( $created['product']['variation_ids'][0] )->get_attributes()['color'] );
+
+		$input['variations'][0]['attributes'][1]['option'] = null;
+		$input['sku']                                      = 'shirt-null-option';
+		$refused = wp_get_ability( 'woocommerce/product-create' )->execute( $input );
+		$this->assertWPError( $refused );
+		$this->assertSame( 'ability_invalid_input', $refused->get_error_code() );
 	}
 
 	/**
