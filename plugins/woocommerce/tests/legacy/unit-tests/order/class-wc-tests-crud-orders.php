@@ -1487,6 +1487,39 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A coupon that apply_coupon() adds after the staged removal of the only recorded coupon is counted once.
+	 */
+	public function test_coupon_applied_after_staged_removal_of_recorded_coupon_is_counted_once(): void {
+		$order = WC_Helper_Order::create_order();
+		$this->create_fixed_cart_coupon( 'recorded-removed' );
+		$this->create_fixed_cart_coupon( 'applied-replacement' );
+		$order->apply_coupon( 'recorded-removed' );
+
+		$order->stage_coupon_removal( 'recorded-removed' );
+		$order->apply_coupon( 'applied-replacement' );
+
+		$this->assertSame( 0, ( new WC_Coupon( 'recorded-removed' ) )->get_usage_count() );
+		$this->assertSame( 1, ( new WC_Coupon( 'applied-replacement' ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox A coupon staged after the staged removal of the only recorded coupon is counted once on save.
+	 */
+	public function test_coupon_staged_after_staged_removal_of_recorded_coupon_is_counted_once(): void {
+		$order = WC_Helper_Order::create_order();
+		$this->create_fixed_cart_coupon( 'recorded-replaced' );
+		$this->create_fixed_cart_coupon( 'staged-replacement' );
+		$order->apply_coupon( 'recorded-replaced' );
+
+		$order->stage_coupon_removal( 'recorded-replaced' );
+		$order->stage_coupon( 'staged-replacement' );
+		$order->save();
+
+		$this->assertSame( 0, ( new WC_Coupon( 'recorded-replaced' ) )->get_usage_count() );
+		$this->assertSame( 1, ( new WC_Coupon( 'staged-replacement' ) )->get_usage_count() );
+	}
+
+	/**
 	 * @testdox Removing a staged coupon before the save leaves no usage of that coupon on the order.
 	 */
 	public function test_removing_a_staged_coupon_leaves_no_usage(): void {

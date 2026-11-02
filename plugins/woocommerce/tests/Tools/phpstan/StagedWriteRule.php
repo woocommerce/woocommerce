@@ -158,7 +158,7 @@ final class StagedWriteRule implements Rule {
 		}
 
 		$source = implode( '', array_slice( $lines, $reflection->getStartLine() - 1, $reflection->getEndLine() - $reflection->getStartLine() + 1 ) );
-		return preg_match( "/refuse_unstaged_override\\(\\s*'(\\w+)'/", $source, $matches ) ? strtolower( $matches[1] ) : null;
+		return preg_match( "/refuse_unstaged_override\\(\\s*['\"](\\w+)['\"]/", $source, $matches ) ? strtolower( $matches[1] ) : null;
 	}
 
 	/**

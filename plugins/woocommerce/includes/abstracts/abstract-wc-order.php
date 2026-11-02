@@ -1989,7 +1989,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		if ( $this->writing_through ) {
-			if ( $recorded_before_save ) {
+			if ( $recorded_before_save && $this->has_recorded_coupon_usage() ) {
 				$this->increase_coupon_usage( array( $coupon ) );
 			}
 			wc_update_coupon_usage_counts( $this->get_id() );
@@ -2028,14 +2028,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Record the usage of the staged coupons once, against the coupons of the saved order. When the order
-	 * already had recorded usage before the write, count the staged coupons, which that usage did not include.
+	 * had recorded usage before the write and still has it after, count the staged coupons, which that usage
+	 * did not include.
 	 * wc_update_coupon_usage_counts() then counts every coupon of an order that has not recorded usage yet.
 	 */
 	private function record_staged_coupon_usage(): void {
 		$coupons              = $this->staged_coupons;
 		$this->staged_coupons = array();
 
-		if ( $this->coupon_usage_recorded_before_save ) {
+		if ( $this->coupon_usage_recorded_before_save && $this->has_recorded_coupon_usage() ) {
 			$this->increase_coupon_usage( $coupons );
 		}
 
