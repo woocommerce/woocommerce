@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { mapValues } from 'lodash';
 import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
@@ -19,17 +18,24 @@ import { store } from './';
 const getWooCommerceMeta = ( user: WCUser ) => {
 	const wooMeta = user.woocommerce_meta || {};
 
-	const userData = mapValues( wooMeta, ( data ) => {
+	const parseValue = ( data: string ) => {
 		if ( ! data || data.length === 0 ) {
 			return '';
 		}
 		try {
 			return JSON.parse( data );
-		} catch ( e ) {
+		} catch {
 			// If we can't parse the value, return the raw data. The meta value could be a string like 'yes' or 'no'.
 			return data;
 		}
-	} );
+	};
+
+	const userData = Object.fromEntries(
+		Object.entries( wooMeta ).map( ( [ key, data ] ) => [
+			key,
+			parseValue( data ),
+		] )
+	);
 
 	return userData;
 };
@@ -53,14 +59,14 @@ async function updateUserPrefs(
 ) {
 	// @todo Handle unresolved getCurrentUser() here.
 	// Prep fields for update.
-	const metaData = mapValues( userPrefs, ( value ) => {
-		if ( typeof value === 'string' ) {
-			// If the value is a string, we don't need to serialize it.
-			return value;
-		}
-
-		return JSON.stringify( value );
-	} );
+	// Callers outside TypeScript can pass nothing; treat that as no preferences, as before.
+	const metaData = Object.fromEntries(
+		Object.entries( userPrefs ?? {} ).map( ( [ key, value ] ) => [
+			key,
+			// A string value doesn't need to be serialized.
+			typeof value === 'string' ? value : JSON.stringify( value ),
+		] )
+	);
 
 	if ( Object.keys( metaData ).length === 0 ) {
 		return {

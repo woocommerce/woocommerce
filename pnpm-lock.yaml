@@ -1019,9 +1019,6 @@ importers:
       '@types/jest':
         specifier: 29.5.x
         version: 29.5.14
-      '@types/lodash':
-        specifier: ^4.14.202
-        version: 4.17.24
       '@types/md5':
         specifier: ^2.3.5
         version: 2.3.6

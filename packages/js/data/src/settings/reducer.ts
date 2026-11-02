@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { union } from 'lodash';
 import { Reducer } from 'redux';
 
 /**
@@ -110,7 +109,12 @@ const reducer: Reducer< SettingsState, Actions > = ( state = {}, action ) => {
 						isRequesting: state[ group ]?.isRequesting || false,
 						dirty:
 							state[ group ] && state[ group ].dirty
-								? union( state[ group ].dirty, groupIds )
+								? [
+										...new Set( [
+											...state[ group ].dirty,
+											...groupIds,
+										] ),
+									]
 								: groupIds,
 					},
 					...updateGroupDataInNewState( newState, {

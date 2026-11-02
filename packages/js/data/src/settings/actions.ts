@@ -5,7 +5,6 @@
 import { __ } from '@wordpress/i18n';
 import { apiFetch, select } from '@wordpress/data-controls';
 import { controls } from '@wordpress/data';
-import { concat } from 'lodash';
 
 /**
  * Internal dependencies
@@ -102,7 +101,7 @@ export function* persistSettingsForGroup( group: string ) {
 				return { id: k, value: dirtyData[ key ][ k ] };
 			} );
 
-			return concat( updates, u );
+			return updates.concat( u );
 		},
 		[]
 	);
