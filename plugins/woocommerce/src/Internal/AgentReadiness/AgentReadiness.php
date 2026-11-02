@@ -219,6 +219,16 @@ class AgentReadiness {
 	 * @return array{generated_at:string,products:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool}
 	 */
 	public function get_report(): array {
+		return $this->build_report();
+	}
+
+	/**
+	 * Run every check over the catalog.
+	 *
+	 * @param callable|null $on_tested Called with each product id and its failures.
+	 * @return array{generated_at:string,products:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool}
+	 */
+	private function build_report( ?callable $on_tested = null ): array {
 		// Rebuild the rules and the scan for each report: a long-running process may have fetched a new rules file or changed GTINs since.
 		$this->active_rules = null;
 		$this->product_scan = null;
@@ -227,7 +237,7 @@ class AgentReadiness {
 		$channel_rules      = $active['channel_rules'];
 
 		$scan = new ProductScan();
-		$scan->evaluate( $rules, $channel_rules, self::PRODUCT_IDS_LIMIT );
+		$scan->evaluate( $rules, $channel_rules, self::PRODUCT_IDS_LIMIT, $on_tested );
 
 		$checks = array();
 		foreach ( $rules as $id => $rule ) {
@@ -266,7 +276,60 @@ class AgentReadiness {
 	 */
 	public function get_cached_report(): ?array {
 		$report = get_option( self::REPORT_OPTION );
-		return is_array( $report ) ? $report : null;
+		return is_array( $report ) ? self::with_saved_products( $report ) : null;
+	}
+
+	/**
+	 * Whether a report has been stored.
+	 */
+	public function has_report(): bool {
+		return is_array( get_option( self::REPORT_OPTION ) );
+	}
+
+	/**
+	 * A stored report with its product counts as they stand now, so a product fixed since the scan no longer counts.
+	 *
+	 * @param array<string, mixed> $report Stored report.
+	 * @return array<string, mixed>
+	 */
+	private static function with_saved_products( array $report ): array {
+		if ( empty( $report['failures_stored'] ) ) {
+			return $report;
+		}
+		$counts = ProductFailures::counts();
+		foreach ( is_array( $report['checks'] ?? null ) ? $report['checks'] : array() as $index => $check ) {
+			if ( ! is_array( $check ) || ! isset( $check['id'] ) ) {
+				continue;
+			}
+			$id                                        = (string) $check['id'];
+			$report['checks'][ $index ]['count']       = $counts[ $id ] ?? 0;
+			$report['checks'][ $index ]['product_ids'] = array_values(
+				array_filter(
+					(array) ( $check['product_ids'] ?? array() ),
+					static fn( $product_id ): bool => in_array( $id, ProductFailures::for_product( (int) $product_id ), true )
+				)
+			);
+		}
+		// Every product the checks cover has a checked row, so products added, fixed or removed since the scan count now.
+		$products           = $counts[ ProductFailures::CHECKED ] ?? 0;
+		$report['products'] = $products;
+		foreach ( is_array( $report['channels'] ?? null ) ? $report['channels'] : array() as $id => $channel ) {
+			if ( ! is_array( $channel ) ) {
+				continue;
+			}
+			$not_listable              = $counts[ ProductFailures::channel_value( ProductScan::NOT_LISTABLE, (string) $id ) ] ?? 0;
+			$with_gaps                 = $counts[ ProductFailures::channel_value( ProductScan::WITH_GAPS, (string) $id ) ] ?? 0;
+			$report['channels'][ $id ] = array_merge(
+				$channel,
+				array(
+					'listable'     => max( 0, $products - $not_listable ),
+					'not_listable' => $not_listable,
+					'with_gaps'    => $with_gaps,
+					'complete'     => max( 0, $products - $not_listable - $with_gaps ),
+				)
+			);
+		}
+		return $report;
 	}
 
 	/**
@@ -309,7 +372,15 @@ class AgentReadiness {
 	 * @return array<string, mixed>
 	 */
 	public function refresh_report(): array {
-		$report = $this->get_report();
+		$tested = array();
+		$report = $this->build_report(
+			static function ( int $product_id, array $failures ) use ( &$tested ): void {
+				$tested[] = $product_id;
+				ProductFailures::store( $product_id, $failures );
+			}
+		);
+		ProductFailures::keep_only( $tested );
+		$report['failures_stored'] = true;
 		update_option( self::REPORT_OPTION, $report, false );
 		return $report;
 	}
