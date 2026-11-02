@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications;
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\NotificationPreferencesRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationStatusRestController;
@@ -12,9 +13,10 @@ use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestC
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
+use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewOrderNotificationTrigger;
+use Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers\PushNotificationsTestTrait;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
-use PHPUnit\Framework\MockObject\MockObject;
 use WC_Logger;
 use WC_Unit_Test_Case;
 use WP_Http;
@@ -27,10 +29,7 @@ use WP_REST_Response;
  * @covers \Automattic\WooCommerce\Internal\PushNotifications\PushNotifications
  */
 class PushNotificationsTest extends WC_Unit_Test_Case {
-	/**
-	 * @var JetpackConnectionManager|MockObject
-	 */
-	private $jetpack_connection_manager_mock;
+	use PushNotificationsTestTrait;
 
 	/**
 	 * Tear down the test case.
@@ -248,6 +247,107 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		$this->assertFalse(
 			post_type_exists( PushToken::POST_TYPE ),
 			'Push token post type should not be registered when disabled via the filter'
+		);
+	}
+
+	/**
+	 * @testdox Tests that on_init records when push notifications were first enabled, as an autoloaded option.
+	 */
+	public function test_on_init_records_enabled_at_when_enabled() {
+		global $wpdb;
+
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+		$this->jetpack_connection_manager_mock->method( 'is_connected' )->willReturn( true );
+
+		$push_notifications = new PushNotifications();
+
+		$before = time();
+		$push_notifications->on_init();
+		$after = time();
+
+		$enabled_at = $push_notifications->get_enabled_at();
+		$this->assertNotNull( $enabled_at, 'The enablement time should be recorded' );
+		$this->assertGreaterThanOrEqual( $before, $enabled_at, 'The enablement time should not predate on_init' );
+		$this->assertLessThanOrEqual( $after, $enabled_at, 'The enablement time should not postdate on_init' );
+
+		$autoload = $wpdb->get_var(
+			$wpdb->prepare( "SELECT autoload FROM {$wpdb->options} WHERE option_name = %s", PushNotifications::ENABLED_AT_OPTION )
+		);
+		$this->assertSame( 'on', $autoload, 'The option should be autoloaded' );
+	}
+
+	/**
+	 * @testdox Tests that on_init keeps the first recorded enablement time.
+	 */
+	public function test_on_init_does_not_overwrite_enabled_at() {
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+		$this->jetpack_connection_manager_mock->method( 'is_connected' )->willReturn( true );
+
+		update_option( PushNotifications::ENABLED_AT_OPTION, 1000 );
+		$push_notifications = new PushNotifications();
+
+		$push_notifications->on_init();
+
+		$this->assertSame( 1000, $push_notifications->get_enabled_at(), 'The first recorded enablement time should be kept' );
+	}
+
+	/**
+	 * @testdox Tests that on_init does not record an enablement time when Jetpack is not connected.
+	 */
+	public function test_on_init_does_not_record_enabled_at_when_jetpack_is_not_connected() {
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+		$this->jetpack_connection_manager_mock->method( 'is_connected' )->willReturn( false );
+
+		$push_notifications = new PushNotifications();
+
+		$push_notifications->on_init();
+
+		$this->assertNull( $push_notifications->get_enabled_at(), 'No enablement time should be recorded while disabled' );
+	}
+
+	/**
+	 * @testdox Tests that on_init does not read the enablement time while disabled.
+	 */
+	public function test_on_init_does_not_read_enabled_at_while_disabled() {
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+		$this->jetpack_connection_manager_mock->method( 'is_connected' )->willReturn( false );
+		$reads = 0;
+		add_filter(
+			'pre_option_' . PushNotifications::ENABLED_AT_OPTION,
+			function ( $pre ) use ( &$reads ) {
+				++$reads;
+				return $pre;
+			}
+		);
+
+		( new PushNotifications() )->on_init();
+
+		$this->assertSame( 0, $reads, 'The option should only be read when an order moves into a notifiable status' );
+	}
+
+	/**
+	 * @testdox Tests that on_init keeps marking orders while disabled only on a site that has used push notifications.
+	 * @testWith [1000, true]
+	 *           [null, false]
+	 *
+	 * @param int|null $enabled_at    The recorded enablement time, or null when never enabled.
+	 * @param bool     $expect_marked Whether the order should be marked.
+	 */
+	public function test_on_init_marks_orders_while_disabled_only_after_first_enablement( ?int $enabled_at, bool $expect_marked ) {
+		$this->remove_trigger_callbacks_registered_at_boot();
+		if ( null !== $enabled_at ) {
+			update_option( PushNotifications::ENABLED_AT_OPTION, $enabled_at );
+		}
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+		$this->jetpack_connection_manager_mock->method( 'is_connected' )->willReturn( false );
+
+		( new PushNotifications() )->on_init();
+		$order = wc_create_order( array( 'status' => OrderStatus::PROCESSING ) );
+
+		$this->assertSame(
+			$expect_marked,
+			wc_get_order( $order->get_id() )->meta_exists( NewOrderNotificationTrigger::NOTIFIABLE_META_KEY ),
+			'Orders should only be marked while disabled once push notifications have been enabled'
 		);
 	}
 

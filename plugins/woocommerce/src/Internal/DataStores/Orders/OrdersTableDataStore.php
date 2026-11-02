@@ -125,6 +125,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		'_wp_trash_meta_comments_status',
 		'_debug_log_source',
 		'_debug_log_source_pending_deletion',
+		'_wc_push_notification_notifiable_at',
 	);
 
 	/**

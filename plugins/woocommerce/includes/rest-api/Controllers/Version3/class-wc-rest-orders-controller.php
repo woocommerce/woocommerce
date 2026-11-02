@@ -117,8 +117,10 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 		$this->check_new_line_item_products( $request['line_items'] );
 
+		$item_types = array( 'shipping_lines', 'line_items', 'fee_lines' );
+
 		// Handle all writable props.
-		foreach ( $data_keys as $key ) {
+		foreach ( array_diff( $data_keys, $item_types ) as $key ) {
 			$value = $request[ $key ];
 
 			if ( ! is_null( $value ) ) {
@@ -137,21 +139,6 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 					case 'shipping':
 						$this->update_address( $order, $value, $key );
 						break;
-					case 'line_items':
-					case 'shipping_lines':
-					case 'fee_lines':
-						if ( is_array( $value ) ) {
-							foreach ( $value as $item ) {
-								if ( is_array( $item ) ) {
-									if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
-										$this->remove_item( $order, $key, $item['id'] );
-									} else {
-										$this->set_item( $order, $key, $item );
-									}
-								}
-							}
-						}
-						break;
 					case 'meta_data':
 						MetaDataUtil::update( $value, $order );
 						break;
@@ -160,6 +147,23 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 							$order->{"set_{$key}"}( $value );
 						}
 						break;
+				}
+			}
+		}
+
+		// Set items once the address is known, shipping lines first, so new line items are priced at the order's tax location (the base address for local pickup).
+		foreach ( array_intersect( $item_types, $data_keys ) as $key ) {
+			if ( ! is_array( $request[ $key ] ) ) {
+				continue;
+			}
+
+			foreach ( $request[ $key ] as $item ) {
+				if ( is_array( $item ) ) {
+					if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
+						$this->remove_item( $order, $key, $item['id'] );
+					} else {
+						$this->set_item( $order, $key, $item );
+					}
 				}
 			}
 		}

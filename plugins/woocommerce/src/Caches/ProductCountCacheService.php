@@ -4,6 +4,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Caches;
 
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use WC_Product;
 use WP_Post;
@@ -103,7 +104,7 @@ class ProductCountCacheService {
 	public function schedule_background_actions(): void {
 		$frequency = HOUR_IN_SECONDS * 12;
 		$timestamp = time() + $frequency;
-		as_schedule_recurring_action( $timestamp, $frequency, self::BACKGROUND_EVENT_HOOK, array( 'product' ), 'count', true );
+		ActionSchedulerUtil::schedule_recurring( $timestamp, $frequency, self::BACKGROUND_EVENT_HOOK, array( 'product' ), 'count', true );
 	}
 
 	/**

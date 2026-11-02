@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\API\Reports\Cache;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -110,25 +111,47 @@ class Analytics {
 			return;
 		}
 
-		add_filter( 'woocommerce_component_settings_preload_endpoints', array( $this, 'add_preload_endpoints' ) );
-		add_filter( 'woocommerce_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
-		add_action( 'admin_menu', array( $this, 'register_pages' ) );
-		add_filter( 'woocommerce_debug_tools', array( $this, 'register_cache_clear_tool' ) );
-		add_filter( 'woocommerce_debug_tools', array( $this, 'register_regenerate_order_fulfillment_status_tool' ), 12 );
-
 		// Always register the batch hook so in-flight jobs survive after the legacy
 		// flag is cleared (clearing happens before the first batch is queued).
 		add_action( 'woocommerce_analytics_refund_fix_batch', array( $this, 'process_refund_fix_batch' ) );
 
 		// Merchant-triggered repair of refunds double-counted before #66320.
-		add_filter( 'woocommerce_debug_tools', array( $this, 'register_refund_double_count_tool' ) );
 		add_action( self::REFUND_DOUBLE_COUNT_FIX_HOOK, array( $this, 'process_refund_double_count_fix_batch' ), 10, 2 );
 		add_action( 'woocommerce_analytics_regenerate_init', array( $this, 'maybe_cancel_refund_double_count_fix_on_regenerate' ), 10, 2 );
 
-		if ( self::should_show_refund_fix_tool() ) {
+		$is_admin = is_admin();
+		$is_rest  = self::is_rest_request();
+		$is_cli   = self::is_cli_request();
+
+		if ( ! $is_admin && ! $is_rest && ! $is_cli ) {
+			return;
+		}
+
+		$should_show_refund_fix_tool = self::should_show_refund_fix_tool();
+
+		// Register debug tools in admin, REST, and WP-CLI contexts where they can be consumed.
+		add_filter( 'woocommerce_debug_tools', array( $this, 'register_cache_clear_tool' ) );
+		add_filter( 'woocommerce_debug_tools', array( $this, 'register_regenerate_order_fulfillment_status_tool' ), 12 );
+		add_filter( 'woocommerce_debug_tools', array( $this, 'register_refund_double_count_tool' ) );
+
+		if ( $should_show_refund_fix_tool ) {
 			add_filter( 'woocommerce_debug_tools', array( $this, 'register_full_refund_fix_data_tool' ) );
-			add_action( 'admin_footer', array( $this, 'output_refund_fix_tool_js' ) );
-			add_action( 'wp_ajax_woocommerce_check_refund_fix_needed', array( $this, 'ajax_check_refund_fix_needed' ) );
+		}
+
+		// User data preferences are read and updated in admin and REST contexts.
+		if ( $is_admin || $is_rest ) {
+			add_filter( 'woocommerce_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
+		}
+
+		// Admin-only UI screens, menus, and client-side assets.
+		if ( $is_admin ) {
+			add_filter( 'woocommerce_component_settings_preload_endpoints', array( $this, 'add_preload_endpoints' ) );
+			add_action( 'admin_menu', array( $this, 'register_pages' ) );
+
+			if ( $should_show_refund_fix_tool ) {
+				add_action( 'admin_footer', array( $this, 'output_refund_fix_tool_js' ) );
+				add_action( 'wp_ajax_woocommerce_check_refund_fix_needed', array( $this, 'ajax_check_refund_fix_needed' ) );
+			}
 		}
 	}
 
@@ -261,6 +284,25 @@ class Analytics {
 	private static function should_show_refund_fix_tool(): bool {
 		return ! OrderUtil::uses_new_full_refund_data()
 			|| 'yes' === get_option( 'woocommerce_analytics_show_old_refund_data_tool' );
+	}
+
+	/**
+	 * Check whether the current execution context is a REST API request.
+	 *
+	 * @return bool
+	 */
+	private static function is_rest_request(): bool {
+		return Constants::is_true( 'REST_REQUEST' )
+			|| ( function_exists( 'WC' ) && WC() && WC()->is_rest_api_request() );
+	}
+
+	/**
+	 * Check whether the current execution context is WP-CLI.
+	 *
+	 * @return bool
+	 */
+	private static function is_cli_request(): bool {
+		return Constants::is_true( 'WP_CLI' );
 	}
 
 	/**

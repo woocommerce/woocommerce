@@ -175,6 +175,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 			'description',
 			'short_description',
 			'sku',
+			'mpn',
 			'global_unique_id',
 			'price',
 			'regular_price',
