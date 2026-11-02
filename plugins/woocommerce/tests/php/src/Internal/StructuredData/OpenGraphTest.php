@@ -115,6 +115,51 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should collect up to six distinct valid product image URLs.
+	 */
+	public function test_collects_six_distinct_valid_images(): void {
+		$deleted_id = self::factory()->attachment->create(
+			array(
+				'file'           => 'deleted.jpg',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$invalid_id = self::factory()->attachment->create(
+			array(
+				'file'           => 'document.pdf',
+				'post_mime_type' => 'application/pdf',
+			)
+		);
+		$image_ids  = array();
+		for ( $i = 1; $i <= 7; $i++ ) {
+			$image_ids[] = self::factory()->attachment->create(
+				array(
+					'file'           => "gallery-$i.jpg",
+					'post_mime_type' => 'image/jpeg',
+				)
+			);
+		}
+		$duplicate_id = self::factory()->attachment->create(
+			array(
+				'file'           => 'gallery-1.jpg',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$this->product->set_image_id( $invalid_id );
+		$this->product->set_gallery_image_ids( array_merge( array( $deleted_id, $image_ids[0], $duplicate_id ), array_slice( $image_ids, 1 ) ) );
+		$this->product->save();
+		wp_delete_attachment( $deleted_id, true );
+
+		$tags = $this->render_meta_tags( '' );
+
+		$this->assertSame(
+			array_map( 'wp_get_attachment_url', array_slice( $image_ids, 0, 6 ) ),
+			$tags['og:image'],
+			'Invalid and duplicate images should not consume the six-image limit.'
+		);
+	}
+
+	/**
 	 * @testdox Should render sale prices and sale dates in product metadata.
 	 */
 	public function test_sale_price_and_dates(): void {
@@ -207,6 +252,29 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 		$this->assertSame( array( 'product' ), $tags['og:type'], 'Missing metadata should still be added alongside existing tags.' );
 		$this->assertSame( array( '25.00' ), $tags['product:price:amount'], 'An existing price should be preserved without duplication.' );
 		$this->assertSame( array( 'EUR' ), $tags['product:price:currency'], 'An existing currency should be preserved without duplication.' );
+	}
+
+	/**
+	 * @testdox Should leave both brand aliases to a provider that supplies either one.
+	 * @testWith ["product:brand", "og:brand"]
+	 *           ["og:brand", "product:brand"]
+	 *
+	 * @param string $provider_property Provider's brand property.
+	 * @param string $other_property Other brand property.
+	 */
+	public function test_existing_brand_suppresses_fallback_aliases( string $provider_property, string $other_property ): void {
+		$brand = wp_insert_term( 'Store brand', 'product_brand' );
+		$this->assertIsArray( $brand );
+		$this->product->set_brand_ids( array( $brand['term_id'] ) );
+		$this->product->save();
+
+		$tags = $this->render_meta_tags( '' );
+		$this->assertSame( array( 'Store brand' ), $tags['product:brand'] ?? array() );
+		$this->assertSame( array( 'Store brand' ), $tags['og:brand'] ?? array() );
+
+		$tags = $this->render_meta_tags( '<meta property="' . $provider_property . '" content="Provider brand">' );
+		$this->assertSame( array( 'Provider brand' ), $tags[ $provider_property ] ?? array() );
+		$this->assertArrayNotHasKey( $other_property, $tags );
 	}
 
 	/**
