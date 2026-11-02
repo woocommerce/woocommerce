@@ -54,17 +54,18 @@ class WC_Settings_Tax_Test extends WC_Settings_Unit_Test_Case {
 		$setting_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$expected = array(
-			'tax_options'                       => array( 'title', 'sectionend' ),
-			'woocommerce_prices_include_tax'    => 'radio',
-			'woocommerce_tax_based_on'          => 'select',
-			'woocommerce_shipping_tax_class'    => 'select',
-			'woocommerce_tax_round_at_subtotal' => 'checkbox',
-			'woocommerce_tax_classes'           => 'textarea',
-			'woocommerce_tax_display_shop'      => 'select',
-			'woocommerce_tax_display_cart'      => 'select',
-			'woocommerce_price_display_suffix'  => 'text',
-			'woocommerce_tax_total_display'     => 'select',
-			''                                  => array( 'conflict_error', 'add_settings_slot' ),
+			'tax_options'                             => array( 'title', 'sectionend' ),
+			'woocommerce_prices_include_tax'          => 'radio',
+			'woocommerce_shipping_prices_include_tax' => 'radio',
+			'woocommerce_tax_based_on'                => 'select',
+			'woocommerce_shipping_tax_class'          => 'select',
+			'woocommerce_tax_round_at_subtotal'       => 'checkbox',
+			'woocommerce_tax_classes'                 => 'textarea',
+			'woocommerce_tax_display_shop'            => 'select',
+			'woocommerce_tax_display_cart'            => 'select',
+			'woocommerce_price_display_suffix'        => 'text',
+			'woocommerce_tax_total_display'           => 'select',
+			''                                        => array( 'conflict_error', 'add_settings_slot' ),
 		);
 
 		$this->assertEquals( $expected, $setting_ids_and_types );

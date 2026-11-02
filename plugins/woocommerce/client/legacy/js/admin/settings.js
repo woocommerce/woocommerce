@@ -1,6 +1,24 @@
 /* global woocommerce_settings_params, wp */
 ( function ( $, params, wp ) {
 	$( function () {
+		var $shippingTaxSetting = $(
+			'input[name="woocommerce_shipping_prices_include_tax"]'
+		);
+		var previousShippingTaxSetting = $shippingTaxSetting
+			.filter( ':checked' )
+			.val();
+		$shippingTaxSetting.on( 'change', function () {
+			if (
+				! window.confirm( $( this ).attr( 'data-change-confirmation' ) )
+			) {
+				$shippingTaxSetting
+					.filter( '[value="' + previousShippingTaxSetting + '"]' )
+					.prop( 'checked', true );
+				return;
+			}
+			previousShippingTaxSetting = $( this ).val();
+		} );
+
 		// Sell Countries
 		$( 'select#woocommerce_allowed_countries' )
 			.on( 'change', function () {

@@ -10,6 +10,13 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Enums\TaxBasedOn;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
+$shipping_methods_with_tax_inclusion = array();
+foreach ( WC()->shipping()->get_shipping_methods() as $shipping_method ) {
+	if ( $shipping_method->supports( 'costs-entered-with-tax' ) ) {
+		$shipping_methods_with_tax_inclusion[] = wp_strip_all_tags( $shipping_method->get_method_title() );
+	}
+}
+
 $settings = array(
 
 	array(
@@ -31,6 +38,26 @@ $settings = array(
 		),
 	),
 
+	'shipping-prices-include-tax' => array(
+		'title'             => __( 'Shipping costs entered with tax', 'woocommerce' ),
+		'id'                => 'woocommerce_shipping_prices_include_tax',
+		'default'           => 'no',
+		'skip_initial_save' => true,
+		'type'              => 'radio',
+		'desc'              => __( 'Applies to supported methods where you enter shipping costs. Live carrier rates are not affected. Changing this setting leaves saved costs unchanged and changes how tax is calculated at checkout.', 'woocommerce' ),
+		'options'           => array(
+			'yes' => __( 'Yes, I will enter shipping costs inclusive of tax', 'woocommerce' ),
+			'no'  => __( 'No, I will enter shipping costs exclusive of tax', 'woocommerce' ),
+		),
+		'custom_attributes' => array(
+			'data-change-confirmation' => sprintf(
+				/* translators: %s: Shipping methods that support tax-inclusive costs. */
+				__( 'Changing this setting will recalculate shipping tax and change checkout prices for these methods: %s. Saved shipping costs will stay the same. Continue?', 'woocommerce' ),
+				implode( ', ', array_unique( $shipping_methods_with_tax_inclusion ) )
+			),
+		),
+	),
+
 	array(
 		'title'    => __( 'Calculate tax based on', 'woocommerce' ),
 		'id'       => 'woocommerce_tax_based_on',
@@ -45,7 +72,7 @@ $settings = array(
 		),
 	),
 
-	'shipping-tax-class' => array(
+	'shipping-tax-class'          => array(
 		'title'    => __( 'Shipping tax class', 'woocommerce' ),
 		'desc'     => __( 'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.', 'woocommerce' ),
 		'id'       => 'woocommerce_shipping_tax_class',
@@ -133,6 +160,7 @@ $settings = array(
 );
 
 if ( ! wc_shipping_enabled() ) {
+	unset( $settings['shipping-prices-include-tax'] );
 	unset( $settings['shipping-tax-class'] );
 }
 
