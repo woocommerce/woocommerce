@@ -55,7 +55,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Product_Attributes_V
 	/**
 	 * Get all attributes, limited to the requested slugs when the `slug` parameter is set.
 	 *
-	 * @since 11.3.0 Supports the `slug` parameter.
+	 * @since 11.4.0 Supports the `slug` parameter.
 	 *
 	 * @param WP_REST_Request<array<string, mixed>> $request The request to get the attributes from.
 	 * @return WP_REST_Response
@@ -93,7 +93,7 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Product_Attributes_V
 	 *
 	 * Slugs are normalized the same way as on create, so `pa_color`, `color` and `Color` all become `pa_color`.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param WP_REST_Request<array<string, mixed>> $request Full details about the request.
 	 * @return string[] Taxonomy names, or an empty array when no slug was requested.
@@ -113,6 +113,8 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Product_Attributes_V
 	/**
 	 * Get the query params for collections.
 	 *
+	 * @since 11.4.0
+	 *
 	 * @return array
 	 */
 	public function get_collection_params() {
@@ -123,7 +125,13 @@ class WC_REST_Product_Attributes_Controller extends WC_REST_Product_Attributes_V
 			'items'             => array(
 				'type' => 'string',
 			),
-			'validate_callback' => 'rest_validate_request_arg',
+			'validate_callback' => static function ( $value, $request, $param ) {
+				if ( ! is_string( $value ) && ! is_array( $value ) ) {
+					return false;
+				}
+
+				return rest_validate_request_arg( $value, $request, $param );
+			},
 		);
 
 		return $params;

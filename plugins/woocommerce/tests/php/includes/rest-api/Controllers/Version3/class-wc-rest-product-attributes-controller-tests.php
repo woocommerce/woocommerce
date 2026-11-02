@@ -75,10 +75,20 @@ class WC_REST_Product_Attributes_Controller_Tests extends WC_REST_Unit_Test_Case
 
 	/**
 	 * @testdox Should reject a slug parameter that is not a string or a list of strings.
+	 *
+	 * @testWith [42]
+	 *           [true]
+	 *           [false]
+	 *           [1.5]
+	 *           [[42]]
+	 *           [["strap-color", 42]]
+	 *           [[["strap-color"]]]
+	 *
+	 * @param mixed $slug Invalid slug parameter.
 	 */
-	public function test_get_items_rejects_invalid_slug_param(): void {
+	public function test_get_items_rejects_invalid_slug_param( $slug ): void {
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products/attributes' );
-		$request->set_param( 'slug', array( array( 'strap-color' ) ) );
+		$request->set_param( 'slug', $slug );
 
 		$response = $this->server->dispatch( $request );
 

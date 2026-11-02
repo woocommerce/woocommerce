@@ -149,10 +149,12 @@ class ProductAttributes extends \WC_REST_Product_Attributes_Controller {
 		$custom_attributes = $this->get_custom_attributes( array( 'name' => $search_string ) );
 
 		if ( ! empty( $taxonomy_names ) ) {
+			$custom_slugs      = array_map( 'sanitize_title', (array) $request['slug'] );
 			$custom_attributes = array_filter(
 				$custom_attributes,
-				static function ( $slug ) use ( $taxonomy_names ) {
-					return in_array( wc_attribute_taxonomy_name( wc_attribute_taxonomy_slug( $slug ) ), $taxonomy_names, true );
+				static function ( $slug ) use ( $custom_slugs ) {
+					$slug = (string) $slug;
+					return 0 !== strpos( $slug, 'pa_' ) && in_array( $slug, $custom_slugs, true );
 				},
 				ARRAY_FILTER_USE_KEY
 			);
