@@ -513,13 +513,6 @@ function parseTestJobConfig(
 			throw new ConfigError( 'The "report" option must be an object.' );
 		}
 
-		// Without this, a job still using the old key would silently stop publishing its report.
-		if ( 'allure' in raw.report ) {
-			throw new ConfigError(
-				'The "allure" report option was renamed to "publish".'
-			);
-		}
-
 		if (
 			! raw.report.resultsBlobName ||
 			typeof raw.report.resultsBlobName !== 'string'

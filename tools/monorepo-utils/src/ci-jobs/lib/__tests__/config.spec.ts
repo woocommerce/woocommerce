@@ -442,33 +442,6 @@ describe( 'Config', () => {
 			} );
 		} );
 
-		it( 'should reject the old "allure" report option', () => {
-			const expectation = () => {
-				parseCIConfig( {
-					name: 'foo',
-					config: {
-						ci: {
-							tests: [
-								{
-									name: 'default',
-									changes: '/src/**/*.{js,jsx,ts,tsx}',
-									command: 'foo',
-									report: {
-										resultsBlobName: 'foo-blob-report',
-										resultsPath: '/test-results',
-										allure: true,
-									},
-								},
-							],
-						},
-					},
-				} );
-			};
-			expect( expectation ).toThrow(
-				'The "allure" report option was renamed to "publish".'
-			);
-		} );
-
 		it.each( testTypes )(
 			'should parse test config with expected testType',
 			( testType ) => {
