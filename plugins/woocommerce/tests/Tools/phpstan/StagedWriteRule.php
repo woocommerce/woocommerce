@@ -22,13 +22,14 @@ use PhpParser\Node\Stmt\Expression;
 use PhpParser\NodeFinder;
 use PHPStan\Analyser\Scope;
 use PHPStan\Node\InClassMethodNode;
+use PHPStan\Reflection\ClassReflection;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
 
 /**
- * Reports a method of a WC_Data subclass that writes to the database outside save(), unless it also calls a
- * stage_*() method on $this, which marks it as the saving twin of a stage method. A stage_*() method never
- * gets that exemption. Methods of the save pipeline and deletes are exempt. Also reports a stage_*() method of a WC_Data subclass that does not start with
+ * Reports a method of a WC_Data subclass that writes to the database outside save(), unless it also calls on $this
+ * the stage_*() method whose refuse_unstaged_override() names it, which marks it as the saving twin of that stage
+ * method. A stage_*() method never gets that exemption. Methods of the save pipeline and deletes are exempt. Also reports a stage_*() method of a WC_Data subclass that does not start with
  * refuse_unstaged_override().
  *
  * @implements Rule<InClassMethodNode>
@@ -86,8 +87,8 @@ final class StagedWriteRule implements Rule {
 			}
 		}
 
-		$writes      = false;
-		$calls_stage = false;
+		$writes     = false;
+		$calls_twin = false;
 		foreach ( $finder->find( $method->stmts, fn( Node $call ) => $call instanceof MethodCall || $call instanceof FuncCall ) as $call ) {
 			if ( $call instanceof FuncCall ) {
 				$writes = $writes || ( $call->name instanceof Name && in_array( $call->name->toLowerString(), self::WRITE_FUNCTIONS, true ) );
@@ -98,8 +99,8 @@ final class StagedWriteRule implements Rule {
 				continue;
 			}
 
-			$name        = $call->name->toLowerString();
-			$calls_stage = $calls_stage || ( self::is_variable( $call->var, 'this' ) && 0 === strpos( $name, 'stage_' ) );
+			$name       = $call->name->toLowerString();
+			$calls_twin = $calls_twin || ( self::is_variable( $call->var, 'this' ) && 0 === strpos( $name, 'stage_' ) && self::saving_method_of( $class, $name ) === $method->name->toLowerString() );
 
 			$on_data_store = ( $call->var instanceof PropertyFetch && self::is_variable( $call->var->var, 'this' ) && $call->var->name instanceof Identifier && 'data_store' === $call->var->name->toString() )
 				|| ( $call->var instanceof Variable && in_array( $call->var->name, $data_stores, true ) );
@@ -110,7 +111,7 @@ final class StagedWriteRule implements Rule {
 				|| ( self::is_variable( $call->var, 'wpdb' ) && in_array( $name, self::WPDB_WRITE_METHODS, true ) );
 		}
 
-		if ( ! $writes || ( $calls_stage && 0 !== strpos( $method->name->toLowerString(), 'stage_' ) ) ) {
+		if ( ! $writes || $calls_twin ) {
 			return array();
 		}
 
@@ -135,6 +136,29 @@ final class StagedWriteRule implements Rule {
 
 		$call = $first->expr;
 		return self::is_variable( $call->var, 'this' ) && $call->name instanceof Identifier && 'refuse_unstaged_override' === $call->name->toString();
+	}
+
+	/**
+	 * Name of the saving method that the stage method names in its refuse_unstaged_override() call, in lower case.
+	 *
+	 * @param ClassReflection $class_reflection Class that calls the stage method.
+	 * @param string          $stage_method     Stage method name in lower case.
+	 * @return string|null
+	 */
+	private static function saving_method_of( ClassReflection $class_reflection, string $stage_method ): ?string {
+		if ( ! $class_reflection->hasNativeMethod( $stage_method ) ) {
+			return null;
+		}
+
+		$reflection = $class_reflection->getNativeMethod( $stage_method )->getDeclaringClass()->getNativeReflection()->getMethod( $stage_method );
+		$file       = $reflection->getFileName();
+		$lines      = false === $file ? false : file( $file );
+		if ( false === $lines || false === $reflection->getStartLine() || false === $reflection->getEndLine() ) {
+			return null;
+		}
+
+		$source = implode( '', array_slice( $lines, $reflection->getStartLine() - 1, $reflection->getEndLine() - $reflection->getStartLine() + 1 ) );
+		return preg_match( "/refuse_unstaged_override\\(\\s*'(\\w+)'/", $source, $matches ) ? strtolower( $matches[1] ) : null;
 	}
 
 	/**

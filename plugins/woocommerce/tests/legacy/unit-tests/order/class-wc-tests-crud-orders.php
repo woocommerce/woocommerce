@@ -1443,6 +1443,21 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A coupon that apply_coupon() adds after a staged coupon is counted once.
+	 */
+	public function test_coupon_applied_after_a_staged_coupon_is_counted_once(): void {
+		$order = WC_Helper_Order::create_order();
+		$this->create_fixed_cart_coupon( 'staged-first' );
+		$this->create_fixed_cart_coupon( 'applied-second' );
+
+		$order->stage_coupon( 'staged-first' );
+		$order->apply_coupon( 'applied-second' );
+
+		$this->assertSame( 1, ( new WC_Coupon( 'staged-first' ) )->get_usage_count() );
+		$this->assertSame( 1, ( new WC_Coupon( 'applied-second' ) )->get_usage_count() );
+	}
+
+	/**
 	 * @testdox A staged coupon is counted once when payment_complete() saves the order.
 	 */
 	public function test_staged_coupon_is_counted_once_on_payment_complete(): void {

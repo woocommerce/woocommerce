@@ -1978,6 +1978,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		do_action( 'woocommerce_order_applied_coupon', $coupon, $this );
 
 		$this->set_coupon_discount_amounts( $discounts );
+		$recorded_before_save = $this->writing_through && $this->has_recorded_coupon_usage();
 		$this->save_if_writing_through();
 
 		// Recalculate totals and taxes.
@@ -1988,7 +1989,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		if ( $this->writing_through ) {
-			if ( $this->has_recorded_coupon_usage() ) {
+			if ( $recorded_before_save ) {
 				$this->increase_coupon_usage( array( $coupon ) );
 			}
 			wc_update_coupon_usage_counts( $this->get_id() );
