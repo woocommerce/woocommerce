@@ -279,7 +279,7 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 				'description' => array( 'type' => 'string' ),
 				'count'       => array(
 					'type'        => 'integer',
-					'description' => __( 'Catalog-visible published product count in REST reads. hide_empty uses stored counts and also retains parents with non-empty children, so a returned term can have count zero.', 'woocommerce' ),
+					'description' => __( 'Number of published, catalog-visible products. hide_empty uses stored counts and also retains parents with non-empty children, so a returned term can have count zero.', 'woocommerce' ),
 				),
 				'parent'      => array( 'type' => 'integer' ),
 				'display'     => array( 'type' => 'string' ),
