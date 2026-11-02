@@ -321,9 +321,8 @@ class WC_Tracker {
 		$data['categories'] = self::get_category_counts();
 		$data['brands']     = self::get_brands_counts();
 
-		// Orders whose gateway recorded the payment mode. The gateway totals in `orders` count every order.
+		// Orders whose gateway recorded test mode. The gateway totals in `orders` count every order, test ones included.
 		$data['test_orders_by_gateway'] = self::get_orders_by_gateway( PaymentMode::TEST );
-		$data['live_orders_by_gateway'] = self::get_orders_by_gateway( PaymentMode::LIVE );
 
 		// Migrator CLI statistics.
 		$data['migrator'] = self::get_migrator_data();

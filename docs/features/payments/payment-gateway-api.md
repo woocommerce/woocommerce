@@ -223,7 +223,7 @@ $order->add_order_note( __('IPN payment completed', 'woothemes') );
 
 Since WooCommerce 11.4, gateways can record whether an order was paid in test or live mode with `$order->set_payment_mode()`. WooCommerce never sets it, so an order whose gateway doesn't call it has no mode. Read it back with `$order->get_payment_mode()`, which returns `PaymentMode::TEST`, `PaymentMode::LIVE` or an empty string.
 
-Call it on every charge, when the gateway picks its test or live credentials and before it saves the order. That includes checkout, the pay-for-order page, subscription renewals, and charges completed by webhooks or other off-session requests. Record `live` too, so live orders aren't counted as unknown.
+Call it on every charge, when the gateway picks its test or live credentials and before it saves the order. That includes checkout, the pay-for-order page, subscription renewals, and charges completed by webhooks or other off-session requests. Record `live` too, so each order says which mode it was paid in.
 
 ```php
 use Automattic\WooCommerce\Enums\PaymentMode;

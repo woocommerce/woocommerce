@@ -591,7 +591,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox Test and live orders by gateway count only paid orders with that payment mode, and the gateway totals still count all orders.
+	 * @testDox Test orders by gateway count only paid orders recorded as test, and the gateway totals still count all orders.
 	 */
 	public function test_get_tracking_data_orders_by_gateway_payment_mode(): void {
 		$orders = array(
@@ -617,14 +617,6 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 			),
 			$tracking_data['test_orders_by_gateway'],
 			'Only paid orders recorded as test should be counted'
-		);
-		$this->assertEquals(
-			array(
-				'gateway_bacs_USD_count' => 1,
-				'gateway_bacs_USD_total' => 20,
-			),
-			$tracking_data['live_orders_by_gateway'],
-			'Only paid orders recorded as live should be counted'
 		);
 		$this->assertEquals( 2, $tracking_data['orders']['gateway_bacs_USD_count'], 'Gateway counts should include test orders' );
 		$this->assertEquals( 30, $tracking_data['orders']['gateway_bacs_USD_total'], 'Gateway totals should include test orders' );
