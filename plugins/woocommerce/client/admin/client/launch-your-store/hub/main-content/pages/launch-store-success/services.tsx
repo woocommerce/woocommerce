@@ -3,7 +3,7 @@
  */
 import { pluginsStore, onboardingStore } from '@woocommerce/data';
 import { resolveSelect } from '@wordpress/data';
-import { fromPromise } from 'xstate5';
+import { fromPromise } from 'xstate';
 import apiFetch from '@wordpress/api-fetch';
 
 type SurveyCompletedResponse = string | null;

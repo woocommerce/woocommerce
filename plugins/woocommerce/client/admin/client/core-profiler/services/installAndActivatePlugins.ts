@@ -15,7 +15,7 @@ import {
 	createMachine,
 	fromPromise,
 	sendParent,
-} from 'xstate5';
+} from 'xstate';
 
 /**
  * Internal dependencies

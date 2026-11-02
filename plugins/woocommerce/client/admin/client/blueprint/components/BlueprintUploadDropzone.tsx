@@ -11,14 +11,14 @@ import {
 } from '@wordpress/components';
 import { closeSmall, upload, check, cautionFilled } from '@wordpress/icons';
 import { __, sprintf } from '@wordpress/i18n';
-import { useMachine } from '@xstate5/react';
+import { useMachine } from '@xstate/react';
 import {
 	assertEvent,
 	assign,
 	enqueueActions,
 	fromPromise,
 	setup,
-} from 'xstate5';
+} from 'xstate';
 import apiFetch from '@wordpress/api-fetch';
 import { dispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';

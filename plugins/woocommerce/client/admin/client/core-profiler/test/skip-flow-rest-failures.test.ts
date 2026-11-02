@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { getQuery } from '@woocommerce/navigation';
-import { createActor, toPromise, waitFor } from 'xstate5';
+import { createActor, toPromise, waitFor } from 'xstate';
 
 /**
  * Internal dependencies

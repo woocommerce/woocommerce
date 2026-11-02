@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useMachine } from '@xstate5/react';
+import { useMachine } from '@xstate/react';
 import { useEffect, useState } from 'react';
 import { useDispatch } from '@wordpress/data';
 import { onboardingStore } from '@woocommerce/data';
@@ -27,7 +27,6 @@ import {
 	MainContentComponentProps,
 	MainContentContainer,
 } from './main-content/xstate';
-import { useXStateInspect } from '~/xstate';
 export type LaunchYourStoreComponentProps = {
 	sendEventToSidebar: ( arg0: SidebarMachineEvents ) => void;
 	sendEventToMainContent: ( arg0: MainContentMachineEvents ) => void;
@@ -47,7 +46,6 @@ const LaunchStoreController = () => {
 	useEffect( () => {
 		window.sessionStorage.setItem( 'lysWaiting', 'no' );
 	}, [] );
-	const { xstateV5Inspector: inspect } = useXStateInspect( 'V5' );
 	const { invalidateResolutionForStoreSelector } =
 		useDispatch( onboardingStore );
 
@@ -55,14 +53,11 @@ const LaunchStoreController = () => {
 	const [ isMobileSidebarOpen, setIsMobileSidebarOpen ] = useState( false );
 
 	const [ mainContentState, sendToMainContent, mainContentMachineService ] =
-		useMachine( mainContentMachine, {
-			inspect,
-		} );
+		useMachine( mainContentMachine );
 
 	const [ sidebarState, sendToSidebar, sidebarMachineService ] = useMachine(
 		sidebarMachine,
 		{
-			inspect,
 			input: {
 				mainContentMachineRef: mainContentMachineService,
 			},

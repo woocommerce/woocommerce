@@ -42,7 +42,6 @@ export default [
 				'react-router-dom',
 				'redux',
 				'xstate',
-				'xstate5',
 			],
 			'import/resolver': {
 				node: {},

@@ -3027,11 +3027,8 @@ importers:
         specifier: catalog:wp-min
         version: 3.33.1
       '@xstate/react':
-        specifier: 3.2.1
-        version: 3.2.1(@types/react@18.3.28)(react@18.3.1)(xstate@4.37.1)
-      '@xstate5/react':
-        specifier: npm:@xstate/react@4
-        version: '@xstate/react@4.1.3(@types/react@18.3.28)(react@18.3.1)(xstate@4.37.1)'
+        specifier: ^4
+        version: 4.1.3(@types/react@18.3.28)(react@18.3.1)(xstate@5.30.0)
       clsx:
         specifier: 2.1.x
         version: 2.1.1
@@ -3084,11 +3081,8 @@ importers:
         specifier: ^4.2.1
         version: 4.2.1
       xstate:
-        specifier: 4.37.1
-        version: 4.37.1
-      xstate5:
-        specifier: npm:xstate@^5.13.1
-        version: xstate@5.30.0
+        specifier: ^5.13.1
+        version: 5.30.0
       zod:
         specifier: ^3.22.4
         version: 3.25.76
@@ -3114,9 +3108,6 @@ importers:
       '@pmmmwh/react-refresh-webpack-plugin':
         specifier: ^0.5.11
         version: 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2)(webpack-hot-middleware@2.26.1)(webpack@5.97.1)
-      '@statelyai/inspect':
-        specifier: ^0.3.1
-        version: 0.3.1(ws@8.21.3)(xstate@4.37.1)
       '@testing-library/dom':
         specifier: 8.11.3
         version: 8.11.3
@@ -3213,12 +3204,6 @@ importers:
       '@wordpress/postcss-themes':
         specifier: next
         version: 6.43.1-next.v.202604091042.0(postcss@8.5.26)
-      '@xstate/inspect':
-        specifier: 0.8.0
-        version: 0.8.0(@types/ws@8.18.1)(ws@8.21.3)(xstate@4.37.1)
-      '@xstate/test':
-        specifier: 0.5.1
-        version: 0.5.1(xstate@4.37.1)
       autoprefixer:
         specifier: ^10.4.16
         version: 10.5.0(postcss@8.5.26)
@@ -3258,9 +3243,6 @@ importers:
       eslint-import-resolver-webpack:
         specifier: ^0.13.11
         version: 0.13.11(eslint-plugin-import@2.32.0)(webpack@5.97.1)
-      fs-extra:
-        specifier: 11.1.1
-        version: 11.1.1
       jest:
         specifier: 29.5.x
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
@@ -7882,11 +7864,6 @@ packages:
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
-  '@statelyai/inspect@0.3.1':
-    resolution: {integrity: sha512-KW3owf5UbPs1+/xOGJoSV4D69hP5xTX7PCzARr2R1senwfUIwyGP8yEsB8dvkMvekYvgFS0qa6lmg1eszYr2tw==}
-    peerDependencies:
-      xstate: ^5.5.1
-
   '@storybook/addon-a11y@10.6.5':
     resolution: {integrity: sha512-7dEH3OHKdE+0zakqEy50KtfhPORIm1xnhWeehyROO1Ct7Rx9s7cYcx6edUZvh0tCuX5VhDnDmkvQV+dbrPDmCA==}
     peerDependencies:
@@ -10854,33 +10831,6 @@ packages:
     resolution: {integrity: sha512-8+XSDCWqq9Md8NsTC4QfIM9++IiBX7Ht62TScV7LAEeWn66YO5o4fH+60x2+u43cr65sp/3AblB9b2gljZMuIA==}
     engines: {node: '>=24.18.0', npm: '>=11.16.0'}
 
-  '@xstate/graph@1.4.2':
-    resolution: {integrity: sha512-XIh6opCf9ukXRj4dXe2fv2kwFFUl15B5Ob8ELNOOqDXB2BPyNwp6TaLe5KJn/na3gzC9B7LyOo+2d0dPkC8PWQ==}
-    peerDependencies:
-      xstate: ^4.30.3
-
-  '@xstate/inspect@0.8.0':
-    resolution: {integrity: sha512-wSkFeOnp+7dhn+zTThO0M4D2FEqZN9lGIWowJu5JLa2ojjtlzRwK8SkjcHZ4rLX8VnMev7kGjgQLrGs8kxy+hw==}
-    peerDependencies:
-      '@types/ws': ^8.0.0
-      ws: ^8.0.0
-      xstate: ^4.37.0
-    peerDependenciesMeta:
-      '@types/ws':
-        optional: true
-
-  '@xstate/react@3.2.1':
-    resolution: {integrity: sha512-L/mqYRxyBWVdIdSaXBHacfvS8NKn3sTKbPb31aRADbE9spsJ1p+tXil0GVQHPlzrmjGeozquLrxuYGiXsFNU7g==}
-    peerDependencies:
-      '@xstate/fsm': ^2.0.0
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0
-      xstate: ^4.36.0
-    peerDependenciesMeta:
-      '@xstate/fsm':
-        optional: true
-      xstate:
-        optional: true
-
   '@xstate/react@4.1.3':
     resolution: {integrity: sha512-zhE+ZfrcCR87bu71Rkh5Z5ruZBivR/7uD/dkelzJqjQdI45IZc9DqTI8lL4Cg5+VN2p5k86KxDsusqW1kW11Tg==}
     peerDependencies:
@@ -10889,12 +10839,6 @@ packages:
     peerDependenciesMeta:
       xstate:
         optional: true
-
-  '@xstate/test@0.5.1':
-    resolution: {integrity: sha512-Ltz46QR9QvEuhlNy+zvs+5ylfpGXzDBh+jVC1/WL8w88uEbN+Wf1bJ/Bi5OWVWWEgXJxfcmlavN4hJOqtQuqgQ==}
-    deprecated: Superseded by @xstate/test@2 (model-based and property-based testing for XState v6). Path utilities live in xstate/graph.
-    peerDependencies:
-      xstate: ^4.29.0
 
   '@xtuc/ieee754@1.2.0':
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
@@ -12147,10 +12091,6 @@ packages:
   cookiejar@2.1.4:
     resolution: {integrity: sha512-LDx6oHrK+PhzLKJU9j5S7/Y3jM/mUHvD/DeI1WQmJn652iPC5Y4TBzC9l+5OMOXlyTTA+SmVUPm0HQUwpD5Jqw==}
 
-  copy-anything@3.0.5:
-    resolution: {integrity: sha512-yCEafptTtb4bk7GLEQoM8KVJpxAfdBJYaXyzQEgQQQgYrZiDp8SJmGKlYza6CYjEDNstAdNdKA3UuoULlEbS6w==}
-    engines: {node: '>=12.13'}
-
   copy-descriptor@0.1.1:
     resolution: {integrity: sha512-XgZ0pFcakEUlbwQEVNg3+QAis1FyTL3Qel9FYy8pSkQqoG3PNoT0bOCQtOXcOkur21r2Eq2kI+IE+gsmAEVlYw==}
     engines: {node: '>=0.10.0'}
@@ -13289,10 +13229,6 @@ packages:
   event-target-shim@5.0.1:
     resolution: {integrity: sha512-i/2XbnSz/uxRCU6+NdVJgKWDTM427+MqYbkQzD321DuCQJUqOuJKIA0IM2+W2xtYHdKOmZ4dR6fExsd4SXL+WQ==}
     engines: {node: '>=6'}
-
-  event-target-shim@6.0.2:
-    resolution: {integrity: sha512-8q3LsZjRezbFZ2PN+uP+Q7pnHUMmAOziU2vA2OwoFaKIXxlxl38IylhSSgUorWu/rf4er67w0ikBqjBFk/pomA==}
-    engines: {node: '>=10.13.0'}
 
   eventemitter2@0.4.14:
     resolution: {integrity: sha512-K7J4xq5xAD5jHsGM5ReWXRTFa3JRGofHiMcVgQ8PRwgWxzjHpMWCIzsmyf60+mh8KLsqYPcjUMa0AC4hd6lPyQ==}
@@ -14790,10 +14726,6 @@ packages:
     resolution: {integrity: sha512-mfcwb6IzQyOKTs84CQMrOwW4gQcaTOAWJ0zzJCl2WSPDrWk/OzDaImWFH3djXhb24g4eudZfLRozAvPGw4d9hQ==}
     engines: {node: '>= 0.4'}
 
-  is-what@4.1.16:
-    resolution: {integrity: sha512-ZhMwEosbFJkA0YhFnNDgTM4ZxDRsS6HqTo7qsZM08fehyRYIYa0yHu5R6mgo1n/8MgaPBXiPimPD77baVFYg+A==}
-    engines: {node: '>=12.13'}
-
   is-windows@0.2.0:
     resolution: {integrity: sha512-n67eJYmXbniZB7RF4I/FTjK1s6RPOCTxhYrVYLRaCt3lF0mpWZPKr3T2LSZAqyjQsxR2qMmGYXXzK0YWwcPM1Q==}
     engines: {node: '>=0.10.0'}
@@ -14847,11 +14779,6 @@ packages:
     resolution: {integrity: sha512-qr1NFCPsVTZ6YGqTXw0CzamnsHyH9QQ1OTEfeXIweSljRUMzuHFCJdUn0wc6OcjtTDns6knxjPb7N6LmJeftOA==}
     engines: {node: '>=14.17'}
     hasBin: true
-
-  isomorphic-ws@5.0.0:
-    resolution: {integrity: sha512-muId7Zzn9ywDsyXgTIafTry2sV3nySZeUDe6YedVd1Hvuuep5AsIlqK+XefWpYTyJG5e503F2xIuT2lcU6rCSw==}
-    peerDependencies:
-      ws: '*'
 
   isomorphic.js@0.2.5:
     resolution: {integrity: sha512-PIeMbHqMt4DnUP3MA/Flc0HElYjMXArsw1qwJZcm9sqR8mq3l8NYizFMty0pWwE/tzIGH3EKK5+jes5mAr85yw==}
@@ -16494,9 +16421,6 @@ packages:
     resolution: {integrity: sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==}
     engines: {node: '>= 0.8'}
 
-  partysocket@0.0.25:
-    resolution: {integrity: sha512-1oCGA65fydX/FgdnsiBh68buOvfxuteoZVSb3Paci2kRp/7lhF0HyA8EDb5X/O6FxId1e+usPTQNRuzFEvkJbQ==}
-
   pascal-case@3.1.2:
     resolution: {integrity: sha512-uWlGT3YSnK9x3BQJaOdcZwrnV6hPpd8jFH1/ucpiLRPh/2zCVJKS19E4GvYHvaCcACn3foXZ0cLB9Wrx1KGe5g==}
 
@@ -18045,10 +17969,6 @@ packages:
   safe-regex@1.1.0:
     resolution: {integrity: sha512-aJXcif4xnaNUzvUuC5gcb46oTS7zvg4jpMTnuqtrEPlR3vFr4pxtdTwaF1Qs3Enjn9HK+ZlwQui+a7z0SywIzg==}
 
-  safe-stable-stringify@2.5.0:
-    resolution: {integrity: sha512-b3rppTKm9T+PsVCBEOUR46GWI7fdOs00VKZ1+9c1EWDaDMvjQc6tUwuFyIprgGgTcWoVHSKrU8H31ZHA2e0RHA==}
-    engines: {node: '>=10'}
-
   safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
 
@@ -18830,10 +18750,6 @@ packages:
     resolution: {integrity: sha512-gZkVCQR1gy/oUXr+kxJMLDjla434KmSOKbx5iGD30Ql+AkJQ/YlPKECJy2nhqOsHLjGHzoDTXNSjhnvWhzKk7g==}
     engines: {node: '>=6.4.0 <13 || >=14'}
     deprecated: Please upgrade to superagent v10.2.2+, see release notes at https://github.com/forwardemail/superagent/releases/tag/v10.2.2 - maintenance is supported by Forward Email @ https://forwardemail.net
-
-  superjson@1.13.3:
-    resolution: {integrity: sha512-mJiVjfd2vokfDxsQPOwJ/PtanO87LhpYY88ubI5dUB1Ab58Txbyje3+jpm+/83R/fevaq/107NNhtYBLuoTrFg==}
-    engines: {node: '>=10'}
 
   supports-color@2.0.0:
     resolution: {integrity: sha512-KKNVtd6pCYgPIKU4cp2733HWYCpplQhddZLBUryaAHou723x+FRzQ5Df824Fj+IyyuiQTRoub4SnIFfIcrp70g==}
@@ -19968,9 +19884,6 @@ packages:
 
   xmlchars@2.2.0:
     resolution: {integrity: sha512-JZnDKK8B0RCDw84FNdDAIpZK+JuJw+s7Lz8nksI7SIuU3UXJJslUthsi+uWBUYOwPFwW7W7PRLRfUKpxjtjFCw==}
-
-  xstate@4.37.1:
-    resolution: {integrity: sha512-MuB7s01nV5vG2CzaBg2msXLGz7JuS+x/NBkQuZAwgEYCnWA8iQMiRz2VGxD3pcFjZAOih3fOgDD3kDaFInEx+g==}
 
   xstate@5.30.0:
     resolution: {integrity: sha512-mIzIuMjtYVkqXq9dUzYQoag7b/dF1CBS/yhliuPLfR0FwKPC18HiUivb/crcqY2gknhR8gJEhnppLg6ubQ0gGw==}
@@ -25020,18 +24933,6 @@ snapshots:
       tslib: 2.8.1
 
   '@standard-schema/spec@1.1.0': {}
-
-  '@statelyai/inspect@0.3.1(ws@8.21.3)(xstate@4.37.1)':
-    dependencies:
-      fast-safe-stringify: 2.1.1
-      isomorphic-ws: 5.0.0(ws@8.21.3)
-      partysocket: 0.0.25
-      safe-stable-stringify: 2.5.0
-      superjson: 1.13.3
-      uuid: 9.0.1
-      xstate: 4.37.1
-    transitivePeerDependencies:
-      - ws
 
   '@storybook/addon-a11y@10.6.5(storybook@10.6.5(@types/react@18.3.28)(prettier@2.8.8)(react@18.3.1))':
     dependencies:
@@ -32530,43 +32431,15 @@ snapshots:
       '@wp-playground/common': 3.1.57
       zstddec: 0.2.0
 
-  '@xstate/graph@1.4.2(xstate@4.37.1)':
-    dependencies:
-      xstate: 4.37.1
-
-  '@xstate/inspect@0.8.0(@types/ws@8.18.1)(ws@8.21.3)(xstate@4.37.1)':
-    dependencies:
-      fast-safe-stringify: 2.1.1
-      ws: 8.21.3
-      xstate: 4.37.1
-    optionalDependencies:
-      '@types/ws': 8.18.1
-
-  '@xstate/react@3.2.1(@types/react@18.3.28)(react@18.3.1)(xstate@4.37.1)':
+  '@xstate/react@4.1.3(@types/react@18.3.28)(react@18.3.1)(xstate@5.30.0)':
     dependencies:
       react: 18.3.1
       use-isomorphic-layout-effect: 1.2.1(@types/react@18.3.28)(react@18.3.1)
       use-sync-external-store: 1.6.0(react@18.3.1)
     optionalDependencies:
-      xstate: 4.37.1
+      xstate: 5.30.0
     transitivePeerDependencies:
       - '@types/react'
-
-  '@xstate/react@4.1.3(@types/react@18.3.28)(react@18.3.1)(xstate@4.37.1)':
-    dependencies:
-      react: 18.3.1
-      use-isomorphic-layout-effect: 1.2.1(@types/react@18.3.28)(react@18.3.1)
-      use-sync-external-store: 1.6.0(react@18.3.1)
-    optionalDependencies:
-      xstate: 4.37.1
-    transitivePeerDependencies:
-      - '@types/react'
-
-  '@xstate/test@0.5.1(xstate@4.37.1)':
-    dependencies:
-      '@xstate/graph': 1.4.2(xstate@4.37.1)
-      chalk: 2.4.2
-      xstate: 4.37.1
 
   '@xtuc/ieee754@1.2.0': {}
 
@@ -34003,10 +33876,6 @@ snapshots:
 
   cookiejar@2.1.4: {}
 
-  copy-anything@3.0.5:
-    dependencies:
-      is-what: 4.1.16
-
   copy-descriptor@0.1.1: {}
 
   copy-dir@1.3.0: {}
@@ -35409,8 +35278,6 @@ snapshots:
   etag@1.8.1: {}
 
   event-target-shim@5.0.1: {}
-
-  event-target-shim@6.0.2: {}
 
   eventemitter2@0.4.14: {}
 
@@ -37103,8 +36970,6 @@ snapshots:
       call-bound: 1.0.4
       get-intrinsic: 1.3.0
 
-  is-what@4.1.16: {}
-
   is-windows@0.2.0: {}
 
   is-windows@1.0.2: {}
@@ -37154,10 +37019,6 @@ snapshots:
       readable-stream: 4.7.0
       sha.js: 2.4.12
       simple-get: 4.0.1
-
-  isomorphic-ws@5.0.0(ws@8.21.3):
-    dependencies:
-      ws: 8.21.3
 
   isomorphic.js@0.2.5: {}
 
@@ -39334,10 +39195,6 @@ snapshots:
 
   parseurl@1.3.3: {}
 
-  partysocket@0.0.25:
-    dependencies:
-      event-target-shim: 6.0.2
-
   pascal-case@3.1.2:
     dependencies:
       no-case: 3.0.4
@@ -40977,8 +40834,6 @@ snapshots:
     dependencies:
       ret: 0.1.15
 
-  safe-stable-stringify@2.5.0: {}
-
   safer-buffer@2.1.2: {}
 
   sass-embedded-all-unknown@1.100.0:
@@ -41921,10 +41776,6 @@ snapshots:
       semver: 7.8.5
     transitivePeerDependencies:
       - supports-color
-
-  superjson@1.13.3:
-    dependencies:
-      copy-anything: 3.0.5
 
   supports-color@2.0.0: {}
 
@@ -43283,8 +43134,6 @@ snapshots:
   xmlbuilder@11.0.1: {}
 
   xmlchars@2.2.0: {}
-
-  xstate@4.37.1: {}
 
   xstate@5.30.0: {}
 

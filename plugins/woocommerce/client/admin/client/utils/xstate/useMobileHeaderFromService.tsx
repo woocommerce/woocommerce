@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useSelector as xstateUseSelector } from '@xstate5/react';
+import { useSelector as xstateUseSelector } from '@xstate/react';
 import { useEffect, useState } from 'react';
 
 type MobileHeaderMetaType< ComponentPropsType > = {

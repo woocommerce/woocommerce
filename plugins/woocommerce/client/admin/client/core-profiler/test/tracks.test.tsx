@@ -4,8 +4,8 @@
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ComponentProps } from 'react';
-import { fromCallback, fromPromise } from 'xstate5';
-import type { AnyActorLogic } from 'xstate5';
+import { fromCallback, fromPromise } from 'xstate';
+import type { AnyActorLogic } from 'xstate';
 import { recordEvent } from '@woocommerce/tracks';
 import { getQuery } from '@woocommerce/navigation';
 
@@ -56,10 +56,6 @@ jest.mock( '@woocommerce/explat', () => ( {
 
 jest.mock( '~/lib/init-remote-logging', () => ( {
 	initRemoteLogging: jest.fn(),
-} ) );
-
-jest.mock( '~/xstate', () => ( {
-	useXStateInspect: jest.fn( () => ( { xstateV5Inspector: undefined } ) ),
 } ) );
 
 jest.mock( '~/utils', () => ( {

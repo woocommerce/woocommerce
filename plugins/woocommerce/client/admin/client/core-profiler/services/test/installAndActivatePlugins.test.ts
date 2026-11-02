@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createActor, fromPromise, waitFor, SimulatedClock } from 'xstate5';
+import { createActor, fromPromise, waitFor, SimulatedClock } from 'xstate';
 
 /**
  * Internal dependencies
