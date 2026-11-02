@@ -220,6 +220,28 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should parse boolean strings from older Abilities REST controllers.
+	 * @testWith [false, 1]
+	 *           ["false", 1]
+	 *           [true, 0]
+	 *           ["true", 0]
+	 * @param bool|string $hide_empty Boolean input.
+	 * @param int         $expected_count Expected number of empty terms.
+	 */
+	public function test_hide_empty_boolean_input( $hide_empty, int $expected_count ): void {
+		$id     = self::factory()->term->create( array( 'taxonomy' => 'product_tag' ) );
+		$result = ProductTermsQuery::execute(
+			array(
+				'taxonomy'   => 'product_tag',
+				'include'    => array( $id ),
+				'hide_empty' => $hide_empty,
+			)
+		);
+		$this->assertCount( $expected_count, $result['terms'] );
+		$this->assertSame( $expected_count, $result['total'] );
+	}
+
+	/**
 	 * @testdox Should support product, slug, exclude and offset filters.
 	 */
 	public function test_remaining_filters(): void {
