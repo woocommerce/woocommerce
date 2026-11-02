@@ -505,6 +505,53 @@ class WC_Helper_Updater {
 	}
 
 	/**
+	 * Active WooCommerce.com plugins that have no subscription on this store.
+	 *
+	 * A connected store uses the same check as the Plugins screen "Subscribe" notice. A store that
+	 * isn't connected has no subscription for any of them. Returns null when an active plugin needs
+	 * checking but the subscription list is unknown: the last fetch failed (for example, rate limited),
+	 * or it isn't cached and $fetch is false.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param bool $fetch Whether to fetch the subscription list from WooCommerce.com when it isn't cached.
+	 *                    False keeps this call local; a page that can't afford to block passes it.
+	 * @return array|null Plugin data from WC_Helper::get_local_woo_plugins(), keyed by plugin file.
+	 */
+	public static function get_plugins_without_subscription( bool $fetch = true ): ?array {
+		$plugins = array_filter(
+			WC_Helper::get_local_woo_plugins(),
+			static function ( $plugin_file ) {
+				return WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_PLUGIN_MAIN_FILE !== $plugin_file
+					&& is_plugin_active( $plugin_file );
+			},
+			ARRAY_FILTER_USE_KEY
+		);
+
+		if ( empty( $plugins ) || ! WC_Helper::is_site_connected() ) {
+			return $plugins;
+		}
+
+		if ( ! $fetch && ! WC_Helper::has_cached_subscriptions() ) {
+			return null;
+		}
+
+		$plugins = array_filter(
+			$plugins,
+			static function ( $plugin ) {
+				return empty( self::get_subscriptions_for_product( $plugin['_product_id'] ) );
+			}
+		);
+
+		// Read after the subscriptions fetch above, so a failure from it is already recorded.
+		if ( null !== WC_Helper::get_api_error() ) {
+			return null;
+		}
+
+		return $plugins;
+	}
+
+	/**
 	 * WooCommerce.com product page URL for a plugin, from the update data Core already holds.
 	 *
 	 * @since 11.2.0
@@ -712,17 +759,26 @@ class WC_Helper_Updater {
 		}
 
 		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_installed() ) {
+			if ( WC_Woo_Update_Manager_Plugin::needs_manual_install() ) {
+				/* translators: 1: Woo Update Manager plugin download URL */
+				$message = __( ' <a href="%1$s">Download the WooCommerce.com Update Manager</a> and upload it to update.', 'woocommerce' );
+				$url     = WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_DOWNLOAD_URL;
+			} else {
+				/* translators: 1: Woo Update Manager plugin install URL */
+				$message = __( ' <a href="%1$s">Install WooCommerce.com Update Manager</a> to update.', 'woocommerce' );
+				$url     = WC_Woo_Update_Manager_Plugin::generate_install_url();
+			}
+
 			printf(
 				wp_kses(
-					/* translators: 1: Woo Update Manager plugin install URL */
-					__( ' <a href="%1$s">Install WooCommerce.com Update Manager</a> to update.', 'woocommerce' ),
+					$message,
 					array(
 						'a' => array(
 							'href' => array(),
 						),
 					)
 				),
-				esc_url( WC_Woo_Update_Manager_Plugin::generate_install_url() ),
+				esc_url( $url ),
 			);
 			return;
 		}

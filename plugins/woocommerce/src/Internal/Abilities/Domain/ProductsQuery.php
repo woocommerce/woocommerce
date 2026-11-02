@@ -8,7 +8,9 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
 
 defined( 'ABSPATH' ) || exit;
@@ -74,6 +76,14 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function execute( array $input ) {
+		if ( ! empty( $input['id'] ) && ! empty( $input['filters'] ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_filters_with_id',
+				__( 'Send either an id or filters, not both.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
 		if ( ! empty( $input['id'] ) ) {
 			$product = self::get_product_from_input( $input );
 
@@ -112,20 +122,26 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			}
 		}
 
-		if ( ! empty( $input['product_type_alias'] ) && is_scalar( $input['product_type_alias'] ) ) {
-			$product_type_alias = sanitize_text_field( (string) $input['product_type_alias'] );
-			$type_args          = self::get_product_query_args_for_alias( $product_type_alias );
+		if ( isset( $input['type'] ) ) {
+			$args['type'] = $input['type'];
+		}
 
-			if ( is_wp_error( $type_args ) ) {
-				return $type_args;
+		foreach ( array( 'virtual', 'downloadable' ) as $field ) {
+			if ( isset( $input[ $field ] ) ) {
+				$args[ $field ] = wc_string_to_bool( $input[ $field ] );
 			}
-
-			$args = array_merge( $args, $type_args );
 		}
 
 		if ( ! empty( $input['search'] ) ) {
 			$args['s'] = wc_clean( $input['search'] );
 		}
+
+		$extension_args = ExtensibleAbilities::get_query_args( 'product', $input );
+		if ( is_wp_error( $extension_args ) ) {
+			return $extension_args;
+		}
+
+		$args[ AbilitiesLoader::EXTENSION_QUERY_VAR ] = $extension_args;
 
 		$results  = wc_get_products( $args );
 		$products = is_object( $results ) && isset( $results->products ) ? $results->products : array();
@@ -164,40 +180,41 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @return array
 	 */
 	private static function get_input_schema(): array {
-		return array(
+		$schema = array(
 			'type'                 => 'object',
 			'properties'           => array(
-				'id'                 => array(
+				'id'           => array(
 					'type'    => 'integer',
 					'minimum' => 1,
 				),
-				'search'             => array( 'type' => 'string' ),
-				'sku'                => array(
+				'search'       => array( 'type' => 'string' ),
+				'sku'          => array(
 					'type'        => 'string',
 					'description' => __( 'Limit results to products with SKUs that partially match this string. Use * to match products with any non-empty SKU.', 'woocommerce' ),
 				),
-				'status'             => array(
+				'status'       => array(
 					'type' => 'string',
 					'enum' => self::get_product_query_status_slugs(),
 				),
-				'product_type_alias' => array(
-					'type'        => 'string',
-					'description' => __(
-						'Filter by supported agent-facing product type alias. physical maps to simple shippable, non-downloadable products; virtual maps to simple non-shipping, non-downloadable products; digital maps to simple virtual/downloadable products; affiliate maps to the external product type; grouped maps to grouped.',
-						'woocommerce'
-					),
-					'enum'        => self::get_supported_product_type_aliases(),
+				'type'         => self::get_product_type_schema( array_keys( wc_get_product_types() ) ),
+				'virtual'      => array(
+					'type'        => 'boolean',
+					'description' => __( 'Limit results to products that are not shipped (true) or that are shipped (false).', 'woocommerce' ),
 				),
-				'stock_status'       => array(
+				'downloadable' => array(
+					'type'        => 'boolean',
+					'description' => __( 'Limit results to products that have files to download (true) or that do not (false).', 'woocommerce' ),
+				),
+				'stock_status' => array(
 					'type' => 'string',
 					'enum' => array_keys( wc_get_product_stock_status_options() ),
 				),
-				'page'               => array(
+				'page'         => array(
 					'type'    => 'integer',
 					'default' => 1,
 					'minimum' => 1,
 				),
-				'per_page'           => array(
+				'per_page'     => array(
 					'type'    => 'integer',
 					'default' => 10,
 					'minimum' => 1,
@@ -207,5 +224,6 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'additionalProperties' => false,
 			'default'              => array(),
 		);
+		return ExtensibleAbilities::add_query_filters_schema( $schema, 'product' );
 	}
 }

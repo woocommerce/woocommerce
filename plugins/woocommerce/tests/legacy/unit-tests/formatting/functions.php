@@ -436,7 +436,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_format_coupon_code() {
-		$this->assertEquals( 'foo#baralert();', wc_format_coupon_code( 'foo#bar<script>alert();</script>' ) );
+		$this->assertEquals( 'foo#bar&lt;script&gt;alert();&lt;/script&gt;', wc_format_coupon_code( 'foo#bar<script>alert();</script>' ) );
 	}
 
 	/**
@@ -466,7 +466,14 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_wc_sanitize_tooltip() {
-		$this->assertEquals( 'alert();cleaned&lt;p&gt;foo&lt;/p&gt;&lt;span&gt;bar&lt;/span&gt;', wc_sanitize_tooltip( '<script>alert();</script>cleaned<p>foo</p><span>bar</span>' ) );
+		// Since WordPress 7.2, wp_kses() also removes the contents of disallowed script elements.
+		$this->assertContains(
+			wc_sanitize_tooltip( '<script>alert();</script>cleaned<p>foo</p><span>bar</span>' ),
+			array(
+				'alert();cleaned&lt;p&gt;foo&lt;/p&gt;&lt;span&gt;bar&lt;/span&gt;',
+				'cleaned&lt;p&gt;foo&lt;/p&gt;&lt;span&gt;bar&lt;/span&gt;',
+			)
+		);
 	}
 
 	/**

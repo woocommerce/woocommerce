@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the product REST API and Store API from listing the featured image twice when it is also in the product gallery.

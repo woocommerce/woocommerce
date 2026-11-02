@@ -1,11 +1,10 @@
 /**
- * External dependencies
- */
-import { globalIgnores } from 'eslint/config';
-
-/**
  * Internal dependencies
  */
 import woocommerce from '@woocommerce/eslint-config';
 
-export default [ ...woocommerce, globalIgnores( [ 'dist/**' ] ) ];
+export default [
+	...woocommerce,
+	// A command-line tool reports progress on the terminal.
+	{ rules: { 'no-console': 'off' } },
+];

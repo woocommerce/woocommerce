@@ -598,6 +598,40 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should exclude guest customers when filter_empty includes username.
+	 */
+	public function test_get_reports_with_filter_empty_username() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$customer = WC_Helper_Customer::create_customer( 'user_customer', 'password', 'user_customer@example.com' );
+
+		$guest_order = WC_Helper_Order::create_order( 0 );
+		$guest_order->set_billing_email( 'guest_customer@example.com' );
+		$guest_order->save();
+
+		$this->assertNotFalse( CustomersDataStore::update_registered_customer( $customer->get_id() ) );
+		$this->assertGreaterThan( 0, CustomersDataStore::get_or_create_customer_from_order( $guest_order ) );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params( array( 'filter_empty' => array( 'email' ) ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertCount( 2, $response->get_data(), 'Both the registered customer and the guest have an email' );
+
+		$request->set_query_params( array( 'filter_empty' => array( 'username' ) ) );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports );
+		$this->assertEquals( $customer->get_id(), $reports[0]['user_id'] );
+		$this->assertEquals( 'user_customer', $reports[0]['username'] );
+
+		$request->set_query_params( array( 'filter_empty' => array( 'username', 'email' ) ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertCount( 1, $response->get_data() );
+	}
+
+	/**
 	 * Test customer user profile name priority.
 	 */
 	public function test_customer_user_profile_name() {

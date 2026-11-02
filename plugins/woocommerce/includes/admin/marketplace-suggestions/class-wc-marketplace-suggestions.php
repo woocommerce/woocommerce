@@ -35,6 +35,9 @@ class WC_Marketplace_Suggestions {
 
 		// Trigger suggestions fetch on wc-admin dashboard.
 		add_action( 'current_screen', array( __CLASS__, 'maybe_trigger_suggestions_fetch' ) );
+
+		// Suggestions for the add products task page, when reached from the empty products list.
+		add_filter( 'woocommerce_admin_shared_settings', array( __CLASS__, 'add_products_list_empty_suggestions_setting' ) );
 	}
 
 	/**
@@ -209,6 +212,81 @@ class WC_Marketplace_Suggestions {
 		}
 
 		return ! empty( $data['suggestions'] ) ? $data['suggestions'] : array();
+	}
+
+	/**
+	 * Get feed suggestions for a display context in feed order (pinned items first), without dismissed items, active plugins or items missing a title or URL.
+	 *
+	 * @param string $context Display context, for example products-list-empty-body.
+	 * @return array[] Feed items.
+	 */
+	private static function get_suggestions_for_context( $context ) {
+		$feed      = self::get_suggestions_api_data();
+		$dismissed = self::get_dismissed_suggestions();
+
+		// Network-activated plugins are stored separately on multisite; the option is empty on a single site.
+		$active_plugins = array_map(
+			'dirname',
+			array_merge(
+				(array) get_option( 'active_plugins', array() ),
+				array_keys( (array) get_site_option( 'active_sitewide_plugins', array() ) )
+			)
+		);
+
+		$suggestions = array_filter(
+			$feed,
+			function ( $item ) use ( $context, $dismissed, $active_plugins ) {
+				return isset( $item['slug'], $item['context'] )
+					&& ! empty( $item['title'] )
+					&& '' !== esc_url_raw( $item['url'] ?? '' )
+					&& in_array( $context, (array) $item['context'], true )
+					&& ! in_array( $item['slug'], $dismissed, true )
+					&& ! in_array( $item['product'] ?? '', $active_plugins, true )
+					&& ( empty( $item['show-if-active'] ) || array() !== array_intersect( (array) $item['show-if-active'], $active_plugins ) );
+			}
+		);
+
+		$count = (int) ( $feed[0]['recommendations-count'] ?? 5 );
+
+		return array_slice( array_values( $suggestions ), 0, $count > 0 && $count <= 50 ? $count : 5 );
+	}
+
+	/**
+	 * Add the productsListEmptySuggestions admin setting on the add products task page when it was reached from the empty products list.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $settings Admin shared settings.
+	 * @return mixed
+	 */
+	public static function add_products_list_empty_suggestions_setting( $settings ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only check of the current admin page.
+		$is_target_page = isset( $_GET['page'], $_GET['path'], $_GET['from'] )
+			&& 'wc-admin' === $_GET['page']
+			&& '/add-product' === $_GET['path']
+			&& 'products-list' === $_GET['from'];
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		if ( ! $is_target_page || ! is_array( $settings ) ) {
+			return $settings;
+		}
+
+		$settings['productsListEmptySuggestions'] = array_map(
+			function ( $item ) {
+				return array(
+					'slug'     => $item['slug'],
+					'product'  => $item['product'] ?? '',
+					'title'    => $item['title'] ?? '',
+					'copy'     => $item['copy'] ?? '',
+					'icon'     => esc_url_raw( $item['icon'] ?? '' ),
+					'url'      => esc_url_raw( $item['url'] ?? '' ),
+					'promoted' => $item['promoted'] ?? '',
+				);
+			},
+			self::get_suggestions_for_context( 'products-list-empty-body' )
+		);
+
+		return $settings;
 	}
 }
 
