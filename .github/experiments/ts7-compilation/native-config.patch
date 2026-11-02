@@ -1,0 +1,72 @@
+--- a/packages/js/internal-build/configs/tsconfig.json
++++ b/packages/js/internal-build/configs/tsconfig.json
+@@ -2,7 +2,7 @@
+ 	"compilerOptions": {
+ 		"target": "esnext",
+ 		"module": "esnext",
+-		"moduleResolution": "node",
++		"moduleResolution": "bundler",
+ 		"allowJs": true,
+ 		"strict": true,
+ 		"esModuleInterop": true,
+@@ -10,6 +10,12 @@
+ 		"isolatedModules": true,
+ 		"jsx": "react",
+ 		"jsxFactory": "createElement",
+-		"jsxFragmentFactory": "Fragment"
++		"jsxFragmentFactory": "Fragment",
++		"resolvePackageJsonExports": false,
++		"resolvePackageJsonImports": false,
++		"types": [
++			"*"
++		],
++		"noUncheckedSideEffectImports": false
+ 	}
+ }
+--- a/plugins/woocommerce/client/admin/tsconfig.json
++++ b/plugins/woocommerce/client/admin/tsconfig.json
+@@ -2,17 +2,16 @@
+ 	"compilerOptions": {
+ 		"noEmit": true,
+ 		"target": "esnext",
+-		"moduleResolution": "node",
++		"moduleResolution": "bundler",
+ 		"allowJs": true,
+ 		"jsx": "preserve",
+ 		"strict": true,
+ 		"esModuleInterop": true,
+ 		"skipLibCheck": true,
+ 		"module": "esnext",
+-		"baseUrl": "client",
+ 		"paths": {
+ 			"~/*": [
+-				"*"
++				"./client/*"
+ 			]
+ 		},
+ 		"rootDir": "client",
+@@ -20,7 +19,13 @@
+ 			"./client/typings",
+ 			"./node_modules/@types"
+ 		],
+-		"composite": true
++		"composite": true,
++		"resolvePackageJsonExports": false,
++		"resolvePackageJsonImports": false,
++		"types": [
++			"*"
++		],
++		"noUncheckedSideEffectImports": false
+ 	},
+ 	"include": [
+ 		"./client/**/*"
+--- a/packages/js/email-editor/tsconfig.json
++++ b/packages/js/email-editor/tsconfig.json
+@@ -7,7 +7,6 @@
+ 		"declarationDir": "build-types",
+ 		"resolveJsonModule": true,
+ 		"allowSyntheticDefaultImports": true,
+-		"downlevelIteration": true,
+ 		"jsx": "react-jsx",
+ 		"jsxFactory": null,
+ 		"jsxFragmentFactory": null,
