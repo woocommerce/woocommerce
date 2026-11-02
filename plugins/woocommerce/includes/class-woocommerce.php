@@ -359,10 +359,6 @@ final class WooCommerce {
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_inbox_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
-		add_action( 'woocommerce_before_order_item_object_save', array( 'WC_Order_Item_Product_Data_Store', 'handle_woocommerce_before_order_item_object_save' ) );
-		add_action( 'woocommerce_after_order_item_object_save', array( 'WC_Order_Item_Product_Data_Store', 'handle_woocommerce_after_order_item_object_save' ) );
-		add_action( 'woocommerce_before_delete_order_item', array( 'WC_Order_Item_Product_Data_Store', 'handle_woocommerce_before_delete_order_item' ) );
-		add_action( 'woocommerce_delete_order_item', array( 'WC_Order_Item_Product_Data_Store', 'handle_woocommerce_delete_order_item' ) );
 
 		// Originating from https://github.com/woocommerce/woocommerce/pull/11082 (WC_API::register_wp_admin_settings(), July 2016),
 		// the settings were intended for REST context only. By chance, admin pages relied on unconditional rest_preload_api_request calls,
@@ -449,6 +445,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\PushNotifications\PushNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\PointOfSaleEmailHandler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\UnpaidOrderTimeoutMarker::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Orders\ProductSales::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\POSController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\StockNotifications\StockNotifications::class )->register();
