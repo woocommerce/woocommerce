@@ -38,6 +38,13 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	private $sent_messages = array();
 
 	/**
+	 * What the short-circuited `wp_mail()` reports back.
+	 *
+	 * @var bool
+	 */
+	private $wp_mail_result = true;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -64,8 +71,9 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		remove_filter( 'pre_wp_mail', array( $this, 'capture_pre_wp_mail' ), 10 );
-		$this->sent_to       = array();
-		$this->sent_messages = array();
+		$this->sent_to        = array();
+		$this->sent_messages  = array();
+		$this->wp_mail_result = true;
 		$this->restore_stock_notifications_feature_option();
 		// Discard this test's `WC_Emails` build so later tests rebuild their own from
 		// whatever filters are active for them, rather than inheriting this test's list.
@@ -96,7 +104,38 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 		foreach ( $recipients as $recipient ) {
 			$this->sent_to[ $recipient ] = true;
 		}
-		return true;
+		return $this->wp_mail_result;
+	}
+
+	/**
+	 * @testdox Should report whether the back-in-stock email was actually sent when send_stock_notification_email is called.
+	 *
+	 * @dataProvider stock_notification_send_outcome_provider
+	 *
+	 * @param bool $email_enabled  Whether the back-in-stock email is enabled.
+	 * @param bool $wp_mail_result What `wp_mail()` reports back.
+	 * @param bool $expected       The expected return value.
+	 */
+	public function test_send_stock_notification_email_returns_whether_sent( bool $email_enabled, bool $wp_mail_result, bool $expected ): void {
+		add_filter( 'woocommerce_email_enabled_customer_stock_notification', fn() => $email_enabled );
+		$this->wp_mail_result = $wp_mail_result;
+		$notification         = $this->build_notification();
+
+		$this->assertSame( $expected, $this->sut->send_stock_notification_email( $notification ) );
+		$this->assertSame( $email_enabled, isset( $this->sent_to[ $notification->get_user_email() ] ), 'Mail should only be attempted when the email is enabled.' );
+	}
+
+	/**
+	 * Data provider for test_send_stock_notification_email_returns_whether_sent.
+	 *
+	 * @return array[]
+	 */
+	public function stock_notification_send_outcome_provider(): array {
+		return array(
+			'email sent'     => array( true, true, true ),
+			'email disabled' => array( false, true, false ),
+			'wp_mail failed' => array( true, false, false ),
+		);
 	}
 
 	/**
@@ -168,6 +207,29 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 		$this->assertSame( $notification->get_user_email(), $verified->get_recipient() );
 		// Behavior assertion: the trigger path actually dispatched mail to the expected recipient.
 		$this->assertArrayHasKey( $notification->get_user_email(), $this->sent_to );
+	}
+
+	/**
+	 * @testdox Should not save the notification while sending the stock email, leaving the unsubscribe key to the caller's save.
+	 */
+	public function test_send_stock_notification_email_leaves_saving_the_unsubscribe_key_to_the_caller() {
+		$notification = $this->build_notification();
+		$updates      = 0;
+		$count        = function () use ( &$updates ) {
+			++$updates;
+		};
+		add_action( 'woocommerce_update_stock_notification', $count );
+
+		$this->sut->send_stock_notification_email( $notification );
+
+		remove_action( 'woocommerce_update_stock_notification', $count );
+		$this->assertSame( 0, $updates );
+		$this->assertCount( 1, $this->sent_messages );
+		$this->assertSame( 1, preg_match( '/email_link_action_key=([A-Za-z0-9]+)/', $this->sent_messages[0], $matches ) );
+
+		$notification->save();
+		$notification = new Notification( $notification->get_id() );
+		$this->assertTrue( $notification->check_unsubscribe_key( $matches[1] ) );
 	}
 
 	/**

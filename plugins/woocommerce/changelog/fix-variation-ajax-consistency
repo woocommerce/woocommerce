@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make variation details loaded on the product page follow the product password setting.

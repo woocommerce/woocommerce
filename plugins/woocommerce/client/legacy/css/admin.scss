@@ -2315,7 +2315,7 @@ body.woocommerce_page_wc-customer-stock-notifications {
 	margin: 0;
 	padding: 0;
 
-	button {
+	button:not([data-page-action]) {
 		margin: 1px;
 		vertical-align: top;
 	}
@@ -3080,6 +3080,82 @@ ul.order_notes {
 		// visually de-emphasised so manual notes scan more easily.
 		background: $gray-100;
 	}
+}
+
+.order-notes-pagination {
+	border-top: 1px solid $gray-200;
+	padding: 12px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 4px;
+	color: $subtext;
+	font-size: 11px;
+
+	&[hidden] {
+		display: none;
+	}
+
+	.order-notes-page-controls {
+		display: flex;
+		align-items: center;
+		gap: 2px;
+	}
+
+	button {
+		background: none;
+		border: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0;
+		margin: 0;
+		width: 24px;
+		height: 28px;
+		color: $gray-900;
+		cursor: pointer;
+
+		&:disabled {
+			color: $gray-400;
+			cursor: default;
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--wp-admin-theme-color, #2271b1);
+			outline-offset: 1px;
+		}
+	}
+
+	#order-notes-page {
+		width: 30px;
+		min-height: 28px;
+		padding: 0 2px;
+		margin: 0;
+		text-align: center;
+		appearance: textfield;
+		margin-right: 2px;
+
+		&::-webkit-inner-spin-button,
+		&::-webkit-outer-spin-button {
+			appearance: none;
+			margin: 0;
+		}
+	}
+
+	.order-notes-total-pages {
+		white-space: nowrap;
+	}
+
+	&:dir(rtl) .dashicons,
+	&:dir(rtl) svg {
+		transform: scaleX(-1);
+	}
+}
+
+.order-notes-error {
+	padding: 0 12px 12px;
+	color: $red;
 }
 
 .add_note {
@@ -8260,7 +8336,7 @@ table.bar_chart {
 		clear: both;
 	}
 
-	#poststuff #woocommerce-order-notes .inside button {
+	#poststuff #woocommerce-order-notes .inside button:not([data-page-action]) {
 		margin: 0 1px 1px;
 	}
 
@@ -8282,7 +8358,7 @@ table.bar_chart {
 			}
 		}
 
-		#poststuff #woocommerce-order-notes .inside button {
+		#poststuff #woocommerce-order-notes .inside button:not([data-page-action]) {
 			line-height: 40px;
 		}
 	}
@@ -8772,6 +8848,7 @@ table.bar_chart {
 				margin: 0;
 			}
 
+			// Unused by core; kept for third-party importers that still output this markup.
 			.woocommerce-importer-file-url-field-wrapper {
 				border: 1px solid #ddd;
 				box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.07);
@@ -8799,6 +8876,11 @@ table.bar_chart {
 					display: inline-block;
 					min-width: 100%;
 				}
+			}
+
+			small code {
+				font-size: inherit;
+				white-space: nowrap;
 			}
 		}
 
@@ -9273,13 +9355,6 @@ body.woocommerce_page_wc-settings {
 			color: #505050;
 			padding: 0 0 10px 0;
 			text-decoration: none;
-
-			&:focus,
-			&:hover,
-			&:active {
-				outline: none;
-				box-shadow: none;
-			}
 		}
 		margin: 0;
 		// Tab strip inherits the wp-admin body bg so it reads as one

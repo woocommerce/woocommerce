@@ -45,7 +45,7 @@
 		"stylelint": "catalog:tooling"
 	},
 	"dependencies": {
-		"sourcebuster": "github:woocommerce/sourcebuster-js#d7f4616d5a17e17db925ca1842457f309379d861"
+		"sourcebuster": "github:woocommerce/sourcebuster-js#b28980f98d8ed3f35ac84974e603a6c3bd103752"
 	},
 	"config": {
 		"ci": {

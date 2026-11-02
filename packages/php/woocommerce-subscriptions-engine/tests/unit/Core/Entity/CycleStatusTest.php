@@ -9,15 +9,18 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Core\Entity;
 
-use DomainException;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
+use Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\AssertsInvalidInput;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus
  */
 class CycleStatusTest extends TestCase {
+
+	use AssertsInvalidInput;
 
 	protected function tearDown(): void {
 		StatusRegistry::reset();
@@ -64,9 +67,13 @@ class CycleStatusTest extends TestCase {
 	 * @param string $slug Malformed slug.
 	 */
 	public function test_constructor_rejects_a_malformed_slug( string $slug ): void {
-		$this->expectException( DomainException::class );
-
-		new CycleStatus( $slug );
+		$this->assert_invalid_input(
+			static function () use ( $slug ): void {
+				new CycleStatus( $slug );
+			},
+			ValidationErrorCode::INVALID_VALUE,
+			'status'
+		);
 	}
 
 	/**
