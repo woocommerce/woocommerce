@@ -83,10 +83,23 @@ class WC_Admin_List_Table_Coupons_Test extends WC_Unit_Test_Case {
 		$coupon->set_date_expires( null );
 		$coupon->save();
 
-		$this->assertSame( '0 / &infin;', $this->render_column( 'usage', $coupon->get_id() ) );
-		$this->assertSame( '&ndash;', $this->render_column( 'description', $coupon->get_id() ) );
-		$this->assertSame( '&ndash;', $this->render_column( 'products', $coupon->get_id() ) );
-		$this->assertSame( '&ndash;', $this->render_column( 'expiry_date', $coupon->get_id() ) );
+		$this->assertSame( "0 / \u{221E}", $this->render_column_text( 'usage', $coupon->get_id() ) );
+		$this->assertSame( "\u{2013}", $this->render_column_text( 'description', $coupon->get_id() ) );
+		$this->assertSame( "\u{2013}", $this->render_column_text( 'products', $coupon->get_id() ) );
+		$this->assertSame( "\u{2013}", $this->render_column_text( 'expiry_date', $coupon->get_id() ) );
+	}
+
+	/**
+	 * Render one column of a coupon row with HTML entities decoded.
+	 *
+	 * The description column goes through wp_kses_post(), which prints `&ndash;` as `–` from WordPress 7.2, so compare decoded text.
+	 *
+	 * @param string $column    Column name.
+	 * @param int    $coupon_id Coupon ID.
+	 * @return string
+	 */
+	private function render_column_text( string $column, int $coupon_id ): string {
+		return html_entity_decode( $this->render_column( $column, $coupon_id ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 	}
 
 	/**
