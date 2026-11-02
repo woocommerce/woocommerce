@@ -160,22 +160,17 @@ export async function merge( source, requestedDestination, { branch } ) {
 	);
 
 	const clonePrefix = join( tmpdir(), 'monorepo-merge-' );
-	const remoteUrl = () =>
-		run( 'git', [ 'remote', 'get-url', REMOTE ], '', inMonorepo ).catch(
-			() => null
-		);
-	// A run that was killed outright leaves its remote behind; remove it only if it points at one of our clones.
-	const leftover = await remoteUrl();
-	if ( leftover?.startsWith( clonePrefix ) ) {
-		await run(
-			'git',
-			[ 'remote', 'remove', REMOTE ],
-			`Failed to remove the leftover remote "${ REMOTE }"`,
-			inMonorepo
-		);
-	} else if ( leftover ) {
+	// The remote may belong to another run in progress or to one that was killed, which this run cannot tell
+	// apart, so never remove it automatically.
+	const existing = await run(
+		'git',
+		[ 'remote', 'get-url', REMOTE ],
+		'',
+		inMonorepo
+	).catch( () => null );
+	if ( existing ) {
 		throw new Error(
-			`A "${ REMOTE }" remote already exists and points at ${ leftover }. Remove it, then run the command again.`
+			`A "${ REMOTE }" remote already exists and points at ${ existing }. Make sure no other merge is running, remove it with "git remote remove ${ REMOTE }", then run the command again.`
 		);
 	}
 
@@ -281,7 +276,7 @@ export async function merge( source, requestedDestination, { branch } ) {
 
 	// The merge only needs the fetched objects, so the clone and remote can go even after a conflict.
 	// Signals are no longer passed on once cleanup starts. A terminal Ctrl+C can still hit these quick git commands,
-	// and if that strands the remote, the next run removes it as a leftover.
+	// and if that strands the remote, the next run stops and explains how to remove it.
 	cleaningUp = true;
 	const problems = [];
 	try {
