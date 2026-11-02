@@ -72,16 +72,9 @@ class UcpCatalog extends ControllerTestCase {
 	 * Enable the UCP routes before the REST server is built.
 	 */
 	protected function setUp(): void {
-		update_option( self::FEATURE_OPTION, 'yes' );
 		parent::setUp();
-	}
-
-	/**
-	 * Restore the default disabled state.
-	 */
-	protected function tearDown(): void {
-		delete_option( self::FEATURE_OPTION );
-		parent::tearDown();
+		update_option( self::FEATURE_OPTION, 'yes' );
+		$this->initialize_store_api_server();
 	}
 
 	/**
