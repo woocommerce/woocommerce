@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Declare `@woocommerce/data`, `@woocommerce/navigation`, and `@woocommerce/tracks` as dependencies so they install with the package.
+Declare the `@woocommerce/*` and `@wordpress/*` packages the customer effort score components import at runtime.

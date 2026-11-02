@@ -103,7 +103,9 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
+		"@wordpress/api-fetch": "catalog:wp-min",
 		"@wordpress/browserslist-config": "next",
+		"@wordpress/data-controls": "catalog:wp-min",
 		"css-loader": "6.11.x",
 		"eslint": "^10.0.0",
 		"stylelint": "catalog:tooling",
@@ -122,7 +124,9 @@
 		"webpack-cli": "5.1.x"
 	},
 	"peerDependencies": {
+		"@wordpress/api-fetch": "^7.19.0",
 		"@wordpress/data": "^10.19.0",
+		"@wordpress/data-controls": "^4.19.0",
 		"react": "18.3.x",
 		"react-dom": "18.3.x"
 	},

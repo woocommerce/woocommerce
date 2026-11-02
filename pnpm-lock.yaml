@@ -898,9 +898,15 @@ importers:
       '@woocommerce/internal-js-tests':
         specifier: workspace:*
         version: link:../internal-js-tests
+      '@wordpress/api-fetch':
+        specifier: catalog:wp-min
+        version: 7.33.1
       '@wordpress/browserslist-config':
         specifier: next
         version: 6.43.1-next.v.202604091042.0
+      '@wordpress/data-controls':
+        specifier: catalog:wp-min
+        version: 4.33.1(@types/react@18.3.28)(react@18.3.1)
       css-loader:
         specifier: 6.11.x
         version: 6.11.0(webpack@5.97.1)
@@ -967,6 +973,9 @@ importers:
       '@wordpress/compose':
         specifier: catalog:wp-min
         version: 7.33.1(@types/react@18.3.28)(react@18.3.1)
+      '@wordpress/core-data':
+        specifier: catalog:wp-min
+        version: 7.33.9(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(date-fns@4.4.0)(esbuild@0.27.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
       '@wordpress/data':
         specifier: ^10.19.0
         version: 10.44.0(@types/react@18.3.28)(react@18.3.1)
@@ -997,9 +1006,6 @@ importers:
       qs:
         specifier: ^6.11.2
         version: 6.15.1
-      redux:
-        specifier: ^4.2.1
-        version: 4.2.1
       rememo:
         specifier: ^4.0.2
         version: 4.0.2
@@ -1046,9 +1052,6 @@ importers:
       '@woocommerce/internal-js-tests':
         specifier: workspace:*
         version: link:../internal-js-tests
-      '@wordpress/core-data':
-        specifier: catalog:wp-min
-        version: 7.33.9(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(date-fns@4.4.0)(esbuild@0.27.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
       eslint:
         specifier: ^10.0.0
         version: 10.7.0(jiti@2.6.1)
@@ -1067,6 +1070,9 @@ importers:
       react-dom:
         specifier: 18.3.x
         version: 18.3.1(react@18.3.1)
+      redux:
+        specifier: ^4.2.1
+        version: 4.2.1
       rimraf:
         specifier: 5.0.5
         version: 5.0.5
@@ -3065,6 +3071,9 @@ importers:
       moment:
         specifier: ^2.29.4
         version: 2.30.1
+      prop-types:
+        specifier: ^15.8.1
+        version: 15.8.1
       qrcode.react:
         specifier: ^3.1.0
         version: 3.2.0(react@18.3.1)
@@ -3300,9 +3309,6 @@ importers:
       promptly:
         specifier: ^3.2.0
         version: 3.2.0
-      prop-types:
-        specifier: ^15.8.1
-        version: 15.8.1
       raw-loader:
         specifier: 4.0.x
         version: 4.0.2(webpack@5.97.1)
