@@ -206,12 +206,15 @@ class OrderUpdateStatus extends ActionableAbility {
 	 * The ability output for the saved order.
 	 *
 	 * @param \WC_Order $subject Saved order.
-	 * @return array
+	 * @return array|\WP_Error
 	 */
-	public function prepare_response( $subject ): array {
-		return array(
-			'order' => self::format_saved_order_for_response( $subject ),
-		);
+	public function prepare_response( $subject ) {
+		$order = self::format_saved_order_for_response( $subject );
+		if ( is_wp_error( $order ) ) {
+			return $order;
+		}
+
+		return array( 'order' => $order );
 	}
 
 	/**

@@ -55,13 +55,6 @@ class ExtensibleAbilities {
 	private static array $validators = array();
 
 	/**
-	 * Fields already reported for a value that does not match the schema, keyed by resource, namespace and field.
-	 *
-	 * @var array<string, bool>
-	 */
-	private static array $reported = array();
-
-	/**
 	 * Whether the store enabled the experimental feature.
 	 *
 	 * @since 11.3.0
@@ -127,7 +120,8 @@ class ExtensibleAbilities {
 	 *     @type string   $namespace    Slug of the extension that owns the field, such as `subscriptions`.
 	 *     @type string   $field        Field name inside the namespace, such as `trial_length`.
 	 *     @type array    $output_schema Optional. JSON schema of the value that `get_callback` returns. Required
-	 *                                  with `get_callback`. It needs a `type`. Core publishes it as declared. Its
+	 *                                  with `get_callback`. It needs one `type` other than null, because clients
+	 *                                  expect one type for each field. Core publishes it as declared. Its
 	 *                                  `title` is the label clients show.
 	 *     @type string[] $object_types Optional. The object types the field applies to, as `get_type()` of the
 	 *                                  object returns them, such as `simple` and `subscription` for a product or
@@ -137,9 +131,14 @@ class ExtensibleAbilities {
 	 *     @type callable $get_callback Optional. Receives the object and returns the value. A field without it
 	 *                                  is not in the output. Required with `output_schema`. Return null when the
 	 *                                  object has no value, and the field is left out with no error. Any other
-	 *                                  value that `output_schema` does not allow is left out and logged. It reads
-	 *                                  the object it is given, not the database, because an ability can format
-	 *                                  an object before it is saved.
+	 *                                  value that `output_schema` does not allow fails the call with
+	 *                                  `woocommerce_ability_field_output_invalid`. A callback that throws fails
+	 *                                  the call with `woocommerce_ability_extension_failed`. It reads the object
+	 *                                  it is given, not the database, because an ability can format an object
+	 *                                  before it is saved. An empty array for an `object` is sent as `{}`. The
+	 *                                  callback must not return a list for an `object` or a `date-time` without
+	 *                                  a UTC offset: the schema check accepts them, and a strict client refuses
+	 *                                  the whole result.
 	 *     @type array    $input_schema Optional. JSON schema of the value that `set_callback` receives. It needs
 	 *                                  a `type`. Core publishes it as declared. A value can be null only where it
 	 *                                  declares null. Required with `set_callback`.
@@ -200,6 +199,10 @@ class ExtensibleAbilities {
 			}
 			if ( ! is_array( $args['output_schema'] ?? null ) || ! isset( $args['output_schema']['type'] ) ) {
 				wc_doing_it_wrong( __METHOD__, 'The "output_schema" argument must be an array with a "type".', '11.4.0' );
+				return;
+			}
+			if ( ! is_string( $args['output_schema']['type'] ) || 'null' === $args['output_schema']['type'] ) {
+				wc_doing_it_wrong( __METHOD__, 'The "type" of the "output_schema" argument must be one type name other than "null". Return null to leave the field out.', '11.4.0' );
 				return;
 			}
 		}
@@ -559,8 +562,11 @@ class ExtensibleAbilities {
 	/**
 	 * Add the field values of an object to its formatted output, under
 	 * `extensions.<namespace>.<field>`. A value is cast to its schema type, so
-	 * `'12'` becomes `12` for an integer field. A field that throws, returns null
-	 * or returns a value that its schema does not allow is left out. A namespace with no
+	 * `'12'` becomes `12` for an integer field. A field that returns null is
+	 * left out. Any other value that its output schema
+	 * does not allow returns a `woocommerce_ability_field_output_invalid` error,
+	 * and a get_callback that throws returns a `woocommerce_ability_extension_failed`
+	 * error. The ability returns the error. A namespace with no
 	 * values is left out, and `extensions` is left out when no namespace has
 	 * values or the feature is off.
 	 *
@@ -569,9 +575,9 @@ class ExtensibleAbilities {
 	 * @param array<string, mixed> $output   Formatted object.
 	 * @param string               $resource_name Resource.
 	 * @param object               $subject  Object to read.
-	 * @return array<string, mixed>
+	 * @return array<string, mixed>|\WP_Error
 	 */
-	public static function add_fields_to_object( array $output, string $resource_name, $subject ): array {
+	public static function add_fields_to_object( array $output, string $resource_name, $subject ) {
 		if ( empty( self::$fields[ $resource_name ] ) || ! self::is_enabled() ) {
 			return $output;
 		}
@@ -585,19 +591,19 @@ class ExtensibleAbilities {
 				try {
 					$value = call_user_func( $args['get_callback'], $subject );
 				} catch ( \Throwable $e ) {
-					wc_get_logger()->error(
-						sprintf( 'Ability field "%s.%s" of "%s" failed: %s', $namespace, $field, $resource_name, $e->getMessage() ),
-						array( 'source' => 'extensible-abilities' )
-					);
+					return self::field_callback_failed( $args, $e );
+				}
+				if ( null === $value ) {
 					continue;
 				}
-				if ( null === $value || ! self::matches_schema( $args, $value ) ) {
-					continue;
+				$valid = rest_validate_value_from_schema( $value, $args['output_schema'], $field );
+				if ( true === $valid ) {
+					$valid = rest_sanitize_value_from_schema( $value, $args['output_schema'], $field );
 				}
-				$sanitized = rest_sanitize_value_from_schema( $value, $args['output_schema'], $field );
-				if ( ! is_wp_error( $sanitized ) ) {
-					$extensions[ $namespace ][ $field ] = $sanitized;
+				if ( is_wp_error( $valid ) ) {
+					return self::field_output_invalid( $args, $valid );
 				}
+				$extensions[ $namespace ][ $field ] = self::prepare_json_value( $valid, $args['output_schema'] );
 			}
 		}
 		if ( ! empty( $extensions ) ) {
@@ -708,40 +714,129 @@ class ExtensibleAbilities {
 	}
 
 	/**
-	 * Whether a value matches the output schema of its field. A value other than null that
-	 * does not match is logged and reported one time for each field.
+	 * Mark an error from a write that saved before it failed. The message names
+	 * the saved object, because MCP clients get the message and not the data.
+	 * The data gets `saved` set to true and the `id` of the object.
+	 *
+	 * @internal
+	 *
+	 * @param \WP_Error            $error         Error after the save.
+	 * @param string               $resource_name Resource, such as product.
+	 * @param int                  $id            ID of the saved object.
+	 * @param array<string, mixed> $data          More data to add.
+	 * @return \WP_Error
+	 */
+	public static function saved_write_error( \WP_Error $error, string $resource_name, int $id, array $data = array() ): \WP_Error {
+		$current = $error->get_error_data();
+		return new \WP_Error(
+			$error->get_error_code(),
+			sprintf(
+				/* translators: 1: Error message. 2: Resource, such as product. 3: Object ID. */
+				__( '%1$s The change is saved on the %2$s %3$d, so do not send it again.', 'woocommerce' ),
+				$error->get_error_message(),
+				$resource_name,
+				$id
+			),
+			array_merge(
+				array( 'status' => 400 ),
+				is_array( $current ) ? $current : array(),
+				$data,
+				array(
+					'saved' => true,
+					'id'    => $id,
+				)
+			)
+		);
+	}
+
+	/**
+	 * The error for a field value that does not match its schema. It is also
+	 * reported with wc_doing_it_wrong(), so the extension developer sees it in the log.
 	 *
 	 * @param array<string, mixed> $args  Field arguments.
-	 * @param mixed                $value Value that the get_callback returned.
-	 * @return bool
+	 * @param \WP_Error            $error Error of the schema check.
+	 * @return \WP_Error
 	 */
-	private static function matches_schema( array $args, $value ): bool {
-		$valid = rest_validate_value_from_schema( $value, $args['output_schema'], $args['field'] );
-		if ( true === $valid ) {
-			return true;
+	private static function field_output_invalid( array $args, \WP_Error $error ): \WP_Error {
+		$message = sprintf(
+			/* translators: 1: Extension namespace. 2: Field name. 3: Resource, such as product. 4: What the field schema expected. */
+			__( 'The "%1$s" extension returned a value for the "%2$s" field of the %3$s that does not match the field schema: %4$s', 'woocommerce' ),
+			$args['namespace'],
+			$args['field'],
+			$args['resource'],
+			$error->get_error_message()
+		);
+		wc_doing_it_wrong( __CLASS__ . '::register_field', $message, '11.3.0' );
+		return new \WP_Error(
+			'woocommerce_ability_field_output_invalid',
+			$message,
+			array(
+				'status'    => 500,
+				'namespace' => $args['namespace'],
+				'field'     => $args['field'],
+				'details'   => $error->get_error_message(),
+			)
+		);
+	}
+
+	/**
+	 * The error for a get_callback that throws. The exception text goes to the
+	 * log through wc_doing_it_wrong(), and stays out of the response.
+	 *
+	 * @param array<string, mixed> $args      Field arguments.
+	 * @param \Throwable           $exception Exception that the get_callback threw.
+	 * @return \WP_Error
+	 */
+	private static function field_callback_failed( array $args, \Throwable $exception ): \WP_Error {
+		$message = sprintf(
+			/* translators: 1: Extension namespace. 2: Field name. 3: Resource, such as product. */
+			__( 'The "%1$s" extension failed while reading the "%2$s" field of the %3$s.', 'woocommerce' ),
+			$args['namespace'],
+			$args['field'],
+			$args['resource']
+		);
+		wc_doing_it_wrong( __CLASS__ . '::register_field', $message . ' ' . $exception->getMessage(), '11.3.0' );
+		return new \WP_Error(
+			'woocommerce_ability_extension_failed',
+			$message,
+			array(
+				'status'    => 500,
+				'namespace' => $args['namespace'],
+				'field'     => $args['field'],
+			)
+		);
+	}
+
+	/**
+	 * Send an empty array for an `object` as an empty object, at any depth.
+	 * rest_sanitize_value_from_schema() turns every object into an array, so a
+	 * callback cannot send `{}` by itself. A part with no schema stays as it is.
+	 *
+	 * @param mixed                $value  Sanitized value.
+	 * @param array<string, mixed> $schema Schema of the value.
+	 * @return mixed The value for the JSON output.
+	 */
+	private static function prepare_json_value( $value, array $schema ) {
+		$type = rest_get_best_type_for_value( $value, (array) ( $schema['type'] ?? array() ) );
+		if ( 'array' === $type ) {
+			$children = array_fill_keys( array_keys( $value ), $schema['items'] ?? null );
+		} elseif ( 'object' === $type ) {
+			if ( empty( $value ) ) {
+				return new \stdClass();
+			}
+			$children = array();
+			foreach ( array_keys( $value ) as $key ) {
+				$children[ $key ] = $schema['properties'][ $key ] ?? rest_find_matching_pattern_property_schema( (string) $key, $schema ) ?? ( $schema['additionalProperties'] ?? null );
+			}
+		} else {
+			return $value;
 		}
 
-		$key = $args['resource'] . '.' . $args['namespace'] . '.' . $args['field'];
-		if ( null === $value || isset( self::$reported[ $key ] ) ) {
-			return false;
+		foreach ( $children as $key => $child_schema ) {
+			if ( is_array( $child_schema ) ) {
+				$value[ $key ] = self::prepare_json_value( $value[ $key ], $child_schema );
+			}
 		}
-
-		self::$reported[ $key ] = true;
-		wc_get_logger()->error(
-			sprintf( 'Ability field "%s.%s" of "%s" was left out because its value does not match its schema: %s', $args['namespace'], $args['field'], $args['resource'], $valid->get_error_message() ),
-			array( 'source' => 'extensible-abilities' )
-		);
-		wc_doing_it_wrong(
-			__CLASS__ . '::register_field',
-			sprintf(
-				'Ability field "%1$s.%2$s" of "%3$s" was left out because its value does not match its schema: %4$s',
-				$args['namespace'],
-				$args['field'],
-				$args['resource'],
-				$valid->get_error_message()
-			),
-			'11.3.0'
-		);
-		return false;
+		return $value;
 	}
 }

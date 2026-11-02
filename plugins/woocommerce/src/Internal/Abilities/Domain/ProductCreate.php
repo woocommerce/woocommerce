@@ -112,12 +112,15 @@ class ProductCreate extends ActionableAbility {
 	 * The ability output for the saved product.
 	 *
 	 * @param \WC_Product $subject Saved product.
-	 * @return array
+	 * @return array|\WP_Error
 	 */
-	protected function prepare_response( $subject ): array {
-		return array(
-			'product' => self::format_saved_product_for_response( $subject ),
-		);
+	protected function prepare_response( $subject ) {
+		$product = self::format_saved_product_for_response( $subject );
+		if ( is_wp_error( $product ) ) {
+			return $product;
+		}
+
+		return array( 'product' => $product );
 	}
 
 	/**
