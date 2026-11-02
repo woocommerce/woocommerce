@@ -159,7 +159,7 @@
 		"ajv-cli": "3.3.x",
 		"autoprefixer": "10.4.14",
 		"babel-jest": "29.5.x",
-		"babel-loader": "9.2.x",
+		"babel-loader": "catalog:tooling",
 		"babel-plugin-react-docgen": "4.2.1",
 		"babel-plugin-transform-react-remove-prop-types": "0.4.24",
 		"chalk": "4.1.2",

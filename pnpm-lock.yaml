@@ -45,6 +45,9 @@ catalogs:
     '@wordpress/stylelint-config':
       specifier: ^23.14.0
       version: 23.42.0
+    babel-loader:
+      specifier: 9.2.x
+      version: 9.2.1
     copy-webpack-plugin:
       specifier: 14.0.x
       version: 14.0.0
@@ -300,7 +303,7 @@ importers:
         specifier: catalog:wp-bundled
         version: 0.17.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.27.7)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
       babel-loader:
-        specifier: 9.2.x
+        specifier: catalog:tooling
         version: 9.2.1(@babel/core@7.29.7)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       chalk:
         specifier: ^4.1.2
@@ -2516,7 +2519,7 @@ importers:
         specifier: next
         version: 6.43.1-next.v.202604091042.0(webpack@5.112.2)
       babel-loader:
-        specifier: 9.2.x
+        specifier: catalog:tooling
         version: 9.2.1(@babel/core@7.29.7)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       jest:
         specifier: 29.5.x
@@ -3231,7 +3234,7 @@ importers:
         specifier: 29.5.x
         version: 29.5.0(@babel/core@7.29.7)
       babel-loader:
-        specifier: 9.2.x
+        specifier: catalog:tooling
         version: 9.2.1(@babel/core@7.29.7)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       babel-plugin-transform-react-remove-prop-types:
         specifier: 0.4.24
@@ -3712,7 +3715,7 @@ importers:
         specifier: 29.5.x
         version: 29.5.0(@babel/core@7.29.7)
       babel-loader:
-        specifier: 9.2.x
+        specifier: catalog:tooling
         version: 9.2.1(@babel/core@7.29.7)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       babel-plugin-react-docgen:
         specifier: 4.2.1

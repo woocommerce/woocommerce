@@ -85,6 +85,7 @@ catalogs:
         '@wordpress/postcss-plugins-preset': 5.56.0
         '@wordpress/scripts': 35.0.0
         '@wordpress/stylelint-config': ^23.14.0
+        babel-loader: 9.2.x
         copy-webpack-plugin: 14.0.x
         markdownlint-cli: 0.50.0
         postcss: ^8.5.26

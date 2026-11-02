@@ -40,7 +40,7 @@
 		"@types/jquery": "3.5.33",
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/dependency-extraction-webpack-plugin": "next",
-		"babel-loader": "9.2.x",
+		"babel-loader": "catalog:tooling",
 		"jest": "29.5.x",
 		"jest-environment-jsdom": "29.5.x",
 		"typescript": "5.7.x",
