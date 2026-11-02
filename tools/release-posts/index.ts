@@ -3,7 +3,7 @@
  */
 import { Command } from '@commander-js/extra-typings';
 import { Logger } from '@woocommerce/monorepo-utils/src/core/logger';
-import dotenv from 'dotenv';
+import { existsSync } from 'fs';
 import { writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
@@ -14,7 +14,9 @@ import { join } from 'path';
 import { generateContributors } from './lib/contributors';
 import { renderTemplate } from './lib/render-template';
 
-dotenv.config();
+if ( existsSync( '.env' ) ) {
+	process.loadEnvFile();
+}
 
 const program = new Command()
 	.name( 'release-post' )

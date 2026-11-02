@@ -2,15 +2,19 @@
  * External dependencies
  */
 import { defineConfig, devices } from '@playwright/test';
-import dotenv from 'dotenv';
+import { existsSync } from 'fs';
 
 /**
  * Internal dependencies
  */
 import { adminFile as BLOCKS_ADMIN_STATE } from './utils/blocks/constants';
+import { loadEnvFile } from './utils/env-file';
 
 // __dirname is not natively available in ESM, but Playwright's config loader shims it.
-dotenv.config( { path: __dirname + '/.env' } );
+const ENV_FILE = __dirname + '/.env';
+if ( existsSync( ENV_FILE ) ) {
+	loadEnvFile( ENV_FILE );
+}
 
 if ( ! process.env.BASE_URL ) {
 	process.env.BASE_URL =

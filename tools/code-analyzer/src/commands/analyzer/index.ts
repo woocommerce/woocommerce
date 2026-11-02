@@ -2,9 +2,11 @@
  * External dependencies
  */
 import { program } from '@commander-js/extra-typings';
-import dotenv from 'dotenv';
+import { existsSync } from 'fs';
 
-dotenv.config();
+if ( existsSync( '.env' ) ) {
+	process.loadEnvFile();
+}
 
 program
 	.name( 'analyzer' )

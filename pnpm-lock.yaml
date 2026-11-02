@@ -1755,9 +1755,6 @@ importers:
       esbuild:
         specifier: ^0.24.0
         version: 0.24.2
-      glob:
-        specifier: ^10.3.10
-        version: 10.5.0
       json2php:
         specifier: ^0.0.7
         version: 0.0.7
@@ -2598,9 +2595,6 @@ importers:
       config:
         specifier: 3.3.7
         version: 3.3.7
-      dotenv:
-        specifier: ^10.0.0
-        version: 10.0.0
       eslint:
         specifier: ^10.0.0
         version: 10.7.0(jiti@2.6.1)
@@ -2610,12 +2604,6 @@ importers:
       eslint-plugin-playwright:
         specifier: ^2.10.5
         version: 2.10.5(eslint@10.7.0(jiti@2.6.1))
-      fs-extra:
-        specifier: 11.1.1
-        version: 11.1.1
-      glob:
-        specifier: ^10.3.10
-        version: 10.5.0
       globals:
         specifier: ^16.5.0
         version: 16.5.0
@@ -3799,9 +3787,6 @@ importers:
       lint-staged:
         specifier: 13.2.0
         version: 13.2.0(enquirer@2.4.1)
-      lodash:
-        specifier: 4.18.1
-        version: 4.18.1
       mini-css-extract-plugin:
         specifier: 2.9.x
         version: 2.9.4(webpack@5.97.1)
@@ -3975,9 +3960,6 @@ importers:
       commander:
         specifier: ^9.5.0
         version: 9.5.0
-      dotenv:
-        specifier: ^10.0.0
-        version: 10.0.0
       simple-git:
         specifier: ^3.21.0
         version: 3.36.0
@@ -4140,9 +4122,6 @@ importers:
       commander:
         specifier: ^10.0.1
         version: 10.0.1
-      dotenv:
-        specifier: ^10.0.0
-        version: 10.0.0
       figlet:
         specifier: ^1.7.0
         version: 1.11.0
@@ -4280,15 +4259,9 @@ importers:
       commander:
         specifier: 9.4.0
         version: 9.4.0
-      dotenv:
-        specifier: ^15.0.1
-        version: 15.0.1
       ejs:
         specifier: ^3.1.9
         version: 3.1.10
-      lodash.shuffle:
-        specifier: ^4.2.0
-        version: 4.2.0
       semver:
         specifier: ^7.5.4
         version: 7.7.4
@@ -4302,9 +4275,6 @@ importers:
       '@types/ejs':
         specifier: ^3.1.5
         version: 3.1.5
-      '@types/lodash.shuffle':
-        specifier: ^4.2.9
-        version: 4.2.9
       '@types/node':
         specifier: ^24.1.0
         version: 24.12.2
@@ -8522,9 +8492,6 @@ packages:
 
   '@types/keyv@3.1.4':
     resolution: {integrity: sha512-BQ5aZNSCpj7D6K2ksrRCTmKRLEpnPvWDiLPfoGyhZ++8YtiK9d/3DBKPJgry359X/P1PfruyYwvnvwFjuEiEIg==}
-
-  '@types/lodash.shuffle@4.2.9':
-    resolution: {integrity: sha512-4siLZ4/vQH4T7Bm4254sG4n6hh9k7vd/bqfDVoeIwSha4Itu3MuoTxPX2I2Tue2JN94y7Y2I27QzwHZLdMlrBg==}
 
   '@types/lodash@4.14.149':
     resolution: {integrity: sha512-ijGqzZt/b7BfzcK9vTrS6MFljQRPn5BFWOx8oE0GYxribu6uV+aA9zZuXI1zc/etK9E8nrgdoF2+LgUw7+9tJQ==}
@@ -12810,14 +12777,6 @@ packages:
     resolution: {integrity: sha512-1gxPBJpI/pcjQhKgIU91II6Wkay+dLcN3M6rf2uwP8hRur3HtQXjVrdAK3sjC0piaEuxzMwjXChcETiJl47lAQ==}
     engines: {node: '>=18'}
 
-  dotenv@10.0.0:
-    resolution: {integrity: sha512-rlBi9d8jpv9Sf1klPjNfFAuWDjKLwTIJJ/VxtoTwIR6hnZxcEOQCZg2oIL3MWBYw5GpUDKOEnND7LXTbIpQ03Q==}
-    engines: {node: '>=10'}
-
-  dotenv@15.0.1:
-    resolution: {integrity: sha512-4OnbwRfzR+xQThp7uq1xpUS9fmgZ//njexOtPjPSbK3yHGrSHSJnaJRsXderSSm2elfvVj+Y5awDC0I8Oy8rkA==}
-    engines: {node: '>=12'}
-
   dotenv@16.6.1:
     resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
     engines: {node: '>=12'}
@@ -15526,9 +15485,6 @@ packages:
 
   lodash.pullall@4.2.0:
     resolution: {integrity: sha512-VhqxBKH0ZxPpLhiu68YD1KnHmbhQJQctcipvmFnqIBDYzcIHzf3Zpu0tpeOKtR4x76p9yohc506eGdOjTmyIBg==}
-
-  lodash.shuffle@4.2.0:
-    resolution: {integrity: sha512-V/rTAABKLFjoecTZjKSv+A1ZomG8hZg8hlgeG6wwQVD9AGv+10zqqSf6mFq2tVA703Zd5R0YhSuSlXA+E/Ei+Q==}
 
   lodash.truncate@4.4.2:
     resolution: {integrity: sha512-jttmRe7bRse52OsWIMDLaXxWqRAmtIUccAQ3garviCqJjafXOfNMO0yMfNpdD6zbGaTU0P5Nz7e7gAT6cKmJRw==}
@@ -25881,10 +25837,6 @@ snapshots:
     dependencies:
       '@types/node': 24.12.2
 
-  '@types/lodash.shuffle@4.2.9':
-    dependencies:
-      '@types/lodash': 4.17.24
-
   '@types/lodash@4.14.149': {}
 
   '@types/lodash@4.14.182': {}
@@ -34709,10 +34661,6 @@ snapshots:
     dependencies:
       type-fest: 4.41.0
 
-  dotenv@10.0.0: {}
-
-  dotenv@15.0.1: {}
-
   dotenv@16.6.1: {}
 
   downloadjs@1.4.7: {}
@@ -38262,8 +38210,6 @@ snapshots:
       lodash.keys: 3.1.2
 
   lodash.pullall@4.2.0: {}
-
-  lodash.shuffle@4.2.0: {}
 
   lodash.truncate@4.4.2: {}
 

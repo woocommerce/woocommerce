@@ -304,9 +304,6 @@ export default [
 		languageOptions: {
 			globals: { ...globals.node },
 		},
-		rules: {
-			'you-dont-need-lodash-underscore/omit': 'off',
-		},
 	},
 	{
 		files: TEST_FILES,

@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Use the built-in Node fs glob in the esbuild package builder; build output is unchanged.

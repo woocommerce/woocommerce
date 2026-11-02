@@ -23,9 +23,6 @@ importers:
       '@mdx-js/react':
         specifier: ^3.0.0
         version: 3.1.1(@types/react@19.2.18)(react@19.2.8)
-      clsx:
-        specifier: ^2.0.0
-        version: 2.1.1
       js-cookie:
         specifier: ^3.0.8
         version: 3.0.8

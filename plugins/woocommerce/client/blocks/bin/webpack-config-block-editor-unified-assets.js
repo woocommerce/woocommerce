@@ -2,7 +2,6 @@
  * External dependencies
  */
 const path = require( 'path' );
-const { omit } = require( 'lodash' );
 const cssnano = require( 'cssnano' );
 const postcss = require( 'postcss' );
 const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
@@ -20,6 +19,7 @@ const {
 	NODE_ENV,
 	getProgressBarPluginConfig,
 	getResolve,
+	omit,
 	requestToExternal,
 	requestToHandle,
 } = require( './webpack-helpers' );

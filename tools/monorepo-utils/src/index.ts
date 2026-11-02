@@ -4,7 +4,7 @@
 import { Command } from '@commander-js/extra-typings';
 import figlet from 'figlet';
 import chalk from 'chalk';
-import dotenv from 'dotenv';
+import { existsSync } from 'fs';
 
 /**
  * Internal dependencies
@@ -20,7 +20,9 @@ import SlackTestReport from './slack-test-report';
 import { Logger } from './core/logger';
 import { isGithubCI } from './core/environment';
 
-dotenv.config();
+if ( existsSync( '.env' ) ) {
+	process.loadEnvFile();
+}
 
 if ( ! isGithubCI() ) {
 	Logger.notice(

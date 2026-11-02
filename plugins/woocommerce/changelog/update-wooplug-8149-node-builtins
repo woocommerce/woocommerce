@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Replace dotenv, fs-extra and glob in e2e tooling with Node built-ins; no production change.

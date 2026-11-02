@@ -1,9 +1,7 @@
 #!/usr/bin/env node
-const { readFileSync } = require( 'fs' );
-const { ensureDirSync, writeJsonSync } = require( 'fs-extra' );
+const { globSync, mkdirSync, readFileSync, writeFileSync } = require( 'fs' );
 const crypto = require( 'crypto' );
 const path = require( 'path' );
-const glob = require( 'glob' );
 const { translations } = require( '../../test-data/blocks/data/data.ts' );
 const {
 	getTestTranslation,
@@ -19,10 +17,10 @@ const BUILD_DIR = path.resolve( BUILD_ROOT, 'assets/client/blocks/' );
 const TESTS_DIR = path.resolve( __dirname, '../../tests/blocks' );
 const LANGUAGES_DIR = path.join( ROOT_DIR, 'i18n/languages/' );
 
-ensureDirSync( LANGUAGES_DIR );
+mkdirSync( LANGUAGES_DIR, { recursive: true } );
 
-const builtJsFiles = glob.sync( path.join( BUILD_DIR, '**/*.js' ) );
-const testFiles = glob.sync( path.join( TESTS_DIR, '**/*.{js,ts}' ) );
+const builtJsFiles = globSync( path.join( BUILD_DIR, '**/*.js' ) );
+const testFiles = globSync( path.join( TESTS_DIR, '**/*.{js,ts}' ) );
 
 if ( builtJsFiles.length === 0 ) {
 	// Without built JS no translation JSONs are generated and the translation
@@ -99,8 +97,8 @@ builtJsFiles.forEach( ( filePath ) => {
 		.update( relativeFilePath )
 		.digest( 'hex' );
 
-	writeJsonSync(
+	writeFileSync(
 		path.join( LANGUAGES_DIR, `woocommerce-${ locale }-${ md5Path }.json` ),
-		data
+		JSON.stringify( data ) + '\n'
 	);
 } );
