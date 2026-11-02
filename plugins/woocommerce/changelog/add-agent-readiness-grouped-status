@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Agent readiness: group store checks by the merchant's question, add a summary and a likely conflict state, behind the agent_readiness flag.

@@ -264,7 +264,7 @@ class AgentReadiness {
 	 *
 	 * @param array<string, mixed>|null                                                                                                               $report Stored report.
 	 * @param array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}>|null $live   Store conditions already read, or null to read them.
-	 * @return array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,pending?:string}>
+	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:string}>
 	 */
 	public function get_store_checks( ?array $report, ?array $live = null ): array {
 		$checks   = $live ?? $this->store_conditions->all();
@@ -274,16 +274,18 @@ class AgentReadiness {
 				continue;
 			}
 			$checks[] = array(
-				'id'      => (string) $check['id'],
-				'ok'      => isset( $check['ok'] ) ? (bool) $check['ok'] : null,
-				'blocks'  => (string) ( $check['blocks'] ?? '' ),
-				'level'   => StoreConditions::LEVEL_RECOMMENDED,
-				'name'    => (string) $check['name'],
-				'label'   => (string) ( $check['label'] ?? '' ),
-				'why'     => (string) ( $check['why'] ?? '' ),
-				'fix'     => (string) ( $check['fix'] ?? '' ),
-				'fix_url' => (string) ( $check['fix_url'] ?? '' ),
-				'pending' => (string) ( $check['pending'] ?? '' ),
+				'id'       => (string) $check['id'],
+				'ok'       => isset( $check['ok'] ) ? (bool) $check['ok'] : null,
+				'blocks'   => (string) ( $check['blocks'] ?? '' ),
+				'group'    => (string) ( $check['group'] ?? '' ),
+				'level'    => StoreConditions::LEVEL_RECOMMENDED,
+				'name'     => (string) $check['name'],
+				'label'    => (string) ( $check['label'] ?? '' ),
+				'why'      => (string) ( $check['why'] ?? '' ),
+				'fix'      => (string) ( $check['fix'] ?? '' ),
+				'fix_url'  => (string) ( $check['fix_url'] ?? '' ),
+				'conflict' => ! empty( $check['conflict'] ),
+				'pending'  => (string) ( $check['pending'] ?? '' ),
 			);
 		}
 		return $checks;

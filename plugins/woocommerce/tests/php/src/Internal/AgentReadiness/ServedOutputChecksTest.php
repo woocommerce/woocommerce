@@ -337,4 +337,17 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $buy_action->invoke( null, array( array( 'potentialAction' => array( array( '@type' => array( 'BuyAction' ) ) ) ) ) ) );
 		$this->assertFalse( $buy_action->invoke( null, array( array( 'potentialAction' => array( '@type' => 'ViewAction' ) ) ) ) );
 	}
+
+	/**
+	 * @testdox Every store output check, UCP ones included, names the question it answers on the settings page.
+	 */
+	public function test_every_check_has_a_group(): void {
+		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
+		$this->serve( array() );
+		$checks = $this->sut->all();
+		$this->assertContains( 'ucp_profile', array_column( $checks, 'id' ) );
+		foreach ( $checks as $check ) {
+			$this->assertContains( $check['group'], array( 'access', 'find', 'understand', 'buy' ), $check['id'] );
+		}
+	}
 }
