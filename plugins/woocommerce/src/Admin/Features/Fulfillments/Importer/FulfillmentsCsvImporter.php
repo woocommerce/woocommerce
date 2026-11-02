@@ -82,7 +82,7 @@ class FulfillmentsCsvImporter {
 	 *                                      enclosure; the other two are kept for the import run.
 	 *                                      - notify_customer (bool): Whether to fire customer notifications. Default false.
 	 *                                      - delimiter (string): Single-character CSV delimiter. Default ','.
-	 *                                      - enclosure (string): CSV enclosure. Default '"'.
+	 *                                      - enclosure (string): Single-byte CSV enclosure. Anything else falls back to '"'.
 	 *                                      - update_existing (bool): Update fulfillment when one with the same tracking number
 	 *                                                                already exists on the order. Default true.
 	 */
@@ -91,7 +91,7 @@ class FulfillmentsCsvImporter {
 		$this->options = array(
 			'notify_customer' => ! empty( $options['notify_customer'] ),
 			'delimiter'       => self::normalize_delimiter( $options['delimiter'] ?? ',' ),
-			'enclosure'       => isset( $options['enclosure'] ) && '' !== $options['enclosure'] ? (string) $options['enclosure'] : '"',
+			'enclosure'       => isset( $options['enclosure'] ) && is_string( $options['enclosure'] ) && 1 === strlen( $options['enclosure'] ) ? $options['enclosure'] : '"',
 			'update_existing' => array_key_exists( 'update_existing', $options ) ? (bool) $options['update_existing'] : true,
 		);
 	}

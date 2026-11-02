@@ -216,6 +216,26 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An enclosure fgetcsv() cannot take falls back to the double quote instead of throwing.
+	 *
+	 * @testWith ["ab"]
+	 *           [""]
+	 *           [["\""]]
+	 *
+	 * @param mixed $enclosure Enclosure option.
+	 */
+	public function test_invalid_enclosure_falls_back_to_double_quote( $enclosure ): void {
+		$csv  = "\"order_number\",\"tracking_number\",\"shipment_provider\"\n\"1\",\"TRACK, 1\",\"ups\"\n";
+		$file = $this->make_csv( $csv );
+
+		$parsed = ( new FulfillmentsCsvImporter( $file, array( 'enclosure' => $enclosure ) ) )->parse_headers();
+
+		$this->assertArrayNotHasKey( 'error', $parsed, 'An unusable enclosure must not fail the parse' );
+		$this->assertSame( array( 'order_number', 'tracking_number', 'shipment_provider' ), $parsed['headers'], 'Headers must be read with the default enclosure' );
+		$this->assertSame( array( '1', 'TRACK, 1', 'ups' ), $parsed['sample'], 'The enclosed comma must stay inside its field' );
+	}
+
+	/**
 	 * @testdox A multibyte delimiter falls back to comma instead of a truncated byte fragment.
 	 */
 	public function test_multibyte_delimiter_falls_back_to_comma(): void {
