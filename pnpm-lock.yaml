@@ -234,6 +234,7 @@ catalogs:
 overrides:
   '@babel/core@<7.29.6': 7.29.7
   '@types/react': 18.3.x
+  colord@2.9.3: 2.9.4
   express@4.22.2>qs: 6.16.2
   '@wordpress/data-controls>@wordpress/api-fetch': 7.33.1
   '@wordpress/private-apis': ^1.33.1
@@ -681,7 +682,7 @@ importers:
         version: 8.5.26
       postcss-loader:
         specifier: 4.3.x
-        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
+        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2)
       qrcode.react:
         specifier: ^3.1.0
         version: 3.2.0(react@18.3.1)
@@ -699,7 +700,7 @@ importers:
         version: 5.0.5
       sass-loader:
         specifier: 10.5.x
-        version: 10.5.2(sass@1.69.5)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
+        version: 10.5.2(sass@1.69.5)(webpack@5.112.2)
       stylelint:
         specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
@@ -929,7 +930,7 @@ importers:
         version: 8.5.26
       postcss-loader:
         specifier: 4.3.x
-        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
+        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2)
       react:
         specifier: 18.3.x
         version: 18.3.1
@@ -941,7 +942,7 @@ importers:
         version: 5.0.5
       sass-loader:
         specifier: 10.5.x
-        version: 10.5.2(sass@1.69.5)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
+        version: 10.5.2(sass@1.69.5)(webpack@5.112.2)
       stylelint:
         specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
@@ -1587,7 +1588,7 @@ importers:
         version: 8.5.26
       postcss-loader:
         specifier: 4.3.x
-        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
+        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2)
       react:
         specifier: 18.3.x
         version: 18.3.1
@@ -1599,7 +1600,7 @@ importers:
         version: 5.0.5
       sass-loader:
         specifier: 10.5.x
-        version: 10.5.2(sass@1.69.5)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
+        version: 10.5.2(sass@1.69.5)(webpack@5.112.2)
       stylelint:
         specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
@@ -2191,13 +2192,13 @@ importers:
         version: 8.5.26
       postcss-loader:
         specifier: 4.3.x
-        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
+        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2)
       rimraf:
         specifier: 5.0.5
         version: 5.0.5
       sass-loader:
         specifier: 10.5.x
-        version: 10.5.2(sass@1.69.5)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
+        version: 10.5.2(sass@1.69.5)(webpack@5.112.2)
       stylelint:
         specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
@@ -3244,7 +3245,7 @@ importers:
         version: 3.3.7
       copy-webpack-plugin:
         specifier: catalog:tooling
-        version: 14.0.0(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
+        version: 14.0.0(webpack@5.112.2)
       css-loader:
         specifier: 6.11.x
         version: 6.11.0(webpack@5.112.2)
@@ -3289,7 +3290,7 @@ importers:
         version: 8.5.26
       postcss-loader:
         specifier: 4.3.x
-        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
+        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2)
       prettier:
         specifier: catalog:tooling
         version: wp-prettier@3.9.6
@@ -3322,7 +3323,7 @@ importers:
         version: 1.69.5
       sass-loader:
         specifier: 10.5.x
-        version: 10.5.2(sass@1.69.5)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
+        version: 10.5.2(sass@1.69.5)(webpack@5.112.2)
       stylelint:
         specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
@@ -3725,7 +3726,7 @@ importers:
         version: 5.2.2(webpack@5.112.2)
       copy-webpack-plugin:
         specifier: catalog:tooling
-        version: 14.0.0(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
+        version: 14.0.0(webpack@5.112.2)
       core-js:
         specifier: 3.25.0
         version: 3.25.0
@@ -3812,7 +3813,7 @@ importers:
         version: 8.5.26
       postcss-loader:
         specifier: 4.3.x
-        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
+        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2)
       prettier:
         specifier: catalog:tooling
         version: wp-prettier@3.9.6
@@ -3839,7 +3840,7 @@ importers:
         version: 4.3.0
       sass-loader:
         specifier: 10.5.x
-        version: 10.5.2(sass@1.69.5)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
+        version: 10.5.2(sass@1.69.5)(webpack@5.112.2)
       storybook:
         specifier: 10.6.5
         version: 10.6.5(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6)
@@ -4137,7 +4138,7 @@ importers:
         version: link:../../packages/js/eslint-plugin
       copy-webpack-plugin:
         specifier: catalog:tooling
-        version: 14.0.0(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
+        version: 14.0.0(webpack@5.112.2)
       eslint:
         specifier: ^10.0.0
         version: 10.7.0(jiti@2.6.1)
@@ -12394,8 +12395,8 @@ packages:
   colord@2.10.0:
     resolution: {integrity: sha512-AidJptpBJmjTclAp9BkLwJi0T93fo5epJnbaZslpg6QVzpHjAiveF55mE9AcUJiGMqRHgMDY8soMsQtuNYMHfw==}
 
-  colord@2.9.3:
-    resolution: {integrity: sha512-jeC1axXpnb0/2nn/Y1LPuLdgXBLH7aDcHu4KEKfqw3CUhX7ZpfBSlPKyqXE6btIgEzfWtrX3/tyBCaCvXvMkOw==}
+  colord@2.9.4:
+    resolution: {integrity: sha512-z0nTt5300AIviCn9FTEL4G2DzPkfEDfghx6Do0ZfM3u0rOINBtfw2H8lD4VXyZF/o8HTzzyiCztaG2X/+IMeZA==}
 
   colorette@2.0.20:
     resolution: {integrity: sha512-IfEDxwoWIjkeXL1eXcDiow4UbKjhLdq6/EuSVR9GMN7KVH3r9gQ83e73hsz1Nd1T3ijd5xv1wcWRYO+D6kCI2w==}
@@ -20550,7 +20551,7 @@ snapshots:
       '@wordpress/url': 4.48.1
       canvas-confetti: 1.9.4
       clsx: 2.1.1
-      colord: 2.9.3
+      colord: 2.9.4
       debug: 4.4.3(supports-color@9.4.0)
       gridicons: 3.4.2(react@18.3.1)
       i18n-calypso: 7.4.0(@types/react@18.3.28)(react@18.3.1)
@@ -20595,7 +20596,7 @@ snapshots:
       '@wordpress/url': 4.48.1
       canvas-confetti: 1.9.4
       clsx: 2.1.1
-      colord: 2.9.3
+      colord: 2.9.4
       debug: 4.4.3(supports-color@9.4.0)
       gridicons: 3.4.2(react@18.3.1)
       i18n-calypso: 7.4.0(@types/react@18.3.28)(react@18.3.1)
@@ -27034,7 +27035,7 @@ snapshots:
       '@wordpress/wordcount': 3.58.0
       change-case: 4.1.2
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       deepmerge: 4.3.1
       diff: 4.0.4
       fast-deep-equal: 3.1.3
@@ -27095,7 +27096,7 @@ snapshots:
       '@wordpress/wordcount': 4.48.1
       change-case: 4.1.2
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       deepmerge: 4.3.1
       diff: 8.0.4
       fast-deep-equal: 3.1.3
@@ -27163,7 +27164,7 @@ snapshots:
       '@wordpress/wordcount': 4.48.1
       change-case: 4.1.2
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       deepmerge: 4.3.1
       diff: 8.0.4
       fast-deep-equal: 3.1.3
@@ -27231,7 +27232,7 @@ snapshots:
       '@wordpress/wordcount': 4.48.1
       change-case: 4.1.2
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       deepmerge: 4.3.1
       diff: 8.0.4
       fast-deep-equal: 3.1.3
@@ -27299,7 +27300,7 @@ snapshots:
       '@wordpress/wordcount': 4.48.1
       change-case: 4.1.2
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       deepmerge: 4.3.1
       diff: 8.0.4
       fast-deep-equal: 3.1.3
@@ -27365,7 +27366,7 @@ snapshots:
       '@wordpress/wordcount': 4.48.1
       change-case: 4.1.2
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       deepmerge: 4.3.1
       diff: 4.0.4
       fast-deep-equal: 3.1.3
@@ -27431,7 +27432,7 @@ snapshots:
       '@wordpress/wordcount': 4.48.1
       change-case: 4.1.2
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       deepmerge: 4.3.1
       diff: 4.0.4
       fast-deep-equal: 3.1.3
@@ -27559,7 +27560,7 @@ snapshots:
       '@wordpress/wordcount': 3.58.0
       change-case: 4.1.2
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       escape-html: 1.0.3
       fast-average-color: 9.5.2
       fast-deep-equal: 3.1.3
@@ -27616,7 +27617,7 @@ snapshots:
       '@wordpress/wordcount': 4.48.1
       change-case: 4.1.2
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       escape-html: 1.0.3
       fast-average-color: 9.5.2
       fast-deep-equal: 3.1.3
@@ -27664,7 +27665,7 @@ snapshots:
       '@wordpress/rich-text': 6.35.0(react@18.3.1)
       '@wordpress/shortcode': 3.58.0
       change-case: 4.1.2
-      colord: 2.10.0
+      colord: 2.9.4
       fast-deep-equal: 3.1.3
       hpq: 1.4.0
       is-plain-object: 5.1.0
@@ -27695,7 +27696,7 @@ snapshots:
       '@wordpress/shortcode': 4.48.1
       '@wordpress/warning': 3.57.0
       change-case: 4.1.2
-      colord: 2.10.0
+      colord: 2.9.4
       fast-deep-equal: 3.1.3
       hpq: 1.4.0
       is-plain-object: 5.1.0
@@ -27728,7 +27729,7 @@ snapshots:
       '@wordpress/shortcode': 4.48.1
       '@wordpress/warning': 3.57.0
       change-case: 4.1.2
-      colord: 2.10.0
+      colord: 2.9.4
       fast-deep-equal: 3.1.3
       hpq: 1.4.0
       is-plain-object: 5.1.0
@@ -28066,7 +28067,7 @@ snapshots:
       '@wordpress/warning': 2.58.0
       change-case: 4.1.2
       classnames: 2.5.1
-      colord: 2.10.0
+      colord: 2.9.4
       date-fns: 2.30.0
       deepmerge: 4.3.1
       dom-scroll-into-view: 1.2.1
@@ -28129,7 +28130,7 @@ snapshots:
       '@wordpress/warning': 2.58.0
       change-case: 4.1.2
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       date-fns: 3.6.0
       deepmerge: 4.3.1
       downshift: 6.1.12(react@18.3.1)
@@ -28185,7 +28186,7 @@ snapshots:
       '@wordpress/warning': 3.57.0
       change-case: 4.1.2
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       date-fns: 3.6.0
       deepmerge: 4.3.1
       fast-deep-equal: 3.1.3
@@ -28240,7 +28241,7 @@ snapshots:
       '@wordpress/warning': 3.57.0
       change-case: 4.1.2
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       date-fns: 3.6.0
       deepmerge: 4.3.1
       fast-deep-equal: 3.1.3
@@ -28295,7 +28296,7 @@ snapshots:
       '@wordpress/warning': 3.57.0
       change-case: 4.1.2
       clsx: 2.1.1
-      colord: 2.9.3
+      colord: 2.9.4
       date-fns: 3.6.0
       deepmerge: 4.3.1
       fast-deep-equal: 3.1.3
@@ -28350,7 +28351,7 @@ snapshots:
       '@wordpress/warning': 3.57.0
       change-case: 4.1.2
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       date-fns: 3.6.0
       deepmerge: 4.3.1
       fast-deep-equal: 3.1.3
@@ -28407,7 +28408,7 @@ snapshots:
       '@wordpress/warning': 3.57.0
       change-case: 4.1.2
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       date-fns: 3.6.0
       deepmerge: 4.3.1
       fast-deep-equal: 3.1.3
@@ -28465,7 +28466,7 @@ snapshots:
       '@wordpress/warning': 3.57.0
       change-case: 4.1.2
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       csstype: 3.2.3
       date-fns: 3.6.0
       deepmerge: 4.3.1
@@ -28523,7 +28524,7 @@ snapshots:
       '@wordpress/warning': 3.57.0
       change-case: 4.1.2
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       csstype: 3.2.3
       date-fns: 3.6.0
       deepmerge: 4.3.1
@@ -28583,7 +28584,7 @@ snapshots:
       '@wordpress/warning': 3.57.0
       change-case: 4.1.2
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       csstype: 3.2.3
       date-fns: 4.4.0
       deepmerge: 4.3.1
@@ -28645,7 +28646,7 @@ snapshots:
       '@wordpress/warning': 3.57.0
       change-case: 4.1.2
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       csstype: 3.2.3
       date-fns: 4.4.0
       deepmerge: 4.3.1
@@ -28706,7 +28707,7 @@ snapshots:
       '@wordpress/warning': 3.57.0
       change-case: 4.1.2
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       csstype: 3.2.3
       date-fns: 4.4.0
       deepmerge: 4.3.1
@@ -28772,7 +28773,7 @@ snapshots:
       '@wordpress/warning': 3.57.0
       change-case: 4.1.2
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       csstype: 3.2.3
       date-fns: 4.4.0
       deepmerge: 4.3.1
@@ -29644,7 +29645,7 @@ snapshots:
       '@wordpress/url': 4.48.1
       '@wordpress/warning': 3.57.0
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       date-fns: 4.4.0
       deepmerge: 4.3.1
       fast-deep-equal: 3.1.3
@@ -29675,7 +29676,7 @@ snapshots:
       '@wordpress/ui': 0.12.0(@date-fns/tz@1.5.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(date-fns@4.4.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
       '@wordpress/warning': 3.57.0
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       date-fns: 4.4.0
       deepmerge: 4.3.1
       fast-deep-equal: 3.1.3
@@ -29709,7 +29710,7 @@ snapshots:
       '@wordpress/ui': 0.15.1(@date-fns/tz@1.5.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(date-fns@4.4.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
       '@wordpress/warning': 3.57.0
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       date-fns: 4.4.0
       deepmerge: 4.3.1
       fast-deep-equal: 3.1.3
@@ -29742,7 +29743,7 @@ snapshots:
       '@wordpress/ui': 0.15.1(@date-fns/tz@1.5.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(date-fns@4.4.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@17.16.0(typescript@5.7.3))
       '@wordpress/warning': 3.57.0
       clsx: 2.1.1
-      colord: 2.10.0
+      colord: 2.9.4
       date-fns: 4.4.0
       deepmerge: 4.3.1
       fast-deep-equal: 3.1.3
@@ -29774,7 +29775,7 @@ snapshots:
       '@wordpress/ui': 0.17.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(date-fns@4.1.0)(esbuild@0.27.7)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
       '@wordpress/warning': 3.51.0
       clsx: 2.1.1
-      colord: 2.9.3
+      colord: 2.9.4
       date-fns: 4.1.0
       deepmerge: 4.3.1
       fast-deep-equal: 3.1.3
@@ -30040,7 +30041,7 @@ snapshots:
       '@wordpress/wordcount': 3.58.0
       change-case: 4.1.2
       classnames: 2.5.1
-      colord: 2.9.3
+      colord: 2.9.4
       deepmerge: 4.3.1
       downloadjs: 1.4.7
       fast-deep-equal: 3.1.3
@@ -30632,7 +30633,7 @@ snapshots:
       '@wordpress/data': 10.57.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@wordpress/i18n': 6.30.0
       '@wordpress/style-engine': 2.44.0
-      colord: 2.9.3
+      colord: 2.9.4
       deepmerge: 4.3.1
       fast-deep-equal: 3.1.3
       is-plain-object: 5.0.0
@@ -30649,7 +30650,7 @@ snapshots:
       '@wordpress/data': 10.57.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@wordpress/i18n': 6.30.0
       '@wordpress/style-engine': 2.48.1
-      colord: 2.10.0
+      colord: 2.9.4
       deepmerge: 4.3.1
       fast-deep-equal: 3.1.3
       is-plain-object: 5.1.0
@@ -32042,7 +32043,7 @@ snapshots:
       '@wordpress/escape-html': 3.57.0
       '@wordpress/i18n': 6.30.0
       '@wordpress/keycodes': 4.57.0(@types/react@18.3.28)
-      colord: 2.9.3
+      colord: 2.9.4
       memize: 2.1.1
       react: 18.3.1
     transitivePeerDependencies:
@@ -34917,7 +34918,7 @@ snapshots:
 
   colord@2.10.0: {}
 
-  colord@2.9.3: {}
+  colord@2.9.4: {}
 
   colorette@2.0.20: {}
 
@@ -35089,6 +35090,15 @@ snapshots:
       tinyglobby: 0.2.17
       webpack: 5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)
 
+  copy-webpack-plugin@14.0.0(webpack@5.112.2):
+    dependencies:
+      glob-parent: 6.0.2
+      normalize-path: 3.0.0
+      schema-utils: 4.3.3
+      serialize-javascript: 7.1.4
+      tinyglobby: 0.2.17
+      webpack: 5.112.2(@swc/core@1.15.24)(cssnano@5.1.12(postcss@8.5.26))(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)
+
   core-js-compat@3.49.0:
     dependencies:
       browserslist: 4.29.5
@@ -35188,7 +35198,7 @@ snapshots:
       postcss-value-parser: 4.2.0
       semver: 7.7.4
     optionalDependencies:
-      webpack: 5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)
+      webpack: 5.112.2(@swc/core@1.15.24)(cssnano@6.1.2(postcss@8.5.26))(esbuild@0.28.2)(postcss@8.5.26)(uglify-js@3.19.3)(webpack-cli@5.1.4)
 
   css-loader@7.1.4(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)):
     dependencies:
@@ -36136,7 +36146,7 @@ snapshots:
       lodash: 4.18.1
       resolve: 2.0.0-next.6
       semver: 5.7.2
-      webpack: 5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)
+      webpack: 5.112.2(@swc/core@1.15.24)(cssnano@5.1.12(postcss@8.5.26))(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)
     transitivePeerDependencies:
       - supports-color
 
@@ -39762,7 +39772,7 @@ snapshots:
     dependencies:
       schema-utils: 4.3.3
       tapable: 2.3.2
-      webpack: 5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)
+      webpack: 5.112.2(@swc/core@1.15.24)(cssnano@6.1.2(postcss@8.5.26))(esbuild@0.28.2)(postcss@8.5.26)(uglify-js@3.19.3)(webpack-cli@5.1.4)
 
   minimalistic-assert@1.0.1: {}
 
@@ -40715,7 +40725,7 @@ snapshots:
     dependencies:
       browserslist: 4.29.5
       caniuse-api: 3.0.0
-      colord: 2.10.0
+      colord: 2.9.4
       postcss: 8.5.26
       postcss-value-parser: 4.2.0
 
@@ -40723,7 +40733,7 @@ snapshots:
     dependencies:
       browserslist: 4.29.5
       caniuse-api: 3.0.0
-      colord: 2.10.0
+      colord: 2.9.4
       postcss: 8.5.26
       postcss-value-parser: 4.2.0
 
@@ -40798,6 +40808,16 @@ snapshots:
       semver: 7.7.4
       webpack: 5.112.2(@swc/core@1.15.24)(cssnano@6.1.2(postcss@8.5.26))(esbuild@0.28.2)(postcss@8.5.26)(webpack-cli@5.1.4)
 
+  postcss-loader@4.3.0(postcss@8.5.26)(webpack@5.112.2):
+    dependencies:
+      cosmiconfig: 7.1.0
+      klona: 2.0.6
+      loader-utils: 2.0.4
+      postcss: 8.5.26
+      schema-utils: 3.3.0
+      semver: 7.7.4
+      webpack: 5.112.2(@swc/core@1.15.24)(cssnano@5.1.12(postcss@8.5.26))(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)
+
   postcss-loader@6.2.1(postcss@8.5.26)(webpack@5.112.2):
     dependencies:
       cosmiconfig: 7.1.0
@@ -40848,14 +40868,14 @@ snapshots:
 
   postcss-minify-gradients@5.1.1(postcss@8.5.26):
     dependencies:
-      colord: 2.10.0
+      colord: 2.9.4
       cssnano-utils: 3.1.0(postcss@8.5.26)
       postcss: 8.5.26
       postcss-value-parser: 4.2.0
 
   postcss-minify-gradients@6.0.3(postcss@8.5.26):
     dependencies:
-      colord: 2.10.0
+      colord: 2.9.4
       cssnano-utils: 4.0.2(postcss@8.5.26)
       postcss: 8.5.26
       postcss-value-parser: 4.2.0
@@ -42194,6 +42214,17 @@ snapshots:
     optionalDependencies:
       sass: 1.69.5
 
+  sass-loader@10.5.2(sass@1.69.5)(webpack@5.112.2):
+    dependencies:
+      klona: 2.0.6
+      loader-utils: 2.0.4
+      neo-async: 2.6.2
+      schema-utils: 3.3.0
+      semver: 7.7.4
+      webpack: 5.112.2(@swc/core@1.15.24)(cssnano@5.1.12(postcss@8.5.26))(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)
+    optionalDependencies:
+      sass: 1.69.5
+
   sass-loader@16.0.7(sass-embedded@1.100.0)(sass@1.69.5)(webpack@5.112.2):
     dependencies:
       neo-async: 2.6.2
@@ -42951,7 +42982,7 @@ snapshots:
       '@csstools/selector-specificity': 5.0.0(postcss-selector-parser@7.1.7)
       '@dual-bundle/import-meta-resolve': 4.2.1
       balanced-match: 2.0.0
-      colord: 2.10.0
+      colord: 2.9.4
       cosmiconfig: 9.0.1(typescript@5.7.3)
       css-functions-list: 3.3.3
       css-tree: 3.2.1

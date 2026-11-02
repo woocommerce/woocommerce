@@ -116,6 +116,7 @@ packages:
 overrides:
     '@babel/core@<7.29.6': 'catalog:tooling'
     '@types/react': 18.3.x
+    'colord@2.9.3': 2.9.4
     'express@4.22.2>qs': 6.16.2
     '@wordpress/data-controls>@wordpress/api-fetch': 'catalog:wp-min'
     '@wordpress/private-apis': 'catalog:wp-min'
