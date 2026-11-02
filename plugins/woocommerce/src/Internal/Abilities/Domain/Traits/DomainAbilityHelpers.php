@@ -17,6 +17,8 @@ trait DomainAbilityHelpers {
 	/**
 	 * Format an ability date with its store or UTC offset without changing the object.
 	 *
+	 * @since 11.4.0
+	 *
 	 * @param mixed $date Date to format.
 	 * @param bool  $utc  Whether to use UTC instead of the store timezone.
 	 * @return string|null
