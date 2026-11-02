@@ -2813,8 +2813,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				foreach ( array( 'first', 'second' ) as $field ) {
 					ExtensibleAbilities::register_field(
 						array(
-							'resource'        => 'product',
-							'namespace'       => 'test-ext',
+							'resource'      => 'product',
+							'namespace'     => 'test-ext',
 							'field'         => $field,
 							'output_schema' => array( 'type' => 'string' ),
 							'input_schema'  => array( 'type' => 'string' ),

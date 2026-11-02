@@ -327,13 +327,13 @@ class ExtensibleAbilities {
 			$value     = $schema[ $keyword ];
 			$is_number = is_int( $value ) || is_float( $value );
 			$checks    = array(
-				'an integer of 0 or more'         => is_int( $value ) && $value >= 0,
-				'a number'                        => $is_number,
-				'a number above 0'                => $is_number && $value > 0,
-				'a number other than 0 equal to its "minimum"' => $is_number && 0 != $value && isset( $schema['minimum'] ) && $value == $schema['minimum'], // phpcs:ignore Universal.Operators.StrictComparisons.LooseEqual -- 1 and 1.0 are the same bound.
-				'a number other than 0 equal to its "maximum"' => $is_number && 0 != $value && isset( $schema['maximum'] ) && $value == $schema['maximum'], // phpcs:ignore Universal.Operators.StrictComparisons.LooseEqual -- 1 and 1.0 are the same bound.
-				'a string'                        => is_string( $value ),
-				'true or false'                   => is_bool( $value ),
+				'an integer of 0 or more' => is_int( $value ) && $value >= 0,
+				'a number'                => $is_number,
+				'a number above 0'        => $is_number && $value > 0,
+				'a number other than 0 equal to its "minimum"' => $is_number && 0.0 !== (float) $value && isset( $schema['minimum'] ) && (float) $value === (float) $schema['minimum'],
+				'a number other than 0 equal to its "maximum"' => $is_number && 0.0 !== (float) $value && isset( $schema['maximum'] ) && (float) $value === (float) $schema['maximum'],
+				'a string'                => is_string( $value ),
+				'true or false'           => is_bool( $value ),
 			);
 			if ( ! $checks[ $expected ] ) {
 				return sprintf( 'The "%1$s" of "%2$s" must be %3$s.', $keyword, $path, $expected );
