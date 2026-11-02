@@ -1145,18 +1145,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'output_schema' => array( 'description' => 'x' ) ) ) );
-		ExtensibleAbilities::register_field(
-			array_merge(
-				$valid,
-				array( 'field' => 'other' ),
-				array(
-					'output_schema' => array(
-						'type'     => 'string',
-						'required' => true,
-					),
-				)
-			)
-		);
 		ExtensibleAbilities::register_field( array_merge( $valid, array( 'namespace' => '0' ) ) );
 		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => '123' ) ) );
 		$order = \WC_Helper_Order::create_order();
@@ -1168,7 +1156,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should refuse an output schema without one non-null type at any depth, and a malformed schema.
+	 * @testdox Should refuse an output schema without a type.
 	 * @dataProvider provider_refused_output_schemas
 	 * @param array $schema Output schema.
 	 */
@@ -1195,82 +1183,16 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 * @return array<string, array{0: array<string, mixed>}>
 	 */
 	public function provider_refused_output_schemas(): array {
-		$nullable = array( 'type' => array( 'string', 'null' ) );
 		return array(
-			'top level null'        => array( $nullable ),
-			'only null'             => array( array( 'type' => 'null' ) ),
-			'nested null'           => array(
-				array(
-					'type'       => 'object',
-					'properties' => array( 'a' => $nullable ),
-				),
-			),
-			'items'                 => array(
-				array(
-					'type'  => 'array',
-					'items' => $nullable,
-				),
-			),
-			'additional properties' => array(
-				array(
-					'type'                 => 'object',
-					'additionalProperties' => $nullable,
-				),
-			),
-			'pattern properties'    => array(
-				array(
-					'type'              => 'object',
-					'patternProperties' => array( '^a' => $nullable ),
-				),
-			),
-			'anyOf'                 => array( array( 'anyOf' => array( array( 'type' => 'string' ) ) ) ),
-			'oneOf'                 => array( array( 'oneOf' => array( array( 'type' => 'string' ) ) ) ),
-			'allOf'                 => array( array( 'allOf' => array( array( 'type' => 'string' ) ) ) ),
-			'anyOf next to type'    => array(
-				array(
-					'type'  => 'string',
-					'anyOf' => array( array( 'type' => 'string' ) ),
-				),
-			),
-			'nested oneOf'          => array(
-				array(
-					'type'       => 'object',
-					'properties' => array( 'a' => array( 'oneOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ),
-				),
-			),
-			'nullable'              => array(
-				array(
-					'type'     => 'string',
-					'nullable' => true,
-				),
-			),
-			'type list of one'      => array( array( 'type' => array( 'string' ) ) ),
-			'string or integer'     => array( array( 'type' => array( 'string', 'integer' ) ) ),
-			'object or array'       => array( array( 'type' => array( 'object', 'array' ) ) ),
-			'unknown type'          => array( array( 'type' => 'text' ) ),
-			'no nested type'        => array(
-				array(
-					'type'       => 'object',
-					'properties' => array( 'a' => array( 'description' => 'x' ) ),
-				),
-			),
-			'malformed property'    => array(
-				array(
-					'type'       => 'object',
-					'properties' => array( 'a' => true ),
-				),
-			),
-			'empty properties'      => array(
-				array(
-					'type'       => 'object',
-					'properties' => array(),
-				),
-			),
+			'no type' => array( array( 'description' => 'x' ) ),
+			'anyOf'   => array( array( 'anyOf' => array( array( 'type' => 'string' ) ) ) ),
+			'oneOf'   => array( array( 'oneOf' => array( array( 'type' => 'string' ) ) ) ),
+			'allOf'   => array( array( 'allOf' => array( array( 'type' => 'string' ) ) ) ),
 		);
 	}
 
 	/**
-	 * @testdox Should refuse a malformed input schema and a malformed query filter schema.
+	 * @testdox Should refuse an input schema and a query filter schema without a type.
 	 * @dataProvider provider_malformed_schemas
 	 * @param array $schema Schema.
 	 */
@@ -1308,179 +1230,14 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should accept a map of properties whose names are numbers, because JSON publishes it as an object.
-	 */
-	public function test_a_map_with_numeric_property_names_is_accepted(): void {
-		AbilitiesLoader::register_core_resources();
-		$schema = array(
-			'type'       => 'object',
-			'properties' => array(
-				'1' => array( 'type' => 'string' ),
-				'2' => array( 'type' => 'string' ),
-			),
-		);
-
-		ExtensibleAbilities::register_field(
-			array(
-				'resource'      => 'order',
-				'namespace'     => 'numeric',
-				'field'         => 'value',
-				'output_schema' => $schema,
-				'get_callback'  => '__return_null',
-				'input_schema'  => $schema,
-				'set_callback'  => '__return_null',
-			)
-		);
-
-		$this->assertArrayHasKey( 'numeric', ExtensibleAbilities::get_fields( 'order' ) );
-		$this->assertSame( '{"1":{"type":"string"},"2":{"type":"string"}}', wp_json_encode( $schema['properties'] ) );
-	}
-
-	/**
-	 * Schemas that are malformed for a field input and for a query filter.
+	 * Schemas without a type, for a field input and for a query filter.
 	 *
 	 * @return array<string, array{0: array<string, mixed>}>
 	 */
 	public function provider_malformed_schemas(): array {
-		$object = array( 'type' => 'object' );
 		return array(
-			'properties true'             => array( $object + array( 'properties' => array( 'a' => true ) ) ),
-			'properties empty'            => array( $object + array( 'properties' => array() ) ),
-			'properties null'             => array( $object + array( 'properties' => null ) ),
-			'properties list'             => array( $object + array( 'properties' => array( array( 'type' => 'string' ) ) ) ),
-			'pattern properties string'   => array( $object + array( 'patternProperties' => 'a' ) ),
-			'nested without type'         => array( $object + array( 'properties' => array( 'a' => array( 'description' => 'x' ) ) ) ),
-			'items list'                  => array(
-				array(
-					'type'  => 'array',
-					'items' => array( array( 'type' => 'string' ) ),
-				),
-			),
-			'additional properties empty' => array( $object + array( 'additionalProperties' => array() ) ),
-			'additional properties null'  => array( $object + array( 'additionalProperties' => null ) ),
-			'required true'               => array( $object + array( 'required' => true ) ),
-			'nested required true'        => array(
-				$object + array(
-					'properties' => array(
-						'a' => array(
-							'type'     => 'string',
-							'required' => true,
-						),
-					),
-				),
-			),
-			'required map'                => array( $object + array( 'required' => array( 'key' => 'a' ) ) ),
-			'required numbers'            => array( $object + array( 'required' => array( 1 ) ) ),
-			'required sparse'             => array( $object + array( 'required' => array( 1 => 'a' ) ) ),
-			'enum sparse'                 => array(
-				array(
-					'type' => 'string',
-					'enum' => array( 1 => 'a' ),
-				),
-			),
-			'type sparse'                 => array( array( 'type' => array( 1 => 'string' ) ) ),
-			'anyOf sparse'                => array( $object + array( 'properties' => array( 'a' => array( 'anyOf' => array( 1 => array( 'type' => 'string' ) ) ) ) ) ),
-			'minLength string'            => array(
-				array(
-					'type'      => 'string',
-					'minLength' => '3',
-				),
-			),
-			'minLength negative'          => array(
-				array(
-					'type'      => 'string',
-					'minLength' => -1,
-				),
-			),
-			'maxItems float'              => array(
-				array(
-					'type'     => 'array',
-					'maxItems' => 1.5,
-				),
-			),
-			'minimum string'              => array(
-				array(
-					'type'    => 'number',
-					'minimum' => '1',
-				),
-			),
-			'multipleOf zero'             => array(
-				array(
-					'type'       => 'number',
-					'multipleOf' => 0,
-				),
-			),
-			'exclusiveMinimum true'       => array(
-				array(
-					'type'             => 'number',
-					'minimum'          => 1,
-					'exclusiveMinimum' => true,
-				),
-			),
-			'exclusiveMaximum other'      => array(
-				array(
-					'type'             => 'number',
-					'maximum'          => 5,
-					'exclusiveMaximum' => 4,
-				),
-			),
-			'exclusiveMinimum zero'       => array(
-				array(
-					'type'             => 'number',
-					'minimum'          => 0,
-					'exclusiveMinimum' => 0,
-				),
-			),
-			'exclusiveMaximum zero'       => array(
-				array(
-					'type'             => 'number',
-					'maximum'          => 0.0,
-					'exclusiveMaximum' => 0.0,
-				),
-			),
-			'exclusiveMinimum alone'      => array(
-				array(
-					'type'             => 'number',
-					'exclusiveMinimum' => 1,
-				),
-			),
-			'pattern number'              => array(
-				array(
-					'type'    => 'string',
-					'pattern' => 5,
-				),
-			),
-			'format number'               => array(
-				array(
-					'type'   => 'string',
-					'format' => 5,
-				),
-			),
-			'uniqueItems string'          => array(
-				array(
-					'type'        => 'array',
-					'uniqueItems' => 'yes',
-				),
-			),
-			'nested minLength string'     => array(
-				$object + array(
-					'properties' => array(
-						'a' => array(
-							'type'      => 'string',
-							'minLength' => '3',
-						),
-					),
-				),
-			),
-			'empty enum'                  => array( $object + array( 'enum' => array() ) ),
-			'empty type list'             => array( array( 'type' => array() ) ),
-			'unknown type in a list'      => array( array( 'type' => array( 'string', 'text' ) ) ),
-			'empty anyOf'                 => array( $object + array( 'anyOf' => array() ) ),
-			'anyOf not a list'            => array( $object + array( 'anyOf' => array( 'type' => 'string' ) ) ),
-			'anyOf with a bad branch'     => array( $object + array( 'anyOf' => array( array( 'properties' => array( 'a' => true ) ) ) ) ),
-			'allOf'                       => array( $object + array( 'allOf' => array( array( 'required' => array( 'a' ) ) ) ) ),
-			'allOf inside anyOf'          => array( $object + array( 'anyOf' => array( array( 'allOf' => array( array( 'required' => array( 'a' ) ) ) ) ) ) ),
-			'anyOf without type'          => array( array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ),
+			'no type'            => array( array( 'description' => 'x' ) ),
+			'anyOf without type' => array( array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ),
 		);
 	}
 

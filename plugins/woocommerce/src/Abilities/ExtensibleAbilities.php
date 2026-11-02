@@ -85,31 +85,6 @@ class ExtensibleAbilities {
 	private const QUERY_ARG_KEYS = array( 'meta_query', 'tax_query', 'include_ids', 'exclude_ids' );
 
 	/**
-	 * JSON schema types.
-	 */
-	private const SCHEMA_TYPES = array( 'array', 'object', 'string', 'number', 'integer', 'boolean', 'null' );
-
-	/**
-	 * Schema keywords with the kind of value they need, as the MCP SDK client compiles them.
-	 */
-	private const KEYWORD_VALUES = array(
-		'minLength'        => 'an integer of 0 or more',
-		'maxLength'        => 'an integer of 0 or more',
-		'minItems'         => 'an integer of 0 or more',
-		'maxItems'         => 'an integer of 0 or more',
-		'minProperties'    => 'an integer of 0 or more',
-		'maxProperties'    => 'an integer of 0 or more',
-		'minimum'          => 'a number',
-		'maximum'          => 'a number',
-		'multipleOf'       => 'a number above 0',
-		'exclusiveMinimum' => 'a number other than 0 equal to its "minimum"',
-		'exclusiveMaximum' => 'a number other than 0 equal to its "maximum"',
-		'pattern'          => 'a string',
-		'format'           => 'a string',
-		'uniqueItems'      => 'true or false',
-	);
-
-	/**
 	 * Register a resource that abilities format, so extensions can register fields on it.
 	 *
 	 * Call it inside the `woocommerce_extensible_abilities_resources_init` action. A call after that action is refused.
@@ -156,9 +131,8 @@ class ExtensibleAbilities {
 	 *     @type string   $namespace    Slug of the extension that owns the field, such as `subscriptions`.
 	 *     @type string   $field        Field name inside the namespace, such as `trial_length`.
 	 *     @type array    $output_schema Optional. JSON schema of the value that `get_callback` returns. Required
-	 *                                  with `get_callback`. Core publishes it as declared. At every depth it declares one `type` that is not null, so it
-	 *                                  cannot use a type list, `nullable`, `anyOf`, `oneOf` or `allOf`. Its `title`
-	 *                                  is the label clients show.
+	 *                                  with `get_callback`. It needs a `type`. Core publishes it as declared. Its
+	 *                                  `title` is the label clients show.
 	 *     @type string[] $object_types Optional. The object types the field applies to, as `get_type()` of the
 	 *                                  object returns them, such as `simple` and `subscription` for a product or
 	 *                                  `line_item` for an order item. The object must have a `get_type()` method.
@@ -170,10 +144,9 @@ class ExtensibleAbilities {
 	 *                                  value that `output_schema` does not allow is left out and logged. It reads
 	 *                                  the object it is given, not the database, because an ability can format
 	 *                                  an object before it is saved.
-	 *     @type array    $input_schema Optional. JSON schema of the value that `set_callback` receives. Core
-	 *                                  publishes it as declared. A value can be null only where it declares null.
-	 *                                  It cannot use `allOf`, because WordPress does not run it.
-	 *                                  Required with `set_callback`.
+	 *     @type array    $input_schema Optional. JSON schema of the value that `set_callback` receives. It needs
+	 *                                  a `type`. Core publishes it as declared. A value can be null only where it
+	 *                                  declares null. Required with `set_callback`.
 	 *     @type callable $set_callback Optional. Receives the object and the value, and changes the object
 	 *                                  in memory, when an ability creates or updates the object. It returns a
 	 *                                  WP_Error to reject the value, and then nothing is saved. A field without
@@ -229,9 +202,8 @@ class ExtensibleAbilities {
 				wc_doing_it_wrong( __METHOD__, 'The "get_callback" argument must be callable, and a field with an "output_schema" needs it.', '11.3.0' );
 				return;
 			}
-			$error = self::get_schema_error( $args['output_schema'] ?? null, 'output_schema', true );
-			if ( null !== $error ) {
-				wc_doing_it_wrong( __METHOD__, $error, '11.4.0' );
+			if ( ! is_array( $args['output_schema'] ?? null ) || ! isset( $args['output_schema']['type'] ) ) {
+				wc_doing_it_wrong( __METHOD__, 'The "output_schema" argument must be an array with a "type".', '11.4.0' );
 				return;
 			}
 		}
@@ -240,9 +212,8 @@ class ExtensibleAbilities {
 				wc_doing_it_wrong( __METHOD__, 'The "set_callback" argument must be callable, and a field with an "input_schema" needs it.', '11.4.0' );
 				return;
 			}
-			$error = self::get_schema_error( $args['input_schema'] ?? null, 'input_schema', false );
-			if ( null !== $error ) {
-				wc_doing_it_wrong( __METHOD__, $error, '11.4.0' );
+			if ( ! is_array( $args['input_schema'] ?? null ) || ! isset( $args['input_schema']['type'] ) ) {
+				wc_doing_it_wrong( __METHOD__, 'The "input_schema" argument must be an array with a "type".', '11.4.0' );
 				return;
 			}
 		}
@@ -265,127 +236,6 @@ class ExtensibleAbilities {
 		}
 
 		self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] = $args;
-	}
-
-	/**
-	 * Find the first problem in a schema and in the schemas inside it. Core publishes
-	 * a schema as declared, so the schema must work in two places.
-	 *
-	 * WordPress runs the schema with rest_validate_value_from_schema():
-	 * 1. A `type` is required at every depth. A nested schema with `anyOf` or `oneOf`
-	 *    can omit it, and a branch inherits it from its parent.
-	 * 2. `allOf` is refused, because WordPress does not run it.
-	 * 3. `exclusiveMinimum` and `exclusiveMaximum` work as a flag on `minimum` and
-	 *    `maximum`.
-	 *
-	 * The MCP SDK client compiles every schema when it lists the tools, and one schema
-	 * that does not compile stops that client from listing any tool:
-	 * 1. `required` is a list of strings, `enum` is a list with at least one value, and
-	 *    `properties` is a map with at least one key. A list has the keys 0, 1, 2 in
-	 *    order, because JSON publishes any other array as an object.
-	 * 2. Each keyword in KEYWORD_VALUES has the kind of value listed there. For this
-	 *    reason `exclusiveMinimum` and `exclusiveMaximum` are numbers equal to `minimum`
-	 *    and `maximum`, the one form that both places read the same way. A bound of 0
-	 *    is refused: WordPress reads 0 as false and accepts 0, and the client refuses it.
-	 * 3. A `pattern` is not checked as a regular expression. The client compiles it as
-	 *    a JavaScript regular expression, and PHP cannot check that.
-	 *
-	 * @param mixed  $schema    Schema to check, of any type until this method checks it.
-	 * @param string $path      Path of the schema, used in the message.
-	 * @param bool   $is_output Whether the schema must declare one type that is not null.
-	 * @param bool   $is_nested Whether the schema is inside another schema.
-	 * @return string|null The problem, or null when the schema is valid.
-	 */
-	private static function get_schema_error( $schema, string $path, bool $is_output, bool $is_nested = false ): ?string {
-		if ( ! is_array( $schema ) ) {
-			return sprintf( '"%s" must be a schema, as an array.', $path );
-		}
-
-		if ( array_key_exists( 'allOf', $schema ) ) {
-			return sprintf( '"%s" cannot use "allOf", because WordPress does not run it. Declare the rules in one schema.', $path );
-		}
-
-		$combinators = array_values( array_intersect( array( 'anyOf', 'oneOf' ), array_keys( $schema ) ) );
-		if ( $is_output && ( ! empty( $combinators ) || ! empty( $schema['nullable'] ) || ! is_string( $schema['type'] ?? null ) || 'null' === $schema['type'] ) ) {
-			return sprintf( '"%s" must declare one "type" that is not null, with no "nullable", "anyOf" or "oneOf". Return null from the get_callback to leave the field out.', $path );
-		}
-		if ( ! isset( $schema['type'] ) && ( empty( $combinators ) || ! $is_nested ) ) {
-			return sprintf( '"%s" must declare a "type".', $path );
-		}
-
-		$types = (array) ( $schema['type'] ?? array() );
-		if ( isset( $schema['type'] ) && ( empty( $types ) || ! self::is_list( $types ) || ! empty( array_filter( $types, static fn( $type ) => ! in_array( $type, self::SCHEMA_TYPES, true ) ) ) ) ) {
-			return sprintf( '"%s" declares an unknown "type".', $path );
-		}
-		if ( array_key_exists( 'required', $schema ) && ( ! self::is_list( $schema['required'] ) || ! empty( array_filter( $schema['required'], static fn( $name ) => ! is_string( $name ) ) ) ) ) {
-			return sprintf( 'The "required" of "%s" must be a list of property names.', $path );
-		}
-		foreach ( self::KEYWORD_VALUES as $keyword => $expected ) {
-			if ( ! array_key_exists( $keyword, $schema ) ) {
-				continue;
-			}
-			$value     = $schema[ $keyword ];
-			$is_number = is_int( $value ) || is_float( $value );
-			$checks    = array(
-				'an integer of 0 or more' => is_int( $value ) && $value >= 0,
-				'a number'                => $is_number,
-				'a number above 0'        => $is_number && $value > 0,
-				'a number other than 0 equal to its "minimum"' => $is_number && 0.0 !== (float) $value && isset( $schema['minimum'] ) && (float) $value === (float) $schema['minimum'],
-				'a number other than 0 equal to its "maximum"' => $is_number && 0.0 !== (float) $value && isset( $schema['maximum'] ) && (float) $value === (float) $schema['maximum'],
-				'a string'                => is_string( $value ),
-				'true or false'           => is_bool( $value ),
-			);
-			if ( ! $checks[ $expected ] ) {
-				return sprintf( 'The "%1$s" of "%2$s" must be %3$s.', $keyword, $path, $expected );
-			}
-		}
-		if ( array_key_exists( 'enum', $schema ) && ( empty( $schema['enum'] ) || ! self::is_list( $schema['enum'] ) ) ) {
-			return sprintf( 'The "enum" of "%s" must be a list of values.', $path );
-		}
-
-		$children = array();
-		foreach ( array( 'properties', 'patternProperties' ) as $keyword ) {
-			if ( array_key_exists( $keyword, $schema ) ) {
-				if ( ! is_array( $schema[ $keyword ] ) || self::is_list( $schema[ $keyword ] ) ) {
-					return sprintf( 'The "%1$s" of "%2$s" must be a map of schemas with at least one key.', $keyword, $path );
-				}
-				foreach ( $schema[ $keyword ] as $key => $child ) {
-					$children[ $path . '.' . $keyword . '.' . $key ] = $child;
-				}
-			}
-		}
-		if ( array_key_exists( 'items', $schema ) ) {
-			$children[ $path . '.items' ] = $schema['items'];
-		}
-		if ( array_key_exists( 'additionalProperties', $schema ) && ! is_bool( $schema['additionalProperties'] ) ) {
-			$children[ $path . '.additionalProperties' ] = $schema['additionalProperties'];
-		}
-		foreach ( $combinators as $keyword ) {
-			if ( empty( $schema[ $keyword ] ) || ! self::is_list( $schema[ $keyword ] ) ) {
-				return sprintf( 'The "%1$s" of "%2$s" must be a list of schemas.', $keyword, $path );
-			}
-			foreach ( $schema[ $keyword ] as $index => $child ) {
-				$children[ $path . '.' . $keyword . '.' . $index ] = is_array( $child ) && isset( $schema['type'] ) ? $child + array( 'type' => $schema['type'] ) : $child;
-			}
-		}
-
-		foreach ( $children as $child_path => $child ) {
-			$error = self::get_schema_error( $child, $child_path, $is_output, true );
-			if ( null !== $error ) {
-				return $error;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Whether a value is an array with the keys 0, 1, 2 in order, which JSON publishes as a list.
-	 *
-	 * @param mixed $value Value to check.
-	 * @return bool True when the value is a list.
-	 */
-	private static function is_list( $value ): bool {
-		return is_array( $value ) && array_values( $value ) === $value;
 	}
 
 	/**
@@ -447,9 +297,8 @@ class ExtensibleAbilities {
 			);
 			return;
 		}
-		$error = self::get_schema_error( $args['schema'] ?? null, 'schema', false );
-		if ( null !== $error ) {
-			wc_doing_it_wrong( __METHOD__, $error, '11.4.0' );
+		if ( ! is_array( $args['schema'] ?? null ) || ! isset( $args['schema']['type'] ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The "schema" argument must be an array with a "type".', '11.3.0' );
 			return;
 		}
 		if ( ! is_callable( $args['callback'] ?? null ) ) {
