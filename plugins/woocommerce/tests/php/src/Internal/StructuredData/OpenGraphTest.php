@@ -445,6 +445,35 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should omit shop metadata on subsequent shortcode product pages.
+	 * @testWith ["1", true]
+	 *           ["2", false]
+	 *
+	 * @param string $page Product page number.
+	 * @param bool   $expected Whether metadata should be present.
+	 */
+	public function test_shop_shortcode_pagination( string $page, bool $expected ): void {
+		$shop_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_title'  => 'Shop',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'woocommerce_shop_page_id', $shop_id );
+		$this->go_to( get_permalink( $shop_id ) );
+		$original_get         = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Restore request state after the test.
+		$_GET['product-page'] = $page;
+
+		try {
+			$tags = $this->render_meta_tags( '' );
+			$this->assertSame( $expected, isset( $tags['og:title'] ) );
+		} finally {
+			$_GET = $original_get;
+		}
+	}
+
+	/**
 	 * @testdox Should only render shop metadata when coming-soon access is allowed.
 	 * @testWith ["", "", false]
 	 *           ["invalid", "", false]

@@ -136,7 +136,12 @@ class OpenGraph {
 			return $this->get_product_page_data();
 		}
 
-		if ( is_shop() && ! is_search() && ! is_paged() ) {
+		if (
+			is_shop()
+			&& ! is_search()
+			&& ! is_paged()
+			&& ( ! isset( $_GET['product-page'] ) || 1 === absint( $_GET['product-page'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public pagination parameter.
+		) {
 			return $this->get_shop_page_data();
 		}
 
