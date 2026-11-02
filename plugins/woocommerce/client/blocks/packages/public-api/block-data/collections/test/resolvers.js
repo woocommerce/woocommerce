@@ -193,8 +193,7 @@ describe( 'getCollection with a Last-Modified header', () => {
 			[],
 			{ items: [], headers }
 		);
-		expect( value.type ).toBe( expected.type );
-		expect( value.response ).toEqual( expected.response );
+		expect( value ).toEqual( expected );
 	} );
 } );
 
