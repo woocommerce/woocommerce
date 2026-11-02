@@ -92,9 +92,6 @@ catalogs:
     '@types/wordpress__blocks':
       specifier: 12.5.18
       version: 12.5.18
-    '@types/wordpress__edit-post':
-      specifier: 8.4.2
-      version: 8.4.2
     '@types/wordpress__viewport':
       specifier: 5.5.3
       version: 5.5.3
