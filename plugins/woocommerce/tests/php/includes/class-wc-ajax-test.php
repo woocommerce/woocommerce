@@ -2878,6 +2878,147 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Refunding more units of a line item than were ordered is rejected and creates no refund.
+	 */
+	public function test_refund_line_items_rejects_quantity_above_ordered_quantity(): void {
+		$order   = $this->create_order_for_refund_quantity_test( 1 );
+		$item_id = array_keys( $order->get_items() )[0];
+
+		$response = $this->do_refund_line_items_request( $order, $item_id, 2, '20' );
+
+		$this->assertFalse( $response['success'] ?? true, 'The AJAX refund request should fail.' );
+		$this->assertSame( 'Line item quantity cannot be greater than the remaining refundable quantity (1).', $response['data']['error'] ?? '', 'The error should state the remaining refundable quantity.' );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds(), 'No refund should be created.' );
+	}
+
+	/**
+	 * @testdox A refund that would exceed the quantity left after earlier refunds is rejected.
+	 */
+	public function test_refund_line_items_rejects_quantity_above_remaining_quantity(): void {
+		$order   = $this->create_order_for_refund_quantity_test( 2 );
+		$item_id = array_keys( $order->get_items() )[0];
+
+		$response = $this->do_refund_line_items_request( $order, $item_id, 1, '10' );
+		$this->assertTrue( $response['success'] ?? false, 'The first refund of 1 unit should succeed.' );
+
+		$response = $this->do_refund_line_items_request( wc_get_order( $order->get_id() ), $item_id, 2, '20' );
+
+		$this->assertFalse( $response['success'] ?? true, 'The second refund of 2 units should fail.' );
+		$this->assertSame( 'Line item quantity cannot be greater than the remaining refundable quantity (1).', $response['data']['error'] ?? '', 'The error should state the remaining refundable quantity.' );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertCount( 1, $order->get_refunds(), 'Only the first refund should exist.' );
+		$this->assertSame( -1, $order->get_qty_refunded_for_item( $item_id ), 'Only 1 unit should be refunded.' );
+	}
+
+	/**
+	 * @testdox Refunding the units left after an earlier partial refund still works.
+	 */
+	public function test_refund_line_items_allows_refunding_remaining_quantity(): void {
+		$order   = $this->create_order_for_refund_quantity_test( 2 );
+		$item_id = array_keys( $order->get_items() )[0];
+
+		$this->do_refund_line_items_request( $order, $item_id, 1, '10' );
+		$response = $this->do_refund_line_items_request( wc_get_order( $order->get_id() ), $item_id, 1, '10' );
+
+		$this->assertTrue( $response['success'] ?? false, 'Refunding the last remaining unit should succeed.' );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertCount( 2, $order->get_refunds(), 'Both refunds should exist.' );
+		$this->assertSame( -2, $order->get_qty_refunded_for_item( $item_id ), 'Both units should be refunded.' );
+	}
+
+	/**
+	 * @testdox Fractional quantities are checked against the exact fractional remainder when stock amounts allow decimals.
+	 */
+	public function test_refund_line_items_checks_fractional_remaining_quantity(): void {
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+
+		try {
+			$order   = $this->create_order_for_refund_quantity_test( 2.3 );
+			$item_id = array_keys( $order->get_items() )[0];
+
+			$response = $this->do_refund_line_items_request( $order, $item_id, 0.1, '1' );
+			$this->assertTrue( $response['success'] ?? false, 'Refunding 0.1 units should succeed.' );
+
+			$response = $this->do_refund_line_items_request( wc_get_order( $order->get_id() ), $item_id, 2.3, '23' );
+			$this->assertFalse( $response['success'] ?? true, 'Refunding more than the 2.2 units left should fail.' );
+			$this->assertSame( 'Line item quantity cannot be greater than the remaining refundable quantity (2.2).', $response['data']['error'] ?? '', 'The error should state the fractional remaining quantity.' );
+
+			$response = $this->do_refund_line_items_request( wc_get_order( $order->get_id() ), $item_id, 2.2, '22' );
+			$this->assertTrue( $response['success'] ?? false, 'Refunding exactly the 2.2 units left should succeed despite float rounding in 2.3 - 0.1.' );
+		} finally {
+			remove_filter( 'woocommerce_stock_amount', 'floatval' );
+			add_filter( 'woocommerce_stock_amount', 'intval' );
+		}
+	}
+
+	/**
+	 * @testdox Refunding an order that does not exist returns an error instead of a fatal.
+	 */
+	public function test_refund_line_items_rejects_missing_order(): void {
+		$order   = $this->create_order_for_refund_quantity_test( 1 );
+		$item_id = array_keys( $order->get_items() )[0];
+		$order->delete( true );
+
+		$response = $this->do_refund_line_items_request( $order, $item_id, 1, '10' );
+
+		$this->assertFalse( $response['success'] ?? true, 'The AJAX refund request should fail.' );
+		$this->assertSame( 'Invalid order ID.', $response['data']['error'] ?? '', 'The error should say the order ID is invalid.' );
+	}
+
+	/**
+	 * Creates an order with a $10 product at the given quantity plus a $100 product, so the
+	 * refund amount limit never blocks a refund before the quantity check does.
+	 *
+	 * @param int|float $quantity Quantity of the first (cheaper) product.
+	 * @return WC_Order
+	 */
+	private function create_order_for_refund_quantity_test( $quantity ): WC_Order {
+		$expensive_product = WC_Helper_Product::create_simple_product();
+		$expensive_product->set_regular_price( 100 );
+		$expensive_product->save();
+
+		$order = new WC_Order();
+		$order->add_product( WC_Helper_Product::create_simple_product(), $quantity );
+		$order->add_product( $expensive_product, 1 );
+		$order->calculate_totals();
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Posts a single line item refund through the admin AJAX handler.
+	 *
+	 * @param WC_Order  $order   Order to refund.
+	 * @param int       $item_id Order item ID to refund.
+	 * @param int|float $qty     Quantity to refund.
+	 * @param string    $amount  Amount to refund, used for both the line and the refund total.
+	 * @return array|null Decoded JSON response.
+	 */
+	private function do_refund_line_items_request( WC_Order $order, int $item_id, $qty, string $amount ): ?array {
+		$this->_setRole( 'administrator' );
+
+		$_POST['security']             = wp_create_nonce( 'order-item' );
+		$_POST['order_id']             = $order->get_id();
+		$_POST['refund_amount']        = $amount;
+		$_POST['refunded_amount']      = (string) $order->get_total_refunded();
+		$_POST['refund_reason']        = '';
+		$_POST['line_item_qtys']       = wp_json_encode( array( $item_id => $qty ) );
+		$_POST['line_item_totals']     = wp_json_encode( array( $item_id => $amount ) );
+		$_POST['line_item_tax_totals'] = wp_json_encode( array() );
+		$_POST['api_refund']           = 'false';
+
+		try {
+			return $this->do_ajax( 'woocommerce_refund_line_items' );
+		} finally {
+			unset( $_POST['security'], $_POST['order_id'], $_POST['refund_amount'], $_POST['refunded_amount'], $_POST['refund_reason'], $_POST['line_item_qtys'], $_POST['line_item_totals'], $_POST['line_item_tax_totals'], $_POST['api_refund'] );
+		}
+	}
+
+	/**
 	 * The ?wc-ajax=get_variation endpoint renders the matched variation's description through
 	 * wc_format_content(), which fires the woocommerce_short_description filter. Eager block registration is
 	 * skipped on AJAX requests, so Bootstrap registers WooCommerce block types on demand there — otherwise a

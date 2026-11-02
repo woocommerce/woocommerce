@@ -611,6 +611,7 @@ class ProductSchema extends AbstractSchema {
 				}
 			)
 		);
+		$this->prime_product_hierarchical_taxonomies_cache( $product );
 
 		return [
 			'id'                    => $product->get_id(),
@@ -682,6 +683,42 @@ class ProductSchema extends AbstractSchema {
 		$parent_id = $product->get_parent_id();
 
 		return $parent_id && '' !== get_post_field( 'post_password', $parent_id, 'raw' );
+	}
+
+	/**
+	 * Prime hierarchical terms cache to reduce queries while generating terms lists in get_item_response method.
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @return void
+	 */
+	private function prime_product_hierarchical_taxonomies_cache( \WC_Product $product ): void {
+		$term_hierarchy_ids = array();
+		foreach ( array( 'product_cat', 'product_brand' ) as $taxonomy ) {
+			$product_terms      = get_object_term_cache( $product->get_id(), $taxonomy );
+			$product_terms      = is_array( $product_terms ) ? $product_terms : array();
+			$taxonomy_hierarchy = ! empty( $product_terms ) ? _get_term_hierarchy( $taxonomy ) : array();
+			if ( ! empty( $taxonomy_hierarchy ) ) {
+				// Populate flat map of child to parent relations.
+				$parent_map = array();
+				foreach ( $taxonomy_hierarchy as $parent_id => $children ) {
+					foreach ( $children as $child_id ) {
+						$parent_map[ $child_id ] = $parent_id;
+					}
+				}
+				// Collect the chain of parent term IDs for cache priming below.
+				foreach ( $product_terms as $term ) {
+					$current = $term->term_id;
+					while ( isset( $parent_map[ $current ] ) && ! in_array( $parent_map[ $current ], $term_hierarchy_ids, true ) ) {
+						$parent_id            = $parent_map[ $current ];
+						$term_hierarchy_ids[] = $parent_id;
+						$current              = $parent_id;
+					}
+				}
+			}
+		}
+		if ( ! empty( $term_hierarchy_ids ) ) {
+			_prime_term_caches( array_unique( $term_hierarchy_ids ), false );
+		}
 	}
 
 	/**

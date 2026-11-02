@@ -277,7 +277,7 @@ class EmailManager {
 	 * Send a stock notification email.
 	 *
 	 * @param Notification $notification The notification object.
-	 * @return void
+	 * @return bool Whether the email was sent.
 	 */
 	public function send_stock_notification_email( Notification $notification ) {
 		$emails = WC()->mailer()->get_emails();
@@ -285,10 +285,10 @@ class EmailManager {
 
 		if ( ! $email instanceof CustomerStockNotificationEmail ) {
 			$this->log_missing_email( 'WC_Email_Customer_Stock_Notification', $notification );
-			return;
+			return false;
 		}
 
-		$email->trigger( $notification );
+		return $email->trigger( $notification );
 	}
 
 	/**

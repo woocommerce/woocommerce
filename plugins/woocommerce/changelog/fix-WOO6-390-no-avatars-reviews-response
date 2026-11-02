@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Store API reviews endpoint: include avatars data only if they are enabled on the site

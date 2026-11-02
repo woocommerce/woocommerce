@@ -282,7 +282,7 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 		$rendered = $this->table_renderer->render( $table_with_caption, $parsed_table, $this->rendering_context );
 
 		// Check that the caption content is preserved with proper styling outside the table.
-		$this->assertStringContainsString( '<div style="text-align: center; margin-top: 8px;', $rendered );
+		$this->assertStringContainsString( '<div class="wp-element-caption" style="text-align: center; margin-top: 8px;', $rendered );
 		$this->assertStringContainsString( '>Table caption text</div>', $rendered );
 		// Check that the caption is not inside the table element.
 		$this->assertStringNotContainsString( '<caption', $rendered );
@@ -588,7 +588,7 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 		$rendered = $this->table_renderer->render( $table_with_caption, $parsed_table, $this->rendering_context );
 
 		// Check that the caption appears outside the table as a div.
-		$this->assertStringContainsString( '<div style="text-align: center; margin-top: 8px;', $rendered );
+		$this->assertStringContainsString( '<div class="wp-element-caption" style="text-align: center; margin-top: 8px;', $rendered );
 		$this->assertStringContainsString( '>Table caption text</div>', $rendered );
 		// Check that the caption is not inside the table element.
 		$this->assertStringNotContainsString( '<caption', $rendered );

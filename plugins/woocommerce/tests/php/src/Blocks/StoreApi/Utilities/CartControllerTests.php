@@ -285,4 +285,87 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 
 		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
+
+	/**
+	 * @testdox Add to cart applies woocommerce_add_to_cart_quantity to the requested quantity.
+	 */
+	public function test_add_to_cart_applies_quantity_filter(): void {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Quantity Filter Product',
+				'regular_price' => 10,
+			)
+		);
+
+		$captured = array();
+		$filter   = static function ( $quantity, $product_id, $variation_id ) use ( &$captured ) {
+			$captured = array( $quantity, $product_id, $variation_id );
+			return 4;
+		};
+
+		add_filter( 'woocommerce_add_to_cart_quantity', $filter, 10, 3 );
+		try {
+			$cart_id = ( new CartController() )->add_to_cart(
+				array(
+					'id'       => $product->get_id(),
+					'quantity' => 1,
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_add_to_cart_quantity', $filter, 10 );
+		}
+
+		$this->assertSame( array( 1, $product->get_id(), 0 ), $captured );
+		$this->assertSame( 4, wc()->cart->get_cart_item( $cart_id )['quantity'] );
+	}
+
+	/**
+	 * @testdox Add to cart passes the variation ID to woocommerce_add_to_cart_quantity.
+	 */
+	public function test_add_to_cart_quantity_filter_receives_variation_id(): void {
+		$product   = \WC_Helper_Product::create_variation_product();
+		$variation = null;
+		foreach ( $product->get_available_variations() as $available_variation ) {
+			if ( ! in_array( '', $available_variation['attributes'], true ) ) {
+				$variation = $available_variation;
+				break;
+			}
+		}
+		$this->assertIsArray( $variation, 'Expected a variation with every attribute set.' );
+
+		$variation_request = array();
+		foreach ( $variation['attributes'] as $name => $value ) {
+			$attribute = $name;
+			if ( str_starts_with( $attribute, 'attribute_' ) ) {
+				$attribute = substr( $attribute, strlen( 'attribute_' ) );
+			}
+			$variation_request[] = array(
+				'attribute' => $attribute,
+				'value'     => $value,
+			);
+		}
+
+		$captured = array();
+		$filter   = static function ( $quantity, $product_id, $variation_id ) use ( &$captured ) {
+			$captured = array( $quantity, $product_id, $variation_id );
+			return 4;
+		};
+
+		add_filter( 'woocommerce_add_to_cart_quantity', $filter, 10, 3 );
+		try {
+			$cart_id = ( new CartController() )->add_to_cart(
+				array(
+					'id'        => $variation['variation_id'],
+					'quantity'  => 1,
+					'variation' => $variation_request,
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_add_to_cart_quantity', $filter, 10 );
+		}
+
+		$this->assertSame( array( 1, $product->get_id(), (int) $variation['variation_id'] ), $captured );
+		$this->assertSame( 4, wc()->cart->get_cart_item( $cart_id )['quantity'] );
+	}
 }
