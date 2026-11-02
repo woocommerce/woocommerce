@@ -1,0 +1,57 @@
+@import "@wordpress/base-styles/_colors.scss";
+
+.woocommerce-fulfillment-importer-step {
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+	max-width: 700px;
+	margin: 0 auto;
+
+	// Border, radius and padding are the @wordpress/ui card defaults; the
+	// Stack inside it sets the gaps. Text sets the type but not the margins.
+	&__card-body > h2,
+	&__card-body > p {
+		margin: 0;
+	}
+
+	&__status {
+		color: $gray-900;
+	}
+}
+
+// The design system track defaults to a fixed width; the wizard uses the
+// full card width. The extra ancestor wins over the emotion-injected style.
+.woocommerce-fulfillment-importer-step .woocommerce-fulfillment-importer-progress {
+	width: 100%;
+}
+
+.woocommerce-fulfillment-importer-counts {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+	gap: 12px;
+	margin: 0;
+
+	&__item {
+		// Value above label, keeping dt before dd in the markup.
+		display: flex;
+		flex-direction: column-reverse;
+		justify-content: flex-end;
+		gap: 4px;
+		padding: 16px;
+		border: 1px solid $gray-200;
+		border-radius: 4px;
+	}
+
+	dt {
+		font-size: 12px;
+		line-height: 16px;
+		color: $gray-700;
+	}
+
+	dd {
+		font-size: 20px;
+		line-height: 24px;
+		font-weight: 600;
+		margin: 0;
+	}
+}
