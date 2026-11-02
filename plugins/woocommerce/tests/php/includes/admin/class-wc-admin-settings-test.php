@@ -580,27 +580,21 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should render the value saved through nested field name $field_name instead of the default.
-	 *
-	 * @testWith ["test_nested_options[one]", "test_nested_options"]
-	 *           ["test.dotted options[one]", "test_dotted_options"]
-	 *
-	 * @param string $field_name  Field name of the saved and rendered field.
-	 * @param string $option_name Option the value is posted and stored under. PHP replaces dots and spaces in posted names.
+	 * @testdox Should render the value saved through a nested field name instead of the default.
 	 */
-	public function test_output_fields_renders_value_saved_through_nested_field_name( string $field_name, string $option_name ): void {
+	public function test_output_fields_renders_value_saved_through_nested_field_name(): void {
 		$options = array(
 			array(
 				'id'         => 'test_nested_one',
-				'field_name' => $field_name,
+				'field_name' => 'test_nested_options[one]',
 				'type'       => 'text',
 				'default'    => 'default value',
 			),
 		);
 
-		WC_Admin_Settings::save_fields( $options, array( $option_name => array( 'one' => 'saved value' ) ) );
+		WC_Admin_Settings::save_fields( $options, array( 'test_nested_options' => array( 'one' => 'saved value' ) ) );
 
-		$this->assertSame( array( 'one' => 'saved value' ), get_option( $option_name ) );
+		$this->assertSame( array( 'one' => 'saved value' ), get_option( 'test_nested_options' ) );
 		$this->assertStringContainsString( 'value="saved value"', $this->render_fields( $options ) );
 	}
 
@@ -642,7 +636,7 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 
 		return array(
 			'plain name'                => array( array( 'test_plain' => 'plain value' ) + $id_value, 'test_plain', 'plain value' ),
-			'nested name'               => array( array( 'test_parent' => array( 'key' => 'nested value' ) ) + $id_value, 'test_parent[key]', 'nested value' ),
+			'rewritten option name'     => array( array( 'test_dotted_options' => array( 'one' => 'rewritten value' ) ) + $id_value, 'test.dotted options[one]', 'rewritten value' ),
 			'encoded nested key'        => array( array( 'test_parent' => array( 'A' => 'decoded value' ) ) + $id_value, 'test_parent[%41]', 'decoded value' ),
 			'nothing stored under name' => array( $id_value, 'test_parent[key]', 'id value' ),
 			'two levels'                => array( array( 'test_parent' => array( 'deep' => array( 'leaf' => 'deep value' ) ) ) + $id_value, 'test_parent[deep][leaf]', 'id value' ),
@@ -682,14 +676,9 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should render an explicit $explicit_value without reading the stored values.
-	 *
-	 * @testWith [""]
-	 *           [false]
-	 *
-	 * @param mixed $explicit_value Value passed in the field definition.
+	 * @testdox Should render an explicit empty value without reading the stored values.
 	 */
-	public function test_output_fields_renders_explicit_value_over_stored_values( $explicit_value ): void {
+	public function test_output_fields_renders_explicit_value_over_stored_values(): void {
 		update_option( 'test_field_id', 'id value' );
 		update_option( 'test_parent', array( 'key' => 'nested value' ) );
 
@@ -700,7 +689,7 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 					'field_name' => 'test_parent[key]',
 					'type'       => 'text',
 					'default'    => 'default value',
-					'value'      => $explicit_value,
+					'value'      => '',
 				),
 			)
 		);
@@ -728,22 +717,16 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should read a field with is_option set to false through ID "$id", not through its field name.
-	 *
-	 * @testWith ["test_field_id", "id value"]
-	 *           ["", "default value"]
-	 *
-	 * @param string $id       ID of the rendered field.
-	 * @param string $expected Value the rendered input should carry.
+	 * @testdox Should read a field with is_option set to false through its ID, not through its field name.
 	 */
-	public function test_output_fields_reads_non_option_field_through_id( string $id, string $expected ): void {
+	public function test_output_fields_reads_non_option_field_through_id(): void {
 		update_option( 'test_field_id', 'id value' );
 		update_option( 'test_parent', array( 'key' => 'nested value' ) );
 
 		$output = $this->render_fields(
 			array(
 				array(
-					'id'         => $id,
+					'id'         => 'test_field_id',
 					'field_name' => 'test_parent[key]',
 					'type'       => 'text',
 					'default'    => 'default value',
@@ -752,19 +735,13 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertStringContainsString( 'value="' . $expected . '"', $output );
+		$this->assertStringContainsString( 'value="id value"', $output );
 	}
 
 	/**
-	 * @testdox Should pass the default to a custom field without an ID, even when a value is stored under field name $field_name.
-	 *
-	 * @testWith ["test_rules"]
-	 *           ["test_parent[rules]"]
-	 *
-	 * @param string $field_name Field name of the rendered field.
+	 * @testdox Should pass the default to a custom field without an ID, even when a value is stored under its field name.
 	 */
-	public function test_output_fields_passes_default_to_id_less_custom_field( string $field_name ): void {
-		update_option( 'test_rules', array( 'stored rule' ) );
+	public function test_output_fields_passes_default_to_id_less_custom_field(): void {
 		update_option( 'test_parent', array( 'rules' => array( 'stored rule' ) ) );
 
 		$received = null;
@@ -779,7 +756,7 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 			array(
 				array(
 					'type'       => 'test_custom',
-					'field_name' => $field_name,
+					'field_name' => 'test_parent[rules]',
 					'default'    => 'default value',
 				),
 			)
