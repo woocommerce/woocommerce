@@ -426,13 +426,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Run the deferred callbacks that belong before or after the write.
+	 * Run the deferred callbacks that belong before or after the write. When the write failed, the callbacks
+	 * that belong after it do not run, so no hook reports a change that was not saved.
 	 *
 	 * @since 11.4.0
 	 * @param array $deferred_actions Entries from take_deferred_actions().
 	 * @param bool  $after_save       True to run the entries that belong after the write.
 	 */
 	protected function run_deferred_actions( array $deferred_actions, bool $after_save ): void {
+		if ( $after_save && null !== $this->last_save_error ) {
+			return;
+		}
+
 		foreach ( $deferred_actions as $entry ) {
 			if ( $entry['after_save'] === $after_save ) {
 				call_user_func_array( $entry['callback'], $entry['args'] );

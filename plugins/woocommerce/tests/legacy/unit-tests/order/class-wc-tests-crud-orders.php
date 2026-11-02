@@ -1287,6 +1287,31 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: a staged note is not added when the order write fails.
+	 */
+	public function test_stage_order_note_is_skipped_when_the_write_fails() {
+		$order = new WC_Order();
+		$order->save();
+		$notes = count( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ) );
+		$fail  = static function () {
+			throw new Exception( 'Disk full.' );
+		};
+
+		$order->stage_order_note( 'Staged note.' );
+		add_action( 'woocommerce_before_order_object_save', $fail );
+		try {
+			$order->save();
+		} finally {
+			remove_action( 'woocommerce_before_order_object_save', $fail );
+		}
+
+		$this->assertInstanceOf( Exception::class, $order->get_last_save_error() );
+		$found = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$this->assertCount( $notes + 1, $found, 'Only the error note of the failed save is added.' );
+		$this->assertStringNotContainsString( 'Staged note.', current( $found )->content );
+	}
+
+	/**
 	 * Test: stage_totals fires woocommerce_order_after_calculate_totals on the next save, right before the write, and a change made by the listener is written.
 	 */
 	public function test_staged_after_calculate_totals_fires_on_save() {
