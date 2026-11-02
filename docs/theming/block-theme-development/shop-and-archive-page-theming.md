@@ -348,7 +348,7 @@ Here, `query.perPage` sets how many products load, while `query.pages` only disp
 
 To restrict the products in the category from displaying, you use the following interdependent attributes:
 
-- `taxQuery` filters by the category, for which you'll need the term ID (found as the `tag_id` within the edit screen URL).
+- `taxQuery` filters by the category, for which you'll need the term ID (found as the `tag_ID` within the edit screen URL).
 - `inherit: false` unlinks the query from the typical display template.
 - `collection` identifies this as a built-in recipe rather than a custom query.
 

@@ -200,7 +200,11 @@ Merchants can customize any of these templates from the Site Editor regardless o
 
 Which template loads and the fallback that's applied depends on the WooCommerce version and theme in use. To confirm this rather than assume once you've built an override, you can use the `wp block template` commands.
 
-These are bundled with WP-CLI 3.0+ by default and let you carry out checks without opening the Site Editor:
+These are bundled with WP-CLI 3.0.0 by default and let you carry out checks without opening the Site Editor.
+
+:::note
+At the time this documentation was written, WP-CLI 3.0.0 was still in prerelease. Until the stable release is available, use a nightly build with `wp cli update --nightly` or install the command separately.
+:::
 
 ```bash
 # List every template WooCommerce or another plugin registers

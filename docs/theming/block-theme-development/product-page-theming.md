@@ -149,7 +149,7 @@ A wrapper Block's markup is always empty. The editable markup for each product t
 To customize a layout, you'll need to override the relevant file in your theme's `/parts` folder.
 :::
 
-WooCommerce generates a template part reference for each registered product type without filtering by your current catalog. This is typically the four built-in types plus any extra you register. WooCommerce only provides template part files for the four core types, so a third-party type also needs a matching part in the theme's `/parts` folder or an extension-provided path through the experimental `__experimental_woocommerce_{product_type}_add_to_cart_with_options_block_template_part` filter. Without either, the Block has no add-to-cart template to render for that product type.
+WooCommerce generates a template part reference for each registered product type without filtering by your current catalog. This is typically the four built-in types plus any extra you register. WooCommerce only provides template part files for the four core types, so a third-party type must provide a valid template part file path through the experimental `__experimental_woocommerce_{product_type}_add_to_cart_with_options_block_template_part` filter. A matching file in the theme's `/parts` folder can then override that registered template part, but it cannot enable the product type by itself. Without a valid filter-provided path, the Block has no add-to-cart template to render for that product type.
 
 For example, a variable product's part builds its attribute selector from `add-to-cart-with-options-variation-selector` and its child Blocks, then adds a quantity selector and the Add to Cart Block underneath:
 
