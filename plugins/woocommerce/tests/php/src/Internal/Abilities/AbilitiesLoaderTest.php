@@ -2798,6 +2798,125 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should fall back to the saved title and description when a gateway leaves the properties unset.
+	 */
+	public function test_payment_gateways_query_falls_back_to_saved_title_and_description(): void {
+		$gateway = new class() extends \WC_Payment_Gateway {
+			/**
+			 * Leaves title and description unset, like gateways that read them from settings in their getters.
+			 */
+			public function __construct() {
+				$this->id          = 'settings_only_gateway';
+				$this->form_fields = array(
+					'title'       => array( 'type' => 'text' ),
+					'description' => array( 'type' => 'textarea' ),
+					'api_key'     => array( 'type' => 'password' ),
+				);
+			}
+		};
+		update_option(
+			'woocommerce_settings_only_gateway_settings',
+			array(
+				'enabled'     => 'yes',
+				'title'       => 'Saved title',
+				'description' => 'Saved description',
+				'api_key'     => 'saved-api-key',
+			)
+		);
+		$register = static function ( $gateways ) use ( $gateway ) {
+			$gateways[] = $gateway;
+			return $gateways;
+		};
+		add_filter( 'woocommerce_payment_gateways', $register );
+
+		try {
+			self::reload_payment_gateways();
+
+			$result = wp_get_ability( 'woocommerce/payment-gateways-query' )->execute( array( 'id' => 'settings_only_gateway' ) );
+		} finally {
+			remove_filter( 'woocommerce_payment_gateways', $register );
+			delete_option( 'woocommerce_settings_only_gateway_settings' );
+			self::reload_payment_gateways();
+		}
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'Saved title', $result['gateways'][0]['title'] );
+		$this->assertSame( 'Saved description', $result['gateways'][0]['description'] );
+		$this->assertStringNotContainsString( 'saved-api-key', wp_json_encode( $result ) );
+	}
+
+	/**
+	 * @testdox Should report a gateway as enabled only when checkout would, that is when enabled is exactly yes.
+	 */
+	public function test_payment_gateways_query_reports_enabled_like_checkout(): void {
+		$gateway  = new class() extends \WC_Payment_Gateway {
+			/**
+			 * Assigns a truthy value other than yes, which checkout treats as disabled.
+			 */
+			public function __construct() {
+				$this->id      = 'truthy_enabled_gateway';
+				$this->title   = 'Truthy';
+				$this->enabled = 'true';
+			}
+		};
+		$register = static function ( $gateways ) use ( $gateway ) {
+			$gateways[] = $gateway;
+			return $gateways;
+		};
+		add_filter( 'woocommerce_payment_gateways', $register );
+
+		try {
+			self::reload_payment_gateways();
+
+			$result = wp_get_ability( 'woocommerce/payment-gateways-query' )->execute( array( 'id' => 'truthy_enabled_gateway' ) );
+		} finally {
+			remove_filter( 'woocommerce_payment_gateways', $register );
+			self::reload_payment_gateways();
+		}
+
+		$this->assertNotWPError( $result );
+		$this->assertFalse( $result['gateways'][0]['enabled'] );
+	}
+
+	/**
+	 * @testdox Should list gateways in the merchant's checkout order.
+	 */
+	public function test_payment_gateways_query_follows_checkout_order(): void {
+		update_option(
+			'woocommerce_gateway_order',
+			array(
+				'cod'    => 0,
+				'cheque' => 1,
+				'bacs'   => 2,
+			)
+		);
+
+		try {
+			self::reload_payment_gateways();
+
+			$result = wp_get_ability( 'woocommerce/payment-gateways-query' )->execute( array() );
+		} finally {
+			delete_option( 'woocommerce_gateway_order' );
+			self::reload_payment_gateways();
+		}
+
+		$this->assertNotWPError( $result );
+		$this->assertSame(
+			array( 'cod', 'cheque', 'bacs' ),
+			array_values( array_intersect( array_column( $result['gateways'], 'id' ), array( 'bacs', 'cheque', 'cod' ) ) )
+		);
+	}
+
+	/**
+	 * @testdox Should close the gateway item schema, so no settings field can be added to the output.
+	 */
+	public function test_payment_gateways_query_item_schema_is_closed(): void {
+		$items = wp_get_ability( 'woocommerce/payment-gateways-query' )->get_output_schema()['properties']['gateways']['items'];
+
+		$this->assertFalse( $items['additionalProperties'] );
+	}
+
+	/**
 	 * @testdox Should let a shop manager query payment gateways.
 	 */
 	public function test_payment_gateways_query_allows_shop_manager(): void {

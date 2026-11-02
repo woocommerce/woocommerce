@@ -12,8 +12,8 @@ use Automattic\WooCommerce\Abilities\AbilityDefinition;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Lists payment gateways from their public properties only. Gateway settings
- * hold API keys and passwords, so they are never read.
+ * Lists payment gateways from their public properties. Gateway settings hold
+ * API keys and passwords, so only the saved title and description are read.
  */
 class PaymentGatewaysQuery extends AbstractDomainAbility implements AbilityDefinition {
 
@@ -90,16 +90,14 @@ class PaymentGatewaysQuery extends AbstractDomainAbility implements AbilityDefin
 		$items = array();
 
 		foreach ( $gateways as $gateway ) {
-			if ( $gateway instanceof \WC_Payment_Gateway ) {
-				// The title and description getters run checkout filters that may expect a cart.
-				$items[] = array(
-					'id'           => (string) $gateway->id,
-					'title'        => (string) $gateway->title,
-					'method_title' => (string) $gateway->get_method_title(),
-					'description'  => (string) $gateway->description,
-					'enabled'      => wc_string_to_bool( $gateway->enabled ),
-				);
-			}
+			// The title and description getters run checkout filters that may expect a cart.
+			$items[] = array(
+				'id'           => (string) $gateway->id,
+				'title'        => (string) ( $gateway->title ? $gateway->title : $gateway->get_option( 'title' ) ),
+				'method_title' => (string) $gateway->get_method_title(),
+				'description'  => (string) ( $gateway->description ? $gateway->description : $gateway->get_option( 'description' ) ),
+				'enabled'      => 'yes' === $gateway->enabled,
+			);
 		}
 
 		return array(
@@ -132,7 +130,7 @@ class PaymentGatewaysQuery extends AbstractDomainAbility implements AbilityDefin
 			'properties'           => array(
 				'id' => array(
 					'type'        => 'string',
-					'description' => __( 'Payment gateway ID, such as bacs or stripe.', 'woocommerce' ),
+					'description' => __( 'Payment gateway ID, such as bacs or cod.', 'woocommerce' ),
 					'minLength'   => 1,
 				),
 			),
@@ -155,7 +153,7 @@ class PaymentGatewaysQuery extends AbstractDomainAbility implements AbilityDefin
 					'id'           => array( 'type' => 'string' ),
 					'title'        => array(
 						'type'        => 'string',
-						'description' => __( 'Title shown to customers at checkout.', 'woocommerce' ),
+						'description' => __( 'Title shown to customers at checkout. Empty when the gateway sets it in code.', 'woocommerce' ),
 					),
 					'method_title' => array(
 						'type'        => 'string',
@@ -163,7 +161,7 @@ class PaymentGatewaysQuery extends AbstractDomainAbility implements AbilityDefin
 					),
 					'description'  => array(
 						'type'        => 'string',
-						'description' => __( 'Description shown to customers at checkout.', 'woocommerce' ),
+						'description' => __( 'Description shown to customers at checkout. Empty when the gateway sets it in code.', 'woocommerce' ),
 					),
 					'enabled'      => array( 'type' => 'boolean' ),
 				),
