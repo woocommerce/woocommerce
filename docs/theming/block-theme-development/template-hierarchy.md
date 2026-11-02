@@ -24,7 +24,7 @@ WooCommerce uses three related template systems, but not every store page has a 
 
 First, **Classic PHP templates** live under `plugins/woocommerce/templates/` as `.php` files and predate Block themes entirely. A classic theme overrides one by copying it into a `woocommerce/` directory within the theme.
 
-Some of these files exist purely to redirect to another. For example, taxonomy-product-cat.php is a single line:
+Some of these files exist purely to redirect to another. For example, `taxonomy-product-cat.php` is a single line:
 
 ```php
 <?php
@@ -46,7 +46,7 @@ A **Blockified set** lives in `plugins/woocommerce/templates/templates/blockifie
 WooCommerce only registers its standard Block templates when `wp_is_block_theme()` returns true. Blockified templates are the default for Block themes unless the store's `wc_blocks_use_blockified_product_grid_block_as_template` option explicitly retains the compatibility set. Every template in this documentation refers to the Blockified set unless stated otherwise.
 
 :::tip
-If a template looks different to what you expect, open it through the Site Editor's **Code editor** view. A single woocommerce/legacy-template Block at the top of the file means you're looking at the classic compatibility version, not the Blockified one.
+If a template looks different to what you expect, open it through the Site Editor's **Code editor** view. A single `woocommerce/legacy-template` Block at the top of the file means you're looking at the classic compatibility version, not the Blockified one.
 :::
 
 ## The core store templates
@@ -55,17 +55,17 @@ WooCommerce registers 11 templates by default to cover every stage of the shoppi
 
 | Template | Slug | Notes |
 | :---- | :---- | :---- |
-| Single Product | single-product | Renders an individual product page. |
-| Product Catalog | archive-product | Renders the main shop page. Acts as the fallback for the four taxonomy templates below. |
-| Products by Category | taxonomy-product_cat | No dedicated file; falls back to Product Catalog. |
-| Products by Tag | taxonomy-product_tag | No dedicated file; falls back to Product Catalog. |
-| Products by Attribute | taxonomy-product_attribute | WooCommerce ships a generic file, but Product Catalog remains the default fallback until a theme or merchant customizes the attribute template. |
-| Products by Brand | taxonomy-product_brand | No dedicated file; falls back to Product Catalog. Brands were enabled by default starting in WooCommerce 9.6. |
-| Product Search Results | product-search-results | Renders search results scoped to products. |
-| Page: Coming soon | coming-soon | Registered regardless of store visibility; Launch Your Store determines when shoppers see it. |
-| Page: Cart | page-cart | Wraps the page a merchant assigns as the Cart page. |
-| Page: Checkout | page-checkout | Wraps the page a merchant assigns as the Checkout page. |
-| Order Confirmation | order-confirmation | Renders after a successful purchase. |
+| Single Product | `single-product` | Renders an individual product page. |
+| Product Catalog | `archive-product` | Renders the main shop page. Acts as the fallback for the four taxonomy templates below. |
+| Products by Category | `taxonomy-product_cat` | No dedicated file; falls back to Product Catalog. |
+| Products by Tag | `taxonomy-product_tag` | No dedicated file; falls back to Product Catalog. |
+| Products by Attribute | `taxonomy-product_attribute` | WooCommerce ships a generic file, but Product Catalog remains the default fallback until a theme or merchant customizes the attribute template. |
+| Products by Brand | `taxonomy-product_brand` | No dedicated file; falls back to Product Catalog. Brands were enabled by default starting in WooCommerce 9.6. |
+| Product Search Results | `product-search-results` | Renders search results scoped to products. |
+| Page: Coming soon | `coming-soon` | Registered regardless of store visibility; Launch Your Store determines when shoppers see it. |
+| Page: Cart | `page-cart` | Wraps the page a merchant assigns as the Cart page. |
+| Page: Checkout | `page-checkout` | Wraps the page a merchant assigns as the Checkout page. |
+| Order Confirmation | `order-confirmation` | Renders after a successful purchase. |
 
 Eight of these 11 exist as files you can open and copy into your theme's `/templates` folder to override:
 
@@ -101,7 +101,7 @@ The **Coming soon** template's file is `coming-soon.html`, not `page-coming-soon
 
 ## Cart, checkout, and order confirmation
 
-The **Cart**, **Checkout**, and **Order Confirmation** templates behave differently from the browsing templates. This is due to how they wrap the content a merchant assigns through the **Pages** screen, rather than the content WooCommerce will query.
+The **Cart** and **Checkout** templates behave differently from the browsing templates. They wrap the content a merchant assigns through the **Pages** screen rather than content WooCommerce queries directly.
 
 Both `page-cart.html` and `page-checkout.html` have a similar structure. The Cart template's main content is:
 
@@ -120,8 +120,10 @@ Both `page-cart.html` and `page-checkout.html` have a similar structure. The Car
 The Checkout template uses the same wrapper with `{"page":"checkout"}`, but it omits the Post Title Block. In both templates, `core/post-content` renders the Cart or Checkout Block assigned to that page.
 
 :::info
-If you override either template, keep the Cart or Checkout Block inside the content rendered by core/post-content rather than hardcoding woocommerce/cart or woocommerce/checkout directly into the template. Bypassing the assigned page content this way desyncs the page editor from the frontend. Some WooCommerce functionality that checks for the presence of those Blocks on the assigned page could break.
+If you override either template, keep the Cart or Checkout Block inside the content rendered by `core/post-content` rather than hardcoding `woocommerce/cart` or `woocommerce/checkout` directly into the template. Bypassing the assigned page content this way desyncs the page editor from the frontend. Some WooCommerce functionality that checks for the presence of those Blocks on the assigned page could break.
 :::
+
+The **Order Confirmation** template does not wrap an assigned page and has no placeholder page. Its dedicated template renders data from the order-received endpoint through Order Confirmation Blocks for the status, summary, totals, downloads, addresses, additional fields, and additional information.
 
 Styling the Cart and Checkout Blocks (including the mobile checkout button and associated CSS containers) is covered in [Cart and Checkout blocks theming](https://developer.woocommerce.com/docs/theming/block-theme-development/cart-and-checkout/).
 
@@ -137,12 +139,12 @@ A template part only renders once something includes it, so registering one chan
 
 WooCommerce supplies seven template-part files:
 
-- **Mini-Cart** (mini-cart) supplies the contents of the Mini-Cart drawer, the panel that opens without navigating away from the current page when a shopper adds an item to cart.
-- **Checkout header** (checkout-header) supplies the header used specifically on the Checkout template (separate from the site's main header), so a merchant can strip distracting navigation away from the payment step.
-- **Coming soon social links** (coming-soon-social-links) supplies the reusable social-links section included by WooCommerce's Coming Soon patterns.
-- **Simple, External, Variable, and Grouped product 'add-to-cart-with-options'** parts handle the add-to-cart form on the product page, one per product type. Their registry entries depend on product types registered with WooCommerce, not on whether the catalog currently contains products of each type. WooCommerce's four core product types normally make all four parts available.
+- **Mini-Cart** (`mini-cart`) supplies the contents of the Mini-Cart drawer, the panel that opens without navigating away from the current page when a shopper adds an item to cart.
+- **Checkout header** (`checkout-header`) supplies the header used specifically on the Checkout template (separate from the site's main header), so a merchant can strip distracting navigation away from the payment step.
+- **Coming soon social links** (`coming-soon-social-links`) supplies the reusable social-links section included by WooCommerce's Coming Soon patterns.
+- **Simple, External, Variable, and Grouped product `add-to-cart-with-options`** parts handle the add-to-cart form on the product page, one per product type. Their registry entries depend on product types registered with WooCommerce, not on whether the catalog currently contains products of each type. WooCommerce's four core product types normally make all four parts available.
 
-The four add-to-cart-with-options parts sit inside its own template part area, separate from the standard header and footer areas, and back the Add to Cart and Options Block. This lets a theme or merchant give each product type its own layout, such as a stepper for a simple product's quantity field, instead of one form that adapts its own contents internally.
+The four `add-to-cart-with-options` parts sit inside its own template part area, separate from the standard header and footer areas, and back the Add to Cart and Options Block. This lets a theme or merchant give each product type its own layout, such as a stepper for a simple product's quantity field, instead of one form that adapts its own contents internally.
 
 :::info
 The Add to Cart and Options Block was introduced in WooCommerce 10.0 and is still in Beta at the time of writing. As such, treat the underlying template parts as subject to change.
@@ -188,7 +190,7 @@ Seeing both fallback chains side-by-side makes the specificity easier to follow 
 | WooCommerce's Single Product template | `archive-product.html` |
 | WordPress's broader singular fallbacks | WordPress's broader taxonomy and archive fallbacks |
 
-In a nutshell, build overrides with this fallback chain in mind rather than against it. A theme that wants one consistent design across every taxonomy archive only needs to touch archive-product.html; a theme that wants Products by Category to diverge from Products by Tag only needs to add the one file that should differ. The rest can inherit the parent.
+In a nutshell, build overrides with this fallback chain in mind rather than against it. A theme that wants one consistent design across every taxonomy archive only needs to touch `archive-product.html`; a theme that wants Products by Category to diverge from Products by Tag only needs to add the one file that should differ. The rest can inherit the parent.
 
 :::info
 Merchants can customize any of these templates from the Site Editor regardless of what a theme provides. These customizations save to the database rather than a file and take priority over both the theme's file and WooCommerce's default. As such, document any custom template you ship with enough context so that merchants understand what it's built around.
@@ -196,7 +198,7 @@ Merchants can customize any of these templates from the Site Editor regardless o
 
 ## Checking your work
 
-Which template loads and the fallback that's applied depends on the WooCommerce version and theme in use. To confirm this rather than assume once you've built an override, you can use the wp block template commands.
+Which template loads and the fallback that's applied depends on the WooCommerce version and theme in use. To confirm this rather than assume once you've built an override, you can use the `wp block template` commands.
 
 These are bundled with WP-CLI 3.0+ by default and let you carry out checks without opening the Site Editor:
 
@@ -226,7 +228,7 @@ Checking a theme's own file system is the simplest confirmation of all: `ls your
 
 If you don't have shell access to the environment, the Site Editor covers the same ground:
 
-- **Open the template through Appearance > Editor > Templates**, select the template, and use the **Code editor** option to view Block markup. A single woocommerce/legacy-template Block at the top means you're looking at the classic-compatibility version rather than the Blockified one.
+- **Open the template through Appearance > Editor > Templates**, select the template, and use the **Code editor** option to view Block markup. A single `woocommerce/legacy-template` Block at the top means you're looking at the classic-compatibility version rather than the Blockified one.
 - **Check the full Templates list** to see which core templates and parts are registered for the active theme. A missing Products by Brand entry can indicate an older WooCommerce version or a store where the Brands feature is unavailable.
 - **Look for a Customized label** next to a template's name in the list. It means a merchant has edited the template directly from the Site Editor and that saved version in the database is what's rendering rather than your theme's file or WooCommerce's default.
 

@@ -8,22 +8,22 @@ sidebar_position: 5
 
 The Product Catalog template will be one of the first interactions when browsing a WooCommerce site. This involves browsing a grid built from the Product Collection Block, which WooCommerce reuses across every product listing on the store.
 
-This guide walks through the Product Catalog template to show you its structure, the grid and its layout choices, sorting and filtering, pagination, how a theme customizes an individual category or tag, and more. It builds on the [Template hierarchy reference](/docs/theming/block-theme-development/template-hierarchy/) and [Global styles for WooCommerce](/docs/theming/block-theme-development/global-styles/), so if template fallbacks or theme.json styling are unfamiliar concepts, start with those first. Where a Block also appears on the Single Product template, [Product page theming](/docs/theming/block-theme-development/product-page-theming/) covers styling options for it in more depth than this guide repeats.
+This guide walks through the Product Catalog template to show you its structure, the grid and its layout choices, sorting and filtering, pagination, how a theme customizes an individual category or tag, and more. It builds on the [Template hierarchy reference](/docs/theming/block-theme-development/template-hierarchy/) and [Global styles for WooCommerce](/docs/theming/block-theme-development/global-styles/), so if template fallbacks or `theme.json` styling are unfamiliar concepts, start with those first. Where a Block also appears on the Single Product template, [Product page theming](/docs/theming/block-theme-development/product-page-theming/) covers styling options for it in more depth than this guide repeats.
 
 ## Requirements
 
 Before you begin, make sure you have the following in place:
 
 - **A Block theme.** Every Block discussed here renders on the Blockified Product Catalog template, which only Block themes use by default.
-- **Familiarity with the Template hierarchy reference.** You should understand how archive-product.html resolves and how the taxonomy templates fall back to it.
-- **Familiarity with Global styles for WooCommerce.** Several Blocks on this template style through theme.json.
+- **Familiarity with the Template hierarchy reference.** You should understand how `archive-product.html` resolves and how the taxonomy templates fall back to it.
+- **Familiarity with Global styles for WooCommerce.** Several Blocks on this template style through `theme.json`.
 - **Familiarity with the Site Editor's List View and Code editor.** Several examples in this guide need you to inspect Block markup directly.
 
 ## How the template is put together
 
-WooCommerce's own classic template for this page is archive-product.php, so the Block Template shares the same archive-product.html name. It resolves through the same template hierarchy as any other page type.
+WooCommerce's own classic template for this page is `archive-product.php`, so the Block Template shares the same `archive-product.html` name. It resolves through the same template hierarchy as any other page type.
 
-WooCommerce ships a default archive-product.html inside its own plugin folder, which a Block theme falls back to unless the theme provides its own copy at the same path:
+WooCommerce ships a default `archive-product.html` inside its own plugin folder, which a Block theme falls back to unless the theme provides its own copy at the same path:
 
 ![The Iris & Co. Product Catalog template open in the Site Editor with List View showing its archive and product-grid block structure.](./_media/shop-and-archive-page-layout-iris-and-co.png)
 
@@ -44,15 +44,15 @@ WooCommerce ships a default archive-product.html inside its own plugin folder, w
 	</div>
 	<!-- /wp:group -->
 
-	<!-- wp:woocommerce/product-collection {"queryId":0,"query":{"inherit":true},"displayLayout":{"type":"flex","columns":3,"shrinkColumns":true},"align":"wide"} -->
+	<!-- wp:woocommerce/product-collection {"queryId":0,"query":{"inherit":true,"isProductCollectionBlock":true},"displayLayout":{"type":"flex","columns":3,"shrinkColumns":true},"align":"wide"} -->
 	<div class="wp-block-woocommerce-product-collection alignwide">
 		<!-- wp:woocommerce/product-template -->
-		<!-- wp:woocommerce/product-image {"showSaleBadge":false,"imageSizing":"thumbnail","isDescendentOfQueryLoop":true} -->
-			<!-- wp:woocommerce/product-sale-badge {"isDescendentOfQueryLoop":true,"align":"right"} /-->
+		<!-- wp:woocommerce/product-image {"showSaleBadge":false,"imageSizing":"thumbnail"} -->
+			<!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
 		<!-- /wp:woocommerce/product-image -->
-		<!-- wp:post-title {"textAlign":"center","level":2,"isLink":true,"isDescendentOfQueryLoop":true} /-->
-		<!-- wp:woocommerce/product-price {"textAlign":"center","isDescendentOfQueryLoop":true} /-->
-		<!-- wp:woocommerce/product-button {"textAlign":"center","isDescendentOfQueryLoop":true} /-->
+		<!-- wp:post-title {"textAlign":"center","level":2,"isLink":true,"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-title","style":{"typography":{"lineHeight":"1.4"}}} /-->
+		<!-- wp:woocommerce/product-price {"textAlign":"center","fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /-->
+		<!-- wp:woocommerce/product-button {"textAlign":"center","fontSize":"small","style":{"spacing":{"margin":{"bottom":"1rem"}}}} /-->
 		<!-- /wp:woocommerce/product-template -->
 
 		<!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"center"}} -->
@@ -76,17 +76,17 @@ WooCommerce ships a default archive-product.html inside its own plugin folder, w
 <!-- wp:template-part {"slug":"footer"} /-->
 ```
 
-Both core/query-title and core/term-description are core WordPress Blocks. WooCommerce configures both for the product context, but styling and behavior for either follows core WordPress conventions rather than anything WooCommerce-specific.
+Both `core/query-title` and `core/term-description` are core WordPress Blocks. WooCommerce configures both for the product context, but styling and behavior for either follows core WordPress conventions rather than anything WooCommerce-specific.
 
-As the Template hierarchy reference covers, archive-product.html is the fallback for every taxonomy archive: Products by Category, Products by Tag, Products by Attribute, and Products by Brand. However, two templates differ from this shared fallback.
+As the Template hierarchy reference covers, `archive-product.html` is the fallback for every taxonomy archive: Products by Category, Products by Tag, Products by Attribute, and Products by Brand. However, two templates differ from this shared fallback.
 
-First, **Products by Attribute** registers taxonomy-product\_attribute.html rather than relying on the fallback other taxonomies use. This file is close in content to archive-product.html. It gives you a direct override point if attribute archives ever need a separate design (without waiting on a fallback change).
+First, **Products by Attribute** registers `taxonomy-product_attribute.html` rather than relying on the fallback other taxonomies use. This file is close in content to `archive-product.html`. It gives you a direct override point if attribute archives ever need a separate design (without waiting on a fallback change).
 
-Also, **Product Search Results** (product-search-results.html) swaps the query title's type to "search" and points its no-results state at a pattern that also renders a search form. Typically, a shopper landing here has already tried to find something specific, so the form is a nice UX addition.
+Also, **Product Search Results** (`product-search-results.html`) swaps the query title's `type` to `search` and points its no-results state at a pattern that also renders a search form. Typically, a shopper landing here has already tried to find something specific, so the form is a nice UX addition.
 
 ## The product grid: Blocks and layout choices
 
-woocommerce/product-collection is the Block behind every product grid on the storefront. On a taxonomy or search template, the query.inherit attribute set to true tells the Block to read its product set from the current request rather than a fixed list. This is what makes one Block definition work correctly regardless of what a shopper is viewing.
+`woocommerce/product-collection` is the Block behind every product grid on the storefront. On a taxonomy or search template, the `query.inherit` attribute set to `true` tells the Block to read its product set from the current request rather than a fixed list. This is what makes one Block definition work correctly regardless of what a shopper is viewing.
 
 ![The Layout panel in the Product Collection Block's settings sidebar, showing Grid, Stack, and Carousel options.](./_media/product-collection-layout-options.png)
 
@@ -96,15 +96,15 @@ The Block offers three layout options in its sidebar settings:
 - **Stack** renders products in a single vertical list rather than a grid, which is the closest thing this Block has to a dedicated list view.
 - **Carousel** renders a horizontal slider, which is better suited to a featured strip on a landing page than a full catalog listing.
 
-Inside the Block, woocommerce/product-template wraps repeating markup for each product. It accepts color and typography through theme.json, even though the Product Collection Block itself doesn't. As such, it's a reasonable place to set shared styles across every card without repeating the rule on each child Block.
+Inside the Block, `woocommerce/product-template` wraps repeating markup for each product. It accepts color and typography through `theme.json`, even though the Product Collection Block itself doesn't. As such, it's a reasonable place to set shared styles across every card without repeating the rule on each child Block.
 
-### Choosing to style in theme.json
+### Choosing to style in `theme.json`
 
 The default catalog card sticks to only a few Blocks:
 
 - **Product Image** renders the featured image and (for this template) links through to the single product.
 - **Product Sale Badge**, nested in Product Image, displays once a product has a sale price.
-- **Product Title**, rendered through core/post-title in this context rather than a dedicated WooCommerce Block, links to the same product page.
+- **Product Title**, rendered through `core/post-title` in this context rather than a dedicated WooCommerce Block, links to the same product page.
 - **Product Price** shows both the current price and any sale price.
 - **Add to Cart Button** adds a product to the cart or links to the product page. Simple products add-to-cart from the card. Other product types send the visitor to the product page.
 
@@ -112,32 +112,16 @@ The default catalog card sticks to only a few Blocks:
 Product page theming covers these Blocks in more depth, since they also appear in the Single Product template's summary area. This includes registered selectors and any supported style properties.
 :::
 
-The Product Collection Block controls where a design needs the grid's column gap or card spacing adjusted, which means you can edit it through theme.json:
+The Product Collection Block does not register spacing support, and the gap between product cards comes from the inner `.wc-block-product-template` grid. To change that gap, use a Block stylesheet rather than `theme.json`:
 
-```json
-{
-  "settings": {
-    "blocks": {
-      "woocommerce/product-collection": {
-        "spacing": {
-          "blockGap": true
-        }
-      }
-    }
-  },
-  "styles": {
-    "blocks": {
-      "woocommerce/product-collection": {
-        "spacing": {
-          "blockGap": "2rem"
-        }
-      }
-    }
-  }
+```css
+.wc-block-product-template.is-flex-container,
+.wc-block-product-template__responsive {
+  gap: 2rem;
 }
 ```
 
-Here, settings lets you give product-collection an editable property through blockGap, while styles sets the value. Without this, you won't see these same options in the Site Editor. A shared text color or font across every card styles through theme.json like any other Block:
+A shared text color or font across every card still styles through `theme.json` like any other Block:
 
 ```json
 {
@@ -163,13 +147,13 @@ WooCommerce splits these across three Blocks, two of which ship in the default t
 
 ### Counting and sorting results
 
-woocommerce/product-results-count and woocommerce/catalog-sorting each render through a classic WooCommerce function server-side, then layer Interactivity API behavior on top.
+`woocommerce/product-results-count` and `woocommerce/catalog-sorting` each render through a classic WooCommerce function server-side, then layer Interactivity API behavior on top.
 
-**Product Results Count**'s render callback calls woocommerce\_result\_count(), which loads the overridable loop/result-count.php template. Copying this file into a theme's woocommerce/loop/ directory still changes the text this Block displays, exactly as it would on a classic theme.
+**Product Results Count**'s render callback calls `woocommerce_result_count()`, which loads the overridable `loop/result-count.php` template. Copying this file into a theme's `woocommerce/loop/` directory still changes the text this Block displays, exactly as it would on a classic theme.
 
-The count itself follows the product grid settings (the woocommerce\_catalog\_columns and woocommerce\_catalog\_rows options). Because Block themes don't have a Customizer, you can use the loop\_shop\_per\_page filter as an override.
+The count itself follows the product grid settings (the `woocommerce_catalog_columns` and `woocommerce_catalog_rows` options). Because Block themes don't have a Customizer, you can use the `loop_shop_per_page` filter as an override.
 
-**Catalog Sorting**'s render callback calls woocommerce\_catalog\_ordering(), which builds the drop-down menu from the woocommerce\_catalog\_orderby filter and reads its default selection from the woocommerce\_default\_catalog\_orderby filter or option. The six default sort options are menu\_order, popularity, rating, date, price, and price-desc.
+**Catalog Sorting**'s render callback calls `woocommerce_catalog_ordering()`, which builds the drop-down menu from the `woocommerce_catalog_orderby` filter and reads its default selection from the `woocommerce_default_catalog_orderby` filter or option. The six default sort options are `menu_order`, `popularity`, `rating`, `date`, `price`, and `price-desc`.
 
 A plugin that already customizes the sorting drop-down menu on a classic theme needs no changes to keep working:
 
@@ -180,9 +164,9 @@ add_filter( 'woocommerce_catalog_orderby', function( $options ) {
 } );
 ```
 
-However, the Blockified template will differ depending on what happens after you generate the PHP output. WooCommerce runs the rendered form through WP\_HTML\_Tag\_Processor to add data-wp-interactive, data-wp-on--submit, and data-wp-on--change attributes. The form connects to the Interactivity API, so a sorting change updates the grid instead of submitting the form and reloading the page.
+However, the Blockified template will differ depending on what happens after you generate the PHP output. WooCommerce runs the rendered form through `WP_HTML_Tag_Processor` to add `data-wp-interactive`, `data-wp-on--submit`, and `data-wp-on--change` attributes. The form connects to the Interactivity API, so a sorting change updates the grid instead of submitting the form and reloading the page.
 
-The Sorting Block also exposes a useLabel attribute that toggles the **Sort by** text alongside the drop-down menu. Both Blocks support text color and font size through theme.json, as per the Global styles guide.
+The Sorting Block also exposes a `useLabel` attribute that toggles the **Sort by** text alongside the drop-down menu. Both Blocks support text color and font size through `theme.json`, as per the Global styles guide.
 
 Neither Block depends on the other for placement. The default template puts them in a flex Group sitting on the same row, but you can separate them, hide one, or move both elsewhere in the layout without affecting how either one queries or renders its data.
 
@@ -192,7 +176,7 @@ Neither Block depends on the other for placement. The default template puts them
 Several child filter Blocks save as an empty wrapper div and populate through the Interactivity API once the page loads. See WordPress' [Interactivity API reference guide](https://developer.wordpress.org/block-editor/reference-guides/interactivity-api/) or the WooCommerce post on [rendering interactive Blocks](https://developer.woocommerce.com/2025/10/30/understanding-the-interactivity-api-driven-future-for-woocommerce-blocks/) for more details.
 :::
 
-The Product Filters Block is not part of the default catalog template. Adding it means nesting inside the Product Collection Block as it gets context from its ancestor:
+The Product Filters Block is not part of the default catalog template. On an inherited archive query, it can sit beside the Product Collection Block because WooCommerce connects it to the active catalog query. For a custom or non-inherited collection, nest Product Filters inside Product Collection so it receives that collection's query context.
 
 ```html
 <!-- wp:woocommerce/product-filters -->
@@ -228,47 +212,54 @@ Each filter type is its own child Block, so you only add the ones a design calls
 | Taxonomy Filter | A taxonomy you choose when adding the Block: category, tag, or brand. |
 | Active Filters | Every filter currently applied, as removable chips. |
 
-Every filter type shares one Block ancestor restriction: each expects to sit inside woocommerce/product-filters, which is why the inserter won't offer the Price Filter Block as a top-level addition to an arbitrary template. This mirrors the ancestor restrictions for general product page theming.
+Every filter type shares one Block `ancestor` restriction: each expects to sit inside `woocommerce/product-filters`, which is why the inserter won't offer the Price Filter Block as a top-level addition to an arbitrary template. This mirrors the `ancestor` restrictions for general product page theming.
 
 ### Configuring the behavior of filters
 
-For filtering, **Collapse filters on small screens** is found on the Product Filters Block and controls whether filters sit inline at narrow viewports or open from a drawer. **Reload full page** is found in the surrounding Product Collection Block's Advanced settings and sets an attribute called forcePageReload, which is disabled by default.
+The Product Filters Block's **Overlay** setting controls whether filters remain on the page or open in an overlay. Its options are **Off**, **Mobile**, and **Always**, stored in the `overlayMode` attribute. When an overlay is enabled, **Overlay position** sets `overlayPosition` to the left or right. **Reload full page** is found in the Product Collection Block's Advanced settings and sets an attribute called `forcePageReload`, which is disabled by default.
 
-When forcePageReload is false, WooCommerce gives the Product Collection Block a data-wp-router-region attribute. As such, both filtering and pagination use the WordPress Interactivity API's client-side router instead of the browser's own navigation. Setting it to true disables client navigation for the Product Filters Block through wp\_interactivity\_config(). Reach for it if another Block or customization inside the collection depends on a traditional full-page reload.
+When `forcePageReload` is `false`, WooCommerce gives the Product Collection Block a `data-wp-router-region` attribute. As such, both filtering and pagination use the WordPress Interactivity API's client-side router instead of the browser's own navigation. Setting it to `true` disables client navigation for the Product Filters Block through `wp_interactivity_config()`. Reach for it if another Block or customization inside the collection depends on a traditional full-page reload.
 
-Product Filters declares forcePageReload in usesContext. It reads from its Product Collection ancestor through Block context:
+When Product Filters is nested in a custom Product Collection, it reads the collection's query and `forcePageReload` setting through Block context. On an inherited archive query, WooCommerce can provide the same behavior when Product Filters is a sibling instead:
 
 ```json
-"usesContext": ["postId", "query", "queryId", "forcePageReload"]
+"usesContext": [
+  "postId",
+  "query",
+  "queryId",
+  "collection",
+  "productCollectionLocation",
+  "forcePageReload"
+]
 ```
 
-This also checks for an isProductCollectionBlock attribute that's nested inside query. The template's own Product Collection Block already includes this, but any product collection you create will need this to ensure you don't have to reload the page to display front-end changes.
+This also checks for an `isProductCollectionBlock` attribute that's nested inside `query`. The template's own Product Collection Block already includes this, but any product collection you create will need this to ensure you don't have to reload the page to display front-end changes.
 
 :::note
-The Attribute Filter, Price Filter, and Active Filters Blocks existed before Product Filters, as woocommerce/attribute-filter, woocommerce/price-filter, and woocommerce/active-filters. Those predate the Product Collection Block, so they don't appear in the Blockified Product Catalog template.
+The Attribute Filter, Price Filter, and Active Filters Blocks existed before Product Filters, as `woocommerce/attribute-filter`, `woocommerce/price-filter`, and `woocommerce/active-filters`. Those predate the Product Collection Block, so they don't appear in the Blockified Product Catalog template.
 :::
 
 ## Pagination
 
-Pagination renders through the core Query Pagination Block as Product Collection registers itself as a compatible query source for it. The forcePageReload attribute governs pagination as well as filtering because both rely on the same router region.
+Pagination renders through the core Query Pagination Block as Product Collection registers itself as a compatible query source for it. The `forcePageReload` attribute governs pagination as well as filtering because both rely on the same router region.
 
-With the default setting, moving between pages updates the grid through client-side navigation and keeps the shopper's scroll position. Enabling **Reload full page** falls back to standard link navigation for the pagination controls too.
+With the default setting, moving between pages updates the grid through client-side navigation, then moves focus to the first product link in the updated collection. This focus change can also move the shopper's scroll position. Enabling **Reload full page** falls back to standard link navigation for the pagination controls instead.
 
 The Query Pagination Block only appears once a collection spans more than one page, so testing pagination changes against a catalog with enough products matters more here than anywhere else on the template. A collection with fewer products than its Products per page setting renders no pagination Blocks. This can make a pagination override look broken in a near-empty development environment when it isn't.
 
 The following child Blocks build the default pagination control:
 
 - **Pagination Previous** links to the prior page and is hidden on the first page.
-- **Pagination Numbers** lists individual page numbers. The midSize attribute sets how many links show on either side of the current page before it displays ellipses.
+- **Pagination Numbers** lists individual page numbers. The `midSize` attribute sets how many links show on either side of the current page before it displays ellipses.
 - **Pagination Next** links to the following page and hides on the last page similar to Pagination Previous.
 
 Each accepts its own label text and styles through the same core Block settings you'd use for a blog's post list, rather than anything WooCommerce-specific.
 
-If a shopper sees no matches on the page (such as a category with no products or a search with no hits), the template uses woocommerce/product-collection-no-results. The default catalog template points this at the no-products-found-clear-filters pattern.
+If a shopper sees no matches on the page (such as a category with no products or a search with no hits), the template uses `woocommerce/product-collection-no-results`. The default catalog template points this at the `no-products-found-clear-filters` pattern.
 
 ## Customizing category, tag, and brand archives
 
-Every taxonomy has a term-specific file that takes priority over the taxonomy's general file, which in turn falls back to archive-product.html. This applies identically to brands:
+Every taxonomy has a term-specific file that takes priority over the taxonomy's general file, which in turn falls back to `archive-product.html`. This applies identically to brands:
 
 ```text
 your-theme/
@@ -280,7 +271,7 @@ your-theme/
 
 This might suit a Stack instead of a Grid (where you need a different layout) or a featured banner above the results, without touching the design every other archive uses.
 
-Here, you can copy the general taxonomy template (or archive-product.html if the taxonomy has no dedicated file of its own) and rename it to match the term's slug. WordPress resolves the correct file based on the term being viewed.
+Here, you can copy the general taxonomy template (or `archive-product.html` if the taxonomy has no dedicated file of its own) and rename it to match the term's slug. WordPress resolves the correct file based on the term being viewed.
 
 ### What a term-level override can break
 
@@ -288,20 +279,20 @@ WooCommerce's classic template fires a sequence of hooks around the product loop
 
 | Block | Position | Hook |
 | :---: | :---: | :---: |
-| Product Collection | Before | woocommerce\_before\_main\_content |
-|  | After | woocommerce\_after\_main\_content |
-| Product Template | Before | woocommerce\_before\_shop\_loop |
-|  | After | woocommerce\_after\_shop\_loop |
-| Post Title | Before | woocommerce\_before\_shop\_loop\_item\_title |
-|  | After | woocommerce\_shop\_loop\_item\_title, woocommerce\_after\_shop\_loop\_item\_title |
-| Term Description | Before | woocommerce\_archive\_description |
-| Query No Results | Before | woocommerce\_no\_products\_found |
-| Each product item | Before | woocommerce\_before\_shop\_loop\_item |
-|  | After | woocommerce\_after\_shop\_loop\_item |
+| Product Collection | Before | `woocommerce_before_main_content` |
+|  | After | `woocommerce_after_main_content` |
+| Product Template | Before | `woocommerce_before_shop_loop` |
+|  | After | `woocommerce_after_shop_loop` |
+| Post Title | Before | `woocommerce_before_shop_loop_item_title` |
+|  | After | `woocommerce_shop_loop_item_title`, `woocommerce_after_shop_loop_item_title` |
+| Term Description | Before | `woocommerce_archive_description` |
+| Query No Results | Before | `woocommerce_no_products_found` |
+| Each product item | Before | `woocommerce_before_shop_loop_item` |
+|  | After | `woocommerce_after_shop_loop_item` |
 
-woocommerce\_before\_shop\_loop\_item and woocommerce\_after\_shop\_loop\_item anchor to each product's internal item context. It means they won't break if you remove a Block.
+`woocommerce_before_shop_loop_item` and `woocommerce_after_shop_loop_item` anchor to each product's internal item context. It means they won't break if you remove a Block.
 
-For example, an extension that still adds content through woocommerce\_archive\_description is anchoring itself to the Term Description Block. A term-level override that drops a Block removes the anchor too, which can leave an extension's content with nowhere to render on that one archive even though it still appears everywhere else.
+For example, an extension that still adds content through `woocommerce_archive_description` is anchoring itself to the Term Description Block. A term-level override that drops a Block removes the anchor too, which can leave an extension's content with nowhere to render on that one archive even though it still appears everywhere else.
 
 :::tip
 Before removing the Product Template, Post Title, Term Description, or Query No Results Blocks from a term-level override, test the change against your current extensions. A missing hook anchor isn't always a visual change you'd catch by looking at the canvas.
@@ -338,30 +329,30 @@ A category or brand override sometimes needs a short, curated row rather than a 
 <div class="wp-block-woocommerce-product-collection">
 
 <!-- wp:woocommerce/product-template -->
-<!-- wp:woocommerce/product-image {"isDescendentOfQueryLoop":true} -->
+<!-- wp:woocommerce/product-image -->
 <!-- wp:woocommerce/product-sale-badge /-->
 <!-- /wp:woocommerce/product-image -->
 
-<!-- wp:post-title {"isLink":true,"isDescendentOfQueryLoop":true} /-->
+<!-- wp:post-title {"isLink":true,"__woocommerceNamespace":"woocommerce/product-title"} /-->
 
-<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true} /-->
+<!-- wp:woocommerce/product-price /-->
 
-<!-- wp:woocommerce/product-button {"isDescendentOfQueryLoop":true} /-->
+<!-- wp:woocommerce/product-button /-->
 <!-- /wp:woocommerce/product-template -->
 </div>
 
 <!-- /wp:woocommerce/product-collection -->
 ```
 
-Here, query.perPage sets how many products load, while query.pages only displays a single page of results.
+Here, `query.perPage` sets how many products load, while `query.pages` only displays a single page of results.
 
 To restrict the products in the category from displaying, you use the following interdependent attributes:
 
-- taxQuery filters by the category, for which you'll need the term ID (found as the tag\_id within the edit screen URL).
-- inherit:false unlinks the query from the typical display template.
-- collection identifies this as a built-in recipe rather than a custom query.
+- `taxQuery` filters by the category, for which you'll need the term ID (found as the `tag_id` within the edit screen URL).
+- `inherit: false` unlinks the query from the typical display template.
+- `collection` identifies this as a built-in recipe rather than a custom query.
 
-Finally, isProductCollectionBlock ties the Block to the same pagination behavior and router region described earlier. This means it typically has to nest in query to have any effect.
+Finally, `isProductCollectionBlock` ties the Block to the same pagination behavior and router region described earlier. This means it typically has to nest in `query` to have any effect.
 
 ### Filters beside the grid instead of above it
 
@@ -369,26 +360,27 @@ Finally, isProductCollectionBlock ties the Block to the same pagination behavior
 
 The default template puts sorting above the grid, but a sidebar layout is just as valid and doesn't need any new Blocks.
 
-Here, it's important to nest the filters inside of the Product Collection Block; query needs to define the correct inheritance, while displayLayout builds grid's column count:
-
-```html
-<!-- wp:woocommerce/product-collection {"queryId":0,"query":{"inherit":true,"isProductCollectionBlock":true},"displayLayout":{"type":"flex","columns":2},"align":"wide"} -->
-```
-
-From there, you can look to build the two-column layout within an empty wrapper div:
+For an inherited catalog archive, place Product Filters and Product Collection in separate columns as siblings. The collection's `query` defines the inheritance, while `displayLayout` sets the grid's column count:
 
 ```html
 <!-- wp:columns {"align":"wide"} -->
 <div class="wp-block-columns alignwide">
 	<!-- wp:column {"width":"25%"} -->
 	<div class="wp-block-column" style="flex-basis:25%">
-		<!-- wp:woocommerce/product-filters -->
-…
+		<!-- wp:woocommerce/product-filters -->…<!-- /wp:woocommerce/product-filters -->
+	</div>
+	<!-- /wp:column -->
+
 	<!-- wp:column {"width":"75%"} -->
-…
+	<div class="wp-block-column" style="flex-basis:75%">
+		<!-- wp:woocommerce/product-collection {"queryId":0,"query":{"inherit":true,"isProductCollectionBlock":true},"displayLayout":{"type":"flex","columns":2}} -->…<!-- /wp:woocommerce/product-collection -->
+	</div>
+	<!-- /wp:column -->
+</div>
+<!-- /wp:columns -->
 ```
 
-Because Product Filters is context-aware, moving it into a column nested inside Product Collection won't change the filter's behavior. However, it has to always be a descendant of the Product Collection Block.
+For a custom or non-inherited Product Collection, keep Product Filters inside that collection instead so the filter receives the correct query context.
 
 ### Swapping the default catalog query for a curated collection
 
@@ -403,14 +395,14 @@ Product Collection's Custom query type replaces its default template-driven beha
 	<h2 class="wp-block-heading">On sale now</h2>
 	<!-- /wp:heading -->
 	<!-- wp:woocommerce/product-template -->
-		<!-- wp:woocommerce/product-image {"isDescendentOfQueryLoop":true} /-->
-		<!-- wp:post-title {"level":3,"isLink":true,"isDescendentOfQueryLoop":true} /-->
-		<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true} /-->
+		<!-- wp:woocommerce/product-image /-->
+		<!-- wp:post-title {"level":3,"isLink":true,"__woocommerceNamespace":"woocommerce/product-title"} /-->
+		<!-- wp:woocommerce/product-price /-->
 	<!-- /wp:woocommerce/product-template -->
 </div>
 <!-- /wp:woocommerce/product-collection -->
 ```
 
-Setting query.inherit to false breaks the connection to the template or page the Block is on. Without it, you wouldn't see the fixed on-sale set of products.
+Setting `query.inherit` to `false` breaks the connection to the template or page the Block is on. Without it, you wouldn't see the fixed on-sale set of products.
 
-woocommerceOnSale is one of several filter attributes the Custom query type exposes. However, unlike the example of a single row of category-based products, you don't need a matching collection value.
+`woocommerceOnSale` is one of several filter attributes the Custom query type exposes. However, unlike the example of a single row of category-based products, you don't need a matching `collection` value.

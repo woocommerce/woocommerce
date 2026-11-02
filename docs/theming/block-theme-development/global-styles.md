@@ -32,7 +32,7 @@ Also, some elements are actually core WordPress Blocks configured for a product 
 
 WooCommerce builds its templates by mixing its own and core WordPress Blocks wherever the latter already does the job. The reliable way to confirm what you're styling is to inspect the template's Block markup through the **Code editor** in the Site Editor. Use the WordPress REST API's Block Types endpoint separately to inspect a registered Block's supports, selectors, styles, and variations.
 
-## Using theme.json to define WooCommerce-specific styles
+## Using `theme.json` to define WooCommerce-specific styles
 
 Most of your styling work happens within `theme.json`. The next three sections cover typography for text-based product details, setting colors for on-screen elements, and spacing for product grids.
 

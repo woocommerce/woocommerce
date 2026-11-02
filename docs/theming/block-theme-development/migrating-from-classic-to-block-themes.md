@@ -25,7 +25,7 @@ Classic and Block themes both support template overrides, but the file format an
 - **Classic themes** copy PHP files from the WooCommerce plugin into a `/woocommerce` directory in the theme root (for example, `yourtheme/woocommerce/single-product.php`).
 - **Block themes** place HTML Block templates in a `/templates` folder in the theme root (for example, `yourtheme/templates/single-product.html`).
 
-The file naming convention is consistent across both approaches, so `single-product.php` maps directly to `single-product.html`. However, the content is composed of WooCommerce and WordPress Blocks rather than PHP markup.
+Some top-level store views retain familiar slugs across both approaches. For example, `single-product.php` and `single-product.html` both represent the single product view. This is not a direct file conversion: many PHP partials have no HTML template counterpart, and the HTML template's content must be composed from WooCommerce and WordPress Blocks rather than copied from the PHP markup.
 
 To override the single product template in a classic theme, you copy and edit a PHP file:
 
