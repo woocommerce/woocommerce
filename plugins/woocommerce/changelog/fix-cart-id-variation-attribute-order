@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix a "Sold individually" product variation sometimes being allowed into the cart more than once.
