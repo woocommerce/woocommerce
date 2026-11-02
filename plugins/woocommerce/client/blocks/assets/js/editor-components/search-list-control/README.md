@@ -6,8 +6,9 @@
     -   [Props](#props)
     -   [`list` item structure:](#list-item-structure)
     -   [`messages` object structure:](#messages-object-structure)
--   [Usage](#usage)
-    -   [Props](#props)
+-   [SearchListItem](#searchlistitem)
+    -   [Usage](#usage-1)
+        -   [Props](#props-1)
 
 Component to display a searchable, selectable list of items.
 
@@ -58,13 +59,13 @@ Component to display a searchable, selectable list of items.
     through the count of currently selected items.
 -   `updated`: String - Label indicating that search results have changed, read to screen reader users.
 
-# SearchListItem
+## SearchListItem
 
-## Usage
+### Usage
 
 Used implicitly by `SearchListControl` when the `renderItem` prop is omitted.
 
-### Props
+#### Props
 
 | Name         | Type      | Default | Description                                                                      |
 | ------------ | --------- | ------- | -------------------------------------------------------------------------------- |
