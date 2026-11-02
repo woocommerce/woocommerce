@@ -1574,6 +1574,34 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return a fixed 500 error when the order write fails, though the order's save() catches the exception.
+	 */
+	public function test_a_failed_order_write_returns_a_fixed_error(): void {
+		$this->register_order_status_ability();
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'pending' );
+		$order->save();
+		$throw = static function () {
+			throw new \RuntimeException( 'Storage text.' );
+		};
+		add_action( 'woocommerce_before_order_object_save', $throw );
+
+		$response = $this->run_ability_response(
+			'test-ext/order-status',
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'completed',
+			)
+		);
+
+		remove_action( 'woocommerce_before_order_object_save', $throw );
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_ability_save_failed', $response->get_data()['code'] );
+		$this->assertStringNotContainsString( 'Storage text.', wp_json_encode( $response->get_data() ) );
+		$this->assertSame( 'pending', wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
 	 * @testdox Should list the extensions key in anyOf and allOf branches that refuse other properties, and accept extension fields through an anyOf branch.
 	 */
 	public function test_combinator_branches_accept_the_extensions_key(): void {
