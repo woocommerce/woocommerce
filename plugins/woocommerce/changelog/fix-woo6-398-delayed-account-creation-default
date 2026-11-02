@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop showing the post-checkout "Create account" form when the "After checkout" account creation setting was never saved.
