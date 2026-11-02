@@ -129,7 +129,8 @@
 		"prop-types": "^15.8.1",
 		"react-dates": "^21.8.0",
 		"react-transition-group": "^4.4.5",
-		"react-window": "^1.8.11"
+		"react-window": "^1.8.11",
+		"uuid": "^9.0.1"
 	},
 	"peerDependencies": {
 		"@types/react": "18.3.x",
@@ -188,7 +189,6 @@
 		"sass-loader": "10.5.x",
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
-		"uuid": "^9.0.1",
 		"webpack": "catalog:tooling",
 		"webpack-cli": "5.1.x"
 	},

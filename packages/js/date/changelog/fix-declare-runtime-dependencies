@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop installing `@types/d3-time-format` with the package; it is only needed to build and test it.

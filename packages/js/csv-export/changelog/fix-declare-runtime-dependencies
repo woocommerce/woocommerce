@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop installing `@types/node` with the package, which added Node.js globals to consumers' TypeScript projects.

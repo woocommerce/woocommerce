@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Declare the `@woocommerce/*` and `@wordpress/*` packages the customer effort score components import at runtime.

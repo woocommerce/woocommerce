@@ -586,6 +586,9 @@ importers:
       react-window:
         specifier: ^1.8.11
         version: 1.8.11(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      uuid:
+        specifier: ^9.0.1
+        version: 9.0.1
     devDependencies:
       '@babel/core':
         specifier: catalog:tooling
@@ -701,9 +704,6 @@ importers:
       typescript:
         specifier: 5.7.x
         version: 5.7.3
-      uuid:
-        specifier: ^9.0.1
-        version: 9.0.1
       webpack:
         specifier: catalog:tooling
         version: 5.97.1(@swc/core@1.15.24)(esbuild@0.27.7)(webpack-cli@5.1.4)
@@ -715,9 +715,6 @@ importers:
 
   packages/js/csv-export:
     dependencies:
-      '@types/node':
-        specifier: ^24.1.0
-        version: 24.12.2
       browser-filesaver:
         specifier: ^1.1.1
         version: 1.1.1
@@ -728,6 +725,9 @@ importers:
       '@types/jest':
         specifier: 29.5.x
         version: 29.5.14
+      '@types/node':
+        specifier: ^24.1.0
+        version: 24.12.2
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
@@ -828,9 +828,18 @@ importers:
 
   packages/js/customer-effort-score:
     dependencies:
+      '@woocommerce/data':
+        specifier: workspace:*
+        version: link:../data
       '@woocommerce/experimental':
         specifier: workspace:*
         version: link:../experimental
+      '@woocommerce/navigation':
+        specifier: workspace:*
+        version: link:../navigation
+      '@woocommerce/tracks':
+        specifier: workspace:*
+        version: link:../tracks
       '@wordpress/components':
         specifier: catalog:wp-min
         version: 30.6.5(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -877,9 +886,6 @@ importers:
       '@types/testing-library__jest-dom':
         specifier: ^5.14.9
         version: 5.14.9
-      '@woocommerce/data':
-        specifier: workspace:*
-        version: link:../data
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
@@ -892,15 +898,15 @@ importers:
       '@woocommerce/internal-js-tests':
         specifier: workspace:*
         version: link:../internal-js-tests
-      '@woocommerce/navigation':
-        specifier: workspace:*
-        version: link:../navigation
-      '@woocommerce/tracks':
-        specifier: workspace:*
-        version: link:../tracks
+      '@wordpress/api-fetch':
+        specifier: catalog:wp-min
+        version: 7.33.1
       '@wordpress/browserslist-config':
         specifier: next
         version: 6.43.1-next.v.202604091042.0
+      '@wordpress/data-controls':
+        specifier: catalog:wp-min
+        version: 4.33.1(@types/react@18.3.28)(react@18.3.1)
       css-loader:
         specifier: 6.11.x
         version: 6.11.0(webpack@5.97.1)
@@ -1079,9 +1085,6 @@ importers:
 
   packages/js/date:
     dependencies:
-      '@types/d3-time-format':
-        specifier: ^2.3.4
-        version: 2.3.4
       '@wordpress/date':
         specifier: catalog:wp-min
         version: 5.33.1
@@ -1104,6 +1107,9 @@ importers:
       '@babel/core':
         specifier: catalog:tooling
         version: 7.25.7
+      '@types/d3-time-format':
+        specifier: ^2.3.4
+        version: 2.3.4
       '@types/jest':
         specifier: 29.5.x
         version: 29.5.14
@@ -2903,6 +2909,9 @@ importers:
       '@woocommerce/navigation':
         specifier: workspace:*
         version: link:../../../../packages/js/navigation
+      '@woocommerce/notices':
+        specifier: workspace:*
+        version: link:../../../../packages/js/notices
       '@woocommerce/number':
         specifier: workspace:*
         version: link:../../../../packages/js/number
@@ -3059,6 +3068,12 @@ importers:
       memize:
         specifier: ^1.1.0
         version: 1.1.0
+      moment:
+        specifier: ^2.29.4
+        version: 2.30.1
+      prop-types:
+        specifier: ^15.8.1
+        version: 15.8.1
       qrcode.react:
         specifier: ^3.1.0
         version: 3.2.0(react@18.3.1)
@@ -3192,9 +3207,6 @@ importers:
       '@woocommerce/internal-js-tests':
         specifier: workspace:*
         version: link:../../../../packages/js/internal-js-tests
-      '@woocommerce/notices':
-        specifier: workspace:*
-        version: link:../../../../packages/js/notices
       '@wordpress/babel-preset-default':
         specifier: next
         version: 8.43.1-next.v.202604091042.0
@@ -3276,9 +3288,6 @@ importers:
       mini-css-extract-plugin:
         specifier: 2.9.x
         version: 2.9.4(webpack@5.97.1)
-      moment:
-        specifier: ^2.29.4
-        version: 2.30.1
       moment-timezone:
         specifier: ^0.5.43
         version: 0.5.48
@@ -3300,9 +3309,6 @@ importers:
       promptly:
         specifier: ^3.2.0
         version: 3.2.0
-      prop-types:
-        specifier: ^15.8.1
-        version: 15.8.1
       raw-loader:
         specifier: 4.0.x
         version: 4.0.2(webpack@5.97.1)

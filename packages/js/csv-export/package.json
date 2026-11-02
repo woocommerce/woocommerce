@@ -59,12 +59,12 @@
 		"watch:build:project:esm": "node build.mjs --watch"
 	},
 	"dependencies": {
-		"@types/node": "^24.1.0",
 		"browser-filesaver": "^1.1.1"
 	},
 	"devDependencies": {
 		"@babel/core": "catalog:tooling",
 		"@types/jest": "29.5.x",
+		"@types/node": "^24.1.0",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",

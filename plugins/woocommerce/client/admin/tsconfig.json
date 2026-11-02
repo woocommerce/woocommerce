@@ -63,6 +63,9 @@
 			"path": "../../../../packages/js/navigation"
 		},
 		{
+			"path": "../../../../packages/js/notices"
+		},
+		{
 			"path": "../../../../packages/js/number"
 		},
 		{
