@@ -90,6 +90,8 @@ These filters change how WooCommerce calculates fulfillment state and resolves s
 | `woocommerce_fulfillments_auto_fulfill_products` | Return an array of product or variation IDs to fulfill automatically. Receives the IDs array and the `WC_Order` object. |
 | `woocommerce_fulfillment_order_fulfillment_status_text` | Customize the display label for an order-level fulfillment state. |
 | `woocommerce_fulfillment_shipping_providers` | Add or modify shipping providers available to the feature. |
+| `woocommerce_fulfillment_shipment_provider_label` | Customize the provider label used in fulfillment emails, order notes, and the orders list column, after WooCommerce resolves it from the provider list or from fulfillment metadata. Receives the label and the `Fulfillment` object. A value that cannot be rendered as text is ignored. |
+| `woocommerce_rest_prepare_fulfillments_providers` | Add or modify the provider list returned by the fulfillments providers REST endpoint. Receives the providers array and the `WP_REST_Request`. Entries missing `label`, `icon`, `value`, or `url` are dropped. |
 | `woocommerce_fulfillment_parse_tracking_number` | Parse or normalize tracking numbers based on origin and destination countries. |
 | `woocommerce_fulfillment_meta_key_translations` | Customize the translation map for fulfillment metadata labels. |
 | `woocommerce_fulfillment_translate_meta_key` | Customize the label for one metadata key before it is rendered in emails or other UI. |

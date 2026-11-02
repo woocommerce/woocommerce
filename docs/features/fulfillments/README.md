@@ -50,6 +50,7 @@ Each fulfillment row stores the relationship back to the owning entity together 
 
 | Field | Description |
 | --- | --- |
+| `fulfillment_id` | Auto-incrementing primary key. Returned by `$fulfillment->get_id()` and used as the foreign key in the metadata table. |
 | `entity_type` | The supported entity class. Core currently registers the order controller for `WC_Order`. |
 | `entity_id` | The owning order ID. |
 | `status` | The fulfillment status slug, for example `unfulfilled` or `fulfilled`. |
