@@ -117,10 +117,6 @@ class ExtensibleAbilities {
 	 * The resource must be registered with `register_resource()` in the earlier `woocommerce_extensible_abilities_resources_init` action.
 	 * A field declares `get_callback` and `output_schema`, `set_callback` and `input_schema`, or both pairs. The
 	 * first pair makes it readable and the second makes it writable. An incomplete pair is refused.
-	 * A malformed `output_schema` or `input_schema` is refused. A schema must work both in WordPress validation and
-	 * in an MCP client, which compiles it. At every depth it declares a `type`, `required` is a list of property
-	 * names, `properties` is a map of schemas with at least one key, and keywords such as `minLength` or
-	 * `pattern` have the kind of value that JSON Schema defines. Core does not check that a `pattern` compiles.
 	 *
 	 * @since 11.3.0
 	 *
@@ -255,7 +251,6 @@ class ExtensibleAbilities {
 	 *     @type string   $namespace Slug of the extension that owns the filter, such as `subscriptions`.
 	 *     @type string   $filter    Filter name inside the namespace, such as `subscribable`.
 	 *     @type array    $schema    JSON schema of the value. Its `description` tells agents how to use the filter.
-	 *                               A malformed schema is refused, with the rules of `register_field()`.
 	 *     @type callable $callback  Receives the value, sanitized with the schema, and returns query arguments:
 	 *                               a `meta_query`, for products also a `tax_query`, `include_ids` or
 	 *                               `exclude_ids`. Core adds each one to the query with AND. Return a
