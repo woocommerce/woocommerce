@@ -208,10 +208,6 @@ WooCommerce registers purpose-built abilities for core store operations. These a
 - Update order status
 - Add order notes
 
-#### Payments
-
-- Query payment gateways, without their credentials (`woocommerce/payment-gateways-query`)
-
 All operations respect WooCommerce's existing permission system. MCP clients authenticate through the MCP Adapter as a WordPress user.
 
 ### Removed in WooCommerce 11.3
