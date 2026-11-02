@@ -1527,9 +1527,7 @@
 		}
 	},
 	"devDependencies": {
-		"@babel/cli": "catalog:tooling",
 		"@babel/core": "catalog:tooling",
-		"@babel/preset-env": "catalog:tooling",
 		"@faker-js/faker": "^9.3.0",
 		"@playwright/test": "^1.63.0",
 		"@typescript-eslint/eslint-plugin": "^8.63.0",
@@ -1554,7 +1552,6 @@
 		"handlebars": "^4.7.9",
 		"jest": "29.5.x",
 		"playwright-ctrf-json-reporter": "0.0.27",
-		"prettier": "catalog:tooling",
 		"rimraf": "5.0.5",
 		"typescript": "5.7.x",
 		"wp-textdomain": "1.0.1"
