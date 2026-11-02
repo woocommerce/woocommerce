@@ -13,6 +13,16 @@ defined( 'ABSPATH' ) || exit;
 class WC_Beta_Tester_Admin_Menus {
 
 	/**
+	 * Environment values the WooCommerce Status page marks private and leaves out of its copyable report.
+	 *
+	 * Nested keys use dot notation.
+	 */
+	private const PRIVATE_KEYS = array(
+		'log_directory',
+		'action_scheduler.source_path', // Added to the environment section by WooCommerce PR #69882.
+	);
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -148,15 +158,96 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 	}
 
 	/**
+	 * Get the environment section of the SSR, one "label: value" line per field.
+	 *
+	 * Object and array values are printed as JSON. Private values (see PRIVATE_KEYS) are left out.
+	 *
+	 * @param array|object $environment Environment values, already cast to their schema types.
+	 * @param array        $properties  The environment properties of the system status schema.
+	 * @return string
+	 */
+	private function get_environment_ssr_info( $environment, $properties ) {
+		$ssr = '';
+
+		foreach ( $environment as $key => $value ) {
+			if ( in_array( $key, self::PRIVATE_KEYS, true ) ) {
+				continue;
+			}
+
+			if ( 'external_object_cache' === $key ) {
+				$ssr .= sprintf( "%s: %s\n", 'External object cache', wc_bool_to_string( $value ) );
+				continue;
+			}
+
+			if ( is_bool( $value ) ) {
+				$value = wc_bool_to_string( $value );
+			} elseif ( is_array( $value ) || is_object( $value ) ) {
+				$value = wp_json_encode( $this->remove_private_keys( $value, $key ) );
+			}
+
+			$label = $properties[ $key ]['description'] ?? $key;
+			$ssr  .= sprintf( "%s: %s\n", $label, $value );
+		}
+
+		return $ssr;
+	}
+
+	/**
+	 * Remove the private keys nested under an environment field before it is printed as JSON.
+	 *
+	 * @param array|object $value Field value.
+	 * @param string       $key   Field key, the first segment of each dotted private key.
+	 * @return array|object
+	 */
+	private function remove_private_keys( $value, $key ) {
+		foreach ( self::PRIVATE_KEYS as $private_key ) {
+			$segments = explode( '.', $private_key );
+
+			if ( array_shift( $segments ) === $key && ! empty( $segments ) ) {
+				$value = $this->remove_key_path( $value, $segments );
+			}
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Remove one key path from a nested array or object. The value comes back as an array.
+	 *
+	 * @param array|object $value    Value to remove the key from.
+	 * @param string[]     $segments Key path, outermost segment first.
+	 * @return array
+	 */
+	private function remove_key_path( $value, array $segments ) {
+		$value   = (array) $value;
+		$segment = array_shift( $segments );
+
+		if ( empty( $segments ) ) {
+			unset( $value[ $segment ] );
+		} elseif ( isset( $value[ $segment ] ) && ( is_array( $value[ $segment ] ) || is_object( $value[ $segment ] ) ) ) {
+			$value[ $segment ] = $this->remove_key_path( $value[ $segment ], $segments );
+		}
+
+		return $value;
+	}
+
+	/**
 	 * Constructs a WC System Status Report.
+	 *
+	 * The report is embedded in the admin bar markup of every wp-admin page, so it is only built for
+	 * users who may view the System Status page. Everyone else gets an empty string.
 	 *
 	 * @return string
 	 */
 	protected function construct_ssr() {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- WooCommerce capability, the same gate core uses for the status page.
+			return '';
+		}
+
 		// This function depends on the WC core global being available. Sometimes, such as when we deactivate
 		// WC to install a live branches version, WC will not be available and cause a crash if we don't exit early
 		// here.
-		if ( ! class_exists( 'WC' ) ) {
+		if ( ! function_exists( 'WC' ) ) {
 			return '';
 		}
 
@@ -175,7 +266,7 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 			// Get SSR.
 			$api      = new WC_REST_System_Status_Controller();
 			$schema   = $api->get_item_schema();
-			$mappings = $api->get_item_mappings();
+			$mappings = $api->get_item_mappings_per_fields( array( 'environment' ) );
 			$response = array();
 
 			foreach ( $mappings as $section => $values ) {
@@ -188,19 +279,10 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 				$response[ $section ] = $values;
 			}
 
-			$ssr = '';
-			foreach ( $response['environment'] as $key => $value ) {
-				$index = $key;
-				if ( 'external_object_cache' === $index ) {
-					$ssr .= sprintf( "%s: %s\n", 'External object cache', wc_bool_to_string( $value ) );
-					continue;
-				}
+			$ssr = $this->get_environment_ssr_info( $response['environment'], $schema['properties']['environment']['properties'] );
 
-				if ( is_bool( $value ) ) {
-					$value = wc_bool_to_string( $value );
-				}
-
-				$ssr .= sprintf( "%s: %s\n", $schema['properties']['environment']['properties'][ $index ]['description'], $value );
+			if ( ! class_exists( 'WC_Plugin_Updates' ) ) {
+				include_once WC_ABSPATH . 'includes/admin/plugin-updates/class-wc-plugin-updates.php';
 			}
 
 			$active_plugins   = $api->get_active_plugins();

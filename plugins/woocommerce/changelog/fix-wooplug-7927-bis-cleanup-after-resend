@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Keep unverified back-in-stock sign-ups from being cleaned up right after the verification email is resent.
