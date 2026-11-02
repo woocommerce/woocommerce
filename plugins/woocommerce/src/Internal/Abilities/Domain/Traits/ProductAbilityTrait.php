@@ -709,15 +709,16 @@ trait ProductAbilityTrait {
 	}
 
 	/**
-	 * Sync the parent of a saved variation, so its price range and stock
-	 * status follow the variation.
+	 * The variable parent of a saved variation. The call syncs and saves it
+	 * after the variation, so it is a secondary object of the call.
 	 *
-	 * @param \WC_Product $product Saved product.
+	 * @param \WC_Product $product Product.
+	 * @return \WC_Product_Variable|null Null when the product is not a variation of a variable product.
 	 */
-	protected static function sync_variation_parent( \WC_Product $product ): void {
-		if ( $product instanceof \WC_Product_Variation && $product->get_parent_id() > 0 ) {
-			\WC_Product_Variable::sync( $product->get_parent_id() );
-		}
+	protected static function get_variable_parent( \WC_Product $product ): ?\WC_Product_Variable {
+		$parent = $product instanceof \WC_Product_Variation && $product->get_parent_id() > 0 ? wc_get_product( $product->get_parent_id() ) : null;
+
+		return $parent instanceof \WC_Product_Variable ? $parent : null;
 	}
 
 	/**

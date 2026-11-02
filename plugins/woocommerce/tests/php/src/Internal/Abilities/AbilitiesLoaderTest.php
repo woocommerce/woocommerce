@@ -2317,6 +2317,44 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should require the delete permission on the parent for a variation item with delete.
+	 */
+	public function test_variation_delete_through_the_parent_requires_the_delete_permission(): void {
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[] = $created['product']['id'];
+		$update                      = array(
+			'id'         => $created['product']['id'],
+			'variations' => array(
+				array(
+					'id'            => $created['product']['variation_ids'][0],
+					'regular_price' => '9.00',
+				),
+			),
+		);
+		$delete                      = array(
+			'id'         => $created['product']['id'],
+			'variations' => array(
+				array(
+					'id'     => $created['product']['variation_ids'][0],
+					'delete' => true,
+				),
+			),
+		);
+
+		$deny = static fn( $caps, $cap ) => 'delete_post' === $cap ? array( 'do_not_allow' ) : $caps;
+		add_filter( 'map_meta_cap', $deny, 10, 2 );
+		try {
+			$this->assertTrue( ProductUpdate::can_update_product( $update ) );
+			$this->assertFalse( ProductUpdate::can_update_product( $delete ) );
+		} finally {
+			remove_filter( 'map_meta_cap', $deny, 10 );
+		}
+
+		$this->assertTrue( ProductUpdate::can_update_product( $delete ) );
+	}
+
+	/**
 	 * @testdox Should nest transactions with savepoints.
 	 */
 	public function test_transaction_query_nests_with_savepoints(): void {

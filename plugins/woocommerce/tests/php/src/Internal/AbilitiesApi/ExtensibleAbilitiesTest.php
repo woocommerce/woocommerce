@@ -1503,6 +1503,126 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should give a sync the parent that a variation update saves.
+	 */
+	public function test_a_sync_gets_the_parent_of_an_updated_variation(): void {
+		$saved = array();
+		$this->register_sync(
+			'product',
+			'test-ext',
+			static function ( array $objects ) use ( &$saved ) {
+				$saved = array_map( static fn( \WC_Data $item ) => $item->get_id(), $objects );
+				return null;
+			}
+		);
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+
+		$this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'            => $created['product']['variation_ids'][0],
+				'regular_price' => '8.00',
+			)
+		);
+
+		$this->assertSame( array( $created['product']['variation_ids'][0], $created['product']['id'] ), $saved );
+		$this->assertSame( '8.00', wc_get_product( $created['product']['id'] )->get_price() );
+	}
+
+	/**
+	 * @testdox Should give a validator every object of the call, with the field writes of all of them applied.
+	 */
+	public function test_a_validator_sees_the_other_variations_of_the_call(): void {
+		$seen = array();
+		$this->register_validator(
+			'product',
+			'test-ext',
+			static function ( \WC_Product $product, ActionableAbility $ability, array $context ) use ( &$seen ) {
+				if ( $product instanceof \WC_Product_Variation ) {
+					$seen[ $product->get_sku() ] = array_map( static fn( \WC_Product $item ) => $item->get_meta( '_test_color' ), $context['objects'] );
+				}
+				return null;
+			}
+		);
+		$input                                = $this->get_shirt_input();
+		$input['variations'][0]['extensions'] = array( 'test-ext' => array( 'color' => 'red' ) );
+		$input['variations'][1]['extensions'] = array( 'test-ext' => array( 'color' => 'blue' ) );
+
+		$this->run_ability( 'woocommerce/product-create', $input );
+
+		$this->assertSame( array( '', 'red', 'blue' ), $seen['shirt-s'], 'The first variation sees the color of the second one.' );
+		$this->assertSame( array( '', 'red', 'blue' ), $seen['shirt-m'] );
+	}
+
+	/**
+	 * @testdox Should drop the cache of a deleted product when a delete hook throws.
+	 */
+	public function test_a_throwing_delete_hook_drops_the_cache_of_the_product(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$cleaned = array();
+		$record  = static function ( $id ) use ( &$cleaned ) {
+			$cleaned[] = (int) $id;
+		};
+		$this->add_test_action(
+			'woocommerce_delete_product',
+			static function () use ( $record ) {
+				add_action( 'clean_post_cache', $record );
+				throw new \RuntimeException( 'Delete hook failed.' );
+			}
+		);
+
+		try {
+			$result = wp_get_ability( 'woocommerce/product-delete' )->execute(
+				array(
+					'id'    => $product->get_id(),
+					'force' => true,
+				)
+			);
+		} finally {
+			remove_action( 'clean_post_cache', $record );
+		}
+
+		$this->assertWPError( $result );
+		$this->assertContains( $product->get_id(), $cleaned );
+	}
+
+	/**
+	 * @testdox Should drop the cache of an order when a sync refuses the change.
+	 */
+	public function test_a_sync_refusal_drops_the_cache_of_the_order(): void {
+		$this->register_order_status_ability();
+		$order   = \WC_Helper_Order::create_order();
+		$cleaned = array();
+		$record  = static function ( $id ) use ( &$cleaned ) {
+			$cleaned[] = (int) $id;
+		};
+		$this->register_sync(
+			'order',
+			'test-ext',
+			static function () use ( $record ) {
+				add_action( 'clean_post_cache', $record );
+				return new \WP_Error( 'test_refused', 'Refused.' );
+			}
+		);
+
+		try {
+			$response = $this->run_ability_response(
+				'test-ext/order-status',
+				array(
+					'id'     => $order->get_id(),
+					'status' => 'completed',
+				)
+			);
+		} finally {
+			remove_action( 'clean_post_cache', $record );
+		}
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertContains( $order->get_id(), $cleaned );
+		$this->assertNotSame( 'completed', wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
 	 * @testdox Should let a validator refuse a delete, and then delete nothing.
 	 */
 	public function test_a_validator_can_refuse_a_delete(): void {

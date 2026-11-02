@@ -507,7 +507,11 @@ class ExtensibleAbilities {
 	 *                               has no parent ID and a rule reads the parent from here.
 	 *                               `$context['deleting']` is true when the call deletes or trashes the object,
 	 *                               such as a variation of a deleted parent, or an item with `delete` in the
-	 *                               `variations` input. It returns a WP_Error to refuse the
+	 *                               `variations` input. `$context['objects']` is every object the call saves,
+	 *                               the primary object first, with the field writes of all of them applied, so
+	 *                               a rule can compare a variation with the other variations of the same call.
+	 *                               `$context['objects_to_delete']` is every object the call deletes or
+	 *                               trashes. It returns a WP_Error to refuse the
 	 *                               change, and then nothing is saved. The error gets the namespace in its
 	 *                               data, and the 400 status when it has no status. Its message can name the
 	 *                               ability or screen to use instead. Rules:

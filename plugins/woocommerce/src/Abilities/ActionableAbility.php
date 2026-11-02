@@ -26,9 +26,9 @@ defined( 'ABSPATH' ) || exit;
  * `additionalProperties` to false rejects it instead.
  *
  * The object that load() returns is the primary object. An ability that saves
- * more objects returns them from change(). These are the secondary objects. Each
- * object gets the field writes and the validators of its own resource before
- * the first save. The objects that get_objects_to_delete() lists get the
+ * more objects returns them from change(). These are the secondary objects. The field
+ * writes of every object run first, then the validators of each object's own
+ * resource, before the first save. The objects that get_objects_to_delete() lists get the
  * validators too.
  *
  * Only save() saves, inside a database transaction. A WP_Error or an exception
@@ -235,34 +235,30 @@ abstract class ActionableAbility extends \WP_Ability {
 			$objects[] = array( $secondary[0], $fields, $resource_name );
 		}
 
-		$deleting = $this->get_objects_to_delete();
-		foreach ( $objects as list( $object, $fields, $resource_name ) ) {
+		foreach ( $objects as list( $object, $fields ) ) {
 			$rejected = $this->apply_fields( $object, $fields );
-			if ( null === $rejected && $enabled ) {
-				$rejected = $this->validate(
-					$object,
-					$resource_name,
-					array(
-						'primary'  => $subject,
-						'deleting' => in_array( $object, $deleting, true ),
-					)
-				);
-			}
 			if ( null !== $rejected ) {
 				return $rejected;
 			}
 		}
 
-		foreach ( $enabled ? $deleting : array() as $object ) {
-			if ( in_array( $object, array_column( $objects, 0 ), true ) ) {
-				continue;
+		$deleting = $this->get_objects_to_delete();
+		$staged   = array_column( $objects, 0 );
+		$to_check = $objects;
+		foreach ( $deleting as $object ) {
+			if ( ! in_array( $object, $staged, true ) ) {
+				$to_check[] = array( $object, array(), $this->get_resource() );
 			}
+		}
+		foreach ( $enabled ? $to_check : array() as list( $object, , $resource_name ) ) {
 			$rejected = $this->validate(
 				$object,
-				$this->get_resource(),
+				$resource_name,
 				array(
-					'primary'  => $subject,
-					'deleting' => true,
+					'primary'           => $subject,
+					'deleting'          => in_array( $object, $deleting, true ),
+					'objects'           => $staged,
+					'objects_to_delete' => $deleting,
 				)
 			);
 			if ( null !== $rejected ) {
@@ -348,6 +344,9 @@ abstract class ActionableAbility extends \WP_Ability {
 					clean_post_cache( $object->get_parent_id() );
 					wc_delete_product_transients( $object->get_parent_id() );
 				}
+			} elseif ( $id > 0 && $object instanceof \WC_Abstract_Order ) {
+				wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class )->remove( $id );
+				clean_post_cache( $id );
 			}
 		}
 	}
@@ -441,9 +440,9 @@ abstract class ActionableAbility extends \WP_Ability {
 	/**
 	 * Run the validators of a resource on the changed object.
 	 *
-	 * @param \WC_Data                                 $subject       Changed object.
-	 * @param string                                   $resource_name Resource of the object.
-	 * @param array{primary: \WC_Data, deleting: bool} $context       The primary object of the call, and whether the call deletes or trashes the object.
+	 * @param \WC_Data $subject       Changed object.
+	 * @param string   $resource_name Resource of the object.
+	 * @param array    $context       The primary object of the call, whether the call deletes or trashes the object, the objects the call saves, and the objects it deletes or trashes.
 	 * @return \WP_Error|null A WP_Error when a validator refuses the change.
 	 */
 	private function validate( $subject, string $resource_name, array $context ): ?\WP_Error {

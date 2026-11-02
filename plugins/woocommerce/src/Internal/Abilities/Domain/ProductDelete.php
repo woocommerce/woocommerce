@@ -180,15 +180,9 @@ class ProductDelete extends ActionableAbility {
 
 		$this->deleting = array_merge( array( $subject ), $subject instanceof \WC_Product_Variable ? self::get_variations_to_delete( $subject ) : array() );
 
-		if ( $subject instanceof \WC_Product_Variation && $subject->get_parent_id() > 0 ) {
-			$parent = wc_get_product( $subject->get_parent_id() );
-			if ( $parent instanceof \WC_Product_Variable ) {
-				$this->parent = $parent;
-				return array( array( $parent, array() ) );
-			}
-		}
+		$this->parent = self::get_variable_parent( $subject );
 
-		return null;
+		return null === $this->parent ? null : array( array( $this->parent, array() ) );
 	}
 
 	/**
@@ -203,6 +197,12 @@ class ProductDelete extends ActionableAbility {
 		$product_id = $this->product_id;
 
 		$removed = array_map( static fn( \WC_Product $product ) => clone $product, $this->deleting );
+		if ( $force ) {
+			$this->deleted = $removed;
+		} else {
+			$this->trashed = $removed;
+		}
+
 		$deleted = $subject->delete( $force );
 
 		if (
@@ -215,12 +215,6 @@ class ProductDelete extends ActionableAbility {
 				__( 'Failed to delete product.', 'woocommerce' ),
 				array( 'status' => 500 )
 			);
-		}
-
-		if ( $force ) {
-			$this->deleted = $removed;
-		} else {
-			$this->trashed = $removed;
 		}
 
 		if ( null !== $this->parent ) {

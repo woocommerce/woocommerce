@@ -92,6 +92,7 @@ class ProductUpdate extends ActionableAbility {
 			'delete' => array(),
 		);
 		$this->deleted    = array();
+		$this->parent     = null;
 
 		$product = self::get_product_from_input( $input );
 
@@ -144,7 +145,7 @@ class ProductUpdate extends ActionableAbility {
 	 *
 	 * @param \WC_Product $subject Product.
 	 * @param array       $input   Ability input.
-	 * @return null|\WP_Error|array<int, array{0: \WC_Product_Variation, 1: array}> The variations that the input names, each with the `extensions` input of its `variations` item.
+	 * @return null|\WP_Error|array<int, array{0: \WC_Product, 1: array}> The variations that the input names, each with the `extensions` input of its `variations` item. For a variation, its parent.
 	 */
 	protected function change( $subject, array $input ) {
 		$product_config = self::get_product_config_for_product( $subject );
@@ -172,7 +173,9 @@ class ProductUpdate extends ActionableAbility {
 				return $plan['save'];
 			}
 
-			return null;
+			$this->parent = self::get_variable_parent( $subject );
+
+			return null === $this->parent ? null : array( array( $this->parent, array() ) );
 		} catch ( \WC_Data_Exception $exception ) {
 			return self::get_product_data_exception_error( $exception );
 		}
@@ -185,6 +188,13 @@ class ProductUpdate extends ActionableAbility {
 	 * @var \WC_Product_Variation[]
 	 */
 	private array $deleted = array();
+
+	/**
+	 * The parent of an updated variation, synced after the save.
+	 *
+	 * @var \WC_Product_Variable|null
+	 */
+	private ?\WC_Product_Variable $parent = null;
 
 	/**
 	 * The variations that the `variations` input marked for deletion.
@@ -221,7 +231,9 @@ class ProductUpdate extends ActionableAbility {
 			return self::save_variations( $subject, $this->variations, 'woocommerce_product_update_failed' );
 		}
 
-		self::sync_variation_parent( $subject );
+		if ( null !== $this->parent ) {
+			self::sync_variable_parent( $this->parent );
+		}
 
 		return null;
 	}
@@ -246,8 +258,11 @@ class ProductUpdate extends ActionableAbility {
 	 */
 	public static function can_update_product( $input = array() ): bool {
 		$product_id = self::get_product_permission_id( self::get_id_from_input( $input ) );
+		$deletes    = is_array( $input ) && is_array( $input['variations'] ?? null ) && ! empty( array_filter( array_column( $input['variations'], 'delete' ) ) );
 
-		return $product_id > 0 && wc_rest_check_post_permissions( 'product', 'edit', $product_id );
+		return $product_id > 0
+			&& wc_rest_check_post_permissions( 'product', 'edit', $product_id )
+			&& ( ! $deletes || wc_rest_check_post_permissions( 'product', 'delete', $product_id ) );
 	}
 
 	/**

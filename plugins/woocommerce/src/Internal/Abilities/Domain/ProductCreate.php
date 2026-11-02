@@ -134,7 +134,7 @@ class ProductCreate extends ActionableAbility {
 	 *
 	 * @param \WC_Product $subject Product.
 	 * @param array       $input   Ability input.
-	 * @return null|\WP_Error|array<int, array{0: \WC_Product_Variation, 1: array}> For a variable product, its variations, each with the `extensions` input of its `variations` item.
+	 * @return null|\WP_Error|array<int, array{0: \WC_Product, 1: array}> For a variable product, its variations, each with the `extensions` input of its `variations` item. For a variation, its parent.
 	 */
 	protected function change( $subject, array $input ) {
 		$product_config = self::get_product_config_for_product( $subject, true );
@@ -159,7 +159,8 @@ class ProductCreate extends ActionableAbility {
 				if ( is_wp_error( $error ) ) {
 					return $error;
 				}
-				return self::check_variation_siblings( $this->variation_parent, array( $subject ) );
+				$error = self::check_variation_siblings( $this->variation_parent, array( $subject ) );
+				return is_wp_error( $error ) ? $error : array( array( $this->variation_parent, array() ) );
 			}
 
 			if ( $subject instanceof \WC_Product_Variable ) {
@@ -193,7 +194,9 @@ class ProductCreate extends ActionableAbility {
 			return self::save_variations( $subject, $this->variations, 'woocommerce_product_create_failed' );
 		}
 
-		self::sync_variation_parent( $subject );
+		if ( null !== $this->variation_parent ) {
+			self::sync_variable_parent( $this->variation_parent );
+		}
 
 		return null;
 	}
