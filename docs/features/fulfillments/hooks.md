@@ -5,7 +5,7 @@ sidebar_label: Hooks
 
 # Order fulfillments hooks
 
-WooCommerce exposes lifecycle hooks, status filters, provider filters, notification actions, email template hooks, and a CSV importer filter for order fulfillments. These hooks let extensions validate fulfillment data, synchronize external systems, customize tracking behavior, adjust merchant or customer-facing output, and accept header names from warehouse exports.
+WooCommerce exposes lifecycle hooks, status filters, provider filters, notification actions, email template hooks, and CSV importer hooks for order fulfillments. These hooks let extensions validate fulfillment data, synchronize external systems, customize tracking behavior, adjust merchant or customer-facing output, accept header names from warehouse exports, and react when a staged import file is cleaned up.
 
 ## Data lifecycle filters
 
@@ -167,4 +167,20 @@ add_filter( 'woocommerce_fulfillments_csv_importer_column_aliases', function( $a
 
     return $aliases;
 } );
+```
+
+## CSV importer actions
+
+The import wizard stages the uploaded CSV and schedules its cleanup through Action Scheduler. The action fires after the import session's lifetime (one hour plus a five-minute grace period) so the staged file is removed when the wizard never finished. The default handler, `ImportSession::handle_cleanup_hook()`, leaves the file alone and schedules the action again while the session is still active, and deletes the file and its attachment post once the session has expired. The action is only scheduled while the `fulfillments` feature is enabled, but the handler is attached regardless of the flag so a pending cleanup still runs after the feature is turned off.
+
+| Hook | Parameters | Purpose |
+| --- | --- | --- |
+| `woocommerce_fulfillments_import_session_cleanup` | `int $user_id`, `string $token`, `string $file`, `int $attachment_id` | React when an abandoned import upload is cleaned up, for example to log it or to remove data stored alongside the session. `$file` is the absolute path of the staged CSV and `$attachment_id` is the attachment post created for it, or `0`. |
+
+```php
+add_action( 'woocommerce_fulfillments_import_session_cleanup', 'log_abandoned_import', 10, 4 );
+
+function log_abandoned_import( $user_id, $token, $file, $attachment_id ) {
+    error_log( sprintf( 'Import session %s of user %d was abandoned', $token, $user_id ) );
+}
 ```
