@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+Comment: Experimental agent readiness scan runs in the background with a REST endpoint; behind a hidden flag, no merchant change.
+
