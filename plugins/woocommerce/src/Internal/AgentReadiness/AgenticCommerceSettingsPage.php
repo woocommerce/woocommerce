@@ -134,6 +134,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 * the store policy fields, the store address and Security.
 	 */
 	public function output(): void {
+		$report  = $this->agent_readiness->get_cached_report();
 		$checks  = $this->store_conditions->all();
 		$failing = $this->store_conditions->failing_required( $checks );
 
@@ -142,8 +143,9 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		echo '<div class="wc-agentic-commerce">';
 		echo '<p class="wc-agentic-commerce-intro">' . esc_html__( 'Let AI shopping assistants find your products, build a cart, and send shoppers to your checkout to pay. Uses the Universal Commerce Protocol (UCP).', 'woocommerce' ) . '</p>';
 		$this->render_switch( $checks, count( $failing ) );
-		$this->render_visibility( $this->agent_readiness->get_cached_report() );
+		$this->render_visibility( $report );
 		$this->render_status( $checks, $this->ucp_switch->status( $failing ), count( $failing ) );
+		$this->render_readiness( self::scanned_checks( $report, $checks ), (bool) ( array_column( $checks, 'ok', 'id' )['launched'] ?? true ) );
 
 		echo '<div class="wc-agentic-commerce-card wc-agentic-commerce-policies">';
 		parent::output();
@@ -152,6 +154,32 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		$this->render_address_and_test();
 		$this->render_security();
 		echo '</div>';
+	}
+
+	/**
+	 * Store checks the last scan ran that aren't read live here: the ones that
+	 * read what the store returns. Never required, so they don't affect the switch.
+	 *
+	 * @param array<string, mixed>|null    $report Stored report.
+	 * @param array<int, array{id:string}> $live   Store conditions read now.
+	 * @return array<int, array{id:string,level:string,ok:bool|null,name:string,fix_url:string}>
+	 */
+	private static function scanned_checks( ?array $report, array $live ): array {
+		$live_ids = array_column( $live, 'id' );
+		$scanned  = array();
+		foreach ( is_array( $report['store_checks'] ?? null ) ? $report['store_checks'] : array() as $check ) {
+			if ( ! is_array( $check ) || ! isset( $check['id'], $check['name'] ) || in_array( $check['id'], $live_ids, true ) ) {
+				continue;
+			}
+			$scanned[] = array(
+				'id'      => (string) $check['id'],
+				'level'   => StoreConditions::LEVEL_RECOMMENDED,
+				'ok'      => isset( $check['ok'] ) ? (bool) $check['ok'] : null,
+				'name'    => (string) $check['name'],
+				'fix_url' => (string) ( $check['fix_url'] ?? '' ),
+			);
+		}
+		return $scanned;
 	}
 
 	/**
@@ -394,6 +422,50 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 					</div>
 				<?php endif; ?>
 			<?php endforeach; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Agent readiness: the checks the last scan ran on what the store returns. They never
+	 * affect the switch, so they sit apart from the setup checks in Status.
+	 *
+	 * @param array<int, array{id:string,level:string,ok:bool|null,name:string,fix_url:string}> $checks   Scanned checks.
+	 * @param bool                                                                              $launched Whether the store is launched.
+	 */
+	private function render_readiness( array $checks, bool $launched ): void {
+		?>
+		<div class="wc-agentic-commerce-card wc-agentic-commerce-readiness">
+			<div class="wc-agentic-commerce-card__header">
+				<h2><?php esc_html_e( 'Agent readiness', 'woocommerce' ); ?></h2>
+				<p><?php esc_html_e( 'What agents get when they visit your store, from the last check.', 'woocommerce' ); ?></p>
+			</div>
+			<?php if ( array() === $checks ) : ?>
+				<p class="wc-agentic-commerce-card__body"><?php esc_html_e( 'Results appear after the first agent readiness check.', 'woocommerce' ); ?></p>
+			<?php else : ?>
+				<ul>
+					<?php foreach ( $checks as $check ) : ?>
+						<?php
+						if ( null === $check['ok'] ) {
+							$badge = array( 'check', __( 'Couldn\'t check', 'woocommerce' ) );
+						} elseif ( $check['ok'] ) {
+							$badge = array( 'pass', __( 'Pass', 'woocommerce' ) );
+						} else {
+							$badge = array( 'check', __( 'Check', 'woocommerce' ) );
+						}
+						?>
+						<li class="wc-agentic-commerce-check">
+							<mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--<?php echo esc_attr( $badge[0] ); ?>"><?php echo esc_html( $badge[1] ); ?></mark>
+							<span class="wc-agentic-commerce-check__text"><?php echo esc_html( $check['name'] ); ?></span>
+							<?php if ( null === $check['ok'] ) : ?>
+								<span class="description"><?php echo $launched ? esc_html__( 'Your store could not load its own page. The next check tries again.', 'woocommerce' ) : esc_html__( 'Launch your store to run this check.', 'woocommerce' ); ?></span>
+							<?php elseif ( ! $check['ok'] && '' !== $check['fix_url'] ) : ?>
+								<a class="button" href="<?php echo esc_url( $check['fix_url'] ); ?>"><?php echo str_starts_with( $check['fix_url'], admin_url() ) ? esc_html__( 'Open settings', 'woocommerce' ) : esc_html__( 'Learn how', 'woocommerce' ); ?></a>
+							<?php endif; ?>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
 		</div>
 		<?php
 	}
