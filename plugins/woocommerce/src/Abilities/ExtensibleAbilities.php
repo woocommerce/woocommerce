@@ -102,8 +102,8 @@ class ExtensibleAbilities {
 		'minimum'          => 'a number',
 		'maximum'          => 'a number',
 		'multipleOf'       => 'a number above 0',
-		'exclusiveMinimum' => 'a number equal to its "minimum"',
-		'exclusiveMaximum' => 'a number equal to its "maximum"',
+		'exclusiveMinimum' => 'a number other than 0 equal to its "minimum"',
+		'exclusiveMaximum' => 'a number other than 0 equal to its "maximum"',
 		'pattern'          => 'a string',
 		'format'           => 'a string',
 		'uniqueItems'      => 'true or false',
@@ -281,10 +281,12 @@ class ExtensibleAbilities {
 	 * The MCP SDK client compiles every schema when it lists the tools, and one schema
 	 * that does not compile stops that client from listing any tool:
 	 * 1. `required` is a list of strings, `enum` is a list with at least one value, and
-	 *    `properties` is a map with at least one key.
+	 *    `properties` is a map with at least one key. A list has the keys 0, 1, 2 in
+	 *    order, because JSON publishes any other array as an object.
 	 * 2. Each keyword in KEYWORD_VALUES has the kind of value listed there. For this
 	 *    reason `exclusiveMinimum` and `exclusiveMaximum` are numbers equal to `minimum`
-	 *    and `maximum`, the one form that both places read the same way.
+	 *    and `maximum`, the one form that both places read the same way. A bound of 0
+	 *    is refused: WordPress reads 0 as false and accepts 0, and the client refuses it.
 	 * 3. A `pattern` is not checked as a regular expression. The client compiles it as
 	 *    a JavaScript regular expression, and PHP cannot check that.
 	 *
@@ -312,10 +314,10 @@ class ExtensibleAbilities {
 		}
 
 		$types = (array) ( $schema['type'] ?? array() );
-		if ( isset( $schema['type'] ) && ( empty( $types ) || ! wp_is_numeric_array( $types ) || ! empty( array_filter( $types, static fn( $type ) => ! in_array( $type, self::SCHEMA_TYPES, true ) ) ) ) ) {
+		if ( isset( $schema['type'] ) && ( empty( $types ) || ! self::is_list( $types ) || ! empty( array_filter( $types, static fn( $type ) => ! in_array( $type, self::SCHEMA_TYPES, true ) ) ) ) ) {
 			return sprintf( '"%s" declares an unknown "type".', $path );
 		}
-		if ( array_key_exists( 'required', $schema ) && ( ! is_array( $schema['required'] ) || ! wp_is_numeric_array( $schema['required'] ) || ! empty( array_filter( $schema['required'], static fn( $name ) => ! is_string( $name ) ) ) ) ) {
+		if ( array_key_exists( 'required', $schema ) && ( ! self::is_list( $schema['required'] ) || ! empty( array_filter( $schema['required'], static fn( $name ) => ! is_string( $name ) ) ) ) ) {
 			return sprintf( 'The "required" of "%s" must be a list of property names.', $path );
 		}
 		foreach ( self::KEYWORD_VALUES as $keyword => $expected ) {
@@ -328,8 +330,8 @@ class ExtensibleAbilities {
 				'an integer of 0 or more'         => is_int( $value ) && $value >= 0,
 				'a number'                        => $is_number,
 				'a number above 0'                => $is_number && $value > 0,
-				'a number equal to its "minimum"' => $is_number && isset( $schema['minimum'] ) && $value == $schema['minimum'], // phpcs:ignore Universal.Operators.StrictComparisons.LooseEqual -- 1 and 1.0 are the same bound.
-				'a number equal to its "maximum"' => $is_number && isset( $schema['maximum'] ) && $value == $schema['maximum'], // phpcs:ignore Universal.Operators.StrictComparisons.LooseEqual -- 1 and 1.0 are the same bound.
+				'a number other than 0 equal to its "minimum"' => $is_number && 0 != $value && isset( $schema['minimum'] ) && $value == $schema['minimum'], // phpcs:ignore Universal.Operators.StrictComparisons.LooseEqual -- 1 and 1.0 are the same bound.
+				'a number other than 0 equal to its "maximum"' => $is_number && 0 != $value && isset( $schema['maximum'] ) && $value == $schema['maximum'], // phpcs:ignore Universal.Operators.StrictComparisons.LooseEqual -- 1 and 1.0 are the same bound.
 				'a string'                        => is_string( $value ),
 				'true or false'                   => is_bool( $value ),
 			);
@@ -337,7 +339,7 @@ class ExtensibleAbilities {
 				return sprintf( 'The "%1$s" of "%2$s" must be %3$s.', $keyword, $path, $expected );
 			}
 		}
-		if ( array_key_exists( 'enum', $schema ) && ( ! is_array( $schema['enum'] ) || empty( $schema['enum'] ) || ! wp_is_numeric_array( $schema['enum'] ) ) ) {
+		if ( array_key_exists( 'enum', $schema ) && ( empty( $schema['enum'] ) || ! self::is_list( $schema['enum'] ) ) ) {
 			return sprintf( 'The "enum" of "%s" must be a list of values.', $path );
 		}
 
@@ -359,7 +361,7 @@ class ExtensibleAbilities {
 			$children[ $path . '.additionalProperties' ] = $schema['additionalProperties'];
 		}
 		foreach ( $combinators as $keyword ) {
-			if ( ! is_array( $schema[ $keyword ] ) || empty( $schema[ $keyword ] ) || ! wp_is_numeric_array( $schema[ $keyword ] ) ) {
+			if ( empty( $schema[ $keyword ] ) || ! self::is_list( $schema[ $keyword ] ) ) {
 				return sprintf( 'The "%1$s" of "%2$s" must be a list of schemas.', $keyword, $path );
 			}
 			foreach ( $schema[ $keyword ] as $index => $child ) {
@@ -374,6 +376,16 @@ class ExtensibleAbilities {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Whether a value is an array with the keys 0, 1, 2 in order, which JSON publishes as a list.
+	 *
+	 * @param mixed $value Value to check.
+	 * @return bool True when the value is a list.
+	 */
+	private static function is_list( $value ): bool {
+		return is_array( $value ) && array_values( $value ) === $value;
 	}
 
 	/**

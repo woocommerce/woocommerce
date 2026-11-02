@@ -1342,6 +1342,15 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			),
 			'required map'                => array( $object + array( 'required' => array( 'key' => 'a' ) ) ),
 			'required numbers'            => array( $object + array( 'required' => array( 1 ) ) ),
+			'required sparse'             => array( $object + array( 'required' => array( 1 => 'a' ) ) ),
+			'enum sparse'                 => array(
+				array(
+					'type' => 'string',
+					'enum' => array( 1 => 'a' ),
+				),
+			),
+			'type sparse'                 => array( array( 'type' => array( 1 => 'string' ) ) ),
+			'anyOf sparse'                => array( $object + array( 'properties' => array( 'a' => array( 'anyOf' => array( 1 => array( 'type' => 'string' ) ) ) ) ) ),
 			'minLength string'            => array(
 				array(
 					'type'      => 'string',
@@ -1384,6 +1393,20 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 					'type'             => 'number',
 					'maximum'          => 5,
 					'exclusiveMaximum' => 4,
+				),
+			),
+			'exclusiveMinimum zero'       => array(
+				array(
+					'type'             => 'number',
+					'minimum'          => 0,
+					'exclusiveMinimum' => 0,
+				),
+			),
+			'exclusiveMaximum zero'       => array(
+				array(
+					'type'             => 'number',
+					'maximum'          => 0.0,
+					'exclusiveMaximum' => 0.0,
 				),
 			),
 			'exclusiveMinimum alone'      => array(
@@ -1521,8 +1544,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				),
 				'amount' => array(
 					'type'             => 'number',
-					'minimum'          => 0,
-					'exclusiveMinimum' => 0,
+					'minimum'          => 1,
+					'exclusiveMinimum' => 1,
 					'maximum'          => 100.5,
 					'multipleOf'       => 0.5,
 				),
