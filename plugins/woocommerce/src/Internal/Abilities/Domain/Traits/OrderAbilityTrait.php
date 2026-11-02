@@ -191,10 +191,7 @@ trait OrderAbilityTrait {
 				'shipping'             => array(
 					'type'                 => 'object',
 					'description'          => __( 'Order shipping address. Countries use ISO 3166-1 alpha-2 codes, and states use WooCommerce state codes.', 'woocommerce' ),
-					'properties'           => array_fill_keys(
-						array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'state', 'postcode', 'country', 'phone' ),
-						array( 'type' => 'string' )
-					),
+					'properties'           => array_fill_keys( self::shipping_address_fields(), array( 'type' => 'string' ) ),
 					'additionalProperties' => false,
 				),
 				'shipping_lines'       => array(
@@ -332,6 +329,16 @@ trait OrderAbilityTrait {
 	}
 
 	/**
+	 * The shipping address fields of the output. The woocommerce_get_order_address
+	 * filter can add other keys, and the closed output schema refuses them.
+	 *
+	 * @return string[]
+	 */
+	private static function shipping_address_fields(): array {
+		return array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'state', 'postcode', 'country', 'phone' );
+	}
+
+	/**
 	 * Format an order for ability output.
 	 *
 	 * @param \WC_Order $order              Order object.
@@ -353,7 +360,7 @@ trait OrderAbilityTrait {
 			'customer_id'          => $order->get_customer_id(),
 			'payment_method'       => $order->get_payment_method(),
 			'payment_method_title' => $order->get_payment_method_title(),
-			'shipping'             => $order->get_address( 'shipping' ),
+			'shipping'             => array_intersect_key( $order->get_address( 'shipping' ), array_flip( self::shipping_address_fields() ) ),
 		);
 
 		if ( $include_line_items ) {
