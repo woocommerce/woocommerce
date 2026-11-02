@@ -171,12 +171,22 @@ class StatusTab implements RegisterHooksInterface {
 	 * @param array $store_checks Store checks from the report.
 	 */
 	private function render_store_checks( array $store_checks ): void {
-		$failing = array_filter(
-			$store_checks,
-			static function ( $check ) {
-				return empty( $check['ok'] );
+		$failing   = array();
+		$unchecked = array();
+		foreach ( $store_checks as $check ) {
+			if ( array_key_exists( 'ok', $check ) && null === $check['ok'] ) {
+				$unchecked[] = (string) $check['name'];
+			} elseif ( empty( $check['ok'] ) ) {
+				$failing[] = $check;
 			}
-		);
+		}
+		if ( ! empty( $unchecked ) ) {
+			printf(
+				'<div class="notice notice-warning inline"><p><strong>%1$s</strong> %2$s</p></div>',
+				esc_html__( 'Your store could not load its own pages, so these were not checked:', 'woocommerce' ),
+				esc_html( implode( ', ', $unchecked ) )
+			);
+		}
 		if ( empty( $failing ) ) {
 			return;
 		}
