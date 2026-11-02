@@ -333,15 +333,33 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox sync_stock_status() compares child statuses byte-for-byte in each storage mode.
-	 * @dataProvider provider_lookup_table_generating
+	 * Storage modes combined with stored values that differ from `custom_status_a` only in case or trailing space.
 	 *
-	 * @param bool $lookup_table_is_generating Whether lookup table generation is active.
+	 * @return array<string, array{bool, string}>
 	 */
-	public function test_sync_stock_status_compares_child_statuses_byte_for_byte( bool $lookup_table_is_generating ): void {
+	public static function byte_for_byte_comparison_data(): array {
+		$data = array();
+		foreach ( array( false, true ) as $lookup_table_is_generating ) {
+			$storage_name = $lookup_table_is_generating ? 'postmeta' : 'lookup table';
+
+			$data[ "{$storage_name}: different case" ] = array( $lookup_table_is_generating, 'CUSTOM_STATUS_A' );
+			$data[ "{$storage_name}: trailing space" ] = array( $lookup_table_is_generating, 'custom_status_a ' );
+		}
+
+		return $data;
+	}
+
+	/**
+	 * @testdox sync_stock_status() compares child statuses byte-for-byte in each storage mode.
+	 * @dataProvider byte_for_byte_comparison_data
+	 *
+	 * @param bool   $lookup_table_is_generating Whether lookup table generation is active.
+	 * @param string $mutated_stock_status       Stored value of the second child, registered too so only the comparison can reject it.
+	 */
+	public function test_sync_stock_status_compares_child_statuses_byte_for_byte( bool $lookup_table_is_generating, string $mutated_stock_status ): void {
 		global $wpdb;
 
-		$this->register_custom_stock_statuses( array( 'custom_status_a' ) );
+		$this->register_custom_stock_statuses( array( 'custom_status_a', $mutated_stock_status ) );
 		update_option( 'woocommerce_product_lookup_table_is_generating', $lookup_table_is_generating );
 
 		$product          = $this->create_variable_product_with_child_stock_statuses( array( 'custom_status_a', 'custom_status_a' ) );
@@ -351,7 +369,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			$wpdb->update(
 				$wpdb->postmeta,
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Direct mutation is required to create malformed storage.
-				array( 'meta_value' => 'CUSTOM_STATUS_A' ),
+				array( 'meta_value' => $mutated_stock_status ),
 				array(
 					'post_id'  => $mutated_child_id,
 					// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Direct mutation is required to create malformed storage.
@@ -363,7 +381,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		} else {
 			$wpdb->update(
 				$wpdb->wc_product_meta_lookup,
-				array( 'stock_status' => 'CUSTOM_STATUS_A' ),
+				array( 'stock_status' => $mutated_stock_status ),
 				array( 'product_id' => $mutated_child_id ),
 				array( '%s' ),
 				array( '%d' )
@@ -450,6 +468,35 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'custom_status_a', $product->get_stock_status( 'edit' ) );
 		$this->assertSame( array(), $product->get_changes() );
+	}
+
+	/**
+	 * @testdox sync_stock_status() does not inherit a core status from storage when the overridable child checks report none in stock.
+	 */
+	public function test_sync_stock_status_does_not_inherit_core_status_from_storage(): void {
+		$this->register_custom_stock_statuses( array( 'custom_status_a' ) );
+		update_option( 'woocommerce_product_lookup_table_is_generating', false );
+
+		$stored_product = $this->create_variable_product_with_child_stock_statuses( array( ProductStockStatus::IN_STOCK, ProductStockStatus::IN_STOCK ) );
+		$stored_product->save();
+
+		// phpcs:disable Generic.CodeAnalysis, Squiz.Commenting
+		$product = new class( $stored_product->get_id() ) extends WC_Product_Variable {
+			public function child_is_in_stock() {
+				return false;
+			}
+
+			public function child_is_on_backorder() {
+				return false;
+			}
+		};
+		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
+		$this->assertCount( 2, $product->get_children(), 'The overriding product reads the stored children.' );
+
+		$data_store = new WC_Product_Variable_Data_Store_CPT();
+		$data_store->sync_stock_status( $product );
+
+		$this->assertSame( ProductStockStatus::OUT_OF_STOCK, $product->get_stock_status() );
 	}
 
 	/**
