@@ -1409,6 +1409,102 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create and save a fixed cart coupon.
+	 *
+	 * @param string $code        Coupon code.
+	 * @param int    $usage_count Usage count to start with.
+	 * @return WC_Coupon
+	 */
+	private function create_fixed_cart_coupon( string $code, int $usage_count = 0 ): WC_Coupon {
+		$coupon = new WC_Coupon();
+		$coupon->set_code( $code );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 1 );
+		$coupon->set_usage_count( $usage_count );
+		$coupon->save();
+
+		return $coupon;
+	}
+
+	/**
+	 * @testdox Two staged coupons are counted once each when the order is saved.
+	 */
+	public function test_staged_coupons_are_counted_once_each(): void {
+		$order = WC_Helper_Order::create_order();
+		$this->create_fixed_cart_coupon( 'staged-a' );
+		$this->create_fixed_cart_coupon( 'staged-b' );
+
+		$order->stage_coupon( 'staged-a' );
+		$order->stage_coupon( 'staged-b' );
+		$order->save();
+
+		$this->assertSame( 1, ( new WC_Coupon( 'staged-a' ) )->get_usage_count() );
+		$this->assertSame( 1, ( new WC_Coupon( 'staged-b' ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox A staged coupon is counted once when payment_complete() saves the order.
+	 */
+	public function test_staged_coupon_is_counted_once_on_payment_complete(): void {
+		$order = WC_Helper_Order::create_order();
+		$this->create_fixed_cart_coupon( 'staged-paid' );
+
+		$order->stage_coupon( 'staged-paid' );
+		$order->payment_complete();
+
+		$this->assertSame( 1, ( new WC_Coupon( 'staged-paid' ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox A staged coupon is counted on an order that already recorded its coupon usage.
+	 */
+	public function test_staged_coupon_is_counted_on_a_recorded_order(): void {
+		$order = WC_Helper_Order::create_order();
+		$this->create_fixed_cart_coupon( 'recorded' );
+		$this->create_fixed_cart_coupon( 'staged-late' );
+		$order->apply_coupon( 'recorded' );
+
+		$order->stage_coupon( 'staged-late' );
+		$order->save();
+
+		$this->assertSame( 1, ( new WC_Coupon( 'recorded' ) )->get_usage_count() );
+		$this->assertSame( 1, ( new WC_Coupon( 'staged-late' ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Removing a staged coupon before the save leaves no usage of that coupon on the order.
+	 */
+	public function test_removing_a_staged_coupon_leaves_no_usage(): void {
+		$order = WC_Helper_Order::create_order();
+		$kept  = $this->create_fixed_cart_coupon( 'kept' );
+		$this->create_fixed_cart_coupon( 'staged-removed', 1 );
+		$order->apply_coupon( 'kept' );
+
+		$order->stage_coupon( 'staged-removed' );
+		$order->stage_coupon_removal( 'staged-removed' );
+		$order->save();
+
+		$this->assertSame( 1, ( new WC_Coupon( 'kept' ) )->get_usage_count() );
+		$this->assertSame( 1, ( new WC_Coupon( 'staged-removed' ) )->get_usage_count() );
+		$this->assertSame( array( $kept->get_id() ), array_keys( wc_get_order( $order->get_id() )->get_meta( '_coupon_usage_identities' ) ) );
+	}
+
+	/**
+	 * @testdox A staged product item that the order removes before the save is not written.
+	 */
+	public function test_staged_product_item_removed_before_save_is_not_written(): void {
+		$order = new WC_Order();
+		$order->save();
+
+		$order->stage_product_item( WC_Helper_Product::create_simple_product() );
+		$order->stage_order_items_removal( 'line_item' );
+		$order->save();
+
+		$this->assertCount( 0, $order->get_items() );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_items() );
+	}
+
+	/**
 	 * Build an order of a class that overrides the saving methods without overriding their stage_*() methods.
 	 *
 	 * @return WC_Order

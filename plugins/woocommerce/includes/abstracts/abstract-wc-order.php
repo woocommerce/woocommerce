@@ -60,6 +60,20 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	private $deferred_actions = array();
 
 	/**
+	 * Coupons that stage_coupon() applied since the last save, keyed by code. The next save() records their usage.
+	 *
+	 * @var WC_Coupon[]
+	 */
+	private $staged_coupons = array();
+
+	/**
+	 * Whether the order had recorded coupon usage when the save that records the staged coupons started.
+	 *
+	 * @var bool
+	 */
+	private $coupon_usage_recorded_before_save = false;
+
+	/**
 	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
 	 *
 	 * Notes: cart_tax = cart_tax is the new name for the legacy 'order_tax'
@@ -1967,23 +1981,26 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->stage_recalculated_coupons();
 		}
 
-		$this->write_or_defer( 'record_coupon_usage_' . $coupon->get_code(), array( $this, 'record_applied_coupon_usage' ), array( $coupon ), true );
+		if ( $this->writing_through ) {
+			if ( $this->has_recorded_coupon_usage() ) {
+				$this->increase_coupon_usage( array( $coupon ) );
+			}
+			wc_update_coupon_usage_counts( $this->get_id() );
+		} else {
+			$this->staged_coupons[ $coupon->get_code() ] = $coupon;
+			$this->defer_to_save( 'read_coupon_usage_before_save', array( $this, 'read_coupon_usage_before_save' ) );
+			$this->defer_to_save( 'record_staged_coupon_usage', array( $this, 'record_staged_coupon_usage' ), array(), true );
+		}
 
 		return true;
 	}
 
 	/**
-	 * Record the usage of an applied coupon, so counts and validation are correct.
+	 * Whether the stored order has its coupon usage recorded.
 	 *
-	 * @param WC_Coupon $coupon Applied coupon.
+	 * @return bool
 	 */
-	private function record_applied_coupon_usage( WC_Coupon $coupon ): void {
-		$used_by = $this->get_user_id();
-
-		if ( ! $used_by && is_callable( array( $this, 'get_billing_email' ) ) ) {
-			$used_by = $this->get_billing_email();
-		}
-
+	private function has_recorded_coupon_usage(): bool {
 		/**
 		 * Data store wrapper.
 		 *
@@ -1991,14 +2008,56 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 */
 		$order_data_store = $this->get_data_store();
 		// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
-		if ( $order_data_store->has_callable( 'get_recorded_coupon_usage_counts' ) && $order_data_store->get_recorded_coupon_usage_counts( $this ) ) {
-			$coupon->increase_usage_count( $used_by );
-			if ( $coupon->get_id() ) {
-				$this->save_coupon_usage_identities( array( $coupon->get_id() => $used_by ) + $this->get_coupon_usage_identities() );
-			}
+		return $order_data_store->has_callable( 'get_recorded_coupon_usage_counts' ) && $order_data_store->get_recorded_coupon_usage_counts( $this );
+	}
+
+	/**
+	 * Remember whether the order had recorded coupon usage before the write. The write can record the usage of
+	 * every coupon, the staged ones included, through a status change.
+	 */
+	private function read_coupon_usage_before_save(): void {
+		$this->coupon_usage_recorded_before_save = $this->has_recorded_coupon_usage();
+	}
+
+	/**
+	 * Record the usage of the staged coupons once, against the coupons of the saved order. When the order
+	 * already had recorded usage before the write, count the staged coupons, which that usage did not include.
+	 * wc_update_coupon_usage_counts() then counts every coupon of an order that has not recorded usage yet.
+	 */
+	private function record_staged_coupon_usage(): void {
+		$coupons              = $this->staged_coupons;
+		$this->staged_coupons = array();
+
+		if ( $this->coupon_usage_recorded_before_save ) {
+			$this->increase_coupon_usage( $coupons );
 		}
 
 		wc_update_coupon_usage_counts( $this->get_id() );
+	}
+
+	/**
+	 * Increase the usage count of applied coupons, and store the identity each one was counted under.
+	 *
+	 * @param WC_Coupon[] $coupons Applied coupons.
+	 */
+	private function increase_coupon_usage( array $coupons ): void {
+		$used_by = $this->get_user_id();
+
+		if ( ! $used_by && is_callable( array( $this, 'get_billing_email' ) ) ) {
+			$used_by = $this->get_billing_email();
+		}
+
+		$identities = array();
+		foreach ( $coupons as $coupon ) {
+			$coupon->increase_usage_count( $used_by );
+			if ( $coupon->get_id() ) {
+				$identities[ $coupon->get_id() ] = $used_by;
+			}
+		}
+
+		if ( ! empty( $identities ) ) {
+			$this->save_coupon_usage_identities( $identities + $this->get_coupon_usage_identities() );
+		}
 	}
 
 	/**
@@ -2140,15 +2199,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function stage_coupon_removal( $code ) {
 		$this->refuse_unstaged_override( 'remove_coupon', 'stage_coupon_removal' );
 
-		$coupons = $this->get_items( 'coupon' );
-		/**
-		 * Data store wrapper.
-		 *
-		 * @var WC_Data_Store $order_data_store
-		 */
-		$order_data_store = $this->get_data_store();
-		// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
-		$has_recorded = $order_data_store->has_callable( 'get_recorded_coupon_usage_counts' ) && $order_data_store->get_recorded_coupon_usage_counts( $this );
+		$coupons      = $this->get_items( 'coupon' );
+		$has_recorded = $this->has_recorded_coupon_usage();
 
 		$used_by = $this->get_user_id();
 		if ( ! $used_by && is_callable( array( $this, 'get_billing_email' ) ) ) {
@@ -2161,11 +2213,22 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$this->remove_item( $this->get_stored_item_key( $coupon ) );
 				$coupon_object = new WC_Coupon( $code );
 
+				$staged = isset( $this->staged_coupons[ $coupon_object->get_code() ] );
+				if ( $staged ) {
+					unset( $this->staged_coupons[ $coupon_object->get_code() ] );
+					if ( empty( $this->staged_coupons ) ) {
+						$this->defer_to_save( 'read_coupon_usage_before_save', null );
+						$this->defer_to_save( 'record_staged_coupon_usage', null );
+					}
+				}
+
 				if ( $has_recorded ) {
 					// Mirror the stored flag into this instance so clearing it below is tracked as a change and saved.
 					$this->set_recorded_coupon_usage_counts( true );
 
-					$this->write_or_defer( 'release_coupon_usage_' . $coupon_object->get_code(), array( $this, 'release_removed_coupon_usage' ), array( $coupon_object, $used_by ) );
+					if ( ! $staged ) {
+						$this->write_or_defer( 'release_coupon_usage_' . $coupon_object->get_code(), array( $this, 'release_removed_coupon_usage' ), array( $coupon_object, $used_by ) );
+					}
 
 					$remaining_codes = array_filter( $this->get_coupon_codes(), fn( $remaining_code ) => ! StringUtil::is_null_or_whitespace( $remaining_code ) );
 					if ( ! $remaining_codes ) {
@@ -2571,7 +2634,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$item->set_props( $args );
 		$item->set_backorder_meta();
 		$item->set_order_id( $this->get_id() );
-		$this->write_or_defer( 'save_product_item_' . spl_object_id( $item ), array( $item, 'save' ) );
+		if ( $this->writing_through ) {
+			$item->save();
+		}
 		$this->add_item( $item );
 		$this->write_or_defer( 'add_product_action_' . spl_object_id( $item ), array( $this, 'fire_add_product_action' ), array( $item, $product, $qty, $args ), true );
 		wp_cache_delete( 'order-needs-processing-' . $this->get_id(), 'orders' );
@@ -2579,7 +2644,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Fire the deprecated woocommerce_order_add_product action for a saved product item.
+	 * Fire the deprecated woocommerce_order_add_product action for a saved product item. Skip an item that the
+	 * order removed before the save, because save() never wrote it.
 	 *
 	 * @param WC_Order_Item_Product $item    Saved item.
 	 * @param WC_Product|false      $product Product object.
@@ -2587,6 +2653,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param array                 $args    Args for the added product, after the defaults.
 	 */
 	private function fire_add_product_action( $item, $product, $qty, $args ): void {
+		if ( ! $item->get_id() ) {
+			return;
+		}
+
 		wc_do_deprecated_action( 'woocommerce_order_add_product', array( $this->get_id(), $item->get_id(), $product, $qty, $args ), '3.0', 'woocommerce_new_order_item action instead' );
 	}
 
