@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Importer;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\ImportSession;
+use Automattic\WooCommerce\Internal\Admin\ImportExport\CSVUploadHelper;
 
 /**
  * Tests for the ImportSession value object.
@@ -15,13 +16,6 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	private const CLEANUP_GROUP = 'woocommerce-fulfillments-importer';
 
 	/**
-	 * Track sessions to delete in tearDown so stray transients can't bleed between tests.
-	 *
-	 * @var array<int, ImportSession>
-	 */
-	private array $sessions = array();
-
-	/**
 	 * Temporary files created by tests; removed in tearDown.
 	 *
 	 * @var array<int, string>
@@ -29,13 +23,10 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	private array $temp_files = array();
 
 	/**
-	 * Clean up any sessions and files created during a test.
+	 * Clean up files created during a test. Transients and scheduled actions are
+	 * rolled back with the test transaction.
 	 */
 	public function tearDown(): void {
-		foreach ( $this->sessions as $session ) {
-			$session->delete();
-		}
-		$this->sessions = array();
 		foreach ( $this->temp_files as $path ) {
 			if ( file_exists( $path ) ) {
 				wp_delete_file( $path );
@@ -46,14 +37,14 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Create a session and remember it for tearDown.
+	 * Create a session with fixed headers and totals.
 	 *
 	 * @param int    $user_id User ID.
 	 * @param string $file    Staged file path to store.
 	 * @return ImportSession
 	 */
 	private function make_session( int $user_id, string $file = '/tmp/sample.csv' ): ImportSession {
-		$session          = ImportSession::create(
+		return ImportSession::create(
 			$user_id,
 			$file,
 			',',
@@ -62,18 +53,16 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 			false,
 			true
 		);
-		$this->sessions[] = $session;
-		return $session;
 	}
 
 	/**
-	 * Write a small CSV inside the uploads directory and track it for tearDown.
+	 * Write a small CSV inside the wc-imports directory and track it for tearDown.
 	 *
 	 * @return string Absolute path.
 	 */
 	private function make_staged_file(): string {
-		$upload_dir = wp_upload_dir();
-		$file       = trailingslashit( $upload_dir['basedir'] ) . 'wc-fulfillments-import-' . wp_generate_uuid4() . '.csv';
+		$dir  = wc_get_container()->get( CSVUploadHelper::class )->get_import_dir();
+		$file = trailingslashit( $dir ) . 'wc-fulfillments-import-' . wp_generate_uuid4() . '.csv';
 		file_put_contents( $file, "a,b,c\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture write.
 		$this->temp_files[] = $file;
 		return $file;
@@ -294,6 +283,20 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox is_staged_path() accepts files in wc-imports only, not the rest of the uploads directory.
+	 */
+	public function test_is_staged_path_is_limited_to_the_import_directory(): void {
+		$staged = $this->make_staged_file();
+		$media  = trailingslashit( wp_upload_dir()['basedir'] ) . 'wc-fulfillments-import-' . wp_generate_uuid4() . '.csv';
+		file_put_contents( $media, "a,b,c\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture write.
+		$this->temp_files[] = $media;
+
+		$this->assertTrue( ImportSession::is_staged_path( $staged ), 'A file in wc-imports is staged' );
+		$this->assertFalse( ImportSession::is_staged_path( $media ), 'A file elsewhere in uploads is not staged' );
+		$this->assertFalse( ImportSession::is_staged_path( '' ), 'An empty path is not staged' );
+	}
+
+	/**
 	 * @testdox delete() removes the session record, its index pointer and its cleanup action.
 	 */
 	public function test_delete_removes_session_and_cleanup_action(): void {
@@ -307,7 +310,6 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 		$this->assertIsInt( as_next_scheduled_action( ImportSession::CLEANUP_HOOK, $args, self::CLEANUP_GROUP ) );
 
 		$session->delete();
-		$this->sessions = array();
 
 		$this->assertNull( ImportSession::load( 33, $token ) );
 		$this->assertNull( ImportSession::active_for_user( 33 ), 'The index pointer must be cleared' );

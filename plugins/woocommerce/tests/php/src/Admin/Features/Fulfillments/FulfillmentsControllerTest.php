@@ -69,11 +69,11 @@ class FulfillmentsControllerTest extends WC_Unit_Test_Case {
 	public function test_register_attaches_cleanup_handler_with_feature_disabled(): void {
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
 		remove_action( ImportSession::CLEANUP_HOOK, array( ImportSession::class, 'handle_cleanup_hook' ), 10 );
-		$this->assertFalse( has_action( ImportSession::CLEANUP_HOOK, array( ImportSession::class, 'handle_cleanup_hook' ) ) );
+		$this->assertFalse( has_action( ImportSession::CLEANUP_HOOK, array( ImportSession::class, 'handle_cleanup_hook' ) ), 'The cleanup handler must be detached before register() runs' );
 
 		$this->sut->register();
 
-		$this->assertSame( 10, has_action( ImportSession::CLEANUP_HOOK, array( ImportSession::class, 'handle_cleanup_hook' ) ) );
+		$this->assertSame( 10, has_action( ImportSession::CLEANUP_HOOK, array( ImportSession::class, 'handle_cleanup_hook' ) ), 'register() must attach the cleanup handler at priority 10 while the feature is off' );
 	}
 
 	/**
