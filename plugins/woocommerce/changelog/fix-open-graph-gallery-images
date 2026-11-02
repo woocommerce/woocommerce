@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Include available product images in shared link previews when gallery images are missing.
