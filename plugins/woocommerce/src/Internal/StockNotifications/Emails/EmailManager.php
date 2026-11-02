@@ -324,18 +324,23 @@ class EmailManager {
 			return $this->send_stock_notification_email( $notification );
 		}
 
-		if ( is_wp_error( $handled ) ) {
-			wc_get_logger()->warning(
-				sprintf( 'Delivery of notification %d failed: %s', $notification->get_id(), $handled->get_error_message() ),
-				array(
-					'source'          => 'wc-customer-stock-notifications',
-					'notification_id' => $notification->get_id(),
-				)
-			);
-			return false;
+		if ( true === $handled ) {
+			return true;
 		}
 
-		return true === $handled;
+		$reason = is_wp_error( $handled )
+			? $handled->get_error_message()
+			: sprintf( 'the pre-send filter returned %s instead of true, false, null or WP_Error', false === $handled ? 'false' : gettype( $handled ) );
+
+		wc_get_logger()->warning(
+			sprintf( 'Delivery of notification %d failed: %s', $notification->get_id(), $reason ),
+			array(
+				'source'          => 'wc-customer-stock-notifications',
+				'notification_id' => $notification->get_id(),
+			)
+		);
+
+		return false;
 	}
 
 	/**

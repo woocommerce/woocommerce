@@ -189,6 +189,57 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 			'true: handled'             => array( true, true, true ),
 			'false: failed'             => array( false, true, false ),
 			'WP_Error: failed'          => array( new \WP_Error( 'delivery_failed', 'Provider unreachable.' ), true, false ),
+			'string: failed'            => array( 'sent', true, false ),
+		);
+	}
+
+	/**
+	 * @testdox Should log a warning naming the notification whenever the pre-send filter does not report success.
+	 *
+	 * @dataProvider pre_send_filter_failure_provider
+	 *
+	 * @param mixed  $handled  What the `woocommerce_customer_stock_notification_pre_send` filter returns.
+	 * @param string $expected Text the logged warning must contain.
+	 */
+	public function test_deliver_stock_notification_logs_a_warning_when_the_pre_send_filter_fails( $handled, string $expected ): void {
+		$notification = $this->build_notification();
+
+		$logger = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		$logger->expects( $this->once() )
+			->method( 'warning' )
+			->with(
+				$this->logicalAnd( $this->stringContains( (string) $notification->get_id() ), $this->stringContains( $expected ) ),
+				$this->callback( fn( $context ) => 'wc-customer-stock-notifications' === $context['source'] && $notification->get_id() === $context['notification_id'] )
+			);
+		$use_logger = function () use ( $logger ) {
+			return $logger;
+		};
+		add_filter( 'woocommerce_logging_class', $use_logger );
+		$take_over = function () use ( $handled ) {
+			return $handled;
+		};
+		add_filter( 'woocommerce_customer_stock_notification_pre_send', $take_over );
+
+		$result = $this->sut->deliver_stock_notification( $notification );
+
+		remove_filter( 'woocommerce_customer_stock_notification_pre_send', $take_over );
+		remove_filter( 'woocommerce_logging_class', $use_logger );
+
+		$this->assertFalse( $result );
+		$this->assertEmpty( $this->sent_to );
+	}
+
+	/**
+	 * Data provider for test_deliver_stock_notification_logs_a_warning_when_the_pre_send_filter_fails.
+	 *
+	 * @return array[]
+	 */
+	public function pre_send_filter_failure_provider(): array {
+		return array(
+			'false'    => array( false, 'returned false' ),
+			'WP_Error' => array( new \WP_Error( 'delivery_failed', 'Provider unreachable.' ), 'Provider unreachable.' ),
+			'string'   => array( 'sent', 'returned string' ),
+			'integer'  => array( 1, 'returned integer' ),
 		);
 	}
 
