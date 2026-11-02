@@ -124,6 +124,7 @@ overrides:
     '@wordpress/private-apis': 'catalog:wp-min'
     '@wordpress/scripts>markdownlint-cli': 'catalog:tooling'
     'markdownlint>re2js': 2.8.7
+    'micromark-extension-math>katex': 0.18.2
     'minimatch@<3.1.4': 3.1.5
     # @automattic/components 2.x lists react-router-dom but never imports it; drop once it is on 5.x.
     '@automattic/components>react-router-dom': ~7.18.5
