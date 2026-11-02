@@ -166,7 +166,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * is, to delete the value.
 	 *
 	 * @param array<string, mixed> $values Values keyed by namespace, then field.
-	 * @return array|\WP_Error A list of update_callback and value pairs, or a WP_Error when a value is rejected.
+	 * @return array|\WP_Error A list of field arguments and value pairs, or a WP_Error when a value is rejected.
 	 */
 	private function prepare_fields( array $values ) {
 		$registered = ExtensibleAbilities::get_fields( $this->get_resource() );
@@ -193,7 +193,7 @@ abstract class ActionableAbility extends \WP_Ability {
 						return self::with_data( $value, array( 'field' => $param ) );
 					}
 				}
-				$updates[ 'extensions.' . $namespace . '.' . $field ] = array( $args['update_callback'], $value );
+				$updates[ 'extensions.' . $namespace . '.' . $field ] = array( $args, $value );
 			}
 		}
 		return $updates;
@@ -205,12 +205,26 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * the given errors, as add_refusal() describes.
 	 *
 	 * @param \WC_Data  $subject Object to change.
-	 * @param array     $updates Pairs of update_callback and value from prepare_fields().
-	 * @param \WP_Error $refused Collects the refusals.
+	 * @param array     $updates Pairs of field arguments and value from prepare_fields().
+	 * @param \WP_Error $refused Collects the refusals, including a field that does not apply to the object.
 	 */
 	private function apply_fields( $subject, array $updates, \WP_Error $refused ): void {
-		foreach ( $updates as $param => list( $callback, $value ) ) {
-			$rejected = self::run_callback( $callback, array( $subject, $value ), array( 'field' => $param ) );
+		foreach ( $updates as $param => list( $args, $value ) ) {
+			if ( ! ExtensibleAbilities::field_applies_to( $args, $subject ) ) {
+				$rejected = new \WP_Error(
+					'woocommerce_ability_field_object_type',
+					sprintf(
+						/* translators: 1: extension field, 2: object type, 3: comma-separated list of object types. */
+						__( 'The %1$s field does not apply to the %2$s type. It applies to %3$s.', 'woocommerce' ),
+						$param,
+						ExtensibleAbilities::get_object_type( $subject ),
+						implode( ', ', $args['object_types'] )
+					),
+					array( 'status' => 400 )
+				);
+			} else {
+				$rejected = self::run_callback( $args['update_callback'], array( $subject, $value ), array( 'field' => $param ) );
+			}
 			if ( null !== $rejected ) {
 				self::add_refusal( $rejected, explode( '.', $param )[1], $refused );
 			}
@@ -290,8 +304,8 @@ abstract class ActionableAbility extends \WP_Ability {
 
 	/**
 	 * Add the `extensions` property one time, at the top level of the input
-	 * schema. It lists the fields that have an update_callback, and allows null
-	 * for each one. Each `oneOf`, `anyOf` and `allOf` branch only accepts the
+	 * schema. It lists the fields that have an update_callback, allows null for
+	 * each one, and says which object types a field with `object_types` applies to. Each `oneOf`, `anyOf` and `allOf` branch only accepts the
 	 * key, so a branch with `additionalProperties` set to false does not reject
 	 * it, and the schema does not grow with the number of branches.
 	 *
@@ -324,6 +338,11 @@ abstract class ActionableAbility extends \WP_Ability {
 						}
 						if ( isset( $field_schema['enum'] ) && ! in_array( null, $field_schema['enum'], true ) ) {
 							$field_schema['enum'][] = null;
+						}
+						if ( ! empty( $args['object_types'] ) ) {
+							/* translators: %s: Comma-separated list of object types. */
+							$applies_to                  = sprintf( __( 'Applies to: %s.', 'woocommerce' ), implode( ', ', $args['object_types'] ) );
+							$field_schema['description'] = trim( ( $field_schema['description'] ?? '' ) . ' ' . $applies_to );
 						}
 						return $field_schema;
 					},
