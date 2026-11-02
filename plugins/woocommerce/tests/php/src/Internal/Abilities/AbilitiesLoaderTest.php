@@ -32,6 +32,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	private static $administrator_id;
 
 	private const CANONICAL_ABILITY_IDS = array(
+		'woocommerce/product-terms-query',
 		'woocommerce/products-query',
 		'woocommerce/product-create',
 		'woocommerce/product-update',
