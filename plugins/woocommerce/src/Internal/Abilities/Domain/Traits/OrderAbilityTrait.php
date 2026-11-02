@@ -325,6 +325,12 @@ trait OrderAbilityTrait {
 			}
 		}
 
-		return ExtensibleAbilities::add_fields_to_object( array_filter( $data, static fn( $value ) => null !== $value ), 'order', $order );
+		foreach ( array( 'billing_email', 'date_created', 'date_created_gmt', 'date_modified', 'date_modified_gmt' ) as $field ) {
+			if ( ! isset( $data[ $field ] ) ) {
+				unset( $data[ $field ] );
+			}
+		}
+
+		return ExtensibleAbilities::add_fields_to_object( $data, 'order', $order );
 	}
 }

@@ -2151,6 +2151,80 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should reject unexpected null output instead of hiding the invalid field.
+	 * @testWith ["product", "woocommerce_product_get_name", "name"]
+	 *           ["order", "woocommerce_order_get_payment_method", "payment_method"]
+	 *
+	 * @param string $resource_name Resource to query.
+	 * @param string $hook     Getter filter to return null.
+	 * @param string $field    Invalid output field.
+	 */
+	public function test_query_rejects_unexpected_null_output( string $resource_name, string $hook, string $field ): void {
+		$object = 'product' === $resource_name ? \WC_Helper_Product::create_simple_product() : \WC_Helper_Order::create_order();
+		add_filter( $hook, '__return_null' );
+
+		try {
+			$result = wp_get_ability( 'woocommerce/' . $resource_name . 's-query' )->execute( array( 'id' => $object->get_id() ) );
+		} finally {
+			remove_filter( $hook, '__return_null' );
+		}
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_output', $result->get_error_code() );
+		$this->assertStringContainsString( $field, $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should omit absent order dates while keeping other output fields.
+	 */
+	public function test_order_output_omits_absent_dates(): void {
+		$order = \WC_Helper_Order::create_order();
+		add_filter( 'woocommerce_order_get_date_created', '__return_null' );
+		add_filter( 'woocommerce_order_get_date_modified', '__return_null' );
+
+		try {
+			$result = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'id' => $order->get_id() ) );
+		} finally {
+			remove_filter( 'woocommerce_order_get_date_created', '__return_null' );
+			remove_filter( 'woocommerce_order_get_date_modified', '__return_null' );
+		}
+
+		$this->assertNotWPError( $result );
+		foreach ( array( 'date_created', 'date_created_gmt', 'date_modified', 'date_modified_gmt' ) as $field ) {
+			$this->assertArrayNotHasKey( $field, $result['orders'][0] );
+		}
+		$this->assertSame( $order->get_id(), $result['orders'][0]['id'] );
+	}
+
+	/**
+	 * @testdox Should omit an absent order note date while preserving false and empty strings.
+	 */
+	public function test_order_note_output_omits_absent_date(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->add_order_note( 'Internal note.' );
+		$omit_date = static function ( $note ) {
+			$note['date_created'] = null;
+			$note['added_by']     = '';
+			return $note;
+		};
+		add_filter( 'woocommerce_get_order_note', $omit_date );
+
+		try {
+			$result = wp_get_ability( 'woocommerce/order-notes-query' )->execute( array( 'id' => $order->get_id() ) );
+		} finally {
+			remove_filter( 'woocommerce_get_order_note', $omit_date );
+		}
+
+		$this->assertNotWPError( $result );
+		$this->assertNotEmpty( $result['notes'] );
+		foreach ( $result['notes'] as $note ) {
+			$this->assertArrayNotHasKey( 'date_created', $note );
+			$this->assertSame( '', $note['author'] );
+			$this->assertFalse( $note['customer_note'] );
+		}
+	}
+
+	/**
 	 * @testdox Should give each Core output field a single type.
 	 */
 	public function test_core_output_schemas_have_single_types(): void {

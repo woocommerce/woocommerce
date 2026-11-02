@@ -780,7 +780,13 @@ trait ProductAbilityTrait {
 			'date_modified_gmt' => self::format_date_for_response( $product->get_date_modified() ),
 		);
 
-		return ExtensibleAbilities::add_fields_to_object( array_filter( $data, static fn( $value ) => null !== $value ), 'product', $product );
+		foreach ( array( 'permalink', 'stock_quantity', 'external_url', 'button_text', 'date_created', 'date_created_gmt', 'date_modified', 'date_modified_gmt' ) as $field ) {
+			if ( ! isset( $data[ $field ] ) ) {
+				unset( $data[ $field ] );
+			}
+		}
+
+		return ExtensibleAbilities::add_fields_to_object( $data, 'product', $product );
 	}
 
 	/**
