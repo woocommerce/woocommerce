@@ -64,7 +64,9 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		title "Skipping benchmarking baseline as benchmarking results already available under $ARTIFACTS_PATH"
 	else
 		title "##[group]Checkout baseline"
-		git fetch --no-tags --quiet --unshallow origin trunk
+		if [ "$GITHUB_EVENT_NAME" == "push" ]; then
+			git fetch --no-tags --quiet --unshallow origin trunk
+		fi
 		echo '##[endgroup]'
 
 		title "##[group]Building baseline"
