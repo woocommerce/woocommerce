@@ -10,12 +10,15 @@ use Automattic\WooCommerce\Internal\Caches\ProductCache;
  */
 class WC_REST_Products_V1_Controller_Test extends WC_REST_Unit_Test_Case {
 
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
+
 	/**
 	 * Set up an administrator for the requests.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::get_shared_administrator_fixture_id() );
 	}
 
 	/**

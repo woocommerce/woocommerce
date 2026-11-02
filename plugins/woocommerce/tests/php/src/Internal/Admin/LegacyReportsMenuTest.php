@@ -14,6 +14,9 @@ use WC_Unit_Test_Case;
  */
 class LegacyReportsMenuTest extends WC_Unit_Test_Case {
 
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
+
 	/**
 	 * Admin menu globals that the tests mutate.
 	 */
@@ -49,7 +52,7 @@ class LegacyReportsMenuTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_analytics_enabled', 'yes' );
 		update_option( WC_Install::INITIAL_INSTALLED_VERSION, '11.3.0' );
 		update_option( WC_Install::NEWLY_INSTALLED_OPTION, 'no' );
-		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::get_shared_administrator_fixture_id() );
 
 		$this->sut = new LegacyReportsMenu();
 	}

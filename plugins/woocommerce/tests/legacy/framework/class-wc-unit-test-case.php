@@ -22,6 +22,13 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 
 	public const DEFAULT_FLOAT_COMPARISON_DELTA = 1e-10;
 
+	/** Whether this class reuses its baseline administrator fixture. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = false;
+
+	/** @var array<class-string, int> Administrator IDs owned by opted-in classes. */
+	private static $shared_administrator_fixture_ids = array();
+
+
 	/**
 	 * Holds the WC_Unit_Test_Factory instance.
 	 *
@@ -91,6 +98,78 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		} finally {
 			self::disable_direct_product_attribute_lookup_updates();
 		}
+	}
+
+
+	/**
+	 * Create the baseline administrator using the normal WordPress test factory.
+	 * @throws RuntimeException When the fixture cannot be created.
+	 */
+	private static function create_shared_administrator_fixture(): void {
+		// Parent test setup clears request inputs before its factory call.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserve test request state around fixture creation.
+		$original_get = $_GET;
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve test request state around fixture creation.
+		$original_post = $_POST;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserve test request state around fixture creation.
+		$original_request = $_REQUEST;
+		$original_user_id = get_current_user_id();
+		$_GET             = array();
+		$_POST            = array();
+		$_REQUEST         = array();
+		wp_set_current_user( 0 );
+
+		try {
+			$user_id = static::factory()->user->create( array( 'role' => 'administrator' ) );
+			if ( is_wp_error( $user_id ) ) {
+				throw new RuntimeException( 'Failed to create the administrator class fixture: ' . $user_id->get_error_message() );
+			}
+			self::$shared_administrator_fixture_ids[ static::class ] = $user_id;
+		} finally {
+			$_GET     = $original_get;
+			$_POST    = $original_post;
+			$_REQUEST = $original_request;
+			wp_set_current_user( $original_user_id );
+		}
+	}
+
+	/**
+	 * Hydrate the administrator at the original factory point without changing user selection.
+	 *
+	 * @return int Administrator user ID.
+	 * @throws RuntimeException When the fixture is unavailable.
+	 */
+	protected static function get_shared_administrator_fixture_id(): int {
+		$user_id = self::$shared_administrator_fixture_ids[ static::class ] ?? 0;
+		if ( $user_id <= 0 ) {
+			throw new RuntimeException( 'The administrator class fixture is unavailable.' );
+		}
+		// The original factory's registration callbacks hydrate the same user and capabilities.
+		$user = get_userdata( $user_id );
+		if ( ! $user instanceof WP_User ) {
+			throw new RuntimeException( 'The administrator class fixture is unavailable.' );
+		}
+		return $user_id;
+	}
+
+
+	/**
+	 * Delete the owned user only if parent class cleanup did not remove it.
+	 * @throws RuntimeException When the owned user cannot be checked or deleted.
+	 */
+	private static function clean_up_shared_administrator_fixture(): void {
+		global $wpdb;
+		$user_id = self::$shared_administrator_fixture_ids[ static::class ] ?? 0;
+		if ( $user_id > 0 ) {
+			$stored_user_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->users} WHERE ID = %d", $user_id ) );
+			if ( '' !== $wpdb->last_error ) {
+				throw new RuntimeException( 'Failed to check the administrator class fixture cleanup.' );
+			}
+			if ( null !== $stored_user_id && ! self::delete_user( $user_id ) ) {
+				throw new RuntimeException( 'Failed to delete the administrator class fixture.' );
+			}
+		}
+		unset( self::$shared_administrator_fixture_ids[ static::class ] );
 	}
 
 	/**
@@ -347,6 +426,10 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 
 		// Terms are deleted in WP_UnitTestCase::tearDownAfterClass, then e.g. Uncategorized product_cat is missing.
 		WC_Install::create_terms();
+
+		if ( static::USE_SHARED_ADMINISTRATOR_FIXTURE ) {
+			self::create_shared_administrator_fixture();
+		}
 	}
 
 	/**
@@ -358,7 +441,13 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			self::clear_hpos_orders();
 			parent::tearDownAfterClass();
 		} finally {
-			self::disable_direct_product_attribute_lookup_updates();
+			try {
+				if ( static::USE_SHARED_ADMINISTRATOR_FIXTURE ) {
+					self::clean_up_shared_administrator_fixture();
+				}
+			} finally {
+				self::disable_direct_product_attribute_lookup_updates();
+			}
 		}
 	}
 

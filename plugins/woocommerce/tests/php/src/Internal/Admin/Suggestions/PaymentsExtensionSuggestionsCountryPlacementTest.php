@@ -86,11 +86,47 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 	protected PaymentsExtensionSuggestions $suggestions;
 
 	/**
+	 * Class-owned administrator shared by the per-test transactions.
+	 *
+	 * @var int
+	 */
+	private static int $shared_store_admin_id = 0;
+
+	/**
 	 * The ID of the store admin user.
 	 *
 	 * @var int
 	 */
 	protected int $store_admin_id;
+
+	/**
+	 * Create the administrator fixture once for this class.
+	 *
+	 * @param \WP_UnitTest_Factory $factory WordPress test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		// Match the empty request context parent setup supplies to per-test factories.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve the test request while creating the class fixture.
+		$original_post = $_POST;
+		$_POST         = array();
+		try {
+			$user_id = $factory->user->create( array( 'role' => 'administrator' ) );
+			if ( is_wp_error( $user_id ) ) {
+				throw new \RuntimeException( 'Failed to create the administrator class fixture: ' . $user_id->get_error_message() );
+			}
+			self::$shared_store_admin_id = $user_id;
+		} finally {
+			$_POST = $original_post;
+		}
+	}
+
+	/**
+	 * Delete the administrator owned by this class fixture.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		self::delete_user( self::$shared_store_admin_id );
+		self::$shared_store_admin_id = 0;
+	}
 
 	/**
 	 * Set up the baseline store state.
@@ -104,8 +140,9 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		add_filter( 'pre_http_request', array( $this, 'mock_placement_http_responses' ), 10, 3 );
 
-		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$this->store_admin_id = self::$shared_store_admin_id;
 		wp_set_current_user( $this->store_admin_id );
 
 		// The online-equivalent profiler state.
@@ -738,5 +775,34 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 		}
 
 		return self::$fixture;
+	}
+
+	/**
+	 * Keep placement fixtures in the no-eligible-incentive API scenario.
+	 *
+	 * @param mixed  $preempt Existing HTTP preemption.
+	 * @param array  $request HTTP request arguments.
+	 * @param string $url HTTP request URL.
+	 * @return mixed Existing preemption, fixture response, or false for another request.
+	 */
+	public function mock_placement_http_responses( $preempt, $request, $url ) {
+		if ( false !== $preempt ) {
+			return $preempt;
+		}
+
+		if ( 'public-api.wordpress.com' !== wp_parse_url( $url, PHP_URL_HOST )
+			|| '/wpcom/v2/wcpay/incentives' !== wp_parse_url( $url, PHP_URL_PATH )
+			|| 'GET' !== ( $request['method'] ?? 'GET' ) ) {
+			return false;
+		}
+
+		return array(
+			'headers'  => array(
+				'cache-for'    => '86400',
+				'content-type' => 'application/json; charset=UTF-8',
+			),
+			'body'     => '',
+			'response' => array( 'code' => 204 ),
+		);
 	}
 }

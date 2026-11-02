@@ -78,9 +78,6 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 		}
 		$this->terms = array();
 
-		foreach ( $this->products as $product ) {
-			$product->delete();
-		}
 		$this->products = array();
 
 		parent::tearDown();

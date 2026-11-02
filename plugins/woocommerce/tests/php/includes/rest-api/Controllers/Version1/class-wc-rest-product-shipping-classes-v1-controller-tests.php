@@ -5,6 +5,9 @@ declare( strict_types = 1 );
  * Product shipping classes controller tests for V1 REST API.
  */
 class WC_REST_Product_Shipping_Classes_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
+
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
 	/**
 	 * @var int Admin user id.
 	 */
@@ -15,7 +18,7 @@ class WC_REST_Product_Shipping_Classes_V1_Controller_Tests extends WC_REST_Unit_
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$this->admin_id = self::get_shared_administrator_fixture_id();
 	}
 
 	/**

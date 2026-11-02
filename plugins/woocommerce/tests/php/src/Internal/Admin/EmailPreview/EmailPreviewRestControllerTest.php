@@ -15,6 +15,9 @@ use WP_REST_Request;
  * @class PaymentsRestController
  */
 class EmailPreviewRestControllerTest extends WC_REST_Unit_Test_Case {
+
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
 	/**
 	 * Endpoint.
 	 *
@@ -59,7 +62,7 @@ class EmailPreviewRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$this->store_admin_id = self::get_shared_administrator_fixture_id();
 		wp_set_current_user( $this->store_admin_id );
 
 		$this->mock_service = $this->getMockBuilder( EmailPreview::class )->getMock();

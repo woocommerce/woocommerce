@@ -12,6 +12,9 @@ use Automattic\WooCommerce\Enums\OrderStatus;
  * @package WooCommerce\Admin\Tests\API
  */
 class WC_Admin_Reports_Customers_Controller_Test extends WC_Unit_Test_Case {
+
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
 	/**
 	 * REST server used to dispatch customer report requests.
 	 *
@@ -216,11 +219,7 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_Unit_Test_Case {
 			true
 		);
 
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user = self::get_shared_administrator_fixture_id();
 
 		wp_set_current_user( $this->user );
 	}

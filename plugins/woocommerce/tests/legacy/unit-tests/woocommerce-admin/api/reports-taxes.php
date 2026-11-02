@@ -13,6 +13,9 @@ use Automattic\WooCommerce\Enums\OrderStatus;
  */
 class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
+
 	/**
 	 * Endpoints.
 	 *
@@ -37,11 +40,7 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 
 		$this->original_tax_option = get_option( 'woocommerce_calc_taxes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user = self::get_shared_administrator_fixture_id();
 	}
 
 	/**

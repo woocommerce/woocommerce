@@ -18,6 +18,9 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
  * Class WC_Tests_API_Orders
  */
 class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
+
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
 	use WC_REST_API_Complex_Meta;
 	use DateFilteringForCrudControllers;
 
@@ -33,11 +36,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Orders_Controller();
-		$this->user     = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user     = self::get_shared_administrator_fixture_id();
 	}
 
 	/**

@@ -15,6 +15,9 @@ use WC_Unit_Test_Case;
  */
 class NotificationPreferencesDataStoreTest extends WC_Unit_Test_Case {
 
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
+
 	/**
 	 * The System Under Test.
 	 *
@@ -36,7 +39,7 @@ class NotificationPreferencesDataStoreTest extends WC_Unit_Test_Case {
 		parent::setUp();
 
 		$this->sut     = new NotificationPreferencesDataStore();
-		$this->user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$this->user_id = self::get_shared_administrator_fixture_id();
 	}
 
 	/**

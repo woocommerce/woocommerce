@@ -13,6 +13,9 @@ use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
  * Class Settings_V2.
  */
 class Settings_V2 extends WC_REST_Unit_Test_Case {
+
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
 	use ArraySubsetAsserts;
 
 	/**
@@ -23,11 +26,7 @@ class Settings_V2 extends WC_REST_Unit_Test_Case {
 		$this->initialize_rest_api_routes();
 		$this->endpoint = new WC_REST_Setting_Options_Controller();
 		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\SettingsHelper::register();
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user = self::get_shared_administrator_fixture_id();
 	}
 
 	/**

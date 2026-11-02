@@ -505,9 +505,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Track for cleanup.
 		$this->created_refunds[] = $response_data['id'];
-
-		// Clean up product.
-		$product->delete( true );
 	}
 
 	/**
@@ -645,9 +642,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Track for cleanup.
 		$this->created_refunds[] = $response_data['id'];
-
-		// Clean up product.
-		$product->delete( true );
 	}
 
 	/**
@@ -794,9 +788,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Track for cleanup.
 		$this->created_refunds[] = $response_data['id'];
-
-		// Clean up product.
-		$product->delete( true );
 	}
 
 	/**
@@ -938,9 +929,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Track for cleanup.
 		$this->created_refunds[] = $response_data['id'];
-
-		// Clean up product.
-		$product->delete( true );
 	}
 
 	/**
@@ -1030,7 +1018,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( -10.00, (float) $refund_taxes['total'][ $tax_rate_id ], 'Explicit tax should be stored on the refund line.' );
 
 		$this->created_refunds[] = $response_data['id'];
-		$product->delete( true );
 	}
 
 	/**
@@ -1117,9 +1104,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'code', $response_data );
 		$this->assertEquals( 'refund_total_exceeds_line', $response_data['code'] );
 		$this->assertStringContainsString( 'cannot exceed the line item total including tax', $response_data['message'] );
-
-		// Clean up product.
-		$product->delete( true );
 	}
 
 	/**
@@ -1243,9 +1227,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'invalid_refund_amount', $response_data['code'] );
 		$this->assertStringContainsString( 'cannot be less than the total of line items', $response_data['message'] );
 		$this->assertStringContainsString( '110.00', $response_data['message'], 'Error should show calculated total' );
-
-		// Clean up product.
-		$product->delete( true );
 	}
 
 	/**
@@ -1569,9 +1550,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Track for cleanup.
 		$this->created_refunds[] = $response_data['id'];
-
-		// Clean up product.
-		$product->delete( true );
 	}
 
 	/**
@@ -1675,8 +1653,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( -25.00, (float) $refund_line_item->get_total(), 'Net subtotal should be half of $50.' );
 		$this->assertEquals( -0.25, (float) $refund_taxes['total'][ $tax_rate_county ], 'County tax should be half of $0.50.' );
 		$this->assertEquals( -2.25, (float) $refund_taxes['total'][ $tax_rate_state ], 'State tax should be half of $4.50.' );
-
-		$product->delete( true );
 	}
 
 	/**
@@ -1786,9 +1762,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 422, $second_response->get_status() );
 		$this->assertEquals( 'line_item_already_refunded', $second_response->get_data()['code'] );
 		$this->assertStringContainsString( 'already been fully refunded', $second_response->get_data()['message'] );
-
-		$product_a->delete( true );
-		$product_b->delete( true );
 	}
 
 	/**
@@ -1853,9 +1826,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 400, $response->get_status() );
 		$this->assertEquals( 'invalid_refund_total', $response->get_data()['code'] );
 		$this->assertCount( 0, $order->get_refunds(), 'No refund should be stored when any line is rejected.' );
-
-		$product_a->delete( true );
-		$product_b->delete( true );
 	}
 
 	/**
@@ -1957,7 +1927,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( '10.00', $data['total'], 'Auto-computed amount should be unit price × quantity' );
 
 		$this->created_refunds[] = $data['id'];
-		$product->delete( true );
 	}
 
 	/**
@@ -2053,7 +2022,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$this->assertEquals( '10.00', $line_item_response['refund_tax'][0]['refund_total'] );
 
 			$this->created_refunds[] = $data['id'];
-			$product->delete( true );
 		} finally {
 			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
 			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
@@ -2133,8 +2101,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->created_refunds[] = $response_b->get_data()['id'];
 
 		$this->assertEquals( $amount_b, $amount_a, 'Simplified form should produce the same amount as the explicit form.' );
-
-		$product->delete( true );
 	}
 
 	/**
@@ -2329,8 +2295,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( '25.00', $data['total'], 'Total = 10 (auto) + 15 (explicit) = 25' );
 
 		$this->created_refunds[] = $data['id'];
-		$product_a->delete( true );
-		$product_b->delete( true );
 	}
 
 	/**
@@ -2439,10 +2403,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( -1, $qty_by_original_id[ $item_a->get_id() ], 'Auto-compute path records qty=-1 (refund of 1 unit).' );
 		$this->assertSame( -1, $qty_by_original_id[ $item_b->get_id() ], 'Explicit-with-quantity path records qty=-1 (refund of 1 unit).' );
 		$this->assertSame( 0, $qty_by_original_id[ $item_c->get_id() ], 'Legacy no-quantity path records qty=0 (no units consumed).' );
-
-		$product_a->delete( true );
-		$product_b->delete( true );
-		$product_c->delete( true );
 	}
 
 	/**
@@ -2483,8 +2443,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 422, $response->get_status(), 'Over-quantity must still be rejected even when refund_total is auto-computed.' );
 		$this->assertEquals( 'quantity_exceeds_refundable', $response->get_data()['code'], 'Create must use the same quantity_exceeds_refundable code as the preview path.' );
-
-		$product->delete( true );
 	}
 
 	/**
@@ -2543,7 +2501,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( '7.50', $data['total'], 'Auto-computed fee refund should equal the full fee total' );
 
 		$this->created_refunds[] = $data['id'];
-		$product->delete( true );
 	}
 
 	/**
@@ -2614,8 +2571,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		// conversation about whether to update it to assert 201 + `-3.00`.
 		$this->assertEquals( 400, $response->get_status() );
 		$this->assertEquals( 'invalid_refund_amount', $response->get_data()['code'] );
-
-		$product->delete( true );
 	}
 
 	/**
@@ -2706,7 +2661,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$this->assertEquals( '10.00', $line_item_response['refund_tax'][0]['refund_total'] );
 
 			$this->created_refunds[] = $data['id'];
-			$product->delete( true );
 		} finally {
 			// Restore the option so a failing assertion above can't leak state into other tests.
 			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
@@ -2823,8 +2777,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$order_after = wc_get_order( $order->get_id() );
 		$this->assertEquals( 70.00, (float) $order_after->get_total_refunded() );
 		$this->assertEquals( 30.00, (float) $order_after->get_remaining_refund_amount() );
-
-		$product->delete( true );
 	}
 
 	/**
@@ -2888,8 +2840,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$stock_after_refund,
 			'Legacy form (no quantity) + api_restock must not restock — qty=0 means no units to put back.'
 		);
-
-		$product->delete( true );
 	}
 
 	/**
@@ -2985,7 +2935,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$this->assertNotEmpty( $data['line_items'][0]['refund_tax'], 'refund_tax must be extracted on the tax-inclusive legacy path.' );
 			$this->assertEquals( '10.00', $data['line_items'][0]['refund_tax'][0]['refund_total'] );
 
-			$product->delete( true );
 		} finally {
 			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
 			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
@@ -3043,8 +2992,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 400, $response->get_status(), 'Cross-order line_item_id must be rejected, not silently auto-computed.' );
 		$data = $response->get_data();
 		$this->assertEquals( 'line_item_not_found', $data['code'], 'Create must use the same line_item_not_found code as the preview path.' );
-
-		$product->delete( true );
 	}
 
 	/**
@@ -3180,9 +3127,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$data2 = $response2->get_data();
 		$this->assertEquals( 'quantity_exceeds_refundable', $data2['code'], 'Create must use the same quantity_exceeds_refundable code as the preview path.' );
 		$this->assertStringContainsString( 'remaining refundable quantity', $data2['message'] );
-
-		$product_a->delete( true );
-		$product_b->delete( true );
 	}
 
 	/**
@@ -3278,7 +3222,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$this->assertEquals( 'invalid_line_item', $data['code'] );
 			$this->assertStringContainsString( 'refund_tax cannot be combined', $data['message'] );
 
-			$product->delete( true );
 		} finally {
 			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
 			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
@@ -3352,7 +3295,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			// Restore the real data_utils on the dispatch-target controller
 			// so the rest of the suite is unaffected.
 			$dispatch_target->init( $this->refund_schema, new RefundPreviewSchema(), new CollectionQuery(), new DataUtils() );
-			$product->delete( true );
 		}
 	}
 
@@ -3410,7 +3352,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$this->assertSame( 25.00, (float) $captured_line_items[0]['refund_total'] );
 		} finally {
 			remove_action( $hook, $listener, 10 );
-			$product->delete( true );
 		}
 	}
 
@@ -3472,7 +3413,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$this->assertSame( 7.50, (float) $captured_line_items[0]['refund_total'], 'Hook listener must see the client-supplied refund_total unchanged.' );
 		} finally {
 			remove_action( $hook, $listener, 10 );
-			$product->delete( true );
 		}
 	}
 
@@ -3515,8 +3455,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$this->assertEquals( 'missing_quantity_or_refund_total', $data['code'], 'Create must use the same missing_quantity_or_refund_total code as the preview path, not cascade to invalid_refund_amount.' );
 		$this->assertStringContainsString( 'positive integer', $data['message'] );
-
-		$product->delete( true );
 	}
 
 	/**
@@ -3604,8 +3542,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$create_data['total'],
 			'Create amount must match build_refund_preview total exactly.'
 		);
-
-		$product->delete( true );
 	}
 
 	/**
@@ -3812,8 +3748,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$this->assertEquals( 'line_item_already_refunded', $data['code'] );
 			$this->assertStringContainsString( 'already been fully refunded', $data['message'] );
 		}
-
-		$product->delete( true );
 	}
 
 	/**
@@ -4348,8 +4282,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 201, $response->get_status() );
 		$this->assertEqualsWithDelta( 12.50, (float) $response->get_data()['total'], 0.001, 'Quantity 1 refunds each non-product line at its full total, exactly once' );
 		$this->created_refunds[] = $response->get_data()['id'];
-
-		$product->delete( true );
 	}
 
 	/**
@@ -4454,8 +4386,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( -50.00, (float) $refund_line_item->get_total(), 'Stored net total should be half of $100.' );
 		$this->assertEquals( -5.00, (float) $refund_taxes['total'][ $tax_rate_id ], 'Stored tax should be half of $10.' );
-
-		$product->delete( true );
 	}
 
 	/**
@@ -4540,8 +4470,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( -1.50, (float) $refund_taxes['total'][ $tax_rate_id ], 'Stored tax should be half of $3.' );
 		// Refund line items store quantity as a negative, mirroring the negative totals.
 		$this->assertEquals( -3, $refund_line_item->get_quantity(), 'The requested quantity is stored even when refund_total drives the amount.' );
-
-		$product->delete( true );
 	}
 
 	/**
@@ -4634,7 +4562,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$this->assertEquals( -50.0, (float) $refund_taxes['total'][ $tax_rate_id ], 'Tax rounds to a whole number at zero decimals.' );
 			$this->assertEquals( 549.0, (float) $data['total'], 'Net + tax must reconstitute the requested amount.' );
 
-			$product->delete( true );
 		} finally {
 			remove_filter( 'wc_get_price_decimals', $zero_decimals );
 		}
@@ -4718,8 +4645,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( -0.43, (float) $refund_taxes['total'][ $tax_rate_id ], 'Tax rounds to the nearest cent.' );
 		$this->assertEquals( -2.90, (float) $refund_line_item->get_total(), 'Net subtotal absorbs the rounding remainder.' );
 		$this->assertEquals( '3.33', $data['total'], 'Net + tax must reconstitute the requested amount to the cent.' );
-
-		$product->delete( true );
 	}
 
 	/**
@@ -4862,7 +4787,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$this->assertEquals( -50.00, (float) $refund_line_item->get_total(), 'Stored net total should be half of $100.' );
 			$this->assertEquals( -5.00, (float) $refund_taxes['total'][ $tax_rate_id ], 'Stored tax should be half of $10, not re-extracted.' );
 
-			$product->delete( true );
 		} finally {
 			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
 		}
@@ -4967,8 +4891,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			(float) $refund_taxes['total'][ $tax_rate_id ],
 			'Stored tax must match the previewed tax.'
 		);
-
-		$product->delete( true );
 	}
 
 	/**
@@ -5061,7 +4983,5 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$third = $refund_line( 0.01 );
 		$this->assertEquals( 422, $third->get_status() );
 		$this->assertEquals( 'order_not_refundable', $third->get_data()['code'] );
-
-		$product->delete( true );
 	}
 }
