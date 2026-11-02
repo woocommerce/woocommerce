@@ -109,7 +109,7 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 	 * @return bool
 	 */
 	protected function is_feature_enabled() {
-		return get_option( 'woocommerce_enable_delayed_account_creation', 'yes' ) === 'yes';
+		return get_option( 'woocommerce_enable_delayed_account_creation', 'no' ) === 'yes';
 	}
 
 	/**
