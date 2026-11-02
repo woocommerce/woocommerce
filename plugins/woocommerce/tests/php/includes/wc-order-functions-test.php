@@ -1140,7 +1140,7 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Download permissions are not granted, or regenerated, for lines refunded before the order was completed.
+	 * @testdox Completing an order, or regenerating its downloads, skips lines that were refunded.
 	 */
 	public function test_wc_downloadable_product_permissions_skips_refunded_lines() {
 		wc_get_container()->get( Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register::class )->add_approved_directory( 'https://always.trusted' );
@@ -1183,11 +1183,11 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		);
 
 		wc_get_order( $order->get_id() )->update_status( OrderStatus::COMPLETED );
-		$this->assertSame( array( $products['kept']->get_id() ), $this->get_download_permission_product_ids( $order ), 'Completing the order grants only the line that was not refunded.' );
+		$this->assertSame( array( $products['kept']->get_id() ), $this->get_download_permission_product_ids( $order ), 'Completing the order should give a download only for the line that was not refunded.' );
 
 		WC_Data_Store::load( 'customer-download' )->delete_by_order_id( $order->get_id() );
 		wc_downloadable_product_permissions( $order->get_id(), true );
-		$this->assertSame( array( $products['kept']->get_id() ), $this->get_download_permission_product_ids( $order ), 'Regenerating the permissions grants only the line that was not refunded.' );
+		$this->assertSame( array( $products['kept']->get_id() ), $this->get_download_permission_product_ids( $order ), 'Regenerating the downloads should give a download only for the line that was not refunded.' );
 	}
 
 	/**
