@@ -11,6 +11,21 @@ import { getSettingValue } from '../../entity-fields/offline/settings';
 export const ENTITY_KIND = 'woo_settings_payments';
 
 /**
+ * Records a page saves alongside its own, which aren't settings pages themselves.
+ */
+export const RELATED_ENTITY_KIND = 'woo_settings_payments_related';
+
+/**
+ * Another record a settings page edits and saves with its own. Fields read it under its
+ * entity name, so the BACS accounts are at `item.bacs_accounts.accounts`.
+ */
+export interface RelatedEntity {
+	kind: string;
+	name: string;
+	recordId: string;
+}
+
+/**
  * A core-data entity config for a settings page. The page's URL segment is the entity name and
  * its record ID, and its fields are registered separately in `entity-fields/`.
  */
@@ -25,7 +40,16 @@ export interface SettingsEntityConfig {
 		persistedRecord: Record< string, unknown >,
 		edits: Record< string, unknown >
 	) => Record< string, unknown >;
+	related?: RelatedEntity[];
 }
+
+/**
+ * A core-data entity config for a record that a settings page saves alongside its own.
+ */
+export type RelatedEntityConfig = Pick<
+	SettingsEntityConfig,
+	'kind' | 'name' | 'baseURL' | 'key' | 'label' | 'getTitle'
+>;
 
 /**
  * Send settings as the plain values the v3 endpoint takes.
@@ -56,7 +80,8 @@ export function getPlainSettings(
  */
 function getPaymentGatewayEntity(
 	name: string,
-	label: string
+	label: string,
+	related?: RelatedEntity[]
 ): SettingsEntityConfig {
 	return {
 		kind: ENTITY_KIND,
@@ -66,6 +91,7 @@ function getPaymentGatewayEntity(
 		label,
 		getTitle: () => label,
 		__unstablePrePersist: getPlainSettings,
+		...( related && { related } ),
 	};
 }
 
@@ -75,6 +101,17 @@ function getPaymentGatewayEntity(
 export function getCoreEntities(): SettingsEntityConfig[] {
 	return [
 		getPaymentGatewayEntity(
+			'bacs',
+			__( 'Direct bank transfer', 'woocommerce' ),
+			[
+				{
+					kind: RELATED_ENTITY_KIND,
+					name: 'bacs_accounts',
+					recordId: 'accounts',
+				},
+			]
+		),
+		getPaymentGatewayEntity(
 			'cheque',
 			__( 'Check payments', 'woocommerce' )
 		),
@@ -82,5 +119,21 @@ export function getCoreEntities(): SettingsEntityConfig[] {
 			'cod',
 			__( 'Cash on delivery', 'woocommerce' )
 		),
+	];
+}
+
+/**
+ * Describe the records Core's pages save alongside their own.
+ */
+export function getCoreRelatedEntities(): RelatedEntityConfig[] {
+	return [
+		{
+			kind: RELATED_ENTITY_KIND,
+			name: 'bacs_accounts',
+			baseURL: '/wc-admin/settings/payments/bacs',
+			key: 'id',
+			label: __( 'Bank accounts', 'woocommerce' ),
+			getTitle: () => __( 'Bank accounts', 'woocommerce' ),
+		},
 	];
 }

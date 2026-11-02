@@ -32,6 +32,7 @@
 	},
 	"dependencies": {
 		"@wordpress/admin-ui": "catalog:wp-bundled",
+		"@wordpress/api-fetch": "catalog:wp-min",
 		"@wordpress/components": "catalog:wp-min",
 		"@wordpress/compose": "catalog:wp-min",
 		"@wordpress/core-data": "catalog:wp-min",

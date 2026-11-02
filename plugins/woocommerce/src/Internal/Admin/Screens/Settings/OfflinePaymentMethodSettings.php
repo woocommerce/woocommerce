@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Internal\Admin\Screens\AdminScreens;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Supplies the cheque and cash on delivery layouts through WordPress View Config.
+ * Supplies the bank transfer, cheque and cash on delivery layouts through WordPress View Config.
  *
  * @internal
  */
@@ -32,8 +32,36 @@ final class OfflinePaymentMethodSettings {
 	 * @internal
 	 */
 	public function __construct() {
+		add_filter( 'get_entity_view_config_woo_settings_payments_bacs', array( $this, 'handle_get_entity_view_config_woo_settings_payments_bacs' ) );
 		add_filter( 'get_entity_view_config_woo_settings_payments_cheque', array( $this, 'handle_get_entity_view_config_woo_settings_payments_cheque' ) );
 		add_filter( 'get_entity_view_config_woo_settings_payments_cod', array( $this, 'handle_get_entity_view_config_woo_settings_payments_cod' ) );
+	}
+
+	/**
+	 * Set the fields shown by the bank transfer form, with the bank accounts in their own card.
+	 *
+	 * @internal
+	 *
+	 * @since 11.4.0
+	 * @param mixed $config View Config object supplied by WordPress.
+	 * @return mixed
+	 */
+	public function handle_get_entity_view_config_woo_settings_payments_bacs( $config ) {
+		return $this->merge_cards(
+			$config,
+			array(
+				$this->get_general_card(),
+				array(
+					'id'       => 'account_details',
+					'label'    => __( 'Account details', 'woocommerce' ),
+					'layout'   => array(
+						'type'          => 'card',
+						'isCollapsible' => false,
+					),
+					'children' => array( 'accounts' ),
+				),
+			)
+		);
 	}
 
 	/**
