@@ -198,22 +198,25 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 				'include'    => array(
 					'description' => __( 'Limit results to these term IDs. Use one ID to retrieve a single term.', 'woocommerce' ),
 					'type'        => 'array',
+					'minItems'    => 1,
 					'items'       => array(
 						'type'    => 'integer',
 						'minimum' => 1,
 					),
 				),
 				'exclude'    => array(
-					'type'  => 'array',
-					'items' => array(
+					'description' => __( 'Exclude these term IDs. Ignored when include is set.', 'woocommerce' ),
+					'type'        => 'array',
+					'items'       => array(
 						'type'    => 'integer',
 						'minimum' => 1,
 					),
 				),
 				'search'     => array( 'type' => 'string' ),
 				'slug'       => array(
-					'type'  => array( 'string', 'array' ),
-					'items' => array( 'type' => 'string' ),
+					'description' => __( 'Limit results to these slugs. An empty string or list applies no slug filter.', 'woocommerce' ),
+					'type'        => array( 'string', 'array' ),
+					'items'       => array( 'type' => 'string' ),
 				),
 				'parent'     => array(
 					'description' => __( 'Parent term ID for categories or brands. Use zero for top-level terms.', 'woocommerce' ),
@@ -273,7 +276,10 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 				'name'        => array( 'type' => 'string' ),
 				'slug'        => array( 'type' => 'string' ),
 				'description' => array( 'type' => 'string' ),
-				'count'       => array( 'type' => 'integer' ),
+				'count'       => array(
+					'type'        => 'integer',
+					'description' => __( 'Catalog-visible published product count in REST reads. hide_empty uses stored counts and also retains parents with non-empty children, so a returned term can have count zero.', 'woocommerce' ),
+				),
 				'parent'      => array( 'type' => 'integer' ),
 				'display'     => array( 'type' => 'string' ),
 				'menu_order'  => array( 'type' => 'integer' ),

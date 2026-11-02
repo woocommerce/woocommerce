@@ -357,6 +357,22 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should reject an empty include list instead of returning every term.
+	 */
+	public function test_empty_include_is_rejected(): void {
+		self::factory()->term->create( array( 'taxonomy' => 'product_tag' ) );
+		$ability = new \WP_Ability( ProductTermsQuery::get_name(), ProductTermsQuery::get_registration_args() );
+		$this->assertWPError(
+			$ability->execute(
+				array(
+					'taxonomy' => 'product_tag',
+					'include'  => array(),
+				)
+			)
+		);
+	}
+
+	/**
 	 * @testdox Should expose extension schema and WP_Term fields only while the feature is enabled.
 	 * @testWith ["product_cat"]
 	 *           ["product_tag"]
