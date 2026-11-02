@@ -203,6 +203,7 @@ jobs:
           ref: ${{ inputs.refName != '' && inputs.refName || '' }}
           # We tried to speed checkout up with shallow copies, but `git merge-base ...` used on different levels of tooling forces us to follow this approach.
           fetch-depth: ${{ ( ( matrix.projectName == '@woocommerce/plugin-woocommerce' && '0' ) || '1' ) }}
+          filter: ${{ matrix.projectName == '@woocommerce/plugin-woocommerce' && 'blob:none' || '' }}
 
       - uses: './.github/actions/setup-woocommerce-monorepo'
         id: 'setup-monorepo'

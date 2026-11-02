@@ -58,6 +58,13 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		};
 		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
 
+		// WC()->checkout() is a process-global singleton whose get_checkout_fields() caches the
+		// filtered field list on first call and keeps it across tests, so reset it or a test's
+		// woocommerce_checkout_fields filter is ignored once an earlier test has populated the cache.
+		( function () {
+			$this->fields = null;
+		} )->call( WC()->checkout() );
+
 		WC()->cart->empty_cart();
 
 		$customer                = WC()->customer;
