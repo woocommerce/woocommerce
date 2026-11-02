@@ -14,10 +14,12 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderNotesQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\PaymentGatewaysQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -43,7 +45,9 @@ class AbilitiesLoader {
 		OrderAddNote::class,
 		OrderNotesQuery::class,
 		OrderUpdateStatus::class,
+		PaymentGatewaysQuery::class,
 		ProductsQuery::class,
+		ProductTermsQuery::class,
 		ProductCreate::class,
 		ProductDelete::class,
 		ProductUpdate::class,
@@ -77,7 +81,7 @@ class AbilitiesLoader {
 	 *
 	 * @since 10.9.0
 	 */
-	final public static function init(): void {
+	final public function init(): void {
 		if ( self::$initialized ) {
 			return;
 		}
@@ -100,7 +104,7 @@ class AbilitiesLoader {
 	 * @since 11.3.0
 	 */
 	public static function register_core_resources(): void {
-		foreach ( array( 'product', 'order', 'order_item' ) as $resource_name ) {
+		foreach ( array( 'product', 'order', 'order_item', 'product_term' ) as $resource_name ) {
 			ExtensibleAbilities::register_resource( $resource_name );
 		}
 	}
