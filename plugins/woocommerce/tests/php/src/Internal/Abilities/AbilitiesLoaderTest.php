@@ -2354,11 +2354,21 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				$this->assertIsString( $schema['type'] );
 				$this->assertNotSame( 'null', $schema['type'] );
 			}
-			foreach ( $schema['properties'] ?? array() as $property ) {
-				$check( $property );
+			$this->assertNotContains( null, $schema['enum'] ?? array() );
+			foreach ( $schema['properties'] ?? array() as $name => $property ) {
+				if ( 'extensions' !== $name ) {
+					$check( $property );
+				}
 			}
-			if ( isset( $schema['items'] ) ) {
-				$check( $schema['items'] );
+			foreach ( array( 'items', 'additionalProperties' ) as $keyword ) {
+				if ( is_array( $schema[ $keyword ] ?? null ) ) {
+					$check( $schema[ $keyword ] );
+				}
+			}
+			foreach ( array( 'anyOf', 'oneOf' ) as $keyword ) {
+				foreach ( $schema[ $keyword ] ?? array() as $branch ) {
+					$check( $branch );
+				}
 			}
 		};
 		foreach ( self::CANONICAL_ABILITY_IDS as $name ) {
