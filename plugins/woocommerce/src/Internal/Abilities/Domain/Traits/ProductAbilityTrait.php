@@ -783,8 +783,14 @@ trait ProductAbilityTrait {
 			$data['stock_quantity'] = wc_stock_amount( $stock_quantity );
 		}
 		if ( $product instanceof \WC_Product_External ) {
-			$data['external_url'] = $product->get_product_url();
-			$data['button_text']  = $product->get_button_text();
+			$external_url = $product->get_product_url();
+			$button_text  = $product->get_button_text();
+			if ( '' !== $external_url ) {
+				$data['external_url'] = $external_url;
+			}
+			if ( '' !== $button_text ) {
+				$data['button_text'] = $button_text;
+			}
 		}
 
 		return ExtensibleAbilities::add_fields_to_object( $data, 'product', $product );
@@ -848,12 +854,12 @@ trait ProductAbilityTrait {
 					'downloadable'      => array( 'type' => 'boolean' ),
 					'external_url'      => array(
 						'type'        => 'string',
-						'description' => __( 'External product URL for external products.', 'woocommerce' ),
+						'description' => __( 'External product URL. Omitted when the product is not external or no URL is set.', 'woocommerce' ),
 						'format'      => 'uri',
 					),
 					'button_text'       => array(
 						'type'        => 'string',
-						'description' => __( 'Button text for external products.', 'woocommerce' ),
+						'description' => __( 'Button text. Omitted when the product is not external or no button text is set.', 'woocommerce' ),
 					),
 					'grouped_products'  => array(
 						'type'        => 'array',

@@ -2132,6 +2132,29 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should omit empty external product fields and preserve configured values.
+	 */
+	public function test_external_product_output_omits_empty_fields(): void {
+		$product = new \WC_Product_External();
+		$product->set_name( 'External product' );
+		$product->save();
+		$this->created_product_ids[] = $product->get_id();
+
+		$result = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'id' => $product->get_id() ) );
+		$this->assertNotWPError( $result );
+		$this->assertArrayNotHasKey( 'external_url', $result['products'][0] );
+		$this->assertArrayNotHasKey( 'button_text', $result['products'][0] );
+
+		$product->set_product_url( 'https://example.com/buy' );
+		$product->set_button_text( 'Buy elsewhere' );
+		$product->save();
+		$result = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'id' => $product->get_id() ) );
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'https://example.com/buy', $result['products'][0]['external_url'] );
+		$this->assertSame( 'Buy elsewhere', $result['products'][0]['button_text'] );
+	}
+
+	/**
 	 * @testdox Should return saved product values and dates after a write.
 	 * @testWith ["product-create"]
 	 *           ["product-update"]
