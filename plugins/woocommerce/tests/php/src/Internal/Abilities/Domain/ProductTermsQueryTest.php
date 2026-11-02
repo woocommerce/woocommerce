@@ -150,6 +150,76 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should count and paginate non-empty terms together with their empty parents.
+	 * @testWith ["product_cat"]
+	 *           ["product_brand"]
+	 * @param string $taxonomy Taxonomy.
+	 */
+	public function test_hide_empty_hierarchical_totals( string $taxonomy ): void {
+		$parent  = self::factory()->term->create(
+			array(
+				'taxonomy' => $taxonomy,
+				'name'     => 'Zulu parent',
+			)
+		);
+		$first   = self::factory()->term->create(
+			array(
+				'taxonomy' => $taxonomy,
+				'name'     => 'Alpha child',
+				'parent'   => $parent,
+			)
+		);
+		$second  = self::factory()->term->create(
+			array(
+				'taxonomy' => $taxonomy,
+				'name'     => 'Bravo child',
+				'parent'   => $parent,
+			)
+		);
+		$hidden  = self::factory()->term->create(
+			array(
+				'taxonomy' => $taxonomy,
+				'name'     => 'Charlie hidden',
+			)
+		);
+		$product = \WC_Helper_Product::create_simple_product();
+		wp_set_object_terms( $product->get_id(), array( $first, $second ), $taxonomy );
+		$hidden_product = \WC_Helper_Product::create_simple_product();
+		$hidden_product->set_catalog_visibility( 'hidden' );
+		$hidden_product->save();
+		wp_set_object_terms( $hidden_product->get_id(), array( $hidden ), $taxonomy );
+
+		$input  = array(
+			'taxonomy'   => $taxonomy,
+			'include'    => array( $parent, $first, $second, $hidden ),
+			'hide_empty' => true,
+		);
+		$result = ProductTermsQuery::execute( $input );
+		$this->assertCount( 4, $result['terms'] );
+		$this->assertSame( 4, $result['total'] );
+		$this->assertSame( 1, $result['total_pages'] );
+		$this->assertSame( 0, $result['terms'][2]['count'] );
+
+		$seen = array();
+		for ( $page = 1; $page <= 4; ++$page ) {
+			$result = ProductTermsQuery::execute(
+				array_merge(
+					$input,
+					array(
+						'page'     => $page,
+						'per_page' => 1,
+					)
+				)
+			);
+			$this->assertSame( 4, $result['total'] );
+			$this->assertSame( 4, $result['total_pages'] );
+			$this->assertCount( 1, $result['terms'] );
+			$seen[] = $result['terms'][0]['id'];
+		}
+		$this->assertSame( array( $first, $second, $hidden, $parent ), $seen );
+	}
+
+	/**
 	 * @testdox Should support product, slug, exclude and offset filters.
 	 */
 	public function test_remaining_filters(): void {

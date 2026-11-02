@@ -107,11 +107,13 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 		}
 		$count_args = $args;
 		unset( $count_args['number'], $count_args['offset'] );
-		$count_args['fields'] = 'count';
+		// WordPress count queries skip hierarchy-based hide_empty filtering.
+		$count_args['fields'] = $args['hide_empty'] && is_taxonomy_hierarchical( $args['taxonomy'] ) ? 'ids' : 'count';
 		$total                = get_terms( $count_args );
 		if ( is_wp_error( $total ) ) {
 			return $total;
 		}
+		$total = is_array( $total ) ? count( $total ) : (int) $total;
 
 		$image_ids = array_filter( array_map( static fn( $term ) => (int) get_term_meta( $term->term_id, 'thumbnail_id', true ), $terms ) );
 		if ( ! empty( $image_ids ) ) {
