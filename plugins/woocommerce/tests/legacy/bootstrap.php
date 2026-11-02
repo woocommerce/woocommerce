@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Internal\Admin\FeaturePlugin;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseTransaction;
 use Automattic\WooCommerce\Internal\VariationGallery\Migration as VariationGalleryMigration;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
@@ -267,10 +268,10 @@ class WC_Unit_Tests_Bootstrap {
 		require_once $this->plugin_dir . '/woocommerce.php';
 		FeaturePlugin::instance()->init();
 
-		// The test case wraps each test in a transaction that it rolls back. Enter
-		// that transaction one time, so every wc_transaction_query() call in a test
-		// becomes a savepoint inside it, and a rollback in the code under test is real.
-		wc_transaction_query( 'start' );
+		// The test case wraps each test in a transaction that it rolls back. Own
+		// that transaction one time, so every transaction in a test becomes a
+		// savepoint inside it, and a rollback in the code under test is real.
+		DatabaseTransaction::start();
 	}
 
 	/**

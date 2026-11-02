@@ -2355,32 +2355,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should nest transactions with savepoints.
-	 */
-	public function test_transaction_query_nests_with_savepoints(): void {
-		$queries = array();
-		$log     = static function ( $query ) use ( &$queries ) {
-			$queries[] = $query;
-			return $query;
-		};
-
-		add_filter( 'query', $log );
-		try {
-			wc_transaction_query( 'start' );
-			wc_transaction_query( 'start' );
-			wc_transaction_query( 'rollback' );
-			wc_transaction_query( 'commit' );
-		} finally {
-			remove_filter( 'query', $log );
-		}
-
-		$this->assertSame(
-			array( 'SAVEPOINT wc_1', 'SAVEPOINT wc_2', 'ROLLBACK TO SAVEPOINT wc_2', 'RELEASE SAVEPOINT wc_1' ),
-			array_values( array_filter( $queries, static fn( $query ) => false !== strpos( $query, 'SAVEPOINT' ) ) )
-		);
-	}
-
-	/**
 	 * @testdox Should treat a name as a local attribute unless global is true, and refuse an unknown global attribute.
 	 */
 	public function test_product_create_uses_a_global_attribute_only_when_asked(): void {

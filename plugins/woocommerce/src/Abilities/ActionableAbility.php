@@ -7,6 +7,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Abilities;
 
+use Automattic\WooCommerce\Internal\Utilities\DatabaseTransaction;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -266,23 +268,21 @@ abstract class ActionableAbility extends \WP_Ability {
 			}
 		}
 
-		wc_transaction_query( 'start' );
 		try {
-			$saved = $this->save( $subject );
-			if ( ! is_wp_error( $saved ) && $enabled ) {
-				$saved = $this->sync( $objects, $input );
-			}
+			$saved = DatabaseTransaction::run(
+				function () use ( $subject, $objects, $input, $enabled ) {
+					$saved = $this->save( $subject );
+					return ! is_wp_error( $saved ) && $enabled ? $this->sync( $objects, $input ) : $saved;
+				}
+			);
 		} catch ( \Throwable $e ) {
-			wc_transaction_query( 'rollback' );
 			self::forget_rolled_back_objects( $objects, array_merge( $this->get_deleted_objects(), $this->get_trashed_objects() ) );
 			throw $e;
 		}
 		if ( is_wp_error( $saved ) ) {
-			wc_transaction_query( 'rollback' );
 			self::forget_rolled_back_objects( $objects, array_merge( $this->get_deleted_objects(), $this->get_trashed_objects() ) );
 			return $saved;
 		}
-		wc_transaction_query( 'commit' );
 
 		return $this->prepare_response( $subject );
 	}
