@@ -69,7 +69,6 @@
 		"@woocommerce/tracks": "workspace:*",
 		"@wordpress/api-fetch": "catalog:wp-min",
 		"@wordpress/compose": "catalog:wp-min",
-		"@wordpress/core-data": "catalog:wp-min",
 		"@wordpress/data-controls": "catalog:wp-min",
 		"@wordpress/deprecated": "catalog:wp-min",
 		"@wordpress/element": "catalog:wp-min",
@@ -78,6 +77,7 @@
 		"@wordpress/url": "catalog:wp-min",
 		"md5": "^2.3.0",
 		"qs": "^6.11.2",
+		"redux": "^4.2.1",
 		"rememo": "^4.0.2"
 	},
 	"publishConfig": {
@@ -105,13 +105,13 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
+		"@wordpress/core-data": "catalog:wp-min",
 		"eslint": "^10.0.0",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"jest-environment-jsdom": "29.5.x",
 		"react": "18.3.x",
 		"react-dom": "18.3.x",
-		"redux": "^4.2.1",
 		"rimraf": "5.0.5",
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x"
