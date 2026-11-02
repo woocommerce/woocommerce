@@ -226,15 +226,6 @@
 		},
 		{
 			"dependencies": [
-				"webpack-dev-server"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "4.15.x"
-		},
-		{
-			"dependencies": [
 				"babel-loader"
 			],
 			"packages": [
