@@ -247,24 +247,38 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		 * When save_fields() saves a field that sets 'field_name', it stores the value under that name, so read it from there.
 		 * Fields it skips, other names, and values not stored there are read through the field ID as before.
 		 *
-		 * @param array $field    Field definition with 'id', 'field_name' and 'default' set.
+		 * @param array $field    Field definition with 'id', 'type', 'field_name' and 'default' set.
 		 * @param bool  $is_saved Whether save_fields() saves this field.
 		 * @return mixed
 		 */
 		private static function get_field_value( $field, $is_saved ) {
 			$field_name = $field['field_name'];
 
-			if ( $is_saved && $field_name !== $field['id'] && is_string( $field_name ) && preg_match( '/^([^\[\]]+)(?:\[([^\[\]]+)\])?$/', $field_name, $matches ) ) {
-				$option_name = $matches[1];
+			if (
+				$is_saved
+				&& $field_name !== $field['id']
+				&& is_string( $field_name )
+				&& is_string( $field['type'] )
+				// save_fields() hands types with a legacy update action to that action instead of saving them.
+				&& ! has_action( 'woocommerce_update_option_' . sanitize_title( $field['type'] ) )
+				&& preg_match( '/^([^\[\]]+)(?:\[([^\[\]]+)\])?$/', $field_name, $matches )
+			) {
+				$option_name  = $matches[1];
+				$setting_name = null;
 				if ( isset( $matches[2] ) ) {
 					// Resolve the name the way save_fields() does: parse_str() stores 'a.b[c]' under 'a_b'.
 					parse_str( $field_name, $parsed_name );
-					$option_name = (string) key( $parsed_name );
+					$option_name   = (string) key( $parsed_name );
+					$parsed_option = $parsed_name[ $option_name ] ?? null;
+					if ( ! is_array( $parsed_option ) ) {
+						return self::get_option( $field['id'], $field['default'] );
+					}
+					$setting_name = (string) key( $parsed_option );
 				}
 
 				$stored = get_option( $option_name, null );
-				if ( isset( $matches[2] ) ) {
-					$stored = is_array( $stored ) ? ( $stored[ $matches[2] ] ?? null ) : null;
+				if ( null !== $setting_name ) {
+					$stored = is_array( $stored ) ? ( $stored[ $setting_name ] ?? null ) : null;
 				}
 
 				if ( null !== $stored && ! is_object( $stored ) ) {

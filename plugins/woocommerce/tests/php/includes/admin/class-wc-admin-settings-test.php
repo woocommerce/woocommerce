@@ -643,11 +643,42 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 		return array(
 			'plain name'                => array( array( 'test_plain' => 'plain value' ) + $id_value, 'test_plain', 'plain value' ),
 			'nested name'               => array( array( 'test_parent' => array( 'key' => 'nested value' ) ) + $id_value, 'test_parent[key]', 'nested value' ),
+			'encoded nested key'        => array( array( 'test_parent' => array( 'A' => 'decoded value' ) ) + $id_value, 'test_parent[%41]', 'decoded value' ),
 			'nothing stored under name' => array( $id_value, 'test_parent[key]', 'id value' ),
 			'two levels'                => array( array( 'test_parent' => array( 'deep' => array( 'leaf' => 'deep value' ) ) ) + $id_value, 'test_parent[deep][leaf]', 'id value' ),
 			'string option'             => array( array( 'test_string' => 'abc' ) + $id_value, 'test_string[0]', 'id value' ),
 			'object value under key'    => array( array( 'test_object' => array( 'key' => new stdClass() ) ) + $id_value, 'test_object[key]', 'id value' ),
+			'name split by &'           => array( array( 'test_split' => array( 'key' => 'other value' ) ) + $id_value, 'test_split&other[key]', 'id value' ),
 		);
+	}
+
+	/**
+	 * @testdox Should pass the ID value to a custom field type that save_fields() hands to a legacy update action.
+	 */
+	public function test_output_fields_reads_through_id_for_types_with_legacy_update_action(): void {
+		update_option( 'test_field_id', 'id value' );
+		update_option( 'test_parent', array( 'key' => 'nested value' ) );
+		add_action( 'woocommerce_update_option_test_legacy_type', function () {} );
+		$received = null;
+		add_action(
+			'woocommerce_admin_field_test_legacy_type',
+			function ( $field ) use ( &$received ) {
+				$received = $field['value'];
+			}
+		);
+
+		$this->render_fields(
+			array(
+				array(
+					'id'         => 'test_field_id',
+					'field_name' => 'test_parent[key]',
+					'type'       => 'test_legacy_type',
+					'default'    => 'default value',
+				),
+			)
+		);
+
+		$this->assertSame( 'id value', $received );
 	}
 
 	/**
