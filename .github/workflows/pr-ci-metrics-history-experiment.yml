@@ -1,0 +1,68 @@
+name: 'PR experiment: Metrics history retrieval'
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - '.github/workflows/pr-ci-metrics-history-experiment.yml'
+      - '.github/experiments/metrics-history/**'
+permissions:
+  contents: read
+concurrency:
+  group: metrics-history-experiment-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  measure:
+    if: ${{ github.repository == 'woocommerce/woocommerce' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'research/ci-history-fetch-benchmarks' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - {arm: full, repetition: 1}
+          - {arm: blobless, repetition: 1}
+          - {arm: shallow, repetition: 1}
+          - {arm: shallow, repetition: 2}
+          - {arm: full, repetition: 2}
+          - {arm: blobless, repetition: 2}
+          - {arm: blobless, repetition: 3}
+          - {arm: shallow, repetition: 3}
+          - {arm: full, repetition: 3}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - name: Measure fixed PR source retrieval
+        env:
+          ARM: ${{ matrix.arm }}
+        run: |
+          python3 .github/experiments/metrics-history/measure.py \
+            --head 327b202c20e62037227e8d793b9b58b59b25028a \
+            --base 4628e9711e0d93bbdcd1081d13d5c0706fd318e0 \
+            --arm "$ARM" --work "$RUNNER_TEMP/source" --output "$RUNNER_TEMP/results"
+          git --version > "$RUNNER_TEMP/results/git-version.txt"
+          uname -a > "$RUNNER_TEMP/results/runner.txt"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        with:
+          name: metrics-history-${{ matrix.arm }}-${{ matrix.repetition }}
+          path: ${{ runner.temp }}/results/
+          if-no-files-found: error
+          retention-days: 3
+  compare:
+    needs: measure
+    if: ${{ !cancelled() && github.repository == 'woocommerce/woocommerce' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'research/ci-history-fetch-benchmarks' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: metrics-history-*
+          path: ${{ runner.temp }}/history-artifacts
+      - name: Require exact source parity and report phase medians
+        shell: bash
+        run: python3 .github/experiments/metrics-history/compare.py "$RUNNER_TEMP/history-artifacts" | tee -a "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+: "${TMPDIR:?}"
+dir=$(mktemp -d "$TMPDIR/metrics-fixture.XXXXXX")
+dir=$(cd "$dir" && pwd -P)
+trap 'rm -rf "$dir"' EXIT
+export GITHUB_WORKSPACE="$dir/repo" RESULT_DIR="$dir/results" TEST_LOG="$dir/calls"
+mkdir -p "$RESULT_DIR" "$GITHUB_WORKSPACE/plugins/woocommerce/tests" "$GITHUB_WORKSPACE/tools/compare-perf" "$GITHUB_WORKSPACE/.github" "$dir/bin"
+printf 'Tested up to: 6.8\n' > "$GITHUB_WORKSPACE/plugins/woocommerce/readme.txt"
+for path in plugins/woocommerce/tests tools/compare-perf .github; do
+  printf 'base\n' > "$GITHUB_WORKSPACE/$path/resource"
+done
+cat > "$dir/bin/fake-git" <<'FAKE'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >> "$TEST_LOG"
+if [[ "${1:-}" == restore ]]; then
+  [[ "${2:-}" == --source && "${3:-}" == head && -f "${4:-}/resource" ]]
+  printf 'head\n' > "$4/resource"
+fi
+FAKE
+chmod +x "$dir/bin/fake-git"
+ln -s "$dir/bin/fake-git" "$dir/bin/git"
+export REAL_GIT="$dir/bin/fake-git" BASE_SHA_PIN=abc ARM=control GITHUB_EVENT_NAME=pull_request
+helper_dir=$(cd "$(dirname "$0")" && pwd)
+"$helper_dir/git" fetch --depth=1 --no-tags origin trunk
+"$helper_dir/git" fetch --no-tags --quiet --unshallow origin trunk
+export ARM=shallow
+"$helper_dir/git" fetch --no-tags --quiet --unshallow origin trunk
+export GITHUB_EVENT_NAME=push
+"$helper_dir/git" fetch --depth=1 --no-tags origin trunk
+"$helper_dir/git" fetch --no-tags --quiet --unshallow origin trunk
+"$helper_dir/git" push origin HEAD
+expected=$(printf '%s\n' 'fetch --depth=1 --no-tags origin +abc:refs/remotes/origin/trunk' 'fetch --no-tags --quiet --unshallow origin +abc:refs/remotes/origin/trunk' 'fetch --depth=1 --no-tags origin trunk' 'fetch --no-tags --quiet --unshallow origin trunk' 'push origin HEAD')
+test "$(cat "$TEST_LOG")" = "$expected"
+# Run the same rewritten expressions from the package cwd used by filtered pnpm scripts.
+cat > "$dir/script" <<'SCRIPT'
+#!/usr/bin/env bash
+set -euo pipefail
+[[ "$(pwd -P)" == "$GITHUB_WORKSPACE/plugins/woocommerce" ]]
+[[ "$(awk -F ': ' '/^Tested up to/{print $2}' readme.txt)" == 6.8 ]]
+SCRIPT
+# Use the actual script's rewritten restore commands, not hand-written approximations.
+# shellcheck disable=SC2016
+sed 's|$(realpath $(dirname -- ${BASH_SOURCE\[0\]})/../../../|$(realpath $GITHUB_WORKSPACE/|g' "$helper_dir/../../workflows/scripts/run-metrics.sh" | sed -n '/^[[:space:]]*git restore --source/p' >> "$dir/script"
+test "$(sed -n '/^[[:space:]]*git restore --source/p' "$dir/script" | wc -l | tr -d ' ')" = 3
+export PATH="$dir/bin:$PATH" GITHUB_SHA=head
+(cd "$GITHUB_WORKSPACE/plugins/woocommerce" && bash "$dir/script")
+for path in plugins/woocommerce/tests tools/compare-perf .github; do
+  test "$(cat "$GITHUB_WORKSPACE/$path/resource")" = head
+done
+printf 'Git event forwarding, package cwd, readme and restored resource paths passed.\n'

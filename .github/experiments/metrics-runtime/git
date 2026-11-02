@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+start=$(date +%s%N)
+args=("$@")
+if [[ "${GITHUB_EVENT_NAME:-}" == pull_request && "$*" == 'fetch --depth=1 --no-tags origin trunk' ]]; then
+  args=(fetch --depth=1 --no-tags origin "+${BASE_SHA_PIN}:refs/remotes/origin/trunk")
+elif [[ "${GITHUB_EVENT_NAME:-}" == pull_request && "$*" == 'fetch --no-tags --quiet --unshallow origin trunk' ]]; then
+  if [[ "$ARM" == shallow ]]; then
+    printf 'git baseline fetch skipped: already fetched pinned base\n' >> "$RESULT_DIR/phases.log"
+    exit 0
+  fi
+  args=(fetch --no-tags --quiet --unshallow origin "+${BASE_SHA_PIN}:refs/remotes/origin/trunk")
+fi
+status=0
+"$REAL_GIT" "${args[@]}" || status=$?
+printf 'git %s status=%s duration_ms=%s\n' "$*" "$status" "$(( ($(date +%s%N) - start) / 1000000 ))" >> "$RESULT_DIR/phases.log"
+exit "$status"

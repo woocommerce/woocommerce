@@ -1,0 +1,127 @@
+name: Metrics runtime experiment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/pr-ci-metrics-runtime-experiment.yml'
+      - '.github/experiments/metrics-runtime/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: metrics-runtime-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  metrics:
+    if: github.event.pull_request.base.repo.full_name == github.repository && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'research/ci-history-fetch-benchmarks'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        arm: [control, shallow]
+        family: [normal, unified]
+    env:
+      ARM: ${{ matrix.arm }}
+      FAMILY: ${{ matrix.family }}
+    steps:
+      - name: Checkout experiment helpers
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Preserve helpers outside checkout
+        run: cp -a .github/experiments/metrics-runtime "$RUNNER_TEMP/metrics-runtime"
+      - name: Checkout pinned head
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: 327b202c20e62037227e8d793b9b58b59b25028a
+          fetch-depth: 1
+      - name: Setup pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          cache: false
+      - name: Setup Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: ''
+          package-manager-cache: false
+      - name: Setup PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '7.4'
+          coverage: none
+      - name: Resolve pnpm store
+        run: echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+      - name: Restore pnpm cache
+        id: pnpm-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.PNPM_STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-
+      - name: Restore build cache
+        id: build-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ./node_modules/.cache
+          key: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-
+      - name: Restore Composer cache
+        id: composer-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/composer/files
+          key: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('packages/*/*/composer.lock', 'plugins/*/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-
+      - name: Restore Playwright cache
+        id: playwright-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright/
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-playwright-
+      - name: Record cache matches
+        env:
+          PNPM_HIT: ${{ steps.pnpm-cache.outputs.cache-hit }}
+          PNPM_KEY: ${{ steps.pnpm-cache.outputs.cache-matched-key }}
+          BUILD_HIT: ${{ steps.build-cache.outputs.cache-hit }}
+          BUILD_KEY: ${{ steps.build-cache.outputs.cache-matched-key }}
+          COMPOSER_HIT: ${{ steps.composer-cache.outputs.cache-hit }}
+          COMPOSER_KEY: ${{ steps.composer-cache.outputs.cache-matched-key }}
+          PLAYWRIGHT_HIT: ${{ steps.playwright-cache.outputs.cache-hit }}
+          PLAYWRIGHT_KEY: ${{ steps.playwright-cache.outputs.cache-matched-key }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/metrics-results"
+          env | LC_ALL=C sort | grep -E '^(PNPM|BUILD|COMPOSER|PLAYWRIGHT)_(HIT|KEY)=' > "$RUNNER_TEMP/metrics-results/caches.txt"
+      - name: Install and build source
+        env:
+          BROWSERSLIST_IGNORE_OLD_DATA: 'true'
+        run: |
+          pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile
+          pnpm --filter='@woocommerce/plugin-woocommerce' build
+      - name: Configure Docker
+        uses: docker/setup-docker-action@6d7cfa65f60a9dda7b46e5513fa982536f3c9877 # v5.3.0
+        with:
+          daemon-config: |
+            {"max-download-attempts": 10, "max-concurrent-downloads": 3}
+      - name: Start performance environment
+        run: pnpm --filter='@woocommerce/plugin-woocommerce' env:perf
+      - name: Enable unified editor assets
+        if: matrix.family == 'unified'
+        run: pnpm --filter='@woocommerce/plugin-woocommerce' wp-env:e2e run cli wp option update woocommerce_feature_block_editor_unified_assets_enabled yes
+      - name: Run original metrics script with pinned fetch
+        run: '"$RUNNER_TEMP/metrics-runtime/run"'
+      - name: Upload experiment evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: metrics-runtime-${{ matrix.family }}-${{ matrix.arm }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/metrics-results
+          if-no-files-found: warn
+          retention-days: 3

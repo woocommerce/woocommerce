@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$GITHUB_WORKSPACE"
+label=$1
+out="$RESULT_DIR/$label"
+mkdir -p "$out"
+"$REAL_GIT" rev-parse HEAD 'HEAD^{tree}' > "$out/revision.txt"
+"$REAL_GIT" diff --binary HEAD | sha256sum > "$out/tracked-diff.sha256"
+sha256sum pnpm-lock.yaml plugins/woocommerce/composer.lock > "$out/lockfiles.sha256"
+# Source tree identities come from Git; output files include every JS/CSS asset in the mounted plugin.
+(cd plugins/woocommerce && find . -type f \( -name '*.js' -o -name '*.css' \) ! -path '*/node_modules/*' ! -path '*/vendor/*' -print0 | LC_ALL=C sort -z | xargs -0 -r sha256sum) > "$out/assets.sha256"

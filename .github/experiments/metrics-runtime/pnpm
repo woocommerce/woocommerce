@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+start=$(date +%s%N)
+if [[ "$*" == *' test:metrics '* ]]; then
+  label="${RESULTS_ID:?}"
+  "$HELPER_DIR/snapshot" "$label"
+fi
+status=0
+"$REAL_PNPM" "$@" || status=$?
+printf 'pnpm %s results_id=%s status=%s duration_ms=%s\n' "$*" "${RESULTS_ID:-none}" "$status" "$(( ($(date +%s%N) - start) / 1000000 ))" >> "$RESULT_DIR/phases.log"
+exit "$status"

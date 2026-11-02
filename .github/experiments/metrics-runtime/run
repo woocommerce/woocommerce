@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+export HELPER_DIR="${RUNNER_TEMP}/metrics-runtime"
+export RESULT_DIR="${RUNNER_TEMP}/metrics-results"
+export BASE_SHA_PIN=4628e9711e0d93bbdcd1081d13d5c0706fd318e0
+export GITHUB_SHA=327b202c20e62037227e8d793b9b58b59b25028a
+export GITHUB_EVENT_NAME=pull_request
+export ARTIFACTS_PATH="$RESULT_DIR/reports"
+REAL_GIT="$(command -v git)"
+REAL_PNPM="$(command -v pnpm)"
+export REAL_GIT REAL_PNPM
+mkdir -p "$ARTIFACTS_PATH"
+test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+# Keep the executing script and instrumentation outside the checkout restored by the original script.
+# Its three realpath calls must still resolve to the original repository.
+# shellcheck disable=SC2016
+sed 's|$(realpath $(dirname -- ${BASH_SOURCE\[0\]})/../../../|$(realpath $GITHUB_WORKSPACE/|g' .github/workflows/scripts/run-metrics.sh > "$HELPER_DIR/original-script.sh"
+export PATH="$HELPER_DIR:$PATH"
+{ date -u; uname -a; printf 'arm=%s family=%s\n' "$ARM" "$FAMILY"; printf 'node=%s pnpm=%s git=%s\n' "$(command -v node)" "$REAL_PNPM" "$REAL_GIT"; ls -l "$REAL_PNPM"; node --version; "$REAL_PNPM" --version; corepack --version || true; php --version; docker version; "$REAL_GIT" --version; } > "$RESULT_DIR/environment.txt" 2>&1
+start=$(date +%s%N)
+status=0
+(cd "$GITHUB_WORKSPACE/plugins/woocommerce" && bash "$HELPER_DIR/original-script.sh") 2>&1 | tee "$RESULT_DIR/script.log" || status=$?
+printf 'whole_script status=%s duration_ms=%s\n' "$status" "$(( ($(date +%s%N) - start) / 1000000 ))" >> "$RESULT_DIR/phases.log"
+# Four actual successful browser invocations are required, even if the script returns early.
+for sha in "$GITHUB_SHA" "$BASE_SHA_PIN"; do
+  for suite in editor frontend; do
+    id="${suite}_${sha}_round-1"
+    if [[ ! -s "$RESULT_DIR/$id/assets.sha256" ]] || [[ "$(head -n 1 "$RESULT_DIR/$id/revision.txt")" != "$sha" ]]; then
+      echo "Missing assets or wrong checkout for $id" >&2
+      status=1
+    fi
+    if ! grep -F "results_id=$id status=0 " "$RESULT_DIR/phases.log" >/dev/null; then
+      echo "Missing successful benchmark: $id" >&2
+      status=1
+    fi
+  done
+done
+if ! grep -F 'compare perf ' "$RESULT_DIR/phases.log" | grep -F 'status=0 ' >/dev/null; then
+  echo 'Final comparison did not succeed' >&2
+  status=1
+fi
+find "$ARTIFACTS_PATH" -type f -print | LC_ALL=C sort > "$RESULT_DIR/report-files.txt"
+# Record structural paths and value types without retaining metric values as a parity requirement.
+while IFS= read -r -d '' file; do
+  jq -r 'paths(scalars) as $p | [($p | map(tostring) | join(".")), (getpath($p) | type)] | @tsv' "$file" | LC_ALL=C sort > "$RESULT_DIR/$(basename "$file").schema.tsv" || status=1
+done < <(find "$ARTIFACTS_PATH" -type f -name '*.json' -print0)
+if [[ -f "$ARTIFACTS_PATH/frontend.delta-results.json" ]]; then
+  printf 'frontend_delta_server_response=' >> "$RESULT_DIR/phases.log"
+  jq -r .serverResponse "$ARTIFACTS_PATH/frontend.delta-results.json" >> "$RESULT_DIR/phases.log"
+fi
+exit "$status"
