@@ -1824,14 +1824,22 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @param string $timezone Store timezone.
 	 * @param string $created Creation date in store time.
 	 * @param string $expected Expected date with offset.
+	 * @param string $expected_gmt Expected UTC date.
 	 */
-	public function test_product_output_dates_have_offsets( string $timezone, string $created, string $expected ): void {
+	public function test_product_output_dates_have_offsets( string $timezone, string $created, string $expected, string $expected_gmt ): void {
 		update_option( 'timezone_string', $timezone );
 		update_option( 'gmt_offset', 5.75 );
 		$product = \WC_Helper_Product::create_simple_product();
 		$product->set_date_created( $created );
 		$product->save();
 		$this->created_product_ids[] = $product->get_id();
+		$modified                    = new \WC_DateTime( $created, wp_timezone() );
+		add_filter(
+			'woocommerce_product_get_date_modified',
+			static function () use ( $modified ) {
+				return $modified;
+			}
+		);
 
 		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
@@ -1841,7 +1849,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $result );
-		$this->assertSame( $expected, $result['product']['date_created'] );
 		$this->assertSame( 'Date output regression', wc_get_product( $product->get_id() )->get_name() );
 		foreach ( array( 'date_created', 'date_modified' ) as $field ) {
 			$date       = $result['product'][ $field ];
@@ -1849,6 +1856,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$parsed     = \DateTimeImmutable::createFromFormat( DATE_ATOM, $date );
 			$parsed_gmt = \DateTimeImmutable::createFromFormat( DATE_ATOM, $date_gmt );
 
+			$this->assertSame( $expected, $date );
+			$this->assertSame( $expected_gmt, $date_gmt );
 			$this->assertInstanceOf( \DateTimeImmutable::class, $parsed );
 			$this->assertInstanceOf( \DateTimeImmutable::class, $parsed_gmt );
 			$this->assertSame( $date, $parsed->format( DATE_ATOM ) );
@@ -1864,8 +1873,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @param string $timezone Store timezone.
 	 * @param string $created Creation date in store time.
 	 * @param string $expected Expected date with offset.
+	 * @param string $expected_gmt Expected UTC date.
 	 */
-	public function test_order_output_dates_have_offsets( string $timezone, string $created, string $expected ): void {
+	public function test_order_output_dates_have_offsets( string $timezone, string $created, string $expected, string $expected_gmt ): void {
 		update_option( 'timezone_string', $timezone );
 		update_option( 'gmt_offset', 5.75 );
 		$order = wc_create_order();
@@ -1880,7 +1890,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertNotWPError( $result );
 		foreach ( array( 'date_created', 'date_modified' ) as $field ) {
 			$this->assertSame( $expected, $result['orders'][0][ $field ] );
-			$this->assertStringEndsWith( '+00:00', $result['orders'][0][ $field . '_gmt' ] );
+			$this->assertSame( $expected_gmt, $result['orders'][0][ $field . '_gmt' ] );
 			$this->assertSame( strtotime( $expected ), strtotime( $result['orders'][0][ $field . '_gmt' ] ) );
 		}
 	}
@@ -1892,11 +1902,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public function provider_output_date_timezones(): array {
 		return array(
-			'UTC'        => array( 'UTC', '2026-07-15T12:00:00', '2026-07-15T12:00:00+00:00' ),
-			'summer'     => array( 'Europe/Amsterdam', '2026-07-15T12:00:00', '2026-07-15T12:00:00+02:00' ),
-			'winter'     => array( 'Europe/Amsterdam', '2026-01-15T12:00:00', '2026-01-15T12:00:00+01:00' ),
-			'negative'   => array( 'America/New_York', '2026-07-15T12:00:00', '2026-07-15T12:00:00-04:00' ),
-			'fractional' => array( '', '2026-07-15T12:00:00', '2026-07-15T12:00:00+05:45' ),
+			'UTC'        => array( 'UTC', '2026-07-15T12:00:00', '2026-07-15T12:00:00+00:00', '2026-07-15T12:00:00+00:00' ),
+			'summer'     => array( 'Europe/Amsterdam', '2026-07-15T12:00:00', '2026-07-15T12:00:00+02:00', '2026-07-15T10:00:00+00:00' ),
+			'winter'     => array( 'Europe/Amsterdam', '2026-01-15T12:00:00', '2026-01-15T12:00:00+01:00', '2026-01-15T11:00:00+00:00' ),
+			'negative'   => array( 'America/New_York', '2026-07-15T12:00:00', '2026-07-15T12:00:00-04:00', '2026-07-15T16:00:00+00:00' ),
+			'fractional' => array( '', '2026-07-15T12:00:00', '2026-07-15T12:00:00+05:45', '2026-07-15T06:15:00+00:00' ),
 		);
 	}
 
