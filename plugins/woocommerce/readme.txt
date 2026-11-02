@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 11.3.0-beta.2 2026-XX-XX =
+= 11.3.0-beta.2 2026-11-02 =
 
 **WooCommerce**
 
@@ -376,6 +376,18 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Use the address entered in the order editor when calculating tax for products added to manual orders. [#69518](https://github.com/woocommerce/woocommerce/pull/69518)
 * Fix - Use the filterable coupon-removed message from `WC_Coupon::get_coupon_message()` when removing a coupon via AJAX. [#69271](https://github.com/woocommerce/woocommerce/pull/69271)
 * Fix - Validate posted Back in Stock variation attributes against the values the store offers, look up an existing sign-up with a single exact query, and check the sign-up rate limit before it. [#68915](https://github.com/woocommerce/woocommerce/pull/68915)
+* Fix - Apply product visibility checks before rendering add-to-cart shortcodes. [#70400](https://github.com/woocommerce/woocommerce/pull/70400)
+* Fix - Don't grant downloads for order lines that were refunded before the order was completed. [#70545](https://github.com/woocommerce/woocommerce/pull/70545)
+* Fix - Fix cross-sell Add to cart buttons sometimes not responding in Safari and other browsers. [#70402](https://github.com/woocommerce/woocommerce/pull/70402)
+* Fix - Improve the consistency of Product Filters prices and counts across user roles. [#70356](https://github.com/woocommerce/woocommerce/pull/70356)
+* Fix - Make variation details loaded on the product page follow the product password setting. [#70382](https://github.com/woocommerce/woocommerce/pull/70382)
+* Fix - Prevent back-in-stock notification saves that only change meta from re-saving the notification, which stored newly added meta (e.g. the unsubscribe key) twice. [#70522](https://github.com/woocommerce/woocommerce/pull/70522)
+* Fix - Reject back-in-stock sign-ups for products the shopper cannot view [#70419](https://github.com/woocommerce/woocommerce/pull/70419)
+* Fix - Show sale prices in the Store API and grouped product structured data only after the scheduled sale starts. [#70540](https://github.com/woocommerce/woocommerce/pull/70540)
+* Fix - Stop showing the post-checkout "Create account" form when the "After checkout" account creation setting was never saved. [#70530](https://github.com/woocommerce/woocommerce/pull/70530)
+* Fix - Store API: reject an address change on the pay-for-order checkout endpoint when it would alter the order's shipping cost or tax. [#70364](https://github.com/woocommerce/woocommerce/pull/70364)
+* Fix - Store API reviews endpoint: include avatars data only if they are enabled on the site [#70521](https://github.com/woocommerce/woocommerce/pull/70521)
+* Fix - Strengthen download permission ID checks [#70334](https://github.com/woocommerce/woocommerce/pull/70334)
 * Add - Add ActionableAbility to the experimental extensible abilities feature. With it on, product create and product update accept extension fields under extensions.<namespace>.<field>, and save Core and extension fields one time. [#69681](https://github.com/woocommerce/woocommerce/pull/69681)
 * Add - Add a location filter to the Analytics Taxes report, narrowing the report, its summary and its export to a country or a state. [#68839](https://github.com/woocommerce/woocommerce/pull/68839)
 * Add - Add an admin notice about the upcoming PHP 8.1 requirement in WooCommerce 11.6 for stores running an older PHP version. [#69094](https://github.com/woocommerce/woocommerce/pull/69094)
@@ -408,6 +420,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Show the number of active WooCommerce.com extensions without a subscription in the WooCommerce Status dashboard widget. [#69509](https://github.com/woocommerce/woocommerce/pull/69509)
 * Add - Split the taxable amount of the Analytics Taxes report into Order gross and Shipping gross columns. [#68890](https://github.com/woocommerce/woocommerce/pull/68890)
 * Add - When usage tracking is enabled, record how WooCommerce abilities are called, such as by AI agents, without their inputs or results. [#69949](https://github.com/woocommerce/woocommerce/pull/69949)
+* Add - Fire ID-based lifecycle actions when a stock notification is created, updated, changes status, is deleted or is about to be anonymized by the privacy eraser. [#70516](https://github.com/woocommerce/woocommerce/pull/70516)
+* Add - Show the free trial length instead of the price on Marketplace product cards when WooCommerce.com offers a trial. [#70358](https://github.com/woocommerce/woocommerce/pull/70358)
 * Update - Clarify that Direct bank transfer accepts offline bank-to-bank and wire transfer payments. [#69743](https://github.com/woocommerce/woocommerce/pull/69743)
 * Update - Decrease top margin in Checkout block [#69560](https://github.com/woocommerce/woocommerce/pull/69560)
 * Update - Deprecate the `type`, `autocompleter`, and `labels.placeholder` settings of Analytics report filters in favor of `settings.searchProps`, which the core report filters now use. [#68816](https://github.com/woocommerce/woocommerce/pull/68816)
