@@ -73,7 +73,7 @@ catalogs:
     # Shared build tooling used across workspace packages.
     tooling:
         '@babel/cli': 7.25.7
-        '@babel/core': 7.25.7
+        '@babel/core': 7.29.7
         '@babel/plugin-syntax-jsx': 7.25.7
         '@babel/preset-env': 7.25.7
         '@babel/preset-react': 7.25.7
@@ -114,6 +114,7 @@ packages:
 
 # Dependency resolution (migrated from the `pnpm` field of package.json)
 overrides:
+    '@babel/core@<7.29.6': 'catalog:tooling'
     '@types/react': 18.3.x
     '@wordpress/data-controls>@wordpress/api-fetch': 'catalog:wp-min'
     '@wordpress/private-apis': 'catalog:wp-min'
