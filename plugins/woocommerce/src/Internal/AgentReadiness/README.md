@@ -126,11 +126,17 @@ Per check, `channels` maps a channel id to the feed field and the effect, the sa
 
 Product changes don't update the stored report: a fixed product leaves it at the next daily scan or "Run check". On a store with 11,000 products, a scan (stopping at 5,000) took about 4 seconds and 144 MB.
 
-`GET wc/v3/agent-readiness` returns `{ "report": <report or null>, "scan_pending": <bool>, "scan_stalled": <bool> }`; `scan_stalled` is true while a queued scan waits on a stalled Action Scheduler. Both routes need `manage_woocommerce` and exist only while the feature is enabled.
+`GET wc/v3/agent-readiness` returns `{ "report": <report or null>, "scan_pending": <bool>, "scan_stalled": <bool> }`, with `store_checks` read now; `scan_stalled` is true while a queued scan waits on a stalled Action Scheduler. Both routes need `manage_woocommerce` and exist only while the feature is enabled.
 
 The same shape is meant for every consumer: this Status tab, an outside scan of a store, and extensions that rank the findings by sales or offer fixes. Check and channel ids are stable keys.
 
 The scan walks published simple and variable products shown in the shop catalog in batches of 200, most recently modified first, primes meta, terms, images and variations per batch, and stops at 5,000 products.
+
+## Abilities
+
+While the feature is enabled, `ReadinessAbilities` registers abilities in the WordPress Abilities API, shown in REST and to MCP clients, for users with `manage_woocommerce`:
+
+- `woocommerce/get-agent-readiness` and `GET wc/v3/agent-readiness` both return `{ report, scan_pending }` with `store_checks` read now (`AgentReadiness::get_store_checks()`): settings changed since the scan show their current state, and store output checks come from the stored report.
 
 ## Agentic commerce settings page
 
