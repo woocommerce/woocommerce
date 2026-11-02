@@ -39,14 +39,6 @@ export const CONSUMER_KEY = { name: '', key: '', secret: '' };
 const reporter = [
 	[ 'list' ],
 	[
-		'allure-playwright',
-		{
-			resultsDir: `${ TESTS_ROOT_PATH }/test-results/allure-results`,
-			detail: true,
-			suiteTitle: true,
-		},
-	],
-	[
 		'json',
 		{
 			outputFile: `${ TESTS_ROOT_PATH }/test-results/test-results-${ Date.now() }.json`,
@@ -62,10 +54,6 @@ const reporter = [
 			appName: 'woocommerce-core',
 			repositoryName: process.env.GITHUB_REPOSITORY || '',
 		},
-	],
-	[
-		`${ TESTS_ROOT_PATH }/reporters/environment-reporter.ts`,
-		{ outputFolder: `${ TESTS_ROOT_PATH }/test-results/allure-results` },
 	],
 ];
 
