@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Allow extensions to opt individual abilities into WooCommerce usage tracking on opted-in stores.
+fix: Track extension abilities registered through WooCommerce when the store allows usage tracking.
