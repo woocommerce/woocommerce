@@ -1795,6 +1795,32 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should preserve the timezone and timestamp of filtered date objects.
+	 */
+	public function test_order_output_preserves_filtered_date_object(): void {
+		update_option( 'timezone_string', 'Europe/Amsterdam' );
+		$order                     = wc_create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$date                      = new \WC_DateTime( '2026-07-15T12:00:00', new \DateTimeZone( 'Asia/Kathmandu' ) );
+		$timestamp                 = $date->getTimestamp();
+		add_filter(
+			'woocommerce_order_get_date_created',
+			static function () use ( $date ) {
+				return $date;
+			}
+		);
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'id' => $order->get_id() ) );
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( '2026-07-15T08:15:00+02:00', $result['orders'][0]['date_created'] );
+		$this->assertSame( '2026-07-15T06:15:00+00:00', $result['orders'][0]['date_created_gmt'] );
+		$this->assertSame( 'Asia/Kathmandu', $date->getTimezone()->getName() );
+		$this->assertSame( $timestamp, $date->getTimestamp() );
+	}
+
+	/**
+	 * @testdox Should return valid product dates with matching store and UTC timestamps.
 	 * @dataProvider provider_output_date_timezones
 	 * @param string $timezone Store timezone.
 	 * @param string $created Creation date in store time.
@@ -1819,9 +1845,17 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $expected, $result['product']['date_created'] );
 		$this->assertSame( 'Date output regression', wc_get_product( $product->get_id() )->get_name() );
 		foreach ( array( 'date_created', 'date_modified' ) as $field ) {
-			$this->assertMatchesRegularExpression( '/[+-]\\d{2}:\\d{2}$/', $result['product'][ $field ] );
-			$this->assertStringEndsWith( '+00:00', $result['product'][ $field . '_gmt' ] );
-			$this->assertSame( strtotime( $result['product'][ $field ] ), strtotime( $result['product'][ $field . '_gmt' ] ) );
+			$date       = $result['product'][ $field ];
+			$date_gmt   = $result['product'][ $field . '_gmt' ];
+			$parsed     = \DateTimeImmutable::createFromFormat( DATE_ATOM, $date );
+			$parsed_gmt = \DateTimeImmutable::createFromFormat( DATE_ATOM, $date_gmt );
+
+			$this->assertInstanceOf( \DateTimeImmutable::class, $parsed );
+			$this->assertInstanceOf( \DateTimeImmutable::class, $parsed_gmt );
+			$this->assertSame( $date, $parsed->format( DATE_ATOM ) );
+			$this->assertSame( $date_gmt, $parsed_gmt->format( DATE_ATOM ) );
+			$this->assertStringEndsWith( '+00:00', $date_gmt );
+			$this->assertSame( $parsed->getTimestamp(), $parsed_gmt->getTimestamp() );
 		}
 	}
 
