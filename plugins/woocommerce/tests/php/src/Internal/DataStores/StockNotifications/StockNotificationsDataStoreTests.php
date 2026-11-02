@@ -473,8 +473,11 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$this->assertEquals( '2024-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
 		$this->assertEquals( '', $notification->get_meta( 'test_meta' ) );
 		$notification->add_meta_data( 'test_meta', 'test_value' );
+		$fired = did_action( 'woocommerce_update_stock_notification' );
 		$notification->save();
 
+		$this->assertSame( 1, did_action( 'woocommerce_update_stock_notification' ) - $fired, 'A meta-only save fires the update action once.' );
+		$this->assertSame( 1, $this->count_meta_rows( $notification->get_id(), 'test_meta' ), 'The added meta is stored once.' );
 		$notification = new Notification( $notification->get_id() );
 		$this->assertNotEquals( '2024-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
 	}
@@ -496,8 +499,10 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$this->assertEquals( '2024-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
 		$this->assertEquals( 'test_value', $notification->get_meta( 'test_meta' ) );
 		$notification->update_meta_data( 'test_meta', 'updated_value' );
+		$fired = did_action( 'woocommerce_update_stock_notification' );
 		$notification->save();
 
+		$this->assertSame( 1, did_action( 'woocommerce_update_stock_notification' ) - $fired, 'A meta-only save fires the update action once.' );
 		$notification = new Notification( $notification->get_id() );
 		$this->assertEquals( 'updated_value', $notification->get_meta( 'test_meta' ) );
 		$this->assertNotEquals( '2024-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
@@ -518,10 +523,105 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$notification = new Notification( $notification->get_id() );
 		$this->assertEquals( '2024-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
 		$notification->delete_meta_data( 'test_meta' );
+		$fired = did_action( 'woocommerce_update_stock_notification' );
+		$notification->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_update_stock_notification' ) - $fired, 'A meta-only save fires the update action once.' );
+		$this->assertSame( 0, $this->count_meta_rows( $notification->get_id(), 'test_meta' ) );
+		$notification = new Notification( $notification->get_id() );
+		$this->assertNotEquals( '2024-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
+	}
+
+	/**
+	 * @testdox Should save prop and meta changes together with one update action.
+	 */
+	public function test_prop_and_meta_changes_save_with_one_update_action(): void {
+		$notification = $this->create_notification_modified_in_the_past();
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->add_meta_data( 'test_meta', 'test_value' );
+		$fired = did_action( 'woocommerce_update_stock_notification' );
+		$notification->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_update_stock_notification' ) - $fired );
+		$notification = new Notification( $notification->get_id() );
+		$this->assertSame( NotificationStatus::ACTIVE, $notification->get_status() );
+		$this->assertSame( 'test_value', $notification->get_meta( 'test_meta' ) );
+		$this->assertNotEquals( '2024-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
+	}
+
+	/**
+	 * @testdox Should keep an explicitly set modified date when meta also changes.
+	 */
+	public function test_explicit_modified_date_is_kept_when_meta_changes(): void {
+		$notification = $this->create_notification_modified_in_the_past();
+		$notification->set_date_modified( '2025-01-01 00:00:00' );
+		$notification->add_meta_data( 'test_meta', 'test_value' );
 		$notification->save();
 
 		$notification = new Notification( $notification->get_id() );
-		$this->assertNotEquals( '2024-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
+		$this->assertSame( '2025-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
+	}
+
+	/**
+	 * @testdox Should fire the update action once and leave the modified date alone when a save has no changes.
+	 */
+	public function test_save_without_changes_keeps_modified_date(): void {
+		$notification = $this->create_notification_modified_in_the_past();
+		$fired        = did_action( 'woocommerce_update_stock_notification' );
+		$notification->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_update_stock_notification' ) - $fired );
+		$notification = new Notification( $notification->get_id() );
+		$this->assertSame( '2024-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
+	}
+
+	/**
+	 * @testdox Should report no meta changes when meta was never read.
+	 */
+	public function test_has_meta_changes_is_false_when_meta_was_never_read(): void {
+		$notification = $this->create_notification_modified_in_the_past();
+
+		$this->assertFalse( $notification->has_meta_changes() );
+	}
+
+	/**
+	 * @testdox Should report no meta changes for unchanged loaded meta.
+	 */
+	public function test_has_meta_changes_is_false_for_unchanged_loaded_meta(): void {
+		$notification = $this->create_notification_modified_in_the_past();
+		$notification->add_meta_data( 'test_meta', 'test_value' );
+		$notification->save();
+
+		$notification = new Notification( $notification->get_id() );
+		$notification->get_meta( 'test_meta' );
+
+		$this->assertFalse( $notification->has_meta_changes() );
+	}
+
+	/**
+	 * @testdox Should report no meta changes when meta is added and deleted before saving.
+	 */
+	public function test_has_meta_changes_is_false_when_meta_is_added_then_deleted_before_save(): void {
+		$notification = $this->create_notification_modified_in_the_past();
+		$notification->add_meta_data( 'test_meta', 'test_value' );
+		$this->assertTrue( $notification->has_meta_changes() );
+
+		$notification->delete_meta_data( 'test_meta' );
+		$this->assertFalse( $notification->has_meta_changes() );
+
+		$notification->save();
+		$notification = new Notification( $notification->get_id() );
+		$this->assertSame( '2024-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
+	}
+
+	/**
+	 * @testdox Should store a first unsubscribe key on an existing notification once.
+	 */
+	public function test_first_unsubscribe_key_is_stored_once(): void {
+		$notification = $this->create_notification_modified_in_the_past();
+		$notification->get_unsubscribe_key( true );
+
+		$this->assertSame( 1, $this->count_meta_rows( $notification->get_id(), 'unsubscribe_action_key' ) );
 	}
 
 	/**
@@ -855,5 +955,39 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$notifications = $this->data_store->query( array( 'user_email' => "O'Brien@Example.com" ) );
 
 		$this->assertSame( array( $notification->get_id() ), array_map( 'intval', $notifications ) );
+	}
+
+	/**
+	 * Create a saved notification last modified on 2024-01-01, read back from the database.
+	 *
+	 * @return Notification
+	 */
+	private function create_notification_modified_in_the_past(): Notification {
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_id( 1 );
+		$notification->set_date_modified( '2024-01-01 00:00:00' );
+		$notification->save();
+
+		return new Notification( $notification->get_id() );
+	}
+
+	/**
+	 * Count the stored meta rows for a notification and key.
+	 *
+	 * @param int    $notification_id The notification ID.
+	 * @param string $meta_key        The meta key.
+	 * @return int
+	 */
+	private function count_meta_rows( int $notification_id, string $meta_key ): int {
+		global $wpdb;
+
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_stock_notificationmeta WHERE notification_id = %d AND meta_key = %s",
+				$notification_id,
+				$meta_key
+			)
+		);
 	}
 }
