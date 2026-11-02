@@ -45,12 +45,18 @@ catalogs:
     '@wordpress/stylelint-config':
       specifier: ^23.14.0
       version: 23.42.0
+    copy-webpack-plugin:
+      specifier: 14.0.x
+      version: 14.0.0
     postcss:
       specifier: ^8.5.26
       version: 8.5.26
     prettier:
       specifier: npm:wp-prettier@3.9.6
       version: 3.9.6
+    simple-git:
+      specifier: ^4.0.2
+      version: 4.0.2
     stylelint:
       specifier: ^16.9.0
       version: 16.26.1
@@ -294,7 +300,7 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2
       copy-webpack-plugin:
-        specifier: 14.0.x
+        specifier: catalog:tooling
         version: 14.0.0(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7))
       core-js:
         specifier: ^3.34.0
@@ -3240,7 +3246,7 @@ importers:
         specifier: 3.3.7
         version: 3.3.7
       copy-webpack-plugin:
-        specifier: 14.0.x
+        specifier: catalog:tooling
         version: 14.0.0(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7))
       css-loader:
         specifier: 6.11.x
@@ -3721,7 +3727,7 @@ importers:
         specifier: 5.2.x
         version: 5.2.2(webpack@5.97.1)
       copy-webpack-plugin:
-        specifier: 14.0.x
+        specifier: catalog:tooling
         version: 14.0.0(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7))
       core-js:
         specifier: 3.25.0
@@ -3965,7 +3971,7 @@ importers:
         specifier: ^10.0.0
         version: 10.0.0
       simple-git:
-        specifier: ^4.0.2
+        specifier: catalog:tooling
         version: 4.0.2
     devDependencies:
       '@types/jest':
@@ -4020,7 +4026,7 @@ importers:
         specifier: ^7.1.0
         version: 7.3.3
       simple-git:
-        specifier: ^4.0.2
+        specifier: catalog:tooling
         version: 4.0.2
       ts-node:
         specifier: ^10.9.2
@@ -4117,7 +4123,7 @@ importers:
         specifier: ^7.5.4
         version: 7.7.4
       simple-git:
-        specifier: ^4.0.2
+        specifier: catalog:tooling
         version: 4.0.2
     devDependencies:
       '@types/jest':
@@ -4133,7 +4139,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/js/eslint-plugin
       copy-webpack-plugin:
-        specifier: 14.0.x
+        specifier: catalog:tooling
         version: 14.0.0(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7))
       eslint:
         specifier: ^10.0.0

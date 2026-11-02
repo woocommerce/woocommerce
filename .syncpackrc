@@ -122,8 +122,10 @@
 				"@wordpress/prettier-config",
 				"@wordpress/postcss-plugins-preset",
 				"@wordpress/scripts",
+				"copy-webpack-plugin",
 				"postcss",
 				"prettier",
+				"simple-git",
 				"webpack"
 			],
 			"packages": [
@@ -275,15 +277,6 @@
 				"**"
 			],
 			"pinVersion": "9.0.x"
-		},
-		{
-			"dependencies": [
-				"copy-webpack-plugin"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "14.0.x"
 		},
 		{
 			"dependencies": [
@@ -545,15 +538,6 @@
 				"**"
 			],
 			"pinVersion": "10.5.x"
-		},
-		{
-			"dependencies": [
-				"simple-git"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^4.0.2"
 		},
 		{
 			"dependencyTypes": [
