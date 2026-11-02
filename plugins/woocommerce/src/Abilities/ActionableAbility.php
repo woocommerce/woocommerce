@@ -241,20 +241,20 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * first rejection gives the response its code, message and status.
 	 *
 	 * @param \WP_Error $rejected  Rejection from run_callback().
-	 * @param string    $namespace Extension that owns the callback.
+	 * @param string    $extension Extension that owns the callback.
 	 * @param \WP_Error $refused   Collects the refusals.
 	 */
-	private static function add_refusal( \WP_Error $rejected, string $namespace, \WP_Error $refused ): void {
+	private static function add_refusal( \WP_Error $rejected, string $extension, \WP_Error $refused ): void {
 		foreach ( $rejected->get_error_codes() as $code ) {
-			$key = $namespace . ':' . $code;
+			$key = $extension . ':' . $code;
 			$n   = 1;
 			while ( in_array( $key, $refused->get_error_codes(), true ) ) {
-				$key = $namespace . ':' . $code . ':' . ( ++$n );
+				$key = $extension . ':' . $code . ':' . ( ++$n );
 			}
 			foreach ( $rejected->get_error_messages( $code ) as $message ) {
 				$refused->add( $key, $message );
 			}
-			$refused->add_data( array_merge( $rejected->get_error_data( $code ), array( 'namespace' => $namespace ) ), $key );
+			$refused->add_data( array_merge( $rejected->get_error_data( $code ), array( 'namespace' => $extension ) ), $key );
 		}
 	}
 
@@ -369,7 +369,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	 */
 	private static function with_data( \WP_Error $error, array $data ): \WP_Error {
 		foreach ( $error->get_error_codes() as $code ) {
-			$current = $error->get_error_data( $code );
+			$current                    = $error->get_error_data( $code );
 			$error->error_data[ $code ] = array_merge( array( 'status' => 400 ), is_array( $current ) ? $current : array(), $data );
 		}
 		return $error;
