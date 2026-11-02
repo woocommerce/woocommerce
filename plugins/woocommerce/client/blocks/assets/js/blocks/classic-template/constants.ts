@@ -34,6 +34,7 @@ export const TEMPLATES: TemplateDetails = {
 	'archive-product': {
 		type: TYPES.productCatalog,
 		title: __( 'Product Grid (Classic)', 'woocommerce' ),
+		// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
 		description: __(
 			'Displays the PHP product grid page. ',
 			'woocommerce'

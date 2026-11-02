@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-expressions */
 /**
  * External dependencies
  */
@@ -11,6 +10,7 @@ import { setDefaultPaymentMethod } from '../utils/set-default-payment-method';
 import { PlainPaymentMethods } from '../../../types';
 import '../../checkout';
 import { store as paymentStore } from '..';
+import { checkoutData } from '../../checkout/constants';
 
 const originalSelect = jest.requireActual( '@wordpress/data' ).select;
 const originalDispatch = jest.requireActual( '@wordpress/data' ).dispatch;
@@ -29,8 +29,12 @@ jest.mock( '@woocommerce/utils', () => {
 	};
 } );
 
+// What the server hydrated as the checkout's payment method. Unset here, as in the editor.
+const hydratedCheckoutData = checkoutData as { payment_method?: string };
+
 describe( 'setDefaultPaymentMethod', () => {
 	afterEach( () => {
+		delete hydratedCheckoutData.payment_method;
 		jest.resetAllMocks();
 		jest.resetModules();
 	} );
@@ -43,6 +47,104 @@ describe( 'setDefaultPaymentMethod', () => {
 			name: 'wc-payment-gateway-2',
 		},
 	};
+
+	const mockStores = ( {
+		activePaymentMethod = '',
+		savedPaymentMethods = {},
+	}: {
+		activePaymentMethod?: string;
+		savedPaymentMethods?: Record< string, unknown[] >;
+	} ) => {
+		const setActivePaymentMethodMock = jest.fn();
+		( select as jest.Mock ).mockImplementation( ( storeName ) => {
+			const originalStore = originalSelect( storeName );
+			if ( storeName === paymentStore ) {
+				return {
+					...originalStore,
+					getActivePaymentMethod: () => activePaymentMethod,
+					getAvailableExpressPaymentMethods: () => ( {} ),
+					getSavedPaymentMethods: () => savedPaymentMethods,
+				};
+			}
+			return originalStore;
+		} );
+		( dispatch as jest.Mock ).mockImplementation( ( storeName ) => {
+			const originalStore = originalDispatch( storeName );
+			if ( storeName === paymentStore ) {
+				return {
+					...originalStore,
+					__internalSetActivePaymentMethod:
+						setActivePaymentMethodMock,
+					__internalSetPaymentIdle: () => void 0,
+				};
+			}
+			return originalStore;
+		} );
+		return setActivePaymentMethodMock;
+	};
+
+	describe( 'when the server preselected nothing', () => {
+		beforeEach( () => {
+			hydratedCheckoutData.payment_method = '';
+		} );
+
+		it( 'leaves no payment method selected', async () => {
+			const setActivePaymentMethodMock = mockStores( {} );
+
+			await setDefaultPaymentMethod( paymentMethods );
+
+			expect( setActivePaymentMethodMock ).not.toHaveBeenCalled();
+		} );
+
+		it( 'does not select a saved payment method either', async () => {
+			const setActivePaymentMethodMock = mockStores( {
+				savedPaymentMethods: {
+					cc: [
+						{
+							method: { gateway: 'saved-method' },
+							is_default: true,
+							tokenId: 2,
+						},
+					],
+				},
+			} );
+
+			await setDefaultPaymentMethod( paymentMethods );
+
+			expect( setActivePaymentMethodMock ).not.toHaveBeenCalled();
+		} );
+
+		it( 'clears a selected method that is no longer available instead of picking another', async () => {
+			const setActivePaymentMethodMock = mockStores( {
+				activePaymentMethod: 'wc-payment-gateway-removed',
+			} );
+
+			await setDefaultPaymentMethod( paymentMethods );
+
+			expect( setActivePaymentMethodMock ).toHaveBeenCalledWith( '' );
+		} );
+	} );
+
+	it( 'still picks the first method when the server preselected one and the store lost it', async () => {
+		hydratedCheckoutData.payment_method = 'wc-payment-gateway-2';
+		const setActivePaymentMethodMock = mockStores( {} );
+
+		await setDefaultPaymentMethod( paymentMethods );
+
+		expect( setActivePaymentMethodMock ).toHaveBeenCalledWith(
+			'wc-payment-gateway-1'
+		);
+	} );
+
+	it( 'still picks the first method where the server gave no answer, as in the editor', async () => {
+		const setActivePaymentMethodMock = mockStores( {} );
+
+		await setDefaultPaymentMethod( paymentMethods );
+
+		expect( setActivePaymentMethodMock ).toHaveBeenCalledWith(
+			'wc-payment-gateway-1'
+		);
+	} );
 
 	it( 'correctly sets the first payment method in the list of available payment methods', async () => {
 		const setActivePaymentMethodMock = jest.fn();

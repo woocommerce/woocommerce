@@ -336,6 +336,10 @@ class WC_Privacy_Erasers {
 			}
 		}
 
+		$identities = $order->get_meta( '_coupon_usage_identities' );
+		if ( $identities && is_array( $identities ) ) {
+			$order->update_meta_data( '_coupon_usage_identities', array_fill_keys( array_keys( $identities ), '' ) );
+		}
 		$order->update_meta_data( '_anonymized', 'yes' );
 		$order->save();
 

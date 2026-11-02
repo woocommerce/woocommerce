@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Treat a shipping address missing required fields as incomplete, even when an extension changes the default address settings.

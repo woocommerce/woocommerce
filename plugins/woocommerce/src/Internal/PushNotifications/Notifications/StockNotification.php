@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\PushNotifications\Notifications;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Enums\SuppressionReason;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use InvalidArgumentException;
 use WC_Product;
@@ -233,20 +234,22 @@ class StockNotification extends Notification {
 	 * Extends the base enabled-toggle check with per-event sub-flag filtering.
 	 *
 	 * @param mixed $pref_value The user's stored preference value, or null.
-	 * @return bool
+	 * @return string|null One of the SuppressionReason constants, or null to send.
 	 *
-	 * @since 10.9.0
+	 * @since 11.3.0
 	 */
-	public function should_send_to_user( $pref_value ): bool {
-		if ( ! parent::should_send_to_user( $pref_value ) ) {
-			return false;
+	public function get_suppression_reason( $pref_value ): ?string {
+		$reason = parent::get_suppression_reason( $pref_value );
+
+		if ( null !== $reason ) {
+			return $reason;
 		}
 
 		if ( ! is_array( $pref_value ) || ! array_key_exists( $this->event_type, $pref_value ) ) {
-			return true;
+			return null;
 		}
 
-		return (bool) $pref_value[ $this->event_type ];
+		return $pref_value[ $this->event_type ] ? null : SuppressionReason::STOCK_ALERT_OFF;
 	}
 
 	/**

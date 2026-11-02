@@ -64,6 +64,30 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The selected return-policy page has a Pages-list label, even while it is a draft.
+	 */
+	public function test_return_policy_page_display_state(): void {
+		$page_id  = $this->factory->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'draft',
+			)
+		);
+		$other_id = $this->factory->post->create( array( 'post_type' => 'page' ) );
+		update_option( 'woocommerce_refund_returns_page_id', $page_id );
+
+		$this->assertSame(
+			array(
+				'draft'                      => 'Draft',
+				'wc_page_for_refund_returns' => 'Refund and Returns Policy Page',
+			),
+			$this->sut->add_display_post_states( array( 'draft' => 'Draft' ), get_post( $page_id ) ),
+			'The selected draft should retain its status and show the return-policy page label.'
+		);
+		$this->assertSame( array(), $this->sut->add_display_post_states( array(), get_post( $other_id ) ), 'Unrelated pages should not receive the return-policy label.' );
+	}
+
+	/**
 	 * @testdox The CPT Add Order screen leaves insertion to WordPress without redirecting or eagerly saving order metadata.
 	 */
 	public function test_new_order_screen_leaves_creation_to_wordpress(): void {

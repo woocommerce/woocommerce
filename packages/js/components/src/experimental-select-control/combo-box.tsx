@@ -55,7 +55,7 @@ export const ComboBox = ( {
 	return (
 		// Disable reason: The click event is purely for accidental clicks around the input.
 		// Keyboard users are still able to tab to and interact with elements in the combobox.
-		/* eslint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
+		/* eslint-disable jsx-a11y/no-static-element-interactions */
 		<div
 			className={ clsx(
 				'woocommerce-experimental-select-control__combo-box-wrapper',

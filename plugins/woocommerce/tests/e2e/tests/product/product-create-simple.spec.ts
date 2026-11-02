@@ -93,13 +93,11 @@ for ( const productType of Object.keys( productData ) ) {
 				// Product description
 				await page.locator( '#content-html' ).click(); // text mode to avoid the iframe
 				await page
-					.locator( '.wp-editor-area' )
-					.first()
+					.locator( '#content' )
 					.fill( productData[ productType ].description );
 				await page.locator( '#excerpt-html' ).click(); // text mode to avoid the iframe
 				await page
-					.locator( '.wp-editor-area' )
-					.nth( 1 )
+					.locator( '#excerpt' )
 					.fill( productData[ productType ].shortDescription );
 			} );
 

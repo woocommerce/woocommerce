@@ -611,6 +611,7 @@ class ProductSchema extends AbstractSchema {
 				}
 			)
 		);
+		$this->prime_product_hierarchical_taxonomies_cache( $product );
 
 		return [
 			'id'                    => $product->get_id(),
@@ -685,13 +686,49 @@ class ProductSchema extends AbstractSchema {
 	}
 
 	/**
+	 * Prime hierarchical terms cache to reduce queries while generating terms lists in get_item_response method.
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @return void
+	 */
+	private function prime_product_hierarchical_taxonomies_cache( \WC_Product $product ): void {
+		$term_hierarchy_ids = array();
+		foreach ( array( 'product_cat', 'product_brand' ) as $taxonomy ) {
+			$product_terms      = get_object_term_cache( $product->get_id(), $taxonomy );
+			$product_terms      = is_array( $product_terms ) ? $product_terms : array();
+			$taxonomy_hierarchy = ! empty( $product_terms ) ? _get_term_hierarchy( $taxonomy ) : array();
+			if ( ! empty( $taxonomy_hierarchy ) ) {
+				// Populate flat map of child to parent relations.
+				$parent_map = array();
+				foreach ( $taxonomy_hierarchy as $parent_id => $children ) {
+					foreach ( $children as $child_id ) {
+						$parent_map[ $child_id ] = $parent_id;
+					}
+				}
+				// Collect the chain of parent term IDs for cache priming below.
+				foreach ( $product_terms as $term ) {
+					$current = $term->term_id;
+					while ( isset( $parent_map[ $current ] ) && ! in_array( $parent_map[ $current ], $term_hierarchy_ids, true ) ) {
+						$parent_id            = $parent_map[ $current ];
+						$term_hierarchy_ids[] = $parent_id;
+						$current              = $parent_id;
+					}
+				}
+			}
+		}
+		if ( ! empty( $term_hierarchy_ids ) ) {
+			_prime_term_caches( array_unique( $term_hierarchy_ids ), false );
+		}
+	}
+
+	/**
 	 * Get list of product images.
 	 *
 	 * @param \WC_Product $product Product instance.
 	 * @return array
 	 */
 	protected function get_images( \WC_Product $product ) {
-		$attachment_ids = array_filter( array_merge( [ $product->get_image_id() ], $product->get_gallery_image_ids() ) );
+		$attachment_ids = array_unique( array_filter( array_merge( [ $product->get_image_id() ], $product->get_gallery_image_ids() ) ) );
 		if ( ! empty( $attachment_ids ) ) {
 			// Prime caches to reduce future queries.
 			_prime_post_caches( $attachment_ids );

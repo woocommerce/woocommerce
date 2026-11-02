@@ -16,7 +16,9 @@ import { BgImageDimensions } from './use-background-image';
  * Useful for converting to a CSS-compatible position string.
  */
 export function calculatePercentPositionFromCoordinates( coords: Coordinates ) {
-	if ( ! coords ) return '';
+	if ( ! coords ) {
+		return '';
+	}
 
 	const x = Math.round( coords.x * 100 );
 	const y = Math.round( coords.y * 100 );
@@ -28,7 +30,9 @@ export function calculatePercentPositionFromCoordinates( coords: Coordinates ) {
  * Given x and y coordinates between 0 and 1 returns a CSS `objectPosition`.
  */
 export function calculateBackgroundImagePosition( coords: Coordinates ) {
-	if ( ! coords ) return {};
+	if ( ! coords ) {
+		return {};
+	}
 
 	return {
 		objectPosition: calculatePercentPositionFromCoordinates( coords ),
@@ -110,11 +114,11 @@ export function getInvalidItemDescription( name: string ): string {
 		? __(
 				'Previously selected product is no longer available',
 				'woocommerce'
-		  )
+			)
 		: __(
 				'Previously selected category is no longer available',
 				'woocommerce'
-		  );
+			);
 }
 
 /**

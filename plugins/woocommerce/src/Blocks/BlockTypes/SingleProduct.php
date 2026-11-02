@@ -93,7 +93,6 @@ class SingleProduct extends AbstractBlock {
 		}
 
 		global $post;
-		$this->previous_post = $post;
 		if ( empty( $context['postId'] ) ) {
 			return;
 		}
@@ -103,6 +102,13 @@ class SingleProduct extends AbstractBlock {
 			return;
 		}
 
+		// If $post already holds $product_post (this might happen in Featured Product),
+		// do nothing.
+		if ( $post instanceof \WP_Post && (int) $post->ID === (int) $product_post->ID ) {
+			return;
+		}
+
+		$this->previous_post = $post;
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Core Post Title reads get_the_title() without a post ID.
 		$post = $product_post;
 	}

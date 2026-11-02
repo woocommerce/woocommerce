@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent back-in-stock notification saves that only change meta from re-saving the notification, which stored newly added meta (e.g. the unsubscribe key) twice.

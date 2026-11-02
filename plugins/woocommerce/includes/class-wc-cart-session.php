@@ -680,7 +680,8 @@ final class WC_Cart_Session {
 					if ( taxonomy_is_product_attribute( $meta->key ) ) {
 						$variations[ $attribute_key ] = sanitize_title( $meta->value );
 					} else {
-						$variations[ $attribute_key ] = html_entity_decode( wc_clean( $meta->value ), ENT_QUOTES, get_bloginfo( 'charset' ) );
+						// Preserve literal percent escapes, matching custom values added through the cart and Store API.
+						$variations[ $attribute_key ] = wp_strip_all_tags( html_entity_decode( $meta->value, ENT_QUOTES, get_bloginfo( 'charset' ) ) );
 					}
 				}
 			}
@@ -820,7 +821,7 @@ final class WC_Cart_Session {
 
 		// Don't cleanup if user just removed an item (undo link is being displayed).
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( isset( $_GET['removed_item'] ) ) {
+		if ( isset( $_GET['remove_item'] ) || isset( $_GET['removed_item'] ) ) {
 			return;
 		}
 

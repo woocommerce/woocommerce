@@ -50,6 +50,7 @@ const Edit = ( { attributes }: BlockEditProps< Attributes > ) => {
 		<div { ...blockProps }>
 			<Disabled>
 				<a href="/">{ __( 'Breadcrumbs', 'woocommerce' ) }</a>
+				{ /* eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace */ }
 				{ __( ' / Navigation / Path', 'woocommerce' ) }
 			</Disabled>
 		</div>

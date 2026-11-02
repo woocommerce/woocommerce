@@ -91,7 +91,7 @@ const program = new Command( 'changefile' )
 				: await cloneAuthenticatedRepo(
 						{ owner: headOwner, name },
 						false
-				  );
+					);
 
 			Logger.endTask();
 

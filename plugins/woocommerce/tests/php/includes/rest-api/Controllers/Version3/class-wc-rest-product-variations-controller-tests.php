@@ -33,6 +33,13 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	protected $user;
 
 	/**
+	 * ORDER BY clauses of product variation queries, recorded by capture_variation_orderby_clauses().
+	 *
+	 * @var string[]
+	 */
+	private $variation_orderby_clauses = array();
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
@@ -463,6 +470,60 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 1, count( $response_products ) );
 		$this->assertEquals( $response_products[0]['id'], $variation->get_id() );
+	}
+
+	/**
+	 * @testdox The on_sale parameter combines with include and exclude.
+	 */
+	public function test_variations_filter_by_on_sale_with_include_and_exclude(): void {
+		$parent_product    = WC_Helper_Product::create_variation_product();
+		$variation_ids     = $parent_product->get_children();
+		$on_sale_variation = wc_get_product( $variation_ids[0] );
+		$on_sale_variation->set_sale_price( 5 );
+		$on_sale_variation->save();
+
+		$excluded_variation = wc_get_product( $variation_ids[1] );
+		$excluded_variation->set_sale_price( 5 );
+		$excluded_variation->save();
+
+		$regular_variation = wc_get_product( $variation_ids[2] );
+		$included_ids      = array( $on_sale_variation->get_id(), $regular_variation->get_id() );
+
+		delete_transient( 'wc_products_onsale' );
+
+		$cases = array(
+			'on_sale=true with include'  => array(
+				'params'   => array(
+					'on_sale' => true,
+					'include' => $included_ids,
+				),
+				'expected' => array( $on_sale_variation->get_id() ),
+			),
+			'on_sale=false with include' => array(
+				'params'   => array(
+					'on_sale' => false,
+					'include' => $included_ids,
+				),
+				'expected' => array( $regular_variation->get_id() ),
+			),
+			'on_sale=true with exclude'  => array(
+				'params'   => array(
+					'on_sale' => true,
+					'exclude' => array( $excluded_variation->get_id() ),
+				),
+				'expected' => array( $on_sale_variation->get_id() ),
+			),
+		);
+
+		foreach ( $cases as $name => $case ) {
+			$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $parent_product->get_id() . '/variations' );
+			$request->set_query_params( $case['params'] );
+
+			$response = $this->server->dispatch( $request );
+
+			$this->assertSame( 200, $response->get_status(), $name );
+			$this->assertSame( $case['expected'], wp_list_pluck( $response->get_data(), 'id' ), $name );
+		}
 	}
 
 	/**
@@ -1066,5 +1127,360 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 			);
 		}
 		$this->assertSame( 1, $parent_product_children_deletes, 'Parent variation transients should be deleted once per batch.' );
+	}
+
+	/**
+	 * @testdox Creating a variation normalizes customs values.
+	 */
+	public function test_create_variation_normalizes_customs_values(): void {
+		$route   = $this->get_customs_variations_route();
+		$request = new WP_REST_Request( 'POST', $route );
+		$request->set_body_params(
+			array(
+				'customs_commodity_code'    => '0901.21.0010',
+				'customs_country_of_origin' => ' br ',
+				'customs_description'       => ' Roasted  coffee ',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status(), 'Valid customs values should create the variation.' );
+		$data = $response->get_data();
+		$this->assertSame( '0901210010', $data['customs_commodity_code'], 'The commodity code should be stored without punctuation.' );
+		$this->assertSame( 'BR', $data['customs_country_of_origin'], 'The country of origin should be trimmed and uppercased.' );
+		$this->assertSame( 'Roasted coffee', $data['customs_description'], 'The customs description should have its whitespace normalized.' );
+	}
+
+	/**
+	 * @testdox Omitted variation customs fields are preserved while null clears them.
+	 */
+	public function test_update_variation_preserves_and_clears_customs_values(): void {
+		$route  = $this->get_customs_variations_route();
+		$create = new WP_REST_Request( 'POST', $route );
+		$create->set_body_params(
+			array(
+				'customs_commodity_code'    => '090121',
+				'customs_country_of_origin' => 'BR',
+				'customs_description'       => 'Coffee',
+			)
+		);
+		$id = $this->server->dispatch( $create )->get_data()['id'];
+
+		$request = new WP_REST_Request( 'PUT', $route . '/' . $id );
+		$request->set_body_params( array( 'menu_order' => 3 ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), 'An update without customs fields should succeed.' );
+		$this->assertSame( '090121', $response->get_data()['customs_commodity_code'], 'Omitted customs fields should be preserved.' );
+
+		$request = new WP_REST_Request( 'PUT', $route . '/' . $id );
+		$request->set_body_params(
+			array(
+				'customs_commodity_code'    => null,
+				'customs_country_of_origin' => null,
+				'customs_description'       => null,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), 'Clearing customs fields should succeed.' );
+		foreach ( array( 'customs_commodity_code', 'customs_country_of_origin', 'customs_description' ) as $field ) {
+			$this->assertNull( $response->get_data()[ $field ], "The $field field should be cleared." );
+			$this->assertFalse( metadata_exists( 'post', $id, '_' . $field ), "The $field meta should be deleted." );
+		}
+	}
+
+	/**
+	 * @testdox Invalid variation customs input rejects the request without saving other changes.
+	 * @testWith ["customs_commodity_code", "0901A10010"]
+	 * @param string $field Invalid field.
+	 * @param string $value Invalid value.
+	 */
+	public function test_update_variation_rejects_invalid_customs_values( string $field, string $value ): void {
+		$route  = $this->get_customs_variations_route();
+		$create = new WP_REST_Request( 'POST', $route );
+		$create->set_body_params( array( 'menu_order' => 2 ) );
+		$id = $this->server->dispatch( $create )->get_data()['id'];
+
+		$request = new WP_REST_Request( 'PUT', $route . '/' . $id );
+		$request->set_body_params(
+			array(
+				'menu_order'                => 7,
+				'customs_country_of_origin' => 'BR',
+				$field                      => $value,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), 'Invalid customs input should return a 400 response.' );
+		$this->assertSame( 'woocommerce_product_invalid_' . $field, $response->get_data()['code'], 'The error code should name the invalid field.' );
+		$this->assertSame( 2, wc_get_product( $id )->get_menu_order(), 'Other variation changes should not be saved.' );
+		$this->assertFalse( metadata_exists( 'post', $id, '_customs_country_of_origin' ), 'Valid customs values in the same request should not be saved.' );
+	}
+
+	/**
+	 * @testdox Variation reads return inherited customs values in view context and stored values in edit context.
+	 */
+	public function test_variation_customs_values_use_request_context(): void {
+		$this->server = $this->create_rest_server_with_routes(
+			array(
+				array( $this->controller, 'register_routes' ),
+				array( new WC_REST_Variations_Controller(), 'register_routes' ),
+			),
+			true
+		);
+
+		$parent = new WC_Product_Variable();
+		$parent->set_customs_commodity_code( '090121' );
+		$parent->save();
+		$child = new WC_Product_Variation();
+		$child->set_parent_id( $parent->get_id() );
+		$child->set_customs_country_of_origin( 'BR' );
+		$child->save();
+
+		$expected = array(
+			'view' => '090121',
+			'edit' => null,
+		);
+		foreach ( $expected as $context => $commodity_code ) {
+			$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $parent->get_id() . '/variations/' . $child->get_id() );
+			$request->set_param( 'context', $context );
+			$data = $this->server->dispatch( $request )->get_data();
+			$this->assertSame( $commodity_code, $data['customs_commodity_code'], "The $context context should return the expected commodity code." );
+			$this->assertSame( 'BR', $data['customs_country_of_origin'], "The $context context should return the variation's own country of origin." );
+
+			$request = new WP_REST_Request( 'GET', '/wc/v3/variations' );
+			$request->set_param( 'include', array( $child->get_id() ) );
+			$request->set_param( 'context', $context );
+			$data = $this->server->dispatch( $request )->get_data();
+			$this->assertSame( $commodity_code, $data[0]['customs_commodity_code'], "The variations collection in $context context should return the expected commodity code." );
+		}
+	}
+
+	/**
+	 * @testdox Generating variations applies normalized customs default values.
+	 */
+	public function test_generate_variations_with_customs_default_values(): void {
+		$product = $this->create_customs_product_with_variation_attribute();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations/generate' );
+		$request->set_body_params(
+			array(
+				'default_values' => array(
+					'customs_commodity_code'    => '0901.21',
+					'customs_country_of_origin' => 'br',
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'Generating variations should succeed.' );
+		$children = wc_get_product( $product->get_id() )->get_children();
+		$this->assertCount( 2, $children, 'A variation should be generated for each attribute option.' );
+		foreach ( $children as $child_id ) {
+			$child = wc_get_product( $child_id );
+			$this->assertSame( '090121', $child->get_customs_commodity_code( 'edit' ), 'Generated variations should store the normalized commodity code.' );
+			$this->assertSame( 'BR', $child->get_customs_country_of_origin( 'edit' ), 'Generated variations should store the normalized country of origin.' );
+		}
+	}
+
+	/**
+	 * @testdox Generating variations with invalid customs default values returns a 400 error and creates nothing.
+	 */
+	public function test_generate_variations_rejects_invalid_customs_default_values(): void {
+		$product = $this->create_customs_product_with_variation_attribute();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations/generate' );
+		$request->set_body_params(
+			array(
+				'default_values' => array( 'customs_country_of_origin' => 'ZZ' ),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), 'Invalid customs default values should return a 400 response.' );
+		$this->assertSame( 'woocommerce_product_invalid_customs_country_of_origin', $response->get_data()['code'], 'The error code should name the invalid field.' );
+		$this->assertSame( array(), wc_get_product( $product->get_id() )->get_children(), 'No variations should be generated.' );
+	}
+
+	/**
+	 * @testdox Paging variations that share a menu_order returns each variation exactly once, in the admin list order.
+	 *
+	 * @testWith ["offset"]
+	 *           ["page"]
+	 *
+	 * @param string $pagination_param Either 'offset' or 'page'.
+	 */
+	public function test_variations_paginated_by_menu_order_return_each_variation_once( string $pagination_param ): void {
+		$product       = $this->create_product_with_variations( array_fill( 0, 7, 0 ) );
+		$per_page      = 3;
+		$collected_ids = array();
+
+		// Request one page past the last, which should come back empty.
+		$page_count = (int) ceil( count( $product->get_children() ) / $per_page ) + 1;
+		for ( $page = 1; $page <= $page_count; $page++ ) {
+			$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() . '/variations' );
+			$request->set_query_params(
+				array(
+					'orderby'         => 'menu_order',
+					'order'           => 'asc',
+					'per_page'        => $per_page,
+					$pagination_param => 'offset' === $pagination_param ? ( $page - 1 ) * $per_page : $page,
+				)
+			);
+			$response = $this->server->dispatch( $request );
+			$this->assertSame( 200, $response->get_status(), "Page {$page} should load." );
+			$collected_ids = array_merge( $collected_ids, wp_list_pluck( $response->get_data(), 'id' ) );
+		}
+
+		// The admin variations list (WC_AJAX::load_variations) breaks menu_order ties by ID DESC.
+		$admin_order_ids = $product->get_children();
+		rsort( $admin_order_ids );
+		$this->assertSame( count( $collected_ids ), count( array_unique( $collected_ids ) ), 'No variation should appear on more than one page.' );
+		$this->assertSame( $admin_order_ids, $collected_ids, 'The pages together should contain every variation, in the admin variations list order.' );
+	}
+
+	/**
+	 * @testdox Sorting by menu_order sorts by menu_order first and breaks ties by ID DESC, like the admin variations list.
+	 */
+	public function test_variations_sorted_by_menu_order_break_ties_within_each_menu_order(): void {
+		$product = $this->create_product_with_variations( array( 1, 0, 1, 0, 2 ) );
+		$ids     = $product->get_children();
+		sort( $ids );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() . '/variations' );
+		$request->set_query_params(
+			array(
+				'orderby' => 'menu_order',
+				'order'   => 'asc',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		// Variations were created with menu_order 1, 0, 1, 0, 2 in ascending ID order.
+		$expected_ids = array( $ids[3], $ids[1], $ids[2], $ids[0], $ids[4] );
+		$this->assertSame( $expected_ids, wp_list_pluck( $response->get_data(), 'id' ), 'Variations should be grouped by menu_order, newest first within each group.' );
+	}
+
+	/**
+	 * @testdox Non-unique orderby values get an ID tie-breaker; menu_order matches the admin variations list.
+	 *
+	 * @testWith ["menu_order", "asc", "{posts}.menu_order ASC, {posts}.ID DESC"]
+	 *           ["menu_order", "desc", "{posts}.menu_order DESC, {posts}.ID DESC"]
+	 *           ["title", "asc", "{posts}.post_title ASC, {posts}.ID ASC"]
+	 *           ["slug", "asc", "{posts}.post_name ASC, {posts}.ID ASC"]
+	 *           ["date", "asc", "{posts}.post_date ASC, {posts}.ID ASC"]
+	 *           ["id", "asc", "{posts}.ID ASC"]
+	 *
+	 * @param string $orderby  The orderby request param.
+	 * @param string $order    The order request param.
+	 * @param string $expected Expected ORDER BY clause, with the posts table name as {posts}.
+	 */
+	public function test_variations_orderby_adds_id_tie_breaker( string $orderby, string $order, string $expected ): void {
+		global $wpdb;
+
+		$product = $this->create_product_with_variations( array( 0, 0 ) );
+		$this->capture_variation_orderby_clauses();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() . '/variations' );
+		$request->set_query_params(
+			array(
+				'orderby' => $orderby,
+				'order'   => $order,
+			)
+		);
+		$this->server->dispatch( $request );
+
+		$this->assertSame(
+			array( str_replace( '{posts}', $wpdb->posts, $expected ) ),
+			$this->variation_orderby_clauses,
+			"orderby={$orderby}&order={$order} should produce the expected ORDER BY clause."
+		);
+	}
+
+	/**
+	 * @testdox An array orderby set through the object query filter is left unchanged.
+	 */
+	public function test_variations_orderby_array_from_filter_is_left_unchanged(): void {
+		global $wpdb;
+
+		$product = $this->create_product_with_variations( array( 0, 0 ) );
+		$this->capture_variation_orderby_clauses();
+		add_filter(
+			'woocommerce_rest_product_variation_object_query',
+			function ( $args ) {
+				$args['orderby'] = array( 'menu_order' => 'ASC' );
+				return $args;
+			}
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() . '/variations' );
+		$request->set_query_params( array( 'orderby' => 'menu_order' ) );
+		$this->server->dispatch( $request );
+
+		$this->assertSame( array( "{$wpdb->posts}.menu_order ASC" ), $this->variation_orderby_clauses, 'A filtered array orderby should not get an ID tie-breaker.' );
+	}
+
+	/**
+	 * Record the ORDER BY clause of each product variation WP_Query in $variation_orderby_clauses.
+	 */
+	private function capture_variation_orderby_clauses(): void {
+		$this->variation_orderby_clauses = array();
+		add_filter(
+			'posts_orderby',
+			function ( $clause, $query ) {
+				if ( 'product_variation' === $query->get( 'post_type' ) ) {
+					$this->variation_orderby_clauses[] = $clause;
+				}
+				return $clause;
+			},
+			10,
+			2
+		);
+	}
+
+	/**
+	 * Create a variable product with one variation per given menu_order, in ascending ID order.
+	 *
+	 * @param int[] $menu_orders The menu_order of each variation.
+	 * @return WC_Product_Variable
+	 */
+	private function create_product_with_variations( array $menu_orders ): WC_Product_Variable {
+		$product = new WC_Product_Variable();
+		$product->save();
+		foreach ( $menu_orders as $menu_order ) {
+			$variation = new WC_Product_Variation();
+			$variation->set_parent_id( $product->get_id() );
+			$variation->set_menu_order( $menu_order );
+			$variation->save();
+		}
+		return new WC_Product_Variable( $product->get_id() );
+	}
+
+	/**
+	 * Create a variable product and return its variations collection route.
+	 *
+	 * @return string
+	 */
+	private function get_customs_variations_route(): string {
+		$parent = new WC_Product_Variable();
+		$parent->save();
+		return '/wc/v3/products/' . $parent->get_id() . '/variations';
+	}
+
+	/**
+	 * Create a variable product with one two-option variation attribute and no variations.
+	 *
+	 * @return WC_Product_Variable
+	 */
+	private function create_customs_product_with_variation_attribute(): WC_Product_Variable {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'Small', 'Large' ) );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+		return $product;
 	}
 }

@@ -185,10 +185,7 @@ export type RecentEmailsQuery = {
 };
 
 export type Feature =
-	| 'fullscreenMode'
-	| 'showIconLabels'
-	| 'fixedToolbar'
-	| 'focusMode';
+	'fullscreenMode' | 'showIconLabels' | 'fixedToolbar' | 'focusMode';
 
 export type EmailEditorPostType = Omit< Post, 'type' > & {
 	type: string;

@@ -330,7 +330,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 					case 'total':
 						$html .= wc_price( $item->get_total(), $price_args );
 						if ( $refund ) {
-							$html .= "<div><small class='refunded'>-" . wc_price( $refund['total'], $price_args ) . '</small></div><br/>';
+							$html .= "<div><small class='refunded'>" . wc_price( -$refund['total'], $price_args ) . '</small></div><br/>';
 						}
 						break;
 					default:
@@ -640,6 +640,11 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 				) );
 				// @codingStandardsIgnoreEnd
 			}
+		}
+
+		// Order by ID as well to keep the ordering stable.
+		if ( empty( $query_vars['orderby'] ) || 'date' === $query_vars['orderby'] ) {
+			$query_vars['orderby'] = 'date ID';
 		}
 
 		// Status.

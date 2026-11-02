@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix a fatal error when saving Screen Options with Back in Stock Notifications enabled.

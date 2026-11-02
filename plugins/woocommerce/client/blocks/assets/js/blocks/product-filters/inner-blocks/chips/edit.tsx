@@ -9,6 +9,7 @@ import { getSetting } from '@woocommerce/settings';
 import {
 	InspectorControls,
 	useBlockProps,
+	useInnerBlocksProps,
 	withColors,
 	// @ts-expect-error - no types.
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -105,6 +106,9 @@ const Edit = ( props: EditProps ): JSX.Element => {
 				undefined,
 		},
 	} );
+	const innerBlocksProps = useInnerBlocksProps( blockProps, {
+		templateLock: 'all',
+	} );
 
 	if ( ! items ) {
 		return <></>;
@@ -137,7 +141,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 
 	return (
 		<>
-			<div { ...blockProps }>
+			<div { ...innerBlocksProps }>
 				<Disabled>
 					<div className="wc-block-product-filter-chips__items">
 						{ isLoading && loadingState }
@@ -172,7 +176,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 											{ typeof item.label === 'string'
 												? decodeHtmlEntities(
 														item.label
-												  )
+													)
 												: item.label }
 										</span>
 										{ item.count !== undefined && (
@@ -221,7 +225,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 												} );
 											},
 										},
-								  ]
+									]
 								: [] ),
 							{
 								label: __(
@@ -295,7 +299,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 												} );
 											},
 										},
-								  ]
+									]
 								: [] ),
 							{
 								label: __(
@@ -347,7 +351,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 												} );
 											},
 										},
-								  ]
+									]
 								: [] ),
 						] }
 						panelId={ clientId }

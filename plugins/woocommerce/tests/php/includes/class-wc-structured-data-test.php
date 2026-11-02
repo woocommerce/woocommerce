@@ -350,6 +350,259 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product schema includes zero MPNs, omits empty values, and preserves extension filters.
+	 * @testWith ["0"]
+	 *           [""]
+	 *
+	 * @param string $mpn Manufacturer part number.
+	 */
+	public function test_mpn_structured_data( string $mpn ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_mpn( $mpn );
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$this->assertSame( '' === $mpn ? null : $mpn, $sut->get_data()[0]['mpn'] ?? null );
+
+		add_filter(
+			'woocommerce_structured_data_product',
+			static function ( $markup ) {
+				$markup['mpn'] = 'EXTENSION-MPN';
+				return $markup;
+			}
+		);
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$this->assertSame( 'EXTENSION-MPN', $sut->get_data()[0]['mpn'] );
+	}
+
+	/**
+	 * @testdox Product schema uses the selected variation's MPN without inheriting the parent's value.
+	 * @testWith ["CHILD-PART", true, "CHILD-PART"]
+	 *           ["0", true, "0"]
+	 *           ["", true, null]
+	 *           ["CHILD-PART", false, "PARENT-PART"]
+	 *
+	 * @param string      $variation_mpn Variation MPN.
+	 * @param bool        $selected Whether the request selects the variation.
+	 * @param string|null $expected_mpn Expected MPN, or null when it should be omitted.
+	 */
+	public function test_mpn_structured_data_for_selected_variation( string $variation_mpn, bool $selected, ?string $expected_mpn ): void {
+		$product = WC_Helper_Product::create_variation_product();
+		$product->set_mpn( 'PARENT-PART' );
+		$product->save();
+		$variation = wc_get_product( wc_get_product_id_by_sku( 'DUMMY SKU VARIABLE HUGE RED 0' ) );
+		$variation->set_mpn( $variation_mpn );
+		$variation->save();
+		WC_Product_Variable::sync( $product->get_id() );
+
+		if ( $selected ) {
+			$_GET['attribute_pa_size']   = 'huge';
+			$_GET['attribute_pa_colour'] = 'red';
+			$_GET['attribute_pa_number'] = '0';
+		}
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( wc_get_product( $product->get_id() ) );
+		$data = $sut->get_data()[0];
+
+		$this->assertSame( $selected ? 'Offer' : 'AggregateOffer', $data['offers'][0]['@type'] );
+		if ( null === $expected_mpn ) {
+			$this->assertArrayNotHasKey( 'mpn', $data );
+		} else {
+			$this->assertSame( $expected_mpn, $data['mpn'] );
+		}
+	}
+
+	/**
+	 * @testdox Product measurements use the configured unit codes and map length to depth.
+	 * @testWith ["kg", "KGM", "m", "MTR"]
+	 *           ["g", "GRM", "cm", "CMT"]
+	 *           ["lbs", "LBR", "mm", "MMT"]
+	 *           ["oz", "ONZ", "in", "INH"]
+	 *           ["kg", "KGM", "yd", "YRD"]
+	 *
+	 * @param string $weight_unit Weight unit.
+	 * @param string $weight_code Expected weight code.
+	 * @param string $dimension_unit Dimension unit.
+	 * @param string $dimension_code Expected dimension code.
+	 */
+	public function test_product_measurement_unit_codes( string $weight_unit, string $weight_code, string $dimension_unit, string $dimension_code ): void {
+		update_option( 'woocommerce_weight_unit', $weight_unit );
+		update_option( 'woocommerce_dimension_unit', $dimension_unit );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_weight( '2.5' );
+		$product->set_length( '3' );
+		$product->set_width( '4' );
+		$product->set_height( '5' );
+
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$data = $sut->get_data()[0];
+		$this->assertSame(
+			array(
+				'@type'    => 'QuantitativeValue',
+				'value'    => 2.5,
+				'unitCode' => $weight_code,
+			),
+			$data['weight']
+		);
+		$this->assertSame(
+			array(
+				'@type'    => 'QuantitativeValue',
+				'value'    => 3.0,
+				'unitCode' => $dimension_code,
+			),
+			$data['depth']
+		);
+		$this->assertSame(
+			array(
+				'@type'    => 'QuantitativeValue',
+				'value'    => 4.0,
+				'unitCode' => $dimension_code,
+			),
+			$data['width']
+		);
+		$this->assertSame(
+			array(
+				'@type'    => 'QuantitativeValue',
+				'value'    => 5.0,
+				'unitCode' => $dimension_code,
+			),
+			$data['height']
+		);
+	}
+
+	/**
+	 * @testdox Empty, non-positive and invalid measurements are omitted from product schema.
+	 * @testWith [""]
+	 *           ["0"]
+	 *           ["-1"]
+	 *           ["invalid"]
+	 *           ["1e999"]
+	 *
+	 * @param string $value Measurement returned by a product filter.
+	 */
+	public function test_invalid_product_measurements_are_omitted( string $value ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		add_filter(
+			'woocommerce_product_get_weight',
+			static function () use ( $value ) {
+				return $value;
+			}
+		);
+		add_filter(
+			'woocommerce_product_get_length',
+			static function () use ( $value ) {
+				return $value;
+			}
+		);
+		add_filter(
+			'woocommerce_product_get_width',
+			static function () use ( $value ) {
+				return $value;
+			}
+		);
+		add_filter(
+			'woocommerce_product_get_height',
+			static function () use ( $value ) {
+				return $value;
+			}
+		);
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$data = $sut->get_data()[0];
+		foreach ( array( 'weight', 'depth', 'width', 'height' ) as $property ) {
+			$this->assertArrayNotHasKey( $property, $data );
+		}
+	}
+
+	/**
+	 * @testdox Unsupported units omit their measurements without affecting other units.
+	 * @testWith ["unknown", "cm", false, true]
+	 *           ["kg", "unknown", true, false]
+	 *
+	 * @param string $weight_unit Weight unit.
+	 * @param string $dimension_unit Dimension unit.
+	 * @param bool   $has_weight Whether weight is expected.
+	 * @param bool   $has_dimensions Whether dimensions are expected.
+	 */
+	public function test_unsupported_measurement_units( string $weight_unit, string $dimension_unit, bool $has_weight, bool $has_dimensions ): void {
+		update_option( 'woocommerce_weight_unit', $weight_unit );
+		update_option( 'woocommerce_dimension_unit', $dimension_unit );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_weight( '2' );
+		$product->set_length( '3' );
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$data = $sut->get_data()[0];
+		$this->assertSame( $has_weight, isset( $data['weight'] ) );
+		$this->assertSame( $has_dimensions, isset( $data['depth'] ) );
+	}
+
+	/**
+	 * @testdox Selected variations use their own measurements and inherit missing values from the parent.
+	 */
+	public function test_selected_variation_measurements(): void {
+		update_option( 'woocommerce_weight_unit', 'kg' );
+		update_option( 'woocommerce_dimension_unit', 'cm' );
+		$product = WC_Helper_Product::create_variation_product();
+		$product->set_weight( '2' );
+		$product->set_length( '3' );
+		$product->set_width( '4' );
+		$product->set_height( '5' );
+		$product->save();
+		$variation = wc_get_product( wc_get_product_id_by_sku( 'DUMMY SKU VARIABLE HUGE RED 0' ) );
+		$variation->set_weight( '7' );
+		$variation->set_length( '' );
+		$variation->set_width( '8' );
+		$variation->set_height( '' );
+		$variation->save();
+		WC_Product_Variable::sync( $product->get_id() );
+		$original_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserve the request state for this test.
+		try {
+			$_GET['attribute_pa_size']   = 'huge';
+			$_GET['attribute_pa_colour'] = 'red';
+			$_GET['attribute_pa_number'] = '0';
+			$sut                         = new WC_Structured_Data();
+			$sut->generate_product_data( wc_get_product( $product->get_id() ) );
+			$data = $sut->get_data()[0];
+			$this->assertSame(
+				array(
+					'@type'    => 'QuantitativeValue',
+					'value'    => 7.0,
+					'unitCode' => 'KGM',
+				),
+				$data['weight']
+			);
+			$this->assertSame(
+				array(
+					'@type'    => 'QuantitativeValue',
+					'value'    => 3.0,
+					'unitCode' => 'CMT',
+				),
+				$data['depth']
+			);
+			$this->assertSame(
+				array(
+					'@type'    => 'QuantitativeValue',
+					'value'    => 8.0,
+					'unitCode' => 'CMT',
+				),
+				$data['width']
+			);
+			$this->assertSame(
+				array(
+					'@type'    => 'QuantitativeValue',
+					'value'    => 5.0,
+					'unitCode' => 'CMT',
+				),
+				$data['height']
+			);
+		} finally {
+			$_GET = $original_get;
+		}
+	}
+
+	/**
 	 * Test simple product offer structured data includes offer-level price currency.
 	 *
 	 * @return void
@@ -713,5 +966,116 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		} finally {
 			unset( $_GET['attribute_pa_size'], $_GET['attribute_pa_colour'], $_GET['attribute_pa_number'] );
 		}
+	}
+
+	/**
+	 * @testdox A selected public return-policy page emits only a link, not inferred policy facts.
+	 */
+	public function test_online_store_links_to_selected_public_return_policy_page(): void {
+		$page_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'woocommerce_refund_returns_page_id', $page_id );
+		$this->go_to( get_permalink( $page_id ) );
+
+		$this->assertSame( 9, has_action( 'wp_footer', array( $this->structured_data, 'generate_online_store_data' ) ), 'Policy data must be generated before the footer output at priority 10.' );
+		$this->assertSame( array(), $this->structured_data->get_structured_data( array( 'onlinestore' ) ), 'Policy data should not be generated before the footer (including in emails).' );
+		$this->structured_data->generate_online_store_data();
+		$this->assertSame(
+			array(
+				'@context'                => 'https://schema.org/',
+				'@type'                   => 'OnlineStore',
+				'name'                    => get_bloginfo( 'name' ),
+				'url'                     => home_url(),
+				'hasMerchantReturnPolicy' => array(
+					'@type'              => 'MerchantReturnPolicy',
+					'merchantReturnLink' => get_permalink( $page_id ),
+				),
+			),
+			$this->structured_data->get_structured_data( array( 'onlinestore' ) ),
+			'The policy page should expose a link-only OnlineStore node.'
+		);
+
+		ob_start();
+		$this->structured_data->output_structured_data();
+		$output = ob_get_clean();
+		$this->assertStringContainsString( '"merchantReturnLink":"' . get_permalink( $page_id ) . '"', $output, 'The footer should output the policy link.' );
+
+		remove_all_actions( 'woocommerce_email_order_details' );
+		add_action( 'woocommerce_email_order_details', array( $this->structured_data, 'output_email_structured_data' ), 30, 3 );
+		ob_start();
+		do_action( 'woocommerce_email_order_details', null, false, false );
+		$email = ob_get_clean();
+		$this->assertStringNotContainsString( 'OnlineStore', $email, 'The policy node must not appear in an order email, even after the footer.' );
+	}
+
+	/**
+	 * @testdox No return-policy data is generated on another page or for an unpublished, private, or password-protected page.
+	 */
+	public function test_online_store_requires_a_public_selected_page(): void {
+		$page_id  = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		$other_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'woocommerce_refund_returns_page_id', $page_id );
+		$this->go_to( get_permalink( $other_id ) );
+		$this->structured_data->generate_online_store_data();
+		$this->assertSame( array(), $this->structured_data->get_data(), 'Other pages must not advertise the policy.' );
+
+		$this->go_to( get_permalink( $page_id ) );
+		foreach ( array( 'draft', 'private' ) as $status ) {
+			wp_update_post(
+				array(
+					'ID'          => $page_id,
+					'post_status' => $status,
+				)
+			);
+			$this->structured_data->generate_online_store_data();
+			$this->assertSame( array(), $this->structured_data->get_data(), "{$status} pages must not be advertised." );
+		}
+
+		wp_update_post(
+			array(
+				'ID'            => $page_id,
+				'post_status'   => 'publish',
+				'post_password' => 'secret',
+			)
+		);
+		$this->structured_data->generate_online_store_data();
+		$this->assertSame( array(), $this->structured_data->get_data(), 'Password-protected pages must not be advertised.' );
+	}
+
+	/**
+	 * @testdox Invalid permalink filters cannot advertise a missing or unsafe URL.
+	 */
+	public function test_online_store_rejects_invalid_permalink(): void {
+		$page_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'woocommerce_refund_returns_page_id', $page_id );
+		add_filter(
+			'woocommerce_get_refund_returns_page_permalink',
+			static function () {
+				return 'javascript:alert(1)';
+			}
+		);
+		$this->go_to( get_permalink( $page_id ) );
+
+		$this->structured_data->generate_online_store_data();
+		$this->assertSame( array(), $this->structured_data->get_data(), 'Invalid URL must not produce policy markup.' );
 	}
 }

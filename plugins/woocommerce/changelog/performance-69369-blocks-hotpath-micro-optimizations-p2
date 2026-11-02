@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Micro-optimizations package to compress Woo core initialization execution time.

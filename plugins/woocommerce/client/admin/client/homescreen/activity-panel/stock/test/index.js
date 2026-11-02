@@ -56,9 +56,11 @@ describe( 'StockPanel', () => {
 			/>
 		);
 
-		userEvent.click( getByRole( 'button', { name: 'Update stock' } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: 'Update stock' } )
+		);
 		// Number input gets "spinbutton", apparently.
-		userEvent.type( getByRole( 'spinbutton' ), '3' );
+		await userEvent.type( getByRole( 'spinbutton' ), '3' );
 		fireEvent.submit( getByRole( 'button', { name: 'Save' } ) );
 
 		await waitFor( () => {
@@ -93,7 +95,9 @@ describe( 'StockPanel', () => {
 				createNotice={ createNotice }
 			/>
 		);
-		userEvent.click( getByRole( 'button', { name: 'Update stock' } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: 'Update stock' } )
+		);
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'activity_panel_stock_update_stock',
 			{}
