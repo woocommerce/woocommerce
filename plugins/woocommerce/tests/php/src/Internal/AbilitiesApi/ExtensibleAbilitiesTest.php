@@ -1308,6 +1308,35 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should accept a map of properties whose names are numbers, because JSON publishes it as an object.
+	 */
+	public function test_a_map_with_numeric_property_names_is_accepted(): void {
+		AbilitiesLoader::register_core_resources();
+		$schema = array(
+			'type'       => 'object',
+			'properties' => array(
+				'1' => array( 'type' => 'string' ),
+				'2' => array( 'type' => 'string' ),
+			),
+		);
+
+		ExtensibleAbilities::register_field(
+			array(
+				'resource'      => 'order',
+				'namespace'     => 'numeric',
+				'field'         => 'value',
+				'output_schema' => $schema,
+				'get_callback'  => '__return_null',
+				'input_schema'  => $schema,
+				'set_callback'  => '__return_null',
+			)
+		);
+
+		$this->assertArrayHasKey( 'numeric', ExtensibleAbilities::get_fields( 'order' ) );
+		$this->assertSame( '{"1":{"type":"string"},"2":{"type":"string"}}', wp_json_encode( $schema['properties'] ) );
+	}
+
+	/**
 	 * Schemas that are malformed for a field input and for a query filter.
 	 *
 	 * @return array<string, array{0: array<string, mixed>}>

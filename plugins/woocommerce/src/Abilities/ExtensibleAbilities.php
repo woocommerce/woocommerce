@@ -346,7 +346,7 @@ class ExtensibleAbilities {
 		$children = array();
 		foreach ( array( 'properties', 'patternProperties' ) as $keyword ) {
 			if ( array_key_exists( $keyword, $schema ) ) {
-				if ( ! is_array( $schema[ $keyword ] ) || wp_is_numeric_array( $schema[ $keyword ] ) ) {
+				if ( ! is_array( $schema[ $keyword ] ) || self::is_list( $schema[ $keyword ] ) ) {
 					return sprintf( 'The "%1$s" of "%2$s" must be a map of schemas with at least one key.', $keyword, $path );
 				}
 				foreach ( $schema[ $keyword ] as $key => $child ) {
