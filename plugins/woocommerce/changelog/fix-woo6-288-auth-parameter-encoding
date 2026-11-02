@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve the approved permissions and credential recipient throughout application authorization.
