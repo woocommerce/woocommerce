@@ -328,6 +328,62 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The declared list shows found and not found as information, and isn't counted in the summary.
+	 */
+	public function test_output_declared_block(): void {
+		update_option(
+			'woocommerce_agent_readiness_report',
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(),
+				'declared'     => array(
+					array(
+						'id'    => 'ai-txt',
+						'name'  => 'ai.txt usage file',
+						'found' => true,
+					),
+					array(
+						'id'    => 'agents-md',
+						'name'  => 'AGENTS.md',
+						'found' => false,
+					),
+				),
+			)
+		);
+
+		$html = $this->render_page();
+
+		$this->assertStringContainsString( '1 of 2 found', $html );
+		$this->assertStringContainsString( 'Not found', $html );
+		$this->assertStringNotContainsString( 'AGENTS.md</td><td>Fix', $html );
+		$this->assertMatchesRegularExpression( '#Can they find your store\?</a>\s*Run check to find out#', $html, 'Not counted as a result' );
+	}
+
+	/**
+	 * @testdox The declared summary says what couldn't be checked, and a bad stored entry doesn't break the page.
+	 */
+	public function test_output_declared_unknown_and_bad_entries(): void {
+		$report = static fn( array $declared ): array => array(
+			'generated_at' => gmdate( 'c' ),
+			'store_checks' => array(),
+			'declared'     => $declared,
+		);
+		$item   = static fn( ?bool $found ): array => array(
+			'id'    => 'ai-txt',
+			'name'  => 'ai.txt usage file',
+			'found' => $found,
+		);
+
+		update_option( 'woocommerce_agent_readiness_report', $report( array( $item( null ), $item( null ), 'not an array' ) ) );
+		$html = $this->render_page();
+		$this->assertStringContainsString( '<summary>Not checked</summary>', $html );
+		$this->assertStringNotContainsString( '0 of', $html );
+
+		update_option( 'woocommerce_agent_readiness_report', $report( array( $item( true ), $item( false ), $item( null ) ) ) );
+		$this->assertStringContainsString( '1 of 3 found, 1 not checked', $this->render_page() );
+	}
+
+	/**
 	 * @testdox Every question reads the scan, so without one each asks for it; pending checks don't count as unchecked.
 	 */
 	public function test_groups_need_a_scan(): void {
