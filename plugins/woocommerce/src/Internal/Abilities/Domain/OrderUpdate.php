@@ -45,7 +45,7 @@ class OrderUpdate extends ActionableAbility {
 	private array $removed_product_lines = array();
 
 	/**
-	 * Product lines that change() gave a new quantity, for the stock change in save().
+	 * Product lines that change() added or gave a new quantity, for the stock change in save().
 	 *
 	 * @var array<int, \WC_Order_Item_Product>
 	 */
@@ -337,7 +337,7 @@ class OrderUpdate extends ActionableAbility {
 				);
 			}
 
-			$error = empty( $line['id'] ) ? self::add_product_line( $order, $line ) : $this->change_product_line( $order, $line );
+			$error = empty( $line['id'] ) ? $this->add_product_line( $order, $line ) : $this->change_product_line( $order, $line );
 			if ( is_wp_error( $error ) ) {
 				return $error;
 			}
@@ -422,14 +422,14 @@ class OrderUpdate extends ActionableAbility {
 	}
 
 	/**
-	 * Add a product line in memory.
+	 * Add a product line in memory. save() reduces its stock.
 	 *
 	 * @param \WC_Order $order Order.
 	 * @param array     $line  Product line input.
 	 * @return null|\WP_Error
 	 * @throws \WC_Data_Exception When the order class has not adopted stage_product_item().
 	 */
-	private static function add_product_line( \WC_Order $order, array $line ): ?\WP_Error {
+	private function add_product_line( \WC_Order $order, array $line ): ?\WP_Error {
 		$product  = wc_get_product( $line['product_id'] );
 		$quantity = $line['quantity'] ?? 1;
 
@@ -457,7 +457,7 @@ class OrderUpdate extends ActionableAbility {
 			return self::quantity_error( $exception );
 		}
 
-		$order->stage_product_item( $product, $quantity, array( 'order' => $order ) );
+		$this->changed_product_lines[] = $order->stage_product_item( $product, $quantity, array( 'order' => $order ) );
 
 		return null;
 	}

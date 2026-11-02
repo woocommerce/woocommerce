@@ -4312,7 +4312,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should change product stock when a line of an order with reduced stock changes quantity or is removed.
+	 * @testdox Should change product stock when a line of an order with reduced stock is added, changes quantity, or is removed.
 	 */
 	public function test_order_update_adjusts_stock_of_changed_and_removed_lines(): void {
 		$changed = \WC_Helper_Product::create_simple_product(
@@ -4323,6 +4323,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			)
 		);
 		$removed = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 10,
+			)
+		);
+		$added   = \WC_Helper_Product::create_simple_product(
 			true,
 			array(
 				'manage_stock'   => true,
@@ -4346,6 +4353,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 						'id'       => $items[0]->get_id(),
 						'quantity' => 5,
 					),
+					array(
+						'product_id' => $added->get_id(),
+						'quantity'   => 4,
+					),
 				),
 				'remove_items' => array( $items[1]->get_id() ),
 			)
@@ -4354,7 +4365,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertIsArray( $result );
 		$this->assertSame( 5, wc_get_product( $changed->get_id() )->get_stock_quantity() );
 		$this->assertSame( 10, wc_get_product( $removed->get_id() )->get_stock_quantity() );
-		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_items() );
+		$this->assertSame( 6, wc_get_product( $added->get_id() )->get_stock_quantity() );
+		$this->assertCount( 2, wc_get_order( $order->get_id() )->get_items() );
+
+		wc_get_order( $order->get_id() )->update_status( 'cancelled' );
+
+		$this->assertSame( 10, wc_get_product( $changed->get_id() )->get_stock_quantity() );
+		$this->assertSame( 10, wc_get_product( $added->get_id() )->get_stock_quantity() );
 	}
 
 	/**
