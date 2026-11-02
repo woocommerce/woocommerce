@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Admin\Features\Fulfillments\Importer;
 
+use Automattic\WooCommerce\Internal\Admin\ImportExport\CSVUploadHelper;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -352,10 +353,11 @@ final class ImportSession {
 	}
 
 	/**
-	 * Whether a path resolves inside the uploads directory the importer stages files in.
+	 * Whether a path resolves inside the wc-imports directory CSVUploadHelper stages files in.
 	 *
 	 * FilesystemUtil::validate_upload_file_path() also accepts anything readable under
-	 * ABSPATH, which is far wider than anything this importer ever writes.
+	 * ABSPATH, which is far wider than anything this importer ever writes, and the
+	 * uploads directory itself holds media the cleanup must never touch.
 	 *
 	 * @since 11.4.0
 	 *
@@ -373,18 +375,19 @@ final class ImportSession {
 			return false;
 		}
 
-		$upload_dir = wp_get_upload_dir();
-		if ( ! empty( $upload_dir['error'] ) ) {
+		try {
+			$staging_dir = wc_get_container()->get( CSVUploadHelper::class )->get_import_dir( false );
+		} catch ( \Exception $e ) {
 			return false;
 		}
 
-		$resolved = realpath( $path );
-		$basedir  = realpath( $upload_dir['basedir'] );
-		if ( false === $resolved || false === $basedir ) {
+		$resolved    = realpath( $path );
+		$staging_dir = realpath( $staging_dir );
+		if ( false === $resolved || false === $staging_dir ) {
 			return false;
 		}
 
-		return 0 === strpos( wp_normalize_path( $resolved ), trailingslashit( wp_normalize_path( $basedir ) ) );
+		return 0 === strpos( wp_normalize_path( $resolved ), trailingslashit( wp_normalize_path( $staging_dir ) ) );
 	}
 
 	/**
