@@ -213,4 +213,55 @@ class ProductsListTest extends WC_Unit_Test_Case {
 		$this->sut->render_column( 'agent_readiness', $product->get_id() );
 		$this->assertSame( '–', ob_get_clean() );
 	}
+
+	/**
+	 * The editor notice for a product.
+	 *
+	 * @param int    $product_id Product id.
+	 * @param string $action     Screen action.
+	 */
+	private function editor_notice( int $product_id, string $action = '' ): string {
+		global $post;
+		$post = get_post( $product_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Only this notice reads it here.
+		$GLOBALS['current_screen']         = \WP_Screen::get( 'product' );
+		$GLOBALS['current_screen']->action = $action; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		ob_start();
+		$this->sut->render_editor_notice();
+		$html = (string) ob_get_clean();
+		unset( $GLOBALS['current_screen'] );
+		return $html;
+	}
+
+	/**
+	 * @testdox The editor notice names what's missing and for which channels, without a scan, and goes after a fix is saved.
+	 */
+	public function test_editor_notice(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$label   = $this->readiness->get_check_fixes()['missing_images'];
+
+		$html = $this->editor_notice( $product->get_id() );
+		$this->assertStringContainsString( esc_html( $label ), $html );
+		$this->assertStringContainsString( 'ChatGPT', $html );
+
+		$product->set_image_id( self::factory()->attachment->create() );
+		$product->save();
+		$this->assertStringNotContainsString( esc_html( $label ), $this->editor_notice( $product->get_id() ) );
+	}
+
+	/**
+	 * @testdox The editor notice stays away from a new product, a product the checks leave out, and a store with the flag off.
+	 */
+	public function test_editor_notice_absent(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$this->assertSame( '', $this->editor_notice( $product->get_id(), 'add' ) );
+
+		update_option( 'woocommerce_feature_' . AgenticCommerceSettings::FEATURE_ID . '_enabled', 'no' );
+		$this->assertSame( '', $this->editor_notice( $product->get_id() ) );
+		update_option( 'woocommerce_feature_' . AgenticCommerceSettings::FEATURE_ID . '_enabled', 'yes' );
+
+		$product->set_catalog_visibility( 'hidden' );
+		$product->save();
+		$this->assertSame( '', $this->editor_notice( $product->get_id() ) );
+	}
 }
