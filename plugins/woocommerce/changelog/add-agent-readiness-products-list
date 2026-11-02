@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Agent readiness: filter the Products list by readiness problem and show each product's status in a column.
