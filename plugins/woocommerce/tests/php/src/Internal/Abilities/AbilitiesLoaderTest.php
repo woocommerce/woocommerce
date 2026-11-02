@@ -290,17 +290,17 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'idempotent'  => true,
 				'destructive' => false,
 			),
-			'woocommerce/order-send-email'    => array(
+			'woocommerce/order-send-email'       => array(
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => false,
 			),
-			'woocommerce/order-update'        => array(
+			'woocommerce/order-update'           => array(
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => true,
 			),
-			'woocommerce/order-update-status' => array(
+			'woocommerce/order-update-status'    => array(
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => true,
@@ -967,21 +967,21 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'id' => 1,
 				),
 			),
-			'order-send-email'    => array(
+			'order-send-email'       => array(
 				'woocommerce/order-send-email',
 				array(
 					'id'    => 1,
 					'email' => 'invoice',
 				),
 			),
-			'order-update'        => array(
+			'order-update'           => array(
 				'woocommerce/order-update',
 				array(
 					'id'       => 1,
 					'shipping' => array( 'city' => 'Denied' ),
 				),
 			),
-			'order-update-status' => array(
+			'order-update-status'    => array(
 				'woocommerce/order-update-status',
 				array(
 					'id'     => 1,
