@@ -22,6 +22,13 @@ The command clones the repository into a temporary directory, rewrites its histo
 
 Merge the resulting pull request with a merge commit. Squashing it discards the imported history.
 
+### After the merge
+
+The imported code still uses its own text domain for translations. Change it to `woocommerce` in a follow-up commit on the same branch:
+
+- JavaScript: once the imported package uses the monorepo's ESLint config, run ESLint with `--fix`. The `@wordpress/i18n-text-domain` rule in `@woocommerce/eslint-plugin`'s recommended config replaces other text domains with `woocommerce` and adds missing ones.
+- PHP: add the WPCS `WordPress.Utils.I18nTextDomainFixer` sniff to the package's `phpcs.xml`, with `old_text_domain` set to the imported text domain and `new_text_domain` set to `woocommerce`, then run `phpcbf`. `packages/php/woocommerce-analytics/phpcs.xml` shows the syntax. The root `phpcs.xml` reports other text domains but does not fix them.
+
 ## Transferring issues
 
 ```bash
