@@ -27,8 +27,8 @@ use PHPStan\Rules\RuleErrorBuilder;
 
 /**
  * Reports a method of a WC_Data subclass that writes to the database outside save(), unless it also calls a
- * stage_*() method on $this, which marks it as the saving twin of a stage method. Methods of the save pipeline
- * and deletes are exempt. Also reports a stage_*() method of a WC_Data subclass that does not start with
+ * stage_*() method on $this, which marks it as the saving twin of a stage method. A stage_*() method never
+ * gets that exemption. Methods of the save pipeline and deletes are exempt. Also reports a stage_*() method of a WC_Data subclass that does not start with
  * refuse_unstaged_override().
  *
  * @implements Rule<InClassMethodNode>
@@ -86,7 +86,8 @@ final class StagedWriteRule implements Rule {
 			}
 		}
 
-		$writes = false;
+		$writes      = false;
+		$calls_stage = false;
 		foreach ( $finder->find( $method->stmts, fn( Node $call ) => $call instanceof MethodCall || $call instanceof FuncCall ) as $call ) {
 			if ( $call instanceof FuncCall ) {
 				$writes = $writes || ( $call->name instanceof Name && in_array( $call->name->toLowerString(), self::WRITE_FUNCTIONS, true ) );
@@ -97,10 +98,8 @@ final class StagedWriteRule implements Rule {
 				continue;
 			}
 
-			$name = $call->name->toLowerString();
-			if ( self::is_variable( $call->var, 'this' ) && 0 === strpos( $name, 'stage_' ) ) {
-				return array();
-			}
+			$name        = $call->name->toLowerString();
+			$calls_stage = $calls_stage || ( self::is_variable( $call->var, 'this' ) && 0 === strpos( $name, 'stage_' ) );
 
 			$on_data_store = ( $call->var instanceof PropertyFetch && self::is_variable( $call->var->var, 'this' ) && $call->var->name instanceof Identifier && 'data_store' === $call->var->name->toString() )
 				|| ( $call->var instanceof Variable && in_array( $call->var->name, $data_stores, true ) );
@@ -111,7 +110,7 @@ final class StagedWriteRule implements Rule {
 				|| ( self::is_variable( $call->var, 'wpdb' ) && in_array( $name, self::WPDB_WRITE_METHODS, true ) );
 		}
 
-		if ( ! $writes ) {
+		if ( ! $writes || ( $calls_stage && 0 !== strpos( $method->name->toLowerString(), 'stage_' ) ) ) {
 			return array();
 		}
 

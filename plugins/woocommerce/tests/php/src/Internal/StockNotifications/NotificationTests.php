@@ -267,9 +267,9 @@ class NotificationTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that the stage key methods set the hash in memory and save nothing.
+	 * @testdox The stage key methods set the hash in memory and save nothing.
 	 */
-	public function test_stage_keys_save_nothing() {
+	public function test_stage_keys_save_nothing(): void {
 		$notification = new Notification();
 		$notification->set_product_id( 1 );
 		$notification->set_user_email( 'test@example.com' );
@@ -286,9 +286,9 @@ class NotificationTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that a class that overrides the key methods keeps working through them, and that the stage methods refuse it.
+	 * @testdox A class that overrides the key methods keeps working through them, and the stage methods refuse it.
 	 */
-	public function test_stage_keys_refuse_a_class_that_has_not_adopted_them() {
+	public function test_stage_keys_refuse_a_class_that_has_not_adopted_them(): void {
 		// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
 		$notification = new class() extends Notification {
 			public function get_verification_key( bool $persist ): string {
