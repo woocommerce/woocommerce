@@ -147,6 +147,19 @@ final class SimpleCheck extends AbstractReadinessCheck {
 				self::on_every_channel( 'title', self::EFFECT_GAPS ),
 				static fn( \WC_Product $product ): bool => mb_strlen( $product->get_name() ) > self::TITLE_MAX_LENGTH
 			),
+			new self(
+				'image_alt_text',
+				array(
+					'label' => __( 'Products whose main image has no alt text', 'woocommerce' ),
+					'why'   => __( 'AI agents and screen readers read alt text to tell what an image shows. No channel\'s feed asks for it, so it doesn\'t change the channel counts.', 'woocommerce' ),
+					'fix'   => __( 'Describe the main image in its Alternative text field in the media library.', 'woocommerce' ),
+				),
+				array(),
+				static function ( \WC_Product $product ): bool {
+					$image_id = ProductFields::image_id( $product );
+					return $image_id > 0 && '' === trim( (string) get_post_meta( $image_id, '_wp_attachment_image_alt', true ) );
+				}
+			),
 		);
 		$by_id  = array();
 		foreach ( $checks as $check ) {
