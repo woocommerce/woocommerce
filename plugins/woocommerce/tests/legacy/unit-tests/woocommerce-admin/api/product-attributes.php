@@ -266,11 +266,13 @@ class WC_Admin_Tests_API_Product_Attributes extends WC_REST_Unit_Test_Case {
 	 *           ["Colour", "colour", ["colour", "pa_colour"]]
 	 *           ["Colour", ["pa_colour", "colour"], ["colour", "pa_colour"]]
 	 *           ["num", "pa_numeric-size", []]
-	 *           ["123", "123", [123]]
+	 *           ["123", "123", ["123"]]
+	 *           ["123", "", ["123"]]
+	 *           ["123", ["123", "colour"], ["123"]]
 	 *
 	 * @param string          $search Search term.
 	 * @param string|string[] $slug Requested slugs.
-	 * @param string[]|int[]  $expected_slugs Expected response slugs.
+	 * @param string[]        $expected_slugs Expected response slugs.
 	 */
 	public function test_search_distinguishes_global_and_custom_slugs( string $search, $slug, array $expected_slugs ): void {
 		wp_set_current_user( $this->user );

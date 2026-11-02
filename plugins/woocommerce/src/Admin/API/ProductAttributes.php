@@ -115,7 +115,7 @@ class ProductAttributes extends \WC_REST_Product_Attributes_Controller {
 			$data = array(
 				'id'           => $attribute_key,
 				'name'         => $attribute_value['name'],
-				'slug'         => $attribute_key,
+				'slug'         => (string) $attribute_key,
 				'type'         => 'select',
 				'order_by'     => 'menu_order',
 				'has_archives' => false,
