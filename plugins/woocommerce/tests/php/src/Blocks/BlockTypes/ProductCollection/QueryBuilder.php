@@ -1033,10 +1033,6 @@ class QueryBuilder extends \WP_UnitTestCase {
 		$this->assertContains( $tshirt->get_id(), $editor_clothing_ids );
 		$this->assertNotContains( $unassigned_product->get_id(), $editor_clothing_ids );
 
-		$laptop->delete();
-		$phone->delete();
-		$tshirt->delete();
-		$unassigned_product->delete();
 		wp_delete_term( $electronics_cat_id, 'product_cat' );
 		wp_delete_term( $clothing_cat_id, 'product_cat' );
 	}
@@ -1164,9 +1160,6 @@ class QueryBuilder extends \WP_UnitTestCase {
 		$this->assertContains( $sale_product->get_id(), $editor_sale_ids );
 		$this->assertNotContains( $regular_product->get_id(), $editor_sale_ids );
 
-		$featured_product->delete();
-		$sale_product->delete();
-		$regular_product->delete();
 		wp_delete_term( $featured_tag_id, 'product_tag' );
 		wp_delete_term( $sale_tag_id, 'product_tag' );
 	}
@@ -1303,10 +1296,6 @@ class QueryBuilder extends \WP_UnitTestCase {
 		$this->assertContains( $adidas_shoes->get_id(), $editor_adidas_ids );
 		$this->assertNotContains( $unbranded_product->get_id(), $editor_adidas_ids );
 
-		$nike_shoes->delete();
-		$nike_shirt->delete();
-		$adidas_shoes->delete();
-		$unbranded_product->delete();
 		wp_delete_term( $nike_brand_id, 'product_brand' );
 		wp_delete_term( $adidas_brand_id, 'product_brand' );
 	}
@@ -1631,9 +1620,6 @@ class QueryBuilder extends \WP_UnitTestCase {
 
 			$this->assertSame( $expected, $product_names, "Unexpected product order for {$scenario}." );
 		} finally {
-			foreach ( $products as $product ) {
-				$product->delete( true );
-			}
 			foreach ( $terms as list( $term_id, $taxonomy ) ) {
 				wp_delete_term( $term_id, $taxonomy );
 			}
@@ -1680,53 +1666,47 @@ class QueryBuilder extends \WP_UnitTestCase {
 	public function test_inspector_pagination_result( int $page, int $expected_offset, array $expected_names ): void {
 		$products = array();
 
-		try {
-			$fixtures = new FixtureData();
-			foreach ( array( 'Alpha', 'Beta', 'Gamma', 'Kappa', 'Omega' ) as $name ) {
-				$products[] = $fixtures->get_simple_product(
-					array(
-						'name'          => "{$name} pagination product",
-						'regular_price' => '10',
-						'status'        => 'publish',
-					)
-				);
-			}
-
-			$parsed_block = Utils::get_base_parsed_block();
-
-			$parsed_block['attrs']['query']['inherit'] = false;
-
-			$parsed_block['attrs']['query']['orderBy'] = 'title';
-
-			$parsed_block['attrs']['query']['order'] = 'asc';
-
-			$parsed_block['attrs']['query']['perPage'] = 2;
-
-			$parsed_block['attrs']['query']['offset'] = 1;
-
-			$parsed_block['attrs']['query']['post__in'] = array_map(
-				static function ( \WC_Product $product ): int {
-					return $product->get_id();
-				},
-				$products
+		$fixtures = new FixtureData();
+		foreach ( array( 'Alpha', 'Beta', 'Gamma', 'Kappa', 'Omega' ) as $name ) {
+			$products[] = $fixtures->get_simple_product(
+				array(
+					'name'          => "{$name} pagination product",
+					'regular_price' => '10',
+					'status'        => 'publish',
+				)
 			);
-
-			$this->block_instance->set_parsed_block( $parsed_block );
-			$block          = new \stdClass();
-			$block->context = $parsed_block['attrs'];
-
-			$merged_query = $this->block_instance->build_frontend_query( array(), $block, $page );
-
-			$result = new WP_Query( $merged_query );
-
-			$this->assertSame( 2, $merged_query['posts_per_page'], 'The requested page size should reach WP_Query.' );
-			$this->assertSame( $expected_offset, $merged_query['offset'], "Page {$page} should use the cumulative inspector offset." );
-			$this->assertSame( $expected_names, wp_list_pluck( $result->posts, 'post_title' ), "Page {$page} should contain the expected nonempty product window." );
-		} finally {
-			foreach ( $products as $product ) {
-				$product->delete( true );
-			}
 		}
+
+		$parsed_block = Utils::get_base_parsed_block();
+
+		$parsed_block['attrs']['query']['inherit'] = false;
+
+		$parsed_block['attrs']['query']['orderBy'] = 'title';
+
+		$parsed_block['attrs']['query']['order'] = 'asc';
+
+		$parsed_block['attrs']['query']['perPage'] = 2;
+
+		$parsed_block['attrs']['query']['offset'] = 1;
+
+		$parsed_block['attrs']['query']['post__in'] = array_map(
+			static function ( \WC_Product $product ): int {
+				return $product->get_id();
+			},
+			$products
+		);
+
+		$this->block_instance->set_parsed_block( $parsed_block );
+		$block          = new \stdClass();
+		$block->context = $parsed_block['attrs'];
+
+		$merged_query = $this->block_instance->build_frontend_query( array(), $block, $page );
+
+		$result = new WP_Query( $merged_query );
+
+		$this->assertSame( 2, $merged_query['posts_per_page'], 'The requested page size should reach WP_Query.' );
+		$this->assertSame( $expected_offset, $merged_query['offset'], "Page {$page} should use the cumulative inspector offset." );
+		$this->assertSame( $expected_names, wp_list_pluck( $result->posts, 'post_title' ), "Page {$page} should contain the expected nonempty product window." );
 	}
 
 	/**

@@ -13,6 +13,13 @@ namespace Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks;
  * Removes all the "final" keywords from class definitions.
  */
 final class BypassFinalsHack extends CodeHack {
+	/**
+	 * Most recent immutable source transformation, independent of active mocks.
+	 *
+	 * @var array{source: string, path: string, output: string}|null
+	 */
+	private $last_transformation;
+
 
 	/**
 	 * Hacks code by removing "final" keywords from class definitions.
@@ -22,6 +29,11 @@ final class BypassFinalsHack extends CodeHack {
 	 * @return string The hacked code.
 	 */
 	public function hack( $code, $path ) {
+		if ( null !== $this->last_transformation && $code === $this->last_transformation['source'] && $path === $this->last_transformation['path'] ) {
+			return $this->last_transformation['output'];
+		}
+		$source = $code;
+
 		if ( stripos( $code, 'final' ) !== false ) {
 			$tokens = $this->tokenize( $code );
 			$code   = '';
@@ -29,6 +41,12 @@ final class BypassFinalsHack extends CodeHack {
 				$code .= $this->is_token_of_type( $token, T_FINAL ) ? '' : $this->token_to_string( $token );
 			}
 		}
+
+		$this->last_transformation = array(
+			'source' => $source,
+			'path'   => $path,
+			'output' => $code,
+		);
 
 		return $code;
 	}

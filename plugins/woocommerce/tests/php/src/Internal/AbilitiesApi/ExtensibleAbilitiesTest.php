@@ -77,6 +77,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 	/**
 	 * Set up test fixtures.
+	 *
+	 * @throws \RuntimeException When the WordPress abilities source cannot be located.
 	 */
 	public function setUp(): void {
 		global $wp_actions;
@@ -90,7 +92,18 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		parent::setUp();
 
-		if ( class_exists( 'WP_REST_Abilities_Init' ) && ! isset( $this->server->get_routes()['/wp-abilities/v1/abilities'] ) ) {
+		if ( class_exists( 'WP_REST_Abilities_Init' ) ) {
+			if ( ! class_exists( 'WP_REST_Abilities_V1_Categories_Controller' ) ) {
+				$initializer      = new \ReflectionClass( 'WP_REST_Abilities_Init' );
+				$initializer_file = $initializer->getFileName();
+				if ( false === $initializer_file ) {
+					throw new \RuntimeException( 'The WordPress abilities source cannot be located.' );
+				}
+				require_once dirname( $initializer_file ) . '/endpoints/class-wp-rest-abilities-v1-categories-controller.php';
+			}
+
+			// A real route keeps the lazy spy focused when the initializer inspects its catalog.
+			( new \WP_REST_Abilities_V1_Categories_Controller() )->register_routes();
 			\WP_REST_Abilities_Init::register_routes( $this->server );
 		}
 

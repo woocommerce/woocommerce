@@ -17,6 +17,9 @@ use WP_REST_Request;
  * @class MarketingRecommendationsTest.
  */
 class MarketingRecommendationsTest extends WC_REST_Unit_Test_Case {
+
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
 	/**
 	 * Endpoint.
 	 *
@@ -38,11 +41,7 @@ class MarketingRecommendationsTest extends WC_REST_Unit_Test_Case {
 		parent::setUp();
 
 		// Register an administrator user and log in.
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user = self::get_shared_administrator_fixture_id();
 		wp_set_current_user( $this->user );
 
 		// Clear any existing cache first.

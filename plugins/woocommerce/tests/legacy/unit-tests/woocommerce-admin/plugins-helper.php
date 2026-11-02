@@ -15,19 +15,6 @@ use Automattic\WooCommerce\Admin\PluginsHelper;
 class WC_Admin_Tests_Plugins_Helper extends WP_UnitTestCase {
 
 	/**
-	 * Setup test data. Called before every test.
-	 */
-	public function setUp(): void {
-		parent::setUp();
-
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-	}
-
-	/**
 	 * Test get_plugin_path_from_slug()
 	 */
 	public function test_get_plugin_path_from_slug() {

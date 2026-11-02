@@ -56,6 +56,18 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		add_filter(
+			'woocommerce_rest_api_get_rest_namespaces',
+			static function ( $namespaces ) {
+				if ( ! is_array( $namespaces ) || ! is_array( $namespaces['wc/v3'] ?? null ) ) {
+					return $namespaces;
+				}
+
+				$namespaces['wc/v3'] = array_intersect_key( $namespaces['wc/v3'], array( 'orders' => true ) );
+
+				return $namespaces;
+			}
+		);
 		$this->endpoint = new WC_REST_Orders_Controller();
 		$this->user     = self::$administrator_id;
 		wp_set_current_user( $this->user );

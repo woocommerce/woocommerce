@@ -6,6 +6,9 @@ declare( strict_types = 1 );
  */
 class WC_Marketplace_Suggestions_Test extends WC_Unit_Test_Case {
 
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
+
 	/**
 	 * Request query vars before the test, restored in tearDown().
 	 *
@@ -19,7 +22,7 @@ class WC_Marketplace_Suggestions_Test extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->original_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Snapshot for tearDown(), not form handling.
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::get_shared_administrator_fixture_id() );
 		update_option( 'active_plugins', array( 'woocommerce/woocommerce.php', 'woocommerce-subscriptions/woocommerce-subscriptions.php' ) );
 		$this->set_feed(
 			array(

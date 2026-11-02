@@ -116,8 +116,6 @@ final class ProductsOrderingMoveServiceTest extends WC_Unit_Test_Case {
 			),
 			array_column( $db_positions, 'menu_order', 'ID' )
 		);
-
-		array_walk( $products, static fn( $id ) => wc_get_product( $id )->delete( true ) );
 	}
 
 	/**
@@ -141,8 +139,6 @@ final class ProductsOrderingMoveServiceTest extends WC_Unit_Test_Case {
 			),
 			$result->moved
 		);
-
-		array_walk( $products, static fn( $id ) => wc_get_product( $id )->delete( true ) );
 	}
 
 	/**
@@ -164,8 +160,6 @@ final class ProductsOrderingMoveServiceTest extends WC_Unit_Test_Case {
 			),
 			$result->moved
 		);
-
-		array_walk( $products, static fn( $id ) => wc_get_product( $id )->delete( true ) );
 	}
 
 	/**
@@ -189,8 +183,6 @@ final class ProductsOrderingMoveServiceTest extends WC_Unit_Test_Case {
 			$result->reindexed
 		);
 		$this->assertSame( array(), $result->moved );
-
-		array_walk( $products, static fn( $id ) => wc_get_product( $id )->delete( true ) );
 	}
 
 	/**
@@ -213,8 +205,6 @@ final class ProductsOrderingMoveServiceTest extends WC_Unit_Test_Case {
 			$result->reindexed
 		);
 		$this->assertSame( array(), $result->moved );
-
-		array_walk( $products, static fn( $id ) => wc_get_product( $id )->delete( true ) );
 	}
 
 	/**
@@ -230,8 +220,6 @@ final class ProductsOrderingMoveServiceTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( array(), $result->reindexed );
 		$this->assertSame( array(), $result->moved );
-
-		array_walk( $products, static fn( $id ) => wc_get_product( $id )->delete( true ) );
 	}
 
 	/**
@@ -244,8 +232,6 @@ final class ProductsOrderingMoveServiceTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( array(), $result->reindexed );
 		$this->assertSame( array(), $result->moved );
-
-		wc_get_product( $alpha_id )->delete( true );
 	}
 
 	/**
@@ -268,8 +254,6 @@ final class ProductsOrderingMoveServiceTest extends WC_Unit_Test_Case {
 			),
 			$result->moved
 		);
-
-		array_walk( $products, static fn( $id ) => wc_get_product( $id )->delete( true ) );
 	}
 
 	/**
@@ -291,8 +275,6 @@ final class ProductsOrderingMoveServiceTest extends WC_Unit_Test_Case {
 			),
 			$result->moved
 		);
-
-		array_walk( $products, static fn( $id ) => wc_get_product( $id )->delete( true ) );
 	}
 
 	/**
@@ -316,8 +298,6 @@ final class ProductsOrderingMoveServiceTest extends WC_Unit_Test_Case {
 			),
 			$result->moved
 		);
-
-		array_walk( $products, static fn( $id ) => wc_get_product( $id )->delete( true ) );
 	}
 
 	/**
@@ -343,8 +323,6 @@ final class ProductsOrderingMoveServiceTest extends WC_Unit_Test_Case {
 			),
 			$result->moved
 		);
-
-		array_walk( $products, static fn( $id ) => wc_get_product( $id )->delete( true ) );
 	}
 
 	/**
@@ -366,8 +344,6 @@ final class ProductsOrderingMoveServiceTest extends WC_Unit_Test_Case {
 			),
 			$result->moved
 		);
-
-		array_walk( $products, static fn( $id ) => wc_get_product( $id )->delete( true ) );
 	}
 
 	/**

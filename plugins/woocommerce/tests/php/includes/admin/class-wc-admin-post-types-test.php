@@ -16,6 +16,9 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
  */
 class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
+
 	/**
 	 * The System Under Test.
 	 *
@@ -49,7 +52,7 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 		$this->sut              = $reflection->newInstanceWithoutConstructor();
 		$this->original_request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->original_user_id = get_current_user_id();
-		$administrator_user_id  = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$administrator_user_id  = self::get_shared_administrator_fixture_id();
 		wp_set_current_user( $administrator_user_id );
 	}
 

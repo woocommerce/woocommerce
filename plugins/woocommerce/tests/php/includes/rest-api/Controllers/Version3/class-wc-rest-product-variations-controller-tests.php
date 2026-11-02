@@ -8,6 +8,146 @@ use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
  * Variations Controller tests for V3 REST API.
  */
 class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
+	/** @var int Class-owned baseline administrator. */
+	private static $fixture_administrator_id;
+
+	/**
+	 * Full variable-product catalog shared by the class.
+	 *
+	 * @var int
+	 */
+	private static $fixture_product_id;
+
+	/**
+	 * Attribute rows created by the class fixture.
+	 *
+	 * @var int[]
+	 */
+	private static $fixture_attribute_ids = array();
+
+	/**
+	 * Whether the rewrite flush was scheduled before the class fixture.
+	 *
+	 * @var bool
+	 */
+	private static $fixture_had_rewrite_flush;
+
+	/**
+	 * Create the original full catalog with Cost of Goods Sold disabled.
+	 *
+	 * @param WP_UnitTest_Factory $factory Test data factory.
+	 * @throws RuntimeException When the administrator fixture cannot be created.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		$previous_user = get_current_user_id();
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserve test request state around fixture creation.
+		$previous_get = $_GET;
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve test request state around fixture creation.
+		$previous_post = $_POST;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserve test request state around fixture creation.
+		$previous_request = $_REQUEST;
+		$_GET             = array();
+		$_POST            = array();
+		$_REQUEST         = array();
+		try {
+			$administrator = $factory->user->create( array( 'role' => 'administrator' ) );
+			if ( is_wp_error( $administrator ) ) {
+				throw new RuntimeException( $administrator->get_error_message() );
+			}
+			self::$fixture_administrator_id = $administrator;
+			wp_set_current_user( self::$fixture_administrator_id );
+			WC_Install::create_terms();
+			$existing_attribute_ids          = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_id' );
+			self::$fixture_had_rewrite_flush = false !== wp_next_scheduled( 'woocommerce_flush_rewrite_rules' );
+
+			self::with_fixture_cogs_disabled(
+				static function () {
+					self::with_direct_product_attribute_lookup_updates(
+						static function () {
+							self::$fixture_product_id = WC_Helper_Product::create_variation_product()->get_id();
+						}
+					);
+				}
+			);
+
+			self::$fixture_attribute_ids = array_values( array_diff( wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_id' ), $existing_attribute_ids ) );
+		} finally {
+			$_GET     = $previous_get;
+			$_POST    = $previous_post;
+			$_REQUEST = $previous_request;
+			wp_set_current_user( $previous_user );
+		}
+	}
+
+	/**
+	 * Delete only the catalog and attributes owned by this class.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		global $wc_product_attributes;
+
+		self::with_fixture_cogs_disabled(
+			static function () use ( &$wc_product_attributes ) {
+				self::with_direct_product_attribute_lookup_updates(
+					static function () use ( &$wc_product_attributes ) {
+						$product = wc_get_product( self::$fixture_product_id );
+						if ( $product ) {
+							$product->delete( true );
+						}
+
+						foreach ( self::$fixture_attribute_ids as $attribute_id ) {
+							$attribute = wc_get_attribute( $attribute_id );
+							$taxonomy  = $attribute ? $attribute->slug : '';
+							wc_delete_attribute( $attribute_id );
+							if ( $taxonomy && taxonomy_exists( $taxonomy ) ) {
+								unregister_taxonomy( $taxonomy );
+							}
+							unset( $wc_product_attributes[ $taxonomy ] );
+						}
+
+						if ( ! self::$fixture_had_rewrite_flush ) {
+							wp_clear_scheduled_hook( 'woocommerce_flush_rewrite_rules' );
+						}
+					}
+				);
+			}
+		);
+		self::delete_user( self::$fixture_administrator_id );
+		self::$fixture_administrator_id = 0;
+	}
+
+	/**
+	 * Keep the class fixture's feature mode local to its lifecycle callback.
+	 *
+	 * @param callable $callback Fixture lifecycle callback.
+	 * @return mixed Callback result.
+	 */
+	private static function with_fixture_cogs_disabled( callable $callback ) {
+		$previous = get_option( 'woocommerce_feature_cost_of_goods_sold_enabled', null );
+		delete_option( 'woocommerce_feature_cost_of_goods_sold_enabled' );
+		try {
+			return $callback();
+		} finally {
+			if ( null === $previous ) {
+				delete_option( 'woocommerce_feature_cost_of_goods_sold_enabled' );
+			} else {
+				update_option( 'woocommerce_feature_cost_of_goods_sold_enabled', $previous );
+			}
+		}
+	}
+
+	/**
+	 * Reload the original full catalog in the current test's feature/cache context.
+	 *
+	 * @throws RuntimeException When the class fixture is unavailable.
+	 */
+	private function get_full_catalog_fixture(): WC_Product_Variable {
+		$product = wc_get_product( self::$fixture_product_id );
+		if ( ! $product instanceof WC_Product_Variable ) {
+			throw new RuntimeException( 'The variable product class fixture is unavailable.' );
+		}
+		return $product;
+	}
+
 	use CogsAwareUnitTestSuiteTrait;
 	use MetaDataAssertionTrait;
 
@@ -49,11 +189,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 			array( array( $this->controller, 'register_routes' ) ),
 			true
 		);
-		$this->user       = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user       = self::$fixture_administrator_id;
 		wp_set_current_user( $this->user );
 	}
 
@@ -73,7 +209,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	public function test_cogs_values_not_received_for_variation_with_feature_disabled() {
 		$this->disable_cogs_feature();
 
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', "/wc/v3/products/{$parent_product->get_id()}/variations/{$parent_product->get_children()[0]}" ) );
 		$this->assertEquals( 200, $response->get_status() );
@@ -93,7 +229,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	public function test_cogs_values_received_for_variation_with_feature_enabled( bool $set_additive_flag ) {
 		$this->enable_cogs_feature();
 
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 		$parent_product->set_cogs_value( 12.34 );
 		$parent_product->save();
 
@@ -133,7 +269,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	public function test_set_cogs_value_for_variation_via_post_request( bool $set_additive_flag ) {
 		$this->enable_cogs_feature();
 
-		$variation = wc_get_product( ( WC_Helper_Product::create_variation_product() )->get_children()[0] );
+		$variation = wc_get_product( ( $this->get_full_catalog_fixture() )->get_children()[0] );
 		$variation->set_cogs_value_is_additive( $set_additive_flag );
 		$variation->save();
 		$this->assertEquals( 0, $variation->get_cogs_value() );
@@ -169,7 +305,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	public function test_set_cogs_additive_field_for_variation_via_post_request( bool $set_additive_flag ) {
 		$this->enable_cogs_feature();
 
-		$variation = wc_get_product( ( WC_Helper_Product::create_variation_product() )->get_children()[0] );
+		$variation = wc_get_product( ( $this->get_full_catalog_fixture() )->get_children()[0] );
 		$variation->set_cogs_value( 12.34 );
 		$variation->set_cogs_value_is_additive( ! $set_additive_flag );
 		$variation->save();
@@ -206,7 +342,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * @testdox The variation GET endpoint returns typed gallery image IDs.
 	 */
 	public function test_variation_get_returns_gallery_image_ids() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 		$variation      = wc_get_product( $parent_product->get_children()[0] );
 		$image_ids      = array(
 			wp_insert_attachment(
@@ -243,7 +379,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * @testdox The variation POST endpoint updates the gallery without touching the featured image (disjoint storage).
 	 */
 	public function test_variation_post_updates_gallery_image_ids() {
-		$parent_product       = WC_Helper_Product::create_variation_product();
+		$parent_product       = $this->get_full_catalog_fixture();
 		$variation            = wc_get_product( $parent_product->get_children()[0] );
 		$pre_existing_feature = wp_insert_attachment(
 			array(
@@ -301,7 +437,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * @testdox The variation POST endpoint can clear a legacy-only variation gallery.
 	 */
 	public function test_variation_post_can_clear_legacy_gallery_image_ids() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 		$variation      = wc_get_product( $parent_product->get_children()[0] );
 
 		update_post_meta(
@@ -337,7 +473,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 */
 	public function test_create_variation_with_persian_attribute_by_id() {
 		// Create a variable product with Persian attribute names.
-		$product         = WC_Helper_Product::create_variation_product();
+		$product         = $this->get_full_catalog_fixture();
 		$color_attribute = WC_Helper_Product::create_product_attribute_object( 'رنگ', array( 'blue', 'green' ) );
 		$product->set_attributes( array( $color_attribute ) );
 		$product->save();
@@ -396,7 +532,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 */
 	public function test_create_variation_with_url_encoded_attribute_option() {
 		// Create a variable product with a Persian attribute name and options.
-		$product         = WC_Helper_Product::create_variation_product();
+		$product         = $this->get_full_catalog_fixture();
 		$color_attribute = WC_Helper_Product::create_product_attribute_object( 'رنگ', array( 'آبی', 'سبز' ) );
 		$product->set_attributes( array( $color_attribute ) );
 		$product->save();
@@ -452,7 +588,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_products_variations_query_by_global_unique_id() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 		$variation      = $parent_product->get_available_variations()[0];
 		$variation      = wc_get_product( $variation['variation_id'] );
 		$unique_id      = $parent_product->get_id() . '-1';
@@ -476,7 +612,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * @testdox The on_sale parameter combines with include and exclude.
 	 */
 	public function test_variations_filter_by_on_sale_with_include_and_exclude(): void {
-		$parent_product    = WC_Helper_Product::create_variation_product();
+		$parent_product    = $this->get_full_catalog_fixture();
 		$variation_ids     = $parent_product->get_children();
 		$on_sale_variation = wc_get_product( $variation_ids[0] );
 		$on_sale_variation->set_sale_price( 5 );
@@ -530,7 +666,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * Test `downloadable` filter returns only downloadable product variations.
 	 */
 	public function test_downloadable_filter_returns_only_downloadable_products() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 		$variations     = $parent_product->get_available_variations( 'objects' );
 		$variations[0]->set_downloadable( true );
 		$variations[0]->save();
@@ -553,7 +689,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * Test `downloadable` filter returns only non-downloadable products when is false.
 	 */
 	public function test_downloadable_filter_returns_only_non_downloadable_products() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 		$variations     = $parent_product->get_available_variations( 'objects' );
 		$variations[0]->set_downloadable( true );
 		$variations[0]->save();
@@ -576,7 +712,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * Test invalid downloadable parameter type returns error.
 	 */
 	public function test_downloadable_filter_with_invalid_param() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $parent_product->get_id() . '/variations' );
 		$request->set_param( 'downloadable', 'invalid' );
@@ -591,7 +727,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * Test `virtual` filter returns only virtual product variations.
 	 */
 	public function test_virtual_filter_returns_only_virtual_products() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 		$variations     = $parent_product->get_available_variations( 'objects' );
 		$variations[0]->set_virtual( true );
 		$variations[0]->save();
@@ -614,7 +750,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * Test `virtual` filter returns only non-virtual products when is false.
 	 */
 	public function test_virtual_filter_returns_only_non_virtual_products() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 		$variations     = $parent_product->get_available_variations( 'objects' );
 		$variations[0]->set_virtual( true );
 		$variations[0]->save();
@@ -637,7 +773,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * Test invalid virtual parameter type returns error.
 	 */
 	public function test_virtual_filter_with_invalid_param() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $parent_product->get_id() . '/variations' );
 		$request->set_param( 'virtual', 'invalid' );
@@ -652,7 +788,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * Test that the `include_status` parameter correctly filters product variations by a single status.
 	 */
 	public function test_collection_filter_with_single_include_status() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 		$variation      = $parent_product->get_available_variations( 'objects' )[0];
 		$variation->set_status( 'draft' );
 		$variation->save();
@@ -681,7 +817,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_collection_filter_with_multiple_include_status() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 		$variations     = $parent_product->get_available_variations( 'objects' );
 
 		$variations[0]->set_status( 'draft' );
@@ -722,7 +858,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * Test that the `include_status` parameter correctly handles invalid status values.
 	 */
 	public function test_collection_filter_with_invalid_include_status() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $parent_product->get_id() . '/variations' );
 		$request->set_query_params(
@@ -740,7 +876,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * Test that the `include_status` parameter with any status returns all product variations.
 	 */
 	public function test_collection_filter_with_include_status_any() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 		$variations     = $parent_product->get_available_variations( 'objects' );
 
 		$all_statuses = array_keys( get_post_statuses() );
@@ -781,7 +917,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 *  Test that the `exclude_status` parameter correctly filters product variations by a single status.
 	 */
 	public function test_collection_filter_with_single_exclude_status() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $parent_product->get_id() . '/variations' );
 		$request->set_query_params(
@@ -805,7 +941,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * Test that `exclude_status` parameter correctly excludes multiple product variations.
 	 */
 	public function test_collection_filter_with_multiple_exclude_status() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 		$variations     = $parent_product->get_available_variations( 'objects' );
 
 		$variations[0]->set_status( 'private' );
@@ -835,7 +971,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * Test that empty `exclude_status` parameter returns all products.
 	 */
 	public function test_collection_filter_with_empty_exclude_status() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 		$variations     = $parent_product->get_available_variations( 'objects' );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $parent_product->get_id() . '/variations' );
@@ -856,7 +992,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * Test that `exclude_status` parameter validation handles invalid values.
 	 */
 	public function test_collection_filter_with_valid_invalid_exclude_status() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $parent_product->get_id() . '/variations' );
 		$request->set_query_params(
@@ -873,7 +1009,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * Test that `exclude_status` with all statuses returns empty.
 	 */
 	public function test_collection_filter_exclude_status_with_all_statuses_returns_empty() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 
 		$all_statuses = array_merge( array( 'future', 'trash' ), array_keys( get_post_statuses() ) );
 
@@ -893,7 +1029,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * Test that `exclude_status` parameter takes precedence over `include_status`.
 	 */
 	public function test_collection_filter_exclude_status_precedence_over_include() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 		$variations     = $parent_product->get_available_variations( 'objects' );
 		$variations[0]->set_status( 'draft' );
 		$variations[0]->save();
@@ -919,7 +1055,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * Test that `exclude_status` works correctly when `include_status` is 'any'.
 	 */
 	public function test_collection_filter_exclude_status_with_include_any() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 		$variations     = $parent_product->get_available_variations( 'objects' );
 		$variations[0]->set_status( 'draft' );
 		$variations[0]->save();
@@ -948,7 +1084,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * Test that `exclude_status` works correctly with specific `include_status` values.
 	 */
 	public function test_collection_filter_exclude_status_with_specific_includes() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 		$variations     = $parent_product->get_available_variations( 'objects' );
 
 		$variations[0]->set_status( 'draft' );
@@ -974,7 +1110,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * Test that `exclude_status` works correctly with the 'status' parameter.
 	 */
 	public function test_collection_filter_exclude_status_with_status_param() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $parent_product->get_id() . '/variations' );
 		$request->set_query_params(
@@ -994,7 +1130,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * Test `pos_products_only` filter returns only POS-visible variations when true.
 	 */
 	public function test_pos_products_only_true_returns_only_pos_visible_variations() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 		$variations     = $parent_product->get_available_variations( 'objects' );
 
 		// Mark one variation as hidden from POS.
@@ -1016,7 +1152,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * Test `pos_products_only` filter returns all variations when false.
 	 */
 	public function test_pos_products_only_false_returns_all_variations() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 		$variations     = $parent_product->get_available_variations( 'objects' );
 
 		// Mark one variation as hidden from POS.
@@ -1038,7 +1174,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * Test that omitting `pos_products_only` filter returns all variations regardless of POS visibility.
 	 */
 	public function test_pos_products_only_omitted_returns_all_variations() {
-		$parent_product = WC_Helper_Product::create_variation_product();
+		$parent_product = $this->get_full_catalog_fixture();
 		$variations     = $parent_product->get_available_variations( 'objects' );
 
 		// Mark one variation as hidden from POS.
@@ -1060,7 +1196,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * @testdox Updating a variation with incomplete meta_data entries does not cause errors.
 	 */
 	public function test_update_meta_data_with_incomplete_entries(): void {
-		$parent    = WC_Helper_Product::create_variation_product();
+		$parent    = $this->get_full_catalog_fixture();
 		$variation = wc_get_product( $parent->get_children()[0] );
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $parent->get_id() . '/variations/' . $variation->get_id() );
@@ -1077,7 +1213,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	 * @testdox Variation batch updates coalesce repeated product transient deletion.
 	 */
 	public function test_batch_update_coalesces_product_transient_deletion(): void {
-		$parent                                = WC_Helper_Product::create_variation_product();
+		$parent                                = $this->get_full_catalog_fixture();
 		$variation_ids                         = array_slice( $parent->get_children(), 0, 2 );
 		$deleted_ids                           = array();
 		$parent_product_children_deletes       = 0;

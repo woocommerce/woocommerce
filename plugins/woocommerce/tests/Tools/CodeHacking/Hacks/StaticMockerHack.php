@@ -7,6 +7,8 @@
 
 namespace Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks;
 
+use ReflectionReference;
+
 /**
  * Hack to mock public static methods and properties.
  *
@@ -35,6 +37,20 @@ namespace Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks;
  * executed inside tests (and thus the above example won't stack-overflow).
  */
 final class StaticMockerHack extends CodeHack {
+	/**
+	 * Most recent immutable source transformation, independent of active mocks.
+	 *
+	 * @var array{source: string, path: string, output: string}|null
+	 */
+	private $last_transformation;
+
+	/**
+	 * Whether the constructor allowlist contains only values without references.
+	 *
+	 * @var bool
+	 */
+	private $can_cache_transformations = true;
+
 	/**
 	 * An associative array of class name => array of class methods.
 	 *
@@ -69,6 +85,12 @@ final class StaticMockerHack extends CodeHack {
 	 */
 	private function __construct( $mockable_classes ) {
 		$this->mockable_classes = $mockable_classes;
+		foreach ( array_keys( $mockable_classes ) as $key ) {
+			if ( null !== ReflectionReference::fromArrayElement( $mockable_classes, $key ) ) {
+				$this->can_cache_transformations = false;
+				break;
+			}
+		}
 	}
 
 	/**
@@ -80,6 +102,11 @@ final class StaticMockerHack extends CodeHack {
 	 *
 	 */
 	public function hack( $code, $path ) {
+		if ( $this->can_cache_transformations && null !== $this->last_transformation && $code === $this->last_transformation['source'] && $path === $this->last_transformation['path'] ) {
+			return $this->last_transformation['output'];
+		}
+		$source = $code;
+
 		$last_item = null;
 
 		$tokens        = $this->tokenize( $code );
@@ -103,6 +130,14 @@ final class StaticMockerHack extends CodeHack {
 				$code .= $this->token_to_string( $current_token );
 			}
 			next( $tokens );
+		}
+
+		if ( $this->can_cache_transformations ) {
+			$this->last_transformation = array(
+				'source' => $source,
+				'path'   => $path,
+				'output' => $code,
+			);
 		}
 
 		return $code;

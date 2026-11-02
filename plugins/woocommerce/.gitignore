@@ -19,6 +19,7 @@ tests/cli/vendor
 /tests/e2e/screenshots
 /tests/e2e/plugins
 .phpunit.result.cache
+/tests/phpunit-profile*.jsonl
 
 # Test translations
 /i18n/languages/woocommerce*

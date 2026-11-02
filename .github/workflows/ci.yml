@@ -456,6 +456,7 @@ jobs:
           PLUGIN_SLUG: '' # required by test:plugincheck; nightly installs under the canonical 'woocommerce' folder
           PLAYWRIGHT_JUNIT_SUITE_NAME: 'WooCommerce Core'
           PLAYWRIGHT_JUNIT_SUITE_ID: 'woocommerce-core'
+          WC_PHPUNIT_PROFILE: ${{ matrix.testType == 'unit:php' && 'tests/phpunit-profile.jsonl' || '' }}
         run: |
           lastRunFile="${{ runner.temp }}/last-run-info/.last-run.json"
           lastRunFileDest="$ARTIFACTS_PATH/.last-run.json"
@@ -493,6 +494,15 @@ jobs:
 
           # Finally, run the tests
           pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }} $lastRunFlag
+
+      - name: 'Upload PHPUnit performance measurements'
+        if: ${{ always() && matrix.testType == 'unit:php' && matrix.projectName == '@woocommerce/plugin-woocommerce' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: 'phpunit-profile__${{ strategy.job-index }}__attempt-${{ github.run_attempt }}'
+          path: '${{ matrix.projectPath }}/tests/phpunit-profile.jsonl'
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: 'Upload Playwright last run info'
         # always upload the last run info, even if the test run passed

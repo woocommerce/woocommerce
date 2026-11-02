@@ -112,6 +112,26 @@ or you can pass `--list-groups` to list all the available test groups:
 pnpm --filter=@woocommerce/plugin-woocommerce test:unit:env:watch -- --list-groups
 ```
 
+### Recording PHPUnit performance
+
+To capture class timings and work counters, set an output filename when running PHPUnit from the plugin directory:
+
+```sh
+WC_PHPUNIT_PROFILE=tests/phpunit-profile.jsonl pnpm test:php:env
+WC_PHPUNIT_PROFILE=tests/phpunit-profile-hpos-off.jsonl pnpm test:php:env:hpos-off
+```
+
+The parent directory must exist and be writable inside the test container. Relative paths resolve from the plugin directory. Each invocation overwrites its output file. Without the variable, the listener does not sample or write anything. PHP CI jobs enable capture and upload a separate `phpunit-profile` artifact for each matrix job and run attempt, including failed runs.
+
+The JSONL file contains metadata, a record after each completed class, and a final `run` record. No final record means capture is incomplete. Times are in seconds, memory in bytes, and counters are counts. Metadata labels SQL, GC and memory counters as `parent_process`: they exclude work inside isolated test processes. Matching parent counters cannot establish equal work in those children.
+
+- `wall_seconds` includes class setup and teardown. `case_seconds` sums PHPUnit's per-case setup/body/teardown timers. `outside_case_seconds` is their signed difference; different timer boundaries, especially isolated processes, can make it negative.
+- `cpu_self_seconds` and `cpu_children_seconds` measure process and reaped-child CPU. They exclude the separate database server and do not directly measure SQL latency.
+- `queries` is the query count when the observed database identity and counter remain continuous. A reset, replacement or missing counter makes it `null`; `observed_queries` then reports only the sum of valid segments and `query_discontinuities` counts invalid segments. Sampling at test and suite boundaries cannot detect a reset or replacement that is restored entirely within one case.
+- `gc_runs`, `gc_collected` and `gc_collector_seconds` measure collection work. Collector duration is `null` before PHP 8.3. Root, threshold, enabled-state and memory snapshots show how state changes through the suite. The recorder never forces collection, changes GC settings, logs SQL, or retains test objects.
+
+The run interval starts after bootstrap and test discovery and ends at the root suite's completion, before final PHPUnit reporting. Compare matching classes and test counts across repeated runs; query count alone says nothing about query cost, and equal counts do not prove equal work.
+
 ### Troubleshooting
 
 In case you're unable to run the unit tests, you might see an error message similar to:

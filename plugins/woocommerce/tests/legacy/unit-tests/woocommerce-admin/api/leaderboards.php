@@ -9,6 +9,9 @@
  * WC Tests API Leaderboards
  */
 class WC_Admin_Tests_API_Leaderboards extends WC_REST_Unit_Test_Case {
+
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
 	/**
 	 * Endpoints.
 	 *
@@ -21,11 +24,7 @@ class WC_Admin_Tests_API_Leaderboards extends WC_REST_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user = self::get_shared_administrator_fixture_id();
 	}
 
 	/**
