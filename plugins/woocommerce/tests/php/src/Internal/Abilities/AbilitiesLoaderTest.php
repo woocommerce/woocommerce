@@ -1860,6 +1860,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return order dates with matching store and UTC timestamps.
 	 * @dataProvider provider_output_date_timezones
 	 * @param string $timezone Store timezone.
 	 * @param string $created Creation date in store time.
@@ -1868,7 +1869,12 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_order_output_dates_have_offsets( string $timezone, string $created, string $expected ): void {
 		update_option( 'timezone_string', $timezone );
 		update_option( 'gmt_offset', 5.75 );
-		$order = $this->create_order_for_query_sorting( 'dates@example.test', $created, $created );
+		$order = wc_create_order();
+		$order->set_date_created( $created );
+		$order->set_date_modified( $created );
+		$order->save();
+		$this->created_order_ids[] = $order->get_id();
+		$this->set_order_modified_date_for_query_test( $order, $created );
 
 		$result = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'id' => $order->get_id() ) );
 
