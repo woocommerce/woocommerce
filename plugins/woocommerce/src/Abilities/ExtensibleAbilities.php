@@ -90,6 +90,26 @@ class ExtensibleAbilities {
 	private const SCHEMA_TYPES = array( 'array', 'object', 'string', 'number', 'integer', 'boolean', 'null' );
 
 	/**
+	 * Schema keywords with the kind of value they need, as the MCP SDK client compiles them.
+	 */
+	private const KEYWORD_VALUES = array(
+		'minLength'        => 'an integer of 0 or more',
+		'maxLength'        => 'an integer of 0 or more',
+		'minItems'         => 'an integer of 0 or more',
+		'maxItems'         => 'an integer of 0 or more',
+		'minProperties'    => 'an integer of 0 or more',
+		'maxProperties'    => 'an integer of 0 or more',
+		'minimum'          => 'a number',
+		'maximum'          => 'a number',
+		'multipleOf'       => 'a number above 0',
+		'exclusiveMinimum' => 'a number equal to its "minimum"',
+		'exclusiveMaximum' => 'a number equal to its "maximum"',
+		'pattern'          => 'a string',
+		'format'           => 'a string',
+		'uniqueItems'      => 'true or false',
+	);
+
+	/**
 	 * Register a resource that abilities format, so extensions can register fields on it.
 	 *
 	 * Call it inside the `woocommerce_extensible_abilities_resources_init` action. A call after that action is refused.
@@ -122,8 +142,10 @@ class ExtensibleAbilities {
 	 * The resource must be registered with `register_resource()` in the earlier `woocommerce_extensible_abilities_resources_init` action.
 	 * A field declares `get_callback` and `output_schema`, `set_callback` and `input_schema`, or both pairs. The
 	 * first pair makes it readable and the second makes it writable. An incomplete pair is refused.
-	 * A malformed `output_schema` or `input_schema` is refused. At every depth a schema declares a `type`, `required`
-	 * is a list, and `properties` is a map of schemas with at least one key.
+	 * A malformed `output_schema` or `input_schema` is refused. A schema must work both in WordPress validation and
+	 * in an MCP client, which compiles it. At every depth it declares a `type`, `required` is a list of property
+	 * names, `properties` is a map of schemas with at least one key, and keywords such as `minLength` or
+	 * `pattern` have the kind of value that JSON Schema defines. Core does not check that a `pattern` compiles.
 	 *
 	 * @since 11.3.0
 	 *
@@ -250,12 +272,24 @@ class ExtensibleAbilities {
 
 	/**
 	 * Find the first problem in a schema and in the schemas inside it. Core publishes
-	 * a schema as declared, and the MCP SDK client compiles every output schema when
-	 * it lists the tools, so one malformed schema stops that client from listing any
-	 * tool. A `type` is required at every depth, because rest_validate_value_from_schema()
-	 * needs it. The top-level schema always declares it. A nested schema with `anyOf` or
-	 * `oneOf` can omit it, and a branch inherits it from its parent, as that function
-	 * allows. `allOf` is refused, because that function does not run it.
+	 * a schema as declared, so the schema must work in two places.
+	 *
+	 * WordPress runs the schema with rest_validate_value_from_schema():
+	 * 1. A `type` is required at every depth. A nested schema with `anyOf` or `oneOf`
+	 *    can omit it, and a branch inherits it from its parent.
+	 * 2. `allOf` is refused, because WordPress does not run it.
+	 * 3. `exclusiveMinimum` and `exclusiveMaximum` work as a flag on `minimum` and
+	 *    `maximum`.
+	 *
+	 * The MCP SDK client compiles every schema when it lists the tools, and one schema
+	 * that does not compile stops that client from listing any tool:
+	 * 1. `required` is a list of strings, `enum` is a list with at least one value, and
+	 *    `properties` is a map with at least one key.
+	 * 2. Each keyword in KEYWORD_VALUES has the kind of value listed there. For this
+	 *    reason `exclusiveMinimum` and `exclusiveMaximum` are numbers equal to `minimum`
+	 *    and `maximum`, the one form that both places read the same way.
+	 * 3. A `pattern` is not checked as a regular expression. The client compiles it as
+	 *    a JavaScript regular expression, and PHP cannot check that.
 	 *
 	 * @param mixed  $schema    Schema to check, of any type until this method checks it.
 	 * @param string $path      Path of the schema, used in the message.
@@ -284,8 +318,27 @@ class ExtensibleAbilities {
 		if ( isset( $schema['type'] ) && ( empty( $types ) || ! wp_is_numeric_array( $types ) || ! empty( array_filter( $types, static fn( $type ) => ! in_array( $type, self::SCHEMA_TYPES, true ) ) ) ) ) {
 			return sprintf( '"%s" declares an unknown "type".', $path );
 		}
-		if ( array_key_exists( 'required', $schema ) && ! is_array( $schema['required'] ) ) {
+		if ( array_key_exists( 'required', $schema ) && ( ! is_array( $schema['required'] ) || ! wp_is_numeric_array( $schema['required'] ) || ! empty( array_filter( $schema['required'], static fn( $name ) => ! is_string( $name ) ) ) ) ) {
 			return sprintf( 'The "required" of "%s" must be a list of property names.', $path );
+		}
+		foreach ( self::KEYWORD_VALUES as $keyword => $expected ) {
+			if ( ! array_key_exists( $keyword, $schema ) ) {
+				continue;
+			}
+			$value     = $schema[ $keyword ];
+			$is_number = is_int( $value ) || is_float( $value );
+			$checks    = array(
+				'an integer of 0 or more'         => is_int( $value ) && $value >= 0,
+				'a number'                        => $is_number,
+				'a number above 0'                => $is_number && $value > 0,
+				'a number equal to its "minimum"' => $is_number && isset( $schema['minimum'] ) && $value == $schema['minimum'], // phpcs:ignore Universal.Operators.StrictComparisons.LooseEqual -- 1 and 1.0 are the same bound.
+				'a number equal to its "maximum"' => $is_number && isset( $schema['maximum'] ) && $value == $schema['maximum'], // phpcs:ignore Universal.Operators.StrictComparisons.LooseEqual -- 1 and 1.0 are the same bound.
+				'a string'                        => is_string( $value ),
+				'true or false'                   => is_bool( $value ),
+			);
+			if ( ! $checks[ $expected ] ) {
+				return sprintf( 'The "%1$s" of "%2$s" must be %3$s.', $keyword, $path, $expected );
+			}
 		}
 		if ( array_key_exists( 'enum', $schema ) && ( ! is_array( $schema['enum'] ) || empty( $schema['enum'] ) || ! wp_is_numeric_array( $schema['enum'] ) ) ) {
 			return sprintf( 'The "enum" of "%s" must be a list of values.', $path );

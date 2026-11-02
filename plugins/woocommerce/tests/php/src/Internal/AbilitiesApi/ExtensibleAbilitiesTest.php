@@ -1348,6 +1348,86 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 					),
 				),
 			),
+			'required map'                => array( $object + array( 'required' => array( 'key' => 'a' ) ) ),
+			'required numbers'            => array( $object + array( 'required' => array( 1 ) ) ),
+			'minLength string'            => array(
+				array(
+					'type'      => 'string',
+					'minLength' => '3',
+				),
+			),
+			'minLength negative'          => array(
+				array(
+					'type'      => 'string',
+					'minLength' => -1,
+				),
+			),
+			'maxItems float'              => array(
+				array(
+					'type'     => 'array',
+					'maxItems' => 1.5,
+				),
+			),
+			'minimum string'              => array(
+				array(
+					'type'    => 'number',
+					'minimum' => '1',
+				),
+			),
+			'multipleOf zero'             => array(
+				array(
+					'type'       => 'number',
+					'multipleOf' => 0,
+				),
+			),
+			'exclusiveMinimum true'       => array(
+				array(
+					'type'             => 'number',
+					'minimum'          => 1,
+					'exclusiveMinimum' => true,
+				),
+			),
+			'exclusiveMaximum other'      => array(
+				array(
+					'type'             => 'number',
+					'maximum'          => 5,
+					'exclusiveMaximum' => 4,
+				),
+			),
+			'exclusiveMinimum alone'      => array(
+				array(
+					'type'             => 'number',
+					'exclusiveMinimum' => 1,
+				),
+			),
+			'pattern number'              => array(
+				array(
+					'type'    => 'string',
+					'pattern' => 5,
+				),
+			),
+			'format number'               => array(
+				array(
+					'type'   => 'string',
+					'format' => 5,
+				),
+			),
+			'uniqueItems string'          => array(
+				array(
+					'type'        => 'array',
+					'uniqueItems' => 'yes',
+				),
+			),
+			'nested minLength string'     => array(
+				$object + array(
+					'properties' => array(
+						'a' => array(
+							'type'      => 'string',
+							'minLength' => '3',
+						),
+					),
+				),
+			),
 			'empty enum'                  => array( $object + array( 'enum' => array() ) ),
 			'empty type list'             => array( array( 'type' => array() ) ),
 			'unknown type in a list'      => array( array( 'type' => array( 'string', 'text' ) ) ),
@@ -1431,6 +1511,158 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$this->assertSame( $input_schemas, $published_input );
 		$this->assertSame( array_fill_keys( array_keys( $input_schemas ), $output_schema ), $published_output );
+	}
+
+	/**
+	 * @testdox Should publish every WooCommerce ability schema as JSON whose keywords have the value types that an MCP client compiles.
+	 */
+	public function test_published_schemas_have_the_keyword_types_that_mcp_clients_compile(): void {
+		$schema = array(
+			'type'                 => 'object',
+			'properties'           => array(
+				'code'   => array(
+					'type'      => 'string',
+					'minLength' => 1,
+					'maxLength' => 20,
+					'pattern'   => '^[a-z]+$',
+					'format'    => 'hex-color',
+				),
+				'amount' => array(
+					'type'             => 'number',
+					'minimum'          => 0,
+					'exclusiveMinimum' => 0,
+					'maximum'          => 100.5,
+					'multipleOf'       => 0.5,
+				),
+				'tags'   => array(
+					'type'        => 'array',
+					'items'       => array(
+						'type' => 'string',
+						'enum' => array( 'a', 'b' ),
+					),
+					'minItems'    => 0,
+					'uniqueItems' => true,
+				),
+			),
+			'required'             => array( 'code' ),
+			'additionalProperties' => false,
+		);
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $schema ) {
+				foreach ( array( 'product', 'order', 'order_item' ) as $resource ) {
+					ExtensibleAbilities::register_field(
+						array(
+							'resource'      => $resource,
+							'namespace'     => 'compiled',
+							'field'         => 'value',
+							'output_schema' => $schema,
+							'get_callback'  => '__return_null',
+							'input_schema'  => $schema,
+							'set_callback'  => '__return_null',
+						)
+					);
+				}
+			}
+		);
+		$this->reset_registries();
+		$this->get_ability( 'woocommerce/product-update' );
+
+		$errors = array();
+		$names  = array();
+		foreach ( wp_get_abilities() as $ability ) {
+			if ( 0 !== strpos( $ability->get_name(), 'woocommerce/' ) ) {
+				continue;
+			}
+			$names[] = $ability->get_name();
+			foreach ( array(
+				'input'  => $ability->get_input_schema(),
+				'output' => $ability->get_output_schema(),
+			) as $kind => $ability_schema ) {
+				$json   = json_decode( (string) wp_json_encode( $ability_schema ) );
+				$errors = array_merge( $errors, self::get_compile_errors( $json, $ability->get_name() . ' ' . $kind ) );
+			}
+		}
+
+		$this->assertContains( 'woocommerce/product-update', $names );
+		$this->assertContains( 'woocommerce/orders-query', $names );
+		$this->assertEmpty( $errors, implode( "\n", $errors ) );
+	}
+
+	/**
+	 * Find the keywords in a decoded JSON schema whose value has a type that the MCP SDK client
+	 * refuses when it compiles the schema with Ajv. The types come from the keyword definitions of Ajv.
+	 *
+	 * @param mixed  $schema Schema decoded from JSON, with maps as objects and lists as arrays.
+	 * @param string $path   Path of the schema, used in the message.
+	 * @return string[] The problems.
+	 */
+	private static function get_compile_errors( $schema, string $path ): array {
+		if ( is_bool( $schema ) ) {
+			return array();
+		}
+		if ( ! is_object( $schema ) ) {
+			return array( $path . ' is not a schema object' );
+		}
+		$is_number = static fn( $value ) => is_int( $value ) || is_float( $value );
+		$checks    = array(
+			'type'                 => static fn( $value ) => is_string( $value ) || ( is_array( $value ) && ! empty( $value ) ),
+			'required'             => static fn( $value ) => is_array( $value ) && empty( array_filter( $value, static fn( $name ) => ! is_string( $name ) ) ),
+			'enum'                 => static fn( $value ) => is_array( $value ) && ! empty( $value ),
+			'properties'           => 'is_object',
+			'patternProperties'    => 'is_object',
+			'additionalProperties' => static fn( $value ) => is_bool( $value ) || is_object( $value ),
+			'items'                => static fn( $value ) => is_bool( $value ) || is_object( $value ) || is_array( $value ),
+			'anyOf'                => static fn( $value ) => is_array( $value ) && ! empty( $value ),
+			'oneOf'                => static fn( $value ) => is_array( $value ) && ! empty( $value ),
+			'allOf'                => static fn( $value ) => is_array( $value ) && ! empty( $value ),
+			'minLength'            => $is_number,
+			'maxLength'            => $is_number,
+			'minItems'             => $is_number,
+			'maxItems'             => $is_number,
+			'minProperties'        => $is_number,
+			'maxProperties'        => $is_number,
+			'minimum'              => $is_number,
+			'maximum'              => $is_number,
+			'exclusiveMinimum'     => $is_number,
+			'exclusiveMaximum'     => $is_number,
+			'multipleOf'           => $is_number,
+			'pattern'              => 'is_string',
+			'format'               => 'is_string',
+			'uniqueItems'          => 'is_bool',
+		);
+
+		$errors = array();
+		foreach ( $checks as $keyword => $check ) {
+			if ( property_exists( $schema, $keyword ) && ! $check( $schema->$keyword ) ) {
+				$errors[] = $path . '.' . $keyword . ' has a value that does not compile';
+			}
+		}
+
+		$children = array();
+		foreach ( array( 'properties', 'patternProperties' ) as $keyword ) {
+			if ( isset( $schema->$keyword ) && is_object( $schema->$keyword ) ) {
+				foreach ( get_object_vars( $schema->$keyword ) as $key => $child ) {
+					$children[ $path . '.' . $keyword . '.' . $key ] = $child;
+				}
+			}
+		}
+		foreach ( array( 'additionalProperties', 'items' ) as $keyword ) {
+			if ( isset( $schema->$keyword ) && is_object( $schema->$keyword ) ) {
+				$children[ $path . '.' . $keyword ] = $schema->$keyword;
+			}
+		}
+		foreach ( array( 'anyOf', 'oneOf', 'allOf' ) as $keyword ) {
+			if ( isset( $schema->$keyword ) && is_array( $schema->$keyword ) ) {
+				foreach ( $schema->$keyword as $index => $child ) {
+					$children[ $path . '.' . $keyword . '.' . $index ] = $child;
+				}
+			}
+		}
+		foreach ( $children as $child_path => $child ) {
+			$errors = array_merge( $errors, self::get_compile_errors( $child, $child_path ) );
+		}
+		return $errors;
 	}
 
 	/**
