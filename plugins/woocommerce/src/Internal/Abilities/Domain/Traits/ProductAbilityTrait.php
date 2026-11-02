@@ -1495,10 +1495,10 @@ trait ProductAbilityTrait {
 			'parent_id'         => (int) $product->get_parent_id(),
 			'attributes'        => self::format_product_attributes( $product ),
 			'variation_ids'     => $product instanceof \WC_Product_Variable ? self::read_variation_children( $product, false )['all'] : array(),
-			'date_created'      => wc_rest_prepare_date_response( $product->get_date_created(), false ),
-			'date_created_gmt'  => wc_rest_prepare_date_response( $product->get_date_created() ),
-			'date_modified'     => wc_rest_prepare_date_response( $product->get_date_modified(), false ),
-			'date_modified_gmt' => wc_rest_prepare_date_response( $product->get_date_modified() ),
+			'date_created'      => self::format_date_for_response( $product->get_date_created(), false ),
+			'date_created_gmt'  => self::format_date_for_response( $product->get_date_created() ),
+			'date_modified'     => self::format_date_for_response( $product->get_date_modified(), false ),
+			'date_modified_gmt' => self::format_date_for_response( $product->get_date_modified() ),
 		);
 
 		return ExtensibleAbilities::add_fields_to_object( $data, 'product', $product );
