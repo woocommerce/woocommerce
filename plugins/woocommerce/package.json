@@ -963,7 +963,10 @@
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks:parallel",
-					"shardingArguments": [],
+					"shardingArguments": [
+						"--shard=1/2",
+						"--shard=2/2"
+					],
 					"changes": [
 						"patterns/**/*.php",
 						"includes/**/*.php",
@@ -1280,7 +1283,10 @@
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks:parallel",
-					"shardingArguments": [],
+					"shardingArguments": [
+						"--shard=1/2",
+						"--shard=2/2"
+					],
 					"changes": [
 						"sample-data/sample_products.xml",
 						"tests/e2e/bin/**",
@@ -1370,7 +1376,10 @@
 					"testType": "e2e",
 					"usesSharedPluginBuild": true,
 					"command": "test:e2e:blocks:parallel",
-					"shardingArguments": [],
+					"shardingArguments": [
+						"--shard=1/2",
+						"--shard=2/2"
+					],
 					"changes": [
 						"sample-data/sample_products.xml",
 						"tests/e2e/bin/**",

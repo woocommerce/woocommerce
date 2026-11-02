@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Reject back-in-stock sign-ups for products the shopper cannot view
