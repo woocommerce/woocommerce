@@ -41,6 +41,7 @@ class ProductOpenGraphTags {
 			array( 'og:type' => 'product' ),
 			array( 'og:url' => $product->get_permalink() ),
 			array( 'og:description' => wc_trim_string( $description ) ),
+			array( 'product:retailer_item_id' => (string) $product->get_id() ),
 		);
 		foreach ( $this->get_site_tags() as $property => $value ) {
 			$tags[] = array( $property => $value );
