@@ -248,7 +248,8 @@ trait OrderAttributionMeta {
 		// Look through each field in given data.
 		foreach ( $this->field_names as $field_name ) {
 			$value = sanitize_text_field( wp_unslash( $raw_values[ $field_name ] ) );
-			if ( '(none)' === $value ) {
+			// Sourcebuster.js empties a field when it doesn't fit the cookie size limit.
+			if ( '' === $value || '(none)' === $value ) {
 				continue;
 			}
 

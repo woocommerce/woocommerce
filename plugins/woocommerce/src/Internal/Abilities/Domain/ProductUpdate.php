@@ -1,35 +1,31 @@
 <?php
 /**
- * Product update ability definition file.
+ * Product update ability class file.
  */
 
 declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
-use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Registers the WooCommerce product update ability.
+ * The WooCommerce product update ability. It runs the steps of ActionableAbility.
  */
-class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
+class ProductUpdate extends ActionableAbility {
 
+	use DomainAbilityHelpers;
 	use ProductAbilityTrait;
 
 	/**
-	 * Get the ability name.
-	 *
-	 * @return string
-	 *
-	 * @since 10.9.0
+	 * Ability name.
 	 */
-	public static function get_name(): string {
-		return 'woocommerce/product-update';
-	}
+	public const ABILITY_NAME = 'woocommerce/product-update';
 
 	/**
 	 * Get the ability registration arguments.
@@ -46,9 +42,8 @@ class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',
-			'input_schema'        => self::get_input_schema(),
+			'input_schema'        => self::build_input_schema(),
 			'output_schema'       => self::get_entity_output_schema( 'product', self::get_product_output_schema() ),
-			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_update_product' ),
 			'meta'                => array(
 				'show_in_rest' => true,
@@ -66,18 +61,29 @@ class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
 	}
 
 	/**
-	 * Update a product.
+	 * Resource that the ability changes.
+	 *
+	 * @return string
+	 */
+	public function get_resource(): string {
+		return 'product';
+	}
+
+	/**
+	 * Load the product to change, with the input type.
 	 *
 	 * @param array $input Ability input.
-	 * @return array|\WP_Error
-	 *
-	 * @since 10.9.0
+	 * @return \WC_Product|\WP_Error
 	 */
-	public static function execute( array $input ) {
+	protected function load( array $input ) {
 		$product = self::get_product_from_input( $input );
 
 		if ( is_wp_error( $product ) ) {
 			return $product;
+		}
+
+		if ( $product instanceof \WC_Product_Variation ) {
+			return self::get_unsupported_product_type_error();
 		}
 
 		if ( empty( array_diff( array_keys( $input ), array( 'id' ) ) ) ) {
@@ -86,12 +92,6 @@ class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
 				__( 'At least one product field is required to update a product.', 'woocommerce' ),
 				array( 'status' => 400 )
 			);
-		}
-
-		$product_config = self::get_product_config_for_product( $product );
-
-		if ( is_wp_error( $product_config ) ) {
-			return $product_config;
 		}
 
 		if (
@@ -111,44 +111,61 @@ class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
 			);
 		}
 
-		if ( isset( $input['product_type_alias'] ) ) {
-			$product_config = self::get_product_config_for_alias( $input['product_type_alias'] );
-
-			if ( is_wp_error( $product_config ) ) {
-				return $product_config;
+		if ( isset( $input['type'] ) ) {
+			$current_config = self::get_product_config_for_product( $product );
+			if ( is_wp_error( $current_config ) ) {
+				return $current_config;
 			}
+			return self::get_product_object_for_type( $input['type'], $product->get_id() );
+		}
 
-			$product = wc_get_product_object( $product_config['wc_type'], $product->get_id() );
+		return $product;
+	}
 
-			if ( ! $product ) {
-				return new \WP_Error(
-					'woocommerce_invalid_product_type',
-					__( 'Invalid product type.', 'woocommerce' ),
-					array( 'status' => 400 )
-				);
-			}
+	/**
+	 * Set the product properties in memory.
+	 *
+	 * @param \WC_Product $subject Product.
+	 * @param array       $input   Ability input.
+	 * @return null|\WP_Error
+	 */
+	protected function change( $subject, array $input ) {
+		$product_config = self::get_product_config_for_product( $subject );
+
+		if ( is_wp_error( $product_config ) ) {
+			return $product_config;
 		}
 
 		try {
-			if ( isset( $input['product_type_alias'] ) ) {
-				self::apply_product_type_config( $product, $product_config );
+			if ( isset( $input['type'] ) && \WC_Product_Factory::get_product_type( $subject->get_id() ) !== $input['type'] ) {
+				self::apply_product_type_config( $subject, $product_config );
 			}
 
-			$validation_error = self::set_product_props_from_input( $product, $input, $product_config );
-			if ( is_wp_error( $validation_error ) ) {
-				return $validation_error;
-			}
+			return self::set_product_props_from_input( $subject, $input, $product_config );
 		} catch ( \WC_Data_Exception $exception ) {
 			return self::get_product_data_exception_error( $exception );
 		}
+	}
 
-		$save_error = self::save_product( $product, 'woocommerce_product_update_failed' );
-		if ( is_wp_error( $save_error ) ) {
-			return $save_error;
-		}
+	/**
+	 * Save the product.
+	 *
+	 * @param \WC_Product $subject Changed product.
+	 * @return null|\WP_Error
+	 */
+	protected function save( $subject ) {
+		return self::save_product( $subject, 'woocommerce_product_update_failed' );
+	}
 
+	/**
+	 * The ability output for the saved product.
+	 *
+	 * @param \WC_Product $subject Saved product.
+	 * @return array
+	 */
+	protected function prepare_response( $subject ): array {
 		return array(
-			'product' => self::format_product_for_response( $product ),
+			'product' => self::format_product_for_response( $subject ),
 		);
 	}
 
@@ -181,7 +198,7 @@ class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
 	 *
 	 * @return array
 	 */
-	private static function get_input_schema(): array {
+	private static function build_input_schema(): array {
 		return self::get_product_update_input_schema();
 	}
 }

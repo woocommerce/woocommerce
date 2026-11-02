@@ -73,11 +73,8 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		$claimed = $this->claim_idempotency_key( $request );
 
 		if ( $claimed instanceof \WP_REST_Response ) {
-			// The gate answers without reaching the parent, which is what stamps the Store API
-			// headers. A replayed cart body carries the one that matters rather than staying cacheable.
-			$claimed->header( 'Cache-Control', 'no-store' );
-
-			return $claimed;
+			// The gate answers without reaching the parent, so it stamps the cache directive itself.
+			return $this->add_response_headers( $claimed );
 		}
 
 		$response = $this->dispatch_ucp_request( $request );
@@ -130,7 +127,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 */
 	private function dispatch_ucp_request( \WP_REST_Request $request ): \WP_REST_Response {
 		if ( '' !== $this->route_cart_id( $request ) && '' === $this->validated_cart_id( $request ) ) {
-			return $this->ucp_not_found();
+			return $this->add_response_headers( $this->ucp_not_found() );
 		}
 
 		$inherited_token = CartTokenUtils::get_request_cart_token();
@@ -292,6 +289,24 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	}
 
 	/**
+	 * Send only the cache directive; the other Store API headers serve browser clients.
+	 *
+	 * A UCP client holds the cart credential as the path id and reads `id` from the body,
+	 * sends no nonce and keeps no hash-keyed cache. Leaving the parent's builder out also
+	 * keeps a `Cart-Token` for whatever session is in memory off an answer built before
+	 * the route binds one, such as the not-found refusal above.
+	 *
+	 * @param \WP_REST_Response $response The response object.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	protected function add_response_headers( \WP_REST_Response $response ) {
+		$response->header( 'Cache-Control', 'no-store' );
+
+		return $response;
+	}
+
+	/**
 	 * Refuse a key another request is still working on.
 	 *
 	 * @return \WP_REST_Response
@@ -353,7 +368,31 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		// trust: the id is the only credential, so the handler is fixed for every route.
 		add_filter( 'woocommerce_session_handler', array( self::class, 'session_handler_class' ) );
 
+		// An extension that calls wc_load_cart() on init leaves a session already in memory, so
+		// load_cart() below keeps it and the filter above never binds: the request would act on
+		// that cookie or guest session instead of the id it named. Drop it unless it already is
+		// the token handler for this id, so a legitimate request keeps its own loaded cart.
+		$session  = WC()->session;
+		$expected = CartTokenUtils::get_cart_token_payload( $cart_id )['user_id'];
+		if ( ! $session instanceof SessionHandler || (string) $session->get_customer_id() !== (string) $expected ) {
+			$this->discard_preloaded_cart_session();
+		}
+
 		parent::load_cart_session( $request );
+	}
+
+	/**
+	 * Reset to the cart state a REST request starts from, before anything called wc_load_cart().
+	 *
+	 * Clearing the session, cart, customer and the one-time load marker lets load_cart()
+	 * rebuild through the forced token handler, whatever ran earlier in the request.
+	 */
+	private function discard_preloaded_cart_session(): void {
+		WC()->session  = null; // @phpstan-ignore assign.propertyType (Defaults to null; reset so load_cart() rebuilds it.)
+		WC()->customer = null; // @phpstan-ignore assign.propertyType (Same.)
+		WC()->cart     = null; // @phpstan-ignore assign.propertyType (Same.)
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Clears the per-process marker so load_cart() reloads.
+		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
 	}
 
 	/**

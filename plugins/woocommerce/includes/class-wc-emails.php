@@ -70,7 +70,7 @@ class WC_Emails {
 	 * @return void
 	 */
 	public function __clone() {
-		wc_doing_it_wrong( __FUNCTION__, __( 'Cloning is forbidden.', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, 'Cloning is forbidden.', '2.1' );
 	}
 
 	/**
@@ -80,7 +80,7 @@ class WC_Emails {
 	 * @return void
 	 */
 	public function __wakeup() {
-		wc_doing_it_wrong( __FUNCTION__, __( 'Unserializing instances of this class is forbidden.', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, 'Unserializing instances of this class is forbidden.', '2.1' );
 	}
 
 	/**

@@ -8,13 +8,18 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderNotesQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\PaymentGatewaysQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -38,8 +43,11 @@ class AbilitiesLoader {
 	private const CORE_ABILITY_DEFINITION_CLASSES = array(
 		OrdersQuery::class,
 		OrderAddNote::class,
+		OrderNotesQuery::class,
 		OrderUpdateStatus::class,
+		PaymentGatewaysQuery::class,
 		ProductsQuery::class,
+		ProductTermsQuery::class,
 		ProductCreate::class,
 		ProductDelete::class,
 		ProductUpdate::class,
@@ -60,28 +68,101 @@ class AbilitiesLoader {
 	private static array $registered_core_abilities = array();
 
 	/**
+	 * Query var that holds the extension filter clauses of a list ability.
+	 *
+	 * @internal
+	 */
+	public const EXTENSION_QUERY_VAR = 'woocommerce_extensible_abilities_query_args';
+
+	/**
 	 * Initialize ability registration hooks.
 	 *
 	 * @internal
 	 *
 	 * @since 10.9.0
 	 */
-	final public static function init(): void {
+	final public function init(): void {
 		if ( self::$initialized ) {
 			return;
 		}
 
-		/*
-		 * Register abilities when Abilities API is ready.
-		 * Support both old (pre-6.9) and new (6.9+) action names.
-		 */
 		AbilitiesCategories::init();
-		add_action( 'abilities_api_init', array( __CLASS__, 'register_abilities' ) );
+		add_action( 'woocommerce_extensible_abilities_resources_init', array( __CLASS__, 'register_core_resources' ), 0 );
+		add_action( 'wp_abilities_api_init', array( __CLASS__, 'init_extensions' ), 0 );
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'register_abilities' ) );
-
-		AbilitiesRestBridge::init();
+		add_filter( 'woocommerce_product_data_store_cpt_get_products_query', array( __CLASS__, 'add_extension_query_args' ), 10, 2 );
+		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( __CLASS__, 'add_extension_query_args' ), 10, 2 );
 
 		self::$initialized = true;
+	}
+
+	/**
+	 * Register the resources that Core's abilities format, so extensions can register fields on them.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 */
+	public static function register_core_resources(): void {
+		foreach ( array( 'product', 'order', 'order_item', 'product_term' ) as $resource_name ) {
+			ExtensibleAbilities::register_resource( $resource_name );
+		}
+	}
+
+	/**
+	 * Add the extension filter clauses of a list ability to its WP_Query arguments.
+	 *
+	 * The posts storage ignores a meta_query argument, so a list ability puts the
+	 * clauses in the EXTENSION_QUERY_VAR query var. Other queries do not have it,
+	 * so a query that a hook runs inside the ability's query stays the same.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array $wp_query_args WP_Query arguments.
+	 * @param array $query_vars    Query vars of wc_get_products() or wc_get_orders().
+	 * @return array
+	 */
+	public static function add_extension_query_args( $wp_query_args, $query_vars ) {
+		if ( empty( $query_vars[ self::EXTENSION_QUERY_VAR ] ) || ! is_array( $wp_query_args ) ) {
+			return $wp_query_args;
+		}
+
+		unset( $wp_query_args[ self::EXTENSION_QUERY_VAR ] );
+		return array_merge_recursive( $wp_query_args, $query_vars[ self::EXTENSION_QUERY_VAR ] );
+	}
+
+	/**
+	 * Let extensions register their resources, then their ability fields, before the abilities build their schemas.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 */
+	public static function init_extensions(): void {
+		if ( did_action( 'woocommerce_extensible_abilities_init' ) || ! ExtensibleAbilities::is_enabled() ) {
+			return;
+		}
+
+		/**
+		 * Fires when extensions can register their resources with ExtensibleAbilities.
+		 *
+		 * Fires one time, before `woocommerce_extensible_abilities_init`, only when the
+		 * experimental `extensible_abilities` feature is on.
+		 *
+		 * @since 11.3.0
+		 */
+		do_action( 'woocommerce_extensible_abilities_resources_init' );
+
+		/**
+		 * Fires when extensions can register their fields with ExtensibleAbilities.
+		 *
+		 * Fires one time, only when the experimental `extensible_abilities` feature is on.
+		 *
+		 * @since 11.3.0
+		 */
+		do_action( 'woocommerce_extensible_abilities_init' );
 	}
 
 	/**
@@ -90,20 +171,19 @@ class AbilitiesLoader {
 	 * @since 10.9.0
 	 */
 	public static function register_abilities(): void {
-		if ( ! function_exists( 'wp_register_ability' ) ) {
-			return;
-		}
-
 		foreach ( self::get_ability_definition_classes() as $class_name ) {
 			if ( ! is_string( $class_name ) || ! class_exists( $class_name ) ) {
 				continue;
 			}
 
-			if ( ! is_a( $class_name, AbilityDefinition::class, true ) ) {
+			// Core's product write abilities extend ActionableAbility, so WordPress builds them from their own class.
+			$is_actionable = is_a( $class_name, ActionableAbility::class, true ) && self::is_core_ability_definition_class( $class_name );
+
+			if ( ! $is_actionable && ! is_a( $class_name, AbilityDefinition::class, true ) ) {
 				continue;
 			}
 
-			$ability_name = $class_name::get_name();
+			$ability_name = $is_actionable ? $class_name::ABILITY_NAME : $class_name::get_name();
 
 			if ( '' === $ability_name ) {
 				continue;
@@ -115,8 +195,8 @@ class AbilitiesLoader {
 				continue;
 			}
 
-			if ( function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_name ) ) {
-				$existing_ability = function_exists( 'wp_get_ability' ) ? wp_get_ability( $ability_name ) : null;
+			if ( wp_has_ability( $ability_name ) ) {
+				$existing_ability = wp_get_ability( $ability_name );
 
 				if (
 					$is_core_ability
@@ -126,7 +206,7 @@ class AbilitiesLoader {
 					continue;
 				}
 
-				if ( ! $is_core_ability || ! function_exists( 'wp_unregister_ability' ) ) {
+				if ( ! $is_core_ability ) {
 					continue;
 				}
 
@@ -136,7 +216,12 @@ class AbilitiesLoader {
 				self::log_replaced_reserved_ability( $ability_name, $class_name );
 			}
 
-			$registered_ability = wp_register_ability( $ability_name, $class_name::get_registration_args() );
+			$args = $class_name::get_registration_args();
+			if ( $is_actionable ) {
+				$args['ability_class'] = $class_name;
+			}
+
+			$registered_ability = wp_register_ability( $ability_name, $args );
 
 			if ( $is_core_ability && null !== $registered_ability ) {
 				self::$registered_core_abilities[ $ability_name ] = $registered_ability;

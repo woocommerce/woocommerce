@@ -3,6 +3,7 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Frontend;
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
@@ -581,6 +582,43 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 
 		$this->assertInstanceOf( \WP_Error::class, $data );
 		$this->assertSame( SignupService::ERROR_INVALID_EMAIL, $data->get_error_code() );
+	}
+
+	/**
+	 * @testdox parse() should reject a product the requester cannot view.
+	 */
+	public function test_parse_rejects_product_the_guest_cannot_view(): void {
+		$product = $this->create_out_of_stock_product();
+		$product->set_status( ProductStatus::DRAFT );
+		$product->save();
+
+		$data = $this->sut->parse(
+			array(
+				'wc_bis_product_id' => $product->get_id(),
+				'wc_bis_email'      => 'guest@example.com',
+			)
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $data );
+		$this->assertSame( SignupService::ERROR_INVALID_PRODUCT, $data->get_error_code() );
+	}
+
+	/**
+	 * @testdox A user who can edit an unpublished product should still be able to sign up for it.
+	 */
+	public function test_signup_accepts_unpublished_product_for_user_who_can_edit_it(): void {
+		$product = $this->create_out_of_stock_product();
+		$product->set_status( ProductStatus::DRAFT );
+		$product->save();
+
+		$user_id = $this->factory()->user->create( array( 'role' => 'shop_manager' ) );
+		\wp_set_current_user( $user_id );
+
+		$data = $this->sut->parse( array( 'wc_bis_product_id' => $product->get_id() ) );
+		$this->assertIsArray( $data );
+
+		$result = $this->sut->signup( $data['product_id'], $data['user_id'], $data['user_email'] );
+		$this->assertSame( SignupService::SIGNUP_SUCCESS, $result->get_code() );
 	}
 
 	/**

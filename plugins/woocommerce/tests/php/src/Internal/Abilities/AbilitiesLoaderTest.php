@@ -10,7 +10,6 @@ namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesCategories;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
-use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
@@ -33,6 +32,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	private static $administrator_id;
 
 	private const CANONICAL_ABILITY_IDS = array(
+		'woocommerce/product-terms-query',
 		'woocommerce/products-query',
 		'woocommerce/product-create',
 		'woocommerce/product-update',
@@ -40,6 +40,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/orders-query',
 		'woocommerce/order-update-status',
 		'woocommerce/order-add-note',
+		'woocommerce/order-notes-query',
+		'woocommerce/payment-gateways-query',
 	);
 
 	/**
@@ -85,7 +87,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	private $original_cot_state = null;
 
 	/**
-	 * Whether HPOS/COT tables were set up by the current test.
+	 * Whether the current test uses the permanent HPOS/COT tables.
 	 *
 	 * @var bool
 	 */
@@ -98,6 +100,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public static function wpSetUpBeforeClass( $factory ): void {
 		self::$administrator_id = $factory->user->create( array( 'role' => 'administrator' ) );
+		self::setup_cot_tables();
 	}
 
 	/**
@@ -112,14 +115,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$this->original_action_counts[ $action ] = $wp_actions[ $action ] ?? null;
 		}
 
-		if ( ! function_exists( 'wp_register_ability' ) ) {
-			$abilities_bootstrap = WC_ABSPATH . 'vendor/wordpress/abilities-api/includes/bootstrap.php';
-			if ( file_exists( $abilities_bootstrap ) ) {
-				require_once $abilities_bootstrap;
-			}
-		}
-
-		// WordPress 6.9+ requires init to have fired before the Abilities API registry can be initialized.
+		// The Abilities API registry can only be initialized after init has fired.
 		$wp_actions['init'] = max( 1, (int) ( $wp_actions['init'] ?? 0 ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		wp_set_current_user( self::$administrator_id );
@@ -151,13 +147,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		}
 
 		foreach ( $this->registered_ability_ids as $ability_id ) {
-			if ( function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_id ) ) {
+			if ( wp_has_ability( $ability_id ) ) {
 				wp_unregister_ability( $ability_id );
 			}
 		}
 
 		foreach ( $this->registered_category_ids as $category_id ) {
-			if ( function_exists( 'wp_has_ability_category' ) && wp_has_ability_category( $category_id ) ) {
+			if ( wp_has_ability_category( $category_id ) ) {
 				wp_unregister_ability_category( $category_id );
 			}
 		}
@@ -216,39 +212,49 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_canonical_ability_annotations_match_intent(): void {
 		$expectations = array(
-			'woocommerce/products-query'      => array(
+			'woocommerce/products-query'         => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
 			),
-			'woocommerce/product-create'      => array(
+			'woocommerce/product-create'         => array(
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => false,
 			),
-			'woocommerce/product-update'      => array(
+			'woocommerce/product-update'         => array(
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => true,
 			),
-			'woocommerce/product-delete'      => array(
+			'woocommerce/product-delete'         => array(
 				'readonly'    => false,
 				'idempotent'  => true,
 				'destructive' => true,
 			),
-			'woocommerce/orders-query'        => array(
+			'woocommerce/orders-query'           => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
 			),
-			'woocommerce/order-update-status' => array(
+			'woocommerce/order-update-status'    => array(
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => true,
 			),
-			'woocommerce/order-add-note'      => array(
+			'woocommerce/order-add-note'         => array(
 				'readonly'    => false,
 				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/order-notes-query'      => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/payment-gateways-query' => array(
+				'readonly'    => true,
+				'idempotent'  => true,
 				'destructive' => false,
 			),
 		);
@@ -299,8 +305,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_collection_output_schemas_describe_pagination_metadata(): void {
 		$schemas = array(
-			'woocommerce/products-query' => 'products',
-			'woocommerce/orders-query'   => 'orders',
+			'woocommerce/products-query'         => 'products',
+			'woocommerce/orders-query'           => 'orders',
+			'woocommerce/payment-gateways-query' => 'gateways',
 		);
 
 		foreach ( $schemas as $ability_id => $collection_key ) {
@@ -319,22 +326,20 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should expose agent-friendly product type alias inputs for product operations.
+	 * @testdox Should expose registered product types as inputs for product operations.
 	 */
-	public function test_product_schema_uses_agent_friendly_product_types(): void {
+	public function test_product_schema_uses_registered_product_types(): void {
 		$query_schema  = wp_get_ability( 'woocommerce/products-query' )->get_input_schema();
 		$create_schema = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
 		$update_schema = wp_get_ability( 'woocommerce/product-update' )->get_input_schema();
 
-		$expected_aliases = array( 'physical', 'virtual', 'digital', 'affiliate', 'grouped' );
+		$expected_types = array( 'simple', 'grouped', 'external' );
 
-		$this->assertSame( $expected_aliases, $query_schema['properties']['product_type_alias']['enum'] ?? array() );
-		$this->assertSame( $expected_aliases, $this->get_product_type_aliases_from_schema_branches( $create_schema ) );
-		$this->assertSame( $expected_aliases, $this->get_product_type_aliases_from_schema_branches( $update_schema ) );
-		$this->assertSame( 'physical', $this->get_product_type_alias_schema_branch( $create_schema, 'physical' )['properties']['product_type_alias']['default'] ?? null );
-		$this->assertArrayNotHasKey( 'default', $this->get_product_type_alias_schema_branch( $update_schema, 'physical' )['properties']['product_type_alias'] ?? array() );
-		$this->assertNotContains( 'variable', $query_schema['properties']['product_type_alias']['enum'] ?? array() );
-		$this->assertNotContains( 'variable', $this->get_product_type_aliases_from_schema_branches( $create_schema ) );
+		$this->assertSame( array( 'simple', 'grouped', 'external', 'variable' ), $query_schema['properties']['type']['enum'] ?? array() );
+		$this->assertSame( $expected_types, $create_schema['properties']['type']['enum'] ?? array() );
+		$this->assertSame( $expected_types, $update_schema['properties']['type']['enum'] ?? array() );
+		$this->assertSame( 'simple', $create_schema['properties']['type']['default'] ?? null );
+		$this->assertArrayNotHasKey( 'default', $update_schema['properties']['type'] ?? array() );
 		$this->assertArrayNotHasKey(
 			'product_type_alias',
 			wp_get_ability( 'woocommerce/product-create' )->get_output_schema()['properties']['product']['properties'] ?? array()
@@ -344,33 +349,32 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should expose only alias-relevant product fields in mutation schema branches.
+	 * @testdox Should list every field in the flat create and update schemas, and the fields of each type in the type description.
 	 */
-	public function test_product_mutation_schema_branches_only_include_alias_relevant_fields(): void {
+	public function test_product_mutation_schemas_list_every_field(): void {
 		$create_schema = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
 		$update_schema = wp_get_ability( 'woocommerce/product-update' )->get_input_schema();
 
-		$physical_properties  = $this->get_product_type_alias_schema_branch( $create_schema, 'physical' )['properties'];
-		$affiliate_properties = $this->get_product_type_alias_schema_branch( $create_schema, 'affiliate' )['properties'];
-		$grouped_properties   = $this->get_product_type_alias_schema_branch( $create_schema, 'grouped' )['properties'];
-		$common_properties    = $update_schema['oneOf'][0]['properties'];
+		foreach ( array( $create_schema, $update_schema ) as $schema ) {
+			$this->assertArrayNotHasKey( 'oneOf', $schema );
+			$this->assertFalse( $schema['additionalProperties'] );
+			foreach ( array( 'type', 'virtual', 'downloadable', 'regular_price', 'external_url', 'grouped_products', 'manage_stock' ) as $field ) {
+				$this->assertArrayHasKey( $field, $schema['properties'] );
+			}
+			$description = $schema['properties']['type']['description'];
+			$this->assertStringContainsString( 'Fields each type takes.', $description );
+			$this->assertStringContainsString( 'external: name, sku, description, short_description, status, regular_price, sale_price, external_url, button_text', $description );
+			$this->assertStringContainsString( 'grouped: name, sku, description, short_description, status, grouped_products', $description );
+			$this->assertStringEndsWith( 'Applies to: grouped.', $schema['properties']['grouped_products']['description'] );
+			$this->assertStringContainsString( 'Applies to: ', $schema['properties']['regular_price']['description'] );
+			$this->assertStringNotContainsString( 'Applies to: ', $schema['properties']['sku']['description'] ?? '' );
+		}
 
-		$this->assertArrayNotHasKey( 'external_url', $physical_properties );
-		$this->assertArrayNotHasKey( 'button_text', $physical_properties );
-		$this->assertArrayNotHasKey( 'grouped_products', $physical_properties );
-
-		$this->assertArrayNotHasKey( 'manage_stock', $affiliate_properties );
-		$this->assertArrayNotHasKey( 'stock_quantity', $affiliate_properties );
-		$this->assertArrayNotHasKey( 'grouped_products', $affiliate_properties );
-
-		$this->assertArrayNotHasKey( 'regular_price', $grouped_properties );
-		$this->assertArrayNotHasKey( 'sale_price', $grouped_properties );
-		$this->assertArrayNotHasKey( 'stock_status', $grouped_properties );
-
-		$this->assertArrayNotHasKey( 'product_type_alias', $common_properties );
-		$this->assertArrayNotHasKey( 'regular_price', $common_properties );
-		$this->assertArrayNotHasKey( 'external_url', $common_properties );
-		$this->assertArrayNotHasKey( 'grouped_products', $common_properties );
+		$this->assertSame( array( 'name' ), $create_schema['required'] );
+		$this->assertArrayNotHasKey( 'id', $create_schema['properties'] );
+		$this->assertStringContainsString( 'A product without a type is simple.', $create_schema['properties']['type']['description'] );
+		$this->assertSame( array( 'id' ), $update_schema['required'] );
+		$this->assertStringNotContainsString( 'without a type', $update_schema['properties']['type']['description'] );
 	}
 
 	/**
@@ -399,8 +403,255 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$query_schema  = wp_get_ability( 'woocommerce/orders-query' )->get_input_schema();
 		$update_schema = wp_get_ability( 'woocommerce/order-update-status' )->get_input_schema();
 
-		$this->assertNotContains( 'checkout-draft', $query_schema['properties']['status']['enum'] ?? array() );
+		$this->assertNotContains( 'checkout-draft', $query_schema['properties']['status']['anyOf'][0]['enum'] ?? array() );
 		$this->assertNotContains( 'checkout-draft', $update_schema['properties']['status']['enum'] ?? array() );
+	}
+
+	/**
+	 * @testdox Should list shop_order by default, and not refunds or HPOS placeholders.
+	 */
+	public function test_orders_query_type_defaults_to_shop_order(): void {
+		$schema = wp_get_ability( 'woocommerce/orders-query' )->get_input_schema();
+		$types  = $schema['properties']['type']['enum'] ?? array();
+
+		$this->assertSame( 'shop_order', $schema['properties']['type']['default'] ?? null );
+		$this->assertContains( 'shop_order', $types );
+		$this->assertNotContains( 'shop_order_refund', $types );
+		$this->assertNotContains( 'shop_order_placehold', $types );
+
+		$query_args = $this->capture_order_query_args( array() );
+
+		$this->assertSame( 'shop_order', $query_args['type'] ?? null );
+	}
+
+	/**
+	 * @testdox Should query an order type and status that an extension registers.
+	 */
+	public function test_orders_query_accepts_registered_order_type_and_status(): void {
+		global $wc_order_types, $post_type_meta_caps;
+
+		$meta_caps = $post_type_meta_caps;
+		$this->unregister_domain_abilities();
+		wc_register_order_type(
+			'shop_test_contract',
+			array(
+				'capability_type'          => 'shop_order',
+				'exclude_from_order_views' => true,
+				'add_order_meta_boxes'     => false,
+			)
+		);
+		register_post_status(
+			'wc-test-active',
+			array(
+				'label'               => 'Active',
+				'exclude_from_search' => false,
+			)
+		);
+
+		try {
+			$this->register_domain_abilities();
+
+			$ability = wp_get_ability( 'woocommerce/orders-query' );
+			$input   = $ability->get_input_schema()['properties'];
+			$output  = $ability->get_output_schema()['properties']['orders']['items']['properties'];
+
+			$this->assertContains( 'shop_test_contract', $input['type']['enum'] );
+			$this->assertContains( 'test-active', $input['status']['anyOf'][0]['enum'] );
+			$this->assertContains( 'test-active', $output['status']['enum'] );
+
+			$query_args = $this->capture_order_query_args(
+				array(
+					'type'   => 'shop_test_contract',
+					'status' => 'test-active',
+				)
+			);
+
+			$this->assertSame( 'shop_test_contract', $query_args['type'] ?? null );
+			$this->assertSame( array( 'wc-test-active' ), $query_args['status'] ?? null );
+		} finally {
+			$this->unregister_domain_abilities();
+			unset( $wc_order_types['shop_test_contract'], $GLOBALS['wp_post_statuses']['wc-test-active'] );
+			unregister_post_type( 'shop_test_contract' );
+			$post_type_meta_caps = $meta_caps; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- unregister_post_type() removes the shop_order meta caps too.
+			$this->register_domain_abilities();
+		}
+	}
+
+	/**
+	 * @testdox Should pass the default order statuses without the wc- prefix, as before, for shop_order.
+	 */
+	public function test_orders_query_default_statuses_match_trunk_for_shop_order(): void {
+		$expected = array();
+		foreach ( array_keys( wc_get_order_statuses() ) as $status ) {
+			if ( 'wc-checkout-draft' !== $status ) {
+				$expected[] = OrderUtil::remove_status_prefix( $status );
+			}
+		}
+
+		$query_args = $this->capture_order_query_args( array() );
+
+		$this->assertSame( $expected, $query_args['status'] ?? null );
+	}
+
+	/**
+	 * @testdox Should not accept a status that is excluded from search, but return it in the output.
+	 */
+	public function test_a_status_excluded_from_search_is_not_queryable(): void {
+		global $wc_order_types, $post_type_meta_caps;
+
+		$meta_caps = $post_type_meta_caps;
+		$this->unregister_domain_abilities();
+		wc_register_order_type(
+			'shop_test_contract',
+			array(
+				'capability_type'          => 'shop_order',
+				'exclude_from_order_views' => true,
+				'add_order_meta_boxes'     => false,
+			)
+		);
+		register_post_status(
+			'wc-test-hidden',
+			array(
+				'label'               => 'Hidden',
+				'exclude_from_search' => true,
+			)
+		);
+
+		try {
+			$this->register_domain_abilities();
+
+			$ability = wp_get_ability( 'woocommerce/orders-query' );
+			$input   = $ability->get_input_schema()['properties'];
+			$output  = $ability->get_output_schema()['properties']['orders']['items']['properties'];
+
+			$this->assertNotContains( 'test-hidden', $input['status']['anyOf'][0]['enum'] );
+			$this->assertContains( 'test-hidden', $output['status']['enum'] );
+
+			$query_args = $this->capture_order_query_args( array( 'type' => 'shop_test_contract' ) );
+
+			$this->assertNotContains( 'test-hidden', $query_args['status'] ?? array() );
+			$this->assertNotContains( 'wc-test-hidden', $query_args['status'] ?? array() );
+		} finally {
+			$this->unregister_domain_abilities();
+			unset( $wc_order_types['shop_test_contract'], $GLOBALS['wp_post_statuses']['wc-test-hidden'] );
+			unregister_post_type( 'shop_test_contract' );
+			$post_type_meta_caps = $meta_caps; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- unregister_post_type() removes the shop_order meta caps too.
+			$this->register_domain_abilities();
+		}
+	}
+
+	/**
+	 * @testdox Should accept a list of statuses and reject a list with an unknown status.
+	 */
+	public function test_orders_query_accepts_a_list_of_statuses(): void {
+		$query_args = $this->capture_order_query_args( array( 'status' => array( 'on-hold', 'processing' ) ) );
+
+		$this->assertSame( array( 'on-hold', 'processing' ), $query_args['status'] ?? null );
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'status' => array( 'processing', 'not-a-status' ) ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should refuse a status that another order type registers, and keep the order status.
+	 */
+	public function test_order_update_status_refuses_status_of_another_order_type(): void {
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$status_before             = $order->get_status();
+
+		$this->unregister_domain_abilities();
+		register_post_status(
+			'wc-test-active',
+			array(
+				'label'               => 'Active',
+				'exclude_from_search' => false,
+			)
+		);
+
+		try {
+			$this->register_domain_abilities();
+
+			$ability = wp_get_ability( 'woocommerce/order-update-status' );
+			$this->assertContains( 'test-active', $ability->get_input_schema()['properties']['status']['enum'] );
+
+			$result = $ability->execute(
+				array(
+					'id'     => $order->get_id(),
+					'status' => 'test-active',
+				)
+			);
+		} finally {
+			$this->unregister_domain_abilities();
+			unset( $GLOBALS['wp_post_statuses']['wc-test-active'] );
+			$this->register_domain_abilities();
+		}
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_order_status_invalid', $result->get_error_code() );
+		$this->assertSame( 400, $result->get_error_data()['status'] ?? null );
+		$this->assertSame( $status_before, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox Should reject an order type that is not registered.
+	 */
+	public function test_orders_query_rejects_unknown_order_type(): void {
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'type' => 'shop_order_refund' ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should check the permission against the actual type of the order ID.
+	 */
+	public function test_orders_query_refuses_id_of_unsupported_order_type(): void {
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$refund                    = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 1,
+			)
+		);
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'id'   => $refund->get_id(),
+				'type' => 'shop_order',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+	}
+
+	/**
+	 * Run the orders query ability and return the arguments of its order query.
+	 *
+	 * @param array $input Ability input.
+	 * @return array
+	 */
+	private function capture_order_query_args( array $input ): array {
+		$captured = null;
+		$capture  = static function ( $args ) use ( &$captured ) {
+			$captured ??= $args;
+			return $args;
+		};
+
+		add_filter( 'woocommerce_order_query_args', $capture );
+		try {
+			$result = wp_get_ability( 'woocommerce/orders-query' )->execute( $input );
+		} finally {
+			remove_filter( 'woocommerce_order_query_args', $capture );
+		}
+
+		$this->assertNotWPError( $result );
+
+		return $captured ?? array();
 	}
 
 	/**
@@ -559,10 +810,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should register WooCommerce ability categories idempotently.
 	 */
 	public function test_ability_category_registration_is_idempotent(): void {
-		if ( ! function_exists( 'wp_register_ability_category' ) || ! function_exists( 'wp_has_ability_category' ) ) {
-			$this->markTestSkipped( 'Abilities API category registry is not available.' );
-		}
-
 		$callback = static function () {
 			AbilitiesCategories::register_categories();
 			AbilitiesCategories::register_categories();
@@ -625,50 +872,60 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function provider_canonical_abilities_with_minimal_input(): array {
 		// Valid-shape input only — permission check should fire before execute.
 		return array(
-			'products-query'      => array(
+			'products-query'         => array(
 				'woocommerce/products-query',
 				array(
 					'id' => 1,
 				),
 			),
-			'product-create'      => array(
+			'product-create'         => array(
 				'woocommerce/product-create',
 				array(
 					'name' => 'Forbidden',
 				),
 			),
-			'product-update'      => array(
+			'product-update'         => array(
 				'woocommerce/product-update',
 				array(
 					'id'   => 1,
 					'name' => 'Forbidden',
 				),
 			),
-			'product-delete'      => array(
+			'product-delete'         => array(
 				'woocommerce/product-delete',
 				array(
 					'id' => 1,
 				),
 			),
-			'orders-query'        => array(
+			'orders-query'           => array(
 				'woocommerce/orders-query',
 				array(
 					'id' => 1,
 				),
 			),
-			'order-update-status' => array(
+			'order-update-status'    => array(
 				'woocommerce/order-update-status',
 				array(
 					'id'     => 1,
 					'status' => 'processing',
 				),
 			),
-			'order-add-note'      => array(
+			'order-add-note'         => array(
 				'woocommerce/order-add-note',
 				array(
 					'id'   => 1,
 					'note' => 'denied',
 				),
+			),
+			'order-notes-query'      => array(
+				'woocommerce/order-notes-query',
+				array(
+					'id' => 1,
+				),
+			),
+			'payment-gateways-query' => array(
+				'woocommerce/payment-gateways-query',
+				array(),
 			),
 		);
 	}
@@ -1039,6 +1296,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'note' => 'Invalid',
 				),
 			),
+			'order-notes-query'   => array(
+				'woocommerce/order-notes-query',
+				array( 'id' => -123 ),
+			),
 		);
 	}
 
@@ -1187,12 +1448,14 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Should map digital products to simple virtual downloadable products.
 	 */
-	public function test_product_create_maps_digital_product_type_to_simple_downloadable_product(): void {
+	public function test_product_create_sets_virtual_and_downloadable_on_a_simple_product(): void {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
-				'name'               => 'Digital Product',
-				'product_type_alias' => 'digital',
-				'regular_price'      => '19.99',
+				'name'          => 'Digital Product',
+				'type'          => 'simple',
+				'virtual'       => true,
+				'downloadable'  => true,
+				'regular_price' => '19.99',
 			)
 		);
 
@@ -1206,12 +1469,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Should map virtual products to simple virtual non-downloadable products.
 	 */
-	public function test_product_create_maps_virtual_product_type_alias_to_simple_virtual_product(): void {
+	public function test_product_create_sets_virtual_on_a_simple_product(): void {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
-				'name'               => 'Virtual Product',
-				'product_type_alias' => 'virtual',
-				'regular_price'      => '29.99',
+				'name'          => 'Virtual Product',
+				'type'          => 'simple',
+				'virtual'       => true,
+				'regular_price' => '29.99',
 			)
 		);
 
@@ -1223,9 +1487,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should query simple products by agent-friendly physical, virtual, and digital product type aliases.
+	 * @testdox Should query simple products by type, virtual and downloadable.
 	 */
-	public function test_products_query_maps_agent_friendly_product_types_to_product_fields(): void {
+	public function test_products_query_filters_by_type_virtual_and_downloadable(): void {
 		$physical_sku = wp_unique_id( 'abilities-physical-' );
 		$virtual_sku  = wp_unique_id( 'abilities-virtual-' );
 		$digital_sku  = wp_unique_id( 'abilities-digital-' );
@@ -1233,9 +1497,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$physical = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
-				'name'               => 'Physical Query Product',
-				'product_type_alias' => 'physical',
-				'sku'                => $physical_sku,
+				'name' => 'Physical Query Product',
+				'type' => 'simple',
+				'sku'  => $physical_sku,
 			)
 		);
 
@@ -1244,9 +1508,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$virtual = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
-				'name'               => 'Virtual Query Product',
-				'product_type_alias' => 'virtual',
-				'sku'                => $virtual_sku,
+				'name'    => 'Virtual Query Product',
+				'type'    => 'simple',
+				'virtual' => true,
+				'sku'     => $virtual_sku,
 			)
 		);
 
@@ -1255,9 +1520,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$digital = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
-				'name'               => 'Digital Query Product',
-				'product_type_alias' => 'digital',
-				'sku'                => $digital_sku,
+				'name'         => 'Digital Query Product',
+				'type'         => 'simple',
+				'virtual'      => true,
+				'downloadable' => true,
+				'sku'          => $digital_sku,
 			)
 		);
 
@@ -1273,8 +1540,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$physical_result = wp_get_ability( 'woocommerce/products-query' )->execute(
 			array(
-				'product_type_alias' => 'physical',
-				'sku'                => $physical_sku,
+				'type'         => 'simple',
+				'virtual'      => false,
+				'downloadable' => false,
+				'sku'          => $physical_sku,
 			)
 		);
 
@@ -1282,10 +1551,23 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 1, $physical_result['total_pages'] );
 		$this->assertSame( $physical['product']['id'], $physical_result['products'][0]['id'] );
 
+		$string_booleans_result = wp_get_ability( 'woocommerce/products-query' )->execute(
+			array(
+				'virtual'      => 'false',
+				'downloadable' => 'false',
+				'sku'          => $physical_sku,
+			)
+		);
+
+		$this->assertNotWPError( $string_booleans_result );
+		$this->assertSame( array( $physical['product']['id'] ), array_column( $string_booleans_result['products'], 'id' ) );
+
 		$virtual_result = wp_get_ability( 'woocommerce/products-query' )->execute(
 			array(
-				'product_type_alias' => 'virtual',
-				'sku'                => $virtual_sku,
+				'type'         => 'simple',
+				'virtual'      => true,
+				'downloadable' => false,
+				'sku'          => $virtual_sku,
 			)
 		);
 
@@ -1295,8 +1577,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$digital_result = wp_get_ability( 'woocommerce/products-query' )->execute(
 			array(
-				'product_type_alias' => 'digital',
-				'sku'                => $digital_sku,
+				'type'         => 'simple',
+				'virtual'      => true,
+				'downloadable' => true,
+				'sku'          => $digital_sku,
 			)
 		);
 
@@ -1306,8 +1590,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$mismatched_result = wp_get_ability( 'woocommerce/products-query' )->execute(
 			array(
-				'product_type_alias' => 'physical',
-				'sku'                => $digital_sku,
+				'type'         => 'simple',
+				'virtual'      => false,
+				'downloadable' => false,
+				'sku'          => $digital_sku,
 			)
 		);
 
@@ -1325,8 +1611,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$physical_hybrid_result = wp_get_ability( 'woocommerce/products-query' )->execute(
 			array(
-				'product_type_alias' => 'physical',
-				'sku'                => $hybrid_sku,
+				'type'         => 'simple',
+				'virtual'      => false,
+				'downloadable' => false,
+				'sku'          => $hybrid_sku,
 			)
 		);
 
@@ -1335,16 +1623,16 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should map affiliate products to external products.
+	 * @testdox Should create external products.
 	 */
-	public function test_product_create_maps_affiliate_product_type_to_external_product(): void {
+	public function test_product_create_creates_external_product(): void {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
-				'name'               => 'Affiliate Product',
-				'product_type_alias' => 'affiliate',
-				'regular_price'      => '49.99',
-				'external_url'       => 'https://example.com/buy',
-				'button_text'        => 'Buy elsewhere',
+				'name'          => 'Affiliate Product',
+				'type'          => 'external',
+				'regular_price' => '49.99',
+				'external_url'  => 'https://example.com/buy',
+				'button_text'   => 'Buy elsewhere',
 			)
 		);
 
@@ -1356,17 +1644,17 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should map grouped products to grouped WooCommerce products with children.
+	 * @testdox Should create grouped products with children.
 	 */
-	public function test_product_create_maps_grouped_product_type_to_grouped_product(): void {
+	public function test_product_create_creates_grouped_product(): void {
 		$child                       = \WC_Helper_Product::create_simple_product();
 		$this->created_product_ids[] = $child->get_id();
 
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
-				'name'               => 'Grouped Product',
-				'product_type_alias' => 'grouped',
-				'grouped_products'   => array( $child->get_id() ),
+				'name'             => 'Grouped Product',
+				'type'             => 'grouped',
+				'grouped_products' => array( $child->get_id() ),
 			)
 		);
 
@@ -1374,6 +1662,194 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->created_product_ids[] = $created['product']['id'];
 		$this->assertSame( 'grouped', $created['product']['type'] );
 		$this->assertSame( array( $child->get_id() ), $created['product']['grouped_products'] );
+	}
+
+	/**
+	 * @testdox Should create products of a type that an extension registers, with the Core fields of its class.
+	 */
+	public function test_product_create_accepts_a_registered_product_type(): void {
+		$this->unregister_domain_abilities();
+		add_filter( 'product_type_selector', array( $this, 'add_test_product_types' ) );
+		add_filter( 'woocommerce_product_class', array( $this, 'get_test_product_class' ), 10, 2 );
+
+		try {
+			$this->register_domain_abilities();
+
+			$create_schema = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
+			$update_schema = wp_get_ability( 'woocommerce/product-update' )->get_input_schema();
+			$bundle        = wp_get_ability( 'woocommerce/product-create' )->execute(
+				array(
+					'name'         => 'Bundle',
+					'type'         => 'test-bundle',
+					'virtual'      => true,
+					'downloadable' => true,
+				)
+			);
+			$subscription  = wp_get_ability( 'woocommerce/product-create' )->execute(
+				array(
+					'name'          => 'Subscription',
+					'type'          => 'test-subscription',
+					'regular_price' => '9.00',
+				)
+			);
+			$bundle_price  = wp_get_ability( 'woocommerce/product-create' )->execute_change(
+				array(
+					'name'          => 'Bundle with price',
+					'type'          => 'test-bundle',
+					'regular_price' => '9.00',
+				)
+			);
+		} finally {
+			remove_filter( 'product_type_selector', array( $this, 'add_test_product_types' ) );
+			remove_filter( 'woocommerce_product_class', array( $this, 'get_test_product_class' ), 10 );
+			$this->unregister_domain_abilities();
+			$this->register_domain_abilities();
+		}
+
+		$this->assertNotWPError( $bundle );
+		$this->created_product_ids[] = $bundle['product']['id'];
+		$this->assertNotWPError( $subscription );
+		$this->created_product_ids[] = $subscription['product']['id'];
+
+		$this->assertContains( 'test-bundle', $create_schema['properties']['type']['enum'] );
+		$this->assertNotContains( 'test-missing', $create_schema['properties']['type']['enum'] );
+		$this->assertContains( 'test-bundle', $update_schema['properties']['type']['enum'] );
+		$this->assertContains( 'test-subscription', $update_schema['properties']['type']['enum'] );
+		$this->assertNotContains( 'test-missing', $update_schema['properties']['type']['enum'] );
+		$this->assertSame( 'test-bundle', $bundle['product']['type'] );
+		$this->assertTrue( $bundle['product']['virtual'] );
+		$this->assertTrue( $bundle['product']['downloadable'] );
+		$this->assertSame( 'test-subscription', $subscription['product']['type'] );
+		$this->assertSame( '9.00', $subscription['product']['regular_price'] );
+		$this->assertWPError( $bundle_price );
+		$this->assertSame( 'woocommerce_product_field_unsupported', $bundle_price->get_error_code() );
+		$this->assertSame( 'The test-bundle product type does not take regular_price. It takes name, sku, description, short_description, status, virtual, downloadable.', $bundle_price->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should change a product to a type that an extension registers, and query by the type.
+	 */
+	public function test_product_update_changes_the_type_to_a_registered_product_type(): void {
+		$product                     = \WC_Helper_Product::create_simple_product();
+		$this->created_product_ids[] = $product->get_id();
+
+		$this->unregister_domain_abilities();
+		add_filter( 'product_type_selector', array( $this, 'add_test_product_types' ) );
+		add_filter( 'woocommerce_product_class', array( $this, 'get_test_product_class' ), 10, 2 );
+
+		try {
+			$this->register_domain_abilities();
+
+			$subscription = wp_get_ability( 'woocommerce/product-update' )->execute(
+				array(
+					'id'            => $product->get_id(),
+					'type'          => 'test-subscription',
+					'regular_price' => '12.00',
+				)
+			);
+			$bundle       = wp_get_ability( 'woocommerce/product-create' )->execute(
+				array(
+					'name' => 'Bundle',
+					'type' => 'test-bundle',
+				)
+			);
+			$bundles      = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'type' => 'test-bundle' ) );
+		} finally {
+			remove_filter( 'product_type_selector', array( $this, 'add_test_product_types' ) );
+			remove_filter( 'woocommerce_product_class', array( $this, 'get_test_product_class' ), 10 );
+			$this->unregister_domain_abilities();
+			$this->register_domain_abilities();
+		}
+
+		$this->assertNotWPError( $bundle );
+		$this->created_product_ids[] = $bundle['product']['id'];
+
+		$this->assertNotWPError( $subscription );
+		$this->assertSame( 'test-subscription', $subscription['product']['type'] );
+		$this->assertSame( '12.00', $subscription['product']['regular_price'] );
+		$this->assertNotWPError( $bundles );
+		$this->assertSame( array( $bundle['product']['id'] ), array_column( $bundles['products'], 'id' ) );
+	}
+
+	/**
+	 * @testdox Should let the owner of a product type add a Core field to it with the woocommerce_ability_product_type_fields filter.
+	 */
+	public function test_product_type_fields_filter_adds_a_core_field_to_a_registered_product_type(): void {
+		$this->unregister_domain_abilities();
+		add_filter( 'product_type_selector', array( $this, 'add_test_product_types' ) );
+		add_filter( 'woocommerce_product_class', array( $this, 'get_test_product_class' ), 10, 2 );
+		add_filter( 'woocommerce_ability_product_type_fields', array( $this, 'add_price_to_test_bundle' ), 10, 2 );
+
+		try {
+			$this->register_domain_abilities();
+
+			$bundle = wp_get_ability( 'woocommerce/product-create' )->execute(
+				array(
+					'name'          => 'Bundle with price',
+					'type'          => 'test-bundle',
+					'regular_price' => '9.00',
+				)
+			);
+		} finally {
+			remove_filter( 'product_type_selector', array( $this, 'add_test_product_types' ) );
+			remove_filter( 'woocommerce_product_class', array( $this, 'get_test_product_class' ), 10 );
+			remove_filter( 'woocommerce_ability_product_type_fields', array( $this, 'add_price_to_test_bundle' ), 10 );
+			$this->unregister_domain_abilities();
+			$this->register_domain_abilities();
+		}
+
+		$this->assertNotWPError( $bundle );
+		$this->created_product_ids[] = $bundle['product']['id'];
+
+		$this->assertSame( '9.00', $bundle['product']['regular_price'] );
+	}
+
+	/**
+	 * Give the test bundle type a regular price.
+	 *
+	 * @internal
+	 *
+	 * @param array  $fields       Field names.
+	 * @param string $product_type Product type.
+	 * @return array
+	 */
+	public function add_price_to_test_bundle( array $fields, string $product_type ): array {
+		if ( 'test-bundle' === $product_type ) {
+			$fields[] = 'regular_price';
+		}
+		return $fields;
+	}
+
+	/**
+	 * Add test product types to the product type registry.
+	 *
+	 * @internal
+	 *
+	 * @param array $types Product types.
+	 * @return array
+	 */
+	public function add_test_product_types( array $types ): array {
+		$types['test-bundle']       = 'Test bundle';
+		$types['test-subscription'] = 'Test subscription';
+		$types['test-missing']      = 'Test type without a class';
+		return $types;
+	}
+
+	/**
+	 * Map the test product types to their classes.
+	 *
+	 * @internal
+	 *
+	 * @param string $classname    Product class name.
+	 * @param string $product_type Product type.
+	 * @return string
+	 */
+	public function get_test_product_class( $classname, $product_type ) {
+		$classes = array(
+			'test-bundle'       => TestBundleProduct::class,
+			'test-subscription' => TestSubscriptionProduct::class,
+		);
+		return $classes[ $product_type ] ?? $classname;
 	}
 
 	/**
@@ -1417,11 +1893,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should reject invalid grouped product IDs before setting children.
 	 */
 	public function test_product_create_rejects_invalid_grouped_product_ids(): void {
-		$result = ProductCreate::execute(
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute_change(
 			array(
-				'name'               => 'Invalid Grouped Product',
-				'product_type_alias' => 'grouped',
-				'grouped_products'   => array( -12 ),
+				'name'             => 'Invalid Grouped Product',
+				'type'             => 'grouped',
+				'grouped_products' => array( -12 ),
 			)
 		);
 
@@ -1430,19 +1906,20 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should reject fields that are unsupported by the selected product type alias.
+	 * @testdox Should reject fields that are unsupported by the selected product type.
 	 */
-	public function test_product_create_rejects_fields_not_supported_by_product_type_alias(): void {
-		$result = ProductCreate::execute(
+	public function test_product_create_rejects_fields_not_supported_by_product_type(): void {
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute_change(
 			array(
-				'name'               => 'Invalid Grouped Product',
-				'product_type_alias' => 'grouped',
-				'regular_price'      => '19.99',
+				'name'          => 'Invalid Grouped Product',
+				'type'          => 'grouped',
+				'regular_price' => '19.99',
 			)
 		);
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_product_field_unsupported', $result->get_error_code() );
+		$this->assertSame( 'The grouped product type does not take regular_price. It takes name, sku, description, short_description, status, grouped_products.', $result->get_error_message() );
 	}
 
 	/**
@@ -1479,7 +1956,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$input_schema  = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
 			$output_schema = wp_get_ability( 'woocommerce/product-create' )->get_output_schema();
 
-			$this->assertSame( 'number', $this->get_product_type_alias_schema_branch( $input_schema, 'physical' )['properties']['stock_quantity']['type'] ?? null );
+			$this->assertSame( 'number', $input_schema['properties']['stock_quantity']['type'] ?? null );
 			$this->assertSame(
 				array( 'number', 'null' ),
 				$output_schema['properties']['product']['properties']['stock_quantity']['type'] ?? null
@@ -1503,7 +1980,159 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should update product properties and reflect changes in the response.
+	 * @testdox Should return null for non-date filter values without failing a product update.
+	 * @testWith ["2026-07-15T10:00:00"]
+	 *           [1784109600]
+	 *           ["1784109600"]
+	 *           ["invalid date"]
+	 *           [[]]
+	 *           [false]
+	 *           [null]
+	 * @param mixed $date Filtered date.
+	 */
+	public function test_product_output_handles_filtered_dates( $date ): void {
+		update_option( 'timezone_string', 'Europe/Amsterdam' );
+		$product                     = \WC_Helper_Product::create_simple_product();
+		$this->created_product_ids[] = $product->get_id();
+		add_filter(
+			'woocommerce_product_get_date_created',
+			static function () use ( $date ) {
+				return $date;
+			}
+		);
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Filtered date update',
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertNull( $result['product']['date_created'] );
+		$this->assertNull( $result['product']['date_created_gmt'] );
+		$this->assertSame( 'Filtered date update', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * @testdox Should preserve the timezone and timestamp of filtered date objects.
+	 */
+	public function test_order_output_preserves_filtered_date_object(): void {
+		update_option( 'timezone_string', 'Europe/Amsterdam' );
+		$order                     = wc_create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$date                      = new \WC_DateTime( '2026-07-15T12:00:00', new \DateTimeZone( 'Asia/Kathmandu' ) );
+		$timestamp                 = $date->getTimestamp();
+		add_filter(
+			'woocommerce_order_get_date_created',
+			static function () use ( $date ) {
+				return $date;
+			}
+		);
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'id' => $order->get_id() ) );
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( '2026-07-15T08:15:00+02:00', $result['orders'][0]['date_created'] );
+		$this->assertSame( '2026-07-15T06:15:00+00:00', $result['orders'][0]['date_created_gmt'] );
+		$this->assertSame( 'Asia/Kathmandu', $date->getTimezone()->getName() );
+		$this->assertSame( $timestamp, $date->getTimestamp() );
+	}
+
+	/**
+	 * @testdox Should return valid product dates with matching store and UTC timestamps.
+	 * @dataProvider provider_output_date_timezones
+	 * @param string $timezone Store timezone.
+	 * @param string $created Creation date in store time.
+	 * @param string $expected Expected date with offset.
+	 * @param string $expected_gmt Expected UTC date.
+	 */
+	public function test_product_output_dates_have_offsets( string $timezone, string $created, string $expected, string $expected_gmt ): void {
+		update_option( 'timezone_string', $timezone );
+		update_option( 'gmt_offset', 5.75 );
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_date_created( $created );
+		$product->save();
+		$this->created_product_ids[] = $product->get_id();
+		$modified                    = new \WC_DateTime( $created, wp_timezone() );
+		add_filter(
+			'woocommerce_product_get_date_modified',
+			static function () use ( $modified ) {
+				return $modified;
+			}
+		);
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Date output regression',
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'Date output regression', wc_get_product( $product->get_id() )->get_name() );
+		foreach ( array( 'date_created', 'date_modified' ) as $field ) {
+			$date       = $result['product'][ $field ];
+			$date_gmt   = $result['product'][ $field . '_gmt' ];
+			$parsed     = \DateTimeImmutable::createFromFormat( DATE_ATOM, $date );
+			$parsed_gmt = \DateTimeImmutable::createFromFormat( DATE_ATOM, $date_gmt );
+
+			$this->assertSame( $expected, $date );
+			$this->assertSame( $expected_gmt, $date_gmt );
+			$this->assertInstanceOf( \DateTimeImmutable::class, $parsed );
+			$this->assertInstanceOf( \DateTimeImmutable::class, $parsed_gmt );
+			$this->assertSame( $date, $parsed->format( DATE_ATOM ) );
+			$this->assertSame( $date_gmt, $parsed_gmt->format( DATE_ATOM ) );
+			$this->assertStringEndsWith( '+00:00', $date_gmt );
+			$this->assertSame( $parsed->getTimestamp(), $parsed_gmt->getTimestamp() );
+		}
+	}
+
+	/**
+	 * @testdox Should return order dates with matching store and UTC timestamps.
+	 * @dataProvider provider_output_date_timezones
+	 * @param string $timezone Store timezone.
+	 * @param string $created Creation date in store time.
+	 * @param string $expected Expected date with offset.
+	 * @param string $expected_gmt Expected UTC date.
+	 */
+	public function test_order_output_dates_have_offsets( string $timezone, string $created, string $expected, string $expected_gmt ): void {
+		update_option( 'timezone_string', $timezone );
+		update_option( 'gmt_offset', 5.75 );
+		$order = wc_create_order();
+		$order->set_date_created( $created );
+		$order->set_date_modified( $created );
+		$order->save();
+		$this->created_order_ids[] = $order->get_id();
+		$this->set_order_modified_date_for_query_test( $order, $created );
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'id' => $order->get_id() ) );
+
+		$this->assertNotWPError( $result );
+		foreach ( array( 'date_created', 'date_modified' ) as $field ) {
+			$this->assertSame( $expected, $result['orders'][0][ $field ] );
+			$this->assertSame( $expected_gmt, $result['orders'][0][ $field . '_gmt' ] );
+			$this->assertSame( strtotime( $expected ), strtotime( $result['orders'][0][ $field . '_gmt' ] ) );
+		}
+	}
+
+	/**
+	 * Store timezones and dates, including daylight saving and fractional offsets.
+	 *
+	 * @return array
+	 */
+	public function provider_output_date_timezones(): array {
+		return array(
+			'UTC'        => array( 'UTC', '2026-07-15T12:00:00', '2026-07-15T12:00:00+00:00', '2026-07-15T12:00:00+00:00' ),
+			'summer'     => array( 'Europe/Amsterdam', '2026-07-15T12:00:00', '2026-07-15T12:00:00+02:00', '2026-07-15T10:00:00+00:00' ),
+			'winter'     => array( 'Europe/Amsterdam', '2026-01-15T12:00:00', '2026-01-15T12:00:00+01:00', '2026-01-15T11:00:00+00:00' ),
+			'negative'   => array( 'America/New_York', '2026-07-15T12:00:00', '2026-07-15T12:00:00-04:00', '2026-07-15T16:00:00+00:00' ),
+			'fractional' => array( '', '2026-07-15T12:00:00', '2026-07-15T12:00:00+05:45', '2026-07-15T06:15:00+00:00' ),
+		);
+	}
+
+	/**
+	 * @testdox Should update a per-type field such as regular_price without a type in the input.
 	 */
 	public function test_product_update_changes_props_and_returns_updated_response(): void {
 		$product                     = \WC_Helper_Product::create_simple_product();
@@ -1511,16 +2140,34 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
-				'id'                 => $product->get_id(),
-				'product_type_alias' => 'physical',
-				'name'               => 'Updated Name',
-				'regular_price'      => '99.00',
+				'id'            => $product->get_id(),
+				'name'          => 'Updated Name',
+				'regular_price' => '99.00',
 			)
 		);
 
 		$this->assertNotWPError( $result );
 		$this->assertSame( 'Updated Name', $result['product']['name'] );
 		$this->assertSame( '99.00', $result['product']['regular_price'] );
+	}
+
+	/**
+	 * @testdox Should refuse an update field that the type of the loaded product does not support.
+	 */
+	public function test_product_update_rejects_fields_not_supported_by_loaded_product_type(): void {
+		$product                     = \WC_Helper_Product::create_grouped_product();
+		$this->created_product_ids[] = $product->get_id();
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'            => $product->get_id(),
+				'regular_price' => '19.99',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_field_unsupported', $result->get_error_code() );
+		$this->assertSame( '', wc_get_product( $product->get_id() )->get_regular_price() );
 	}
 
 	/**
@@ -1576,7 +2223,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should apply product type configuration when updating a product type alias.
+	 * @testdox Should apply product type configuration when updating a product type.
 	 */
 	public function test_product_update_applies_product_type_configuration(): void {
 		$product                     = \WC_Helper_Product::create_simple_product();
@@ -1584,8 +2231,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
-				'id'                 => $product->get_id(),
-				'product_type_alias' => 'digital',
+				'id'           => $product->get_id(),
+				'type'         => 'simple',
+				'virtual'      => true,
+				'downloadable' => true,
 			)
 		);
 
@@ -1593,6 +2242,45 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'simple', $result['product']['type'] );
 		$this->assertTrue( $result['product']['virtual'] );
 		$this->assertTrue( $result['product']['downloadable'] );
+	}
+
+	/**
+	 * @testdox Should apply the forced properties of a product type only when the type changes.
+	 */
+	public function test_product_update_applies_forced_properties_only_on_a_type_change(): void {
+		$grouped = new \WC_Product_Grouped();
+		$grouped->set_name( 'Grouped' );
+		$grouped->set_manage_stock( true );
+		$grouped->set_stock_quantity( 5 );
+		$grouped->save();
+		$this->created_product_ids[] = $grouped->get_id();
+
+		$simple                      = \WC_Helper_Product::create_simple_product();
+		$this->created_product_ids[] = $simple->get_id();
+		$simple->set_manage_stock( true );
+		$simple->set_stock_quantity( 5 );
+		$simple->save();
+
+		$repeated = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $grouped->get_id(),
+				'type' => 'grouped',
+				'name' => 'Renamed',
+			)
+		);
+		$changed  = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $simple->get_id(),
+				'type' => 'grouped',
+			)
+		);
+
+		$this->assertNotWPError( $repeated );
+		$this->assertSame( 'yes', get_post_meta( $grouped->get_id(), '_manage_stock', true ) );
+		$this->assertSame( '5', get_post_meta( $grouped->get_id(), '_stock', true ) );
+		$this->assertNotWPError( $changed );
+		$this->assertSame( 'no', get_post_meta( $simple->get_id(), '_manage_stock', true ) );
+		$this->assertSame( '', get_post_meta( $simple->get_id(), '_stock', true ) );
 	}
 
 	/**
@@ -1647,6 +2335,51 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_product_type_unsupported', $result->get_error_code() );
 		$this->assertNotNull( wc_get_product( $variation_id ) );
+	}
+
+	/**
+	 * @testdox Should refuse a type change on a variable product, because WooCommerce would delete its variations.
+	 */
+	public function test_product_update_rejects_a_type_change_on_a_variable_product(): void {
+		$variable                    = \WC_Helper_Product::create_variation_product();
+		$this->created_product_ids[] = $variable->get_id();
+		$children                    = $variable->get_children();
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $variable->get_id(),
+				'type' => 'simple',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_type_unsupported', $result->get_error_code() );
+		$this->assertSame( 'variable', wc_get_product( $variable->get_id() )->get_type() );
+		$this->assertSame( $children, wc_get_product( $variable->get_id() )->get_children() );
+	}
+
+	/**
+	 * @testdox Should reject product variation IDs when updating products, with and without a type.
+	 */
+	public function test_product_update_rejects_variation_ids(): void {
+		$variation_id = $this->create_variation_product_id_for_test();
+
+		foreach ( array( array(), array( 'type' => 'simple' ) ) as $type_input ) {
+			$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+				array_merge(
+					array(
+						'id'   => $variation_id,
+						'name' => 'Changed variation',
+					),
+					$type_input
+				)
+			);
+
+			$this->assertWPError( $result );
+			$this->assertSame( 'woocommerce_product_type_unsupported', $result->get_error_code() );
+		}
+
+		$this->assertSame( 'variation', wc_get_product( $variation_id )->get_type() );
 	}
 
 	/**
@@ -1849,6 +2582,119 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should list every note of an order, newest first.
+	 *
+	 * @dataProvider provider_order_storage_engines
+	 *
+	 * @param bool $hpos_enabled Whether HPOS/COT should be enabled for the test.
+	 */
+	public function test_order_notes_query_lists_every_note( bool $hpos_enabled ): void {
+		$this->set_order_storage_for_test( $hpos_enabled );
+
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+
+		$newer_note_id = $order->add_order_note( 'Internal note.' );
+		$order->add_order_note( 'Customer note.', true );
+
+		// A note with a higher ID but an older date must sort after the newer one.
+		wp_update_comment(
+			array(
+				'comment_ID'       => $newer_note_id,
+				'comment_date'     => '2030-01-01 00:00:00',
+				'comment_date_gmt' => '2030-01-01 00:00:00',
+			)
+		);
+
+		update_option( 'timezone_string', 'America/Sao_Paulo' );
+
+		$result = wp_get_ability( 'woocommerce/order-notes-query' )->execute( array( 'id' => $order->get_id() ) );
+
+		$this->assertNotWPError( $result );
+
+		$by_content = array_column( $result['notes'], 'customer_note', 'note' );
+		$this->assertTrue( $by_content['Customer note.'] );
+		$this->assertFalse( $by_content['Internal note.'] );
+
+		$dates_by_content = array_column( $result['notes'], 'date_created', 'note' );
+		$this->assertSame( '2029-12-31T21:00:00-03:00', $dates_by_content['Internal note.'] );
+
+		$this->assertContainsOnly( 'int', array_column( $result['notes'], 'id' ) );
+		$this->assertSame( $newer_note_id, $result['notes'][0]['id'], 'Notes should be newest first by creation date.' );
+	}
+
+	/**
+	 * @testdox Should return a not-found error when order-notes-query receives an unknown order ID.
+	 */
+	public function test_order_notes_query_returns_not_found_for_unknown_id(): void {
+		$result = wp_get_ability( 'woocommerce/order-notes-query' )->execute( array( 'id' => 999999 ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_order_not_found', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should check the order-notes-query permission against the actual type of the order ID.
+	 */
+	public function test_order_notes_query_refuses_id_of_unsupported_order_type(): void {
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$refund                    = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 1,
+			)
+		);
+
+		$result = wp_get_ability( 'woocommerce/order-notes-query' )->execute( array( 'id' => $refund->get_id() ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should check the order-notes-query permission against the capabilities of an order type that an extension registers.
+	 */
+	public function test_order_notes_query_uses_the_capabilities_of_the_order_type(): void {
+		global $wc_order_types, $post_type_meta_caps, $wpdb;
+
+		$meta_caps = $post_type_meta_caps;
+		wc_register_order_type(
+			'shop_test_private',
+			array(
+				'capability_type'          => 'shop_test_private',
+				'exclude_from_order_views' => true,
+				'add_order_meta_boxes'     => false,
+			)
+		);
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$wpdb->update( $wpdb->posts, array( 'post_type' => 'shop_test_private' ), array( 'ID' => $order->get_id() ) );
+		$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'type' => 'shop_test_private' ), array( 'id' => $order->get_id() ) );
+		clean_post_cache( $order->get_id() );
+		wp_cache_flush();
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
+		$ability = wp_get_ability( 'woocommerce/order-notes-query' );
+
+		try {
+			$this->assertSame( 'shop_test_private', OrderUtil::get_order_type( $order->get_id() ) );
+
+			$refused = $ability->execute( array( 'id' => $order->get_id() ) );
+
+			$this->assertWPError( $refused );
+			$this->assertSame( 'ability_invalid_permissions', $refused->get_error_code() );
+
+			wp_get_current_user()->add_cap( 'read_private_shop_test_privates' );
+
+			$this->assertIsArray( $ability->execute( array( 'id' => $order->get_id() ) ) );
+		} finally {
+			unset( $wc_order_types['shop_test_private'] );
+			unregister_post_type( 'shop_test_private' );
+			$post_type_meta_caps = $meta_caps; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- unregister_post_type() removes the shop_order meta caps too.
+		}
+	}
+
+	/**
 	 * @testdox Should exclude checkout-draft orders from default order queries.
 	 *
 	 * @dataProvider provider_order_storage_engines
@@ -1994,6 +2840,90 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should apply date_after and date_before with a time in the store timezone.
+	 *
+	 * @dataProvider provider_order_storage_engines
+	 *
+	 * @param bool $hpos_enabled Whether HPOS/COT should be enabled for the test.
+	 */
+	public function test_orders_query_filters_created_date_in_store_timezone( bool $hpos_enabled ): void {
+		$this->set_order_storage_for_test( $hpos_enabled );
+
+		update_option( 'timezone_string', 'Europe/Amsterdam' );
+
+		$email = wp_unique_id( 'abilities-order-created-timezone-' ) . '@example.com';
+		$early = $this->create_order_for_query_sorting( $email, '2025-07-15T09:00:00', '2025-07-15T09:00:00' );
+		$late  = $this->create_order_for_query_sorting( $email, '2025-07-15T11:00:00', '2025-07-15T11:00:00' );
+
+		$after = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'billing_email' => $email,
+				'date_after'    => '2025-07-15T10:00:00',
+				'per_page'      => 2,
+			)
+		);
+
+		$this->assertNotWPError( $after );
+		$this->assertSame( array( $late->get_id() ), array_column( $after['orders'], 'id' ), 'date_after 10:00 should return only the order created at 11:00 store time.' );
+
+		$before = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'billing_email' => $email,
+				'date_before'   => '2025-07-15T10:00:00',
+				'per_page'      => 2,
+			)
+		);
+
+		$this->assertNotWPError( $before );
+		$this->assertSame( array( $early->get_id() ), array_column( $before['orders'], 'id' ), 'date_before 10:00 should return only the order created at 09:00 store time.' );
+
+		$after_utc = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'billing_email' => $email,
+				'date_after'    => '2025-07-15T08:00:00Z',
+				'per_page'      => 2,
+			)
+		);
+
+		$this->assertNotWPError( $after_utc );
+		$this->assertSame( array( $late->get_id() ), array_column( $after_utc['orders'], 'id' ), 'date_after 08:00 UTC (10:00 store time) should return only the order created at 11:00 store time.' );
+
+		$after_millis_utc = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'billing_email' => $email,
+				'date_after'    => '2025-07-15T08:00:00.000Z',
+				'per_page'      => 2,
+			)
+		);
+
+		$this->assertNotWPError( $after_millis_utc );
+		$this->assertSame( array( $late->get_id() ), array_column( $after_millis_utc['orders'], 'id' ), 'date_after 08:00 UTC with fractional seconds (the form JavaScript toISOString() produces) should match the plain UTC value.' );
+
+		$after_short_offset = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'billing_email' => $email,
+				'date_after'    => '2025-07-15T10:00:00+02',
+				'per_page'      => 2,
+			)
+		);
+
+		$this->assertNotWPError( $after_short_offset );
+		$this->assertSame( array( $late->get_id() ), array_column( $after_short_offset['orders'], 'id' ), 'date_after 10:00 with a +02 offset (08:00 UTC) should return only the order created at 11:00 store time.' );
+
+		$range = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'billing_email' => $email,
+				'date_after'    => '2025-07-15T08:00:00',
+				'date_before'   => '2025-07-15T10:00:00',
+				'per_page'      => 2,
+			)
+		);
+
+		$this->assertNotWPError( $range );
+		$this->assertSame( array( $early->get_id() ), array_column( $range['orders'], 'id' ), 'date_after 08:00 together with date_before 10:00 store time should return only the order created at 09:00.' );
+	}
+
+	/**
 	 * @testdox Should filter modified_before with time precision across order storage engines.
 	 *
 	 * @dataProvider provider_order_storage_engines
@@ -2019,6 +2949,36 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$ids = array_column( $result['orders'], 'id' );
 		$this->assertContains( $early->get_id(), $ids );
 		$this->assertNotContains( $late->get_id(), $ids );
+	}
+
+	/**
+	 * @testdox Should apply modified_before with a UTC offset in the store timezone.
+	 *
+	 * @dataProvider provider_order_storage_engines
+	 *
+	 * @param bool $hpos_enabled Whether HPOS/COT should be enabled for the test.
+	 */
+	public function test_orders_query_filters_modified_date_in_store_timezone( bool $hpos_enabled ): void {
+		$this->set_order_storage_for_test( $hpos_enabled );
+
+		update_option( 'timezone_string', 'Europe/Amsterdam' );
+
+		$email = wp_unique_id( 'abilities-order-modified-timezone-' ) . '@example.com';
+		$early = $this->create_order_for_query_sorting( $email, '2025-07-15T09:00:00', '2025-07-15T10:00:00' );
+		$late  = $this->create_order_for_query_sorting( $email, '2025-07-15T09:00:00', '2025-07-15T12:00:00' );
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'billing_email'   => $email,
+				'modified_before' => '2025-07-15T09:00:00.000Z',
+				'per_page'        => 2,
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$ids = array_column( $result['orders'], 'id' );
+		$this->assertContains( $early->get_id(), $ids, 'modified_before 09:00 UTC with fractional seconds should return the order modified at 10:00 store time (08:00 UTC).' );
+		$this->assertNotContains( $late->get_id(), $ids, 'modified_before 09:00 UTC with fractional seconds should exclude the order modified at 12:00 store time (10:00 UTC).' );
 	}
 
 	/**
@@ -2211,13 +3171,251 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should never return the API credentials of a configured gateway.
+	 */
+	public function test_payment_gateways_query_omits_gateway_credentials(): void {
+		update_option(
+			'woocommerce_paypal_settings',
+			array(
+				'_should_load'          => 'yes',
+				'enabled'               => 'yes',
+				'title'                 => 'PayPal',
+				'api_username'          => 'live-api-username',
+				'api_password'          => 'live-api-password',
+				'api_signature'         => 'live-api-signature',
+				'sandbox_api_username'  => 'sandbox-api-username',
+				'sandbox_api_password'  => 'sandbox-api-password',
+				'sandbox_api_signature' => 'sandbox-api-signature',
+				'identity_token'        => 'pdt-identity-token',
+			)
+		);
+
+		try {
+			self::reload_payment_gateways();
+
+			$result = wp_get_ability( 'woocommerce/payment-gateways-query' )->execute( array( 'id' => 'paypal' ) );
+		} finally {
+			delete_option( 'woocommerce_paypal_settings' );
+			self::reload_payment_gateways();
+		}
+
+		$this->assertNotWPError( $result );
+		$this->assertCount( 1, $result['gateways'] );
+		$this->assertSame(
+			array( 'id', 'title', 'method_title', 'description', 'enabled' ),
+			array_keys( $result['gateways'][0] )
+		);
+		$this->assertTrue( $result['gateways'][0]['enabled'] );
+
+		$encoded = wp_json_encode( $result );
+		foreach ( array( 'api-username', 'api-password', 'api-signature', 'pdt-identity-token' ) as $secret ) {
+			$this->assertStringNotContainsString( $secret, $encoded, "Output should not contain the {$secret} setting." );
+		}
+	}
+
+	/**
+	 * @testdox Should list every loaded gateway, enabled or not, with a boolean enabled flag.
+	 */
+	public function test_payment_gateways_query_lists_loaded_gateways(): void {
+		update_option( 'woocommerce_bacs_settings', array( 'enabled' => 'yes' ) );
+		update_option( 'woocommerce_cheque_settings', array( 'enabled' => 'no' ) );
+
+		try {
+			self::reload_payment_gateways();
+
+			$result = wp_get_ability( 'woocommerce/payment-gateways-query' )->execute( array() );
+		} finally {
+			delete_option( 'woocommerce_bacs_settings' );
+			delete_option( 'woocommerce_cheque_settings' );
+			self::reload_payment_gateways();
+		}
+
+		$this->assertNotWPError( $result );
+
+		$enabled_by_id = array_column( $result['gateways'], 'enabled', 'id' );
+		$this->assertTrue( $enabled_by_id['bacs'] );
+		$this->assertFalse( $enabled_by_id['cheque'] );
+		$this->assertArrayHasKey( 'cod', $enabled_by_id );
+		$this->assertSame( 'Direct bank transfer', array_column( $result['gateways'], 'method_title', 'id' )['bacs'] );
+		$this->assertSame( 1, $result['total_pages'] );
+		$this->assertSame( count( $result['gateways'] ), $result['per_page'] );
+	}
+
+	/**
+	 * @testdox Should read gateway titles and descriptions without running the checkout filters.
+	 */
+	public function test_payment_gateways_query_skips_checkout_title_and_description_filters(): void {
+		$filter = static function () {
+			return 'filtered';
+		};
+		add_filter( 'woocommerce_gateway_title', $filter );
+		add_filter( 'woocommerce_gateway_description', $filter );
+
+		try {
+			$result = wp_get_ability( 'woocommerce/payment-gateways-query' )->execute( array( 'id' => 'bacs' ) );
+		} finally {
+			remove_filter( 'woocommerce_gateway_title', $filter );
+			remove_filter( 'woocommerce_gateway_description', $filter );
+		}
+
+		$this->assertNotWPError( $result );
+		$this->assertNotSame( 'filtered', $result['gateways'][0]['title'] );
+		$this->assertNotSame( 'filtered', $result['gateways'][0]['description'] );
+	}
+
+	/**
+	 * @testdox Should fall back to the saved title and description when a gateway leaves the properties unset.
+	 */
+	public function test_payment_gateways_query_falls_back_to_saved_title_and_description(): void {
+		$gateway = new class() extends \WC_Payment_Gateway {
+			/**
+			 * Leaves title and description unset, like gateways that read them from settings in their getters.
+			 */
+			public function __construct() {
+				$this->id          = 'settings_only_gateway';
+				$this->form_fields = array(
+					'title'       => array( 'type' => 'text' ),
+					'description' => array( 'type' => 'textarea' ),
+					'api_key'     => array( 'type' => 'password' ),
+				);
+			}
+		};
+		update_option(
+			'woocommerce_settings_only_gateway_settings',
+			array(
+				'enabled'     => 'yes',
+				'title'       => 'Saved title',
+				'description' => 'Saved description',
+				'api_key'     => 'saved-api-key',
+			)
+		);
+		$register = static function ( $gateways ) use ( $gateway ) {
+			$gateways[] = $gateway;
+			return $gateways;
+		};
+		add_filter( 'woocommerce_payment_gateways', $register );
+
+		try {
+			self::reload_payment_gateways();
+
+			$result = wp_get_ability( 'woocommerce/payment-gateways-query' )->execute( array( 'id' => 'settings_only_gateway' ) );
+		} finally {
+			remove_filter( 'woocommerce_payment_gateways', $register );
+			delete_option( 'woocommerce_settings_only_gateway_settings' );
+			self::reload_payment_gateways();
+		}
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'Saved title', $result['gateways'][0]['title'] );
+		$this->assertSame( 'Saved description', $result['gateways'][0]['description'] );
+		$this->assertStringNotContainsString( 'saved-api-key', wp_json_encode( $result ) );
+	}
+
+	/**
+	 * @testdox Should report a gateway as enabled only when checkout would, that is when enabled is exactly yes.
+	 */
+	public function test_payment_gateways_query_reports_enabled_like_checkout(): void {
+		$gateway  = new class() extends \WC_Payment_Gateway {
+			/**
+			 * Assigns a truthy value other than yes, which checkout treats as disabled.
+			 */
+			public function __construct() {
+				$this->id      = 'truthy_enabled_gateway';
+				$this->title   = 'Truthy';
+				$this->enabled = 'true';
+			}
+		};
+		$register = static function ( $gateways ) use ( $gateway ) {
+			$gateways[] = $gateway;
+			return $gateways;
+		};
+		add_filter( 'woocommerce_payment_gateways', $register );
+
+		try {
+			self::reload_payment_gateways();
+
+			$result = wp_get_ability( 'woocommerce/payment-gateways-query' )->execute( array( 'id' => 'truthy_enabled_gateway' ) );
+		} finally {
+			remove_filter( 'woocommerce_payment_gateways', $register );
+			self::reload_payment_gateways();
+		}
+
+		$this->assertNotWPError( $result );
+		$this->assertFalse( $result['gateways'][0]['enabled'] );
+	}
+
+	/**
+	 * @testdox Should list gateways in the merchant's checkout order.
+	 */
+	public function test_payment_gateways_query_follows_checkout_order(): void {
+		update_option(
+			'woocommerce_gateway_order',
+			array(
+				'cod'    => 0,
+				'cheque' => 1,
+				'bacs'   => 2,
+			)
+		);
+
+		try {
+			self::reload_payment_gateways();
+
+			$result = wp_get_ability( 'woocommerce/payment-gateways-query' )->execute( array() );
+		} finally {
+			delete_option( 'woocommerce_gateway_order' );
+			self::reload_payment_gateways();
+		}
+
+		$this->assertNotWPError( $result );
+		$this->assertSame(
+			array( 'cod', 'cheque', 'bacs' ),
+			array_values( array_intersect( array_column( $result['gateways'], 'id' ), array( 'bacs', 'cheque', 'cod' ) ) )
+		);
+	}
+
+	/**
+	 * @testdox Should close the gateway item schema, so no settings field can be added to the output.
+	 */
+	public function test_payment_gateways_query_item_schema_is_closed(): void {
+		$items = wp_get_ability( 'woocommerce/payment-gateways-query' )->get_output_schema()['properties']['gateways']['items'];
+
+		$this->assertFalse( $items['additionalProperties'] );
+	}
+
+	/**
+	 * @testdox Should let a shop manager query payment gateways.
+	 */
+	public function test_payment_gateways_query_allows_shop_manager(): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'shop_manager' ) ) );
+
+		$result = wp_get_ability( 'woocommerce/payment-gateways-query' )->execute( array( 'id' => 'bacs' ) );
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'bacs', $result['gateways'][0]['id'] );
+	}
+
+	/**
+	 * @testdox Should return a not-found error for an unknown payment gateway ID.
+	 */
+	public function test_payment_gateways_query_returns_not_found_for_unknown_id(): void {
+		$result = wp_get_ability( 'woocommerce/payment-gateways-query' )->execute( array( 'id' => 'no-such-gateway' ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_payment_gateway_not_found', $result->get_error_code() );
+	}
+
+	/**
+	 * Rebuild the loaded payment gateways from the current options, since init() only appends.
+	 */
+	private static function reload_payment_gateways(): void {
+		WC()->payment_gateways()->payment_gateways = array();
+		WC()->payment_gateways()->init();
+	}
+
+	/**
 	 * Register the WooCommerce ability category for this test.
 	 */
 	private function register_woocommerce_category(): void {
-		if ( ! function_exists( 'wp_register_ability_category' ) || ! function_exists( 'wp_has_ability_category' ) ) {
-			return;
-		}
-
 		if ( wp_has_ability_category( 'woocommerce' ) ) {
 			return;
 		}
@@ -2255,7 +3453,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	private function unregister_domain_abilities(): void {
 		foreach ( self::CANONICAL_ABILITY_IDS as $ability_id ) {
-			if ( function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_id ) ) {
+			if ( wp_has_ability( $ability_id ) ) {
 				wp_unregister_ability( $ability_id );
 			}
 		}
@@ -2275,44 +3473,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $registration_args['category'], $ability->get_category() );
 		$this->assertSame( $registration_args['input_schema'], $ability->get_input_schema() );
 		$this->assertSame( $registration_args['output_schema'], $ability->get_output_schema() );
-	}
-
-	/**
-	 * Get product type aliases from a branched product input schema.
-	 *
-	 * @param array $schema Input schema.
-	 * @return array<int, string>
-	 */
-	private function get_product_type_aliases_from_schema_branches( array $schema ): array {
-		$aliases = array();
-
-		foreach ( $schema['oneOf'] ?? array() as $branch ) {
-			$alias = $branch['properties']['product_type_alias']['enum'][0] ?? null;
-
-			if ( is_string( $alias ) ) {
-				$aliases[] = $alias;
-			}
-		}
-
-		return array_values( array_unique( $aliases ) );
-	}
-
-	/**
-	 * Get a product input schema branch for a product type alias.
-	 *
-	 * @param array  $schema             Input schema.
-	 * @param string $product_type_alias Product type alias.
-	 * @return array
-	 */
-	private function get_product_type_alias_schema_branch( array $schema, string $product_type_alias ): array {
-		foreach ( $schema['oneOf'] ?? array() as $branch ) {
-			if ( in_array( $product_type_alias, $branch['properties']['product_type_alias']['enum'] ?? array(), true ) ) {
-				return $branch;
-			}
-		}
-
-		$this->fail( "Missing product type alias schema branch: {$product_type_alias}" );
-		return array();
 	}
 
 	/**
@@ -2396,9 +3556,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		}
 
 		if ( $hpos_enabled && ! $this->cot_setup_for_test ) {
-			$this->setup_cot();
+			// Keep the permanent HPOS tables outside the per-test transaction.
+			remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+			remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 			$this->cot_setup_for_test = true;
-			return;
 		}
 
 		$this->toggle_cot_feature_and_usage( $hpos_enabled );

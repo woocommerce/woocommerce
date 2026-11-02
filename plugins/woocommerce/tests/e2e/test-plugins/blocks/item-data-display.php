@@ -10,6 +10,11 @@
 
 declare(strict_types=1);
 
+// Only requests from specs that enable this plugin send the cookie.
+if ( ! isset( $_COOKIE['woocommerce-blocks-test-item-data-display'] ) ) {
+	return;
+}
+
 add_action(
 	'woocommerce_init',
 	function () {

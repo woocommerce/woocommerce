@@ -408,8 +408,7 @@ class PaymentsProviders {
 			wc_doing_it_wrong(
 				__METHOD__,
 				sprintf(
-					/* translators: %s: Gateway ID. */
-					esc_html__( 'The provider class for gateway ID "%s" must extend the PaymentGateway class.', 'woocommerce' ),
+					esc_html( 'The provider class for gateway ID "%s" must extend the PaymentGateway class.' ),
 					$gateway_id
 				),
 				'10.4.0'
@@ -456,8 +455,7 @@ class PaymentsProviders {
 				wc_doing_it_wrong(
 					__METHOD__,
 					sprintf(
-						/* translators: %s: Payment extension suggestion ID. */
-						esc_html__( 'The provider class for payment extension suggestion ID "%s" must extend the PaymentGateway class.', 'woocommerce' ),
+						esc_html( 'The provider class for payment extension suggestion ID "%s" must extend the PaymentGateway class.' ),
 						$pes_id
 					),
 					'10.4.0'

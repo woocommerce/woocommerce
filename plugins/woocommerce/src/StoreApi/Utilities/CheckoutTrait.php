@@ -321,10 +321,7 @@ trait CheckoutTrait {
 	 * @return array
 	 */
 	private function get_request_payment_data( \WP_REST_Request $request ) {
-		static $payment_data = [];
-		if ( ! empty( $payment_data ) ) {
-			return $payment_data;
-		}
+		$payment_data = [];
 		if ( ! empty( $request['payment_data'] ) ) {
 			foreach ( $request['payment_data'] as $data ) {
 				$payment_data[ sanitize_key( $data['key'] ) ] = wc_clean( $data['value'] );

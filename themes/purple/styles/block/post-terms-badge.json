@@ -3,9 +3,7 @@
 	"version": 3,
 	"slug": "post-terms-badge",
 	"title": "Badge",
-	"blockTypes": [
-		"core/post-terms"
-	],
+	"blockTypes": [ "core/post-terms" ],
 	"styles": {
 		"css": "display: flex; flex-wrap: wrap; gap: 2px; justify-content: center;",
 		"typography": {

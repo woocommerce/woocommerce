@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Make the load, change and save steps of write abilities protected, so only the ability run can call them.

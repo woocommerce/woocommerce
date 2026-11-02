@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep paragraphs and headings in emails when their only content is a personalization tag.
