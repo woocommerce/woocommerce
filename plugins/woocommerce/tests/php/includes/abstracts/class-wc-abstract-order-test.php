@@ -2968,6 +2968,44 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep a paid order's stored status when a filter changes its displayed status and an unregistered status is set.
+	 */
+	public function test_unregistered_status_keeps_the_stored_status_when_the_displayed_status_is_filtered(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 10 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->payment_complete();
+		$this->assertSame( OrderStatus::PROCESSING, $order->get_status( 'edit' ), 'Payment should store the processing status.' );
+		$this->assertFalse( $order->needs_payment(), 'A paid order should not need payment.' );
+		$this->assertSame( 6, wc_get_product( $product->get_id() )->get_stock_quantity(), 'Payment should reduce stock.' );
+
+		$pending_actions = did_action( 'woocommerce_order_status_pending' );
+		$changed_actions = did_action( 'woocommerce_order_status_changed' );
+
+		$show_as_pending = static function () {
+			return OrderStatus::PENDING;
+		};
+		add_filter( 'woocommerce_order_get_status', $show_as_pending );
+
+		$this->setExpectedIncorrectUsage( 'WC_Abstract_Order::set_status' );
+		$order->update_status( 'not-a-status' );
+
+		$this->assertSame( OrderStatus::PROCESSING, wc_get_order( $order->get_id() )->get_status( 'edit' ), 'The stored status should stay processing, not the filtered pending.' );
+
+		remove_filter( 'woocommerce_order_get_status', $show_as_pending );
+
+		$reloaded_order = wc_get_order( $order->get_id() );
+		$this->assertSame( OrderStatus::PROCESSING, $reloaded_order->get_status(), 'The order should keep its status.' );
+		$this->assertFalse( $reloaded_order->needs_payment(), 'The order should not ask for payment again.' );
+		$this->assertSame( 6, wc_get_product( $product->get_id() )->get_stock_quantity(), 'Stock should not be restored.' );
+		$this->assertSame( $pending_actions, did_action( 'woocommerce_order_status_pending' ), 'No transition to pending should fire.' );
+		$this->assertSame( $changed_actions, did_action( 'woocommerce_order_status_changed' ), 'No status change should fire.' );
+	}
+
+	/**
 	 * @testdox Should still fall back to pending, without a warning, when the current status isn't registered either.
 	 * @testWith ["legacy-status"]
 	 *           ["auto-draft"]

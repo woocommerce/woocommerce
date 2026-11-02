@@ -948,24 +948,27 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				! in_array( 'wc-' . $new_status, $this->get_valid_statuses(), true )
 				&& ! in_array( $new_status, $status_exceptions, true )
 			) {
-				$old_is_valid = $old_status && in_array(
-					'wc-' . $old_status,
+				// Check the stored status, since a filter on the displayed status could otherwise decide what is kept.
+				$stored_status   = $this->get_status( 'edit' );
+				$stored_is_valid = $stored_status && in_array(
+					'wc-' . $stored_status,
 					$this->get_valid_statuses(),
 					true
 				);
 
-				if ( $old_is_valid ) {
+				if ( $stored_is_valid ) {
 					wc_doing_it_wrong(
 						__METHOD__,
 						sprintf(
 							'Order %d: "%s" is not a registered order status; status left as "%s".',
 							$this->get_id(),
 							$new_status,
-							$old_status
+							$stored_status
 						),
 						'11.4.0'
 					);
-					$new_status = $old_status;
+					$new_status = $stored_status;
+					$old_status = $stored_status;
 				} else {
 					$new_status = OrderStatus::PENDING;
 				}
