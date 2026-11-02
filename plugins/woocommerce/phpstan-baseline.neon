@@ -15025,18 +15025,6 @@ parameters:
 			path: includes/class-wc-structured-data.php
 
 		-
-			message: '#^Cannot call method get_regular_price\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-structured-data.php
-
-		-
-			message: '#^Cannot call method get_sale_price\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-structured-data.php
-
-		-
 			message: '#^Method WC_Structured_Data\:\:generate_breadcrumblist_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -15124,12 +15112,6 @@ parameters:
 			message: '#^Parameter \#1 \$post of function get_the_title expects int\|WP_Post, string given\.$#'
 			identifier: argument.type
 			count: 1
-			path: includes/class-wc-structured-data.php
-
-		-
-			message: '#^Parameter \#1 \$product of callable ''wc_get_price…'' expects WC_Product, WC_Product\|false\|null given\.$#'
-			identifier: argument.type
-			count: 2
 			path: includes/class-wc-structured-data.php
 
 		-
@@ -59038,18 +59020,6 @@ parameters:
 			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
 			count: 3
-			path: src/Internal/DataStores/StockNotifications/StockNotificationsDataStore.php
-
-		-
-			message: '#^Parameter \#1 \$notification of method Automattic\\WooCommerce\\Internal\\DataStores\\StockNotifications\\StockNotificationsDataStore\:\:after_meta_change\(\) expects Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification, Automattic\\WooCommerce\\Internal\\DataStores\\WC_Data given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/DataStores/StockNotifications/StockNotificationsDataStore.php
-
-		-
-			message: '#^Parameter \#1 \$notification of method Automattic\\WooCommerce\\Internal\\DataStores\\StockNotifications\\StockNotificationsDataStore\:\:after_meta_change\(\) expects Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification, WC_Data given\.$#'
-			identifier: argument.type
-			count: 2
 			path: src/Internal/DataStores/StockNotifications/StockNotificationsDataStore.php
 
 		-

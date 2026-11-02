@@ -47,7 +47,7 @@ class ProductOpenGraphTags {
 		}
 		$gallery   = $product->get_gallery_image_ids();
 		$image_ids = array_merge( array( $product->get_image_id() ), is_array( $gallery ) ? $gallery : array() );
-		$image_ids = array_slice( array_unique( array_filter( array_map( 'intval', $image_ids ) ) ), 0, 6 );
+		$image_ids = array_unique( array_filter( array_map( 'intval', $image_ids ) ) );
 		if ( ! empty( $image_ids ) ) {
 			// Prime caches to reduce future queries.
 			_prime_post_caches( $image_ids );
@@ -58,6 +58,9 @@ class ProductOpenGraphTags {
 			if ( $image && ! in_array( $image['og:image'], $urls, true ) ) {
 				$tags[] = $image;
 				$urls[] = $image['og:image'];
+				if ( 6 === count( $urls ) ) {
+					break;
+				}
 			}
 		}
 		$tags[] = array( 'twitter:card' => $urls ? 'summary_large_image' : 'summary' );

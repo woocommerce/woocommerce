@@ -118,10 +118,6 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 
 		parent::setUp();
 
-		if ( ! function_exists( 'wp_register_ability' ) ) {
-			$this->markTestSkipped( 'The Abilities API is not available.' );
-		}
-
 		foreach ( array( 'init', 'wp_abilities_api_init', 'wp_abilities_api_categories_init', 'rest_api_init' ) as $action ) {
 			$this->original_action_counts[ $action ] = $wp_actions[ $action ] ?? null;
 		}
@@ -154,7 +150,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 
 			// The abilities registry is a singleton that outlives the test.
 			foreach ( array_merge( array( self::ABILITY_ID, self::INNER_ABILITY_ID, self::UNTRACKED_ABILITY_ID, self::LONG_ABILITY_ID, self::NO_SCHEMA_ABILITY_ID ), $this->registered_adapter_ids ) as $ability_id ) {
-				if ( function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_id ) ) {
+				if ( wp_has_ability( $ability_id ) ) {
 					wp_unregister_ability( $ability_id );
 				}
 			}
@@ -562,8 +558,15 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	 * @testdox Should record only slug-like error codes.
 	 * @testWith ["tracking_test_failure", "tracking_test_failure"]
 	 *           ["Tracking-Test-Failure", "tracking_test_failure"]
+	 *           ["first_ext:test_refused", "first_ext_test_refused"]
+	 *           ["first-ext:test_refused:2", "first_ext_test_refused_2"]
+	 *           ["first_ext:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "other"]
+	 *           ["first_ext:order 1234", "other"]
 	 *           ["customer@example.com", "other"]
 	 *           ["order 1234 for Jane", "other"]
+	 *           [":", "other"]
+	 *           ["::", "other"]
+	 *           ["-_", "other"]
 	 *
 	 * @param string $code     Error code returned by the ability.
 	 * @param string $expected Recorded error code.
