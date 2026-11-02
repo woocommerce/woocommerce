@@ -29,8 +29,24 @@ class WC_Admin_Reports {
 	 * Register the hook handlers for integrating with admin.
 	 */
 	public static function register_hook_handlers() {
-		add_filter( 'woocommerce_after_dashboard_status_widget_parameter', array( __CLASS__, 'get_report_instance' ) );
-		add_filter( 'woocommerce_dashboard_status_widget_reports', array( __CLASS__, 'replace_dashboard_status_widget_reports' ) );
+		add_filter( 'woocommerce_after_dashboard_status_widget_parameter', array( __CLASS__, 'get_status_widget_report_instance' ) );
+	}
+
+	/**
+	 * Provide a legacy report to `woocommerce_after_dashboard_status_widget` callbacks, but only when there are any.
+	 *
+	 * @internal
+	 * @since 11.4.0
+	 *
+	 * @param mixed $reports The value passed to `woocommerce_after_dashboard_status_widget`.
+	 * @return mixed
+	 */
+	public static function get_status_widget_report_instance( $reports ) {
+		if ( ! has_action( 'woocommerce_after_dashboard_status_widget' ) ) {
+			return $reports;
+		}
+
+		return self::get_report_instance();
 	}
 
 	/**
@@ -89,6 +105,8 @@ class WC_Admin_Reports {
 
 	/**
 	 * Filter handler for replacing the data of the status widget on the Dashboard page.
+	 *
+	 * Core no longer hooks this in: the status widget hides its sales rows when Analytics is disabled.
 	 *
 	 * @param array $status_widget_reports The data to display in the status widget.
 	 */
