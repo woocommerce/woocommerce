@@ -27,7 +27,7 @@ class ShopOpenGraphTags {
 	 * @return array<array<string, string>>
 	 */
 	public function get_tags( WP_Post $page ): array {
-		$description = wc_get_container()->get( OpenGraphDescription::class )->clean( $page->post_excerpt );
+		$description = wc_get_container()->get( OpenGraphDescription::class )->clean( get_the_excerpt( $page ) );
 		$tags        = array(
 			array( 'og:title' => get_the_title( $page ) ),
 			array( 'og:type' => 'website' ),

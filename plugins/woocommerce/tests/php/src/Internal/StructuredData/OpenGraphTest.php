@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\StructuredData;
 
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
 use Automattic\WooCommerce\Internal\StructuredData\OpenGraph;
 use WC_Helper_Product;
 use WC_Product;
@@ -325,6 +326,25 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should generate the shop description from page content when no excerpt is set.
+	 */
+	public function test_shop_description_uses_generated_excerpt(): void {
+		$shop_id = self::factory()->post->create(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_content' => '<p>Fresh <strong>coffee</strong>.</p>',
+				'post_excerpt' => '',
+			)
+		);
+		update_option( 'woocommerce_shop_page_id', $shop_id );
+		$this->go_to( get_permalink( $shop_id ) );
+
+		$tags = $this->render_meta_tags( '' );
+		$this->assertSame( array( 'Fresh coffee.' ), $tags['og:description'] ?? array() );
+	}
+
+	/**
 	 * @testdox Should add shop metadata regardless of query parameters.
 	 * @testWith ["woo-share"]
 	 *           ["min_price"]
@@ -342,7 +362,6 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 		);
 		$this->assertIsInt( $shop_id );
 		update_option( 'woocommerce_shop_page_id', $shop_id );
-		update_option( 'woocommerce_coming_soon', 'yes' );
 		$shop_url = get_permalink( $shop_id );
 		$this->assertIsString( $shop_url );
 		$this->go_to( $shop_url );
@@ -355,6 +374,60 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 			$this->assertSame( array( 'summary' ), $tags['twitter:card'] );
 		} finally {
 			$_GET = $original_get;
+		}
+	}
+
+	/**
+	 * @testdox Should only render shop metadata when coming-soon access is allowed.
+	 * @testWith ["", false]
+	 *           ["invalid", false]
+	 *           ["secret", true]
+	 *
+	 * @param string $cookie Share cookie value.
+	 * @param bool   $allowed Whether access is allowed.
+	 */
+	public function test_shop_metadata_respects_coming_soon_access( string $cookie, bool $allowed ): void {
+		$visibility = new \ReflectionProperty( ComingSoonRequestHandler::class, 'show_coming_soon' );
+		$visibility->setAccessible( true );
+		$original_visibility = $visibility->getValue();
+		$original_cookie     = $_COOKIE;
+		$original_get        = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Restore the request after the test.
+		$original_theme      = get_stylesheet();
+
+		try {
+			$visibility->setValue( null, null );
+			switch_theme( 'storefront' );
+			$this->assertFalse( wp_is_block_theme() );
+			wp_set_current_user( 0 );
+			$shop_id = self::factory()->post->create(
+				array(
+					'post_type'   => 'page',
+					'post_title'  => 'Private shop',
+					'post_status' => 'publish',
+				)
+			);
+			update_option( 'woocommerce_shop_page_id', $shop_id );
+			update_option( 'woocommerce_coming_soon', 'yes' );
+			update_option( 'woocommerce_store_pages_only', 'no' );
+			update_option( 'woocommerce_private_link', 'yes' );
+			update_option( 'woocommerce_share_key', 'secret' );
+			unset( $_GET['woo-share'] );
+			$_COOKIE['woo-share'] = $cookie;
+			$this->go_to( get_permalink( $shop_id ) );
+			$this->sut->handle_template_redirect();
+			wc_get_container()->get( ComingSoonRequestHandler::class )->handle_classic_template_include( '/original.php' );
+			$tags = $this->render_meta_tags( '' );
+
+			if ( $allowed ) {
+				$this->assertSame( array( 'Private shop' ), $tags['og:title'] ?? array() );
+			} else {
+				$this->assertSame( array(), $tags, 'Blocked requests must not expose shop metadata.' );
+			}
+		} finally {
+			$visibility->setValue( null, $original_visibility );
+			$_COOKIE = $original_cookie;
+			$_GET    = $original_get;
+			switch_theme( $original_theme );
 		}
 	}
 
