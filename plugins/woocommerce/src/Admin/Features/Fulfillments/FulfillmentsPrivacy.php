@@ -65,8 +65,10 @@ class FulfillmentsPrivacy {
 			$datastore = WC_Data_Store::load( 'order-fulfillment' );
 
 			// Include soft-deleted fulfillments: their tracking meta is retained and must be
-			// covered by the access request, mirroring what the eraser clears.
-			$fulfillments = $datastore->read_fulfillments( WC_Order::class, (string) $order->get_id(), true );
+			// covered by the access request, mirroring what the eraser clears. The final flag makes
+			// a read failure throw rather than return empty, so a DB error is not mistaken for
+			// "no fulfillments" and silently reported as a complete export.
+			$fulfillments = $datastore->read_fulfillments( WC_Order::class, (string) $order->get_id(), true, true );
 
 			$number_shipments = count( $fulfillments ) > 1;
 			$shipment_index   = 0;

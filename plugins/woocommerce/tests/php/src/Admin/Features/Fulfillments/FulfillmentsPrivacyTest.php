@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments;
 
+use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsPrivacy;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
@@ -130,6 +131,52 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 			has_action( 'woocommerce_privacy_remove_order_personal_data', array( $this->sut, 'remove_fulfillment_personal_data' ) ),
 			'The eraser should hook order anonymization.'
 		);
+	}
+
+	/**
+	 * @testdox The order export does not fake a complete export when the fulfillment read fails.
+	 */
+	public function test_export_skips_order_when_read_fails(): void {
+		$order = new WC_Order();
+		$order->save();
+
+		// Swap in a data store whose read throws, mimicking a DB failure the real store surfaces
+		// when the exporter asks it to. Extends the real store so it passes WC_Data_Store validation.
+		add_filter(
+			'woocommerce_order-fulfillment_data_store',
+			function () {
+				return new class() extends FulfillmentsDataStore {
+					/**
+					 * Throw when the caller opts into error surfacing.
+					 *
+					 * @param string $entity_type    The entity type.
+					 * @param string $entity_id      The entity ID.
+					 * @param bool   $with_deleted   Whether to include deleted fulfillments.
+					 * @param bool   $throw_on_error Whether to throw when the query fails.
+					 * @return array
+					 * @throws \Exception When $throw_on_error is true.
+					 */
+					public function read_fulfillments( string $entity_type, string $entity_id, bool $with_deleted = false, bool $throw_on_error = false ): array {
+						if ( $throw_on_error ) {
+							throw new \Exception( 'Simulated read failure.' );
+						}
+						return array();
+					}
+				};
+			}
+		);
+
+		$existing = array(
+			array(
+				'name'  => 'Order number',
+				'value' => (string) $order->get_id(),
+			),
+		);
+
+		$result = $this->sut->export_order_fulfillment_data( $existing, $order );
+
+		// The order's own rows survive and no fulfillment rows are appended from the failed read.
+		$this->assertSame( $existing, $result );
 	}
 
 	/**

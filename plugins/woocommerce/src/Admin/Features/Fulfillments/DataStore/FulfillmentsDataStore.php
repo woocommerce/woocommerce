@@ -517,12 +517,13 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 	 * @param string $entity_type The entity type.
 	 * @param string $entity_id The entity ID.
 	 * @param bool   $with_deleted Whether to include deleted fulfillments in the results.
+	 * @param bool   $throw_on_error Whether to throw when the query fails instead of returning an empty result.
 	 *
 	 * @return Fulfillment[] Fulfillment object.
 	 *
-	 * @throws \Exception If the fulfillment data can't be read.
+	 * @throws \Exception If the fulfillment data can't be read and $throw_on_error is true.
 	 */
-	public function read_fulfillments( string $entity_type, string $entity_id, bool $with_deleted = false ): array {
+	public function read_fulfillments( string $entity_type, string $entity_id, bool $with_deleted = false, bool $throw_on_error = false ): array {
 		// Read the fulfillment data from the database.
 		global $wpdb;
 
@@ -546,9 +547,13 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 			);
 		}
 
-		if ( is_wp_error( $fulfillment_data ) ) {
+		// get_results() returns an empty array on a failed query rather than a WP_Error, so a read
+		// failure is indistinguishable from "no fulfillments" unless the caller asks to surface it.
+		if ( $throw_on_error && '' !== (string) $wpdb->last_error ) {
 			throw new \Exception( esc_html__( 'Failed to read fulfillment data.', 'woocommerce' ) );
 		}
+
+		$fulfillment_data = is_array( $fulfillment_data ) ? $fulfillment_data : array();
 
 		// Create Fulfillment objects from the data.
 		$fulfillments = array();
