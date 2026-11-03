@@ -25,10 +25,14 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 
 	private const POLICIES_SECTION = 'agentic_commerce_policies';
 
+	public const SECTION_READINESS = 'readiness';
+
+	public const SECTION_PRODUCTS = 'products';
+
 	/**
-	 * Example products per product check, to keep the page short. The count column has the total.
+	 * Product checks the Product checks section leaves out: product image alt text repeats the images_have_alt store check.
 	 */
-	private const EXAMPLES_SHOWN = 3;
+	private const HIDDEN_PRODUCT_CHECKS = array( 'image_alt_text' );
 
 	/**
 	 * Marks the page dropdowns on this tab, which share options with other tabs.
@@ -155,22 +159,59 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
-	 * Render the page as the design's cards: the switch, what agents can see, Status,
-	 * the store policy fields, the store address and Security.
+	 * AI shopping holds the settings; Store readiness and Product checks show the last scan.
+	 *
+	 * @return array<string, string>
+	 */
+	protected function get_own_sections() {
+		return array(
+			''                      => __( 'AI shopping', 'woocommerce' ),
+			self::SECTION_READINESS => __( 'Store readiness', 'woocommerce' ),
+			self::SECTION_PRODUCTS  => __( 'Product checks', 'woocommerce' ),
+		);
+	}
+
+	/**
+	 * Link to a section of this tab.
+	 *
+	 * @param string $section Section id, or '' for AI shopping.
+	 */
+	public static function section_url( string $section ): string {
+		return admin_url( 'admin.php?page=wc-settings&tab=' . AgenticCommerceSettings::TAB . ( '' === $section ? '' : '&section=' . $section ) );
+	}
+
+	/**
+	 * Render the current section. AI shopping has the design's cards: the switch, what agents
+	 * can see, Status, the store policy fields, the store address and Security.
 	 */
 	public function output(): void {
-		$report  = $this->agent_readiness->get_cached_report();
-		$checks  = $this->store_conditions->all();
-		$failing = $this->store_conditions->failing_required( $checks );
+		global $current_section;
+
+		$report   = $this->agent_readiness->get_cached_report();
+		$checks   = $this->store_conditions->all();
+		$failing  = $this->store_conditions->failing_required( $checks );
+		$launched = (bool) ( array_column( $checks, 'ok', 'id' )['launched'] ?? true );
+		$section  = is_string( $current_section ) ? $current_section : '';
 
 		$this->enqueue_script( count( $failing ) );
 
 		echo '<div class="wc-agentic-commerce">';
+		if ( self::SECTION_READINESS === $section || self::SECTION_PRODUCTS === $section ) {
+			// These sections show results only; nothing on them saves with Save changes.
+			$GLOBALS['hide_save_button'] = true;
+			if ( self::SECTION_READINESS === $section ) {
+				$this->render_readiness( $this->visible_store_checks( $report, $checks ), $launched, $report );
+			} else {
+				$this->render_product_checks( $report );
+			}
+			echo '</div>';
+			return;
+		}
+
 		echo '<p class="wc-agentic-commerce-intro">' . esc_html__( 'Let AI shopping assistants find your products, build a cart, and send shoppers to your checkout to pay. Uses the Universal Commerce Protocol (UCP).', 'woocommerce' ) . '</p>';
 		$this->render_switch( $checks, count( $failing ) );
 		$this->render_visibility( $report );
-		$this->render_status( $checks, $this->ucp_switch->status( $failing ), count( $failing ) );
-		$this->render_readiness( array_slice( $this->agent_readiness->get_store_checks( $report, $checks ), count( $checks ) ), (bool) ( array_column( $checks, 'ok', 'id' )['launched'] ?? true ), $report );
+		$this->render_status( $checks, $this->ucp_switch->status( $failing ), count( $failing ), $report );
 
 		echo '<div class="wc-agentic-commerce-card wc-agentic-commerce-policies">';
 		parent::output();
@@ -179,6 +220,46 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		$this->render_address_and_test();
 		$this->render_security();
 		echo '</div>';
+	}
+
+	/**
+	 * The scanned store checks the page shows: with UCP off nothing is served, so its checks
+	 * are left out, and a check whose prerequisite failed can't say anything.
+	 *
+	 * @param array<string, mixed>|null                                                                                                     $report Stored report, or null before the first scan.
+	 * @param array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}> $checks Store conditions.
+	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:string,seen_at?:string}>
+	 */
+	private function visible_store_checks( ?array $report, array $checks ): array {
+		$scanned = array_slice( $this->agent_readiness->get_store_checks( $report, $checks ), count( $checks ) );
+		$results = array_column( $scanned, 'ok', 'id' );
+		return array_values(
+			array_filter(
+				$scanned,
+				static function ( array $check ) use ( $results ): bool {
+					if ( ! UcpUtils::is_enabled() && 'ucp' === $check['blocks'] ) {
+						return false;
+					}
+					$needs = self::CHECK_NEEDS[ $check['id'] ] ?? null;
+					return null === $needs || false !== ( $results[ $needs ] ?? null );
+				}
+			)
+		);
+	}
+
+	/**
+	 * Failing product checks from the report, without the ones this page leaves out.
+	 *
+	 * @param array<string, mixed>|null $report Stored report.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function failing_product_checks( ?array $report ): array {
+		return array_values(
+			array_filter(
+				is_array( $report['checks'] ?? null ) ? $report['checks'] : array(),
+				static fn( $check ): bool => is_array( $check ) && (int) ( $check['count'] ?? 0 ) > 0 && ! in_array( $check['id'] ?? '', self::HIDDEN_PRODUCT_CHECKS, true )
+			)
+		);
 	}
 
 	/**
@@ -323,91 +404,76 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
-	 * Per-channel product counts and each failing product check with example products.
+	 * The Product checks section: how many products each channel can list, then each
+	 * failing product check with the channels it matters to and a link to its products.
 	 *
-	 * @param array<string, mixed> $report Stored report.
+	 * @param array<string, mixed>|null $report Stored report, or null before the first scan.
 	 */
-	private function render_product_checks( array $report ): void {
-		$channels = is_array( $report['channels'] ?? null ) ? $report['channels'] : array();
-		$failing  = array_filter(
-			is_array( $report['checks'] ?? null ) ? $report['checks'] : array(),
-			static fn( $check ): bool => is_array( $check ) && (int) ( $check['count'] ?? 0 ) > 0
-		);
+	private function render_product_checks( ?array $report ): void {
+		echo '<div class="wc-agentic-commerce-card wc-agentic-commerce-products">';
+		echo '<div class="wc-agentic-commerce-card__header"><h2>' . esc_html__( 'Product checks', 'woocommerce' ) . '</h2>';
+		echo '<p>' . esc_html__( 'Each AI shopping channel has its own rules for product data. Products that miss a required field can\'t be listed there.', 'woocommerce' ) . '</p>';
+		$this->render_run( $report );
+		echo '</div>';
+		if ( null === $report ) {
+			echo '<p class="wc-agentic-commerce-card__body">' . esc_html__( 'Results appear after the first agent readiness check.', 'woocommerce' ) . '</p></div>';
+			return;
+		}
 
-		echo '<div class="wc-agentic-commerce-card__section"><h3>' . esc_html__( 'Product checks', 'woocommerce' ) . '</h3>';
-		echo '<p>' . esc_html__( 'Checks your products against the product data specs of AI shopping channels, so agents such as ChatGPT, Google and Copilot can list and recommend them.', 'woocommerce' ) . '</p>';
+		$channels = is_array( $report['channels'] ?? null ) ? $report['channels'] : array();
+		$linked   = ! empty( $report['failures_stored'] );
 		if ( ! empty( $report['truncated'] ) ) {
 			/* translators: %d: number of products checked. */
 			echo '<div class="notice notice-info inline"><p>' . esc_html( sprintf( __( 'Only the %d most recently updated products were checked.', 'woocommerce' ), ProductScan::PRODUCT_LIMIT ) ) . '</p></div>';
 		}
-		?>
-		<table class="widefat striped wc-agentic-commerce-channels">
-			<thead>
-				<tr>
-					<th><?php esc_html_e( 'Channel', 'woocommerce' ); ?></th>
-					<th><?php esc_html_e( 'Can be listed', 'woocommerce' ); ?></th>
-					<th><?php esc_html_e( 'Missing a required field', 'woocommerce' ); ?></th>
-					<th><?php esc_html_e( 'Listed with gaps', 'woocommerce' ); ?></th>
-					<th><?php esc_html_e( 'Complete', 'woocommerce' ); ?></th>
-				</tr>
-			</thead>
-			<tbody>
-				<?php foreach ( $channels as $channel_id => $channel ) : ?>
-					<tr>
-						<td><a href="<?php echo esc_url( (string) $channel['url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( (string) $channel['name'] ); ?></a><br /><span class="description"><?php echo esc_html( (string) $channel['spec'] ); ?></span></td>
-						<td><?php echo esc_html( number_format_i18n( (int) $channel['listable'] ) ); ?></td>
-						<td><?php echo wp_kses_post( self::count_link( (int) $channel['not_listable'], ProductFailures::channel_value( ProductScan::NOT_LISTABLE, (string) $channel_id ), ! empty( $report['failures_stored'] ) ) ); ?></td>
-						<td><?php echo esc_html( number_format_i18n( (int) $channel['with_gaps'] ) ); ?></td>
-						<td><?php echo esc_html( number_format_i18n( (int) $channel['complete'] ) ); ?></td>
-					</tr>
-				<?php endforeach; ?>
-			</tbody>
-		</table>
-		<?php
-		if ( empty( $failing ) ) {
-			echo '<p>' . esc_html__( 'Every product passed every check.', 'woocommerce' ) . '</p></div>';
+		echo '<ul class="wc-agentic-commerce-counts">';
+		foreach ( $channels as $channel_id => $channel ) {
+			$not_listable = (int) ( $channel['not_listable'] ?? 0 );
+			$listed       = sprintf(
+				/* translators: 1: number of products the channel can list, 2: number of products checked. */
+				esc_html__( '%1$s of %2$s can be listed', 'woocommerce' ),
+				'<strong>' . esc_html( number_format_i18n( (int) ( $channel['listable'] ?? 0 ) ) ) . '</strong>',
+				esc_html( number_format_i18n( (int) ( $report['products'] ?? 0 ) ) )
+			);
+			printf(
+				'<li><span>%1$s</span> %2$s%3$s</li>',
+				esc_html( (string) ( $channel['name'] ?? $channel_id ) ),
+				wp_kses_post( $listed ),
+				wp_kses_post( $linked && $not_listable > 0 ? ' ' . self::products_link( $not_listable, ProductFailures::channel_value( ProductScan::NOT_LISTABLE, (string) $channel_id ), true ) : '' )
+			);
+		}
+		echo '</ul>';
+
+		$failing = self::failing_product_checks( $report );
+		if ( array() === $failing ) {
+			echo '<p class="wc-agentic-commerce-card__body">' . esc_html__( 'Every product passed every check.', 'woocommerce' ) . '</p></div>';
 			return;
 		}
-		?>
-		<table class="widefat striped wc-agentic-commerce-product-checks">
-			<thead>
-				<tr>
-					<th><?php esc_html_e( 'Problem', 'woocommerce' ); ?></th>
-					<th><?php esc_html_e( 'Channels', 'woocommerce' ); ?></th>
-					<th><?php esc_html_e( 'Products', 'woocommerce' ); ?></th>
-					<th><?php esc_html_e( 'Examples', 'woocommerce' ); ?></th>
-				</tr>
-			</thead>
-			<tbody>
-				<?php foreach ( $failing as $check ) : ?>
-					<tr>
-						<td>
-							<strong><?php echo esc_html( (string) $check['label'] ); ?></strong>
-							<p><?php echo esc_html( (string) $check['why'] ); ?></p>
-							<p><a href="<?php echo esc_url( (string) $check['fix_url'] ); ?>"><?php echo esc_html( (string) $check['fix'] ); ?></a></p>
-						</td>
-						<td><?php echo empty( $check['channels'] ) ? esc_html__( 'Product page only', 'woocommerce' ) : wp_kses_post( implode( '<br />', $this->channel_tags( (array) $check['channels'], $channels ) ) ); ?></td>
-						<td><?php echo wp_kses_post( self::count_link( (int) $check['count'], (string) ( $check['id'] ?? '' ), ! empty( $report['failures_stored'] ) ) ); ?></td>
-						<td><?php echo wp_kses_post( implode( '<br />', $this->product_links( (array) ( $check['product_ids'] ?? array() ) ) ) ); ?></td>
-					</tr>
-				<?php endforeach; ?>
-			</tbody>
-		</table>
-		</div>
-		<?php
+		echo '<ul class="wc-agentic-commerce-problems">';
+		foreach ( $failing as $check ) {
+			$tags = empty( $check['channels'] ) ? array( esc_html__( 'Product page only', 'woocommerce' ) ) : $this->channel_tags( (array) $check['channels'], $channels );
+			echo '<li><p><strong>' . esc_html( (string) ( $check['label'] ?? '' ) ) . '</strong> ' . wp_kses_post( implode( ' ', $tags ) ) . '</p>';
+			echo '<p class="description">' . esc_html( trim( (string) ( $check['why'] ?? '' ) . ' ' . (string) ( $check['fix'] ?? '' ) ) ) . '</p>';
+			echo '<p>' . wp_kses_post( self::products_link( (int) $check['count'], (string) ( $check['id'] ?? '' ), $linked ) ) . '</p></li>';
+		}
+		echo '</ul></div>';
 	}
 
 	/**
-	 * A count, linked to the Products list filtered to those products when each product's failures are stored.
+	 * "View N products", linked to the Products list filtered to them when each product's failures are stored.
 	 *
 	 * @param int    $count  Number of products.
 	 * @param string $value  Stored failure value.
 	 * @param bool   $linked Whether the list can be filtered.
 	 * @return string Escaped HTML.
 	 */
-	private static function count_link( int $count, string $value, bool $linked ): string {
-		$text = esc_html( number_format_i18n( $count ) );
-		return $linked && $count > 0 ? '<a href="' . esc_url( ProductsList::url( $value ) ) . '">' . $text . '</a>' : $text;
+	private static function products_link( int $count, string $value, bool $linked ): string {
+		if ( ! $linked ) {
+			/* translators: %s: number of products. */
+			return esc_html( sprintf( _n( '%s product', '%s products', $count, 'woocommerce' ), number_format_i18n( $count ) ) );
+		}
+		/* translators: %s: number of products. */
+		return '<a href="' . esc_url( ProductsList::url( $value ) ) . '">' . esc_html( sprintf( _n( 'View %s product', 'View %s products', $count, 'woocommerce' ), number_format_i18n( $count ) ) ) . '</a>';
 	}
 
 	/**
@@ -430,27 +496,6 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			}
 		}
 		return $tags;
-	}
-
-	/**
-	 * Edit links for the example products that still exist.
-	 *
-	 * @param array $product_ids Product ids.
-	 * @return array<int, string> Escaped HTML.
-	 */
-	private function product_links( array $product_ids ): array {
-		$links = array();
-		foreach ( $product_ids as $product_id ) {
-			$url = get_edit_post_link( (int) $product_id, 'raw' );
-			if ( ! $url ) {
-				continue;
-			}
-			$links[] = '<a href="' . esc_url( $url ) . '">' . esc_html( get_the_title( (int) $product_id ) ) . '</a>';
-			if ( self::EXAMPLES_SHOWN === count( $links ) ) {
-				break;
-			}
-		}
-		return $links;
 	}
 
 	/**
@@ -504,11 +549,12 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 * The Status card: a badge, then the setup checks grouped into Required, Recommended and Done.
 	 * Each open check says what to do and links to where to do it. UCP itself is the switch, so it is not listed.
 	 *
-	 * @param array<int, array{id:string,level:string,ok:bool,name:string,label:string,fix_url:string}> $checks           Store conditions.
-	 * @param string                                                                                    $status           UcpSwitch status.
-	 * @param int                                                                                       $failing_required Number of failing required setup checks.
+	 * @param array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}> $checks           Store conditions.
+	 * @param string                                                                                                                        $status           UcpSwitch status.
+	 * @param int                                                                                                                           $failing_required Number of failing required setup checks.
+	 * @param array<string, mixed>|null                                                                                                     $report           Stored report, or null before the first scan.
 	 */
-	private function render_status( array $checks, string $status, int $failing_required ): void {
+	private function render_status( array $checks, string $status, int $failing_required, ?array $report ): void {
 		$statuses = self::status_labels();
 		$classes  = array(
 			UcpSwitch::STATUS_ACTIVE          => 'pass',
@@ -574,8 +620,38 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 					</div>
 				<?php endif; ?>
 			<?php endforeach; ?>
+			<?php $this->render_result_links( $report, $checks ); ?>
 		</div>
 		<?php
+	}
+
+	/**
+	 * The last row of Status: links to Store readiness and Product checks, with how many problems each found.
+	 *
+	 * @param array<string, mixed>|null                                                                                                     $report Stored report, or null before the first scan.
+	 * @param array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}> $checks Store conditions.
+	 */
+	private function render_result_links( ?array $report, array $checks ): void {
+		$problems = count( self::failing_product_checks( $report ) );
+		/* translators: %d: number of issues. */
+		$products = $problems > 0 ? array( 'check', sprintf( _n( '%d issue', '%d issues', $problems, 'woocommerce' ), $problems ) ) : array( 'pass', __( 'No issues', 'woocommerce' ) );
+		$labels   = $this->get_own_sections();
+		$links    = array(
+			self::SECTION_READINESS => array( $labels[ self::SECTION_READINESS ], self::group_badge( $this->visible_store_checks( $report, $checks ) ) ),
+			self::SECTION_PRODUCTS  => array( $labels[ self::SECTION_PRODUCTS ], $products ),
+		);
+		echo '<ul class="wc-agentic-commerce-results">';
+		foreach ( $links as $section => $link ) {
+			$badge = null === $report ? array( 'off', __( 'Not checked yet', 'woocommerce' ) ) : $link[1];
+			printf(
+				'<li><a href="%1$s">%2$s</a> <mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--%3$s">%4$s</mark></li>',
+				esc_url( self::section_url( $section ) ),
+				esc_html( $link[0] ),
+				esc_attr( $badge[0] ),
+				esc_html( $badge[1] )
+			);
+		}
+		echo '</ul>';
 	}
 
 	/**
@@ -610,45 +686,24 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
-	 * One line on where a question stands.
+	 * The badge on a question: how many issues, or that everything passed. A check that
+	 * couldn't run isn't an issue, and pending checks don't count as run.
 	 *
-	 * @param string                                                       $group            Question id.
-	 * @param array<int, array{ok:bool|null,level:string,pending?:string}> $checks           The question's checks. Pending ones don't count as unchecked.
-	 * @param bool                                                         $scanned          Whether a scan has run.
-	 * @param int                                                          $product_problems Failing product checks under the question.
-	 * @param bool                                                         $ucp_scanned      Whether the last scan checked UCP.
-	 * @param bool                                                         $ucp_enabled      Whether UCP is on.
+	 * @param array<int, array{ok:bool|null,pending?:string}> $checks The question's checks.
+	 * @return array{0:string,1:string} Badge class and text.
 	 */
-	private static function group_summary( string $group, array $checks, bool $scanned, int $product_problems, bool $ucp_scanned, bool $ucp_enabled ): string {
-		$fix     = count( array_filter( $checks, static fn( array $check ): bool => false === $check['ok'] && StoreConditions::LEVEL_REQUIRED === $check['level'] ) );
-		$check   = $product_problems + count( array_filter( $checks, static fn( array $check ): bool => false === $check['ok'] && StoreConditions::LEVEL_REQUIRED !== $check['level'] ) );
-		$unknown = count( array_filter( $checks, static fn( array $check ): bool => null === $check['ok'] && empty( $check['pending'] ) ) );
-		$parts   = array();
-		if ( $fix > 0 ) {
-			/* translators: %d: number of checks. */
-			$parts[] = sprintf( _n( '%d to fix', '%d to fix', $fix, 'woocommerce' ), $fix );
-		}
-		if ( $check > 0 ) {
-			/* translators: %d: number of checks. */
-			$parts[] = sprintf( _n( '%d to check', '%d to check', $check, 'woocommerce' ), $check );
-		}
-		if ( $unknown > 0 ) {
-			/* translators: %d: number of checks. */
-			$parts[] = sprintf( _n( '%d couldn\'t be checked', '%d couldn\'t be checked', $unknown, 'woocommerce' ), $unknown );
-		}
-		if ( 'access' === $group && ! $ucp_enabled ) {
-			array_unshift( $parts, __( 'Agent shopping is off', 'woocommerce' ) );
-		}
-		if ( array() !== $parts ) {
-			return implode( ', ', $parts );
+	private static function group_badge( array $checks ): array {
+		$issues = count( array_filter( $checks, static fn( array $check ): bool => false === $check['ok'] ) );
+		if ( $issues > 0 ) {
+			/* translators: %d: number of issues. */
+			return array( 'check', sprintf( _n( '%d issue', '%d issues', $issues, 'woocommerce' ), $issues ) );
 		}
 		$ran = array_filter( $checks, static fn( array $check ): bool => empty( $check['pending'] ) );
-		if ( array() === $ran && array() !== $checks ) {
-			return __( 'Coming soon', 'woocommerce' );
+		if ( array() === $ran ) {
+			return array( 'off', array() === $checks ? __( 'Not checked yet', 'woocommerce' ) : __( 'Coming soon', 'woocommerce' ) );
 		}
-		// Rows from before UCP was turned on, or a report without store checks, don't answer the question.
-		$answered = $scanned && array() !== $ran && ( 'access' !== $group || $ucp_scanned );
-		return $answered ? __( 'Yes', 'woocommerce' ) : __( 'Run check to find out', 'woocommerce' );
+		$passed = array() === array_filter( $ran, static fn( array $check ): bool => true !== $check['ok'] );
+		return $passed ? array( 'pass', __( 'All passed', 'woocommerce' ) ) : array( 'off', __( 'No issues', 'woocommerce' ) );
 	}
 
 	/**
@@ -732,29 +787,16 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
-	 * Agent readiness: the checks the last scan ran on what the store returns, under the
-	 * merchant question each answers, with a one-line answer per question. They never
-	 * affect the switch, so they sit apart from the setup checks in Status. Run check is
-	 * at the top, and the product checks sit under "Do they understand your products?".
+	 * The Store readiness section: the checks the last scan ran on what the store returns,
+	 * under the merchant question each answers. Problems show first and passed checks are
+	 * folded. They never affect the switch, so they sit apart from the setup steps in Status.
 	 *
-	 * @param array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:string,seen_at?:string}> $checks   Scanned checks.
+	 * @param array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:string,seen_at?:string}> $checks   Scanned checks to show.
 	 * @param bool                                                                                                                                                                               $launched Whether the store is launched.
 	 * @param array<string, mixed>|null                                                                                                                                                          $report   Stored report, or null before the first scan.
 	 */
 	private function render_readiness( array $checks, bool $launched, ?array $report ): void {
-		$results = array_column( $checks, 'ok', 'id' );
-		$checks  = array_filter(
-			$checks,
-			static function ( array $check ) use ( $results ): bool {
-				// With UCP off nothing is served; the switch already says so.
-				if ( ! UcpUtils::is_enabled() && 'ucp' === $check['blocks'] ) {
-					return false;
-				}
-				$needs = self::CHECK_NEEDS[ $check['id'] ] ?? null;
-				return null === $needs || false !== ( $results[ $needs ] ?? null );
-			}
-		);
-		$groups  = array(
+		$groups = array(
 			'access'     => array( __( 'Can agents get in?', 'woocommerce' ), array() ),
 			'find'       => array( __( 'Can they find your store?', 'woocommerce' ), array() ),
 			'understand' => array( __( 'Do they understand your products?', 'woocommerce' ), array() ),
@@ -766,56 +808,36 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 				$groups[ $check['group'] ][1][] = $check;
 			}
 		}
-		$product_problems = 0;
-		foreach ( is_array( $report['checks'] ?? null ) ? $report['checks'] : array() as $product_check ) {
-			$product_problems += is_array( $product_check ) && (int) ( $product_check['count'] ?? 0 ) > 0 ? 1 : 0;
-		}
 		?>
 		<div class="wc-agentic-commerce-card wc-agentic-commerce-readiness">
 			<div class="wc-agentic-commerce-card__header">
-				<h2><?php esc_html_e( 'Agent readiness', 'woocommerce' ); ?></h2>
+				<h2><?php esc_html_e( 'Store readiness', 'woocommerce' ); ?></h2>
 				<p><?php esc_html_e( 'What agents get when they visit your store, from the last check.', 'woocommerce' ); ?></p>
 				<?php $this->render_run( $report ); ?>
 			</div>
 			<?php if ( null === $report ) : ?>
 				<p class="wc-agentic-commerce-card__body"><?php esc_html_e( 'Results appear after the first agent readiness check.', 'woocommerce' ); ?></p>
 			<?php else : ?>
-				<ul class="wc-agentic-commerce-summary">
-					<?php foreach ( $groups as $id => $group ) : ?>
-						<li>
-							<a href="#wc-agentic-commerce-group-<?php echo esc_attr( $id ); ?>"><?php echo esc_html( $group[0] ); ?></a>
-							<?php
-							$summary = static fn( bool $ucp_enabled ): string => self::group_summary( $id, $group[1], true, 'understand' === $id ? $product_problems : 0, array_key_exists( 'ucp_profile', $results ), $ucp_enabled );
-							if ( 'access' === $id ) {
-								// The switch script swaps these, so the line follows the switch without a reload.
-								printf( '<span class="wc-agentic-commerce-access-summary" data-on="%1$s" data-off="%2$s">%3$s</span>', esc_attr( $summary( true ) ), esc_attr( $summary( false ) ), esc_html( $summary( UcpUtils::is_enabled() ) ) );
-							} else {
-								echo esc_html( $summary( UcpUtils::is_enabled() ) );
-							}
-							?>
-						</li>
-					<?php endforeach; ?>
-				</ul>
 				<?php foreach ( $groups as $id => $group ) : ?>
+					<?php
+					$badge  = self::group_badge( $group[1] );
+					$folded = array_filter( $group[1], static fn( array $check ): bool => true === $check['ok'] || ! empty( $check['pending'] ) );
+					?>
 					<div class="wc-agentic-commerce-card__section" id="wc-agentic-commerce-group-<?php echo esc_attr( $id ); ?>">
-						<h3><?php echo esc_html( $group[0] ); ?></h3>
+						<h3><?php echo esc_html( $group[0] ); ?> <mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--<?php echo esc_attr( $badge[0] ); ?>"><?php echo esc_html( $badge[1] ); ?></mark></h3>
+						<?php if ( 'access' === $id && ! UcpUtils::is_enabled() ) : ?>
+							<p><?php esc_html_e( 'Agent shopping is off, so the UCP checks don\'t run.', 'woocommerce' ); ?></p>
+						<?php endif; ?>
 						<?php
-						$open   = array_filter( $group[1], static fn( array $check ): bool => true !== $check['ok'] );
-						$passed = array_filter( $group[1], static fn( array $check ): bool => true === $check['ok'] );
-						$this->render_check_rows( $open, $launched );
-						if ( array() !== $passed ) {
-							/* translators: %d: number of checks that passed. */
-							echo '<details><summary>' . esc_html( sprintf( _n( '%d check passed', '%d checks passed', count( $passed ), 'woocommerce' ), count( $passed ) ) ) . '</summary>';
-							$this->render_check_rows( $passed, $launched );
+						$this->render_check_rows( array_diff_key( $group[1], $folded ), $launched );
+						if ( array() !== $folded ) {
+							/* translators: %d: number of checks. */
+							echo '<details><summary>' . esc_html( sprintf( _n( 'Show %d more check', 'Show %d more checks', count( $folded ), 'woocommerce' ), count( $folded ) ) ) . '</summary>';
+							$this->render_check_rows( $folded, $launched );
 							echo '</details>';
 						}
 						?>
 					</div>
-					<?php
-					if ( 'understand' === $id ) {
-						$this->render_product_checks( $report );
-					}
-					?>
 				<?php endforeach; ?>
 				<?php $this->render_declared( is_array( $report['declared'] ?? null ) ? $report['declared'] : array() ); ?>
 			<?php endif; ?>

@@ -9965,26 +9965,30 @@ body.woocommerce-settings-payments-section_legacy {
 	}
 }
 
-.wc-agentic-commerce-channels {
-	margin-block-end: 16px;
-}
-
-.wc-agentic-commerce-summary {
-	max-inline-size: 900px;
+.wc-agentic-commerce-results,
+.wc-agentic-commerce-problems {
+	margin: 0;
 
 	li {
-		display: flex;
-		justify-content: space-between;
-		padding: 8px 12px;
 		margin: 0;
-		background: #fff;
-		border: 1px solid #dcdcde;
-		border-block-end-width: 0;
-
-		&:last-child {
-			border-block-end-width: 1px;
-		}
+		padding: 12px 24px;
+		border-block-start: 1px solid #f0f0f1;
 	}
+
+	p {
+		margin: 0 0 4px;
+	}
+}
+
+.wc-agentic-commerce-results li {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.wc-agentic-commerce-readiness h3 .wc-agentic-commerce-badge {
+	margin-inline-start: 8px;
+	font-size: 12px;
 }
 
 .wc-agentic-commerce-checks + details,

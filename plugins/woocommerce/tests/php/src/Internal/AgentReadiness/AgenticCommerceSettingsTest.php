@@ -210,7 +210,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			false
 		);
 
-		$html = $this->render_page();
+		$html = $this->render_page( AgenticCommerceSettingsPage::SECTION_READINESS );
 
 		$this->assertStringContainsString( 'Sitemap lists your products', $html );
 		$this->assertStringContainsString( 'Couldn&#039;t check', $html );
@@ -240,9 +240,9 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			false
 		);
 
-		$live = $this->render_page();
+		$live = $this->render_page( AgenticCommerceSettingsPage::SECTION_READINESS );
 		update_option( 'woocommerce_coming_soon', 'yes' );
-		$coming_soon = $this->render_page();
+		$coming_soon = $this->render_page( AgenticCommerceSettingsPage::SECTION_READINESS );
 
 		$this->assertStringContainsString( 'This couldn&#039;t be checked.', $live );
 		$this->assertStringNotContainsString( 'Launch your store', $live );
@@ -267,7 +267,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The page answers each merchant question, marks a likely conflict with the page but names no plugin, hides checks whose prerequisite failed, and folds passed checks away.
+	 * @testdox Store readiness badges each merchant question, marks a likely conflict with the page but names no plugin, hides checks whose prerequisite failed, and folds passed checks away.
 	 */
 	public function test_output_groups_summary_and_conflict(): void {
 		$row = static fn( string $id, ?bool $ok, bool $conflict = false ): array => array(
@@ -301,19 +301,20 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$html = $this->render_page();
+		$html = $this->render_page( AgenticCommerceSettingsPage::SECTION_READINESS );
 
 		foreach ( array( 'Can agents get in?', 'Can they find your store?', 'Do they understand your products?', 'Can they buy?' ) as $question ) {
 			$this->assertStringContainsString( $question, $html );
 		}
-		$this->assertStringContainsString( 'Agent shopping is off', $html, 'UCP is off in this test' );
-		$this->assertMatchesRegularExpression( '/data-on="(?![^"]*Agent shopping is off)[^"]*" data-off="Agent shopping is off/', $html, 'The switch script can show the line for UCP on without a reload' );
+		$this->assertStringContainsString( 'Agent shopping is off, so the UCP checks don&#039;t run.', $html, 'UCP is off in this test' );
+		$this->assertMatchesRegularExpression( '#Do they understand your products\? <mark[^>]*>1 issue</mark>#', $html, 'The failing check is the issue; the unrun one is hidden' );
+		$this->assertMatchesRegularExpression( '#Can they find your store\? <mark[^>]*>All passed</mark>#', $html );
 		$this->assertStringContainsString( 'Likely conflict', $html );
 		$this->assertStringContainsString( 'Something on your store may be replacing this.', $html );
 		$this->assertStringContainsString( 'Seen on: <a href="https://example.org/product/mug/">https://example.org/product/mug/</a>', $html, 'A conflict names the page' );
 		$this->assertStringNotContainsString( 'Yoast SEO', $html, 'No plugin is named, even from an older stored report' );
 		$this->assertStringNotContainsString( 'product_offer_jsonld name', $html, 'Its prerequisite failed' );
-		$this->assertMatchesRegularExpression( '#<details>.*sitemap_lists_products name.*</details>#s', $html );
+		$this->assertMatchesRegularExpression( '#<details><summary>Show 1 more check</summary>.*sitemap_lists_products name.*</details>#s', $html );
 	}
 
 	/**
@@ -340,12 +341,12 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$html = $this->render_page();
+		$html = $this->render_page( AgenticCommerceSettingsPage::SECTION_READINESS );
 
 		$this->assertStringContainsString( '1 of 2 found', $html );
 		$this->assertStringContainsString( 'Not found', $html );
 		$this->assertStringNotContainsString( 'AGENTS.md</td><td>Fix', $html );
-		$this->assertMatchesRegularExpression( '#Can they find your store\?</a>\s*Run check to find out#', $html, 'Not counted as a result' );
+		$this->assertMatchesRegularExpression( '#Can they find your store\? <mark[^>]*>Not checked yet</mark>#', $html, 'Not counted as a result' );
 	}
 
 	/**
@@ -364,74 +365,140 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		);
 
 		update_option( 'woocommerce_agent_readiness_report', $report( array( $item( null ), $item( null ), 'not an array' ) ) );
-		$html = $this->render_page();
+		$html = $this->render_page( AgenticCommerceSettingsPage::SECTION_READINESS );
 		$this->assertStringContainsString( '<summary>Not checked</summary>', $html );
 		$this->assertStringNotContainsString( '0 of', $html );
 
 		update_option( 'woocommerce_agent_readiness_report', $report( array( $item( true ), $item( false ), $item( null ) ) ) );
-		$this->assertStringContainsString( '1 of 3 found, 1 not checked', $this->render_page() );
+		$this->assertStringContainsString( '1 of 3 found, 1 not checked', $this->render_page( AgenticCommerceSettingsPage::SECTION_READINESS ) );
 	}
 
 	/**
-	 * @testdox Every question reads the scan, so without one each asks for it; pending checks don't count as unchecked.
+	 * @testdox A question's badge counts its issues; a check that couldn't run isn't an issue, and pending checks don't count as run.
 	 */
-	public function test_groups_need_a_scan(): void {
-		$summary = new \ReflectionMethod( AgenticCommerceSettingsPage::class, 'group_summary' );
-		$summary->setAccessible( true );
-		$passed = array(
-			array(
-				'ok'    => true,
-				'level' => 'recommended',
-			),
-		);
-
+	public function test_group_badge(): void {
+		$badge = new \ReflectionMethod( AgenticCommerceSettingsPage::class, 'group_badge' );
+		$badge->setAccessible( true );
+		$text    = static fn( array $checks ): string => $badge->invoke( null, $checks )[1];
+		$row     = static fn( ?bool $ok ): array => array( 'ok' => $ok );
 		$pending = array(
-			array(
-				'ok'      => null,
-				'level'   => 'recommended',
-				'pending' => 'WOOPRD-3912',
-			),
+			'ok'      => null,
+			'pending' => 'WOOPRD-3912',
 		);
 
-		$this->assertSame( 'Run check to find out', $summary->invoke( null, 'buy', $passed, false, 0, false, true ) );
-		$this->assertSame( 'Yes', $summary->invoke( null, 'buy', $passed, true, 0, false, true ) );
-		$this->assertSame( 'Yes', $summary->invoke( null, 'buy', array_merge( $passed, $pending ), true, 0, false, true ) );
-		$this->assertSame( 'Coming soon', $summary->invoke( null, 'buy', $pending, true, 0, false, true ), 'Only pending checks answer nothing yet' );
-		$this->assertSame( 'Run check to find out', $summary->invoke( null, 'access', $passed, true, 0, false, true ), 'A scan from before UCP was on does not answer access' );
-		$this->assertSame( 'Yes', $summary->invoke( null, 'access', $passed, true, 0, true, true ) );
+		$this->assertSame( '2 issues', $text( array( $row( false ), $row( false ), $row( true ) ) ) );
+		$this->assertSame( '1 issue', $text( array( $row( false ), $row( null ) ) ) );
+		$this->assertSame( 'All passed', $text( array( $row( true ), $pending ) ) );
+		$this->assertSame( 'No issues', $text( array( $row( true ), $row( null ) ) ), 'A check that could not run is not an issue, nor a pass' );
+		$this->assertSame( 'Coming soon', $text( array( $pending ) ) );
+		$this->assertSame( 'Not checked yet', $text( array() ) );
 	}
 
 	/**
-	 * @testdox Examples skip deleted products, so a deleted product doesn't leave the cell empty.
-	 */
-	public function test_examples_skip_deleted_products(): void {
-		$kept  = \WC_Helper_Product::create_simple_product();
-		$links = new \ReflectionMethod( AgenticCommerceSettingsPage::class, 'product_links' );
-		$links->setAccessible( true );
-
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
-		$result = $links->invoke( $this->page(), array( 999991, 999992, 999993, $kept->get_id() ) );
-
-		$this->assertCount( 1, $result );
-		$this->assertStringContainsString( (string) $kept->get_id(), $result[0] );
-	}
-
-	/**
-	 * @testdox The page shows each failing product check with its channel tags and example products, and a failing setup check says what to do.
+	 * @testdox Product checks shows what each channel can list and each failing check with its channel tags and a filtered list link, without the alt text check; a failing setup check says what to do.
 	 */
 	public function test_output_product_checks_and_store_check_detail(): void {
 		$product = WC_Helper_Product::create_simple_product();
+		$image   = self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg' ) );
+		$product->set_image_id( $image );
+		$product->save();
 		update_option( 'blog_public', '0' );
 		wc_get_container()->get( AgentReadiness::class )->refresh_report();
 
-		$html = $this->render_page();
+		$html = $this->render_page( AgenticCommerceSettingsPage::SECTION_PRODUCTS );
 
-		$this->assertStringContainsString( 'Product checks', $html );
+		$this->assertGreaterThan( 0, array_column( get_option( AgentReadiness::REPORT_OPTION )['checks'], 'count', 'id' )['image_alt_text'] ?? 0, 'The scan found the missing alt text' );
+		$this->assertStringContainsString( '<span>ChatGPT</span> <strong>0</strong> of 1 can be listed', $html );
 		$this->assertStringContainsString( 'Required by ChatGPT', $html );
 		$this->assertStringContainsString( 'Harder to find on Google', $html );
-		$this->assertStringContainsString( 'post=' . $product->get_id(), $html );
-		$this->assertStringContainsString( 'Let search engines index your store', $html, 'Hidden from search engines is a Recommended setup step' );
+		$this->assertStringContainsString( 'View 1 product</a>', $html );
+		$this->assertStringContainsString( 'agent_readiness=', $html, 'The link opens the Products list filtered to the failing products' );
+		$this->assertStringNotContainsString( 'main image has no alt text', $html, 'Store readiness covers alt text' );
+		$this->assertStringNotContainsString( 'post=' . $product->get_id(), $html, 'No example products' );
 		$this->assertStringContainsString( 'Last checked', $html );
+		$this->assertStringContainsString( 'Let search engines index your store', $this->render_page(), 'Hidden from search engines is a Recommended setup step' );
+	}
+
+	/**
+	 * @testdox The tab has three sections; Status links to the two result sections with their issue counts, and those sections have no Save changes button.
+	 */
+	public function test_sections_and_status_links(): void {
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(
+					array(
+						'id'      => 'llms_txt_present',
+						'group'   => 'find',
+						'ok'      => false,
+						'blocks'  => 'discovery',
+						'level'   => 'recommended',
+						'name'    => 'Store serves an llms.txt file',
+						'label'   => 'No llms.txt file',
+						'why'     => '',
+						'fix'     => '',
+						'fix_url' => '',
+					),
+				),
+				'checks'       => array(
+					array(
+						'id'    => 'image_alt_text',
+						'count' => 3,
+					),
+					array(
+						'id'    => 'missing_brand',
+						'label' => 'Products with no brand',
+						'count' => 2,
+					),
+				),
+			),
+			false
+		);
+
+		$this->assertSame( array( '', 'readiness', 'products' ), array_keys( $this->page()->get_sections() ) );
+
+		$html = $this->render_page();
+		$this->assertMatchesRegularExpression( '#section=readiness">Store readiness</a> <mark[^>]*>1 issue</mark>#', $html );
+		$this->assertMatchesRegularExpression( '#section=products">Product checks</a> <mark[^>]*>1 issue</mark>#', $html, 'The alt text check is not counted' );
+		$this->assertFalse( $this->save_hidden, 'AI shopping saves the store policy fields' );
+
+		$this->render_page( AgenticCommerceSettingsPage::SECTION_READINESS );
+		$this->assertTrue( $this->save_hidden );
+
+		$html = $this->render_page( AgenticCommerceSettingsPage::SECTION_PRODUCTS );
+		$this->assertTrue( $this->save_hidden );
+		$this->assertStringContainsString( '<p>2 products</p>', $html, 'A report without stored failures has no filtered list to link to' );
+		$this->assertStringNotContainsString( 'View 2 products', $html );
+	}
+
+	/**
+	 * @testdox Status says no issues only when readiness checks ran; a scan whose checks couldn't run isn't shown as passed.
+	 */
+	public function test_status_link_when_checks_could_not_run(): void {
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(
+					array(
+						'id'      => 'llms_txt_present',
+						'group'   => 'find',
+						'ok'      => null,
+						'blocks'  => 'discovery',
+						'level'   => 'recommended',
+						'name'    => 'Store serves an llms.txt file',
+						'label'   => 'No llms.txt file',
+						'why'     => '',
+						'fix'     => '',
+						'fix_url' => '',
+					),
+				),
+			),
+			false
+		);
+
+		$this->assertMatchesRegularExpression( '#Store readiness</a> <mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--off">No issues</mark>#', $this->render_page() );
 	}
 
 	/**
@@ -441,19 +508,19 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		delete_option( AgentReadiness::REPORT_OPTION );
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 
-		$html = $this->render_page();
+		$html = $this->render_page( AgenticCommerceSettingsPage::SECTION_READINESS );
 		$this->assertDoesNotMatchRegularExpression( '/wc-agentic-commerce-run"[^>]*disabled/', $html );
-		$this->assertStringNotContainsString( 'Product checks', $html, 'No product checks before the first scan' );
+		$this->assertStringContainsString( 'Results appear after the first agent readiness check.', $this->render_page( AgenticCommerceSettingsPage::SECTION_PRODUCTS ), 'No product checks before the first scan' );
 
 		wc_get_container()->get( ScheduledScan::class )->queue();
-		$html = $this->render_page();
+		$html = $this->render_page( AgenticCommerceSettingsPage::SECTION_READINESS );
 		$this->assertStringContainsString( 'Checking your store in the background.', $html );
 		$this->assertMatchesRegularExpression( '/wc-agentic-commerce-run"[^>]*disabled/', $html );
 
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 		$this->age_finished_actions();
 		as_schedule_single_action( time() - ScheduledScan::STALLED_AFTER - 60, ScheduledScan::RUN_NOW_HOOK, array(), ScheduledScan::GROUP );
-		$html = $this->render_page();
+		$html = $this->render_page( AgenticCommerceSettingsPage::SECTION_READINESS );
 		$this->assertStringContainsString( 'The background check has not started', $html );
 		$this->assertDoesNotMatchRegularExpression( '/wc-agentic-commerce-run"[^>]*disabled/', $html );
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
@@ -594,14 +661,32 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Render the default section.
+	 * Whether the last render_page() hid Save changes.
+	 *
+	 * @var bool
 	 */
-	private function render_page(): string {
+	private $save_hidden = false;
+
+	/**
+	 * Render a section of the tab, AI shopping by default.
+	 *
+	 * @param string $section Section id.
+	 */
+	private function render_page( string $section = '' ): string {
+		global $current_section;
 		// Localized data accumulates on a registered handle, so start each render clean.
 		wp_deregister_script( 'wc-agentic-commerce-settings' );
-		$page = $this->page();
-		ob_start();
-		$page->output();
-		return (string) ob_get_clean();
+		$page            = $this->page();
+		$current_section = $section;
+		unset( $GLOBALS['hide_save_button'] );
+		try {
+			ob_start();
+			$page->output();
+			return (string) ob_get_clean();
+		} finally {
+			$current_section   = '';
+			$this->save_hidden = ! empty( $GLOBALS['hide_save_button'] );
+			unset( $GLOBALS['hide_save_button'] );
+		}
 	}
 }

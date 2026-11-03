@@ -201,15 +201,18 @@ While the feature is enabled, `ReadinessAbilities` registers abilities in the Wo
 
 ## Agentic commerce settings page
 
-WooCommerce > Settings > Agentic commerce (`AgenticCommerceSettings`, `AgenticCommerceSettingsPage`) shows while the feature is enabled. It follows the WOOPRD-3796 design, one card per part:
+WooCommerce > Settings > Agentic commerce (`AgenticCommerceSettings`, `AgenticCommerceSettingsPage`) shows while the feature is enabled. It follows the WOOPRD-3796 and WOOPRD-3947 designs, in three sections: AI shopping (the settings), Store readiness and Product checks (the last scan's results, with no Save changes button). AI shopping has one card per part:
 
 - The UCP switch, first. It saves through `POST wc/v3/agent-readiness/ucp` (`{ "enabled": true }`). A failing required check keeps it from being turned on, and that POST answers 409; turning it off still works. In coming soon mode the card says agents can't shop the store yet and links to Site visibility.
 - Product counts from the stored report (`products`, `hidden_from_catalog`, `unsupported_types`), each linking to a filtered product list.
-- Status: the store conditions from `StoreConditions`, the same list the readiness report shows, in three groups. Required lists failing `required` conditions (coming soon mode, HTTPS, permalinks, and the privacy, terms and refund and returns pages) and puts the status at Action needed; Recommended lists failing `recommended` ones, such as a missing shipping policy page; Done lists the passing ones by their passing state (`name`). Each open condition says what to do and links to it; a chosen policy page that isn't published links to its editor.
-- Agent readiness: the store output checks from the stored report, since they only run in the scan. Each check names the question it answers in `group` (`access`, `find`, `understand` or `buy`), and the card shows the checks under those four questions. They are never required, so they don't affect the switch or Status. A failing row adds why it matters and what it affects (`blocks`). The card has "Run check" with the time of the last run, and the product checks from the stored report: per-channel counts, and each failing check with its channels and up to 3 example products. The stored report still keeps up to 10 ids per check.
+- Status: the store conditions from `StoreConditions`, the same list the readiness report shows, in three groups. Required lists failing `required` conditions (coming soon mode, HTTPS, permalinks, and the privacy, terms and refund and returns pages) and puts the status at Action needed; Recommended lists failing `recommended` ones, such as a missing shipping policy page; Done lists the passing ones by their passing state (`name`). Each open condition says what to do and links to it; a chosen policy page that isn't published links to its editor. The last rows link to Store readiness and Product checks with how many issues each found.
 - Store policy pages. Refund and returns, privacy and terms are the existing options, so they stay in sync with Advanced > Page setup and Settings > Privacy; shipping policy, FAQ and warranty are new. UCP sends each as a checkout link. The dropdowns list published pages only, and saving leaves a stored draft page in place.
 - The store address agents start from (`/.well-known/ucp`), with Copy.
 - Placeholders for parts that aren't built yet: Test your setup (WOOAI-1619) and Security (WOOAI-1620).
+
+Store readiness (`section=readiness`) shows the store output checks from the stored report, since they only run in the scan. Each check names the question it answers in `group` (`access`, `find`, `understand` or `buy`), and the section shows them under those four questions, each with a badge: how many issues, All passed, or No issues when a check couldn't run. Failing and unchecked rows show first; passed and pending ones are folded. They are never required, so they don't affect the switch or Status. A failing row adds why it matters and what it affects (`blocks`). The declared list is last.
+
+Product checks (`section=products`) shows how many products each channel can list, then each failing product check with the channels it matters to and "View N products", which opens the Products list filtered to them. Product image alt text isn't listed there, since the `images_have_alt` store check covers it. Both sections have "Run check" with the time of the last run.
 
 Tracks event: `agentic_commerce_ucp_toggled` (`enabled`), sent only when the store allows tracking.
 
@@ -229,4 +232,4 @@ Core's UCP catalog mapper (`src/Internal/ProductFeed/Mapping/UcpProductMapper.ph
 wp option update woocommerce_feature_agent_readiness_enabled yes
 ```
 
-Then open WooCommerce > Settings > Agentic commerce and select "Run check".
+Then open WooCommerce > Settings > Agentic commerce > Store readiness and select "Run check".
