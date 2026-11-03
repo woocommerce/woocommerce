@@ -462,11 +462,14 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * @param mixed                            $value    Value from the input.
 	 * @param array<int, array<string, mixed>> $branches The `anyOf` branches, each with one type.
 	 * @param string                           $param    Path of the field in the input.
-	 * @return string|null The refusal, or null when the branch of the value accepts it.
+	 * @return string|null The refusal, or null when the branches do not each have their own type name, or when the branch of the value accepts it.
 	 */
 	private static function describe_any_of_refusal( $value, array $branches, string $param ): ?string {
 		$types = array_column( $branches, 'type' );
-		$type  = rest_get_best_type_for_value( $value, $types );
+		if ( count( array_unique( array_filter( $types, 'is_string' ) ) ) !== count( $branches ) ) {
+			return null;
+		}
+		$type = rest_get_best_type_for_value( $value, $types );
 		if ( '' === $type ) {
 			/* translators: 1: Path of the field in the input. 2: Comma-separated list of JSON types. */
 			return sprintf( __( '%1$s is not of type %2$s.', 'woocommerce' ), $param, implode( ',', $types ) );

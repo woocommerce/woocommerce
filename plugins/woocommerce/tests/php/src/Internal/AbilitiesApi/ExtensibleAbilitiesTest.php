@@ -1305,13 +1305,26 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			'empty anyOf'            => array( array( 'anyOf' => array() ) ),
 			'anyOf branch type list' => array( array( 'anyOf' => array( array( 'type' => array( 'string', 'null' ) ), array( 'type' => 'integer' ) ) ) ),
 			'anyOf branch no type'   => array( array( 'anyOf' => array( array( 'type' => 'string' ), array( 'enum' => array( 'a' ) ) ) ) ),
+			'anyOf branch bad type'  => array( array( 'anyOf' => array( array( 'type' => 'integre' ), array( 'type' => 'null' ) ) ) ),
+			'anyOf with named keys'  => array(
+				array(
+					'anyOf' => array(
+						'a' => array( 'type' => 'string' ),
+						'b' => array( 'type' => 'null' ),
+					),
+				),
+			),
 		);
 	}
 
 	/**
-	 * @testdox Should refuse a field whose input schema has a list of types at the top level.
+	 * @testdox Should refuse a field whose input schema has a list of types or an unknown type at the top level.
+	 * @testWith [["string", "null"]]
+	 *           ["integre"]
+	 *
+	 * @param mixed $type Top-level type of the input schema.
 	 */
-	public function test_a_top_level_type_list_in_an_input_schema_is_refused(): void {
+	public function test_a_top_level_type_list_in_an_input_schema_is_refused( $type ): void {
 		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
 		AbilitiesLoader::register_core_resources();
 
@@ -1322,12 +1335,53 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				'field'         => 'value',
 				'output_schema' => array( 'type' => 'string' ),
 				'get_callback'  => '__return_null',
-				'input_schema'  => array( 'type' => array( 'string', 'null' ) ),
+				'input_schema'  => array( 'type' => $type ),
 				'set_callback'  => '__return_null',
 			)
 		);
 
 		$this->assertArrayNotHasKey( 'refused', ExtensibleAbilities::get_fields( 'order' ) );
+	}
+
+	/**
+	 * @testdox Should keep the WordPress message for an anyOf under a top-level type whose branches do not each have their own type name.
+	 * @testWith [[{"enum":["small"]},{"enum":["large"]}]]
+	 *           [[{"type":["integer","null"]},{"type":"null"}]]
+	 *           [[{"type":"string","enum":["small"]},{"type":"string","pattern":"^x"}]]
+	 *
+	 * @param array $any_of The anyOf branches.
+	 */
+	public function test_an_any_of_branch_without_a_type_keeps_the_wordpress_message( array $any_of ): void {
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $any_of ) {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'product',
+						'namespace'    => 'untyped',
+						'field'        => 'size',
+						'input_schema' => array(
+							'type'  => 'string',
+							'anyOf' => $any_of,
+						),
+						'set_callback' => '__return_null',
+					)
+				);
+			}
+		);
+		$this->reset_registries();
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$refused = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'untyped' => array( 'size' => 'huge' ) ),
+			)
+		);
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'extensions.untyped.size does not match any of the expected formats.', $refused->get_data()['message'] );
 	}
 
 	/**
@@ -1349,6 +1403,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 						'field'        => 'days',
 						'input_schema' => $input_schema,
 						'set_callback' => static function ( \WC_Data $data, $value ) use ( &$received ) {
+							unset( $data );
 							$received[] = $value;
 						},
 					)

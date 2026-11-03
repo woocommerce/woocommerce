@@ -86,6 +86,11 @@ class ExtensibleAbilities {
 	private const QUERY_ARG_KEYS = array( 'meta_query', 'tax_query', 'include_ids', 'exclude_ids' );
 
 	/**
+	 * Type names that the REST schema check knows. It accepts any value for another name.
+	 */
+	private const JSON_TYPES = array( 'array', 'boolean', 'integer', 'null', 'number', 'object', 'string' );
+
+	/**
 	 * Register a resource that abilities format, so extensions can register fields on it.
 	 *
 	 * Call it inside the `woocommerce_extensible_abilities_resources_init` action. A call after that action is refused.
@@ -255,22 +260,23 @@ class ExtensibleAbilities {
 	}
 
 	/**
-	 * Whether a field input schema has one top-level `type` name, or a non-empty
-	 * `anyOf` where each branch has one type name. The REST schema check needs
-	 * a type for every branch that a value can match.
+	 * Whether a field input schema has one top-level JSON type name, or a non-empty
+	 * `anyOf` list where each branch has one JSON type name. The REST schema check
+	 * needs a known type for every branch that a value can match.
 	 *
 	 * @param array<string, mixed> $schema Field input schema.
 	 * @return bool
 	 */
 	private static function input_schema_has_type( array $schema ): bool {
 		if ( isset( $schema['type'] ) ) {
-			return is_string( $schema['type'] );
+			return in_array( $schema['type'], self::JSON_TYPES, true );
 		}
-		if ( ! is_array( $schema['anyOf'] ?? null ) || empty( $schema['anyOf'] ) ) {
+		$branches = $schema['anyOf'] ?? null;
+		if ( ! is_array( $branches ) || empty( $branches ) || array_values( $branches ) !== $branches ) {
 			return false;
 		}
-		foreach ( $schema['anyOf'] as $branch ) {
-			if ( ! is_array( $branch ) || ! is_string( $branch['type'] ?? null ) ) {
+		foreach ( $branches as $branch ) {
+			if ( ! is_array( $branch ) || ! in_array( $branch['type'] ?? null, self::JSON_TYPES, true ) ) {
 				return false;
 			}
 		}
