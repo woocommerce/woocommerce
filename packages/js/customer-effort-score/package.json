@@ -111,7 +111,7 @@
 		"jest-cli": "29.5.x",
 		"jest-environment-jsdom": "29.5.x",
 		"postcss": "catalog:tooling",
-		"postcss-loader": "4.3.x",
+		"postcss-loader": "catalog:tooling",
 		"react": "18.3.x",
 		"react-dom": "18.3.x",
 		"rimraf": "5.0.5",

@@ -179,7 +179,7 @@
 		"jest-cli": "29.5.x",
 		"jest-environment-jsdom": "29.5.x",
 		"postcss": "catalog:tooling",
-		"postcss-loader": "4.3.x",
+		"postcss-loader": "catalog:tooling",
 		"qrcode.react": "^3.1.0",
 		"react": "18.3.x",
 		"react-dom": "18.3.x",

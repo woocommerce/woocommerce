@@ -126,6 +126,7 @@
 				"copy-webpack-plugin",
 				"css-loader",
 				"postcss",
+				"postcss-loader",
 				"prettier",
 				"simple-git",
 				"webpack",
@@ -469,15 +470,6 @@
 				"**"
 			],
 			"pinVersion": "2.1.x"
-		},
-		{
-			"dependencies": [
-				"postcss-loader"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "4.3.x"
 		},
 		{
 			"dependencies": [

@@ -89,6 +89,7 @@ catalogs:
         copy-webpack-plugin: 14.0.x
         css-loader: 6.11.x
         postcss: ^8.5.26
+        postcss-loader: 4.3.x
         prettier: npm:wp-prettier@3.9.6
         simple-git: ^4.0.2
         stylelint: ^16.9.0
