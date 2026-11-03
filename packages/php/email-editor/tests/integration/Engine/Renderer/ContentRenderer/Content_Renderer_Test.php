@@ -794,6 +794,24 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test a link color set on a block in the editor, which WordPress prints in the block-supports stylesheet, is inlined.
+	 */
+	public function testItInlinesALinkColorSetOnABlock(): void {
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+		$email_post        = $this->create_email_post( '<!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"var:preset|color|vivid-red"}}}}} --><p class="has-link-color">Read <a href="https://example.com">more</a></p><!-- /wp:paragraph -->' );
+
+		try {
+			$rendered = $this->renderer->render( $email_post, $template );
+		} finally {
+			\WP_Style_Engine_CSS_Rules_Store::remove_all_stores();
+		}
+
+		$this->assertStringContainsString( 'color: #cf2e2e', (string) $this->getStylesValueForTag( $rendered, 'a' ) );
+	}
+
+	/**
 	 * Test content styles added through the filter are inlined when they use `:where()`.
 	 */
 	public function testItInlinesFilteredContentStylesWithWhere(): void {
