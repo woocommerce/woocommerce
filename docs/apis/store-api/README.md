@@ -169,22 +169,27 @@ If you're looking to add _new routes and endpoints_, rather than extending the S
 WooCommerce doesn't load the cart for REST requests outside the Store API, so `WC()->cart` is `null` in a route registered with `register_rest_route()`. Load it in your callback before using it:
 
 ```php
-register_rest_route(
-	'my-extension/v1',
-	'/cart-summary',
-	array(
-		'methods'             => 'GET',
-		'permission_callback' => '__return_true',
-		'callback'            => function () {
-			if ( ! function_exists( 'wc_load_cart' ) ) {
-				return new WP_Error( 'cart_unavailable', 'WooCommerce is not active.', array( 'status' => 503 ) );
-			}
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'my-extension/v1',
+			'/cart-summary',
+			array(
+				'methods'             => 'GET',
+				'permission_callback' => '__return_true',
+				'callback'            => function () {
+					if ( ! function_exists( 'wc_load_cart' ) ) {
+						return new WP_Error( 'cart_unavailable', 'WooCommerce is not active.', array( 'status' => 503 ) );
+					}
 
-			wc_load_cart();
+					wc_load_cart();
 
-			return array( 'items_count' => WC()->cart->get_cart_contents_count() );
-		},
-	)
+					return array( 'items_count' => WC()->cart->get_cart_contents_count() );
+				},
+			)
+		);
+	}
 );
 ```
 
@@ -206,8 +211,12 @@ wp_add_inline_script(
 ```
 
 ```js
-const response = await fetch( myExtension.cartSummaryUrl, {
-	credentials: 'same-origin',
-	headers: { 'X-WP-Nonce': myExtension.restNonce },
-} );
+async function getCartSummary() {
+	const response = await fetch( myExtension.cartSummaryUrl, {
+		credentials: 'same-origin',
+		headers: { 'X-WP-Nonce': myExtension.restNonce },
+	} );
+
+	return response.json();
+}
 ```

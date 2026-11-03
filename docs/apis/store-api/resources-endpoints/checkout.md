@@ -264,10 +264,6 @@ An example of the payment data sent to the Checkout endpoint by current versions
     {
       "key": "wc-stripe-payment-method",
       "value": "pm_xxxxxxxxxxxxx"
-    },
-    {
-      "key": "wc-stripe-is-deferred-intent",
-      "value": true
     }
   ]
 }

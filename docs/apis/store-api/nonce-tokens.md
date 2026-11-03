@@ -44,17 +44,23 @@ Then send it in the `Nonce` header, and keep the updated value the response retu
 ```js
 let nonce = myStoreApi.nonce;
 
-const response = await fetch( `${ myStoreApi.root }cart/add-item`, {
-	method: 'POST',
-	credentials: 'same-origin',
-	headers: {
-		'Content-Type': 'application/json',
-		Nonce: nonce,
-	},
-	body: JSON.stringify( { id: 100, quantity: 1 } ),
-} );
+async function addToCart( id, quantity ) {
+	const response = await fetch( `${ myStoreApi.root }cart/add-item`, {
+		method: 'POST',
+		credentials: 'same-origin',
+		headers: {
+			'Content-Type': 'application/json',
+			Nonce: nonce,
+		},
+		body: JSON.stringify( { id, quantity } ),
+	} );
 
-nonce = response.headers.get( 'Nonce' ) || nonce;
+	nonce = response.headers.get( 'Nonce' ) || nonce;
+
+	return response.json();
+}
+
+addToCart( 100, 1 );
 ```
 
 `credentials: 'same-origin'` sends the cookies that identify the customer's cart session.
