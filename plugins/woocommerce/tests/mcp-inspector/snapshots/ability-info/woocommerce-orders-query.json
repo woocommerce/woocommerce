@@ -1,0 +1,441 @@
+{
+	"name": "woocommerce/orders-query",
+	"label": "Query orders",
+	"description": "Find orders by ID or common order filters.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"id": {
+				"type": "integer",
+				"minimum": 1
+			},
+			"type": {
+				"type": "string",
+				"description": "Order type to list. Extensions can register more order types. Defaults to shop_order.",
+				"enum": [
+					"shop_order"
+				],
+				"default": "shop_order"
+			},
+			"status": {
+				"description": "Filter by one order status slug, or a list of slugs, without the wc- prefix. Custom order types may add their own statuses.",
+				"anyOf": [
+					{
+						"type": "string",
+						"enum": [
+							"pending",
+							"processing",
+							"on-hold",
+							"completed",
+							"cancelled",
+							"refunded",
+							"failed"
+						]
+					},
+					{
+						"type": "array",
+						"items": {
+							"type": "string",
+							"enum": [
+								"pending",
+								"processing",
+								"on-hold",
+								"completed",
+								"cancelled",
+								"refunded",
+								"failed"
+							]
+						}
+					}
+				]
+			},
+			"customer_id": {
+				"type": "integer",
+				"description": "Filter by customer ID. Use 0 to filter guest orders.",
+				"minimum": 0
+			},
+			"billing_email": {
+				"type": "string",
+				"format": "email"
+			},
+			"parent": {
+				"type": "integer",
+				"description": "Filter by parent order ID.",
+				"minimum": 1
+			},
+			"exclude": {
+				"type": "array",
+				"description": "Order IDs to exclude from the results.",
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				}
+			},
+			"date_after": {
+				"type": "string",
+				"description": "Filter orders created after this date and time, in ISO 8601 format. A value without a UTC offset, such as 2025-07-15T10:00:00, is in the store timezone. Add Z or an offset such as +02:00 to use another timezone.",
+				"format": "date-time"
+			},
+			"date_before": {
+				"type": "string",
+				"description": "Filter orders created before this date and time, in ISO 8601 format. A value without a UTC offset, such as 2025-07-15T10:00:00, is in the store timezone. Add Z or an offset such as +02:00 to use another timezone.",
+				"format": "date-time"
+			},
+			"modified_after": {
+				"type": "string",
+				"description": "Filter orders modified after this date and time, in ISO 8601 format. A value without a UTC offset, such as 2025-07-15T10:00:00, is in the store timezone. Add Z or an offset such as +02:00 to use another timezone.",
+				"format": "date-time"
+			},
+			"modified_before": {
+				"type": "string",
+				"description": "Filter orders modified before this date and time, in ISO 8601 format. A value without a UTC offset, such as 2025-07-15T10:00:00, is in the store timezone. Add Z or an offset such as +02:00 to use another timezone.",
+				"format": "date-time"
+			},
+			"orderby": {
+				"type": "string",
+				"enum": [
+					"id",
+					"date",
+					"date_modified",
+					"total"
+				]
+			},
+			"order": {
+				"type": "string",
+				"enum": [
+					"asc",
+					"desc"
+				]
+			},
+			"include_line_items": {
+				"type": "boolean",
+				"description": "Whether to include order line items in each returned order. Defaults to false.",
+				"default": false
+			},
+			"page": {
+				"type": "integer",
+				"default": 1,
+				"minimum": 1
+			},
+			"per_page": {
+				"type": "integer",
+				"default": 10,
+				"minimum": 1,
+				"maximum": 100
+			}
+		},
+		"additionalProperties": false,
+		"default": []
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"orders": {
+				"type": "array",
+				"description": "Returned orders for the current page.",
+				"items": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "integer"
+						},
+						"status": {
+							"type": "string",
+							"enum": [
+								"pending",
+								"failed",
+								"on-hold",
+								"completed",
+								"processing",
+								"refunded",
+								"cancelled",
+								"trash",
+								"new",
+								"auto-draft",
+								"draft",
+								"checkout-draft"
+							]
+						},
+						"currency": {
+							"type": "string",
+							"enum": [
+								"AED",
+								"AFN",
+								"ALL",
+								"AMD",
+								"ANG",
+								"AOA",
+								"ARS",
+								"AUD",
+								"AWG",
+								"AZN",
+								"BAM",
+								"BBD",
+								"BDT",
+								"BGN",
+								"BHD",
+								"BIF",
+								"BMD",
+								"BND",
+								"BOB",
+								"BRL",
+								"BSD",
+								"BTC",
+								"BTN",
+								"BWP",
+								"BYR",
+								"BYN",
+								"BZD",
+								"CAD",
+								"CDF",
+								"CHF",
+								"CHW",
+								"CLP",
+								"CNY",
+								"COP",
+								"CRC",
+								"CUC",
+								"CUP",
+								"CVE",
+								"CZK",
+								"DJF",
+								"DKK",
+								"DOP",
+								"DZD",
+								"EGP",
+								"ERN",
+								"ETB",
+								"EUR",
+								"FJD",
+								"FKP",
+								"GBP",
+								"GEL",
+								"GGP",
+								"GHS",
+								"GIP",
+								"GMD",
+								"GNF",
+								"GTQ",
+								"GYD",
+								"HKD",
+								"HNL",
+								"HRK",
+								"HTG",
+								"HUF",
+								"IDR",
+								"ILS",
+								"IMP",
+								"INR",
+								"IQD",
+								"IRR",
+								"IRT",
+								"ISK",
+								"JEP",
+								"JMD",
+								"JOD",
+								"JPY",
+								"KES",
+								"KGS",
+								"KHR",
+								"KMF",
+								"KPW",
+								"KRW",
+								"KWD",
+								"KYD",
+								"KZT",
+								"LAK",
+								"LBP",
+								"LKR",
+								"LRD",
+								"LSL",
+								"LYD",
+								"MAD",
+								"MDL",
+								"MGA",
+								"MKD",
+								"MMK",
+								"MNT",
+								"MOP",
+								"MRU",
+								"MUR",
+								"MVR",
+								"MWK",
+								"MXN",
+								"MYR",
+								"MZN",
+								"NAD",
+								"NGN",
+								"NIO",
+								"NOK",
+								"NPR",
+								"NZD",
+								"OMR",
+								"PAB",
+								"PEN",
+								"PGK",
+								"PHP",
+								"PKR",
+								"PLN",
+								"PRB",
+								"PYG",
+								"QAR",
+								"RON",
+								"RSD",
+								"RUB",
+								"RWF",
+								"SAR",
+								"SBD",
+								"SCR",
+								"SDG",
+								"SEK",
+								"SGD",
+								"SHP",
+								"SLL",
+								"SOS",
+								"SRD",
+								"SSP",
+								"STN",
+								"SYP",
+								"SZL",
+								"THB",
+								"TJS",
+								"TMT",
+								"TND",
+								"TOP",
+								"TRY",
+								"TTD",
+								"TWD",
+								"TZS",
+								"UAH",
+								"UGX",
+								"USD",
+								"UYU",
+								"UZS",
+								"VEF",
+								"VES",
+								"VND",
+								"VUV",
+								"WST",
+								"XAF",
+								"XCD",
+								"XOF",
+								"XPF",
+								"YER",
+								"ZAR",
+								"ZMW"
+							]
+						},
+						"currency_symbol": {
+							"type": "string"
+						},
+						"total": {
+							"type": "string"
+						},
+						"customer_id": {
+							"type": "integer"
+						},
+						"billing_email": {
+							"type": [
+								"string",
+								"null"
+							],
+							"format": "email"
+						},
+						"payment_method": {
+							"type": "string"
+						},
+						"payment_method_title": {
+							"type": "string"
+						},
+						"date_created": {
+							"type": [
+								"string",
+								"null"
+							],
+							"format": "date-time"
+						},
+						"date_created_gmt": {
+							"type": [
+								"string",
+								"null"
+							],
+							"format": "date-time"
+						},
+						"date_modified": {
+							"type": [
+								"string",
+								"null"
+							],
+							"format": "date-time"
+						},
+						"date_modified_gmt": {
+							"type": [
+								"string",
+								"null"
+							],
+							"format": "date-time"
+						},
+						"line_items": {
+							"type": "array",
+							"description": "Order line items. Only present when include_line_items is true.",
+							"items": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "integer"
+									},
+									"name": {
+										"type": "string"
+									},
+									"product_id": {
+										"type": "integer"
+									},
+									"variation_id": {
+										"type": "integer"
+									},
+									"quantity": {
+										"type": "integer"
+									},
+									"subtotal": {
+										"type": "string"
+									},
+									"total": {
+										"type": "string"
+									}
+								},
+								"additionalProperties": false
+							}
+						}
+					},
+					"additionalProperties": false
+				}
+			},
+			"total_pages": {
+				"type": "integer",
+				"description": "Total number of result pages available for the current query."
+			},
+			"page": {
+				"type": "integer",
+				"description": "Current result page."
+			},
+			"per_page": {
+				"type": "integer",
+				"description": "Maximum number of items requested per page."
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": true,
+			"destructive": false,
+			"idempotent": true
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}
