@@ -45,7 +45,7 @@ class Separator extends Abstract_Block_Renderer {
 				),
 				array(
 					'align' => 'center',
-					'style' => "color:{$color};font-family:serif;font-size:{$dots_size}px;line-height:1;letter-spacing:{$spacing}px;padding-left:{$spacing}px;",
+					'style' => "color:{$color};font-family:serif;font-size:{$dots_size}px;line-height:1;mso-line-height-rule:exactly;letter-spacing:{$spacing}px;padding-left:{$spacing}px;",
 				)
 			);
 		}

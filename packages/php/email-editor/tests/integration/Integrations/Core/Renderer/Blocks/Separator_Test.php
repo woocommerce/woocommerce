@@ -183,15 +183,14 @@ class Separator_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * A color that isn't a valid CSS color never reaches the style attribute.
+	 * A color that isn’t a valid CSS color never reaches the style attribute.
 	 */
 	public function testItDropsInvalidColor(): void {
 		$rendered = $this->render(
-			array( 'style' => array( 'color' => array( 'background' => 'red;background:url(x)' ) ) ),
-			'<hr class="wp-block-separator has-alpha-channel-opacity"/>',
-			array( 'color' => '#123456' )
+			array( 'style' => array( 'color' => array( 'background' => 'red;background:url(x)' ) ) )
 		);
 
 		$this->assertStringNotContainsString( 'url(', $rendered );
+		$this->assertStringContainsString( 'border-top:2px solid #000000', $rendered );
 	}
 }
