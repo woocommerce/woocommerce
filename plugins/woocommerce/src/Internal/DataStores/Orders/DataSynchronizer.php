@@ -572,8 +572,8 @@ class DataSynchronizer implements BatchProcessorInterface {
 SELECT
  COUNT(CASE WHEN (posts.post_type IS NULL OR posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "')
   AND orders.status <> %s AND orders.type IN ($order_post_type_placeholder) THEN 1 END)
- + COUNT(CASE WHEN posts.post_type IN ($order_post_type_placeholder)
-  AND orders.date_updated_gmt > posts.post_modified_gmt THEN 1 END) AS count
+ + COUNT(CASE WHEN orders.date_updated_gmt > posts.post_modified_gmt
+  AND posts.post_type IN ($order_post_type_placeholder) THEN 1 END) AS count
 FROM $orders_table orders
 LEFT JOIN $wpdb->posts posts ON posts.ID = orders.id",
 				// Both IN clauses need their own copy of the order-type arguments.
