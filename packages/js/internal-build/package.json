@@ -68,7 +68,7 @@
 		"mini-css-extract-plugin": "2.9.x",
 		"postcss-loader": "catalog:tooling",
 		"rtlcss": "4.3.x",
-		"sass-loader": "10.5.x",
+		"sass-loader": "catalog:tooling",
 		"webpack-remove-empty-scripts": "1.0.x"
 	},
 	"devDependencies": {

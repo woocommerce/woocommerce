@@ -202,7 +202,7 @@
 		"redux": "4.2.1",
 		"rimraf": "5.0.5",
 		"rtlcss": "4.3.x",
-		"sass-loader": "10.5.x",
+		"sass-loader": "catalog:tooling",
 		"storybook": "10.6.5",
 		"stylelint": "catalog:tooling",
 		"stylelint-scss": "^6.4.0",

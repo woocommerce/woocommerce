@@ -128,6 +128,7 @@
 				"postcss",
 				"postcss-loader",
 				"prettier",
+				"sass-loader",
 				"simple-git",
 				"webpack",
 				"webpack-cli"
@@ -488,15 +489,6 @@
 				"**"
 			],
 			"pinVersion": "5.0.5"
-		},
-		{
-			"dependencies": [
-				"sass-loader"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "10.5.x"
 		},
 		{
 			"dependencyTypes": [

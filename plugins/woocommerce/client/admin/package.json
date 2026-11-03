@@ -206,7 +206,7 @@
 		"rimraf": "5.0.5",
 		"rtlcss": "4.3.x",
 		"sass": "^1.69.5",
-		"sass-loader": "10.5.x",
+		"sass-loader": "catalog:tooling",
 		"stylelint": "catalog:tooling",
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",

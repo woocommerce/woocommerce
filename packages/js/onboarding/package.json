@@ -99,7 +99,7 @@
 		"postcss": "catalog:tooling",
 		"postcss-loader": "catalog:tooling",
 		"rimraf": "5.0.5",
-		"sass-loader": "10.5.x",
+		"sass-loader": "catalog:tooling",
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
 		"webpack": "catalog:tooling",
