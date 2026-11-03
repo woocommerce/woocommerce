@@ -1442,6 +1442,80 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: a saving method that runs after its stage method replaces the staged entry, so the next save does not
+	 * fire woocommerce_order_after_calculate_totals again.
+	 */
+	public function test_saving_method_after_its_stage_method_replaces_the_staged_entry() {
+		$order    = WC_Helper_Order::create_order();
+		$calls    = array();
+		$listener = static function ( $and_taxes, $listened_order, $staged ) use ( &$calls ) {
+			$calls[] = $staged;
+		};
+		add_action( 'woocommerce_order_after_calculate_totals', $listener, 10, 3 );
+
+		$order->stage_totals( false );
+		$order->calculate_totals( false );
+		$order->save();
+		remove_action( 'woocommerce_order_after_calculate_totals', $listener, 10 );
+
+		$this->assertSame( array( false ), $calls );
+	}
+
+	/**
+	 * Test: a clone starts without the staged callbacks, so saving the clone and then the original fires
+	 * woocommerce_order_after_calculate_totals once, for the original.
+	 */
+	public function test_clone_does_not_copy_staged_callbacks() {
+		$order    = WC_Helper_Order::create_order();
+		$orders   = array();
+		$listener = static function ( $and_taxes, $listened_order ) use ( &$orders ) {
+			$orders[] = $listened_order;
+		};
+		add_action( 'woocommerce_order_after_calculate_totals', $listener, 10, 2 );
+
+		$order->stage_totals( false );
+		$copy = clone $order;
+		$copy->save();
+		$order->save();
+		remove_action( 'woocommerce_order_after_calculate_totals', $listener, 10 );
+
+		$this->assertSame( array( $order ), $orders );
+	}
+
+	/**
+	 * Test: stage_coupon() refuses a class that overrides only calculate_totals() before it fires
+	 * woocommerce_order_applied_coupon or adds the coupon.
+	 */
+	public function test_stage_coupon_refuses_an_unadopted_twin_of_its_chain_before_any_change() {
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'chain' );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
+		$order = new class() extends WC_Order {
+			public function calculate_totals( $and_taxes = true ) {
+				return parent::calculate_totals( $and_taxes );
+			}
+		};
+		// phpcs:enable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
+		$order->add_product( WC_Helper_Product::create_simple_product(), 1 );
+		$order->calculate_totals();
+
+		$fired = did_action( 'woocommerce_order_applied_coupon' );
+		try {
+			$order->stage_coupon( 'chain' );
+			$this->fail( 'stage_coupon did not refuse the class.' );
+		} catch ( WC_Data_Exception $e ) {
+			$this->assertStringContainsString( 'stage_totals()', $e->getMessage() );
+		}
+
+		$this->assertSame( 0, did_action( 'woocommerce_order_applied_coupon' ) - $fired );
+		$this->assertCount( 0, $order->get_items( 'coupon' ) );
+	}
+
+	/**
 	 * Test: a woocommerce_order_after_calculate_totals listener that calls a saving method saves the order from
 	 * inside the save of stage_totals(). The action fires once, and the listener's taxes and total are written.
 	 */

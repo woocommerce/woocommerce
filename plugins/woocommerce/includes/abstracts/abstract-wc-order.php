@@ -60,6 +60,19 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	private $deferred_actions = array();
 
 	/**
+	 * Saving methods and their stage methods, in the order the stage methods call each other. For example,
+	 * stage_recalculated_coupons() calls stage_totals().
+	 *
+	 * @var array<string, string>
+	 */
+	private const STAGED_CHAIN = array(
+		'recalculate_coupons' => 'stage_recalculated_coupons',
+		'calculate_totals'    => 'stage_totals',
+		'calculate_taxes'     => 'stage_taxes',
+		'update_taxes'        => 'stage_tax_items',
+	);
+
+	/**
 	 * Coupons that stage_coupon() applied since the last save, keyed by code. The next save() records their usage.
 	 *
 	 * @var WC_Coupon[]
@@ -250,6 +263,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * Orders use cache mode. A cached copy keeps its meta IDs, so it does not insert its meta again on save.
 	 * Each copy gets its own meta, item, and date objects, so a change to one copy does not reach the others.
+	 * A copy starts without the staged callbacks and coupons, so a save of the copy does not run them for the
+	 * original order.
 	 *
 	 * Eventually, Core should stop unsetting meta IDs in WC_Data::__clone() for every subclass, and make
 	 * duplication an explicit operation. Duplicating an object does not need to hook into __clone().
@@ -258,6 +273,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function __clone() {
 		parent::__clone();
+		$this->deferred_actions = array();
+		$this->staged_coupons   = array();
 		foreach ( $this->items as $group => $items ) {
 			foreach ( $items as $key => $item ) {
 				$mode = $item->get_clone_mode();
@@ -390,6 +407,22 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Refuse the stage methods that a stage method calls, from the given saving method to the end of the chain.
+	 * A stage method calls this before it fires a hook or changes the order, so a refusal deeper in the chain
+	 * does not leave a change half done.
+	 *
+	 * @since 11.4.0
+	 * @param string $method First saving method of the chain to check, for example calculate_totals.
+	 * @throws WC_Data_Exception When a class has not adopted one of the stage methods.
+	 */
+	private function refuse_unstaged_chain( string $method ): void {
+		$chain = array_slice( self::STAGED_CHAIN, (int) array_search( $method, array_keys( self::STAGED_CHAIN ), true ), null, true );
+		foreach ( $chain as $saving_method => $stage_method ) {
+			$this->refuse_unstaged_override( $saving_method, $stage_method );
+		}
+	}
+
+	/**
 	 * Leave a callback to the next save(), which runs it before or after the order is written. An entry with
 	 * the same key replaces the earlier one, and a null callback removes it.
 	 *
@@ -465,6 +498,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	protected function write_or_defer( string $key, callable $callback, array $args = array(), bool $after_save = false ): void {
 		if ( $this->writing_through ) {
+			unset( $this->deferred_actions[ $key ] );
 			call_user_func_array( $callback, $args );
 			return;
 		}
@@ -1920,6 +1954,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function stage_coupon( $raw_coupon ) {
 		$this->refuse_unstaged_override( 'apply_coupon', 'stage_coupon' );
+		$this->refuse_unstaged_chain( 'recalculate_coupons' );
 
 		if ( is_a( $raw_coupon, 'WC_Coupon' ) ) {
 			$coupon = $raw_coupon;
@@ -2219,6 +2254,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function stage_coupon_removal( $code ) {
 		$this->refuse_unstaged_override( 'remove_coupon', 'stage_coupon_removal' );
+		$this->refuse_unstaged_chain( 'recalculate_coupons' );
 
 		$coupons      = $this->get_items( 'coupon' );
 		$has_recorded = $this->has_recorded_coupon_usage();
@@ -2366,6 +2402,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function stage_recalculated_coupons() {
 		$this->refuse_unstaged_override( 'recalculate_coupons', 'stage_recalculated_coupons' );
+		$this->refuse_unstaged_chain( 'calculate_totals' );
 
 		// Reset line item totals.
 		foreach ( $this->get_items() as $item ) {
@@ -2920,6 +2957,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function stage_taxes( $args = array() ) {
 		$this->refuse_unstaged_override( 'calculate_taxes', 'stage_taxes' );
+		$this->refuse_unstaged_chain( 'update_taxes' );
 
 		do_action( 'woocommerce_order_before_calculate_taxes', $args, $this );
 
@@ -3135,6 +3173,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function stage_totals( $and_taxes = true ) {
 		$this->refuse_unstaged_override( 'calculate_totals', 'stage_totals' );
+		if ( $and_taxes ) {
+			$this->refuse_unstaged_chain( 'calculate_taxes' );
+		}
 
 		do_action( 'woocommerce_order_before_calculate_totals', $and_taxes, $this );
 
