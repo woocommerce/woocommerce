@@ -2418,6 +2418,18 @@ p.demo_store,
 	}
 }
 
+// The email sits in <code> so wptexturize() leaves it unchanged; show it as plain text.
+.woocommerce-order-withdrawal-content code.woocommerce-email,
+.woocommerce-review-order__meta code.woocommerce-email,
+.woocommerce-message code.woocommerce-email,
+.wc-block-components-notice-banner__content code.woocommerce-email {
+	font: inherit;
+	color: inherit;
+	background: none;
+	border: 0;
+	padding: 0;
+}
+
 /**
  * Order withdrawal form
  */
