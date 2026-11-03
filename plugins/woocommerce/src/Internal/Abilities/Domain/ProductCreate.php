@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
+use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductFieldRefusalsTrait;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -22,6 +23,7 @@ class ProductCreate extends ActionableAbility {
 
 	use DomainAbilityHelpers;
 	use ProductAbilityTrait;
+	use ProductFieldRefusalsTrait;
 
 	/**
 	 * Ability name.

@@ -2523,6 +2523,103 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Delete flag values that the boolean schema accepts and that mean false.
+	 *
+	 * @return array<string, array{0: bool|string|int}>
+	 */
+	public function provider_false_delete_flags(): array {
+		return array(
+			'boolean false' => array( false ),
+			'string false'  => array( 'false' ),
+			'string zero'   => array( '0' ),
+			'integer zero'  => array( 0 ),
+		);
+	}
+
+	/**
+	 * @testdox Should change a variation through the parent when its item sends a false delete flag.
+	 * @dataProvider provider_false_delete_flags
+	 *
+	 * @param bool|string|int $flag Delete flag value.
+	 */
+	public function test_a_variation_item_with_a_false_delete_flag_is_a_change( $flag ): void {
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[] = $created['product']['id'];
+		$variation_id                = $created['product']['variation_ids'][0];
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'         => $created['product']['id'],
+				'variations' => array(
+					array(
+						'id'            => $variation_id,
+						'delete'        => $flag,
+						'regular_price' => '9.00',
+					),
+				),
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertNotNull( get_post( $variation_id ) );
+		$this->assertSame( '9.00', wc_get_product( $variation_id )->get_regular_price() );
+
+		$kept = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'         => $created['product']['id'],
+				'variations' => array(
+					array(
+						'id'     => $variation_id,
+						'delete' => $flag,
+					),
+				),
+			)
+		);
+
+		$this->assertNotWPError( $kept );
+		$this->assertNotNull( get_post( $variation_id ) );
+	}
+
+	/**
+	 * @testdox Should move a product to the trash when force is the string false.
+	 */
+	public function test_product_delete_with_force_string_false_trashes(): void {
+		$product                     = \WC_Helper_Product::create_simple_product();
+		$this->created_product_ids[] = $product->get_id();
+
+		$result = wp_get_ability( 'woocommerce/product-delete' )->execute(
+			array(
+				'id'    => $product->get_id(),
+				'force' => 'false',
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'trash', get_post_status( $product->get_id() ) );
+	}
+
+	/**
+	 * @testdox Should read string false on the attribute flags of a product as false.
+	 */
+	public function test_product_create_reads_string_false_attribute_flags(): void {
+		$input                               = $this->get_shirt_input();
+		$input['attributes'][0]['visible']   = 'false';
+		$input['attributes'][0]['variation'] = 'false';
+		$input['attributes'][0]['global']    = 'false';
+		unset( $input['variations'] );
+
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $input );
+
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[] = $created['product']['id'];
+		$attribute                   = $created['product']['attributes'][0];
+		$this->assertFalse( $attribute['visible'] );
+		$this->assertFalse( $attribute['variation'] );
+		$this->assertSame( 0, $attribute['id'] );
+	}
+
+	/**
 	 * @testdox Should fail a variation delete through the parent when pre_delete_post blocks it.
 	 */
 	public function test_a_blocked_variation_delete_through_the_parent_fails(): void {
