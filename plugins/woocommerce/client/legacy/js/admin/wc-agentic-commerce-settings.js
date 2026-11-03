@@ -10,9 +10,6 @@
 	const knob = toggle && toggle.querySelector( '.woocommerce-input-toggle' );
 	const message = document.querySelector( '.wc-agentic-commerce-ucp-message' );
 	const statusBadge = document.querySelector( '.wc-agentic-commerce-status' );
-	const accessSummary = document.querySelector(
-		'.wc-agentic-commerce-access-summary'
-	);
 
 	const render = ( enabled ) => {
 		toggle.setAttribute( 'aria-checked', enabled ? 'true' : 'false' );
@@ -46,10 +43,6 @@
 				render( response.enabled );
 				renderStatus( response.status );
 				message.textContent = response.enabled ? settings.i18n.on : '';
-				if ( accessSummary ) {
-					accessSummary.textContent =
-						accessSummary.dataset[ response.enabled ? 'on' : 'off' ];
-				}
 			} catch ( error ) {
 				render( ! enable );
 				message.textContent = ( error && error.message ) || settings.i18n.error;
