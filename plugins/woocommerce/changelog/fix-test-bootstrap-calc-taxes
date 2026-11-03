@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Enable taxes in the PHP test bootstrap after install so tests no longer depend on leaked options; no production change.

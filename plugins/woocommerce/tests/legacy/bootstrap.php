@@ -262,7 +262,6 @@ class WC_Unit_Tests_Bootstrap {
 		define( 'WC_USE_TRANSACTIONS', false );
 
 		update_option( 'woocommerce_enable_coupons', 'yes' );
-		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_onboarding_opt_in', 'yes' );
 
 		require_once $this->plugin_dir . '/woocommerce.php';
@@ -287,6 +286,9 @@ class WC_Unit_Tests_Bootstrap {
 		}
 
 		WC_Install::install();
+
+		// uninstall.php above deletes every woocommerce_* option, so enable taxes after the install.
+		update_option( 'woocommerce_calc_taxes', 'yes' );
 
 		// Run the test suite with product object caching enabled (the new-install default).
 		// This ensures tests exercise the cache-on path and fail loudly if any code bypasses
