@@ -128,6 +128,26 @@ class WC_Privacy_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The order eraser erases orders whose anonymized marker is set to a value other than yes.
+	 *
+	 * @return void
+	 */
+	public function test_order_data_eraser_erases_orders_not_marked_anonymized(): void {
+		update_option( 'woocommerce_erasure_request_removes_order_data', 'yes' );
+		$order_ids = $this->create_orders_for_email( 'guest@example.com', 2 );
+		$order     = wc_get_order( $order_ids[0] );
+		$order->update_meta_data( '_anonymized', 'no' );
+		$order->save();
+
+		$messages = $this->run_order_data_eraser( 'guest@example.com' );
+
+		$this->assertCount( 2, $messages, 'Each order is processed once.' );
+		foreach ( $order_ids as $order_id ) {
+			$this->assertSame( 'yes', wc_get_order( $order_id )->get_meta( '_anonymized' ), "Order $order_id is anonymized." );
+		}
+	}
+
+	/**
 	 * Create orders with distinct creation dates for a billing email.
 	 *
 	 * @param string $email Billing email.
