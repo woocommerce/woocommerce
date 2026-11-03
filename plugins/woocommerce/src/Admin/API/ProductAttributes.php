@@ -121,8 +121,14 @@ class ProductAttributes extends \WC_REST_Product_Attributes_Controller {
 				'has_archives' => false,
 			);
 
+			$links = $this->prepare_links( (object) array( 'attribute_id' => $attribute_key ) );
+			// All-digit paths belong to global attribute IDs, not custom slugs.
+			if ( preg_match( '/^\d+$/D', (string) $attribute_key ) ) {
+				unset( $links['self'] );
+			}
+
 			$item_response = rest_ensure_response( $data );
-			$item_response->add_links( $this->prepare_links( (object) array( 'attribute_id' => $attribute_key ) ) );
+			$item_response->add_links( $links );
 			$item_response = $this->prepare_response_for_collection(
 				$item_response
 			);
