@@ -157,7 +157,7 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 
 		ImportSession::cleanup_abandoned_file( 75, 'ghost', $file );
 
-		$this->assertFileExists( $file, 'Only files staged in the uploads directory may be cleaned up' );
+		$this->assertFileExists( $file, 'Only files staged in the import directory may be cleaned up' );
 	}
 
 	/**
@@ -290,6 +290,35 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( ImportSession::is_staged_path( $staged ), 'A file in wc-imports is staged' );
 		$this->assertFalse( ImportSession::is_staged_path( $media ), 'A file elsewhere in uploads is not staged' );
 		$this->assertFalse( ImportSession::is_staged_path( '' ), 'An empty path is not staged' );
+
+		$gone_staged = dirname( $staged ) . '/wc-fulfillments-import-gone.csv';
+		$gone_media  = dirname( $media ) . '/wc-fulfillments-import-gone.csv';
+		$this->assertFileDoesNotExist( $gone_staged );
+		$this->assertTrue( ImportSession::is_staged_path( $gone_staged ), 'A missing file in wc-imports is still a staged path' );
+		$this->assertFalse( ImportSession::is_staged_path( $gone_media ), 'A missing file elsewhere in uploads is not staged' );
+		$this->assertFalse( ImportSession::is_staged_path( dirname( $staged ) . '/../wc-fulfillments-import-gone.csv' ), 'A missing path that climbs out of wc-imports is not staged' );
+		$this->assertFalse( ImportSession::is_staged_path( dirname( $staged ) . '/missing-dir/wc-fulfillments-import-gone.csv' ), 'A missing path in a missing directory is not staged' );
+	}
+
+	/**
+	 * @testdox cleanup_abandoned_file() keeps an attachment whose missing file is outside wc-imports.
+	 */
+	public function test_cleanup_abandoned_file_keeps_attachment_for_missing_file_outside_import_dir(): void {
+		$media = trailingslashit( wp_upload_dir()['basedir'] ) . 'wc-fulfillments-import-' . wp_generate_uuid4() . '.jpg';
+		$this->assertFileDoesNotExist( $media );
+
+		$attachment_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'Media with a missing original',
+				'post_mime_type' => 'image/jpeg',
+			),
+			$media
+		);
+		$this->assertGreaterThan( 0, $attachment_id );
+
+		ImportSession::cleanup_abandoned_file( 74, 'ghost', $media, (int) $attachment_id );
+
+		$this->assertNotNull( get_post( $attachment_id ), 'An attachment outside wc-imports must not be deleted even when its file is gone' );
 	}
 
 	/**

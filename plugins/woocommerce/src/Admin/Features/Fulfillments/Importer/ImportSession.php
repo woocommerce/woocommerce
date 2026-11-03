@@ -10,8 +10,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Admin\Features\Fulfillments\Importer;
 
 use Automattic\WooCommerce\Internal\Admin\ImportExport\CSVUploadHelper;
-use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -307,16 +305,16 @@ final class ImportSession {
 			return;
 		}
 
-		$file_exists = file_exists( $file );
-		if ( ! $file_exists && $attachment_id <= 0 ) {
+		if ( ! file_exists( $file ) && $attachment_id <= 0 ) {
 			return;
 		}
 
 		// The Action Scheduler payload is persisted, so refuse to delete anything that does not
-		// resolve inside the uploads directory even if the args were tampered with.
-		if ( $file_exists && ! self::is_staged_path( $file ) ) {
+		// resolve inside the import directory even if the args were tampered with. The check
+		// runs for a missing file too, because the attachment delete below does not need it.
+		if ( ! self::is_staged_path( $file ) ) {
 			wc_get_logger()->warning(
-				sprintf( 'Refusing to clean up staged fulfillments import file outside the uploads directory: %s', $file ),
+				sprintf( 'Refusing to clean up staged fulfillments import file outside the import directory: %s', $file ),
 				array( 'source' => 'fulfillments-importer' )
 			);
 			return;
@@ -355,9 +353,10 @@ final class ImportSession {
 	/**
 	 * Whether a path resolves inside the wc-imports directory CSVUploadHelper stages files in.
 	 *
-	 * FilesystemUtil::validate_upload_file_path() also accepts anything readable under
-	 * ABSPATH, which is far wider than anything this importer ever writes, and the
-	 * uploads directory itself holds media the cleanup must never touch.
+	 * The uploads directory itself holds media the cleanup must never touch, so the check
+	 * is against the import subdirectory only. A path whose file is already gone is
+	 * resolved through its directory, so the cleanup can still refuse it before deleting
+	 * an attachment that claims the same path.
 	 *
 	 * @since 11.4.0
 	 *
@@ -370,21 +369,22 @@ final class ImportSession {
 		}
 
 		try {
-			FilesystemUtil::validate_upload_file_path( $path );
+			$staging_dir = realpath( wc_get_container()->get( CSVUploadHelper::class )->get_import_dir( false ) );
 		} catch ( \Exception $e ) {
 			return false;
 		}
-
-		try {
-			$staging_dir = wc_get_container()->get( CSVUploadHelper::class )->get_import_dir( false );
-		} catch ( \Exception $e ) {
+		if ( false === $staging_dir ) {
 			return false;
 		}
 
-		$resolved    = realpath( $path );
-		$staging_dir = realpath( $staging_dir );
-		if ( false === $resolved || false === $staging_dir ) {
-			return false;
+		$resolved = realpath( $path );
+		if ( false === $resolved ) {
+			$name = wp_basename( $path );
+			$dir  = realpath( dirname( $path ) );
+			if ( false === $dir || '' === $name || '.' === $name || '..' === $name ) {
+				return false;
+			}
+			$resolved = trailingslashit( $dir ) . $name;
 		}
 
 		return 0 === strpos( wp_normalize_path( $resolved ), trailingslashit( wp_normalize_path( $staging_dir ) ) );
