@@ -918,10 +918,11 @@ trait ProductAbilityTrait {
 
 	/**
 	 * Check that no variation picks the same options as another variation in
-	 * the list or a saved variation of the parent, and that no two variations
-	 * in the list carry the same SKU. A saved variation that the input names is
-	 * left out, because the input changes or deletes it. `set_sku()` already
-	 * checks a SKU against the saved products.
+	 * the list or a saved variation of the parent, and that no variation in the
+	 * list carries the SKU of the parent or of another variation in the list. A
+	 * saved variation that the input names is left out, because the input
+	 * changes or deletes it. `set_sku()` already checks a SKU against the saved
+	 * products, but not against the parent's SKU before the parent is saved.
 	 *
 	 * @param \WC_Product_Variable    $parent_product Parent product.
 	 * @param \WC_Product_Variation[] $variations     Variations to save, in input order.
@@ -930,7 +931,8 @@ trait ProductAbilityTrait {
 	 */
 	protected static function check_variation_siblings( \WC_Product_Variable $parent_product, array $variations, array $named = array() ) {
 		$combinations = array();
-		$skus         = array();
+		$parent_sku   = $parent_product->get_sku( 'edit' );
+		$skus         = '' === $parent_sku ? array() : array( $parent_sku => true );
 		foreach ( $parent_product->get_id() > 0 ? self::read_variation_children( $parent_product, true )['all'] : array() as $child_id ) {
 			$child = isset( $named[ $child_id ] ) ? null : wc_get_product( $child_id );
 			if ( $child instanceof \WC_Product_Variation ) {
@@ -955,7 +957,7 @@ trait ProductAbilityTrait {
 				return new \WP_Error(
 					'woocommerce_product_variation_sku_duplicate',
 					/* translators: %d: variation position. */
-					sprintf( __( 'Variation %d repeats the SKU of another variation.', 'woocommerce' ), $position ),
+					sprintf( __( 'Variation %d repeats the SKU of the product or of another variation. Give each one its own SKU.', 'woocommerce' ), $position ),
 					array( 'status' => 400 )
 				);
 			}

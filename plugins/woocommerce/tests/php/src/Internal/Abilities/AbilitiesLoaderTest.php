@@ -2483,6 +2483,22 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse a variation that repeats the SKU of its parent.
+	 */
+	public function test_product_create_refuses_a_variation_with_the_parent_sku(): void {
+		$input                         = $this->get_shirt_input();
+		$input['sku']                  = 'shirt';
+		$input['variations'][1]['sku'] = 'shirt';
+
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute_change( $input );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_variation_sku_duplicate', $result->get_error_code() );
+		$this->assertStringContainsString( 'Variation 2', $result->get_error_message() );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'shirt' ) );
+	}
+
+	/**
 	 * @testdox Should treat a name as a local attribute unless global is true, and refuse an unknown global attribute.
 	 */
 	public function test_product_create_uses_a_global_attribute_only_when_asked(): void {
