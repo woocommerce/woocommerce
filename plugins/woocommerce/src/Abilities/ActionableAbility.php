@@ -443,14 +443,36 @@ abstract class ActionableAbility extends Ability {
 					/* translators: 1: Extension namespace. 2: Field name. */
 					$refusals[] = sprintf( __( 'The extension field "%1$s.%2$s" is read-only. Remove it from the input.', 'woocommerce' ), $namespace, $field );
 				} else {
-					$valid = rest_validate_value_from_schema( $value, $args['input_schema'], 'extensions.' . $namespace . '.' . $field );
+					$param = 'extensions.' . $namespace . '.' . $field;
+					$valid = rest_validate_value_from_schema( $value, $args['input_schema'], $param );
 					if ( is_wp_error( $valid ) ) {
-						$refusals[] = $valid->get_error_message();
+						$refusals[] = ( isset( $args['input_schema']['anyOf'] ) ? self::describe_any_of_refusal( $value, $args['input_schema']['anyOf'], $param ) : null ) ?? $valid->get_error_message();
 					}
 				}
 			}
 		}
 		return $refusals;
+	}
+
+	/**
+	 * Say what an `anyOf` field takes, because the WordPress message only says that no branch matched.
+	 * A value of none of the branch types gets the types it can take. A value of one branch type gets
+	 * the refusal of that branch, such as the values of its `enum`.
+	 *
+	 * @param mixed                            $value    Value from the input.
+	 * @param array<int, array<string, mixed>> $branches The `anyOf` branches, each with one type.
+	 * @param string                           $param    Path of the field in the input.
+	 * @return string|null The refusal, or null when the branch of the value accepts it.
+	 */
+	private static function describe_any_of_refusal( $value, array $branches, string $param ): ?string {
+		$types = array_column( $branches, 'type' );
+		$type  = rest_get_best_type_for_value( $value, $types );
+		if ( '' === $type ) {
+			/* translators: 1: Path of the field in the input. 2: Comma-separated list of JSON types. */
+			return sprintf( __( '%1$s is not of type %2$s.', 'woocommerce' ), $param, implode( ',', $types ) );
+		}
+		$valid = rest_validate_value_from_schema( $value, $branches[ array_search( $type, $types, true ) ], $param );
+		return is_wp_error( $valid ) ? $valid->get_error_message() : null;
 	}
 
 	/**

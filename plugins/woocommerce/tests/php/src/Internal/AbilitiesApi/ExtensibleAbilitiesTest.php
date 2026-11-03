@@ -226,11 +226,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 * @return array<string, mixed>
 	 */
 	private static function nullable( array $schema ): array {
-		$schema['type'] = array( $schema['type'], 'null' );
-		if ( isset( $schema['enum'] ) ) {
-			$schema['enum'][] = null;
-		}
-		return $schema;
+		$top = array_intersect_key( $schema, array( 'description' => true ) );
+		return $top + array( 'anyOf' => array( array_diff_key( $schema, $top ), array( 'type' => 'null' ) ) );
 	}
 
 	/**
@@ -1312,6 +1309,28 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse a field whose input schema has a list of types at the top level.
+	 */
+	public function test_a_top_level_type_list_in_an_input_schema_is_refused(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		AbilitiesLoader::register_core_resources();
+
+		ExtensibleAbilities::register_field(
+			array(
+				'resource'      => 'order',
+				'namespace'     => 'refused',
+				'field'         => 'value',
+				'output_schema' => array( 'type' => 'string' ),
+				'get_callback'  => '__return_null',
+				'input_schema'  => array( 'type' => array( 'string', 'null' ) ),
+				'set_callback'  => '__return_null',
+			)
+		);
+
+		$this->assertArrayNotHasKey( 'refused', ExtensibleAbilities::get_fields( 'order' ) );
+	}
+
+	/**
 	 * @testdox Should register a field whose input schema is an anyOf of single types, publish it as declared and pass null or a typed value to the set_callback.
 	 */
 	public function test_an_any_of_input_schema_takes_null_and_a_typed_value(): void {
@@ -1394,14 +1413,19 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	public function test_valid_schemas_are_published_as_declared(): void {
 		$input_schemas = array(
-			'type_list'   => array( 'type' => array( 'string', 'null' ) ),
+			'nullable'    => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ),
 			'any_of'      => array(
 				'type'       => 'object',
 				'properties' => array( 'a' => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ),
 			),
 			'enum_null'   => array(
-				'type' => array( 'string', 'null' ),
-				'enum' => array( 'a', null ),
+				'anyOf' => array(
+					array(
+						'type' => 'string',
+						'enum' => array( 'a' ),
+					),
+					array( 'type' => 'null' ),
+				),
 			),
 			'enum_mixed'  => array(
 				'type' => 'string',
@@ -2275,7 +2299,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 *           [{"nope":{}}, "No extension registered the namespace \"nope\" for this ability. Remove it from the input, or use a namespace from the input schema."]
 	 *           [{"other_ext":{"cuont":3}}, "The extension namespace \"other_ext\" has no field \"cuont\". The fields you can write in this namespace are: count, size. Use one of them, or remove \"other_ext.cuont\" from the input."]
 	 *           [{"test-ext":{"code":"A2"}}, "The extension field \"test-ext.code\" is read-only. Remove it from the input."]
-	 *           [{"other_ext":{"size":"huge"}}, "extensions.other_ext.size is not one of small, large, and null."]
+	 *           [{"other_ext":{"size":"huge"}}, "extensions.other_ext.size is not one of small and large."]
 	 *
 	 * @param array  $extensions Value of the `extensions` input.
 	 * @param string $message    Expected error message.
@@ -2396,7 +2420,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$result = wp_get_ability( $ability )->execute( $input );
 
 		$this->assertSame(
-			'extensions.other_ext.size is not one of small, large, and null. variations[0]: extensions.other_ext.count is not of type integer,null. variations[1]: No extension registered the namespace "nope" for this ability. Remove it from the input, or use a namespace from the input schema.',
+			'extensions.other_ext.size is not one of small and large. variations[0]: extensions.other_ext.count is not of type integer,null. variations[1]: No extension registered the namespace "nope" for this ability. Remove it from the input, or use a namespace from the input schema.',
 			$result->get_error_message()
 		);
 		$this->assertSame( 0, $validated );
@@ -3351,7 +3375,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( array( 'small', 'large', null ), $schema['enum'] );
+		$this->assertSame( array( 'small', 'large' ), $schema['anyOf'][0]['enum'] );
+		$this->assertSame( array( 'type' => 'null' ), $schema['anyOf'][1] );
 		$this->assertSame( 400, $rejected->get_status() );
 		$this->assertFalse( wc_get_product( $product->get_id() )->meta_exists( '_test_size' ) );
 	}
@@ -3373,7 +3398,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( array( 'string', 'null' ), $schema['properties']['test-ext']['properties']['color']['type'] );
+		$this->assertSame( array( 'string', 'null' ), array_column( $schema['properties']['test-ext']['properties']['color']['anyOf'], 'type' ) );
 		$this->assertArrayNotHasKey( 'code', $schema['properties']['test-ext']['properties'] );
 		$this->assertSame( 'Pencil', wc_get_product( $product->get_id() )->get_name() );
 		$this->assertSame( array( 'color' => 'green' ), $output['extensions']['test-ext'] );
@@ -3518,14 +3543,14 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$schema     = $this->get_ability( $name )['input_schema'];
 			$extensions = $schema['properties']['extensions']['properties'];
 
-			$this->assertSame( array( 'string', 'null' ), $extensions['test-ext']['properties']['color']['type'] );
-			$this->assertSame( array( 'integer', 'null' ), $extensions['other_ext']['properties']['count']['type'] );
+			$this->assertSame( array( 'string', 'null' ), array_column( $extensions['test-ext']['properties']['color']['anyOf'], 'type' ) );
+			$this->assertSame( array( 'integer', 'null' ), array_column( $extensions['other_ext']['properties']['count']['anyOf'], 'type' ) );
 			$this->assertArrayNotHasKey( 'code', $extensions['test-ext']['properties'] );
 			$this->assertSame( 2, substr_count( wp_json_encode( $schema ), '"color"' ) );
 			$this->assertArrayNotHasKey( 'oneOf', $schema );
 		}
 		$order = $this->get_ability( 'woocommerce/order-update-status' )['input_schema'];
-		$this->assertSame( array( 'string', 'null' ), $order['properties']['extensions']['properties']['test-ext']['properties']['gift_message']['type'] );
+		$this->assertSame( array( 'string', 'null' ), array_column( $order['properties']['extensions']['properties']['test-ext']['properties']['gift_message']['anyOf'], 'type' ) );
 		$delete = $this->get_ability( 'woocommerce/product-delete' )['input_schema'];
 		$this->assertArrayNotHasKey( 'extensions', $delete['properties'], 'A delete writes no extension fields.' );
 	}

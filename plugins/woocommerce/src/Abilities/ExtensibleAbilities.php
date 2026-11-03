@@ -148,10 +148,11 @@ class ExtensibleAbilities {
 	 *                                  a UTC offset: the schema check accepts them, and a strict client refuses
 	 *                                  the whole result.
 	 *     @type array    $input_schema Optional. JSON schema of the value that `set_callback` receives. It needs
-	 *                                  a `type`, or an `anyOf` where each branch has one `type`. Use the `anyOf`
-	 *                                  for a nullable field, such as `[{"type":"string"},{"type":"null"}]`,
-	 *                                  because some clients refuse a list of types. Core publishes it as declared.
-	 *                                  A value can be null only where it declares null. Required with `set_callback`.
+	 *                                  one `type` name, or an `anyOf` where each branch has one `type` name. A
+	 *                                  list of types is refused at the top level, because some clients refuse it:
+	 *                                  a nullable field uses `[{"type":"string"},{"type":"null"}]` as its `anyOf`.
+	 *                                  Core publishes it as declared. A value can be null only where it declares
+	 *                                  null. Required with `set_callback`.
 	 *     @type callable $set_callback Optional. Receives the object and the value, and changes the object
 	 *                                  in memory, when an ability creates or updates the object. It returns a
 	 *                                  WP_Error to reject the value, and then nothing is saved. A field without
@@ -228,7 +229,7 @@ class ExtensibleAbilities {
 				return;
 			}
 			if ( ! is_array( $args['input_schema'] ?? null ) || ! self::input_schema_has_type( $args['input_schema'] ) ) {
-				wc_doing_it_wrong( __METHOD__, 'The "input_schema" argument must be an array with a "type", or with an "anyOf" where each branch has one "type" name.', '11.4.0' );
+				wc_doing_it_wrong( __METHOD__, 'The "input_schema" argument must be an array with one "type" name, or with an "anyOf" where each branch has one "type" name. For a nullable field, use an "anyOf" with a {"type":"null"} branch instead of a list of types.', '11.4.0' );
 				return;
 			}
 		}
@@ -254,7 +255,7 @@ class ExtensibleAbilities {
 	}
 
 	/**
-	 * Whether a field input schema has a top-level `type`, or a non-empty
+	 * Whether a field input schema has one top-level `type` name, or a non-empty
 	 * `anyOf` where each branch has one type name. The REST schema check needs
 	 * a type for every branch that a value can match.
 	 *
@@ -263,7 +264,7 @@ class ExtensibleAbilities {
 	 */
 	private static function input_schema_has_type( array $schema ): bool {
 		if ( isset( $schema['type'] ) ) {
-			return true;
+			return is_string( $schema['type'] );
 		}
 		if ( ! is_array( $schema['anyOf'] ?? null ) || empty( $schema['anyOf'] ) ) {
 			return false;
