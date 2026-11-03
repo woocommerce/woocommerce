@@ -174,7 +174,7 @@
 		"@xstate/test": "0.5.1",
 		"autoprefixer": "^10.4.16",
 		"await-exec": "^0.1.2",
-		"babel-jest": "29.5.x",
+		"babel-jest": "catalog:tooling",
 		"babel-loader": "catalog:tooling",
 		"babel-plugin-transform-react-remove-prop-types": "catalog:tooling",
 		"chalk": "^4.1.2",

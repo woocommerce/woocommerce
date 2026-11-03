@@ -51,6 +51,9 @@ catalogs:
     '@wordpress/stylelint-config':
       specifier: ^23.14.0
       version: 23.42.0
+    babel-jest:
+      specifier: 29.5.x
+      version: 29.5.0
     babel-loader:
       specifier: 9.2.x
       version: 9.2.1
@@ -1915,7 +1918,7 @@ importers:
         specifier: catalog:wp-min
         version: 5.33.1(@types/react@18.3.28)(react@18.3.1)
       babel-jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@babel/core@7.29.7)
       eslint:
         specifier: catalog:tooling
@@ -3275,7 +3278,7 @@ importers:
         specifier: ^0.1.2
         version: 0.1.2
       babel-jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@babel/core@7.29.7)
       babel-loader:
         specifier: catalog:tooling
@@ -3756,7 +3759,7 @@ importers:
         specifier: 10.4.14
         version: 10.4.14(postcss@8.5.26)
       babel-jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@babel/core@7.29.7)
       babel-loader:
         specifier: catalog:tooling
@@ -27189,7 +27192,7 @@ snapshots:
       '@typescript-eslint/types': 8.64.0
       '@typescript-eslint/visitor-keys': 8.64.0
       debug: 4.4.3(supports-color@9.4.0)
-      minimatch: 10.2.5
+      minimatch: 10.2.6
       semver: 7.8.5
       tinyglobby: 0.2.17
       ts-api-utils: 2.5.0(typescript@5.7.3)

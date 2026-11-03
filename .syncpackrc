@@ -124,6 +124,7 @@
 				"@wordpress/postcss-plugins-preset",
 				"@wordpress/prettier-config",
 				"@wordpress/scripts",
+				"babel-jest",
 				"babel-loader",
 				"babel-plugin-transform-react-remove-prop-types",
 				"copy-webpack-plugin",
@@ -491,8 +492,7 @@
 			"label": "Testing related dependencies: React 18",
 			"dependencies": [
 				"@jest/test-sequencer",
-				"jest-each",
-				"babel-jest"
+				"jest-each"
 			],
 			"packages": [
 				"@woocommerce/block-library",
@@ -504,8 +504,7 @@
 			"label": "Testing related dependencies: React 17",
 			"dependencies": [
 				"@jest/test-sequencer",
-				"jest-each",
-				"babel-jest"
+				"jest-each"
 			],
 			"packages": [
 				"**"

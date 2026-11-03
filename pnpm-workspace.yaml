@@ -87,6 +87,7 @@ catalogs:
         '@wordpress/postcss-plugins-preset': 5.56.0
         '@wordpress/scripts': 35.0.0
         '@wordpress/stylelint-config': ^23.14.0
+        babel-jest: 29.5.x
         babel-loader: 9.2.x
         babel-plugin-transform-react-remove-prop-types: 0.4.24
         copy-webpack-plugin: 14.0.x
