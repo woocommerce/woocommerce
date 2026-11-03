@@ -93,8 +93,13 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 				return $order;
 			}
 
+			$orders = self::format_orders_for_response( array( $order ), $include_line_items );
+			if ( is_wp_error( $orders ) ) {
+				return $orders;
+			}
+
 			return array(
-				'orders'      => array( self::format_order_for_response( $order, $include_line_items ) ),
+				'orders'      => $orders,
 				'total_pages' => 1,
 				'page'        => 1,
 				'per_page'    => 1,
@@ -182,13 +187,13 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 		);
 		$pages   = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : ( count( $orders ) > 0 ? 1 : 0 );
 
+		$orders = self::format_orders_for_response( $orders, $include_line_items );
+		if ( is_wp_error( $orders ) ) {
+			return $orders;
+		}
+
 		return array(
-			'orders'      => array_map(
-				static function ( $order ) use ( $include_line_items ) {
-					return self::format_order_for_response( $order, $include_line_items );
-				},
-				$orders
-			),
+			'orders'      => $orders,
 			'total_pages' => $pages,
 			'page'        => $page,
 			'per_page'    => $per_page,
@@ -307,7 +312,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 				'include_line_items' => array(
 					'type'        => 'boolean',
 					'description' => __(
-						'Whether to include order line items in each returned order. Defaults to false.',
+						'Whether to include order line items and shipping lines in each returned order. Defaults to false.',
 						'woocommerce'
 					),
 					'default'     => false,

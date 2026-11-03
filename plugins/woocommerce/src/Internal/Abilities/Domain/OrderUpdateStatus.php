@@ -11,7 +11,6 @@ use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
-use Automattic\WooCommerce\Internal\Orders\StagedMethod;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -138,24 +137,7 @@ class OrderUpdateStatus extends ActionableAbility {
 			return self::update_status( $subject, $status, self::get_note( $input ) );
 		}
 
-		$unstaged_class = StagedMethod::unstaged_class( $subject, 'update_status', 'stage_status' );
-		if ( null !== $unstaged_class ) {
-			return new \WP_Error(
-				'woocommerce_order_status_staging_unsupported',
-				sprintf(
-					/* translators: %s: PHP class name of the order. */
-					__( 'This order type does not support this change yet. The class %s overrides update_status() and needs to override stage_status() too.', 'woocommerce' ),
-					$unstaged_class
-				),
-				array( 'status' => 400 )
-			);
-		}
-
-		try {
-			$subject->stage_status( $status, self::get_note( $input ), true );
-		} catch ( \WC_Data_Exception $e ) {
-			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
-		}
+		$subject->stage_status( $status, self::get_note( $input ), true );
 
 		return null;
 	}
@@ -206,12 +188,15 @@ class OrderUpdateStatus extends ActionableAbility {
 	 * The ability output for the saved order.
 	 *
 	 * @param \WC_Order $subject Saved order.
-	 * @return array
+	 * @return array|\WP_Error
 	 */
-	public function prepare_response( $subject ): array {
-		return array(
-			'order' => self::format_saved_order_for_response( $subject ),
-		);
+	public function prepare_response( $subject ) {
+		$order = self::format_saved_order_for_response( $subject );
+		if ( is_wp_error( $order ) ) {
+			return $order;
+		}
+
+		return array( 'order' => $order );
 	}
 
 	/**
