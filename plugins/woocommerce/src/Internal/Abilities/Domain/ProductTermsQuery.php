@@ -85,9 +85,9 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 	 * @return array|\WP_Error
 	 */
 	public static function execute( array $input ) {
-		$page               = (int) ( $input['page'] ?? 1 );
-		$per_page           = (int) ( $input['per_page'] ?? 10 );
-		$args               = array_merge(
+		$page     = $input['page'] ?? 1;
+		$per_page = $input['per_page'] ?? 10;
+		$args     = array_merge(
 			array(
 				'hide_empty' => false,
 				'orderby'    => 'name',
@@ -95,7 +95,6 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 			),
 			array_intersect_key( $input, array_flip( array( 'taxonomy', 'include', 'exclude', 'search', 'slug', 'parent', 'hide_empty', 'orderby', 'order' ) ) )
 		);
-		$args['hide_empty'] = wp_validate_boolean( $input['hide_empty'] ?? false );
 		if ( isset( $input['slug'] ) ) {
 			$args['slug'] = wp_parse_slug_list( $input['slug'] );
 		}

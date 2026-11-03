@@ -614,15 +614,7 @@ trait ProductAbilityTrait {
 			);
 		}
 
-		$product_id = (int) $input['id'];
-
-		if ( $product_id < 1 ) {
-			return new \WP_Error(
-				'woocommerce_product_id_required',
-				__( 'Product ID is required.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
+		$product_id = $input['id'];
 
 		$product = wc_get_product( $product_id );
 
@@ -702,7 +694,7 @@ trait ProductAbilityTrait {
 	 * @return null|\WP_Error
 	 */
 	protected static function check_publish_permission( ?\WC_Product $product, array $input ) {
-		$status = isset( $input['status'] ) ? sanitize_key( (string) $input['status'] ) : '';
+		$status = isset( $input['status'] ) ? sanitize_key( $input['status'] ) : '';
 		if (
 			! in_array( $status, array( ProductStatus::PUBLISH, ProductStatus::FUTURE, ProductStatus::PRIVATE ), true )
 			|| ( $product && $product->get_status() === $status )
@@ -834,8 +826,8 @@ trait ProductAbilityTrait {
 
 		foreach ( array_values( $items ) as $index => $item ) {
 			$position = $index + 1;
-			$id       = (int) ( $item['id'] ?? 0 );
-			$delete   = wc_string_to_bool( $item['delete'] ?? false );
+			$id       = $item['id'] ?? 0;
+			$delete   = ! empty( $item['delete'] );
 
 			if ( $delete && ( $id <= 0 || count( $item ) > 2 ) ) {
 				return new \WP_Error(
@@ -1064,11 +1056,11 @@ trait ProductAbilityTrait {
 				if ( isset( $item['options'] ) ) {
 					return self::get_invalid_product_attributes_error();
 				}
-				$key = empty( $item['id'] ) ? sanitize_title( (string) ( $item['name'] ?? '' ) ) : wc_attribute_taxonomy_name_by_id( (int) $item['id'] );
+				$key = empty( $item['id'] ) ? sanitize_title( $item['name'] ?? '' ) : wc_attribute_taxonomy_name_by_id( $item['id'] );
 				if ( '' === $key ) {
 					return self::get_invalid_product_attributes_error();
 				}
-				$attributes[ $key ] = isset( $item['option'] ) ? wc_clean( (string) $item['option'] ) : '';
+				$attributes[ $key ] = isset( $item['option'] ) ? wc_clean( $item['option'] ) : '';
 			}
 			return $attributes;
 		}
@@ -1077,14 +1069,14 @@ trait ProductAbilityTrait {
 		foreach ( $value as $position => $item ) {
 			$options  = array_map( 'sanitize_text_field', $item['options'] ?? array() );
 			$taxonomy = self::get_global_attribute_taxonomy( $item );
-			$name     = '' === $taxonomy ? sanitize_text_field( trim( (string) ( $item['name'] ?? '' ) ) ) : $taxonomy;
-			if ( '' === $taxonomy && ( ! empty( $item['id'] ) || wc_string_to_bool( $item['global'] ?? false ) ) ) {
+			$name     = '' === $taxonomy ? sanitize_text_field( trim( $item['name'] ?? '' ) ) : $taxonomy;
+			if ( '' === $taxonomy && ( ! empty( $item['id'] ) || ! empty( $item['global'] ) ) ) {
 				return new \WP_Error(
 					'woocommerce_product_attributes_invalid',
 					sprintf(
 						/* translators: %s: attribute name or id. */
 						__( 'There is no global attribute "%s".', 'woocommerce' ),
-						(string) ( $item['id'] ?? $item['name'] ?? '' )
+						$item['id'] ?? $item['name'] ?? ''
 					),
 					array( 'status' => 400 )
 				);
@@ -1131,11 +1123,11 @@ trait ProductAbilityTrait {
 	 */
 	private static function get_global_attribute_taxonomy( array $item ): string {
 		if ( ! empty( $item['id'] ) ) {
-			return wc_attribute_taxonomy_name_by_id( (int) $item['id'] );
+			return wc_attribute_taxonomy_name_by_id( $item['id'] );
 		}
 
 		$name = trim( $item['name'] ?? '' );
-		if ( ! wc_string_to_bool( $item['global'] ?? false ) || '' === $name ) {
+		if ( empty( $item['global'] ) || '' === $name ) {
 			return '';
 		}
 
@@ -1323,49 +1315,23 @@ trait ProductAbilityTrait {
 	 *
 	 * @param string $field Field name.
 	 * @param mixed  $value Field value.
-	 * @return mixed|\WP_Error
+	 * @return mixed
 	 */
 	private static function prepare_product_field_value( string $field, $value ) {
-		if ( in_array( $field, array( 'name', 'description', 'short_description' ), true ) && is_string( $value ) ) {
+		if ( in_array( $field, array( 'name', 'description', 'short_description' ), true ) ) {
 			return wp_filter_post_kses( $value );
 		}
 
-		if ( 'status' === $field && is_string( $value ) ) {
+		if ( 'status' === $field ) {
 			return sanitize_key( $value );
 		}
 
-		if ( 'external_url' === $field && is_string( $value ) ) {
+		if ( 'external_url' === $field ) {
 			return esc_url_raw( $value );
 		}
 
 		if ( in_array( $field, array( 'regular_price', 'sale_price' ), true ) ) {
-			return self::prepare_product_price_value( $value );
-		}
-
-		if ( 'grouped_products' === $field ) {
-			if ( ! is_array( $value ) ) {
-				return new \WP_Error(
-					'woocommerce_product_grouped_products_invalid',
-					__( 'Grouped product IDs must be positive integers.', 'woocommerce' ),
-					array( 'status' => 400 )
-				);
-			}
-
-			$grouped_product_ids = array();
-
-			foreach ( $value as $product_id ) {
-				if ( ! rest_is_integer( $product_id ) || (int) $product_id < 1 ) {
-					return new \WP_Error(
-						'woocommerce_product_grouped_products_invalid',
-						__( 'Grouped product IDs must be positive integers.', 'woocommerce' ),
-						array( 'status' => 400 )
-					);
-				}
-
-				$grouped_product_ids[] = (int) $product_id;
-			}
-
-			return $grouped_product_ids;
+			return wc_format_decimal( $value );
 		}
 
 		if ( is_string( $value ) ) {
@@ -1373,26 +1339,6 @@ trait ProductAbilityTrait {
 		}
 
 		return $value;
-	}
-
-	/**
-	 * Prepare a product price before passing it to the product setter.
-	 *
-	 * @param mixed $value Price value.
-	 * @return string|\WP_Error
-	 */
-	private static function prepare_product_price_value( $value ) {
-		if ( ! is_scalar( $value ) || is_bool( $value ) ) {
-			return self::get_invalid_product_price_error();
-		}
-
-		$value = trim( (string) $value );
-
-		if ( 1 !== preg_match( '/' . self::get_product_price_input_pattern() . '/', $value ) ) {
-			return self::get_invalid_product_price_error();
-		}
-
-		return wc_format_decimal( $value );
 	}
 
 	/**
@@ -1433,19 +1379,6 @@ trait ProductAbilityTrait {
 					}
 				)
 			)
-		);
-	}
-
-	/**
-	 * Get an invalid product price error.
-	 *
-	 * @return \WP_Error
-	 */
-	private static function get_invalid_product_price_error(): \WP_Error {
-		return new \WP_Error(
-			'woocommerce_product_price_invalid',
-			__( 'Product prices must be decimal strings without currency symbols or thousand separators.', 'woocommerce' ),
-			array( 'status' => 400 )
 		);
 	}
 

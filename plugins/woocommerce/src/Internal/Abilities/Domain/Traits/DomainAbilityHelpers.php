@@ -121,6 +121,6 @@ trait DomainAbilityHelpers {
 	 * @return int
 	 */
 	protected static function get_id_from_input( $input ): int {
-		return is_array( $input ) && ! empty( $input['id'] ) ? (int) $input['id'] : 0;
+		return $input['id'] ?? 0;
 	}
 }
