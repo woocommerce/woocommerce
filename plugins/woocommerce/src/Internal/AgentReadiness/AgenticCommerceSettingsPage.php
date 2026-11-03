@@ -228,7 +228,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 *
 	 * @param array<string, mixed>|null                                                                                                     $report Stored report, or null before the first scan.
 	 * @param array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}> $checks Store conditions.
-	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:string,seen_at?:string}>
+	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label?:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:string,seen_at?:string}>
 	 */
 	private function visible_store_checks( ?array $report, array $checks ): array {
 		$scanned = array_slice( $this->agent_readiness->get_store_checks( $report, $checks ), count( $checks ) );
@@ -477,7 +477,8 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
-	 * "Required by X" or "Harder to find on X" per channel.
+	 * "Required by X" for each channel that can't list a product without the field. The design leaves out
+	 * channels that only list it with a warning, which the why text already names.
 	 *
 	 * @param array $check_channels Field and effect by channel id.
 	 * @param array $channels       Channels from the report.
@@ -490,9 +491,6 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			if ( ReadinessRule::EFFECT_NOT_LISTABLE === ( $spec['effect'] ?? '' ) ) {
 				/* translators: %s: channel name, e.g. ChatGPT. */
 				$tags[] = '<mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--fix">' . esc_html( sprintf( __( 'Required by %s', 'woocommerce' ), $name ) ) . '</mark>';
-			} else {
-				/* translators: %s: channel name, e.g. ChatGPT. */
-				$tags[] = esc_html( sprintf( __( 'Harder to find on %s', 'woocommerce' ), $name ) );
 			}
 		}
 		return $tags;
@@ -707,10 +705,10 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
-	 * A table of store checks.
+	 * A table of store checks. A failing check is named by its failing title.
 	 *
-	 * @param array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:string,seen_at?:string}> $checks   Checks.
-	 * @param bool|null                                                                                                                                                            $launched Whether the store is launched.
+	 * @param array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,label?:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:string,seen_at?:string}> $checks   Checks.
+	 * @param bool|null                                                                                                                                                                          $launched Whether the store is launched.
 	 */
 	private function render_check_rows( array $checks, ?bool $launched ): void {
 		if ( array() === $checks ) {
@@ -739,7 +737,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 					<tr>
 						<td><mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--<?php echo esc_attr( $badge[0] ); ?>"><?php echo esc_html( $badge[1] ); ?></mark></td>
 						<td>
-							<?php echo esc_html( $check['name'] ); ?>
+							<?php echo esc_html( false === $check['ok'] && '' !== ( $check['label'] ?? '' ) ? $check['label'] : $check['name'] ); ?>
 							<?php if ( false === $check['ok'] ) : ?>
 								<br /><span class="description"><?php echo esc_html( trim( ( $conflict ? __( 'Something on your store may be replacing this. If you just changed it, a page cache may show the old page for a while.', 'woocommerce' ) . ' ' : '' ) . $check['why'] . ' ' . self::blocks_text( $check['blocks'] ) ) ); ?></span>
 								<?php if ( $conflict && ! empty( $check['seen_at'] ) ) : ?>
@@ -791,9 +789,9 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 * under the merchant question each answers. Problems show first and passed checks are
 	 * folded. They never affect the switch, so they sit apart from the setup steps in Status.
 	 *
-	 * @param array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:string,seen_at?:string}> $checks   Scanned checks to show.
-	 * @param bool                                                                                                                                                                               $launched Whether the store is launched.
-	 * @param array<string, mixed>|null                                                                                                                                                          $report   Stored report, or null before the first scan.
+	 * @param array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label?:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:string,seen_at?:string}> $checks   Scanned checks to show.
+	 * @param bool                                                                                                                                                                                             $launched Whether the store is launched.
+	 * @param array<string, mixed>|null                                                                                                                                                                        $report   Stored report, or null before the first scan.
 	 */
 	private function render_readiness( array $checks, bool $launched, ?array $report ): void {
 		$groups = array(
