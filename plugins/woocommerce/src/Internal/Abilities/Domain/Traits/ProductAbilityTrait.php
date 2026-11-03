@@ -745,21 +745,39 @@ trait ProductAbilityTrait {
 	 * Format a product after a save, retaining the saved object if reloading fails.
 	 *
 	 * @param \WC_Product $product Saved product object.
-	 * @return array
+	 * @return array|\WP_Error
 	 */
-	protected static function format_saved_product_for_response( \WC_Product $product ): array {
+	protected static function format_saved_product_for_response( \WC_Product $product ) {
 		$stored = wc_get_product( $product->get_id() );
 
 		return self::format_product_for_response( $stored instanceof \WC_Product ? $stored : $product );
 	}
 
 	/**
+	 * Format products for ability output. One product that fails returns its error.
+	 *
+	 * @param \WC_Product[] $products Product objects.
+	 * @return array|\WP_Error
+	 */
+	protected static function format_products_for_response( array $products ) {
+		$formatted = array();
+		foreach ( $products as $product ) {
+			$data = self::format_product_for_response( $product );
+			if ( is_wp_error( $data ) ) {
+				return $data;
+			}
+			$formatted[] = $data;
+		}
+		return $formatted;
+	}
+
+	/**
 	 * Format a product for ability output.
 	 *
 	 * @param \WC_Product $product Product object.
-	 * @return array
+	 * @return array|\WP_Error A WP_Error when an extension field value does not match its schema.
 	 */
-	protected static function format_product_for_response( \WC_Product $product ): array {
+	protected static function format_product_for_response( \WC_Product $product ) {
 		$stock_quantity   = $product->get_stock_quantity();
 		$low_stock_amount = $product->get_low_stock_amount();
 		$permalink        = $product->get_permalink();
@@ -776,9 +794,9 @@ trait ProductAbilityTrait {
 				get_woocommerce_currency_symbol(),
 				ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401
 			),
-			'price'             => $product->get_price(),
-			'regular_price'     => $product->get_regular_price(),
-			'sale_price'        => $product->get_sale_price(),
+			'price'             => self::format_amount_for_response( $product->get_price() ),
+			'regular_price'     => self::format_amount_for_response( $product->get_regular_price() ),
+			'sale_price'        => self::format_amount_for_response( $product->get_sale_price() ),
 			'on_sale'           => (bool) $product->is_on_sale(),
 			'stock_status'      => $product->get_stock_status(),
 			'manage_stock'      => (bool) $product->get_manage_stock(),
