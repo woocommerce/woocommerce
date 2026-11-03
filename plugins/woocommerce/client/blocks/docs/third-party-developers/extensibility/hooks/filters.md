@@ -80,7 +80,6 @@
 - [woocommerce_store_api_rate_limit_options](#woocommerce_store_api_rate_limit_options)
 - [woocommerce_thankyou_order_failed_text](#woocommerce_thankyou_order_failed_text)
 - [woocommerce_thankyou_order_received_title](#woocommerce_thankyou_order_received_title)
-- [woocommerce_ucp_cart_continue_url](#woocommerce_ucp_cart_continue_url)
 - [woocommerce_ucp_idempotency_enabled](#woocommerce_ucp_idempotency_enabled)
 - [woocommerce_ucp_idempotency_retention_seconds](#woocommerce_ucp_idempotency_retention_seconds)
 - [woocommerce_ucp_idempotency_strict](#woocommerce_ucp_idempotency_strict)
@@ -2010,28 +2009,6 @@ apply_filters( 'woocommerce_thankyou_order_received_title', string $title, \WC_O
 ### Source
 
 - [Blocks/BlockTypes/OrderConfirmation/Status.php](../../../../../../src/Blocks/BlockTypes/OrderConfirmation/Status.php)
-
----
-
-## woocommerce_ucp_cart_continue_url
-
-
-Filters the URL a UCP cart hands the buyer for completing the purchase.
-
-```php
-apply_filters( 'woocommerce_ucp_cart_continue_url', string $continue_url, string $cart_id )
-```
-
-### Parameters
-
-| Argument | Type | Description |
-| -------- | ---- | ----------- |
-| $continue_url | string | Continue URL. |
-| $cart_id | string | Cart identifier. |
-
-### Source
-
-- [StoreApi/Utilities/UcpCartTransformer.php](../../../../../../src/StoreApi/Utilities/UcpCartTransformer.php)
 
 ---
 
