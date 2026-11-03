@@ -33,9 +33,14 @@ describe( ABILITY, () => {
 			[ 'completed', 'processing' ],
 		],
 		[
-			'filters by one status sent as a string',
-			{ status: 'on-hold' },
+			'filters by one status as a list of one',
+			{ status: [ 'on-hold' ] },
 			[ 'on-hold' ],
+		],
+		[
+			'applies no status filter for an empty list',
+			{ status: [] },
+			[ 'completed', 'on-hold', 'processing' ],
 		],
 	] ) {
 		test( title, async () => {

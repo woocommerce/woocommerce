@@ -87,11 +87,8 @@
 							"type": "string"
 						},
 						"permalink": {
-							"type": [
-								"string",
-								"null"
-							],
-							"description": "Product permalink, or null when no public permalink is available.",
+							"type": "string",
+							"description": "Product permalink. Omitted when no public permalink is available.",
 							"format": "uri"
 						},
 						"type": {
@@ -312,11 +309,8 @@
 							]
 						},
 						"stock_quantity": {
-							"type": [
-								"integer",
-								"null"
-							],
-							"description": "Current stock quantity, or null when no stock quantity is set."
+							"type": "integer",
+							"description": "Current stock quantity. Omitted when no stock quantity is set."
 						},
 						"manage_stock": {
 							"type": "boolean"
@@ -328,19 +322,13 @@
 							"type": "boolean"
 						},
 						"external_url": {
-							"type": [
-								"string",
-								"null"
-							],
-							"description": "External product URL for external products.",
+							"type": "string",
+							"description": "External product URL. Omitted when the product is not external or no URL is set.",
 							"format": "uri"
 						},
 						"button_text": {
-							"type": [
-								"string",
-								"null"
-							],
-							"description": "Button text for external products."
+							"type": "string",
+							"description": "Button text. Omitted when the product is not external or no button text is set."
 						},
 						"grouped_products": {
 							"type": "array",
@@ -350,32 +338,24 @@
 							}
 						},
 						"date_created": {
-							"type": [
-								"string",
-								"null"
-							],
-							"format": "date-time"
+							"type": "string",
+							"format": "date-time",
+							"description": "Product creation date in the store timezone. Omitted when no creation date is available."
 						},
 						"date_created_gmt": {
-							"type": [
-								"string",
-								"null"
-							],
-							"format": "date-time"
+							"type": "string",
+							"format": "date-time",
+							"description": "Product creation date in UTC. Omitted when no creation date is available."
 						},
 						"date_modified": {
-							"type": [
-								"string",
-								"null"
-							],
-							"format": "date-time"
+							"type": "string",
+							"format": "date-time",
+							"description": "Product modification date in the store timezone. Omitted when no modification date is available."
 						},
 						"date_modified_gmt": {
-							"type": [
-								"string",
-								"null"
-							],
-							"format": "date-time"
+							"type": "string",
+							"format": "date-time",
+							"description": "Product modification date in UTC. Omitted when no modification date is available."
 						}
 					},
 					"additionalProperties": false
