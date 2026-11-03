@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
-Comment: Apply the test bootstrap option overrides after the WooCommerce install so taxes stay enabled in unit tests.
+Comment: Enable taxes in the prices_include_tax order tests instead of relying on state leaked from other test classes.
 
