@@ -633,7 +633,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		} elseif ( 'update' === $action || $this->is_custom_line_item( $posted ) ) {
 			$product_id = 0;
 		} else {
-			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', esc_html__( 'Product ID or SKU is required. For a custom item, send a name and total instead.', 'woocommerce' ), 400 );
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- REST API JSON response, not HTML.
+			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required. For a custom item, send a name and total instead.', 'woocommerce' ), 400 );
 		}
 		return $product_id;
 	}
@@ -676,7 +677,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 
 			$product = wc_get_product( $this->get_product_id( $posted ) );
 			if ( ! $product || ! $product->exists() ) {
-				throw new WC_REST_Exception( 'woocommerce_rest_invalid_product_id', esc_html__( 'Invalid product ID.', 'woocommerce' ), 400 );
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- REST API JSON response, not HTML.
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_product_id', __( 'Invalid product ID.', 'woocommerce' ), 400 );
 			}
 		}
 	}
@@ -738,7 +740,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 
 		// New items must resolve unless they are custom items. Existing items need not, so orders whose products were deleted later stay editable.
 		if ( 'create' === $action && ( ! $product || ! $product->exists() ) && ! $this->is_custom_line_item( $posted ) ) {
-			throw new WC_REST_Exception( 'woocommerce_rest_invalid_product_id', esc_html__( 'Invalid product ID.', 'woocommerce' ), 400 );
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- REST API JSON response, not HTML.
+			throw new WC_REST_Exception( 'woocommerce_rest_invalid_product_id', __( 'Invalid product ID.', 'woocommerce' ), 400 );
 		}
 
 		if ( $clear_variation_id && $product instanceof WC_Product_Variation ) {
