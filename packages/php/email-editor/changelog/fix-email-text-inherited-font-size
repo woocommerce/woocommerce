@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use a parent Group’s font size for paragraphs in the sent email, as the editor does.
