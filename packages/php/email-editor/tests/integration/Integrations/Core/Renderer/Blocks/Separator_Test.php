@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Html2Text;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 
 /**
@@ -72,6 +73,15 @@ class Separator_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'width="100"', $rendered );
 		$this->assertStringContainsString( 'border-top:2px solid #123456', $rendered );
 		$this->assertStringNotContainsString( '<hr', $rendered );
+	}
+
+	/**
+	 * The plain-text email shows the line as a row of dashes, as it would for an <hr>.
+	 */
+	public function testItRendersLineAsDashesInPlainText(): void {
+		$text = Html2Text::convert( '<p>Above</p>' . $this->render( array() ) . '<p>Below</p>' );
+
+		$this->assertMatchesRegularExpression( '/Above\s+-{20,}\s+Below/', $text );
 	}
 
 	/**

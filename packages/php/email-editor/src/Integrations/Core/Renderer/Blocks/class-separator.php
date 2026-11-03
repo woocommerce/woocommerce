@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Html2Text;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
@@ -54,6 +55,7 @@ class Separator extends Abstract_Block_Renderer {
 		return Table_Wrapper_Helper::render_table_wrapper(
 			'&nbsp;',
 			array(
+				'class' => Html2Text::HR_CLASS,
 				'align' => 'center',
 				'width' => $is_wide ? '100%' : '100',
 				'style' => 'width:' . ( $is_wide ? '100%' : '100px' ) . ';border-collapse:collapse;',

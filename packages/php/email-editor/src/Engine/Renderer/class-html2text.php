@@ -22,6 +22,11 @@ namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer;
  * - Handles various HTML elements appropriately for text conversion
  */
 class Html2Text {
+	/**
+	 * Class for elements drawn as a horizontal rule without an <hr> (email clients style <hr> poorly).
+	 * The plain text shows them like an <hr>.
+	 */
+	public const HR_CLASS = 'email-block-separator';
 
 	/**
 	 * Default options for HTML to text conversion
@@ -382,7 +387,10 @@ class Html2Text {
 		}
 
 		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-		$name      = strtolower( $node->nodeName );
+		$name = strtolower( $node->nodeName );
+		if ( $node instanceof \DOMElement && in_array( self::HR_CLASS, explode( ' ', $node->getAttribute( 'class' ) ), true ) ) {
+			$name = 'hr';
+		}
 		$next_name = self::next_child_name( $node );
 
 		// Start whitespace.
