@@ -1373,6 +1373,26 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A status change fires its hooks once, when a save after a failed write succeeds.
+	 */
+	public function test_status_transition_fires_after_a_failed_write_is_retried(): void {
+		$order = new WC_Order();
+		$order->save();
+		$changed    = did_action( 'woocommerce_order_status_changed' );
+		$transition = did_action( 'woocommerce_order_status_pending_to_processing' );
+
+		$order->set_status( OrderStatus::PROCESSING );
+		$this->save_with_failed_write( $order );
+		$this->assertSame( 0, did_action( 'woocommerce_order_status_changed' ) - $changed );
+		$this->assertSame( 0, did_action( 'woocommerce_order_status_pending_to_processing' ) - $transition );
+
+		$order->save();
+		$order->save();
+		$this->assertSame( 1, did_action( 'woocommerce_order_status_changed' ) - $changed );
+		$this->assertSame( 1, did_action( 'woocommerce_order_status_pending_to_processing' ) - $transition );
+	}
+
+	/**
 	 * Test: a staged note is not added when the order write fails.
 	 */
 	public function test_stage_order_note_is_skipped_when_the_write_fails() {

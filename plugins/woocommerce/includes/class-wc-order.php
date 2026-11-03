@@ -334,6 +334,8 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Save data to the database.
 	 *
+	 * When the write fails, the status change hooks do not fire, and the next successful save fires them.
+	 *
 	 * @since 3.0.0
 	 * @return int order ID
 	 */
@@ -343,7 +345,9 @@ class WC_Order extends WC_Abstract_Order {
 
 		$this->maybe_set_user_billing_email();
 		parent::save();
-		$this->status_transition();
+		if ( null === $this->get_last_save_error() ) {
+			$this->status_transition();
+		}
 
 		$this->run_deferred_actions( $deferred_actions, true );
 
