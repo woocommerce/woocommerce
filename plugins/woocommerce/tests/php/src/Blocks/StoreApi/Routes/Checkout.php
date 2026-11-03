@@ -2349,6 +2349,89 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * Data provider for test_checkout_local_pickup_tax_status.
+	 *
+	 * @return array[]
+	 */
+	public function local_pickup_tax_status_provider(): array {
+		return array(
+			'not taxable' => array( 'none', 0.0 ),
+			'taxable'     => array( 'taxable', 0.5 ),
+		);
+	}
+
+	/**
+	 * @testdox Checkout charges local pickup tax only when local pickup is taxable ($tax_status).
+	 *
+	 * @dataProvider local_pickup_tax_status_provider
+	 * @param string $tax_status            Local pickup tax status.
+	 * @param float  $expected_shipping_tax Expected tax on the 5.00 pickup cost at 10%.
+	 */
+	public function test_checkout_local_pickup_tax_status( string $tax_status, float $expected_shipping_tax ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		$this->inserted_tax_rate_ids[] = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'CA Sales Tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+			)
+		);
+
+		$pickup_settings               = get_option( 'woocommerce_pickup_location_settings' );
+		$pickup_settings['cost']       = '5';
+		$pickup_settings['tax_status'] = $tax_status;
+		update_option( 'woocommerce_pickup_location_settings', $pickup_settings );
+		WC()->shipping()->unregister_shipping_methods();
+		\WC_Cache_Helper::get_transient_version( 'shipping', true );
+
+		WC()->session->set( 'chosen_shipping_methods', array( 'pickup_location:0' ) );
+
+		$address = array(
+			'first_name' => 'test',
+			'last_name'  => 'test',
+			'address_1'  => 'test',
+			'city'       => 'test',
+			'state'      => 'CA',
+			'postcode'   => '12345',
+			'country'    => 'US',
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array_merge( $address, array( 'email' => 'test@test.com' ) ),
+				'shipping_address' => (object) $address,
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+
+		$order          = wc_get_order( $response->get_data()['order_id'] );
+		$shipping_lines = $order->get_items( 'shipping' );
+		$this->assertCount( 1, $shipping_lines );
+
+		$shipping_line = reset( $shipping_lines );
+		$this->assertSame( 'pickup_location', $shipping_line->get_method_id() );
+		$this->assertEqualsWithDelta( 5.0, (float) $shipping_line->get_total(), 0.001 );
+		$this->assertEqualsWithDelta( $expected_shipping_tax, (float) $shipping_line->get_total_tax(), 0.001, 'The saved pickup line should carry the tax checkout quoted.' );
+		$this->assertEqualsWithDelta( $expected_shipping_tax, (float) $order->get_shipping_tax(), 0.001 );
+		$this->assertEqualsWithDelta(
+			(float) $order->get_subtotal() + (float) $order->get_cart_tax() + 5.0 + $expected_shipping_tax,
+			(float) $order->get_total(),
+			0.001,
+			'The order total should match the quote: items, item tax, the pickup cost, and pickup tax only when taxable.'
+		);
+	}
+
+	/**
 	 * Test that local pickup orders bypass shipping country validation.
 	 */
 	public function test_local_pickup_country_validation() {
