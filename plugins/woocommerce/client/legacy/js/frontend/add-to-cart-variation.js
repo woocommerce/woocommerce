@@ -563,10 +563,10 @@
 								}
 
 								if ( attr_val ) {
-									// Decode entities.
-									attr_val = $( '<div/>' )
-										.html( attr_val )
-										.text();
+									// Decode entities without parsing tags. A textarea's content is plain text.
+									var decoder = document.createElement( 'textarea' );
+									decoder.innerHTML = attr_val;
+									attr_val = decoder.value;
 
 									// Attach to matching options by value. This is done to compare
 									// TEXT values rather than any HTML entities.
