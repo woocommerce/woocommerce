@@ -20,6 +20,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewsQuery;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -48,6 +49,7 @@ class AbilitiesLoader {
 		PaymentGatewaysQuery::class,
 		ProductsQuery::class,
 		ProductTermsQuery::class,
+		ProductReviewsQuery::class,
 		ProductCreate::class,
 		ProductDelete::class,
 		ProductUpdate::class,
