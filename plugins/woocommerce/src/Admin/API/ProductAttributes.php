@@ -87,7 +87,7 @@ class ProductAttributes extends \WC_REST_Product_Attributes_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function get_item_by_slug( $request ) {
-		if ( empty( $request['slug'] ) ) {
+		if ( '' === (string) $request['slug'] ) {
 			return array();
 		}
 
@@ -140,7 +140,7 @@ class ProductAttributes extends \WC_REST_Product_Attributes_Controller {
 	 * @return \WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		if ( empty( $request['search'] ) ) {
+		if ( '' === (string) $request['search'] ) {
 			return parent::get_items( $request );
 		}
 
@@ -154,7 +154,7 @@ class ProductAttributes extends \WC_REST_Product_Attributes_Controller {
 				$custom_attributes,
 				static function ( $slug ) use ( $custom_slugs ) {
 					$slug = (string) $slug;
-					return 0 !== strpos( $slug, 'pa_' ) && in_array( $slug, $custom_slugs, true );
+					return in_array( $slug, $custom_slugs, true );
 				},
 				ARRAY_FILTER_USE_KEY
 			);

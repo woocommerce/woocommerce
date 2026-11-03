@@ -95,7 +95,7 @@ class ProductAttributeTerms extends \WC_REST_Product_Attribute_Terms_Controller 
 	protected function get_custom_attribute_values( $slug ) {
 		global $wpdb;
 
-		if ( empty( $slug ) ) {
+		if ( '' === (string) $slug ) {
 			return array();
 		}
 

@@ -260,7 +260,7 @@ class WC_Admin_Tests_API_Product_Attributes extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Prefixed slugs select only global attributes, while unprefixed slugs can select both kinds.
+	 * @testdox Prefixed global slugs exclude unprefixed custom keys, while unprefixed slugs can select both kinds.
 	 * @testWith ["Colour", "pa_colour", ["pa_colour"]]
 	 *           ["Colour", "PA_Colour", ["pa_colour"]]
 	 *           ["Colour", "colour", ["colour", "pa_colour"]]
@@ -312,13 +312,20 @@ class WC_Admin_Tests_API_Product_Attributes extends WC_REST_Unit_Test_Case {
 	 * @testWith ["123"]
 	 *           ["0123"]
 	 *           ["9223372036854775808"]
+	 *           ["0"]
+	 *           ["456", true]
+	 *           ["custom-extra", true]
 	 *
 	 * @param string $slug The custom attribute slug.
+	 * @param bool   $extra_data Whether the attribute has extension data.
 	 */
-	public function test_numeric_custom_attribute_lookup( string $slug ): void {
+	public function test_numeric_custom_attribute_lookup( string $slug, bool $extra_data = false ): void {
 		$attribute = new WC_Product_Attribute();
 		$attribute->set_name( $slug );
 		$attribute->set_options( array( 'example' ) );
+		if ( $extra_data ) {
+			$attribute->set_extra_data( 'extension_field', 'extension value' );
+		}
 		$product = new WC_Product_Simple();
 		$product->set_attributes( array( $attribute ) );
 		$product->save();
@@ -331,6 +338,7 @@ class WC_Admin_Tests_API_Product_Attributes extends WC_REST_Unit_Test_Case {
 			$response   = $controller->get_item_by_slug( $request );
 
 			$this->assertNotWPError( $response );
+			$this->assertArrayHasKey( 'slug', $response );
 			$this->assertSame( $slug, $response['slug'] );
 			$this->assertSame( $slug, $response['name'] );
 
@@ -338,6 +346,44 @@ class WC_Admin_Tests_API_Product_Attributes extends WC_REST_Unit_Test_Case {
 			$terms            = $terms_controller->get_item_by_slug( $request );
 			$this->assertNotWPError( $terms );
 			$this->assertSame( array( 'example' ), wp_list_pluck( $terms, 'slug' ) );
+		} finally {
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox Search and slug filters preserve zero and prefixed custom attribute keys.
+	 * @testWith ["0"]
+	 *           ["pa_bespoke"]
+	 *
+	 * @param string $slug The custom attribute slug.
+	 */
+	public function test_search_with_special_custom_slug( string $slug ): void {
+		wp_set_current_user( $this->user );
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( $slug );
+		$attribute->set_options( array( 'example' ) );
+		$product = new WC_Product_Simple();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		try {
+			$request = new WP_REST_Request( 'GET', $this->endpoint );
+			$request->set_query_params( array( 'search' => $slug ) );
+			$response = $this->server->dispatch( $request );
+			$this->assertSame( 200, $response->get_status() );
+			$this->assertSame( array( $slug ), wp_list_pluck( $response->get_data(), 'slug' ) );
+
+			$request->set_query_params(
+				array(
+					'search' => $slug,
+					'slug'   => $slug,
+				)
+			);
+			$response = $this->server->dispatch( $request );
+			$this->assertSame( 200, $response->get_status() );
+			$this->assertSame( array( $slug ), wp_list_pluck( $response->get_data(), 'slug' ) );
+			$this->assertSame( 1, $response->get_headers()['X-WP-Total'] );
 		} finally {
 			$product->delete( true );
 		}
