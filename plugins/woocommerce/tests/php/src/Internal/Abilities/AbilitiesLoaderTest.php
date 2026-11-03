@@ -2499,6 +2499,46 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should apply the product type fields filter to a variation item of the parent.
+	 */
+	public function test_variation_items_follow_the_product_type_fields_filter(): void {
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[] = $created['product']['id'];
+		$variation_id                = $created['product']['variation_ids'][0];
+		$drop                        = static fn( array $fields, string $type ) => 'variation' === $type ? array_values( array_diff( $fields, array( 'regular_price' ) ) ) : $fields;
+
+		add_filter( 'woocommerce_ability_product_type_fields', $drop, 10, 2 );
+		try {
+			$nested = wp_get_ability( 'woocommerce/product-update' )->execute_change(
+				array(
+					'id'         => $created['product']['id'],
+					'variations' => array(
+						array(
+							'id'            => $variation_id,
+							'regular_price' => '9.00',
+						),
+					),
+				)
+			);
+			$direct = wp_get_ability( 'woocommerce/product-update' )->execute_change(
+				array(
+					'id'            => $variation_id,
+					'regular_price' => '9.00',
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_ability_product_type_fields', $drop, 10 );
+		}
+
+		$this->assertWPError( $nested );
+		$this->assertSame( 'woocommerce_product_field_unsupported', $nested->get_error_code() );
+		$this->assertWPError( $direct );
+		$this->assertSame( 'woocommerce_product_field_unsupported', $direct->get_error_code() );
+		$this->assertSame( '10.00', wc_get_product( $variation_id )->get_regular_price() );
+	}
+
+	/**
 	 * @testdox Should treat a name as a local attribute unless global is true, and refuse an unknown global attribute.
 	 */
 	public function test_product_create_uses_a_global_attribute_only_when_asked(): void {

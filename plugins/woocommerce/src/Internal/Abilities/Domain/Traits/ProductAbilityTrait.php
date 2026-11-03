@@ -407,8 +407,9 @@ trait ProductAbilityTrait {
 	 * a Core class gets the fields of that class. A variable type accepts
 	 * `attributes` and `variations`. A variation accepts `parent_id` and
 	 * `attributes` on create only: on update its options change through the
-	 * `variations` input of its parent. The owner of a type changes the list
-	 * with the `woocommerce_ability_product_type_fields` filter.
+	 * `variations` input of its parent. An item of that input takes the create
+	 * fields without `parent_id`. The owner of a type changes the list with the
+	 * `woocommerce_ability_product_type_fields` filter.
 	 *
 	 * `WC_Product_Factory` returns `WC_Product_Simple` itself for a type that
 	 * has no class. Such a type is refused. A class that extends
@@ -822,12 +823,11 @@ trait ProductAbilityTrait {
 	 * @throws \WC_Data_Exception When a variation setter rejects a value.
 	 */
 	protected static function plan_variations( \WC_Product_Variable $parent_product, array $items ) {
-		$config = self::get_variation_config();
-		$plan   = array(
+		$plan  = array(
 			'save'   => array(),
 			'delete' => array(),
 		);
-		$named  = array();
+		$named = array();
 
 		foreach ( array_values( $items ) as $index => $item ) {
 			$position = $index + 1;
@@ -881,6 +881,12 @@ trait ProductAbilityTrait {
 					$variation->set_status( ProductStatus::PUBLISH );
 				}
 			}
+
+			$config = self::get_product_class_config( get_class( $variation ), $variation->get_type(), true );
+			if ( is_wp_error( $config ) ) {
+				return $config;
+			}
+			$config['fields'] = array_values( array_diff( $config['fields'], array( 'parent_id' ) ) );
 
 			$error = self::set_product_props_from_input( $variation, array_diff_key( $item, array_flip( array( 'id', 'delete', 'extensions' ) ) ), $config );
 			if ( is_wp_error( $error ) ) {
