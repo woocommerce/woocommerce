@@ -36,6 +36,12 @@ class TaxRatesQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @since 11.4.0
 	 */
 	public static function get_registration_args(): array {
+		$output_schema                        = self::get_collection_output_schema( 'rates', self::get_rate_output_schema() );
+		$output_schema['properties']['total'] = array(
+			'type'        => 'integer',
+			'description' => __( 'Total number of matching rates across all pages.', 'woocommerce' ),
+		);
+
 		return array(
 			'label'               => __( 'Query tax rates', 'woocommerce' ),
 			'description'         => __( 'List the tax rates of every tax class, in the order of the tax settings.', 'woocommerce' ),
@@ -43,6 +49,15 @@ class TaxRatesQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'input_schema'        => array(
 				'type'                 => 'object',
 				'properties'           => array(
+					'include'  => array(
+						'type'        => 'array',
+						'description' => __( 'Return only these tax rate IDs.', 'woocommerce' ),
+						'minItems'    => 1,
+						'items'       => array(
+							'type'    => 'integer',
+							'minimum' => 1,
+						),
+					),
 					'country'  => array(
 						'type'        => 'string',
 						'description' => __( 'Two-letter country code. Rates for every country are included too.', 'woocommerce' ),
@@ -67,7 +82,7 @@ class TaxRatesQuery extends AbstractDomainAbility implements AbilityDefinition {
 				'additionalProperties' => false,
 				'default'              => array(),
 			),
-			'output_schema'       => self::get_collection_output_schema( 'rates', self::get_rate_output_schema() ),
+			'output_schema'       => $output_schema,
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_query_taxes' ),
 			'meta'                => array(
@@ -100,11 +115,18 @@ class TaxRatesQuery extends AbstractDomainAbility implements AbilityDefinition {
 		$per_page = min( 100, max( 1, (int) ( $input['per_page'] ?? 50 ) ) );
 
 		$conditions = array( '1=1' );
+		if ( ! empty( $input['include'] ) ) {
+			$include      = array_map( 'intval', (array) $input['include'] );
+			$placeholders = implode( ', ', array_fill( 0, count( $include ), '%d' ) );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The placeholders are generated for each ID.
+			$conditions[] = $wpdb->prepare( "tax_rate_id IN ({$placeholders})", $include );
+		}
 		if ( isset( $input['class'] ) ) {
 			$tax_class = sanitize_title( (string) $input['class'] );
 			if ( 'standard' !== $tax_class && ! in_array( $tax_class, \WC_Tax::get_tax_class_slugs(), true ) ) {
 				return array(
 					'rates'       => array(),
+					'total'       => 0,
 					'total_pages' => 0,
 					'page'        => $page,
 					'per_page'    => $per_page,
@@ -135,6 +157,7 @@ class TaxRatesQuery extends AbstractDomainAbility implements AbilityDefinition {
 				static fn ( \stdClass $rate ): array => self::format_rate_for_response( $rate, $locations[ (int) $rate->tax_rate_id ] ?? array() ),
 				$rows
 			),
+			'total'       => $total,
 			'total_pages' => (int) ceil( $total / $per_page ),
 			'page'        => $page,
 			'per_page'    => $per_page,

@@ -288,8 +288,32 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( array( $ids[0], $ids[1] ), array_column( $first['rates'], 'id' ) );
 		$this->assertSame( array( $ids[2] ), array_column( $second['rates'], 'id' ) );
+		$this->assertSame( 3, $first['total'] );
 		$this->assertSame( 2, $first['total_pages'] );
 		$this->assertSame( array(), $unknown['rates'] );
+		$this->assertSame( 0, $unknown['total'] );
+	}
+
+	/**
+	 * @testdox Should return only the included tax rates, in the order of the tax settings.
+	 */
+	public function test_tax_rates_filter_by_include(): void {
+		$ids = array();
+		foreach ( array( 0, 1, 2 ) as $order ) {
+			$ids[ $order ] = \WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country' => 'DE',
+					'tax_rate'         => '19.0000',
+					'tax_rate_order'   => $order,
+				)
+			);
+		}
+
+		$result = $this->run_ability( 'woocommerce/tax-rates-query', array( 'include' => array( $ids[2], $ids[0] ) ) );
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( array( $ids[0], $ids[2] ), array_column( $result['rates'], 'id' ) );
+		$this->assertSame( 2, $result['total'] );
 	}
 
 	/**
