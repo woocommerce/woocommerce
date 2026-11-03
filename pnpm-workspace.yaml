@@ -87,7 +87,6 @@ catalogs:
         '@wordpress/stylelint-config': ^23.14.0
         babel-loader: 9.2.x
         copy-webpack-plugin: 14.0.x
-        markdownlint-cli: 0.50.0
         postcss: ^8.5.26
         prettier: npm:wp-prettier@3.9.6
         simple-git: ^4.0.2
@@ -116,21 +115,11 @@ packages:
 
 # Dependency resolution (migrated from the `pnpm` field of package.json)
 overrides:
-    # Keep older transitive Babel copies on the patched tooling version; remove when their parents resolve >=7.29.6.
-    '@babel/core@<7.29.6': 'catalog:tooling'
     '@types/react': 18.3.x
     # Patch exact Colord 2.9.3 pins without changing other versions; remove when their parents use patched releases.
     'colord@2.9.3': 2.9.4
-    # Playground pins Express 4.22.2, whose qs ~6.15.1 range excludes this fix; remove when that chain allows patched qs.
-    'express@4.22.2>qs': 6.16.2
     '@wordpress/data-controls>@wordpress/api-fetch': 'catalog:wp-min'
     '@wordpress/private-apis': 'catalog:wp-min'
-    # WordPress scripts' ^0.31.1 CLI range retains vulnerable Markdown-it/Linkify-it; remove once it accepts the patched CLI.
-    '@wordpress/scripts>markdownlint-cli': 'catalog:tooling'
-    # Markdownlint pins RE2JS 2.8.6; remove when it requires 2.8.7 or newer.
-    'markdownlint>re2js': 2.8.7
-    # Patched KaTeX exceeds the parent's ^0.16.0 range; rendering and docs builds verified. Remove when the parent supports a patched version.
-    'micromark-extension-math>katex': 0.18.2
     'minimatch@<3.1.4': 3.1.5
     # @automattic/components 2.x lists react-router-dom but never imports it; drop once it is on 5.x.
     '@automattic/components>react-router-dom': ~7.18.5
