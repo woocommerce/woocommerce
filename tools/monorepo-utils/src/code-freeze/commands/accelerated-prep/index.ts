@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Command } from '@commander-js/extra-typings';
-import simpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 
 /**
  * Internal dependencies
@@ -11,6 +11,7 @@ import { Logger } from '../../../core/logger';
 import {
 	sparseCheckoutRepoShallow,
 	checkoutRemoteBranch,
+	GIT_IDENTITY_ENVIRONMENT,
 } from '../../../core/git';
 import { createPullRequest } from '../../../core/github/repo';
 import { getEnvVar } from '../../../core/environment';
@@ -76,6 +77,7 @@ export const acceleratedPrepCommand = new Command( 'accelerated-prep' )
 
 		const git = simpleGit( {
 			baseDir: tmpRepoPath,
+			allowEnvironment: GIT_IDENTITY_ENVIRONMENT,
 			unsafe: {
 				allowUnsafeHooksPath: true,
 			},
