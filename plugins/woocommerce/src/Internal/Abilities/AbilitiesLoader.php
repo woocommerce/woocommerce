@@ -42,6 +42,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\SystemStatusToolsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\TaxRatesQuery;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReportAbility;
 use Automattic\WooCommerce\Internal\AgentReadiness\RunCheckAbility;
+use Automattic\WooCommerce\Internal\Abilities\Domain\StoreSettingsGet;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -95,6 +96,7 @@ class AbilitiesLoader {
 		ShippingZoneMethodUpdate::class,
 		TaxRatesQuery::class,
 		CustomersQuery::class,
+		StoreSettingsGet::class,
 	);
 
 	/**
