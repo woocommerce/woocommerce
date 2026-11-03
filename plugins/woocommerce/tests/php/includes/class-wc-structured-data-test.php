@@ -376,6 +376,44 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product schema follows the breadcrumb category selection and includes its ancestors.
+	 */
+	public function test_product_category_path(): void {
+		$parent  = wp_insert_term( 'Clothing', 'product_cat' );
+		$child   = wp_insert_term( 'Hoodies', 'product_cat', array( 'parent' => $parent['term_id'] ) );
+		$other   = wp_insert_term( 'Accessories', 'product_cat' );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_category_ids( array( $child['term_id'], $other['term_id'] ) );
+		$product->save();
+
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$this->assertSame( 'Clothing > Hoodies', $sut->get_data()[0]['category'] );
+
+		add_filter(
+			'woocommerce_breadcrumb_main_term',
+			static function () use ( $other ) {
+				return get_term( $other['term_id'], 'product_cat' );
+			}
+		);
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$this->assertSame( 'Accessories', $sut->get_data()[0]['category'] );
+	}
+
+	/**
+	 * @testdox Product schema omits an invalid breadcrumb category.
+	 */
+	public function test_product_with_invalid_category_path(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		add_filter( 'woocommerce_breadcrumb_main_term', '__return_null' );
+
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$this->assertArrayNotHasKey( 'category', $sut->get_data()[0] );
+	}
+
+	/**
 	 * @testdox Product schema uses the selected variation's MPN without inheriting the parent's value.
 	 * @testWith ["CHILD-PART", true, "CHILD-PART"]
 	 *           ["0", true, "0"]

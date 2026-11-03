@@ -598,6 +598,30 @@ class WC_Structured_Data {
 			);
 		}
 
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Reuse the breadcrumb filter.
+		$term_args = apply_filters(
+			'woocommerce_breadcrumb_product_terms_args',
+			array(
+				'orderby' => 'parent',
+				'order'   => 'DESC',
+			)
+		);
+		$terms     = is_array( $term_args ) ? wc_get_product_terms( $product->get_id(), 'product_cat', $term_args ) : array();
+		if ( ! empty( $terms ) && is_array( $terms ) ) {
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Reuse the breadcrumb filter.
+			$term  = apply_filters( 'woocommerce_breadcrumb_main_term', $terms[0], $terms );
+			$names = array();
+			$seen  = array();
+			while ( $term instanceof WP_Term && 'product_cat' === $term->taxonomy && ! isset( $seen[ $term->term_id ] ) ) {
+				$seen[ $term->term_id ] = true;
+				$names[]                = $term->name;
+				if ( ! $term->parent ) {
+					$markup['category'] = implode( ' > ', array_reverse( $names ) );
+					break;
+				}
+				$term = get_term( $term->parent, 'product_cat' );
+			}
+		}
 		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
 	}
 
