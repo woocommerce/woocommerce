@@ -276,6 +276,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					$setting_name = (string) key( $parsed_option );
 				}
 
+				// save_fields() writes a setting name of '0' over the whole option, and update_option() rejects names that trim to '' or '0'.
+				if ( empty( trim( $option_name ) ) || '0' === $setting_name ) {
+					return self::get_option( $field['id'], $field['default'] );
+				}
+
 				$stored = get_option( $option_name, null );
 				if ( null !== $setting_name ) {
 					$stored = is_array( $stored ) ? ( $stored[ $setting_name ] ?? null ) : null;
