@@ -1249,6 +1249,21 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: payment_complete after stage_payment_complete replaces the staged pre-payment hook, so the hook fires once.
+	 */
+	public function test_payment_complete_after_stage_payment_complete_fires_the_pre_payment_hook_once() {
+		$object = new WC_Order();
+		$object->save();
+		$pre = did_action( 'woocommerce_pre_payment_complete' );
+
+		$this->assertTrue( $object->stage_payment_complete( '12345' ) );
+		$object->payment_complete( '67890' );
+		$object->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_pre_payment_complete' ) - $pre );
+	}
+
+	/**
 	 * Test: stage_payment_complete does not change an order that is not saved yet.
 	 */
 	public function test_stage_payment_complete_refuses_an_unsaved_order() {

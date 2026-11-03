@@ -218,7 +218,7 @@ class WC_Order extends WC_Abstract_Order {
 		};
 
 		if ( $this->writing_through ) {
-			$pre_payment_complete( $this->get_id(), $transaction_id );
+			$this->write_or_defer( 'pre_payment_complete', $pre_payment_complete, array( $this->get_id(), $transaction_id ) );
 		}
 
 		/**
