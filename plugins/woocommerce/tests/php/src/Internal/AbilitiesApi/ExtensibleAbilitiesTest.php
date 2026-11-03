@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
@@ -4357,6 +4358,50 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$this->assertGreaterThanOrEqual( 400, $refused->get_status() );
 		$this->assertCount( $count, ( new \WC_Order( $order->get_id() ) )->get_items() );
+	}
+
+	/**
+	 * @testdox Should keep the reduced stock when the save of a removed product line fails, and restore it when the save succeeds.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $feature Whether the extensible abilities feature is on.
+	 */
+	public function test_order_update_restores_stock_of_a_removed_line_only_after_the_save( bool $feature ): void {
+		$this->set_feature( $feature );
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 10 );
+		$product->save();
+		$order   = wc_create_order();
+		$item_id = $order->add_product( $product, 2 );
+		$order->set_status( OrderStatus::ON_HOLD );
+		$order->save();
+		wc_reduce_stock_levels( $order->get_id() );
+		$input = array(
+			'id'           => $order->get_id(),
+			'remove_items' => array( $item_id ),
+		);
+		$fail  = static function () {
+			throw new \Exception( 'Disk full.' );
+		};
+
+		add_action( 'woocommerce_before_order_object_save', $fail );
+		try {
+			$refused = $this->run_ability_response( 'woocommerce/order-update', $input );
+		} finally {
+			remove_action( 'woocommerce_before_order_object_save', $fail );
+		}
+
+		$this->assertGreaterThanOrEqual( 400, $refused->get_status(), 'The removal should fail when the save throws.' );
+		$this->assertSame( 8, wc_get_product( $product->get_id() )->get_stock_quantity(), 'A failed save should keep the reduced stock.' );
+		$this->assertArrayHasKey( $item_id, ( new \WC_Order( $order->get_id() ) )->get_items(), 'A failed save should keep the line.' );
+
+		$this->run_ability( 'woocommerce/order-update', $input );
+
+		$this->assertSame( 10, wc_get_product( $product->get_id() )->get_stock_quantity(), 'A successful save should restore the reduced stock.' );
+		$this->assertArrayNotHasKey( $item_id, ( new \WC_Order( $order->get_id() ) )->get_items(), 'A successful save should remove the line.' );
 	}
 
 	/**

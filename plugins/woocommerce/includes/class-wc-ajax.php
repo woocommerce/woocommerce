@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 use Automattic\WooCommerce\Internal\Orders\CouponsController;
+use Automattic\WooCommerce\Internal\Orders\LineItemStock;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Internal\Admin\Orders\ItemQuantityLimits;
@@ -1670,11 +1671,14 @@ class WC_AJAX {
 						continue;
 					}
 
-					// Before deleting the item, adjust any stock values already reduced.
-					if ( $item->is_type( 'line_item' ) ) {
-						$changed_stock = wc_maybe_adjust_line_item_product_stock( $item, 0 );
+					if ( ! wc_delete_order_item( $item_id ) ) {
+						continue;
+					}
 
-						if ( $changed_stock && ! is_wp_error( $changed_stock ) ) {
+					if ( $item->is_type( 'line_item' ) ) {
+						$changed_stock = LineItemStock::restore_after_delete( $item );
+
+						if ( $changed_stock ) {
 							/* translators: %1$s: item name %2$s: stock change */
 							$order->add_order_note( sprintf( __( 'Deleted %1$s and adjusted stock (%2$s)', 'woocommerce' ), $item->get_name(), $changed_stock['from'] . '&rarr;' . $changed_stock['to'] ), 0, true, array( 'note_group' => OrderNoteGroup::PRODUCT_STOCK ) );
 						} else {
@@ -1682,8 +1686,6 @@ class WC_AJAX {
 							$order->add_order_note( sprintf( __( 'Deleted %s', 'woocommerce' ), $item->get_name() ), 0, true, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
 						}
 					}
-
-					wc_delete_order_item( $item_id );
 				}
 			}
 
@@ -1698,7 +1700,7 @@ class WC_AJAX {
 			 *
 			 * @param int $item_id WC item ID.
 			 * @param WC_Order_Item|false $item As returned by $order->get_item( $item_id ).
-			 * @param bool|array|WP_Error $changed_store Result of wc_maybe_adjust_line_item_product_stock().
+			 * @param bool|array|WP_Error $changed_store Stock change of the last removed line, as returned by LineItemStock::restore_after_delete().
 			 * @param bool|WC_Order|WC_Order_Refund $order As returned by wc_get_order().
 			 */
 			do_action( 'woocommerce_ajax_order_items_removed', $item_id ?? 0, $item ?? false, $changed_stock ?? false, $order );

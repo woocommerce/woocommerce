@@ -4222,6 +4222,63 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox remove_order_item keeps the reduced stock when the delete fails, and restores it when the delete succeeds.
+	 */
+	public function test_remove_order_item_restores_stock_only_after_the_delete(): void {
+		$this->_setRole( 'administrator' );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 10 );
+		$product->save();
+		$order   = wc_create_order();
+		$item_id = $order->add_product( $product, 2 );
+		$order->set_status( OrderStatus::ON_HOLD );
+		$order->save();
+		wc_reduce_stock_levels( $order->get_id() );
+
+		$_POST['order_id']       = $order->get_id();
+		$_POST['security']       = wp_create_nonce( 'order-item' );
+		$_POST['order_item_ids'] = array( $item_id );
+		$fail                    = static function () {
+			throw new Exception( 'Disk full.' );
+		};
+
+		add_action( 'woocommerce_before_delete_order_item', $fail );
+		try {
+			$refused = $this->do_ajax( 'woocommerce_remove_order_item' );
+		} finally {
+			remove_action( 'woocommerce_before_delete_order_item', $fail );
+		}
+
+		$this->assertFalse( $refused['success'], 'The removal should fail when the delete throws.' );
+		$this->assertSame( 8, wc_get_product( $product->get_id() )->get_stock_quantity(), 'A failed delete should keep the reduced stock.' );
+		$this->assertInstanceOf( WC_Order_Item_Product::class, WC_Order_Factory::get_order_item( $item_id ), 'A failed delete should keep the line.' );
+
+		$stop_request = new Error( 'AJAX response sent.' );
+		$die_handler  = static function () use ( $stop_request ) {
+			return static function () use ( $stop_request ) {
+				throw $stop_request;
+			};
+		};
+		add_filter( 'wp_die_ajax_handler', $die_handler, PHP_INT_MAX );
+		try {
+			$this->_handleAjax( 'woocommerce_remove_order_item' );
+		} catch ( Error $error ) {
+			if ( $error !== $stop_request ) {
+				throw $error;
+			}
+		} finally {
+			remove_filter( 'wp_die_ajax_handler', $die_handler, PHP_INT_MAX );
+		}
+		$removed              = json_decode( (string) ob_get_clean(), true );
+		$this->_last_response = false;
+
+		$this->assertTrue( $removed['success'], 'The removal should succeed without the failing callback.' );
+		$this->assertSame( 10, wc_get_product( $product->get_id() )->get_stock_quantity(), 'A successful delete should restore the reduced stock.' );
+		$this->assertFalse( WC_Order_Factory::get_order_item( $item_id ), 'A successful delete should remove the line.' );
+	}
+
+	/**
 	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
 	 *
 	 * @param string $ajax_action The action to be triggered.

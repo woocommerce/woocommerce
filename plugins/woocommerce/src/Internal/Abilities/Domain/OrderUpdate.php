@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 use Automattic\WooCommerce\Internal\Admin\Orders\ItemQuantityLimits;
+use Automattic\WooCommerce\Internal\Orders\LineItemStock;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 
 defined( 'ABSPATH' ) || exit;
@@ -182,23 +183,15 @@ class OrderUpdate extends ActionableAbility {
 	/**
 	 * Save the order, recalculate it with the feature off, and change the product
 	 * stock of the changed lines in the same way as the order screen. Validators have already run, so a refused
-	 * change never reaches the stock. A removed line restores its stock before
-	 * the save, because the save deletes the line that holds the reduced amount. After a successful save, one
-	 * order note lists the stock changes, in the same format as the order screen.
+	 * change never reaches the stock. A removed line restores its stock only after the save deletes it, so a failed
+	 * save leaves the stock as it is. After a successful save, one order note lists the stock changes, in the same
+	 * format as the order screen.
 	 *
 	 * @param \WC_Order $subject Changed order.
 	 * @return null|\WP_Error
 	 */
 	public function save( $subject ) {
 		require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
-
-		$stock_notes = array();
-		foreach ( $this->removed_product_lines as $item ) {
-			$changed_stock = wc_maybe_adjust_line_item_product_stock( $item, 0 );
-			if ( is_array( $changed_stock ) ) {
-				$stock_notes[] = $item->get_name() . ' &ndash; ' . $changed_stock['from'] . '&rarr;' . $changed_stock['to'];
-			}
-		}
 
 		$added = array();
 		foreach ( $this->products_to_add as list( $product, $quantity ) ) {
@@ -218,6 +211,14 @@ class OrderUpdate extends ActionableAbility {
 		}
 
 		$this->changed_product_lines = array_merge( $this->changed_product_lines, $added );
+
+		$stock_notes = array();
+		foreach ( $this->removed_product_lines as $item ) {
+			$changed_stock = LineItemStock::restore_after_delete( $item );
+			if ( $changed_stock ) {
+				$stock_notes[] = $item->get_name() . ' &ndash; ' . $changed_stock['from'] . '&rarr;' . $changed_stock['to'];
+			}
+		}
 
 		if ( 'coupons' === $this->recalculate_after_save ) {
 			if ( $subject->get_prices_include_tax() ) {

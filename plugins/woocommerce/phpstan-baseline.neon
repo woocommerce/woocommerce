@@ -2629,12 +2629,6 @@ parameters:
 			path: includes/admin/class-wc-admin-post-types.php
 
 		-
-			message: '#^Parameter \#2 \$stock_quantity of function wc_update_product_stock expects int\|null, float\|int\|null given\.$#'
-			identifier: argument.type
-			count: 3
-			path: includes/admin/class-wc-admin-post-types.php
-
-		-
 			message: '#^Parameter \#2 \$stock_status of method WC_Admin_Post_Types\:\:maybe_update_stock_status\(\) expects string\|null, array\|string\|null given\.$#'
 			identifier: argument.type
 			count: 2
@@ -8080,12 +8074,6 @@ parameters:
 			message: '#^Function woocommerce_update_options\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: includes/admin/wc-admin-functions.php
-
-		-
-			message: '#^Parameter \#2 \$stock_quantity of function wc_update_product_stock expects int\|null, float\|int\<1, max\> given\.$#'
-			identifier: argument.type
-			count: 2
 			path: includes/admin/wc-admin-functions.php
 
 		-
@@ -34596,12 +34584,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#2 \$is_customer_note of method WC_Order\:\:add_order_note\(\) expects int, false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-stock-functions.php
-
-		-
-			message: '#^Parameter \#2 \$stock_quantity of function wc_update_product_stock expects int\|null, float\|int given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/wc-stock-functions.php
