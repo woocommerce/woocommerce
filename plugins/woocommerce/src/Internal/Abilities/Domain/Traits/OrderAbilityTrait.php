@@ -224,7 +224,7 @@ trait OrderAbilityTrait {
 		if ( empty( $input['id'] ) ) {
 			return new \WP_Error(
 				'woocommerce_order_id_required',
-				__( 'Order ID is required. Send the ID of the order as id.', 'woocommerce' ),
+				__( 'Order ID is required.', 'woocommerce' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -234,7 +234,7 @@ trait OrderAbilityTrait {
 		if ( $order_id < 1 ) {
 			return new \WP_Error(
 				'woocommerce_order_id_required',
-				__( 'Order ID is required. Send the ID of the order as id.', 'woocommerce' ),
+				__( 'Order ID is required.', 'woocommerce' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -244,7 +244,7 @@ trait OrderAbilityTrait {
 		if ( ! $order instanceof \WC_Order ) {
 			return new \WP_Error(
 				'woocommerce_order_not_found',
-				__( 'Order not found. Use the woocommerce/orders-query ability to find the order ID.', 'woocommerce' ),
+				__( 'Order not found.', 'woocommerce' ),
 				array( 'status' => 404 )
 			);
 		}
