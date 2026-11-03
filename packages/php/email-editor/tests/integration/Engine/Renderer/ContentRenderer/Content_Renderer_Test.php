@@ -812,6 +812,44 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test the content styles filter still receives the layout rule in the `*:not(…)` form released versions passed to it.
+	 */
+	public function testItPassesTheLayoutRuleToTheContentFilterInItsReleasedForm(): void {
+		$selector = '.wp-container-core-columns-is-layout-1 > :where(:not(.alignleft):not(.alignright):not(.alignfull))';
+		wp_style_engine_get_stylesheet_from_css_rules(
+			array(
+				array(
+					'rules_group'  => '',
+					'selector'     => $selector,
+					'declarations' => array( 'max-width' => '321px' ),
+				),
+			),
+			array( 'context' => 'block-supports' )
+		);
+		$received = '';
+		$capture  = static function ( string $styles ) use ( &$received ): string {
+			$received = $styles;
+			return $styles;
+		};
+		add_filter( 'woocommerce_email_content_renderer_styles', $capture );
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+
+		try {
+			$this->renderer->render_without_css_inline( $this->email_post, $template );
+		} finally {
+			remove_filter( 'woocommerce_email_content_renderer_styles', $capture );
+			$store = \WP_Style_Engine_CSS_Rules_Store::get_store( 'block-supports' );
+			if ( $store instanceof \WP_Style_Engine_CSS_Rules_Store ) {
+				$store->remove_rule( $selector );
+			}
+		}
+
+		$this->assertStringContainsString( '.wp-container-core-columns-is-layout-1 > *:not(.alignleft):not(.alignright):not(.alignfull)', $received );
+	}
+
+	/**
 	 * Test content styles added through the filter are inlined when they use `:where()`.
 	 */
 	public function testItInlinesFilteredContentStylesWithWhere(): void {
