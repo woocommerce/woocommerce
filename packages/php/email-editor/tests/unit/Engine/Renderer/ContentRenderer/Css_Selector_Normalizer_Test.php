@@ -128,4 +128,12 @@ class Css_Selector_Normalizer_Test extends \Email_Editor_Unit_Test {
 		$font = '.a{src:url(data:font/woff2;base64,' . str_repeat( 'A', 1100000 ) . ');}';
 		$this->assertSame( $font . '.b .c{color:red}', Css_Selector_Normalizer::normalize( $font . '.b :where(.c){color:red}' ) );
 	}
+
+	/**
+	 * Test a stylesheet with a very long quoted value, such as an inline SVG, is still normalized.
+	 */
+	public function test_normalize_with_a_long_quoted_value(): void {
+		$svg = '.a{background:url("data:image/svg+xml,' . str_repeat( 'A', 1100000 ) . '");}';
+		$this->assertSame( $svg . '.b .c{color:red}', Css_Selector_Normalizer::normalize( $svg . '.b :where(.c){color:red}' ) );
+	}
 }

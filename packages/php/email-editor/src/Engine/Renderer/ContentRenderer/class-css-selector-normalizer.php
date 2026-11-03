@@ -36,7 +36,7 @@ class Css_Selector_Normalizer {
 		}
 
 		$pattern = <<<'REGEX'
-~("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|/\*.*?\*/|\\.|[{};])~s
+~("[^"\\]*+(?:\\.[^"\\]*+)*+"|'[^'\\]*+(?:\\.[^'\\]*+)*+'|/\*.*?\*/|\\.|[{};])~s
 REGEX;
 		$tokens  = preg_split( $pattern, $css, -1, PREG_SPLIT_DELIM_CAPTURE );
 		$result  = '';
@@ -91,7 +91,7 @@ REGEX;
 	 */
 	private static function expand_where( string $selector ): array {
 		$pattern = <<<'REGEX'
-~"(?:\\.|[^"\\])*"(*SKIP)(*F)|'(?:\\.|[^'\\])*'(*SKIP)(*F)|/\*.*?\*/(*SKIP)(*F)|\\.(*SKIP)(*F)|:where\((?<inner>(?:[^()"'\\]+|\\.|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?&inner)\))*)\)~is
+~"[^"\\]*+(?:\\.[^"\\]*+)*+"(*SKIP)(*F)|'[^'\\]*+(?:\\.[^'\\]*+)*+'(*SKIP)(*F)|/\*.*?\*/(*SKIP)(*F)|\\.(*SKIP)(*F)|:where\((?<inner>(?:[^()"'\\]+|\\.|"[^"\\]*+(?:\\.[^"\\]*+)*+"|'[^'\\]*+(?:\\.[^'\\]*+)*+'|\((?&inner)\))*)\)~is
 REGEX;
 		if ( ! preg_match( $pattern, $selector, $matches, PREG_OFFSET_CAPTURE ) || '' === trim( $matches['inner'][0] ) ) {
 			return array( trim( $selector ) );
@@ -102,7 +102,7 @@ REGEX;
 		$selectors = array();
 		$parts     = self::split_selectors( $matches['inner'][0] );
 		$quoted    = <<<'REGEX'
-~"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|/\*.*?\*/|\\.~s
+~"[^"\\]*+(?:\\.[^"\\]*+)*+"|'[^'\\]*+(?:\\.[^'\\]*+)*+'|/\*.*?\*/|\\.~s
 REGEX;
 		$prefix    = (string) preg_replace( $quoted, '', $before );
 		if ( substr_count( $prefix, '(' ) > substr_count( $prefix, ')' ) ) {
@@ -154,7 +154,7 @@ REGEX;
 	 */
 	private static function split_selectors( string $selector ): array {
 		$pattern = <<<'REGEX'
-~("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|/\*.*?\*/|\\.|[(),])~s
+~("[^"\\]*+(?:\\.[^"\\]*+)*+"|'[^'\\]*+(?:\\.[^'\\]*+)*+'|/\*.*?\*/|\\.|[(),])~s
 REGEX;
 		$tokens  = preg_split( $pattern, $selector, -1, PREG_SPLIT_DELIM_CAPTURE );
 		if ( false === $tokens ) {
