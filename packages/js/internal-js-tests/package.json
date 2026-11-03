@@ -77,7 +77,7 @@
 		"babel-jest": "29.5.x",
 		"eslint": "catalog:tooling",
 		"jest": "catalog:tooling",
-		"jest-cli": "29.5.x",
+		"jest-cli": "catalog:tooling",
 		"jest-environment-jsdom": "29.5.x",
 		"lib0": "0.2.x",
 		"react": "18.3.x",

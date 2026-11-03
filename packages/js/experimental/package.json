@@ -85,7 +85,7 @@
 		"eslint": "catalog:tooling",
 		"stylelint": "catalog:tooling",
 		"jest": "catalog:tooling",
-		"jest-cli": "29.5.x",
+		"jest-cli": "catalog:tooling",
 		"jest-environment-jsdom": "29.5.x",
 		"postcss": "catalog:tooling",
 		"postcss-loader": "catalog:tooling",

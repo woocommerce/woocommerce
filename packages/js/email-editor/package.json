@@ -145,7 +145,7 @@
 		"@wordpress/browserslist-config": "next",
 		"eslint": "catalog:tooling",
 		"jest": "catalog:tooling",
-		"jest-cli": "29.5.x",
+		"jest-cli": "catalog:tooling",
 		"jest-environment-jsdom": "29.5.x",
 		"prettier": "catalog:tooling",
 		"react": "18.3.x",

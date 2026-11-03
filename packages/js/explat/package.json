@@ -85,7 +85,7 @@
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"eslint": "catalog:tooling",
 		"jest": "catalog:tooling",
-		"jest-cli": "29.5.x",
+		"jest-cli": "catalog:tooling",
 		"jest-environment-jsdom": "29.5.x",
 		"rimraf": "catalog:tooling",
 		"ts-jest": "29.1.x",
