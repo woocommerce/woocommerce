@@ -123,7 +123,7 @@ class ProductAttributes extends \WC_REST_Product_Attributes_Controller {
 
 			$links = $this->prepare_links( (object) array( 'attribute_id' => $attribute_key ) );
 			// All-digit paths belong to global attribute IDs, not custom slugs.
-			if ( preg_match( '/^\d+$/D', (string) $attribute_key ) ) {
+			if ( ctype_digit( (string) $attribute_key ) ) {
 				unset( $links['self'] );
 			}
 
