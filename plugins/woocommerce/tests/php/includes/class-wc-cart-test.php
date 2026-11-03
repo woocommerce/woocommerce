@@ -3066,4 +3066,43 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			$first_child->delete( true );
 		}
 	}
+
+	/**
+	 * @testdox Adding a variation by ID succeeds when no attributes are posted, and fails when the posted options belong to a different variation.
+	 */
+	public function test_add_to_cart_rejects_options_for_a_different_variation(): void {
+		$product   = new WC_Product_Variable();
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Color' );
+		$attribute->set_options( array( 'Red', 'Blue' ) );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$red = new WC_Product_Variation();
+		$red->set_parent_id( $product->get_id() );
+		$red->set_attributes( array( 'color' => 'Red' ) );
+		$red->set_regular_price( '5' );
+		$red->save();
+
+		$blue = new WC_Product_Variation();
+		$blue->set_parent_id( $product->get_id() );
+		$blue->set_attributes( array( 'color' => 'Blue' ) );
+		$blue->set_regular_price( '10' );
+		$blue->save();
+
+		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $red->get_id() );
+
+		$this->assertNotFalse( $cart_item_key, 'The variation should be added when no attributes are posted.' );
+
+		$cart_item = WC()->cart->get_cart_item( (string) $cart_item_key );
+
+		$this->assertSame( $red->get_id(), $cart_item['variation_id'], 'The requested variation should be added.' );
+		$this->assertSame( 'Red', $cart_item['variation']['attribute_color'], 'The variation color should be kept.' );
+
+		$added = WC()->cart->add_to_cart( $product->get_id(), 1, $red->get_id(), array( 'attribute_color' => 'Blue' ) );
+
+		$this->assertFalse( $added );
+		$this->assertSame( 'The selected options belong to a different variation of this product.', wc_get_notices( 'error' )[0]['notice'] );
+	}
 }

@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
+use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -388,5 +389,57 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 
 		$this->assertSame( array( 1, $product->get_id(), (int) $variation['variation_id'] ), $captured );
 		$this->assertSame( 4, wc()->cart->get_cart_item( $cart_id )['quantity'] );
+	}
+
+	/**
+	 * @testdox Add to cart accepts a variation ID without attributes and rejects options that belong to a different variation.
+	 */
+	public function test_add_to_cart_rejects_options_for_a_different_variation(): void {
+		$product   = new \WC_Product_Variable();
+		$attribute = new \WC_Product_Attribute();
+		$attribute->set_name( 'Color' );
+		$attribute->set_options( array( 'Red', 'Blue' ) );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$red = new \WC_Product_Variation();
+		$red->set_parent_id( $product->get_id() );
+		$red->set_attributes( array( 'color' => 'Red' ) );
+		$red->set_regular_price( '5' );
+		$red->save();
+
+		$blue = new \WC_Product_Variation();
+		$blue->set_parent_id( $product->get_id() );
+		$blue->set_attributes( array( 'color' => 'Blue' ) );
+		$blue->set_regular_price( '10' );
+		$blue->save();
+
+		$cart_id   = ( new CartController() )->add_to_cart(
+			array(
+				'id'       => $red->get_id(),
+				'quantity' => 1,
+			)
+		);
+		$cart_item = wc()->cart->get_cart_item( $cart_id );
+
+		$this->assertSame( $red->get_id(), $cart_item['variation_id'], 'A variation can be added by ID when no attributes are posted.' );
+		$this->assertSame( 'Red', $cart_item['variation']['attribute_color'], 'The variation color should be kept.' );
+
+		$this->expectException( RouteException::class );
+		$this->expectExceptionMessage( 'The selected options belong to a different variation of this product.' );
+
+		( new CartController() )->add_to_cart(
+			array(
+				'id'        => $red->get_id(),
+				'quantity'  => 1,
+				'variation' => array(
+					array(
+						'attribute' => 'Color',
+						'value'     => 'Blue',
+					),
+				),
+			)
+		);
 	}
 }
