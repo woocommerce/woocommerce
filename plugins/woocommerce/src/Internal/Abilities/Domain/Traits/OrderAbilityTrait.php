@@ -307,10 +307,6 @@ trait OrderAbilityTrait {
 			'customer_id'          => $order->get_customer_id(),
 			'payment_method'       => $order->get_payment_method(),
 			'payment_method_title' => $order->get_payment_method_title(),
-			'date_created'         => self::format_date_for_response( $order->get_date_created(), false ),
-			'date_created_gmt'     => self::format_date_for_response( $order->get_date_created() ),
-			'date_modified'        => self::format_date_for_response( $order->get_date_modified(), false ),
-			'date_modified_gmt'    => self::format_date_for_response( $order->get_date_modified() ),
 		);
 
 		if ( $include_line_items ) {
@@ -341,11 +337,14 @@ trait OrderAbilityTrait {
 			$data['billing_email'] = $billing_email;
 		}
 
-		foreach ( array( 'date_created', 'date_created_gmt', 'date_modified', 'date_modified_gmt' ) as $key ) {
-			if ( ! isset( $data[ $key ] ) ) {
-				unset( $data[ $key ] );
-			}
-		}
+		$data += array_filter(
+			array(
+				'date_created'      => self::format_date_for_response( $order->get_date_created(), false ),
+				'date_created_gmt'  => self::format_date_for_response( $order->get_date_created() ),
+				'date_modified'     => self::format_date_for_response( $order->get_date_modified(), false ),
+				'date_modified_gmt' => self::format_date_for_response( $order->get_date_modified() ),
+			)
+		);
 
 		return ExtensibleAbilities::add_fields_to_object( $data, 'order', $order );
 	}

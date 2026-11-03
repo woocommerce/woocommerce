@@ -763,29 +763,25 @@ trait ProductAbilityTrait {
 		$permalink      = $product->get_permalink();
 
 		$data = array(
-			'id'                => $product->get_id(),
-			'name'              => $product->get_name(),
-			'slug'              => $product->get_slug(),
-			'type'              => $product->get_type(),
-			'status'            => $product->get_status(),
-			'sku'               => $product->get_sku(),
-			'currency'          => get_woocommerce_currency(),
-			'currency_symbol'   => html_entity_decode(
+			'id'               => $product->get_id(),
+			'name'             => $product->get_name(),
+			'slug'             => $product->get_slug(),
+			'type'             => $product->get_type(),
+			'status'           => $product->get_status(),
+			'sku'              => $product->get_sku(),
+			'currency'         => get_woocommerce_currency(),
+			'currency_symbol'  => html_entity_decode(
 				get_woocommerce_currency_symbol(),
 				ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401
 			),
-			'price'             => $product->get_price(),
-			'regular_price'     => $product->get_regular_price(),
-			'sale_price'        => $product->get_sale_price(),
-			'stock_status'      => $product->get_stock_status(),
-			'manage_stock'      => (bool) $product->get_manage_stock(),
-			'virtual'           => (bool) $product->get_virtual(),
-			'downloadable'      => (bool) $product->get_downloadable(),
-			'grouped_products'  => $product instanceof \WC_Product_Grouped ? array_map( 'absint', $product->get_children( 'edit' ) ) : array(),
-			'date_created'      => self::format_date_for_response( $product->get_date_created(), false ),
-			'date_created_gmt'  => self::format_date_for_response( $product->get_date_created() ),
-			'date_modified'     => self::format_date_for_response( $product->get_date_modified(), false ),
-			'date_modified_gmt' => self::format_date_for_response( $product->get_date_modified() ),
+			'price'            => $product->get_price(),
+			'regular_price'    => $product->get_regular_price(),
+			'sale_price'       => $product->get_sale_price(),
+			'stock_status'     => $product->get_stock_status(),
+			'manage_stock'     => (bool) $product->get_manage_stock(),
+			'virtual'          => (bool) $product->get_virtual(),
+			'downloadable'     => (bool) $product->get_downloadable(),
+			'grouped_products' => $product instanceof \WC_Product_Grouped ? array_map( 'absint', $product->get_children( 'edit' ) ) : array(),
 		);
 
 		if ( false !== $permalink ) {
@@ -805,11 +801,14 @@ trait ProductAbilityTrait {
 			}
 		}
 
-		foreach ( array( 'date_created', 'date_created_gmt', 'date_modified', 'date_modified_gmt' ) as $key ) {
-			if ( ! isset( $data[ $key ] ) ) {
-				unset( $data[ $key ] );
-			}
-		}
+		$data += array_filter(
+			array(
+				'date_created'      => self::format_date_for_response( $product->get_date_created(), false ),
+				'date_created_gmt'  => self::format_date_for_response( $product->get_date_created() ),
+				'date_modified'     => self::format_date_for_response( $product->get_date_modified(), false ),
+				'date_modified_gmt' => self::format_date_for_response( $product->get_date_modified() ),
+			)
+		);
 
 		return ExtensibleAbilities::add_fields_to_object( $data, 'product', $product );
 	}

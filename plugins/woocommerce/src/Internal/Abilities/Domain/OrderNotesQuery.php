@@ -143,8 +143,9 @@ class OrderNotesQuery extends AbstractDomainAbility implements AbilityDefinition
 							'id'            => array( 'type' => 'integer' ),
 							'author'        => array( 'type' => 'string' ),
 							'date_created'  => array(
-								'type'   => 'string',
-								'format' => 'date-time',
+								'type'        => 'string',
+								'format'      => 'date-time',
+								'description' => __( 'Note creation date. Omitted when no creation date is available.', 'woocommerce' ),
 							),
 							'note'          => array( 'type' => 'string' ),
 							'customer_note' => array( 'type' => 'boolean' ),
