@@ -873,6 +873,26 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test a Site Title link keeps inheriting its color inside a Group that has a link color, as in the editor.
+	 */
+	public function testItKeepsTheSiteTitleLinkColorInsideAGroupWithALinkColor(): void {
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+		$email_post        = $this->create_email_post( '<!-- wp:group {"style":{"elements":{"link":{"color":{"text":"#123456"}}}}} --><div class="wp-block-group has-link-color"><!-- wp:site-title {"isLink":true} /--></div><!-- /wp:group -->' );
+
+		try {
+			$rendered = $this->renderer->render( $email_post, $template );
+		} finally {
+			\WP_Style_Engine_CSS_Rules_Store::remove_all_stores();
+		}
+
+		$this->assertSame( 1, preg_match( '/<a [^>]*>[^<]*' . preg_quote( get_bloginfo( 'name' ), '/' ) . '/', $rendered, $site_title_link ) );
+		$this->assertStringContainsString( 'color: inherit', $site_title_link[0] );
+		$this->assertStringNotContainsString( '#123456', $site_title_link[0] );
+	}
+
+	/**
 	 * Test a link color set on a block does not reach the buttons inside it.
 	 */
 	public function testItKeepsBlockLinkColorsOffButtons(): void {
