@@ -2359,7 +2359,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 *           [{"nope":{}}, "No extension registered the namespace \"nope\" for this ability. Remove it from the input, or use a namespace from the input schema."]
 	 *           [{"other_ext":{"cuont":3}}, "The extension namespace \"other_ext\" has no field \"cuont\". The fields you can write in this namespace are: count, size. Use one of them, or remove \"other_ext.cuont\" from the input."]
 	 *           [{"test-ext":{"code":"A2"}}, "The extension field \"test-ext.code\" is read-only. Remove it from the input."]
-	 *           [{"other_ext":{"size":"huge"}}, "extensions.other_ext.size is not one of small and large."]
+	 *           [{"other_ext":{"size":"huge"}}, "extensions.other_ext.size does not match the expected format. Reason: extensions.other_ext.size is not one of small and large."]
 	 *
 	 * @param array  $extensions Value of the `extensions` input.
 	 * @param string $message    Expected error message.
@@ -2480,7 +2480,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$result = wp_get_ability( $ability )->execute( $input );
 
 		$this->assertSame(
-			'extensions.other_ext.size is not one of small and large. variations[0]: extensions.other_ext.count is not of type integer,null. variations[1]: No extension registered the namespace "nope" for this ability. Remove it from the input, or use a namespace from the input schema.',
+			'extensions.other_ext.size does not match the expected format. Reason: extensions.other_ext.size is not one of small and large. variations[0]: extensions.other_ext.count is not of type integer,null. variations[1]: No extension registered the namespace "nope" for this ability. Remove it from the input, or use a namespace from the input schema.',
 			$result->get_error_message()
 		);
 		$this->assertSame( 0, $validated );

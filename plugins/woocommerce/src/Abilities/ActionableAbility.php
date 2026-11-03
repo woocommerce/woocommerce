@@ -455,27 +455,21 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
-	 * Say what an `anyOf` field takes, because the WordPress message only says that no branch matched.
-	 * A value of none of the branch types gets the types it can take. A value of one branch type gets
-	 * the refusal of that branch, such as the values of its `enum`.
+	 * Name the types an `anyOf` field takes when the value matches none of them, because the
+	 * WordPress message then names no type. Other refusals keep the WordPress message.
 	 *
 	 * @param mixed                            $value    Value from the input.
-	 * @param array<int, array<string, mixed>> $branches The `anyOf` branches, each with one type.
+	 * @param array<int, array<string, mixed>> $branches The `anyOf` branches.
 	 * @param string                           $param    Path of the field in the input.
-	 * @return string|null The refusal, or null when the branches do not each have their own type name, or when the branch of the value accepts it.
+	 * @return string|null The refusal, or null to keep the WordPress message.
 	 */
 	private static function describe_any_of_refusal( $value, array $branches, string $param ): ?string {
 		$types = array_column( $branches, 'type' );
-		if ( count( array_unique( array_filter( $types, 'is_string' ) ) ) !== count( $branches ) ) {
+		if ( count( array_filter( $types, 'is_string' ) ) !== count( $branches ) || '' !== rest_get_best_type_for_value( $value, $types ) ) {
 			return null;
 		}
-		$type = rest_get_best_type_for_value( $value, $types );
-		if ( '' === $type ) {
-			/* translators: 1: Path of the field in the input. 2: Comma-separated list of JSON types. */
-			return sprintf( __( '%1$s is not of type %2$s.', 'woocommerce' ), $param, implode( ',', $types ) );
-		}
-		$valid = rest_validate_value_from_schema( $value, $branches[ array_search( $type, $types, true ) ], $param );
-		return is_wp_error( $valid ) ? $valid->get_error_message() : null;
+		/* translators: 1: Path of the field in the input. 2: Comma-separated list of JSON types. */
+		return sprintf( __( '%1$s is not of type %2$s.', 'woocommerce' ), $param, implode( ',', $types ) );
 	}
 
 	/**
