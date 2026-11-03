@@ -169,6 +169,20 @@ class Separator_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Inside a block with its own font size (a Group), the dots follow that size.
+	 */
+	public function testItSizesDotsFromInheritedFontSize(): void {
+		$rendered = $this->render(
+			array( 'className' => 'is-style-dots' ),
+			'<hr class="wp-block-separator has-alpha-channel-opacity is-style-dots"/>',
+			array( 'font-size' => '32px' )
+		);
+
+		$this->assertStringContainsString( 'font-size:48px', $rendered );
+		$this->assertStringContainsString( 'letter-spacing:96px', $rendered );
+	}
+
+	/**
 	 * A color that isn't a valid CSS color never reaches the style attribute.
 	 */
 	public function testItDropsInvalidColor(): void {

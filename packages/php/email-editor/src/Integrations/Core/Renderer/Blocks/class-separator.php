@@ -31,9 +31,10 @@ class Separator extends Abstract_Block_Renderer {
 		$color      = $this->get_color( $attributes, $parsed_block['email_attrs'] ?? array(), $rendering_context );
 
 		if ( false !== strpos( $class_name, 'is-style-dots' ) ) {
-			// Match the editor: dots are 1.5× the text size, spaced 2em apart.
+			// Match the editor: dots are 1.5× the inherited text size, spaced 2em apart.
 			$theme_styles = $rendering_context->get_theme_styles();
-			$font_size    = Styles_Helper::parse_value( Styles_Helper::convert_to_px( (string) ( $theme_styles['typography']['fontSize'] ?? '16px' ) ) ?? '16px' );
+			$font_size    = (string) ( $parsed_block['email_attrs']['font-size'] ?? $theme_styles['typography']['fontSize'] ?? '16px' );
+			$font_size    = Styles_Helper::parse_value( Styles_Helper::convert_to_px( $font_size ) ?? '16px' );
 			$dots_size    = (int) round( 1.5 * $font_size );
 			$spacing      = 2 * $dots_size;
 			return Table_Wrapper_Helper::render_table_wrapper(
