@@ -74,7 +74,7 @@
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
-		"eslint": "^10.0.0",
+		"eslint": "catalog:tooling",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"react": "18.3.x",

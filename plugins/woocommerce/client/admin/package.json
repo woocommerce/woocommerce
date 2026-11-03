@@ -182,7 +182,7 @@
 		"config": "3.3.7",
 		"copy-webpack-plugin": "catalog:tooling",
 		"css-loader": "catalog:tooling",
-		"eslint": "^10.0.0",
+		"eslint": "catalog:tooling",
 		"eslint-import-resolver-typescript": "^4.4.5",
 		"eslint-import-resolver-webpack": "^0.13.11",
 		"fs-extra": "11.1.1",

@@ -29,7 +29,7 @@
 		"@types/node": "^24.1.0",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"eslint": "^10.0.0",
+		"eslint": "catalog:tooling",
 		"jest": "29.5.x",
 		"ts-jest": "29.1.x",
 		"ts-node": "^10.9.2",

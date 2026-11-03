@@ -126,6 +126,7 @@
 				"babel-plugin-transform-react-remove-prop-types",
 				"copy-webpack-plugin",
 				"css-loader",
+				"eslint",
 				"mini-css-extract-plugin",
 				"postcss",
 				"postcss-loader",
@@ -140,6 +141,19 @@
 				"**"
 			],
 			"policy": "catalog"
+		},
+		{
+			"label": "Preserve public ESLint peer compatibility ranges",
+			"dependencyTypes": [
+				"peer"
+			],
+			"dependencies": [
+				"eslint"
+			],
+			"packages": [
+				"**"
+			],
+			"isIgnored": true
 		},
 		{
 			"label": "React-related dependencies: React 18",
@@ -189,20 +203,6 @@
 				"**"
 			],
 			"pinVersion": "^0.0.10"
-		},
-		{
-			"label": "ESLint dev target. Peer deps are excluded so @woocommerce/eslint-plugin can peer the wider `^9 || ^10` range.",
-			"dependencyTypes": [
-				"prod",
-				"dev"
-			],
-			"dependencies": [
-				"eslint"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^10.0.0"
 		},
 		{
 			"dependencies": [

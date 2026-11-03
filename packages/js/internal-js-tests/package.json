@@ -75,7 +75,7 @@
 		"@wordpress/html-entities": "catalog:wp-min",
 		"@wordpress/notices": "catalog:wp-min",
 		"babel-jest": "29.5.x",
-		"eslint": "^10.0.0",
+		"eslint": "catalog:tooling",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"jest-environment-jsdom": "29.5.x",

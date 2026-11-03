@@ -50,7 +50,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
-		"eslint": "^10.0.0",
+		"eslint": "catalog:tooling",
 		"stylelint": "catalog:tooling",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",

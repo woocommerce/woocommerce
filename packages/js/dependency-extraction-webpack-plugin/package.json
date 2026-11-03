@@ -34,7 +34,7 @@
 		"@babel/core": "catalog:tooling",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"eslint": "^10.0.0",
+		"eslint": "catalog:tooling",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"rimraf": "5.0.5",

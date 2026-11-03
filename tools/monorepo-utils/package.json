@@ -54,7 +54,7 @@
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"copy-webpack-plugin": "catalog:tooling",
-		"eslint": "^10.0.0",
+		"eslint": "catalog:tooling",
 		"jest": "29.5.x",
 		"replace": "^1.2.2",
 		"ts-jest": "29.1.x",

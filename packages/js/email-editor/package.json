@@ -143,7 +143,7 @@
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@wordpress/browserslist-config": "next",
-		"eslint": "^10.0.0",
+		"eslint": "catalog:tooling",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"jest-environment-jsdom": "29.5.x",

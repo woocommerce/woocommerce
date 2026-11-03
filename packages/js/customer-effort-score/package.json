@@ -105,7 +105,7 @@
 		"@woocommerce/tracks": "workspace:*",
 		"@wordpress/browserslist-config": "next",
 		"css-loader": "catalog:tooling",
-		"eslint": "^10.0.0",
+		"eslint": "catalog:tooling",
 		"stylelint": "catalog:tooling",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
