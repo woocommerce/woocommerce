@@ -33,11 +33,10 @@ class Separator extends Abstract_Block_Renderer {
 
 		if ( in_array( 'is-style-dots', $classes, true ) ) {
 			// Match the editor: dots are 1.5× the inherited text size, spaced 2em apart.
-			$theme_styles = $rendering_context->get_theme_styles();
-			$font_size    = (string) ( $parsed_block['email_attrs']['font-size'] ?? $theme_styles['typography']['fontSize'] ?? '16px' );
-			$font_size    = Styles_Helper::parse_value( (string) Styles_Helper::convert_to_px( $font_size ) );
-			$dots_size    = (int) round( 1.5 * $font_size );
-			$spacing      = 2 * $dots_size;
+			$font_size = (string) ( $parsed_block['email_attrs']['font-size'] ?? '16px' );
+			$font_size = Styles_Helper::parse_value( (string) Styles_Helper::convert_to_px( $font_size ) );
+			$dots_size = (int) round( 1.5 * $font_size );
+			$spacing   = 2 * $dots_size;
 			return Table_Wrapper_Helper::render_table_wrapper(
 				'&#183;&#183;&#183;',
 				array(
@@ -78,7 +77,7 @@ class Separator extends Abstract_Block_Renderer {
 	private function get_color( array $attributes, array $email_attrs, Rendering_Context $rendering_context ): string {
 		$styles       = Styles_Helper::get_block_styles( $attributes, $rendering_context, array( 'background-color' ) );
 		$theme_styles = $rendering_context->get_theme_styles();
-		$color        = $styles['declarations']['background-color'] ?? $email_attrs['color'] ?? $theme_styles['color']['text'] ?? '#000000';
+		$color        = $styles['declarations']['background-color'] ?? $email_attrs['color'] ?? '#000000';
 
 		$color = Html_Processing_Helper::sanitize_color( (string) $color );
 
@@ -87,6 +86,7 @@ class Separator extends Abstract_Block_Renderer {
 
 	/**
 	 * Blends a hex color with alpha (#rrggbbaa, as the color picker saves it) onto the background, since Outlook can’t read alpha.
+	 * Uses the email background, not a parent Group’s: preprocessors don’t pass that down.
 	 *
 	 * @param string $color Color.
 	 * @param string $background Email background color; white when it isn’t a 6-digit hex.

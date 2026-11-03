@@ -85,16 +85,6 @@ class Separator_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Without an inherited color, the line uses the email text color.
-	 */
-	public function testItFallsBackToEmailTextColor(): void {
-		$theme_styles = $this->rendering_context->get_theme_styles();
-		$rendered     = $this->render( array() );
-
-		$this->assertStringContainsString( 'border-top:2px solid ' . $theme_styles['color']['text'], $rendered );
-	}
-
-	/**
 	 * The wide style spans the full content width.
 	 */
 	public function testItRendersWideStyleAtFullWidth(): void {
