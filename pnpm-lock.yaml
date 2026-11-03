@@ -2624,8 +2624,8 @@ importers:
         specifier: ^10.6.0
         version: 10.6.0
       '@modelcontextprotocol/inspector':
-        specifier: 2.11.0
-        version: 2.11.0(@types/node@24.12.2)(@types/react@18.3.28)(esbuild@0.28.2)(jiti@2.6.1)(react-dom@18.3.1(react@19.3.1))(sass-embedded@1.100.0)(sass@1.69.5)(terser@5.51.2)
+        specifier: 2.13.0
+        version: 2.13.0(@types/node@24.12.2)(@types/react@18.3.28)(esbuild@0.28.2)(jiti@2.6.1)(react-dom@18.3.1(react@19.3.1))(sass-embedded@1.100.0)(sass@1.69.5)(terser@5.51.2)
       '@playwright/test':
         specifier: ^1.63.0
         version: 1.63.0
@@ -6611,12 +6611,12 @@ packages:
       '@types/react': 18.3.x
       react: '>=16'
 
-  '@modelcontextprotocol/client@2.3.1':
-    resolution: {integrity: sha512-mIGZXpHsjnZ6lD+gD/WCMpR5k8yVQQ8nNFH1N0Srf7AvnwTUMYD6pvTY8ng2+He5FfV7YMZLmrjL7cLa/cc3dQ==}
+  '@modelcontextprotocol/client@2.4.0':
+    resolution: {integrity: sha512-LgrD2OphHuG12vfKFKz6SOnq7bKHQmhGJIAYdD+MZBn2npHEyry6uD8zvktodtl5CQM85MO0anUyD9JwmUmxww==}
     engines: {node: '>=20'}
 
-  '@modelcontextprotocol/core@2.3.1':
-    resolution: {integrity: sha512-laVmIhPGpWi7rG9q+0UigblRN0Hws/Yjlb6qLFtVqryXVLkc4h+yN8z731POD2LnAGQlFe7/tXhUm7Bi0YB91g==}
+  '@modelcontextprotocol/core@2.4.0':
+    resolution: {integrity: sha512-z8QBKqdfXLPzkLQuG4xp8hrVEMm1PZ1IgxMN2sMbJiFiAKOWXnAzogXn2W4aqIBlP1ea6U5yiqVquvUNM1Cj6Q==}
     engines: {node: '>=20'}
 
   '@modelcontextprotocol/ext-apps@2.0.4':
@@ -6645,13 +6645,13 @@ packages:
       '@modelcontextprotocol/client':
         optional: true
 
-  '@modelcontextprotocol/inspector@2.11.0':
-    resolution: {integrity: sha512-gqMw2x0NCotTdjLNv3PSm/IJSeXL7O8u0SpyZXtXGhSukJ2DMoAy8RR7xKngHTCETJcG5gyPdxhOn8zf/ofSRA==}
+  '@modelcontextprotocol/inspector@2.13.0':
+    resolution: {integrity: sha512-k+eCnlMFWTVRops5+vGljX74f+eb7XsvTCB3ODWuEKXhIwKL2cLcnwsO3vOfXIp0gczjc1kzl8lS5+cwvGPYdA==}
     engines: {node: '>=22.19.0'}
     hasBin: true
 
-  '@modelcontextprotocol/server@2.3.1':
-    resolution: {integrity: sha512-e59MfWuSssj6DoQ96JCTqdW1AXT5/XtnTl0WWd6MU1Ka434fFUGGosCLJbGNySDhHGvxQWoRWK137FXYFkYNWw==}
+  '@modelcontextprotocol/server@2.4.0':
+    resolution: {integrity: sha512-rgR9yxSaAJ+bcsi/XroT/S2AfPiIWloXAnrdfYSCms9ivVju0ishu/wW0J21Ho6+ZOR1r7RyeRbjiRuF87ix5Q==}
     engines: {node: '>=20'}
 
   '@mswjs/interceptors@0.39.8':
@@ -24500,9 +24500,9 @@ snapshots:
       '@types/react': 18.3.28
       react: 18.3.1
 
-  '@modelcontextprotocol/client@2.3.1':
+  '@modelcontextprotocol/client@2.4.0':
     dependencies:
-      '@modelcontextprotocol/core': 2.3.1
+      '@modelcontextprotocol/core': 2.4.0
       cross-spawn: 7.0.6
       eventsource: 3.0.7
       eventsource-parser: 3.1.1
@@ -24510,35 +24510,35 @@ snapshots:
       pkce-challenge: 5.0.1
       zod: 4.6.7
 
-  '@modelcontextprotocol/core@2.3.1':
+  '@modelcontextprotocol/core@2.4.0':
     dependencies:
       zod: 4.6.7
 
-  '@modelcontextprotocol/ext-apps@2.0.4(@modelcontextprotocol/client@2.3.1)(@modelcontextprotocol/core@2.3.1)(@modelcontextprotocol/server@2.3.1)(react-dom@18.3.1(react@19.3.1))(react@19.3.1)(zod@4.6.7)':
+  '@modelcontextprotocol/ext-apps@2.0.4(@modelcontextprotocol/client@2.4.0)(@modelcontextprotocol/core@2.4.0)(@modelcontextprotocol/server@2.4.0)(react-dom@18.3.1(react@19.3.1))(react@19.3.1)(zod@4.6.7)':
     dependencies:
-      '@modelcontextprotocol/client': 2.3.1
-      '@modelcontextprotocol/core': 2.3.1
+      '@modelcontextprotocol/client': 2.4.0
+      '@modelcontextprotocol/core': 2.4.0
       '@standard-schema/spec': 1.1.0
       zod: 4.6.7
     optionalDependencies:
-      '@modelcontextprotocol/server': 2.3.1
+      '@modelcontextprotocol/server': 2.4.0
       react: 19.3.1
       react-dom: 18.3.1(react@19.3.1)
 
-  '@modelcontextprotocol/ext-tasks@0.2.2(@modelcontextprotocol/client@2.3.1)':
+  '@modelcontextprotocol/ext-tasks@0.2.2(@modelcontextprotocol/client@2.4.0)':
     dependencies:
       zod: 4.6.7
     optionalDependencies:
-      '@modelcontextprotocol/client': 2.3.1
+      '@modelcontextprotocol/client': 2.4.0
 
-  '@modelcontextprotocol/inspector@2.11.0(@types/node@24.12.2)(@types/react@18.3.28)(esbuild@0.28.2)(jiti@2.6.1)(react-dom@18.3.1(react@19.3.1))(sass-embedded@1.100.0)(sass@1.69.5)(terser@5.51.2)':
+  '@modelcontextprotocol/inspector@2.13.0(@types/node@24.12.2)(@types/react@18.3.28)(esbuild@0.28.2)(jiti@2.6.1)(react-dom@18.3.1(react@19.3.1))(sass-embedded@1.100.0)(sass@1.69.5)(terser@5.51.2)':
     dependencies:
       '@hono/node-server': 2.1.6(hono@4.13.16)
-      '@modelcontextprotocol/client': 2.3.1
-      '@modelcontextprotocol/core': 2.3.1
-      '@modelcontextprotocol/ext-apps': 2.0.4(@modelcontextprotocol/client@2.3.1)(@modelcontextprotocol/core@2.3.1)(@modelcontextprotocol/server@2.3.1)(react-dom@18.3.1(react@19.3.1))(react@19.3.1)(zod@4.6.7)
-      '@modelcontextprotocol/ext-tasks': 0.2.2(@modelcontextprotocol/client@2.3.1)
-      '@modelcontextprotocol/server': 2.3.1
+      '@modelcontextprotocol/client': 2.4.0
+      '@modelcontextprotocol/core': 2.4.0
+      '@modelcontextprotocol/ext-apps': 2.0.4(@modelcontextprotocol/client@2.4.0)(@modelcontextprotocol/core@2.4.0)(@modelcontextprotocol/server@2.4.0)(react-dom@18.3.1(react@19.3.1))(react@19.3.1)(zod@4.6.7)
+      '@modelcontextprotocol/ext-tasks': 0.2.2(@modelcontextprotocol/client@2.4.0)
+      '@modelcontextprotocol/server': 2.4.0
       '@napi-rs/keyring': 2.1.2
       '@vitejs/plugin-react': 6.2.1(vite@8.3.5(@types/node@24.12.2)(esbuild@0.28.2)(jiti@2.6.1)(sass-embedded@1.100.0)(sass@1.69.5)(terser@5.51.2)(yaml@2.9.1))
       ajv: 8.20.0
@@ -24547,7 +24547,7 @@ snapshots:
       commander: 15.0.0
       hono: 4.13.16
       ink: 6.8.0(@types/react@18.3.28)(react@19.3.1)
-      open: 10.2.0
+      open: 11.0.4
       pino: 9.14.0
       proper-lockfile: 4.1.2
       react: 19.3.1
@@ -24576,9 +24576,9 @@ snapshots:
       - tsx
       - utf-8-validate
 
-  '@modelcontextprotocol/server@2.3.1':
+  '@modelcontextprotocol/server@2.4.0':
     dependencies:
-      '@modelcontextprotocol/core': 2.3.1
+      '@modelcontextprotocol/core': 2.4.0
       zod: 4.6.7
 
   '@mswjs/interceptors@0.39.8':
@@ -38247,6 +38247,10 @@ snapshots:
   fdir@6.5.0(picomatch@4.0.4):
     optionalDependencies:
       picomatch: 4.0.4
+
+  fdir@6.5.0(picomatch@4.0.7):
+    optionalDependencies:
+      picomatch: 4.0.7
 
   figlet@1.12.0:
     dependencies:
