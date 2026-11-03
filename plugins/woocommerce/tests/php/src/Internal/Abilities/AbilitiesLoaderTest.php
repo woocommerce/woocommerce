@@ -1159,6 +1159,20 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return the default category that saving assigns to a product created without categories.
+	 */
+	public function test_product_create_returns_the_default_category(): void {
+		$default = wp_insert_term( 'Uncategorized test', 'product_cat' )['term_id'];
+		update_option( 'default_product_cat', $default );
+
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute( array( 'name' => 'Default category product' ) );
+
+		$this->assertIsArray( $result );
+		$this->created_product_ids[] = $result['product']['id'];
+		$this->assertSame( array( $default ), array_column( $result['product']['categories'], 'id' ) );
+	}
+
+	/**
 	 * @testdox Should reject auto-draft as a product mutation status.
 	 */
 	public function test_product_create_rejects_auto_draft_status(): void {

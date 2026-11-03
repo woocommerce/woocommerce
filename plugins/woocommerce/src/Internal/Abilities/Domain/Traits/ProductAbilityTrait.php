@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain\Traits;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 
@@ -1520,32 +1521,52 @@ trait ProductAbilityTrait {
 	 * @return array
 	 */
 	protected static function format_product_for_response( \WC_Product $product ): array {
-		$stock_quantity = $product->get_stock_quantity();
-		$permalink      = $product->get_permalink();
+		$stock_quantity   = $product->get_stock_quantity();
+		$low_stock_amount = $product->get_low_stock_amount();
+		$permalink        = $product->get_permalink();
 
 		$data = array(
-			'id'               => $product->get_id(),
-			'name'             => $product->get_name(),
-			'slug'             => $product->get_slug(),
-			'type'             => $product->get_type(),
-			'status'           => $product->get_status(),
-			'sku'              => $product->get_sku(),
-			'currency'         => get_woocommerce_currency(),
-			'currency_symbol'  => html_entity_decode(
+			'id'                => $product->get_id(),
+			'name'              => $product->get_name(),
+			'slug'              => $product->get_slug(),
+			'type'              => $product->get_type(),
+			'status'            => $product->get_status(),
+			'sku'               => $product->get_sku(),
+			'currency'          => get_woocommerce_currency(),
+			'currency_symbol'   => html_entity_decode(
 				get_woocommerce_currency_symbol(),
 				ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401
 			),
-			'price'            => $product->get_price(),
-			'regular_price'    => $product->get_regular_price(),
-			'sale_price'       => $product->get_sale_price(),
-			'stock_status'     => $product->get_stock_status(),
-			'manage_stock'     => (bool) $product->get_manage_stock(),
-			'virtual'          => (bool) $product->get_virtual(),
-			'downloadable'     => (bool) $product->get_downloadable(),
-			'grouped_products' => $product instanceof \WC_Product_Grouped ? array_map( 'absint', $product->get_children( 'edit' ) ) : array(),
-			'parent_id'        => (int) $product->get_parent_id(),
-			'attributes'       => self::format_product_attributes( $product ),
-			'variation_ids'    => $product instanceof \WC_Product_Variable ? self::read_variation_children( $product, false )['all'] : array(),
+			'price'             => $product->get_price(),
+			'regular_price'     => $product->get_regular_price(),
+			'sale_price'        => $product->get_sale_price(),
+			'on_sale'           => (bool) $product->is_on_sale(),
+			'stock_status'      => $product->get_stock_status(),
+			'manage_stock'      => (bool) $product->get_manage_stock(),
+			'virtual'           => (bool) $product->get_virtual(),
+			'downloadable'      => (bool) $product->get_downloadable(),
+			'grouped_products'  => $product instanceof \WC_Product_Grouped ? array_map( 'absint', $product->get_children( 'edit' ) ) : array(),
+			'categories'        => self::format_product_terms_for_response( $product->get_category_ids( 'edit' ), 'product_cat' ),
+			'tags'              => self::format_product_terms_for_response( $product->get_tag_ids( 'edit' ), 'product_tag' ),
+			'brands'            => self::format_product_terms_for_response( $product->get_brand_ids( 'edit' ), 'product_brand' ),
+			'description'       => $product->get_description(),
+			'short_description' => $product->get_short_description(),
+			'images'            => self::format_product_images_for_response( $product ),
+			'weight'            => $product->get_weight(),
+			'dimensions'        => array(
+				'length' => $product->get_length(),
+				'width'  => $product->get_width(),
+				'height' => $product->get_height(),
+			),
+			'shipping_required' => (bool) $product->needs_shipping(),
+			'shipping_class'    => $product->get_shipping_class(),
+			'shipping_class_id' => $product->get_shipping_class_id(),
+			'tax_status'        => $product->get_tax_status(),
+			'tax_class'         => $product->get_tax_class(),
+			'backorders'        => $product->get_backorders(),
+			'parent_id'         => (int) $product->get_parent_id(),
+			'attributes'        => self::format_product_attributes( $product ),
+			'variation_ids'     => $product instanceof \WC_Product_Variable ? self::read_variation_children( $product, false )['all'] : array(),
 		);
 
 		if ( false !== $permalink ) {
@@ -1553,6 +1574,9 @@ trait ProductAbilityTrait {
 		}
 		if ( null !== $stock_quantity ) {
 			$data['stock_quantity'] = wc_stock_amount( $stock_quantity );
+		}
+		if ( is_numeric( $low_stock_amount ) ) {
+			$data['low_stock_amount'] = wc_stock_amount( (float) $low_stock_amount );
 		}
 		if ( $product instanceof \WC_Product_External ) {
 			$external_url = $product->get_product_url();
@@ -1676,6 +1700,74 @@ trait ProductAbilityTrait {
 	}
 
 	/**
+	 * Terms of a product in one taxonomy. Loading a product caches its terms, so this adds no query per product.
+	 *
+	 * @param array<int, int|string> $term_ids Term IDs of the product.
+	 * @param string                 $taxonomy Taxonomy, such as `product_cat`.
+	 * @return array<int, array{id: int, name: string, slug: string}>
+	 */
+	private static function format_product_terms_for_response( array $term_ids, string $taxonomy ): array {
+		if ( ! taxonomy_exists( $taxonomy ) ) {
+			return array();
+		}
+
+		$terms = array();
+
+		foreach ( $term_ids as $term_id ) {
+			$term = get_term( (int) $term_id, $taxonomy );
+
+			if ( $term instanceof \WP_Term ) {
+				$terms[] = array(
+					'id'   => $term->term_id,
+					'name' => html_entity_decode( $term->name, ENT_QUOTES | ENT_HTML5 ),
+					'slug' => $term->slug,
+				);
+			}
+		}
+
+		return $terms;
+	}
+
+	/**
+	 * Featured image first, then the gallery. Unlike the REST API, a product without images gets no placeholder.
+	 *
+	 * @param \WC_Product $product Product object.
+	 * @return array<int, array{id: int, src: string, name: string, alt: string}>
+	 */
+	private static function format_product_images_for_response( \WC_Product $product ): array {
+		$images = array();
+
+		foreach ( self::get_product_image_ids( $product ) as $attachment_id ) {
+			$attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
+
+			if ( ! is_array( $attachment ) ) {
+				continue;
+			}
+
+			$images[] = array(
+				'id'   => $attachment_id,
+				'src'  => (string) $attachment[0],
+				'name' => get_post_field( 'post_title', $attachment_id ),
+				'alt'  => (string) get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
+			);
+		}
+
+		return $images;
+	}
+
+	/**
+	 * Attachment IDs of a product's featured image and gallery, without duplicates.
+	 *
+	 * @param \WC_Product $product Product object.
+	 * @return array<int, int>
+	 */
+	protected static function get_product_image_ids( \WC_Product $product ): array {
+		$image_ids = array_merge( array( (int) $product->get_image_id() ), array_map( 'intval', $product->get_gallery_image_ids() ) );
+
+		return array_values( array_unique( array_filter( $image_ids ) ) );
+	}
+
+	/**
 	 * Get the schema for a single product in a response.
 	 *
 	 * @return array
@@ -1726,6 +1818,10 @@ trait ProductAbilityTrait {
 				'sale_price'        => array(
 					'type'        => 'string',
 					'description' => __( 'Decimal price as a string, without a currency symbol.', 'woocommerce' ),
+				),
+				'on_sale'           => array(
+					'type'        => 'boolean',
+					'description' => __( 'Whether the sale price applies now, taking the sale dates into account.', 'woocommerce' ),
 				),
 				'stock_status'      => array(
 					'type' => 'string',
@@ -1785,6 +1881,75 @@ trait ProductAbilityTrait {
 						'additionalProperties' => false,
 					),
 				),
+				'categories'        => self::get_product_terms_output_schema(),
+				'tags'              => self::get_product_terms_output_schema(),
+				'brands'            => self::get_product_terms_output_schema(),
+				'description'       => array( 'type' => 'string' ),
+				'short_description' => array( 'type' => 'string' ),
+				'images'            => array(
+					'type'        => 'array',
+					'description' => __( 'Featured image first, then the gallery.', 'woocommerce' ),
+					'items'       => array(
+						'type'                 => 'object',
+						'properties'           => array(
+							'id'   => array( 'type' => 'integer' ),
+							'src'  => array(
+								'type'   => 'string',
+								'format' => 'uri',
+							),
+							'name' => array( 'type' => 'string' ),
+							'alt'  => array( 'type' => 'string' ),
+						),
+						'additionalProperties' => false,
+					),
+				),
+				'weight'            => array(
+					'type'        => 'string',
+					'description' => sprintf(
+						/* translators: %s: weight unit, such as kg. */
+						__( 'Decimal string in %s, or empty when not set.', 'woocommerce' ),
+						get_option( 'woocommerce_weight_unit' )
+					),
+				),
+				'dimensions'        => array(
+					'type'                 => 'object',
+					'description'          => sprintf(
+						/* translators: %s: dimension unit, such as cm. */
+						__( 'Decimal strings in %s, each empty when not set.', 'woocommerce' ),
+						get_option( 'woocommerce_dimension_unit' )
+					),
+					'properties'           => array(
+						'length' => array( 'type' => 'string' ),
+						'width'  => array( 'type' => 'string' ),
+						'height' => array( 'type' => 'string' ),
+					),
+					'additionalProperties' => false,
+				),
+				'shipping_required' => array( 'type' => 'boolean' ),
+				'shipping_class'    => array(
+					'type'        => 'string',
+					'description' => __( 'Shipping class slug, or empty when the product has none.', 'woocommerce' ),
+				),
+				'shipping_class_id' => array(
+					'type'        => 'integer',
+					'description' => __( 'Shipping class term ID, or 0 when the product has none.', 'woocommerce' ),
+				),
+				'tax_status'        => array(
+					'type' => 'string',
+					'enum' => array( ProductTaxStatus::TAXABLE, ProductTaxStatus::SHIPPING, ProductTaxStatus::NONE ),
+				),
+				'tax_class'         => array(
+					'type'        => 'string',
+					'description' => __( 'Tax class slug, or empty for the standard rate.', 'woocommerce' ),
+				),
+				'backorders'        => array(
+					'type' => 'string',
+					'enum' => array_keys( wc_get_product_backorder_options() ),
+				),
+				'low_stock_amount'  => array(
+					'type'        => self::get_product_stock_quantity_schema_type(),
+					'description' => __( 'Low stock threshold of the product. Omitted when the store-wide threshold applies.', 'woocommerce' ),
+				),
 				'variation_ids'     => array(
 					'type'        => 'array',
 					'description' => __( 'IDs of the variations of a variable product.', 'woocommerce' ),
@@ -1812,6 +1977,26 @@ trait ProductAbilityTrait {
 				),
 			),
 			'additionalProperties' => false,
+		);
+	}
+
+	/**
+	 * Schema of a product's terms in one taxonomy.
+	 *
+	 * @return array
+	 */
+	private static function get_product_terms_output_schema(): array {
+		return array(
+			'type'  => 'array',
+			'items' => array(
+				'type'                 => 'object',
+				'properties'           => array(
+					'id'   => array( 'type' => 'integer' ),
+					'name' => array( 'type' => 'string' ),
+					'slug' => array( 'type' => 'string' ),
+				),
+				'additionalProperties' => false,
+			),
 		);
 	}
 

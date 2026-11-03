@@ -368,6 +368,71 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should combine Core's term filters with an extension's OR tax_query with AND.
+	 */
+	public function test_term_filters_combine_with_extension_or_tax_query(): void {
+		$gifts  = wp_insert_term( 'Gifts', 'product_cat' )['term_id'];
+		$sale   = wp_insert_term( 'Sale', 'product_cat' )['term_id'];
+		$summer = wp_insert_term( 'Summer', 'product_tag' )['term_id'];
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_query_filter(
+					array(
+						'resource'  => 'product',
+						'namespace' => 'test-ext',
+						'filter'    => 'gifts_or_sale',
+						'schema'    => array( 'type' => 'boolean' ),
+						'callback'  => static function () {
+							return array(
+								'tax_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+									array(
+										'relation' => 'OR',
+										array(
+											'taxonomy' => 'product_cat',
+											'field'    => 'slug',
+											'terms'    => 'gifts',
+										),
+										array(
+											'taxonomy' => 'product_cat',
+											'field'    => 'slug',
+											'terms'    => 'sale',
+										),
+									),
+								),
+							);
+						},
+					)
+				);
+			}
+		);
+		$matched = array();
+		foreach ( array( array( $gifts ), array( $sale ) ) as $categories ) {
+			$product = \WC_Helper_Product::create_simple_product();
+			$product->set_category_ids( $categories );
+			$product->set_tag_ids( array( $summer ) );
+			$product->save();
+			$matched[] = $product->get_id();
+		}
+		$category_only = \WC_Helper_Product::create_simple_product();
+		$category_only->set_category_ids( array( $gifts ) );
+		$category_only->save();
+		$tag_only = \WC_Helper_Product::create_simple_product();
+		$tag_only->set_tag_ids( array( $summer ) );
+		$tag_only->save();
+
+		$output = $this->run_ability(
+			'woocommerce/products-query',
+			array(
+				'tag'     => array( $summer ),
+				'filters' => array( 'extensions' => array( 'test-ext' => array( 'gifts_or_sale' => 'true' ) ) ),
+			)
+		);
+
+		$this->assertEqualsCanonicalizing( $matched, array_column( $output['products'], 'id' ) );
+	}
+
+	/**
 	 * @testdox Should not filter a product query that a hook runs inside the ability's query.
 	 */
 	public function test_product_filter_does_not_reach_a_nested_query(): void {
