@@ -1,6 +1,7 @@
 <?php
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 
 /**
  * Tests relating to the WC_Privacy class.
@@ -138,6 +139,26 @@ class WC_Privacy_Test extends WC_Unit_Test_Case {
 		$order     = wc_get_order( $order_ids[0] );
 		$order->update_meta_data( '_anonymized', 'no' );
 		$order->save();
+
+		$messages = $this->run_order_data_eraser( 'guest@example.com' );
+
+		$this->assertCount( 2, $messages, 'Each order is processed once.' );
+		foreach ( $order_ids as $order_id ) {
+			$this->assertSame( 'yes', wc_get_order( $order_id )->get_meta( '_anonymized' ), "Order $order_id is anonymized." );
+		}
+	}
+
+	/**
+	 * @testdox The order eraser erases HPOS orders that have no metadata rows.
+	 *
+	 * @return void
+	 */
+	public function test_order_data_eraser_erases_orders_without_metadata(): void {
+		global $wpdb;
+		update_option( 'woocommerce_erasure_request_removes_order_data', 'yes' );
+		$order_ids = $this->create_orders_for_email( 'guest@example.com', 2 );
+		$wpdb->delete( OrdersTableDataStore::get_meta_table_name(), array( 'order_id' => $order_ids[0] ) );
+		wp_cache_flush();
 
 		$messages = $this->run_order_data_eraser( 'guest@example.com' );
 

@@ -130,8 +130,15 @@ class OrdersTableMetaQuery {
 	 * }
 	 */
 	public function get_sql_clauses(): array {
+		$join = $this->sanitize_join( $this->join );
+
+		// Same as WP_Meta_Query: with any LEFT JOIN (NOT EXISTS), all JOINs must be LEFT so orders without metadata aren't excluded.
+		if ( preg_grep( '/^LEFT JOIN/', $join ) ) {
+			$join = str_replace( 'INNER JOIN', 'LEFT JOIN', $join );
+		}
+
 		return array(
-			'join'  => $this->sanitize_join( $this->join ),
+			'join'  => $join,
 			'where' => $this->flatten_where_clauses( $this->where ),
 		);
 	}
