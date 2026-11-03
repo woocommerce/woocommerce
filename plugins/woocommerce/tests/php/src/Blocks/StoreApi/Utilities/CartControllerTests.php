@@ -392,7 +392,7 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Add to cart accepts a variation ID without attributes and rejects options that belong to a different variation.
+	 * @testdox Add to cart accepts a variation ID without attributes, and an Any variation rejects a value that belongs to another variation.
 	 */
 	public function test_add_to_cart_rejects_options_for_a_different_variation(): void {
 		$product   = new \WC_Product_Variable();
@@ -403,17 +403,20 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 		$product->set_attributes( array( $attribute ) );
 		$product->save();
 
+		// The specific variation is first, so it takes priority over Any for its own value.
 		$red = new \WC_Product_Variation();
 		$red->set_parent_id( $product->get_id() );
 		$red->set_attributes( array( 'color' => 'Red' ) );
 		$red->set_regular_price( '5' );
+		$red->set_menu_order( 0 );
 		$red->save();
 
-		$blue = new \WC_Product_Variation();
-		$blue->set_parent_id( $product->get_id() );
-		$blue->set_attributes( array( 'color' => 'Blue' ) );
-		$blue->set_regular_price( '10' );
-		$blue->save();
+		$any = new \WC_Product_Variation();
+		$any->set_parent_id( $product->get_id() );
+		$any->set_attributes( array( 'color' => '' ) );
+		$any->set_regular_price( '10' );
+		$any->set_menu_order( 1 );
+		$any->save();
 
 		$cart_id   = ( new CartController() )->add_to_cart(
 			array(
@@ -426,17 +429,34 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 		$this->assertSame( $red->get_id(), $cart_item['variation_id'], 'A variation can be added by ID when no attributes are posted.' );
 		$this->assertSame( 'Red', $cart_item['variation']['attribute_color'], 'The variation color should be kept.' );
 
-		$this->expectException( RouteException::class );
-		$this->expectExceptionMessage( 'The selected options belong to a different variation of this product.' );
-
-		( new CartController() )->add_to_cart(
+		$any_cart_id = ( new CartController() )->add_to_cart(
 			array(
-				'id'        => $red->get_id(),
+				'id'        => $any->get_id(),
 				'quantity'  => 1,
 				'variation' => array(
 					array(
 						'attribute' => 'Color',
 						'value'     => 'Blue',
+					),
+				),
+			)
+		);
+		$any_cart_item = wc()->cart->get_cart_item( $any_cart_id );
+
+		$this->assertSame( $any->get_id(), $any_cart_item['variation_id'], 'An Any variation should accept a value that no other variation defines.' );
+		$this->assertSame( 'Blue', $any_cart_item['variation']['attribute_color'], 'The posted Any value should be kept.' );
+
+		$this->expectException( RouteException::class );
+		$this->expectExceptionMessage( 'The selected options belong to a different variation of this product.' );
+
+		( new CartController() )->add_to_cart(
+			array(
+				'id'        => $any->get_id(),
+				'quantity'  => 1,
+				'variation' => array(
+					array(
+						'attribute' => 'Color',
+						'value'     => 'Red',
 					),
 				),
 			)
