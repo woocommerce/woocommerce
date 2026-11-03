@@ -162,6 +162,9 @@
 		],
 		"phpstan:baseline": [
 			"vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=4G --generate-baseline=phpstan-baseline.neon"
+		],
+		"test:phpstan-rules": [
+			"phpunit -c tests/Tools/phpstan/phpunit.xml"
 		]
 	},
 	"extra": {

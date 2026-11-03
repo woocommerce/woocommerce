@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add PHPUnit tests for the custom PHPStan rule StagedWriteRule, and run them in the PHPStan CI job.
