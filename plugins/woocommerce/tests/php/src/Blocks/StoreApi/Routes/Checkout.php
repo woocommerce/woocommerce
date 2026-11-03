@@ -2762,6 +2762,34 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Existing order payment should keep the shipping address of a physical order when the store has no shipping methods.
+	 */
+	public function test_checkout_order_keeps_physical_order_shipping_without_shipping_methods() {
+		// With no shipping methods, needs_shipping() is false for physical items too.
+		$no_methods = static function () {
+			return array(
+				'version'  => \WC_Cache_Helper::get_transient_version( 'shipping' ),
+				'legacy'   => 0,
+				'enabled'  => 0,
+				'disabled' => 0,
+			);
+		};
+		add_filter( 'pre_transient_wc_shipping_method_count', $no_methods );
+
+		// A merchant-created order for a physical product with a manual shipping line and no address yet.
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_billing_country( '' );
+		$order->save();
+		$this->assertFalse( $order->needs_shipping() );
+
+		$response = $this->dispatch_pay_for_order_request( $order, array( 'country' => 'US' ), $this->get_different_destination() );
+		remove_filter( 'pre_transient_wc_shipping_method_count', $no_methods );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertEquals( 'GB', wc_get_order( $order->get_id() )->get_shipping_country() );
+	}
+
+	/**
 	 * @testdox Existing order payment should reject a first shipping address away from the billing address the order ships to.
 	 */
 	public function test_checkout_order_rejects_first_shipping_address_away_from_billing() {
