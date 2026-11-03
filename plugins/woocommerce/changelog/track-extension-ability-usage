@@ -1,4 +1,4 @@
 Significance: patch
-Type: fix
+Type: update
 
-fix: Track extension abilities registered through WooCommerce when the store allows usage tracking.
+Record calls to abilities that extensions register through WooCommerce in usage tracking, when the store allows it.
