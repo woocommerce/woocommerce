@@ -43,6 +43,8 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\TaxRatesQuery;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReportAbility;
 use Automattic\WooCommerce\Internal\AgentReadiness\RunCheckAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\StoreSettingsGet;
+use Automattic\WooCommerce\Internal\Abilities\Domain\SettingsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\SettingsGroupsQuery;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -97,6 +99,8 @@ class AbilitiesLoader {
 		TaxRatesQuery::class,
 		CustomersQuery::class,
 		StoreSettingsGet::class,
+		SettingsQuery::class,
+		SettingsGroupsQuery::class,
 	);
 
 	/**
