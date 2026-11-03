@@ -1315,14 +1315,15 @@ class CartController {
 			}
 
 			// Keep attributes the request left out, so a partial selection is matched as this variation plus those posted values.
-			$match_request              = $request;
-			$match_request['variation'] = array_merge(
+			$match_attributes = array_merge(
 				array_filter( wc_get_product_variation_attributes( $request['id'] ), 'wc_array_filter_default_attributes' ),
 				$request['variation']
 			);
-			$variation_id               = $this->get_variation_id_from_variation_data( $match_request, $parent_product );
+			$data_store       = \WC_Data_Store::load( 'product' );
+			// @phpstan-ignore-next-line method.notFound Called via __call() on the underlying product data store instance.
+			$matched_variation_id = $data_store->find_matching_product_variation( $parent_product, $match_attributes );
 
-			if ( $variation_id !== $request['id'] ) {
+			if ( ! empty( $matched_variation_id ) && (int) $matched_variation_id !== (int) $request['id'] ) {
 				throw new RouteException(
 					'woocommerce_rest_invalid_variation_data',
 					esc_html__( 'The selected options belong to a different variation of this product.', 'woocommerce' ),

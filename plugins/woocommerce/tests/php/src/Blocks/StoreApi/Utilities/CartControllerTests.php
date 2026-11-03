@@ -442,4 +442,42 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 			)
 		);
 	}
+
+	/**
+	 * @testdox Add to cart reports an invalid attribute when the posted options match no variation.
+	 */
+	public function test_add_to_cart_reports_invalid_attribute_when_options_match_no_variation(): void {
+		$product   = new \WC_Product_Variable();
+		$attribute = new \WC_Product_Attribute();
+		$attribute->set_name( 'Color' );
+		$attribute->set_options( array( 'Red', 'Blue' ) );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$red = new \WC_Product_Variation();
+		$red->set_parent_id( $product->get_id() );
+		$red->set_attributes( array( 'color' => 'Red' ) );
+		$red->set_regular_price( '5' );
+		$red->save();
+
+		try {
+			( new CartController() )->add_to_cart(
+				array(
+					'id'        => $red->get_id(),
+					'quantity'  => 1,
+					'variation' => array(
+						array(
+							'attribute' => 'Color',
+							'value'     => 'Green',
+						),
+					),
+				)
+			);
+			$this->fail( 'Posting an attribute value that matches no variation should be rejected.' );
+		} catch ( RouteException $exception ) {
+			$this->assertSame( 'woocommerce_rest_invalid_variation_data', $exception->getErrorCode() );
+			$this->assertStringContainsString( 'Invalid value posted for Color', $exception->getMessage() );
+		}
+	}
 }
