@@ -402,6 +402,28 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product schema output preserves ampersands in category names.
+	 */
+	public function test_product_category_output_preserves_ampersands(): void {
+		$category = wp_insert_term( 'Food & Drink', 'product_cat' );
+		$product  = WC_Helper_Product::create_simple_product();
+		$product->set_category_ids( array( $category['term_id'] ) );
+		$product->save();
+		$this->go_to( get_permalink( $product->get_id() ) );
+
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		ob_start();
+		$sut->output_structured_data();
+		$output = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '~^<script type="application/ld\+json">(.*)</script>$~s', $output );
+		preg_match( '~^<script type="application/ld\+json">(.*)</script>$~s', $output, $matches );
+		$data = json_decode( $matches[1], true );
+		$this->assertSame( 'Food & Drink', $data['category'] );
+	}
+
+	/**
 	 * @testdox Product schema omits an invalid breadcrumb category.
 	 */
 	public function test_product_with_invalid_category_path(): void {
