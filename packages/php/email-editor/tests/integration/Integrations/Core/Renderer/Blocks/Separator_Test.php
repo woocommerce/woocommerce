@@ -133,6 +133,16 @@ class Separator_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * A see-through color is blended onto the email background, since Outlook can't read hex with alpha.
+	 */
+	public function testItBlendsTransparentColorOntoEmailBackground(): void {
+		$rendered = $this->render(
+			array( 'style' => array( 'color' => array( 'background' => '#cf2e2e80' ) ) )
+		);
+		$this->assertStringContainsString( 'border-top:2px solid #e79696', $rendered );
+	}
+
+	/**
 	 * A style is picked by its whole class name, not a class that starts with it.
 	 */
 	public function testItIgnoresClassesThatOnlyStartWithStyleName(): void {

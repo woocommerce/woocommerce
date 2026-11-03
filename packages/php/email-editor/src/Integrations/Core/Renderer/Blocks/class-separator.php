@@ -80,6 +80,31 @@ class Separator extends Abstract_Block_Renderer {
 		$theme_styles = $rendering_context->get_theme_styles();
 		$color        = $styles['declarations']['background-color'] ?? $email_attrs['color'] ?? $theme_styles['color']['text'] ?? '#000000';
 
-		return Html_Processing_Helper::sanitize_color( (string) $color );
+		$color = Html_Processing_Helper::sanitize_color( (string) $color );
+
+		return $this->blend_alpha( $color, (string) ( $theme_styles['color']['background'] ?? '#ffffff' ) );
+	}
+
+	/**
+	 * Blends a hex color with alpha (#rrggbbaa, as the color picker saves it) onto the background, since Outlook can't read alpha.
+	 *
+	 * @param string $color Color.
+	 * @param string $background Email background color; white when it isn't a 6-digit hex.
+	 */
+	private function blend_alpha( string $color, string $background ): string {
+		if ( ! preg_match( '/^#[0-9a-f]{8}$/i', $color ) ) {
+			return $color;
+		}
+		if ( ! preg_match( '/^#[0-9a-f]{6}$/i', $background ) ) {
+			$background = '#ffffff';
+		}
+
+		$alpha   = hexdec( substr( $color, 7, 2 ) ) / 255;
+		$blended = '#';
+		for ( $i = 1; $i < 7; $i += 2 ) {
+			$channel  = hexdec( substr( $color, $i, 2 ) ) * $alpha + hexdec( substr( $background, $i, 2 ) ) * ( 1 - $alpha );
+			$blended .= sprintf( '%02x', (int) round( $channel ) );
+		}
+		return $blended;
 	}
 }
