@@ -132,6 +132,7 @@
 				"prettier",
 				"sass-loader",
 				"simple-git",
+				"typescript",
 				"webpack",
 				"webpack-cli"
 			],
@@ -179,15 +180,6 @@
 				"**"
 			],
 			"pinVersion": "3.3.7"
-		},
-		{
-			"dependencies": [
-				"typescript"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "5.7.x"
 		},
 		{
 			"dependencies": [

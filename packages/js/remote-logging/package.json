@@ -85,7 +85,7 @@
 		"jest-environment-jsdom": "29.5.x",
 		"rimraf": "5.0.5",
 		"ts-jest": "29.1.x",
-		"typescript": "5.7.x"
+		"typescript": "catalog:tooling"
 	},
 	"publishConfig": {
 		"access": "public",

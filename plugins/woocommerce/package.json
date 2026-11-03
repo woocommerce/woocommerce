@@ -1555,7 +1555,7 @@
 		"playwright-ctrf-json-reporter": "0.0.27",
 		"prettier": "catalog:tooling",
 		"rimraf": "5.0.5",
-		"typescript": "5.7.x",
+		"typescript": "catalog:tooling",
 		"wp-textdomain": "1.0.1"
 	},
 	"engines": {

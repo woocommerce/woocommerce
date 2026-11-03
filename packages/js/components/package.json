@@ -187,7 +187,7 @@
 		"rimraf": "5.0.5",
 		"sass-loader": "catalog:tooling",
 		"ts-jest": "29.1.x",
-		"typescript": "5.7.x",
+		"typescript": "catalog:tooling",
 		"uuid": "^11.1.1",
 		"webpack": "catalog:tooling",
 		"webpack-cli": "catalog:tooling"

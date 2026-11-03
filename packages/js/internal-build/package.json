@@ -81,7 +81,7 @@
 		"@wordpress/notices": "5.33.1",
 		"eslint": "^10.0.0",
 		"stylelint": "catalog:tooling",
-		"typescript": "5.7.x"
+		"typescript": "catalog:tooling"
 	},
 	"config": {
 		"ci": {

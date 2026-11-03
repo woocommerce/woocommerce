@@ -72,7 +72,7 @@
 		"sass-loader": "catalog:tooling",
 		"stylelint": "catalog:tooling",
 		"syncpack": "15.3.3",
-		"typescript": "5.7.x",
+		"typescript": "catalog:tooling",
 		"webpack": "catalog:tooling"
 	},
 	"dependencies": {

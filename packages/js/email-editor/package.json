@@ -154,7 +154,7 @@
 		"stylelint": "catalog:tooling",
 		"ts-jest": "29.1.x",
 		"ts-loader": "9.5.x",
-		"typescript": "5.7.x",
+		"typescript": "catalog:tooling",
 		"webpack": "catalog:tooling",
 		"webpack-cli": "catalog:tooling"
 	},
