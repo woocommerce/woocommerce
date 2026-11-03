@@ -105,8 +105,13 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 				return $product;
 			}
 
+			$products = self::format_products_for_response( array( $product ) );
+			if ( is_wp_error( $products ) ) {
+				return $products;
+			}
+
 			return array(
-				'products'    => array( self::format_product_for_response( $product ) ),
+				'products'    => $products,
 				'total_pages' => 1,
 				'page'        => 1,
 				'per_page'    => 1,
@@ -182,13 +187,13 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			_prime_post_caches( $image_ids );
 		}
 
+		$products = self::format_products_for_response( $products );
+		if ( is_wp_error( $products ) ) {
+			return $products;
+		}
+
 		return array(
-			'products'    => array_map(
-				static function ( $product ) {
-					return self::format_product_for_response( $product );
-				},
-				$products
-			),
+			'products'    => $products,
 			'total_pages' => $pages,
 			'page'        => $page,
 			'per_page'    => $per_page,

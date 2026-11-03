@@ -230,9 +230,9 @@ class ProductUpdate extends ActionableAbility {
 	 * The ability output for the saved product.
 	 *
 	 * @param \WC_Product $subject Saved product.
-	 * @return array
+	 * @return array|\WP_Error
 	 */
-	protected function prepare_response( $subject ): array {
+	protected function prepare_response( $subject ) {
 		return self::format_product_mutation_response( $subject, array_column( $this->variations['save'], 0 ) );
 	}
 

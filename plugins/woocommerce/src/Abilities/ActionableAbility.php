@@ -18,8 +18,11 @@ defined( 'ABSPATH' ) || exit;
  * `ability_class`. The execute callback loads the primary object, checks the
  * `extensions` input against the field input schemas, changes the objects in memory,
  * writes the fields with their `set_callback`, runs the validators that
- * ExtensibleAbilities::register_validator() adds, and then saves. A rejection
- * from any step saves nothing.
+ * ExtensibleAbilities::register_validator() adds, saves, and then prepares the
+ * response. A rejection before the save saves nothing. When prepare_response()
+ * returns a WP_Error, the change is already saved, so the error message names
+ * the saved object, and the error data gets `saved` set to true and the `id`
+ * of the object.
  *
  * The input schema gets the `extensions` property of the resource, so the
  * ability accepts the fields with no extra code.
@@ -97,7 +100,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * @since 11.3.0
 	 *
 	 * @param \WC_Data $subject Saved object.
-	 * @return mixed
+	 * @return mixed|\WP_Error A WP_Error fails the call, but the change stays saved.
 	 */
 	abstract protected function prepare_response( $subject );
 
@@ -290,7 +293,12 @@ abstract class ActionableAbility extends \WP_Ability {
 			return $saved;
 		}
 
-		return $this->prepare_response( $subject );
+		$response = $this->prepare_response( $subject );
+		if ( is_wp_error( $response ) ) {
+			return ExtensibleAbilities::saved_write_error( $response, $this->get_resource(), $subject->get_id() );
+		}
+
+		return $response;
 	}
 
 	/**
