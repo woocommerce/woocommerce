@@ -21,7 +21,19 @@ class Css_Selector_Normalizer {
 	 *
 	 * WordPress link rules skip buttons with `:not(.wp-element-button)`. Email buttons carry these classes instead.
 	 */
-	public const EMAIL_BUTTON_EXCLUSIONS = ':not(.button-link):not(.product-button-link)';
+	private const EMAIL_BUTTON_EXCLUSIONS = ':not(.button-link):not(.product-button-link)';
+
+	/**
+	 * Pattern for a quoted string, without backtracking so long values such as data URLs can't exhaust PCRE.
+	 */
+	private const STRING_PATTERN = <<<'REGEX'
+"[^"\\]*+(?:\\.[^"\\]*+)*+"|'[^'\\]*+(?:\\.[^'\\]*+)*+'
+REGEX;
+
+	/**
+	 * Pattern for text whose characters are not selector syntax: a quoted string, a comment or an escaped character.
+	 */
+	private const LITERAL_PATTERN = self::STRING_PATTERN . '|/\*.*?\*/|\\\\.';
 
 	/**
 	 * Normalize rule selectors without changing declarations or at-rule conditions.
@@ -35,10 +47,7 @@ class Css_Selector_Normalizer {
 			return $css;
 		}
 
-		$pattern = <<<'REGEX'
-~("[^"\\]*+(?:\\.[^"\\]*+)*+"|'[^'\\]*+(?:\\.[^'\\]*+)*+'|/\*.*?\*/|\\.|[{};])~s
-REGEX;
-		$tokens  = preg_split( $pattern, $css, -1, PREG_SPLIT_DELIM_CAPTURE );
+		$tokens  = preg_split( '~(' . self::LITERAL_PATTERN . '|[{};])~s', $css, -1, PREG_SPLIT_DELIM_CAPTURE );
 		$result  = '';
 		$prelude = '';
 		if ( false === $tokens ) {
@@ -79,7 +88,7 @@ REGEX;
 			$prelude = implode( ', ', $selectors );
 		}
 
-		// Without `:where()` a link rule would beat the email button's own color.
+		// Without `:where()` a link rule would beat the email button’s own color.
 		return (string) preg_replace( '/:not\(\.wp-element-button\)(?!' . preg_quote( self::EMAIL_BUTTON_EXCLUSIONS, '/' ) . ')/', ':not(.wp-element-button)' . self::EMAIL_BUTTON_EXCLUSIONS, $prelude );
 	}
 
@@ -90,9 +99,7 @@ REGEX;
 	 * @return string[]
 	 */
 	private static function expand_where( string $selector ): array {
-		$pattern = <<<'REGEX'
-~"[^"\\]*+(?:\\.[^"\\]*+)*+"(*SKIP)(*F)|'[^'\\]*+(?:\\.[^'\\]*+)*+'(*SKIP)(*F)|/\*.*?\*/(*SKIP)(*F)|\\.(*SKIP)(*F)|:where\((?<inner>(?:[^()"'\\]+|\\.|"[^"\\]*+(?:\\.[^"\\]*+)*+"|'[^'\\]*+(?:\\.[^'\\]*+)*+'|\((?&inner)\))*)\)~is
-REGEX;
+		$pattern = '~(?:' . self::LITERAL_PATTERN . ')(*SKIP)(*F)|:where\((?<inner>(?:[^()"\'\\\\]+|\\\\.|' . self::STRING_PATTERN . '|\((?&inner)\))*)\)~is';
 		if ( ! preg_match( $pattern, $selector, $matches, PREG_OFFSET_CAPTURE ) || '' === trim( $matches['inner'][0] ) ) {
 			return array( trim( $selector ) );
 		}
@@ -101,10 +108,10 @@ REGEX;
 		$after     = substr( $selector, $matches[0][1] + strlen( $matches[0][0] ) );
 		$selectors = array();
 		$parts     = self::split_selectors( $matches['inner'][0] );
-		$quoted    = <<<'REGEX'
-~"[^"\\]*+(?:\\.[^"\\]*+)*+"|'[^'\\]*+(?:\\.[^'\\]*+)*+'|/\*.*?\*/|\\.~s
-REGEX;
-		$prefix    = (string) preg_replace( $quoted, '', $before );
+
+		// Keep the existing treatment of WordPress’s :root :where(...) wrapper.
+		$before = (string) preg_replace( '/:root\s+$/i', '', $before );
+		$prefix = (string) preg_replace( '~' . self::LITERAL_PATTERN . '~s', '', $before );
 		if ( substr_count( $prefix, '(' ) > substr_count( $prefix, ')' ) ) {
 			// Inside another function, only a single `:where()` that is the whole argument keeps its meaning as plain text.
 			if ( count( $parts ) > 1 || ! preg_match( '/\(\s*$/', $prefix ) || ! preg_match( '/^\s*\)/', $after ) ) {
@@ -112,10 +119,7 @@ REGEX;
 			}
 		}
 
-		// Keep the existing treatment of WordPress's :root :where(...) wrapper.
-		$before = (string) preg_replace( '/:root\s+$/i', '', $before );
-		$prefix = ltrim( (string) preg_replace( $quoted, '', $before ) );
-		if ( '' !== $prefix && ! self::can_follow( $prefix, $parts ) ) {
+		if ( '' !== ltrim( $prefix ) && ! self::can_follow( ltrim( $prefix ), $parts ) ) {
 			return array( $selector );
 		}
 		foreach ( $parts as $part ) {
@@ -153,10 +157,7 @@ REGEX;
 	 * @return string[]
 	 */
 	private static function split_selectors( string $selector ): array {
-		$pattern = <<<'REGEX'
-~("[^"\\]*+(?:\\.[^"\\]*+)*+"|'[^'\\]*+(?:\\.[^'\\]*+)*+'|/\*.*?\*/|\\.|[(),])~s
-REGEX;
-		$tokens  = preg_split( $pattern, $selector, -1, PREG_SPLIT_DELIM_CAPTURE );
+		$tokens = preg_split( '~(' . self::LITERAL_PATTERN . '|[(),])~s', $selector, -1, PREG_SPLIT_DELIM_CAPTURE );
 		if ( false === $tokens ) {
 			return array( $selector );
 		}
