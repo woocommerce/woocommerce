@@ -2095,6 +2095,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	public function malformed_query_arg_provider(): array {
 		return array(
 			'date, array'               => array( 'date_created', array( '2000-01-01' ) ),
+			'date, empty array'         => array( 'date_created', array() ),
 			'date, object'              => array( 'date_paid', new stdClass() ),
 			'customer, object'          => array( 'customer', new stdClass() ),
 			'customer, object in array' => array( 'customer', array( 1, new stdClass() ) ),

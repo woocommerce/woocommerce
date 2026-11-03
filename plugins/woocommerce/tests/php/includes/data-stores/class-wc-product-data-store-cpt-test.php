@@ -900,9 +900,10 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 */
 	public function malformed_date_arg_provider(): array {
 		return array(
-			'post column, array'  => array( 'date_created', array( '2000-01-01' ) ),
-			'post column, object' => array( 'date_created', new stdClass() ),
-			'sale date, array'    => array( 'date_on_sale_from', array( '2000-01-01' ) ),
+			'post column, array'       => array( 'date_created', array( '2000-01-01' ) ),
+			'post column, empty array' => array( 'date_created', array() ),
+			'post column, object'      => array( 'date_created', new stdClass() ),
+			'sale date, array'         => array( 'date_on_sale_from', array( '2000-01-01' ) ),
 		);
 	}
 }

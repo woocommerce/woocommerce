@@ -245,6 +245,71 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Date args that are objects with a string form still match orders.
+	 *
+	 * @dataProvider stringable_date_arg_provider
+	 * @param string $date_key   The date query var.
+	 * @param object $date_value The date object.
+	 */
+	public function test_stringable_date_arg_matches_order( string $date_key, $date_value ): void {
+		$orders = $this->create_orders_with_different_dates();
+
+		$queried_orders = wc_get_orders(
+			array(
+				$date_key => $date_value,
+				'return'  => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $orders[0]->get_id() ), $queried_orders );
+	}
+
+	/**
+	 * Data provider for test_stringable_date_arg_matches_order.
+	 *
+	 * @return array
+	 */
+	public function stringable_date_arg_provider(): array {
+		$date_time = new \WC_DateTime( '2000-01-01T10:00:00', new \DateTimeZone( 'UTC' ) );
+
+		return array(
+			'local key, WC_DateTime' => array( 'date_created', $date_time ),
+			'GMT key, WC_DateTime'   => array( 'date_created_gmt', $date_time ),
+			'local key, Stringable'  => array(
+				'date_created',
+				new class() {
+					/**
+					 * @return string
+					 */
+					public function __toString(): string {
+						return '2000-01-01';
+					}
+				},
+			),
+		);
+	}
+
+	/**
+	 * @testdox An empty date array applies no date filter, like an unset date arg.
+	 */
+	public function test_empty_date_array_applies_no_date_filter(): void {
+		$order_ids = array_map(
+			fn( $order ) => $order->get_id(),
+			$this->create_orders_with_different_dates()
+		);
+
+		$queried_orders = wc_get_orders(
+			array(
+				'date_created' => array(),
+				'return'       => 'ids',
+			)
+		);
+
+		sort( $queried_orders );
+		$this->assertSame( $order_ids, $queried_orders );
+	}
+
+	/**
 	 * @testDox 'suppress_filters' arg is honored in queries.
 	 */
 	public function test_query_suppress_filters() {
