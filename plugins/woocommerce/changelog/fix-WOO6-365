@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Verify attributes match variation ID when adding products to cart
