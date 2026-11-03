@@ -217,7 +217,7 @@ $order->add_order_note( __('IPN payment completed', 'woothemes') );
 
 - If the order has completed but the admin needs to manually verify payment, use **On-Hold**
 - If the order fails and has already been created, set to **Failed**
-- If payment is complete, let WooCommerce handle the status and use `$order->payment_complete()`. WooCommerce will use either **Completed** or **Processing** status and handle stock.
+- If payment is complete, let WooCommerce handle the status and use `$order->payment_complete()`. WooCommerce will use either **Completed** or **Processing** status and handle stock. Call it only after the payment provider confirms the payment: see [Retries and uncertain outcomes](#retries-and-uncertain-outcomes).
 
 ## Notes on Direct Gateways
 
@@ -258,6 +258,49 @@ return array(
     'redirect' => $this->get_return_url( $order )
 );
 ```
+
+## Retries and uncertain outcomes
+
+A checkout request can end after the payment provider accepts a payment but before the shopper reaches the order received page, for example on a timeout, a lost connection, or a fatal error in code that runs after the payment. The shopper may then submit checkout again for the same order. Follow these practices so that a retry never charges the shopper twice.
+
+### The order status tells checkout whether to collect payment
+
+WooCommerce reads an order's status to decide whether it still needs payment. Orders in a payable status, **Pending payment** or **Failed** by default, can be paid again. Once your gateway moves an order out of those statuses, for example with `$order->payment_complete()` or by setting it to **On-Hold**, checkout treats the payment step as done. If checkout fails after that point, or the shopper submits the same cart again, WooCommerce sends the shopper to the order received page instead of asking them to pay again.
+
+So:
+
+- Call `$order->payment_complete()` only after the provider confirms the payment.
+- If the payment fails, leave the order **Pending payment** or set it to **Failed**, so the shopper can pay again.
+- If your gateway holds orders in a custom status while it waits for payment, add that status with the `woocommerce_valid_order_statuses_for_payment` filter, so WooCommerce still treats the order as awaiting payment.
+
+### Make process_payment() safe to repeat
+
+While an order stays in a payable status, WooCommerce calls `process_payment()` for the same order each time the shopper submits checkout with an unchanged cart. If an earlier request reached the provider but its response never came back, a new charge request can take a second payment. Use the provider's idempotency support, such as an idempotency key or one payment object reused for the order, so that a repeated request returns the first result instead of creating a new charge.
+
+### Store the transaction ID and check it before charging again
+
+Save the provider's transaction or payment intent ID on the order as soon as the provider returns it, before you wait for the outcome. On the next attempt, ask the provider for the status of that transaction before you create a new one. In this sketch, `is_paid_at_provider()` stands for your provider's status lookup:
+
+```php
+public function process_payment( $order_id ) {
+    $order     = wc_get_order( $order_id );
+    $intent_id = $order->get_meta( '_your_gateway_intent_id' );
+
+    // An earlier attempt may have taken the payment before its request ended.
+    if ( $intent_id && $this->is_paid_at_provider( $intent_id ) ) {
+        $order->payment_complete( $intent_id );
+
+        return array(
+            'result'   => 'success',
+            'redirect' => $this->get_return_url( $order ),
+        );
+    }
+
+    // Otherwise create or confirm the payment, saving its ID on the order first.
+}
+```
+
+Create a new charge only when the provider confirms that the earlier one failed or never happened.
 
 ## Working with Payment Gateway Callbacks (such as PayPal IPN)
 
