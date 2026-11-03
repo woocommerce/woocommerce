@@ -40,7 +40,7 @@
 				"variations": {}
 			},
 			"core/separator": {
-				"css": "color: inherit; &:not(.is-style-wide):not(.is-style-dots) { width: 100px; }"
+				"css": "color: inherit; &:not(.is-style-wide):not(.is-style-dots) { width: 100px; margin-inline: auto !important; }"
 			},
 			"core/table": {
 				"spacing": {
