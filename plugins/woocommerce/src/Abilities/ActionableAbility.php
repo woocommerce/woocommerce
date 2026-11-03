@@ -14,8 +14,11 @@ defined( 'ABSPATH' ) || exit;
  * a subclass as the `ability_class`. The execute callback loads the object,
  * checks the `extensions` input against the field input schemas, changes the object
  * in memory, writes the fields with their `set_callback`, runs the validators
- * that ExtensibleAbilities::register_validator() adds, and then saves it. A
- * rejection from any step saves nothing.
+ * that ExtensibleAbilities::register_validator() adds, saves it, and then
+ * prepares the response. A rejection before the save saves nothing. When
+ * prepare_response() returns a WP_Error, the change is already saved, so the
+ * error message names the saved object, and the error data gets `saved` set
+ * to true and the `id` of the object.
  *
  * The input schema gets the `extensions` property of the resource, so the
  * ability accepts the fields with no extra code.
@@ -70,15 +73,16 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * @since 11.3.0
 	 *
 	 * @param \WC_Data $subject Saved object.
-	 * @return mixed
+	 * @return mixed|\WP_Error A WP_Error fails the call, but the change stays saved.
 	 */
 	abstract protected function prepare_response( $subject );
 
 	/**
-	 * Save the changed object. The default calls WC_Data::save(). When the save
-	 * throws or leaves the object without an ID, it logs the error and returns
-	 * a WP_Error with a fixed message, so the exception text stays out of the
-	 * response.
+	 * Save the changed object. The default calls WC_Data::save(). An order's
+	 * save() catches a failed write, so the default reads that error from
+	 * WC_Abstract_Order::get_last_save_error(). When the save fails or leaves
+	 * the object without an ID, it logs the error and returns a WP_Error with a
+	 * fixed message, so the exception text stays out of the response.
 	 *
 	 * @since 11.3.0
 	 *
@@ -88,9 +92,14 @@ abstract class ActionableAbility extends \WP_Ability {
 	protected function save( $subject ) {
 		try {
 			$subject->save();
+			$error = $subject instanceof \WC_Abstract_Order ? $subject->get_last_save_error() : null;
 		} catch ( \Exception $e ) {
+			$error = $e;
+		}
+
+		if ( null !== $error ) {
 			wc_get_logger()->error(
-				sprintf( 'Ability "%s" failed to save: %s', $this->get_name(), $e->getMessage() ),
+				sprintf( 'Ability "%s" failed to save: %s', $this->get_name(), $error->getMessage() ),
 				array( 'source' => 'woocommerce-abilities' )
 			);
 			return self::save_failed();
@@ -142,7 +151,12 @@ abstract class ActionableAbility extends \WP_Ability {
 			return $saved;
 		}
 
-		return $this->prepare_response( $subject );
+		$response = $this->prepare_response( $subject );
+		if ( is_wp_error( $response ) ) {
+			return ExtensibleAbilities::saved_write_error( $response, $this->get_resource(), $subject->get_id() );
+		}
+
+		return $response;
 	}
 
 	/**

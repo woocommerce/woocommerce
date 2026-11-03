@@ -71,7 +71,7 @@
 		"test": "pnpm test:unit",
 		"test:api": "pnpm test:e2e:default --project=api",
 		"test:api:hpos-off": "pnpm test:e2e:with-env default-hpos-disabled --project=api-hpos-disabled",
-		"test:api:object-cache": "pnpm test:e2e:with-env default-object-cache --project=api",
+		"test:api:object-cache": "pnpm test:e2e:with-env default-object-cache --project=api --workers=1",
 		"test:api:tracking": "test \"$(pnpm --silent wp-env:e2e run cli wp option get woocommerce_allow_tracking)\" = \"yes\" && pnpm test:api",
 		"test:e2e:core-serial": "pnpm test:e2e:default --project=core-serial",
 		"test:e2e:core-parallel": "pnpm test:e2e:default --project=core-parallel",

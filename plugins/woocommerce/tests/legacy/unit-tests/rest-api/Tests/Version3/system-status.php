@@ -565,6 +565,26 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 			$mocked_response = array(
 				'response' => array( 'code' => 200 ),
 			);
+		} elseif ( 'api.wordpress.org' === wp_parse_url( $url, PHP_URL_HOST ) && '/themes/info/1.2/' === wp_parse_url( $url, PHP_URL_PATH ) ) {
+			$mocked_response = array(
+				'body'     => wp_json_encode(
+					array(
+						'name'           => 'Default',
+						'slug'           => 'default',
+						'version'        => '1.7.2',
+						'preview_url'    => 'https://wp-themes.com/default',
+						'author'         => 'wordpressdotorg',
+						'screenshot_url' => '//ts.w.org/wp-content/themes/default/screenshot.png?ver=1.7.2',
+						'rating'         => 100,
+						'num_ratings'    => '3',
+						'downloaded'     => 296618,
+						'last_updated'   => '2010-06-14',
+						'homepage'       => 'https://wordpress.org/themes/default/',
+						'download_link'  => 'https://downloads.wordpress.org/theme/default.1.7.2.zip',
+					)
+				),
+				'response' => array( 'code' => 200 ),
+			);
 		} elseif ( 'https://api.wordpress.org/themes/info/1.0/' === $url ) {
 			$mocked_response = array(
 				'body'     => 'O:8:"stdClass":12:{s:4:"name";s:7:"Default";s:4:"slug";s:7:"default";s:7:"version";s:5:"1.7.2";s:11:"preview_url";s:29:"https://wp-themes.com/default";s:6:"author";s:15:"wordpressdotorg";s:14:"screenshot_url";s:61:"//ts.w.org/wp-content/themes/default/screenshot.png?ver=1.7.2";s:6:"rating";d:100;s:11:"num_ratings";s:1:"3";s:10:"downloaded";i:296618;s:12:"last_updated";s:10:"2010-06-14";s:8:"homepage";s:37:"https://wordpress.org/themes/default/";s:13:"download_link";s:55:"https://downloads.wordpress.org/theme/default.1.7.2.zip";}',

@@ -173,6 +173,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 		$writable = array(
 			array( 'product', 'test-ext', 'color', array( 'type' => 'string' ) ),
+			array( 'order', 'test-ext', 'gift_message', array( 'type' => 'string' ) ),
 			array( 'product', 'other_ext', 'count', array( 'type' => 'integer' ) ),
 			array(
 				'product',
@@ -364,6 +365,71 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertSame( array( $external->get_id() ), array_column( $output['products'], 'id' ) );
+	}
+
+	/**
+	 * @testdox Should combine Core's term filters with an extension's OR tax_query with AND.
+	 */
+	public function test_term_filters_combine_with_extension_or_tax_query(): void {
+		$gifts  = wp_insert_term( 'Gifts', 'product_cat' )['term_id'];
+		$sale   = wp_insert_term( 'Sale', 'product_cat' )['term_id'];
+		$summer = wp_insert_term( 'Summer', 'product_tag' )['term_id'];
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_query_filter(
+					array(
+						'resource'  => 'product',
+						'namespace' => 'test-ext',
+						'filter'    => 'gifts_or_sale',
+						'schema'    => array( 'type' => 'boolean' ),
+						'callback'  => static function () {
+							return array(
+								'tax_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+									array(
+										'relation' => 'OR',
+										array(
+											'taxonomy' => 'product_cat',
+											'field'    => 'slug',
+											'terms'    => 'gifts',
+										),
+										array(
+											'taxonomy' => 'product_cat',
+											'field'    => 'slug',
+											'terms'    => 'sale',
+										),
+									),
+								),
+							);
+						},
+					)
+				);
+			}
+		);
+		$matched = array();
+		foreach ( array( array( $gifts ), array( $sale ) ) as $categories ) {
+			$product = \WC_Helper_Product::create_simple_product();
+			$product->set_category_ids( $categories );
+			$product->set_tag_ids( array( $summer ) );
+			$product->save();
+			$matched[] = $product->get_id();
+		}
+		$category_only = \WC_Helper_Product::create_simple_product();
+		$category_only->set_category_ids( array( $gifts ) );
+		$category_only->save();
+		$tag_only = \WC_Helper_Product::create_simple_product();
+		$tag_only->set_tag_ids( array( $summer ) );
+		$tag_only->save();
+
+		$output = $this->run_ability(
+			'woocommerce/products-query',
+			array(
+				'tag'     => array( $summer ),
+				'filters' => array( 'extensions' => array( 'test-ext' => array( 'gifts_or_sale' => 'true' ) ) ),
+			)
+		);
+
+		$this->assertEqualsCanonicalizing( $matched, array_column( $output['products'], 'id' ) );
 	}
 
 	/**
@@ -1145,6 +1211,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'output_schema' => array( 'description' => 'x' ) ) ) );
+		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'output_schema' => array( 'type' => array( 'string', 'null' ) ) ) ) );
+		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'output_schema' => array( 'type' => 'null' ) ) ) );
 		ExtensibleAbilities::register_field( array_merge( $valid, array( 'namespace' => '0' ) ) );
 		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => '123' ) ) );
 		$order = \WC_Helper_Order::create_order();
@@ -1654,37 +1722,130 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should leave out a field that throws, returns null or fails sanitization, and cast a value to its schema type.
+	 * @testdox Should send an empty array for an object as an empty object at any depth, and keep free-form parts as they are.
+	 */
+	public function test_an_empty_array_for_an_object_is_an_empty_object(): void {
+		$output = $this->read_field_values(
+			array(
+				'flat'    => array( array( 'type' => 'object' ), array() ),
+				'nested'  => array(
+					array(
+						'type'       => 'object',
+						'properties' => array( 'inner' => array( 'type' => 'object' ) ),
+					),
+					array( 'inner' => array() ),
+				),
+				'in_list' => array(
+					array(
+						'type'  => 'array',
+						'items' => array( 'type' => 'object' ),
+					),
+					array( array() ),
+				),
+				'free'    => array( array( 'type' => 'object' ), array( 'list' => array() ) ),
+			)
+		);
+
+		$this->assertSame(
+			'{"flat":{},"nested":{"inner":{}},"in_list":[{}],"free":{"list":[]}}',
+			wp_json_encode( $output )
+		);
+	}
+
+	/**
+	 * @testdox Should keep an empty array for an array as an empty list.
+	 */
+	public function test_an_empty_array_for_an_array_is_an_empty_list(): void {
+		$output = $this->read_field_values(
+			array(
+				'flat'       => array( array( 'type' => 'array' ), array() ),
+				'of_objects' => array(
+					array(
+						'type'  => 'array',
+						'items' => array( 'type' => 'object' ),
+					),
+					array(),
+				),
+				'in_object'  => array(
+					array(
+						'type'       => 'object',
+						'properties' => array(
+							'list' => array(
+								'type'  => 'array',
+								'items' => array( 'type' => 'string' ),
+							),
+						),
+					),
+					array( 'list' => array() ),
+				),
+			)
+		);
+
+		$this->assertSame( '{"flat":[],"of_objects":[],"in_object":{"list":[]}}', wp_json_encode( $output ) );
+	}
+
+	/**
+	 * @testdox Should return product amounts as strings when the getters return an int or a float, and save the write.
+	 */
+	public function test_product_amounts_are_returned_as_strings(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$this->add_test_filter( 'woocommerce_product_get_price', static fn() => 12.5 );
+		$this->add_test_filter( 'woocommerce_product_get_regular_price', static fn() => 15 );
+		$this->add_test_filter( 'woocommerce_product_get_sale_price', static fn() => 12.5 );
+
+		$query = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'id' => $product->get_id() ) );
+		$write = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Saved',
+			)
+		);
+
+		$this->assertNotWPError( $query );
+		$this->assertSame( '12.5', $query['products'][0]['price'] );
+		$this->assertSame( '15', $query['products'][0]['regular_price'] );
+		$this->assertSame( '12.5', $query['products'][0]['sale_price'] );
+		$this->assertNotWPError( $write );
+		$this->assertSame( '12.5', $write['product']['price'] );
+		$this->assertSame( 'Saved', get_post( $product->get_id() )->post_title );
+	}
+
+	/**
+	 * @testdox Should return the order total and line item amounts as strings when the getters return an int or a float.
+	 */
+	public function test_order_amounts_are_returned_as_strings(): void {
+		$order = \WC_Helper_Order::create_order();
+		$this->add_test_filter( 'woocommerce_order_get_total', static fn() => 40 );
+		$this->add_test_filter( 'woocommerce_order_item_get_subtotal', static fn() => 30 );
+		$this->add_test_filter( 'woocommerce_order_item_get_total', static fn() => 25.5 );
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'id'                 => $order->get_id(),
+				'include_line_items' => true,
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( '40', $result['orders'][0]['total'] );
+		$this->assertSame( '30', $result['orders'][0]['line_items'][0]['subtotal'] );
+		$this->assertSame( '25.5', $result['orders'][0]['line_items'][0]['total'] );
+	}
+
+	/**
+	 * @testdox Should cast a value to its schema type, and leave out a null.
 	 */
 	public function test_field_values_follow_their_schema(): void {
 		AbilitiesLoader::register_core_resources();
 		$this->register_test_fields();
 		$fields = array(
-			'broken' => array(
-				'output_schema' => array( 'type' => 'string' ),
-				'get_callback'  => static function () {
-					throw new \RuntimeException( 'Broken' );
-				},
-			),
-			'count'  => array(
+			'count' => array(
 				'output_schema' => array( 'type' => 'integer' ),
 				'get_callback'  => static fn() => '12',
 			),
-			'empty'  => array(
+			'empty' => array(
 				'output_schema' => array( 'type' => 'string' ),
 				'get_callback'  => '__return_null',
-			),
-			'none'   => array(
-				'output_schema' => array( 'type' => array( 'string', 'null' ) ),
-				'get_callback'  => '__return_null',
-			),
-			'dupes'  => array(
-				'output_schema' => array(
-					'type'        => 'array',
-					'items'       => array( 'type' => 'integer' ),
-					'uniqueItems' => true,
-				),
-				'get_callback'  => static fn() => array( '12', 12 ),
 			),
 		);
 		foreach ( $fields as $field => $args ) {
@@ -1704,46 +1865,210 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should leave out and report one time a value that does not match its schema, and keep the output valid.
+	 * @testdox Should fail products-query and product-update with a named error when a product field value does not match its schema.
 	 */
-	public function test_a_value_that_does_not_match_its_schema_is_left_out(): void {
+	public function test_a_product_field_value_that_does_not_match_its_schema_fails_the_call(): void {
 		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
-		add_action(
+		$this->register_invalid_field( 'product', array( 'type' => 'integer' ), 'many' );
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen one' ) );
+		\WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen two' ) );
+
+		$query = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'search' => 'Pen' ) );
+		$write = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		);
+
+		$this->assert_field_output_invalid( $query, 'product' );
+		$this->assert_field_output_invalid( $write, 'product' );
+		$this->assertTrue( $write->get_error_data()['saved'] );
+		$this->assertSame( $product->get_id(), $write->get_error_data()['id'] );
+		$this->assertStringContainsString( 'The change is saved on the product ' . $product->get_id() . ',', $write->get_error_message() );
+		$this->assertSame( 'Pencil', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * @testdox Should fail orders-query with a named error when an order or line item field value does not match its schema.
+	 * @dataProvider invalid_order_field_values
+	 *
+	 * @param string $resource_name Resource.
+	 * @param array  $schema        Field schema.
+	 * @param mixed  $value         Value that the get_callback returns.
+	 */
+	public function test_an_order_field_value_that_does_not_match_its_schema_fails_the_call( string $resource_name, array $schema, $value ): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		$this->register_invalid_field( $resource_name, $schema, $value );
+		$order = \WC_Helper_Order::create_order();
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'id'                 => $order->get_id(),
+				'include_line_items' => true,
+			)
+		);
+
+		$this->assert_field_output_invalid( $result, $resource_name );
+	}
+
+	/**
+	 * @testdox Should name the saved order and note in the error when order-add-note saves and an order field value then fails its schema.
+	 */
+	public function test_an_order_note_that_saves_before_a_field_fails_names_the_saved_note(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		$this->register_invalid_field( 'order', array( 'type' => 'integer' ), 'many' );
+		$order = \WC_Helper_Order::create_order();
+
+		$result = wp_get_ability( 'woocommerce/order-add-note' )->execute(
+			array(
+				'id'   => $order->get_id(),
+				'note' => 'Packed.',
+			)
+		);
+
+		$this->assert_field_output_invalid( $result, 'order' );
+		$this->assertStringContainsString( 'The change is saved on the order ' . $order->get_id() . ',', $result->get_error_message() );
+		$this->assertTrue( $result->get_error_data()['saved'] );
+		$this->assertSame( $order->get_id(), $result->get_error_data()['id'] );
+		$note = wc_get_order_note( $result->get_error_data()['note_id'] );
+		$this->assertSame( $order->get_id(), (int) get_comment( $note->id )->comment_post_ID );
+		$this->assertSame( 'Packed.', $note->content );
+	}
+
+	/**
+	 * @testdox Should name the saved order in the error when order-update-status saves and an order field value then fails its schema.
+	 */
+	public function test_an_order_status_that_saves_before_a_field_fails_names_the_saved_order(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		$this->register_invalid_field( 'order', array( 'type' => 'integer' ), 'many' );
+		$order = \WC_Helper_Order::create_order();
+
+		$result = wp_get_ability( 'woocommerce/order-update-status' )->execute(
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'completed',
+			)
+		);
+
+		$this->assert_field_output_invalid( $result, 'order' );
+		$this->assertStringContainsString( 'The change is saved on the order ' . $order->get_id() . ',', $result->get_error_message() );
+		$this->assertTrue( $result->get_error_data()['saved'] );
+		$this->assertSame( $order->get_id(), $result->get_error_data()['id'] );
+		$this->assertSame( 'completed', wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox Should fail orders-query with a named error that keeps the exception text out when a get_callback throws.
+	 */
+	public function test_a_get_callback_that_throws_fails_the_call(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		$this->add_test_action(
 			'woocommerce_extensible_abilities_init',
 			static function () {
 				ExtensibleAbilities::register_field(
 					array(
-						'resource'      => 'product',
-						'namespace'     => 'test-ext',
-						'field'         => 'count',
-						'output_schema' => array( 'type' => 'integer' ),
-						'get_callback'  => static fn() => 'many',
+						'resource'      => 'order',
+						'namespace'     => 'invalid-ext',
+						'field'         => 'bad',
+						'output_schema' => array( 'type' => 'string' ),
+						'get_callback'  => static function () {
+							throw new \RuntimeException( 'Secret failure' );
+						},
 					)
 				);
 			}
 		);
-		$reported = array();
-		add_action(
-			'doing_it_wrong_run',
-			static function ( $function_name, $message ) use ( &$reported ) {
-				$reported[] = $message;
-			},
-			10,
-			2
-		);
-		$first = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen one' ) );
-		$first->update_meta_data( '_test_code', 'A1' );
-		$first->save();
-		\WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen two' ) );
+		$order = \WC_Helper_Order::create_order();
 
-		$products = array_column( $this->run_ability( 'woocommerce/products-query', array( 'search' => 'Pen' ) )['products'], null, 'id' );
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'id' => $order->get_id() ) );
 
-		$this->assertSame( array( 'code' => 'A1' ), $products[ $first->get_id() ]['extensions']['test-ext'] );
-		$matches = array_filter(
-			$reported,
-			static fn( $message ) => false !== strpos( $message, '"test-ext.count" of "product"' )
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_extension_failed', $result->get_error_code(), $result->get_error_message() );
+		$this->assertSame( 'The "invalid-ext" extension failed while reading the "bad" field of the order.', $result->get_error_message() );
+		$this->assertSame(
+			array(
+				'status'    => 500,
+				'namespace' => 'invalid-ext',
+				'field'     => 'bad',
+			),
+			$result->get_error_data()
 		);
-		$this->assertCount( 1, $matches );
+	}
+
+	/**
+	 * Field values that do not match their schema.
+	 *
+	 * @return array<string, array{0: string, 1: array, 2: mixed}>
+	 */
+	public function invalid_order_field_values(): array {
+		return array(
+			'order field of the wrong type' => array( 'order', array( 'type' => 'integer' ), 'many' ),
+			'nested object on a line item'  => array(
+				'order_item',
+				array(
+					'type'       => 'object',
+					'properties' => array(
+						'inner' => array(
+							'type'       => 'object',
+							'properties' => array( 'count' => array( 'type' => 'integer' ) ),
+						),
+					),
+				),
+				array( 'inner' => array( 'count' => 'many' ) ),
+			),
+			'list that fails sanitization'  => array(
+				'order',
+				array(
+					'type'        => 'array',
+					'items'       => array( 'type' => 'integer' ),
+					'uniqueItems' => true,
+				),
+				array( '12', 12 ),
+			),
+		);
+	}
+
+	/**
+	 * Register the field invalid-ext.bad on a resource, with a get_callback that returns a fixed value.
+	 *
+	 * @param string $resource_name Resource.
+	 * @param array  $schema        Field schema.
+	 * @param mixed  $value         Value that the get_callback returns.
+	 */
+	private function register_invalid_field( string $resource_name, array $schema, $value ): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $resource_name, $schema, $value ) {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => $resource_name,
+						'namespace'     => 'invalid-ext',
+						'field'         => 'bad',
+						'output_schema' => $schema,
+						'get_callback'  => static fn() => $value,
+					)
+				);
+			}
+		);
+	}
+
+	/**
+	 * Assert that a result is the error for the invalid-ext.bad field.
+	 *
+	 * @param mixed  $result        Ability result.
+	 * @param string $resource_name Resource.
+	 */
+	private function assert_field_output_invalid( $result, string $resource_name ): void {
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_field_output_invalid', $result->get_error_code(), $result->get_error_message() );
+		$this->assertStringContainsString( '"invalid-ext" extension', $result->get_error_message() );
+		$this->assertStringContainsString( '"bad" field of the ' . $resource_name, $result->get_error_message() );
+		$data = $result->get_error_data();
+		$this->assertSame( 500, $data['status'] );
+		$this->assertSame( 'invalid-ext', $data['namespace'] );
+		$this->assertSame( 'bad', $data['field'] );
+		$this->assertNotEmpty( $data['details'] );
 	}
 
 	/**
@@ -1781,9 +2106,9 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should accept extension fields in product create, and none in order status update.
+	 * @testdox Should write extension fields in product create and in order status update.
 	 */
-	public function test_product_create_writes_fields_and_order_status_update_does_not(): void {
+	public function test_product_create_and_order_status_update_write_fields(): void {
 		$order = \WC_Helper_Order::create_order();
 
 		$created = $this->run_ability(
@@ -1793,10 +2118,20 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				'extensions' => array( 'test-ext' => array( 'color' => 'blue' ) ),
 			)
 		);
-		$schema  = $this->get_ability( 'woocommerce/order-update-status' )['input_schema'];
+		$updated = $this->run_ability(
+			'woocommerce/order-update-status',
+			array(
+				'id'         => $order->get_id(),
+				'status'     => 'on-hold',
+				'extensions' => array( 'test-ext' => array( 'gift_message' => 'Happy birthday' ) ),
+			)
+		);
 
+		$saved = wc_get_order( $order->get_id() );
 		$this->assertSame( 'blue', wc_get_product( $created['product']['id'] )->get_meta( '_test_color' ) );
-		$this->assertArrayNotHasKey( 'extensions', $schema['properties'] );
+		$this->assertSame( 'on-hold', $saved->get_status() );
+		$this->assertSame( 'Happy birthday', $saved->get_meta( '_test_gift_message' ) );
+		$this->assertSame( 'Happy birthday', $updated['order']['extensions']['test-ext']['gift_message'] );
 	}
 
 	/**
@@ -1901,7 +2236,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should call WC_Order::update_status() with the feature off and on.
+	 * @testdox Should call WC_Order::update_status() with the feature off, and refuse an order class that only overrides it with the feature on.
 	 */
 	public function test_the_feature_off_path_calls_update_status(): void {
 		$calls        = 0;
@@ -1937,7 +2272,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$order_class::$calls = 0;
 			$order               = \WC_Helper_Order::create_order();
 
-			$this->run_ability(
+			$response = $this->run_ability_response(
 				'woocommerce/order-update-status',
 				array(
 					'id'     => $order->get_id(),
@@ -1946,8 +2281,16 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			);
 
 			$calls = $order_class::$calls;
-			$this->assertSame( 1, $calls, $enabled ? 'feature on' : 'feature off' );
-			$this->assertSame( 'completed', wc_get_order( $order->get_id() )->get_status() );
+			if ( $enabled ) {
+				$this->assertSame( 400, $response->get_status() );
+				$this->assertSame( 'woocommerce_order_status_staging_unsupported', $response->get_data()['code'] );
+				$this->assertSame( 0, $calls );
+				$this->assertSame( 'pending', wc_get_order( $order->get_id() )->get_status() );
+			} else {
+				$this->assertSame( 200, $response->get_status() );
+				$this->assertSame( 1, $calls );
+				$this->assertSame( 'completed', wc_get_order( $order->get_id() )->get_status() );
+			}
 		}
 
 		remove_filter( 'woocommerce_order_class', $filter_class, 100 );
@@ -2054,6 +2397,34 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return a fixed 500 error when the order write fails, though the order's save() catches the exception.
+	 */
+	public function test_a_failed_order_write_returns_a_fixed_error(): void {
+		$this->register_order_status_ability();
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'pending' );
+		$order->save();
+		$throw = static function () {
+			throw new \RuntimeException( 'Storage text.' );
+		};
+		add_action( 'woocommerce_before_order_object_save', $throw );
+
+		$response = $this->run_ability_response(
+			'test-ext/order-status',
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'completed',
+			)
+		);
+
+		remove_action( 'woocommerce_before_order_object_save', $throw );
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_ability_save_failed', $response->get_data()['code'] );
+		$this->assertStringNotContainsString( 'Storage text.', wp_json_encode( $response->get_data() ) );
+		$this->assertSame( 'pending', wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
 	 * @testdox Should list the extensions key in anyOf and allOf branches that refuse other properties, and accept extension fields through an anyOf branch.
 	 */
 	public function test_combinator_branches_accept_the_extensions_key(): void {
@@ -2123,7 +2494,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$this->assertArrayNotHasKey( 'oneOf', $schema );
 		}
 		$order = $this->get_ability( 'woocommerce/order-update-status' )['input_schema'];
-		$this->assertArrayNotHasKey( 'extensions', $order['properties'] );
+		$this->assertSame( array( 'string', 'null' ), $order['properties']['extensions']['properties']['test-ext']['properties']['gift_message']['type'] );
 	}
 
 	/**
@@ -2277,6 +2648,237 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 1, did_action( 'woocommerce_order_status_changed' ) - $changes );
 		$this->assertSame( 'on-hold', $allowed['status'] );
 		$this->assertSame( 'test-ext/order-status', $ability );
+	}
+
+	/**
+	 * @testdox Should stage the status on a plain order, so an order validator sees it, and save nothing or fire no status action when the validator refuses.
+	 */
+	public function test_an_order_validator_sees_the_staged_status(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'processing' );
+		$order->save();
+		$seen = array();
+		$this->register_validator(
+			'order',
+			'other_ext',
+			static function ( \WC_Order $subject ) use ( &$seen ) {
+				$seen[] = array( $subject->get_status(), $subject->get_meta( '_test_gift_message' ) );
+				if ( 'completed' === $subject->get_status() && 'Hi' === $subject->get_meta( '_test_gift_message' ) ) {
+					return new \WP_Error( 'test_gift_not_sent', 'Send the gift message first.' );
+				}
+				return null;
+			}
+		);
+		$edits   = did_action( 'woocommerce_order_edit_status' );
+		$changes = did_action( 'woocommerce_order_status_changed' );
+
+		$refused = $this->run_ability_response(
+			'woocommerce/order-update-status',
+			array(
+				'id'         => $order->get_id(),
+				'status'     => 'completed',
+				'extensions' => array( 'test-ext' => array( 'gift_message' => 'Hi' ) ),
+			)
+		);
+
+		$saved = wc_get_order( $order->get_id() );
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertStringEndsWith( 'test_gift_not_sent', $refused->get_data()['code'] );
+		$this->assertSame( 'processing', $saved->get_status() );
+		$this->assertFalse( $saved->meta_exists( '_test_gift_message' ) );
+		$this->assertSame( 0, did_action( 'woocommerce_order_edit_status' ) - $edits );
+		$this->assertSame( 0, did_action( 'woocommerce_order_status_changed' ) - $changes );
+
+		$this->run_ability(
+			'woocommerce/order-update-status',
+			array(
+				'id'         => $order->get_id(),
+				'status'     => 'completed',
+				'extensions' => array( 'test-ext' => array( 'gift_message' => 'Thanks' ) ),
+			)
+		);
+
+		$saved = wc_get_order( $order->get_id() );
+		$this->assertSame( 'completed', $saved->get_status() );
+		$this->assertSame( 'Thanks', $saved->get_meta( '_test_gift_message' ) );
+		$this->assertSame( 1, did_action( 'woocommerce_order_edit_status' ) - $edits );
+		$this->assertSame( 1, did_action( 'woocommerce_order_status_changed' ) - $changes );
+		$this->assertSame( array( array( 'completed', 'Hi' ), array( 'completed', 'Thanks' ) ), $seen );
+	}
+
+	/**
+	 * @testdox Should show the staged status and its completed date to an order validator, and fire woocommerce_order_edit_status before the write.
+	 */
+	public function test_an_order_validator_sees_the_dates_that_the_status_sets(): void {
+		$order = \WC_Helper_Order::create_order();
+		$seen  = array();
+		$this->register_validator(
+			'order',
+			'other_ext',
+			static function ( \WC_Order $data ) use ( &$seen ) {
+				$seen[] = array( $data->get_status(), null !== $data->get_date_completed( 'edit' ) );
+				return null;
+			}
+		);
+		$events   = array();
+		$listener = static function ( $order_id ) use ( &$events ) {
+			$events[] = wc_get_order( $order_id )->get_status();
+		};
+		add_action( 'woocommerce_order_edit_status', $listener );
+
+		$this->run_ability(
+			'woocommerce/order-update-status',
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'completed',
+			)
+		);
+
+		remove_action( 'woocommerce_order_edit_status', $listener );
+		$this->assertSame( array( array( 'completed', true ) ), $seen );
+		$this->assertSame( array( 'pending' ), $events );
+		$this->assertSame( 'completed', wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox Should stage the status on an order class that overrides update_status() and stage_status(), with its rule, and refuse a subclass that overrides update_status() again.
+	 */
+	public function test_an_order_class_that_stages_keeps_its_rule(): void {
+		$order_class  = TestStagingOrder::class;
+		$filter_class = static function () use ( &$order_class ) {
+			return $order_class;
+		};
+		add_filter( 'woocommerce_order_class', $filter_class, 100 );
+		$order = \WC_Helper_Order::create_order();
+
+		$refused     = $this->run_ability_response(
+			'woocommerce/order-update-status',
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'on-hold',
+			)
+		);
+		$updated     = $this->run_ability(
+			'woocommerce/order-update-status',
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'processing',
+			)
+		);
+		$order_class = get_class(
+			new class() extends TestStagingOrder {
+				/**
+				 * Mark the order, then change the status.
+				 *
+				 * @param string $new_status    Status to change the order to.
+				 * @param string $note          Optional note.
+				 * @param bool   $manual_update Whether a person made the change.
+				 * @return bool
+				 */
+				public function update_status( $new_status, $note = '', $manual_update = false ) {
+					$this->update_meta_data( '_test_child_rule', 'yes' );
+					return parent::update_status( $new_status, $note, $manual_update );
+				}
+			}
+		);
+		$child       = \WC_Helper_Order::create_order();
+		$again       = $this->run_ability_response(
+			'woocommerce/order-update-status',
+			array(
+				'id'     => $child->get_id(),
+				'status' => 'completed',
+			)
+		);
+
+		remove_filter( 'woocommerce_order_class', $filter_class, 100 );
+		$this->assertSame( 409, $refused->get_status() );
+		$this->assertSame( 'test_on_hold_refused', $refused->get_data()['code'] );
+		$this->assertSame( 'processing', $updated['order']['status'] );
+		$this->assertSame( 400, $again->get_status() );
+		$this->assertSame( 'woocommerce_order_status_staging_unsupported', $again->get_data()['code'] );
+		$this->assertSame( 'processing', wc_get_order( $order->get_id() )->get_status() );
+		$this->assertSame( 'pending', wc_get_order( $child->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox Should stage the status on an order class that overrides stage_status() only.
+	 */
+	public function test_an_order_class_that_overrides_stage_status_only_is_staged(): void {
+		$order_class  = get_class(
+			new class() extends \WC_Order {
+				/**
+				 * Mark the order, then stage the status.
+				 *
+				 * @param string       $new_status    Status to change the order to.
+				 * @param string|false $note          Optional note.
+				 * @param bool         $manual_update Whether a person made the change.
+				 * @return array
+				 */
+				public function stage_status( $new_status, $note = '', $manual_update = false ) {
+					$this->update_meta_data( '_test_staged', 'yes' );
+					return parent::stage_status( $new_status, $note, $manual_update );
+				}
+			}
+		);
+		$filter_class = static function () use ( $order_class ) {
+			return $order_class;
+		};
+		add_filter( 'woocommerce_order_class', $filter_class, 100 );
+		$order = \WC_Helper_Order::create_order();
+
+		$updated = $this->run_ability(
+			'woocommerce/order-update-status',
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'completed',
+			)
+		);
+
+		remove_filter( 'woocommerce_order_class', $filter_class, 100 );
+		$this->assertSame( 'completed', $updated['order']['status'] );
+		$saved = wc_get_order( $order->get_id() );
+		$this->assertSame( 'completed', $saved->get_status() );
+		$this->assertSame( 'yes', $saved->get_meta( '_test_staged' ) );
+	}
+
+	/**
+	 * @testdox Should refuse an order class whose parent overrides update_status() without stage_status(), and name that parent.
+	 */
+	public function test_an_order_class_below_an_unstaged_parent_is_refused(): void {
+		$order_class  = get_class(
+			new class() extends TestUnstagedOrder {
+				/**
+				 * Mark the order, then stage the status.
+				 *
+				 * @param string       $new_status    Status to change the order to.
+				 * @param string|false $note          Optional note.
+				 * @param bool         $manual_update Whether a person made the change.
+				 * @return array
+				 */
+				public function stage_status( $new_status, $note = '', $manual_update = false ) {
+					$this->update_meta_data( '_test_staged', 'yes' );
+					return parent::stage_status( $new_status, $note, $manual_update );
+				}
+			}
+		);
+		$filter_class = static fn() => $order_class;
+		add_filter( 'woocommerce_order_class', $filter_class, 100 );
+		$order        = \WC_Helper_Order::create_order();
+
+		$response = $this->run_ability_response(
+			'woocommerce/order-update-status',
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'completed',
+			)
+		);
+
+		remove_filter( 'woocommerce_order_class', $filter_class, 100 );
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_order_status_staging_unsupported', $response->get_data()['code'] );
+		$this->assertStringContainsString( TestUnstagedOrder::class, $response->get_data()['message'] );
+		$this->assertStringContainsString( 'stage_status()', $response->get_data()['message'] );
+		$this->assertSame( 'pending', wc_get_order( $order->get_id() )->get_status() );
 	}
 
 	/**
@@ -2761,6 +3363,43 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Register fields on the order resource and read their values.
+	 *
+	 * @param array<string, array{0: array<string, mixed>, 1: mixed}> $fields Schema and value, keyed by field.
+	 * @return array<string, mixed> The values under the namespace.
+	 */
+	private function read_field_values( array $fields ): array {
+		AbilitiesLoader::register_core_resources();
+		foreach ( $fields as $field => list( $schema, $value ) ) {
+			ExtensibleAbilities::register_field(
+				array(
+					'resource'      => 'order',
+					'namespace'     => 'values',
+					'field'         => $field,
+					'output_schema' => $schema,
+					'get_callback'  => static fn() => $value,
+				)
+			);
+		}
+
+		$output = ExtensibleAbilities::add_fields_to_object( array(), 'order', \WC_Helper_Order::create_order() );
+		return $output['extensions']['values'];
+	}
+
+	/**
+	 * Add a filter and remove it in tearDown.
+	 *
+	 * @param string   $hook          Hook name.
+	 * @param callable $callback      Callback.
+	 * @param int      $priority      Priority.
+	 * @param int      $accepted_args Number of arguments.
+	 */
+	private function add_test_filter( string $hook, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
+		add_filter( $hook, $callback, $priority, $accepted_args );
+		$this->test_actions[] = array( $hook, $callback, $priority );
+	}
+
+	/**
 	 * Add an action that tearDown removes.
 	 *
 	 * @param string   $hook     Action name.
@@ -2930,7 +3569,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	private function reset_registries(): void {
 		global $wp_actions;
 
-		foreach ( array( 'fields', 'reported', 'validators', 'filters' ) as $property ) {
+		foreach ( array( 'fields', 'validators', 'filters' ) as $property ) {
 			$reflection = new \ReflectionProperty( ExtensibleAbilities::class, $property );
 			$reflection->setAccessible( true );
 			$reflection->setValue( null, array() );
