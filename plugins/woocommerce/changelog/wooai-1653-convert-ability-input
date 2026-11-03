@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Read inputs that AI agents send as strings, such as "false" or "5", as booleans and numbers in the WooCommerce abilities.
