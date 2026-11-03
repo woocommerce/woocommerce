@@ -1442,6 +1442,49 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: a woocommerce_order_after_calculate_totals listener that calls a saving method saves the order from
+	 * inside the save of stage_totals(). The action fires once, and the listener's taxes and total are written.
+	 */
+	public function test_staged_after_calculate_totals_listener_can_call_a_saving_method() {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'TAX',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+		$order    = WC_Helper_Order::create_order();
+		$calls    = 0;
+		$listener = static function ( $and_taxes, $listened_order ) use ( &$calls ) {
+			++$calls;
+			$listened_order->update_taxes();
+			$listened_order->set_total( 123 );
+		};
+		add_action( 'woocommerce_order_after_calculate_totals', $listener, 10, 2 );
+
+		$order->stage_totals( true );
+		$this->assertSame( 0, $calls );
+
+		$order->save();
+		remove_action( 'woocommerce_order_after_calculate_totals', $listener, 10 );
+		$this->assertSame( 1, $calls );
+
+		$saved = wc_get_order( $order->get_id() );
+		$this->assertEquals( 123, $saved->get_total() );
+		$taxes = $saved->get_taxes();
+		$this->assertCount( 1, $taxes );
+		$this->assertGreaterThan( 0, current( $taxes )->get_id() );
+		$this->assertGreaterThan( 0, (float) $saved->get_cart_tax() );
+	}
+
+	/**
 	 * Test: the saving methods save as many times as before, so hooks see saved items, and their stage twins save nothing.
 	 */
 	public function test_saving_methods_keep_their_saves() {
