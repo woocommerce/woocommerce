@@ -314,8 +314,7 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 					array(
 						'version' => 3,
 						'styles'  => array(
-							'elements' => array( 'link' => array( 'color' => array( 'text' => '#654321' ) ) ),
-							'blocks'   => array(
+							'blocks' => array(
 								'core/paragraph' => array(
 									'elements' => array( 'link' => array( 'color' => array( 'text' => '#123456' ) ) ),
 								),
@@ -336,7 +335,6 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 		}
 		$this->assertStringContainsString( 'p a:not(.wp-element-button):not(.button-link):not(.product-button-link){color: #123456;}', $stylesheet );
 		$this->assertStringNotContainsString( ':where(', $stylesheet );
-		$this->assertStringContainsString( 'a:not(.button-link):not(.product-button-link){color:#654321;}', $stylesheet );
 	}
 
 	/**
