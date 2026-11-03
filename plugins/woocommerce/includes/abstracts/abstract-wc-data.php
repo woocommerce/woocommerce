@@ -10,7 +10,7 @@
  * @package     WooCommerce\Classes
  */
 
-use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Internal\Utilities\StagedMethod;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -195,7 +195,7 @@ abstract class WC_Data {
 			return;
 		}
 
-		ExtensibleAbilities::refuse_unstaged_override( $this, $method, $stage_method );
+		StagedMethod::refuse_unstaged( $this, $method, $stage_method );
 	}
 
 	/**

@@ -47,6 +47,34 @@ final class StagedMethod {
 	}
 
 	/**
+	 * Refuse a direct call of the stage method when the object's class overrides the saving method without
+	 * overriding the stage method too.
+	 *
+	 * @param object $subject      Object to change, for example an order.
+	 * @param string $method       Method that sets and saves, for example update_status.
+	 * @param string $stage_method Method that only stages the change, for example stage_status.
+	 * @throws \WC_Data_Exception When the class has not adopted the stage method.
+	 */
+	public static function refuse_unstaged( object $subject, string $method, string $stage_method ): void {
+		$class_name = self::unstaged_class( $subject, $method, $stage_method );
+		if ( null !== $class_name ) {
+			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- A plain text message for a client, built from PHP names.
+			throw new \WC_Data_Exception(
+				'woocommerce_data_staging_unsupported',
+				sprintf(
+					/* translators: 1: PHP class name of the object, 2: method that the class overrides, 3: method that the class needs to override. */
+					__( 'This object does not support this change yet. The class %1$s overrides %2$s() and needs to override %3$s() too.', 'woocommerce' ),
+					$class_name,
+					$method,
+					$stage_method
+				),
+				400
+			);
+			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		}
+	}
+
+	/**
 	 * Whether the class itself declares the method, rather than inherits it.
 	 *
 	 * @param string $class_name Class name.
