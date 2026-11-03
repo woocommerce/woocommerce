@@ -1788,26 +1788,6 @@ trait ProductAbilityTrait {
 	}
 
 	/**
-	 * Say what is wrong with each bad extension field of the `variations` items.
-	 * The message starts with the item, as `variations[0]: `.
-	 *
-	 * @param array $input Ability input that the schema refused.
-	 * @return string[]
-	 */
-	private static function get_variation_field_refusals( array $input ): array {
-		if ( ! ExtensibleAbilities::is_enabled() || ! is_array( $input['variations'] ?? null ) ) {
-			return array();
-		}
-		$refusals = array();
-		foreach ( $input['variations'] as $index => $item ) {
-			foreach ( self::describe_bad_fields( $item['extensions'] ?? null, 'product', array( self::class, 'field_applies_to_variations' ) ) as $message ) {
-				$refusals[] = 'variations[' . $index . ']: ' . $message;
-			}
-		}
-		return $refusals;
-	}
-
-	/**
 	 * Get the schema for a single product in a response.
 	 *
 	 * @return array

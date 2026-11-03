@@ -43,8 +43,5 @@ parameters:
 		-
 			message: '#Call to an undefined static method Automattic\\WooCommerce\\StoreApi\\Schemas\\V1\\AbstractSchema::prepare_product_price_response\(\)#'
 			path: src/StoreApi/Utilities/ProductItemTrait.php
-		-
-			message: '#Call to an undefined static method Automattic\\WooCommerce\\Internal\\Abilities\\Domain\\ProductsQuery::describe_bad_fields\(\)#'
-			path: src/Internal/Abilities/Domain/Traits/ProductAbilityTrait.php
 	parallel:
 		maximumNumberOfProcesses: 4

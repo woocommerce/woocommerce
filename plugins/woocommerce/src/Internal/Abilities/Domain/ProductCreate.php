@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
+use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductFieldRefusalsTrait;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -22,6 +23,7 @@ class ProductCreate extends ActionableAbility {
 
 	use DomainAbilityHelpers;
 	use ProductAbilityTrait;
+	use ProductFieldRefusalsTrait;
 
 	/**
 	 * Ability name.
@@ -76,17 +78,6 @@ class ProductCreate extends ActionableAbility {
 				),
 			),
 		);
-	}
-
-	/**
-	 * Say what is wrong with each bad extension field of the input and of its
-	 * `variations` items.
-	 *
-	 * @param array $input Ability input that the schema refused.
-	 * @return string[]
-	 */
-	protected function get_field_refusals( array $input ): array {
-		return array_merge( parent::get_field_refusals( $input ), self::get_variation_field_refusals( $input ) );
 	}
 
 	/**
