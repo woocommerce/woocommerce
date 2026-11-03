@@ -23,8 +23,8 @@ describe( ABILITY, () => {
 			[ 'mcp-alpha', 'mcp-gamma' ],
 		],
 		[
-			'filters by one slug sent as a string',
-			{ slug: 'mcp-beta' },
+			'filters by one slug as a list of one',
+			{ slug: [ 'mcp-beta' ] },
 			[ 'mcp-beta' ],
 		],
 		[ 'searches by name', { search: 'mcp-gam' }, [ 'mcp-gamma' ] ],
