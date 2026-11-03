@@ -4368,6 +4368,17 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 6, wc_get_product( $added->get_id() )->get_stock_quantity() );
 		$this->assertCount( 2, wc_get_order( $order->get_id() )->get_items() );
 
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$this->assertSame(
+			sprintf(
+				'Adjusted stock: %1$s &ndash; 7&rarr;10, %2$s (8&rarr;5), %3$s (10&rarr;6)',
+				$removed->get_name(),
+				$changed->get_name(),
+				$added->get_name()
+			),
+			$notes[0]->content
+		);
+
 		wc_get_order( $order->get_id() )->update_status( 'cancelled' );
 
 		$this->assertSame( 10, wc_get_product( $changed->get_id() )->get_stock_quantity() );

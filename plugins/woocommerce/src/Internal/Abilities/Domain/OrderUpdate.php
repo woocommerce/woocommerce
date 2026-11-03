@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 use Automattic\WooCommerce\Internal\Admin\Orders\ItemQuantityLimits;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -182,7 +183,8 @@ class OrderUpdate extends ActionableAbility {
 	 * Save the order, recalculate it with the feature off, and change the product
 	 * stock of the changed lines in the same way as the order screen. Validators have already run, so a refused
 	 * change never reaches the stock. A removed line restores its stock before
-	 * the save, because the save deletes the line that holds the reduced amount.
+	 * the save, because the save deletes the line that holds the reduced amount. After a successful save, one
+	 * order note lists the stock changes, in the same format as the order screen.
 	 *
 	 * @param \WC_Order $subject Changed order.
 	 * @return null|\WP_Error
@@ -190,8 +192,12 @@ class OrderUpdate extends ActionableAbility {
 	public function save( $subject ) {
 		require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
 
+		$stock_notes = array();
 		foreach ( $this->removed_product_lines as $item ) {
-			wc_maybe_adjust_line_item_product_stock( $item, 0 );
+			$changed_stock = wc_maybe_adjust_line_item_product_stock( $item, 0 );
+			if ( is_array( $changed_stock ) ) {
+				$stock_notes[] = $item->get_name() . ' &ndash; ' . $changed_stock['from'] . '&rarr;' . $changed_stock['to'];
+			}
 		}
 
 		$added = array();
@@ -224,8 +230,16 @@ class OrderUpdate extends ActionableAbility {
 
 		if ( in_array( $subject->get_status(), array( OrderStatus::PROCESSING, OrderStatus::COMPLETED, OrderStatus::ON_HOLD ), true ) ) {
 			foreach ( $this->changed_product_lines as $item ) {
-				wc_maybe_adjust_line_item_product_stock( $item );
+				$changed_stock = wc_maybe_adjust_line_item_product_stock( $item );
+				if ( is_array( $changed_stock ) ) {
+					$stock_notes[] = $item->get_name() . ' (' . $changed_stock['from'] . '&rarr;' . $changed_stock['to'] . ')';
+				}
 			}
+		}
+
+		if ( ! empty( $stock_notes ) ) {
+			/* translators: %s item name. */
+			$subject->add_order_note( sprintf( __( 'Adjusted stock: %s', 'woocommerce' ), implode( ', ', $stock_notes ) ), 0, true, array( 'note_group' => OrderNoteGroup::PRODUCT_STOCK ) );
 		}
 
 		return null;
