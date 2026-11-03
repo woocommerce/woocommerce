@@ -58,7 +58,8 @@ class Separator extends Abstract_Block_Renderer {
 				Html2Text::HR_ATTRIBUTE => '1',
 				'align'                 => 'center',
 				'width'                 => $is_wide ? '100%' : '100',
-				'style'                 => 'width:' . ( $is_wide ? '100%' : '100px' ) . ';border-collapse:collapse;',
+				// min-width stops the Gmail app from shrinking the table on mobile, as in the Text block.
+				'style'                 => 'width:' . ( $is_wide ? '100%;min-width:100%' : '100px' ) . ';border-collapse:collapse;',
 			),
 			array(
 				'style' => "border-top:2px solid {$color};font-size:0;line-height:0;height:0;mso-line-height-rule:exactly;",

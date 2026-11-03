@@ -179,6 +179,15 @@ class Separator_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * The Wide line keeps its width in the Gmail app, which shrinks tables without a minimum width.
+	 */
+	public function testItKeepsWideLineFromShrinkingInGmail(): void {
+		$rendered = $this->render( array( 'className' => 'is-style-wide' ) );
+
+		$this->assertStringContainsString( 'min-width:100%', $rendered );
+	}
+
+	/**
 	 * The plain-text email shows the dots as a row of dashes too.
 	 */
 	public function testItRendersDotsAsDashesInPlainText(): void {
