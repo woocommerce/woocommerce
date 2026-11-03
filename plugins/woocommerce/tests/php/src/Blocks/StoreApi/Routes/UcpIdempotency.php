@@ -208,6 +208,36 @@ class UcpIdempotency extends ControllerTestCase {
 	}
 
 	/**
+	 * A completed record past retention is dropped and the write runs again.
+	 */
+	public function test_a_record_past_retention_is_not_replayed(): void {
+		global $wpdb;
+
+		$key   = wp_generate_uuid4();
+		$body  = $this->cart_body( 0 );
+		$first = $this->request( 'POST', '/carts', $body, $key );
+
+		$this->assertSame( 'success', $first->get_data()['ucp']['status'] );
+
+		// Age the record past retention, as a retry arriving before the daily sweep finds it.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Ageing a row the test just created.
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->prefix}wc_ucp_idempotency_keys SET completed_at = %s WHERE idempotency_key = %s",
+				gmdate( 'Y-m-d H:i:s', time() - ( UcpIdempotencyStore::retention_seconds() + 60 ) ),
+				$key
+			)
+		);
+
+		$second = $this->request( 'POST', '/carts', $body, $key );
+
+		$this->assertSame( 200, $second->get_status() );
+		$this->assertArrayNotHasKey( 'Idempotency-Replayed', $second->get_headers() );
+		$this->assertNotSame( $first->get_data()['id'], $second->get_data()['id'], 'An expired key runs the write again.' );
+		$this->assertSame( 1, $this->stored_record_count() );
+	}
+
+	/**
 	 * Reusing a key for a different payload is a conflict.
 	 */
 	public function test_reusing_a_key_for_another_payload_is_a_conflict(): void {

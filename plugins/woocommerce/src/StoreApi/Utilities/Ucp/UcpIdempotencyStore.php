@@ -140,7 +140,7 @@ class UcpIdempotencyStore {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Reading a claim another request may have just written; a cache would answer stale.
 		$row = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT request_fingerprint, state, response_status, response_body
+				"SELECT request_fingerprint, state, response_status, response_body, completed_at
 					FROM {$wpdb->prefix}wc_ucp_idempotency_keys
 					WHERE idempotency_key = %s",
 				$key
@@ -200,17 +200,11 @@ class UcpIdempotencyStore {
 	}
 
 	/**
-	 * Delete expired records.
+	 * How long a completed record answers a retry, in seconds.
 	 *
-	 * Each kind of row has its own clock: a `completed` record follows the retention window,
-	 * an `in_progress` claim the shorter orphan window. The claim deliberately ignores the
-	 * filter, so shortening retention cannot free a claim whose request is still running.
-	 *
-	 * @return void
+	 * @return int
 	 */
-	public static function cleanup(): void {
-		global $wpdb;
-
+	public static function retention_seconds(): int {
 		/**
 		 * Filters how long a completed UCP idempotency record is kept, in seconds.
 		 *
@@ -224,11 +218,32 @@ class UcpIdempotencyStore {
 		 */
 		$retention = (int) apply_filters( 'woocommerce_ucp_idempotency_retention_seconds', HOUR_IN_SECONDS );
 
-		if ( $retention <= 0 ) {
-			$retention = HOUR_IN_SECONDS;
+		return $retention > 0 ? $retention : HOUR_IN_SECONDS;
+	}
+
+	/**
+	 * Whether a completed record is past retention and no longer answers for its key.
+	 *
+	 * @param array<string, mixed> $record Row as `find()` returns it.
+	 * @return bool
+	 */
+	public static function has_expired( array $record ): bool {
+		if ( self::STATE_COMPLETED !== (string) ( $record['state'] ?? '' ) || empty( $record['completed_at'] ) ) {
+			return false;
 		}
 
-		$completed_cutoff = gmdate( 'Y-m-d H:i:s', time() - $retention );
+		return strtotime( (string) $record['completed_at'] . ' UTC' ) < time() - self::retention_seconds();
+	}
+
+	/**
+	 * Delete expired records.
+	 *
+	 * @return void
+	 */
+	public static function cleanup(): void {
+		global $wpdb;
+
+		$completed_cutoff = gmdate( 'Y-m-d H:i:s', time() - self::retention_seconds() );
 		$claim_cutoff     = gmdate( 'Y-m-d H:i:s', time() - self::STALE_CLAIM_SECONDS );
 
 		// Deleted in batches, after WC_Session_Handler::cleanup_sessions(): a row here holds a

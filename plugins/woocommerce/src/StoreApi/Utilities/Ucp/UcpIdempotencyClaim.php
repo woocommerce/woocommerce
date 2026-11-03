@@ -111,7 +111,15 @@ final class UcpIdempotencyClaim {
 		// The row went away between the two statements, which a refused write does as it releases
 		// its key. It is free again, so the claim is retried rather than reported as held.
 		if ( null === $existing ) {
-			return true === UcpIdempotencyStore::try_begin( $key, $fingerprint ) ? new self( $key ) : self::in_flight( $capability );
+			return self::claim_again( $key, $fingerprint, $capability );
+		}
+
+		// Past retention the record no longer answers for its key, whatever it was used for, so
+		// it is dropped and the key is free again. The sweep that would have dropped it runs daily.
+		if ( UcpIdempotencyStore::has_expired( $existing ) ) {
+			UcpIdempotencyStore::delete( $key );
+
+			return self::claim_again( $key, $fingerprint, $capability );
 		}
 
 		if ( (string) $existing['request_fingerprint'] !== $fingerprint ) {
@@ -135,6 +143,18 @@ final class UcpIdempotencyClaim {
 		}
 
 		return self::replay( $existing );
+	}
+
+	/**
+	 * Claim a key that was just found free, once; a second loss means another retry won it.
+	 *
+	 * @param string $key Idempotency key.
+	 * @param string $fingerprint Request fingerprint.
+	 * @param string $capability UCP capability the route serves.
+	 * @return \WP_REST_Response|self
+	 */
+	private static function claim_again( string $key, string $fingerprint, string $capability ) {
+		return true === UcpIdempotencyStore::try_begin( $key, $fingerprint ) ? new self( $key ) : self::in_flight( $capability );
 	}
 
 	/**
