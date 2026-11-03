@@ -956,8 +956,8 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Copy the billing details over the session's shipping ones, as checkout does while "Ship to a different address?"
-	 * is unticked: checkout.js posts the billing address as the shipping one on every update, and placing an order
-	 * copies the name too.
+	 * is unticked: checkout.js posts the billing address as the shipping one on every update, and submitting the form
+	 * copies the name too, even when validation then fails.
 	 */
 	private function copy_billing_to_shipping_in_session(): void {
 		foreach ( self::PREFILLED_SHIPPING_FIELDS as $field ) {

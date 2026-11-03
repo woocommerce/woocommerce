@@ -66,14 +66,18 @@ class WC_Checkout {
 	protected $legacy_posted_data = array();
 
 	/**
-	 * Caches customer object. @see get_value.
+	 * Caches customer object.
+	 *
+	 * @see WC_Checkout::get_value()
 	 *
 	 * @var WC_Customer
 	 */
 	private $logged_in_customer = null;
 
 	/**
-	 * Caches the logged-in customer as saved to their account, without session changes. @see get_saved_customer_for_shipping_field.
+	 * Caches the logged-in customer as saved to their account, without session changes.
+	 *
+	 * @see WC_Checkout::get_saved_customer_for_shipping_field()
 	 *
 	 * @var WC_Customer|null
 	 */
@@ -1824,9 +1828,9 @@ class WC_Checkout {
 	/**
 	 * Get the saved customer to prefill a shipping field from, when the session's shipping address is the billing copy.
 	 *
-	 * Prefilling from that copy would hide the shipping address saved to the account (issue #30258). Once the copy is
-	 * detected, every shipping field comes from the saved record, so the name and address shown belong together. A session
-	 * address that differs from billing still wins; one the customer typed to match billing looks the same as the copy.
+	 * Prefilling from that copy would hide the shipping address saved to the account. Once the copy is detected, every
+	 * shipping field comes from the saved record, so the name and address shown belong together. A session address that
+	 * differs from billing still wins; one the customer typed to match billing looks the same as the copy.
 	 *
 	 * @param string $input Name of the input we want to grab data for, e.g. shipping_city.
 	 * @return WC_Customer|null The customer as saved to their account, or null to read the session.
