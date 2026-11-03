@@ -105,7 +105,7 @@ class OrderAddNote extends AbstractDomainAbility implements AbilityDefinition {
 
 		return array(
 			'note_id' => (int) $note_id,
-			'order'   => self::format_order_for_response( $order, false ),
+			'order'   => self::format_saved_order_for_response( $order ),
 		);
 	}
 

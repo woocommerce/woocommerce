@@ -116,7 +116,7 @@ class ProductCreate extends ActionableAbility {
 	 */
 	protected function prepare_response( $subject ): array {
 		return array(
-			'product' => self::format_product_for_response( $subject ),
+			'product' => self::format_saved_product_for_response( $subject ),
 		);
 	}
 
