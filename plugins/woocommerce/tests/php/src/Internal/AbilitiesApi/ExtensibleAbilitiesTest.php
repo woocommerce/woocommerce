@@ -3786,14 +3786,15 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			static function () {
 				ExtensibleAbilities::register_field(
 					array(
-						'resource'        => 'order',
-						'namespace'       => 'test-ext',
-						'field'           => 'priority',
-						'schema'          => array( 'type' => 'string' ),
-						'get_callback'    => static function ( \WC_Order $order ) {
+						'resource'      => 'order',
+						'namespace'     => 'test-ext',
+						'field'         => 'priority',
+						'output_schema' => array( 'type' => 'string' ),
+						'input_schema'  => array( 'type' => 'string' ),
+						'get_callback'  => static function ( \WC_Order $order ) {
 							return $order->get_meta( '_test_priority' );
 						},
-						'update_callback' => static function ( \WC_Order $order, $value ) {
+						'set_callback'  => static function ( \WC_Order $order, $value ) {
 							$order->update_meta_data( '_test_priority', $value );
 						},
 					)
