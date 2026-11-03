@@ -12,6 +12,7 @@
  * @version 3.0.0
  */
 
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -598,8 +599,82 @@ class WC_Structured_Data {
 			);
 		}
 
+		$video = $this->get_product_gallery_video_data( $product );
+		if ( $video ) {
+			$markup['subjectOf'] = $video;
+		}
+
 		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
 	}
+
+	/**
+	 * Get structured data for the first usable uploaded gallery video.
+	 *
+	 * @param WC_Product $product Product data.
+	 * @return array Video data, or an empty array.
+	 */
+	private function get_product_gallery_video_data( $product ) {
+		if ( ! ProductMediaGallery::is_feature_enabled() ) {
+			return array();
+		}
+
+		$videos = ProductMediaGallery::get_stored_video_gallery_items( $product );
+		$ids    = array_filter( array_map( 'absint', array_merge( array_column( $videos, 'id' ), array_column( $videos, 'poster_id' ) ) ) );
+		if ( $ids ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( array_unique( $ids ) );
+		}
+
+		foreach ( ProductMediaGallery::get_product_media_gallery_items( $product ) as $item ) {
+			if ( 'video' !== $item['media_type'] ) {
+				continue;
+			}
+
+			$id         = (int) $item['id'];
+			$attachment = get_post( $id );
+			if ( ! $attachment || 'attachment' !== $attachment->post_type ) {
+				continue;
+			}
+			$url       = wp_get_attachment_url( $id );
+			$date      = get_post_datetime( $attachment, 'date', 'gmt' );
+			$poster_id = (int) ( $item['poster_id'] ?? 0 );
+			$thumbnail = $poster_id ? wp_get_attachment_image_url( $poster_id, 'full' ) : false;
+			if ( ! $thumbnail && $product->get_image_id() ) {
+				$thumbnail = wp_get_attachment_image_url( (int) $product->get_image_id(), 'full' );
+			}
+			$name = trim( wp_strip_all_tags( $attachment->post_title ) );
+			$name = $name ? $name : trim( wp_strip_all_tags( $product->get_name() ) );
+			if ( ! $url || ! $thumbnail || ! $date || ! $name ) {
+				continue;
+			}
+
+			$video       = array(
+				'@type'        => 'VideoObject',
+				'name'         => $name,
+				'contentUrl'   => $url,
+				'thumbnailUrl' => $thumbnail,
+				'uploadDate'   => $date->format( DATE_ATOM ),
+			);
+			$description = trim( wp_strip_all_tags( $attachment->post_content ) );
+			if ( $description ) {
+				$video['description'] = $description;
+			}
+			/**
+			 * Video attachment metadata.
+			 *
+			 * @var array<string, mixed>|false $metadata
+			 */
+			$metadata = wp_get_attachment_metadata( $id );
+			$length   = is_array( $metadata ) ? ( $metadata['length'] ?? null ) : null;
+			if ( is_int( $length ) && 0 < $length ) {
+				$video['duration'] = 'PT' . (int) $length . 'S';
+			}
+			return $video;
+		}
+
+		return array();
+	}
+
 
 	/**
 	 * Generates Review structured data.
