@@ -308,6 +308,42 @@ class WC_Admin_Tests_API_Product_Attributes extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Custom attribute callbacks look up numeric slugs without changing their string representation.
+	 * @testWith ["123"]
+	 *           ["0123"]
+	 *           ["9223372036854775808"]
+	 *
+	 * @param string $slug The custom attribute slug.
+	 */
+	public function test_numeric_custom_attribute_lookup( string $slug ): void {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( $slug );
+		$attribute->set_options( array( 'example' ) );
+		$product = new WC_Product_Simple();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		try {
+			// Numeric URLs retain the inherited global-ID route; exercise the custom callbacks directly.
+			$request = new WP_REST_Request( 'GET' );
+			$request->set_param( 'slug', $slug );
+			$controller = new \Automattic\WooCommerce\Admin\API\ProductAttributes();
+			$response   = $controller->get_item_by_slug( $request );
+
+			$this->assertNotWPError( $response );
+			$this->assertSame( $slug, $response['slug'] );
+			$this->assertSame( $slug, $response['name'] );
+
+			$terms_controller = new \Automattic\WooCommerce\Admin\API\ProductAttributeTerms();
+			$terms            = $terms_controller->get_item_by_slug( $request );
+			$this->assertNotWPError( $terms );
+			$this->assertSame( array( 'example' ), wp_list_pluck( $terms, 'slug' ) );
+		} finally {
+			$product->delete( true );
+		}
+	}
+
+	/**
 	 * Test not finding a single attribute by slug.
 	 */
 	public function test_by_slug_404() {

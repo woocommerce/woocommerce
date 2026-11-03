@@ -65,8 +65,12 @@ trait CustomAttributeTraits {
 			$like = '%"name";s:%:"%' . $wpdb->esc_like( $name ) . '%"%';
 		} else {
 			$slug = sanitize_title_for_query( $args['slug'] );
+			// PHP stores canonical numeric string keys as integers when serializing product attributes.
+			$attribute_key = array_key_first( array( $slug => true ) );
 			// Get as close as we can to matching the slug property of custom attributes using SQL.
-			$like = '%s:' . strlen( $slug ) . ':"' . $slug . '";a:6:{%';
+			$like = is_int( $attribute_key )
+				? '%i:' . $attribute_key . ';a:6:{%'
+				: '%s:' . strlen( $slug ) . ':"' . $slug . '";a:6:{%';
 		}
 
 		// Find all serialized product attributes with names like the search string.
@@ -112,7 +116,7 @@ trait CustomAttributeTraits {
 					continue;
 				}
 
-				if ( ( 'slug' === $mode ) && ( $meta_attribute_key !== $slug ) ) {
+				if ( ( 'slug' === $mode ) && ( (string) $meta_attribute_key !== $slug ) ) {
 					continue;
 				}
 
