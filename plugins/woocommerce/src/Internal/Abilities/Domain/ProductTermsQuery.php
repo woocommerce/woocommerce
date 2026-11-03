@@ -96,6 +96,9 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 			array_intersect_key( $input, array_flip( array( 'taxonomy', 'include', 'exclude', 'search', 'slug', 'parent', 'hide_empty', 'orderby', 'order' ) ) )
 		);
 		$args['hide_empty'] = wp_validate_boolean( $input['hide_empty'] ?? false );
+		if ( isset( $input['slug'] ) ) {
+			$args['slug'] = wp_parse_slug_list( $input['slug'] );
+		}
 		$args['number']     = $per_page;
 		$args['offset']     = $input['offset'] ?? ( $page - 1 ) * $per_page;
 		if ( ! empty( $input['product'] ) ) {

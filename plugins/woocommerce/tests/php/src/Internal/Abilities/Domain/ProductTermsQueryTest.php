@@ -305,6 +305,13 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 		$result = ProductTermsQuery::execute(
 			array(
 				'taxonomy' => 'product_tag',
+				'slug'     => 'alpha,beta',
+			)
+		);
+		$this->assertSame( array( $first, $second ), array_column( $result['terms'], 'id' ) );
+		$result = ProductTermsQuery::execute(
+			array(
+				'taxonomy' => 'product_tag',
 				'include'  => array( $first, $second ),
 				'offset'   => 1,
 				'order'    => 'desc',
