@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep product stock unchanged when removing an order line fails, instead of restoring it too early.
