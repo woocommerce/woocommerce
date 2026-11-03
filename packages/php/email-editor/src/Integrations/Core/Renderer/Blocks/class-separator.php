@@ -40,8 +40,9 @@ class Separator extends Abstract_Block_Renderer {
 			return Table_Wrapper_Helper::render_table_wrapper(
 				'&#183;&#183;&#183;',
 				array(
-					'align' => 'center',
-					'width' => '100%',
+					Html2Text::HR_ATTRIBUTE => '1',
+					'align'                 => 'center',
+					'width'                 => '100%',
 				),
 				array(
 					'align' => 'center',

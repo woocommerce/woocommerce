@@ -133,6 +133,15 @@ class Separator_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * The plain-text email shows the dots as a row of dashes too.
+	 */
+	public function testItRendersDotsAsDashesInPlainText(): void {
+		$text = Html2Text::convert( '<p>Above</p>' . $this->render( array( 'className' => 'is-style-dots' ) ) . '<p>Below</p>' );
+
+		$this->assertMatchesRegularExpression( '/Above\s+-{20,}\s+Below/', $text );
+	}
+
+	/**
 	 * A style is picked by its whole class name, not a class that starts with it.
 	 */
 	public function testItIgnoresClassesThatOnlyStartWithStyleName(): void {
