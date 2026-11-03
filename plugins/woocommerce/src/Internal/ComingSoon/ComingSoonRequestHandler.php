@@ -31,6 +31,8 @@ class ComingSoonRequestHandler {
 	/**
 	 * Whether the coming soon screen was selected for this request.
 	 *
+	 * @since 11.4.0
+	 *
 	 * @internal
 	 * @return bool
 	 */

@@ -501,7 +501,7 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 */
 	private function build_variants( \WC_Product $product, array $item, string $currency, array $required_variation_ids, bool $only_required, ?array $candidates ): array {
 		if ( ! $product instanceof \WC_Product_Variable ) {
-			return array( $this->build_simple_variant( $item, $currency ) );
+			return array( $this->build_simple_variant( $product, $item, $currency ) );
 		}
 
 		$children = array_map( 'intval', null === $candidates ? $product->get_visible_children() : $candidates );
@@ -557,7 +557,7 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 				continue;
 			}
 
-			$variants[] = $this->build_variation_variant( $this->item( $variation ), $options[ (int) $variation_id ] ?? array(), $currency );
+			$variants[] = $this->build_variation_variant( $variation, $this->item( $variation ), $options[ (int) $variation_id ] ?? array(), $currency );
 		}
 
 		return $variants;
@@ -585,11 +585,12 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	/**
 	 * Build a variant entry from a simple product's item response.
 	 *
-	 * @param array  $item Store API item response.
-	 * @param string $currency ISO 4217 currency code.
+	 * @param \WC_Product $product The product.
+	 * @param array       $item Store API item response.
+	 * @param string      $currency ISO 4217 currency code.
 	 * @return array
 	 */
-	private function build_simple_variant( array $item, string $currency ): array {
+	private function build_simple_variant( \WC_Product $product, array $item, string $currency ): array {
 		$variant = array(
 			'id'           => (string) $item['id'],
 			'title'        => (string) $item['name'],
@@ -603,6 +604,11 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 			$variant['sku'] = $sku;
 		}
 
+		$barcodes = $this->build_barcodes( $product );
+		if ( ! empty( $barcodes ) ) {
+			$variant['barcodes'] = $barcodes;
+		}
+
 		$list_price = $this->build_variant_list_price( $item['prices'], $currency );
 		if ( null !== $list_price ) {
 			$variant['list_price'] = $list_price;
@@ -614,12 +620,13 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	/**
 	 * Build a variant entry from a variation's item response.
 	 *
-	 * @param array  $item Store API item response of the variation.
-	 * @param array  $options Selected options, each `{ name, label }`.
-	 * @param string $currency ISO 4217 currency code.
+	 * @param \WC_Product_Variation $variation The variation.
+	 * @param array                 $item Store API item response of the variation.
+	 * @param array                 $options Selected options, each `{ name, label }`.
+	 * @param string                $currency ISO 4217 currency code.
 	 * @return array
 	 */
-	private function build_variation_variant( array $item, array $options, string $currency ): array {
+	private function build_variation_variant( \WC_Product_Variation $variation, array $item, array $options, string $currency ): array {
 		$labels = array_column( $options, 'label' );
 
 		$variant = array(
@@ -633,6 +640,11 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 		$sku = (string) $item['sku'];
 		if ( '' !== $sku ) {
 			$variant['sku'] = $sku;
+		}
+
+		$barcodes = $this->build_barcodes( $variation );
+		if ( ! empty( $barcodes ) ) {
+			$variant['barcodes'] = $barcodes;
 		}
 
 		$list_price = $this->build_variant_list_price( $item['prices'], $currency );
@@ -650,6 +662,33 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 		}
 
 		return $variant;
+	}
+
+	/**
+	 * Build a variant's barcodes from its GTIN, normalized and validated by the product structured data,
+	 * so the catalog and the structured data never disagree on a GTIN.
+	 *
+	 * A variation's GTIN is its own: the parent's identifies a different item.
+	 *
+	 * @param \WC_Product $product The product or variation.
+	 * @return array Empty, or one `{ type, value }` barcode.
+	 */
+	private function build_barcodes( \WC_Product $product ): array {
+		$structured_data = WC()->structured_data;
+		if ( ! $structured_data instanceof \WC_Structured_Data ) {
+			return array();
+		}
+		$gtin = (string) $structured_data->prepare_gtin( (string) $product->get_global_unique_id() );
+		if ( ! $structured_data->is_valid_gtin( $gtin ) ) {
+			return array();
+		}
+
+		return array(
+			array(
+				'type'  => 'GTIN',
+				'value' => $gtin,
+			),
+		);
 	}
 
 	/**

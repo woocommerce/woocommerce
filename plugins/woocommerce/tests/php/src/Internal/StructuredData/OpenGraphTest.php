@@ -116,6 +116,51 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should collect up to six distinct valid product image URLs.
+	 */
+	public function test_collects_six_distinct_valid_images(): void {
+		$deleted_id = self::factory()->attachment->create(
+			array(
+				'file'           => 'deleted.jpg',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$invalid_id = self::factory()->attachment->create(
+			array(
+				'file'           => 'document.pdf',
+				'post_mime_type' => 'application/pdf',
+			)
+		);
+		$image_ids  = array();
+		for ( $i = 1; $i <= 7; $i++ ) {
+			$image_ids[] = self::factory()->attachment->create(
+				array(
+					'file'           => "gallery-$i.jpg",
+					'post_mime_type' => 'image/jpeg',
+				)
+			);
+		}
+		$duplicate_id = self::factory()->attachment->create(
+			array(
+				'file'           => 'gallery-1.jpg',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$this->product->set_image_id( $invalid_id );
+		$this->product->set_gallery_image_ids( array_merge( array( $deleted_id, $image_ids[0], $duplicate_id ), array_slice( $image_ids, 1 ) ) );
+		$this->product->save();
+		wp_delete_attachment( $deleted_id, true );
+
+		$tags = $this->render_meta_tags( '' );
+
+		$this->assertSame(
+			array_map( 'wp_get_attachment_url', array_slice( $image_ids, 0, 6 ) ),
+			$tags['og:image'],
+			'Invalid and duplicate images should not consume the six-image limit.'
+		);
+	}
+
+	/**
 	 * @testdox Should render sale prices and sale dates in product metadata.
 	 */
 	public function test_sale_price_and_dates(): void {
@@ -128,9 +173,10 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 		$this->product->save();
 
 		$tags = $this->render_meta_tags( '' );
+		$this->assertSame( array( '8.00' ), $tags['product:price:amount'] );
 		$this->assertSame( array( '8.00' ), $tags['product:sale_price:amount'] );
 		$this->assertSame( array( 'USD' ), $tags['product:sale_price:currency'] );
-		$this->assertSame( array( '8.00' ), $tags['og:price:amount'] );
+		$this->assertSame( array( '10.00' ), $tags['og:price:amount'] );
 		$this->assertSame( array( '10.00' ), $tags['og:price:standard_amount'] );
 		$this->assertSame( array( $this->product->get_date_on_sale_from()->format( DATE_ATOM ) ), $tags['product:sale_price_dates:start'] );
 		$this->assertSame( array( $this->product->get_date_on_sale_to()->format( DATE_ATOM ) ), $tags['product:sale_price_dates:end'] );
@@ -368,6 +414,50 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not add shop metadata for excluded views.
+	 * @testWith ["search"]
+	 *           ["pagination"]
+	 *           ["protected"]
+	 *           ["unpublished"]
+	 *
+	 * @param string $view Excluded shop view.
+	 */
+	public function test_excludes_shop_views( string $view ): void {
+		$shop_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_title'  => 'Shop',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'woocommerce_shop_page_id', $shop_id );
+		$this->go_to( get_permalink( $shop_id ) );
+		$this->assertTrue( is_shop(), 'The request must be recognized as a shop view.' );
+
+		if ( 'search' === $view ) {
+			$GLOBALS['wp_query']->is_search = true;
+		} elseif ( 'pagination' === $view ) {
+			$GLOBALS['wp_query']->is_paged = true;
+		} elseif ( 'protected' === $view ) {
+			wp_update_post(
+				array(
+					'ID'            => $shop_id,
+					'post_password' => 'secret',
+				)
+			);
+		} else {
+			wp_update_post(
+				array(
+					'ID'          => $shop_id,
+					'post_status' => 'draft',
+				)
+			);
+		}
+
+		$this->assertSame( array(), $this->render_meta_tags( '' ), "The $view shop view must not output metadata." );
+	}
+
+	/**
 	 * @testdox Should add shop metadata regardless of query parameters.
 	 * @testWith ["woo-share"]
 	 *           ["min_price"]
@@ -395,6 +485,35 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 			$tags = $this->render_meta_tags( '' );
 			$this->assertSame( array( $shop_url ), $tags['og:url'] );
 			$this->assertSame( array( 'summary' ), $tags['twitter:card'] );
+		} finally {
+			$_GET = $original_get;
+		}
+	}
+
+	/**
+	 * @testdox Should omit shop metadata on subsequent shortcode product pages.
+	 * @testWith ["1", true]
+	 *           ["2", false]
+	 *
+	 * @param string $page Product page number.
+	 * @param bool   $expected Whether metadata should be present.
+	 */
+	public function test_shop_shortcode_pagination( string $page, bool $expected ): void {
+		$shop_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_title'  => 'Shop',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'woocommerce_shop_page_id', $shop_id );
+		$this->go_to( get_permalink( $shop_id ) );
+		$original_get         = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Restore request state after the test.
+		$_GET['product-page'] = $page;
+
+		try {
+			$tags = $this->render_meta_tags( '' );
+			$this->assertSame( $expected, isset( $tags['og:title'] ) );
 		} finally {
 			$_GET = $original_get;
 		}

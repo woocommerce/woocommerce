@@ -39,13 +39,14 @@ class ProductOpenGraphTags {
 			array( 'og:type' => 'product' ),
 			array( 'og:url' => $product->get_permalink() ),
 			array( 'og:description' => wc_trim_string( $description ) ),
+			array( 'product:retailer_item_id' => (string) $product->get_id() ),
 		);
 		foreach ( $this->get_site_tags() as $property => $value ) {
 			$tags[] = array( $property => $value );
 		}
 		$gallery   = $product->get_gallery_image_ids();
 		$image_ids = array_merge( array( $product->get_image_id() ), is_array( $gallery ) ? $gallery : array() );
-		$image_ids = array_slice( array_unique( array_filter( array_map( 'intval', $image_ids ) ) ), 0, 6 );
+		$image_ids = array_unique( array_filter( array_map( 'intval', $image_ids ) ) );
 		if ( ! empty( $image_ids ) ) {
 			// Prime caches to reduce future queries.
 			_prime_post_caches( $image_ids );
@@ -56,6 +57,9 @@ class ProductOpenGraphTags {
 			if ( $image && ! in_array( $image['og:image'], $urls, true ) ) {
 				$tags[] = $image;
 				$urls[] = $image['og:image'];
+				if ( 6 === count( $urls ) ) {
+					break;
+				}
 			}
 		}
 		$tags[] = array( 'twitter:card' => $urls ? 'summary_large_image' : 'summary' );
@@ -152,6 +156,8 @@ class ProductOpenGraphTags {
 			$tags['product:sale_price:amount']   = $price;
 			$tags['product:sale_price:currency'] = $currency;
 			$tags['og:price:standard_amount']    = wc_format_decimal( wc_get_price_to_display( $product, array( 'price' => $product->get_regular_price() ) ), wc_get_price_decimals() );
+			// Meta uses og:price:amount as the catalog price when both price aliases are present.
+			$tags['og:price:amount'] = $tags['og:price:standard_amount'];
 			foreach ( array(
 				'start' => $product->get_date_on_sale_from(),
 				'end'   => $product->get_date_on_sale_to(),
