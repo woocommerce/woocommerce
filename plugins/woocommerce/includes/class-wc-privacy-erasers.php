@@ -122,10 +122,15 @@ class WC_Privacy_Erasers {
 			'done'           => true,
 		);
 
+		// Erased orders drop out of the query, so only retained orders from earlier pages are skipped.
+		$retained_key = 'wc_privacy_retained_orders_' . md5( $email_address );
+		$retained     = 1 < $page ? (int) get_transient( $retained_key ) : 0;
+
 		$order_query = array(
-			'limit'    => 10,
-			'page'     => $page,
-			'customer' => array( $email_address ),
+			'limit'      => 10,
+			'offset'     => $retained,
+			'customer'   => array( $email_address ),
+			'anonymized' => false,
 		);
 
 		if ( $user instanceof WP_User ) {
@@ -146,11 +151,18 @@ class WC_Privacy_Erasers {
 					/* Translators: %s Order number. */
 					$response['messages'][]     = sprintf( __( 'Personal data within order %s has been retained.', 'woocommerce' ), $order->get_order_number() );
 					$response['items_retained'] = true;
+					++$retained;
 				}
 			}
 			$response['done'] = 10 > count( $orders );
 		} else {
 			$response['done'] = true;
+		}
+
+		if ( $response['done'] ) {
+			delete_transient( $retained_key );
+		} else {
+			set_transient( $retained_key, $retained, DAY_IN_SECONDS );
 		}
 
 		return $response;
