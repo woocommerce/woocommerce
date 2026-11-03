@@ -660,9 +660,16 @@ class Content_Renderer {
 		);
 
 		// Get styles from theme.
-		$styles .= $this->theme_controller->get_stylesheet_for_rendering( $post, $template );
-		// Get styles from block-supports stylesheet. This includes rules such as layout (contentWidth) that some blocks use.
+		$styles              .= $this->theme_controller->get_stylesheet_for_rendering( $post, $template );
 		$block_support_styles = $this->theme_controller->get_stylesheet_from_context( 'block-supports', array() );
+		// Get styles from block-supports stylesheet. This includes rules such as layout (contentWidth) that some blocks use.
+		// @see https://github.com/WordPress/WordPress/blob/3c5da9c74344aaf5bf8097f2e2c6a1a781600e03/wp-includes/script-loader.php#L3134
+		// @internal :where is not supported by emogrifier, so we need to replace it with *.
+		$block_support_styles = str_replace(
+			':where(:not(.alignleft):not(.alignright):not(.alignfull))',
+			'*:not(.alignleft):not(.alignright):not(.alignfull)',
+			$block_support_styles
+		);
 
 		/*
 		 * Layout CSS assumes the top level block will have a single DIV wrapper with children. Since our blocks use tables,
@@ -677,9 +684,7 @@ class Content_Renderer {
 		);
 
 		$styles .= $block_support_styles;
-		// Normalize before the filter too: callbacks get the layout rule as `*:not(…)`, as in released versions, and other rules already unwrapped.
-		$styles = Css_Selector_Normalizer::normalize( $styles );
-		$styles = wp_strip_all_tags( (string) apply_filters( 'woocommerce_email_content_renderer_styles', $styles, $post ) );
+		$styles  = wp_strip_all_tags( (string) apply_filters( 'woocommerce_email_content_renderer_styles', $styles, $post ) );
 
 		// Normalize after the filter, so styles that integrations add here are inlined too.
 		return Css_Selector_Normalizer::normalize( $styles );
