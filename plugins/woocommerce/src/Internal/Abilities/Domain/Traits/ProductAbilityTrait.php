@@ -694,7 +694,7 @@ trait ProductAbilityTrait {
 	 * @return null|\WP_Error
 	 */
 	protected static function check_publish_permission( ?\WC_Product $product, array $input ) {
-		$status = isset( $input['status'] ) ? sanitize_key( $input['status'] ) : '';
+		$status = $input['status'] ?? '';
 		if (
 			! in_array( $status, array( ProductStatus::PUBLISH, ProductStatus::FUTURE, ProductStatus::PRIVATE ), true )
 			|| ( $product && $product->get_status() === $status )
@@ -825,7 +825,7 @@ trait ProductAbilityTrait {
 		foreach ( array_values( $items ) as $index => $item ) {
 			$position = $index + 1;
 			$id       = $item['id'] ?? 0;
-			$delete   = ! empty( $item['delete'] );
+			$delete   = $item['delete'] ?? false;
 
 			if ( $delete && ( $id <= 0 || count( $item ) > 2 ) ) {
 				return new \WP_Error(
@@ -1066,7 +1066,7 @@ trait ProductAbilityTrait {
 			$options  = array_map( 'sanitize_text_field', $item['options'] ?? array() );
 			$taxonomy = self::get_global_attribute_taxonomy( $item );
 			$name     = '' === $taxonomy ? sanitize_text_field( trim( $item['name'] ?? '' ) ) : $taxonomy;
-			if ( '' === $taxonomy && ( ! empty( $item['id'] ) || ! empty( $item['global'] ) ) ) {
+			if ( '' === $taxonomy && ( ! empty( $item['id'] ) || ( $item['global'] ?? false ) ) ) {
 				return new \WP_Error(
 					'woocommerce_product_attributes_invalid',
 					sprintf(
@@ -1123,7 +1123,7 @@ trait ProductAbilityTrait {
 		}
 
 		$name = trim( $item['name'] ?? '' );
-		if ( empty( $item['global'] ) || '' === $name ) {
+		if ( ! ( $item['global'] ?? false ) || '' === $name ) {
 			return '';
 		}
 
@@ -1318,12 +1318,8 @@ trait ProductAbilityTrait {
 			return wp_filter_post_kses( $value );
 		}
 
-		if ( 'status' === $field ) {
-			return sanitize_key( $value );
-		}
-
-		if ( 'external_url' === $field ) {
-			return esc_url_raw( $value );
+		if ( in_array( $field, array( 'status', 'stock_status', 'external_url' ), true ) ) {
+			return $value;
 		}
 
 		if ( in_array( $field, array( 'regular_price', 'sale_price' ), true ) ) {

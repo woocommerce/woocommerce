@@ -127,10 +127,14 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'return'   => 'objects',
 		);
 
-		foreach ( array( 'status', 'sku', 'stock_status' ) as $field ) {
+		foreach ( array( 'status', 'stock_status' ) as $field ) {
 			if ( ! empty( $input[ $field ] ) ) {
-				$args[ $field ] = wc_clean( $input[ $field ] );
+				$args[ $field ] = $input[ $field ];
 			}
+		}
+
+		if ( ! empty( $input['sku'] ) ) {
+			$args['sku'] = wc_clean( $input['sku'] );
 		}
 
 		if ( isset( $input['type'] ) ) {
