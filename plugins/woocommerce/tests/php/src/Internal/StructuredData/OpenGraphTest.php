@@ -356,9 +356,14 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should add shop metadata and preserve a provider's image.
+	 * @testdox Should add shop metadata and preserve a provider's image and locale.
+	 * @testWith ["en_US", ["en_US"]]
+	 *           ["hr", []]
+	 *
+	 * @param string   $locale Site locale.
+	 * @param string[] $expected_locale Expected locale values.
 	 */
-	public function test_shop_metadata(): void {
+	public function test_shop_metadata( string $locale, array $expected_locale ): void {
 		$shop_id = self::factory()->post->create(
 			array(
 				'post_type'    => 'page',
@@ -373,6 +378,12 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 		$shop_url = get_permalink( $shop_id );
 		$this->assertIsString( $shop_url );
 		$this->go_to( $shop_url );
+		add_filter(
+			'locale',
+			static function () use ( $locale ) {
+				return $locale;
+			}
+		);
 
 		$tags = $this->render_meta_tags( '<meta property="og:type" content="article">' );
 
@@ -381,15 +392,17 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 		$this->assertSame( array( $shop_url ), $tags['og:url'] );
 		$this->assertSame( array( 'Fresh coffee.' ), $tags['og:description'] );
 		$this->assertSame( array( 'Test store' ), $tags['og:site_name'] );
+		$this->assertSame( $expected_locale, $tags['og:locale'] ?? array() );
 		$this->assertSame( array( wp_get_attachment_url( (int) $this->product->get_image_id() ) ), $tags['og:image'] );
 		$this->assertSame( array( '1200' ), $tags['og:image:width'] );
 		$this->assertSame( array( '800' ), $tags['og:image:height'] );
 		$this->assertSame( array( 'Product photo' ), $tags['og:image:alt'] );
 		$this->assertSame( array( 'summary_large_image' ), $tags['twitter:card'] );
 
-		$tags = $this->render_meta_tags( '<meta property="og:image" content="https://example.org/provider.jpg"><meta property="og:image:width" content="600">' );
+		$tags = $this->render_meta_tags( '<meta property="og:image" content="https://example.org/provider.jpg"><meta property="og:image:width" content="600"><meta property="og:locale" content="fr_FR">' );
 		$this->assertSame( array( 'https://example.org/provider.jpg' ), $tags['og:image'] );
 		$this->assertSame( array( '600' ), $tags['og:image:width'] );
+		$this->assertSame( array( 'fr_FR' ), $tags['og:locale'] );
 		$this->assertArrayNotHasKey( 'og:image:height', $tags );
 		$this->assertSame( array( 'summary_large_image' ), $tags['twitter:card'] );
 	}
