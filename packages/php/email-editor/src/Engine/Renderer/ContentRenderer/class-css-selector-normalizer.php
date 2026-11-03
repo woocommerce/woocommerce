@@ -16,6 +16,12 @@ namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer;
  * @since 2.19.0
  */
 class Css_Selector_Normalizer {
+	/**
+	 * Selector part that keeps link rules off the buttons the email renderers output.
+	 *
+	 * WordPress link rules skip buttons with `:not(.wp-element-button)`. Email buttons carry these classes instead.
+	 */
+	public const EMAIL_BUTTON_EXCLUSIONS = ':not(.button-link):not(.product-button-link)';
 
 	/**
 	 * Normalize rule selectors without changing declarations or at-rule conditions.
@@ -25,7 +31,7 @@ class Css_Selector_Normalizer {
 	 * @return string
 	 */
 	public static function normalize( string $css ): string {
-		if ( false === stripos( $css, ':where(' ) ) {
+		if ( false === stripos( $css, ':where(' ) && false === strpos( $css, ':not(.wp-element-button)' ) ) {
 			return $css;
 		}
 
@@ -61,16 +67,20 @@ REGEX;
 	 */
 	private static function normalize_rule( string $prelude ): string {
 		$selector = ltrim( (string) preg_replace( '~/\*.*?\*/~s', '', $prelude ) );
-		if ( 0 === strpos( $selector, '@' ) || false === stripos( $prelude, ':where(' ) ) {
+		if ( 0 === strpos( $selector, '@' ) ) {
 			return $prelude;
 		}
 
-		$selectors = array();
-		foreach ( self::split_selectors( $prelude ) as $part ) {
-			$selectors = array_merge( $selectors, self::expand_where( $part ) );
+		if ( false !== stripos( $prelude, ':where(' ) ) {
+			$selectors = array();
+			foreach ( self::split_selectors( $prelude ) as $part ) {
+				$selectors = array_merge( $selectors, self::expand_where( $part ) );
+			}
+			$prelude = implode( ', ', $selectors );
 		}
 
-		return implode( ', ', $selectors );
+		// Without `:where()` a link rule would beat the email button's own color.
+		return (string) preg_replace( '/:not\(\.wp-element-button\)(?!' . preg_quote( self::EMAIL_BUTTON_EXCLUSIONS, '/' ) . ')/', ':not(.wp-element-button)' . self::EMAIL_BUTTON_EXCLUSIONS, $prelude );
 	}
 
 	/**

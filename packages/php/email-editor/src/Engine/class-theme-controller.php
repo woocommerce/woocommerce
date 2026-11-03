@@ -264,7 +264,7 @@ class Theme_Controller {
 					$selector = 'h1, h2, h3, h4, h5, h6';
 					break;
 				case 'link':
-					$selector = 'a:not(.button-link)';
+					$selector = 'a' . Css_Selector_Normalizer::EMAIL_BUTTON_EXCLUSIONS;
 					break;
 				case 'caption':
 					// Captions render as elements carrying core's caption class, never as a `<caption>` tag.

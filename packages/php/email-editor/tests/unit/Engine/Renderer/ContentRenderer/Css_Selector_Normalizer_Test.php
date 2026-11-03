@@ -34,38 +34,78 @@ class Css_Selector_Normalizer_Test extends \Email_Editor_Unit_Test {
 	 */
 	public function stylesheet_provider(): array {
 		return array(
-			'nested link selector'                     => array(
+			'nested link selector'                        => array(
 				':root :where(.wp-block-post-author a:where(:not(.wp-element-button))) { color: #123456; }',
-				'.wp-block-post-author a:not(.wp-element-button){ color: #123456; }',
+				'.wp-block-post-author a:not(.wp-element-button):not(.button-link):not(.product-button-link){ color: #123456; }',
 			),
-			'layout exclusions'                        => array(
+			'layout exclusions'                           => array(
 				'.group > :where(:not(.alignleft):not(.alignright):not(.alignfull)) { max-width: 660px; }',
 				'.group > *:not(.alignleft):not(.alignright):not(.alignfull){ max-width: 660px; }',
 			),
-			'selector lists'                           => array(
+			'selector lists'                              => array(
 				'.scope :where(a, span) :where(.first, .second), .other { color: red; }',
 				'.scope a .first, .scope a .second, .scope span .first, .scope span .second, .other{ color: red; }',
 			),
-			'quoted selector and declaration values'   => array(
+			'quoted selector and declaration values'      => array(
 				'a[data-label=":where(a,b)"] :where(span) { content: ":where(a) { ; }"; }',
 				'a[data-label=":where(a,b)"] span{ content: ":where(a) { ; }"; }',
 			),
-			'nested function with quoted parentheses'  => array(
+			'nested function with quoted parentheses'     => array(
 				':where(a:not([data-label=")"])) { color: red; }',
 				'a:not([data-label=")"]){ color: red; }',
 			),
-			'at-rule condition'                        => array(
+			'at-rule condition'                           => array(
 				'@supports selector(:where(a)) { .scope :where(a) { color: red; } }',
 				'@supports selector(:where(a)) {.scope a{ color: red; } }',
 			),
-			'no functional selector'                   => array(
+			'no functional selector'                      => array(
 				'a { color: red; }',
 				'a { color: red; }',
 			),
-			'list inside negation remains unsupported' => array(
+			'list inside negation remains unsupported'    => array(
 				'a:not(:where(.first, .second)) { color: red; }',
 				'a:not(:where(.first, .second)){ color: red; }',
 			),
+			'combinator with no prefix'                   => array(
+				'.c :where(.a){color:red} :where(.a .b) .c{color:red}',
+				'.c .a{color:red}.a .b .c{color:red}',
+			),
+			'nested whole argument'                       => array(
+				'a:not(:where(.b)){color:red}',
+				'a:not(.b){color:red}',
+			),
+			'root without a space'                        => array(
+				':root:where(.a){color:red}',
+				':root.a{color:red}',
+			),
+			'rule after an import'                        => array(
+				'@import url(x.css);.p :where(.a){color:red}',
+				'@import url(x.css);.p .a{color:red}',
+			),
+			'comment before the rule'                     => array(
+				'/* don\'t */ :root :where(.a){color:red}',
+				'/* don\'t */ .a{color:red}',
+			),
+			'link rule skips email buttons'               => array(
+				'.wp-elements-1 a:where(:not(.wp-element-button)){color:red}',
+				'.wp-elements-1 a:not(.wp-element-button):not(.button-link):not(.product-button-link){color:red}',
+			),
+			'link rule without where skips email buttons' => array(
+				'.t a:not(.wp-element-button){color:red}',
+				'.t a:not(.wp-element-button):not(.button-link):not(.product-button-link){color:red}',
+			),
+			'button exclusion is added once'              => array(
+				'a:not(.wp-element-button):not(.button-link):not(.product-button-link){color:red}',
+				'a:not(.wp-element-button):not(.button-link):not(.product-button-link){color:red}',
+			),
 		);
+	}
+
+	/**
+	 * Test a stylesheet with a very long declaration, such as an embedded font, is still normalized.
+	 */
+	public function test_normalize_with_a_long_declaration(): void {
+		$font = '.a{src:url(data:font/woff2;base64,' . str_repeat( 'A', 1100000 ) . ');}';
+		$this->assertSame( $font . '.b .c{color:red}', Css_Selector_Normalizer::normalize( $font . '.b :where(.c){color:red}' ) );
 	}
 }

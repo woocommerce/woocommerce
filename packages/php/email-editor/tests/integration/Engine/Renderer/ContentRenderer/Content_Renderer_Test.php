@@ -794,6 +794,78 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test a link color set on a block does not reach the buttons inside it.
+	 */
+	public function testItKeepsBlockLinkColorsOffButtons(): void {
+		$theme_json_filter = static function ( \WP_Theme_JSON $theme ): \WP_Theme_JSON {
+			$theme->merge(
+				new \WP_Theme_JSON(
+					array(
+						'version' => 3,
+						'styles'  => array(
+							'blocks' => array(
+								'core/group' => array( 'elements' => array( 'link' => array( 'color' => array( 'text' => '#123456' ) ) ) ),
+							),
+						),
+					),
+					'custom'
+				)
+			);
+			return $theme;
+		};
+		add_filter( 'woocommerce_email_editor_theme_json', $theme_json_filter );
+
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+		$email_post        = $this->create_email_post( '<!-- wp:group --><div class="wp-block-group"><!-- wp:buttons --><div class="wp-block-buttons"><!-- wp:button --><div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="https://example.com">Buy</a></div><!-- /wp:button --></div><!-- /wp:buttons --></div><!-- /wp:group -->' );
+
+		// Register core/button with its email renderer, as testItAppliesASavedCaptionColorToAnImageCaption does for core/image.
+		$core_integration = $this->di_container->get( Core_Initializer::class );
+		$core_integration->initialize();
+		$registry       = \WP_Block_Type_Registry::get_instance();
+		$original_block = $registry->get_registered( 'core/button' );
+		$this->assertInstanceOf( \WP_Block_Type::class, $original_block );
+		$registry->unregister( 'core/button' );
+		register_block_type(
+			'core/button',
+			$core_integration->update_block_settings(
+				array(
+					'title'    => $original_block->title,
+					'name'     => $original_block->name,
+					'category' => $original_block->category,
+					'supports' => $original_block->supports ?? array(),
+				)
+			)
+		);
+
+		try {
+			$rendered = $this->renderer->render( $email_post, $template );
+		} finally {
+			$registry->unregister( 'core/button' );
+			$registry->register( $original_block );
+			remove_filter( 'woocommerce_email_editor_theme_json', $theme_json_filter );
+		}
+
+		$button_styles = (string) $this->getStylesValueForTag( $rendered, 'a' );
+		$this->assertStringContainsString( 'color: #fff', $button_styles );
+		$this->assertStringNotContainsString( '#123456', $button_styles );
+	}
+
+	/**
+	 * Create an email post with the given content.
+	 *
+	 * @param string $content Post content.
+	 */
+	private function create_email_post( string $content ): \WP_Post {
+		$email_post_id = $this->factory->post->create( array( 'post_content' => $content ) );
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( \WP_Post::class, $email_post );
+		return $email_post;
+	}
+
+	/**
 	 * Get the value of the style attribute for a given tag in the HTML.
 	 *
 	 * @param string $html HTML content.
