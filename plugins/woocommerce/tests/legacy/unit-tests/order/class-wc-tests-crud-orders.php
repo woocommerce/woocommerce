@@ -1511,6 +1511,43 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox payment_complete() adds no payment note when the order write fails.
+	 */
+	public function test_payment_complete_adds_no_payment_note_when_the_write_fails(): void {
+		$order = new WC_Order();
+		$order->save();
+
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), 'content' );
+		$this->assertNotContains( 'Payment complete.', $notes );
+	}
+
+	/**
+	 * @testdox A save after a failed payment_complete() fires no payment hook when the status changed in between.
+	 */
+	public function test_payment_complete_drops_its_hook_when_the_status_changes_after_a_failed_write(): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid = did_action( 'woocommerce_payment_complete' );
+
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+		$order->set_status( OrderStatus::FAILED );
+		$order->save();
+
+		$this->assertSame( 0, did_action( 'woocommerce_payment_complete' ) - $paid );
+		$this->assertSame( OrderStatus::FAILED, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
 	 * @testdox update_taxes() does not write the tax items when the order write fails.
 	 */
 	public function test_update_taxes_does_not_write_tax_items_when_the_write_fails(): void {
