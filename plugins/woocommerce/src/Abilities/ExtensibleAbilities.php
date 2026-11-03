@@ -591,7 +591,7 @@ class ExtensibleAbilities {
 				try {
 					$value = call_user_func( $args['get_callback'], $subject );
 				} catch ( \Throwable $e ) {
-					return self::field_callback_failed( $args, $e );
+					return self::field_callback_failed_error( $args, $e );
 				}
 				if ( null === $value ) {
 					continue;
@@ -601,7 +601,7 @@ class ExtensibleAbilities {
 					$valid = rest_sanitize_value_from_schema( $value, $args['output_schema'], $field );
 				}
 				if ( is_wp_error( $valid ) ) {
-					return self::field_output_invalid( $args, $valid );
+					return self::field_output_invalid_error( $args, $valid );
 				}
 				$extensions[ $namespace ][ $field ] = self::prepare_json_value( $valid, $args['output_schema'] );
 			}
@@ -757,7 +757,7 @@ class ExtensibleAbilities {
 	 * @param \WP_Error            $error Error of the schema check.
 	 * @return \WP_Error
 	 */
-	private static function field_output_invalid( array $args, \WP_Error $error ): \WP_Error {
+	private static function field_output_invalid_error( array $args, \WP_Error $error ): \WP_Error {
 		$message = sprintf(
 			/* translators: 1: Extension namespace. 2: Field name. 3: Resource, such as product. 4: What the field schema expected. */
 			__( 'The "%1$s" extension returned a value for the "%2$s" field of the %3$s that does not match the field schema: %4$s', 'woocommerce' ),
@@ -766,7 +766,7 @@ class ExtensibleAbilities {
 			$args['resource'],
 			$error->get_error_message()
 		);
-		wc_doing_it_wrong( __CLASS__ . '::register_field', $message, '11.3.0' );
+		wc_doing_it_wrong( __CLASS__ . '::register_field', $message, '11.4.0' );
 		return new \WP_Error(
 			'woocommerce_ability_field_output_invalid',
 			$message,
@@ -787,7 +787,7 @@ class ExtensibleAbilities {
 	 * @param \Throwable           $exception Exception that the get_callback threw.
 	 * @return \WP_Error
 	 */
-	private static function field_callback_failed( array $args, \Throwable $exception ): \WP_Error {
+	private static function field_callback_failed_error( array $args, \Throwable $exception ): \WP_Error {
 		$message = sprintf(
 			/* translators: 1: Extension namespace. 2: Field name. 3: Resource, such as product. */
 			__( 'The "%1$s" extension failed while reading the "%2$s" field of the %3$s.', 'woocommerce' ),
