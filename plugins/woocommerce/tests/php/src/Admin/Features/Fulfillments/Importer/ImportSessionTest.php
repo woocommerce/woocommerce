@@ -272,14 +272,10 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 		);
 		$this->assertGreaterThan( 0, $attachment_id );
 
-		try {
-			ImportSession::cleanup_abandoned_file( 73, 'ghost', $file, (int) $attachment_id );
+		ImportSession::cleanup_abandoned_file( 73, 'ghost', $file, (int) $attachment_id );
 
-			$this->assertFileDoesNotExist( $file );
-			$this->assertNotNull( get_post( $attachment_id ), 'An attachment for a different file must not be deleted' );
-		} finally {
-			wp_delete_attachment( (int) $attachment_id, true );
-		}
+		$this->assertFileDoesNotExist( $file );
+		$this->assertNotNull( get_post( $attachment_id ), 'An attachment for a different file must not be deleted' );
 	}
 
 	/**
