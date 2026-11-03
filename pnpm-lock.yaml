@@ -60,6 +60,9 @@ catalogs:
     eslint:
       specifier: ^10.0.0
       version: 10.7.0
+    jest:
+      specifier: 29.5.x
+      version: 29.5.0
     mini-css-extract-plugin:
       specifier: 2.9.x
       version: 2.9.4
@@ -347,7 +350,7 @@ importers:
         specifier: ^9.0.11
         version: 9.1.7
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       lint-staged:
         specifier: ^12.5.0
@@ -420,7 +423,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-cli:
         specifier: 29.5.x
@@ -697,7 +700,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-cli:
         specifier: 29.5.x
@@ -781,7 +784,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-cli:
         specifier: 29.5.x
@@ -845,7 +848,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-cli:
         specifier: 29.5.x
@@ -945,7 +948,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-cli:
         specifier: 29.5.x
@@ -1087,7 +1090,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-cli:
         specifier: 29.5.x
@@ -1172,7 +1175,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-cli:
         specifier: 29.5.x
@@ -1209,7 +1212,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-cli:
         specifier: 29.5.x
@@ -1264,7 +1267,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-cli:
         specifier: 29.5.x
@@ -1448,7 +1451,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-cli:
         specifier: 29.5.x
@@ -1603,7 +1606,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-cli:
         specifier: 29.5.x
@@ -1700,7 +1703,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-cli:
         specifier: 29.5.x
@@ -1749,7 +1752,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-cli:
         specifier: 29.5.x
@@ -1825,7 +1828,7 @@ importers:
         version: link:../eslint-plugin
       '@wordpress/core-data':
         specifier: 7.33.9
-        version: 7.33.9(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(date-fns@3.6.0)(esbuild@0.28.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
+        version: 7.33.9(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(date-fns@4.4.0)(esbuild@0.28.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
       '@wordpress/data':
         specifier: 10.33.1
         version: 10.33.1(@types/react@18.3.28)(react@18.3.1)
@@ -1900,7 +1903,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-cli:
         specifier: 29.5.x
@@ -1994,7 +1997,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-cli:
         specifier: 29.5.x
@@ -2055,7 +2058,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-cli:
         specifier: 29.5.x
@@ -2113,7 +2116,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-cli:
         specifier: 29.5.x
@@ -2207,7 +2210,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-cli:
         specifier: 29.5.x
@@ -2289,7 +2292,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-cli:
         specifier: 29.5.x
@@ -2338,7 +2341,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-cli:
         specifier: 29.5.x
@@ -2402,7 +2405,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-cli:
         specifier: 29.5.x
@@ -2463,7 +2466,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-cli:
         specifier: 29.5.x
@@ -2545,7 +2548,7 @@ importers:
         specifier: catalog:tooling
         version: 9.2.1(@babel/core@7.29.7)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
         specifier: 29.5.x
@@ -2654,7 +2657,7 @@ importers:
         specifier: ^4.7.9
         version: 4.7.10
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       playwright-ctrf-json-reporter:
         specifier: 0.0.27
@@ -2857,7 +2860,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
         specifier: 29.5.x
@@ -3290,7 +3293,7 @@ importers:
         specifier: 11.1.1
         version: 11.1.1
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
         specifier: 29.5.x
@@ -3807,7 +3810,7 @@ importers:
         specifier: 0.1.x
         version: 0.1.2
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-circus:
         specifier: 29.5.x
@@ -4016,7 +4019,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       ts-jest:
         specifier: 29.1.x
@@ -4171,7 +4174,7 @@ importers:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
       jest:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       replace:
         specifier: ^1.2.2
@@ -27957,6 +27960,74 @@ snapshots:
       - supports-color
       - vite
 
+  '@wordpress/block-editor@15.21.1(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(date-fns@4.4.0)(esbuild@0.28.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))':
+    dependencies:
+      '@react-spring/web': 9.7.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@types/react': 18.3.28
+      '@wordpress/a11y': 4.57.0
+      '@wordpress/base-styles': 10.2.0
+      '@wordpress/blob': 4.48.1
+      '@wordpress/block-serialization-default-parser': 5.48.1
+      '@wordpress/blocks': 15.21.1(@types/react-dom@18.3.7(@types/react@18.3.28))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@wordpress/commands': 1.48.1(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.28.2)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
+      '@wordpress/components': 35.0.1(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
+      '@wordpress/compose': 8.10.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@wordpress/data': 10.57.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@wordpress/dataviews': 16.0.1(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
+      '@wordpress/date': 5.57.0
+      '@wordpress/deprecated': 4.57.0
+      '@wordpress/dom': 4.57.0
+      '@wordpress/element': 8.8.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@wordpress/escape-html': 3.57.0
+      '@wordpress/global-styles-engine': 1.15.1(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@wordpress/hooks': 4.57.0
+      '@wordpress/html-entities': 4.57.0
+      '@wordpress/i18n': 6.30.0
+      '@wordpress/icons': 14.0.1(@types/react-dom@18.3.7(@types/react@18.3.28))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@wordpress/image-cropper': 1.12.1(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
+      '@wordpress/interactivity': 6.48.1
+      '@wordpress/is-shallow-equal': 5.57.0
+      '@wordpress/keyboard-shortcuts': 5.48.1(@types/react-dom@18.3.7(@types/react@18.3.28))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@wordpress/keycodes': 4.57.0(@types/react@18.3.28)
+      '@wordpress/notices': 5.48.1(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
+      '@wordpress/preferences': 4.57.0(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.28.2)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
+      '@wordpress/priority-queue': 3.57.0
+      '@wordpress/private-apis': 1.48.1
+      '@wordpress/rich-text': 7.57.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@wordpress/style-engine': 2.48.1
+      '@wordpress/token-list': 3.48.1
+      '@wordpress/ui': 0.15.1(@date-fns/tz@1.5.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(date-fns@4.4.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
+      '@wordpress/upload-media': 0.33.1(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(esbuild@0.28.2)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
+      '@wordpress/url': 4.48.1
+      '@wordpress/warning': 3.57.0
+      '@wordpress/wordcount': 4.48.1
+      change-case: 4.1.2
+      clsx: 2.1.1
+      colord: 2.9.4
+      deepmerge: 4.3.1
+      diff: 8.0.4
+      fast-deep-equal: 3.1.3
+      memize: 2.1.1
+      parsel-js: 1.2.2
+      postcss: 8.5.26
+      postcss-prefix-selector: 1.16.1(postcss@8.5.26)
+      postcss-urlrebase: 1.4.0(postcss@8.5.26)
+      react: 18.3.1
+      react-autosize-textarea: 7.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-dom: 18.3.1(react@18.3.1)
+      react-easy-crop: 5.5.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      remove-accents: 0.5.0
+    transitivePeerDependencies:
+      - '@date-fns/tz'
+      - '@emotion/is-prop-valid'
+      - '@types/react-dom'
+      - date-fns
+      - esbuild
+      - lightningcss
+      - stylelint
+      - supports-color
+      - vite
+
   '@wordpress/block-editor@15.21.1(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(date-fns@4.4.0)(esbuild@0.28.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@17.16.0(typescript@5.7.3))':
     dependencies:
       '@react-spring/web': 9.7.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -29973,6 +30044,43 @@ snapshots:
     dependencies:
       '@wordpress/api-fetch': 7.48.1
       '@wordpress/block-editor': 15.21.1(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(date-fns@4.4.0)(esbuild@0.27.7)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
+      '@wordpress/blocks': 15.21.1(@types/react-dom@18.3.7(@types/react@18.3.28))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@wordpress/compose': 7.45.0(@types/react@18.3.28)(react@18.3.1)
+      '@wordpress/data': 10.33.1(@types/react@18.3.28)(react@18.3.1)
+      '@wordpress/deprecated': 4.57.0
+      '@wordpress/element': 6.45.0
+      '@wordpress/html-entities': 4.57.0
+      '@wordpress/i18n': 6.30.0
+      '@wordpress/is-shallow-equal': 5.57.0
+      '@wordpress/private-apis': 1.48.1
+      '@wordpress/rich-text': 7.57.0(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@wordpress/sync': 1.48.1
+      '@wordpress/undo-manager': 1.57.0
+      '@wordpress/url': 4.48.1
+      '@wordpress/warning': 3.57.0
+      change-case: 4.1.2
+      equivalent-key-map: 0.2.2
+      fast-deep-equal: 3.1.3
+      memize: 2.1.1
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      uuid: 9.0.1
+    transitivePeerDependencies:
+      - '@date-fns/tz'
+      - '@emotion/is-prop-valid'
+      - '@types/react'
+      - '@types/react-dom'
+      - date-fns
+      - esbuild
+      - lightningcss
+      - stylelint
+      - supports-color
+      - vite
+
+  '@wordpress/core-data@7.33.9(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(date-fns@4.4.0)(esbuild@0.28.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))':
+    dependencies:
+      '@wordpress/api-fetch': 7.48.1
+      '@wordpress/block-editor': 15.21.1(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(date-fns@4.4.0)(esbuild@0.28.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
       '@wordpress/blocks': 15.21.1(@types/react-dom@18.3.7(@types/react@18.3.28))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@wordpress/compose': 7.45.0(@types/react@18.3.28)(react@18.3.1)
       '@wordpress/data': 10.33.1(@types/react@18.3.28)(react@18.3.1)

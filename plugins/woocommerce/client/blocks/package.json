@@ -182,7 +182,7 @@
 		"globals": "^16.5.0",
 		"handlebars": "^4.7.8",
 		"ignore-loader": "0.1.x",
-		"jest": "29.5.x",
+		"jest": "catalog:tooling",
 		"jest-circus": "29.5.x",
 		"jest-fixed-jsdom": "^0.0.10",
 		"json2md": "1.12.0",

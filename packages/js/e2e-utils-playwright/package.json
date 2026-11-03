@@ -79,7 +79,7 @@
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"eslint": "catalog:tooling",
-		"jest": "29.5.x",
+		"jest": "catalog:tooling",
 		"jest-cli": "29.5.x",
 		"ts-jest": "29.1.x",
 		"typescript": "catalog:tooling"

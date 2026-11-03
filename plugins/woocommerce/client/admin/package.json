@@ -186,7 +186,7 @@
 		"eslint-import-resolver-typescript": "^4.4.5",
 		"eslint-import-resolver-webpack": "^0.13.11",
 		"fs-extra": "11.1.1",
-		"jest": "29.5.x",
+		"jest": "catalog:tooling",
 		"jest-environment-jsdom": "29.5.x",
 		"jest-environment-node": "29.5.x",
 		"md5": "^2.3.0",

@@ -127,6 +127,7 @@
 				"copy-webpack-plugin",
 				"css-loader",
 				"eslint",
+				"jest",
 				"mini-css-extract-plugin",
 				"postcss",
 				"postcss-loader",
@@ -485,7 +486,6 @@
 			"dependencies": [
 				"@jest/test-sequencer",
 				"@types/jest",
-				"jest",
 				"jest-cli",
 				"jest-circus",
 				"jest-each",
@@ -504,7 +504,6 @@
 			"dependencies": [
 				"@jest/test-sequencer",
 				"@types/jest",
-				"jest",
 				"jest-cli",
 				"jest-circus",
 				"jest-each",

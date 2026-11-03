@@ -41,7 +41,7 @@
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/dependency-extraction-webpack-plugin": "next",
 		"babel-loader": "catalog:tooling",
-		"jest": "29.5.x",
+		"jest": "catalog:tooling",
 		"jest-environment-jsdom": "29.5.x",
 		"typescript": "catalog:tooling",
 		"webpack": "catalog:tooling",

@@ -56,7 +56,7 @@
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/build": "catalog:tooling",
 		"eslint": "catalog:tooling",
-		"jest": "29.5.x",
+		"jest": "catalog:tooling",
 		"jest-environment-jsdom": "29.5.x",
 		"ts-jest": "29.1.x",
 		"typescript": "catalog:tooling"

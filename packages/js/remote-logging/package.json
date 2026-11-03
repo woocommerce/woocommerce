@@ -80,7 +80,7 @@
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@wordpress/jest-console": "^5.4.0",
 		"eslint": "catalog:tooling",
-		"jest": "29.5.x",
+		"jest": "catalog:tooling",
 		"jest-cli": "29.5.x",
 		"jest-environment-jsdom": "29.5.x",
 		"rimraf": "catalog:tooling",
