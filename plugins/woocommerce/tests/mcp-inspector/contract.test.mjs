@@ -173,9 +173,15 @@ describe(
 				! info.input_schema?.required?.length
 		);
 
-		for ( const { name } of readonly ) {
-			// The adapter requires `parameters`, so `{}` is the emptiest input an MCP client can send.
+		for ( const { name, input_schema: inputSchema } of readonly ) {
+			// The adapter requires `parameters`, so `{}` is the emptiest input an MCP client can send. A REST GET can
+			// send no input at all, which only the root `default` turns into valid input, so the schema has to declare one.
 			test( name, async () => {
+				assert.ok(
+					Object.hasOwn( inputSchema, 'default' ),
+					'Declare a `default` on the root input schema, so a call without any input validates.'
+				);
+
 				const { isError, payload } = await call( name, {} );
 
 				assert.equal( isError, false, JSON.stringify( payload ) );
