@@ -54,10 +54,10 @@ class Separator extends Abstract_Block_Renderer {
 		return Table_Wrapper_Helper::render_table_wrapper(
 			'&nbsp;',
 			array(
-				'class' => Html2Text::HR_CLASS,
-				'align' => 'center',
-				'width' => $is_wide ? '100%' : '100',
-				'style' => 'width:' . ( $is_wide ? '100%' : '100px' ) . ';border-collapse:collapse;',
+				Html2Text::HR_ATTRIBUTE => '1',
+				'align'                 => 'center',
+				'width'                 => $is_wide ? '100%' : '100',
+				'style'                 => 'width:' . ( $is_wide ? '100%' : '100px' ) . ';border-collapse:collapse;',
 			),
 			array(
 				'style' => "border-top:2px solid {$color};font-size:0;line-height:0;height:0;mso-line-height-rule:exactly;",

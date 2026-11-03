@@ -255,6 +255,16 @@ class Html2Text_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * A block whose custom class matches the separator marker keeps its text.
+	 */
+	public function test_separator_marker_class_keeps_content(): void {
+		$result = Html2Text::convert( '<div class="email-block-separator"><p>Hello</p></div>' );
+
+		$this->assertStringContainsString( 'Hello', $result );
+		$this->assertStringNotContainsString( '-----', $result );
+	}
+
+	/**
 	 * Test default options
 	 */
 	public function test_default_options(): void {
