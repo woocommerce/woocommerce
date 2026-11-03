@@ -28,6 +28,12 @@ class CartPricingContext {
 	private const CROSS_SELLS_TEMPLATE = 'cart/cross-sells.php';
 
 	/**
+	 * Product Collection block name and collection of the block Cart cross-sells.
+	 */
+	private const PRODUCT_COLLECTION_BLOCK = 'woocommerce/product-collection';
+	private const CROSS_SELLS_COLLECTION   = 'woocommerce/product-collection/cross-sells';
+
+	/**
 	 * Stack of Store API and hydrated route dispatches, with whether each is a cart or checkout route and the calculation depth when it started.
 	 *
 	 * @var array<int, array{request: object, is_cart_or_checkout: bool, calculation_depth: int}>
@@ -65,6 +71,8 @@ class CartPricingContext {
 		add_action( 'woocommerce_before_calculate_totals', array( $this, 'handle_woocommerce_before_calculate_totals' ), PHP_INT_MIN, 0 );
 		add_action( 'woocommerce_after_calculate_totals', array( $this, 'handle_woocommerce_after_calculate_totals' ), PHP_INT_MAX, 0 );
 		// The template part hooks fire around the mini-cart and cross-sells even when a theme override drops their own hooks.
+		add_filter( 'pre_render_block', array( $this, 'handle_pre_render_block' ), PHP_INT_MAX, 2 );
+		add_filter( 'render_block_' . self::PRODUCT_COLLECTION_BLOCK, array( $this, 'handle_render_block' ), PHP_INT_MIN, 2 );
 		add_action( 'woocommerce_before_template_part', array( $this, 'handle_woocommerce_before_template_part' ), PHP_INT_MIN, 1 );
 		add_action( 'woocommerce_after_template_part', array( $this, 'handle_woocommerce_after_template_part' ), PHP_INT_MAX, 1 );
 	}
@@ -163,6 +171,42 @@ class CartPricingContext {
 		} elseif ( self::CROSS_SELLS_TEMPLATE === $template_name ) {
 			$this->end_catalog_pricing();
 		}
+	}
+
+	/**
+	 * Start catalog pricing when the block Cart cross-sells begin to render.
+	 *
+	 * Runs last, so a filter that short-circuits the render, which also skips the matching end, is seen first.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $pre_render   Short-circuit content, or null to render normally.
+	 * @param mixed $parsed_block Parsed block.
+	 * @return mixed The unchanged short-circuit content.
+	 */
+	public function handle_pre_render_block( $pre_render, $parsed_block = null ) {
+		if ( null === $pre_render && self::is_cross_sells_collection_block( $parsed_block ) ) {
+			$this->begin_catalog_pricing();
+		}
+
+		return $pre_render;
+	}
+
+	/**
+	 * End catalog pricing once the block Cart cross-sells have rendered.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $block_content Rendered block content.
+	 * @param mixed $parsed_block  Parsed block.
+	 * @return mixed The unchanged block content.
+	 */
+	public function handle_render_block( $block_content, $parsed_block = null ) {
+		if ( self::is_cross_sells_collection_block( $parsed_block ) ) {
+			$this->end_catalog_pricing();
+		}
+
+		return $block_content;
 	}
 
 	/**
@@ -286,6 +330,18 @@ class CartPricingContext {
 	 */
 	private function end_catalog_pricing(): void {
 		array_pop( $this->catalog_pricing_scopes );
+	}
+
+	/**
+	 * Determine whether a parsed block is the Product Collection of the block Cart cross-sells.
+	 *
+	 * @param mixed $parsed_block Parsed block.
+	 * @return bool True for the cross-sells collection.
+	 */
+	private static function is_cross_sells_collection_block( $parsed_block ): bool {
+		return is_array( $parsed_block )
+			&& self::PRODUCT_COLLECTION_BLOCK === ( $parsed_block['blockName'] ?? null )
+			&& self::CROSS_SELLS_COLLECTION === ( $parsed_block['attrs']['collection'] ?? null );
 	}
 
 	/**

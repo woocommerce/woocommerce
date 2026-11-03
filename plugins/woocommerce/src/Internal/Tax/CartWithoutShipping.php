@@ -58,12 +58,12 @@ class CartWithoutShipping {
 			return false;
 		}
 
-		if ( ! $this->cart_pricing_context->is_active() ) {
+		$cart = WC()->cart;
+		if ( ! $cart instanceof \WC_Cart || $cart->get_customer() !== $customer ) {
 			return false;
 		}
 
-		$cart = WC()->cart;
-		if ( ! $cart instanceof \WC_Cart || $cart->get_customer() !== $customer ) {
+		if ( ! $this->cart_pricing_context->is_active() ) {
 			return false;
 		}
 
@@ -81,7 +81,7 @@ class CartWithoutShipping {
 			/**
 			 * Filters whether shipping-based tax uses the billing address for a non-empty cart with nothing to ship.
 			 *
-			 * Return false to keep using the shipping address. The filter only fires when the cart qualifies,
+			 * Return anything other than true to keep using the shipping address. The filter only fires when the cart qualifies,
 			 * so it cannot turn the fallback on for other carts. It may fire multiple times per request.
 			 *
 			 * @since 11.4.0

@@ -197,6 +197,44 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Prices block cart cross-sells using the shipping address and other product collections using the billing address.
+	 *
+	 * @testWith ["woocommerce/product-collection/cross-sells", false]
+	 *           ["woocommerce/product-collection/upsells", true]
+	 *
+	 * @param string $collection      Product Collection collection.
+	 * @param bool   $expected_billing Whether the billing address is expected while the collection renders.
+	 */
+	public function test_block_cart_cross_sells_use_catalog_address( string $collection, bool $expected_billing ): void {
+		$this->add_product_to_cart( true );
+		add_filter( 'woocommerce_is_cart', '__return_true' );
+
+		$during_render = null;
+		add_filter(
+			'render_block_context',
+			function ( $context ) use ( &$during_render ) {
+				$during_render = $this->customer->get_taxable_address();
+				return $context;
+			}
+		);
+
+		render_block(
+			array(
+				'blockName'    => 'woocommerce/product-collection',
+				'attrs'        => array( 'collection' => $collection ),
+				'innerBlocks'  => array(),
+				'innerHTML'    => '',
+				'innerContent' => array(),
+			)
+		);
+
+		$billing  = array( 'GB', 'LND', 'SW1A 1AA', 'London' );
+		$shipping = array( 'US', 'CA', '90210', 'Beverly Hills' );
+		$this->assertSame( $expected_billing ? $billing : $shipping, $during_render, 'The collection should be priced using the expected address.' );
+		$this->assertSame( $billing, $this->customer->get_taxable_address(), 'The cart should use the billing address again once the collection is rendered.' );
+	}
+
+	/**
 	 * @testdox Prices Store API cross-sells using shipping tax while virtual cart items use billing tax.
 	 */
 	public function test_store_api_cross_sell_uses_catalog_tax(): void {
