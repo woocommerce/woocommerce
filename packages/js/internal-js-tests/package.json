@@ -78,7 +78,7 @@
 		"eslint": "catalog:tooling",
 		"jest": "catalog:tooling",
 		"jest-cli": "catalog:tooling",
-		"jest-environment-jsdom": "29.5.x",
+		"jest-environment-jsdom": "catalog:tooling",
 		"lib0": "0.2.x",
 		"react": "18.3.x",
 		"react-dom": "18.3.x",

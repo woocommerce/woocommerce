@@ -54,7 +54,7 @@
 		"stylelint": "catalog:tooling",
 		"jest": "catalog:tooling",
 		"jest-cli": "catalog:tooling",
-		"jest-environment-jsdom": "29.5.x",
+		"jest-environment-jsdom": "catalog:tooling",
 		"react": "18.3.x",
 		"react-dom": "18.3.x",
 		"rimraf": "catalog:tooling",

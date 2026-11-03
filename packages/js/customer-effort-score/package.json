@@ -109,7 +109,7 @@
 		"stylelint": "catalog:tooling",
 		"jest": "catalog:tooling",
 		"jest-cli": "catalog:tooling",
-		"jest-environment-jsdom": "29.5.x",
+		"jest-environment-jsdom": "catalog:tooling",
 		"postcss": "catalog:tooling",
 		"postcss-loader": "catalog:tooling",
 		"react": "18.3.x",

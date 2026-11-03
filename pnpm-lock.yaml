@@ -66,6 +66,9 @@ catalogs:
     jest-cli:
       specifier: 29.5.x
       version: 29.5.0
+    jest-environment-jsdom:
+      specifier: 29.5.x
+      version: 29.5.0
     mini-css-extract-plugin:
       specifier: 2.9.x
       version: 2.9.4
@@ -709,7 +712,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0
       postcss:
         specifier: catalog:tooling
@@ -793,7 +796,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0
       rimraf:
         specifier: catalog:tooling
@@ -857,7 +860,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0
       rimraf:
         specifier: catalog:tooling
@@ -957,7 +960,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0
       postcss:
         specifier: catalog:tooling
@@ -1099,7 +1102,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0
       react:
         specifier: 18.3.x
@@ -1184,7 +1187,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0
       rimraf:
         specifier: catalog:tooling
@@ -1460,7 +1463,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0
       prettier:
         specifier: catalog:tooling
@@ -1615,7 +1618,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0
       postcss:
         specifier: catalog:tooling
@@ -1712,7 +1715,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0
       rimraf:
         specifier: catalog:tooling
@@ -1761,7 +1764,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0
       rimraf:
         specifier: catalog:tooling
@@ -1912,7 +1915,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0
       lib0:
         specifier: 0.2.x
@@ -2006,7 +2009,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0
       react:
         specifier: 18.3.x
@@ -2125,7 +2128,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0
       rimraf:
         specifier: catalog:tooling
@@ -2219,7 +2222,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0
       postcss:
         specifier: catalog:tooling
@@ -2301,7 +2304,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0
       rimraf:
         specifier: catalog:tooling
@@ -2350,7 +2353,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0
       rimraf:
         specifier: catalog:tooling
@@ -2414,7 +2417,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0
       react:
         specifier: 18.3.x
@@ -2475,7 +2478,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0
       rimraf:
         specifier: catalog:tooling
@@ -2554,7 +2557,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0
       typescript:
         specifier: catalog:tooling
@@ -2866,7 +2869,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0
       ts-jest:
         specifier: 29.1.x
@@ -3299,7 +3302,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-environment-jsdom:
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0
       jest-environment-node:
         specifier: 29.5.x

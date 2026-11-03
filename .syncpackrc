@@ -129,6 +129,7 @@
 				"eslint",
 				"jest",
 				"jest-cli",
+				"jest-environment-jsdom",
 				"mini-css-extract-plugin",
 				"postcss",
 				"postcss-loader",
@@ -489,7 +490,6 @@
 				"@types/jest",
 				"jest-circus",
 				"jest-each",
-				"jest-environment-jsdom",
 				"jest-environment-node",
 				"babel-jest"
 			],
@@ -506,7 +506,6 @@
 				"@types/jest",
 				"jest-circus",
 				"jest-each",
-				"jest-environment-jsdom",
 				"jest-environment-node",
 				"babel-jest"
 			],

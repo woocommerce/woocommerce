@@ -57,7 +57,7 @@
 		"@wordpress/build": "catalog:tooling",
 		"eslint": "catalog:tooling",
 		"jest": "catalog:tooling",
-		"jest-environment-jsdom": "29.5.x",
+		"jest-environment-jsdom": "catalog:tooling",
 		"ts-jest": "29.1.x",
 		"typescript": "catalog:tooling"
 	},
