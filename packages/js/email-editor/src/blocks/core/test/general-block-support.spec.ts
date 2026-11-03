@@ -18,7 +18,7 @@ jest.mock(
 	() => ( callback: () => void ) => callback()
 );
 
-const BLOCKS = [ 'core/separator', 'test/other' ];
+const BLOCKS = [ 'core/separator', 'core/social-links', 'test/other' ];
 
 function styleNames( blockName: string ): string[] {
 	return select( 'core/blocks' )
@@ -30,6 +30,7 @@ describe( 'removeBlockStylesFromAllBlocks', () => {
 	beforeEach( () => {
 		BLOCKS.forEach( ( name ) => {
 			registerBlockType( name, {
+				apiVersion: 3,
 				title: name,
 				category: 'design',
 				edit: () => null,
@@ -38,6 +39,12 @@ describe( 'removeBlockStylesFromAllBlocks', () => {
 		} );
 		[ 'default', 'wide', 'dots', 'theme-fancy' ].forEach( ( style ) =>
 			registerBlockStyle( 'core/separator', {
+				name: style,
+				label: style,
+			} )
+		);
+		[ 'default', 'pill-shape', 'theme-fancy' ].forEach( ( style ) =>
+			registerBlockStyle( 'core/social-links', {
 				name: style,
 				label: style,
 			} )
@@ -56,6 +63,16 @@ describe( 'removeBlockStylesFromAllBlocks', () => {
 			'default',
 			'wide',
 			'dots',
+		] );
+	} );
+
+	it( 'keeps every style of a block that supports them all', () => {
+		removeBlockStylesFromAllBlocks();
+
+		expect( styleNames( 'core/social-links' ) ).toEqual( [
+			'default',
+			'pill-shape',
+			'theme-fancy',
 		] );
 	} );
 
