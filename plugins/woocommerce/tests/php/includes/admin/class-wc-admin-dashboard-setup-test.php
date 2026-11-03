@@ -35,7 +35,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 		$this->default_country_option_existed = $missing_option !== $this->default_country_option_value;
 
 		parent::setUp();
-		add_filter( 'pre_http_request', array( $this, 'mock_dashboard_http_responses' ), 10, 3 );
+		$this->http_responder = array( $this, 'mock_dashboard_http_responses' );
 
 		// Set default country to non-US so that 'payments' task gets added but 'woocommerce-payments' doesn't,
 		// by default it won't be considered completed but we can manually change that as needed.
@@ -517,15 +517,11 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 	/**
 	 * Keep dashboard incentive requests local while retaining real response parsing.
 	 *
-	 * @param mixed  $preempt Existing HTTP preemption.
 	 * @param array  $request HTTP request arguments.
 	 * @param string $url HTTP request URL.
-	 * @return mixed Existing preemption, fixture response, or false for another request.
+	 * @return array|false Fixture response, or false for another request.
 	 */
-	public function mock_dashboard_http_responses( $preempt, $request, $url ) {
-		if ( false !== $preempt ) {
-			return $preempt;
-		}
+	protected function mock_dashboard_http_responses( $request, $url ) {
 		if ( 'GET' !== ( $request['method'] ?? 'GET' ) ) {
 			return false;
 		}

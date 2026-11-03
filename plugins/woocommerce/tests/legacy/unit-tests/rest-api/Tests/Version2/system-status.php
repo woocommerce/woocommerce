@@ -49,7 +49,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		add_filter( 'pre_http_request', array( $this, 'mock_status_http_responses' ), 10, 3 );
+		$this->http_responder = array( $this, 'mock_status_http_responses' );
 	}
 
 	/**
@@ -425,15 +425,11 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	/**
 	 * Supply captured public responses while retaining real status report parsing.
 	 *
-	 * @param mixed  $preempt Existing HTTP preemption.
 	 * @param array  $request HTTP request arguments.
 	 * @param string $url HTTP request URL.
-	 * @return mixed Existing preemption, fixture response, or false for another request.
+	 * @return array|false Fixture response, or false for another request.
 	 */
-	public function mock_status_http_responses( $preempt, $request, $url ) {
-		if ( false !== $preempt ) {
-			return $preempt;
-		}
+	protected function mock_status_http_responses( $request, $url ) {
 		$host   = wp_parse_url( $url, PHP_URL_HOST );
 		$path   = wp_parse_url( $url, PHP_URL_PATH );
 		$method = $request['method'] ?? 'GET';

@@ -2314,21 +2314,16 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 * Keep fixture transient writes from contacting the public update service.
 	 */
 	private function mock_plugin_row_update_check(): void {
-		add_filter(
-			'pre_http_request',
-			static function ( $preempt, $args, $url ) {
-				if ( false !== $preempt || 'POST' !== ( $args['method'] ?? '' ) || 'https://woocommerce.com/wp-json/helper/1.0/update-check-public' !== $url ) {
-					return $preempt;
-				}
+		$this->http_responder = static function ( $request, $url ) {
+			if ( 'POST' !== ( $request['method'] ?? '' ) || 'https://woocommerce.com/wp-json/helper/1.0/update-check-public' !== $url ) {
+				return false;
+			}
 
-				return array(
-					'response' => array( 'code' => 200 ),
-					'body'     => wp_json_encode( array() ),
-				);
-			},
-			10,
-			3
-		);
+			return array(
+				'response' => array( 'code' => 200 ),
+				'body'     => wp_json_encode( array() ),
+			);
+		};
 	}
 
 	/**

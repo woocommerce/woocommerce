@@ -25,7 +25,8 @@ class WC_Admin_Tests_API_Onboarding_Product_Types extends WC_REST_Unit_Test_Case
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		add_filter( 'pre_http_request', array( $this, 'mock_product_catalog_response' ), 10, 3 );
+		$this->http_responder = array( $this, 'mock_product_catalog_response' );
+
 		$this->user = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
@@ -88,15 +89,11 @@ class WC_Admin_Tests_API_Onboarding_Product_Types extends WC_REST_Unit_Test_Case
 	/**
 	 * Supply captured product fields for the real onboarding response parser.
 	 *
-	 * @param mixed  $preempt Existing HTTP preemption.
 	 * @param array  $request HTTP request arguments.
 	 * @param string $url HTTP request URL.
-	 * @return mixed Existing preemption, fixture response, or false for another request.
+	 * @return array|false Fixture response, or false for another request.
 	 */
-	public function mock_product_catalog_response( $preempt, $request, $url ) {
-		if ( false !== $preempt ) {
-			return $preempt;
-		}
+	protected function mock_product_catalog_response( $request, $url ) {
 		if ( 'woocommerce.com' !== wp_parse_url( $url, PHP_URL_HOST )
 			|| '/wp-json/wccom-extensions/1.0/search' !== wp_parse_url( $url, PHP_URL_PATH )
 			|| 'GET' !== ( $request['method'] ?? 'GET' ) ) {
