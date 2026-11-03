@@ -82,7 +82,7 @@
 	"devDependencies": {
 		"@babel/core": "catalog:tooling",
 		"@testing-library/react": "^16.x.x",
-		"@types/jest": "29.5.x",
+		"@types/jest": "catalog:tooling",
 		"@types/react": "18.3.x",
 		"@types/string-similarity": "4.0.0",
 		"@woocommerce/eslint-config": "workspace:*",

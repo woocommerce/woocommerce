@@ -118,6 +118,7 @@
 				"@babel/preset-react",
 				"@babel/preset-typescript",
 				"@babel/runtime",
+				"@types/jest",
 				"@wordpress/env",
 				"@wordpress/postcss-plugins-preset",
 				"@wordpress/prettier-config",
@@ -489,7 +490,6 @@
 			"label": "Testing related dependencies: React 18",
 			"dependencies": [
 				"@jest/test-sequencer",
-				"@types/jest",
 				"jest-each",
 				"babel-jest"
 			],
@@ -503,7 +503,6 @@
 			"label": "Testing related dependencies: React 17",
 			"dependencies": [
 				"@jest/test-sequencer",
-				"@types/jest",
 				"jest-each",
 				"babel-jest"
 			],

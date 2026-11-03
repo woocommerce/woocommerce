@@ -95,7 +95,7 @@
 		"@babel/runtime": "catalog:tooling",
 		"@testing-library/dom": "^10.4.x",
 		"@testing-library/react": "^16.x.x",
-		"@types/jest": "29.5.x",
+		"@types/jest": "catalog:tooling",
 		"@types/lodash": "^4.14.202",
 		"@types/md5": "^2.3.5",
 		"@types/node": "^24.1.0",

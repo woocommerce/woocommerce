@@ -73,7 +73,7 @@
 	"devDependencies": {
 		"@babel/core": "catalog:tooling",
 		"@babel/runtime": "catalog:tooling",
-		"@types/jest": "29.5.x",
+		"@types/jest": "catalog:tooling",
 		"@types/lodash": "^4.14.202",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",

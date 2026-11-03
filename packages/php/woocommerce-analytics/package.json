@@ -36,7 +36,7 @@
 		"@babel/preset-env": "catalog:tooling",
 		"@babel/preset-typescript": "catalog:tooling",
 		"@jest/globals": "29.5.x",
-		"@types/jest": "29.5.x",
+		"@types/jest": "catalog:tooling",
 		"@types/jquery": "3.5.33",
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/dependency-extraction-webpack-plugin": "next",

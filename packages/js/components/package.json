@@ -160,7 +160,7 @@
 		"@testing-library/react": "^16.x.x",
 		"@testing-library/user-event": "13.5.0",
 		"@types/canvas-confetti": "^1.6.4",
-		"@types/jest": "29.5.x",
+		"@types/jest": "catalog:tooling",
 		"@types/lodash": "^4.14.202",
 		"@types/prop-types": "^15.7.11",
 		"@types/testing-library__jest-dom": "^5.14.9",

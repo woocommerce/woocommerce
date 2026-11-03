@@ -47,7 +47,7 @@
 		"react-dom": "18.3.x"
 	},
 	"devDependencies": {
-		"@types/jest": "29.5.x",
+		"@types/jest": "catalog:tooling",
 		"@types/react": "18.3.x",
 		"@typescript-eslint/eslint-plugin": "^8.63.0",
 		"@woocommerce/eslint-config": "workspace:*",
