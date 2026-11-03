@@ -66,7 +66,6 @@ export const DEFAULT_QUERY: ProductCollectionQuery = {
 		categories: true,
 		tags: true,
 	},
-	archivePerPage: undefined,
 };
 
 export const DEFAULT_ATTRIBUTES: Pick<

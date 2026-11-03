@@ -48,7 +48,7 @@ import LinkedProductControl from './linked-product-control';
 import WidthOptionsControl from './width-options-control';
 import RelatedByControl from './related-by-control';
 import ProductsPerPageControl from './products-per-page-control';
-import ArchiveProductsPerPageControl from './archive-products-per-page-control';
+import DefaultQueryProductsPerPageControl from './default-query-products-per-page-control';
 import OffsetControl from './offset-control';
 import MaxPagesToShowControl from './max-pages-to-show-control';
 
@@ -104,12 +104,8 @@ const ProductCollectionInspectorControls = (
 	const showProductsPerPageControl =
 		showCustomQueryControls &&
 		shouldShowFilter( CoreFilterNames.PRODUCTS_PER_PAGE );
-	// With the "Default" query type on an archive template the page size is
-	// the template's to set; a carousel has no pages.
-	const showArchiveProductsPerPageControl =
-		inherit &&
-		isArchiveTemplate &&
-		! isCarouselLayout &&
+	const showDefaultProductsPerPageControl =
+		showDefaultOrderControl &&
 		shouldShowFilter( CoreFilterNames.PRODUCTS_PER_PAGE );
 	const showOnSaleControl = shouldShowFilter( CoreFilterNames.ON_SALE );
 	const showStockStatusControl = shouldShowFilter(
@@ -215,6 +211,11 @@ const ProductCollectionInspectorControls = (
 						trackInteraction={ trackInteraction }
 					/>
 				) }
+				{ showDefaultProductsPerPageControl && (
+					<DefaultQueryProductsPerPageControl
+						trackInteraction={ trackInteraction }
+					/>
+				) }
 				{ ! isEmailEditor && (
 					<LayoutOptionsControl { ...displayControlProps } />
 				) }
@@ -226,9 +227,6 @@ const ProductCollectionInspectorControls = (
 						{ ...queryControlProps }
 						carouselVariant={ isCarouselLayout }
 					/>
-				) }
-				{ showArchiveProductsPerPageControl && (
-					<ArchiveProductsPerPageControl { ...queryControlProps } />
 				) }
 				{ showColumnsControl && (
 					<ColumnsControl

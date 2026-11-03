@@ -218,7 +218,6 @@ const ProductTemplateEdit = (
 				inherit,
 				taxQuery,
 				pages,
-				archivePerPage,
 				...restQueryArgs
 			},
 			queryContext = [ { page: 1 } ],
@@ -330,17 +329,20 @@ const ProductTemplateEdit = (
 						}
 					}
 				}
-				// An archive template may size its own pages; otherwise the store default applies.
-				query.per_page = archivePerPage || loopShopPerPage;
-
 				const settings = getEditedEntityRecord(
 					'root',
 					'site',
 					undefined
-				) as unknown as Record< string, string >;
+				) as unknown as Record< string, string | number >;
+
+				query.per_page = isNumber(
+					settings.woocommerce_catalog_products_per_page
+				)
+					? settings.woocommerce_catalog_products_per_page
+					: loopShopPerPage;
 
 				const orderProperties = getOrderPropertiesForDefaultQuery(
-					settings.woocommerce_default_catalog_orderby
+					settings.woocommerce_default_catalog_orderby as string
 				);
 				query.orderby = orderProperties.orderby;
 				query.order = orderProperties.order;
@@ -385,7 +387,6 @@ const ProductTemplateEdit = (
 			location,
 			productCollectionQueryContext,
 			loopShopPerPage,
-			archivePerPage,
 			__privateProductCollectionPreviewState,
 		]
 	);
