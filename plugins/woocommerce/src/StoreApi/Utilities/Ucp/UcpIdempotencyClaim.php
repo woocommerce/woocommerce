@@ -49,7 +49,7 @@ final class UcpIdempotencyClaim {
 		/**
 		 * Filters whether UCP idempotency handling runs at all.
 		 *
-		 * @since 11.3.0
+		 * @since 11.4.0
 		 *
 		 * @param bool $enabled Whether the `Idempotency-Key` header is honoured. Default true.
 		 */
@@ -64,7 +64,7 @@ final class UcpIdempotencyClaim {
 		 * required on every mutating cart operation: a missing or malformed key is refused
 		 * at 400. False honours a key when one is sent and lets a keyless write through.
 		 *
-		 * @since 11.3.0
+		 * @since 11.4.0
 		 *
 		 * @param bool $strict Whether a key is required. Default true.
 		 */

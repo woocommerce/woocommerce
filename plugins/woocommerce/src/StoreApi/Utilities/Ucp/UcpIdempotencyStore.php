@@ -218,7 +218,7 @@ class UcpIdempotencyStore {
 		 * since an agent retries within seconds and a longer window would keep a shopper's basket
 		 * on disk after anything could replay it. Raise it for a client that retries more slowly.
 		 *
-		 * @since 11.3.0
+		 * @since 11.4.0
 		 *
 		 * @param int $seconds Retention window. Default one hour.
 		 */
