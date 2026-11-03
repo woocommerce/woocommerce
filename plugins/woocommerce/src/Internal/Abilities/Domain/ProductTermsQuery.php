@@ -96,8 +96,11 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 			array_intersect_key( $input, array_flip( array( 'taxonomy', 'include', 'exclude', 'search', 'slug', 'parent', 'hide_empty', 'orderby', 'order' ) ) )
 		);
 		$args['hide_empty'] = wp_validate_boolean( $input['hide_empty'] ?? false );
-		$args['number']     = $per_page;
-		$args['offset']     = $input['offset'] ?? ( $page - 1 ) * $per_page;
+		if ( isset( $input['slug'] ) ) {
+			$args['slug'] = wp_parse_slug_list( $input['slug'] );
+		}
+		$args['number'] = $per_page;
+		$args['offset'] = $input['offset'] ?? ( $page - 1 ) * $per_page;
 		if ( ! empty( $input['product'] ) ) {
 			$args['object_ids'] = array( $input['product'] );
 		}
@@ -215,8 +218,8 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 				),
 				'search'     => array( 'type' => 'string' ),
 				'slug'       => array(
-					'description' => __( 'Limit results to these slugs. An empty string or list applies no slug filter.', 'woocommerce' ),
-					'type'        => array( 'string', 'array' ),
+					'description' => __( 'Limit results to these slugs. Send one slug as a list of one. An empty list applies no slug filter.', 'woocommerce' ),
+					'type'        => 'array',
 					'items'       => array( 'type' => 'string' ),
 				),
 				'parent'     => array(

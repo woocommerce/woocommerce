@@ -13,6 +13,17 @@ use WP_Error;
 class PluginsHelperTest extends WC_Unit_Test_Case {
 
 	/**
+	 * Prevent unrelated update checks after the real upgrader runs.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		remove_action( 'upgrader_process_complete', 'wp_version_check' );
+		remove_action( 'upgrader_process_complete', 'wp_update_plugins' );
+		remove_action( 'upgrader_process_complete', 'wp_update_themes' );
+	}
+
+	/**
 	 * @testdox Should join the error message and its string data into one reason.
 	 */
 	public function test_get_error_reason_uses_message_and_string_data(): void {
