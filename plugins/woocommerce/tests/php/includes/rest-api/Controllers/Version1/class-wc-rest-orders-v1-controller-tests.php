@@ -242,6 +242,33 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox prepare_line_items() rejects a new line item for a deleted product, for subclasses that skip the up-front check.
+	 */
+	public function test_prepare_line_items_rejects_new_line_item_with_deleted_product(): void {
+		$deleted    = WC_Helper_Product::create_simple_product();
+		$deleted_id = $deleted->get_id();
+		$deleted->delete( true );
+
+		$controller = new class() extends WC_REST_Orders_V1_Controller {
+			/**
+			 * Public wrapper for prepare_line_items().
+			 *
+			 * @param array $posted Line item data.
+			 * @return WC_Order_Item_Product
+			 */
+			public function call_prepare_line_items( array $posted ) {
+				return $this->prepare_line_items( $posted );
+			}
+		};
+
+		$this->expectException( WC_REST_Exception::class );
+		$this->expectExceptionMessage( 'Invalid product ID.' );
+		$this->expectExceptionCode( 400 );
+
+		$controller->call_prepare_line_items( array( 'product_id' => $deleted_id ) );
+	}
+
+	/**
 	 * @testdox Updating with the unchanged parent preserves the variation while ignoring view-context product ID filters.
 	 */
 	public function test_update_line_item_with_unchanged_parent_preserves_variation_id(): void {
