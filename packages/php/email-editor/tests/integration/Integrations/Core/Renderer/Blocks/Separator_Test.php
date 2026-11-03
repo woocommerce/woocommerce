@@ -179,6 +179,27 @@ class Separator_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * A palette color as the email background is resolved before blending, not replaced by white.
+	 */
+	public function testItBlendsOntoPaletteBackground(): void {
+		$theme = clone $this->di_container->get( Theme_Controller::class )->get_theme();
+		$theme->merge(
+			new \WP_Theme_JSON(
+				array(
+					'version' => 3,
+					'styles'  => array( 'color' => array( 'background' => 'var:preset|color|black' ) ),
+				),
+				'custom'
+			)
+		);
+		$this->rendering_context = new Rendering_Context( $theme );
+
+		$rendered = $this->render( array( 'style' => array( 'color' => array( 'background' => '#ffffff80' ) ) ) );
+
+		$this->assertStringContainsString( 'border-top:2px solid #808080;', $rendered );
+	}
+
+	/**
 	 * The Wide line keeps its width in the Gmail app, which shrinks tables without a minimum width.
 	 */
 	public function testItKeepsWideLineFromShrinkingInGmail(): void {

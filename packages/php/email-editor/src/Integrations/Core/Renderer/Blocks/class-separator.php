@@ -88,8 +88,13 @@ class Separator extends Abstract_Block_Renderer {
 			return Html_Processing_Helper::sanitize_color( $color );
 		}
 		$theme_styles = $rendering_context->get_theme_styles();
-		$background   = $this->parse_color( (string) ( $theme_styles['color']['background'] ?? '' ) ) ?? array( 255, 255, 255, 1.0 );
-		$hex          = '#';
+		$background   = (string) ( $theme_styles['color']['background'] ?? '' );
+		// A palette background is stored as a preset reference; look its slug up in the palette.
+		if ( preg_match( '/^(?:var:preset\|color\||var\(--wp--preset--color--)([a-z0-9-]+)\)?$/i', $background, $matches ) ) {
+			$background = $rendering_context->translate_slug_to_color( $matches[1] );
+		}
+		$background = $this->parse_color( $background ) ?? array( 255, 255, 255, 1.0 );
+		$hex        = '#';
 		for ( $i = 0; $i < 3; $i++ ) {
 			$hex .= sprintf( '%02x', (int) round( $rgba[ $i ] * $rgba[3] + $background[ $i ] * ( 1 - $rgba[3] ) ) );
 		}
