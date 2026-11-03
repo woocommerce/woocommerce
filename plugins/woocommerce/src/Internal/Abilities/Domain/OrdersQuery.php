@@ -117,12 +117,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			}
 		}
 
-		$status = $input['status'] ?? array();
-		if ( is_string( $status ) && '' !== $status ) {
-			$args['status'] = array( wc_clean( $status ) );
-		} elseif ( is_array( $status ) && ! empty( $status ) ) {
-			$args['status'] = array_map( 'wc_clean', array_filter( array_map( 'strval', $status ), static fn ( string $slug ): bool => '' !== $slug ) );
-		}
+		$args['status'] = array_map( 'wc_clean', array_map( 'strval', wp_parse_list( $input['status'] ?? array() ) ) );
 
 		if ( empty( $args['status'] ) ) {
 			$args['status'] = 'shop_order' === $args['type'] ? self::get_allowed_order_status_slugs() : self::get_query_order_status_slugs();
@@ -252,19 +247,11 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 					'default'     => 'shop_order',
 				),
 				'status'             => array(
-					'description' => __( 'Filter by one order status slug, or a list of slugs, without the wc- prefix. Custom order types may add their own statuses.', 'woocommerce' ),
-					'anyOf'       => array(
-						array(
-							'type' => 'string',
-							'enum' => self::get_query_order_status_slugs(),
-						),
-						array(
-							'type'  => 'array',
-							'items' => array(
-								'type' => 'string',
-								'enum' => self::get_query_order_status_slugs(),
-							),
-						),
+					'description' => __( 'Limit results to these order status slugs, without the wc- prefix. Send one status as a list of one. An empty list applies no status filter. Custom order types may add their own statuses.', 'woocommerce' ),
+					'type'        => 'array',
+					'items'       => array(
+						'type' => 'string',
+						'enum' => self::get_query_order_status_slugs(),
 					),
 				),
 				'customer_id'        => array(

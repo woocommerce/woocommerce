@@ -142,26 +142,31 @@ trait OrderAbilityTrait {
 				'total'                => array( 'type' => 'string' ),
 				'customer_id'          => array( 'type' => 'integer' ),
 				'billing_email'        => array(
-					'type'   => array( 'string', 'null' ),
-					'format' => 'email',
+					'type'        => 'string',
+					'format'      => 'email',
+					'description' => __( 'Billing email. Omitted when no billing email is set.', 'woocommerce' ),
 				),
 				'payment_method'       => array( 'type' => 'string' ),
 				'payment_method_title' => array( 'type' => 'string' ),
 				'date_created'         => array(
-					'type'   => array( 'string', 'null' ),
-					'format' => 'date-time',
+					'type'        => 'string',
+					'format'      => 'date-time',
+					'description' => __( 'Order creation date in the store timezone. Omitted when no creation date is available.', 'woocommerce' ),
 				),
 				'date_created_gmt'     => array(
-					'type'   => array( 'string', 'null' ),
-					'format' => 'date-time',
+					'type'        => 'string',
+					'format'      => 'date-time',
+					'description' => __( 'Order creation date in UTC. Omitted when no creation date is available.', 'woocommerce' ),
 				),
 				'date_modified'        => array(
-					'type'   => array( 'string', 'null' ),
-					'format' => 'date-time',
+					'type'        => 'string',
+					'format'      => 'date-time',
+					'description' => __( 'Order modification date in the store timezone. Omitted when no modification date is available.', 'woocommerce' ),
 				),
 				'date_modified_gmt'    => array(
-					'type'   => array( 'string', 'null' ),
-					'format' => 'date-time',
+					'type'        => 'string',
+					'format'      => 'date-time',
+					'description' => __( 'Order modification date in UTC. Omitted when no modification date is available.', 'woocommerce' ),
 				),
 				'line_items'           => array(
 					'type'        => 'array',
@@ -174,7 +179,7 @@ trait OrderAbilityTrait {
 								'name'         => array( 'type' => 'string' ),
 								'product_id'   => array( 'type' => 'integer' ),
 								'variation_id' => array( 'type' => 'integer' ),
-								'quantity'     => array( 'type' => 'integer' ),
+								'quantity'     => array( 'type' => 'number' ),
 								'subtotal'     => array( 'type' => 'string' ),
 								'total'        => array( 'type' => 'string' ),
 							),
@@ -273,6 +278,18 @@ trait OrderAbilityTrait {
 	}
 
 	/**
+	 * Format an order after a save, retaining the saved object if reloading fails.
+	 *
+	 * @param \WC_Order $order Saved order object.
+	 * @return array
+	 */
+	protected static function format_saved_order_for_response( \WC_Order $order ): array {
+		$stored = wc_get_order( $order->get_id() );
+
+		return self::format_order_for_response( $stored instanceof \WC_Order ? $stored : $order, false );
+	}
+
+	/**
 	 * Format an order for ability output.
 	 *
 	 * @param \WC_Order $order              Order object.
@@ -292,13 +309,8 @@ trait OrderAbilityTrait {
 			),
 			'total'                => $order->get_total(),
 			'customer_id'          => $order->get_customer_id(),
-			'billing_email'        => '' === $billing_email ? null : $billing_email,
 			'payment_method'       => $order->get_payment_method(),
 			'payment_method_title' => $order->get_payment_method_title(),
-			'date_created'         => self::format_date_for_response( $order->get_date_created(), false ),
-			'date_created_gmt'     => self::format_date_for_response( $order->get_date_created() ),
-			'date_modified'        => self::format_date_for_response( $order->get_date_modified(), false ),
-			'date_modified_gmt'    => self::format_date_for_response( $order->get_date_modified() ),
 		);
 
 		if ( $include_line_items ) {
@@ -324,6 +336,19 @@ trait OrderAbilityTrait {
 				);
 			}
 		}
+
+		if ( '' !== $billing_email ) {
+			$data['billing_email'] = $billing_email;
+		}
+
+		$data += array_filter(
+			array(
+				'date_created'      => self::format_date_for_response( $order->get_date_created(), false ),
+				'date_created_gmt'  => self::format_date_for_response( $order->get_date_created() ),
+				'date_modified'     => self::format_date_for_response( $order->get_date_modified(), false ),
+				'date_modified_gmt' => self::format_date_for_response( $order->get_date_modified() ),
+			)
+		);
 
 		return ExtensibleAbilities::add_fields_to_object( $data, 'order', $order );
 	}

@@ -275,7 +275,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 
 		$settings = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['settings'];
 
-		$this->assertEquals( 31, count( $settings ) );
+		$this->assertEquals( 33, count( $settings ) );
 		$this->assertEquals( WC()->legacy_rest_api_is_available(), $settings['api_enabled'] );
 		$this->assertEquals( get_woocommerce_currency(), $settings['currency'] );
 		$this->assertEquals( $term_response, $settings['taxonomies'] );
@@ -563,6 +563,26 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 
 		if ( in_array( $url, array( 'https://www.paypal.com/cgi-bin/webscr', 'https://woocommerce.com/wc-api/product-key-api?request=ping&network=0' ), true ) ) {
 			$mocked_response = array(
+				'response' => array( 'code' => 200 ),
+			);
+		} elseif ( 'api.wordpress.org' === wp_parse_url( $url, PHP_URL_HOST ) && '/themes/info/1.2/' === wp_parse_url( $url, PHP_URL_PATH ) ) {
+			$mocked_response = array(
+				'body'     => wp_json_encode(
+					array(
+						'name'           => 'Default',
+						'slug'           => 'default',
+						'version'        => '1.7.2',
+						'preview_url'    => 'https://wp-themes.com/default',
+						'author'         => 'wordpressdotorg',
+						'screenshot_url' => '//ts.w.org/wp-content/themes/default/screenshot.png?ver=1.7.2',
+						'rating'         => 100,
+						'num_ratings'    => '3',
+						'downloaded'     => 296618,
+						'last_updated'   => '2010-06-14',
+						'homepage'       => 'https://wordpress.org/themes/default/',
+						'download_link'  => 'https://downloads.wordpress.org/theme/default.1.7.2.zip',
+					)
+				),
 				'response' => array( 'code' => 200 ),
 			);
 		} elseif ( 'https://api.wordpress.org/themes/info/1.0/' === $url ) {
