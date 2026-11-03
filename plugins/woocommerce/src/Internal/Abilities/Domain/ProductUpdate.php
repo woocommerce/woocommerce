@@ -8,7 +8,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
-use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
 
@@ -107,21 +106,9 @@ class ProductUpdate extends ActionableAbility {
 			);
 		}
 
-		if (
-			isset( $input['status'] )
-			&& in_array(
-				sanitize_key( $input['status'] ),
-				array( ProductStatus::PUBLISH, ProductStatus::FUTURE, ProductStatus::PRIVATE ),
-				true
-			)
-			&& sanitize_key( $input['status'] ) !== $product->get_status()
-			&& ! self::current_user_can_publish_products()
-		) {
-			return new \WP_Error(
-				'woocommerce_product_publish_forbidden',
-				__( 'You are not allowed to publish products.', 'woocommerce' ),
-				array( 'status' => rest_authorization_required_code() )
-			);
+		$error = self::check_publish_permission( $product, $input );
+		if ( is_wp_error( $error ) ) {
+			return $error;
 		}
 
 		if ( isset( $input['type'] ) && (string) $input['type'] !== $product->get_type() ) {
@@ -264,16 +251,6 @@ class ProductUpdate extends ActionableAbility {
 		return $product_id > 0
 			&& wc_rest_check_post_permissions( 'product', 'edit', $product_id )
 			&& ( ! $deletes || wc_rest_check_post_permissions( 'product', 'delete', $product_id ) );
-	}
-
-	/**
-	 * Check whether the current user can publish products.
-	 *
-	 * @return bool
-	 */
-	private static function current_user_can_publish_products(): bool {
-		// phpcs:ignore WordPress.WP.Capabilities.Unknown -- WooCommerce registers the publish_products capability.
-		return current_user_can( 'publish_products' );
 	}
 
 	/**

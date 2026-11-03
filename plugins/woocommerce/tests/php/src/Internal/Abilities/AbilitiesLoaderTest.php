@@ -2415,6 +2415,42 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse to publish a variation through the parent without publish_products.
+	 */
+	public function test_variation_publish_through_the_parent_requires_publish_cap(): void {
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[] = $created['product']['id'];
+		$variation_id                = $created['product']['variation_ids'][0];
+		$variation                   = wc_get_product( $variation_id );
+		$variation->set_status( 'private' );
+		$variation->save();
+
+		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$user    = get_user_by( 'id', $user_id );
+		$user->add_cap( 'edit_products' );
+		$user->add_cap( 'edit_others_products' );
+		$user->add_cap( 'edit_published_products' );
+		wp_set_current_user( $user_id );
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'         => $created['product']['id'],
+				'variations' => array(
+					array(
+						'id'     => $variation_id,
+						'status' => 'publish',
+					),
+				),
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_publish_forbidden', $result->get_error_code() );
+		$this->assertSame( 'private', get_post_status( $variation_id ) );
+	}
+
+	/**
 	 * @testdox Should treat a name as a local attribute unless global is true, and refuse an unknown global attribute.
 	 */
 	public function test_product_create_uses_a_global_attribute_only_when_asked(): void {

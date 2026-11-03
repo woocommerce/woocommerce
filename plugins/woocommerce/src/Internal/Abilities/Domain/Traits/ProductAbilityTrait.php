@@ -692,6 +692,32 @@ trait ProductAbilityTrait {
 	}
 
 	/**
+	 * Refuse a status change to a published status when the current user
+	 * cannot publish products. Keeping the current status is allowed.
+	 *
+	 * @param \WC_Product $product Saved product or variation.
+	 * @param array       $input   Input that may carry a `status`.
+	 * @return null|\WP_Error
+	 */
+	protected static function check_publish_permission( \WC_Product $product, array $input ) {
+		$status = isset( $input['status'] ) ? sanitize_key( (string) $input['status'] ) : '';
+		if (
+			! in_array( $status, array( ProductStatus::PUBLISH, ProductStatus::FUTURE, ProductStatus::PRIVATE ), true )
+			|| $product->get_status() === $status
+			// phpcs:ignore WordPress.WP.Capabilities.Unknown -- WooCommerce registers the publish_products capability.
+			|| current_user_can( 'publish_products' )
+		) {
+			return null;
+		}
+
+		return new \WP_Error(
+			'woocommerce_product_publish_forbidden',
+			__( 'You are not allowed to publish products.', 'woocommerce' ),
+			array( 'status' => rest_authorization_required_code() )
+		);
+	}
+
+	/**
 	 * The product whose permissions decide access to a product ID. A variation
 	 * follows its parent: a published variation of a draft parent is as hidden
 	 * as the parent, and whoever may edit the parent may edit its variations.
@@ -838,6 +864,10 @@ trait ProductAbilityTrait {
 				if ( ! empty( $item['delete'] ) ) {
 					$plan['delete'][] = $variation;
 					continue;
+				}
+				$error = self::check_publish_permission( $variation, $item );
+				if ( is_wp_error( $error ) ) {
+					return $error;
 				}
 			} else {
 				$variation = self::get_new_variation( $parent_product );
