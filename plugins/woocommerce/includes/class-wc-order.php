@@ -178,10 +178,10 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Make the in-memory changes of payment_complete(): the transaction ID, the paid date and the payment
 	 * complete status. Leave woocommerce_pre_payment_complete, the session's order_awaiting_payment flag, the
-	 * payment note and woocommerce_payment_complete to the next save(), which runs the first three before it
-	 * writes and fires the action after it writes. payment_complete() runs this method through write_through(),
-	 * so it runs all of them and saves right away, as it always did.
-	 * When that save fails, the action waits for the next save that writes the order, and the method throws.
+	 * payment note and woocommerce_payment_complete to the next save(), which runs the first two before it
+	 * writes, and adds the note and fires the action after it writes. payment_complete() runs this method
+	 * through write_through(), so it runs all of them and saves right away. When that save fails, the method
+	 * throws, and the note and the action wait for the next save that writes the order with the same status.
 	 *
 	 * When the order status is not one that payment can complete, the order does not change, the
 	 * woocommerce_payment_complete_order_status_<status> action fires right away, the method adds nothing for
@@ -247,6 +247,8 @@ class WC_Order extends WC_Abstract_Order {
 			$this->defer_to_save( 'pre_payment_complete', $pre_payment_complete, array( $this->get_id(), $transaction_id ) );
 		}
 
+		$this->defer_to_save( 'payment_complete', null );
+
 		if ( ! empty( $transaction_id ) ) {
 			$this->set_transaction_id( $transaction_id );
 		}
@@ -272,16 +274,28 @@ class WC_Order extends WC_Abstract_Order {
 
 		$this->set_status( $next_status, false );
 
-		$this->write_or_defer( 'payment_complete_note', array( $this, 'add_order_note' ), array( $payment_complete_note, false, false, array( 'note_group' => OrderNoteGroup::PAYMENT ) ) );
 		$this->save_if_writing_through();
 
-		$payment_complete_args = array( 'woocommerce_payment_complete', $this->get_id(), $transaction_id );
-		$save_error            = $this->writing_through ? $this->get_last_save_error() : null;
+		$note_args   = array( $payment_complete_note, false, false, array( 'note_group' => OrderNoteGroup::PAYMENT ) );
+		$action_args = array( 'woocommerce_payment_complete', $this->get_id(), $transaction_id );
+		$save_error  = $this->writing_through ? $this->get_last_save_error() : null;
 		if ( null !== $save_error ) {
-			$this->defer_to_save( 'payment_complete', 'do_action', $payment_complete_args, true );
+			$paid_status = $this->get_status();
+			$this->defer_to_save(
+				'payment_complete',
+				function () use ( $paid_status, $note_args, $action_args ) {
+					if ( $this->has_status( $paid_status ) ) {
+						call_user_func_array( array( $this, 'add_order_note' ), $note_args );
+						call_user_func_array( 'do_action', $action_args );
+					}
+				},
+				array(),
+				true
+			);
 			throw $save_error;
 		}
-		$this->write_or_defer( 'payment_complete', 'do_action', $payment_complete_args, true );
+		$this->write_or_defer( 'payment_complete_note', array( $this, 'add_order_note' ), $note_args, true );
+		$this->write_or_defer( 'payment_complete', 'do_action', $action_args, true );
 
 		return true;
 	}
