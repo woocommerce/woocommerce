@@ -1405,6 +1405,7 @@ function wc_transaction_query( $type = 'start', $force = false ) {
 			return;
 		}
 
+		DatabaseTransaction::track_caller( $type );
 		switch ( $type ) {
 			case 'commit':
 				$wpdb->query( 'COMMIT' );

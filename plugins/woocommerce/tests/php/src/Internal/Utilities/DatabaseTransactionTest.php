@@ -30,11 +30,19 @@ class DatabaseTransactionTest extends WC_Unit_Test_Case {
 	private $depth;
 
 	/**
+	 * Whether a caller transaction was open before the test.
+	 *
+	 * @var bool
+	 */
+	private $caller_open;
+
+	/**
 	 * Start every test with no owned transaction, and record the transaction statements instead of sending them.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->depth = $this->set_depth( 0 );
+		$this->depth       = $this->set_depth( 0 );
+		$this->caller_open = $this->set_caller_open( false );
 		add_filter( 'query', array( $this, 'record_statement' ), 1 );
 	}
 
@@ -44,6 +52,7 @@ class DatabaseTransactionTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_filter( 'query', array( $this, 'record_statement' ), 1 );
 		$this->set_depth( $this->depth );
+		$this->set_caller_open( $this->caller_open );
 		parent::tearDown();
 	}
 
@@ -114,6 +123,30 @@ class DatabaseTransactionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox run() should use a savepoint inside a transaction that wc_transaction_query() started, and leave the end to the caller.
+	 */
+	public function test_run_joins_a_transaction_that_a_caller_started(): void {
+		wc_transaction_query( 'start' );
+		DatabaseTransaction::run(
+			static function () {
+				wc_transaction_query( 'start' );
+				wc_transaction_query( 'commit' );
+				return null;
+			}
+		);
+		$this->assertFalse( DatabaseTransaction::is_open() );
+		DatabaseTransaction::run( static fn() => new \WP_Error( 'refused', 'Refused.' ) );
+		wc_transaction_query( 'rollback' );
+		DatabaseTransaction::run( static fn() => null );
+
+		$this->assertSame(
+			array( 'START TRANSACTION', 'SAVEPOINT wc_1', 'SAVEPOINT wc_2', 'RELEASE SAVEPOINT wc_2', 'RELEASE SAVEPOINT wc_1', 'SAVEPOINT wc_1', 'ROLLBACK TO SAVEPOINT wc_1', 'ROLLBACK', 'START TRANSACTION', 'COMMIT' ),
+			$this->statements
+		);
+		$this->assertFalse( DatabaseTransaction::is_open() );
+	}
+
+	/**
 	 * @testdox run() should roll back when the callback returns a WP_Error or throws.
 	 */
 	public function test_run_rolls_back_on_error(): void {
@@ -133,6 +166,20 @@ class DatabaseTransactionTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( array( 'START TRANSACTION', 'ROLLBACK', 'START TRANSACTION', 'ROLLBACK' ), $this->statements );
 		$this->assertFalse( DatabaseTransaction::is_open() );
+	}
+
+	/**
+	 * Set whether a caller transaction is open.
+	 *
+	 * @param bool $open New value.
+	 * @return bool The value before.
+	 */
+	private function set_caller_open( bool $open ): bool {
+		$property = new \ReflectionProperty( DatabaseTransaction::class, 'caller_open' );
+		$property->setAccessible( true );
+		$before = $property->getValue();
+		$property->setValue( null, $open );
+		return $before;
 	}
 
 	/**

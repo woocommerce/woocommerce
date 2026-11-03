@@ -19,6 +19,9 @@ defined( 'ABSPATH' ) || exit;
  * When run() ends, it always commits or rolls back what it opened, even when a caller inside it left a
  * transaction open. Outside run(), wc_transaction_query() works as it always did.
  *
+ * When a caller started a transaction with wc_transaction_query() before run(), run() works in a savepoint
+ * inside it, so the caller's commit or rollback decides the outcome, as on code without run().
+ *
  * Raw START TRANSACTION, COMMIT or ROLLBACK queries and DDL statements still end the transaction, because
  * MySQL commits before them.
  *
@@ -35,8 +38,16 @@ final class DatabaseTransaction {
 	private static $depth = 0;
 
 	/**
+	 * Whether wc_transaction_query() started a transaction outside run() that it has not ended yet.
+	 *
+	 * @var bool
+	 */
+	private static $caller_open = false;
+
+	/**
 	 * Run the callback in a transaction. Commit when it returns, roll back when it returns a WP_Error or
-	 * throws. Inside another run(), the callback runs in a savepoint.
+	 * throws. Inside another run(), or inside a transaction that wc_transaction_query() started, the callback
+	 * runs in a savepoint.
 	 *
 	 * @param callable $callback Callback to run.
 	 * @return mixed What the callback returns.
@@ -48,15 +59,19 @@ final class DatabaseTransaction {
 			return $callback();
 		}
 
-		$level = self::$depth;
+		$joined      = 0 === self::$depth && self::$caller_open;
+		$level       = $joined ? 1 : self::$depth;
+		self::$depth = $level;
 		self::start();
 		try {
 			$result = $callback();
 		} catch ( \Throwable $e ) {
 			self::end( $level, false );
+			self::$depth = $joined ? 0 : self::$depth;
 			throw $e;
 		}
 		self::end( $level, ! is_wp_error( $result ) );
+		self::$depth = $joined ? 0 : self::$depth;
 
 		return $result;
 	}
@@ -68,6 +83,15 @@ final class DatabaseTransaction {
 	 */
 	public static function is_open(): bool {
 		return self::$depth > 0;
+	}
+
+	/**
+	 * Record a start, commit or rollback that wc_transaction_query() sent outside run().
+	 *
+	 * @param string $type Types: start, commit, rollback.
+	 */
+	public static function track_caller( string $type ): void {
+		self::$caller_open = 'commit' !== $type && 'rollback' !== $type;
 	}
 
 	/**
