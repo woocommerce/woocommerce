@@ -51,8 +51,8 @@
 
   "toolchain": [
     {
-      "$comment": "CI's Node: setup-woocommerce-monorepo runs setup-node with node-version-file .nvmrc. pnpm is not checked: action-setup reads it from packageManager in package.json, and expectFrom takes a file that holds only the version. Nor is PHP: the JavaScript rule's build-type dependencies skips setup-php.",
-      "run": "node -v",
+      "$comment": "CI's Node: setup-woocommerce-monorepo runs setup-node with node-version-file .nvmrc. Locally every job runs through pnpm, which uses useNodeVersion from pnpm-workspace.yaml whatever node is on PATH, so the check asks pnpm, not PATH. pnpm is not checked: action-setup reads it from packageManager in package.json, and expectFrom takes a file that holds only the version. Nor is PHP: the JavaScript rule's build-type dependencies skips setup-php.",
+      "run": "pnpm exec node -v",
       "expectFrom": ".nvmrc"
     }
   ]
