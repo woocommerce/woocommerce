@@ -1475,6 +1475,24 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A payment_complete() retry after a failed staged payment adds only the note of the retry.
+	 */
+	public function test_payment_complete_retry_after_a_failed_staged_payment_adds_one_note(): void {
+		$order = new WC_Order();
+		$order->set_payment_method_title( 'Cheque' );
+		$order->save();
+
+		$order->stage_payment_complete( 'first' );
+		$this->with_failed_writes( array( $order, 'save' ) );
+		$order->set_status( OrderStatus::PENDING );
+		$this->assertTrue( $order->payment_complete( 'second' ) );
+
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), 'content' );
+		$this->assertNotContains( 'Payment via Cheque (first).', $notes );
+		$this->assertCount( 1, array_keys( $notes, 'Payment via Cheque (second).', true ) );
+	}
+
+	/**
 	 * @testdox payment_complete() adds no payment note when the order write fails.
 	 */
 	public function test_payment_complete_adds_no_payment_note_when_the_write_fails(): void {
