@@ -438,6 +438,69 @@ class WC_Admin_Tests_API_Product_Attributes extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Legacy custom attributes advertise self links only for keys the item lookup can resolve.
+	 * @testWith ["legacy/key", false]
+	 *           ["legacy.key", false]
+	 *           ["legacy key", false]
+	 *           ["legacy%2fkey", false]
+	 *           ["Legacy-Key", false]
+	 *           ["légacy", false]
+	 *           ["", false]
+	 *           ["-legacy-key", false]
+	 *           ["legacy-key-", false]
+	 *           ["legacy--key", false]
+	 *           ["-123", false]
+	 *           ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", false]
+	 *           ["legacy_key", true]
+	 *           ["legacy-key", true]
+	 *           ["pa_legacy", true]
+	 *           ["legacy-123", true]
+	 *           ["batch", true]
+	 *
+	 * @param string $slug The legacy attribute key.
+	 * @param bool   $has_self_link Whether the key has a resolvable item URL.
+	 */
+	public function test_legacy_custom_attribute_links( string $slug, bool $has_self_link ): void {
+		wp_set_current_user( $this->user );
+		$product = new WC_Product_Simple();
+		$product->save();
+		// Legacy metadata can contain keys that the current product setter would sanitize.
+		update_post_meta(
+			$product->get_id(),
+			'_product_attributes',
+			array(
+				$slug => array(
+					'name'         => 'Legacy link attribute',
+					'value'        => 'example',
+					'position'     => 0,
+					'is_visible'   => 0,
+					'is_variation' => 0,
+					'is_taxonomy'  => 0,
+				),
+			)
+		);
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_param( 'search', 'Legacy link attribute' );
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status() );
+		$items = $response->get_data();
+		$this->assertCount( 1, $items );
+		$this->assertSame( $slug, $items[0]['slug'] );
+		$this->assertSame( rest_url( $this->endpoint ), $items[0]['_links']['collection'][0]['href'] );
+
+		$item_response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/' . $slug ) );
+		if ( $has_self_link ) {
+			$this->assertSame( 200, $item_response->get_status() );
+			$this->assertSame( $slug, $item_response->get_data()['slug'] );
+			$this->assertSame( rest_url( $this->endpoint . '/' . $slug ), $items[0]['_links']['self'][0]['href'] );
+		} else {
+			$this->assertNotSame( $slug, $item_response->get_data()['slug'] ?? null );
+			$this->assertArrayNotHasKey( 'self', $items[0]['_links'] );
+		}
+	}
+
+	/**
 	 * @testdox Search results retain resolvable self links for ordinary custom and global attributes.
 	 */
 	public function test_search_result_self_links(): void {

@@ -112,18 +112,24 @@ class ProductAttributes extends \WC_REST_Product_Attributes_Controller {
 		$response = array();
 
 		foreach ( $custom_attributes as $attribute_key => $attribute_value ) {
+			$slug = (string) $attribute_key;
 			$data = array(
 				'id'           => $attribute_key,
 				'name'         => $attribute_value['name'],
-				'slug'         => (string) $attribute_key,
+				'slug'         => $slug,
 				'type'         => 'select',
 				'order_by'     => 'menu_order',
 				'has_archives' => false,
 			);
 
 			$links = $this->prepare_links( (object) array( 'attribute_id' => $attribute_key ) );
-			// All-digit paths belong to global attribute IDs, not custom slugs.
-			if ( ctype_digit( (string) $attribute_key ) ) {
+			// Numeric paths belong to global IDs; custom keys must survive route matching and lookup unchanged.
+			if (
+				'' === $slug
+				|| ctype_digit( $slug )
+				|| strspn( $slug, 'abcdefghijklmnopqrstuvwxyz0123456789_-' ) !== strlen( $slug )
+				|| sanitize_title_for_query( $slug ) !== $slug
+			) {
 				unset( $links['self'] );
 			}
 
