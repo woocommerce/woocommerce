@@ -636,6 +636,8 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 
 		return array(
 			'plain name'                => array( array( 'test_plain' => 'plain value' ) + $id_value, 'test_plain', 'plain value' ),
+			'empty value under name'    => array( array( 'test_plain' => '' ) + $id_value, 'test_plain', '' ),
+			'zero under nested name'    => array( array( 'test_parent' => array( 'key' => '0' ) ) + $id_value, 'test_parent[key]', '0' ),
 			'rewritten option name'     => array( array( 'test_dotted_options' => array( 'one' => 'rewritten value' ) ) + $id_value, 'test.dotted options[one]', 'rewritten value' ),
 			'encoded nested key'        => array( array( 'test_parent' => array( 'A' => 'decoded value' ) ) + $id_value, 'test_parent[%41]', 'decoded value' ),
 			'nothing stored under name' => array( $id_value, 'test_parent[key]', 'id value' ),
