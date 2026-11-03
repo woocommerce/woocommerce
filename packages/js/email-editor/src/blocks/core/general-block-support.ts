@@ -22,7 +22,7 @@ type BlockSupports = WPBlockSupports & { shadow: boolean };
 type Block = WPBlock & { supports?: BlockSupports };
 
 // List of blocks that we want to support.
-const BLOCK_STYLES_TO_PRESERVE = [ 'core/social-links' ];
+const BLOCK_STYLES_TO_PRESERVE = [ 'core/separator', 'core/social-links' ];
 
 /**
  * Disables Shadow Support for all blocks
