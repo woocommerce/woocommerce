@@ -189,7 +189,7 @@
 		"knip": "^5.60.2",
 		"lint-staged": "13.2.0",
 		"lodash": "4.18.1",
-		"mini-css-extract-plugin": "2.9.x",
+		"mini-css-extract-plugin": "catalog:tooling",
 		"msw": "2.10.4",
 		"playwright-ctrf-json-reporter": "0.0.27",
 		"postcss": "catalog:tooling",

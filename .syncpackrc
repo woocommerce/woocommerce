@@ -125,6 +125,7 @@
 				"babel-loader",
 				"copy-webpack-plugin",
 				"css-loader",
+				"mini-css-extract-plugin",
 				"postcss",
 				"postcss-loader",
 				"prettier",
@@ -273,15 +274,6 @@
 				"**"
 			],
 			"pinVersion": "2.0.x"
-		},
-		{
-			"dependencies": [
-				"mini-css-extract-plugin"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "2.9.x"
 		},
 		{
 			"dependencies": [
