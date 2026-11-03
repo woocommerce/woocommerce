@@ -35,11 +35,8 @@
 				"type": "string"
 			},
 			"slug": {
-				"description": "Limit results to these slugs. An empty string or list applies no slug filter.",
-				"type": [
-					"string",
-					"array"
-				],
+				"description": "Limit results to these slugs. Send one slug as a list of one. An empty list applies no slug filter.",
+				"type": "array",
 				"items": {
 					"type": "string"
 				}
