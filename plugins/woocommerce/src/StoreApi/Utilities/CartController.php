@@ -1138,12 +1138,12 @@ class CartController {
 	 * @throws RouteException Exception if invalid data is detected.
 	 *
 	 * @param array $request Add to cart request params.
-	 * @return \WC_Product|Error Returns a product object if purchasable.
+	 * @return \WC_Product Returns a product object if purchasable.
 	 */
 	protected function get_product_for_cart( $request ) {
 		$product = wc_get_product( $request['id'] );
 
-		if ( ! $product || ProductStatus::TRASH === $product->get_status() ) {
+		if ( ! $product instanceof \WC_Product || ProductStatus::TRASH === $product->get_status() ) {
 			throw new RouteException(
 				'woocommerce_rest_cart_invalid_product',
 				sprintf(
@@ -1300,6 +1300,35 @@ class CartController {
 		// If we have a parent product, find the variation ID.
 		if ( $product->is_type( ProductType::VARIABLE ) ) {
 			$request['id'] = $this->get_variation_id_from_variation_data( $request, $product );
+		}
+
+		// A variation can be added by ID alone. Posted attributes are checked only when the request includes them.
+		if ( $product->is_type( ProductType::VARIATION ) && ! empty( $request['variation'] ) ) {
+			$parent_product = wc_get_product( $product->get_parent_id() );
+
+			if ( ! $parent_product instanceof \WC_Product ) {
+				throw new RouteException(
+					'woocommerce_rest_cart_invalid_product',
+					esc_html__( 'Cart item is invalid.', 'woocommerce' ),
+					400
+				);
+			}
+
+			// Keep attributes the request left out, so a partial selection is matched as this variation plus those posted values.
+			$match_request              = $request;
+			$match_request['variation'] = array_merge(
+				array_filter( wc_get_product_variation_attributes( $request['id'] ), 'wc_array_filter_default_attributes' ),
+				$request['variation']
+			);
+			$variation_id               = $this->get_variation_id_from_variation_data( $match_request, $parent_product );
+
+			if ( $variation_id !== $request['id'] ) {
+				throw new RouteException(
+					'woocommerce_rest_invalid_variation_data',
+					esc_html__( 'The selected options belong to a different variation of this product.', 'woocommerce' ),
+					400
+				);
+			}
 		}
 
 		// Now we have a variation ID, get the valid set of attributes for this variation. They will have an attribute_ prefix since they are from meta.

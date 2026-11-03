@@ -1269,10 +1269,20 @@ class WC_Cart extends WC_Legacy_Cart {
 				// Merge variation attributes and posted attributes.
 				$posted_and_variation_attributes = array_merge( $variation_attributes, $posted_attributes );
 
+				$data_store = WC_Data_Store::load( 'product' );
+
 				// If no variation ID is set, attempt to get a variation ID from posted attributes.
 				if ( empty( $variation_id ) ) {
-					$data_store   = WC_Data_Store::load( 'product' );
+					// @phpstan-ignore-next-line method.notFound Called via __call() on the underlying product data store instance.
 					$variation_id = $data_store->find_matching_product_variation( $parent_data, $posted_attributes );
+				} elseif ( ! empty( $posted_attributes ) ) {
+					// @phpstan-ignore-next-line method.notFound Called via __call() on the underlying product data store instance.
+					$matched_variation_id = $data_store->find_matching_product_variation( $parent_data, $posted_and_variation_attributes );
+
+					// Verify that the variation data matches the variation ID.
+					if ( ! empty( $matched_variation_id ) && (int) $matched_variation_id !== (int) $variation_id ) {
+						throw new Exception( __( 'The selected options belong to a different variation of this product.', 'woocommerce' ) );
+					}
 				}
 
 				// Do we have a variation ID?
