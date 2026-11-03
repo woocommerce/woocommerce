@@ -1631,12 +1631,14 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	public function test_read_with_direct_meta_write() {
 		$this->toggle_cot_feature_and_usage( true );
 		$this->enable_cot_sync();
-		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 		$order = $this->create_complex_cot_order();
 
 		$post_object = get_post( $order->get_id() );
 		// Make sure that COT sync is enabled, by checking that this is not placeholder post.
 		$this->assertTrue( get_post_type( $post_object->ID ) === 'shop_order' );
+
+		// Fixture saves can read the order, so enable sync-on-read only after setup.
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 
 		// simulate direct write.
 		update_post_meta( $post_object->ID, 'my_custom_meta', array( 'key' => 'value' ) );
@@ -1656,7 +1658,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	public function test_read_multiple_with_direct_write() {
 		$this->enable_cot_sync();
 		$this->toggle_cot_feature_and_usage( true );
-		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 		$order       = $this->create_complex_cot_order();
 		$order_total = $order->get_total();
 		$order->add_meta_data( 'custom_meta_1', 'custom_value_1' );
@@ -1665,6 +1666,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order->save();
 		$post_object = get_post( $order->get_id() );
 		assert( get_post_type( $post_object->ID ) === 'shop_order' );
+
+		// Fixture saves can read the order, so enable sync-on-read only after setup.
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 
 		// simulate direct write.
 		update_post_meta( $post_object->ID, '_order_total', $order_total + 100 ); // core table.
@@ -1695,7 +1699,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	public function test_is_post_different_from_order() {
 		$this->toggle_cot_feature_and_usage( true );
 		$this->enable_cot_sync();
-		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 		$order                         = $this->create_complex_cot_order();
 		$post_order_comparison_closure = function ( $order ) {
 			$post_order = $this->get_post_orders_for_ids( array( $order->get_id() => $order ) )[ $order->get_id() ];
@@ -1704,6 +1707,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		};
 		// No changes, post and order should be same.
 		$this->assertFalse( $post_order_comparison_closure->call( $this->sut, $order ) );
+
+		// Fixture saves can read the order, so enable sync-on-read only after setup.
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 
 		// Simulate direct write.
 		update_post_meta( $order->get_id(), 'my_custom_meta', array( 'key' => 'value' ) );
