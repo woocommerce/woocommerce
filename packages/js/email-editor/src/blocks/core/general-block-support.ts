@@ -4,9 +4,9 @@
 import {
 	Block as WPBlock,
 	BlockSupports as WPBlockSupports,
-} from '@wordpress/blocks/index';
+	getBlockTypes,
+} from '@wordpress/blocks';
 import domReady from '@wordpress/dom-ready';
-import { getBlockTypes } from '@wordpress/blocks';
 import { select } from '@wordpress/data';
 
 /**
