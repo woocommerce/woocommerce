@@ -135,6 +135,7 @@
 				"jest-cli",
 				"jest-environment-jsdom",
 				"jest-environment-node",
+				"jest-fixed-jsdom",
 				"mini-css-extract-plugin",
 				"postcss",
 				"postcss-loader",
@@ -204,15 +205,6 @@
 				"**"
 			],
 			"pinVersion": "3.3.7"
-		},
-		{
-			"dependencies": [
-				"jest-fixed-jsdom"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^0.0.10"
 		},
 		{
 			"dependencies": [

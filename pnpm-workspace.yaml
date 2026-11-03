@@ -70,7 +70,7 @@ catalogs:
         '@wordpress/views': 2.0.0
         '@wordpress/base-styles': 6.9.1
 
-    # Shared build tooling used across workspace packages.
+    # Shared build, lint and test tooling used across workspace packages.
     tooling:
         '@babel/cli': 7.25.7
         '@babel/core': 7.29.7
@@ -79,6 +79,7 @@ catalogs:
         '@babel/preset-react': 7.25.7
         '@babel/preset-typescript': 7.25.7
         '@babel/runtime': 7.25.7
+        # Keep direct Jest packages on 29.5.x; WordPress scripts manages its own test runner.
         '@jest/globals': 29.5.x
         '@types/jest': 29.5.x
         '@wordpress/build': 0.24.0
@@ -98,6 +99,7 @@ catalogs:
         jest-cli: 29.5.x
         jest-environment-jsdom: 29.5.x
         jest-environment-node: 29.5.x
+        jest-fixed-jsdom: ^0.0.10
         mini-css-extract-plugin: 2.9.x
         postcss: ^8.5.26
         postcss-loader: 4.3.x

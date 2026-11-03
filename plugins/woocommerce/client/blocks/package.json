@@ -184,7 +184,7 @@
 		"ignore-loader": "0.1.x",
 		"jest": "catalog:tooling",
 		"jest-circus": "catalog:tooling",
-		"jest-fixed-jsdom": "^0.0.10",
+		"jest-fixed-jsdom": "catalog:tooling",
 		"json2md": "1.12.0",
 		"knip": "^5.60.2",
 		"lint-staged": "13.2.0",

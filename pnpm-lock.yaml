@@ -84,6 +84,9 @@ catalogs:
     jest-environment-node:
       specifier: 29.5.x
       version: 29.5.0
+    jest-fixed-jsdom:
+      specifier: ^0.0.10
+      version: 0.0.10
     mini-css-extract-plugin:
       specifier: 2.9.x
       version: 2.9.4
@@ -737,7 +740,7 @@ importers:
         version: 8.5.26
       postcss-loader:
         specifier: catalog:tooling
-        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2)
+        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       qrcode.react:
         specifier: ^3.1.0
         version: 3.2.0(react@18.3.1)
@@ -755,7 +758,7 @@ importers:
         version: 5.0.5
       sass-loader:
         specifier: catalog:tooling
-        version: 10.5.2(sass@1.69.5)(webpack@5.112.2)
+        version: 10.5.2(sass@1.69.5)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       stylelint:
         specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
@@ -985,7 +988,7 @@ importers:
         version: 8.5.26
       postcss-loader:
         specifier: catalog:tooling
-        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2)
+        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       react:
         specifier: 18.3.x
         version: 18.3.1
@@ -997,7 +1000,7 @@ importers:
         version: 5.0.5
       sass-loader:
         specifier: catalog:tooling
-        version: 10.5.2(sass@1.69.5)(webpack@5.112.2)
+        version: 10.5.2(sass@1.69.5)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       stylelint:
         specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
@@ -1643,7 +1646,7 @@ importers:
         version: 8.5.26
       postcss-loader:
         specifier: catalog:tooling
-        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2)
+        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       react:
         specifier: 18.3.x
         version: 18.3.1
@@ -1655,7 +1658,7 @@ importers:
         version: 5.0.5
       sass-loader:
         specifier: catalog:tooling
-        version: 10.5.2(sass@1.69.5)(webpack@5.112.2)
+        version: 10.5.2(sass@1.69.5)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       stylelint:
         specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
@@ -2247,13 +2250,13 @@ importers:
         version: 8.5.26
       postcss-loader:
         specifier: catalog:tooling
-        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2)
+        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       rimraf:
         specifier: catalog:tooling
         version: 5.0.5
       sass-loader:
         specifier: catalog:tooling
-        version: 10.5.2(sass@1.69.5)(webpack@5.112.2)
+        version: 10.5.2(sass@1.69.5)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       stylelint:
         specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
@@ -3300,7 +3303,7 @@ importers:
         version: 3.3.7
       copy-webpack-plugin:
         specifier: catalog:tooling
-        version: 14.0.0(webpack@5.112.2)
+        version: 14.0.0(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       css-loader:
         specifier: catalog:tooling
         version: 6.11.0(webpack@5.112.2)
@@ -3345,7 +3348,7 @@ importers:
         version: 8.5.26
       postcss-loader:
         specifier: catalog:tooling
-        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2)
+        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       prettier:
         specifier: catalog:tooling
         version: wp-prettier@3.9.6
@@ -3378,7 +3381,7 @@ importers:
         version: 1.69.5
       sass-loader:
         specifier: catalog:tooling
-        version: 10.5.2(sass@1.69.5)(webpack@5.112.2)
+        version: 10.5.2(sass@1.69.5)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       stylelint:
         specifier: catalog:tooling
         version: 16.26.1(typescript@5.7.3)
@@ -3781,7 +3784,7 @@ importers:
         version: 5.2.2(webpack@5.112.2)
       copy-webpack-plugin:
         specifier: catalog:tooling
-        version: 14.0.0(webpack@5.112.2)
+        version: 14.0.0(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       core-js:
         specifier: 3.25.0
         version: 3.25.0
@@ -3840,7 +3843,7 @@ importers:
         specifier: catalog:tooling
         version: 29.5.0
       jest-fixed-jsdom:
-        specifier: ^0.0.10
+        specifier: catalog:tooling
         version: 0.0.10(jest-environment-jsdom@30.5.2)
       json2md:
         specifier: 1.12.0
@@ -3868,7 +3871,7 @@ importers:
         version: 8.5.26
       postcss-loader:
         specifier: catalog:tooling
-        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2)
+        version: 4.3.0(postcss@8.5.26)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       prettier:
         specifier: catalog:tooling
         version: wp-prettier@3.9.6
@@ -3895,7 +3898,7 @@ importers:
         version: 4.3.0
       sass-loader:
         specifier: catalog:tooling
-        version: 10.5.2(sass@1.69.5)(webpack@5.112.2)
+        version: 10.5.2(sass@1.69.5)(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       storybook:
         specifier: 10.6.5
         version: 10.6.5(@types/react@18.3.28)(react@18.3.1)(wp-prettier@3.9.6)
@@ -3979,7 +3982,7 @@ importers:
         specifier: 0.20.1
         version: 0.20.1(stylelint@16.26.1(typescript@5.7.3))
       jest-fixed-jsdom:
-        specifier: ^0.0.10
+        specifier: catalog:tooling
         version: 0.0.10(jest-environment-jsdom@30.5.2)
       jquery:
         specifier: 3.7.1
@@ -4193,7 +4196,7 @@ importers:
         version: link:../../packages/js/eslint-plugin
       copy-webpack-plugin:
         specifier: catalog:tooling
-        version: 14.0.0(webpack@5.112.2)
+        version: 14.0.0(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       eslint:
         specifier: catalog:tooling
         version: 10.7.0(jiti@2.6.1)
@@ -35836,15 +35839,6 @@ snapshots:
       tinyglobby: 0.2.17
       webpack: 5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)
 
-  copy-webpack-plugin@14.0.0(webpack@5.112.2):
-    dependencies:
-      glob-parent: 6.0.2
-      normalize-path: 3.0.0
-      schema-utils: 4.3.3
-      serialize-javascript: 7.1.4
-      tinyglobby: 0.2.17
-      webpack: 5.112.2(@swc/core@1.15.24)(cssnano@5.1.12(postcss@8.5.26))(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)
-
   core-js-compat@3.49.0:
     dependencies:
       browserslist: 4.29.5
@@ -35944,7 +35938,7 @@ snapshots:
       postcss-value-parser: 4.2.0
       semver: 7.8.5
     optionalDependencies:
-      webpack: 5.112.2(@swc/core@1.15.24)(cssnano@6.1.2(postcss@8.5.26))(esbuild@0.28.2)(postcss@8.5.26)(uglify-js@3.19.3)(webpack-cli@5.1.4)
+      webpack: 5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)
 
   css-loader@7.1.4(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)):
     dependencies:
@@ -36892,7 +36886,7 @@ snapshots:
       lodash: 4.18.1
       resolve: 2.0.0-next.6
       semver: 5.7.2
-      webpack: 5.112.2(@swc/core@1.15.24)(cssnano@5.1.12(postcss@8.5.26))(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)
+      webpack: 5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)
     transitivePeerDependencies:
       - supports-color
 
@@ -40518,7 +40512,7 @@ snapshots:
     dependencies:
       schema-utils: 4.8.1(webpack@5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26))
       tapable: 2.3.3
-      webpack: 5.112.2(@swc/core@1.15.24)(cssnano@6.1.2(postcss@8.5.26))(esbuild@0.28.2)(postcss@8.5.26)(uglify-js@3.19.3)(webpack-cli@5.1.4)
+      webpack: 5.112.2(@swc/core@1.15.24)(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)
 
   minimalistic-assert@1.0.1: {}
 
@@ -41557,16 +41551,6 @@ snapshots:
       schema-utils: 3.3.0
       semver: 7.8.5
       webpack: 5.112.2(@swc/core@1.15.24)(cssnano@6.1.2(postcss@8.5.26))(esbuild@0.28.2)(postcss@8.5.26)(webpack-cli@5.1.4)
-
-  postcss-loader@4.3.0(postcss@8.5.26)(webpack@5.112.2):
-    dependencies:
-      cosmiconfig: 7.1.0
-      klona: 2.0.6
-      loader-utils: 2.0.4
-      postcss: 8.5.26
-      schema-utils: 3.3.0
-      semver: 7.8.5
-      webpack: 5.112.2(@swc/core@1.15.24)(cssnano@5.1.12(postcss@8.5.26))(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)
 
   postcss-loader@6.2.1(postcss@8.5.26)(webpack@5.112.2):
     dependencies:
@@ -42966,17 +42950,6 @@ snapshots:
       schema-utils: 3.3.0
       semver: 7.8.5
       webpack: 5.112.2(@swc/core@1.15.24)(cssnano@6.1.2(postcss@8.5.26))(esbuild@0.28.2)(postcss@8.5.26)(webpack-cli@5.1.4)
-    optionalDependencies:
-      sass: 1.69.5
-
-  sass-loader@10.5.2(sass@1.69.5)(webpack@5.112.2):
-    dependencies:
-      klona: 2.0.6
-      loader-utils: 2.0.4
-      neo-async: 2.6.2
-      schema-utils: 3.3.0
-      semver: 7.8.5
-      webpack: 5.112.2(@swc/core@1.15.24)(cssnano@5.1.12(postcss@8.5.26))(esbuild@0.27.7)(postcss@8.5.26)(webpack-cli@5.1.4)
     optionalDependencies:
       sass: 1.69.5
 
