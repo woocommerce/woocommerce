@@ -27,13 +27,8 @@ class ProductTaxonomyOpenGraphTags {
 	 * @return array<array<string, string>>
 	 */
 	public function get_tags( WP_Term $term ): array {
-		$page  = max( 1, (int) get_query_var( 'paged' ) );
 		$title = $term->name;
-		if ( $page > 1 ) {
-			/* translators: 1: archive name, 2: page number. */
-			$title = sprintf( __( '%1$s – Page %2$d', 'woocommerce' ), $title, $page );
-		}
-		$url = wc_get_container()->get( CatalogOpenGraphUrl::class )->get_url();
+		$url   = wc_get_container()->get( CatalogOpenGraphUrl::class )->get_url();
 
 		$shop        = get_post( wc_get_page_id( 'shop' ) );
 		$description = $term->description;
