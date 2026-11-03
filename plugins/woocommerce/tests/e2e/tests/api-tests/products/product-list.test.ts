@@ -2034,26 +2034,36 @@ test.describe( 'Products API tests: List All Products', () => {
 				( p ) => p.name === `T-Shirt ${ RAND_NUM }`
 			);
 
-			const order = await request.post( './wp-json/wc/v3/orders', {
-				data: {
-					set_paid: true,
-					status: 'completed',
-					line_items: [
-						{
-							product_id: single.id,
-							quantity: 2,
-						},
-						{
-							product_id: beanie.id,
-							quantity: 3,
-						},
-						{
-							product_id: shirt.id,
-							quantity: 1,
-						},
-					],
-				},
-			} );
+			const orderData = {
+				set_paid: true,
+				status: 'completed',
+				line_items: [
+					{
+						product_id: single.id,
+						quantity: 2,
+					},
+					{
+						product_id: beanie.id,
+						quantity: 3,
+					},
+					{
+						product_id: shirt.id,
+						quantity: 1,
+					},
+				],
+			};
+
+			// Retry on non-OK responses: with SQLite, concurrent writes can
+			// transiently fail with a plain-text lock error instead of JSON.
+			let order;
+			for ( let attempt = 1; attempt <= 3; attempt++ ) {
+				order = await request.post( './wp-json/wc/v3/orders', {
+					data: orderData,
+				} );
+				if ( order.ok() ) {
+					break;
+				}
+			}
 			const orderJSON = await order.json();
 			return [ orderJSON ];
 		};
@@ -2220,7 +2230,10 @@ test.describe( 'Products API tests: List All Products', () => {
 			}
 		};
 
-		await deleteSampleData( sampleData );
+		// Setup may have failed before the sample data was created.
+		if ( sampleData ) {
+			await deleteSampleData( sampleData );
+		}
 	}, 10000 );
 
 	test.describe( 'List all products', () => {
