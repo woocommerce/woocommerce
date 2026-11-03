@@ -887,9 +887,10 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			\WP_Style_Engine_CSS_Rules_Store::remove_all_stores();
 		}
 
-		$this->assertSame( 1, preg_match( '/<a [^>]*>[^<]*' . preg_quote( get_bloginfo( 'name' ), '/' ) . '/', $rendered, $site_title_link ) );
-		$this->assertStringContainsString( 'color: inherit', $site_title_link[0] );
-		$this->assertStringNotContainsString( '#123456', $site_title_link[0] );
+		// The Site Title is the only link in this email.
+		$site_title_link_styles = (string) $this->getStylesValueForTag( $rendered, 'a' );
+		$this->assertStringContainsString( 'color: inherit', $site_title_link_styles );
+		$this->assertStringNotContainsString( '#123456', $site_title_link_styles );
 	}
 
 	/**
