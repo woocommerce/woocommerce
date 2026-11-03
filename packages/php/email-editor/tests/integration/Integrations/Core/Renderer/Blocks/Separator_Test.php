@@ -133,6 +133,50 @@ class Separator_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Short hex and rgba() colors with alpha are blended too.
+	 *
+	 * @dataProvider alpha_color_provider
+	 * @param string $color Picked color.
+	 * @param string $expected Blended color.
+	 */
+	public function testItBlendsOtherAlphaColorFormats( string $color, string $expected ): void {
+		$rendered = $this->render( array( 'style' => array( 'color' => array( 'background' => $color ) ) ) );
+
+		$this->assertStringContainsString( 'border-top:2px solid ' . $expected, $rendered );
+	}
+
+	/**
+	 * Alpha colors in other formats and their blend onto white.
+	 */
+	public function alpha_color_provider(): array {
+		return array(
+			'four-digit hex' => array( '#f008', '#ff7777' ),
+			'rgba()'         => array( 'rgba(255, 0, 0, 0.5)', '#ff8080' ),
+		);
+	}
+
+	/**
+	 * A three-digit email background is used for the blend, not replaced by white.
+	 */
+	public function testItBlendsOntoShortHexBackground(): void {
+		$theme = clone $this->di_container->get( Theme_Controller::class )->get_theme();
+		$theme->merge(
+			new \WP_Theme_JSON(
+				array(
+					'version' => 3,
+					'styles'  => array( 'color' => array( 'background' => '#000' ) ),
+				),
+				'custom'
+			)
+		);
+		$this->rendering_context = new Rendering_Context( $theme );
+
+		$rendered = $this->render( array( 'style' => array( 'color' => array( 'background' => '#ff000080' ) ) ) );
+
+		$this->assertStringContainsString( 'border-top:2px solid #800000', $rendered );
+	}
+
+	/**
 	 * The plain-text email shows the dots as a row of dashes too.
 	 */
 	public function testItRendersDotsAsDashesInPlainText(): void {

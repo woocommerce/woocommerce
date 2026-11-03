@@ -76,36 +76,53 @@ class Separator extends Abstract_Block_Renderer {
 	 * @param Rendering_Context $rendering_context Rendering context.
 	 */
 	private function get_color( array $attributes, array $email_attrs, Rendering_Context $rendering_context ): string {
-		$styles       = Styles_Helper::get_block_styles( $attributes, $rendering_context, array( 'background-color' ) );
-		$theme_styles = $rendering_context->get_theme_styles();
-		$color        = $styles['declarations']['background-color'] ?? $email_attrs['color'] ?? '#000000';
+		$styles = Styles_Helper::get_block_styles( $attributes, $rendering_context, array( 'background-color' ) );
+		$color  = (string) ( $styles['declarations']['background-color'] ?? $email_attrs['color'] ?? '#000000' );
 
-		$color = Html_Processing_Helper::sanitize_color( (string) $color );
+		// Outlook can’t read alpha, so blend a see-through color onto the email background.
+		// That’s the email background, not a parent Group’s: preprocessors don’t pass that down.
+		$rgba = $this->parse_color( $color );
+		if ( null !== $rgba && $rgba[3] < 1 ) {
+			$theme_styles = $rendering_context->get_theme_styles();
+			$background   = $this->parse_color( (string) ( $theme_styles['color']['background'] ?? '' ) ) ?? array( 255, 255, 255, 1.0 );
+			$blended      = '#';
+			for ( $i = 0; $i < 3; $i++ ) {
+				$blended .= sprintf( '%02x', (int) round( $rgba[ $i ] * $rgba[3] + $background[ $i ] * ( 1 - $rgba[3] ) ) );
+			}
+			return $blended;
+		}
 
-		return $this->blend_alpha( $color, (string) ( $theme_styles['color']['background'] ?? '#ffffff' ) );
+		return Html_Processing_Helper::sanitize_color( $color );
 	}
 
 	/**
-	 * Blends a hex color with alpha (#rrggbbaa, as the color picker saves it) onto the background, since Outlook can’t read alpha.
-	 * Uses the email background, not a parent Group’s: preprocessors don’t pass that down.
+	 * Reads a hex or rgb()/rgba() color as [ red, green, blue, alpha ], or null for any other format.
 	 *
 	 * @param string $color Color.
-	 * @param string $background Email background color; white when it isn’t a 6-digit hex.
+	 * @return array{0: int, 1: int, 2: int, 3: float}|null
 	 */
-	private function blend_alpha( string $color, string $background ): string {
-		if ( ! preg_match( '/^#[0-9a-f]{8}$/i', $color ) ) {
-			return $color;
+	private function parse_color( string $color ): ?array {
+		$color = trim( $color );
+		if ( preg_match( '/^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i', $color, $matches ) ) {
+			$hex = $matches[1];
+			if ( strlen( $hex ) <= 4 ) {
+				$hex = preg_replace( '/(.)/', '$1$1', $hex ) ?? $hex;
+			}
+			return array(
+				(int) hexdec( substr( $hex, 0, 2 ) ),
+				(int) hexdec( substr( $hex, 2, 2 ) ),
+				(int) hexdec( substr( $hex, 4, 2 ) ),
+				8 === strlen( $hex ) ? hexdec( substr( $hex, 6, 2 ) ) / 255 : 1.0,
+			);
 		}
-		if ( ! preg_match( '/^#[0-9a-f]{6}$/i', $background ) ) {
-			$background = '#ffffff';
+		if ( preg_match( '/^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,\s*(\d*\.?\d+)\s*)?\)$/i', $color, $matches ) ) {
+			return array(
+				min( 255, (int) $matches[1] ),
+				min( 255, (int) $matches[2] ),
+				min( 255, (int) $matches[3] ),
+				isset( $matches[4] ) ? min( 1.0, (float) $matches[4] ) : 1.0,
+			);
 		}
-
-		$alpha   = hexdec( substr( $color, 7, 2 ) ) / 255;
-		$blended = '#';
-		for ( $i = 1; $i < 7; $i += 2 ) {
-			$channel  = hexdec( substr( $color, $i, 2 ) ) * $alpha + hexdec( substr( $background, $i, 2 ) ) * ( 1 - $alpha );
-			$blended .= sprintf( '%02x', (int) round( $channel ) );
-		}
-		return $blended;
+		return null;
 	}
 }
