@@ -19,6 +19,12 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
  */
 class Separator extends Abstract_Block_Renderer {
 	/**
+	 * Widest the dots row may get, in px, so it fits a 320px phone screen after the email’s padding.
+	 * The editor CSS in theme.json uses the same limit.
+	 */
+	private const MAX_DOTS_WIDTH = 240;
+
+	/**
 	 * Renders the block content.
 	 *
 	 * @param string            $block_content Block content.
@@ -36,7 +42,10 @@ class Separator extends Abstract_Block_Renderer {
 			$font_size = (string) ( $parsed_block['email_attrs']['font-size'] ?? '16px' );
 			$font_size = Styles_Helper::parse_value( (string) Styles_Helper::convert_to_px( $font_size ) );
 			$dots_size = (int) round( 1.5 * $font_size );
-			$spacing   = 2 * $dots_size;
+			// The cell grows to fit its content, so cap the spacing to fit the column and a phone screen.
+			// The row is 3 dots (counted as 1em each, a safe overestimate) plus 4 spacings.
+			$max_width = min( self::MAX_DOTS_WIDTH, (int) Styles_Helper::parse_value( $parsed_block['email_attrs']['width'] ?? self::MAX_DOTS_WIDTH ) );
+			$spacing   = max( 0, min( 2 * $dots_size, (int) floor( ( $max_width - 3 * $dots_size ) / 4 ) ) );
 			return Table_Wrapper_Helper::render_table_wrapper(
 				'&#183;&#183;&#183;',
 				array(

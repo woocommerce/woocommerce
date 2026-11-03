@@ -241,7 +241,8 @@ class Separator_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( '&#183;&#183;&#183;', $rendered );
 		$this->assertStringContainsString( 'color:#cf2e2e', $rendered );
 		$this->assertStringContainsString( 'font-size:24px', $rendered );
-		$this->assertStringContainsString( 'letter-spacing:48px', $rendered );
+		// 2em would be 48px; the row is capped at 240px so it fits a phone screen.
+		$this->assertStringContainsString( 'letter-spacing:42px', $rendered );
 		$this->assertStringContainsString( 'align="center"', $rendered );
 		$this->assertStringNotContainsString( 'border-top', $rendered );
 	}
@@ -257,7 +258,25 @@ class Separator_Test extends \Email_Editor_Integration_Test_Case {
 		);
 
 		$this->assertStringContainsString( 'font-size:48px', $rendered );
-		$this->assertStringContainsString( 'letter-spacing:96px', $rendered );
+		// 2em would be 96px; the row is capped at 240px so it fits a phone screen.
+		$this->assertStringContainsString( 'letter-spacing:24px', $rendered );
+	}
+
+	/**
+	 * In a narrow column the dot spacing shrinks to fit, so the column doesn’t grow.
+	 */
+	public function testItFitsDotsIntoNarrowColumn(): void {
+		$rendered = $this->render(
+			array( 'className' => 'is-style-dots' ),
+			'<hr class="wp-block-separator has-alpha-channel-opacity is-style-dots"/>',
+			array(
+				'font-size' => '32px',
+				'width'     => '200px',
+			)
+		);
+
+		$this->assertStringContainsString( 'letter-spacing:14px', $rendered );
+		$this->assertStringContainsString( 'padding-left:14px', $rendered );
 	}
 
 	/**
