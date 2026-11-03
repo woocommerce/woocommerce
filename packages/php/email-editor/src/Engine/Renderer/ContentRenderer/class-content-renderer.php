@@ -677,7 +677,7 @@ class Content_Renderer {
 		);
 
 		$styles .= $block_support_styles;
-		// Normalize before the filter too, so callbacks keep receiving the layout rule as `*:not(…)`, as in released versions.
+		// Normalize before the filter too: callbacks get the layout rule as `*:not(…)`, as in released versions, and other rules already unwrapped.
 		$styles = Css_Selector_Normalizer::normalize( $styles );
 		$styles = wp_strip_all_tags( (string) apply_filters( 'woocommerce_email_content_renderer_styles', $styles, $post ) );
 
