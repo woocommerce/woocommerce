@@ -3954,7 +3954,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$result = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'id' => 999999 ) );
 
 		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_ability_order_not_found', $result->get_error_code() );
+		$this->assertSame( 'woocommerce_order_not_found', $result->get_error_code() );
 	}
 
 	/**
@@ -4582,7 +4582,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$result = wp_get_ability( 'woocommerce/order-notes-query' )->execute( array( 'id' => 999999 ) );
 
 		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_ability_order_not_found', $result->get_error_code() );
+		$this->assertSame( 'woocommerce_order_not_found', $result->get_error_code() );
 	}
 
 	/**
