@@ -29,7 +29,8 @@ use PHPStan\Rules\RuleErrorBuilder;
 /**
  * Reports a method of a WC_Data subclass that writes to the database outside save(), unless it also calls on $this
  * the stage_*() method whose refuse_unstaged_override() names it, which marks it as the saving twin of that stage
- * method. A stage_*() method never gets that exemption. Methods of the save pipeline and deletes are exempt. Also reports a stage_*() method of a WC_Data subclass that does not start with
+ * method. A stage_*() method never gets that exemption. Methods of the save pipeline, deletes, and methods that take a
+ * lock, which must write at once, are exempt. Also reports a stage_*() method of a WC_Data subclass that does not start with
  * refuse_unstaged_override().
  *
  * @implements Rule<InClassMethodNode>
@@ -37,6 +38,8 @@ use PHPStan\Rules\RuleErrorBuilder;
 final class StagedWriteRule implements Rule {
 
 	private const ALLOWED_METHODS = array( 'save', 'create', 'update', 'read', 'apply_changes', 'save_items', 'save_meta_data', 'validate_props', 'before_data_store_save_or_update', 'after_data_store_save_or_update' );
+
+	private const LOCK_METHODS = array( 'hold_applied_coupons' );
 
 	private const DATA_STORE_WRITE_PREFIXES = array( 'update', 'delete', 'increase', 'decrease', 'set', 'sync', 'create', 'save' );
 
@@ -65,7 +68,7 @@ final class StagedWriteRule implements Rule {
 		$method = $node->getOriginalNode();
 
 		$name = $method->name->toLowerString();
-		if ( ! $class->isSubclassOf( 'WC_Data' ) || $method->isStatic() || null === $method->stmts || in_array( $name, self::ALLOWED_METHODS, true ) || 0 === strpos( $name, 'delete' ) ) {
+		if ( ! $class->isSubclassOf( 'WC_Data' ) || $method->isStatic() || null === $method->stmts || in_array( $name, self::ALLOWED_METHODS, true ) || in_array( $name, self::LOCK_METHODS, true ) || 0 === strpos( $name, 'delete' ) ) {
 			return array();
 		}
 
@@ -103,6 +106,7 @@ final class StagedWriteRule implements Rule {
 			$calls_twin = $calls_twin || ( self::is_variable( $call->var, 'this' ) && 0 === strpos( $name, 'stage_' ) && self::saving_method_of( $class, $name ) === $method->name->toLowerString() );
 
 			$on_data_store = ( $call->var instanceof PropertyFetch && self::is_variable( $call->var->var, 'this' ) && $call->var->name instanceof Identifier && 'data_store' === $call->var->name->toString() )
+				|| ( $call->var instanceof MethodCall && self::is_variable( $call->var->var, 'this' ) && $call->var->name instanceof Identifier && 'get_data_store' === $call->var->name->toLowerString() )
 				|| ( $call->var instanceof Variable && in_array( $call->var->name, $data_stores, true ) );
 
 			$writes = $writes
