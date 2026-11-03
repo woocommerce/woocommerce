@@ -208,6 +208,57 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should give every input field of a Core ability one type, so clients that accept one type per field can use the tools.
+	 */
+	public function test_core_ability_inputs_have_one_type_per_field(): void {
+		$abilities = array_filter(
+			wp_get_abilities(),
+			static fn( \WP_Ability $ability ): bool => 0 === strpos( $ability->get_name(), 'woocommerce/' )
+		);
+		$this->assertNotEmpty( $abilities );
+
+		$problems = array();
+		foreach ( $abilities as $ability ) {
+			$this->collect_mixed_types( $ability->get_input_schema(), $ability->get_name(), $problems );
+		}
+
+		$this->assertSame( array(), $problems );
+	}
+
+	/**
+	 * Collect the paths of a schema where a field takes a type list, or one value or a list of it.
+	 *
+	 * @param mixed    $schema   Schema to walk.
+	 * @param string   $path     Path of the schema.
+	 * @param string[] $problems Paths found so far.
+	 */
+	private function collect_mixed_types( $schema, string $path, array &$problems ): void {
+		if ( ! is_array( $schema ) ) {
+			return;
+		}
+		if ( is_array( $schema['type'] ?? null ) ) {
+			$problems[] = $path . ' declares the type list ' . implode( '|', $schema['type'] );
+		}
+		foreach ( array( 'anyOf', 'oneOf' ) as $keyword ) {
+			$types = array_column( $schema[ $keyword ] ?? array(), 'type' );
+			if ( in_array( 'array', $types, true ) && count( array_unique( $types ) ) > 1 ) {
+				$problems[] = $path . ' takes one value or a list in ' . $keyword;
+			}
+		}
+		foreach ( array( 'properties', 'patternProperties' ) as $keyword ) {
+			foreach ( $schema[ $keyword ] ?? array() as $name => $child ) {
+				$this->collect_mixed_types( $child, $path . '.' . $name, $problems );
+			}
+		}
+		foreach ( array( 'items', 'additionalProperties' ) as $keyword ) {
+			$this->collect_mixed_types( $schema[ $keyword ] ?? null, $path . '.' . $keyword, $problems );
+		}
+		foreach ( array_merge( $schema['anyOf'] ?? array(), $schema['oneOf'] ?? array() ) as $index => $branch ) {
+			$this->collect_mixed_types( $branch, $path . '.' . $index, $problems );
+		}
+	}
+
+	/**
 	 * @testdox Should mark write abilities as destructive and queries as readonly/idempotent.
 	 */
 	public function test_canonical_ability_annotations_match_intent(): void {
@@ -403,7 +454,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$query_schema  = wp_get_ability( 'woocommerce/orders-query' )->get_input_schema();
 		$update_schema = wp_get_ability( 'woocommerce/order-update-status' )->get_input_schema();
 
-		$this->assertNotContains( 'checkout-draft', $query_schema['properties']['status']['anyOf'][0]['enum'] ?? array() );
+		$this->assertNotContains( 'checkout-draft', $query_schema['properties']['status']['items']['enum'] );
 		$this->assertNotContains( 'checkout-draft', $update_schema['properties']['status']['enum'] ?? array() );
 	}
 
@@ -456,7 +507,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$output  = $ability->get_output_schema()['properties']['orders']['items']['properties'];
 
 			$this->assertContains( 'shop_test_contract', $input['type']['enum'] );
-			$this->assertContains( 'test-active', $input['status']['anyOf'][0]['enum'] );
+			$this->assertSame( 'array', $input['status']['type'] );
+			$this->assertContains( 'test-active', $input['status']['items']['enum'] );
 			$this->assertContains( 'test-active', $output['status']['enum'] );
 
 			$query_args = $this->capture_order_query_args(
@@ -524,7 +576,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$input   = $ability->get_input_schema()['properties'];
 			$output  = $ability->get_output_schema()['properties']['orders']['items']['properties'];
 
-			$this->assertNotContains( 'test-hidden', $input['status']['anyOf'][0]['enum'] );
+			$this->assertNotContains( 'test-hidden', $input['status']['items']['enum'] );
 			$this->assertContains( 'test-hidden', $output['status']['enum'] );
 
 			$query_args = $this->capture_order_query_args( array( 'type' => 'shop_test_contract' ) );

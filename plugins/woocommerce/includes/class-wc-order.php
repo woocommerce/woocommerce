@@ -30,6 +30,20 @@ class WC_Order extends WC_Abstract_Order {
 	protected $status_transition = false;
 
 	/**
+	 * Whether set_status() leaves woocommerce_order_edit_status to the next save(). stage_status() sets it.
+	 *
+	 * @var bool
+	 */
+	private $staging_status = false;
+
+	/**
+	 * Status that the next save() fires woocommerce_order_edit_status for, or null when there is none.
+	 *
+	 * @var string|null
+	 */
+	private $pending_edit_status = null;
+
+	/**
 	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
 	 *
 	 * @since 3.0.0
@@ -281,6 +295,24 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return int order ID
 	 */
 	public function save() {
+		$status                    = $this->pending_edit_status;
+		$this->pending_edit_status = null;
+
+		if ( null !== $status ) {
+			/**
+			 * Fires for a manual status change of an order, before the change
+			 * is written, so a listener that reloads the order sees the old row.
+			 * After set_status(), it fires before the paid and completed dates
+			 * are set. After stage_status() or update_status(), it fires from
+			 * save(), with those dates already set on the order object.
+			 *
+			 * @since 3.0.0
+			 * @param int    $order_id Order ID.
+			 * @param string $status   New status, without the wc- prefix.
+			 */
+			do_action( 'woocommerce_order_edit_status', $this->get_id(), $status );
+		}
+
 		$this->maybe_set_user_billing_email();
 		parent::save();
 		$this->status_transition();
@@ -327,7 +359,9 @@ class WC_Order extends WC_Abstract_Order {
 				'manual' => (bool) $manual_update,
 			);
 
-			if ( $manual_update ) {
+			$this->pending_edit_status = $manual_update && $this->staging_status ? $result['to'] : null;
+
+			if ( $manual_update && ! $this->staging_status ) {
 				do_action( 'woocommerce_order_edit_status', $this->get_id(), $result['to'] );
 			}
 
@@ -391,9 +425,34 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Set the order status in memory, like set_status(), including the paid and completed dates, but leave
+	 * woocommerce_order_edit_status to the next save(), which fires it before it writes. A later status
+	 * change before that save() replaces the pending action, or cancels it when the change is not manual.
+	 * update_status() calls this method, then save().
+	 *
+	 * An order class that overrides update_status() with rules of its own must override this method
+	 * too, in the same class, with the same rules. Abilities stage a status change with this method
+	 * only when every class that declares update_status() also declares this method.
+	 *
+	 * @since 11.4.0
+	 * @param string       $new_status    Status to change the order to. No internal wc- prefix is required.
+	 * @param string|false $note          Optional note to add. False will skip adding a note entirely.
+	 * @param bool         $manual_update Is this a manual order status change?.
+	 * @return array
+	 */
+	public function stage_status( $new_status, $note = '', $manual_update = false ) {
+		$this->staging_status = true;
+		try {
+			return $this->set_status( $new_status, $note, $manual_update );
+		} finally {
+			$this->staging_status = false;
+		}
+	}
+
+	/**
 	 * Updates status of order immediately.
 	 *
-	 * @uses self::set_status()
+	 * @uses self::stage_status()
 	 * @param string $new_status    Status to change the order to. No internal wc- prefix is required.
 	 * @param string $note          Optional note to add.
 	 * @param bool   $manual        Is this a manual order status change?.
@@ -405,7 +464,7 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		try {
-			$this->set_status( $new_status, $note, $manual );
+			$this->stage_status( $new_status, $note, $manual );
 			$this->save();
 		} catch ( Exception $e ) {
 			$logger = wc_get_logger();

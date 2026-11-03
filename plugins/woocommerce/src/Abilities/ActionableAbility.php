@@ -101,10 +101,11 @@ abstract class ActionableAbility extends \WP_Ability {
 	abstract protected function prepare_response( $subject );
 
 	/**
-	 * Save the changed object. The default calls WC_Data::save(). When the save
-	 * throws or leaves the object without an ID, it logs the error and returns
-	 * a WP_Error with a fixed message, so the exception text stays out of the
-	 * response.
+	 * Save the changed object. The default calls WC_Data::save(). An order's
+	 * save() catches a failed write, so the default reads that error from
+	 * WC_Abstract_Order::get_last_save_error(). When the save fails or leaves
+	 * the object without an ID, it logs the error and returns a WP_Error with a
+	 * fixed message, so the exception text stays out of the response.
 	 *
 	 * @since 11.3.0
 	 *
@@ -114,9 +115,14 @@ abstract class ActionableAbility extends \WP_Ability {
 	protected function save( $subject ) {
 		try {
 			$subject->save();
+			$error = $subject instanceof \WC_Abstract_Order ? $subject->get_last_save_error() : null;
 		} catch ( \Exception $e ) {
+			$error = $e;
+		}
+
+		if ( null !== $error ) {
 			wc_get_logger()->error(
-				sprintf( 'Ability "%s" failed to save: %s', $this->get_name(), $e->getMessage() ),
+				sprintf( 'Ability "%s" failed to save: %s', $this->get_name(), $error->getMessage() ),
 				array( 'source' => 'woocommerce-abilities' )
 			);
 			return self::save_failed();

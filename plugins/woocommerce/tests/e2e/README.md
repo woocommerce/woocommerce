@@ -231,7 +231,7 @@ How a helper is wired up depends on when it needs to be active:
     - `woocommerce-e2e-test-helper` — the general-purpose helper bundle, covering four concerns in one plugin:
         - **Filter setter** — registers WordPress filters from an `e2e-filters` cookie so tests can override filtered values on the fly.
         - **Process waiting actions** — runs the Action Scheduler queue synchronously when a request carries the `?process-waiting-actions` query param (used by the analytics suite so order data lands in reports immediately).
-        - **Test helper REST API** — endpoints (`e2e-feature-flags`, `e2e-options`, `e2e-environment`, `e2e-theme`) for toggling feature flags, setting/deleting options, reading environment info and switching themes during a test.
+        - **Test helper REST API** — endpoints (`e2e-feature-flags`, `e2e-options`, `e2e-theme`) for toggling feature flags, setting/deleting options and switching themes during a test.
         - **Timing overrides** — fixed filters removing production delays and throttles that only slow tests down or make them flaky: WordPress' comment flood protection, and the 1-minute wait before the first Back in Stock Notifications batch. Unconditional rather than cookie-driven, because they must also apply to REST requests made outside the browser.
     - `wc-email-template-sync-test-helper` — see below (email template sync fixtures for RSM-146).
 - **Per-test block plugins** live in `tests/e2e/test-plugins/blocks/`, mounted (not auto-activated) via the `woocommerce-blocks-test-plugins` mapping. They change store behavior, so they must not act for every test.
