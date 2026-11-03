@@ -1207,6 +1207,20 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: stage_payment_complete does not change an order that is not saved yet.
+	 */
+	public function test_stage_payment_complete_refuses_an_unsaved_order() {
+		$object = new WC_Order();
+		$fired  = did_action( 'woocommerce_payment_complete' );
+
+		$this->assertFalse( $object->stage_payment_complete( '12345' ) );
+		$object->save();
+
+		$this->assertSame( 0, did_action( 'woocommerce_payment_complete' ) - $fired );
+		$this->assertNull( wc_get_order( $object->get_id() )->get_date_paid( 'edit' ) );
+	}
+
+	/**
 	 * Test: payment_complete fires woocommerce_payment_complete once, after the write, and does not save an order whose status payment cannot complete.
 	 */
 	public function test_payment_complete_fires_its_action_after_the_write() {

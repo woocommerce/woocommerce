@@ -184,6 +184,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * When the order status is not one that payment can complete, the order does not change, the
 	 * woocommerce_payment_complete_order_status_<status> action fires right away, and the method returns false.
 	 *
+	 * An order that is not saved yet does not change, and the method returns false.
+	 *
 	 * An order class that overrides payment_complete() with rules of its own must override this method too,
 	 * with the same rules.
 	 *
@@ -193,6 +195,10 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function stage_payment_complete( $transaction_id = '' ) {
 		$this->refuse_unstaged_override( 'payment_complete', 'stage_payment_complete' );
+
+		if ( ! $this->get_id() ) {
+			return false;
+		}
 
 		/**
 		 * Fires before the payment of an order is completed.
