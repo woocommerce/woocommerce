@@ -1,0 +1,76 @@
+{
+	"name": "woocommerce/payment-gateways-query",
+	"label": "Query payment gateways",
+	"description": "List the payment gateways in checkout order, enabled or not, or get one by ID.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"id": {
+				"type": "string",
+				"description": "Payment gateway ID, such as bacs or cod.",
+				"minLength": 1
+			}
+		},
+		"default": [],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"gateways": {
+				"type": "array",
+				"description": "Returned gateways for the current page.",
+				"items": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "string"
+						},
+						"title": {
+							"type": "string",
+							"description": "Title shown to customers at checkout. Can be empty."
+						},
+						"method_title": {
+							"type": "string",
+							"description": "Name of the payment method or provider."
+						},
+						"description": {
+							"type": "string",
+							"description": "Description shown to customers at checkout. Can be empty."
+						},
+						"enabled": {
+							"type": "boolean"
+						}
+					},
+					"additionalProperties": false
+				}
+			},
+			"total_pages": {
+				"type": "integer",
+				"description": "Total number of result pages available for the current query."
+			},
+			"page": {
+				"type": "integer",
+				"description": "Current result page."
+			},
+			"per_page": {
+				"type": "integer",
+				"description": "Maximum number of items requested per page."
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": true,
+			"destructive": false,
+			"idempotent": true
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

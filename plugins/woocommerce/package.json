@@ -99,6 +99,7 @@
 		"test:php": "sh ./client/blocks/bin/copy-blocks-json.sh && ./vendor/bin/phpunit -c ./phpunit.xml",
 		"test:php:hpos-off": "sh ./client/blocks/bin/copy-blocks-json.sh && DISABLE_HPOS=1 ./vendor/bin/phpunit -c ./phpunit.xml",
 		"test:php:watch": "sh ./client/blocks/bin/copy-blocks-json.sh && ./vendor/bin/phpunit-watcher watch",
+		"test:mcp-inspector": "node --test 'tests/mcp-inspector/*.test.mjs'",
 		"test:metrics": "USE_WP_ENV=1 pnpm playwright test --config=tests/metrics/playwright.config.js",
 		"test:metrics:ci": "../../.github/workflows/scripts/run-metrics.sh",
 		"test:metrics:ci:unified-editor-assets": "pnpm wp-env:e2e run cli wp option update woocommerce_feature_block_editor_unified_assets_enabled yes && pnpm test:metrics:ci",
