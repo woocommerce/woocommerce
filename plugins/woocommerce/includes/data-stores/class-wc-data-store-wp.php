@@ -333,6 +333,7 @@ class WC_Data_Store_WP {
 	 * Map a valid date query var to WP_Query arguments.
 	 * Valid date formats: YYYY-MM-DD or timestamp, possibly combined with an operator from $valid_operators.
 	 * Also accepts a WC_DateTime object.
+	 * An array, or an object without __toString(), adds an entry to $wp_query_args['errors'] instead of a date clause, so callers must check 'errors' before querying.
 	 *
 	 * @since 3.2.0
 	 * @param mixed  $query_var A valid date format.
