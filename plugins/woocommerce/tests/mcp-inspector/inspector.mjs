@@ -31,7 +31,7 @@ function toolArg( key, value ) {
 export function inspect( { user, method, toolName, toolArgs = {} } ) {
 	if ( ! existsSync( INSPECTOR_BIN ) ) {
 		throw new Error(
-			`MCP Inspector is not installed at ${ INSPECTOR_BIN }. Install @modelcontextprotocol/inspector@2.11.0 and point MCP_INSPECTOR_BIN at its mcp-inspector binary.`
+			`MCP Inspector is not installed at ${ INSPECTOR_BIN }. Run \`pnpm install\` first.`
 		);
 	}
 
@@ -58,6 +58,8 @@ export function inspect( { user, method, toolName, toolArgs = {} } ) {
 		'pnpm',
 		'exec',
 		'wp-env',
+		'--config',
+		'.wp-env.mcp.json',
 		'run',
 		'cli',
 		'wp',
