@@ -61,7 +61,7 @@
 		"ts-loader": "9.5.x",
 		"typescript": "5.7.x",
 		"webpack": "catalog:tooling",
-		"webpack-cli": "5.1.x"
+		"webpack-cli": "catalog:tooling"
 	},
 	"engines": {
 		"node": "^24.15.0"

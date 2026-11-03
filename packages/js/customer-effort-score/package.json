@@ -119,7 +119,7 @@
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
 		"webpack": "catalog:tooling",
-		"webpack-cli": "5.1.x"
+		"webpack-cli": "catalog:tooling"
 	},
 	"peerDependencies": {
 		"@wordpress/data": "^10.19.0",

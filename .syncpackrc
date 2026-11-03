@@ -119,15 +119,16 @@
 				"@babel/preset-typescript",
 				"@babel/runtime",
 				"@wordpress/env",
-				"@wordpress/prettier-config",
 				"@wordpress/postcss-plugins-preset",
+				"@wordpress/prettier-config",
 				"@wordpress/scripts",
 				"babel-loader",
 				"copy-webpack-plugin",
 				"postcss",
 				"prettier",
 				"simple-git",
-				"webpack"
+				"webpack",
+				"webpack-cli"
 			],
 			"packages": [
 				"**"
@@ -215,15 +216,6 @@
 				"**"
 			],
 			"pinVersion": "^10.0.0"
-		},
-		{
-			"dependencies": [
-				"webpack-cli"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "5.1.x"
 		},
 		{
 			"dependencies": [

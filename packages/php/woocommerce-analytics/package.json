@@ -45,7 +45,7 @@
 		"jest-environment-jsdom": "29.5.x",
 		"typescript": "5.7.x",
 		"webpack": "catalog:tooling",
-		"webpack-cli": "5.1.x"
+		"webpack-cli": "catalog:tooling"
 	},
 	"config": {
 		"ci": {

@@ -92,6 +92,7 @@ catalogs:
         simple-git: ^4.0.2
         stylelint: ^16.9.0
         webpack: 5.112.2
+        webpack-cli: 5.1.x
 
 packages:
     - 'packages/js/*'

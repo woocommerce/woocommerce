@@ -210,7 +210,7 @@
 		"utility-types": "3.10.0",
 		"webpack": "catalog:tooling",
 		"webpack-bundle-analyzer": "4.9.x",
-		"webpack-cli": "5.1.x",
+		"webpack-cli": "catalog:tooling",
 		"wp-types": "3.63.0"
 	},
 	"engines": {

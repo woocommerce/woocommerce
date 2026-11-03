@@ -212,7 +212,7 @@
 		"typescript": "5.7.x",
 		"webpack": "catalog:tooling",
 		"webpack-bundle-analyzer": "4.9.x",
-		"webpack-cli": "5.1.x",
+		"webpack-cli": "catalog:tooling",
 		"webpack-fix-style-only-entries": "^0.6.1",
 		"whatwg-fetch": "^3.6.20"
 	},

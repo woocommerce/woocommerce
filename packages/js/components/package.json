@@ -190,7 +190,7 @@
 		"typescript": "5.7.x",
 		"uuid": "^11.1.1",
 		"webpack": "catalog:tooling",
-		"webpack-cli": "5.1.x"
+		"webpack-cli": "catalog:tooling"
 	},
 	"config": {
 		"ci": {
