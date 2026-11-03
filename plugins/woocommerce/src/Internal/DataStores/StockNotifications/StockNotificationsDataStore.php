@@ -198,7 +198,22 @@ CREATE TABLE $meta_table_name (
 		$notification->save_meta_data();
 		$notification->apply_changes();
 
-		return $notification->get_id();
+		/**
+		 * Action: woocommerce_new_stock_notification
+		 *
+		 * Fires after a stock notification is created, from any code path.
+		 * With double opt-in the new notification is `pending` until the shopper verifies it, so
+		 * integrations that only want confirmed sign-ups can wait for
+		 * `woocommerce_stock_notification_status_changed` to `active` instead.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param int          $notification_id The notification ID.
+		 * @param Notification $notification    The notification.
+		 */
+		do_action( 'woocommerce_new_stock_notification', $notification_id, $notification );
+
+		return $notification_id;
 	}
 
 	/**
@@ -263,10 +278,13 @@ CREATE TABLE $meta_table_name (
 			return new \WP_Error( 'invalid_stock_notification', 'Invalid notification ID.' );
 		}
 
-		$changes = $notification->get_changes();
-		$result  = 0;
+		$changes     = $notification->get_changes();
+		$result      = 0;
+		$status_from = $notification->get_data()['status'];
 
-		if ( array_intersect( array( 'product_id', 'user_id', 'user_email', 'status', 'date_modified', 'date_confirmed', 'date_last_attempt', 'date_notified', 'date_cancelled', 'cancellation_source' ), array_keys( $changes ) ) ) {
+		$has_prop_changes = (bool) array_intersect( array( 'product_id', 'user_id', 'user_email', 'status', 'date_modified', 'date_confirmed', 'date_last_attempt', 'date_notified', 'date_cancelled', 'cancellation_source' ), array_keys( $changes ) );
+
+		if ( $has_prop_changes || $notification->has_meta_changes() ) {
 
 			if ( ! array_key_exists( 'date_modified', $changes ) ) {
 				$notification->set_date_modified( time() );
@@ -298,9 +316,37 @@ CREATE TABLE $meta_table_name (
 		}
 
 		$notification->save_meta_data();
+		$notification->apply_changes();
 
-		if ( $changes ) {
-			$notification->apply_changes();
+		$status_to = $notification->get_status( 'edit' );
+
+		/**
+		 * Action: woocommerce_update_stock_notification
+		 *
+		 * Fires after a stock notification is updated, from any code path, whether or not anything changed.
+		 * Also fires inside the back-in-stock send batch, so defer remote calls to Action Scheduler.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param int          $notification_id The notification ID.
+		 * @param Notification $notification    The notification.
+		 */
+		do_action( 'woocommerce_update_stock_notification', $notification->get_id(), $notification );
+
+		if ( array_key_exists( 'status', $changes ) && $status_from !== $status_to ) {
+			/**
+			 * Action: woocommerce_stock_notification_status_changed
+			 *
+			 * Fires after a stock notification's status is persisted with a different value, from any code path.
+			 *
+			 * @since 11.3.0
+			 *
+			 * @param int          $notification_id The notification ID.
+			 * @param string       $status_from     The previous status.
+			 * @param string       $status_to       The new status.
+			 * @param Notification $notification    The notification.
+			 */
+			do_action( 'woocommerce_stock_notification_status_changed', $notification->get_id(), $status_from, $status_to, $notification );
 		}
 
 		return $result;
@@ -316,10 +362,23 @@ CREATE TABLE $meta_table_name (
 	public function delete( &$notification, $args = array() ) {
 		global $wpdb;
 
-		$deleted = $wpdb->delete( $this->get_table_name(), array( 'id' => $notification->get_id() ), array( '%d' ) );
+		$notification_id = $notification->get_id();
+		$deleted         = $wpdb->delete( $this->get_table_name(), array( 'id' => $notification_id ), array( '%d' ) );
 
 		if ( $deleted > 0 ) {
-			$this->data_store_meta->delete_by_notification_id( $notification->get_id() );
+			$this->data_store_meta->delete_by_notification_id( $notification_id );
+
+			/**
+			 * Action: woocommerce_delete_stock_notification
+			 *
+			 * Fires after a stock notification is deleted, from any code path.
+			 *
+			 * @since 11.3.0
+			 *
+			 * @param int          $notification_id The deleted notification ID.
+			 * @param Notification $notification    The notification, as it was before deletion.
+			 */
+			do_action( 'woocommerce_delete_stock_notification', $notification_id, $notification );
 		}
 	}
 
@@ -332,7 +391,6 @@ CREATE TABLE $meta_table_name (
 	 */
 	public function add_meta( &$notification, $meta ) {
 		$add_meta = $this->data_store_meta->add_meta( $notification, $meta );
-		$this->after_meta_change( $notification );
 		return $add_meta ? $add_meta : false;
 	}
 
@@ -355,9 +413,7 @@ CREATE TABLE $meta_table_name (
 	 * @return bool
 	 */
 	public function update_meta( &$notification, $meta ): bool {
-		$update_meta = $this->data_store_meta->update_meta( $notification, $meta );
-		$this->after_meta_change( $notification );
-		return $update_meta;
+		return $this->data_store_meta->update_meta( $notification, $meta );
 	}
 
 	/**
@@ -368,35 +424,7 @@ CREATE TABLE $meta_table_name (
 	 * @return bool
 	 */
 	public function delete_meta( &$notification, $meta ): bool {
-		$delete_meta = $this->data_store_meta->delete_meta( $notification, $meta );
-
-		$this->after_meta_change( $notification );
-		return $delete_meta;
-	}
-
-	/**
-	 * Perform after meta change operations.
-	 *
-	 * @param Notification $notification The notification object.
-	 * @return bool True if changes were applied, false otherwise.
-	 */
-	private function after_meta_change( &$notification ): bool {
-
-		$current_time      = time();
-		$current_date_time = new \WC_DateTime( "@$current_time", new \DateTimeZone( 'UTC' ) );
-
-		$should_save =
-			$notification->get_id() > 0
-			&& $notification->get_date_modified( 'edit' ) < $current_date_time
-			&& empty( $notification->get_changes() );
-
-		if ( $should_save ) {
-			$notification->set_date_modified( $current_time );
-			$saved = $notification->save();
-			return ! is_wp_error( $saved );
-		}
-
-		return false;
+		return $this->data_store_meta->delete_meta( $notification, $meta );
 	}
 
 	/**
@@ -415,6 +443,7 @@ CREATE TABLE $meta_table_name (
 				'product_id'         => array(),
 				'user_id'            => 0,
 				'user_email'         => '',
+				'customer'           => array(),
 				'last_attempt_limit' => 0,
 				'start_date'         => 0,
 				'end_date'           => 0,
@@ -466,6 +495,32 @@ CREATE TABLE $meta_table_name (
 			$where_values[] = EmailNormalizer::normalize( (string) $args['user_email'] );
 		}
 
+		if ( ! empty( $args['customer'] ) ) {
+			$customer_ids    = array();
+			$customer_emails = array();
+			foreach ( (array) $args['customer'] as $customer ) {
+				if ( is_int( $customer ) || ( is_string( $customer ) && ctype_digit( $customer ) ) ) {
+					$customer_ids[] = (int) $customer;
+				} elseif ( is_string( $customer ) && '' !== EmailNormalizer::normalize( $customer ) ) {
+					$customer_emails[] = EmailNormalizer::normalize( $customer );
+				}
+			}
+
+			$customer_ids    = array_values( array_unique( array_filter( $customer_ids ) ) );
+			$customer_emails = array_values( array_unique( $customer_emails ) );
+			$customer_where  = array();
+			if ( ! empty( $customer_ids ) ) {
+				$customer_where[] = 'user_id IN (' . implode( ',', array_fill( 0, count( $customer_ids ), '%d' ) ) . ')';
+				$where_values     = array_merge( $where_values, $customer_ids );
+			}
+			if ( ! empty( $customer_emails ) ) {
+				$customer_where[] = 'user_email IN (' . implode( ',', array_fill( 0, count( $customer_emails ), '%s' ) ) . ')';
+				$where_values     = array_merge( $where_values, $customer_emails );
+			}
+
+			$where[] = empty( $customer_where ) ? '1=0' : '(' . implode( ' OR ', $customer_where ) . ')';
+		}
+
 		if ( $args['last_attempt_limit'] > 0 ) {
 			$where[]        = '(date_last_attempt_gmt < %s OR date_last_attempt_gmt IS NULL)';
 			$where_values[] = gmdate( 'Y-m-d H:i:s', $args['last_attempt_limit'] );
@@ -485,7 +540,8 @@ CREATE TABLE $meta_table_name (
 		$order_by         = '';
 		$order_by_clauses = array();
 
-		if ( $args['order_by'] && is_array( $args['order_by'] ) ) {
+		// A COUNT() has no rows to sort, and ORDER BY on it fails under ONLY_FULL_GROUP_BY.
+		if ( 'count' !== $args['return'] && $args['order_by'] && is_array( $args['order_by'] ) ) {
 			foreach ( $args['order_by'] as $what => $how ) {
 				$order_by_clauses[] = $table . '.' . esc_sql( strval( $what ) ) . ' ' . esc_sql( strval( $how ) );
 			}

@@ -4,7 +4,10 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Admin;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController;
+use Automattic\WooCommerce\Internal\StockNotifications\Config;
+use Automattic\WooCommerce\Internal\StockNotifications\DataRetentionController;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
+use WC_Helper_Product;
 use WC_Settings_Advanced;
 use WC_Settings_Products;
 use WP_REST_Request;
@@ -84,6 +87,7 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 		$this->assertSame( 100, has_filter( 'woocommerce_get_sections_products', array( $sut, 'add_customer_stock_notifications_section' ) ) );
 		$this->assertSame( 100, has_filter( 'woocommerce_get_settings_products', array( $sut, 'add_customer_stock_notifications_settings' ) ) );
 		$this->assertSame( 100, has_filter( 'woocommerce_get_settings_advanced', array( $sut, 'add_my_account_endpoint_setting' ) ) );
+		$this->assertSame( 10, has_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_customer_stock_notifications_unverified_deletions_days_threshold', array( $sut, 'sanitize_unverified_deletion_days_threshold' ) ) );
 		$this->assertFalse( has_action( 'admin_notices', array( $sut, 'output_admin_notices' ) ) );
 		$this->assertFalse( has_action( 'woocommerce_product_options_stock_status', array( $sut, 'add_disable_stock_notifications_checkbox' ) ) );
 		$this->assertFalse( has_action( 'woocommerce_admin_process_product_object', array( $sut, 'process_product_object' ) ) );
@@ -167,9 +171,109 @@ class SettingsControllerTests extends \WC_Settings_Unit_Test_Case {
 	}
 
 	/**
-	 * Reset the REST server so this test does not leak it into tests that run after it.
+	 * @return array<string, array{0: string, 1: bool, 2: string}>
+	 */
+	public function provider_product_signups_checkbox(): array {
+		return array(
+			'no meta, checkbox unticked'  => array( '', false, 'no' ),
+			'no meta, checkbox ticked'    => array( '', true, '' ),
+			'disabled, checkbox ticked'   => array( 'no', true, 'yes' ),
+			'enabled, checkbox unticked'  => array( 'yes', false, 'no' ),
+			'disabled, checkbox unticked' => array( 'no', false, 'no' ),
+		);
+	}
+
+	/**
+	 * @testdox Saving a product stores the "Stock notifications" checkbox when it differs from the effective value.
+	 *
+	 * @dataProvider provider_product_signups_checkbox
+	 *
+	 * @param string $stored_value   Meta value before saving.
+	 * @param bool   $posted_enabled Whether the checkbox is posted.
+	 * @param string $expected_value Meta value after saving.
+	 */
+	public function test_process_product_object_saves_signups_checkbox( string $stored_value, bool $posted_enabled, string $expected_value ): void {
+		update_option( 'woocommerce_customer_stock_notifications_allow_signups', 'yes' );
+		$meta_key = Config::get_product_signups_meta_key();
+		$product  = WC_Helper_Product::create_simple_product();
+		if ( '' !== $stored_value ) {
+			$product->update_meta_data( $meta_key, $stored_value );
+			$product->save();
+		}
+
+		$nonce = wp_create_nonce( 'woocommerce-customer-stock-notifications-edit-product' );
+		$_POST['customer_stock_notifications_edit_product_security']    = $nonce;
+		$_REQUEST['customer_stock_notifications_edit_product_security'] = $nonce;
+		if ( $posted_enabled ) {
+			$_POST[ $meta_key ] = 'on';
+		}
+
+		SettingsController::process_product_object( $product );
+
+		$this->assertSame( $expected_value, $product->get_meta( $meta_key ) );
+	}
+
+	/**
+	 * @testdox Saving a product from a form without the stock notifications nonce field leaves the setting unchanged.
+	 */
+	public function test_process_product_object_skips_save_when_nonce_field_is_absent(): void {
+		update_option( 'woocommerce_customer_stock_notifications_allow_signups', 'yes' );
+		$meta_key = Config::get_product_signups_meta_key();
+		$product  = WC_Helper_Product::create_simple_product();
+		$product->update_meta_data( $meta_key, 'yes' );
+		$product->save();
+
+		SettingsController::process_product_object( $product );
+
+		$this->assertSame( 'yes', $product->get_meta( $meta_key ) );
+	}
+
+	/**
+	 * @testdox Saving a negative unverified sign-up deletion threshold stores 0 and unschedules the cleanup.
+	 */
+	public function test_negative_unverified_deletion_days_threshold_is_saved_as_zero() {
+		$option_id            = 'woocommerce_customer_stock_notifications_unverified_deletions_days_threshold';
+		$retention_controller = new DataRetentionController();
+		update_option( $option_id, 30 );
+		$this->assertSame( 'daily', wp_get_schedule( DataRetentionController::DAILY_TASK_HOOK ), 'A positive threshold should schedule the cleanup.' );
+
+		\WC_Admin_Settings::save_fields(
+			array(
+				array(
+					'id'   => $option_id,
+					'type' => 'number',
+				),
+			),
+			array( $option_id => '-5' )
+		);
+
+		$this->assertSame( 0, (int) get_option( $option_id ), 'A negative threshold should be stored as 0.' );
+		$this->assertFalse( wp_get_schedule( DataRetentionController::DAILY_TASK_HOOK ), 'A negative threshold should turn the cleanup off.' );
+
+		$retention_controller->clear_daily_task();
+	}
+
+	/**
+	 * @testdox A stored negative unverified sign-up deletion threshold renders as 0 so the settings form stays submittable.
+	 */
+	public function test_stored_negative_unverified_deletion_days_threshold_renders_as_zero() {
+		$option_id = 'woocommerce_customer_stock_notifications_unverified_deletions_days_threshold';
+		update_option( $option_id, -5 );
+
+		$settings = ( new WC_Settings_Products() )->get_settings_for_section( 'customer_stock_notifications' );
+		$field    = current( array_filter( $settings, fn( $setting ) => ( $setting['id'] ?? '' ) === $option_id ) );
+
+		$this->assertSame( 0, $field['value'] );
+		$this->assertSame( 0, $field['custom_attributes']['min'] );
+
+		delete_option( $option_id );
+	}
+
+	/**
+	 * Reset the REST server and request globals so this test does not leak them into tests that run after it.
 	 */
 	public function tearDown(): void {
+		unset( $_POST['customer_stock_notifications_edit_product_security'], $_REQUEST['customer_stock_notifications_edit_product_security'], $_POST[ Config::get_product_signups_meta_key() ] );
 		$this->clear_rest_server();
 		parent::tearDown();
 	}

@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import {
 	AlignmentToolbar,
+	BlockVerticalAlignmentToolbar,
 	BlockControls as BlockControlsWrapper,
 	MediaReplaceFlow,
 } from '@wordpress/block-editor';
@@ -31,14 +32,16 @@ interface WithBlockControlsRequiredProps< T > {
 	canEditItem: boolean;
 }
 
-interface WithBlockControlsCategoryProps< T >
-	extends WithBlockControlsRequiredProps< T > {
+interface WithBlockControlsCategoryProps<
+	T,
+> extends WithBlockControlsRequiredProps< T > {
 	category: WP_REST_API_Category;
 	product: never;
 }
 
-interface WithBlockControlsProductProps< T >
-	extends WithBlockControlsRequiredProps< T > {
+interface WithBlockControlsProductProps<
+	T,
+> extends WithBlockControlsRequiredProps< T > {
 	category: never;
 	product: ProductResponseItem;
 }
@@ -49,6 +52,7 @@ type WithBlockControlsProps< T extends EditorBlock< T > > =
 
 type BlockControlRequiredAttributes = {
 	contentAlign: BlockAlignment;
+	verticalAlignment?: 'top' | 'center' | 'bottom' | undefined;
 	mediaId: number;
 	mediaSrc: string;
 };
@@ -58,6 +62,7 @@ interface BlockControlsProps {
 	backgroundImageId: number;
 	backgroundImageSrc: string;
 	contentAlign: BlockAlignment;
+	verticalAlignment?: 'top' | 'center' | 'bottom' | undefined;
 	cropLabel: string;
 	editLabel: string;
 	editMode: boolean;
@@ -78,6 +83,7 @@ export const BlockControls = ( {
 	backgroundImageId,
 	backgroundImageSrc,
 	contentAlign,
+	verticalAlignment,
 	cropLabel,
 	editLabel,
 	editMode,
@@ -89,6 +95,12 @@ export const BlockControls = ( {
 }: BlockControlsProps ) => {
 	return (
 		<BlockControlsWrapper>
+			<BlockVerticalAlignmentToolbar
+				value={ verticalAlignment || 'center' }
+				onChange={ ( nextAlignment ) =>
+					setAttributes( { verticalAlignment: nextAlignment } )
+				}
+			/>
 			<AlignmentToolbar
 				value={ contentAlign }
 				onChange={ ( nextAlign: BlockAlignment ) => {
@@ -148,7 +160,8 @@ export const withBlockControls =
 		const [ isEditingImage, setIsEditingImage ] = props.useEditingImage;
 		const [ editMode, setEditMode ] = props.useEditMode;
 		const { attributes, category, name, product, setAttributes } = props;
-		const { contentAlign, mediaId, mediaSrc } = attributes;
+		const { contentAlign, verticalAlignment, mediaId, mediaSrc } =
+			attributes;
 		const item = category || product;
 
 		const { backgroundImageId, backgroundImageSrc } = useBackgroundImage( {
@@ -165,6 +178,7 @@ export const withBlockControls =
 					backgroundImageId={ backgroundImageId }
 					backgroundImageSrc={ backgroundImageSrc }
 					contentAlign={ contentAlign }
+					verticalAlignment={ verticalAlignment }
 					cropLabel={ cropLabel }
 					editLabel={ editLabel }
 					editMode={ editMode }

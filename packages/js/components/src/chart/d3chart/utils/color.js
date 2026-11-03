@@ -33,7 +33,6 @@ export const getColor = ( orderedKeys, colorScheme ) => ( key ) => {
 	 *	];
 	 * 	return colorScales[ idx ] || false;
 	 * });
-	 *
 	 */
 	const color = applyFilters(
 		'woocommerce_admin_chart_item_color',

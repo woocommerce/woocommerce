@@ -36,6 +36,7 @@
 - [woocommerce_cart_contents_changed](#woocommerce_cart_contents_changed)
 - [woocommerce_cart_item_permalink](#woocommerce_cart_item_permalink)
 - [woocommerce_checkout_must_be_logged_in_message](#woocommerce_checkout_must_be_logged_in_message)
+- [woocommerce_default_payment_method](#woocommerce_default_payment_method)
 - [woocommerce_delete_expired_draft_orders_batch_size](#woocommerce_delete_expired_draft_orders_batch_size)
 - [woocommerce_disable_compatibility_layer](#woocommerce_disable_compatibility_layer)
 - [woocommerce_filter_fields_for_order_confirmation](#woocommerce_filter_fields_for_order_confirmation)
@@ -70,8 +71,10 @@
 - [woocommerce_sortable_taxonomies](#woocommerce_sortable_taxonomies)
 - [woocommerce_store_api_add_to_cart_data](#woocommerce_store_api_add_to_cart_data)
 - [woocommerce_store_api_cart_item_images](#woocommerce_store_api_cart_item_images)
+- [woocommerce_store_api_cart_item_parent_item_key](#woocommerce_store_api_cart_item_parent_item_key)
 - [woocommerce_store_api_cart_item_quantity_validation](#woocommerce_store_api_cart_item_quantity_validation)
 - [woocommerce_store_api_disable_nonce_check](#woocommerce_store_api_disable_nonce_check)
+- [woocommerce_store_api_expose_error_details](#woocommerce_store_api_expose_error_details)
 - [`woocommerce_store_api_product_quantity_{$value_type}`](#woocommerce_store_api_product_quantity_value_type)
 - [woocommerce_store_api_rate_limit_id](#woocommerce_store_api_rate_limit_id)
 - [woocommerce_store_api_rate_limit_options](#woocommerce_store_api_rate_limit_options)
@@ -369,23 +372,15 @@ apply_filters( 'woocommerce_add_to_cart_form_action', string $action_url )
 ## woocommerce_add_to_cart_quantity
 
 
-Filters the change the quantity to add to cart.
+This filter is documented in includes/class-wc-cart.php.
 
 ```php
-apply_filters( 'woocommerce_add_to_cart_quantity', int|float $default_quantity, int $product_id, int $variation_id )
+apply_filters( 'woocommerce_add_to_cart_quantity' )
 ```
-
-### Parameters
-
-| Argument | Type | Description |
-| -------- | ---- | ----------- |
-| $default_quantity | int, float | The default quantity. |
-| $product_id | int | The product id. |
-| $variation_id | int | The variation ID. Always 0 in this context. |
 
 ### Source
 
-- [Blocks/BlockTypes/ProductButton.php](../../../../../../src/Blocks/BlockTypes/ProductButton.php)
+- [StoreApi/Utilities/CartController.php](../../../../../../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -887,6 +882,32 @@ apply_filters( 'woocommerce_checkout_must_be_logged_in_message', string $message
 
 ---
 
+## woocommerce_default_payment_method
+
+
+Filters the payment method the Checkout block starts with.
+
+```php
+apply_filters( 'woocommerce_default_payment_method', string $payment_method, array $available_gateways )
+```
+
+### Description
+
+Return a gateway id from `$available_gateways` to preselect it, or an empty string to select nothing; any other value selects nothing. Attach the callback by `init` at the latest.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $payment_method | string | Gateway id WooCommerce would preselect: the customer's default saved card's gateway, the method remembered in the session, or the first enabled gateway; '' when there is none. |
+| $available_gateways | array | Gateways available for this cart, keyed by id. |
+
+### Source
+
+- [StoreApi/Utilities/PaymentUtils.php](../../../../../../src/StoreApi/Utilities/PaymentUtils.php)
+
+---
+
 ## woocommerce_delete_expired_draft_orders_batch_size
 
 
@@ -1190,18 +1211,11 @@ Allows backward compatibility with the `rest_request_after_callbacks` filter by 
 ## woocommerce_loop_add_to_cart_args
 
 
-Allow filtering of the add to cart button arguments.
+This filter is documented in includes/wc-template-functions.php.
 
 ```php
-apply_filters( 'woocommerce_loop_add_to_cart_args', array $args, \WC_Product $product )
+apply_filters( 'woocommerce_loop_add_to_cart_args' )
 ```
-
-### Parameters
-
-| Argument | Type | Description |
-| -------- | ---- | ----------- |
-| $args | array | Button arguments, with a `class` string and an `attributes` array. |
-| $product | \WC_Product | Product the button is rendered for. |
 
 ### Source
 
@@ -1736,6 +1750,42 @@ This hook allows the cart item images to be changed. This is specific to the car
 
 ---
 
+## woocommerce_store_api_cart_item_parent_item_key
+
+
+Filter to declare the parent cart item of a cart line.
+
+```php
+apply_filters( 'woocommerce_store_api_cart_item_parent_item_key', string|null $parent_item_key, array $cart_item, string $cart_item_key )
+```
+
+### Description
+
+Only a non-empty string is kept; empty strings and other values become null. A key that names no line in the current cart, or the line's own key, also becomes null. A line with no declared parent counts as a standalone line. Callbacks that declare no parent for a line should return the value unchanged.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $parent_item_key | string, null | Initially null; may be a value returned by an earlier callback. |
+| $cart_item | array | The raw cart item. |
+| $cart_item_key | string | The cart item key. |
+
+### Returns
+
+
+`string, null` The parent item key, or null when no parent is declared or it is not in the cart.
+
+### See
+
+- <https://github.com/woocommerce/woocommerce/blob/trunk/docs/apis/store-api/extending-store-api/extend-store-api-parent-item.md>
+
+### Source
+
+- [StoreApi/Schemas/V1/CartItemSchema.php](../../../../../../src/StoreApi/Schemas/V1/CartItemSchema.php)
+
+---
+
 ## woocommerce_store_api_cart_item_quantity_validation
 
 
@@ -1799,6 +1849,36 @@ This can be used to disable the nonce check when testing API endpoints via a RES
 
 - [StoreApi/Routes/V1/AbstractCartRoute.php](../../../../../../src/StoreApi/Routes/V1/AbstractCartRoute.php)
 - [StoreApi/Routes/V1/ShopperListsNonceCheck.php](../../../../../../src/StoreApi/Routes/V1/ShopperListsNonceCheck.php)
+
+---
+
+## woocommerce_store_api_expose_error_details
+
+
+Filters whether unexpected Store API failures include the error message and exception class in the response.
+
+```php
+apply_filters( 'woocommerce_store_api_expose_error_details', bool $expose_error_details )
+```
+
+### Description
+
+Details are only ever sent to users who can manage WooCommerce; this filter cannot bypass that check. It defaults to WP_DEBUG so store staff can debug a production store without enabling debug mode site-wide.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $expose_error_details | bool | Whether to include the error message and exception class. Defaults to WP_DEBUG. |
+
+### Returns
+
+
+`bool`
+
+### Source
+
+- [StoreApi/Utilities/UnexpectedErrorResponse.php](../../../../../../src/StoreApi/Utilities/UnexpectedErrorResponse.php)
 
 ---
 
@@ -1978,6 +2058,7 @@ The same filter WC_Order::needs_payment() applies. A status a site declares paya
 ### Source
 
 - [StoreApi/Utilities/CheckoutTrait.php](../../../../../../src/StoreApi/Utilities/CheckoutTrait.php)
+- [StoreApi/Utilities/DraftOrderTrait.php](../../../../../../src/StoreApi/Utilities/DraftOrderTrait.php)
 
 ---
 

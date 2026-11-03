@@ -58,7 +58,7 @@ const completer: AutoCompleter = {
 						'name',
 						'sku',
 					],
-			  }
+				}
 			: {};
 		const product = ( getQuery() as Record< string, string > ).products;
 

@@ -114,8 +114,12 @@ export function createClient( baseURL: string, auth: Auth ): ApiClient {
 		]
 	): Record< string, unknown > | null | undefined {
 		const shouldRedact = process.env.CI === 'true';
-		if ( ! shouldRedact ) return obj;
-		if ( ! obj || typeof obj !== 'object' ) return obj;
+		if ( ! shouldRedact ) {
+			return obj;
+		}
+		if ( ! obj || typeof obj !== 'object' ) {
+			return obj;
+		}
 		return Object.fromEntries(
 			Object.entries( obj ).map( ( [ k, v ] ) =>
 				keys.includes( k.toLowerCase() )
@@ -125,7 +129,7 @@ export function createClient( baseURL: string, auth: Auth ): ApiClient {
 							typeof v === 'object'
 								? redact( v as Record< string, unknown >, keys )
 								: v,
-					  ]
+						]
 			)
 		);
 	}

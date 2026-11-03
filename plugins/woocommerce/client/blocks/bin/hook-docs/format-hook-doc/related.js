@@ -16,7 +16,7 @@ const related = ( hookDoc ) => {
 					const reference = linkify( refers );
 					return content ? reference + ' - ' + content : reference;
 				} ),
-		  }
+			}
 		: null;
 };
 

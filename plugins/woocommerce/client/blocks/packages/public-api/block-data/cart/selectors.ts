@@ -217,6 +217,20 @@ export const isAddressFieldsForShippingRatesUpdating = (
 };
 
 /**
+ * Retrieves if the shipping rates in the store are out of date because shipping address fields that affect them have
+ * changed. True from the moment the address changes until the server has returned rates for it.
+ *
+ * @param {CartState} state The current state.
+ * @return {boolean} True if the shipping rates do not reflect the current shipping address yet.
+ */
+export const isShippingRatesStale = ( state: CartState ): boolean => {
+	return (
+		!! state.metaData.isShippingRatesUpdateQueued ||
+		!! state.metaData.updatingAddressFieldsForShippingRates
+	);
+};
+
+/**
  * Retrieves if the shipping rate selection is being persisted.
  *
  * @param {CartState} state The current state.

@@ -177,8 +177,11 @@ class ProductPageIntegration {
 			return;
 		}
 
+		// The My Account login form turns `redirect_to` into its hidden `redirect` field, so the shopper comes back here after logging in.
+		$login_url = add_query_arg( 'redirect_to', rawurlencode( $product->get_permalink() ), wc_get_page_permalink( 'myaccount' ) );
+
 		$text = __( 'Please {login_link} to sign up for stock notifications.', 'woocommerce' );
-		$text = str_replace( '{login_link}', '<a href="' . esc_url( wc_get_account_endpoint_url( 'dashboard' ) ) . '">' . _x( 'log in', 'back in stock form', 'woocommerce' ) . '</a>', $text );
+		$text = str_replace( '{login_link}', '<a href="' . esc_url( $login_url ) . '">' . _x( 'log in', 'back in stock form', 'woocommerce' ) . '</a>', $text );
 		wc_print_notice( $text, 'notice' );
 	}
 

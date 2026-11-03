@@ -166,7 +166,7 @@ export const selectedRatesAreCollectable = (
 					( rate ) =>
 						! rate.selected || isPackageRateCollectable( rate )
 				);
-		  } )
+			} )
 		: false;
 };
 
@@ -178,6 +178,6 @@ export const allRatesAreCollectable = (
 				return shippingPackage.shipping_rates.every( ( rate ) =>
 					isPackageRateCollectable( rate )
 				);
-		  } )
+			} )
 		: false;
 };

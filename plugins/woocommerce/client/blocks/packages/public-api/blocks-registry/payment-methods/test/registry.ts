@@ -17,7 +17,6 @@ describe( 'registerPaymentMethodExtensionCallbacks', () => {
 			}
 		);
 
-		// eslint-disable-next-line no-console
 		expect( console ).not.toHaveErrored();
 		registerPaymentMethodExtensionCallbacks(
 			'woocommerce-marketplace-extension',
@@ -40,7 +39,6 @@ describe( 'registerPaymentMethodExtensionCallbacks', () => {
 			}
 		);
 
-		// eslint-disable-next-line no-console
 		expect( console ).not.toHaveErrored();
 		registerPaymentMethodExtensionCallbacks(
 			'overwrite-marketplace-extension',
@@ -65,7 +63,6 @@ describe( 'registerPaymentMethodExtensionCallbacks', () => {
 			}
 		);
 
-		// eslint-disable-next-line no-console
 		expect( console ).toHaveErrored();
 		expect( canMakePaymentExtensionsCallbacks ).toHaveProperty(
 			'other-woocommerce-marketplace-extension'

@@ -100,6 +100,50 @@ class DataSynchronizerTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox Should count and detect missing and changed orders when HPOS uses a temporary table.
+	 * @testWith [false, true]
+	 *           [true, true]
+	 *           [false, false]
+	 *           [true, false]
+	 *
+	 * @param bool $hpos_is_authoritative Whether HPOS is authoritative.
+	 * @param bool $full_count Whether to request the count or check for pending orders.
+	 */
+	public function test_pending_sync_with_temporary_orders_table( bool $hpos_is_authoritative, bool $full_count ): void {
+		global $wpdb;
+
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, $hpos_is_authoritative ? 'yes' : 'no' );
+		update_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
+
+		$changed_order = OrderHelper::create_order();
+		$this->sut->process_batch( array( $changed_order->get_id() ) );
+		OrderHelper::create_order();
+
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		$wpdb->update( $orders_table, array( 'date_updated_gmt' => $hpos_is_authoritative ? '2025-01-02 00:00:00' : '2025-01-01 00:00:00' ), array( 'id' => $changed_order->get_id() ) );
+		$wpdb->update( $wpdb->posts, array( 'post_modified_gmt' => $hpos_is_authoritative ? '2025-01-01 00:00:00' : '2025-01-02 00:00:00' ), array( 'ID' => $changed_order->get_id() ) );
+
+		$orders = $wpdb->get_results( "SELECT * FROM $orders_table", ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Internal table name.
+		$schema = $wpdb->get_row( "SHOW CREATE TABLE $orders_table", ARRAY_N ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Internal table name.
+
+		// Shadow the permanent table without committing the test transaction.
+		$this->assertNotFalse( $wpdb->query( str_replace( 'CREATE TABLE', 'CREATE TEMPORARY TABLE', $schema[1] ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Schema returned by the database.
+		try {
+			foreach ( $orders as $order ) {
+				$wpdb->insert( $orders_table, $order );
+			}
+
+			if ( $full_count ) {
+				$this->assertSame( 2, $this->sut->get_current_orders_pending_sync_count(), 'Both the missing order and the changed order should be counted.' );
+			} else {
+				$this->assertTrue( $this->sut->has_orders_pending_sync(), 'Temporary tables must not hide pending orders.' );
+			}
+		} finally {
+			$wpdb->query( "DROP TEMPORARY TABLE $orders_table" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Internal table name.
+		}
+	}
+
+	/**
 	 * Test that orders are synced properly where there are orders to migrate from posts table.
 	 */
 	public function test_get_ids_orders_pending_sync_migration() {
@@ -276,6 +320,52 @@ class DataSynchronizerTests extends \HposTestCase {
 			get_post( $order_id ),
 			'After the COT order record was deleted, the order was also deleted from the posts table.'
 		);
+	}
+
+	/**
+	 * @testdox When HPOS is authoritative and sync is disabled, deleting a post with the ID of an existing order is prevented and the order keeps its items.
+	 *
+	 * @testWith ["shop_order_placehold"]
+	 *           ["post"]
+	 *
+	 * @param string $post_type Post type of the post sharing the order's ID.
+	 */
+	public function test_post_deletion_is_prevented_while_order_exists_in_hpos( string $post_type ): void {
+		global $wpdb;
+
+		$this->toggle_cot_authoritative( true );
+		$this->disable_cot_sync();
+
+		$order_id = OrderHelper::create_order()->get_id();
+		$wpdb->update( $wpdb->posts, array( 'post_type' => $post_type ), array( 'ID' => $order_id ) );
+		clean_post_cache( $order_id );
+		$this->assertSame( $post_type, get_post_type( $order_id ) );
+
+		$count_items_query = $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order_id );
+		$items_before      = (int) $wpdb->get_var( $count_items_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$this->assertGreaterThan( 0, $items_before );
+
+		$result = wp_delete_post( $order_id, true );
+
+		$this->assertFalse( $result, 'Deleting the post should fail.' );
+		$this->assertSame( $post_type, get_post_type( $order_id ), 'The post should still exist.' );
+		$this->assertSame( $items_before, (int) $wpdb->get_var( $count_items_query ), 'The order should keep its items.' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	}
+
+	/**
+	 * @testdox When HPOS is authoritative, a placeholder post whose order no longer exists in HPOS can be deleted.
+	 */
+	public function test_orphaned_placeholder_post_can_be_deleted(): void {
+		$this->toggle_cot_authoritative( true );
+		$this->disable_cot_sync();
+
+		$order_id = OrderHelper::create_order()->get_id();
+		$this->direct_delete_cot_order( $order_id );
+
+		$result = wp_delete_post( $order_id, true );
+
+		$this->assertInstanceOf( \WP_Post::class, $result, 'Deleting an orphaned placeholder post should succeed.' );
+		$this->assertNull( get_post( $order_id ), 'The orphaned placeholder post should be gone.' );
 	}
 
 	/**
@@ -720,6 +810,8 @@ class DataSynchronizerTests extends \HposTestCase {
 
 	/**
 	 * @testDox When HPOS is enabled, the custom orders table is created.
+	 *
+	 * @ddlInTransaction DataSynchronizer drops and creates the HPOS tables under test.
 	 */
 	public function test_tables_are_created_when_hpos_enabled() {
 		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
@@ -759,6 +851,8 @@ class DataSynchronizerTests extends \HposTestCase {
 	 *
 	 * @param bool  $auth_table_change_allowed_with_sync_pending True if changing the authoritative data source for orders while synchronization is pending is allowed, false otherwise.
 	 * @param array $expected_setting_disabled_status Expected value for the 'disabled' key in the setting configuration array.
+	 *
+	 * @ddlInTransaction DataSynchronizer drops and creates the HPOS tables under test.
 	 */
 	public function test_hpos_option_is_disabled_but_sync_enabled_with_pending_orders( $auth_table_change_allowed_with_sync_pending, $expected_setting_disabled_status ) {
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', fn() => $auth_table_change_allowed_with_sync_pending );

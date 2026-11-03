@@ -1249,6 +1249,48 @@ export function getDateFormatsForInterval(
 	}
 }
 
+const defaultShortDateFormat = 'MM/DD/YYYY';
+
+/**
+ * Pads single "D" and "M" tokens to "DD" and "MM", leaving literals, "Do",
+ * "DDD" and the month name tokens alone. Strict parsing rejects a
+ * leading zero for "D" and "M", but the hint and formatted dates both pad.
+ *
+ * @param {string} format Moment.js date format.
+ * @return {string} Format with single day and month tokens padded.
+ */
+function padShortDateTokens( format: string ) {
+	return format.replace( /\[[^[]*\]|\\?(?:D+o?|M+o?)/g, ( token ) => {
+		if ( token === 'D' ) {
+			return 'DD';
+		}
+		return token === 'M' ? 'MM' : token;
+	} );
+}
+
+/**
+ * Returns the translated Moment.js format for typing a date, like "DD/MM/YYYY".
+ * Some translations aren't Moment.js formats (e.g. "MM/DD/RRRR"), so fall back
+ * to "MM/DD/YYYY" unless the translation formats and parses a date back to itself.
+ *
+ * @return {string} Moment.js date format for date inputs.
+ */
+export function getShortDateFormat() {
+	const format = padShortDateTokens(
+		/* translators: Moment.js date format for typed dates. Keep the DD, MM and YYYY tokens. */
+		__( 'MM/DD/YYYY', 'woocommerce' )
+	);
+	// Localized tokens ("L", "l", "LT", ...) round-trip, but loadLocaleData()
+	// would then define "L" in terms of itself.
+	if ( /[Ll]/.test( format.replace( /\[[^[]*\]|\\./g, '' ) ) ) {
+		return defaultShortDateFormat;
+	}
+	// Created per call so month names format and parse in the current locale.
+	const checkDate = moment( '2001-02-03', isoDateFormat );
+	const parsed = moment( checkDate.format( format ), format, true );
+	return parsed.isSame( checkDate, 'day' ) ? format : defaultShortDateFormat;
+}
+
 /**
  * Gutenberg's moment instance is loaded with i18n values, which are
  * PHP date formats, ie 'LLL: "F j, Y g:i a"'. Override those with translations
@@ -1269,7 +1311,7 @@ export function loadLocaleData( {
 	if ( moment.locale() !== 'en' ) {
 		moment.updateLocale( userLocale, {
 			longDateFormat: {
-				L: __( 'MM/DD/YYYY', 'woocommerce' ),
+				L: getShortDateFormat(),
 				LL: __( 'MMMM D, YYYY', 'woocommerce' ),
 				LLL: __( 'D MMMM YYYY LT', 'woocommerce' ),
 				LLLL: __( 'dddd, D MMMM YYYY LT', 'woocommerce' ),

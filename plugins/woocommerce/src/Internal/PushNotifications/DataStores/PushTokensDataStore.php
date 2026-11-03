@@ -35,6 +35,15 @@ class PushTokensDataStore {
 	private array $tokens_by_roles_cache = array();
 
 	/**
+	 * Memoized count_tokens() result for this request. The step log puts it on
+	 * every notification's recipients line, and one request can carry thousands
+	 * of notifications.
+	 *
+	 * @var int|null
+	 */
+	private ?int $token_count = null;
+
+	/**
 	 * Memoized has_tokens() result. Null until the first lookup, and reset by create() so a stale false cannot drop a notification.
 	 *
 	 * @var bool|null
@@ -121,7 +130,8 @@ class PushTokensDataStore {
 
 		$push_token->set_id( $id );
 
-		$this->has_tokens = null;
+		$this->has_tokens  = null;
+		$this->token_count = null;
 
 		return $push_token;
 	}
@@ -286,6 +296,7 @@ class PushTokensDataStore {
 
 		// Anything read earlier in this request now includes deleted tokens.
 		$this->tokens_by_roles_cache = array();
+		$this->token_count           = null;
 
 		return $deleted;
 	}
@@ -430,6 +441,64 @@ class PushTokensDataStore {
 		);
 
 		return $this->has_tokens;
+	}
+
+	/**
+	 * Counts every push token on the store, whatever the owner's role.
+	 *
+	 * Registration requires one of the roles that receive push notifications,
+	 * so no token starts out ineligible. A user can lose the role afterwards
+	 * though, and their token stays, which is the difference between this count
+	 * and what get_tokens_for_roles() returns.
+	 *
+	 * @since 11.3.0
+	 * @return int
+	 */
+	public function count_tokens(): int {
+		if ( null !== $this->token_count ) {
+			return $this->token_count;
+		}
+
+		global $wpdb;
+
+		$this->token_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private'",
+				PushToken::POST_TYPE
+			)
+		);
+
+		return $this->token_count;
+	}
+
+	/**
+	 * Returns the IDs of the push tokens a user owns, most recently registered
+	 * first.
+	 *
+	 * Capped, because the step log read tests every line against every ID
+	 * returned. Re-registering a device updates its post, so ordering by
+	 * modification time keeps the devices still in use and drops the ones
+	 * abandoned longest ago.
+	 *
+	 * @since 11.3.0
+	 * @param int $user_id The user.
+	 * @param int $limit   The most IDs to return.
+	 * @return int[]
+	 */
+	public function get_token_ids_for_user( int $user_id, int $limit = 100 ): array {
+		global $wpdb;
+
+		return array_map(
+			'intval',
+			$wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private' AND post_author = %d ORDER BY post_modified DESC LIMIT %d",
+					PushToken::POST_TYPE,
+					$user_id,
+					$limit
+				)
+			)
+		);
 	}
 
 	/**

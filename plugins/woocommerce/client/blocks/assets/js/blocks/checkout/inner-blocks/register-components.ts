@@ -35,7 +35,7 @@ import CheckoutOrderSummaryShippingBlock from './checkout-order-summary-shipping
 import CheckoutOrderSummaryTaxesBlock from './checkout-order-summary-taxes/frontend';
 
 // Modify webpack publicPath at runtime based on location of WordPress Plugin.
-// eslint-disable-next-line no-undef,camelcase
+// eslint-disable-next-line no-undef
 __webpack_public_path__ = WC_BLOCKS_BUILD_URL;
 
 // @todo When forcing all blocks at once, they will append based on the order they are registered. Introduce formal sorting param.

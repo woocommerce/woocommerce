@@ -43,7 +43,7 @@ export const getDateSpaces = (
 				? xScale( moment( uniqueDates[ i + 1 ] ).toDate() )
 				: xScale(
 						moment( uniqueDates[ uniqueDates.length - 1 ] ).toDate()
-				  );
+					);
 		let xWidth = i === 0 ? xNext - xNow : xNow - xPrev;
 		const xStart = i === 0 ? 0 : xNow - xWidth / 2;
 		xWidth = i === 0 || i === uniqueDates.length - 1 ? xWidth / 2 : xWidth;
@@ -133,7 +133,6 @@ export const drawLines = ( node, data, params, scales, formats, tooltip ) => {
 	lineStroke = width <= smallBreak ? 1.25 : lineStroke;
 	const dotRadius = width <= wideBreak ? 4 : 6;
 
-	// eslint-disable-next-line no-unused-expressions
 	params.uniqueDates.length > 1 &&
 		series
 			.append( 'path' )
@@ -149,7 +148,7 @@ export const drawLines = ( node, data, params, scales, formats, tooltip ) => {
 			.attr( 'd', ( d ) => line( d.values ) );
 
 	const minDataPointSpacing = 36;
-	// eslint-disable-next-line no-unused-expressions
+
 	width / params.uniqueDates.length > minDataPointSpacing &&
 		series
 			.selectAll( 'circle' )

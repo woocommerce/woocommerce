@@ -8,9 +8,9 @@ import {
 	PanelRow,
 	TextControl,
 	ToggleControl,
-	__experimentalText as Text,
 } from '@wordpress/components';
 import { addFilter } from '@wordpress/hooks';
+import { Text } from '@wordpress/ui';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { useState } from '@wordpress/element';
@@ -86,6 +86,10 @@ const SidebarSettings = ( {
 	};
 
 	const previewTextLength = woocommerce_email_data?.preheader?.length ?? 0;
+	// null means the email does not support Cc/Bcc.
+	const supportsCcBcc =
+		woocommerce_email_data.cc !== null &&
+		woocommerce_email_data.bcc !== null;
 
 	if (
 		woocommerce_email_data.email_type ===
@@ -203,93 +207,125 @@ const SidebarSettings = ( {
 					) }
 				</BaseControl>
 			</PanelRow>
-			<PanelRow>
-				<BaseControl __nextHasNoMarginBottom>
-					<ToggleControl
-						__nextHasNoMarginBottom
-						name="add_cc"
-						checked={ addCC }
-						label={ __( 'Add CC', 'woocommerce' ) }
-						onChange={ ( value ) => {
-							setAddCC( value );
-							if ( ! value ) {
-								updateWooMailProperty( 'cc', '' );
-							}
-							recordEvent( 'email_cc_toggle_clicked', {
-								isEnabled: value,
-							} );
-						} }
-					/>
-				</BaseControl>
-			</PanelRow>
-			{ addCC && (
+			{ typeof woocommerce_email_data.send_on_unpaid_timeout ===
+				'boolean' && (
 				<PanelRow>
 					<BaseControl __nextHasNoMarginBottom>
-						<TextControl
+						<ToggleControl
 							__nextHasNoMarginBottom
-							__next40pxDefaultSize
-							data-testid="email_cc"
-							value={ woocommerce_email_data?.cc || '' }
-							onChange={ ( value ) => {
-								updateWooMailProperty( 'cc', value );
-								debouncedRecordEvent(
-									'email_cc_input_updated',
-									{
-										value,
-									}
-								);
-							} }
-							help={ __(
-								'Add recipients who will receive a copy of the email. Separate multiple addresses with commas.',
+							name="send_on_unpaid_timeout"
+							checked={
+								woocommerce_email_data.send_on_unpaid_timeout
+							}
+							label={ __(
+								'Send this email when an unpaid order is cancelled automatically',
 								'woocommerce'
 							) }
+							help={ __(
+								'Unpaid orders are cancelled automatically when the “Hold stock (minutes)” limit in Settings › Products › Inventory is reached.',
+								'woocommerce'
+							) }
+							onChange={ ( value ) => {
+								updateWooMailProperty(
+									'send_on_unpaid_timeout',
+									value
+								);
+							} }
 						/>
 					</BaseControl>
 				</PanelRow>
 			) }
-			<PanelRow>
-				<BaseControl __nextHasNoMarginBottom>
-					<ToggleControl
-						__nextHasNoMarginBottom
-						name="add_bcc"
-						checked={ addBCC }
-						label={ __( 'Add BCC', 'woocommerce' ) }
-						onChange={ ( value ) => {
-							setAddBCC( value );
-							if ( ! value ) {
-								updateWooMailProperty( 'bcc', '' );
-							}
-							recordEvent( 'email_bcc_toggle_clicked', {
-								isEnabled: value,
-							} );
-						} }
-					/>
-				</BaseControl>
-			</PanelRow>
-			{ addBCC && (
-				<PanelRow>
-					<BaseControl __nextHasNoMarginBottom>
-						<TextControl
-							__nextHasNoMarginBottom
-							__next40pxDefaultSize
-							data-testid="email_bcc"
-							value={ woocommerce_email_data?.bcc || '' }
-							onChange={ ( value ) => {
-								updateWooMailProperty( 'bcc', value );
-								debouncedRecordEvent(
-									'email_bcc_input_updated',
-									{
-										value,
+			{ supportsCcBcc && (
+				<>
+					<PanelRow>
+						<BaseControl __nextHasNoMarginBottom>
+							<ToggleControl
+								__nextHasNoMarginBottom
+								name="add_cc"
+								checked={ addCC }
+								label={ __( 'Add CC', 'woocommerce' ) }
+								onChange={ ( value ) => {
+									setAddCC( value );
+									if ( ! value ) {
+										updateWooMailProperty( 'cc', '' );
 									}
-								);
-							} }
-							help={ __(
-								'Add recipients who will receive a hidden copy of the email. Separate multiple addresses with commas.',
-								'woocommerce'
-							) }
-						/>
-					</BaseControl>
-				</PanelRow>
+									recordEvent( 'email_cc_toggle_clicked', {
+										isEnabled: value,
+									} );
+								} }
+							/>
+						</BaseControl>
+					</PanelRow>
+					{ addCC && (
+						<PanelRow>
+							<BaseControl __nextHasNoMarginBottom>
+								<TextControl
+									__nextHasNoMarginBottom
+									__next40pxDefaultSize
+									data-testid="email_cc"
+									value={ woocommerce_email_data?.cc || '' }
+									onChange={ ( value ) => {
+										updateWooMailProperty( 'cc', value );
+										debouncedRecordEvent(
+											'email_cc_input_updated',
+											{
+												value,
+											}
+										);
+									} }
+									help={ __(
+										'Add recipients who will receive a copy of the email. Separate multiple addresses with commas.',
+										'woocommerce'
+									) }
+								/>
+							</BaseControl>
+						</PanelRow>
+					) }
+					<PanelRow>
+						<BaseControl __nextHasNoMarginBottom>
+							<ToggleControl
+								__nextHasNoMarginBottom
+								name="add_bcc"
+								checked={ addBCC }
+								label={ __( 'Add BCC', 'woocommerce' ) }
+								onChange={ ( value ) => {
+									setAddBCC( value );
+									if ( ! value ) {
+										updateWooMailProperty( 'bcc', '' );
+									}
+									recordEvent( 'email_bcc_toggle_clicked', {
+										isEnabled: value,
+									} );
+								} }
+							/>
+						</BaseControl>
+					</PanelRow>
+					{ addBCC && (
+						<PanelRow>
+							<BaseControl __nextHasNoMarginBottom>
+								<TextControl
+									__nextHasNoMarginBottom
+									__next40pxDefaultSize
+									data-testid="email_bcc"
+									value={ woocommerce_email_data?.bcc || '' }
+									onChange={ ( value ) => {
+										updateWooMailProperty( 'bcc', value );
+										debouncedRecordEvent(
+											'email_bcc_input_updated',
+											{
+												value,
+											}
+										);
+									} }
+									help={ __(
+										'Add recipients who will receive a hidden copy of the email. Separate multiple addresses with commas.',
+										'woocommerce'
+									) }
+								/>
+							</BaseControl>
+						</PanelRow>
+					) }
+				</>
 			) }
 		</>
 	);

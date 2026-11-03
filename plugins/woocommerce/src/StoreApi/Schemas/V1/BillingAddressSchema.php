@@ -133,8 +133,10 @@ class BillingAddressSchema extends AbstractAddressSchema {
 					$address_object[ $key ] = (bool) $value;
 				} elseif ( 'email' === $key ) {
 					$address_object[ $key ] = sanitize_email( $value );
-				} else {
+				} elseif ( $this->additional_fields_controller->is_field( $key ) ) {
 					$address_object[ $key ] = $this->prepare_html_response( $value );
+				} else {
+					$address_object[ $key ] = sanitize_text_field( $value );
 				}
 			}
 			return $address_object;

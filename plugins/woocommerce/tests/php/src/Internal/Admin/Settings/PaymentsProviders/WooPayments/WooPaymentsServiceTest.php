@@ -207,6 +207,17 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Clear the version constant setUp() sets, which would otherwise outlive the class.
+	 */
+	public function tearDown(): void {
+		try {
+			Constants::clear_single_constant( 'WCPAY_VERSION_NUMBER' );
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
 	 * Test get onboarding details when the extension is NOT active.
 	 */
 	public function test_get_onboarding_details_throws_when_extension_not_active(): void {
@@ -892,6 +903,31 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			->expects( $this->any() )
 			->method( 'is_connection_owner' )
 			->willReturn( $wpcom_connection['is_connection_owner'] );
+		// Reading the onboarding details must never register the store with WPCOM.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->never() )
+			->method( 'try_registration' );
+		// Until the store is registered, the step offers the `authorize` action instead of an authorization URL.
+		if ( ! $wpcom_connection['is_store_connected'] ) {
+			$expected_steps[1]['actions'] = array(
+				'start'     => array(
+					'type' => WooPaymentsService::ACTION_TYPE_REST,
+					'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/start' ),
+				),
+				'authorize' => array(
+					'type' => WooPaymentsService::ACTION_TYPE_REST,
+					'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' ),
+				),
+				'check'     => array(
+					'type' => WooPaymentsService::ACTION_TYPE_REST,
+					'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/check' ),
+				),
+				'clean'     => array(
+					'type' => WooPaymentsService::ACTION_TYPE_REST,
+					'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/clean' ),
+				),
+			);
+		}
 		// If the status is completed, we expect only the general actions.
 		if ( WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED === $expected_step_statuses[ WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION ] ) {
 			$expected_steps[1]['actions'] = array(
@@ -10613,9 +10649,11 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			->expects( $this->any() )
 			->method( 'is_connected' )
 			->willReturn( false );
+		// The preload runs in the background, so the attempt is not forced.
 		$this->mock_wpcom_connection_manager
 			->expects( $this->once() )
 			->method( 'try_registration' )
+			->with( true, false )
 			->willReturn( $expected_wpcom_registration_result );
 
 		// Arrange the onboarding locked DB option.

@@ -154,7 +154,7 @@ describe( 'No Recommendations and not loading', () => {
 } );
 
 describe( 'Click Recommendations', () => {
-	it( 'should record an event when clicked', () => {
+	it( 'should record an event when clicked', async () => {
 		const { getByRole } = render(
 			<RecommendedExtensionsItem
 				title={ 'AutomateWoo' }
@@ -166,7 +166,7 @@ describe( 'Click Recommendations', () => {
 			/>
 		);
 
-		userEvent.click( getByRole( 'link' ) );
+		await userEvent.click( getByRole( 'link' ) );
 
 		expect( recordEvent ).toHaveBeenCalledTimes( 1 );
 		expect( recordEvent ).toHaveBeenCalledWith(

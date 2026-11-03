@@ -63,7 +63,7 @@ class EmailTemplatesController {
 	/**
 	 * Email product title.
 	 *
-	 * @param WC_Product   $product The product object.
+	 * @param \WC_Product  $product The product object.
 	 * @param Notification $notification The notification object.
 	 * @param bool         $plain_text Whether the email is plain text.
 	 */

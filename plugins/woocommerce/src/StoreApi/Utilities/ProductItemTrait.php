@@ -87,6 +87,11 @@ trait ProductItemTrait {
 				 */
 				$value = apply_filters( 'woocommerce_variation_option_name', $value, null, $taxonomy, $product );
 				$label = wc_attribute_label( str_replace( 'attribute_', '', $key ), $product );
+
+				// Custom values can be stored URL-encoded. Decode for display so the Blocks
+				// cart shows the same value as the classic cart and variation titles, which
+				// decode via wc_get_formatted_variation(). Taxonomy slugs are left as-is.
+				$value = rawurldecode( (string) $value );
 			}
 
 			$return[] = array(

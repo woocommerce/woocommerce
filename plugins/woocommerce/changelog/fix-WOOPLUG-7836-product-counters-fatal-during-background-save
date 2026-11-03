@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixed a fatal error in persistent product status counters during background revision save in the admin when a null value was dispatched instead of a post object.

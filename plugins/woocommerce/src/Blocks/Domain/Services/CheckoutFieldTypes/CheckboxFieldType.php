@@ -50,13 +50,13 @@ class CheckboxFieldType extends AbstractFieldType {
 	}
 
 	/**
-	 * Converts the stored '1'/'0' meta value back to a boolean.
+	 * Converts the stored '1'/'0' meta value back to a boolean, returning null for missing or empty values.
 	 *
 	 * @param mixed $value The stored value.
-	 * @return bool
+	 * @return bool|null
 	 */
 	public function from_storage( $value ) {
-		return '1' === $value;
+		return null === $value || '' === $value ? null : '1' === $value;
 	}
 
 	/**
