@@ -998,7 +998,8 @@ trait ProductAbilityTrait {
 		}
 
 		foreach ( $plan['delete'] as $variation ) {
-			if ( ! $variation->delete( true ) ) {
+			$variation_id = $variation->get_id();
+			if ( ! $variation->delete( true ) || null !== get_post( $variation_id ) ) {
 				return new \WP_Error( $failure_code, __( 'Failed to delete a variation.', 'woocommerce' ), array( 'status' => 500 ) );
 			}
 		}

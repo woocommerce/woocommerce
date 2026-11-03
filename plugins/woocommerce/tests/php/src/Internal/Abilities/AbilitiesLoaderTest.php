@@ -2451,6 +2451,38 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should fail a variation delete through the parent when pre_delete_post blocks it.
+	 */
+	public function test_a_blocked_variation_delete_through_the_parent_fails(): void {
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[] = $created['product']['id'];
+		$variation_id                = $created['product']['variation_ids'][0];
+		$block                       = static fn( $check, $post ) => 'product_variation' === $post->post_type ? false : $check;
+
+		add_filter( 'pre_delete_post', $block, 10, 2 );
+		try {
+			$result = wp_get_ability( 'woocommerce/product-update' )->execute_change(
+				array(
+					'id'         => $created['product']['id'],
+					'variations' => array(
+						array(
+							'id'     => $variation_id,
+							'delete' => true,
+						),
+					),
+				)
+			);
+		} finally {
+			remove_filter( 'pre_delete_post', $block, 10 );
+		}
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_update_failed', $result->get_error_code() );
+		$this->assertNotNull( get_post( $variation_id ) );
+	}
+
+	/**
 	 * @testdox Should treat a name as a local attribute unless global is true, and refuse an unknown global attribute.
 	 */
 	public function test_product_create_uses_a_global_attribute_only_when_asked(): void {
