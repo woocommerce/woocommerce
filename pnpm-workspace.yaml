@@ -93,6 +93,7 @@ catalogs:
         jest: 29.5.x
         jest-cli: 29.5.x
         jest-environment-jsdom: 29.5.x
+        jest-environment-node: 29.5.x
         mini-css-extract-plugin: 2.9.x
         postcss: ^8.5.26
         postcss-loader: 4.3.x

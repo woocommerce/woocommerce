@@ -130,6 +130,7 @@
 				"jest",
 				"jest-cli",
 				"jest-environment-jsdom",
+				"jest-environment-node",
 				"mini-css-extract-plugin",
 				"postcss",
 				"postcss-loader",
@@ -490,7 +491,6 @@
 				"@types/jest",
 				"jest-circus",
 				"jest-each",
-				"jest-environment-node",
 				"babel-jest"
 			],
 			"packages": [
@@ -506,7 +506,6 @@
 				"@types/jest",
 				"jest-circus",
 				"jest-each",
-				"jest-environment-node",
 				"babel-jest"
 			],
 			"packages": [
