@@ -12,7 +12,6 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\RestApi\OrderLineItemValidationTrait;
-use Automattic\WooCommerce\Internal\RestApi\OrderLineItemValidator;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\OrderLineMetaValidator;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -902,7 +901,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			$product_id = (int) $posted['product_id'];
 		} elseif ( ! empty( $posted['variation_id'] ) ) {
 			$product_id = (int) $posted['variation_id'];
-		} elseif ( 'update' === $action || OrderLineItemValidator::is_custom_line_item( $posted ) ) {
+		} elseif ( 'update' === $action || $this->is_custom_line_item( $posted ) ) {
 			$product_id = 0;
 		} else {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- REST API JSON response, not HTML.
@@ -980,7 +979,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			&& 0 === (int) $posted['variation_id'];
 
 		// New items must resolve unless they are custom items. Existing items need not, so orders whose products were deleted later stay editable.
-		if ( 'create' === $action && ( ! $product || ! $product->exists() ) && ! OrderLineItemValidator::is_custom_line_item( $posted ) ) {
+		if ( 'create' === $action && ( ! $product || ! $product->exists() ) && ! $this->is_custom_line_item( $posted ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- REST API JSON response, not HTML.
 			throw new WC_REST_Exception( 'woocommerce_rest_invalid_product_id', __( 'Invalid product ID.', 'woocommerce' ), 400 );
 		}

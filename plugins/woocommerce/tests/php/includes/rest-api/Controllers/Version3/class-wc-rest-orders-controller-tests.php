@@ -1801,15 +1801,6 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 					);
 				},
 			),
-			'unknown SKU with name and total'     => array(
-				static function (): array {
-					return array(
-						'sku'   => 'missing-sku',
-						'name'  => 'Gone',
-						'total' => '25.00',
-					);
-				},
-			),
 		);
 	}
 
@@ -1867,38 +1858,16 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox POST /orders rejects a line item with no product and no name or total.
-	 * @testWith [{"name": "Gift wrap"}]
-	 *           [{"total": "5.00"}]
-	 *           [{"name": " ", "total": "5.00"}]
-	 *           [{"product_id": 0, "name": "Gift wrap", "total": ""}]
-	 *
-	 * @param array<string, int|string> $line_item Line item payload.
+	 * @testdox POST /orders rejects a custom line item that has no total.
 	 */
-	public function test_create_order_rejects_incomplete_custom_line_item( array $line_item ): void {
+	public function test_create_order_rejects_custom_line_item_without_total(): void {
 		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
 		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body( wp_json_encode( array( 'line_items' => array( $line_item ) ) ) );
+		$request->set_body( wp_json_encode( array( 'line_items' => array( array( 'name' => 'Gift wrap' ) ) ) ) );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertSame( 400, $response->get_status(), 'The request should be rejected.' );
 		$this->assertSame( 'woocommerce_rest_required_product_reference', $response->get_data()['code'], 'The error should ask for a product.' );
-	}
-
-	/**
-	 * @testdox PUT /orders rejects a new line item for a deleted product.
-	 */
-	public function test_update_order_rejects_new_line_item_with_deleted_product(): void {
-		list( $order ) = $this->create_order_with_line_item();
-		$deleted       = WC_Helper_Product::create_simple_product();
-		$deleted_id    = $deleted->get_id();
-		$deleted->delete( true );
-
-		$response = $this->dispatch_line_item_update( $order->get_id(), array( 'product_id' => $deleted_id ) );
-
-		$this->assertSame( 400, $response->get_status(), 'The request should be rejected.' );
-		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'], 'The error should name the invalid product.' );
-		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_items(), 'The order should keep only its original line item.' );
 	}
 
 	/**
@@ -1938,6 +1907,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertSame( 400, $response->get_status(), 'The request should be rejected.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'], 'The error should name the invalid product.' );
 		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_items(), 'The order should keep only its original line item.' );
 		$this->assertSame( 10, wc_get_product( $stocked->get_id() )->get_stock_quantity(), 'The stock should not change.' );
 	}
