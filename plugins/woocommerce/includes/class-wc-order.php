@@ -141,7 +141,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @uses self::stage_payment_complete()
 	 * @param string $transaction_id Optional transaction id to store in post meta.
-	 * @return bool success
+	 * @return bool False when the order is not saved yet or the order write fails, true otherwise.
 	 */
 	public function payment_complete( $transaction_id = '' ) {
 		if ( ! $this->get_id() ) { // Order must exist.
@@ -181,6 +181,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * payment note and woocommerce_payment_complete to the next save(), which runs the first three before it
 	 * writes and fires the action after it writes. payment_complete() runs this method through write_through(),
 	 * so it runs all of them and saves right away, as it always did.
+	 * When that save fails, the action waits for the next save that writes the order, and the method throws.
 	 *
 	 * When the order status is not one that payment can complete, the order does not change, the
 	 * woocommerce_payment_complete_order_status_<status> action fires right away, the method adds nothing for
@@ -194,6 +195,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @since 11.4.0
 	 * @param string $transaction_id Optional transaction ID to store.
 	 * @return bool True when the order has changes for save() to write.
+	 * @throws Exception When payment_complete() runs this method and the order write fails.
 	 */
 	public function stage_payment_complete( $transaction_id = '' ) {
 		$this->refuse_unstaged_override( 'payment_complete', 'stage_payment_complete' );
@@ -272,7 +274,14 @@ class WC_Order extends WC_Abstract_Order {
 
 		$this->write_or_defer( 'payment_complete_note', array( $this, 'add_order_note' ), array( $payment_complete_note, false, false, array( 'note_group' => OrderNoteGroup::PAYMENT ) ) );
 		$this->save_if_writing_through();
-		$this->write_or_defer( 'payment_complete', 'do_action', array( 'woocommerce_payment_complete', $this->get_id(), $transaction_id ), true );
+
+		$payment_complete_args = array( 'woocommerce_payment_complete', $this->get_id(), $transaction_id );
+		$save_error            = $this->writing_through ? $this->get_last_save_error() : null;
+		if ( null !== $save_error ) {
+			$this->defer_to_save( 'payment_complete', 'do_action', $payment_complete_args, true );
+			throw $save_error;
+		}
+		$this->write_or_defer( 'payment_complete', 'do_action', $payment_complete_args, true );
 
 		return true;
 	}
