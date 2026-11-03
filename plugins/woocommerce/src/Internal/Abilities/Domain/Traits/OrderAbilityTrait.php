@@ -397,7 +397,7 @@ trait OrderAbilityTrait {
 							'id'           => $item->get_id(),
 							'method_id'    => $item->get_method_id(),
 							'method_title' => $item->get_method_title(),
-							'total'        => $item->get_total(),
+							'total'        => self::format_amount_for_response( $item->get_total() ),
 						);
 					},
 					$order->get_shipping_methods()
