@@ -144,8 +144,9 @@ class NotificationManagementService {
 			exit;
 		}
 
+		// wptexturize() skips text inside <code>, which keeps the email as stored.
 		/* translators: %s user email. */
-		wc_add_notice( sprintf( esc_html__( 'Verification email sent to %s.', 'woocommerce' ), $notification->get_user_email() ), 'success' );
+		wc_add_notice( sprintf( esc_html__( 'Verification email sent to %s.', 'woocommerce' ), '<code class="woocommerce-email">' . esc_html( $notification->get_user_email() ) . '</code>' ), 'success' );
 		wp_safe_redirect( $redirect_url );
 		exit;
 	}

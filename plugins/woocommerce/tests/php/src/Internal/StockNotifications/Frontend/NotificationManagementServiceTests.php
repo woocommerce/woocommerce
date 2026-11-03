@@ -175,6 +175,27 @@ class NotificationManagementServiceTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The resend success notice shows the email as stored after wptexturize() runs over the printed notice.
+	 */
+	public function test_resend_request_notice_email_survives_wptexturize() {
+		$notification = $this->build_pending_notification();
+		$notification->set_user_email( "o'neil--shop@48x17.com" );
+		$notification->save();
+
+		$this->seed_resend_request( $notification->get_id() );
+
+		try {
+			$this->sut->maybe_process_resend_request();
+			$this->fail( 'Expected redirect to be intercepted via exception.' );
+		} catch ( \RuntimeException $e ) {
+			unset( $e );
+		}
+
+		$text = html_entity_decode( wp_strip_all_tags( wptexturize( (string) wc_print_notices( true ) ) ), ENT_QUOTES | ENT_HTML5 );
+		$this->assertStringContainsString( "o'neil--shop@48x17.com", $text, 'The email in the notice should not be texturized.' );
+	}
+
+	/**
 	 * @testdox Should persist the rate-limit timestamp before dispatching the email (TOCTOU guard).
 	 */
 	public function test_resend_request_writes_rate_limit_timestamp_before_sending_email() {
