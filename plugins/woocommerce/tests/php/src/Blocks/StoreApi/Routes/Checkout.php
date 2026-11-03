@@ -2403,6 +2403,13 @@ class Checkout extends \WP_Test_REST_TestCase {
 			'country'    => 'US',
 		);
 
+		// The quote the shopper sees at checkout, before the order is placed.
+		WC()->customer->set_billing_location( 'US', 'CA', '12345', 'test' );
+		WC()->customer->set_shipping_location( 'US', 'CA', '12345', 'test' );
+		WC()->cart->calculate_totals();
+		$this->assertEqualsWithDelta( $expected_shipping_tax, (float) WC()->cart->get_shipping_tax(), 0.001, 'The checkout quote should tax pickup only when it is taxable.' );
+		$this->assertEqualsWithDelta( $expected_total, (float) WC()->cart->get_total( 'edit' ), 0.001 );
+
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
 		$request->set_body_params(
