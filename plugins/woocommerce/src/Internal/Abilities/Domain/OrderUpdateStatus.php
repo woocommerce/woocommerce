@@ -94,14 +94,6 @@ class OrderUpdateStatus extends ActionableAbility {
 	 * @return null|\WP_Error
 	 */
 	public function change( $subject, array $input ) {
-		if ( empty( $input['status'] ) ) {
-			return new \WP_Error(
-				'woocommerce_order_status_required',
-				__( 'Order status is required.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
 		$status = $input['status'];
 
 		if ( $status === $subject->get_status() ) {
