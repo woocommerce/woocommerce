@@ -1700,7 +1700,7 @@ class WC_AJAX {
 			 *
 			 * @param int $item_id WC item ID.
 			 * @param WC_Order_Item|false $item As returned by $order->get_item( $item_id ).
-			 * @param bool|array|WP_Error $changed_store Stock change of the last removed line, as returned by LineItemStock::restore_after_delete().
+			 * @param array|false $changed_store Stock change of the last removed line, as returned by LineItemStock::restore_after_delete().
 			 * @param bool|WC_Order|WC_Order_Refund $order As returned by wc_get_order().
 			 */
 			do_action( 'woocommerce_ajax_order_items_removed', $item_id ?? 0, $item ?? false, $changed_stock ?? false, $order );
