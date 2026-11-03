@@ -241,6 +241,8 @@ class ProductDelete extends ActionableAbility {
 			)
 		);
 
+		_prime_post_caches( $variation_ids );
+
 		/** @var \WC_Product_Variation[] $variations */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 		$variations = array_map( 'wc_get_product', $variation_ids );
 
