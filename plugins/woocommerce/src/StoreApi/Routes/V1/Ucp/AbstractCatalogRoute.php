@@ -6,7 +6,7 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 use Automattic\WooCommerce\Internal\ProductFeed\Mapping\UcpProductMapper;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractRoute;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\Ucp\UcpProductSchema;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\UcpUtils;
 
 /**
  * Shared behaviour of the UCP catalog routes.

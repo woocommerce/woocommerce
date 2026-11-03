@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Internal\Ucp;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\UcpUtils;
 
 /**
  * Serves the UCP discovery profile at `/.well-known/ucp`.

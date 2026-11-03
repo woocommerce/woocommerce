@@ -53,7 +53,7 @@ use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\CustomerEmailVerification;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpIdempotencyStore;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\UcpIdempotencyStore;
 use Automattic\WooCommerce\Internal\StructuredData\OpenGraph;
 
 /**

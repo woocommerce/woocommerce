@@ -3,7 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
-use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\UcpUtils;
 
 /**
  * UCP `POST /catalog/product` route.

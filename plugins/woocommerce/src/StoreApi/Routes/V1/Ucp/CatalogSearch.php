@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\UcpUtils;
 
 /**
  * UCP `POST /catalog/search` route.

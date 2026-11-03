@@ -8,8 +8,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
 use Automattic\WooCommerce\StoreApi\Routes\V1\Ucp\AbstractCartRoute;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpIdempotencyStore;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpRequestFingerprint;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\UcpIdempotencyStore;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\UcpRequestFingerprint;
 
 /**
  * Tests for `Idempotency-Key` handling on the /wc/ucp/v1/carts writes.

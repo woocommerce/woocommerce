@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Ucp;
 
 use Automattic\WooCommerce\Internal\Ucp\UcpDiscovery;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\UcpUtils;
 
 /**
  * Tests for the `/.well-known/ucp` discovery profile.

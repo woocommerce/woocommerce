@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\StoreApi;
 
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractRoute;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\UcpUtils;
 
 /**
  * RoutesController class.

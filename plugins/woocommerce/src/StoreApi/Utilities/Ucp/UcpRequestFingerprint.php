@@ -1,7 +1,7 @@
 <?php
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\StoreApi\Utilities;
+namespace Automattic\WooCommerce\StoreApi\Utilities\Ucp;
 
 use Automattic\WooCommerce\Internal\Utilities\ArrayUtil;
 
