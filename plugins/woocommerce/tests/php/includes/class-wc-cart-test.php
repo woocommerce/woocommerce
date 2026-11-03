@@ -860,7 +860,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$product   = new WC_Product_Variable();
 		$attribute = new WC_Product_Attribute();
 		$attribute->set_name( 'Finish' );
-		$attribute->set_options( array( 'Black%20White', 'Gloss' ) );
+		$attribute->set_options( array( 'Black%20White', 'Blue%20Green' ) );
 		$attribute->set_visible( true );
 		$attribute->set_variation( true );
 		$product->set_name( 'Percent Escape Product' );
@@ -886,10 +886,10 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$any_variation->set_regular_price( '10' );
 		$any_variation->save();
 
-		$any_cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $any_variation->get_id(), array( 'attribute_finish' => 'Black%20White' ) );
+		$any_cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $any_variation->get_id(), array( 'attribute_finish' => 'Blue%20Green' ) );
 
 		$this->assertNotFalse( $any_cart_item_key, 'A posted value for an Any attribute must validate against the configured options.' );
-		$this->assertSame( 'Black%20White', WC()->cart->get_cart_item( $any_cart_item_key )['variation']['attribute_finish'], 'The percent escape must survive sanitization on the Any path too.' );
+		$this->assertSame( 'Blue%20Green', WC()->cart->get_cart_item( $any_cart_item_key )['variation']['attribute_finish'], 'The percent escape must survive sanitization on the Any path too.' );
 	}
 
 	/**
