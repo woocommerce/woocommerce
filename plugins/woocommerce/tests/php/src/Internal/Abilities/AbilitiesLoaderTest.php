@@ -343,10 +343,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$product       = $output_schema['properties']['product']['properties'] ?? array();
 
 		$this->assertSame( 'uri', $product['permalink']['format'] ?? null );
-		$this->assertSame( array( 'string', 'null' ), $product['permalink']['type'] ?? null );
+		$this->assertSame( 'string', $product['permalink']['type'] ?? null );
 		$this->assertContains( get_woocommerce_currency(), $product['currency']['enum'] ?? array() );
 		$this->assertSame(
-			array( wc_is_stock_amount_integer() ? 'integer' : 'number', 'null' ),
+			wc_is_stock_amount_integer() ? 'integer' : 'number',
 			$product['stock_quantity']['type'] ?? null
 		);
 	}
@@ -439,7 +439,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertContains( 'trash', $order['status']['enum'] ?? array() );
 		$this->assertContains( 'checkout-draft', $order['status']['enum'] ?? array() );
 		$this->assertContains( get_woocommerce_currency(), $order['currency']['enum'] ?? array() );
-		$this->assertSame( array( 'string', 'null' ), $order['billing_email']['type'] ?? null );
+		$this->assertSame( 'string', $order['billing_email']['type'] ?? null );
 		$this->assertSame( 'email', $order['billing_email']['format'] ?? null );
 		$this->assertNotEmpty( $order['line_items']['description'] ?? '' );
 		$this->assertSame( 'array', $order['line_items']['type'] ?? null );
@@ -3026,7 +3026,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 			$this->assertSame( 'number', $input_schema['properties']['stock_quantity']['type'] ?? null );
 			$this->assertSame(
-				array( 'number', 'null' ),
+				'number',
 				$output_schema['properties']['product']['properties']['stock_quantity']['type'] ?? null
 			);
 
@@ -3048,7 +3048,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return null for non-date filter values without failing a product update.
+	 * @testdox Should omit non-date filter values without failing a product update.
 	 * @testWith ["2026-07-15T10:00:00"]
 	 *           [1784109600]
 	 *           ["1784109600"]
@@ -3062,12 +3062,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		update_option( 'timezone_string', 'Europe/Amsterdam' );
 		$product                     = \WC_Helper_Product::create_simple_product();
 		$this->created_product_ids[] = $product->get_id();
-		add_filter(
-			'woocommerce_product_get_date_created',
-			static function () use ( $date ) {
-				return $date;
-			}
-		);
+		$filter                      = static function () use ( $date ) {
+			return $date;
+		};
+		add_filter( 'woocommerce_product_get_date_created', $filter );
+		add_filter( 'woocommerce_product_get_date_modified', $filter );
 
 		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
@@ -3077,8 +3076,12 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $result );
-		$this->assertNull( $result['product']['date_created'] );
-		$this->assertNull( $result['product']['date_created_gmt'] );
+		$query = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'id' => $product->get_id() ) );
+		$this->assertNotWPError( $query );
+		foreach ( array( 'date_created', 'date_created_gmt', 'date_modified', 'date_modified_gmt' ) as $field ) {
+			$this->assertArrayNotHasKey( $field, $result['product'] );
+			$this->assertArrayNotHasKey( $field, $query['products'][0] );
+		}
 		$this->assertSame( 'Filtered date update', wc_get_product( $product->get_id() )->get_name() );
 	}
 
@@ -3197,6 +3200,314 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'negative'   => array( 'America/New_York', '2026-07-15T12:00:00', '2026-07-15T12:00:00-04:00', '2026-07-15T16:00:00+00:00' ),
 			'fractional' => array( '', '2026-07-15T12:00:00', '2026-07-15T12:00:00+05:45', '2026-07-15T06:15:00+00:00' ),
 		);
+	}
+
+	/**
+	 * @testdox Should return fractional order quantities when the store supports them.
+	 * @testWith [false]
+	 *           [true]
+	 * @param bool $preserve_type Whether the stock filter preserves the input type.
+	 */
+	public function test_order_output_allows_fractional_quantities( bool $preserve_type ): void {
+		$filter = static function ( $amount ) use ( $preserve_type ) {
+			return $preserve_type ? $amount : (float) $amount;
+		};
+		$this->unregister_domain_abilities();
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', $filter );
+
+		try {
+			$this->register_domain_abilities();
+			$order                     = \WC_Helper_Order::create_order();
+			$this->created_order_ids[] = $order->get_id();
+			foreach ( $order->get_items() as $item ) {
+				$item->set_quantity( 1.5 );
+				$item->save();
+			}
+
+			$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
+				array(
+					'id'                 => $order->get_id(),
+					'include_line_items' => true,
+				)
+			);
+			$this->assertNotWPError( $result );
+			$this->assertSame( 1.5, $result['orders'][0]['line_items'][0]['quantity'] );
+		} finally {
+			remove_filter( 'woocommerce_stock_amount', $filter );
+			add_filter( 'woocommerce_stock_amount', 'intval' );
+		}
+	}
+
+	/**
+	 * @testdox Should omit empty external product fields and preserve configured values.
+	 */
+	public function test_external_product_output_omits_empty_fields(): void {
+		$product = new \WC_Product_External();
+		$product->set_name( 'External product' );
+		$product->save();
+		$this->created_product_ids[] = $product->get_id();
+
+		$result = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'id' => $product->get_id() ) );
+		$this->assertNotWPError( $result );
+		$this->assertArrayNotHasKey( 'external_url', $result['products'][0] );
+		$this->assertArrayNotHasKey( 'button_text', $result['products'][0] );
+
+		$product->set_product_url( 'https://example.com/buy' );
+		$product->set_button_text( 'Buy elsewhere' );
+		$product->save();
+		$result = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'id' => $product->get_id() ) );
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'https://example.com/buy', $result['products'][0]['external_url'] );
+		$this->assertSame( 'Buy elsewhere', $result['products'][0]['button_text'] );
+	}
+
+	/**
+	 * @testdox Should retain the saved product response when reloading fails.
+	 */
+	public function test_saved_product_response_falls_back_when_reload_fails(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$id      = $product->get_id();
+		wp_delete_post( $id, true );
+		$this->assertFalse( wc_get_product( $id ) );
+
+		$formatter = new class() {
+			use \Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
+			use \Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait {
+				format_saved_product_for_response as public format;
+			}
+		};
+		$result    = $formatter::format( $product );
+
+		$this->assertSame( $id, $result['id'] );
+		$this->assertSame( $product->get_name(), $result['name'] );
+		$this->assertTrue( rest_validate_value_from_schema( $result, wp_get_ability( 'woocommerce/product-create' )->get_output_schema()['properties']['product'] ) );
+	}
+
+	/**
+	 * @testdox Should retain the saved order response when reloading fails.
+	 */
+	public function test_saved_order_response_falls_back_when_reload_fails(): void {
+		$order = \WC_Helper_Order::create_order();
+		$id    = $order->get_id();
+		wc_get_order( $id )->delete( true );
+		$this->assertFalse( wc_get_order( $id ) );
+
+		$formatter = new class() {
+			use \Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
+			use \Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait {
+				format_saved_order_for_response as public format;
+			}
+		};
+		$result    = $formatter::format( $order );
+
+		$this->assertSame( $id, $result['id'] );
+		$this->assertSame( $order->get_status(), $result['status'] );
+		$this->assertTrue( rest_validate_value_from_schema( $result, wp_get_ability( 'woocommerce/order-add-note' )->get_output_schema()['properties']['order'] ) );
+	}
+
+	/**
+	 * @testdox Should return saved product values and dates after a write.
+	 * @testWith ["product-create"]
+	 *           ["product-update"]
+	 *
+	 * @param string $ability_name Product write ability.
+	 */
+	public function test_product_write_returns_saved_state( string $ability_name ): void {
+		$input = array( 'name' => 'Saved name' );
+		if ( 'product-update' === $ability_name ) {
+			$input['id'] = \WC_Helper_Product::create_simple_product()->get_id();
+		}
+		$change_in_memory = static function ( $product ) {
+			$product->set_name( 'Unsaved name' );
+		};
+		add_action( 'woocommerce_after_product_object_save', $change_in_memory );
+		try {
+			$result = wp_get_ability( 'woocommerce/' . $ability_name )->execute( $input );
+		} finally {
+			remove_action( 'woocommerce_after_product_object_save', $change_in_memory );
+		}
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'Saved name', $result['product']['name'] );
+		foreach ( array( 'date_created', 'date_created_gmt', 'date_modified', 'date_modified_gmt' ) as $field ) {
+			$this->assertNotEmpty( $result['product'][ $field ] ?? null, $field );
+		}
+	}
+
+	/**
+	 * @testdox Should return saved order values after a status change or note.
+	 * @testWith ["order-update-status"]
+	 *           ["order-add-note"]
+	 *
+	 * @param string $ability_name Order write ability.
+	 */
+	public function test_order_write_returns_saved_state( string $ability_name ): void {
+		$order = wc_create_order( array( 'status' => 'pending' ) );
+		$order->set_payment_method( 'bacs' );
+		$order->save();
+		$change_in_memory = static function ( $value, $subject ) {
+			$subject->set_payment_method( 'unsaved' );
+			return $value;
+		};
+		$hook             = 'order-update-status' === $ability_name ? 'woocommerce_valid_order_statuses_for_payment' : 'woocommerce_order_note_added';
+		add_filter( $hook, $change_in_memory, PHP_INT_MAX, 2 );
+		$input = array( 'id' => $order->get_id() );
+		if ( 'order-update-status' === $ability_name ) {
+			$input['status'] = 'on-hold';
+		} else {
+			$input['note'] = 'Test note';
+		}
+		try {
+			$result = wp_get_ability( 'woocommerce/' . $ability_name )->execute( $input );
+		} finally {
+			remove_filter( $hook, $change_in_memory, PHP_INT_MAX );
+		}
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'bacs', $result['order']['payment_method'] );
+	}
+
+	/**
+	 * @testdox Should omit absent product values while keeping zero and false.
+	 */
+	public function test_product_output_omits_null_values(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_sale_price( '' );
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 0 );
+		$product->save();
+		$result = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'id' => $product->get_id() ) )['products'][0];
+
+		foreach ( array( 'external_url', 'button_text' ) as $field ) {
+			$this->assertArrayNotHasKey( $field, $result );
+		}
+		$this->assertSame( 0, $result['stock_quantity'] );
+		$this->assertFalse( $result['virtual'] );
+		$this->assertSame( '', $result['sale_price'] );
+
+		$product->set_manage_stock( false );
+		$product->set_stock_quantity( '' );
+		$product->save();
+		$this->assertArrayNotHasKey( 'stock_quantity', wp_get_ability( 'woocommerce/products-query' )->execute( array( 'id' => $product->get_id() ) )['products'][0] );
+	}
+
+	/**
+	 * @testdox Should reject unexpected null output instead of hiding the invalid field.
+	 * @testWith ["product", "woocommerce_product_get_name", "name"]
+	 *           ["order", "woocommerce_order_get_payment_method", "payment_method"]
+	 *
+	 * @param string $resource_name Resource to query.
+	 * @param string $hook     Getter filter to return null.
+	 * @param string $field    Invalid output field.
+	 */
+	public function test_query_rejects_unexpected_null_output( string $resource_name, string $hook, string $field ): void {
+		$object = 'product' === $resource_name ? \WC_Helper_Product::create_simple_product() : \WC_Helper_Order::create_order();
+		add_filter( $hook, '__return_null' );
+
+		try {
+			$result = wp_get_ability( 'woocommerce/' . $resource_name . 's-query' )->execute( array( 'id' => $object->get_id() ) );
+		} finally {
+			remove_filter( $hook, '__return_null' );
+		}
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_output', $result->get_error_code() );
+		$this->assertStringContainsString( $field, $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should omit non-date filter values without failing an order note write.
+	 * @testWith ["2026-07-15T10:00:00"]
+	 *           [1784109600]
+	 *           ["1784109600"]
+	 *           ["invalid date"]
+	 *           [[]]
+	 *           [false]
+	 *           [null]
+	 * @param mixed $date Filtered date.
+	 */
+	public function test_order_output_handles_filtered_dates( $date ): void {
+		$order  = \WC_Helper_Order::create_order();
+		$filter = static function () use ( $date ) {
+			return $date;
+		};
+		add_filter( 'woocommerce_order_get_date_created', $filter );
+		add_filter( 'woocommerce_order_get_date_modified', $filter );
+
+		$result = wp_get_ability( 'woocommerce/order-add-note' )->execute(
+			array(
+				'id'   => $order->get_id(),
+				'note' => 'Filtered date note',
+			)
+		);
+		$this->assertNotWPError( $result );
+		$query = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'id' => $order->get_id() ) );
+		$this->assertNotWPError( $query );
+		foreach ( array( 'date_created', 'date_created_gmt', 'date_modified', 'date_modified_gmt' ) as $field ) {
+			$this->assertArrayNotHasKey( $field, $result['order'] );
+			$this->assertArrayNotHasKey( $field, $query['orders'][0] );
+		}
+		$this->assertSame( 'Filtered date note', wc_get_order_note( $result['note_id'] )->content );
+	}
+
+	/**
+	 * @testdox Should omit an absent order note date while preserving false and empty strings.
+	 */
+	public function test_order_note_output_omits_absent_date(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->add_order_note( 'Internal note.' );
+		$omit_date = static function ( $note ) {
+			$note['date_created'] = null;
+			$note['added_by']     = '';
+			return $note;
+		};
+		add_filter( 'woocommerce_get_order_note', $omit_date );
+
+		try {
+			$result = wp_get_ability( 'woocommerce/order-notes-query' )->execute( array( 'id' => $order->get_id() ) );
+		} finally {
+			remove_filter( 'woocommerce_get_order_note', $omit_date );
+		}
+
+		$this->assertNotWPError( $result );
+		$this->assertNotEmpty( $result['notes'] );
+		foreach ( $result['notes'] as $note ) {
+			$this->assertArrayNotHasKey( 'date_created', $note );
+			$this->assertSame( '', $note['author'] );
+			$this->assertFalse( $note['customer_note'] );
+		}
+	}
+
+	/**
+	 * @testdox Should give each Core output field a single type.
+	 */
+	public function test_core_output_schemas_have_single_types(): void {
+		$check = function ( array $schema ) use ( &$check ): void {
+			if ( isset( $schema['type'] ) ) {
+				$this->assertIsString( $schema['type'] );
+				$this->assertNotSame( 'null', $schema['type'] );
+			}
+			$this->assertNotContains( null, $schema['enum'] ?? array() );
+			foreach ( $schema['properties'] ?? array() as $name => $property ) {
+				if ( 'extensions' !== $name ) {
+					$check( $property );
+				}
+			}
+			foreach ( array( 'items', 'additionalProperties' ) as $keyword ) {
+				if ( is_array( $schema[ $keyword ] ?? null ) ) {
+					$check( $schema[ $keyword ] );
+				}
+			}
+			foreach ( array( 'anyOf', 'oneOf' ) as $keyword ) {
+				foreach ( $schema[ $keyword ] ?? array() as $branch ) {
+					$check( $branch );
+				}
+			}
+		};
+		foreach ( self::CANONICAL_ABILITY_IDS as $name ) {
+			$check( wp_get_ability( $name )->get_output_schema() );
+		}
 	}
 
 	/**
@@ -3565,7 +3876,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotWPError( $result );
 		$this->assertSame( 'auto-draft', $result['products'][0]['status'] );
-		$this->assertNull( $result['products'][0]['permalink'] );
+		$this->assertArrayNotHasKey( 'permalink', $result['products'][0] );
 	}
 
 	/**
@@ -3818,9 +4129,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return null for absent billing email values.
+	 * @testdox Should omit absent billing email values.
 	 */
-	public function test_orders_query_returns_null_for_absent_billing_email(): void {
+	public function test_orders_query_omits_absent_billing_email(): void {
 		$order = wc_create_order();
 		$this->assertNotWPError( $order );
 		$order->save();
@@ -3833,7 +4144,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $result );
-		$this->assertNull( $result['orders'][0]['billing_email'] );
+		$this->assertArrayNotHasKey( 'billing_email', $result['orders'][0] );
 	}
 
 	/**

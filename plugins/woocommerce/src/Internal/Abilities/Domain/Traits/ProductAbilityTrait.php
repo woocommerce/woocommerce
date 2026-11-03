@@ -1502,6 +1502,18 @@ trait ProductAbilityTrait {
 	}
 
 	/**
+	 * Format a product after a save, retaining the saved object if reloading fails.
+	 *
+	 * @param \WC_Product $product Saved product object.
+	 * @return array
+	 */
+	protected static function format_saved_product_for_response( \WC_Product $product ): array {
+		$stored = wc_get_product( $product->get_id() );
+
+		return self::format_product_for_response( $stored instanceof \WC_Product ? $stored : $product );
+	}
+
+	/**
 	 * Format a product for ability output.
 	 *
 	 * @param \WC_Product $product Product object.
@@ -1512,36 +1524,54 @@ trait ProductAbilityTrait {
 		$permalink      = $product->get_permalink();
 
 		$data = array(
-			'id'                => $product->get_id(),
-			'name'              => $product->get_name(),
-			'slug'              => $product->get_slug(),
-			'permalink'         => false === $permalink ? null : $permalink,
-			'type'              => $product->get_type(),
-			'status'            => $product->get_status(),
-			'sku'               => $product->get_sku(),
-			'currency'          => get_woocommerce_currency(),
-			'currency_symbol'   => html_entity_decode(
+			'id'               => $product->get_id(),
+			'name'             => $product->get_name(),
+			'slug'             => $product->get_slug(),
+			'type'             => $product->get_type(),
+			'status'           => $product->get_status(),
+			'sku'              => $product->get_sku(),
+			'currency'         => get_woocommerce_currency(),
+			'currency_symbol'  => html_entity_decode(
 				get_woocommerce_currency_symbol(),
 				ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401
 			),
-			'price'             => $product->get_price(),
-			'regular_price'     => $product->get_regular_price(),
-			'sale_price'        => $product->get_sale_price(),
-			'stock_status'      => $product->get_stock_status(),
-			'stock_quantity'    => null === $stock_quantity ? null : wc_stock_amount( $stock_quantity ),
-			'manage_stock'      => (bool) $product->get_manage_stock(),
-			'virtual'           => (bool) $product->get_virtual(),
-			'downloadable'      => (bool) $product->get_downloadable(),
-			'external_url'      => $product instanceof \WC_Product_External ? $product->get_product_url() : null,
-			'button_text'       => $product instanceof \WC_Product_External ? $product->get_button_text() : null,
-			'grouped_products'  => $product instanceof \WC_Product_Grouped ? array_map( 'absint', $product->get_children( 'edit' ) ) : array(),
-			'parent_id'         => (int) $product->get_parent_id(),
-			'attributes'        => self::format_product_attributes( $product ),
-			'variation_ids'     => $product instanceof \WC_Product_Variable ? self::read_variation_children( $product, false )['all'] : array(),
-			'date_created'      => self::format_date_for_response( $product->get_date_created(), false ),
-			'date_created_gmt'  => self::format_date_for_response( $product->get_date_created() ),
-			'date_modified'     => self::format_date_for_response( $product->get_date_modified(), false ),
-			'date_modified_gmt' => self::format_date_for_response( $product->get_date_modified() ),
+			'price'            => $product->get_price(),
+			'regular_price'    => $product->get_regular_price(),
+			'sale_price'       => $product->get_sale_price(),
+			'stock_status'     => $product->get_stock_status(),
+			'manage_stock'     => (bool) $product->get_manage_stock(),
+			'virtual'          => (bool) $product->get_virtual(),
+			'downloadable'     => (bool) $product->get_downloadable(),
+			'grouped_products' => $product instanceof \WC_Product_Grouped ? array_map( 'absint', $product->get_children( 'edit' ) ) : array(),
+			'parent_id'        => (int) $product->get_parent_id(),
+			'attributes'       => self::format_product_attributes( $product ),
+			'variation_ids'    => $product instanceof \WC_Product_Variable ? self::read_variation_children( $product, false )['all'] : array(),
+		);
+
+		if ( false !== $permalink ) {
+			$data['permalink'] = $permalink;
+		}
+		if ( null !== $stock_quantity ) {
+			$data['stock_quantity'] = wc_stock_amount( $stock_quantity );
+		}
+		if ( $product instanceof \WC_Product_External ) {
+			$external_url = $product->get_product_url();
+			$button_text  = $product->get_button_text();
+			if ( '' !== $external_url ) {
+				$data['external_url'] = $external_url;
+			}
+			if ( '' !== $button_text ) {
+				$data['button_text'] = $button_text;
+			}
+		}
+
+		$data += array_filter(
+			array(
+				'date_created'      => self::format_date_for_response( $product->get_date_created(), false ),
+				'date_created_gmt'  => self::format_date_for_response( $product->get_date_created() ),
+				'date_modified'     => self::format_date_for_response( $product->get_date_modified(), false ),
+				'date_modified_gmt' => self::format_date_for_response( $product->get_date_modified() ),
+			)
 		);
 
 		return ExtensibleAbilities::add_fields_to_object( $data, 'product', $product );
@@ -1611,7 +1641,7 @@ trait ProductAbilityTrait {
 	protected static function format_product_mutation_response( \WC_Product $product, array $variations ): array {
 		$format = static function ( \WC_Product $saved ): array {
 			return array_merge(
-				self::format_product_for_response( $saved ),
+				self::format_saved_product_for_response( $saved ),
 				array( 'slug' => (string) get_post_field( 'post_name', $saved->get_id() ) )
 			);
 		};
@@ -1667,8 +1697,8 @@ trait ProductAbilityTrait {
 				'name'              => array( 'type' => 'string' ),
 				'slug'              => array( 'type' => 'string' ),
 				'permalink'         => array(
-					'type'        => array( 'string', 'null' ),
-					'description' => __( 'Product permalink, or null when no public permalink is available.', 'woocommerce' ),
+					'type'        => 'string',
+					'description' => __( 'Product permalink. Omitted when no public permalink is available.', 'woocommerce' ),
 					'format'      => 'uri',
 				),
 				'type'              => array(
@@ -1702,20 +1732,20 @@ trait ProductAbilityTrait {
 					'enum' => array_keys( wc_get_product_stock_status_options() ),
 				),
 				'stock_quantity'    => array(
-					'type'        => array( self::get_product_stock_quantity_schema_type(), 'null' ),
-					'description' => __( 'Current stock quantity, or null when no stock quantity is set.', 'woocommerce' ),
+					'type'        => self::get_product_stock_quantity_schema_type(),
+					'description' => __( 'Current stock quantity. Omitted when no stock quantity is set.', 'woocommerce' ),
 				),
 				'manage_stock'      => array( 'type' => 'boolean' ),
 				'virtual'           => array( 'type' => 'boolean' ),
 				'downloadable'      => array( 'type' => 'boolean' ),
 				'external_url'      => array(
-					'type'        => array( 'string', 'null' ),
-					'description' => __( 'External product URL for external products.', 'woocommerce' ),
+					'type'        => 'string',
+					'description' => __( 'External product URL. Omitted when the product is not external or no URL is set.', 'woocommerce' ),
 					'format'      => 'uri',
 				),
 				'button_text'       => array(
-					'type'        => array( 'string', 'null' ),
-					'description' => __( 'Button text for external products.', 'woocommerce' ),
+					'type'        => 'string',
+					'description' => __( 'Button text. Omitted when the product is not external or no button text is set.', 'woocommerce' ),
 				),
 				'grouped_products'  => array(
 					'type'        => 'array',
@@ -1761,20 +1791,24 @@ trait ProductAbilityTrait {
 					'items'       => array( 'type' => 'integer' ),
 				),
 				'date_created'      => array(
-					'type'   => array( 'string', 'null' ),
-					'format' => 'date-time',
+					'type'        => 'string',
+					'format'      => 'date-time',
+					'description' => __( 'Product creation date in the store timezone. Omitted when no creation date is available.', 'woocommerce' ),
 				),
 				'date_created_gmt'  => array(
-					'type'   => array( 'string', 'null' ),
-					'format' => 'date-time',
+					'type'        => 'string',
+					'format'      => 'date-time',
+					'description' => __( 'Product creation date in UTC. Omitted when no creation date is available.', 'woocommerce' ),
 				),
 				'date_modified'     => array(
-					'type'   => array( 'string', 'null' ),
-					'format' => 'date-time',
+					'type'        => 'string',
+					'format'      => 'date-time',
+					'description' => __( 'Product modification date in the store timezone. Omitted when no modification date is available.', 'woocommerce' ),
 				),
 				'date_modified_gmt' => array(
-					'type'   => array( 'string', 'null' ),
-					'format' => 'date-time',
+					'type'        => 'string',
+					'format'      => 'date-time',
+					'description' => __( 'Product modification date in UTC. Omitted when no modification date is available.', 'woocommerce' ),
 				),
 			),
 			'additionalProperties' => false,

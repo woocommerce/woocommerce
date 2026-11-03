@@ -210,7 +210,7 @@ class OrderUpdateStatus extends ActionableAbility {
 	 */
 	public function prepare_response( $subject ): array {
 		return array(
-			'order' => self::format_order_for_response( $subject, false ),
+			'order' => self::format_saved_order_for_response( $subject ),
 		);
 	}
 
