@@ -304,7 +304,8 @@ class WC_REST_Image_Upload_Cleanup_Test extends WC_REST_Unit_Test_Case {
 		};
 		add_filter( 'upload_mimes', $allow_svg );
 		add_filter( 'woocommerce_rest_allowed_image_mime_types', $allow_svg );
-		$this->download_content = '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10"/></svg>';
+		// Older Fileinfo versions need the XML declaration to recognize the SVG MIME type.
+		$this->download_content = '<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10"/></svg>';
 		$request                = $this->image_request( $kind, $version, $method, array( 'src' => 'https://example.org/accepted.svg' ) );
 		$response               = $this->server->dispatch( $request );
 
