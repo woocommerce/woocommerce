@@ -1,0 +1,66 @@
+# Database operations and performance evidence
+
+Use for indexes, large writes, cleanup, caches backed by database work, and performance validation. Query-shape decisions belong in [SQL query patterns](sql-query-patterns.md).
+
+## Measure the consumer and the work it causes
+
+For a performance claim, keep the exact SQL/revision, engine/version, actual schema/indexes, dataset shape, cache state, and caller operation with the result. Distinguish server execution time from client fetching, PHP hydration, and total request time. EXPLAIN row estimates are not measured rows examined. Use execution analysis where supported and appropriate; commands that execute the statement need a suitable test environment.
+
+Choose cases that can reverse the result:
+
+- Sparse and dense matches, hot and cold values, long/no-match scans, duplicate metadata, NULLs, and different parent/variation ratios.
+- HPOS versus posts authority, synchronization/compatibility modes, and non-order posts with large content. An HPOS-wide aggregate can be cheap while scanning content-heavy posts is expensive: see [#69360's posts-authority regression](https://github.com/woocommerce/woocommerce/pull/69360#discussion_r4194113463).
+- Cold versus warm caches, with and without an external object cache, and relevant feature switches. These are separate axes.
+- Current versus stale update targets, concurrent checkout/writers, and realistic maintenance backlog when writes are affected.
+
+Compare repeated runs under equivalent conditions, including tails for contention-sensitive work. Fewer SQL calls can still mean more rows, bytes, sorting, memory or hydration. In [#69100](https://github.com/woocommerce/woocommerce/pull/69100#issuecomment-5912552732), large isolated method gains did not improve the consuming page enough to justify the complexity. In [#66111](https://github.com/woocommerce/woocommerce/pull/66111), replacing SQL_CALC_FOUND_ROWS with a separate count yielded mixed engine results and ultimately closed unmerged. Neither result is a universal ban on the candidate technique.
+
+A lower latency at fixed, below-saturation load does not establish extra throughput capacity. Include post-mutation cache churn where relevant: [#68043](https://github.com/woocommerce/woocommerce/pull/68043) targets term reads after product updates even when steady-warm page counts are unchanged.
+
+Repeated PHP computation and eager file reads can remain expensive after SQL is cached. Request-local memoization still needs identity and reset rules for blog/theme switching; laziness must precede the consumers' processing hooks and preserve singular, plural and override paths. [#69698](https://github.com/woocommerce/woocommerce/pull/69698) and [#69749](https://github.com/woocommerce/woocommerce/pull/69749) illustrate these mechanisms, but their shared experimental benchmark does not establish each patch's individual gain. A measured speedup can also lose on maintenance: [#70056](https://github.com/woocommerce/woocommerce/pull/70056#pullrequestreview-5656187138) closed after review opposed duplicating upstream block registration.
+
+## Design indexes for access paths and deployment states
+
+Start from equality/range predicates, joins, ordering, LIMIT and actual cardinality. A covering count index and an index for newest eligible rows can need different column order. A tiny table may legitimately scan. Prefix length must follow actual value distribution and storage constraints; the 20-character transaction prefix in [#64025](https://github.com/woocommerce/woocommerce/pull/64025) is not a general recommendation.
+
+Price the index in bytes, write maintenance, build time and lock behavior, including supported engine/version differences. Inspect existing/custom indexes before adding or redefining one. Updating the fresh-install schema alone does not update installed stores; include the project's appropriate migration and cleanup paths. The [#62805 review](https://github.com/woocommerce/woocommerce/pull/62805#pullrequestreview-3670835280) distinguishes count coverage from the retained date-leading index.
+
+Code and database versions can differ while updates wait. A named index hint can fail before its migration runs; [#62680's review](https://github.com/woocommerce/woocommerce/pull/62680#pullrequestreview-3632238976) rejected that assumption. Prefer a query that remains valid through the supported rollout states. Use hints only with evidence for the actual workload and schema, not to encode one benchmark's plan forever. [#54530](https://github.com/woocommerce/woocommerce/pull/54530) closed its index experiment when measurements did not justify it.
+
+## Treat write cost and lock behavior separately from read speed
+
+A useful index can reduce rows examined by a locking statement, yet a joined table can still inherit problematic locks. Trace the actual tables/index ranges, lock modes, transaction duration, and competing operations. The reservation index in [#63864](https://github.com/woocommerce/woocommerce/pull/63864) and later lock-scope change in [#65325](https://github.com/woocommerce/woocommerce/pull/65325) address different problems. Shared locks can conflict with updates; neither those PRs nor a faster isolated checkout justify removing stock-serialization guarantees.
+
+Keep increments/decrements atomic in the database. Replacing them with PHP read-modify-write can lose concurrent updates. Distinguish `false` SQL failure from zero affected rows, which can be a valid insufficient-stock outcome. [#64597](https://github.com/woocommerce/woocommerce/pull/64597) removed dependence on translated error text with a bounded retry specific to reservation logic; it is not a generic instruction to retry every write. Consistent acquisition order reduces one source of deadlocks, not all sources.
+
+Shared-option mutations need fresh authoritative state inside the protected section, including positive and negative cache handling. Leases need ownership-checked release plus explicit expiry, timeout and recovery behavior. [#65877](https://github.com/woocommerce/woocommerce/pull/65877) uses best-effort locking with a fail-open path and watchdog; it is not proof of strict exclusion. Its accepted restart delay concerns recovery/startup, not ongoing throughput, and cannot be transferred to stock guarantees ([follow-up](https://github.com/woocommerce/woocommerce/issues/66540#issuecomment-4961102066)).
+
+Guard avoidable writes using the actual stored value and relevant filtered value while preserving required hooks. Avoid suppressing other business work as a side effect: [#63355](https://github.com/woocommerce/woocommerce/pull/63355#discussion_r2832359436) retained Analytics synchronization despite a small local gain from skipping it. Read-time legacy migrations also need the correct entity graph: [#62966](https://github.com/woocommerce/woocommerce/pull/62966#pullrequestreview-3722060677) had to migrate the current parent's variations, not just the parent row.
+
+Before collapsing saves, identify the later successful save and preserve required intermediate state on exceptions. An empty `get_changes()` is not a complete no-op proof: [#66342](https://github.com/woocommerce/woocommerce/pull/66342) reverted a customer-save shortcut because session VAT/shipping setters bypassed that tracker. Account for lifecycle hooks and datastore state beyond tracked properties.
+
+## Bound maintenance work without hiding the tradeoff
+
+Combining or splitting statements changes more than round trips. Reopening the same temporary table can make a combined query invalid ([#69864](https://github.com/woocommerce/woocommerce/pull/69864)); separate reads can observe different concurrent states. Splitting an OR-based DELETE, as in [#62748](https://github.com/woocommerce/woocommerce/pull/62748), changes its atomicity and partial-failure boundary. Preserve the operation's required snapshot and transaction guarantees when comparing shapes.
+
+For cleanup or regeneration, consider bounded keyset batches, a useful selection index, progress/termination, concurrent inserts/updates, and failure recovery. A smaller transaction can help lock duration and replication while increasing total runtime. The proposed batching follow-up [#69890](https://github.com/woocommerce/woocommerce/pull/69890) was closed unmerged; its timings do not prove measured replica or checkout improvement. Its batch-size experiments also changed the selected plan, so increasing batch size is not necessarily faster.
+
+Bound whole-run memory and time as well as statement size. Retained IDs, hydrated caches, diagnostics and deferred shutdown work can grow across small batches; verify progress and resource use across multiple batches. [#68016](https://github.com/woocommerce/woocommerce/pull/68016) moved scheduled-sales priming and release into each batch. Release only owned entries or request-local state through supported APIs; [#69243](https://github.com/woocommerce/woocommerce/pull/69243) corrected a memory cleanup that flushed the shared persistent cache. Batching alone does not establish constant memory.
+
+Direct SQL deletion/update can bypass object hooks and cache invalidation. Establish whether that is allowed for the particular storage. [#60711](https://github.com/woocommerce/woocommerce/pull/60711) uses indexed, bounded session cleanup; product ordering required compatibility fallback and later bulk hooks plus per-product cache events in [#67812](https://github.com/woocommerce/woocommerce/pull/67812). A zero-result extension search cannot establish absence of consumers.
+
+## Make caching and scheduling correct across their lifecycle
+
+A cheap lookup can cost less than retrieving, filling and invalidating a cache. Identify the cache layer first: request-local values/instances, WordPress posts/meta, database transients, persistent object cache, or autoloaded options. Cache keys must represent every result-changing context. Changing query meaning may require a cache-version bump, as in [#65517](https://github.com/woocommerce/woocommerce/pull/65517).
+
+If user, role, geography or extension filters make a decision context-dependent, a persistent product-level key may not be viable. [#66767](https://github.com/woocommerce/woocommerce/pull/66767) removed a purchasability transient despite a measured gain. When bypassing a write API, also replace the invalidation it used to trigger; [#66966](https://github.com/woocommerce/woocommerce/pull/66966) had to restore query-cache invalidation and preserve filtered product-type resolution separately from its stored-term no-op check.
+
+For persistent counters, test independent key eviction, missed/deferred events, create/status-change/delete paths, custom or numeric-looking historic statuses, and malformed cache values. Normalize at typed boundaries without dropping valid custom keys. [#56652](https://github.com/woocommerce/woocommerce/pull/56652) exposed double counting through a real admin create flow; [#67058](https://github.com/woocommerce/woocommerce/pull/67058) and [#67366](https://github.com/woocommerce/woocommerce/pull/67366) document rollback and repair of product counters. Sequential hooks inside one request do not prove safety across requests. A display counter that can be rebuilt has different freshness requirements from stock or payment correctness; do not transfer eventual-consistency choices between them.
+
+Invalidate the keys owned by the operation rather than flushing a shared group indiscriminately. Preserve observable invalidation hooks and mutable-object identity/cloning behavior. Measure first load as well as reuse: [#65486](https://github.com/woocommerce/woocommerce/pull/65486) removed earlier order-item product retention after a regression concern. Bound payload bytes and context cardinality when keys accumulate; retain entries still needed by the current operation ([#68058](https://github.com/woocommerce/woocommerce/pull/68058)).
+
+Cached objects can run datastore/cache writes during deserialization and re-enter a cache client before its response completes. Use an inert cached representation for that path, then budget reconstruction separately; the ID-list fix in [#64232](https://github.com/woocommerce/woocommerce/pull/64232) did not make warm-hit hydration free.
+
+Deferral adds queue lookup/write costs and stale-data time. Coalesce repeated work, preserve the synchronous path where cheaper, and define failure behavior. [#63118](https://github.com/woocommerce/woocommerce/pull/63118#discussion_r2774926422) keeps transient invalidation synchronous with external object caching. Background warming is useful only if the cache survives the worker and the value is genuinely missing; zero is not a miss ([#63753](https://github.com/woocommerce/woocommerce/pull/63753)).
+
+Use the current scheduler integration and validate recurrence/filter results. Rescheduling a running recurring action can interfere with its next run ([#65831](https://github.com/woocommerce/woocommerce/pull/65831)). Existing scheduled callbacks can outlive a feature rollback. Test fresh installs, upgraded stores, future settings saves, and applicable multisite/network lifecycle; record when those are untested rather than assuming single-request success covers them.
