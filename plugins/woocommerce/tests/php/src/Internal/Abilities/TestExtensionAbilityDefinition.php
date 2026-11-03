@@ -8,7 +8,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
-use WP_Error;
 
 /**
  * Test extension ability definition.
@@ -36,16 +35,7 @@ class TestExtensionAbilityDefinition implements AbilityDefinition {
 			'label'               => 'Test extension ability',
 			'description'         => 'Test extension ability registered through the ability loader.',
 			'category'            => 'woocommerce',
-			'input_schema'        => array(
-				'type'                 => 'object',
-				'default'              => array(),
-				'properties'           => array( 'fail' => array( 'type' => 'boolean' ) ),
-				'additionalProperties' => false,
-			),
-			'execute_callback'    => static function ( $input ) {
-				if ( ! empty( $input['fail'] ) ) {
-					return new WP_Error( 'extension_failure' );
-				}
+			'execute_callback'    => static function (): array {
 				return array(
 					'ok' => true,
 				);

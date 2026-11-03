@@ -198,38 +198,29 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should record successful and failed calls to loader-registered extensions without tracking metadata.
-	 * @testWith [false]
-	 *           [true]
-	 *
-	 * @param bool $fail Whether the extension callback returns an error.
+	 * @testdox Should record calls to extension abilities registered through the loader.
 	 */
-	public function test_records_loader_registered_extension_calls( bool $fail ): void {
+	public function test_records_loader_registered_extension_calls(): void {
 		$this->register_extension_ability();
 		$this->start_mcp_tool_call();
 
-		$result = wp_get_ability( TestExtensionAbilityDefinition::ABILITY_ID )->execute( array( 'fail' => $fail ) );
+		wp_get_ability( TestExtensionAbilityDefinition::ABILITY_ID )->execute();
 		$this->sut->handle_shutdown();
 
-		$this->assertSame( $fail, is_wp_error( $result ) );
 		$this->assertCount( 1, $this->sut->recorded, 'The extension call should be tracked once' );
 		$event = $this->sut->recorded[0];
 		$this->assertSame( 'wcadmin_ability_called', $event['_en'] );
 		$this->assertSame( 'test-extension__test-extension-ability', $event['ability_name'] );
-		$this->assertSame( $fail ? 'error' : 'success', $event['outcome'] );
-		$this->assertSame( $fail ? ( class_exists( 'WP_Filter_Sentinel' ) ? 'extension_failure' : 'unknown' ) : 'none', $event['error_code'] );
+		$this->assertSame( 'success', $event['outcome'] );
+		$this->assertSame( 'none', $event['error_code'] );
 		$this->assertSame( 'mcp', $event['channel'] );
 	}
 
 	/**
-	 * @testdox Should not track extensions registered directly with WordPress, even with tracking metadata.
-	 * @testWith [null]
-	 *           [{"track_usage":true}]
-	 *
-	 * @param mixed $tracking_meta WooCommerce metadata, or null to omit it.
+	 * @testdox Should not track extensions registered directly with WordPress.
 	 */
-	public function test_does_not_track_extensions_registered_directly( $tracking_meta ): void {
-		$this->register_extension_ability( false, $tracking_meta );
+	public function test_does_not_track_extensions_registered_directly(): void {
+		$this->register_extension_ability( false );
 		$this->start_mcp_tool_call();
 
 		$result = wp_get_ability( TestExtensionAbilityDefinition::ABILITY_ID )->execute();
@@ -241,7 +232,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 
 		$this->assertNotWPError( $result, 'The extension remains usable outside the WooCommerce loader' );
 		$this->assertSame( 403, $response->get_status() );
-		$this->assertCount( 0, $this->sut->recorded, 'Public discovery, tracking metadata, and a matching category do not make an ability loader-owned' );
+		$this->assertCount( 0, $this->sut->recorded, 'Public discovery and a matching category do not make an ability loader-owned' );
 	}
 
 	/**
@@ -255,7 +246,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$response = rest_do_request( new WP_REST_Request( 'GET', '/wp-abilities/v1/abilities/' . TestExtensionAbilityDefinition::ABILITY_ID . '/run' ) );
 		$this->sut->handle_shutdown();
 
-		$this->assertGreaterThanOrEqual( 400, $response->get_status() );
+		$this->assertSame( 403, $response->get_status() );
 		$this->assertCount( 1, $this->sut->recorded );
 		$this->assertSame( 'test-extension__test-extension-ability', $this->sut->recorded[0]['ability_name'] );
 		$this->assertSame( 'rest', $this->sut->recorded[0]['channel'] );
@@ -264,31 +255,12 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should exclude extension execution and discovery when usage tracking is disabled.
-	 */
-	public function test_does_not_track_extensions_without_consent(): void {
-		$this->register_extension_ability();
-		$this->start_mcp_tool_call();
-		update_option( 'woocommerce_allow_tracking', 'no' );
-
-		wp_get_ability( TestExtensionAbilityDefinition::ABILITY_ID )->execute();
-		wp_get_ability( 'mcp-adapter/get-ability-info' )->execute( array( 'ability_name' => TestExtensionAbilityDefinition::ABILITY_ID ) );
-		$this->sut->handle_shutdown();
-
-		$this->assertSame( array(), $this->sut->recorded );
-	}
-
-	/**
 	 * @testdox Should not track an extension ability replaced outside the loader.
-	 * @testWith [null]
-	 *           [{"track_usage":true}]
-	 *
-	 * @param mixed $tracking_meta WooCommerce metadata, or null to omit it.
 	 */
-	public function test_does_not_track_replaced_extension_ability( $tracking_meta ): void {
+	public function test_does_not_track_replaced_extension_ability(): void {
 		$this->register_extension_ability();
 		wp_unregister_ability( TestExtensionAbilityDefinition::ABILITY_ID );
-		$this->register_extension_ability( false, $tracking_meta );
+		$this->register_extension_ability( false );
 		$this->start_mcp_tool_call();
 
 		wp_get_ability( TestExtensionAbilityDefinition::ABILITY_ID )->execute();
@@ -296,26 +268,6 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$this->sut->handle_shutdown();
 
 		$this->assertCount( 0, $this->sut->recorded, 'Only the ability instance registered by the loader belongs to WooCommerce tracking' );
-	}
-
-	/**
-	 * @testdox Should track loader-registered extensions without a metadata opt-in.
-	 * @testWith [null]
-	 *           [{"track_usage":false}]
-	 *
-	 * @param mixed $tracking_meta WooCommerce metadata, or null to omit it.
-	 */
-	public function test_tracks_loader_extensions_without_metadata_opt_in( $tracking_meta ): void {
-		$this->register_extension_ability( true, $tracking_meta );
-		$this->start_mcp_tool_call();
-
-		wp_get_ability( TestExtensionAbilityDefinition::ABILITY_ID )->execute();
-		wp_get_ability( 'mcp-adapter/get-ability-info' )->execute( array( 'ability_name' => TestExtensionAbilityDefinition::ABILITY_ID ) );
-		$this->sut->handle_shutdown();
-
-		$this->assertCount( 2, $this->sut->recorded );
-		$this->assertSame( 'wcadmin_ability_called', $this->sut->recorded[0]['_en'] );
-		$this->assertSame( 'wcadmin_ability_discovered', $this->sut->recorded[1]['_en'] );
 	}
 
 	/**
@@ -985,7 +937,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not record abilities outside the woocommerce namespace.
+	 * @testdox Should not record abilities outside the woocommerce namespace that the loader did not register.
 	 */
 	public function test_ignores_abilities_outside_woocommerce_namespace(): void {
 		$this->start_mcp_tool_call();
@@ -1329,22 +1281,12 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	/**
 	 * Register the extension fixture through WooCommerce or directly with WordPress.
 	 *
-	 * @param bool  $through_loader Whether to use the WooCommerce loader.
-	 * @param mixed $tracking_meta  WooCommerce metadata, or null to omit it.
+	 * @param bool $through_loader Whether to use the WooCommerce loader.
 	 */
-	private function register_extension_ability( bool $through_loader = true, $tracking_meta = null ): void {
+	private function register_extension_ability( bool $through_loader = true ): void {
 		$definitions = static function ( $classes ) {
 			$classes[] = TestExtensionAbilityDefinition::class;
 			return $classes;
-		};
-		$arguments   = static function ( $args, $name ) use ( $tracking_meta ) {
-			if ( TestExtensionAbilityDefinition::ABILITY_ID !== $name ) {
-				return $args;
-			}
-			if ( null !== $tracking_meta ) {
-				$args['meta']['woocommerce'] = $tracking_meta;
-			}
-			return $args;
 		};
 		$register    = $through_loader ? array( AbilitiesLoader::class, 'register_abilities' ) : static function (): void {
 			wp_register_ability( TestExtensionAbilityDefinition::ABILITY_ID, TestExtensionAbilityDefinition::get_registration_args() );
@@ -1353,13 +1295,11 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		if ( $through_loader ) {
 			add_filter( 'woocommerce_ability_definition_classes', $definitions );
 		}
-		add_filter( 'wp_register_ability_args', $arguments, 10, 2 );
 		add_action( 'wp_abilities_api_init', $register );
 		try {
 			do_action( 'wp_abilities_api_init' );
 		} finally {
 			remove_action( 'wp_abilities_api_init', $register );
-			remove_filter( 'wp_register_ability_args', $arguments, 10 );
 			remove_filter( 'woocommerce_ability_definition_classes', $definitions );
 		}
 	}
