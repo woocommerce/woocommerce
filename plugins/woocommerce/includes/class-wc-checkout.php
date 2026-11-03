@@ -1520,7 +1520,7 @@ class WC_Checkout {
 	 * The shopper is sent to the order received page, where wc_clear_cart_after_payment()
 	 * empties the cart the gateway left behind, instead of being charged for a second order.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 * @param WC_Order $order The order the session was awaiting payment for.
 	 */
 	protected function send_repeat_submit_response( WC_Order $order ): void {
@@ -1546,7 +1546,7 @@ class WC_Checkout {
 	 * received page: after payment_complete() nothing in the session points at the order, so
 	 * if the shopper never lands there, a submit from the still-open form would build a new one.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 * @param WC_Order  $order The order, re-read after the failure.
 	 * @param Throwable $error The failure raised after the gateway ran.
 	 */

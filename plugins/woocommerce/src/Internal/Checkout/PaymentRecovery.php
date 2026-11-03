@@ -39,7 +39,7 @@ final class PaymentRecovery {
 	/**
 	 * Remembers the order a checkout is about to hand to the gateway.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param int $order_id Order ID.
 	 */
@@ -55,7 +55,7 @@ final class PaymentRecovery {
 	 * That combination means a submit repeats one the gateway already took: the gateway moved the
 	 * order on but the request died before the cart was emptied.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param int $fallback_order_id Order to use when nothing was remembered, as in a session written before the key existed.
 	 * @return WC_Order|null
@@ -78,7 +78,7 @@ final class PaymentRecovery {
 	/**
 	 * Notes on the order that a repeat submit was answered with its order received page.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param WC_Order $order The order the gateway already moved past payment.
 	 */
@@ -89,7 +89,7 @@ final class PaymentRecovery {
 	/**
 	 * Reads the order again, so a status the gateway set on its own instance is seen.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param WC_Order $order Order object, possibly stale.
 	 * @return WC_Order The stored order, or the given one when it can no longer be read.
@@ -112,7 +112,7 @@ final class PaymentRecovery {
 	 * Not needs_payment(): that folds in the order total, and a fully discounted order that
 	 * failed would then keep its stock and coupon holds.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param WC_Order $order Order object.
 	 * @return bool
@@ -144,7 +144,7 @@ final class PaymentRecovery {
 	 * The caller still has to answer the shopper with the order received page: this only writes
 	 * down what happened, since neither checkout reports the failure to the shopper any more.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param WC_Order  $order      Order object.
 	 * @param Throwable $error      The failure raised after the gateway moved the order on.
