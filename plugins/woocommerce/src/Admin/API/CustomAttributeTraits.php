@@ -18,7 +18,7 @@ trait CustomAttributeTraits {
 	 *
 	 * @internal
 	 * @param string $slug The attribute slug.
-	 * @return \WP_Error|array The matching attribute data keyed by slug, or WP_Error if not found.
+	 * @return WP_Error|object The matching attribute object or WP_Error if not found.
 	 */
 	public function get_custom_attribute_by_slug( $slug ) {
 		$matching_attributes = $this->get_custom_attributes( array( 'slug' => $slug ) );
@@ -53,11 +53,11 @@ trait CustomAttributeTraits {
 			)
 		);
 
-		if ( '' === (string) $args['name'] && '' === (string) $args['slug'] ) {
+		if ( empty( $args['name'] ) && empty( $args['slug'] ) ) {
 			return array();
 		}
 
-		$mode = '' !== (string) $args['name'] ? 'name' : 'slug';
+		$mode = $args['name'] ? 'name' : 'slug';
 
 		if ( 'name' === $mode ) {
 			$name = $args['name'];
@@ -65,12 +65,8 @@ trait CustomAttributeTraits {
 			$like = '%"name";s:%:"%' . $wpdb->esc_like( $name ) . '%"%';
 		} else {
 			$slug = sanitize_title_for_query( $args['slug'] );
-			// PHP stores canonical numeric string keys as integers when serializing product attributes.
-			$attribute_key = array_key_first( array( $slug => true ) );
 			// Get as close as we can to matching the slug property of custom attributes using SQL.
-			$like = is_int( $attribute_key )
-				? '%i:' . $attribute_key . ';a:%:{%'
-				: '%s:' . strlen( $slug ) . ':"' . $slug . '";a:%:{%';
+			$like = '%s:' . strlen( $slug ) . ':"' . $slug . '";a:6:{%';
 		}
 
 		// Find all serialized product attributes with names like the search string.
@@ -116,7 +112,7 @@ trait CustomAttributeTraits {
 					continue;
 				}
 
-				if ( ( 'slug' === $mode ) && ( (string) $meta_attribute_key !== $slug ) ) {
+				if ( ( 'slug' === $mode ) && ( $meta_attribute_key !== $slug ) ) {
 					continue;
 				}
 

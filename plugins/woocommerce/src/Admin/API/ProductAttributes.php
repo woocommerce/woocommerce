@@ -87,7 +87,7 @@ class ProductAttributes extends \WC_REST_Product_Attributes_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function get_item_by_slug( $request ) {
-		if ( '' === (string) $request['slug'] ) {
+		if ( empty( $request['slug'] ) ) {
 			return array();
 		}
 
@@ -112,29 +112,17 @@ class ProductAttributes extends \WC_REST_Product_Attributes_Controller {
 		$response = array();
 
 		foreach ( $custom_attributes as $attribute_key => $attribute_value ) {
-			$slug = (string) $attribute_key;
 			$data = array(
 				'id'           => $attribute_key,
 				'name'         => $attribute_value['name'],
-				'slug'         => $slug,
+				'slug'         => $attribute_key,
 				'type'         => 'select',
 				'order_by'     => 'menu_order',
 				'has_archives' => false,
 			);
 
-			$links = $this->prepare_links( (object) array( 'attribute_id' => $attribute_key ) );
-			// Numeric paths belong to global IDs; custom keys must survive route matching and lookup unchanged.
-			if (
-				'' === $slug
-				|| ctype_digit( $slug )
-				|| strspn( $slug, 'abcdefghijklmnopqrstuvwxyz0123456789_-' ) !== strlen( $slug )
-				|| sanitize_title_for_query( $slug ) !== $slug
-			) {
-				unset( $links['self'] );
-			}
-
 			$item_response = rest_ensure_response( $data );
-			$item_response->add_links( $links );
+			$item_response->add_links( $this->prepare_links( (object) array( 'attribute_id' => $attribute_key ) ) );
 			$item_response = $this->prepare_response_for_collection(
 				$item_response
 			);
@@ -152,7 +140,7 @@ class ProductAttributes extends \WC_REST_Product_Attributes_Controller {
 	 * @return \WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		if ( '' === (string) $request['search'] ) {
+		if ( empty( $request['search'] ) ) {
 			return parent::get_items( $request );
 		}
 
@@ -166,7 +154,7 @@ class ProductAttributes extends \WC_REST_Product_Attributes_Controller {
 				$custom_attributes,
 				static function ( $slug ) use ( $custom_slugs ) {
 					$slug = (string) $slug;
-					return in_array( $slug, $custom_slugs, true );
+					return 0 !== strpos( $slug, 'pa_' ) && in_array( $slug, $custom_slugs, true );
 				},
 				ARRAY_FILTER_USE_KEY
 			);

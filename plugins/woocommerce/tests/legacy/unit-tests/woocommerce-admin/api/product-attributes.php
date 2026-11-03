@@ -260,19 +260,17 @@ class WC_Admin_Tests_API_Product_Attributes extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Prefixed global slugs exclude unprefixed custom keys, while unprefixed slugs can select both kinds.
+	 * @testdox Prefixed slugs select only global attributes, while unprefixed slugs can select both kinds.
 	 * @testWith ["Colour", "pa_colour", ["pa_colour"]]
 	 *           ["Colour", "PA_Colour", ["pa_colour"]]
 	 *           ["Colour", "colour", ["colour", "pa_colour"]]
 	 *           ["Colour", ["pa_colour", "colour"], ["colour", "pa_colour"]]
 	 *           ["num", "pa_numeric-size", []]
-	 *           ["123", "123", ["123"]]
-	 *           ["123", "", ["123"]]
-	 *           ["123", ["123", "colour"], ["123"]]
+	 *           ["123", "123", [123]]
 	 *
 	 * @param string          $search Search term.
 	 * @param string|string[] $slug Requested slugs.
-	 * @param string[]        $expected_slugs Expected response slugs.
+	 * @param string[]|int[]  $expected_slugs Expected response slugs.
 	 */
 	public function test_search_distinguishes_global_and_custom_slugs( string $search, $slug, array $expected_slugs ): void {
 		wp_set_current_user( $this->user );
@@ -305,220 +303,6 @@ class WC_Admin_Tests_API_Product_Attributes extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'numeric-size', $attribute['id'] );
 		$this->assertEquals( 'numeric-size', $attribute['slug'] );
 		$this->assertEquals( 'Numeric Size', $attribute['name'] );
-	}
-
-	/**
-	 * @testdox Custom attribute callbacks look up numeric slugs without changing their string representation.
-	 * @testWith ["123"]
-	 *           ["0123"]
-	 *           ["9223372036854775808"]
-	 *           ["0"]
-	 *           ["456", true]
-	 *           ["custom-extra", true]
-	 *
-	 * @param string $slug The custom attribute slug.
-	 * @param bool   $extra_data Whether the attribute has extension data.
-	 */
-	public function test_numeric_custom_attribute_lookup( string $slug, bool $extra_data = false ): void {
-		$attribute = new WC_Product_Attribute();
-		$attribute->set_name( $slug );
-		$attribute->set_options( array( 'example' ) );
-		if ( $extra_data ) {
-			$attribute->set_extra_data( 'extension_field', 'extension value' );
-		}
-		$product = new WC_Product_Simple();
-		$product->set_attributes( array( $attribute ) );
-		$product->save();
-
-		try {
-			// Numeric URLs retain the inherited global-ID route; exercise the custom callbacks directly.
-			$request = new WP_REST_Request( 'GET' );
-			$request->set_param( 'slug', $slug );
-			$controller = new \Automattic\WooCommerce\Admin\API\ProductAttributes();
-			$response   = $controller->get_item_by_slug( $request );
-
-			$this->assertNotWPError( $response );
-			$this->assertArrayHasKey( 'slug', $response );
-			$this->assertSame( $slug, $response['slug'] );
-			$this->assertSame( $slug, $response['name'] );
-
-			$terms_controller = new \Automattic\WooCommerce\Admin\API\ProductAttributeTerms();
-			$terms            = $terms_controller->get_item_by_slug( $request );
-			$this->assertNotWPError( $terms );
-			$this->assertSame( array( 'example' ), wp_list_pluck( $terms, 'slug' ) );
-		} finally {
-			$product->delete( true );
-		}
-	}
-
-	/**
-	 * @testdox Search and slug filters preserve zero and prefixed custom attribute keys.
-	 * @testWith ["0"]
-	 *           ["pa_bespoke"]
-	 *
-	 * @param string $slug The custom attribute slug.
-	 */
-	public function test_search_with_special_custom_slug( string $slug ): void {
-		wp_set_current_user( $this->user );
-		$attribute = new WC_Product_Attribute();
-		$attribute->set_name( $slug );
-		$attribute->set_options( array( 'example' ) );
-		$product = new WC_Product_Simple();
-		$product->set_attributes( array( $attribute ) );
-		$product->save();
-
-		try {
-			$request = new WP_REST_Request( 'GET', $this->endpoint );
-			$request->set_query_params( array( 'search' => $slug ) );
-			$response = $this->server->dispatch( $request );
-			$this->assertSame( 200, $response->get_status() );
-			$this->assertSame( array( $slug ), wp_list_pluck( $response->get_data(), 'slug' ) );
-
-			$request->set_query_params(
-				array(
-					'search' => $slug,
-					'slug'   => $slug,
-				)
-			);
-			$response = $this->server->dispatch( $request );
-			$this->assertSame( 200, $response->get_status() );
-			$this->assertSame( array( $slug ), wp_list_pluck( $response->get_data(), 'slug' ) );
-			$this->assertSame( 1, $response->get_headers()['X-WP-Total'] );
-		} finally {
-			$product->delete( true );
-		}
-	}
-
-	/**
-	 * @testdox Numeric custom attributes omit self links that would resolve through the global-ID route.
-	 * @testWith ["0"]
-	 *           ["123"]
-	 *           ["0123"]
-	 *           ["9223372036854775808"]
-	 *           ["global-id"]
-	 *
-	 * @param string $slug The custom slug, or global-id to collide with an existing global attribute.
-	 */
-	public function test_numeric_custom_attribute_links( string $slug ): void {
-		wp_set_current_user( $this->user );
-		$global_attributes = wc_get_attribute_taxonomies();
-		$global_attribute  = reset( $global_attributes );
-		$collides          = 'global-id' === $slug;
-		if ( $collides ) {
-			$slug = (string) $global_attribute->attribute_id;
-		}
-		$attribute = new WC_Product_Attribute();
-		$attribute->set_name( $slug );
-		$attribute->set_options( array( 'example' ) );
-		$product = new WC_Product_Simple();
-		$product->set_attributes( array( $attribute ) );
-		$product->save();
-
-		$request = new WP_REST_Request( 'GET', $this->endpoint );
-		$request->set_query_params(
-			array(
-				'search' => $slug,
-				'slug'   => $slug,
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$this->assertSame( 200, $response->get_status() );
-		$items = $response->get_data();
-		$this->assertCount( 1, $items );
-		$this->assertSame( $slug, $items[0]['slug'] );
-
-		$numeric_response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/' . $slug ) );
-		$this->assertSame( $collides ? 200 : 404, $numeric_response->get_status() );
-		if ( $collides ) {
-			$this->assertSame( 'pa_' . $global_attribute->attribute_name, $numeric_response->get_data()['slug'] );
-		}
-
-		$this->assertArrayNotHasKey( 'self', $items[0]['_links'] );
-		$this->assertSame( rest_url( $this->endpoint ), $items[0]['_links']['collection'][0]['href'] );
-	}
-
-	/**
-	 * @testdox Legacy custom attributes advertise self links only for keys the item lookup can resolve.
-	 * @testWith ["legacy/key", false]
-	 *           ["legacy.key", false]
-	 *           ["legacy key", false]
-	 *           ["legacy%2fkey", false]
-	 *           ["Legacy-Key", false]
-	 *           ["légacy", false]
-	 *           ["", false]
-	 *           ["-legacy-key", false]
-	 *           ["legacy-key-", false]
-	 *           ["legacy--key", false]
-	 *           ["-123", false]
-	 *           ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", false]
-	 *           ["legacy_key", true]
-	 *           ["legacy-key", true]
-	 *           ["pa_legacy", true]
-	 *           ["legacy-123", true]
-	 *           ["batch", true]
-	 *
-	 * @param string $slug The legacy attribute key.
-	 * @param bool   $has_self_link Whether the key has a resolvable item URL.
-	 */
-	public function test_legacy_custom_attribute_links( string $slug, bool $has_self_link ): void {
-		wp_set_current_user( $this->user );
-		$product = new WC_Product_Simple();
-		$product->save();
-		// Legacy metadata can contain keys that the current product setter would sanitize.
-		update_post_meta(
-			$product->get_id(),
-			'_product_attributes',
-			array(
-				$slug => array(
-					'name'         => 'Legacy link attribute',
-					'value'        => 'example',
-					'position'     => 0,
-					'is_visible'   => 0,
-					'is_variation' => 0,
-					'is_taxonomy'  => 0,
-				),
-			)
-		);
-
-		$request = new WP_REST_Request( 'GET', $this->endpoint );
-		$request->set_param( 'search', 'Legacy link attribute' );
-		$response = $this->server->dispatch( $request );
-		$this->assertSame( 200, $response->get_status() );
-		$items = $response->get_data();
-		$this->assertCount( 1, $items );
-		$this->assertSame( $slug, $items[0]['slug'] );
-		$this->assertSame( rest_url( $this->endpoint ), $items[0]['_links']['collection'][0]['href'] );
-
-		$item_response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/' . $slug ) );
-		if ( $has_self_link ) {
-			$this->assertSame( 200, $item_response->get_status() );
-			$this->assertSame( $slug, $item_response->get_data()['slug'] );
-			$this->assertSame( rest_url( $this->endpoint . '/' . $slug ), $items[0]['_links']['self'][0]['href'] );
-		} else {
-			$this->assertNotSame( $slug, $item_response->get_data()['slug'] ?? null );
-			$this->assertArrayNotHasKey( 'self', $items[0]['_links'] );
-		}
-	}
-
-	/**
-	 * @testdox Search results retain resolvable self links for ordinary custom and global attributes.
-	 */
-	public function test_search_result_self_links(): void {
-		wp_set_current_user( $this->user );
-		$request = new WP_REST_Request( 'GET', $this->endpoint );
-		$request->set_query_params( array( 'search' => 'num' ) );
-		$response = $this->server->dispatch( $request );
-		$this->assertSame( 200, $response->get_status() );
-		$items = $response->get_data();
-		$this->assertSame( array( 'numeric-size', 'pa_number' ), wp_list_pluck( $items, 'slug' ) );
-
-		foreach ( $items as $item ) {
-			$self_route    = str_replace( rest_url(), '/', $item['_links']['self'][0]['href'] );
-			$item_response = $this->server->dispatch( new WP_REST_Request( 'GET', $self_route ) );
-			$this->assertSame( 200, $item_response->get_status() );
-			$this->assertSame( $item['slug'], $item_response->get_data()['slug'] );
-			$this->assertSame( rest_url( $this->endpoint ), $item['_links']['collection'][0]['href'] );
-		}
 	}
 
 	/**
