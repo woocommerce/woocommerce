@@ -66,9 +66,29 @@ class Css_Selector_Normalizer_Test extends \Email_Editor_Unit_Test {
 				'a:not(:where(.first, .second)) { color: red; }',
 				'a:not(:where(.first, .second)){ color: red; }',
 			),
+			'type joined to a prefix is kept'             => array(
+				'.x:where(div){color:red}',
+				'.x:where(div){color:red}',
+			),
+			'combinator after a descendant is kept'       => array(
+				'.p :where(.a .b){color:red}',
+				'.p :where(.a .b){color:red}',
+			),
+			'combinator after a child is kept'            => array(
+				'.x > :where(.a .b){color:red}',
+				'.x > :where(.a .b){color:red}',
+			),
 			'combinator with no prefix'                   => array(
 				'.c :where(.a){color:red} :where(.a .b) .c{color:red}',
 				'.c .a{color:red}.a .b .c{color:red}',
+			),
+			'nested type selector is kept'                => array(
+				':not(.x:where(div)){color:red}',
+				':not(.x:where(div)){color:red}',
+			),
+			'nested combinator is kept'                   => array(
+				'a:not(.a:where(.b .c)){color:red}',
+				'a:not(.a:where(.b .c)){color:red}',
 			),
 			'nested whole argument'                       => array(
 				'a:not(:where(.b)){color:red}',

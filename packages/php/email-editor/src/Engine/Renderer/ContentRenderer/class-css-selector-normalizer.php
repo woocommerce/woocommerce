@@ -105,19 +105,45 @@ REGEX;
 ~"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|/\*.*?\*/|\\.~s
 REGEX;
 		$prefix    = (string) preg_replace( $quoted, '', $before );
-		if ( count( $parts ) > 1 && substr_count( $prefix, '(' ) > substr_count( $prefix, ')' ) ) {
-			// Distributing a list inside another function can change its meaning, especially in :not().
-			return array( $selector );
+		if ( substr_count( $prefix, '(' ) > substr_count( $prefix, ')' ) ) {
+			// Inside another function, only a single `:where()` that is the whole argument keeps its meaning as plain text.
+			if ( count( $parts ) > 1 || ! preg_match( '/\(\s*$/', $prefix ) || ! preg_match( '/^\s*\)/', $after ) ) {
+				return array( $selector );
+			}
 		}
 
 		// Keep the existing treatment of WordPress's :root :where(...) wrapper.
 		$before = (string) preg_replace( '/:root\s+$/i', '', $before );
+		$prefix = ltrim( (string) preg_replace( $quoted, '', $before ) );
+		if ( '' !== $prefix && ! self::can_follow( $prefix, $parts ) ) {
+			return array( $selector );
+		}
 		foreach ( $parts as $part ) {
 			$universal = preg_match( '/(?:^|[\s>+~])$/', $before ) && 0 === strpos( $part, ':' ) ? '*' : '';
 			$selectors = array_merge( $selectors, self::expand_where( $before . $universal . $part . $after ) );
 		}
 
 		return $selectors;
+	}
+
+	/**
+	 * Check that each `:where()` argument means the same as plain text after the given prefix.
+	 *
+	 * An argument with a combinator, such as `.a .b`, would match other elements, and so would a type selector joined to the prefix.
+	 *
+	 * @param string   $prefix Selector text before `:where()`, without comments and strings.
+	 * @param string[] $parts  The `:where()` arguments.
+	 * @return bool
+	 */
+	private static function can_follow( string $prefix, array $parts ): bool {
+		$joined = ! preg_match( '/[\s>+~(]$/', $prefix );
+		foreach ( $parts as $part ) {
+			$outer = (string) preg_replace( '/\[[^\]]*\]|\((?:[^()]++|(?R))*\)/', '', $part );
+			if ( preg_match( '/[\s>+~]/', trim( $outer ) ) || ( $joined && preg_match( '/^[a-z*|\\\\]/i', $part ) ) ) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
