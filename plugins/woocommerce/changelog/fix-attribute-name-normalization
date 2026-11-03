@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Normalize global attribute names consistently on save.
