@@ -1450,6 +1450,103 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Run a callback while a listener makes every order write fail.
+	 *
+	 * @param callable $callback Callback to run.
+	 * @return mixed What the callback returns.
+	 */
+	private function with_failed_writes( callable $callback ) {
+		$fail = static function () {
+			throw new Exception( 'Disk full.' );
+		};
+		add_action( 'woocommerce_before_order_object_save', $fail );
+		try {
+			return $callback();
+		} finally {
+			remove_action( 'woocommerce_before_order_object_save', $fail );
+		}
+	}
+
+	/**
+	 * @testdox payment_complete() returns false and fires no payment or status hook when the order write fails.
+	 */
+	public function test_payment_complete_stops_when_the_write_fails(): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid    = did_action( 'woocommerce_payment_complete' );
+		$changed = did_action( 'woocommerce_order_status_changed' );
+
+		$result = $this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+
+		$this->assertFalse( $result );
+		$this->assertSame( 0, did_action( 'woocommerce_payment_complete' ) - $paid );
+		$this->assertSame( 0, did_action( 'woocommerce_order_status_changed' ) - $changed );
+		$stored = wc_get_order( $order->get_id() );
+		$this->assertSame( OrderStatus::PENDING, $stored->get_status() );
+		$this->assertNull( $stored->get_date_paid() );
+	}
+
+	/**
+	 * @testdox woocommerce_payment_complete fires once, when a save after a failed payment_complete() succeeds.
+	 */
+	public function test_payment_complete_fires_its_hook_after_a_failed_write_is_retried(): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid = did_action( 'woocommerce_payment_complete' );
+
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+		$order->save();
+		$order->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $paid );
+		$this->assertSame( OrderStatus::COMPLETED, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox update_taxes() does not write the tax items when the order write fails.
+	 */
+	public function test_update_taxes_does_not_write_tax_items_when_the_write_fails(): void {
+		$rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country' => '',
+				'tax_rate'         => '10.0000',
+				'tax_rate_name'    => 'TAX',
+				'tax_rate_order'   => '1',
+			)
+		);
+		$order   = new WC_Order();
+		$product = new WC_Order_Item_Product();
+		$product->set_taxes(
+			array(
+				'total'    => array( $rate_id => '1' ),
+				'subtotal' => array( $rate_id => '1' ),
+			)
+		);
+		$order->add_item( $product );
+		$order->update_taxes();
+		$tax_item = current( $order->get_taxes() );
+		$this->assertSame( 1.0, (float) $tax_item->get_tax_total() );
+
+		$product->set_taxes(
+			array(
+				'total'    => array( $rate_id => '2' ),
+				'subtotal' => array( $rate_id => '2' ),
+			)
+		);
+		$this->with_failed_writes( array( $order, 'update_taxes' ) );
+
+		$this->assertSame( 1.0, (float) ( new WC_Order_Item_Tax( $tax_item->get_id() ) )->get_tax_total() );
+	}
+
+	/**
 	 * Test: a staged note is not added when the order write fails.
 	 */
 	public function test_stage_order_note_is_skipped_when_the_write_fails() {
