@@ -998,7 +998,7 @@ class ProductSchema extends AbstractSchema {
 			$sale_price    = $product->get_variation_sale_price();
 		} else {
 			$regular_price = $product->get_regular_price();
-			$sale_price    = $product->get_sale_price();
+			$sale_price    = $product->is_on_sale() ? $product->get_sale_price() : '';
 		}
 
 		$prices['price']         = $this->prepare_money_response( $price_function( $product ), $price_decimals );

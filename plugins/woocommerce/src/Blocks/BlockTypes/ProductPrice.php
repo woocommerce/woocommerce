@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 
 /**
@@ -77,8 +78,10 @@ class ProductPrice extends AbstractBlock {
 				/** @var \WC_Product_Variable $product */
 				$prices_vary = $product->get_variation_sale_price( 'min' ) !== $product->get_variation_sale_price( 'max' )
 					|| $product->get_variation_regular_price( 'min' ) !== $product->get_variation_regular_price( 'max' );
+				// A suffix like {price_including_tax} only shows on the chosen variation's price, so switch to it even when all prices match.
+				$has_variation_only_suffix = wc_tax_enabled() && ProductTaxStatus::TAXABLE === $product->get_tax_status() && str_contains( (string) get_option( 'woocommerce_price_display_suffix' ), '{' );
 
-				if ( ! $prices_vary ) {
+				if ( ! $prices_vary && ! $has_variation_only_suffix ) {
 					$is_interactive = false;
 				}
 			}

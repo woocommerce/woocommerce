@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the collections data store ignoring the Store API Last-Modified header.

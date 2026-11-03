@@ -133,6 +133,34 @@ class Products extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Sale price is only returned while the sale is active.
+	 */
+	public function test_sale_price_is_hidden_until_scheduled_sale_starts(): void {
+		$fixtures  = new FixtureData();
+		$scheduled = $fixtures->get_simple_product(
+			array(
+				'regular_price'     => 100,
+				'sale_price'        => 63.45,
+				'date_on_sale_from' => strtotime( '+1 year' ),
+				'date_on_sale_to'   => strtotime( '+1 year +3 days' ),
+			)
+		);
+		$active    = $fixtures->get_simple_product(
+			array(
+				'regular_price' => 100,
+				'sale_price'    => 70,
+			)
+		);
+
+		$scheduled_prices = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $scheduled->get_id() ) )->get_data()['prices'];
+		$active_prices    = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $active->get_id() ) )->get_data()['prices'];
+
+		$this->assertSame( '10000', $scheduled_prices->price );
+		$this->assertSame( '10000', $scheduled_prices->sale_price, 'A sale that has not started must not expose its sale price.' );
+		$this->assertSame( '7000', $active_prices->sale_price, 'An active sale returns its sale price.' );
+	}
+
+	/**
 	 * Test get grouped product.
 	 */
 	public function test_grouped_product() {
