@@ -314,6 +314,9 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'Seen on: <a href="https://example.org/product/mug/">https://example.org/product/mug/</a>', $html, 'A conflict names the page' );
 		$this->assertStringNotContainsString( 'Yoast SEO', $html, 'No plugin is named, even from an older stored report' );
 		$this->assertStringNotContainsString( 'product_offer_jsonld name', $html, 'Its prerequisite failed' );
+		$this->assertStringContainsString( 'product_jsonld_present label', $html, 'A failing check is named by its failing title' );
+		$this->assertStringNotContainsString( 'product_jsonld_present name', $html );
+		$this->assertStringNotContainsString( 'sitemap_lists_products label', $html, 'A passed check keeps its passing title' );
 		$this->assertMatchesRegularExpression( '#<details><summary>Show 1 more check</summary>.*sitemap_lists_products name.*</details>#s', $html );
 	}
 
@@ -395,7 +398,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Product checks shows what each channel can list and each failing check with its channel tags and a filtered list link, without the alt text check; a failing setup check says what to do.
+	 * @testdox Product checks shows what each channel can list and each failing check with its Required by tags and a filtered list link, without the alt text check; a failing setup check says what to do.
 	 */
 	public function test_output_product_checks_and_store_check_detail(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -410,7 +413,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertGreaterThan( 0, array_column( get_option( AgentReadiness::REPORT_OPTION )['checks'], 'count', 'id' )['image_alt_text'] ?? 0, 'The scan found the missing alt text' );
 		$this->assertStringContainsString( '<span>ChatGPT</span> <strong>0</strong> of 1 can be listed', $html );
 		$this->assertStringContainsString( 'Required by ChatGPT', $html );
-		$this->assertStringContainsString( 'Harder to find on Google', $html );
+		$this->assertStringNotContainsString( 'Harder to find on', $html, 'Only channels that can\'t list the product are tagged' );
 		$this->assertStringContainsString( 'View 1 product</a>', $html );
 		$this->assertStringContainsString( 'agent_readiness=', $html, 'The link opens the Products list filtered to the failing products' );
 		$this->assertStringNotContainsString( 'main image has no alt text', $html, 'Store readiness covers alt text' );

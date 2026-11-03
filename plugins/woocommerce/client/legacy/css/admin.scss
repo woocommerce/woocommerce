@@ -9980,6 +9980,14 @@ body.woocommerce-settings-payments-section_legacy {
 	}
 }
 
+.wc-agentic-commerce-results {
+	margin-block-start: 8px;
+
+	li:first-child {
+		border-block-start-color: #dcdcde;
+	}
+}
+
 .wc-agentic-commerce-results li {
 	display: flex;
 	justify-content: space-between;
