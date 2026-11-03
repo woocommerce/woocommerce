@@ -6,7 +6,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 11.3.0
+ * @version 11.4.0
  *
  * @var WC_Order $order Order being reviewed.
  */
@@ -17,7 +17,7 @@ if ( ! $order instanceof WC_Order ) {
 	return;
 }
 
-$meta_line = \Automattic\WooCommerce\Internal\OrderReviews\Meta::line_for_order( $order );
+$meta_line_html = \Automattic\WooCommerce\Internal\OrderReviews\Meta::line_html_for_order( $order );
 
 /**
  * Filter the eligible items rendered on the Review Order page.
@@ -93,7 +93,7 @@ $wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_
 ?>
 <div class="woocommerce-review-order">
 	<p class="woocommerce-breadcrumb woocommerce-review-order__meta">
-		<?php echo esc_html( $meta_line ); ?>
+		<?php echo $meta_line_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Meta::line_html_for_order() escapes each part. ?>
 	</p>
 
 	<?php // Focusable so dismissing the notice can hand focus back. ?>
