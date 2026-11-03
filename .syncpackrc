@@ -128,6 +128,7 @@
 				"css-loader",
 				"eslint",
 				"jest",
+				"jest-circus",
 				"jest-cli",
 				"jest-environment-jsdom",
 				"jest-environment-node",
@@ -489,7 +490,6 @@
 			"dependencies": [
 				"@jest/test-sequencer",
 				"@types/jest",
-				"jest-circus",
 				"jest-each",
 				"babel-jest"
 			],
@@ -504,7 +504,6 @@
 			"dependencies": [
 				"@jest/test-sequencer",
 				"@types/jest",
-				"jest-circus",
 				"jest-each",
 				"babel-jest"
 			],
