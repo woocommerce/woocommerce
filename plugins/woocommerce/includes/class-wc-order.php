@@ -235,6 +235,8 @@ class WC_Order extends WC_Abstract_Order {
 			return false;
 		}
 
+		$this->defer_to_save( 'payment_complete', null );
+
 		if ( ! empty( $transaction_id ) ) {
 			$this->set_transaction_id( $transaction_id );
 		}
