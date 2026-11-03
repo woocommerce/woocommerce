@@ -2618,9 +2618,11 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	 */
 	public function test_create_without_explicit_prices_include_tax_keeps_default(): void {
 		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$previous_calc_tax = get_option( 'woocommerce_calc_taxes' );
 		$order             = null;
 
 		try {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
 			update_option( 'woocommerce_prices_include_tax', 'yes' );
 			$order = new WC_Order();
 			update_option( 'woocommerce_prices_include_tax', 'no' );
@@ -2644,6 +2646,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 				$order->delete( true );
 			}
 			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+			update_option( 'woocommerce_calc_taxes', $previous_calc_tax );
 		}
 	}
 
@@ -2687,9 +2690,11 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		global $wpdb;
 
 		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$previous_calc_tax = get_option( 'woocommerce_calc_taxes' );
 		$order             = new WC_Order();
 
 		try {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
 			update_option( 'woocommerce_prices_include_tax', 'yes' );
 			$this->switch_data_store( $order, $this->sut );
 			$order->save();
@@ -2716,6 +2721,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		} finally {
 			$order->delete( true );
 			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+			update_option( 'woocommerce_calc_taxes', $previous_calc_tax );
 		}
 	}
 
