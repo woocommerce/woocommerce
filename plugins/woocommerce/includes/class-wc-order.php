@@ -183,8 +183,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * so it runs all of them and saves right away, as it always did.
 	 *
 	 * When the order status is not one that payment can complete, the order does not change, the
-	 * woocommerce_payment_complete_order_status_<status> action fires right away, nothing is left to the next
-	 * save(), and the method returns false.
+	 * woocommerce_payment_complete_order_status_<status> action fires right away, the method adds nothing for
+	 * the next save(), and it returns false.
 	 *
 	 * An order that is not saved yet does not change, and the method returns false.
 	 *
@@ -202,24 +202,24 @@ class WC_Order extends WC_Abstract_Order {
 			return false;
 		}
 
-		$this->write_or_defer(
-			'pre_payment_complete',
-			function ( $order_id, $transaction_id ) {
-				/**
-				 * Fires before the payment of an order is completed.
-				 *
-				 * @param int    $order_id       Order ID.
-				 * @param string $transaction_id Transaction ID passed to payment_complete().
-				 * @since 2.1.0
-				 */
-				do_action( 'woocommerce_pre_payment_complete', $order_id, $transaction_id );
+		$pre_payment_complete = static function ( $order_id, $transaction_id ) {
+			/**
+			 * Fires before the payment of an order is completed.
+			 *
+			 * @param int    $order_id       Order ID.
+			 * @param string $transaction_id Transaction ID passed to payment_complete().
+			 * @since 2.1.0
+			 */
+			do_action( 'woocommerce_pre_payment_complete', $order_id, $transaction_id );
 
-				if ( WC()->session ) {
-					WC()->session->set( 'order_awaiting_payment', false );
-				}
-			},
-			array( $this->get_id(), $transaction_id )
-		);
+			if ( WC()->session ) {
+				WC()->session->set( 'order_awaiting_payment', false );
+			}
+		};
+
+		if ( $this->writing_through ) {
+			$pre_payment_complete( $this->get_id(), $transaction_id );
+		}
 
 		/**
 		 * Filters the valid order statuses for payment complete.
@@ -238,8 +238,11 @@ class WC_Order extends WC_Abstract_Order {
 			 * @since 2.1.0
 			 */
 			do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id(), $transaction_id );
-			$this->defer_to_save( 'pre_payment_complete', null );
 			return false;
+		}
+
+		if ( ! $this->writing_through ) {
+			$this->defer_to_save( 'pre_payment_complete', $pre_payment_complete, array( $this->get_id(), $transaction_id ) );
 		}
 
 		if ( ! empty( $transaction_id ) ) {

@@ -970,6 +970,65 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox log_delivery() after a staged disable fires the disabled action once.
+	 */
+	public function test_log_delivery_after_a_staged_disable_fires_the_disabled_action_once() {
+		$webhook = $this->create_failing_webhook();
+		$fired   = did_action( 'woocommerce_webhook_disabled_due_delivery_failures' );
+
+		$webhook->stage_delivery_result( 500 );
+		$webhook->log_delivery( 1, $this->delivery_request(), new WP_Error( 'http_request_failed', 'Failed' ), 0.1 );
+		$webhook->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_webhook_disabled_due_delivery_failures' ) - $fired );
+	}
+
+	/**
+	 * @testdox save() does not fire the disabled action when a status change replaced the staged disable.
+	 */
+	public function test_save_skips_the_disabled_action_when_the_webhook_is_active_again() {
+		$webhook = $this->create_failing_webhook();
+		$fired   = did_action( 'woocommerce_webhook_disabled_due_delivery_failures' );
+
+		$webhook->stage_delivery_result( 500 );
+		$webhook->set_status( 'active' );
+		$webhook->save();
+
+		$this->assertSame( 0, did_action( 'woocommerce_webhook_disabled_due_delivery_failures' ) - $fired );
+	}
+
+	/**
+	 * Create a saved, active webhook that the next failed delivery disables.
+	 *
+	 * @return WC_Webhook
+	 */
+	private function create_failing_webhook(): WC_Webhook {
+		$webhook = new WC_Webhook();
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 6 );
+		$webhook->save();
+
+		return $webhook;
+	}
+
+	/**
+	 * Build the request array that log_delivery() reads.
+	 *
+	 * @return array
+	 */
+	private function delivery_request(): array {
+		return array(
+			'method'     => 'POST',
+			'user-agent' => 'WooCommerce',
+			'headers'    => array(),
+			'body'       => '',
+		);
+	}
+
+	/**
 	 * @testdox log_delivery() fires the disabled action right away, before it saves.
 	 */
 	public function test_log_delivery_fires_the_disabled_action_once() {

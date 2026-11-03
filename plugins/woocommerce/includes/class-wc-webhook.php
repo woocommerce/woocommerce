@@ -649,10 +649,9 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		if ( $failures > apply_filters( 'woocommerce_max_webhook_delivery_failures', 5 ) ) {
 			$this->set_status( 'disabled' );
 
+			$this->disabled_due_delivery_failures = ! $this->writing_through;
 			if ( $this->writing_through ) {
 				$this->fire_disabled_due_delivery_failures();
-			} else {
-				$this->disabled_due_delivery_failures = true;
 			}
 		} else {
 			$this->set_failure_count( ++$failures );
@@ -661,7 +660,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 
 	/**
 	 * Save the webhook, then fire woocommerce_webhook_disabled_due_delivery_failures when
-	 * stage_delivery_result() disabled it since the last save.
+	 * stage_delivery_result() disabled it since the last save and it is still disabled.
 	 *
 	 * @since 11.4.0
 	 * @return int Webhook ID.
@@ -669,8 +668,9 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	public function save() {
 		$id = parent::save();
 
-		if ( $this->disabled_due_delivery_failures ) {
-			$this->disabled_due_delivery_failures = false;
+		$disabled                             = $this->disabled_due_delivery_failures && 'disabled' === $this->get_status();
+		$this->disabled_due_delivery_failures = false;
+		if ( $disabled ) {
 			$this->fire_disabled_due_delivery_failures();
 		}
 
