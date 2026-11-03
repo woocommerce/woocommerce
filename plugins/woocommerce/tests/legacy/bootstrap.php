@@ -261,10 +261,6 @@ class WC_Unit_Tests_Bootstrap {
 		define( 'WC_TAX_ROUNDING_MODE', 'auto' );
 		define( 'WC_USE_TRANSACTIONS', false );
 
-		update_option( 'woocommerce_enable_coupons', 'yes' );
-		update_option( 'woocommerce_calc_taxes', 'yes' );
-		update_option( 'woocommerce_onboarding_opt_in', 'yes' );
-
 		require_once $this->plugin_dir . '/woocommerce.php';
 		FeaturePlugin::instance()->init();
 	}
@@ -287,6 +283,10 @@ class WC_Unit_Tests_Bootstrap {
 		}
 
 		WC_Install::install();
+
+		update_option( 'woocommerce_enable_coupons', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_onboarding_opt_in', 'yes' );
 
 		// Run the test suite with product object caching enabled (the new-install default).
 		// This ensures tests exercise the cache-on path and fail loudly if any code bypasses
