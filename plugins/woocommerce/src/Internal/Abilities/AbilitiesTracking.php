@@ -14,7 +14,7 @@ use WP_REST_Request;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Records Tracks events for WooCommerce abilities and extensions registered through its loader.
+ * Records Tracks events for WooCommerce abilities, including extension abilities registered through its loader.
  *
  * Hooks only collect data in memory. Events are sent once per request on shutdown through the batched
  * Tracks client. Ability input and output are never recorded, except the name of a registered ability an agent
@@ -50,7 +50,7 @@ class AbilitiesTracking {
 	private const TRACKED_CHANNELS = array( 'mcp', 'rest', 'cli' );
 
 	/**
-	 * Abilities in this namespace are tracked by default.
+	 * Abilities in this namespace are always tracked.
 	 *
 	 * @var string
 	 */

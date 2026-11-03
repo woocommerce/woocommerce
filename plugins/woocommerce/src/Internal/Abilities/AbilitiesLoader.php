@@ -305,10 +305,9 @@ class AbilitiesLoader {
 		 * get_registration_args() on each definition class and register the ability on the
 		 * Abilities API init hook. Returning a subset will not unregister core abilities;
 		 * core classes are always retained.
-		 * Since 11.4.0, abilities registered through this loader, including extension abilities,
-		 * share WooCommerce's usage tracking when the store allows it.
 		 *
 		 * @since 10.9.0
+		 * @since 11.4.0 Calls to abilities registered through this filter are recorded in usage tracking when the store allows it.
 		 *
 		 * @param array<int, class-string> $classes Ability definition class names.
 		 */
