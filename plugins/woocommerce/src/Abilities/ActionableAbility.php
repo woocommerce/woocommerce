@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Abilities;
 
+use Automattic\WooCommerce\Internal\Caches\ProductCache;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseTransaction;
 
 defined( 'ABSPATH' ) || exit;
@@ -334,20 +335,27 @@ abstract class ActionableAbility extends \WP_Ability {
 	/**
 	 * Drop the object caches of the objects a rolled back save() touched. The
 	 * saves filled the caches with rows the rollback removed, so a read in the
-	 * same request would still see them.
+	 * same request would still see them. The `WC_Data` meta cache and the
+	 * product instance cache are separate from the post cache.
 	 *
 	 * @param array<int, array{0: \WC_Data, 1: array, 2: string}> $objects The primary object and the secondary objects.
 	 * @param \WC_Data[]                                          $deleted The objects the call deleted.
 	 */
 	private static function forget_rolled_back_objects( array $objects, array $deleted = array() ): void {
+		$product_cache = wc_get_container()->get( ProductCache::class );
 		foreach ( array_merge( $objects, array_map( static fn( $item ) => array( $item ), $deleted ) ) as list( $object ) ) {
 			$id = $object->get_id();
+			if ( $id > 0 ) {
+				$object->delete_meta_cache();
+			}
 			if ( $id > 0 && $object instanceof \WC_Product ) {
 				clean_post_cache( $id );
 				wc_delete_product_transients( $id );
+				$product_cache->remove( $id );
 				if ( $object->get_parent_id() > 0 ) {
 					clean_post_cache( $object->get_parent_id() );
 					wc_delete_product_transients( $object->get_parent_id() );
+					$product_cache->remove( $object->get_parent_id() );
 				}
 			} elseif ( $id > 0 && $object instanceof \WC_Abstract_Order ) {
 				wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class )->remove( $id );

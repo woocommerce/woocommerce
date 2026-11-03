@@ -2125,6 +2125,35 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should drop the meta cache of a product when a sync refuses the change.
+	 */
+	public function test_a_sync_refusal_drops_the_meta_cache_of_the_product(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->update_meta_data( '_test_color', 'red' );
+		$product->save();
+		$this->register_sync(
+			'product',
+			'test-ext',
+			static function ( array $saved ) {
+				wc_get_product( $saved[0]->get_id() )->get_meta( '_test_color' );
+				return new \WP_Error( 'test_refused', 'Refused.' );
+			}
+		);
+
+		$response = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'test-ext' => array( 'color' => 'green' ) ),
+			)
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'red', get_post_meta( $product->get_id(), '_test_color', true ) );
+		$this->assertSame( 'red', wc_get_product( $product->get_id() )->get_meta( '_test_color' ) );
+	}
+
+	/**
 	 * @testdox Should let a validator refuse a delete, and then delete nothing.
 	 */
 	public function test_a_validator_can_refuse_a_delete(): void {
