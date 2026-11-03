@@ -24,7 +24,7 @@ namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer;
 class Html2Text {
 	/**
 	 * Attribute for elements drawn as a horizontal rule without an <hr> (email clients style <hr> poorly).
-	 * The plain text shows them like an <hr>. An attribute, not a class, so a block's custom class can't match it.
+	 * The plain text shows them like an <hr>. An attribute, not a class, so a block’s custom class can’t match it.
 	 */
 	public const HR_ATTRIBUTE = 'data-email-separator';
 
