@@ -86,6 +86,7 @@ catalogs:
         '@wordpress/scripts': 35.0.0
         '@wordpress/stylelint-config': ^23.14.0
         babel-loader: 9.2.x
+        babel-plugin-transform-react-remove-prop-types: 0.4.24
         copy-webpack-plugin: 14.0.x
         css-loader: 6.11.x
         mini-css-extract-plugin: 2.9.x

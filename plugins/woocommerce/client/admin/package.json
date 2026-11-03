@@ -176,7 +176,7 @@
 		"await-exec": "^0.1.2",
 		"babel-jest": "29.5.x",
 		"babel-loader": "catalog:tooling",
-		"babel-plugin-transform-react-remove-prop-types": "0.4.24",
+		"babel-plugin-transform-react-remove-prop-types": "catalog:tooling",
 		"chalk": "^4.1.2",
 		"comment-parser": "^1.4.1",
 		"config": "3.3.7",

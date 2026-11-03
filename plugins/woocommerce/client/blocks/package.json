@@ -161,7 +161,7 @@
 		"babel-jest": "29.5.x",
 		"babel-loader": "catalog:tooling",
 		"babel-plugin-react-docgen": "4.2.1",
-		"babel-plugin-transform-react-remove-prop-types": "0.4.24",
+		"babel-plugin-transform-react-remove-prop-types": "catalog:tooling",
 		"chalk": "4.1.2",
 		"circular-dependency-plugin": "5.2.x",
 		"copy-webpack-plugin": "catalog:tooling",

@@ -123,6 +123,7 @@
 				"@wordpress/prettier-config",
 				"@wordpress/scripts",
 				"babel-loader",
+				"babel-plugin-transform-react-remove-prop-types",
 				"copy-webpack-plugin",
 				"css-loader",
 				"mini-css-extract-plugin",
@@ -138,16 +139,6 @@
 				"**"
 			],
 			"policy": "catalog"
-		},
-		{
-			"label": "Babel dependencies: babel-plugin-transform-react-remove-prop-types - reduce build artifacts size",
-			"dependencies": [
-				"babel-plugin-transform-react-remove-prop-types"
-			],
-			"pinVersion": "0.4.24",
-			"packages": [
-				"**"
-			]
 		},
 		{
 			"label": "React-related dependencies: React 18",
