@@ -117,14 +117,15 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox register() adds the fulfillment exporter and hooks the order anonymization eraser.
+	 * @testdox register() hooks the order exporter and the order anonymization eraser.
 	 */
-	public function test_register_registers_exporter_and_eraser(): void {
+	public function test_register_hooks_order_exporter_and_eraser(): void {
 		$this->sut->register();
 
-		$exporters = apply_filters( 'wp_privacy_personal_data_exporters', array() );
-
-		$this->assertArrayHasKey( 'woocommerce-customer-fulfillments', $exporters, 'The fulfillment exporter should be registered.' );
+		$this->assertNotFalse(
+			has_filter( 'woocommerce_privacy_export_order_personal_data', array( $this->sut, 'export_order_fulfillment_data' ) ),
+			'The order exporter filter should be hooked.'
+		);
 		$this->assertNotFalse(
 			has_action( 'woocommerce_privacy_remove_order_personal_data', array( $this->sut, 'remove_fulfillment_personal_data' ) ),
 			'The eraser should hook order anonymization.'
@@ -132,25 +133,9 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox register_eraser() hooks only the eraser, without the exporter.
+	 * @testdox The order export includes the customer's fulfillment tracking data.
 	 */
-	public function test_register_eraser_hooks_only_the_eraser(): void {
-		$this->sut->register_eraser();
-
-		$this->assertNotFalse(
-			has_action( 'woocommerce_privacy_remove_order_personal_data', array( $this->sut, 'remove_fulfillment_personal_data' ) ),
-			'register_eraser should hook order anonymization.'
-		);
-		$this->assertFalse(
-			has_filter( 'wp_privacy_personal_data_exporters', array( $this->sut, 'register_exporter' ) ),
-			'register_eraser should not register the exporter.'
-		);
-	}
-
-	/**
-	 * @testdox The exporter includes the customer's fulfillment tracking data.
-	 */
-	public function test_exporter_includes_fulfillment_tracking_data(): void {
+	public function test_export_includes_fulfillment_tracking_data(): void {
 		list( $order ) = $this->create_order_with_fulfillment(
 			array(
 				'_tracking_number'   => 'TRACK123456',
@@ -159,28 +144,22 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$result = $this->sut->fulfillment_data_exporter( $order->get_billing_email(), 1 );
+		$values = wp_list_pluck( $this->sut->export_order_fulfillment_data( array(), $order ), 'value' );
 
-		$this->assertTrue( $result['done'], 'A single page of orders should mark the export done.' );
-		$this->assertNotEmpty( $result['data'], 'The export should include the fulfillment.' );
-
-		$values = wp_list_pluck( $result['data'][0]['data'], 'value' );
 		$this->assertContains( 'TRACK123456', $values, 'The export should include the tracking number.' );
 		$this->assertContains( 'https://example.com/track/TRACK123456', $values, 'The export should include the tracking URL.' );
 	}
 
 	/**
-	 * @testdox The exporter includes the fulfillment status and the items shipped in it.
+	 * @testdox The order export includes the fulfillment status and the items shipped in it.
 	 */
-	public function test_exporter_includes_status_and_items(): void {
+	public function test_export_includes_status_and_items(): void {
 		list( $order ) = $this->create_order_with_fulfillment(
 			array( '_tracking_number' => 'TRACK123456' )
 		);
 
-		$result = $this->sut->fulfillment_data_exporter( $order->get_billing_email(), 1 );
-
 		$rows = array();
-		foreach ( $result['data'][0]['data'] as $row ) {
+		foreach ( $this->sut->export_order_fulfillment_data( array(), $order ) as $row ) {
 			$rows[ $row['name'] ] = $row['value'];
 		}
 
@@ -191,9 +170,9 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The exporter includes soft-deleted fulfillments, matching what the eraser clears.
+	 * @testdox The order export includes soft-deleted fulfillments, matching what the eraser clears.
 	 */
-	public function test_exporter_includes_soft_deleted_fulfillment(): void {
+	public function test_export_includes_soft_deleted_fulfillment(): void {
 		list( $order, $fulfillment ) = $this->create_order_with_fulfillment(
 			array( '_tracking_number' => 'TRACK123456' )
 		);
@@ -201,23 +180,118 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 		$datastore = WC_Data_Store::load( 'order-fulfillment' );
 		$datastore->delete( $fulfillment );
 
-		$result = $this->sut->fulfillment_data_exporter( $order->get_billing_email(), 1 );
-
-		$values = array();
-		foreach ( $result['data'] as $item ) {
-			$values = array_merge( $values, wp_list_pluck( $item['data'], 'value' ) );
-		}
+		$values = wp_list_pluck( $this->sut->export_order_fulfillment_data( array(), $order ), 'value' );
 		$this->assertContains( 'TRACK123456', $values, 'A soft-deleted fulfillment should still appear in the export.' );
 	}
 
 	/**
-	 * @testdox The exporter returns no data for an email without fulfillments.
+	 * @testdox The order export leaves the existing rows unchanged for an order without fulfillments.
 	 */
-	public function test_exporter_returns_empty_for_unknown_email(): void {
-		$result = $this->sut->fulfillment_data_exporter( 'nobody@example.com', 1 );
+	public function test_export_leaves_order_without_fulfillments_unchanged(): void {
+		$order    = OrderHelper::create_order();
+		$existing = array(
+			array(
+				'name'  => 'Order Number',
+				'value' => (string) $order->get_id(),
+			),
+		);
 
-		$this->assertSame( array(), $result['data'] );
-		$this->assertTrue( $result['done'] );
+		$this->assertSame( $existing, $this->sut->export_order_fulfillment_data( $existing, $order ) );
+	}
+
+	/**
+	 * @testdox Several shipments on one order are numbered so their rows stay distinct.
+	 */
+	public function test_export_numbers_multiple_shipments(): void {
+		$order       = OrderHelper::create_order();
+		$order_items = $order->get_items();
+		$order_item  = reset( $order_items );
+		$item_id     = $order_item ? $order_item->get_id() : 1;
+
+		foreach ( array( 'FIRST111', 'SECOND22' ) as $tracking ) {
+			FulfillmentsHelper::create_fulfillment(
+				array(
+					'entity_id'    => (string) $order->get_id(),
+					'status'       => 'fulfilled',
+					'is_fulfilled' => true,
+				),
+				array(
+					'_items'           => array(
+						array(
+							'item_id' => $item_id,
+							'qty'     => 1,
+						),
+					),
+					'_tracking_number' => $tracking,
+				)
+			);
+		}
+
+		$names = wp_list_pluck( $this->sut->export_order_fulfillment_data( array(), $order ), 'name' );
+
+		$this->assertContains( 'Shipment 1: Tracking number', $names, 'The first shipment rows should be numbered.' );
+		$this->assertContains( 'Shipment 2: Tracking number', $names, 'The second shipment rows should be numbered.' );
+	}
+
+	/**
+	 * @testdox The order export resolves the shipment provider to its display name, not its slug.
+	 */
+	public function test_export_uses_provider_display_name(): void {
+		list( $order ) = $this->create_order_with_fulfillment(
+			array(
+				'_tracking_number'   => 'TRACK123456',
+				'_shipment_provider' => 'dhl',
+			)
+		);
+
+		// get_provider_display_name() applies this label filter; resolve_provider_name() does not,
+		// so a hit here proves the export resolves the display name rather than the raw slug.
+		add_filter(
+			'woocommerce_fulfillment_shipment_provider_label',
+			function () {
+				return 'DHL Express';
+			}
+		);
+
+		$values = wp_list_pluck( $this->sut->export_order_fulfillment_data( array(), $order ), 'value' );
+		$this->assertContains( 'DHL Express', $values, 'The export should use the provider display name.' );
+	}
+
+	/**
+	 * @testdox Running the core order exporter attaches the customer's fulfillment rows and excludes other customers.
+	 */
+	public function test_core_order_exporter_includes_fulfillment_rows(): void {
+		$this->sut->register();
+
+		list( $order ) = $this->create_order_with_fulfillment(
+			array( '_tracking_number' => 'MINE1111' )
+		);
+
+		$other_order = OrderHelper::create_order();
+		$other_order->set_customer_id( 0 );
+		$other_order->set_billing_email( 'someone-else@example.com' );
+		$other_order->save();
+		FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => (string) $other_order->get_id() ),
+			array(
+				'_items'           => array(
+					array(
+						'item_id' => 1,
+						'qty'     => 1,
+					),
+				),
+				'_tracking_number' => 'THEIRS2222',
+			)
+		);
+
+		$export = \WC_Privacy_Exporters::order_data_exporter( $order->get_billing_email(), 1 );
+
+		$values = array();
+		foreach ( $export['data'] as $item ) {
+			$values = array_merge( $values, wp_list_pluck( $item['data'], 'value' ) );
+		}
+		$this->assertContains( 'MINE1111', $values, 'The requesting customer tracking number should be exported.' );
+		$this->assertNotContains( 'THEIRS2222', $values, 'Another customer tracking number must not be exported.' );
 	}
 
 	/**
@@ -310,6 +384,45 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The scheduled retention cleanup redacts fulfillment tracking on anonymized orders.
+	 */
+	public function test_retention_cleanup_redacts_fulfillment(): void {
+		$this->sut->register();
+
+		list( $order, $fulfillment ) = $this->create_order_with_fulfillment(
+			array(
+				'_tracking_number' => 'TRACK123456',
+				'_tracking_url'    => 'https://example.com/track/TRACK123456',
+			)
+		);
+
+		// Make the order eligible for the completed-order retention sweep.
+		$order->set_status( 'completed' );
+		$order->set_date_created( time() - 2 * DAY_IN_SECONDS );
+		$order->save();
+
+		$original = get_option( 'woocommerce_anonymize_completed_orders' );
+		update_option(
+			'woocommerce_anonymize_completed_orders',
+			array(
+				'number' => 1,
+				'unit'   => 'days',
+			)
+		);
+
+		\WC_Privacy::anonymize_completed_orders();
+
+		if ( false === $original ) {
+			delete_option( 'woocommerce_anonymize_completed_orders' );
+		} else {
+			update_option( 'woocommerce_anonymize_completed_orders', $original );
+		}
+
+		$reloaded = $this->reload_fulfillment( $order->get_id(), $fulfillment->get_id() );
+		$this->assertNull( $reloaded->get_tracking_number(), 'The retention cleanup should redact the fulfillment tracking number.' );
+	}
+
+	/**
 	 * @testdox The eraser only redacts the fulfillments of the given order.
 	 */
 	public function test_eraser_only_redacts_the_given_order(): void {
@@ -347,40 +460,5 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 
 		$reloaded = $this->reload_fulfillment( $order->get_id(), $fulfillment->get_id() );
 		$this->assertNull( $reloaded->get_tracking_number(), 'The valid key should be redacted and the non-scalar entry ignored.' );
-	}
-
-	/**
-	 * @testdox The exporter only returns fulfillments belonging to the requested email.
-	 */
-	public function test_exporter_excludes_other_customers(): void {
-		list( $order ) = $this->create_order_with_fulfillment(
-			array( '_tracking_number' => 'MINE1111' )
-		);
-
-		$other_order = OrderHelper::create_order();
-		$other_order->set_customer_id( 0 );
-		$other_order->set_billing_email( 'someone-else@example.com' );
-		$other_order->save();
-		FulfillmentsHelper::create_fulfillment(
-			array( 'entity_id' => (string) $other_order->get_id() ),
-			array(
-				'_items'           => array(
-					array(
-						'item_id' => 1,
-						'qty'     => 1,
-					),
-				),
-				'_tracking_number' => 'THEIRS2222',
-			)
-		);
-
-		$result = $this->sut->fulfillment_data_exporter( $order->get_billing_email(), 1 );
-
-		$values = array();
-		foreach ( $result['data'] as $item ) {
-			$values = array_merge( $values, wp_list_pluck( $item['data'], 'value' ) );
-		}
-		$this->assertContains( 'MINE1111', $values, 'The requesting customer tracking number should be exported.' );
-		$this->assertNotContains( 'THEIRS2222', $values, 'Another customer tracking number must not be exported.' );
 	}
 }

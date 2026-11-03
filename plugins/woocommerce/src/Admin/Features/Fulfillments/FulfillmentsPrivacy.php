@@ -12,7 +12,8 @@ defined( 'ABSPATH' ) || exit;
  * Wires fulfillment (shipment tracking) data into the WordPress personal-data
  * export and erasure framework.
  *
- * Export adds the customer's fulfillment records to their personal-data export.
+ * Export appends the customer's fulfillment records onto each order in their
+ * personal-data export, through the core order exporter.
  * Erasure redacts the tracking meta whenever an order is anonymized, which covers
  * both the admin "Erase Personal Data" tool and the automatic retention cleanup,
  * since both route through {@see \WC_Privacy_Erasers::remove_order_personal_data()}.
@@ -28,60 +29,33 @@ class FulfillmentsPrivacy {
 	 * Register the privacy hooks.
 	 */
 	public function register(): void {
-		add_filter( 'wp_privacy_personal_data_exporters', array( $this, 'register_exporter' ) );
-		$this->register_eraser();
-	}
-
-	/**
-	 * Register only the erasure hook.
-	 *
-	 * Kept separate from {@see self::register()} so the eraser can stay active for stores
-	 * that created fulfillments before the feature was disabled, since the retained tracking
-	 * meta still needs to be redacted on a personal-data erasure.
-	 */
-	public function register_eraser(): void {
+		add_filter( 'woocommerce_privacy_export_order_personal_data', array( $this, 'export_order_fulfillment_data' ), 10, 2 );
 		add_action( 'woocommerce_privacy_remove_order_personal_data', array( $this, 'remove_fulfillment_personal_data' ) );
 	}
 
 	/**
-	 * Register the fulfillment personal-data exporter.
+	 * Append an order's fulfillment tracking data to its personal-data export entry.
 	 *
-	 * @param array $exporters Registered exporters.
+	 * Hooked onto the core order exporter rather than registered as a standalone exporter.
+	 * A standalone exporter adds one personal-data item per fulfillment, and the export
+	 * framework reloads and rewrites every accumulated item on each page, so a large order
+	 * history exhausts memory. Riding on the order's existing item keeps that cost flat and
+	 * reuses the core exporter's own order pagination.
+	 *
+	 * @param mixed $personal_data Name/value rows the core exporter built for the order.
+	 * @param mixed $order         The order being exported.
 	 * @return array
 	 */
-	public function register_exporter( array $exporters ): array {
-		$exporters['woocommerce-customer-fulfillments'] = array(
-			'exporter_friendly_name' => __( 'WooCommerce Customer Fulfillments', 'woocommerce' ),
-			'callback'               => array( $this, 'fulfillment_data_exporter' ),
-		);
+	public function export_order_fulfillment_data( $personal_data, $order ): array {
+		$personal_data = is_array( $personal_data ) ? $personal_data : array();
 
-		return $exporters;
-	}
-
-	/**
-	 * Export fulfillment tracking data for a customer, paginated by order.
-	 *
-	 * @param string $email_address The customer email address.
-	 * @param int    $page          Page number (1-based).
-	 * @return array{data: array, done: bool}
-	 */
-	public function fulfillment_data_exporter( string $email_address, int $page = 1 ): array {
-		$page           = max( 1, $page );
-		$user           = get_user_by( 'email', $email_address );
-		$data_to_export = array();
-
-		$order_query = array(
-			'limit'    => 10,
-			'page'     => $page,
-			'customer' => array( $email_address ),
-		);
-		if ( $user instanceof \WP_User ) {
-			$order_query['customer'][] = (int) $user->ID;
+		if ( ! $order instanceof WC_Order ) {
+			return $personal_data;
 		}
 
-		$orders = wc_get_orders( $order_query );
-		$orders = is_array( $orders ) ? $orders : array();
-
+		// A read failure here must not abort the customer's whole personal-data export, which
+		// spans every extension's order data, so it is logged and this order's fulfillment rows
+		// are skipped. No completeness signal is faked: core owns the export's pagination.
 		try {
 			/**
 			 * Fulfillments data store.
@@ -90,37 +64,42 @@ class FulfillmentsPrivacy {
 			 */
 			$datastore = WC_Data_Store::load( 'order-fulfillment' );
 
-			foreach ( $orders as $order ) {
-				// Include soft-deleted fulfillments: their tracking meta is retained and must
-				// be covered by the access request, mirroring what the eraser clears.
-				$fulfillments = $datastore->read_fulfillments( WC_Order::class, (string) $order->get_id(), true );
+			// Include soft-deleted fulfillments: their tracking meta is retained and must be
+			// covered by the access request, mirroring what the eraser clears.
+			$fulfillments = $datastore->read_fulfillments( WC_Order::class, (string) $order->get_id(), true );
 
-				foreach ( $fulfillments as $fulfillment ) {
-					$data = $this->get_fulfillment_personal_data( $fulfillment, $order );
-					if ( empty( $data ) ) {
-						continue;
-					}
+			$number_shipments = count( $fulfillments ) > 1;
+			$shipment_index   = 0;
 
-					$data_to_export[] = array(
-						'group_id'          => 'woocommerce_customer_fulfillments',
-						'group_label'       => __( 'Fulfillments', 'woocommerce' ),
-						'group_description' => __( 'User&#8217;s WooCommerce fulfillment (shipment) data.', 'woocommerce' ),
-						'item_id'           => 'fulfillment-' . $fulfillment->get_id(),
-						'data'              => $data,
+			foreach ( $fulfillments as $fulfillment ) {
+				$rows = $this->get_fulfillment_personal_data( $fulfillment, $order );
+				if ( empty( $rows ) ) {
+					continue;
+				}
+
+				++$shipment_index;
+
+				// Several shipments share the one order entry, so number the rows to tell them apart.
+				$prefix = $number_shipments
+					/* translators: %d: shipment number within the order. */
+					? sprintf( __( 'Shipment %d: ', 'woocommerce' ), $shipment_index )
+					: '';
+
+				foreach ( $rows as $row ) {
+					$personal_data[] = array(
+						'name'  => $prefix . $row['name'],
+						'value' => $row['value'],
 					);
 				}
 			}
 		} catch ( \Throwable $e ) {
 			wc_get_logger()->error(
-				'Failed to export fulfillment personal data: ' . $e->getMessage(),
+				'Failed to export fulfillment personal data for order ' . $order->get_id() . ': ' . $e->getMessage(),
 				array( 'source' => 'fulfillments' )
 			);
 		}
 
-		return array(
-			'data' => $data_to_export,
-			'done' => count( $orders ) < 10,
-		);
+		return $personal_data;
 	}
 
 	/**
@@ -152,7 +131,7 @@ class FulfillmentsPrivacy {
 				continue;
 			}
 			$item_id    = isset( $item['item_id'] ) ? (int) $item['item_id'] : 0;
-			$order_item = $item_id > 0 ? $order->get_item( $item_id ) : false;
+			$order_item = $item_id > 0 ? $order->get_item( $item_id, false ) : false;
 			if ( $order_item ) {
 				$quantity     = isset( $item['qty'] ) ? (int) $item['qty'] : 0;
 				$item_names[] = $order_item->get_name() . ' x ' . $quantity;
@@ -173,7 +152,7 @@ class FulfillmentsPrivacy {
 			);
 		}
 
-		$provider = FulfillmentUtils::resolve_provider_name( $fulfillment );
+		$provider = FulfillmentUtils::get_provider_display_name( $fulfillment );
 		if ( '' !== $provider ) {
 			$data[] = array(
 				'name'  => __( 'Shipment provider', 'woocommerce' ),
@@ -250,7 +229,7 @@ class FulfillmentsPrivacy {
 		);
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->query(
+		$result = $wpdb->query(
 			$wpdb->prepare(
 				"UPDATE {$wpdb->prefix}wc_order_fulfillment_meta AS m
 				INNER JOIN {$wpdb->prefix}wc_order_fulfillments AS f ON f.fulfillment_id = m.fulfillment_id
@@ -260,5 +239,15 @@ class FulfillmentsPrivacy {
 			)
 		);
 		// phpcs:enable
+
+		// The erasure action cannot report failure back to the request, so a failed redaction
+		// would otherwise leave tracking in place while the order reads as anonymized. Zero rows
+		// is not a failure, so only false is logged.
+		if ( false === $result ) {
+			wc_get_logger()->error(
+				'Failed to redact fulfillment tracking for order ' . $order->get_id() . ': ' . $wpdb->last_error,
+				array( 'source' => 'fulfillments' )
+			);
+		}
 	}
 }
