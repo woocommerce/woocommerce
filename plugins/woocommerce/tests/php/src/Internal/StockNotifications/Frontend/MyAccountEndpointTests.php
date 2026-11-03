@@ -699,6 +699,27 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The resend success notice shows the email as stored after wptexturize() runs over the printed notice.
+	 */
+	public function test_resend_notice_email_survives_wptexturize(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+		$notification = $this->create_notification( $user_id, NotificationStatus::PENDING );
+		$notification->set_user_email( "o'neil--shop@48x17.com" );
+		$notification->save();
+
+		$service = $this->createMock( NotificationManagementService::class );
+		$service->method( 'resend_verification_email' )->willReturn( true );
+
+		$this->simulate_action_request( MyAccountEndpoint::ACTION_RESEND, $notification->get_id(), true );
+
+		$this->run_action_expecting_redirect( $service );
+
+		$text = html_entity_decode( wp_strip_all_tags( wptexturize( (string) \wc_print_notices( true ) ) ), ENT_QUOTES | ENT_HTML5 );
+		$this->assertStringContainsString( "o'neil--shop@48x17.com", $text, 'The email in the notice should not be texturized.' );
+	}
+
+	/**
 	 * A resend the service refuses (already verified, rate limited) surfaces its message as an error notice.
 	 */
 	public function test_resend_reports_service_error(): void {
