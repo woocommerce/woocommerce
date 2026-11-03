@@ -2046,7 +2046,7 @@ apply_filters( 'woocommerce_valid_order_statuses_for_payment', array $valid_orde
 
 ### Description
 
-The same filter WC_Order::needs_payment() applies. A status a site declares payable counts as awaiting payment here too, so a failure while the order is in it is reported rather than recovered as one that took payment.
+The same filter WC_Order::needs_payment() applies, so a zero-total order in a status the site declares payable can be resumed.
 
 ### Parameters
 
@@ -2057,7 +2057,6 @@ The same filter WC_Order::needs_payment() applies. A status a site declares paya
 
 ### Source
 
-- [StoreApi/Utilities/CheckoutTrait.php](../../../../../../src/StoreApi/Utilities/CheckoutTrait.php)
 - [StoreApi/Utilities/DraftOrderTrait.php](../../../../../../src/StoreApi/Utilities/DraftOrderTrait.php)
 
 ---

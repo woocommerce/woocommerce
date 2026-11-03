@@ -23,6 +23,15 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 	use ProductAbilityTrait;
 
 	/**
+	 * Taxonomies of the term filters, keyed by input property.
+	 */
+	private const TERM_FILTERS = array(
+		'category' => 'product_cat',
+		'tag'      => 'product_tag',
+		'brand'    => 'product_brand',
+	);
+
+	/**
 	 * Get the ability name.
 	 *
 	 * @return string
@@ -99,8 +108,13 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 				);
 			}
 
+			$products = self::format_products_for_response( array( $product ) );
+			if ( is_wp_error( $products ) ) {
+				return $products;
+			}
+
 			return array(
-				'products'    => array( self::format_product_for_response( $product ) ),
+				'products'    => $products,
 				'total_pages' => 1,
 				'page'        => 1,
 				'per_page'    => 1,
@@ -122,15 +136,14 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			}
 		}
 
-		if ( ! empty( $input['product_type_alias'] ) && is_scalar( $input['product_type_alias'] ) ) {
-			$product_type_alias = sanitize_text_field( (string) $input['product_type_alias'] );
-			$type_args          = self::get_product_query_args_for_alias( $product_type_alias );
+		if ( isset( $input['type'] ) ) {
+			$args['type'] = $input['type'];
+		}
 
-			if ( is_wp_error( $type_args ) ) {
-				return $type_args;
+		foreach ( array( 'virtual', 'downloadable' ) as $field ) {
+			if ( isset( $input[ $field ] ) ) {
+				$args[ $field ] = wc_string_to_bool( $input[ $field ] );
 			}
-
-			$args = array_merge( $args, $type_args );
 		}
 
 		if ( ! empty( $input['search'] ) ) {
@@ -142,19 +155,34 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			return $extension_args;
 		}
 
+		foreach ( self::TERM_FILTERS as $field => $taxonomy ) {
+			if ( ! empty( $input[ $field ] ) && is_array( $input[ $field ] ) ) {
+				$extension_args['tax_query'][] = array(
+					'taxonomy' => $taxonomy,
+					'field'    => 'term_id',
+					'terms'    => array_map( 'absint', $input[ $field ] ),
+				);
+			}
+		}
+
 		$args[ AbilitiesLoader::EXTENSION_QUERY_VAR ] = $extension_args;
 
 		$results  = wc_get_products( $args );
 		$products = is_object( $results ) && isset( $results->products ) ? $results->products : array();
 		$pages    = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : ( count( $products ) > 0 ? 1 : 0 );
 
+		$image_ids = array_unique( array_merge( array(), ...array_map( array( __CLASS__, 'get_product_image_ids' ), $products ) ) );
+		if ( ! empty( $image_ids ) ) {
+			_prime_post_caches( $image_ids );
+		}
+
+		$products = self::format_products_for_response( $products );
+		if ( is_wp_error( $products ) ) {
+			return $products;
+		}
+
 		return array(
-			'products'    => array_map(
-				static function ( $product ) {
-					return self::format_product_for_response( $product );
-				},
-				$products
-			),
+			'products'    => $products,
 			'total_pages' => $pages,
 			'page'        => $page,
 			'per_page'    => $per_page,
@@ -184,37 +212,41 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 		$schema = array(
 			'type'                 => 'object',
 			'properties'           => array(
-				'id'                 => array(
+				'id'           => array(
 					'type'    => 'integer',
 					'minimum' => 1,
 				),
-				'search'             => array( 'type' => 'string' ),
-				'sku'                => array(
+				'search'       => array( 'type' => 'string' ),
+				'sku'          => array(
 					'type'        => 'string',
 					'description' => __( 'Limit results to products with SKUs that partially match this string. Use * to match products with any non-empty SKU.', 'woocommerce' ),
 				),
-				'status'             => array(
+				'status'       => array(
 					'type' => 'string',
 					'enum' => self::get_product_query_status_slugs(),
 				),
-				'product_type_alias' => array(
-					'type'        => 'string',
-					'description' => __(
-						'Filter by supported agent-facing product type alias. physical maps to simple shippable, non-downloadable products; virtual maps to simple non-shipping, non-downloadable products; digital maps to simple virtual/downloadable products; affiliate maps to the external product type; grouped maps to grouped.',
-						'woocommerce'
-					),
-					'enum'        => self::get_supported_product_type_aliases(),
+				'type'         => self::get_product_type_schema( array_keys( wc_get_product_types() ) ),
+				'virtual'      => array(
+					'type'        => 'boolean',
+					'description' => __( 'Limit results to products that are not shipped (true) or that are shipped (false).', 'woocommerce' ),
 				),
-				'stock_status'       => array(
+				'downloadable' => array(
+					'type'        => 'boolean',
+					'description' => __( 'Limit results to products that have files to download (true) or that do not (false).', 'woocommerce' ),
+				),
+				'stock_status' => array(
 					'type' => 'string',
 					'enum' => array_keys( wc_get_product_stock_status_options() ),
 				),
-				'page'               => array(
+				'category'     => self::get_term_filter_input_schema( __( 'Only products in any of these product category IDs, including their child categories.', 'woocommerce' ) ),
+				'tag'          => self::get_term_filter_input_schema( __( 'Only products with any of these product tag IDs.', 'woocommerce' ) ),
+				'brand'        => self::get_term_filter_input_schema( __( 'Only products of any of these brand IDs, including their child brands.', 'woocommerce' ) ),
+				'page'         => array(
 					'type'    => 'integer',
 					'default' => 1,
 					'minimum' => 1,
 				),
-				'per_page'           => array(
+				'per_page'     => array(
 					'type'    => 'integer',
 					'default' => 10,
 					'minimum' => 1,
@@ -225,5 +257,22 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'default'              => array(),
 		);
 		return ExtensibleAbilities::add_query_filters_schema( $schema, 'product' );
+	}
+
+	/**
+	 * Schema of a filter that takes term IDs.
+	 *
+	 * @param string $description Filter description.
+	 * @return array
+	 */
+	private static function get_term_filter_input_schema( string $description ): array {
+		return array(
+			'type'        => 'array',
+			'description' => $description,
+			'items'       => array(
+				'type'    => 'integer',
+				'minimum' => 1,
+			),
+		);
 	}
 }

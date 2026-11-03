@@ -773,6 +773,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$id = wc_rest_set_uploaded_image_as_attachment( $upload, $product_id );
 
 			if ( ! wp_attachment_is_image( $id ) ) {
+				if ( $id > 0 ) {
+					wp_delete_attachment( $id, true );
+				}
+
 				/* translators: %s: image URL */
 				throw new Exception( sprintf( __( 'Not able to attach "%s".', 'woocommerce' ), $url ), 400 );
 			}

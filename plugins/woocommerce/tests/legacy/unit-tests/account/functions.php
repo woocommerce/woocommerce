@@ -280,6 +280,120 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_get_account_formatted_address() formats the address type it is asked for.
+	 *
+	 * @since 11.3.0
+	 */
+	public function test_wc_get_account_formatted_address_formats_the_requested_address_type() {
+		$customer = $this->create_customer_with_distinct_addresses( 'formatted-address-customer', 'formatted.address@example.com' );
+
+		$shipping = wc_get_account_formatted_address( 'shipping', $customer->get_id() );
+		$billing  = wc_get_account_formatted_address( 'billing', $customer->get_id() );
+
+		$this->assertStringContainsString( 'Jane Shipping', $shipping );
+		$this->assertStringContainsString( '456 Nevergreen Terrace', $shipping );
+		$this->assertStringContainsString( 'New York', $shipping );
+		$this->assertStringContainsString( '10010', $shipping );
+		$this->assertStringNotContainsString( 'John Doe', $shipping );
+		$this->assertStringNotContainsString( '123 Evergreen Terrace', $shipping );
+		$this->assertStringNotContainsString( 'Springfield', $shipping );
+		$this->assertStringNotContainsString( '10001', $shipping );
+
+		$this->assertStringContainsString( 'John Doe', $billing );
+		$this->assertStringContainsString( '123 Evergreen Terrace', $billing );
+		$this->assertStringContainsString( 'Springfield', $billing );
+		$this->assertStringContainsString( '10001', $billing );
+		$this->assertStringNotContainsString( 'Jane Shipping', $billing );
+		$this->assertStringNotContainsString( '456 Nevergreen Terrace', $billing );
+		$this->assertStringNotContainsString( 'New York', $billing );
+		$this->assertStringNotContainsString( '10010', $billing );
+	}
+
+	/**
+	 * Test the My Account addresses page renders each saved address under its own heading.
+	 *
+	 * @since 11.3.0
+	 */
+	public function test_my_address_template_renders_each_saved_address_in_its_own_column() {
+		$customer = $this->create_customer_with_distinct_addresses( 'my-address-customer', 'my.address@example.com' );
+
+		update_option( 'woocommerce_ship_to_destination', 'shipping' );
+		update_option( 'woocommerce_ship_to_countries', '' );
+		wp_set_current_user( $customer->get_id() );
+
+		$html = wc_get_template_html( 'myaccount/my-address.php' );
+
+		$shipping_column = $this->get_rendered_address_column( $html, 'Shipping address' );
+		$billing_column  = $this->get_rendered_address_column( $html, 'Billing address' );
+
+		$this->assertStringContainsString( 'Jane Shipping', $shipping_column );
+		$this->assertStringContainsString( '456 Nevergreen Terrace', $shipping_column );
+		$this->assertStringContainsString( 'New York', $shipping_column );
+		$this->assertStringContainsString( '10010', $shipping_column );
+		$this->assertStringNotContainsString( '123 Evergreen Terrace', $shipping_column );
+
+		$this->assertStringContainsString( 'John Doe', $billing_column );
+		$this->assertStringContainsString( '123 Evergreen Terrace', $billing_column );
+		$this->assertStringContainsString( 'Springfield', $billing_column );
+		$this->assertStringContainsString( '10001', $billing_column );
+		$this->assertStringNotContainsString( '456 Nevergreen Terrace', $billing_column );
+	}
+
+	/**
+	 * Create a customer whose billing and shipping addresses share no values.
+	 *
+	 * @param string $username Username for the new customer.
+	 * @param string $email    Email address for the new customer.
+	 * @return WC_Customer
+	 */
+	private function create_customer_with_distinct_addresses( $username, $email ) {
+		$customer = new WC_Customer();
+		$customer->set_username( $username );
+		$customer->set_email( $email );
+		$customer->set_billing_first_name( 'John' );
+		$customer->set_billing_last_name( 'Doe' );
+		$customer->set_billing_address_1( '123 Evergreen Terrace' );
+		$customer->set_billing_city( 'Springfield' );
+		$customer->set_billing_state( 'IL' );
+		$customer->set_billing_postcode( '10001' );
+		$customer->set_billing_country( 'US' );
+		$customer->set_shipping_first_name( 'Jane' );
+		$customer->set_shipping_last_name( 'Shipping' );
+		$customer->set_shipping_address_1( '456 Nevergreen Terrace' );
+		$customer->set_shipping_city( 'New York' );
+		$customer->set_shipping_state( 'NY' );
+		$customer->set_shipping_postcode( '10010' );
+		$customer->set_shipping_country( 'US' );
+		$customer->save();
+
+		return $customer;
+	}
+
+	/**
+	 * Get the markup of the address rendered under a My Account addresses heading.
+	 *
+	 * @param string $html          Rendered My Account addresses markup.
+	 * @param string $address_title Heading the address is rendered under.
+	 * @return string
+	 */
+	private function get_rendered_address_column( $html, $address_title ) {
+		$document       = new DOMDocument();
+		$previous_state = libxml_use_internal_errors( true );
+		$loaded         = $document->loadHTML( '<!DOCTYPE html><html><body>' . $html . '</body></html>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_state );
+
+		$this->assertTrue( $loaded, 'The My Account addresses markup should be valid enough for DOM parsing.' );
+
+		$xpath = new DOMXPath( $document );
+		$nodes = $xpath->query( "//div[contains(concat(' ', normalize-space(@class), ' '), ' woocommerce-Address ')][.//h2[normalize-space(.)='{$address_title}']]/address" );
+
+		$this->assertSame( 1, $nodes->length, "The page should render one address under the {$address_title} heading." );
+
+		return (string) $document->saveHTML( $nodes->item( 0 ) );
+	}
+
+	/**
 	 * Test wc_get_account_saved_payment_methods_list().
 	 *
 	 * @since 3.3.0
