@@ -149,20 +149,24 @@ trait OrderAbilityTrait {
 				'payment_method'       => array( 'type' => 'string' ),
 				'payment_method_title' => array( 'type' => 'string' ),
 				'date_created'         => array(
-					'type'   => 'string',
-					'format' => 'date-time',
+					'type'        => 'string',
+					'format'      => 'date-time',
+					'description' => __( 'Order creation date in the store timezone. Omitted when no creation date is available.', 'woocommerce' ),
 				),
 				'date_created_gmt'     => array(
-					'type'   => 'string',
-					'format' => 'date-time',
+					'type'        => 'string',
+					'format'      => 'date-time',
+					'description' => __( 'Order creation date in UTC. Omitted when no creation date is available.', 'woocommerce' ),
 				),
 				'date_modified'        => array(
-					'type'   => 'string',
-					'format' => 'date-time',
+					'type'        => 'string',
+					'format'      => 'date-time',
+					'description' => __( 'Order modification date in the store timezone. Omitted when no modification date is available.', 'woocommerce' ),
 				),
 				'date_modified_gmt'    => array(
-					'type'   => 'string',
-					'format' => 'date-time',
+					'type'        => 'string',
+					'format'      => 'date-time',
+					'description' => __( 'Order modification date in UTC. Omitted when no modification date is available.', 'woocommerce' ),
 				),
 				'line_items'           => array(
 					'type'        => 'array',
