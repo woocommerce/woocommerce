@@ -38,7 +38,7 @@ trait OrderLineItemValidationTrait {
 	 * @return void
 	 * @throws \WC_REST_Exception When a new line item has no product reference, or its product doesn't exist.
 	 */
-	private function check_new_line_item_products( $line_items ) {
+	private function check_new_line_item_products( $line_items ): void {
 		if ( ! is_array( $line_items ) ) {
 			return;
 		}

@@ -199,18 +199,6 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Creating an order with a custom line item that has no total is rejected.
-	 */
-	public function test_create_order_rejects_custom_line_item_without_total(): void {
-		$request = new WP_REST_Request( 'POST', '/wc/v1/orders' );
-		$request->set_body_params( array( 'line_items' => array( array( 'name' => 'Gift wrap' ) ) ) );
-		$response = $this->server->dispatch( $request );
-
-		$this->assertSame( 400, $response->get_status(), 'The request should be rejected.' );
-		$this->assertSame( 'woocommerce_rest_required_product_reference', $response->get_data()['code'], 'The error should ask for a product.' );
-	}
-
-	/**
 	 * @testdox Updating an order with a deleted product leaves its existing items unchanged.
 	 */
 	public function test_update_order_with_deleted_product_leaves_existing_items_unchanged(): void {

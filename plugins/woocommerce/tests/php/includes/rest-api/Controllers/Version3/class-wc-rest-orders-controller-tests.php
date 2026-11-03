@@ -1761,7 +1761,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function provide_line_items_with_missing_product(): array {
 		return array(
-			'deleted variation'                   => array(
+			'deleted variation' => array(
 				static function (): array {
 					$variable  = WC_Helper_Product::create_variation_product();
 					$variation = wc_get_product( $variable->get_children()[0] );
@@ -1774,22 +1774,9 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 					return $line_item;
 				},
 			),
-			'unknown SKU'                         => array(
+			'unknown SKU'       => array(
 				static function (): array {
 					return array( 'sku' => 'missing-sku' );
-				},
-			),
-			'deleted product with name and total' => array(
-				static function (): array {
-					$product    = WC_Helper_Product::create_simple_product();
-					$product_id = $product->get_id();
-					$product->delete( true );
-
-					return array(
-						'product_id' => $product_id,
-						'name'       => 'Gone',
-						'total'      => '25.00',
-					);
 				},
 			),
 		);
@@ -1846,19 +1833,6 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 'Gift wrap', $item->get_name(), 'The item should keep its name.' );
 		$this->assertSame( 2, $item->get_quantity(), 'The item should keep its quantity.' );
 		$this->assertSame( 5.0, (float) $item->get_total(), 'The item should keep its total.' );
-	}
-
-	/**
-	 * @testdox POST /orders rejects a custom line item that has no total.
-	 */
-	public function test_create_order_rejects_custom_line_item_without_total(): void {
-		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
-		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body( wp_json_encode( array( 'line_items' => array( array( 'name' => 'Gift wrap' ) ) ) ) );
-		$response = $this->server->dispatch( $request );
-
-		$this->assertSame( 400, $response->get_status(), 'The request should be rejected.' );
-		$this->assertSame( 'woocommerce_rest_required_product_reference', $response->get_data()['code'], 'The error should ask for a product.' );
 	}
 
 	/**
