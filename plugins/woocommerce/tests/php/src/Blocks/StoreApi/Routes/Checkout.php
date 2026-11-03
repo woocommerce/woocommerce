@@ -2355,8 +2355,8 @@ class Checkout extends \WP_Test_REST_TestCase {
 	 */
 	public function local_pickup_tax_status_provider(): array {
 		return array(
-			'not taxable' => array( 'none', 0.0 ),
-			'taxable'     => array( 'taxable', 0.5 ),
+			'not taxable' => array( 'none', 0.0, 38.0 ),
+			'taxable'     => array( 'taxable', 0.5, 38.5 ),
 		);
 	}
 
@@ -2366,9 +2366,11 @@ class Checkout extends \WP_Test_REST_TestCase {
 	 * @dataProvider local_pickup_tax_status_provider
 	 * @param string $tax_status            Local pickup tax status.
 	 * @param float  $expected_shipping_tax Expected tax on the 5.00 pickup cost at 10%.
+	 * @param float  $expected_total        Expected order total: 30.00 of items, 3.00 item tax, 5.00 pickup, and the pickup tax.
 	 */
-	public function test_checkout_local_pickup_tax_status( string $tax_status, float $expected_shipping_tax ): void {
+	public function test_checkout_local_pickup_tax_status( string $tax_status, float $expected_shipping_tax, float $expected_total ): void {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
 		$this->inserted_tax_rate_ids[] = WC_Tax::_insert_tax_rate(
 			array(
 				'tax_rate_country'  => 'US',
@@ -2423,12 +2425,8 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->assertEqualsWithDelta( 5.0, (float) $shipping_line->get_total(), 0.001 );
 		$this->assertEqualsWithDelta( $expected_shipping_tax, (float) $shipping_line->get_total_tax(), 0.001, 'The saved pickup line should carry the tax checkout quoted.' );
 		$this->assertEqualsWithDelta( $expected_shipping_tax, (float) $order->get_shipping_tax(), 0.001 );
-		$this->assertEqualsWithDelta(
-			(float) $order->get_subtotal() + (float) $order->get_cart_tax() + 5.0 + $expected_shipping_tax,
-			(float) $order->get_total(),
-			0.001,
-			'The order total should match the quote: items, item tax, the pickup cost, and pickup tax only when taxable.'
-		);
+		$this->assertEqualsWithDelta( 3.0, (float) $order->get_cart_tax(), 0.001 );
+		$this->assertEqualsWithDelta( $expected_total, (float) $order->get_total(), 0.001, 'The order total should match the quote, with pickup tax only when pickup is taxable.' );
 	}
 
 	/**
