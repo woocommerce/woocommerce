@@ -741,6 +741,18 @@ trait ProductAbilityTrait {
 	}
 
 	/**
+	 * Format a product after a save, retaining the saved object if reloading fails.
+	 *
+	 * @param \WC_Product $product Saved product object.
+	 * @return array
+	 */
+	protected static function format_saved_product_for_response( \WC_Product $product ): array {
+		$stored = wc_get_product( $product->get_id() );
+
+		return self::format_product_for_response( $stored instanceof \WC_Product ? $stored : $product );
+	}
+
+	/**
 	 * Format a product for ability output.
 	 *
 	 * @param \WC_Product $product Product object.

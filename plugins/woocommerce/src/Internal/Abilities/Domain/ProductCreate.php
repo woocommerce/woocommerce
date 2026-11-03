@@ -115,9 +115,8 @@ class ProductCreate extends ActionableAbility {
 	 * @return array
 	 */
 	protected function prepare_response( $subject ): array {
-		$product = wc_get_product( $subject->get_id() );
 		return array(
-			'product' => $product ? self::format_product_for_response( $product ) : null,
+			'product' => self::format_saved_product_for_response( $subject ),
 		);
 	}
 

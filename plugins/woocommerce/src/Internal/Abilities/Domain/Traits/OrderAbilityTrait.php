@@ -274,6 +274,18 @@ trait OrderAbilityTrait {
 	}
 
 	/**
+	 * Format an order after a save, retaining the saved object if reloading fails.
+	 *
+	 * @param \WC_Order $order Saved order object.
+	 * @return array
+	 */
+	protected static function format_saved_order_for_response( \WC_Order $order ): array {
+		$stored = wc_get_order( $order->get_id() );
+
+		return self::format_order_for_response( $stored instanceof \WC_Order ? $stored : $order, false );
+	}
+
+	/**
 	 * Format an order for ability output.
 	 *
 	 * @param \WC_Order $order              Order object.

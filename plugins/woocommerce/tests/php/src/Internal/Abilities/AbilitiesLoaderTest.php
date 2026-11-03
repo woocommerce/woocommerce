@@ -2189,6 +2189,50 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should retain the saved product response when reloading fails.
+	 */
+	public function test_saved_product_response_falls_back_when_reload_fails(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$id      = $product->get_id();
+		wp_delete_post( $id, true );
+		$this->assertFalse( wc_get_product( $id ) );
+
+		$formatter = new class() {
+			use \Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
+			use \Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait {
+				format_saved_product_for_response as public format;
+			}
+		};
+		$result    = $formatter::format( $product );
+
+		$this->assertSame( $id, $result['id'] );
+		$this->assertSame( $product->get_name(), $result['name'] );
+		$this->assertTrue( rest_validate_value_from_schema( $result, wp_get_ability( 'woocommerce/product-create' )->get_output_schema()['properties']['product'] ) );
+	}
+
+	/**
+	 * @testdox Should retain the saved order response when reloading fails.
+	 */
+	public function test_saved_order_response_falls_back_when_reload_fails(): void {
+		$order = \WC_Helper_Order::create_order();
+		$id    = $order->get_id();
+		wc_get_order( $id )->delete( true );
+		$this->assertFalse( wc_get_order( $id ) );
+
+		$formatter = new class() {
+			use \Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
+			use \Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait {
+				format_saved_order_for_response as public format;
+			}
+		};
+		$result    = $formatter::format( $order );
+
+		$this->assertSame( $id, $result['id'] );
+		$this->assertSame( $order->get_status(), $result['status'] );
+		$this->assertTrue( rest_validate_value_from_schema( $result, wp_get_ability( 'woocommerce/order-add-note' )->get_output_schema()['properties']['order'] ) );
+	}
+
+	/**
 	 * @testdox Should return saved product values and dates after a write.
 	 * @testWith ["product-create"]
 	 *           ["product-update"]
