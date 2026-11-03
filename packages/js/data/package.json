@@ -113,7 +113,7 @@
 		"react-dom": "18.3.x",
 		"redux": "^4.2.1",
 		"rimraf": "catalog:tooling",
-		"ts-jest": "29.1.x",
+		"ts-jest": "catalog:tooling",
 		"typescript": "catalog:tooling"
 	},
 	"peerDependencies": {

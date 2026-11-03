@@ -152,7 +152,7 @@
 		"react-dom": "18.3.x",
 		"rimraf": "catalog:tooling",
 		"stylelint": "catalog:tooling",
-		"ts-jest": "29.1.x",
+		"ts-jest": "catalog:tooling",
 		"ts-loader": "9.5.x",
 		"typescript": "catalog:tooling",
 		"webpack": "catalog:tooling",

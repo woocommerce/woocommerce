@@ -93,7 +93,7 @@
 		"react-dom": "18.3.x",
 		"rimraf": "catalog:tooling",
 		"sass-loader": "catalog:tooling",
-		"ts-jest": "29.1.x",
+		"ts-jest": "catalog:tooling",
 		"typescript": "catalog:tooling",
 		"webpack": "catalog:tooling",
 		"webpack-cli": "catalog:tooling"

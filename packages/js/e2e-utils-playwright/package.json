@@ -81,7 +81,7 @@
 		"eslint": "catalog:tooling",
 		"jest": "catalog:tooling",
 		"jest-cli": "catalog:tooling",
-		"ts-jest": "29.1.x",
+		"ts-jest": "catalog:tooling",
 		"typescript": "catalog:tooling"
 	},
 	"dependencies": {

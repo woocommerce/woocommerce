@@ -142,6 +142,7 @@
 				"rimraf",
 				"sass-loader",
 				"simple-git",
+				"ts-jest",
 				"typescript",
 				"webpack",
 				"webpack-cli"
@@ -510,15 +511,6 @@
 				"**"
 			],
 			"pinVersion": "29.5.x"
-		},
-		{
-			"dependencies": [
-				"ts-jest"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "29.1.x"
 		},
 		{
 			"dependencies": [

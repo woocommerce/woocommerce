@@ -31,7 +31,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "catalog:tooling",
 		"jest": "catalog:tooling",
-		"ts-jest": "29.1.x",
+		"ts-jest": "catalog:tooling",
 		"ts-node": "^10.9.2",
 		"tslib": "^2.6.2",
 		"typescript": "catalog:tooling"

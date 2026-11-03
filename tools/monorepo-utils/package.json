@@ -57,7 +57,7 @@
 		"eslint": "catalog:tooling",
 		"jest": "catalog:tooling",
 		"replace": "^1.2.2",
-		"ts-jest": "29.1.x",
+		"ts-jest": "catalog:tooling",
 		"ts-loader": "9.5.x",
 		"typescript": "catalog:tooling",
 		"webpack": "catalog:tooling",
