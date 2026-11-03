@@ -8,7 +8,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
-use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
 
@@ -28,6 +27,16 @@ class ProductUpdate extends ActionableAbility {
 	public const ABILITY_NAME = 'woocommerce/product-update';
 
 	/**
+	 * The variations that change() planned, saved after their parent by save().
+	 *
+	 * @var array{save: array<int, array{0: \WC_Product_Variation, 1: array}>, delete: \WC_Product_Variation[]}
+	 */
+	private array $variations = array(
+		'save'   => array(),
+		'delete' => array(),
+	);
+
+	/**
 	 * Get the ability registration arguments.
 	 *
 	 * @return array
@@ -43,7 +52,7 @@ class ProductUpdate extends ActionableAbility {
 			),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::build_input_schema(),
-			'output_schema'       => self::get_entity_output_schema( 'product', self::get_product_output_schema() ),
+			'output_schema'       => self::get_product_mutation_output_schema(),
 			'permission_callback' => array( __CLASS__, 'can_update_product' ),
 			'meta'                => array(
 				'show_in_rest' => true,
@@ -76,14 +85,17 @@ class ProductUpdate extends ActionableAbility {
 	 * @return \WC_Product|\WP_Error
 	 */
 	protected function load( array $input ) {
+		$this->variations = array(
+			'save'   => array(),
+			'delete' => array(),
+		);
+		$this->deleted    = array();
+		$this->parent     = null;
+
 		$product = self::get_product_from_input( $input );
 
 		if ( is_wp_error( $product ) ) {
 			return $product;
-		}
-
-		if ( $product instanceof \WC_Product_Variation ) {
-			return self::get_unsupported_product_type_error();
 		}
 
 		if ( empty( array_diff( array_keys( $input ), array( 'id' ) ) ) ) {
@@ -94,27 +106,21 @@ class ProductUpdate extends ActionableAbility {
 			);
 		}
 
-		if (
-			isset( $input['status'] )
-			&& in_array(
-				sanitize_key( $input['status'] ),
-				array( ProductStatus::PUBLISH, ProductStatus::FUTURE, ProductStatus::PRIVATE ),
-				true
-			)
-			&& sanitize_key( $input['status'] ) !== $product->get_status()
-			&& ! self::current_user_can_publish_products()
-		) {
-			return new \WP_Error(
-				'woocommerce_product_publish_forbidden',
-				__( 'You are not allowed to publish products.', 'woocommerce' ),
-				array( 'status' => rest_authorization_required_code() )
-			);
+		$error = self::check_publish_permission( $product, $input );
+		if ( is_wp_error( $error ) ) {
+			return $error;
 		}
 
-		if ( isset( $input['type'] ) ) {
-			$current_config = self::get_product_config_for_product( $product );
-			if ( is_wp_error( $current_config ) ) {
-				return $current_config;
+		if ( isset( $input['type'] ) && (string) $input['type'] !== $product->get_type() ) {
+			$is_variable = static function ( $class_or_object ): bool {
+				return is_a( $class_or_object, \WC_Product_Variable::class, true ) || is_a( $class_or_object, \WC_Product_Variation::class, true );
+			};
+			if ( $is_variable( \WC_Product_Factory::get_product_classname( $product->get_id(), (string) $input['type'] ) ) || $is_variable( $product ) ) {
+				return new \WP_Error(
+					'woocommerce_product_type_unsupported',
+					__( 'A product cannot change into or out of a variable product or a variation through this ability. WooCommerce would delete its variations.', 'woocommerce' ),
+					array( 'status' => 400 )
+				);
 			}
 			return self::get_product_object_for_type( $input['type'], $product->get_id() );
 		}
@@ -127,7 +133,7 @@ class ProductUpdate extends ActionableAbility {
 	 *
 	 * @param \WC_Product $subject Product.
 	 * @param array       $input   Ability input.
-	 * @return null|\WP_Error
+	 * @return null|\WP_Error|array<int, array{0: \WC_Product, 1: array}> The variations that the input names, each with the `extensions` input of its `variations` item. For a variation, its parent.
 	 */
 	protected function change( $subject, array $input ) {
 		$product_config = self::get_product_config_for_product( $subject );
@@ -141,20 +147,83 @@ class ProductUpdate extends ActionableAbility {
 				self::apply_product_type_config( $subject, $product_config );
 			}
 
-			return self::set_product_props_from_input( $subject, $input, $product_config );
+			$error = self::set_product_props_from_input( $subject, $input, $product_config );
+			if ( is_wp_error( $error ) ) {
+				return $error;
+			}
+
+			if ( $subject instanceof \WC_Product_Variable && isset( $input['variations'] ) ) {
+				$plan = self::plan_variations( $subject, $input['variations'] );
+				if ( is_wp_error( $plan ) ) {
+					return $plan;
+				}
+				$this->variations = $plan;
+				return $plan['save'];
+			}
+
+			$this->parent = self::get_variable_parent( $subject );
+
+			return null === $this->parent ? null : array( array( $this->parent, array() ) );
 		} catch ( \WC_Data_Exception $exception ) {
 			return self::get_product_data_exception_error( $exception );
 		}
 	}
 
 	/**
-	 * Save the product.
+	 * The variations that the `variations` input marked for deletion, as they
+	 * were before the delete.
+	 *
+	 * @var \WC_Product_Variation[]
+	 */
+	private array $deleted = array();
+
+	/**
+	 * The parent of an updated variation, synced after the save.
+	 *
+	 * @var \WC_Product_Variable|null
+	 */
+	private ?\WC_Product_Variable $parent = null;
+
+	/**
+	 * The variations that the `variations` input marked for deletion.
+	 *
+	 * @return \WC_Product_Variation[]
+	 */
+	protected function get_deleted_objects(): array {
+		return $this->deleted;
+	}
+
+	/**
+	 * The variations that the `variations` input marked for deletion, for the validators.
+	 *
+	 * @return \WC_Product_Variation[]
+	 */
+	protected function get_objects_to_delete(): array {
+		return $this->variations['delete'];
+	}
+
+	/**
+	 * Save the product, then the variations that the input names.
 	 *
 	 * @param \WC_Product $subject Changed product.
 	 * @return null|\WP_Error
 	 */
 	protected function save( $subject ) {
-		return self::save_product( $subject, 'woocommerce_product_update_failed' );
+		$error = self::save_product( $subject, 'woocommerce_product_update_failed' );
+		if ( is_wp_error( $error ) ) {
+			return $error;
+		}
+
+		if ( $subject instanceof \WC_Product_Variable ) {
+			$this->deleted = array_map( static fn( \WC_Product_Variation $variation ) => clone $variation, $this->variations['delete'] );
+			return self::save_variations( $subject, $this->variations, 'woocommerce_product_update_failed' );
+		}
+
+		if ( null !== $this->parent ) {
+			self::sync_variable_parent( $this->parent );
+		}
+
+		return null;
 	}
 
 	/**
@@ -164,12 +233,7 @@ class ProductUpdate extends ActionableAbility {
 	 * @return array|\WP_Error
 	 */
 	protected function prepare_response( $subject ) {
-		$product = self::format_saved_product_for_response( $subject );
-		if ( is_wp_error( $product ) ) {
-			return $product;
-		}
-
-		return array( 'product' => $product );
+		return self::format_product_mutation_response( $subject, array_column( $this->variations['save'], 0 ) );
 	}
 
 	/**
@@ -181,19 +245,12 @@ class ProductUpdate extends ActionableAbility {
 	 * @since 10.9.0
 	 */
 	public static function can_update_product( $input = array() ): bool {
-		$product_id = self::get_id_from_input( $input );
+		$product_id = self::get_product_permission_id( self::get_id_from_input( $input ) );
+		$deletes    = is_array( $input ) && is_array( $input['variations'] ?? null ) && ! empty( array_filter( array_column( $input['variations'], 'delete' ) ) );
 
-		return $product_id > 0 && wc_rest_check_post_permissions( 'product', 'edit', $product_id );
-	}
-
-	/**
-	 * Check whether the current user can publish products.
-	 *
-	 * @return bool
-	 */
-	private static function current_user_can_publish_products(): bool {
-		// phpcs:ignore WordPress.WP.Capabilities.Unknown -- WooCommerce registers the publish_products capability.
-		return current_user_can( 'publish_products' );
+		return $product_id > 0
+			&& wc_rest_check_post_permissions( 'product', 'edit', $product_id )
+			&& ( ! $deletes || wc_rest_check_post_permissions( 'product', 'delete', $product_id ) );
 	}
 
 	/**
