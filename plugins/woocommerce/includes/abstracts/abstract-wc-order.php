@@ -413,7 +413,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Take the deferred callbacks and clear the list, so that each one runs for one save only.
+	 * Take the deferred callbacks and clear the list, so that each one runs for one save only. When the write
+	 * fails, run_deferred_actions() puts the after-save callbacks back for the next save.
 	 *
 	 * @since 11.4.0
 	 * @return array
@@ -426,8 +427,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Run the deferred callbacks that belong before or after the write. When the write failed, the callbacks
-	 * that belong after it do not run, so no hook reports a change that was not saved.
+	 * Run the deferred callbacks that belong before or after the write. When the write fails, the callbacks
+	 * that belong after it stay queued for the next save, so no hook reports a change that was not saved.
+	 * A callback queued under the same key during the failed save replaces the old one.
 	 *
 	 * @since 11.4.0
 	 * @param array $deferred_actions Entries from take_deferred_actions().
@@ -435,6 +437,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	protected function run_deferred_actions( array $deferred_actions, bool $after_save ): void {
 		if ( $after_save && null !== $this->last_save_error ) {
+			$this->deferred_actions += array_filter(
+				$deferred_actions,
+				static function ( array $entry ): bool {
+					return $entry['after_save'];
+				}
+			);
 			return;
 		}
 

@@ -1301,6 +1301,78 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Save the order while a listener makes the write fail.
+	 *
+	 * @param WC_Order $order Order to save.
+	 */
+	private function save_with_failed_write( WC_Order $order ): void {
+		$fail = static function () {
+			throw new Exception( 'Disk full.' );
+		};
+		add_action( 'woocommerce_before_order_object_save', $fail );
+		try {
+			$order->save();
+		} finally {
+			remove_action( 'woocommerce_before_order_object_save', $fail );
+		}
+		$this->assertInstanceOf( Exception::class, $order->get_last_save_error() );
+	}
+
+	/**
+	 * @testdox A staged coupon is counted once when a save after a failed write succeeds.
+	 */
+	public function test_staged_coupon_is_counted_after_a_failed_write_is_retried(): void {
+		$order = WC_Helper_Order::create_order();
+		$this->create_fixed_cart_coupon( 'staged-retry' );
+
+		$order->stage_coupon( 'staged-retry' );
+		$this->save_with_failed_write( $order );
+		$this->assertSame( 0, ( new WC_Coupon( 'staged-retry' ) )->get_usage_count() );
+
+		$order->save();
+		$order->save();
+		$this->assertSame( 1, ( new WC_Coupon( 'staged-retry' ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox A staged note is added once when a save after a failed write succeeds.
+	 */
+	public function test_staged_order_note_is_added_after_a_failed_write_is_retried(): void {
+		$order = new WC_Order();
+		$order->save();
+
+		$order->stage_order_note( 'Staged note.' );
+		$this->save_with_failed_write( $order );
+		$order->save();
+		$order->save();
+
+		$found = array_filter(
+			wc_get_order_notes( array( 'order_id' => $order->get_id() ) ),
+			static function ( $note ) {
+				return 'Staged note.' === $note->content;
+			}
+		);
+		$this->assertCount( 1, $found );
+	}
+
+	/**
+	 * @testdox A staged payment fires woocommerce_payment_complete once, when a save after a failed write succeeds.
+	 */
+	public function test_staged_payment_complete_fires_after_a_failed_write_is_retried(): void {
+		$order = new WC_Order();
+		$order->save();
+		$fired = did_action( 'woocommerce_payment_complete' );
+
+		$this->assertTrue( $order->stage_payment_complete( '12345' ) );
+		$this->save_with_failed_write( $order );
+		$this->assertSame( 0, did_action( 'woocommerce_payment_complete' ) - $fired );
+
+		$order->save();
+		$order->save();
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $fired );
+	}
+
+	/**
 	 * Test: a staged note is not added when the order write fails.
 	 */
 	public function test_stage_order_note_is_skipped_when_the_write_fails() {
