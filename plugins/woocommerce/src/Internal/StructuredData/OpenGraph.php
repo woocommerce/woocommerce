@@ -1,6 +1,6 @@
 <?php
 /**
- * Product Open Graph metadata.
+ * Open Graph metadata.
  *
  * @package WooCommerce
  */
@@ -10,12 +10,13 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\StructuredData;
 
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
 use WC_Product;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Provides product link previews and fills missing Open Graph metadata.
+ * Provides link previews and fills missing Open Graph metadata.
  */
 class OpenGraph {
 
@@ -43,7 +44,7 @@ class OpenGraph {
 	}
 
 	/**
-	 * Prepare metadata for a public, unprotected product before rendering the template.
+	 * Prepare metadata for a public, unprotected page before rendering the template.
 	 *
 	 * @internal
 	 */
@@ -135,7 +136,12 @@ class OpenGraph {
 			return $this->get_product_page_data();
 		}
 
-		if ( is_shop() && ! is_search() && ! is_paged() ) {
+		if (
+			is_shop()
+			&& ! is_search()
+			&& ! is_paged()
+			&& ( ! isset( $_GET['product-page'] ) || 1 === absint( $_GET['product-page'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public pagination parameter.
+		) {
 			return $this->get_shop_page_data();
 		}
 
@@ -199,7 +205,7 @@ class OpenGraph {
 	 * @return mixed
 	 */
 	public function handle_wp_template_enhancement_output_buffer( $html ) {
-		if ( ! is_string( $html ) || ! $this->tags ) {
+		if ( ! is_string( $html ) || ! $this->tags || ComingSoonRequestHandler::is_showing_coming_soon() ) {
 			return $html;
 		}
 

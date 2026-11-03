@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the shipping zone screen getting stuck with no error when a save fails, and losing edits typed during a save.

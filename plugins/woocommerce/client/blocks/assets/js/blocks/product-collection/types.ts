@@ -56,8 +56,14 @@ export enum WidthOptions {
 
 export interface ProductCollectionDisplayLayout {
 	type: LayoutOptions;
-	columns: number;
-	shrinkColumns: boolean;
+	/**
+	 * Column count for the Grid layout. Omitted for Stack and Carousel.
+	 */
+	columns?: number;
+	/**
+	 * Whether Grid columns shrink on smaller screens. Omitted for Stack and Carousel.
+	 */
+	shrinkColumns?: boolean;
 }
 
 export interface ProductCollectionDimensions {

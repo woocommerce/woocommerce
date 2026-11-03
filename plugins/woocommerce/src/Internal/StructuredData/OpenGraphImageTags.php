@@ -20,6 +20,8 @@ class OpenGraphImageTags {
 	/**
 	 * Build an image group, or return an empty array when the image is unavailable.
 	 *
+	 * @since 11.4.0
+	 *
 	 * @param int         $image_id Image attachment ID.
 	 * @param string|null $fallback_alt Fallback when the image has no alt text.
 	 * @param bool        $secure_url Whether to include the secure URL.

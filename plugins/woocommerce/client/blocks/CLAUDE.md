@@ -220,7 +220,7 @@ Webpack writes directly to `plugins/woocommerce/assets/client/blocks/` so PHP en
 - Projects: `blocks-parallel` (default) and `blocks-serial` (specs in `blocksSerialSpecs`, database reset after each test). Write new specs parallel-safe, or use a test lock; add them to `blocksSerialSpecs` only as a last resort. See `../../tests/e2e/README.md#parallel-locked-and-serial-specs`.
 - Test themes: `block-theme`, `classic-theme`, `block-theme-with-templates`
 - Setup script: `../../tests/e2e/bin/blocks/test-env-setup.sh`
-- Uses MSW for API mocking, Allure for reporting
+- Uses MSW for API mocking
 
 ### PHP Tests
 
