@@ -21,6 +21,8 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\StoreSettingsGet;
+use Automattic\WooCommerce\Internal\Abilities\Domain\SettingsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\SettingsGroupsQuery;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -53,6 +55,8 @@ class AbilitiesLoader {
 		ProductDelete::class,
 		ProductUpdate::class,
 		StoreSettingsGet::class,
+		SettingsQuery::class,
+		SettingsGroupsQuery::class,
 	);
 
 	/**
