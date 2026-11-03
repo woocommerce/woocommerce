@@ -794,6 +794,29 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test content styles added through the filter are inlined when they use `:where()`.
+	 */
+	public function testItInlinesFilteredContentStylesWithWhere(): void {
+		$add_styles = static function ( string $styles ): string {
+			return $styles . '.wp-block-paragraph :where(a){color: #0a0b0c;}';
+		};
+		add_filter( 'woocommerce_email_content_renderer_styles', $add_styles );
+
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+		$email_post        = $this->create_email_post( '<!-- wp:paragraph --><p class="wp-block-paragraph">Read <a href="https://example.com">more</a></p><!-- /wp:paragraph -->' );
+
+		try {
+			$rendered = $this->renderer->render( $email_post, $template );
+		} finally {
+			remove_filter( 'woocommerce_email_content_renderer_styles', $add_styles );
+		}
+
+		$this->assertStringContainsString( 'color: #0a0b0c', (string) $this->getStylesValueForTag( $rendered, 'a' ) );
+	}
+
+	/**
 	 * Test a link color set on a block does not reach the buttons inside it.
 	 */
 	public function testItKeepsBlockLinkColorsOffButtons(): void {
