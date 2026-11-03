@@ -79,20 +79,20 @@ class Separator extends Abstract_Block_Renderer {
 		$styles = Styles_Helper::get_block_styles( $attributes, $rendering_context, array( 'background-color' ) );
 		$color  = (string) ( $styles['declarations']['background-color'] ?? $email_attrs['color'] ?? '#000000' );
 
-		// Outlook can’t read alpha, so blend a see-through color onto the email background.
-		// That’s the email background, not a parent Group’s: preprocessors don’t pass that down.
+		// Outlook can’t read alpha, so output plain 6-digit hex, blending a see-through color onto the
+		// email background. That’s the email background, not a parent Group’s: preprocessors don’t
+		// pass that down.
 		$rgba = $this->parse_color( $color );
-		if ( null !== $rgba && $rgba[3] < 1 ) {
-			$theme_styles = $rendering_context->get_theme_styles();
-			$background   = $this->parse_color( (string) ( $theme_styles['color']['background'] ?? '' ) ) ?? array( 255, 255, 255, 1.0 );
-			$blended      = '#';
-			for ( $i = 0; $i < 3; $i++ ) {
-				$blended .= sprintf( '%02x', (int) round( $rgba[ $i ] * $rgba[3] + $background[ $i ] * ( 1 - $rgba[3] ) ) );
-			}
-			return $blended;
+		if ( null === $rgba ) {
+			return Html_Processing_Helper::sanitize_color( $color );
 		}
-
-		return Html_Processing_Helper::sanitize_color( $color );
+		$theme_styles = $rendering_context->get_theme_styles();
+		$background   = $this->parse_color( (string) ( $theme_styles['color']['background'] ?? '' ) ) ?? array( 255, 255, 255, 1.0 );
+		$hex          = '#';
+		for ( $i = 0; $i < 3; $i++ ) {
+			$hex .= sprintf( '%02x', (int) round( $rgba[ $i ] * $rgba[3] + $background[ $i ] * ( 1 - $rgba[3] ) ) );
+		}
+		return $hex;
 	}
 
 	/**

@@ -133,7 +133,7 @@ class Separator_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Short hex and rgba() colors with alpha are blended too.
+	 * Short hex and rgba() colors with alpha are blended too, and every hex form ends up as 6 digits.
 	 *
 	 * @dataProvider alpha_color_provider
 	 * @param string $color Picked color.
@@ -142,7 +142,7 @@ class Separator_Test extends \Email_Editor_Integration_Test_Case {
 	public function testItBlendsOtherAlphaColorFormats( string $color, string $expected ): void {
 		$rendered = $this->render( array( 'style' => array( 'color' => array( 'background' => $color ) ) ) );
 
-		$this->assertStringContainsString( 'border-top:2px solid ' . $expected, $rendered );
+		$this->assertStringContainsString( 'border-top:2px solid ' . $expected . ';', $rendered );
 	}
 
 	/**
@@ -152,6 +152,8 @@ class Separator_Test extends \Email_Editor_Integration_Test_Case {
 		return array(
 			'four-digit hex' => array( '#f008', '#ff7777' ),
 			'rgba()'         => array( 'rgba(255, 0, 0, 0.5)', '#ff8080' ),
+			'opaque #rgba'   => array( '#f00f', '#ff0000' ),
+			'opaque 8-digit' => array( '#ff0000ff', '#ff0000' ),
 		);
 	}
 
