@@ -154,6 +154,24 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Give the clone its own attribute and download objects.
+	 *
+	 * @since 11.4.0
+	 */
+	public function __clone() {
+		parent::__clone();
+		foreach ( array( 'data', 'changes' ) as $set ) {
+			foreach ( array( 'attributes', 'downloads' ) as $prop ) {
+				foreach ( $this->{$set}[ $prop ] ?? array() as $key => $value ) {
+					if ( is_object( $value ) ) {
+						$this->{$set}[ $prop ][ $key ] = clone $value;
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 * Get internal type. Should return string and *should be overridden* by child classes.
 	 *
 	 * The product_type property is deprecated but is used here for BW compatibility with child classes which may be defining product_type and not have a get_type method.
