@@ -1017,12 +1017,12 @@ describe( 'Address Suggestions Component', () => {
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await jest.advanceTimersByTimeAsync( 150 );
+			await jest.runAllTimersAsync();
 
 			document
 				.querySelector( '#address_suggestions_billing .suggestions-list li' )
 				.click();
-			await jest.advanceTimersByTimeAsync( 250 );
+			await jest.runAllTimersAsync();
 
 			document.body.removeEventListener( 'change', onChange );
 
@@ -1059,12 +1059,12 @@ describe( 'Address Suggestions Component', () => {
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await jest.advanceTimersByTimeAsync( 150 );
+			await jest.runAllTimersAsync();
 
 			document
 				.querySelector( '#address_suggestions_billing .suggestions-list li' )
 				.click();
-			await jest.advanceTimersByTimeAsync( 250 );
+			await jest.runAllTimersAsync();
 
 			document.body.removeEventListener( 'change', onChange );
 
@@ -1095,7 +1095,7 @@ describe( 'Address Suggestions Component', () => {
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await jest.advanceTimersByTimeAsync( 150 );
+			await jest.runAllTimersAsync();
 
 			document
 				.querySelector( '#address_suggestions_billing .suggestions-list li' )
@@ -1104,7 +1104,7 @@ describe( 'Address Suggestions Component', () => {
 			// Before the delayed fields are filled there is no refresh request.
 			expect( jQueryTrigger ).not.toHaveBeenCalledWith( 'update_checkout' );
 
-			await jest.advanceTimersByTimeAsync( 250 );
+			await jest.runAllTimersAsync();
 
 			expect( document.getElementById( 'billing_city' ).value ).toBe( 'City' );
 			expect( jQueryTrigger ).toHaveBeenCalledWith( 'update_checkout' );
