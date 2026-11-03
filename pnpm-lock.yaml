@@ -27,6 +27,9 @@ catalogs:
     '@babel/runtime':
       specifier: 7.25.7
       version: 7.25.7
+    '@jest/globals':
+      specifier: 29.5.x
+      version: 29.5.0
     '@types/jest':
       specifier: 29.5.x
       version: 29.5.14
@@ -2545,7 +2548,7 @@ importers:
         specifier: catalog:tooling
         version: 7.25.7(@babel/core@7.29.7)
       '@jest/globals':
-        specifier: 29.5.x
+        specifier: catalog:tooling
         version: 29.5.0
       '@types/jest':
         specifier: catalog:tooling

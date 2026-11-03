@@ -35,7 +35,7 @@
 		"@babel/core": "catalog:tooling",
 		"@babel/preset-env": "catalog:tooling",
 		"@babel/preset-typescript": "catalog:tooling",
-		"@jest/globals": "29.5.x",
+		"@jest/globals": "catalog:tooling",
 		"@types/jest": "catalog:tooling",
 		"@types/jquery": "3.5.33",
 		"@wordpress/browserslist-config": "next",

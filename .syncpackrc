@@ -118,6 +118,7 @@
 				"@babel/preset-react",
 				"@babel/preset-typescript",
 				"@babel/runtime",
+				"@jest/globals",
 				"@types/jest",
 				"@wordpress/env",
 				"@wordpress/postcss-plugins-preset",
