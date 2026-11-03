@@ -7,7 +7,8 @@ import { useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { type ProductCollectionAttributes } from '../../types';
+import { type ProductCollectionAttributes, LayoutOptions } from '../../types';
+import { sanitizeDisplayLayout } from '../../utils';
 
 const MAX_EMAIL_COLUMNS = 2;
 
@@ -32,16 +33,18 @@ const useEmailColumnAdjustments = (
 			return;
 		}
 
-		// Only adjust columns if currently more than the max allowed for email
+		// Only adjust columns if currently more than the max allowed for email.
+		// Other layouts do not store a column count.
 		if (
+			displayLayout?.type === LayoutOptions.GRID &&
 			displayLayout.columns &&
 			displayLayout.columns > MAX_EMAIL_COLUMNS
 		) {
 			setAttributes( {
-				displayLayout: {
+				displayLayout: sanitizeDisplayLayout( {
 					...displayLayout,
 					columns: MAX_EMAIL_COLUMNS,
-				},
+				} ),
 			} );
 		}
 	}, [ isEmail, displayLayout, setAttributes ] );

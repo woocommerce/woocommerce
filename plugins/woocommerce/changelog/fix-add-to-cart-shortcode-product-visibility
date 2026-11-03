@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Apply product visibility checks before rendering add-to-cart shortcodes.
