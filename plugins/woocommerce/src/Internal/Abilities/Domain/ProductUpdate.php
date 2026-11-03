@@ -248,7 +248,7 @@ class ProductUpdate extends ActionableAbility {
 	 */
 	public static function can_update_product( $input = array() ): bool {
 		$product_id = self::get_product_permission_id( self::get_id_from_input( $input ) );
-		$deletes    = is_array( $input ) && is_array( $input['variations'] ?? null ) && ! empty( array_filter( array_column( $input['variations'], 'delete' ) ) );
+		$deletes    = is_array( $input ) && is_array( $input['variations'] ?? null ) && ! empty( array_filter( array_map( 'wc_string_to_bool', array_column( $input['variations'], 'delete' ) ) ) );
 
 		return $product_id > 0
 			&& wc_rest_check_post_permissions( 'product', 'edit', $product_id )

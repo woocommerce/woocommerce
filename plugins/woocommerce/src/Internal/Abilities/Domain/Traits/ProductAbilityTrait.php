@@ -833,8 +833,9 @@ trait ProductAbilityTrait {
 		foreach ( array_values( $items ) as $index => $item ) {
 			$position = $index + 1;
 			$id       = (int) ( $item['id'] ?? 0 );
+			$delete   = wc_string_to_bool( $item['delete'] ?? false );
 
-			if ( array_key_exists( 'delete', $item ) && ( $id <= 0 || count( $item ) > 2 ) ) {
+			if ( $delete && ( $id <= 0 || count( $item ) > 2 ) ) {
 				return new \WP_Error(
 					'woocommerce_product_variation_invalid',
 					/* translators: %d: variation position. */
@@ -862,7 +863,7 @@ trait ProductAbilityTrait {
 					);
 				}
 				$named[ $id ] = true;
-				if ( ! empty( $item['delete'] ) ) {
+				if ( $delete ) {
 					$plan['delete'][] = $variation;
 					continue;
 				}
@@ -1073,7 +1074,7 @@ trait ProductAbilityTrait {
 			$options  = array_map( 'sanitize_text_field', $item['options'] ?? array() );
 			$taxonomy = self::get_global_attribute_taxonomy( $item );
 			$name     = '' === $taxonomy ? sanitize_text_field( trim( (string) ( $item['name'] ?? '' ) ) ) : $taxonomy;
-			if ( '' === $taxonomy && ( ! empty( $item['id'] ) || ! empty( $item['global'] ) ) ) {
+			if ( '' === $taxonomy && ( ! empty( $item['id'] ) || wc_string_to_bool( $item['global'] ?? false ) ) ) {
 				return new \WP_Error(
 					'woocommerce_product_attributes_invalid',
 					sprintf(
@@ -1100,8 +1101,8 @@ trait ProductAbilityTrait {
 			$attribute->set_name( $name );
 			$attribute->set_options( $options );
 			$attribute->set_position( (int) $position );
-			$attribute->set_visible( (bool) ( $item['visible'] ?? true ) );
-			$attribute->set_variation( (bool) ( $item['variation'] ?? true ) );
+			$attribute->set_visible( $item['visible'] ?? true );
+			$attribute->set_variation( $item['variation'] ?? true );
 			$attributes[ sanitize_title( $name ) ] = $attribute;
 		}
 
@@ -1130,7 +1131,7 @@ trait ProductAbilityTrait {
 		}
 
 		$name = trim( $item['name'] ?? '' );
-		if ( empty( $item['global'] ) || '' === $name ) {
+		if ( ! wc_string_to_bool( $item['global'] ?? false ) || '' === $name ) {
 			return '';
 		}
 
