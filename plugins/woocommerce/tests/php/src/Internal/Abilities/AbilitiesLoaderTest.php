@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 
+use Automattic\WooCommerce\Abilities\Ability;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesCategories;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
@@ -1305,6 +1306,60 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should add a private order note when customer_note is the string false.
+	 */
+	public function test_order_add_note_reads_string_false_as_a_private_note(): void {
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+
+		$result = wp_get_ability( 'woocommerce/order-add-note' )->execute(
+			array(
+				'id'            => $order->get_id(),
+				'note'          => 'Packed.',
+				'customer_note' => 'false',
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertCount(
+			0,
+			wc_get_order_notes(
+				array(
+					'order_id' => $order->get_id(),
+					'type'     => 'customer',
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox Should move a product to the trash when force is the string false.
+	 */
+	public function test_product_delete_reads_string_false_force_as_trash(): void {
+		$product                     = \WC_Helper_Product::create_simple_product();
+		$this->created_product_ids[] = $product->get_id();
+
+		$result = wp_get_ability( 'woocommerce/product-delete' )->execute(
+			array(
+				'id'    => $product->get_id(),
+				'force' => 'false',
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'trash', get_post_status( $product->get_id() ) );
+	}
+
+	/**
+	 * @testdox Should register every Core ability with the WooCommerce Ability class.
+	 */
+	public function test_core_abilities_use_the_ability_class(): void {
+		foreach ( array( 'woocommerce/products-query', 'woocommerce/order-add-note', 'woocommerce/product-update' ) as $name ) {
+			$this->assertInstanceOf( Ability::class, wp_get_ability( $name ), $name );
+		}
 	}
 
 	/**
@@ -2975,7 +3030,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should reject invalid grouped product IDs before setting children.
 	 */
 	public function test_product_create_rejects_invalid_grouped_product_ids(): void {
-		$result = wp_get_ability( 'woocommerce/product-create' )->execute_change(
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
 				'name'             => 'Invalid Grouped Product',
 				'type'             => 'grouped',
@@ -2984,7 +3039,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_product_grouped_products_invalid', $result->get_error_code() );
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
 	}
 
 	/**

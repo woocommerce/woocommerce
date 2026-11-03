@@ -54,7 +54,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @since 11.3.0
  */
-abstract class ActionableAbility extends \WP_Ability {
+abstract class ActionableAbility extends Ability {
 
 	/**
 	 * Resource that the ability changes, for example `product` or `order`. The fields of this resource are written.

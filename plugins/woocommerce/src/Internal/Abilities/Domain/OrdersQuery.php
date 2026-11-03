@@ -76,7 +76,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function execute( array $input ) {
-		$include_line_items = (bool) ( $input['include_line_items'] ?? false );
+		$include_line_items = ! empty( $input['include_line_items'] );
 
 		if ( ! empty( $input['id'] ) && ! empty( $input['filters'] ) ) {
 			return new \WP_Error(
@@ -106,8 +106,8 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			);
 		}
 
-		$page     = (int) ( $input['page'] ?? 1 );
-		$per_page = (int) ( $input['per_page'] ?? 10 );
+		$page     = $input['page'] ?? 1;
+		$per_page = $input['per_page'] ?? 10;
 		$args     = array(
 			'limit'    => $per_page,
 			'page'     => $page,
@@ -117,12 +117,12 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 		);
 
 		foreach ( array( 'billing_email', 'order' ) as $field ) {
-			if ( ! empty( $input[ $field ] ) && is_scalar( $input[ $field ] ) ) {
-				$args[ $field ] = wc_clean( (string) $input[ $field ] );
+			if ( ! empty( $input[ $field ] ) ) {
+				$args[ $field ] = wc_clean( $input[ $field ] );
 			}
 		}
 
-		$args['status'] = array_map( 'wc_clean', array_map( 'strval', wp_parse_list( $input['status'] ?? array() ) ) );
+		$args['status'] = array_map( 'wc_clean', $input['status'] ?? array() );
 
 		if ( empty( $args['status'] ) ) {
 			$args['status'] = 'shop_order' === $args['type'] ? self::get_allowed_order_status_slugs() : self::get_query_order_status_slugs();
@@ -130,19 +130,19 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 		$args['status'] = array_map( array( __CLASS__, 'prepare_status_arg' ), (array) $args['status'] );
 
-		if ( ! empty( $input['orderby'] ) && is_scalar( $input['orderby'] ) ) {
-			$orderby         = sanitize_text_field( (string) $input['orderby'] );
+		if ( ! empty( $input['orderby'] ) ) {
+			$orderby         = sanitize_text_field( $input['orderby'] );
 			$args['orderby'] = self::prepare_orderby_arg( $orderby );
 		}
 
 		foreach ( array( 'customer_id', 'parent' ) as $field ) {
 			if ( isset( $input[ $field ] ) ) {
-				$args[ $field ] = (int) $input[ $field ];
+				$args[ $field ] = $input[ $field ];
 			}
 		}
 
-		if ( ! empty( $input['exclude'] ) && is_array( $input['exclude'] ) ) {
-			$args['exclude'] = array_map( 'intval', $input['exclude'] );
+		if ( ! empty( $input['exclude'] ) ) {
+			$args['exclude'] = $input['exclude'];
 		}
 
 		$created_date_arg = self::build_created_date_arg( $input );
@@ -215,7 +215,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			return self::check_order_permission( $order_id, 'read' );
 		}
 
-		$type = is_array( $input ) ? self::get_order_type_from_input( $input ) : 'shop_order';
+		$type = self::get_order_type_from_input( $input );
 
 		return wc_rest_check_post_permissions( $type, 'read' );
 	}
@@ -227,9 +227,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @return string
 	 */
 	private static function get_order_type_from_input( array $input ): string {
-		$type = $input['type'] ?? 'shop_order';
-
-		return is_string( $type ) && in_array( $type, self::get_order_type_slugs(), true ) ? $type : 'shop_order';
+		return $input['type'] ?? 'shop_order';
 	}
 
 	/**
@@ -400,8 +398,8 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @return array{0: int|null, 1: int|null}|null Null when neither field is set, or when a provided value is not a valid date-time.
 	 */
 	private static function resolve_date_range_timestamps( array $input, string $after_field, string $before_field ): ?array {
-		$after  = isset( $input[ $after_field ] ) && is_string( $input[ $after_field ] ) ? sanitize_text_field( $input[ $after_field ] ) : '';
-		$before = isset( $input[ $before_field ] ) && is_string( $input[ $before_field ] ) ? sanitize_text_field( $input[ $before_field ] ) : '';
+		$after  = isset( $input[ $after_field ] ) ? sanitize_text_field( $input[ $after_field ] ) : '';
+		$before = isset( $input[ $before_field ] ) ? sanitize_text_field( $input[ $before_field ] ) : '';
 
 		if ( '' === $after && '' === $before ) {
 			return null;
