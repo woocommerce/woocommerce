@@ -13,7 +13,7 @@ namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer;
  * Converts WordPress :where() selectors to selectors supported by the CSS inliner.
  *
  * @internal
- * @since 2.19.0
+ * @since 2.20.0
  */
 class Css_Selector_Normalizer {
 	/**
@@ -26,7 +26,7 @@ class Css_Selector_Normalizer {
 	/**
 	 * Normalize rule selectors without changing declarations or at-rule conditions.
 	 *
-	 * @since 2.19.0
+	 * @since 2.20.0
 	 * @param string $css Collected stylesheet.
 	 * @return string
 	 */
