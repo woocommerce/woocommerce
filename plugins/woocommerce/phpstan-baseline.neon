@@ -10513,12 +10513,6 @@ parameters:
 			path: includes/class-wc-comments.php
 
 		-
-			message: '#^Parameter \#3 \$args of function wp_die expects array\{response\?\: int, link_url\?\: string, link_text\?\: string, back_link\?\: bool, text_direction\?\: string, charset\?\: string, code\?\: string, exit\?\: bool\}\|int, array\{code\: 403\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-comments.php
-
-		-
 			message: '#^Parameter \#3 \$product_id of function wc_customer_bought_product expects int, string given\.$#'
 			identifier: argument.type
 			count: 1
