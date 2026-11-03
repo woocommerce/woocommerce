@@ -130,7 +130,6 @@ class ProductsQueryTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $item['shipping_required'] );
 		$this->assertSame( 'bulky', $item['shipping_class'] );
 		$this->assertSame( $shipping_class['term_id'], $item['shipping_class_id'] );
-		$this->assertSame( 0, $item['parent_id'] );
 		$this->assertSame( ProductTaxStatus::SHIPPING, $item['tax_status'] );
 		$this->assertSame( 'reduced-rate', $item['tax_class'] );
 		$this->assertSame( 'notify', $item['backorders'] );
@@ -180,6 +179,20 @@ class ProductsQueryTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Featured', $item['images'][0]['name'] );
 		$this->assertSame( 'Front view', $item['images'][0]['alt'] );
 		$this->assertStringEndsWith( 'featured.jpg', $item['images'][0]['src'] );
+	}
+
+	/**
+	 * @testdox Should return the image title as stored, without texturized quotes and dashes.
+	 */
+	public function test_returns_plain_image_names(): void {
+		$image   = $this->create_image( 'mug.jpg', 'Bob\'s mug -- "x"', '' );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( $image );
+		$product->save();
+
+		$item = $this->query_single( $product->get_id() );
+
+		$this->assertSame( 'Bob\'s mug -- "x"', $item['images'][0]['name'] );
 	}
 
 	/**

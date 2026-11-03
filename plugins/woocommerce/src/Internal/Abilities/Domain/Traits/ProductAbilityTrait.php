@@ -785,7 +785,6 @@ trait ProductAbilityTrait {
 			'virtual'           => (bool) $product->get_virtual(),
 			'downloadable'      => (bool) $product->get_downloadable(),
 			'grouped_products'  => $product instanceof \WC_Product_Grouped ? array_map( 'absint', $product->get_children( 'edit' ) ) : array(),
-			'parent_id'         => $product->get_parent_id(),
 			'categories'        => self::format_product_terms_for_response( $product->get_category_ids( 'edit' ), 'product_cat' ),
 			'tags'              => self::format_product_terms_for_response( $product->get_tag_ids( 'edit' ), 'product_tag' ),
 			'brands'            => self::format_product_terms_for_response( $product->get_brand_ids( 'edit' ), 'product_brand' ),
@@ -886,7 +885,7 @@ trait ProductAbilityTrait {
 			$images[] = array(
 				'id'   => $attachment_id,
 				'src'  => (string) $attachment[0],
-				'name' => get_the_title( $attachment_id ),
+				'name' => get_post_field( 'post_title', $attachment_id ),
 				'alt'  => (string) get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
 			);
 		}
@@ -979,10 +978,6 @@ trait ProductAbilityTrait {
 						'type'        => 'array',
 						'description' => __( 'Product IDs included as children of a grouped product.', 'woocommerce' ),
 						'items'       => array( 'type' => 'integer' ),
-					),
-					'parent_id'         => array(
-						'type'        => 'integer',
-						'description' => __( 'Parent product ID, or 0 when the product has no parent.', 'woocommerce' ),
 					),
 					'categories'        => self::get_product_terms_output_schema(),
 					'tags'              => self::get_product_terms_output_schema(),

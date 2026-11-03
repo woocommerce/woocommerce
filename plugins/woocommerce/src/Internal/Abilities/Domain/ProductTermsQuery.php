@@ -164,7 +164,7 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 				$output['image'] = array(
 					'id'   => $image->ID,
 					'src'  => $image_url,
-					'name' => get_the_title( $image ),
+					'name' => $image->post_title,
 					'alt'  => get_post_meta( $image->ID, '_wp_attachment_image_alt', true ),
 				);
 				foreach ( array(

@@ -459,6 +459,33 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return the image title as stored, without texturized quotes and dashes.
+	 */
+	public function test_returns_plain_image_name(): void {
+		$id       = self::factory()->term->create( array( 'taxonomy' => 'product_cat' ) );
+		$image_id = self::factory()->post->create(
+			array(
+				'post_type'      => 'attachment',
+				'post_title'     => 'Bob\'s mug -- "x"',
+				'post_mime_type' => 'image/jpeg',
+				'guid'           => 'https://example.test/mug.jpg',
+			)
+		);
+		update_term_meta( $id, 'thumbnail_id', $image_id );
+
+		$ability = new \WP_Ability( ProductTermsQuery::get_name(), ProductTermsQuery::get_registration_args() );
+		$result  = $ability->execute(
+			array(
+				'taxonomy' => 'product_cat',
+				'include'  => array( $id ),
+			)
+		);
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 'Bob\'s mug -- "x"', $result['terms'][0]['image']['name'] );
+	}
+
+	/**
 	 * @testdox Should enforce read permissions and validate taxonomy and pagination through the ability.
 	 */
 	public function test_permissions_and_validation(): void {
