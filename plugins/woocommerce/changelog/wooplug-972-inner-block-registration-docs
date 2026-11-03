@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Clarify how server registration makes Checkout inner block attributes available on the frontend.

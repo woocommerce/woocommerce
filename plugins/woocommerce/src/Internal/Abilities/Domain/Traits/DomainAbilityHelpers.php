@@ -15,6 +15,25 @@ defined( 'ABSPATH' ) || exit;
 trait DomainAbilityHelpers {
 
 	/**
+	 * Format an ability date with its store or UTC offset without changing the object.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param mixed $date Date to format.
+	 * @param bool  $utc  Whether to use UTC instead of the store timezone.
+	 * @return string|null
+	 */
+	protected static function format_date_for_response( $date, bool $utc = true ): ?string {
+		if ( ! $date instanceof \WC_DateTime ) {
+			return null;
+		}
+
+		$date = clone $date;
+		$date->setTimezone( $utc ? new \DateTimeZone( 'UTC' ) : wp_timezone() );
+		return $date->format( DATE_ATOM );
+	}
+
+	/**
 	 * Get a collection output schema.
 	 *
 	 * @param string $collection_key Collection property key.
