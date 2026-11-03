@@ -172,9 +172,10 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 		$this->product->save();
 
 		$tags = $this->render_meta_tags( '' );
+		$this->assertSame( array( '8.00' ), $tags['product:price:amount'] );
 		$this->assertSame( array( '8.00' ), $tags['product:sale_price:amount'] );
 		$this->assertSame( array( 'USD' ), $tags['product:sale_price:currency'] );
-		$this->assertSame( array( '8.00' ), $tags['og:price:amount'] );
+		$this->assertSame( array( '10.00' ), $tags['og:price:amount'] );
 		$this->assertSame( array( '10.00' ), $tags['og:price:standard_amount'] );
 		$this->assertSame( array( $this->product->get_date_on_sale_from()->format( DATE_ATOM ) ), $tags['product:sale_price_dates:start'] );
 		$this->assertSame( array( $this->product->get_date_on_sale_to()->format( DATE_ATOM ) ), $tags['product:sale_price_dates:end'] );

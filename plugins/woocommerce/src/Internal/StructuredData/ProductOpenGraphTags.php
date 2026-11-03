@@ -41,6 +41,7 @@ class ProductOpenGraphTags {
 			array( 'og:type' => 'product' ),
 			array( 'og:url' => $product->get_permalink() ),
 			array( 'og:description' => wc_trim_string( $description ) ),
+			array( 'product:retailer_item_id' => (string) $product->get_id() ),
 		);
 		foreach ( $this->get_site_tags() as $property => $value ) {
 			$tags[] = array( $property => $value );
@@ -181,6 +182,8 @@ class ProductOpenGraphTags {
 			$tags['product:sale_price:amount']   = $price;
 			$tags['product:sale_price:currency'] = $currency;
 			$tags['og:price:standard_amount']    = wc_format_decimal( wc_get_price_to_display( $product, array( 'price' => $product->get_regular_price() ) ), wc_get_price_decimals() );
+			// Meta uses og:price:amount as the catalog price when both price aliases are present.
+			$tags['og:price:amount'] = $tags['og:price:standard_amount'];
 			foreach ( array(
 				'start' => $product->get_date_on_sale_from(),
 				'end'   => $product->get_date_on_sale_to(),
