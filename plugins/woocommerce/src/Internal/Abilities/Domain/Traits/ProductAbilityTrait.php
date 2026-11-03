@@ -696,15 +696,15 @@ trait ProductAbilityTrait {
 	 * Refuse a status change to a published status when the current user
 	 * cannot publish products. Keeping the current status is allowed.
 	 *
-	 * @param \WC_Product $product Saved product or variation.
-	 * @param array       $input   Input that may carry a `status`.
+	 * @param \WC_Product|null $product Saved product or variation, or null for a new one.
+	 * @param array            $input   Input that may carry a `status`.
 	 * @return null|\WP_Error
 	 */
-	protected static function check_publish_permission( \WC_Product $product, array $input ) {
+	protected static function check_publish_permission( ?\WC_Product $product, array $input ) {
 		$status = isset( $input['status'] ) ? sanitize_key( (string) $input['status'] ) : '';
 		if (
 			! in_array( $status, array( ProductStatus::PUBLISH, ProductStatus::FUTURE, ProductStatus::PRIVATE ), true )
-			|| $product->get_status() === $status
+			|| ( $product && $product->get_status() === $status )
 			// phpcs:ignore WordPress.WP.Capabilities.Unknown -- WooCommerce registers the publish_products capability.
 			|| current_user_can( 'publish_products' )
 		) {
@@ -879,6 +879,10 @@ trait ProductAbilityTrait {
 				}
 				if ( ! $variation->get_status( 'edit' ) ) {
 					$variation->set_status( ProductStatus::PUBLISH );
+				}
+				$error = self::check_publish_permission( null, array( 'status' => $item['status'] ?? $variation->get_status( 'edit' ) ) );
+				if ( is_wp_error( $error ) ) {
+					return $error;
 				}
 			}
 

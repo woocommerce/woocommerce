@@ -2451,6 +2451,64 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Statuses of a new variation added through the parent.
+	 *
+	 * @return array
+	 */
+	public function new_variation_status_provider(): array {
+		return array(
+			'status omitted' => array( null ),
+			'publish'        => array( 'publish' ),
+			'private'        => array( 'private' ),
+		);
+	}
+
+	/**
+	 * @testdox Should refuse a new published variation through the parent without publish_products.
+	 * @dataProvider new_variation_status_provider
+	 *
+	 * @param string|null $status Status of the new variation, or null to omit it.
+	 */
+	public function test_new_variation_through_the_parent_requires_publish_cap( ?string $status ): void {
+		$input = $this->get_shirt_input();
+		array_pop( $input['variations'] );
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $input );
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[] = $created['product']['id'];
+
+		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$user    = get_user_by( 'id', $user_id );
+		$user->add_cap( 'edit_products' );
+		$user->add_cap( 'edit_others_products' );
+		$user->add_cap( 'edit_published_products' );
+		wp_set_current_user( $user_id );
+
+		$item = array(
+			'attributes'    => array(
+				array(
+					'name'   => 'Size',
+					'option' => 'M',
+				),
+			),
+			'regular_price' => '12.00',
+		);
+		if ( null !== $status ) {
+			$item['status'] = $status;
+		}
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'         => $created['product']['id'],
+				'variations' => array( $item ),
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_publish_forbidden', $result->get_error_code() );
+		$this->assertSame( array( $created['product']['variation_ids'][0] ), wc_get_product( $created['product']['id'] )->get_children() );
+	}
+
+	/**
 	 * @testdox Should fail a variation delete through the parent when pre_delete_post blocks it.
 	 */
 	public function test_a_blocked_variation_delete_through_the_parent_fails(): void {
