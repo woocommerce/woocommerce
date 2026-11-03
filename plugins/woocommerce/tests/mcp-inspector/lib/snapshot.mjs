@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 export const SNAPSHOT_DIR = path.join(
 	path.dirname( fileURLToPath( import.meta.url ) ),
-	'snapshots'
+	'../snapshots'
 );
 
 const UPDATE = Boolean( process.env.UPDATE_SNAPSHOTS );
