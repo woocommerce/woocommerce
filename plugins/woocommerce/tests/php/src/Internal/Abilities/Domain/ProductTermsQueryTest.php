@@ -408,14 +408,14 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 			static function () {
 				ExtensibleAbilities::register_field(
 					array(
-						'resource'     => 'product_term',
-						'namespace'    => 'test-ext',
-						'field'        => 'taxonomy',
-						'schema'       => array(
+						'resource'      => 'product_term',
+						'namespace'     => 'test-ext',
+						'field'         => 'taxonomy',
+						'output_schema' => array(
 							'type'  => 'string',
 							'title' => 'Taxonomy',
 						),
-						'get_callback' => static function ( \WP_Term $term ) {
+						'get_callback'  => static function ( \WP_Term $term ) {
 								return $term->taxonomy;
 						},
 					)
