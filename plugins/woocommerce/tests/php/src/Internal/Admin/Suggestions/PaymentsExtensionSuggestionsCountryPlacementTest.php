@@ -104,6 +104,7 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->http_responder = array( $this, 'mock_placement_http_responses' );
 
 		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $this->store_admin_id );
@@ -738,5 +739,29 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 		}
 
 		return self::$fixture;
+	}
+
+	/**
+	 * Keep placement fixtures in the no-eligible-incentive API scenario.
+	 *
+	 * @param array  $request HTTP request arguments.
+	 * @param string $url HTTP request URL.
+	 * @return array|false Fixture response, or false for another request.
+	 */
+	protected function mock_placement_http_responses( $request, $url ) {
+		if ( 'public-api.wordpress.com' !== wp_parse_url( $url, PHP_URL_HOST )
+			|| '/wpcom/v2/wcpay/incentives' !== wp_parse_url( $url, PHP_URL_PATH )
+			|| 'GET' !== ( $request['method'] ?? 'GET' ) ) {
+			return false;
+		}
+
+		return array(
+			'headers'  => array(
+				'cache-for'    => '86400',
+				'content-type' => 'application/json; charset=UTF-8',
+			),
+			'body'     => '',
+			'response' => array( 'code' => 204 ),
+		);
 	}
 }

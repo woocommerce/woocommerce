@@ -1,77 +1,38 @@
 {
 	"name": "monorepo-merge",
 	"version": "0.0.0",
+	"private": true,
 	"description": "A tool for merging repositories into the WooCommerce Monorepo.",
 	"author": "Automattic",
 	"bin": {
-		"monorepo-merge": "./bin/run"
+		"monorepo-merge": "./bin/monorepo-merge.mjs"
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce",
 	"license": "GPL-2.0-or-later",
-	"main": "dist/index.js",
 	"repository": "woocommerce/woocommerce",
-	"files": [
-		"/bin",
-		"/dist",
-		"/npm-shrinkwrap.json",
-		"/oclif.manifest.json"
-	],
 	"scripts": {
-		"build": "shx rm -rf dist && tsc --project tsconfig.json",
 		"lint": "eslint .",
-		"prepack": "pnpm build && oclif manifest",
-		"postpack": "shx rm -f oclif.manifest.json",
 		"posttest": "pnpm lint",
-		"test": "pnpm build && node --test test/merge.test.mjs"
-	},
-	"dependencies": {
-		"@inquirer/confirm": "^6.1.1",
-		"@inquirer/password": "^5.1.1",
-		"@oclif/core": "^4.13.5",
-		"@oclif/plugin-help": "^6.2.58",
-		"@oclif/plugin-plugins": "^5.4.87",
-		"@octokit/graphql": "4.8.0"
+		"test": "node --test"
 	},
 	"devDependencies": {
-		"@octokit/request-error": "^3.0.3",
-		"@types/node": "^24.1.0",
 		"@woocommerce/eslint-config": "workspace:*",
-		"@woocommerce/eslint-plugin": "workspace:*",
-		"eslint": "^10.0.0",
-		"jscodeshift": "^0.13.1",
-		"oclif": "^4.23.30",
-		"shx": "^0.3.4",
-		"ts-node": "^10.9.2",
-		"tslib": "^2.6.2",
-		"typescript": "5.7.x"
-	},
-	"oclif": {
-		"bin": "monorepo-merge",
-		"dirname": "monorepo-merge",
-		"commands": "./dist/commands",
-		"plugins": [
-			"@oclif/plugin-help",
-			"@oclif/plugin-plugins"
-		],
-		"topicSeparator": " ",
-		"topics": {
-			"merge": {
-				"description": "Merges other repositories into the monorepo."
-			},
-			"transfer-issues": {
-				"description": "Transfers issues from other repositories into the monorepo."
-			}
-		}
+		"eslint": "^10.0.0"
 	},
 	"engines": {
 		"node": "^24.15.0"
 	},
-	"types": "dist/index.d.ts",
 	"config": {
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": "src/**/*.ts"
+				"changes": [
+					"bin/**",
+					"src/**",
+					"test/**",
+					"eslint.config.mjs",
+					"package.json"
+				]
 			},
 			"tests": [
 				{
@@ -79,9 +40,9 @@
 					"command": "test",
 					"changes": [
 						"bin/**",
-						"src/**/*.ts",
-						"test/**/*.mjs",
-						"tsconfig.json"
+						"src/**",
+						"test/**",
+						"package.json"
 					],
 					"events": [
 						"pull_request",

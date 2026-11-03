@@ -203,7 +203,7 @@ class OrderController {
 	 * Rejects a location change that would change the shipping cost or tax. The request recalculates
 	 * tax but not shipping, and the total should stay what the order was priced at.
 	 *
-	 * @since 11.4.0
+	 * @since 11.3.0
 	 *
 	 * @throws RouteException When an address is not valid or its location cannot change.
 	 * @param \WC_Order  $order    Existing order.
