@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Abilities;
 
+use Automattic\WooCommerce\Internal\Utilities\StagedMethod;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -494,6 +495,24 @@ class ExtensibleAbilities {
 	}
 
 	/**
+	 * Refuse a direct call of a stage method when a class overrides its saving
+	 * method without overriding the stage method too, because staging would skip
+	 * the rules of that override. WC_Data classes use
+	 * WC_Data::refuse_unstaged_override(). Another class calls this method at the
+	 * start of its stage method, unless its saving method runs the stage method.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param object $subject      Object that gets the change.
+	 * @param string $method       Saving method, for example add_tracking_item.
+	 * @param string $stage_method Stage method, for example stage_tracking_item.
+	 * @throws \WC_Data_Exception When a class has not adopted the stage method.
+	 */
+	public static function refuse_unstaged_override( object $subject, string $method, string $stage_method ): void {
+		StagedMethod::refuse_unstaged( $subject, $method, $stage_method );
+	}
+
+	/**
 	 * Register a validator that can refuse a change to an object of a resource.
 	 *
 	 * Call it inside the `woocommerce_extensible_abilities_init` action. Validators
@@ -507,9 +526,10 @@ class ExtensibleAbilities {
 	 *
 	 * Core's product abilities and order-update-status run validators. An order
 	 * validator sees the order with its new status staged, including the paid
-	 * and completed dates that the status sets. While the feature is on,
-	 * order-update-status refuses an order class that cannot stage a status
-	 * change. See WC_Order::stage_status().
+	 * and completed dates that the status sets. A stage_*() method refuses a class
+	 * that overrides its saving method without overriding the stage method too, so
+	 * the ability refuses that class while the feature is on. See
+	 * WC_Data::refuse_unstaged_override().
 	 *
 	 * @since 11.3.0
 	 *
