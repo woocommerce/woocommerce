@@ -99,8 +99,8 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 		if ( isset( $input['slug'] ) ) {
 			$args['slug'] = wp_parse_slug_list( $input['slug'] );
 		}
-		$args['number']     = $per_page;
-		$args['offset']     = $input['offset'] ?? ( $page - 1 ) * $per_page;
+		$args['number'] = $per_page;
+		$args['offset'] = $input['offset'] ?? ( $page - 1 ) * $per_page;
 		if ( ! empty( $input['product'] ) ) {
 			$args['object_ids'] = array( $input['product'] );
 		}
