@@ -215,9 +215,9 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
-	 * Block HTTP requests from tests to external hosts. WC_External_HTTP_Guard_Listener,
-	 * registered in phpunit.xml, fails the test that sent one; tests that need the
-	 * network declare `@group external-http`.
+	 * Install the guard against HTTP requests from tests to external hosts. It blocks them
+	 * only once WC_External_HTTP_Guard_Listener, registered in phpunit.xml, arms it, and the
+	 * listener fails the test that sent one; tests that need the network declare `@group external-http`.
 	 */
 	private function register_external_http_guard() {
 		WC_External_HTTP_Guard::register();

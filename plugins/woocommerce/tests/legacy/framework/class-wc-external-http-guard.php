@@ -15,6 +15,9 @@ declare( strict_types = 1 );
  * and bound for a host other than the test site gets a WP_Error instead of reaching
  * the network, and WC_External_HTTP_Guard_Listener fails the test that sent it.
  * A test that needs the real network declares it with `@group external-http`.
+ *
+ * The guard does nothing until the listener arms it, so a project that loads this
+ * bootstrap with its own phpunit.xml, and so without the listener, is not blocked silently.
  */
 final class WC_External_HTTP_Guard {
 
@@ -29,7 +32,7 @@ final class WC_External_HTTP_Guard {
 	const ERROR_CODE = 'wc_tests_external_http_blocked';
 
 	/**
-	 * Requests blocked during the current test, as 'METHOD URL (from file:line)'.
+	 * Requests blocked since the list was last cleared, as 'METHOD URL (from file:line)'.
 	 *
 	 * @var string[]
 	 */
@@ -41,6 +44,13 @@ final class WC_External_HTTP_Guard {
 	 * @var bool
 	 */
 	private static $allow_external = false;
+
+	/**
+	 * Whether the guard blocks requests. Set by WC_External_HTTP_Guard_Listener, which reports them.
+	 *
+	 * @var bool
+	 */
+	private static $armed = false;
 
 	/**
 	 * Lowercase hosts that count as local, captured when the guard is registered.
@@ -67,17 +77,30 @@ final class WC_External_HTTP_Guard {
 	}
 
 	/**
-	 * Start a test: forget earlier requests and set whether external requests are allowed.
-	 *
-	 * @param bool $allow_external Whether the test may reach external hosts.
+	 * Start blocking requests. Called by the listener, which reports them; calling it again is harmless.
 	 */
-	public static function reset( bool $allow_external ): void {
-		self::$blocked        = array();
+	public static function arm(): void {
+		self::$armed = true;
+	}
+
+	/**
+	 * Set whether external requests are allowed until the next call.
+	 *
+	 * @param bool $allow_external Whether external hosts may be reached.
+	 */
+	public static function allow_external( bool $allow_external ): void {
 		self::$allow_external = $allow_external;
 	}
 
 	/**
-	 * Requests blocked since the last reset.
+	 * Forget the requests blocked so far.
+	 */
+	public static function clear_blocked_requests(): void {
+		self::$blocked = array();
+	}
+
+	/**
+	 * Requests blocked since the list was last cleared.
 	 *
 	 * @return string[] Each as 'METHOD URL (from file:line)', without query strings.
 	 */
@@ -86,7 +109,7 @@ final class WC_External_HTTP_Guard {
 	}
 
 	/**
-	 * Block an unanswered request to an external host.
+	 * Block an unanswered request to an external host, once the guard is armed.
 	 *
 	 * @param false|array|WP_Error $preempt A response from an earlier filter, or false.
 	 * @param array                $args    The request arguments.
@@ -94,7 +117,7 @@ final class WC_External_HTTP_Guard {
 	 * @return false|array|WP_Error The earlier answer unchanged, or an error for a blocked request.
 	 */
 	public static function filter_request( $preempt, $args, $url ) {
-		if ( false !== $preempt || self::$allow_external || ! self::is_external_url( (string) $url ) ) {
+		if ( ! self::$armed || false !== $preempt || self::$allow_external || ! self::is_external_url( (string) $url ) ) {
 			return $preempt;
 		}
 
@@ -122,18 +145,26 @@ final class WC_External_HTTP_Guard {
 	}
 
 	/**
-	 * The file and line that sent the request, skipping WordPress's HTTP and hook plumbing.
+	 * The file and line that sent the request: the first frame outside WordPress, or else
+	 * the first one outside WordPress's HTTP and hook plumbing.
 	 *
 	 * @return string A path relative to ABSPATH and a line, or 'unknown caller'.
 	 */
 	private static function caller(): string {
+		$fallback = null;
 		foreach ( debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ) as $frame ) { // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- Names the code that sent the blocked request.
 			$file = $frame['file'] ?? '';
-			if ( '' === $file || __FILE__ === $file || preg_match( '#/wp-includes/(?:class-wp-http[^/]*|http|class-wp-hook|plugin)\.php$#', $file ) ) {
+			if ( '' === $file || __FILE__ === $file ) {
 				continue;
 			}
-			return str_replace( ABSPATH, '', $file ) . ':' . ( $frame['line'] ?? 0 );
+			$location = str_replace( ABSPATH, '', $file ) . ':' . ( $frame['line'] ?? 0 );
+			if ( ! preg_match( '#/wp-(?:includes|admin)/#', $file ) ) {
+				return $location;
+			}
+			if ( null === $fallback && ! preg_match( '#/wp-includes/(?:class-wp-http[^/]*|http|class-wp-hook|plugin)\.php$#', $file ) ) {
+				$fallback = $location;
+			}
 		}
-		return 'unknown caller';
+		return $fallback ?? 'unknown caller';
 	}
 }

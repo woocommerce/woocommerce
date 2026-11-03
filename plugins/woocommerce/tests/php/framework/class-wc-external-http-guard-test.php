@@ -15,11 +15,27 @@ declare( strict_types = 1 );
 class WC_External_HTTP_Guard_Test extends WC_Unit_Test_Case {
 
 	/**
-	 * Drop requests recorded here, so the listener does not fail this test for them.
+	 * Drop requests recorded here, so the listener does not fail this test for them, and keep the guard armed for the rest of the suite.
 	 */
 	public function tearDown(): void {
-		WC_External_HTTP_Guard::reset( false );
-		parent::tearDown();
+		try {
+			WC_External_HTTP_Guard::clear_blocked_requests();
+			WC_External_HTTP_Guard::allow_external( false );
+			self::set_armed( true );
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
+	 * Set the guard's private armed flag, which only the listener sets in a real run.
+	 *
+	 * @param bool $armed Whether the guard blocks requests.
+	 */
+	private static function set_armed( bool $armed ): void {
+		$property = new ReflectionProperty( WC_External_HTTP_Guard::class, 'armed' );
+		$property->setAccessible( true );
+		$property->setValue( null, $armed );
 	}
 
 	/**
@@ -39,10 +55,11 @@ class WC_External_HTTP_Guard_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A request to an external IP address is blocked.
+	 * @testdox A request to an external IP address or a disguised external host is blocked.
 	 *
 	 * @testWith ["http://203.0.113.10/feed"]
 	 *           ["https://[2001:db8::1]/feed"]
+	 *           ["https://localhost@evil.example/feed"]
 	 *
 	 * @param string $url The request URL.
 	 */
@@ -98,10 +115,35 @@ class WC_External_HTTP_Guard_Test extends WC_Unit_Test_Case {
 	 * @testdox An external request passes through untouched while external requests are allowed.
 	 */
 	public function test_external_request_passes_through_when_allowed(): void {
-		WC_External_HTTP_Guard::reset( true );
+		WC_External_HTTP_Guard::allow_external( true );
 
 		$this->assertFalse( WC_External_HTTP_Guard::filter_request( false, array( 'method' => 'GET' ), 'https://api.example.com/feed' ), 'An allowed request should reach the network.' );
 		$this->assertSame( array(), WC_External_HTTP_Guard::get_blocked_requests(), 'An allowed request should not be recorded.' );
+	}
+
+	/**
+	 * @testdox An external request passes through untouched until the guard is armed.
+	 */
+	public function test_unarmed_guard_lets_external_request_through(): void {
+		self::set_armed( false );
+
+		$this->assertFalse( WC_External_HTTP_Guard::filter_request( false, array( 'method' => 'GET' ), 'https://api.example.com/feed' ), 'An unarmed guard should let the request reach the network.' );
+		$this->assertSame( array(), WC_External_HTTP_Guard::get_blocked_requests(), 'An unarmed guard should record nothing.' );
+	}
+
+	/**
+	 * @testdox A request sent through a WordPress admin helper names the code that called the helper.
+	 */
+	public function test_record_names_caller_outside_wordpress(): void {
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+
+		$result = download_url( 'https://api.example.com/plugin.zip' );
+
+		$this->assertWPError( $result, 'The guard should block the download.' );
+		$this->assertSame( WC_External_HTTP_Guard::ERROR_CODE, $result->get_error_code(), 'The error should name the guard.' );
+		$blocked = WC_External_HTTP_Guard::get_blocked_requests();
+		$this->assertCount( 1, $blocked, 'The blocked download should be recorded once.' );
+		$this->assertStringContainsString( 'class-wc-external-http-guard-test.php:', $blocked[0], 'The record should name this test, not the WordPress helper it called.' );
 	}
 
 	/**
