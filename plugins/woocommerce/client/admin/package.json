@@ -203,7 +203,7 @@
 		"react-refresh": "^0.14.0",
 		"readline-sync": "^1.4.10",
 		"replace": "^1.2.2",
-		"rimraf": "5.0.5",
+		"rimraf": "catalog:tooling",
 		"rtlcss": "4.3.x",
 		"sass": "^1.69.5",
 		"sass-loader": "catalog:tooling",

@@ -91,7 +91,7 @@
 		"postcss-loader": "catalog:tooling",
 		"react": "18.3.x",
 		"react-dom": "18.3.x",
-		"rimraf": "5.0.5",
+		"rimraf": "catalog:tooling",
 		"sass-loader": "catalog:tooling",
 		"ts-jest": "29.1.x",
 		"typescript": "catalog:tooling",

@@ -98,7 +98,7 @@
 		"jest-environment-jsdom": "29.5.x",
 		"postcss": "catalog:tooling",
 		"postcss-loader": "catalog:tooling",
-		"rimraf": "5.0.5",
+		"rimraf": "catalog:tooling",
 		"sass-loader": "catalog:tooling",
 		"ts-jest": "29.1.x",
 		"typescript": "catalog:tooling",

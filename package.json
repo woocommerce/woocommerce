@@ -67,7 +67,7 @@
 		"postcss-loader": "catalog:tooling",
 		"prettier": "catalog:tooling",
 		"regenerator-runtime": "^0.13.11",
-		"rimraf": "5.0.5",
+		"rimraf": "catalog:tooling",
 		"sass": "^1.69.5",
 		"sass-loader": "catalog:tooling",
 		"stylelint": "catalog:tooling",

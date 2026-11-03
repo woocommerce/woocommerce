@@ -131,6 +131,7 @@
 				"postcss",
 				"postcss-loader",
 				"prettier",
+				"rimraf",
 				"sass-loader",
 				"simple-git",
 				"typescript",
@@ -455,15 +456,6 @@
 				"**"
 			],
 			"pinVersion": "4.3.x"
-		},
-		{
-			"dependencies": [
-				"rimraf"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "5.0.5"
 		},
 		{
 			"dependencyTypes": [

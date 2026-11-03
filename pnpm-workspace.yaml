@@ -94,6 +94,7 @@ catalogs:
         postcss: ^8.5.26
         postcss-loader: 4.3.x
         prettier: npm:wp-prettier@3.9.6
+        rimraf: 5.0.5
         sass-loader: 10.5.x
         simple-git: ^4.0.2
         stylelint: ^16.9.0

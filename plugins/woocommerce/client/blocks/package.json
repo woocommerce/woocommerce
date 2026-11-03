@@ -200,7 +200,7 @@
 		"react-docgen": "5.4.3",
 		"react-dom": "18.3.x",
 		"redux": "4.2.1",
-		"rimraf": "5.0.5",
+		"rimraf": "catalog:tooling",
 		"rtlcss": "4.3.x",
 		"sass-loader": "catalog:tooling",
 		"storybook": "10.6.5",

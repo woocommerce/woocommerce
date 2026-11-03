@@ -50,7 +50,7 @@
 	"devDependencies": {
 		"@babel/core": "catalog:tooling",
 		"eslint": "catalog:tooling",
-		"rimraf": "5.0.5",
+		"rimraf": "catalog:tooling",
 		"typescript": "catalog:tooling"
 	},
 	"lint-staged": {

@@ -57,7 +57,7 @@
 		"jest-environment-jsdom": "29.5.x",
 		"react": "18.3.x",
 		"react-dom": "18.3.x",
-		"rimraf": "5.0.5",
+		"rimraf": "catalog:tooling",
 		"ts-jest": "29.1.x",
 		"typescript": "catalog:tooling"
 	},
