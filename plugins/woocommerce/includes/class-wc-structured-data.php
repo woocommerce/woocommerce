@@ -506,6 +506,17 @@ class WC_Structured_Data {
 				$markup_offer['priceCurrency'] = $currency;
 			}
 
+			if ( ( ! $product->is_type( array( ProductType::VARIABLE, ProductType::GROUPED ) ) || $selected_variation ) && $offer_source->is_on_sale() ) {
+				$date_on_sale_from = $offer_source->get_date_on_sale_from();
+				$date_on_sale_to   = $offer_source->get_date_on_sale_to();
+				if ( $date_on_sale_from ) {
+					$markup_offer['validFrom'] = wp_date( DATE_ATOM, $date_on_sale_from->getTimestamp(), wp_timezone() );
+				}
+				if ( $date_on_sale_to ) {
+					$markup_offer['validThrough'] = wp_date( DATE_ATOM, $date_on_sale_to->getTimestamp(), wp_timezone() );
+				}
+			}
+
 			$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
 		}
 
