@@ -1277,6 +1277,50 @@ class CartController {
 	}
 
 	/**
+	 * First visible variation that matches the attributes.
+	 *
+	 * @param \WC_Product $parent_product   Parent variable product.
+	 * @param array       $match_attributes Attributes keyed by attribute_*.
+	 * @return int Matching variation ID, or 0 when no visible variation matches.
+	 */
+	private function find_visible_matching_variation( $parent_product, $match_attributes ) {
+		$child_ids = $parent_product->get_children();
+
+		if ( ! empty( $child_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $child_ids );
+		}
+
+		foreach ( $child_ids as $child_id ) {
+			$variation = wc_get_product( $child_id );
+
+			if ( ! $variation instanceof \WC_Product_Variation || ! $variation->variation_is_visible() ) {
+				continue;
+			}
+
+			$matches = true;
+
+			foreach ( $variation->get_variation_attributes() as $attribute_key => $attribute_value ) {
+				// An empty stored value means this variation accepts any posted value.
+				if ( '' === $attribute_value ) {
+					continue;
+				}
+
+				if ( ! array_key_exists( $attribute_key, $match_attributes ) || $match_attributes[ $attribute_key ] !== $attribute_value ) {
+					$matches = false;
+					break;
+				}
+			}
+
+			if ( $matches ) {
+				return $variation->get_id();
+			}
+		}
+
+		return 0;
+	}
+
+	/**
 	 * If variations are set, validate and format the values ready to add to the cart.
 	 *
 	 * @throws RouteException Exception if invalid data is detected.
@@ -1319,9 +1363,7 @@ class CartController {
 				array_filter( wc_get_product_variation_attributes( $request['id'] ), 'wc_array_filter_default_attributes' ),
 				$request['variation']
 			);
-			$data_store       = \WC_Data_Store::load( 'product' );
-			// @phpstan-ignore-next-line method.notFound Called via __call() on the underlying product data store instance.
-			$matched_variation_id = $data_store->find_matching_product_variation( $parent_product, $match_attributes );
+			$matched_variation_id = $this->find_visible_matching_variation( $parent_product, $match_attributes );
 
 			if ( ! empty( $matched_variation_id ) && (int) $matched_variation_id !== (int) $request['id'] ) {
 				throw new RouteException(

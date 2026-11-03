@@ -403,19 +403,25 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 		$product->set_attributes( array( $attribute ) );
 		$product->save();
 
-		// The specific variation is first, so it takes priority over Any for its own value.
+		// Blue has no price, so the storefront hides it. Red is the visible variation that takes priority over Any.
+		$blue = new \WC_Product_Variation();
+		$blue->set_parent_id( $product->get_id() );
+		$blue->set_attributes( array( 'color' => 'Blue' ) );
+		$blue->set_menu_order( 0 );
+		$blue->save();
+
 		$red = new \WC_Product_Variation();
 		$red->set_parent_id( $product->get_id() );
 		$red->set_attributes( array( 'color' => 'Red' ) );
 		$red->set_regular_price( '5' );
-		$red->set_menu_order( 0 );
+		$red->set_menu_order( 1 );
 		$red->save();
 
 		$any = new \WC_Product_Variation();
 		$any->set_parent_id( $product->get_id() );
 		$any->set_attributes( array( 'color' => '' ) );
 		$any->set_regular_price( '10' );
-		$any->set_menu_order( 1 );
+		$any->set_menu_order( 2 );
 		$any->save();
 
 		$cart_id   = ( new CartController() )->add_to_cart(
@@ -443,7 +449,7 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 		);
 		$any_cart_item = wc()->cart->get_cart_item( $any_cart_id );
 
-		$this->assertSame( $any->get_id(), $any_cart_item['variation_id'], 'An Any variation should accept a value that no other variation defines.' );
+		$this->assertSame( $any->get_id(), $any_cart_item['variation_id'], 'An Any variation should accept a value that only an unpriced variation defines.' );
 		$this->assertSame( 'Blue', $any_cart_item['variation']['attribute_color'], 'The posted Any value should be kept.' );
 
 		$this->expectException( RouteException::class );

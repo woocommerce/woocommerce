@@ -3079,19 +3079,25 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$product->set_attributes( array( $attribute ) );
 		$product->save();
 
-		// The specific variation is first, so it takes priority over Any for its own value.
+		// Blue has no price, so the storefront hides it. Red is the visible variation that takes priority over Any.
+		$blue = new WC_Product_Variation();
+		$blue->set_parent_id( $product->get_id() );
+		$blue->set_attributes( array( 'color' => 'Blue' ) );
+		$blue->set_menu_order( 0 );
+		$blue->save();
+
 		$red = new WC_Product_Variation();
 		$red->set_parent_id( $product->get_id() );
 		$red->set_attributes( array( 'color' => 'Red' ) );
 		$red->set_regular_price( '5' );
-		$red->set_menu_order( 0 );
+		$red->set_menu_order( 1 );
 		$red->save();
 
 		$any = new WC_Product_Variation();
 		$any->set_parent_id( $product->get_id() );
 		$any->set_attributes( array( 'color' => '' ) );
 		$any->set_regular_price( '10' );
-		$any->set_menu_order( 1 );
+		$any->set_menu_order( 2 );
 		$any->save();
 
 		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $red->get_id() );
@@ -3105,7 +3111,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		$any_cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $any->get_id(), array( 'attribute_color' => 'Blue' ) );
 
-		$this->assertNotFalse( $any_cart_item_key, 'An Any variation should accept a value that no other variation defines.' );
+		$this->assertNotFalse( $any_cart_item_key, 'An Any variation should accept a value that only an unpriced variation defines.' );
 
 		$added = WC()->cart->add_to_cart( $product->get_id(), 1, $any->get_id(), array( 'attribute_color' => 'Red' ) );
 
