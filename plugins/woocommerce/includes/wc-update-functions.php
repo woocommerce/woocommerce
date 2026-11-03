@@ -4244,3 +4244,20 @@ function wc_update_1140_re_enable_autoload_options(): void {
 		)
 	);
 }
+
+/**
+ * Add the MPN lookup column and index for existing stores.
+ *
+ * @since 11.4.0
+ */
+function wc_update_1140_add_mpn_to_product_lookup_table(): void {
+	global $wpdb;
+
+	if ( ! $wpdb->get_var( "SHOW COLUMNS FROM {$wpdb->wc_product_meta_lookup} LIKE 'mpn'" ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->wc_product_meta_lookup} ADD COLUMN mpn varchar(100) NOT NULL DEFAULT '' AFTER global_unique_id" );
+	}
+
+	if ( ! $wpdb->get_var( "SHOW INDEX FROM {$wpdb->wc_product_meta_lookup} WHERE Key_name = 'mpn'" ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->wc_product_meta_lookup} ADD INDEX mpn (mpn(50))" );
+	}
+}

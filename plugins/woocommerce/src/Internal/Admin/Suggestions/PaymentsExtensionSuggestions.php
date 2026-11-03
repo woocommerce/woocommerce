@@ -1500,9 +1500,7 @@ class PaymentsExtensionSuggestions {
 		),
 		'GY' => array(
 			self::TILOPAY,
-			self::PAYPAL_FULL_STACK,
 			self::VISA,
-			self::PAYPAL_WALLET,
 		),
 		'HT' => array(
 			self::VISA => array(
@@ -2136,7 +2134,9 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
 			self::VISA,
+			self::PAYPAL_WALLET,
 		),
 		'KR' => array(
 			self::VISA => array(
@@ -2204,6 +2204,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'VN' => array(
 			self::PAYONEER => array(
@@ -2332,6 +2334,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'DJ' => array(
 			self::VISA => array(
@@ -2490,6 +2494,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
 		),
 		'MA' => array(
 			self::PAYONEER => array(
@@ -2706,7 +2712,9 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
 			self::VISA,
+			self::PAYPAL_WALLET,
 		),
 		'JO' => array(
 			self::MASTERCARD,

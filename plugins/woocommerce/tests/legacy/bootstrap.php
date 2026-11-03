@@ -92,6 +92,14 @@ class WC_Unit_Tests_Bootstrap {
 		// load the WP testing environment.
 		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
 
+		/*
+		 * WordPress 7.2's test bootstrap deletes its isolated upload directory after loading, by
+		 * which point wp_upload_dir() has memoised the path as created, so nothing recreates it.
+		 */
+		if ( version_compare( $GLOBALS['wp_version'], '7.2-alpha', '>=' ) ) {
+			wp_mkdir_p( wp_upload_dir()['path'] );
+		}
+
 		// Ensure theme install tests use direct filesystem method.
 		if ( ! defined( 'FS_METHOD' ) ) {
 			define( 'FS_METHOD', 'direct' );
@@ -357,6 +365,7 @@ class WC_Unit_Tests_Bootstrap {
 		require_once dirname( $this->tests_dir ) . '/php/helpers/MetaDataAssertionTrait.php';
 		require_once dirname( $this->tests_dir ) . '/php/helpers/CorePayPalGatewayTrait.php';
 		require_once dirname( $this->tests_dir ) . '/php/helpers/ImageAttachmentTrait.php';
+		require_once dirname( $this->tests_dir ) . '/php/helpers/InterleavedStatusOrdersTrait.php';
 	}
 
 	/**

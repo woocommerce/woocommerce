@@ -231,6 +231,29 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Existing-order validation removes an invalid coupon line that has not been saved yet.
+	 */
+	public function test_validate_existing_order_before_payment_removes_unsaved_invalid_coupon() {
+		$coupon = CouponHelper::create_coupon( 'unsaved-exhausted', 'publish', array( 'usage_limit' => 1 ) );
+		$coupon->increase_usage_count();
+
+		$order = WC_Helper_Order::create_order();
+		$item  = new \WC_Order_Item_Coupon();
+		$item->set_code( $coupon->get_code() );
+		$order->add_item( $item );
+
+		try {
+			$this->sut->validate_existing_order_before_payment( $order );
+			$this->fail( 'Expected a RouteException for the exhausted coupon.' );
+		} catch ( RouteException $e ) {
+			$this->assertEquals( 409, $e->getCode() );
+		}
+
+		$this->assertEmpty( $order->get_coupon_codes(), 'The coupon line should be removed from the order.' );
+		$this->assertEmpty( wc_get_order( $order->get_id() )->get_coupon_codes(), 'The coupon line should not be saved.' );
+	}
+
+	/**
 	 * test_validate_order_before_payment_invalid_email.
 	 */
 	public function test_validate_order_before_payment_invalid_email() {

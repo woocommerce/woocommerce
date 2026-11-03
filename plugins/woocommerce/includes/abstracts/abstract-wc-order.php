@@ -38,6 +38,20 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	use CogsAwareTrait;
 
 	/**
+	 * Clone mode. A clone of an order keeps the meta IDs, so a cached copy does not insert its meta again.
+	 *
+	 * @var string
+	 */
+	protected $clone_mode = self::CLONE_MODE_CACHE;
+
+	/**
+	 * The exception that stopped the last save(), or null when the last save() wrote the order.
+	 *
+	 * @var Exception|null
+	 */
+	private $last_save_error = null;
+
+	/**
 	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
 	 *
 	 * Notes: cart_tax = cart_tax is the new name for the legacy 'order_tax'
@@ -210,15 +224,30 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * This method overwrites the base class's clone method to make it a no-op. In base class WC_Data, we are unsetting the meta_id to clone.
-	 * It seems like this was done to avoid conflicting the metadata when duplicating products. However, doing that does not seems necessary for orders.
-	 * In-fact, when we do that for orders, we lose the capability to clone orders with custom meta data by caching plugins. This is because, when we clone an order object for caching, it will clone the metadata without the ID. Unfortunately, when this cached object with nulled meta ID is retrieved, WC_Data will consider it as a new meta and will insert it as a new meta-data causing duplicates.
+	 * Clone the order.
 	 *
-	 * Eventually, we should move away from overwriting the __clone method in base class itself, since it's easily possible to still duplicate the product without having to hook into the __clone method.
+	 * Orders use cache mode. A cached copy keeps its meta IDs, so it does not insert its meta again on save.
+	 * Each copy gets its own meta, item, and date objects, so a change to one copy does not reach the others.
+	 *
+	 * Eventually, Core should stop unsetting meta IDs in WC_Data::__clone() for every subclass, and make
+	 * duplication an explicit operation. Duplicating an object does not need to hook into __clone().
 	 *
 	 * @since 7.6.0
 	 */
-	public function __clone() {}
+	public function __clone() {
+		parent::__clone();
+		foreach ( $this->items as $group => $items ) {
+			foreach ( $items as $key => $item ) {
+				$mode = $item->get_clone_mode();
+				$item->set_clone_mode( self::CLONE_MODE_CACHE );
+				$copy = clone $item;
+				$item->set_clone_mode( $mode );
+				$copy->set_order( $this );
+				$copy->set_clone_mode( $mode );
+				$this->items[ $group ][ $key ] = $copy;
+			}
+		}
+	}
 
 	/**
 	 * Get internal type.
@@ -277,6 +306,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return $this->get_id();
 		}
 
+		$this->last_save_error = null;
+
 		try {
 			/**
 			 * Trigger action before saving to the DB. Allows you to adjust object props before save.
@@ -303,7 +334,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
 
 		} catch ( Exception $e ) {
-			$message_id = $this->get_id() ? $this->get_id() : __( '(no ID)', 'woocommerce' );
+			$this->last_save_error = $e;
+			$message_id            = $this->get_id() ? $this->get_id() : __( '(no ID)', 'woocommerce' );
 			$this->handle_exception(
 				$e,
 				wp_kses_post(
@@ -317,6 +349,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		return $this->get_id();
+	}
+
+	/**
+	 * Get the exception that stopped the last save(). save() logs that exception and does not throw it.
+	 *
+	 * @internal
+	 * @since 11.4.0
+	 * @return Exception|null The exception, or null when the last save() wrote the order.
+	 */
+	public function get_last_save_error(): ?Exception {
+		return $this->last_save_error;
 	}
 
 	/**
@@ -1141,8 +1184,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( null !== $type && ! is_string( $type ) ) {
 			wc_doing_it_wrong(
 				__METHOD__,
-				/* translators: %s: PHP type that was passed instead of a string. */
-				sprintf( esc_html__( 'remove_order_items() expects a string item type or null; received %s.', 'woocommerce' ), esc_html( gettype( $type ) ) ),
+				sprintf( esc_html( 'remove_order_items() expects a string item type or null; received %s.' ), esc_html( gettype( $type ) ) ),
 				'11.0.0'
 			);
 			return;
@@ -1430,8 +1472,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Get an order item object, based on its type.
 	 *
 	 * @since  3.0.0
-	 * @param  int  $item_id ID of item to get.
-	 * @param  bool $load_from_db Prior to 3.2 this item was loaded direct from WC_Order_Factory, not this object. This param is here for backwards compatibility with that. If false, uses the local items variable instead.
+	 * @param  int|string $item_id ID of item to get, or the temporary key of an unsaved item when $load_from_db is false.
+	 * @param  bool       $load_from_db Prior to 3.2 this item was loaded direct from WC_Order_Factory, not this object. This param is here for backwards compatibility with that. If false, uses the local items variable instead.
 	 * @return WC_Order_Item|false
 	 */
 	public function get_item( $item_id, $load_from_db = true ) {
@@ -1483,9 +1525,25 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Get the key an item is stored under in this order's items list.
+	 *
+	 * Unsaved items are stored under a temporary key such as 'new:fee_lines0' rather than their ID.
+	 * Falls back to the item ID when the item isn't in the list, e.g. a filtered copy of a saved item.
+	 *
+	 * @param WC_Order_Item $item Order item.
+	 * @return int|string
+	 */
+	private function get_stored_item_key( $item ) {
+		$items_key = $this->get_items_key( $item );
+		$item_key  = $items_key && isset( $this->items[ $items_key ] ) ? array_search( $item, $this->items[ $items_key ], true ) : false;
+
+		return false === $item_key ? $item->get_id() : $item_key;
+	}
+
+	/**
 	 * Remove item from the order.
 	 *
-	 * @param int $item_id Item ID to delete.
+	 * @param int|string $item_id Item ID, or the temporary key of an unsaved item, to delete.
 	 * @return false|void
 	 */
 	public function remove_item( $item_id ) {
@@ -1496,9 +1554,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return false;
 		}
 
+		if ( ( $this->items[ $items_key ][ $item_id ] ?? null ) !== $item ) {
+			$item_id = $this->get_stored_item_key( $item );
+		}
+
 		// Unset and remove later.
 		$this->items_to_delete[] = $item;
-		unset( $this->items[ $items_key ][ $item->get_id() ] );
+		unset( $this->items[ $items_key ][ $item_id ] );
 	}
 
 	/**
@@ -1762,6 +1824,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
 		if ( $order_data_store->has_callable( 'get_recorded_coupon_usage_counts' ) && $order_data_store->get_recorded_coupon_usage_counts( $this ) ) {
 			$coupon->increase_usage_count( $used_by );
+			if ( $coupon->get_id() ) {
+				$this->save_coupon_usage_identities( array( $coupon->get_id() => $used_by ) + $this->get_coupon_usage_identities() );
+			}
 		}
 
 		wc_update_coupon_usage_counts( $this->get_id() );
@@ -1903,15 +1968,19 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		// Remove the coupon line.
-		foreach ( $coupons as $item_id => $coupon ) {
+		foreach ( $coupons as $coupon ) {
 			if ( wc_is_same_coupon( $coupon->get_code(), $code ) ) {
-				$this->remove_item( $item_id );
+				$this->remove_item( $this->get_stored_item_key( $coupon ) );
 				$coupon_object = new WC_Coupon( $code );
 
 				if ( $has_recorded ) {
 					// Mirror the stored flag into this instance so clearing it below is tracked as a change and saved.
 					$this->set_recorded_coupon_usage_counts( true );
-					$coupon_object->decrease_usage_count( $used_by );
+
+					$identities = $this->get_coupon_usage_identities();
+					$coupon_object->decrease_usage_count( $identities[ $coupon_object->get_id() ] ?? $used_by );
+					unset( $identities[ $coupon_object->get_id() ] );
+					$this->save_coupon_usage_identities( $identities );
 
 					$remaining_codes = array_filter( $this->get_coupon_codes(), fn( $remaining_code ) => ! StringUtil::is_null_or_whitespace( $remaining_code ) );
 					if ( ! $remaining_codes ) {
@@ -1936,6 +2005,41 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get the identity each coupon was counted under, keyed by coupon ID.
+	 *
+	 * Reads and writes go through a fresh order instance, like wc_update_coupon_usage_counts(), so this
+	 * instance never holds a stale copy of the key.
+	 *
+	 * @return array
+	 */
+	private function get_coupon_usage_identities() {
+		$order      = wc_get_order( $this->get_id() );
+		$identities = $order ? $order->get_meta( '_coupon_usage_identities' ) : array();
+
+		return is_array( $identities ) ? $identities : array();
+	}
+
+	/**
+	 * Store the identity each coupon was counted under, or clear it when there are none.
+	 *
+	 * @param array $identities Identities keyed by coupon ID.
+	 * @return void
+	 */
+	private function save_coupon_usage_identities( array $identities ) {
+		$order = wc_get_order( $this->get_id() );
+		if ( ! $order ) {
+			return;
+		}
+
+		if ( $identities ) {
+			$order->update_meta_data( '_coupon_usage_identities', $identities );
+		} else {
+			$order->delete_meta_data( '_coupon_usage_identities' );
+		}
+		$order->save_meta_data();
 	}
 
 	/**
@@ -2484,7 +2588,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax_rate_id = $tax->get_rate_id();
 			// Remove taxes which no longer exist for cart/shipping.
 			if ( ( ! array_key_exists( $tax_rate_id, $cart_taxes ) && ! array_key_exists( $tax_rate_id, $shipping_taxes ) ) || in_array( $tax_rate_id, $saved_rate_ids, true ) ) {
-				$this->remove_item( $tax->get_id() );
+				$this->remove_item( $this->get_stored_item_key( $tax ) );
 				continue;
 			}
 
