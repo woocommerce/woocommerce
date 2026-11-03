@@ -10,6 +10,7 @@
  * @since    3.0.0
  */
 
+use Automattic\WooCommerce\Internal\RestApi\OrderLineItemValidator;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
@@ -630,29 +631,13 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			$product_id = (int) $posted['product_id'];
 		} elseif ( ! empty( $posted['variation_id'] ) ) {
 			$product_id = (int) $posted['variation_id'];
-		} elseif ( 'update' === $action || $this->is_custom_line_item( $posted ) ) {
+		} elseif ( 'update' === $action || OrderLineItemValidator::is_custom_line_item( $posted ) ) {
 			$product_id = 0;
 		} else {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- REST API JSON response, not HTML.
 			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required. For a custom item, send a name and total instead.', 'woocommerce' ), 400 );
 		}
 		return $product_id;
-	}
-
-	/**
-	 * Checks whether a line item is a custom item: one with no product, but a name and a total.
-	 *
-	 * @since 11.4.0
-	 *
-	 * @param array $posted Line item data.
-	 * @return bool
-	 */
-	protected function is_custom_line_item( $posted ) {
-		$has_product_reference = ! empty( $posted['product_id'] ) || ! empty( $posted['variation_id'] ) || ! empty( $posted['sku'] );
-		$has_name              = isset( $posted['name'] ) && is_string( $posted['name'] ) && '' !== trim( $posted['name'] );
-		$has_total             = isset( $posted['total'] ) && is_numeric( wc_format_decimal( $posted['total'] ) );
-
-		return ! $has_product_reference && $has_name && $has_total;
 	}
 
 	/**
@@ -671,7 +656,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		}
 
 		foreach ( $line_items as $posted ) {
-			if ( ! is_array( $posted ) || ! empty( $posted['id'] ) || $this->item_is_null( $posted ) || ( isset( $posted['quantity'] ) && 0 === $posted['quantity'] ) || $this->is_custom_line_item( $posted ) ) {
+			if ( ! is_array( $posted ) || ! empty( $posted['id'] ) || $this->item_is_null( $posted ) || ( isset( $posted['quantity'] ) && 0 === $posted['quantity'] ) || OrderLineItemValidator::is_custom_line_item( $posted ) ) {
 				continue;
 			}
 
@@ -739,7 +724,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			&& 0 === (int) $posted['variation_id'];
 
 		// New items must resolve unless they are custom items. Existing items need not, so orders whose products were deleted later stay editable.
-		if ( 'create' === $action && ( ! $product || ! $product->exists() ) && ! $this->is_custom_line_item( $posted ) ) {
+		if ( 'create' === $action && ( ! $product || ! $product->exists() ) && ! OrderLineItemValidator::is_custom_line_item( $posted ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- REST API JSON response, not HTML.
 			throw new WC_REST_Exception( 'woocommerce_rest_invalid_product_id', __( 'Invalid product ID.', 'woocommerce' ), 400 );
 		}
