@@ -101,6 +101,10 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 		}
 		$args['number'] = $per_page;
 		$args['offset'] = $input['offset'] ?? ( $page - 1 ) * $per_page;
+		if ( isset( $args['search'] ) && is_string( $args['search'] ) ) {
+			// Term names are stored with &, < and > encoded, so the search has to match that.
+			$args['search'] = _wp_specialchars( $args['search'] );
+		}
 		if ( ! empty( $input['product'] ) ) {
 			$args['object_ids'] = array( $input['product'] );
 		}
@@ -152,7 +156,7 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 	private static function format_term( \WP_Term $term ) {
 		$output = array(
 			'id'          => $term->term_id,
-			'name'        => $term->name,
+			'name'        => html_entity_decode( $term->name, ENT_QUOTES | ENT_HTML5 ),
 			'slug'        => $term->slug,
 			'description' => $term->description,
 			'count'       => $term->count,
@@ -169,7 +173,7 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 				$output['image'] = array(
 					'id'   => $image->ID,
 					'src'  => $image_url,
-					'name' => get_the_title( $image ),
+					'name' => $image->post_title,
 					'alt'  => get_post_meta( $image->ID, '_wp_attachment_image_alt', true ),
 				);
 				foreach ( array(
