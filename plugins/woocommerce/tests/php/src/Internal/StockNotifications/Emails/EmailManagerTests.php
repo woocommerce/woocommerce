@@ -150,6 +150,100 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should send the Core email when the pre-send filter returns null, and otherwise report what the filter decided.
+	 *
+	 * @dataProvider pre_send_filter_provider
+	 *
+	 * @param mixed $handled        What the `woocommerce_customer_stock_notification_pre_send` filter returns.
+	 * @param bool  $wp_mail_result What `wp_mail()` reports back when Core sends.
+	 * @param bool  $expected       The expected return value of deliver_stock_notification.
+	 */
+	public function test_deliver_stock_notification_honours_pre_send_filter( $handled, bool $wp_mail_result, bool $expected ): void {
+		$this->wp_mail_result = $wp_mail_result;
+		$notification         = $this->build_notification();
+		$received             = array();
+		add_filter(
+			'woocommerce_customer_stock_notification_pre_send',
+			function ( $pre, $filtered_notification, $product ) use ( $handled, &$received ) {
+				$received = array( $pre, $filtered_notification->get_id(), $product->get_id() );
+				return $handled;
+			},
+			10,
+			3
+		);
+
+		$this->assertSame( $expected, $this->sut->deliver_stock_notification( $notification ) );
+		$this->assertSame( array( null, $notification->get_id(), $notification->get_product_id() ), $received );
+		$this->assertSame( null === $handled, isset( $this->sent_to[ $notification->get_user_email() ] ), 'The Core email should only go out when the filter returns null.' );
+	}
+
+	/**
+	 * Data provider for test_deliver_stock_notification_honours_pre_send_filter.
+	 *
+	 * @return array[]
+	 */
+	public function pre_send_filter_provider(): array {
+		return array(
+			'null: Core sends'          => array( null, true, true ),
+			'null: Core email not sent' => array( null, false, false ),
+			'true: handled'             => array( true, true, true ),
+			'false: failed'             => array( false, true, false ),
+			'WP_Error: failed'          => array( new \WP_Error( 'delivery_failed', 'Provider unreachable.' ), true, false ),
+			'string: failed'            => array( 'sent', true, false ),
+		);
+	}
+
+	/**
+	 * @testdox Should log a warning naming the notification whenever the pre-send filter does not report success.
+	 *
+	 * @dataProvider pre_send_filter_failure_provider
+	 *
+	 * @param mixed  $handled  What the `woocommerce_customer_stock_notification_pre_send` filter returns.
+	 * @param string $expected Text the logged warning must contain.
+	 */
+	public function test_deliver_stock_notification_logs_a_warning_when_the_pre_send_filter_fails( $handled, string $expected ): void {
+		$notification = $this->build_notification();
+
+		$logger = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		$logger->expects( $this->once() )
+			->method( 'warning' )
+			->with(
+				$this->logicalAnd( $this->stringContains( (string) $notification->get_id() ), $this->stringContains( $expected ) ),
+				$this->callback( fn( $context ) => 'wc-customer-stock-notifications' === $context['source'] && $notification->get_id() === $context['notification_id'] )
+			);
+		$use_logger = function () use ( $logger ) {
+			return $logger;
+		};
+		add_filter( 'woocommerce_logging_class', $use_logger );
+		$take_over = function () use ( $handled ) {
+			return $handled;
+		};
+		add_filter( 'woocommerce_customer_stock_notification_pre_send', $take_over );
+
+		$result = $this->sut->deliver_stock_notification( $notification );
+
+		remove_filter( 'woocommerce_customer_stock_notification_pre_send', $take_over );
+		remove_filter( 'woocommerce_logging_class', $use_logger );
+
+		$this->assertFalse( $result );
+		$this->assertEmpty( $this->sent_to );
+	}
+
+	/**
+	 * Data provider for test_deliver_stock_notification_logs_a_warning_when_the_pre_send_filter_fails.
+	 *
+	 * @return array[]
+	 */
+	public function pre_send_filter_failure_provider(): array {
+		return array(
+			'false'    => array( false, 'returned false' ),
+			'WP_Error' => array( new \WP_Error( 'delivery_failed', 'Provider unreachable.' ), 'Provider unreachable.' ),
+			'string'   => array( 'sent', 'returned string' ),
+			'integer'  => array( 1, 'returned integer' ),
+		);
+	}
+
+	/**
 	 * @testdox Should log a warning instead of failing silently when the email class is missing from the mailer.
 	 */
 	public function test_send_verify_email_logs_a_warning_when_the_email_is_not_registered() {
@@ -207,6 +301,29 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 		$this->assertSame( $notification->get_user_email(), $verified->get_recipient() );
 		// Behavior assertion: the trigger path actually dispatched mail to the expected recipient.
 		$this->assertArrayHasKey( $notification->get_user_email(), $this->sent_to );
+	}
+
+	/**
+	 * @testdox Should not save the notification while sending the stock email, leaving the unsubscribe key to the caller's save.
+	 */
+	public function test_send_stock_notification_email_leaves_saving_the_unsubscribe_key_to_the_caller() {
+		$notification = $this->build_notification();
+		$updates      = 0;
+		$count        = function () use ( &$updates ) {
+			++$updates;
+		};
+		add_action( 'woocommerce_update_stock_notification', $count );
+
+		$this->sut->send_stock_notification_email( $notification );
+
+		remove_action( 'woocommerce_update_stock_notification', $count );
+		$this->assertSame( 0, $updates );
+		$this->assertCount( 1, $this->sent_messages );
+		$this->assertSame( 1, preg_match( '/email_link_action_key=([A-Za-z0-9]+)/', $this->sent_messages[0], $matches ) );
+
+		$notification->save();
+		$notification = new Notification( $notification->get_id() );
+		$this->assertTrue( $notification->check_unsubscribe_key( $matches[1] ) );
 	}
 
 	/**

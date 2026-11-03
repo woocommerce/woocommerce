@@ -647,6 +647,37 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Grouped product offer ignores child sale prices whose sale has not started.
+	 */
+	public function test_grouped_product_offer_ignores_scheduled_child_sale_price(): void {
+		$product   = WC_Helper_Product::create_grouped_product();
+		$children  = $product->get_children();
+		$active    = wc_get_product( $children[0] );
+		$scheduled = wc_get_product( $children[1] );
+		$active->set_props(
+			array(
+				'regular_price' => '100',
+				'sale_price'    => '70',
+			)
+		);
+		$active->save();
+		$scheduled->set_props(
+			array(
+				'regular_price'     => '100',
+				'sale_price'        => '63.45',
+				'date_on_sale_from' => strtotime( '+1 year' ),
+			)
+		);
+		$scheduled->save();
+
+		$this->structured_data->generate_product_data( wc_get_product( $product->get_id() ) );
+
+		$prices = wp_list_pluck( $this->structured_data->get_data()[0]['offers'][0]['priceSpecification'], 'price' );
+		$this->assertContains( '70.00', $prices );
+		$this->assertNotContains( '63.45', $prices, 'A child sale that has not started must not be advertised.' );
+	}
+
+	/**
 	 * @testdox valueAddedTaxIncluded is present in product structured data when taxes are enabled.
 	 *
 	 * @return void
