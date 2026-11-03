@@ -946,6 +946,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		MetaDataUtil::update( $posted['meta_data'] ?? null, $item );
 	}
 
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- This method also throws WC_REST_Exception indirectly through get_product_id().
 	/**
 	 * Create or update a line item.
 	 *
@@ -978,10 +979,10 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			&& array_key_exists( 'variation_id', $posted )
 			&& 0 === (int) $posted['variation_id'];
 
-		// New items must resolve unless they are custom items. Existing items need not, so orders whose products were deleted later stay editable.
-		if ( 'create' === $action && ( ! $product || ! $product->exists() ) && ! $this->is_custom_line_item( $posted ) ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- REST API JSON response, not HTML.
-			throw new WC_REST_Exception( 'woocommerce_rest_invalid_product_id', __( 'Invalid product ID.', 'woocommerce' ), 400 );
+		// Only new items are checked, so orders whose products were deleted later stay editable.
+		// prepare_object_for_database() already checks them up front, but subclasses that skip it, like Subscriptions, rely on this check.
+		if ( 'create' === $action ) {
+			$this->check_line_item_product( $posted, $product );
 		}
 
 		if ( $clear_variation_id && $product instanceof WC_Product_Variation ) {
@@ -1042,6 +1043,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 		return $item;
 	}
+
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
 	 * Create or update an order shipping method.

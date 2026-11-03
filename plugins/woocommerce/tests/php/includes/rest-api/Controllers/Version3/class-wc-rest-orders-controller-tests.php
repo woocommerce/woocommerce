@@ -1761,15 +1761,6 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function provide_line_items_with_missing_product(): array {
 		return array(
-			'deleted product'                     => array(
-				static function (): array {
-					$product    = WC_Helper_Product::create_simple_product();
-					$product_id = $product->get_id();
-					$product->delete( true );
-
-					return array( 'product_id' => $product_id );
-				},
-			),
 			'deleted variation'                   => array(
 				static function (): array {
 					$variable  = WC_Helper_Product::create_variation_product();

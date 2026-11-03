@@ -62,15 +62,28 @@ trait OrderLineItemValidationTrait {
 				continue;
 			}
 
-			if ( $this->is_custom_line_item( $posted ) ) {
-				continue;
-			}
-
-			$product = wc_get_product( $this->get_product_id( $posted ) );
-			if ( ! $product || ! $product->exists() ) {
-				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- REST API JSON response, not HTML.
-				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_product_id', __( 'Invalid product ID.', 'woocommerce' ), 400 );
-			}
+			$this->check_line_item_product( $posted, wc_get_product( $this->get_product_id( $posted ) ) );
 		}
+	}
+
+	/**
+	 * Checks that a new line item points to an existing product, unless it's a custom item.
+	 *
+	 * @param array                  $line_item Line item data from the request.
+	 * @param \WC_Product|false|null $product   The product the line item resolves to.
+	 * @return void
+	 * @throws \WC_REST_Exception When the product doesn't exist.
+	 */
+	private function check_line_item_product( $line_item, $product ): void {
+		if ( $this->is_custom_line_item( $line_item ) ) {
+			return;
+		}
+
+		if ( $product && $product->exists() ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- REST API JSON response, not HTML.
+		throw new \WC_REST_Exception( 'woocommerce_rest_invalid_product_id', __( 'Invalid product ID.', 'woocommerce' ), 400 );
 	}
 }
