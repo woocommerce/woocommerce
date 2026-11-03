@@ -133,6 +133,15 @@ class Separator_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * A style is picked by its whole class name, not a class that starts with it.
+	 */
+	public function testItIgnoresClassesThatOnlyStartWithStyleName(): void {
+		$rendered = $this->render( array( 'className' => 'is-style-wide-dashed' ) );
+
+		$this->assertStringContainsString( 'width="100"', $rendered );
+	}
+
+	/**
 	 * The dots style renders three centered dots in the picked color, without a line.
 	 */
 	public function testItRendersDotsStyle(): void {

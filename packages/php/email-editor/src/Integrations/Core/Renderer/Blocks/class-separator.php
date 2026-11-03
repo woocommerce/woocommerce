@@ -28,10 +28,10 @@ class Separator extends Abstract_Block_Renderer {
 	 */
 	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		$attributes = $parsed_block['attrs'] ?? array();
-		$class_name = $attributes['className'] ?? '';
+		$classes    = explode( ' ', (string) ( $attributes['className'] ?? '' ) );
 		$color      = $this->get_color( $attributes, $parsed_block['email_attrs'] ?? array(), $rendering_context );
 
-		if ( false !== strpos( $class_name, 'is-style-dots' ) ) {
+		if ( in_array( 'is-style-dots', $classes, true ) ) {
 			// Match the editor: dots are 1.5× the inherited text size, spaced 2em apart.
 			$theme_styles = $rendering_context->get_theme_styles();
 			$font_size    = (string) ( $parsed_block['email_attrs']['font-size'] ?? $theme_styles['typography']['fontSize'] ?? '16px' );
@@ -51,7 +51,7 @@ class Separator extends Abstract_Block_Renderer {
 			);
 		}
 
-		$is_wide = false !== strpos( $class_name, 'is-style-wide' );
+		$is_wide = in_array( 'is-style-wide', $classes, true );
 		return Table_Wrapper_Helper::render_table_wrapper(
 			'&nbsp;',
 			array(
