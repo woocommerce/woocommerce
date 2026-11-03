@@ -2136,11 +2136,17 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should return fractional order quantities when the store supports them.
+	 * @testWith [false]
+	 *           [true]
+	 * @param bool $preserve_type Whether the stock filter preserves the input type.
 	 */
-	public function test_order_output_allows_fractional_quantities(): void {
+	public function test_order_output_allows_fractional_quantities( bool $preserve_type ): void {
+		$filter = static function ( $amount ) use ( $preserve_type ) {
+			return $preserve_type ? $amount : (float) $amount;
+		};
 		$this->unregister_domain_abilities();
 		remove_filter( 'woocommerce_stock_amount', 'intval' );
-		add_filter( 'woocommerce_stock_amount', array( $this, 'preserve_fractional_stock_amount' ) );
+		add_filter( 'woocommerce_stock_amount', $filter );
 
 		try {
 			$this->register_domain_abilities();
@@ -2160,7 +2166,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$this->assertNotWPError( $result );
 			$this->assertSame( 1.5, $result['orders'][0]['line_items'][0]['quantity'] );
 		} finally {
-			remove_filter( 'woocommerce_stock_amount', array( $this, 'preserve_fractional_stock_amount' ) );
+			remove_filter( 'woocommerce_stock_amount', $filter );
 			add_filter( 'woocommerce_stock_amount', 'intval' );
 		}
 	}
