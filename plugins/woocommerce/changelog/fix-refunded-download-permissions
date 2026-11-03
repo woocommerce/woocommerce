@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Don't grant downloads for order lines that were refunded before the order was completed.

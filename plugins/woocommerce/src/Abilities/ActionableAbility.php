@@ -12,8 +12,8 @@ defined( 'ABSPATH' ) || exit;
 /**
  * An ability that changes one object and saves it one time. Register it with
  * a subclass as the `ability_class`. The execute callback loads the object,
- * checks the `extensions` input against the field schemas, changes the object
- * in memory, writes the fields with their `update_callback`, runs the validators
+ * checks the `extensions` input against the field input schemas, changes the object
+ * in memory, writes the fields with their `set_callback`, runs the validators
  * that ExtensibleAbilities::register_validator() adds, and then saves it. A
  * rejection from any step saves nothing.
  *
@@ -161,12 +161,12 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
-	 * Check `extensions.<namespace>.<field>` input values against the schema of
-	 * each field, and cast them. No callback runs here. A null value is kept as
-	 * is, to delete the value.
+	 * Check `extensions.<namespace>.<field>` input values against the input
+	 * schema of each field, and cast them. No callback runs here. A null value
+	 * passes only where the input schema declares null.
 	 *
 	 * @param array<string, mixed> $values Values keyed by namespace, then field.
-	 * @return array|\WP_Error A list of update_callback and value pairs, or a WP_Error when a value is rejected.
+	 * @return array|\WP_Error A list of field arguments and value pairs, or a WP_Error when a value is rejected.
 	 */
 	private function prepare_fields( array $values ) {
 		$registered = ExtensibleAbilities::get_fields( $this->get_resource() );
@@ -174,7 +174,7 @@ abstract class ActionableAbility extends \WP_Ability {
 		foreach ( $values as $namespace => $fields ) {
 			foreach ( (array) $fields as $field => $value ) {
 				$args = $registered[ $namespace ][ $field ] ?? array();
-				if ( ! isset( $args['update_callback'] ) ) {
+				if ( ! isset( $args['set_callback'] ) ) {
 					return new \WP_Error(
 						'woocommerce_ability_field_not_writable',
 						/* translators: 1: Extension namespace. 2: Field name. */
@@ -182,35 +182,47 @@ abstract class ActionableAbility extends \WP_Ability {
 						array( 'status' => 400 )
 					);
 				}
-				if ( null !== $value ) {
-					$param = 'extensions.' . $namespace . '.' . $field;
-					$valid = rest_validate_value_from_schema( $value, $args['schema'], $param );
-					if ( is_wp_error( $valid ) ) {
-						return self::with_data( $valid, array( 'field' => $param ) );
-					}
-					$value = rest_sanitize_value_from_schema( $value, $args['schema'], $param );
-					if ( is_wp_error( $value ) ) {
-						return self::with_data( $value, array( 'field' => $param ) );
-					}
+				$param = 'extensions.' . $namespace . '.' . $field;
+				$valid = rest_validate_value_from_schema( $value, $args['input_schema'], $param );
+				if ( is_wp_error( $valid ) ) {
+					return self::with_data( $valid, array( 'field' => $param ) );
 				}
-				$updates[ 'extensions.' . $namespace . '.' . $field ] = array( $args['update_callback'], $value );
+				$value = rest_sanitize_value_from_schema( $value, $args['input_schema'], $param );
+				if ( is_wp_error( $value ) ) {
+					return self::with_data( $value, array( 'field' => $param ) );
+				}
+				$updates[ $param ] = array( $args, $value );
 			}
 		}
 		return $updates;
 	}
 
 	/**
-	 * Write the checked values to the object in memory with the update_callback
+	 * Write the checked values to the object in memory with the set_callback
 	 * of each field, also after one rejects its value. Each rejection goes into
 	 * the given errors, as add_refusal() describes.
 	 *
 	 * @param \WC_Data  $subject Object to change.
-	 * @param array     $updates Pairs of update_callback and value from prepare_fields().
-	 * @param \WP_Error $refused Collects the refusals.
+	 * @param array     $updates Pairs of field arguments and value from prepare_fields().
+	 * @param \WP_Error $refused Collects the refusals, including a field that does not apply to the object.
 	 */
 	private function apply_fields( $subject, array $updates, \WP_Error $refused ): void {
-		foreach ( $updates as $param => list( $callback, $value ) ) {
-			$rejected = self::run_callback( $callback, array( $subject, $value ), array( 'field' => $param ) );
+		foreach ( $updates as $param => list( $args, $value ) ) {
+			if ( ! ExtensibleAbilities::field_applies_to( $args, $subject ) ) {
+				$rejected = new \WP_Error(
+					'woocommerce_ability_field_object_type',
+					sprintf(
+						/* translators: 1: extension field, 2: object type, 3: comma-separated list of object types. */
+						__( 'The %1$s field does not apply to the %2$s type. It applies to %3$s.', 'woocommerce' ),
+						$param,
+						ExtensibleAbilities::get_object_type( $subject ),
+						implode( ', ', $args['object_types'] )
+					),
+					array( 'status' => 400 )
+				);
+			} else {
+				$rejected = self::run_callback( $args['set_callback'], array( $subject, $value ), array( 'field' => $param ) );
+			}
 			if ( null !== $rejected ) {
 				self::add_refusal( $rejected, explode( '.', $param )[1], $refused );
 			}
@@ -264,7 +276,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * logged and becomes a 500 with a fixed message, so its text never reaches
 	 * the client.
 	 *
-	 * @param callable             $callback Field update_callback or validator.
+	 * @param callable             $callback Field set_callback or validator.
 	 * @param array                $args     Callback arguments.
 	 * @param array<string, mixed> $data     Data that names the field or the namespace.
 	 * @return \WP_Error|null
@@ -290,8 +302,9 @@ abstract class ActionableAbility extends \WP_Ability {
 
 	/**
 	 * Add the `extensions` property one time, at the top level of the input
-	 * schema. It lists the fields that have an update_callback, and allows null
-	 * for each one. Each `oneOf`, `anyOf` and `allOf` branch only accepts the
+	 * schema. It lists the fields that have a set_callback, each with its input
+	 * schema as declared, and says which object types a field with `object_types`
+	 * applies to. Each `oneOf`, `anyOf` and `allOf` branch only accepts the
 	 * key, so a branch with `additionalProperties` set to false does not reject
 	 * it, and the schema does not grow with the number of branches.
 	 *
@@ -301,14 +314,14 @@ abstract class ActionableAbility extends \WP_Ability {
 	private function add_extensions_input_schema( array $schema ): array {
 		$extensions = array(
 			'type'                 => 'object',
-			'description'          => __( 'Values to write to the fields that extensions add, keyed by extension namespace, then field. A null value deletes the value.', 'woocommerce' ),
+			'description'          => __( 'Values to write to the fields that extensions add, keyed by extension namespace, then field.', 'woocommerce' ),
 			'additionalProperties' => false,
 		);
 		foreach ( ExtensibleAbilities::get_fields( $this->get_resource() ) as $namespace => $fields ) {
 			$writable = array_filter(
 				$fields,
 				static function ( array $args ): bool {
-					return isset( $args['update_callback'] );
+					return isset( $args['set_callback'] );
 				}
 			);
 			if ( empty( $writable ) ) {
@@ -318,12 +331,11 @@ abstract class ActionableAbility extends \WP_Ability {
 				'type'                 => 'object',
 				'properties'           => array_map(
 					static function ( array $args ): array {
-						$field_schema = $args['schema'];
-						if ( isset( $field_schema['type'] ) ) {
-							$field_schema['type'] = array_values( array_unique( array_merge( (array) $field_schema['type'], array( 'null' ) ) ) );
-						}
-						if ( isset( $field_schema['enum'] ) && ! in_array( null, $field_schema['enum'], true ) ) {
-							$field_schema['enum'][] = null;
+						$field_schema = $args['input_schema'];
+						if ( ! empty( $args['object_types'] ) ) {
+							/* translators: %s: Comma-separated list of object types. */
+							$applies_to                  = sprintf( __( 'Applies to: %s.', 'woocommerce' ), implode( ', ', $args['object_types'] ) );
+							$field_schema['description'] = trim( ( $field_schema['description'] ?? '' ) . ' ' . $applies_to );
 						}
 						return $field_schema;
 					},
