@@ -188,6 +188,26 @@ trait OrderAbilityTrait {
 						'order_item'
 					),
 				),
+				'shipping'             => array(
+					'type'                 => 'object',
+					'description'          => __( 'Order shipping address. Countries use ISO 3166-1 alpha-2 codes, and states use WooCommerce state codes.', 'woocommerce' ),
+					'properties'           => array_fill_keys( self::shipping_address_fields(), array( 'type' => 'string' ) ),
+					'additionalProperties' => false,
+				),
+				'shipping_lines'       => array(
+					'type'        => 'array',
+					'description' => __( 'Order shipping lines. Present together with line_items.', 'woocommerce' ),
+					'items'       => array(
+						'type'                 => 'object',
+						'properties'           => array(
+							'id'           => array( 'type' => 'integer' ),
+							'method_id'    => array( 'type' => 'string' ),
+							'method_title' => array( 'type' => 'string' ),
+							'total'        => array( 'type' => 'string' ),
+						),
+						'additionalProperties' => false,
+					),
+				),
 			),
 			'additionalProperties' => false,
 		);
@@ -299,10 +319,20 @@ trait OrderAbilityTrait {
 	}
 
 	/**
+	 * The shipping address fields of the output. The woocommerce_get_order_address
+	 * filter can add other keys, and the closed output schema refuses them.
+	 *
+	 * @return string[]
+	 */
+	private static function shipping_address_fields(): array {
+		return array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'state', 'postcode', 'country', 'phone' );
+	}
+
+	/**
 	 * Format an order for ability output.
 	 *
 	 * @param \WC_Order $order              Order object.
-	 * @param bool      $include_line_items Whether to include line items.
+	 * @param bool      $include_line_items Whether to include line items and shipping lines.
 	 * @return array|\WP_Error A WP_Error when an extension field value does not match its schema.
 	 */
 	protected static function format_order_for_response( \WC_Order $order, bool $include_line_items ) {
@@ -320,6 +350,7 @@ trait OrderAbilityTrait {
 			'customer_id'          => $order->get_customer_id(),
 			'payment_method'       => $order->get_payment_method(),
 			'payment_method_title' => $order->get_payment_method_title(),
+			'shipping'             => array_intersect_key( $order->get_address( 'shipping' ), array_flip( self::shipping_address_fields() ) ),
 		);
 
 		if ( $include_line_items ) {
@@ -348,6 +379,20 @@ trait OrderAbilityTrait {
 				}
 				$data['line_items'][] = $line_item;
 			}
+
+			$data['shipping_lines'] = array_values(
+				array_map(
+					static function ( \WC_Order_Item_Shipping $item ): array {
+						return array(
+							'id'           => $item->get_id(),
+							'method_id'    => $item->get_method_id(),
+							'method_title' => $item->get_method_title(),
+							'total'        => self::format_amount_for_response( $item->get_total() ),
+						);
+					},
+					$order->get_shipping_methods()
+				)
+			);
 		}
 
 		if ( '' !== $billing_email ) {

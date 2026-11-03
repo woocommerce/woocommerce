@@ -2158,12 +2158,230 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 			$this->assertSame( 400, $response->get_status(), wp_json_encode( $extensions ) );
 			if ( isset( $extensions['other_ext']['count'] ) && 'many' === $extensions['other_ext']['count'] ) {
-				$this->assertStringContainsString( 'input[extensions][other_ext][count] is not of type integer,null.', $response->get_data()['message'] );
+				$this->assertSame( 'extensions.other_ext.count is not of type integer,null.', $response->get_data()['message'] );
 			}
 		}
 		$saved = wc_get_product( $product->get_id() );
 		$this->assertSame( 'Pen', $saved->get_name() );
 		$this->assertFalse( $saved->meta_exists( '_test_color' ) );
+	}
+
+	/**
+	 * @testdox Should say what is wrong with one bad extension field, and save nothing.
+	 * @testWith [{"nope":{"x":"red"}}, "No extension registered the namespace \"nope\" for this ability. Remove it from the input, or use a namespace from the input schema."]
+	 *           [{"nope":"red"}, "No extension registered the namespace \"nope\" for this ability. Remove it from the input, or use a namespace from the input schema."]
+	 *           [{"nope":{}}, "No extension registered the namespace \"nope\" for this ability. Remove it from the input, or use a namespace from the input schema."]
+	 *           [{"other_ext":{"cuont":3}}, "The extension namespace \"other_ext\" has no field \"cuont\". The fields you can write in this namespace are: count, size. Use one of them, or remove \"other_ext.cuont\" from the input."]
+	 *           [{"test-ext":{"code":"A2"}}, "The extension field \"test-ext.code\" is read-only. Remove it from the input."]
+	 *           [{"other_ext":{"size":"huge"}}, "extensions.other_ext.size is not one of small, large, and null."]
+	 *
+	 * @param array  $extensions Value of the `extensions` input.
+	 * @param string $message    Expected error message.
+	 */
+	public function test_a_bad_extension_field_is_refused_by_name( array $extensions, string $message ): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->validate_input(
+			array(
+				'id'         => $product->get_id(),
+				'name'       => 'Pencil',
+				'extensions' => $extensions,
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( array( 'woocommerce_ability_invalid_fields' ), $result->get_error_codes() );
+		$this->assertSame( $message, $result->get_error_message() );
+		$this->assertSame( 400, $result->get_error_data()['status'] );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * @testdox Should say that a namespace has no writable fields when a field does not exist and all its fields are read-only.
+	 */
+	public function test_an_unknown_field_in_a_read_only_namespace_is_refused(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'product',
+						'namespace'     => 'read_only_ext',
+						'field'         => 'code',
+						'output_schema' => array( 'type' => 'string' ),
+						'get_callback'  => static fn() => 'A1',
+					)
+				);
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->validate_input(
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'read_only_ext' => array( 'cdoe' => 'A2' ) ),
+			)
+		);
+
+		$this->assertSame( 'The extension namespace "read_only_ext" has no field "cdoe", and it has no fields you can write. Remove "read_only_ext.cdoe" from the input.', $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should name every bad extension field in the first message of one error, for a client that reads only that message.
+	 */
+	public function test_every_bad_extension_field_is_in_the_first_message(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'         => $product->get_id(),
+				'name'       => 'Pencil',
+				'extensions' => array(
+					'nope'      => array( 'x' => 'y' ),
+					'test-ext'  => array( 'code' => 'A2' ),
+					'other_ext' => array(
+						'cuont' => 3,
+						'count' => 'many',
+					),
+				),
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertCount( 1, $result->get_error_messages() );
+		$this->assertSame(
+			implode(
+				' ',
+				array(
+					'No extension registered the namespace "nope" for this ability. Remove it from the input, or use a namespace from the input schema.',
+					'The extension field "test-ext.code" is read-only. Remove it from the input.',
+					'The extension namespace "other_ext" has no field "cuont". The fields you can write in this namespace are: count, size. Use one of them, or remove "other_ext.cuont" from the input.',
+					'extensions.other_ext.count is not of type integer,null.',
+				)
+			),
+			$result->get_error_message()
+		);
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * @testdox Should name the bad fields of the product and of its variations in one message on $ability, and run no validator.
+	 * @testWith ["woocommerce/product-create"]
+	 *           ["woocommerce/product-update"]
+	 *
+	 * @param string $ability Ability name.
+	 */
+	public function test_bad_fields_on_the_product_and_its_variations_are_refused_together( string $ability ): void {
+		$validated = 0;
+		$this->register_validator(
+			'product',
+			'test-ext',
+			static function () use ( &$validated ) {
+				++$validated;
+				return null;
+			}
+		);
+		$input = $this->get_shirt_input();
+		if ( 'woocommerce/product-update' === $ability ) {
+			$input['id'] = \WC_Helper_Product::create_variation_product()->get_id();
+		}
+		$input['extensions']                  = array( 'other_ext' => array( 'size' => 'huge' ) );
+		$input['variations'][0]['extensions'] = array( 'other_ext' => array( 'count' => 'many' ) );
+		$input['variations'][1]['extensions'] = array( 'nope' => array( 'x' => 'y' ) );
+
+		$result = wp_get_ability( $ability )->execute( $input );
+
+		$this->assertSame(
+			'extensions.other_ext.size is not one of small, large, and null. variations[0]: extensions.other_ext.count is not of type integer,null. variations[1]: No extension registered the namespace "nope" for this ability. Remove it from the input, or use a namespace from the input schema.',
+			$result->get_error_message()
+		);
+		$this->assertSame( 0, $validated );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'shirt-s' ) );
+	}
+
+	/**
+	 * @testdox Should suggest only the fields that apply to a variation.
+	 */
+	public function test_an_unknown_field_on_a_variation_suggests_only_variation_fields(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				$fields = array(
+					'simple_only'    => 'simple',
+					'variation_only' => 'variation',
+				);
+				foreach ( $fields as $field => $object_type ) {
+					ExtensibleAbilities::register_field(
+						array(
+							'resource'      => 'product',
+							'namespace'     => 'typed-ext',
+							'field'         => $field,
+							'output_schema' => array( 'type' => 'string' ),
+							'input_schema'  => array( 'type' => 'string' ),
+							'object_types'  => array( $object_type ),
+							'get_callback'  => static fn() => 'value',
+							'set_callback'  => static function () {},
+						)
+					);
+				}
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$input = $this->get_shirt_input();
+
+		$input['variations'][0]['extensions'] = array( 'typed-ext' => array( 'typo' => 'x' ) );
+
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute( $input );
+
+		$this->assertSame(
+			'variations[0]: The extension namespace "typed-ext" has no field "typo". The fields you can write in this namespace are: variation_only. Use one of them, or remove "typed-ext.typo" from the input.',
+			$result->get_error_message()
+		);
+	}
+
+	/**
+	 * @testdox Should keep the schema error when no extension field is at fault.
+	 * @testWith [{"not_a_core_field":"x"}]
+	 *           [{"extensions":{"test-ext":"red"}}]
+	 *           [{"extensions":"red"}]
+	 *
+	 * @param array $bad_input Input that only the schema refuses.
+	 */
+	public function test_the_schema_error_stands_without_a_bad_extension_field( array $bad_input ): void {
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->validate_input( array( 'id' => $product->get_id() ) + $bad_input );
+
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should keep the extensions input schema closed.
+	 */
+	public function test_the_extensions_input_schema_stays_closed(): void {
+		$extensions = $this->get_ability( 'woocommerce/product-update' )['input_schema']['properties']['extensions'];
+
+		$this->assertFalse( $extensions['additionalProperties'] );
+		$this->assertFalse( $extensions['properties']['test-ext']['additionalProperties'] );
+	}
+
+	/**
+	 * @testdox Should write valid extension fields on the product and on its variations.
+	 */
+	public function test_valid_extension_fields_on_the_product_and_its_variations_are_written(): void {
+		$input = $this->get_shirt_input();
+
+		$input['extensions']                  = array( 'test-ext' => array( 'color' => 'red' ) );
+		$input['variations'][0]['extensions'] = array( 'other_ext' => array( 'count' => 3 ) );
+
+		$this->run_ability( 'woocommerce/product-create', $input );
+
+		$this->assertSame( 'red', self::$received['color'] ?? null );
+		$this->assertSame( 3, self::$received['count'] ?? null );
+		$this->assertGreaterThan( 0, wc_get_product_id_by_sku( 'shirt-s' ) );
 	}
 
 	/**
@@ -3358,8 +3576,47 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'typed-ext', $schema['properties']['variations']['items']['properties']['extensions']['properties'] );
 		$this->assertFalse( $schema['properties']['variations']['items']['properties']['extensions']['additionalProperties'] );
 		$this->assertSame( 400, $refused->get_status() );
-		$this->assertSame( 'ability_invalid_input', $refused->get_data()['code'] );
-		$this->assertSame( 'Ability "woocommerce/product-create" has invalid input. Reason: typed-ext is not a valid property of Object.', $refused->get_data()['message'] );
+		$this->assertSame( 'woocommerce_ability_invalid_fields', $refused->get_data()['code'] );
+		$this->assertSame( 'variations[0]: The extension namespace "typed-ext" has no field "simple_only", and it has no fields you can write. Remove "typed-ext.simple_only" from the input.', $refused->get_data()['message'] );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'shirt-s' ) );
+	}
+
+	/**
+	 * @testdox Should name a variation field that does not apply to a variation and list the fields that do.
+	 */
+	public function test_a_variation_field_that_does_not_apply_lists_the_variation_fields(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				$fields = array(
+					'simple_only'    => 'simple',
+					'variation_only' => 'variation',
+				);
+				foreach ( $fields as $field => $object_type ) {
+					ExtensibleAbilities::register_field(
+						array(
+							'resource'      => 'product',
+							'namespace'     => 'typed-ext',
+							'field'         => $field,
+							'output_schema' => array( 'type' => 'string' ),
+							'input_schema'  => array( 'type' => 'string' ),
+							'object_types'  => array( $object_type ),
+							'get_callback'  => static fn() => 'value',
+							'set_callback'  => static function () {},
+						)
+					);
+				}
+			}
+		);
+		$this->reset_registries();
+
+		$input                                = $this->get_shirt_input();
+		$input['variations'][1]['extensions'] = array( 'typed-ext' => array( 'simple_only' => 'nope' ) );
+		$refused                              = $this->run_ability_response( 'woocommerce/product-create', $input );
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'woocommerce_ability_invalid_fields', $refused->get_data()['code'] );
+		$this->assertSame( 'variations[1]: The extension namespace "typed-ext" has no field "simple_only". The fields you can write in this namespace are: variation_only. Use one of them, or remove "typed-ext.simple_only" from the input.', $refused->get_data()['message'] );
 		$this->assertSame( 0, wc_get_product_id_by_sku( 'shirt-s' ) );
 	}
 
@@ -3775,6 +4032,331 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 400, $refused->get_status() );
 		$this->assertSame( 'woocommerce_invalid_product_type', $refused->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Should write an order extension field and the shipping address in one save, and save nothing when a validator refuses.
+	 */
+	public function test_order_update_writes_extension_fields_and_runs_validators(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'order',
+						'namespace'     => 'test-ext',
+						'field'         => 'priority',
+						'output_schema' => array( 'type' => 'string' ),
+						'input_schema'  => array( 'type' => 'string' ),
+						'get_callback'  => static function ( \WC_Order $order ) {
+							return $order->get_meta( '_test_priority' );
+						},
+						'set_callback'  => static function ( \WC_Order $order, $value ) {
+							$order->update_meta_data( '_test_priority', $value );
+						},
+					)
+				);
+			}
+		);
+		$this->register_validator(
+			'order',
+			'test-ext',
+			static function ( \WC_Order $order ) {
+				return 'Closed' === $order->get_shipping_city() ? new \WP_Error( 'test_refused', 'Refused.' ) : null;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$order = \WC_Helper_Order::create_order();
+		$saves = 0;
+		$count = static function () use ( &$saves ) {
+			++$saves;
+		};
+		$this->add_test_action( 'woocommerce_update_order', $count );
+
+		$output  = $this->run_ability(
+			'woocommerce/order-update',
+			array(
+				'id'         => $order->get_id(),
+				'shipping'   => array( 'city' => 'Lisbon' ),
+				'extensions' => array( 'test-ext' => array( 'priority' => 'high' ) ),
+			)
+		);
+		$refused = $this->run_ability_response(
+			'woocommerce/order-update',
+			array(
+				'id'         => $order->get_id(),
+				'shipping'   => array( 'city' => 'Closed' ),
+				'extensions' => array( 'test-ext' => array( 'priority' => 'low' ) ),
+			)
+		);
+
+		wp_cache_flush();
+		$saved = wc_get_order( $order->get_id() );
+		$this->assertSame( 1, $saves );
+		$this->assertSame( 'high', $output['order']['extensions']['test-ext']['priority'] );
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'test-ext:test_refused', $refused->get_data()['code'] );
+		$this->assertSame( 'Lisbon', $saved->get_shipping_city() );
+		$this->assertSame( 'high', $saved->get_meta( '_test_priority' ) );
+	}
+
+	/**
+	 * @testdox Should recalculate with calculate_totals() after the save when the feature is off.
+	 */
+	public function test_order_update_uses_the_saving_totals_with_the_feature_off(): void {
+		$this->set_feature( false );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		\WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate'          => '10',
+				'tax_rate_name'     => 'Tax',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '10' ) );
+		$order   = wc_create_order();
+		$order->add_product( $product, 1 );
+		$order->set_status( 'pending' );
+		$order->save();
+
+		$calls  = array();
+		$record = static function ( $and_taxes, $listened, $staged ) use ( &$calls ) {
+			$calls[] = array(
+				'staged'   => $staged,
+				'quantity' => array_sum( array_map( static fn( $item ) => $item->get_quantity(), wc_get_order( $listened->get_id() )->get_items() ) ),
+				'tax_ids'  => array_map( static fn( $tax ) => $tax->get_id(), array_values( $listened->get_taxes() ) ),
+			);
+		};
+		add_action( 'woocommerce_order_after_calculate_totals', $record, 10, 3 );
+
+		$result = wp_get_ability( 'woocommerce/order-update' )->execute(
+			array(
+				'id'         => $order->get_id(),
+				'line_items' => array(
+					array(
+						'id'       => array_key_first( $order->get_items() ),
+						'quantity' => 3,
+					),
+				),
+			)
+		);
+		remove_action( 'woocommerce_order_after_calculate_totals', $record, 10 );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+
+		$this->assertNotWPError( $result );
+		$this->assertCount( 1, $calls );
+		$this->assertFalse( $calls[0]['staged'] );
+		$this->assertSame( 3, $calls[0]['quantity'] );
+		$this->assertGreaterThan( 0, $calls[0]['tax_ids'][0] );
+		$this->assertSame( '33.00', wc_get_order( $order->get_id() )->get_total() );
+	}
+
+	/**
+	 * @testdox Should save no line change and fire no totals action when a validator refuses, and fire it staged once when the change saves.
+	 */
+	public function test_order_update_refusal_saves_no_line_change(): void {
+		$this->register_validator(
+			'order',
+			'test-ext',
+			static function ( \WC_Order $order ) {
+				return count( $order->get_shipping_methods() ) === 0 ? new \WP_Error( 'test_refused', 'Keep one shipping line.' ) : null;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'pending' );
+		$order->save();
+		$shipping_id = array_key_first( $order->get_shipping_methods() );
+		$total       = $order->get_total();
+		$staged      = array();
+		$record      = static function ( $and_taxes, $order, $is_staged = false ) use ( &$staged ) {
+			$staged[] = $is_staged;
+		};
+		add_action( 'woocommerce_order_after_calculate_totals', $record, 10, 3 );
+
+		$refused = $this->run_ability_response(
+			'woocommerce/order-update',
+			array(
+				'id'           => $order->get_id(),
+				'remove_items' => array( $shipping_id ),
+			)
+		);
+
+		wp_cache_flush();
+		$saved = wc_get_order( $order->get_id() );
+		$this->assertSame( 'test-ext:test_refused', $refused->get_data()['code'] );
+		$this->assertArrayHasKey( $shipping_id, $saved->get_shipping_methods() );
+		$this->assertSame( $total, $saved->get_total() );
+		$this->assertSame( array(), $staged );
+
+		$saves = 0;
+		$count = static function () use ( &$saves ) {
+			++$saves;
+		};
+		add_action( 'woocommerce_update_order', $count );
+
+		$output = $this->run_ability(
+			'woocommerce/order-update',
+			array(
+				'id'             => $order->get_id(),
+				'shipping_lines' => array(
+					array(
+						'id'    => $shipping_id,
+						'total' => '25.00',
+					),
+				),
+			)
+		);
+
+		remove_action( 'woocommerce_update_order', $count );
+		remove_action( 'woocommerce_order_after_calculate_totals', $record, 10 );
+		$this->assertSame( 1, $saves );
+		$this->assertSame( array( true ), $staged );
+		$this->assertSame( '25.00', wc_format_decimal( $output['order']['shipping_lines'][0]['total'], 2 ) );
+	}
+
+	/**
+	 * @testdox Should refuse a line change, and save nothing, when the order class overrides add_product() without its twin.
+	 */
+	public function test_order_update_refuses_class_without_stage_twin(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'pending' );
+		$order->save();
+		$order_class  = get_class(
+			new class() extends \WC_Order {
+				/**
+				 * Add a product with a rule of this class.
+				 *
+				 * @param \WC_Product $product Product.
+				 * @param int         $qty     Quantity.
+				 * @param array       $args    Arguments.
+				 * @return int
+				 */
+				public function add_product( $product, $qty = 1, $args = array() ) { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found -- The test needs an add_product() override without a stage_product_item() twin.
+					return parent::add_product( $product, $qty, $args );
+				}
+			}
+		);
+		$filter_class = static fn() => $order_class;
+		add_filter( 'woocommerce_order_class', $filter_class, 100 );
+		$product      = \WC_Helper_Product::create_simple_product();
+		$count        = count( $order->get_items() );
+
+		$refused = $this->run_ability_response(
+			'woocommerce/order-update',
+			array(
+				'id'         => $order->get_id(),
+				'line_items' => array( array( 'product_id' => $product->get_id() ) ),
+			)
+		);
+
+		remove_filter( 'woocommerce_order_class', $filter_class, 100 );
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'woocommerce_data_staging_unsupported', $refused->get_data()['code'] );
+		$this->assertStringContainsString( 'stage_product_item', $refused->get_data()['message'] );
+		$this->assertCount( $count, ( new \WC_Order( $order->get_id() ) )->get_items() );
+	}
+
+	/**
+	 * @testdox Should add a product line through add_product() of a class without the stage twin when the feature is off, and save nothing when a later line is refused.
+	 */
+	public function test_order_update_falls_back_to_add_product_with_the_feature_off(): void {
+		$this->set_feature( false );
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'pending' );
+		$order->save();
+		$order_class  = get_class(
+			new class() extends \WC_Order {
+				/**
+				 * Calls of add_product().
+				 *
+				 * @var int
+				 */
+				public static $calls = 0;
+
+				/**
+				 * Add a product with a rule of this class.
+				 *
+				 * @param \WC_Product $product Product.
+				 * @param int         $qty     Quantity.
+				 * @param array       $args    Arguments.
+				 * @return int
+				 */
+				public function add_product( $product, $qty = 1, $args = array() ) {
+					++self::$calls;
+					return parent::add_product( $product, $qty, $args );
+				}
+			}
+		);
+		$filter_class = static fn() => $order_class;
+		add_filter( 'woocommerce_order_class', $filter_class, 100 );
+		$product      = \WC_Helper_Product::create_simple_product();
+		$count        = count( $order->get_items() );
+
+		try {
+			$refused = $this->run_ability_response(
+				'woocommerce/order-update',
+				array(
+					'id'         => $order->get_id(),
+					'line_items' => array(
+						array( 'product_id' => $product->get_id() ),
+						array( 'product_id' => 999999 ),
+					),
+				)
+			);
+			$updated = $this->run_ability(
+				'woocommerce/order-update',
+				array(
+					'id'         => $order->get_id(),
+					'line_items' => array( array( 'product_id' => $product->get_id() ) ),
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_order_class', $filter_class, 100 );
+		}
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 1, $order_class::$calls );
+		$this->assertCount( $count + 1, $updated['order']['line_items'] );
+		$this->assertCount( $count + 1, ( new \WC_Order( $order->get_id() ) )->get_items() );
+	}
+
+	/**
+	 * @testdox Should delete the product line that add_product() wrote when the order save fails with the feature off.
+	 */
+	public function test_order_update_deletes_the_added_line_when_the_save_fails_with_the_feature_off(): void {
+		$this->set_feature( false );
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'pending' );
+		$order->save();
+		$product = \WC_Helper_Product::create_simple_product();
+		$count   = count( $order->get_items() );
+		$fail    = static function () {
+			throw new \Exception( 'Disk full.' );
+		};
+
+		add_action( 'woocommerce_before_order_object_save', $fail );
+		try {
+			$refused = $this->run_ability_response(
+				'woocommerce/order-update',
+				array(
+					'id'         => $order->get_id(),
+					'line_items' => array( array( 'product_id' => $product->get_id() ) ),
+				)
+			);
+		} finally {
+			remove_action( 'woocommerce_before_order_object_save', $fail );
+		}
+
+		$this->assertGreaterThanOrEqual( 400, $refused->get_status() );
+		$this->assertCount( $count, ( new \WC_Order( $order->get_id() ) )->get_items() );
 	}
 
 	/**

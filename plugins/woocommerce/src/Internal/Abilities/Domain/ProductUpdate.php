@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
+use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductFieldRefusalsTrait;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -20,6 +21,7 @@ class ProductUpdate extends ActionableAbility {
 
 	use DomainAbilityHelpers;
 	use ProductAbilityTrait;
+	use ProductFieldRefusalsTrait;
 
 	/**
 	 * Ability name.

@@ -310,7 +310,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 				'include_line_items' => array(
 					'type'        => 'boolean',
 					'description' => __(
-						'Whether to include order line items in each returned order. Defaults to false.',
+						'Whether to include order line items and shipping lines in each returned order. Defaults to false.',
 						'woocommerce'
 					),
 					'default'     => false,

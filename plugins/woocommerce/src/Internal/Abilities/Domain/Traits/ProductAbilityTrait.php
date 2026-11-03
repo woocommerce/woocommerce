@@ -824,9 +824,10 @@ trait ProductAbilityTrait {
 
 		foreach ( array_values( $items ) as $index => $item ) {
 			$position = $index + 1;
-			$id       = (int) ( $item['id'] ?? 0 );
+			$id       = $item['id'] ?? 0;
+			$delete   = ! empty( $item['delete'] );
 
-			if ( array_key_exists( 'delete', $item ) && ( $id <= 0 || count( $item ) > 2 ) ) {
+			if ( $delete && ( $id <= 0 || count( $item ) > 2 ) ) {
 				return new \WP_Error(
 					'woocommerce_product_variation_invalid',
 					/* translators: %d: variation position. */
@@ -854,7 +855,7 @@ trait ProductAbilityTrait {
 					);
 				}
 				$named[ $id ] = true;
-				if ( ! empty( $item['delete'] ) ) {
+				if ( $delete ) {
 					$plan['delete'][] = $variation;
 					continue;
 				}
