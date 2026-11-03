@@ -35,7 +35,7 @@ class Separator extends Abstract_Block_Renderer {
 			// Match the editor: dots are 1.5× the inherited text size, spaced 2em apart.
 			$theme_styles = $rendering_context->get_theme_styles();
 			$font_size    = (string) ( $parsed_block['email_attrs']['font-size'] ?? $theme_styles['typography']['fontSize'] ?? '16px' );
-			$font_size    = Styles_Helper::parse_value( Styles_Helper::convert_to_px( $font_size ) ?? '16px' );
+			$font_size    = Styles_Helper::parse_value( (string) Styles_Helper::convert_to_px( $font_size ) );
 			$dots_size    = (int) round( 1.5 * $font_size );
 			$spacing      = 2 * $dots_size;
 			return Table_Wrapper_Helper::render_table_wrapper(
@@ -86,10 +86,10 @@ class Separator extends Abstract_Block_Renderer {
 	}
 
 	/**
-	 * Blends a hex color with alpha (#rrggbbaa, as the color picker saves it) onto the background, since Outlook can't read alpha.
+	 * Blends a hex color with alpha (#rrggbbaa, as the color picker saves it) onto the background, since Outlook can’t read alpha.
 	 *
 	 * @param string $color Color.
-	 * @param string $background Email background color; white when it isn't a 6-digit hex.
+	 * @param string $background Email background color; white when it isn’t a 6-digit hex.
 	 */
 	private function blend_alpha( string $color, string $background ): string {
 		if ( ! preg_match( '/^#[0-9a-f]{8}$/i', $color ) ) {

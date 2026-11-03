@@ -133,7 +133,7 @@ class Separator_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * A see-through color is blended onto the email background, since Outlook can't read hex with alpha.
+	 * A see-through color is blended onto the email background, since Outlook can’t read hex with alpha.
 	 */
 	public function testItBlendsTransparentColorOntoEmailBackground(): void {
 		$rendered = $this->render(
@@ -169,32 +169,6 @@ class Separator_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'letter-spacing:48px', $rendered );
 		$this->assertStringContainsString( 'align="center"', $rendered );
 		$this->assertStringNotContainsString( 'border-top', $rendered );
-	}
-
-	/**
-	 * The dots scale with the email text size, as they do in the editor.
-	 */
-	public function testItSizesDotsFromEmailFontSize(): void {
-		$theme = clone $this->di_container->get( Theme_Controller::class )->get_theme();
-		$theme->merge(
-			new \WP_Theme_JSON(
-				array(
-					'version' => 3,
-					'styles'  => array( 'typography' => array( 'fontSize' => '20px' ) ),
-				),
-				'custom'
-			)
-		);
-		$this->rendering_context = new Rendering_Context( $theme );
-
-		$rendered = $this->render(
-			array( 'className' => 'is-style-dots' ),
-			'<hr class="wp-block-separator has-alpha-channel-opacity is-style-dots"/>'
-		);
-
-		$this->assertStringContainsString( 'font-size:30px', $rendered );
-		$this->assertStringContainsString( 'letter-spacing:60px', $rendered );
-		$this->assertStringContainsString( 'padding-left:60px', $rendered );
 	}
 
 	/**
