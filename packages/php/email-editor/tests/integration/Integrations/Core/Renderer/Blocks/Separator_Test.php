@@ -1,0 +1,183 @@
+<?php
+/**
+ * This file is part of the WooCommerce Email Editor package
+ *
+ * @package Automattic\WooCommerce\EmailEditor
+ */
+
+declare(strict_types = 1);
+namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
+
+use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
+
+/**
+ * Integration test for Separator class
+ */
+class Separator_Test extends \Email_Editor_Integration_Test_Case {
+	/**
+	 * Separator renderer instance
+	 *
+	 * @var Separator
+	 */
+	private $separator_renderer;
+
+	/**
+	 * Instance of Rendering_Context class
+	 *
+	 * @var Rendering_Context
+	 */
+	private $rendering_context;
+
+	/**
+	 * Set up before each test
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->di_container->get( Email_Editor::class )->initialize();
+		$this->separator_renderer = new Separator();
+		$theme_controller         = $this->di_container->get( Theme_Controller::class );
+		$this->rendering_context  = new Rendering_Context( $theme_controller->get_theme() );
+	}
+
+	/**
+	 * Renders a separator block with the given attributes and saved markup.
+	 *
+	 * @param array  $attrs Block attributes.
+	 * @param string $html Saved block markup.
+	 * @param array  $email_attrs Email attributes added by the preprocessors.
+	 */
+	private function render( array $attrs, string $html = '<hr class="wp-block-separator has-alpha-channel-opacity"/>', array $email_attrs = array() ): string {
+		$parsed_block = array(
+			'blockName'    => 'core/separator',
+			'attrs'        => $attrs,
+			'email_attrs'  => $email_attrs,
+			'innerBlocks'  => array(),
+			'innerHTML'    => $html,
+			'innerContent' => array( $html ),
+		);
+		$rendered     = $this->separator_renderer->render( $html, $parsed_block, $this->rendering_context );
+		$this->checkValidHTML( $rendered );
+		return $rendered;
+	}
+
+	/**
+	 * The default style is a short centered line in the inherited text color.
+	 */
+	public function testItRendersDefaultStyleAsShortCenteredLine(): void {
+		$rendered = $this->render( array(), '<hr class="wp-block-separator has-alpha-channel-opacity"/>', array( 'color' => '#123456' ) );
+
+		$this->assertStringContainsString( 'align="center"', $rendered );
+		$this->assertStringContainsString( 'width="100"', $rendered );
+		$this->assertStringContainsString( 'border-top:2px solid #123456', $rendered );
+		$this->assertStringNotContainsString( '<hr', $rendered );
+	}
+
+	/**
+	 * Without an inherited color, the line uses the email text color.
+	 */
+	public function testItFallsBackToEmailTextColor(): void {
+		$theme_styles = $this->rendering_context->get_theme_styles();
+		$rendered     = $this->render( array() );
+
+		$this->assertStringContainsString( 'border-top:2px solid ' . $theme_styles['color']['text'], $rendered );
+	}
+
+	/**
+	 * The wide style spans the full content width.
+	 */
+	public function testItRendersWideStyleAtFullWidth(): void {
+		$rendered = $this->render(
+			array( 'className' => 'is-style-wide' ),
+			'<hr class="wp-block-separator has-alpha-channel-opacity is-style-wide"/>'
+		);
+
+		$this->assertStringContainsString( 'width="100%"', $rendered );
+		$this->assertStringNotContainsString( 'width="100"', $rendered );
+		$this->assertStringContainsString( 'border-top:2px solid', $rendered );
+	}
+
+	/**
+	 * A palette color picked in the editor colors the line.
+	 */
+	public function testItUsesPaletteColor(): void {
+		$rendered = $this->render(
+			array( 'backgroundColor' => 'vivid-red' ),
+			'<hr class="wp-block-separator has-text-color has-vivid-red-color has-alpha-channel-opacity has-vivid-red-background-color has-background"/>'
+		);
+
+		$this->assertStringContainsString( 'border-top:2px solid #cf2e2e', $rendered );
+	}
+
+	/**
+	 * A custom color picked in the editor colors the line.
+	 */
+	public function testItUsesCustomColor(): void {
+		$rendered = $this->render(
+			array( 'style' => array( 'color' => array( 'background' => '#00ff00' ) ) ),
+			'<hr class="wp-block-separator has-text-color has-alpha-channel-opacity has-background" style="background-color:#00ff00;color:#00ff00"/>'
+		);
+
+		$this->assertStringContainsString( 'border-top:2px solid #00ff00', $rendered );
+	}
+
+	/**
+	 * The dots style renders three centered dots in the picked color, without a line.
+	 */
+	public function testItRendersDotsStyle(): void {
+		$rendered = $this->render(
+			array(
+				'className'       => 'is-style-dots',
+				'backgroundColor' => 'vivid-red',
+			),
+			'<hr class="wp-block-separator has-text-color has-vivid-red-color has-alpha-channel-opacity has-vivid-red-background-color has-background is-style-dots"/>'
+		);
+
+		$this->assertStringContainsString( '&#183;&#183;&#183;', $rendered );
+		$this->assertStringContainsString( 'color:#cf2e2e', $rendered );
+		$this->assertStringContainsString( 'font-size:24px', $rendered );
+		$this->assertStringContainsString( 'letter-spacing:48px', $rendered );
+		$this->assertStringContainsString( 'align="center"', $rendered );
+		$this->assertStringNotContainsString( 'border-top', $rendered );
+	}
+
+	/**
+	 * The dots scale with the email text size, as they do in the editor.
+	 */
+	public function testItSizesDotsFromEmailFontSize(): void {
+		$theme = clone $this->di_container->get( Theme_Controller::class )->get_theme();
+		$theme->merge(
+			new \WP_Theme_JSON(
+				array(
+					'version' => 3,
+					'styles'  => array( 'typography' => array( 'fontSize' => '20px' ) ),
+				),
+				'custom'
+			)
+		);
+		$this->rendering_context = new Rendering_Context( $theme );
+
+		$rendered = $this->render(
+			array( 'className' => 'is-style-dots' ),
+			'<hr class="wp-block-separator has-alpha-channel-opacity is-style-dots"/>'
+		);
+
+		$this->assertStringContainsString( 'font-size:30px', $rendered );
+		$this->assertStringContainsString( 'letter-spacing:60px', $rendered );
+		$this->assertStringContainsString( 'padding-left:60px', $rendered );
+	}
+
+	/**
+	 * A color that isn't a valid CSS color never reaches the style attribute.
+	 */
+	public function testItDropsInvalidColor(): void {
+		$rendered = $this->render(
+			array( 'style' => array( 'color' => array( 'background' => 'red;background:url(x)' ) ) ),
+			'<hr class="wp-block-separator has-alpha-channel-opacity"/>',
+			array( 'color' => '#123456' )
+		);
+
+		$this->assertStringNotContainsString( 'url(', $rendered );
+	}
+}
