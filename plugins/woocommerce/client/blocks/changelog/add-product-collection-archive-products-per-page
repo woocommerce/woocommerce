@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Set products per page directly in Product Collection blocks that use the default archive query.
