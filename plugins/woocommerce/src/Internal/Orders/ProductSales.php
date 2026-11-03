@@ -24,18 +24,18 @@ use WC_Product_Data_Store_Interface;
 class ProductSales implements RegisterHooksInterface {
 
 	/**
-	 * Persisted product and quantity before each item save.
+	 * Persisted item values before saving, keyed by PHP object ID.
 	 *
 	 * @var array<int, array{product_id: int, quantity: int, order_id: int}>
 	 */
-	private array $previous_items = array();
+	private array $item_snapshots_before_save = array();
 
 	/**
-	 * Sales to reverse after item deletion, keyed by item ID.
+	 * Recorded item sales captured before deletion, keyed by item ID.
 	 *
 	 * @var array<int, array{product_id: int, quantity: int}>
 	 */
-	private array $deleted_items = array();
+	private array $item_sales_before_delete = array();
 
 	/**
 	 * Register hooks.
@@ -61,17 +61,17 @@ class ProductSales implements RegisterHooksInterface {
 			return;
 		}
 
-		$key = spl_object_id( $item );
-		unset( $this->previous_items[ $key ] );
+		$object_id = spl_object_id( $item );
+		unset( $this->item_snapshots_before_save[ $object_id ] );
 		if ( $item->get_id() && ! array_intersect( array( 'product_id', 'quantity', 'order_id' ), array_keys( $item->get_changes() ) ) ) {
 			return;
 		}
 
-		$previous                     = $item->get_id() ? WC_Order_Factory::get_order_item( $item->get_id() ) : false;
-		$this->previous_items[ $key ] = array(
-			'product_id' => $previous instanceof WC_Order_Item_Product ? $previous->get_product_id() : 0,
-			'quantity'   => $previous instanceof WC_Order_Item_Product ? absint( $previous->get_quantity() ) : 0,
-			'order_id'   => $previous ? $previous->get_order_id() : $item->get_order_id(),
+		$persisted_item                                 = $item->get_id() ? WC_Order_Factory::get_order_item( $item->get_id() ) : false;
+		$this->item_snapshots_before_save[ $object_id ] = array(
+			'product_id' => $persisted_item instanceof WC_Order_Item_Product ? $persisted_item->get_product_id() : 0,
+			'quantity'   => $persisted_item instanceof WC_Order_Item_Product ? absint( $persisted_item->get_quantity() ) : 0,
+			'order_id'   => $persisted_item ? $persisted_item->get_order_id() : $item->get_order_id(),
 		);
 	}
 
@@ -87,27 +87,27 @@ class ProductSales implements RegisterHooksInterface {
 			return;
 		}
 
-		$key      = spl_object_id( $item );
-		$previous = $this->previous_items[ $key ] ?? null;
-		unset( $this->previous_items[ $key ] );
-		if ( null === $previous ) {
+		$object_id        = spl_object_id( $item );
+		$item_before_save = $this->item_snapshots_before_save[ $object_id ] ?? null;
+		unset( $this->item_snapshots_before_save[ $object_id ] );
+		if ( null === $item_before_save ) {
 			return;
 		}
 
-		$previous_recorded = $this->has_recorded_sales( $previous['order_id'] );
-		$current_recorded  = $previous['order_id'] === $item->get_order_id() ? $previous_recorded : $this->has_recorded_sales( $item->get_order_id() );
-		if ( ! $previous_recorded && ! $current_recorded ) {
+		$previous_order_has_recorded_sales = $this->has_recorded_sales( $item_before_save['order_id'] );
+		$current_order_has_recorded_sales  = $item_before_save['order_id'] === $item->get_order_id() ? $previous_order_has_recorded_sales : $this->has_recorded_sales( $item->get_order_id() );
+		if ( ! $previous_order_has_recorded_sales && ! $current_order_has_recorded_sales ) {
 			return;
 		}
 
-		$product_id           = $item->get_product_id();
-		$quantity             = $current_recorded ? absint( $item->get_quantity() ) : 0;
-		$previous['quantity'] = $previous_recorded ? $previous['quantity'] : 0;
-		if ( $previous['product_id'] === $product_id ) {
-			$this->update_sales( $product_id, $quantity - $previous['quantity'] );
+		$current_product_id      = $item->get_product_id();
+		$current_sales_quantity  = $current_order_has_recorded_sales ? absint( $item->get_quantity() ) : 0;
+		$previous_sales_quantity = $previous_order_has_recorded_sales ? $item_before_save['quantity'] : 0;
+		if ( $item_before_save['product_id'] === $current_product_id ) {
+			$this->update_sales( $current_product_id, $current_sales_quantity - $previous_sales_quantity );
 		} else {
-			$this->update_sales( $previous['product_id'], -$previous['quantity'] );
-			$this->update_sales( $product_id, $quantity );
+			$this->update_sales( $item_before_save['product_id'], -$previous_sales_quantity );
+			$this->update_sales( $current_product_id, $current_sales_quantity );
 		}
 	}
 
@@ -124,13 +124,13 @@ class ProductSales implements RegisterHooksInterface {
 		}
 
 		$item_id = absint( $item_id );
-		unset( $this->deleted_items[ $item_id ] );
+		unset( $this->item_sales_before_delete[ $item_id ] );
 		$item = WC_Order_Factory::get_order_item( $item_id );
 		if ( ! $item instanceof WC_Order_Item_Product || ! $this->has_recorded_sales( $item->get_order_id() ) ) {
 			return;
 		}
 
-		$this->deleted_items[ $item_id ] = array(
+		$this->item_sales_before_delete[ $item_id ] = array(
 			'product_id' => $item->get_product_id(),
 			'quantity'   => absint( $item->get_quantity() ),
 		);
@@ -148,11 +148,11 @@ class ProductSales implements RegisterHooksInterface {
 			return;
 		}
 
-		$item_id  = absint( $item_id );
-		$previous = $this->deleted_items[ $item_id ] ?? null;
-		unset( $this->deleted_items[ $item_id ] );
-		if ( null !== $previous ) {
-			$this->update_sales( $previous['product_id'], -$previous['quantity'] );
+		$item_id             = absint( $item_id );
+		$sales_before_delete = $this->item_sales_before_delete[ $item_id ] ?? null;
+		unset( $this->item_sales_before_delete[ $item_id ] );
+		if ( null !== $sales_before_delete ) {
+			$this->update_sales( $sales_before_delete['product_id'], -$sales_before_delete['quantity'] );
 		}
 	}
 
