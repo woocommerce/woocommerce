@@ -181,7 +181,7 @@
 		"comment-parser": "^1.4.1",
 		"config": "3.3.7",
 		"copy-webpack-plugin": "catalog:tooling",
-		"css-loader": "6.11.x",
+		"css-loader": "catalog:tooling",
 		"eslint": "^10.0.0",
 		"eslint-import-resolver-typescript": "^4.4.5",
 		"eslint-import-resolver-webpack": "^0.13.11",

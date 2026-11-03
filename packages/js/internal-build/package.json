@@ -61,7 +61,7 @@
 		"@wordpress/postcss-plugins-preset": "catalog:tooling",
 		"@wordpress/theme": "catalog:wp-bundled",
 		"chokidar": "^3.6.0",
-		"css-loader": "6.11.x",
+		"css-loader": "catalog:tooling",
 		"esbuild": "^0.28.1",
 		"glob": "^10.3.10",
 		"json2php": "^0.0.7",

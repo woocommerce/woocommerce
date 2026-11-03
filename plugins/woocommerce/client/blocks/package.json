@@ -166,7 +166,7 @@
 		"circular-dependency-plugin": "5.2.x",
 		"copy-webpack-plugin": "catalog:tooling",
 		"core-js": "3.25.0",
-		"css-loader": "6.11.x",
+		"css-loader": "catalog:tooling",
 		"cssnano": "5.1.12",
 		"deep-freeze": "0.0.1",
 		"dotenv": "^16.3.1",

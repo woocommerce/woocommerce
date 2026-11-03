@@ -124,6 +124,7 @@
 				"@wordpress/scripts",
 				"babel-loader",
 				"copy-webpack-plugin",
+				"css-loader",
 				"postcss",
 				"prettier",
 				"simple-git",
@@ -216,15 +217,6 @@
 				"**"
 			],
 			"pinVersion": "^10.0.0"
-		},
-		{
-			"dependencies": [
-				"css-loader"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "6.11.x"
 		},
 		{
 			"dependencies": [
