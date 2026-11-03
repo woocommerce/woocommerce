@@ -78,11 +78,11 @@ WooCommerce ships a default `archive-product.html` inside its own plugin folder,
 
 Both `core/query-title` and `core/term-description` are core WordPress Blocks. WooCommerce configures both for the product context, but styling and behavior for either follows core WordPress conventions rather than anything WooCommerce-specific.
 
-As the Template hierarchy reference covers, `archive-product.html` is the fallback for every taxonomy archive: Products by Category, Products by Tag, Products by Attribute, and Products by Brand. However, two templates differ from this shared fallback.
+As the Template hierarchy reference covers, `archive-product.html` is the fallback for every taxonomy archive: Products by Category, Products by Tag, Products by Attribute, and Products by Brand. However, two cases are worth calling out.
 
-First, **Products by Attribute** registers `taxonomy-product_attribute.html` rather than relying on the fallback other taxonomies use. This file is close in content to `archive-product.html`. It gives you a direct override point if attribute archives ever need a separate design (without waiting on a fallback change).
+First, **Products by Attribute** uses `archive-product.html` by default. A theme template named `taxonomy-product_attribute.html`, or a customized database template with that slug, takes priority when present. To give attribute archives a separate design, add `taxonomy-product_attribute.html` to your theme.
 
-Also, **Product Search Results** (`product-search-results.html`) swaps the query title's `type` to `search` and points its no-results state at a pattern that also renders a search form. Typically, a shopper landing here has already tried to find something specific, so the form is a nice UX addition.
+Also, **Product Search Results** (`product-search-results.html`) swaps the query title's `type` to `search` and renders two separate patterns in its no-results state: `woocommerce/no-products-found` and `woocommerce/product-search-form`. Typically, a shopper landing here has already tried to find something specific, so the separate search form is a nice UX addition.
 
 ## The product grid: Blocks and layout choices
 
@@ -153,7 +153,7 @@ WooCommerce splits these across three Blocks, two of which ship in the default t
 
 The count itself follows the product grid settings (the `woocommerce_catalog_columns` and `woocommerce_catalog_rows` options). Because Block themes don't have a Customizer, you can use the `loop_shop_per_page` filter as an override.
 
-**Catalog Sorting**'s render callback calls `woocommerce_catalog_ordering()`, which builds the drop-down menu from the `woocommerce_catalog_orderby` filter and reads its default selection from the `woocommerce_default_catalog_orderby` filter or option. The six default sort options are `menu_order`, `popularity`, `rating`, `date`, `price`, and `price-desc`.
+**Catalog Sorting**'s render callback calls `woocommerce_catalog_ordering()`, which builds the drop-down menu from the `woocommerce_catalog_orderby` filter and reads its default selection from the `woocommerce_default_catalog_orderby` filter or option. The base option set contains `menu_order`, `popularity`, `rating`, `date`, `price`, and `price-desc`. Search pages add `relevance` and remove `menu_order`. WooCommerce also removes `menu_order` on other catalog pages when it isn't the configured default, and removes `rating` on every page when product ratings are disabled.
 
 A plugin that already customizes the sorting drop-down menu on a classic theme needs no changes to keep working:
 
@@ -218,9 +218,9 @@ Every filter type shares one Block `ancestor` restriction: each expects to sit i
 
 The Product Filters Block's **Overlay** setting controls whether filters remain on the page or open in an overlay. Its options are **Off**, **Mobile**, and **Always**, stored in the `overlayMode` attribute. When an overlay is enabled, **Overlay position** sets `overlayPosition` to the left or right. **Reload full page** is found in the Product Collection Block's Advanced settings and sets an attribute called `forcePageReload`, which is disabled by default.
 
-When `forcePageReload` is `false`, WooCommerce gives the Product Collection Block a `data-wp-router-region` attribute. As such, both filtering and pagination use the WordPress Interactivity API's client-side router instead of the browser's own navigation. Setting it to `true` disables client navigation for the Product Filters Block through `wp_interactivity_config()`. Reach for it if another Block or customization inside the collection depends on a traditional full-page reload.
+When `forcePageReload` is `false`, WooCommerce gives the Product Collection Block its own `data-wp-router-region` attribute, and Product Filters renders a separate router region. Both can use the WordPress Interactivity API's client-side navigation. Setting `forcePageReload` to `true` disables enhanced pagination and tells nested Product Filters to reload through Block context. For an inherited archive query where Product Filters is a sibling, WooCommerce provides the same value through `wp_interactivity_config()`. Reach for it if another Block or customization inside the collection depends on a traditional full-page reload.
 
-When Product Filters is nested in a custom Product Collection, it reads the collection's query and `forcePageReload` setting through Block context. On an inherited archive query, WooCommerce can provide the same behavior when Product Filters is a sibling instead:
+Product Filters declares the following context keys. When nested in a custom Product Collection, it receives the collection's query and `forcePageReload` setting through Block context. When it's a sibling of an inherited archive collection, it relies on the archive query and uses the global configuration described above for `forcePageReload`:
 
 ```json
 "usesContext": [
@@ -241,7 +241,7 @@ The Attribute Filter, Price Filter, and Active Filters Blocks existed before Pro
 
 ## Pagination
 
-Pagination renders through the core Query Pagination Block as Product Collection registers itself as a compatible query source for it. The `forcePageReload` attribute governs pagination as well as filtering because both rely on the same router region.
+Pagination renders through the core Query Pagination Block as Product Collection registers itself as a compatible query source for it. Product Collection and Product Filters render separate router regions, although both can use client-side navigation. The `forcePageReload` attribute disables enhanced pagination for the collection and tells the associated filters to fall back to a full-page reload through the context or configuration described above.
 
 With the default setting, moving between pages updates the grid through client-side navigation, then moves focus to the first product link in the updated collection. This focus change can also move the shopper's scroll position. Enabling **Reload full page** falls back to standard link navigation for the pagination controls instead.
 

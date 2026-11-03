@@ -205,7 +205,7 @@ To get an editable, Blockified version of the same three tabs, add `core/accordi
 - `woocommerce/product-specifications` shows the weight, dimensions, and attributes, with `showAttributes`, `showDimensions`, and `showWeight` attributes to control which appear.
 - `woocommerce/product-reviews` gives you the review list, along with its own child Blocks for the review's form, author name, rating, date, and pagination.
 
-WooCommerce will also auto-detect tabs through the `woocommerce_product_tabs` filter. However, this only applies to third-party extensions. If you'd rather turn this off, you can use the `woocommerce_disable_compatibility_layer` filter.
+WooCommerce also auto-detects non-default tabs returned through the `woocommerce_product_tabs` filter, regardless of whether a plugin, theme, or another customization added them. If you'd rather turn this off, you can use the `woocommerce_disable_compatibility_layer` filter.
 
 :::note
 Some Blocks have permanently empty wrapper markup (such as `woocommerce/add-to-cart-with-options`). For those Blocks, content will be generated at render time based on the template files.
@@ -245,8 +245,11 @@ The compatibility layer means some Blocks are doing more under the hood, so remo
 | `woocommerce_template_single_excerpt` | 20 | Short description |
 | `woocommerce_template_single_add_to_cart` | 30 | Add-to-Cart form |
 | `woocommerce_template_single_meta` | 40 | SKU, categories, tags |
+| `woocommerce_template_single_sharing` | 50 | Sharing integrations |
 
 On the Blockified template, the `woocommerce_single_product_summary` action is wired to the `core/post-excerpt` Block rendering the short description. Any extension that still adds content through this hook is anchoring itself to that Block. In practice, you'll use this for elements such as trust badges and upsell prompts.
+
+The compatibility layer handles sharing separately. It removes `woocommerce_template_single_sharing` from the summary action and injects the underlying `woocommerce_share` action before Product Details. Removing the short-description Block doesn't remove sharing output, but removing Product Details can.
 
 Also, Product Details only calls WordPress' `the_post()` function while rendering its legacy fallback tabs. Once you make it Blockified, this call disappears. Related Products' underlying `woocommerce/product-template` Block calls `the_post()` for each product in the loop, then `wp_reset_postdata()`. This restores global `$product` to the product being viewed, independent of the state of Product Details.
 
@@ -385,7 +388,7 @@ This is a good example of a Blockified version showing the compatibility layer's
 <!-- /wp:woocommerce/product-details -->
 ```
 
-Only third-party tabs added through the `woocommerce_product_tabs` filter get automatically injected by WooCommerce, so you'll need to repeat the pattern for `woocommerce/product-specifications` and `woocommerce/product-reviews`.
+Non-default tabs returned through the `woocommerce_product_tabs` filter are automatically injected by WooCommerce. The default Specifications and Reviews tabs aren't, so you'll need to repeat the pattern for `woocommerce/product-specifications` and `woocommerce/product-reviews`.
 
 ### Replacing Related Products with a curated pick
 
