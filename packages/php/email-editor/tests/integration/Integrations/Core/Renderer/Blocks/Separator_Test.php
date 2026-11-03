@@ -263,6 +263,19 @@ class Separator_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * A fluid (clamp) inherited font size is turned into its smallest px value, as for paragraphs.
+	 */
+	public function testItSizesDotsFromFluidInheritedFontSize(): void {
+		$rendered = $this->render(
+			array( 'className' => 'is-style-dots' ),
+			'<hr class="wp-block-separator has-alpha-channel-opacity is-style-dots"/>',
+			array( 'font-size' => 'clamp(20px, 2vw, 40px)' )
+		);
+
+		$this->assertStringContainsString( 'font-size:30px', $rendered );
+	}
+
+	/**
 	 * In a narrow column the dot spacing shrinks to fit, so the column doesn’t grow.
 	 */
 	public function testItFitsDotsIntoNarrowColumn(): void {
