@@ -10,10 +10,14 @@
   "enabled": true,
 
   "plan": {
-    "$comment": "The same planner CI runs (ci.yml → pnpm utils ci-jobs) with the same inputs: a diff from the merge base (CI uses gh pr diff) and the pull_request event filter. GITHUB_ACTIONS=true makes it write its matrix to GITHUB_OUTPUT.",
+    "$comment": "The same planner CI runs (ci.yml → pnpm utils ci-jobs) with the same inputs: a diff from the merge base (CI uses gh pr diff) and the pull_request event filter. GITHUB_ACTIONS=true makes it write its matrix to GITHUB_OUTPUT. fields.path is projectPath, the project's directory from the repository root, so gh local-ci can skip a rule's prepare when only files inside the tested projects changed.",
     "command": [ "sh", "-c", "GITHUB_ACTIONS=true GITHUB_OUTPUT={out} pnpm utils ci-jobs --base-ref {mergeBase} --event pull_request" ],
     "output": "github-output",
-    "fields": { "name": "name", "project": "projectName", "command": "command", "type": "testType" }
+    "fields": { "name": "name", "project": "projectName", "command": "command", "type": "testType", "path": "projectPath" },
+    "all": {
+      "$comment": "The same planner with no diff, for gh local-ci setup to warm every project a rule could test. Without --base-ref the planner treats every project as changed.",
+      "command": [ "sh", "-c", "GITHUB_ACTIONS=true GITHUB_OUTPUT={out} pnpm utils ci-jobs --event pull_request" ]
+    }
   },
 
   "eligible": [
@@ -43,5 +47,13 @@
     "build": { "context": ".github/local-ci" }
   },
 
-  "lockfile": "pnpm-lock.yaml"
+  "lockfile": "pnpm-lock.yaml",
+
+  "toolchain": [
+    {
+      "$comment": "CI's Node: setup-woocommerce-monorepo runs setup-node with node-version-file .nvmrc. pnpm is not checked: action-setup reads it from packageManager in package.json, and expectFrom takes a file that holds only the version. Nor is PHP: the JavaScript rule's build-type dependencies skips setup-php.",
+      "run": "node -v",
+      "expectFrom": ".nvmrc"
+    }
+  ]
 }
