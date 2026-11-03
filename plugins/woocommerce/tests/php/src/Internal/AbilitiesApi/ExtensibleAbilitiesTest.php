@@ -1298,14 +1298,94 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Schemas without a type, for a field input and for a query filter.
+	 * Schemas without a type, or with an anyOf branch without one type name, for a field input and for a query filter.
 	 *
 	 * @return array<string, array{0: array<string, mixed>}>
 	 */
 	public function provider_malformed_schemas(): array {
 		return array(
-			'no type'            => array( array( 'description' => 'x' ) ),
-			'anyOf without type' => array( array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ),
+			'no type'                => array( array( 'description' => 'x' ) ),
+			'empty anyOf'            => array( array( 'anyOf' => array() ) ),
+			'anyOf branch type list' => array( array( 'anyOf' => array( array( 'type' => array( 'string', 'null' ) ), array( 'type' => 'integer' ) ) ) ),
+			'anyOf branch no type'   => array( array( 'anyOf' => array( array( 'type' => 'string' ), array( 'enum' => array( 'a' ) ) ) ) ),
+		);
+	}
+
+	/**
+	 * @testdox Should register a field whose input schema is an anyOf of single types, publish it as declared and pass null or a typed value to the set_callback.
+	 */
+	public function test_an_any_of_input_schema_takes_null_and_a_typed_value(): void {
+		$input_schema = array(
+			'description' => 'Days of the trial.',
+			'anyOf'       => array( array( 'type' => 'integer' ), array( 'type' => 'null' ) ),
+		);
+		$received     = array();
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $input_schema, &$received ) {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'product',
+						'namespace'    => 'nullable',
+						'field'        => 'days',
+						'input_schema' => $input_schema,
+						'set_callback' => static function ( \WC_Data $data, $value ) use ( &$received ) {
+							$received[] = $value;
+						},
+					)
+				);
+			}
+		);
+		$this->reset_registries();
+		$product = \WC_Helper_Product::create_simple_product();
+		$write   = fn( $value ) => $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'nullable' => array( 'days' => $value ) ),
+			)
+		);
+
+		$published = $this->get_ability( 'woocommerce/product-update' )['input_schema']['properties']['extensions']['properties']['nullable']['properties']['days'];
+		$this->assertSame( $input_schema, $published );
+		$this->assertSame( 200, $write( 7 )->get_status() );
+		$this->assertSame( 200, $write( null )->get_status() );
+		$refused = $write( 'many' );
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertStringContainsString( 'extensions.nullable.days', $refused->get_data()['message'] );
+		$this->assertSame( array( 7, null ), $received );
+
+		$received = array();
+		$result   = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'nullable' => array( 'days' => '8' ) ),
+			)
+		);
+		$this->assertNotWPError( $result );
+		$this->assertSame( array( 8 ), $received, 'A direct call gets the value cast to the integer branch.' );
+	}
+
+	/**
+	 * @testdox Should refuse a query filter schema that has an anyOf and no top-level type.
+	 */
+	public function test_a_query_filter_schema_needs_a_type_even_with_an_any_of(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_query_filter' );
+		AbilitiesLoader::register_core_resources();
+
+		ExtensibleAbilities::register_query_filter(
+			array(
+				'resource'  => 'order',
+				'namespace' => 'refused',
+				'filter'    => 'value',
+				'schema'    => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ),
+				'callback'  => '__return_empty_array',
+			)
+		);
+
+		$this->assertSame(
+			array( 'type' => 'object' ),
+			ExtensibleAbilities::add_query_filters_schema( array( 'type' => 'object' ), 'order' )
 		);
 	}
 
