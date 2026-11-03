@@ -18,36 +18,20 @@
 				"default": "shop_order"
 			},
 			"status": {
-				"description": "Filter by one order status slug, or a list of slugs, without the wc- prefix. Custom order types may add their own statuses.",
-				"anyOf": [
-					{
-						"type": "string",
-						"enum": [
-							"pending",
-							"processing",
-							"on-hold",
-							"completed",
-							"cancelled",
-							"refunded",
-							"failed"
-						]
-					},
-					{
-						"type": "array",
-						"items": {
-							"type": "string",
-							"enum": [
-								"pending",
-								"processing",
-								"on-hold",
-								"completed",
-								"cancelled",
-								"refunded",
-								"failed"
-							]
-						}
-					}
-				]
+				"description": "Limit results to these order status slugs, without the wc- prefix. Send one status as a list of one. An empty list applies no status filter. Custom order types may add their own statuses.",
+				"type": "array",
+				"items": {
+					"type": "string",
+					"enum": [
+						"pending",
+						"processing",
+						"on-hold",
+						"completed",
+						"cancelled",
+						"refunded",
+						"failed"
+					]
+				}
 			},
 			"customer_id": {
 				"type": "integer",
@@ -335,11 +319,9 @@
 							"type": "integer"
 						},
 						"billing_email": {
-							"type": [
-								"string",
-								"null"
-							],
-							"format": "email"
+							"type": "string",
+							"format": "email",
+							"description": "Billing email. Omitted when no billing email is set."
 						},
 						"payment_method": {
 							"type": "string"
@@ -348,32 +330,24 @@
 							"type": "string"
 						},
 						"date_created": {
-							"type": [
-								"string",
-								"null"
-							],
-							"format": "date-time"
+							"type": "string",
+							"format": "date-time",
+							"description": "Order creation date in the store timezone. Omitted when no creation date is available."
 						},
 						"date_created_gmt": {
-							"type": [
-								"string",
-								"null"
-							],
-							"format": "date-time"
+							"type": "string",
+							"format": "date-time",
+							"description": "Order creation date in UTC. Omitted when no creation date is available."
 						},
 						"date_modified": {
-							"type": [
-								"string",
-								"null"
-							],
-							"format": "date-time"
+							"type": "string",
+							"format": "date-time",
+							"description": "Order modification date in the store timezone. Omitted when no modification date is available."
 						},
 						"date_modified_gmt": {
-							"type": [
-								"string",
-								"null"
-							],
-							"format": "date-time"
+							"type": "string",
+							"format": "date-time",
+							"description": "Order modification date in UTC. Omitted when no modification date is available."
 						},
 						"line_items": {
 							"type": "array",
@@ -394,7 +368,7 @@
 										"type": "integer"
 									},
 									"quantity": {
-										"type": "integer"
+										"type": "number"
 									},
 									"subtotal": {
 										"type": "string"

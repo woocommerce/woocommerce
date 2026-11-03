@@ -31,11 +31,9 @@
 							"type": "string"
 						},
 						"date_created": {
-							"type": [
-								"string",
-								"null"
-							],
-							"format": "date-time"
+							"type": "string",
+							"format": "date-time",
+							"description": "Note creation date. Omitted when no creation date is available."
 						},
 						"note": {
 							"type": "string"
