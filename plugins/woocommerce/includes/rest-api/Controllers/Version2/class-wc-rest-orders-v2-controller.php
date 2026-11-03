@@ -11,6 +11,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\RestApi\OrderLineItemValidationTrait;
 use Automattic\WooCommerce\Internal\RestApi\OrderLineItemValidator;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\OrderLineMetaValidator;
 use Automattic\WooCommerce\Internal\Utilities\Users;
@@ -30,6 +31,8 @@ use Automattic\WooCommerce\Utilities\StringUtil;
 class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 	// phpcs:enable
+	use OrderLineItemValidationTrait;
+
 	/**
 	 * Endpoint namespace.
 	 *
@@ -906,34 +909,6 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required. For a custom item, send a name and total instead.', 'woocommerce' ), 400 );
 		}
 		return $product_id;
-	}
-
-	/**
-	 * Checks that every new line item, other than custom items, points to an existing product, before any item is saved.
-	 * Otherwise a bad item fails the request after earlier items, and their stock, were already saved.
-	 *
-	 * @since 11.4.0
-	 *
-	 * @throws WC_REST_Exception When a new line item has no product reference, or its product doesn't exist.
-	 * @param mixed $line_items Line items from the request.
-	 * @return void
-	 */
-	protected function check_new_line_item_products( $line_items ) {
-		if ( ! is_array( $line_items ) ) {
-			return;
-		}
-
-		foreach ( $line_items as $posted ) {
-			if ( ! is_array( $posted ) || ! empty( $posted['id'] ) || $this->item_is_null( $posted ) || ( isset( $posted['quantity'] ) && 0 === $posted['quantity'] ) || OrderLineItemValidator::is_custom_line_item( $posted ) ) {
-				continue;
-			}
-
-			$product = wc_get_product( $this->get_product_id( $posted ) );
-			if ( ! $product || ! $product->exists() ) {
-				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- REST API JSON response, not HTML.
-				throw new WC_REST_Exception( 'woocommerce_rest_invalid_product_id', __( 'Invalid product ID.', 'woocommerce' ), 400 );
-			}
-		}
 	}
 
 	/**

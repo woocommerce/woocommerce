@@ -10,6 +10,7 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\RestApi\OrderLineItemValidationTrait;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -26,6 +27,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	use CogsAwareTrait;
+	use OrderLineItemValidationTrait;
 
 	/**
 	 * Endpoint namespace.
