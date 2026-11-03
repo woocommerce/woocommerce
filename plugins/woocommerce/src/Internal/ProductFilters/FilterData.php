@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFilters;
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
@@ -58,6 +59,8 @@ class FilterData {
 	 * @return object
 	 */
 	public function get_filtered_price( array $query_vars ) {
+		$query_vars = $this->get_query_vars_with_default_post_status( $query_vars );
+
 		/**
 		 * Allows offloading the filter data to external services like Elasticsearch.
 		 *
@@ -133,6 +136,8 @@ class FilterData {
 	 * @return array status=>count pairs.
 	 */
 	public function get_stock_status_counts( array $query_vars, array $statuses ) {
+		$query_vars = $this->get_query_vars_with_default_post_status( $query_vars );
+
 		/**
 		 * Filter the data. @see get_filtered_price() for full documentation.
 		 */
@@ -198,6 +203,8 @@ class FilterData {
 	 * @return array rating=>count pairs.
 	 */
 	public function get_rating_counts( array $query_vars ) {
+		$query_vars = $this->get_query_vars_with_default_post_status( $query_vars );
+
 		/**
 		 * Filter the data. @see get_filtered_price() for full documentation.
 		 */
@@ -258,6 +265,8 @@ class FilterData {
 	 * @return array termId=>count pairs.
 	 */
 	public function get_attribute_counts( array $query_vars, string $attribute_to_count ) {
+		$query_vars = $this->get_query_vars_with_default_post_status( $query_vars );
+
 		/**
 		 * Filter the data. @see get_filtered_price() for full documentation.
 		 */
@@ -345,6 +354,8 @@ class FilterData {
 	 * @return array termId=>count pairs.
 	 */
 	public function get_taxonomy_counts( array $query_vars, string $taxonomy_to_count ) {
+		$query_vars = $this->get_query_vars_with_default_post_status( $query_vars );
+
 		/**
 		 * Filter the data. @see get_filtered_price() for full documentation.
 		 *
@@ -500,6 +511,24 @@ class FilterData {
 		}
 
 		return $final_counts;
+	}
+
+	/**
+	 * Make default visibility explicit before generating SQL or shared cache keys.
+	 *
+	 * @param array $query_vars The WP_Query arguments.
+	 * @return array Query arguments with an explicit post status.
+	 */
+	private function get_query_vars_with_default_post_status( array $query_vars ): array {
+		if ( empty( $query_vars['post_status'] ) ) {
+			$post_statuses = get_post_stati( array( 'public' => true ) );
+			if ( current_user_can( 'read_private_products' ) ) {
+				$post_statuses = array_merge( $post_statuses, get_post_stati( array( 'private' => true ) ) );
+			}
+			$query_vars['post_status'] = array_values( $post_statuses );
+		}
+
+		return $query_vars;
 	}
 
 	/**

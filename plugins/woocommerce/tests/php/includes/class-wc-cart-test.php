@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 
 /**
@@ -220,6 +221,30 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		WC()->session->set( 'wc_notices', null );
 		$product->delete( true );
+	}
+
+	/**
+	 * @testdox generate_cart_id should not depend on the order the variation attributes are listed in
+	 */
+	public function test_generate_cart_id_ignores_variation_attribute_order(): void {
+		$this->assertSame(
+			WC()->cart->generate_cart_id(
+				1,
+				2,
+				array(
+					'attribute_pa_size'   => 'small',
+					'attribute_pa_colour' => 'red',
+				)
+			),
+			WC()->cart->generate_cart_id(
+				1,
+				2,
+				array(
+					'attribute_pa_colour' => 'red',
+					'attribute_pa_size'   => 'small',
+				)
+			)
+		);
 	}
 
 	/**
@@ -2136,6 +2161,26 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 				WC_Helper_Order::delete_order( $order->get_id() );
 			}
 		}
+	}
+
+	/**
+	 * @testdox Should clear the cart after payment_complete() cleared order_awaiting_payment, when the order sent to the gateway moved past payment.
+	 */
+	public function test_clear_cart_after_payment_reads_the_order_sent_to_gateway(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => OrderStatus::PENDING ) );
+		$order->set_cart_hash( WC()->cart->get_cart_hash() );
+		$order->save();
+
+		PaymentRecovery::remember_order_sent_to_gateway( $order->get_id() );
+		WC()->session->set( 'order_awaiting_payment', $order->get_id() );
+		$order->payment_complete( 'txn_died_in_transition' );
+
+		wc_clear_cart_after_payment();
+
+		$this->assertTrue( WC()->cart->is_empty(), 'The next page load should empty the cart of an order a card gateway already charged, so a retry cannot place it again.' );
 	}
 
 	/**
