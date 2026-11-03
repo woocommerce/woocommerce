@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Tax;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 use Automattic\WooCommerce\Enums\TaxBasedOn;
+use Automattic\WooCommerce\Internal\Tax\BaseLocationTaxEstimate;
 use Automattic\WooCommerce\Internal\Tax\CartPricingContext;
 use Automattic\WooCommerce\Internal\Tax\CartWithoutShipping;
 use Automattic\WooCommerce\StoreApi\StoreApi;
@@ -112,6 +113,30 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Treats a missing tax location setting as based on shipping, like WC_Customer does.
+	 */
+	public function test_uses_billing_address_when_tax_location_setting_is_missing(): void {
+		$this->add_product_to_cart( true );
+		$this->set_checkout_context();
+		delete_option( 'woocommerce_tax_based_on' );
+
+		$this->assertTrue( $this->sut->should_use_billing_address( $this->customer ), 'A missing setting should behave like the shipping default.' );
+	}
+
+	/**
+	 * @testdox Uses the billing address when a legacy local pickup method is left in the session of a cart without shipping.
+	 */
+	public function test_uses_billing_address_when_legacy_local_pickup_is_left_in_session(): void {
+		$this->add_product_to_cart( true );
+		WC()->session->set( 'chosen_shipping_methods', array( 'local_pickup:1' ) );
+		$this->set_checkout_context();
+
+		$result = $this->customer->get_taxable_address();
+
+		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $result, 'A legacy local pickup choice should not replace the billing address.' );
+	}
+
+	/**
 	 * @testdox Keeps the local pickup location when the taxable address filter is applied without a customer.
 	 *
 	 * Third-party code can apply woocommerce_customer_taxable_address with only the address argument.
@@ -120,6 +145,8 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 		$this->add_product_to_cart( true );
 		$this->choose_local_pickup_in_us();
 		$this->set_checkout_context();
+		// Its callback requires the customer argument, which this one-argument call leaves out.
+		$this->remove_base_location_tax_estimate_callback();
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Simulates a third-party call without the customer argument.
 		$result = apply_filters( 'woocommerce_customer_taxable_address', array( 'US', 'CA', '90210', 'Beverly Hills' ) );
@@ -328,6 +355,13 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 					add_filter( 'woocommerce_cart_needs_shipping', '__return_true' );
 				},
 				false,
+			),
+			'shipping address collection forced'           => array(
+				true,
+				static function (): void {
+					add_filter( 'woocommerce_cart_needs_shipping_address', '__return_true' );
+				},
+				true,
 			),
 		);
 	}
@@ -566,6 +600,19 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 		$product->save();
 
 		return (string) WC()->cart->add_to_cart( $product->get_id() );
+	}
+
+	/**
+	 * Detach the shop base tax estimate callback from the taxable address filter.
+	 */
+	private function remove_base_location_tax_estimate_callback(): void {
+		global $wp_filter;
+
+		foreach ( $wp_filter['woocommerce_customer_taxable_address']->callbacks[10] ?? array() as $callback ) {
+			if ( is_array( $callback['function'] ) && $callback['function'][0] instanceof BaseLocationTaxEstimate ) {
+				remove_filter( 'woocommerce_customer_taxable_address', $callback['function'], 10 );
+			}
+		}
 	}
 
 	/**

@@ -50,7 +50,7 @@ class CartWithoutShipping {
 	 * @return bool True when the billing address should be used.
 	 */
 	public function should_use_billing_address( \WC_Customer $customer ): bool {
-		if ( TaxBasedOn::SHIPPING !== get_option( 'woocommerce_tax_based_on' ) ) {
+		if ( TaxBasedOn::SHIPPING !== get_option( 'woocommerce_tax_based_on', TaxBasedOn::SHIPPING ) ) {
 			return false;
 		}
 
