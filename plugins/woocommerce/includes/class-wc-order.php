@@ -2636,7 +2636,8 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * Payment gateways should call this when they choose test or live credentials for a charge, before saving the order.
 	 * WooCommerce never sets it, so an order whose gateway doesn't call it has no payment mode. Saving the order with
-	 * another gateway clears the mode, unless this was called on the same object before that switch.
+	 * another gateway clears the mode, unless this was called on the same object before that switch. That includes
+	 * changes after payment, such as an admin edit or a REST update, so a cleared mode can only count a test order as live.
 	 *
 	 * @since 11.4.0
 	 * @param string $mode One of the PaymentMode constants, or an empty string to clear it.
