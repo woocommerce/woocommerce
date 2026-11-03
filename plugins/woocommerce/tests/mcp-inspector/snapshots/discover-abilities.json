@@ -1,0 +1,52 @@
+[
+	{
+		"name": "woocommerce/orders-query",
+		"label": "Query orders",
+		"description": "Find orders by ID or common order filters."
+	},
+	{
+		"name": "woocommerce/order-add-note",
+		"label": "Add order note",
+		"description": "Add a note to an order."
+	},
+	{
+		"name": "woocommerce/order-notes-query",
+		"label": "Query order notes",
+		"description": "List every note of an order, newest first."
+	},
+	{
+		"name": "woocommerce/order-update-status",
+		"label": "Update order status",
+		"description": "Update an order status."
+	},
+	{
+		"name": "woocommerce/payment-gateways-query",
+		"label": "Query payment gateways",
+		"description": "List the payment gateways in checkout order, enabled or not, or get one by ID."
+	},
+	{
+		"name": "woocommerce/products-query",
+		"label": "Query products",
+		"description": "Find products by ID or common catalog filters."
+	},
+	{
+		"name": "woocommerce/product-terms-query",
+		"label": "Query product terms",
+		"description": "Find product categories, tags or brands. Use include to retrieve specific term IDs."
+	},
+	{
+		"name": "woocommerce/product-create",
+		"label": "Create product",
+		"description": "Create a product using supported catalog fields."
+	},
+	{
+		"name": "woocommerce/product-delete",
+		"label": "Delete product",
+		"description": "Delete, trash, or restore a product."
+	},
+	{
+		"name": "woocommerce/product-update",
+		"label": "Update product",
+		"description": "Update an existing product using supported catalog fields."
+	}
+]

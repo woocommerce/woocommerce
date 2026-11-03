@@ -1,0 +1,159 @@
+{
+	"tools": [
+		{
+			"name": "mcp-adapter-discover-abilities",
+			"title": "Discover Abilities",
+			"description": "Discover all available WordPress abilities in the system. Returns a list of all registered abilities with their basic information.",
+			"inputSchema": {
+				"type": "object",
+				"properties": {}
+			},
+			"outputSchema": {
+				"type": "object",
+				"properties": {
+					"abilities": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"name": {
+									"type": "string"
+								},
+								"label": {
+									"type": "string"
+								},
+								"description": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"name",
+								"label",
+								"description"
+							]
+						}
+					}
+				},
+				"required": [
+					"abilities"
+				]
+			},
+			"annotations": {
+				"title": "Discover Abilities",
+				"readOnlyHint": true,
+				"destructiveHint": false,
+				"idempotentHint": true
+			}
+		},
+		{
+			"name": "mcp-adapter-get-ability-info",
+			"title": "Get Ability Info",
+			"description": "Get detailed information about a specific WordPress ability including its input/output schema, description, and usage examples.",
+			"inputSchema": {
+				"type": "object",
+				"properties": {
+					"ability_name": {
+						"type": "string",
+						"description": "The full name of the ability to get information about"
+					}
+				},
+				"required": [
+					"ability_name"
+				]
+			},
+			"outputSchema": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"label": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string"
+					},
+					"input_schema": {
+						"type": "object",
+						"description": "JSON Schema for the ability input parameters"
+					},
+					"output_schema": {
+						"type": "object",
+						"description": "JSON Schema for the ability output structure"
+					},
+					"meta": {
+						"type": "object",
+						"description": "Additional metadata about the ability"
+					}
+				},
+				"required": [
+					"name",
+					"label",
+					"description",
+					"input_schema"
+				]
+			},
+			"annotations": {
+				"title": "Get Ability Info",
+				"readOnlyHint": true,
+				"destructiveHint": false,
+				"idempotentHint": true
+			}
+		},
+		{
+			"name": "mcp-adapter-execute-ability",
+			"title": "Execute Ability",
+			"description": "Execute a WordPress ability with the provided parameters. This is the primary execution layer that can run any registered ability.",
+			"inputSchema": {
+				"type": "object",
+				"properties": {
+					"ability_name": {
+						"type": "string",
+						"description": "The full name of the ability to execute"
+					},
+					"parameters": {
+						"type": "object",
+						"description": "Parameters to pass to the ability"
+					}
+				},
+				"required": [
+					"ability_name",
+					"parameters"
+				]
+			},
+			"outputSchema": {
+				"type": "object",
+				"properties": {
+					"success": {
+						"type": "boolean"
+					},
+					"data": {
+						"type": [
+							"object",
+							"array",
+							"string",
+							"number",
+							"integer",
+							"boolean",
+							"null"
+						],
+						"description": "The result data from the ability execution"
+					},
+					"error": {
+						"type": "string",
+						"description": "Error message if execution failed"
+					}
+				},
+				"required": [
+					"success"
+				]
+			},
+			"annotations": {
+				"title": "Execute Ability",
+				"readOnlyHint": false,
+				"destructiveHint": true,
+				"idempotentHint": false
+			}
+		}
+	]
+}
