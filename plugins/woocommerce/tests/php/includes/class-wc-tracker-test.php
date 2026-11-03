@@ -599,6 +599,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 			array( WC_Gateway_BACS::ID, OrderStatus::COMPLETED, 20, PaymentMode::LIVE ),
 			array( WC_Gateway_BACS::ID, OrderStatus::PENDING, 40, PaymentMode::TEST ),
 			array( WC_Gateway_COD::ID, OrderStatus::COMPLETED, 80, '' ),
+			array( WC_Gateway_COD::ID, OrderStatus::PROCESSING, 160, PaymentMode::TEST ),
 		);
 		foreach ( $orders as list( $payment_method, $status, $total, $mode ) ) {
 			$order = wc_create_order( array( 'status' => $status ) );
@@ -614,13 +615,16 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 			array(
 				'gateway_bacs_USD_count' => 1,
 				'gateway_bacs_USD_total' => 10,
+				'gateway_cod_USD_count'  => 1,
+				'gateway_cod_USD_total'  => 160,
 			),
 			$tracking_data['test_orders_by_gateway'],
-			'Only paid orders recorded as test should be counted'
+			'Only paid orders recorded as test should be counted, per gateway'
 		);
 		$this->assertEquals( 2, $tracking_data['orders']['gateway_bacs_USD_count'], 'Gateway counts should include test orders' );
 		$this->assertEquals( 30, $tracking_data['orders']['gateway_bacs_USD_total'], 'Gateway totals should include test orders' );
-		$this->assertEquals( 1, $tracking_data['orders']['gateway_cod_USD_count'], 'Orders without a payment mode should keep counting' );
+		$this->assertEquals( 2, $tracking_data['orders']['gateway_cod_USD_count'], 'Orders without a payment mode should keep counting' );
+		$this->assertEquals( 240, $tracking_data['orders']['gateway_cod_USD_total'], 'Gateway totals should include orders without a payment mode' );
 	}
 
 	/**

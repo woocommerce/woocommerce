@@ -3,12 +3,22 @@ declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Enums\PaymentMode;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Tests for the WC_Order class.
  */
 class WC_Order_Test extends WC_Unit_Test_Case {
+	use HPOSToggleTrait;
+
+	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start, so the sync test can run with posts authoritative.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::setup_cot_tables();
+	}
 
 	/**
 	 * @testdox Should keep the payment mode a gateway sets after the order is saved and read again.
@@ -73,15 +83,22 @@ class WC_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should keep a payment mode the gateway set on the loaded order when it then switches the gateway ID.
+	 * @testdox Should keep a payment mode the gateway set on the loaded order when it then switches the gateway ID, even after saving the mode first.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $save_before_switch Whether the gateway saves the order after recording the mode and before switching its gateway ID.
 	 */
-	public function test_set_payment_method_keeps_payment_mode_set_on_the_loaded_order(): void {
+	public function test_set_payment_method_keeps_payment_mode_set_on_the_loaded_order( bool $save_before_switch ): void {
 		$order = wc_create_order();
 		$order->set_payment_method( WC_Gateway_BACS::ID );
 		$order->save();
 
 		$order = wc_get_order( $order->get_id() );
 		$order->set_payment_mode( PaymentMode::TEST );
+		if ( $save_before_switch ) {
+			$order->save();
+		}
 		$order->set_payment_method( WC_Gateway_COD::ID );
 		$order->save();
 
@@ -94,30 +111,57 @@ class WC_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should keep the payment mode in the posts copy when HPOS syncs a gateway switch the gateway recorded a mode for.
+	 * @testdox Should sync a gateway switch to the backup copy of the order, keeping the mode only when the gateway recorded it before the switch.
+	 * @testWith [true, "test"]
+	 *           [false, ""]
+	 *
+	 * @param bool   $set_before_switch Whether the gateway records the mode on the loaded order before switching its gateway ID.
+	 * @param string $expected_mode     The payment mode expected in the backup copy after the switch.
 	 */
-	public function test_payment_mode_set_before_gateway_switch_reaches_synced_posts(): void {
-		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$this->markTestSkipped( 'Needs HPOS to be authoritative.' );
-		}
-
+	public function test_payment_mode_gateway_switch_reaches_synced_copy( bool $set_before_switch, string $expected_mode ): void {
 		$sync_option_filter = 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION;
 		add_filter( $sync_option_filter, array( $this, 'return_yes' ) );
 
 		try {
 			$order = wc_create_order();
 			$order->set_payment_method( WC_Gateway_BACS::ID );
+			$order->set_payment_mode( PaymentMode::TEST );
 			$order->save();
+			$this->assertSame( PaymentMode::TEST, $this->get_synced_payment_mode( $order->get_id() ), 'The backup copy should receive the payment mode' );
 
 			$order = wc_get_order( $order->get_id() );
-			$order->set_payment_mode( PaymentMode::TEST );
+			if ( $set_before_switch ) {
+				$order->set_payment_mode( PaymentMode::TEST );
+			}
 			$order->set_payment_method( WC_Gateway_COD::ID );
 			$order->save();
 
-			$this->assertSame( PaymentMode::TEST, get_post_meta( $order->get_id(), '_wc_payment_mode', true ), 'The posts copy should keep the payment mode' );
+			$this->assertSame( $expected_mode, $this->get_synced_payment_mode( $order->get_id() ), 'The backup copy should match the authoritative payment mode' );
 		} finally {
 			remove_filter( $sync_option_filter, array( $this, 'return_yes' ) );
 		}
+	}
+
+	/**
+	 * Read the payment mode from the backup copy of an order: the posts copy when HPOS is authoritative, the HPOS copy otherwise.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return string
+	 */
+	private function get_synced_payment_mode( int $order_id ): string {
+		global $wpdb;
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return (string) get_post_meta( $order_id, '_wc_payment_mode', true );
+		}
+
+		$meta_table = OrdersTableDataStore::get_meta_table_name();
+		return (string) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT meta_value FROM $meta_table WHERE order_id = %d AND meta_key = '_wc_payment_mode'", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is provided by the data store.
+				$order_id
+			)
+		);
 	}
 
 	/**
