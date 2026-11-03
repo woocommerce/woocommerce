@@ -71,9 +71,8 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 	 * @return bool
 	 */
 	public static function can_query_terms( $input = array() ): bool {
-		$taxonomy = $input['taxonomy'] ?? '';
-		return in_array( $taxonomy, array( 'product_cat', 'product_tag', 'product_brand' ), true )
-			&& taxonomy_exists( $taxonomy )
+		$taxonomy = $input['taxonomy'];
+		return taxonomy_exists( $taxonomy )
 			&& wc_rest_check_product_term_permissions( $taxonomy, 'read' );
 	}
 

@@ -80,7 +80,7 @@ class OrderAddNote extends AbstractDomainAbility implements AbilityDefinition {
 			return $order;
 		}
 
-		$note = isset( $input['note'] ) ? trim( wp_kses_post( $input['note'] ) ) : '';
+		$note = trim( wp_kses_post( $input['note'] ) );
 
 		if ( '' === $note ) {
 			return new \WP_Error(

@@ -606,17 +606,7 @@ trait ProductAbilityTrait {
 	 * @return \WC_Product|\WP_Error
 	 */
 	protected static function get_product_from_input( array $input ) {
-		if ( empty( $input['id'] ) ) {
-			return new \WP_Error(
-				'woocommerce_product_id_required',
-				__( 'Product ID is required.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		$product_id = $input['id'];
-
-		$product = wc_get_product( $product_id );
+		$product = wc_get_product( $input['id'] );
 
 		if ( ! $product ) {
 			return new \WP_Error(
