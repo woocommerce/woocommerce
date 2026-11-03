@@ -1,5 +1,5 @@
 {
-	"core": "https://wordpress.org/wordpress-latest.zip",
+	"core": "https://downloads.wordpress.org/release/wordpress-7.1.4.zip",
 	"phpVersion": "8.1",
 	"testsEnvironment": false,
 	"port": 8087,

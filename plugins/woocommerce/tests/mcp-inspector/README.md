@@ -50,6 +50,11 @@ The suite runs against its own environment, `.wp-env.mcp.json`, which adds the M
 pnpm env:mcp
 ```
 
+The schemas take some of their `enum` values from WordPress and from WooCommerce functions outside the abilities, so a change there changes the snapshots:
+
+- WordPress and the MCP Adapter are pinned in `.wp-env.mcp.json`. Bump them on purpose, together with the snapshots.
+- The CI job runs on pull requests that change the abilities, the suite, or `includes/wc-core-functions.php`, `wc-order-functions.php` and `wc-product-functions.php`, where the currency, order status, order type, product type and stock status lists come from. A schema that reads from another file needs that file added to the job's `changes` in `package.json`. Pushes to trunk run the job whatever changed.
+
 ## Running
 
 ```bash

@@ -751,6 +751,9 @@
 					"changes": [
 						"src/Abilities/**/*.php",
 						"src/Internal/Abilities/**/*.php",
+						"includes/wc-core-functions.php",
+						"includes/wc-order-functions.php",
+						"includes/wc-product-functions.php",
 						"tests/mcp-inspector/**",
 						".wp-env.mcp.json"
 					],
