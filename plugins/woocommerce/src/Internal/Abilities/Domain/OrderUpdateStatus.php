@@ -103,7 +103,7 @@ class OrderUpdateStatus extends ActionableAbility {
 			);
 		}
 
-		$status = OrderUtil::remove_status_prefix( sanitize_key( $input['status'] ) );
+		$status = OrderUtil::remove_status_prefix( $input['status'] );
 
 		if ( ! in_array( $status, self::get_query_order_status_slugs(), true ) ) {
 			return new \WP_Error(

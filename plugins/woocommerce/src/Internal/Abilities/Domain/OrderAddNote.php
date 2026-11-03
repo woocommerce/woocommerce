@@ -92,7 +92,7 @@ class OrderAddNote extends AbstractDomainAbility implements AbilityDefinition {
 
 		$note_id = $order->add_order_note(
 			$note,
-			! empty( $input['customer_note'] ) ? 1 : 0,
+			( $input['customer_note'] ?? false ) ? 1 : 0,
 			get_current_user_id() > 0
 		);
 

@@ -76,7 +76,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function execute( array $input ) {
-		$include_line_items = ! empty( $input['include_line_items'] );
+		$include_line_items = $input['include_line_items'] ?? false;
 
 		if ( ! empty( $input['id'] ) && ! empty( $input['filters'] ) ) {
 			return new \WP_Error(
@@ -118,11 +118,11 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 		foreach ( array( 'billing_email', 'order' ) as $field ) {
 			if ( ! empty( $input[ $field ] ) ) {
-				$args[ $field ] = wc_clean( $input[ $field ] );
+				$args[ $field ] = $input[ $field ];
 			}
 		}
 
-		$args['status'] = array_map( 'wc_clean', $input['status'] ?? array() );
+		$args['status'] = $input['status'] ?? array();
 
 		if ( empty( $args['status'] ) ) {
 			$args['status'] = 'shop_order' === $args['type'] ? self::get_allowed_order_status_slugs() : self::get_query_order_status_slugs();
@@ -131,8 +131,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 		$args['status'] = array_map( array( __CLASS__, 'prepare_status_arg' ), (array) $args['status'] );
 
 		if ( ! empty( $input['orderby'] ) ) {
-			$orderby         = sanitize_text_field( $input['orderby'] );
-			$args['orderby'] = self::prepare_orderby_arg( $orderby );
+			$args['orderby'] = self::prepare_orderby_arg( $input['orderby'] );
 		}
 
 		foreach ( array( 'customer_id', 'parent' ) as $field ) {
@@ -398,8 +397,8 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @return array{0: int|null, 1: int|null}|null Null when neither field is set, or when a provided value is not a valid date-time.
 	 */
 	private static function resolve_date_range_timestamps( array $input, string $after_field, string $before_field ): ?array {
-		$after  = isset( $input[ $after_field ] ) ? sanitize_text_field( $input[ $after_field ] ) : '';
-		$before = isset( $input[ $before_field ] ) ? sanitize_text_field( $input[ $before_field ] ) : '';
+		$after  = $input[ $after_field ] ?? '';
+		$before = $input[ $before_field ] ?? '';
 
 		if ( '' === $after && '' === $before ) {
 			return null;
