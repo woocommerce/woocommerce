@@ -352,11 +352,6 @@ class ReadinessAbilities implements RegisterHooksInterface {
 										'type'        => 'string',
 										'description' => __( 'On a likely conflict: the address where it was seen.', 'woocommerce' ),
 									),
-									'plugins'  => array(
-										'type'        => 'array',
-										'items'       => array( 'type' => 'string' ),
-										'description' => __( 'On a likely conflict: active plugins known to output the same thing. A hint, not the cause.', 'woocommerce' ),
-									),
 								),
 							),
 						),
