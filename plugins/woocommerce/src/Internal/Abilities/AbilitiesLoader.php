@@ -14,6 +14,10 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderNotesQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\CouponsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\CouponCreate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\CouponUpdate;
+
 use Automattic\WooCommerce\Internal\Abilities\Domain\PaymentGatewaysQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
@@ -42,6 +46,9 @@ class AbilitiesLoader {
 	 */
 	private const CORE_ABILITY_DEFINITION_CLASSES = array(
 		OrdersQuery::class,
+		CouponsQuery::class,
+		CouponCreate::class,
+		CouponUpdate::class,
 		OrderAddNote::class,
 		OrderNotesQuery::class,
 		OrderUpdateStatus::class,
