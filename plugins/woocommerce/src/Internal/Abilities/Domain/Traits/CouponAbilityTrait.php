@@ -193,9 +193,18 @@ trait CouponAbilityTrait {
 	 * @return bool
 	 */
 	protected static function is_coupon_code_taken( string $code, int $coupon_id = 0 ): bool {
-		$existing_id = wc_get_coupon_id_by_code( $code, $coupon_id );
-
-		return $existing_id > 0 && $existing_id !== $coupon_id;
+		$query = new \WP_Query(
+			array(
+				'post_type'      => 'shop_coupon',
+				'post_status'    => self::get_coupon_status_slugs(),
+				'title'          => $code,
+				'post__not_in'   => array( $coupon_id ),
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'no_found_rows'  => true,
+			)
+		);
+		return ! empty( $query->posts );
 	}
 
 	/**
@@ -206,6 +215,16 @@ trait CouponAbilityTrait {
 	 * @return true|\WP_Error
 	 */
 	protected static function set_coupon_props_from_input( \WC_Coupon $coupon, array $input ) {
+		if ( 'future' === $coupon->get_status() && ( ! $coupon->get_date_created() || $coupon->get_date_created()->getTimestamp() <= time() ) ) {
+			return new \WP_Error( 'woocommerce_ability_coupon_invalid_schedule', __( 'Scheduling requires an existing future publication date.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+		if ( isset( $input['date_expires'] ) && '' !== $input['date_expires'] ) {
+			$date = date_parse( $input['date_expires'] );
+			if ( $date['error_count'] || $date['warning_count'] || ! $date['year'] || ! $date['month'] || ! $date['day'] ) {
+				return new \WP_Error( 'woocommerce_ability_coupon_invalid_expiry', __( 'Expiry must be a valid date or datetime.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+		}
+
 		if ( isset( $input['code'] ) ) {
 			$code = wc_format_coupon_code( (string) $input['code'] );
 
@@ -245,6 +264,9 @@ trait CouponAbilityTrait {
 				if ( array_key_exists( $field, $input ) ) {
 					$coupon->$setter( $input[ $field ] ?? null );
 				}
+			}
+			if ( isset( $input['discount_type'] ) && ! isset( $input['amount'] ) ) {
+				$coupon->set_amount( $coupon->get_amount( 'edit' ) );
 			}
 		} catch ( \WC_Data_Exception $exception ) {
 			return new \WP_Error(

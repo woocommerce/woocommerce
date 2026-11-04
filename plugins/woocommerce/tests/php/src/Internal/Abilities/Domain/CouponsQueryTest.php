@@ -133,4 +133,43 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 		);
 		$this->assertSame( 'draft', ( new \WC_Coupon( $coupon->get_id() ) )->get_status() );
 	}
+
+	/**
+	 * @testdox Should reject invalid mutations without changing stored coupon data.
+	 * @testWith [{"status":"future"}]
+	 *           [{"date_expires":"not-a-date"}]
+	 *           [{"discount_type":"percent"}]
+	 * @param array $input Mutation.
+	 */
+	public function test_invalid_mutations( array $input ): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'invalid-mutation' );
+		$coupon->set_amount( '150' );
+		$coupon->set_date_expires( '2030-01-01' );
+		$coupon->save();
+		$before  = ( new \WC_Coupon( $coupon->get_id() ) )->get_data();
+		$class   = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponUpdate::class;
+		$ability = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
+		$this->assertWPError( $ability->execute( $input + array( 'id' => $coupon->get_id() ) ) );
+		$this->assertEquals( $before, ( new \WC_Coupon( $coupon->get_id() ) )->get_data() );
+	}
+
+	/**
+	 * @testdox Should reject duplicate draft codes and unscheduled future creation.
+	 * @testWith [{"code":"existing-draft"}]
+	 *           [{"code":"new-future","status":"future"}]
+	 * @param array $input Creation input.
+	 */
+	public function test_invalid_creation( array $input ): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'existing-draft' );
+		$coupon->set_status( 'draft' );
+		$coupon->save();
+		$class   = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponCreate::class;
+		$ability = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
+		$this->assertWPError( $ability->execute( $input ) );
+	}
+
 }
