@@ -60,7 +60,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '11.2.1';
+	public $version = '11.2.2';
 
 	/**
 	 * WooCommerce Schema version.
