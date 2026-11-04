@@ -11,6 +11,8 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\ProductFilters\CacheController;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -236,11 +238,14 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 		);
 		if ( method_exists( 'WC_Install', 'verify_base_tables' ) ) {
 			$tools['verify_db_tables'] = array(
-				'name'   => __( 'Verify base database tables', 'woocommerce' ),
-				'button' => __( 'Verify database', 'woocommerce' ),
-				'desc'   => sprintf(
+				'name'             => __( 'Verify base database tables', 'woocommerce' ),
+				'button'           => __( 'Verify database', 'woocommerce' ),
+				'desc'             => sprintf(
 					__( 'Verify if all base database tables are present.', 'woocommerce' )
 				),
+				// Re-creating tables changes what schema-dependent tools can offer, so re-render
+				// the list this tool is part of.
+				'requires_refresh' => true,
 			);
 		}
 
@@ -553,6 +558,11 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				WC_Cache_Helper::get_transient_version( 'shipping', true );
 
 				wc_get_container()->get( CacheController::class )->delete_filter_data_transients();
+
+				// These names end in a product ID or a hash, so they can only be found by prefix.
+				wc_get_container()->get( DatabaseUtil::class )->delete_transients_by_prefix(
+					array_merge( ProductUtil::PRODUCT_SPECIFIC_TRANSIENT_PREFIXES, array( 'wc_product_loop_', 'wc_report_' ) )
+				);
 
 				$message = __( 'Product transients cleared', 'woocommerce' );
 				break;

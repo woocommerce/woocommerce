@@ -117,9 +117,8 @@ const Edit = ( props: EditProps ) => {
 			? sortFilterOptions( [ ...termOptionsPreview ], sortOrder )
 			: []
 	);
-	const [ isOptionsLoading, setIsOptionsLoading ] = useState< boolean >(
-		! isPreview
-	);
+	const [ isOptionsLoading, setIsOptionsLoading ] =
+		useState< boolean >( ! isPreview );
 
 	// Fetch taxonomy terms using WordPress core data
 	const { taxonomyTerms, isTermsLoading } = useSelect(
@@ -140,8 +139,7 @@ const Edit = ( props: EditProps ) => {
 			return {
 				taxonomyTerms:
 					( getEntityRecords( 'taxonomy', taxonomy, selectArgs ) as
-						| WPTaxonomyTerm[]
-						| null ) || EMPTY_TAXONOMY_TERMS,
+						WPTaxonomyTerm[] | null ) || EMPTY_TAXONOMY_TERMS,
 				isTermsLoading: ! hasFinishedResolution( 'getEntityRecords', [
 					'taxonomy',
 					taxonomy,
@@ -270,7 +268,7 @@ const Edit = ( props: EditProps ) => {
 		? false
 		: isTermsLoading || isFilterCountsLoading || isOptionsLoading;
 
-	if ( ! taxonomy )
+	if ( ! taxonomy ) {
 		return (
 			<div { ...innerBlocksProps }>
 				<TaxonomyFilterInspectorControls { ...props } />
@@ -284,8 +282,9 @@ const Edit = ( props: EditProps ) => {
 				</Notice>
 			</div>
 		);
+	}
 
-	if ( ! isLoading && ! isPreview && taxonomyTerms.length === 0 )
+	if ( ! isLoading && ! isPreview && taxonomyTerms.length === 0 ) {
 		return (
 			<div { ...innerBlocksProps }>
 				<TaxonomyFilterInspectorControls { ...props } />
@@ -303,6 +302,7 @@ const Edit = ( props: EditProps ) => {
 				</Notice>
 			</div>
 		);
+	}
 
 	return (
 		<div { ...innerBlocksProps }>

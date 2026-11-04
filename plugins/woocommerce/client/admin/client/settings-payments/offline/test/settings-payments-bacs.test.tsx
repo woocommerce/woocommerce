@@ -31,6 +31,18 @@ const bacsSettings = {
 	settings: {
 		title: { value: 'Direct bank transfer' },
 		instructions: { value: 'Use your order ID as the payment reference.' },
+		enable_for_methods: {
+			value: [ 'flat_rate:1' ],
+			options: {
+				'Flat rate': {
+					'flat_rate:1': 'Flat rate (#1)',
+				},
+				'Free shipping': {
+					'free_shipping:2': 'Free shipping (#2)',
+				},
+			},
+		},
+		enable_for_virtual: { value: 'yes' },
 	},
 };
 
@@ -85,6 +97,14 @@ describe( 'SettingsPaymentsBacs', () => {
 		expect( screen.getByLabelText( 'Instructions' ) ).toHaveValue(
 			'Use your order ID as the payment reference.'
 		);
+		expect(
+			screen.getByLabelText( 'Enable for shipping methods' )
+		).toBeInTheDocument();
+		// The stored shipping method selection is rendered as a tag.
+		expect( screen.getByText( 'Flat rate (#1)' ) ).toBeInTheDocument();
+		expect(
+			screen.getByLabelText( 'Accept for virtual orders' )
+		).toBeChecked();
 	} );
 
 	it( 'renders the bank accounts section', () => {
@@ -250,6 +270,7 @@ describe( 'SettingsPaymentsBacs', () => {
 		fireEvent.click(
 			screen.getByLabelText( 'Enable direct bank transfers' )
 		);
+		fireEvent.click( screen.getByLabelText( 'Accept for virtual orders' ) );
 		fireEvent.click(
 			screen.getByRole( 'button', { name: 'Save changes' } )
 		);
@@ -262,6 +283,8 @@ describe( 'SettingsPaymentsBacs', () => {
 				settings: {
 					title: 'Bank transfer payments',
 					instructions: 'Use your order ID as the payment reference.',
+					enable_for_methods: [ 'flat_rate:1' ],
+					enable_for_virtual: 'no',
 				},
 			} );
 		} );
@@ -316,10 +339,19 @@ describe( 'SettingsPaymentsBacs', () => {
 		expect( screen.getByLabelText( 'Description' ) ).toHaveFocus();
 		await userEvent.tab();
 		expect( screen.getByLabelText( 'Instructions' ) ).toHaveFocus();
-		await userEvent.tab();
-		expect(
-			screen.getByRole( 'button', { name: 'Save changes' } )
-		).toHaveFocus();
+		// The shipping methods tree select and the virtual orders checkbox
+		// sit between Instructions and Save; tab until Save receives focus.
+		const saveButton = screen.getByRole( 'button', {
+			name: 'Save changes',
+		} );
+		for (
+			let i = 0;
+			i < 6 && saveButton.ownerDocument.activeElement !== saveButton;
+			i++
+		) {
+			await userEvent.tab();
+		}
+		expect( saveButton ).toHaveFocus();
 	} );
 
 	it( 'shows an error notice when saving fails', async () => {

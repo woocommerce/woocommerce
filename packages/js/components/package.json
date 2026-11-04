@@ -55,7 +55,9 @@
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
+		"lint:fix:lang:style": "stylelint 'src/**/*.scss' --fix",
 		"lint:lang:js": "eslint src",
+		"lint:lang:style": "stylelint 'src/**/*.scss'",
 		"lint:lang:types": "tsc --build --emitDeclarationOnly",
 		"prepack": "pnpm build:publish:project",
 		"test:js": "jest --config ./jest.config.json --passWithNoTests",
@@ -150,9 +152,9 @@
 	"devDependencies": {
 		"@babel/core": "catalog:tooling",
 		"@babel/runtime": "catalog:tooling",
-		"@storybook/addon-docs": "10.5.10",
-		"@storybook/addon-links": "10.5.10",
-		"@storybook/react-webpack5": "10.5.10",
+		"@storybook/addon-docs": "10.6.5",
+		"@storybook/addon-links": "10.6.5",
+		"@storybook/react-webpack5": "10.6.5",
 		"@testing-library/dom": "10.4.1",
 		"@testing-library/jest-dom": "^6.x.x",
 		"@testing-library/react": "^16.x.x",
@@ -172,6 +174,7 @@
 		"@wordpress/browserslist-config": "next",
 		"css-loader": "6.11.x",
 		"eslint": "^10.0.0",
+		"stylelint": "catalog:tooling",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"jest-environment-jsdom": "29.5.x",
@@ -185,7 +188,7 @@
 		"sass-loader": "10.5.x",
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
-		"uuid": "^9.0.1",
+		"uuid": "^11.1.1",
 		"webpack": "catalog:tooling",
 		"webpack-cli": "5.1.x"
 	},
@@ -193,7 +196,7 @@
 		"ci": {
 			"lint": {
 				"command": "lint",
-				"changes": "src/**/*.{js,ts,tsx}"
+				"changes": "src/**/*.{js,ts,tsx,scss}"
 			},
 			"tests": [
 				{

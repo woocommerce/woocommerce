@@ -6,6 +6,7 @@
 		display: flex;
 		flex-flow: row wrap;
 		align-items: flex-start;
+		column-gap: $gap-largest;
 		padding-left: 5px;
 
 		&:has(> :first-child.wp-block-woocommerce-checkout-totals-block) {
@@ -98,6 +99,7 @@ body.wc-lock-selected-block--remove {
 	> .block-editor-inner-blocks > .block-editor-block-list__layout {
 		display: flex;
 		flex-wrap: wrap;
+		column-gap: $gap-largest;
 		margin: 0 auto $gap;
 		position: relative;
 		&:has(> :last-child.wp-block-woocommerce-checkout-fields-block) {

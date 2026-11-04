@@ -81,7 +81,10 @@ class FormHandlerService {
 			);
 
 			if ( \is_wp_error( $result ) ) {
-				wc_add_notice( $this->signup_service->get_error_message( $result->get_error_code() ), 'error' );
+				// Match the resend cooldown, which asks the customer to wait rather than
+				// reporting a failure.
+				$notice_type = SignupService::ERROR_RATE_LIMITED === $result->get_error_code() ? 'notice' : 'error';
+				wc_add_notice( $this->signup_service->get_error_message( $result->get_error_code() ), $notice_type );
 				return;
 			}
 

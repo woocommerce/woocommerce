@@ -2,14 +2,13 @@
 * Fonts
 */
 @import "fonts";
-
 @import "mixins";
 @import "animation";
 
 /**
  * Forms
  */
- @import "forms";
+@import "forms";
 
 /*
 	Layout fix.
@@ -23,12 +22,14 @@
 		margin-right: auto;
 
 		.woocommerce {
+
 			@include clearfix();
 		}
 	}
 }
 
 .theme-twentytwentythree {
+
 	.container-colors {
 		display: flex;
 		flex-direction: row;
@@ -38,7 +39,6 @@
 		width: 20%;
 		height: 100px;
 		text-align: center;
-		vert-align: middle;
 	}
 
 	.base {
@@ -73,6 +73,7 @@
 
 	// Make quantity selector less wide.
 	.quantity {
+
 		input[type="number"] {
 			width: 3em;
 		}
@@ -94,6 +95,7 @@
 	}
 	// Checkout notice group styling.
 	.woocommerce-NoticeGroup-checkout {
+
 		ul.woocommerce-error[role="alert"] {
 			color: var(--wp--preset--color--contrast);
 			background: var(--wp--preset--color--primary);
@@ -101,6 +103,7 @@
 			&::before {
 				display: none;
 			}
+
 			li {
 				display: inherit;
 				margin-bottom: 1rem;
@@ -158,6 +161,7 @@
 		flex-direction: row;
 		flex-wrap: wrap;
 		justify-content: flex-start;
+
 		@media only screen and (max-width: 768px) {
 			justify-content: space-between;
 		}
@@ -242,6 +246,7 @@
 
 		// How price gets displayed
 		.entry-summary {
+
 			.woocommerce-Price-amount,
 			del,
 			.price {
@@ -253,6 +258,7 @@
 			position: relative;
 
 			.woocommerce-product-gallery__trigger {
+
 				@include woocommerce-product-gallery__trigger;
 			}
 
@@ -283,9 +289,11 @@
 			}
 
 			.woocommerce-product-rating {
+
 				.star-rating {
 					display: inline-block;
 				}
+
 				.woocommerce-review-link {
 					display: inline-block;
 					overflow: hidden;
@@ -335,6 +343,7 @@
 		}
 
 		table.group_table {
+
 			td {
 				padding-right: 0.5rem;
 				padding-bottom: 1rem;
@@ -355,6 +364,7 @@
 
 	// Reviews tab.
 	.woocommerce-Reviews {
+
 		ol.commentlist {
 			list-style: none;
 			padding-left: 0;
@@ -384,6 +394,7 @@
 		}
 
 		.comment-form-rating {
+
 			label {
 				display: inline-block;
 				padding-right: var(--wp--style--block-gap);
@@ -392,6 +403,7 @@
 
 			p.stars {
 				display: inline;
+
 				a::before {
 					color: var(--wp--preset--color--contrast);
 				}
@@ -399,6 +411,7 @@
 		}
 
 		.comment-form-comment {
+
 			label {
 				float: left;
 				padding-right: var(--wp--style--block-gap);
@@ -573,9 +586,11 @@ ul.wc-tabs {
 
 	// Attributes table styles.
 	table.woocommerce-product-attributes {
+
 		tbody {
 
-			td, th {
+			td,
+			th {
 				padding: 0.2rem 0.2rem 0.2rem 0;
 
 				p {
@@ -592,6 +607,7 @@ ul.wc-tabs {
 }
 
 .woocommerce-page {
+
 	.woocommerce-cart-form {
 
 		// Make coupon code input less ginormous.
@@ -600,6 +616,7 @@ ul.wc-tabs {
 		}
 
 		.actions {
+
 			button.button {
 				height: initial;
 			}
@@ -620,6 +637,7 @@ ul.wc-tabs {
 				}
 
 				@media only screen and (max-width: 768px) {
+
 					td {
 						padding-left: 0;
 					}
@@ -675,7 +693,7 @@ ul.wc-tabs {
 		}
 
 		.woocommerce-Price-amount {
-			font-weight: normal;
+			font-weight: 400;
 		}
 	}
 
@@ -684,7 +702,7 @@ ul.wc-tabs {
 	input[type="radio"].shipping_method {
 		display: none;
 
-		& + label {
+		+ label {
 
 			&::before {
 				content: "";
@@ -700,7 +718,7 @@ ul.wc-tabs {
 			}
 		}
 
-		& ~ .payment_box {
+		~ .payment_box {
 			padding-left: 3rem;
 			margin-top: 1rem;
 		}
@@ -708,14 +726,14 @@ ul.wc-tabs {
 		&:checked + label {
 
 			&::before {
-				background: radial-gradient(circle at center, black 45%, white 0);
+				background: radial-gradient(circle at center, #000 45%, #fff 0);
 			}
 		}
 	}
 
 	// Style labels like "Remember me?" or "Ship to different address".
 	label.woocommerce-form__label-for-checkbox {
-		font-weight: normal;
+		font-weight: 400;
 		cursor: pointer;
 
 		span {
@@ -749,7 +767,7 @@ ul.wc-tabs {
 		th,
 		td {
 			font-size: var(--wp--preset--font-size--small);
-			font-weight: normal;
+			font-weight: 400;
 		}
 
 		th {
@@ -763,6 +781,7 @@ ul.wc-tabs {
 			}
 
 			td {
+
 				a.button,
 				button {
 					margin-bottom: 1rem;
@@ -770,6 +789,7 @@ ul.wc-tabs {
 				}
 
 				&.woocommerce-orders-table__cell-order-actions {
+
 					a.button {
 						display: block;
 
@@ -785,10 +805,13 @@ ul.wc-tabs {
 
 	table.shop_table,
 	table.shop_table_responsive {
+
 		tbody {
+
 			.product-name {
 
 				.variation {
+
 					dt {
 						font-style: italic;
 						margin-right: 0.25rem;
@@ -819,6 +842,7 @@ ul.wc-tabs {
 		width: calc(100% - 1.5rem);
 
 		.form-row {
+
 			button[name="apply_coupon"] {
 				margin-top: 0;
 			}
@@ -868,6 +892,7 @@ ul.wc-tabs {
 
 		.blockUI.blockOverlay {
 			position: relative;
+
 			@include loader();
 		}
 
@@ -883,6 +908,7 @@ ul.wc-tabs {
 		}
 
 		@media only screen and (max-width: 768px) {
+
 			.col2-set,
 			#customer_details {
 				width: 100%;
@@ -908,7 +934,7 @@ ul.wc-tabs {
 
 			th {
 				text-align: left;
-				font-weight: normal;
+				font-weight: 400;
 			}
 
 			th,
@@ -926,7 +952,7 @@ ul.wc-tabs {
 			}
 
 			.product-quantity {
-				font-weight: normal;
+				font-weight: 400;
 			}
 
 			.product-total,
@@ -935,8 +961,9 @@ ul.wc-tabs {
 			.tax-rate,
 			input[type="radio"].shipping_method:checked + label,
 			input[type="hidden"].shipping_method + label {
+
 				.woocommerce-Price-amount {
-					font-weight: bold;
+					font-weight: 700;
 				}
 			}
 		}
@@ -958,11 +985,13 @@ ul.wc-tabs {
 
 	// Bottom section of the Thank you page---customer details: align, add border, make it look nice.
 	.woocommerce-customer-details {
+
 		address {
 			border: 1px solid var(--wp--preset--color--black);
 			font-style: inherit;
 
 			p[class^="woocommerce-customer-details--"] {
+
 				&:first-of-type {
 					margin-top: 2rem;
 				}
@@ -993,7 +1022,7 @@ ul.wc-tabs {
 			text-align: left;
 			border-top: 1px solid var(--wp--preset--color--black);
 			border-bottom: 1px solid var(--wp--preset--color--black);
-			font-weight: normal;
+			font-weight: 400;
 		}
 
 		thead th {
@@ -1023,11 +1052,12 @@ ul.wc-tabs {
 
 		table.woocommerce-table--order-downloads,
 		table.woocommerce-MyAccount-orders {
+
 			thead tr {
 				border-top: 2px solid var(--wp--preset--color--contrast);
 
 				span {
-					font-weight: bold;
+					font-weight: 700;
 				}
 
 			}
@@ -1038,7 +1068,9 @@ ul.wc-tabs {
 		}
 
 		.woocommerce-MyAccount-navigation li {
+
 			&.is-active a {
+
 				&::before {
 					content: "> ";
 				}
@@ -1066,9 +1098,9 @@ ul.wc-tabs {
 
 // Store-wide notice
 .theme-twentytwentythree .woocommerce-store-notice {
-	color: black;
+	color: #000;
 	border-top: 2px solid var(--wp--preset--color--primary);
-	background: lightgray;
+	background: #d3d3d3;
 	padding: 2rem;
 	position: fixed;
 	bottom: 0;
@@ -1090,68 +1122,74 @@ Notice messages (like 'Added to cart', 'Billing address needs to be filled in', 
 .woocommerce-message,
 .woocommerce-error,
 .woocommerce-info {
-  background-color: rgba( 176, 176, 176, 0.6 );
-  color: #222;
-  border-top-color: var( --wp--preset--color--primary );
-  border-top-style: solid;
-  border-top-width: 2px;
-  padding: 1rem 1.5rem 1rem 3.5rem;
-  margin-bottom: 2rem;
-  list-style: none;
-  font-size: var( --wp--preset--font-size--small );
-  position: relative;
+	background-color: rgba(176, 176, 176, 0.6);
+	color: #222;
+	border-top-color: var(--wp--preset--color--primary);
+	border-top-style: solid;
+	border-top-width: 2px;
+	padding: 1rem 1.5rem 1rem 3.5rem;
+	margin-bottom: 2rem;
+	list-style: none;
+	font-size: var(--wp--preset--font-size--small);
+	position: relative;
 
-  @include clearfix();
+	@include clearfix();
 
-  &[role='alert']::before {
-    background: #d5d5d5;
-    color: black;
-    border-radius: 5rem;
-    font-size: 1rem;
-    content: "\e028";
-    display: inline-block;
-    margin-right: 1rem;
-    height: 1.5em;
-    line-height: 1.5em;
-    text-align: center;
-    width: 1.5em;
-    position: absolute;
-    top: 1em;
-    left: 1.5em;
-  }
+	&[role="alert"]::before {
+		background: #d5d5d5;
+		color: #000;
+		border-radius: 5rem;
+		font-size: 1rem;
+		content: "\e028";
+		display: inline-block;
+		margin-right: 1rem;
+		height: 1.5em;
+		line-height: 1.5em;
+		text-align: center;
+		width: 1.5em;
+		position: absolute;
+		top: 1em;
+		left: 1.5em;
+	}
 
-  a.button {
-    margin-bottom: -0.5rem;
-    margin-top: -0.5rem;
-    border: none;
-    padding: 0.5rem 1rem;
-  }
+	a.button {
+		margin-bottom: -0.5rem;
+		margin-top: -0.5rem;
+		border: none;
+		padding: 0.5rem 1rem;
+	}
 }
 
 .woocommerce-error {
-  &[role='alert']::before {
-    content: 'X';
-  }
+
+	&[role="alert"]::before {
+		content: "X";
+	}
 }
 
 .woocommerce-message {
-  &[role='alert']::before {
-    content: '\2713';
-  }
+
+	&[role="alert"]::before {
+		content: "\2713";
+	}
 }
 
 /**
  * Coupon error notice
  */
- .woocommerce-cart {
+.woocommerce-cart {
+
 	td.actions .coupon .coupon-error-notice {
+
 		@include coupon-error-notice-cart();
 		margin-top: 0;
- 	}
+	}
 }
 
 form.checkout_coupon {
+
 	.coupon-error-notice {
+
 		@include coupon-error-notice-checkout();
 	}
 
@@ -1163,12 +1201,14 @@ form.checkout_coupon {
 /**
  * Checkout error message
  */
- .woocommerce-checkout {
+.woocommerce-checkout {
+
 	form .form-row.woocommerce-invalid input.input-text {
 		border-color: var(--wc-red);
 	}
 
 	.checkout-inline-error-message {
+
 		@include checkout-inline-error-message();
 	}
 }

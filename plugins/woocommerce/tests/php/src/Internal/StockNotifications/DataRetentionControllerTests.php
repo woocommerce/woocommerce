@@ -3,8 +3,10 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications;
 
+use Automattic\WooCommerce\Internal\StockNotifications\Config;
 use Automattic\WooCommerce\Internal\StockNotifications\DataRetentionController;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Internal\StockNotifications\Frontend\NotificationManagementService;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
 
@@ -12,6 +14,8 @@ use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
  * DataRetentionControllerTests tests.
  */
 class DataRetentionControllerTests extends \WC_Unit_Test_Case {
+
+	use StockNotificationsFeatureTrait;
 
 	/**
 	 * The controller instance.
@@ -25,6 +29,7 @@ class DataRetentionControllerTests extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->enable_stock_notifications_feature();
 		$this->controller = new DataRetentionController();
 	}
 
@@ -32,9 +37,10 @@ class DataRetentionControllerTests extends \WC_Unit_Test_Case {
 	 * Clean up after tests
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
 		$this->controller->clear_daily_task();
 		delete_option( 'woocommerce_customer_stock_notifications_unverified_deletions_days_threshold' );
+		$this->restore_stock_notifications_feature_option();
+		parent::tearDown();
 	}
 
 	/**
@@ -74,6 +80,19 @@ class DataRetentionControllerTests extends \WC_Unit_Test_Case {
 		);
 		$schedule = wp_get_schedule( DataRetentionController::DAILY_TASK_HOOK );
 		$this->assertFalse( $schedule );
+	}
+
+	/**
+	 * Test that an already stored negative threshold turns the cleanup off and unschedules the daily task.
+	 */
+	public function test_negative_threshold_is_treated_as_zero() {
+		update_option( 'woocommerce_customer_stock_notifications_unverified_deletions_days_threshold', 30 );
+		$this->assertEquals( 'daily', wp_get_schedule( DataRetentionController::DAILY_TASK_HOOK ) );
+
+		update_option( 'woocommerce_customer_stock_notifications_unverified_deletions_days_threshold', '-5' );
+
+		$this->assertSame( 0, Config::get_unverified_deletion_days_threshold() );
+		$this->assertFalse( wp_get_schedule( DataRetentionController::DAILY_TASK_HOOK ) );
 	}
 
 	/**
@@ -118,5 +137,40 @@ class DataRetentionControllerTests extends \WC_Unit_Test_Case {
 
 		$this->expectException( \Exception::class );
 		new Notification( $expired_id );
+	}
+
+	/**
+	 * @testdox Daily task keeps an overdue pending notification whose verification email was resent within the retention window.
+	 */
+	public function test_daily_task_keeps_overdue_notification_with_recent_verification_resend(): void {
+		$days_until_deletion = 5;
+		update_option(
+			'woocommerce_customer_stock_notifications_unverified_deletions_days_threshold',
+			$days_until_deletion
+		);
+		$expired_time = time() - ( ( $days_until_deletion + 1 ) * DAY_IN_SECONDS );
+
+		$notification_resent = new Notification();
+		$notification_resent->set_user_email( 'resent@test.com' );
+		$notification_resent->set_product_id( 1 );
+		$notification_resent->set_status( NotificationStatus::PENDING );
+		$notification_resent->set_date_created( gmdate( 'Y-m-d H:i:s', $expired_time ) );
+		$notification_resent->update_meta_data( NotificationManagementService::LAST_VERIFY_EMAIL_SENT_META, (string) time() );
+		$resent_id = $notification_resent->save();
+
+		$notification_stale = new Notification();
+		$notification_stale->set_user_email( 'stale@test.com' );
+		$notification_stale->set_product_id( 1 );
+		$notification_stale->set_status( NotificationStatus::PENDING );
+		$notification_stale->set_date_created( gmdate( 'Y-m-d H:i:s', $expired_time ) );
+		$notification_stale->update_meta_data( NotificationManagementService::LAST_VERIFY_EMAIL_SENT_META, (string) $expired_time );
+		$notification_stale->save();
+
+		$this->controller->do_wc_customer_stock_notifications_daily();
+
+		$notifications_after = NotificationQuery::get_notifications( array() );
+
+		$this->assertCount( 1, $notifications_after );
+		$this->assertEquals( $resent_id, (int) $notifications_after[0] );
 	}
 }

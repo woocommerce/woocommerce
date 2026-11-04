@@ -1,4 +1,5 @@
 .woocommerce {
+
 	/**
 	 * Generic forms styles used in places such as my account and the shortcode based checkout.
 	 */
@@ -17,7 +18,7 @@
 
 			&.hidden {
 				visibility: hidden;
-		  	}
+			}
 
 			&.inline {
 				display: inline;
@@ -66,9 +67,9 @@
 		.input-text,
 		select {
 			font-family: inherit;
-			font-weight: normal;
+			font-weight: 400;
 			letter-spacing: normal;
-			padding: .5em;
+			padding: 0.5em;
 			display: block;
 			background-color: var(--wc-form-color-background, #fff);
 			border: var(--wc-form-border-width) solid var(--wc-form-border-color);
@@ -81,16 +82,17 @@
 			height: auto;
 
 			&:focus {
-				border-color: currentColor;
+				border-color: currentcolor;
 			}
 		}
 
 		select {
 			cursor: pointer;
+
 			/* We hide the default chevron because it cannot be directly modified. Instead, we add a custom chevron using a background image. */
 			appearance: none;
 			padding-right: 3em;
-			background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItY2hldnJvbi1kb3duIj48cG9seWxpbmUgcG9pbnRzPSI2IDkgMTIgMTUgMTggOSI+PC9wb2x5bGluZT48L3N2Zz4=);
+			background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItY2hldnJvbi1kb3duIj48cG9seWxpbmUgcG9pbnRzPSI2IDkgMTIgMTUgMTggOSI+PC9wb2x5bGluZT48L3N2Zz4=");
 			background-repeat: no-repeat;
 			background-size: 16px;
 			background-position: calc(100% - 0.5em) 50%;
@@ -128,23 +130,28 @@
 		}
 
 		&.woocommerce-invalid {
+
 			label {
 				color: var(--wc-red);
 			}
+
 			input.input-text,
 			select {
 				border-color: var(--wc-red);
 			}
+
 			.select2-container:not(.select2-container--open) .select2-selection {
 				border-color: var(--wc-red);
 			}
 		}
 
 		&.woocommerce-validated {
+
 			input.input-text,
 			select {
 				border-color: var(--wc-green);
 			}
+
 			.select2-container:not(.select2-container--open) .select2-selection {
 				border-color: var(--wc-green);
 			}
@@ -165,6 +172,7 @@
 }
 
 :where(.woocommerce) {
+
 	.select2-container {
 		width: 100%;
 
@@ -176,7 +184,7 @@
 				line-height: normal;
 				box-sizing: border-box;
 				color: var(--wc-form-color-text, #444);
-				font-weight: normal;
+				font-weight: 400;
 			}
 
 			.select2-selection__placeholder {
@@ -194,7 +202,7 @@
 					border: none;
 					display: block;
 					background:
-						url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItY2hldnJvbi1kb3duIj48cG9seWxpbmUgcG9pbnRzPSI2IDkgMTIgMTUgMTggOSI+PC9wb2x5bGluZT48L3N2Zz4=)
+						url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJibGFjayIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJmZWF0aGVyIGZlYXRoZXItY2hldnJvbi1kb3duIj48cG9seWxpbmUgcG9pbnRzPSI2IDkgMTIgMTUgMTggOSI+PC9wb2x5bGluZT48L3N2Zz4=")
 						no-repeat;
 					background-size: 16px;
 					width: 16px;

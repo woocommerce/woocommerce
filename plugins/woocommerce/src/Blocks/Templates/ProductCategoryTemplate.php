@@ -2,7 +2,8 @@
 declare( strict_types=1 );
 namespace Automattic\WooCommerce\Blocks\Templates;
 
-use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
+use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
+use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
@@ -56,8 +57,7 @@ class ProductCategoryTemplate extends AbstractTemplateWithFallback {
 	 */
 	public function render_block_template() {
 		if ( ! is_embed() && is_product_taxonomy() && is_tax( 'product_cat' ) ) {
-			$compatibility_layer = new ArchiveProductTemplatesCompatibility();
-			$compatibility_layer->init();
+			Package::container()->get( BlockTemplatesRegistry::class )->init_archive_compatibility();
 
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		}

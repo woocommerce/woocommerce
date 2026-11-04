@@ -225,4 +225,74 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 		wp_delete_comment( $comment_id, true );
 		wp_delete_post( $post_id, true );
 	}
+
+	/**
+	 * @testdox add_comment_rating() stores a rating only for whole numbers from 1 to 5.
+	 *
+	 * @testWith ["1", 1]
+	 *           ["3", 3]
+	 *           ["5", 5]
+	 *           ["05", 5]
+	 *           ["5.0", 5]
+	 *           ["4.7", 4]
+	 *           ["3abc", 3]
+	 *           ["", null]
+	 *           ["0", null]
+	 *           ["6", null]
+	 *           ["-1", null]
+	 *           ["-0.5", null]
+	 *           ["0.5", null]
+	 *           ["0.9", null]
+	 *           ["5.9", null]
+	 *           ["abc", null]
+	 *
+	 * @param string   $posted_rating   Raw value posted in the rating field.
+	 * @param int|null $expected_rating Rating expected in comment meta, or null when nothing should be stored.
+	 */
+	public function test_add_comment_rating_stores_only_whole_ratings_in_range( string $posted_rating, ?int $expected_rating ): void {
+		$this->assert_posted_rating_is_stored_as( $posted_rating, $expected_rating );
+	}
+
+	/**
+	 * @testdox add_comment_rating() stores nothing when the rating field is posted as an array.
+	 */
+	public function test_add_comment_rating_ignores_an_array_rating(): void {
+		$this->assert_posted_rating_is_stored_as( array( '5' ), null );
+	}
+
+	/**
+	 * Post a rating for a fresh product review and assert what ends up in comment meta.
+	 *
+	 * @param mixed    $posted_rating   Raw value to place in $_POST['rating'].
+	 * @param int|null $expected_rating Rating expected in comment meta, or null when nothing should be stored.
+	 */
+	private function assert_posted_rating_is_stored_as( $posted_rating, ?int $expected_rating ): void {
+		$product    = WC_Helper_Product::create_simple_product();
+		$comment_id = wp_insert_comment(
+			array(
+				'comment_post_ID'  => $product->get_id(),
+				'comment_type'     => 'review',
+				'comment_approved' => '1',
+			)
+		);
+
+		$_POST['comment_post_ID'] = (string) $product->get_id();
+		$_POST['rating']          = $posted_rating;
+
+		try {
+			WC_Comments::add_comment_rating( $comment_id );
+
+			$stored = get_comment_meta( $comment_id, 'rating', true );
+
+			if ( null === $expected_rating ) {
+				$this->assertSame( '', $stored, 'No rating should have been stored.' );
+			} else {
+				$this->assertSame( $expected_rating, (int) $stored, 'The stored rating does not match.' );
+			}
+		} finally {
+			unset( $_POST['comment_post_ID'], $_POST['rating'] );
+			wp_delete_comment( $comment_id, true );
+			$product->delete( true );
+		}
+	}
 }

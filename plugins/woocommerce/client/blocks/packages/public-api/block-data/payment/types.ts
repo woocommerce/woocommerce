@@ -34,12 +34,15 @@ export interface SavedPaymentMethod {
 	method: CustomerPaymentMethodConfiguration;
 	expires: string;
 	is_default: boolean;
+	/**
+	 * The token's own label, from `WC_Payment_Token::get_display_name()`. Absent in data from WooCommerce versions before 11.3.0.
+	 */
+	display_name?: string;
 	tokenId: number;
 	actions: ObjectType;
 }
 export type SavedPaymentMethods =
-	| Record< string, SavedPaymentMethod[] >
-	| EmptyObjectType;
+	Record< string, SavedPaymentMethod[] > | EmptyObjectType;
 
 export interface PaymentMethodDispatchers {
 	setRegisteredPaymentMethods: (

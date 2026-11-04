@@ -3,4 +3,5 @@
 	<description>Local WooCommerce Core PHPCS sniffs. Used standalone to verify the sniffs against their fixtures; the sniffs are wired into the main ruleset from plugins/woocommerce/phpcs.xml.</description>
 
 	<rule ref="./Sniffs/DB/IdentifierPlaceholderSniff.php" />
+	<rule ref="./Sniffs/I18n/DiagnosticMessageSniff.php" />
 </ruleset>

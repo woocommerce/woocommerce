@@ -11,6 +11,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\OrderLineMetaValidator;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -62,6 +63,13 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @var array
 	 */
 	protected $request = array();
+
+	/**
+	 * Order whose item set_item() is preparing, so new line items are priced at the order's tax location.
+	 *
+	 * @var WC_Order|null
+	 */
+	private $order_for_item = null;
 
 	/**
 	 * Register the routes for orders.
@@ -284,7 +292,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					$display_value = wp_kses_post( rawurldecode( (string) $meta->value ) );
 
 					// Skip items with values already in the product details area of the product name.
-					if ( $product && $product->is_type( ProductType::VARIATION ) && wc_is_attribute_in_product_name( $display_value, $order_item_name ) ) {
+					if ( $product && $product->is_type( ProductType::VARIATION ) && wc_is_attribute_in_product_name( $display_value, $order_item_name, $product ) ) {
 						return false;
 					}
 
@@ -728,8 +736,10 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		$schema    = $this->get_item_schema();
 		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
 
+		$item_types = array( 'shipping_lines', 'line_items', 'fee_lines', 'coupon_lines' );
+
 		// Handle all writable props.
-		foreach ( $data_keys as $key ) {
+		foreach ( array_diff( $data_keys, $item_types ) as $key ) {
 			$value = $request[ $key ];
 
 			if ( ! is_null( $value ) ) {
@@ -740,22 +750,6 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					case 'billing':
 					case 'shipping':
 						$this->update_address( $order, $value, $key );
-						break;
-					case 'line_items':
-					case 'shipping_lines':
-					case 'fee_lines':
-					case 'coupon_lines':
-						if ( is_array( $value ) ) {
-							foreach ( $value as $item ) {
-								if ( is_array( $item ) ) {
-									if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
-										$order->remove_item( $item['id'] );
-									} else {
-										$this->set_item( $order, $key, $item );
-									}
-								}
-							}
-						}
 						break;
 					case 'meta_data':
 						if ( is_array( $value ) ) {
@@ -769,6 +763,23 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 							$order->{"set_{$key}"}( $value );
 						}
 						break;
+				}
+			}
+		}
+
+		// Set items once the address is known, shipping lines first, so new line items are priced at the order's tax location (the base address for local pickup).
+		foreach ( array_intersect( $item_types, $data_keys ) as $key ) {
+			if ( ! is_array( $request[ $key ] ) ) {
+				continue;
+			}
+
+			foreach ( $request[ $key ] as $item ) {
+				if ( is_array( $item ) ) {
+					if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
+						$order->remove_item( $item['id'] );
+					} else {
+						$this->set_item( $order, $key, $item );
+					}
 				}
 			}
 		}
@@ -822,7 +833,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 			if ( $creating ) {
 				$object->set_created_via( 'rest-api' );
-				$object->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+				$object->set_prices_include_tax( wc_prices_include_tax() );
 				$object->save();
 				$object->calculate_totals();
 			} else {
@@ -995,7 +1006,15 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 			if ( 'create' === $action ) {
 				$quantity = isset( $posted['quantity'] ) ? $posted['quantity'] : 1;
-				$total    = wc_get_price_excluding_tax( $product, array( 'qty' => $quantity ) );
+				$order    = $this->order_for_item;
+				$total    = wc_get_price_excluding_tax(
+					$product,
+					array(
+						'qty'          => $quantity,
+						'order'        => $order,
+						'tax_location' => $order ? $order->get_taxable_location() : array(),
+					)
+				);
 				$item->set_total( $total );
 				$item->set_subtotal( $total );
 			}
@@ -1003,6 +1022,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		if ( $clear_variation_id && $product_item ) {
 			$product_item->set_variation_id( 0 );
 		}
+
+		OrderLineMetaValidator::assert_no_serialized_meta_value( (array) ( $posted['meta_data'] ?? array() ) );
 
 		$this->maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class' ), $posted );
 		$this->maybe_set_item_meta_data( $item, $posted );
@@ -1030,6 +1051,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			}
 		}
 
+		OrderLineMetaValidator::assert_no_serialized_meta_value( (array) ( $posted['meta_data'] ?? array() ) );
+
 		$this->maybe_set_item_props( $item, array( 'method_id', 'method_title', 'total', 'instance_id' ), $posted );
 		$this->maybe_set_item_meta_data( $item, $posted );
 
@@ -1053,6 +1076,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 				throw new WC_REST_Exception( 'woocommerce_rest_invalid_fee_item', __( 'Fee name is required.', 'woocommerce' ), 400 );
 			}
 		}
+
+		OrderLineMetaValidator::assert_no_serialized_meta_value( (array) ( $posted['meta_data'] ?? array() ) );
 
 		$this->maybe_set_item_props( $item, array( 'name', 'tax_class', 'tax_status', 'total' ), $posted );
 		$this->maybe_set_item_meta_data( $item, $posted );
@@ -1117,7 +1142,12 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		// Prepare item data.
-		$item = $this->$method( $posted, $action, $item );
+		$this->order_for_item = $order;
+		try {
+			$item = $this->$method( $posted, $action, $item );
+		} finally {
+			$this->order_for_item = null;
+		}
 
 		/**
 		 * Allow extensions be notified before the item is saved.
@@ -1544,6 +1574,9 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					'description' => __( 'Line items data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'validate_callback' => array( OrderLineMetaValidator::class, 'validate_request_arg' ),
+					),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
@@ -1792,6 +1825,9 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					'description' => __( 'Shipping lines data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'validate_callback' => array( OrderLineMetaValidator::class, 'validate_request_arg' ),
+					),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
@@ -1883,6 +1919,9 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					'description' => __( 'Fee lines data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'validate_callback' => array( OrderLineMetaValidator::class, 'validate_request_arg' ),
+					),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(

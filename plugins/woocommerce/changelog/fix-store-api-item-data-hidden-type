@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Correct the public TypeScript type for the Store API item_data `hidden` flag, which arrives as a string rather than a boolean.

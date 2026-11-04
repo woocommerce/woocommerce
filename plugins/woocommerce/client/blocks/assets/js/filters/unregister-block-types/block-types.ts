@@ -1,4 +1,14 @@
 /**
+ * Template blocks needed to preview the Product Catalog on the Shop page.
+ */
+export const SHOP_PAGE_TEMPLATE_BLOCK_TYPES = [
+	'woocommerce/breadcrumbs',
+	'woocommerce/catalog-sorting',
+	'woocommerce/product-results-count',
+	'woocommerce/legacy-template',
+];
+
+/**
  * WooCommerce block types hidden from post editors.
  */
 export const POST_EDITOR_BLOCK_TYPES_TO_UNREGISTER = [

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Icon, mediaAndText } from '@wordpress/icons';
-import { getBlockMap } from '@woocommerce/atomic-utils';
+import { getBlockMap } from '@woocommerce/utils/get-block-map';
 import { getSetting } from '@woocommerce/settings';
 import type { InnerBlockTemplate } from '@wordpress/blocks';
 
@@ -10,7 +10,7 @@ import type { InnerBlockTemplate } from '@wordpress/blocks';
  * Internal dependencies
  */
 import metadata from './block.json';
-import { VARIATION_NAME as PRODUCT_TITLE_VARIATION_NAME } from '../product-query/variations/elements/product-title';
+import { PRODUCT_TITLE_VARIATION_NAME } from '../product-elements-blocks/variations/constants';
 
 export const BLOCK_ICON = (
 	<Icon
@@ -38,18 +38,9 @@ export const DEFAULT_INNER_BLOCKS: InnerBlockTemplate[] = [
 								PRODUCT_TITLE_VARIATION_NAME,
 						},
 					],
-					[
-						'woocommerce/product-rating',
-						{ isDescendentOfSingleProductBlock: true },
-					],
-					[
-						'woocommerce/product-price',
-						{ isDescendentOfSingleProductBlock: true },
-					],
-					[
-						'woocommerce/product-summary',
-						{ isDescendentOfSingleProductBlock: true },
-					],
+					[ 'woocommerce/product-rating' ],
+					[ 'woocommerce/product-price' ],
+					[ 'woocommerce/product-summary' ],
 					[
 						getSetting( 'isBlockTheme', false )
 							? 'woocommerce/add-to-cart-with-options'

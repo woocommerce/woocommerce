@@ -241,7 +241,7 @@ export const SearchListItem = < T extends object = object >( {
 	) : (
 		// Items can be enabled via the radios and checkboxes. But we make the
 		// whole row clickable for convenience.
-		// eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
+		// eslint-disable-next-line jsx-a11y/click-events-have-key-events
 		<div
 			className={ classes }
 			onClick={ disabled ? undefined : onSelect( item ) }

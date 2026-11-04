@@ -15,8 +15,11 @@ import {
 import './style.scss';
 import { ScheduledUpdatesPromotionNotice } from '~/analytics/components';
 
-const CustomizableDashboard = lazy( () =>
-	import( /* webpackChunkName: "customizable-dashboard" */ './customizable' )
+const CustomizableDashboard = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "customizable-dashboard" */ './customizable'
+		)
 );
 
 class Dashboard extends Component {

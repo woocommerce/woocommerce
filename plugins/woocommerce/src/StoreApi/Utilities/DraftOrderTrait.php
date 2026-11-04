@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 /**
  * DraftOrderTrait
  *
@@ -65,6 +67,37 @@ trait DraftOrderTrait {
 			return true;
 		}
 
+		// needs_payment() is always false for a zero total, so zero-total orders are checked separately.
+		if ( $this->is_zero_total_order_awaiting_payment( $order_object ) && $order_object->has_cart_hash( wc()->cart->get_cart_hash() ) ) {
+			return true;
+		}
+
 		return false;
+	}
+
+	/**
+	 * Whether a zero-total order is still awaiting payment, such as a fully discounted renewal order.
+	 *
+	 * @param \WC_Order $order_object Order object to check.
+	 * @return bool
+	 */
+	private function is_zero_total_order_awaiting_payment( \WC_Order $order_object ): bool {
+		if ( $order_object->get_total() > 0 ) {
+			return false;
+		}
+
+		/**
+		 * Filter the valid order statuses for payment.
+		 *
+		 * The same filter WC_Order::needs_payment() applies, so a zero-total order in a status the site declares payable can be resumed.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param array     $valid_order_statuses Array of valid order statuses for payment.
+		 * @param \WC_Order $order                Order object.
+		 */
+		$payable_statuses = array_filter( (array) apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( OrderStatus::PENDING, OrderStatus::FAILED ), $order_object ) );
+
+		return $order_object->has_status( $payable_statuses );
 	}
 }

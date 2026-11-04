@@ -8,7 +8,6 @@
 namespace Automattic\WooCommerce\Admin;
 
 use ActionScheduler;
-use ActionScheduler_DBStore;
 use ActionScheduler_QueueRunner;
 use Automatic_Upgrader_Skin;
 use Automattic\WooCommerce\Admin\PluginsInstallLoggers\AsyncPluginsInstallLogger;
@@ -80,6 +79,11 @@ class PluginsHelper {
 	 * Meta key for dismissing connected notice
 	 */
 	const DISMISS_CONNECT_NOTICE = 'woo_connect_notice_dismiss';
+
+	/**
+	 * Meta key for dismissing the connected account notice on My Subscriptions
+	 */
+	const DISMISS_CONNECTED_ACCOUNT_NOTICE = 'woo_connected_account_notice_dismiss';
 
 	/**
 	 * Initialize hooks.
@@ -751,12 +755,11 @@ class PluginsHelper {
 		$data = array();
 
 		foreach ( $actions as $action_id => $action ) {
-			$store  = new ActionScheduler_DBStore();
 			$args   = $action->get_args();
 			$data[] = array(
 				'job_id'  => $args[1],
 				'plugins' => $args[0],
-				'status'  => $store->get_status( $action_id ),
+				'status'  => ActionScheduler::store()->get_status( $action_id ),
 			);
 		}
 
@@ -855,6 +858,7 @@ class PluginsHelper {
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-plugin-update-connect-notice' );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-enable-autorenew' );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-renew-subscription' );
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-purchase-subscription' );
 		wp_enqueue_script( 'woo-plugin-update-connect-notice' );
 		wp_enqueue_script( 'woo-enable-autorenew' );
 		wp_enqueue_script( 'woo-renew-subscription' );
@@ -999,7 +1003,7 @@ class PluginsHelper {
 			/* translators: 1: Product price */
 			$renew_string = sprintf( __( 'Renew for %1$s', 'woocommerce' ), $subscription['product_regular_price'] );
 		}
-		$expiry_date   = date_i18n( 'F jS', $subscription['expires'] );
+		$expiry_date   = (string) wp_date( get_option( 'date_format' ), (int) $subscription['expires'] );
 		$hyperlink_url = add_query_arg(
 			array(
 				'product_id'   => $product_id,

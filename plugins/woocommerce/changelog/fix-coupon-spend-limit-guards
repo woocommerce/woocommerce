@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve coupon amounts and spend limits when plugins change discount types or convert currencies.

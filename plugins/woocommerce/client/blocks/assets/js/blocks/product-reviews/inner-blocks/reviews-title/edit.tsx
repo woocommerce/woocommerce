@@ -35,7 +35,7 @@ function getProductReviewsTitle(
 					/* translators: %s: Product title. */
 					__( 'One review for %s', 'woocommerce' ),
 					productTitle
-			  )
+				)
 			: sprintf(
 					/* translators: 1: Number of comments, 2: Product title. */
 					_n(
@@ -46,7 +46,7 @@ function getProductReviewsTitle(
 					),
 					reviewsCount,
 					productTitle
-			  );
+				);
 	}
 
 	if ( ! showReviewsCount && showProductTitle ) {
@@ -55,12 +55,12 @@ function getProductReviewsTitle(
 					/* translators: %s: Product title. */
 					__( 'Review for %s', 'woocommerce' ),
 					productTitle
-			  )
+				)
 			: sprintf(
 					/* translators: %s: Product title. */
 					__( 'Reviews for %s', 'woocommerce' ),
 					productTitle
-			  );
+				);
 	}
 
 	if ( showReviewsCount && ! showProductTitle ) {
@@ -75,7 +75,7 @@ function getProductReviewsTitle(
 						'woocommerce'
 					),
 					reviewsCount
-			  );
+				);
 	}
 
 	if ( reviewsCount === 1 ) {

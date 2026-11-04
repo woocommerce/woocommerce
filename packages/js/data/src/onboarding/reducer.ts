@@ -55,7 +55,7 @@ const getUpdatedTaskLists = (
 			? Object.keys( taskLists )
 			: Object.keys( taskLists ).filter(
 					( taskListId ) => taskListId === scopedTaskListId
-			  );
+				);
 
 	return taskListIds.reduce(
 		( lists, taskListId ) => {

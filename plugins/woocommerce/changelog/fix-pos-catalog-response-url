@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure POS catalog download URLs reflect the current site URL.

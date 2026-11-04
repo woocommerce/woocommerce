@@ -613,6 +613,49 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_save_order_items() should store the expected shipping cost after an admin edit.
+	 *
+	 * @dataProvider shipping_cost_data_provider
+	 * @param string $posted_cost The submitted shipping cost.
+	 * @param string $expected_cost The cost expected after saving.
+	 */
+	public function test_wc_save_order_items_saves_shipping_cost( string $posted_cost, string $expected_cost ): void {
+		$order         = WC_Helper_Order::create_order();
+		$shipping_item = new WC_Order_Item_Shipping();
+		$shipping_item->set_order_id( $order->get_id() );
+		$shipping_item->set_total( '10' );
+		$item_id = $shipping_item->save();
+
+		$items = array(
+			'shipping_method_id'    => array( $item_id ),
+			'shipping_method'       => array( $item_id => 'flat_rate' ),
+			'shipping_method_title' => array( $item_id => 'Flat rate' ),
+			'shipping_cost'         => array( $item_id => $posted_cost ),
+			'shipping_taxes'        => array( $item_id => array() ),
+		);
+
+		wc_save_order_items( $order->get_id(), $items );
+
+		$saved_item = new WC_Order_Item_Shipping( $item_id );
+		$this->assertSame( $expected_cost, $saved_item->get_total(), 'The saved shipping total should match the submitted cost' );
+	}
+
+	/**
+	 * Shipping cost inputs and their expected stored values.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public function shipping_cost_data_provider(): array {
+		return array(
+			'empty'       => array( '', '0' ),
+			'whitespace'  => array( ' ', '0' ),
+			'nonnumeric'  => array( 'abc', '0' ),
+			'normal cost' => array( '12.50', '12.50' ),
+			'zero cost'   => array( '0', '0' ),
+		);
+	}
+
+	/**
 	 * @testdox wc_save_order_items() should preserve an existing shipping line named Shipping.
 	 *
 	 * @link https://github.com/woocommerce/woocommerce/issues/66847
@@ -642,5 +685,228 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 			$saved_item->get_name(),
 			'Existing shipping lines named Shipping should not be replaced with the generic method title'
 		);
+	}
+
+	/**
+	 * A block-based default page is matched by its WooCommerce block opener, so a customized
+	 * existing page is adopted instead of duplicated.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/68099
+	 */
+	public function test_wc_create_page_adopts_customized_block_page(): void {
+		delete_option( 'woocommerce_cart_page_id' );
+
+		$existing_page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_name'    => 'my-custom-cart',
+				'post_title'   => 'My custom cart',
+				'post_content' => '<!-- wp:paragraph --><p>Intro added by the merchant.</p><!-- /wp:paragraph --><!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">customized</div><!-- /wp:woocommerce/cart -->',
+			)
+		);
+
+		$page_id = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '<!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart alignwide is-loading">default markup</div><!-- /wp:woocommerce/cart -->' );
+
+		$this->assertEquals( $existing_page_id, $page_id );
+		$this->assertEquals( $existing_page_id, get_option( 'woocommerce_cart_page_id' ) );
+	}
+
+	/**
+	 * @testdox A customized page is adopted when its WooCommerce block is nested inside another block.
+	 */
+	public function test_wc_create_page_adopts_nested_block_page(): void {
+		delete_option( 'woocommerce_cart_page_id' );
+
+		$existing_page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_name'    => 'nested-cart',
+				'post_title'   => 'Nested cart',
+				'post_content' => '<!-- wp:group --><div class="wp-block-group"><!-- wp:paragraph --><p>Customized.</p><!-- /wp:paragraph --><!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">customized</div><!-- /wp:woocommerce/cart --></div><!-- /wp:group -->',
+			)
+		);
+
+		$page_id = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '<!-- wp:group --><div class="wp-block-group"><!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">default</div><!-- /wp:woocommerce/cart --></div><!-- /wp:group -->' );
+
+		$this->assertEquals( $existing_page_id, $page_id );
+		$this->assertEquals( $existing_page_id, get_option( 'woocommerce_cart_page_id' ) );
+	}
+
+	/**
+	 * @testdox The page with the requested slug and status is preferred when multiple pages contain the block.
+	 */
+	public function test_wc_create_page_prefers_matching_slug_and_status(): void {
+		delete_option( 'woocommerce_cart_page_id' );
+
+		wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'draft',
+				'post_name'    => 'untitled-cart-draft',
+				'post_title'   => '',
+				'post_content' => '<!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">draft</div><!-- /wp:woocommerce/cart -->',
+			)
+		);
+		$published_page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_name'    => 'cart',
+				'post_title'   => 'Cart',
+				'post_content' => '<!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">customized</div><!-- /wp:woocommerce/cart -->',
+			)
+		);
+
+		$page_id = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '<!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">default</div><!-- /wp:woocommerce/cart -->' );
+
+		$this->assertEquals( $published_page_id, $page_id );
+	}
+
+	/**
+	 * @testdox A draft or private block page remains eligible when it is the only match.
+	 * @testWith ["draft"]
+	 *           ["private"]
+	 *
+	 * @param string $page_status Status of the existing page.
+	 */
+	public function test_wc_create_page_preserves_existing_status_policy( string $page_status ): void {
+		delete_option( 'woocommerce_cart_page_id' );
+
+		$existing_page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => $page_status,
+				'post_name'    => 'custom-cart',
+				'post_title'   => 'Custom cart',
+				'post_content' => '<!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">customized</div><!-- /wp:woocommerce/cart -->',
+			)
+		);
+
+		$page_id = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '<!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">default</div><!-- /wp:woocommerce/cart -->' );
+
+		$this->assertEquals( $existing_page_id, $page_id );
+		$this->assertSame( $page_status, get_post_status( $page_id ) );
+	}
+
+	/**
+	 * A page holding a different block with the same name prefix (e.g. cart-link) is not adopted.
+	 */
+	public function test_wc_create_page_does_not_adopt_page_with_prefixed_block_name(): void {
+		delete_option( 'woocommerce_cart_page_id' );
+
+		$other_page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_name'    => 'header-links',
+				'post_title'   => 'Header links',
+				'post_content' => '<!-- wp:woocommerce/cart-link {"cartIcon":"cart"} --><a href="/cart/">Cart</a><!-- /wp:woocommerce/cart-link -->',
+			)
+		);
+
+		$page_id = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '<!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">default</div><!-- /wp:woocommerce/cart -->' );
+
+		$this->assertNotEquals( $other_page_id, $page_id );
+		$this->assertSame( 'cart', get_post( $page_id )->post_name );
+	}
+
+	/**
+	 * The classic shortcode matching keeps working unchanged.
+	 */
+	public function test_wc_create_page_still_matches_shortcode_content(): void {
+		delete_option( 'woocommerce_cart_page_id' );
+
+		$existing_page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_name'    => 'old-cart',
+				'post_title'   => 'Old cart',
+				'post_content' => 'Before [woocommerce_cart] after',
+			)
+		);
+
+		$page_id = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '<!-- wp:shortcode -->[woocommerce_cart]<!-- /wp:shortcode -->' );
+
+		$this->assertEquals( $existing_page_id, $page_id );
+	}
+
+	/**
+	 * @testdox Classic Cart and Checkout blocks are distinguished by their shortcode attribute.
+	 */
+	public function test_wc_create_page_distinguishes_classic_shortcode_blocks(): void {
+		delete_option( 'woocommerce_cart_page_id' );
+		delete_option( 'woocommerce_checkout_page_id' );
+
+		$cart_page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_name'    => 'cart',
+				'post_title'   => 'Cart',
+				'post_content' => '<!-- wp:paragraph --><p>Customized cart.</p><!-- /wp:paragraph --><!-- wp:woocommerce/classic-shortcode {"shortcode":"cart"} /-->',
+			)
+		);
+
+		$checkout_page_id = wc_create_page( 'checkout', 'woocommerce_checkout_page_id', 'Checkout', '<!-- wp:woocommerce/classic-shortcode {"shortcode":"checkout"} /-->' );
+		$matched_cart_id  = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '<!-- wp:woocommerce/classic-shortcode {"shortcode":"cart"} /-->' );
+
+		$this->assertNotEquals( $cart_page_id, $checkout_page_id );
+		$this->assertEquals( $checkout_page_id, get_option( 'woocommerce_checkout_page_id' ) );
+		$this->assertEquals( $cart_page_id, $matched_cart_id );
+	}
+
+	/**
+	 * @testdox An empty shortcode wrapper falls back to matching the requested slug.
+	 */
+	public function test_wc_create_page_does_not_match_empty_content_needle(): void {
+		delete_option( 'woocommerce_cart_page_id' );
+
+		wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_name'    => 'unrelated',
+				'post_title'   => 'Unrelated page',
+				'post_content' => 'Unrelated content',
+			)
+		);
+		$cart_page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_name'    => 'cart',
+				'post_title'   => 'Cart',
+				'post_content' => 'Existing cart content',
+			)
+		);
+
+		$page_id = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '<!-- wp:shortcode --><!-- /wp:shortcode -->' );
+
+		$this->assertEquals( $cart_page_id, $page_id );
+	}
+
+	/**
+	 * A trashed page that only contains the block is not restored; the trash lookup keeps its strict match.
+	 */
+	public function test_wc_create_page_does_not_restore_trashed_page_by_block_only(): void {
+		delete_option( 'woocommerce_cart_page_id' );
+
+		$trashed_page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'trash',
+				'post_name'    => 'cart__trashed',
+				'post_title'   => 'Cart',
+				'post_content' => '<!-- wp:paragraph --><p>Outdated intro.</p><!-- /wp:paragraph --><!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">old</div><!-- /wp:woocommerce/cart -->',
+			)
+		);
+
+		$page_id = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '<!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">default</div><!-- /wp:woocommerce/cart -->' );
+
+		$this->assertNotEquals( $trashed_page_id, $page_id );
+		$this->assertSame( 'trash', get_post( $trashed_page_id )->post_status );
 	}
 }

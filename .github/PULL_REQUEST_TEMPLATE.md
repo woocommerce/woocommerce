@@ -3,6 +3,7 @@
 -   I have followed the [WooCommerce Contributing Guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) and the [WordPress Coding Standards](https://make.wordpress.org/core/handbook/best-practices/coding-standards/).
 -   I have checked to ensure there aren't other open [Pull Requests](https://github.com/woocommerce/woocommerce/pulls) for the same update/change.
 -   I have reviewed my code for [security best practices](https://developer.wordpress.org/apis/security/).
+-   I have assessed the impact of this change and followed the applicable [review requirements](https://github.com/woocommerce/woocommerce/blob/trunk/docs/contribution/contributing/deciding-pr-high-impact.md#review-requirements).
 -   Following the above guidelines will result in quick merges and clear and detailed feedback when appropriate.
 
 <!-- You can erase any parts of this template not applicable to your Pull Request. -->
@@ -113,28 +114,6 @@ Using the [WooCommerce Testing Instructions Guide](https://developer.woocommerce
 
 #### Comment <!-- If your Pull Request doesn't require a changelog entry, a comment explaining why is required instead -->
 
-</details>
-
-### Release Communication
-
-<!-- release-communication-section -->
-Select the release communication labels this PR needs:
-
-- [ ] **Feature Highlight** - For user-facing features (what changed, user impact)
-- [ ] **Developer Advisory** - For developer-facing changes (what changed, how to detect, actions needed)
-
-<details>
-<summary>When to use each?</summary>
-
-**Feature Highlight**: New features, UI changes, or improvements that merchants/store owners will notice.
-
-- Example: "New bulk editing for products", "Improved checkout performance"
-
-**Developer Advisory**: Breaking changes, deprecations, or changes that affect themes/plugins/extensions.
-
-- Example: "Hook signature change", "Deprecated filter", "REST API field removed"
-
-Selected labels are applied when the pull request is merged.
 </details>
 
 ### Use of AI Tools

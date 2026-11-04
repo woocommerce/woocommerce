@@ -17,7 +17,8 @@ import BusinessDetails from '../sections/business-details';
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 
 jest.mock( '@wordpress/components', () => {
-	const ReactModule = jest.requireActual< typeof import('react') >( 'react' );
+	const ReactModule =
+		jest.requireActual< typeof import( 'react' ) >( 'react' );
 
 	return {
 		Button: ReactModule.forwardRef(

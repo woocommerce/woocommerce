@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Preserve custom data store cleanup when removing order items.

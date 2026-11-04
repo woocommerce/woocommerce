@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { readFile } from 'node:fs/promises';
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -68,53 +69,7 @@ const test = baseTest.extend( {
 } );
 
 test.describe( 'Product > Export Selected Products', () => {
-	test( 'should allow exporting a single selected simple product', async ( {
-		page,
-		productsFixture,
-	} ) => {
-		const simpleProduct = productsFixture.simple;
-
-		await test.step( 'Navigate to product list and select product', async () => {
-			await page.goto( 'wp-admin/edit.php?post_type=product' );
-			await page.locator( `#cb-select-${ simpleProduct.id }` ).check();
-		} );
-
-		const exportButton = page.locator(
-			'a.page-title-action[href*="page=product_exporter"]'
-		);
-
-		await test.step( 'Verify export button text and link for single selection', async () => {
-			await expect( exportButton ).toHaveText( 'Export 1 selected' );
-			const exportButtonHref = await exportButton.getAttribute( 'href' );
-			expect( exportButtonHref ).toContain(
-				`product_ids=${ simpleProduct.id }`
-			);
-			expect( exportButtonHref ).toContain( '_wpnonce=' );
-		} );
-
-		await test.step( 'Navigate to export page and verify UI elements', async () => {
-			await exportButton.click();
-			await expect( page.locator( '.wrap.woocommerce h1' ) ).toHaveText(
-				'Export Products'
-			);
-			await expect(
-				page.locator( '#selected-product-export-notice p' )
-			).toContainText(
-				'You are about to export 1 product. To export all products, clear your selection.'
-			);
-			await expect(
-				page.locator( 'input[name="product_ids"]' )
-			).toHaveValue( String( simpleProduct.id ) );
-			await expect(
-				page.locator( 'label[for="woocommerce-exporter-types"]' )
-			).toBeHidden();
-			await expect(
-				page.locator( 'label[for="woocommerce-exporter-category"]' )
-			).toBeHidden();
-		} );
-	} );
-
-	test( 'should allow exporting multiple selected products (simple and variable)', async ( {
+	test( 'carries a multi-product selection into the export and the generated CSV, then clears it', async ( {
 		page,
 		productsFixture,
 	} ) => {
@@ -122,7 +77,7 @@ test.describe( 'Product > Export Selected Products', () => {
 		const variableProduct = productsFixture.variable;
 
 		await test.step( 'Navigate to product list and select multiple products', async () => {
-			await page.goto( 'wp-admin/edit.php?post_type=product' ); // Changed to page.goto
+			await page.goto( 'wp-admin/edit.php?post_type=product' );
 			await page.locator( `#cb-select-${ simpleProduct.id }` ).check();
 			await page.locator( `#cb-select-${ variableProduct.id }` ).check();
 		} );
@@ -134,7 +89,6 @@ test.describe( 'Product > Export Selected Products', () => {
 		await test.step( 'Verify export button text and link for multiple selections', async () => {
 			await expect( exportButton ).toHaveText( 'Export 2 selected' );
 			const exportButtonHref = await exportButton.getAttribute( 'href' );
-			// Use a regex to match product_ids in any order, allowing for both comma and URL-encoded comma.
 			expect( exportButtonHref ).toMatch(
 				new RegExp(
 					`product_ids=(${ simpleProduct.id }(,|%2C)${ variableProduct.id }|${ variableProduct.id }(,|%2C)${ simpleProduct.id })`
@@ -145,9 +99,13 @@ test.describe( 'Product > Export Selected Products', () => {
 
 		await test.step( 'Navigate to export page and verify UI elements for multiple products', async () => {
 			await exportButton.click();
-			await expect( page.locator( '.wrap.woocommerce h1' ) ).toHaveText(
-				'Export Products'
-			);
+			await expect(
+				page.getByRole( 'heading', {
+					name: 'Export Products',
+					level: 1,
+					exact: true,
+				} )
+			).toHaveCount( 1 );
 			await expect(
 				page.locator( '#selected-product-export-notice p' )
 			).toContainText(
@@ -158,11 +116,11 @@ test.describe( 'Product > Export Selected Products', () => {
 				String( simpleProduct.id ),
 				String( variableProduct.id ),
 			]
-				.sort()
+				.toSorted()
 				.join( ',' );
 			const actualIds = ( await productIdsInput.inputValue() )
 				.split( ',' )
-				.sort()
+				.toSorted()
 				.join( ',' );
 			expect( actualIds ).toBe( expectedIds );
 			await expect(
@@ -171,84 +129,74 @@ test.describe( 'Product > Export Selected Products', () => {
 			await expect(
 				page.locator( 'label[for="woocommerce-exporter-category"]' )
 			).toBeHidden();
-		} );
-	} );
-
-	test( 'should allow clearing selection from the export page', async ( {
-		page,
-		productsFixture,
-	} ) => {
-		const simpleProduct = productsFixture.simple;
-
-		await test.step( 'Navigate to product list, select product, and go to export page', async () => {
-			await page.goto( 'wp-admin/edit.php?post_type=product' );
-			await page.locator( `#cb-select-${ simpleProduct.id }` ).check();
-			await page
-				.locator( 'a.page-title-action[href*="page=product_exporter"]' )
-				.click();
-		} );
-
-		await test.step( 'Verify export page notice and URL for selected product', async () => {
 			await expect(
-				page.locator( '#selected-product-export-notice p' )
-			).toContainText( 'You are about to export 1 product.' );
-			await expect( page.url() ).toContain(
-				`product_ids=${ simpleProduct.id }`
-			);
-		} );
-
-		await test.step( "Click 'clear your selection' link", async () => {
-			await page
-				.locator( '.notice-info p a:has-text("clear your selection")' )
-				.click();
-		} );
-
-		await test.step( 'Verify redirect to general export page and UI elements', async () => {
-			await expect( page.url() ).not.toContain( 'product_ids=' );
-			await expect(
-				page.locator(
-					'.notice-info p:has-text("You are about to export")'
+				page.getByText(
+					'This tool allows you to generate and download a CSV file containing the selected products.',
+					{ exact: true }
 				)
-			).toBeHidden();
-			await expect(
-				page.locator( 'label[for="woocommerce-exporter-types"]' )
-			).toBeVisible();
-			await expect(
-				page.locator( 'label[for="woocommerce-exporter-category"]' )
 			).toBeVisible();
 		} );
-	} );
 
-	test( 'should show the default export screen when no products are selected', async ( {
-		page,
-		productsFixture,
-	} ) => {
-		expect( productsFixture ).toBeDefined();
-		await test.step( 'Navigate to product list', async () => {
-			await page.goto( 'wp-admin/edit.php?post_type=product' );
+		await test.step( 'Generate the CSV and verify it holds only the selected products', async () => {
+			const downloadPromise = page.waitForEvent( 'download' );
+			await page.getByRole( 'button', { name: 'Generate CSV' } ).click();
+			const download = await downloadPromise;
+			const csv = await readFile( await download.path(), 'utf8' );
+
+			// Keep only rows that start with an id, so a quoted field holding a
+			// newline cannot be read as a row of its own.
+			const dataRows = csv
+				.trim()
+				.split( '\n' )
+				.slice( 1 )
+				.filter( ( row ) => /^\d+,/.test( row ) );
+			const parentIds = dataRows
+				.map( ( row ) => row.split( ',' ) )
+				.filter(
+					( columns ) =>
+						// The Type column is a quoted list for a variation that
+						// is also virtual or downloadable.
+						! columns[ 1 ]
+							.replace( /^"/, '' )
+							.startsWith( 'variation' )
+				)
+				.map( ( columns ) => columns[ 0 ] );
+
+			expect( parentIds.toSorted() ).toEqual(
+				[
+					String( simpleProduct.id ),
+					String( variableProduct.id ),
+				].toSorted()
+			);
+			expect( csv ).toContain( simpleProduct.name );
+			expect( csv ).toContain( variableProduct.name );
 		} );
 
-		const exportButton = page.locator(
-			'a.page-title-action[href*="page=product_exporter"]'
-		);
-
-		await test.step( 'Verify default export button state and navigate to export page', async () => {
-			await expect( exportButton ).toHaveText( 'Export' );
-			await exportButton.click();
+		await test.step( 'Clear the selected products', async () => {
+			await page
+				.getByRole( 'link', { name: 'clear your selection' } )
+				.click();
 		} );
 
-		await test.step( 'Verify UI elements for default export', async () => {
-			await expect( page.url() ).not.toContain( 'product_ids=' );
-			// Verify the selection-specific notice is NOT present
+		await test.step( 'Verify the default export state', async () => {
+			expect( page.url() ).not.toContain( 'product_ids=' );
 			await expect(
 				page.locator( '#selected-product-export-notice' )
 			).toBeHidden();
-			// Verify the standard filters ARE present
+			await expect(
+				page.locator( 'input[name="product_ids"]' )
+			).toHaveCount( 0 );
 			await expect(
 				page.locator( 'label[for="woocommerce-exporter-types"]' )
 			).toBeVisible();
 			await expect(
 				page.locator( 'label[for="woocommerce-exporter-category"]' )
+			).toBeVisible();
+			await expect(
+				page.getByText(
+					'This tool allows you to generate and download a CSV file containing a list of all products.',
+					{ exact: true }
+				)
 			).toBeVisible();
 		} );
 	} );

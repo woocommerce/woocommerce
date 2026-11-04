@@ -1,0 +1,2410 @@
+<?php
+/**
+ * Integration tests for the public Contracts facade.
+ *
+ * @package Automattic\WooCommerce\SubscriptionsEngine
+ */
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Api;
+
+use DateTimeImmutable;
+use DateTimeZone;
+use EngineIntegrationTestCase;
+use InvalidArgumentException;
+use WC_Order;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\ValidationException;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\CycleView;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
+use Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\AssertsValidationErrors;
+
+/**
+ * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts
+ */
+class ContractsTest extends EngineIntegrationTestCase {
+
+	use AssertsValidationErrors;
+
+	private const EXTENSION_SLUG = 'acme-subs';
+
+	/**
+	 * A second connection whose committed rows outlive the test transaction, closed after its
+	 * rollback (a duplicate-key insert left shared locks on those rows until then).
+	 *
+	 * @var array{wpdb: \wpdb, statements: array<int, string>}|null
+	 */
+	private $committed_cleanup = null;
+
+	public function tear_down(): void {
+		StatusRegistry::reset();
+		parent::tear_down();
+
+		if ( null !== $this->committed_cleanup ) {
+			foreach ( $this->committed_cleanup['statements'] as $statement ) {
+				$this->committed_cleanup['wpdb']->query( $statement ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- prepared when queued.
+			}
+			$this->committed_cleanup['wpdb']->close();
+			$this->committed_cleanup = null;
+		}
+	}
+
+	/**
+	 * Read a contract back as a view, asserting it exists.
+	 *
+	 * @param int $id Contract id.
+	 */
+	private function view( int $id ): ContractView {
+		$view = Contracts::get( $id );
+		$this->assertInstanceOf( ContractView::class, $view );
+
+		return $view;
+	}
+
+	/**
+	 * Read a contract back as the entity, asserting it exists.
+	 *
+	 * @param int $id Contract id.
+	 */
+	private function entity( int $id ): Contract {
+		$contract = ( new ContractRepository() )->find( $id );
+		$this->assertInstanceOf( Contract::class, $contract );
+
+		return $contract;
+	}
+
+	public function test_an_extension_slug_only_create_is_an_empty_draft(): void {
+		$created = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$id      = $created->get_id();
+
+		$view = $this->view( $id );
+		$this->assertEquals( $view, $created, 'The returned view matches a fresh read.' );
+		$this->assertSame( ContractStatus::DRAFT, $view->get_status() );
+		$this->assertSame( self::EXTENSION_SLUG, $view->get_extension_slug() );
+		$this->assertNull( $view->get_customer_id() );
+		$this->assertNull( $view->get_currency() );
+		$this->assertNull( $view->get_selling_plan_id() );
+		$this->assertNull( $view->get_start_gmt() );
+		$this->assertNull( $view->get_next_payment_gmt() );
+		$this->assertSame( '0.00000000', $view->get_billing_total() );
+		$this->assertSame( '0.00000000', $view->get_tax_total() );
+		$this->assertSame( array(), $view->get_items() );
+	}
+
+	public function test_create_stores_and_returns_every_field(): void {
+		$created = $this->create_released(
+			array(
+				'extension_slug'       => self::EXTENSION_SLUG,
+				'status'               => ContractStatus::ACTIVE,
+				'customer_id'          => '12',
+				'currency'             => 'EUR',
+				'selling_plan_id'      => 3,
+				'origin_order_id'      => 4,
+				'payment_method'       => 'dummy',
+				'payment_method_title' => 'Dummy',
+				'payment_token_id'     => 5,
+				'start_gmt'            => '2026-01-01 00:00:00',
+				'next_payment_gmt'     => '2026-02-01 00:00:00',
+				'last_payment_gmt'     => '2026-01-02 00:00:00',
+				'last_attempt_gmt'     => '2026-01-03 00:00:00',
+				'trial_end_gmt'        => '2026-01-04 00:00:00',
+				'end_gmt'              => '2027-01-01 00:00:00',
+				'schedule_source'      => 'my_gateway',
+				'billing_total'        => 20,
+				'discount_total'       => '1.5',
+				'shipping_total'       => 5.25,
+				'tax_total'            => '2',
+				'items'                => array(
+					array(
+						'item_name'  => 'Coffee',
+						'product_id' => 9,
+						'quantity'   => '2',
+						'total'      => '20',
+					),
+				),
+				'addresses'            => array(
+					'billing' => array(
+						'first_name' => 'Ada',
+						'country'    => 'PT',
+					),
+				),
+			)
+		);
+
+		$id = $created->get_id();
+		$this->assertGreaterThan( 0, $id );
+
+		foreach ( array( $created, $this->view( $id ) ) as $view ) {
+			$this->assertSame( ContractStatus::ACTIVE, $view->get_status() );
+			$this->assertSame( 12, $view->get_customer_id() );
+			$this->assertSame( 'EUR', $view->get_currency() );
+			$this->assertSame( 3, $view->get_selling_plan_id() );
+			$this->assertSame( 4, $view->get_origin_order_id() );
+			$this->assertSame( 'dummy', $view->get_payment_method() );
+			$this->assertSame( 'Dummy', $view->get_payment_method_title() );
+			$this->assertSame( 5, $view->get_payment_token_id() );
+			$this->assertSame( '2026-01-01 00:00:00', $view->get_start_gmt() );
+			$this->assertSame( '2026-02-01 00:00:00', $view->get_next_payment_gmt() );
+			$this->assertSame( '2026-01-02 00:00:00', $view->get_last_payment_gmt() );
+			$this->assertSame( '2026-01-03 00:00:00', $view->get_last_attempt_gmt() );
+			$this->assertSame( '2026-01-04 00:00:00', $view->get_trial_end_gmt() );
+			$this->assertSame( '2027-01-01 00:00:00', $view->get_end_gmt() );
+			$this->assertSame( 'my_gateway', $view->get_schedule_source() );
+			$this->assertSame( '20.00000000', $view->get_billing_total() );
+			$this->assertSame( '1.50000000', $view->get_discount_total() );
+			$this->assertSame( '5.25000000', $view->get_shipping_total() );
+			$this->assertSame( '2.00000000', $view->get_tax_total() );
+
+			$items = $view->get_items();
+			$this->assertIsArray( $items );
+			$this->assertCount( 1, $items );
+			$this->assertSame( 'Coffee', $items[0]['item_name'] );
+
+			$addresses = $view->get_addresses();
+			$this->assertIsArray( $addresses );
+			$this->assertSame( 'Ada', $addresses['billing']['first_name'] ?? null );
+		}
+	}
+
+	public function test_items_and_addresses_read_back_in_the_written_shape(): void {
+		$items     = array(
+			array(
+				'item_name'    => 'Coffee',
+				'item_type'    => 'line_item',
+				'product_id'   => 9,
+				'variation_id' => 10,
+				'quantity'     => '2.0000',
+				'subtotal'     => '20.00000000',
+				'total'        => '18.00000000',
+				'taxes'        => array(
+					'total'    => array( 1 => '1.80' ),
+					'subtotal' => array( 1 => '2.00' ),
+				),
+			),
+		);
+		$billing   = array_fill_keys( Contract::ADDRESS_FIELDS, null );
+		$addresses = array(
+			'billing'  => array_merge(
+				$billing,
+				array(
+					'first_name' => 'Ada',
+					'country'    => 'PT',
+				)
+			),
+			'shipping' => array_merge( $billing, array( 'city' => 'Porto' ) ),
+		);
+
+		$created = $this->create_released(
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'items'          => $items,
+				'addresses'      => $addresses,
+			)
+		);
+		$id      = $created->get_id();
+
+		$view = $this->view( $id );
+		$this->assertEquals( $view, $created, 'The returned view matches a fresh read.' );
+		$this->assertSame( $items, $view->get_items() );
+		$this->assertEquals( $addresses, $view->get_addresses() );
+
+		$listed = Contracts::list( array( 'search' => (string) $id ) );
+		$this->assertSame( array( $id ), array_map( static fn( ContractView $row ): int => $row->get_id(), $listed ) );
+		$this->assertNull( $listed[0]->get_items() );
+		$this->assertNull( $listed[0]->get_addresses() );
+	}
+
+	public function test_datetime_objects_are_stored_as_utc_strings(): void {
+		$id = $this->create_released(
+			array(
+				'extension_slug'   => self::EXTENSION_SLUG,
+				'start_gmt'        => new DateTimeImmutable( '2026-01-01 02:00:00', new DateTimeZone( 'Europe/Lisbon' ) ),
+				'next_payment_gmt' => new DateTimeImmutable( '2026-07-01 02:00:00', new DateTimeZone( 'Europe/Lisbon' ) ),
+			)
+		)->get_id();
+
+		$view = $this->view( $id );
+		$this->assertSame( '2026-01-01 02:00:00', $view->get_start_gmt() );
+		$this->assertSame( '2026-07-01 01:00:00', $view->get_next_payment_gmt() );
+	}
+
+	public function test_an_unknown_key_is_ignored_with_a_notice(): void {
+		$this->setExpectedIncorrectUsage( Contracts::class . '::create' );
+		$messages = array();
+		add_action(
+			'doing_it_wrong_run',
+			static function ( $function_name, $message ) use ( &$messages ): void {
+				$messages[] = $message;
+			},
+			10,
+			2
+		);
+
+		$id = $this->create_released(
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'custmer_id'     => 1,
+				'customer_id'    => 7,
+			)
+		)->get_id();
+
+		$this->assertSame( array( 'Unknown key "custmer_id" ignored.' ), $messages );
+		$this->assertSame( 7, $this->view( $id )->get_customer_id(), 'The known key beside the unknown one is written.' );
+	}
+
+	public function test_unknown_item_and_address_keys_are_ignored_with_a_notice(): void {
+		$this->setExpectedIncorrectUsage( Contracts::class );
+
+		$id = $this->create_released(
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'items'          => array(
+					array(
+						'item_name' => 'Coffee',
+						'price'     => '1',
+					),
+				),
+				'addresses'      => array(
+					'billing' => array(
+						'first_name' => 'Ada',
+						'zip'        => '1',
+					),
+				),
+			)
+		)->get_id();
+
+		$contract = $this->entity( $id );
+		$items    = $contract->get_items();
+		$this->assertCount( 1, $items );
+		$this->assertSame( 'Coffee', $items[0]['item_name'] );
+		$this->assertArrayNotHasKey( 'price', $items[0] );
+		$billing = $contract->get_addresses()['billing'];
+		$this->assertSame( 'Ada', $billing['first_name'] );
+		$this->assertArrayNotHasKey( 'zip', $billing );
+	}
+
+	/**
+	 * @dataProvider provide_bad_extension_slugs
+	 *
+	 * @param array<string, mixed> $args Create args.
+	 */
+	public function test_a_missing_or_empty_extension_slug_is_rejected( array $args ): void {
+		$this->expectException( InvalidArgumentException::class );
+
+		$this->create_released( $args );
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provide_bad_extension_slugs(): array {
+		return array(
+			'missing'    => array( array() ),
+			'empty'      => array( array( 'extension_slug' => '' ) ),
+			'not string' => array( array( 'extension_slug' => 5 ) ),
+		);
+	}
+
+	public function test_an_entity_invariant_failure_is_reported_as_invalid_input(): void {
+		try {
+			$this->create_released(
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'status'         => 'nonsense',
+				)
+			);
+			$this->fail( 'Expected a ValidationException.' );
+		} catch ( ValidationException $e ) {
+			$this->assertInstanceOf( InvalidInputException::class, $e->getPrevious() );
+			$this->assertSame( esc_html( $e->getPrevious()->getMessage() ), $e->getMessage() );
+			$this->assertSame( array( ValidationErrorCode::NOT_REGISTERED ), $e->get_errors()->get_error_codes() );
+		}
+	}
+
+	/**
+	 * @testdox Contract writes report the error code and field.
+	 */
+	public function test_contract_writes_report_the_error_code_and_field(): void {
+		$this->assert_validation_errors(
+			static function (): void {
+				Contracts::create(
+					array(
+						'extension_slug' => self::EXTENSION_SLUG,
+						'currency'       => 'usd',
+					)
+				);
+			},
+			array( array( ValidationErrorCode::INVALID_VALUE, 'currency' ) )
+		);
+		$this->assert_validation_errors(
+			static function (): void {
+				Contracts::create(
+					array(
+						'extension_slug' => self::EXTENSION_SLUG,
+						'billing_total'  => '10',
+					)
+				);
+			},
+			array( array( ValidationErrorCode::REQUIRED, 'currency' ) )
+		);
+		$this->assert_validation_errors(
+			static function (): void {
+				Contracts::create(
+					array(
+						'extension_slug'  => self::EXTENSION_SLUG,
+						'schedule_source' => 'Not a slug',
+					)
+				);
+			},
+			array( array( ValidationErrorCode::INVALID_VALUE, 'schedule_source' ) )
+		);
+
+		$id = $this->contract_with_currency();
+		$this->assert_validation_errors(
+			static function () use ( $id ): void {
+				Contracts::update( $id, array( 'addresses' => array( 'home' => array( 'first_name' => 'Ada' ) ) ) );
+			},
+			array( array( ValidationErrorCode::NOT_IN_ENUM, 'addresses.home' ) )
+		);
+	}
+
+	/**
+	 * @testdox Cycle writes and reads report the error code and field.
+	 */
+	public function test_cycle_writes_report_the_error_code_and_field(): void {
+		$id    = $this->contract_with_currency();
+		$cycle = $this->add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
+
+		$this->assert_validation_errors(
+			function () use ( $id ): void {
+				$this->add_cycle_locked( $id, array( 'currency' => 'USD' ) );
+			},
+			array(
+				array( ValidationErrorCode::REQUIRED, 'starts_at_gmt' ),
+				array( ValidationErrorCode::REQUIRED, 'ends_at_gmt' ),
+			)
+		);
+		$this->assert_validation_errors(
+			function () use ( $cycle ): void {
+				$this->transition_cycle_locked(
+					$cycle->get_id(),
+					array(
+						'from_status' => CycleStatus::PENDING,
+						'to_status'   => 'never-registered',
+					)
+				);
+			},
+			array( array( ValidationErrorCode::NOT_REGISTERED, 'to_status' ) )
+		);
+		$this->assert_validation_errors(
+			static function () use ( $id ): void {
+				Contracts::get_cycles( $id, -1 );
+			},
+			array( array( ValidationErrorCode::OUT_OF_BOUNDS, 'limit' ) )
+		);
+	}
+
+	/**
+	 * @testdox create reports every ill-typed argument at once and writes nothing.
+	 */
+	public function test_create_reports_every_ill_typed_argument(): void {
+		$before = Contracts::count();
+
+		$this->assert_validation_errors(
+			static function (): void {
+				Contracts::create(
+					array(
+						'extension_slug' => self::EXTENSION_SLUG,
+						'currency'       => 'usd',
+						'customer_id'    => 'x',
+						'addresses'      => array( 'home' => array( 'first_name' => 'Ada' ) ),
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::INVALID_TYPE, 'customer_id', array( 'type' => 'integer' ) ),
+				array( ValidationErrorCode::INVALID_VALUE, 'currency', array() ),
+				array( ValidationErrorCode::NOT_IN_ENUM, 'addresses.home', array( 'allowed' => array( 'billing', 'shipping' ) ) ),
+			)
+		);
+		$this->assertSame( $before, Contracts::count() );
+	}
+
+	/**
+	 * @testdox create reports every contract refusal at once.
+	 */
+	public function test_create_reports_every_contract_refusal(): void {
+		$this->assert_validation_errors(
+			static function (): void {
+				Contracts::create(
+					array(
+						'extension_slug'  => self::EXTENSION_SLUG,
+						'creation_key'    => str_repeat( 'k', 101 ),
+						'status'          => 'never-registered',
+						'schedule_source' => 'Not a slug',
+						'billing_total'   => '10',
+					)
+				);
+			},
+			array(
+				// The facade error groups messages by code, so both `invalid_value` errors come first.
+				array( ValidationErrorCode::INVALID_VALUE, 'creation_key' ),
+				array( ValidationErrorCode::INVALID_VALUE, 'schedule_source' ),
+				array( ValidationErrorCode::NOT_REGISTERED, 'status' ),
+				array( ValidationErrorCode::REQUIRED, 'currency' ),
+			)
+		);
+	}
+
+	/**
+	 * @testdox update reports every contract refusal at once and writes nothing.
+	 */
+	public function test_update_reports_every_contract_refusal(): void {
+		$id     = $this->contract_with_currency();
+		$before = $this->entity( $id )->to_storage();
+
+		$this->assert_validation_errors(
+			static function () use ( $id ): void {
+				Contracts::update(
+					$id,
+					array(
+						'status'          => 'never-registered',
+						'schedule_source' => 'Not a slug',
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::NOT_REGISTERED, 'status' ),
+				array( ValidationErrorCode::INVALID_VALUE, 'schedule_source' ),
+			)
+		);
+		$this->assertSame( $before, $this->entity( $id )->to_storage() );
+	}
+
+	/**
+	 * @testdox update checks its arguments before reading, so invalid arguments throw for a missing contract.
+	 */
+	public function test_update_checks_its_arguments_before_reading(): void {
+		$this->assert_validation_errors(
+			static function (): void {
+				Contracts::update( 999999, array( 'customer_id' => 0 ) );
+			},
+			array( array( ValidationErrorCode::OUT_OF_BOUNDS, 'customer_id' ) )
+		);
+		$this->assertNull( Contracts::update( 999999, array( 'customer_id' => 5 ) ) );
+	}
+
+	/**
+	 * @testdox add_cycle reports every refusal at once: ill-typed arguments before the cycle is built.
+	 */
+	public function test_add_cycle_reports_every_refusal(): void {
+		$id = $this->contract_with_currency();
+
+		$this->assert_validation_errors(
+			function () use ( $id ): void {
+				$this->add_cycle_locked( $id, array( 'kind' => '' ) );
+			},
+			array(
+				array( ValidationErrorCode::REQUIRED, 'kind' ),
+				array( ValidationErrorCode::REQUIRED, 'starts_at_gmt' ),
+				array( ValidationErrorCode::REQUIRED, 'ends_at_gmt' ),
+				array( ValidationErrorCode::REQUIRED, 'currency' ),
+			)
+		);
+		$this->assert_validation_errors(
+			function () use ( $id ): void {
+				$this->add_cycle_locked(
+					$id,
+					array(
+						'count'         => 0,
+						'starts_at_gmt' => 'soon',
+						'ends_at_gmt'   => 'later',
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'count' ),
+				array( ValidationErrorCode::INVALID_VALUE, 'starts_at_gmt' ),
+				array( ValidationErrorCode::INVALID_VALUE, 'ends_at_gmt' ),
+			)
+		);
+		$this->assertSame( 0, $this->stored_cycle_count( $id ) );
+	}
+
+	/**
+	 * @testdox transition_cycle and get_cycles report every invalid value at once.
+	 */
+	public function test_cycle_tools_report_every_invalid_value(): void {
+		$id    = $this->contract_with_currency();
+		$cycle = $this->add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
+
+		$this->assert_validation_errors(
+			function () use ( $cycle ): void {
+				$this->transition_cycle_locked(
+					$cycle->get_id(),
+					array(
+						'from_status' => '',
+						'to_status'   => CycleStatus::BILLED,
+						'order_id'    => 'x',
+						'reason'      => 5,
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::REQUIRED, 'from_status' ),
+				array( ValidationErrorCode::INVALID_TYPE, 'order_id' ),
+				array( ValidationErrorCode::INVALID_TYPE, 'reason' ),
+			)
+		);
+		$this->assert_validation_errors(
+			static function () use ( $id ): void {
+				Contracts::get_cycles( $id, -1, -2 );
+			},
+			array(
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'limit', array( 'min' => 0 ) ),
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'offset', array( 'min' => 0 ) ),
+			)
+		);
+	}
+
+	/**
+	 * @dataProvider provide_invalid_fields
+	 *
+	 * @param array<string, mixed> $fields Invalid fields.
+	 */
+	public function test_invalid_values_are_rejected_without_a_write( array $fields ): void {
+		$before = Contracts::count();
+
+		try {
+			$this->create_released( array_merge( array( 'extension_slug' => self::EXTENSION_SLUG ), $fields ) );
+			$this->fail( 'Expected an InvalidArgumentException.' );
+		} catch ( InvalidArgumentException $e ) {
+			$this->assertSame( $before, Contracts::count(), 'Nothing is written.' );
+		}
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provide_invalid_fields(): array {
+		return array(
+			'unregistered status'    => array( array( 'status' => 'nonsense' ) ),
+			'lowercase currency'     => array( array( 'currency' => 'usd' ) ),
+			'long currency'          => array( array( 'currency' => 'USDX' ) ),
+			'zero customer'          => array( array( 'customer_id' => 0 ) ),
+			'negative plan'          => array( array( 'selling_plan_id' => -3 ) ),
+			'non-numeric token'      => array( array( 'payment_token_id' => 'abc' ) ),
+			'malformed date'         => array( array( 'start_gmt' => '2026-01-01' ) ),
+			'impossible date'        => array( array( 'end_gmt' => '2026-02-30 00:00:00' ) ),
+			'non-numeric money'      => array(
+				array(
+					'currency'      => 'USD',
+					'billing_total' => 'ten',
+				),
+			),
+			'money without currency' => array( array( 'billing_total' => '10' ) ),
+			'bad schedule source'    => array( array( 'schedule_source' => 'Not a slug' ) ),
+			'non-string method'      => array( array( 'payment_method' => 5 ) ),
+			'items not a list'       => array( array( 'items' => array( 'a' => array() ) ) ),
+			'unknown address type'   => array( array( 'addresses' => array( 'home' => array() ) ) ),
+		);
+	}
+
+	/**
+	 * A rejected update writes none of its keys, including the valid ones beside the bad one.
+	 *
+	 * @dataProvider provide_invalid_update_fields
+	 *
+	 * @param array<string, mixed> $fields Invalid fields.
+	 */
+	public function test_a_rejected_update_writes_none_of_its_keys( array $fields ): void {
+		$id = $this->create_released(
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'currency'       => 'USD',
+				'payment_method' => 'dummy',
+				'billing_total'  => '10',
+			)
+		)->get_id();
+
+		try {
+			Contracts::update(
+				$id,
+				array_merge(
+					array(
+						'payment_method' => 'other',
+						'billing_total'  => '25',
+					),
+					$fields
+				)
+			);
+			$this->fail( 'Expected an InvalidArgumentException.' );
+		} catch ( InvalidArgumentException $e ) {
+			$view = $this->view( $id );
+			$this->assertSame( 'dummy', $view->get_payment_method(), 'The valid key beside the bad one is not written.' );
+			$this->assertSame( '10.00000000', $view->get_billing_total() );
+		}
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provide_invalid_update_fields(): array {
+		return array(
+			'unregistered status' => array( array( 'status' => 'nonsense' ) ),
+			'malformed date'      => array( array( 'end_gmt' => '2026-01-01' ) ),
+		);
+	}
+
+	public function test_money_without_currency_is_rejected_on_update(): void {
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+
+		$this->expectException( InvalidArgumentException::class );
+
+		Contracts::update( $id, array( 'billing_total' => '10' ) );
+	}
+
+	public function test_a_null_money_value_resets_to_zero_without_a_currency(): void {
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+
+		$this->assertInstanceOf( ContractView::class, Contracts::update( $id, array( 'billing_total' => null ) ) );
+		$this->assertSame( '0.00000000', $this->view( $id )->get_billing_total() );
+	}
+
+	public function test_the_currency_cannot_be_cleared_while_a_total_is_non_zero(): void {
+		$id = $this->create_released(
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'currency'       => 'USD',
+				'billing_total'  => '10',
+			)
+		)->get_id();
+
+		Contracts::update( $id, array( 'billing_total' => '10' ) );
+		try {
+			Contracts::update( $id, array( 'currency' => null ) );
+			$this->fail( 'Expected an InvalidArgumentException.' );
+		} catch ( InvalidArgumentException $e ) {
+			$this->assertSame( 'USD', $this->view( $id )->get_currency() );
+		}
+
+		// Clearing the totals in the same call is allowed.
+		$this->assertInstanceOf(
+			ContractView::class,
+			Contracts::update(
+				$id,
+				array(
+					'currency'      => null,
+					'billing_total' => null,
+				)
+			)
+		);
+		$this->assertNull( $this->view( $id )->get_currency() );
+	}
+
+	public function test_progressive_update_builds_the_contract(): void {
+		$customer = self::factory()->user->create();
+		$this->assertIsInt( $customer );
+
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+
+		$this->assertInstanceOf( ContractView::class, Contracts::update( $id, array( 'customer_id' => $customer ) ) );
+		$this->assertInstanceOf(
+			ContractView::class,
+			Contracts::update(
+				$id,
+				array(
+					'currency'      => 'USD',
+					'billing_total' => '19.99',
+				)
+			)
+		);
+		$updated = Contracts::update( $id, array( 'status' => ContractStatus::ACTIVE ) );
+		$this->assertInstanceOf( ContractView::class, $updated );
+		$this->assertEquals( $this->view( $id ), $updated, 'The returned view matches a fresh read.' );
+
+		$view = $this->view( $id );
+		$this->assertSame( $customer, $view->get_customer_id() );
+		$this->assertSame( 'USD', $view->get_currency() );
+		$this->assertSame( '19.99000000', $view->get_billing_total() );
+		$this->assertSame( ContractStatus::ACTIVE, $view->get_status() );
+		$this->assertSame( self::EXTENSION_SLUG, $view->get_extension_slug() );
+	}
+
+	public function test_update_keeps_unmentioned_payment_fields(): void {
+		$id = $this->create_released(
+			array(
+				'extension_slug'       => self::EXTENSION_SLUG,
+				'payment_method'       => 'dummy',
+				'payment_method_title' => 'Dummy',
+				'payment_token_id'     => 5,
+			)
+		)->get_id();
+
+		Contracts::update( $id, array( 'payment_token_id' => 6 ) );
+
+		$view = $this->view( $id );
+		$this->assertSame( 'dummy', $view->get_payment_method() );
+		$this->assertSame( 'Dummy', $view->get_payment_method_title() );
+		$this->assertSame( 6, $view->get_payment_token_id() );
+	}
+
+	public function test_update_with_no_fields_returns_the_view(): void {
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+
+		$updated = Contracts::update( $id, array() );
+
+		$this->assertInstanceOf( ContractView::class, $updated );
+		$this->assertSame( $id, $updated->get_id() );
+	}
+
+	public function test_update_returns_null_when_the_contract_is_deleted_before_the_write(): void {
+		global $wpdb;
+
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+
+		// A concurrent delete lands after the facade read the contract and before its write.
+		$table    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$injected = false;
+		$race     = static function ( string $query ) use ( &$injected, $table, $id, $wpdb ): string {
+			if ( ! $injected && 0 === strpos( $query, "UPDATE `{$table}`" ) ) {
+				$injected = true;
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+				$wpdb->delete( $table, array( 'id' => $id ) );
+			}
+
+			return $query;
+		};
+		add_filter( 'query', $race );
+
+		try {
+			$updated = Contracts::update( $id, array( 'payment_method_title' => 'X' ) );
+		} finally {
+			remove_filter( 'query', $race );
+		}
+
+		$this->assertTrue( $injected );
+		$this->assertNull( $updated );
+	}
+
+	public function test_update_does_not_revert_a_concurrent_write_to_other_fields(): void {
+		global $wpdb;
+
+		$id = $this->create_released(
+			array(
+				'extension_slug'   => self::EXTENSION_SLUG,
+				'status'           => ContractStatus::ACTIVE,
+				'next_payment_gmt' => '2026-02-01 00:00:00',
+			)
+		)->get_id();
+
+		// A concurrent writer (e.g. a cancel compare-and-set) lands after the facade
+		// read the contract and before its own write.
+		$table    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$injected = false;
+		$race     = static function ( string $query ) use ( &$injected, $table, $id, $wpdb ): string {
+			if ( ! $injected && 0 === strpos( $query, "UPDATE `{$table}`" ) ) {
+				$injected = true;
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+				$wpdb->update(
+					$table,
+					array(
+						'status'           => ContractStatus::CANCELLED,
+						'next_payment_gmt' => null,
+					),
+					array( 'id' => $id )
+				);
+			}
+
+			return $query;
+		};
+		add_filter( 'query', $race );
+
+		try {
+			$updated = Contracts::update( $id, array( 'payment_method_title' => 'X' ) );
+		} finally {
+			remove_filter( 'query', $race );
+		}
+
+		$this->assertTrue( $injected );
+		$this->assertInstanceOf( ContractView::class, $updated );
+		$this->assertSame( 'X', $updated->get_payment_method_title() );
+		$this->assertSame( ContractStatus::ACTIVE, $updated->get_status(), 'The returned view keeps the pre-write read of other columns.' );
+		$view = $this->view( $id );
+		$this->assertSame( 'X', $view->get_payment_method_title() );
+		$this->assertSame( ContractStatus::CANCELLED, $view->get_status() );
+		$this->assertNull( $view->get_next_payment_gmt() );
+	}
+
+	public function test_items_and_addresses_are_replaced_as_a_whole(): void {
+		$id = $this->create_released(
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'items'          => array( array( 'item_name' => 'Coffee' ), array( 'item_name' => 'Tea' ) ),
+				'addresses'      => array(
+					'billing'  => array( 'city' => 'Lisbon' ),
+					'shipping' => array( 'city' => 'Porto' ),
+				),
+			)
+		)->get_id();
+
+		$updated = Contracts::update(
+			$id,
+			array(
+				'items'     => array( array( 'item_name' => 'Cocoa' ) ),
+				'addresses' => array( 'billing' => array( 'city' => 'Faro' ) ),
+			)
+		);
+		$this->assertInstanceOf( ContractView::class, $updated );
+
+		foreach ( array( $updated, $this->view( $id ) ) as $view ) {
+			$items = $view->get_items();
+			$this->assertIsArray( $items );
+			$this->assertSame( array( 'Cocoa' ), array_column( $items, 'item_name' ) );
+			$addresses = $view->get_addresses();
+			$this->assertIsArray( $addresses );
+			$this->assertSame( array( 'billing' ), array_keys( $addresses ) );
+			$this->assertSame( 'Faro', $addresses['billing']['city'] ?? null );
+		}
+	}
+
+	/**
+	 * The number of stored cycles of a contract, on any chain.
+	 *
+	 * @param int $contract_id Contract id.
+	 */
+	private function stored_cycle_count( int $contract_id ): int {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE contract_id = %d", $contract_id ) );
+	}
+
+	/**
+	 * Run a contract write while every insert into a child table fails, asserting it throws.
+	 *
+	 * @param string   $child_table Child table constant of SchemaInstaller.
+	 * @param callable $write       The facade write; must throw rather than return.
+	 */
+	private function assert_write_throws_when_child_inserts_fail( string $child_table, callable $write ): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( $child_table );
+		$break = static function ( string $query ) use ( $table ): string {
+			return 1 === preg_match( '/^INSERT INTO `?' . preg_quote( $table, '/' ) . '`?\s/', $query ) ? 'SELECT broken syntax (' : $query;
+		};
+		add_filter( 'query', $break );
+		$suppressed = $wpdb->suppress_errors( true );
+
+		try {
+			$write();
+			$this->fail( 'Expected the write to throw instead of returning a view.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'Failed to', $e->getMessage() );
+		} finally {
+			$wpdb->suppress_errors( $suppressed );
+			remove_filter( 'query', $break );
+		}
+	}
+
+	public function test_create_throws_when_an_item_insert_fails(): void {
+		$this->assert_write_throws_when_child_inserts_fail(
+			SchemaInstaller::TABLE_CONTRACT_ITEMS,
+			static function () {
+				return Contracts::create(
+					array(
+						'extension_slug' => self::EXTENSION_SLUG,
+						'items'          => array( array( 'item_name' => 'Coffee' ) ),
+					)
+				);
+			}
+		);
+	}
+
+	/**
+	 * @testdox A failed item insert on update throws and keeps the previous items.
+	 */
+	public function test_update_throws_when_an_item_insert_fails(): void {
+		$view = $this->create_released(
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'items'          => array( array( 'item_name' => 'Coffee' ) ),
+			)
+		);
+		$id   = $view->get_id();
+
+		$this->assert_write_throws_when_child_inserts_fail(
+			SchemaInstaller::TABLE_CONTRACT_ITEMS,
+			static function () use ( $id ) {
+				return Contracts::update( $id, array( 'items' => array( array( 'item_name' => 'Cocoa' ) ) ) );
+			}
+		);
+
+		$this->assertSame( array( 'Coffee' ), array_column( (array) $this->view( $id )->get_items(), 'item_name' ) );
+		$this->assertNull( $this->get_lock_holder( $id )['operation'], 'The internal lock is released.' );
+	}
+
+	/**
+	 * @testdox A failed address write on update throws and keeps the previous address.
+	 */
+	public function test_update_throws_when_an_address_insert_fails(): void {
+		$view = $this->create_released(
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'addresses'      => array( 'billing' => array( 'city' => 'Lisbon' ) ),
+			)
+		);
+		$id   = $view->get_id();
+
+		$this->assert_write_throws_when_child_inserts_fail(
+			SchemaInstaller::TABLE_CONTRACT_ADDRESSES,
+			static function () use ( $id ) {
+				return Contracts::update( $id, array( 'addresses' => array( 'billing' => array( 'city' => 'Faro' ) ) ) );
+			}
+		);
+
+		$addresses = (array) $this->view( $id )->get_addresses();
+		$this->assertSame( 'Lisbon', $addresses['billing']['city'] ?? null );
+	}
+
+	public function test_null_clears_nullable_fields(): void {
+		$id = $this->create_released(
+			array(
+				'extension_slug'   => self::EXTENSION_SLUG,
+				'selling_plan_id'  => 3,
+				'next_payment_gmt' => '2026-02-01 00:00:00',
+			)
+		)->get_id();
+
+		Contracts::update(
+			$id,
+			array(
+				'selling_plan_id'  => null,
+				'next_payment_gmt' => null,
+			)
+		);
+
+		$view = $this->view( $id );
+		$this->assertNull( $view->get_selling_plan_id() );
+		$this->assertNull( $view->get_next_payment_gmt() );
+	}
+
+	public function test_update_on_an_unknown_contract_returns_null(): void {
+		$this->assertNull( Contracts::update( 999999, array( 'status' => ContractStatus::ACTIVE ) ) );
+	}
+
+	public function test_an_unknown_update_key_is_ignored_with_a_notice(): void {
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		$this->setExpectedIncorrectUsage( Contracts::class . '::update' );
+		$this->setExpectedIncorrectUsage( Contracts::class );
+
+		$this->assertInstanceOf(
+			ContractView::class,
+			Contracts::update(
+				$id,
+				array(
+					'nonsense'       => 1,
+					'payment_method' => 'dummy',
+					'items'          => array(
+						array(
+							'item_name' => 'Coffee',
+							'price'     => '1',
+						),
+					),
+				)
+			)
+		);
+
+		$this->assertSame( 'dummy', $this->view( $id )->get_payment_method(), 'The known key beside the unknown one is written.' );
+		$items = $this->entity( $id )->get_items();
+		$this->assertSame( 'Coffee', $items[0]['item_name'] );
+		$this->assertArrayNotHasKey( 'price', $items[0] );
+	}
+
+	public function test_extension_slug_is_not_an_update_key(): void {
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		$this->setExpectedIncorrectUsage( Contracts::class . '::update' );
+
+		Contracts::update(
+			$id,
+			array(
+				'extension_slug' => 'other',
+				'customer_id'    => 7,
+			)
+		);
+
+		$view = $this->view( $id );
+		$this->assertSame( self::EXTENSION_SLUG, $view->get_extension_slug(), 'The extension slug is not rewritten.' );
+		$this->assertSame( 7, $view->get_customer_id() );
+	}
+
+	public function test_snapshot_keys_are_ignored_with_a_notice(): void {
+		$this->setExpectedIncorrectUsage( Contracts::class . '::create' );
+		$messages = array();
+		add_action(
+			'doing_it_wrong_run',
+			static function ( $function_name, $message ) use ( &$messages ): void {
+				$messages[] = $message;
+			},
+			10,
+			2
+		);
+
+		$id = $this->create_released(
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'plan_snapshot'  => array( 'selling_plan_id' => 3 ),
+				'items_snapshot' => array( array( 'item_name' => 'Coffee' ) ),
+			)
+		)->get_id();
+
+		$this->assertSame(
+			array( 'Unknown key "plan_snapshot" ignored.', 'Unknown key "items_snapshot" ignored.' ),
+			$messages
+		);
+		$this->assertNull( $this->entity( $id )->get_plan_snapshot_id() );
+		$this->assertNull( $this->entity( $id )->get_items_snapshot_id() );
+	}
+
+	public function test_a_registered_extension_status_is_accepted(): void {
+		StatusRegistry::register( StatusRegistry::KIND_CONTRACT, 'paused-by-merchant' );
+
+		$id = $this->create_released(
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'status'         => 'paused-by-merchant',
+			)
+		)->get_id();
+
+		$this->assertSame( 'paused-by-merchant', $this->view( $id )->get_status() );
+	}
+
+	/**
+	 * Create a contract carrying a currency, ready for cycles.
+	 */
+	private function contract_with_currency(): int {
+		return $this->create_released(
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'currency'       => 'USD',
+			)
+		)->get_id();
+	}
+
+	/**
+	 * Fetch a stored cycle by id.
+	 *
+	 * @param int $contract_id Contract id.
+	 * @param int $cycle_id    Cycle id.
+	 */
+	private function cycle( int $contract_id, int $cycle_id ): Cycle {
+		foreach ( ( new ContractRepository() )->find_cycle_history( $contract_id ) as $cycle ) {
+			if ( $cycle->get_id() === $cycle_id ) {
+				return $cycle;
+			}
+		}
+
+		$this->fail( "Cycle {$cycle_id} not found." );
+	}
+
+	/**
+	 * Minimal valid cycle args.
+	 *
+	 * @param array<string, mixed> $overrides Extra or replacement keys.
+	 * @return array<string, mixed>
+	 */
+	private function cycle_args( array $overrides = array() ): array {
+		return array_merge(
+			array(
+				'status'        => CycleStatus::BILLED,
+				'starts_at_gmt' => '2026-01-01 00:00:00',
+				'ends_at_gmt'   => '2026-02-01 00:00:00',
+				'currency'      => 'USD',
+			),
+			$overrides
+		);
+	}
+
+	public function test_the_first_cycle_takes_the_chain_defaults(): void {
+		$id = $this->contract_with_currency();
+
+		$cycle_id = $this->add_cycle( $id, $this->cycle_args( array( 'order_id' => 77 ) ) )->get_id();
+		$cycle    = $this->cycle( $id, $cycle_id );
+
+		$this->assertSame( Cycle::KIND_BILLING, $cycle->get_kind() );
+		$this->assertSame( 1, $cycle->get_sequence_no() );
+		$this->assertNull( $cycle->get_count(), 'The engine never assigns a count.' );
+		$this->assertSame( 'USD', $cycle->get_currency() );
+		$this->assertSame( '0.00000000', $cycle->get_expected_total() );
+		$this->assertSame( 77, $cycle->get_order_id() );
+		$this->assertNull( $cycle->get_extension_slug(), 'The contract is not read, so its owner is not copied.' );
+		$this->assertNull( $cycle->get_plan_snapshot_id() );
+		$this->assertNull( $cycle->get_items_snapshot_id() );
+	}
+
+	public function test_the_next_cycle_defaults_to_the_next_position(): void {
+		$id = $this->contract_with_currency();
+		$this->add_cycle( $id, $this->cycle_args() );
+
+		$cycle_id = $this->add_cycle(
+			$id,
+			$this->cycle_args(
+				array(
+					'status'         => CycleStatus::PENDING,
+					'starts_at_gmt'  => '2026-02-01 00:00:00',
+					'ends_at_gmt'    => '2026-03-01 00:00:00',
+					'expected_total' => '19.99',
+				)
+			)
+		)->get_id();
+		$cycle    = $this->cycle( $id, $cycle_id );
+
+		$this->assertSame( 2, $cycle->get_sequence_no() );
+		$this->assertNull( $cycle->get_count() );
+		$this->assertSame( '19.99000000', $cycle->get_expected_total() );
+	}
+
+	public function test_a_non_counting_cycle_takes_a_null_count(): void {
+		$id = $this->contract_with_currency();
+
+		$cycle_id = $this->add_cycle( $id, $this->cycle_args( array( 'count' => null ) ) )->get_id();
+
+		$this->assertNull( $this->cycle( $id, $cycle_id )->get_count() );
+	}
+
+	public function test_a_taken_position_returns_null(): void {
+		$id = $this->contract_with_currency();
+		$this->add_cycle( $id, $this->cycle_args() );
+
+		$this->assertNull( $this->add_cycle_locked( $id, $this->cycle_args( array( 'sequence_no' => 1 ) ) ), 'A lost append returns null.' );
+		$this->assertCount( 1, Contracts::get_cycles( $id ), 'Nothing is written.' );
+	}
+
+	public function test_an_over_long_kind_is_refused_and_nothing_is_written(): void {
+		$id   = $this->contract_with_currency();
+		$kind = str_repeat( 'k', 21 );
+
+		try {
+			$this->add_cycle_locked( $id, $this->cycle_args( array( 'kind' => $kind ) ) );
+			$this->fail( 'Expected add_cycle() to refuse a kind longer than its column.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'longer than the column allows', $e->getMessage() );
+		}
+		$this->assertSame( 0, $this->stored_cycle_count( $id ), 'Nothing is written.' );
+	}
+
+	public function test_a_null_sequence_no_takes_the_next_position(): void {
+		$id = $this->contract_with_currency();
+		$this->add_cycle( $id, $this->cycle_args() );
+
+		$view = $this->add_cycle( $id, $this->cycle_args( array( 'sequence_no' => null ) ) );
+
+		$this->assertSame( 2, $view->get_sequence_no() );
+	}
+
+	/**
+	 * @testdox A failed read of the next position throws and appends nothing.
+	 */
+	public function test_a_failed_position_read_throws_and_appends_nothing(): void {
+		$id = $this->contract_with_currency();
+		$this->add_cycle( $id, $this->cycle_args() );
+
+		$this->fail_next_query( '/^\s*SELECT COALESCE\( MAX\( sequence_no \)/i' );
+		try {
+			$this->add_cycle_locked( $id, $this->cycle_args() );
+			$this->fail( 'Expected the failed read to throw.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertNotInstanceOf( ContractLockedException::class, $e, 'A failed read, not a lock conflict.' );
+		}
+		$this->assertCount( 1, Contracts::get_cycles( $id ), 'Nothing is appended.' );
+	}
+
+	/**
+	 * @testdox A taken position, count or creation key is a lost race by its error number, even when the caller's transaction snapshot cannot see the row that took it.
+	 */
+	public function test_a_taken_slot_is_a_lost_race_inside_a_caller_transaction(): void {
+		$cycles    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$contracts = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$id        = $this->contract_with_currency();
+		$this->add_cycle( $id, $this->cycle_args( array( 'count' => 1 ) ) );
+
+		// The test runs in a transaction whose snapshot is already open; a second connection
+		// commits rows that snapshot cannot see, as a concurrent writer would.
+		$credentials = array();
+		foreach ( array( 'DB_USER', 'DB_PASSWORD', 'DB_NAME', 'DB_HOST' ) as $name ) {
+			$value = constant( $name );
+			$this->assertIsString( $value );
+			$credentials[] = $value;
+		}
+		$other = new \wpdb( ...$credentials );
+		$slug  = self::EXTENSION_SLUG;
+
+		// Fixed test values only: the contract id is an int and the rest are literals.
+		$this->committed_cleanup = array(
+			'wpdb'       => $other,
+			'statements' => array(
+				sprintf( 'DELETE FROM `%s` WHERE contract_id = %d AND sequence_no = 2', $cycles, $id ),
+				sprintf( "DELETE FROM `%s` WHERE extension_slug = '%s' AND creation_key = 'order:12'", $contracts, $slug ),
+			),
+		);
+
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		// Rows an aborted earlier run committed would make these inserts fail; tear_down() removes them otherwise.
+		foreach ( $this->committed_cleanup['statements'] as $statement ) {
+			$other->query( $statement );
+		}
+		$other->query( sprintf( "INSERT INTO `%s` ( contract_id, kind, sequence_no, count, status, starts_at_gmt, ends_at_gmt, currency, date_created_gmt, date_updated_gmt ) VALUES ( %d, 'billing', 2, 2, 'billed', '2026-02-01 00:00:00', '2026-03-01 00:00:00', 'USD', UTC_TIMESTAMP(), UTC_TIMESTAMP() )", $cycles, $id ) );
+		$other->query( sprintf( "INSERT INTO `%s` ( status, extension_slug, creation_key, date_created_gmt, date_updated_gmt ) VALUES ( 'draft', '%s', 'order:12', UTC_TIMESTAMP(), UTC_TIMESTAMP() )", $contracts, $slug ) );
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+		$this->assertSame( '', $other->last_error );
+
+		$this->assertNull( $this->add_cycle_locked( $id, $this->cycle_args() ), 'The next position, read from the old snapshot, is taken.' );
+		$this->assertNull(
+			$this->add_cycle_locked(
+				$id,
+				$this->cycle_args(
+					array(
+						'sequence_no' => 3,
+						'count'       => 2,
+					)
+				)
+			),
+			'The count is taken.'
+		);
+		$this->assertNull(
+			Contracts::create(
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'creation_key'   => 'order:12',
+				)
+			),
+			'The creation key is taken.'
+		);
+	}
+
+	/**
+	 * @testdox A failed insert that is not a duplicate key surfaces as a database error, even when its slot is taken.
+	 */
+	public function test_a_failure_other_than_a_duplicate_key_is_a_database_error(): void {
+		$id = $this->contract_with_currency();
+		$this->add_cycle( $id, $this->cycle_args() );
+
+		$this->fail_next_query( '/^\s*INSERT INTO `\S*subscription_cycles`/' );
+		$this->expectException( \RuntimeException::class );
+		$this->add_cycle_locked( $id, $this->cycle_args( array( 'sequence_no' => 1 ) ) );
+	}
+
+	/**
+	 * @dataProvider provide_invalid_cycle_args
+	 *
+	 * @param array<string, mixed> $args Cycle args.
+	 */
+	public function test_invalid_cycle_args_are_rejected( array $args ): void {
+		$id = $this->contract_with_currency();
+
+		try {
+			$this->add_cycle( $id, $args );
+			$this->fail( 'Expected an InvalidArgumentException.' );
+		} catch ( InvalidArgumentException $e ) {
+			$this->assertSame( array(), Contracts::get_cycles( $id ), 'No cycle is written.' );
+		}
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provide_invalid_cycle_args(): array {
+		return array(
+			'unregistered status'  => array(
+				array(
+					'status'        => 'nonsense',
+					'starts_at_gmt' => '2026-01-01 00:00:00',
+					'ends_at_gmt'   => '2026-02-01 00:00:00',
+				),
+			),
+			'missing starts_at'    => array(
+				array(
+					'status'      => CycleStatus::BILLED,
+					'ends_at_gmt' => '2026-02-01 00:00:00',
+				),
+			),
+			'missing ends_at'      => array(
+				array(
+					'status'        => CycleStatus::BILLED,
+					'starts_at_gmt' => '2026-01-01 00:00:00',
+				),
+			),
+			'zero sequence number' => array(
+				array(
+					'status'        => CycleStatus::BILLED,
+					'starts_at_gmt' => '2026-01-01 00:00:00',
+					'ends_at_gmt'   => '2026-02-01 00:00:00',
+					'sequence_no'   => 0,
+				),
+			),
+			'non-string status'    => array(
+				array(
+					'status'        => array( 'billed' ),
+					'starts_at_gmt' => '2026-01-01 00:00:00',
+					'ends_at_gmt'   => '2026-02-01 00:00:00',
+					'currency'      => 'USD',
+				),
+			),
+			'empty kind'           => array(
+				array(
+					'status'        => CycleStatus::BILLED,
+					'kind'          => '',
+					'starts_at_gmt' => '2026-01-01 00:00:00',
+					'ends_at_gmt'   => '2026-02-01 00:00:00',
+				),
+			),
+		);
+	}
+
+	public function test_add_cycle_defaults_the_status_to_pending(): void {
+		$id = $this->contract_with_currency();
+
+		$cycle = $this->add_cycle(
+			$id,
+			array(
+				'starts_at_gmt' => '2026-01-01 00:00:00',
+				'ends_at_gmt'   => '2026-02-01 00:00:00',
+				'currency'      => 'USD',
+			)
+		);
+
+		$this->assertSame( CycleStatus::PENDING, $cycle->get_status() );
+	}
+
+	public function test_an_unknown_cycle_key_is_ignored_with_a_notice(): void {
+		$id = $this->contract_with_currency();
+		$this->setExpectedIncorrectUsage( Contracts::class . '::add_cycle' );
+
+		$cycle_id = $this->add_cycle(
+			$id,
+			$this->cycle_args(
+				array(
+					'reason'   => 'x',
+					'order_id' => 77,
+				)
+			)
+		)->get_id();
+
+		$this->assertSame( 77, $this->cycle( $id, $cycle_id )->get_order_id(), 'The known key beside the unknown one is written.' );
+	}
+
+	public function test_a_cycle_needs_a_currency(): void {
+		$id = $this->contract_with_currency();
+
+		$this->expectException( InvalidArgumentException::class );
+
+		$this->add_cycle( $id, $this->cycle_args( array( 'currency' => null ) ) );
+	}
+
+	public function test_the_cycle_currency_is_the_given_one(): void {
+		$id = $this->contract_with_currency();
+
+		$cycle_id = $this->add_cycle( $id, $this->cycle_args( array( 'currency' => 'EUR' ) ) )->get_id();
+
+		$this->assertSame( 'EUR', $this->cycle( $id, $cycle_id )->get_currency() );
+	}
+
+	public function test_get_cycles_returns_the_appended_cycle_as_a_view(): void {
+		$id      = $this->contract_with_currency();
+		$created = $this->add_cycle( $id, $this->cycle_args( array( 'order_id' => 77 ) ) );
+
+		$history = Contracts::get_cycles( $id );
+
+		$this->assertCount( 1, $history );
+		$this->assertEquals( $history[0], $created, 'The returned view matches a fresh read.' );
+		$cycle_id = $created->get_id();
+		$this->assertGreaterThan( 0, $cycle_id );
+		$this->assertInstanceOf( CycleView::class, $history[0] );
+		$this->assertSame( $cycle_id, $history[0]->get_id() );
+		$this->assertSame( CycleStatus::BILLED, $history[0]->get_status() );
+		$this->assertSame( 77, $history[0]->get_order_id() );
+	}
+
+	/**
+	 * @testdox get_cycles refuses a negative limit or offset.
+	 *
+	 * @dataProvider provide_negative_cycle_windows
+	 *
+	 * @param int $limit  Window size.
+	 * @param int $offset Cycles to skip.
+	 */
+	public function test_get_cycles_refuses_a_negative_window( int $limit, int $offset ): void {
+		$this->expectException( InvalidArgumentException::class );
+
+		Contracts::get_cycles( $this->contract_with_currency(), $limit, $offset );
+	}
+
+	/**
+	 * @return array<string, array{0: int, 1: int}>
+	 */
+	public function provide_negative_cycle_windows(): array {
+		return array(
+			'negative limit'  => array( -1, 0 ),
+			'negative offset' => array( 20, -1 ),
+		);
+	}
+
+	/**
+	 * @testdox transition_cycle settles a pending cycle billed with its order, and a lost compare-and-set returns false.
+	 */
+	public function test_transition_cycle_settles_and_loses_a_stale_read(): void {
+		$id    = $this->contract_with_currency();
+		$cycle = $this->add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
+
+		$this->assertTrue( $this->transition_cycle_locked( $cycle->get_id(), $this->transition( CycleStatus::PENDING, CycleStatus::BILLED, array( 'order_id' => 77 ) ) ) );
+		$this->assertFalse( $this->transition_cycle_locked( $cycle->get_id(), $this->transition( CycleStatus::PENDING, CycleStatus::FAILED ) ), 'A caller that read pending loses.' );
+
+		$stored = $this->cycle( $id, $cycle->get_id() );
+		$this->assertSame( CycleStatus::BILLED, $stored->get_status()->get_value() );
+		$this->assertSame( 77, $stored->get_order_id() );
+	}
+
+	/**
+	 * @testdox transition_cycle attaches an order, fails with a reason, keeps an omitted order and clears a null reason.
+	 */
+	public function test_transition_cycle_order_and_reason(): void {
+		$id       = $this->contract_with_currency();
+		$cycle_id = $this->add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) )->get_id();
+
+		$this->assertTrue( $this->transition_cycle_locked( $cycle_id, $this->transition( CycleStatus::PENDING, CycleStatus::PENDING, array( 'order_id' => 77 ) ) ) );
+		$this->assertSame( 77, $this->cycle( $id, $cycle_id )->get_order_id() );
+
+		$this->assertTrue( $this->transition_cycle_locked( $cycle_id, $this->transition( CycleStatus::PENDING, CycleStatus::FAILED, array( 'reason' => 'payment-failed' ) ) ) );
+		$failed = Contracts::get_cycles( $id, 1 )[0];
+		$this->assertSame( CycleStatus::FAILED, $failed->get_status() );
+		$this->assertSame( 'payment-failed', $failed->get_reason() );
+		$this->assertSame( 77, $failed->get_order_id(), 'An omitted order_id keeps the stored one.' );
+
+		$this->assertTrue( $this->transition_cycle_locked( $cycle_id, $this->transition( CycleStatus::FAILED, CycleStatus::BILLED, array( 'reason' => null ) ) ) );
+		$this->assertNull( Contracts::get_cycles( $id, 1 )[0]->get_reason(), 'A null reason clears it.' );
+	}
+
+	/**
+	 * @testdox transition_cycle rejects an unregistered target status and ignores unknown keys with a notice.
+	 */
+	public function test_transition_cycle_rejects_bad_input(): void {
+		$id    = $this->contract_with_currency();
+		$cycle = $this->add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
+
+		try {
+			$this->transition_cycle_locked( $cycle->get_id(), $this->transition( CycleStatus::PENDING, 'nonsense' ) );
+			$this->fail( 'Expected an InvalidArgumentException.' );
+		} catch ( InvalidArgumentException $e ) {
+			$this->assertSame( CycleStatus::PENDING, Contracts::get_cycles( $id, 1 )[0]->get_status() );
+		}
+
+		$this->setExpectedIncorrectUsage( Contracts::class . '::transition_cycle' );
+		$this->assertTrue( $this->transition_cycle_locked( $cycle->get_id(), $this->transition( CycleStatus::PENDING, CycleStatus::BILLED, array( 'status' => 'x' ) ) ) );
+	}
+
+	/**
+	 * @testdox transition_cycle rejects an invalid argument value and leaves the cycle unchanged.
+	 * @dataProvider provide_invalid_transition_args
+	 *
+	 * @param array<string, mixed> $args Transition args.
+	 */
+	public function test_transition_cycle_rejects_invalid_argument_values( array $args ): void {
+		$id    = $this->contract_with_currency();
+		$cycle = $this->add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
+
+		try {
+			$this->transition_cycle_locked( $cycle->get_id(), $args );
+			$this->fail( 'Expected an InvalidArgumentException.' );
+		} catch ( InvalidArgumentException $e ) {
+			$stored = $this->cycle( $id, $cycle->get_id() );
+			$this->assertSame( CycleStatus::PENDING, $stored->get_status()->get_value() );
+			$this->assertNull( $stored->get_order_id() );
+			$this->assertNull( $stored->get_reason() );
+		}
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provide_invalid_transition_args(): array {
+		$valid = array(
+			'from_status' => CycleStatus::PENDING,
+			'to_status'   => CycleStatus::BILLED,
+		);
+
+		return array(
+			'missing from_status'    => array( array( 'to_status' => CycleStatus::BILLED ) ),
+			'missing to_status'      => array( array( 'from_status' => CycleStatus::PENDING ) ),
+			'empty from_status'      => array( array_merge( $valid, array( 'from_status' => '' ) ) ),
+			'non-string from_status' => array( array_merge( $valid, array( 'from_status' => 1 ) ) ),
+			'non-string to_status'   => array( array_merge( $valid, array( 'to_status' => array( 'billed' ) ) ) ),
+			'zero order id'          => array( array_merge( $valid, array( 'order_id' => 0 ) ) ),
+			'negative order id'      => array( array_merge( $valid, array( 'order_id' => -5 ) ) ),
+			'non-string reason'      => array( array_merge( $valid, array( 'reason' => array( 'payment-failed' ) ) ) ),
+			'numeric reason'         => array( array_merge( $valid, array( 'reason' => 42 ) ) ),
+		);
+	}
+
+	/**
+	 * Transition args.
+	 *
+	 * @param string               $from  The status read.
+	 * @param string               $to    The status to write.
+	 * @param array<string, mixed> $extra Further args.
+	 * @return array<string, mixed>
+	 */
+	private function transition( string $from, string $to, array $extra = array() ): array {
+		return array_merge(
+			array(
+				'from_status' => $from,
+				'to_status'   => $to,
+			),
+			$extra
+		);
+	}
+
+	/**
+	 * @testdox lock() returns null while another operation holds the lock and for an unknown contract; bad labels are invalid.
+	 */
+	public function test_lock_lost_race_and_validation(): void {
+		$id = $this->contract_with_currency();
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$lock = $this->take_lock( $id, 'hold' );
+		$this->assertSame( $id, $lock->get_contract_id() );
+
+		$this->assertNull( Contracts::lock( $id, 'cancel' ), 'A held lock is a lost race.' );
+		$this->assertNull( Contracts::lock( 999999, 'hold' ), 'An unknown contract has no lock to take.' );
+
+		$lock_state = $this->view( $id )->get_lock_state();
+		$this->assertNotNull( $lock_state );
+		$this->assertSame( 'hold', $lock_state['operation'] );
+		$this->assertSame( '2035-01-01 00:10:00', $lock_state['locked_until']->format( 'Y-m-d H:i:s' ) );
+
+		foreach ( array( '', str_repeat( 'x', 65 ) ) as $label ) {
+			try {
+				Contracts::lock( $id, $label );
+				$this->fail( 'Expected an InvalidArgumentException.' );
+			} catch ( InvalidArgumentException $e ) {
+				$this->assertStringNotContainsString( 'lock_token', $e->getMessage() );
+			}
+		}
+	}
+
+	/**
+	 * @testdox create() returns the new contract and its lock, taken for "create" by default; writes with it land, others are refused until release.
+	 */
+	public function test_create_is_locked_from_birth(): void {
+		$default = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ) );
+		$this->assertNotNull( $default );
+		$this->assertSame( 'create', $default['lock']->get_operation() );
+		$lock_state = $this->view( $default['contract']->get_id() )->get_lock_state();
+		$this->assertNotNull( $lock_state );
+		$this->assertSame( 'create', $lock_state['operation'] );
+		try {
+			Contracts::update( $default['contract']->get_id(), array( 'currency' => 'USD' ) );
+			$this->fail( 'Expected an unlocked write to be refused.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( 'create', $e->get_operation() );
+		}
+		$default['lock']->release();
+
+		$created = Contracts::create(
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'currency'       => 'USD',
+				'creation_key'   => 'order:1',
+			),
+			array( 'operation' => 'checkout' )
+		);
+		$this->assertNotNull( $created );
+		$lock = $created['lock'];
+		$id   = $created['contract']->get_id();
+
+		$this->assertSame( $id, $lock->get_contract_id() );
+		$this->assertSame( 'USD', $created['contract']->get_currency() );
+		$this->assertSame( ContractStatus::DRAFT, $this->view( $id )->get_status() );
+		$this->assertInstanceOf( CycleView::class, Contracts::add_cycle( $id, $this->cycle_args(), $lock ) );
+		$this->assertInstanceOf( ContractView::class, Contracts::update( $id, array( 'status' => ContractStatus::ACTIVE ), $lock ) );
+
+		try {
+			Contracts::update( $id, array( 'status' => ContractStatus::ON_HOLD ) );
+			$this->fail( 'Expected an unlocked write to be refused.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( 'checkout', $e->get_operation() );
+		}
+
+		$lock->release();
+		$this->assertInstanceOf( ContractView::class, Contracts::update( $id, array( 'status' => ContractStatus::ON_HOLD ) ) );
+	}
+
+	/**
+	 * @testdox A duplicate creation key is a lost race: create() returns null and writes nothing; an invalid key throws.
+	 */
+	public function test_a_duplicate_creation_key_returns_null(): void {
+		global $wpdb;
+
+		$args    = array(
+			'extension_slug' => self::EXTENSION_SLUG,
+			'creation_key'   => 'order:9',
+		);
+		$created = Contracts::create( $args );
+		$this->assertNotNull( $created );
+
+		$this->assertNull( Contracts::create( $args ) );
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$this->assertSame( '1', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE creation_key = %s", 'order:9' ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$this->expectException( InvalidArgumentException::class );
+		Contracts::create(
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'creation_key'   => str_repeat( 'k', 101 ),
+			)
+		);
+	}
+
+	/**
+	 * @testdox A creation key differing only in surrounding whitespace is the same key.
+	 */
+	public function test_a_whitespace_padded_creation_key_is_the_same_key(): void {
+		$this->assertNotNull(
+			Contracts::create(
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'creation_key'   => 'order:1',
+				)
+			)
+		);
+
+		$this->assertNull(
+			Contracts::create(
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'creation_key'   => 'order:1 ',
+				)
+			)
+		);
+		$this->assertNull(
+			Contracts::create(
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'creation_key'   => ' order:1',
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox Without a creation key every create makes a new contract.
+	 */
+	public function test_keyless_creates_never_collide(): void {
+		$args   = array( 'extension_slug' => self::EXTENSION_SLUG );
+		$first  = Contracts::create( $args );
+		$second = Contracts::create( $args );
+
+		$this->assertNotNull( $first );
+		$this->assertNotNull( $second );
+		$this->assertNotSame( $first['contract']->get_id(), $second['contract']->get_id() );
+	}
+
+	/**
+	 * @testdox An unknown create option is noticed and ignored; an invalid operation label throws.
+	 */
+	public function test_create_options_are_validated(): void {
+		$this->setExpectedIncorrectUsage( Contracts::class . '::create' );
+		$created = Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ), array( 'skip_lock' => true ) );
+		$this->assertNotNull( $created );
+		$this->assertSame( 'create', $created['lock']->get_operation() );
+
+		// A non-string label is an invalid argument; a malformed string is refused by the lock.
+		$labels = array(
+			ValidationException::class      => 5,
+			InvalidArgumentException::class => 'Checkout',
+		);
+		foreach ( $labels as $expected => $operation ) {
+			try {
+				Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ), array( 'operation' => $operation ) );
+				$this->fail( 'Expected an invalid operation label to throw.' );
+			} catch ( InvalidArgumentException $e ) {
+				$this->assertSame( $expected, get_class( $e ) );
+				$this->assertStringContainsString( 'operation', $e->getMessage() );
+			}
+		}
+	}
+
+	/**
+	 * @testdox A duplicate creation key prints no database error and restores the error suppression setting.
+	 */
+	public function test_a_duplicate_creation_key_is_quiet(): void {
+		global $wpdb;
+
+		$args = array(
+			'extension_slug' => self::EXTENSION_SLUG,
+			'creation_key'   => 'order:10',
+		);
+		$this->assertNotNull( Contracts::create( $args ) );
+
+		$show_errors = $wpdb->show_errors( true );
+		$suppressed  = $wpdb->suppress_errors( false );
+		ob_start();
+		try {
+			$this->assertNull( Contracts::create( $args ) );
+		} finally {
+			$output            = (string) ob_get_clean();
+			$still_suppressing = $wpdb->suppress_errors( $suppressed );
+			$wpdb->show_errors( $show_errors );
+		}
+
+		$this->assertSame( '', $output, 'A duplicate creation key must not print a database error.' );
+		$this->assertFalse( $still_suppressing, 'The previous error suppression setting must be restored.' );
+	}
+
+	/**
+	 * @testdox An unlocked update with items while another lock lives throws, writes nothing and leaves no internal lock.
+	 */
+	public function test_an_unlocked_items_update_conflicts_cleanly(): void {
+		$view = $this->create_released(
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'items'          => array( array( 'item_name' => 'Coffee' ) ),
+			)
+		);
+		$id   = $view->get_id();
+		$lock = $this->take_lock( $id, 'renewal' );
+
+		try {
+			Contracts::update( $id, array( 'items' => array( array( 'item_name' => 'Cocoa' ) ) ) );
+			$this->fail( 'Expected a conflict.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( 'renewal', $e->get_operation() );
+		}
+		$this->assertSame( array( 'Coffee' ), array_column( (array) $this->view( $id )->get_items(), 'item_name' ) );
+
+		$lock->release();
+		Contracts::update( $id, array( 'items' => array( array( 'item_name' => 'Cocoa' ) ) ) );
+		$this->assertSame( array( 'Cocoa' ), array_column( (array) $this->view( $id )->get_items(), 'item_name' ) );
+		$this->assertSame( $id, $this->take_lock( $id, 'next' )->get_contract_id(), 'The internal lock was released.' );
+	}
+
+	/**
+	 * @testdox An unlocked update refused by validation releases the internal lock.
+	 */
+	public function test_a_refused_unlocked_update_releases_the_internal_lock(): void {
+		$id = $this->contract_with_currency();
+		Contracts::update( $id, array( 'billing_total' => '10' ) );
+
+		try {
+			Contracts::update( $id, array( 'currency' => null ) );
+			$this->fail( 'Expected totals without a currency to be refused.' );
+		} catch ( InvalidArgumentException $e ) {
+			$this->assertNull( $this->view( $id )->get_lock_state(), 'The internal lock is released.' );
+		}
+		$this->assertSame( 'USD', $this->view( $id )->get_currency() );
+	}
+
+	/**
+	 * @testdox An unlocked update takes the internal lock before it reads the contract and releases it after the write; it is refused while another operation holds the lock and reads as missing for an unknown contract.
+	 */
+	public function test_an_unlocked_row_update_uses_the_internal_lock(): void {
+		$id = $this->contract_with_currency();
+
+		$statements = array();
+		$record     = static function ( $query ) use ( &$statements ) {
+			$statements[] = (string) $query;
+			return $query;
+		};
+		add_filter( 'query', $record );
+		try {
+			$this->assertInstanceOf( ContractView::class, Contracts::update( $id, array( 'status' => ContractStatus::ON_HOLD ) ) );
+		} finally {
+			remove_filter( 'query', $record );
+		}
+		$acquires = array_keys( (array) preg_grep( "/SET lock_token = '[0-9a-f]{32}'/", $statements ) );
+		$reads    = array_keys( (array) preg_grep( '/^\s*SELECT .* FROM \S*subscription_contracts\b/', $statements ) );
+		$writes   = array_keys( (array) preg_grep( '/SET `write_seq` = `write_seq` \+ 1/', $statements ) );
+		$releases = array_keys( (array) preg_grep( '/SET lock_token = NULL/', $statements ) );
+		$this->assertCount( 1, $acquires, 'The internal lock is taken once.' );
+		$this->assertCount( 1, $releases, 'It is released once.' );
+		$this->assertNotSame( array(), $reads );
+		$this->assertCount( 1, $writes );
+		$this->assertLessThan( $reads[0], $acquires[0], 'The lock is taken before the contract is read.' );
+		$this->assertGreaterThan( $writes[0], $releases[0], 'It is released after the write.' );
+		$this->assertNull( $this->view( $id )->get_lock_state(), 'The internal lock is released.' );
+
+		$this->take_lock( $id, 'renewal' );
+		try {
+			Contracts::update( $id, array( 'status' => ContractStatus::ACTIVE ) );
+			$this->fail( 'Expected a conflict.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( 'renewal', $e->get_operation() );
+		}
+		$this->assertSame( ContractStatus::ON_HOLD, $this->view( $id )->get_status() );
+
+		$this->assertNull( Contracts::update( 999999, array( 'status' => ContractStatus::ACTIVE ) ) );
+	}
+
+	/**
+	 * @testdox An unlocked items update refused by a live lock reads the holder once to report it.
+	 */
+	public function test_a_refused_internal_lock_reads_the_holder_once(): void {
+		$id = $this->contract_with_currency();
+		$this->take_lock( $id, 'renewal' );
+
+		$statements = array();
+		$record     = static function ( $query ) use ( &$statements ) {
+			$statements[] = $query;
+			return $query;
+		};
+		add_filter( 'query', $record );
+		try {
+			Contracts::update( $id, array( 'items' => array( array( 'item_name' => 'Cocoa' ) ) ) );
+			$this->fail( 'Expected a conflict.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( 'renewal', $e->get_operation() );
+		} finally {
+			remove_filter( 'query', $record );
+		}
+
+		$holder_reads = preg_grep( '/AS live, lock_operation/', $statements );
+		$this->assertIsArray( $holder_reads );
+		$this->assertCount( 1, $holder_reads, 'The holder is read once.' );
+		$this->assertSame( array(), preg_grep( '/^\s*(INSERT|DELETE)\b|SET lock_token = NULL/i', $statements ), 'Nothing is written or released.' );
+	}
+
+	/**
+	 * @testdox Every write method refuses a lock for another contract.
+	 */
+	public function test_every_write_refuses_another_contracts_lock(): void {
+		$id       = $this->contract_with_currency();
+		$cycle_id = $this->add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) )->get_id();
+		$lock     = $this->take_lock( $this->contract_with_currency(), 'hold' );
+
+		$writes = array(
+			'update'           => static function () use ( $id, $lock ): void {
+				Contracts::update( $id, array( 'status' => ContractStatus::ON_HOLD ), $lock );
+			},
+			'add_cycle'        => function () use ( $id, $lock ): void {
+				Contracts::add_cycle( $id, $this->cycle_args(), $lock );
+			},
+			'transition_cycle' => function () use ( $cycle_id, $lock ): void {
+				Contracts::transition_cycle( $cycle_id, $this->transition( CycleStatus::PENDING, CycleStatus::BILLED ), $lock );
+			},
+			'add_meta'         => static function () use ( $id, $lock ): void {
+				Contracts::add_meta( $id, 'k', 'v', false, $lock );
+			},
+			'update_meta'      => static function () use ( $id, $lock ): void {
+				Contracts::update_meta( $id, 'k', 'v', null, $lock );
+			},
+			'delete_meta'      => static function () use ( $id, $lock ): void {
+				Contracts::delete_meta( $id, 'k', null, $lock );
+			},
+		);
+
+		foreach ( $writes as $method => $write ) {
+			// A cycle is addressed by its id, so its refusal names the cycle and the lock's contract.
+			$ids = 'transition_cycle' === $method ? array( $cycle_id, $lock->get_contract_id() ) : array( $lock->get_contract_id(), $id );
+			try {
+				$write();
+				$this->fail( "Expected {$method}() to refuse the lock." );
+			} catch ( InvalidArgumentException $e ) {
+				foreach ( $ids as $named ) {
+					$this->assertStringContainsString( (string) $named, $e->getMessage(), "{$method}() names both ids." );
+				}
+			}
+		}
+		$this->assertSame( CycleStatus::PENDING, $this->cycle( $id, $cycle_id )->get_status()->get_value() );
+		$this->assertSame( array(), Contracts::get_meta( $id ) );
+	}
+
+	/**
+	 * @testdox A failed child insert is reported as a lock conflict when the caller's lock was lost.
+	 */
+	public function test_a_failed_child_insert_under_a_lock_conflict_is_a_lock_conflict(): void {
+		$meta   = '/^\s*INSERT INTO \S*contract_meta .* FROM \S*subscription_contracts c WHERE c\.id = \d+/s';
+		$cycles = '/^\s*INSERT INTO `?\S*subscription_cycles`? .* VALUES /s';
+
+		$id = $this->contract_with_currency();
+		$this->pin_db_clock( '2035-01-01 00:00:00' );
+		$lock = $this->take_lock( $id, 'hold' );
+		$this->pin_db_clock( '2035-01-01 00:10:00' );
+		$this->take_lock( $id, 'cancel' );
+
+		$writes = array(
+			'add_meta'        => static function () use ( $id, $lock ): void {
+				Contracts::add_meta( $id, 'k', 'v', false, $lock );
+			},
+			'add_meta unique' => static function () use ( $id, $lock ): void {
+				Contracts::add_meta( $id, 'k', 'v', true, $lock );
+			},
+			'add_cycle'       => function () use ( $id, $lock ): void {
+				Contracts::add_cycle( $id, $this->cycle_args(), $lock );
+			},
+		);
+		foreach ( $writes as $name => $write ) {
+			$this->fail_next_query( 'add_cycle' === $name ? $cycles : $meta );
+			try {
+				$write();
+				$this->fail( "Expected {$name} to report the lost lock." );
+			} catch ( ContractLockedException $e ) {
+				$this->assertSame( 'cancel', $e->get_operation(), "{$name} names the new holder." );
+			}
+		}
+	}
+
+	/**
+	 * @testdox A failed child insert with no lock conflict still surfaces the database error.
+	 */
+	public function test_a_failed_child_insert_without_a_lock_conflict_is_a_database_error(): void {
+		$id = $this->contract_with_currency();
+
+		$this->fail_next_query( '/^\s*INSERT INTO \S*contract_meta .* FROM \S*subscription_contracts c WHERE c\.id = \d+/s' );
+		try {
+			Contracts::add_meta( $id, 'k', 'v', true );
+			$this->fail( 'Expected the failed insert to throw.' );
+		} catch ( ContractLockedException $e ) {
+			$this->fail( 'The internal lock is still held, so the failure is not a lock conflict.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'Failed to add contract meta', $e->getMessage() );
+		}
+
+		$this->fail_next_query( '/^\s*INSERT INTO `?\S*subscription_cycles`? .* VALUES /s' );
+		try {
+			$this->add_cycle_locked( $id, $this->cycle_args() );
+			$this->fail( 'Expected the failed insert to throw.' );
+		} catch ( ContractLockedException $e ) {
+			$this->fail( 'The caller still holds its lock, so the failure is not a lock conflict.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'Failed to insert cycle', $e->getMessage() );
+		}
+	}
+
+	/**
+	 * @testdox find_cycles_by_order returns the cycles of every contract linked to an order, newest first.
+	 */
+	public function test_find_cycles_by_order_spans_contracts_newest_first(): void {
+		$first  = $this->contract_with_currency();
+		$second = $this->contract_with_currency();
+		$older  = $this->add_cycle( $first, $this->cycle_args( array( 'order_id' => 77 ) ) );
+		$newer  = $this->add_cycle( $second, $this->cycle_args( array( 'order_id' => 77 ) ) );
+		$this->add_cycle( $first, $this->cycle_args( array( 'order_id' => 88 ) ) );
+
+		$cycles = Contracts::find_cycles_by_order( 77 );
+
+		$this->assertSame(
+			array( $newer->get_id(), $older->get_id() ),
+			array_map(
+				static function ( CycleView $cycle ): int {
+					return $cycle->get_id();
+				},
+				$cycles
+			)
+		);
+		$this->assertSame( array(), Contracts::find_cycles_by_order( 99 ) );
+	}
+
+	/**
+	 * @testdox get_cycles pages with an offset, newest first.
+	 */
+	public function test_get_cycles_pages_with_an_offset(): void {
+		$id    = $this->contract_with_currency();
+		$one   = $this->add_cycle( $id, $this->cycle_args() );
+		$two   = $this->add_cycle( $id, $this->cycle_args() );
+		$three = $this->add_cycle( $id, $this->cycle_args() );
+
+		$ids = static function ( array $cycles ): array {
+			return array_map(
+				static function ( CycleView $cycle ): int {
+					return $cycle->get_id();
+				},
+				$cycles
+			);
+		};
+
+		$this->assertSame( array( $three->get_id(), $two->get_id() ), $ids( Contracts::get_cycles( $id, 2 ) ) );
+		$this->assertSame( array( $one->get_id() ), $ids( Contracts::get_cycles( $id, 2, 2 ) ) );
+	}
+
+	/**
+	 * Append a cycle through the facade, asserting the append won.
+	 *
+	 * @param int                  $contract_id Contract id.
+	 * @param array<string, mixed> $args        Cycle fields.
+	 */
+	private function add_cycle( int $contract_id, array $args ): CycleView {
+		$view = $this->add_cycle_locked( $contract_id, $args );
+		$this->assertInstanceOf( CycleView::class, $view );
+
+		return $view;
+	}
+
+	public function test_meta_keeps_several_values_under_one_key(): void {
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+
+		$this->assertIsInt( Contracts::add_meta( $id, 'note', 'one' ) );
+		$this->assertIsInt( Contracts::add_meta( $id, 'note', array( 'two' ) ) );
+
+		$this->assertSame( array( 'one', array( 'two' ) ), Contracts::get_meta( $id, 'note' ) );
+		$this->assertSame( 'one', Contracts::get_meta( $id, 'note', true ) );
+		$this->assertSame( array( 'note' => array( 'one', array( 'two' ) ) ), Contracts::get_meta( $id ) );
+	}
+
+	public function test_a_unique_meta_add_refuses_an_existing_key(): void {
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		Contracts::add_meta( $id, 'note', 'one' );
+
+		$this->assertNull( Contracts::add_meta( $id, 'note', 'two', true ) );
+		$this->assertSame( array( 'one' ), Contracts::get_meta( $id, 'note' ) );
+	}
+
+	public function test_update_meta_with_a_previous_value_and_delete_one_value(): void {
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		Contracts::add_meta( $id, 'note', 'one' );
+		Contracts::add_meta( $id, 'note', 'two' );
+
+		$this->assertTrue( Contracts::update_meta( $id, 'note', 'three', 'two' ) );
+		$this->assertSame( array( 'one', 'three' ), Contracts::get_meta( $id, 'note' ) );
+
+		$this->assertTrue( Contracts::delete_meta( $id, 'note', 'one' ) );
+		$this->assertSame( array( 'three' ), Contracts::get_meta( $id, 'note' ) );
+	}
+
+	public function test_only_null_matches_any_meta_value(): void {
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		Contracts::add_meta( $id, 'note', 'one' );
+		Contracts::add_meta( $id, 'note', '' );
+
+		$this->assertTrue( Contracts::update_meta( $id, 'note', 'blank', '' ) );
+		$this->assertSame( array( 'one', 'blank' ), Contracts::get_meta( $id, 'note' ), 'An empty previous value matches literally.' );
+
+		$this->assertFalse( Contracts::delete_meta( $id, 'note', '' ) );
+		$this->assertSame( array( 'one', 'blank' ), Contracts::get_meta( $id, 'note' ), 'An empty value deletes only empty values.' );
+
+		$this->assertTrue( Contracts::delete_meta( $id, 'note' ) );
+		$this->assertSame( array(), Contracts::get_meta( $id, 'note' ) );
+	}
+
+	public function test_meta_reads_for_an_unknown_contract_are_empty(): void {
+		$this->assertFalse( Contracts::delete_meta( 999999, 'note' ) );
+		$this->assertSame( '', Contracts::get_meta( 999999, 'note', true ) );
+		$this->assertSame( array(), Contracts::get_meta( 999999, 'note' ) );
+	}
+
+	public function test_deleting_a_contract_removes_its_meta(): void {
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		Contracts::add_meta( $id, 'note', 'one' );
+
+		$this->assertTrue( ( new ContractRepository() )->delete( $id ) );
+
+		$this->assertSame( array(), Contracts::get_meta( $id, 'note' ) );
+	}
+
+	public function test_an_empty_meta_key_is_rejected(): void {
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+
+		$this->expectException( InvalidArgumentException::class );
+
+		Contracts::add_meta( $id, '', 'one' );
+	}
+
+	public function test_meta_survives_a_contract_update(): void {
+		$id = $this->create_released( array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_id();
+		Contracts::add_meta( $id, 'note', 'kept' );
+
+		Contracts::update(
+			$id,
+			array(
+				'status' => ContractStatus::ACTIVE,
+				'items'  => array( array( 'item_name' => 'Coffee' ) ),
+			)
+		);
+
+		$this->assertSame( array( 'kept' ), Contracts::get_meta( $id, 'note' ) );
+	}
+
+	/**
+	 * Sign up a contract through the contracts facade (cycle 1 billed). The monthly plan's
+	 * cadence is frozen onto the contract's plan snapshot at signup.
+	 *
+	 * @param int $customer_id Owning customer id; 0 gives the order a new customer.
+	 * @return Contract The persisted contract with cycle 1 billed.
+	 */
+	private function sign_up_contract( int $customer_id = 0 ): Contract {
+		$plan = $this->plan_view( $this->make_plan() );
+
+		$order = new WC_Order();
+		$order->set_currency( 'USD' );
+		$order->set_payment_method( 'dummy' );
+		$order->set_total( '19.99' );
+		$order->set_date_paid( '2026-01-15 00:00:00' );
+		if ( $customer_id > 0 ) {
+			$order->set_customer_id( $customer_id );
+		}
+		$order->save();
+
+		$contract = ( new ContractRepository() )->find( $this->sign_up_from_order( $order, $plan ) );
+		$this->assertInstanceOf( Contract::class, $contract );
+
+		return $contract;
+	}
+
+	/**
+	 * Seed a bare contract at a status and billing total for the list-query tests,
+	 * returning its id.
+	 *
+	 * @param string $status        Contract status.
+	 * @param string $billing_total Billing total (decimal string).
+	 */
+	private function seed_list_contract( string $status = ContractStatus::ACTIVE, string $billing_total = '19.99' ): int {
+		$contract = Contract::create(
+			array(
+				'extension_slug'   => 'engine-tests',
+				'customer_id'      => 42,
+				'status'           => $status,
+				'currency'         => 'USD',
+				'selling_plan_id'  => 1,
+				'start_gmt'        => '2026-01-01 00:00:00',
+				'next_payment_gmt' => '2099-02-01 00:00:00',
+				'billing_total'    => $billing_total,
+			)
+		);
+
+		return $this->insert_released( $contract );
+	}
+
+	/**
+	 * Seed a contract for a customer at a status, returning its id.
+	 *
+	 * @param int    $customer_id Owning customer.
+	 * @param string $status      Contract status.
+	 */
+	private function seed_for_customer( int $customer_id, string $status = ContractStatus::ACTIVE ): int {
+		$contract = Contract::create(
+			array(
+				'extension_slug'   => 'engine-tests',
+				'customer_id'      => $customer_id,
+				'status'           => $status,
+				'currency'         => 'USD',
+				'selling_plan_id'  => 1,
+				'start_gmt'        => '2026-01-01 00:00:00',
+				'next_payment_gmt' => '2099-02-01 00:00:00',
+				'billing_total'    => '19.99',
+			)
+		);
+
+		return $this->insert_released( $contract );
+	}
+
+	/**
+	 * @testdox get returns the contract, and null for an unknown id.
+	 */
+	public function test_get_round_trips_a_contract(): void {
+		$contract    = $this->sign_up_contract();
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$loaded = Contracts::get( $contract_id );
+		$this->assertInstanceOf( ContractView::class, $loaded );
+		$this->assertSame( $contract_id, $loaded->get_id() );
+		$this->assertIsArray( $loaded->get_items(), 'A single read loads children.' );
+		$this->assertIsArray( $loaded->get_addresses(), 'A single read loads children.' );
+
+		$this->assertNull( Contracts::get( 999999 ) );
+	}
+
+	/**
+	 * @testdox find_by_origin_order returns views of the contracts created from an order.
+	 */
+	public function test_find_by_origin_order_returns_views(): void {
+		$contract = $this->sign_up_contract();
+		$order_id = $contract->get_origin_order_id();
+		$this->assertNotNull( $order_id );
+
+		$found = Contracts::find_by_origin_order( $order_id );
+
+		$this->assertCount( 1, $found );
+		$this->assertInstanceOf( ContractView::class, $found[0] );
+		$this->assertSame( $contract->get_id(), $found[0]->get_id() );
+		$this->assertSame( $order_id, $found[0]->get_origin_order_id() );
+		$this->assertNull( $found[0]->get_items() );
+		$this->assertSame( array(), Contracts::find_by_origin_order( 999999 ) );
+	}
+
+	/**
+	 * @testdox list_for_customer does not load children.
+	 */
+	public function test_list_for_customer_does_not_load_children(): void {
+		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		$this->assertIsInt( $customer_id );
+
+		$this->sign_up_contract( $customer_id );
+
+		$contracts = Contracts::list_for_customer( $customer_id );
+		$this->assertCount( 1, $contracts );
+		$this->assertNull( $contracts[0]->get_items(), 'List reads do not load children.' );
+	}
+
+	/**
+	 * @testdox list does not load children.
+	 */
+	public function test_list_does_not_load_children(): void {
+		$this->sign_up_contract();
+
+		$contracts = Contracts::list( array( 'limit' => 1 ) );
+		$this->assertCount( 1, $contracts );
+		$this->assertNull( $contracts[0]->get_items(), 'List reads do not load children.' );
+		$this->assertNull( $contracts[0]->get_addresses(), 'List reads do not load children.' );
+	}
+
+	/**
+	 * @testdox list returns recent contracts newest first.
+	 */
+	public function test_list_returns_recent_contracts(): void {
+		$first  = $this->sign_up_contract();
+		$second = $this->sign_up_contract();
+
+		$contracts = Contracts::list();
+		$ids       = array_map( static fn ( ContractView $c ) => $c->get_id(), $contracts );
+
+		// Newest first, and both signups are present.
+		$this->assertSame( array( $second->get_id(), $first->get_id() ), array_slice( $ids, 0, 2 ) );
+		$this->assertInstanceOf( ContractView::class, $contracts[0] );
+	}
+
+	/**
+	 * @testdox list passes status / sort / search / paging args through to the query.
+	 */
+	public function test_list_passes_query_args_through(): void {
+		$active_low  = $this->seed_list_contract( ContractStatus::ACTIVE, '10.00' );
+		$active_high = $this->seed_list_contract( ContractStatus::ACTIVE, '20.00' );
+		$this->seed_list_contract( ContractStatus::CANCELLED, '30.00' );
+
+		// Status filter + sort compose through the facade.
+		$ids = array_map(
+			static fn ( ContractView $c ) => (int) $c->get_id(),
+			Contracts::list(
+				array(
+					'status'  => ContractStatus::ACTIVE,
+					'orderby' => 'total',
+					'order'   => 'ASC',
+				)
+			)
+		);
+		$this->assertSame( array( $active_low, $active_high ), $ids );
+
+		// Paging windows the same filtered set.
+		$page = Contracts::list(
+			array(
+				'status' => ContractStatus::ACTIVE,
+				'limit'  => 1,
+				'offset' => 1,
+			)
+		);
+		$this->assertCount( 1, $page );
+	}
+
+	/**
+	 * @testdox count_by_status returns a full status map and count honours the same filter.
+	 */
+	public function test_count_by_status_and_count(): void {
+		$this->seed_list_contract( ContractStatus::ACTIVE );
+		$this->seed_list_contract( ContractStatus::ACTIVE );
+		$this->seed_list_contract( ContractStatus::ON_HOLD );
+
+		$by_status = Contracts::count_by_status();
+		$this->assertSame( ContractStatus::get_all(), array_keys( $by_status ) );
+		$this->assertSame( 2, $by_status[ ContractStatus::ACTIVE ] );
+		$this->assertSame( 1, $by_status[ ContractStatus::ON_HOLD ] );
+		$this->assertSame( 0, $by_status[ ContractStatus::CANCELLED ] );
+
+		// The grand total and a status-filtered total agree with the map.
+		$this->assertSame( 3, Contracts::count() );
+		$this->assertSame( 2, Contracts::count( array( 'status' => ContractStatus::ACTIVE ) ) );
+	}
+
+	/**
+	 * @testdox get_cycles returns the billing cycles newest first.
+	 */
+	public function test_get_cycles_returns_cycles(): void {
+		$contract    = $this->sign_up_contract();
+		$contract_id = $contract->get_id();
+		$this->assertNotNull( $contract_id );
+
+		$history = Contracts::get_cycles( $contract_id );
+		$this->assertCount( 1, $history );
+		$this->assertInstanceOf( CycleView::class, $history[0] );
+		$this->assertSame( 1, $history[0]->get_count() );
+		$this->assertSame( CycleStatus::BILLED, $history[0]->get_status() );
+	}
+
+	/**
+	 * @testdox list_for_customer returns only the requested customer's contracts.
+	 */
+	public function test_list_for_customer_is_owner_scoped(): void {
+		$mine_a = $this->seed_for_customer( 41 );
+		$mine_b = $this->seed_for_customer( 41 );
+		$theirs = $this->seed_for_customer( 42 );
+
+		$ids = array_map(
+			static fn ( ContractView $c ) => (int) $c->get_id(),
+			Contracts::list_for_customer( 41 )
+		);
+
+		$this->assertContains( $mine_a, $ids );
+		$this->assertContains( $mine_b, $ids );
+		$this->assertNotContains( $theirs, $ids );
+		$this->assertCount( 2, $ids );
+	}
+
+	/**
+	 * @testdox list_for_customer filters by status before paging.
+	 */
+	public function test_list_for_customer_filters_by_status_before_paging(): void {
+		$active_old = $this->seed_for_customer( 44 );
+		$this->seed_for_customer( 44, ContractStatus::DRAFT );
+		$on_hold = $this->seed_for_customer( 44, ContractStatus::ON_HOLD );
+		$this->seed_for_customer( 44, ContractStatus::DRAFT );
+
+		$ids  = static fn ( array $views ): array => array_map( static fn ( ContractView $c ): int => (int) $c->get_id(), $views );
+		$args = array( 'status' => array( ContractStatus::ACTIVE, ContractStatus::ON_HOLD ) );
+
+		$this->assertSame( array( $on_hold ), $ids( Contracts::list_for_customer( 44, 1, 0, $args ) ) );
+		$this->assertSame( array( $active_old ), $ids( Contracts::list_for_customer( 44, 1, 1, $args ) ) );
+		$this->assertSame( array( $on_hold ), $ids( Contracts::list_for_customer( 44, 20, 0, array( 'status' => ContractStatus::ON_HOLD ) ) ), 'A single status is accepted.' );
+		$this->assertCount( 4, Contracts::list_for_customer( 44, 20, 0, array( 'status' => array( 'nonsense' ) ) ), 'An unregistered status is dropped, leaving no filter.' );
+	}
+
+	/**
+	 * @testdox get_for_customer returns the contract when the customer owns it.
+	 */
+	public function test_get_for_customer_returns_the_owned_contract(): void {
+		$id = $this->seed_for_customer( 43 );
+
+		$contract = Contracts::get_for_customer( $id, 43 );
+
+		$this->assertInstanceOf( ContractView::class, $contract );
+		$this->assertSame( $id, $contract->get_id() );
+	}
+
+	/**
+	 * @testdox get_for_customer is null for both a foreign owner and an unknown id (asymmetric).
+	 */
+	public function test_get_for_customer_is_null_for_foreign_and_unknown(): void {
+		$id = $this->seed_for_customer( 44 );
+
+		$this->assertNull( Contracts::get_for_customer( $id, 45 ), 'foreign-owned reads as not found' );
+		$this->assertNull( Contracts::get_for_customer( 987654, 44 ), 'unknown id reads as not found' );
+	}
+}

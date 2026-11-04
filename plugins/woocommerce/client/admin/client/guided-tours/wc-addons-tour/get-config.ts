@@ -20,7 +20,7 @@ export const getTourConfig = ( {
 	steps: TourKitTypes.WooStep[];
 } ): TourKitTypes.WooConfig => {
 	let previousPopperTopPosition: number | null = null;
-	let perviousPopperRef: unknown = null;
+	let previousPopperRef: unknown = null;
 	const defaultPlacement = 'top-start';
 
 	return {
@@ -51,7 +51,7 @@ export const getTourConfig = ( {
 						allowedAutoPlacements: [ 'right', 'bottom', 'top' ],
 						fallbackPlacements: [ 'bottom-start', 'right' ],
 						flipVariations: false,
-						boundry: 'clippingParents',
+						boundary: 'clippingParents',
 					},
 				},
 				{
@@ -60,7 +60,7 @@ export const getTourConfig = ( {
 					phase: 'read',
 					fn( { state, instance } ) {
 						// 1. First modification - force `right` placement for items in admin menu.
-						if ( perviousPopperRef !== state.elements.reference ) {
+						if ( previousPopperRef !== state.elements.reference ) {
 							const isAdminMenuItem = (
 								state.elements.reference as HTMLElement
 							 ).closest( '#adminmenu' );
@@ -87,7 +87,7 @@ export const getTourConfig = ( {
 						// Also, change if popper's top position changed - the modifier can be called
 						// multiple times for the same position.
 						if (
-							perviousPopperRef !== state.elements.reference &&
+							previousPopperRef !== state.elements.reference &&
 							arrowHeight !== 0 &&
 							previousPopperTopPosition !== popperBoundingRect.top
 						) {
@@ -95,7 +95,7 @@ export const getTourConfig = ( {
 								popperBoundingRect
 							);
 							previousPopperTopPosition = popperBoundingRect.top;
-							perviousPopperRef = state.elements.reference;
+							previousPopperRef = state.elements.reference;
 						}
 					},
 				},

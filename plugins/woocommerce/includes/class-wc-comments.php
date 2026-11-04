@@ -224,7 +224,7 @@ class WC_Comments {
 	 */
 	public static function check_comment_rating( $comment_data ) {
 		// If posting a comment (not trackback etc) and not logged in.
-		if ( ! is_admin() && isset( $_POST['comment_post_ID'], $_POST['rating'], $comment_data['comment_type'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) && empty( $_POST['rating'] ) && self::is_default_comment_type( $comment_data['comment_type'] ) && wc_review_ratings_enabled() && wc_review_ratings_required() ) { // WPCS: input var ok, CSRF ok.
+		if ( ! is_admin() && isset( $_POST['comment_post_ID'], $_POST['rating'], $comment_data['comment_type'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) && empty( $_POST['rating'] ) && self::is_default_comment_type( $comment_data['comment_type'] ) && wc_review_ratings_enabled() && wc_review_ratings_required() ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Anonymous product reviews are submitted through the core comment form, which carries no WooCommerce nonce; the post ID is read through absint() and the rating is only tested for emptiness.
 			wp_die( esc_html__( 'Please rate the product.', 'woocommerce' ) );
 			exit;
 		}
@@ -237,13 +237,25 @@ class WC_Comments {
 	 * @param int $comment_id Comment ID.
 	 */
 	public static function add_comment_rating( $comment_id ) {
-		if ( isset( $_POST['rating'], $_POST['comment_post_ID'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) ) { // WPCS: input var ok, CSRF ok.
-			if ( ! $_POST['rating'] || $_POST['rating'] > 5 || $_POST['rating'] < 0 ) { // WPCS: input var ok, CSRF ok, sanitization ok.
+		if ( isset( $_POST['rating'], $_POST['comment_post_ID'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Anonymous product reviews are submitted through the core comment form, which carries no WooCommerce nonce; the post ID is read through absint().
+			$raw_rating = is_scalar( $_POST['rating'] ) ? wp_unslash( $_POST['rating'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Anonymous product reviews are submitted through the core comment form, which carries no WooCommerce nonce; the value is range checked and cast to an integer below.
+
+			// Stored ratings are whole numbers from 1 to 5. Numeric input is range checked before it
+			// is truncated, so 0.5 and 5.9 are rejected rather than stored as 0 and 5, while 4.7
+			// still stores 4 as before.
+			if ( is_numeric( $raw_rating ) && ( $raw_rating < 1 || $raw_rating > 5 ) ) {
 				return;
 			}
-			add_comment_meta( $comment_id, 'rating', intval( $_POST['rating'] ), true ); // WPCS: input var ok, CSRF ok.
 
-			$post_id = isset( $_POST['comment_post_ID'] ) ? absint( $_POST['comment_post_ID'] ) : 0; // WPCS: input var ok, CSRF ok.
+			$rating = intval( $raw_rating );
+
+			if ( $rating < 1 || $rating > 5 ) {
+				return;
+			}
+
+			add_comment_meta( $comment_id, 'rating', $rating, true );
+
+			$post_id = isset( $_POST['comment_post_ID'] ) ? absint( $_POST['comment_post_ID'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Anonymous product reviews are submitted through the core comment form, which carries no WooCommerce nonce; the post ID is read through absint().
 			if ( $post_id ) {
 				self::clear_transients( $post_id );
 			}
@@ -642,7 +654,7 @@ class WC_Comments {
 	 * @return array
 	 */
 	public static function update_comment_type( $comment_data ) {
-		if ( ! is_admin() && isset( $_POST['comment_post_ID'], $comment_data['comment_type'] ) && self::is_default_comment_type( $comment_data['comment_type'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) ) { // WPCS: input var ok, CSRF ok.
+		if ( ! is_admin() && isset( $_POST['comment_post_ID'], $comment_data['comment_type'] ) && self::is_default_comment_type( $comment_data['comment_type'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Anonymous product reviews are submitted through the core comment form, which carries no WooCommerce nonce; the post ID is read through absint().
 			$comment_data['comment_type'] = 'review';
 		}
 

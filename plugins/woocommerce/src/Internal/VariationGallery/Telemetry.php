@@ -16,9 +16,10 @@ defined( 'ABSPATH' ) || exit;
  */
 class Telemetry implements RegisterHooksInterface {
 
-	public const EVENT_SAVE_SUCCEEDED      = 'variation_gallery_save_succeeded';
-	public const EVENT_SAVE_FAILED         = 'variation_gallery_save_failed';
-	public const EVENT_MIGRATION_COMPLETED = 'variation_gallery_migration_completed';
+	public const EVENT_SAVE_SUCCEEDED                    = 'variation_gallery_save_succeeded';
+	public const EVENT_SAVE_FAILED                       = 'variation_gallery_save_failed';
+	public const EVENT_MIGRATION_COMPLETED               = 'variation_gallery_migration_completed';
+	public const EVENT_INHERITED_IMAGE_CLEANUP_COMPLETED = 'variation_gallery_inherited_image_cleanup_completed';
 
 	private const LEGACY_PLUGIN_FILE = 'woocommerce-additional-variation-images/woocommerce-additional-variation-images.php';
 

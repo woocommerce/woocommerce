@@ -4,7 +4,7 @@ WooCommerce powers many online stores across the internet, and your help making 
 
 There are many ways to contribute to the project!
 
-- [Translating strings into your language](https://developer.woocommerce.com/docs/best-practices/localization-translation/translating-woocommerce/).
+- [Translating strings into your language](https://developer.woocommerce.com/docs/contribution/contributing/string-localisation-guidelines/#translating-woocommerce).
 - Answering questions on the various WooCommerce communities like the [WP.org support forums](https://wordpress.org/support/plugin/woocommerce/).
 - Testing open [issues](https://github.com/woocommerce/woocommerce/issues) or [pull requests](https://github.com/woocommerce/woocommerce/pulls) and sharing your findings in a comment.
 - Testing WooCommerce beta versions and release candidates. Those are announced in the [WooCommerce development blog](https://developer.woocommerce.com/blog/).
