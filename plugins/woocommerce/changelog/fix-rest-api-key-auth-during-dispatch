@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restrict REST API key authentication to REST API requests.
