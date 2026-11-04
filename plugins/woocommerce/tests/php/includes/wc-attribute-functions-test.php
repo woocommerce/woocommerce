@@ -368,6 +368,54 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should remove the deleted attribute from the _product_attributes meta of products using it.
+	 */
+	public function test_wc_delete_attribute_removes_stale_entry_from_product_attributes_meta(): void {
+		$slug      = $this->get_unique_attribute_slug( 'stale-meta' );
+		$attribute = $this->create_registered_attribute( $slug );
+		$taxonomy  = $attribute['taxonomy'];
+		$product   = WC_Helper_Product::create_simple_product();
+
+		try {
+			$term = wp_insert_term( 'Blue', $taxonomy );
+			$this->assertIsArray( $term, 'The term fixture should be created.' );
+			wp_set_object_terms( $product->get_id(), array( (int) $term['term_id'] ), $taxonomy );
+
+			update_post_meta(
+				$product->get_id(),
+				'_product_attributes',
+				array(
+					$taxonomy => array(
+						'name'         => $taxonomy,
+						'value'        => '',
+						'position'     => 0,
+						'is_visible'   => 1,
+						'is_variation' => 0,
+						'is_taxonomy'  => 1,
+					),
+					'custom'  => array(
+						'name'         => 'Custom',
+						'value'        => 'a | b',
+						'position'     => 1,
+						'is_visible'   => 1,
+						'is_variation' => 0,
+						'is_taxonomy'  => 0,
+					),
+				)
+			);
+
+			$this->assertTrue( wc_delete_attribute( $attribute['id'] ) );
+
+			$meta = get_post_meta( $product->get_id(), '_product_attributes', true );
+			$this->assertArrayNotHasKey( $taxonomy, $meta, 'The deleted attribute should be removed from the product meta.' );
+			$this->assertArrayHasKey( 'custom', $meta, 'Other product attributes should be preserved.' );
+		} finally {
+			$product->delete( true );
+			$this->clean_up_attribute_test_state( array( $attribute['id'] ), $taxonomy );
+		}
+	}
+
+	/**
 	 * @testdox Should tolerate a deletion callback unregistering the original taxonomy first.
 	 */
 	public function test_wc_delete_attribute_is_idempotent_when_taxonomy_is_pre_unregistered(): void {

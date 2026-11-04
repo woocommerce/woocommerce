@@ -795,8 +795,27 @@ function wc_delete_attribute( $id ) {
 	if ( $name && $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = %d", $id ) ) ) {
 		if ( taxonomy_exists( $taxonomy ) ) {
 			$terms = get_terms( $taxonomy, 'orderby=name&hide_empty=0' );
+
+			// Collect products using the attribute before its terms (and relationships) are removed.
+			$product_ids = array();
+			if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) {
+				$product_ids = get_objects_in_term( wp_list_pluck( $terms, 'term_id' ), $taxonomy );
+			}
+
 			foreach ( $terms as $term ) {
 				wp_delete_term( $term->term_id, $taxonomy );
+			}
+
+			// Remove the stale attribute entry from those products.
+			if ( ! is_wp_error( $product_ids ) ) {
+				foreach ( $product_ids as $product_id ) {
+					$product_attributes = get_post_meta( $product_id, '_product_attributes', true );
+					if ( is_array( $product_attributes ) && isset( $product_attributes[ $taxonomy ] ) ) {
+						unset( $product_attributes[ $taxonomy ] );
+						update_post_meta( $product_id, '_product_attributes', $product_attributes );
+						wc_delete_product_transients( $product_id );
+					}
+				}
 			}
 		}
 
