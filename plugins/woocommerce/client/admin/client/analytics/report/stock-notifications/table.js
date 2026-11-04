@@ -32,8 +32,8 @@ class StockNotificationsReportTable extends Component {
 				isSortable: false,
 			},
 			{
-				label: __( 'Waiting', 'woocommerce' ),
-				key: 'active_signups',
+				label: __( 'Sign-ups', 'woocommerce' ),
+				key: 'signups',
 				required: true,
 				defaultSort: true,
 				defaultOrder: 'desc',
@@ -41,20 +41,8 @@ class StockNotificationsReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Sign-ups', 'woocommerce' ),
-				key: 'signups',
-				isSortable: true,
-				isNumeric: true,
-			},
-			{
 				label: __( 'Customers', 'woocommerce' ),
 				key: 'customers',
-				isSortable: true,
-				isNumeric: true,
-			},
-			{
-				label: __( 'Days waiting', 'woocommerce' ),
-				key: 'days_waiting',
 				isSortable: true,
 				isNumeric: true,
 			},
@@ -67,12 +55,7 @@ class StockNotificationsReportTable extends Component {
 			formatValue( currency, 'number', value );
 
 		return map( rows, ( row ) => {
-			const {
-				active_signups: activeSignups,
-				customers,
-				days_waiting: daysWaiting,
-				signups,
-			} = row;
+			const { customers, signups } = row;
 			const { name, edit_url: editUrl } = row.extended_info || {};
 
 			return [
@@ -87,20 +70,12 @@ class StockNotificationsReportTable extends Component {
 					value: name,
 				},
 				{
-					display: formatNumber( activeSignups ),
-					value: activeSignups,
-				},
-				{
 					display: formatNumber( signups ),
 					value: signups,
 				},
 				{
 					display: formatNumber( customers ),
 					value: customers,
-				},
-				{
-					display: formatNumber( daysWaiting ),
-					value: daysWaiting,
 				},
 			];
 		} );
@@ -111,7 +86,6 @@ class StockNotificationsReportTable extends Component {
 			signups = 0,
 			customers = 0,
 			notifications_sent: notificationsSent = 0,
-			active_signups: activeSignups = 0,
 		} = totals;
 		const currency = this.context.getCurrencyConfig();
 		return [
@@ -132,10 +106,6 @@ class StockNotificationsReportTable extends Component {
 				),
 				value: formatValue( currency, 'number', notificationsSent ),
 			},
-			{
-				label: __( 'Waiting', 'woocommerce' ),
-				value: formatValue( currency, 'number', activeSignups ),
-			},
 		];
 	}
 
@@ -152,13 +122,12 @@ class StockNotificationsReportTable extends Component {
 					'signups',
 					'customers',
 					'notifications_sent',
-					'active_signups',
 				] }
 				isRequesting={ isRequesting }
 				itemIdField="product_id"
 				query={ query }
 				tableQuery={ {
-					orderby: query.orderby || 'active_signups',
+					orderby: query.orderby || 'signups',
 					order: query.order || 'desc',
 					extended_info: true,
 				} }

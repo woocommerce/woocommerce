@@ -115,13 +115,6 @@ class Controller extends GenericStatsController {
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'active_signups'     => array(
-				'title'       => __( 'Waiting', 'woocommerce' ),
-				'description' => __( 'Customers waiting right now, whatever the period. Totals only, not included in intervals.', 'woocommerce' ),
-				'type'        => 'integer',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-			),
 		);
 	}
 
@@ -136,10 +129,7 @@ class Controller extends GenericStatsController {
 		$schema['title'] = 'report_stock_notifications_stats';
 
 		unset( $schema['properties']['totals']['properties']['segments'] );
-		$schema['properties']['intervals']['items']['properties']['subtotals']['properties'] = array_diff_key(
-			$this->get_item_properties_schema(),
-			array( 'active_signups' => true )
-		);
+		unset( $schema['properties']['intervals']['items']['properties']['subtotals']['properties']['segments'] );
 
 		return $this->add_additional_fields_schema( $schema );
 	}

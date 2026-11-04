@@ -20,7 +20,6 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
  * - signups and customers: same definitions as the per-product report, bucketed on date_created_gmt.
  * - notifications_sent: rows whose date_notified_gmt falls in the period, any status. The date is
  *   overwritten on re-send, so a re-send moves the count to the new date rather than adding to it.
- * - active_signups: rows currently active, whatever the period. Totals only; it has no meaning per interval.
  */
 class DataStore extends StockNotificationsDataStore implements DataStoreInterface {
 	use StatsDataStoreTrait;
@@ -40,7 +39,6 @@ class DataStore extends StockNotificationsDataStore implements DataStoreInterfac
 		'signups'            => 'intval',
 		'customers'          => 'intval',
 		'notifications_sent' => 'intval',
-		'active_signups'     => 'intval',
 	);
 
 	/**
@@ -138,7 +136,7 @@ class DataStore extends StockNotificationsDataStore implements DataStoreInterfac
 	 * Will be called by `get_data` if there is no data in cache.
 	 *
 	 * Runs the standard interval flow for sign-ups, then merges in notifications sent,
-	 * which are bucketed on a different date column, and the point-in-time active count.
+	 * which are bucketed on a different date column.
 	 *
 	 * @override StockNotificationsDataStore::get_noncached_stats_data()
 	 *
@@ -229,16 +227,6 @@ class DataStore extends StockNotificationsDataStore implements DataStoreInterfac
 				$data->intervals[ $idx ]['notifications_sent'] = $sent_by_interval[ $interval['time_interval'] ] ?? 0;
 			}
 			$data->totals->notifications_sent = array_sum( $sent_by_interval );
-		}
-
-		if ( $this->is_field_requested( $query_args, 'active_signups' ) ) {
-			$data->totals->active_signups = (int) $wpdb->get_var(
-				$wpdb->prepare(
-					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal.
-					"SELECT COUNT(*) FROM {$table_name} WHERE status = %s",
-					NotificationStatus::ACTIVE
-				)
-			);
 		}
 
 		return $data;

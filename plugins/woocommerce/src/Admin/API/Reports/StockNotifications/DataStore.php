@@ -24,9 +24,6 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
  *   double opt-in and get purged by DataRetentionController, so counting them would shrink history.
  *   Cancelled rows still count on their creation date.
  * - customers: distinct emails behind `signups`.
- * - active_signups: rows currently active, whatever the period. Includes products already back in
- *   stock that the processor has not handled yet.
- * - days_waiting: days since the oldest active sign-up was created, 0 when there is none.
  *
  * The product is the one the customer signed up for, so a variation is its own row.
  *
@@ -35,11 +32,6 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
  * around a DST switch. Accepted for sign-up counts; the fix would be local-time columns, like wc_order_stats.
  */
 class DataStore extends ReportsDataStore implements DataStoreInterface {
-
-	/**
-	 * Stands in for the period condition in report columns until the query period is known.
-	 */
-	protected const PERIOD_PLACEHOLDER = '{period}';
 
 	/**
 	 * Table used to get the data.
@@ -85,74 +77,25 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @var array
 	 */
 	protected $column_types = array(
-		'product_id'     => 'intval',
-		'signups'        => 'intval',
-		'customers'      => 'intval',
-		'active_signups' => 'intval',
-		'days_waiting'   => 'intval',
+		'product_id' => 'intval',
+		'signups'    => 'intval',
+		'customers'  => 'intval',
 	);
 
 	/**
 	 * Assign report columns once full table name has been assigned.
-	 *
-	 * The row set also holds active sign-ups from outside the period, so `signups` and `customers`
-	 * repeat the period check inside their CASE.
 	 *
 	 * @override ReportsDataStore::assign_report_columns()
 	 *
 	 * @return void
 	 */
 	protected function assign_report_columns() {
-		global $wpdb;
-
-		$table_name = self::get_db_table_name();
-		$period     = self::PERIOD_PLACEHOLDER;
-
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name and placeholder are internal.
+		$table_name           = self::get_db_table_name();
 		$this->report_columns = array(
-			'product_id'     => "{$table_name}.product_id",
-			'signups'        => $wpdb->prepare( "SUM( CASE WHEN {$period} AND {$table_name}.status <> %s THEN 1 ELSE 0 END ) AS signups", NotificationStatus::PENDING ),
-			'customers'      => $wpdb->prepare( "COUNT( DISTINCT CASE WHEN {$period} AND {$table_name}.status <> %s THEN {$table_name}.user_email END ) AS customers", NotificationStatus::PENDING ),
-			'active_signups' => $wpdb->prepare( "SUM( CASE WHEN {$table_name}.status = %s THEN 1 ELSE 0 END ) AS active_signups", NotificationStatus::ACTIVE ),
-			'days_waiting'   => $wpdb->prepare( "COALESCE( DATEDIFF( UTC_TIMESTAMP(), MIN( CASE WHEN {$table_name}.status = %s THEN {$table_name}.date_created_gmt END ) ), 0 ) AS days_waiting", NotificationStatus::ACTIVE ),
+			'product_id' => "{$table_name}.product_id",
+			'signups'    => 'COUNT(*) AS signups',
+			'customers'  => "COUNT( DISTINCT {$table_name}.user_email ) AS customers",
 		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-	}
-
-	/**
-	 * Returns the selected columns, with the query period filled in.
-	 *
-	 * @override ReportsDataStore::selected_columns()
-	 *
-	 * @param array $query_args User-supplied options.
-	 * @return string
-	 */
-	protected function selected_columns( $query_args ) {
-		return str_replace( self::PERIOD_PLACEHOLDER, $this->get_period_condition( $query_args ), parent::selected_columns( $query_args ) );
-	}
-
-	/**
-	 * Returns the SQL condition matching rows created in the query period.
-	 *
-	 * @param array $query_args Query parameters.
-	 * @return string
-	 */
-	protected function get_period_condition( $query_args ) {
-		global $wpdb;
-
-		$column     = self::get_db_table_name() . '.`' . $this->date_column_name . '`';
-		$conditions = array();
-
-		if ( ! empty( $query_args['after'] ) ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- column name is internal.
-			$conditions[] = $wpdb->prepare( "{$column} >= %s", $this->get_utc_datetime_string( $query_args['after'] ) );
-		}
-		if ( ! empty( $query_args['before'] ) ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- column name is internal.
-			$conditions[] = $wpdb->prepare( "{$column} <= %s", $this->get_utc_datetime_string( $query_args['before'] ) );
-		}
-
-		return $conditions ? '( ' . implode( ' AND ', $conditions ) . ' )' : '1=1';
 	}
 
 	/**
@@ -277,7 +220,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	public function get_default_query_vars() {
 		$defaults                     = parent::get_default_query_vars();
-		$defaults['orderby']          = 'active_signups';
+		$defaults['orderby']          = 'signups';
 		$defaults['order']            = 'desc';
 		$defaults['product_includes'] = array();
 		$defaults['extended_info']    = false;
@@ -310,16 +253,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		);
 
 		$limit_params = $this->get_limit_sql_params( $query_args );
-		$period       = $this->get_period_condition( $query_args );
-
-		// Products with a sign-up in the period, or anyone still waiting.
+		$this->add_time_period_sql_params( $query_args, $table_name );
 		$this->subquery->add_sql_clause(
 			'where',
 			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name and period condition are internal.
-				"AND ( ( {$period} AND {$table_name}.status <> %s ) OR {$table_name}.status = %s )",
-				NotificationStatus::PENDING,
-				NotificationStatus::ACTIVE
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal.
+				"AND {$table_name}.status <> %s",
+				NotificationStatus::PENDING
 			)
 		);
 

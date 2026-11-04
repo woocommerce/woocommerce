@@ -18,8 +18,6 @@ const STOCK_NOTIFICATIONS_REPORT_ADVANCED_FILTERS_FILTER =
 /**
  * Stock Notifications Report charts filter.
  *
- * `active_signups` is left out: it is a point-in-time count with no interval series, so its chart would be a flat zero line.
- *
  * @filter woocommerce_admin_stock_notifications_report_charts
  * @param {Array.<chart>} charts Report charts.
  */

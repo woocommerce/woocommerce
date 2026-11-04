@@ -3,7 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Admin\API\Reports\StockNotifications;
 
-use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -58,16 +57,6 @@ trait ReportTestTrait {
 				'date_notified_gmt' => $date_notified,
 			)
 		);
-	}
-
-	/**
-	 * Insert an active row created the given number of days ago.
-	 *
-	 * @param int $product_id Product ID.
-	 * @param int $days_ago   Age of the row in days.
-	 */
-	private function insert_active_row_days_ago( int $product_id, int $days_ago ): void {
-		$this->insert_row( $product_id, NotificationStatus::ACTIVE, gmdate( 'Y-m-d H:i:s', time() - $days_ago * DAY_IN_SECONDS ) );
 	}
 
 	/**

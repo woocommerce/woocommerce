@@ -115,7 +115,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertSame( 1, $local_day[5]['signups'], 'A sign-up at 23:30 local time belongs to that local day.' );
-		$this->assertSame( 0, $next_day[5]['signups'], 'A sign-up at 23:30 local time does not belong to the next UTC day.' );
+		$this->assertArrayNotHasKey( 5, $next_day, 'A sign-up at 23:30 local time does not belong to the next UTC day.' );
 	}
 
 	/**
@@ -132,24 +132,6 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( array( 1 ), array_keys( $rows ), 'A product with only pending sign-ups should not be listed.' );
 		$this->assertSame( 2, $rows[1]['signups'], 'Cancelled and sent sign-ups count, pending ones do not.' );
 		$this->assertSame( 2, $rows[1]['customers'], 'Pending sign-ups do not add customers.' );
-		$this->assertSame( 0, $rows[1]['active_signups'] );
-	}
-
-	/**
-	 * @testdox Should count active sign-ups whatever the period and measure the wait from the oldest one.
-	 */
-	public function test_active_signups_and_days_waiting(): void {
-		$this->insert_row( 1, NotificationStatus::ACTIVE, '2026-01-15 10:00:00' );
-		$this->insert_active_row_days_ago( 2, 3 );
-		$this->insert_active_row_days_ago( 2, 10 );
-		$this->insert_row( 2, NotificationStatus::SENT, gmdate( 'Y-m-d H:i:s', time() - 30 * DAY_IN_SECONDS ) );
-
-		$rows = $this->get_rows( self::PERIOD );
-
-		$this->assertSame( 0, $rows[1]['signups'], 'An active sign-up from before the period is not a sign-up in it.' );
-		$this->assertSame( 1, $rows[1]['active_signups'], 'An active sign-up from before the period is still waiting.' );
-		$this->assertSame( 2, $rows[2]['active_signups'], 'Only active rows count as waiting.' );
-		$this->assertSame( 10, $rows[2]['days_waiting'], 'The wait is measured from the oldest active sign-up.' );
 	}
 
 	/**
@@ -166,15 +148,18 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should reject an unknown orderby and sort by active sign-ups, descending, by default.
+	 * @testdox Should reject an unknown orderby and sort by sign-ups, descending, by default.
 	 */
 	public function test_default_order_and_invalid_orderby(): void {
 		$this->insert_row( 1, NotificationStatus::ACTIVE, '2026-03-02 10:00:00' );
 		$this->insert_row( 2, NotificationStatus::ACTIVE, '2026-03-02 10:00:00' );
-		$this->insert_row( 2, NotificationStatus::ACTIVE, '2026-03-02 10:00:00' );
-		$this->insert_row( 3, NotificationStatus::SENT, '2026-03-02 10:00:00' );
+		$this->insert_row( 2, NotificationStatus::SENT, '2026-03-03 10:00:00' );
+		$this->insert_row( 3, NotificationStatus::ACTIVE, '2026-03-02 10:00:00' );
+		$this->insert_row( 3, NotificationStatus::SENT, '2026-03-03 10:00:00' );
+		$this->insert_row( 3, NotificationStatus::CANCELLED, '2026-03-04 10:00:00' );
+		$this->insert_row( 3, NotificationStatus::ACTIVE, '2026-02-01 10:00:00' );
 
-		$this->assertSame( array( 2, 1, 3 ), array_column( $this->request( self::ENDPOINT, self::PERIOD )->get_data(), 'product_id' ) );
+		$this->assertSame( array( 3, 2, 1 ), array_column( $this->request( self::ENDPOINT, self::PERIOD )->get_data(), 'product_id' ) );
 		$this->assertSame( 400, $this->request( self::ENDPOINT, array_merge( self::PERIOD, array( 'orderby' => 'date' ) ) )->get_status() );
 	}
 
@@ -183,8 +168,6 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testWith ["product_id"]
 	 *           ["signups"]
 	 *           ["customers"]
-	 *           ["active_signups"]
-	 *           ["days_waiting"]
 	 *
 	 * @param string $orderby Orderby value.
 	 */

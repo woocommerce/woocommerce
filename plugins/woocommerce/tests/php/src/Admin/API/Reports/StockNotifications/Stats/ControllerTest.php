@@ -82,7 +82,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should compute totals from non-pending sign-ups, sends in the period and current active sign-ups.
+	 * @testdox Should compute totals from non-pending sign-ups and sends in the period.
 	 */
 	public function test_totals(): void {
 		$this->insert_row( 1, NotificationStatus::PENDING, '2026-03-02 10:00:00', 'pending@example.com' );
@@ -99,7 +99,6 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 				'signups'            => 3,
 				'customers'          => 2,
 				'notifications_sent' => 2,
-				'active_signups'     => 2,
 			),
 			$stats['totals']
 		);

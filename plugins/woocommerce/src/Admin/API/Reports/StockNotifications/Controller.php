@@ -112,37 +112,25 @@ class Controller extends GenericController implements ExportableInterface {
 			'title'      => 'report_stock_notifications',
 			'type'       => 'object',
 			'properties' => array(
-				'product_id'     => array(
+				'product_id'    => array(
 					'description' => __( 'ID of the product or variation customers signed up for.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'signups'        => array(
+				'signups'       => array(
 					'description' => __( 'Sign-ups created in the period. Excludes unconfirmed (pending) sign-ups.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'customers'      => array(
+				'customers'     => array(
 					'description' => __( 'Distinct email addresses behind the sign-ups in the period.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'active_signups' => array(
-					'description' => __( 'Customers waiting for the product right now, whatever the period.', 'woocommerce' ),
-					'type'        => 'integer',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'days_waiting'   => array(
-					'description' => __( 'Days since the oldest active sign-up was created.', 'woocommerce' ),
-					'type'        => 'integer',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'extended_info'  => array(
+				'extended_info' => array(
 					'name'      => array(
 						'type'        => 'string',
 						'readonly'    => true,
@@ -175,14 +163,12 @@ class Controller extends GenericController implements ExportableInterface {
 	 */
 	public function get_collection_params() {
 		$params                       = parent::get_collection_params();
-		$params['orderby']['default'] = 'active_signups';
+		$params['orderby']['default'] = 'signups';
 		$params['orderby']['enum']    = $this->apply_custom_orderby_filters(
 			array(
 				'product_id',
 				'signups',
 				'customers',
-				'active_signups',
-				'days_waiting',
 			)
 		);
 		$params['products']           = array(
@@ -212,11 +198,9 @@ class Controller extends GenericController implements ExportableInterface {
 	 */
 	public function get_export_columns() {
 		$export_columns = array(
-			'product_name'   => __( 'Product', 'woocommerce' ),
-			'active_signups' => __( 'Waiting', 'woocommerce' ),
-			'signups'        => __( 'Sign-ups', 'woocommerce' ),
-			'customers'      => __( 'Customers', 'woocommerce' ),
-			'days_waiting'   => __( 'Days waiting', 'woocommerce' ),
+			'product_name' => __( 'Product', 'woocommerce' ),
+			'signups'      => __( 'Sign-ups', 'woocommerce' ),
+			'customers'    => __( 'Customers', 'woocommerce' ),
 		);
 
 		/**
@@ -237,11 +221,9 @@ class Controller extends GenericController implements ExportableInterface {
 	 */
 	public function prepare_item_for_export( $item ) {
 		$export_item = array(
-			'product_name'   => $item['extended_info']['name'] ?? '',
-			'active_signups' => $item['active_signups'],
-			'signups'        => $item['signups'],
-			'customers'      => $item['customers'],
-			'days_waiting'   => $item['days_waiting'],
+			'product_name' => $item['extended_info']['name'] ?? '',
+			'signups'      => $item['signups'],
+			'customers'    => $item['customers'],
 		);
 
 		/**
