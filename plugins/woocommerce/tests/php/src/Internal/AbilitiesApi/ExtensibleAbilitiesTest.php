@@ -1385,6 +1385,51 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should name each anyOf type once when several branches share a type and the value matches none.
+	 */
+	public function test_an_any_of_type_mismatch_names_each_type_once(): void {
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'product',
+						'namespace'    => 'shared',
+						'field'        => 'size',
+						'input_schema' => array(
+							'anyOf' => array(
+								array(
+									'type' => 'string',
+									'enum' => array( 'small' ),
+								),
+								array(
+									'type'    => 'string',
+									'pattern' => '^x',
+								),
+								array( 'type' => 'null' ),
+							),
+						),
+						'set_callback' => '__return_null',
+					)
+				);
+			}
+		);
+		$this->reset_registries();
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$refused = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'shared' => array( 'size' => 7 ) ),
+			)
+		);
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'extensions.shared.size is not of type string,null.', $refused->get_data()['message'] );
+	}
+
+	/**
 	 * @testdox Should register a field whose input schema is an anyOf of single types, publish it as declared and pass null or a typed value to the set_callback.
 	 */
 	public function test_an_any_of_input_schema_takes_null_and_a_typed_value(): void {

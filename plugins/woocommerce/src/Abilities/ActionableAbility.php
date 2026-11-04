@@ -469,7 +469,7 @@ abstract class ActionableAbility extends \WP_Ability {
 			return null;
 		}
 		/* translators: 1: Path of the field in the input. 2: Comma-separated list of JSON types. */
-		return sprintf( __( '%1$s is not of type %2$s.', 'woocommerce' ), $param, implode( ',', $types ) );
+		return sprintf( __( '%1$s is not of type %2$s.', 'woocommerce' ), $param, implode( ',', array_unique( $types ) ) );
 	}
 
 	/**
