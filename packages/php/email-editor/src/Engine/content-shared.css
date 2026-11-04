@@ -20,8 +20,12 @@ ol.has-background {
 	padding: 20px 40px;
 }
 
-/* Remove default browser underline from site title link, and keep link colors from parent blocks off it unless it has its own */
-.wp-block-site-title:not(.has-link-color) a:not(.wp-element-button) {
+/* Remove default browser underline from site title link */
+.wp-block-site-title a:not(.wp-element-button) {
 	text-decoration: none !important;
-	color: inherit !important;
+}
+
+/* Keep link colors from parent blocks off a site title without a link color of its own */
+.wp-block-site-title:not(.has-link-color) a:not(.wp-element-button) {
+	color: inherit;
 }

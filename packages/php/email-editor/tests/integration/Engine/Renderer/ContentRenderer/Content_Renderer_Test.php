@@ -929,7 +929,9 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		}
 
 		// The Site Title is the only link in this email.
-		$this->assertStringContainsString( 'color: #ab1234', (string) $this->getStylesValueForTag( $rendered, 'a' ) );
+		$site_title_link_styles = (string) $this->getStylesValueForTag( $rendered, 'a' );
+		$this->assertStringContainsString( 'color: #ab1234', $site_title_link_styles );
+		$this->assertStringContainsString( 'text-decoration: none', $site_title_link_styles );
 	}
 
 	/**
