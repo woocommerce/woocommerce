@@ -141,7 +141,8 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @uses self::stage_payment_complete()
 	 * @param string $transaction_id Optional transaction id to store in post meta.
-	 * @return bool False when the order is not saved yet or the order write fails, true otherwise.
+	 * @return bool False when the order is not saved yet, the order write fails or a listener throws. True otherwise,
+	 *              also when the order status does not let the payment complete.
 	 */
 	public function payment_complete( $transaction_id = '' ) {
 		if ( ! $this->get_id() ) { // Order must exist.
@@ -155,6 +156,9 @@ class WC_Order extends WC_Abstract_Order {
 				}
 			);
 		} catch ( Exception $e ) {
+			if ( $e === $this->get_last_save_error() ) {
+				return false;
+			}
 			/**
 			 * If there was an error completing the payment, log to a file and add an order note so the admin can take action.
 			 */
@@ -281,7 +285,13 @@ class WC_Order extends WC_Abstract_Order {
 			try {
 				$this->add_order_note( $payment_complete_note, 0, false, array( 'note_group' => OrderNoteGroup::PAYMENT ) );
 			} catch ( Exception $e ) {
-				$this->handle_exception( $e, sprintf( 'Error adding the payment note for order #%d', $this->get_id() ) );
+				wc_get_logger()->error(
+					sprintf( 'Error adding the payment note for order #%d', $this->get_id() ),
+					array(
+						'order' => $this,
+						'error' => $e,
+					)
+				);
 			}
 		};
 		$action_args = array( 'woocommerce_payment_complete', $this->get_id(), $transaction_id );

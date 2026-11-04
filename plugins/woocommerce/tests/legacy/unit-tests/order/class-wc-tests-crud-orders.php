@@ -1363,15 +1363,11 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 * @param WC_Order $order Order to save.
 	 */
 	private function save_with_failed_write( WC_Order $order ): void {
-		$fail = static function () {
-			throw new Exception( 'Disk full.' );
-		};
-		add_action( 'woocommerce_before_order_object_save', $fail );
-		try {
-			$order->save();
-		} finally {
-			remove_action( 'woocommerce_before_order_object_save', $fail );
-		}
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				$order->save();
+			}
+		);
 		$this->assertInstanceOf( Exception::class, $order->get_last_save_error() );
 	}
 
@@ -1488,6 +1484,50 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$stored = wc_get_order( $order->get_id() );
 		$this->assertSame( OrderStatus::PENDING, $stored->get_status() );
 		$this->assertNull( $stored->get_date_paid() );
+	}
+
+	/**
+	 * @testdox A failed payment_complete() write adds one error note and no payment note.
+	 */
+	public function test_payment_complete_adds_one_error_note_when_the_write_fails(): void {
+		$order = new WC_Order();
+		$order->save();
+
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), 'content' );
+		$this->assertCount( 1, $notes );
+		$this->assertStringContainsString( 'Disk full.', $notes[0] );
+	}
+
+	/**
+	 * @testdox The retry after a failed payment_complete() fires woocommerce_payment_complete when every note throws.
+	 */
+	public function test_payment_complete_retry_fires_its_action_when_every_note_throws(): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid = did_action( 'woocommerce_payment_complete' );
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+		$throw = static function () {
+			throw new Exception( 'Note listener failed.' );
+		};
+		add_action( 'woocommerce_order_note_added', $throw );
+
+		try {
+			$order->save();
+		} finally {
+			remove_action( 'woocommerce_order_note_added', $throw );
+		}
+
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $paid );
 	}
 
 	/**
