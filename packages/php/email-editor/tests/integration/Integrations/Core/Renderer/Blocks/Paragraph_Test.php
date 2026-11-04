@@ -281,6 +281,19 @@ class Paragraph_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * An inherited font size that isn’t a plain px length adds nothing to the styles.
+	 */
+	public function testItIgnoresInheritedFontSizeWithExtraDeclarations(): void {
+		$parsed_paragraph = $this->parsed_paragraph;
+		unset( $parsed_paragraph['attrs']['style']['typography'] );
+		$parsed_paragraph['email_attrs'] = array( 'font-size' => '16px;display:none;--x:1px' );
+
+		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $parsed_paragraph, $this->rendering_context );
+		$this->assertStringNotContainsString( 'display:none', $rendered );
+		$this->assertStringNotContainsString( 'font-size', $rendered );
+	}
+
+	/**
 	 * A paragraph's own font size wins over the inherited one.
 	 */
 	public function testItPrefersOwnFontSizeOverInheritedOne(): void {
