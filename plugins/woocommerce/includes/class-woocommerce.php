@@ -422,6 +422,7 @@ final class WooCommerce {
 		$container->get( SettingsScreen::class );
 		$container->get( AbilitiesTracking::class );
 		$container->get( OpenGraph::class );
+		$container->get( Automattic\WooCommerce\Internal\Admin\MenuIcons::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.
