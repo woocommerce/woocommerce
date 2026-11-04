@@ -23,6 +23,7 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\ShippingUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -344,7 +345,7 @@ class WC_AJAX {
 
 		if ( is_array( $posted_shipping_methods ) ) {
 			foreach ( $posted_shipping_methods as $i => $value ) {
-				if ( ! is_string( $value ) ) {
+				if ( ! is_string( $value ) || ! ShippingUtil::is_shipping_rate_listed( $i, $value ) ) {
 					continue;
 				}
 				$chosen_shipping_methods[ $i ] = $value;
@@ -412,7 +413,7 @@ class WC_AJAX {
 
 		if ( is_array( $posted_shipping_methods ) ) {
 			foreach ( $posted_shipping_methods as $i => $value ) {
-				if ( ! is_string( $value ) ) {
+				if ( ! is_string( $value ) || ! ShippingUtil::is_shipping_rate_listed( $i, $value ) ) {
 					continue;
 				}
 				$chosen_shipping_methods[ $i ] = $value;
