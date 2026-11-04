@@ -144,9 +144,11 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 			)
 		);
 
+		clean_post_cache( $child->get_id() );
 		$this->sut->maybe_schedule_adjust_download_permissions( $product );
 
 		$this->assertSame( 0, $checks, 'No children should be checked for empty parent downloads.' );
+		$this->assertFalse( wp_cache_get( $child->get_id(), 'posts' ), 'Child posts should not be primed for empty parent downloads.' );
 	}
 
 	/**
