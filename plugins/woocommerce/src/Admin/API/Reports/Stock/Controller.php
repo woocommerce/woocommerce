@@ -17,6 +17,9 @@ use WP_REST_Request;
 use WP_REST_Response;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
+use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * REST API Reports stock controller class.
@@ -39,6 +42,13 @@ class Controller extends GenericController implements ExportableInterface {
 	 * @var array
 	 */
 	protected $status_options;
+
+	/**
+	 * Active stock notification counts for the current page, keyed by product ID.
+	 *
+	 * @var array<int, array{active_signups: int, days_waiting: int}>
+	 */
+	private $notification_stats = array();
 
 	/**
 	 * Constructor.
@@ -135,6 +145,10 @@ class Controller extends GenericController implements ExportableInterface {
 		remove_filter( 'posts_groupby', array( __CLASS__, 'add_wp_query_group_by' ), 10 );
 		remove_filter( 'posts_clauses', array( __CLASS__, 'add_wp_query_orderby' ), 10 );
 
+		$this->notification_stats = self::is_stock_notifications_enabled()
+			? $this->get_notification_stats( array_map( fn( $product ) => $product->get_id(), array_filter( $query_results['objects'] ) ) )
+			: array();
+
 		$objects = array();
 		foreach ( $query_results['objects'] as $object ) {
 			$data      = $this->prepare_item_for_response( $object, $request );
@@ -148,6 +162,53 @@ class Controller extends GenericController implements ExportableInterface {
 			(int) $query_args['paged'],
 			(int) $query_results['pages']
 		);
+	}
+
+	/**
+	 * Whether the Back in stock notifications columns should be included.
+	 *
+	 * @return bool
+	 */
+	private static function is_stock_notifications_enabled(): bool {
+		return FeaturesUtil::feature_is_enabled( StockNotifications::FEATURE_NAME );
+	}
+
+	/**
+	 * Count active stock notifications and the oldest one's age in days for the given products.
+	 *
+	 * @param int[] $product_ids Product or variation IDs.
+	 * @return array<int, array{active_signups: int, days_waiting: int}> Keyed by product ID.
+	 */
+	private function get_notification_stats( array $product_ids ): array {
+		global $wpdb;
+
+		if ( empty( $product_ids ) ) {
+			return array();
+		}
+
+		$placeholders = implode( ', ', array_fill( 0, count( $product_ids ), '%d' ) );
+
+		// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $placeholders is a list of %d placeholders.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT product_id, COUNT(*) AS active_signups, DATEDIFF( UTC_TIMESTAMP(), MIN( date_created_gmt ) ) AS days_waiting
+				FROM {$wpdb->prefix}wc_stock_notifications
+				WHERE status = %s AND product_id IN ( {$placeholders} )
+				GROUP BY product_id",
+				array_merge( array( NotificationStatus::ACTIVE ), $product_ids )
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$stats = array();
+		foreach ( (array) $rows as $row ) {
+			$stats[ (int) $row->product_id ] = array(
+				'active_signups' => (int) $row->active_signups,
+				'days_waiting'   => (int) $row->days_waiting,
+			);
+		}
+
+		return $stats;
 	}
 
 	/**
@@ -274,9 +335,49 @@ class Controller extends GenericController implements ExportableInterface {
 				$args['join']    = self::append_product_sorting_table_join( $args['join'] );
 				$args['orderby'] = " wc_product_meta_lookup.sku {$order}, wc_product_meta_lookup.product_id {$order} ";
 				break;
+			case 'active_signups':
+				$sort_order      = self::get_normalized_order( $order );
+				$args['join']   .= self::get_notification_stats_join();
+				$args['orderby'] = " COALESCE( sn.sn_count, 0 ) {$sort_order}, {$wpdb->posts}.ID {$sort_order} ";
+				break;
+			case 'days_waiting':
+				// More days waiting means an older sign-up, so the date sorts the other way. Rows without sign-ups always go last.
+				$sort_order      = self::get_normalized_order( $order );
+				$date_order      = 'ASC' === $sort_order ? 'DESC' : 'ASC';
+				$args['join']   .= self::get_notification_stats_join();
+				$args['orderby'] = " sn.sn_oldest IS NULL, sn.sn_oldest {$date_order}, {$wpdb->posts}.ID {$sort_order} ";
+				break;
 		}
 
 		return $args;
+	}
+
+	/**
+	 * Get the query's sort direction as ASC or DESC.
+	 *
+	 * @param mixed $order The query's sort direction.
+	 * @return string
+	 */
+	private static function get_normalized_order( $order ): string {
+		return is_string( $order ) && 'ASC' === strtoupper( $order ) ? 'ASC' : 'DESC';
+	}
+
+	/**
+	 * Join the active stock notification count and oldest sign-up date per product, for sorting.
+	 *
+	 * @return string
+	 */
+	private static function get_notification_stats_join(): string {
+		global $wpdb;
+
+		$status = NotificationStatus::ACTIVE;
+
+		return " LEFT JOIN (
+			SELECT product_id, COUNT(*) AS sn_count, MIN( date_created_gmt ) AS sn_oldest
+			FROM {$wpdb->prefix}wc_stock_notifications
+			WHERE status = '{$status}'
+			GROUP BY product_id
+		) sn ON sn.product_id = {$wpdb->posts}.ID ";
 	}
 
 	/**
@@ -300,6 +401,12 @@ class Controller extends GenericController implements ExportableInterface {
 
 		if ( '' === $data['low_stock_amount'] ) {
 			$data['low_stock_amount'] = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
+		}
+
+		if ( self::is_stock_notifications_enabled() ) {
+			$stats                  = $this->notification_stats[ $data['id'] ] ?? array();
+			$data['active_signups'] = $stats['active_signups'] ?? 0;
+			$data['days_waiting']   = $stats['days_waiting'] ?? 0;
 		}
 
 		$response = parent::prepare_item_for_response( $data, $request );
@@ -410,6 +517,21 @@ class Controller extends GenericController implements ExportableInterface {
 			),
 		);
 
+		if ( self::is_stock_notifications_enabled() ) {
+			$schema['properties']['active_signups'] = array(
+				'description' => __( 'Number of customers waiting for a back in stock notification.', 'woocommerce' ),
+				'type'        => 'integer',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			);
+			$schema['properties']['days_waiting']   = array(
+				'description' => __( 'Days since the oldest active back in stock sign-up.', 'woocommerce' ),
+				'type'        => 'integer',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			);
+		}
+
 		return $this->add_additional_fields_schema( $schema );
 	}
 
@@ -419,6 +541,19 @@ class Controller extends GenericController implements ExportableInterface {
 	 * @return array
 	 */
 	public function get_collection_params() {
+		$orderby_options = array(
+			'stock_status',
+			'stock_quantity',
+			'date',
+			'id',
+			'include',
+			'title',
+			'sku',
+		);
+		if ( self::is_stock_notifications_enabled() ) {
+			array_push( $orderby_options, 'active_signups', 'days_waiting' );
+		}
+
 		$params = parent::get_collection_params();
 		unset( $params['after'], $params['before'], $params['force_cache_refresh'] );
 		$params['exclude']            = array(
@@ -447,17 +582,7 @@ class Controller extends GenericController implements ExportableInterface {
 		);
 		$params['order']['default']   = 'asc';
 		$params['orderby']['default'] = 'stock_status';
-		$params['orderby']['enum']    = $this->apply_custom_orderby_filters(
-			array(
-				'stock_status',
-				'stock_quantity',
-				'date',
-				'id',
-				'include',
-				'title',
-				'sku',
-			)
-		);
+		$params['orderby']['enum']    = $this->apply_custom_orderby_filters( $orderby_options );
 		$params['parent']             = array(
 			'description'       => __( 'Limit result set to those of particular parent IDs.', 'woocommerce' ),
 			'type'              => 'array',
@@ -499,6 +624,11 @@ class Controller extends GenericController implements ExportableInterface {
 			'stock_quantity' => __( 'Stock', 'woocommerce' ),
 		);
 
+		if ( self::is_stock_notifications_enabled() ) {
+			$export_columns['active_signups'] = __( 'Waiting', 'woocommerce' );
+			$export_columns['days_waiting']   = __( 'Days waiting', 'woocommerce' );
+		}
+
 		/**
 		 * Filter to add or remove column names from the stock report for
 		 * export.
@@ -529,6 +659,11 @@ class Controller extends GenericController implements ExportableInterface {
 			'stock_status'   => $status,
 			'stock_quantity' => $item['stock_quantity'],
 		);
+
+		if ( self::is_stock_notifications_enabled() ) {
+			$export_item['active_signups'] = $item['active_signups'] ?? 0;
+			$export_item['days_waiting']   = $item['days_waiting'] ?? 0;
+		}
 
 		/**
 		 * Filter to prepare extra columns in the export item for the stock
