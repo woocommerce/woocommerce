@@ -114,6 +114,17 @@ The `preview` attribute is optional, and it is used to set the preview state of 
 
 For more info, you may check [PR #46369](https://github.com/woocommerce/woocommerce/pull/46369), in which the Preview feature was added
 
+## Migrating collection filters in WooCommerce 11.4
+
+Starting with WooCommerce 11.4, local Product Collections (`query.inherit: false`) read URL filter parameters scoped to their own `queryId`. The `filterable` query attribute has been removed and no longer enables global filtering for local collections. This behavior was introduced in [#69888](https://github.com/woocommerce/woocommerce/pull/69888) and applies whether you register a collection with `registerProductCollection` or its deprecated experimental alias.
+
+Extensions that previously relied on `filterable` with standalone filters or a custom filter UI need to adapt:
+
+- Place WooCommerce's Product Filters block **inside** the Product Collection so it receives the collection's context and generates scoped parameters.
+- For a custom filter UI, prefix supported filter parameters with `wcp-{queryId}-`, using the target block's actual `queryId`. For example, a collection with `queryId: 17` reads `wcp-17-min_price=20` instead of `min_price=20`. Preserve other collections' parameters and reset only the target collection's pagination parameter (`query-17-page` in this example) when changing its filters.
+
+Scoped filters narrow the collection's saved query criteria, such as on-sale or featured products. Collections that inherit the default page query (`query.inherit: true`) continue to use unprefixed global filter parameters.
+
 ## Examples
 
 ### Example 1: Registering a new collection
