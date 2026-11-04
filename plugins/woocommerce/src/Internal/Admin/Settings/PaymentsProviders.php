@@ -895,10 +895,8 @@ class PaymentsProviders {
 		}
 
 		$payments_nox_profile = get_option( Payments::PAYMENTS_NOX_PROFILE_KEY, array() );
-		if ( empty( $payments_nox_profile ) ) {
+		if ( ! is_array( $payments_nox_profile ) ) {
 			$payments_nox_profile = array();
-		} else {
-			$payments_nox_profile = maybe_unserialize( $payments_nox_profile );
 		}
 
 		// Check if it is already marked as attached.
@@ -962,10 +960,8 @@ class PaymentsProviders {
 		}
 
 		$user_payments_nox_profile = get_user_meta( get_current_user_id(), Payments::PAYMENTS_NOX_PROFILE_KEY, true );
-		if ( empty( $user_payments_nox_profile ) ) {
+		if ( ! is_array( $user_payments_nox_profile ) ) {
 			$user_payments_nox_profile = array();
-		} else {
-			$user_payments_nox_profile = maybe_unserialize( $user_payments_nox_profile );
 		}
 
 		// Mark the suggestion as hidden.
@@ -1575,12 +1571,7 @@ class PaymentsProviders {
 	 */
 	private function is_payment_extension_suggestion_hidden( array $extension ): bool {
 		$user_payments_nox_profile = get_user_meta( get_current_user_id(), Payments::PAYMENTS_NOX_PROFILE_KEY, true );
-		if ( empty( $user_payments_nox_profile ) ) {
-			return false;
-		}
-		$user_payments_nox_profile = maybe_unserialize( $user_payments_nox_profile );
-
-		if ( empty( $user_payments_nox_profile['hidden_suggestions'] ) ) {
+		if ( ! is_array( $user_payments_nox_profile ) || empty( $user_payments_nox_profile['hidden_suggestions'] ) ) {
 			return false;
 		}
 
