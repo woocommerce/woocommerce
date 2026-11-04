@@ -44,7 +44,8 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$class   = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponCreate::class;
 		$ability = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
-		$result  = $ability->execute(
+		$this->assertArrayNotHasKey( 'email_restrictions', $ability->get_input_schema()['properties'] );
+		$result = $ability->execute(
 			array(
 				'code'   => 'write-test',
 				'amount' => '10',
@@ -56,7 +57,8 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 		$coupon->save();
 		$class   = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponUpdate::class;
 		$ability = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
-		$result  = $ability->execute(
+		$this->assertArrayNotHasKey( 'email_restrictions', $ability->get_input_schema()['properties'] );
+		$result = $ability->execute(
 			array(
 				'id'     => $coupon->get_id(),
 				'amount' => '20',
@@ -101,5 +103,34 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
 		$ability = new \WP_Ability( CouponsQuery::get_name(), CouponsQuery::get_registration_args() );
 		$this->assertWPError( $ability->execute( array() ) );
+	}
+
+	/**
+	 * @testdox Should require publication permission for published, scheduled and private coupons.
+	 * @testWith ["publish"]
+	 *           ["future"]
+	 *           ["private"]
+	 * @param string $status Requested status.
+	 */
+	public function test_publication_permission( string $status ): void {
+		$user = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user );
+		wp_get_current_user()->add_cap( 'publish_shop_coupons', false );
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'restricted-status' );
+		$coupon->set_status( 'draft' );
+		$coupon->save();
+		$class   = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponUpdate::class;
+		$ability = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
+		$this->assertArrayNotHasKey( 'email_restrictions', $ability->get_input_schema()['properties'] );
+		$this->assertWPError(
+			$ability->execute(
+				array(
+					'id'     => $coupon->get_id(),
+					'status' => $status,
+				)
+			)
+		);
+		$this->assertSame( 'draft', ( new \WC_Coupon( $coupon->get_id() ) )->get_status() );
 	}
 }

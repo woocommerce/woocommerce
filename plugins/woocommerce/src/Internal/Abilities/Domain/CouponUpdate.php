@@ -57,9 +57,14 @@ class CouponUpdate extends ActionableAbility {
 		);
 	}
 
-	/** Resource being changed. @return string */
+	/**
+	 * Resource being changed.
+	 *
+	 * @return string
+	 */
 	public function get_resource(): string {
-		return 'coupon'; }
+		return 'coupon';
+	}
 
 	/**
 	 * Load the coupon without saving.
@@ -68,7 +73,8 @@ class CouponUpdate extends ActionableAbility {
 	 * @return \WC_Coupon|\WP_Error
 	 */
 	protected function load( array $input ) {
-		return self::get_coupon_from_input( $input ); }
+		return self::get_coupon_from_input( $input );
+	}
 
 	/**
 	 * Change coupon fields in memory.
@@ -79,7 +85,8 @@ class CouponUpdate extends ActionableAbility {
 	 */
 	protected function change( $subject, array $input ) {
 		if ( isset( $input['status'] ) ) {
-			$subject->set_status( $input['status'] ); }
+			$subject->set_status( $input['status'] );
+		}
 		$result = self::set_coupon_props_from_input( $subject, $input );
 		return is_wp_error( $result ) ? $result : null;
 	}
@@ -105,7 +112,7 @@ class CouponUpdate extends ActionableAbility {
 	public static function can_update_coupon( $input = array() ): bool {
 		$coupon_id = self::get_id_from_input( $input );
 
-		return ( ! isset( $input['status'] ) || 'publish' !== $input['status'] || wc_rest_check_post_permissions( 'shop_coupon', 'create' ) ) && $coupon_id > 0 && wc_rest_check_post_permissions( 'shop_coupon', 'edit', $coupon_id );
+		return ( ! isset( $input['status'] ) || ! in_array( $input['status'], array( 'publish', 'future', 'private' ), true ) || wc_rest_check_post_permissions( 'shop_coupon', 'create' ) ) && $coupon_id > 0 && wc_rest_check_post_permissions( 'shop_coupon', 'edit', $coupon_id );
 	}
 
 	/**

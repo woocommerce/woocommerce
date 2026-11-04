@@ -153,11 +153,7 @@ trait CouponAbilityTrait {
 				'type'    => 'string',
 				'pattern' => '^([0-9]+(\.[0-9]+)?)?$',
 			),
-			'email_restrictions'   => array(
-				'type'        => 'array',
-				'description' => __( 'Billing emails allowed to use the coupon. An empty array removes the restriction.', 'woocommerce' ),
-				'items'       => array( 'type' => 'string' ),
-			),
+
 		);
 	}
 
@@ -252,7 +248,7 @@ trait CouponAbilityTrait {
 			}
 		} catch ( \WC_Data_Exception $exception ) {
 			return new \WP_Error(
-				$exception->getErrorCode(),
+				'woocommerce_ability_coupon_invalid_data',
 				$exception->getMessage(),
 				array( 'status' => 400 )
 			);

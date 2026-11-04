@@ -57,9 +57,14 @@ class CouponCreate extends ActionableAbility {
 		);
 	}
 
-	/** Resource being changed. @return string */
+	/**
+	 * Resource being changed.
+	 *
+	 * @return string
+	 */
 	public function get_resource(): string {
-		return 'coupon'; }
+		return 'coupon';
+	}
 
 	/**
 	 * Load the coupon without saving.
@@ -68,7 +73,8 @@ class CouponCreate extends ActionableAbility {
 	 * @return \WC_Coupon|\WP_Error
 	 */
 	protected function load( array $input ) {
-		return new \WC_Coupon(); }
+		return new \WC_Coupon();
+	}
 
 	/**
 	 * Change coupon fields in memory.
