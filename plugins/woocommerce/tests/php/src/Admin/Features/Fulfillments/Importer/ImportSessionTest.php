@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Importer;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\ImportSession;
 use Automattic\WooCommerce\Internal\Admin\ImportExport\CSVUploadHelper;
+use Automattic\WooCommerce\Tests\Internal\TransientFiles\TransientFilesTestStreamWrapper;
 
 /**
  * Tests for the ImportSession value object.
@@ -14,6 +15,11 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	 * Action Scheduler group the session schedules its cleanup in.
 	 */
 	private const CLEANUP_GROUP = 'woocommerce-fulfillments-importer';
+
+	/**
+	 * Scheme the stream wrapper tests register their uploads directory under.
+	 */
+	private const STREAM_SCHEME = 'wcfulfillmentstest';
 
 	/**
 	 * Temporary files created by tests; removed in tearDown.
@@ -76,6 +82,54 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	 */
 	private function cleanup_args( ImportSession $session ): array {
 		return array( $session->user_id(), $session->token(), $session->file(), $session->attachment_id() );
+	}
+
+	/**
+	 * Run a test with the uploads directory served by a stream wrapper, as on an S3-backed site.
+	 *
+	 * @param callable $test Receives the wrapper path of the uploads directory, e.g. "wcfulfillmentstest://uploads".
+	 */
+	private function run_with_stream_uploads( callable $test ): void {
+		$root    = sys_get_temp_dir() . '/wc-fulfillments-stream-' . wp_generate_uuid4();
+		$uploads = self::STREAM_SCHEME . '://uploads';
+		wp_mkdir_p( $root . '/uploads/wc-imports' );
+		TransientFilesTestStreamWrapper::register( self::STREAM_SCHEME, $root );
+
+		$upload_dir_filter = static function ( $upload_dir ) use ( $uploads ) {
+			$upload_dir['basedir'] = $uploads;
+			$upload_dir['path']    = $uploads;
+			return $upload_dir;
+		};
+		add_filter( 'upload_dir', $upload_dir_filter );
+
+		try {
+			$test( $uploads );
+		} finally {
+			remove_filter( 'upload_dir', $upload_dir_filter );
+			TransientFilesTestStreamWrapper::unregister( self::STREAM_SCHEME );
+			self::remove_directory( $root );
+		}
+	}
+
+	/**
+	 * Remove a fixture directory and everything in it.
+	 *
+	 * @param string $dir Absolute path.
+	 */
+	private static function remove_directory( string $dir ): void {
+		$entries = scandir( $dir );
+		foreach ( false === $entries ? array() : $entries as $entry ) {
+			if ( '.' === $entry || '..' === $entry ) {
+				continue;
+			}
+			$path = $dir . '/' . $entry;
+			if ( is_dir( $path ) ) {
+				self::remove_directory( $path );
+			} else {
+				wp_delete_file( $path );
+			}
+		}
+		rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Removing a test fixture directory.
 	}
 
 	/**
@@ -411,5 +465,38 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 
 		$this->assertFalse( as_next_scheduled_action( ImportSession::CLEANUP_HOOK, $first_args, self::CLEANUP_GROUP ), 'The replaced session must not keep a cleanup action' );
 		$this->assertIsInt( as_next_scheduled_action( ImportSession::CLEANUP_HOOK, $this->cleanup_args( $second ), self::CLEANUP_GROUP ) );
+	}
+
+	/**
+	 * @testdox is_staged_path() accepts a file in wc-imports when the uploads directory is a stream wrapper path.
+	 */
+	public function test_is_staged_path_accepts_stream_wrapper_import_directory(): void {
+		$this->run_with_stream_uploads(
+			function ( string $uploads ) {
+				$staged = $uploads . '/wc-imports/wc-fulfillments-import-' . wp_generate_uuid4() . '.csv';
+				file_put_contents( $staged, "a,b,c\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture write.
+
+				$this->assertTrue( ImportSession::is_staged_path( $staged ), 'A file in wc-imports on a stream wrapper is staged' );
+				$this->assertTrue( ImportSession::is_staged_path( $uploads . '/wc-imports/wc-fulfillments-import-gone.csv' ), 'A missing file in wc-imports on a stream wrapper is still a staged path' );
+				$this->assertFalse( ImportSession::is_staged_path( $uploads . '/wc-fulfillments-import-gone.csv' ), 'A file elsewhere in the stream uploads directory is not staged' );
+				$this->assertFalse( ImportSession::is_staged_path( $uploads . '/wc-imports/../wc-fulfillments-import-gone.csv' ), 'A stream path that climbs out of wc-imports is not staged' );
+			}
+		);
+	}
+
+	/**
+	 * @testdox cleanup_abandoned_file() deletes the staged file when the uploads directory is a stream wrapper path.
+	 */
+	public function test_cleanup_abandoned_file_deletes_stream_wrapper_file_when_session_is_gone(): void {
+		$this->run_with_stream_uploads(
+			function ( string $uploads ) {
+				$staged = $uploads . '/wc-imports/wc-fulfillments-import-' . wp_generate_uuid4() . '.csv';
+				file_put_contents( $staged, "a,b,c\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture write.
+
+				ImportSession::cleanup_abandoned_file( 76, 'ghost', $staged );
+
+				$this->assertFileDoesNotExist( $staged, 'An abandoned file on a stream wrapper must be deleted like a local one' );
+			}
+		);
 	}
 }
