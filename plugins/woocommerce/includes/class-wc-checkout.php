@@ -14,11 +14,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
-<<<<<<< HEAD
-=======
 use Automattic\WooCommerce\Utilities\ShippingUtil;
-use Automattic\WooCommerce\StoreApi\Utilities\CartController;
->>>>>>> 9966df3533 (Use a chosen shipping method only when its rate was offered (#70629))
 
 defined( 'ABSPATH' ) || exit;
 
