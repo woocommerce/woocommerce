@@ -320,7 +320,7 @@ CREATE TABLE $meta_table_name (
 			}
 
 			// Only the props the Analytics report reads; bookkeeping saves such as send attempts keep the cache.
-			if ( array_intersect( array( 'status', 'date_created', 'date_notified' ), array_keys( $changes ) ) ) {
+			if ( array_intersect( array( 'product_id', 'user_email', 'status', 'date_created', 'date_notified' ), array_keys( $changes ) ) ) {
 				ReportsCache::invalidate();
 			}
 		}
