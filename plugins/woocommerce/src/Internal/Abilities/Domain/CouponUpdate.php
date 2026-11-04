@@ -112,7 +112,7 @@ class CouponUpdate extends ActionableAbility {
 	public static function can_update_coupon( $input = array() ): bool {
 		$coupon_id = self::get_id_from_input( $input );
 
-		return ( ! isset( $input['status'] ) || ! in_array( $input['status'], array( 'publish', 'future', 'private' ), true ) || wc_rest_check_post_permissions( 'shop_coupon', 'create' ) ) && $coupon_id > 0 && wc_rest_check_post_permissions( 'shop_coupon', 'edit', $coupon_id );
+		return ( ! isset( $input['status'] ) || get_post_status( $coupon_id ) === $input['status'] || ! in_array( $input['status'], array( 'publish', 'future', 'private' ), true ) || wc_rest_check_post_permissions( 'shop_coupon', 'create' ) ) && $coupon_id > 0 && wc_rest_check_post_permissions( 'shop_coupon', 'edit', $coupon_id );
 	}
 
 	/**

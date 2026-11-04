@@ -172,4 +172,25 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 		$this->assertWPError( $ability->execute( $input ) );
 	}
 
+	/**
+	 * @testdox Should let an editor retain the existing publication status.
+	 */
+	public function test_unchanged_status(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_get_current_user()->add_cap( 'publish_shop_coupons', false );
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'unchanged-status' );
+		$coupon->save();
+		$class   = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponUpdate::class;
+		$ability = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
+		$result  = $ability->execute(
+			array(
+				'id'     => $coupon->get_id(),
+				'status' => 'publish',
+				'amount' => '20',
+			)
+		);
+		$this->assertNotWPError( $result );
+		$this->assertSame( '20', ( new \WC_Coupon( $coupon->get_id() ) )->get_amount() );
+	}
 }
