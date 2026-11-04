@@ -1394,6 +1394,25 @@ export function isLeapYear( year: number ) {
 }
 
 /**
+ * Get the calendar year of a date string, or NaN if the date is invalid.
+ *
+ * Date-only ISO strings (YYYY, YYYY-MM, YYYY-MM-DD) are parsed as UTC
+ * midnight, so getFullYear() returns the previous year west of UTC on Jan 1.
+ * For those, use the year as written.
+ *
+ * @param {string} date Date string.
+ * @return {number} The year.
+ */
+function getYear( date: string ) {
+	const parsed = new Date( date );
+	if ( isNaN( parsed.getTime() ) ) {
+		return NaN;
+	}
+	const dateOnly = /^(\d{4})(?:-\d{2}(?:-\d{2})?)?$/.exec( date );
+	return dateOnly ? Number( dateOnly[ 1 ] ) : parsed.getFullYear();
+}
+
+/**
  * Checks whether a date range contains leap year.
  *
  * @param {string} startDate Start date
@@ -1401,51 +1420,8 @@ export function isLeapYear( year: number ) {
  * @return {boolean} True if date range contains a leap year
  */
 export function containsLeapYear( startDate: string, endDate: string ) {
-	// Parse the input dates to get the years. Date-only ISO 8601 strings
-	// (YYYY, YYYY-MM, YYYY-MM-DD) are parsed as UTC midnight, so
-	// getFullYear() would return the previous year in timezones west of
-	// UTC; use the written year for those. Date-time strings keep
-	// local-time interpretation.
-	const isAsciiDigits = ( value: string ): boolean => {
-		if ( ! value.length ) {
-			return false;
-		}
-		for ( let i = 0; i < value.length; i++ ) {
-			const code = value.charCodeAt( i );
-			if ( code < 48 || code > 57 ) {
-				return false;
-			}
-		}
-		return true;
-	};
-	const isDateOnlyString = ( value: string ): boolean => {
-		// YYYY, YYYY-MM or YYYY-MM-DD with ASCII digits only.
-		const parts = value.split( '-' );
-		return (
-			parts.length >= 1 &&
-			parts.length <= 3 &&
-			parts[ 0 ].length === 4 &&
-			isAsciiDigits( parts[ 0 ] ) &&
-			parts
-				.slice( 1 )
-				.every( ( part ) => part.length === 2 && isAsciiDigits( part ) )
-		);
-	};
-	const yearOf = ( dateString: string ): number => {
-		const parsed = new Date( dateString );
-		if ( isNaN( parsed.getTime() ) ) {
-			return NaN;
-		}
-		if ( typeof dateString === 'string' ) {
-			const trimmed = dateString.trim();
-			if ( isDateOnlyString( trimmed ) ) {
-				return parseInt( trimmed.slice( 0, 4 ), 10 );
-			}
-		}
-		return parsed.getFullYear();
-	};
-	const startYear = yearOf( startDate );
-	const endYear = yearOf( endDate );
+	const startYear = getYear( startDate );
+	const endYear = getYear( endDate );
 
 	if ( ! isNaN( startYear ) && ! isNaN( endYear ) ) {
 		// Check each year in the range
