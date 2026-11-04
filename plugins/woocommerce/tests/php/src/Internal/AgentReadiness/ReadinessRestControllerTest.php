@@ -113,20 +113,20 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox POST ucp turns UCP on while a required setup check fails, and reports Needs attention.
+	 * @testdox POST ucp answers 409 and leaves UCP off while a required setup check fails.
 	 */
-	public function test_ucp_switch_not_blocked_by_failing_check(): void {
+	public function test_ucp_switch_blocked_by_failing_check(): void {
 		StoreConditionsTest::make_store_ready( $this );
 		update_option( 'woocommerce_coming_soon', 'yes' );
 		update_option( 'woocommerce_feature_ucp_enabled', 'no' );
 
 		$response = $this->dispatch_ucp( true );
+		$data     = $response->get_data();
 
-		$this->assertSame( 200, $response->get_status() );
-		$this->assertTrue( $response->get_data()['enabled'] );
-		$this->assertSame( UcpSwitch::STATUS_NEEDS_ATTENTION, $response->get_data()['status'] );
-		$this->assertSame( array( 'launched' ), $response->get_data()['failing_checks'] );
-		$this->assertSame( 'yes', get_option( 'woocommerce_feature_ucp_enabled' ) );
+		$this->assertSame( 409, $response->get_status() );
+		$this->assertSame( 'woocommerce_ucp_required_checks_failing', $data['code'] );
+		$this->assertSame( array( 'launched' ), $data['data']['failing_checks'] );
+		$this->assertSame( 'no', get_option( 'woocommerce_feature_ucp_enabled' ) );
 	}
 
 	/**
