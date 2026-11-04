@@ -86,6 +86,11 @@ class ExtensibleAbilities {
 	private const QUERY_ARG_KEYS = array( 'meta_query', 'tax_query', 'include_ids', 'exclude_ids' );
 
 	/**
+	 * Type names that the REST schema check knows. It accepts any value for another name.
+	 */
+	private const JSON_TYPES = array( 'array', 'boolean', 'integer', 'null', 'number', 'object', 'string' );
+
+	/**
 	 * Register a resource that abilities format, so extensions can register fields on it.
 	 *
 	 * Call it inside the `woocommerce_extensible_abilities_resources_init` action. A call after that action is refused.
@@ -148,8 +153,11 @@ class ExtensibleAbilities {
 	 *                                  a UTC offset: the schema check accepts them, and a strict client refuses
 	 *                                  the whole result.
 	 *     @type array    $input_schema Optional. JSON schema of the value that `set_callback` receives. It needs
-	 *                                  a `type`. Core publishes it as declared. A value can be null only where it
-	 *                                  declares null. Required with `set_callback`.
+	 *                                  one `type` name, or an `anyOf` where each branch has one `type` name. A
+	 *                                  list of types is refused at the top level, because some clients refuse it:
+	 *                                  a nullable field uses `[{"type":"string"},{"type":"null"}]` as its `anyOf`.
+	 *                                  Core publishes it as declared. A value can be null only where it declares
+	 *                                  null. Required with `set_callback`.
 	 *     @type callable $set_callback Optional. Receives the object and the value, and changes the object
 	 *                                  in memory, when an ability creates or updates the object. It returns a
 	 *                                  WP_Error to reject the value, and then nothing is saved. A field without
@@ -225,8 +233,8 @@ class ExtensibleAbilities {
 				wc_doing_it_wrong( __METHOD__, 'The "set_callback" argument must be callable, and a field with an "input_schema" needs it.', '11.4.0' );
 				return;
 			}
-			if ( ! is_array( $args['input_schema'] ?? null ) || ! isset( $args['input_schema']['type'] ) ) {
-				wc_doing_it_wrong( __METHOD__, 'The "input_schema" argument must be an array with a "type".', '11.4.0' );
+			if ( ! is_array( $args['input_schema'] ?? null ) || ! self::input_schema_has_type( $args['input_schema'] ) ) {
+				wc_doing_it_wrong( __METHOD__, 'The "input_schema" argument must be an array with one "type" name, or with an "anyOf" where each branch has one "type" name. For a nullable field, use an "anyOf" with a {"type":"null"} branch instead of a list of types.', '11.4.0' );
 				return;
 			}
 		}
@@ -249,6 +257,30 @@ class ExtensibleAbilities {
 		}
 
 		self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] = $args;
+	}
+
+	/**
+	 * Whether a field input schema has one top-level JSON type name, or a non-empty
+	 * `anyOf` list where each branch has one JSON type name. The REST schema check
+	 * needs a known type for every branch that a value can match.
+	 *
+	 * @param array<string, mixed> $schema Field input schema.
+	 * @return bool
+	 */
+	private static function input_schema_has_type( array $schema ): bool {
+		if ( isset( $schema['type'] ) ) {
+			return in_array( $schema['type'], self::JSON_TYPES, true );
+		}
+		$branches = $schema['anyOf'] ?? null;
+		if ( ! is_array( $branches ) || empty( $branches ) || array_values( $branches ) !== $branches ) {
+			return false;
+		}
+		foreach ( $branches as $branch ) {
+			if ( ! is_array( $branch ) || ! in_array( $branch['type'] ?? null, self::JSON_TYPES, true ) ) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
