@@ -3198,4 +3198,77 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( array( 'Premium', 'Basic' ), $product->get_attributes()['edition']->get_options() );
 		$this->assertSame( array( 'edition' => 'Premium' ), $product->get_default_attributes() );
 	}
+
+	/**
+	 * @testdox Only recognised product fields from the column mapping are applied to the imported product.
+	 * @testWith ["post_type"]
+	 *           ["post_author"]
+	 *           ["ID"]
+	 *           ["unknown_prop"]
+	 *
+	 * @param string $key Unrecognised key the first column is mapped to.
+	 */
+	public function test_import_applies_only_recognised_product_fields( string $key ): void {
+		$page_id = self::factory()->post->create(
+			array(
+				'post_type'  => 'page',
+				'post_title' => 'About us',
+			)
+		);
+
+		$file = get_temp_dir() . 'product-import-' . wp_generate_uuid4() . '.csv';
+		file_put_contents( $file, "target,name\n{$page_id},Imported name\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Temporary CSV fixture.
+
+		try {
+			$importer = new WC_Product_CSV_Importer(
+				$file,
+				array(
+					'parse'           => true,
+					'update_existing' => false,
+					'mapping'         => array(
+						'target' => $key,
+						'name'   => 'name',
+					),
+				)
+			);
+			$data     = $importer->import();
+		} finally {
+			wp_delete_file( $file );
+		}
+
+		$this->assertCount( 1, $data['imported'], 'The row should import as its own product' );
+		$this->assertEmpty( $data['failed'] );
+		$this->assertNotContains( $page_id, $data['imported'], 'The imported product should not reuse the page ID' );
+		$this->assertSame( 'About us', get_the_title( $page_id ), 'The page title should be unchanged' );
+		$this->assertSame( 'page', get_post_type( $page_id ), 'The page should keep its post type' );
+	}
+
+	/**
+	 * @testdox get_product_object() only treats an existing product or variation as the variation to update.
+	 */
+	public function test_get_product_object_requires_product_id_for_variation(): void {
+		$page_id  = self::factory()->post->create( array( 'post_type' => 'page' ) );
+		$importer = new class( __DIR__ . '/sample.csv' ) extends WC_Product_CSV_Importer {
+			/**
+			 * Expose the protected method under test.
+			 *
+			 * @param array $data Row data.
+			 * @return WC_Product|WP_Error
+			 */
+			public function product_object_for( array $data ) {
+				return $this->get_product_object( $data );
+			}
+		};
+
+		$result = $importer->product_object_for(
+			array(
+				'type' => ProductType::VARIATION,
+				'id'   => $page_id,
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_csv_importer_invalid_id', $result->get_error_code() );
+		$this->assertSame( 'page', get_post_type( $page_id ), 'The page should keep its post type' );
+	}
 }

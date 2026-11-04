@@ -54,7 +54,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @since 11.3.0
  */
-abstract class ActionableAbility extends \WP_Ability {
+abstract class ActionableAbility extends Ability {
 
 	/**
 	 * Resource that the ability changes, for example `product` or `order`. The fields of this resource are written.
@@ -443,14 +443,33 @@ abstract class ActionableAbility extends \WP_Ability {
 					/* translators: 1: Extension namespace. 2: Field name. */
 					$refusals[] = sprintf( __( 'The extension field "%1$s.%2$s" is read-only. Remove it from the input.', 'woocommerce' ), $namespace, $field );
 				} else {
-					$valid = rest_validate_value_from_schema( $value, $args['input_schema'], 'extensions.' . $namespace . '.' . $field );
+					$param = 'extensions.' . $namespace . '.' . $field;
+					$valid = rest_validate_value_from_schema( $value, $args['input_schema'], $param );
 					if ( is_wp_error( $valid ) ) {
-						$refusals[] = $valid->get_error_message();
+						$refusals[] = ( isset( $args['input_schema']['anyOf'] ) ? self::describe_any_of_refusal( $value, $args['input_schema']['anyOf'], $param ) : null ) ?? $valid->get_error_message();
 					}
 				}
 			}
 		}
 		return $refusals;
+	}
+
+	/**
+	 * Name the types an `anyOf` field takes when the value matches none of them, because the
+	 * WordPress message then names no type. Other refusals keep the WordPress message.
+	 *
+	 * @param mixed                            $value    Value from the input.
+	 * @param array<int, array<string, mixed>> $branches The `anyOf` branches.
+	 * @param string                           $param    Path of the field in the input.
+	 * @return string|null The refusal, or null to keep the WordPress message.
+	 */
+	private static function describe_any_of_refusal( $value, array $branches, string $param ): ?string {
+		$types = array_column( $branches, 'type' );
+		if ( count( array_filter( $types, 'is_string' ) ) !== count( $branches ) || '' !== rest_get_best_type_for_value( $value, $types ) ) {
+			return null;
+		}
+		/* translators: 1: Path of the field in the input. 2: Comma-separated list of JSON types. */
+		return sprintf( __( '%1$s is not of type %2$s.', 'woocommerce' ), $param, implode( ',', array_unique( $types ) ) );
 	}
 
 	/**

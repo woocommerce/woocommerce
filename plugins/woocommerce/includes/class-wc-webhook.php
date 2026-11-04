@@ -37,6 +37,14 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	protected $processed = array();
 
 	/**
+	 * Whether stage_delivery_result() disabled the webhook since the last save. The next save() fires
+	 * woocommerce_webhook_disabled_due_delivery_failures after it writes.
+	 *
+	 * @var bool
+	 */
+	private $disabled_due_delivery_failures = false;
+
+	/**
 	 * Stores webhook data.
 	 *
 	 * @var array
@@ -619,7 +627,9 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * then save().
 	 *
 	 * A success, which is a 2xx, 301 or 302 response code, resets the failure count. A failure adds one to
-	 * the failure count, and disables the webhook after more than 5 consecutive failures.
+	 * the failure count, and disables the webhook after more than 5 consecutive failures. The next save()
+	 * fires woocommerce_webhook_disabled_due_delivery_failures after it writes. log_delivery() runs this
+	 * method through write_through(), so it fires the action right away, as it always did.
 	 *
 	 * @since 11.4.0
 	 * @param int|string $response_code Response code, or the error code of a failed request.
@@ -639,10 +649,47 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		if ( $failures > apply_filters( 'woocommerce_max_webhook_delivery_failures', 5 ) ) {
 			$this->set_status( 'disabled' );
 
-			do_action( 'woocommerce_webhook_disabled_due_delivery_failures', $this->get_id() );
+			$this->disabled_due_delivery_failures = ! $this->writing_through;
+			if ( $this->writing_through ) {
+				$this->fire_disabled_due_delivery_failures();
+			}
 		} else {
 			$this->set_failure_count( ++$failures );
 		}
+	}
+
+	/**
+	 * Save the webhook, then fire woocommerce_webhook_disabled_due_delivery_failures when
+	 * stage_delivery_result() disabled it since the last save and it is still disabled.
+	 *
+	 * @since 11.4.0
+	 * @return int Webhook ID.
+	 */
+	public function save() {
+		$id = parent::save();
+
+		$disabled                             = $this->disabled_due_delivery_failures && 'disabled' === $this->get_status();
+		$this->disabled_due_delivery_failures = false;
+		if ( $disabled ) {
+			$this->fire_disabled_due_delivery_failures();
+		}
+
+		return $id;
+	}
+
+	/**
+	 * Fire the action for a webhook that too many failed deliveries disabled.
+	 *
+	 * @since 11.4.0
+	 */
+	private function fire_disabled_due_delivery_failures(): void {
+		/**
+		 * Fires when a webhook is disabled after too many consecutive failed deliveries.
+		 *
+		 * @param int $webhook_id Webhook ID.
+		 * @since 2.2.0
+		 */
+		do_action( 'woocommerce_webhook_disabled_due_delivery_failures', $this->get_id() );
 	}
 
 	/**

@@ -132,7 +132,7 @@ class ProductDelete extends ActionableAbility {
 	 */
 	protected function load( array $input ) {
 		$this->product_id = 0;
-		$this->force      = wc_string_to_bool( $input['force'] ?? false );
+		$this->force      = $input['force'] ?? false;
 		$this->parent     = null;
 		$this->deleting   = array();
 		$this->deleted    = array();
@@ -240,6 +240,8 @@ class ProductDelete extends ActionableAbility {
 				'numberposts' => -1, // phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_numberposts -- Every variation of one product.
 			)
 		);
+
+		_prime_post_caches( $variation_ids );
 
 		/** @var \WC_Product_Variation[] $variations */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 		$variations = array_map( 'wc_get_product', $variation_ids );
