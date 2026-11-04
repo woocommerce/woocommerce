@@ -89,7 +89,7 @@ for t in ${tests[@]+"${tests[@]}"}; do
 		[[ -n "$classes" ]] || { echo "error: no test class found in '$t'" >&2; usage; }
 		for c in $classes; do filters+=( "(^|\\\\)$c\\b" ); done
 	elif [[ "$t" =~ $identifier ]]; then
-		filters+=( "(^|\\\\)$t\\b" )
+		filters+=( "(^|\\\\)${t//\\/\\\\}\\b" )
 	else
 		filters+=( "$t" )
 	fi
