@@ -215,10 +215,12 @@ final class ImportSession {
 		 * Fires (via Action Scheduler) after a fulfillments import session's TTL plus a small grace
 		 * window to clean up the staged CSV when the wizard never finishes the import.
 		 *
-		 * Listeners receive the session metadata and can bail out early by checking whether
-		 * the matching session transient still exists. The default handler is
-		 * {@see ImportSession::handle_cleanup_hook()}. Action Scheduler fires the hook, so this
-		 * docblock sits on the scheduling call rather than on a do_action().
+		 * The action also fires while the session is still live, when a later write extended
+		 * its TTL; the default handler, {@see ImportSession::handle_cleanup_hook()}, then
+		 * schedules it again. Listeners that act on an abandoned session check
+		 * {@see ImportSession::load()} first, which returns null once the session is gone.
+		 * Action Scheduler fires the hook, so this docblock sits on the scheduling call rather
+		 * than on a do_action().
 		 *
 		 * @since 11.4.0
 		 *
