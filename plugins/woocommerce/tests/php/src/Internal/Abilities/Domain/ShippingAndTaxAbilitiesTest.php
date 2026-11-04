@@ -341,6 +341,32 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should list standard rates first, then each class in the order of the tax settings, not by slug.
+	 */
+	public function test_tax_rates_follow_the_tax_class_order(): void {
+		\WC_Tax::create_tax_class( 'Alpha rate', 'zz-alpha-rate' );
+		$ids = array();
+		foreach ( array( 'zz-alpha-rate', 'reduced-rate', '' ) as $tax_class ) {
+			$ids[ $tax_class ] = \WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country' => 'DE',
+					'tax_rate'         => '7.0000',
+					'tax_rate_class'   => $tax_class,
+				)
+			);
+		}
+
+		try {
+			$result = $this->run_ability( 'woocommerce/tax-rates-query' );
+		} finally {
+			// The class list is cached, and the cache outlives the test's database rollback.
+			\WC_Tax::delete_tax_class_by( 'slug', 'zz-alpha-rate' );
+		}
+
+		$this->assertSame( array( $ids[''], $ids['zz-alpha-rate'], $ids['reduced-rate'] ), array_column( $result['rates'], 'id' ) );
+	}
+
+	/**
 	 * @testdox Should return only the included tax rates, in the order of the tax settings.
 	 */
 	public function test_tax_rates_filter_by_include(): void {

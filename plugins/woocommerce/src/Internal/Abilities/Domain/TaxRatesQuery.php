@@ -139,10 +139,18 @@ class TaxRatesQuery extends AbstractDomainAbility implements AbilityDefinition {
 		}
 		$where = implode( ' AND ', $conditions );
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Each condition is prepared above.
+		// Standard first, then the classes in the order the tax settings list them; rates of a deleted class last.
+		$class_slugs = \WC_Tax::get_tax_class_slugs();
+		$class_order = "WHEN '' THEN 0";
+		foreach ( $class_slugs as $index => $slug ) {
+			$class_order .= $wpdb->prepare( ' WHEN %s THEN %d', $slug, $index + 1 );
+		}
+		$class_order = "CASE tax_rate_class {$class_order} ELSE " . ( count( $class_slugs ) + 1 ) . ' END';
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Each condition and the class order are prepared above.
 		$rows  = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates WHERE {$where} ORDER BY tax_rate_class, tax_rate_order, tax_rate_id LIMIT %d, %d",
+				"SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates WHERE {$where} ORDER BY {$class_order}, tax_rate_order, tax_rate_id LIMIT %d, %d",
 				( $page - 1 ) * $per_page,
 				$per_page
 			)
