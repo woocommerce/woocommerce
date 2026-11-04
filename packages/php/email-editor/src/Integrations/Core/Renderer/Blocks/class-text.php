@@ -75,8 +75,8 @@ class Text extends Abstract_Block_Renderer {
 
 		// Use the font size inherited from a parent block (e.g. a Group) when the block sets none.
 		if ( empty( $block_styles['declarations']['font-size'] ) && is_string( $parsed_block['email_attrs']['font-size'] ?? null ) ) {
-			$inherited_font_size = Styles_Helper::convert_to_px( (string) Styles_Helper::clamp_to_static_px( $parsed_block['email_attrs']['font-size'] ), false );
-			if ( null !== $inherited_font_size && preg_match( '/^\d+(\.\d+)?px$/', $inherited_font_size ) ) {
+			$inherited_font_size = Styles_Helper::get_static_font_size( $parsed_block['email_attrs']['font-size'] );
+			if ( null !== $inherited_font_size ) {
 				$additional_styles['font-size'] = $inherited_font_size;
 			}
 		}

@@ -39,8 +39,7 @@ class Separator extends Abstract_Block_Renderer {
 
 		if ( in_array( 'is-style-dots', $classes, true ) ) {
 			// Match the editor: dots are 1.5× the inherited text size, spaced 2em apart.
-			$font_size = (string) ( $parsed_block['email_attrs']['font-size'] ?? '16px' );
-			$font_size = Styles_Helper::parse_value( (string) Styles_Helper::convert_to_px( (string) Styles_Helper::clamp_to_static_px( $font_size ) ) );
+			$font_size = Styles_Helper::parse_value( Styles_Helper::get_static_font_size( (string) ( $parsed_block['email_attrs']['font-size'] ?? '' ) ) ?? '16px' );
 			$dots_size = (int) round( 1.5 * $font_size );
 			// The cell grows to fit its content, so cap the spacing to fit the column and a phone screen.
 			// The row is 3 dots (counted as 1em each, a safe overestimate) plus 4 spacings.
