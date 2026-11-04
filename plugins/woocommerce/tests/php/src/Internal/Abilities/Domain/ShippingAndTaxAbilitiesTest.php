@@ -260,7 +260,7 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should list tax rates of every class and filter them by country.
+	 * @testdox Should list tax rates of every class and filter them by country and by class.
 	 */
 	public function test_tax_rates_filter_by_country(): void {
 		\WC_Tax::_insert_tax_rate(
@@ -295,6 +295,11 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 		$this->assertSame( array( 'MwSt', 'MwSt reduced' ), array_column( $result['rates'], 'name' ) );
 		$this->assertSame( 'reduced-rate', $result['rates'][1]['class'] );
 		$this->assertSame( array( '10115', '10117' ), $result['rates'][1]['postcodes'] );
+
+		$reduced_only = $this->run_ability( 'woocommerce/tax-rates-query', array( 'class' => 'reduced-rate' ) );
+
+		$this->assertSame( array( $reduced ), array_column( $reduced_only['rates'], 'id' ) );
+		$this->assertSame( 1, $reduced_only['total'] );
 	}
 
 	/**
@@ -305,6 +310,16 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 
 		$this->assertWPError( $this->run_ability( 'woocommerce/shipping-zones-query' ) );
 		$this->assertWPError( $this->run_ability( 'woocommerce/tax-rates-query' ) );
+	}
+
+	/**
+	 * @testdox Should let a shop manager read shipping zones and tax rates.
+	 */
+	public function test_shop_manager_can_read(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
+
+		$this->assertNotWPError( $this->run_ability( 'woocommerce/shipping-zones-query' ) );
+		$this->assertNotWPError( $this->run_ability( 'woocommerce/tax-rates-query' ) );
 	}
 
 	/**
