@@ -273,6 +273,7 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 		// preview
 		if ( typeof config.preview !== 'object' || config.preview === null ) {
 			console.warn( 'Invalid preview: preview must be an object.' );
+			return false;
 		}
 		// preview.setPreviewState
 		if (
@@ -286,10 +287,14 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 
 		if ( config.preview.initialPreviewState !== undefined ) {
 			// preview.initialPreviewState
-			if ( typeof config.preview.initialPreviewState !== 'object' ) {
+			if (
+				typeof config.preview.initialPreviewState !== 'object' ||
+				config.preview.initialPreviewState === null
+			) {
 				console.warn(
 					'Invalid preview: initialPreviewState must be an object.'
 				);
+				return false;
 			}
 			// preview.initialPreviewState.isPreview
 			if (

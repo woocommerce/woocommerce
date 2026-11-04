@@ -252,6 +252,44 @@ describe( 'registerProductCollection', () => {
 		}
 	);
 
+	it.each( [
+		...[ null, 'invalid', 42, true ].map( ( preview ) => ( {
+			preview,
+			warning: 'Invalid preview: preview must be an object.',
+		} ) ),
+		...[ null, 'invalid', 42, true ].map( ( initialPreviewState ) => ( {
+			preview: { initialPreviewState },
+			warning: 'Invalid preview: initialPreviewState must be an object.',
+		} ) ),
+	] )(
+		'rejects invalid preview $preview without interrupting subsequent registration',
+		( { preview, warning } ) => {
+			const variationsBefore = getBlockVariations( BLOCK_NAME ) || [];
+			const config = {
+				name: `${ TEST_NAMESPACE }/invalid-preview`,
+				title: 'Invalid preview',
+				preview,
+			};
+
+			expect( () =>
+				registerCollection(
+					config as unknown as ProductCollectionConfig
+				)
+			).not.toThrow();
+			expect( getBlockVariations( BLOCK_NAME ) || [] ).toEqual(
+				variationsBefore
+			);
+			expect( console ).toHaveWarnedWith( warning );
+			expect( console ).toHaveErroredWith(
+				'Collection could not be registered due to invalid configuration.'
+			);
+
+			const name = `${ TEST_NAMESPACE }/after-invalid-preview`;
+			registerCollection( { name, title: 'Valid collection' } );
+			expect( getRegisteredVariation( name ) ).toMatchObject( { name } );
+		}
+	);
+
 	it( 'keeps experimental registration working with a migration warning', () => {
 		const name = `${ TEST_NAMESPACE }/deprecated`;
 		trackAttemptedCollectionName( { name } );

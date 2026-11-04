@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent invalid custom collection preview settings from stopping other collections from registering.
