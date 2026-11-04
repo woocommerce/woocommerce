@@ -89,6 +89,8 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 		$result            = $this->email_api_controller->get_email_data( $post_data );
 		$this->assertNull( $result['subject'] );
 		$this->assertNull( $result['email_type'] );
+		$this->assertArrayHasKey( 'send_on_unpaid_timeout', $result );
+		$this->assertNull( $result['send_on_unpaid_timeout'] );
 	}
 
 	/**
@@ -107,13 +109,15 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 				array( 'recipient', get_option( 'admin_email' ), 'admin@example.com' ),
 				array( 'cc', null, 'cc@example.com' ),
 				array( 'bcc', null, 'bcc@example.com' ),
+				array( 'send_on_unpaid_timeout', 'yes', 'no' ),
 			)
 		);
 		$mock_email->method( 'supports_cc_bcc' )->willReturn( true );
 		$mock_email->method( 'get_default_subject' )->willReturn( 'Default Subject' );
 		$mock_email->method( 'get_form_fields' )->willReturn(
 			array(
-				'recipient' => array(),
+				'recipient'              => array(),
+				'send_on_unpaid_timeout' => array(),
 			)
 		);
 
@@ -134,6 +138,7 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'admin@example.com', $result['recipient'] );
 		$this->assertEquals( 'cc@example.com', $result['cc'] );
 		$this->assertEquals( 'bcc@example.com', $result['bcc'] );
+		$this->assertFalse( $result['send_on_unpaid_timeout'] );
 	}
 
 	/**
@@ -249,6 +254,7 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'subject', $schema['properties'] );
 		$this->assertArrayHasKey( 'preheader', $schema['properties'] );
 		$this->assertArrayHasKey( 'recipient', $schema['properties'] );
+		$this->assertArrayHasKey( 'send_on_unpaid_timeout', $schema['properties'] );
 	}
 
 	/**
@@ -324,6 +330,101 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 		$post_data = array( 'id' => $this->email_post->ID );
 		$result    = $controller->get_email_data( $post_data );
 		$this->assertNull( $result['recipient'] );
+		$this->assertNull( $result['send_on_unpaid_timeout'] );
+	}
+
+	/**
+	 * @testdox get_email_data() reports the unpaid timeout toggle as enabled when no option is saved.
+	 */
+	public function test_get_email_data_send_on_unpaid_timeout_defaults_to_true(): void {
+		$controller = $this->create_controller_with_email( $this->create_email_with_unpaid_timeout_field() );
+
+		$result = $controller->get_email_data( array( 'id' => $this->email_post->ID ) );
+
+		$this->assertTrue( $result['send_on_unpaid_timeout'] );
+	}
+
+	/**
+	 * @testdox save_email_data() stores the unpaid timeout toggle as yes/no.
+	 */
+	public function test_save_email_data_stores_send_on_unpaid_timeout(): void {
+		$controller = $this->create_controller_with_email( $this->create_email_with_unpaid_timeout_field() );
+
+		$controller->save_email_data(
+			array(
+				'subject'                => 'Subject',
+				'send_on_unpaid_timeout' => false,
+			),
+			$this->email_post
+		);
+		$option = get_option( 'woocommerce_' . $this->email_type . '_settings' );
+		$this->assertSame( 'no', $option['send_on_unpaid_timeout'] );
+
+		$controller->save_email_data(
+			array(
+				'subject'                => 'Subject',
+				'send_on_unpaid_timeout' => true,
+			),
+			$this->email_post
+		);
+		$option = get_option( 'woocommerce_' . $this->email_type . '_settings' );
+		$this->assertSame( 'yes', $option['send_on_unpaid_timeout'] );
+	}
+
+	/**
+	 * @testdox save_email_data() leaves the unpaid timeout toggle untouched for non-boolean values.
+	 */
+	public function test_save_email_data_ignores_non_boolean_send_on_unpaid_timeout(): void {
+		update_option( 'woocommerce_' . $this->email_type . '_settings', array( 'send_on_unpaid_timeout' => 'no' ) );
+		$controller = $this->create_controller_with_email( $this->create_email_with_unpaid_timeout_field() );
+
+		foreach ( array( null, 'yes', 1 ) as $value ) {
+			$controller->save_email_data(
+				array(
+					'subject'                => 'Subject',
+					'send_on_unpaid_timeout' => $value,
+				),
+				$this->email_post
+			);
+			$option = get_option( 'woocommerce_' . $this->email_type . '_settings' );
+			$this->assertSame( 'no', $option['send_on_unpaid_timeout'] );
+		}
+	}
+
+	/**
+	 * @testdox save_email_data() ignores the unpaid timeout toggle when the email has no such field.
+	 */
+	public function test_save_email_data_ignores_send_on_unpaid_timeout_without_field(): void {
+		$controller = $this->create_controller_with_email( new EmailStub() );
+
+		$controller->save_email_data(
+			array(
+				'subject'                => 'Subject',
+				'send_on_unpaid_timeout' => false,
+			),
+			$this->email_post
+		);
+
+		$option = get_option( 'woocommerce_' . $this->email_type . '_settings' );
+		$this->assertArrayNotHasKey( 'send_on_unpaid_timeout', $option );
+	}
+
+	/**
+	 * Create a test email that has the unpaid timeout form field.
+	 *
+	 * @return EmailStub
+	 */
+	private function create_email_with_unpaid_timeout_field(): EmailStub {
+		return new class() extends EmailStub {
+			/**
+			 * Get form fields.
+			 *
+			 * @return array
+			 */
+			public function get_form_fields(): array {
+				return array_merge( parent::get_form_fields(), array( 'send_on_unpaid_timeout' => array( 'default' => '' ) ) );
+			}
+		};
 	}
 
 	/**

@@ -16,7 +16,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
 
-use DomainException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -26,8 +27,7 @@ defined( 'ABSPATH' ) || exit;
  * Immutable: `new CycleStatus( CycleStatus::PENDING )`. The constructor checks the slug
  * format only, so a stored status a since-deactivated extension wrote still loads;
  * whether a status is registered is checked where a cycle status is written
- * ({@see Cycle::create()}, {@see Cycle::set_status()}, the repository's status
- * compare-and-set).
+ * ({@see Cycle::create()} and the repository's status compare-and-set).
  */
 final class CycleStatus {
 
@@ -48,11 +48,13 @@ final class CycleStatus {
 	 * Wrap a status slug.
 	 *
 	 * @param string $value Status slug.
-	 * @throws DomainException If `$value` is not a well-formed status slug.
+	 * @throws InvalidInputException If `$value` is not a well-formed status slug.
 	 */
 	public function __construct( string $value ) {
 		if ( ! self::is_valid( $value ) ) {
-			throw new DomainException(
+			throw new InvalidInputException(
+				ValidationErrorCode::INVALID_VALUE,
+				'status',
 				sprintf( 'CycleStatus: "%s" is not a valid status slug.', $value )
 			);
 		}
@@ -65,15 +67,6 @@ final class CycleStatus {
 	 */
 	public function get_value(): string {
 		return $this->value;
-	}
-
-	/**
-	 * Whether this status is the same as `$other`.
-	 *
-	 * @param CycleStatus $other Status to compare against.
-	 */
-	public function equals( CycleStatus $other ): bool {
-		return $this->value === $other->value;
 	}
 
 	/**
@@ -119,18 +112,5 @@ final class CycleStatus {
 	 */
 	public static function is_valid( string $status ): bool {
 		return StatusRegistry::is_valid_slug( $status );
-	}
-
-	/**
-	 * Whether `$status` is `billed` or `cancelled`.
-	 *
-	 * Interim: moves out of the engine with the renewal flow (only the repository's
-	 * snapshot skip in `hydrate_cycle()` reads this). Unknown and
-	 * extension-registered statuses report false.
-	 *
-	 * @param string $status Status to check.
-	 */
-	public static function is_terminal( string $status ): bool {
-		return in_array( $status, array( self::BILLED, self::CANCELLED ), true );
 	}
 }

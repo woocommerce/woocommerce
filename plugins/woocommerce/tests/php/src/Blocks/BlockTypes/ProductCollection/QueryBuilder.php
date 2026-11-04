@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection\Utils;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductCollectionMock;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 use WC_Helper_Product;
 use WP_Query;
@@ -25,6 +26,51 @@ class QueryBuilder extends \WP_UnitTestCase {
 	 * @var ProductCollectionMock
 	 */
 	private $block_instance;
+
+	/**
+	 * @testdox Should filter only the requested collection within its saved product selection.
+	 * @testWith [0, false]
+	 *           [17, true]
+	 * @param int  $query_id Collection ID.
+	 * @param bool $legacy_filterable Previously saved filterable value.
+	 */
+	public function test_local_filter_products( int $query_id, bool $legacy_filterable ): void {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Restore the original request verbatim after the test.
+		$original_uri = $_SERVER['REQUEST_URI'] ?? null;
+		$products     = array();
+		foreach ( array( '10.25', '15.28', '5' ) as $price ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_regular_price( $price );
+			$product->save();
+			$products[] = $product->get_id();
+		}
+		try {
+			$_SERVER['REQUEST_URI'] = '/?min_price=999&wcp-' . $query_id . '-max_price=10.28&wcp-28-min_price=15';
+			set_query_var( 'min_price', '999' );
+			$block                                 = Utils::get_base_parsed_block();
+			$block['attrs']['queryId']             = $query_id;
+			$block['attrs']['query']['inherit']    = false;
+			$block['attrs']['query']['filterable'] = $legacy_filterable;
+			$block['attrs']['query']['woocommerceHandPickedProducts'] = array_slice( $products, 0, 2 );
+			$query = Utils::initialize_merged_query( $this->block_instance, $block );
+			$this->assertSame( array( $products[0] ), wp_list_pluck( ( new WP_Query( $query ) )->posts, 'ID' ) );
+
+			$block['attrs']['queryId'] = 28;
+			$query                     = Utils::initialize_merged_query( $this->block_instance, $block );
+			$this->assertSame( array( $products[1] ), wp_list_pluck( ( new WP_Query( $query ) )->posts, 'ID' ) );
+
+			$_SERVER['REQUEST_URI'] = '/?min_price=999';
+			$query                  = Utils::initialize_merged_query( $this->block_instance, $block );
+			$this->assertEqualsCanonicalizing( array_slice( $products, 0, 2 ), wp_list_pluck( ( new WP_Query( $query ) )->posts, 'ID' ) );
+		} finally {
+			set_query_var( 'min_price', '' );
+			if ( null === $original_uri ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = $original_uri;
+			}
+		}
+	}
 
 	/**
 	 * Initiate the mock object.
@@ -1457,6 +1503,50 @@ class QueryBuilder extends \WP_UnitTestCase {
 					$query['orderBy']    = 'title';
 					$query['order']      = 'asc';
 					break;
+				case 'decimal-minimum-price':
+					// Pin the two options that decide the branch, so the price range filter
+					// always builds its non-tax-adjusted clause. The transaction rolls them back.
+					update_option( 'woocommerce_calc_taxes', 'no' );
+					update_option( 'woocommerce_tax_display_shop', TaxDisplayMode::EXCLUSIVE );
+
+					$decimal_product     = $fixtures->get_simple_product(
+						array(
+							'name'          => 'Decimal inspector target',
+							'regular_price' => '15.50',
+							'status'        => 'publish',
+							'stock_status'  => ProductStockStatus::IN_STOCK,
+						)
+					);
+					$products[]          = $decimal_product;
+					$query['post__in'][] = $decimal_product->get_id();
+					$query['priceRange'] = array(
+						'min' => 15.28,
+					);
+					$query['orderBy']    = 'title';
+					$query['order']      = 'asc';
+					break;
+				case 'decimal-maximum-price':
+					// Pin the two options that decide the branch, so the price range filter
+					// always builds its non-tax-adjusted clause. The transaction rolls them back.
+					update_option( 'woocommerce_calc_taxes', 'no' );
+					update_option( 'woocommerce_tax_display_shop', TaxDisplayMode::EXCLUSIVE );
+
+					$decimal_product     = $fixtures->get_simple_product(
+						array(
+							'name'          => 'Decimal inspector target',
+							'regular_price' => '10.25',
+							'status'        => 'publish',
+							'stock_status'  => ProductStockStatus::IN_STOCK,
+						)
+					);
+					$products[]          = $decimal_product;
+					$query['post__in'][] = $decimal_product->get_id();
+					$query['priceRange'] = array(
+						'max' => 10.28,
+					);
+					$query['orderBy']    = 'title';
+					$query['order']      = 'asc';
+					break;
 				case 'inclusive-price':
 					$query['priceRange'] = array(
 						'min' => 10,
@@ -1560,19 +1650,21 @@ class QueryBuilder extends \WP_UnitTestCase {
 	 */
 	public function inspector_query_result_provider(): array {
 		return array(
-			'category'         => array( 'category', array( 'Alpha inspector target' ) ),
-			'tag'              => array( 'tag', array( 'Alpha inspector target' ) ),
-			'brand'            => array( 'brand', array( 'Alpha inspector target' ) ),
-			'combined attrs'   => array( 'attributes', array( 'Alpha inspector target' ) ),
-			'keyword search'   => array( 'search', array( 'Alpha inspector target' ) ),
-			'stock'            => array( 'stock', array( 'Alpha inspector target' ) ),
-			'minimum price'    => array( 'minimum-price', array( 'Alpha inspector target', 'Zulu inspector distractor' ) ),
-			'maximum price'    => array( 'maximum-price', array( 'Alpha inspector target', 'Below inspector distractor' ) ),
-			'inclusive price'  => array( 'inclusive-price', array( 'Alpha inspector target' ) ),
-			'created before'   => array( 'created-before', array( 'Alpha inspector target' ) ),
-			'created within'   => array( 'created-within', array( 'Zulu inspector distractor' ) ),
-			'hand picked'      => array( 'hand-picked', array( 'Zulu inspector distractor', 'Alpha inspector target' ) ),
-			'title descending' => array( 'title-descending', array( 'Zulu inspector distractor', 'Alpha inspector target' ) ),
+			'category'              => array( 'category', array( 'Alpha inspector target' ) ),
+			'tag'                   => array( 'tag', array( 'Alpha inspector target' ) ),
+			'brand'                 => array( 'brand', array( 'Alpha inspector target' ) ),
+			'combined attrs'        => array( 'attributes', array( 'Alpha inspector target' ) ),
+			'keyword search'        => array( 'search', array( 'Alpha inspector target' ) ),
+			'stock'                 => array( 'stock', array( 'Alpha inspector target' ) ),
+			'minimum price'         => array( 'minimum-price', array( 'Alpha inspector target', 'Zulu inspector distractor' ) ),
+			'maximum price'         => array( 'maximum-price', array( 'Alpha inspector target', 'Below inspector distractor' ) ),
+			'decimal minimum price' => array( 'decimal-minimum-price', array( 'Decimal inspector target' ) ),
+			'decimal maximum price' => array( 'decimal-maximum-price', array( 'Alpha inspector target', 'Below inspector distractor', 'Decimal inspector target' ) ),
+			'inclusive price'       => array( 'inclusive-price', array( 'Alpha inspector target' ) ),
+			'created before'        => array( 'created-before', array( 'Alpha inspector target' ) ),
+			'created within'        => array( 'created-within', array( 'Zulu inspector distractor' ) ),
+			'hand picked'           => array( 'hand-picked', array( 'Zulu inspector distractor', 'Alpha inspector target' ) ),
+			'title descending'      => array( 'title-descending', array( 'Zulu inspector distractor', 'Alpha inspector target' ) ),
 		);
 	}
 

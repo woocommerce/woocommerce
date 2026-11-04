@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Send the new order push notification before the stock ones queued by the same order, so devices play the new order sound.

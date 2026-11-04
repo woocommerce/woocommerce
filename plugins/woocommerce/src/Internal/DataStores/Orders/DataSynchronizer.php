@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\Admin\Orders\EditLock;
 use Automattic\WooCommerce\Internal\BatchProcessing\{ BatchProcessingController, BatchProcessorInterface };
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
@@ -384,8 +385,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 	private function schedule_background_sync() {
 		$interval = $this->get_background_sync_interval();
 
-		// Calling Action Scheduler directly because WC_Action_Queue doesn't support the unique parameter yet.
-		as_schedule_recurring_action(
+		ActionSchedulerUtil::schedule_recurring(
 			time() + $interval,
 			$interval,
 			self::BACKGROUND_SYNC_EVENT_HOOK,
@@ -589,25 +589,23 @@ $limit_clause",
 			$operator = '<';
 		}
 
-		$sql = $wpdb->prepare(
+		$changed_orders_count_sql = $wpdb->prepare(
 			"
-SELECT(
-	COALESCE(($missing_orders_count_sql), 0)
-	+
-	(SELECT COUNT(1) FROM (
-		SELECT orders.id FROM $orders_table orders
-		JOIN $wpdb->posts posts on posts.ID = orders.id
-		WHERE
-		  posts.post_type IN ($order_post_type_placeholder)
-		  AND orders.date_updated_gmt $operator posts.post_modified_gmt
-	) x)
-) count",
+SELECT $count_clause FROM $orders_table orders
+JOIN $wpdb->posts posts ON posts.ID = orders.id
+WHERE
+  posts.post_type IN ($order_post_type_placeholder)
+  AND orders.date_updated_gmt $operator posts.post_modified_gmt
+$limit_clause",
 			$order_post_types
 		);
 		// phpcs:enable
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$pending_count = (int) $wpdb->get_var( $sql );
+		// MySQL cannot reference the same temporary table twice in one query.
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query prepared above.
+		$pending_count = (int) $wpdb->get_var( $missing_orders_count_sql );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query prepared above.
+		$pending_count += (int) $wpdb->get_var( $changed_orders_count_sql );
 
 		$deleted_from_table = $this->get_current_deletion_record_meta_value();
 
@@ -979,7 +977,7 @@ ORDER BY orders.id ASC
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function maybe_prevent_deletion_of_post( $delete, $post ) {
-		if ( self::PLACEHOLDER_ORDER_POST_TYPE !== $post->post_type && $this->custom_orders_table_is_authoritative() && $this->data_store->order_exists( $post->ID ) ) {
+		if ( $this->custom_orders_table_is_authoritative() && $this->data_store->order_exists( $post->ID ) ) {
 			$delete = false;
 		}
 

@@ -10,6 +10,9 @@ use ReflectionException;
 use stdClass;
 use WC_Unit_Test_Case;
 use WP_Comment;
+use WP_Screen;
+use WPDieException;
+use WPAjaxDieContinueException;
 
 /**
  * Tests for the admin reviews handler.
@@ -396,6 +399,105 @@ class ReviewsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox `load_javascript` enqueues both core comment scripts that drive the review row actions on the reviews screen.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::load_javascript()
+	 *
+	 * @return void
+	 */
+	public function test_load_javascript_enqueues_the_comment_scripts_on_the_reviews_screen(): void {
+		$reviews = wc_get_container()->get( Reviews::class );
+
+		$this->turn_on_comment_hotkeys_for_the_current_user();
+		$this->set_admin_screen( 'product_page_product-reviews' );
+		$previous_scripts = $this->reset_registered_scripts();
+
+		try {
+			$this->assertTrue( $reviews->is_reviews_page(), 'The reviews page should be the current screen.' );
+			$this->assertTrue( wp_script_is( 'admin-comments', 'registered' ), 'The core admin-comments script should be registered on an admin screen.' );
+			$this->assertTrue( wp_script_is( 'jquery-table-hotkeys', 'registered' ), 'The core jquery-table-hotkeys script should be registered on an admin screen.' );
+
+			$reviews->load_javascript();
+
+			$this->assertTrue(
+				wp_script_is( 'admin-comments', 'enqueued' ),
+				'The reviews screen should enqueue the core admin-comments script, which runs the approve, spam and trash row actions without a page reload.'
+			);
+			$this->assertTrue(
+				wp_script_is( 'jquery-table-hotkeys', 'enqueued' ),
+				'The reviews screen should enqueue the core jquery-table-hotkeys script for a user who has comment keyboard shortcuts turned on.'
+			);
+		} finally {
+			$GLOBALS['wp_scripts'] = $previous_scripts; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the registry drops everything the test enqueued.
+		}
+	}
+
+	/**
+	 * @testdox `load_javascript` leaves both core comment scripts alone outside the reviews screen.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::load_javascript()
+	 *
+	 * @return void
+	 */
+	public function test_load_javascript_does_not_enqueue_the_comment_scripts_outside_the_reviews_screen(): void {
+		$reviews = wc_get_container()->get( Reviews::class );
+
+		$this->turn_on_comment_hotkeys_for_the_current_user();
+		$this->set_admin_screen( 'edit-product' );
+		$previous_scripts = $this->reset_registered_scripts();
+
+		try {
+			$this->assertFalse( $reviews->is_reviews_page(), 'The products list should not count as the reviews page.' );
+			$this->assertTrue( wp_script_is( 'admin-comments', 'registered' ), 'The core admin-comments script should be registered on an admin screen.' );
+			$this->assertTrue( wp_script_is( 'jquery-table-hotkeys', 'registered' ), 'The core jquery-table-hotkeys script should be registered on an admin screen.' );
+
+			$reviews->load_javascript();
+
+			$this->assertFalse( wp_script_is( 'admin-comments', 'enqueued' ), 'Only the reviews screen should enqueue the core admin-comments script.' );
+			$this->assertFalse( wp_script_is( 'jquery-table-hotkeys', 'enqueued' ), 'Only the reviews screen should enqueue the core jquery-table-hotkeys script.' );
+		} finally {
+			$GLOBALS['wp_scripts'] = $previous_scripts; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the registry drops everything the test enqueued.
+		}
+	}
+
+	/**
+	 * Turn the core comment keyboard shortcuts on for the current user.
+	 *
+	 * `enqueue_comment_hotkeys_js()` enqueues its script only for a user who has them on.
+	 *
+	 * @return void
+	 */
+	private function turn_on_comment_hotkeys_for_the_current_user(): void {
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		update_user_option( get_current_user_id(), 'comment_shortcuts', 'true' );
+	}
+
+	/**
+	 * Make an admin screen current without running the `current_screen` callbacks.
+	 *
+	 * @param string $hook_name Screen hook name.
+	 * @return void
+	 */
+	private function set_admin_screen( string $hook_name ): void {
+		$GLOBALS['current_screen'] = WP_Screen::get( $hook_name ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- tearDown restores the pre-test screen.
+	}
+
+	/**
+	 * Rebuild the script registry so it reflects the current screen.
+	 *
+	 * WordPress registers the admin-only default scripts once, when the registry is first built, which
+	 * in a test run happens long before a screen is current.
+	 *
+	 * @return mixed The registry to restore.
+	 */
+	private function reset_registered_scripts() {
+		$previous_scripts      = $GLOBALS['wp_scripts'] ?? null;
+		$GLOBALS['wp_scripts'] = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The caller restores the registry.
+
+		return $previous_scripts;
+	}
+
+	/**
 	 * @testdox `get_bulk_action_notice_messages` the appropriate admin notice is displayed after a product review bulk action is processed.
 	 *
 	 * @covers       \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::get_bulk_action_notice_messages()
@@ -710,6 +812,74 @@ test2</p></div>',
 	 */
 	public function test_get_reviews_page_url() : void {
 		$this->assertSame( 'http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&page=product-reviews', Reviews::get_reviews_page_url() );
+	}
+
+	/**
+	 * @testdox `handle_reply_to_review` approves the parent review when replying to an unapproved review.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::handle_reply_to_review()
+	 *
+	 * @return void
+	 */
+	public function test_handle_reply_to_review_approves_unapproved_parent_review(): void {
+		$admin_id = $this->factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+
+		$product_id = $this->factory()->post->create(
+			array(
+				'post_type'   => 'product',
+				'post_status' => 'publish',
+			)
+		);
+
+		$parent_review_id = $this->factory()->comment->create(
+			array(
+				'comment_post_ID'  => $product_id,
+				'comment_type'     => 'review',
+				'comment_approved' => '0',
+			)
+		);
+
+		$nonce = wp_create_nonce( 'replyto-comment' );
+
+		$request = array(
+			'action'                      => 'replyto-comment',
+			'mode'                        => 'detail',
+			'_ajax_nonce-replyto-comment' => $nonce,
+			'comment_post_ID'             => $product_id,
+			'comment_ID'                  => $parent_review_id,
+			'content'                     => 'Thank you for your review!',
+			'comment_type'                => 'comment',
+			'approve_parent'              => 1,
+			'_wp_unfiltered_html_comment' => wp_create_nonce( 'unfiltered-html-comment' ),
+		);
+
+		$_POST    = $request;
+		$_REQUEST = array_merge( $_REQUEST, $request ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		add_filter( 'wp_doing_ajax', '__return_true' );
+
+		$reviews = wc_get_container()->get( Reviews::class );
+
+		try {
+			$reviews->handle_reply_to_review();
+		} catch ( WPAjaxDieContinueException $e ) {
+			unset( $e );
+		} catch ( WPDieException $e ) {
+			unset( $e );
+		} catch ( \Throwable $e ) {
+			// WP_Ajax_Response::send() may fail when headers are already sent in the test environment.
+			unset( $e );
+		}
+
+		remove_filter( 'wp_doing_ajax', '__return_true' );
+
+		$parent = get_comment( $parent_review_id );
+
+		$this->assertSame( '1', $parent->comment_approved );
+
+		wp_set_current_user( 0 );
+		$_POST = array();
 	}
 
 }

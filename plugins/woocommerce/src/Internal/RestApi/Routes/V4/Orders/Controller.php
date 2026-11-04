@@ -332,7 +332,7 @@ class Controller extends AbstractController {
 		try {
 			$order = new WC_Order();
 			$order->set_created_via( ! empty( $request['created_via'] ) ? sanitize_text_field( wp_unslash( $request['created_via'] ) ) : 'rest-api' );
-			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+			$order->set_prices_include_tax( wc_prices_include_tax() );
 
 			$this->update_utils->update_order_from_request( $order, $request );
 			$this->update_additional_fields_for_object( $order, $request );

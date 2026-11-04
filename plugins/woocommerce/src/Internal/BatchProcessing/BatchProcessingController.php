@@ -383,7 +383,7 @@ class BatchProcessingController {
 		}
 
 		if ( ! ActionSchedulerUtil::has_scheduled_action( self::WATCHDOG_ACTION_NAME ) ) {
-			as_schedule_single_action(
+			ActionSchedulerUtil::schedule_single(
 				$time,
 				self::WATCHDOG_ACTION_NAME,
 				array(),

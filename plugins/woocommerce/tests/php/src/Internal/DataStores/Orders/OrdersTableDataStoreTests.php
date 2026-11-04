@@ -2618,9 +2618,11 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	 */
 	public function test_create_without_explicit_prices_include_tax_keeps_default(): void {
 		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$previous_calc_tax = get_option( 'woocommerce_calc_taxes' );
 		$order             = null;
 
 		try {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
 			update_option( 'woocommerce_prices_include_tax', 'yes' );
 			$order = new WC_Order();
 			update_option( 'woocommerce_prices_include_tax', 'no' );
@@ -2644,6 +2646,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 				$order->delete( true );
 			}
 			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+			update_option( 'woocommerce_calc_taxes', $previous_calc_tax );
 		}
 	}
 
@@ -2687,9 +2690,11 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		global $wpdb;
 
 		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$previous_calc_tax = get_option( 'woocommerce_calc_taxes' );
 		$order             = new WC_Order();
 
 		try {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
 			update_option( 'woocommerce_prices_include_tax', 'yes' );
 			$this->switch_data_store( $order, $this->sut );
 			$order->save();
@@ -2716,6 +2721,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		} finally {
 			$order->delete( true );
 			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+			update_option( 'woocommerce_calc_taxes', $previous_calc_tax );
 		}
 	}
 
@@ -3745,6 +3751,176 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox A 'date_query' value on a local date column is converted to UTC once, whatever its format.
+	 * @testWith ["after", "2024-05-01T10:00:00.500Z", ["late"]]
+	 *           ["before", "2024-05-01T10:00:00.500Z", ["early", "middle"]]
+	 *           ["after", "2024-05-01T12:00:00+02", ["late"]]
+	 *           ["before", "2024-05-01T12:00:00+02", ["early", "middle"]]
+	 *           ["after", "2024-05-01T10:00:00Z", ["late"]]
+	 *           ["after", "2024-05-01 15:30:00", ["late"]]
+	 *           ["before", "2024-05-01 15:30:00", ["early", "middle"]]
+	 *
+	 * @param string   $operator        The date query operator, 'after' or 'before'.
+	 * @param string   $date_value      A date equal to 10:00 UTC, in the format a REST API client may send.
+	 * @param string[] $expected_orders Labels of the orders the query should return.
+	 */
+	public function test_local_date_query_converts_date_values_to_utc_once( string $operator, string $date_value, array $expected_orders ): void {
+		$order_ids = array(
+			'early'  => $this->create_order_created_at( '2024-05-01T04:00:00Z' ),
+			// Falls between the correct boundary (10:00 UTC) and 04:30 UTC, where applying the +05:30 site offset twice puts it.
+			'middle' => $this->create_order_created_at( '2024-05-01T07:00:00Z' ),
+			'late'   => $this->create_order_created_at( '2024-05-01T11:00:00Z' ),
+		);
+
+		$query = new OrdersTableQuery(
+			array(
+				'date_query' => array(
+					array(
+						'column'  => 'post_date',
+						$operator => $date_value,
+					),
+				),
+			)
+		);
+
+		foreach ( $order_ids as $label => $order_id ) {
+			$this->assertSame(
+				in_array( $label, $expected_orders, true ),
+				in_array( $order_id, $query->orders, true ),
+				"Unexpected result for the '{$label}' order with '{$operator}' => '{$date_value}'."
+			);
+		}
+	}
+
+	/**
+	 * @testdox A relative 'date_query' value on a local date column is resolved in the site timezone without an extra offset.
+	 */
+	public function test_local_date_query_resolves_relative_values_once(): void {
+		$now       = time();
+		$recent_id = $this->create_order_created_at( $now - HOUR_IN_SECONDS );
+		// Falls between the correct boundary (one day ago) and one moved back by the +05:30 site offset.
+		$boundary_id = $this->create_order_created_at( $now - DAY_IN_SECONDS - ( 3 * HOUR_IN_SECONDS ) );
+		$old_id      = $this->create_order_created_at( $now - ( 3 * DAY_IN_SECONDS ) );
+
+		$query = new OrdersTableQuery(
+			array(
+				'date_query' => array(
+					array(
+						'column' => 'post_date',
+						'after'  => '-1 day',
+					),
+				),
+			)
+		);
+
+		$this->assertContains( $recent_id, $query->orders, 'An order from an hour ago should match "after -1 day".' );
+		$this->assertNotContains( $boundary_id, $query->orders, 'An order from 27 hours ago should not match "after -1 day".' );
+		$this->assertNotContains( $old_id, $query->orders, 'An order from three days ago should not match "after -1 day".' );
+	}
+
+	/**
+	 * @testdox An unparseable 'date_query' value on a local date column keeps its existing behavior.
+	 */
+	public function test_local_date_query_keeps_existing_behavior_for_unparseable_values(): void {
+		$order_id = $this->create_order_created_at( '2024-05-01T11:00:00Z' );
+
+		$query = new OrdersTableQuery(
+			array(
+				'date_query' => array(
+					array(
+						'column' => 'post_date',
+						'after'  => 'not a date',
+					),
+				),
+			)
+		);
+
+		// wc_string_to_datetime() resolves an unparseable value to the Unix epoch, so every order matches.
+		$this->assertContains( $order_id, $query->orders, 'An unparseable "after" value should still resolve to the Unix epoch.' );
+	}
+
+	/**
+	 * @testdox An empty 'date_query' boundary on a local date column is ignored, as WP_Date_Query does.
+	 * @testWith ["after"]
+	 *           ["before"]
+	 *
+	 * @param string $operator The date query operator, 'after' or 'before'.
+	 */
+	public function test_local_date_query_ignores_empty_boundary( string $operator ): void {
+		$past_id   = $this->create_order_created_at( '2024-05-01T11:00:00Z' );
+		$future_id = $this->create_order_created_at( time() + DAY_IN_SECONDS );
+
+		$query = new OrdersTableQuery(
+			array(
+				'date_query' => array(
+					array(
+						'column'  => 'post_date',
+						$operator => '',
+					),
+				),
+			)
+		);
+
+		$this->assertContains( $past_id, $query->orders, "A past order should match an empty '{$operator}' boundary." );
+		$this->assertContains( $future_id, $query->orders, "A future order should match an empty '{$operator}' boundary." );
+	}
+
+	/**
+	 * @testdox A 'date_query' on a local date column with no 'after' or 'before' boundary still matches orders.
+	 */
+	public function test_local_date_query_without_boundary_matches_orders(): void {
+		$order_id = $this->create_order_created_at( '2024-05-01T11:00:00Z' );
+
+		$query = new OrdersTableQuery(
+			array(
+				'date_query' => array(
+					array(
+						'column' => 'post_date',
+						'year'   => 2024,
+					),
+				),
+			)
+		);
+		$this->assertContains( $order_id, $query->orders, 'A year-only query should match an order from that year.' );
+	}
+
+	/**
+	 * @testdox A WC_DateTime 'date_query' value on a local date column keeps its existing behavior.
+	 */
+	public function test_local_date_query_keeps_existing_behavior_for_wc_datetime_values(): void {
+		$earlier_id = $this->create_order_created_at( '2024-05-01T07:00:00Z' );
+		$later_id   = $this->create_order_created_at( '2024-05-01T11:00:00Z' );
+
+		$query = new OrdersTableQuery(
+			array(
+				'date_query' => array(
+					array(
+						'column' => 'post_date',
+						'after'  => new \WC_DateTime( '2024-05-01 10:00:00', new DateTimeZone( 'UTC' ) ),
+					),
+				),
+			)
+		);
+
+		$this->assertNotContains( $earlier_id, $query->orders, 'An order created before 10:00 UTC should not match.' );
+		$this->assertContains( $later_id, $query->orders, 'An order created after 10:00 UTC should match.' );
+	}
+
+	/**
+	 * Create an order in the orders table with the given creation date.
+	 *
+	 * @param string|int $date_created A creation date accepted by WC_Order::set_date_created().
+	 * @return int The order ID.
+	 */
+	private function create_order_created_at( $date_created ): int {
+		$order = new WC_Order();
+		$order->set_date_created( $date_created );
+		$this->sut->create( $order );
+
+		return $order->get_id();
+	}
+
+	/**
 	 * @testDox Hooking into woocommerce_delete_shop_order_transients does not cause data loss.
 	 */
 	public function test_data_retained_when_hooked_in_cache_filter() {
@@ -4572,5 +4748,38 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$this->assertNull( get_comment( $note_id ), 'Order note should be deleted' );
 		$this->assertEmpty( get_comment_meta( $note_id ), 'Commentmeta should be deleted along with the note' );
+	}
+
+	/**
+	 * @testdox An address value too long for its column fails the update before the order row is written, so the order is not left half saved.
+	 */
+	public function test_update_with_address_value_too_long_for_its_column_writes_nothing(): void {
+		global $wpdb;
+		$this->toggle_cot_feature_and_usage( true );
+		$this->disable_cot_sync();
+
+		$order = OrderHelper::create_order();
+		$order->set_total( '50.00' );
+		$order->set_billing_phone( '5551234' );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$order->set_total( '5.00' );
+		$order->set_billing_phone( str_repeat( '1', 101 ) );
+		$error = null;
+		try {
+			$this->sut->update( $order );
+		} catch ( \Exception $e ) {
+			$error = $e;
+		}
+
+		//phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$orders_table    = $this->sut::get_orders_table_name();
+		$addresses_table = $this->sut::get_addresses_table_name();
+		$this->assertSame( '50.00000000', $wpdb->get_var( $wpdb->prepare( "SELECT total_amount FROM {$orders_table} WHERE id = %d", $order_id ) ), 'The new total must not be written when the address row cannot be.' );
+		$this->assertSame( '5551234', $wpdb->get_var( $wpdb->prepare( "SELECT phone FROM {$addresses_table} WHERE order_id = %d AND address_type = 'billing'", $order_id ) ) );
+		//phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$this->assertInstanceOf( \Exception::class, $error, 'The update should throw when a value does not fit its column.' );
+		$this->assertStringContainsString( 'phone', $error->getMessage(), 'The error should name the column that is too long.' );
 	}
 }

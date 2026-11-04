@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Store API: give each checkout request in a batch its own payment data instead of reusing the first one.
