@@ -276,6 +276,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return $this->get_id();
 		}
 
+<<<<<<< HEAD
+=======
+		$persisted             = false;
+		$this->last_save_error = null;
+
+		$deferred_actions = $this->take_deferred_actions();
+		$this->run_deferred_actions( $deferred_actions, false );
+
+>>>>>>> 65e8d600dc (Stop Store API checkout when the order could not be saved (#70626))
 		try {
 			/**
 			 * Trigger action before saving to the DB. Allows you to adjust object props before save.
@@ -293,6 +302,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 			$this->save_items();
 
+			$persisted = true;
+
 			/**
 			 * Trigger action after saving to the DB.
 			 *
@@ -302,6 +313,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
 
 		} catch ( Exception $e ) {
+<<<<<<< HEAD
+=======
+			// A callback on the after-save action throwing doesn't mean the order wasn't saved.
+			if ( ! $persisted ) {
+				$this->last_save_error = $e;
+			}
+
+>>>>>>> 65e8d600dc (Stop Store API checkout when the order could not be saved (#70626))
 			$message_id = $this->get_id() ? $this->get_id() : __( '(no ID)', 'woocommerce' );
 			$this->handle_exception(
 				$e,
@@ -319,6 +338,135 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+<<<<<<< HEAD
+=======
+	 * Get the exception that stopped the last save(). save() logs that exception and does not throw it.
+	 *
+	 * @internal
+	 * @since 11.2.2
+	 * @return Exception|null The exception, or null when the last save() wrote the order.
+	 */
+	public function get_last_save_error(): ?Exception {
+		return $this->last_save_error;
+	}
+
+	/**
+	 * Refuse the stage methods that a stage method calls, from the given saving method to the end of the chain.
+	 * A stage method calls this before it fires a hook or changes the order, so a refusal deeper in the chain
+	 * does not leave a change half done.
+	 *
+	 * @since 11.4.0
+	 * @param string $method First saving method of the chain to check, for example calculate_totals.
+	 * @throws WC_Data_Exception When a class has not adopted one of the stage methods.
+	 */
+	private function refuse_unstaged_chain( string $method ): void {
+		$chain = array_slice( self::STAGED_CHAIN, (int) array_search( $method, array_keys( self::STAGED_CHAIN ), true ), null, true );
+		foreach ( $chain as $saving_method => $stage_method ) {
+			$this->refuse_unstaged_override( $saving_method, $stage_method );
+		}
+	}
+
+	/**
+	 * Leave a callback to the next save(), which runs it before or after the order is written. An entry with
+	 * the same key replaces the earlier one, and a null callback removes it.
+	 *
+	 * @since 11.4.0
+	 * @param string        $key        Name of the entry.
+	 * @param callable|null $callback   Callback to run, or null to remove the entry.
+	 * @param array         $args       Arguments for the callback.
+	 * @param bool          $after_save True to run the callback after the order is written.
+	 */
+	protected function defer_to_save( string $key, ?callable $callback, array $args = array(), bool $after_save = false ): void {
+		if ( null === $callback ) {
+			unset( $this->deferred_actions[ $key ] );
+			return;
+		}
+
+		$this->deferred_actions[ $key ] = array(
+			'callback'   => $callback,
+			'args'       => $args,
+			'after_save' => $after_save,
+		);
+	}
+
+	/**
+	 * Take the deferred callbacks and clear the list, so that each one runs for one save only. When the write
+	 * fails, run_deferred_actions() puts the after-save callbacks back for the next save.
+	 *
+	 * @since 11.4.0
+	 * @return array
+	 */
+	protected function take_deferred_actions(): array {
+		$deferred_actions       = $this->deferred_actions;
+		$this->deferred_actions = array();
+
+		return $deferred_actions;
+	}
+
+	/**
+	 * Run the deferred callbacks that belong before or after the write. When the write fails, the callbacks
+	 * that belong after it stay queued for the next save, so no hook reports a change that was not saved.
+	 * A callback queued under the same key during the failed save replaces the old one.
+	 *
+	 * @since 11.4.0
+	 * @param array $deferred_actions Entries from take_deferred_actions().
+	 * @param bool  $after_save       True to run the entries that belong after the write.
+	 */
+	protected function run_deferred_actions( array $deferred_actions, bool $after_save ): void {
+		if ( $after_save && null !== $this->last_save_error ) {
+			$this->deferred_actions += array_filter(
+				$deferred_actions,
+				static function ( array $entry ): bool {
+					return $entry['after_save'];
+				}
+			);
+			return;
+		}
+
+		foreach ( $deferred_actions as $entry ) {
+			if ( $entry['after_save'] === $after_save ) {
+				call_user_func_array( $entry['callback'], $entry['args'] );
+			}
+		}
+	}
+
+	/**
+	 * Run a write or a hook right away when the stage method runs for its saving method, or leave it to the
+	 * next save() otherwise.
+	 *
+	 * A stage method changes the order in memory only. Route its other side effects through this method. Only a
+	 * hook that lets listeners read or change the order before the change may fire at stage time.
+	 *
+	 * @since 11.4.0
+	 * @param string   $key        Name of the deferred entry.
+	 * @param callable $callback   Callback to run.
+	 * @param array    $args       Arguments for the callback.
+	 * @param bool     $after_save True to run a deferred callback after the order is written.
+	 */
+	protected function write_or_defer( string $key, callable $callback, array $args = array(), bool $after_save = false ): void {
+		if ( $this->writing_through ) {
+			unset( $this->deferred_actions[ $key ] );
+			call_user_func_array( $callback, $args );
+			return;
+		}
+
+		$this->defer_to_save( $key, $callback, $args, $after_save );
+	}
+
+	/**
+	 * Save the order when the stage method runs for its saving method, at the point where the saving method
+	 * always saved. Do nothing otherwise.
+	 *
+	 * @since 11.4.0
+	 */
+	protected function save_if_writing_through(): void {
+		if ( $this->writing_through ) {
+			$this->save();
+		}
+	}
+
+	/**
+>>>>>>> 65e8d600dc (Stop Store API checkout when the order could not be saved (#70626))
 	 * Log an error about this order is exception is encountered.
 	 *
 	 * @param Exception $e Exception object.

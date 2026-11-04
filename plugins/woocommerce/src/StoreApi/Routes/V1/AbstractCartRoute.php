@@ -315,6 +315,8 @@ abstract class AbstractCartRoute extends AbstractRoute {
 			 * @param \WP_REST_Request $request Full details about the request.
 			 */
 			do_action( 'woocommerce_store_api_cart_update_order_from_request', $draft_order, $request );
+
+			$this->forget_draft_order_if_not_saved( $draft_order );
 		}
 	}
 

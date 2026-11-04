@@ -862,6 +862,53 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	}
 
 	/**
+	 * Throws before any order table is written when a value will not fit its column.
+	 *
+	 * Rows saved with $wpdb->insert() or $wpdb->update() (the ones with a `where` clause) are refused by wpdb when a
+	 * value is too long, which would otherwise happen after the order row was already written. The other rows use a
+	 * raw query, where MySQL truncates instead of failing, so they are not checked.
+	 *
+	 * @param array $db_updates Rows to persist, as returned by get_db_rows_for_order().
+	 * @return void
+	 * @throws \Exception When a value is longer than its column allows.
+	 */
+	private function validate_db_row_lengths( array $db_updates ): void {
+		global $wpdb;
+
+		foreach ( $db_updates as $update ) {
+			if ( ! isset( $update['where'] ) ) {
+				continue;
+			}
+
+			foreach ( $update['data'] as $column => $value ) {
+				if ( ! is_string( $value ) || in_array( $update['format'][ $column ] ?? '%s', array( '%d', '%f' ), true ) ) {
+					continue;
+				}
+
+				$column_length = $wpdb->get_col_length( $update['table'], $column );
+				if ( ! is_array( $column_length ) || empty( $column_length['length'] ) ) {
+					continue;
+				}
+
+				// Same measure wpdb uses: bytes for binary and text columns, characters for char and varchar.
+				$value_length = 'byte' === $column_length['type'] ? strlen( $value ) : mb_strlen( $value, 'UTF-8' );
+				if ( $value_length > $column_length['length'] ) {
+					throw new \Exception(
+						esc_html(
+							sprintf(
+								/* translators: 1: database table name, 2: column name. */
+								__( 'Could not persist order to database table "%1$s": the value for "%2$s" is too long.', 'woocommerce' ),
+								$update['table'],
+								$column
+							)
+						)
+					);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Get information about whether permissions are granted yet.
 	 *
 	 * @param \WC_Order $order Order object.
@@ -2265,6 +2312,8 @@ FROM $order_meta_table
 		$only_changes = ! $force_all_fields && 'update' === $context;
 		// Figure out what needs to be updated in the database.
 		$db_updates = $this->get_db_rows_for_order( $order, $context, $only_changes );
+
+		$this->validate_db_row_lengths( $db_updates );
 
 		// Persist changes.
 		foreach ( $db_updates as $update ) {

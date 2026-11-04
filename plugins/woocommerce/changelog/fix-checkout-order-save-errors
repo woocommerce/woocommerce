@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop checkout from continuing to payment when the order could not be saved, and reject phone numbers over 100 characters.
