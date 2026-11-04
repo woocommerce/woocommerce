@@ -1010,6 +1010,30 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @return void
 	 */
 	public function refresh_product_lookup_table( int $product_id ): void {
+		// Custom stores can delegate back here through a different store instance.
+		static $refreshing = array();
+
+		$product_id = absint( $product_id );
+		if ( ! $product_id ) {
+			return;
+		}
+		$refresh_key = get_current_blog_id() . ':' . $product_id;
+
+		if ( empty( $refreshing[ $refresh_key ] ) ) {
+			$product_type = WC_Product_Factory::get_product_type( $product_id );
+			$data_store   = WC_Data_Store::load( is_string( $product_type ) ? 'product-' . $product_type : 'product' );
+
+			if ( ! is_a( $this, $data_store->get_current_class_name() ) && $data_store->has_callable( 'refresh_product_lookup_table' ) ) {
+				$refreshing[ $refresh_key ] = true;
+				try {
+					$data_store->__call( 'refresh_product_lookup_table', array( $product_id ) );
+				} finally {
+					unset( $refreshing[ $refresh_key ] );
+				}
+				return;
+			}
+		}
+
 		$this->update_lookup_table( $product_id, 'wc_product_meta_lookup' );
 	}
 
@@ -1936,7 +1960,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// Sometimes I wonder if it shouldn't be part of update_lookup_table.
 		wp_cache_delete( $product_id_with_stock, 'post_meta' );
 
-		$this->update_lookup_table( $product_id_with_stock, 'wc_product_meta_lookup' );
+		$this->refresh_product_lookup_table( absint( $product_id_with_stock ) );
 
 		/**
 		 * Fire an action for this direct update so it can be detected by other code.
@@ -2000,7 +2024,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		wp_cache_delete( $product_id, 'post_meta' );
 
-		$this->update_lookup_table( $product_id, 'wc_product_meta_lookup' );
+		$this->refresh_product_lookup_table( absint( $product_id ) );
 
 		/**
 		 * Fire an action for this direct update so it can be detected by other code.
