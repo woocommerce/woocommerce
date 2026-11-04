@@ -73,13 +73,13 @@ class WC_Tests_Order_Item_Functions extends WC_Unit_Test_Case {
 		$callback = function () use ( &$received ) {
 			$received = func_get_args();
 		};
-		add_action( 'woocommerce_update_order_item', $callback, 10, 4 );
+		add_action( 'woocommerce_update_order_item', $callback, 10, 3 );
 		wc_update_order_item( $item_id, $args );
 		remove_action( 'woocommerce_update_order_item', $callback, 10 );
 
+		$this->assertCount( 3, $received );
 		$this->assertSame( $item_id, $received[0] );
 		$this->assertInstanceOf( WC_Order_Item_Product::class, $received[1] );
 		$this->assertSame( $order->get_id(), $received[2] );
-		$this->assertSame( $args, $received[3] );
 	}
 }
