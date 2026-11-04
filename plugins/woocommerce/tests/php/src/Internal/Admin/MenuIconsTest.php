@@ -100,12 +100,14 @@ class MenuIconsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'woocommerce/logo', $this->sut->get_icon( 'woocommerce/logo', 'legacy' ) );
 		$this->assertStringContainsString( '<svg', wp_get_icon( 'woocommerce/logo' ) );
 		$this->assertStringContainsString( 'stroke="currentColor"', wp_get_icon( 'woocommerce/megaphone' ) );
+		$this->assertStringContainsString( 'fill: none', wp_get_icon( 'woocommerce/megaphone' ) );
 	}
 
 	/**
 	 * @testdox Should fall back when an icon is not registered.
 	 */
 	public function test_missing_icon_falls_back(): void {
+		$GLOBALS['wp_version'] = '7.2'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Exercise the missing-icon fallback on a supported version.
 		$this->assertSame( 'dashicons-archive', $this->sut->get_icon( 'woocommerce/missing', 'dashicons-archive' ) );
 	}
 
@@ -114,6 +116,7 @@ class MenuIconsTest extends WC_Unit_Test_Case {
 	 */
 	public function test_post_type_menu_icons(): void {
 		$this->require_icon_api();
+		$GLOBALS['wp_version'] = '7.2'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Exercise the supported menu path independently of the host version.
 		$this->sut->handle_admin_menu_registration();
 		$GLOBALS['menu'] = array( // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Set up menu fixtures.
 			55 => array( 'Products', 'edit_products', 'edit.php?post_type=product', 'Products', '', 'menu-posts-product', 'dashicons-archive' ),
