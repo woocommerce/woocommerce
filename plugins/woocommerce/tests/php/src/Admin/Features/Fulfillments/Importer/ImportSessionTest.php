@@ -87,12 +87,13 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	/**
 	 * Run a test with the uploads directory served by a stream wrapper, as on an S3-backed site.
 	 *
-	 * @param callable $test Receives the wrapper path of the uploads directory, e.g. "wcfulfillmentstest://uploads".
+	 * @param callable $test        Receives the wrapper path of the uploads directory, e.g. "wcfulfillmentstest://uploads".
+	 * @param string   $uploads_dir Name of the uploads directory under the wrapper root.
 	 */
-	private function run_with_stream_uploads( callable $test ): void {
+	private function run_with_stream_uploads( callable $test, string $uploads_dir = 'uploads' ): void {
 		$root    = sys_get_temp_dir() . '/wc-fulfillments-stream-' . wp_generate_uuid4();
-		$uploads = self::STREAM_SCHEME . '://uploads';
-		wp_mkdir_p( $root . '/uploads/wc-imports' );
+		$uploads = self::STREAM_SCHEME . '://' . $uploads_dir;
+		wp_mkdir_p( $root . '/' . $uploads_dir . '/wc-imports' );
 		TransientFilesTestStreamWrapper::register( self::STREAM_SCHEME, $root );
 
 		$upload_dir_filter = static function ( $upload_dir ) use ( $uploads ) {
@@ -399,16 +400,16 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	 * @testdox persist() extends the payload TTL even when the payload is unchanged, so it keeps pace with the index pointer.
 	 */
 	public function test_persist_slides_payload_ttl_for_unchanged_payload(): void {
-		$session        = $this->make_session( 48, $this->make_staged_file() );
-		$timeout_option = '_transient_timeout_wc_fulfillment_import_48_' . $session->token();
-		$backdated      = time() + 10 * MINUTE_IN_SECONDS;
-		update_option( $timeout_option, $backdated );
+		$session           = $this->make_session( 48, $this->make_staged_file() );
+		$timeout_option    = '_transient_timeout_wc_fulfillment_import_48_' . $session->token();
+		$shortened_timeout = time() + 10 * MINUTE_IN_SECONDS;
+		update_option( $timeout_option, $shortened_timeout );
 
 		$persist = new \ReflectionMethod( ImportSession::class, 'persist' );
 		$persist->setAccessible( true );
 
 		$this->assertTrue( $persist->invoke( $session ), 'An unchanged payload still counts as stored' );
-		$this->assertGreaterThan( $backdated + 30 * MINUTE_IN_SECONDS, (int) get_option( $timeout_option ), 'The payload TTL must slide on persist() even when the payload is unchanged' );
+		$this->assertGreaterThanOrEqual( time() + HOUR_IN_SECONDS - MINUTE_IN_SECONDS, (int) get_option( $timeout_option ), 'The payload TTL must be a full hour again after persist(), even when the payload is unchanged' );
 	}
 
 	/**
@@ -496,7 +497,26 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 				$this->assertTrue( ImportSession::is_staged_path( $uploads . '/wc-imports/wc-fulfillments-import-gone.csv' ), 'A missing file in wc-imports on a stream wrapper is still a staged path' );
 				$this->assertFalse( ImportSession::is_staged_path( $uploads . '/wc-fulfillments-import-gone.csv' ), 'A file elsewhere in the stream uploads directory is not staged' );
 				$this->assertFalse( ImportSession::is_staged_path( $uploads . '/wc-imports/../wc-fulfillments-import-gone.csv' ), 'A stream path that climbs out of wc-imports is not staged' );
+				$this->assertFalse( ImportSession::is_staged_path( $uploads . '/wc-imports/' ), 'The stream import directory itself is not a staged file' );
 			}
+		);
+	}
+
+	/**
+	 * @testdox is_staged_path() on a stream wrapper does not depend on what wp_normalize_path() cached before the wrapper existed.
+	 */
+	public function test_is_staged_path_ignores_stale_wp_normalize_path_cache_for_stream_wrapper(): void {
+		// Before the wrapper is registered, wp_normalize_path() collapses the "://" and caches that form.
+		wp_normalize_path( self::STREAM_SCHEME . '://stale-uploads/wc-imports' );
+
+		$this->run_with_stream_uploads(
+			function ( string $uploads ) {
+				$staged = $uploads . '/wc-imports/wc-fulfillments-import-' . wp_generate_uuid4() . '.csv';
+				file_put_contents( $staged, "a,b,c\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture write.
+
+				$this->assertTrue( ImportSession::is_staged_path( $staged ), 'A stale wp_normalize_path() cache entry must not break the stream path check' );
+			},
+			'stale-uploads'
 		);
 	}
 

@@ -382,19 +382,24 @@ final class ImportSession {
 	 * outside wc-imports look like one inside it; a missing file is resolved through its
 	 * directory. realpath() returns false for a stream wrapper path (an uploads directory on
 	 * S3 reads "s3://bucket/uploads"), so that path is only normalized, and refused when it
-	 * contains a dot segment because nothing resolves one for a stream.
+	 * contains a dot or empty segment because nothing resolves one for a stream. The
+	 * normalization is done here rather than by wp_normalize_path(), which caches its result
+	 * by the raw string and collapses the "://" of a scheme whose wrapper was not registered
+	 * at the time.
 	 *
 	 * @param string $path Absolute path or stream wrapper URL.
 	 * @return string|null Path with forward slashes, or null when it cannot be resolved.
 	 */
 	private static function canonical_path( string $path ): ?string {
 		if ( wp_is_stream( $path ) ) {
-			$normalized = wp_normalize_path( $path );
-			$segments   = explode( '/', substr( $normalized, strpos( $normalized, '://' ) + 3 ) );
-			if ( in_array( '.', $segments, true ) || in_array( '..', $segments, true ) ) {
+			list( $scheme, $rest ) = explode( '://', $path, 2 );
+
+			$rest     = ltrim( (string) preg_replace( '#/+#', '/', str_replace( '\\', '/', $rest ) ), '/' );
+			$segments = explode( '/', $rest );
+			if ( in_array( '.', $segments, true ) || in_array( '..', $segments, true ) || in_array( '', $segments, true ) ) {
 				return null;
 			}
-			return $normalized;
+			return $scheme . '://' . $rest;
 		}
 
 		$resolved = realpath( $path );
