@@ -482,29 +482,6 @@
 			"pinVersion": "^11.1.1"
 		},
 		{
-			"label": "Testing related dependencies: React 18",
-			"dependencies": [
-				"@jest/test-sequencer",
-				"jest-each"
-			],
-			"packages": [
-				"@woocommerce/block-library",
-				"@woocommerce/storybook"
-			],
-			"pinVersion": "29.5.x"
-		},
-		{
-			"label": "Testing related dependencies: React 17",
-			"dependencies": [
-				"@jest/test-sequencer",
-				"jest-each"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "29.5.x"
-		},
-		{
 			"dependencies": [
 				"ts-loader"
 			],
