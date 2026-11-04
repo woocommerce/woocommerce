@@ -44,7 +44,7 @@ When an ability is added, the contract test fails until it has a snapshot and a 
 
 ## Setup
 
-The suite runs against its own environment, `.wp-env.mcp.json`, which adds the MCP Adapter and creates the `customer` user the permission tests run as:
+The suite runs against its own environment, `.wp-env.mcp.json`, which adds the MCP Adapter, creates the `customer` user the permission tests run as, and accepts mail without sending it (`env/accept-mail.php`), so abilities that send email can succeed:
 
 ```bash
 pnpm env:mcp
