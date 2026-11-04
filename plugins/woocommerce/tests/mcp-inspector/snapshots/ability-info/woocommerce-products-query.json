@@ -34,8 +34,14 @@
 					"simple",
 					"grouped",
 					"external",
-					"variable"
+					"variable",
+					"variation"
 				]
+			},
+			"parent_id": {
+				"type": "integer",
+				"description": "Limit results to the variations of this variable product.",
+				"minimum": 1
 			},
 			"virtual": {
 				"type": "boolean",
@@ -52,6 +58,30 @@
 					"outofstock",
 					"onbackorder"
 				]
+			},
+			"category": {
+				"type": "array",
+				"description": "Only products in any of these product category IDs, including their child categories.",
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				}
+			},
+			"tag": {
+				"type": "array",
+				"description": "Only products with any of these product tag IDs.",
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				}
+			},
+			"brand": {
+				"type": "array",
+				"description": "Only products of any of these brand IDs, including their child brands.",
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				}
 			},
 			"page": {
 				"type": "integer",
@@ -93,13 +123,7 @@
 						},
 						"type": {
 							"type": "string",
-							"description": "Internal product type slug, such as simple, external, grouped, or variable.",
-							"enum": [
-								"simple",
-								"grouped",
-								"external",
-								"variable"
-							]
+							"description": "Internal product type slug, such as simple, external, grouped, variable or variation."
 						},
 						"status": {
 							"type": "string",
@@ -300,6 +324,10 @@
 							"type": "string",
 							"description": "Decimal price as a string, without a currency symbol."
 						},
+						"on_sale": {
+							"type": "boolean",
+							"description": "Whether the sale price applies now, taking the sale dates into account."
+						},
 						"stock_status": {
 							"type": "string",
 							"enum": [
@@ -333,6 +361,192 @@
 						"grouped_products": {
 							"type": "array",
 							"description": "Product IDs included as children of a grouped product.",
+							"items": {
+								"type": "integer"
+							}
+						},
+						"parent_id": {
+							"type": "integer",
+							"description": "ID of the variable product of a variation, or 0."
+						},
+						"attributes": {
+							"type": "array",
+							"description": "Attributes with their options on a product, or the option each attribute picks on a variation. For a global attribute the options are term slugs.",
+							"items": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "integer",
+										"description": "ID of the global attribute, or 0 for an attribute of this product only."
+									},
+									"name": {
+										"type": "string"
+									},
+									"options": {
+										"type": "array",
+										"items": {
+											"type": "string"
+										}
+									},
+									"option": {
+										"type": "string",
+										"description": "The option a variation picks. Omitted when the variation matches any option."
+									},
+									"visible": {
+										"type": "boolean"
+									},
+									"variation": {
+										"type": "boolean",
+										"description": "Whether the variations pick an option of this attribute."
+									}
+								},
+								"required": [
+									"name"
+								],
+								"additionalProperties": false
+							}
+						},
+						"categories": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "integer"
+									},
+									"name": {
+										"type": "string"
+									},
+									"slug": {
+										"type": "string"
+									}
+								},
+								"additionalProperties": false
+							}
+						},
+						"tags": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "integer"
+									},
+									"name": {
+										"type": "string"
+									},
+									"slug": {
+										"type": "string"
+									}
+								},
+								"additionalProperties": false
+							}
+						},
+						"brands": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "integer"
+									},
+									"name": {
+										"type": "string"
+									},
+									"slug": {
+										"type": "string"
+									}
+								},
+								"additionalProperties": false
+							}
+						},
+						"description": {
+							"type": "string"
+						},
+						"short_description": {
+							"type": "string"
+						},
+						"images": {
+							"type": "array",
+							"description": "Featured image first, then the gallery.",
+							"items": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "integer"
+									},
+									"src": {
+										"type": "string",
+										"format": "uri"
+									},
+									"name": {
+										"type": "string"
+									},
+									"alt": {
+										"type": "string"
+									}
+								},
+								"additionalProperties": false
+							}
+						},
+						"weight": {
+							"type": "string",
+							"description": "Decimal string in lbs, or empty when not set."
+						},
+						"dimensions": {
+							"type": "object",
+							"description": "Decimal strings in in, each empty when not set.",
+							"properties": {
+								"length": {
+									"type": "string"
+								},
+								"width": {
+									"type": "string"
+								},
+								"height": {
+									"type": "string"
+								}
+							},
+							"additionalProperties": false
+						},
+						"shipping_required": {
+							"type": "boolean"
+						},
+						"shipping_class": {
+							"type": "string",
+							"description": "Shipping class slug, or empty when the product has none."
+						},
+						"shipping_class_id": {
+							"type": "integer",
+							"description": "Shipping class term ID, or 0 when the product has none."
+						},
+						"tax_status": {
+							"type": "string",
+							"enum": [
+								"taxable",
+								"shipping",
+								"none"
+							]
+						},
+						"tax_class": {
+							"type": "string",
+							"description": "Tax class slug, or empty for the standard rate."
+						},
+						"backorders": {
+							"type": "string",
+							"enum": [
+								"no",
+								"notify",
+								"yes"
+							]
+						},
+						"low_stock_amount": {
+							"type": "integer",
+							"description": "Low stock threshold of the product. Omitted when the store-wide threshold applies."
+						},
+						"variation_ids": {
+							"type": "array",
+							"description": "IDs of the variations of a variable product.",
 							"items": {
 								"type": "integer"
 							}
