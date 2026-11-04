@@ -1561,6 +1561,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 				return $order->payment_complete( '12345' );
 			}
 		);
+		$order->stage_order_note( 'Staged after the failed call.' );
 		$throw = static function () {
 			throw new Exception( 'Payment listener failed.' );
 		};
@@ -1574,6 +1575,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), 'content' );
 		$this->assertContains( 'Payment complete event failed. Payment listener failed.', $notes );
+		$this->assertContains( 'Staged after the failed call.', $notes );
 		$this->assertSame( OrderStatus::COMPLETED, wc_get_order( $order->get_id() )->get_status() );
 	}
 
