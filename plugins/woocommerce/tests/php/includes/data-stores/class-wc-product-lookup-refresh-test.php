@@ -115,8 +115,83 @@ class WC_Product_Lookup_Refresh_Test extends WC_Unit_Test_Case {
 		$this->assertSame( (float) $min_price, (float) $row['min_price'] );
 		$this->assertSame( 30.0, (float) $row['max_price'], 'The type-specific maximum price must survive the refresh.' );
 	}
+
 	/**
-	 * @testdox Should allow a product store to delegate refreshes to the generic CPT store without recursion.
+	 * @testdox Should keep a customized generic product store's lookup data for types with a Core store.
+	 */
+	public function test_custom_generic_store_keeps_lookup_data(): void {
+		$store = new class() extends WC_Product_Data_Store_CPT {
+			/**
+			 * Supply a custom highest price, as an extension replacing the generic store might.
+			 *
+			 * @param int    $id Product ID.
+			 * @param string $table Lookup table name.
+			 * @return array
+			 */
+			protected function get_data_for_lookup_table( $id, $table ) {
+				$data = parent::get_data_for_lookup_table( $id, $table );
+				if ( 'wc_product_meta_lookup' === $table ) {
+					$data['max_price'] = get_post_meta( $id, '_test_max_price', true );
+				}
+				return $data;
+			}
+		};
+		add_filter(
+			'woocommerce_data_stores',
+			function ( $stores ) use ( $store ) {
+				$stores['product'] = $store;
+				return $stores;
+			}
+		);
+		$variation_id = WC_Helper_Product::create_variation_product()->get_children()[0];
+		update_post_meta( $variation_id, '_test_max_price', '30' );
+
+		WC_Data_Store::load( 'product' )->update_product_stock( $variation_id, 4 );
+
+		global $wpdb;
+		$this->assertSame( 30.0, (float) $wpdb->get_var( $wpdb->prepare( "SELECT max_price FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $variation_id ) ) );
+	}
+
+	/**
+	 * @testdox Should not recurse when a product-type store hands its refresh back to the generic store.
+	 */
+	public function test_type_store_calling_generic_refresh(): void {
+		$store = new class() extends WC_Product_Data_Store_CPT {
+			/**
+			 * Number of refreshes received.
+			 *
+			 * @var int
+			 */
+			public static $calls = 0;
+
+			/**
+			 * Hand the refresh back to the generic product store.
+			 *
+			 * @param int $product_id Product ID.
+			 */
+			public function refresh_product_lookup_table( int $product_id ): void {
+				++self::$calls;
+				WC_Data_Store::load( 'product' )->refresh_product_lookup_table( $product_id );
+			}
+		};
+		add_filter(
+			'woocommerce_data_stores',
+			function ( $stores ) use ( $store ) {
+				$stores['product-simple'] = $store;
+				return $stores;
+			}
+		);
+		$product = WC_Helper_Product::create_simple_product();
+
+		WC_Data_Store::load( 'product' )->update_product_sales( $product->get_id(), 2, 'increase' );
+
+		global $wpdb;
+		$this->assertSame( 1, $store::$calls );
+		$this->assertSame( 2, (int) $wpdb->get_var( $wpdb->prepare( "SELECT total_sales FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $product->get_id() ) ) );
+	}
+
+	/**
+	 * @testdox Should still refresh the lookup table when a product store wraps the generic CPT store.
 	 */
 	public function test_delegating_store_refresh(): void {
 		$product = WC_Helper_Product::create_simple_product();

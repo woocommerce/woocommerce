@@ -109,6 +109,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	protected $updated_props = array();
 
+	/**
+	 * Lookup refreshes currently handed off to a product-type store, keyed by blog and product ID.
+	 *
+	 * @var array<string, bool>
+	 */
+	private static $refreshing_lookup_table = array();
+
 
 	/**
 	 * Method to obtain DB lock on SKU to make sure we only
@@ -1005,30 +1012,31 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Refresh the product meta lookup table row for a given product.
 	 *
+	 * When the product type's data store extends this one, the refresh runs there so its lookup data is used.
+	 *
 	 * @since 10.8.0
 	 * @param int $product_id Product ID.
 	 * @return void
 	 */
 	public function refresh_product_lookup_table( int $product_id ): void {
-		// Custom stores can delegate back here through a different store instance.
-		static $refreshing = array();
-
 		$product_id = absint( $product_id );
 		if ( ! $product_id ) {
 			return;
 		}
 		$refresh_key = get_current_blog_id() . ':' . $product_id;
 
-		if ( empty( $refreshing[ $refresh_key ] ) ) {
+		// Custom stores can delegate back here through a different store instance.
+		if ( empty( self::$refreshing_lookup_table[ $refresh_key ] ) ) {
 			$product_type = WC_Product_Factory::get_product_type( $product_id );
 			$data_store   = WC_Data_Store::load( is_string( $product_type ) ? 'product-' . $product_type : 'product' );
 
-			if ( ! is_a( $this, $data_store->get_current_class_name() ) && $data_store->has_callable( 'refresh_product_lookup_table' ) ) {
-				$refreshing[ $refresh_key ] = true;
+			// Only hand off to a more specific store, so a customized generic store keeps its own lookup data.
+			if ( is_subclass_of( $data_store->get_current_class_name(), get_class( $this ) ) ) {
+				self::$refreshing_lookup_table[ $refresh_key ] = true;
 				try {
 					$data_store->__call( 'refresh_product_lookup_table', array( $product_id ) );
 				} finally {
-					unset( $refreshing[ $refresh_key ] );
+					unset( self::$refreshing_lookup_table[ $refresh_key ] );
 				}
 				return;
 			}
@@ -1891,7 +1899,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// Sometimes I wonder if it shouldn't be part of update_lookup_table.
 		wp_cache_delete( $product_id_with_stock, 'post_meta' );
 
-		$this->update_lookup_table( $product_id_with_stock, 'wc_product_meta_lookup' );
+		$this->refresh_product_lookup_table( absint( $product_id_with_stock ) );
 	}
 
 	/**
