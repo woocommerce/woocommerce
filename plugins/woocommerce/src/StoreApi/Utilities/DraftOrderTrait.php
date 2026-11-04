@@ -32,6 +32,20 @@ trait DraftOrderTrait {
 	}
 
 	/**
+	 * Removes the order from the session when it is the draft order and its last save failed.
+	 *
+	 * A failed save can leave the order partly written, and resuming it would reuse that state.
+	 *
+	 * @since 11.2.2
+	 * @param \WC_Order $order Order object.
+	 */
+	protected function forget_draft_order_if_not_saved( \WC_Order $order ): void {
+		if ( null !== $order->get_last_save_error() && (int) $this->get_draft_order_id() === $order->get_id() ) {
+			$this->set_draft_order_id( 0 );
+		}
+	}
+
+	/**
 	 * Uses the draft order ID to return an order object, if valid.
 	 *
 	 * @return \WC_Order|null;

@@ -544,6 +544,7 @@ class Checkout extends AbstractCartRoute {
 				} catch ( \Throwable $save_exception ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 					// Ignore the save exception, the root cause will be bubbled up via re-throwing $exception.
 				}
+				$this->forget_draft_order_if_not_saved( $this->order );
 			}
 			throw $exception;
 		}
@@ -695,6 +696,8 @@ class Checkout extends AbstractCartRoute {
 		// Custom statuses are preserved when no payment is needed; payment gateway statuses take precedence otherwise.
 		$this->order->update_status( 'pending' );
 		// Order save-point: 2.
+		$this->validate_order_was_saved();
+		$order = $this->get_order_or_throw();
 
 		/**
 		 * Fires after the Checkout Block/Store API request has populated and validated the order.
@@ -715,14 +718,18 @@ class Checkout extends AbstractCartRoute {
 		 *
 		 * @param \WC_Order $order Order object.
 		 */
-		do_action( 'woocommerce_store_api_checkout_order_processed', $this->order );
+		do_action( 'woocommerce_store_api_checkout_order_processed', $order );
 
 		/**
 		 * Process the payment and return the results.
 		 */
 		$payment_result = new PaymentResult();
+		$needs_payment  = $order->needs_payment();
 
-		if ( $this->order->needs_payment() ) {
+		// Callbacks on the action above, or on the needs_payment() filters, may have saved the order.
+		$this->validate_order_was_saved();
+
+		if ( $needs_payment ) {
 			$this->process_payment( $request, $payment_result );
 		} else {
 			$this->process_without_payment( $request, $payment_result );
@@ -731,8 +738,8 @@ class Checkout extends AbstractCartRoute {
 		wc_log_order_step(
 			'[Store API #9] Order processed',
 			array(
-				'order_object'           => $this->order,
-				'processed_with_payment' => $this->order->needs_payment() ? 'yes' : 'no',
+				'order_object'           => $order,
+				'processed_with_payment' => $order->needs_payment() ? 'yes' : 'no',
 				'payment_status'         => $payment_result->status,
 			),
 			true
@@ -740,7 +747,7 @@ class Checkout extends AbstractCartRoute {
 
 		return $this->prepare_item_for_response(
 			(object) [
-				'order'          => wc_get_order( $this->order ),
+				'order'          => wc_get_order( $order ),
 				'payment_result' => $payment_result,
 			],
 			$request
@@ -888,6 +895,8 @@ class Checkout extends AbstractCartRoute {
 		// Store order ID to session.
 		$this->set_draft_order_id( $this->order->get_id() );
 		wc_log_order_step( '[Store API #4::create_or_update_draft_order] Set order draft id', array( 'order_object' => $this->order ) );
+
+		$this->validate_order_was_saved();
 	}
 
 	/**

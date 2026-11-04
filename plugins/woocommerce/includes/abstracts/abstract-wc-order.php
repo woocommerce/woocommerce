@@ -37,6 +37,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	use CogsAwareTrait;
 
 	/**
+	 * The exception that stopped the last save(), or null when the last save() wrote the order.
+	 *
+	 * @var Exception|null
+	 */
+	private $last_save_error = null;
+
+	/**
 	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
 	 *
 	 * Notes: cart_tax = cart_tax is the new name for the legacy 'order_tax'
@@ -276,6 +283,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return $this->get_id();
 		}
 
+		$persisted             = false;
+		$this->last_save_error = null;
+
 		try {
 			/**
 			 * Trigger action before saving to the DB. Allows you to adjust object props before save.
@@ -293,6 +303,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 			$this->save_items();
 
+			$persisted = true;
+
 			/**
 			 * Trigger action after saving to the DB.
 			 *
@@ -302,6 +314,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
 
 		} catch ( Exception $e ) {
+			// A callback on the after-save action throwing doesn't mean the order wasn't saved.
+			if ( ! $persisted ) {
+				$this->last_save_error = $e;
+			}
+
 			$message_id = $this->get_id() ? $this->get_id() : __( '(no ID)', 'woocommerce' );
 			$this->handle_exception(
 				$e,
@@ -316,6 +333,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		return $this->get_id();
+	}
+
+	/**
+	 * Get the exception that stopped the last save(). save() logs that exception and does not throw it.
+	 *
+	 * @internal
+	 * @since 11.2.2
+	 * @return Exception|null The exception, or null when the last save() wrote the order.
+	 */
+	public function get_last_save_error(): ?Exception {
+		return $this->last_save_error;
 	}
 
 	/**
