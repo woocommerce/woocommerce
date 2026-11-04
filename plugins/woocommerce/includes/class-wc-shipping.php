@@ -417,6 +417,11 @@ class WC_Shipping {
 	 * @return string
 	 */
 	private function get_package_hash( array $package_to_hash ): string {
+		// The rate taxes depend on the tax address, so a new tax address must not reuse saved rates.
+		if ( wc_tax_enabled() && WC()->customer instanceof WC_Customer ) {
+			$package_to_hash['tax_location'] = WC()->customer->get_taxable_address();
+		}
+
 		/**
 		 * Filters package fields that should not affect the shipping-rate cache hash.
 		 *

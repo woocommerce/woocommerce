@@ -14,6 +14,7 @@ use Automattic\WooCommerce\StoreApi\Utilities\ArrayUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\StoreApi\Utilities\NoticeHandler;
 use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
+use Automattic\WooCommerce\Utilities\ShippingUtil;
 use WP_Error;
 
 /**
@@ -918,11 +919,13 @@ class CartController {
 	/**
 	 * Selects a shipping rate.
 	 *
+	 * The rate must be listed for the package. Other choices are ignored.
+	 *
 	 * @param int|string $package_id ID of the package to choose a rate for.
 	 * @param string     $rate_id ID of the rate being chosen.
 	 */
 	public function select_shipping_rate( $package_id, $rate_id ) {
-		if ( ! is_string( $rate_id ) ) {
+		if ( ! is_string( $rate_id ) || ! ShippingUtil::is_shipping_rate_listed( $package_id, $rate_id ) ) {
 			return;
 		}
 		$cart                        = $this->get_cart_instance();

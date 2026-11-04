@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
+use Automattic\WooCommerce\Utilities\ShippingUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -1125,12 +1126,15 @@ class WC_Checkout {
 		array_walk( $address_fields, array( $this, 'set_customer_address_fields' ), $data );
 		WC()->customer->save();
 
+		// Calculate the rates for the posted address, so the posted choices are checked against them.
+		WC()->cart->calculate_shipping();
+
 		// Update customer shipping and payment method to posted method.
 		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
 		if ( is_array( $data['shipping_method'] ) ) {
 			foreach ( $data['shipping_method'] as $i => $value ) {
-				if ( ! is_string( $value ) ) {
+				if ( ! is_string( $value ) || ! ShippingUtil::is_shipping_rate_listed( $i, $value ) ) {
 					continue;
 				}
 				$chosen_shipping_methods[ $i ] = $value;
@@ -1271,6 +1275,11 @@ class WC_Checkout {
 					throw new Exception( apply_filters( 'woocommerce_registration_error_email_exists', __( 'An account is already registered with your email address. <a href="#" class="showlogin">Please log in.</a>', 'woocommerce' ), $data['billing_email'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				}
 				throw new Exception( $customer_id->get_error_message() ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			}
+
+			// Save the posted choices, because the login loads the session again from the database.
+			if ( is_callable( array( WC()->session, 'save_data' ) ) ) {
+				WC()->session->save_data();
 			}
 
 			wc_set_customer_auth_cookie( $customer_id );
