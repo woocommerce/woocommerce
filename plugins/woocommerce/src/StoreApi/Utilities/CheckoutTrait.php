@@ -60,9 +60,30 @@ trait CheckoutTrait {
 	}
 
 	/**
+	 * Stops the request when the order could not be saved, removing a draft order from the session so a later
+	 * request does not resume it.
+	 *
+	 * @throws RouteException When the order is missing or its last save failed.
+	 */
+	private function validate_order_was_saved(): void {
+		$order = $this->get_order_or_throw();
+		$this->forget_draft_order_if_not_saved( $order );
+
+		if ( null === $order->get_last_save_error() ) {
+			return;
+		}
+
+		throw new RouteException(
+			'woocommerce_rest_checkout_order_not_saved',
+			esc_html__( 'Your order could not be saved. Please try again.', 'woocommerce' ),
+			500
+		);
+	}
+
+	/**
 	 * For orders which do not require payment, just update status.
 	 *
-	 * @throws RouteException If the order is missing.
+	 * @throws RouteException If the order is missing or could not be saved.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @param PaymentResult    $payment_result Payment result object.
@@ -71,6 +92,7 @@ trait CheckoutTrait {
 		$order = $this->get_order_or_throw();
 
 		$order->payment_complete();
+		$this->validate_order_was_saved();
 
 		// Mark the payment as successful.
 		$payment_result->set_status( 'success' );
@@ -255,6 +277,7 @@ trait CheckoutTrait {
 
 		if ( $persist ) {
 			$order->save();
+			$this->validate_order_was_saved();
 		}
 	}
 
