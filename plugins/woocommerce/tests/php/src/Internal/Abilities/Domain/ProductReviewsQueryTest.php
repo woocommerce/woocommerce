@@ -8,6 +8,8 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewsQuery;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 
 /**
  * Tests review queries through the Abilities API.
@@ -230,5 +232,67 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 		$result = $this->sut->execute( array( 'status' => 'spam' ) );
 		$this->assertSame( 0, $result['total'] );
 		$this->assertSame( 0, $result['total_pages'] );
+	}
+
+	/**
+	 * @testdox Should expose review extension schema and WP_Comment fields only while the feature is enabled.
+	 */
+	public function test_extension_fields(): void {
+		$saved = array();
+		foreach ( array( 'resources', 'fields' ) as $name ) {
+			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+			$property->setAccessible( true );
+			$saved[ $name ] = $property->getValue();
+			$property->setValue( null, array() );
+		}
+		try {
+			update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
+			$product  = \WC_Helper_Product::create_simple_product()->get_id();
+			$ids      = array( $this->review( $product, 1 ), $this->review( $product, 5 ) );
+			$input    = array( 'include' => $ids );
+			$baseline = ProductReviewsQuery::execute( $input );
+			$schema   = ProductReviewsQuery::get_registration_args()['output_schema'];
+			update_option( 'woocommerce_feature_extensible_abilities_enabled', 'yes' );
+			$this->assertSame( $baseline, ProductReviewsQuery::execute( $input ) );
+			$this->assertSame( $schema, ProductReviewsQuery::get_registration_args()['output_schema'] );
+			add_action( 'woocommerce_extensible_abilities_resources_init', array( AbilitiesLoader::class, 'register_core_resources' ), 0 );
+			do_action( 'woocommerce_extensible_abilities_resources_init' );
+			add_action(
+				'woocommerce_extensible_abilities_init',
+				static function () {
+					ExtensibleAbilities::register_field(
+						array(
+							'resource'      => 'product_review',
+							'namespace'     => 'test-ext',
+							'field'         => 'review_id',
+							'output_schema' => array( 'type' => 'integer' ),
+							'get_callback'  => static function ( \WP_Comment $comment ) {
+								return (int) $comment->comment_ID;
+							},
+						)
+					);
+				}
+			);
+			do_action( 'woocommerce_extensible_abilities_init' );
+			$ability = new \WP_Ability( ProductReviewsQuery::get_name(), ProductReviewsQuery::get_registration_args() );
+			$result  = $ability->execute( $input );
+			$this->assertIsArray( $result );
+			$this->assertCount( 2, $result['reviews'] );
+			foreach ( $result['reviews'] as $review ) {
+				$this->assertSame( $review['id'], $review['extensions']['test-ext']['review_id'] );
+				$this->assertArrayNotHasKey( 'reviewer', $review );
+				$this->assertArrayNotHasKey( 'reviewer_email', $review );
+			}
+			$this->assertSame( 'integer', $ability->get_output_schema()['properties']['reviews']['items']['properties']['extensions']['properties']['test-ext']['properties']['review_id']['type'] );
+			update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
+			$this->assertSame( $baseline, ProductReviewsQuery::execute( $input ) );
+			$this->assertSame( $schema, ProductReviewsQuery::get_registration_args()['output_schema'] );
+		} finally {
+			foreach ( $saved as $name => $value ) {
+				$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+				$property->setAccessible( true );
+				$property->setValue( null, $value );
+			}
+		}
 	}
 }

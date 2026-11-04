@@ -13,6 +13,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -40,12 +41,15 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 	 * @return array
 	 */
 	public static function get_registration_args(): array {
+		$output_schema                                   = self::get_output_schema();
+		$output_schema['properties']['reviews']['items'] = ExtensibleAbilities::add_fields_schema( $output_schema['properties']['reviews']['items'], 'product_review' );
+
 		return array(
 			'label'               => __( 'Query product reviews', 'woocommerce' ),
 			'description'         => __( 'Read product reviews, ratings and moderation status. Search matches review text only, never reviewer identity. Summary and per-product ranking cover all reviews in the requested product/status scope, ignoring search, rating range and include. Unrated reviews have rating zero and do not affect averages. Ranking is worst first; above 200 products it keeps the 100 worst and 100 best rated. Text searches omit the ranking. Requested products without reviews and unknown product IDs are reported separately. Reviewer identity is withheld.', 'woocommerce' ),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
-			'output_schema'       => self::get_output_schema(),
+			'output_schema'       => $output_schema,
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_query_reviews' ),
 			'meta'                => array(
@@ -292,7 +296,7 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 			if ( 'all' !== $status ) {
 				unset( $review['status'] );
 			}
-			$reviews[] = $review;
+			$reviews[] = ExtensibleAbilities::add_fields_to_object( $review, 'product_review', $comment );
 		}
 
 		$grouped = self::fetch(
