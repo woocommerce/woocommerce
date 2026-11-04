@@ -253,8 +253,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	public function read_variation_attributes( &$product ) {
 		global $wpdb;
 
-		$product_id  = $product->get_id();
-		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . 'product_variation_attributes_' . $product_id;
+		$product_id = $product->get_id();
+		// The v2 key skips lists cached before a variation with no attribute row counted as "any".
+		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . 'product_variation_attributes_v2_' . $product_id;
 		$cached_data = wp_cache_get( $cache_key, 'products' );
 
 		if ( false !== $cached_data ) {
