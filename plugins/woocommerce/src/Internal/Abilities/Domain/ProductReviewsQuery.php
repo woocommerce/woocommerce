@@ -251,7 +251,7 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 		$status      = $input['status'] ?? 'approved';
 		$product_ids = array_values( array_unique( $input['product_ids'] ?? array() ) );
 		if ( ( $input['min_rating'] ?? 1 ) > ( $input['max_rating'] ?? 5 ) ) {
-			return new \WP_Error( 'woocommerce_ability_product_review_invalid_rating_range', __( 'min_rating must not exceed max_rating.', 'woocommerce' ) );
+			return new \WP_Error( 'woocommerce_ability_product_review_invalid_rating_range', __( 'min_rating must not exceed max_rating.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$scope = array(

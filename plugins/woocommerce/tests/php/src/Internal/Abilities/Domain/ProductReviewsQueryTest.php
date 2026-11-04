@@ -175,6 +175,7 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 		);
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_ability_product_review_invalid_rating_range', $result->get_error_code() );
+		$this->assertSame( 400, rest_convert_error_to_response( $result )->get_status() );
 		foreach ( array( 'customer', 'subscriber' ) as $role ) {
 			wp_set_current_user( self::factory()->user->create( array( 'role' => $role ) ) );
 			$this->assertWPError( $this->sut->execute() );
