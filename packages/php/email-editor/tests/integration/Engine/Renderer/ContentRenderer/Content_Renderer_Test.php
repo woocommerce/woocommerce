@@ -914,6 +914,25 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test a link color set on the Site Title itself shows, also inside a Group that has a link color.
+	 */
+	public function testItUsesTheSiteTitleOwnLinkColor(): void {
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+		$email_post        = $this->create_email_post( '<!-- wp:group {"style":{"elements":{"link":{"color":{"text":"#123456"}}}}} --><div class="wp-block-group has-link-color"><!-- wp:site-title {"isLink":true,"style":{"elements":{"link":{"color":{"text":"#ab1234"}}}}} /--></div><!-- /wp:group -->' );
+
+		try {
+			$rendered = $this->renderer->render( $email_post, $template );
+		} finally {
+			\WP_Style_Engine_CSS_Rules_Store::remove_all_stores();
+		}
+
+		// The Site Title is the only link in this email.
+		$this->assertStringContainsString( 'color: #ab1234', (string) $this->getStylesValueForTag( $rendered, 'a' ) );
+	}
+
+	/**
 	 * Test a link color set on a block does not reach the buttons inside it.
 	 */
 	public function testItKeepsBlockLinkColorsOffButtons(): void {
