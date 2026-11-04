@@ -31,7 +31,7 @@ class Ability extends \WP_Ability {
 	 * @param mixed $input Optional. The raw input provided for the ability. Default `null`.
 	 * @return mixed The converted input, the input unchanged when it cannot be converted, or a WP_Error from the parent.
 	 */
-	public function normalize_input( $input = null ) {
+	final public function normalize_input( $input = null ) {
 		$input = parent::normalize_input( $input );
 		if ( null === $input || is_wp_error( $input ) ) {
 			return $input;
