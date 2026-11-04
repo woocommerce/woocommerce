@@ -608,15 +608,6 @@ class WC_Query {
 	 * @param WP_Query $q Query instance.
 	 */
 	public function product_query( $q ) {
-		// Prime caches to reduce future queries.
-		wp_prime_option_caches(
-			array(
-				'woocommerce_default_catalog_orderby',
-				'woocommerce_catalog_columns',
-				'woocommerce_catalog_rows',
-			)
-		);
-
 		if ( ! is_feed() ) {
 			$ordering = $this->get_catalog_ordering_args();
 			$q->set( 'orderby', $ordering['orderby'] );

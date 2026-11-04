@@ -437,10 +437,10 @@ function wc_get_default_products_per_row() {
 
 	if ( $min_columns && $columns < $min_columns ) {
 		$columns = $min_columns;
-		update_option( 'woocommerce_catalog_columns', $columns );
+		update_option( 'woocommerce_catalog_columns', $columns, true );
 	} elseif ( $max_columns && $columns > $max_columns ) {
 		$columns = $max_columns;
-		update_option( 'woocommerce_catalog_columns', $columns );
+		update_option( 'woocommerce_catalog_columns', $columns, true );
 	}
 
 	if ( has_filter( 'loop_shop_columns' ) ) { // Legacy filter handling.
@@ -466,10 +466,10 @@ function wc_get_default_product_rows_per_page() {
 
 	if ( $min_rows && $rows < $min_rows ) {
 		$rows = $min_rows;
-		update_option( 'woocommerce_catalog_rows', $rows );
+		update_option( 'woocommerce_catalog_rows', $rows, true );
 	} elseif ( $max_rows && $rows > $max_rows ) {
 		$rows = $max_rows;
-		update_option( 'woocommerce_catalog_rows', $rows );
+		update_option( 'woocommerce_catalog_rows', $rows, true );
 	}
 
 	return $rows;
@@ -485,11 +485,11 @@ function wc_reset_product_grid_settings() {
 	$product_grid = wc_get_theme_support( 'product_grid' );
 
 	if ( ! empty( $product_grid['default_rows'] ) ) {
-		update_option( 'woocommerce_catalog_rows', absint( $product_grid['default_rows'] ) );
+		update_option( 'woocommerce_catalog_rows', absint( $product_grid['default_rows'] ), true );
 	}
 
 	if ( ! empty( $product_grid['default_columns'] ) ) {
-		update_option( 'woocommerce_catalog_columns', absint( $product_grid['default_columns'] ) );
+		update_option( 'woocommerce_catalog_columns', absint( $product_grid['default_columns'] ), true );
 	}
 
 	wp_cache_flush(); // Flush any caches which could impact settings or templates.
