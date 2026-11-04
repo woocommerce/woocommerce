@@ -115,9 +115,13 @@ final class UcpIdempotencyClaim {
 		}
 
 		// Past retention the record no longer answers for its key, whatever it was used for, so
-		// it is dropped and the key is free again. The sweep that would have dropped it runs daily.
+		// this request takes the row over. The sweep that would have dropped it runs daily.
 		if ( UcpIdempotencyStore::has_expired( $existing ) ) {
-			return self::claim_again( $key, $fingerprint, $capability );
+			if ( UcpIdempotencyStore::try_reclaim_expired( $key, $fingerprint ) ) {
+				return new self( $key );
+			}
+
+			return self::in_flight( $capability );
 		}
 
 		if ( (string) $existing['request_fingerprint'] !== $fingerprint ) {

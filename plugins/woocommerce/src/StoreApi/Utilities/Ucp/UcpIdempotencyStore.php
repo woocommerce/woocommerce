@@ -129,6 +129,38 @@ class UcpIdempotencyStore {
 	}
 
 	/**
+	 * Reclaim a completed record past retention for a new request.
+	 *
+	 * The row is reset in place rather than deleted and re-inserted, so the `UPDATE` is the
+	 * test as in `try_take_over_stale()`: the `completed_at` predicate matches only the first
+	 * of several competing retries. The stored body is cleared with it.
+	 *
+	 * @param string $key Idempotency key.
+	 * @param string $fingerprint Fingerprint of the request now claiming the key.
+	 * @return bool True when this caller now owns the claim.
+	 */
+	public static function try_reclaim_expired( string $key, string $fingerprint ): bool {
+		global $wpdb;
+
+		$taken = self::write(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->prefix}wc_ucp_idempotency_keys
+					SET request_fingerprint = %s, state = %s, created_at = %s,
+						response_status = NULL, response_body = NULL, completed_at = NULL
+					WHERE idempotency_key = %s AND state = %s AND completed_at < %s",
+				$fingerprint,
+				self::STATE_IN_PROGRESS,
+				gmdate( 'Y-m-d H:i:s' ),
+				$key,
+				self::STATE_COMPLETED,
+				gmdate( 'Y-m-d H:i:s', time() - self::retention_seconds() )
+			)
+		);
+
+		return $taken && 1 === (int) $wpdb->rows_affected;
+	}
+
+	/**
 	 * Read a record back.
 	 *
 	 * @param string $key Idempotency key.
