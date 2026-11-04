@@ -275,7 +275,7 @@ So:
 
 ### Make process_payment() safe to repeat
 
-When an order is **Pending payment** or **Failed** and the cart has not changed, WooCommerce calls `process_payment()` for the same order each time the shopper submits checkout. A custom status added with the `woocommerce_valid_order_statuses_for_payment` filter gets the same treatment on the block checkout only. The classic checkout creates a new order instead, and that order does not carry the transaction ID saved on the earlier one. To keep retries on one order in both checkouts, leave the order **Pending payment** while you wait for the provider.
+Within the shopper's checkout session, when an order is **Pending payment** or **Failed** and the cart has not changed, WooCommerce calls `process_payment()` for the same order each time the shopper submits checkout. A custom status added with the `woocommerce_valid_order_statuses_for_payment` filter gets the same treatment on the block checkout only. The classic checkout creates a new order instead, and that order does not carry the transaction ID saved on the earlier one. To keep retries on one order in both checkouts, leave the order **Pending payment** while you wait for the provider.
 
 If an earlier request reached the provider but its response never came back, a new charge request can take a second payment. Use the provider's idempotency support, such as an idempotency key or one payment object reused for the order, so that a repeated request returns the first result instead of creating a new charge.
 
