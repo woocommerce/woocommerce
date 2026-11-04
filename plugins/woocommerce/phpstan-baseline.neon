@@ -13045,12 +13045,6 @@ parameters:
 			path: includes/class-wc-post-data.php
 
 		-
-			message: '#^Access to an undefined property object\:\:\$taxonomy\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/class-wc-post-data.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:delete_by_order_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -13084,12 +13078,6 @@ parameters:
 			message: '#^Cannot access property \$slug on WP_Term\|false\.$#'
 			identifier: property.nonObject
 			count: 3
-			path: includes/class-wc-post-data.php
-
-		-
-			message: '#^Cannot access property \$taxonomy on WP_Term\|false\.$#'
-			identifier: property.nonObject
-			count: 1
 			path: includes/class-wc-post-data.php
 
 		-
@@ -28171,12 +28159,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-buttons-controller.php
 
 		-
-			message: '#^Access to an undefined property WooCommerce\:\:\$checkout\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-standard-controller.php
-
-		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_instance_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -28184,24 +28166,6 @@ parameters:
 
 		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_method_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-standard-controller.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_product\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-standard-controller.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_product_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-standard-controller.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_variation_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-standard-controller.php
@@ -34124,7 +34088,6 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: includes/wc-order-functions.php
-
 
 		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:add_metadata\(\)\.$#'
@@ -67154,12 +67117,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
-			message: '#^Cannot access offset string on 0\|0\.0\|''''\|''0''\|array\<string, array\|string\>\|false\|null\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
 			message: '#^Expression on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.expr
 			count: 2
@@ -67204,12 +67161,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Checkout\:\:get_request_payment_data\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Checkout\:\:get_request_payment_data\(\) should return array but returns array\<string, array\|string\>\|float\|int\|string\|false\|null\.$#'
-			identifier: return.type
 			count: 1
 			path: src/StoreApi/Routes/V1/Checkout.php
 
@@ -67412,12 +67363,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 
 		-
-			message: '#^Cannot access offset string on 0\|0\.0\|''''\|''0''\|array\<string, array\|string\>\|false\|null\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
 			message: '#^Instanceof between Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult and Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult will always evaluate to true\.$#'
 			identifier: instanceof.alwaysTrue
 			count: 1
@@ -67444,12 +67389,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:get_request_payment_data\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:get_request_payment_data\(\) should return array but returns array\<string, array\|string\>\|float\|int\|string\|false\|null\.$#'
-			identifier: return.type
 			count: 1
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 

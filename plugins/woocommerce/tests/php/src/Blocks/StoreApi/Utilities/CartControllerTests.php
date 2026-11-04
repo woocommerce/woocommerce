@@ -81,6 +81,27 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test set_cart_item_quantity stores the normalized quantity that was validated, not the raw value.
+	 */
+	public function test_set_cart_item_quantity_stores_normalized_quantity() {
+		$class    = new CartController();
+		$fixtures = new FixtureData();
+
+		$product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Test Product 1',
+				'regular_price' => 10,
+			)
+		);
+
+		$product_key = wc()->cart->add_to_cart( $product->get_id(), 1 );
+		$class->set_cart_item_quantity( $product_key, '3abc' );
+
+		$this->assertSame( 3, wc()->cart->get_cart_item( $product_key )['quantity'] );
+		wc()->cart->empty_cart();
+	}
+
+	/**
 	 * Test cart error code is getting exposed.
 	 */
 	public function test_get_cart_errors() {

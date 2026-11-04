@@ -365,12 +365,19 @@ class WC_Install {
 			// Run again to cancel all pattern fetch jobs now that scheduling is disabled.
 			'wc_update_1040_cleanup_legacy_ptk_patterns_fetching',
 		),
+		'11.2.2'   => array(
+			'wc_update_1122_remove_objects_from_default_attributes',
+		),
 		'11.3.0'   => array(
 			'wc_update_1130_set_legacy_variation_price_hash_option',
 			'wc_update_1130_delete_unpublished_variation_lookup_rows',
 			'wc_update_1130_split_tax_lookup_taxable_amount',
 			'wc_update_1130_delete_stock_notification_sync_notice_option',
 			'wc_update_1130_backfill_order_stats_payment_method',
+		),
+		'11.3.0-1' => array(
+			// Run again for stores whose database was already at 11.3.0 or later, as they skip the 11.2.2 key.
+			'wc_update_1122_remove_objects_from_default_attributes',
 		),
 	);
 
