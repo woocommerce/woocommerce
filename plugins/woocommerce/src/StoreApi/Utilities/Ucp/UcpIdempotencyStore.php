@@ -285,7 +285,7 @@ class UcpIdempotencyStore {
 			$written = self::write(
 				$wpdb->prepare(
 					"DELETE FROM {$wpdb->prefix}wc_ucp_idempotency_keys
-						WHERE ( state = %s AND created_at < %s )
+						WHERE ( state = %s AND completed_at < %s )
 							OR ( state = %s AND created_at < %s )
 						ORDER BY created_at
 						LIMIT %d",

@@ -121,7 +121,9 @@ final class UcpIdempotencyClaim {
 				return new self( $key );
 			}
 
-			return self::in_flight( $capability );
+			// Zero rows affected is either a competing retry that won, or the sweep deleting
+			// the row first. Claiming once more tells them apart.
+			return self::claim_again( $key, $fingerprint, $capability );
 		}
 
 		if ( (string) $existing['request_fingerprint'] !== $fingerprint ) {
@@ -141,14 +143,15 @@ final class UcpIdempotencyClaim {
 				return new self( $key );
 			}
 
-			return self::in_flight( $capability );
+			// Same race as above: the sweep may have removed the orphan between the read and the update.
+			return self::claim_again( $key, $fingerprint, $capability );
 		}
 
 		return self::replay( $existing );
 	}
 
 	/**
-	 * Claim a key that was just found free, once; a second loss means another retry won it.
+	 * Claim a key that was just found free, once; a loss here means another retry holds it.
 	 *
 	 * @param string $key Idempotency key.
 	 * @param string $fingerprint Request fingerprint.

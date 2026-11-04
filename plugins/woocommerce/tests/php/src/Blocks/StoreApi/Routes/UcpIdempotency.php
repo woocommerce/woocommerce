@@ -368,16 +368,23 @@ class UcpIdempotency extends ControllerTestCase {
 
 		$stale = gmdate( 'Y-m-d H:i:s', time() - ( 2 * DAY_IN_SECONDS ) );
 
-		foreach ( array( $orphaned, $finished ) as $key ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Ageing a row the test just created.
-			$wpdb->query(
-				$wpdb->prepare(
-					"UPDATE {$wpdb->prefix}wc_ucp_idempotency_keys SET created_at = %s WHERE idempotency_key = %s",
-					$stale,
-					$key
-				)
-			);
-		}
+		// An orphan ages by its claim, a finished record by its completion.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Ageing a row the test just created.
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->prefix}wc_ucp_idempotency_keys SET created_at = %s WHERE idempotency_key = %s",
+				$stale,
+				$orphaned
+			)
+		);
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Same.
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->prefix}wc_ucp_idempotency_keys SET completed_at = %s WHERE idempotency_key = %s",
+				$stale,
+				$finished
+			)
+		);
 
 		UcpIdempotencyStore::cleanup();
 
@@ -598,7 +605,7 @@ class UcpIdempotency extends ControllerTestCase {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Ageing a row the test just created.
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE {$wpdb->prefix}wc_ucp_idempotency_keys SET created_at = %s WHERE idempotency_key = %s",
+				"UPDATE {$wpdb->prefix}wc_ucp_idempotency_keys SET completed_at = %s WHERE idempotency_key = %s",
 				gmdate( 'Y-m-d H:i:s', time() - 30 ),
 				$finished
 			)
