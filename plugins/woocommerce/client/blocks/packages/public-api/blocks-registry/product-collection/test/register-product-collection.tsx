@@ -13,6 +13,7 @@ import { createRegistry, RegistryProvider, select } from '@wordpress/data';
 import { applyFilters, removeFilter } from '@wordpress/hooks';
 import {
 	__experimentalRegisterProductCollection,
+	registerProductCollection,
 	type ProductCollectionConfig,
 } from '@woocommerce/blocks-registry';
 import {
@@ -48,7 +49,7 @@ const trackAttemptedCollectionName = ( config: unknown ) => {
 
 const registerCollection = ( config: ProductCollectionConfig ) => {
 	trackAttemptedCollectionName( config );
-	__experimentalRegisterProductCollection( config );
+	registerProductCollection( config );
 };
 
 const getRegisteredVariation = ( name: string ) => {
@@ -135,7 +136,7 @@ const renderFilteredState = ( {
 	);
 };
 
-describe( '__experimentalRegisterProductCollection', () => {
+describe( 'registerProductCollection', () => {
 	const originalWpDescriptor = Object.getOwnPropertyDescriptor(
 		window,
 		'wp'
@@ -207,7 +208,7 @@ describe( '__experimentalRegisterProductCollection', () => {
 		);
 		trackAttemptedCollectionName( config );
 
-		__experimentalRegisterProductCollection(
+		registerProductCollection(
 			config as unknown as ProductCollectionConfig
 		);
 
@@ -218,6 +219,29 @@ describe( '__experimentalRegisterProductCollection', () => {
 		).toEqual( variationNamesBefore );
 		expect( variationsAfter ).toEqual( variationsBefore );
 		expect( console ).toHaveErrored();
+	} );
+
+	it( 'keeps experimental registration working with a migration warning', () => {
+		const name = `${ TEST_NAMESPACE }/deprecated`;
+		trackAttemptedCollectionName( { name } );
+
+		__experimentalRegisterProductCollection( {
+			name,
+			title: 'Deprecated collection',
+			scope: [ 'inserter' ],
+			attributes: { query: { perPage: 3 } },
+		} );
+
+		expect( getRegisteredVariation( name ) ).toMatchObject( {
+			scope: [ 'inserter' ],
+			attributes: {
+				collection: name,
+				query: { perPage: 3 },
+			},
+		} );
+		expect( console ).toHaveWarnedWith(
+			'__experimentalRegisterProductCollection is deprecated since version 11.4.0. Please use registerProductCollection instead. See: https://developer.woocommerce.com/docs/block-development/extensible-blocks/product-collection-block/register-product-collection/'
+		);
 	} );
 
 	it( 'registers a complete variation while preserving supported falsy values and caller attributes', () => {

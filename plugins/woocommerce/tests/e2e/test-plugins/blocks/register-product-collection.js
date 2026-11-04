@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars, no-undef */
-const { __experimentalRegisterProductCollection } = wc.wcBlocksRegistry;
+const { registerProductCollection } = wc.wcBlocksRegistry;
 
 /**
- * Basic usage of `__experimentalRegisterProductCollection`.
+ * Basic usage of `registerProductCollection`.
  */
 // Register a new collection.
-__experimentalRegisterProductCollection( {
+registerProductCollection( {
 	name: 'woocommerce/product-collection/my-custom-collection',
 	title: 'My Custom Collection',
 	description: 'This is a custom collection.',
@@ -19,7 +19,7 @@ __experimentalRegisterProductCollection( {
 } );
 
 // Register a new collection with a preview.
-__experimentalRegisterProductCollection( {
+registerProductCollection( {
 	name: 'woocommerce/product-collection/my-custom-collection-with-preview',
 	title: 'My Custom Collection with Preview',
 	description: 'This is a custom collection with preview.',
@@ -34,7 +34,7 @@ __experimentalRegisterProductCollection( {
 } );
 
 // Advanced usage of preview.
-__experimentalRegisterProductCollection( {
+registerProductCollection( {
 	name: 'woocommerce/product-collection/my-custom-collection-with-advanced-preview',
 	title: 'My Custom Collection with Advanced Preview',
 	description: 'This is a custom collection with advanced preview.',
@@ -68,7 +68,7 @@ __experimentalRegisterProductCollection( {
  * Register product collections with different `usesReference` values.
  */
 // Product context
-__experimentalRegisterProductCollection( {
+registerProductCollection( {
 	name: 'woocommerce/product-collection/my-custom-collection-product-context',
 	title: 'My Custom Collection - Product Context',
 	description: 'This is a custom collection with product context.',
@@ -76,7 +76,7 @@ __experimentalRegisterProductCollection( {
 } );
 
 // Cart context
-__experimentalRegisterProductCollection( {
+registerProductCollection( {
 	name: 'woocommerce/product-collection/my-custom-collection-cart-context',
 	title: 'My Custom Collection - Cart Context',
 	description: 'This is a custom collection with cart context.',
@@ -84,7 +84,7 @@ __experimentalRegisterProductCollection( {
 } );
 
 // Order context
-__experimentalRegisterProductCollection( {
+registerProductCollection( {
 	name: 'woocommerce/product-collection/my-custom-collection-order-context',
 	title: 'My Custom Collection - Order Context',
 	description: 'This is a custom collection with order context.',
@@ -92,7 +92,7 @@ __experimentalRegisterProductCollection( {
 } );
 
 // Archive context
-__experimentalRegisterProductCollection( {
+registerProductCollection( {
 	name: 'woocommerce/product-collection/my-custom-collection-archive-context',
 	title: 'My Custom Collection - Archive Context',
 	description: 'This is a custom collection with archive context.',
@@ -100,7 +100,7 @@ __experimentalRegisterProductCollection( {
 } );
 
 // Multiple contexts
-__experimentalRegisterProductCollection( {
+registerProductCollection( {
 	name: 'woocommerce/product-collection/my-custom-collection-multiple-contexts',
 	title: 'My Custom Collection - Multiple Contexts',
 	description: 'This is a custom collection with multiple contexts.',
@@ -111,7 +111,7 @@ __experimentalRegisterProductCollection( {
  * Scope argument
  */
 // Collection with only `inserter` scope
-__experimentalRegisterProductCollection( {
+registerProductCollection( {
 	name: 'woocommerce/product-collection/my-custom-collection-with-inserter-scope',
 	title: 'My Custom Collection - With Inserter Scope',
 	description: 'This is a custom collection with only inserter scope.',
@@ -119,7 +119,7 @@ __experimentalRegisterProductCollection( {
 } );
 
 // Collection with only `block` scope
-__experimentalRegisterProductCollection( {
+registerProductCollection( {
 	name: 'woocommerce/product-collection/my-custom-collection-with-block-scope',
 	title: 'My Custom Collection - With Block Scope',
 	description: 'This is a custom collection with only block scope.',

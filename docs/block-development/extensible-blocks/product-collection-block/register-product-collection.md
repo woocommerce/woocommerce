@@ -6,22 +6,22 @@ sidebar_label: Registering custom collections
 
 # Registering custom collections in product collection block
 
-The `__experimentalRegisterProductCollection` function is part of the `@woocommerce/blocks-registry` package. This function allows third party developers to register a new collection. This function accepts most of the arguments that are accepted by [Block Variation](https://developer.wordpress.org/block-editor/reference-guides/block-api/block-variations/#defining-a-block-variation).
+The `registerProductCollection` function is part of the `@woocommerce/blocks-registry` package. This function allows third party developers to register a new collection. This function accepts most of the arguments that are accepted by [Block Variation](https://developer.wordpress.org/block-editor/reference-guides/block-api/block-variations/#defining-a-block-variation).
 
-**CAUTION:** It's experimental and may change in the future. Please use it with caution.
+The stable API is available from WooCommerce 11.4.0. The previous `__experimentalRegisterProductCollection` function remains available as a deprecated alias and emits a console warning. Update existing imports and calls to `registerProductCollection`; the configuration options and `wc-blocks-registry` script dependency are unchanged.
 
 **There are two ways to use this function:**
 
 1. Using `@woocommerce/dependency-extraction-webpack-plugin` in a Webpack configuration: This will allow you to import the function from the package & use it in your code. For example:
 
 	```tsx
-	import { __experimentalRegisterProductCollection } from "@woocommerce/blocks-registry";
+	import { registerProductCollection } from "@woocommerce/blocks-registry";
 	```
 
 2. Using the global `wc` object: This will allow you to use the function using the global JS object without importing it. For example:
 
 	```tsx
-	wc.wcBlocksRegistry.__experimentalRegisterProductCollection({
+	wc.wcBlocksRegistry.registerProductCollection({
 	...
 	});
 	```
@@ -44,7 +44,7 @@ Be sure to add `wc-blocks-registry` as a dependency to your script if you opt to
 
 ## Defining a Collection
 
-We will explain important arguments that can be passed to `__experimentalRegisterProductCollection`. For other arguments, you can refer to the [Block Variation](https://developer.wordpress.org/block-editor/reference-guides/block-api/block-variations/#defining-a-block-variation) documentation.
+We will explain important arguments that can be passed to `registerProductCollection`. For other arguments, you can refer to the [Block Variation](https://developer.wordpress.org/block-editor/reference-guides/block-api/block-variations/#defining-a-block-variation) documentation.
 
 A Collection is defined by an object that can contain the following fields:
 
@@ -60,7 +60,7 @@ A Collection is defined by an object that can contain the following fields:
 
 ### Attributes
 
-Attributes are the properties that define the behavior of the collection. All the attributes are *optional*. Here are some of the important attributes that can be passed to `__experimentalRegisterProductCollection`:
+Attributes are the properties that define the behavior of the collection. All the attributes are *optional*. Here are some of the important attributes that can be passed to `registerProductCollection`:
 
 - `query` (type `object`): The query object that defines the query for the collection. It can contain the following fields:
     - `offset` (type `number`): The number of items to offset the query by.
@@ -119,7 +119,7 @@ For more info, you may check [PR #46369](https://github.com/woocommerce/woocomme
 ### Example 1: Registering a new collection
 
 ```tsx
-__experimentalRegisterProductCollection({
+registerProductCollection({
   name: "your-plugin-name/product-collection/my-custom-collection",
   title: "My Custom Collection",
   icon: "games",
@@ -136,7 +136,7 @@ As you can see in the example above, we are registering a new collection with th
 As you can see below, setting the initial preview state is possible. In the example below, we are setting `isPreview` and `previewMessage`.
 
 ```tsx
-__experimentalRegisterProductCollection({
+registerProductCollection({
   name: "your-plugin-name/product-collection/my-custom-collection-with-preview",
   title: "My Custom Collection with Preview",
   icon: "games",
@@ -180,7 +180,7 @@ As you can see below, it's also possible to use `setPreviewState` to set the pre
    	- We are returning a cleanup function that will clear the timeout after the component is unmounted. You can use this to clean up any resources you have used in `setPreviewState`.
 
 ```tsx
-__experimentalRegisterProductCollection({
+registerProductCollection({
   name: "your-plugin-name/product-collection/my-custom-collection-with-advanced-preview",
   title: "My Custom Collection with Advanced Preview",
   icon: "games",
@@ -221,7 +221,7 @@ __experimentalRegisterProductCollection({
 As you can see below, it's also possible to define inner blocks for the collection. In the example below, we are defining inner blocks for the collection.
 
 ```tsx
-__experimentalRegisterProductCollection({
+registerProductCollection({
   name: "your-plugin-name/product-collection/my-custom-collection-with-inner-blocks",
   title: "My Custom Collection with Inner Blocks",
   icon: "games",
@@ -265,7 +265,7 @@ This will create a collection with a heading, product image, and product price. 
 When a collection requires a reference to work properly, you can specify it using the `usesReference` argument. In the example below, we are defining a collection that requires a `product` reference.
 
 ```tsx
-__experimentalRegisterProductCollection({
+registerProductCollection({
   name: "your-plugin-name/product-collection/my-custom-collection",
   title: "My Custom Collection",
   icon: "games",
@@ -280,7 +280,7 @@ This will create a collection that requires a `product` reference. If the requir
 When a collection need one of the multiple references, you can specify it using the `usesReference` argument. In the example below, we are defining a collection that requires either a `product` or `order` reference.
 
 ```tsx
-__experimentalRegisterProductCollection({
+registerProductCollection({
   name: "your-plugin-name/product-collection/my-custom-collection",
   title: "My Custom Collection",
   icon: "games",
@@ -306,7 +306,7 @@ If you don't want to show your collection in the Collection Chooser, you can set
 For example:
 
 ```tsx
-__experimentalRegisterProductCollection({
+registerProductCollection({
   name: "your-plugin-name/product-collection/my-custom-collection",
   title: "My Custom Collection",
   icon: "games",
@@ -323,7 +323,7 @@ If you want to show your collection exclusively in the block inserter and not in
 For example:
 
 ```tsx
-__experimentalRegisterProductCollection({
+registerProductCollection({
   name: "your-plugin-name/product-collection/my-custom-collection",
   title: "My Custom Collection",
   description: "This is a custom collection.",

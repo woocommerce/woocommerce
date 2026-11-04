@@ -72,7 +72,7 @@ The checkout-field aliases are implemented in [`functions.php`](https://github.c
 
 | Interface | Status and purpose |
 | --- | --- |
-| `__experimentalRegisterProductCollection` | Registers a Product Collection collection. It is experimental and can change without notice. See [`register-product-collection.tsx`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/packages/public-api/blocks-registry/product-collection/register-product-collection.tsx). |
+| `__experimentalRegisterProductCollection` | Deprecated alias for the stable `registerProductCollection` API since WooCommerce 11.4.0. See [registering custom collections](https://developer.woocommerce.com/docs/block-development/extensible-blocks/product-collection-block/register-product-collection/). |
 | `__experimentalDeRegisterPaymentMethod` | Deregisters a payment method. It is primarily used by tests. See [`registry.ts`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/packages/public-api/blocks-registry/payment-methods/registry.ts). |
 | `__experimentalDeRegisterExpressPaymentMethod` | Deregisters an express payment method. It is primarily used by tests. See [`registry.ts`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/packages/public-api/blocks-registry/payment-methods/registry.ts). |
 | `__experimentalRegisterCheckoutFilters` | Deprecated alias for `registerCheckoutFilters`. |

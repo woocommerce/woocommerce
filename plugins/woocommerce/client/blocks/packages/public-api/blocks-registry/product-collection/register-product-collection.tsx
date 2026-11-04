@@ -3,6 +3,7 @@
  * External dependencies
  */
 import { BlockVariation } from '@wordpress/blocks';
+import deprecated from '@wordpress/deprecated';
 import { addFilter } from '@wordpress/hooks';
 import { EditorBlock } from '@woocommerce/types';
 import type { ElementType } from '@wordpress/element';
@@ -41,7 +42,7 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 	// Basic checks for the top-level argument
 	if ( typeof config !== 'object' || config === null ) {
 		console.error(
-			'Invalid arguments: You must pass an object to __experimentalRegisterProductCollection.'
+			'Invalid arguments: You must pass an object to registerProductCollection.'
 		);
 		return false;
 	}
@@ -327,11 +328,10 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 /**
  * Register a new collection for the Product Collection block.
  *
- * 🚨🚨🚨 WARNING: This is an experimental API and is subject to change without notice.
- *
+ * @since 11.4.0
  * @param {ProductCollectionConfig} config The configuration of new collection.
  */
-export const __experimentalRegisterProductCollection = (
+export const registerProductCollection = (
 	config: ProductCollectionConfig
 ) => {
 	// If the config is invalid, return early.
@@ -506,3 +506,20 @@ export const __experimentalRegisterProductCollection = (
 		} );
 	}
 };
+
+/**
+ * Register a collection using the deprecated experimental API.
+ *
+ * @deprecated Since WooCommerce 11.4.0. Use registerProductCollection instead.
+ * @param {ProductCollectionConfig} config The configuration of new collection.
+ */
+export const __experimentalRegisterProductCollection: typeof registerProductCollection =
+	( config ) => {
+		deprecated( '__experimentalRegisterProductCollection', {
+			since: '11.4.0',
+			alternative: 'registerProductCollection',
+			plugin: 'WooCommerce',
+			link: 'https://developer.woocommerce.com/docs/block-development/extensible-blocks/product-collection-block/register-product-collection/',
+		} );
+		return registerProductCollection( config );
+	};
