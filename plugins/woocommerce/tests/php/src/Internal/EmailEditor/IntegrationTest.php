@@ -638,6 +638,45 @@ class IntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Initializing the integration does not build the WC_Emails mailer, so emails registered later on init are still listed.
+	 */
+	public function test_initialize_does_not_build_the_mailer(): void {
+		$instance_property = new \ReflectionProperty( \WC_Emails::class, 'instance' );
+		$instance_property->setAccessible( true );
+		$previous_instance = $instance_property->getValue();
+
+		try {
+			$instance_property->setValue( null, null );
+
+			$this->sut->initialize();
+
+			$this->assertNull(
+				$instance_property->getValue(),
+				'Integration::initialize() must not build WC_Emails: it runs on woocommerce_init, before features hooked on init register their emails'
+			);
+		} finally {
+			$instance_property->setValue( null, $previous_instance );
+		}
+	}
+
+	/**
+	 * @testdox Preview sends use the configured "From" address and name while wp_mail runs, and restore the defaults afterwards.
+	 */
+	public function test_preview_send_applies_and_restores_from_filters(): void {
+		$new_order = \WC_Emails::instance()->get_emails()['WC_Email_New_Order'];
+
+		$this->sut->send_preview_email_before_wp_mail();
+
+		$this->assertSame( $new_order->get_from_address(), apply_filters( 'wp_mail_from', 'placeholder@example.com' ) );
+		$this->assertSame( $new_order->get_from_name(), apply_filters( 'wp_mail_from_name', 'Placeholder' ) );
+
+		$this->sut->send_preview_email_after_wp_mail();
+
+		$this->assertSame( 'placeholder@example.com', apply_filters( 'wp_mail_from', 'placeholder@example.com' ) );
+		$this->assertSame( 'Placeholder', apply_filters( 'wp_mail_from_name', 'Placeholder' ) );
+	}
+
+	/**
 	 * Create a `woo_email` post carrying the email type meta.
 	 *
 	 * @param string $email_type  Email type to stamp into the meta.

@@ -2,10 +2,7 @@
  * External dependencies
  */
 import { Icon } from '@wordpress/components';
-import {
-	title,
-	description,
-} from '@woocommerce/product-elements/title/block.json';
+import { __ } from '@wordpress/i18n';
 import { heading } from '@wordpress/icons';
 
 /**
@@ -17,9 +14,9 @@ export const CORE_NAME = 'core/post-title';
 export const VARIATION_NAME = 'woocommerce/product-query/product-title';
 
 registerElementVariation( CORE_NAME, {
-	blockDescription: description,
+	blockDescription: __( 'Display the title of a product.', 'woocommerce' ),
 	blockIcon: <Icon icon={ heading } />,
-	blockTitle: title,
+	blockTitle: __( 'Product Title', 'woocommerce' ),
 	variationName: VARIATION_NAME,
 	scope: [ 'block' ],
 } );

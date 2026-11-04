@@ -37,7 +37,6 @@ import { emptyHiddenAddressFields } from '@woocommerce/base-utils';
 import { useStoreCartEventListeners } from './use-store-cart-event-listeners';
 
 declare module '@wordpress/html-entities' {
-	// eslint-disable-next-line @typescript-eslint/no-shadow
 	export function decodeEntities< T >( coupon: T ): T;
 }
 const defaultShippingAddress: CartResponseShippingAddress = {
@@ -117,7 +116,7 @@ const normalizeCoupons = ( coupons: CartResponseCouponItem[] ) => {
 		? coupons.map( ( coupon: CartResponseCouponItem ) => ( {
 				...coupon,
 				label: decodeEntities( coupon.code ),
-		  } ) )
+			} ) )
 		: EMPTY_CART_COUPONS;
 };
 
@@ -136,9 +135,9 @@ const normalizeShippingRates = ( shippingRates: CartShippingRate[] ) => {
 						? shippingRate.shipping_rates.map(
 								( rate: CartShippingPackageShippingRate ) =>
 									decodeValues( rate )
-						  )
+							)
 						: [],
-		  } ) )
+			} ) )
 		: [];
 };
 

@@ -87,21 +87,19 @@ class BlockTemplatesRegistry {
 		}
 
 		// Init all templates.
+		$directory = BlockTemplateUtils::get_templates_directory( 'wp_template' );
 		foreach ( $templates as $template ) {
 			$template->init();
 
-			// Taxonomy templates are registered automatically by WordPress and
-			// are made available through the Add Template menu.
+			// Taxonomy templates are registered automatically by WordPress and are made available through the Add Template menu.
 			if ( ! $template->is_taxonomy_template ) {
-				$directory          = BlockTemplateUtils::get_templates_directory( 'wp_template' );
-				$template_file_path = $directory . '/' . $template::SLUG . '.html';
 				register_block_template(
 					'woocommerce//' . $template::SLUG,
 					array(
 						'title'       => $template->get_template_title(),
 						'description' => $template->get_template_description(),
 						// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-						'content'     => file_get_contents( $template_file_path ),
+						'content'     => file_get_contents( $directory . '/' . $template::SLUG . '.html' ),
 					)
 				);
 			}

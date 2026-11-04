@@ -86,8 +86,8 @@ class EmailApiController {
 			'email_type'      => $email_type,
 			// Recipient is possible to set only for the specific type of emails. When the field `recipient` is set in the form fields, it means that the email type has a recipient field.
 			'recipient'       => array_key_exists( 'recipient', $form_fields ) ? $email->get_option( 'recipient', get_option( 'admin_email' ) ) : null,
-			'cc'              => $email->get_option( 'cc' ),
-			'bcc'             => $email->get_option( 'bcc' ),
+			'cc'              => $email->supports_cc_bcc() ? $email->get_option( 'cc' ) : null,
+			'bcc'             => $email->supports_cc_bcc() ? $email->get_option( 'bcc' ) : null,
 		);
 	}
 
@@ -136,11 +136,13 @@ class EmailApiController {
 		if ( array_key_exists( 'recipient', $data ) ) {
 			$email->update_option( 'recipient', $data['recipient'] );
 		}
-		if ( array_key_exists( 'cc', $data ) ) {
-			$email->update_option( 'cc', $data['cc'] );
-		}
-		if ( array_key_exists( 'bcc', $data ) ) {
-			$email->update_option( 'bcc', $data['bcc'] );
+		if ( $email->supports_cc_bcc() ) {
+			if ( array_key_exists( 'cc', $data ) ) {
+				$email->update_option( 'cc', $data['cc'] );
+			}
+			if ( array_key_exists( 'bcc', $data ) ) {
+				$email->update_option( 'bcc', $data['bcc'] );
+			}
 		}
 
 		return null;
@@ -346,7 +348,7 @@ class EmailApiController {
 						'sanitize_callback' => 'absint',
 					),
 					'choices' => array(
-						'description' => __( 'Per-conflict apply decisions: an array of {path, decision} entries. `decision` is `keep_yours` or `use_core`.', 'woocommerce' ),
+						'description' => __( 'Per-conflict apply decisions: an array of {path, decision} entries. `decision` is `keep_yours` or `use_core`. A block with no entry follows the change summary: if only core changed the block, it takes core\'s version; if the merchant also edited it, it keeps the merchant\'s version. Without a stored base render, a block with no entry keeps the merchant\'s version.', 'woocommerce' ),
 						'type'        => 'array',
 						'required'    => false,
 						'default'     => array(),
@@ -711,7 +713,7 @@ class EmailApiController {
 			'type'       => 'object',
 			'properties' => array(
 				'merged_content'     => array(
-					'description' => __( 'The merged block content written to the post. May differ from the input `post_content` even when every choice was `keep_yours` — the namespace-alias migration (see `aliases_migrated`) rewrites legacy block names unconditionally.', 'woocommerce' ),
+					'description' => __( 'The merged block content written to the post. May differ from the input `post_content` even when every choice was `keep_yours`: blocks the merchant never edited take core\'s version, and the namespace-alias migration (see `aliases_migrated`) rewrites legacy block names unconditionally.', 'woocommerce' ),
 					'type'        => 'string',
 					'readonly'    => true,
 				),

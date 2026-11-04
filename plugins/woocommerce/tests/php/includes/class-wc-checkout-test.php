@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Checkout.
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
 /**
@@ -36,6 +37,14 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 			public function validate_checkout( &$data, &$errors ) {
 				return parent::validate_checkout( $data, $errors );
+			}
+
+			public function process_order_without_payment( $order_id ) {
+				return parent::process_order_without_payment( $order_id );
+			}
+
+			public function process_customer( $data ) {
+				parent::process_customer( $data );
 			}
 		};
 		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
@@ -142,6 +151,91 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( '<a href="http://attackerpage.com/csrf.html">', $content );
 		$this->assertStringNotContainsString( '<script>', $content );
 		$this->assertStringContainsString( 'This text should not save inside an anchor.', $content );
+	}
+
+	/**
+	 * @testdox Checkout refuses to complete a cancelled unpaid non-zero order without payment.
+	 */
+	public function test_process_order_without_payment_rejects_cancelled_unpaid_non_zero_order(): void {
+		$order = wc_create_order();
+		$order->set_total( 10 );
+		$order->set_status( OrderStatus::CANCELLED );
+		$order->save();
+
+		try {
+			$this->sut->process_order_without_payment( $order->get_id() );
+			$this->fail( 'Checkout should not complete a cancelled unpaid non-zero order without payment.' );
+		} catch ( Exception $exception ) {
+			$this->assertSame( 'This order cannot be completed without payment. Please try again.', $exception->getMessage() );
+		}
+
+		$reloaded_order = wc_get_order( $order->get_id() );
+		$this->assertSame( OrderStatus::CANCELLED, $reloaded_order->get_status(), 'The order status should not change.' );
+		$this->assertNull( $reloaded_order->get_date_paid(), 'The order should not be marked paid.' );
+	}
+
+	/**
+	 * @testdox Checkout allows extensions to complete a pending non-zero order without payment.
+	 */
+	public function test_process_order_without_payment_allows_pending_non_zero_order(): void {
+		$order = wc_create_order();
+		$order->set_total( 10 );
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+
+		add_filter(
+			'woocommerce_checkout_no_payment_needed_redirect',
+			function () {
+				throw new RuntimeException( 'Stop the test before checkout sends its redirect.' );
+			}
+		);
+
+		try {
+			$this->sut->process_order_without_payment( $order->get_id() );
+			$this->fail( 'Checkout should reach its no-payment redirect.' );
+		} catch ( RuntimeException $exception ) {
+			$this->assertSame( 'Stop the test before checkout sends its redirect.', $exception->getMessage() );
+		}
+
+		$reloaded_order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $reloaded_order->is_paid(), 'The intentionally payment-free order should be completed.' );
+		$this->assertNotNull( $reloaded_order->get_date_paid(), 'The intentionally payment-free order should have a paid date.' );
+	}
+
+	/**
+	 * @testdox A logged in customer's VAT exemption should survive checkout saving their account.
+	 */
+	public function test_process_customer_keeps_logged_in_customer_vat_exemption(): void {
+		$customer_id = WC_Helper_Customer::create_customer( 'classic_vat_exempt', 'password', 'classic-vat-exempt@example.com' )->get_id();
+		// Backdate the account so checkout's save gives it a newer timestamp than the session.
+		update_user_meta( $customer_id, 'last_update', time() - MINUTE_IN_SECONDS );
+		wp_set_current_user( $customer_id );
+		WC()->session->init();
+
+		$original_customer = WC()->customer;
+		WC()->customer     = new WC_Customer( $customer_id, true );
+
+		try {
+			WC()->customer->set_is_vat_exempt( true );
+			WC()->customer->save();
+
+			$this->sut->process_customer(
+				array(
+					'billing_first_name' => 'Classic',
+					'billing_address_1'  => '456 Classic Road',
+					'billing_email'      => 'classic-vat-exempt@example.com',
+				)
+			);
+
+			// The session customer is saved on shutdown in a real request.
+			WC()->customer->save();
+
+			$reloaded_customer = new WC_Customer( $customer_id, true );
+			$this->assertTrue( $reloaded_customer->get_is_vat_exempt(), 'VAT exemption should survive the account save so a retry is not charged tax.' );
+			$this->assertSame( '456 Classic Road', $reloaded_customer->get_billing_address_1(), 'The address should come from the saved account.' );
+		} finally {
+			WC()->customer = $original_customer;
+		}
 	}
 
 	/**

@@ -48,6 +48,7 @@ class WCAdminAssets {
 	public function __construct() {
 		Features::get_instance();
 		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'register_deprecated_scripts_and_styles' ) );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'inject_wc_settings_dependencies' ), 14 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ), 15 );
@@ -61,6 +62,16 @@ class WCAdminAssets {
 	 */
 	public static function get_path( $ext ) {
 		return ( $ext === 'css' ) ? WC_ADMIN_DIST_CSS_FOLDER : WC_ADMIN_DIST_JS_FOLDER;
+	}
+
+	/**
+	 * Registers deprecated scripts and styles.
+	 *
+	 * @return void
+	 */
+	public static function register_deprecated_scripts_and_styles() {
+		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		wp_register_style( 'wc-admin-layout', false );
 	}
 
 	/**
@@ -254,8 +265,9 @@ class WCAdminAssets {
 
 		if ( PageController::is_settings_page() ) {
 			$settings_ui_dependencies = $this->get_settings_ui_script_dependencies();
+			$design_tokens_handle     = $this->get_design_tokens_handle();
 			$this->register_script( 'wp-admin-scripts', 'settings-embed', true, $settings_ui_dependencies );
-			$this->register_style( 'settings-embed', 'style', array( 'wp-components' ) );
+			$this->register_style( 'settings-embed', 'style', array( 'wp-components', $design_tokens_handle ) );
 			$this->enqueue_settings_ui_style( $settings_ui_dependencies );
 		}
 
@@ -381,9 +393,6 @@ class WCAdminAssets {
 		// Register the CSS styles.
 		$styles = array(
 			array(
-				'handle' => 'wc-admin-layout',
-			),
-			array(
 				'handle' => 'wc-components',
 			),
 			array(
@@ -394,7 +403,7 @@ class WCAdminAssets {
 			),
 			array(
 				'handle'       => WC_ADMIN_APP,
-				'dependencies' => array( 'wc-components', 'wc-admin-layout', 'wc-customer-effort-score', 'wp-components', 'wc-experimental' ),
+				'dependencies' => array( 'wc-components', 'wc-customer-effort-score', 'wp-components', 'wc-experimental' ),
 			),
 			array(
 				'handle' => 'wc-onboarding',
@@ -402,6 +411,9 @@ class WCAdminAssets {
 			array(
 				'handle'       => 'wc-settings-ui',
 				'dependencies' => array( 'wp-components' ),
+			),
+			array(
+				'handle' => 'wc-design-tokens',
 			),
 		);
 
@@ -455,6 +467,20 @@ class WCAdminAssets {
 		} catch ( \Throwable $e ) {
 			return array();
 		}
+	}
+
+	/**
+	 * Get the handle of the WordPress Design System tokens stylesheet.
+	 *
+	 * Uses the `wp-theme` style registered by WordPress 7.1+ or the Gutenberg plugin when available,
+	 * and falls back to the copy of the tokens bundled with WooCommerce otherwise. The caller lists
+	 * the handle as a style dependency, so WordPress enqueues it.
+	 *
+	 * @return string The style handle.
+	 */
+	private function get_design_tokens_handle(): string {
+		// The bundled fallback (and the `design-tokens` wp-admin-script) can be removed once WP 7.1 is the minimum supported version.
+		return wp_style_is( 'wp-theme', 'registered' ) ? 'wp-theme' : 'wc-design-tokens';
 	}
 
 	/**

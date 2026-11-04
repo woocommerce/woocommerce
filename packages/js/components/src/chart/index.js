@@ -90,11 +90,10 @@ class Chart extends Component {
 		if ( ! isEqual( uniqueKeys, this.prevDataKeys ) ) {
 			const dataKeys = this.getDataKeys();
 			this.prevDataKeys = uniqueKeys;
-			/* eslint-disable react/no-did-update-set-state */
+
 			this.setState( {
 				visibleKeys: dataKeys.slice( 0, selectionLimit ),
 			} );
-			/* eslint-enable react/no-did-update-set-state */
 		}
 	}
 

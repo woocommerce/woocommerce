@@ -120,6 +120,9 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 */
 	protected $ephemeral_meta_keys = array(
 		EditLock::META_KEY_NAME,
+		'_wp_trash_meta_status',
+		'_wp_trash_meta_time',
+		'_wp_trash_meta_comments_status',
 	);
 
 	/**

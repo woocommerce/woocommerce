@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix an accessibility issue where the Enter key didn't open links in Payments settings badge popovers.

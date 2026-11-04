@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
+use Automattic\WooCommerce\Internal\ProductCustoms\CustomsDataValidator;
 use Automattic\WooCommerce\Internal\RestApi\ProductRequestPreparationTrait;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\I18nUtil;
@@ -452,13 +453,26 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		// Filter by on sale products.
 		if ( is_bool( $request['on_sale'] ) ) {
-			$on_sale_key = $request['on_sale'] ? 'post__in' : 'post__not_in';
 			$on_sale_ids = wc_get_product_ids_on_sale();
 
 			// Use 0 when there's no on sale products to avoid return all products.
 			$on_sale_ids = empty( $on_sale_ids ) ? array( 0 ) : $on_sale_ids;
 
-			$args[ $on_sale_key ] += $on_sale_ids;
+			if ( $request['on_sale'] || ! empty( $args['post__in'] ) ) {
+				$post_in = empty( $args['post__in'] ) ? $on_sale_ids : $args['post__in'];
+
+				// WP_Query ignores post__not_in when post__in is set, so the on_sale filter and exclude are applied to post__in.
+				if ( $request['on_sale'] ) {
+					$post_in = array_intersect( $post_in, $on_sale_ids );
+				} else {
+					$post_in = array_diff( $post_in, $on_sale_ids );
+				}
+				$post_in = array_diff( $post_in, (array) $args['post__not_in'] );
+
+				$args['post__in'] = empty( $post_in ) ? array( 0 ) : array_values( $post_in );
+			} else {
+				$args['post__not_in'] = array_merge( (array) $args['post__not_in'], $on_sale_ids );
+			}
 		}
 
 		// Force the post_type argument, since it's not a user input variable.
@@ -747,10 +761,15 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @return WP_Error|WC_Data
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
+		$customs = CustomsDataValidator::normalize_fields( $request->get_params() );
 		$product = $this->get_product_for_rest_request( $request );
 
 		if ( is_wp_error( $product ) ) {
 			return $product;
+		}
+
+		foreach ( $customs as $property => $value ) {
+			$product->{ 'set_' . $property }( $value );
 		}
 
 		// Post title.
@@ -1848,6 +1867,24 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$schema = $this->add_cogs_related_product_schema( $schema, false );
 		}
 
+		$schema['properties']['customs_commodity_code'] = array(
+			'description' => __( 'Customs commodity code containing 6 to 14 digits. Punctuation and spaces are removed.', 'woocommerce' ),
+			'type'        => array( 'string', 'null' ),
+			'context'     => array( 'view', 'edit' ),
+		);
+
+		$schema['properties']['customs_country_of_origin'] = array(
+			'description' => __( 'Two-letter country of origin code.', 'woocommerce' ),
+			'type'        => array( 'string', 'null' ),
+			'context'     => array( 'view', 'edit' ),
+		);
+
+		$schema['properties']['customs_description'] = array(
+			'description' => __( 'Plain-text customs description, up to 35 characters, without emoji or special symbols such as ™.', 'woocommerce' ),
+			'type'        => array( 'string', 'null' ),
+			'context'     => array( 'view', 'edit' ),
+		);
+
 		return $this->add_additional_fields_schema( $schema );
 	}
 
@@ -2064,6 +2101,12 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 			if ( in_array( 'global_unique_id', $fields, true ) ) {
 				$data['global_unique_id'] = $product->get_global_unique_id( $context );
+			}
+
+			foreach ( CustomsDataValidator::FIELDS as $property ) {
+				if ( in_array( $property, $fields, true ) ) {
+					$data[ $property ] = $product->{ 'get_' . $property }( $context );
+				}
 			}
 
 			$post_type_obj = get_post_type_object( $this->post_type );

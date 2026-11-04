@@ -7,7 +7,7 @@ use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 
 /**
- * Unit tests for the ProductQuery::get_last_modified() caching behavior.
+ * Unit tests for the ProductQuery class.
  */
 class ProductQueryTest extends \WC_Unit_Test_Case {
 
@@ -213,5 +213,191 @@ class ProductQueryTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotNull( $second_result );
 		$this->assertNotFalse( wp_cache_get( 'last_modified', 'wc_products' ) );
+	}
+
+	/**
+	 * @testdox Slug filters containing double quotes are safely prepared when NO_BACKSLASH_ESCAPES is enabled.
+	 */
+	public function test_slug_filter_with_double_quote_is_prepared_with_no_backslash_escapes(): void {
+		global $wpdb;
+
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name' => 'Slug filter product',
+				'slug' => 'slug-filter-product',
+			)
+		);
+		$sql_mode = $wpdb->get_var( 'SELECT @@SESSION.sql_mode' );
+
+		try {
+			$wpdb->query( "SET SESSION sql_mode = 'NO_BACKSLASH_ESCAPES'" );
+			$this->assertSame( 'NO_BACKSLASH_ESCAPES', $wpdb->get_var( 'SELECT @@SESSION.sql_mode' ), 'The test requires NO_BACKSLASH_ESCAPES.' );
+			$matching_ids = $this->get_product_ids_for_slug_filter( $product->get_slug() . '"' );
+			$last_error   = $wpdb->last_error;
+		} finally {
+			$wpdb->query( $wpdb->prepare( 'SET SESSION sql_mode = %s', $sql_mode ) );
+		}
+
+		$this->assertSame( '', $last_error, 'The slug filter query should remain valid SQL.' );
+		$this->assertNotContains( $product->get_id(), $matching_ids, 'The slug value must be matched literally.' );
+	}
+
+	/**
+	 * @testdox Slug filters support single and comma-separated values when NO_BACKSLASH_ESCAPES is enabled.
+	 */
+	public function test_slug_filter_supports_valid_values_with_no_backslash_escapes(): void {
+		global $wpdb;
+
+		$fixtures = new FixtureData();
+		$product1 = $fixtures->get_simple_product(
+			array(
+				'name' => 'First slug filter product',
+				'slug' => 'first-slug-filter-product',
+			)
+		);
+		$product2 = $fixtures->get_simple_product(
+			array(
+				'name' => 'Second slug filter product',
+				'slug' => 'second-slug-filter-product',
+			)
+		);
+		$sql_mode = $wpdb->get_var( 'SELECT @@SESSION.sql_mode' );
+
+		try {
+			$wpdb->query( "SET SESSION sql_mode = 'NO_BACKSLASH_ESCAPES'" );
+			$single_slug_ids   = $this->get_product_ids_for_slug_filter( $product1->get_slug() );
+			$multiple_slug_ids = $this->get_product_ids_for_slug_filter( $product1->get_slug() . ',' . $product2->get_slug() );
+		} finally {
+			$wpdb->query( $wpdb->prepare( 'SET SESSION sql_mode = %s', $sql_mode ) );
+		}
+
+		$this->assertSame( array( $product1->get_id() ), $single_slug_ids, 'A single slug should return the matching product.' );
+		$this->assertEqualsCanonicalizing(
+			array( $product1->get_id(), $product2->get_id() ),
+			$multiple_slug_ids,
+			'Comma-separated slugs should return all matching products.'
+		);
+	}
+
+	/**
+	 * on_sale=true combined with include must intersect: only the included products that are on sale.
+	 */
+	public function test_on_sale_true_intersects_with_include(): void {
+		set_transient( 'wc_products_onsale', array( 55, 66, 77 ) );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'on_sale', true );
+		$request->set_param( 'include', array( 55, 101 ) );
+
+		$args = $this->product_query->prepare_objects_query( $request );
+
+		$this->assertEqualsCanonicalizing( array( 55 ), $args['post__in'] );
+	}
+
+	/**
+	 * on_sale=true with an include list that contains no on-sale products must return nothing, not the include list.
+	 */
+	public function test_on_sale_true_is_not_ignored_when_include_has_no_on_sale_products(): void {
+		set_transient( 'wc_products_onsale', array( 55, 66 ) );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'on_sale', true );
+		$request->set_param( 'include', array( 101, 102 ) );
+
+		$args = $this->product_query->prepare_objects_query( $request );
+
+		$this->assertSame( array( 0 ), $args['post__in'] );
+	}
+
+	/**
+	 * on_sale=false combined with exclude must merge: exclude the explicit list plus every on-sale product.
+	 */
+	public function test_on_sale_false_merges_on_sale_ids_into_exclude(): void {
+		set_transient( 'wc_products_onsale', array( 55, 66 ) );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'on_sale', false );
+		$request->set_param( 'exclude', array( 99 ) );
+
+		$args = $this->product_query->prepare_objects_query( $request );
+
+		$this->assertEqualsCanonicalizing( array( 99, 55, 66 ), $args['post__not_in'] );
+	}
+
+	/**
+	 * on_sale=false combined with include must remove the on-sale products from post__in, because WP_Query ignores post__not_in when post__in is set.
+	 */
+	public function test_on_sale_false_removes_on_sale_products_from_include(): void {
+		set_transient( 'wc_products_onsale', array( 55, 66 ) );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'on_sale', false );
+		$request->set_param( 'include', array( 55, 101 ) );
+
+		$args = $this->product_query->prepare_objects_query( $request );
+
+		$this->assertSame( array( 101 ), $args['post__in'] );
+	}
+
+	/**
+	 * on_sale=true combined with exclude must remove the excluded products from post__in.
+	 */
+	public function test_on_sale_true_removes_excluded_products(): void {
+		set_transient( 'wc_products_onsale', array( 55, 66, 77 ) );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'on_sale', true );
+		$request->set_param( 'exclude', array( 66 ) );
+
+		$args = $this->product_query->prepare_objects_query( $request );
+
+		$this->assertEqualsCanonicalizing( array( 55, 77 ), $args['post__in'] );
+	}
+
+	/**
+	 * The related filter must return no products when none of the included products are related, not every product.
+	 */
+	public function test_related_filter_with_empty_intersection_returns_no_products(): void {
+		$fixtures = new FixtureData();
+		$anchor   = $fixtures->get_simple_product( array( 'name' => 'Related anchor' ) );
+
+		$callback = static function () {
+			return array( 55, 66 );
+		};
+		add_filter( 'woocommerce_related_products', $callback );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'related', $anchor->get_id() );
+		$request->set_param( 'include', array( 101 ) );
+
+		$args = $this->product_query->prepare_objects_query( $request );
+
+		remove_filter( 'woocommerce_related_products', $callback );
+
+		$this->assertSame( array( 0 ), $args['post__in'] );
+	}
+
+	/**
+	 * Get product IDs matched by a Store API slug filter.
+	 *
+	 * @param string $slug_filter Slug filter value.
+	 * @return int[]
+	 */
+	private function get_product_ids_for_slug_filter( string $slug_filter ): array {
+		global $wpdb;
+
+		$wp_query = new \WP_Query();
+		$wp_query->set( 'slug', $slug_filter );
+		$clauses = $this->product_query->add_query_clauses(
+			array(
+				'join'  => '',
+				'where' => '',
+			),
+			$wp_query
+		);
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- The slug query clause is prepared by ProductQuery.
+		return array_map( 'intval', $wpdb->get_col( "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'product'{$clauses['where']}" ) );
 	}
 }
