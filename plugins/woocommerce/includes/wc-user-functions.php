@@ -874,7 +874,7 @@ function wc_get_customer_available_downloads( $customer_id ) {
  *
  * @since 11.4.0 Added the optional `$args` parameter for paid-date timeframe totals.
  *
- * @param  int   $user_id User ID. Use 0 for guest totals.
+ * @param  int   $user_id User ID.
  * @param  array $args    Optional timeframe arguments. Supports the exclusive `before` and `after`
  *                        paid-date filters, each accepted as a date string, a Unix timestamp, or
  *                        a DateTimeInterface object. When empty, the all-time total is returned.
@@ -896,7 +896,8 @@ function wc_get_customer_total_spent( $user_id, $args = array() ) {
 		return $customer->get_total_spent();
 	}
 
-	if ( 0 > $user_id ) {
+	// Guest totals are not summed: ID 0 returns '0.00', like the unfiltered call does.
+	if ( 0 >= $user_id ) {
 		return '0.00';
 	}
 
@@ -908,10 +909,7 @@ function wc_get_customer_total_spent( $user_id, $args = array() ) {
 	}
 
 	$data_store = $customer->get_data_store();
-	if ( is_a( $data_store->get_current_class_name(), 'WC_Customer_Data_Store_Timeframe_Interface', true ) ) {
-		// The method is not part of the established data store interface; it is only
-		// called on stores that declare the timeframe capability via the interface.
-		// @phpstan-ignore-next-line method.notFound
+	if ( $data_store instanceof WC_Customer_Data_Store_Timeframe_Interface ) {
 		return $data_store->get_total_spent_for_timeframe( $customer, $args );
 	}
 

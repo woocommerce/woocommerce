@@ -523,11 +523,12 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	/**
 	 * Build the total-spent query for a paid-date timeframe.
 	 *
-	 * The canonical paid date is used when present: the `_date_paid` meta (a Unix
-	 * timestamp) with posts storage, or `date_paid_gmt` in the order operational
-	 * data with HPOS. When it is missing or empty, the pre-3.0 `_paid_date` meta
-	 * (a local datetime string) is used instead, mirroring how order data stores
-	 * read the paid date. Date bounds are exclusive.
+	 * The canonical paid date is used: `date_paid_gmt` in the order operational
+	 * data with HPOS, or the `_date_paid` meta (a Unix timestamp) with posts
+	 * storage. With posts storage, a missing or empty canonical value falls back
+	 * to the pre-3.0 `_paid_date` meta (a local datetime string). HPOS has no such
+	 * fallback: its order data store never reads `_paid_date`, so an order whose
+	 * paid date only exists there has no paid date in HPOS. Bounds are exclusive.
 	 *
 	 * @since 11.4.0
 	 * @param int    $customer_id  Customer ID.
@@ -546,20 +547,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			$sql        = "SELECT SUM( orders.total_amount )
 				FROM %i AS orders
 				INNER JOIN %i AS operational_data ON orders.id = operational_data.order_id
-				LEFT JOIN %i AS legacy_date_paid
-					ON legacy_date_paid.id = (
-						SELECT MIN( legacy_date_paid_lookup.id )
-						FROM %i AS legacy_date_paid_lookup
-						WHERE legacy_date_paid_lookup.order_id = orders.id
-							AND legacy_date_paid_lookup.meta_key = '_paid_date'
-					)
 				WHERE orders.customer_id = %d
 				AND orders.status IN $statuses_sql";
 			$query_args = array(
 				OrdersTableDataStore::get_orders_table_name(),
 				OrdersTableDataStore::get_operational_data_table_name(),
-				OrdersTableDataStore::get_meta_table_name(),
-				OrdersTableDataStore::get_meta_table_name(),
 				$customer_id,
 			);
 		} else {
@@ -591,12 +583,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 		if ( null !== $after_timestamp ) {
 			if ( $is_cot_in_use ) {
-				$sql         .= " AND (
-					( operational_data.date_paid_gmt IS NOT NULL AND operational_data.date_paid_gmt NOT IN ( '', '0000-00-00 00:00:00' ) AND operational_data.date_paid_gmt > %s )
-					OR ( ( operational_data.date_paid_gmt IS NULL OR operational_data.date_paid_gmt IN ( '', '0000-00-00 00:00:00' ) ) AND legacy_date_paid.meta_value IS NOT NULL AND legacy_date_paid.meta_value NOT IN ( '', '0', '0000-00-00 00:00:00' ) AND legacy_date_paid.meta_value > %s )
-				)";
+				$sql         .= " AND operational_data.date_paid_gmt IS NOT NULL AND operational_data.date_paid_gmt <> '0000-00-00 00:00:00' AND operational_data.date_paid_gmt > %s";
 				$query_args[] = gmdate( 'Y-m-d H:i:s', $after_timestamp );
-				$query_args[] = wp_date( 'Y-m-d H:i:s', $after_timestamp );
 			} else {
 				$sql         .= " AND (
 					( date_paid.meta_value NOT IN ( '', '0' ) AND CAST( date_paid.meta_value AS UNSIGNED ) > %d )
@@ -609,12 +597,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 		if ( null !== $before_timestamp ) {
 			if ( $is_cot_in_use ) {
-				$sql         .= " AND (
-					( operational_data.date_paid_gmt IS NOT NULL AND operational_data.date_paid_gmt NOT IN ( '', '0000-00-00 00:00:00' ) AND operational_data.date_paid_gmt < %s )
-					OR ( ( operational_data.date_paid_gmt IS NULL OR operational_data.date_paid_gmt IN ( '', '0000-00-00 00:00:00' ) ) AND legacy_date_paid.meta_value IS NOT NULL AND legacy_date_paid.meta_value NOT IN ( '', '0', '0000-00-00 00:00:00' ) AND legacy_date_paid.meta_value < %s )
-				)";
+				$sql         .= " AND operational_data.date_paid_gmt IS NOT NULL AND operational_data.date_paid_gmt <> '0000-00-00 00:00:00' AND operational_data.date_paid_gmt < %s";
 				$query_args[] = gmdate( 'Y-m-d H:i:s', $before_timestamp );
-				$query_args[] = wp_date( 'Y-m-d H:i:s', $before_timestamp );
 			} else {
 				$sql         .= " AND (
 					( date_paid.meta_value NOT IN ( '', '0' ) AND CAST( date_paid.meta_value AS UNSIGNED ) < %d )
@@ -747,8 +731,18 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			return (string) $this->get_total_spent( $customer );
 		}
 
+		// A guest customer (ID 0) has no timeframe total; return '0.00' like get_total_spent() does.
+		if ( 0 >= $customer->get_id() ) {
+			return '0.00';
+		}
+
 		global $wpdb;
 
+		/**
+		 * Paid order statuses escaped for use in the query.
+		 *
+		 * @var string[] $statuses
+		 */
 		$statuses     = array_map( 'esc_sql', wc_get_is_paid_statuses() );
 		$statuses_sql = "( 'wc-" . implode( "','wc-", $statuses ) . "' )";
 		$sql          = $this->get_total_spent_timeframe_query( $customer->get_id(), $statuses_sql, $args );
