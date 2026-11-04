@@ -983,7 +983,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox A child theme's own fonts are not replaced by parent fonts that share a slug.
 	 */
-	public function test_experimental_filter_theme_json_theme_keeps_child_fonts_with_same_slug_as_parent() {
+	public function test_experimental_filter_theme_json_theme_keeps_child_fonts_with_same_slug_as_parent(): void {
 		$original = get_stylesheet();
 		$parent   = array(
 			array(
@@ -1017,7 +1017,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox A child theme without fonts of its own inherits the parent theme's fonts.
 	 */
-	public function test_experimental_filter_theme_json_theme_inherits_parent_fonts_when_child_has_none() {
+	public function test_experimental_filter_theme_json_theme_inherits_parent_fonts_when_child_has_none(): void {
 		$original = get_stylesheet();
 		$parent   = array(
 			array(
@@ -1042,7 +1042,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox A child theme without fonts inherits the parent's fonts and keeps fonts that earlier filters added.
 	 */
-	public function test_experimental_filter_theme_json_theme_keeps_filter_added_fonts_when_child_has_none() {
+	public function test_experimental_filter_theme_json_theme_keeps_filter_added_fonts_when_child_has_none(): void {
 		$original     = get_stylesheet();
 		$parent       = array(
 			array(
@@ -1072,7 +1072,7 @@ class ComingSoonRequestHandlerTest extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox A child theme.json without a schema version, which WordPress ignores, still inherits the parent theme's fonts.
 	 */
-	public function test_experimental_filter_theme_json_theme_inherits_parent_fonts_when_child_json_has_no_version() {
+	public function test_experimental_filter_theme_json_theme_inherits_parent_fonts_when_child_json_has_no_version(): void {
 		$original = get_stylesheet();
 		$parent   = array(
 			array(
