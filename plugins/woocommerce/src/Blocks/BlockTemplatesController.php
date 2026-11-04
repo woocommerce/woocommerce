@@ -32,6 +32,39 @@ class BlockTemplatesController {
 		add_filter( 'block_type_metadata_settings', array( $this, 'prevent_shortcodes_html_breakage' ), 10, 2 );
 		add_action( 'current_screen', array( $this, 'hide_template_selector_in_cart_checkout_pages' ), 10 );
 		add_action( 'wp_enqueue_scripts', [ $this, 'dequeue_legacy_scripts' ], 20 );
+		add_action( 'template_redirect', array( $this, 'skip_address_texturize_on_order_pages' ) );
+	}
+
+	/**
+	 * Stop wptexturize() changing customer details in `<address>` on the order received and view order pages.
+	 *
+	 * Block themes texturize the whole template HTML, which changes emails such as `o'neil--shop@48x17.com`.
+	 *
+	 * @since 11.4.0
+	 * @internal
+	 */
+	public function skip_address_texturize_on_order_pages(): void {
+		if ( is_order_received_page() || is_view_order_page() ) {
+			add_filter( 'no_texturize_tags', array( $this, 'add_address_tag' ) );
+		}
+	}
+
+	/**
+	 * Add `address` to the tags wptexturize() skips.
+	 *
+	 * @since 11.4.0
+	 * @internal
+	 *
+	 * @param mixed $tags HTML element names.
+	 * @return mixed
+	 */
+	public function add_address_tag( $tags ) {
+		if ( ! is_array( $tags ) || in_array( 'address', $tags, true ) ) {
+			return $tags;
+		}
+
+		$tags[] = 'address';
+		return $tags;
 	}
 
 	/**
