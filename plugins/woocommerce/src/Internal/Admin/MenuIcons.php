@@ -80,7 +80,7 @@ final class MenuIcons {
 	/**
 	 * Return a registered menu icon, retaining the legacy icon on older WordPress versions.
 	 *
-	 * @since 11.4.0
+	 * @since 11.3.0
 	 *
 	 * @param string $icon_name Namespaced icon name.
 	 * @param string $fallback  Legacy Dashicon class or SVG data URI.
