@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Improve handling of unexpected payment settings profile data.
