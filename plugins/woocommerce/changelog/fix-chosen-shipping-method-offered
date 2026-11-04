@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use a chosen shipping method only when its rate was calculated for the cart.
