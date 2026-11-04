@@ -25,7 +25,11 @@ const CONCURRENCY = Number( process.env.MCP_INSPECTOR_CONCURRENCY ?? 4 );
 
 // Estimated tokens of what `mcp-adapter-get-ability-info` returns for one ability. Placeholder until agreed with Core reviewers.
 const TOKEN_BUDGET = 3000;
-const TOKEN_BUDGET_EXCEPTIONS = {};
+// The variable product fields and their variations take these past the budget.
+const TOKEN_BUDGET_EXCEPTIONS = {
+	'woocommerce/product-create': 5000,
+	'woocommerce/product-update': 5000,
+};
 
 // Abilities still without a file in `abilities/`. The list only shrinks: an ability that gains one fails until it is removed here.
 const WITHOUT_BEHAVIOUR_TESTS = [];
