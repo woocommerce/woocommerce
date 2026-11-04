@@ -152,6 +152,47 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox decide() finds the order's review even when the billing email has since changed.
+	 */
+	public function test_decide_finds_review_whose_author_email_differs(): void {
+		$built = $this->make_order( 'new-contact@example.test' );
+		// Written while the order still carried a different billing address.
+		$comment_id = $this->insert_review(
+			$built['product_id'],
+			'old-contact@example.test',
+			'Before the address changed.',
+			4,
+			(int) $built['order']->get_id()
+		);
+
+		$decision = ItemEligibility::decide( $built['item'], $built['order'] );
+
+		$this->assertNotNull( $decision['comment'], 'The order is the scope, not the address.' );
+		$this->assertSame( $comment_id, (int) $decision['comment']->comment_ID );
+	}
+
+	/**
+	 * @testdox decide() finds a review the moderation checks are still holding.
+	 */
+	public function test_decide_finds_a_held_review(): void {
+		$built      = $this->make_order( 'jane@example.test' );
+		$comment_id = $this->insert_review(
+			$built['product_id'],
+			'jane@example.test',
+			'Waiting on moderation.',
+			4,
+			(int) $built['order']->get_id(),
+			0,
+			0
+		);
+
+		$decision = ItemEligibility::decide( $built['item'], $built['order'] );
+
+		$this->assertNotNull( $decision['comment'], 'A held review still occupies the slot.' );
+		$this->assertSame( $comment_id, (int) $decision['comment']->comment_ID );
+	}
+
+	/**
 	 * @testdox exclude_fully_refunded_items drops items whose full quantity has been refunded.
 	 */
 	public function test_exclude_fully_refunded_items_drops_full_refunds(): void {

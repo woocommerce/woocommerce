@@ -77,8 +77,8 @@ class ItemEligibility {
 	public const VARIATION_SUMMARY_META_KEY = '_review_variation_summary';
 
 	/**
-	 * Per-request cache for the "did this email review this product (and this
-	 * variation) on this order" lookup, keyed by
+	 * Per-request cache for the "does this order already have a review for this
+	 * product (and this variation)" lookup, keyed by
 	 * `order_id|product_id|variation_id|email`. Value is a `WP_Comment` when
 	 * one matches, or `null` when the slot has been checked and nothing
 	 * matches (so a second call doesn't re-query).
@@ -158,7 +158,7 @@ class ItemEligibility {
 	public static function preload_for_items( iterable $items, WC_Order $order ): void {
 		$email    = $order->get_billing_email();
 		$order_id = $order->get_id();
-		if ( '' === $email || $order_id <= 0 ) {
+		if ( $order_id <= 0 ) {
 			return;
 		}
 
@@ -195,14 +195,12 @@ class ItemEligibility {
 		// product on a later order shouldn't see their old review here.
 		$comments = get_comments(
 			array(
-				'post__in'           => array_values( $product_ids ),
-				'author_email'       => $email,
-				'type'               => 'review',
-				'status'             => 'approve',
-				'include_unapproved' => array( $email ),
-				'orderby'            => 'comment_date_gmt',
-				'order'              => 'DESC',
-				'meta_query'         => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- bounded by post__in + author_email.
+				'post__in'   => array_values( $product_ids ),
+				'type'       => 'review',
+				'status'     => array( 'approve', 'hold' ),
+				'orderby'    => 'comment_date_gmt',
+				'order'      => 'DESC',
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- bounded by post__in + the order meta.
 					array(
 						'key'   => self::ORDER_META_KEY,
 						'value' => (string) $order_id,
@@ -486,7 +484,7 @@ class ItemEligibility {
 	private static function find_existing_review( int $product_id, int $variation_id, WC_Order $order ): ?WP_Comment {
 		$email    = $order->get_billing_email();
 		$order_id = (int) $order->get_id();
-		if ( '' === $email || $order_id <= 0 || $product_id <= 0 ) {
+		if ( $order_id <= 0 || $product_id <= 0 ) {
 			return null;
 		}
 
@@ -497,15 +495,13 @@ class ItemEligibility {
 
 		$comments = get_comments(
 			array(
-				'post_id'            => $product_id,
-				'author_email'       => $email,
-				'type'               => 'review',
-				'status'             => 'approve',
-				'include_unapproved' => array( $email ),
-				'number'             => 1,
-				'orderby'            => 'comment_date_gmt',
-				'order'              => 'DESC',
-				'meta_query'         => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- bounded by post_id + author_email.
+				'post_id'    => $product_id,
+				'type'       => 'review',
+				'status'     => array( 'approve', 'hold' ),
+				'number'     => 1,
+				'orderby'    => 'comment_date_gmt',
+				'order'      => 'DESC',
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- bounded by post_id + the order meta.
 					'relation' => 'AND',
 					array(
 						'key'   => self::ORDER_META_KEY,
