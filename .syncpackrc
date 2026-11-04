@@ -122,6 +122,7 @@
 				"@wordpress/prettier-config",
 				"@wordpress/postcss-plugins-preset",
 				"@wordpress/scripts",
+				"babel-loader",
 				"copy-webpack-plugin",
 				"postcss",
 				"prettier",
@@ -223,15 +224,6 @@
 				"**"
 			],
 			"pinVersion": "5.1.x"
-		},
-		{
-			"dependencies": [
-				"babel-loader"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "9.2.x"
 		},
 		{
 			"dependencies": [
