@@ -72,15 +72,6 @@ final class ImportSession {
 	private array $data;
 
 	/**
-	 * Payload as it was last read from or written to the transient.
-	 *
-	 * Lets persist() skip a no-op write without re-reading the transient.
-	 *
-	 * @var array<string, mixed>|null
-	 */
-	private ?array $stored_data = null;
-
-	/**
 	 * Whether the last write of the payload transient succeeded.
 	 *
 	 * @var bool
@@ -450,9 +441,7 @@ final class ImportSession {
 		if ( ! is_array( $payload ) ) {
 			return null;
 		}
-		$session              = new self( $user_id, $token, $payload );
-		$session->stored_data = $payload;
-		return $session;
+		return new self( $user_id, $token, $payload );
 	}
 
 	/**
@@ -725,21 +714,19 @@ final class ImportSession {
 	/**
 	 * Persist the current payload back to its transient.
 	 *
-	 * The set_transient() call returns false when the stored value is unchanged, so an
-	 * unchanged payload is treated as already stored rather than as a lost write. The index
-	 * pointer is rewritten every time so its TTL slides with the payload's.
+	 * The payload and the index pointer are both rewritten on every call, so their TTLs
+	 * slide together. set_transient() returns false when the stored value is unchanged
+	 * even though it still extends the timeout, so a false result is confirmed by reading
+	 * the transient back before it is treated as a lost write.
 	 *
 	 * @return bool Whether the payload is stored.
 	 */
 	private function persist(): bool {
 		$payload_key = self::PREFIX . $this->user_id . '_' . $this->token;
 
-		$stored = $this->data === $this->stored_data;
+		$stored = set_transient( $payload_key, $this->data, self::TTL );
 		if ( ! $stored ) {
-			$stored = set_transient( $payload_key, $this->data, self::TTL );
-			if ( $stored ) {
-				$this->stored_data = $this->data;
-			}
+			$stored = get_transient( $payload_key ) === $this->data;
 		}
 
 		set_transient( self::INDEX_PREFIX . $this->user_id, $this->token, self::TTL );
