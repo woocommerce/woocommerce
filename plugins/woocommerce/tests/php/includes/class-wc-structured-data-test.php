@@ -1,6 +1,8 @@
 <?php
 declare( strict_types = 1 );
 
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
+
 /**
  * Class WC_Structured_Data_Test.
  */
@@ -347,6 +349,91 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( $this->structured_data->prepare_gtin( array( '123-456-78', '123-456-78' ) ), '' );
 		$this->assertEquals( $this->structured_data->prepare_gtin( '+12345678' ), '12345678' );
 		$this->assertEquals( $this->structured_data->prepare_gtin( '123.4e-5' ), '12345' );
+	}
+
+	/**
+	 * @testdox Product schema includes usable gallery videos in order and omits them when disabled or without thumbnails.
+	 */
+	public function test_product_gallery_video_structured_data(): void {
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'yes' );
+		$uploads = wp_get_upload_dir();
+		$image   = wp_insert_attachment(
+			array( 'post_mime_type' => 'image/jpeg' ),
+			$uploads['basedir'] . '/product.jpg'
+		);
+		$poster  = wp_insert_attachment(
+			array( 'post_mime_type' => 'image/jpeg' ),
+			$uploads['basedir'] . '/poster.jpg'
+		);
+		$first   = wp_insert_attachment(
+			array(
+				'post_title'     => 'First video',
+				'post_mime_type' => 'video/mp4',
+				'post_date'      => '2024-01-02 03:04:05',
+				'post_date_gmt'  => '2024-01-02 03:04:05',
+			),
+			$uploads['basedir'] . '/first.mp4'
+		);
+		$second  = wp_insert_attachment(
+			array(
+				'post_title'     => 'Second video',
+				'post_mime_type' => 'video/mp4',
+				'post_date'      => '2024-02-03 04:05:06',
+				'post_date_gmt'  => '2024-02-03 04:05:06',
+			),
+			$uploads['basedir'] . '/second.mp4'
+		);
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( $image );
+		$product->save();
+		ProductMediaGallery::set_stored_video_gallery_items(
+			$product,
+			array(
+				array(
+					'id'       => $second,
+					'position' => 1,
+				),
+				array(
+					'id'        => $first,
+					'position'  => 0,
+					'poster_id' => $poster,
+				),
+			)
+		);
+
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$this->assertSame(
+			array(
+				array(
+					'@type'        => 'VideoObject',
+					'name'         => 'First video',
+					'contentUrl'   => wp_get_attachment_url( $first ),
+					'thumbnailUrl' => wp_get_attachment_image_url( $poster, 'full' ),
+					'uploadDate'   => '2024-01-02T03:04:05+00:00',
+				),
+				array(
+					'@type'        => 'VideoObject',
+					'name'         => 'Second video',
+					'contentUrl'   => wp_get_attachment_url( $second ),
+					'thumbnailUrl' => wp_get_attachment_image_url( $image, 'full' ),
+					'uploadDate'   => '2024-02-03T04:05:06+00:00',
+				),
+			),
+			$sut->get_data()[0]['subjectOf']
+		);
+
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'no' );
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$this->assertArrayNotHasKey( 'subjectOf', $sut->get_data()[0] );
+
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'yes' );
+		$product->set_image_id( 0 );
+		$product->save();
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$this->assertSame( array( 'First video' ), array_column( $sut->get_data()[0]['subjectOf'], 'name' ) );
 	}
 
 	/**
