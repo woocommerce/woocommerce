@@ -72,7 +72,7 @@ describe( ABILITY, () => {
 		[
 			'refuses a product without a name',
 			{ sku: 'mcp-create-unnamed' },
-			/name is a required property/,
+			/needs a name/,
 		],
 		[
 			'refuses a price that is not a number',

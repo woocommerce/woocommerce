@@ -15,6 +15,16 @@
 		"description": "List every note of an order, newest first."
 	},
 	{
+		"name": "woocommerce/order-send-email",
+		"label": "Send order email",
+		"description": "Send an order email to the customer again."
+	},
+	{
+		"name": "woocommerce/order-update",
+		"label": "Update order",
+		"description": "Update the addresses, customer note, product lines and shipping lines of an order. Fields that are not sent keep their value. Changing lines recalculates the totals and needs an order status that allows editing. Use the woocommerce/order-update-status ability to change the status."
+	},
+	{
 		"name": "woocommerce/order-update-status",
 		"label": "Update order status",
 		"description": "Update an order status."
