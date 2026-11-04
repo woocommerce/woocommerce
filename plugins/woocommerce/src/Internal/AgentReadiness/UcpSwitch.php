@@ -10,7 +10,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Turns UCP on or off from the Agentic commerce settings page. A failing
- * required setup check never blocks the switch; it shows as Needs attention.
+ * required setup check keeps it from being turned on. Turning it off still
+ * works, and a switch that is already on shows as Needs attention.
  *
  * @since 11.4.0
  */
@@ -57,6 +58,15 @@ class UcpSwitch {
 	 */
 	public function set_enabled( bool $enable ): array {
 		$failing = $this->store_conditions->failing_required();
+
+		// Already on stays on, so it can be turned off. Off stays off until the required checks pass.
+		if ( $enable && ! UcpUtils::is_enabled() && array() !== $failing ) {
+			return array(
+				'enabled'        => false,
+				'status'         => self::STATUS_OFF,
+				'failing_checks' => $failing,
+			);
+		}
 
 		if ( UcpUtils::is_enabled() !== $enable ) {
 			$this->features_controller->change_feature_enable( UcpUtils::FEATURE_ID, $enable );
