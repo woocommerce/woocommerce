@@ -296,4 +296,88 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 			}
 		}
 	}
+	/**
+	 * @testdox Should include spam and trash only when requested and preserve totals beyond the last page.
+	 */
+	public function test_moderation_statuses_and_empty_pages(): void {
+		$product = \WC_Helper_Product::create_simple_product()->get_id();
+		foreach ( array( '1', '0', 'spam', 'trash' ) as $status ) {
+			$this->review( $product, 4, array( 'comment_approved' => $status ) );
+		}
+		$all = $this->sut->execute( array( 'status' => 'all' ) );
+		$this->assertSame( 4, $all['total'] );
+		$this->assertCount( 4, $all['reviews'] );
+		foreach ( array( 'spam', 'trash' ) as $status ) {
+			$result = $this->sut->execute(
+				array(
+					'status'   => $status,
+					'page'     => 2,
+					'per_page' => 1,
+				)
+			);
+			$this->assertSame( array(), $result['reviews'] );
+			$this->assertSame( 1, $result['total'] );
+			$this->assertSame( 1, $result['total_pages'] );
+		}
+	}
+
+	/**
+	 * @testdox Should escape literal search characters and recognize requested trashed products without reviews.
+	 */
+	public function test_literal_search_and_trashed_products(): void {
+		$product = \WC_Helper_Product::create_simple_product()->get_id();
+		$id      = $this->review( $product, 3, array( 'comment_content' => '100%_match' ) );
+		$this->review( $product, 5, array( 'comment_content' => '100 other match' ) );
+		$result = $this->sut->execute( array( 'search' => '%_' ) );
+		$this->assertSame( array( $id ), array_column( $result['reviews'], 'id' ) );
+		$empty = \WC_Helper_Product::create_simple_product()->get_id();
+		wp_trash_post( $empty );
+		$result = $this->sut->execute( array( 'product_ids' => array( $empty ) ) );
+		$this->assertSame( array( $empty ), $result['products_without_reviews'] );
+		$this->assertArrayNotHasKey( 'unknown_product_ids', $result );
+	}
+	/**
+	 * @testdox Should leave nested comment queries unchanged and remove its query filter afterward.
+	 */
+	public function test_nested_comment_queries(): void {
+		$post_comment = self::factory()->comment->create(
+			array(
+				'comment_post_ID' => self::factory()->post->create(),
+				'comment_type'    => 'comment',
+			)
+		);
+		$product      = \WC_Helper_Product::create_simple_product()->get_id();
+		$this->review( $product, 5 );
+		$nested = null;
+		$filter = static function ( $clauses ) use ( &$nested, $post_comment ) {
+			if ( null === $nested ) {
+				$nested = array();
+				$nested = get_comments(
+					array(
+						'comment__in' => array( $post_comment ),
+						'status'      => 'all',
+					)
+				);
+			}
+			return $clauses;
+		};
+		add_filter( 'comments_clauses', $filter, 20 );
+		try {
+			$result = $this->sut->execute();
+			$this->assertSame( 1, $result['total'] );
+			$this->assertSame( array( $post_comment ), array_map( 'intval', wp_list_pluck( $nested, 'comment_ID' ) ) );
+		} finally {
+			remove_filter( 'comments_clauses', $filter, 20 );
+		}
+		$this->assertCount(
+			1,
+			get_comments(
+				array(
+					'comment__in'  => array( $post_comment ),
+					'status'       => 'all',
+					'cache_domain' => 'after-review-query',
+				)
+			)
+		);
+	}
 }

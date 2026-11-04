@@ -145,14 +145,14 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 
 	/**
 	 * Moderation statuses mapped to the comment_approved values they cover.
-	 * An empty list means every status.
+	 * Null means every status.
 	 */
 	private const STATUSES = array(
-		'approved' => array( '1' ),
-		'hold'     => array( '0' ),
-		'spam'     => array( 'spam' ),
-		'trash'    => array( 'trash' ),
-		'all'      => array(),
+		'approved' => '1',
+		'hold'     => '0',
+		'spam'     => 'spam',
+		'trash'    => 'trash',
+		'all'      => null,
 	);
 
 	private const STATUS_LABELS = array(
@@ -270,60 +270,18 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 		$filters['include'] = $input['include'] ?? array();
 		$page               = (int) ( $input['page'] ?? 1 );
 		$per_page           = (int) ( $input['per_page'] ?? self::DEFAULT_LIMIT );
-		$offset             = ( $page - 1 ) * $per_page;
-		$rows               = self::fetch( 'c.comment_ID, p.post_title', $filters, "ORDER BY c.comment_date_gmt DESC, c.comment_ID DESC LIMIT {$per_page} OFFSET {$offset}" );
-		_prime_comment_caches( array_column( $rows, 'comment_ID' ), true );
-
-		$reviews = array();
-		foreach ( $rows as $row ) {
-			$comment = get_comment( (int) $row->comment_ID );
-			if ( ! $comment ) {
-				continue;
+		$matches            = self::query_reviews( $filters, $page, $per_page );
+		$total              = (int) $matches->found_comments;
+		$reviews            = array();
+		foreach ( $matches->comments as $comment ) {
+			$comment = get_comment( $comment );
+			if ( $comment ) {
+				$reviews[] = self::format_review( $comment, $scope );
 			}
-			$review = array(
-				'id'           => (int) $comment->comment_ID,
-				'product_id'   => (int) $comment->comment_post_ID,
-				'product_name' => (string) $row->post_title,
-				'date_created' => self::format_date( $comment->comment_date_gmt ),
-				'rating'       => (int) get_comment_meta( (int) $comment->comment_ID, 'rating', true ),
-				'verified'     => (bool) get_comment_meta( (int) $comment->comment_ID, 'verified', true ),
-				'status'       => self::STATUS_LABELS[ $comment->comment_approved ] ?? (string) $comment->comment_approved,
-				'review'       => wp_strip_all_tags( (string) $comment->comment_content ),
-			);
-			if ( 1 === count( $product_ids ) ) {
-				unset( $review['product_id'], $review['product_name'] );
-			}
-			if ( 'all' !== $status ) {
-				unset( $review['status'] );
-			}
-			$reviews[] = ExtensibleAbilities::add_fields_to_object( $review, 'product_review', $comment );
 		}
+		$ratings    = self::get_rating_summary( $scope, $total );
+		$by_product = $ratings['by_product'];
 
-		$grouped = self::fetch(
-			'c.comment_post_ID, p.post_title, COUNT(*) AS total, SUM( NULLIF( cm.meta_value + 0, 0 ) ) AS rating_sum, COUNT( NULLIF( cm.meta_value + 0, 0 ) ) AS rated',
-			$scope,
-			'GROUP BY c.comment_post_ID, p.post_title'
-		);
-
-		$total_reviews = 0;
-		$rating_sum    = 0.0;
-		$rated_reviews = 0;
-		$by_product    = array();
-
-		foreach ( $grouped as $row ) {
-			$total_reviews += (int) $row->total;
-			$rating_sum    += (float) $row->rating_sum;
-			$rated_reviews += (int) $row->rated;
-
-			$by_product[] = array(
-				'product_id'     => (int) $row->comment_post_ID,
-				'product_name'   => (string) $row->post_title,
-				'review_count'   => (int) $row->total,
-				'average_rating' => $row->rated ? round( (float) $row->rating_sum / (int) $row->rated, 2 ) : 0.0,
-			);
-		}
-
-		$total  = self::fetch( 'COUNT(*)', $filters );
 		$result = array(
 			'total'       => $total,
 			'page'        => $page,
@@ -331,12 +289,7 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 			'total_pages' => (int) ceil( $total / $per_page ),
 			'status'      => $status,
 			'count'       => count( $reviews ),
-			'summary'     => array(
-				'average_rating'   => $rated_reviews ? round( $rating_sum / $rated_reviews, 2 ) : 0.0,
-				'total_reviews'    => $total_reviews,
-				'matching_reviews' => $total,
-				'total_products'   => count( $by_product ),
-			),
+			'summary'     => $ratings['summary'],
 		);
 
 		if ( $product_ids ) {
@@ -363,96 +316,176 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 	}
 
 	/**
-	 * Build the shared FROM/WHERE for every review query.
+	 * Query review objects and the matching count using WordPress pagination and caches.
 	 *
-	 * Legacy plain comments require rating metadata; modern reviews can be unrated.
-	 * Replies are excluded even when WooCommerce stamps them as reviews.
-	 *
-	 * @param array<string, mixed> $filters status, product_ids, and optionally
-	 *                                      min_rating/max_rating/search.
-	 * @return array{0: string, 1: array<int, mixed>} SQL fragment and its params.
+	 * @param array $filters Review filters.
+	 * @param int   $page Current page.
+	 * @param int   $per_page Page size.
+	 * @return \WP_Comment_Query
 	 */
-	private static function build_query( array $filters ): array {
-		global $wpdb;
+	private static function query_reviews( array $filters, int $page, int $per_page ): \WP_Comment_Query {
+		$args = array(
+			'post_type'                 => 'product',
+			'post__in'                  => $filters['product_ids'],
+			'comment__in'               => $filters['include'],
+			'type__in'                  => array( 'review', 'comment' ),
+			'parent'                    => 0,
+			'status'                    => 'all' === $filters['status'] ? 'any' : ( 'approved' === $filters['status'] ? 'approve' : $filters['status'] ),
+			'number'                    => $per_page,
+			'offset'                    => ( $page - 1 ) * $per_page,
+			'orderby'                   => array(
+				'comment_date_gmt' => 'DESC',
+				'comment_ID'       => 'DESC',
+			),
+			'no_found_rows'             => false,
+			'update_comment_post_cache' => true,
+			// The text-only search is added through SQL, so include it in the cache key.
+			'cache_domain'              => 'woocommerce-product-reviews-' . md5( $filters['search'] ),
+		);
+		if ( isset( $filters['min_rating'] ) ) {
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- WordPress stores review ratings in comment metadata.
+			$args['meta_query'] = array(
+				array(
+					'key'     => 'rating',
+					'value'   => array( $filters['min_rating'], $filters['max_rating'] ),
+					'compare' => 'BETWEEN',
+					'type'    => 'NUMERIC',
+				),
+			);
+		}
 
-		$sql = "FROM {$wpdb->comments} c
-			INNER JOIN {$wpdb->posts} p ON p.ID = c.comment_post_ID
-			LEFT JOIN {$wpdb->commentmeta} cm ON cm.comment_id = c.comment_ID AND cm.meta_key = 'rating'
-			WHERE p.post_type = 'product'
-			AND c.comment_parent = 0
+		$query  = new \WP_Comment_Query();
+		$filter = static function ( array $clauses, \WP_Comment_Query $current ) use ( $query, $filters ): array {
+			if ( $current !== $query ) {
+				return $clauses;
+			}
+			global $wpdb;
+			// Modern reviews may be unrated; legacy plain comments require a rating.
+			$clauses['where'] .= " AND ( {$wpdb->comments}.comment_type = 'review' OR EXISTS (
+				SELECT 1 FROM {$wpdb->commentmeta} legacy_rating
+				WHERE legacy_rating.comment_id = {$wpdb->comments}.comment_ID
+				AND legacy_rating.meta_key = 'rating' AND legacy_rating.meta_value + 0 > 0
+			) )";
+			// WordPress's normal comment search also matches reviewer identity.
+			if ( '' !== $filters['search'] ) {
+				$clauses['where'] .= $wpdb->prepare( " AND {$wpdb->comments}.comment_content LIKE %s", '%' . $wpdb->esc_like( $filters['search'] ) . '%' );
+			}
+			return $clauses;
+		};
+		add_filter( 'comments_clauses', $filter, 10, 2 );
+		try {
+			$query->query( $args );
+			if ( ! $query->comments ) {
+				unset( $args['number'], $args['offset'] );
+				$args['count']         = true;
+				$query->found_comments = (int) $query->query( $args );
+			}
+			return $query;
+		} finally {
+			remove_filter( 'comments_clauses', $filter, 10 );
+		}
+	}
+
+	/**
+	 * Format a review without exposing reviewer identity.
+	 *
+	 * @param \WP_Comment $comment Review object.
+	 * @param array       $scope Product and status scope.
+	 * @return array
+	 */
+	private static function format_review( \WP_Comment $comment, array $scope ): array {
+		$review = array(
+			'id'           => (int) $comment->comment_ID,
+			'date_created' => self::format_date( $comment->comment_date_gmt ),
+			'rating'       => (int) get_comment_meta( (int) $comment->comment_ID, 'rating', true ),
+			'verified'     => (bool) get_comment_meta( (int) $comment->comment_ID, 'verified', true ),
+			'review'       => wp_strip_all_tags( (string) $comment->comment_content ),
+		);
+		if ( 1 !== count( $scope['product_ids'] ) ) {
+			$review['product_id']   = (int) $comment->comment_post_ID;
+			$review['product_name'] = (string) get_post_field( 'post_title', (int) $comment->comment_post_ID, 'raw' );
+		}
+		if ( 'all' === $scope['status'] ) {
+			$review['status'] = self::STATUS_LABELS[ $comment->comment_approved ] ?? (string) $comment->comment_approved;
+		}
+		return ExtensibleAbilities::add_fields_to_object( $review, 'product_review', $comment );
+	}
+
+	/**
+	 * Aggregate all reviews in the product/status scope, independently of the page filters.
+	 *
+	 * @param array $scope Product and status scope.
+	 * @param int   $matching_reviews Total matching the page filters.
+	 * @return array
+	 */
+	private static function get_rating_summary( array $scope, int $matching_reviews ): array {
+		global $wpdb;
+		$where    = "p.post_type = 'product' AND c.comment_parent = 0
 			AND c.comment_type IN ( 'review', 'comment', '' )
 			AND ( c.comment_type = 'review' OR cm.meta_value > 0 )";
-
-		$params = array();
-
-		$approved = self::STATUSES[ $filters['status'] ];
-		if ( $approved ) {
-			$sql   .= ' AND c.comment_approved IN ( ' . implode( ', ', array_fill( 0, count( $approved ), '%s' ) ) . ' )';
-			$params = array_merge( $params, $approved );
+		$params   = array();
+		$approved = self::STATUSES[ $scope['status'] ];
+		if ( null !== $approved ) {
+			$where   .= ' AND c.comment_approved = %s';
+			$params[] = $approved;
 		}
-
-		if ( $filters['product_ids'] ) {
-			$sql   .= ' AND c.comment_post_ID IN ( ' . implode( ', ', array_fill( 0, count( $filters['product_ids'] ), '%d' ) ) . ' )';
-			$params = array_merge( $params, $filters['product_ids'] );
+		if ( $scope['product_ids'] ) {
+			$where .= ' AND c.comment_post_ID IN ( ' . implode( ', ', array_fill( 0, count( $scope['product_ids'] ), '%d' ) ) . ' )';
+			$params = array_merge( $params, $scope['product_ids'] );
 		}
-
-		if ( ! empty( $filters['include'] ) ) {
-			$sql   .= ' AND c.comment_ID IN ( ' . implode( ', ', array_fill( 0, count( $filters['include'] ), '%d' ) ) . ' )';
-			$params = array_merge( $params, $filters['include'] );
+		$sql = "SELECT c.comment_post_ID, p.post_title, COUNT(*) AS total,
+			SUM( NULLIF( cm.meta_value + 0, 0 ) ) AS rating_sum, COUNT( NULLIF( cm.meta_value + 0, 0 ) ) AS rated
+			FROM {$wpdb->comments} c
+			INNER JOIN {$wpdb->posts} p ON p.ID = c.comment_post_ID
+			LEFT JOIN {$wpdb->commentmeta} cm ON cm.comment_id = c.comment_ID AND cm.meta_key = 'rating'
+			WHERE {$where} GROUP BY c.comment_post_ID, p.post_title";
+		if ( $params ) {
+			$sql = $wpdb->prepare( $sql, $params ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Only internal clauses and placeholders are combined above.
 		}
-
-		if ( isset( $filters['min_rating'] ) ) {
-			$sql     .= ' AND cm.meta_value + 0 BETWEEN %d AND %d';
-			$params[] = $filters['min_rating'];
-			$params[] = $filters['max_rating'];
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Filter values are prepared above.
+		$grouped       = $wpdb->get_results( $sql );
+		$total_reviews = 0;
+		$rating_sum    = 0.0;
+		$rated_reviews = 0;
+		$by_product    = array();
+		foreach ( $grouped as $row ) {
+			$total_reviews += (int) $row->total;
+			$rating_sum    += (float) $row->rating_sum;
+			$rated_reviews += (int) $row->rated;
+			$by_product[]   = array(
+				'product_id'     => (int) $row->comment_post_ID,
+				'product_name'   => (string) $row->post_title,
+				'review_count'   => (int) $row->total,
+				'average_rating' => $row->rated ? round( (float) $row->rating_sum / (int) $row->rated, 2 ) : 0.0,
+			);
 		}
-
-		if ( isset( $filters['search'] ) && '' !== $filters['search'] ) {
-			$sql     .= ' AND c.comment_content LIKE %s';
-			$params[] = '%' . $wpdb->esc_like( $filters['search'] ) . '%';
-		}
-
-		return array( $sql, $params );
+		return array(
+			'summary'    => array(
+				'average_rating'   => $rated_reviews ? round( $rating_sum / $rated_reviews, 2 ) : 0.0,
+				'total_reviews'    => $total_reviews,
+				'matching_reviews' => $matching_reviews,
+				'total_products'   => count( $by_product ),
+			),
+			'by_product' => $by_product,
+		);
 	}
 
 	/**
-	 * Narrow a list of IDs to the ones that are products, whatever their status.
+	 * Find requested products regardless of their publication status.
 	 *
-	 * @param array<int, int> $ids Candidate product IDs.
-	 * @return array<int, int>
+	 * @param int[] $ids Candidate product IDs.
+	 * @return int[]
 	 */
 	private static function existing_product_ids( array $ids ): array {
-		global $wpdb;
-
-		$placeholders = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
-		$sql          = "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'product' AND ID IN ( {$placeholders} )";
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The ID placeholders are built above.
-		$found = $wpdb->get_col( $wpdb->prepare( $sql, $ids ) );
-
-		return array_map( 'intval', $found );
-	}
-
-	/**
-	 * Run a review query, optionally as a count.
-	 *
-	 * @param string               $select  Columns to select, or 'COUNT(*)'.
-	 * @param array<string, mixed> $filters Filters for build_query().
-	 * @param string               $tail    ORDER BY / LIMIT / GROUP BY clause.
-	 * @return ($select is 'COUNT(*)' ? int : array<int, \stdClass>)
-	 */
-	private static function fetch( string $select, array $filters, string $tail = '' ) {
-		global $wpdb;
-
-		list( $from, $params ) = self::build_query( $filters );
-
-		$sql = "SELECT {$select} {$from} {$tail}";
-		if ( $params ) {
-			$sql = $wpdb->prepare( $sql, $params ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- placeholders are built above.
-		}
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Only internal SQL fragments and prepared filter values are used.
-		return 'COUNT(*)' === $select ? (int) $wpdb->get_var( $sql ) : $wpdb->get_results( $sql );
+		return get_posts(
+			array(
+				'post_type'   => 'product',
+				'post_status' => array_keys( get_post_stati() ),
+				'post__in'    => $ids,
+				'numberposts' => -1,
+				'fields'      => 'ids',
+			)
+		);
 	}
 
 	/**
