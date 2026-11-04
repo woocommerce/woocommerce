@@ -1184,9 +1184,13 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object = new WC_Order();
 		$object->save();
 		$fired = did_action( 'woocommerce_payment_complete' );
+		$pre   = did_action( 'woocommerce_pre_payment_complete' );
 		$notes = count( wc_get_order_notes( array( 'order_id' => $object->get_id() ) ) );
+		WC()->session->set( 'order_awaiting_payment', $object->get_id() );
 
 		$this->assertTrue( $object->stage_payment_complete( '12345' ) );
+		$this->assertSame( 0, did_action( 'woocommerce_pre_payment_complete' ) - $pre );
+		$this->assertSame( $object->get_id(), WC()->session->get( 'order_awaiting_payment' ) );
 		$this->assertSame( OrderStatus::COMPLETED, $object->get_status() );
 		$this->assertSame( '12345', $object->get_transaction_id() );
 		$this->assertNotNull( $object->get_date_paid( 'edit' ) );
@@ -1198,12 +1202,65 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$this->assertCount( $notes, wc_get_order_notes( array( 'order_id' => $object->get_id() ) ) );
 
 		$object->save();
+		$this->assertSame( 1, did_action( 'woocommerce_pre_payment_complete' ) - $pre );
+		$this->assertFalse( WC()->session->get( 'order_awaiting_payment' ) );
 		$this->assertSame( OrderStatus::COMPLETED, wc_get_order( $object->get_id() )->get_status() );
 		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $fired );
 		$this->assertCount( $notes + 1, wc_get_order_notes( array( 'order_id' => $object->get_id() ) ) );
 
 		$object->save();
 		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $fired );
+	}
+
+	/**
+	 * Test: stage_payment_complete leaves nothing to the next save when the order status is not one that payment can complete.
+	 */
+	public function test_stage_payment_complete_leaves_nothing_to_save_for_a_status_payment_cannot_complete() {
+		$object = new WC_Order();
+		$object->set_status( OrderStatus::COMPLETED );
+		$object->save();
+		$pre = did_action( 'woocommerce_pre_payment_complete' );
+		WC()->session->set( 'order_awaiting_payment', $object->get_id() );
+
+		$this->assertFalse( $object->stage_payment_complete( '12345' ) );
+		$object->save();
+
+		$this->assertSame( 0, did_action( 'woocommerce_pre_payment_complete' ) - $pre );
+		$this->assertSame( $object->get_id(), WC()->session->get( 'order_awaiting_payment' ) );
+	}
+
+	/**
+	 * Test: a second stage_payment_complete that the status refuses keeps the pre-payment hook that the first one left to the save.
+	 */
+	public function test_refused_second_stage_payment_complete_keeps_the_staged_pre_payment_hook() {
+		$object = new WC_Order();
+		$object->save();
+		$pre   = did_action( 'woocommerce_pre_payment_complete' );
+		$fired = did_action( 'woocommerce_payment_complete' );
+		WC()->session->set( 'order_awaiting_payment', $object->get_id() );
+
+		$this->assertTrue( $object->stage_payment_complete( '12345' ) );
+		$this->assertFalse( $object->stage_payment_complete( '67890' ) );
+		$object->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_pre_payment_complete' ) - $pre );
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $fired );
+		$this->assertFalse( WC()->session->get( 'order_awaiting_payment' ) );
+	}
+
+	/**
+	 * Test: payment_complete after stage_payment_complete replaces the staged pre-payment hook, so the hook fires once.
+	 */
+	public function test_payment_complete_after_stage_payment_complete_fires_the_pre_payment_hook_once() {
+		$object = new WC_Order();
+		$object->save();
+		$pre = did_action( 'woocommerce_pre_payment_complete' );
+
+		$this->assertTrue( $object->stage_payment_complete( '12345' ) );
+		$object->payment_complete( '67890' );
+		$object->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_pre_payment_complete' ) - $pre );
 	}
 
 	/**
