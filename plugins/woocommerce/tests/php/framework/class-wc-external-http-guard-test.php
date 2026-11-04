@@ -59,17 +59,19 @@ class WC_External_HTTP_Guard_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A request to a loopback host or without a host passes through untouched.
+	 * @testdox A request to a loopback host, or one WordPress refuses to send, passes through untouched.
 	 *
 	 * @testWith ["http://localhost:8188/wp-admin/admin-ajax.php"]
 	 *           ["http://LOCALHOST/feed"]
 	 *           ["http://127.0.0.1/feed"]
 	 *           ["http://[::1]/feed"]
 	 *           ["bad-data-source.json"]
+	 *           ["ftp://api.example.com/feed"]
+	 *           ["//api.example.com/feed"]
 	 *
 	 * @param string $url The request URL.
 	 */
-	public function test_local_request_passes_through( string $url ): void {
+	public function test_request_that_stays_local_passes_through( string $url ): void {
 		$this->assertFalse( WC_External_HTTP_Guard::filter_request( false, array( 'method' => 'GET' ), $url ), "The guard should not answer {$url}." );
 		$this->assertSame( array(), WC_External_HTTP_Guard::get_blocked_requests(), "The request to {$url} should not be recorded." );
 	}

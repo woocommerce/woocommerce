@@ -119,15 +119,15 @@ final class WC_External_HTTP_Guard {
 	 * Whether a URL points at a host other than the test site and the loopback addresses.
 	 *
 	 * @param string $url The request URL.
-	 * @return bool False for a URL without a host, which WordPress rejects on its own.
+	 * @return bool False for a URL without a host or with a scheme other than HTTP(S), which WordPress refuses to send.
 	 */
 	private static function is_external_url( string $url ): bool {
-		$host = wp_parse_url( $url, PHP_URL_HOST );
-		if ( ! is_string( $host ) || '' === $host ) {
+		$parts = wp_parse_url( $url );
+		if ( ! is_array( $parts ) || empty( $parts['host'] ) || ! in_array( strtolower( $parts['scheme'] ?? '' ), array( 'http', 'https' ), true ) ) {
 			return false;
 		}
 
-		return ! in_array( strtolower( trim( $host, '[]' ) ), self::$local_hosts, true );
+		return ! in_array( strtolower( trim( $parts['host'], '[]' ) ), self::$local_hosts, true );
 	}
 
 	/**
