@@ -625,19 +625,19 @@ class WC_Structured_Data {
 			}
 		}
 
-		$video = $this->get_product_gallery_video_data( $product );
-		if ( $video ) {
-			$markup['subjectOf'] = $video;
+		$videos = $this->get_product_gallery_video_data( $product );
+		if ( $videos ) {
+			$markup['subjectOf'] = $videos;
 		}
 
 		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
 	}
 
 	/**
-	 * Get structured data for the first usable uploaded gallery video.
+	 * Get structured data for usable uploaded gallery videos.
 	 *
 	 * @param WC_Product $product Product data.
-	 * @return array Video data, or an empty array.
+	 * @return array Video data.
 	 */
 	private function get_product_gallery_video_data( $product ) {
 		if ( ! ProductMediaGallery::is_feature_enabled() ) {
@@ -645,12 +645,17 @@ class WC_Structured_Data {
 		}
 
 		$videos = ProductMediaGallery::get_stored_video_gallery_items( $product );
-		$ids    = array_filter( array_map( 'absint', array_merge( array_column( $videos, 'id' ), array_column( $videos, 'poster_id' ) ) ) );
+		if ( ! $videos ) {
+			return array();
+		}
+
+		$ids = array_filter( array_map( 'absint', array_merge( array_column( $videos, 'id' ), array_column( $videos, 'poster_id' ) ) ) );
 		if ( $ids ) {
 			// Prime caches to reduce future queries.
 			_prime_post_caches( array_unique( $ids ) );
 		}
 
+		$video_data = array();
 		foreach ( ProductMediaGallery::get_product_media_gallery_items( $product ) as $item ) {
 			if ( 'video' !== $item['media_type'] ) {
 				continue;
@@ -695,10 +700,10 @@ class WC_Structured_Data {
 			if ( is_int( $length ) && 0 < $length ) {
 				$video['duration'] = 'PT' . (int) $length . 'S';
 			}
-			return $video;
+			$video_data[] = $video;
 		}
 
-		return array();
+		return $video_data;
 	}
 
 
