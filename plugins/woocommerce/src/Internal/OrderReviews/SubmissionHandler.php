@@ -399,16 +399,35 @@ class SubmissionHandler {
 			? $existing->comment_approved
 			: self::moderate_edited_review( $existing, $content, $ip, $agent );
 
-		$update_ok = wp_update_comment(
-			wp_slash(
-				array(
-					'comment_ID'      => $existing_id,
-					'comment_content' => $content,
-					// Stored by core before it recounts the product's ratings.
-					'comment_meta'    => array( 'rating' => $rating ),
+		// Core re-filters the stored address on every update and encodes `&`, drifting it one
+		// step per write. Put it back for this row only, since callbacks inside
+		// wp_update_comment() can update other comments. No sanitize_email() as the insert path
+		// uses: that strips the `;` from an address an earlier write already encoded. No
+		// wp_slash() either: wp_update_comment_data receives unslashed data.
+		$stored_email   = (string) $existing->comment_author_email;
+		$keep_raw_email = function ( $data, $comment ) use ( $existing_id, $stored_email ) {
+			// A callback may short-circuit the update by returning WP_Error instead of data.
+			if ( is_array( $data ) && (int) ( $comment['comment_ID'] ?? 0 ) === $existing_id ) {
+				$data['comment_author_email'] = $stored_email;
+			}
+
+			return $data;
+		};
+		add_filter( 'wp_update_comment_data', $keep_raw_email, PHP_INT_MAX, 2 );
+		try {
+			$update_ok = wp_update_comment(
+				wp_slash(
+					array(
+						'comment_ID'      => $existing_id,
+						'comment_content' => $content,
+						// Stored by core before it recounts the product's ratings.
+						'comment_meta'    => array( 'rating' => $rating ),
+					)
 				)
-			)
-		);
+			);
+		} finally {
+			remove_filter( 'wp_update_comment_data', $keep_raw_email, PHP_INT_MAX );
+		}
 		if ( false === $update_ok || is_wp_error( $update_ok ) ) {
 			return array( 'error' => 'update_failed' );
 		}
@@ -492,8 +511,8 @@ class SubmissionHandler {
 	 */
 	private static function insert_review( array $comment_data ) {
 		// Sanitize the address as core's pre_comment_author_email chain would, but
-		// keep it un-encoded (sanitize_email preserves `&`) so the eligibility
-		// lookups still match the order's billing email.
+		// keep it un-encoded (sanitize_email preserves `&`): WordPress matches this
+		// column exactly elsewhere, the privacy exporter and eraser included.
 		$raw_email      = wp_slash( sanitize_email( (string) $comment_data['comment_author_email'] ) );
 		$keep_raw_email = function () use ( $raw_email ) {
 			return $raw_email;
@@ -532,19 +551,13 @@ class SubmissionHandler {
 	 * @return bool
 	 */
 	private static function has_rejected_review( WC_Order $order, int $product_id, int $variation_id ): bool {
-		$email = $order->get_billing_email();
-		if ( '' === $email ) {
-			return false;
-		}
-
 		$comments = get_comments(
 			array(
-				'post_id'      => $product_id,
-				'author_email' => $email,
-				'type'         => 'review',
-				'status'       => array( 'spam', 'trash' ),
-				'number'       => 1,
-				'meta_query'   => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- bounded by post_id + author_email.
+				'post_id'    => $product_id,
+				'type'       => 'review',
+				'status'     => array( 'spam', 'trash' ),
+				'number'     => 1,
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- bounded by post_id + the order meta.
 					'relation' => 'AND',
 					array(
 						'key'   => ItemEligibility::ORDER_META_KEY,
@@ -585,21 +598,15 @@ class SubmissionHandler {
 	 * @return \WP_Comment|null
 	 */
 	private static function find_auto_rejected_review( WC_Order $order, int $product_id, int $variation_id ): ?\WP_Comment {
-		$email = $order->get_billing_email();
-		if ( '' === $email ) {
-			return null;
-		}
-
 		$comments = get_comments(
 			array(
-				'post_id'      => $product_id,
-				'author_email' => $email,
-				'type'         => 'review',
-				'status'       => array( 'spam', 'trash' ),
-				'number'       => 1,
-				'orderby'      => 'comment_date_gmt',
-				'order'        => 'DESC',
-				'meta_query'   => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- bounded by post_id + author_email.
+				'post_id'    => $product_id,
+				'type'       => 'review',
+				'status'     => array( 'spam', 'trash' ),
+				'number'     => 1,
+				'orderby'    => 'comment_date_gmt',
+				'order'      => 'DESC',
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- bounded by post_id + the order meta.
 					'relation' => 'AND',
 					array(
 						'key'   => ItemEligibility::ORDER_META_KEY,
@@ -645,11 +652,6 @@ class SubmissionHandler {
 			return;
 		}
 
-		$customer_email = $order->get_billing_email();
-		if ( '' === $customer_email ) {
-			return;
-		}
-
 		// Build the same eligible-row set the page uses, then collect the
 		// distinct (parent product, variation) slots that need a review.
 		// Counting by slot rather than per-line-item means a double-submit of
@@ -687,12 +689,11 @@ class SubmissionHandler {
 		// reviewable items.
 		$comments = get_comments(
 			array(
-				'post__in'     => array_values( $product_ids ),
-				'author_email' => $customer_email,
-				'type'         => 'review',
-				'status'       => array( 'approve', 'hold' ),
-				'number'       => 0,
-				'meta_query'   => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- bounded by post__in + author_email.
+				'post__in'   => array_values( $product_ids ),
+				'type'       => 'review',
+				'status'     => array( 'approve', 'hold' ),
+				'number'     => 0,
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- bounded by post__in + the order meta.
 					array(
 						'key'   => ItemEligibility::ORDER_META_KEY,
 						'value' => (string) $order->get_id(),
