@@ -57,7 +57,7 @@ class Ability extends \WP_Ability {
 	 * @param mixed $input Optional. The raw input provided for the ability. Default `null`.
 	 * @return bool|\WP_Error Whether the ability has the necessary permission, or the input error.
 	 */
-	public function check_permissions( $input = null ) {
+	final public function check_permissions( $input = null ) {
 		$input = $this->normalize_input( $input );
 		if ( is_wp_error( $input ) ) {
 			return $input;
