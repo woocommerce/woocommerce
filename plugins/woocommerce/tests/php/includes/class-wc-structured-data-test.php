@@ -376,6 +376,66 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product schema follows the breadcrumb category selection and includes its ancestors.
+	 */
+	public function test_product_category_path(): void {
+		$parent  = wp_insert_term( 'Clothing', 'product_cat' );
+		$child   = wp_insert_term( 'Hoodies', 'product_cat', array( 'parent' => $parent['term_id'] ) );
+		$other   = wp_insert_term( 'Accessories', 'product_cat' );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_category_ids( array( $child['term_id'], $other['term_id'] ) );
+		$product->save();
+
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$this->assertSame( 'Clothing > Hoodies', $sut->get_data()[0]['category'] );
+
+		add_filter(
+			'woocommerce_breadcrumb_main_term',
+			static function () use ( $other ) {
+				return get_term( $other['term_id'], 'product_cat' );
+			}
+		);
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$this->assertSame( 'Accessories', $sut->get_data()[0]['category'] );
+	}
+
+	/**
+	 * @testdox Product schema output preserves ampersands in category names.
+	 */
+	public function test_product_category_output_preserves_ampersands(): void {
+		$category = wp_insert_term( 'Food & Drink', 'product_cat' );
+		$product  = WC_Helper_Product::create_simple_product();
+		$product->set_category_ids( array( $category['term_id'] ) );
+		$product->save();
+		$this->go_to( get_permalink( $product->get_id() ) );
+
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		ob_start();
+		$sut->output_structured_data();
+		$output = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '~^<script type="application/ld\+json">(.*)</script>$~s', $output );
+		preg_match( '~^<script type="application/ld\+json">(.*)</script>$~s', $output, $matches );
+		$data = json_decode( $matches[1], true );
+		$this->assertSame( 'Food & Drink', $data['category'] );
+	}
+
+	/**
+	 * @testdox Product schema omits an invalid breadcrumb category.
+	 */
+	public function test_product_with_invalid_category_path(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		add_filter( 'woocommerce_breadcrumb_main_term', '__return_null' );
+
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$this->assertArrayNotHasKey( 'category', $sut->get_data()[0] );
+	}
+
+	/**
 	 * @testdox Product schema uses the selected variation's MPN without inheriting the parent's value.
 	 * @testWith ["CHILD-PART", true, "CHILD-PART"]
 	 *           ["0", true, "0"]
@@ -409,6 +469,196 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 			$this->assertArrayNotHasKey( 'mpn', $data );
 		} else {
 			$this->assertSame( $expected_mpn, $data['mpn'] );
+		}
+	}
+
+	/**
+	 * @testdox Product measurements use the configured unit codes and map length to depth.
+	 * @testWith ["kg", "KGM", "m", "MTR"]
+	 *           ["g", "GRM", "cm", "CMT"]
+	 *           ["lbs", "LBR", "mm", "MMT"]
+	 *           ["oz", "ONZ", "in", "INH"]
+	 *           ["kg", "KGM", "yd", "YRD"]
+	 *
+	 * @param string $weight_unit Weight unit.
+	 * @param string $weight_code Expected weight code.
+	 * @param string $dimension_unit Dimension unit.
+	 * @param string $dimension_code Expected dimension code.
+	 */
+	public function test_product_measurement_unit_codes( string $weight_unit, string $weight_code, string $dimension_unit, string $dimension_code ): void {
+		update_option( 'woocommerce_weight_unit', $weight_unit );
+		update_option( 'woocommerce_dimension_unit', $dimension_unit );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_weight( '2.5' );
+		$product->set_length( '3' );
+		$product->set_width( '4' );
+		$product->set_height( '5' );
+
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$data = $sut->get_data()[0];
+		$this->assertSame(
+			array(
+				'@type'    => 'QuantitativeValue',
+				'value'    => 2.5,
+				'unitCode' => $weight_code,
+			),
+			$data['weight']
+		);
+		$this->assertSame(
+			array(
+				'@type'    => 'QuantitativeValue',
+				'value'    => 3.0,
+				'unitCode' => $dimension_code,
+			),
+			$data['depth']
+		);
+		$this->assertSame(
+			array(
+				'@type'    => 'QuantitativeValue',
+				'value'    => 4.0,
+				'unitCode' => $dimension_code,
+			),
+			$data['width']
+		);
+		$this->assertSame(
+			array(
+				'@type'    => 'QuantitativeValue',
+				'value'    => 5.0,
+				'unitCode' => $dimension_code,
+			),
+			$data['height']
+		);
+	}
+
+	/**
+	 * @testdox Empty, non-positive and invalid measurements are omitted from product schema.
+	 * @testWith [""]
+	 *           ["0"]
+	 *           ["-1"]
+	 *           ["invalid"]
+	 *           ["1e999"]
+	 *
+	 * @param string $value Measurement returned by a product filter.
+	 */
+	public function test_invalid_product_measurements_are_omitted( string $value ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		add_filter(
+			'woocommerce_product_get_weight',
+			static function () use ( $value ) {
+				return $value;
+			}
+		);
+		add_filter(
+			'woocommerce_product_get_length',
+			static function () use ( $value ) {
+				return $value;
+			}
+		);
+		add_filter(
+			'woocommerce_product_get_width',
+			static function () use ( $value ) {
+				return $value;
+			}
+		);
+		add_filter(
+			'woocommerce_product_get_height',
+			static function () use ( $value ) {
+				return $value;
+			}
+		);
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$data = $sut->get_data()[0];
+		foreach ( array( 'weight', 'depth', 'width', 'height' ) as $property ) {
+			$this->assertArrayNotHasKey( $property, $data );
+		}
+	}
+
+	/**
+	 * @testdox Unsupported units omit their measurements without affecting other units.
+	 * @testWith ["unknown", "cm", false, true]
+	 *           ["kg", "unknown", true, false]
+	 *
+	 * @param string $weight_unit Weight unit.
+	 * @param string $dimension_unit Dimension unit.
+	 * @param bool   $has_weight Whether weight is expected.
+	 * @param bool   $has_dimensions Whether dimensions are expected.
+	 */
+	public function test_unsupported_measurement_units( string $weight_unit, string $dimension_unit, bool $has_weight, bool $has_dimensions ): void {
+		update_option( 'woocommerce_weight_unit', $weight_unit );
+		update_option( 'woocommerce_dimension_unit', $dimension_unit );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_weight( '2' );
+		$product->set_length( '3' );
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$data = $sut->get_data()[0];
+		$this->assertSame( $has_weight, isset( $data['weight'] ) );
+		$this->assertSame( $has_dimensions, isset( $data['depth'] ) );
+	}
+
+	/**
+	 * @testdox Selected variations use their own measurements and inherit missing values from the parent.
+	 */
+	public function test_selected_variation_measurements(): void {
+		update_option( 'woocommerce_weight_unit', 'kg' );
+		update_option( 'woocommerce_dimension_unit', 'cm' );
+		$product = WC_Helper_Product::create_variation_product();
+		$product->set_weight( '2' );
+		$product->set_length( '3' );
+		$product->set_width( '4' );
+		$product->set_height( '5' );
+		$product->save();
+		$variation = wc_get_product( wc_get_product_id_by_sku( 'DUMMY SKU VARIABLE HUGE RED 0' ) );
+		$variation->set_weight( '7' );
+		$variation->set_length( '' );
+		$variation->set_width( '8' );
+		$variation->set_height( '' );
+		$variation->save();
+		WC_Product_Variable::sync( $product->get_id() );
+		$original_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserve the request state for this test.
+		try {
+			$_GET['attribute_pa_size']   = 'huge';
+			$_GET['attribute_pa_colour'] = 'red';
+			$_GET['attribute_pa_number'] = '0';
+			$sut                         = new WC_Structured_Data();
+			$sut->generate_product_data( wc_get_product( $product->get_id() ) );
+			$data = $sut->get_data()[0];
+			$this->assertSame(
+				array(
+					'@type'    => 'QuantitativeValue',
+					'value'    => 7.0,
+					'unitCode' => 'KGM',
+				),
+				$data['weight']
+			);
+			$this->assertSame(
+				array(
+					'@type'    => 'QuantitativeValue',
+					'value'    => 3.0,
+					'unitCode' => 'CMT',
+				),
+				$data['depth']
+			);
+			$this->assertSame(
+				array(
+					'@type'    => 'QuantitativeValue',
+					'value'    => 8.0,
+					'unitCode' => 'CMT',
+				),
+				$data['width']
+			);
+			$this->assertSame(
+				array(
+					'@type'    => 'QuantitativeValue',
+					'value'    => 5.0,
+					'unitCode' => 'CMT',
+				),
+				$data['height']
+			);
+		} finally {
+			$_GET = $original_get;
 		}
 	}
 
@@ -454,6 +704,37 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( '70.00', $offer['price'] );
 		$this->assertEquals( '70.00', $offer['priceSpecification'][0]['price'] );
 		$this->assertEquals( get_woocommerce_currency(), $offer['priceCurrency'] );
+	}
+
+	/**
+	 * @testdox Grouped product offer ignores child sale prices whose sale has not started.
+	 */
+	public function test_grouped_product_offer_ignores_scheduled_child_sale_price(): void {
+		$product   = WC_Helper_Product::create_grouped_product();
+		$children  = $product->get_children();
+		$active    = wc_get_product( $children[0] );
+		$scheduled = wc_get_product( $children[1] );
+		$active->set_props(
+			array(
+				'regular_price' => '100',
+				'sale_price'    => '70',
+			)
+		);
+		$active->save();
+		$scheduled->set_props(
+			array(
+				'regular_price'     => '100',
+				'sale_price'        => '63.45',
+				'date_on_sale_from' => strtotime( '+1 year' ),
+			)
+		);
+		$scheduled->save();
+
+		$this->structured_data->generate_product_data( wc_get_product( $product->get_id() ) );
+
+		$prices = wp_list_pluck( $this->structured_data->get_data()[0]['offers'][0]['priceSpecification'], 'price' );
+		$this->assertContains( '70.00', $prices );
+		$this->assertNotContains( '63.45', $prices, 'A child sale that has not started must not be advertised.' );
 	}
 
 	/**
