@@ -146,6 +146,7 @@
 					);
 					$( document.body ).on( 'click', '.wc-shipping-zone-method-settings', { view: this }, this.onConfigureShippingMethod );
 					$( document.body ).on( 'click', '.wc-shipping-zone-add-method', { view: this }, this.onAddShippingMethod );
+					$( document.body ).on( 'wc_backbone_modal_before_response', this.onModalBeforeResponse );
 					$( document.body ).on( 'wc_backbone_modal_response', this.onConfigureShippingMethodSubmitted );
 					$( document.body ).on( 'wc_region_picker_update', this.onUpdateZoneRegionPicker );
 					$( document.body ).on( 'wc_backbone_modal_next_response', this.onAddShippingMethodSubmitted );
@@ -268,6 +269,12 @@
 
 					event.preventDefault();
 
+					// The row overlay only blocks the mouse, so refuse the action while another
+					// one is running.
+					if ( model.isRunning ) {
+						return;
+					}
+
 					if ( window.confirm( data.strings.delete_shipping_method_confirmation ) ) {
 						shippingMethodView.block();
 						setRunning( model, true );
@@ -286,7 +293,13 @@
 								changes.methods = changes.methods || data.methods;
 								model.set('methods', methods);
 								model.logChanges( changes );
-								view.clearUnloadConfirmation();
+								// Zone edits can still be pending, so only mark the form clean when
+								// nothing else is left to save.
+								if ( _.isEmpty( _.omit( model.changes, 'methods' ) ) ) {
+									view.clearUnloadConfirmation();
+								} else {
+									$save_button.prop( 'disabled', false );
+								}
 								view.render();
 								shippingMethodView.unblock();
 							},
@@ -313,6 +326,13 @@
 						changes     = {};
 
 					event.preventDefault();
+
+					// The row overlay only blocks the mouse, so refuse the action while another
+					// one is running.
+					if ( model.isRunning ) {
+						return;
+					}
+
 					methods[ instance_id ].enabled = enabled;
 					changes.methods = changes.methods || { methods : {} };
 					changes.methods[ instance_id ] = _.extend( changes.methods[ instance_id ] || {}, { enabled : enabled } );
@@ -396,6 +416,12 @@
 
 					event.preventDefault();
 
+					// The row overlay only blocks the mouse, so refuse the action while another
+					// one is running.
+					if ( model.isRunning ) {
+						return;
+					}
+
 					method.settings_html = shippingMethodView.reformatSettingsHTML( method.settings_html );
 
 					$( this ).WCBackboneModal({
@@ -450,6 +476,13 @@
 
 					return data;
 				},
+				onModalBeforeResponse: function( event, target ) {
+					// The modal closes itself once the response fires, so refuse the submit here to
+					// keep the entered settings while another operation is running.
+					if ( 'wc-modal-shipping-method-settings' === target && shippingMethod.isRunning ) {
+						event.preventDefault();
+					}
+				},
 				onConfigureShippingMethodSubmitted: function( event, target, posted_data ) {
 					if ( 'wc-modal-shipping-method-settings' === target ) {
 						shippingMethodView.block();
@@ -468,7 +501,7 @@
 									$( 'table.wc-shipping-zone-methods' ).parent().find( '#woocommerce_errors' ).remove();
 
 									// If there were errors, prepend the form.
-									if ( response.data.errors.length > 0 ) {
+									if ( ( response.data.errors || [] ).length > 0 ) {
 										shippingMethodView.showErrors( response.data.errors );
 									}
 
@@ -668,10 +701,16 @@
 				},
 				onAddShippingMethodSubmitted: function( event, target, posted_data, closeModal ) {
 					if ( 'wc-modal-add-shipping-method' === target ) {
+						if ( shippingMethod.isRunning ) {
+							return;
+						}
+
 						shippingMethodView.block();
 						setRunning( shippingMethod, true );
 
-						$('#btn-next').addClass( 'is-busy' );
+						// Feedback only: the modal's Enter handler ignores the attribute, so the guard
+						// above is what prevents a second add request.
+						$('#btn-next').prop( 'disabled', true ).addClass( 'is-busy' );
 
 						// Add method to zone via ajax call
 						$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zone_add_method', {
@@ -687,7 +726,7 @@
 								! response.success ||
 								! response.data
 							) {
-								$( '#btn-next' ).removeClass( 'is-busy' );
+								$( '#btn-next' ).prop( 'disabled', false ).removeClass( 'is-busy' );
 								shippingMethod.onSaveFailure();
 								return;
 							}
@@ -752,7 +791,7 @@
 
 							$( document.body ).trigger( 'init_tooltips' );
 						}, 'json' ).fail( function() {
-							$( '#btn-next' ).removeClass( 'is-busy' );
+							$( '#btn-next' ).prop( 'disabled', false ).removeClass( 'is-busy' );
 							shippingMethod.onSaveFailure();
 						} );
 					}
@@ -873,7 +912,13 @@
 									changes.methods = changes.methods || data.methods;
 									model.set('methods', methods);
 									model.logChanges( changes );
-									view.clearUnloadConfirmation();
+									// Zone edits can still be pending, so only mark the form clean when
+									// nothing else is left to save.
+									if ( _.isEmpty( _.omit( model.changes, 'methods' ) ) ) {
+										view.clearUnloadConfirmation();
+									} else {
+										$save_button.prop( 'disabled', false );
+									}
 									view.render();
 									shippingMethodView.unblock();
 								},

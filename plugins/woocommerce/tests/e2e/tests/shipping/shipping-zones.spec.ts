@@ -433,9 +433,8 @@ test( 'surfaces a failed zone save and releases the methods table', async ( {
 		.poll( () => dialogMessages )
 		.toContain( 'Your changes were not saved. Please retry.' );
 
-	// Releasing the table and clearing the busy state are what regress; the enabled button
-	// is recorded as the expected end state rather than as coverage, since Save changes is
-	// never disabled on this path either way.
+	// Releasing the table and clearing the busy state are what regress; Save is re-enabled
+	// here because this change set is not methods-only.
 	await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
 	await expect( page.locator( '#submit' ) ).toBeEnabled();
 	await expect( page.locator( '#submit' ) ).not.toHaveClass( /is-busy/ );
@@ -501,8 +500,22 @@ test( 'keeps a zone edit made while an earlier save is in flight', async ( {
 	).toBeDisabled();
 	await expect( page.locator( '.blockOverlay' ).first() ).toBeVisible();
 
+	// Keyboard activation reaches the row links through the overlay, so prove the guard
+	// refuses the action rather than trusting the overlay.
+	const methodRow = page
+		.locator( '.wc-shipping-zone-method-rows tr[data-id]' )
+		.first();
+	await expect( methodRow ).toHaveAttribute( 'data-enabled', 'yes' );
+	await methodRow.locator( '.wc-shipping-zone-method-enabled a' ).focus();
+	await page.keyboard.press( 'Enter' );
+	await expect( methodRow ).toHaveAttribute( 'data-enabled', 'yes' );
+
 	// The zone fields stay editable while the table is blocked, so type again mid-request.
 	await page.getByLabel( 'Zone name' ).fill( secondName );
+
+	// That edit re-renders the rows, so the block has to be reapplied.
+	await expect( page.locator( '.blockOverlay' ).first() ).toBeVisible();
+
 	releaseFirstSave();
 	await page.waitForFunction(
 		() =>
@@ -520,6 +533,7 @@ test( 'keeps a zone edit made while an earlier save is in flight', async ( {
 	await page.locator( '#submit' ).click();
 	await secondSave;
 	await expect( page.locator( '#submit' ) ).toBeDisabled();
+	await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
 
 	const saved = await restApi.get(
 		`${ WC_API_PATH }/shipping/zones/${ zone.id }`
