@@ -26,6 +26,13 @@ class Email_Editor {
 	public const WOOCOMMERCE_EMAIL_META_THEME_TYPE = 'woocommerce_email_theme';
 
 	/**
+	 * Script module providing the JavaScript parts of the email editor's entity actions (WordPress 7.2+).
+	 * Integrations can pass it to wp_register_entity_actions() and add their parts with the
+	 * `woocommerce_email_editor_entity_actions` JavaScript filter.
+	 */
+	public const ENTITY_ACTIONS_SCRIPT_MODULE_ID = '@woocommerce/email-editor/entity-actions';
+
+	/**
 	 * Property for the email API controller.
 	 *
 	 * @var Email_Api_Controller Email API controller.
@@ -112,6 +119,7 @@ class Email_Editor {
 		$this->register_block_templates();
 		$this->register_email_post_sent_status();
 		$this->register_personalization_tags();
+		$this->register_entity_actions_script_module();
 		$is_editor_page = apply_filters( 'woocommerce_is_email_editor_page', false );
 		if ( $is_editor_page ) {
 			$this->extend_email_post_api();
@@ -162,6 +170,70 @@ class Email_Editor {
 			register_post_type(
 				$post_type['name'],
 				array_merge( $this->get_default_email_post_args(), $post_type['args'] )
+			);
+		}
+	}
+
+	/**
+	 * From WordPress 7.2 the editor reads post actions from a server-side registry,
+	 * so register the script module of the email editor's actions and the actions themselves there.
+	 *
+	 * @return void
+	 */
+	private function register_entity_actions_script_module(): void {
+		if ( ! function_exists( 'wp_register_entity_actions' ) ) {
+			return;
+		}
+		$version = filemtime( __DIR__ . '/entity-actions.js' );
+		wp_register_script_module(
+			self::ENTITY_ACTIONS_SCRIPT_MODULE_ID,
+			plugins_url( 'entity-actions.js', __FILE__ ),
+			array(),
+			false === $version ? false : (string) $version
+		);
+		add_action( 'wp_entity_actions_api_init', array( $this, 'register_entity_actions' ) );
+	}
+
+	/**
+	 * Replace core's "Trash" action of the email post types that opt in with the email editor's own,
+	 * which can permanently delete the email (see the `woocommerce_email_editor_trash_modal_should_permanently_delete` JS filter).
+	 * The label is replaced by the script module.
+	 *
+	 * @return void
+	 */
+	public function register_entity_actions(): void {
+		if ( ! function_exists( 'wp_register_entity_actions' ) || ! function_exists( 'wp_unregister_entity_actions' ) ) {
+			return;
+		}
+		foreach ( self::get_post_types() as $post_type ) {
+			/**
+			 * Filters whether the email editor's trash action replaces core's "Trash…" for an email post type on WordPress 7.2+.
+			 * Only opt in when the editor's JavaScript comes from a version of the email editor package that provides the action,
+			 * otherwise the post type is left without a trash action.
+			 *
+			 * @param bool   $replace   Whether to replace core's action. Default false.
+			 * @param string $post_type The email post type.
+			 *
+			 * @since 2.20.0
+			 */
+			if ( true !== apply_filters( 'woocommerce_email_editor_replace_trash_action', false, $post_type['name'] ) ) {
+				continue;
+			}
+			wp_unregister_entity_actions( 'postType', $post_type['name'], array( 'move-to-trash' ) );
+			wp_register_entity_actions(
+				'woocommerce',
+				'postType',
+				$post_type['name'],
+				array(
+					array(
+						'id'                => 'trash-email-post',
+						'label'             => __( 'Move to trash', 'woocommerce' ),
+						'supportsBulk'      => true,
+						'hideModalHeader'   => true,
+						'modalFocusOnMount' => 'firstContentElement',
+					),
+				),
+				self::ENTITY_ACTIONS_SCRIPT_MODULE_ID
 			);
 		}
 	}

@@ -2618,9 +2618,11 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	 */
 	public function test_create_without_explicit_prices_include_tax_keeps_default(): void {
 		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$previous_calc_tax = get_option( 'woocommerce_calc_taxes' );
 		$order             = null;
 
 		try {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
 			update_option( 'woocommerce_prices_include_tax', 'yes' );
 			$order = new WC_Order();
 			update_option( 'woocommerce_prices_include_tax', 'no' );
@@ -2644,6 +2646,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 				$order->delete( true );
 			}
 			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+			update_option( 'woocommerce_calc_taxes', $previous_calc_tax );
 		}
 	}
 
@@ -2687,9 +2690,11 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		global $wpdb;
 
 		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$previous_calc_tax = get_option( 'woocommerce_calc_taxes' );
 		$order             = new WC_Order();
 
 		try {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
 			update_option( 'woocommerce_prices_include_tax', 'yes' );
 			$this->switch_data_store( $order, $this->sut );
 			$order->save();
@@ -2716,6 +2721,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		} finally {
 			$order->delete( true );
 			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+			update_option( 'woocommerce_calc_taxes', $previous_calc_tax );
 		}
 	}
 
@@ -3831,6 +3837,51 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		// wc_string_to_datetime() resolves an unparseable value to the Unix epoch, so every order matches.
 		$this->assertContains( $order_id, $query->orders, 'An unparseable "after" value should still resolve to the Unix epoch.' );
+	}
+
+	/**
+	 * @testdox An empty 'date_query' boundary on a local date column is ignored, as WP_Date_Query does.
+	 * @testWith ["after"]
+	 *           ["before"]
+	 *
+	 * @param string $operator The date query operator, 'after' or 'before'.
+	 */
+	public function test_local_date_query_ignores_empty_boundary( string $operator ): void {
+		$past_id   = $this->create_order_created_at( '2024-05-01T11:00:00Z' );
+		$future_id = $this->create_order_created_at( time() + DAY_IN_SECONDS );
+
+		$query = new OrdersTableQuery(
+			array(
+				'date_query' => array(
+					array(
+						'column'  => 'post_date',
+						$operator => '',
+					),
+				),
+			)
+		);
+
+		$this->assertContains( $past_id, $query->orders, "A past order should match an empty '{$operator}' boundary." );
+		$this->assertContains( $future_id, $query->orders, "A future order should match an empty '{$operator}' boundary." );
+	}
+
+	/**
+	 * @testdox A 'date_query' on a local date column with no 'after' or 'before' boundary still matches orders.
+	 */
+	public function test_local_date_query_without_boundary_matches_orders(): void {
+		$order_id = $this->create_order_created_at( '2024-05-01T11:00:00Z' );
+
+		$query = new OrdersTableQuery(
+			array(
+				'date_query' => array(
+					array(
+						'column' => 'post_date',
+						'year'   => 2024,
+					),
+				),
+			)
+		);
+		$this->assertContains( $order_id, $query->orders, 'A year-only query should match an order from that year.' );
 	}
 
 	/**

@@ -2267,10 +2267,16 @@ function wc_update_450_sanitize_coupons_code() {
 	);
 
 	$codes_changed = false;
+	$encode_emoji  = in_array( $wpdb->get_col_charset( $wpdb->posts, 'post_title' ), array( 'utf8', 'utf8mb3' ), true );
 
 	foreach ( $coupons as $key => $data ) {
 		$coupon_id = intval( $data['ID'] );
-		$code      = trim( wp_filter_kses( $data['post_title'] ) );
+		$code      = wc_sanitize_coupon_code( $data['post_title'] );
+
+		// Like coupon saves, keep emoji encoded when the column can't store them.
+		if ( $encode_emoji ) {
+			$code = wp_encode_emoji( $code );
+		}
 
 		if ( ! empty( $code ) && $data['post_title'] !== $code ) {
 			$wpdb->update(
@@ -4237,4 +4243,21 @@ function wc_update_1140_re_enable_autoload_options(): void {
 			'woocommerce_logs_logging_enabled'            => true,
 		)
 	);
+}
+
+/**
+ * Add the MPN lookup column and index for existing stores.
+ *
+ * @since 11.4.0
+ */
+function wc_update_1140_add_mpn_to_product_lookup_table(): void {
+	global $wpdb;
+
+	if ( ! $wpdb->get_var( "SHOW COLUMNS FROM {$wpdb->wc_product_meta_lookup} LIKE 'mpn'" ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->wc_product_meta_lookup} ADD COLUMN mpn varchar(100) NOT NULL DEFAULT '' AFTER global_unique_id" );
+	}
+
+	if ( ! $wpdb->get_var( "SHOW INDEX FROM {$wpdb->wc_product_meta_lookup} WHERE Key_name = 'mpn'" ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->wc_product_meta_lookup} ADD INDEX mpn (mpn(50))" );
+	}
 }

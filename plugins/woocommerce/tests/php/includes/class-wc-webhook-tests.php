@@ -694,6 +694,86 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A successful delivery clears the pending ping, so no ping follows it.
+	 */
+	public function test_successful_delivery_clears_pending_ping(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$webhook = $this->create_active_webhook( 'product.updated' );
+		$webhook->set_user_id( 1 );
+		$webhook->save();
+
+		$requests = array();
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args ) use ( &$requests ) {
+				$is_ping    = 0 === strpos( (string) $args['body'], 'webhook_id=' );
+				$requests[] = $is_ping ? 'ping' : 'delivery';
+
+				// Like an endpoint that verifies signatures: the unsigned ping is rejected, the delivery accepted.
+				return $this->mock_http_response( $is_ping ? 401 : 200 );
+			},
+			10,
+			2
+		);
+
+		$webhook->deliver( $product->get_id() );
+
+		$this->assertSame( array( 'delivery' ), $requests, 'A successful delivery should not be followed by a ping.' );
+		$this->assertFalse( wc_get_webhook( $webhook->get_id() )->get_pending_delivery(), 'A successful delivery should clear the pending ping.' );
+	}
+
+	/**
+	 * @testdox The ping counts any 2xx response as success, like deliveries do.
+	 *
+	 * @testWith [200, true]
+	 *           [202, true]
+	 *           [204, true]
+	 *           [302, false]
+	 *           [401, false]
+	 *           [500, false]
+	 *
+	 * @param int  $response_code  HTTP status code the delivery URL answers with.
+	 * @param bool $expect_success Whether the ping should succeed.
+	 */
+	public function test_ping_succeeds_on_any_2xx_response( int $response_code, bool $expect_success ): void {
+		$webhook = $this->create_active_webhook( 'product.updated' );
+		$webhook->save();
+
+		add_filter(
+			'pre_http_request',
+			function () use ( $response_code ) {
+				return $this->mock_http_response( $response_code );
+			}
+		);
+
+		$result = $webhook->deliver_ping();
+
+		if ( $expect_success ) {
+			$this->assertTrue( $result, "A ping answered with {$response_code} should succeed." );
+		} else {
+			$this->assertInstanceOf( WP_Error::class, $result, "A ping answered with {$response_code} should fail with an error." );
+		}
+		$this->assertSame( ! $expect_success, wc_get_webhook( $webhook->get_id() )->get_pending_delivery(), 'Only a successful ping should clear the pending ping.' );
+	}
+
+	/**
+	 * Build a pre_http_request response with the given status code.
+	 *
+	 * @param int $response_code HTTP status code.
+	 * @return array
+	 */
+	private function mock_http_response( int $response_code ): array {
+		return array(
+			'response' => array(
+				'code'    => $response_code,
+				'message' => get_status_header_desc( $response_code ),
+			),
+			'headers'  => array(),
+			'body'     => '',
+		);
+	}
+
+	/**
 	 * @testDox The woocommerce_webhook_enable_delivery_log filter toggles delivery logging without affecting failure tracking.
 	 */
 	public function test_delivery_logging_respects_enable_delivery_log_filter() {
@@ -771,4 +851,92 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_logger_log_message', $log_spy, 10 );
 	}
 
+	/**
+	 * @testdox A class that overrides the saving delivery methods keeps working through them, and the stage methods refuse it.
+	 */
+	public function test_stage_delivery_methods_refuse_a_class_that_has_not_adopted_them() {
+		// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
+		$webhook = new class() extends WC_Webhook {
+			public function log_delivery( $delivery_id, $request, $response, $duration ) {
+				parent::log_delivery( $delivery_id, $request, $response, $duration );
+			}
+			public function deliver_ping() {
+				return parent::deliver_ping();
+			}
+		};
+		// phpcs:enable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 0 );
+		$webhook->save();
+
+		$response = array(
+			'response' => array(
+				'code'    => 500,
+				'message' => 'Internal Server Error',
+			),
+			'headers'  => array(),
+			'body'     => '',
+		);
+		$request  = array(
+			'method'     => 'POST',
+			'headers'    => array(),
+			'body'       => '',
+			'user-agent' => 'test',
+		);
+		$webhook->log_delivery( 'delivery', $request, $response, 0.1 );
+		$this->assertSame( 1, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
+
+		$http = static fn() => array(
+			'response' => array(
+				'code'    => 200,
+				'message' => 'OK',
+			),
+			'headers'  => array(),
+			'body'     => '',
+		);
+		add_filter( 'pre_http_request', $http );
+		$this->assertTrue( $webhook->deliver_ping() );
+		remove_filter( 'pre_http_request', $http );
+
+		$calls = array(
+			'stage_delivery_result' => array( 500 ),
+			'stage_delivery_ping'   => array(),
+		);
+		foreach ( $calls as $stage_method => $args ) {
+			try {
+				$webhook->$stage_method( ...$args );
+				$this->fail( $stage_method . ' did not refuse the class.' );
+			} catch ( WC_Data_Exception $e ) {
+				$this->assertSame( 'woocommerce_data_staging_unsupported', $e->getErrorCode() );
+				$this->assertStringContainsString( $stage_method . '()', $e->getMessage() );
+			}
+		}
+	}
+
+	/**
+	 * @testdox stage_delivery_result() counts a failure in memory, and the next save writes it.
+	 */
+	public function test_stage_delivery_result_changes_the_webhook_in_memory_only() {
+		$webhook = new WC_Webhook();
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 0 );
+		$webhook->save();
+
+		$webhook->stage_delivery_result( 500 );
+		$this->assertSame( 1, $webhook->get_failure_count() );
+		$this->assertSame( 0, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
+
+		$webhook->save();
+		$this->assertSame( 1, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
+
+		$webhook->stage_delivery_result( 200 );
+		$webhook->save();
+		$this->assertSame( 0, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
+	}
 }

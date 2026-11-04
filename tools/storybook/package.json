@@ -30,10 +30,10 @@
 		"@babel/preset-react": "catalog:tooling",
 		"@babel/preset-typescript": "catalog:tooling",
 		"@babel/runtime": "catalog:tooling",
-		"@storybook/addon-a11y": "10.5.10",
-		"@storybook/addon-docs": "10.5.10",
-		"@storybook/addon-links": "10.5.10",
-		"@storybook/react-webpack5": "10.5.10",
+		"@storybook/addon-a11y": "10.6.5",
+		"@storybook/addon-docs": "10.6.5",
+		"@storybook/addon-links": "10.6.5",
+		"@storybook/react-webpack5": "10.6.5",
 		"@woocommerce/admin-library": "workspace:*",
 		"@woocommerce/block-library": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
@@ -41,7 +41,7 @@
 		"@wordpress/base-styles": "catalog:wp-bundled",
 		"react": "18.3.x",
 		"react-dom": "18.3.x",
-		"storybook": "10.5.10",
+		"storybook": "10.6.5",
 		"typescript": "5.7.x",
 		"webpack": "catalog:tooling"
 	}

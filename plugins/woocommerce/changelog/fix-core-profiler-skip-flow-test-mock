@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Fix a core profiler unit test stub; no production change.

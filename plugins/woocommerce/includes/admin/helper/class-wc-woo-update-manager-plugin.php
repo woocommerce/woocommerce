@@ -23,6 +23,12 @@ class WC_Woo_Update_Manager_Plugin {
 	const WOO_UPDATE_MANAGER_SLUG             = 'woo-update-manager';
 
 	/**
+	 * Domains, and their subdomains, that WooCommerce.com treats as local.
+	 * Keep in sync with `Site_Reachability::host_reason()` in WooCommerce.com's in-app-purchase plugin.
+	 */
+	private const LOCAL_DOMAINS = array( 'localhost', 'local', 'test', 'lan', 'internal', 'invalid', 'example', 'home', 'localdomain', 'ddev.site', 'lndo.site' );
+
+	/**
 	 * Loads the class, runs on init.
 	 *
 	 * @return void
@@ -58,6 +64,66 @@ class WC_Woo_Update_Manager_Plugin {
 		$install_url = WC_Helper::get_install_base_url() . self::WOO_UPDATE_MANAGER_SLUG . '/';
 
 		return WC_Helper_API::add_auth_parameters( $install_url );
+	}
+
+	/**
+	 * Whether the URL's host is one WooCommerce.com can't reach to push an install: private or reserved IPs,
+	 * single-label hosts and local development domains. Matches the check WooCommerce.com runs on its side.
+	 *
+	 * @internal
+	 * @since 11.4.0
+	 * @param string $url URL to check, usually the home URL.
+	 * @return bool
+	 */
+	public static function is_local_url( string $url ): bool {
+		$host = rtrim( strtolower( trim( (string) wp_parse_url( $url, PHP_URL_HOST ), '[]' ) ), '.' );
+
+		if ( '' === $host ) {
+			return false;
+		}
+
+		if ( false !== filter_var( $host, FILTER_VALIDATE_IP ) ) {
+			// The PHP range flags miss 100.64.0.0/10 (carrier-grade NAT) and changed in PHP 8.2, so rare ranges can be
+			// classified differently than on WooCommerce.com. A mismatch only falls back to the one-click install.
+			$long           = ip2long( $host );
+			$is_shared_ipv4 = false !== $long && $long >= ip2long( '100.64.0.0' ) && $long <= ip2long( '100.127.255.255' );
+
+			return $is_shared_ipv4 || false === filter_var( $host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );
+		}
+
+		if ( ! str_contains( $host, '.' ) ) {
+			return true;
+		}
+
+		foreach ( self::LOCAL_DOMAINS as $domain ) {
+			if ( $host === $domain || str_ends_with( $host, '.' . $domain ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Whether the Update Manager has to be installed by hand: the home URL is local and the helper talks to production
+	 * WooCommerce.com. Pointing `woocommerce_helper_api_base` or `woo_com_base_url` at another host keeps the one-click install.
+	 *
+	 * @internal
+	 * @since 11.4.0
+	 * @return bool
+	 */
+	public static function needs_manual_install(): bool {
+		if ( ! self::is_local_url( home_url() ) ) {
+			return false;
+		}
+
+		foreach ( array( WC_Helper_API::$api_base, WC_Helper::get_woocommerce_com_base_url() ) as $url ) {
+			if ( 'woocommerce.com' !== strtolower( (string) wp_parse_url( (string) $url, PHP_URL_HOST ) ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
