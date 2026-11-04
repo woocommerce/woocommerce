@@ -83,6 +83,8 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 | `images_have_alt` | Every image on the home and product page has an `alt` attribute (empty counts); images hidden from assistive technology are skipped. |
 | `single_h1` | The product page has exactly one `h1`. |
 | `schema_matches_product` | A Product item names the product and, for a product with one price, an offer has its price with or without tax; a failure shows as a likely conflict. |
+| `product_gtin_jsonld` | The product's JSON-LD or its offers give a valid GTIN (`gtin`, `gtin8`, `gtin12`, `gtin13` or `gtin14`), from any source. Fails as a likely conflict only when the product's own GTIN is valid but the page gives none or an invalid one. Skipped when the product doesn't need one, or its own GTIN is missing or invalid: `missing_gtin` and `invalid_gtin` report those. |
+| `product_brand_jsonld` | The product's JSON-LD gives a brand, from any source. Fails as a likely conflict only when the product has a WooCommerce brand (`product_brand`), the only brand WooCommerce prints. A brand kept in an attribute or another plugin's taxonomy isn't printed by WooCommerce, so the check is skipped then and `missing_brand` reports the stored value. |
 | `product_review_markup` | The newest visible published product with reviews (of the five newest with reviews) has `aggregateRating` or `review` in its JSON-LD. Passes when reviews are off or no product has any. |
 | `policy_pages_linked` | The home page links to the privacy policy and refund and returns pages the store set. Skipped when neither is set. |
 | `ucp_profile` | With UCP on: `/.well-known/ucp` is served and names a REST endpoint. |
@@ -92,6 +94,15 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 | `product_return_policy_schema` | A product offer in the product page's JSON-LD has `hasMerchantReturnPolicy`. Pending (WOOPRD-3912). |
 | `product_shipping_schema` | A product offer has `shippingDetails`. "Couldn't check" for a product that doesn't ship. Pending (WOOPRD-3908). |
 | `product_buy_action_schema` | The product or an offer has a `BuyAction` in `potentialAction`. "Couldn't check" for a variable product without one: WooCommerce links only a chosen variation to checkout (WOOPRD-3946, after the ProductGroup work in WOOPRD-3907). Pending (WOOPRD-3918). |
+
+A likely conflict names the page where it was seen (`seen_at`), not a plugin: a list of plugins goes stale, and several plugins can change the same output (WOOAI-1618).
+
+The checks judge what the store returns, whoever provides it. Some things they can't see, by design (WOOAI-1618):
+
+- What a plugin sends a channel directly. Google for WooCommerce sends its own GTIN and brand to Google, so the page can pass while Google gets another value (WOOAI-1595).
+- Output that depends on the shopper. The scan is a logged-out visitor with the store's default currency and prices; a currency switcher or wholesale pricing shows other shoppers other values.
+- Values added in the browser. The page is read as the server sends it, so JSON-LD a script adds after load is missed.
+- Every product. Output checks read one product page; the stored-data checks run on every product.
 
 A check listed in `StoreOutputChecks::PENDING` tests output WooCommerce doesn't build yet. It doesn't run: it's reported with `ok` null and `pending` set to the issue that builds the output, so it reads as coming soon, not as failed or couldn't check. Remove its entry when that output ships.
 
