@@ -277,16 +277,22 @@ class WC_Order extends WC_Abstract_Order {
 
 		$this->save_if_writing_through();
 
-		$note_args   = array( $payment_complete_note, false, false, array( 'note_group' => OrderNoteGroup::PAYMENT ) );
+		$add_note    = function () use ( $payment_complete_note ) {
+			try {
+				$this->add_order_note( $payment_complete_note, 0, false, array( 'note_group' => OrderNoteGroup::PAYMENT ) );
+			} catch ( Exception $e ) {
+				$this->handle_exception( $e, sprintf( 'Error adding the payment note for order #%d', $this->get_id() ) );
+			}
+		};
 		$action_args = array( 'woocommerce_payment_complete', $this->get_id(), $transaction_id );
 		$save_error  = $this->writing_through ? $this->get_last_save_error() : null;
 		if ( null !== $save_error ) {
 			$paid_status = $this->get_status();
 			$this->defer_to_save(
 				'payment_complete',
-				function () use ( $paid_status, $note_args, $action_args ) {
+				function () use ( $paid_status, $add_note, $action_args ) {
 					if ( $this->has_status( $paid_status ) ) {
-						call_user_func_array( array( $this, 'add_order_note' ), $note_args );
+						$add_note();
 						call_user_func_array( 'do_action', $action_args );
 					}
 				},
@@ -295,7 +301,7 @@ class WC_Order extends WC_Abstract_Order {
 			);
 			throw $save_error;
 		}
-		$this->write_or_defer( 'payment_complete_note', array( $this, 'add_order_note' ), $note_args, true );
+		$this->write_or_defer( 'payment_complete_note', $add_note, array(), true );
 		$this->write_or_defer( 'payment_complete', 'do_action', $action_args, true );
 
 		return true;

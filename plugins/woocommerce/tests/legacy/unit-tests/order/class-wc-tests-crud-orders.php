@@ -1491,6 +1491,28 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox payment_complete() still fires woocommerce_payment_complete when adding the payment note throws.
+	 */
+	public function test_payment_complete_fires_its_action_when_the_payment_note_throws(): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid  = did_action( 'woocommerce_payment_complete' );
+		$throw = static function ( $comment_id ) {
+			if ( 'Payment complete.' === get_comment( $comment_id )->comment_content ) {
+				throw new Exception( 'Note listener failed.' );
+			}
+		};
+		add_action( 'woocommerce_order_note_added', $throw );
+
+		$result = $order->payment_complete( '12345' );
+
+		remove_action( 'woocommerce_order_note_added', $throw );
+		$this->assertTrue( $result );
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $paid );
+		$this->assertSame( OrderStatus::COMPLETED, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
 	 * @testdox woocommerce_payment_complete fires once, when a save after a failed payment_complete() succeeds.
 	 */
 	public function test_payment_complete_fires_its_hook_after_a_failed_write_is_retried(): void {
