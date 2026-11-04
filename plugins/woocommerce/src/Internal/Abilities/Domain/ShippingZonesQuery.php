@@ -92,10 +92,7 @@ class ShippingZonesQuery extends AbstractDomainAbility implements AbilityDefinit
 	 * @since 11.4.0
 	 */
 	public static function execute( array $input ) {
-		$zones = array();
-		foreach ( \WC_Shipping_Zones::get_zones( 'admin' ) as $zone_data ) {
-			$zones[] = new \WC_Shipping_Zone( (int) $zone_data['id'] );
-		}
+		$zones   = array_values( \WC_Shipping_Zones::get_shipping_zones() );
 		$zones[] = new \WC_Shipping_Zone( 0 );
 
 		if ( isset( $input['include'] ) ) {
