@@ -254,6 +254,7 @@ const isValidCollectionConfig = ( config: ProductCollectionConfig ) => {
 		console.warn(
 			'Invalid hideControls: hideControls must be an array of strings.'
 		);
+		return false;
 	}
 	// attributes.queryContextIncludes
 	if (

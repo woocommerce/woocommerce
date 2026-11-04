@@ -221,6 +221,37 @@ describe( 'registerProductCollection', () => {
 		expect( console ).toHaveErrored();
 	} );
 
+	it.each( [ {}, null, 'keyword', 42, true ] )(
+		'rejects non-array hideControls (%p) without interrupting subsequent registration',
+		( hideControls ) => {
+			const variationsBefore = getBlockVariations( BLOCK_NAME ) || [];
+			const config = {
+				name: `${ TEST_NAMESPACE }/invalid-hide-controls`,
+				title: 'Invalid hidden controls',
+				attributes: { hideControls },
+			};
+
+			expect( () =>
+				registerCollection(
+					config as unknown as ProductCollectionConfig
+				)
+			).not.toThrow();
+			expect( getBlockVariations( BLOCK_NAME ) || [] ).toEqual(
+				variationsBefore
+			);
+			expect( console ).toHaveWarnedWith(
+				'Invalid hideControls: hideControls must be an array of strings.'
+			);
+			expect( console ).toHaveErroredWith(
+				'Collection could not be registered due to invalid configuration.'
+			);
+
+			const name = `${ TEST_NAMESPACE }/after-invalid-hide-controls`;
+			registerCollection( { name, title: 'Valid collection' } );
+			expect( getRegisteredVariation( name ) ).toMatchObject( { name } );
+		}
+	);
+
 	it( 'keeps experimental registration working with a migration warning', () => {
 		const name = `${ TEST_NAMESPACE }/deprecated`;
 		trackAttemptedCollectionName( { name } );

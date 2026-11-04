@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent invalid custom collection control settings from stopping other collections from registering.
