@@ -114,6 +114,9 @@
 		},
 		"classmap": [
 			"tests/legacy/unit-tests/rest-api/Helpers"
+		],
+		"exclude-from-classmap": [
+			"tests/Tools/phpstan/data/"
 		]
 	},
 	"scripts": {
