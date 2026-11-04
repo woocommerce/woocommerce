@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix deleted global attributes leaving stale entries in product attribute meta that reappeared when the attribute slug was re-created.
