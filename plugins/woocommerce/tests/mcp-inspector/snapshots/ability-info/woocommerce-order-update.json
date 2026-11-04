@@ -1,0 +1,500 @@
+{
+	"name": "woocommerce/order-update",
+	"label": "Update order",
+	"description": "Update the addresses, customer note, product lines and shipping lines of an order. Fields that are not sent keep their value. Changing lines recalculates the totals and needs an order status that allows editing. Use the woocommerce/order-update-status ability to change the status.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"id": {
+				"type": "integer",
+				"minimum": 1
+			},
+			"billing": {
+				"type": "object",
+				"description": "Countries use ISO 3166-1 alpha-2 codes, and states use WooCommerce state codes.",
+				"properties": {
+					"first_name": {
+						"type": "string"
+					},
+					"last_name": {
+						"type": "string"
+					},
+					"company": {
+						"type": "string"
+					},
+					"address_1": {
+						"type": "string"
+					},
+					"address_2": {
+						"type": "string"
+					},
+					"city": {
+						"type": "string"
+					},
+					"state": {
+						"type": "string"
+					},
+					"postcode": {
+						"type": "string"
+					},
+					"country": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					}
+				},
+				"additionalProperties": false,
+				"minProperties": 1
+			},
+			"shipping": {
+				"type": "object",
+				"description": "Countries use ISO 3166-1 alpha-2 codes, and states use WooCommerce state codes.",
+				"properties": {
+					"first_name": {
+						"type": "string"
+					},
+					"last_name": {
+						"type": "string"
+					},
+					"company": {
+						"type": "string"
+					},
+					"address_1": {
+						"type": "string"
+					},
+					"address_2": {
+						"type": "string"
+					},
+					"city": {
+						"type": "string"
+					},
+					"state": {
+						"type": "string"
+					},
+					"postcode": {
+						"type": "string"
+					},
+					"country": {
+						"type": "string"
+					},
+					"phone": {
+						"type": "string"
+					}
+				},
+				"additionalProperties": false,
+				"minProperties": 1
+			},
+			"customer_note": {
+				"type": "string"
+			},
+			"line_items": {
+				"type": "array",
+				"description": "Send id and quantity to change a line, or product_id and quantity to add one. A variation uses its own ID as product_id.",
+				"minItems": 1,
+				"items": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "integer",
+							"minimum": 1
+						},
+						"product_id": {
+							"type": "integer",
+							"minimum": 1
+						},
+						"quantity": {
+							"type": "integer",
+							"minimum": 1
+						}
+					},
+					"additionalProperties": false
+				}
+			},
+			"shipping_lines": {
+				"type": "array",
+				"description": "Send id to change a line. Without id, this adds a line, which needs method_title.",
+				"minItems": 1,
+				"items": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "integer",
+							"minimum": 1
+						},
+						"method_id": {
+							"type": "string"
+						},
+						"method_title": {
+							"type": "string"
+						},
+						"total": {
+							"type": "string"
+						}
+					},
+					"additionalProperties": false
+				}
+			},
+			"remove_items": {
+				"type": "array",
+				"description": "IDs of the product and shipping lines to remove.",
+				"minItems": 1,
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				}
+			}
+		},
+		"required": [
+			"id"
+		],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"order": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"status": {
+						"type": "string",
+						"enum": [
+							"pending",
+							"failed",
+							"on-hold",
+							"completed",
+							"processing",
+							"refunded",
+							"cancelled",
+							"trash",
+							"new",
+							"auto-draft",
+							"draft",
+							"checkout-draft"
+						]
+					},
+					"currency": {
+						"type": "string",
+						"enum": [
+							"AED",
+							"AFN",
+							"ALL",
+							"AMD",
+							"ANG",
+							"AOA",
+							"ARS",
+							"AUD",
+							"AWG",
+							"AZN",
+							"BAM",
+							"BBD",
+							"BDT",
+							"BGN",
+							"BHD",
+							"BIF",
+							"BMD",
+							"BND",
+							"BOB",
+							"BRL",
+							"BSD",
+							"BTC",
+							"BTN",
+							"BWP",
+							"BYR",
+							"BYN",
+							"BZD",
+							"CAD",
+							"CDF",
+							"CHF",
+							"CHW",
+							"CLP",
+							"CNY",
+							"COP",
+							"CRC",
+							"CUC",
+							"CUP",
+							"CVE",
+							"CZK",
+							"DJF",
+							"DKK",
+							"DOP",
+							"DZD",
+							"EGP",
+							"ERN",
+							"ETB",
+							"EUR",
+							"FJD",
+							"FKP",
+							"GBP",
+							"GEL",
+							"GGP",
+							"GHS",
+							"GIP",
+							"GMD",
+							"GNF",
+							"GTQ",
+							"GYD",
+							"HKD",
+							"HNL",
+							"HRK",
+							"HTG",
+							"HUF",
+							"IDR",
+							"ILS",
+							"IMP",
+							"INR",
+							"IQD",
+							"IRR",
+							"IRT",
+							"ISK",
+							"JEP",
+							"JMD",
+							"JOD",
+							"JPY",
+							"KES",
+							"KGS",
+							"KHR",
+							"KMF",
+							"KPW",
+							"KRW",
+							"KWD",
+							"KYD",
+							"KZT",
+							"LAK",
+							"LBP",
+							"LKR",
+							"LRD",
+							"LSL",
+							"LYD",
+							"MAD",
+							"MDL",
+							"MGA",
+							"MKD",
+							"MMK",
+							"MNT",
+							"MOP",
+							"MRU",
+							"MUR",
+							"MVR",
+							"MWK",
+							"MXN",
+							"MYR",
+							"MZN",
+							"NAD",
+							"NGN",
+							"NIO",
+							"NOK",
+							"NPR",
+							"NZD",
+							"OMR",
+							"PAB",
+							"PEN",
+							"PGK",
+							"PHP",
+							"PKR",
+							"PLN",
+							"PRB",
+							"PYG",
+							"QAR",
+							"RON",
+							"RSD",
+							"RUB",
+							"RWF",
+							"SAR",
+							"SBD",
+							"SCR",
+							"SDG",
+							"SEK",
+							"SGD",
+							"SHP",
+							"SLL",
+							"SOS",
+							"SRD",
+							"SSP",
+							"STN",
+							"SYP",
+							"SZL",
+							"THB",
+							"TJS",
+							"TMT",
+							"TND",
+							"TOP",
+							"TRY",
+							"TTD",
+							"TWD",
+							"TZS",
+							"UAH",
+							"UGX",
+							"USD",
+							"UYU",
+							"UZS",
+							"VEF",
+							"VES",
+							"VND",
+							"VUV",
+							"WST",
+							"XAF",
+							"XCD",
+							"XOF",
+							"XPF",
+							"YER",
+							"ZAR",
+							"ZMW"
+						]
+					},
+					"currency_symbol": {
+						"type": "string"
+					},
+					"total": {
+						"type": "string"
+					},
+					"customer_id": {
+						"type": "integer"
+					},
+					"billing_email": {
+						"type": "string",
+						"format": "email",
+						"description": "Billing email. Omitted when no billing email is set."
+					},
+					"payment_method": {
+						"type": "string"
+					},
+					"payment_method_title": {
+						"type": "string"
+					},
+					"date_created": {
+						"type": "string",
+						"format": "date-time",
+						"description": "Order creation date in the store timezone. Omitted when no creation date is available."
+					},
+					"date_created_gmt": {
+						"type": "string",
+						"format": "date-time",
+						"description": "Order creation date in UTC. Omitted when no creation date is available."
+					},
+					"date_modified": {
+						"type": "string",
+						"format": "date-time",
+						"description": "Order modification date in the store timezone. Omitted when no modification date is available."
+					},
+					"date_modified_gmt": {
+						"type": "string",
+						"format": "date-time",
+						"description": "Order modification date in UTC. Omitted when no modification date is available."
+					},
+					"line_items": {
+						"type": "array",
+						"description": "Order line items. Only present when include_line_items is true.",
+						"items": {
+							"type": "object",
+							"properties": {
+								"id": {
+									"type": "integer"
+								},
+								"name": {
+									"type": "string"
+								},
+								"product_id": {
+									"type": "integer"
+								},
+								"variation_id": {
+									"type": "integer"
+								},
+								"quantity": {
+									"type": "number"
+								},
+								"subtotal": {
+									"type": "string"
+								},
+								"total": {
+									"type": "string"
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"shipping": {
+						"type": "object",
+						"description": "Order shipping address. Countries use ISO 3166-1 alpha-2 codes, and states use WooCommerce state codes.",
+						"properties": {
+							"first_name": {
+								"type": "string"
+							},
+							"last_name": {
+								"type": "string"
+							},
+							"company": {
+								"type": "string"
+							},
+							"address_1": {
+								"type": "string"
+							},
+							"address_2": {
+								"type": "string"
+							},
+							"city": {
+								"type": "string"
+							},
+							"state": {
+								"type": "string"
+							},
+							"postcode": {
+								"type": "string"
+							},
+							"country": {
+								"type": "string"
+							},
+							"phone": {
+								"type": "string"
+							}
+						},
+						"additionalProperties": false
+					},
+					"shipping_lines": {
+						"type": "array",
+						"description": "Order shipping lines. Present together with line_items.",
+						"items": {
+							"type": "object",
+							"properties": {
+								"id": {
+									"type": "integer"
+								},
+								"method_id": {
+									"type": "string"
+								},
+								"method_title": {
+									"type": "string"
+								},
+								"total": {
+									"type": "string"
+								}
+							},
+							"additionalProperties": false
+						}
+					}
+				},
+				"additionalProperties": false
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": false,
+			"destructive": true,
+			"idempotent": false
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}
