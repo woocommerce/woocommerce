@@ -13081,21 +13081,12 @@ parameters:
 			path: includes/class-wc-post-data.php
 
 		-
-<<<<<<< HEAD
-			message: '#^Cannot access property \$taxonomy on WP_Term\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-post-data.php
-
-		-
 			message: '#^Cannot call method get_type\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/class-wc-post-data.php
 
 		-
-=======
->>>>>>> f4cfdcb51f (Keep custom default attribute values intact when a term is renamed (#70627))
 			message: '#^Expected 4 @param tags, found 3\.$#'
 			identifier: paramTag.count
 			count: 1

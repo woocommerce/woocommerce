@@ -375,15 +375,10 @@ class WC_Install {
 			'wc_update_1130_delete_stock_notification_sync_notice_option',
 			'wc_update_1130_backfill_order_stats_payment_method',
 		),
-<<<<<<< HEAD
-=======
-		'11.4.0'   => array(
-			'wc_update_1140_re_enable_autoload_options',
-			'wc_update_1140_add_mpn_to_product_lookup_table',
+		'11.3.0-1' => array(
 			// Run again for stores whose database was already at 11.3.0 or later, as they skip the 11.2.2 key.
 			'wc_update_1122_remove_objects_from_default_attributes',
 		),
->>>>>>> f4cfdcb51f (Keep custom default attribute values intact when a term is renamed (#70627))
 	);
 
 	/**

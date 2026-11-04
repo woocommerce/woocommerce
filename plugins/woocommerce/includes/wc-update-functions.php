@@ -4219,44 +4219,6 @@ function wc_update_1130_backfill_order_stats_payment_method() {
 
 	return false;
 }
-<<<<<<< HEAD
-=======
-
-/**
- * Re-enable autoloading for options whose settings definitions reverted it on save after the 10.5.0 migration.
- *
- * @since 11.4.0
- */
-function wc_update_1140_re_enable_autoload_options(): void {
-	wp_set_option_autoload_values(
-		array(
-			'woocommerce_cart_page_id'                    => true,
-			'woocommerce_checkout_page_id'                => true,
-			'woocommerce_myaccount_page_id'               => true,
-			'woocommerce_terms_page_id'                   => true,
-			'woocommerce_show_marketplace_suggestions'    => true,
-			'woocommerce_enable_delayed_account_creation' => true,
-			'woocommerce_logs_logging_enabled'            => true,
-		)
-	);
-}
-
-/**
- * Add the MPN lookup column and index for existing stores.
- *
- * @since 11.4.0
- */
-function wc_update_1140_add_mpn_to_product_lookup_table(): void {
-	global $wpdb;
-
-	if ( ! $wpdb->get_var( "SHOW COLUMNS FROM {$wpdb->wc_product_meta_lookup} LIKE 'mpn'" ) ) {
-		$wpdb->query( "ALTER TABLE {$wpdb->wc_product_meta_lookup} ADD COLUMN mpn varchar(100) NOT NULL DEFAULT '' AFTER global_unique_id" );
-	}
-
-	if ( ! $wpdb->get_var( "SHOW INDEX FROM {$wpdb->wc_product_meta_lookup} WHERE Key_name = 'mpn'" ) ) {
-		$wpdb->query( "ALTER TABLE {$wpdb->wc_product_meta_lookup} ADD INDEX mpn (mpn(50))" );
-	}
-}
 
 /**
  * Remove PHP objects from product default attributes, where WooCommerce only stores strings.
@@ -4335,4 +4297,3 @@ function wc_update_1122_remove_objects_from_default_attributes(): void {
 		);
 	}
 }
->>>>>>> f4cfdcb51f (Keep custom default attribute values intact when a term is renamed (#70627))
