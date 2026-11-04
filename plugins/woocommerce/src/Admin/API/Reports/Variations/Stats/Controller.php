@@ -36,6 +36,7 @@ class Controller extends GenericStatsController {
 	 */
 	protected $param_mapping = array(
 		'variations' => 'variation_includes',
+		'products'   => 'product_includes',
 	);
 
 	/**
@@ -260,6 +261,17 @@ class Controller extends GenericStatsController {
 			'default'           => array(),
 			'validate_callback' => 'rest_validate_request_arg',
 			'sanitize_callback' => 'wp_parse_id_list',
+		);
+		// Alias used by Analytics when filtering the Variations table to a single product.
+		// Mapped to product_includes via $param_mapping so stats match the list endpoint.
+		$params['products']          = array(
+			'description'       => __( 'Limit result to items with specified product ids.', 'woocommerce' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'integer',
+			),
 		);
 		$params['variations']        = array(
 			'description'       => __( 'Limit result to items with specified variation ids.', 'woocommerce' ),
