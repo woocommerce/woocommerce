@@ -669,14 +669,14 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		$product->set_price( '70' );
 		if ( 'unscheduled' !== $schedule ) {
 			$product->set_date_on_sale_from( strtotime( 'future' === $schedule ? '+1 day' : '2020-01-01 12:00:00 UTC' ) );
-			$product->set_date_on_sale_to( strtotime( 'expired' === $schedule ? '-1 day' : '2099-06-01 12:00:00 UTC' ) );
+			$product->set_date_on_sale_to( strtotime( 'expired' === $schedule ? '-1 day' : '2037-06-01 12:00:00 UTC' ) );
 		}
 
 		$this->structured_data->generate_product_data( $product );
 		$offer = $this->structured_data->get_data()[0]['offers'][0];
 		if ( 'active' === $schedule ) {
 			$this->assertSame( '2020-01-01T17:30:00+05:30', $offer['validFrom'] );
-			$this->assertSame( '2099-06-01T17:30:00+05:30', $offer['validThrough'] );
+			$this->assertSame( '2037-06-01T17:30:00+05:30', $offer['validThrough'] );
 		} else {
 			$this->assertArrayNotHasKey( 'validFrom', $offer );
 			$this->assertArrayNotHasKey( 'validThrough', $offer );
@@ -886,7 +886,7 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 			if ( 'DUMMY SKU VARIABLE HUGE RED 0' === $variation->get_sku() ) {
 				$variation->set_sale_price( '12' );
 				$variation->set_date_on_sale_from( strtotime( '2020-01-01 12:00:00 UTC' ) );
-				$variation->set_date_on_sale_to( strtotime( '2099-06-01 12:00:00 UTC' ) );
+				$variation->set_date_on_sale_to( strtotime( '2037-06-01 12:00:00 UTC' ) );
 				$variation->save();
 				break;
 			}
@@ -907,7 +907,7 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 			$this->assertEquals( 'Offer', $offer['@type'] );
 			$this->assertEquals( '12.00', $offer['price'] );
 			$this->assertSame( '2020-01-01T12:00:00+00:00', $offer['validFrom'] );
-			$this->assertSame( '2099-06-01T12:00:00+00:00', $offer['validThrough'] );
+			$this->assertSame( '2037-06-01T12:00:00+00:00', $offer['validThrough'] );
 			$this->assertArrayNotHasKey( 'lowPrice', $offer );
 			$this->assertArrayNotHasKey( 'highPrice', $offer );
 			$this->assertEquals( get_woocommerce_currency(), $offer['priceCurrency'] );
