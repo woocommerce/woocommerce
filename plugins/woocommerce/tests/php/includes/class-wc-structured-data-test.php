@@ -635,7 +635,7 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		$product->set_sale_price( '70' );
 		$product->set_price( '70' );
 		$product->set_date_on_sale_from( strtotime( '2020-01-01 12:00:00 UTC' ) );
-		$product->set_date_on_sale_to( strtotime( '2099-06-01 12:00:00 UTC' ) );
+		$product->set_date_on_sale_to( strtotime( '2037-06-01 12:00:00 UTC' ) );
 		$product->save();
 
 		$this->structured_data->generate_product_data( $product );
@@ -648,7 +648,7 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( '70.00', $offer['priceSpecification'][0]['price'] );
 		$this->assertEquals( get_woocommerce_currency(), $offer['priceCurrency'] );
 		$this->assertSame( '2020-01-01T07:00:00-05:00', $offer['validFrom'] );
-		$this->assertSame( '2099-06-01T08:00:00-04:00', $offer['validThrough'] );
+		$this->assertSame( '2037-06-01T08:00:00-04:00', $offer['validThrough'] );
 	}
 
 	/**
