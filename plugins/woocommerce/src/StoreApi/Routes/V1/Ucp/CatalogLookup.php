@@ -84,7 +84,7 @@ class CatalogLookup extends AbstractCatalogRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		$raw_ids = $request->get_param( 'ids' );
+		$raw_ids = UcpUtils::json_param( $request, 'ids' );
 
 		if ( ! is_array( $raw_ids ) || empty( $raw_ids ) ) {
 			return $this->ucp_error( 'VALIDATION_ERROR', __( 'ids is required.', 'woocommerce' ), 'recoverable', 400 );
