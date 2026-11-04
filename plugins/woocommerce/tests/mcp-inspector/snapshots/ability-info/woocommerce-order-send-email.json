@@ -1,0 +1,58 @@
+{
+	"name": "woocommerce/order-send-email",
+	"label": "Send order email",
+	"description": "Send an order email to the customer again.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"id": {
+				"type": "integer",
+				"minimum": 1
+			},
+			"email": {
+				"type": "string",
+				"description": "A status email needs the order to have that status.",
+				"enum": [
+					"invoice",
+					"processing",
+					"completed"
+				]
+			}
+		},
+		"required": [
+			"id",
+			"email"
+		],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"order_id": {
+				"type": "integer"
+			},
+			"email": {
+				"type": "string",
+				"enum": [
+					"invoice",
+					"processing",
+					"completed"
+				]
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": false,
+			"destructive": false,
+			"idempotent": false
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}
