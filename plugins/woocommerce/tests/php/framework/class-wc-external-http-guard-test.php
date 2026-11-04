@@ -48,6 +48,8 @@ class WC_External_HTTP_Guard_Test extends WC_Unit_Test_Case {
 	 * @testWith ["http://203.0.113.10/feed"]
 	 *           ["https://[2001:db8::1]/feed"]
 	 *           ["https://localhost@evil.example/feed"]
+	 *           ["ftp:https://api.example.com/feed"]
+	 *           ["ftp://example.org/path:https://api.example.com/feed"]
 	 *
 	 * @param string $url The request URL.
 	 */
@@ -127,9 +129,58 @@ class WC_External_HTTP_Guard_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A disguised request is recorded as the URL WordPress would send after stripping disallowed protocols.
+	 */
+	public function test_disguised_request_is_recorded_as_sent(): void {
+		WC_External_HTTP_Guard::filter_request( false, array( 'method' => 'GET' ), 'ftp://example.org/path:https://api.example.com/feed' );
+
+		$blocked = WC_External_HTTP_Guard::get_blocked_requests();
+		$this->assertCount( 1, $blocked, 'The disguised request should be recorded once.' );
+		$this->assertStringStartsWith( 'GET https://api.example.com/feed (from ', $blocked[0], 'The record should hold the URL WordPress would request.' );
+	}
+
+	/**
+	 * @testdox A redirect from an allowed request to an external host is blocked and recorded.
+	 */
+	public function test_redirect_to_external_host_is_blocked(): void {
+		try {
+			self::dispatch_redirect( 'https://api.example.com/next?token=secret' );
+			$this->fail( 'The guard should stop a redirect to an external host.' );
+		} catch ( WpOrg\Requests\Exception $e ) {
+			$this->assertSame( WC_External_HTTP_Guard::ERROR_CODE, $e->getType(), 'The exception should name the guard.' );
+		}
+
+		$blocked = WC_External_HTTP_Guard::get_blocked_requests();
+		$this->assertCount( 1, $blocked, 'The blocked redirect should be recorded once.' );
+		$this->assertStringStartsWith( 'REDIRECT https://api.example.com/next (from ', $blocked[0], 'The record should name the redirect target without its query string.' );
+	}
+
+	/**
+	 * @testdox A redirect to the test site is followed untouched.
+	 */
+	public function test_redirect_to_test_site_passes_through(): void {
+		self::dispatch_redirect( home_url( '/next/' ) );
+
+		$this->assertSame( array(), WC_External_HTTP_Guard::get_blocked_requests(), 'A redirect to the test site should not be recorded.' );
+	}
+
+	/**
+	 * Fire the hook WordPress's HTTP API fires before following a redirect, as Requests does.
+	 *
+	 * @param string $location The redirect target.
+	 */
+	private static function dispatch_redirect( string $location ): void {
+		$headers = array();
+		$data    = array();
+		$options = array();
+		( new WP_HTTP_Requests_Hooks( home_url( '/start/' ), array() ) )->dispatch( 'requests.before_redirect', array( &$location, &$headers, &$data, &$options, null ) );
+	}
+
+	/**
 	 * @testdox The guard is registered on pre_http_request after every other filter.
 	 */
 	public function test_guard_runs_last(): void {
 		$this->assertSame( PHP_INT_MAX, has_filter( 'pre_http_request', array( WC_External_HTTP_Guard::class, 'filter_request' ) ), 'The guard should be registered at the last priority.' );
+		$this->assertSame( PHP_INT_MAX, has_action( 'requests-requests.before_redirect', array( WC_External_HTTP_Guard::class, 'check_redirect' ) ), 'The redirect check should be registered at the last priority.' );
 	}
 }

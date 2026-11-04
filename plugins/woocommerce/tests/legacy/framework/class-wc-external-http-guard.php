@@ -63,6 +63,7 @@ final class WC_External_HTTP_Guard {
 		}
 
 		add_filter( 'pre_http_request', array( self::class, 'filter_request' ), PHP_INT_MAX, 3 );
+		add_action( 'requests-requests.before_redirect', array( self::class, 'check_redirect' ), PHP_INT_MAX );
 	}
 
 	/**
@@ -103,16 +104,49 @@ final class WC_External_HTTP_Guard {
 	 * @return false|array|WP_Error The earlier answer unchanged, or an error for a blocked request.
 	 */
 	public static function filter_request( $preempt, $args, $url ) {
-		if ( false !== $preempt || self::$allow_external || ! self::is_external_url( (string) $url ) ) {
+		if ( false !== $preempt || self::$allow_external ) {
 			return $preempt;
 		}
 
-		$method  = strtoupper( (string) ( $args['method'] ?? 'GET' ) );
-		$request = sprintf( '%s %s (from %s)', $method, preg_replace( '/[?#].*$/s', '', (string) $url ), self::caller() );
+		// WP_Http::request() strips disallowed protocols only after this filter, so classify the URL it will send.
+		$url = wp_kses_bad_protocol( (string) $url, array( 'http', 'https', 'ssl' ) );
+		if ( ! self::is_external_url( $url ) ) {
+			return $preempt;
+		}
 
-		self::$blocked[] = $request;
+		$request = self::record( strtoupper( (string) ( $args['method'] ?? 'GET' ) ), $url );
 
 		return new WP_Error( self::ERROR_CODE, 'The PHPUnit external HTTP guard blocked this request: ' . $request );
+	}
+
+	/**
+	 * Stop a redirect to an external host. Requests follows redirects without calling
+	 * pre_http_request again; WP_Http::request() turns the exception into a WP_Error.
+	 *
+	 * @param string $location The redirect target.
+	 * @throws WpOrg\Requests\Exception For a redirect to an external host.
+	 */
+	public static function check_redirect( $location ): void {
+		if ( self::$allow_external || ! self::is_external_url( (string) $location ) ) {
+			return;
+		}
+
+		$request = self::record( 'REDIRECT', (string) $location );
+
+		throw new WpOrg\Requests\Exception( esc_html( 'The PHPUnit external HTTP guard blocked this redirect: ' . $request ), self::ERROR_CODE ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- The message is escaped; the second argument is a fixed error type, not output.
+	}
+
+	/**
+	 * Record a blocked request without its query string.
+	 *
+	 * @param string $method The HTTP method, or REDIRECT.
+	 * @param string $url    The URL that would have been requested.
+	 * @return string The record, as 'METHOD URL (from file:line)'.
+	 */
+	private static function record( string $method, string $url ): string {
+		$request         = sprintf( '%s %s (from %s)', $method, preg_replace( '/[?#].*$/s', '', $url ), self::caller() );
+		self::$blocked[] = $request;
+		return $request;
 	}
 
 	/**
