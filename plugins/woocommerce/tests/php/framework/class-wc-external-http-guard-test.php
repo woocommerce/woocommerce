@@ -39,7 +39,7 @@ class WC_External_HTTP_Guard_Test extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $blocked, 'The blocked request should be recorded once.' );
 		$this->assertStringStartsWith( 'POST https://api.example.com/v1/items (from ', $blocked[0], 'The record should hold the method and the URL without its query string.' );
 		$this->assertStringContainsString( 'class-wc-external-http-guard-test.php:', $blocked[0], 'The record should name the calling file.' );
-		$this->assertStringNotContainsString( 'secret', $blocked[0], 'Query strings can hold secrets and should not be recorded.' );
+		$this->assertStringNotContainsString( 'secret', $blocked[0], 'The record should not include the query string.' );
 	}
 
 	/**
