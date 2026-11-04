@@ -262,7 +262,7 @@ class Controller extends GenericStatsController {
 			'validate_callback' => 'rest_validate_request_arg',
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['products']         = array(
+		$params['products']          = array(
 			'description'       => __( 'Limit result to items with specified product ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -271,7 +271,7 @@ class Controller extends GenericStatsController {
 				'type' => 'integer',
 			),
 		);
-		$params['variations']       = array(
+		$params['variations']        = array(
 			'description'       => __( 'Limit result to items with specified variation ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -280,7 +280,7 @@ class Controller extends GenericStatsController {
 				'type' => 'integer',
 			),
 		);
-		$params['segmentby']        = array(
+		$params['segmentby']         = array(
 			'description'       => __( 'Segment the response by additional constraint.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array(
@@ -290,7 +290,7 @@ class Controller extends GenericStatsController {
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['attribute_is']     = array(
+		$params['attribute_is']      = array(
 			'description'       => __( 'Limit result set to orders that include products with the specified attributes.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -299,7 +299,7 @@ class Controller extends GenericStatsController {
 			'default'           => array(),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['attribute_is_not'] = array(
+		$params['attribute_is_not']  = array(
 			'description'       => __( 'Limit result set to orders that don\'t include products with the specified attributes.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
