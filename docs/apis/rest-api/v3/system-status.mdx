@@ -29,6 +29,7 @@ The system status API allows you to view all system status items.
 | `home_url`                  | string  | Home URL. `READ-ONLY`                        |
 | `site_url`                  | string  | Site URL. `READ-ONLY`                        |
 | `version`                   | string  | WooCommerce version. `READ-ONLY`             |
+| `action_scheduler`          | object  | The loaded Action Scheduler copy. See [System status - Action Scheduler properties](#system-status---action-scheduler-properties) `READ-ONLY` |
 | `log_directory`             | string  | Log directory. `READ-ONLY`                   |
 | `log_directory_writable`    | boolean | Is log directory writable? `READ-ONLY`       |
 | `wp_version`                | string  | WordPress version. `READ-ONLY`               |
@@ -57,6 +58,17 @@ The system status API allows you to view all system status items.
 | `remote_post_response`      | string  | Remote POST response. `READ-ONLY`            |
 | `remote_get_successful`     | boolean | Remote GET successful? `READ-ONLY`           |
 | `remote_get_response`       | string  | Remote GET response. `READ-ONLY`             |
+
+### System status - Action Scheduler properties
+
+| Attribute            | Type           | Description                                                                                                                                      |
+| -------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `loaded_version`     | string or null | Version of the loaded copy. `null` when no copy is loaded. `READ-ONLY`                                                                            |
+| `registered_version` | string or null | Newest version installed, which may differ from the loaded one. `null` when no copy is loaded. `READ-ONLY`                                        |
+| `source_type`        | string or null | What loads the copy. Options: `woocommerce`, `plugin`, `mu-plugin`, `theme` and `other`. `null` when no copy is loaded. `READ-ONLY`               |
+| `source_name`        | string or null | Name of the plugin or theme that loads the copy, `WooCommerce` for the bundled copy. Empty when unknown, `null` when no copy is loaded. `READ-ONLY` |
+| `source_path`        | string or null | Directory of the loaded copy. `null` when no copy is loaded. `READ-ONLY`                                                                          |
+| `is_risky`           | boolean        | Does the loaded copy lack features WooCommerce relies on? `READ-ONLY`                                                                             |
 
 ### System status - Database properties
 
@@ -165,6 +177,14 @@ woocommerce.get("system_status").parsed_response
 		"home_url": "http://example.com",
 		"site_url": "http://example.com",
 		"version": "3.0.0",
+		"action_scheduler": {
+			"loaded_version": "4.2.0",
+			"registered_version": "4.2.0",
+			"source_type": "woocommerce",
+			"source_name": "WooCommerce",
+			"source_path": "/var/www/woocommerce/wp-content/plugins/woocommerce/packages/action-scheduler",
+			"is_risky": false
+		},
 		"log_directory": "/var/www/woocommerce/wp-content/uploads/wc-logs/",
 		"log_directory_writable": true,
 		"wp_version": "4.7.3",

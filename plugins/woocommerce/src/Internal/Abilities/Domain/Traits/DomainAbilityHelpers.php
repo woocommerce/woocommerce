@@ -15,6 +15,36 @@ defined( 'ABSPATH' ) || exit;
 trait DomainAbilityHelpers {
 
 	/**
+	 * Format an ability date with its store or UTC offset without changing the object.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param mixed $date Date to format.
+	 * @param bool  $utc  Whether to use UTC instead of the store timezone.
+	 * @return string|null
+	 */
+	protected static function format_date_for_response( $date, bool $utc = true ): ?string {
+		if ( ! $date instanceof \WC_DateTime ) {
+			return null;
+		}
+
+		$date = clone $date;
+		$date->setTimezone( $utc ? new \DateTimeZone( 'UTC' ) : wp_timezone() );
+		return $date->format( DATE_ATOM );
+	}
+
+	/**
+	 * Get a price or total as a string, because the output schema declares Core
+	 * amount fields as strings. The getters can return an int or a float.
+	 *
+	 * @param mixed $amount Value from a getter of the object.
+	 * @return mixed
+	 */
+	protected static function format_amount_for_response( $amount ) {
+		return is_int( $amount ) ? (string) $amount : wc_float_to_string( $amount );
+	}
+
+	/**
 	 * Get a collection output schema.
 	 *
 	 * @param string $collection_key Collection property key.

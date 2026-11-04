@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix link colors set for individual email blocks, including colors selected from the theme palette.

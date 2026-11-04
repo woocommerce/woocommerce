@@ -6,13 +6,13 @@
  * Fixed upstream in https://github.com/woocommerce/woocommerce/pull/69150.
  */
 .wp-block-product-specifications-item__value p {
-	margin: 0
+	margin: 0;
 }
 
 /* Checkbox alignment for reviews form.
  * Fixed upstream in https://github.com/woocommerce/woocommerce/pull/68696.
  */
- .wp-block-woocommerce-product-review-form .comment-form-cookies-consent {
+.wp-block-woocommerce-product-review-form .comment-form-cookies-consent {
 	align-items: flex-start;
 }
 

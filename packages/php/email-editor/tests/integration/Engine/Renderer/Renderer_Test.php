@@ -301,6 +301,22 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test template styles added through the filter are inlined when they use `:where()`.
+	 */
+	public function testItInlinesFilteredTemplateStylesWithWhere(): void {
+		$add_styles = static function ( string $styles ): string {
+			return $styles . ':where(.email_layout_wrapper){border-top: 7px solid #010203;}';
+		};
+		add_filter( 'woocommerce_email_renderer_styles', $add_styles );
+		try {
+			$rendered = $this->renderer->render( $this->email_post, 'Subject', '', 'en' );
+		} finally {
+			remove_filter( 'woocommerce_email_renderer_styles', $add_styles );
+		}
+		$this->assertMatchesRegularExpression( '/class="email_layout_wrapper[^"]*"[^>]*style="[^"]*border-top: 7px solid #010203/', $rendered['html'] );
+	}
+
+	/**
 	 * Test it renders post wrapped within a template associated with the post via _wp_page_template post meta.
 	 */
 	public function testItRendersPostWithinAssociatedTemplate(): void {

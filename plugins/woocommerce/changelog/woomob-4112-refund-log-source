@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Log refund warnings from the wc/v3 refund endpoints under the wc-rest-refunds source instead of wc-v4-refunds.

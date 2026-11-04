@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Keep erased back-in-stock sign-ups distinct from customer opt-outs and leave sent ones marked as sent.

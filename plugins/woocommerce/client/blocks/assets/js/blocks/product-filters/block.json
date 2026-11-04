@@ -37,7 +37,14 @@
 		}
 	},
 	"textdomain": "woocommerce",
-	"usesContext": [ "postId", "query", "queryId", "forcePageReload" ],
+	"usesContext": [
+		"postId",
+		"query",
+		"queryId",
+		"collection",
+		"productCollectionLocation",
+		"forcePageReload"
+	],
 	"attributes": {
 		"isPreview": {
 			"type": "boolean",
