@@ -55,6 +55,13 @@ class CartPricingContext {
 	private $catalog_pricing_scopes = array();
 
 	/**
+	 * Number of open catalog pricing scopes right after each cross-sells collection block opened its own.
+	 *
+	 * @var array<int, int>
+	 */
+	private $block_scope_depths = array();
+
+	/**
 	 * Register hooks.
 	 *
 	 * @since 11.4.0
@@ -176,7 +183,7 @@ class CartPricingContext {
 	/**
 	 * Start catalog pricing when the block Cart cross-sells begin to render.
 	 *
-	 * Runs last, so a filter that short-circuits the render, which also skips the matching end, is seen first.
+	 * Does nothing when an earlier filter already short-circuited the render, since the matching end would not run.
 	 *
 	 * @internal
 	 *
@@ -187,6 +194,7 @@ class CartPricingContext {
 	public function handle_pre_render_block( $pre_render, $parsed_block = null ) {
 		if ( null === $pre_render && self::is_cross_sells_collection_block( $parsed_block ) ) {
 			$this->begin_catalog_pricing();
+			$this->block_scope_depths[] = count( $this->catalog_pricing_scopes );
 		}
 
 		return $pre_render;
@@ -203,7 +211,16 @@ class CartPricingContext {
 	 */
 	public function handle_render_block( $block_content, $parsed_block = null ) {
 		if ( self::is_cross_sells_collection_block( $parsed_block ) ) {
-			$this->end_catalog_pricing();
+			$open_scopes = count( $this->catalog_pricing_scopes );
+			while ( ! empty( $this->block_scope_depths ) && end( $this->block_scope_depths ) > $open_scopes ) {
+				array_pop( $this->block_scope_depths );
+			}
+
+			// Render paths that skip pre_render_block, like WP_Block::render(), reach here without having opened a scope.
+			if ( ! empty( $this->block_scope_depths ) && end( $this->block_scope_depths ) === $open_scopes ) {
+				array_pop( $this->block_scope_depths );
+				$this->end_catalog_pricing();
+			}
 		}
 
 		return $block_content;

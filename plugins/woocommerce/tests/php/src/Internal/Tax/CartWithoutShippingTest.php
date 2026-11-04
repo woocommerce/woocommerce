@@ -235,6 +235,57 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Keeps an outer catalog pricing scope open when a cross-sells block renders without pre_render_block.
+	 */
+	public function test_block_cart_cross_sells_render_without_pre_render_keeps_outer_catalog_scope(): void {
+		$this->add_product_to_cart( true );
+		add_filter( 'woocommerce_is_cart', '__return_true' );
+		$shipping = array( 'US', 'CA', '90210', 'Beverly Hills' );
+
+		$after_render = null;
+		wc_get_container()->get( CartPricingContext::class )->with_catalog_pricing(
+			function () use ( &$after_render ) {
+				// WP_Block::render() fires render_block_{name} without pre_render_block for a top-level block.
+				$block = new \WP_Block(
+					array(
+						'blockName'    => 'woocommerce/product-collection',
+						'attrs'        => array( 'collection' => 'woocommerce/product-collection/cross-sells' ),
+						'innerBlocks'  => array(),
+						'innerHTML'    => '',
+						'innerContent' => array(),
+					)
+				);
+				$block->render();
+				$after_render = $this->customer->get_taxable_address();
+			}
+		);
+
+		$this->assertSame( $shipping, $after_render, 'The outer catalog pricing scope should still apply after the block render.' );
+		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $this->customer->get_taxable_address(), 'The cart should use the billing address once the outer scope ends.' );
+	}
+
+	/**
+	 * @testdox Leaves no catalog pricing scope open when another filter short-circuits the cross-sells block render.
+	 */
+	public function test_block_cart_cross_sells_short_circuited_render_opens_no_scope(): void {
+		$this->add_product_to_cart( true );
+		add_filter( 'woocommerce_is_cart', '__return_true' );
+		add_filter( 'pre_render_block', static fn() => '<p>short-circuit</p>', 10, 0 );
+
+		render_block(
+			array(
+				'blockName'    => 'woocommerce/product-collection',
+				'attrs'        => array( 'collection' => 'woocommerce/product-collection/cross-sells' ),
+				'innerBlocks'  => array(),
+				'innerHTML'    => '',
+				'innerContent' => array(),
+			)
+		);
+
+		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $this->customer->get_taxable_address(), 'A skipped render should not leave catalog pricing on for the cart.' );
+	}
+
+	/**
 	 * @testdox Prices Store API cross-sells using shipping tax while virtual cart items use billing tax.
 	 */
 	public function test_store_api_cross_sell_uses_catalog_tax(): void {
