@@ -3816,6 +3816,420 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+<<<<<<< HEAD
+=======
+	 * @testdox Checkout stops when the draft order could not be saved.
+	 */
+	public function test_post_rejects_draft_order_when_save_fails(): void {
+		$order_id = $this->create_draft_order_then_remove_first_cart_line();
+		$this->fail_saves_of_order( $order_id );
+
+		$response = rest_get_server()->dispatch( $this->build_place_order_request() );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_checkout_order_not_saved', $response->get_data()['code'] );
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::CHECKOUT_DRAFT ), 'The order must not move on to payment.' );
+		$this->assertEmpty( WC()->session->get( 'store_api_draft_order' ), 'The order whose save failed must not stay in the session to be resumed.' );
+	}
+
+	/**
+	 * @testdox The next checkout after a failed save completes normally.
+	 */
+	public function test_post_after_failed_save_places_order(): void {
+		$order_id = $this->create_draft_order_then_remove_first_cart_line();
+		$fail     = $this->fail_saves_of_order( $order_id );
+		rest_get_server()->dispatch( $this->build_place_order_request() );
+		remove_action( 'woocommerce_update_order', $fail );
+
+		$response = rest_get_server()->dispatch( $this->build_place_order_request() );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$items = array_values( $order->get_items() );
+		$this->assertCount( 1, $items, 'The order should hold the cart line.' );
+		$this->assertSame( $this->products[1]->get_id(), $items[0]->get_product_id() );
+		$this->assertSame( (float) $items[0]->get_total() + (float) $order->get_shipping_total(), (float) $order->get_total() );
+	}
+
+	/**
+	 * @testdox Checkout stops before payment when setting the order to pending fails to save.
+	 */
+	public function test_post_rejects_order_when_pending_status_fails_to_save(): void {
+		$fail = function ( $order ) {
+			if ( $order->has_status( OrderStatus::PENDING ) ) {
+				throw new \Exception( 'Forced save failure' );
+			}
+		};
+		add_action( 'woocommerce_before_order_object_save', $fail );
+		$processed = false;
+		add_action(
+			'woocommerce_store_api_checkout_order_processed',
+			function () use ( &$processed ) {
+				$processed = true;
+			}
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_checkout_order_not_saved', $response->get_data()['code'] );
+		$this->assertFalse( $processed, 'The order must not reach the processed action or payment.' );
+		$this->assertEmpty( WC()->session->get( 'store_api_draft_order' ) );
+	}
+
+	/**
+	 * @testdox Checkout stops before payment when an extension's save of the order fails on $hook.
+	 * @testWith ["woocommerce_store_api_checkout_order_processed"]
+	 *           ["woocommerce_valid_order_statuses_for_payment"]
+	 *           ["woocommerce_order_needs_payment"]
+	 *
+	 * @param string $hook Action or filter that receives the order after its last save point.
+	 */
+	public function test_post_rejects_order_when_extension_save_fails_before_payment( string $hook ): void {
+		$order_id = 0;
+		$this->record_processed_order_id( $order_id );
+		add_filter(
+			$hook,
+			function ( $value, $order = null ) use ( &$order_id ) {
+				$order = $value instanceof \WC_Order ? $value : $order;
+				// The needs_payment() filters also run before the processed action, which the earlier save points cover.
+				if ( $order_id && $order instanceof \WC_Order ) {
+					$this->save_order_with_forced_failure( $order );
+				}
+				return $value;
+			},
+			10,
+			2
+		);
+		$payment_attempted = false;
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function () use ( &$payment_attempted ) {
+				$payment_attempted = true;
+			}
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_checkout_order_not_saved', $response->get_data()['code'] );
+		$this->assertFalse( $payment_attempted, 'Payment must not be attempted for an order that could not be saved.' );
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::PENDING ), 'The order must stay pending.' );
+		$this->assertEmpty( WC()->session->get( 'store_api_draft_order' ), 'The order whose save failed must not stay in the session to be resumed.' );
+	}
+
+	/**
+	 * @testdox Checkout of an order that needs no payment fails when marking it paid cannot save it.
+	 */
+	public function test_post_without_payment_rejects_order_when_payment_complete_fails_to_save(): void {
+		add_filter( 'woocommerce_order_needs_payment', '__return_false' );
+		$order_id = 0;
+		$this->record_processed_order_id( $order_id );
+		// As an extension saving invalid data from this filter would, make the payment_complete() save fail.
+		add_filter(
+			'woocommerce_payment_complete_order_status',
+			function ( $status ) use ( &$order_id ) {
+				if ( $order_id ) {
+					add_action(
+						'woocommerce_before_order_object_save',
+						function () {
+							throw new \Exception( 'Forced save failure' );
+						}
+					);
+				}
+				return $status;
+			}
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_checkout_order_not_saved', $response->get_data()['code'] );
+		$order = wc_get_order( $order_id );
+		$this->assertTrue( $order->has_status( OrderStatus::PENDING ), 'The order must stay pending.' );
+		$this->assertNull( $order->get_date_paid(), 'The order must not be marked paid.' );
+	}
+
+	/**
+	 * Record the ID of the order passed to the processed action, which also marks that the last save point has passed.
+	 *
+	 * @param int $order_id Set to the order ID when the action fires.
+	 */
+	private function record_processed_order_id( int &$order_id ): void {
+		$order_id = 0;
+		add_action(
+			'woocommerce_store_api_checkout_order_processed',
+			function ( $order ) use ( &$order_id ) {
+				$order_id = $order->get_id();
+			},
+			1
+		);
+	}
+
+	/**
+	 * Save the order while a callback makes the save fail, as saving a value too long for its column would.
+	 *
+	 * @param \WC_Order $order Order object.
+	 */
+	private function save_order_with_forced_failure( \WC_Order $order ): void {
+		$fail = function () {
+			throw new \Exception( 'Forced save failure' );
+		};
+		add_action( 'woocommerce_before_order_object_save', $fail );
+		$order->save();
+		remove_action( 'woocommerce_before_order_object_save', $fail );
+	}
+
+	/**
+	 * @testdox Updating the checkout with PATCH fails and forgets the draft order when the order cannot be saved.
+	 */
+	public function test_put_rejects_draft_order_that_fails_to_save(): void {
+		$order_id = $this->create_draft_order_then_remove_first_cart_line();
+		$this->fail_saves_of_order( $order_id );
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( array( 'customer_note' => 'Leave at the door' ) );
+		$this->simulate_fresh_request();
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_checkout_order_not_saved', $response->get_data()['code'] );
+		$this->assertEmpty( WC()->session->get( 'store_api_draft_order' ) );
+	}
+
+	/**
+	 * @testdox Pay for order stops before payment when the order cannot be saved.
+	 */
+	public function test_checkout_order_rejects_order_that_fails_to_save(): void {
+		$order    = \WC_Helper_Order::create_order( 0 );
+		$order_id = $order->get_id();
+		$this->fail_saves_of_order( $order_id );
+
+		$response = rest_get_server()->dispatch( $this->build_pay_for_order_request( $order ) );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_checkout_order_not_saved', $response->get_data()['code'] );
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::PENDING ), 'The order must not move on to payment.' );
+	}
+
+	/**
+	 * @testdox Pay for order stops before payment when an extension's save of the order fails on $hook.
+	 * @testWith ["woocommerce_store_api_checkout_order_processed"]
+	 *           ["woocommerce_valid_order_statuses_for_payment"]
+	 *           ["woocommerce_order_needs_payment"]
+	 *
+	 * @param string $hook Action or filter that receives the order after its last save point.
+	 */
+	public function test_checkout_order_rejects_order_when_extension_save_fails_before_payment( string $hook ): void {
+		$order        = \WC_Helper_Order::create_order( 0 );
+		$processed_id = 0;
+		$this->record_processed_order_id( $processed_id );
+		add_filter(
+			$hook,
+			function ( $value, $filtered_order = null ) use ( &$processed_id ) {
+				$filtered_order = $value instanceof \WC_Order ? $value : $filtered_order;
+				// The needs_payment() filters also run before the processed action, which the earlier save points cover.
+				if ( $processed_id && $filtered_order instanceof \WC_Order ) {
+					$this->save_order_with_forced_failure( $filtered_order );
+				}
+				return $value;
+			},
+			10,
+			2
+		);
+		$payment_attempted = false;
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function () use ( &$payment_attempted ) {
+				$payment_attempted = true;
+			}
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_pay_for_order_request( $order ) );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_checkout_order_not_saved', $response->get_data()['code'] );
+		$this->assertFalse( $payment_attempted, 'Payment must not be attempted for an order that could not be saved.' );
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::PENDING ), 'The order must stay pending.' );
+	}
+
+	/**
+	 * Build a pay for order request for an existing order, sending the order's own billing address.
+	 *
+	 * The order's own address keeps the request from being refused for re-pricing the order.
+	 *
+	 * @param \WC_Order $order Order to pay for.
+	 * @return \WP_REST_Request
+	 */
+	private function build_pay_for_order_request( \WC_Order $order ): \WP_REST_Request {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_query_params(
+			array(
+				'key'           => $order->get_order_key(),
+				'billing_email' => $order->get_billing_email(),
+			)
+		);
+		$request->set_body_params(
+			array(
+				'billing_address' => $order->get_address( 'billing' ),
+				'payment_method'  => WC_Gateway_BACS::ID,
+			)
+		);
+		return $request;
+	}
+
+	/**
+	 * Store a draft order for the seeded cart, then remove one cart line.
+	 *
+	 * @return int Draft order ID.
+	 */
+	private function create_draft_order_then_remove_first_cart_line(): int {
+		// A registered but disabled gateway is refused after the draft order is stored.
+		$request = $this->build_valid_post_request();
+		$request->set_param( 'payment_method', 'cheque' );
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 400, $response->get_status() );
+
+		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
+		$this->assertCount( 2, wc_get_order( $order_id )->get_items(), 'The draft order should hold both cart lines.' );
+
+		wc()->cart->remove_cart_item( wc()->cart->generate_cart_id( $this->products[0]->get_id() ) );
+
+		return $order_id;
+	}
+
+	/**
+	 * Build a place order request for the current cart, as a new HTTP request would send it.
+	 *
+	 * @return \WP_REST_Request
+	 */
+	private function build_place_order_request(): \WP_REST_Request {
+		$request = $this->build_valid_post_request();
+		$params  = $request->get_body_params();
+		unset( $params['expected_total'] );
+		$request->set_body_params( $params );
+		$this->simulate_fresh_request();
+		return $request;
+	}
+
+	/**
+	 * Make every save of the given order fail, as a database error would.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return callable The callback added to woocommerce_update_order.
+	 */
+	private function fail_saves_of_order( int $order_id ): callable {
+		$fail = function ( $updated_order_id ) use ( $order_id ) {
+			if ( (int) $updated_order_id === $order_id ) {
+				throw new \Exception( 'Forced save failure' );
+			}
+		};
+		add_action( 'woocommerce_update_order', $fail );
+		return $fail;
+	}
+
+	/**
+	 * @testdox Checkout places a zero-total pending or failed order from the session instead of creating a new one.
+	 * @testWith ["pending"]
+	 *           ["failed"]
+	 *
+	 * @param string $status Status of the order in the session.
+	 */
+	public function test_post_reuses_zero_total_order_from_session( string $status ): void {
+		$this->apply_full_discount_coupon();
+		$order = $this->create_session_order_from_cart( $status );
+		$order->update_meta_data( '_subscription_renewal', 123 );
+		$order->save();
+		$this->assertSame( 0.0, (float) $order->get_total(), 'The coupon must take the order to a zero total, which is the case this test covers.' );
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( $order->get_id(), (int) $response->get_data()['order_id'], 'Checkout must place the zero-total order from the session, not a new one without its data.' );
+
+		$placed_order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $placed_order->is_paid(), 'The zero-total order from the session should be completed by checkout.' );
+		$this->assertSame( '123', (string) $placed_order->get_meta( '_subscription_renewal' ), 'Renewal metadata on the order from the session should be kept.' );
+	}
+
+	/**
+	 * @testdox Checkout answers with the zero-total order from the session, without placing another, once that order has moved past awaiting payment.
+	 */
+	public function test_post_answers_with_completed_zero_total_order_from_session(): void {
+		$this->apply_full_discount_coupon();
+		$order = $this->create_session_order_from_cart( OrderStatus::COMPLETED );
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$order_ids = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( array( $order->get_id() ), $order_ids, 'A completed order must not be placed again.' );
+		$this->assertSame( $order->get_checkout_order_received_url(), $response->get_data()['payment_result']['redirect_url'], 'The shopper should be sent to the order received page of the completed order.' );
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::COMPLETED ), 'The completed order should be left as it was.' );
+	}
+
+	/**
+	 * @testdox Checkout does not reuse a positive-total order from the session when woocommerce_order_needs_payment says it needs no payment.
+	 */
+	public function test_post_respects_needs_payment_filter_for_positive_total_order_from_session(): void {
+		$order = $this->create_session_order_from_cart( OrderStatus::PENDING );
+		add_filter(
+			'woocommerce_order_needs_payment',
+			function ( $needs_payment, $filtered_order ) use ( $order ) {
+				return $filtered_order->get_id() === $order->get_id() ? false : $needs_payment;
+			},
+			10,
+			2
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertNotSame( $order->get_id(), (int) $response->get_data()['order_id'], 'An order the filter says needs no payment must not be reused.' );
+	}
+
+	/**
+	 * Apply a 100% coupon to the cart, taking its total to zero.
+	 */
+	private function apply_full_discount_coupon(): void {
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'full_discount_coupon' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 100 );
+		$coupon->save();
+
+		WC()->cart->apply_coupon( 'full_discount_coupon' );
+	}
+
+	/**
+	 * Create an order from the cart and point the session at it, as Subscriptions does with a renewal order.
+	 *
+	 * @param string $status Order status.
+	 * @return \WC_Order
+	 */
+	private function create_session_order_from_cart( string $status ): \WC_Order {
+		WC()->cart->calculate_totals();
+
+		$order = ( new OrderController() )->create_order_from_cart();
+		$order->set_status( $status );
+		$order->save();
+
+		WC()->session->set( 'store_api_draft_order', $order->get_id() );
+
+		return $order;
+	}
+
+	/**
+>>>>>>> 65e8d600dc (Stop Store API checkout when the order could not be saved (#70626))
 	 * @testdox Store API checkout stores the order awaiting payment before invoking the payment gateway.
 	 */
 	public function test_post_sets_order_awaiting_payment_before_processing_payment(): void {
