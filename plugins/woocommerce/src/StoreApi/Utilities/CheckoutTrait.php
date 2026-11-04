@@ -83,15 +83,7 @@ trait CheckoutTrait {
 	/**
 	 * For orders which do not require payment, just update status.
 	 *
-<<<<<<< HEAD
-	 * @throws RouteException If the order is missing.
-=======
-	 * Deliberately no recovery of the kind process_payment() does: nothing was charged, so a
-	 * failure costs the shopper only a retry, and claiming success would be the worse outcome.
-	 *
-	 * @throws RouteException If the order is missing, a cancelled unpaid order would be marked paid, or the order
-	 *                        could not be saved.
->>>>>>> 65e8d600dc (Stop Store API checkout when the order could not be saved (#70626))
+	 * @throws RouteException If the order is missing or could not be saved.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @param PaymentResult    $payment_result Payment result object.
