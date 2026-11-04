@@ -708,6 +708,14 @@
 							// now describes a row nobody can see and must not ride along on the next save.
 							shippingMethodView.model.changes = _.omit( shippingMethodView.model.changes, 'methods' );
 
+							// Setting 'methods' above marks the form dirty, which on the modal branch below
+							// still has to warn about navigating away from unfinished settings, so only
+							// the button is disabled here: an empty change set posts nothing and the
+							// endpoint rejects it. A completed save clears the flag via 'saved:methods'.
+							if ( _.isEmpty( shippingMethodView.model.changes ) ) {
+								$save_button.attr( 'disabled', 'disabled' );
+							}
+
 							// Close original modal
 							closeModal();
 

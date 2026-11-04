@@ -551,6 +551,50 @@ test( 'does not apply an unsaved method toggle when a method is added', async ( 
 	expect( dialogMessages ).toEqual( [] );
 } );
 
+// Regression: adding a method with a settings modal marks the form dirty through the model's
+// method list, but the add already persisted the method, so the zone-level change set is empty.
+// A failed settings save left Save changes enabled over that empty set, and submitting it posts
+// no changes at all, which the endpoint rejects as missing_fields. The non-modal branch cannot
+// show this: it reaches onSaveResponse, whose 'saved:methods' already disables the button.
+test( 'leaves Save changes disabled when a settings save fails on a freshly added method', async ( {
+	page,
+	zone,
+} ) => {
+	await openZone( page, zone.name );
+
+	const dialogMessages: string[] = [];
+	page.on( 'dialog', async ( dialog ) => {
+		dialogMessages.push( dialog.message() );
+		await dialog.accept();
+	} );
+
+	await page.route(
+		( url ) => url.searchParams.get( 'action' ) === SAVE_SETTINGS_ACTION,
+		( route ) =>
+			route.fulfill( {
+				status: 500,
+				contentType: 'text/plain',
+				body: 'Injected settings save failure',
+			} )
+	);
+
+	// Free shipping has a settings modal and is not already on the fixture's zone.
+	await openAddMethodModal( page );
+	await page.getByText( 'Free shipping' ).click();
+	await page.getByRole( 'button', { name: 'Continue' } ).click();
+
+	await page.locator( '#btn-ok' ).click();
+
+	await expect
+		.poll( () => dialogMessages )
+		.toContain( 'Your changes were not saved. Please retry.' );
+
+	// The zone itself was never edited, so there is nothing to retry.
+	await expect( page.locator( '#submit' ) ).toBeDisabled();
+	await expect( page.locator( '#submit' ) ).not.toHaveClass( /is-busy/ );
+	expect( dialogMessages ).toHaveLength( 1 );
+} );
+
 // Guards the other half of the branch, not the toggle fix: a delete marks the form clean while
 // a zone edit is still pending. Simplifying down to the unload flag alone would drop this case.
 test( 'keeps Save changes clickable when a failed save carries a zone edit made before a delete', async ( {
