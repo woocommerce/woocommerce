@@ -610,26 +610,28 @@ class UcpIdempotency extends ControllerTestCase {
 	}
 
 	/**
-	 * A server error keeps the claim: it is unknown whether the write landed, so a retry
-	 * must not be allowed to run it again.
+	 * A server error releases the claim, so the retry is processed rather than refused.
 	 */
-	public function test_a_server_error_keeps_the_claim(): void {
-		add_action(
-			'woocommerce_add_to_cart',
-			static function () {
-				throw new \RuntimeException( 'Storage went away mid-write.' );
-			}
-		);
+	public function test_a_server_error_releases_the_claim(): void {
+		$fail = static function () {
+			throw new \RuntimeException( 'Storage went away mid-write.' );
+		};
+		add_action( 'woocommerce_add_to_cart', $fail );
 
 		$key      = wp_generate_uuid4();
-		$response = $this->request( 'POST', '/carts', $this->cart_body( 0 ), $key );
+		$body     = $this->cart_body( 0 );
+		$response = $this->request( 'POST', '/carts', $body, $key );
 
 		$this->assertGreaterThanOrEqual( 500, $response->get_status() );
+		$this->assertNull( UcpIdempotencyStore::find( $key ) );
 
-		$record = UcpIdempotencyStore::find( $key );
+		remove_action( 'woocommerce_add_to_cart', $fail );
 
-		$this->assertNotNull( $record );
-		$this->assertSame( UcpIdempotencyStore::STATE_IN_PROGRESS, $record['state'] );
+		$retry = $this->request( 'POST', '/carts', $body, $key );
+
+		$this->assertSame( 200, $retry->get_status() );
+		$this->assertSame( 'success', $retry->get_data()['ucp']['status'] );
+		$this->assertArrayNotHasKey( 'Idempotency-Replayed', $retry->get_headers() );
 	}
 
 	/**

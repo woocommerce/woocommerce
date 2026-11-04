@@ -8,7 +8,7 @@ namespace Automattic\WooCommerce\StoreApi\Utilities\Ucp;
  *
  * `for_request()` settles a request before anything else runs — a replay, a conflict or a
  * refused key is answered without loading a session — or hands back the claim the request
- * now owns, which `settle()` stores, releases or keeps according to the response.
+ * now owns, which `settle()` stores or releases according to the response.
  */
 final class UcpIdempotencyClaim {
 	/**
@@ -168,14 +168,7 @@ final class UcpIdempotencyClaim {
 			return $response;
 		}
 
-		// A `500` leaves it unknown whether the write landed, so the claim is kept: a retry is
-		// refused until the orphan window frees it, rather than repeating a write that may have.
-		if ( $response->get_status() >= 500 ) {
-			return $response;
-		}
-
-		// A refused request changed nothing, since the route restores its state on failure, so
-		// the key is released and a corrected retry is processed normally.
+		// A failed request is released.
 		UcpIdempotencyStore::delete( $this->key );
 
 		return $response;
