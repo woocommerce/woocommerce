@@ -22,7 +22,7 @@ class AbilityTest extends \WC_Unit_Test_Case {
 	private $received = array();
 
 	/**
-	 * Build a test ability with a boolean, an integer and a nested boolean field.
+	 * Build a test ability with a boolean, an integer, a list of unique integers and a nested boolean field.
 	 *
 	 * @return Ability
 	 */
@@ -41,6 +41,11 @@ class AbilityTest extends \WC_Unit_Test_Case {
 					'properties'           => array(
 						'flag'  => array( 'type' => 'boolean' ),
 						'count' => array( 'type' => 'integer' ),
+						'ids'   => array(
+							'type'        => 'array',
+							'uniqueItems' => true,
+							'items'       => array( 'type' => 'integer' ),
+						),
 						'items' => array(
 							'type'  => 'array',
 							'items' => array(
@@ -120,6 +125,18 @@ class AbilityTest extends \WC_Unit_Test_Case {
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+		$this->assertArrayNotHasKey( 'execute', $this->received );
+	}
+
+	/**
+	 * @testdox Should refuse input that validates but cannot be converted, and not run the callbacks.
+	 */
+	public function test_refuses_input_that_cannot_be_converted(): void {
+		$result = $this->get_ability()->execute( array( 'ids' => array( '1', '01' ) ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+		$this->assertArrayNotHasKey( 'permission', $this->received );
 		$this->assertArrayNotHasKey( 'execute', $this->received );
 	}
 

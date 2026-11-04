@@ -12,61 +12,87 @@ defined( 'ABSPATH' ) || exit;
 /**
  * The base class of the WooCommerce abilities.
  *
- * WordPress validates the input of an ability against its schema, but only the
- * REST route converts it to the schema types. A direct execute() call, such as
- * one from the MCP adapter, gets a boolean field as the string "false". This
- * class converts valid input on every path, the same way the REST route does.
+ * WordPress 7.2 converts valid ability input to the schema types with
+ * WP_Ability::coerce_input() before the callbacks run. This class backports
+ * that method, so the callbacks get converted input on WordPress 7.0 and 7.1 too.
  *
  * @since 11.4.0
  */
 class Ability extends \WP_Ability {
 
 	/**
-	 * Apply the schema default, then convert valid input to the schema types.
+	 * Apply the schema default. Before WordPress 7.2, also convert valid input to
+	 * the schema types, as WordPress 7.2 does in execute().
 	 *
 	 * Invalid input stays unchanged, so validate_input() refuses it as before.
 	 *
 	 * @since 11.4.0
 	 *
 	 * @param mixed $input Optional. The raw input provided for the ability. Default `null`.
-	 * @return mixed The converted input, the input unchanged when it cannot be converted, or a WP_Error from the parent.
+	 * @return mixed The input, converted before WordPress 7.2, or a WP_Error.
 	 */
 	final public function normalize_input( $input = null ) {
 		$input = parent::normalize_input( $input );
-		if ( null === $input || is_wp_error( $input ) ) {
+		if ( method_exists( \WP_Ability::class, 'coerce_input' ) || null === $input || is_wp_error( $input ) || is_wp_error( $this->validate_input( $input ) ) ) {
 			return $input;
 		}
 
+		return $this->coerce_input( $input );
+	}
+
+	/**
+	 * Convert validated input to the schema types, the same way WordPress 7.2 does.
+	 *
+	 * Converting can fail on input that validated, such as items that are unique
+	 * as strings but not as integers. The input is then refused.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param mixed $input Validated ability input.
+	 * @return mixed|\WP_Error The converted input, or a WP_Error when it cannot be converted.
+	 */
+	public function coerce_input( $input ) {
 		$schema = $this->get_input_schema();
-		if ( empty( $schema ) || is_wp_error( $this->validate_input( $input ) ) ) {
+		if ( null === $input || empty( $schema ) ) {
 			return $input;
 		}
 
 		$sanitized = rest_sanitize_value_from_schema( $input, $schema, 'input' );
 
-		return self::contains_error( $sanitized ) ? $input : $sanitized;
+		$error = self::get_input_error( $sanitized );
+		if ( null !== $error ) {
+			return new \WP_Error(
+				'ability_invalid_input',
+				sprintf(
+					/* translators: %1$s: ability name, %2$s: error message. */
+					__( 'Ability "%1$s" has invalid input. Reason: %2$s', 'woocommerce' ),
+					$this->name,
+					$error->get_error_message()
+				)
+			);
+		}
+
+		return $sanitized;
 	}
 
 	/**
-	 * Whether a converted value is, or contains, a WP_Error.
-	 *
-	 * Converting can fail on input that validated, such as items that are unique
-	 * as strings but not as integers.
+	 * Get the first WP_Error in a converted value.
 	 *
 	 * @param mixed $value Converted value.
-	 * @return bool
+	 * @return \WP_Error|null
 	 */
-	private static function contains_error( $value ): bool {
+	private static function get_input_error( $value ): ?\WP_Error {
 		if ( is_wp_error( $value ) ) {
-			return true;
+			return $value;
 		}
 		if ( is_array( $value ) ) {
 			foreach ( $value as $item ) {
-				if ( self::contains_error( $item ) ) {
-					return true;
+				$error = self::get_input_error( $item );
+				if ( null !== $error ) {
+					return $error;
 				}
 			}
 		}
-		return false;
+		return null;
 	}
 }
