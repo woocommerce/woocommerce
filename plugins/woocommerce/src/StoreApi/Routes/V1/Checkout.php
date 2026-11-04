@@ -148,6 +148,14 @@ class Checkout extends AbstractCartRoute {
 	}
 
 	/**
+	 * Clear the order held from a previous request. One route instance can serve several requests
+	 * in the same PHP process, so each request must resolve its own order.
+	 */
+	private function reset_request_state(): void {
+		$this->order = null;
+	}
+
+	/**
 	 * Get the route response based on the type of request.
 	 *
 	 * @param \WP_REST_Request $request Request object.
@@ -155,6 +163,8 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
+		$this->reset_request_state();
+
 		try {
 			$this->load_cart_session( $request );
 		} catch ( \Throwable $error ) {
@@ -844,7 +854,7 @@ class Checkout extends AbstractCartRoute {
 	 */
 	private function create_or_update_draft_order( \WP_REST_Request $request ) {
 		// Reuse the failed/pending order from the customer's session if one exists; otherwise the POST flow would orphan it by creating a fresh order on every retry.
-		$this->order = $this->order ?? $this->get_draft_order();
+		$this->order = $this->get_draft_order();
 
 		if ( ! $this->order ) {
 			$this->order = $this->order_controller->create_order_from_cart();
