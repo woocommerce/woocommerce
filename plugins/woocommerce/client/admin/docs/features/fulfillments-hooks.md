@@ -714,7 +714,7 @@ function customize_provider_label( $label, $fulfillment ) {
 
 #### `woocommerce_privacy_remove_fulfillment_personal_data_meta`
 
-Filters the fulfillment meta keys cleared when an order is anonymized through the WordPress personal-data eraser or the automatic retention cleanup.
+Filters the fulfillment meta keys cleared when an order is anonymized through the WordPress personal-data eraser or the automatic retention cleanup. It also runs on a store where the fulfillments feature has since been disabled, as long as its tables were created while it was on, since any tracking data they hold is still stored.
 
 **File:** `src/Admin/Features/Fulfillments/FulfillmentsPrivacy.php`
 

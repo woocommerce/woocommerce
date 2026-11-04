@@ -140,24 +140,23 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 		$order = new WC_Order();
 		$order->save();
 
-		// Swap in a data store whose read throws, mimicking a DB failure the real store surfaces
-		// when the exporter asks it to. Extends the real store so it passes WC_Data_Store validation.
+		// Swap in a data store whose read throws. Extends the real store so it passes
+		// WC_Data_Store validation.
 		add_filter(
 			'woocommerce_order-fulfillment_data_store',
 			function () {
 				return new class() extends FulfillmentsDataStore {
 					/**
-					 * Throw when the caller opts into error surfacing.
+					 * Fail the read the exporter performs.
 					 *
-					 * @param string $entity_type    The entity type.
-					 * @param string $entity_id      The entity ID.
-					 * @param bool   $with_deleted   Whether to include deleted fulfillments.
-					 * @param bool   $throw_on_error Whether to throw when the query fails.
+					 * @param string $entity_type  The entity type.
+					 * @param string $entity_id    The entity ID.
+					 * @param bool   $with_deleted Whether to include deleted fulfillments.
 					 * @return array
-					 * @throws \Exception When $throw_on_error is true.
+					 * @throws \Exception When deleted records are requested, as the exporter does.
 					 */
-					public function read_fulfillments( string $entity_type, string $entity_id, bool $with_deleted = false, bool $throw_on_error = false ): array {
-						if ( $throw_on_error ) {
+					public function read_fulfillments( string $entity_type, string $entity_id, bool $with_deleted = false ): array {
+						if ( $with_deleted ) {
 							throw new \Exception( 'Simulated read failure.' );
 						}
 						return array();
@@ -180,6 +179,53 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The order export does not fake a complete export when the fulfillment query errors.
+	 */
+	public function test_export_skips_order_when_the_query_errors(): void {
+		$order = new WC_Order();
+		$order->save();
+
+		// get_results() returns an empty array on a failed query, so mimic that rather than a
+		// throw: the error only shows up in $wpdb->last_error.
+		add_filter(
+			'woocommerce_order-fulfillment_data_store',
+			function () {
+				return new class() extends FulfillmentsDataStore {
+					/**
+					 * Return nothing, leaving a DB error behind as a failed query does.
+					 *
+					 * @param string $entity_type  The entity type.
+					 * @param string $entity_id    The entity ID.
+					 * @param bool   $with_deleted Whether to include deleted fulfillments.
+					 * @return array
+					 */
+					public function read_fulfillments( string $entity_type, string $entity_id, bool $with_deleted = false ): array {
+						global $wpdb;
+						$wpdb->last_error = 'Table \'wp_wc_order_fulfillment_meta\' doesn\'t exist';
+						return array();
+					}
+				};
+			}
+		);
+
+		$existing = array(
+			array(
+				'name'  => 'Order number',
+				'value' => (string) $order->get_id(),
+			),
+		);
+
+		global $wpdb;
+		try {
+			$result = $this->sut->export_order_fulfillment_data( $existing, $order );
+		} finally {
+			$wpdb->last_error = '';
+		}
+
+		$this->assertSame( $existing, $result, 'No fulfillment rows should be appended from an errored read.' );
+	}
+
+	/**
 	 * @testdox The order export includes the customer's fulfillment tracking data.
 	 */
 	public function test_export_includes_fulfillment_tracking_data(): void {
@@ -191,10 +237,12 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$values = wp_list_pluck( $this->sut->export_order_fulfillment_data( array(), $order ), 'value' );
+		$rows = $this->sut->export_order_fulfillment_data( array(), $order );
 
-		$this->assertContains( 'TRACK123456', $values, 'The export should include the tracking number.' );
-		$this->assertContains( 'https://example.com/track/TRACK123456', $values, 'The export should include the tracking URL.' );
+		$this->assertCount( 1, $rows, 'A fulfillment should add one row, not one row per field.' );
+		$this->assertSame( 'Shipment', $rows[0]['name'] );
+		$this->assertStringContainsString( 'TRACK123456', $rows[0]['value'], 'The export should include the tracking number.' );
+		$this->assertStringContainsString( 'https://example.com/track/TRACK123456', $rows[0]['value'], 'The export should include the tracking URL.' );
 	}
 
 	/**
@@ -205,15 +253,11 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 			array( '_tracking_number' => 'TRACK123456' )
 		);
 
-		$rows = array();
-		foreach ( $this->sut->export_order_fulfillment_data( array(), $order ) as $row ) {
-			$rows[ $row['name'] ] = $row['value'];
-		}
+		$rows = $this->sut->export_order_fulfillment_data( array(), $order );
 
-		$this->assertArrayHasKey( 'Fulfillment status', $rows, 'The export should include the fulfillment status.' );
-		$this->assertSame( 'Fulfilled', $rows['Fulfillment status'] );
-		$this->assertArrayHasKey( 'Items in this shipment', $rows, 'The export should list the items shipped in the fulfillment.' );
-		$this->assertStringContainsString( ' x 1', $rows['Items in this shipment'], 'The shipment items should include the quantity.' );
+		$this->assertCount( 1, $rows );
+		$this->assertStringContainsString( 'Status: Fulfilled', $rows[0]['value'], 'The export should include the fulfillment status.' );
+		$this->assertMatchesRegularExpression( '/Items: .+ x 1/', $rows[0]['value'], 'The export should list the items shipped, with their quantity.' );
 	}
 
 	/**
@@ -227,8 +271,8 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 		$datastore = WC_Data_Store::load( 'order-fulfillment' );
 		$datastore->delete( $fulfillment );
 
-		$values = wp_list_pluck( $this->sut->export_order_fulfillment_data( array(), $order ), 'value' );
-		$this->assertContains( 'TRACK123456', $values, 'A soft-deleted fulfillment should still appear in the export.' );
+		$values = implode( ' ', wp_list_pluck( $this->sut->export_order_fulfillment_data( array(), $order ), 'value' ) );
+		$this->assertStringContainsString( 'TRACK123456', $values, 'A soft-deleted fulfillment should still appear in the export.' );
 	}
 
 	/**
@@ -247,7 +291,7 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Several shipments on one order are numbered so their rows stay distinct.
+	 * @testdox Several shipments on one order each add one numbered row.
 	 */
 	public function test_export_numbers_multiple_shipments(): void {
 		$order       = OrderHelper::create_order();
@@ -274,10 +318,17 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 			);
 		}
 
-		$names = wp_list_pluck( $this->sut->export_order_fulfillment_data( array(), $order ), 'name' );
+		$rows = $this->sut->export_order_fulfillment_data( array(), $order );
 
-		$this->assertContains( 'Shipment 1: Tracking number', $names, 'The first shipment rows should be numbered.' );
-		$this->assertContains( 'Shipment 2: Tracking number', $names, 'The second shipment rows should be numbered.' );
+		// One row per shipment keeps the accumulated export blob small, which core rewrites
+		// in full on every export page.
+		$this->assertCount( 2, $rows, 'Each shipment should add exactly one row.' );
+		$this->assertSame( array( 'Shipment 1', 'Shipment 2' ), wp_list_pluck( $rows, 'name' ) );
+
+		// read_fulfillments() does not order its query, so assert on the set of values.
+		$values = implode( ' ', wp_list_pluck( $rows, 'value' ) );
+		$this->assertStringContainsString( 'FIRST111', $values );
+		$this->assertStringContainsString( 'SECOND22', $values );
 	}
 
 	/**
@@ -300,8 +351,8 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 			}
 		);
 
-		$values = wp_list_pluck( $this->sut->export_order_fulfillment_data( array(), $order ), 'value' );
-		$this->assertContains( 'DHL Express', $values, 'The export should use the provider display name.' );
+		$values = implode( ' ', wp_list_pluck( $this->sut->export_order_fulfillment_data( array(), $order ), 'value' ) );
+		$this->assertStringContainsString( 'DHL Express', $values, 'The export should use the provider display name.' );
 	}
 
 	/**
@@ -337,8 +388,69 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 		foreach ( $export['data'] as $item ) {
 			$values = array_merge( $values, wp_list_pluck( $item['data'], 'value' ) );
 		}
-		$this->assertContains( 'MINE1111', $values, 'The requesting customer tracking number should be exported.' );
-		$this->assertNotContains( 'THEIRS2222', $values, 'Another customer tracking number must not be exported.' );
+		$values = implode( ' ', $values );
+		$this->assertStringContainsString( 'MINE1111', $values, 'The requesting customer tracking number should be exported.' );
+		$this->assertStringNotContainsString( 'THEIRS2222', $values, 'Another customer tracking number must not be exported.' );
+	}
+
+	/**
+	 * @testdox The export adds no rows on a store that never created the fulfillment tables.
+	 */
+	public function test_export_skips_order_when_tables_were_never_created(): void {
+		list( $order ) = $this->create_order_with_fulfillment(
+			array( '_tracking_number' => 'TRACK123456' )
+		);
+
+		// The exporter is registered for every store with the feature off, so it has to skip
+		// the ones that never created the tables rather than ask for an absent data store.
+		$original = get_option( 'woocommerce_fulfillments_db_tables_created' );
+		delete_option( 'woocommerce_fulfillments_db_tables_created' );
+		try {
+			$rows = $this->sut->export_order_fulfillment_data( array(), $order );
+		} finally {
+			if ( false !== $original ) {
+				update_option( 'woocommerce_fulfillments_db_tables_created', $original );
+			}
+		}
+
+		$this->assertSame( array(), $rows, 'The export should add no fulfillment rows.' );
+	}
+
+	/**
+	 * @testdox The eraser stops before redacting on a store that never created the fulfillment tables.
+	 */
+	public function test_eraser_skips_redaction_when_tables_were_never_created(): void {
+		list( $order, $fulfillment ) = $this->create_order_with_fulfillment(
+			array( '_tracking_number' => 'TRACK123456' )
+		);
+
+		$filter_ran = false;
+		add_filter(
+			'woocommerce_privacy_remove_fulfillment_personal_data_meta',
+			function ( $meta_keys ) use ( &$filter_ran ) {
+				$filter_ran = true;
+				return $meta_keys;
+			}
+		);
+
+		// The eraser is registered for every store with the feature off, so it has to skip the
+		// ones that never created the tables.
+		$original = get_option( 'woocommerce_fulfillments_db_tables_created' );
+		delete_option( 'woocommerce_fulfillments_db_tables_created' );
+		try {
+			$this->sut->remove_fulfillment_personal_data( $order );
+		} finally {
+			if ( false !== $original ) {
+				update_option( 'woocommerce_fulfillments_db_tables_created', $original );
+			}
+		}
+
+		$this->assertFalse( $filter_ran, 'Redaction should stop before building the query.' );
+		$this->assertSame(
+			'TRACK123456',
+			$this->reload_fulfillment( $order->get_id(), $fulfillment->get_id() )->get_tracking_number(),
+			'The tracking number should be left untouched.'
+		);
 	}
 
 	/**
