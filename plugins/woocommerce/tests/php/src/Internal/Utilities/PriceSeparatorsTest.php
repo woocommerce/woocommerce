@@ -12,7 +12,7 @@ use WC_Unit_Test_Case;
 class PriceSeparatorsTest extends WC_Unit_Test_Case {
 
 	/**
-	 * @testdox Should decode HTML entities stored as separators, including HTML5-only entities.
+	 * @testdox Should decode HTML entities stored as separators and drop markup characters.
 	 * @dataProvider separator_entity_data
 	 *
 	 * @param string $stored   The raw option value.
@@ -33,12 +33,17 @@ class PriceSeparatorsTest extends WC_Unit_Test_Case {
 	 */
 	public function separator_entity_data(): array {
 		return array(
+			'plain period'            => array( '.', '.' ),
 			'plain comma'             => array( ',', ',' ),
 			'plain space'             => array( ' ', ' ' ),
 			'non-breaking space char' => array( "\u{00A0}", "\u{00A0}" ),
 			'named entity nbsp'       => array( '&nbsp;', "\u{00A0}" ),
 			'numeric entity comma'    => array( '&#44;', ',' ),
 			'HTML5-only entity apos'  => array( '&apos;', "'" ),
+			'numeric entity apos'     => array( '&#39;', "'" ),
+			'padded numeric apos'     => array( '&#039;', "'" ),
+			'narrow nbsp entity'      => array( '&#8239;', "\u{202F}" ),
+			'encoded markup'          => array( '&lt;b&gt;x&lt;/b&gt;', 'bx/b' ),
 		);
 	}
 

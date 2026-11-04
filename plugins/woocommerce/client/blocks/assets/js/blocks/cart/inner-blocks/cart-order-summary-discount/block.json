@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/cart-order-summary-discount-block",
-	"version": "1.0.0",
 	"title": "Discount",
 	"description": "Shows the cart discount row.",
 	"category": "woocommerce",

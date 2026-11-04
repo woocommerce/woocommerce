@@ -75,6 +75,49 @@ describe( 'settings UI shell header visibility', () => {
 		document.body.innerHTML = '';
 	} );
 
+	it.each( [
+		[ 'navigation', 'Settings pages' ],
+		[ 'sectionNavigation', 'Settings sections' ],
+	] )(
+		'marks only the active link as current in %s',
+		( navigation, label ) => {
+			const { container, root } = renderElement(
+				<SettingsUIPage
+					schema={ baseSchema( {
+						[ navigation ]: [
+							{ id: 'first', label: 'First', href: '#first' },
+							{
+								id: 'current',
+								label: 'Current',
+								href: '#current',
+								active: true,
+							},
+							{
+								id: 'last',
+								label: 'Last',
+								href: '#last',
+								active: false,
+							},
+						],
+					} ) }
+					page="test_page"
+				/>
+			);
+
+			const links = container.querySelectorAll(
+				`nav[aria-label="${ label }"] a`
+			);
+			expect(
+				Array.from( links, ( link ) =>
+					link.getAttribute( 'aria-current' )
+				)
+			).toEqual( [ null, 'page', null ] );
+
+			act( () => root.unmount() );
+			container.remove();
+		}
+	);
+
 	it( 'labels the shell region with a fallback when the schema has no title', () => {
 		const schema = baseSchema( {} );
 		delete schema.title;

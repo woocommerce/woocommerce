@@ -53,7 +53,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</td>
 				</tr>
 				<tr>
-					<th><label for="woocommerce-importer-update-existing"><?php esc_html_e( 'Update existing products', 'woocommerce' ); ?></label><br/></th>
+					<th><label for="woocommerce-importer-update-existing"><?php esc_html_e( 'Update existing products', 'woocommerce' ); ?></label></th>
 					<td>
 						<input type="hidden" name="update_existing" value="0" />
 						<input type="checkbox" id="woocommerce-importer-update-existing" name="update_existing" value="1" />
@@ -65,21 +65,29 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<label for="woocommerce-importer-file-url"><?php esc_html_e( 'Alternatively, enter the path to a CSV file on your server:', 'woocommerce' ); ?></label>
 					</th>
 					<td>
-						<label for="woocommerce-importer-file-url" class="woocommerce-importer-file-url-field-wrapper">
-							<code><?php echo esc_html( ABSPATH ) . ' '; ?></code><input type="text" id="woocommerce-importer-file-url" name="file_url" />
-						</label>
+						<input type="text" id="woocommerce-importer-file-url" name="file_url" class="regular-text code" />
+						<br>
+						<small>
+							<?php
+							printf(
+								/* translators: %s: example relative file path. */
+								esc_html__( 'Absolute or relative path to a CSV file in your WordPress or uploads directory, for example %s.', 'woocommerce' ),
+								'<code>wp-content/uploads/products.csv</code>'
+							);
+							?>
+						</small>
 					</td>
 				</tr>
 				<tr class="woocommerce-importer-advanced hidden">
-					<th><label><?php esc_html_e( 'CSV Delimiter', 'woocommerce' ); ?></label><br/></th>
+					<th><label><?php esc_html_e( 'CSV Delimiter', 'woocommerce' ); ?></label></th>
 					<td><input type="text" name="delimiter" placeholder="," size="2" /></td>
 				</tr>
 				<tr class="woocommerce-importer-advanced hidden">
-					<th><label><?php esc_html_e( 'Use previous column mapping preferences?', 'woocommerce' ); ?></label><br/></th>
+					<th><label><?php esc_html_e( 'Use previous column mapping preferences?', 'woocommerce' ); ?></label></th>
 					<td><input type="checkbox" id="woocommerce-importer-map-preferences" name="map_preferences" value="1" /></td>
 				</tr>
 				<tr class="woocommerce-importer-advanced hidden">
-					<th><label for="woocommerce-importer-character-encoding"><?php esc_html_e( 'Character encoding of the file', 'woocommerce' ); ?></label><br/></th>
+					<th><label for="woocommerce-importer-character-encoding"><?php esc_html_e( 'Character encoding of the file', 'woocommerce' ); ?></label></th>
 					<td>
 						<?php
 						if ( function_exists( 'mb_list_encodings' ) ) {

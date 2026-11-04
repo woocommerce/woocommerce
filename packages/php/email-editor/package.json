@@ -22,7 +22,7 @@
 	},
 	"license": "GPL-2.0-or-later",
 	"devDependencies": {
-		"@wordpress/env": "11.9.0",
+		"@wordpress/env": "catalog:tooling",
 		"rimraf": "5.0.5"
 	},
 	"config": {
@@ -62,7 +62,9 @@
 					"testType": "static:analysis",
 					"command": "phpstan:php7",
 					"changes": [
-						"**/*.php"
+						"**/*.php",
+						"**/*.neon",
+						"tasks/phpstan/**"
 					],
 					"events": [
 						"pull_request",
@@ -74,7 +76,9 @@
 					"testType": "static:analysis",
 					"command": "phpstan:php8",
 					"changes": [
-						"**/*.php"
+						"**/*.php",
+						"**/*.neon",
+						"tasks/phpstan/**"
 					],
 					"events": [
 						"pull_request",

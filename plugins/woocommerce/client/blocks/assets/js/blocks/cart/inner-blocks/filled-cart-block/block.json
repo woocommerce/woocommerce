@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/filled-cart-block",
-	"version": "1.0.0",
 	"title": "Filled Cart",
 	"description": "Contains blocks that are displayed when the cart contains products.",
 	"category": "woocommerce",

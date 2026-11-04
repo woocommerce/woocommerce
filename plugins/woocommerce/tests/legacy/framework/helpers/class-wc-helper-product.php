@@ -72,6 +72,24 @@ class WC_Helper_Product {
 	}
 
 	/**
+	 * Create a product whose sale has ended while its stored price is still the sale price.
+	 *
+	 * @return WC_Product
+	 */
+	public static function create_missed_sale_end_product() {
+		$product = self::create_simple_product();
+		$product->set_regular_price( '100' );
+		$product->set_sale_price( '50' );
+		$product->save();
+
+		update_post_meta( $product->get_id(), '_price', 50 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+
+		return $product;
+	}
+
+	/**
 	 * Create a downloadable product.
 	 *
 	 * @since 6.4.0
@@ -335,7 +353,7 @@ class WC_Helper_Product {
 		if ( ! $attribute_id ) {
 			$taxonomy_name = wc_attribute_taxonomy_name( $attribute_name );
 
-			// Degister taxonomy which other tests may have created...
+			// Deregister taxonomy which other tests may have created...
 			unregister_taxonomy( $taxonomy_name );
 
 			$attribute_id = wc_create_attribute(
@@ -443,5 +461,41 @@ class WC_Helper_Product {
 	 */
 	public static function save_post_test_update_meta_data_direct( $id ) {
 		update_post_meta( $id, '_test2', 'world' );
+	}
+
+	/**
+	 * Creates a variable product with global attributes and a single variation.
+	 *
+	 * Variation attribute values may be term slugs or empty strings ("Any" attributes).
+	 *
+	 * @param string $product_name         Product name.
+	 * @param array  $variation_attributes Variation attributes, e.g. array( 'pa_size' => 'huge', 'pa_number' => '' ).
+	 * @param array  $attribute_terms      Attribute terms keyed by raw attribute name (without 'pa_' prefix).
+	 *
+	 * @return array The variable product and its variation: array( WC_Product_Variable, WC_Product_Variation ).
+	 */
+	public static function create_variation_product_with_global_attributes( $product_name, $variation_attributes, $attribute_terms = array(
+		'size'   => array( 'small', 'huge' ),
+		'number' => array( '0', '1' ),
+	) ) {
+		$product = new WC_Product_Variable();
+		$product->set_name( $product_name );
+
+		$attributes = array();
+		foreach ( $attribute_terms as $attribute_name => $terms ) {
+			$attributes[] = self::create_product_attribute_object( $attribute_name, $terms );
+		}
+
+		$product->set_attributes( $attributes );
+		$product->save();
+
+		$variation = self::create_product_variation_object(
+			$product->get_id(),
+			$product_name . ' variation',
+			10,
+			$variation_attributes
+		);
+
+		return array( $product, wc_get_product( $variation->get_id() ) );
 	}
 }

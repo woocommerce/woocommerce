@@ -224,6 +224,9 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 
 		// Default REMOTE_ADDR for exchange IP bucketing tests.
 		$_SERVER['REMOTE_ADDR'] = '203.0.113.10';
+
+		// Start each test without a logged-in cookie; helpers set one when needed.
+		unset( $_COOKIE[ LOGGED_IN_COOKIE ] );
 	}
 
 	/**
@@ -231,6 +234,7 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		wp_set_current_user( 0 );
+		unset( $_COOKIE[ LOGGED_IN_COOKIE ] );
 
 		// Clear any QR login data the tests may have written.
 		$this->delete_all_qr_login_data();
@@ -463,12 +467,43 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Attach a valid `wp_rest` nonce for the current user, mirroring the
+	 * `X-WP-Nonce` header the wc-admin React client sends on every apiFetch
+	 * request. The QR login browser endpoints require it to prove an
+	 * interactive session.
+	 *
+	 * @param WP_REST_Request $request Request to authenticate.
+	 * @return void
+	 */
+	private function add_rest_nonce( WP_REST_Request $request ): void {
+		$this->set_logged_in_cookie();
+		$request->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
+	}
+
+	/**
+	 * Set a valid `logged_in` cookie for the current user, so the endpoints'
+	 * interactive-session check passes. No-op for logged-out requests.
+	 *
+	 * @return void
+	 */
+	private function set_logged_in_cookie(): void {
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) {
+			return;
+		}
+		$expiration                  = time() + DAY_IN_SECONDS;
+		$token                       = \WP_Session_Tokens::get_instance( $user_id )->create( $expiration );
+		$_COOKIE[ LOGGED_IN_COOKIE ] = wp_generate_auth_cookie( $user_id, $expiration, 'logged_in', $token );
+	}
+
+	/**
 	 * Issue a POST to the token-generation endpoint.
 	 *
 	 * @return \WP_REST_Response
 	 */
 	private function dispatch_generate(): \WP_REST_Response {
 		$request = new WP_REST_Request( 'POST', self::TOKEN_ENDPOINT );
+		$this->add_rest_nonce( $request );
 		return $this->server->dispatch( $request );
 	}
 
@@ -529,6 +564,7 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 	 */
 	private function dispatch_approve( ?string $token, ?string $choice ): \WP_REST_Response {
 		$request = new WP_REST_Request( 'POST', self::APPROVE_ENDPOINT );
+		$this->add_rest_nonce( $request );
 		if ( null !== $token ) {
 			$request->set_param( 'token', $token );
 		}
@@ -619,6 +655,7 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 	 */
 	private function dispatch_status( ?string $token ): \WP_REST_Response {
 		$request = new WP_REST_Request( 'POST', self::STATUS_ENDPOINT );
+		$this->add_rest_nonce( $request );
 		if ( null !== $token ) {
 			$request->set_param( 'token', $token );
 		}
@@ -633,6 +670,7 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 	 */
 	private function dispatch_revoke( ?string $uuid ): \WP_REST_Response {
 		$request = new WP_REST_Request( 'DELETE', self::REVOKE_ENDPOINT );
+		$this->add_rest_nonce( $request );
 		if ( null !== $uuid ) {
 			$request->set_param( 'uuid', $uuid );
 		}
@@ -682,7 +720,7 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 		$response = $this->dispatch_generate();
 
 		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
-		$this->assertSame( 'woocommerce_rest_cannot_view', $response->get_data()['code'] );
+		$this->assertSame( 'woocommerce_rest_qr_login_missing_session', $response->get_data()['code'] );
 	}
 
 	/**
@@ -695,6 +733,49 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
 		$this->assertSame( 'woocommerce_rest_cannot_view', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Token generation rejects an administrator session that carries no REST nonce.
+	 */
+	public function test_generate_token_rejects_missing_nonce(): void {
+		wp_set_current_user( $this->admin_id );
+		$this->set_logged_in_cookie();
+
+		$request  = new WP_REST_Request( 'POST', self::TOKEN_ENDPOINT );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( rest_authorization_required_code(), $response->get_status(), 'A cookie session without a wp_rest nonce must be rejected even for an administrator.' );
+		$this->assertSame( 'woocommerce_rest_qr_login_missing_session', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Token generation rejects an administrator session carrying an invalid REST nonce.
+	 */
+	public function test_generate_token_rejects_invalid_nonce(): void {
+		wp_set_current_user( $this->admin_id );
+		$this->set_logged_in_cookie();
+
+		$request = new WP_REST_Request( 'POST', self::TOKEN_ENDPOINT );
+		$request->set_header( 'X-WP-Nonce', 'not-a-valid-nonce' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( rest_authorization_required_code(), $response->get_status(), 'A cookie session with an invalid wp_rest nonce must be rejected.' );
+		$this->assertSame( 'woocommerce_rest_qr_login_missing_session', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Token generation rejects an administrator with a valid nonce but no logged-in cookie.
+	 */
+	public function test_generate_token_rejects_valid_nonce_without_cookie(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$request = new WP_REST_Request( 'POST', self::TOKEN_ENDPOINT );
+		$request->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( rest_authorization_required_code(), $response->get_status(), 'A valid nonce without a logged-in cookie must be rejected.' );
+		$this->assertSame( 'woocommerce_rest_qr_login_missing_session', $response->get_data()['code'] );
 	}
 
 	// -----------------------------------------------------------------------
@@ -1682,6 +1763,42 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The WordPress application password email is skipped only for the QR login password.
+	 */
+	public function test_exchange_token_skips_wordpress_application_password_email_only_for_its_password(): void {
+		// A site forcing WordPress's email on at a later priority must not override the skip.
+		add_filter( 'wp_send_application_password_created_email', '__return_true', 20 );
+
+		$decisions = array();
+		$listener  = static function ( $user_id, $new_item ) use ( &$decisions ) {
+			$user       = get_userdata( $user_id );
+			$other_item = array_merge( $new_item, array( 'app_id' => 'another-app' ) );
+			$decisions  = array(
+				'qr'    => apply_filters( 'wp_send_application_password_created_email', true, $user, $new_item ),
+				'other' => apply_filters( 'wp_send_application_password_created_email', true, $user, $other_item ),
+				'item'  => $new_item,
+			);
+		};
+		add_action( 'wp_create_application_password', $listener, 10, 2 );
+
+		$prep = $this->prepare_exchange_token(
+			array(
+				'os'    => 'iOS',
+				'model' => 'iPhone 15',
+			)
+		);
+
+		$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertFalse( $decisions['qr'], 'The WordPress email should be skipped for the QR login password, even when a site forces it on.' );
+		$this->assertTrue( $decisions['other'], 'Other application passwords should keep WordPress email behavior.' );
+		$this->assertTrue(
+			apply_filters( 'wp_send_application_password_created_email', true, get_userdata( $this->admin_id ), $decisions['item'] ),
+			'The temporary skip filter should be removed after the exchange.'
+		);
+	}
+
+	/**
 	 * @testdox The sign-in notification email can be suppressed via the woocommerce_qr_login_should_send_signin_email filter.
 	 */
 	public function test_sign_in_notification_email_can_be_suppressed_via_filter(): void {
@@ -1699,15 +1816,88 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 			$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 			$this->assertSame( 200, $response->get_status() );
 
-			$this->assertCount(
-				0,
-				$capture['captures'],
-				'Filter returning false must suppress the email send entirely.'
-			);
+			foreach ( $capture['captures'] as $mail ) {
+				$this->assertStringContainsString(
+					'Application Password Created',
+					(string) $mail['subject'],
+					'Filter returning false must suppress WooCommerce\'s email; only WordPress\'s own email may be sent.'
+				);
+			}
 		} finally {
 			remove_filter( 'woocommerce_qr_login_should_send_signin_email', $suppress );
 			$capture['remove']();
 		}//end try
+	}
+
+	/**
+	 * @testdox When the WooCommerce email is disabled, WordPress's application password email is sent unless the site has turned it off.
+	 * @dataProvider wp_application_password_email_fallback_provider
+	 * @requires function wp_application_password_created_notification
+	 *
+	 * @param callable $site_setup           Applies the site's WordPress email configuration.
+	 * @param int      $expected_email_count Number of emails the exchange should send.
+	 */
+	public function test_wordpress_application_password_email_is_used_when_sign_in_email_is_disabled( callable $site_setup, int $expected_email_count ): void {
+		$site_setup();
+		add_filter( 'woocommerce_qr_login_should_send_signin_email', '__return_false' );
+
+		$capture                      = $this->capture_wp_mail();
+		$application_password         = array();
+		$capture_application_password = static function ( $user_id, $new_item ) use ( &$application_password ) {
+			unset( $user_id );
+			$application_password = $new_item;
+		};
+		add_action( 'wp_create_application_password', $capture_application_password, 1, 2 );
+
+		$prep = $this->prepare_exchange_token(
+			array(
+				'os'    => 'iOS',
+				'model' => 'iPhone 15',
+			)
+		);
+
+		$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertCount( $expected_email_count, $capture['captures'] );
+
+		if ( 1 === $expected_email_count ) {
+			$mail = $capture['captures'][0];
+			$this->assertSame( get_userdata( $this->admin_id )->user_email, $mail['to'] );
+			$this->assertStringContainsString( 'Application Password Created', (string) $mail['subject'] );
+			$this->assertStringContainsString( $application_password['name'], (string) $mail['message'] );
+		}
+	}
+
+	/**
+	 * Provide site configurations for the WordPress application password email fallback.
+	 *
+	 * @return array<string, array{callable, int}>
+	 */
+	public static function wp_application_password_email_fallback_provider(): array {
+		return array(
+			'WordPress email is enabled'              => array(
+				static function () {},
+				1,
+			),
+			'WordPress email action is removed'       => array(
+				static function () {
+					remove_action( 'wp_create_application_password', 'wp_application_password_created_notification' );
+				},
+				0,
+			),
+			'WordPress email is disabled by a filter' => array(
+				static function () {
+					add_filter( 'wp_send_application_password_created_email', '__return_false' );
+				},
+				0,
+			),
+			'WordPress email is forced on at a later priority' => array(
+				static function () {
+					add_filter( 'wp_send_application_password_created_email', '__return_true', 20 );
+				},
+				1,
+			),
+		);
 	}
 
 	/**
@@ -2392,6 +2582,50 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 		$this->assertNotEmpty( $post->get_data()['exchange_grant'] );
 	}
 
+	/**
+	 * @testdox Session-status is scoped to the session recorded on the token.
+	 */
+	public function test_session_status_is_scoped_to_the_recorded_session(): void {
+		$plaintext = $this->generate_token_as_admin();
+
+		wp_set_current_user( 0 );
+		$scan_data        = $this->dispatch_scan( $plaintext )->get_data();
+		$recorded_session = $scan_data['session_id'];
+
+		// A second session id can also resolve to the same token record, while
+		// the record itself still names the scanned session above.
+		$other_session = wp_generate_uuid4();
+		set_transient(
+			MobileAppQRLogin::SESSION_TRANSIENT_PREFIX . hash( 'sha256', $other_session ),
+			$this->token_hash( $plaintext ),
+			MobileAppQRLogin::TOKEN_TTL
+		);
+
+		wp_set_current_user( $this->admin_id );
+		$this->assertSame( 200, $this->dispatch_approve( $plaintext, $scan_data['real_number'] )->get_status() );
+		wp_set_current_user( 0 );
+
+		$other = $this->dispatch_session_status( $other_session, $plaintext );
+		$this->assertSame( 200, $other->get_status() );
+		$this->assertSame(
+			MobileAppQRLogin::STATE_EXPIRED,
+			$other->get_data()['state'],
+			'State is only returned for the session recorded on the token.'
+		);
+		$this->assertArrayNotHasKey(
+			'exchange_grant',
+			$other->get_data(),
+			'The exchange grant is only returned for the session recorded on the token.'
+		);
+
+		$recorded = $this->dispatch_session_status( $recorded_session, $plaintext );
+		$this->assertSame( MobileAppQRLogin::STATE_APPROVED, $recorded->get_data()['state'] );
+		$this->assertNotEmpty(
+			$recorded->get_data()['exchange_grant'],
+			'The recorded session receives its grant.'
+		);
+	}
+
 	// -----------------------------------------------------------------------
 	// Availability endpoint (`/qr-login-availability`).
 	// -----------------------------------------------------------------------
@@ -2403,6 +2637,7 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 	 */
 	private function dispatch_availability(): \WP_REST_Response {
 		$request = new WP_REST_Request( 'GET', self::AVAILABILITY_ENDPOINT );
+		$this->add_rest_nonce( $request );
 		return $this->server->dispatch( $request );
 	}
 

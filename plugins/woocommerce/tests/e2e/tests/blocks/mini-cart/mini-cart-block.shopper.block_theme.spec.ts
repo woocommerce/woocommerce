@@ -67,7 +67,9 @@ test.describe( 'Shopper → Notices', () => {
 			const cookies = await page.context().cookies();
 			await noJsContext.addCookies( cookies );
 
-			await noJsPage.goto( currentUrl );
+			await noJsPage.goto( currentUrl, {
+				waitUntil: 'domcontentloaded',
+			} );
 
 			// Verify error notice banner is rendered in SSR output (not client-side JS).
 			// Note: The notice text content contains HTML and is rendered client-side via
@@ -88,14 +90,24 @@ test.describe( 'Shopper → Notices', () => {
 		productCollectionPage,
 	} ) => {
 		const checkMiniCartTitle = async ( itemCount: number ) => {
-			try {
-				// iAPI Mini Cart.
-				const miniCartTitleLabelBlock = page.locator(
-					'[data-block-name="woocommerce/mini-cart-title-label-block"]'
+			const miniCartTitleLabelBlock = page.locator(
+				'[data-block-name="woocommerce/mini-cart-title-label-block"]'
+			);
+
+			// `count()` samples the DOM once and never waits, so a title block
+			// that is still rendering would send us down the legacy branch and
+			// fail there on markup that was never going to appear. Wait for it
+			// instead, and treat the timeout as "this build ships the legacy
+			// Mini Cart".
+			const usesIapiMiniCart = await miniCartTitleLabelBlock
+				.waitFor( { state: 'visible', timeout: 5000 } )
+				.then(
+					() => true,
+					() => false
 				);
-				await expect( miniCartTitleLabelBlock ).toBeVisible( {
-					timeout: 1000,
-				} );
+
+			if ( usesIapiMiniCart ) {
+				// iAPI Mini Cart.
 				const miniCartTitleItemsCounterBlock = page.locator(
 					'[data-block-name="woocommerce/mini-cart-title-items-counter-block"]'
 				);
@@ -106,9 +118,11 @@ test.describe( 'Shopper → Notices', () => {
 				await expect( miniCartTitleItemsCounterBlock ).toContainText(
 					String( itemCount )
 				);
-			} catch ( e ) {
+			} else {
 				// Legacy React Mini Cart.
-				await expect( page.getByText( 'Your cart' ) ).toBeVisible();
+				await expect(
+					page.getByText( 'Your cart', { exact: true } )
+				).toBeVisible();
 				await expect(
 					page.getByText(
 						`(${ itemCount } item${ itemCount > 1 ? 's' : '' })`

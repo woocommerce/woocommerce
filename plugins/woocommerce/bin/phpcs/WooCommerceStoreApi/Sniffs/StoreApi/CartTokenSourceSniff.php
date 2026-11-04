@@ -13,7 +13,7 @@ use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
 
 /**
- * The cart token selects which customer session a request loads. It must always be read from a unified palce the via CartTokenUtils::get_request_cart_token().
+ * The cart token selects which customer session a request loads. It must always be read from a unified place the via CartTokenUtils::get_request_cart_token().
  *
  */
 class CartTokenSourceSniff implements Sniff {

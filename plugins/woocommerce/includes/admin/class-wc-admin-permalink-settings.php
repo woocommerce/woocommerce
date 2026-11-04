@@ -318,14 +318,6 @@ class WC_Admin_Permalink_Settings {
 			// value is the same site-locale form settings() compares against.
 			$permalinks['product_base'] = $this->get_stored_product_base( $product_base, $posted_structure );
 
-			// Shop base may require verbose page rules if nesting pages.
-			$shop_page_id   = wc_get_page_id( 'shop' );
-			$shop_permalink = $this->get_shop_base_slug( $shop_page_id );
-
-			if ( $shop_page_id && stristr( trim( $permalinks['product_base'], '/' ), $shop_permalink ) ) {
-				$permalinks['use_verbose_page_rules'] = true;
-			}
-
 			update_option( 'woocommerce_permalinks', $permalinks );
 			wc_restore_locale();
 		}

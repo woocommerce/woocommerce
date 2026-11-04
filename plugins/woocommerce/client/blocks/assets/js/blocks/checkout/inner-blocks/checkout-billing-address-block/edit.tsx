@@ -16,8 +16,8 @@ import {
 } from '../../form-step';
 import Block from './block';
 import {
-	getBillingAddresssBlockTitle,
-	getBillingAddresssBlockDescription,
+	getBillingAddressBlockTitle,
+	getBillingAddressBlockDescription,
 } from './utils';
 import { AddressFieldControls } from '../../address-field-controls';
 
@@ -39,11 +39,11 @@ export const Edit = ( {
 	if ( ! showBillingFields && ! useBillingAsShipping ) {
 		return null;
 	}
-	attributes.title = getBillingAddresssBlockTitle(
+	attributes.title = getBillingAddressBlockTitle(
 		attributes.title,
 		forcedBillingAddress
 	);
-	attributes.description = getBillingAddresssBlockDescription(
+	attributes.description = getBillingAddressBlockDescription(
 		attributes.description,
 		forcedBillingAddress
 	);

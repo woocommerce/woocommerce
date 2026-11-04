@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Store the default Cart page empty cart headings as block pattern references so they follow the site language instead of the install language, and restore the missing "Browse store" link.

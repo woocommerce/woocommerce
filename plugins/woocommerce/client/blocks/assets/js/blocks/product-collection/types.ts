@@ -41,9 +41,6 @@ export interface ProductCollectionAttributes {
 	 */
 	queryContextIncludes: string[];
 	forcePageReload: boolean;
-	filterable: boolean;
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	__privatePreviewState?: PreviewState;
 }
 
 export enum LayoutOptions {
@@ -59,8 +56,14 @@ export enum WidthOptions {
 
 export interface ProductCollectionDisplayLayout {
 	type: LayoutOptions;
-	columns: number;
-	shrinkColumns: boolean;
+	/**
+	 * Column count for the Grid layout. Omitted for Stack and Carousel.
+	 */
+	columns?: number;
+	/**
+	 * Whether Grid columns shrink on smaller screens. Omitted for Stack and Carousel.
+	 */
+	shrinkColumns?: boolean;
 }
 
 export interface ProductCollectionDimensions {
@@ -118,8 +121,11 @@ export interface ProductCollectionQuery {
 	isProductCollectionBlock: boolean;
 	woocommerceHandPickedProducts: string[];
 	priceRange: undefined | PriceRange;
-	filterable: boolean;
 	productReference?: number;
+	/**
+	 * If `null`/`undefined`: Infer from location context.
+	 */
+	productReferenceType?: 'cart' | 'order' | null;
 	relatedBy?: RelatedBy | undefined;
 }
 
@@ -151,11 +157,7 @@ export type ProductCollectionContentProps =
 
 export type TProductCollectionOrder = 'asc' | 'desc';
 export type TProductCollectionOrderBy =
-	| 'date'
-	| 'title'
-	| 'popularity'
-	| 'price'
-	| 'rating';
+	'date' | 'title' | 'popularity' | 'price' | 'rating';
 
 export type ProductCollectionSetAttributes = (
 	attrs: Partial< ProductCollectionAttributes >
@@ -209,7 +211,6 @@ export enum CoreFilterNames {
 	STOCK_STATUS = 'stock-status',
 	TAXONOMY = 'taxonomy',
 	PRICE_RANGE = 'price-range',
-	FILTERABLE = 'filterable',
 	PRODUCTS_PER_PAGE = 'products-per-page',
 	MAX_PAGES_TO_SHOW = 'max-pages-to-show',
 	OFFSET = 'offset',

@@ -1,6 +1,7 @@
 @import "settings-payments-main.scss";
 
 .settings-payments-offline__container {
+	/* stylelint-disable-next-line scss/at-extend-no-missing-placeholder */
 	@extend .settings-payments-main__container;
 
 	.settings-payment-gateways {

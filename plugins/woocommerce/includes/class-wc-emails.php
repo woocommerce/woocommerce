@@ -70,7 +70,7 @@ class WC_Emails {
 	 * @return void
 	 */
 	public function __clone() {
-		wc_doing_it_wrong( __FUNCTION__, __( 'Cloning is forbidden.', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, 'Cloning is forbidden.', '2.1' );
 	}
 
 	/**
@@ -80,7 +80,7 @@ class WC_Emails {
 	 * @return void
 	 */
 	public function __wakeup() {
-		wc_doing_it_wrong( __FUNCTION__, __( 'Unserializing instances of this class is forbidden.', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, 'Unserializing instances of this class is forbidden.', '2.1' );
 	}
 
 	/**
@@ -308,6 +308,10 @@ class WC_Emails {
 		}
 		if ( FeaturesUtil::feature_is_enabled( 'customer_review_request' ) ) {
 			$emails['WC_Email_Customer_Review_Request'] = __DIR__ . '/emails/class-wc-email-customer-review-request.php';
+		}
+		if ( FeaturesUtil::feature_is_enabled( 'order_withdrawal' ) ) {
+			$emails['WC_Email_Customer_Order_Withdrawal_Requested'] = __DIR__ . '/emails/class-wc-email-customer-order-withdrawal-requested.php';
+			$emails['WC_Email_Order_Withdrawal_Requested']          = __DIR__ . '/emails/class-wc-email-order-withdrawal-requested.php';
 		}
 
 		// Prime caches to reduce future queries.

@@ -111,4 +111,24 @@ abstract class OrdersStatsTestCase extends WC_Unit_Test_Case {
 			'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 		);
 	}
+
+	/**
+	 * Give an order's refunds the same date as the order itself.
+	 *
+	 * A refund reaches the report through its own date: the lookup table backfills a refund
+	 * row's date_paid from the refund's date_created whenever the parent order has a date_paid.
+	 * Neither `wc_create_refund()` nor the refund `wc_order_fully_refunded()` creates on a
+	 * `refunded` status change takes a date, so both use the wall clock. A fixture that pins its
+	 * order to a fixed hour and then queries that hour loses those refunds when the clock has
+	 * moved on, which for a plain `time()` fixture means whenever the run crosses the hour.
+	 *
+	 * @param \WC_Order  $order The order whose refunds should be pinned.
+	 * @param int|string $date  Date to apply, in any form set_date_created() accepts.
+	 */
+	protected function pin_refund_dates( \WC_Order $order, $date ): void {
+		foreach ( $order->get_refunds() as $refund ) {
+			$refund->set_date_created( $date );
+			$refund->save();
+		}
+	}
 }

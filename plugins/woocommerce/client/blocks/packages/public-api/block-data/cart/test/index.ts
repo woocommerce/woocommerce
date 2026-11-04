@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { dispatch as wpDispatch } from '@wordpress/data';
+import { getSetting } from '@woocommerce/settings';
+import type { Cart } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -18,7 +20,15 @@ jest.mock( '@woocommerce/utils', () => ( {
 	isSiteEditorPage: jest.fn().mockReturnValue( true ),
 } ) );
 jest.mock( '../persistence-layer' );
+jest.mock( '@woocommerce/settings', () => {
+	const actual = jest.requireActual( '@woocommerce/settings' );
+	return {
+		...actual,
+		getSetting: jest.fn( actual.getSetting ),
+	};
+} );
 
+const mockGetSetting = jest.mocked( getSetting );
 const mockHasCartSession = jest.mocked( hasCartSession );
 const mockIsAddingToCart = jest.mocked( isAddingToCart );
 const mockPersistenceLayerGet = jest.mocked( persistenceLayer.get );
@@ -27,13 +37,16 @@ const mockWpDispatch = jest.mocked( wpDispatch );
 describe( 'Window load event handler', () => {
 	let mockFinishResolution: jest.Mock;
 	let originalAddEventListener: typeof window.addEventListener;
-	let loadHandler: EventListener;
+	let loadHandler: ( event: Event ) => void;
 
 	beforeAll( () => {
 		// Capture the addEventListener calls to extract the load handler
 		originalAddEventListener = window.addEventListener;
 		window.addEventListener = jest.fn(
-			( event: string, handler: EventListenerOrEventListenerObject ) => {
+			(
+				event: string,
+				handler: Parameters< typeof window.addEventListener >[ 1 ]
+			) => {
 				if ( event === 'load' && typeof handler === 'function' ) {
 					loadHandler = handler;
 				}
@@ -42,7 +55,7 @@ describe( 'Window load event handler', () => {
 		);
 
 		// Now import the module to register the event listener
-		require( '../index' );
+		jest.requireActual( '../index' );
 	} );
 
 	beforeEach( () => {
@@ -69,17 +82,34 @@ describe( 'Window load event handler', () => {
 	it( 'should skip API request when cached cart has items and not adding to cart with /?add-to-cart=', () => {
 		mockHasCartSession.mockReturnValue( true );
 		mockIsAddingToCart.mockReturnValue( false );
-		mockPersistenceLayerGet.mockReturnValue( { itemsCount: 2 } );
+		mockPersistenceLayerGet.mockReturnValue( {
+			itemsCount: 2,
+		} as unknown as Cart );
 
 		loadHandler( new Event( 'load' ) );
 
 		expect( mockFinishResolution ).toHaveBeenCalledWith( 'getCartData' );
 	} );
 
+	it( 'should let the resolver read the cart when the page preloaded it, even if cached cart has items', () => {
+		mockHasCartSession.mockReturnValue( true );
+		mockIsAddingToCart.mockReturnValue( false );
+		mockPersistenceLayerGet.mockReturnValue( {
+			itemsCount: 2,
+		} as unknown as Cart );
+		mockGetSetting.mockReturnValueOnce( [ '/wc/store/v1/cart' ] );
+
+		loadHandler( new Event( 'load' ) );
+
+		expect( mockFinishResolution ).not.toHaveBeenCalled();
+	} );
+
 	it( 'should make API request when has cart session but cached cart is empty', () => {
 		mockHasCartSession.mockReturnValue( true );
 		mockIsAddingToCart.mockReturnValue( false );
-		mockPersistenceLayerGet.mockReturnValue( { itemsCount: 0 } );
+		mockPersistenceLayerGet.mockReturnValue( {
+			itemsCount: 0,
+		} as unknown as Cart );
 
 		loadHandler( new Event( 'load' ) );
 
@@ -109,7 +139,9 @@ describe( 'Window load event handler', () => {
 	it( 'should make API request when has cart session, cached cart has items, but adding to cart with /?add-to-cart=', () => {
 		mockHasCartSession.mockReturnValue( true );
 		mockIsAddingToCart.mockReturnValue( true );
-		mockPersistenceLayerGet.mockReturnValue( { itemsCount: 2 } );
+		mockPersistenceLayerGet.mockReturnValue( {
+			itemsCount: 2,
+		} as unknown as Cart );
 
 		loadHandler( new Event( 'load' ) );
 

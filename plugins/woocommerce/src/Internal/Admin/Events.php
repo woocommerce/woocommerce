@@ -31,6 +31,7 @@ use Automattic\WooCommerce\Internal\Admin\Notes\PaymentsRemindMeLater;
 use Automattic\WooCommerce\Internal\Admin\Notes\PerformanceOnMobile;
 use Automattic\WooCommerce\Internal\Admin\Notes\PersonalizeStore;
 use Automattic\WooCommerce\Internal\Admin\Notes\RealTimeOrderAlerts;
+use Automattic\WooCommerce\Internal\Admin\Notes\RefundDoubleCountToolNotice;
 use Automattic\WooCommerce\Internal\Admin\Notes\ScheduledUpdatesPromotion;
 use Automattic\WooCommerce\Internal\Admin\Notes\SellingOnlineCourses;
 use Automattic\WooCommerce\Internal\Admin\Notes\TrackingOptIn;
@@ -88,6 +89,7 @@ class Events {
 		PerformanceOnMobile::class,
 		PersonalizeStore::class,
 		RealTimeOrderAlerts::class,
+		RefundDoubleCountToolNotice::class,
 		ScheduledUpdatesPromotion::class,
 		TrackingOptIn::class,
 		WooCommercePayments::class,
@@ -202,6 +204,7 @@ class Events {
 		PaymentsRemindMeLater::delete_if_not_applicable();
 		PaymentsMoreInfoNeeded::delete_if_not_applicable();
 		FullRefundFixDataToolNotice::delete_if_not_applicable();
+		RefundDoubleCountToolNotice::delete_if_not_applicable();
 	}
 
 	/**

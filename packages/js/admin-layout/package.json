@@ -1,7 +1,7 @@
 {
 	"name": "@woocommerce/admin-layout",
 	"version": "2.0.0",
-	"description": "WooCommerce admin layout copmonents and utilities.",
+	"description": "WooCommerce admin layout components and utilities.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"keywords": [
@@ -31,13 +31,9 @@
 	"files": [
 		"build",
 		"build-module",
-		"build-style",
 		"build-types"
 	],
-	"sideEffects": [
-		"build-style/**",
-		"src/**/*.scss"
-	],
+	"sideEffects": false,
 	"publishConfig": {
 		"access": "public",
 		"exports": {
@@ -51,7 +47,6 @@
 	"scripts": {
 		"build": "pnpm build:project",
 		"build:project": "pnpm --stream '/^build:project:.*$/'",
-		"build:project:bundle": "NODE_ENV=production webpack",
 		"build:project:esm": "node build.mjs",
 		"build:publish:project": "pnpm --stream '/^build:publish:project:.*$/'",
 		"build:publish:project:cjs": "node build.mjs --commonjs",
@@ -67,7 +62,6 @@
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"watch:build": "pnpm watch:build:project",
 		"watch:build:project": "pnpm --stream '/^watch:build:project:.*$/'",
-		"watch:build:project:bundle": "NODE_ENV=development webpack --watch",
 		"watch:build:project:esm": "node build.mjs --watch"
 	},
 	"dependencies": {
@@ -80,20 +74,14 @@
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
-		"@wordpress/browserslist-config": "next",
-		"css-loader": "6.11.x",
 		"eslint": "^10.0.0",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
-		"postcss-loader": "4.3.x",
 		"react": "18.3.x",
 		"react-dom": "18.3.x",
 		"rimraf": "5.0.5",
-		"sass-loader": "10.5.x",
 		"ts-jest": "29.1.x",
-		"typescript": "5.7.x",
-		"webpack": "catalog:tooling",
-		"webpack-cli": "5.1.x"
+		"typescript": "5.7.x"
 	},
 	"peerDependencies": {
 		"@types/react": "18.3.x",
