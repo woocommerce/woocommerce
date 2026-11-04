@@ -250,12 +250,15 @@ class OrderUpdate extends ActionableAbility {
 	 * client gets the IDs of the lines it added.
 	 *
 	 * @param \WC_Order $subject Saved order.
-	 * @return array
+	 * @return array|\WP_Error
 	 */
-	public function prepare_response( $subject ): array {
-		return array(
-			'order' => self::format_order_for_response( $subject, true ),
-		);
+	public function prepare_response( $subject ) {
+		$order = self::format_order_for_response( $subject, true );
+		if ( is_wp_error( $order ) ) {
+			return $order;
+		}
+
+		return array( 'order' => $order );
 	}
 
 	/**

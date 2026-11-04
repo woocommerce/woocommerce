@@ -1959,6 +1959,33 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should name the saved order in the error when order-update saves and an order or line item field value then fails its schema.
+	 * @dataProvider invalid_order_field_values
+	 *
+	 * @param string $resource_name Resource.
+	 * @param array  $schema        Field schema.
+	 * @param mixed  $value         Value that the get_callback returns.
+	 */
+	public function test_an_order_update_that_saves_before_a_field_fails_names_the_saved_order( string $resource_name, array $schema, $value ): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		$this->register_invalid_field( $resource_name, $schema, $value );
+		$order = \WC_Helper_Order::create_order();
+
+		$result = wp_get_ability( 'woocommerce/order-update' )->execute(
+			array(
+				'id'            => $order->get_id(),
+				'customer_note' => 'Probe',
+			)
+		);
+
+		$this->assert_field_output_invalid( $result, $resource_name );
+		$this->assertStringContainsString( 'The change is saved on the order ' . $order->get_id() . ',', $result->get_error_message() );
+		$this->assertTrue( $result->get_error_data()['saved'] );
+		$this->assertSame( $order->get_id(), $result->get_error_data()['id'] );
+		$this->assertSame( 'Probe', wc_get_order( $order->get_id() )->get_customer_note() );
+	}
+
+	/**
 	 * @testdox Should fail orders-query with a named error that keeps the exception text out when a get_callback throws.
 	 */
 	public function test_a_get_callback_that_throws_fails_the_call(): void {
