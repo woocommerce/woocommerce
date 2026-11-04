@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Display currency values without a symbol using the store's decimal separator.
