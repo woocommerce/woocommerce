@@ -169,15 +169,17 @@ class ShippingZonesQuery extends AbstractDomainAbility implements AbilityDefinit
 	}
 
 	/**
-	 * Format a shipping method of a zone. Settings keep scalar values only, without secrets.
+	 * Format a shipping method of a zone. Settings keep the scalar values of declared fields only, without secrets.
 	 *
 	 * @param \WC_Shipping_Method $method Method.
 	 * @return array|\WP_Error A WP_Error when an extension field fails.
 	 */
 	private static function format_method( \WC_Shipping_Method $method ) {
+		$method->init_instance_settings();
 		$settings = array();
-		foreach ( (array) $method->instance_settings as $key => $value ) {
-			$type = (string) ( $method->instance_form_fields[ $key ]['type'] ?? '' );
+		foreach ( (array) $method->get_instance_form_fields() as $key => $field ) {
+			$value = $method->instance_settings[ $key ] ?? null;
+			$type  = (string) ( $field['type'] ?? '' );
 			if ( is_scalar( $value ) && 'title' !== $key && ! SecretFields::is_secret( (string) $key, $type ) ) {
 				$settings[ $key ] = (string) $value;
 			}

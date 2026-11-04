@@ -202,6 +202,52 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should leave secret settings out of a method, also those declared through the form fields filter.
+	 */
+	public function test_method_settings_leave_out_secrets(): void {
+		add_filter(
+			'woocommerce_shipping_instance_form_fields_flat_rate',
+			static function ( array $fields ): array {
+				$fields['carrier_login']   = array(
+					'title' => 'Carrier login',
+					'type'  => 'password',
+				);
+				$fields['carrier_api_key'] = array(
+					'title' => 'Carrier API key',
+					'type'  => 'text',
+				);
+				$fields['carrier_account'] = array(
+					'title' => 'Carrier account',
+					'type'  => 'text',
+				);
+				return $fields;
+			}
+		);
+		$zone        = new \WC_Shipping_Zone( 0 );
+		$instance_id = $zone->add_shipping_method( 'flat_rate' );
+		update_option(
+			"woocommerce_flat_rate_{$instance_id}_settings",
+			array(
+				'cost'            => '4.50',
+				'carrier_login'   => 'canary-login',
+				'carrier_api_key' => 'canary-key',
+				'carrier_account' => 'ACME-1',
+				'undeclared'      => 'stale',
+			)
+		);
+
+		$result   = $this->run_ability( 'woocommerce/shipping-zones-query', array( 'include' => array( 0 ) ) );
+		$settings = (array) $result['zones'][0]['methods'][0]['settings'];
+
+		$this->assertSame( '4.50', $settings['cost'] );
+		$this->assertSame( 'ACME-1', $settings['carrier_account'] );
+		$this->assertArrayNotHasKey( 'carrier_login', $settings );
+		$this->assertArrayNotHasKey( 'carrier_api_key', $settings );
+		$this->assertArrayNotHasKey( 'undeclared', $settings );
+		$this->assertStringNotContainsString( 'canary', (string) wp_json_encode( $result ) );
+	}
+
+	/**
 	 * @testdox Should return zones and methods without extensions while the feature is off.
 	 */
 	public function test_zones_and_methods_have_no_extensions_with_the_feature_off(): void {
