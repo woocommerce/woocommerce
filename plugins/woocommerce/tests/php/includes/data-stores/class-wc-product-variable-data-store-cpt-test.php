@@ -1166,7 +1166,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$product    = WC_Helper_Product::create_variation_product();
 		$product_id = $product->get_id();
 
-		$cache_key = WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . 'product_variation_attributes_v2_' . $product_id;
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . 'product_variation_attributes_' . $product_id;
 		wp_cache_delete( $cache_key, 'products' );
 
 		$attributes = ( new WC_Product_Variable_Data_Store_CPT() )->read_variation_attributes( $product );
@@ -1191,7 +1191,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$product    = WC_Helper_Product::create_variation_product();
 		$product_id = $product->get_id();
 
-		$cache_key = WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . 'product_variation_attributes_v2_' . $product_id;
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . 'product_variation_attributes_' . $product_id;
 		wp_cache_delete( $cache_key, 'products' );
 
 		$first  = $data_store->read_variation_attributes( $product );
@@ -1253,7 +1253,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		);
 
 		$product   = wc_get_product( $product_id );
-		$cache_key = WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . 'product_variation_attributes_v2_' . $product_id;
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . 'product_variation_attributes_' . $product_id;
 		wp_cache_delete( $cache_key, 'products' );
 
 		$attributes = ( new WC_Product_Variable_Data_Store_CPT() )->read_variation_attributes( $product );
@@ -1296,7 +1296,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		// Overwrite the stored value with the slug form to simulate pre-2.4 database state.
 		update_post_meta( $variation_id, 'attribute_size', 'small' );
 
-		$cache_key = WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . 'product_variation_attributes_v2_' . $product_id;
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . 'product_variation_attributes_' . $product_id;
 		wp_cache_delete( $cache_key, 'products' );
 
 		$attributes = ( new WC_Product_Variable_Data_Store_CPT() )->read_variation_attributes( $product );
@@ -1335,7 +1335,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		WC_Helper_Product::create_product_variation_object( $product_id, 'DUMMY SKU ANY SILK', 15, array( 'pa_fabric' => 'silk' ) );
 
 		$product = wc_get_product( $product_id );
-		wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . 'product_variation_attributes_v2_' . $product_id, 'products' );
+		wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . 'product_variation_attributes_' . $product_id, 'products' );
 
 		$attributes = ( new WC_Product_Variable_Data_Store_CPT() )->read_variation_attributes( $product );
 
