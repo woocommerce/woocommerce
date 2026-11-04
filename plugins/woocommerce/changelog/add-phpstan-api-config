@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add a PHPStan configuration that can analyse the PHP 8.1+ Code API, which the main configuration has to exclude.
