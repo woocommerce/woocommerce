@@ -121,10 +121,10 @@ if ( ! empty( $variations ) ) {
 
 ```php
 wc_get_container()->get( \Automattic\WooCommerce\Internal\Utilities\ProductUtil::class )
-    ->prime_image_caches( $variations );
+    ->prime_image_caches( array_values( $variations ) );
 ```
 
-`WC_Product_Variation` extends `WC_Product`, so variation collections are accepted. An explicit collect-and-prime path can be appropriate when the consumer needs only featured images, a different getter context, or a narrower cache scope. A legacy `includes/` file is not by itself a reason to assume the DI container is unavailable; check the actual lifecycle and dependencies.
+`WC_Product_Variation` extends `WC_Product`, so variation collections are accepted. Pass a numerically indexed copy: the current helper preserves collection keys before unpacking gallery arrays into `array_merge()`, which can fail for string-keyed collections. `array_values()` leaves the caller's keyed collection intact. An explicit collect-and-prime path can be appropriate when the consumer needs only featured images, a different getter context, or a narrower cache scope. A legacy `includes/` file is not by itself a reason to assume the DI container is unavailable; check the actual lifecycle and dependencies.
 
 **Scope priming to attachment IDs your code actually accesses.** Calls such as `get_post()`, `wp_attachment_is_image()`, `wp_get_attachment_image_src()`, and `get_the_title()` can load attachment records or metadata. Merely returning integer image IDs, such as a response's `gallery_image_ids`, does not need attachment hydration. [#63006](https://github.com/woocommerce/woocommerce/pull/63006) and [#69319](https://github.com/woocommerce/woocommerce/pull/69319) illustrate collection-specific placement.
 
@@ -263,7 +263,7 @@ For example, when a post-based consumer needs terms and a separate loader alread
 _prime_post_caches( $post_ids, true, false );
 ```
 
-That is a conditional example, not a general order-loading recipe. Disable term priming only when no downstream reader needs those terms, and disable metadata priming only when it is unnecessary or already covered.
+That is a conditional example, not a general order-loading recipe. Either term or metadata priming can be disabled when downstream readers do not need that cache or an earlier loader already guarantees it is warm.
 
 ## Check the cost and lifetime
 

@@ -146,6 +146,8 @@ The engine chooses the semijoin strategy. IN does not force materialization or g
 
 ## Pattern D — N-query loop (flag this)
 
+First ask whether the caller needs an exact count. For batch continuation, compare a one-item next-batch query or equivalent existence check before optimizing a full count; [#38165](https://github.com/woocommerce/woocommerce/pull/38165) removed repeated pending-work counts this way. Preserve error and no-progress handling, and measure no-match and near-completion cases: LIMIT bounds returned rows, not examined rows. Keep exact totals where another consumer needs them, such as a progress display.
+
 When repeated queries scan substantially the same bounded population, compare GROUP BY or conditional aggregation. Several selective point lookups can be cheaper than an unrestricted aggregate. Keep requested status/term predicates, zero buckets, original result types and COUNT versus COUNT DISTINCT semantics.
 
 The following comparison assumes nonempty, validated product IDs and canonical stock-status values, with the same eligibility and freshness established for both paths. Custom values need separate checks for SQL collation versus PHP array-key equality before grouping:

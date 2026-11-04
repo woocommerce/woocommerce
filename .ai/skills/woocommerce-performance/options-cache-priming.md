@@ -25,6 +25,8 @@ The example shows placement, not proof that these particular options need primin
 
 No empty guard is needed for a statically declared, non-empty array. Place the prime before the first consumer and keep using `get_option()` for actual values so option filters and defaults retain their behavior. Add a comment only when a non-obvious placement or cache constraint needs explanation.
 
+**Use exact option names.** Match the established spelling used to persist each option. A case-insensitive database lookup can find a differently cased name while PHP cache keys remain distinct. When priming that alias alongside a missing key, [`wp_prime_option_caches()`](https://developer.wordpress.org/reference/functions/wp_prime_option_caches/) can mark the alias absent and change a later `get_option()` result. Do not blindly lowercase extension-defined names; preserve any existing alias behavior before adding priming.
+
 **Common locations to check:**
 
 - `register_routes()` methods that actually read several settings during registration; do not move endpoint-only reads into every registration request.
@@ -119,11 +121,11 @@ Do not broaden a request's work to every possible registry entry just because in
 
 ---
 
-### 5. Transient names passed to `wp_prime_option_caches()` — unsafe under persistent object cache
+### 5. Transient backing-option priming depends on storage and installation state
 
-**Anti-pattern:** passing transient backing-option names to an options-table priming API when the active transient storage is an external object cache.
+**Anti-pattern:** passing transient backing-option names to an options-table priming API when the consumer reads the object cache instead.
 
-With an external object cache, `get_transient()` and `set_transient()` use the `transient` cache group instead of the options table. Priming `_transient_{name}` and `_transient_timeout_{name}` rows on that path does not warm the cache entries the consumer uses.
+With an external object cache, or while `wp_installing()` is true, `get_transient()` and `set_transient()` use the `transient` cache group instead of the options table. Priming `_transient_{name}` and `_transient_timeout_{name}` rows on that path does not warm the cache entries the consumer uses.
 
 For names absent from the options table, the prime can add entries to `notoptions`, WordPress's negative cache. Its size can grow as **new unique names** accumulate. Repeating the same names does not add new entries each time, and eviction or legacy transient rows in the database can affect the result. If the backend stores `notoptions` as a single value, a larger value can increase transfer and processing cost.
 
@@ -132,18 +134,18 @@ For names absent from the options table, the prime can add entries to `notoption
 This assumes `$transient_option_names` contains the actual backing-option names needed by a bounded set of upcoming transient reads, including timeout names where applicable.
 
 ```php
-if ( ! wp_using_ext_object_cache() ) {
+if ( ! wp_using_ext_object_cache() && ! wp_installing() ) {
     wp_prime_option_caches( $transient_option_names );
 }
 ```
 
-`wp_using_ext_object_cache()` follows the same storage distinction used by the transient API. Skipping the options-table prime on the external-cache path avoids warming the wrong namespace. It does not imply that all external-cache reads are free or that no backend-specific batching can help. See [#65440](https://github.com/woocommerce/woocommerce/pull/65440) and its [skill correction #65441](https://github.com/woocommerce/woocommerce/pull/65441).
+These checks follow the storage distinction in [`get_transient()`](https://developer.wordpress.org/reference/functions/get_transient/). Skipping the options-table prime on the object-cache path avoids warming the wrong namespace. It does not imply that all external-cache reads are free or that no backend-specific batching can help. See [#65440](https://github.com/woocommerce/woocommerce/pull/65440) and its [skill correction #65441](https://github.com/woocommerce/woocommerce/pull/65441).
 
 **Mixed key list:** keep regular options outside the guard. Guarding the entire list would also remove useful ordinary-option priming on sites with an external cache.
 
 ```php
 wp_prime_option_caches( $regular_option_names );
-if ( ! wp_using_ext_object_cache() ) {
+if ( ! wp_using_ext_object_cache() && ! wp_installing() ) {
     wp_prime_option_caches( $transient_option_names );
 }
 ```
