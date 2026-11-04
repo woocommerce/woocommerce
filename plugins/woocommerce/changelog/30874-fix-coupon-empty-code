@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Show an error, and block the save in the browser, when a coupon is saved without a coupon code.
+Save a coupon as a draft instead of publishing it when its coupon code is left empty, and show an error.

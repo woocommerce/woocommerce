@@ -355,10 +355,6 @@ class WC_Meta_Box_Coupon_Data {
 	 * @param WP_Post $post
 	 */
 	public static function save( $post_id, $post ) {
-		if ( '' === wc_format_coupon_code( $post->post_title ) ) {
-			WC_Admin_Meta_Boxes::add_error( __( 'Coupon code is required.', 'woocommerce' ) );
-		}
-
 		// Check for dupe coupons.
 		$coupon_code  = wc_format_coupon_code( $post->post_title );
 		$id_from_code = wc_get_coupon_id_by_code( $coupon_code, $post_id );
@@ -397,6 +393,10 @@ class WC_Meta_Box_Coupon_Data {
 			foreach ( $errors->get_error_messages() as $error_message ) {
 				WC_Admin_Meta_Boxes::add_error( $error_message );
 			}
+		}
+
+		if ( '' === trim( $coupon_code ) ) {
+			WC_Admin_Meta_Boxes::add_error( __( 'Coupon code is required. Coupons without a code are saved as drafts.', 'woocommerce' ) );
 		}
 
 		$coupon->save();
