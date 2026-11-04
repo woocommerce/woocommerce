@@ -45,3 +45,34 @@ describe( ABILITY, () => {
 	test( 'refuses a product that is gone', () =>
 		refused( ABILITY, { id }, /permission/i ) );
 } );
+
+// Product saves write shared rows, such as a term count, so two at once can deadlock. The loser of the deadlock must
+// fail instead of reporting a write that the database rolled back.
+describe( `${ ABILITY } while another product is saved`, () => {
+	const SKUS = [ 'mcp-delete-race', 'mcp-delete-race-other' ];
+	let trashed;
+	let other;
+	before( async () => {
+		await seed( 'remove-products', { skus: SKUS } );
+		trashed = await seed( 'product', { sku: SKUS[ 0 ] } );
+		other = await seed( 'product', { sku: SKUS[ 1 ] } );
+	} );
+	after( () => seed( 'remove-products', { skus: SKUS } ) );
+
+	test( 'reports the trash only when it happened', async () => {
+		const [ result ] = await Promise.allSettled( [
+			execute( ABILITY, { id: trashed.id } ),
+			execute( 'woocommerce/product-update', {
+				id: other.id,
+				name: 'MCP renamed at the same time',
+			} ),
+		] );
+
+		if ( result.status === 'fulfilled' ) {
+			assert.deepEqual(
+				( await lookUp( trashed.id ) ).map( ( { status } ) => status ),
+				[ 'trash' ]
+			);
+		}
+	} );
+} );
