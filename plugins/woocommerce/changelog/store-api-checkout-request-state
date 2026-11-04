@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Start each Store API checkout request with its own order and payment data.
