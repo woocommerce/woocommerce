@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseTransaction;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -1378,7 +1379,11 @@ function wc_array_cartesian( $input ) {
 /**
  * Run a MySQL transaction query, if supported.
  *
+ * Inside a transaction that DatabaseTransaction::run() owns, a start sets a
+ * savepoint, and the matching commit or rollback releases or rolls back to it.
+ *
  * @since 2.5.0
+ * @since 11.4.0 Sets savepoints inside a transaction that DatabaseTransaction::run() owns.
  * @param string $type Types: start (default), commit, rollback.
  * @param bool   $force use of transactions.
  * @return void
@@ -1391,6 +1396,16 @@ function wc_transaction_query( $type = 'start', $force = false ) {
 	wc_maybe_define_constant( 'WC_USE_TRANSACTIONS', true );
 
 	if ( Constants::is_true( 'WC_USE_TRANSACTIONS' ) || $force ) {
+		if ( DatabaseTransaction::is_open() ) {
+			if ( 'commit' === $type || 'rollback' === $type ) {
+				DatabaseTransaction::close_latest( 'commit' === $type );
+			} else {
+				DatabaseTransaction::start();
+			}
+			return;
+		}
+
+		DatabaseTransaction::track_caller( $type );
 		switch ( $type ) {
 			case 'commit':
 				$wpdb->query( 'COMMIT' );
