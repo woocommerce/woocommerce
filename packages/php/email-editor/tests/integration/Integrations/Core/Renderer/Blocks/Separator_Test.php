@@ -235,7 +235,8 @@ class Separator_Test extends \Email_Editor_Integration_Test_Case {
 				'className'       => 'is-style-dots',
 				'backgroundColor' => 'vivid-red',
 			),
-			'<hr class="wp-block-separator has-text-color has-vivid-red-color has-alpha-channel-opacity has-vivid-red-background-color has-background is-style-dots"/>'
+			'<hr class="wp-block-separator has-text-color has-vivid-red-color has-alpha-channel-opacity has-vivid-red-background-color has-background is-style-dots"/>',
+			array( 'width' => '600px' )
 		);
 
 		$this->assertStringContainsString( '&#183;&#183;&#183;', $rendered );
@@ -254,7 +255,10 @@ class Separator_Test extends \Email_Editor_Integration_Test_Case {
 		$rendered = $this->render(
 			array( 'className' => 'is-style-dots' ),
 			'<hr class="wp-block-separator has-alpha-channel-opacity is-style-dots"/>',
-			array( 'font-size' => '32px' )
+			array(
+				'font-size' => '32px',
+				'width'     => '600px',
+			)
 		);
 
 		$this->assertStringContainsString( 'font-size:48px', $rendered );
