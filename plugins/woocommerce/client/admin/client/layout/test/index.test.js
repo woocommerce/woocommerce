@@ -160,4 +160,51 @@ describe( 'Layout', () => {
 			removeFilter( PAGES_FILTER, namespace );
 		} );
 	} );
+
+	describe( 'Pages added through the pages filter', () => {
+		const namespace = `woocommerce/woocommerce/test_ext_${ PAGES_FILTER }`;
+		const ExtensionPage = ( { params, path } ) => (
+			<p>{ `params=${ JSON.stringify( params ) } path=${ path }` }</p>
+		);
+
+		beforeEach( () => {
+			addFilter( PAGES_FILTER, namespace, ( pages ) => [
+				...pages,
+				{
+					breadcrumbs: [ 'Extension item' ],
+					container: ExtensionPage,
+					path: '/test-ext/:id',
+				},
+				{
+					breadcrumbs: [ 'Extension section' ],
+					container: ExtensionPage,
+					path: '/test-ext-section/*',
+				},
+			] );
+		} );
+
+		afterEach( () => {
+			removeFilter( PAGES_FILTER, namespace );
+		} );
+
+		it.each( [
+			[ '/test-ext/42', 'params={"id":"42"} path=/test-ext/42' ],
+			[
+				'/test-ext-section/a/b',
+				'params={"*":"a/b"} path=/test-ext-section/a/b',
+			],
+			[
+				'/test-ext/hello%20world',
+				'params={"id":"hello world"} path=/test-ext/hello%20world',
+			],
+		] )(
+			'should render %s with its params and path',
+			( pathname, expected ) => {
+				mockPath( pathname );
+				render( <Layout /> );
+
+				expect( screen.getByText( expected ) ).toBeInTheDocument();
+			}
+		);
+	} );
 } );

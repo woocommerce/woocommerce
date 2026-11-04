@@ -376,6 +376,66 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product schema follows the breadcrumb category selection and includes its ancestors.
+	 */
+	public function test_product_category_path(): void {
+		$parent  = wp_insert_term( 'Clothing', 'product_cat' );
+		$child   = wp_insert_term( 'Hoodies', 'product_cat', array( 'parent' => $parent['term_id'] ) );
+		$other   = wp_insert_term( 'Accessories', 'product_cat' );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_category_ids( array( $child['term_id'], $other['term_id'] ) );
+		$product->save();
+
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$this->assertSame( 'Clothing > Hoodies', $sut->get_data()[0]['category'] );
+
+		add_filter(
+			'woocommerce_breadcrumb_main_term',
+			static function () use ( $other ) {
+				return get_term( $other['term_id'], 'product_cat' );
+			}
+		);
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$this->assertSame( 'Accessories', $sut->get_data()[0]['category'] );
+	}
+
+	/**
+	 * @testdox Product schema output preserves ampersands in category names.
+	 */
+	public function test_product_category_output_preserves_ampersands(): void {
+		$category = wp_insert_term( 'Food & Drink', 'product_cat' );
+		$product  = WC_Helper_Product::create_simple_product();
+		$product->set_category_ids( array( $category['term_id'] ) );
+		$product->save();
+		$this->go_to( get_permalink( $product->get_id() ) );
+
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		ob_start();
+		$sut->output_structured_data();
+		$output = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '~^<script type="application/ld\+json">(.*)</script>$~s', $output );
+		preg_match( '~^<script type="application/ld\+json">(.*)</script>$~s', $output, $matches );
+		$data = json_decode( $matches[1], true );
+		$this->assertSame( 'Food & Drink', $data['category'] );
+	}
+
+	/**
+	 * @testdox Product schema omits an invalid breadcrumb category.
+	 */
+	public function test_product_with_invalid_category_path(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		add_filter( 'woocommerce_breadcrumb_main_term', '__return_null' );
+
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$this->assertArrayNotHasKey( 'category', $sut->get_data()[0] );
+	}
+
+	/**
 	 * @testdox Product schema uses the selected variation's MPN without inheriting the parent's value.
 	 * @testWith ["CHILD-PART", true, "CHILD-PART"]
 	 *           ["0", true, "0"]
@@ -644,6 +704,37 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( '70.00', $offer['price'] );
 		$this->assertEquals( '70.00', $offer['priceSpecification'][0]['price'] );
 		$this->assertEquals( get_woocommerce_currency(), $offer['priceCurrency'] );
+	}
+
+	/**
+	 * @testdox Grouped product offer ignores child sale prices whose sale has not started.
+	 */
+	public function test_grouped_product_offer_ignores_scheduled_child_sale_price(): void {
+		$product   = WC_Helper_Product::create_grouped_product();
+		$children  = $product->get_children();
+		$active    = wc_get_product( $children[0] );
+		$scheduled = wc_get_product( $children[1] );
+		$active->set_props(
+			array(
+				'regular_price' => '100',
+				'sale_price'    => '70',
+			)
+		);
+		$active->save();
+		$scheduled->set_props(
+			array(
+				'regular_price'     => '100',
+				'sale_price'        => '63.45',
+				'date_on_sale_from' => strtotime( '+1 year' ),
+			)
+		);
+		$scheduled->save();
+
+		$this->structured_data->generate_product_data( wc_get_product( $product->get_id() ) );
+
+		$prices = wp_list_pluck( $this->structured_data->get_data()[0]['offers'][0]['priceSpecification'], 'price' );
+		$this->assertContains( '70.00', $prices );
+		$this->assertNotContains( '63.45', $prices, 'A child sale that has not started must not be advertised.' );
 	}
 
 	/**
