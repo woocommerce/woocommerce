@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { concat } from 'lodash';
 import { Reducer } from 'redux';
 
 /**
@@ -29,10 +28,7 @@ const reducer: Reducer< PluginsState, Actions > = (
 					...state,
 					active: payload.replace
 						? payload.active
-						: ( concat(
-								state.active,
-								payload.active
-							) as string[] ),
+						: ( state.active ?? [] ).concat( payload.active ),
 					requesting: {
 						...state.requesting,
 						getActivePlugins: false,
@@ -50,10 +46,7 @@ const reducer: Reducer< PluginsState, Actions > = (
 					...state,
 					installed: payload.replace
 						? payload.installed
-						: ( concat(
-								state.installed,
-								payload.installed
-							) as string[] ),
+						: ( state.installed ?? [] ).concat( payload.installed ),
 					requesting: {
 						...state.requesting,
 						getInstalledPlugins: false,

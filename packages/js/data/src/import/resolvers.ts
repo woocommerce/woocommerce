@@ -3,7 +3,6 @@
  */
 import { addQueryArgs } from '@wordpress/url';
 import { apiFetch } from '@wordpress/data-controls';
-import { omit } from 'lodash';
 
 /**
  * Internal dependencies
@@ -19,9 +18,15 @@ import {
 
 export function* getImportStatus( query: ImportStatusQuery ) {
 	try {
+		let args = {};
+		if ( query && typeof query === 'object' ) {
+			// Drop the cache-busting timestamp from the request.
+			const { timestamp, ...rest } = query as Record< string, unknown >;
+			args = rest;
+		}
 		const url = addQueryArgs(
 			`${ NAMESPACE }/reports/import/status`,
-			typeof query === 'object' ? omit( query, [ 'timestamp' ] ) : {}
+			args
 		);
 		const response: ImportStatus = yield apiFetch( { path: url } );
 		yield setImportStatus( query, response );

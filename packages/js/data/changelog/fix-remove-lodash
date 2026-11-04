@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop importing `lodash`, which the package used at runtime without declaring it as a dependency.

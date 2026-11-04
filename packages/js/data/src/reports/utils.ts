@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { find, isNull, get, includes } from 'lodash';
 import moment from 'moment';
 import createSelector from 'rememo';
 import {
@@ -77,7 +76,7 @@ export function timeStampFilterDates(
 	activeFilter: ActiveFilter
 ) {
 	const advancedFilterConfig = config.filters[ activeFilter.key ];
-	if ( get( advancedFilterConfig, [ 'input', 'component' ] ) !== 'Date' ) {
+	if ( advancedFilterConfig?.input?.component !== 'Date' ) {
 		return activeFilter;
 	}
 
@@ -138,9 +137,9 @@ export function getQueryFromConfig(
 		};
 	}
 
-	const filter = find( flattenFilters( config.filters ), {
-		value: queryValue,
-	} );
+	const filter = flattenFilters( config.filters ).find(
+		( item ) => item.value === queryValue
+	);
 
 	if ( ! filter ) {
 		return {};
@@ -209,7 +208,7 @@ export function usesServerSideSearch( limitProperties: string[] ) {
 		return false;
 	}
 
-	return includes( itemTypes, limitProperties[ 0 ] );
+	return itemTypes.includes( limitProperties[ 0 ] );
 }
 
 /**
@@ -275,7 +274,7 @@ export function getFilterQuery(
 }
 
 // Some stats endpoints don't have interval data, so they can ignore after/before params and omit that part of the response.
-const noIntervalEndpoints = [ 'stock', 'customers' ] as const;
+const noIntervalEndpoints: readonly string[] = [ 'stock', 'customers' ];
 
 type ActiveFilter = {
 	key: string;
@@ -300,11 +299,11 @@ export function isReportDataEmpty(
 	if ( ! report.data ) {
 		return true;
 	}
-	if ( ! report.data.totals || isNull( report.data.totals ) ) {
+	if ( ! report.data.totals ) {
 		return true;
 	}
 
-	const checkIntervals = ! includes( noIntervalEndpoints, endpoint );
+	const checkIntervals = ! noIntervalEndpoints.includes( endpoint );
 	if (
 		checkIntervals &&
 		( ! report.data.intervals || report.data.intervals.length === 0 )
@@ -334,7 +333,7 @@ export function getRequestQuery( options: QueryOptions ) {
 	const filterQuery = getFilterQuery( options );
 	const end = datesFromQuery[ dataType ].before;
 
-	const noIntervals = includes( noIntervalEndpoints, endpoint );
+	const noIntervals = noIntervalEndpoints.includes( endpoint );
 	return noIntervals
 		? { ...filterQuery, fields }
 		: {
@@ -627,7 +626,7 @@ export function getReportTableQuery(
 	const filterQuery = getFilterQuery( options );
 	const datesFromQuery = getCurrentDates( query, options.defaultDateRange );
 
-	const noIntervals = includes( noIntervalEndpoints, options.endpoint );
+	const noIntervals = noIntervalEndpoints.includes( options.endpoint );
 
 	return {
 		orderby: query.orderby || 'date',
