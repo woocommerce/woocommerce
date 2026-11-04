@@ -3097,6 +3097,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax->set_tax_total( $cart_taxes[ $tax_rate_id ] ?? 0 );
 			$tax->set_shipping_tax_total( ! empty( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
 
+			// Do not save the tax item here. save_items() writes it with the order, so a failed order write leaves it unchanged.
 			$saved_rate_ids[] = $tax_rate_id;
 		}
 
