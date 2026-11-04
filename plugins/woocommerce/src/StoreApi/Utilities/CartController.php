@@ -249,6 +249,8 @@ class CartController {
 			throw new RouteException( 'woocommerce_rest_cart_invalid_product', esc_html__( 'Cart item is invalid.', 'woocommerce' ), 404 );
 		}
 
+		// Normalize the raw value so it's properly stored.
+		$quantity            = wc_stock_amount( $quantity );
 		$quantity_validation = ( new QuantityLimits() )->validate_cart_item_quantity( $quantity, $cart_item );
 
 		if ( is_wp_error( $quantity_validation ) ) {
