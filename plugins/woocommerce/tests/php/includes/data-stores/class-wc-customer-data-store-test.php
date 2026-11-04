@@ -524,18 +524,18 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$customer = WC_Helper_Customer::create_customer( 'test1', 'pass1', 'test1@example.com' );
 		$this->create_paid_order( $customer->get_id(), '2024-02-10 12:00:00', 20 );
 
-		$all_time_value_calls    = 0;
-		$all_time_query_calls    = 0;
-		$timeframe_query_calls   = 0;
-		$all_time_value_filter   = static function ( $spent ) use ( &$all_time_value_calls ) {
+		$all_time_value_calls   = 0;
+		$all_time_query_calls   = 0;
+		$timeframe_query_calls  = 0;
+		$all_time_value_filter  = static function ( $spent ) use ( &$all_time_value_calls ) {
 			++$all_time_value_calls;
 			return $spent;
 		};
-		$all_time_query_filter   = static function ( $sql ) use ( &$all_time_query_calls ) {
+		$all_time_query_filter  = static function ( $sql ) use ( &$all_time_query_calls ) {
 			++$all_time_query_calls;
 			return $sql;
 		};
-		$timeframe_query_filter  = static function ( $sql ) use ( &$timeframe_query_calls ) {
+		$timeframe_query_filter = static function ( $sql ) use ( &$timeframe_query_calls ) {
 			++$timeframe_query_calls;
 			return $sql;
 		};
@@ -644,9 +644,9 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'get_total_spent_for_timeframe' includes migrated orders that only had the legacy paid-date meta with HPOS storage.
+	 * @testdox 'get_total_spent_for_timeframe' ignores the legacy paid-date meta with HPOS storage, which the HPOS order store never reads.
 	 */
-	public function test_get_total_spent_timeframe_includes_migrated_legacy_paid_date_using_cot() {
+	public function test_get_total_spent_timeframe_ignores_migrated_legacy_paid_date_using_cot() {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
 		$original_timezone = get_option( 'timezone_string' );
 		update_option( 'timezone_string', 'America/New_York' );
@@ -664,33 +664,22 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
 
 			global $wpdb;
+			$meta_table         = OrdersTableDataStore::get_meta_table_name();
 			$migrated_paid_date = $wpdb->get_var(
 				$wpdb->prepare(
-					'SELECT meta_value FROM %i WHERE order_id = %d AND meta_key = %s',
-					OrdersTableDataStore::get_meta_table_name(),
+					"SELECT meta_value FROM {$meta_table} WHERE order_id = %d AND meta_key = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is a fixed internal identifier from OrdersTableDataStore.
 					$order->get_id(),
 					'_paid_date'
 				)
 			);
-			$this->assertSame( '2024-02-10 12:00:00', $migrated_paid_date );
+			$this->assertSame( '2024-02-10 12:00:00', $migrated_paid_date, 'The fixture order must carry its paid date only in the migrated legacy meta.' );
 
 			$sut       = new WC_Customer_Data_Store();
 			$timeframe = array(
 				'after'  => '2024-02-10 11:59:59',
 				'before' => '2024-02-10 12:00:01',
 			);
-			$this->assertSame( '20.00', $sut->get_total_spent_for_timeframe( $customer, $timeframe ) );
-
-			$wpdb->insert(
-				OrdersTableDataStore::get_meta_table_name(),
-				array(
-					'order_id'   => $order->get_id(),
-					'meta_key'   => '_paid_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Creates duplicate legacy meta for the regression fixture.
-					'meta_value' => '2024-03-10 12:00:00', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Creates duplicate legacy meta for the regression fixture.
-				),
-				array( '%d', '%s', '%s' )
-			);
-			$this->assertSame( '20.00', $sut->get_total_spent_for_timeframe( $customer, $timeframe ), 'The first migrated legacy meta value should win without multiplying the order total.' );
+			$this->assertSame( '0.00', $sut->get_total_spent_for_timeframe( $customer, $timeframe ), 'The legacy paid-date meta must be ignored in HPOS, like the HPOS order store ignores it.' );
 
 			$wpdb->update(
 				OrdersTableDataStore::get_operational_data_table_name(),
@@ -699,7 +688,7 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 				array( '%s' ),
 				array( '%d' )
 			);
-			$this->assertSame( '20.00', $sut->get_total_spent_for_timeframe( $customer, $timeframe ), 'The canonical migrated paid date should count the order only once.' );
+			$this->assertSame( '20.00', $sut->get_total_spent_for_timeframe( $customer, $timeframe ), 'The canonical paid date should count the order once it is set.' );
 
 			$wpdb->update(
 				OrdersTableDataStore::get_operational_data_table_name(),
@@ -708,7 +697,7 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 				array( '%s' ),
 				array( '%d' )
 			);
-			$this->assertSame( '0.00', $sut->get_total_spent_for_timeframe( $customer, $timeframe ), 'The canonical paid date should take precedence over the migrated legacy value.' );
+			$this->assertSame( '0.00', $sut->get_total_spent_for_timeframe( $customer, $timeframe ), 'A canonical paid date outside the timeframe should exclude the order.' );
 
 			$wpdb->update(
 				OrdersTableDataStore::get_operational_data_table_name(),
@@ -717,17 +706,7 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 				array( '%s' ),
 				array( '%d' )
 			);
-			$wpdb->update(
-				OrdersTableDataStore::get_meta_table_name(),
-				array( 'meta_value' => '' ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Creates empty legacy meta for the regression fixture.
-				array(
-					'order_id' => $order->get_id(),
-					'meta_key' => '_paid_date', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Targets the regression fixture's legacy meta.
-				),
-				array( '%s' ),
-				array( '%d', '%s' )
-			);
-			$this->assertSame( '0.00', $sut->get_total_spent_for_timeframe( $customer, array( 'before' => '2024-03-01 00:00:00' ) ), 'An empty migrated legacy paid date should not satisfy a before-only filter.' );
+			$this->assertSame( '0.00', $sut->get_total_spent_for_timeframe( $customer, array( 'before' => '2024-03-01 00:00:00' ) ), 'Without a canonical paid date, the legacy meta alone must not satisfy a before-only filter in HPOS.' );
 		} finally {
 			update_option( 'timezone_string', $original_timezone );
 		}

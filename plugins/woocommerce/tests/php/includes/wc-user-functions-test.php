@@ -263,7 +263,7 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Timeframe totals reject invalid IDs while preserving guest and unfiltered behavior.
+	 * Timeframe totals reject invalid IDs, and guest timeframe totals agree with the unfiltered path.
 	 */
 	public function test_timeframe_total_spent_rejects_invalid_customer_ids(): void {
 		foreach ( array( false, true ) as $hpos_enabled ) {
@@ -295,9 +295,9 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 			);
 
 			$this->assertSame(
-				'20.00',
+				'0.00',
 				wc_get_customer_total_spent( 0, $timeframe ),
-				'Explicit guest timeframe totals should include guest orders.'
+				'Guest timeframe totals must agree with the unfiltered path and not sum guest orders.'
 			);
 			$this->assertSame(
 				'0.00',
@@ -369,8 +369,8 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 			}
 
 			// The all-time hooks must not fire for timeframe calls, whichever store is active.
-			$all_time_value_calls = 0;
-			$all_time_query_calls = 0;
+			$all_time_value_calls  = 0;
+			$all_time_query_calls  = 0;
 			$all_time_value_filter = static function ( $spent ) use ( &$all_time_value_calls ) {
 				++$all_time_value_calls;
 				return $spent;
