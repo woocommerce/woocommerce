@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-When a shopper adds a product to the cart, ignore attributes that the product does not use.
