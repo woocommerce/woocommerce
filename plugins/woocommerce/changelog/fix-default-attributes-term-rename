@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Keep custom default attribute values intact when a global attribute term slug is renamed.

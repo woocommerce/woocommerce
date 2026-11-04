@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Validate the quantity when updating a cart item via the Store API.
