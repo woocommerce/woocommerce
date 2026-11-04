@@ -71,7 +71,7 @@
 		"test": "pnpm test:unit",
 		"test:api": "pnpm test:e2e:default --project=api",
 		"test:api:hpos-off": "pnpm test:e2e:with-env default-hpos-disabled --project=api-hpos-disabled",
-		"test:api:object-cache": "pnpm test:e2e:with-env default-object-cache --project=api",
+		"test:api:object-cache": "pnpm test:e2e:with-env default-object-cache --project=api --workers=1",
 		"test:api:tracking": "test \"$(pnpm --silent wp-env:e2e run cli wp option get woocommerce_allow_tracking)\" = \"yes\" && pnpm test:api",
 		"test:e2e:core-serial": "pnpm test:e2e:default --project=core-serial",
 		"test:e2e:core-parallel": "pnpm test:e2e:default --project=core-parallel",
@@ -329,7 +329,7 @@
 					"report": {
 						"resultsBlobName": "core-e2e-report",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -354,7 +354,7 @@
 					"report": {
 						"resultsBlobName": "core-e2e-report-php-7.4",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -393,7 +393,7 @@
 					"report": {
 						"resultsBlobName": "core-e2e-report",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -415,7 +415,7 @@
 					"report": {
 						"resultsBlobName": "core-e2e-report-php-7.4",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -445,7 +445,7 @@
 					"report": {
 						"resultsBlobName": "gutenberg-stable-e2e-report",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -474,7 +474,7 @@
 					"report": {
 						"resultsBlobName": "gutenberg-nightly-e2e-report",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -504,7 +504,7 @@
 					"report": {
 						"resultsBlobName": "core-e2e-reports-hpos-disabled",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -534,7 +534,7 @@
 					"report": {
 						"resultsBlobName": "core-e2e-report-php-8.5",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -567,7 +567,7 @@
 					"report": {
 						"resultsBlobName": "core-e2e-report-php-8.5",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -598,7 +598,7 @@
 					"report": {
 						"resultsBlobName": "core-e2e-report-wp-latest-1",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -632,7 +632,7 @@
 					"report": {
 						"resultsBlobName": "core-e2e-report-wp-latest-1",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -664,7 +664,7 @@
 					"report": {
 						"resultsBlobName": "core-e2e-report-wp-pre-release",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -699,7 +699,7 @@
 					"report": {
 						"resultsBlobName": "core-e2e-report-wp-pre-release",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -734,7 +734,7 @@
 					"report": {
 						"resultsBlobName": "core-api-report",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -770,7 +770,7 @@
 					"report": {
 						"resultsBlobName": "core-api-report-tracking-enabled",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -804,7 +804,7 @@
 					"report": {
 						"resultsBlobName": "core-api-report-hpos-disabled",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -870,7 +870,7 @@
 					"report": {
 						"resultsBlobName": "core-api-report-object-cache",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -1006,7 +1006,7 @@
 					"report": {
 						"resultsBlobName": "blocks-e2e-report",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -1063,7 +1063,7 @@
 					"report": {
 						"resultsBlobName": "blocks-e2e-report",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -1088,7 +1088,7 @@
 					"report": {
 						"resultsBlobName": "blocks-e2e-report-php-7.4",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -1122,7 +1122,7 @@
 					"report": {
 						"resultsBlobName": "blocks-e2e-report-php-7.4",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -1147,7 +1147,7 @@
 					"report": {
 						"resultsBlobName": "blocks-e2e-report-php-8.5",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -1181,7 +1181,7 @@
 					"report": {
 						"resultsBlobName": "blocks-e2e-report-php-8.5",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -1223,7 +1223,7 @@
 					"report": {
 						"resultsBlobName": "blocks-e2e-unified-editor-assets-report",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -1274,7 +1274,7 @@
 					"report": {
 						"resultsBlobName": "blocks-e2e-unified-editor-assets-report",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -1318,7 +1318,7 @@
 					"report": {
 						"resultsBlobName": "blocks-e2e-report-wp-pre-release",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -1368,7 +1368,7 @@
 					"report": {
 						"resultsBlobName": "blocks-e2e-report-wp-pre-release",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -1411,7 +1411,7 @@
 					"report": {
 						"resultsBlobName": "blocks-e2e-report-wp-latest-1",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -1460,7 +1460,7 @@
 					"report": {
 						"resultsBlobName": "blocks-e2e-report-wp-latest-1",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -1475,7 +1475,7 @@
 					"report": {
 						"resultsBlobName": "default-pressable-core-e2e-and-api",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -1490,7 +1490,7 @@
 					"report": {
 						"resultsBlobName": "default-wpcom-core-e2e-and-api",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				},
 				{
@@ -1520,7 +1520,7 @@
 					"report": {
 						"resultsBlobName": "core-e2e-report",
 						"resultsPath": "tests/e2e/test-results",
-						"allure": true
+						"publish": true
 					}
 				}
 			]

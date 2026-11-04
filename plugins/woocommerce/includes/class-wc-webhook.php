@@ -603,29 +603,37 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			);
 		}
 
-		// Track failures.
-		// Check for a success, which is a 2xx, 301 or 302 Response Code.
-		if ( intval( $response_code ) >= 200 && intval( $response_code ) < 303 ) {
-			$this->set_failure_count( 0 );
-			// A successful delivery proves the delivery URL works, so it no longer needs a ping.
-			$this->set_pending_delivery( false );
-
-			if ( 0 !== $this->get_id() ) {
-				$this->save();
+		$this->write_through(
+			function () use ( $response_code ) {
+				$this->stage_delivery_result( $response_code );
 			}
-		} else {
-			$this->failed_delivery();
+		);
+
+		if ( 0 !== $this->get_id() ) {
+			$this->save();
 		}
 	}
 
 	/**
-	 * Track consecutive delivery failures and automatically disable the webhook.
-	 * if more than 5 consecutive failures occur. A failure is defined as a.
-	 * non-2xx response.
+	 * Track the result of a delivery in memory. The next save() writes it. log_delivery() calls this method,
+	 * then save().
 	 *
-	 * @since 2.2.0
+	 * A success, which is a 2xx, 301 or 302 response code, resets the failure count. A failure adds one to
+	 * the failure count, and disables the webhook after more than 5 consecutive failures.
+	 *
+	 * @since 11.4.0
+	 * @param int|string $response_code Response code, or the error code of a failed request.
 	 */
-	private function failed_delivery() {
+	public function stage_delivery_result( $response_code ): void {
+		$this->refuse_unstaged_override( 'log_delivery', 'stage_delivery_result' );
+
+		if ( intval( $response_code ) >= 200 && intval( $response_code ) < 303 ) {
+			$this->set_failure_count( 0 );
+			// A successful delivery proves the delivery URL works, so it no longer needs a ping.
+			$this->set_pending_delivery( false );
+			return;
+		}
+
 		$failures = $this->get_failure_count();
 
 		if ( $failures > apply_filters( 'woocommerce_max_webhook_delivery_failures', 5 ) ) {
@@ -634,10 +642,6 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			do_action( 'woocommerce_webhook_disabled_due_delivery_failures', $this->get_id() );
 		} else {
 			$this->set_failure_count( ++$failures );
-		}
-
-		if ( 0 !== $this->get_id() ) {
-			$this->save();
 		}
 	}
 
@@ -673,9 +677,33 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * Send a test ping to the delivery URL, sent when the webhook is first created.
 	 *
 	 * @since  2.2.0
+	 * @uses   self::stage_delivery_ping()
 	 * @return bool|WP_Error
 	 */
 	public function deliver_ping() {
+		$result = $this->write_through(
+			function () {
+				return $this->stage_delivery_ping();
+			}
+		);
+
+		if ( true === $result ) {
+			$this->save();
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Send a test ping to the delivery URL and, when it succeeds, clear the pending delivery flag in memory.
+	 * The next save() writes it. deliver_ping() calls this method, then save().
+	 *
+	 * @since  11.4.0
+	 * @return bool|WP_Error True when the ping succeeded, an error otherwise.
+	 */
+	public function stage_delivery_ping() {
+		$this->refuse_unstaged_override( 'deliver_ping', 'stage_delivery_ping' );
+
 		$args = array(
 			'user-agent' => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', Constants::get_constant( 'WC_VERSION' ), $GLOBALS['wp_version'] ),
 			'body'       => 'webhook_id=' . $this->get_id(),
@@ -706,7 +734,6 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		}
 
 		$this->set_pending_delivery( false );
-		$this->save();
 
 		return true;
 	}

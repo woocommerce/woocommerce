@@ -93,7 +93,7 @@ const program = new Command( 'ci-jobs' )
 
 		const resultsBlobNames = jobs.test
 			.map( ( job ) => {
-				if ( job.report && job.report.allure ) {
+				if ( job.report && job.report.publish ) {
 					return job.report.resultsBlobName;
 				}
 				return undefined;
