@@ -26,6 +26,9 @@ class Ability extends \WP_Ability {
 	 *
 	 * Invalid input stays unchanged, so validate_input() refuses it as before.
 	 *
+	 * Remove this override, coerce_input() and get_input_error() when WooCommerce
+	 * requires WordPress 7.2, because WP_Ability::execute() converts the input there.
+	 *
 	 * @since 11.4.0
 	 *
 	 * @param mixed $input Optional. The raw input provided for the ability. Default `null`.
@@ -45,9 +48,6 @@ class Ability extends \WP_Ability {
 	 *
 	 * Converting can fail on input that validated, such as items that are unique
 	 * as strings but not as integers. The input is then refused.
-	 *
-	 * Remove this method, the normalize_input() override and get_input_error() when
-	 * WooCommerce requires WordPress 7.2, because WP_Ability then converts the input itself.
 	 *
 	 * @since 11.4.0
 	 *

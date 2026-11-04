@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix AI agent requests where "false" counted as true, which could delete a product permanently instead of moving it to the trash.
+Fix WooCommerce abilities reading values that AI agents send as text, such as "false" or "5", as the wrong type.
