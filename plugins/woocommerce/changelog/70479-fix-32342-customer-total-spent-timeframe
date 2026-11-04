@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Add before and after arguments to wc_get_customer_total_spent() so developers can get a customer's total spent for a specific period.
