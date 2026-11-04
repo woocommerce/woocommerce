@@ -3816,8 +3816,6 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-<<<<<<< HEAD
-=======
 	 * @testdox Checkout stops when the draft order could not be saved.
 	 */
 	public function test_post_rejects_draft_order_when_save_fails(): void {
@@ -4131,105 +4129,6 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * @testdox Checkout places a zero-total pending or failed order from the session instead of creating a new one.
-	 * @testWith ["pending"]
-	 *           ["failed"]
-	 *
-	 * @param string $status Status of the order in the session.
-	 */
-	public function test_post_reuses_zero_total_order_from_session( string $status ): void {
-		$this->apply_full_discount_coupon();
-		$order = $this->create_session_order_from_cart( $status );
-		$order->update_meta_data( '_subscription_renewal', 123 );
-		$order->save();
-		$this->assertSame( 0.0, (float) $order->get_total(), 'The coupon must take the order to a zero total, which is the case this test covers.' );
-
-		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
-
-		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
-		$this->assertSame( $order->get_id(), (int) $response->get_data()['order_id'], 'Checkout must place the zero-total order from the session, not a new one without its data.' );
-
-		$placed_order = wc_get_order( $order->get_id() );
-		$this->assertTrue( $placed_order->is_paid(), 'The zero-total order from the session should be completed by checkout.' );
-		$this->assertSame( '123', (string) $placed_order->get_meta( '_subscription_renewal' ), 'Renewal metadata on the order from the session should be kept.' );
-	}
-
-	/**
-	 * @testdox Checkout answers with the zero-total order from the session, without placing another, once that order has moved past awaiting payment.
-	 */
-	public function test_post_answers_with_completed_zero_total_order_from_session(): void {
-		$this->apply_full_discount_coupon();
-		$order = $this->create_session_order_from_cart( OrderStatus::COMPLETED );
-
-		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
-
-		$order_ids = wc_get_orders(
-			array(
-				'limit'  => -1,
-				'status' => 'any',
-				'return' => 'ids',
-			)
-		);
-
-		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
-		$this->assertSame( array( $order->get_id() ), $order_ids, 'A completed order must not be placed again.' );
-		$this->assertSame( $order->get_checkout_order_received_url(), $response->get_data()['payment_result']['redirect_url'], 'The shopper should be sent to the order received page of the completed order.' );
-		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::COMPLETED ), 'The completed order should be left as it was.' );
-	}
-
-	/**
-	 * @testdox Checkout does not reuse a positive-total order from the session when woocommerce_order_needs_payment says it needs no payment.
-	 */
-	public function test_post_respects_needs_payment_filter_for_positive_total_order_from_session(): void {
-		$order = $this->create_session_order_from_cart( OrderStatus::PENDING );
-		add_filter(
-			'woocommerce_order_needs_payment',
-			function ( $needs_payment, $filtered_order ) use ( $order ) {
-				return $filtered_order->get_id() === $order->get_id() ? false : $needs_payment;
-			},
-			10,
-			2
-		);
-
-		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
-
-		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
-		$this->assertNotSame( $order->get_id(), (int) $response->get_data()['order_id'], 'An order the filter says needs no payment must not be reused.' );
-	}
-
-	/**
-	 * Apply a 100% coupon to the cart, taking its total to zero.
-	 */
-	private function apply_full_discount_coupon(): void {
-		$coupon = new \WC_Coupon();
-		$coupon->set_code( 'full_discount_coupon' );
-		$coupon->set_discount_type( 'percent' );
-		$coupon->set_amount( 100 );
-		$coupon->save();
-
-		WC()->cart->apply_coupon( 'full_discount_coupon' );
-	}
-
-	/**
-	 * Create an order from the cart and point the session at it, as Subscriptions does with a renewal order.
-	 *
-	 * @param string $status Order status.
-	 * @return \WC_Order
-	 */
-	private function create_session_order_from_cart( string $status ): \WC_Order {
-		WC()->cart->calculate_totals();
-
-		$order = ( new OrderController() )->create_order_from_cart();
-		$order->set_status( $status );
-		$order->save();
-
-		WC()->session->set( 'store_api_draft_order', $order->get_id() );
-
-		return $order;
-	}
-
-	/**
->>>>>>> 65e8d600dc (Stop Store API checkout when the order could not be saved (#70626))
 	 * @testdox Store API checkout stores the order awaiting payment before invoking the payment gateway.
 	 */
 	public function test_post_sets_order_awaiting_payment_before_processing_payment(): void {
