@@ -38,6 +38,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$product->save();
 
 		$this->assertEquals( ProductStatus::PUBLISH, $product->get_status() );
+		$this->assertEquals( 'my-product', $product->get_slug() );
 
 		$read_product = new WC_Product( $product->get_id() );
 

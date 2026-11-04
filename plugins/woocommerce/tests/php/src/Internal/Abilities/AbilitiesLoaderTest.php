@@ -1560,6 +1560,25 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return generated product slug and permalink in product-create ability response.
+	 */
+	public function test_product_create_returns_generated_slug(): void {
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'name'          => 'Generated Slug Product',
+				'regular_price' => '15.00',
+				'status'        => 'publish',
+			)
+		);
+
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[] = $created['product']['id'];
+
+		$this->assertSame( 'generated-slug-product', $created['product']['slug'] );
+		$this->assertNotNull( $created['product']['permalink'] );
+	}
+
+	/**
 	 * @testdox Should map digital products to simple virtual downloadable products.
 	 */
 	public function test_product_create_sets_virtual_and_downloadable_on_a_simple_product(): void {

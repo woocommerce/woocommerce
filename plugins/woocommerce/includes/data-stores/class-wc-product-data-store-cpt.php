@@ -252,6 +252,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			// changed by the woocommerce_new_product_data filter above.
 			$post_object = get_post( $product->get_id() );
 			$product->set_status( $post_object->post_status );
+			$product->set_slug( $post_object->post_name );
 
 			$this->update_post_meta( $product, true );
 			$this->update_terms( $product, true );

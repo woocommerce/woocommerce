@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Synchronize product slug in WC_Product_Data_Store_CPT after creation so that $product->get_slug() and woocommerce/product-create ability responses return the generated slug.
