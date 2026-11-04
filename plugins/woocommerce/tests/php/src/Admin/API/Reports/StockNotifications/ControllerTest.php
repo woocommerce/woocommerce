@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Admin\API\Reports\StockNotifications;
 
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Admin\API\Reports\StockNotifications\Controller;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
@@ -11,6 +12,7 @@ use Exception;
 use WC_Data_Store;
 use WC_Helper_Product;
 use WC_REST_Unit_Test_Case;
+use WP_REST_Request;
 
 /**
  * Stock notifications report API controller test.
@@ -248,7 +250,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should serve cached data until a notification write bumps the cache version.
+	 * @testdox Should serve cached data until a notification write that changes report data bumps the cache version.
 	 */
 	public function test_notification_write_invalidates_cache(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -271,6 +273,59 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertNotSame( $version, ReportsCache::get_version(), 'Saving a notification should invalidate the reports cache.' );
 		$this->assertSame( 3, $this->get_rows( $period )[ $product->get_id() ]['signups'], 'The report should be recomputed after the bump.' );
+
+		$version = ReportsCache::get_version();
+		$notification->set_date_last_attempt( time() );
+		$notification->save();
+		$this->assertSame( $version, ReportsCache::get_version(), 'A send-attempt bookkeeping save should keep the reports cache.' );
+
+		$notification->set_status( NotificationStatus::CANCELLED );
+		$notification->save();
+		$this->assertNotSame( $version, ReportsCache::get_version(), 'A status change should invalidate the reports cache.' );
+	}
+
+	/**
+	 * @testdox Should accept a server-side CSV export of the report.
+	 */
+	public function test_export_route_accepts_the_report(): void {
+		$this->insert_row( 1, NotificationStatus::ACTIVE, '2026-03-02 10:00:00' );
+
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/export' );
+		$request->set_body_params( array( 'report_args' => self::PERIOD ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertStringContainsString( '/reports/stock-notifications/export/', $response->get_data()['_links']['status'][0]['href'] );
+	}
+
+	/**
+	 * @testdox Should export the product name, sign-ups and customers columns.
+	 */
+	public function test_export_columns_and_rows(): void {
+		$controller = new Controller();
+		$item       = array(
+			'product_id'    => 7,
+			'signups'       => 3,
+			'customers'     => 2,
+			'extended_info' => array( 'name' => 'Hoodie' ),
+		);
+
+		$this->assertSame(
+			array(
+				'product_name' => 'Product',
+				'signups'      => 'Sign-ups',
+				'customers'    => 'Customers',
+			),
+			$controller->get_export_columns()
+		);
+		$this->assertSame(
+			array(
+				'product_name' => 'Hoodie',
+				'signups'      => 3,
+				'customers'    => 2,
+			),
+			$controller->prepare_item_for_export( $item )
+		);
 	}
 
 	/**

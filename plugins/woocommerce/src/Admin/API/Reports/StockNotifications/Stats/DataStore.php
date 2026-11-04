@@ -205,11 +205,8 @@ class DataStore extends StockNotificationsDataStore implements DataStoreInterfac
 		$data->intervals = $intervals;
 
 		if ( $this->intervals_missing( $expected_interval_count, $db_interval_count, $limit_params['per_page'], $query_args['page'], $query_args['order'], $query_args['orderby'], count( $intervals ) ) ) {
-			// @phpstan-ignore argument.type, class.notFound (base docblocks name an unqualified stdClass)
 			$this->fill_in_missing_intervals( $db_intervals, $query_args['adj_after'], $query_args['adj_before'], $query_args['interval'], $data );
-			// @phpstan-ignore class.notFound
 			$this->sort_intervals( $data, $query_args['orderby'], $query_args['order'] );
-			// @phpstan-ignore class.notFound
 			$this->remove_extra_records( $data, $query_args['page'], $limit_params['per_page'], $db_interval_count, $expected_interval_count, $query_args['orderby'], $query_args['order'] );
 		} else {
 			$this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $data->intervals );

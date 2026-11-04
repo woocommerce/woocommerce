@@ -142,6 +142,38 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should page date-ordered intervals on site-time days when rows are sparse.
+	 */
+	public function test_date_ordered_paging_uses_site_timezone(): void {
+		update_option( 'timezone_string', 'America/Los_Angeles' );
+		// Local times (UTC-8): 03-02 20:00, 03-03 00:30, 03-03 23:30, 03-04 20:00. 03-01 and 03-05 stay empty.
+		$this->insert_row( 1, NotificationStatus::ACTIVE, '2026-03-03 04:00:00', 'b@example.com' );
+		$this->insert_row( 1, NotificationStatus::ACTIVE, '2026-03-03 08:30:00', 'c@example.com' );
+		$this->insert_row( 1, NotificationStatus::ACTIVE, '2026-03-04 07:30:00', 'd@example.com' );
+		$this->insert_row( 1, NotificationStatus::ACTIVE, '2026-03-05 04:00:00', 'e@example.com' );
+
+		$stats = $this->get_stats(
+			array(
+				'after'    => '2026-03-01T00:00:00',
+				'before'   => '2026-03-05T23:59:59',
+				'interval' => 'day',
+				'orderby'  => 'date',
+				'order'    => 'asc',
+				'per_page' => 2,
+				'page'     => 2,
+			)
+		);
+
+		$this->assertSame(
+			array(
+				'2026-03-03' => 2,
+				'2026-03-04' => 1,
+			),
+			array_column( array_map( array( $this, 'flatten_interval' ), $stats['intervals'] ), 'signups', 'interval' )
+		);
+	}
+
+	/**
 	 * Get the stats response data.
 	 *
 	 * @param array $params Query parameters.

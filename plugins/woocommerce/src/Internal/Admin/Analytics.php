@@ -1347,7 +1347,7 @@ class Analytics {
 				'parent' => 'woocommerce-analytics',
 				'path'   => '/analytics/stock',
 			) : null,
-			FeaturesUtil::feature_is_enabled( StockNotifications::FEATURE_NAME ) ? array(
+			StockNotifications::is_enabled_before_init() ? array(
 				'id'     => 'woocommerce-analytics-stock-notifications',
 				'title'  => __( 'Stock notifications', 'woocommerce' ),
 				'parent' => 'woocommerce-analytics',

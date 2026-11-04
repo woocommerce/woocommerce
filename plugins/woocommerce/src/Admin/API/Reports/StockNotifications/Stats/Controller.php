@@ -77,7 +77,7 @@ class Controller extends GenericStatsController {
 		/**
 		 * Filter a stock notifications stats interval returned from the API.
 		 *
-		 * @since 11.3.0
+		 * @since 11.4.0
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param array            $report   The original report interval.

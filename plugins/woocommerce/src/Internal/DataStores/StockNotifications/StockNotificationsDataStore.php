@@ -101,7 +101,7 @@ CREATE TABLE $table_name (
 	KEY user_lookup (user_id, product_id, status),
 	KEY email_lookup (user_email, product_id, status),
 	KEY date_created (date_created_gmt, status, product_id),
-	KEY date_notified (date_notified_gmt, id)
+	KEY date_notified (date_notified_gmt)
 ) $collate;
 CREATE TABLE $meta_table_name (
 	id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -319,7 +319,10 @@ CREATE TABLE $meta_table_name (
 				return new \WP_Error( 'db_update_error', 'Could not update stock notification in the database.' );
 			}
 
-			ReportsCache::invalidate();
+			// Only the props the Analytics report reads; bookkeeping saves such as send attempts keep the cache.
+			if ( array_intersect( array( 'status', 'date_created', 'date_notified' ), array_keys( $changes ) ) ) {
+				ReportsCache::invalidate();
+			}
 		}
 
 		$notification->save_meta_data();

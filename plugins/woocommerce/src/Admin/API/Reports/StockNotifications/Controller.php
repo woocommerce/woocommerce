@@ -78,7 +78,7 @@ class Controller extends GenericController implements ExportableInterface {
 		/**
 		 * Filter a stock notifications report item returned from the API.
 		 *
-		 * @since 11.3.0
+		 * @since 11.4.0
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param array            $report   The original report item.
@@ -206,7 +206,7 @@ class Controller extends GenericController implements ExportableInterface {
 		/**
 		 * Filter to add or remove column names from the stock notifications report for export.
 		 *
-		 * @since 11.3.0
+		 * @since 11.4.0
 		 *
 		 * @param array $export_columns Key value pair of Column ID => Label.
 		 */
@@ -229,7 +229,7 @@ class Controller extends GenericController implements ExportableInterface {
 		/**
 		 * Filter to prepare extra columns in the export item for the stock notifications report.
 		 *
-		 * @since 11.3.0
+		 * @since 11.4.0
 		 *
 		 * @param array $export_item Key value pair of Column ID => Row Value.
 		 * @param array $item        Single report item/row.

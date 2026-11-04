@@ -205,7 +205,9 @@ class StockNotifications implements RegisterHooksInterface {
 	 *
 	 * Reads the feature option directly, so it is safe in callbacks that can run before
 	 * `init`, such as `woocommerce_data_stores`: feature_is_enabled() would build the
-	 * translated feature definitions too early. Prefer is_enabled() everywhere else.
+	 * translated feature definitions too early. Also honours the alpha constant, so it is
+	 * the single gate for code outside this class, such as the Analytics report routes,
+	 * menu item and data stores.
 	 *
 	 * @internal
 	 * @return bool
