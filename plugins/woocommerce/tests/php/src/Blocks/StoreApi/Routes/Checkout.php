@@ -888,6 +888,208 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Each checkout served by the same route instance works on its own order.
+	 */
+	public function test_checkouts_on_same_route_instance_use_their_own_orders() {
+		$fixtures     = new FixtureData();
+		$free_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Free Test Product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 0,
+				'virtual'       => true,
+			)
+		);
+
+		wc_empty_cart();
+		wc()->cart->add_to_cart( $free_product->get_id(), 1 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( array( 'billing_address' => (object) $this->get_fallback_billing_address() ) );
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$first_order_id = $response->get_data()['order_id'];
+		$this->assertTrue( wc_get_order( $first_order_id )->is_paid() );
+
+		wc_empty_cart();
+		wc()->cart->add_to_cart( self::$product_ids[2], 5 );
+
+		// Both dispatches go through the same registered route instance, which is also how the batch endpoint serves its children.
+		$billing_address              = $this->get_fallback_billing_address();
+		$billing_address['last_name'] = '';
+		$request                      = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( array( 'billing_address' => (object) $billing_address ) );
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 400, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		$first_order = wc_get_order( $first_order_id );
+		$this->assertSame( 0.0, (float) $first_order->get_total() );
+		$this->assertCount( 1, $first_order->get_items() );
+	}
+
+	/**
+	 * @testdox Each checkout hands the gateway the payment data from its own request.
+	 */
+	public function test_each_checkout_hands_gateway_its_own_payment_data() {
+		$seen_payment_data = array();
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function ( $context ) use ( &$seen_payment_data ) {
+				$seen_payment_data[] = $context->payment_data['token'] ?? null;
+			}
+		);
+
+		foreach ( array( 'first', 'second' ) as $token ) {
+			wc_empty_cart();
+			wc()->cart->add_to_cart( self::$product_ids[2], 1 );
+
+			$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+			$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+			$request->set_body_params(
+				array(
+					'billing_address' => (object) $this->get_fallback_billing_address(),
+					'payment_method'  => WC_Gateway_BACS::ID,
+					'payment_data'    => array(
+						array(
+							'key'   => 'token',
+							'value' => $token,
+						),
+					),
+				)
+			);
+			$response = rest_get_server()->dispatch( $request );
+			$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		}
+
+		$this->assertSame( array( 'first', 'second' ), $seen_payment_data );
+	}
+
+	/**
+	 * @testdox Checkouts in one batch request each work on their own order.
+	 */
+	public function test_batch_checkouts_use_their_own_orders() {
+		$fixtures     = new FixtureData();
+		$free_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Free Test Product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 0,
+				'virtual'       => true,
+			)
+		);
+
+		wc_empty_cart();
+
+		$nonce        = wp_create_nonce( 'wc_store_api' );
+		$good_address = (object) $this->get_fallback_billing_address();
+		$bad_address  = $this->get_fallback_billing_address();
+		unset( $bad_address['last_name'] );
+		$bad_address = (object) array_merge( $bad_address, array( 'last_name' => '' ) );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/batch' );
+		$request->set_header( 'Nonce', $nonce );
+		$request->set_body_params(
+			array(
+				'requests' => array(
+					array(
+						'method'  => 'POST',
+						'path'    => '/wc/store/v1/cart/add-item',
+						'headers' => array( 'Nonce' => $nonce ),
+						'body'    => array(
+							'id'       => $free_product->get_id(),
+							'quantity' => 1,
+						),
+					),
+					array(
+						'method'  => 'POST',
+						'path'    => '/wc/store/v1/checkout',
+						'headers' => array( 'Nonce' => $nonce ),
+						'body'    => array( 'billing_address' => $good_address ),
+					),
+					array(
+						'method'  => 'POST',
+						'path'    => '/wc/store/v1/cart/add-item',
+						'headers' => array( 'Nonce' => $nonce ),
+						'body'    => array(
+							'id'       => self::$product_ids[2],
+							'quantity' => 5,
+						),
+					),
+					array(
+						'method'  => 'POST',
+						'path'    => '/wc/store/v1/checkout',
+						'headers' => array( 'Nonce' => $nonce ),
+						'body'    => array( 'billing_address' => $bad_address ),
+					),
+				),
+			)
+		);
+
+		$responses = rest_get_server()->dispatch( $request )->get_data()['responses'];
+
+		// The first checkout completes; the second is rejected.
+		$this->assertSame( 200, $responses[1]['status'], print_r( $responses[1]['body'], true ) );
+		$first_order_id = $responses[1]['body']['order_id'];
+		$this->assertSame( 400, $responses[3]['status'], print_r( $responses[3]['body'], true ) );
+
+		$first_order = wc_get_order( $first_order_id );
+		$this->assertTrue( $first_order->is_paid() );
+		$this->assertSame( 0.0, (float) $first_order->get_total() );
+		$this->assertCount( 1, $first_order->get_items() );
+	}
+
+	/**
+	 * @testdox A failed checkout request leaves other orders' reserved stock alone.
+	 */
+	public function test_failed_checkout_request_keeps_other_orders_reserved_stock() {
+		update_option( 'woocommerce_hold_stock_minutes', '60' );
+
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Reserved Stock Product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 10,
+			)
+		);
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 100 );
+		$product->save();
+
+		// First request: a pending order that holds reserved stock.
+		wc_empty_cart();
+		wc()->cart->add_to_cart( $product->get_id(), 3 );
+
+		$order = new \WC_Order();
+		$order->add_product( $product, 3 );
+		$order->set_status( OrderStatus::PENDING );
+		$order->set_cart_hash( wc()->cart->get_cart_hash() );
+		$order->calculate_totals();
+		$order->save();
+		wc_reserve_stock_for_order( $order );
+		wc()->session->set( 'store_api_draft_order', $order->get_id() );
+
+		$reserve = new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock();
+		$this->assertSame( 3, $reserve->get_reserved_stock( $product, 0 ), 'Setup: the order should hold 3 reserved units.' );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$this->assertSame( 200, rest_get_server()->dispatch( $request )->get_status() );
+
+		// Second request on the same route instance fails early.
+		wc_empty_cart();
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( array( 'billing_address' => (object) $this->get_fallback_billing_address() ) );
+		$this->assertSame( 'woocommerce_rest_cart_empty', rest_get_server()->dispatch( $request )->get_data()['code'] );
+
+		// The first order still holds its reserved stock.
+		$this->assertSame( 3, $reserve->get_reserved_stock( $product, 0 ) );
+	}
+
+	/**
 	 * Billing address used by the shipping address fallback tests.
 	 *
 	 * @return array
@@ -3407,4 +3609,708 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );
 		$this->assertSame( 'woocommerce_rest_unknown_server_error', $response->get_data()['code'] );
 	}
+<<<<<<< HEAD
+=======
+
+	/**
+	 * Adds a payment participant that takes payment and then throws, simulating a
+	 * post-payment integration (transactional email, CRM, fulfilment) failing after
+	 * the money has already changed hands.
+	 *
+	 * Priority 998 runs before Legacy::process_legacy_payment (999), so the cart is
+	 * left populated exactly as it is when a gateway dies part-way through.
+	 */
+	private function fail_after_payment_is_taken(): void {
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function ( $context ) {
+				$context->order->payment_complete();
+				throw new \Exception( 'Transactional email integration failed.' );
+			},
+			998
+		);
+	}
+
+	/**
+	 * Re-registers the checkout route so the next dispatch behaves like a separate
+	 * HTTP request. Without this the route object, and the order it is holding, is
+	 * carried over from the previous dispatch.
+	 */
+	private function simulate_fresh_request(): void {
+		$schema_controller = new SchemaController( $this->mock_extend );
+		$route             = new CheckoutRoute( $schema_controller, $schema_controller->get( 'checkout' ) );
+		register_rest_route( $route->get_namespace(), $route->get_path(), $route->get_args(), true );
+	}
+
+	/**
+	 * Builds a valid place-order request for the seeded cart.
+	 */
+	private function build_checkout_post_request(): \WP_REST_Request {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		return $request;
+	}
+
+	/**
+	 * @testdox A failure raised after the gateway took payment is not reported to the shopper as a failed order.
+	 */
+	public function test_failure_after_payment_is_taken_is_not_reported_as_a_failed_order() {
+		$this->fail_after_payment_is_taken();
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$data     = $response->get_data();
+
+		$this->assertEquals(
+			200,
+			$response->get_status(),
+			'A failure after payment was taken must not be reported as a failed checkout: ' . print_r( $data, true )
+		);
+
+		// A 200 on its own proves little: the route returns one whenever process_payment() does not
+		// throw, so the payload is what shows the shopper was actually sent to their order.
+		$this->assertArrayHasKey( 'payment_result', $data );
+		$this->assertSame( 'success', $data['payment_result']['payment_status'], 'Recovery must report the payment as successful.' );
+		$this->assertSame(
+			wc_get_order( $data['order_id'] )->get_checkout_order_received_url(),
+			$data['payment_result']['redirect_url'],
+			'Recovery must redirect the shopper to the order they just paid for.'
+		);
+	}
+
+	/**
+	 * @testdox A single attempt that fails after payment leaves one order, and the shopper is sent to it.
+	 */
+	public function test_failure_after_payment_is_taken_leaves_the_order_paid() {
+		$this->fail_after_payment_is_taken();
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$orders = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+			)
+		);
+		$this->assertCount( 1, $orders, 'Exactly one order should exist after a single place-order attempt.' );
+		$this->assertFalse( $orders[0]->needs_payment(), 'The order took payment, so it must not be left awaiting payment.' );
+
+		// The helper pays the order itself, so the assertion above holds with or without recovery.
+		// Tying the response to that same order is what shows recovery ran.
+		$this->assertSame(
+			$orders[0]->get_id(),
+			$response->get_data()['order_id'],
+			'The shopper must be sent to the order that took payment, not told to place another.'
+		);
+	}
+
+	/**
+	 * @testdox Retrying after a failure raised post-payment does not place a duplicate paid order.
+	 */
+	public function test_retry_after_failure_post_payment_does_not_duplicate_the_order() {
+		$this->fail_after_payment_is_taken();
+
+		rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$order_ids_after_first_attempt = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+				'return' => 'ids',
+			)
+		);
+
+		$this->simulate_fresh_request();
+		rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$order_ids_after_retry = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame(
+			$order_ids_after_first_attempt,
+			$order_ids_after_retry,
+			'Retrying after a post-payment failure must not create a second paid order.'
+		);
+	}
+
+	/**
+	 * @testdox Retrying after the request died between payment_complete() and the cart being emptied does not place a second paid order.
+	 */
+	public function test_retry_after_the_request_died_post_payment_does_not_duplicate_the_order() {
+		// PHPUnit cannot survive a real exit, so arrange the state one leaves behind: the first
+		// POST stops before payment, as an exit inside the transition would stop before the
+		// catch, and the gateway's payment_complete() is then run on the order directly.
+		$stop_before_payment = function () {
+			throw new \Automattic\WooCommerce\StoreApi\Exceptions\RouteException(
+				'woocommerce_rest_checkout_payment_failed',
+				'Stands in for the request dying after payment_complete()',
+				400
+			);
+		};
+		add_action( 'woocommerce_store_api_checkout_order_processed', $stop_before_payment, 999 );
+
+		try {
+			rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		} finally {
+			remove_action( 'woocommerce_store_api_checkout_order_processed', $stop_before_payment, 999 );
+		}
+
+		$first_order_id = (int) WC()->session->get( 'store_api_draft_order' );
+		$this->assertGreaterThan( 0, $first_order_id, 'The session should point at the order the first attempt created.' );
+
+		$first_order = wc_get_order( $first_order_id );
+		$first_order->payment_complete( 'txn_died_after_payment' );
+
+		$this->assertFalse( wc_get_order( $first_order_id )->needs_payment(), 'The gateway took payment before the request died.' );
+		$this->assertFalse( WC()->cart->is_empty(), 'The request died before anything emptied the cart.' );
+		$this->assertSame( $first_order_id, (int) WC()->session->get( 'store_api_draft_order' ), 'payment_complete() leaves the Store API pointer in place.' );
+
+		$this->simulate_fresh_request();
+		$retry = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$order_ids_after_retry = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame(
+			array( $first_order_id ),
+			$order_ids_after_retry,
+			'Retrying after the request died post-payment must not create a second paid order. Retry answered: ' . print_r( $retry->get_data(), true )
+		);
+		$this->assertSame( $first_order_id, $retry->get_data()['order_id'], 'The retry should answer with the order that was already paid.' );
+		$this->assertSame( 'success', $retry->get_data()['payment_result']['payment_status'] );
+		$this->assertSame( wc_get_order( $first_order_id )->get_checkout_order_received_url(), $retry->get_data()['payment_result']['redirect_url'], 'The shopper should be sent to the order received page of the paid order.' );
+	}
+
+	/**
+	 * @testdox Retrying after the request died post-payment is answered with the paid order, not a stock error, when that order took the last unit.
+	 */
+	public function test_retry_after_the_paid_order_took_the_last_unit_is_answered_with_that_order() {
+		// Its own product rather than a class fixture, so enabling stock management here cannot
+		// leak into the other tests in this class.
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 1 );
+		$product->set_backorders( 'no' );
+		$product->save();
+		update_option( 'woocommerce_manage_stock', 'yes' );
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Same arrangement as the test above: the first POST stops before payment, then the gateway's
+		// payment_complete() runs on the order directly, which takes the last unit.
+		$stop_before_payment = function () {
+			throw new \Automattic\WooCommerce\StoreApi\Exceptions\RouteException(
+				'woocommerce_rest_checkout_payment_failed',
+				'Stands in for the request dying after payment_complete()',
+				400
+			);
+		};
+		add_action( 'woocommerce_store_api_checkout_order_processed', $stop_before_payment, 999 );
+
+		try {
+			rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		} finally {
+			remove_action( 'woocommerce_store_api_checkout_order_processed', $stop_before_payment, 999 );
+		}
+
+		$first_order_id = (int) WC()->session->get( 'store_api_draft_order' );
+		wc_get_order( $first_order_id )->payment_complete( 'txn_took_the_last_unit' );
+		$this->assertSame( 0, wc_get_product( $product->get_id() )->get_stock_quantity(), 'The paid order took the last unit.' );
+
+		// The retry is a new request, so its cart holds the product as it is now: out of stock.
+		$this->simulate_fresh_request();
+		WC()->cart->get_cart_from_session();
+		$retry = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$this->assertEquals( 200, $retry->get_status(), 'The shopper should be sent to the order, not told the product sold out: ' . print_r( $retry->get_data(), true ) );
+		$this->assertSame( $first_order_id, $retry->get_data()['order_id'], 'The retry should answer with the order that took the last unit.' );
+		$this->assertSame( 'success', $retry->get_data()['payment_result']['payment_status'] );
+	}
+
+	/**
+	 * @testdox A recovered checkout empties the cart the gateway never got to.
+	 */
+	public function test_recovered_checkout_empties_the_cart() {
+		$this->fail_after_payment_is_taken();
+
+		rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$this->assertTrue( WC()->cart->is_empty(), 'Recovery should leave the shopper with an empty cart, as a successful checkout does.' );
+	}
+
+	/**
+	 * @testdox A recovered checkout leaves a cart that no longer belongs to the order alone.
+	 */
+	public function test_recovered_checkout_keeps_a_cart_that_no_longer_matches_the_order() {
+		// Pay-for-order runs through the same trait with a cart unrelated to the order, and a
+		// shopper checking out in a second tab has moved the cart on. Model that by changing the
+		// cart after the order was built from it, so the hashes no longer agree.
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function ( $context ) {
+				$context->order->payment_complete();
+				WC()->cart->add_to_cart( $this->products[0]->get_id(), 1 );
+				throw new \Exception( 'Transactional email integration failed.' );
+			},
+			998
+		);
+
+		rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$this->assertFalse( WC()->cart->is_empty(), 'A cart that no longer matches the order must survive recovery.' );
+	}
+
+	/**
+	 * @testdox A failure raised after the gateway has run is recovered too.
+	 */
+	public function test_failure_raised_after_the_gateway_ran_is_recovered() {
+		// Priority 1000 runs after Legacy::process_legacy_payment (999), so BACS has really
+		// processed the payment and moved the order on before this throws.
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function () {
+				throw new \Exception( 'Transactional email integration failed.' );
+			},
+			1000
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$this->assertEquals(
+			200,
+			$response->get_status(),
+			'A failure after the gateway ran must not be reported as a failed checkout: ' . print_r( $response->get_data(), true )
+		);
+
+		$orders = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+			)
+		);
+		$this->assertCount( 1, $orders, 'Exactly one order should exist.' );
+		$this->assertFalse( $orders[0]->needs_payment(), 'BACS moved the order on, so it must not be left awaiting payment.' );
+	}
+
+	/**
+	 * @testdox A recovered checkout records what went wrong on the order.
+	 */
+	public function test_recovered_checkout_records_the_failure_on_the_order() {
+		$this->fail_after_payment_is_taken();
+
+		rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$orders = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+			)
+		);
+		$notes  = wc_get_order_notes( array( 'order_id' => $orders[0]->get_id() ) );
+		$notes  = wp_list_pluck( $notes, 'content' );
+
+		$this->assertNotEmpty(
+			array_filter(
+				$notes,
+				function ( $note ) {
+					return false !== strpos( $note, 'Transactional email integration failed.' );
+				}
+			),
+			'The merchant needs a trace of the failure on the order, since the shopper was told the checkout succeeded. Notes: ' . print_r( $notes, true )
+		);
+	}
+
+	/**
+	 * Failures an extension can raise while the order is still a draft.
+	 *
+	 * @return array<string, array{\Throwable}>
+	 */
+	public function provider_draft_order_failures() {
+		return array(
+			'ordinary exception' => array( new \Exception( 'Extension failed while the order was still a draft.' ) ),
+			'engine error'       => array( new \TypeError( 'Extension raised an engine error while the order was still a draft.' ) ),
+		);
+	}
+
+	/**
+	 * @testdox A failure while the order is still a draft releases the stock it had reserved: $_dataName.
+	 * @dataProvider provider_draft_order_failures
+	 *
+	 * @param \Throwable $failure The failure raised while the order is still a draft.
+	 */
+	public function test_failure_before_the_order_leaves_draft_releases_held_stock( \Throwable $failure ) {
+		// Its own product rather than a class fixture, so enabling stock management here cannot
+		// leak into the other tests in this class.
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 10 );
+		$product->set_backorders( 'no' );
+		$product->save();
+
+		update_option( 'woocommerce_manage_stock', 'yes' );
+		update_option( 'woocommerce_hold_stock_minutes', 60 );
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 2 );
+
+		// The only extension hooks between wc_reserve_stock_for_order() and update_status( 'pending' )
+		// are deprecated ones, and that window is exactly what this test covers, so the notice is
+		// expected rather than a signal to hook something else.
+		$this->setExpectedDeprecated( 'woocommerce_blocks_checkout_order_processed' );
+
+		// Fires while the order is still checkout-draft and holding stock.
+		$state_at_failure = null;
+		add_action(
+			'woocommerce_blocks_checkout_order_processed',
+			function () use ( &$state_at_failure, $product, $failure ) {
+				$draft_ids = wc_get_orders(
+					array(
+						'limit'  => 1,
+						'status' => 'checkout-draft',
+						'return' => 'ids',
+					)
+				);
+
+				$state_at_failure = array(
+					'held'   => (int) wc_get_held_stock_quantity( wc_get_product( $product->get_id() ) ),
+					'status' => $draft_ids ? wc_get_order( $draft_ids[0] )->get_status() : 'none',
+				);
+				throw $failure;
+			}
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$this->assertEquals( 500, $response->get_status(), 'The checkout should still be reported as failed: ' . print_r( $response->get_data(), true ) );
+
+		// Without these the test could pass for the wrong reason: no hold placed, or the order
+		// already past checkout-draft by the time the failure lands.
+		$this->assertSame( 2, $state_at_failure['held'], 'The order must actually be holding stock when the failure happens, or this test proves nothing.' );
+		$this->assertSame( 'checkout-draft', $state_at_failure['status'], 'The failure must land while the order is still a draft, which is the window this test covers.' );
+
+		$this->assertSame(
+			0,
+			(int) wc_get_held_stock_quantity( wc_get_product( $product->get_id() ) ),
+			'A draft order that never took payment must not keep its stock hold when the checkout fails.'
+		);
+	}
+
+	/**
+	 * @testdox An Error raised before any payment was taken is reported as a failed checkout.
+	 */
+	public function test_error_raised_before_payment_is_not_converted_into_a_successful_checkout() {
+		// No payment_complete() here: the order is still awaiting payment when this lands, so the
+		// recovery path must not claim it, and the Error must reach the client as a failure.
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function () {
+				// Raises Error: call to a member function on null.
+				$integration = null;
+				$integration->push_order();
+			},
+			998
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$this->assertSame( 500, $response->get_status(), 'An Error with no payment taken must be reported as a failed checkout: ' . print_r( $response->get_data(), true ) );
+		$this->assertSame( 'woocommerce_rest_unknown_server_error', $response->get_data()['code'] );
+
+		$orders = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+			)
+		);
+		$this->assertCount( 1, $orders, 'Exactly one order should exist.' );
+		$this->assertTrue( $orders[0]->has_status( OrderStatus::PENDING ), 'The order never took payment, so it must be left awaiting payment.' );
+	}
+
+	/**
+	 * @testdox An Error raised inside a status transition after the gateway moved the order on is recovered.
+	 */
+	public function test_error_raised_inside_a_status_transition_after_the_gateway_ran_is_recovered() {
+		// Core catches Exception, not Error, around status-transition hooks, so an integration
+		// dying there is the failure that escapes the gateway and reaches the route. BACS moves
+		// the order on-hold before it empties the cart, so this lands between the two, as the
+		// report did. This is the test that fails if the catch narrows back to \Exception.
+		add_action(
+			'woocommerce_order_status_on-hold',
+			function () {
+				// Raises Error: call to a member function on null.
+				$integration = null;
+				$integration->push_order();
+			}
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status(), 'An Error after the gateway moved the order on must be recovered, not surfaced: ' . print_r( $data, true ) );
+		$this->assertSame( 'success', $data['payment_result']['payment_status'], 'Recovery must report the payment as successful.' );
+
+		$order = wc_get_order( $data['order_id'] );
+		$this->assertTrue( $order->has_status( OrderStatus::ON_HOLD ), 'The gateway had already moved the order on when the Error was raised.' );
+		$this->assertTrue( WC()->cart->is_empty(), 'The gateway never reached empty_cart(), so recovery must empty the cart.' );
+
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), 'content' );
+		$this->assertNotEmpty(
+			array_filter(
+				$notes,
+				function ( $note ) {
+					return false !== strpos( $note, 'push_order() on null' );
+				}
+			),
+			'The Error must be recorded on the order. Notes: ' . print_r( $notes, true )
+		);
+	}
+
+	/**
+	 * @testdox A failure while the order sits in a custom status the site declares payable is reported, not recovered.
+	 */
+	public function test_failure_in_a_custom_payable_status_is_not_recovered() {
+		// Short on purpose: the status column holds twenty characters, prefix included.
+		$status_name = 'awaiting_review';
+		$this->register_custom_order_status( $status_name, true );
+
+		// A gateway that parks the order in the custom status and then declines. No payment was
+		// taken, so the status must read as awaiting payment rather than as moved past it.
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function ( $context ) use ( $status_name ) {
+				$context->order->update_status( $status_name );
+				throw new \Exception( 'Your card was declined.' );
+			},
+			998
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$this->assertEquals( 400, $response->get_status(), 'A decline while the order is awaiting payment must be reported: ' . print_r( $response->get_data(), true ) );
+		$this->assertSame( 'woocommerce_rest_checkout_process_payment_error', $response->get_data()['code'] );
+		$this->assertFalse( WC()->cart->is_empty(), 'The cart must survive so the shopper can retry.' );
+	}
+
+	/**
+	 * Gateways read the redirect back out of payment_details on the client rather than out of
+	 * redirect_url, so a recovered result has to carry it in both. WooPayments reads
+	 * paymentDetails.redirect and calls String.match() on it, which throws on undefined and
+	 * strands the shopper on the checkout with a JavaScript error even though the recovery
+	 * itself succeeded.
+	 */
+	public function test_recovery_reports_the_redirect_in_the_payment_details() {
+		$this->fail_after_payment_is_taken();
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $data, true ) );
+		$this->assertSame( 'success', $data['payment_result']['payment_status'] );
+
+		$details = wp_list_pluck( $data['payment_result']['payment_details'], 'value', 'key' );
+
+		$this->assertArrayHasKey(
+			'redirect',
+			$details,
+			'A success result without a redirect in payment_details breaks gateway client code that reads it from there.'
+		);
+		$this->assertSame(
+			$data['payment_result']['redirect_url'],
+			$details['redirect'],
+			'The redirect reported in payment_details must match the one in redirect_url.'
+		);
+	}
+
+	/**
+	 * A redirect the gateway set before failing is kept in payment_details too, rather than
+	 * being replaced with the order confirmation.
+	 */
+	public function test_recovery_reports_a_gateway_set_redirect_in_the_payment_details() {
+		$gateway_redirect = 'https://example.com/3ds-challenge';
+
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function ( $context, &$payment_result ) use ( $gateway_redirect ) {
+				$context->order->update_status( OrderStatus::ON_HOLD );
+				$payment_result->set_redirect_url( $gateway_redirect );
+				throw new \Exception( 'Gateway failed after parking the order for authentication.' );
+			},
+			998,
+			2
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$data     = $response->get_data();
+		$details  = wp_list_pluck( $data['payment_result']['payment_details'], 'value', 'key' );
+
+		$this->assertSame( $gateway_redirect, $details['redirect'] );
+	}
+
+	/**
+	 * @testdox Recovery keeps a redirect the gateway set before it failed.
+	 */
+	public function test_recovery_keeps_a_redirect_the_gateway_already_set() {
+		$gateway_redirect = 'https://example.com/3ds-challenge';
+
+		// Parks the order on-hold with an authentication step still outstanding, sets the redirect
+		// that step needs, then fails. The shopper still has to complete the challenge.
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function ( $context, &$payment_result ) use ( $gateway_redirect ) {
+				$context->order->update_status( OrderStatus::ON_HOLD );
+				$payment_result->set_redirect_url( $gateway_redirect );
+				throw new \Exception( 'Gateway failed after parking the order for authentication.' );
+			},
+			998,
+			2
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status(), 'The order moved past awaiting payment, so the checkout is recovered: ' . print_r( $data, true ) );
+		$this->assertSame( 'success', $data['payment_result']['payment_status'] );
+		$this->assertSame(
+			$gateway_redirect,
+			$data['payment_result']['redirect_url'],
+			'Overwriting the gateway redirect would walk the shopper past the step it was pointing at.'
+		);
+	}
+
+	/**
+	 * @testdox A failure on a fully discounted order still releases its stock and coupon holds.
+	 */
+	public function test_failure_on_a_zero_total_order_releases_held_stock_and_coupons() {
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '10' );
+		$product->set_virtual( true );
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 10 );
+		$product->set_backorders( 'no' );
+		$product->save();
+
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'zero_total_coupon' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 100 );
+		$coupon->set_usage_limit( 1 );
+		$coupon->save();
+
+		update_option( 'woocommerce_manage_stock', 'yes' );
+		update_option( 'woocommerce_hold_stock_minutes', 60 );
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 2 );
+		WC()->cart->apply_coupon( 'zero_total_coupon' );
+
+		$state_at_failure = null;
+		add_action(
+			'woocommerce_store_api_checkout_order_processed',
+			function ( $order ) use ( &$state_at_failure, $product ) {
+				$state_at_failure = array(
+					'total'  => (float) $order->get_total(),
+					'status' => $order->get_status(),
+					'held'   => (int) wc_get_held_stock_quantity( wc_get_product( $product->get_id() ) ),
+					'coupon' => $order->get_meta( '_coupon_held_keys' ),
+				);
+				throw new \Exception( 'Extension failed on a fully discounted order.' );
+			}
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$this->assertEquals( 500, $response->get_status(), 'The checkout should be reported as failed: ' . print_r( $response->get_data(), true ) );
+
+		// Preconditions: without these the release assertions could pass for the wrong reason.
+		$this->assertSame( 0.0, $state_at_failure['total'], 'The coupon must take the order to a zero total, which is the case this test covers.' );
+		$this->assertSame( 2, $state_at_failure['held'], 'The order must actually be holding stock when the failure happens.' );
+		$this->assertNotEmpty( $state_at_failure['coupon'], 'The order must actually be holding the coupon when the failure happens.' );
+
+		$this->assertSame(
+			0,
+			(int) wc_get_held_stock_quantity( wc_get_product( $product->get_id() ) ),
+			'A zero-total order that never took payment must not keep its stock hold when the checkout fails.'
+		);
+
+		$orders = wc_get_orders(
+			array(
+				'limit'  => 1,
+				'status' => 'pending',
+				'return' => 'ids',
+			)
+		);
+		$this->assertNotEmpty( $orders, 'The failed order should still exist to inspect.' );
+		$this->assertEmpty(
+			wc_get_order( $orders[0] )->get_meta( '_coupon_held_keys' ),
+			'A zero-total order that never took payment must release its coupon hold, or the shopper cannot retry with the same coupon.'
+		);
+	}
+
+	/**
+	 * @testdox Recovery survives a gateway that replaces the payment result with an invalid value.
+	 */
+	public function test_recovery_handles_a_gateway_that_discards_the_payment_result() {
+		// Takes payment, then hands back something that is not a PaymentResult. The route rejects
+		// the result, and recovery has to cope with the replacement rather than fatal on it.
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function ( $context, &$payment_result ) {
+				$context->order->payment_complete();
+				$payment_result = null;
+			},
+			998,
+			2
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		$data     = $response->get_data();
+
+		$this->assertEquals(
+			200,
+			$response->get_status(),
+			'A discarded payment result must not turn a paid order into a fatal: ' . print_r( $data, true )
+		);
+		$this->assertArrayHasKey( 'payment_result', $data );
+		$this->assertSame( 'success', $data['payment_result']['payment_status'], 'Recovery must still report success on the result the response uses.' );
+	}
+>>>>>>> 7d708435e0 (Reset Store API checkout request state between requests (#70625))
 }
