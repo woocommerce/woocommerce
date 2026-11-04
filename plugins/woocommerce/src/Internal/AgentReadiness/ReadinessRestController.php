@@ -159,7 +159,7 @@ class ReadinessRestController extends RestApiControllerBase {
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 * @return array{enabled:bool,status:string,failing_checks:array<int,string>}|\WP_Error
 	 */
-	protected function set_ucp_enabled( WP_REST_Request $request ): array|\WP_Error {
+	protected function set_ucp_enabled( WP_REST_Request $request ) {
 		$enable = (bool) $request->get_param( 'enabled' );
 		$result = $this->ucp_switch->set_enabled( $enable );
 		if ( $enable && ! $result['enabled'] ) {
