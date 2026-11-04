@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Require a logged-in admin browser session for the Jetpack connection endpoints used during onboarding.
