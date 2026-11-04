@@ -356,7 +356,8 @@ final class ImportSession {
 	 * The uploads directory itself holds media the cleanup must never touch, so the check
 	 * is against the import subdirectory only. A path whose file is already gone is
 	 * resolved through its directory, so the cleanup can still refuse it before deleting
-	 * an attachment that claims the same path.
+	 * an attachment that claims the same path. Both paths are canonicalized the same way,
+	 * so an uploads directory served by a stream wrapper (S3-backed sites) is checked too.
 	 *
 	 * @since 11.4.0
 	 *
@@ -369,12 +370,38 @@ final class ImportSession {
 		}
 
 		try {
-			$staging_dir = realpath( wc_get_container()->get( CSVUploadHelper::class )->get_import_dir( false ) );
+			$staging_dir = self::canonical_path( wc_get_container()->get( CSVUploadHelper::class )->get_import_dir( false ) );
 		} catch ( \Exception $e ) {
 			return false;
 		}
-		if ( false === $staging_dir ) {
+		$resolved = self::canonical_path( $path );
+		if ( null === $staging_dir || null === $resolved ) {
 			return false;
+		}
+
+		return 0 === strpos( $resolved, trailingslashit( $staging_dir ) );
+	}
+
+	/**
+	 * Canonical form of a path for the staged-path check.
+	 *
+	 * A local path goes through realpath(), so a symlink or a dot segment cannot make a path
+	 * outside wc-imports look like one inside it; a missing file is resolved through its
+	 * directory. realpath() returns false for a stream wrapper path (an uploads directory on
+	 * S3 reads "s3://bucket/uploads"), so that path is only normalized, and refused when it
+	 * contains a dot segment because nothing resolves one for a stream.
+	 *
+	 * @param string $path Absolute path or stream wrapper URL.
+	 * @return string|null Path with forward slashes, or null when it cannot be resolved.
+	 */
+	private static function canonical_path( string $path ): ?string {
+		if ( wp_is_stream( $path ) ) {
+			$normalized = wp_normalize_path( $path );
+			$segments   = explode( '/', substr( $normalized, strpos( $normalized, '://' ) + 3 ) );
+			if ( in_array( '.', $segments, true ) || in_array( '..', $segments, true ) ) {
+				return null;
+			}
+			return $normalized;
 		}
 
 		$resolved = realpath( $path );
@@ -382,12 +409,12 @@ final class ImportSession {
 			$name = wp_basename( $path );
 			$dir  = realpath( dirname( $path ) );
 			if ( false === $dir || '' === $name || '.' === $name || '..' === $name ) {
-				return false;
+				return null;
 			}
 			$resolved = trailingslashit( $dir ) . $name;
 		}
 
-		return 0 === strpos( wp_normalize_path( $resolved ), trailingslashit( wp_normalize_path( $staging_dir ) ) );
+		return wp_normalize_path( $resolved );
 	}
 
 	/**
