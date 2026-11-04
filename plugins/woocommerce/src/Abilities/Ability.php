@@ -44,6 +44,39 @@ class Ability extends \WP_Ability {
 	}
 
 	/**
+	 * Apply the schema default, validate and convert the input, then check the permissions.
+	 *
+	 * Callers such as the MCP adapter call this method directly with raw input. The
+	 * permission callback then gets the same input as through execute().
+	 *
+	 * Remove this override when WooCommerce requires a WordPress version that fixes
+	 * https://core.trac.wordpress.org/ticket/66482.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param mixed $input Optional. The raw input provided for the ability. Default `null`.
+	 * @return bool|\WP_Error Whether the ability has the necessary permission, or the input error.
+	 */
+	public function check_permissions( $input = null ) {
+		$input = $this->normalize_input( $input );
+		if ( is_wp_error( $input ) ) {
+			return $input;
+		}
+
+		$is_valid = $this->validate_input( $input );
+		if ( is_wp_error( $is_valid ) ) {
+			return $is_valid;
+		}
+
+		$input = $this->coerce_input( $input );
+		if ( is_wp_error( $input ) ) {
+			return $input;
+		}
+
+		return parent::check_permissions( $input );
+	}
+
+	/**
 	 * Convert validated input to the schema types, the same way WordPress 7.2 does.
 	 *
 	 * Converting can fail on input that validated, such as items that are unique

@@ -2685,6 +2685,17 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should check the permissions of a direct call with a numeric string id or no input, as the MCP adapter sends them.
+	 */
+	public function test_check_permissions_converts_raw_input(): void {
+		$order   = \WC_Helper_Order::create_order();
+		$ability = wp_get_ability( 'woocommerce/orders-query' );
+
+		$this->assertTrue( $ability->check_permissions( array( 'id' => (string) $order->get_id() ) ), 'A numeric string id is converted.' );
+		$this->assertTrue( $ability->check_permissions( null ), 'No input gets the schema default.' );
+	}
+
+	/**
 	 * @testdox Should read string false on the attribute flags of a product as false.
 	 */
 	public function test_product_create_reads_string_false_attribute_flags(): void {

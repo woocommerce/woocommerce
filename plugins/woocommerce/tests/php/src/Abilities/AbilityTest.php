@@ -141,6 +141,33 @@ class AbilityTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should pass converted input to the permission callback when check_permissions() is called directly.
+	 */
+	public function test_check_permissions_converts_the_input(): void {
+		$result = $this->get_ability()->check_permissions(
+			array(
+				'flag'  => 'false',
+				'count' => '5',
+			)
+		);
+
+		$this->assertTrue( $result );
+		$this->assertSame( false, $this->received['permission']['flag'] );
+		$this->assertSame( 5, $this->received['permission']['count'] );
+	}
+
+	/**
+	 * @testdox Should refuse invalid input in check_permissions() and not run the permission callback.
+	 */
+	public function test_check_permissions_refuses_invalid_input(): void {
+		$result = $this->get_ability()->check_permissions( array( 'flag' => 'maybe' ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+		$this->assertArrayNotHasKey( 'permission', $this->received );
+	}
+
+	/**
 	 * @testdox Should return input that is already converted unchanged.
 	 */
 	public function test_converting_twice_changes_nothing(): void {
