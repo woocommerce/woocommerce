@@ -7,7 +7,6 @@
 
 namespace Automattic\WooCommerce\Admin\API;
 
-use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use Automattic\WooCommerce\Admin\Features\MarketingRecommendations\Init as MarketingRecommendationsInit;
 
@@ -117,23 +116,13 @@ class Marketing extends \WC_REST_Data_Controller {
 	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_recommended_plugins( $request ) {
+		wc_deprecated_function( 'GET /wc-admin/marketing/recommended', '11.3.0', 'GET /wc-admin/marketing/recommendations' );
+
 		// Default to marketing category (if no category set).
-		$category      = ( ! empty( $request->get_param( 'category' ) ) ) ? $request->get_param( 'category' ) : 'marketing';
-		$all_plugins   = MarketingRecommendationsInit::get_recommended_plugins();
-		$valid_plugins = [];
-		$per_page      = $request->get_param( 'per_page' );
+		$category = ( ! empty( $request->get_param( 'category' ) ) ) ? $request->get_param( 'category' ) : 'marketing';
+		$plugins  = MarketingRecommendationsInit::get_uninstalled_recommended_plugins_in_category( $category );
 
-		foreach ( $all_plugins as $plugin ) {
-
-			// default to marketing if 'categories' is empty on the plugin object (support for legacy api while testing).
-			$plugin_categories = ( ! empty( $plugin['categories'] ) ) ? $plugin['categories'] : [ 'marketing' ];
-
-			if ( ! PluginsHelper::is_plugin_installed( $plugin['plugin'] ) && in_array( $category, $plugin_categories, true ) ) {
-				$valid_plugins[] = $plugin;
-			}
-		}
-
-		return rest_ensure_response( array_slice( $valid_plugins, 0, $per_page ) );
+		return rest_ensure_response( array_slice( $plugins, 0, $request->get_param( 'per_page' ) ) );
 	}
 
 	/**

@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features\MarketingRecommendations;
 
+use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\RemoteSpecs\RemoteSpecsEngine;
 
 defined( 'ABSPATH' ) || exit;
@@ -130,6 +131,29 @@ class Init extends RemoteSpecsEngine {
 		}
 
 		return $specs_to_return;
+	}
+
+	/**
+	 * Return recommended plugins in a category that are not installed yet.
+	 *
+	 * Plugins without categories count as "marketing".
+	 *
+	 * @since 11.3.0
+	 * @param string $category Category slug, such as "marketing" or "coupons".
+	 * @return array
+	 */
+	public static function get_uninstalled_recommended_plugins_in_category( string $category ): array {
+		$plugins = array();
+
+		foreach ( self::get_recommended_plugins() as $plugin ) {
+			$plugin_categories = ! empty( $plugin['categories'] ) ? $plugin['categories'] : array( 'marketing' );
+
+			if ( in_array( $category, $plugin_categories, true ) && ! PluginsHelper::is_plugin_installed( $plugin['plugin'] ) ) {
+				$plugins[] = $plugin;
+			}
+		}
+
+		return $plugins;
 	}
 
 	/**

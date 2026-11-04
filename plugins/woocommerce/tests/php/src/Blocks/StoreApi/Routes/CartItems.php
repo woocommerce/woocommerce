@@ -315,6 +315,55 @@ class CartItems extends ControllerTestCase {
 	}
 
 	/**
+	 * Updating an item through cart/items/{key} fires the same action as cart/update-item.
+	 */
+	public function test_update_item_fires_user_request_action() {
+		$calls    = array();
+		$callback = function ( $key, $quantity, $old_quantity ) use ( &$calls ) {
+			$calls[] = array( $key, $quantity, $old_quantity );
+		};
+		add_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback, 10, 3 );
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/store/v1/cart/items/' . $this->keys[0] );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( array( 'quantity' => '5' ) );
+		$response = rest_get_server()->dispatch( $request );
+
+		remove_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback, 10 );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( array( array( $this->keys[0], 5, 2 ) ), $calls );
+	}
+
+	/**
+	 * Adding an item through cart/items applies the same filter as cart/add-item.
+	 */
+	public function test_create_item_applies_add_to_cart_data_filter() {
+		wc_empty_cart();
+
+		$callback = function ( $data ) {
+			$data['quantity'] = 3;
+			return $data;
+		};
+		add_filter( 'woocommerce_store_api_add_to_cart_data', $callback );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/items' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id'       => $this->products[0]->get_id(),
+				'quantity' => '1',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+
+		remove_filter( 'woocommerce_store_api_add_to_cart_data', $callback );
+
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertEquals( 3, $response->get_data()['quantity'] );
+	}
+
+	/**
 	 * Test delete item.
 	 */
 	public function test_delete_item() {

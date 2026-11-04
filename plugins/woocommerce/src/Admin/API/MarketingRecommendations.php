@@ -55,7 +55,7 @@ class MarketingRecommendations extends WC_REST_Controller {
 							'type'              => 'string',
 							'validate_callback' => 'rest_validate_request_arg',
 							'sanitize_callback' => 'sanitize_title_with_dashes',
-							'enum'              => [ 'channels', 'extensions' ],
+							'enum'              => array( 'channels', 'extensions', 'marketing', 'coupons' ),
 							'required'          => true,
 						],
 					],
@@ -93,8 +93,10 @@ class MarketingRecommendations extends WC_REST_Controller {
 			$items = MarketingRecommendationsInit::get_recommended_marketing_channels();
 		} elseif ( 'extensions' === $category ) {
 			$items = MarketingRecommendationsInit::get_recommended_marketing_extensions_excluding_channels();
+		} elseif ( 'marketing' === $category || 'coupons' === $category ) {
+			$items = MarketingRecommendationsInit::get_uninstalled_recommended_plugins_in_category( $category );
 		} else {
-			return new WP_Error( 'woocommerce_rest_invalid_category', __( 'The specified category for recommendations is invalid. Allowed values: "channels", "extensions".', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_category', __( 'The specified category for recommendations is invalid. Allowed values: "channels", "extensions", "marketing", "coupons".', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$responses = [];

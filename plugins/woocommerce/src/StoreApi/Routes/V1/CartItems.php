@@ -104,13 +104,7 @@ class CartItems extends AbstractCartRoute {
 			throw new RouteException( 'woocommerce_rest_cart_item_exists', __( 'Cannot create an existing cart item.', 'woocommerce' ), 400 );
 		}
 
-		$result = $this->cart_controller->add_to_cart(
-			[
-				'id'        => $request['id'],
-				'quantity'  => $request['quantity'],
-				'variation' => $request['variation'],
-			]
-		);
+		$result = $this->cart_controller->add_to_cart_from_request( $request );
 
 		$response = rest_ensure_response( $this->prepare_item_for_response( $this->cart_controller->get_cart_item( $result ), $request ) );
 		$response->set_status( 201 );

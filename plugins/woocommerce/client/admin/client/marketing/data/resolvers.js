@@ -18,9 +18,10 @@ import { API_NAMESPACE } from './constants';
 
 export function* getRecommendedPlugins( category ) {
 	try {
-		const categoryParam = yield category ? `&category=${ category }` : '';
 		const response = yield apiFetch( {
-			path: `${ API_NAMESPACE }/recommended?per_page=50${ categoryParam }`,
+			path: `${ API_NAMESPACE }/recommendations?category=${
+				category || 'marketing'
+			}`,
 		} );
 
 		if ( response ) {
