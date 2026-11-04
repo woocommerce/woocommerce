@@ -830,6 +830,8 @@ trait ProductAbilityTrait {
 		);
 		$named = array();
 
+		_prime_post_caches( array_filter( array_map( static fn( $item ) => (int) ( $item['id'] ?? 0 ), $items ) ) );
+
 		foreach ( array_values( $items ) as $index => $item ) {
 			$position = $index + 1;
 			$id       = (int) ( $item['id'] ?? 0 );
@@ -945,7 +947,9 @@ trait ProductAbilityTrait {
 		$combinations = array();
 		$parent_sku   = $parent_product->get_sku( 'edit' );
 		$skus         = '' === $parent_sku ? array() : array( $parent_sku => true );
-		foreach ( $parent_product->get_id() > 0 ? self::read_variation_children( $parent_product, true )['all'] : array() as $child_id ) {
+		$child_ids    = $parent_product->get_id() > 0 ? self::read_variation_children( $parent_product, true )['all'] : array();
+		_prime_post_caches( $child_ids );
+		foreach ( $child_ids as $child_id ) {
 			$child = isset( $named[ $child_id ] ) ? null : wc_get_product( $child_id );
 			if ( $child instanceof \WC_Product_Variation ) {
 				$combinations[ self::get_variation_combination( $child ) ] = true;
