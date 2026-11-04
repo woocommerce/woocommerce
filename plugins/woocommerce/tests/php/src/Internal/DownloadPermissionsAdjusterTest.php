@@ -110,15 +110,19 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Does not check variations or schedule adjustment when the parent has no download files.
-	 * @testWith [false]
-	 *           [true]
-	 * @param bool $downloadable Whether a child is downloadable.
+	 * @testWith [false, false]
+	 *           [false, true]
+	 *           [true, false]
+	 *           [true, true]
+	 * @param bool $parent_downloadable Whether the parent is downloadable.
+	 * @param bool $child_downloadable Whether a child is downloadable.
 	 */
-	public function test_parent_without_downloads_does_not_check_children( bool $downloadable ): void {
+	public function test_parent_without_downloads_does_not_check_children( bool $parent_downloadable, bool $child_downloadable ): void {
 		$product = $this->create_downloadable_variation_product();
 		$product->set_downloads( array() );
-		$child = wc_get_product( current( $product->get_children() ) );
-		$child->set_downloadable( $downloadable );
+		$product->set_downloadable( $parent_downloadable );
+		$child = new \WC_Product_Variation( current( $product->get_children() ) );
+		$child->set_downloadable( $child_downloadable );
 		$child->save();
 		$checks = 0;
 		add_filter(
@@ -147,11 +151,15 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Uses filtered parent downloads when deciding whether to schedule adjustment.
+	 * @testWith [false]
+	 *           [true]
+	 * @param bool $downloadable Whether the parent is downloadable.
 	 */
-	public function test_filtered_parent_downloads_are_scheduled(): void {
+	public function test_filtered_parent_downloads_are_scheduled( bool $downloadable ): void {
 		$product   = $this->create_downloadable_variation_product();
 		$downloads = $product->get_downloads();
 		$product->set_downloads( array() );
+		$product->set_downloadable( $downloadable );
 		add_filter(
 			'woocommerce_product_get_downloads',
 			static function ( $files, $candidate ) use ( $product, $downloads ) {
