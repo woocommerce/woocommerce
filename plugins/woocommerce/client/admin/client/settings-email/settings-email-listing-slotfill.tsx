@@ -42,10 +42,10 @@ const ListView = lazy( () =>
 		isRTL()
 			? import(
 					/* webpackChunkName: "settings-email-listing-styles-rtl" */ './settings-email-listing-rtl.scss'
-			  )
+				)
 			: import(
 					/* webpackChunkName: "settings-email-listing-styles" */ './settings-email-listing.scss'
-			  ),
+				),
 	] )
 		.then( ( [ module ] ) => ( { default: module.ListView } ) )
 		.catch( ( error ) => {
@@ -71,9 +71,7 @@ export type EmailStatus = 'enabled' | 'disabled' | 'manual';
  * Public REST API contract — see RSM-140 spec § 4.3.
  */
 export type TemplateStatus =
-	| 'in_sync'
-	| 'core_updated_uncustomized'
-	| 'core_updated_customized';
+	'in_sync' | 'core_updated_uncustomized' | 'core_updated_customized';
 
 export type EmailType = {
 	title: string;
@@ -82,6 +80,12 @@ export type EmailType = {
 	email_key: string;
 	email_class_name: string;
 	post_id: string;
+	/**
+	 * False for emails not registered for the block editor (classic
+	 * `WC_Email`s without a block template). Those are configured on the
+	 * classic per-email settings section instead.
+	 */
+	block_editor_supported: boolean;
 	/** Null for emails not registered for the block editor. */
 	file_template_preview_url: string | null;
 	recipients: Recipients;
@@ -331,7 +335,7 @@ export const registerSettingsEmailListingFill = () => {
 		emailTypes = Array.isArray( parsed )
 			? parsed.map( ( item: Record< string, unknown > ) =>
 					normalizeEmailTypePayload( item )
-			  )
+				)
 			: [];
 	} catch ( e ) {}
 

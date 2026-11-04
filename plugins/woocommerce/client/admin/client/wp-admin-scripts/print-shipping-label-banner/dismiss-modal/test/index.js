@@ -27,7 +27,9 @@ describe( 'Option Save events in DismissModal', () => {
 			</Fragment>
 		);
 
-		userEvent.click( getByRole( 'button', { name: "I don't need this" } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: "I don't need this" } )
+		);
 
 		await waitFor( () =>
 			expect( spyUpdateOptions ).toHaveBeenCalledWith( {
@@ -55,7 +57,9 @@ describe( 'Option Save events in DismissModal', () => {
 			</Fragment>
 		);
 
-		userEvent.click( getByRole( 'button', { name: 'Remind me later' } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: 'Remind me later' } )
+		);
 
 		await waitFor( () =>
 			expect( spyUpdateOptions ).toHaveBeenCalledWith( {
@@ -85,7 +89,9 @@ describe( 'Tracking events in DismissModal', () => {
 			</Fragment>
 		);
 
-		userEvent.click( getByRole( 'button', { name: "I don't need this" } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: "I don't need this" } )
+		);
 
 		await waitFor( () =>
 			expect( trackElementClicked ).toHaveBeenCalledWith(
@@ -108,7 +114,9 @@ describe( 'Tracking events in DismissModal', () => {
 			</Fragment>
 		);
 
-		userEvent.click( getByRole( 'button', { name: 'Remind me later' } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: 'Remind me later' } )
+		);
 
 		await waitFor( () =>
 			expect( trackElementClicked ).toHaveBeenCalledWith(
@@ -136,7 +144,9 @@ describe( 'Dismissing modal', () => {
 			</Fragment>
 		);
 
-		userEvent.click( getByRole( 'button', { name: "I don't need this" } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: "I don't need this" } )
+		);
 
 		await waitFor( () =>
 			expect( getByTestId( 'print-label' ) ).not.toBeVisible()
@@ -160,7 +170,9 @@ describe( 'Dismissing modal', () => {
 			</Fragment>
 		);
 
-		userEvent.click( getByRole( 'button', { name: 'Remind me later' } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: 'Remind me later' } )
+		);
 
 		await waitFor( () =>
 			expect( getByTestId( 'print-label' ) ).not.toBeVisible()

@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { expect, request, tags } from '../../fixtures/fixtures';
+import { expect, request, tags, locks } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import {
 	BIS_EMAIL_ELEMENTS,
@@ -25,11 +25,15 @@ import {
 	triggerStockNotificationsBatch,
 	uniqueGuestEmail,
 } from '../../utils/back-in-stock-notifications';
+import { quotedPattern } from '../../utils/helpers';
 import { setOption } from '../../utils/options';
 
 test.describe(
 	'Back in Stock Notifications — variable products and variations',
-	{ tag: [ tags.SKIP_ON_EXTERNAL_ENV ] },
+	{
+		tag: [ tags.SKIP_ON_EXTERNAL_ENV ],
+		lock: [ locks.STOCK_NOTIFICATIONS, locks.EMAIL_FEATURE_FLAGS ],
+	},
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
@@ -127,11 +131,13 @@ test.describe(
 				await expect(
 					guestPage.getByText(
 						new RegExp(
-							`You have successfully signed up! You will be notified when "${ escapeRegExp(
-								variableProduct.name
-							) } [-–] ${ escapeRegExp(
-								outOfStockVariation.option
-							) }" is back in stock\\.`
+							`You have successfully signed up! You will be notified when ${ quotedPattern(
+								`${ escapeRegExp(
+									variableProduct.name
+								) } [-–] ${ escapeRegExp(
+									outOfStockVariation.option
+								) }`
+							) } is back in stock\\.`
 						)
 					)
 				).toBeVisible();

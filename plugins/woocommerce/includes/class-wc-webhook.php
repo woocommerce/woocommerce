@@ -13,6 +13,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\RestApiUtil;
@@ -193,6 +194,9 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			case 'delete_user':
 				$return = $this->is_valid_user_action( $arg );
 				break;
+			case 'before_delete_post':
+				$return = $this->is_valid_variation_delete_action( $arg );
+				break;
 		}
 
 		if ( 0 === strpos( $current_action, 'woocommerce_process_shop' ) || 0 === strpos( $current_action, 'woocommerce_process_product' ) ) {
@@ -226,6 +230,34 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		$post_type             = get_post_type( $post_id );
 
 		return isset( $post_type_to_resource[ $post_type ] ) && $post_type_to_resource[ $post_type ] === $this->get_resource();
+	}
+
+	/**
+	 * Validates permanent deletions for product webhooks: only variations, skipping those already reported.
+	 *
+	 * Trashing through wp_trash_post() fires `product.deleted` and records `_wp_trash_meta_status`,
+	 * so a variation trashed that way is not reported again when it is permanently deleted.
+	 *
+	 * @since  11.3.0
+	 * @param  mixed $arg First hook argument.
+	 * @return bool       True if validation passes.
+	 */
+	private function is_valid_variation_delete_action( $arg ) {
+		if ( 'product' !== $this->get_resource() ) {
+			return true;
+		}
+
+		if ( ! $this->is_valid_post_action( $arg ) ) {
+			return false;
+		}
+
+		$variation_id = absint( $arg );
+
+		if ( 'product_variation' !== get_post_type( $variation_id ) ) {
+			return false;
+		}
+
+		return ProductStatus::TRASH !== get_post_status( $variation_id ) || ! metadata_exists( 'post', $variation_id, '_wp_trash_meta_status' );
 	}
 
 	/**
@@ -300,8 +332,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 
 			$order = wc_get_order( absint( $arg ) );
 
-			// Ignore standard drafts for orders.
-			if ( in_array( $order->get_status(), array( OrderStatus::DRAFT, OrderStatus::AUTO_DRAFT, 'new' ), true ) ) {
+			// Ignore drafts for orders, matching the statuses for which the data stores skip woocommerce_new_order.
+			if ( in_array( $order->get_status(), array( OrderStatus::DRAFT, OrderStatus::AUTO_DRAFT, OrderStatus::CHECKOUT_DRAFT, OrderStatus::NEW ), true ) ) {
 				return false;
 			}
 		}
@@ -571,27 +603,37 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			);
 		}
 
-		// Track failures.
-		// Check for a success, which is a 2xx, 301 or 302 Response Code.
-		if ( intval( $response_code ) >= 200 && intval( $response_code ) < 303 ) {
-			$this->set_failure_count( 0 );
-
-			if ( 0 !== $this->get_id() ) {
-				$this->save();
+		$this->write_through(
+			function () use ( $response_code ) {
+				$this->stage_delivery_result( $response_code );
 			}
-		} else {
-			$this->failed_delivery();
+		);
+
+		if ( 0 !== $this->get_id() ) {
+			$this->save();
 		}
 	}
 
 	/**
-	 * Track consecutive delivery failures and automatically disable the webhook.
-	 * if more than 5 consecutive failures occur. A failure is defined as a.
-	 * non-2xx response.
+	 * Track the result of a delivery in memory. The next save() writes it. log_delivery() calls this method,
+	 * then save().
 	 *
-	 * @since 2.2.0
+	 * A success, which is a 2xx, 301 or 302 response code, resets the failure count. A failure adds one to
+	 * the failure count, and disables the webhook after more than 5 consecutive failures.
+	 *
+	 * @since 11.4.0
+	 * @param int|string $response_code Response code, or the error code of a failed request.
 	 */
-	private function failed_delivery() {
+	public function stage_delivery_result( $response_code ): void {
+		$this->refuse_unstaged_override( 'log_delivery', 'stage_delivery_result' );
+
+		if ( intval( $response_code ) >= 200 && intval( $response_code ) < 303 ) {
+			$this->set_failure_count( 0 );
+			// A successful delivery proves the delivery URL works, so it no longer needs a ping.
+			$this->set_pending_delivery( false );
+			return;
+		}
+
 		$failures = $this->get_failure_count();
 
 		if ( $failures > apply_filters( 'woocommerce_max_webhook_delivery_failures', 5 ) ) {
@@ -600,10 +642,6 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			do_action( 'woocommerce_webhook_disabled_due_delivery_failures', $this->get_id() );
 		} else {
 			$this->set_failure_count( ++$failures );
-		}
-
-		if ( 0 !== $this->get_id() ) {
-			$this->save();
 		}
 	}
 
@@ -639,9 +677,33 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * Send a test ping to the delivery URL, sent when the webhook is first created.
 	 *
 	 * @since  2.2.0
+	 * @uses   self::stage_delivery_ping()
 	 * @return bool|WP_Error
 	 */
 	public function deliver_ping() {
+		$result = $this->write_through(
+			function () {
+				return $this->stage_delivery_ping();
+			}
+		);
+
+		if ( true === $result ) {
+			$this->save();
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Send a test ping to the delivery URL and, when it succeeds, clear the pending delivery flag in memory.
+	 * The next save() writes it. deliver_ping() calls this method, then save().
+	 *
+	 * @since  11.4.0
+	 * @return bool|WP_Error True when the ping succeeded, an error otherwise.
+	 */
+	public function stage_delivery_ping() {
+		$this->refuse_unstaged_override( 'deliver_ping', 'stage_delivery_ping' );
+
 		$args = array(
 			'user-agent' => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', Constants::get_constant( 'WC_VERSION' ), $GLOBALS['wp_version'] ),
 			'body'       => 'webhook_id=' . $this->get_id(),
@@ -666,13 +728,12 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			return new WP_Error( 'error', sprintf( __( 'Error: Delivery URL cannot be reached: %s', 'woocommerce' ), $test->get_error_message() ) );
 		}
 
-		if ( 200 !== $response_code ) {
+		if ( $response_code < 200 || $response_code >= 300 ) {
 			/* translators: error message */
 			return new WP_Error( 'error', sprintf( __( 'Error: Delivery URL returned response code: %s', 'woocommerce' ), absint( $response_code ) ) );
 		}
 
 		$this->set_pending_delivery( false );
-		$this->save();
 
 		return true;
 	}
@@ -1023,6 +1084,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			'order.updated'     => array(
 				'woocommerce_update_order',
 				'woocommerce_order_refunded',
+				'woocommerce_order_refund_deleted',
 			),
 			'order.deleted'     => array(
 				'wp_trash_post',
@@ -1044,6 +1106,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			),
 			'product.deleted'   => array(
 				'wp_trash_post',
+				'before_delete_post',
 			),
 			'product.restored'  => array(
 				'untrashed_post',

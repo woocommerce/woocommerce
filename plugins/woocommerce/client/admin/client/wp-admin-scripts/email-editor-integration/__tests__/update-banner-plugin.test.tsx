@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 /**
  * Internal dependencies
@@ -68,7 +69,7 @@ describe( 'UpdateBannerPlugin', () => {
 
 		render( <UpdateBannerPlugin /> );
 
-		expect( target.querySelector( '.wc-update-banner' ) ).not.toBeNull();
+		expect( within( target ).getByRole( 'status' ) ).toBeInTheDocument();
 	} );
 
 	it( 'falls back to document.body when no canvas target is present', () => {
@@ -79,8 +80,31 @@ describe( 'UpdateBannerPlugin', () => {
 
 		render( <UpdateBannerPlugin /> );
 
-		expect(
-			document.body.querySelector( '.wc-update-banner' )
-		).not.toBeNull();
+		expect( screen.getByRole( 'status' ).parentElement ).toBe(
+			document.body
+		);
+	} );
+
+	it( 'wires the banner dismiss control to dismiss, not autoDismiss', async () => {
+		const dismiss = jest.fn();
+		const autoDismiss = jest.fn();
+		useUpdateBannerMock.mockReturnValue( {
+			...baseHookReturn,
+			shouldRender: true,
+			dismiss,
+			autoDismiss,
+		} );
+
+		render( <UpdateBannerPlugin /> );
+
+		await userEvent.click(
+			screen.getByRole( 'button', { name: 'Dismiss for this session' } )
+		);
+
+		// The two callbacks differ in one observable way: only `dismiss` reports
+		// the `_dismissed` Tracks event, so the × in the default banner has to
+		// reach `dismiss` and leave `autoDismiss` untouched.
+		expect( dismiss ).toHaveBeenCalledTimes( 1 );
+		expect( autoDismiss ).not.toHaveBeenCalled();
 	} );
 } );

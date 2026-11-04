@@ -75,7 +75,9 @@ export const SelectTreeMenu = ( {
 	}, [ isOpen, scrollIntoViewOnOpen ] );
 
 	const shouldItemBeExpanded = ( item: LinkedTree ): boolean => {
-		if ( ! props.createValue || ! item.children?.length ) return false;
+		if ( ! props.createValue || ! item.children?.length ) {
+			return false;
+		}
 		return item.children.some( ( child ) => {
 			if (
 				new RegExp(
@@ -89,7 +91,6 @@ export const SelectTreeMenu = ( {
 		} );
 	};
 
-	/* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
 	/* Disabled because of the onmouseup on the ul element below. */
 	return (
 		<div
@@ -154,5 +155,4 @@ export const SelectTreeMenu = ( {
 			</div>
 		</div>
 	);
-	/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
 };

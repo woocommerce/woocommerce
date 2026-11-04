@@ -28,6 +28,7 @@
 		"watch": "pnpm build --watch"
 	},
 	"dependencies": {
+		"@automattic/tracks-shared-utils": "^1.1.0",
 		"debug": "4.4.3"
 	},
 	"devDependencies": {
@@ -41,6 +42,7 @@
 		"@wordpress/dependency-extraction-webpack-plugin": "next",
 		"babel-loader": "9.2.x",
 		"jest": "29.5.x",
+		"jest-environment-jsdom": "29.5.x",
 		"typescript": "5.7.x",
 		"webpack": "catalog:tooling",
 		"webpack-cli": "5.1.x"
@@ -56,6 +58,20 @@
 						"composer.json",
 						"composer.lock",
 						"**/*.php"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				},
+				{
+					"name": "JavaScript",
+					"command": "test",
+					"changes": [
+						"babel.config.js",
+						"jest.config.js",
+						"package.json",
+						"src/client/**/*.ts"
 					],
 					"events": [
 						"pull_request",

@@ -504,6 +504,280 @@ class DataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Syncing an order splits the taxable amount into its order and shipping parts, and the reports expose both.
+	 */
+	public function test_sync_order_taxes_splits_taxable_amount(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id = $this->insert_tax_rate();
+		$order   = $this->create_taxed_de_order();
+
+		OrdersStatsDataStore::sync_order( $order->get_id() );
+		DataStore::sync_order_taxes( $order->get_id() );
+		ReportsCache::invalidate();
+
+		// 2 x 100 product + 10 fee on the order side, 5 shipping on the shipping side.
+		$lookup_row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT order_taxable_amount, shipping_taxable_amount FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id = %d AND tax_rate_id = %d",
+				$order->get_id(),
+				$rate_id
+			)
+		);
+		$this->assertSame( 210.0, (float) $lookup_row->order_taxable_amount, 'The order part should hold the net total of the line items and the fee.' );
+		$this->assertSame( 5.0, (float) $lookup_row->shipping_taxable_amount, 'The shipping part should hold the net shipping total.' );
+
+		$after  = gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS );
+		$before = gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS );
+
+		$taxes_data = ( new DataStore() )->get_data( $this->taxes_query( $after, $before, $rate_id ) );
+		$this->assertSame( 210.0, $taxes_data->data[0]['order_taxable_amount'], 'The Taxes report row should expose the order part.' );
+		$this->assertSame( 5.0, $taxes_data->data[0]['shipping_taxable_amount'], 'The Taxes report row should expose the shipping part.' );
+		$this->assertSame(
+			$taxes_data->data[0]['taxable_amount'],
+			$taxes_data->data[0]['order_taxable_amount'] + $taxes_data->data[0]['shipping_taxable_amount'],
+			'The parts should add up to the taxable amount.'
+		);
+	}
+
+	/**
+	 * @testdox A rate holding one row the rebuild has not reached reports no split at all, rather than the sum of the rows it has.
+	 */
+	public function test_report_hides_the_split_of_a_rate_holding_an_unrebuilt_row(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id = $this->insert_tax_rate();
+		$rebuilt = $this->create_taxed_de_order();
+		$unsplit = $this->create_taxed_de_order();
+
+		foreach ( array( $rebuilt, $unsplit ) as $order ) {
+			OrdersStatsDataStore::sync_order( $order->get_id() );
+			DataStore::sync_order_taxes( $order->get_id() );
+		}
+
+		// The shape a row carries until the rebuild reaches it: a base, with neither part of it.
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->prefix}wc_order_tax_lookup SET order_taxable_amount = NULL, shipping_taxable_amount = NULL WHERE order_id = %d",
+				$unsplit->get_id()
+			)
+		);
+		ReportsCache::invalidate();
+
+		$after  = gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS );
+		$before = gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS );
+		$row    = ( new DataStore() )->get_data( $this->taxes_query( $after, $before, $rate_id ) )->data[0];
+
+		$this->assertSame( 430.0, $row['taxable_amount'], 'The taxable amount is recorded on both rows, so it stays whole.' );
+		$this->assertArrayNotHasKey( 'order_taxable_amount', $row, 'The order part should be left out while a row of the rate holds no split.' );
+		$this->assertArrayNotHasKey( 'shipping_taxable_amount', $row, 'The shipping part should be left out while a row of the rate holds no split.' );
+	}
+
+	/**
+	 * @testdox A rate whose unrebuilt row has a base netting to zero reports no split, rather than two zero parts.
+	 */
+	public function test_report_hides_the_split_of_an_unrebuilt_row_netting_to_zero(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id = $this->insert_tax_rate();
+		$order   = $this->create_taxed_de_order();
+
+		OrdersStatsDataStore::sync_order( $order->get_id() );
+		DataStore::sync_order_taxes( $order->get_id() );
+
+		// A negative fee offsetting shipping at the same rate leaves a zero base before the split.
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->prefix}wc_order_tax_lookup SET taxable_amount = 0, order_taxable_amount = NULL, shipping_taxable_amount = NULL WHERE order_id = %d",
+				$order->get_id()
+			)
+		);
+		ReportsCache::invalidate();
+
+		$after  = gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS );
+		$before = gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS );
+		$row    = ( new DataStore() )->get_data( $this->taxes_query( $after, $before, $rate_id ) )->data[0];
+
+		$this->assertArrayNotHasKey( 'order_taxable_amount', $row, 'The order part should be left out while the row holds no split.' );
+		$this->assertArrayNotHasKey( 'shipping_taxable_amount', $row, 'The shipping part should be left out while the row holds no split.' );
+	}
+
+	/**
+	 * @testdox A zero-rated rate whose row the rebuild has not reached reports no split, which its tax cannot say.
+	 */
+	public function test_report_hides_the_split_of_an_unrebuilt_zero_rated_rate(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id = $this->insert_tax_rate( '0' );
+		$order   = $this->create_taxed_de_order();
+
+		OrdersStatsDataStore::sync_order( $order->get_id() );
+		DataStore::sync_order_taxes( $order->get_id() );
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->prefix}wc_order_tax_lookup SET order_taxable_amount = NULL, shipping_taxable_amount = NULL WHERE order_id = %d",
+				$order->get_id()
+			)
+		);
+		ReportsCache::invalidate();
+
+		$after  = gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS );
+		$before = gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS );
+		$row    = ( new DataStore() )->get_data( $this->taxes_query( $after, $before, $rate_id ) )->data[0];
+
+		$this->assertSame( 0.0, $row['total_tax'], 'The rate should charge no tax.' );
+		$this->assertSame( 215.0, $row['taxable_amount'], 'A zero-rated sale still records the base it was taxed on.' );
+		$this->assertArrayNotHasKey( 'order_taxable_amount', $row, 'The order part should be left out while the row holds no split.' );
+		$this->assertArrayNotHasKey( 'shipping_taxable_amount', $row, 'The shipping part should be left out while the row holds no split.' );
+	}
+
+	/**
+	 * @testdox A rate applied only to shipping records the whole base on the shipping side.
+	 */
+	public function test_sync_order_taxes_records_shipping_only_taxable_amount(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id = $this->insert_tax_rate();
+		$order   = $this->create_taxed_de_order();
+
+		// An admin save without recalculating stores '' for rates that never applied to the
+		// item, which is the shape a shipping-only rate leaves on the products and the fee.
+		foreach ( $order->get_items( array( OrderItemType::LINE_ITEM, OrderItemType::FEE ) ) as $item ) {
+			$taxes                      = $item->get_taxes();
+			$taxes['total'][ $rate_id ] = '';
+			if ( isset( $taxes['subtotal'] ) ) {
+				$taxes['subtotal'][ $rate_id ] = '';
+			}
+			$item->set_taxes( $taxes );
+			$item->save();
+		}
+		$order->update_taxes();
+		$order->save();
+
+		DataStore::sync_order_taxes( $order->get_id() );
+
+		$lookup_row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT order_taxable_amount, shipping_taxable_amount FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id = %d AND tax_rate_id = %d",
+				$order->get_id(),
+				$rate_id
+			)
+		);
+		$this->assertSame( 0.0, (float) $lookup_row->order_taxable_amount, 'A rate that applied to no line item or fee should record a zero order part.' );
+		$this->assertSame( 5.0, (float) $lookup_row->shipping_taxable_amount, 'The shipping part should still hold the net shipping total.' );
+	}
+
+	/**
+	 * @testdox Each part of a compound rate's base includes the taxes compounded over on that same side.
+	 */
+	public function test_sync_order_taxes_splits_compound_taxable_amount(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$base_rate_id     = $this->insert_tax_rate( '5', 1 );
+		$compound_rate_id = $this->insert_tax_rate( '7', 2, 1 );
+		$order            = $this->create_taxed_de_order();
+
+		DataStore::sync_order_taxes( $order->get_id() );
+
+		$amounts = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT tax_rate_id, order_taxable_amount, shipping_taxable_amount FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id = %d",
+				$order->get_id()
+			),
+			OBJECT_K
+		);
+
+		$this->assertSame( 210.0, (float) $amounts[ $base_rate_id ]->order_taxable_amount );
+		$this->assertSame( 5.0, (float) $amounts[ $base_rate_id ]->shipping_taxable_amount );
+
+		// The compound rate is applied on top of the 5% tax of each item, so the order part
+		// carries 210 + 10.50 and the shipping part 5 + 0.25.
+		$this->assertSame( 220.5, (float) $amounts[ $compound_rate_id ]->order_taxable_amount, 'The order part should compound over the order taxes only.' );
+		$this->assertSame( 5.25, (float) $amounts[ $compound_rate_id ]->shipping_taxable_amount, 'The shipping part should compound over the shipping taxes only.' );
+	}
+
+	/**
+	 * @testdox A fully refunded order nets both parts of the taxable amount back to zero.
+	 */
+	public function test_refunded_order_nets_taxable_amount_parts_to_zero(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id = $this->insert_tax_rate();
+		$order   = $this->create_taxed_de_order();
+		$refund  = $this->refund_order_in_full( $order );
+
+		DataStore::sync_order_taxes( $order->get_id() );
+		DataStore::sync_order_taxes( $refund->get_id() );
+
+		$sums = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT SUM(order_taxable_amount) AS order_part, SUM(shipping_taxable_amount) AS shipping_part FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id IN (%d, %d) AND tax_rate_id = %d",
+				$order->get_id(),
+				$refund->get_id(),
+				$rate_id
+			)
+		);
+		$this->assertSame( 0.0, (float) $sums->order_part, 'A full refund should net the order part back to zero.' );
+		$this->assertSame( 0.0, (float) $sums->shipping_part, 'A full refund should net the shipping part back to zero.' );
+	}
+
+	/**
+	 * @testdox While the split columns are missing, syncing still writes rows and the report still returns data.
+	 */
+	public function test_guards_apply_while_taxable_amount_split_columns_are_missing(): void {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$rate_id = $this->insert_tax_rate();
+		$order   = $this->create_taxed_de_order();
+
+		// Force the columns-missing code paths through the static:: seam instead of
+		// dropping the real columns, which would break test transaction isolation.
+		$sut       = new class() extends DataStore {
+			/**
+			 * Report the taxable amount split columns as missing.
+			 *
+			 * @return bool
+			 */
+			public static function has_taxable_amount_split_columns() {
+				return false;
+			}
+		};
+		$sut_class = get_class( $sut );
+
+		$sut_class::sync_order_taxes( $order->get_id() );
+		OrdersStatsDataStore::sync_order( $order->get_id() );
+		ReportsCache::invalidate();
+
+		$lookup_row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT total_tax, taxable_amount FROM {$wpdb->prefix}wc_order_tax_lookup WHERE order_id = %d AND tax_rate_id = %d",
+				$order->get_id(),
+				$rate_id
+			)
+		);
+		$this->assertNotNull( $lookup_row, 'The sync must still write lookup rows while the columns are missing.' );
+		$this->assertSame( 215.0, (float) $lookup_row->taxable_amount, 'The taxable amount must still be recorded.' );
+
+		$after  = gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS );
+		$before = gmdate( 'Y-m-d H:i:s', time() + DAY_IN_SECONDS );
+		$query  = $this->taxes_query( $after, $before, $rate_id );
+
+		$data = $sut->get_data( array_merge( $query, array( 'orderby' => 'order_taxable_amount' ) ) );
+		$this->assertCount( 1, $data->data, 'Ordering by a missing column must fall back instead of erroring into an empty report.' );
+		$this->assertArrayNotHasKey( 'order_taxable_amount', $data->data[0], 'The report must omit the columns it cannot select.' );
+		$this->assertArrayNotHasKey( 'shipping_taxable_amount', $data->data[0], 'The report must omit the columns it cannot select.' );
+	}
+
+	/**
 	 * @testdox Syncing an order records the taxable amount for a zero-rated tax rate.
 	 */
 	public function test_sync_order_taxes_records_taxable_amount_for_zero_rate(): void {

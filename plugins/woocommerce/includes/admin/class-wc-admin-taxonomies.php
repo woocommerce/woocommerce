@@ -122,6 +122,7 @@ class WC_Admin_Taxonomies {
 	 */
 	public function add_category_fields() {
 		?>
+		<?php if ( ! wp_is_block_theme() ) : ?>
 		<div class="form-field term-display-type-wrap">
 			<label for="display_type"><?php esc_html_e( 'Display type', 'woocommerce' ); ?></label>
 			<select id="display_type" name="display_type" class="postform">
@@ -131,6 +132,7 @@ class WC_Admin_Taxonomies {
 				<option value="both"><?php esc_html_e( 'Both', 'woocommerce' ); ?></option>
 			</select>
 		</div>
+		<?php endif; ?>
 		<div class="form-field term-thumbnail-wrap">
 			<label><?php esc_html_e( 'Thumbnail', 'woocommerce' ); ?></label>
 			<div id="product_cat_thumbnail" style="float: left; margin-right: 10px;"><img src="<?php echo esc_url( wc_placeholder_img_src() ); ?>" width="60px" height="60px" /></div>
@@ -229,6 +231,7 @@ class WC_Admin_Taxonomies {
 			$image = wc_placeholder_img_src();
 		}
 		?>
+		<?php if ( ! wp_is_block_theme() ) : ?>
 		<tr class="form-field term-display-type-wrap">
 			<th scope="row" valign="top"><label><?php esc_html_e( 'Display type', 'woocommerce' ); ?></label></th>
 			<td>
@@ -240,6 +243,7 @@ class WC_Admin_Taxonomies {
 				</select>
 			</td>
 		</tr>
+		<?php endif; ?>
 		<tr class="form-field term-thumbnail-wrap">
 			<th scope="row" valign="top"><label><?php esc_html_e( 'Thumbnail', 'woocommerce' ); ?></label></th>
 			<td>

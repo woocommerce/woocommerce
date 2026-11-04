@@ -21,7 +21,7 @@ export const UpgradeNotice = ( {
 		? __(
 				'The classic Product Image Gallery block is not compatible with the Add to Cart + Options block in this template. Switch to the new Product Gallery block for a better experience.',
 				'woocommerce'
-		  )
+			)
 		: createInterpolateElement(
 				__(
 					'Upgrade to the <strongText /> for more flexibility.',
@@ -34,7 +34,7 @@ export const UpgradeNotice = ( {
 						</strong>
 					),
 				}
-		  );
+			);
 
 	const buttonLabel = __( 'Use the Product Gallery block', 'woocommerce' );
 

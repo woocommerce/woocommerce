@@ -437,4 +437,28 @@ $on_duplicate_clause
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_item_table is hardcoded.
 		return ! empty( $wpdb->get_results( "SHOW INDEX FROM $order_item_table WHERE Key_name = 'order_item_fts'" ) );
 	}
+
+	/**
+	 * Delete the transients whose name starts with any of the given prefixes.
+	 *
+	 * Rows are deleted from the options table directly, so transients held in a persistent object cache are not affected.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string[] $prefixes Transient name prefixes, without the "_transient_" part. Empty prefixes are ignored.
+	 * @return void
+	 */
+	public function delete_transients_by_prefix( array $prefixes ): void {
+		global $wpdb;
+
+		foreach ( array_filter( $prefixes ) as $prefix ) {
+			$wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+					$wpdb->esc_like( '_transient_' . $prefix ) . '%',
+					$wpdb->esc_like( '_transient_timeout_' . $prefix ) . '%'
+				)
+			);
+		}
+	}
 }

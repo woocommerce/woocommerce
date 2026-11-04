@@ -359,6 +359,68 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_dropdown_variation_attribute_options keeps a percent-escaped custom option value raw and decodes its label.
+	 */
+	public function test_variation_dropdown_decodes_custom_option_label_but_keeps_value_raw(): void {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Finish' );
+		$attribute->set_options( array( 'Black%20White', 'Gloss' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		ob_start();
+		wc_dropdown_variation_attribute_options(
+			array(
+				'options'   => array( 'Black%20White', 'Gloss' ),
+				'attribute' => 'Finish',
+				'product'   => $product,
+				'selected'  => 'Black%20White',
+				'name'      => 'attribute_finish',
+			)
+		);
+		$html = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'value="Black%20White"', $html, 'The option value must stay raw so the posted value still matches.' );
+		$this->assertStringContainsString( '>Black White<', $html, 'The option label must be decoded to match the cart and order.' );
+		$this->assertStringNotContainsString( '>Black%20White<', $html, 'The percent-escaped label must not be displayed.' );
+	}
+
+	/**
+	 * @testdox Displaying product attributes renders plain text when a term link cannot be resolved.
+	 */
+	public function test_display_product_attributes_does_not_crash_for_deleted_term(): void {
+		global $wc_product_attributes;
+
+		$previous_attributes = $wc_product_attributes;
+		$attribute           = WC_Helper_Product::create_product_attribute_object( 'Archive Finish', array( 'Matte & Gloss' ) );
+		$taxonomy            = $attribute->get_name();
+
+		try {
+			$wc_product_attributes[ $taxonomy ]->attribute_public = true;
+
+			$product = new WC_Product_Simple();
+			$product->set_attributes( array( $attribute ) );
+
+			$term = get_term( $attribute->get_options()[0], $taxonomy );
+			wp_delete_term( $term->term_id, $taxonomy );
+
+			add_filter( 'woocommerce_get_product_terms', static fn() => array( $term ) );
+			ob_start();
+			wc_display_product_attributes( $product );
+			$markup = (string) ob_get_clean();
+		} finally {
+			unregister_taxonomy( $taxonomy );
+			$wc_product_attributes = $previous_attributes;
+		}
+
+		$this->assertStringContainsString( 'Matte &amp; Gloss', $markup, 'The term name should be rendered as escaped text.' );
+		$this->assertStringNotContainsString( '<a ', $markup, 'The deleted term should not be linked.' );
+	}
+
+	/**
 	 * @testdox The empty cart message should be wrapped in the shared notices wrapper.
 	 */
 	public function test_empty_cart_message_uses_notices_wrapper(): void {
