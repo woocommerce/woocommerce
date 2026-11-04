@@ -15,27 +15,15 @@ declare( strict_types = 1 );
 class WC_External_HTTP_Guard_Test extends WC_Unit_Test_Case {
 
 	/**
-	 * Drop requests recorded here, so the listener does not fail this test for them, and keep the guard armed for the rest of the suite.
+	 * Drop requests recorded here and disallow external requests again, so the listener does not fail this test.
 	 */
 	public function tearDown(): void {
 		try {
-			WC_External_HTTP_Guard::clear_blocked_requests();
+			WC_External_HTTP_Guard::take_blocked_requests();
 			WC_External_HTTP_Guard::allow_external( false );
-			self::set_armed( true );
 		} finally {
 			parent::tearDown();
 		}
-	}
-
-	/**
-	 * Set the guard's private armed flag, which only the listener sets in a real run.
-	 *
-	 * @param bool $armed Whether the guard blocks requests.
-	 */
-	private static function set_armed( bool $armed ): void {
-		$property = new ReflectionProperty( WC_External_HTTP_Guard::class, 'armed' );
-		$property->setAccessible( true );
-		$property->setValue( null, $armed );
 	}
 
 	/**
@@ -122,16 +110,6 @@ class WC_External_HTTP_Guard_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox An external request passes through untouched until the guard is armed.
-	 */
-	public function test_unarmed_guard_lets_external_request_through(): void {
-		self::set_armed( false );
-
-		$this->assertFalse( WC_External_HTTP_Guard::filter_request( false, array( 'method' => 'GET' ), 'https://api.example.com/feed' ), 'An unarmed guard should let the request reach the network.' );
-		$this->assertSame( array(), WC_External_HTTP_Guard::get_blocked_requests(), 'An unarmed guard should record nothing.' );
-	}
-
-	/**
 	 * @testdox A request sent through a WordPress admin helper names the code that called the helper.
 	 */
 	public function test_record_names_caller_outside_wordpress(): void {
@@ -150,6 +128,6 @@ class WC_External_HTTP_Guard_Test extends WC_Unit_Test_Case {
 	 * @testdox The guard is registered on pre_http_request after every other filter.
 	 */
 	public function test_guard_runs_last(): void {
-		$this->assertSame( PHP_INT_MAX, has_filter( 'pre_http_request', array( WC_External_HTTP_Guard::class, 'filter_request' ) ), 'The guard should be registered by the test bootstrap at the last priority.' );
+		$this->assertSame( PHP_INT_MAX, has_filter( 'pre_http_request', array( WC_External_HTTP_Guard::class, 'filter_request' ) ), 'The guard should be registered at the last priority.' );
 	}
 }

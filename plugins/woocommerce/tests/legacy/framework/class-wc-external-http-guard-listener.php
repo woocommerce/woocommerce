@@ -12,14 +12,13 @@ use PHPUnit\Framework\Test;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\TestListener;
 use PHPUnit\Framework\TestListenerDefaultImplementation;
-use PHPUnit\Framework\TestSuite;
+
+require_once __DIR__ . '/class-wc-external-http-guard.php';
 
 /**
- * Turns requests blocked by WC_External_HTTP_Guard into a failure of the test that sent them.
- *
- * A listener rather than an exception from the filter, because code under test often
- * catches exceptions and the test would carry on. Registered in phpunit.xml, so it
- * covers every test whatever its base class, and it arms the guard. A request sent
+ * Installs WC_External_HTTP_Guard and fails each test whose requests it blocked. A listener
+ * rather than an exception from the filter, because code under test often catches exceptions.
+ * Registered in phpunit.xml, so it covers every test whatever its base class. A request sent
  * outside any test, such as from class setup or teardown, fails the next test.
  */
 final class WC_External_HTTP_Guard_Listener implements TestListener {
@@ -29,55 +28,50 @@ final class WC_External_HTTP_Guard_Listener implements TestListener {
 	/**
 	 * Appended to a request blocked outside any test, which fails the next test instead.
 	 */
-	const BEFORE_TEST_NOTE = "sent before this test started, during class setup or teardown (possibly the previous class's teardown)";
+	private const BEFORE_TEST_NOTE = "sent before this test started, during class setup or teardown (possibly the previous class's teardown)";
 
 	/**
-	 * Requests blocked between the previous test and this one, as the guard recorded them.
+	 * Requests blocked between the previous test and this one, already labelled with BEFORE_TEST_NOTE.
 	 *
 	 * @var string[]
 	 */
 	private $requests_before_test = array();
 
 	/**
-	 * Arm the guard. PHPUnit starts the root suite before any class setup runs; nested suites arm it again, harmlessly.
-	 *
-	 * @param TestSuite $suite The suite about to run.
+	 * Install the guard. PHPUnit creates listeners after the bootstrap and before any class setup.
 	 */
-	public function startTestSuite( TestSuite $suite ): void {
-		WC_External_HTTP_Guard::arm();
+	public function __construct() {
+		WC_External_HTTP_Guard::register();
 	}
 
 	/**
-	 * Keep requests blocked since the previous test for this test's failure, then allow external requests for tests in the external-http group.
-	 *
-	 * Requests from the last class's tearDownAfterClass have no following test and go unreported.
+	 * Keep requests blocked since the previous test for this test's failure, then allow external
+	 * requests for tests in the external-http group. Requests from the last class's
+	 * tearDownAfterClass have no following test and go unreported.
 	 *
 	 * @param Test $test The test about to run.
 	 */
 	public function startTest( Test $test ): void {
-		$this->requests_before_test = WC_External_HTTP_Guard::get_blocked_requests();
-		WC_External_HTTP_Guard::clear_blocked_requests();
+		$this->requests_before_test = array();
+		foreach ( WC_External_HTTP_Guard::take_blocked_requests() as $request ) {
+			$this->requests_before_test[] = $request . ', ' . self::BEFORE_TEST_NOTE;
+		}
 		WC_External_HTTP_Guard::allow_external( $test instanceof TestCase && in_array( WC_External_HTTP_Guard::GROUP, $test->getGroups(), true ) );
 	}
 
 	/**
-	 * Fail the test if the guard blocked any request during it or before it started, then block external requests until the next test starts.
+	 * Fail the test if the guard blocked any request during it or before it started, then
+	 * block external requests until the next test starts.
 	 *
 	 * @param Test  $test The test that just ran.
 	 * @param float $time How long it took, in seconds.
 	 */
 	public function endTest( Test $test, float $time ): void {
-		$before_test = array_map(
-			function ( string $request ): string {
-				return $request . ', ' . self::BEFORE_TEST_NOTE;
-			},
-			$this->requests_before_test
-		);
-		$blocked     = array_merge( $before_test, WC_External_HTTP_Guard::get_blocked_requests() );
-
-		$this->requests_before_test = array();
-		WC_External_HTTP_Guard::clear_blocked_requests();
 		WC_External_HTTP_Guard::allow_external( false );
+
+		$before_test                = $this->requests_before_test;
+		$this->requests_before_test = array();
+		$blocked                    = array_merge( $before_test, WC_External_HTTP_Guard::take_blocked_requests() );
 
 		if ( array() === $blocked || ! $test instanceof TestCase ) {
 			return;

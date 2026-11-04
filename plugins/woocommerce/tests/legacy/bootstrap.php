@@ -114,7 +114,6 @@ class WC_Unit_Tests_Bootstrap {
 
 		$this->maybe_initialize_hpos();
 		$this->register_ddl_guard();
-		$this->register_external_http_guard();
 
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.PHP.DiscouragedPHPFunctions
 		error_reporting( error_reporting() & ~E_DEPRECATED );
@@ -213,15 +212,6 @@ class WC_Unit_Tests_Bootstrap {
 			include $this->tests_dir . '/framework/ddl-in-transaction-allowlist.php',
 			$mode
 		);
-	}
-
-	/**
-	 * Install the guard against HTTP requests from tests to external hosts. It blocks them
-	 * only once WC_External_HTTP_Guard_Listener, registered in phpunit.xml, arms it, and the
-	 * listener fails the test that sent one; tests that need the network declare `@group external-http`.
-	 */
-	private function register_external_http_guard() {
-		WC_External_HTTP_Guard::register();
 	}
 
 	/**
@@ -355,7 +345,6 @@ class WC_Unit_Tests_Bootstrap {
 		require_once $this->tests_dir . '/includes/wp-http-testcase.php';
 		require_once $this->tests_dir . '/framework/class-wc-unit-test-case.php';
 		require_once $this->tests_dir . '/framework/class-wc-ddl-in-transaction-guard.php';
-		require_once $this->tests_dir . '/framework/class-wc-external-http-guard.php';
 		require_once $this->tests_dir . '/framework/class-wc-rest-unit-test-case.php';
 
 		// Helpers.

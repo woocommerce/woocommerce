@@ -9,7 +9,6 @@ declare( strict_types = 1 );
 
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\TestResult;
-use PHPUnit\Framework\TestSuite;
 
 /**
  * WC_External_HTTP_Guard_Listener_Test class.
@@ -58,27 +57,15 @@ class WC_External_HTTP_Guard_Listener_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Drop requests recorded here, disallow external requests again and keep the guard armed, so the listener does not fail this test.
+	 * Drop requests recorded here and disallow external requests again, so the listener does not fail this test.
 	 */
 	public function tearDown(): void {
 		try {
-			WC_External_HTTP_Guard::clear_blocked_requests();
+			WC_External_HTTP_Guard::take_blocked_requests();
 			WC_External_HTTP_Guard::allow_external( false );
-			$this->armed_property()->setValue( null, true );
 		} finally {
 			parent::tearDown();
 		}
-	}
-
-	/**
-	 * The guard's private armed flag, which only the listener sets in a real run.
-	 *
-	 * @return ReflectionProperty
-	 */
-	private function armed_property(): ReflectionProperty {
-		$property = new ReflectionProperty( WC_External_HTTP_Guard::class, 'armed' );
-		$property->setAccessible( true );
-		return $property;
 	}
 
 	/**
@@ -160,13 +147,13 @@ class WC_External_HTTP_Guard_Listener_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Starting a test suite arms the guard.
+	 * @testdox Creating the listener installs the guard at the last priority.
 	 */
-	public function test_start_test_suite_arms_the_guard(): void {
-		$this->armed_property()->setValue( null, false );
+	public function test_listener_installs_the_guard(): void {
+		remove_filter( 'pre_http_request', array( WC_External_HTTP_Guard::class, 'filter_request' ), PHP_INT_MAX );
 
-		$this->sut->startTestSuite( new TestSuite() );
+		new WC_External_HTTP_Guard_Listener();
 
-		$this->assertTrue( $this->armed_property()->getValue(), 'The guard should block requests once a suite starts.' );
+		$this->assertSame( PHP_INT_MAX, has_filter( 'pre_http_request', array( WC_External_HTTP_Guard::class, 'filter_request' ) ), 'The listener should install the guard.' );
 	}
 }

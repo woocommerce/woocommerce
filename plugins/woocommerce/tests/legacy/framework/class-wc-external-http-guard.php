@@ -8,16 +8,10 @@
 declare( strict_types = 1 );
 
 /**
- * Guard against tests reaching external hosts over HTTP.
- *
- * Runs last on `pre_http_request`, so test mocks, WP_HTTP_TestCase::$http_responder
- * and every other filter get the first chance to answer. A request still unanswered
- * and bound for a host other than the test site gets a WP_Error instead of reaching
- * the network, and WC_External_HTTP_Guard_Listener fails the test that sent it.
- * A test that needs the real network declares it with `@group external-http`.
- *
- * The guard does nothing until the listener arms it, so a project that loads this
- * bootstrap with its own phpunit.xml, and so without the listener, is not blocked silently.
+ * Answers unmocked requests to external hosts with a WP_Error and records them. Runs last on
+ * `pre_http_request`, so mocks and WP_HTTP_TestCase::$http_responder answer first. Only
+ * WC_External_HTTP_Guard_Listener installs it, and it fails the test that sent the request,
+ * so suites that load the bootstrap without that listener are unaffected.
  */
 final class WC_External_HTTP_Guard {
 
@@ -32,7 +26,7 @@ final class WC_External_HTTP_Guard {
 	const ERROR_CODE = 'wc_tests_external_http_blocked';
 
 	/**
-	 * Requests blocked since the list was last cleared, as 'METHOD URL (from file:line)'.
+	 * Requests blocked since the list was last taken, as 'METHOD URL (from file:line)'.
 	 *
 	 * @var string[]
 	 */
@@ -46,13 +40,6 @@ final class WC_External_HTTP_Guard {
 	private static $allow_external = false;
 
 	/**
-	 * Whether the guard blocks requests. Set by WC_External_HTTP_Guard_Listener, which reports them.
-	 *
-	 * @var bool
-	 */
-	private static $armed = false;
-
-	/**
 	 * Lowercase hosts that count as local, captured when the guard is registered.
 	 *
 	 * @var string[]
@@ -60,27 +47,22 @@ final class WC_External_HTTP_Guard {
 	private static $local_hosts = array();
 
 	/**
-	 * Install the guard. Call once, after WordPress has loaded.
+	 * Install the guard, after WordPress has loaded. Calling it again is harmless.
 	 */
 	public static function register(): void {
-		$hosts = array( 'localhost', '127.0.0.1', '::1' );
-		foreach ( array( home_url(), site_url() ) as $url ) {
-			$host = wp_parse_url( $url, PHP_URL_HOST );
-			if ( is_string( $host ) && '' !== $host ) {
-				$hosts[] = strtolower( $host );
-			}
-		}
 		// Captured once, so a test that changes the home or site URL cannot make an external host count as local.
-		self::$local_hosts = array_values( array_unique( $hosts ) );
+		if ( array() === self::$local_hosts ) {
+			$hosts = array( 'localhost', '127.0.0.1', '::1' );
+			foreach ( array( home_url(), site_url() ) as $url ) {
+				$host = wp_parse_url( $url, PHP_URL_HOST );
+				if ( is_string( $host ) && '' !== $host ) {
+					$hosts[] = strtolower( $host );
+				}
+			}
+			self::$local_hosts = array_unique( $hosts );
+		}
 
 		add_filter( 'pre_http_request', array( self::class, 'filter_request' ), PHP_INT_MAX, 3 );
-	}
-
-	/**
-	 * Start blocking requests. Called by the listener, which reports them; calling it again is harmless.
-	 */
-	public static function arm(): void {
-		self::$armed = true;
 	}
 
 	/**
@@ -93,14 +75,7 @@ final class WC_External_HTTP_Guard {
 	}
 
 	/**
-	 * Forget the requests blocked so far.
-	 */
-	public static function clear_blocked_requests(): void {
-		self::$blocked = array();
-	}
-
-	/**
-	 * Requests blocked since the list was last cleared.
+	 * Requests blocked since the list was last taken.
 	 *
 	 * @return string[] Each as 'METHOD URL (from file:line)', without query strings.
 	 */
@@ -109,7 +84,18 @@ final class WC_External_HTTP_Guard {
 	}
 
 	/**
-	 * Block an unanswered request to an external host, once the guard is armed.
+	 * Return the requests blocked so far and forget them.
+	 *
+	 * @return string[] Each as 'METHOD URL (from file:line)', without query strings.
+	 */
+	public static function take_blocked_requests(): array {
+		$blocked       = self::$blocked;
+		self::$blocked = array();
+		return $blocked;
+	}
+
+	/**
+	 * Block an unanswered request to an external host.
 	 *
 	 * @param false|array|WP_Error $preempt A response from an earlier filter, or false.
 	 * @param array                $args    The request arguments.
@@ -117,11 +103,11 @@ final class WC_External_HTTP_Guard {
 	 * @return false|array|WP_Error The earlier answer unchanged, or an error for a blocked request.
 	 */
 	public static function filter_request( $preempt, $args, $url ) {
-		if ( ! self::$armed || false !== $preempt || self::$allow_external || ! self::is_external_url( (string) $url ) ) {
+		if ( false !== $preempt || self::$allow_external || ! self::is_external_url( (string) $url ) ) {
 			return $preempt;
 		}
 
-		$method  = is_array( $args ) && isset( $args['method'] ) ? strtoupper( (string) $args['method'] ) : 'GET';
+		$method  = strtoupper( (string) ( $args['method'] ?? 'GET' ) );
 		$request = sprintf( '%s %s (from %s)', $method, preg_replace( '/[?#].*$/s', '', (string) $url ), self::caller() );
 
 		self::$blocked[] = $request;
