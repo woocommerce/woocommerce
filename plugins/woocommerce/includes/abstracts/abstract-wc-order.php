@@ -3053,7 +3053,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$cart_taxes     = array();
 		$shipping_taxes = array();
 		$existing_taxes = $this->get_taxes();
-		$saved_rate_ids = array();
+		$kept_rate_ids  = array();
 
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
 			$taxes = $item->get_taxes();
@@ -3082,7 +3082,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		foreach ( $existing_taxes as $tax ) {
 			$tax_rate_id = $tax->get_rate_id();
 			// Remove taxes which no longer exist for cart/shipping.
-			if ( ( ! array_key_exists( $tax_rate_id, $cart_taxes ) && ! array_key_exists( $tax_rate_id, $shipping_taxes ) ) || in_array( $tax_rate_id, $saved_rate_ids, true ) ) {
+			if ( ( ! array_key_exists( $tax_rate_id, $cart_taxes ) && ! array_key_exists( $tax_rate_id, $shipping_taxes ) ) || in_array( $tax_rate_id, $kept_rate_ids, true ) ) {
 				$this->remove_item( $this->get_stored_item_key( $tax ) );
 				continue;
 			}
@@ -3098,10 +3098,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax->set_shipping_tax_total( ! empty( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
 
 			// Do not save the tax item here. save_items() writes it with the order, so a failed order write leaves it unchanged.
-			$saved_rate_ids[] = $tax_rate_id;
+			$kept_rate_ids[] = $tax_rate_id;
 		}
 
-		$new_rate_ids = wp_parse_id_list( array_diff( array_keys( $cart_taxes + $shipping_taxes ), $saved_rate_ids ) );
+		$new_rate_ids = wp_parse_id_list( array_diff( array_keys( $cart_taxes + $shipping_taxes ), $kept_rate_ids ) );
 
 		// New taxes.
 		foreach ( $new_rate_ids as $tax_rate_id ) {

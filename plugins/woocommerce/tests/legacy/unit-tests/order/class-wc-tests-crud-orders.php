@@ -1505,9 +1505,9 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The retry after a failed payment_complete() fires woocommerce_payment_complete when every note throws.
+	 * @testdox The retry after a failed payment_complete() fires woocommerce_payment_complete when the note listener throws.
 	 */
-	public function test_payment_complete_retry_fires_its_action_when_every_note_throws(): void {
+	public function test_payment_complete_retry_fires_its_action_when_the_note_listener_throws(): void {
 		$order = new WC_Order();
 		$order->save();
 		$paid = did_action( 'woocommerce_payment_complete' );
@@ -1528,6 +1528,53 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		}
 
 		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $paid );
+	}
+
+	/**
+	 * @testdox The retry after a failed payment_complete() fires its action when the status moved to another paid status.
+	 */
+	public function test_payment_complete_retry_fires_its_action_after_a_move_to_another_paid_status(): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid = did_action( 'woocommerce_payment_complete' );
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+		$this->assertSame( OrderStatus::COMPLETED, $order->get_status() );
+
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $paid );
+	}
+
+	/**
+	 * @testdox The retry after a failed payment_complete() logs a throwing payment listener and keeps the other callbacks.
+	 */
+	public function test_payment_complete_retry_logs_a_throwing_payment_listener(): void {
+		$order = new WC_Order();
+		$order->save();
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+		$throw = static function () {
+			throw new Exception( 'Payment listener failed.' );
+		};
+		add_action( 'woocommerce_payment_complete', $throw );
+
+		try {
+			$order->save();
+		} finally {
+			remove_action( 'woocommerce_payment_complete', $throw );
+		}
+
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), 'content' );
+		$this->assertContains( 'Payment complete event failed. Payment listener failed.', $notes );
+		$this->assertSame( OrderStatus::COMPLETED, wc_get_order( $order->get_id() )->get_status() );
 	}
 
 	/**

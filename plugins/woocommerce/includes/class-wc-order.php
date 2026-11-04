@@ -185,7 +185,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * payment note and woocommerce_payment_complete to the next save(), which runs the first two before it
 	 * writes and adds the note and fires the action after it writes. payment_complete() runs this method through
 	 * write_through(), so it runs all of them and saves right away. When that save fails, the method throws, and
-	 * the note and the action wait for the next save that writes the order with the same status.
+	 * the note and the action wait for the next save that writes the order with the same status or a paid one.
 	 *
 	 * When the order status is not one that payment can complete, the order does not change, the
 	 * woocommerce_payment_complete_order_status_<status> action fires right away, the method adds nothing for
@@ -301,9 +301,21 @@ class WC_Order extends WC_Abstract_Order {
 			$this->defer_to_save(
 				'payment_complete',
 				function () use ( $paid_status, $add_note, $action_args ) {
-					if ( $this->has_status( $paid_status ) ) {
-						$add_note();
+					if ( ! $this->has_status( $paid_status ) && ! $this->is_paid() ) {
+						return;
+					}
+					$add_note();
+					try {
 						call_user_func_array( 'do_action', $action_args );
+					} catch ( Exception $e ) {
+						wc_get_logger()->error(
+							sprintf( 'Error completing payment for order #%d', $this->get_id() ),
+							array(
+								'order' => $this,
+								'error' => $e,
+							)
+						);
+						$this->add_order_note( __( 'Payment complete event failed.', 'woocommerce' ) . ' ' . $e->getMessage(), 0, false, array( 'note_group' => OrderNoteGroup::ERROR ) );
 					}
 				},
 				array(),
