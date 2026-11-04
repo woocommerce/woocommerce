@@ -12757,7 +12757,7 @@ parameters:
 			path: includes/class-wc-order.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this                     Order object\.\)\: Unexpected token "\$this", expected variable at offset 193 on line 5$#'
+			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this                     Order object\.\)\: Unexpected token "\$this", expected variable at offset 189 on line 5$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: includes/class-wc-order.php
@@ -12775,7 +12775,7 @@ parameters:
 			path: includes/class-wc-order.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this          Order object\.\)\: Unexpected token "\$this", expected variable at offset 197 on line 6$#'
+			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this          Order object\.\)\: Unexpected token "\$this", expected variable at offset 187 on line 6$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: includes/class-wc-order.php
@@ -12825,7 +12825,7 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$is_customer_note of method WC_Order\:\:add_order_note\(\) expects int, false given\.$#'
 			identifier: argument.type
-			count: 5
+			count: 4
 			path: includes/class-wc-order.php
 
 		-
@@ -12949,12 +12949,6 @@ parameters:
 			path: includes/class-wc-post-data.php
 
 		-
-			message: '#^Access to an undefined property object\:\:\$taxonomy\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/class-wc-post-data.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:delete_by_order_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -12988,12 +12982,6 @@ parameters:
 			message: '#^Cannot access property \$slug on WP_Term\|false\.$#'
 			identifier: property.nonObject
 			count: 3
-			path: includes/class-wc-post-data.php
-
-		-
-			message: '#^Cannot access property \$taxonomy on WP_Term\|false\.$#'
-			identifier: property.nonObject
-			count: 1
 			path: includes/class-wc-post-data.php
 
 		-
@@ -15644,12 +15632,6 @@ parameters:
 
 		-
 			message: '#^Method WC_Webhook\:\:enqueue\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-webhook.php
-
-		-
-			message: '#^Method WC_Webhook\:\:failed_delivery\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/class-wc-webhook.php
@@ -28057,12 +28039,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-buttons-controller.php
 
 		-
-			message: '#^Access to an undefined property WooCommerce\:\:\$checkout\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-standard-controller.php
-
-		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_instance_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -28070,24 +28046,6 @@ parameters:
 
 		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_method_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-standard-controller.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_product\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-standard-controller.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_product_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-standard-controller.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_variation_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-standard-controller.php
@@ -34004,7 +33962,6 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: includes/wc-order-functions.php
-
 
 		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:add_metadata\(\)\.$#'
