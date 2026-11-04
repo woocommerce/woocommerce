@@ -873,6 +873,26 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test a link color set on a Paragraph wins over the link color of the Group around it, when both are set in the editor.
+	 *
+	 * Both rules have the same weight, so the inner block's rule wins because WordPress prints it later.
+	 */
+	public function testItUsesTheInnerBlockLinkColorInsideAGroupWithALinkColor(): void {
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+		$email_post        = $this->create_email_post( '<!-- wp:group {"style":{"elements":{"link":{"color":{"text":"#123456"}}}}} --><div class="wp-block-group has-link-color"><!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"#654321"}}}}} --><p class="has-link-color">Read <a href="https://example.com">more</a></p><!-- /wp:paragraph --></div><!-- /wp:group -->' );
+
+		try {
+			$rendered = $this->renderer->render( $email_post, $template );
+		} finally {
+			\WP_Style_Engine_CSS_Rules_Store::remove_all_stores();
+		}
+
+		$this->assertStringContainsString( 'color: #654321', (string) $this->getStylesValueForTag( $rendered, 'a' ) );
+	}
+
+	/**
 	 * Test a Site Title link keeps inheriting its color inside a Group that has a link color, as in the editor.
 	 */
 	public function testItKeepsTheSiteTitleLinkColorInsideAGroupWithALinkColor(): void {
