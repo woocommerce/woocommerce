@@ -580,7 +580,7 @@ test( 'leaves Save changes disabled when a settings save fails on a freshly adde
 
 	// Free shipping has a settings modal and is not already on the fixture's zone.
 	await openAddMethodModal( page );
-	await page.getByText( 'Free shipping' ).click();
+	await page.getByText( 'Free shipping', { exact: true } ).click();
 	await page.getByRole( 'button', { name: 'Continue' } ).click();
 
 	await page.locator( '#btn-ok' ).click();
