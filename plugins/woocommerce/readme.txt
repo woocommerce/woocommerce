@@ -170,12 +170,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 11.2.1 2026-10-09 =
-
-**WooCommerce**
-
-* Fix - Restore how the classic checkout sends order review and coupon requests, so fields removed with checkout field filters are no longer sent as empty values. [#69649](https://github.com/woocommerce/woocommerce/pull/69649)
-* Fix - Accept legacy four-digit Argentine postcodes in the Checkout block again. [#69662](https://github.com/woocommerce/woocommerce/pull/69662)
-
+= 11.2.2 2026-XX-XX =
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
