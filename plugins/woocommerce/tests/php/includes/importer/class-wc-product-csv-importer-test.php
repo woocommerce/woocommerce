@@ -3198,4 +3198,29 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( array( 'Premium', 'Basic' ), $product->get_attributes()['edition']->get_options() );
 		$this->assertSame( array( 'edition' => 'Premium' ), $product->get_default_attributes() );
 	}
+
+	/**
+	 * @testdox Importing keeps backslashes in names and descriptions, and turns only escaped newlines into line breaks.
+	 */
+	public function test_import_keeps_backslashes_in_name_and_descriptions(): void {
+		$importer = new WC_Product_CSV_Importer(
+			__DIR__ . '/import-description-backslashes-69755-data.csv',
+			array(
+				'parse'   => true,
+				'mapping' => array(
+					'Type'              => 'type',
+					'Name'              => 'name',
+					'Description'       => 'description',
+					'Short description' => 'short_description',
+				),
+			)
+		);
+		$data     = $importer->import();
+
+		$this->assertCount( 1, $data['imported'], 'The product should be imported.' );
+		$post = get_post( $data['imported'][0] );
+		$this->assertSame( 'Cable 1\\2 inch', $post->post_title, 'The name should keep its backslash.' );
+		$this->assertSame( 'Path C:\\temp\\nliteral', $post->post_content, 'The description should keep its backslash and the literal \\n text.' );
+		$this->assertSame( "Line one\nLine two", $post->post_excerpt, 'An escaped newline should become a line break.' );
+	}
 }
