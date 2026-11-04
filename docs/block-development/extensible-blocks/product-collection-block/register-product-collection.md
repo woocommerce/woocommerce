@@ -6,7 +6,7 @@ sidebar_label: Registering custom collections
 
 # Registering custom collections in product collection block
 
-The `registerProductCollection` function is part of the `@woocommerce/blocks-registry` package. This function allows third party developers to register a new collection. This function accepts most of the arguments that are accepted by [Block Variation](https://developer.wordpress.org/block-editor/reference-guides/block-api/block-variations/#defining-a-block-variation).
+The `registerProductCollection` function is part of the `@woocommerce/blocks-registry` package. This function allows third-party developers to register a new collection. This function accepts most of the arguments that are accepted by [Block Variation](https://developer.wordpress.org/block-editor/reference-guides/block-api/block-variations/#defining-a-block-variation).
 
 The stable API is available from WooCommerce 11.4.0. The previous `__experimentalRegisterProductCollection` function remains available as a deprecated alias and emits a console warning. Update existing imports and calls to `registerProductCollection`; the configuration options and `wc-blocks-registry` script dependency are unchanged.
 
