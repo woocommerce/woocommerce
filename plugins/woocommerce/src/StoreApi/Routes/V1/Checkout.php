@@ -9,6 +9,7 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
+use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 
 /**
  * Checkout class.
@@ -147,6 +148,14 @@ class Checkout extends AbstractCartRoute {
 	}
 
 	/**
+	 * Clear the order held from a previous request. One route instance can serve several requests
+	 * in the same PHP process, so each request must resolve its own order.
+	 */
+	private function reset_request_state(): void {
+		$this->order = null;
+	}
+
+	/**
 	 * Get the route response based on the type of request.
 	 *
 	 * @param \WP_REST_Request $request Request object.
@@ -154,6 +163,8 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
+		$this->reset_request_state();
+
 		try {
 			$this->load_cart_session( $request );
 		} catch ( \Throwable $error ) {
@@ -190,10 +201,9 @@ class Checkout extends AbstractCartRoute {
 			// that never left checkout-draft included.
 			// Re-read the order first, since a gateway that advanced it may have done so on its own
 			// instance, leaving the one held here reporting a stale status.
-			$order = $this->order ? wc_get_order( $this->order->get_id() ) : null;
-			$order = $order instanceof \WC_Order ? $order : $this->order;
+			$order = $this->order instanceof \WC_Order ? PaymentRecovery::refresh_order( $this->order ) : null;
 
-			if ( $order && ! $this->order_moved_past_payment( $order ) ) {
+			if ( $order && ! PaymentRecovery::order_moved_past_payment( $order ) ) {
 				wc_release_stock_for_order( $order );
 				wc_release_coupons_for_order( $order );
 			}
@@ -573,6 +583,16 @@ class Checkout extends AbstractCartRoute {
 		wc_log_order_step( '[Store API #2] Cart validated' );
 
 		/**
+		 * Answer a repeat submit before the cart and stock checks: the gateway already moved this
+		 * order on and the request died before the cart was emptied, so a new order would charge
+		 * the shopper twice, and the first one may have taken the last units.
+		 */
+		$session_order = PaymentRecovery::get_session_order_moved_past_payment( (int) $this->get_draft_order_id() );
+		if ( $session_order ) {
+			return $this->get_repeat_submit_response( $session_order, $request );
+		}
+
+		/**
 		 * Persist customer session data from the request first so that OrderController::update_addresses_from_cart
 		 * uses the up-to-date customer address.
 		 */
@@ -738,6 +758,38 @@ class Checkout extends AbstractCartRoute {
 	}
 
 	/**
+	 * Answers a submit that repeats one the gateway already took, with that order's received page.
+	 *
+	 * Both redirect fields are set, as on the normal success path: gateway client code reads the
+	 * redirect from the payment details rather than from redirect_url.
+	 *
+	 * @param \WC_Order                              $order   The order the gateway moved past payment.
+	 * @param \WP_REST_Request<array<string, mixed>> $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	private function get_repeat_submit_response( \WC_Order $order, \WP_REST_Request $request ) { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
+		PaymentRecovery::record_repeat_submit( $order );
+
+		$payment_result = new PaymentResult( 'success' );
+		$payment_result->set_redirect_url( $order->get_checkout_order_received_url() );
+		$payment_result->set_payment_details( array( 'redirect' => $payment_result->get_redirect_url() ) );
+
+		wc_log_order_step(
+			'[Store API #2A] Repeat submit for an order that moved past payment, sending to the order received page',
+			array( 'order_object' => $order ),
+			true
+		);
+
+		return $this->prepare_item_for_response(
+			(object) [
+				'order'          => $order,
+				'payment_result' => $payment_result,
+			],
+			$request
+		);
+	}
+
+	/**
 	 * Get route response when something went wrong.
 	 *
 	 * @param string $error_code String based error code.
@@ -802,7 +854,7 @@ class Checkout extends AbstractCartRoute {
 	 */
 	private function create_or_update_draft_order( \WP_REST_Request $request ) {
 		// Reuse the failed/pending order from the customer's session if one exists; otherwise the POST flow would orphan it by creating a fresh order on every retry.
-		$this->order = $this->order ?? $this->get_draft_order();
+		$this->order = $this->get_draft_order();
 
 		if ( ! $this->order ) {
 			$this->order = $this->order_controller->create_order_from_cart();
