@@ -1277,19 +1277,26 @@ class CartController {
 	}
 
 	/**
-	 * First visible variation that matches the attributes.
+	 * Most specific visible variation that matches the attributes.
 	 *
-	 * @param \WC_Product $parent_product   Parent variable product.
-	 * @param array       $match_attributes Attributes keyed by attribute_*.
+	 * More non-empty attributes win over a broader match, independent of menu order.
+	 * Empty stored values accept any posted value. An equal match keeps the requested variation.
+	 *
+	 * @param \WC_Product $parent_product          Parent variable product.
+	 * @param array       $match_attributes        Attributes keyed by attribute_*.
+	 * @param int         $requested_variation_id  Variation the customer asked for.
 	 * @return int Matching variation ID, or 0 when no visible variation matches.
 	 */
-	private function find_visible_matching_variation( $parent_product, $match_attributes ) {
+	private function find_visible_matching_variation( $parent_product, $match_attributes, $requested_variation_id ) {
 		$child_ids = $parent_product->get_children();
 
 		if ( ! empty( $child_ids ) ) {
 			// Prime caches to reduce future queries.
 			_prime_post_caches( $child_ids );
 		}
+
+		$best_variation_id = 0;
+		$best_specificity  = -1;
 
 		foreach ( $child_ids as $child_id ) {
 			$variation = wc_get_product( $child_id );
@@ -1298,7 +1305,8 @@ class CartController {
 				continue;
 			}
 
-			$matches = true;
+			$matches     = true;
+			$specificity = 0;
 
 			foreach ( $variation->get_variation_attributes() as $attribute_key => $attribute_value ) {
 				// An empty stored value means this variation accepts any posted value.
@@ -1306,18 +1314,26 @@ class CartController {
 					continue;
 				}
 
+				++$specificity;
+
 				if ( ! array_key_exists( $attribute_key, $match_attributes ) || $match_attributes[ $attribute_key ] !== $attribute_value ) {
 					$matches = false;
 					break;
 				}
 			}
 
-			if ( $matches ) {
-				return $variation->get_id();
+			if ( ! $matches || $specificity < $best_specificity ) {
+				continue;
+			}
+
+			// Prefer a closer match, and keep the requested variation when specificity is equal.
+			if ( $specificity > $best_specificity || (int) $variation->get_id() === (int) $requested_variation_id ) {
+				$best_variation_id = $variation->get_id();
+				$best_specificity  = $specificity;
 			}
 		}
 
-		return 0;
+		return $best_variation_id;
 	}
 
 	/**
@@ -1363,7 +1379,7 @@ class CartController {
 				array_filter( wc_get_product_variation_attributes( $request['id'] ), 'wc_array_filter_default_attributes' ),
 				$request['variation']
 			);
-			$matched_variation_id = $this->find_visible_matching_variation( $parent_product, $match_attributes );
+			$matched_variation_id = $this->find_visible_matching_variation( $parent_product, $match_attributes, $request['id'] );
 
 			if ( ! empty( $matched_variation_id ) && (int) $matched_variation_id !== (int) $request['id'] ) {
 				throw new RouteException(
