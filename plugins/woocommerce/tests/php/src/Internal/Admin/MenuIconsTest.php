@@ -51,7 +51,7 @@ class MenuIconsTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		try {
 			if ( $this->owns_collection && \WP_Icon_Collections_Registry::get_instance()->is_registered( 'woocommerce' ) ) {
-				foreach ( array( 'woocommerce/logo', 'woocommerce/box', 'woocommerce/megaphone' ) as $name ) {
+				foreach ( array( 'woocommerce/logo', 'woocommerce/megaphone' ) as $name ) {
 					if ( \WP_Icons_Registry::get_instance()->is_registered( $name ) ) {
 						wp_unregister_icon( $name );
 					}
@@ -75,10 +75,9 @@ class MenuIconsTest extends WC_Unit_Test_Case {
 	 * @param string $version WordPress version.
 	 */
 	public function test_legacy_icons( string $version ): void {
-		$this->sut->handle_admin_menu_registration();
 		$GLOBALS['wp_version'] = $version; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulate supported WordPress versions.
 
-		$this->assertSame( 'dashicons-archive', $this->sut->get_icon( 'woocommerce/box', 'dashicons-archive' ) );
+		$this->assertSame( 'dashicons-archive', $this->sut->get_icon( 'core-admin/tag', 'dashicons-archive' ) );
 		$this->assertSame( 'data:image/svg+xml;base64,legacy', $this->sut->get_icon( 'woocommerce/logo', 'data:image/svg+xml;base64,legacy' ) );
 	}
 
@@ -96,11 +95,10 @@ class MenuIconsTest extends WC_Unit_Test_Case {
 		$GLOBALS['wp_version'] = $version; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulate WordPress versions.
 		$this->sut->handle_admin_menu_registration();
 
-		$this->assertSame( 'woocommerce/box', $this->sut->get_icon( 'woocommerce/box', 'dashicons-archive' ) );
+		$this->assertSame( 'core-admin/tag', $this->sut->get_icon( 'core-admin/tag', 'dashicons-archive' ) );
 		$this->assertSame( 'core-admin/payment', $this->sut->get_icon( 'core-admin/payment', 'legacy' ) );
 		$this->assertSame( 'woocommerce/logo', $this->sut->get_icon( 'woocommerce/logo', 'legacy' ) );
 		$this->assertStringContainsString( '<svg', wp_get_icon( 'woocommerce/logo' ) );
-		$this->assertStringContainsString( 'fill: none', wp_get_icon( 'woocommerce/box' ) );
 		$this->assertStringContainsString( 'stroke="currentColor"', wp_get_icon( 'woocommerce/megaphone' ) );
 		$this->assertStringContainsString( 'fill: none', wp_get_icon( 'woocommerce/megaphone' ) );
 	}
@@ -128,7 +126,7 @@ class MenuIconsTest extends WC_Unit_Test_Case {
 
 		$this->sut->handle_admin_menu();
 
-		$this->assertSame( 'woocommerce/box', $GLOBALS['menu'][55][6] );
+		$this->assertSame( 'core-admin/tag', $GLOBALS['menu'][55][6] );
 		$this->assertSame( 'core-admin/receipt', $GLOBALS['menu'][56][6] );
 		$this->assertSame( 'dashicons-admin-post', $GLOBALS['menu'][57][6] );
 		$this->assertSame( 'edit_products', $GLOBALS['menu'][55][1] );
