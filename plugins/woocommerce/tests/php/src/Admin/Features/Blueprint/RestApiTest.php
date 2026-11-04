@@ -90,6 +90,61 @@ class RestApiTest extends WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Should report import eligibility only for users who may import.
+	 * @testWith ["administrator", true]
+	 *           ["shop_manager", false]
+	 * @param string $role User role.
+	 * @param bool   $expected Whether the user may import.
+	 */
+	public function test_import_allowed_respects_permissions( string $role, bool $expected ): void {
+		$user_id = $this->factory->user->create( array( 'role' => $role ) );
+		wp_set_current_user( $user_id );
+		update_option( 'woocommerce_coming_soon', 'yes' );
+		if ( is_multisite() && $expected ) {
+			grant_super_admin( $user_id );
+		}
+
+		try {
+			$server = rest_get_server();
+			add_action( 'rest_api_init', array( $this->rest_api, 'register_routes' ) );
+			do_action( 'rest_api_init', $server );
+			$response = $server->dispatch( new WP_REST_Request( 'GET', '/wc-admin/blueprint/import-allowed' ) );
+
+			$this->assertSame( 200, $response->get_status() );
+			$this->assertSame( $expected, $response->get_data()['import_allowed'] );
+			update_option( 'woocommerce_coming_soon', 'no' );
+			$this->assertFalse( $this->rest_api->get_import_allowed()->get_data()['import_allowed'] );
+		} finally {
+			if ( is_multisite() && $expected ) {
+				revoke_super_admin( $user_id );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should deny a multisite subsite administrator and allow a network super administrator.
+	 * @group ms-required
+	 */
+	public function test_import_allowed_requires_multisite_super_admin(): void {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'Requires multisite.' );
+		}
+		update_option( 'woocommerce_coming_soon', 'yes' );
+
+		$this->assertFalse( is_super_admin( $this->user ) );
+		$this->assertWPError( $this->rest_api->check_import_permission() );
+		$this->assertFalse( $this->rest_api->get_import_allowed()->get_data()['import_allowed'] );
+
+		grant_super_admin( $this->user );
+		try {
+			$this->assertTrue( $this->rest_api->check_import_permission() );
+			$this->assertTrue( $this->rest_api->get_import_allowed()->get_data()['import_allowed'] );
+		} finally {
+			revoke_super_admin( $this->user );
+		}
+	}
+
+	/**
 	 * Test that blueprint imports are disabled in live mode.
 	 */
 	public function test_cannot_import_blueprint_in_live_mode() {
