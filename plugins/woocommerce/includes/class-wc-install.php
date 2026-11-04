@@ -364,6 +364,9 @@ class WC_Install {
 			// Run again to cancel all pattern fetch jobs now that scheduling is disabled.
 			'wc_update_1040_cleanup_legacy_ptk_patterns_fetching',
 		),
+		'11.2.2'   => array(
+			'wc_update_1122_remove_objects_from_default_attributes',
+		),
 	);
 
 	/**

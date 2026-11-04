@@ -3994,3 +3994,81 @@ function wc_update_11203_normalize_stock_notification_emails() {
 
 	return false;
 }
+
+/**
+ * Remove PHP objects from product default attributes, where WooCommerce only stores strings.
+ *
+ * Rows are decoded without allowing classes and written directly, so a stored object is never created. A row holding an object that
+ * can't be decoded is deleted; that product's default form values need to be set again.
+ *
+ * @since 11.2.2
+ */
+function wc_update_1122_remove_objects_from_default_attributes(): void {
+	global $wpdb;
+
+	// Objects serialize as O: or C:, so only matching rows are decoded. Each one is checked again below. LIKE rather than REGEXP, because
+	// MySQL 5.7's REGEXP stops reading at a NUL byte, which a custom default value can contain.
+	$meta_ids = $wpdb->get_col( "SELECT meta_id FROM {$wpdb->postmeta} WHERE meta_key = '_default_attributes' AND ( meta_value LIKE '%O:%' OR meta_value LIKE '%C:%' )" );
+
+	if ( '' !== $wpdb->last_error ) {
+		wc_get_logger()->error(
+			sprintf( 'Could not check product default attributes for PHP objects: %s', $wpdb->last_error ),
+			array( 'source' => 'wc-updater' )
+		);
+		return;
+	}
+
+	$product_ids = array();
+
+	foreach ( array_chunk( array_map( 'intval', $meta_ids ), 500 ) as $chunk ) {
+		$rows = $wpdb->get_results( "SELECT meta_id, post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_id IN (" . implode( ',', $chunk ) . ')' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Integer IDs.
+
+		foreach ( $rows as $row ) {
+			$raw   = trim( $row->meta_value );
+			$value = @unserialize( $raw, array( 'allowed_classes' => false ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize -- Same as maybe_unserialize(), without objects.
+
+			// WooCommerce stores a flat array of strings here. An object, an array holding non-scalars, or a row that can't be decoded is cleaned
+			// when it contains object notation: the LIKE above also matches text such as "Info:" on case-insensitive collations, and the decoded
+			// value isn't walked because it can reference itself. Object text inside the strings of a flat array is plain text, and stays.
+			$may_hold_object = is_object( $value ) || false === $value || ( is_array( $value ) && array_filter( $value, 'is_scalar' ) !== $value );
+			if ( ! $may_hold_object || ! preg_match( '/[OC]:\d+:"/', $raw ) ) {
+				continue;
+			}
+
+			// Matched on the value read as well, so a row saved again in the meantime is left to that save.
+			$where = array(
+				'meta_id'    => $row->meta_id,
+				'meta_value' => $row->meta_value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Matches the row by its primary key.
+			);
+			$done  = is_array( $value )
+				? $wpdb->update( $wpdb->postmeta, array( 'meta_value' => serialize( array_filter( $value, 'is_scalar' ) ) ), $where ) // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value, WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Update data, stored in the same format WordPress uses.
+				: $wpdb->delete( $wpdb->postmeta, $where );
+
+			if ( false === $done ) {
+				wc_get_logger()->error(
+					sprintf( 'Could not remove PHP objects from the default attributes of product %d: %s', $row->post_id, $wpdb->last_error ),
+					array( 'source' => 'wc-updater' )
+				);
+				continue;
+			}
+
+			// Nothing matched: the row was saved again after it was read.
+			if ( ! $done ) {
+				continue;
+			}
+
+			wp_cache_delete( (int) $row->post_id, 'post_meta' );
+			$product_ids[] = (int) $row->post_id;
+		}
+	}
+
+	if ( $product_ids ) {
+		wc_get_logger()->warning(
+			sprintf(
+				'Removed PHP objects or other non-string values from the default attributes of these products. WooCommerce only stores strings there, so check these products\' default form values: %s',
+				implode( ', ', array_unique( $product_ids ) )
+			),
+			array( 'source' => 'wc-updater' )
+		);
+	}
+}
