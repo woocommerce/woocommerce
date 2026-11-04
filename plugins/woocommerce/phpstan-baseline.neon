@@ -34390,15 +34390,12 @@ parameters:
 			count: 2
 			path: includes/wc-order-functions.php
 
-<<<<<<< HEAD
 		-
 			message: '#^Parameter \#3 \$order of function wc_downloadable_file_permission expects WC_Order, WC_Order\|WC_Order_Refund given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/wc-order-functions.php
 
-=======
->>>>>>> 6ab74ad24c (Fix PayPal Standard shipping and tax updates made in PayPal (#70634))
 		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:add_metadata\(\)\.$#'
 			identifier: method.notFound
