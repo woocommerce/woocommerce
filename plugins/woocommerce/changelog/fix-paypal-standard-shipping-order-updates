@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure PayPal Standard shipping updates correctly update shipping and tax amounts
