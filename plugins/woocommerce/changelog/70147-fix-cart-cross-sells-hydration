@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix cross-sell Add to cart buttons sometimes not responding in Safari and other browsers.

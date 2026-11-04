@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsDataSourcePoller;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
 use Automattic\WooCommerce\Admin\RemoteSpecs\DataSourcePoller;
+use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use WC_Action_Queue;
 use WC_Queue;
 use WC_Queue_Interface;
@@ -16,7 +17,7 @@ use WC_Unit_Test_Case;
 use WP_Error;
 
 /**
- * Tests for upgrade-triggered remote inbox scheduling and withdrawn alert reconciliation.
+ * Tests for remote inbox triggers and withdrawn alert reconciliation.
  *
  * @covers \Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine
  */
@@ -56,6 +57,23 @@ class RemoteInboxNotificationsEngineTest extends WC_Unit_Test_Case {
 		}
 		remove_all_actions( 'woocommerce_updated' );
 		RemoteInboxNotificationsEngine::init();
+	}
+
+	/**
+	 * @testdox Completing an existing onboarding profile runs the inbox engine.
+	 */
+	public function test_completing_profile_runs_the_inbox_engine(): void {
+		update_option( OnboardingProfile::DATA_OPTION, array() );
+		$note        = $this->create_note( 'profile-completion-alert', 'woocommerce.com', Note::E_WC_ADMIN_NOTE_UPDATE, Note::E_WC_ADMIN_NOTE_PENDING );
+		$spec        = $this->create_spec( $note->get_name() );
+		$spec->rules = array( (object) array( 'type' => 'pass' ) );
+		$this->arrange_feed( array( $spec ), time() );
+
+		update_option( OnboardingProfile::DATA_OPTION, array( 'completed' => false ) );
+		$this->assertSame( Note::E_WC_ADMIN_NOTE_PENDING, $this->get_status( $note ), 'An incomplete profile must not run the inbox engine.' );
+
+		update_option( OnboardingProfile::DATA_OPTION, array( 'completed' => true ) );
+		$this->assertSame( Note::E_WC_ADMIN_NOTE_UNACTIONED, $this->get_status( $note ), 'Completing the profile must process the published inbox alert.' );
 	}
 
 	/**
@@ -615,9 +633,9 @@ class RemoteInboxNotificationsEngineTest extends WC_Unit_Test_Case {
 	 *
 	 * @param string      $slug   Spec slug.
 	 * @param string|null $source Spec source, or null to omit it.
-	 * @return object Remote spec.
+	 * @return \stdClass Remote spec.
 	 */
-	private function create_spec( string $slug, ?string $source = 'woocommerce.com' ): object {
+	private function create_spec( string $slug, ?string $source = 'woocommerce.com' ): \stdClass {
 		$spec = (object) array(
 			'slug'    => $slug,
 			'status'  => Note::E_WC_ADMIN_NOTE_UNACTIONED,

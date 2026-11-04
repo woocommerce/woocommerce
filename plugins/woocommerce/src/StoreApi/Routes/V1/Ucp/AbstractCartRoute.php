@@ -82,6 +82,24 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	}
 
 	/**
+	 * Send only the cache directive; the other Store API headers serve browser clients.
+	 *
+	 * A UCP client holds the cart credential as the path id and reads `id` from the body,
+	 * sends no nonce and keeps no hash-keyed cache. Leaving the parent's builder out also
+	 * keeps a `Cart-Token` for whatever session is in memory off an answer built before
+	 * the route binds one, such as the not-found refusal above.
+	 *
+	 * @param \WP_REST_Response $response The response object.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	protected function add_response_headers( \WP_REST_Response $response ) {
+		$response->header( 'Cache-Control', 'no-store' );
+
+		return $response;
+	}
+
+	/**
 	 * Put the request's cart token slot back the way it was found.
 	 *
 	 * @param string $token The token the request arrived with, or '' for none.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix WooCommerce.com requests such as connection status checks failing intermittently on stores that use ALTERNATE_WP_CRON.
