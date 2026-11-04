@@ -435,7 +435,7 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 		$this->assertSame( $red->get_id(), $cart_item['variation_id'], 'A variation can be added by ID when no attributes are posted.' );
 		$this->assertSame( 'Red', $cart_item['variation']['attribute_color'], 'The variation color should be kept.' );
 
-		$any_cart_id = ( new CartController() )->add_to_cart(
+		$any_cart_id   = ( new CartController() )->add_to_cart(
 			array(
 				'id'        => $any->get_id(),
 				'quantity'  => 1,

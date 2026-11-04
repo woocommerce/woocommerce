@@ -1359,7 +1359,7 @@ class CartController {
 			}
 
 			// Keep attributes the request left out, so a partial selection is matched as this variation plus those posted values.
-			$match_attributes = array_merge(
+			$match_attributes     = array_merge(
 				array_filter( wc_get_product_variation_attributes( $request['id'] ), 'wc_array_filter_default_attributes' ),
 				$request['variation']
 			);
