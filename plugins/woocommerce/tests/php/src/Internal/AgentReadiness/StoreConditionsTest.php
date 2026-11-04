@@ -58,7 +58,7 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A draft or trashed refund page fails its check like an unset one, as a required check that doesn't block the switch.
+	 * @testdox A draft or trashed refund page fails its check like an unset one.
 	 *
 	 * @testWith ["draft"]
 	 *           ["trash"]

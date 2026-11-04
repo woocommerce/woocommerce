@@ -153,14 +153,26 @@ class ReadinessRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Turn UCP on or off. Failing setup checks don't block it.
+	 * Turn UCP on or off. A failing required check keeps it from being turned on, and that request answers 409.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
-	 * @return array{enabled:bool,status:string,failing_checks:array<int,string>}
+	 * @return array{enabled:bool,status:string,failing_checks:array<int,string>}|\WP_Error
 	 */
-	protected function set_ucp_enabled( WP_REST_Request $request ): array {
-		return $this->ucp_switch->set_enabled( (bool) $request->get_param( 'enabled' ) );
+	protected function set_ucp_enabled( WP_REST_Request $request ): array|\WP_Error {
+		$enable = (bool) $request->get_param( 'enabled' );
+		$result = $this->ucp_switch->set_enabled( $enable );
+		if ( $enable && ! $result['enabled'] ) {
+			return new \WP_Error(
+				'woocommerce_ucp_required_checks_failing',
+				__( 'Finish the required setup checks before letting agents shop your store.', 'woocommerce' ),
+				array(
+					'status'         => 409,
+					'failing_checks' => $result['failing_checks'],
+				)
+			);
+		}
+		return $result;
 	}
 
 	/**

@@ -112,7 +112,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '<span>Available to agents</span> <strong>1</strong></li>', $html, 'No list matches the available count, so it has no link' );
 		$this->assertStringContainsString( 'product_type=simple,variable&#038;product_visibility=exclude-from-catalog', $html, 'The hidden link matches its count' );
 		$this->assertStringContainsString( 'aria-checked="false"', $html );
-		$this->assertStringNotContainsString( 'to turn this on', $html, 'Failing checks never block the switch' );
+		$this->assertStringNotContainsString( 'to turn this on', $html );
 		$this->assertMatchesRegularExpression( '/but \d+ required setup checks? below still needs? fixing\./', (string) wp_scripts()->get_data( 'wc-agentic-commerce-settings', 'data' ), 'Turning the switch on shows the failing checks without a reload' );
 		$this->assertStringContainsString( 'wc-agentic-commerce-check--required', $html, 'Failing required checks are in the Required group' );
 		$this->assertMatchesRegularExpression( '/(Choose a|Publish your) privacy policy page/', $html, 'An open check says what to do' );
@@ -292,6 +292,20 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( '', get_option( AgenticCommerceSettings::TERMS_PAGE_OPTION ) );
+	}
+
+	/**
+	 * @testdox The switch stays disabled until the required checks pass.
+	 */
+	public function test_switch_disabled_until_required_checks_pass(): void {
+		update_option( 'woocommerce_coming_soon', 'yes' );
+
+		$blocked = $this->render_page();
+		$this->assertMatchesRegularExpression( '/<button[^>]*wc-agentic-commerce-ucp-switch[^>]*disabled=([\'"])disabled\\1/', $blocked );
+
+		StoreConditionsTest::make_store_ready( $this );
+		$ready = $this->render_page();
+		$this->assertDoesNotMatchRegularExpression( '/<button[^>]*wc-agentic-commerce-ucp-switch[^>]*disabled=([\'"])disabled\\1/', $ready );
 	}
 
 	/**
