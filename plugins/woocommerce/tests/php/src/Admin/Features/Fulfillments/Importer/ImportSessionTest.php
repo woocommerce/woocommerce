@@ -396,6 +396,22 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox persist() extends the payload TTL even when the payload is unchanged, so it keeps pace with the index pointer.
+	 */
+	public function test_persist_slides_payload_ttl_for_unchanged_payload(): void {
+		$session        = $this->make_session( 48, $this->make_staged_file() );
+		$timeout_option = '_transient_timeout_wc_fulfillment_import_48_' . $session->token();
+		$backdated      = time() + 10 * MINUTE_IN_SECONDS;
+		update_option( $timeout_option, $backdated );
+
+		$persist = new \ReflectionMethod( ImportSession::class, 'persist' );
+		$persist->setAccessible( true );
+
+		$this->assertTrue( $persist->invoke( $session ), 'An unchanged payload still counts as stored' );
+		$this->assertGreaterThan( $backdated + 30 * MINUTE_IN_SECONDS, (int) get_option( $timeout_option ), 'The payload TTL must slide on persist() even when the payload is unchanged' );
+	}
+
+	/**
 	 * @testdox Creating a second session for the same user invalidates the first.
 	 */
 	public function test_create_replaces_prior_session_for_same_user(): void {
