@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+WC_Abstract_Order::apply_coupon() no longer counts the usage of the new coupon twice when the order's save records the coupon usage, for example after a status change to processing that was not saved yet.

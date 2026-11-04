@@ -15,6 +15,8 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\DimensionUnit;
+use Automattic\WooCommerce\Enums\WeightUnit;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
@@ -191,7 +193,7 @@ class WC_Structured_Data {
 		$data  = $this->get_structured_data( $types );
 
 		if ( $data ) {
-			echo '<script type="application/ld+json">' . wc_esc_json( wp_json_encode( $data, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ), true ) . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo '<script type="application/ld+json">' . wc_esc_json( wp_json_encode( $data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_SLASHES ), true ) . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 	}
 
@@ -364,6 +366,7 @@ class WC_Structured_Data {
 				$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
 				$child_ids        = $product->get_children();
 				_prime_post_caches( $child_ids );
+				/** @var WC_Product[] $children */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 				$children       = array_filter( array_map( 'wc_get_product', $child_ids ), 'wc_products_array_filter_visible_grouped' );
 				$price_function = TaxDisplayMode::INCLUSIVE === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
 
@@ -371,7 +374,7 @@ class WC_Structured_Data {
 					if ( '' !== $child->get_regular_price() ) {
 						$child_prices[] = $price_function( $child, array( 'price' => $child->get_regular_price() ) );
 					}
-					if ( '' !== $child->get_sale_price() ) {
+					if ( '' !== $child->get_sale_price() && $child->is_on_sale() ) {
 						$child_sale_prices[] = $price_function( $child, array( 'price' => $child->get_sale_price() ) );
 					}
 				}
@@ -560,6 +563,66 @@ class WC_Structured_Data {
 			return;
 		}
 
+		$measurement_product = $selected_variation ?? $product;
+		$weight_units        = array(
+			WeightUnit::KILOGRAM => 'KGM',
+			WeightUnit::GRAM     => 'GRM',
+			WeightUnit::POUND    => 'LBR',
+			WeightUnit::OUNCE    => 'ONZ',
+		);
+		$dimension_units     = array(
+			DimensionUnit::METER      => 'MTR',
+			DimensionUnit::CENTIMETER => 'CMT',
+			DimensionUnit::MILLIMETER => 'MMT',
+			DimensionUnit::INCH       => 'INH',
+			DimensionUnit::YARD       => 'YRD',
+		);
+		$weight_unit         = get_option( 'woocommerce_weight_unit' );
+		$dimension_unit      = get_option( 'woocommerce_dimension_unit' );
+		$measurements        = array(
+			'weight' => $measurement_product->get_weight(),
+			'width'  => $measurement_product->get_width(),
+			'height' => $measurement_product->get_height(),
+			'depth'  => $measurement_product->get_length(),
+		);
+		foreach ( $measurements as $property => $value ) {
+			$unit  = 'weight' === $property ? $weight_unit : $dimension_unit;
+			$units = 'weight' === $property ? $weight_units : $dimension_units;
+			if ( ! is_numeric( $value ) || ! is_finite( (float) $value ) || (float) $value <= 0 || ! is_string( $unit ) || ! isset( $units[ $unit ] ) || isset( $markup[ $property ] ) ) {
+				continue;
+			}
+			$markup[ $property ] = array(
+				'@type'    => 'QuantitativeValue',
+				'value'    => (float) $value,
+				'unitCode' => $units[ $unit ],
+			);
+		}
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Reuse the breadcrumb filter.
+		$term_args  = apply_filters(
+			'woocommerce_breadcrumb_product_terms_args',
+			array(
+				'orderby' => 'parent',
+				'order'   => 'DESC',
+			)
+		);
+		$product_id = $product instanceof WC_Product_Variation ? $product->get_parent_id() : $product->get_id();
+		$terms      = is_array( $term_args ) ? wc_get_product_terms( $product_id, 'product_cat', $term_args ) : array();
+		if ( ! empty( $terms ) && is_array( $terms ) ) {
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Reuse the breadcrumb filter.
+			$term  = apply_filters( 'woocommerce_breadcrumb_main_term', reset( $terms ), $terms );
+			$names = array();
+			$seen  = array();
+			while ( $term instanceof WP_Term && 'product_cat' === $term->taxonomy && ! isset( $seen[ $term->term_id ] ) ) {
+				$seen[ $term->term_id ] = true;
+				$names[]                = html_entity_decode( $term->name, ENT_QUOTES, get_bloginfo( 'charset' ) );
+				if ( ! $term->parent ) {
+					$markup['category'] = implode( ' > ', array_reverse( $names ) );
+					break;
+				}
+				$term = get_term( $term->parent, 'product_cat' );
+			}
+		}
 		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
 	}
 

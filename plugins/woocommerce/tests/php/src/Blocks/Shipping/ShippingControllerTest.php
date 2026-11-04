@@ -334,6 +334,7 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 	public function test_filter_taxable_address_returns_chosen_pickup_location_address(): void {
 		$this->save_pickup_locations();
 		WC()->session->set( 'chosen_shipping_methods', array( 'pickup_location:1' ) );
+		WC()->session->set( 'previous_shipping_methods', array( array( 'pickup_location:1' ) ) );
 
 		$this->assertSame(
 			array( 'US', 'NY', '10001', 'New York' ),
@@ -361,6 +362,7 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 			)
 		);
 		WC()->session->set( 'chosen_shipping_methods', array( 'pickup_location:0' ) );
+		WC()->session->set( 'previous_shipping_methods', array( array( 'pickup_location:0' ) ) );
 
 		$this->assertSame(
 			array( 'FR', '', '75001', 'Paris' ),

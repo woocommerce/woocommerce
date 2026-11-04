@@ -34,12 +34,12 @@
 		"@types/node": "^24.1.0",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"eslint": "^10.0.0",
+		"eslint": "catalog:tooling",
 		"oclif": "^4.23.30",
 		"shx": "^0.3.4",
 		"ts-node": "^10.9.2",
 		"tslib": "^2.6.2",
-		"typescript": "5.7.x"
+		"typescript": "catalog:tooling"
 	},
 	"oclif": {
 		"bin": "package-release",
