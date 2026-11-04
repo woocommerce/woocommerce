@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Internal\Admin\FeaturePlugin;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseTransaction;
 use Automattic\WooCommerce\Internal\VariationGallery\Migration as VariationGalleryMigration;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
@@ -269,7 +270,6 @@ class WC_Unit_Tests_Bootstrap {
 	 */
 	public function load_wc() {
 		define( 'WC_TAX_ROUNDING_MODE', 'auto' );
-		define( 'WC_USE_TRANSACTIONS', false );
 
 		update_option( 'woocommerce_enable_coupons', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
@@ -277,6 +277,11 @@ class WC_Unit_Tests_Bootstrap {
 
 		require_once $this->plugin_dir . '/woocommerce.php';
 		FeaturePlugin::instance()->init();
+
+		// The test case wraps each test in a transaction that it rolls back. Own
+		// that transaction one time, so every transaction in a test becomes a
+		// savepoint inside it, and a rollback in the code under test is real.
+		DatabaseTransaction::start();
 	}
 
 	/**
