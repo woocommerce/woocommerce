@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add a stable API for registering custom product collections, retaining the experimental API as a deprecated alias.
