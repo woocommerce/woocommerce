@@ -13112,12 +13112,6 @@ parameters:
 			path: includes/class-wc-post-data.php
 
 		-
-			message: '#^Access to an undefined property object\:\:\$taxonomy\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/class-wc-post-data.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:delete_by_order_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -13154,6 +13148,7 @@ parameters:
 			path: includes/class-wc-post-data.php
 
 		-
+<<<<<<< HEAD
 			message: '#^Cannot access property \$taxonomy on WP_Term\|false\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -13166,6 +13161,8 @@ parameters:
 			path: includes/class-wc-post-data.php
 
 		-
+=======
+>>>>>>> f4cfdcb51f (Keep custom default attribute values intact when a term is renamed (#70627))
 			message: '#^Expected 4 @param tags, found 3\.$#'
 			identifier: paramTag.count
 			count: 1

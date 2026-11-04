@@ -280,17 +280,85 @@ class WC_Post_Data {
 
 				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE meta_key = %s AND meta_value = %s;", $edited_term->slug, 'attribute_' . sanitize_title( $taxonomy ), self::$editing_term->slug ) );
 
-				$wpdb->query(
+				// Edit the decoded array, not the serialized text: a text replace also hits matching text inside other values and breaks their lengths.
+				$old_slug = self::$editing_term->slug;
+				$meta_ids = $wpdb->get_col(
 					$wpdb->prepare(
-						"UPDATE {$wpdb->postmeta} SET meta_value = REPLACE( meta_value, %s, %s ) WHERE meta_key = '_default_attributes'",
-						serialize( self::$editing_term->taxonomy ) . serialize( self::$editing_term->slug ),
-						serialize( $edited_term->taxonomy ) . serialize( $edited_term->slug )
+						"SELECT meta_id FROM {$wpdb->postmeta} WHERE meta_key = '_default_attributes' AND meta_value LIKE %s",
+						'%' . $wpdb->esc_like( serialize( $taxonomy ) . serialize( $old_slug ) ) . '%' // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Matches the stored serialized form.
 					)
 				);
+
+				foreach ( array_chunk( array_map( 'absint', $meta_ids ), 500 ) as $chunk ) {
+					$rows     = $wpdb->get_results( "SELECT meta_id, post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_id IN (" . implode( ',', $chunk ) . ')' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- IDs are absint'd.
+					$updates  = array();
+					$post_ids = array();
+
+					foreach ( $rows as $row ) {
+						$default_attributes = @unserialize( trim( $row->meta_value ), array( 'allowed_classes' => false ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize -- Same as maybe_unserialize(), without objects.
+
+						// WooCommerce only stores strings here; leave rows holding anything else alone.
+						if ( ! is_array( $default_attributes ) || array_filter( $default_attributes, 'is_scalar' ) !== $default_attributes || ( $default_attributes[ $taxonomy ] ?? null ) !== $old_slug ) {
+							continue;
+						}
+
+						$default_attributes[ $taxonomy ] = $edited_term->slug;
+
+						$updates[ (int) $row->meta_id ] = array(
+							'old_value' => $row->meta_value,
+							'new_value' => serialize( $default_attributes ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Stored in the same format WordPress uses.
+						);
+						$post_ids[]                     = (int) $row->post_id;
+					}
+
+					if ( ! $updates ) {
+						continue;
+					}
+
+					$updated = self::update_post_meta_batch( $updates );
+
+					if ( false === $updated ) {
+						wc_get_logger()->error(
+							sprintf( 'Could not update the default attributes of products %1$s after a %2$s term was renamed: %3$s', implode( ', ', array_unique( $post_ids ) ), $taxonomy, $wpdb->last_error ),
+							array( 'source' => 'product-attributes' )
+						);
+					}
+
+					wp_cache_delete_multiple( array_unique( $post_ids ), 'post_meta' );
+				}
 			}
 		} else {
 			self::$editing_term = null;
 		}
+	}
+
+	/**
+	 * Update post metadata in one query, preserving concurrent edits.
+	 *
+	 * Each CASE branch assigns a replacement only when the row still holds its original value, compared under the column's collation; ELSE keeps newer values.
+	 * Writes bypass metadata hooks. The caller must invalidate the affected post meta caches.
+	 *
+	 * @param array<int, array{old_value: string, new_value: string}> $updates Original and replacement stored values, keyed by metadata ID.
+	 * @return bool Whether the query succeeded.
+	 */
+	private static function update_post_meta_batch( array $updates ): bool {
+		global $wpdb;
+
+		if ( ! $updates ) {
+			return true;
+		}
+
+		$cases = array();
+		foreach ( $updates as $meta_id => $values ) {
+			$cases[ (int) $meta_id ] = $wpdb->prepare(
+				'WHEN meta_id = %d AND meta_value = %s THEN %s',
+				$meta_id,
+				$values['old_value'],
+				$values['new_value']
+			);
+		}
+
+		return false !== $wpdb->query( "UPDATE {$wpdb->postmeta} SET meta_value = CASE " . implode( ' ', $cases ) . ' ELSE meta_value END WHERE meta_id IN (' . implode( ',', array_keys( $cases ) ) . ')' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Built from prepared fragments and integer IDs.
 	}
 
 	/**

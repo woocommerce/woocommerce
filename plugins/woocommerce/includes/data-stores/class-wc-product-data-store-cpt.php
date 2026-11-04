@@ -486,7 +486,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$set_props = array();
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			$meta_value         = $post_meta_values[ $meta_key ][0] ?? null;
+			$meta_value = $post_meta_values[ $meta_key ][0] ?? null;
+
+			if ( '_default_attributes' === $meta_key && is_serialized( $meta_value ) ) {
+				// Default attributes only hold strings, so don't let a stored value create objects.
+				$default_attributes = @unserialize( trim( $meta_value ), array( 'allowed_classes' => false ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize -- Same as maybe_unserialize(), without objects.
+				// A whole-row object would otherwise be cast to an array of its class name and properties.
+				$set_props[ $prop ] = is_object( $default_attributes ) ? array() : $default_attributes;
+				continue;
+			}
+
 			$set_props[ $prop ] = maybe_unserialize( $meta_value ); // get_post_meta only unserializes single values.
 		}
 
