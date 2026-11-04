@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Admin\API\Reports\Stock;
 
+use Automattic\WooCommerce\Admin\API\Reports\Stock\Controller;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
@@ -105,9 +106,46 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'active_signups', $schema );
 		$this->assertArrayNotHasKey( 'days_waiting', $schema );
 
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT );
-		$request->set_param( 'orderby', 'active_signups' );
-		$this->assertSame( 400, $this->server->dispatch( $request )->get_status() );
+		foreach ( array( 'active_signups', 'days_waiting' ) as $orderby ) {
+			$request = new WP_REST_Request( 'GET', self::ENDPOINT );
+			$request->set_param( 'orderby', $orderby );
+			$this->assertSame( 400, $this->server->dispatch( $request )->get_status(), "Sorting by $orderby should be rejected." );
+		}
+	}
+
+	/**
+	 * @testdox Should export the stock notification columns only when the feature is enabled.
+	 */
+	public function test_export_columns_follow_feature_flag(): void {
+		$controller = new Controller();
+		$item       = array(
+			'name'           => 'Test product',
+			'sku'            => 'test-sku',
+			'stock_status'   => 'outofstock',
+			'stock_quantity' => 0,
+			'active_signups' => 2,
+			'days_waiting'   => 5,
+		);
+
+		$this->assertArrayNotHasKey( 'active_signups', $controller->get_export_columns() );
+		$this->assertArrayNotHasKey( 'days_waiting', $controller->get_export_columns() );
+		$this->assertArrayNotHasKey( 'active_signups', $controller->prepare_item_for_export( $item ) );
+		$this->assertArrayNotHasKey( 'days_waiting', $controller->prepare_item_for_export( $item ) );
+
+		update_option( StockNotifications::ENABLE_OPTION_NAME, 'yes' );
+
+		$this->assertArrayHasKey( 'active_signups', $controller->get_export_columns() );
+		$this->assertArrayHasKey( 'days_waiting', $controller->get_export_columns() );
+
+		$export_item = $controller->prepare_item_for_export( $item );
+		$this->assertSame( 2, $export_item['active_signups'] );
+		$this->assertSame( 5, $export_item['days_waiting'] );
+
+		$item['active_signups'] = 0;
+		$item['days_waiting']   = null;
+		$export_item            = $controller->prepare_item_for_export( $item );
+		$this->assertSame( 0, $export_item['active_signups'] );
+		$this->assertSame( '', $export_item['days_waiting'], 'A product without active sign-ups should export no days waiting.' );
 	}
 
 	/**
@@ -136,8 +174,8 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 			array(
 				$ids['simple_a']  => array( 2, 5 ),
 				$ids['simple_b']  => array( 1, 2 ),
-				$ids['none']      => array( 0, 0 ),
-				$ids['parent']    => array( 0, 0 ),
+				$ids['none']      => array( 0, null ),
+				$ids['parent']    => array( 0, null ),
 				$ids['variation'] => array( 3, 9 ),
 			),
 			array_replace( array_fill_keys( $ids, null ), $actual )
@@ -219,7 +257,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 *
 	 * @param int    $product_id Product or variation ID.
 	 * @param string $status     Notification status.
-	 * @param int    $days_ago   How many days ago it was created.
+	 * @param int    $days_ago   How many whole days ago it was created, plus a minute so the elapsed day count is stable.
 	 */
 	private function insert_notification( int $product_id, string $status, int $days_ago ): void {
 		global $wpdb;
@@ -231,7 +269,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 				'user_id'          => 0,
 				'user_email'       => wp_generate_password( 8, false ) . '@example.com',
 				'status'           => $status,
-				'date_created_gmt' => gmdate( 'Y-m-d H:i:s', time() - $days_ago * DAY_IN_SECONDS ),
+				'date_created_gmt' => gmdate( 'Y-m-d H:i:s', time() - $days_ago * DAY_IN_SECONDS - MINUTE_IN_SECONDS ),
 			)
 		);
 	}

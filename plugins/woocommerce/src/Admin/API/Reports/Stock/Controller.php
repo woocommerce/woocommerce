@@ -191,7 +191,7 @@ class Controller extends GenericController implements ExportableInterface {
 		// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $placeholders is a list of %d placeholders.
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT product_id, COUNT(*) AS active_signups, DATEDIFF( UTC_TIMESTAMP(), MIN( date_created_gmt ) ) AS days_waiting
+				"SELECT product_id, COUNT(*) AS active_signups, TIMESTAMPDIFF( DAY, MIN( date_created_gmt ), UTC_TIMESTAMP() ) AS days_waiting
 				FROM {$wpdb->prefix}wc_stock_notifications
 				WHERE status = %s AND product_id IN ( {$placeholders} )
 				GROUP BY product_id",
@@ -406,7 +406,7 @@ class Controller extends GenericController implements ExportableInterface {
 		if ( self::is_stock_notifications_enabled() ) {
 			$stats                  = $this->notification_stats[ $data['id'] ] ?? array();
 			$data['active_signups'] = $stats['active_signups'] ?? 0;
-			$data['days_waiting']   = $stats['days_waiting'] ?? 0;
+			$data['days_waiting']   = $stats['days_waiting'] ?? null;
 		}
 
 		$response = parent::prepare_item_for_response( $data, $request );
@@ -525,8 +525,8 @@ class Controller extends GenericController implements ExportableInterface {
 				'readonly'    => true,
 			);
 			$schema['properties']['days_waiting']   = array(
-				'description' => __( 'Days since the oldest active back in stock sign-up.', 'woocommerce' ),
-				'type'        => 'integer',
+				'description' => __( 'Days since the oldest active back in stock sign-up, or null when there are none.', 'woocommerce' ),
+				'type'        => array( 'integer', 'null' ),
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			);
@@ -625,7 +625,7 @@ class Controller extends GenericController implements ExportableInterface {
 		);
 
 		if ( self::is_stock_notifications_enabled() ) {
-			$export_columns['active_signups'] = __( 'Waiting', 'woocommerce' );
+			$export_columns['active_signups'] = _x( 'Waiting', 'number of customers waiting for stock', 'woocommerce' );
 			$export_columns['days_waiting']   = __( 'Days waiting', 'woocommerce' );
 		}
 
@@ -662,7 +662,7 @@ class Controller extends GenericController implements ExportableInterface {
 
 		if ( self::is_stock_notifications_enabled() ) {
 			$export_item['active_signups'] = $item['active_signups'] ?? 0;
-			$export_item['days_waiting']   = $item['days_waiting'] ?? 0;
+			$export_item['days_waiting']   = $item['days_waiting'] ?? '';
 		}
 
 		/**

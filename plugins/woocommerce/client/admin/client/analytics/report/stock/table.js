@@ -62,7 +62,11 @@ class StockReportTable extends Component {
 		if ( showStockNotifications ) {
 			headers.push(
 				{
-					label: __( 'Waiting', 'woocommerce' ),
+					label: _x(
+						'Waiting',
+						'number of customers waiting for stock',
+						'woocommerce'
+					),
 					key: 'active_signups',
 					isSortable: true,
 					isNumeric: true,
@@ -93,7 +97,7 @@ class StockReportTable extends Component {
 				stock_status: stockStatus,
 				low_stock_amount: lowStockAmount,
 				active_signups: activeSignups = 0,
-				days_waiting: daysWaiting = 0,
+				days_waiting: daysWaiting = null,
 			} = product;
 
 			const name = decodeEntities( product.name );
@@ -171,7 +175,14 @@ class StockReportTable extends Component {
 						value: activeSignups,
 					},
 					{
-						display: formatValue( currency, 'number', daysWaiting ),
+						display:
+							daysWaiting === null
+								? '—'
+								: formatValue(
+										currency,
+										'number',
+										daysWaiting
+									),
 						value: daysWaiting,
 					}
 				);
