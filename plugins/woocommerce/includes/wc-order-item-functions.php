@@ -71,7 +71,7 @@ function wc_update_order_item( $item_id, $args ) {
 	 * @param WC_Order_Item|false $item     Updated order item.
 	 * @param int                 $order_id Order ID.
 	 */
-	do_action( 'woocommerce_update_order_item', $item_id, $item, $item ? $item->get_order_id() : 0 );
+	do_action( 'woocommerce_update_order_item', $item_id, $item, $item ? $item->get_order_id() : wc_get_order_id_by_order_item_id( $item_id ) );
 
 	return true;
 }

@@ -82,4 +82,25 @@ class WC_Tests_Order_Item_Functions extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( WC_Order_Item_Product::class, $received[1] );
 		$this->assertSame( $order->get_id(), $received[2] );
 	}
+
+	/**
+	 * @testdox wc_update_order_item() passes the order ID when the updated item cannot be loaded.
+	 */
+	public function test_wc_update_order_item_hook_order_id_when_item_cannot_be_loaded() {
+		$order   = WC_Helper_Order::create_order();
+		$item_id = current( $order->get_items() )->get_id();
+
+		$received = array();
+		$callback = function () use ( &$received ) {
+			$received = func_get_args();
+		};
+		add_action( 'woocommerce_update_order_item', $callback, 10, 3 );
+		$updated = wc_update_order_item( $item_id, array( 'order_item_type' => 'unknown_type' ) );
+		remove_action( 'woocommerce_update_order_item', $callback, 10 );
+
+		$this->assertTrue( $updated );
+		$this->assertSame( $item_id, $received[0] );
+		$this->assertFalse( $received[1] );
+		$this->assertSame( $order->get_id(), $received[2] );
+	}
 }
