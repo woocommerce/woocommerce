@@ -96,8 +96,15 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 			array_intersect_key( $input, array_flip( array( 'taxonomy', 'include', 'exclude', 'search', 'slug', 'parent', 'hide_empty', 'orderby', 'order' ) ) )
 		);
 		$args['hide_empty'] = wp_validate_boolean( $input['hide_empty'] ?? false );
-		$args['number']     = $per_page;
-		$args['offset']     = $input['offset'] ?? ( $page - 1 ) * $per_page;
+		if ( isset( $input['slug'] ) ) {
+			$args['slug'] = wp_parse_slug_list( $input['slug'] );
+		}
+		$args['number'] = $per_page;
+		$args['offset'] = $input['offset'] ?? ( $page - 1 ) * $per_page;
+		if ( isset( $args['search'] ) && is_string( $args['search'] ) ) {
+			// Term names are stored with &, < and > encoded, so the search has to match that.
+			$args['search'] = _wp_specialchars( $args['search'] );
+		}
 		if ( ! empty( $input['product'] ) ) {
 			$args['object_ids'] = array( $input['product'] );
 		}
@@ -122,8 +129,17 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 			_prime_post_caches( $image_ids );
 		}
 
+		$formatted = array();
+		foreach ( $terms as $term ) {
+			$data = self::format_term( $term );
+			if ( is_wp_error( $data ) ) {
+				return $data;
+			}
+			$formatted[] = $data;
+		}
+
 		return array(
-			'terms'       => array_map( array( __CLASS__, 'format_term' ), array_values( $terms ) ),
+			'terms'       => $formatted,
 			'total'       => (int) $total,
 			'total_pages' => (int) ceil( (int) $total / $per_page ),
 			'page'        => isset( $input['offset'] ) ? (int) floor( $args['offset'] / $per_page ) + 1 : $page,
@@ -135,12 +151,12 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 	 * Format a term with the fields of the WooCommerce term reads.
 	 *
 	 * @param \WP_Term $term Term to format.
-	 * @return array
+	 * @return array|\WP_Error A WP_Error when an extension field value does not match its schema.
 	 */
-	private static function format_term( \WP_Term $term ): array {
+	private static function format_term( \WP_Term $term ) {
 		$output = array(
 			'id'          => $term->term_id,
-			'name'        => $term->name,
+			'name'        => html_entity_decode( $term->name, ENT_QUOTES | ENT_HTML5 ),
 			'slug'        => $term->slug,
 			'description' => $term->description,
 			'count'       => $term->count,
@@ -157,7 +173,7 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 				$output['image'] = array(
 					'id'   => $image->ID,
 					'src'  => $image_url,
-					'name' => get_the_title( $image ),
+					'name' => $image->post_title,
 					'alt'  => get_post_meta( $image->ID, '_wp_attachment_image_alt', true ),
 				);
 				foreach ( array(
@@ -215,8 +231,8 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 				),
 				'search'     => array( 'type' => 'string' ),
 				'slug'       => array(
-					'description' => __( 'Limit results to these slugs. An empty string or list applies no slug filter.', 'woocommerce' ),
-					'type'        => array( 'string', 'array' ),
+					'description' => __( 'Limit results to these slugs. Send one slug as a list of one. An empty list applies no slug filter.', 'woocommerce' ),
+					'type'        => 'array',
 					'items'       => array( 'type' => 'string' ),
 				),
 				'parent'     => array(

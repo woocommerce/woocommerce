@@ -82,8 +82,9 @@ class OpenGraph {
 		$this->default_card = array_column( $tags, 'twitter:card' )[0] ?? null;
 
 		/**
-		 * Filters Open Graph metadata before output. Applied to product and shop pages.
+		 * Filters Open Graph metadata before output. Applied to product, shop, product taxonomy and product search pages.
 		 * Other page types may be supported later; callbacks must check the object type.
+		 * Product searches may use the shop page as their queried object; use is_search() to distinguish them.
 		 * The first tag in each group is its root; details follow it. Remove or replace an entire group to omit or replace its details.
 		 *
 		 * @since 11.4.0
@@ -136,6 +137,20 @@ class OpenGraph {
 			return $this->get_product_page_data();
 		}
 
+		if ( is_search() && is_post_type_archive( 'product' ) ) {
+			$search = get_search_query( false );
+			if ( is_string( $search ) && '' !== trim( $search ) ) {
+				$context = get_queried_object();
+				if ( ! $context instanceof \WP_Post && ! $context instanceof \WP_Term && ! $context instanceof \WP_Post_Type ) {
+					$context = null;
+				}
+				return array(
+					'tags'    => wc_get_container()->get( ProductSearchOpenGraphTags::class )->get_tags( $search ),
+					'context' => $context,
+				);
+			}
+		}
+
 		if (
 			is_shop()
 			&& ! is_search()
@@ -143,6 +158,16 @@ class OpenGraph {
 			&& ( ! isset( $_GET['product-page'] ) || 1 === absint( $_GET['product-page'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public pagination parameter.
 		) {
 			return $this->get_shop_page_data();
+		}
+
+		if ( ! is_search() && is_tax( array( 'product_cat', 'product_brand', 'product_tag' ) ) ) {
+			$term = get_queried_object();
+			if ( $term instanceof \WP_Term ) {
+				return array(
+					'tags'    => wc_get_container()->get( ProductTaxonomyOpenGraphTags::class )->get_tags( $term ),
+					'context' => $term,
+				);
+			}
 		}
 
 		return null;
