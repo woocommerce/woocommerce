@@ -1,31 +1,8 @@
 <%
-  const contributorsByLogin = new Map();
-  let commitCount = 0;
-
-  for ( const packageName in contributors ) {
-    const packageData = contributors[packageName];
-
-    if ( ! packageData.contributors ) {
-      continue;
-    }
-
-    commitCount += packageData.totalCommits ?? 0;
-
-    for ( const contributor of packageData.contributors ) {
-      if (
-        contributor.login &&
-        ! contributorsByLogin.has( contributor.login )
-      ) {
-        contributorsByLogin.set( contributor.login, contributor );
-      }
-    }
-  }
-
-  const contributorNames = Array.from( contributorsByLogin.values() )
-    .map( ( contributor ) => String( contributor.login ) )
-    .sort( ( firstContributor, secondContributor ) =>
-      firstContributor.localeCompare( secondContributor )
-    );
+  const commitCount = Object.values( contributors ).reduce(
+    ( total, packageData ) => total + ( packageData.totalCommits ?? 0 ),
+    0
+  );
   const contributorDisplayVersion =
     typeof displayVersion !== 'undefined'
       ? displayVersion
