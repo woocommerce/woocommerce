@@ -873,7 +873,7 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		$webhook->save();
 
 		// Saving an active webhook with a pending delivery pings its URL; answer locally.
-		add_filter( 'pre_http_request', fn() => $this->mock_http_response( 200 ) );
+		$this->http_responder = fn() => $this->mock_http_response( 200 );
 
 		$response = array(
 			'response' => array(
@@ -932,7 +932,7 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		$webhook->save();
 
 		// Saving an active webhook with a pending delivery pings its URL; answer locally.
-		add_filter( 'pre_http_request', fn() => $this->mock_http_response( 200 ) );
+		$this->http_responder = fn() => $this->mock_http_response( 200 );
 
 		$webhook->stage_delivery_result( 500 );
 		$this->assertSame( 1, $webhook->get_failure_count() );
