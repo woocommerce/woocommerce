@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Stock\Controller;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
+use Automattic\WooCommerce\Internal\StockNotifications\StockReportColumns;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WC_Product_Simple;
 use WC_Product_Variable;
@@ -44,7 +45,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Tear down.
 	 */
 	public function tearDown(): void {
-		unset( $GLOBALS['current_screen'] );
+		unset( $GLOBALS['current_screen'], $GLOBALS['wp_rest_additional_fields']['report_stock'] );
 		$this->restore_stock_notifications_feature_option();
 
 		parent::tearDown();
@@ -132,7 +133,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'active_signups', $controller->prepare_item_for_export( $item ) );
 		$this->assertArrayNotHasKey( 'days_waiting', $controller->prepare_item_for_export( $item ) );
 
-		update_option( StockNotifications::ENABLE_OPTION_NAME, 'yes' );
+		$this->enable_stock_notification_columns();
 
 		$this->assertArrayHasKey( 'active_signups', $controller->get_export_columns() );
 		$this->assertArrayHasKey( 'days_waiting', $controller->get_export_columns() );
@@ -152,7 +153,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Should report active sign-ups and days waiting per product and variation when the feature is enabled.
 	 */
 	public function test_notification_columns_report_active_signups(): void {
-		update_option( StockNotifications::ENABLE_OPTION_NAME, 'yes' );
+		$this->enable_stock_notification_columns();
 		$ids = $this->create_notification_fixture();
 
 		$schema = $this->server->dispatch( new WP_REST_Request( 'OPTIONS', self::ENDPOINT ) )->get_data()['schema']['properties'];
@@ -186,7 +187,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Should sort by active sign-up count in both orders.
 	 */
 	public function test_orderby_active_signups(): void {
-		update_option( StockNotifications::ENABLE_OPTION_NAME, 'yes' );
+		$this->enable_stock_notification_columns();
 		$ids = $this->create_notification_fixture();
 
 		$this->assertSame(
@@ -203,7 +204,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Should sort by days waiting in both orders, with products without sign-ups last.
 	 */
 	public function test_orderby_days_waiting(): void {
-		update_option( StockNotifications::ENABLE_OPTION_NAME, 'yes' );
+		$this->enable_stock_notification_columns();
 		$ids     = $this->create_notification_fixture();
 		$without = array( $ids['none'], $ids['parent'] );
 
@@ -214,6 +215,26 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$asc = $this->get_sorted_ids( $ids, 'days_waiting', 'asc' );
 		$this->assertSame( array( $ids['simple_b'], $ids['simple_a'], $ids['variation'] ), array_slice( $asc, 0, 3 ) );
 		$this->assertEqualsCanonicalizing( $without, array_slice( $asc, 3 ) );
+	}
+
+	/**
+	 * @testdox Should attach the report columns when the feature's services are wired up.
+	 */
+	public function test_feature_wires_up_report_columns(): void {
+		update_option( StockNotifications::ENABLE_OPTION_NAME, 'yes' );
+		$this->init_stock_notifications_services();
+
+		$schema = $this->server->dispatch( new WP_REST_Request( 'OPTIONS', self::ENDPOINT ) )->get_data()['schema']['properties'];
+		$this->assertArrayHasKey( 'active_signups', $schema );
+		$this->assertArrayHasKey( 'days_waiting', $schema );
+	}
+
+	/**
+	 * Enable the feature and attach the report columns, which the feature wires up once at `init`.
+	 */
+	private function enable_stock_notification_columns(): void {
+		update_option( StockNotifications::ENABLE_OPTION_NAME, 'yes' );
+		new StockReportColumns();
 	}
 
 	/**
