@@ -1,11 +1,11 @@
 <?php
-declare( strict_types = 1 );
-
 /**
  * Reports Variations Stats REST API Test
  *
  * @package WooCommerce\Admin\Tests\API
  */
+
+declare(strict_types=1);
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 
