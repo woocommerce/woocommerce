@@ -184,7 +184,23 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			try {
 				// Prevent getting "variation_invalid_id" error message from Variation Data Store.
 				if ( ProductType::VARIATION === $data['type'] ) {
-					$was_variation = $id && 'product_variation' === get_post_type( $id );
+					$post_type = $id ? get_post_type( $id ) : false;
+
+					// The wp_update_post() below rewrites the post type, so refuse an ID that is
+					// not already a product or variation to avoid converting an arbitrary post.
+					if ( $post_type && ! in_array( $post_type, array( 'product', 'product_variation' ), true ) ) {
+						return new WP_Error(
+							'woocommerce_product_csv_importer_invalid_id',
+							/* translators: %d: product ID */
+							sprintf( __( 'Invalid product ID %d.', 'woocommerce' ), $id ),
+							array(
+								'id'     => $id,
+								'status' => 401,
+							)
+						);
+					}
+
+					$was_variation = 'product_variation' === $post_type;
 
 					$id = wp_update_post(
 						array(
@@ -341,7 +357,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				unset( $data['cogs_value'] );
 			}
 
-			$result = $object->set_props( array_diff_key( $data, array_flip( array( 'meta_data', 'raw_image_id', 'raw_gallery_image_ids', 'raw_attributes' ) ) ) );
+			$result = $object->set_props( array_intersect_key( $data, array_flip( $object->get_data_keys() ) ) );
 
 			if ( is_wp_error( $result ) ) {
 				throw new Exception( $result->get_error_message() );
