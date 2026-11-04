@@ -95,6 +95,20 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Build a completed order with one product and the given billing email.
+	 *
+	 * @param string $email Billing email.
+	 * @return array{order:WC_Order, product_ids:int[], item_ids:int[]}
+	 */
+	private function make_order_with_email( string $email ): array {
+		$built = $this->make_order( 1 );
+		$built['order']->set_billing_email( $email );
+		$built['order']->save();
+
+		return $built;
+	}
+
+	/**
 	 * Invoke the handler and capture the JSON it would have sent.
 	 *
 	 * @return array{success:bool, data:mixed, status:int}
@@ -1295,6 +1309,207 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		$second_row = reset( $second['data']['results'] );
 
 		$this->assertSame( $comment_id, (int) $second_row['comment_id'], 'Resubmit must reuse the same comment.' );
+	}
+
+	/**
+	 * @testdox A moderator's trash verdict still blocks resubmission after the shopper has edited the review.
+	 * @testWith ["a+b@example.test"]
+	 *           ["a&b@example.test"]
+	 *           ["o'neil&b@example.test"]
+	 *
+	 * @param string $email Billing email to run the flow with.
+	 */
+	public function test_trash_verdict_survives_an_edit( string $email ): void {
+		$built   = $this->make_order_with_email( $email );
+		$order   = $built['order'];
+		$product = $built['product_ids'][0];
+		$item    = $built['item_ids'][0];
+
+		$first = $this->submit_review( $order, $product, $item, 4, 'First take.' );
+
+		// The edit is the step that used to re-encode the stored address.
+		$second = $this->submit_review( $order, $product, $item, 5, 'Second take.' );
+		$this->assertSame( (int) $first['comment_id'], (int) $second['comment_id'], 'The edit must reuse the row.' );
+
+		wp_trash_comment( (int) $first['comment_id'] );
+
+		$third = $this->submit_review( $order, $product, $item, 5, 'Third take.' );
+
+		$this->assertSame( 'error', $third['status'], 'A trashed review must block resubmission.' );
+		$this->assertSame( 'update_failed', $third['error'] );
+		$this->assertCount(
+			1,
+			get_comments(
+				array(
+					'post_id' => $product,
+					'type'    => 'review',
+					'status'  => 'any',
+				)
+			),
+			'The refusal must not leave a second review behind.'
+		);
+	}
+
+	/**
+	 * @testdox Editing a review leaves an ampersand in the stored author email unencoded.
+	 */
+	public function test_edit_does_not_encode_the_stored_author_email(): void {
+		$built   = $this->make_order_with_email( 'a&b@example.test' );
+		$order   = $built['order'];
+		$product = $built['product_ids'][0];
+		$item    = $built['item_ids'][0];
+
+		$first = $this->submit_review( $order, $product, $item, 4, 'First take.' );
+		$this->submit_review( $order, $product, $item, 5, 'Second take.' );
+
+		$comment = get_comment( (int) $first['comment_id'] );
+
+		$this->assertSame( 'a&b@example.test', $comment->comment_author_email );
+	}
+
+	/**
+	 * @testdox A trashed review is found whatever the stored author email says.
+	 */
+	public function test_trash_verdict_is_found_whatever_the_stored_email(): void {
+		global $wpdb;
+
+		$stored = 'drifted-past-recognition@example.test';
+
+		$built   = $this->make_order_with_email( 'a&b@example.test' );
+		$order   = $built['order'];
+		$product = $built['product_ids'][0];
+		$item    = $built['item_ids'][0];
+
+		$first      = $this->submit_review( $order, $product, $item, 4, 'First take.' );
+		$comment_id = (int) $first['comment_id'];
+
+		// Stand in for a row another wp_update_comment() caller has drifted. Each write adds
+		// another step, so the lookups key on the order instead of chasing the address.
+		$wpdb->update(
+			$wpdb->comments,
+			array( 'comment_author_email' => $stored ),
+			array( 'comment_ID' => $comment_id )
+		);
+		clean_comment_cache( $comment_id );
+		$this->assertSame(
+			$stored,
+			get_comment( $comment_id )->comment_author_email,
+			'The simulated drifted row must actually be encoded, or this proves nothing.'
+		);
+
+		wp_trash_comment( $comment_id );
+
+		$second = $this->submit_review( $order, $product, $item, 5, 'Second take.' );
+
+		$this->assertSame( 'error', $second['status'], 'A drifted row must still be found.' );
+		$this->assertSame( 'update_failed', $second['error'] );
+		$this->assertCount(
+			1,
+			get_comments(
+				array(
+					'post_id' => $product,
+					'type'    => 'review',
+					'status'  => 'any',
+				)
+			),
+			'The refusal must not leave a second review behind.'
+		);
+	}
+
+	/**
+	 * @testdox A trashed review still blocks resubmission on an order with no billing email.
+	 */
+	public function test_trash_verdict_holds_for_an_order_without_a_billing_email(): void {
+		// Built without an address rather than by clearing one: WC_Order keeps the stored
+		// value when an existing billing email is set back to an empty string.
+		$order = new WC_Order();
+		$order->set_billing_first_name( 'Phone' );
+		$order->set_billing_last_name( 'Order' );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$wc_product = WC_Helper_Product::create_simple_product();
+		$order->add_product( $wc_product, 1 );
+		$order->save();
+
+		$items   = array_values( $order->get_items() );
+		$product = $wc_product->get_id();
+		$item    = $items[0]->get_id();
+
+		$this->assertSame(
+			'',
+			wc_get_order( $order->get_id() )->get_billing_email(),
+			'The order must really have no billing email, or this proves nothing.'
+		);
+
+		$first = $this->submit_review( $order, $product, $item, 4, 'First take.' );
+		wp_trash_comment( (int) $first['comment_id'] );
+
+		$second = $this->submit_review( $order, $product, $item, 5, 'Second take.' );
+
+		$this->assertSame( 'error', $second['status'], 'The guard must not depend on a billing email.' );
+		$this->assertSame( 'update_failed', $second['error'] );
+		$this->assertCount(
+			1,
+			get_comments(
+				array(
+					'post_id' => $product,
+					'type'    => 'review',
+					'status'  => 'any',
+				)
+			),
+			'The refusal must not leave a second review behind.'
+		);
+	}
+
+	/**
+	 * @testdox Editing a review leaves another comment's author email alone.
+	 */
+	public function test_edit_does_not_rewrite_another_comments_author_email(): void {
+		$built   = $this->make_order_with_email( 'a&b@example.test' );
+		$order   = $built['order'];
+		$product = $built['product_ids'][0];
+		$item    = $built['item_ids'][0];
+
+		$this->submit_review( $order, $product, $item, 4, 'First take.' );
+
+		$bystander_id = (int) self::factory()->comment->create(
+			array(
+				'comment_post_ID'      => $product,
+				'comment_author_email' => 'bystander@example.test',
+			)
+		);
+
+		// Stand in for a plugin that updates a different comment from inside this update.
+		$meddle = function ( $data, $comment ) use ( $bystander_id ) {
+			if ( (int) $comment['comment_ID'] !== $bystander_id ) {
+				wp_update_comment(
+					array(
+						'comment_ID'      => $bystander_id,
+						'comment_content' => 'Touched.',
+					)
+				);
+			}
+
+			return $data;
+		};
+		add_filter( 'wp_update_comment_data', $meddle, 10, 2 );
+		try {
+			$this->submit_review( $order, $product, $item, 5, 'Second take.' );
+		} finally {
+			remove_filter( 'wp_update_comment_data', $meddle, 10 );
+		}
+
+		$this->assertSame(
+			'Touched.',
+			get_comment( $bystander_id )->comment_content,
+			'The nested update must actually have run, or this proves nothing.'
+		);
+		$this->assertSame(
+			'bystander@example.test',
+			get_comment( $bystander_id )->comment_author_email,
+			'The override must apply to the review being edited, not to every comment update.'
+		);
 	}
 
 	/**

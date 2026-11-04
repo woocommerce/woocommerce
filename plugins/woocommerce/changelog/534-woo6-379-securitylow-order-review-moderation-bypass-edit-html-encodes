@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update a shopper's existing order review instead of adding a duplicate, including for orders whose billing email contains special characters or is missing.
