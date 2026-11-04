@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a pre-send filter and a sent action to the stock notification send path so integrations can take over delivery.
