@@ -2845,6 +2845,61 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Adding a variation to the cart keeps only the attributes its parent uses for variations.
+	 * @dataProvider parent_variation_attribute_provider
+	 *
+	 * @param bool  $used_for_variations Whether the parent's Color attribute is ticked "Used for variations".
+	 * @param array $expected            The variation data the cart item should keep.
+	 */
+	public function test_add_to_cart_keeps_only_parent_variation_attributes( bool $used_for_variations, array $expected ): void {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Color' );
+		$attribute->set_options( array( 'Red', 'Blue' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'color' => 'Red' ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+
+		// Save the parent again with the box ticked or unticked. Unticking it leaves the variation published and for sale.
+		$attribute = clone $attribute;
+		$attribute->set_variation( $used_for_variations );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$cart_item_key = WC()->cart->add_to_cart(
+			$variation->get_id(),
+			1,
+			0,
+			array(
+				'attribute_color' => 'Red',
+				'attribute_x'     => 'not an option of this product',
+			)
+		);
+
+		$this->assertNotFalse( $cart_item_key );
+		$this->assertSame( $expected, WC()->cart->get_cart_item( $cart_item_key )['variation'] );
+	}
+
+	/**
+	 * Provides whether the parent uses Color for variations, and the variation data the cart should keep.
+	 *
+	 * @return array<string, array{bool, array<string, string>}>
+	 */
+	public static function parent_variation_attribute_provider(): array {
+		return array(
+			'parent uses Color for variations'        => array( true, array( 'attribute_color' => 'Red' ) ),
+			'parent uses no attribute for variations' => array( false, array() ),
+		);
+	}
+
+	/**
 	 * @testdox woocommerce_add_to_cart_quantity filter should receive 0 as variation_id when a simple product is added to cart.
 	 */
 	public function test_add_to_cart_quantity_filter_receives_zero_variation_id_for_simple_product() {

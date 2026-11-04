@@ -23,6 +23,7 @@ class WC_Tests_Customer extends WC_Unit_Test_Case {
 		// Create dummy product, and add the product to the cart.
 		$product = WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->session->set( 'previous_shipping_methods', array( array( 'local_pickup', 'free_shipping' ) ) );
 
 		// Customer is going with the Local Pickup option, and the store calculates tax based on the store location.
 		WC_Helper_Customer::set_chosen_shipping_methods( array( 'local_pickup' ) );
@@ -69,6 +70,7 @@ class WC_Tests_Customer extends WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->session->set( 'previous_shipping_methods', array( array( 'local_pickup', 'free_shipping' ) ) );
 
 		// Customer is going with the Local Pickup option, and the store calculates tax based on the store location.
 		WC_Helper_Customer::set_chosen_shipping_methods( array( 'local_pickup' ) );
