@@ -6,6 +6,7 @@ import {
 	expect,
 	BlockData,
 	enableTestPlugin,
+	wpCLI,
 } from '@woocommerce/e2e-utils';
 
 /**
@@ -519,5 +520,62 @@ test.describe( `${ blockData.name } Block (admin)`, () => {
 			'color',
 			hexToRgb( parentBgColorHex as string )
 		);
+	} );
+} );
+
+test.describe( `${ blockData.name } Block (variation attributes)`, () => {
+	test.use( {
+		storageState: {
+			origins: [],
+			cookies: [],
+		},
+	} );
+
+	test( 'should render variation attributes in the products table', async ( {
+		page,
+		frontendUtils,
+		miniCartUtils,
+	} ) => {
+		// The API returns the ampersand as "&amp;", so this also checks that
+		// the variation branch of the table decodes it.
+		const cliOutput = await wpCLI(
+			`wc product create --user=1 --name="Test Variable" --type="variable" --attributes='${ JSON.stringify(
+				[
+					{
+						name: 'Shade',
+						options: [ 'Red & Blue' ],
+						variation: true,
+						visible: true,
+					},
+				]
+			) }'`
+		);
+		const productId = cliOutput.stdout.match(
+			/Created product (\d+)/
+		)?.[ 1 ];
+		const variationOutput = await wpCLI(
+			`wc product_variation create --user=1 "${ productId }" --regular_price="10" --attributes='${ JSON.stringify(
+				[ { name: 'Shade', option: 'Red & Blue' } ]
+			) }'`
+		);
+		const variationId = variationOutput.stdout.match(
+			/Created product_variation (\d+)/
+		)?.[ 1 ];
+
+		// Add the variation through the classic add-to-cart URL, since the
+		// product page form is not what this test covers.
+		await page.goto(
+			`/?add-to-cart=${ productId }&variation_id=${ variationId }`
+		);
+		await frontendUtils.goToShop();
+		await miniCartUtils.openMiniCart();
+
+		const dialog = page.getByRole( 'dialog' );
+		await expect(
+			dialog.locator( '.wc-block-components-product-details__name' )
+		).toContainText( [ 'Shade' ] );
+		await expect(
+			dialog.locator( '.wc-block-components-product-details__value' )
+		).toContainText( [ 'Red & Blue' ] );
 	} );
 } );
