@@ -33,14 +33,13 @@ class ProductOpenGraphTags {
 	public function get_tags( WC_Product $product ): array {
 		$description = $product->get_short_description();
 		$description = '' !== $description ? $description : $product->get_description();
-		$description = wp_strip_all_tags( strip_shortcodes( $description ) );
-		// Collapse Unicode whitespace, including NBSP, which wp_strip_all_tags() leaves intact.
-		$description = trim( (string) preg_replace( '/\s+/u', ' ', $description ) );
+		$description = wc_get_container()->get( OpenGraphDescription::class )->clean( $description );
 		$tags        = array(
 			array( 'og:title' => $product->get_name() ),
 			array( 'og:type' => 'product' ),
 			array( 'og:url' => $product->get_permalink() ),
 			array( 'og:description' => wc_trim_string( $description ) ),
+			array( 'product:retailer_item_id' => (string) $product->get_id() ),
 		);
 		foreach ( $this->get_site_tags() as $property => $value ) {
 			$tags[] = array( $property => $value );
@@ -54,7 +53,7 @@ class ProductOpenGraphTags {
 		}
 		$urls = array();
 		foreach ( $image_ids as $image_id ) {
-			$image = $this->get_image_tags( $image_id, $product->get_name() );
+			$image = wc_get_container()->get( OpenGraphImageTags::class )->get_tags( $image_id, $product->get_name() );
 			if ( $image && ! in_array( $image['og:image'], $urls, true ) ) {
 				$tags[] = $image;
 				$urls[] = $image['og:image'];
@@ -135,30 +134,6 @@ class ProductOpenGraphTags {
 	}
 
 	/**
-	 * Build metadata for an attachment and its image properties.
-	 *
-	 * @param int    $image_id Attachment ID.
-	 * @param string $title Fallback alternative text.
-	 * @return array<string, string>
-	 */
-	private function get_image_tags( int $image_id, string $title ): array {
-		$tags  = array();
-		$image = wp_get_attachment_image_src( $image_id, 'full' );
-		if ( $image ) {
-			$tags['og:image'] = $image[0];
-			if ( $image[1] > 0 && $image[2] > 0 ) {
-				$tags['og:image:width']  = (string) $image[1];
-				$tags['og:image:height'] = (string) $image[2];
-			}
-			$alt                   = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
-			$tags['og:image:alt']  = is_string( $alt ) && '' !== trim( $alt ) ? $alt : $title;
-			$tags['og:image:type'] = (string) get_post_mime_type( $image_id );
-		}
-
-		return $tags;
-	}
-
-	/**
 	 * Build prices and sale dates for products with a single price.
 	 *
 	 * @param WC_Product $product Product being shared.
@@ -181,6 +156,8 @@ class ProductOpenGraphTags {
 			$tags['product:sale_price:amount']   = $price;
 			$tags['product:sale_price:currency'] = $currency;
 			$tags['og:price:standard_amount']    = wc_format_decimal( wc_get_price_to_display( $product, array( 'price' => $product->get_regular_price() ) ), wc_get_price_decimals() );
+			// Meta uses og:price:amount as the catalog price when both price aliases are present.
+			$tags['og:price:amount'] = $tags['og:price:standard_amount'];
 			foreach ( array(
 				'start' => $product->get_date_on_sale_from(),
 				'end'   => $product->get_date_on_sale_to(),

@@ -29,6 +29,10 @@ jobs:
                   pull-package-deps: '@woocommerce/plugin-woocommerce'
                   php-version: '8.4'
 
+            - name: 'Run PHPStan rule tests'
+              working-directory: plugins/woocommerce
+              run: composer test:phpstan-rules
+
             - name: 'Create tmp directory'
               working-directory: plugins/woocommerce
               run: mkdir -p tmp

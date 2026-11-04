@@ -23,5 +23,9 @@ ol.has-background {
 /* Remove default browser underline from site title link */
 .wp-block-site-title a:not(.wp-element-button) {
 	text-decoration: none !important;
+}
+
+/* Keep link colors from parent blocks off a site title without a link color of its own */
+.wp-block-site-title:not(.has-link-color) a:not(.wp-element-button) {
 	color: inherit;
 }

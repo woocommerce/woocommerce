@@ -193,7 +193,7 @@ class WC_Structured_Data {
 		$data  = $this->get_structured_data( $types );
 
 		if ( $data ) {
-			echo '<script type="application/ld+json">' . wc_esc_json( wp_json_encode( $data, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ), true ) . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo '<script type="application/ld+json">' . wc_esc_json( wp_json_encode( $data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_SLASHES ), true ) . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 	}
 
@@ -598,6 +598,31 @@ class WC_Structured_Data {
 			);
 		}
 
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Reuse the breadcrumb filter.
+		$term_args  = apply_filters(
+			'woocommerce_breadcrumb_product_terms_args',
+			array(
+				'orderby' => 'parent',
+				'order'   => 'DESC',
+			)
+		);
+		$product_id = $product instanceof WC_Product_Variation ? $product->get_parent_id() : $product->get_id();
+		$terms      = is_array( $term_args ) ? wc_get_product_terms( $product_id, 'product_cat', $term_args ) : array();
+		if ( ! empty( $terms ) && is_array( $terms ) ) {
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Reuse the breadcrumb filter.
+			$term  = apply_filters( 'woocommerce_breadcrumb_main_term', reset( $terms ), $terms );
+			$names = array();
+			$seen  = array();
+			while ( $term instanceof WP_Term && 'product_cat' === $term->taxonomy && ! isset( $seen[ $term->term_id ] ) ) {
+				$seen[ $term->term_id ] = true;
+				$names[]                = html_entity_decode( $term->name, ENT_QUOTES, get_bloginfo( 'charset' ) );
+				if ( ! $term->parent ) {
+					$markup['category'] = implode( ' > ', array_reverse( $names ) );
+					break;
+				}
+				$term = get_term( $term->parent, 'product_cat' );
+			}
+		}
 		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
 	}
 

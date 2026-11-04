@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add stage_*() methods for the WC_Data methods that save inside themselves. A stage_*() method changes the object in memory and does not save, so an extensible ability can make the change and run validators before one save. Direct calls to the existing saving methods keep their saves and hooks. When a class overrides a saving method without its stage_*() method, a direct call to the stage_*() method throws a WC_Data_Exception, and the class keeps working through the saving method.
