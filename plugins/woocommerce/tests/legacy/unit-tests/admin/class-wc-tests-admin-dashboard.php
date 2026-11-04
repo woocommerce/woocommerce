@@ -203,9 +203,9 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'best-seller-this-month', $widget_output, 'Top seller row should be hidden without Analytics.' );
 		$this->assertStringContainsString( 'processing-orders', $widget_output );
 		$this->assertStringContainsString( 'on-hold-orders', $widget_output );
-		$this->assertMatchesRegularExpression( '/page\=wc-reports\&\#038\;tab\=stock\&\#038\;report\=low_in_stock/', $widget_output );
-		$this->assertMatchesRegularExpression( '/page\=wc-reports\&\#038\;tab\=stock\&\#038\;report\=out_of_stock/', $widget_output );
-		$this->assertDoesNotMatchRegularExpression( '/page\=wc-admin/', $widget_output, 'No status widget link should point to Analytics while it is disabled.' );
+		$this->assertStringContainsString( 'page=wc-reports&#038;tab=stock&#038;report=low_in_stock', $widget_output );
+		$this->assertStringContainsString( 'page=wc-reports&#038;tab=stock&#038;report=out_of_stock', $widget_output );
+		$this->assertStringNotContainsString( 'page=wc-admin', $widget_output, 'No status widget link should point to Analytics while it is disabled.' );
 	}
 
 	/**
@@ -225,8 +225,33 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		$widget_output = ob_get_clean();
 
 		$this->assertStringContainsString( '50.00 worth in the', $widget_output );
-		$this->assertMatchesRegularExpression( '/page\=wc-reports\&\#038\;tab\=orders\&\#038\;range\=month/', $widget_output );
-		$this->assertMatchesRegularExpression( '/page\=wc-reports\&\#038\;tab\=orders\&\#038\;report\=sales_by_product/', $widget_output );
+		$this->assertStringContainsString( 'page=wc-reports&#038;tab=orders&#038;range=month', $widget_output );
+		$this->assertStringContainsString( 'page=wc-reports&#038;tab=orders&#038;report=sales_by_product', $widget_output );
+	}
+
+	/**
+	 * @testdox Should show legacy sales data adjusted by a reports filter callback when Analytics is disabled.
+	 */
+	public function test_status_widget_reports_filter_can_adjust_legacy_net_sales_with_analytics_disabled() {
+		wp_set_current_user( $this->user );
+		add_filter( 'woocommerce_admin_disabled', '__return_true' );
+		include_once WC_ABSPATH . 'includes/admin/class-wc-admin-reports.php';
+		WC_Admin_Reports::register_hook_handlers();
+		add_filter(
+			'woocommerce_dashboard_status_widget_reports',
+			function ( $reports ) {
+				$reports['report_data']->net_sales = 4321;
+				return $reports;
+			},
+			20
+		);
+
+		ob_start();
+		( new WC_Admin_Dashboard() )->status_widget_content();
+		$widget_output = ob_get_clean();
+
+		$this->assertStringContainsString( 'sales-this-month', $widget_output );
+		$this->assertStringContainsString( '4,321.00', $widget_output );
 	}
 
 	/**

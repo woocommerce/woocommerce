@@ -171,7 +171,6 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			$is_wc_admin_disabled = apply_filters( 'woocommerce_admin_disabled', false ) || ! FeaturesUtil::feature_is_enabled( 'analytics' );
 
 			if ( $is_wc_admin_disabled ) {
-				// Without Analytics there is no sales data source, so the sales rows are hidden unless a filter supplies one.
 				$default_reports = array(
 					'net_sales_link'      => 'admin.php?page=wc-reports&tab=orders&range=month',
 					'top_seller_link'     => 'admin.php?page=wc-reports&tab=orders&report=sales_by_product&range=month&product_ids=',
@@ -182,12 +181,24 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				);
 
 				/**
-				 * Filter to change the reports of the status widget on the Dashboard page.
+				 * Filters the data of the status widget on the Dashboard page when Analytics is disabled.
 				 *
-				 * Please note that this filter is mainly for backward compatibility with the legacy reports.
-				 * It's not recommended to use this filter to change the data of this widget.
+				 * The net sales and top seller rows only show when `report_data` and `get_sales_sparkline` are both set.
+				 * They are null by default; when another callback is hooked here, legacy reports fill them in first.
+				 * This filter is kept for backward compatibility; it's not recommended for new code.
 				 *
 				 * @since 9.5.0
+				 *
+				 * @param array $status_widget_reports {
+				 *     Status widget data.
+				 *
+				 *     @type string        $net_sales_link      Admin URL path for the net sales row.
+				 *     @type string        $top_seller_link     Admin URL path for the top seller row; the product ID is appended.
+				 *     @type string        $lowstock_link       Admin URL path for the low in stock row.
+				 *     @type string        $outofstock_link     Admin URL path for the out of stock row.
+				 *     @type object|null   $report_data         Sales data with a `net_sales` property.
+				 *     @type callable|null $get_sales_sparkline Called with ( $product_id, $days, $type ) and returns an array with `total` and `data`.
+				 * }
 				 */
 				$status_widget_reports = apply_filters( 'woocommerce_dashboard_status_widget_reports', $default_reports );
 				$status_widget_reports = is_array( $status_widget_reports ) ? array_merge( $default_reports, $status_widget_reports ) : $default_reports;

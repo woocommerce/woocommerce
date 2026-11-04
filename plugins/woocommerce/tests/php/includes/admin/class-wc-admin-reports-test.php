@@ -39,13 +39,48 @@ final class WC_Admin_Reports_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should only hook the after status widget parameter, not the legacy sales data, into the dashboard status widget.
+	 * @testdox Should hook only the conditional legacy handlers into the dashboard status widget.
 	 */
-	public function test_register_hook_handlers_does_not_replace_dashboard_status_widget_reports(): void {
+	public function test_register_hook_handlers_hooks_conditional_status_widget_handlers(): void {
 		\WC_Admin_Reports::register_hook_handlers();
 
 		$this->assertFalse( has_filter( 'woocommerce_dashboard_status_widget_reports', array( \WC_Admin_Reports::class, 'replace_dashboard_status_widget_reports' ) ) );
+		$this->assertSame( 10, has_filter( 'woocommerce_dashboard_status_widget_reports', array( \WC_Admin_Reports::class, 'maybe_replace_dashboard_status_widget_reports' ) ) );
 		$this->assertSame( 10, has_filter( 'woocommerce_after_dashboard_status_widget_parameter', array( \WC_Admin_Reports::class, 'get_status_widget_report_instance' ) ) );
+	}
+
+	/**
+	 * @testdox Should leave the status widget sales data empty when no other callback is hooked to the reports filter.
+	 */
+	public function test_status_widget_reports_stay_empty_without_other_callbacks(): void {
+		remove_all_filters( 'woocommerce_dashboard_status_widget_reports' );
+		\WC_Admin_Reports::register_hook_handlers();
+
+		$reports = apply_filters( 'woocommerce_dashboard_status_widget_reports', $this->get_default_status_widget_reports() );
+
+		$this->assertNull( $reports['report_data'] );
+		$this->assertNull( $reports['get_sales_sparkline'] );
+	}
+
+	/**
+	 * @testdox Should fill in legacy sales data when another callback adjusts it through the reports filter.
+	 */
+	public function test_status_widget_reports_are_filled_for_other_callbacks(): void {
+		remove_all_filters( 'woocommerce_dashboard_status_widget_reports' );
+		\WC_Admin_Reports::register_hook_handlers();
+		add_filter(
+			'woocommerce_dashboard_status_widget_reports',
+			function ( $reports ) {
+				$reports['report_data']->net_sales = 42;
+				return $reports;
+			},
+			20
+		);
+
+		$reports = apply_filters( 'woocommerce_dashboard_status_widget_reports', $this->get_default_status_widget_reports() );
+
+		$this->assertSame( 42, $reports['report_data']->net_sales );
+		$this->assertIsCallable( $reports['get_sales_sparkline'] );
 	}
 
 	/**
@@ -61,5 +96,21 @@ final class WC_Admin_Reports_Test extends WC_Unit_Test_Case {
 
 		$this->assertIsObject( $reports, 'Listeners should still receive a legacy report.' );
 		$this->assertSame( 'WC_Admin_Report', get_class( $reports ) );
+	}
+
+	/**
+	 * The status widget data the dashboard passes to the reports filter when Analytics is disabled.
+	 *
+	 * @return array
+	 */
+	private function get_default_status_widget_reports(): array {
+		return array(
+			'net_sales_link'      => 'admin.php?page=wc-reports&tab=orders&range=month',
+			'top_seller_link'     => 'admin.php?page=wc-reports&tab=orders&report=sales_by_product&range=month&product_ids=',
+			'lowstock_link'       => 'admin.php?page=wc-reports&tab=stock&report=low_in_stock',
+			'outofstock_link'     => 'admin.php?page=wc-reports&tab=stock&report=out_of_stock',
+			'report_data'         => null,
+			'get_sales_sparkline' => null,
+		);
 	}
 }

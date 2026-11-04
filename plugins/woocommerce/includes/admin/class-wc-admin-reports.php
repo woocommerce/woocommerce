@@ -30,6 +30,36 @@ class WC_Admin_Reports {
 	 */
 	public static function register_hook_handlers() {
 		add_filter( 'woocommerce_after_dashboard_status_widget_parameter', array( __CLASS__, 'get_status_widget_report_instance' ) );
+		add_filter( 'woocommerce_dashboard_status_widget_reports', array( __CLASS__, 'maybe_replace_dashboard_status_widget_reports' ) );
+	}
+
+	/**
+	 * Fill in legacy sales data for the dashboard status widget, but only when another callback is hooked to the filter.
+	 *
+	 * Those callbacks were written against the legacy data, for example to adjust `report_data->net_sales`.
+	 *
+	 * @internal
+	 * @since 11.4.0
+	 *
+	 * @param mixed $status_widget_reports The data to display in the status widget.
+	 * @return mixed
+	 */
+	public static function maybe_replace_dashboard_status_widget_reports( $status_widget_reports ) {
+		global $wp_filter;
+
+		$hook           = $wp_filter['woocommerce_dashboard_status_widget_reports'] ?? null;
+		$callback_count = 0;
+		if ( $hook instanceof WP_Hook ) {
+			foreach ( $hook->callbacks as $callbacks ) {
+				$callback_count += count( $callbacks );
+			}
+		}
+
+		if ( $callback_count < 2 || ! is_array( $status_widget_reports ) ) {
+			return $status_widget_reports;
+		}
+
+		return self::replace_dashboard_status_widget_reports( $status_widget_reports );
 	}
 
 	/**
@@ -106,7 +136,7 @@ class WC_Admin_Reports {
 	/**
 	 * Filter handler for replacing the data of the status widget on the Dashboard page.
 	 *
-	 * Core no longer hooks this in: the status widget hides its sales rows when Analytics is disabled.
+	 * Core only calls this when another callback is hooked to `woocommerce_dashboard_status_widget_reports`.
 	 *
 	 * @param array $status_widget_reports The data to display in the status widget.
 	 */
