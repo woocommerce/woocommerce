@@ -29,6 +29,18 @@ use WP_Error;
 final class ProductImporter {
 
 	/**
+	 * Minimum time between lock refreshes during a batch, in seconds.
+	 */
+	private const LOCK_REFRESH_INTERVAL = MINUTE_IN_SECONDS;
+
+	/**
+	 * When this run last refreshed the import lock during a batch.
+	 *
+	 * @var int
+	 */
+	private int $last_lock_refresh = 0;
+
+	/**
 	 * The mapping resolver.
 	 *
 	 * @var MappingResolver
@@ -179,6 +191,13 @@ final class ProductImporter {
 			wp_defer_term_counting( true );
 			wp_suspend_cache_addition( true );
 
+			$this->last_lock_refresh = time();
+
+			$refresh_lock_if_due = function (): void {
+				$this->refresh_lock_if_due();
+			};
+			add_action( 'woocommerce_product_import_before_import', $refresh_lock_if_due );
+
 			try {
 				$position = 0;
 
@@ -201,6 +220,7 @@ final class ProductImporter {
 					}
 				} while ( ! $batch['done'] );
 			} finally {
+				remove_action( 'woocommerce_product_import_before_import', $refresh_lock_if_due );
 				wp_suspend_cache_addition( false );
 				wp_defer_term_counting( false );
 			}
@@ -214,6 +234,19 @@ final class ProductImporter {
 			return $totals;
 		} finally {
 			$this->import_lock->release();
+		}
+	}
+
+	/**
+	 * Refresh the import lock before a row when the last refresh is old enough.
+	 *
+	 * Rows with slow remote images can make one batch outlast the lock's stale timeout. The check
+	 * runs on every row, and the throttle keeps it to one write per interval.
+	 */
+	private function refresh_lock_if_due(): void {
+		if ( time() - $this->last_lock_refresh >= self::LOCK_REFRESH_INTERVAL ) {
+			$this->import_lock->refresh();
+			$this->last_lock_refresh = time();
 		}
 	}
 

@@ -69,9 +69,14 @@ final class MappingResolver {
 	 *
 	 * @return array{mapping: array<string, string>, unknown: string[]}
 	 *
-	 * @throws InvalidArgumentException When a header or override resolves to an invalid target.
+	 * @throws InvalidArgumentException When an override matches no header, or a header or override resolves to an invalid target.
 	 */
 	public function resolve( array $raw_headers, array $overrides = array(), string $unknown_mode = self::UNKNOWN_SKIP ): array {
+		$unmatched = array_diff( array_keys( $overrides ), $raw_headers );
+		if ( ! empty( $unmatched ) ) {
+			throw new InvalidArgumentException( esc_html( 'Mapping overrides must match a CSV column exactly, including case. No match for: ' . implode( ', ', $unmatched ) ) );
+		}
+
 		$this->load_importer();
 
 		$controller  = new CsvImporterController();

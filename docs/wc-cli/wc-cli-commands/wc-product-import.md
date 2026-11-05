@@ -19,7 +19,7 @@ Import products from a CSV file, or `-` to read from STDIN.
 
     Default: `UTF-8`
 
-- `--mapping=<spec>` - Column overrides: `Header=target,...`, inline JSON, or `@file.json`. Target `-` skips a column.
+- `--mapping=<spec>` - Column overrides: `Header=target,...`, inline JSON, or `@file.json`. Target `-` skips a column. Headers must match the CSV exactly, including case.
 - `--map-unknown=<mode>` - What to do with CSV columns that have no known target: `skip` or `meta`.
 
     Default: `skip`
@@ -47,8 +47,8 @@ for the duration of the run and refuses to start while an admin CSV import (or a
 `wp wc product import`) holds it. Do not run this command at the same time as an import in
 **WooCommerce > Products > Import**.
 
-Importing requires a user who can edit products and manage product terms, so pass `--user=<admin>`.
-Without one the importer silently drops categories. Rows with downloadable files outside an approved
+Importing requires a user with the `edit_products`, `import`, and `manage_product_terms` capabilities,
+so pass `--user=<admin>`. Without `manage_product_terms` the importer silently drops categories. Rows with downloadable files outside an approved
 directory fail unless that user can manage options. `--show-mapping` does not need a user.
 
 If a run is interrupted or crashes and nothing is running, clear the lock with
