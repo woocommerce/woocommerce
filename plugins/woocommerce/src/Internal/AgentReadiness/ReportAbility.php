@@ -139,7 +139,7 @@ class ReportAbility implements AbilityDefinition {
 									'fix_url'  => array( 'type' => 'string' ),
 									'conflict' => array(
 										'type'        => 'boolean',
-										'description' => __( 'On output checks: the store is set to send this, but what it returns differs, so something else is likely replacing it.', 'woocommerce' ),
+										'description' => __( 'On output checks: true only when the check failed and the store is set to send this, so something else is likely replacing it.', 'woocommerce' ),
 									),
 									'pending'  => array(
 										'type'        => 'boolean',
