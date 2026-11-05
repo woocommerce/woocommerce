@@ -16,13 +16,6 @@ return array(
 	// Creates the HPOS tables per test through setup_cot(). Move to wpSetUpBeforeClass() + setup_cot_tables(), as #68930 did.
 	'WC_Tests_API_Reports_Sales::test_get_sales_report_with_hpos_enabled_and_sync_off',
 
-	// Creates the HPOS tables in setUp() through setup_cot(). Move to wpSetUpBeforeClass() + setup_cot_tables(), as #68930 did.
-	'Automattic\WooCommerce\Tests\Internal\Admin\Orders\EditLockTest::*',
-	'Automattic\WooCommerce\Tests\Internal\Customers\SearchServiceTest::*',
-	'Automattic\WooCommerce\Tests\Internal\DataStores\Orders\LegacyDataCleanupTests::*',
-	'Automattic\WooCommerce\Tests\Internal\DataStores\Orders\OrdersTableDataStoreCacheCrossBleedTest::*',
-	'Automattic\WooCommerce\Tests\Internal\DataStores\Orders\OrdersTableDataStoreCachePrimingTest::*',
-
 	// setUp() recreates the HPOS tables whenever an earlier test dropped them, so which test trips depends on run order. Create them once before the class instead.
 	'Automattic\WooCommerce\Tests\Internal\DataStores\Orders\DataSynchronizerTests::*',
 

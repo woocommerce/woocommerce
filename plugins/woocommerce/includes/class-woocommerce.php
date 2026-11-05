@@ -22,7 +22,7 @@ use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\LegacyAssets\LegacySelect2UsageTracker;
 use Automattic\WooCommerce\Internal\MCP\McpEndpointRemoval;
-use Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesTracking;
 use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermAdmin;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
@@ -408,7 +408,7 @@ final class WooCommerce {
 		$container->get( EmailImprovements::class );
 		$container->get( DeferredEmailQueue::class );
 		$container->get( AddressProviderController::class );
-		$container->get( AbilitiesRegistry::class );
+		$container->get( AbilitiesLoader::class );
 		$container->get( McpEndpointRemoval::class );
 		$container->get( CouponCodeLookupInvalidator::class );
 		$container->get( ProductVersionStringInvalidator::class );
@@ -427,6 +427,7 @@ final class WooCommerce {
 		 * These classes have a register method for attaching hooks.
 		 */
 		$container->get( Automattic\WooCommerce\Internal\Utilities\PluginInstaller::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Tax\BaseLocationTaxEstimate::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderAttributionController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderAttributionBlocksController::class )->register();

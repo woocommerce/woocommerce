@@ -35,6 +35,7 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 		$this->default_country_option_existed = $missing_option !== $this->default_country_option_value;
 
 		parent::setUp();
+		$this->http_responder = array( $this, 'mock_dashboard_http_responses' );
 
 		// Set default country to non-US so that 'payments' task gets added but 'woocommerce-payments' doesn't,
 		// by default it won't be considered completed but we can manually change that as needed.
@@ -511,5 +512,35 @@ class WC_Admin_Dashboard_Setup_Test extends WC_Unit_Test_Case {
 		}
 
 		delete_option( 'woocommerce_onboarding_profile' );
+	}
+
+	/**
+	 * Keep dashboard incentive requests local while retaining real response parsing.
+	 *
+	 * @param array  $request HTTP request arguments.
+	 * @param string $url HTTP request URL.
+	 * @return array|false Fixture response, or false for another request.
+	 */
+	protected function mock_dashboard_http_responses( $request, $url ) {
+		if ( 'GET' !== ( $request['method'] ?? 'GET' ) ) {
+			return false;
+		}
+		$host = wp_parse_url( $url, PHP_URL_HOST );
+		$path = wp_parse_url( $url, PHP_URL_PATH );
+
+		if ( 'public-api.wordpress.com' === $host && '/wpcom/v2/wcpay/incentives' === $path ) {
+			return array(
+				'headers'  => array(
+					'cache-for'    => '172800',
+					'content-type' => 'application/json; charset=UTF-8',
+				),
+				'body'     => '[{"id":"wcpay-promo-2023-action-discount","promo_id":"wcpay-promo-2023-action-discount","type":"welcome_page","cta_label":"Install WooPayments for free","tc_url":"https:\\/\\/woocommerce.com\\/terms-conditions\\/woopayments-action-promotion-2023\\/","description":"<b>Save 10%<\\/b> on payment processing costs in your <b>first three months<\\/b> when you sign up for WooPayments today.","task_header_content":"Power your payments with a simple, all-in-one option and <b>save 10% on payment processing costs in your first three months<\\/b>. See <a href=\\"https:\\/\\/woocommerce.com\\/terms-conditions\\/woopayments-action-promotion-2023\\/\\">Terms and Conditions<\\/a> for details.","task_badge":"Save 10% on payment processing fees"},{"id":"wcpay-promo-2023-action-discount__wc_settings_payments","promo_id":"wcpay-promo-2023-action-discount","type":"wc_settings_payments","description":"Use the native payments solution built and supported by Woo to accept online and in-person payments, track revenue, and handle all payment activity in one place.","cta_label":"Install and save 10%","tc_url":"https:\\/\\/woocommerce.com\\/terms-conditions\\/woopayments-action-promotion-2023\\/","title":"Save 10% on processing fees during your first 3 months when you sign up for WooPayments.","short_description":"Save 10% on processing fees during your first 3 months when you sign up for WooPayments.","badge":"Save 10% on processing fees"}]',
+				'response' => array(
+					'code' => 200,
+				),
+			);
+		}
+
+		return false;
 	}
 }

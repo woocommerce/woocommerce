@@ -151,7 +151,7 @@ export const PaymentGatewayList = ( {
 									id={ offlinePmsGroup.id }
 									className="transitions-disabled woocommerce-list__item clickable-list-item enter-done"
 									onClick={ () => {
-										navigate(
+										void navigate(
 											removeOriginFromURL(
 												offlinePmsGroup.management
 													._links.settings.href

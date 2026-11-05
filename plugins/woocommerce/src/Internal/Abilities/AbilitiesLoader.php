@@ -7,17 +7,22 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities;
 
+use Automattic\WooCommerce\Abilities\Ability;
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderNotesQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderSendEmail;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\PaymentGatewaysQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -42,8 +47,12 @@ class AbilitiesLoader {
 		OrdersQuery::class,
 		OrderAddNote::class,
 		OrderNotesQuery::class,
+		OrderSendEmail::class,
+		OrderUpdate::class,
 		OrderUpdateStatus::class,
+		PaymentGatewaysQuery::class,
 		ProductsQuery::class,
+		ProductTermsQuery::class,
 		ProductCreate::class,
 		ProductDelete::class,
 		ProductUpdate::class,
@@ -77,7 +86,7 @@ class AbilitiesLoader {
 	 *
 	 * @since 10.9.0
 	 */
-	final public static function init(): void {
+	final public function init(): void {
 		if ( self::$initialized ) {
 			return;
 		}
@@ -100,7 +109,7 @@ class AbilitiesLoader {
 	 * @since 11.3.0
 	 */
 	public static function register_core_resources(): void {
-		foreach ( array( 'product', 'order', 'order_item' ) as $resource_name ) {
+		foreach ( array( 'product', 'order', 'order_item', 'product_term' ) as $resource_name ) {
 			ExtensibleAbilities::register_resource( $resource_name );
 		}
 	}
@@ -172,7 +181,7 @@ class AbilitiesLoader {
 				continue;
 			}
 
-			// Core's product write abilities extend ActionableAbility, so WordPress builds them from their own class.
+			// Core's write abilities extend ActionableAbility, so WordPress builds them from their own class.
 			$is_actionable = is_a( $class_name, ActionableAbility::class, true ) && self::is_core_ability_definition_class( $class_name );
 
 			if ( ! $is_actionable && ! is_a( $class_name, AbilityDefinition::class, true ) ) {
@@ -215,6 +224,8 @@ class AbilitiesLoader {
 			$args = $class_name::get_registration_args();
 			if ( $is_actionable ) {
 				$args['ability_class'] = $class_name;
+			} elseif ( $is_core_ability ) {
+				$args['ability_class'] = Ability::class;
 			}
 
 			$registered_ability = wp_register_ability( $ability_name, $args );
