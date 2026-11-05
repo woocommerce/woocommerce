@@ -151,12 +151,16 @@ class RegressionGuardChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox noindex, noai and none fail in a robots meta tag or an X-Robots-Tag header; noarchive doesn't.
+	 * @testdox noindex, noai and none fail in a robots meta tag or an X-Robots-Tag header; noarchive and a preview size of none don't.
 	 */
 	public function test_noindex_directives(): void {
 		$store      = $this->healthy_store();
 		$store['/'] = array( 200, '<html><head><meta name="robots" content="max-image-preview:large, noarchive"></head></html>' );
 		$this->assertTrue( $this->results( $store )['no_noindex_directives'] );
+
+		remove_all_filters( 'pre_http_request' );
+		$store['/'] = array( 200, '<html><head><meta name="robots" content="index, follow, max-image-preview:none, max-video-preview:none"></head></html>' );
+		$this->assertTrue( $this->results( $store )['no_noindex_directives'], 'none as a preview size is not the none directive' );
 
 		foreach ( array( '<meta name="robots" content="noindex, follow">', '<meta name="googlebot" content="none">', '<meta name="robots" content="noai, noimageai">' ) as $tag ) {
 			remove_all_filters( 'pre_http_request' );
