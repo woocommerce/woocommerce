@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Improve validation of the column mapping used by the product CSV importer.

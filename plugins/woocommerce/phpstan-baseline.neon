@@ -35182,12 +35182,6 @@ parameters:
 			path: includes/wc-user-functions.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:delete_by_order_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-user-functions.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:get_downloads_for_customer\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -35195,12 +35189,6 @@ parameters:
 
 		-
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_order_key\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-user-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:has_downloadable_item\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: includes/wc-user-functions.php

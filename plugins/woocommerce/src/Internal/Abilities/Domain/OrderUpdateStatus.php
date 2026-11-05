@@ -11,7 +11,6 @@ use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
-use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -95,23 +94,7 @@ class OrderUpdateStatus extends ActionableAbility {
 	 * @return null|\WP_Error
 	 */
 	public function change( $subject, array $input ) {
-		if ( empty( $input['status'] ) ) {
-			return new \WP_Error(
-				'woocommerce_order_status_required',
-				__( 'Order status is required.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		$status = OrderUtil::remove_status_prefix( sanitize_key( $input['status'] ) );
-
-		if ( ! in_array( $status, self::get_query_order_status_slugs(), true ) ) {
-			return new \WP_Error(
-				'woocommerce_order_status_invalid',
-				__( 'Order status is invalid.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
+		$status = $input['status'];
 
 		if ( $status === $subject->get_status() ) {
 			return new \WP_Error(
