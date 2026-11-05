@@ -4,9 +4,8 @@
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { Badge, Button, Text } from '@wordpress/ui';
-import { Icon, check, error } from '@wordpress/icons';
-import clsx from 'clsx';
+import { Badge, Button, Notice, Text } from '@wordpress/ui';
+import { Icon, check } from '@wordpress/icons';
 import type { ComponentProps, MouseEvent } from 'react';
 
 /**
@@ -286,17 +285,20 @@ export const PurpleCard = ( props: PurpleCardProps ) => {
 				<div className="purple-cys-theme-card__actions">
 					<Actions { ...props } />
 				</div>
-				{ copy.helper && (
+				{ state === 'error' && (
+					<Notice.Root
+						intent="error"
+						className="purple-cys-theme-card__notice"
+					>
+						<Notice.Description>{ copy.helper }</Notice.Description>
+					</Notice.Root>
+				) }
+				{ state !== 'error' && copy.helper && (
 					<Text
 						variant="body-sm"
-						className={ clsx( 'purple-cys-theme-card__helper', {
-							'is-error': state === 'error',
-						} ) }
+						className="purple-cys-theme-card__helper"
 						render={ <p /> }
 					>
-						{ state === 'error' && (
-							<Icon icon={ error } size={ 16 } />
-						) }
 						{ copy.helper }
 					</Text>
 				) }

@@ -111,16 +111,13 @@
 		padding-block: var(--wpds-dimension-padding-3xl);
 	}
 
-	&--purple &__helper {
-		&.is-error {
-			color: var(--wpds-color-foreground-content-error);
+	// The footer spans the text column, so an error notice can use the full width.
+	&--purple &__footer {
+		align-self: stretch;
+	}
 
-			svg {
-				fill: currentColor;
-				vertical-align: top;
-				margin-inline-end: var(--wpds-dimension-gap-xs);
-			}
-		}
+	&__notice {
+		align-self: stretch;
 	}
 
 
