@@ -74,7 +74,7 @@ class PaymentGatewaysQuery extends AbstractDomainAbility implements AbilityDefin
 		$gateways = WC()->payment_gateways()->payment_gateways();
 
 		if ( isset( $input['id'] ) ) {
-			$id = (string) $input['id'];
+			$id = $input['id'];
 
 			if ( ! isset( $gateways[ $id ] ) ) {
 				return new \WP_Error(

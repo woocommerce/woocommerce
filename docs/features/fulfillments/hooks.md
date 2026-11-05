@@ -132,3 +132,20 @@ The fulfillment email templates expose the standard extension points below.
 | `woocommerce_email_after_fulfillment_table` | `WC_Order $order`, `Fulfillment $fulfillment`, `bool $sent_to_admin`, `bool $plain_text`, `WC_Email $email` | Inject content after the fulfillment items table. |
 | `woocommerce_email_fulfillment_items_args` | Template arguments array | Customize how fulfillment line items are rendered in the email templates. |
 | `woocommerce_get_email_fulfillment_items_table` | `string $html`, `WC_Order $order`, `Fulfillment $fulfillment` | Filter and return the rendered fulfillment items table HTML. |
+
+## Privacy filters
+
+When an order is anonymized, through the WordPress personal-data eraser or the automatic retention cleanup, WooCommerce clears the personal data stored on its fulfillments. This also runs on a store where the fulfillments feature has since been disabled, as long as its tables were created while it was on, since any tracking data they hold is still stored.
+
+| Hook | Parameters | Purpose |
+| --- | --- | --- |
+| `woocommerce_privacy_remove_fulfillment_personal_data_meta` | `string[] $meta_keys`, `WC_Order $order` | Add or remove the fulfillment meta keys cleared during erasure. Defaults to `_tracking_number` and `_tracking_url`. |
+
+```php
+add_filter( 'woocommerce_privacy_remove_fulfillment_personal_data_meta', function( $meta_keys, $order ) {
+    // Redact a shipping label URL stored by this extension.
+    $meta_keys[] = '_shipping_label_url';
+
+    return $meta_keys;
+}, 10, 2 );
+```
