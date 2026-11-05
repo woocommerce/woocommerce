@@ -113,11 +113,11 @@ class ProductUpdate extends ActionableAbility {
 			return $error;
 		}
 
-		if ( isset( $input['type'] ) && (string) $input['type'] !== $product->get_type() ) {
+		if ( isset( $input['type'] ) && $input['type'] !== $product->get_type() ) {
 			$is_variable = static function ( $class_or_object ): bool {
 				return is_a( $class_or_object, \WC_Product_Variable::class, true ) || is_a( $class_or_object, \WC_Product_Variation::class, true );
 			};
-			if ( $is_variable( \WC_Product_Factory::get_product_classname( $product->get_id(), (string) $input['type'] ) ) || $is_variable( $product ) ) {
+			if ( $is_variable( \WC_Product_Factory::get_product_classname( $product->get_id(), $input['type'] ) ) || $is_variable( $product ) ) {
 				return new \WP_Error(
 					'woocommerce_product_type_unsupported',
 					__( 'A product cannot change into or out of a variable product or a variation through this ability. WooCommerce would delete its variations.', 'woocommerce' ),
@@ -248,7 +248,7 @@ class ProductUpdate extends ActionableAbility {
 	 */
 	public static function can_update_product( $input = array() ): bool {
 		$product_id = self::get_product_permission_id( self::get_id_from_input( $input ) );
-		$deletes    = is_array( $input ) && is_array( $input['variations'] ?? null ) && ! empty( array_filter( array_map( 'wc_string_to_bool', array_column( $input['variations'], 'delete' ) ) ) );
+		$deletes    = ! empty( array_filter( array_column( $input['variations'] ?? array(), 'delete' ) ) );
 
 		return $product_id > 0
 			&& wc_rest_check_post_permissions( 'product', 'edit', $product_id )
