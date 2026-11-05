@@ -1693,6 +1693,33 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Unchanged related queries do not reorder the cache or renew its expiry.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $external_cache Whether transients use the object cache.
+	 */
+	public function test_unchanged_related_queries_do_not_rewrite_cache( bool $external_cache ): void {
+		$product_id = $this->factory->post->create( array( 'post_type' => 'product' ) );
+		$key        = 'wc_related_' . $product_id;
+		$previous   = wp_using_ext_object_cache();
+		wp_using_ext_object_cache( $external_cache );
+		try {
+			wc_get_related_products( $product_id, 5 );
+			wc_get_related_products( $product_id, 10 );
+			$cached = get_transient( $key );
+			$writes = did_action( 'set_transient_' . $key );
+
+			wc_get_related_products( $product_id, 5 );
+			$this->assertSame( $cached, get_transient( $key ), 'Unchanged results must preserve query order.' );
+			wc_get_related_products( $product_id, 10 );
+			$this->assertSame( $writes, did_action( 'set_transient_' . $key ), 'Unchanged results must not renew the cache expiry.' );
+		} finally {
+			wp_using_ext_object_cache( $previous );
+		}
+	}
+
+	/**
 	 * @testdox Related caches trim old variants and keep two large alternating queries cacheable.
 	 * @testWith [false, 8192]
 	 *           [true, 65536]

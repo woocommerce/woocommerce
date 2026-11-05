@@ -44,7 +44,7 @@ class ProductUtil {
 	/**
 	 * Register hooks.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 * @internal
 	 */
 	public function register(): void {
@@ -54,7 +54,7 @@ class ProductUtil {
 	/**
 	 * Schedule cleanup of existing products' persistent transients for the current site.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param int $last_id Last product ID processed, or zero to start cleanup.
 	 * @return bool False if cleanup could not be scheduled.
@@ -69,14 +69,14 @@ class ProductUtil {
 			as_unschedule_all_actions( 'woocommerce_delete_product_transients_batch' );
 		}
 
-		return (bool) as_enqueue_async_action( 'woocommerce_delete_product_transients_batch', array( $last_id ), 'woocommerce' );
+		return (bool) ActionSchedulerUtil::enqueue_async( 'woocommerce_delete_product_transients_batch', array( $last_id ), 'woocommerce' );
 	}
 
 	/**
 	 * Delete one batch of persistent product transients, bypassing per-transient deletion actions.
 	 * The scheduled action retains the last processed ID for the next batch.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 * @internal
 	 *
 	 * @param mixed $last_id Last product ID processed.

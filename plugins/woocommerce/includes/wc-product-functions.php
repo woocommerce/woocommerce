@@ -1486,7 +1486,9 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 
 		$original_transient = $transient;
 		if ( $transient && is_array( $transient ) ) {
-			unset( $transient[ $query_args ] );
+			if ( ( $transient[ $query_args ] ?? null ) !== $related_posts ) {
+				unset( $transient[ $query_args ] );
+			}
 			$transient[ $query_args ] = $related_posts;
 		} else {
 			$transient = array( $query_args => $related_posts );
