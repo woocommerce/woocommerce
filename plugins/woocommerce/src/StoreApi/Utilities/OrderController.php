@@ -240,8 +240,8 @@ class OrderController {
 		if ( ! $needs_shipping && empty( $old_shipping_location['country'] ) && ! self::ships_items_without_methods( $order ) ) {
 			// An order with no address yet may take any first address, but the shipping address of an order that
 			// ships nothing is not validated while it still sets the tax. Such an order ships, and is taxed, at billing.
-			// needs_shipping() is also false for physical items when the store has no shipping methods; those orders
-			// keep the address they are sent to.
+			// needs_shipping() is also false for physical items when the store has no shipping methods; only an existing
+			// shipping line shows that such an order still has a destination to keep.
 			$shipping = self::get_billing_address_for_shipping( $order );
 			$order->set_shipping_address( $shipping );
 			$this->restore_state_names( $order, $old_states );
@@ -255,16 +255,18 @@ class OrderController {
 	}
 
 	/**
-	 * Checks whether an order has a product that needs shipping while the store offers no shipping method.
+	 * Checks whether an order still ships a physical product while the store offers no shipping method.
 	 *
-	 * Such an order's needs_shipping() is false only because nothing can be shipped, not because the order ships
-	 * nothing, so its goods still go to its shipping address.
+	 * An existing shipping line shows that the order has a destination to keep.
 	 *
 	 * @param \WC_Order $order Order to check.
 	 * @return bool
 	 */
 	private static function ships_items_without_methods( \WC_Order $order ): bool {
 		if ( wc_shipping_enabled() && 0 < wc_get_shipping_method_count( true ) ) {
+			return false;
+		}
+		if ( ! $order->get_shipping_methods() ) {
 			return false;
 		}
 		foreach ( $order->get_items() as $item ) {
