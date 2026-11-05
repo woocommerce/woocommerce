@@ -94,6 +94,13 @@
 	text-align: center;
 
 	// Same as the Continue button on the other wizard steps, for both buttons.
+	.woocommerce-profiler-purple-theme__buttons {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: $gap-small;
+	}
+
 	.woocommerce-profiler-purple-theme__continue {
 		justify-content: center;
 		width: 200px;

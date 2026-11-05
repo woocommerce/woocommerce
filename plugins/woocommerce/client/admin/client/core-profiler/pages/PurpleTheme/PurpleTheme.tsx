@@ -81,20 +81,22 @@ export const PurpleTheme = ( {
 					</div>
 				</div>
 				<div className="woocommerce-profiler-purple-theme__footer">
-					<Button
-						className="woocommerce-profiler-purple-theme__continue"
-						variant="primary"
-						onClick={ () => complete( true ) }
-					>
-						{ __( 'Install Purple', 'woocommerce' ) }
-					</Button>
-					<Button
-						className="woocommerce-profiler-purple-theme__continue"
-						variant="tertiary"
-						onClick={ () => complete( false ) }
-					>
-						{ __( 'Keep my current theme', 'woocommerce' ) }
-					</Button>
+					<div className="woocommerce-profiler-purple-theme__buttons">
+						<Button
+							className="woocommerce-profiler-purple-theme__continue"
+							variant="primary"
+							onClick={ () => complete( true ) }
+						>
+							{ __( 'Install Purple', 'woocommerce' ) }
+						</Button>
+						<Button
+							className="woocommerce-profiler-purple-theme__continue"
+							variant="secondary"
+							onClick={ () => complete( false ) }
+						>
+							{ __( 'Keep my current theme', 'woocommerce' ) }
+						</Button>
+					</div>
 					<p className="woocommerce-profiler-purple-theme__note">
 						{ __(
 							'We’ll install Purple and activate it, so it becomes your store’s theme right away. You can switch back any time in Appearance > Themes.',
