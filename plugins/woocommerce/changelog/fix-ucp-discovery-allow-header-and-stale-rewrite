@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-UCP: Answer non-GET requests to /.well-known/ucp with a 405 that lists the allowed methods, and serve the discovery profile even when the UCP feature was enabled without a rewrite rules flush.
+UCP: Send an Allow header with 405 responses from /.well-known/ucp and recover the endpoint when the flag changes without a rewrite flush.
