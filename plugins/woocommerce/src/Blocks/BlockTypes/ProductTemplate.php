@@ -61,13 +61,16 @@ class ProductTemplate extends AbstractBlock {
 
 		$classnames = '';
 		if ( isset( $block->context['displayLayout'] ) && isset( $block->context['query'] ) ) {
-			$classnames = 'is-product-collection-layout-' . $block->context['displayLayout']['type'] . ' ';
+			$type    = $block->context['displayLayout']['type'] ?? '';
+			$columns = $block->context['displayLayout']['columns'] ?? null;
 
-			if ( isset( $block->context['displayLayout']['type'] ) && 'flex' === $block->context['displayLayout']['type'] ) {
+			$classnames = 'is-product-collection-layout-' . $type . ' ';
+
+			if ( 'flex' === $type && ! empty( $columns ) ) {
 				if ( isset( $block->context['displayLayout']['shrinkColumns'] ) && $block->context['displayLayout']['shrinkColumns'] ) {
-					$classnames = "wc-block-product-template__responsive columns-{$block->context['displayLayout']['columns']}";
+					$classnames = "wc-block-product-template__responsive columns-{$columns}";
 				} else {
-					$classnames = "is-flex-container columns-{$block->context['displayLayout']['columns']}";
+					$classnames = "is-flex-container columns-{$columns}";
 				}
 			}
 		}
@@ -93,28 +96,28 @@ class ProductTemplate extends AbstractBlock {
 			// Get an instance of the current Post Template block.
 			$block_instance = $block->parsed_block;
 			$product_id     = (int) get_the_ID();
+			$post_type      = get_post_type();
 
 			// Set the block name to one that does not correspond to an existing registered block.
 			// This ensures that for the inner instances of the Post Template block, we do not render any block supports.
 			$block_instance['blockName'] = 'core/null';
 
-			// Relay the block context to the inner blocks.
-			$available_context = array_merge(
-				(array) $block->context,
-				array(
-					'postType' => get_post_type(),
-					'postId'   => $product_id,
-				)
-			);
+			$filter_block_context = static function ( $context ) use ( $product_id, $post_type ) {
+				$context['postType'] = $post_type;
+				$context['postId']   = $product_id;
+				return $context;
+			};
 
-			// Render the inner blocks of the Post Template block with `dynamic` set to `false` to prevent calling
-			// `render_callback` and ensure that no wrapper markup is included.
-			$block_content = (
-				new WP_Block(
-					$block_instance,
-					$available_context
-				)
-			)->render( array( 'dynamic' => false ) );
+			// Use an early priority so that other 'render_block_context' filters have access to the values.
+			add_filter( 'render_block_context', $filter_block_context, 1 );
+
+			$inner_block = new WP_Block( $block_instance, $block->context );
+			// core/null has no uses_context, so preserve the collection marker for descendant checks.
+			$inner_block->context['isProductCollectionInnerBlock'] = $block->context['isProductCollectionInnerBlock'] ?? false;
+
+			// Render only the inner blocks, without the Product Template callback or wrapper.
+			$block_content = $inner_block->render( array( 'dynamic' => false ) );
+			remove_filter( 'render_block_context', $filter_block_context, 1 );
 
 			// Load product into the shared products store.
 			wc_interactivity_api_load_product(
@@ -168,22 +171,19 @@ class ProductTemplate extends AbstractBlock {
 	/**
 	 * Determines whether a block list contains a block that uses the featured image.
 	 *
-	 * @param WP_Block_List $inner_blocks Inner block instance.
-	 *
+	 * @param \WP_Block_List $inner_blocks Inner block instance.
 	 * @return bool Whether the block list contains a block that uses the featured image.
 	 */
 	protected function block_core_post_template_uses_featured_image( $inner_blocks ) {
+		// Extended replica from upstreams' block_core_post_template_uses_featured_image function.
 		foreach ( $inner_blocks as $block ) {
-			if ( 'core/post-featured-image' === $block->name ) {
+			if ( 'core/post-featured-image' === $block->name || 'woocommerce/product-image' === $block->name ) {
 				return true;
 			}
-			if (
-			'core/cover' === $block->name &&
-			! empty( $block->attributes['useFeaturedImage'] )
-			) {
+			if ( 'core/cover' === $block->name && ! empty( $block->attributes['useFeaturedImage'] ) ) {
 				return true;
 			}
-			if ( $block->inner_blocks && block_core_post_template_uses_featured_image( $block->inner_blocks ) ) {
+			if ( $block->inner_blocks && $this->block_core_post_template_uses_featured_image( $block->inner_blocks ) ) {
 				return true;
 			}
 		}

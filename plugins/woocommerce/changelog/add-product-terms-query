@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Allow external clients to read product categories, tags, and brands through WooCommerce abilities.

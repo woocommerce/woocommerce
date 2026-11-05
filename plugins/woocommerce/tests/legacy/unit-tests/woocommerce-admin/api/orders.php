@@ -59,7 +59,7 @@ class WC_Admin_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 
 		$orders = array();
 		for ( $i = 0; $i < 10; $i++ ) {
-			$orders[] = WC_Helper_Order::create_order( $this->user );
+			$orders[] = wc_create_order( array( 'customer_id' => $this->user ) );
 		}
 
 		$order = $orders[9];

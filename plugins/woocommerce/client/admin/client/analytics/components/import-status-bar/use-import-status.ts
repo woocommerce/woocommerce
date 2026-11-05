@@ -84,7 +84,7 @@ export function useImportStatus(): UseImportStatusReturn {
 	 * Initial fetch on mount
 	 */
 	useEffect( () => {
-		fetchStatus();
+		void fetchStatus();
 	}, [ fetchStatus ] );
 
 	/**

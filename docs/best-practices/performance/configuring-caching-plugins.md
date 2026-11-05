@@ -1,7 +1,7 @@
 ---
 post_title: How to configure caching plugins for WooCommerce
 sidebar_label: Configure caching plugins
-
+description: A guide to configuring caching plugins for WooCommerce to ensure proper functionality and performance.
 ---
 
 # How to configure caching plugins for WooCommerce

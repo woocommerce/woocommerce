@@ -21,6 +21,23 @@ defined( 'ABSPATH' ) || exit;
  */
 $render_refunds = (bool) apply_filters( 'woocommerce_admin_order_should_render_refunds', 0 < $order->get_total() - $order->get_total_refunded() || 0 < absint( $order->get_item_count() - $order->get_item_count_refunded() ), $order->get_id(), $order );
 
+$date_paid          = $order->get_date_paid(); // @phpstan-ignore variable.undefined ($order is set by the code that includes this view.)
+$render_paid_totals = false;
+
+if ( $date_paid ) {
+	/**
+	 * Allow plugins to determine whether the "Paid" totals section should be rendered in the template.
+	 * Only applies to orders with a paid date.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param bool     $render_paid_totals If the "Paid" totals section should be rendered.
+	 * @param int      $order_id           The Order ID.
+	 * @param WC_Order $order              The Order object.
+	 */
+	$render_paid_totals = (bool) apply_filters( 'woocommerce_admin_order_should_render_paid_totals', $order->is_paid() || $order->has_status( OrderStatus::REFUNDED ), $order->get_id(), $order );
+}
+
 global $wpdb;
 
 $payment_gateway     = wc_get_payment_gateway_by_order( $order );
@@ -52,7 +69,7 @@ if ( wc_tax_enabled() ) {
 				<?php
 				if ( ! empty( $order_taxes ) ) :
 					foreach ( $order_taxes as $tax_id => $tax_item ) :
-						$tax_class      = wc_get_tax_class_by_tax_id( $tax_item['rate_id'] );
+						$tax_class      = wc_get_tax_class_by_tax_id( $tax_item['rate_id'] ?? 0 ) ?? '';
 						$tax_class_name = isset( $classes_options[ $tax_class ] ) ? $classes_options[ $tax_class ] : __( 'Tax', 'woocommerce' );
 						$column_label   = ! empty( $tax_item['label'] ) ? $tax_item['label'] : __( 'Tax', 'woocommerce' );
 						/* translators: %1$s: tax item name %2$s: tax class name  */
@@ -171,15 +188,15 @@ if ( wc_tax_enabled() ) {
 				<td class="label"><?php esc_html_e( 'Items Subtotal:', 'woocommerce' ); ?></td>
 				<td width="1%"></td>
 				<td class="total">
-					<?php echo wc_price( $order->get_subtotal_amount_to_display(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php echo wc_price( $order->get_subtotal(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</td>
 			</tr>
 		<?php if ( 0 < $order->get_total_discount() ) : ?>
 			<tr>
 				<td class="label"><?php esc_html_e( 'Discount:', 'woocommerce' ); ?></td>
 				<td width="1%"></td>
-				<td class="total">-
-					<?php echo wc_price( $order->get_total_discount(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<td class="total">
+					<?php echo wc_price( -$order->get_total_discount(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</td>
 			</tr>
 		<?php endif; ?>
@@ -236,7 +253,7 @@ if ( wc_tax_enabled() ) {
 
 	<div class="clear"></div>
 
-	<?php if ( in_array( $order->get_status(), array( OrderStatus::PROCESSING, OrderStatus::COMPLETED, OrderStatus::REFUNDED ), true ) && ! empty( $order->get_date_paid() ) ) : ?>
+	<?php if ( $render_paid_totals ) : ?>
 
 		<table class="wc-order-totals" style="border-top: 1px solid #999; margin-top:12px; padding-top:12px">
 			<tr>
@@ -252,9 +269,9 @@ if ( wc_tax_enabled() ) {
 					<?php
 					if ( $order->get_payment_method_title() ) {
 						/* translators: 1: payment date. 2: payment method */
-						echo esc_html( sprintf( __( '%1$s via %2$s', 'woocommerce' ), $order->get_date_paid()->date_i18n( get_option( 'date_format' ) ), $order->get_payment_method_title() ) );
+						echo esc_html( sprintf( __( '%1$s via %2$s', 'woocommerce' ), $date_paid->date_i18n( get_option( 'date_format' ) ), $order->get_payment_method_title() ) );
 					} else {
-						echo esc_html( $order->get_date_paid()->date_i18n( get_option( 'date_format' ) ) );
+						echo esc_html( $date_paid->date_i18n( get_option( 'date_format' ) ) );
 					}
 					?>
 					</span>
@@ -272,7 +289,7 @@ if ( wc_tax_enabled() ) {
 			<tr>
 				<td class="label refunded-total"><?php esc_html_e( 'Refunded', 'woocommerce' ); ?>:</td>
 				<td width="1%"></td>
-				<td class="total refunded-total">-<?php echo wc_price( $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
+				<td class="total refunded-total"><?php echo wc_price( - (float) $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
 			</tr>
 
 			<?php do_action( 'woocommerce_admin_order_totals_after_refunded', $order->get_id() ); ?>
@@ -357,7 +374,7 @@ if ( wc_tax_enabled() ) {
 		<?php endif; ?>
 		<tr>
 			<td class="label"><?php esc_html_e( 'Amount already refunded', 'woocommerce' ); ?>:</td>
-			<td class="total">-<?php echo wc_price( $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
+			<td class="total"><?php echo wc_price( - (float) $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
 		</tr>
 		<tr>
 			<td class="label"><?php esc_html_e( 'Total available to refund', 'woocommerce' ); ?>:</td>
@@ -417,7 +434,7 @@ if ( wc_tax_enabled() ) {
 <?php endif; ?>
 
 <script type="text/template" id="tmpl-wc-modal-add-products">
-	<div class="wc-backbone-modal">
+	<div class="wc-backbone-modal wc-backbone-modal-add-products">
 		<div class="wc-backbone-modal-content">
 			<section class="wc-backbone-modal-main" role="main">
 				<header class="wc-backbone-modal-header">
@@ -460,7 +477,7 @@ if ( wc_tax_enabled() ) {
 </script>
 
 <script type="text/template" id="tmpl-wc-modal-add-tax">
-	<div class="wc-backbone-modal">
+	<div class="wc-backbone-modal wc-modal-add-tax">
 		<div class="wc-backbone-modal-content">
 			<section class="wc-backbone-modal-main" role="main">
 				<header class="wc-backbone-modal-header">
@@ -471,42 +488,86 @@ if ( wc_tax_enabled() ) {
 				</header>
 				<article>
 					<form action="" method="post">
-						<table class="widefat">
+						<p class="search-box" data-wc-tax-rate-search-box>
+							<label class="screen-reader-text" for="add_order_tax_search"><?php esc_html_e( 'Search tax rates:', 'woocommerce' ); ?></label>
+							<span class="screen-reader-text" id="add_order_tax_search_description">
+								<?php echo esc_html_x( 'Search by name, code, class, rate, or ID.', 'tax rate search input help', 'woocommerce' ); ?>
+							</span>
+							<input
+								type="search"
+								id="add_order_tax_search"
+								name="s"
+								data-wc-tax-rate-search
+								aria-describedby="add_order_tax_search_description"
+								placeholder="<?php echo esc_attr_x( 'Search', 'tax rate search input placeholder', 'woocommerce' ); ?>"
+							/>
+							<button type="submit" class="button"><?php esc_html_e( 'Search tax rates', 'woocommerce' ); ?></button>
+							<span class="description wc-tax-rate-search-summary" data-wc-tax-rate-search-summary hidden></span>
+						</p>
+						<br class="clear" />
+						<table class="widefat striped wc-tax-rate-results" data-wc-tax-rate-results data-per_page="10">
 							<thead>
 								<tr>
-									<th>&nbsp;</th>
-									<th><?php esc_html_e( 'Rate name', 'woocommerce' ); ?></th>
-									<th><?php esc_html_e( 'Tax class', 'woocommerce' ); ?></th>
-									<th><?php esc_html_e( 'Rate code', 'woocommerce' ); ?></th>
-									<th><?php esc_html_e( 'Rate %', 'woocommerce' ); ?></th>
+									<th scope="col">
+										<span class="screen-reader-text"><?php esc_html_e( 'Select tax rate', 'woocommerce' ); ?></span>
+										<span aria-hidden="true">&nbsp;</span>
+									</th>
+									<th scope="col"><?php esc_html_e( 'Rate name', 'woocommerce' ); ?></th>
+									<th scope="col"><?php esc_html_e( 'Tax class', 'woocommerce' ); ?></th>
+									<th scope="col"><?php esc_html_e( 'Rate code', 'woocommerce' ); ?></th>
+									<th scope="col"><?php esc_html_e( 'Rate %', 'woocommerce' ); ?></th>
 								</tr>
 							</thead>
-						<?php
-						$rates = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates ORDER BY tax_rate_name LIMIT 100" );
-						foreach ( $rates as $rate ) {
-							echo '
-									<tr>
-										<td><input type="radio" id="add_order_tax_' . absint( $rate->tax_rate_id ) . '" name="add_order_tax" value="' . absint( $rate->tax_rate_id ) . '" /></td>
-										<td><label for="add_order_tax_' . absint( $rate->tax_rate_id ) . '">' . esc_html( WC_Tax::get_rate_label( $rate ) ) . '</label></td>
-										<td>' . ( isset( $classes_options[ $rate->tax_rate_class ] ) ? esc_html( $classes_options[ $rate->tax_rate_class ] ) : '-' ) . '</td>
-										<td>' . esc_html( WC_Tax::get_rate_code( $rate ) ) . '</td>
-										<td>' . esc_html( WC_Tax::get_rate_percent( $rate ) ) . '</td>
-									</tr>
-								';
-						}
-						?>
+							<tbody>
+								<tr class="no-items">
+									<td class="colspanchange wc-tax-rate-status" colspan="5"><?php esc_html_e( 'Loading tax rates…', 'woocommerce' ); ?></td>
+								</tr>
+							</tbody>
 						</table>
-						<?php if ( absint( $wpdb->get_var( "SELECT COUNT(tax_rate_id) FROM {$wpdb->prefix}woocommerce_tax_rates;" ) ) > 100 ) : ?>
-							<p>
-								<label for="manual_tax_rate_id"><?php esc_html_e( 'Or, enter tax rate ID:', 'woocommerce' ); ?></label><br/>
-								<input type="number" name="manual_tax_rate_id" id="manual_tax_rate_id" step="1" placeholder="<?php esc_attr_e( 'Optional', 'woocommerce' ); ?>" />
-							</p>
-						<?php endif; ?>
+						<div class="tablenav bottom" data-wc-tax-rate-pagination-container>
+							<div class="tablenav-pages" data-wc-tax-rate-pagination data-page="1" data-total-pages="1">
+								<span class="displaying-num"></span>
+								<span class="pagination-links">
+									<button type="button" class="first-page button" disabled>
+										<span class="screen-reader-text"><?php esc_html_e( 'First page', 'woocommerce' ); ?></span>
+										<span aria-hidden="true">&laquo;</span>
+									</button>
+									<button type="button" class="prev-page button" disabled>
+										<span class="screen-reader-text"><?php esc_html_e( 'Previous page', 'woocommerce' ); ?></span>
+										<span aria-hidden="true">&lsaquo;</span>
+									</button>
+									<span class="paging-input">
+										<label for="add_order_tax_current_page" class="screen-reader-text"><?php esc_html_e( 'Current page', 'woocommerce' ); ?></label>
+										<input class="current-page" id="add_order_tax_current_page" type="text" name="paged" value="1" size="1" aria-describedby="add-order-tax-table-paging" />
+										<span class="tablenav-paging-text" id="add-order-tax-table-paging">
+											<?php
+											echo wp_kses_post(
+												sprintf(
+													/* translators: %s: total number of pages. */
+													__( 'of %s', 'woocommerce' ),
+													'<span class="total-pages">1</span>'
+												)
+											);
+											?>
+										</span>
+									</span>
+									<button type="button" class="next-page button" disabled>
+										<span class="screen-reader-text"><?php esc_html_e( 'Next page', 'woocommerce' ); ?></span>
+										<span aria-hidden="true">&rsaquo;</span>
+									</button>
+									<button type="button" class="last-page button" disabled>
+										<span class="screen-reader-text"><?php esc_html_e( 'Last page', 'woocommerce' ); ?></span>
+										<span aria-hidden="true">&raquo;</span>
+									</button>
+								</span>
+							</div>
+							<br class="clear" />
+						</div>
 					</form>
 				</article>
 				<footer>
 					<div class="wc-backbone-modal-buttons">
-						<button id="btn-ok" class="button button-primary button-large"><?php esc_html_e( 'Add', 'woocommerce' ); ?></button>
+						<button id="btn-ok" class="button button-primary button-large" disabled><?php esc_html_e( 'Add', 'woocommerce' ); ?></button>
 					</div>
 				</footer>
 			</section>

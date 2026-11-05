@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\Tests\Internal\Customers;
 
 use Automattic\WooCommerce\Internal\Customers\SearchService as CustomersSearchService;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper;
-use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -15,6 +14,13 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
  */
 class SearchServiceTest extends \WC_Unit_Test_Case {
 	use HPOSToggleTrait;
+
+	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::setup_cot_tables();
+	}
 
 	/**
 	 * Service instance.
@@ -39,7 +45,9 @@ class SearchServiceTest extends \WC_Unit_Test_Case {
 
 		$this->original_hpos_status = OrderUtil::custom_orders_table_usage_is_enabled();
 		if ( ! $this->original_hpos_status ) {
-			$this->setup_cot();
+			remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+			remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+			$this->toggle_cot_feature_and_usage( true );
 		}
 	}
 
@@ -124,7 +132,8 @@ class SearchServiceTest extends \WC_Unit_Test_Case {
 	 * @return \WC_Order
 	 */
 	private function create_order_for( \WC_Customer $customer ): \WC_Order {
-		$order = OrderHelper::create_order( $customer->get_id() );
+		$order = new \WC_Order();
+		$order->set_customer_id( $customer->get_id() );
 		$order->set_billing_email( $customer->get_billing_email( 'edit' ) );
 		$order->save();
 		return $order;

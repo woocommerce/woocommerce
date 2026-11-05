@@ -41,27 +41,28 @@
 		"@types/d3-time-format": "^2.3.4",
 		"@wordpress/date": "catalog:wp-min",
 		"@wordpress/i18n": "catalog:wp-min",
+		"date-fns-tz": "^3.2.0",
 		"moment": "^2.29.4",
-		"moment-timezone": "^0.5.43",
 		"qs": "^6.11.2"
 	},
 	"devDependencies": {
-		"@babel/core": "7.25.7",
-		"@types/jest": "29.5.x",
+		"@babel/core": "catalog:tooling",
+		"@types/jest": "catalog:tooling",
 		"@types/lodash": "^4.14.202",
 		"@types/node": "^24.1.0",
 		"@types/qs": "^6.9.10",
+		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"d3-time-format": "^2.3.0",
-		"eslint": "^8.55.0",
-		"jest": "29.5.x",
-		"jest-cli": "29.5.x",
-		"jest-environment-jsdom": "29.5.x",
-		"rimraf": "5.0.5",
-		"ts-jest": "29.1.x",
-		"typescript": "5.7.x"
+		"eslint": "catalog:tooling",
+		"jest": "catalog:tooling",
+		"jest-cli": "catalog:tooling",
+		"jest-environment-jsdom": "catalog:tooling",
+		"rimraf": "catalog:tooling",
+		"ts-jest": "catalog:tooling",
+		"typescript": "catalog:tooling"
 	},
 	"peerDependencies": {
 		"lodash": "^4.17.0"

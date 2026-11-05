@@ -40,6 +40,7 @@ class LaunchYourStore {
 			'woocommerce_coming_soon'      => array( 'yes', 'no' ),
 			'woocommerce_store_pages_only' => array( 'yes', 'no' ),
 			'woocommerce_private_link'     => array( 'yes', 'no' ),
+			'woocommerce_feature_site_visibility_badge_enabled' => array( 'yes', 'no' ),
 		);
 
 		$event_data = array();
@@ -114,7 +115,7 @@ class LaunchYourStore {
 		// phpcs:enable
 
 		if ( $is_setting_page || $is_woopayments_connect ) {
-			// Regnerate the share key if it's not set.
+			// Regenerate the share key if it's not set.
 			add_option( 'woocommerce_share_key', wp_generate_password( 32, false ) );
 
 			$settings['siteVisibilitySettings'] = array(
@@ -123,6 +124,7 @@ class LaunchYourStore {
 				'woocommerce_store_pages_only' => get_option( 'woocommerce_store_pages_only' ),
 				'woocommerce_private_link'     => get_option( 'woocommerce_private_link' ),
 				'woocommerce_share_key'        => get_option( 'woocommerce_share_key' ),
+				'woocommerce_feature_site_visibility_badge_enabled' => get_option( 'woocommerce_feature_site_visibility_badge_enabled', 'yes' ),
 			);
 		}
 

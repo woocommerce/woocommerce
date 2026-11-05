@@ -6,11 +6,22 @@
  */
 
 use Automattic\WooCommerce\Admin\API\Plugins;
+use Automattic\WooCommerce\Admin\PluginsHelper;
 
 /**
  * WC Tests API Plugins
  */
 class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
+
+	/**
+	 * Test plugin slug.
+	 */
+	private const TEST_PLUGIN_SLUG = 'sample-woo-plugin';
+
+	/**
+	 * Test plugin file.
+	 */
+	private const TEST_PLUGIN_FILE = 'sample-woo-plugin/sample-woo-plugin.php';
 
 	/**
 	 * Endpoints.
@@ -24,6 +35,7 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->delete_test_plugin();
 
 		$this->user = $this->factory->user->create(
 			array(
@@ -37,8 +49,22 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		deactivate_plugins( 'akismet/akismet.php', true );
+		$this->delete_test_plugin();
+		unset( $GLOBALS['wp_rest_auth_cookie'] );
 
 		parent::tearDown();
+	}
+
+	/**
+	 * Delete files installed by the plugin installation test.
+	 */
+	private function delete_test_plugin(): void {
+		if ( ! file_exists( WP_PLUGIN_DIR . '/' . self::TEST_PLUGIN_FILE ) ) {
+			return;
+		}
+
+		delete_plugins( array( self::TEST_PLUGIN_FILE ) );
+		wp_clean_plugins_cache( true );
 	}
 
 	/**
@@ -55,23 +81,75 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 	public function test_install_plugin() {
 		wp_set_current_user( $this->user );
 
+		$plugin_package = wp_tempnam( 'sample-woo-plugin.zip' );
+		copy( WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/sample-woo-plugin.zip', $plugin_package );
+
+		$api_filter = static function ( $result, $action, $args ) {
+			if ( 'plugin_information' !== $action || self::TEST_PLUGIN_SLUG !== $args->slug ) {
+				return $result;
+			}
+
+			return (object) array(
+				'slug'          => self::TEST_PLUGIN_SLUG,
+				'version'       => '1.0.0',
+				'download_link' => 'https://example.com/sample-woo-plugin.zip',
+			);
+		};
+
+		$download_filter = static function ( $reply, $package, $upgrader ) use ( $plugin_package ) {
+			if ( $upgrader instanceof Plugin_Upgrader ) {
+				return $plugin_package;
+			}
+
+			return $reply;
+		};
+
+		$upgrader_hooks = array(
+			array( array( 'Language_Pack_Upgrader', 'async_upgrade' ), 20, 1 ),
+			array( 'wp_version_check', 10, 0 ),
+			array( 'wp_update_plugins', 10, 0 ),
+			array( 'wp_update_themes', 10, 0 ),
+		);
+
+		$removed_upgrader_hooks = array();
+
+		add_filter( 'plugins_api', $api_filter, 10, 3 );
+		add_filter( 'upgrader_pre_download', $download_filter, 10, 3 );
+		foreach ( $upgrader_hooks as $upgrader_hook ) {
+			if ( false !== has_action( 'upgrader_process_complete', $upgrader_hook[0] ) ) {
+				remove_action( 'upgrader_process_complete', $upgrader_hook[0], $upgrader_hook[1] );
+				$removed_upgrader_hooks[] = $upgrader_hook;
+			}
+		}
+
 		$request = new WP_REST_Request( 'POST', $this->endpoint . '/install' );
 		$request->set_query_params(
 			array(
-				'plugins' => 'hello-dolly',
+				'plugins' => self::TEST_PLUGIN_SLUG,
 			)
 		);
-		$response = $this->server->dispatch( $request );
 
-		// TODO: This test should be skipped if WordPress.org's plugins API endpoint cannot be reached.
+		$this->assertFalse( PluginsHelper::is_plugin_installed( self::TEST_PLUGIN_SLUG ) );
 
-		$data    = $response->get_data();
-		$plugins = get_plugins();
+		try {
+			$response = $this->server->dispatch( $request );
+			$data     = $response->get_data();
+			$plugins  = get_plugins();
 
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( array( 'hello-dolly' ), $data['data']['installed'] );
-		$this->assertEquals( true, $data['success'] );
-		$this->assertArrayHasKey( 'hello-dolly/hello.php', $plugins );
+			$this->assertEquals( 200, $response->get_status() );
+			$this->assertEquals( array( self::TEST_PLUGIN_SLUG ), $data['data']['installed'] );
+			$this->assertEquals( true, $data['success'] );
+			$this->assertArrayHasKey( self::TEST_PLUGIN_FILE, $plugins );
+		} finally {
+			remove_filter( 'plugins_api', $api_filter, 10 );
+			remove_filter( 'upgrader_pre_download', $download_filter, 10 );
+			foreach ( $removed_upgrader_hooks as $upgrader_hook ) {
+				add_action( 'upgrader_process_complete', $upgrader_hook[0], $upgrader_hook[1], $upgrader_hook[2] );
+			}
+			if ( file_exists( $plugin_package ) ) {
+				wp_delete_file( $plugin_package );
+			}
+		}
 	}
 
 	/**
@@ -79,23 +157,31 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_install_plugin_async() {
 		wp_set_current_user( $this->user );
+		as_unschedule_all_actions( 'woocommerce_plugins_install_callback' );
 
-		$request = new WP_REST_Request( 'POST', $this->endpoint . '/install' );
-		$request->set_query_params(
-			array(
-				'async'   => true,
-				'plugins' => 'hello-dolly',
-			)
-		);
-		$response = $this->server->dispatch( $request );
+		try {
+			$request = new WP_REST_Request( 'POST', $this->endpoint . '/install' );
+			$request->set_query_params(
+				array(
+					'async'   => true,
+					'plugins' => self::TEST_PLUGIN_SLUG,
+				)
+			);
+			$response = $this->server->dispatch( $request );
 
-		// TODO: This test should be skipped if WordPress.org's plugins API endpoint cannot be reached.
+			$data = $response->get_data();
 
-		$data    = $response->get_data();
-		$plugins = get_plugins();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertArrayHasKey( 'job_id', $data['data'] );
+			$this->assertEquals( 200, $response->get_status() );
+			$this->assertNotEmpty( $data['data']['job_id'] );
+			$this->assertTrue(
+				as_has_scheduled_action(
+					'woocommerce_plugins_install_callback',
+					array( array( self::TEST_PLUGIN_SLUG ) )
+				)
+			);
+		} finally {
+			as_unschedule_all_actions( 'woocommerce_plugins_install_callback' );
+		}
 	}
 
 	/**
@@ -173,4 +259,96 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 		return 'fr_FR';
 	}
 
+	/**
+	 * @testdox The connect-jetpack endpoint rejects a request with no wp_rest nonce.
+	 */
+	public function test_connect_jetpack_rejects_request_without_nonce() {
+		wp_set_current_user( $this->user );
+		unset( $GLOBALS['wp_rest_auth_cookie'] );
+
+		$request  = new WP_REST_Request( 'GET', $this->endpoint . '/connect-jetpack' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 403, $response->get_status(), 'A request without an interactive session nonce must be rejected.' );
+		$this->assertEquals( 'woocommerce_rest_missing_session', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox The connect-jetpack endpoint rejects a cookie session whose wp_rest nonce is missing or invalid.
+	 *
+	 * @testWith [null]
+	 *           ["not-a-valid-nonce"]
+	 *
+	 * @param string|null $nonce Nonce header to send, or null to send none.
+	 */
+	public function test_connect_jetpack_rejects_cookie_with_bad_nonce( $nonce ) {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint . '/connect-jetpack' );
+		$this->add_rest_nonce( $request );
+		if ( null === $nonce ) {
+			$request->remove_header( 'X-WP-Nonce' );
+		} else {
+			$request->set_header( 'X-WP-Nonce', $nonce );
+		}
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 403, $response->get_status(), 'A cookie session without a valid wp_rest nonce must be rejected.' );
+		$this->assertEquals( 'woocommerce_rest_missing_session', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox The connect-jetpack endpoint rejects a wp_rest nonce sent without a cookie session.
+	 */
+	public function test_connect_jetpack_rejects_nonce_without_cookie() {
+		wp_set_current_user( $this->user );
+		unset( $GLOBALS['wp_rest_auth_cookie'] );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint . '/connect-jetpack' );
+		$request->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 403, $response->get_status(), 'A wp_rest nonce without a cookie session must be rejected.' );
+		$this->assertEquals( 'woocommerce_rest_missing_session', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox The connect-jetpack endpoint allows an admin with a valid wp_rest nonce.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $header_nonce Send the nonce as the X-WP-Nonce header, or as the _wpnonce parameter.
+	 */
+	public function test_connect_jetpack_allows_interactive_admin( $header_nonce ) {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint . '/connect-jetpack' );
+		$this->add_rest_nonce( $request );
+		if ( ! $header_nonce ) {
+			$request->set_param( '_wpnonce', $request->get_header( 'X-WP-Nonce' ) );
+			$request->remove_header( 'X-WP-Nonce' );
+		}
+		$response = $this->server->dispatch( $request );
+
+		$this->assertNotEquals( 403, $response->get_status(), 'An admin browser session must pass the interactive-session check.' );
+		$this->assertNotEquals( 'woocommerce_rest_missing_session', $response->get_data()['code'] ?? '' );
+	}
+
+	/**
+	 * Authenticate the current user through a `logged_in` cookie, as core does
+	 * for a browser request, and attach the matching `wp_rest` nonce header.
+	 *
+	 * @param WP_REST_Request $request Request to authenticate.
+	 * @return void
+	 */
+	private function add_rest_nonce( WP_REST_Request $request ) {
+		$user_id    = get_current_user_id();
+		$expiration = time() + DAY_IN_SECONDS;
+		$token      = WP_Session_Tokens::get_instance( $user_id )->create( $expiration );
+
+		// Validating the cookie fires auth_cookie_valid, which core records in $wp_rest_auth_cookie.
+		wp_validate_auth_cookie( wp_generate_auth_cookie( $user_id, $expiration, 'logged_in', $token ), 'logged_in' );
+		$request->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
+	}
 }

@@ -186,7 +186,7 @@ export const usePlaceholderProducts = ( {
 
 		// Inject into both entity stores.
 		// Args: kind, name, records, query, invalidateCache, edits, meta.
-		storeActions.receiveEntityRecords(
+		void storeActions.receiveEntityRecords(
 			'postType',
 			'product',
 			wpEntities,
@@ -195,7 +195,7 @@ export const usePlaceholderProducts = ( {
 			null,
 			null
 		);
-		storeActions.receiveEntityRecords(
+		void storeActions.receiveEntityRecords(
 			'root',
 			'product',
 			wcEntities,
@@ -210,22 +210,22 @@ export const usePlaceholderProducts = ( {
 		// resolver) and getEditedEntityRecord (checked by useProduct
 		// hook's hasFinishedResolution) need to be finished.
 		for ( const id of placeholderIds ) {
-			storeActions.finishResolution( 'getEntityRecord', [
+			void storeActions.finishResolution( 'getEntityRecord', [
 				'root',
 				'product',
 				id,
 			] );
-			storeActions.finishResolution( 'getEntityRecord', [
+			void storeActions.finishResolution( 'getEntityRecord', [
 				'postType',
 				'product',
 				id,
 			] );
-			storeActions.finishResolution( 'getEditedEntityRecord', [
+			void storeActions.finishResolution( 'getEditedEntityRecord', [
 				'root',
 				'product',
 				id,
 			] );
-			storeActions.finishResolution( 'getEditedEntityRecord', [
+			void storeActions.finishResolution( 'getEditedEntityRecord', [
 				'postType',
 				'product',
 				id,

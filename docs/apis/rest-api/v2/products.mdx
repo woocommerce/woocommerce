@@ -27,6 +27,7 @@ The products API allows you to create, view, update, and delete individual, or a
 | `description`           | string    | Product description.                                                                                                 |       |                                                                               |
 | `short_description`     | string    | Product short description.                                                                                           |       |                                                                               |
 | `sku`                   | string    | Unique identifier.                                                                                                   |       |                                                                               |
+| `mpn`                   | string    | Manufacturer part number.                                                                                            |       |                                                                               |
 | `price`                 | string    | Current product price. `READ-ONLY`                                                     |       |                                                                               |
 | `regular_price`         | string    | Product regular price.                                                                                               |       |                                                                               |
 | `sale_price`            | string    | Product sale price.                                                                                                  |       |                                                                               |
@@ -1591,6 +1592,7 @@ woocommerce.get("products").parsed_response
 | `on_sale`        | boolean | Limit result set to products on sale.                                                                                                   |
 | `min_price`      | string  | Limit result set to products based on a minimum price.                                                                                  |
 | `max_price`      | string  | Limit result set to products based on a maximum price.                                                                                  |
+| `image_size`     | string  | Use a specific registered image size for the returned image `src` values. Falls back to the full size if the requested size is not registered. Default is `full`. |
 
 ## Update a product
 This API lets you make changes to a product.
@@ -2320,7 +2322,7 @@ data = {
             "default_attributes": [
                 {
                     "id": 6,
-                    "name": "Color,
+                    "name": "Color",
                     "option": "Green"
                 },
                 {

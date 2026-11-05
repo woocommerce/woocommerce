@@ -10,6 +10,7 @@ import { useCollectionData } from '@woocommerce/base-context/hooks';
 import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 import { getSetting } from '@woocommerce/settings';
+import type { SelectableItemsContext } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -18,7 +19,6 @@ import { InitialDisabled } from '../../components/initial-disabled';
 import { Inspector } from './inspector';
 import type { EditProps } from './types';
 import type { FilterItemFields } from '../../types';
-import type { SelectableItemsContext } from '../../../../types/type-defs/selectable-items';
 
 const Edit = ( props: EditProps ) => {
 	const { showCounts, hideEmpty } = props.attributes;
@@ -30,7 +30,7 @@ const Edit = ( props: EditProps ) => {
 					'core/heading',
 					{
 						level: 3,
-						content: __( 'Status', 'woocommerce' ),
+						content: __( 'Availability', 'woocommerce' ),
 						style: {
 							spacing: {
 								margin: {
@@ -60,7 +60,9 @@ const Edit = ( props: EditProps ) => {
 	const items = useMemo( () => {
 		return Object.entries( stockStatusOptions )
 			.filter( ( [ key ] ) => {
-				if ( ! hideEmpty ) return true;
+				if ( ! hideEmpty ) {
+					return true;
+				}
 				const count =
 					filteredCounts?.stock_status_counts?.find(
 						( item ) => item.status === key

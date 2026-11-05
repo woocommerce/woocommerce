@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Remove the unused block templates admin package and PHP API.

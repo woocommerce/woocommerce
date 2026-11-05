@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
+import NoticeBanner from '@woocommerce/base-components/notice-banner';
 import {
 	useExpressPaymentMethods,
 	usePaymentMethodInterface,
@@ -15,19 +16,21 @@ import {
 import { useEditorContext } from '@woocommerce/base-context';
 import deprecated from '@wordpress/deprecated';
 import { useDispatch, useSelect } from '@wordpress/data';
+import clsx from 'clsx';
 import {
 	ActionCreatorsOf,
 	ConfigOf,
 	CurriedSelectorsOf,
 } from '@wordpress/data/build-types/types';
+import { paymentStore } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
  */
+import type { PaymentStoreDescriptor } from '@woocommerce/block-data/payment';
 import PaymentMethodErrorBoundary from './payment-method-error-boundary';
-import { STORE_KEY as PAYMENT_STORE_KEY } from '../../../data/payment/constants';
 import { useExpressPaymentContext } from '../../cart-checkout-shared/payment-methods/express-payment/express-payment-context';
-import type { PaymentStoreDescriptor } from '../../../data/payment';
+import { useExpressPaymentFocus } from './use-express-payment-focus';
 
 const ExpressPaymentMethods = () => {
 	const { isEditor } = useEditorContext();
@@ -40,13 +43,13 @@ const ExpressPaymentMethods = () => {
 		? {
 				height: buttonHeight,
 				borderRadius: buttonBorderRadius,
-		  }
+			}
 		: undefined;
 
 	const { activePaymentMethod, paymentMethodData } = useSelect(
 		( select ) => {
 			const store = select(
-				PAYMENT_STORE_KEY
+				paymentStore
 			) as CurriedSelectorsOf< PaymentStoreDescriptor >;
 			return {
 				activePaymentMethod: store.getActivePaymentMethod(),
@@ -61,7 +64,7 @@ const ExpressPaymentMethods = () => {
 		__internalSetPaymentError,
 		__internalSetPaymentMethodData,
 		__internalSetExpressPaymentError,
-	} = useDispatch( PAYMENT_STORE_KEY ) as ActionCreatorsOf<
+	} = useDispatch( paymentStore ) as ActionCreatorsOf<
 		ConfigOf< PaymentStoreDescriptor >
 	>;
 	const { paymentMethods } = useExpressPaymentMethods();
@@ -69,6 +72,9 @@ const ExpressPaymentMethods = () => {
 	const paymentMethodInterface = usePaymentMethodInterface();
 	const previousActivePaymentMethod = useRef( activePaymentMethod );
 	const previousPaymentMethodData = useRef( paymentMethodData );
+	const entries = Object.entries( paymentMethods );
+	const { expressPaymentWrapperRef, focusedExpressPaymentMethod } =
+		useExpressPaymentFocus( ! isEditor && entries.length > 0 );
 
 	/**
 	 * onExpressPaymentClick should be triggered when the express payment button is clicked.
@@ -80,8 +86,8 @@ const ExpressPaymentMethods = () => {
 		( paymentMethodId ) => () => {
 			previousActivePaymentMethod.current = activePaymentMethod;
 			previousPaymentMethodData.current = paymentMethodData;
-			__internalSetExpressPaymentStarted();
-			__internalSetActivePaymentMethod( paymentMethodId );
+			void __internalSetExpressPaymentStarted();
+			void __internalSetActivePaymentMethod( paymentMethodId );
 		},
 		[
 			activePaymentMethod,
@@ -97,8 +103,8 @@ const ExpressPaymentMethods = () => {
 	 * This restores the active method and returns the state to pristine.
 	 */
 	const onExpressPaymentClose = useCallback( () => {
-		__internalSetPaymentIdle();
-		__internalSetActivePaymentMethod(
+		void __internalSetPaymentIdle();
+		void __internalSetActivePaymentMethod(
 			previousActivePaymentMethod.current,
 			previousPaymentMethodData.current
 		);
@@ -111,10 +117,10 @@ const ExpressPaymentMethods = () => {
 	 */
 	const onExpressPaymentError = useCallback(
 		( errorMessage ) => {
-			__internalSetPaymentError();
-			__internalSetPaymentMethodData( errorMessage );
-			__internalSetExpressPaymentError( errorMessage );
-			__internalSetActivePaymentMethod(
+			void __internalSetPaymentError();
+			void __internalSetPaymentMethodData( errorMessage );
+			void __internalSetExpressPaymentError( errorMessage );
+			void __internalSetActivePaymentMethod(
 				previousActivePaymentMethod.current,
 				previousPaymentMethodData.current
 			);
@@ -136,14 +142,13 @@ const ExpressPaymentMethods = () => {
 				'Express Payment Methods should use the provided onError handler instead.',
 				{
 					alternative: 'onError',
-					plugin: 'woocommerce-gutenberg-products-block',
 					link: 'https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4228',
 				}
 			);
 			if ( errorMessage ) {
 				onExpressPaymentError( errorMessage );
 			} else {
-				__internalSetExpressPaymentError( '' );
+				void __internalSetExpressPaymentError( '' );
 			}
 		},
 		[ __internalSetExpressPaymentError, onExpressPaymentError ]
@@ -156,7 +161,6 @@ const ExpressPaymentMethods = () => {
 	 * Currently re-renders excessively but is not easy to useMemo because paymentMethodInterface could become stale.
 	 * paymentMethodInterface itself also updates on most renders.
 	 */
-	const entries = Object.entries( paymentMethods );
 	/*
 	 * Define the elements used for the Express Payments markup.
 	 *
@@ -177,21 +181,53 @@ const ExpressPaymentMethods = () => {
 				const expressPaymentMethod = isEditor
 					? paymentMethod.edit
 					: paymentMethod.content;
-				return isValidElement( expressPaymentMethod ) ? (
+				const itemId = `express-payment-method-${ id }`;
+				// Each method gets its own error boundary so one broken button doesn't take down the others. A
+				// broken button shows an inline error in the editor and is hidden on the storefront.
+				const errorFallback = isEditor ? (
 					<ExpressPayItem
-						key={ id }
-						id={ `express-payment-method-${ id }` }
+						id={ itemId }
+						style={
+							buttonAttributes
+								? {
+										minHeight: `${ buttonAttributes.height }px`,
+									}
+								: undefined
+						}
 					>
-						{ cloneElement( expressPaymentMethod, {
-							...paymentMethodInterface,
-							onClick: onExpressPaymentClick( id ),
-							onClose: onExpressPaymentClose,
-							onError: onExpressPaymentError,
-							setExpressPaymentError:
-								deprecatedSetExpressPaymentError,
-							buttonAttributes,
-						} ) }
+						<NoticeBanner status="error" isDismissible={ false }>
+							{ sprintf(
+								/* translators: %s: express payment method title, e.g. "Apple Pay". */
+								__( "%s couldn't load.", 'woocommerce' ),
+								paymentMethod.title
+							) }
+						</NoticeBanner>
 					</ExpressPayItem>
+				) : null;
+				return isValidElement( expressPaymentMethod ) ? (
+					<PaymentMethodErrorBoundary
+						key={ id }
+						isEditor={ isEditor }
+						fallback={ errorFallback }
+					>
+						<ExpressPayItem
+							id={ itemId }
+							className={ clsx( {
+								'wc-block-components-express-payment__event-button--focused':
+									focusedExpressPaymentMethod === id,
+							} ) }
+						>
+							{ cloneElement( expressPaymentMethod, {
+								...paymentMethodInterface,
+								onClick: onExpressPaymentClick( id ),
+								onClose: onExpressPaymentClose,
+								onError: onExpressPaymentError,
+								setExpressPaymentError:
+									deprecatedSetExpressPaymentError,
+								buttonAttributes,
+							} ) }
+						</ExpressPayItem>
+					</PaymentMethodErrorBoundary>
 				) : null;
 			} )
 		) : (
@@ -201,11 +237,12 @@ const ExpressPaymentMethods = () => {
 		);
 
 	return (
-		<PaymentMethodErrorBoundary isEditor={ isEditor }>
-			<ExpressPayWrapper className="wc-block-components-express-payment__event-buttons">
-				{ content }
-			</ExpressPayWrapper>
-		</PaymentMethodErrorBoundary>
+		<ExpressPayWrapper
+			className="wc-block-components-express-payment__event-buttons"
+			ref={ expressPaymentWrapperRef }
+		>
+			{ content }
+		</ExpressPayWrapper>
 	);
 };
 

@@ -1,6 +1,4 @@
 export const PRODUCT_FILTERS_STORE_NAME = 'woocommerce/product-filters';
-export const PRODUCT_FILTERS_STORE_LOCK =
-	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 export const EXCLUDED_BLOCKS = [
 	PRODUCT_FILTERS_STORE_NAME,

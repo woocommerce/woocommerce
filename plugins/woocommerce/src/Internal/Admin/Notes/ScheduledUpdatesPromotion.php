@@ -11,7 +11,6 @@ namespace Automattic\WooCommerce\Internal\Admin\Notes;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\NoteTraits;
 
@@ -49,10 +48,6 @@ class ScheduledUpdatesPromotion {
 	 * @return bool
 	 */
 	public static function is_applicable() {
-		if ( ! Features::is_enabled( 'analytics-scheduled-import' ) ) {
-			return false;
-		}
-
 		// Get the current option value.
 		// Note: get_option() returns false when option doesn't exist.
 		$immediate_import = get_option( self::OPTION_NAME, false );

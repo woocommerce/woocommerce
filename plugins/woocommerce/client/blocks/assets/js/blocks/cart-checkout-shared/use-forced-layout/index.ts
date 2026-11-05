@@ -113,7 +113,7 @@ export const useForcedLayout = ( {
 			} );
 
 			registry.batch( () => {
-				registry
+				void registry
 					.dispatch( 'core/block-editor' )
 					.insertBlocks( blockConfig, insertAtPosition, clientId );
 			} );

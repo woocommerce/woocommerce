@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { render, fireEvent } from '@testing-library/react';
-import { useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -34,10 +34,29 @@ const alerts = [
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
+	useDispatch: jest.fn(),
 	useSelect: jest.fn(),
 } ) );
 
+jest.mock( '@woocommerce/data', () => ( {
+	notesStore: 'wc/admin/notes',
+	optionsStore: 'wc/admin/options',
+	QUERY_DEFAULTS: {
+		pageSize: 25,
+	},
+	useUserPreferences: jest.fn().mockReturnValue( {} ),
+} ) );
+
 describe( 'StoreAlerts', () => {
+	beforeEach( () => {
+		useDispatch.mockReturnValue( {
+			createNotice: jest.fn(),
+			removeNote: jest.fn(),
+			triggerNoteAction: jest.fn(),
+			updateNote: jest.fn(),
+		} );
+	} );
+
 	it( 'should return null when no alerts exist', () => {
 		useSelect.mockImplementation( () => {
 			return {

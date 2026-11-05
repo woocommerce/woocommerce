@@ -24,8 +24,7 @@
 		},
 		"spacing": {
 			"margin": true,
-			"padding": true,
-			"blockGap": true
+			"padding": true
 		},
 		"typography": {
 			"fontSize": true,

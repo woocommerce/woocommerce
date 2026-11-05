@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Story, Meta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react-webpack5';
 
 /**
  * Internal dependencies
@@ -23,7 +23,7 @@ export default {
 	component: Button,
 } as Meta< ButtonProps >;
 
-const Template: Story< ButtonProps > = ( args ) => {
+const Template: StoryFn< ButtonProps > = ( args ) => {
 	return <Button { ...args } />;
 };
 

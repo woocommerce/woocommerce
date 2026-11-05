@@ -32,7 +32,7 @@ const getProps = ( source: string ) =>
 		maxLength: 1000,
 		countType: 'words',
 		className: 'test-class',
-	} as SummaryProps );
+	} ) as SummaryProps;
 
 describe( 'Summary component', () => {
 	it( 'renders rich HTML with the allowed tags and attributes', () => {

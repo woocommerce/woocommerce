@@ -40,12 +40,15 @@ const baseEmail: EmailType = {
 	enabled: true,
 	manual: false,
 	email_key: 'new_order',
+	email_class_name: 'WC_Email_New_Order',
 	recipients: { to: '', cc: '', bcc: '' },
 	status: 'enabled',
 	templateStatus: null,
 	templateVersion: null,
 	currentVersion: null,
 	wasBackfilled: false,
+	block_editor_supported: true,
+	file_template_preview_url: null,
 };
 
 describe( '<UpdatesCell>', () => {

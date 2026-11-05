@@ -31,9 +31,15 @@ const AccountIcon = ( {
 	displayStyle: DisplayStyle;
 	iconClass: string;
 } ) => {
-	return displayStyle === DisplayStyle.TEXT_ONLY ? null : (
-		<Icon className={ iconClass } icon={ icons[ iconStyle ] } size={ 18 } />
-	);
+	return displayStyle !== DisplayStyle.TEXT_ONLY ? (
+		<div className="wc-block-customer-account__visual">
+			<Icon
+				className={ iconClass }
+				icon={ icons[ iconStyle ] }
+				size={ 18 }
+			/>
+		</div>
+	) : null;
 };
 
 const Label = ( { displayStyle }: { displayStyle: DisplayStyle } ) => {
@@ -64,7 +70,7 @@ export const CustomerAccountBlock = ( {
 		displayStyle === DisplayStyle.ICON_ONLY
 			? {
 					'aria-label': __( 'My Account', 'woocommerce' ),
-			  }
+				}
 			: {};
 
 	const content = (

@@ -4,6 +4,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\EmailEditor\WCTransactionalEmails;
 
+use Automattic\WooCommerce\Internal\EmailEditor\Integration;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncBackfill;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncRegistry;
@@ -55,6 +56,10 @@ class WCEmailTemplateSyncTrackerTest extends \WC_Unit_Test_Case {
 
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
 		update_option( WCEmailTemplateDivergenceDetector::BACKFILL_COMPLETE_OPTION, 'yes' );
+
+		// Eagerly boot \WC_Emails so the \WC_Email class is autoloaded before any
+		// test reflects on it via getMockBuilder() / onlyMethods().
+		\WC_Emails::instance();
 
 		$this->fixtures_base = __DIR__ . '/fixtures/';
 		$this->posts_manager = WCTransactionalEmailPostsManager::get_instance();
@@ -256,6 +261,33 @@ class WCEmailTemplateSyncTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A real backfill should emit only one completion event through the production Integration hooks.
+	 */
+	public function test_backfill_records_only_completion_event_through_integration_hooks(): void {
+		$email_id = 'wc_test_tracker_backfill_integration';
+		$post_id  = $this->generate_stamped_post( $email_id );
+
+		foreach ( $this->get_sync_meta_keys() as $meta_key ) {
+			delete_post_meta( $post_id, $meta_key );
+		}
+		delete_option( WCEmailTemplateSyncTracker::BACKFILL_COMPLETED_TRACKED_OPTION );
+
+		$integration = new Integration();
+		$integration->init_hooks();
+		$integration->register_hooks();
+
+		WCEmailTemplateSyncBackfill::run();
+
+		$event_names       = array_column( $this->captured_events, 0 );
+		$available_events  = array_values( array_filter( $event_names, static fn( string $event_name ): bool => WCEmailTemplateSyncTracker::EVENT_UPDATE_AVAILABLE === $event_name ) );
+		$completion_events = array_values( array_filter( $event_names, static fn( string $event_name ): bool => WCEmailTemplateSyncTracker::EVENT_BACKFILL_COMPLETED === $event_name ) );
+
+		$this->assertNotSame( '', (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true ), 'The fixture must be processed by the public backfill.' );
+		$this->assertSame( array(), $available_events, 'Backfill and its immediate divergence sweep must not emit update-available events.' );
+		$this->assertSame( array( WCEmailTemplateSyncTracker::EVENT_BACKFILL_COMPLETED ), $completion_events, 'The production hook chain must emit exactly one backfill-completed event.' );
+	}
+
+	/**
 	 * @testdox Should swallow exceptions thrown inside build_base_payload so callers don't surface failures.
 	 */
 	public function test_record_swallows_exceptions_from_payload_builder(): void {
@@ -322,6 +354,49 @@ class WCEmailTemplateSyncTrackerTest extends \WC_Unit_Test_Case {
 		$this->assertSame( array(), $this->captured_events, 'Unregistered posts should not produce events.' );
 	}
 
+	/**
+	 * @testdox An unmapped email should remain outside the public backfill and detection pipeline.
+	 */
+	public function test_unmapped_email_remains_unstamped_without_update_available_event(): void {
+		$post_id = self::factory()->post->create(
+			array(
+				'post_type'    => Integration::EMAIL_POST_TYPE,
+				'post_status'  => 'publish',
+				'post_content' => '<!-- wp:paragraph --><p>Unmapped third-party content.</p><!-- /wp:paragraph -->',
+			)
+		);
+
+		// Positive control. Every assertion below is an absence, and the backfill has
+		// several early returns -- no eligible posts, an empty registry, the sweep's
+		// own completion guard -- any of which would leave all of them green while
+		// nothing ran at all. A mapped post in the same run has to come out stamped.
+		$mapped_post_id = $this->generate_stamped_post( 'wc_test_tracker_unmapped_control' );
+		foreach ( $this->get_sync_meta_keys() as $meta_key ) {
+			delete_post_meta( $mapped_post_id, $meta_key );
+		}
+
+		WCEmailTemplateSyncBackfill::run();
+		WCEmailTemplateDivergenceDetector::run_sweep();
+
+		$this->assertNotSame(
+			'',
+			(string) get_post_meta( $mapped_post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true ),
+			'The mapped control post must be processed, or the assertions below prove nothing.'
+		);
+
+		foreach ( $this->get_sync_meta_keys() as $meta_key ) {
+			$this->assertFalse( metadata_exists( 'post', $post_id, $meta_key ), "Unmapped posts must not receive `{$meta_key}`." );
+		}
+
+		$available_events = array_values(
+			array_filter(
+				$this->captured_events,
+				static fn( array $event ): bool => WCEmailTemplateSyncTracker::EVENT_UPDATE_AVAILABLE === $event[0]
+			)
+		);
+		$this->assertSame( array(), $available_events, 'The public pipeline must not emit update-available events for unmapped posts.' );
+	}
+
 	// ------------------------------------------------------------------
 	// Helpers (mirror the detector test's fixture flow).
 	// ------------------------------------------------------------------
@@ -333,16 +408,22 @@ class WCEmailTemplateSyncTrackerTest extends \WC_Unit_Test_Case {
 	 * @return int The generated post ID.
 	 */
 	private function generate_stamped_post( string $email_id ): int {
-		$this->register_fixture_email( $email_id );
+		$email = $this->register_fixture_email( $email_id );
 
 		$generator = new WCTransactionalEmailPostsGenerator();
-		$generator->init_default_transactional_emails();
-		$this->posts_manager->delete_email_template( $email_id );
+		$post_id   = $generator->create_draft( $email );
 
-		$post_id = $generator->generate_email_template_if_not_exists( $email_id );
-
-		$this->assertIsInt( $post_id );
 		$this->assertGreaterThan( 0, $post_id );
+
+		wp_update_post(
+			array(
+				'ID'          => $post_id,
+				'post_status' => 'publish',
+			)
+		);
+		// Integration's transition_post_status hook is not registered in the
+		// unit-test bootstrap, so write the email_type => post_id mapping explicitly.
+		$this->posts_manager->save_email_template_post_id( $email_id, $post_id );
 
 		return $post_id;
 	}
@@ -408,6 +489,22 @@ class WCEmailTemplateSyncTrackerTest extends \WC_Unit_Test_Case {
 		}
 		$property->setValue( $emails_container, $current );
 		$this->injected_email_keys = array();
+	}
+
+	/**
+	 * Return the complete sync-meta tuple owned by the backfill and detector pipeline.
+	 *
+	 * @return string[]
+	 */
+	private function get_sync_meta_keys(): array {
+		return array(
+			WCEmailTemplateDivergenceDetector::VERSION_META_KEY,
+			WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY,
+			WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY,
+			WCEmailTemplateDivergenceDetector::STATUS_META_KEY,
+			WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY,
+			WCEmailTemplateDivergenceDetector::BACKFILLED_META_KEY,
+		);
 	}
 
 	/**

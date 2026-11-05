@@ -16,6 +16,20 @@ use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore;
  */
 class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 	/**
+	 * Administrator used to authenticate requests.
+	 *
+	 * @var int
+	 */
+	protected static $administrator_user;
+
+	/**
+	 * Customer used by imported orders.
+	 *
+	 * @var int
+	 */
+	protected static $customer_user;
+
+	/**
 	 * Endpoint.
 	 *
 	 * @var string
@@ -23,24 +37,34 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 	protected $endpoint = '/wc-analytics/reports/import';
 
 	/**
-	 * Setup test reports products data.
+	 * Create shared report users.
+	 *
+	 * @param WP_UnitTest_Factory $factory WordPress test factory.
 	 */
-	public function setUp(): void {
-		parent::setUp();
-
-		$this->user = $this->factory->user->create(
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$administrator_user = $factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
 		);
 
-		$this->customer = $this->factory->user->create(
+		self::$customer_user = $factory->user->create(
 			array(
 				'first_name' => 'Steve',
 				'last_name'  => 'User',
 				'role'       => 'customer',
 			)
 		);
+	}
+
+	/**
+	 * Setup test reports products data.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		$this->user     = self::$administrator_user;
+		$this->customer = self::$customer_user;
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: major
+Type: dev
+
+Update @wordpress/core-data peer dependency to ^7.19.0 to align with WordPress 6.8 minimum.

@@ -1,0 +1,29 @@
+{
+	"$schema": "https://json.schemastore.org/tsconfig.json",
+	"compilerOptions": {
+		"target": "esnext",
+		"module": "esnext",
+		"moduleResolution": "node",
+		"baseUrl": ".",
+		"paths": {
+			"@woocommerce/e2e-utils": [ "./utils/blocks" ],
+			"@woocommerce/stores/woocommerce/cart": [
+				"../../client/blocks/assets/js/base/stores/woocommerce/cart"
+			]
+		},
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"resolveJsonModule": true,
+		"sourceMap": true,
+		"strict": true,
+		"strictNullChecks": true,
+		"skipLibCheck": true,
+		"noEmit": true,
+		"allowJs": true,
+		"checkJs": false,
+		"lib": [ "dom", "esnext" ],
+		"types": [ "node" ]
+	},
+	"include": [ "**/*" ],
+	"exclude": [ "node_modules", "test-results", "playwright-report" ]
+}

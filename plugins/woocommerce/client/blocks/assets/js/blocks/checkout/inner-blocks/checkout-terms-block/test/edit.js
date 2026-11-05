@@ -62,10 +62,6 @@ describe( 'Edit', () => {
 		expect(
 			queryByText( container, 'I agree to the terms and conditions' )
 		).toBeTruthy();
-
-		// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
-		// opt out of without changing the visual output.
-		expect( console ).toHaveWarned();
 	} );
 
 	it( 'Renders a notice if either the terms and conditions or privacy url attribute are unset', async () => {
@@ -82,11 +78,11 @@ describe( 'Edit', () => {
 		);
 
 		expect(
-			queryByText( container, 'Setup a Terms and Conditions page' )
+			queryByText( container, 'Set up a Terms and Conditions page' )
 		).toBeInTheDocument();
 
 		expect(
-			queryByText( container, 'Setup a Privacy Policy page' )
+			queryByText( container, 'Set up a Privacy Policy page' )
 		).toBeInTheDocument();
 
 		expect(

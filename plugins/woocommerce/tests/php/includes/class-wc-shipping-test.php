@@ -13,6 +13,11 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * @var array The customer shipping address before the test.
+	 */
+	private $previous_shipping_address = array();
+
+	/**
 	 * Set up test
 	 *
 	 * @return void
@@ -22,12 +27,19 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 		$this->sut = new WC_Shipping();
 
 		update_option( 'woocommerce_shipping_debug_mode', 'yes' );
+
+		// Tests set the shipping address on WC()->customer, which outlives a test.
+		$this->previous_shipping_address = WC()->customer->get_shipping( 'edit' );
 	}
 
 	/**
 	 * Restore options.
 	 */
 	public function tearDown(): void {
+		foreach ( $this->previous_shipping_address as $key => $value ) {
+			WC()->customer->{"set_shipping_{$key}"}( $value );
+		}
+
 		parent::tearDown();
 
 		update_option( 'woocommerce_shipping_debug_mode', 'no' );
@@ -67,6 +79,84 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 		}
 
 		remove_action( 'woocommerce_shipping_methods', $shipping_methods_hook );
+	}
+
+	/**
+	 * A destination the store does not ship to cannot be delivered, but it can still be collected,
+	 * so the shopper is left with collection rather than with nothing.
+	 *
+	 * @testdox A destination the store does not ship to leaves collection as the only option.
+	 */
+	public function test_an_unshippable_destination_leaves_collection_as_the_only_option(): void {
+		update_option( 'woocommerce_ship_to_countries', 'specific' );
+		update_option( 'woocommerce_specific_ship_to_countries', array( 'GB' ) );
+
+		$rates = $this->rates_offered_to( 'US' );
+
+		$this->assertSame( array( 'local_pickup:1' ), array_keys( $rates ), 'Only what the shopper can collect should be offered.' );
+	}
+
+	/**
+	 * @testdox A destination the store does ship to is offered delivery as well as collection.
+	 */
+	public function test_a_shippable_destination_is_offered_delivery_too(): void {
+		update_option( 'woocommerce_ship_to_countries', 'specific' );
+		update_option( 'woocommerce_specific_ship_to_countries', array( 'US' ) );
+
+		$rates = $this->rates_offered_to( 'US' );
+
+		$this->assertSame( array( 'flat_rate:1', 'local_pickup:1' ), array_keys( $rates ), 'A destination the store ships to should be offered both.' );
+	}
+
+	/**
+	 * A package with nowhere named yet cannot be proven unshippable, so the shopper keeps every
+	 * option while they are still typing.
+	 *
+	 * @testdox A package with no destination country is offered delivery as well as collection.
+	 */
+	public function test_a_package_with_no_destination_country_is_offered_delivery_too(): void {
+		update_option( 'woocommerce_ship_to_countries', 'specific' );
+		update_option( 'woocommerce_specific_ship_to_countries', array( 'GB' ) );
+
+		$rates = $this->rates_offered_to( '' );
+
+		$this->assertSame( array( 'flat_rate:1', 'local_pickup:1' ), array_keys( $rates ), 'Nothing has been ruled out yet, so nothing should be withheld.' );
+	}
+
+	/**
+	 * Ask for the rates a package bound for the given country is offered.
+	 *
+	 * @param string $country Destination country.
+	 * @return array Rates keyed by rate id.
+	 */
+	private function rates_offered_to( string $country ): array {
+		$methods = array( new WC_Shipping_Flat_Rate( 1 ), new WC_Shipping_Local_Pickup( 1 ) );
+		$hook    = fn () => $methods;
+
+		// Rates are cached in the session against a hash of the package, and the ship-to setting is
+		// not part of that hash, so two calls with the same package would otherwise read the first
+		// call's answer.
+		WC()->session->set( 'shipping_for_package_0', null );
+
+		add_action( 'woocommerce_shipping_methods', $hook );
+
+		try {
+			$package = $this->sut->calculate_shipping_for_package(
+				array(
+					'contents'      => array(),
+					'contents_cost' => 10,
+					'destination'   => array(
+						'country'  => $country,
+						'state'    => 'CA',
+						'postcode' => '00000',
+					),
+				)
+			);
+		} finally {
+			remove_action( 'woocommerce_shipping_methods', $hook );
+		}
+
+		return $package['rates'];
 	}
 
 	/**
@@ -129,6 +219,179 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox ignored package fields do not invalidate cached shipping rates
+	 *
+	 * @dataProvider provide_ignored_package_hash_fields
+	 *
+	 * @param string $field Package field to mutate.
+	 * @param mixed  $value Mutated field value.
+	 */
+	public function test_calculate_shipping_for_package_ignores_non_rate_fields_in_package_hash( string $field, $value ) {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+		WC()->session->__unset( 'shipping_for_package_0' );
+
+		$filter_calls = 0;
+		$filter       = $this->get_package_rates_counter( $filter_calls );
+		$package      = $this->get_package_hash_test_package();
+
+		add_filter( 'woocommerce_package_rates', $filter, 10 );
+
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$package[ $field ] = $value;
+
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$this->assertSame( 1, $filter_calls );
+
+		remove_filter( 'woocommerce_package_rates', $filter, 10 );
+	}
+
+	/**
+	 * @testdox material package fields invalidate cached shipping rates
+	 *
+	 * @dataProvider provide_material_package_hash_fields
+	 *
+	 * @param callable $mutate_package Package mutation callback.
+	 */
+	public function test_calculate_shipping_for_package_invalidates_cache_for_material_package_changes( callable $mutate_package ) {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+		WC()->session->__unset( 'shipping_for_package_0' );
+
+		$filter_calls = 0;
+		$filter       = $this->get_package_rates_counter( $filter_calls );
+		$package      = $this->get_package_hash_test_package();
+
+		add_filter( 'woocommerce_package_rates', $filter, 10 );
+
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$mutate_package( $package );
+
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$this->assertSame( 2, $filter_calls );
+
+		remove_filter( 'woocommerce_package_rates', $filter, 10 );
+	}
+
+	/**
+	 * @testdox unknown package fields invalidate cached shipping rates by default
+	 */
+	public function test_calculate_shipping_for_package_invalidates_cache_for_unknown_package_fields_by_default() {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+		WC()->session->__unset( 'shipping_for_package_0' );
+
+		$filter_calls = 0;
+		$filter       = $this->get_package_rates_counter( $filter_calls );
+		$package      = $this->get_package_hash_test_package();
+
+		add_filter( 'woocommerce_package_rates', $filter, 10 );
+
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$package['custom_extension_key'] = 'changed';
+
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$this->assertSame( 2, $filter_calls );
+
+		remove_filter( 'woocommerce_package_rates', $filter, 10 );
+	}
+
+	/**
+	 * @testdox extensions can ignore package fields for the shipping-rate cache hash
+	 */
+	public function test_calculate_shipping_for_package_allows_extensions_to_ignore_package_hash_fields() {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+		WC()->session->__unset( 'shipping_for_package_0' );
+
+		$filter_calls          = 0;
+		$filter                = $this->get_package_rates_counter( $filter_calls );
+		$ignored_fields_filter = function ( array $ignored_fields ): array {
+			$ignored_fields[] = 'custom_extension_key';
+			return $ignored_fields;
+		};
+		$package               = $this->get_package_hash_test_package();
+
+		add_filter( 'woocommerce_package_rates', $filter, 10 );
+		add_filter( 'woocommerce_shipping_package_hash_ignored_fields', $ignored_fields_filter );
+
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$package['custom_extension_key'] = 'changed';
+
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$this->assertSame( 1, $filter_calls );
+
+		remove_filter( 'woocommerce_shipping_package_hash_ignored_fields', $ignored_fields_filter );
+		remove_filter( 'woocommerce_package_rates', $filter, 10 );
+	}
+
+	/**
+	 * @testdox a new customer tax address invalidates cached shipping rates for the same package only while taxes are enabled
+	 *
+	 * @testWith ["yes", 2]
+	 *           ["no", 1]
+	 *
+	 * @param string $calc_taxes             Value of the woocommerce_calc_taxes option.
+	 * @param int    $expected_calculations  Number of rate calculations for the two tax addresses.
+	 */
+	public function test_calculate_shipping_for_package_invalidates_cache_for_new_tax_address( string $calc_taxes, int $expected_calculations ) {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+		update_option( 'woocommerce_calc_taxes', $calc_taxes );
+		WC()->session->__unset( 'shipping_for_package_0' );
+
+		$filter_calls = 0;
+		$filter       = $this->get_package_rates_counter( $filter_calls );
+		$package      = $this->get_package_hash_test_package();
+
+		add_filter( 'woocommerce_package_rates', $filter, 10 );
+
+		$this->set_customer_tax_location( 'US', 'CA' );
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$this->set_customer_tax_location( 'GB', '' );
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$this->assertSame( $expected_calculations, $filter_calls );
+
+		remove_filter( 'woocommerce_package_rates', $filter, 10 );
+	}
+
+	/**
+	 * @testdox extensions can ignore the customer tax address for the shipping-rate cache hash
+	 */
+	public function test_calculate_shipping_for_package_allows_extensions_to_ignore_tax_address() {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		WC()->session->__unset( 'shipping_for_package_0' );
+
+		$filter_calls          = 0;
+		$filter                = $this->get_package_rates_counter( $filter_calls );
+		$ignored_fields_filter = function ( array $ignored_fields ): array {
+			$ignored_fields[] = 'tax_location';
+			return $ignored_fields;
+		};
+		$package               = $this->get_package_hash_test_package();
+
+		add_filter( 'woocommerce_package_rates', $filter, 10 );
+		add_filter( 'woocommerce_shipping_package_hash_ignored_fields', $ignored_fields_filter );
+
+		$this->set_customer_tax_location( 'US', 'CA' );
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$this->set_customer_tax_location( 'GB', '' );
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$this->assertSame( 1, $filter_calls );
+
+		remove_filter( 'woocommerce_shipping_package_hash_ignored_fields', $ignored_fields_filter );
+		remove_filter( 'woocommerce_package_rates', $filter, 10 );
+	}
+
+	/**
 	 * Data provider for test_package_rates_filter_error_handling.
 	 *
 	 * @return array[]
@@ -167,6 +430,103 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 				},
 				'Filter handles arithmetic operations on rate costs safely',
 			),
+		);
+	}
+
+	/**
+	 * Data provider for ignored package hash fields.
+	 *
+	 * @return array[]
+	 */
+	public function provide_ignored_package_hash_fields(): array {
+		return array(
+			'subtotal'      => array( 'subtotal', 20 ),
+			'total'         => array( 'total', 20 ),
+			'package_id'    => array( 'package_id', 'package-1-changed' ),
+			'package_name'  => array( 'package_name', 'Package 1 Changed' ),
+			'rates'         => array( 'rates', array( 'prefilled_rate' => new WC_Shipping_Rate( 'prefilled_rate', 'Prefilled Rate', '7.00' ) ) ),
+			'package_index' => array( 'package_index', 2 ),
+		);
+	}
+
+	/**
+	 * Data provider for material package hash fields.
+	 *
+	 * @return array[]
+	 */
+	public function provide_material_package_hash_fields(): array {
+		return array(
+			'destination postcode' => array(
+				function ( array &$package ): void {
+					$package['destination']['postcode'] = '11111';
+				},
+			),
+			'contents cost'        => array(
+				function ( array &$package ): void {
+					$package['contents_cost'] = 20;
+				},
+			),
+			'cart contents'        => array(
+				function ( array &$package ): void {
+					$package['contents']['test_item']['quantity'] = 2;
+				},
+			),
+		);
+	}
+
+	/**
+	 * Give the customer a shipping address that taxes apply to.
+	 *
+	 * @param string $country Country code.
+	 * @param string $state   State code.
+	 */
+	private function set_customer_tax_location( string $country, string $state ): void {
+		update_option( 'woocommerce_tax_based_on', 'shipping' );
+		WC()->customer->set_shipping_location( $country, $state, '00000', 'Test City' );
+	}
+
+	/**
+	 * Get a package rates filter that counts recalculations.
+	 *
+	 * @param int $filter_calls Filter call count.
+	 * @return callable
+	 */
+	private function get_package_rates_counter( int &$filter_calls ): callable {
+		return function ( $rates ) use ( &$filter_calls ) {
+			++$filter_calls;
+			return $rates;
+		};
+	}
+
+	/**
+	 * Get a package for shipping hash tests.
+	 *
+	 * @return array
+	 */
+	private function get_package_hash_test_package(): array {
+		return array(
+			'contents'      => array(
+				'test_item' => array(
+					'quantity'          => 1,
+					'line_subtotal'     => 10,
+					'line_subtotal_tax' => 0,
+					'line_total'        => 10,
+					'line_tax'          => 0,
+					'data'              => new WC_Product_Simple(),
+				),
+			),
+			'contents_cost' => 10,
+			'destination'   => array(
+				'country'  => 'US',
+				'state'    => 'CA',
+				'postcode' => '00000',
+			),
+			'package_id'    => 'package-1',
+			'package_name'  => 'Package 1',
+			'package_index' => 1,
+			'subtotal'      => 10,
+			'total'         => 10,
+			'rates'         => array(),
 		);
 	}
 

@@ -110,4 +110,103 @@ class WC_Admin_Duplicate_Product_Test extends WC_Unit_Test_Case {
 
 		remove_filter( 'wc_product_has_unique_sku', array( $this, 'dont_allow_skus_with_numbers_lower_than_8' ) );
 	}
+
+	/**
+	 * Tests that duplicating a product with hyphens in the SKU correctly appends the suffix.
+	 *
+	 * For SKUs like "SKU-123", the duplicate should get "SKU-123-1", not "SKU-124".
+	 * This tests the fix for issue #65378.
+	 */
+	public function test_duplicate_product_with_hyphenated_sku_preserves_original() {
+		// Test case 1: Simple hyphen with number.
+		$product1 = WC_Helper_Product::create_simple_product();
+		$product1->set_sku( 'SKU-123' );
+		$product1->save();
+
+		$duplicate1 = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product1 );
+		$this->assertEquals( 'SKU-123-1', $duplicate1->get_sku(), 'Duplicate of SKU-123 should be SKU-123-1' );
+
+		// Test case 2: Multiple hyphens.
+		$product2 = WC_Helper_Product::create_simple_product();
+		$product2->set_sku( 'my-product-456' );
+		$product2->save();
+
+		$duplicate2 = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product2 );
+		$this->assertEquals( 'my-product-456-1', $duplicate2->get_sku(), 'Duplicate of my-product-456 should be my-product-456-1' );
+
+		// Test case 3: Non-numeric suffix (should still work).
+		$product3 = WC_Helper_Product::create_simple_product();
+		$product3->set_sku( 'PROD-A' );
+		$product3->save();
+
+		$duplicate3 = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product3 );
+		$this->assertEquals( 'PROD-A-1', $duplicate3->get_sku(), 'Duplicate of PROD-A should be PROD-A-1' );
+
+		// Test case 4: Sequential duplicates.
+		$product4 = WC_Helper_Product::create_simple_product();
+		$product4->set_sku( 'SEQ-100' );
+		$product4->save();
+
+		$dup_a = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product4 );
+		$this->assertEquals( 'SEQ-100-1', $dup_a->get_sku() );
+
+		$dup_b = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product4 );
+		$this->assertEquals( 'SEQ-100-2', $dup_b->get_sku() );
+
+		$dup_c = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product4 );
+		$this->assertEquals( 'SEQ-100-3', $dup_c->get_sku() );
+	}
+
+	/**
+	 * Tests that case-insensitive SKU matching prevents collisions.
+	 *
+	 * MySQL LIKE is case-insensitive by default, so 'SKU-%' matches 'sku-1'.
+	 * The prefix check must use stripos() to match SQL behavior.
+	 */
+	public function test_duplicate_product_handles_case_insensitive_sku_conflict() {
+		// Create product with uppercase SKU.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( 'SKU' );
+		$product->save();
+
+		// Create a different product with lowercase variant + suffix.
+		$other = WC_Helper_Product::create_simple_product();
+		$other->set_sku( 'sku-1' );
+		$other->save();
+
+		// Duplicate the uppercase product.
+		// SQL LIKE 'SKU-%' returns 'sku-1', so max_suffix should be 1.
+		// Expected: 'SKU-2', not 'SKU-1' (which collides with 'sku-1').
+		$duplicate = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product );
+		$this->assertEquals( 'SKU-2', $duplicate->get_sku(), 'Duplicate must not collide with case-variant sku-1' );
+	}
+
+	/**
+	 * @testdox Should preserve parent customs data and variation null overrides when duplicating a variable product.
+	 */
+	public function test_duplicate_preserves_customs_data(): void {
+		$product = new WC_Product_Variable();
+		$product->set_customs_commodity_code( '010203' );
+		$product->set_customs_country_of_origin( 'RO' );
+		$product->set_customs_description( 'Cotton shirt' );
+		$product->save();
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_customs_country_of_origin( 'US' );
+		$variation->save();
+		$product = new WC_Product_Variable( $product->get_id() );
+
+		$duplicate = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product );
+		$child_ids = $duplicate->get_children();
+		$this->assertCount( 1, $child_ids, 'Duplicating a variable product should also copy its variation.' );
+		$child = new WC_Product_Variation( $child_ids[0] );
+
+		$this->assertSame( '010203', $duplicate->get_customs_commodity_code( 'edit' ), 'The duplicate should preserve its commodity code.' );
+		$this->assertSame( 'RO', $duplicate->get_customs_country_of_origin( 'edit' ), 'The duplicate should preserve its origin country.' );
+		$this->assertSame( 'Cotton shirt', $duplicate->get_customs_description( 'edit' ), 'The duplicate should preserve its customs description.' );
+		$this->assertSame( 'US', $child->get_customs_country_of_origin( 'edit' ), 'The duplicated variation should preserve its override.' );
+		$this->assertNull( $child->get_customs_commodity_code( 'edit' ), 'Duplication should not persist an inherited commodity code.' );
+		$this->assertNull( $child->get_customs_description( 'edit' ), 'Duplication should not persist an inherited description.' );
+		$this->assertSame( '010203', $child->get_customs_commodity_code(), 'The duplicated variation should inherit from its duplicated parent.' );
+	}
 }

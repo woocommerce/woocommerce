@@ -419,19 +419,36 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Check whether the current user can generate a QR login token.
+	 * Check whether the current user can access the QR login browser endpoints.
 	 *
-	 * Requires the `manage_woocommerce` capability, which covers administrators and
-	 * shop managers out of the box. The check is deliberately explicit (not routed
-	 * through `wc_rest_check_manager_permissions()`) so it cannot be loosened by the
+	 * These endpoints back an interactive wp-admin flow, so they require a real
+	 * logged-in browser session — a valid `logged_in` cookie for the current user
+	 * plus a matching `wp_rest` nonce — as well as the `manage_woocommerce`
+	 * capability. The capability check is deliberately explicit (not routed through
+	 * `wc_rest_check_manager_permissions()`) so it cannot be loosened by the
 	 * `woocommerce_rest_check_permissions` filter that other Admin API endpoints share.
 	 *
-	 * @param \WP_REST_Request<array<string, mixed>> $request The REST request (unused).
-	 * @return \WP_Error|bool True if the user has the required capability, WP_Error otherwise.
+	 * @param \WP_REST_Request<array<string, mixed>> $request The REST request.
+	 * @return \WP_Error|bool True if the user is allowed, WP_Error otherwise.
 	 */
 	public function get_items_permissions_check( $request ) {
-		unset( $request );
-		// Parameter required by WP REST contract but unused here.
+		$user_id = get_current_user_id();
+		if ( ! $user_id || (int) wp_validate_auth_cookie( '', 'logged_in' ) !== $user_id ) {
+			return new \WP_Error(
+				'woocommerce_rest_qr_login_missing_session',
+				__( 'This action requires an interactive admin session.', 'woocommerce' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
+
+		$nonce = $request->get_header( 'X-WP-Nonce' );
+		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+			return new \WP_Error(
+				'woocommerce_rest_qr_login_missing_session',
+				__( 'This action requires an interactive admin session.', 'woocommerce' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
 
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			return new \WP_Error(
@@ -1140,16 +1157,30 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			: array();
 		$device        = $this->sanitize_device_payload( $device_source );
 
+		// WordPress 7.2+ emails the user when an application password is
+		// created. Skip that email for this password only: the sign-in email
+		// sent below replaces it, or, when a site turns the sign-in email off,
+		// maybe_send_sign_in_notification_email() sends WordPress's instead.
+		$skip_core_email = static function ( $send, $user, $new_item ) {
+			unset( $user );
+			return self::APP_ID === ( $new_item['app_id'] ?? null ) ? false : $send;
+		};
+		add_filter( 'wp_send_application_password_created_email', $skip_core_email, PHP_INT_MAX, 3 );
+
 		// Create an Application Password for the mobile app. The name is
 		// descriptive (e.g. "Woo Mobile · iPhone 15 · 2026-04-28") so the user
 		// can identify it later in Users → Profile → Application Passwords.
-		$app_password_result = \WP_Application_Passwords::create_new_application_password(
-			$user_id,
-			array(
-				'name'   => $this->format_application_password_name( $device ),
-				'app_id' => self::APP_ID,
-			)
-		);
+		try {
+			$app_password_result = \WP_Application_Passwords::create_new_application_password(
+				$user_id,
+				array(
+					'name'   => $this->format_application_password_name( $device ),
+					'app_id' => self::APP_ID,
+				)
+			);
+		} finally {
+			remove_filter( 'wp_send_application_password_created_email', $skip_core_email, PHP_INT_MAX );
+		}
 
 		if ( is_wp_error( $app_password_result ) ) {
 			wc_get_logger()->error(
@@ -1198,7 +1229,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		// even when they aren't currently looking at wc-admin. Wrapped in a
 		// try/catch + filter to keep the exchange path uninterrupted if the
 		// site's mailer is misconfigured.
-		$this->maybe_send_sign_in_notification_email( $user, $consumed_record );
+		$this->maybe_send_sign_in_notification_email( $user, $consumed_record, $item );
 
 		return rest_ensure_response(
 			array(
@@ -1842,6 +1873,11 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			return $this->rest_ensure_nocache_response( array( 'state' => self::STATE_EXPIRED ) );
 		}
 
+		$canonical_session = isset( $record['challenge']['session_id'] ) ? (string) $record['challenge']['session_id'] : '';
+		if ( '' === $canonical_session || ! hash_equals( $canonical_session, $session_id ) ) {
+			return $this->rest_ensure_nocache_response( array( 'state' => self::STATE_EXPIRED ) );
+		}
+
 		$state    = isset( $record['state'] ) ? (string) $record['state'] : self::STATE_PENDING;
 		$response = array( 'state' => $state );
 
@@ -1972,19 +2008,19 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Send the merchant a transactional email summarizing a successful QR
-	 * sign-in, unless they (or a site owner) opt out via the
-	 * `woocommerce_qr_login_should_send_signin_email` filter.
+	 * Send a sign-in notification email, or fall back to WordPress's application
+	 * password email when the WooCommerce email is disabled.
 	 *
 	 * Wrapped so a misconfigured mailer cannot break the exchange path. Mailer
-	 * false returns and exceptions are logged, but delivery never blocks the API
-	 * response.
+	 * exceptions, and a false return for the WooCommerce email, are logged, but
+	 * delivery never blocks the API response.
 	 *
-	 * @param \WP_User             $user            The user who minted the token (recipient).
-	 * @param array<string, mixed> $consumed_record The record persisted to the consumed transient (keys: consumed_at, user_id, ap_uuid, ap_name, device).
+	 * @param \WP_User             $user                 The user who minted the token (recipient).
+	 * @param array<string, mixed> $consumed_record      The record persisted to the consumed transient (keys: consumed_at, user_id, ap_uuid, ap_name, device).
+	 * @param array<string, mixed> $application_password The created application password's details, as returned by WP_Application_Passwords::create_new_application_password().
 	 * @return void
 	 */
-	private function maybe_send_sign_in_notification_email( \WP_User $user, array $consumed_record ): void {
+	private function maybe_send_sign_in_notification_email( \WP_User $user, array $consumed_record, array $application_password ): void {
 		/**
 		 * Filter whether to send the QR sign-in notification email.
 		 *
@@ -1992,6 +2028,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		 * user, environment (e.g. staging), or test run.
 		 *
 		 * @since 10.9.0
+		 * @since 11.4.0 On WordPress 7.2+, returning false sends WordPress's application password email instead, unless the site has turned it off.
 		 *
 		 * @param bool                 $should_send     Whether to send the email.
 		 * @param \WP_User             $user            The user who minted the QR token.
@@ -2004,11 +2041,16 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			$consumed_record
 		);
 
-		if ( ! $should_send ) {
-			return;
-		}
-
 		try {
+			if ( ! $should_send ) {
+				// WordPress's email was skipped during password creation to prevent a duplicate. Send it now when ours is off.
+				if ( function_exists( 'wp_application_password_created_notification' )
+					&& false !== has_action( 'wp_create_application_password', 'wp_application_password_created_notification' ) ) {
+					wp_application_password_created_notification( $user->ID, $application_password );
+				}
+				return;
+			}
+
 			if ( ! $this->send_sign_in_notification_email( $user, $consumed_record ) ) {
 				wc_get_logger()->warning(
 					sprintf(

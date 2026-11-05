@@ -3,14 +3,14 @@
  */
 import { Card, CardBody } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
-import { Story } from '@storybook/react';
+import { StoryFn } from '@storybook/react-webpack5';
 
 /**
  * Internal dependencies
  */
 import { Badge, BadgeProps } from '../';
 
-const Template: Story< BadgeProps > = ( args ) => (
+const Template: StoryFn< BadgeProps > = ( args ) => (
 	<Card>
 		<CardBody>
 			<Badge { ...args } />

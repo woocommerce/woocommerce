@@ -44,6 +44,7 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		( new WC_Admin_Dashboard() )->recent_reviews();
 		$this->expectOutputRegex( '/Loading reviews data.../' );
+		$this->expectOutputRegex( '/wc-dashboard-widget-loading/' );
 		$this->expectOutputRegex( '/wc-recent-reviews-widget-loading/' );
 		$this->expectOutputRegex( '/wc-recent-reviews-widget-content/' );
 	}
@@ -65,6 +66,39 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		$this->expectOutputRegex( "/#comment-{$comment_id1}/" );
 		$this->expectOutputRegex( "/#comment-{$comment_id5}/" );
 		$this->expectOutputRegex( '/reviewed by/' );
+
+		$product->delete();
+	}
+
+	/**
+	 * Test: recent reviews widget truncates long product and reviewer names.
+	 */
+	public function test_recent_reviews_widget_content_truncates_long_product_and_reviewer_names() {
+		$product_name = 'Extra long dashboard review stress test product name with multiple descriptive words';
+		$author_name  = 'Alexandria Montgomery-Silverstein With A Very Long Reviewer Name';
+		$product      = WC_Helper_Product::create_simple_product();
+		$product->set_name( $product_name );
+		$product->save();
+
+		$comment_id = WC_Helper_Product::create_product_review( $product->get_id(), 'Review content here' );
+		wp_update_comment(
+			array(
+				'comment_ID'       => $comment_id,
+				'comment_author'   => $author_name,
+				'comment_date'     => current_time( 'mysql' ),
+				'comment_date_gmt' => current_time( 'mysql', true ),
+			)
+		);
+
+		wp_set_current_user( $this->user );
+		ob_start();
+		( new WC_Admin_Dashboard() )->recent_reviews_content();
+		$html = ob_get_clean();
+
+		$this->assertStringContainsString( 'title="' . esc_attr( $product_name ) . '"', $html );
+		$this->assertStringContainsString( '>' . esc_html( wc_trim_string( $product_name, 40 ) ) . '</a>', $html );
+		$this->assertStringContainsString( 'title="' . esc_attr( $author_name ) . '"', $html );
+		$this->assertStringContainsString( '>' . esc_html( wc_trim_string( $author_name, 24 ) ) . '</span>', $html );
 
 		$product->delete();
 	}
@@ -102,14 +136,13 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		( new WC_Admin_Dashboard() )->status_widget();
 		$this->expectOutputRegex( '/Loading status data.../' );
-		$this->expectOutputRegex( '/<div id="wc-status-widget-loading" class="wc-status-widget-loading">/' );
+		$this->expectOutputRegex( '/<div id="wc-status-widget-loading" class="wc-dashboard-widget-loading wc-status-widget-loading" aria-busy="true">/' );
 	}
 
 	/**
 	 * Test: get_status_widget
 	 */
 	public function test_status_widget_content() {
-		$this->skip_if_hpos_enabled( 'We don\'t support legacy reports on HPOS' );
 		wp_set_current_user( $this->user );
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( OrderStatus::COMPLETED );
@@ -125,19 +158,44 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		$this->assertMatchesRegularExpression( '/page\=wc-admin\&\#038\;filter\=single_product/', $widget_output );
 		$this->assertMatchesRegularExpression( '/page\=wc-admin\&\#038\;type\=lowstock/', $widget_output );
 		$this->assertMatchesRegularExpression( '/page\=wc-admin\&\#038\;type\=outofstock/', $widget_output );
+		$this->assertDoesNotMatchRegularExpression( '/page\=wc-reports/', $widget_output, 'No status widget link should point to legacy Reports while Analytics is enabled.' );
 	}
 
 	/**
-	 * Test: get_status_widget with woo admin disabled.
+	 * Ways Analytics can be turned off, each of which must bring back the legacy report links.
+	 *
+	 * @return array<string, array{callable}>
 	 */
-	public function test_status_widget_with_woo_admin_disabled() {
+	public function provide_analytics_disabled_setups(): array {
+		return array(
+			'woocommerce_admin_disabled filter' => array(
+				function () {
+					add_filter( 'woocommerce_admin_disabled', '__return_true' );
+				},
+			),
+			'analytics feature turned off'      => array(
+				function () {
+					// A filter, not update_option(): saving the option makes Analytics redirect on the next settings save.
+					add_filter( 'pre_option_woocommerce_analytics_enabled', fn() => 'no' );
+				},
+			),
+		);
+	}
+
+	/**
+	 * @testdox Should use the legacy status widget reports filter when Analytics is disabled.
+	 * @dataProvider provide_analytics_disabled_setups
+	 *
+	 * @param callable $disable_analytics Turns Analytics off.
+	 */
+	public function test_status_widget_with_analytics_disabled( callable $disable_analytics ) {
 		$this->skip_if_hpos_enabled( 'We don\'t support legacy reports on HPOS' );
 		wp_set_current_user( $this->user );
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
-		add_filter( 'woocommerce_admin_disabled', '__return_true' );
+		$disable_analytics();
 
 		$this->expectOutputRegex( '/50\.00 worth in the/' );
 
@@ -148,8 +206,7 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		$this->assertMatchesRegularExpression( '/page\=wc-reports\&\#038\;tab\=orders\&\#038\;report\=sales_by_product/', $widget_output );
 		$this->assertMatchesRegularExpression( '/page\=wc-reports\&\#038\;tab\=stock\&\#038\;report\=low_in_stock/', $widget_output );
 		$this->assertMatchesRegularExpression( '/page\=wc-reports\&\#038\;tab\=stock\&\#038\;report\=out_of_stock/', $widget_output );
-
-		remove_filter( 'woocommerce_admin_disabled', '__return_true' );
+		$this->assertDoesNotMatchRegularExpression( '/page\=wc-admin/', $widget_output, 'No status widget link should point to Analytics while it is disabled.' );
 	}
 
 	/**

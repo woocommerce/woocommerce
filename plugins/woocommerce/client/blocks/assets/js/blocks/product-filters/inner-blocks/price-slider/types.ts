@@ -3,10 +3,7 @@
  */
 import type { BlockEditProps } from '@wordpress/blocks';
 
-/**
- * Internal dependencies
- */
-import type { RangeInputBlockContext } from '../../../../types/type-defs/range-input';
+import type { RangeInputBlockContext } from '@woocommerce/types';
 
 type Color = {
 	slug?: string;

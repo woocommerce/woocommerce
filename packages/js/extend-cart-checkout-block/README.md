@@ -20,11 +20,20 @@ When this has completed, go to your WordPress plugins page and activate the plug
 
 Add some items to your cart and visit the Checkout block, notice there is additional data on the block that this template has added.
 
-### Linting
+## Inner block registration
 
-You can lint the project according to the [WordPress coding standards](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/javascript/) by running `npm run lint:js`. The configuration is ultimately read from the [WooCommerce recommended eslint config](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/eslint-plugin/configs/recommended.js). To modify the rules edit the `.estintrc.js` file.
+The generated extension registers its Checkout inner block on both the server and the client. Keep both registrations when adapting the example:
 
-### Installing `wp-env` (optional)
+- Server registration allows WooCommerce to inspect the block's `parent` metadata, add the HTML `data-*` attributes used by the frontend component, and load translations.
+- Client registration makes the block available in the editor and connects its frontend component through `registerCheckoutBlock`.
+
+Registering the block only in JavaScript can appear to work in the editor while leaving the frontend component without the block's saved attributes. See the [Checkout Blocks Registry documentation](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/packages/public-api/blocks-checkout/blocks-registry/README.md#registering-a-block) for details.
+
+## Linting
+
+You can lint the project according to the [WordPress coding standards](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/javascript/) by running `npm run lint:js`. The configuration is ultimately read from the [WooCommerce recommended eslint config](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/eslint-plugin/configs/recommended.js). To modify the rules edit the `eslint.config.mjs` file.
+
+## Installing `wp-env` (optional)
 
 `wp-env` lets you easily set up a local WordPress environment for building and testing your extension. If you want to use `wp-env`, you will need to run the following command:
 

@@ -301,11 +301,13 @@ class ReceiptRenderingEngine {
 			$line_item_product = $line_item->get_product();
 			if ( false === $line_item_product ) {
 				$line_item_title = $line_item->get_name();
+			} elseif ( $line_item_product instanceof \WC_Product_Variation ) {
+				$parent_product  = wc_get_product( $line_item_product->get_parent_id() );
+				$line_item_title = $parent_product instanceof \WC_Product
+					? $parent_product->get_name() . '. ' . $line_item_product->get_attribute_summary()
+					: $line_item->get_name();
 			} else {
-				$line_item_title =
-					( $line_item_product instanceof \WC_Product_Variation ) ?
-						( wc_get_product( $line_item_product->get_parent_id() )->get_name() ) . '. ' . $line_item_product->get_attribute_summary() :
-						$line_item_product->get_name();
+				$line_item_title = $line_item_product->get_name();
 			}
 			$line_items_info[] = array(
 				'type'     => 'product',
@@ -322,13 +324,19 @@ class ReceiptRenderingEngine {
 			'amount' => wc_price( $order->get_subtotal(), $get_price_args ),
 		);
 
-		$coupon_names = ArrayUtil::select( $order->get_coupons(), 'get_name', ArrayUtil::SELECT_BY_OBJECT_METHOD );
-		if ( ! empty( $coupon_names ) ) {
+		$coupon_names   = ArrayUtil::select( $order->get_coupons(), 'get_name', ArrayUtil::SELECT_BY_OBJECT_METHOD );
+		$total_discount = (float) $order->get_total_discount();
+		if ( $total_discount || ! empty( $coupon_names ) ) {
+			if ( empty( $coupon_names ) ) {
+				$discount_title = __( 'Discount', 'woocommerce' );
+			} else {
+				/* translators: %s = comma-separated list of coupon codes */
+				$discount_title = sprintf( __( 'Discount (%s)', 'woocommerce' ), join( ', ', $coupon_names ) );
+			}
 			$line_items_info[] = array(
 				'type'   => 'discount',
-				/* translators: %s = comma-separated list of coupon codes */
-				'title'  => sprintf( __( 'Discount (%s)', 'woocommerce' ), join( ', ', $coupon_names ) ),
-				'amount' => wc_price( -$order->get_total_discount(), $get_price_args ),
+				'title'  => $discount_title,
+				'amount' => wc_price( -$total_discount, $get_price_args ),
 			);
 		}
 

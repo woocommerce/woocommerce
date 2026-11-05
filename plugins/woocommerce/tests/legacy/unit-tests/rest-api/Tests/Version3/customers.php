@@ -65,7 +65,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$matching_customer_data = current(
 			array_filter(
 				$customers,
-				function( $customer ) use ( $customer_1 ) {
+				function ( $customer ) use ( $customer_1 ) {
 					return $customer['id'] === $customer_1->get_id();
 				}
 			)
@@ -128,7 +128,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 			$matching_customer_data
 		);
 
-		update_option( 'timezone_tring', 'America/New York' );
+		update_option( 'timezone_string', 'America/New_York' );
 		$customer_3 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'timezonetest', 'timezonetest', 'timezonetest@woo.local' );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/customers' );
@@ -146,7 +146,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$matching_customer_data = current(
 			array_filter(
 				$customers,
-				function( $customer ) use ( $customer_3 ) {
+				function ( $customer ) use ( $customer_3 ) {
 					return $customer['id'] === $customer_3->get_id();
 				}
 			)
@@ -608,6 +608,248 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 3, count( $data ) );
+	}
+
+	/**
+	 * @testdox Customer routes expose each user's role, filter the collection to customers unless role=all, and allow updating an allow-listed non-customer user, email included.
+	 */
+	public function test_customer_roles_and_collection_contract(): void {
+		wp_set_current_user( 1 );
+
+		$roles    = array(
+			'administrator' => $this->factory->user->create( array( 'role' => 'administrator' ) ),
+			'subscriber'    => $this->factory->user->create( array( 'role' => 'subscriber' ) ),
+			'customer'      => $this->factory->user->create( array( 'role' => 'customer' ) ),
+		);
+		$user_ids = array_values( $roles );
+
+		foreach ( $roles as $expected_role => $user_id ) {
+			$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/customers/' . $user_id ) );
+			$this->assertSame( 200, $response->get_status() );
+			$this->assertSame( $expected_role, $response->get_data()['role'] );
+		}
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/customers' );
+		$request->set_query_params(
+			array(
+				'include'  => $user_ids,
+				'orderby'  => 'id',
+				'per_page' => count( $user_ids ),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( array( $roles['customer'] ), wp_list_pluck( $response->get_data(), 'id' ), 'The collection should default to the customer role.' );
+
+		$request->set_param( 'role', 'all' );
+		$response   = $this->server->dispatch( $request );
+		$actual_ids = wp_list_pluck( $response->get_data(), 'id' );
+		sort( $actual_ids );
+		sort( $user_ids );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $user_ids, $actual_ids, 'role=all should return every included user.' );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/customers/' . $roles['subscriber'] );
+		$request->set_body_params(
+			array(
+				'email'      => 'registered.subscriber@woo.local',
+				'first_name' => 'Registered Subscriber',
+				'billing'    => array( 'first_name' => 'Registered Subscriber' ),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'registered.subscriber@woo.local', $response->get_data()['email'] );
+		$this->assertSame( 'Registered Subscriber', $response->get_data()['first_name'] );
+		$this->assertSame( 'Registered Subscriber', $response->get_data()['billing']['first_name'] );
+
+		clean_user_cache( $roles['subscriber'] );
+		$fresh_customer = new WC_Customer( $roles['subscriber'] );
+		$this->assertSame( 'registered.subscriber@woo.local', $fresh_customer->get_email() );
+		$this->assertSame( 'Registered Subscriber', $fresh_customer->get_first_name() );
+		$this->assertSame( 'Registered Subscriber', $fresh_customer->get_billing_first_name() );
+	}
+
+	/**
+	 * @testdox A customer's full billing and shipping addresses round-trip through create, read, update, and delete.
+	 */
+	public function test_customer_crud_lifecycle_contract(): void {
+		wp_set_current_user( 1 );
+
+		$billing  = array(
+			'first_name' => 'Ada',
+			'last_name'  => 'Lovelace',
+			'company'    => 'Analytical Engines',
+			'address_1'  => '12 St James Square',
+			'address_2'  => 'Suite 3',
+			'city'       => 'London',
+			'state'      => 'London',
+			'postcode'   => 'SW1Y 4JH',
+			'country'    => 'GB',
+			'email'      => 'customer_crud_contract@woo.local',
+			'phone'      => '02079460000',
+		);
+		$shipping = array(
+			'first_name' => 'Ada',
+			'last_name'  => 'Lovelace',
+			'company'    => 'Analytical Engines',
+			'address_1'  => '15 Hanover Square',
+			'address_2'  => 'Floor 2',
+			'city'       => 'London',
+			'state'      => 'London',
+			'postcode'   => 'W1S 1HS',
+			'country'    => 'GB',
+			'phone'      => '02079460001',
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/customers' );
+		$request->set_body_params(
+			array(
+				'username'   => 'customer_crud_contract',
+				'password'   => 'test123',
+				'email'      => 'customer_crud_contract@woo.local',
+				'first_name' => 'Ada',
+				'last_name'  => 'Lovelace',
+				'billing'    => $billing,
+				'shipping'   => $shipping,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 201, $response->get_status() );
+		$customer_id = $data['id'];
+		$this->assertIsInt( $customer_id );
+		$this->assertSame( 'customer', $data['role'] );
+		$this->assert_customer_address_matches( $billing, $data['billing'] );
+		$this->assert_customer_address_matches( $shipping, $data['shipping'] );
+
+		$fresh_customer = new WC_Customer( $customer_id );
+		$this->assertSame( $billing['address_1'], $fresh_customer->get_billing_address_1() );
+		$this->assertSame( $shipping['address_1'], $fresh_customer->get_shipping_address_1() );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/customers/' . $customer_id ) );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assert_customer_address_matches( $billing, $response->get_data()['billing'] );
+		$this->assert_customer_address_matches( $shipping, $response->get_data()['shipping'] );
+
+		$billing['first_name']  = 'Augusta';
+		$billing['address_1']   = '18 St James Square';
+		$shipping['first_name'] = 'Augusta';
+		$shipping['address_1']  = '20 Hanover Square';
+		$request                = new WP_REST_Request( 'PUT', '/wc/v3/customers/' . $customer_id );
+		$request->set_body_params(
+			array(
+				'first_name' => 'Augusta',
+				'billing'    => $billing,
+				'shipping'   => $shipping,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'Augusta', $response->get_data()['first_name'] );
+		$this->assert_customer_address_matches( $billing, $response->get_data()['billing'] );
+		$this->assert_customer_address_matches( $shipping, $response->get_data()['shipping'] );
+
+		clean_user_cache( $customer_id );
+		$fresh_customer = new WC_Customer( $customer_id );
+		$this->assertSame( 'Augusta', $fresh_customer->get_first_name() );
+		$this->assertSame( $billing['address_1'], $fresh_customer->get_billing_address_1() );
+		$this->assertSame( $shipping['address_1'], $fresh_customer->get_shipping_address_1() );
+
+		$request = new WP_REST_Request( 'DELETE', '/wc/v3/customers/' . $customer_id );
+		$request->set_param( 'force', true );
+		$this->assertSame( 200, $this->server->dispatch( $request )->get_status() );
+		$this->assertSame( 404, $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/customers/' . $customer_id ) )->get_status() );
+		$this->assertFalse( get_userdata( $customer_id ) );
+	}
+
+	/**
+	 * @testdox The customers batch route creates, updates, and deletes customers in request order with persisted results.
+	 */
+	public function test_customer_batch_lifecycle_contract(): void {
+		wp_set_current_user( 1 );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/customers/batch' );
+		$request->set_body_params(
+			array(
+				'create' => array(
+					array(
+						'username' => 'customer_batch_one',
+						'password' => 'test123',
+						'email'    => 'customer_batch_one@woo.local',
+						'billing'  => array( 'address_1' => '1 Compiler Way' ),
+					),
+					array(
+						'username' => 'customer_batch_two',
+						'password' => 'test123',
+						'email'    => 'customer_batch_two@woo.local',
+						'shipping' => array( 'address_1' => '3 Orbital Lane' ),
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( array( 'customer_batch_one', 'customer_batch_two' ), wp_list_pluck( $data['create'], 'username' ) );
+		$this->assertSame( '1 Compiler Way', $data['create'][0]['billing']['address_1'] );
+		$this->assertSame( '3 Orbital Lane', $data['create'][1]['shipping']['address_1'] );
+		$customer_ids = wp_list_pluck( $data['create'], 'id' );
+		$this->assertContainsOnly( 'int', $customer_ids );
+		$this->assertSame( '1 Compiler Way', ( new WC_Customer( $customer_ids[0] ) )->get_billing_address_1() );
+		$this->assertSame( '3 Orbital Lane', ( new WC_Customer( $customer_ids[1] ) )->get_shipping_address_1() );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/customers/batch' );
+		$request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'      => $customer_ids[0],
+						'billing' => array( 'address_1' => '11 Updated Way' ),
+					),
+					array(
+						'id'       => $customer_ids[1],
+						'shipping' => array( 'address_1' => '12 Updated Way' ),
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $customer_ids, wp_list_pluck( $data['update'], 'id' ) );
+		$this->assertSame( '11 Updated Way', $data['update'][0]['billing']['address_1'] );
+		$this->assertSame( '12 Updated Way', $data['update'][1]['shipping']['address_1'] );
+		clean_user_cache( $customer_ids[0] );
+		clean_user_cache( $customer_ids[1] );
+		$this->assertSame( '11 Updated Way', ( new WC_Customer( $customer_ids[0] ) )->get_billing_address_1() );
+		$this->assertSame( '12 Updated Way', ( new WC_Customer( $customer_ids[1] ) )->get_shipping_address_1() );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/customers/batch' );
+		$request->set_body_params( array( 'delete' => $customer_ids ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $customer_ids, wp_list_pluck( $response->get_data()['delete'], 'id' ) );
+		foreach ( $customer_ids as $customer_id ) {
+			$this->assertSame( 404, $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/customers/' . $customer_id ) )->get_status() );
+			$this->assertFalse( get_userdata( $customer_id ) );
+		}
+	}
+
+	/**
+	 * Assert an exact customer address without treating associative key order as behavior.
+	 *
+	 * @param array $expected Expected address fields.
+	 * @param array $actual   Actual address fields.
+	 */
+	private function assert_customer_address_matches( array $expected, array $actual ): void {
+		ksort( $expected );
+		ksort( $actual );
+
+		$this->assertSame( $expected, $actual );
 	}
 
 	/**

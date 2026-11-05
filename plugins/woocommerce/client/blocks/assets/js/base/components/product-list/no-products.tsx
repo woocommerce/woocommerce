@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useInnerBlockLayoutContext } from '@woocommerce/shared-context';
-import { Icon, warning } from '@wordpress/icons';
+import { Icon, cautionFilled } from '@wordpress/icons';
 
 const NoProducts = (): JSX.Element => {
 	const { parentClassName } = useInnerBlockLayoutContext();
@@ -11,7 +11,7 @@ const NoProducts = (): JSX.Element => {
 		<div className={ `${ parentClassName }__no-products` }>
 			<Icon
 				className={ `${ parentClassName }__no-products-image` }
-				icon={ warning }
+				icon={ cautionFilled }
 				size={ 100 }
 			/>
 			<strong className={ `${ parentClassName }__no-products-title` }>

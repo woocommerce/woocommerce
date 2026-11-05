@@ -1,9 +1,11 @@
 <?php
 
+use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
+use Automattic\WooCommerce\Tests\Helpers\InterleavedStatusOrdersTrait;
 
 //phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Legacy class name.
 /**
@@ -13,13 +15,29 @@ use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
  */
 class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
+	use InterleavedStatusOrdersTrait;
 
 	/**
-	 * Store the COT state before the test.
+	 * Store the COT state before the test class.
 	 *
 	 * @var bool
 	 */
-	private $prev_cot_state;
+	private static $previous_cot_state;
+
+	/**
+	 * Use the CPT order data store for every test in this class.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::$previous_cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		OrderHelper::toggle_cot_feature_and_usage( false );
+	}
+
+	/**
+	 * Restore the order data store used before this class.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		OrderHelper::toggle_cot_feature_and_usage( self::$previous_cot_state );
+	}
 
 	/**
 	 * Store the COT state before the test.
@@ -28,8 +46,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->prev_cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
-		OrderHelper::toggle_cot_feature_and_usage( false );
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 	}
 
@@ -39,7 +55,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function tearDown(): void {
-		OrderHelper::toggle_cot_feature_and_usage( $this->prev_cot_state );
 		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 		$this->disable_cogs_feature();
 		parent::tearDown();
@@ -561,6 +576,9 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertFalse( $r_order->get_item( $fee_item_2->get_id() ) );
 		$this->assertTrue( $r_order->get_item( $product_item->get_id() )->get_id() === $product_item->get_id() );
 		$this->assertTrue( $r_order->get_item( $shipping_item->get_id() )->get_id() === $shipping_item->get_id() );
+		$this->assertSame( 0, $this->get_item_meta_count( $fee_item_1->get_id() ), 'Deleted items should not leave metadata behind.' );
+		$this->assertSame( 0, $this->get_item_meta_count( $fee_item_2->get_id() ), 'Deleted items should not leave metadata behind.' );
+		$this->assertGreaterThan( 0, $this->get_item_meta_count( $product_item->get_id() ), 'Metadata of items of other types should remain.' );
 
 		// Deleting all items should all items.
 		$r_order->get_data_store()->delete_items( $r_order );
@@ -568,6 +586,42 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertFalse( $r_order->get_item( $fee_item_2->get_id() ) );
 		$this->assertFalse( $r_order->get_item( $product_item->get_id() ) );
 		$this->assertFalse( $r_order->get_item( $shipping_item->get_id() ) );
+		$this->assertSame( 0, $this->get_item_meta_count( $product_item->get_id() ), 'Deleted items should not leave metadata behind.' );
+		$this->assertSame( 0, $this->get_item_meta_count( $shipping_item->get_id() ), 'Deleted items should not leave metadata behind.' );
+	}
+
+	/**
+	 * @testdox delete_items_by_ids() should reject invalid IDs and preserve items belonging to other orders.
+	 */
+	public function test_delete_items_by_ids_sanitizes_and_scopes_ids_to_order() {
+		$order_1         = WC_Helper_Order::create_order();
+		$order_2         = WC_Helper_Order::create_order();
+		$order_1_item_id = array_key_first( $order_1->get_items() );
+		$order_2_item_id = array_key_first( $order_2->get_items() );
+		$data_store      = $order_1->get_data_store();
+
+		$data_store->delete_items_by_ids( $order_1, array( -$order_1_item_id, 0 ) );
+
+		$this->assertInstanceOf( WC_Order_Item::class, WC_Order_Factory::get_order_item( $order_1_item_id ), 'Negative and zero IDs should be rejected.' );
+
+		$data_store->delete_items_by_ids( $order_1, array( $order_1_item_id, $order_1_item_id, $order_2_item_id ) );
+
+		$this->assertFalse( WC_Order_Factory::get_order_item( $order_1_item_id ), 'A valid item belonging to the target order should be deleted.' );
+		$this->assertInstanceOf( WC_Order_Item::class, WC_Order_Factory::get_order_item( $order_2_item_id ), 'An item belonging to another order should remain.' );
+
+		$this->assertSame( 0, $this->get_item_meta_count( $order_1_item_id ), 'The deleted item should not leave metadata behind.' );
+		$this->assertGreaterThan( 0, $this->get_item_meta_count( $order_2_item_id ), 'Metadata of an item belonging to another order should remain.' );
+	}
+
+	/**
+	 * Count the metadata rows stored for an order item.
+	 *
+	 * @param int $item_id Order item ID.
+	 * @return int
+	 */
+	private function get_item_meta_count( int $item_id ): int {
+		global $wpdb;
+		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d", $item_id ) );
 	}
 
 	/**
@@ -599,6 +653,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $order_1->get_item( $product_item_1->get_id() ) );
 		$this->assertTrue( $order_2->get_item( $product_item_2->get_id() )->get_id() === $product_item_2->get_id() );
+		$this->assertGreaterThan( 0, $this->get_item_meta_count( $product_item_2->get_id() ), 'Metadata of items belonging to another order should remain.' );
 	}
 
 	/**
@@ -705,7 +760,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	public function test_total_filtering_with_operators() {
 		$order_totals_to_test = array( 5, 10, 50, 100.00, 100.00, 250.50, 250.50, 500.75, 1000.00 );
 		foreach ( $order_totals_to_test as $order_total ) {
-			$order = OrderHelper::create_order();
+			$order = wc_create_order();
 			$order->set_total( $order_total );
 			$order->save();
 		}
@@ -794,6 +849,157 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( 100, $read_order->get_total() );
 		$this->assertEquals( WC_VERSION, $read_order->get_version() );
 		$this->assertTrue( $read_order->get_prices_include_tax() );
+	}
+
+	/**
+	 * @testdox An order with missing tax-mode metadata uses the filtered setting without writing during the read.
+	 */
+	public function test_reading_order_without_prices_include_tax_metadata_uses_effective_setting(): void {
+		$previous_tax_mode    = get_option( 'woocommerce_prices_include_tax' );
+		$previous_tax_enabled = get_option( 'woocommerce_calc_taxes' );
+		$order                = null;
+
+		try {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
+			update_option( 'woocommerce_prices_include_tax', 'no' );
+			add_filter( 'woocommerce_prices_include_tax', '__return_true' );
+
+			$order = WC_Helper_Order::create_order();
+			delete_post_meta( $order->get_id(), '_prices_include_tax' );
+			wp_cache_flush();
+
+			$read_order = wc_get_order( $order->get_id() );
+
+			$this->assertTrue(
+				$read_order->get_prices_include_tax(),
+				'Missing metadata should use the effective price tax setting.'
+			);
+			$this->assertFalse( metadata_exists( 'post', $order->get_id(), '_prices_include_tax' ), 'Reading must not persist the fallback.' );
+		} finally {
+			remove_filter( 'woocommerce_prices_include_tax', '__return_true' );
+			if ( $order ) {
+				$order->delete( true );
+			}
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+			update_option( 'woocommerce_calc_taxes', $previous_tax_enabled );
+		}
+	}
+
+	/**
+	 * @testdox A native order draft loads store defaults in memory and persists them on its next CRUD save.
+	 * @dataProvider provide_native_draft_tax_modes
+	 *
+	 * @param string $tax_mode    Store tax-mode setting.
+	 * @param bool   $expected    Expected order tax mode.
+	 * @param string $post_status Post status when WooCommerce first loads the order.
+	 */
+	public function test_native_draft_loads_and_persists_store_defaults( string $tax_mode, bool $expected, string $post_status ): void {
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$previous_currency = get_option( 'woocommerce_currency' );
+		$order_id          = 0;
+
+		try {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
+			update_option( 'woocommerce_prices_include_tax', $tax_mode );
+			update_option( 'woocommerce_currency', 'EUR' );
+			$post     = get_default_post_to_edit( 'shop_order', true );
+			$order_id = $post->ID;
+
+			if ( 'auto-draft' !== $post_status ) {
+				// WordPress changes auto-draft to draft before the admin metadata save callbacks run.
+				wp_update_post(
+					array(
+						'ID'          => $order_id,
+						'post_status' => $post_status,
+					)
+				);
+			}
+
+			$sut = new WC_Order( $order_id );
+
+			$this->assertSame( $expected, $sut->get_prices_include_tax( 'edit' ), 'Missing tax mode should use the store setting.' );
+			$this->assertSame( 'EUR', $sut->get_currency( 'edit' ), 'Missing currency should use the store setting.' );
+			$this->assertFalse( metadata_exists( 'post', $order_id, '_prices_include_tax' ), 'Loading must not persist tax metadata.' );
+			$this->assertFalse( metadata_exists( 'post', $order_id, '_order_currency' ), 'Loading must not persist currency metadata.' );
+
+			update_option( 'woocommerce_prices_include_tax', 'yes' === $tax_mode ? 'no' : 'yes' );
+			update_option( 'woocommerce_currency', 'USD' );
+			$this->assertSame( $expected, $sut->get_prices_include_tax(), 'The getter should return the loaded property, not reread store settings.' );
+			$this->assertSame( 'EUR', $sut->get_currency(), 'The loaded currency should remain unchanged until the order is reloaded.' );
+
+			$sut->save();
+
+			$this->assertSame( $tax_mode, get_post_meta( $order_id, '_prices_include_tax', true ), 'Saving must write the loaded tax mode even without a setter call.' );
+			$this->assertSame( 'EUR', get_post_meta( $order_id, '_order_currency', true ), 'Saving must write the loaded currency.' );
+
+			$reloaded_order = new WC_Order( $order_id );
+			$this->assertSame( $expected, $reloaded_order->get_prices_include_tax(), 'Persisted tax mode must take precedence over changed store settings.' );
+			$this->assertSame( 'EUR', $reloaded_order->get_currency(), 'Persisted currency must take precedence over changed store settings.' );
+		} finally {
+			if ( $order_id ) {
+				wp_delete_post( $order_id, true );
+			}
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+			update_option( 'woocommerce_currency', $previous_currency );
+		}
+	}
+
+	/**
+	 * Provides tax modes for the initial draft load and the first native form submission.
+	 *
+	 * @return array<string, array{string, bool, string}>
+	 */
+	public static function provide_native_draft_tax_modes(): array {
+		return array(
+			'inclusive auto-draft'       => array( 'yes', true, 'auto-draft' ),
+			'exclusive auto-draft'       => array( 'no', false, 'auto-draft' ),
+			'inclusive first submission' => array( 'yes', true, 'draft' ),
+			'exclusive first submission' => array( 'no', false, 'draft' ),
+		);
+	}
+
+	/**
+	 * @testdox A persisted tax mode is preserved when the store setting differs, including explicit false on a draft.
+	 * @dataProvider provide_persisted_order_tax_modes
+	 *
+	 * @param string $tax_mode    Store tax-mode setting.
+	 * @param bool   $saved_value Persisted order tax mode.
+	 * @param string $status      Order status.
+	 */
+	public function test_reading_order_preserves_persisted_tax_mode( string $tax_mode, bool $saved_value, string $status ): void {
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$order             = new WC_Order();
+
+		try {
+			update_option( 'woocommerce_prices_include_tax', $tax_mode );
+			$order->set_status( $status );
+			$order->set_prices_include_tax( $saved_value );
+			$order->save();
+
+			$sut = new WC_Order( $order->get_id() );
+			$this->assertSame( $saved_value, $sut->get_prices_include_tax(), 'An existing value must not be replaced with a dynamic default.' );
+			$sut->save();
+			$this->assertSame( $saved_value ? 'yes' : 'no', get_post_meta( $order->get_id(), '_prices_include_tax', true ) );
+		} finally {
+			if ( $order->get_id() ) {
+				$order->delete( true );
+			}
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
+	}
+
+	/**
+	 * Provides persisted tax modes that disagree with the store setting.
+	 *
+	 * @return array<string, array{string, bool, string}>
+	 */
+	public static function provide_persisted_order_tax_modes(): array {
+		return array(
+			'explicit false on draft'           => array( 'yes', false, 'auto-draft' ),
+			'explicit true on draft'            => array( 'no', true, 'auto-draft' ),
+			'explicit false on completed order' => array( 'yes', false, 'completed' ),
+			'explicit true on completed order'  => array( 'no', true, 'completed' ),
+		);
 	}
 
 	/**
@@ -1519,5 +1725,303 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		foreach ( $items as $item ) {
 			$this->assertGreaterThan( 0, $item->get_product_id(), 'Item should have a product ID from cached meta' );
 		}
+	}
+
+	/**
+	 * @testdox CPT order queries return matching orders when the "$filter" filter replaces an unknown status with a registered one.
+	 *
+	 * @dataProvider cpt_query_args_filter_provider
+	 * @param string $filter Filter that receives the WP_Query args.
+	 */
+	public function test_cpt_order_queries_respect_filter_replacing_unknown_status_with_registered_one( string $filter ): void {
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		add_filter(
+			$filter,
+			function ( $wp_query_args ) {
+				$wp_query_args['post_status'] = array( OrderInternalStatus::COMPLETED );
+				return $wp_query_args;
+			}
+		);
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => 'foobar',
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'The status set by the filter should be validated instead of the original unknown one.' );
+	}
+
+	/**
+	 * @testdox CPT order queries return no orders when the "$filter" filter replaces a registered status with an unknown one.
+	 *
+	 * @dataProvider cpt_query_args_filter_provider
+	 * @param string $filter Filter that receives the WP_Query args.
+	 */
+	public function test_cpt_order_queries_return_empty_when_filter_replaces_registered_status_with_unknown_one( string $filter ): void {
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		add_filter(
+			$filter,
+			function ( $wp_query_args ) {
+				$wp_query_args['post_status'] = 'foobar';
+				return $wp_query_args;
+			}
+		);
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => OrderStatus::COMPLETED,
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array(), $queried_order_ids, 'An unknown status set by the filter should not make the query return every order.' );
+	}
+
+	/**
+	 * @testdox CPT order queries return no orders when the "$filter" filter sets an uppercase status string, which WP_Query cannot match.
+	 *
+	 * @dataProvider cpt_query_args_filter_provider
+	 * @param string $filter Filter that receives the WP_Query args.
+	 */
+	public function test_cpt_order_queries_return_empty_when_filter_sets_uppercase_status_string( string $filter ): void {
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		add_filter(
+			$filter,
+			function ( $wp_query_args ) {
+				$wp_query_args['post_status'] = 'WC-COMPLETED';
+				return $wp_query_args;
+			}
+		);
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => OrderStatus::COMPLETED,
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array(), $queried_order_ids, 'WP_Query strips uppercase letters from a status string, so the status should be validated as WP_Query sees it.' );
+	}
+
+	/**
+	 * @testdox CPT order queries return matching orders when a query filter sets a status that WP_Query normalizes to a registered one.
+	 *
+	 * @testWith [["WC-COMPLETED"]]
+	 *           ["wc-completed "]
+	 *
+	 * @param string|array $post_status Status value set by the filter.
+	 */
+	public function test_cpt_order_queries_validate_filtered_status_as_wp_query_normalizes_it( $post_status ): void {
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		add_filter(
+			'woocommerce_order_data_store_cpt_get_orders_query',
+			function ( $wp_query_args ) use ( $post_status ) {
+				$wp_query_args['post_status'] = $post_status;
+				return $wp_query_args;
+			}
+		);
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => 'foobar',
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'A status that WP_Query can match after its own normalization should not be treated as unknown.' );
+	}
+
+	/**
+	 * @testdox CPT order queries with default statuses still find orders before order statuses are registered, as during upgrades.
+	 */
+	public function test_cpt_order_queries_find_orders_before_order_statuses_are_registered(): void {
+		global $wp_post_statuses;
+
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$registered_statuses = $wp_post_statuses;
+		foreach ( array_keys( wc_get_order_statuses() ) as $status ) {
+			unset( $wp_post_statuses[ $status ] );
+		}
+
+		try {
+			$queried_order_ids = wc_get_orders(
+				array(
+					'limit'  => -1,
+					'return' => 'ids',
+				)
+			);
+		} finally {
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the global changed above.
+			$wp_post_statuses = $registered_statuses;
+		}
+
+		$this->assertEqualsCanonicalizing( $order_ids, $queried_order_ids, 'Default order statuses should count as known even before they are registered, so early queries such as the HPOS new-shop check still find orders.' );
+	}
+
+	/**
+	 * @testdox CPT order queries for an unknown status return no orders even before order statuses are registered.
+	 */
+	public function test_cpt_order_queries_return_empty_for_unknown_status_before_order_statuses_are_registered(): void {
+		global $wp_post_statuses;
+
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		$registered_statuses = $wp_post_statuses;
+		foreach ( array_keys( wc_get_order_statuses() ) as $status ) {
+			unset( $wp_post_statuses[ $status ] );
+		}
+
+		try {
+			$queried_order_ids = wc_get_orders(
+				array(
+					'status' => 'foobar',
+					'limit'  => -1,
+					'return' => 'ids',
+				)
+			);
+		} finally {
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the global changed above.
+			$wp_post_statuses = $registered_statuses;
+		}
+
+		$this->assertSame( array(), $queried_order_ids, 'The early-query fallback should only make order statuses known, not unknown ones.' );
+	}
+
+	/**
+	 * @testdox CPT order queries return every order when the "$filter" filter replaces the status with "any".
+	 *
+	 * @dataProvider cpt_query_args_filter_provider
+	 * @param string $filter Filter that receives the WP_Query args.
+	 */
+	public function test_cpt_order_queries_respect_filter_replacing_status_with_any( string $filter ): void {
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		add_filter(
+			$filter,
+			function ( $wp_query_args ) {
+				$wp_query_args['post_status'] = 'any';
+				return $wp_query_args;
+			}
+		);
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => 'foobar',
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( $order_ids, $queried_order_ids, 'A special status set by the filter should not be treated as unknown.' );
+	}
+
+	/**
+	 * @testdox CPT order queries do not fail when the woocommerce_order_data_store_cpt_get_orders_query filter returns a query string.
+	 */
+	public function test_cpt_order_queries_accept_query_string_from_filter(): void {
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		add_filter(
+			'woocommerce_order_data_store_cpt_get_orders_query',
+			function () {
+				return 'post_type=shop_order&post_status=' . OrderInternalStatus::COMPLETED . '&fields=ids';
+			}
+		);
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => OrderStatus::COMPLETED,
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'A query string returned by the filter should still reach WP_Query.' );
+	}
+
+	/**
+	 * @testdox CPT order queries return no orders for an order status that was left out of the post status registration.
+	 */
+	public function test_cpt_order_queries_return_empty_for_order_status_left_out_of_registration(): void {
+		global $wp_post_statuses;
+
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		$registered_statuses = $wp_post_statuses;
+		unset( $wp_post_statuses[ OrderInternalStatus::COMPLETED ] );
+
+		try {
+			$queried_order_ids = wc_get_orders(
+				array(
+					'status' => OrderStatus::COMPLETED,
+					'limit'  => -1,
+					'return' => 'ids',
+				)
+			);
+		} finally {
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the global changed above.
+			$wp_post_statuses = $registered_statuses;
+		}
+
+		$this->assertSame( array(), $queried_order_ids, 'A status listed by wc_get_order_statuses() but not registered as a post status should not make the query return every order.' );
+	}
+
+	/**
+	 * Provides filters that can change the WP_Query args of CPT order queries.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function cpt_query_args_filter_provider(): array {
+		return array(
+			'woocommerce_get_wp_query_args' => array( 'woocommerce_get_wp_query_args' ),
+			'woocommerce_order_data_store_cpt_get_orders_query' => array( 'woocommerce_order_data_store_cpt_get_orders_query' ),
+		);
+	}
+
+	/**
+	 * @testdox Unsupported order query arguments are reported in English, with the singular or plural wording for their count, whatever the site language.
+	 *
+	 * @testWith [["meta_query"], "Order query argument (meta_query) is not supported on the current order datastore."]
+	 *           [["meta_query", "field_query"], "Order query arguments (meta_query, field_query) are not supported on the current order datastore."]
+	 *
+	 * @param string[] $unsupported_args Unsupported query arguments to pass.
+	 * @param string   $expected_message Expected start of the diagnostic message.
+	 */
+	public function test_query_reports_unsupported_args_in_english( array $unsupported_args, string $expected_message ): void {
+		$this->setExpectedIncorrectUsage( WC_Order_Data_Store_CPT::class . '::query' );
+		add_filter(
+			'ngettext',
+			function ( $translation, $single, $plural, $number, $domain ) {
+				return 'woocommerce' === $domain ? 'Übersetzt: ' . ( 1 === $number ? $single : $plural ) : $translation;
+			},
+			10,
+			5
+		);
+		$messages = array();
+		add_action(
+			'doing_it_wrong_run',
+			function ( $function_name, $message ) use ( &$messages ) {
+				$messages[ $function_name ] = $message;
+			},
+			10,
+			2
+		);
+
+		$query_vars = array_fill_keys( $unsupported_args, array( array( 'key' => '_unsupported_probe' ) ) );
+		( new WC_Order_Data_Store_CPT() )->query( $query_vars );
+
+		$this->assertArrayHasKey( WC_Order_Data_Store_CPT::class . '::query', $messages, 'Unsupported arguments should raise a notice.' );
+		$this->assertStringStartsWith( $expected_message, $messages[ WC_Order_Data_Store_CPT::class . '::query' ], 'The notice should use the English wording for the argument count.' );
 	}
 }

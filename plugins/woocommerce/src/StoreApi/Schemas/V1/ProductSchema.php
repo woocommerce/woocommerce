@@ -6,7 +6,10 @@ use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
 use Automattic\WooCommerce\Blocks\Utils\ProductAvailabilityUtils;
+use Automattic\WooCommerce\Blocks\Utils\ProductDescriptionUtils;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\StockDisplayFormat;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
 /**
  * ProductSchema class.
@@ -575,7 +578,7 @@ class ProductSchema extends AbstractSchema {
 				],
 			],
 			'is_password_protected' => [
-				'description' => __( 'Whether the product requires a password to access its content.', 'woocommerce' ),
+				'description' => __( 'Whether the product or its parent requires a password to access its content.', 'woocommerce' ),
 				'type'        => 'boolean',
 				'context'     => [ 'view', 'edit', 'embed' ],
 				'readonly'    => true,
@@ -592,9 +595,23 @@ class ProductSchema extends AbstractSchema {
 	 */
 	public function get_item_response( $product ) {
 		$availability      = ProductAvailabilityUtils::get_product_availability( $product );
-		$password_required = post_password_required( $product->get_id() );
-		$short_description = $password_required ? '' : $this->prepare_html_response( wc_format_content( wp_kses_post( $product->get_short_description() ) ) );
-		$description       = $password_required ? '' : $this->prepare_html_response( wc_format_content( wp_kses_post( $product->get_description() ) ) );
+		$short_description = $this->prepare_html_response(
+			ProductDescriptionUtils::guarded_format(
+				$product,
+				function () use ( $product ) {
+					return wc_format_content( wp_kses_post( $product->get_short_description() ) );
+				}
+			)
+		);
+		$description       = $this->prepare_html_response(
+			ProductDescriptionUtils::guarded_format(
+				$product,
+				function () use ( $product ) {
+					return wc_format_content( wp_kses_post( $product->get_description() ) );
+				}
+			)
+		);
+		$this->prime_product_hierarchical_taxonomies_cache( $product );
 
 		return [
 			'id'                    => $product->get_id(),
@@ -646,10 +663,62 @@ class ProductSchema extends AbstractSchema {
 				],
 				( new QuantityLimits() )->get_add_to_cart_limits( $product )
 			),
-			'is_password_protected' => '' !== $product->get_post_password(),
+			'is_password_protected' => $this->is_password_protected( $product ),
 			self::EXTENDING_KEY     => $this->get_extended_data( self::IDENTIFIER, $product ),
 
 		];
+	}
+
+	/**
+	 * Whether the product or its parent is password-protected.
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @return bool
+	 */
+	private function is_password_protected( $product ) {
+		if ( '' !== $product->get_post_password() ) {
+			return true;
+		}
+
+		$parent_id = $product->get_parent_id();
+
+		return $parent_id && '' !== get_post_field( 'post_password', $parent_id, 'raw' );
+	}
+
+	/**
+	 * Prime hierarchical terms cache to reduce queries while generating terms lists in get_item_response method.
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @return void
+	 */
+	private function prime_product_hierarchical_taxonomies_cache( \WC_Product $product ): void {
+		$term_hierarchy_ids = array();
+		foreach ( array( 'product_cat', 'product_brand' ) as $taxonomy ) {
+			$product_terms      = get_object_term_cache( $product->get_id(), $taxonomy );
+			$product_terms      = is_array( $product_terms ) ? $product_terms : array();
+			$taxonomy_hierarchy = ! empty( $product_terms ) ? _get_term_hierarchy( $taxonomy ) : array();
+			if ( ! empty( $taxonomy_hierarchy ) ) {
+				// Populate flat map of child to parent relations.
+				$parent_map = array();
+				foreach ( $taxonomy_hierarchy as $parent_id => $children ) {
+					foreach ( $children as $child_id ) {
+						$parent_map[ $child_id ] = $parent_id;
+					}
+				}
+				// Collect the chain of parent term IDs for cache priming below.
+				foreach ( $product_terms as $term ) {
+					$current = $term->term_id;
+					while ( isset( $parent_map[ $current ] ) && ! in_array( $parent_map[ $current ], $term_hierarchy_ids, true ) ) {
+						$parent_id            = $parent_map[ $current ];
+						$term_hierarchy_ids[] = $parent_id;
+						$current              = $parent_id;
+					}
+				}
+			}
+		}
+		if ( ! empty( $term_hierarchy_ids ) ) {
+			_prime_term_caches( array_unique( $term_hierarchy_ids ), false );
+		}
 	}
 
 	/**
@@ -659,7 +728,7 @@ class ProductSchema extends AbstractSchema {
 	 * @return array
 	 */
 	protected function get_images( \WC_Product $product ) {
-		$attachment_ids = array_filter( array_merge( [ $product->get_image_id() ], $product->get_gallery_image_ids() ) );
+		$attachment_ids = array_unique( array_filter( array_merge( [ $product->get_image_id() ], $product->get_gallery_image_ids() ) ) );
 		if ( ! empty( $attachment_ids ) ) {
 			// Prime caches to reduce future queries.
 			_prime_post_caches( $attachment_ids );
@@ -692,7 +761,7 @@ class ProductSchema extends AbstractSchema {
 		$stock_format    = get_option( 'woocommerce_stock_format' );
 
 		// Don't show the low stock badge if the settings doesn't allow it.
-		if ( 'no_amount' === $stock_format ) {
+		if ( StockDisplayFormat::NEVER === $stock_format ) {
 			return null;
 		}
 
@@ -860,7 +929,7 @@ class ProductSchema extends AbstractSchema {
 				continue;
 			}
 
-			$terms = $attribute->is_taxonomy() ? array_map( [ $this, 'prepare_product_attribute_taxonomy_value' ], $attribute->get_terms() ) : array_map( [ $this, 'prepare_product_attribute_value' ], $attribute->get_options() );
+			$terms = $attribute->is_taxonomy() ? array_map( [ $this, 'prepare_product_attribute_taxonomy_value' ], (array) $attribute->get_terms() ) : array_map( [ $this, 'prepare_product_attribute_value' ], $attribute->get_options() );
 			// Custom attribute names are sanitized to be the array keys.
 			// So when we do the array_key_exists check below we also need to sanitize the attribute names.
 
@@ -929,7 +998,7 @@ class ProductSchema extends AbstractSchema {
 			$sale_price    = $product->get_variation_sale_price();
 		} else {
 			$regular_price = $product->get_regular_price();
-			$sale_price    = $product->get_sale_price();
+			$sale_price    = $product->is_on_sale() ? $product->get_sale_price() : '';
 		}
 
 		$prices['price']         = $this->prepare_money_response( $price_function( $product ), $price_decimals );
@@ -947,7 +1016,7 @@ class ProductSchema extends AbstractSchema {
 	 * @return string Valid tax display mode.
 	 */
 	protected function get_tax_display_mode( $tax_display_mode = '' ) {
-		return in_array( $tax_display_mode, [ 'incl', 'excl' ], true ) ? $tax_display_mode : get_option( 'woocommerce_tax_display_shop' );
+		return in_array( $tax_display_mode, [ TaxDisplayMode::INCLUSIVE, TaxDisplayMode::EXCLUSIVE ], true ) ? $tax_display_mode : get_option( 'woocommerce_tax_display_shop' );
 	}
 
 	/**
@@ -957,7 +1026,7 @@ class ProductSchema extends AbstractSchema {
 	 * @return string Function name.
 	 */
 	protected function get_price_function_from_tax_display_mode( $tax_display_mode ) {
-		return 'incl' === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
+		return TaxDisplayMode::INCLUSIVE === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
 	}
 
 	/**
@@ -983,7 +1052,7 @@ class ProductSchema extends AbstractSchema {
 
 		if ( $product->is_type( ProductType::GROUPED ) ) {
 			$children       = $product->get_visible_children();
-			$price_function = 'incl' === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
+			$price_function = TaxDisplayMode::INCLUSIVE === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
 
 			foreach ( $children as $child ) {
 				if ( '' !== $child->get_price() ) {

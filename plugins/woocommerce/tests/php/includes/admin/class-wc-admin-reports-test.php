@@ -22,7 +22,19 @@ final class WC_Admin_Reports_Test extends WC_Unit_Test_Case {
 
 		// Verify the purge-workflow.
 		set_transient( 'wc_admin_report', 'Verify deletion' );
-		do_action( 'woocommerce_delete_legacy_report_transients', 0, false ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'woocommerce_delete_legacy_report_transients', 0, false );
 		$this->assertFalse( get_transient( 'wc_admin_report' ) );
+	}
+
+	/**
+	 * @testdox Should point the dashboard status widget at legacy Reports, which it only uses when Analytics is disabled.
+	 */
+	public function test_replace_dashboard_status_widget_reports_uses_legacy_report_links(): void {
+		$reports = \WC_Admin_Reports::replace_dashboard_status_widget_reports( array() );
+
+		$this->assertSame( 'admin.php?page=wc-reports&tab=orders&range=month', $reports['net_sales_link'] );
+		$this->assertSame( 'admin.php?page=wc-reports&tab=orders&report=sales_by_product&range=month&product_ids=', $reports['top_seller_link'] );
+		$this->assertSame( 'admin.php?page=wc-reports&tab=stock&report=low_in_stock', $reports['lowstock_link'] );
+		$this->assertSame( 'admin.php?page=wc-reports&tab=stock&report=out_of_stock', $reports['outofstock_link'] );
 	}
 }

@@ -123,6 +123,36 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test a caption saved without core's caption class still gets it.
+	 *
+	 * Image captions saved before WordPress 6.2 carry no class, and the email's caption styles key off
+	 * that class, so without it a saved caption color never reaches them.
+	 */
+	public function testItAddsTheCaptionClassToACaptionSavedWithoutIt(): void {
+		$image_content             = str_replace( '</figure>', '<figcaption>Caption</figcaption></figure>', $this->image_content );
+		$parsed_image              = $this->parsed_image;
+		$parsed_image['innerHTML'] = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertStringContainsString( '<span class="wp-element-caption">Caption</span>', $rendered );
+	}
+
+	/**
+	 * Test it keeps a caption's existing classes and does not repeat the caption class.
+	 */
+	public function testItKeepsExistingCaptionClasses(): void {
+		$image_content             = str_replace( '</figure>', '<figcaption class="custom-caption wp-element-caption">Caption</figcaption></figure>', $this->image_content );
+		$parsed_image              = $this->parsed_image;
+		$parsed_image['innerHTML'] = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertStringContainsString( '<span class="custom-caption wp-element-caption">Caption</span>', $rendered );
+		$this->assertSame( 1, substr_count( $rendered, 'wp-element-caption' ) );
+	}
+
+	/**
 	 * Test it renders image alignment
 	 */
 	public function testItRendersImageAlignment(): void {
@@ -209,7 +239,44 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 		$html->next_tag( array( 'tag_name' => 'img' ) );
 		$img_style = $html->get_attribute( 'style' );
 		$this->assertIsString( $img_style );
-		$this->assertStringNotContainsString( 'border', $img_style );
+		// The image keeps a rounded corner reduced by the border width so it stays flush inside the border.
+		$this->assertStringContainsString( 'border-radius:10px;', $img_style );
+		$this->assertStringNotContainsString( 'border-style', $img_style );
+		$this->assertStringNotContainsString( 'border-width', $img_style );
+		$this->assertStringNotContainsString( 'border-color', $img_style );
+	}
+
+	/**
+	 * Test the image radius is clamped to 0 when the border width exceeds the radius
+	 */
+	public function testItClampsImageBorderRadiusToZero(): void {
+		$image_content                            = '
+			<figure class="wp-block-image alignleft size-full is-style-default">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" style="border-width:10px;border-color:#000001;border-radius:5px;height:auto;" srcset="https://test.com/wp-content/uploads/2023/05/image.jpg 1000w"/>
+			</figure>
+		';
+		$parsed_image                             = $this->parsed_image;
+		$parsed_image['attrs']['style']['border'] = array(
+			'width'  => '10px',
+			'color'  => '#000001',
+			'radius' => '5px',
+		);
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+		$html     = new \WP_HTML_Tag_Processor( $rendered );
+		$html->next_tag(
+			array(
+				'tag_name'   => 'td',
+				'class_name' => 'email-image-border-cell',
+			)
+		);
+		$table_cell_style = $html->get_attribute( 'style' );
+		$this->assertIsString( $table_cell_style );
+		$this->assertStringContainsString( 'border-radius:5px', $table_cell_style );
+		$html->next_tag( array( 'tag_name' => 'img' ) );
+		$img_style = $html->get_attribute( 'style' );
+		$this->assertIsString( $img_style );
+		$this->assertStringContainsString( 'border-radius:0px;', $img_style );
 	}
 
 	/**

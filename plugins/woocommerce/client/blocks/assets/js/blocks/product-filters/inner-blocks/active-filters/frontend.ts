@@ -2,20 +2,17 @@
  * External dependencies
  */
 import { store, getContext, getConfig } from '@wordpress/interactivity';
+import type {
+	RemovableItem,
+	RemovableItemsParentStore,
+} from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import type { ProductFiltersContext } from '../../types';
 import type { ProductFiltersStore } from '../../frontend';
-import type {
-	RemovableItem,
-	RemovableItemsParentStore,
-} from '../../../../types/type-defs/removable-items';
-import {
-	PRODUCT_FILTERS_STORE_LOCK,
-	PRODUCT_FILTERS_STORE_NAME,
-} from '../../constants';
+import { PRODUCT_FILTERS_STORE_NAME } from '../../constants';
 
 type RemovableItemContext = {
 	item: RemovableItem;
@@ -49,7 +46,7 @@ const activeFiltersStore = {
 		removeAll: () => {
 			const context = getContext< ProductFiltersContext >();
 			context.activeFilters = [];
-			actions.navigate();
+			void actions.navigate();
 		},
 		remove: () => {
 			const { item } = getContext< RemovableItemContext >();
@@ -57,17 +54,15 @@ const activeFiltersStore = {
 				( filter ) =>
 					filter.value === item.value && filter.type === item.type
 			);
-			actions.navigate();
+			void actions.navigate();
 		},
 	},
 };
 
 // Compile-time protocol conformance check.
-// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+
 activeFiltersStore satisfies RemovableItemsParentStore;
 
 const { state, actions } = store<
 	ProductFiltersStore & typeof activeFiltersStore
->( PRODUCT_FILTERS_STORE_NAME, activeFiltersStore, {
-	lock: PRODUCT_FILTERS_STORE_LOCK,
-} );
+>( PRODUCT_FILTERS_STORE_NAME, activeFiltersStore );

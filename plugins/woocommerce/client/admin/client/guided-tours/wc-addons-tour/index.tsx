@@ -24,7 +24,7 @@ const WCAddonsTour = () => {
 	const defaultAutoScrollBlock: ScrollLogicalPosition = 'center';
 
 	useEffect( () => {
-		const query = new URLSearchParams( location.search );
+		const query = new URLSearchParams( window.location.search );
 		if ( query.get( 'tutorial' ) === 'true' ) {
 			const intervalId = waitUntilElementTopNotChange(
 				steps[ 0 ].referenceElements?.desktop || '',
@@ -56,7 +56,7 @@ const WCAddonsTour = () => {
 				}
 			}
 
-			// In a rare case, admin notices might load before observe is added below (moving `.wc-addons-wrap`).
+			// In a rare case, admin notices might load before observe is added below (moving `.woocommerce-marketplace`).
 			// In such a case, if Tour is shown before this effect is called, it might not be position correctly.
 			// Updating popper's position here, ensures it's always visible.
 			const timeoutId = setTimeout( showPopper, 500 );
@@ -83,7 +83,7 @@ const WCAddonsTour = () => {
 	) => {
 		setShowTour( false );
 		// mark tour as completed
-		updateOptions( {
+		void updateOptions( {
 			woocommerce_admin_dismissed_in_app_marketplace_tour: 'yes',
 		} );
 		// remove `tutorial` from search query, so it's not shown on page refresh

@@ -147,7 +147,7 @@ This function is the standard way of retrieving orders based on certain paramete
 wc_get_orders( $args )
 ```
 
-[Arguments and usage](/docs/extensions/core-concepts/wc-get-orders/)
+[Arguments and usage](/docs/features/orders/wc-get-orders/)
 
 ### wc_get_order
 
@@ -203,7 +203,7 @@ This function is the standard way of retrieving products based on certain parame
 wc_get_products( $args )
 ```
 
-[Arguments and usage](/docs/extensions/core-concepts/wc-get-products/)
+[Arguments and usage](/docs/features/products/wc-get-products/)
 
 ### wc_get_product
 

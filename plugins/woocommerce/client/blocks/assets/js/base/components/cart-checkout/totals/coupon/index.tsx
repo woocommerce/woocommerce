@@ -67,7 +67,7 @@ export const TotalsCoupon = ( {
 	) => {
 		e.preventDefault();
 		if ( typeof onSubmit !== 'undefined' ) {
-			onSubmit( couponValue )?.then( ( result ) => {
+			void onSubmit( couponValue )?.then( ( result ) => {
 				if ( result ) {
 					setCouponValue( '' );
 					setIsCouponFormVisible( false );

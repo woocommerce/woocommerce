@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/product-filter-rating",
 	"title": "Rating Filter",
-	"description": "Enable customers to filter the product collection by rating.",
+	"description": "Let shoppers filter products by rating.",
 	"category": "woocommerce",
 	"keywords": [],
 	"supports": {
@@ -12,7 +12,14 @@
 		}
 	},
 	"ancestor": [ "woocommerce/product-filters" ],
-	"usesContext": [ "query", "filterParams" ],
+	"usesContext": [
+		"query",
+		"queryId",
+		"collection",
+		"productCollectionLocation",
+		"filterParams",
+		"productFiltersKey"
+	],
 	"attributes": {
 		"className": {
 			"type": "string",

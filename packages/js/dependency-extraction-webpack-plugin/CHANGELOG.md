@@ -2,11 +2,15 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [5.0.0](https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin/v/5.0.0) - 2026-06-10
+## [5.1.0](https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin/v/5.1.0) - 2026-06-30 
 
--   Major - Remove the block templates package from dependency extraction. [#65503]
--   Major - Remove the product editor package from dependency extraction. [#65500]
--   Major - Remove the settings editor package from dependency extraction. [#65316]
+-   Minor - Replace the @woocommerce/settings-ui-sdk dependency-extraction entry with @woocommerce/settings-ui, matching the renamed package. The previous entry was never consumable: the package is unpublished and no WooCommerce release registers its script handle. [#65719]
+
+## [5.0.0](https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin/v/5.0.0) - 2026-06-10 
+
+-   Major [ **BREAKING CHANGE** ] - Remove the block templates package from dependency extraction. [#65503]
+-   Major [ **BREAKING CHANGE** ] - Remove the product editor package from dependency extraction. [#65500]
+-   Major [ **BREAKING CHANGE** ] - Remove the settings editor package from dependency extraction. [#65316]
 -   Minor - Include @woocommerce/sanitize package in dependency extraction. [#60324]
 -   Patch - Monorepo: refresh DependencyExtractionWebpackPlugin for compatibility with filesystem cache, admin build cleanup. [#64111]
 -   Patch - Register the settings UI SDK package with dependency extraction. [#64387]
@@ -14,7 +18,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [4.0.0](https://www.npmjs.com/package/@woocommerce/dependency-extraction-webpack-plugin/v/4.0.0) - 2025-06-24 
 
--   Major - Monorepo: bump @wordpress/dependency-extraction-webpack-plugin dependency version to the latest (breaking changes, see [upstream CHANGELOG](https://github.com/WordPress/gutenberg/blob/trunk/packages/dependency-extraction-webpack-plugin/CHANGELOG.md) for details). [#59106]
+-   Major [ **BREAKING CHANGE** ] - Monorepo: bump @wordpress/dependency-extraction-webpack-plugin dependency version to the latest (breaking changes, see [upstream CHANGELOG](https://github.com/WordPress/gutenberg/blob/trunk/packages/dependency-extraction-webpack-plugin/CHANGELOG.md) for details). [#59106]
 -   Patch - Monorepo: consolidate @babel/* dependencies versions across the monorepo. [#56575]
 -   Patch - Monorepo: consolidate packages licenses to `GPL-2.0-or-later`. [#58941]
 -   Patch - Monorepo: consolidate Webpack dependencies versions across the monorepo. [#59104]

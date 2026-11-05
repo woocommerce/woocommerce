@@ -37,7 +37,6 @@ import { emptyHiddenAddressFields } from '@woocommerce/base-utils';
 import { useStoreCartEventListeners } from './use-store-cart-event-listeners';
 
 declare module '@wordpress/html-entities' {
-	// eslint-disable-next-line @typescript-eslint/no-shadow
 	export function decodeEntities< T >( coupon: T ): T;
 }
 const defaultShippingAddress: CartResponseShippingAddress = {
@@ -84,7 +83,7 @@ const decodeValues = <
 		| Record< string, unknown >
 		| CartResponseBillingAddress
 		| CartResponseShippingAddress
-		| CartShippingPackageShippingRate
+		| CartShippingPackageShippingRate,
 >(
 	object: T
 ): T => {
@@ -98,7 +97,7 @@ const decodeValues = <
 
 // Normalize address fields to ensure they are always in the same format and update the ref to track the latest value.
 const normalizeAddress = <
-	T extends CartResponseBillingAddress | CartResponseShippingAddress
+	T extends CartResponseBillingAddress | CartResponseShippingAddress,
 >(
 	address: T,
 	addressRef: React.MutableRefObject< T >
@@ -117,7 +116,7 @@ const normalizeCoupons = ( coupons: CartResponseCouponItem[] ) => {
 		? coupons.map( ( coupon: CartResponseCouponItem ) => ( {
 				...coupon,
 				label: decodeEntities( coupon.code ),
-		  } ) )
+			} ) )
 		: EMPTY_CART_COUPONS;
 };
 
@@ -136,9 +135,9 @@ const normalizeShippingRates = ( shippingRates: CartShippingRate[] ) => {
 						? shippingRate.shipping_rates.map(
 								( rate: CartShippingPackageShippingRate ) =>
 									decodeValues( rate )
-						  )
+							)
 						: [],
-		  } ) )
+			} ) )
 		: [];
 };
 

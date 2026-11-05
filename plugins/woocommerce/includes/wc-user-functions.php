@@ -326,9 +326,14 @@ function wc_set_customer_auth_cookie( $customer_id ) {
  * @return int
  */
 function wc_update_new_customer_past_orders( $customer_id ) {
+	$customer = get_user_by( 'id', absint( $customer_id ) );
+
+	if ( ! $customer ) {
+		return 0;
+	}
+
 	$linked          = 0;
 	$complete        = 0;
-	$customer        = get_user_by( 'id', absint( $customer_id ) );
 	$customer_orders = wc_get_orders(
 		array(
 			'limit'    => -1,
@@ -743,7 +748,8 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 						break;
 					}
 					$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-					if ( ! empty( $userdata->roles ) && ! array_intersect( $userdata->roles, $shop_manager_editable_roles ) ) {
+					$can_manage_user             = ! empty( $userdata->roles ) && empty( array_diff( $userdata->roles, array_unique( $shop_manager_editable_roles ) ) );
+					if ( ! $can_manage_user ) {
 						$caps[] = 'do_not_allow';
 					}
 				}
@@ -1152,11 +1158,6 @@ function wc_update_user_last_active( $user_id ) {
  * @return string
  */
 function wc_translate_user_roles( $translation, $text, $context ) {
-	// translate_user_role() only accepts a second parameter starting in WP 5.2.
-	if ( version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ) {
-		return $translation;
-	}
-
 	if ( 'User role' === $context && in_array( $text, array( 'Shop manager', 'Customer' ), true ) ) {
 		return translate_user_role( $text, 'woocommerce' );
 	}

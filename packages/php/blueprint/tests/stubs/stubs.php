@@ -3,6 +3,8 @@
  * Stubs for WooCommerce classes and interfaces.
  */
 
+require_once __DIR__ . '/WPCli.php';
+
 if ( ! class_exists( 'WC_Log_Levels', false ) ) {
 	/**
 	 * WC Log Levels Class

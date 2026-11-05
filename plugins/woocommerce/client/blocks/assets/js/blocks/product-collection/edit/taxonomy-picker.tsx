@@ -106,7 +106,6 @@ const TaxonomyPicker = ( props: TaxonomyPickerProps ) => {
 	const handleTermChange = ( termIds: number[] ) => {
 		setQueryAttribute( props, {
 			taxQuery: {
-				...attributes.query?.taxQuery,
 				[ taxonomySlug ]: termIds,
 			},
 		} );

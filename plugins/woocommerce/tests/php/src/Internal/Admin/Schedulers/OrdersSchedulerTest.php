@@ -5,8 +5,12 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Schedulers;
 
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
+use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Unit_Test_Case;
-use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * OrdersScheduler Test.
@@ -14,6 +18,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
  * @class OrdersSchedulerTest
  */
 class OrdersSchedulerTest extends WC_Unit_Test_Case {
+	use LoggerSpyTrait;
 
 	/**
 	 * Set up the test environment.
@@ -21,8 +26,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		// Enable the analytics-scheduled-import feature.
-		Features::enable( 'analytics-scheduled-import' );
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'yes' );
 	}
 
 	/**
@@ -36,11 +40,427 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_ID_OPTION );
 		delete_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION );
 		delete_option( OrdersScheduler::LEGACY_IMMEDIATE_IMPORT_OPTION );
+		delete_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION );
 
 		// Clean up any scheduled actions.
 		$this->clear_scheduled_batch_processor();
 
-		Features::disable( 'analytics-scheduled-import' );
+		delete_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION );
+	}
+
+	/**
+	 * Hook the import filter that keeps child orders out of Analytics, for the active order storage.
+	 */
+	private function exclude_child_orders_from_import(): void {
+		add_filter(
+			'woocommerce_analytics_orders_import_where_clauses',
+			function ( $clauses, $table_alias ) {
+				$clauses[] = OrderUtil::custom_orders_table_usage_is_enabled()
+					? "NOT ( {$table_alias}.type = 'shop_order' AND {$table_alias}.parent_order_id <> 0 )"
+					: "NOT ( {$table_alias}.post_type = 'shop_order' AND {$table_alias}.post_parent <> 0 )";
+				return $clauses;
+			},
+			10,
+			2
+		);
+	}
+
+	/**
+	 * Hook the import filter to add one fixed condition.
+	 *
+	 * @param string $condition SQL condition.
+	 * @return callable The filter callback, for tests that remove it before a retry.
+	 */
+	private function add_import_condition( string $condition ): callable {
+		$callback = function ( $clauses ) use ( $condition ) {
+			$clauses[] = $condition;
+			return $clauses;
+		};
+		add_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
+
+		return $callback;
+	}
+
+	/**
+	 * Refund 1 of an order.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return int Refund ID.
+	 */
+	private function create_refund( int $order_id ): int {
+		return wc_create_refund(
+			array(
+				'order_id' => $order_id,
+				'amount'   => 1,
+			)
+		)->get_id();
+	}
+
+	/**
+	 * Create a completed parent order, a completed child order pointing at it, and a refund of the parent.
+	 *
+	 * @return int[] Parent, child and refund IDs.
+	 */
+	private function create_parent_child_and_refund(): array {
+		$parent = \WC_Helper_Order::create_order();
+		$parent->set_status( OrderStatus::COMPLETED );
+		$parent->save();
+
+		$child = \WC_Helper_Order::create_order();
+		$child->set_parent_id( $parent->get_id() );
+		$child->set_status( OrderStatus::COMPLETED );
+		$child->save();
+
+		return array( $parent->get_id(), $child->get_id(), $this->create_refund( $parent->get_id() ) );
+	}
+
+	/**
+	 * Order and refund IDs currently in the order stats table.
+	 *
+	 * @return int[]
+	 */
+	private function get_imported_order_ids(): array {
+		global $wpdb;
+
+		return array_map( 'intval', $wpdb->get_col( "SELECT order_id FROM {$wpdb->prefix}wc_order_stats" ) );
+	}
+
+	/**
+	 * Status recorded for a record in the order stats table.
+	 *
+	 * @param int $order_id Order or refund ID.
+	 * @return string|null
+	 */
+	private function get_imported_status( int $order_id ): ?string {
+		global $wpdb;
+
+		return $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $order_id ) );
+	}
+
+	/**
+	 * @testdox A refund inherits the exclusion of its parent order in every import path.
+	 */
+	public function test_refund_of_excluded_record_is_not_imported(): void {
+		list( $parent_id, $child_id, $refund_id ) = $this->create_parent_child_and_refund();
+		$child_refund_id                          = $this->create_refund( $child_id );
+		$this->exclude_child_orders_from_import();
+
+		$items = OrdersScheduler::get_items( 100, 1, false, true );
+		$ids   = array_map( 'intval', $items->ids );
+		$this->assertSame( $items->total, count( $ids ), 'The count and the page must agree.' );
+		$this->assertNotContains( $child_refund_id, $ids, 'get_items() must leave out the refund of an excluded order.' );
+		$this->assertContains( $refund_id, $ids, 'A refund of a kept order is still imported.' );
+		$this->assertTrue( OrdersScheduler::is_excluded_from_import( $child_refund_id ), 'The per-record check must exclude the refund too.' );
+
+		OrdersScheduler::import( $child_refund_id );
+		$this->assertSame( -1, OrdersStatsDataStore::update( wc_get_order( $child_refund_id ) ), 'The stats data store must skip the refund.' );
+		OrdersScheduler::process_pending_batch( '2000-01-01 00:00:00', 0 );
+
+		$imported = $this->get_imported_order_ids();
+		$this->assertNotContains( $child_refund_id, $imported, 'No import path may write the refund of an excluded order.' );
+		$this->assertNotContains( $child_id, $imported, 'The excluded order stays out.' );
+		$this->assertContains( $parent_id, $imported, 'The scheduled batch imports the kept order.' );
+		$this->assertContains( $refund_id, $imported, 'The scheduled batch imports the refund of the kept order.' );
+	}
+
+	/**
+	 * @testdox A refund is excluded along with an order whose conditions come out NULL.
+	 */
+	public function test_refund_of_order_with_null_condition_is_excluded(): void {
+		$order     = \WC_Helper_Order::create_order();
+		$refund_id = $this->create_refund( $order->get_id() );
+		add_filter(
+			'woocommerce_analytics_orders_import_where_clauses',
+			function ( $clauses, $table_alias ) {
+				// NULL for orders and true for refunds, like a comparison against an empty nullable column.
+				$column    = OrderUtil::custom_orders_table_usage_is_enabled() ? 'type' : 'post_type';
+				$clauses[] = "IF( {$table_alias}.{$column} = 'shop_order', NULL, 1 )";
+				return $clauses;
+			},
+			10,
+			2
+		);
+
+		$this->assertTrue( OrdersScheduler::is_excluded_from_import( $order->get_id() ), 'A NULL condition excludes the order.' );
+		$this->assertTrue( OrdersScheduler::is_excluded_from_import( $refund_id ), 'The refund inherits the exclusion of its order.' );
+		$this->assertNotContains( $refund_id, array_map( 'intval', OrdersScheduler::get_items( 100, 1, false, true )->ids ), 'get_items() agrees with the per-record check.' );
+	}
+
+	/**
+	 * @testdox A "skip existing" import that pages one record at a time finishes with excluded refunds present.
+	 */
+	public function test_skip_existing_import_finishes_with_excluded_refunds(): void {
+		list( , $child_id ) = $this->create_parent_child_and_refund();
+		$this->create_refund( $child_id );
+		$this->exclude_child_orders_from_import();
+
+		// ImportScheduler::import_batch() always reads page 1 while skipping existing records, so a
+		// counted record that never lands would be served again and again.
+		$rounds = 0;
+		do {
+			$items = OrdersScheduler::get_items( 1, 1, false, true );
+			foreach ( $items->ids as $id ) {
+				OrdersScheduler::import( (int) $id );
+			}
+			++$rounds;
+		} while ( $items->ids && $rounds < 10 );
+
+		$this->assertSame( 0, OrdersScheduler::get_items( 1, 1, false, true )->total, 'Every counted record was imported.' );
+	}
+
+	/**
+	 * @testdox A record imported before a condition excluded it keeps syncing through the scheduled batch.
+	 */
+	public function test_record_imported_before_exclusion_keeps_syncing(): void {
+		list( , $child_id ) = $this->create_parent_child_and_refund();
+		OrdersScheduler::import( $child_id );
+		$this->assertSame( OrderInternalStatus::COMPLETED, $this->get_imported_status( $child_id ), 'The child is imported before the condition exists.' );
+		$this->exclude_child_orders_from_import();
+
+		$child = wc_get_order( $child_id );
+		$child->set_status( OrderStatus::CANCELLED );
+		$child->save();
+		OrdersScheduler::process_pending_batch( '2000-01-01 00:00:00', 0 );
+
+		$this->assertFalse( OrdersScheduler::is_excluded_from_import( $child_id ), 'A record Analytics holds is never excluded.' );
+		$this->assertSame( OrderInternalStatus::CANCELLED, $this->get_imported_status( $child_id ), 'The status change reaches the held stats row.' );
+	}
+
+	/**
+	 * @testdox A new refund of an excluded order that Analytics holds is imported, so its sale is not overstated.
+	 */
+	public function test_new_refund_of_held_excluded_record_is_imported(): void {
+		list( , $child_id ) = $this->create_parent_child_and_refund();
+		OrdersScheduler::import( $child_id );
+		$this->exclude_child_orders_from_import();
+
+		$child_refund_id = $this->create_refund( $child_id );
+
+		$this->assertFalse( OrdersScheduler::is_excluded_from_import( $child_refund_id ), 'A refund of a held order is not excluded.' );
+		$this->assertContains( $child_refund_id, array_map( 'intval', OrdersScheduler::get_items( 100, 1, false, true )->ids ), 'get_items() counts it.' );
+
+		OrdersScheduler::import( $child_refund_id );
+
+		$this->assertContains( $child_refund_id, $this->get_imported_order_ids(), 'import() writes the new refund of the held order.' );
+	}
+
+	/**
+	 * @testdox A record with no row in the orders table is not excluded.
+	 */
+	public function test_is_excluded_from_import_ignores_missing_record(): void {
+		$this->add_import_condition( '0' );
+
+		$this->assertFalse( OrdersScheduler::is_excluded_from_import( 999999999 ), 'With no row to evaluate, the conditions cannot exclude the record.' );
+	}
+
+	/**
+	 * @testdox get_items() logs the error when the import conditions make the count query fail.
+	 */
+	public function test_get_items_logs_failed_count_query(): void {
+		global $wpdb;
+		$this->create_parent_child_and_refund();
+		$this->add_import_condition( 'no_such_column_for_this_test = 1' );
+
+		$suppress = $wpdb->suppress_errors();
+		$items    = OrdersScheduler::get_items( 100, 1, false, true );
+		$wpdb->suppress_errors( $suppress );
+
+		$this->assertSame( 0, $items->total, 'A failed count reads as nothing to import.' );
+		$this->assertSame( array(), $items->ids );
+		$this->assertLogged( 'error', 'Could not count the orders to import' );
+		$this->assertCount( 1, $this->get_logs_by_level( 'error' ), 'Only the failed count is logged, not the page query it skipped.' );
+	}
+
+	/**
+	 * @testdox get_items() applies the import conditions filter to both the count and the IDs.
+	 */
+	public function test_get_items_honors_import_where_clauses_filter(): void {
+		list( $parent_id, $child_id, $refund_id ) = $this->create_parent_child_and_refund();
+
+		$unfiltered = OrdersScheduler::get_items( 100, 1, false, true );
+		$this->exclude_child_orders_from_import();
+		$filtered = OrdersScheduler::get_items( 100, 1, false, true );
+
+		$unfiltered_ids = array_map( 'intval', $unfiltered->ids );
+		$filtered_ids   = array_map( 'intval', $filtered->ids );
+
+		$this->assertContains( $child_id, $unfiltered_ids, 'Without the filter the child order is imported as before.' );
+		$this->assertSame( $unfiltered->total - 1, $filtered->total, 'The count drops by the excluded child order.' );
+		$this->assertNotContains( $child_id, $filtered_ids );
+		$this->assertContains( $parent_id, $filtered_ids );
+		$this->assertContains( $refund_id, $filtered_ids, 'A refund keeps its order in the parent column and must survive a child-order condition.' );
+	}
+
+	/**
+	 * @testdox import() skips a record the import conditions filter excludes and imports the rest.
+	 */
+	public function test_import_skips_record_excluded_by_import_where_clauses_filter(): void {
+		list( $parent_id, $child_id, $refund_id ) = $this->create_parent_child_and_refund();
+		$this->exclude_child_orders_from_import();
+
+		OrdersScheduler::import( $child_id );
+		OrdersScheduler::import( $parent_id );
+
+		$imported = $this->get_imported_order_ids();
+		$this->assertNotContains( $child_id, $imported, 'The excluded child order is not imported.' );
+		$this->assertContains( $parent_id, $imported, 'The kept parent order is imported.' );
+		$this->assertContains( $refund_id, $imported, 'Importing the parent also syncs its refund.' );
+	}
+
+	/**
+	 * @testdox The scheduled import batch skips a record the import conditions filter excludes.
+	 */
+	public function test_process_pending_batch_skips_excluded_record(): void {
+		list( $parent_id, $child_id ) = $this->create_parent_child_and_refund();
+		$this->exclude_child_orders_from_import();
+
+		OrdersScheduler::process_pending_batch( '2000-01-01 00:00:00', 0 );
+
+		$imported = $this->get_imported_order_ids();
+		$this->assertContains( $parent_id, $imported );
+		$this->assertNotContains( $child_id, $imported );
+	}
+
+	/**
+	 * @testdox The stats data store refuses a record the import conditions filter excludes.
+	 */
+	public function test_stats_data_store_update_skips_excluded_record(): void {
+		list( , $child_id ) = $this->create_parent_child_and_refund();
+		$this->exclude_child_orders_from_import();
+
+		$result = OrdersStatsDataStore::update( wc_get_order( $child_id ) );
+
+		$this->assertSame( -1, $result, 'update() reports an excluded record as skipped (-1), not failed.' );
+		$this->assertNotContains( $child_id, $this->get_imported_order_ids() );
+	}
+
+	/**
+	 * @testdox An excluded record is dropped from the failed imports list instead of being retried forever.
+	 */
+	public function test_import_clears_failed_entry_for_excluded_record(): void {
+		list( , $child_id ) = $this->create_parent_child_and_refund();
+		OrdersScheduler::record_failed_order_import( $child_id );
+		$this->exclude_child_orders_from_import();
+
+		OrdersScheduler::import( $child_id );
+
+		$this->assertNotContains( $child_id, OrdersScheduler::get_failed_order_imports()['ids'] );
+	}
+
+	/**
+	 * @testdox A filter return that is not an array of strings is ignored.
+	 * @testWith [false]
+	 *           [[42, "  ", null]]
+	 *
+	 * @param mixed $invalid_return Value the filter returns.
+	 */
+	public function test_import_where_clauses_filter_ignores_invalid_return( $invalid_return ): void {
+		list( , $child_id ) = $this->create_parent_child_and_refund();
+		add_filter(
+			'woocommerce_analytics_orders_import_where_clauses',
+			function () use ( $invalid_return ) {
+				return $invalid_return;
+			}
+		);
+
+		$this->assertContains( $child_id, array_map( 'intval', OrdersScheduler::get_items( 100, 1, false, true )->ids ), 'get_items() ignores the return.' );
+		$this->assertFalse( OrdersScheduler::is_excluded_from_import( $child_id ), 'The per-record check ignores the return.' );
+	}
+
+	/**
+	 * @testdox A '0' condition excludes every record instead of being dropped as empty.
+	 */
+	public function test_import_where_clauses_filter_keeps_zero_condition(): void {
+		list( $parent_id ) = $this->create_parent_child_and_refund();
+		$this->add_import_condition( '0' );
+
+		$items = OrdersScheduler::get_items( 100, 1, false, true );
+
+		$this->assertSame( 0, $items->total, 'get_items() must count nothing.' );
+		$this->assertSame( array(), $items->ids );
+		$this->assertTrue( OrdersScheduler::is_excluded_from_import( $parent_id ), 'The per-record check must exclude too.' );
+	}
+
+	/**
+	 * @testdox A condition with a literal percent sign, such as a LIKE pattern, survives the prepared queries.
+	 */
+	public function test_import_where_clauses_filter_allows_like_patterns(): void {
+		list( $parent_id, $child_id, $refund_id ) = $this->create_parent_child_and_refund();
+		add_filter(
+			'woocommerce_analytics_orders_import_where_clauses',
+			function ( $clauses, $table_alias ) {
+				$column    = OrderUtil::custom_orders_table_usage_is_enabled() ? 'type' : 'post_type';
+				$clauses[] = "{$table_alias}.{$column} NOT LIKE '%shop_order_refund'"; // Starts with %s, which prepare() would read as a placeholder.
+				return $clauses;
+			},
+			10,
+			2
+		);
+
+		$items = OrdersScheduler::get_items( 100, 1, false, true );
+
+		$ids = array_map( 'intval', $items->ids );
+		$this->assertSame( $items->total, count( $ids ), 'The count and the page must agree.' );
+		$this->assertContains( $parent_id, $ids );
+		$this->assertContains( $child_id, $ids );
+		$this->assertNotContains( $refund_id, $ids, 'The LIKE condition excludes refunds in the prepared page query.' );
+		$this->assertTrue( OrdersScheduler::is_excluded_from_import( $refund_id ), 'The LIKE condition excludes refunds in the prepared probe.' );
+		$this->assertFalse( OrdersScheduler::is_excluded_from_import( $parent_id ) );
+
+		OrdersScheduler::process_pending_batch( '2000-01-01 00:00:00', 0 );
+		$imported = $this->get_imported_order_ids();
+		$this->assertContains( $parent_id, $imported, 'The prepared cursor query keeps the parent.' );
+		$this->assertNotContains( $refund_id, $imported, 'The prepared cursor query applies the LIKE condition.' );
+	}
+
+	/**
+	 * @testdox A failing exclusion check logs the error, imports nothing and keeps the record on the failed list.
+	 */
+	public function test_failed_exclusion_check_skips_import_and_keeps_record_for_retry(): void {
+		global $wpdb;
+		list( , $child_id ) = $this->create_parent_child_and_refund();
+		$callback           = $this->add_import_condition( 'no_such_column_for_this_test = 1' );
+
+		$suppress = $wpdb->suppress_errors();
+		$excluded = OrdersScheduler::is_excluded_from_import( $child_id );
+		OrdersScheduler::import( $child_id );
+		$updated = OrdersStatsDataStore::update( wc_get_order( $child_id ) );
+		$wpdb->suppress_errors( $suppress );
+		remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
+
+		$this->assertNull( $excluded, 'A failed check is neither an exclusion nor a pass.' );
+		$this->assertLogged( 'error', "Could not check whether record #{$child_id} is excluded from the import" );
+		$this->assertFalse( $updated, 'The stats data store reports a failed sync and writes nothing.' );
+		$this->assertNotContains( $child_id, $this->get_imported_order_ids() );
+		$this->assertContains( $child_id, OrdersScheduler::get_failed_order_imports()['ids'], 'The record stays on the list Analytics settings retries.' );
+
+		// Once the condition is fixed, the retry imports the record.
+		OrdersScheduler::import( $child_id );
+		$this->assertContains( $child_id, $this->get_imported_order_ids() );
+		$this->assertNotContains( $child_id, OrdersScheduler::get_failed_order_imports()['ids'] );
+	}
+
+	/**
+	 * @testdox The scheduled batch leaves the cursor unchanged when the import conditions make the query fail.
+	 */
+	public function test_process_pending_batch_keeps_cursor_when_filtered_query_fails(): void {
+		global $wpdb;
+		list( $parent_id ) = $this->create_parent_child_and_refund();
+		update_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION, '2000-01-01 00:00:00', false );
+		update_option( OrdersScheduler::LAST_PROCESSED_ORDER_ID_OPTION, 0, false );
+		$callback = $this->add_import_condition( 'no_such_column_for_this_test = 1' );
+
+		$suppress = $wpdb->suppress_errors();
+		OrdersScheduler::process_pending_batch();
+		$wpdb->suppress_errors( $suppress );
+		remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
+
+		$this->assertSame( '2000-01-01 00:00:00', get_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION ), 'The cursor must not move past orders the failed query never returned.' );
+		$this->assertNotContains( $parent_id, $this->get_imported_order_ids() );
+
+		// Once the condition is gone, the same cursor picks the orders up.
+		OrdersScheduler::process_pending_batch();
+		$this->assertContains( $parent_id, $this->get_imported_order_ids() );
 	}
 
 	/**
@@ -112,6 +532,62 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 			$filter_called,
 			'Import interval filter should be applied when scheduling batch processor'
 		);
+	}
+
+	/**
+	 * Filter values that cannot be used as an import interval.
+	 *
+	 * @return array[]
+	 */
+	public function invalid_import_interval_provider(): array {
+		return array(
+			'null'               => array( null ),
+			'non-numeric string' => array( 'abc' ),
+			'zero'               => array( 0 ),
+			'negative'           => array( -5 ),
+			'below one second'   => array( 0.5 ),
+			'infinite'           => array( INF ),
+		);
+	}
+
+	/**
+	 * Test that an invalid import interval from the filter falls back to the 12 hour default.
+	 *
+	 * @dataProvider invalid_import_interval_provider
+	 *
+	 * @param mixed $value The filter return value.
+	 */
+	public function test_invalid_import_interval_falls_back_to_default( $value ) {
+		$this->clear_scheduled_batch_processor();
+		$this->setExpectedIncorrectUsage( OrdersScheduler::class . '::get_import_interval' );
+
+		$filter = fn() => $value;
+		add_filter( 'woocommerce_analytics_import_interval', $filter );
+
+		$interval = OrdersScheduler::get_import_interval();
+		OrdersScheduler::schedule_recurring_batch_processor();
+
+		remove_filter( 'woocommerce_analytics_import_interval', $filter );
+
+		$this->assertSame( 12 * HOUR_IN_SECONDS, $interval, 'An invalid import interval should fall back to 12 hours' );
+		$this->assertTrue(
+			$this->is_batch_processor_scheduled(),
+			'An invalid import interval should still schedule the batch processor'
+		);
+	}
+
+	/**
+	 * Test that a numeric string from the filter is returned as an integer.
+	 */
+	public function test_numeric_string_import_interval_is_cast_to_int() {
+		$filter = fn() => '3600';
+		add_filter( 'woocommerce_analytics_import_interval', $filter );
+
+		$interval = OrdersScheduler::get_import_interval();
+
+		remove_filter( 'woocommerce_analytics_import_interval', $filter );
+
+		$this->assertSame( 3600, $interval );
 	}
 
 	/**
@@ -512,6 +988,732 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Trashing an order schedules an import that syncs the trash status to wp_wc_order_stats.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/44371
+	 */
+	public function test_trash_order_schedules_import_that_syncs_status_to_order_stats(): void {
+		global $wpdb;
+
+		// Immediate import mode: trash/untrash schedule a per-order import action.
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
+
+		// Create and import a completed order.
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+		$order_id = $order->get_id();
+		OrdersScheduler::import( $order_id );
+
+		// Verify the order stats row has wc-completed status.
+		$status_before = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT status FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d",
+				$order_id
+			)
+		);
+		$this->assertSame( 'wc-completed', $status_before );
+
+		// Trash the order. Note: delete() sets the object's ID to 0, so we use $order_id.
+		$order->delete( false );
+
+		// The trash hook should have scheduled an import for this order.
+		$this->assertTrue(
+			as_has_scheduled_action( OrdersScheduler::get_action( 'import' ), array( $order_id ), OrdersScheduler::$group ),
+			'Trashing an order should schedule a wc-admin_import_orders action.'
+		);
+
+		\WC_Helper_Queue::run_all_pending( OrdersScheduler::$group );
+
+		// Verify the order stats row now has wc-trash status.
+		$status_after = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT status FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d",
+				$order_id
+			)
+		);
+		$this->assertSame( 'wc-trash', $status_after );
+	}
+
+	/**
+	 * @testdox Untrashing an order schedules an import that restores the status in wp_wc_order_stats.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/44371
+	 */
+	public function test_untrash_order_schedules_import_that_restores_status_in_order_stats(): void {
+		global $wpdb;
+
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
+
+		// Create, complete, import, then trash an order and sync the trash status.
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+		$order_id = $order->get_id();
+		OrdersScheduler::import( $order_id );
+		$order->delete( false );
+		\WC_Helper_Queue::run_all_pending( OrdersScheduler::$group );
+
+		// Verify the order is trashed in stats.
+		// Note: delete() sets the object's ID to 0, so we use $order_id.
+		$status_trashed = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT status FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d",
+				$order_id
+			)
+		);
+		$this->assertSame( 'wc-trash', $status_trashed );
+
+		// Untrash the order — reload since delete() cleared the in-memory ID.
+		// WC_Data_Store proxies via __call, so method_exists() can't detect
+		// untrash_order; route by the authoritative storage mode instead.
+		$order = wc_get_order( $order_id );
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$order->get_data_store()->untrash_order( $order );
+		} else {
+			wp_untrash_post( $order_id );
+		}
+
+		// The untrash hook schedules an import, which runs only after the
+		// restored status has been persisted.
+		\WC_Helper_Queue::run_all_pending( OrdersScheduler::$group );
+
+		// Verify the order stats row is restored.
+		$status_restored = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT status FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d",
+				$order_id
+			)
+		);
+		$this->assertSame( 'wc-completed', $status_restored );
+	}
+
+	/**
+	 * @testdox Untrashing syncs the restored status even when action scheduling runs synchronously.
+	 *
+	 * woocommerce_untrash_order fires before the restored status is saved, so an inline
+	 * import recorded wc-trash — and nothing corrected it, since the data store
+	 * suppresses woocommerce_update_order for trash transitions.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/44371
+	 */
+	public function test_untrash_syncs_restored_status_when_action_scheduling_is_synchronous(): void {
+		global $wpdb;
+
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'Only HPOS fires the untrash hook before persisting; the CPT path is covered via untrashed_post.' );
+		}
+
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
+
+		// Force schedule_action() down its synchronous fallback.
+		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+
+		$read_status = static function ( $id ) use ( $wpdb ) {
+			return $wpdb->get_var(
+				$wpdb->prepare( "SELECT status FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $id )
+			);
+		};
+
+		try {
+			$order = \WC_Helper_Order::create_order();
+			$order->set_status( 'completed' );
+			$order->save();
+			$order_id = $order->get_id();
+			OrdersScheduler::import( $order_id );
+
+			// Trash. woocommerce_trash_order fires after the status is persisted, so the
+			// synchronous import records it correctly without any queue run.
+			$order->delete( false );
+			$this->assertSame( 'wc-trash', $read_status( $order_id ), 'Trashing should sync wc-trash synchronously.' );
+
+			// Restore. Note delete() cleared the in-memory ID, so reload first.
+			$order = wc_get_order( $order_id );
+			$order->get_data_store()->untrash_order( $order );
+
+			// Deliberately no queue run: the import already ran inline, and it must have
+			// seen the restored status rather than the trashed one.
+			$this->assertSame(
+				'wc-completed',
+				$read_status( $order_id ),
+				'Untrashing should sync the restored status, not wc-trash, on the synchronous path.'
+			);
+		} finally {
+			remove_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+		}
+	}
+
+	/**
+	 * @testdox maybe_schedule_import_on_untrash ignores transitions that are not restores.
+	 */
+	public function test_maybe_schedule_import_on_untrash_ignores_non_trash_transitions(): void {
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'The status-transition listener is HPOS-only; CPT restores are covered by untrashed_post.' );
+		}
+
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
+
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+
+		$this->clear_scheduled_import( $order->get_id() );
+
+		OrdersScheduler::maybe_schedule_import_on_untrash( $order->get_id(), 'pending' );
+
+		$this->assertFalse(
+			$this->is_import_scheduled( $order->get_id() ),
+			'A transition that does not come from trash should not schedule an import.'
+		);
+
+		OrdersScheduler::maybe_schedule_import_on_untrash( $order->get_id(), 'trash' );
+
+		$this->assertTrue(
+			$this->is_import_scheduled( $order->get_id() ),
+			'A transition out of trash should schedule an import.'
+		);
+
+		$this->clear_scheduled_import( $order->get_id() );
+	}
+
+	/**
+	 * @testdox Under CPT, trashing and restoring each schedule exactly one import.
+	 *
+	 * CPT emits both the post hook and the Woo-side signal per operation, so acting on
+	 * both would import twice and fire the public post-import hook twice.
+	 */
+	public function test_cpt_trash_and_untrash_each_schedule_a_single_import(): void {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'Test requires CPT to be the authoritative store.' );
+		}
+
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
+
+		// Run inline so each import is observable. Must precede the fixture: otherwise
+		// saving queues a real action and has_existing_jobs() suppresses what we count.
+		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+		$order_id = $order->get_id();
+		OrdersScheduler::import( $order_id );
+
+		$imports  = 0;
+		$callback = function ( $imported_id ) use ( &$imports, $order_id ) {
+			if ( (int) $imported_id === $order_id ) {
+				++$imports;
+			}
+		};
+		add_action( 'woocommerce_order_scheduler_after_import_order', $callback );
+
+		try {
+			$order->delete( false );
+			$this->assertSame( 1, $imports, 'Trashing a CPT order should schedule exactly one import.' );
+
+			$imports = 0;
+			wp_untrash_post( $order_id );
+			$this->assertSame( 1, $imports, 'Restoring a CPT order should schedule exactly one import.' );
+		} finally {
+			remove_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+			remove_action( 'woocommerce_order_scheduler_after_import_order', $callback );
+		}
+	}
+
+	/**
+	 * @testdox Under CPT, restoring syncs the status even when scheduling runs synchronously.
+	 *
+	 * Companion to the HPOS synchronous-untrash test: once the status-transition
+	 * listener is HPOS-only, CPT restores depend entirely on untrashed_post, which
+	 * fires after wp_untrash_post() has persisted the restored status.
+	 */
+	public function test_cpt_untrash_syncs_restored_status_when_scheduling_is_synchronous(): void {
+		global $wpdb;
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'Test requires CPT to be the authoritative store.' );
+		}
+
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
+		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+
+		$read_status = static function ( $id ) use ( $wpdb ) {
+			return $wpdb->get_var(
+				$wpdb->prepare( "SELECT status FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $id )
+			);
+		};
+
+		try {
+			$order = \WC_Helper_Order::create_order();
+			$order->set_status( 'completed' );
+			$order->save();
+			$order_id = $order->get_id();
+			OrdersScheduler::import( $order_id );
+
+			$order->delete( false );
+			$this->assertSame( 'wc-trash', $read_status( $order_id ), 'Trashing should sync wc-trash synchronously under CPT.' );
+
+			wp_untrash_post( $order_id );
+			$this->assertSame(
+				'wc-completed',
+				$read_status( $order_id ),
+				'Restoring should sync the restored status under CPT on the synchronous path.'
+			);
+		} finally {
+			remove_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+		}
+	}
+
+	/**
+	 * @testdox maybe_schedule_import_on_post_trash_change is a no-op when HPOS is the authoritative store.
+	 *
+	 * When HPOS is active the woocommerce_trash_order/woocommerce_untrash_order hooks
+	 * already schedule the import. The trashed_post/untrashed_post hooks then fire for
+	 * the same order, so this handler must early-return to avoid a redundant import.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/44371
+	 */
+	public function test_maybe_schedule_import_on_post_trash_change_skips_when_hpos_active(): void {
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'Test requires HPOS to be the authoritative store.' );
+		}
+
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
+
+		$order    = \WC_Helper_Order::create_order();
+		$order_id = $order->get_id();
+
+		// Creating the order schedules an import of its own; clear the queue so
+		// the assertion below isolates this handler.
+		\WC_Helper_Queue::cancel_all_pending();
+
+		OrdersScheduler::maybe_schedule_import_on_post_trash_change( $order_id );
+
+		$this->assertFalse(
+			as_has_scheduled_action( OrdersScheduler::get_action( 'import' ), array( $order_id ), OrdersScheduler::$group ),
+			'maybe_schedule_import_on_post_trash_change should not schedule an import when HPOS is the authoritative store.'
+		);
+	}
+
+	/**
+	 * @testdox process_pending_batch picks up trashed orders and syncs wc-trash to wp_wc_order_stats.
+	 *
+	 * In scheduled import mode no per-order action is created on trash; the batch
+	 * cursor query must include trashed orders so the transition is synced.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/44371
+	 */
+	public function test_process_pending_batch_picks_up_trashed_order(): void {
+		global $wpdb;
+
+		// Scheduled import mode is set in setUp().
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+		$order_id = $order->get_id();
+		OrdersScheduler::import( $order_id );
+
+		// Trash the order. Note: delete() sets the object's ID to 0, so we use $order_id.
+		$order->delete( false );
+
+		OrdersScheduler::process_pending_batch( '2020-01-01 00:00:00', 0 );
+
+		$status_after = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT status FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d",
+				$order_id
+			)
+		);
+		$this->assertSame( 'wc-trash', $status_after );
+	}
+
+	/**
+	 * @testdox A trashed order that was never imported does not create an analytics customer.
+	 *
+	 * An order created and trashed between batch runs reaches import() for the first
+	 * time while trashed, and the stats sync creates a wc_customer_lookup row as a side
+	 * effect. Reports join wc_order_stats and hide the order, but Analytics > Customers
+	 * counts the lookup table directly, so the customer would linger with no orders.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/pull/64157
+	 */
+	public function test_never_imported_trashed_order_does_not_create_customer(): void {
+		global $wpdb;
+
+		// Scheduled import mode is set in setUp().
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->set_billing_email( 'ghost-64157@example.com' );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$customers_before = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_customer_lookup" );
+
+		$new_customer_fired = 0;
+		$callback           = function () use ( &$new_customer_fired ) {
+			++$new_customer_fired;
+		};
+		add_action( 'woocommerce_analytics_new_customer', $callback );
+
+		// Trash without ever importing, then let the batch pick it up.
+		$order->delete( false );
+		OrdersScheduler::process_pending_batch( '2020-01-01 00:00:00', 0 );
+
+		remove_action( 'woocommerce_analytics_new_customer', $callback );
+
+		$customers_after = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_customer_lookup" );
+
+		$this->assertSame( 0, $new_customer_fired, 'Importing a never-imported trashed order should not create an analytics customer.' );
+		$this->assertSame( $customers_before, $customers_after, 'The customer lookup table should be unchanged.' );
+		$this->assertSame(
+			0,
+			(int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $order_id ) ),
+			'A never-imported trashed order should not gain a stats row.'
+		);
+	}
+
+	/**
+	 * @testdox Trashing a partially imported order does not add an analytics customer.
+	 *
+	 * A missing stats row does not prove the record was never imported. Skipping is
+	 * still right: import() only creates and updates, so it would not clear the remnant.
+	 */
+	public function test_trashing_partially_imported_order_adds_no_customer(): void {
+		global $wpdb;
+
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
+
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->set_billing_email( 'partial-64157@example.com' );
+		$order->save();
+		$order_id = $order->get_id();
+
+		// Import fully, then simulate a partial import by dropping only the stats row.
+		OrdersScheduler::import( $order_id );
+		$wpdb->delete( $wpdb->prefix . 'wc_order_stats', array( 'order_id' => $order_id ) );
+
+		$customers_before = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_customer_lookup" );
+
+		$new_customer_fired = 0;
+		$callback           = function () use ( &$new_customer_fired ) {
+			++$new_customer_fired;
+		};
+		add_action( 'woocommerce_analytics_new_customer', $callback );
+
+		$order->delete( false );
+		OrdersScheduler::import( $order_id );
+
+		remove_action( 'woocommerce_analytics_new_customer', $callback );
+
+		$this->assertSame( 0, $new_customer_fired, 'Trashing a partially imported order should not create another analytics customer.' );
+		$this->assertSame(
+			$customers_before,
+			(int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_customer_lookup" ),
+			'The customer lookup table should be unchanged.'
+		);
+	}
+
+	/**
+	 * @testdox A trashed order that was never imported is imported normally once restored.
+	 */
+	public function test_never_imported_trashed_order_imports_after_restore(): void {
+		global $wpdb;
+
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
+
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+		$order_id = $order->get_id();
+
+		// Trash without importing; the skip guard should leave no stats row.
+		$order->delete( false );
+		OrdersScheduler::import( $order_id );
+		$this->assertSame(
+			0,
+			(int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $order_id ) ),
+			'The trashed, never-imported order should have been skipped.'
+		);
+
+		// Restore it: the status is no longer trash, so it imports as usual.
+		$order = wc_get_order( $order_id );
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$order->get_data_store()->untrash_order( $order );
+		} else {
+			wp_untrash_post( $order_id );
+		}
+		OrdersScheduler::import( $order_id );
+
+		$this->assertSame(
+			'wc-completed',
+			$wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $order_id ) ),
+			'A restored order should import normally.'
+		);
+	}
+
+	/**
+	 * @testdox get_failed_order_imports normalizes malformed or legacy option values.
+	 */
+	public function test_get_failed_order_imports_normalizes_malformed_option(): void {
+		// A scalar value (e.g. from a corrupted or manually edited option).
+		update_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION, 'yes', false );
+		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertSame( array(), $failed['ids'] );
+		$this->assertSame( 0, $failed['overflow'] );
+
+		// An array missing the 'ids' key, with a non-int overflow.
+		update_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION, array( 'overflow' => '4' ), false );
+		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertSame( array(), $failed['ids'] );
+		$this->assertSame( 4, $failed['overflow'] );
+
+		// 'ids' set to a non-array value.
+		update_option(
+			OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION,
+			array(
+				'ids'      => 'not-an-array',
+				'overflow' => 1,
+			),
+			false
+		);
+		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertSame( array(), $failed['ids'] );
+		$this->assertSame( 1, $failed['overflow'] );
+	}
+
+	/**
+	 * @testdox record_failed_order_import stores deduplicated order IDs.
+	 */
+	public function test_record_failed_order_import_dedupes(): void {
+		OrdersScheduler::record_failed_order_import( 11 );
+		OrdersScheduler::record_failed_order_import( 22 );
+		OrdersScheduler::record_failed_order_import( 11 );
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+
+		$this->assertSame( array( 11, 22 ), $failed['ids'] );
+		$this->assertSame( 0, $failed['overflow'] );
+	}
+
+	/**
+	 * @testdox record_failed_order_import ignores invalid order IDs.
+	 */
+	public function test_record_failed_order_import_ignores_invalid_ids(): void {
+		OrdersScheduler::record_failed_order_import( 0 );
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+
+		$this->assertSame( array(), $failed['ids'] );
+	}
+
+	/**
+	 * @testdox record_failed_order_import drops the oldest ID and counts overflow when the cap is reached.
+	 */
+	public function test_record_failed_order_import_caps_list_and_counts_overflow(): void {
+		update_option(
+			OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION,
+			array(
+				'ids'      => range( 1, 1000 ),
+				'overflow' => 2,
+			),
+			false
+		);
+
+		OrdersScheduler::record_failed_order_import( 1001 );
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertCount( 1000, $failed['ids'], 'List should stay at the cap' );
+		$this->assertNotContains( 1, $failed['ids'], 'Oldest ID should be dropped' );
+		$this->assertContains( 1001, $failed['ids'], 'New ID should be recorded' );
+		$this->assertSame( 3, $failed['overflow'] );
+	}
+
+	/**
+	 * @testdox clear_failed_order_import removes a recorded ID.
+	 */
+	public function test_clear_failed_order_import_removes_id(): void {
+		OrdersScheduler::record_failed_order_import( 11 );
+		OrdersScheduler::record_failed_order_import( 22 );
+
+		OrdersScheduler::clear_failed_order_import( 11 );
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertSame( array( 22 ), $failed['ids'] );
+	}
+
+	/**
+	 * @testdox clear_failed_order_import deletes the option when nothing is left.
+	 */
+	public function test_clear_failed_order_import_deletes_option_when_empty(): void {
+		OrdersScheduler::record_failed_order_import( 11 );
+
+		OrdersScheduler::clear_failed_order_import( 11 );
+
+		$this->assertFalse( get_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION ) );
+	}
+
+	/**
+	 * @testdox reset_failed_order_imports_overflow resets the counter but keeps stored IDs.
+	 */
+	public function test_reset_failed_order_imports_overflow(): void {
+		update_option(
+			OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION,
+			array(
+				'ids'      => array( 5 ),
+				'overflow' => 7,
+			),
+			false
+		);
+
+		OrdersScheduler::reset_failed_order_imports_overflow();
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertSame( array( 5 ), $failed['ids'] );
+		$this->assertSame( 0, $failed['overflow'] );
+	}
+
+	/**
+	 * @testdox clear_failed_order_import preserves the option when overflow is non-zero after clearing all IDs.
+	 */
+	public function test_clear_failed_order_import_keeps_option_when_overflow_remains(): void {
+		update_option(
+			OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION,
+			array(
+				'ids'      => array( 11 ),
+				'overflow' => 3,
+			),
+			false
+		);
+
+		OrdersScheduler::clear_failed_order_import( 11 );
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertSame( array(), $failed['ids'] );
+		$this->assertSame( 3, $failed['overflow'] );
+	}
+
+	/**
+	 * @testdox reset_failed_order_imports_overflow deletes the option when IDs are empty after reset.
+	 */
+	public function test_reset_failed_order_imports_overflow_deletes_option_when_ids_empty(): void {
+		update_option(
+			OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION,
+			array(
+				'ids'      => array(),
+				'overflow' => 5,
+			),
+			false
+		);
+
+		OrdersScheduler::reset_failed_order_imports_overflow();
+
+		$this->assertFalse( get_option( OrdersScheduler::FAILED_ORDER_IMPORTS_OPTION ) );
+	}
+
+	/**
+	 * @testdox process_pending_batch records the ID of an order that fails to import.
+	 */
+	public function test_process_pending_batch_records_failed_order(): void {
+		global $wpdb;
+		// Anchor the cursor just before test orders so existing DB orders are excluded.
+		$cursor_id = (int) $wpdb->get_var( "SELECT MAX(id) FROM {$wpdb->prefix}wc_orders" );
+
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+
+		$throwing_filter = function ( $is_test, $checked_order ) use ( $order ) {
+			if ( $checked_order instanceof \WC_Abstract_Order && $checked_order->get_id() === $order->get_id() ) {
+				throw new \DivisionByZeroError( 'Division by zero' );
+			}
+
+			return $is_test;
+		};
+
+		OrdersScheduler::clear_queued_actions();
+		add_filter( 'woocommerce_analytics_is_test_order', $throwing_filter, 10, 2 );
+		OrdersScheduler::process_pending_batch( '2000-01-01 00:00:00', $cursor_id );
+		remove_filter( 'woocommerce_analytics_is_test_order', $throwing_filter, 10 );
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertContains( $order->get_id(), $failed['ids'] );
+	}
+
+	/**
+	 * @testdox import clears the failed record for an order that imports successfully.
+	 */
+	public function test_import_clears_failed_order_on_success(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+
+		OrdersScheduler::record_failed_order_import( $order->get_id() );
+
+		OrdersScheduler::import( $order->get_id() );
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertNotContains( $order->get_id(), $failed['ids'] );
+	}
+
+	/**
+	 * @testdox import keeps the failed record of an order whose tax lookup rows could not be written.
+	 */
+	public function test_import_keeps_failed_order_when_the_tax_sync_does_not_land(): void {
+		global $wpdb;
+
+		$tax_item = new \WC_Order_Item_Tax();
+		$tax_item->set_name( 'US-CA-STATE-TAX-1' );
+		$tax_item->set_rate_id( 1 );
+		$tax_item->set_rate_percent( 0 );
+		$tax_item->set_tax_total( 6.0 );
+		$tax_item->set_shipping_tax_total( 0 );
+
+		$order = \WC_Helper_Order::create_order();
+		$order->add_item( $tax_item );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		OrdersScheduler::record_failed_order_import( $order->get_id() );
+
+		$suppress = $wpdb->suppress_errors( true );
+		$restore  = $this->break_next_lookup_write();
+		OrdersScheduler::import( $order->get_id() );
+		$restore();
+		$wpdb->suppress_errors( $suppress );
+
+		$failed = OrdersScheduler::get_failed_order_imports();
+		$this->assertContains( $order->get_id(), $failed['ids'], 'A retry whose tax sync failed again should stay on the failed imports list.' );
+	}
+
+	/**
+	 * Make the next write to the tax lookup table fail, the way a database error would.
+	 *
+	 * @return callable Restores normal writes.
+	 */
+	private function break_next_lookup_write(): callable {
+		$table_name = TaxesDataStore::get_db_table_name();
+		$broken     = false;
+
+		$filter = function ( $query ) use ( &$broken, $table_name ) {
+			if ( $broken || 0 !== strpos( $query, "REPLACE INTO {$table_name}" ) ) {
+				return $query;
+			}
+
+			$broken = true;
+
+			// A table that does not exist, so the write fails the way a database error would.
+			return "REPLACE INTO `{$table_name}_missing` (order_id) VALUES (1)";
+		};
+
+		add_filter( 'query', $filter );
+
+		return function () use ( $filter ) {
+			remove_filter( 'query', $filter );
+		};
+	}
+
+	/**
 	 * Clear any scheduled batch processor actions.
 	 *
 	 * @return void
@@ -531,5 +1733,31 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	private function is_batch_processor_scheduled(): bool {
 		$action_hook = OrdersScheduler::get_action( 'process_pending_batch' );
 		return function_exists( 'as_has_scheduled_action' ) ? as_has_scheduled_action( $action_hook, array(), OrdersScheduler::$group ) : (bool) as_next_scheduled_action( $action_hook, array(), OrdersScheduler::$group );
+	}
+
+	/**
+	 * Clear any scheduled single-order import actions for an order.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return void
+	 */
+	private function clear_scheduled_import( int $order_id ): void {
+		$action_hook = OrdersScheduler::get_action( 'import' );
+		if ( function_exists( 'as_unschedule_all_actions' ) ) {
+			as_unschedule_all_actions( $action_hook, array( $order_id ), OrdersScheduler::$group );
+		}
+	}
+
+	/**
+	 * Check whether a single-order import action is scheduled for an order.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return bool
+	 */
+	private function is_import_scheduled( int $order_id ): bool {
+		$action_hook = OrdersScheduler::get_action( 'import' );
+		return function_exists( 'as_has_scheduled_action' )
+			? as_has_scheduled_action( $action_hook, array( $order_id ), OrdersScheduler::$group )
+			: (bool) as_next_scheduled_action( $action_hook, array( $order_id ), OrdersScheduler::$group );
 	}
 }

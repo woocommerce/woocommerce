@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep Settings UI unsaved-changes protection enabled when the legacy settings form is missing.

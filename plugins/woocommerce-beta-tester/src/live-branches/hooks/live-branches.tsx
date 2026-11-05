@@ -53,7 +53,7 @@ export const useLiveBranchesData = () => {
 			}
 		};
 
-		getBranches();
+		void getBranches();
 	}, [] );
 
 	return { branches, isLoading: loading, isError };

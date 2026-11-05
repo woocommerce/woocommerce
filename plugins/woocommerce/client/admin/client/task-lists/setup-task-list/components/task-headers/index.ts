@@ -13,6 +13,8 @@ import PaymentsHeader from './payments';
 import WoocommercePaymentsHeader from './woocommerce-payments';
 import LaunchYourStoreHeader from './launch-your-store';
 
+export { default as DefaultTaskHeader } from './default';
+
 export const taskHeaders: Record< string, React.ElementType > = {
 	store_details: StoreDetailsHeader,
 	'customize-store': CustomizeStoreHeader,

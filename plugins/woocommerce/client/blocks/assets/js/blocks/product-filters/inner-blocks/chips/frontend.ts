@@ -2,24 +2,20 @@
  * External dependencies
  */
 import { store, getContext, getElement } from '@wordpress/interactivity';
+import type {
+	SelectableItem,
+	SelectableItemsParentStore,
+} from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
-import type {
-	SelectableItem,
-	SelectableItemsParentStore,
-} from '../../../../types/type-defs/selectable-items';
 import {
 	getVisualAttributeTermStyleString,
 	isVisualAttributeTermEmpty,
 } from '../../../../base/utils/visual-attribute-terms';
 import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribute-terms';
 import { getClosestColor } from '../../utils/get-closest-color';
-import {
-	PRODUCT_FILTERS_STORE_LOCK,
-	PRODUCT_FILTERS_STORE_NAME,
-} from '../../constants';
 
 type ChipsItem = SelectableItem< {
 	visual?: VisualAttributeTerm;
@@ -52,11 +48,8 @@ type ChipsStore = {
 };
 
 function getParentStore( storeNamespace?: string ) {
-	if ( ! storeNamespace ) return undefined;
-	if ( storeNamespace === PRODUCT_FILTERS_STORE_NAME ) {
-		return store<
-			SelectableItemsParentStore< { visual?: VisualAttributeTerm } >
-		>( storeNamespace, undefined, { lock: PRODUCT_FILTERS_STORE_LOCK } );
+	if ( ! storeNamespace ) {
+		return undefined;
 	}
 	return store<
 		SelectableItemsParentStore< { visual?: VisualAttributeTerm } >
@@ -110,7 +103,9 @@ const { state }: ChipsStore = store< ChipsStore >(
 					getContext< ChipsContext >();
 				const parentItems =
 					getParentStore( storeNamespace )?.state?.selectableItems;
-				if ( ! Array.isArray( parentItems ) ) return [];
+				if ( ! Array.isArray( parentItems ) ) {
+					return [];
+				}
 				const normalizedDisplayLimit =
 					normalizeDisplayLimit( displayLimit );
 				return parentItems.map( ( item, index ) => ( {
@@ -135,7 +130,9 @@ const { state }: ChipsStore = store< ChipsStore >(
 		actions: {
 			toggle() {
 				const item = getCurrentItem();
-				if ( ! item ) return;
+				if ( ! item ) {
+					return;
+				}
 				const { storeNamespace } = getContext< ChipsContext >();
 				getParentStore( storeNamespace )?.actions?.toggle?.( item );
 			},

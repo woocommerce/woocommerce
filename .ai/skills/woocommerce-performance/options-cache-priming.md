@@ -77,7 +77,32 @@ Guard with `! empty()` when the list is dynamically built and may be empty. When
 
 ---
 
-### 4. Transient names passed to `wp_prime_option_caches()` — unsafe under persistent object cache
+### 4. Registry / definition-array based priming at init time
+
+**Apply when:** A class maintains a registry (array) of entities whose option key is derivable from the entry — either stored as an explicit `option_key` field or computable from the entry's ID using a known naming convention.
+
+**Correct pattern:**
+
+```php
+// Prime options caches to reduce future queries (for non-existing yet or non-autoloaded options).
+wp_prime_option_caches(
+    array_map(
+        static fn( $id, $def ) => $def['option_key'] ?? "woocommerce_feature_{$id}_enabled",
+        array_keys( $this->registry ),
+        $this->registry
+    )
+);
+```
+
+Place the call at the end of the method that populates the registry, before any code that reads from it. This ensures a single batch query covers all entries regardless of which specific entry triggers the first read.
+
+`wp_prime_option_caches()` skips entries already in `alloptions` (autoloaded options loaded at WordPress boot) — the resulting SQL `WHERE option_name IN (...)` contains only the non-autoloaded or not-yet-existing subset. This is expected and correct: the SQL appearing in query monitors will show a subset of the full registry, not all entries.
+
+**Real-world example:** `FeaturesController::init_feature_definitions()` — after registering all feature definitions, primes all `woocommerce_feature_{id}_enabled` keys (and any custom `option_key` overrides) in one call. Without this, each `feature_is_enabled()` call throughout the request issues its own individual `SELECT`.
+
+---
+
+### 5. Transient names passed to `wp_prime_option_caches()` — unsafe under persistent object cache
 
 **Anti-pattern:** Passing `_transient_*`, `_transient_timeout_*`, `_site_transient_*`, or `_site_transient_timeout_*` option names to `wp_prime_option_caches()`.
 
@@ -153,13 +178,11 @@ High `get_option()` concentration alone is **not** a signal. These are common fa
 
 All three entity types extend `WC_Settings_API`, which saves settings with `autoload='yes'`. Once saved, these options are already in cache. However, on a fresh install or before settings are first saved, they are absent from `wp_load_alloptions()` — each `get_option()` issues an individual query. Priming is justified here specifically for the existence dimension (batching those misses), particularly when looping over a large number of entities such as email classes.
 
-The four built-in payment gateways are a negligible count and are skipped.
-
 | Location | Pattern | Status |
 | --- | --- | --- |
 | `includes/class-wc-emails.php` — `init()` | array_map over email class list | ✅ covered — batches miss queries on fresh/unconfigured installs |
 | `includes/class-wc-shipping.php` — `get_shipping_method_class_names()` | array_map over method ID list | ✅ covered — same rationale |
-| `includes/class-wc-payment-gateways.php` — `init()` | 4 built-in gateways — negligible count | ✅ verified, skipped |
+| `includes/class-wc-payment-gateways.php` — `init()` | 5 known option keys for 4 built-in gateways | ✅ covered — same rationale |
 
 ### Workflow for gap analysis
 

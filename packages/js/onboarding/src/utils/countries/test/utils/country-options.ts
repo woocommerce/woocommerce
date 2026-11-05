@@ -97,7 +97,7 @@ export const countryStateOptions = [
 	},
 	{
 		key: 'DZ:DZ-11',
-		label: 'Algeria — Tamanghasset',
+		label: 'Algeria — Tamanrasset',
 	},
 	{
 		key: 'DZ:DZ-12',
@@ -246,6 +246,46 @@ export const countryStateOptions = [
 	{
 		key: 'DZ:DZ-48',
 		label: 'Algeria — Relizane',
+	},
+	{
+		key: 'DZ:DZ-49',
+		label: 'Algeria — Timimoun',
+	},
+	{
+		key: 'DZ:DZ-50',
+		label: 'Algeria — Bordj Badji Mokhtar',
+	},
+	{
+		key: 'DZ:DZ-51',
+		label: 'Algeria — Ouled Djellal',
+	},
+	{
+		key: 'DZ:DZ-52',
+		label: 'Algeria — Béni Abbès',
+	},
+	{
+		key: 'DZ:DZ-53',
+		label: 'Algeria — In Salah',
+	},
+	{
+		key: 'DZ:DZ-54',
+		label: 'Algeria — In Guezzam',
+	},
+	{
+		key: 'DZ:DZ-55',
+		label: 'Algeria — Touggourt',
+	},
+	{
+		key: 'DZ:DZ-56',
+		label: 'Algeria — Djanet',
+	},
+	{
+		key: 'DZ:DZ-57',
+		label: 'Algeria — El Meghaier',
+	},
+	{
+		key: 'DZ:DZ-58',
+		label: 'Algeria — El Meniaa',
 	},
 	{
 		key: 'AS',

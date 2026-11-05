@@ -14,6 +14,7 @@ use Automattic\WooCommerce\StoreApi\Utilities\ArrayUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\StoreApi\Utilities\NoticeHandler;
 use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
+use Automattic\WooCommerce\Utilities\ShippingUtil;
 use WP_Error;
 
 /**
@@ -108,21 +109,37 @@ class CartController {
 			]
 		);
 
-		$request = $this->filter_request_data( $this->parse_variation_data( $request ) );
-		$product = $this->get_product_for_cart( $request );
-		$cart_id = $cart->generate_cart_id(
-			$this->get_product_id( $product ),
-			$this->get_variation_id( $product ),
-			$request['variation'],
-			$request['cart_item_data']
-		);
-
+		$request         = $this->parse_variation_data( $request );
+		$product         = $this->get_product_for_cart( $request );
 		$quantity_limits = new QuantityLimits();
 
 		// If quantity was not passed, it should default to the minimum allowed quantity.
 		if ( null === $request['quantity'] ) {
 			$request['quantity'] = $quantity_limits->get_add_to_cart_limits( $product )['minimum'];
 		}
+
+		$product_id   = $this->get_product_id( $product );
+		$variation_id = $this->get_variation_id( $product );
+
+		/**
+		 * This filter is documented in includes/class-wc-cart.php.
+		 *
+		 * @since 3.1.0
+		 */
+		$request['quantity'] = apply_filters(
+			'woocommerce_add_to_cart_quantity',
+			$request['quantity'],
+			$product_id,
+			$variation_id
+		);
+
+		$request = $this->filter_request_data( $request );
+		$cart_id = $cart->generate_cart_id(
+			$product_id,
+			$variation_id,
+			$request['variation'],
+			$request['cart_item_data']
+		);
 
 		$this->validate_add_to_cart( $product, $request );
 		$existing_cart_id = $cart->find_product_in_cart( $cart_id );
@@ -234,8 +251,10 @@ class CartController {
 	 *
 	 * @param string    $item_id Cart item id.
 	 * @param int|float $quantity Cart quantity.
+	 * @param bool      $refresh_totals Whether to recalculate totals now; pass false when changing several
+	 *                                  lines and calling calculate_totals() once afterwards.
 	 */
-	public function set_cart_item_quantity( $item_id, $quantity = 1 ) {
+	public function set_cart_item_quantity( $item_id, $quantity = 1, $refresh_totals = true ) {
 		$cart_item = $this->get_cart_item( $item_id );
 
 		if ( empty( $cart_item ) ) {
@@ -248,6 +267,8 @@ class CartController {
 			throw new RouteException( 'woocommerce_rest_cart_invalid_product', esc_html__( 'Cart item is invalid.', 'woocommerce' ), 404 );
 		}
 
+		// Normalize the raw value so it's properly stored.
+		$quantity            = wc_stock_amount( $quantity );
 		$quantity_validation = ( new QuantityLimits() )->validate_cart_item_quantity( $quantity, $cart_item );
 
 		if ( is_wp_error( $quantity_validation ) ) {
@@ -255,7 +276,7 @@ class CartController {
 		}
 
 		$cart = $this->get_cart_instance();
-		$cart->set_quantity( $item_id, $quantity );
+		$cart->set_quantity( $item_id, $quantity, $refresh_totals );
 	}
 
 	/**
@@ -488,7 +509,7 @@ class CartController {
 		 *
 		 * @since 7.2.0
 		 *
-		 * @example See docs/examples/validate-cart.md
+		 * @example docs/examples/validate-cart.md
 		 *
 		 * @param \WP_Error $errors  WP_Error object.
 		 * @param \WC_Cart  $cart    Cart object.
@@ -514,12 +535,15 @@ class CartController {
 		 * Fires when cart items are being validated.
 		 *
 		 * Allow 3rd parties to validate cart items. This is a legacy hook from Woo core.
-		 * This filter will be deprecated because it encourages usage of wc_add_notice. For the API we need to capture
-		 * notices and convert to wp errors instead.
+		 *
+		 * This action will be deprecated in the Store API because it encourages wc_add_notice:
+		 * the API has to capture those notices and convert them to WP_Error objects. Prefer
+		 * `woocommerce_store_api_cart_errors`, which passes a WP_Error to callbacks directly.
+		 * Core keeps firing this action from the classic cart and checkout, so it is not
+		 * deprecated there.
 		 *
 		 * @since 7.2.0
 		 *
-		 * @deprecated
 		 * @internal Matches action name in WooCommerce core.
 		 */
 		do_action( 'woocommerce_check_cart_items' );
@@ -915,11 +939,13 @@ class CartController {
 	/**
 	 * Selects a shipping rate.
 	 *
+	 * The rate must be listed for the package. Other choices are ignored.
+	 *
 	 * @param int|string $package_id ID of the package to choose a rate for.
 	 * @param string     $rate_id ID of the rate being chosen.
 	 */
 	public function select_shipping_rate( $package_id, $rate_id ) {
-		if ( ! is_string( $rate_id ) ) {
+		if ( ! is_string( $rate_id ) || ! ShippingUtil::is_shipping_rate_listed( $package_id, $rate_id ) ) {
 			return;
 		}
 		$cart                        = $this->get_cart_instance();
@@ -1399,6 +1425,7 @@ class CartController {
 	 * Format and sanitize variation data posted to the API.
 	 *
 	 * Labels are converted to names (e.g. Size to pa_size), and values are cleaned.
+	 * Custom (non-taxonomy) values are stripped of HTML tags but keep percent sequences (e.g. `%20`), which `wc_clean()` would destroy, breaking validation against the stored options.
 	 *
 	 * @throws RouteException Exception if variation cannot be found.
 	 *
@@ -1422,10 +1449,12 @@ class CartController {
 						?
 						sanitize_title( $variation_data[ $variation_attribute_name ] )
 						:
-						html_entity_decode(
-							wc_clean( $variation_data[ $variation_attribute_name ] ),
-							ENT_QUOTES,
-							get_bloginfo( 'charset' )
+						wp_strip_all_tags(
+							html_entity_decode(
+								$variation_data[ $variation_attribute_name ],
+								ENT_QUOTES,
+								get_bloginfo( 'charset' )
+							)
 						);
 				continue;
 			}
@@ -1443,10 +1472,12 @@ class CartController {
 						?
 						sanitize_title( $variation_data[ $attribute_label ] )
 						:
-						html_entity_decode(
-							wc_clean( $variation_data[ $attribute_label ] ),
-							ENT_QUOTES,
-							get_bloginfo( 'charset' )
+						wp_strip_all_tags(
+							html_entity_decode(
+								$variation_data[ $attribute_label ],
+								ENT_QUOTES,
+								get_bloginfo( 'charset' )
+							)
 						);
 				continue;
 			}
@@ -1458,10 +1489,12 @@ class CartController {
 						?
 						sanitize_title( $variation_data[ $attribute['name'] ] )
 						:
-						html_entity_decode(
-							wc_clean( $variation_data[ $attribute['name'] ] ),
-							ENT_QUOTES,
-							get_bloginfo( 'charset' )
+						wp_strip_all_tags(
+							html_entity_decode(
+								$variation_data[ $attribute['name'] ],
+								ENT_QUOTES,
+								get_bloginfo( 'charset' )
+							)
 						);
 			}
 		}
