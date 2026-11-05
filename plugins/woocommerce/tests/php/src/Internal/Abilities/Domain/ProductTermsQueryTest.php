@@ -596,4 +596,46 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 
 		return $result['terms'];
 	}
+
+	/**
+	 * @testdox Should return the terms of a global attribute with their menu order and no category fields.
+	 */
+	public function test_queries_global_attribute_terms(): void {
+		$attribute = \WC_Helper_Product::create_attribute( 'Color', array( 'Red' ) );
+		update_term_meta( $attribute['term_ids'][0], 'order', 3 );
+		$ability = new Ability( ProductTermsQuery::get_name(), ProductTermsQuery::get_registration_args() );
+
+		$result = $ability->execute( array( 'taxonomy' => 'pa_color' ) );
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( 'Red', $result['terms'][0]['name'] );
+		$this->assertSame( 3, $result['terms'][0]['menu_order'] );
+		$this->assertArrayNotHasKey( 'parent', $result['terms'][0] );
+		$this->assertArrayNotHasKey( 'display', $result['terms'][0] );
+	}
+
+	/**
+	 * @testdox Should tell a store manager that a global attribute taxonomy does not exist.
+	 */
+	public function test_refuses_unknown_global_attribute_taxonomy(): void {
+		$ability = new Ability( ProductTermsQuery::get_name(), ProductTermsQuery::get_registration_args() );
+
+		$result = $ability->execute( array( 'taxonomy' => 'pa_missing' ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_product_term_taxonomy_unknown', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should refuse a taxonomy that is neither a product taxonomy nor a global attribute.
+	 */
+	public function test_refuses_other_taxonomy(): void {
+		$ability = new Ability( ProductTermsQuery::get_name(), ProductTermsQuery::get_registration_args() );
+
+		$result = $ability->execute( array( 'taxonomy' => 'category' ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+	}
 }

@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Queries product categories, tags and brands.
+ * Queries product categories, tags, brands and the terms of global attributes.
  */
 class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefinition {
 
@@ -42,7 +42,7 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 
 		return array(
 			'label'               => __( 'Query product terms', 'woocommerce' ),
-			'description'         => __( 'Find product categories, tags or brands. Use include to retrieve specific term IDs.', 'woocommerce' ),
+			'description'         => __( 'Find product categories, tags, brands or the terms of a global attribute, such as pa_color. Use include to retrieve specific term IDs.', 'woocommerce' ),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
 			'output_schema'       => $output_schema,
@@ -72,8 +72,11 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 	 */
 	public static function can_query_terms( $input = array() ): bool {
 		$taxonomy = $input['taxonomy'];
-		return taxonomy_exists( $taxonomy )
-			&& wc_rest_check_product_term_permissions( $taxonomy, 'read' );
+		if ( ! taxonomy_exists( $taxonomy ) ) {
+			// Let execute() tell a store manager that the attribute does not exist, rather than refuse access.
+			return wc_rest_check_manager_permissions( 'attributes', 'read' );
+		}
+		return wc_rest_check_product_term_permissions( $taxonomy, 'read' );
 	}
 
 	/**
@@ -84,6 +87,15 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 	 * @return array|\WP_Error
 	 */
 	public static function execute( array $input ) {
+		if ( ! taxonomy_exists( $input['taxonomy'] ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_product_term_taxonomy_unknown',
+				/* translators: %s: taxonomy name. */
+				sprintf( __( 'The taxonomy "%s" does not exist. Use product-attributes-query to list the global attributes.', 'woocommerce' ), $input['taxonomy'] ),
+				array( 'status' => 404 )
+			);
+		}
+
 		$page     = $input['page'] ?? 1;
 		$per_page = $input['per_page'] ?? 10;
 		$args     = array_merge(
@@ -159,7 +171,9 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 			'description' => $term->description,
 			'count'       => $term->count,
 		);
-		if ( 'product_tag' !== $term->taxonomy ) {
+		if ( taxonomy_is_product_attribute( $term->taxonomy ) ) {
+			$output['menu_order'] = (int) get_term_meta( $term->term_id, 'order', true );
+		} elseif ( 'product_tag' !== $term->taxonomy ) {
 			$output['parent']     = $term->parent;
 			$display              = get_term_meta( $term->term_id, 'display_type', true );
 			$output['display']    = $display ? $display : 'default';
@@ -206,9 +220,9 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 			'type'                 => 'object',
 			'properties'           => array(
 				'taxonomy'   => array(
-					'description' => __( 'Product taxonomy to query.', 'woocommerce' ),
+					'description' => __( 'Product taxonomy to query: product_cat, product_tag, product_brand, or the slug of a global attribute from product-attributes-query.', 'woocommerce' ),
 					'type'        => 'string',
-					'enum'        => array( 'product_cat', 'product_tag', 'product_brand' ),
+					'pattern'     => '^(product_cat|product_tag|product_brand|pa_[^\\s]+)$',
 				),
 				'include'    => array(
 					'description' => __( 'Limit results to these term IDs. Use one ID to retrieve a single term.', 'woocommerce' ),
