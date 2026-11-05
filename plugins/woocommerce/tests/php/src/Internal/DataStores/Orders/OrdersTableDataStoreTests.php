@@ -1694,6 +1694,39 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testDox Sync-on-read does not write duplicate rows back to wp_postmeta when migrating meta.
+	 */
+	public function test_sync_on_read_does_not_duplicate_postmeta() {
+		$this->enable_cot_sync();
+		$this->toggle_cot_feature_and_usage( true );
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
+		$order = $this->create_complex_cot_order();
+		$order->add_meta_data( 'multi_meta', 'x' );
+		$order->add_meta_data( 'multi_meta', 'y' );
+		$order->add_meta_data( 'changed_meta', 'before' );
+		$order->save();
+
+		// Simulate direct writes to the posts table.
+		add_post_meta( $order->get_id(), 'new_meta', 'new_value' ); // add_meta path.
+		update_post_meta( $order->get_id(), 'changed_meta', 'after' ); // update_meta path.
+		delete_post_meta( $order->get_id(), 'multi_meta', 'x' ); // delete_meta path.
+		add_post_meta( $order->get_id(), 'multi_meta', 'z' );
+
+		$refreshed_order = new WC_Order();
+		$refreshed_order->set_id( $order->get_id() );
+		$this->switch_data_store( $refreshed_order, $this->sut );
+		$this->sut->read( $refreshed_order );
+
+		$this->assertEquals( 'new_value', $refreshed_order->get_meta( 'new_meta' ) );
+		$this->assertEquals( 'after', $refreshed_order->get_meta( 'changed_meta' ) );
+
+		$this->assertEquals( array( 'new_value' ), get_post_meta( $order->get_id(), 'new_meta', false ) );
+		$this->assertEquals( array( 'after' ), get_post_meta( $order->get_id(), 'changed_meta', false ) );
+		$this->assertEquals( array( 'y', 'z' ), get_post_meta( $order->get_id(), 'multi_meta', false ) );
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
+	}
+
+	/**
 	 * @testDox Test that we are able to correctly detect when order and post are out of sync.
 	 */
 	public function test_is_post_different_from_order() {
@@ -3724,6 +3757,25 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$post_meta = get_post_meta( $order->get_id(), 'test_key2' );
 		$this->assertTrue( in_array( 'test_value4', $post_meta, true ) );
 		$this->assertFalse( in_array( 'test_value5', $post_meta, true ) );
+	}
+
+	/**
+	 * @testdox Multi-value meta keeps its order in the posts table when a meta save triggers a full order save.
+	 */
+	public function test_multi_value_meta_order_is_synced_when_meta_save_triggers_order_save(): void {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$order = WC_Helper_Order::create_order();
+		// An earlier modified date makes the first add_meta() call trigger a full order save.
+		$order->set_date_modified( gmdate( 'Y-m-d H:i:s', strtotime( '-2 day' ) ) );
+		$order->save();
+
+		$order->add_meta_data( 'test_key', 'test_value1' );
+		$order->add_meta_data( 'test_key', 'test_value2' );
+		$order->save_meta_data();
+
+		$this->assertSame( array( 'test_value1', 'test_value2' ), get_post_meta( $order->get_id(), 'test_key', false ) );
 	}
 
 	/**
