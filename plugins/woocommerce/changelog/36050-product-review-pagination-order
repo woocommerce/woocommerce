@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Honour the "Comments should be displayed with the" sort setting across paginated product reviews so page 1 shows the newest reviews when descending order is selected.

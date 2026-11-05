@@ -120,21 +120,27 @@ class ProductReviewTemplate extends AbstractBlock {
 			return;
 		}
 
-		$comment_query = new WP_Comment_Query(
-			build_comment_query_vars_from_block( $block )
-		);
+		$comment_vars  = build_comment_query_vars_from_block( $block );
+		$comment_order = strtolower( (string) get_option( 'comment_order' ) );
+
+		// Fetch reviews in the configured sort order so pagination reflects the overall order
+		// instead of reversing each page individually.
+		$comment_vars['order'] = ( 'desc' === $comment_order ) ? 'DESC' : 'ASC';
+
+		$comment_query = new WP_Comment_Query( $comment_vars );
 
 		// Get an array of comments for the current post.
 		$comments = $comment_query->get_comments();
-		if ( count( $comments ) === 0 ) {
+		if ( ! is_array( $comments ) || count( $comments ) === 0 ) {
 			return '';
 		}
 
-		$comment_order = get_option( 'comment_order' );
-
-		if ( 'desc' === $comment_order ) {
-			$comments = array_reverse( $comments );
-		}
+		$comments = array_filter(
+			$comments,
+			static function ( $comment ) {
+				return $comment instanceof WP_Comment;
+			}
+		);
 
 		$wrapper_attributes = get_block_wrapper_attributes();
 
