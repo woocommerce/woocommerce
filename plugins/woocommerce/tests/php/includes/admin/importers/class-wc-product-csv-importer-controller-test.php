@@ -677,6 +677,26 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A batch should refresh the import lock between rows, so a slow batch is not seen as abandoned.
+	 */
+	public function test_batch_refreshes_the_import_lock_between_rows(): void {
+		$import_lock = wc_get_container()->get( ProductImportLock::class );
+		$age_lock    = function (): void {
+			$this->age_import_lock( ProductImportLock::HOLDER_ADMIN, 2 * MINUTE_IN_SECONDS );
+		};
+		add_action( 'woocommerce_product_import_before_import', $age_lock, 5 );
+
+		try {
+			$this->dispatch_import_request( '0' );
+		} finally {
+			remove_action( 'woocommerce_product_import_before_import', $age_lock, 5 );
+		}
+
+		$this->assertLessThan( MINUTE_IN_SECONDS, $import_lock->get_age() );
+		$this->assertFalse( has_action( 'woocommerce_product_import_before_import', array( $import_lock, 'refresh_if_due' ) ) );
+	}
+
+	/**
 	 * @testdox A resumed batch should refresh the import lock so a long import is not seen as stale.
 	 */
 	public function test_resumed_batch_refreshes_the_import_lock(): void {

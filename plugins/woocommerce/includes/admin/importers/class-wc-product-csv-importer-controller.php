@@ -5,8 +5,8 @@
  * @package WooCommerce\Admin\Importers
  */
 
-use Automattic\WooCommerce\Internal\Admin\ImportExport\Product\ProductImportLock;
 use Automattic\WooCommerce\Internal\Admin\ImportExport\Product\ImportPlaceholders;
+use Automattic\WooCommerce\Internal\Admin\ImportExport\Product\ProductImportLock;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Internal\Utilities\URL;
@@ -445,8 +445,17 @@ class WC_Product_CSV_Importer_Controller {
 
 			include_once WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php';
 
-			$importer         = self::get_importer( $file, $params );
-			$results          = $importer->import();
+			$importer     = self::get_importer( $file, $params );
+			$refresh_lock = array( $import_lock, 'refresh_if_due' );
+
+			add_action( 'woocommerce_product_import_before_import', $refresh_lock );
+
+			try {
+				$results = $importer->import();
+			} finally {
+				remove_action( 'woocommerce_product_import_before_import', $refresh_lock );
+			}
+
 			$percent_complete = $importer->get_percent_complete();
 			$error_log        = array_merge( $error_log, $results['failed'], $results['skipped'] );
 
