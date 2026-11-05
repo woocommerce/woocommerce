@@ -8,6 +8,7 @@
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 
 /**
@@ -3204,5 +3205,51 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		$this->assertFalse( $any_added, 'A broader variation ordered after a closer match should be rejected.' );
 		$this->assertSame( 'The selected options belong to a different variation of this product.', wc_get_notices( 'error' )[0]['notice'] );
+	}
+
+	/**
+	 * @testdox Add to cart accepts an Any variation when an earlier match is hidden because it is out of stock.
+	 */
+	public function test_add_to_cart_accepts_any_variation_when_earlier_match_is_out_of_stock(): void {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+
+		$product = new WC_Product_Variable();
+		$color   = new WC_Product_Attribute();
+		$color->set_name( 'Color' );
+		$color->set_options( array( 'Red', 'Blue' ) );
+		$color->set_variation( true );
+		$product->set_attributes( array( $color ) );
+		$product->save();
+
+		$red = new WC_Product_Variation();
+		$red->set_parent_id( $product->get_id() );
+		$red->set_attributes( array( 'color' => 'Red' ) );
+		$red->set_regular_price( '10' );
+		$red->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$red->set_menu_order( 0 );
+		$red->save();
+
+		$any = new WC_Product_Variation();
+		$any->set_parent_id( $product->get_id() );
+		$any->set_attributes( array( 'color' => '' ) );
+		$any->set_regular_price( '5' );
+		$any->set_menu_order( 1 );
+		$any->save();
+
+		$cart_item_key = WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$any->get_id(),
+			array(
+				'attribute_color' => 'Red',
+			)
+		);
+
+		$this->assertNotFalse( $cart_item_key, 'An Any variation should be added when the closer match is hidden as out of stock.' );
+
+		$cart_item = WC()->cart->get_cart_item( (string) $cart_item_key );
+
+		$this->assertSame( $any->get_id(), $cart_item['variation_id'], 'The in-stock Any variation should be added.' );
+		$this->assertSame( 'Red', $cart_item['variation']['attribute_color'], 'The posted color should be kept.' );
 	}
 }

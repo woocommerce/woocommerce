@@ -591,4 +591,51 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 			$this->assertStringContainsString( 'Invalid value posted for Color', $exception->getMessage() );
 		}
 	}
+
+	/**
+	 * @testdox Add to cart accepts an Any variation when an earlier match is hidden because it is out of stock.
+	 */
+	public function test_add_to_cart_accepts_any_variation_when_earlier_match_is_out_of_stock(): void {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+
+		$product   = new \WC_Product_Variable();
+		$attribute = new \WC_Product_Attribute();
+		$attribute->set_name( 'Color' );
+		$attribute->set_options( array( 'Red', 'Blue' ) );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$red = new \WC_Product_Variation();
+		$red->set_parent_id( $product->get_id() );
+		$red->set_attributes( array( 'color' => 'Red' ) );
+		$red->set_regular_price( '10' );
+		$red->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$red->set_menu_order( 0 );
+		$red->save();
+
+		$any = new \WC_Product_Variation();
+		$any->set_parent_id( $product->get_id() );
+		$any->set_attributes( array( 'color' => '' ) );
+		$any->set_regular_price( '5' );
+		$any->set_menu_order( 1 );
+		$any->save();
+
+		$cart_id   = ( new CartController() )->add_to_cart(
+			array(
+				'id'        => $any->get_id(),
+				'quantity'  => 1,
+				'variation' => array(
+					array(
+						'attribute' => 'Color',
+						'value'     => 'Red',
+					),
+				),
+			)
+		);
+		$cart_item = wc()->cart->get_cart_item( $cart_id );
+
+		$this->assertSame( $any->get_id(), $cart_item['variation_id'], 'The in-stock Any variation should be added.' );
+		$this->assertSame( 'Red', $cart_item['variation']['attribute_color'], 'The posted color should be kept.' );
+	}
 }

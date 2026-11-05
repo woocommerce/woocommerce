@@ -1280,7 +1280,8 @@ class CartController {
 	 * Visible variations that match the attributes, in menu order.
 	 *
 	 * Each variation is more specific than the previous one. An empty stored
-	 * attribute accepts any posted value. Any returned ID matches these attributes.
+	 * attribute accepts any posted value. Out-of-stock variations are skipped
+	 * when the catalog hides them. Every returned ID matches these attributes.
 	 *
 	 * @param \WC_Product $parent_product   Parent variable product.
 	 * @param array       $match_attributes Attributes keyed by attribute_*.
@@ -1294,13 +1295,19 @@ class CartController {
 			_prime_post_caches( $child_ids );
 		}
 
-		$matched_variation_ids = [];
-		$matched_specificity   = -1;
+		$hide_out_of_stock_items = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' );
+		$matched_variation_ids   = [];
+		$matched_specificity     = -1;
 
 		foreach ( $child_ids as $child_id ) {
 			$variation = wc_get_product( $child_id );
 
 			if ( ! $variation instanceof \WC_Product_Variation || ! $variation->variation_is_visible() ) {
+				continue;
+			}
+
+			// The product form omits these variations, so they must not claim the posted attributes.
+			if ( $hide_out_of_stock_items && ! $variation->is_in_stock() ) {
 				continue;
 			}
 
