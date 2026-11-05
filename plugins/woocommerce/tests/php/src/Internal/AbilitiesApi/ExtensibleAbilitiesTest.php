@@ -2868,30 +2868,19 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should fail a trash, and keep the product, when the database rolls the transaction back on its own.
+	 * @testdox Should fail a trash, and keep the product, when a query of the call hits a deadlock.
 	 */
-	public function test_a_transaction_the_database_rolled_back_fails_the_call(): void {
+	public function test_a_deadlock_fails_the_call_and_keeps_the_product(): void {
 		$product = \WC_Helper_Product::create_simple_product();
-		$lose    = static function ( $query ) {
-			global $wpdb;
-			static $losing = false;
-
-			// A deadlock drops every savepoint, so the release that run() sends to commit fails.
-			if ( $losing || ! preg_match( '/^RELEASE SAVEPOINT (wc_\d+)$/', $query, $matches ) ) {
-				return $query;
+		$this->add_test_action(
+			'trashed_post',
+			static function () {
+				global $wpdb;
+				$wpdb->last_error = 'Deadlock found when trying to get lock; try restarting transaction';
 			}
-			$losing = true;
-			$wpdb->query( 'ROLLBACK TO SAVEPOINT ' . $matches[1] ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The savepoint name is matched digits.
-			$losing = false;
-			return 'RELEASE SAVEPOINT wc_missing';
-		};
-		add_filter( 'query', $lose );
+		);
 
-		try {
-			$response = $this->run_ability_response( 'woocommerce/product-delete', array( 'id' => $product->get_id() ) );
-		} finally {
-			remove_filter( 'query', $lose );
-		}
+		$response = $this->run_ability_response( 'woocommerce/product-delete', array( 'id' => $product->get_id() ) );
 
 		$this->assertSame( 409, $response->get_status() );
 		$this->assertSame( 'woocommerce_transaction_rolled_back', $response->get_data()['code'] );
