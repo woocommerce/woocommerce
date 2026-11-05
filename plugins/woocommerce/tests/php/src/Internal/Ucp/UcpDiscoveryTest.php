@@ -49,6 +49,7 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 		remove_action( 'admin_notices', array( $this->sut, 'maybe_render_notice' ) );
 		delete_option( 'woocommerce_queue_flush_rewrite_rules' );
 		if ( is_file( $this->file ) ) {
+			chmod( dirname( $this->file ), 0755 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
 			wp_delete_file( $this->file );
 		}
 		parent::tearDown();
@@ -143,15 +144,15 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The notice shows when the endpoint is unreachable under plain permalinks or shadowed by a read-only file under pretty ones.
+	 * @testdox The notice shows when the endpoint is unreachable under plain permalinks or shadowed by an undeletable file under pretty ones.
 	 * @testWith ["", null, true]
-	 *           ["", 420, false]
-	 *           ["/%postname%/", 292, true]
-	 *           ["/%postname%/", 420, false]
+	 *           ["", 493, false]
+	 *           ["/%postname%/", 365, true]
+	 *           ["/%postname%/", 493, false]
 	 *           ["/%postname%/", null, false]
 	 *
 	 * @param string   $structure Permalink structure.
-	 * @param int|null $mode      Static file mode, or null when the file is missing.
+	 * @param int|null $mode      Mode of the static file's directory, or null when the file is missing.
 	 * @param bool     $expected  Whether the notice should show.
 	 */
 	public function test_notice( string $structure, ?int $mode, bool $expected ): void {
@@ -159,7 +160,7 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 		if ( null !== $mode ) {
 			wp_mkdir_p( dirname( $this->file ) );
 			file_put_contents( $this->file, '{}' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-			chmod( $this->file, $mode ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
+			chmod( dirname( $this->file ), $mode ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
 		}
 
 		ob_start();

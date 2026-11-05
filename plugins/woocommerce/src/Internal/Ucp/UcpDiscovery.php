@@ -78,8 +78,7 @@ final class UcpDiscovery implements RegisterHooksInterface {
 		update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 
 		$path = $this->get_file_path();
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable
-		if ( ! $is_enabled && is_file( $path ) && is_writable( $path ) ) {
+		if ( ! $is_enabled && $this->is_deletable( $path ) ) {
 			wp_delete_file( $path );
 		}
 	}
@@ -98,7 +97,7 @@ final class UcpDiscovery implements RegisterHooksInterface {
 		$path = $this->get_file_path();
 		// phpcs:disable WordPress.WP.AlternativeFunctions
 		if ( $wp_rewrite->using_permalinks() ) {
-			if ( is_file( $path ) && is_writable( $path ) ) {
+			if ( $this->is_deletable( $path ) ) {
 				wp_delete_file( $path );
 			}
 			return;
@@ -124,16 +123,15 @@ final class UcpDiscovery implements RegisterHooksInterface {
 		}
 
 		$path = $this->get_file_path();
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable
-		$writable = is_writable( $path );
 		if ( $wp_rewrite->using_permalinks() ) {
-			if ( ! is_file( $path ) || $writable ) {
+			if ( ! is_file( $path ) || $this->is_deletable( $path ) ) {
 				return;
 			}
 			/* translators: %1$s: discovery file path. */
-			$message = __( 'A static %1$s file is overriding the UCP discovery endpoint. Delete it or make it writable by the web server.', 'woocommerce' );
+			$message = __( 'A static %1$s file is overriding the UCP discovery endpoint. Delete it or make its directory writable by the web server.', 'woocommerce' );
 		} else {
-			if ( $writable ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable
+			if ( is_writable( $path ) ) {
 				return;
 			}
 			/* translators: %1$s: discovery file path, %2$s: opening link tag, %3$s: closing link tag. */
@@ -145,6 +143,17 @@ final class UcpDiscovery implements RegisterHooksInterface {
 			. sprintf( $message, '<code>' . esc_html( $path ) . '</code>', '<a href="' . esc_url( admin_url( 'options-permalink.php' ) ) . '">', '</a>' )
 			. '</p></div>'
 		);
+	}
+
+	/**
+	 * Whether the static file exists and the web server can remove it: unlink needs write access to the directory, not the file.
+	 *
+	 * @param string $path Absolute file path.
+	 * @return bool
+	 */
+	private function is_deletable( string $path ): bool {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable
+		return is_file( $path ) && is_writable( dirname( $path ) );
 	}
 
 	/**
