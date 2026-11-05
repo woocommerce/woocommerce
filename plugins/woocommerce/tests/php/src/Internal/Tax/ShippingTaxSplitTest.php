@@ -5,7 +5,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Tax;
 
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
-use Automattic\WooCommerce\Enums\ShippingTaxClass;
 use Automattic\WooCommerce\Internal\Tax\ShippingTaxSplit;
 use WC_Coupon;
 use WC_Helper_Shipping;
@@ -76,17 +75,19 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Shipping tax at checkout follows the shipping tax class setting.
+	 * @testdox Shipping tax at checkout follows the split setting.
 	 *
 	 * @dataProvider provide_baskets
 	 *
-	 * @param string $shipping_tax_class Shipping tax class option.
-	 * @param array  $lines              Lines of tax class, tax status, price and whether the product is virtual.
-	 * @param int[]  $free_lines         Lines a 100% coupon makes free.
-	 * @param float  $expected           Expected shipping tax.
+	 * @param bool  $split      Whether to split shipping tax by cart item value.
+	 * @param array $lines      Lines of tax class, tax status, price and whether the product is virtual.
+	 * @param int[] $free_lines Lines a 100% coupon makes free.
+	 * @param float $expected   Expected shipping tax.
 	 */
-	public function test_cart_shipping_tax( string $shipping_tax_class, array $lines, array $free_lines, float $expected ): void {
-		update_option( 'woocommerce_shipping_tax_class', $shipping_tax_class );
+	public function test_cart_shipping_tax( bool $split, array $lines, array $free_lines, float $expected ): void {
+		if ( $split ) {
+			$this->enable_split();
+		}
 		$products = $this->create_products( $lines );
 
 		$this->fill_cart( $products );
@@ -99,17 +100,19 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Shipping tax on an order recalculation follows the shipping tax class setting.
+	 * @testdox Shipping tax on an order recalculation follows the split setting.
 	 *
 	 * @dataProvider provide_baskets
 	 *
-	 * @param string $shipping_tax_class Shipping tax class option.
-	 * @param array  $lines              Lines of tax class, tax status, price and whether the product is virtual.
-	 * @param int[]  $free_lines         Lines a 100% coupon makes free.
-	 * @param float  $expected           Expected shipping tax.
+	 * @param bool  $split      Whether to split shipping tax by cart item value.
+	 * @param array $lines      Lines of tax class, tax status, price and whether the product is virtual.
+	 * @param int[] $free_lines Lines a 100% coupon makes free.
+	 * @param float $expected   Expected shipping tax.
 	 */
-	public function test_order_shipping_tax( string $shipping_tax_class, array $lines, array $free_lines, float $expected ): void {
-		update_option( 'woocommerce_shipping_tax_class', $shipping_tax_class );
+	public function test_order_shipping_tax( bool $split, array $lines, array $free_lines, float $expected ): void {
+		if ( $split ) {
+			$this->enable_split();
+		}
 		$products = $this->create_products( $lines );
 
 		$order = $this->create_order( $products );
@@ -127,12 +130,12 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 	 * @return array
 	 */
 	public function provide_baskets(): array {
-		$split    = ShippingTaxClass::SPLIT_BY_ITEM_VALUE;
+		$split    = true;
 		$standard = array( '', ProductTaxStatus::TAXABLE, 10, false );
 		$zero     = array( 'zero-rate', ProductTaxStatus::TAXABLE, 90, false );
 
 		return array(
-			'based on cart items'      => array( ShippingTaxClass::INHERIT, array( $standard, $zero ), array(), 2.0 ),
+			'based on cart items'      => array( false, array( $standard, $zero ), array(), 2.0 ),
 			'split'                    => array( $split, array( $standard, $zero ), array(), 0.2 ),
 			'item with no tax'         => array( $split, array( $standard, array( '', ProductTaxStatus::NONE, 90, false ) ), array(), 0.2 ),
 			'item with shipping tax'   => array( $split, array( array( '', ProductTaxStatus::SHIPPING, 50, false ), array( 'zero-rate', ProductTaxStatus::TAXABLE, 50, false ) ), array(), 1.0 ),
@@ -146,7 +149,7 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 	 * @testdox A rate added without a package is split by the cart contents.
 	 */
 	public function test_package_values_use_the_cart_without_a_package(): void {
-		update_option( 'woocommerce_shipping_tax_class', ShippingTaxClass::SPLIT_BY_ITEM_VALUE );
+		$this->enable_split();
 
 		$this->fill_cart( $this->create_products( array( array( '', ProductTaxStatus::TAXABLE, 10, false ), array( 'zero-rate', ProductTaxStatus::NONE, 30, false ) ) ) );
 
@@ -167,7 +170,7 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 	 * @param int $first_cost Shipping cost of the zero rate package.
 	 */
 	public function test_split_per_package( int $first_cost ): void {
-		update_option( 'woocommerce_shipping_tax_class', ShippingTaxClass::SPLIT_BY_ITEM_VALUE );
+		$this->enable_split();
 		$products = $this->create_products(
 			array(
 				array( 'zero-rate', ProductTaxStatus::TAXABLE, 90, false ),
@@ -176,18 +179,7 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 			)
 		);
 		$first_id = $products[0]->get_id();
-		add_filter(
-			'woocommerce_cart_shipping_packages',
-			function ( $packages ) use ( $first_id ) {
-				$first = $packages[0];
-				$rest  = $packages[0];
-
-				$first['contents'] = wp_list_filter( $packages[0]['contents'], array( 'product_id' => $first_id ) );
-				$rest['contents']  = array_diff_key( $packages[0]['contents'], $first['contents'] );
-
-				return array( $first, $rest );
-			}
-		);
+		$this->split_packages_by_product( $first_id );
 		add_filter(
 			'woocommerce_shipping_method_add_rate_args',
 			function ( $args ) use ( $first_id, $first_cost ) {
@@ -207,10 +199,181 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An order created from the cart keeps the cart's shipping tax when an item is in no package.
+	 */
+	public function test_item_in_no_package_keeps_the_cart_tax(): void {
+		$this->enable_split();
+		$products = $this->create_products( array( array( '', ProductTaxStatus::TAXABLE, 10, false ), array( 'zero-rate', ProductTaxStatus::TAXABLE, 90, false ) ) );
+		$zero_id  = $products[1]->get_id();
+		add_filter(
+			'woocommerce_cart_shipping_packages',
+			function ( $packages ) use ( $zero_id ) {
+				$packages[0]['contents'] = array_diff_key( $packages[0]['contents'], wp_list_filter( $packages[0]['contents'], array( 'product_id' => $zero_id ) ) );
+				return $packages;
+			}
+		);
+
+		$this->fill_cart( $products );
+		WC()->cart->calculate_totals();
+		$order = $this->create_order_from_cart();
+
+		// The package has only the standard rate item, so all 10.00 of shipping is taxed at 20%.
+		$this->assertEqualsWithDelta( 2.0, (float) WC()->cart->get_shipping_tax(), 0.001 );
+		$this->assertEqualsWithDelta( 2.0, (float) $order->get_shipping_tax(), 0.001 );
+	}
+
+	/**
+	 * @testdox An order created from the cart keeps the cart's shipping tax when a rate is rebuilt without its split.
+	 *
+	 * @testWith [1, 4.0]
+	 *           [2, 4.0]
+	 *
+	 * @param int   $package_count Number of packages, each with a 10.00 rate.
+	 * @param float $expected      Expected shipping tax.
+	 */
+	public function test_rate_rebuilt_without_split_keeps_the_cart_tax( int $package_count, float $expected ): void {
+		$this->enable_split();
+		$products = $this->create_products( array( array( '', ProductTaxStatus::TAXABLE, 10, false ), array( 'zero-rate', ProductTaxStatus::TAXABLE, 90, false ) ) );
+		if ( 2 === $package_count ) {
+			$this->split_packages_by_product( $products[0]->get_id() );
+		} else {
+			add_filter(
+				'woocommerce_shipping_method_add_rate_args',
+				function ( $args ) {
+					$args['cost'] = 20;
+					return $args;
+				}
+			);
+		}
+		add_filter(
+			'woocommerce_package_rates',
+			function ( $rates ) {
+				foreach ( $rates as $rate_id => $rate ) {
+					$taxes             = WC_Tax::calc_shipping_tax( $rate->get_cost(), WC_Tax::get_shipping_tax_rates() );
+					$rates[ $rate_id ] = new \WC_Shipping_Rate( $rate->get_id(), $rate->get_label(), $rate->get_cost(), $taxes, $rate->get_method_id(), $rate->get_instance_id() );
+				}
+				return $rates;
+			}
+		);
+
+		$this->fill_cart( $products, array_fill( 0, $package_count, 'flat_rate' ) );
+		WC()->cart->calculate_totals();
+		$order = $this->create_order_from_cart();
+
+		// The rebuilt rates are taxed as trunk does, at 20% for the standard rate item: 20.00 of shipping in all.
+		$this->assertEqualsWithDelta( $expected, (float) WC()->cart->get_shipping_tax(), 0.001 );
+		$this->assertEqualsWithDelta( $expected, (float) $order->get_shipping_tax(), 0.001 );
+	}
+
+	/**
+	 * @testdox A checkout draft keeps the cart's shipping tax when its items change and its shipping lines are kept.
+	 */
+	public function test_draft_with_changed_items_keeps_the_cart_tax(): void {
+		$this->enable_split();
+		$products = $this->create_products( array( array( '', ProductTaxStatus::TAXABLE, 100, false ), array( 'zero-rate', ProductTaxStatus::TAXABLE, 50, false ) ) );
+		$this->split_packages_by_product( $products[0]->get_id() );
+		$this->fill_cart( $products, array( 'flat_rate', 'flat_rate' ) );
+		WC()->cart->calculate_totals();
+		$order = $this->create_order_from_cart();
+
+		// The Store API rebuilds a draft's line items when the cart changes, and keeps its shipping lines while their rates are unchanged.
+		WC()->cart->set_quantity( (string) array_key_first( WC()->cart->get_cart() ), 2 );
+		WC()->cart->calculate_totals();
+		$order->remove_order_items( 'line_item' );
+		WC()->checkout()->create_order_line_items( $order, WC()->cart );
+		$order->calculate_totals();
+
+		// Each package holds one class, so only the standard rate package's 10.00 is taxed, at 20%.
+		$this->assertEqualsWithDelta( 2.0, (float) WC()->cart->get_shipping_tax(), 0.001 );
+		$this->assertEqualsWithDelta( 2.0, (float) $order->get_shipping_tax(), 0.001 );
+	}
+
+	/**
+	 * @testdox An order created from the cart keeps the cart's shipping tax when a rate's cost and taxes are changed and its split is not.
+	 */
+	public function test_rate_with_changed_cost_keeps_the_cart_tax(): void {
+		$this->enable_split();
+		$products = $this->create_products( array( array( '', ProductTaxStatus::TAXABLE, 10, false ), array( 'zero-rate', ProductTaxStatus::TAXABLE, 90, false ) ) );
+		add_filter(
+			'woocommerce_package_rates',
+			function ( $rates ) {
+				foreach ( $rates as $rate ) {
+					$rate->set_cost( 5 );
+					$rate->set_taxes( WC_Tax::calc_shipping_tax( 5, WC_Tax::get_shipping_tax_rates() ) );
+				}
+				return $rates;
+			}
+		);
+
+		$this->fill_cart( $products );
+		WC()->cart->calculate_totals();
+		$order = $this->create_order_from_cart();
+
+		// The changed rate is taxed as trunk does, at 20% for the standard rate item.
+		$this->assertEqualsWithDelta( 1.0, (float) WC()->cart->get_shipping_tax(), 0.001 );
+		$this->assertEqualsWithDelta( 1.0, (float) $order->get_shipping_tax(), 0.001 );
+	}
+
+	/**
+	 * @testdox Recalculating an order saves the unrounded costs it taxed on the shipping line.
+	 */
+	public function test_recalculate_saves_the_costs_it_taxed(): void {
+		$this->enable_split();
+		$order = $this->create_order( $this->create_products( array( array( '', ProductTaxStatus::TAXABLE, 10, false ), array( 'zero-rate', ProductTaxStatus::TAXABLE, 20, false ) ) ) );
+
+		$order->calculate_totals();
+		$lines = $order->get_shipping_methods();
+		$costs = reset( $lines )->get_meta( ShippingTaxSplit::COSTS_META_KEY );
+
+		// A third of the 10.00 is standard rate, and its tax was worked out on that third, not on 3.33.
+		$this->assertEqualsWithDelta( 10 / 3, $costs[''], 0.000001 );
+		$this->assertEqualsWithDelta( 20 / 3, $costs['zero-rate'], 0.000001 );
+	}
+
+	/**
+	 * @testdox Recalculating an order split by its items saves the split on each shipping line.
+	 */
+	public function test_recalculate_saves_the_split_on_the_line(): void {
+		$this->enable_split();
+		$order = $this->create_order( $this->create_products( array( array( '', ProductTaxStatus::TAXABLE, 10, false ), array( 'zero-rate', ProductTaxStatus::TAXABLE, 90, false ) ) ) );
+
+		$order->calculate_totals();
+		$lines = $order->get_shipping_methods();
+		$line  = reset( $lines );
+
+		$this->assertEqualsWithDelta( 0.2, (float) $order->get_shipping_tax(), 0.001 );
+		$this->assertSame(
+			array(
+				''          => 1.0,
+				'zero-rate' => 9.0,
+			),
+			$line->get_meta( ShippingTaxSplit::COSTS_META_KEY )
+		);
+	}
+
+	/**
+	 * @testdox Recalculating with the split turned off removes the split saved on the shipping line.
+	 */
+	public function test_recalculate_with_the_split_off_removes_the_saved_split(): void {
+		$this->enable_split();
+		$order = $this->create_order( $this->create_products( array( array( '', ProductTaxStatus::TAXABLE, 10, false ), array( 'zero-rate', ProductTaxStatus::TAXABLE, 90, false ) ) ) );
+		$order->calculate_totals();
+
+		update_option( ShippingTaxSplit::OPTION, 'no' );
+		$order->calculate_totals();
+		$lines = $order->get_shipping_methods();
+		$line  = reset( $lines );
+
+		$this->assertEqualsWithDelta( 2.0, (float) $order->get_shipping_tax(), 0.001 );
+		$this->assertSame( '', $line->get_meta( ShippingTaxSplit::COSTS_META_KEY ) );
+		$this->assertSame( '', $line->get_meta( ShippingTaxSplit::VALUES_META_KEY ) );
+	}
+
+	/**
 	 * @testdox With shipping costs entered with tax, the order created from the cart keeps the cart's shipping tax.
 	 */
 	public function test_split_with_shipping_costs_including_tax(): void {
-		update_option( 'woocommerce_shipping_tax_class', ShippingTaxClass::SPLIT_BY_ITEM_VALUE );
+		$this->enable_split();
 		add_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
 
 		$this->fill_cart( $this->create_products( array( array( '', ProductTaxStatus::TAXABLE, 50, false ), array( '', ProductTaxStatus::NONE, 50, false ) ) ) );
@@ -223,6 +386,35 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox With shipping costs entered with tax, the order keeps the cart's shipping tax to the penny.
+	 */
+	public function test_split_with_shipping_costs_including_tax_rounds_as_the_cart(): void {
+		$this->enable_split();
+		add_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
+		add_filter(
+			'woocommerce_shipping_method_add_rate_args',
+			function ( $args ) {
+				$args['cost'] = 10.08;
+				return $args;
+			}
+		);
+		$products = $this->create_products(
+			array(
+				array( $this->create_tax_class( 'High', '19.0000' ), ProductTaxStatus::TAXABLE, 50, false ),
+				array( $this->create_tax_class( 'Low', '7.0000' ), ProductTaxStatus::TAXABLE, 50, false ),
+			)
+		);
+
+		$this->fill_cart( $products );
+		WC()->cart->calculate_totals();
+		$order = $this->create_order_from_cart();
+
+		// Each half of the 10.08 includes its tax: 0.80 at 19% and 0.33 at 7%. Rounding the net halves first gives 0.81 and 0.33.
+		$this->assertEqualsWithDelta( 1.13, (float) WC()->cart->get_shipping_tax(), 0.001 );
+		$this->assertEqualsWithDelta( 1.13, (float) $order->get_shipping_tax(), 0.001 );
+	}
+
+	/**
 	 * @testdox Recalculating an order after its items change splits shipping by the items it has now.
 	 *
 	 * @testWith ["remove", 0.0]
@@ -232,7 +424,7 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 	 * @param float  $expected Expected shipping tax after recalculating.
 	 */
 	public function test_recalculate_after_items_change( string $edit, float $expected ): void {
-		update_option( 'woocommerce_shipping_tax_class', ShippingTaxClass::SPLIT_BY_ITEM_VALUE );
+		$this->enable_split();
 		$products = $this->create_products( array( array( '', ProductTaxStatus::TAXABLE, 10, false ), array( 'zero-rate', ProductTaxStatus::TAXABLE, 90, false ) ) );
 
 		$this->fill_cart( $products );
@@ -266,7 +458,7 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 	 * @param bool $in_cart Whether to check the cart or an order.
 	 */
 	public function test_negative_fee_tax( bool $in_cart ): void {
-		update_option( 'woocommerce_shipping_tax_class', ShippingTaxClass::SPLIT_BY_ITEM_VALUE );
+		$this->enable_split();
 		$products = $this->create_products( array( array( '', ProductTaxStatus::TAXABLE, 10, false ), array( 'zero-rate', ProductTaxStatus::TAXABLE, 90, false ) ) );
 
 		if ( $in_cart ) {
@@ -297,7 +489,7 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 	 * @testdox A negative fee gets the same tax in the cart and the order when the rate was taxed per item and has no split of its own.
 	 */
 	public function test_negative_fee_tax_with_a_rate_taxed_per_item(): void {
-		update_option( 'woocommerce_shipping_tax_class', ShippingTaxClass::SPLIT_BY_ITEM_VALUE );
+		$this->enable_split();
 		add_filter(
 			'woocommerce_shipping_method_add_rate_args',
 			function ( $args ) {
@@ -327,10 +519,43 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A negative fee on a second cart, such as a recurring cart, counts shipping by that cart's items, not the main cart's.
+	 */
+	public function test_negative_fee_tax_on_a_second_cart(): void {
+		$this->enable_split();
+		add_filter(
+			'woocommerce_shipping_method_add_rate_args',
+			function ( $args ) {
+				return array_merge( $args, array( 'calc_tax' => 'per_item' ) );
+			}
+		);
+		$this->fill_cart( $this->create_products( array( array( '', ProductTaxStatus::TAXABLE, 100, false ) ) ) );
+
+		$second_cart = new \WC_Cart();
+		foreach ( $this->create_products( array( array( '', ProductTaxStatus::TAXABLE, 10, false ), array( 'zero-rate', ProductTaxStatus::TAXABLE, 90, false ) ) ) as $product ) {
+			$second_cart->add_to_cart( $product->get_id() );
+		}
+		add_action(
+			'woocommerce_cart_calculate_fees',
+			function ( $cart ) use ( $second_cart ) {
+				if ( $cart === $second_cart ) {
+					$cart->add_fee( 'Discount', -10, true );
+				}
+			}
+		);
+		$second_cart->calculate_totals();
+		$fees = $second_cart->get_fees();
+
+		// The second cart's standard rate items and their 1.00 of shipping are 11 of the 110 total: 20% of -1.00.
+		// Split by the main cart's items, all 10.00 of shipping would be standard rate, giving 20% of -1.82.
+		$this->assertEqualsWithDelta( -0.2, (float) reset( $fees )->tax, 0.001 );
+	}
+
+	/**
 	 * @testdox Items in a taxable class slugged non-taxable are still taxed on their share of shipping.
 	 */
 	public function test_class_slugged_non_taxable_is_taxed(): void {
-		update_option( 'woocommerce_shipping_tax_class', ShippingTaxClass::SPLIT_BY_ITEM_VALUE );
+		$this->enable_split();
 		$slug = $this->create_tax_class( 'Non-taxable' );
 
 		$this->fill_cart( $this->create_products( array( array( $slug, ProductTaxStatus::TAXABLE, 10, false ), array( '', ProductTaxStatus::TAXABLE, 10, false ) ) ) );
@@ -350,7 +575,7 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 	 * @param bool $in_cart Whether to check the cart or an order.
 	 */
 	public function test_negative_fee_tax_with_a_class_slugged_non_taxable( bool $in_cart ): void {
-		update_option( 'woocommerce_shipping_tax_class', ShippingTaxClass::SPLIT_BY_ITEM_VALUE );
+		$this->enable_split();
 		$products = $this->create_products( array( array( $this->create_tax_class( 'Non-taxable' ), ProductTaxStatus::TAXABLE, 10, false ), array( 'zero-rate', ProductTaxStatus::TAXABLE, 90, false ) ) );
 
 		if ( $in_cart ) {
@@ -378,54 +603,16 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox On a store without the split, a product in a class slugged split_by_item_value keeps its own class in a negative fee.
+	 * @testdox A fixed shipping tax class wins over the split setting.
 	 *
 	 * @testWith [true]
 	 *           [false]
 	 *
 	 * @param bool $in_cart Whether to check the cart or an order.
 	 */
-	public function test_negative_fee_tax_with_a_class_slugged_like_the_option( bool $in_cart ): void {
-		update_option( 'woocommerce_shipping_tax_class', ShippingTaxClass::INHERIT );
-		$slug     = $this->create_tax_class( 'split_by_item_value' );
-		$products = $this->create_products( array( array( 'zero-rate', ProductTaxStatus::TAXABLE, 90, false ), array( $slug, ProductTaxStatus::TAXABLE, 10, false ) ) );
-
-		if ( $in_cart ) {
-			add_action(
-				'woocommerce_cart_calculate_fees',
-				function ( $cart ) {
-					$cart->add_fee( 'Discount', -10, true );
-				}
-			);
-			$this->fill_cart( $products );
-			WC()->cart->calculate_totals();
-			$fees    = WC()->cart->get_fees();
-			$fee_tax = reset( $fees )->tax;
-		} else {
-			$order = $this->create_order( $products );
-			$fee   = new WC_Order_Item_Fee();
-			$fee->set_total( '-10' );
-			$order->add_item( $fee );
-			$order->calculate_totals();
-			$fee_tax = $fee->get_total_tax();
-		}
-
-		// Shipping goes to the first item's zero rate class, and the product's 10.00 is 10 of the 110 total: 20% of -0.91.
-		$this->assertEqualsWithDelta( -0.18, (float) $fee_tax, 0.001 );
-	}
-
-	/**
-	 * @testdox A tax class slugged split_by_item_value can be the fixed shipping tax class.
-	 *
-	 * @testWith [true]
-	 *           [false]
-	 *
-	 * @param bool $in_cart Whether to check the cart or an order.
-	 */
-	public function test_fixed_shipping_tax_class_slugged_like_the_option( bool $in_cart ): void {
-		$slug = $this->create_tax_class( 'split_by_item_value' );
-		$this->assertSame( 'split_by_item_value', $slug );
-		update_option( 'woocommerce_shipping_tax_class', $slug );
+	public function test_fixed_shipping_tax_class_wins_over_the_split( bool $in_cart ): void {
+		$this->enable_split();
+		update_option( 'woocommerce_shipping_tax_class', $this->create_tax_class( 'Shipping' ) );
 		$products = $this->create_products( array( array( 'zero-rate', ProductTaxStatus::TAXABLE, 100, false ) ) );
 
 		if ( $in_cart ) {
@@ -443,19 +630,47 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Create a tax class with a 20% rate.
+	 * Turn on the split, with the shipping tax class left based on cart items.
+	 */
+	private function enable_split(): void {
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+		update_option( 'woocommerce_split_shipping_tax_by_item_value', 'yes' );
+	}
+
+	/**
+	 * Ship one product in a package of its own and the rest in a second package.
+	 *
+	 * @param int $product_id Product to ship on its own.
+	 */
+	private function split_packages_by_product( int $product_id ): void {
+		add_filter(
+			'woocommerce_cart_shipping_packages',
+			function ( $packages ) use ( $product_id ) {
+				$first = $packages[0];
+				$rest  = $packages[0];
+
+				$first['contents'] = wp_list_filter( $packages[0]['contents'], array( 'product_id' => $product_id ) );
+				$rest['contents']  = array_diff_key( $packages[0]['contents'], $first['contents'] );
+
+				return array( $first, $rest );
+			}
+		);
+	}
+
+	/**
+	 * Create a tax class with one rate, applied to shipping.
 	 *
 	 * @param string $name Class name.
-	 * @param string $slug Class slug, or empty to make one from the name.
+	 * @param string $rate Tax rate.
 	 * @return string The class slug.
 	 */
-	private function create_tax_class( string $name, string $slug = '' ): string {
-		$tax_class = WC_Tax::create_tax_class( $name, $slug );
+	private function create_tax_class( string $name, string $rate = '20.0000' ): string {
+		$tax_class = WC_Tax::create_tax_class( $name );
 		$this->assertIsArray( $tax_class );
 		WC_Tax::_insert_tax_rate(
 			array(
 				'tax_rate_country'  => '',
-				'tax_rate'          => '20.0000',
+				'tax_rate'          => $rate,
 				'tax_rate_name'     => 'VAT',
 				'tax_rate_priority' => '1',
 				'tax_rate_shipping' => '1',

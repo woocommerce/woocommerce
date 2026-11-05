@@ -363,11 +363,6 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			}
 		}
 
-		// Every package keeps its item values, split or not, so the order can tell when its items change.
-		if ( null !== $tax_class_values ) {
-			$args['meta_data'][ ShippingTaxSplit::VALUES_META_KEY ] = $tax_class_values;
-		}
-
 		// Round the total cost after taxes have been calculated.
 		$total_cost = wc_format_decimal( $total_cost, $args['price_decimals'] );
 

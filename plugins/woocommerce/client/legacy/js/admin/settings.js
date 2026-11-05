@@ -28,11 +28,11 @@
 			} )
 			.trigger( 'change' );
 
-		// Shipping tax split help text
+		// The shipping tax split only applies while shipping tax is based on cart items.
 		$( 'select#woocommerce_shipping_tax_class' )
 			.on( 'change', function () {
-				$( 'tr.wc-settings-row-shipping-tax-split-help' ).toggle(
-					':split_by_item_value' === $( this ).val()
+				$( 'tr.wc-settings-row-shipping-tax-split' ).toggle(
+					'inherit' === $( this ).val()
 				);
 			} )
 			.trigger( 'change' );

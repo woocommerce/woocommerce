@@ -11,7 +11,6 @@
  */
 
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
-use Automattic\WooCommerce\Enums\ShippingTaxClass;
 use Automattic\WooCommerce\Internal\Tax\ShippingTaxSplit;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
@@ -72,7 +71,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 			}
 			if ( ProductTaxStatus::TAXABLE !== $item->get_tax_status() ) {
 				$costs[ ShippingTaxSplit::NON_TAXABLE ] += $item->get_total();
-			} elseif ( ShippingTaxClass::INHERIT === $item->get_tax_class() || ( $item instanceof WC_Order_Item_Shipping && ShippingTaxSplit::is_based_on_items( $item->get_tax_class() ) ) ) {
+			} elseif ( 'inherit' === $item->get_tax_class() ) {
 				$split_values = $item instanceof WC_Order_Item_Shipping ? wc_get_container()->get( ShippingTaxSplit::class )->get_shipping_line_values( $item, $order ) : null;
 				$item_total   = (float) $item->get_total();
 				$item_costs   = null === $split_values ? array( reset( $order_item_tax_classes ) => $item_total ) : ShippingTaxSplit::split_cost( $item_total, $split_values );

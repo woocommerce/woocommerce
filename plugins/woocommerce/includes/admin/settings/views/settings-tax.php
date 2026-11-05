@@ -7,7 +7,6 @@
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Enums\ShippingTaxClass;
 use Automattic\WooCommerce\Enums\TaxBasedOn;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
@@ -65,21 +64,21 @@ $settings = array(
 		'desc'     => __( 'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.', 'woocommerce' ),
 		'id'       => 'woocommerce_shipping_tax_class',
 		'css'      => 'min-width:150px;',
-		'default'  => ShippingTaxClass::INHERIT,
+		'default'  => 'inherit',
 		'type'     => 'select',
 		'class'    => 'wc-enhanced-select',
-		'options'  => array(
-			ShippingTaxClass::INHERIT             => __( 'Shipping tax class based on cart items', 'woocommerce' ),
-			ShippingTaxClass::SPLIT_BY_ITEM_VALUE => __( 'Split by cart item value', 'woocommerce' ),
-		) + wc_get_product_tax_class_options(),
+		'options'  => array( 'inherit' => __( 'Shipping tax class based on cart items', 'woocommerce' ) ) + wc_get_product_tax_class_options(),
 		'desc_tip' => true,
 	),
 
-	'shipping-tax-split-help'            => array(
-		'type'      => 'info',
+	'shipping-tax-split'                 => array(
 		'title'     => '',
-		'row_class' => 'shipping-tax-split-help',
-		'text'      => __( 'Shipping tax is split across the tax rates of the items in each package, in proportion to their price before tax. For example, if 10% of a package\'s value is taxed at 20% and the rest is untaxed, 20% tax applies to 10% of the shipping.', 'woocommerce' ),
+		'desc'      => __( 'Split shipping tax by cart item value', 'woocommerce' ),
+		'desc_tip'  => __( 'Shipping tax is split across the tax rates of the items in each package, in proportion to their price before tax. For example, if 10% of a package\'s value is taxed at 20% and the rest is untaxed, 20% tax applies to 10% of the shipping.', 'woocommerce' ),
+		'id'        => 'woocommerce_split_shipping_tax_by_item_value',
+		'default'   => 'no',
+		'type'      => 'checkbox',
+		'row_class' => 'shipping-tax-split',
 	),
 
 	array(
@@ -158,7 +157,7 @@ $settings = array(
 );
 
 if ( ! wc_shipping_enabled() ) {
-	unset( $settings['shipping-tax-class'], $settings['shipping-tax-split-help'] );
+	unset( $settings['shipping-tax-class'], $settings['shipping-tax-split'] );
 }
 
 if ( '' === $base_location_no_rate_warning ) {

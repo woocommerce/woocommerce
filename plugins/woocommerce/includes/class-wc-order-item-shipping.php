@@ -55,7 +55,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 			} else {
 				$taxes = array();
 
-				foreach ( ShippingTaxSplit::split_cost( (float) $this->get_total(), $calculate_tax_for['tax_class_costs'] ) as $tax_class => $cost ) {
+				foreach ( ShippingTaxSplit::split_cost( (float) $this->get_total(), $calculate_tax_for['tax_class_costs'], false ) as $tax_class => $cost ) {
 					if ( ShippingTaxSplit::NON_TAXABLE !== $tax_class ) {
 						$tax_rates = WC_Tax::find_shipping_rates( array_merge( $calculate_tax_for, array( 'tax_class' => (string) $tax_class ) ) );
 						$taxes     = wc_array_merge_recursive_numeric( $taxes, WC_Tax::calc_tax( $cost, $tax_rates, false ) );

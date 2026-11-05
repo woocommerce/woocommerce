@@ -9,9 +9,9 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore;
 use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\Enums\ShippingTaxClass;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
+use Automattic\WooCommerce\Internal\Tax\ShippingTaxSplit;
 use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 use Automattic\WooCommerce\Internal\DataStores\Orders\{ CustomOrdersTableController, DataSynchronizer, OrdersTableDataStore };
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
@@ -1404,16 +1404,14 @@ class WC_Install {
 	}
 
 	/**
-	 * Split shipping tax by cart item value for new stores, unless a value other than the default was set before install.
+	 * Split shipping tax by cart item value for new stores. The shipping tax class keeps its default.
 	 *
 	 * @since 11.4.0
 	 *
 	 * @return void
 	 */
 	public static function split_shipping_tax_for_newly_installed(): void {
-		if ( ShippingTaxClass::INHERIT === get_option( 'woocommerce_shipping_tax_class' ) ) {
-			update_option( 'woocommerce_shipping_tax_class', ShippingTaxClass::SPLIT_BY_ITEM_VALUE );
-		}
+		update_option( ShippingTaxSplit::OPTION, 'yes' );
 	}
 
 	/**

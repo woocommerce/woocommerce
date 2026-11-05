@@ -2968,7 +2968,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$calculate_tax_for  = $this->get_tax_location( $args );
 		$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
 
-		if ( ShippingTaxSplit::is_based_on_items( $shipping_tax_class ) ) {
+		if ( 'inherit' === $shipping_tax_class ) {
 			$found_classes      = array_intersect( array_merge( array( '' ), WC_Tax::get_tax_class_slugs() ), $this->get_items_tax_classes() );
 			$shipping_tax_class = count( $found_classes ) ? current( $found_classes ) : false;
 
@@ -2992,7 +2992,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		foreach ( $this->get_shipping_methods() as $item_id => $item ) {
 			if ( false !== $shipping_tax_class && ! $is_vat_exempt ) {
 				$item_tax_for    = array_merge( $calculate_tax_for, array( 'tax_class' => $shipping_tax_class ) );
-				$tax_class_costs = wc_get_container()->get( ShippingTaxSplit::class )->get_shipping_line_values( $item, $this );
+				$tax_class_costs = wc_get_container()->get( ShippingTaxSplit::class )->split_shipping_line( $item, $this );
 
 				if ( null !== $tax_class_costs ) {
 					$item_tax_for['tax_class_costs'] = $tax_class_costs;
