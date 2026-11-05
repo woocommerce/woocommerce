@@ -1549,7 +1549,7 @@ trait ProductAbilityTrait {
 	 * @return string|\WP_Error
 	 */
 	private static function prepare_product_sale_date( string $field, string $value ) {
-		$is_real_date = checkdate( (int) substr( $value, 5, 2 ), (int) substr( $value, 8, 2 ), (int) substr( $value, 0, 4 ) ) && false !== strtotime( $value );
+		$is_real_date = checkdate( (int) substr( $value, 5, 2 ), (int) substr( $value, 8, 2 ), (int) substr( $value, 0, 4 ) );
 
 		if ( '' !== $value && ! $is_real_date ) {
 			return new \WP_Error(
@@ -1572,7 +1572,7 @@ trait ProductAbilityTrait {
 	 * @return string
 	 */
 	private static function get_product_date_input_pattern(): string {
-		return '^(?:[0-9]{4}-[0-9]{2}-[0-9]{2}(?:[T ][0-9]{2}:[0-9]{2}(?::[0-9]{2})?)?)?$';
+		return '^(?:[0-9]{4}-[0-9]{2}-[0-9]{2}(?:[T ](?:[01][0-9]|2[0-3]):[0-5][0-9](?::[0-5][0-9])?)?)?$';
 	}
 
 	/**
@@ -1591,7 +1591,11 @@ trait ProductAbilityTrait {
 		if ( ! $term instanceof \WP_Term ) {
 			return new \WP_Error(
 				'woocommerce_ability_product_shipping_class_not_found',
-				__( 'Shipping class not found.', 'woocommerce' ),
+				sprintf(
+					/* translators: %s: shipping class slug sent in the input. */
+					__( 'Shipping class "%s" not found. Send the slug of an existing shipping class, or an empty string to remove it.', 'woocommerce' ),
+					$value
+				),
 				array( 'status' => 400 )
 			);
 		}

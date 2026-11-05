@@ -313,6 +313,22 @@ class ProductWritesTest extends WC_Unit_Test_Case {
 			$this->assertSame( $error_code, $result->get_error_code() );
 		}
 
+		$unknown_class = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'             => $product->get_id(),
+				'shipping_class' => 'missing',
+			)
+		);
+		$this->assertStringContainsString( '"missing"', $unknown_class->get_error_message() );
+
+		$out_of_range_time = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'              => $product->get_id(),
+				'date_on_sale_to' => '2030-01-31T24:00:00',
+			)
+		);
+		$this->assertWPError( $out_of_range_time );
+
 		$stored = wc_get_product( $product->get_id() );
 
 		$this->assertSame( array(), $stored->get_tag_ids() );
