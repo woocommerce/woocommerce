@@ -34,6 +34,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 	private const CANONICAL_ABILITY_IDS = array(
 		'woocommerce/product-terms-query',
+		'woocommerce/product-attributes-query',
+		'woocommerce/product-attribute-create',
 		'woocommerce/products-query',
 		'woocommerce/product-create',
 		'woocommerce/product-update',
@@ -266,57 +268,67 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_canonical_ability_annotations_match_intent(): void {
 		$expectations = array(
-			'woocommerce/products-query'         => array(
+			'woocommerce/products-query'           => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
 			),
-			'woocommerce/product-create'         => array(
-				'readonly'    => false,
-				'idempotent'  => false,
-				'destructive' => false,
-			),
-			'woocommerce/product-update'         => array(
-				'readonly'    => false,
-				'idempotent'  => false,
-				'destructive' => true,
-			),
-			'woocommerce/product-delete'         => array(
-				'readonly'    => false,
-				'idempotent'  => true,
-				'destructive' => true,
-			),
-			'woocommerce/orders-query'           => array(
+			'woocommerce/product-attributes-query' => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
 			),
-			'woocommerce/order-send-email'       => array(
+			'woocommerce/product-attribute-create' => array(
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => false,
 			),
-			'woocommerce/order-update'           => array(
-				'readonly'    => false,
-				'idempotent'  => false,
-				'destructive' => true,
-			),
-			'woocommerce/order-update-status'    => array(
-				'readonly'    => false,
-				'idempotent'  => false,
-				'destructive' => true,
-			),
-			'woocommerce/order-add-note'         => array(
+			'woocommerce/product-create'           => array(
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => false,
 			),
-			'woocommerce/order-notes-query'      => array(
+			'woocommerce/product-update'           => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
+			),
+			'woocommerce/product-delete'           => array(
+				'readonly'    => false,
+				'idempotent'  => true,
+				'destructive' => true,
+			),
+			'woocommerce/orders-query'             => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
 			),
-			'woocommerce/payment-gateways-query' => array(
+			'woocommerce/order-send-email'         => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/order-update'             => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
+			),
+			'woocommerce/order-update-status'      => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
+			),
+			'woocommerce/order-add-note'           => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/order-notes-query'        => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/payment-gateways-query'   => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
