@@ -939,4 +939,118 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		$webhook->save();
 		$this->assertSame( 0, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
 	}
+
+	/**
+	 * @testdox stage_delivery_result() leaves the disabled action to the next save, which fires it after the write.
+	 */
+	public function test_stage_delivery_result_fires_the_disabled_action_after_the_write() {
+		$webhook = new WC_Webhook();
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 6 );
+		$webhook->save();
+
+		$statuses = array();
+		$listener = static function ( $webhook_id ) use ( &$statuses ) {
+			$statuses[] = wc_get_webhook( $webhook_id )->get_status();
+		};
+		add_action( 'woocommerce_webhook_disabled_due_delivery_failures', $listener );
+
+		$webhook->stage_delivery_result( 500 );
+		$this->assertSame( 'disabled', $webhook->get_status() );
+		$this->assertSame( array(), $statuses );
+
+		$webhook->save();
+		$webhook->save();
+
+		remove_action( 'woocommerce_webhook_disabled_due_delivery_failures', $listener );
+		$this->assertSame( array( 'disabled' ), $statuses );
+	}
+
+	/**
+	 * @testdox log_delivery() after a staged disable fires the disabled action once.
+	 */
+	public function test_log_delivery_after_a_staged_disable_fires_the_disabled_action_once() {
+		$webhook = $this->create_failing_webhook();
+		$fired   = did_action( 'woocommerce_webhook_disabled_due_delivery_failures' );
+
+		$webhook->stage_delivery_result( 500 );
+		$webhook->log_delivery( 1, $this->delivery_request(), new WP_Error( 'http_request_failed', 'Failed' ), 0.1 );
+		$webhook->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_webhook_disabled_due_delivery_failures' ) - $fired );
+	}
+
+	/**
+	 * @testdox save() does not fire the disabled action when a status change replaced the staged disable.
+	 */
+	public function test_save_skips_the_disabled_action_when_the_webhook_is_active_again() {
+		$webhook = $this->create_failing_webhook();
+		$fired   = did_action( 'woocommerce_webhook_disabled_due_delivery_failures' );
+
+		$webhook->stage_delivery_result( 500 );
+		$webhook->set_status( 'active' );
+		$webhook->save();
+
+		$this->assertSame( 0, did_action( 'woocommerce_webhook_disabled_due_delivery_failures' ) - $fired );
+	}
+
+	/**
+	 * Create a saved, active webhook that the next failed delivery disables.
+	 *
+	 * @return WC_Webhook
+	 */
+	private function create_failing_webhook(): WC_Webhook {
+		$webhook = new WC_Webhook();
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 6 );
+		$webhook->save();
+
+		return $webhook;
+	}
+
+	/**
+	 * Build the request array that log_delivery() reads.
+	 *
+	 * @return array
+	 */
+	private function delivery_request(): array {
+		return array(
+			'method'     => 'POST',
+			'user-agent' => 'WooCommerce',
+			'headers'    => array(),
+			'body'       => '',
+		);
+	}
+
+	/**
+	 * @testdox log_delivery() fires the disabled action right away, before it saves.
+	 */
+	public function test_log_delivery_fires_the_disabled_action_once() {
+		$webhook = new WC_Webhook();
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 6 );
+		$webhook->save();
+		$fired = did_action( 'woocommerce_webhook_disabled_due_delivery_failures' );
+
+		$request = array(
+			'method'     => 'POST',
+			'user-agent' => 'WooCommerce',
+			'headers'    => array(),
+			'body'       => '',
+		);
+		$webhook->log_delivery( 1, $request, new WP_Error( 'http_request_failed', 'Failed' ), 0.1 );
+		$webhook->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_webhook_disabled_due_delivery_failures' ) - $fired );
+		$this->assertSame( 'disabled', wc_get_webhook( $webhook->get_id() )->get_status() );
+	}
 }

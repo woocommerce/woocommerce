@@ -226,11 +226,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 * @return array<string, mixed>
 	 */
 	private static function nullable( array $schema ): array {
-		$schema['type'] = array( $schema['type'], 'null' );
-		if ( isset( $schema['enum'] ) ) {
-			$schema['enum'][] = null;
-		}
-		return $schema;
+		$top = array_intersect_key( $schema, array( 'description' => true ) );
+		return $top + array( 'anyOf' => array( array_diff_key( $schema, $top ), array( 'type' => 'null' ) ) );
 	}
 
 	/**
@@ -1298,14 +1295,216 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Schemas without a type, for a field input and for a query filter.
+	 * Schemas without a type, or with an anyOf branch without one type name, for a field input and for a query filter.
 	 *
 	 * @return array<string, array{0: array<string, mixed>}>
 	 */
 	public function provider_malformed_schemas(): array {
 		return array(
-			'no type'            => array( array( 'description' => 'x' ) ),
-			'anyOf without type' => array( array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ),
+			'no type'                => array( array( 'description' => 'x' ) ),
+			'empty anyOf'            => array( array( 'anyOf' => array() ) ),
+			'anyOf branch type list' => array( array( 'anyOf' => array( array( 'type' => array( 'string', 'null' ) ), array( 'type' => 'integer' ) ) ) ),
+			'anyOf branch no type'   => array( array( 'anyOf' => array( array( 'type' => 'string' ), array( 'enum' => array( 'a' ) ) ) ) ),
+			'anyOf branch bad type'  => array( array( 'anyOf' => array( array( 'type' => 'integre' ), array( 'type' => 'null' ) ) ) ),
+			'anyOf with named keys'  => array(
+				array(
+					'anyOf' => array(
+						'a' => array( 'type' => 'string' ),
+						'b' => array( 'type' => 'null' ),
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * @testdox Should refuse a field whose input schema has a list of types or an unknown type at the top level.
+	 * @testWith [["string", "null"]]
+	 *           ["integre"]
+	 *
+	 * @param mixed $type Top-level type of the input schema.
+	 */
+	public function test_a_top_level_type_list_in_an_input_schema_is_refused( $type ): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		AbilitiesLoader::register_core_resources();
+
+		ExtensibleAbilities::register_field(
+			array(
+				'resource'      => 'order',
+				'namespace'     => 'refused',
+				'field'         => 'value',
+				'output_schema' => array( 'type' => 'string' ),
+				'get_callback'  => '__return_null',
+				'input_schema'  => array( 'type' => $type ),
+				'set_callback'  => '__return_null',
+			)
+		);
+
+		$this->assertArrayNotHasKey( 'refused', ExtensibleAbilities::get_fields( 'order' ) );
+	}
+
+	/**
+	 * @testdox Should keep the WordPress message for an anyOf under a top-level type whose branches do not each have their own type name.
+	 * @testWith [[{"enum":["small"]},{"enum":["large"]}]]
+	 *           [[{"type":["integer","null"]},{"type":"null"}]]
+	 *           [[{"type":"string","enum":["small"]},{"type":"string","pattern":"^x"}]]
+	 *
+	 * @param array $any_of The anyOf branches.
+	 */
+	public function test_an_any_of_branch_without_a_type_keeps_the_wordpress_message( array $any_of ): void {
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $any_of ) {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'product',
+						'namespace'    => 'untyped',
+						'field'        => 'size',
+						'input_schema' => array(
+							'type'  => 'string',
+							'anyOf' => $any_of,
+						),
+						'set_callback' => '__return_null',
+					)
+				);
+			}
+		);
+		$this->reset_registries();
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$refused = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'untyped' => array( 'size' => 'huge' ) ),
+			)
+		);
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'extensions.untyped.size does not match any of the expected formats.', $refused->get_data()['message'] );
+	}
+
+	/**
+	 * @testdox Should name each anyOf type once when several branches share a type and the value matches none.
+	 */
+	public function test_an_any_of_type_mismatch_names_each_type_once(): void {
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'product',
+						'namespace'    => 'shared',
+						'field'        => 'size',
+						'input_schema' => array(
+							'anyOf' => array(
+								array(
+									'type' => 'string',
+									'enum' => array( 'small' ),
+								),
+								array(
+									'type'    => 'string',
+									'pattern' => '^x',
+								),
+								array( 'type' => 'null' ),
+							),
+						),
+						'set_callback' => '__return_null',
+					)
+				);
+			}
+		);
+		$this->reset_registries();
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$refused = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'shared' => array( 'size' => 7 ) ),
+			)
+		);
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'extensions.shared.size is not of type string,null.', $refused->get_data()['message'] );
+	}
+
+	/**
+	 * @testdox Should register a field whose input schema is an anyOf of single types, publish it as declared and pass null or a typed value to the set_callback.
+	 */
+	public function test_an_any_of_input_schema_takes_null_and_a_typed_value(): void {
+		$input_schema = array(
+			'description' => 'Days of the trial.',
+			'anyOf'       => array( array( 'type' => 'integer' ), array( 'type' => 'null' ) ),
+		);
+		$received     = array();
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $input_schema, &$received ) {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'product',
+						'namespace'    => 'nullable',
+						'field'        => 'days',
+						'input_schema' => $input_schema,
+						'set_callback' => static function ( \WC_Data $data, $value ) use ( &$received ) {
+							unset( $data );
+							$received[] = $value;
+						},
+					)
+				);
+			}
+		);
+		$this->reset_registries();
+		$product = \WC_Helper_Product::create_simple_product();
+		$write   = fn( $value ) => $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'nullable' => array( 'days' => $value ) ),
+			)
+		);
+
+		$published = $this->get_ability( 'woocommerce/product-update' )['input_schema']['properties']['extensions']['properties']['nullable']['properties']['days'];
+		$this->assertSame( $input_schema, $published );
+		$this->assertSame( 200, $write( 7 )->get_status() );
+		$this->assertSame( 200, $write( null )->get_status() );
+		$refused = $write( 'many' );
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertStringContainsString( 'extensions.nullable.days', $refused->get_data()['message'] );
+		$this->assertSame( array( 7, null ), $received );
+
+		$received = array();
+		$result   = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'nullable' => array( 'days' => '8' ) ),
+			)
+		);
+		$this->assertNotWPError( $result );
+		$this->assertSame( array( 8 ), $received, 'A direct call gets the value cast to the integer branch.' );
+	}
+
+	/**
+	 * @testdox Should refuse a query filter schema that has an anyOf and no top-level type.
+	 */
+	public function test_a_query_filter_schema_needs_a_type_even_with_an_any_of(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_query_filter' );
+		AbilitiesLoader::register_core_resources();
+
+		ExtensibleAbilities::register_query_filter(
+			array(
+				'resource'  => 'order',
+				'namespace' => 'refused',
+				'filter'    => 'value',
+				'schema'    => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ),
+				'callback'  => '__return_empty_array',
+			)
+		);
+
+		$this->assertSame(
+			array( 'type' => 'object' ),
+			ExtensibleAbilities::add_query_filters_schema( array( 'type' => 'object' ), 'order' )
 		);
 	}
 
@@ -1314,14 +1513,19 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	public function test_valid_schemas_are_published_as_declared(): void {
 		$input_schemas = array(
-			'type_list'   => array( 'type' => array( 'string', 'null' ) ),
+			'nullable'    => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ),
 			'any_of'      => array(
 				'type'       => 'object',
 				'properties' => array( 'a' => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ),
 			),
 			'enum_null'   => array(
-				'type' => array( 'string', 'null' ),
-				'enum' => array( 'a', null ),
+				'anyOf' => array(
+					array(
+						'type' => 'string',
+						'enum' => array( 'a' ),
+					),
+					array( 'type' => 'null' ),
+				),
 			),
 			'enum_mixed'  => array(
 				'type' => 'string',
@@ -1959,6 +2163,33 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should name the saved order in the error when order-update saves and an order or line item field value then fails its schema.
+	 * @dataProvider invalid_order_field_values
+	 *
+	 * @param string $resource_name Resource.
+	 * @param array  $schema        Field schema.
+	 * @param mixed  $value         Value that the get_callback returns.
+	 */
+	public function test_an_order_update_that_saves_before_a_field_fails_names_the_saved_order( string $resource_name, array $schema, $value ): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		$this->register_invalid_field( $resource_name, $schema, $value );
+		$order = \WC_Helper_Order::create_order();
+
+		$result = wp_get_ability( 'woocommerce/order-update' )->execute(
+			array(
+				'id'            => $order->get_id(),
+				'customer_note' => 'Probe',
+			)
+		);
+
+		$this->assert_field_output_invalid( $result, $resource_name );
+		$this->assertStringContainsString( 'The change is saved on the order ' . $order->get_id() . ',', $result->get_error_message() );
+		$this->assertTrue( $result->get_error_data()['saved'] );
+		$this->assertSame( $order->get_id(), $result->get_error_data()['id'] );
+		$this->assertSame( 'Probe', wc_get_order( $order->get_id() )->get_customer_note() );
+	}
+
+	/**
 	 * @testdox Should fail orders-query with a named error that keeps the exception text out when a get_callback throws.
 	 */
 	public function test_a_get_callback_that_throws_fails_the_call(): void {
@@ -2173,7 +2404,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 *           [{"nope":{}}, "No extension registered the namespace \"nope\" for this ability. Remove it from the input, or use a namespace from the input schema."]
 	 *           [{"other_ext":{"cuont":3}}, "The extension namespace \"other_ext\" has no field \"cuont\". The fields you can write in this namespace are: count, size. Use one of them, or remove \"other_ext.cuont\" from the input."]
 	 *           [{"test-ext":{"code":"A2"}}, "The extension field \"test-ext.code\" is read-only. Remove it from the input."]
-	 *           [{"other_ext":{"size":"huge"}}, "extensions.other_ext.size is not one of small, large, and null."]
+	 *           [{"other_ext":{"size":"huge"}}, "extensions.other_ext.size does not match the expected format. Reason: extensions.other_ext.size is not one of small and large."]
 	 *
 	 * @param array  $extensions Value of the `extensions` input.
 	 * @param string $message    Expected error message.
@@ -2294,7 +2525,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$result = wp_get_ability( $ability )->execute( $input );
 
 		$this->assertSame(
-			'extensions.other_ext.size is not one of small, large, and null. variations[0]: extensions.other_ext.count is not of type integer,null. variations[1]: No extension registered the namespace "nope" for this ability. Remove it from the input, or use a namespace from the input schema.',
+			'extensions.other_ext.size does not match the expected format. Reason: extensions.other_ext.size is not one of small and large. variations[0]: extensions.other_ext.count is not of type integer,null. variations[1]: No extension registered the namespace "nope" for this ability. Remove it from the input, or use a namespace from the input schema.',
 			$result->get_error_message()
 		);
 		$this->assertSame( 0, $validated );
@@ -3249,7 +3480,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( array( 'small', 'large', null ), $schema['enum'] );
+		$this->assertSame( array( 'small', 'large' ), $schema['anyOf'][0]['enum'] );
+		$this->assertSame( array( 'type' => 'null' ), $schema['anyOf'][1] );
 		$this->assertSame( 400, $rejected->get_status() );
 		$this->assertFalse( wc_get_product( $product->get_id() )->meta_exists( '_test_size' ) );
 	}
@@ -3271,7 +3503,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( array( 'string', 'null' ), $schema['properties']['test-ext']['properties']['color']['type'] );
+		$this->assertSame( array( 'string', 'null' ), array_column( $schema['properties']['test-ext']['properties']['color']['anyOf'], 'type' ) );
 		$this->assertArrayNotHasKey( 'code', $schema['properties']['test-ext']['properties'] );
 		$this->assertSame( 'Pencil', wc_get_product( $product->get_id() )->get_name() );
 		$this->assertSame( array( 'color' => 'green' ), $output['extensions']['test-ext'] );
@@ -3416,14 +3648,14 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$schema     = $this->get_ability( $name )['input_schema'];
 			$extensions = $schema['properties']['extensions']['properties'];
 
-			$this->assertSame( array( 'string', 'null' ), $extensions['test-ext']['properties']['color']['type'] );
-			$this->assertSame( array( 'integer', 'null' ), $extensions['other_ext']['properties']['count']['type'] );
+			$this->assertSame( array( 'string', 'null' ), array_column( $extensions['test-ext']['properties']['color']['anyOf'], 'type' ) );
+			$this->assertSame( array( 'integer', 'null' ), array_column( $extensions['other_ext']['properties']['count']['anyOf'], 'type' ) );
 			$this->assertArrayNotHasKey( 'code', $extensions['test-ext']['properties'] );
 			$this->assertSame( 2, substr_count( wp_json_encode( $schema ), '"color"' ) );
 			$this->assertArrayNotHasKey( 'oneOf', $schema );
 		}
 		$order = $this->get_ability( 'woocommerce/order-update-status' )['input_schema'];
-		$this->assertSame( array( 'string', 'null' ), $order['properties']['extensions']['properties']['test-ext']['properties']['gift_message']['type'] );
+		$this->assertSame( array( 'string', 'null' ), array_column( $order['properties']['extensions']['properties']['test-ext']['properties']['gift_message']['anyOf'], 'type' ) );
 		$delete = $this->get_ability( 'woocommerce/product-delete' )['input_schema'];
 		$this->assertArrayNotHasKey( 'extensions', $delete['properties'], 'A delete writes no extension fields.' );
 	}

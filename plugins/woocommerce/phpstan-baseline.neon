@@ -12949,12 +12949,6 @@ parameters:
 			path: includes/class-wc-post-data.php
 
 		-
-			message: '#^Access to an undefined property object\:\:\$taxonomy\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/class-wc-post-data.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:delete_by_order_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -12988,12 +12982,6 @@ parameters:
 			message: '#^Cannot access property \$slug on WP_Term\|false\.$#'
 			identifier: property.nonObject
 			count: 3
-			path: includes/class-wc-post-data.php
-
-		-
-			message: '#^Cannot access property \$taxonomy on WP_Term\|false\.$#'
-			identifier: property.nonObject
-			count: 1
 			path: includes/class-wc-post-data.php
 
 		-
@@ -28051,12 +28039,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-buttons-controller.php
 
 		-
-			message: '#^Access to an undefined property WooCommerce\:\:\$checkout\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-standard-controller.php
-
-		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_instance_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -28064,24 +28046,6 @@ parameters:
 
 		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_method_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-standard-controller.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_product\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-standard-controller.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_product_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-standard-controller.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_variation_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-standard-controller.php
@@ -33998,7 +33962,6 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: includes/wc-order-functions.php
-
 
 		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:add_metadata\(\)\.$#'

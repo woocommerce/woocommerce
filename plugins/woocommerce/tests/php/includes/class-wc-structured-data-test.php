@@ -1191,6 +1191,92 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product pages output the store return-policy link only while the selected page is public.
+	 */
+	public function test_product_page_outputs_online_store_return_policy(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$page_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'woocommerce_refund_returns_page_id', $page_id );
+		$this->go_to( get_permalink( $product->get_id() ) );
+
+		$filtered_page = null;
+		add_filter(
+			'woocommerce_structured_data_online_store',
+			static function ( $markup, $page ) use ( &$filtered_page ) {
+				$filtered_page  = $page;
+				$markup['name'] = 'Filtered store';
+				return $markup;
+			},
+			10,
+			2
+		);
+		$this->structured_data->generate_product_data( $product );
+		$this->structured_data->generate_online_store_data();
+		ob_start();
+		$this->structured_data->output_structured_data();
+		$output = ob_get_clean();
+		$this->assertStringContainsString( '"@type":"Product"', $output );
+		$this->assertStringContainsString( '"@type":"OnlineStore"', $output );
+		$this->assertStringContainsString( '"merchantReturnLink":"' . get_permalink( $page_id ) . '"', $output );
+		$this->assertStringContainsString( '"name":"Filtered store"', $output );
+		$this->assertSame( $page_id, $filtered_page->ID );
+
+		remove_all_actions( 'woocommerce_email_order_details' );
+		add_action( 'woocommerce_email_order_details', array( $this->structured_data, 'output_email_structured_data' ), 30, 3 );
+		ob_start();
+		do_action( 'woocommerce_email_order_details', null, false, false );
+		$this->assertStringNotContainsString( 'OnlineStore', ob_get_clean(), 'Order emails must not include the store node.' );
+
+		foreach ( array( 'draft', 'private', 'trash' ) as $status ) {
+			wp_update_post(
+				array(
+					'ID'          => $page_id,
+					'post_status' => $status,
+				)
+			);
+			$structured_data = new WC_Structured_Data();
+			$structured_data->generate_online_store_data();
+			$this->assertSame( array(), $structured_data->get_data(), "{$status} pages must not be advertised." );
+		}
+
+		wp_update_post(
+			array(
+				'ID'            => $page_id,
+				'post_status'   => 'publish',
+				'post_password' => 'secret',
+			)
+		);
+		$structured_data = new WC_Structured_Data();
+		$structured_data->generate_online_store_data();
+		$this->assertSame( array(), $structured_data->get_data(), 'Password-protected pages must not be advertised.' );
+
+		wp_update_post(
+			array(
+				'ID'            => $page_id,
+				'post_password' => '',
+			)
+		);
+		$invalid_url = static function () {
+			return 'javascript:alert(1)';
+		};
+		add_filter( 'woocommerce_get_refund_returns_page_permalink', $invalid_url );
+		$structured_data = new WC_Structured_Data();
+		$structured_data->generate_online_store_data();
+		$this->assertSame( array(), $structured_data->get_data(), 'Invalid policy URLs must not be advertised.' );
+		remove_filter( 'woocommerce_get_refund_returns_page_permalink', $invalid_url );
+
+		wp_delete_post( $page_id, true );
+		$structured_data = new WC_Structured_Data();
+		$structured_data->generate_online_store_data();
+		$this->assertSame( array(), $structured_data->get_data(), 'Deleted pages must not be advertised.' );
+	}
+
+	/**
 	 * @testdox No return-policy data is generated on another page or for an unpublished, private, or password-protected page.
 	 */
 	public function test_online_store_requires_a_public_selected_page(): void {

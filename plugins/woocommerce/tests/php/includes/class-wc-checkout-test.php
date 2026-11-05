@@ -911,6 +911,264 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'update_session' keeps only posted shipping rates that are listed for their package key.
+	 */
+	public function test_update_session_ignores_posted_shipping_rates_that_are_not_listed(): void {
+		WC_Helper_Shipping::create_simple_flat_rate( 8 );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
+		$_POST         = array(
+			'billing_first_name' => 'Test',
+			'billing_last_name'  => 'Shopper',
+			'billing_phone'      => '5555555555',
+			'billing_email'      => 'shopper@example.com',
+			'billing_country'    => 'US',
+			'billing_state'      => 'NY',
+			'billing_postcode'   => '10001',
+			'billing_city'       => 'New York',
+			'billing_address_1'  => '1 Main St',
+			'shipping_method'    => array(
+				0       => 'local_pickup',
+				'extra' => 'local_pickup',
+			),
+			'payment_method'     => 'cod',
+		);
+
+		try {
+			$this->sut->update_session( $this->sut->get_posted_data() );
+		} finally {
+			$_POST = $original_post;
+			WC_Helper_Shipping::delete_simple_flat_rate();
+		}
+
+		$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
+
+		$this->assertArrayNotHasKey( 'extra', $chosen_methods, 'A posted choice for a key with no listed rates must not be saved.' );
+		$this->assertSame( 'legacy_flat_rate', $chosen_methods[0], 'A posted rate that is not listed must not replace the listed rate.' );
+	}
+
+	/**
+	 * @testdox 'update_session' taxes the posted shipping rate at the posted address when a pickup rate was chosen before and the item taxes do not change with the address.
+	 */
+	public function test_update_session_taxes_posted_shipping_rate_at_posted_address(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_based_on', 'shipping' );
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_shipping_tax_class', '' );
+
+		foreach ( array( array( 'US', 'CA', '10.0000', 'CA tax' ), array( 'GB', '', '20.0000', 'GB tax' ) ) as list( $country, $state, $rate, $name ) ) {
+			WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country'  => $country,
+					'tax_rate_state'    => $state,
+					'tax_rate'          => $rate,
+					'tax_rate_name'     => $name,
+					'tax_rate_priority' => '1',
+					'tax_rate_compound' => '0',
+					'tax_rate_shipping' => '1',
+					'tax_rate_order'    => '1',
+					'tax_rate_class'    => '',
+				)
+			);
+		}
+
+		$base_zone = new WC_Shipping_Zone();
+		$base_zone->set_zone_name( 'Store base' );
+		$base_zone->save();
+		$base_zone->add_location( 'US:CA', 'state' );
+		$base_zone->save();
+		$pickup_id = $base_zone->add_shipping_method( 'local_pickup' );
+
+		$delivery_zone = new WC_Shipping_Zone();
+		$delivery_zone->set_zone_name( 'Delivery' );
+		$delivery_zone->save();
+		$delivery_zone->add_location( 'GB', 'country' );
+		$delivery_zone->save();
+		$flat_rate_id = $delivery_zone->add_shipping_method( 'flat_rate' );
+		update_option(
+			"woocommerce_flat_rate_{$flat_rate_id}_settings",
+			array(
+				'title'      => 'Flat rate',
+				'tax_status' => 'taxable',
+				'cost'       => '5',
+			)
+		);
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'tax_status' => 'none' ) );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->customer->set_is_vat_exempt( false );
+		WC()->customer->set_billing_location( 'US', 'CA', '90001', 'Los Angeles' );
+		WC()->customer->set_shipping_location( 'US', 'CA', '90001', 'Los Angeles' );
+		WC()->cart->calculate_totals();
+		WC()->session->set( 'chosen_shipping_methods', array( "local_pickup:{$pickup_id}" ) );
+		WC()->cart->calculate_totals();
+
+		$this->assertSame( array( "local_pickup:{$pickup_id}" ), WC()->session->get( 'chosen_shipping_methods' ), 'The pickup rate must be the chosen rate at the store address.' );
+
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
+		$_POST         = array(
+			'billing_first_name' => 'Test',
+			'billing_last_name'  => 'Shopper',
+			'billing_phone'      => '5555555555',
+			'billing_email'      => 'shopper@example.com',
+			'billing_country'    => 'GB',
+			'billing_postcode'   => 'SW1A 1AA',
+			'billing_city'       => 'London',
+			'billing_address_1'  => '1 Main St',
+			'shipping_method'    => array( "flat_rate:{$flat_rate_id}" ),
+			'payment_method'     => 'cod',
+		);
+
+		try {
+			$this->sut->update_session( $this->sut->get_posted_data() );
+		} finally {
+			$_POST = $original_post;
+		}
+
+		$this->assertSame( array( "flat_rate:{$flat_rate_id}" ), WC()->session->get( 'chosen_shipping_methods' ), 'The posted rate must be the chosen rate.' );
+		$this->assertSame( 5.0, (float) WC()->cart->get_shipping_total(), 'The cart must be charged the posted rate.' );
+		$this->assertSame( 1.0, (float) WC()->cart->get_shipping_tax(), 'The shipping tax must be the tax of the posted address.' );
+	}
+
+	/**
+	 * @testdox 'process_customer' keeps the posted shipping rate, taxed at the posted address, when the checkout creates an account.
+	 *
+	 * @testWith ["GB", "", "SW1A 1AA", "London", 5.0, 1.0]
+	 *           ["US", "CA", "90001", "Los Angeles", 7.0, 0.7]
+	 *
+	 * @param string $country               Posted billing country.
+	 * @param string $state                 Posted billing state.
+	 * @param string $postcode              Posted billing postcode.
+	 * @param string $city                  Posted billing city.
+	 * @param float  $expected_shipping     Cost of the posted flat rate.
+	 * @param float  $expected_shipping_tax Tax of the posted flat rate at the posted address.
+	 */
+	public function test_process_customer_keeps_posted_shipping_rate_when_creating_an_account( string $country, string $state, string $postcode, string $city, float $expected_shipping, float $expected_shipping_tax ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_based_on', 'shipping' );
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_shipping_tax_class', '' );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
+
+		foreach ( array( array( 'US', 'CA', '10.0000', 'CA tax' ), array( 'GB', '', '20.0000', 'GB tax' ) ) as list( $rate_country, $rate_state, $rate, $name ) ) {
+			WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country'  => $rate_country,
+					'tax_rate_state'    => $rate_state,
+					'tax_rate'          => $rate,
+					'tax_rate_name'     => $name,
+					'tax_rate_priority' => '1',
+					'tax_rate_compound' => '0',
+					'tax_rate_shipping' => '1',
+					'tax_rate_order'    => '1',
+					'tax_rate_class'    => '',
+				)
+			);
+		}
+
+		$base_zone = new WC_Shipping_Zone();
+		$base_zone->set_zone_name( 'Store base' );
+		$base_zone->save();
+		$base_zone->add_location( 'US:CA', 'state' );
+		$base_zone->save();
+		$pickup_id = $base_zone->add_shipping_method( 'local_pickup' );
+
+		$delivery_zone = new WC_Shipping_Zone();
+		$delivery_zone->set_zone_name( 'Delivery' );
+		$delivery_zone->save();
+		$delivery_zone->add_location( 'GB', 'country' );
+		$delivery_zone->save();
+
+		$flat_rate_ids   = array(
+			'US' => $base_zone->add_shipping_method( 'flat_rate' ),
+			'GB' => $delivery_zone->add_shipping_method( 'flat_rate' ),
+		);
+		$flat_rate_costs = array(
+			'US' => '7',
+			'GB' => '5',
+		);
+		foreach ( $flat_rate_costs as $zone_country => $cost ) {
+			update_option(
+				"woocommerce_flat_rate_{$flat_rate_ids[ $zone_country ]}_settings",
+				array(
+					'title'      => 'Flat rate',
+					'tax_status' => 'taxable',
+					'cost'       => $cost,
+				)
+			);
+		}
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+
+		// Keep the session cookie in $_COOKIE, where the login reads it, instead of sending a header.
+		$cookie_name  = '';
+		$store_cookie = function ( $enabled, $name, $value ) use ( &$cookie_name ) {
+			$cookie_name             = $name;
+			$_COOKIE[ $cookie_name ] = $value;
+			return false;
+		};
+
+		$posted_rate      = "flat_rate:{$flat_rate_ids[ $country ]}";
+		$original_session = WC()->session;
+		$original_post    = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
+
+		try {
+			wp_set_current_user( 0 );
+			add_filter( 'woocommerce_set_cookie_enabled', $store_cookie, 10, 3 );
+			WC()->session = new WC_Session_Handler();
+			WC()->session->init_session_cookie();
+			WC()->session->set_customer_session_cookie( true );
+
+			$product = WC_Helper_Product::create_simple_product( true, array( 'tax_status' => 'none' ) );
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+			WC()->customer->set_is_vat_exempt( false );
+			WC()->customer->set_billing_location( 'US', 'CA', '90001', 'Los Angeles' );
+			WC()->customer->set_shipping_location( 'US', 'CA', '90001', 'Los Angeles' );
+			WC()->cart->calculate_totals();
+			WC()->session->set( 'chosen_shipping_methods', array( "local_pickup:{$pickup_id}" ) );
+			WC()->cart->calculate_totals();
+			WC()->session->save_data();
+
+			$this->assertSame( array( "local_pickup:{$pickup_id}" ), WC()->session->get( 'chosen_shipping_methods' ), 'The pickup rate must be the chosen rate at the store address.' );
+
+			$_POST = array(
+				'billing_first_name' => 'Test',
+				'billing_last_name'  => 'Shopper',
+				'billing_phone'      => '5555555555',
+				'billing_email'      => 'new-shopper@example.com',
+				'billing_country'    => $country,
+				'billing_state'      => $state,
+				'billing_postcode'   => $postcode,
+				'billing_city'       => $city,
+				'billing_address_1'  => '1 Main St',
+				'shipping_method'    => array( $posted_rate ),
+				'payment_method'     => 'cod',
+				'createaccount'      => '1',
+			);
+
+			$data = $this->sut->get_posted_data();
+			$this->sut->update_session( $data );
+			$this->sut->process_customer( $data );
+
+			$this->assertTrue( is_user_logged_in(), 'The checkout must create the account and log the customer in.' );
+			$this->assertSame( array( $posted_rate ), WC()->session->get( 'chosen_shipping_methods' ), 'The posted rate must still be the chosen rate after the login.' );
+			$this->assertSame( $expected_shipping, (float) WC()->cart->get_shipping_total(), 'The cart must be charged the posted rate.' );
+			$this->assertSame( $expected_shipping_tax, (float) WC()->cart->get_shipping_tax(), 'The shipping tax must be the tax of the posted address.' );
+		} finally {
+			remove_filter( 'woocommerce_set_cookie_enabled', $store_cookie, 10 );
+			if ( '' !== $cookie_name ) {
+				unset( $_COOKIE[ $cookie_name ] );
+			}
+			wp_set_current_user( 0 );
+			WC()->session = $original_session;
+			$_POST        = $original_post;
+		}
+	}
+
+	/**
 	 * @testdox 'validate_checkout' still accepts an order when a plugin deliberately turns off shipping calculation.
 	 */
 	public function test_validate_checkout_accepts_order_when_shipping_calculation_is_turned_off_by_filter(): void {

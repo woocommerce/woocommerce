@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
 use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
@@ -126,6 +128,10 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 			return new WP_REST_Response( $response, 422 );
 		}
 
+		if ( ! is_array( $shipping_option ) ) {
+			$shipping_option = array();
+		}
+
 		// Get the WC order.
 		$order = PayPalHelper::get_wc_order_from_paypal_custom_id( $purchase_units[0]['custom_id'] ?? '{}' );
 		if ( ! $order ) {
@@ -177,70 +183,130 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 		// Update the shipping address before we do anything else.
 		$this->update_order_shipping_address( $order, $shipping_address );
 
-		// We need to rebuild the cart from the order, as we do not have session cart data
-		// for REST API requests.
-		$this->rebuild_cart_from_order( $order );
+		$re_add_cart_item_fees = static function ( $cart ) use ( $order ) {
+			if ( ! ( $cart instanceof WC_Cart ) ) {
+				return;
+			}
 
-		// Get the new shipping options, which depend on the new shipping address.
-		$updated_shipping_options = $this->get_updated_shipping_options( $order, $shipping_option );
-		if ( empty( $updated_shipping_options ) ) {
-			WC_Gateway_Paypal::log(
-				'No shipping options found for address. Order ID: ' . $order->get_id() .
-				'. Address: ' . wp_json_encode( $shipping_address )
-			);
-			$response = $this->get_update_shipping_error_response();
-			return new WP_REST_Response( $response, 422 );
-		}
+			foreach ( $order->get_fees() as $fee_item ) {
+				if ( ! ( $fee_item instanceof WC_Order_Item_Fee ) ) {
+					continue;
+				}
+				WC()->cart->add_fee(
+					$fee_item->get_name(),
+					(float) $fee_item->get_amount(),
+					ProductTaxStatus::TAXABLE === $fee_item->get_tax_status(),
+					$fee_item->get_tax_class()
+				);
+			}
+		};
+		add_action( 'woocommerce_cart_calculate_fees', $re_add_cart_item_fees );
 
-		// Set the chosen shipping method in the session.
-		if ( ! empty( $shipping_option ) ) {
-			WC()->session->set( 'chosen_shipping_methods', array( $shipping_option['id'] ) );
-		}
+		try {
+			// We need to rebuild the cart from the order, as we do not have session cart data
+			// for REST API requests.
+			try {
+				$this->rebuild_cart_from_order( $order );
+			} catch ( Exception $e ) {
+				WC_Gateway_Paypal::log(
+					'Error rebuilding cart from order. Order ID: ' . $order->get_id() .
+					'. Error: ' . $e->getMessage()
+				);
+				$response = $this->get_update_shipping_error_response();
+				return new WP_REST_Response( $response, 422 );
+			}
 
-		// Recompute fees after everything has been updated.
-		$this->recompute_fees( $order );
+			// Get the new shipping options, which depend on the new shipping address.
+			$updated_shipping_options = $this->get_updated_shipping_options( $order, $shipping_option, $updated_shipping_option_id );
+			if ( empty( $updated_shipping_options ) ) {
+				WC_Gateway_Paypal::log(
+					'No shipping options found for address. Order ID: ' . $order->get_id() .
+					'. Address: ' . wp_json_encode( $shipping_address )
+				);
+				$response = $this->get_update_shipping_error_response();
+				return new WP_REST_Response( $response, 422 );
+			}
 
-		$paypal_request = new PayPalRequest( WC_Gateway_Paypal::get_instance() );
-		$updated_amount = $paypal_request->get_paypal_order_purchase_unit_amount( $order );
+			if ( null === $updated_shipping_option_id ) {
+				WC_Gateway_Paypal::log(
+					'No default shipping option selected after address update. Order ID: ' . $order->get_id() .
+					'. Shipping options: ' . wp_json_encode( $updated_shipping_options )
+				);
+				$response = $this->get_update_shipping_error_response();
+				return new WP_REST_Response( $response, 422 );
+			}
 
-		$response = array(
-			'id'             => $paypal_order_id,
-			'purchase_units' => array(
-				array(
-					'reference_id'     => isset( $purchase_units[0]['reference_id'] ) ? $purchase_units[0]['reference_id'] : '', // No change.
-					'amount'           => $updated_amount,
-					'shipping_options' => $updated_shipping_options,
+			// Update the shipping method for the order and recompute the shipping and tax
+			// totals based on the address and shipping method updates.
+			$this->update_shipping_method_and_totals_for_order( $order, $updated_shipping_option_id );
+
+			$paypal_request = new PayPalRequest( WC_Gateway_Paypal::get_instance() );
+			$updated_amount = $paypal_request->get_paypal_order_purchase_unit_amount( $order );
+
+			$response = array(
+				'id'             => $paypal_order_id,
+				'purchase_units' => array(
+					array(
+						'reference_id'     => isset( $purchase_units[0]['reference_id'] ) ? $purchase_units[0]['reference_id'] : '', // No change.
+						'amount'           => $updated_amount,
+						'shipping_options' => $updated_shipping_options,
+					),
 				),
-			),
-		);
+			);
 
-		return new WP_REST_Response( $response, 200 );
+			return new WP_REST_Response( $response, 200 );
+		} finally {
+			remove_action( 'woocommerce_cart_calculate_fees', $re_add_cart_item_fees );
+		}
 	}
 
 	/**
 	 * Rebuild the session cart.
 	 *
 	 * @param WC_Order $order The order object.
-	 * @return void
+	 * @throws Exception If the cart cannot be rebuilt.
 	 */
-	private function rebuild_cart_from_order( $order ) {
+	private function rebuild_cart_from_order( $order ): void {
 		wc_load_cart();
 		WC()->cart->empty_cart();
 		foreach ( $order->get_items() as $item ) {
+			if ( ! ( $item instanceof WC_Order_Item_Product ) ) {
+				continue;
+			}
+
 			$product_id = $item->get_product_id();
 			$product    = $item->get_product();
 
-			if ( ! $product ) {
+			if ( ! $product instanceof WC_Product ) {
 				continue;
 			}
 
-			if ( $product->is_type( 'variation' ) ) {
-				$variation_id = $item->get_variation_id();
-				WC()->cart->add_to_cart( $product_id, $item->get_quantity(), $variation_id );
-				continue;
+			$order_product_subtotal = (float) $item->get_subtotal();
+			$order_product_quantity = (float) $item->get_quantity();
+			$order_product_price    = round( $order_product_subtotal / $order_product_quantity, wc_get_price_decimals() );
+
+			if ( $product->is_type( ProductType::VARIATION ) ) {
+				$variation_id  = $item->get_variation_id();
+				$cart_item_key = WC()->cart->add_to_cart(
+					$product_id,
+					$item->get_quantity(),
+					$variation_id,
+					$this->get_variation_attributes_from_order_item( $item, $product_id )
+				);
+			} else {
+				$cart_item_key = WC()->cart->add_to_cart( $product_id, $item->get_quantity() );
 			}
 
-			WC()->cart->add_to_cart( $product_id, $item->get_quantity() );
+			if ( ! is_string( $cart_item_key ) ) {
+				throw new Exception( 'Failed to add product to cart.' );
+			}
+
+			$cart_item = WC()->cart->get_cart_item( $cart_item_key );
+			if ( ! $cart_item ) {
+				throw new Exception( 'Failed to get cart item.' );
+			}
+
+			$cart_item['data']->set_price( (string) $order_product_price );
 		}
 
 		// Re-apply coupons present on the order so discounts/totals are accurate.
@@ -252,6 +318,10 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 			}
 		}
 
+		// Recalculate the cart totals after all changes have been applied.
+		// Note that fees are handled via a hook.
+		WC()->cart->calculate_totals();
+
 		// Re-apply shipping methods present on the order so totals are accurate.
 		$order_shipping_rate_id = $this->get_order_shipping_rate_id( $order );
 		if ( ! empty( $order_shipping_rate_id ) ) {
@@ -260,19 +330,74 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Recompute the fees for the order.
+	 * Get the variation attributes stored in an order item's meta, in the format expected by
+	 * WC_Cart::add_to_cart(). This mirrors the attribute handling in {@see WC_Cart_Session::populate_cart_from_order()}.
 	 *
-	 * @param WC_Order $order The order object.
+	 * @param WC_Order_Item_Product $item       The order item.
+	 * @param int                   $product_id The ID of the parent variable product.
+	 * @return array Attribute values keyed by 'attribute_{name}'.
+	 */
+	private function get_variation_attributes_from_order_item( WC_Order_Item_Product $item, int $product_id ): array {
+		$variation_attributes = array();
+
+		foreach ( $item->get_meta_data() as $meta ) {
+			$is_taxonomy_attribute = taxonomy_is_product_attribute( $meta->key );
+			if ( ! $is_taxonomy_attribute && ! meta_is_product_attribute( $meta->key, $meta->value, $product_id ) ) {
+				continue;
+			}
+
+			$attribute_key = 'attribute_' . sanitize_title( $meta->key );
+			if ( $is_taxonomy_attribute ) {
+				$variation_attributes[ $attribute_key ] = sanitize_title( $meta->value );
+			} else {
+				$meta_value   = wc_clean( $meta->value );
+				$blog_charset = get_bloginfo( 'charset' );
+				if ( is_string( $meta_value ) ) {
+					$variation_attributes[ $attribute_key ] = html_entity_decode( $meta_value, ENT_QUOTES, $blog_charset );
+				} elseif ( is_array( $meta_value ) ) {
+					$variation_attributes[ $attribute_key ] = $this->decode_meta_values( $meta->value, $blog_charset );
+				}
+			}
+		}
+
+		return $variation_attributes;
+	}
+
+	/**
+	 * Helper method to support recursively ensuring metadata string values are decoded.
+	 *
+	 * @param array  $meta_value_array The metadata value array.
+	 * @param string $blog_charset     The blog charset.
+	 * @return array The decoded metadata value array.
+	 */
+	private function decode_meta_values( array $meta_value_array, string $blog_charset ): array {
+		$decoded_values = array();
+		foreach ( $meta_value_array as $key => $value ) {
+			if ( is_string( $value ) ) {
+				$decoded_values[ $key ] = html_entity_decode( $value, ENT_QUOTES, $blog_charset );
+			} elseif ( is_array( $value ) ) {
+				$decoded_values[ $key ] = $this->decode_meta_values( $value, $blog_charset );
+			} elseif ( is_scalar( $value ) ) {
+				$decoded_values[ $key ] = $value;
+			}
+		}
+		return $decoded_values;
+	}
+
+	/**
+	 * Update the shipping method for the order, and then recompute the order totals.
+	 *
+	 * @param WC_Order $order              The order object.
+	 * @param string   $shipping_option_id The shipping option id.
 	 * @return void
 	 */
-	private function recompute_fees( $order ) {
-		WC()->cart->calculate_fees();
-		WC()->cart->calculate_shipping();
-		WC()->cart->calculate_totals();
-
-		$order->remove_order_items();
-		WC()->checkout->set_data_from_cart( $order );
-		$order->save();
+	private function update_shipping_method_and_totals_for_order( $order, $shipping_option_id ): void {
+		// Remove and recreate the shipping lines for the order.
+		$order->remove_order_items( 'shipping' );
+		$packages = WC()->shipping()->get_packages();
+		WC()->checkout()->create_order_shipping_lines( $order, array( $shipping_option_id ), $packages );
+		// Update the order totals based on the updated shipping method and any relevant taxes.
+		$order->calculate_totals( true );
 	}
 
 	/**
@@ -311,12 +436,16 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 	/**
 	 * Get the shipping options for the order.
 	 *
-	 * @param WC_Order $order The order object.
-	 * @param array    $selected_shipping_option The selected shipping option.
+	 * @param WC_Order    $order                      The order object.
+	 * @param array       $selected_shipping_option   The selected shipping option.
+	 * @param string|null $updated_shipping_option_id The updated shipping option id after the updates.
 	 * @return array The shipping options.
 	 */
-	private function get_updated_shipping_options( $order, $selected_shipping_option ) {
+	private function get_updated_shipping_options( $order, $selected_shipping_option, ?string &$updated_shipping_option_id ) {
+		$updated_shipping_option_id = null;
+
 		WC()->cart->calculate_shipping();
+
 		$packages               = WC()->shipping()->get_packages();
 		$order_shipping_rate_id = $this->get_order_shipping_rate_id( $order );
 
@@ -340,6 +469,7 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 
 				if ( $is_selected ) {
 					$has_selected_shipping_option = true;
+					$updated_shipping_option_id   = $shipping_option_id;
 				}
 				$options[] = array(
 					'id'       => $shipping_option_id,
@@ -356,7 +486,8 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 
 		// Set first option as selected if no option is selected.
 		if ( ! empty( $options ) && ! $has_selected_shipping_option ) {
-			$options[0]['selected'] = true;
+			$options[0]['selected']     = true;
+			$updated_shipping_option_id = $options[0]['id'];
 		}
 
 		return $options;

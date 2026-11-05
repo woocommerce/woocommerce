@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities;
 
+use Automattic\WooCommerce\Abilities\Ability;
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
@@ -223,6 +224,8 @@ class AbilitiesLoader {
 			$args = $class_name::get_registration_args();
 			if ( $is_actionable ) {
 				$args['ability_class'] = $class_name;
+			} elseif ( $is_core_ability ) {
+				$args['ability_class'] = Ability::class;
 			}
 
 			$registered_ability = wp_register_ability( $ability_name, $args );
