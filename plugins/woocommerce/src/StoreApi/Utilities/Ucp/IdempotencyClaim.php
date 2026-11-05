@@ -17,6 +17,12 @@ final class IdempotencyClaim {
 	const RETRY_AFTER_SECONDS = 30;
 
 	/**
+	 * Shape of an acceptable key: 22 characters of this alphabet carry the 128 bits the spec
+	 * asks for, and 191 is the column width. https://ucp.dev/2026-04-08/specification/signatures/#replay-protection
+	 */
+	const KEY_PATTERN = '/^[A-Za-z0-9_-]{22,191}\z/';
+
+	/**
 	 * Key this request owns.
 	 *
 	 * @var string
@@ -75,14 +81,13 @@ final class IdempotencyClaim {
 		 */
 		$strict = (bool) apply_filters( 'woocommerce_ucp_idempotency_strict', true );
 
-		// RFC 4122 calls a UUID case-insensitive but `wp_is_uuid()` matches lower case only, so
-		// an upper-case key would be refused. Normalising also stops two spellings claiming two rows.
-		$key = strtolower( trim( (string) $request->get_header( 'Idempotency-Key' ) ) );
+		// Case counts: a 22-character key only carries 128 bits when it is not folded.
+		$key = trim( (string) $request->get_header( 'Idempotency-Key' ) );
 
-		if ( '' === $key || ! wp_is_uuid( $key ) ) {
+		if ( 1 !== preg_match( self::KEY_PATTERN, $key ) ) {
 			if ( ! $strict ) {
-				// Not stored when it is not a UUID: the column is bounded, so a longer key
-				// would be truncated and could then collide with an unrelated request's.
+				// Not stored when malformed: a key longer than the column would be truncated and
+				// could then collide with an unrelated request's.
 				return null;
 			}
 
@@ -91,7 +96,7 @@ final class IdempotencyClaim {
 				'' === $key ? 'IDEMPOTENCY_KEY_REQUIRED' : 'IDEMPOTENCY_KEY_INVALID',
 				'' === $key
 					? __( 'The Idempotency-Key header is required.', 'woocommerce' )
-					: __( 'The Idempotency-Key header must be a UUID.', 'woocommerce' ),
+					: __( 'The Idempotency-Key header must be 22 to 191 letters, digits, hyphens or underscores.', 'woocommerce' ),
 				'recoverable',
 				400
 			);

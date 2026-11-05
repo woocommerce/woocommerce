@@ -169,14 +169,48 @@ class UcpIdempotency extends ControllerTestCase {
 	}
 
 	/**
-	 * A key that is not a UUID is refused.
+	 * A malformed key is refused.
+	 *
+	 * @dataProvider provider_malformed_keys
+	 *
+	 * @param string $key Key to send.
 	 */
-	public function test_a_key_that_is_not_a_uuid_is_refused(): void {
-		$response = $this->request( 'POST', '/carts', $this->cart_body( 0 ), 'not-a-uuid' );
+	public function test_a_malformed_key_is_refused( string $key ): void {
+		$response = $this->request( 'POST', '/carts', $this->cart_body( 0 ), $key );
 
 		$this->assertSame( 400, $response->get_status() );
 		$this->assertSame( array( 'IDEMPOTENCY_KEY_INVALID' ), $this->message_codes( $response ) );
 		$this->assertSame( 0, $this->stored_record_count() );
+	}
+
+	/**
+	 * Keys outside the accepted shape.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function provider_malformed_keys(): array {
+		return array(
+			'too short'          => array( str_repeat( 'a', 21 ) ),
+			'outside alphabet'   => array( str_repeat( 'a', 21 ) . '.' ),
+			'longer than column' => array( str_repeat( 'a', 192 ) ),
+		);
+	}
+
+	/**
+	 * A key need not be a UUID: any 22 characters of the alphabet are accepted and replay.
+	 */
+	public function test_a_non_uuid_key_is_accepted_and_replays(): void {
+		$key  = 'Ab3_dE-7Gh9Jk1Lm3Np5Qr';
+		$body = $this->cart_body( 0 );
+
+		$first = $this->request( 'POST', '/carts', $body, $key );
+
+		$this->assertSame( 200, $first->get_status() );
+
+		$second = $this->request( 'POST', '/carts', $body, $key );
+
+		$this->assertSame( 'true', $second->get_headers()['Idempotency-Replayed'] ?? '' );
+		$this->assertSame( 1, $this->stored_record_count() );
 	}
 
 	/**
@@ -543,34 +577,19 @@ class UcpIdempotency extends ControllerTestCase {
 	}
 
 	/**
-	 * An upper-case key is accepted: RFC 4122 calls a UUID case-insensitive.
+	 * Two spellings of a key are two keys: a case-folding index would hand the second request
+	 * the first one's response.
 	 */
-	public function test_an_uppercase_key_is_accepted_and_replays(): void {
-		$key  = strtoupper( wp_generate_uuid4() );
-		$body = $this->cart_body( 0 );
-
-		$first = $this->request( 'POST', '/carts', $body, $key );
-
-		$this->assertSame( 200, $first->get_status() );
-
-		$second = $this->request( 'POST', '/carts', $body, $key );
-
-		$this->assertSame( 'true', $second->get_headers()['Idempotency-Replayed'] ?? '' );
-		$this->assertSame( 1, $this->stored_record_count() );
-	}
-
-	/**
-	 * The two spellings of one key address one record, rather than claiming two.
-	 */
-	public function test_key_case_does_not_split_a_record(): void {
+	public function test_key_case_is_significant(): void {
 		$key  = wp_generate_uuid4();
 		$body = $this->cart_body( 0 );
 
 		$this->request( 'POST', '/carts', $body, strtolower( $key ) );
-		$replay = $this->request( 'POST', '/carts', $body, strtoupper( $key ) );
+		$second = $this->request( 'POST', '/carts', $body, strtoupper( $key ) );
 
-		$this->assertSame( 'true', $replay->get_headers()['Idempotency-Replayed'] ?? '' );
-		$this->assertSame( 1, $this->stored_record_count() );
+		$this->assertSame( 200, $second->get_status() );
+		$this->assertArrayNotHasKey( 'Idempotency-Replayed', $second->get_headers() );
+		$this->assertSame( 2, $this->stored_record_count() );
 	}
 
 	/**

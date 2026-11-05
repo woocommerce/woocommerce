@@ -2115,7 +2115,7 @@ CREATE TABLE {$wpdb->prefix}wc_rate_limits (
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_ucp_idempotency_keys (
   idempotency_key_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  idempotency_key varchar(191) NOT NULL,
+  idempotency_key varchar(191) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   request_fingerprint char(64) NOT NULL,
   state varchar(16) NOT NULL DEFAULT 'in_progress',
   response_status smallint(5) unsigned NULL,
