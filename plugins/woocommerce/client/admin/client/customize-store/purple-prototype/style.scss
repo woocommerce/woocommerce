@@ -25,14 +25,15 @@
 
 	&__content {
 		display: flex;
-		gap: var(--wpds-dimension-gap-2xl);
+		// Same as the card padding, so the image looks evenly framed.
+		gap: var(--wpds-dimension-padding-2xl);
 		align-items: stretch;
 	}
 
 	// The text column sets the card height, so the image is positioned out of the flow.
 	&__media {
 		position: relative;
-		flex: 0 0 360px;
+		flex: 0 0 var(--wpds-dimension-surface-width-md);
 		border: 1px solid var(--wpds-color-stroke-surface-neutral);
 		border-radius: var(--wpds-border-radius-md);
 		overflow: hidden;
@@ -48,11 +49,11 @@
 		}
 	}
 
-	// Capped so lines stay readable on wide screens.
+	// Capped so lines stay short and the text doesn't run to the card edge.
 	&__body {
 		flex: 1;
 		min-width: 0;
-		max-width: var(--wpds-dimension-surface-width-lg);
+		max-width: var(--wpds-dimension-surface-width-md);
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
