@@ -356,9 +356,14 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should add shop metadata and preserve a provider's image.
+	 * @testdox Should add shop and category metadata and preserve a provider's image and locale.
+	 * @testWith ["en_US", ["en_US"]]
+	 *           ["hr", []]
+	 *
+	 * @param string   $locale Site locale.
+	 * @param string[] $expected_locale Expected locale values.
 	 */
-	public function test_shop_metadata(): void {
+	public function test_shop_metadata( string $locale, array $expected_locale ): void {
 		$shop_id = self::factory()->post->create(
 			array(
 				'post_type'    => 'page',
@@ -373,6 +378,12 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 		$shop_url = get_permalink( $shop_id );
 		$this->assertIsString( $shop_url );
 		$this->go_to( $shop_url );
+		add_filter(
+			'locale',
+			static function () use ( $locale ) {
+				return $locale;
+			}
+		);
 
 		$tags = $this->render_meta_tags( '<meta property="og:type" content="article">' );
 
@@ -381,17 +392,63 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 		$this->assertSame( array( $shop_url ), $tags['og:url'] );
 		$this->assertSame( array( 'Fresh coffee.' ), $tags['og:description'] );
 		$this->assertSame( array( 'Test store' ), $tags['og:site_name'] );
+		$this->assertSame( $expected_locale, $tags['og:locale'] ?? array() );
 		$this->assertSame( array( wp_get_attachment_url( (int) $this->product->get_image_id() ) ), $tags['og:image'] );
 		$this->assertSame( array( '1200' ), $tags['og:image:width'] );
 		$this->assertSame( array( '800' ), $tags['og:image:height'] );
 		$this->assertSame( array( 'Product photo' ), $tags['og:image:alt'] );
 		$this->assertSame( array( 'summary_large_image' ), $tags['twitter:card'] );
 
-		$tags = $this->render_meta_tags( '<meta property="og:image" content="https://example.org/provider.jpg"><meta property="og:image:width" content="600">' );
+		$tags = $this->render_meta_tags( '<meta property="og:image" content="https://example.org/provider.jpg"><meta property="og:image:width" content="600"><meta property="og:locale" content="fr_FR">' );
 		$this->assertSame( array( 'https://example.org/provider.jpg' ), $tags['og:image'] );
 		$this->assertSame( array( '600' ), $tags['og:image:width'] );
+		$this->assertSame( array( 'fr_FR' ), $tags['og:locale'] );
 		$this->assertArrayNotHasKey( 'og:image:height', $tags );
 		$this->assertSame( array( 'summary_large_image' ), $tags['twitter:card'] );
+
+		$term_id = self::factory()->term->create(
+			array(
+				'taxonomy' => 'product_cat',
+				'name'     => 'Coffee beans',
+			)
+		);
+		wp_set_object_terms( $this->product->get_id(), $term_id, 'product_cat' );
+		$term = get_term( $term_id, 'product_cat' );
+		$this->go_to( get_term_link( $term ) );
+		$context = null;
+		add_filter(
+			'woocommerce_open_graph_tags',
+			static function ( $tags, $source ) use ( &$context ) {
+				$context = $source;
+				return $tags;
+			},
+			10,
+			2
+		);
+
+		$tags = $this->render_meta_tags( '' );
+		$this->assertSame( array( 'Coffee beans' ), $tags['og:title'] ?? array(), 'The category archive should use the category name.' );
+		$this->assertInstanceOf( \WP_Term::class, $context, 'The filter should receive a term.' );
+		$this->assertSame( $term_id, $context->term_id, 'The filter should receive the queried category.' );
+	}
+
+	/**
+	 * @testdox Should use the category name as the preview title on paginated archives.
+	 */
+	public function test_paginated_category_title(): void {
+		$term_id = self::factory()->term->create(
+			array(
+				'taxonomy' => 'product_cat',
+				'name'     => 'Coffee beans',
+			)
+		);
+		wp_set_object_terms( $this->product->get_id(), $term_id, 'product_cat' );
+		$this->go_to( get_term_link( $term_id, 'product_cat' ) );
+		set_query_var( 'paged', 2 );
+
+		$tags = $this->render_meta_tags( '' );
+
+		$this->assertSame( array( 'Coffee beans' ), $tags['og:title'] ?? array(), 'The title should not include the page number.' );
 	}
 
 	/**
