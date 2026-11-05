@@ -33,7 +33,8 @@
 	// The text column sets the card height, so the image is positioned out of the flow.
 	&__media {
 		position: relative;
-		flex: 0 0 var(--wpds-dimension-surface-width-md);
+		// Narrow enough that the shorter cards' images don't look stretched next to Purple's.
+		flex: 0 0 360px;
 		border: 1px solid var(--wpds-color-stroke-surface-neutral);
 		border-radius: var(--wpds-border-radius-md);
 		overflow: hidden;
@@ -68,10 +69,18 @@
 		align-items: flex-start;
 		gap: var(--wpds-dimension-gap-xs);
 
-		// A badge above the title gets a little more room than the description below it.
+		// A badge above the title gets more room than the description below it.
 		> h2:not(:first-child) {
-			margin-block-start: var(--wpds-dimension-gap-xs);
+			margin-block-start: var(--wpds-dimension-gap-sm);
 		}
+	}
+
+	// The Purple card's checklist sits a little closer to the description than the buttons do.
+	&__intro {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: var(--wpds-dimension-gap-lg);
 	}
 
 	&__footer {

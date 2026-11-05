@@ -57,6 +57,28 @@ class PurpleCysPrototype {
 		add_action( 'admin_head', array( $this, 'output_admin_bar_css' ) );
 		add_action( 'wp_head', array( $this, 'output_admin_bar_css' ) );
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'add_shared_settings' ) );
+		add_filter( 'block_editor_settings_all', array( $this, 'set_site_editor_back_link' ), 10, 2 );
+	}
+
+	/**
+	 * Send the Site Editor's back button to "Customize your store" when Purple's preview was opened from there.
+	 *
+	 * @param mixed $settings Block editor settings.
+	 * @param mixed $context  Block editor context.
+	 * @return mixed
+	 */
+	public function set_site_editor_back_link( $settings, $context ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only changes a link target.
+		$from_cys = ! empty( $_GET['purple_cys_return'] );
+
+		if ( ! $from_cys || ! is_array( $settings ) || ! $context instanceof \WP_Block_Editor_Context || 'core/edit-site' !== $context->name ) {
+			return $settings;
+		}
+
+		$settings['__experimentalDashboardLink']     = $this->get_cys_url();
+		$settings['__experimentalDashboardLinkText'] = __( 'Back to Customize your store', 'woocommerce' );
+
+		return $settings;
 	}
 
 	/**

@@ -2,13 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Card, Link, Text } from '@wordpress/ui';
+import { Card, Text } from '@wordpress/ui';
 
 /**
  * Internal dependencies
  */
 import { LinkButton } from './theme-card';
-import { completeCustomizeStoreTask } from '../task-completion';
 import { getSiteEditorUrl } from '../urls';
 import purplePreview from '../assets/purple-preview.jpg';
 
@@ -39,13 +38,9 @@ export const PurpleSuccess = ( { homeUrl }: { homeUrl: string } ) => (
 				<LinkButton href={ getSiteEditorUrl() }>
 					{ __( 'Customize in Site Editor', 'woocommerce' ) }
 				</LinkButton>
-				<Link
-					href={ homeUrl }
-					openInNewTab
-					onClick={ () => void completeCustomizeStoreTask() }
-				>
+				<LinkButton variant="outline" href={ homeUrl } isExternal>
 					{ __( 'View store', 'woocommerce' ) }
-				</Link>
+				</LinkButton>
 			</div>
 		</Card.Content>
 	</Card.Root>

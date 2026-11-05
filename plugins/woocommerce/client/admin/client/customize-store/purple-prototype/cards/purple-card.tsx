@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { Badge, Button, Link, Text } from '@wordpress/ui';
+import { Badge, Button, Text } from '@wordpress/ui';
 import { Icon, check, error } from '@wordpress/icons';
 import clsx from 'clsx';
 import type { ComponentProps, MouseEvent } from 'react';
@@ -218,13 +218,9 @@ const Actions = ( {
 					<LinkButton href={ getSiteEditorUrl() }>
 						{ __( 'Customize in Site Editor', 'woocommerce' ) }
 					</LinkButton>
-					<Link
-						href={ homeUrl }
-						openInNewTab
-						onClick={ () => void completeCustomizeStoreTask() }
-					>
+					<LinkButton variant="outline" href={ homeUrl } isExternal>
 						{ __( 'View store', 'woocommerce' ) }
-					</Link>
+					</LinkButton>
 				</>
 			);
 		case 'error':
@@ -265,25 +261,27 @@ export const PurpleCard = ( props: PurpleCardProps ) => {
 				/>
 			}
 		>
-			<div className="purple-cys-theme-card__header">
-				<Badge intent={ copy.badgeIntent }>{ copy.badge }</Badge>
-				<Text variant="heading-xl" render={ <h2 /> }>
-					{ __(
-						'Built by WooCommerce, for your store',
-						'woocommerce'
-					) }
-				</Text>
-				<Text
-					className="purple-cys-theme-card__description"
-					render={ <p /> }
-				>
-					{ __(
-						'A free theme made for stores, so your shop looks polished from day one.',
-						'woocommerce'
-					) }
-				</Text>
+			<div className="purple-cys-theme-card__intro">
+				<div className="purple-cys-theme-card__header">
+					<Badge intent={ copy.badgeIntent }>{ copy.badge }</Badge>
+					<Text variant="heading-xl" render={ <h2 /> }>
+						{ __(
+							'Built by WooCommerce, for your store',
+							'woocommerce'
+						) }
+					</Text>
+					<Text
+						className="purple-cys-theme-card__description"
+						render={ <p /> }
+					>
+						{ __(
+							'A free theme made for stores, so your shop looks polished from day one.',
+							'woocommerce'
+						) }
+					</Text>
+				</div>
+				<Benefits />
 			</div>
-			<Benefits />
 			<div className="purple-cys-theme-card__footer">
 				<div className="purple-cys-theme-card__actions">
 					<Actions { ...props } />

@@ -23,9 +23,12 @@ export const rememberPreviewReturn = () =>
 
 export const getSiteEditorUrl = () => getAdminLink( 'site-editor.php' );
 
+// `purple_cys_return` sends the Site Editor's back button to "Customize your store".
 export const getLivePreviewUrl = ( slug: string ) =>
 	getAdminLink(
-		`site-editor.php?wp_theme_preview=${ encodeURIComponent( slug ) }`
+		`site-editor.php?wp_theme_preview=${ encodeURIComponent(
+			slug
+		) }&purple_cys_return=1`
 	);
 
 export const getMarketplaceThemesUrl = () =>
