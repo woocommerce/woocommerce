@@ -42,6 +42,11 @@ final class ProductImportLock {
 	private const ADMIN_LOCK_STALE_AFTER = MINUTE_IN_SECONDS * 2;
 
 	/**
+	 * Minimum time between lock refreshes during a batch, in seconds.
+	 */
+	private const REFRESH_INTERVAL = MINUTE_IN_SECONDS;
+
+	/**
 	 * Try to take the site-wide product import lock.
 	 *
 	 * Modeled on `WC_Install::create_lock()`: the option row acts as a mutex through an
@@ -49,7 +54,7 @@ final class ProductImportLock {
 	 * `IMPORT_LOCK_STALE_AFTER` seconds so a crashed run cannot block imports forever.
 	 * An admin import takes over another admin import's lock after only `ADMIN_LOCK_STALE_AFTER`
 	 * seconds, because closing the browser tab leaves no way to release it. A running import
-	 * refreshes the lock on each batch, so it stays protected.
+	 * keeps refreshing the lock, so it stays protected.
 	 *
 	 * @param string $holder Who is taking the lock, one of the `HOLDER_*` constants.
 	 * @return bool Whether the lock was acquired.
@@ -112,6 +117,20 @@ final class ProductImportLock {
 				self::IMPORT_LOCK_OPTION
 			)
 		);
+	}
+
+	/**
+	 * Refresh the lock if its last refresh is old enough.
+	 *
+	 * Called before each row, because rows with slow remote images can make one batch outlast the
+	 * lock's stale timeout. The check limits this to one write per `REFRESH_INTERVAL`.
+	 */
+	public function refresh_if_due(): void {
+		$age = $this->get_age();
+
+		if ( null !== $age && $age >= self::REFRESH_INTERVAL ) {
+			$this->refresh();
+		}
 	}
 
 	/**

@@ -153,6 +153,32 @@ class ProductImportLockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A due refresh should only write once the lock is a minute old, so importing rows does not write on every row.
+	 * @testWith [59, 59]
+	 *           [60, 0]
+	 *
+	 * @param int $age          How long ago the lock was last refreshed.
+	 * @param int $expected_age The age expected afterwards.
+	 */
+	public function test_refresh_if_due_only_refreshes_an_old_enough_lock( int $age, int $expected_age ): void {
+		$this->sut->acquire( ProductImportLock::HOLDER_ADMIN );
+		$this->age_lock( ProductImportLock::HOLDER_ADMIN, $age );
+
+		$this->sut->refresh_if_due();
+
+		$this->assertEqualsWithDelta( $expected_age, $this->sut->get_age(), 5 );
+	}
+
+	/**
+	 * @testdox A due refresh should not create a lock when no import is running.
+	 */
+	public function test_refresh_if_due_does_nothing_without_a_lock(): void {
+		$this->sut->refresh_if_due();
+
+		$this->assertNull( $this->sut->get_age() );
+	}
+
+	/**
 	 * Rewrite the lock so it looks like it was last refreshed in the past.
 	 *
 	 * @param string $holder  The lock holder to store.
