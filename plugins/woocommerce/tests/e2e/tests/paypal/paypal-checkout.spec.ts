@@ -161,10 +161,17 @@ test.describe(
 		} ) => {
 			await addProductToCart( page, product.id );
 			await page.goto( CLASSIC_CHECKOUT_PAGE.slug );
+			const checkoutUrl = page.url();
+			const { billing } = getFakeCustomer();
 
 			await test.step( 'Fill guest billing details', async () => {
-				const { billing } = getFakeCustomer();
-
+				// Set the country first: changing it re-renders the address fields.
+				await page
+					.locator( '#billing_country' )
+					.selectOption( billing.country );
+				await page
+					.locator( '#billing_state' )
+					.selectOption( billing.state );
 				await page
 					.getByRole( 'textbox', { name: 'First name' } )
 					.fill( billing.first_name );
@@ -209,8 +216,45 @@ test.describe(
 			// Clean up the pending order this checkout created.
 			await deleteOrderFromPayPalUrl( restApi, paypalUrl );
 
-			expect( paypalUrl ).toContain( 'paypal.com' );
-			expect( paypalUrl ).toContain( 'cmd=_cart' );
+			const parsedPayPalUrl = new URL( paypalUrl );
+			const params = parsedPayPalUrl.searchParams;
+
+			expect( parsedPayPalUrl.host ).toBe( 'www.paypal.com' );
+			expect( parsedPayPalUrl.pathname ).toBe( '/cgi-bin/webscr' );
+			expect( params.get( 'cmd' ) ).toBe( '_cart' );
+			expect( params.get( 'business' ) ).toBe( PAYPAL_TEST_EMAIL );
+			expect( params.get( 'currency_code' ) ).toBe( 'USD' );
+			expect( params.get( 'paymentaction' ) ).toBe( 'sale' );
+			expect( params.get( 'no_shipping' ) ).toBe( '1' );
+
+			// Intentionally throw if `custom` is missing or not valid JSON.
+			const custom = JSON.parse( params.get( 'custom' ) ?? '' );
+			expect( custom.order_id ).toBeGreaterThan( 0 );
+			expect( custom.order_key ).toBeTruthy();
+
+			// Billing fields.
+			expect( params.get( 'first_name' ) ).toBe( billing.first_name );
+			expect( params.get( 'last_name' ) ).toBe( billing.last_name );
+			expect( params.get( 'address1' ) ).toBe( billing.address_1 );
+			expect( params.get( 'city' ) ).toBe( billing.city );
+			expect( params.get( 'state' ) ).toBe( billing.state );
+			expect( params.get( 'zip' ) ).toBe( billing.postcode );
+			expect( params.get( 'country' ) ).toBe( billing.country );
+			expect( params.get( 'email' ) ).toBe( billing.email );
+
+			// Product line.
+			expect( params.get( 'item_name_1' ) ).toBe( product.name );
+			expect( params.get( 'amount_1' ) ).toBe( product.price );
+			expect( params.get( 'quantity_1' ) ).toBe( '1' );
+
+			// Return URLs point back to this store.
+			const storeOrigin = `${ new URL( checkoutUrl ).origin }/`;
+			expect( params.get( 'return' )?.startsWith( storeOrigin ) ).toBe(
+				true
+			);
+			expect(
+				params.get( 'cancel_return' )?.startsWith( storeOrigin )
+			).toBe( true );
 		} );
 	}
 );
