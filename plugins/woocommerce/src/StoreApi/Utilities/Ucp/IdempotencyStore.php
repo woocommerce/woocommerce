@@ -240,17 +240,15 @@ class IdempotencyStore {
 		/**
 		 * Filters how long a completed UCP idempotency record is kept, in seconds.
 		 *
-		 * How long a retry carrying the same key is answered from storage. One hour by default,
-		 * since an agent retries within seconds and a longer window would keep a shopper's basket
-		 * on disk after anything could replay it. Raise it for a client that retries more slowly.
+		 * The UCP spec requires at least 24 hours: https://ucp.dev/2026-04-08/specification/checkout-rest/
 		 *
 		 * @since 11.4.0
 		 *
-		 * @param int $seconds Retention window. Default one hour.
+		 * @param int $seconds Retention window. Default one day.
 		 */
-		$retention = (int) apply_filters( 'woocommerce_ucp_idempotency_retention_seconds', HOUR_IN_SECONDS );
+		$retention = (int) apply_filters( 'woocommerce_ucp_idempotency_retention_seconds', DAY_IN_SECONDS );
 
-		return $retention > 0 ? $retention : HOUR_IN_SECONDS;
+		return $retention > 0 ? $retention : DAY_IN_SECONDS;
 	}
 
 	/**

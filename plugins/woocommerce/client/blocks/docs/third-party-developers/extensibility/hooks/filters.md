@@ -2044,13 +2044,13 @@ apply_filters( 'woocommerce_ucp_idempotency_retention_seconds', int $seconds )
 
 ### Description
 
-How long a retry carrying the same key is answered from storage. One hour by default, since an agent retries within seconds and a longer window would keep a shopper's basket on disk after anything could replay it. Raise it for a client that retries more slowly.
+How long a retry carrying the same key is answered from storage. The UCP spec requires at least 24 hours: https://ucp.dev/2026-04-08/specification/checkout-rest/
 
 ### Parameters
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| $seconds | int | Retention window. Default one hour. |
+| $seconds | int | Retention window. Default one day. |
 
 ### Source
 
