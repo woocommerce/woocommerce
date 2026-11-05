@@ -91,11 +91,37 @@ class ProductImportLockTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox An admin import should take over a fresh lock held by another admin import, so an abandoned run can be retried.
+	 * @testdox An admin import should not take over a fresh lock held by another admin import, so two runs cannot overlap.
 	 */
-	public function test_admin_takes_over_a_fresh_admin_lock(): void {
+	public function test_admin_does_not_take_over_a_fresh_admin_lock(): void {
 		$this->assertTrue( $this->sut->acquire( ProductImportLock::HOLDER_ADMIN ) );
+		$this->assertFalse( $this->sut->acquire( ProductImportLock::HOLDER_ADMIN ) );
+	}
+
+	/**
+	 * @testdox An admin import should take over another admin import's lock after 2 minutes, so an abandoned run can be retried.
+	 */
+	public function test_admin_takes_over_an_admin_lock_after_two_minutes(): void {
 		$this->assertTrue( $this->sut->acquire( ProductImportLock::HOLDER_ADMIN ) );
+		$this->age_lock( ProductImportLock::HOLDER_ADMIN, 2 * MINUTE_IN_SECONDS + 1 );
+
+		$this->assertTrue( $this->sut->acquire( ProductImportLock::HOLDER_ADMIN ) );
+	}
+
+	/**
+	 * @testdox A lock older than 2 minutes should still be honored when the holders are not both admin imports.
+	 * @testWith ["admin", "cli"]
+	 *           ["cli", "admin"]
+	 *           ["cli", "cli"]
+	 *
+	 * @param string $holder     The holder of the existing lock.
+	 * @param string $challenger The holder trying to take the lock.
+	 */
+	public function test_two_minute_takeover_only_applies_between_admin_imports( string $holder, string $challenger ): void {
+		$this->assertTrue( $this->sut->acquire( $holder ) );
+		$this->age_lock( $holder, 2 * MINUTE_IN_SECONDS + 1 );
+
+		$this->assertFalse( $this->sut->acquire( $challenger ) );
 	}
 
 	/**
@@ -123,6 +149,23 @@ class ProductImportLockTest extends WC_Unit_Test_Case {
 		$this->sut->refresh();
 
 		$this->assertFalse( $this->sut->acquire( ProductImportLock::HOLDER_ADMIN ) );
-		$this->assertSame( 0, $this->sut->get_age() );
+		$this->assertLessThan( MINUTE_IN_SECONDS, $this->sut->get_age() );
+	}
+
+	/**
+	 * Rewrite the lock so it looks like it was last refreshed in the past.
+	 *
+	 * @param string $holder  The lock holder to store.
+	 * @param int    $seconds How long ago the lock should appear to have been refreshed.
+	 */
+	private function age_lock( string $holder, int $seconds ): void {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update(
+			$wpdb->options,
+			array( 'option_value' => ( time() - $seconds ) . ':' . $holder ),
+			array( 'option_name' => 'wc_product_importing' )
+		);
 	}
 }

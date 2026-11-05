@@ -1,3 +1,4 @@
 Significance: patch
-Type: dev
-Comment: Add a site-wide product import lock for the upcoming CLI import; nothing contends for it yet.
+Type: tweak
+
+Stop two product CSV imports overlapping, and show the error on the import screen instead of a frozen progress bar.
