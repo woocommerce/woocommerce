@@ -251,6 +251,21 @@ class RegressionGuardChecksTest extends WC_Unit_Test_Case {
 		$jsonld['name']            = 'Another product';
 		$store[ $path ]            = array( 200, '<html><script type="application/ld+json">' . wp_json_encode( $jsonld ) . '</script><h1>' . $this->product->get_name() . '</h1></html>' );
 		$this->assertFalse( $this->results( $store )['schema_matches_product'], 'Name' );
+
+		remove_all_filters( 'pre_http_request' );
+		$jsonld['name']            = $this->product->get_name();
+		$jsonld['offers']['price'] = '99.00';
+		$related                   = array(
+			'@type'  => 'Product',
+			'name'   => 'Related product',
+			'offers' => array(
+				'@type'         => 'Offer',
+				'price'         => $this->product->get_price(),
+				'priceCurrency' => 'USD',
+			),
+		);
+		$store[ $path ]            = array( 200, '<html><script type="application/ld+json">' . wp_json_encode( array( $jsonld, $related ) ) . '</script><h1>' . $this->product->get_name() . '</h1></html>' );
+		$this->assertFalse( $this->results( $store )['schema_matches_product'], 'A related product at the right price doesn\'t stand in for the product\'s own offer' );
 	}
 
 	/**

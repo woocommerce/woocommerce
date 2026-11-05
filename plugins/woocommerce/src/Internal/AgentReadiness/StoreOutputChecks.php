@@ -1306,8 +1306,9 @@ class StoreOutputChecks {
 	}
 
 	/**
-	 * Whether a Product item names the product, and, for a product with one price, an offer has that price
-	 * with or without tax. Offers without a price aren't judged here: product_offer_jsonld reports them.
+	 * Whether a Product item names the product, and, for a product with one price, one of its own items
+	 * offers that price with or without tax; a related product's offer at that price doesn't count.
+	 * Offers without a price aren't judged here: product_offer_jsonld reports them.
 	 *
 	 * @param array<int, array<string, mixed>> $products Product items.
 	 * @param \WC_Product|null                 $product  The product of the page.
@@ -1323,7 +1324,7 @@ class StoreOutputChecks {
 			return true;
 		}
 		$prices = array();
-		foreach ( self::offers( $products ) as $offer ) {
+		foreach ( self::offers( self::own_items( $products, $product ) ) as $offer ) {
 			foreach ( array_merge( array( $offer['price'] ?? null ), array_column( self::as_list( $offer['priceSpecification'] ?? null ), 'price' ) ) as $price ) {
 				if ( is_numeric( $price ) ) {
 					$prices[] = (float) $price;
