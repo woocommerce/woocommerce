@@ -37,7 +37,7 @@ class ProductAttributesQueryTest extends WC_Unit_Test_Case {
 	 * @testdox Should return the fields of the wc/v3 attribute read, with the terms and their count.
 	 */
 	public function test_output_parity_and_terms(): void {
-		$attribute = WC_Helper_Product::create_attribute( 'Color', array( 'Red', 'Blue' ) );
+		$attribute = WC_Helper_Product::create_attribute( 'Test Color', array( 'Red', 'Blue' ) );
 		update_term_meta( $attribute['term_ids'][0], 'order', 2 );
 		update_term_meta( $attribute['term_ids'][1], 'order', 1 );
 		$expected = ( new \WC_REST_Product_Attributes_Controller() )
@@ -62,7 +62,7 @@ class ProductAttributesQueryTest extends WC_Unit_Test_Case {
 	 * @testdox Should cap the terms of each attribute while still counting all of them.
 	 */
 	public function test_caps_terms_per_attribute(): void {
-		$attribute = WC_Helper_Product::create_attribute( 'Size', array( 'S', 'M', 'L' ) );
+		$attribute = WC_Helper_Product::create_attribute( 'Test Size', array( 'S', 'M', 'L' ) );
 
 		$capped = $this->sut->execute(
 			array(
@@ -87,23 +87,25 @@ class ProductAttributesQueryTest extends WC_Unit_Test_Case {
 	 * @testdox Should filter by search and page through the attributes with a total.
 	 */
 	public function test_search_and_pagination(): void {
-		foreach ( array( 'Color', 'Size', 'Material' ) as $name ) {
-			WC_Helper_Product::create_attribute( $name, array() );
+		$ids = array();
+		foreach ( array( 'Test Fabric', 'Test Finish', 'Test Pattern' ) as $name ) {
+			$ids[] = WC_Helper_Product::create_attribute( $name, array() )['attribute_id'];
 		}
 
-		$search = $this->sut->execute( array( 'search' => 'COL' ) );
+		$search = $this->sut->execute( array( 'search' => 'test fin' ) );
 		$page   = $this->sut->execute(
 			array(
+				'include'  => $ids,
 				'per_page' => 2,
 				'page'     => 2,
 			)
 		);
 
-		$this->assertSame( array( 'Color' ), wp_list_pluck( $search['attributes'], 'name' ) );
+		$this->assertSame( array( 'Test Finish' ), wp_list_pluck( $search['attributes'], 'name' ) );
 		$this->assertSame( 1, $search['total'] );
 		$this->assertSame( 3, $page['total'] );
 		$this->assertSame( 2, $page['total_pages'] );
-		$this->assertSame( array( 'Size' ), wp_list_pluck( $page['attributes'], 'name' ), 'Attributes are sorted by slug.' );
+		$this->assertSame( array( 'Test Pattern' ), wp_list_pluck( $page['attributes'], 'name' ), 'Attributes are sorted by slug.' );
 	}
 
 	/**
