@@ -19,6 +19,7 @@ use Automattic\WooCommerce\Enums\DimensionUnit;
 use Automattic\WooCommerce\Enums\WeightUnit;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -236,7 +237,17 @@ class WC_Structured_Data {
 		$shop_url  = home_url();
 		$currency  = get_woocommerce_currency();
 		$permalink = get_permalink( $product->get_id() );
-		$image     = wp_get_attachment_url( (int) $product->get_image_id() );
+		wc_get_container()->get( ProductUtil::class )->prime_image_caches( array( $product ) );
+		$image   = wp_get_attachment_url( (int) $product->get_image_id() );
+		$gallery = $product->get_gallery_image_ids();
+		$gallery = array_unique( array_filter( array_map( 'intval', $gallery ) ) );
+		$images  = $image ? array( $image ) : array();
+		foreach ( $gallery as $image_id ) {
+			$gallery_image = wp_attachment_is_image( $image_id ) ? wp_get_attachment_url( $image_id ) : false;
+			if ( $gallery_image && ! in_array( $gallery_image, $images, true ) ) {
+				$images[] = $gallery_image;
+			}
+		}
 
 		$markup = array(
 			'@type'       => 'Product',
@@ -246,8 +257,8 @@ class WC_Structured_Data {
 			'description' => wp_strip_all_tags( do_shortcode( $product->get_short_description() ? $product->get_short_description() : $product->get_description() ) ),
 		);
 
-		if ( $image ) {
-			$markup['image'] = $image;
+		if ( $images ) {
+			$markup['image'] = 1 === count( $images ) ? $images[0] : $images;
 		}
 
 		// Declare SKU or fallback to ID.
