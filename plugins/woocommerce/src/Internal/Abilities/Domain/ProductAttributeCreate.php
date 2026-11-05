@@ -93,8 +93,24 @@ class ProductAttributeCreate extends AbstractDomainAbility implements AbilityDef
 			return new \WP_Error( 'woocommerce_ability_product_attribute_name_empty', __( 'The attribute name is empty.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
+		$slug        = wc_attribute_taxonomy_slug( $input['slug'] ?? $name );
+		$existing_id = wc_attribute_taxonomy_id_by_name( $slug );
+		// wc_create_attribute() only checks registered taxonomies, which misses an attribute created earlier in this request.
+		if ( $existing_id > 0 ) {
+			return new \WP_Error(
+				self::CREATE_ERRORS['invalid_product_attribute_slug_already_exists'],
+				/* translators: %s: attribute slug. */
+				sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), $slug ),
+				array(
+					'status' => 400,
+					'id'     => $existing_id,
+				)
+			);
+		}
+
+		// Product writes resolve a name by its sanitized slug first, then by label ignoring case.
+		$name_slug = wc_attribute_taxonomy_slug( $name );
 		foreach ( wc_get_attribute_taxonomies() as $attribute ) {
-			// Product writes find a global attribute by its label, ignoring case, so two labels must not match.
 			if ( 0 === strcasecmp( (string) $attribute->attribute_label, $name ) ) {
 				return new \WP_Error(
 					'woocommerce_ability_product_attribute_name_exists',
@@ -106,20 +122,17 @@ class ProductAttributeCreate extends AbstractDomainAbility implements AbilityDef
 					)
 				);
 			}
-		}
-
-		$slug = wc_sanitize_taxonomy_name( $input['slug'] ?? $name );
-		$slug = (string) preg_replace( '/^pa\_/', '', $slug );
-		if ( wc_attribute_taxonomy_id_by_name( $slug ) > 0 ) {
-			return new \WP_Error(
-				self::CREATE_ERRORS['invalid_product_attribute_slug_already_exists'],
-				/* translators: %s: attribute slug. */
-				sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), $slug ),
-				array(
-					'status' => 400,
-					'id'     => wc_attribute_taxonomy_id_by_name( $slug ),
-				)
-			);
+			if ( wc_attribute_taxonomy_slug( (string) $attribute->attribute_label ) === $slug || $attribute->attribute_name === $name_slug ) {
+				return new \WP_Error(
+					'woocommerce_ability_product_attribute_name_ambiguous',
+					/* translators: 1: attribute name, 2: existing attribute name. */
+					sprintf( __( 'Product writes could not tell "%1$s" apart from the global attribute "%2$s". Choose another name or slug.', 'woocommerce' ), $name, $attribute->attribute_label ),
+					array(
+						'status' => 400,
+						'id'     => (int) $attribute->attribute_id,
+					)
+				);
+			}
 		}
 
 		$id = wc_create_attribute(

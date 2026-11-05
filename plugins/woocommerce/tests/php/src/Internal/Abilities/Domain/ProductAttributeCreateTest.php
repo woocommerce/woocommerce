@@ -75,9 +75,11 @@ class ProductAttributeCreateTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should refuse an input it cannot store, with an ability error code.
-	 * @testWith ["Other", "size", "woocommerce_ability_product_attribute_slug_exists"]
-	 *           ["Other", "pa_size", "woocommerce_ability_product_attribute_slug_exists"]
-	 *           ["SIZE", "other-size", "woocommerce_ability_product_attribute_name_exists"]
+	 * @testWith ["Other", "test-colour", "woocommerce_ability_product_attribute_slug_exists"]
+	 *           ["Other", "pa_test-colour", "woocommerce_ability_product_attribute_slug_exists"]
+	 *           ["TEST COLOR", "other-color", "woocommerce_ability_product_attribute_name_exists"]
+	 *           ["Shade", "test-color", "woocommerce_ability_product_attribute_name_ambiguous"]
+	 *           ["Test Colour", "shade", "woocommerce_ability_product_attribute_name_ambiguous"]
 	 *           ["Type", "type", "woocommerce_ability_product_attribute_slug_reserved"]
 	 *           ["Long", "abcdefghijklmnopqrstuvwxyz0123", "woocommerce_ability_product_attribute_slug_too_long"]
 	 *           ["<b></b>", "blank", "woocommerce_ability_product_attribute_name_empty"]
@@ -86,7 +88,14 @@ class ProductAttributeCreateTest extends WC_Unit_Test_Case {
 	 * @param string $code Expected error code.
 	 */
 	public function test_refuses_invalid_attribute( string $name, string $slug, string $code ): void {
-		WC_Helper_Product::create_attribute( 'Size', array() );
+		$this->assertIsInt(
+			wc_create_attribute(
+				array(
+					'name' => 'Test Color',
+					'slug' => 'test-colour',
+				)
+			)
+		);
 		$before = count( wc_get_attribute_taxonomies() );
 
 		$result = $this->sut->execute(
@@ -134,8 +143,8 @@ class ProductAttributeCreateTest extends WC_Unit_Test_Case {
 	 * @testdox Should let product-update turn a simple product into a variable one with two new global attributes and four priced variations.
 	 */
 	public function test_product_update_uses_created_attributes(): void {
-		$color = $this->sut->execute( array( 'name' => 'Color' ) )['attribute'];
-		$size  = $this->sut->execute( array( 'name' => 'Size' ) )['attribute'];
+		$color = $this->sut->execute( array( 'name' => 'Test Color' ) )['attribute'];
+		$size  = $this->sut->execute( array( 'name' => 'Test Size' ) )['attribute'];
 		foreach ( array( $color, $size ) as $attribute ) {
 			// WooCommerce registers attribute taxonomies on init, which already ran.
 			register_taxonomy( $attribute['slug'], array( 'product' ), array( 'hierarchical' => false ) );
@@ -176,7 +185,7 @@ class ProductAttributeCreateTest extends WC_Unit_Test_Case {
 						'options' => array( 'Red', 'Blue' ),
 					),
 					array(
-						'name'    => 'Size',
+						'name'    => 'Test Size',
 						'global'  => true,
 						'options' => array( 'S', 'M' ),
 					),
@@ -189,11 +198,11 @@ class ProductAttributeCreateTest extends WC_Unit_Test_Case {
 		$saved = wc_get_product( $product->get_id() );
 		$this->assertInstanceOf( \WC_Product_Variable::class, $saved );
 		$this->assertCount( 4, $saved->get_children() );
-		$this->assertSame( array( 'red', 'blue' ), wc_get_product_terms( $saved->get_id(), 'pa_color', array( 'fields' => 'slugs' ) ) );
+		$this->assertSame( array( 'red', 'blue' ), wc_get_product_terms( $saved->get_id(), $color['slug'], array( 'fields' => 'slugs' ) ) );
 		$saved_prices = array();
 		foreach ( $saved->get_children() as $child_id ) {
 			$variation = wc_get_product( $child_id );
-			$key       = $variation->get_attribute( 'pa_color' ) . '-' . $variation->get_attribute( 'pa_size' );
+			$key       = $variation->get_attribute( $color['slug'] ) . '-' . $variation->get_attribute( $size['slug'] );
 			$saved_prices[ strtolower( (string) $key ) ] = $variation->get_regular_price();
 		}
 		ksort( $prices );
@@ -215,6 +224,7 @@ class ProductAttributeCreateTest extends WC_Unit_Test_Case {
 		$result = $update->execute(
 			array(
 				'id'         => $product->get_id(),
+				'type'       => 'variable',
 				'attributes' => array(
 					array(
 						'name'    => 'Missing',
