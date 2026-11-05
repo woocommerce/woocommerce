@@ -61,7 +61,8 @@ class PurpleCysPrototype {
 	}
 
 	/**
-	 * Send the Site Editor's back button to "Customize your store" when Purple's preview was opened from there.
+	 * Point the Site Editor's back button back into WooCommerce when it was opened from "Customize your store".
+	 * Purple's preview returns to the task; the other Site Editor buttons complete it, so they return to WooCommerce Home.
 	 *
 	 * @param mixed $settings Block editor settings.
 	 * @param mixed $context  Block editor context.
@@ -69,14 +70,19 @@ class PurpleCysPrototype {
 	 */
 	public function set_site_editor_back_link( $settings, $context ) {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only changes a link target.
-		$from_cys = ! empty( $_GET['purple_cys_return'] );
+		$return_to = isset( $_GET['purple_cys_return'] ) ? sanitize_key( wp_unslash( $_GET['purple_cys_return'] ) ) : '';
 
-		if ( ! $from_cys || ! is_array( $settings ) || ! $context instanceof \WP_Block_Editor_Context || 'core/edit-site' !== $context->name ) {
+		if ( '' === $return_to || ! is_array( $settings ) || ! $context instanceof \WP_Block_Editor_Context || 'core/edit-site' !== $context->name ) {
 			return $settings;
 		}
 
-		$settings['__experimentalDashboardLink']     = $this->get_cys_url();
-		$settings['__experimentalDashboardLinkText'] = __( 'Back to Customize your store', 'woocommerce' );
+		if ( 'home' === $return_to ) {
+			$settings['__experimentalDashboardLink']     = admin_url( 'admin.php?page=wc-admin' );
+			$settings['__experimentalDashboardLinkText'] = __( 'Back to WooCommerce Home', 'woocommerce' );
+		} else {
+			$settings['__experimentalDashboardLink']     = $this->get_cys_url();
+			$settings['__experimentalDashboardLinkText'] = __( 'Back to Customize your store', 'woocommerce' );
+		}
 
 		return $settings;
 	}

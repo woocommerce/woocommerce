@@ -21,14 +21,18 @@ export const getPreviewDemoUrl = ( slug: string ) =>
 export const rememberPreviewReturn = () =>
 	window.sessionStorage.setItem( 'purpleCysReturn', window.location.href );
 
-export const getSiteEditorUrl = () => getAdminLink( 'site-editor.php' );
+const WOO_HOME_PATH = 'admin.php?page=wc-admin';
 
-// `purple_cys_return` sends the Site Editor's back button to "Customize your store".
+// `purple_cys_return` sets where the Site Editor's back button goes: WooCommerce Home once
+// the task is done, or back to "Customize your store" from Purple's preview.
+export const getSiteEditorUrl = () =>
+	getAdminLink( 'site-editor.php?purple_cys_return=home' );
+
 export const getLivePreviewUrl = ( slug: string ) =>
 	getAdminLink(
 		`site-editor.php?wp_theme_preview=${ encodeURIComponent(
 			slug
-		) }&purple_cys_return=1`
+		) }&purple_cys_return=task`
 	);
 
 export const getMarketplaceThemesUrl = () =>
@@ -42,4 +46,10 @@ export const getMarketplaceThemesUrl = () =>
  * Where "Open Site Editor" goes for the current theme. Classic themes have no Site Editor.
  */
 export const getCurrentThemeEditorUrl = ( isBlockTheme: boolean ) =>
-	isBlockTheme ? getSiteEditorUrl() : getAdminLink( 'customize.php' );
+	isBlockTheme
+		? getSiteEditorUrl()
+		: getAdminLink(
+				`customize.php?return=${ encodeURIComponent(
+					getAdminLink( WOO_HOME_PATH )
+				) }`
+			);
