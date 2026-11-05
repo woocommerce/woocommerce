@@ -46,6 +46,25 @@ export type CompiledSchema = ( ( data: unknown ) => boolean ) & {
 };
 
 /**
+ * Whether the browser can compile every pattern in a schema.
+ *
+ * `pattern` is compiled as a JavaScript `RegExp` with the `u` flag, so this is
+ * the same check AJV makes, without needing a parser to hand.
+ *
+ * @param schema The schema to check.
+ * @return True when at least one pattern is one the browser rejects.
+ */
+export const hasUncompilablePattern = ( schema: unknown ): boolean =>
+	collectPatterns( schema ).some( ( pattern ) => {
+		try {
+			new RegExp( pattern, 'u' );
+			return false;
+		} catch {
+			return true;
+		}
+	} );
+
+/**
  * Compile a schema without letting a pattern the browser rejects take the form down.
  *
  * AJV compiles `pattern` as a JavaScript `RegExp` with the `u` flag, so a

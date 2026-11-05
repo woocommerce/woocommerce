@@ -211,31 +211,65 @@ final class JavaScriptPattern {
 	 * @return string|null Description of the construct, or null when the escape is usable.
 	 */
 	private static function check_escape_tail( string $pattern, int $index, string $escape ): ?string {
-		$length = strlen( $pattern );
-		$rest   = (string) substr( $pattern, $index + 2 );
+		$rest = (string) substr( $pattern, $index + 2 );
 
 		if ( 'c' === $escape ) {
-			return 1 === preg_match( '/^[A-Za-z]/', $rest ) ? null : 'an incomplete control escape, which JavaScript does not support';
+			return '' !== $rest && ctype_alpha( $rest[0] ) ? null : 'an incomplete control escape, which JavaScript does not support';
 		}
 
 		if ( 'x' === $escape ) {
-			return 1 === preg_match( '/^[0-9A-Fa-f]{2}/', $rest ) ? null : 'an incomplete hex escape, which JavaScript does not support';
+			$digits = substr( $rest, 0, 2 );
+
+			return 2 === strlen( $digits ) && ctype_xdigit( $digits ) ? null : 'an incomplete hex escape, which JavaScript does not support';
 		}
 
 		if ( 'u' === $escape ) {
 			if ( 0 === strpos( $rest, '{' ) ) {
-				return 1 === preg_match( '/^\{[0-9A-Fa-f]+\}/', $rest ) ? null : 'an incomplete unicode escape, which JavaScript does not support';
+				return self::has_braced_hex( $rest, 1 ) ? null : 'an incomplete unicode escape, which JavaScript does not support';
 			}
 
-			return 1 === preg_match( '/^[0-9A-Fa-f]{4}/', $rest ) ? null : 'an incomplete unicode escape, which JavaScript does not support';
+			$digits = substr( $rest, 0, 4 );
+
+			return 4 === strlen( $digits ) && ctype_xdigit( $digits ) ? null : 'an incomplete unicode escape, which JavaScript does not support';
 		}
 
 		// \p{...} and \P{...} need a property name in braces.
 		if ( 'p' === $escape || 'P' === $escape ) {
-			return 1 === preg_match( '/^\{[^}]+\}/', $rest ) ? null : 'an incomplete property escape, which JavaScript does not support';
+			return self::has_braced_name( $rest ) ? null : 'an incomplete property escape, which JavaScript does not support';
 		}
 
 		return null;
+	}
+
+	/**
+	 * Whether a brace opens at `$offset` and holds one or more hex digits up to `}`.
+	 *
+	 * @param string $text   The text to inspect.
+	 * @param int    $offset Position of the opening brace.
+	 * @return bool
+	 */
+	private static function has_braced_hex( string $text, int $offset ): bool {
+		$close = strpos( $text, '}', $offset + 1 );
+
+		if ( false === $close || $close === $offset + 1 ) {
+			return false;
+		}
+
+		return ctype_xdigit( substr( $text, $offset + 1, $close - $offset - 1 ) );
+	}
+
+	/**
+	 * Whether a `\p{...}` or `\P{...}` escape has a non-empty name in braces.
+	 *
+	 * @param string $text The text after the escape letter, starting at the brace.
+	 * @return bool
+	 */
+	private static function has_braced_name( string $text ): bool {
+		if ( 0 !== strpos( $text, '{' ) ) {
+			return false;
+		}
+
+		return 1 === preg_match( '/^\{[^}]+\}/', $text );
 	}
 
 	/**

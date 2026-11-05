@@ -32,10 +32,23 @@ class JavaScriptPatternTest extends WC_Unit_Test_Case {
 	 *           ["[\\B]"]
 	 *           ["a}"]
 	 *           ["a]"]
+	 *           ["a\\"]
+	 *           ["\\00"]
+	 *           ["\\x4"]
+	 *           ["\\u12"]
+	 *           ["\\u{}"]
+	 *           ["\\pL"]
+	 *           ["\\c1"]
+	 *           ["[\\k]"]
+	 *           ["a{"]
+	 *           ["(?x)"]
+	 *           ["(?-i)"]
+	 *           ["(?R)"]
+	 *           ["(?|a)"]
 	 *
 	 * @param string $pattern The pattern to check.
 	 */
-	public function test_unsupported_patterns_are_reported( string $pattern ) {
+	public function test_unsupported_patterns_are_reported( string $pattern ): void {
 		$this->assertNotNull(
 			JavaScriptPattern::find_unsupported_construct( $pattern ),
 			sprintf( 'The pattern "%s" should be reported as unsupported by JavaScript.', $pattern )
@@ -62,10 +75,15 @@ class JavaScriptPatternTest extends WC_Unit_Test_Case {
 	 *           ["^\\u0041$"]
 	 *           ["(?i:abc)"]
 	 *           [""]
+	 *           ["\\u{1F600}"]
+	 *           ["\\p{Script=Greek}"]
+	 *           ["(?i-s:a)"]
+	 *           ["\\cA"]
+	 *           ["\\0"]
 	 *
 	 * @param string $pattern The pattern to check.
 	 */
-	public function test_supported_patterns_are_left_alone( string $pattern ) {
+	public function test_supported_patterns_are_left_alone( string $pattern ): void {
 		$this->assertNull(
 			JavaScriptPattern::find_unsupported_construct( $pattern ),
 			sprintf( 'The pattern "%s" is valid ECMA-262 and should not be reported.', $pattern )
@@ -75,7 +93,7 @@ class JavaScriptPatternTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox A report names the construct, so the message can say what to change.
 	 */
-	public function test_report_describes_the_construct() {
+	public function test_report_describes_the_construct(): void {
 		$this->assertStringContainsString(
 			'\\-',
 			JavaScriptPattern::find_unsupported_construct( '^[0-9]{3}\\-[0-9]{4}$' )
@@ -95,7 +113,7 @@ class JavaScriptPatternTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox A character class is not read as pattern syntax.
 	 */
-	public function test_character_class_contents_are_not_read_as_syntax() {
+	public function test_character_class_contents_are_not_read_as_syntax(): void {
 		// The `+` and `{` inside the class are literals, not quantifiers.
 		$this->assertNull( JavaScriptPattern::find_unsupported_construct( '^[+{]+$' ) );
 		// A `-` may be escaped inside a class, even though `\-` throws outside one.
@@ -105,7 +123,7 @@ class JavaScriptPatternTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox An unterminated class is reported, since `u` mode throws on it.
 	 */
-	public function test_unterminated_class_is_reported() {
+	public function test_unterminated_class_is_reported(): void {
 		$this->assertNotNull( JavaScriptPattern::find_unsupported_construct( '^[a-z$' ) );
 	}
 }
