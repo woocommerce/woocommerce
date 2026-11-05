@@ -2992,10 +2992,26 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * @testdox Existing order payment should ship a physical order to billing when a filter says it needs no shipping and the store has shipping methods.
+	 * @testdox Existing order payment should ship a filtered physical order to billing when an enabled or disabled shipping method exists.
+	 * @testWith [1, 0]
+	 *           [0, 1]
+	 *
+	 * @param int $enabled_methods  Number of enabled shipping methods.
+	 * @param int $disabled_methods Number of disabled shipping methods.
 	 */
-	public function test_checkout_order_ships_filtered_physical_order_to_billing_with_shipping_methods() {
-		$this->assertGreaterThan( 0, wc_get_shipping_method_count( true ) );
+	public function test_checkout_order_ships_filtered_physical_order_to_billing_with_shipping_methods( int $enabled_methods, int $disabled_methods ) {
+		$method_counts = static function () use ( $enabled_methods, $disabled_methods ) {
+			return array(
+				'version'  => \WC_Cache_Helper::get_transient_version( 'shipping' ),
+				'legacy'   => 0,
+				'enabled'  => $enabled_methods,
+				'disabled' => $disabled_methods,
+			);
+		};
+		add_filter( 'pre_transient_wc_shipping_method_count', $method_counts );
+
+		$this->assertSame( 1, wc_get_shipping_method_count( true ) );
+		$this->assertSame( $enabled_methods, wc_get_shipping_method_count( false, true ) );
 		add_filter( 'woocommerce_order_needs_shipping', '__return_false' );
 
 		// A merchant-created order for a physical product that an extension says ships nothing, with no address yet.
@@ -3005,6 +3021,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 
 		$response = $this->dispatch_pay_for_order_request( $order, array( 'country' => 'US' ), $this->get_different_destination() );
 		remove_filter( 'woocommerce_order_needs_shipping', '__return_false' );
+		remove_filter( 'pre_transient_wc_shipping_method_count', $method_counts );
 
 		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
 		$this->assertEquals( 'US', wc_get_order( $order->get_id() )->get_shipping_country() );
