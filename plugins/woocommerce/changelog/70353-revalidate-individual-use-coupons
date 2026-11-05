@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Revalidate individual-use coupon combinations on cart and checkout so saved carts cannot keep a conflicting stack after the setting changes.

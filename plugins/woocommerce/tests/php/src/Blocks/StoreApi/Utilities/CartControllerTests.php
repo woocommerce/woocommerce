@@ -389,4 +389,41 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 		$this->assertSame( array( 1, $product->get_id(), (int) $variation['variation_id'] ), $captured );
 		$this->assertSame( 4, wc()->cart->get_cart_item( $cart_id )['quantity'] );
 	}
+
+	/**
+	 * Store API cart validation should reject individual-use conflicts left in a saved cart.
+	 */
+	public function test_validate_cart_coupons_blocks_individual_use_after_setting_change() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Coupon Conflict Product',
+				'regular_price' => 100,
+			)
+		);
+
+		wc()->cart->empty_cart();
+		wc()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$coupon_one = \WC_Helper_Coupon::create_coupon( 'store-api-combo1' );
+		$coupon_two = \WC_Helper_Coupon::create_coupon( 'store-api-combo2' );
+
+		$this->assertTrue( wc()->cart->add_discount( $coupon_one->get_code() ) );
+		$this->assertTrue( wc()->cart->add_discount( $coupon_two->get_code() ) );
+
+		$coupon_one->set_individual_use( true );
+		$coupon_one->save();
+
+		$controller = new CartController();
+		try {
+			$controller->validate_cart_coupons();
+			$this->fail( 'Expected InvalidCartException for an individual-use coupon conflict.' );
+		} catch ( \Automattic\WooCommerce\StoreApi\Exceptions\InvalidCartException $exception ) {
+			$this->assertSame( 'woocommerce_coupons_error', $exception->getErrorCode() );
+			$this->assertStringContainsString( 'combo1', $exception->getError()->get_error_message() );
+		}
+
+		$this->assertCount( 2, wc()->cart->get_applied_coupons() );
+		wc()->cart->empty_cart();
+	}
 }
