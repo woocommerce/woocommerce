@@ -153,6 +153,39 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A sitemap robots.txt lists on another host is skipped, not couldn't check.
+	 */
+	public function test_off_host_listed_sitemap_is_skipped(): void {
+		add_filter( 'wp_sitemaps_enabled', '__return_false' );
+		$this->serve(
+			array(
+				'/robots.txt'        => array( 200, "User-agent: *\nDisallow:\nSitemap: https://cdn.example/sitemap.xml\n" ),
+				'/sitemap_index.xml' => array( 404, '' ),
+				'/sitemap.xml'       => array( 404, '' ),
+			)
+		);
+
+		$this->assertFalse( $this->results()['sitemap_lists_products'] );
+	}
+
+	/**
+	 * @testdox The shop page URL is not a product page when the product base is the shop slug.
+	 */
+	public function test_shop_page_url_is_not_a_product_in_the_sitemap(): void {
+		$names = new \ReflectionMethod( StoreOutputChecks::class, 'names_products' );
+		$names->setAccessible( true );
+		add_filter(
+			'pre_option_woocommerce_permalinks',
+			static fn() => array( 'product_base' => 'shop' )
+		);
+		$shop = '<urlset><url><loc>' . home_url( '/shop/' ) . '</loc></url></urlset>';
+		$item = '<urlset><url><loc>' . home_url( '/shop/beanie/' ) . '</loc></url></urlset>';
+
+		$this->assertFalse( $names->invoke( null, $shop ) );
+		$this->assertTrue( $names->invoke( null, $item ) );
+	}
+
+	/**
 	 * @testdox With the WordPress sitemap off, no sitemap is missing, and an unreachable one is couldn't check.
 	 */
 	public function test_sitemap_off(): void {
