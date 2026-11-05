@@ -11,6 +11,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Orders\PaymentStock;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 
 /**
@@ -135,53 +136,9 @@ class WC_Shortcode_Checkout {
 					throw new Exception( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ) );
 				}
 
-				// Ensure order items are still stocked if paying for a failed order. Pending orders do not need this check because stock is held.
-				if ( ! $order->has_status( wc_get_is_pending_statuses() ) ) {
-					$quantities = array();
-
-					foreach ( $order->get_items() as $item_key => $item ) {
-						if ( $item && is_callable( array( $item, 'get_product' ) ) ) {
-							$product = $item->get_product();
-
-							if ( ! $product ) {
-								continue;
-							}
-
-							$quantities[ $product->get_stock_managed_by_id() ] = isset( $quantities[ $product->get_stock_managed_by_id() ] ) ? $quantities[ $product->get_stock_managed_by_id() ] + $item->get_quantity() : $item->get_quantity();
-						}
-					}
-
-					// Stock levels may already have been adjusted for this order (in which case we don't need to worry about checking for low stock).
-					if ( ! $order->get_data_store()->get_stock_reduced( $order->get_id() ) ) {
-						foreach ( $order->get_items() as $item_key => $item ) {
-							if ( $item && is_callable( array( $item, 'get_product' ) ) ) {
-								$product = $item->get_product();
-
-								if ( ! $product ) {
-									continue;
-								}
-
-								if ( ! apply_filters( 'woocommerce_pay_order_product_in_stock', $product->is_in_stock(), $product, $order ) ) {
-									/* translators: %s: product name */
-									throw new Exception( sprintf( __( 'Sorry, "%s" is no longer in stock so this order cannot be paid for. We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name() ) );
-								}
-
-								// We only need to check products managing stock, with a limited stock qty.
-								if ( ! $product->managing_stock() || $product->backorders_allowed() ) {
-									continue;
-								}
-
-								// Check stock based on all items in the cart and consider any held stock within pending orders.
-								$held_stock     = wc_get_held_stock_quantity( $product, $order->get_id() );
-								$required_stock = $quantities[ $product->get_stock_managed_by_id() ];
-
-								if ( ! apply_filters( 'woocommerce_pay_order_product_has_enough_stock', ( $product->get_stock_quantity() >= ( $held_stock + $required_stock ) ), $product, $order ) ) {
-									/* translators: 1: product name 2: quantity in stock */
-									throw new Exception( sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s available). We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name(), wc_format_stock_quantity_for_display( $product->get_stock_quantity() - $held_stock, $product ) ) );
-								}
-							}
-						}
-					}
+				$stock_error = wc_get_container()->get( PaymentStock::class )->get_stock_error( $order );
+				if ( $stock_error ) {
+					throw new Exception( $stock_error['message'] );
 				}
 
 				// If we cannot match the order with the current user, ask that they verify their email address.
