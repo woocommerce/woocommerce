@@ -1060,9 +1060,9 @@ function wc_fix_rewrite_rules( $rules ) {
 		}
 	}
 
-	$shop_page_id      = wc_get_page_id( 'shop' );
-	$product_base      = trim( rawurldecode( $permalinks['product_base'] ), '/' );
-	$uses_shop_as_base = false;
+	$shop_page_id = wc_get_page_id( 'shop' );
+	$product_base = trim( rawurldecode( $permalinks['product_base'] ), '/' );
+	$parent_ids   = array();
 
 	// The product base is site-wide, while multilingual extensions can filter the Shop page for the current request.
 	// Read the stored ID directly too: get_option() can already return a translated Shop page.
@@ -1073,12 +1073,11 @@ function wc_fix_rewrite_rules( $rules ) {
 		$shop_base = $shop_page instanceof WP_Post && 'page' === $shop_page->post_type ? trim( rawurldecode( (string) get_page_uri( $candidate_shop_page_id ) ), '/' ) : '';
 
 		if ( '' !== $shop_base && ( $shop_base === $product_base || 0 === strpos( $product_base, $shop_base . '/' ) ) ) {
-			$uses_shop_as_base = true;
-			break;
+			$parent_ids[] = $candidate_shop_page_id;
 		}
 	}
 
-	if ( ! $uses_shop_as_base ) {
+	if ( empty( $parent_ids ) ) {
 		return $rules;
 	}
 
@@ -1088,8 +1087,8 @@ function wc_fix_rewrite_rules( $rules ) {
 	$page_rewrite_rules = array();
 	$subpages           = array();
 
-	// Start from the filtered Shop page and the root matching the persisted product base, one level per query.
-	$parent_ids = array_filter( array_unique( array( $shop_page_id, $candidate_shop_page_id ) ), static fn( $page_id ) => $page_id > 0 );
+	// Start from the filtered Shop page and every root matching the persisted product base, one level per query.
+	$parent_ids = array_filter( array_unique( array_merge( array( $shop_page_id ), $parent_ids ) ), static fn( $page_id ) => $page_id > 0 );
 	while ( $parent_ids ) {
 		$parent_format = implode( ', ', array_fill( 0, count( $parent_ids ), '%d' ) );
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The interpolated values are placeholder lists.
@@ -1109,10 +1108,7 @@ function wc_fix_rewrite_rules( $rules ) {
 		$page_rewrite_rules = array_merge( $page_rewrite_rules, $wp_generated_rewrite_rules );
 	}
 
-	// Merge with rules.
-	$rules = array_merge( $page_rewrite_rules, $rules );
-
-	return $rules;
+	return array_merge( $page_rewrite_rules, $rules );
 }
 add_filter( 'rewrite_rules_array', 'wc_fix_rewrite_rules' );
 
