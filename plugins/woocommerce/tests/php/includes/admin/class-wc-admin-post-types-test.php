@@ -335,6 +335,44 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Bulk Edit updates categories and brands, preserving mixed and omitted terms.
+	 *
+	 * @testWith ["product_cat", "category_ids"]
+	 *           ["product_brand", "brand_ids"]
+	 * @param string $taxonomy Product taxonomy.
+	 * @param string $property Product property.
+	 */
+	public function test_bulk_edit_taxonomy_scope( string $taxonomy, string $property ): void {
+		$terms = array();
+		foreach ( array( 'Removed', 'Mixed', 'Omitted', 'Added' ) as $name ) {
+			$terms[] = $this->factory->term->create(
+				array(
+					'taxonomy' => $taxonomy,
+					'name'     => $name,
+				)
+			);
+		}
+		$product = WC_Helper_Product::create_simple_product();
+		$product->{"set_$property"}( array( $terms[0], $terms[1], $terms[2] ) );
+		$product->save();
+
+		$this->bulk_edit(
+			array( $product ),
+			array(
+				'wc_bulk_edit_taxonomies'    => array( $taxonomy => implode( ',', array( $terms[0], $terms[1], $terms[3] ) ) ),
+				'wc_bulk_edit_indeterminate' => array( $taxonomy => array( $terms[1] ) ),
+				'tax_input'                  => array( $taxonomy => array( $terms[3] ) ),
+			)
+		);
+
+		$this->assertEqualsCanonicalizing(
+			array( $terms[1], $terms[2], $terms[3] ),
+			wp_get_object_terms( $product->get_id(), $taxonomy, array( 'fields' => 'ids' ) ),
+			'Category and brand assignments should change, with mixed and omitted terms preserved.'
+		);
+	}
+
+	/**
 	 * @testdox Bulk Edit applies percentage price and stock changes to each edited product.
 	 *
 	 * Deliberately not a "leaves unselected products alone" test. Selection happens in

@@ -3041,8 +3041,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Update the tax items of the order from the item taxes in memory, like update_taxes(), but do not save.
-	 * The next save() writes the changed tax items before it writes the order. update_taxes() runs this method
-	 * through write_through(), so it saves at the same points as it always did.
+	 * The next save() writes the changed tax items with the other items of the order, so a failed order write
+	 * leaves them unchanged. update_taxes() runs this method through write_through(), so it saves right away.
 	 *
 	 * @since 11.4.0
 	 * @return void
@@ -3053,7 +3053,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$cart_taxes     = array();
 		$shipping_taxes = array();
 		$existing_taxes = $this->get_taxes();
-		$saved_rate_ids = array();
+		$kept_rate_ids  = array();
 
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
 			$taxes = $item->get_taxes();
@@ -3082,7 +3082,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		foreach ( $existing_taxes as $tax ) {
 			$tax_rate_id = $tax->get_rate_id();
 			// Remove taxes which no longer exist for cart/shipping.
-			if ( ( ! array_key_exists( $tax_rate_id, $cart_taxes ) && ! array_key_exists( $tax_rate_id, $shipping_taxes ) ) || in_array( $tax_rate_id, $saved_rate_ids, true ) ) {
+			if ( ( ! array_key_exists( $tax_rate_id, $cart_taxes ) && ! array_key_exists( $tax_rate_id, $shipping_taxes ) ) || in_array( $tax_rate_id, $kept_rate_ids, true ) ) {
 				$this->remove_item( $this->get_stored_item_key( $tax ) );
 				continue;
 			}
@@ -3097,11 +3097,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax->set_tax_total( $cart_taxes[ $tax_rate_id ] ?? 0 );
 			$tax->set_shipping_tax_total( ! empty( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
 
-			$saved_rate_ids[] = $tax_rate_id;
-			$this->write_or_defer( 'save_tax_item_' . spl_object_id( $tax ), array( $tax, 'save' ) );
+			// Do not save the tax item here. save_items() writes it with the order, so a failed order write leaves it unchanged.
+			$kept_rate_ids[] = $tax_rate_id;
 		}
 
-		$new_rate_ids = wp_parse_id_list( array_diff( array_keys( $cart_taxes + $shipping_taxes ), $saved_rate_ids ) );
+		$new_rate_ids = wp_parse_id_list( array_diff( array_keys( $cart_taxes + $shipping_taxes ), $kept_rate_ids ) );
 
 		// New taxes.
 		foreach ( $new_rate_ids as $tax_rate_id ) {
