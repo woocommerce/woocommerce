@@ -22,7 +22,7 @@ trait ReadinessAbility {
 	 */
 	protected static function name_when_enabled( string $name ): string {
 		$features = wc_get_container()->get( FeaturesController::class );
-		return $features->feature_is_enabled( StatusTab::FEATURE_ID ) ? $name : '';
+		return $features->feature_is_enabled( AgenticCommerceSettings::FEATURE_ID ) ? $name : '';
 	}
 
 	/**
