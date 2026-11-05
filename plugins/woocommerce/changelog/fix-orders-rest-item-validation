@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Check that order items match their expected type when updating orders via the REST API.
