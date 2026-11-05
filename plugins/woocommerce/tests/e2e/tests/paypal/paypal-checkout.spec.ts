@@ -57,6 +57,8 @@ async function deleteOrderFromPayPalUrl(
 		await restApi.delete( `${ WC_API_PATH }/orders/${ custom.order_id }`, {
 			force: true,
 		} );
+	} else {
+		console.warn( 'Unable to find order ID from PayPal URL' );
 	}
 }
 
