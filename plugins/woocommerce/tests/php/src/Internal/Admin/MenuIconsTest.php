@@ -75,6 +75,7 @@ class MenuIconsTest extends WC_Unit_Test_Case {
 	 * @param string $version WordPress version.
 	 */
 	public function test_legacy_icons( string $version ): void {
+		$this->require_icon_api();
 		$GLOBALS['wp_version'] = $version; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulate supported WordPress versions.
 
 		$this->assertSame( 'dashicons-archive', $this->sut->get_icon( 'core-admin/tag', 'dashicons-archive' ) );
