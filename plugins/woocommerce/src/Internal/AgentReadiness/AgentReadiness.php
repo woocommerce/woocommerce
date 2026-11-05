@@ -157,11 +157,12 @@ class AgentReadiness {
 			}
 			$rules[ $id ] = array();
 			foreach ( $rule_channels as $channel => $spec ) {
-				if ( ! isset( $channels[ $channel ] ) || ! is_array( $spec ) || ! in_array( $spec['effect'] ?? null, $effects, true ) ) {
+				$field = is_array( $spec ) ? ( $spec['field'] ?? null ) : null;
+				if ( ! isset( $channels[ $channel ] ) || ! is_string( $field ) || ! in_array( $spec['effect'] ?? null, $effects, true ) ) {
 					continue;
 				}
 				$rules[ $id ][ $channel ] = array(
-					'field'  => (string) ( $spec['field'] ?? '' ),
+					'field'  => $field,
 					'effect' => $spec['effect'],
 				);
 			}
