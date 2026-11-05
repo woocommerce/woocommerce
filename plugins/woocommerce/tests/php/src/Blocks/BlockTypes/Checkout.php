@@ -68,6 +68,9 @@ class Checkout extends \WC_Unit_Test_Case {
 		if ( \WP_Block_Type_Registry::get_instance()->is_registered( 'woocommerce/checkout-mock' ) ) {
 			\WP_Block_Type_Registry::get_instance()->unregister( 'woocommerce/checkout-mock' );
 		}
+
+		// A test sets an admin screen so is_admin() is true.
+		unset( $GLOBALS['current_screen'] );
 	}
 
 	/**
@@ -153,6 +156,30 @@ class Checkout extends \WC_Unit_Test_Case {
 		$checkout = new CheckoutMock( $this->asset_api, $registry, $this->integration_registry, 'checkout-mock' );
 		$checkout->mock_enqueue_data();
 		$this->assertFalse( $registry->get()['checkoutShowTerms'], 'The filter should hide terms' );
+	}
+
+	/**
+	 * @testdox The editor does not run woocommerce_checkout_show_terms, because callbacks may expect a loaded cart.
+	 */
+	public function test_enqueue_data_skips_checkout_show_terms_in_admin(): void {
+		set_current_screen( 'page' );
+		$filter = function () {
+			// Mirrors a callback written for the frontend, where the cart is loaded.
+			return WC()->cart->get_total() > 0;
+		};
+		add_filter( 'woocommerce_checkout_show_terms', $filter );
+		$cart      = WC()->cart;
+		WC()->cart = null;
+
+		try {
+			$checkout = new CheckoutMock( $this->asset_api, $this->registry, $this->integration_registry, 'checkout-mock' );
+			$checkout->mock_enqueue_data();
+		} finally {
+			WC()->cart = $cart;
+			remove_filter( 'woocommerce_checkout_show_terms', $filter );
+		}
+
+		$this->assertArrayNotHasKey( 'checkoutShowTerms', $this->registry->get(), 'The editor should not run the filter' );
 	}
 
 	/**

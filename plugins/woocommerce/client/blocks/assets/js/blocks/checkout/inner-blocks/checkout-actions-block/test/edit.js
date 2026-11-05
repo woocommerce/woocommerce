@@ -86,18 +86,6 @@ jest.mock( '@woocommerce/block-settings', () => ( {
 
 const blockSettingsMock = jest.requireMock( '@woocommerce/block-settings' );
 
-let mockCheckoutShowTerms = true;
-jest.mock( '@woocommerce/settings', () => {
-	const actual = jest.requireActual( '@woocommerce/settings' );
-	return {
-		...actual,
-		getSetting: ( key, fallback ) =>
-			key === 'checkoutShowTerms'
-				? mockCheckoutShowTerms
-				: actual.getSetting( key, fallback ),
-	};
-} );
-
 const defaultAttributes = {
 	cartPageId: 0,
 	showReturnToCart: false,
@@ -238,47 +226,6 @@ describe( 'Checkout Actions Block Edit', () => {
 			expect(
 				queryByText( container, 'Return to Cart' )
 			).toBeInTheDocument();
-		} );
-	} );
-
-	describe( 'terms hidden by an extension', () => {
-		afterEach( () => {
-			mockCheckoutShowTerms = true;
-		} );
-
-		it( 'shows a notice when woocommerce_checkout_show_terms hides the terms', () => {
-			mockCheckoutShowTerms = false;
-			const { container } = renderEdit( { showTerms: true } );
-
-			expect(
-				queryByText(
-					container,
-					'Terms are hidden by an extension on your store.'
-				)
-			).toBeInTheDocument();
-		} );
-
-		it( 'does not render terms in the canvas when hidden by an extension', () => {
-			mockCheckoutShowTerms = false;
-			const { container } = renderEdit( {
-				showTerms: true,
-				termsText: 'Custom terms',
-			} );
-
-			expect(
-				queryByText( container, 'Custom terms' )
-			).not.toBeInTheDocument();
-		} );
-
-		it( 'shows no notice by default', () => {
-			const { container } = renderEdit( { showTerms: true } );
-
-			expect(
-				queryByText(
-					container,
-					'Terms are hidden by an extension on your store.'
-				)
-			).not.toBeInTheDocument();
 		} );
 	} );
 

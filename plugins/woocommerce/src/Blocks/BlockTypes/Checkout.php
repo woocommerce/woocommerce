@@ -434,17 +434,6 @@ class Checkout extends AbstractBlock {
 		}
 		$this->asset_data_registry->add( 'addressAutocompleteProviders', $providers_payload );
 		$this->asset_data_registry->add( 'countryData', $country_data );
-		/**
-		 * Filters whether checkout shows the terms and conditions.
-		 *
-		 * Returning false hides the terms on classic checkout and on the Checkout block's Actions block, for example
-		 * when an extension shows its own legal checkboxes.
-		 *
-		 * @since 3.4.0
-		 * @since 11.4.0 Also applies to the Checkout block.
-		 * @param bool $show_terms Whether to show the terms and conditions.
-		 */
-		$this->asset_data_registry->add( 'checkoutShowTerms', (bool) apply_filters( 'woocommerce_checkout_show_terms', true ) );
 		$this->asset_data_registry->add( 'defaultAddressFormat', $address_formats['default'] );
 
 		// Prime caches to reduce future queries.
@@ -588,6 +577,18 @@ class Checkout extends AbstractBlock {
 		}
 
 		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
+			/**
+			 * Filters whether checkout shows the terms and conditions.
+			 *
+			 * Returning false hides the terms on classic checkout and on the Checkout block's Actions block, for example
+			 * when an extension shows its own legal checkboxes. Like classic checkout, this only runs on the frontend,
+			 * where callbacks can rely on the cart being loaded.
+			 *
+			 * @since 3.4.0
+			 * @since 11.4.0 Also applies to the Checkout block.
+			 * @param bool $show_terms Whether to show the terms and conditions.
+			 */
+			$this->asset_data_registry->add( 'checkoutShowTerms', (bool) apply_filters( 'woocommerce_checkout_show_terms', true ) );
 			$this->asset_data_registry->hydrate_api_request( '/wc/store/v1/cart' );
 			$this->asset_data_registry->hydrate_data_from_api_request( 'checkoutData', '/wc/store/v1/checkout' );
 			$this->hydrate_customer_payment_methods();

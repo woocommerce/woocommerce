@@ -9,12 +9,7 @@ import {
 	RichText,
 	useBlockProps,
 } from '@wordpress/block-editor';
-import {
-	Notice,
-	PanelBody,
-	TextControl,
-	ToggleControl,
-} from '@wordpress/components';
+import { PanelBody, TextControl, ToggleControl } from '@wordpress/components';
 import PageSelector from '@woocommerce/editor-components/page-selector';
 import { CHECKOUT_PAGE_ID } from '@woocommerce/block-settings';
 import {
@@ -23,7 +18,6 @@ import {
 } from '@woocommerce/base-components/cart-checkout';
 import clsx from 'clsx';
 import { CheckboxControl } from '@woocommerce/blocks-components';
-import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -73,38 +67,30 @@ export const Edit = ( {
 	// While the Terms block is in the checkout, it owns the terms.
 	const { termsClientId } = useCheckoutTermsBlocks( clientId );
 
-	const isTermsDisabledByExtension = ! getSetting(
-		'checkoutShowTerms',
-		true
-	);
-
 	// Mirrors the frontend: a required checkbox goes above the button, consent text below it.
-	const terms =
-		showTerms && ! isTermsDisabledByExtension ? (
-			<div className="wc-block-checkout__terms">
-				{ termsCheckbox && (
-					<div className="wc-block-checkout__terms-checkbox-wrapper">
-						<CheckboxControl
-							id="terms-and-conditions"
-							checked={ false }
-							onChange={ () => undefined }
-						/>
-					</div>
-				) }
-				<RichText
-					tagName="span"
-					value={
-						termsText ||
-						( termsCheckbox
-							? termsCheckboxDefaultText
-							: termsConsentDefaultText )
-					}
-					onChange={ ( value ) =>
-						setAttributes( { termsText: value } )
-					}
-				/>
-			</div>
-		) : null;
+	const terms = showTerms ? (
+		<div className="wc-block-checkout__terms">
+			{ termsCheckbox && (
+				<div className="wc-block-checkout__terms-checkbox-wrapper">
+					<CheckboxControl
+						id="terms-and-conditions"
+						checked={ false }
+						onChange={ () => undefined }
+					/>
+				</div>
+			) }
+			<RichText
+				tagName="span"
+				value={
+					termsText ||
+					( termsCheckbox
+						? termsCheckboxDefaultText
+						: termsConsentDefaultText )
+				}
+				onChange={ ( value ) => setAttributes( { termsText: value } ) }
+			/>
+		</div>
+	) : null;
 
 	return (
 		<div { ...blockProps }>
@@ -148,18 +134,6 @@ export const Edit = ( {
 					<PanelBody
 						title={ __( 'Terms and Conditions', 'woocommerce' ) }
 					>
-						{ isTermsDisabledByExtension && (
-							<Notice
-								className="wc-block-checkout__terms_notice"
-								status="warning"
-								isDismissible={ false }
-							>
-								{ __(
-									'Terms are hidden by an extension on your store.',
-									'woocommerce'
-								) }
-							</Notice>
-						) }
 						{ showTerms && (
 							<TermsNotices
 								text={ termsText }
