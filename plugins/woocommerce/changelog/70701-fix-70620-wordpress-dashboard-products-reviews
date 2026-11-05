@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix a critical error on the Products > Reviews screen caused by out-of-range ratings, and reject ratings outside 0 to 5 in the product reviews REST API.
