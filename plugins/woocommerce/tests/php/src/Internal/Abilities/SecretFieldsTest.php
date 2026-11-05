@@ -30,6 +30,8 @@ class SecretFieldsTest extends \WC_Unit_Test_Case {
 	 *           ["license_key", "text", true]
 	 *           ["licenseKey", "text", true]
 	 *           ["licensekey", "text", true]
+	 *           ["licence_key", "text", true]
+	 *           ["licencekey", "text", true]
 	 *           ["testPublishableKey", "text", false]
 	 *           ["webhookSecret", "text", true]
 	 *           ["woocommerce_stripe_api_key", "text", true]

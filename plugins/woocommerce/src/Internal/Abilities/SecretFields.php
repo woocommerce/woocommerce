@@ -20,7 +20,7 @@ class SecretFields {
 	 * Name parts that mark a credential, matched as whole words after camelCase and punctuation become underscores.
 	 * Joined spellings such as `apikey` or `APIKey` normalize to one word, so they are listed too.
 	 */
-	private const SECRET_WORDS = '(password|passwd|passphrase|secret|secretkey|signature|credentials?|authorization|private_key|privatekey|api_key|apikey|access_key|accesskey|accesstoken|consumer_key|consumerkey|license_key|licensekey|token|webhook_key|webhookkey)';
+	private const SECRET_WORDS = '(password|passwd|passphrase|secret|secretkey|signature|credentials?|authorization|private_key|privatekey|api_key|apikey|access_key|accesskey|accesstoken|consumer_key|consumerkey|licen[cs]e_key|licen[cs]ekey|token|webhook_key|webhookkey)';
 
 	/**
 	 * Whether a setting holds a credential.
