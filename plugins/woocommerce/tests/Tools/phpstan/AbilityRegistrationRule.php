@@ -18,7 +18,7 @@ use PHPStan\Rules\RuleErrorBuilder;
 
 /**
  * Reports a wp_register_ability() call outside AbilitiesLoader. The loader registers
- * every WooCommerce ability with Automattic\WooCommerce\Abilities\Ability or
+ * every WooCommerce ability with Automattic\WooCommerce\Internal\Abilities\Ability or
  * ActionableAbility, so it gets its input converted to the schema types.
  *
  * @implements Rule<FuncCall>
