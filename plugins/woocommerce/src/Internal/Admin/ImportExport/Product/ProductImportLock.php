@@ -37,13 +37,19 @@ final class ProductImportLock {
 	private const IMPORT_LOCK_STALE_AFTER = MINUTE_IN_SECONDS * 10;
 
 	/**
+	 * How long an admin import's lock is honored against another admin import, in seconds.
+	 */
+	private const ADMIN_LOCK_STALE_AFTER = MINUTE_IN_SECONDS * 2;
+
+	/**
 	 * Try to take the site-wide product import lock.
 	 *
 	 * Modeled on `WC_Install::create_lock()`: the option row acts as a mutex through an
 	 * `INSERT` that fails if a lock already exists, with a stale takeover after
 	 * `IMPORT_LOCK_STALE_AFTER` seconds so a crashed run cannot block imports forever.
-	 * An admin import also takes over a lock held by another admin import, because closing the
-	 * browser tab leaves no way to release it and the merchant must be able to retry right away.
+	 * An admin import takes over another admin import's lock after only `ADMIN_LOCK_STALE_AFTER`
+	 * seconds, because closing the browser tab leaves no way to release it. A running import
+	 * refreshes the lock on each batch, so it stays protected.
 	 *
 	 * @param string $holder Who is taking the lock, one of the `HOLDER_*` constants.
 	 * @return bool Whether the lock was acquired.
@@ -69,12 +75,9 @@ final class ProductImportLock {
 		}
 
 		if ( ! $acquired ) {
-			// Check the holder instead of adding it to the UPDATE below: a retry within the same second writes an identical value, which MySQL reports as zero changed rows.
-			if ( self::HOLDER_ADMIN === $holder && self::HOLDER_ADMIN === $this->get_holder() ) {
-				$this->refresh();
-
-				return true;
-			}
+			$stale_after = self::HOLDER_ADMIN === $holder && self::HOLDER_ADMIN === $this->get_holder()
+				? self::ADMIN_LOCK_STALE_AFTER
+				: self::IMPORT_LOCK_STALE_AFTER;
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$acquired = $wpdb->query(
@@ -82,7 +85,7 @@ final class ProductImportLock {
 					"UPDATE {$wpdb->options} SET option_value = %s WHERE option_name = %s AND CAST( SUBSTRING_INDEX( option_value, ':', 1 ) AS UNSIGNED ) < %d",
 					$value,
 					self::IMPORT_LOCK_OPTION,
-					time() - self::IMPORT_LOCK_STALE_AFTER
+					time() - $stale_after
 				)
 			);
 		}
