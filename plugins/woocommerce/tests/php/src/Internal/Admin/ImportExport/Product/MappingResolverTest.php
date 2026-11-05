@@ -76,6 +76,16 @@ class MappingResolverTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should reject an override that differs from its column only by case, rather than silently ignoring it.
+	 */
+	public function test_resolve_throws_for_override_matching_no_header(): void {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'No match for: Sku' );
+
+		$this->sut->resolve( array( 'SKU' ), array( 'Sku' => 'meta:sku_override' ) );
+	}
+
+	/**
 	 * @testdox Should treat override values of "-" and "" as skipping the column.
 	 */
 	public function test_resolve_dash_and_empty_override_skip_column(): void {

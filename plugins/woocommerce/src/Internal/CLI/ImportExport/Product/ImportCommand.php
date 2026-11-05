@@ -88,7 +88,7 @@ final class ImportCommand {
 	 * ---
 	 *
 	 * [--mapping=<spec>]
-	 * : Column overrides: `Header=target,...`, inline JSON, or `@file.json`. Target `-` skips a column.
+	 * : Column overrides: `Header=target,...`, inline JSON, or `@file.json`. Target `-` skips a column. Headers must match the CSV exactly, including case.
 	 *
 	 * [--map-unknown=<mode>]
 	 * : What to do with CSV columns that have no known target.
@@ -131,9 +131,9 @@ final class ImportCommand {
 	 * are written as rows are read). Test against a staging site or a database
 	 * snapshot first.
 	 *
-	 * Importing needs a WordPress user that can edit products and manage product terms, because
-	 * the importer silently drops categories otherwise. Pass `--user=<admin>`. `--show-mapping`
-	 * does not need one.
+	 * Importing needs a WordPress user with the `edit_products`, `import`, and `manage_product_terms`
+	 * capabilities, and the importer silently drops categories without the last one. Pass
+	 * `--user=<admin>`. `--show-mapping` does not need one.
 	 *
 	 * Cleanup of placeholder products at the end of an import is site-wide, so this
 	 * command takes a lock for the duration of the run and refuses to start while an
@@ -178,7 +178,7 @@ final class ImportCommand {
 
 		// The importer silently drops categories without these capabilities, so fail before anything is written.
 		if ( ! $show_mapping && ! ( current_user_can( 'edit_products' ) && current_user_can( 'import' ) && current_user_can( 'manage_product_terms' ) ) ) {
-			WP_CLI::error( 'Importing products requires a user who can edit products and manage product terms, otherwise categories are silently dropped. Pass --user=<admin>.' );
+			WP_CLI::error( 'Importing products requires a user with the edit_products, import, and manage_product_terms capabilities. Pass --user=<admin>.' );
 			return;
 		}
 
