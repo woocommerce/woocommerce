@@ -108,7 +108,7 @@ class ReadinessAbilities {
 		if ( self::RUN_CHECK === $name ) {
 			return array(
 				'label'               => __( 'Run agent readiness check', 'woocommerce' ),
-				'description'         => __( 'Check one product again now, after fixing it, and get its failing checks and status per channel. Without a product id, queue a check of the whole store in the background; read the result with woocommerce/get-agent-readiness once scan_pending is false.', 'woocommerce' ),
+				'description'         => __( 'Check one product again now, after fixing it, and get its failing checks and status per channel. Without a product id, queue a check of the whole store in the background; read the result with woocommerce/get-agent-readiness once scan_pending is false. When scan_stalled is true, scheduled actions are not running on the store and the check waits for them.', 'woocommerce' ),
 				'category'            => 'woocommerce',
 				'input_schema'        => array(
 					'type'                 => 'object',
@@ -185,9 +185,11 @@ class ReadinessAbilities {
 		$product_id = is_array( $input ) ? absint( $input['product_id'] ?? 0 ) : 0;
 		if ( 0 === $product_id ) {
 			$this->scheduled_scan->queue();
-			$report = $this->agent_readiness->get_cached_report();
+			$report  = $this->agent_readiness->get_cached_report();
+			$pending = $this->scheduled_scan->is_pending();
 			return array(
-				'scan_pending'        => $this->scheduled_scan->is_pending(),
+				'scan_pending'        => $pending,
+				'scan_stalled'        => $pending && $this->scheduled_scan->is_stalled(),
 				'report_generated_at' => is_string( $report['generated_at'] ?? null ) ? $report['generated_at'] : null,
 			);
 		}
@@ -233,6 +235,10 @@ class ReadinessAbilities {
 				'scan_pending'        => array(
 					'type'        => 'boolean',
 					'description' => __( 'Whole store: whether the queued check has not finished yet.', 'woocommerce' ),
+				),
+				'scan_stalled'        => array(
+					'type'        => 'boolean',
+					'description' => __( 'Whole store: whether the queued check has not started because scheduled actions are not running on the store. It runs once they do; until then the report does not change.', 'woocommerce' ),
 				),
 				'report_generated_at' => array(
 					'type'        => array( 'string', 'null' ),

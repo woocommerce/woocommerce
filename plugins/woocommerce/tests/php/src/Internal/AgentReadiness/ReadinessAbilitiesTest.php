@@ -209,7 +209,26 @@ class ReadinessAbilitiesTest extends WC_Unit_Test_Case {
 
 		$this->assertTrue( rest_validate_value_from_schema( $output, $ability->get_output_schema() ) );
 		$this->assertTrue( $output['scan_pending'] );
+		$this->assertFalse( $output['scan_stalled'] );
 		$this->assertNull( $output['report_generated_at'] );
 		$this->assertNull( get_option( AgentReadiness::REPORT_OPTION, null ), 'Nothing ran in the request' );
+	}
+
+	/**
+	 * @testdox Without a product, a queued check that has stalled stays queued and is reported as scan_stalled.
+	 */
+	public function test_run_check_says_when_the_scan_stalled(): void {
+		global $wpdb;
+		delete_option( AgentReadiness::REPORT_OPTION );
+		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
+		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}actionscheduler_actions SET last_attempt_gmt = %s WHERE status = 'complete'", gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) ) );
+		as_schedule_single_action( time() - ScheduledScan::STALLED_AFTER - 60, ScheduledScan::RUN_NOW_HOOK, array(), ScheduledScan::GROUP );
+
+		$output = wp_get_ability( ReadinessAbilities::RUN_CHECK )->execute();
+
+		$this->assertTrue( $output['scan_pending'] );
+		$this->assertTrue( $output['scan_stalled'] );
+		$this->assertNull( get_option( AgentReadiness::REPORT_OPTION, null ), 'The stalled check must not run in the request' );
+		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 	}
 }
