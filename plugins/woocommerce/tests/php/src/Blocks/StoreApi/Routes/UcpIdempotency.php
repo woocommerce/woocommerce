@@ -8,6 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
 use Automattic\WooCommerce\StoreApi\Routes\V1\Ucp\AbstractCartRoute;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\IdempotencyClaim;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\IdempotencyStore;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\RequestFingerprint;
 
@@ -269,6 +270,44 @@ class UcpIdempotency extends ControllerTestCase {
 
 		$this->assertSame( 409, $response->get_status() );
 		$this->assertSame( array( 'IDEMPOTENCY_CONFLICT' ), $this->message_codes( $response ) );
+	}
+
+	/**
+	 * A key the store cannot record fails closed, so the write never runs undeduplicated.
+	 */
+	public function test_an_unavailable_store_refuses_the_write(): void {
+		global $wpdb;
+
+		$table        = $wpdb->prefix . 'wc_ucp_idempotency_keys';
+		$query_filter = static function ( $query ) use ( $table ) {
+			return false !== strpos( $query, $table ) ? 'INVALID SQL' : $query;
+		};
+
+		$logger = $this->createMock( \WC_Logger_Interface::class );
+		$logger->expects( $this->once() )
+			->method( 'error' )
+			->with( $this->stringContains( 'UCP idempotency record could not be written' ) );
+		$logger_filter = static function () use ( $logger ) {
+			return $logger;
+		};
+
+		$previous_suppress_errors = $wpdb->suppress_errors( true );
+		add_filter( 'query', $query_filter );
+		add_filter( 'woocommerce_logging_class', $logger_filter );
+
+		try {
+			$response = $this->request( 'POST', '/carts', $this->cart_body( 0 ), wp_generate_uuid4() );
+		} finally {
+			remove_filter( 'query', $query_filter );
+			remove_filter( 'woocommerce_logging_class', $logger_filter );
+			$wpdb->suppress_errors( $previous_suppress_errors );
+		}
+
+		$this->assertSame( 503, $response->get_status() );
+		$this->assertSame( (string) IdempotencyClaim::RETRY_AFTER_SECONDS, $response->get_headers()['Retry-After'] ?? '' );
+		$this->assertSame( 'error', $response->get_data()['ucp']['status'] );
+		$this->assertSame( array( 'IDEMPOTENCY_STORE_UNAVAILABLE' ), $this->message_codes( $response ) );
+		$this->assertSame( 0, $this->stored_record_count() );
 	}
 
 	/**

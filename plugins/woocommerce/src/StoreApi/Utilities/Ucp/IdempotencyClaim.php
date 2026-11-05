@@ -12,6 +12,11 @@ namespace Automattic\WooCommerce\StoreApi\Utilities\Ucp;
  */
 final class IdempotencyClaim {
 	/**
+	 * Seconds a client is told to wait before retrying when the key store is unavailable.
+	 */
+	const RETRY_AFTER_SECONDS = 30;
+
+	/**
 	 * Key this request owns.
 	 *
 	 * @var string
@@ -100,10 +105,9 @@ final class IdempotencyClaim {
 			return new self( $key );
 		}
 
-		// Storage is unreachable, which the store logs, so this write cannot be deduplicated. It
-		// proceeds unprotected rather than refused, since a `409` here would refuse every retry too.
+		// A key that cannot be stored fails closed, per https://ucp.dev/2026-04-08/specification/signatures/#replay-protection.
 		if ( null === $claimed ) {
-			return null;
+			return self::store_unavailable( $capability );
 		}
 
 		$existing = IdempotencyStore::find( $key );
@@ -159,7 +163,13 @@ final class IdempotencyClaim {
 	 * @return \WP_REST_Response|self
 	 */
 	private static function claim_again( string $key, string $fingerprint, string $capability ) {
-		return true === IdempotencyStore::try_begin( $key, $fingerprint ) ? new self( $key ) : self::in_flight( $capability );
+		$claimed = IdempotencyStore::try_begin( $key, $fingerprint );
+
+		if ( true === $claimed ) {
+			return new self( $key );
+		}
+
+		return null === $claimed ? self::store_unavailable( $capability ) : self::in_flight( $capability );
 	}
 
 	/**
@@ -237,5 +247,25 @@ final class IdempotencyClaim {
 			'recoverable',
 			409
 		);
+	}
+
+	/**
+	 * Refuse a write whose key could not be recorded, rather than run it undeduplicated.
+	 *
+	 * @param string $capability UCP capability the route serves.
+	 * @return \WP_REST_Response
+	 */
+	private static function store_unavailable( string $capability ): \WP_REST_Response {
+		$response = Utils::error_response(
+			$capability,
+			'IDEMPOTENCY_STORE_UNAVAILABLE',
+			__( 'The Idempotency-Key could not be recorded. Retry the request later.', 'woocommerce' ),
+			'recoverable',
+			503
+		);
+
+		$response->header( 'Retry-After', (string) self::RETRY_AFTER_SECONDS );
+
+		return $response;
 	}
 }
