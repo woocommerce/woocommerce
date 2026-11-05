@@ -263,7 +263,7 @@ return array(
 
 A checkout request can end after the payment provider accepts a payment but before the shopper reaches the order received page, for example on a timeout, a lost connection, or a fatal error in code that runs after the payment. The shopper may then submit checkout again for the same order. Follow these practices so that a retry of the same order does not charge the shopper twice.
 
-### Keep the order payable until the provider confirms payment
+### Set the order status to match the payment
 
 WooCommerce reads an order's status to decide whether it still needs payment. Orders in a payable status, **Pending payment** or **Failed** by default, can be paid again when their total is above zero. From WooCommerce 11.4, once your gateway moves an order out of those statuses, for example with `$order->payment_complete()` or by setting it to **On-Hold**, checkout treats the payment step as done. If checkout fails after that point, or the shopper submits the same cart again, WooCommerce sends the shopper to the order received page of the existing order instead of asking them to pay again. The exceptions are draft, **Cancelled**, **Refunded** and trashed orders, for which checkout does not treat the payment step as done. On earlier versions, a repeat submit creates a new order and calls `process_payment()` again.
 
@@ -279,7 +279,7 @@ If an earlier request reached the provider but its response never came back, a n
 
 ### Store the transaction ID and check it before charging again
 
-Save the provider's transaction or payment intent ID on the order as soon as the provider returns it, before you wait for the outcome. On the next attempt, ask the provider for the status of that transaction, and create a new charge only if it confirms that the earlier one failed or never happened. In this sketch, `get_provider_status()` stands for your provider's status lookup. It returns `paid`, `failed` for a payment that failed or never happened, or `unknown` for anything else, such as a pending payment or a lookup that could not finish:
+Save the provider's transaction or payment intent ID on the order as soon as the provider returns it, before you wait for the outcome. On the next attempt, ask the provider for the status of that transaction, and create a new charge only if it confirms that the earlier one failed or never happened. In this sketch, `get_provider_status()` stands for your provider's status lookup. It returns `paid`, `failed` for a payment that failed or never happened, or `unknown` for anything else, such as a lookup that could not finish:
 
 ```php
 public function process_payment( $order_id ) {
@@ -310,6 +310,8 @@ public function process_payment( $order_id ) {
     // No saved ID, or the earlier payment failed: create the payment, then save its ID on the order.
 }
 ```
+
+If the lookup shows that the provider accepted the payment and will confirm it later, set the order to **On-Hold** instead of returning a failure.
 
 This check reads the order, so it works only when the retry reaches the same order. WooCommerce creates a new order, without the saved ID, when the cart or its total changed, when the order was cancelled, or when the session ended. A shopper who switches to another gateway also skips the check.
 
