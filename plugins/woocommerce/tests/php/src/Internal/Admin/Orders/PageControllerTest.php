@@ -220,11 +220,13 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders {
 			$previous_theorder = $theorder ?? null;
 			$previous_get      = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+			$previous_calc_tax = get_option( 'woocommerce_calc_taxes' );
 			$previous_currency = get_option( 'woocommerce_currency' );
 			$order_id          = 0;
 
 			try {
 				$this->toggle_cot_feature_and_usage( true );
+				update_option( 'woocommerce_calc_taxes', 'yes' );
 				update_option( 'woocommerce_prices_include_tax', $tax_mode );
 				update_option( 'woocommerce_currency', 'EUR' );
 				set_current_screen();
@@ -270,6 +272,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders {
 				}
 
 				update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+				update_option( 'woocommerce_calc_taxes', $previous_calc_tax );
 				update_option( 'woocommerce_currency', $previous_currency );
 
 				if ( $had_pagenow ) {

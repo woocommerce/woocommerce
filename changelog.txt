@@ -1,5 +1,22 @@
 == Changelog ==
 
+= 11.2.2 2026-11-04 =
+
+**WooCommerce**
+
+* Fix - Ensure PayPal Standard shipping updates correctly update shipping and tax amounts [#70653](https://github.com/woocommerce/woocommerce/pull/70653)
+* Fix - Improve handling of unexpected payment settings profile data. [#70642](https://github.com/woocommerce/woocommerce/pull/70642)
+* Fix - Improve validation of the column mapping used by the product CSV importer. [#70646](https://github.com/woocommerce/woocommerce/pull/70646)
+* Fix - Keep custom default attribute values intact when a global attribute term slug is renamed. [#70641](https://github.com/woocommerce/woocommerce/pull/70641)
+* Fix - Require a logged-in admin browser session for the Jetpack connection endpoints used during onboarding. [#70656](https://github.com/woocommerce/woocommerce/pull/70656)
+* Fix - Restrict REST API key authentication to REST API requests. [#70649](https://github.com/woocommerce/woocommerce/pull/70649)
+* Fix - Start each Store API checkout request with its own order and payment data. [#70637](https://github.com/woocommerce/woocommerce/pull/70637)
+* Fix - Stop checkout from continuing to payment when the order could not be saved, and reject phone numbers over 100 characters. [#70639](https://github.com/woocommerce/woocommerce/pull/70639)
+* Fix - Use a chosen shipping method only when its rate was calculated for the cart. [#70648](https://github.com/woocommerce/woocommerce/pull/70648)
+* Fix - Validate the quantity when updating a cart item via the Store API. [#70657](https://github.com/woocommerce/woocommerce/pull/70657)
+* Fix - When a shopper adds a product to the cart, ignore attributes that the product does not use. [#70651](https://github.com/woocommerce/woocommerce/pull/70651)
+
+
 = 11.2.1 2026-10-09 =
 
 **WooCommerce**

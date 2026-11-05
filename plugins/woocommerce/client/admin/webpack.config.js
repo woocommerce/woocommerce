@@ -437,14 +437,6 @@ if ( ! isProduction || WC_ADMIN_PHASE === 'development' ) {
 			allowedHosts: 'auto',
 			host: 'localhost',
 			port: 8887,
-			proxy: [
-				{
-					context: [ '/assets/client/admin' ],
-					pathRewrite: {
-						'^/assets/client/admin': '',
-					},
-				},
-			],
 		};
 	}
 }
