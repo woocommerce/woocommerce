@@ -460,7 +460,8 @@ class WC_Structured_Data {
 						? wc_get_price_including_tax( $offer_source, array( 'price' => $offer_source->get_sale_price() ) )
 						: wc_get_price_excluding_tax( $offer_source, array( 'price' => $offer_source->get_sale_price() ) );
 					if ( $offer_source->get_date_on_sale_to() ) {
-						$sale_price_valid_until = (string) wp_date( 'Y-m-d', $offer_source->get_date_on_sale_to()->getTimestamp(), wp_timezone() );
+						$sale_date_to           = clone $offer_source->get_date_on_sale_to();
+						$sale_price_valid_until = (string) $sale_date_to->setTimezone( wp_timezone() )->format( 'Y-m-d' );
 					}
 
 					// We add the sale price to the top of the array so it's the first offer.
@@ -510,10 +511,10 @@ class WC_Structured_Data {
 				$date_on_sale_from = $offer_source->get_date_on_sale_from();
 				$date_on_sale_to   = $offer_source->get_date_on_sale_to();
 				if ( $date_on_sale_from ) {
-					$markup_offer['validFrom'] = wp_date( DATE_ATOM, $date_on_sale_from->getTimestamp(), wp_timezone() );
+					$markup_offer['validFrom'] = ( clone $date_on_sale_from )->setTimezone( wp_timezone() )->format( DATE_ATOM );
 				}
 				if ( $date_on_sale_to ) {
-					$markup_offer['validThrough'] = wp_date( DATE_ATOM, $date_on_sale_to->getTimestamp(), wp_timezone() );
+					$markup_offer['validThrough'] = ( clone $date_on_sale_to )->setTimezone( wp_timezone() )->format( DATE_ATOM );
 				}
 			}
 
