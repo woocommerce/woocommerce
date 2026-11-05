@@ -13,7 +13,7 @@ namespace Automattic\WooCommerce\Internal\Admin\ImportExport\Product;
  *
  * @since 11.4.0
  */
-final class ProductImportPlaceholderCleanup {
+final class ImportPlaceholders {
 
 	/**
 	 * Number of temporary products deleted per query when cleaning up after an import.
