@@ -157,6 +157,27 @@ class AbstractAddressSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should accept a phone number up to 100 characters, the size of the order address phone column.
+	 */
+	public function test_accepts_phone_up_to_column_length(): void {
+		$address = $this->make_address( array( 'phone' => str_repeat( '1', 100 ) ) );
+
+		$this->assertTrue( $this->sut->validate_callback( $address, null, 'billing_address' ) );
+	}
+
+	/**
+	 * @testdox Should reject a phone number longer than 100 characters, which cannot be stored against the order.
+	 */
+	public function test_rejects_phone_longer_than_column_length(): void {
+		$address = $this->make_address( array( 'phone' => str_repeat( '1', 101 ) ) );
+
+		$result = $this->sut->validate_callback( $address, null, 'billing_address' );
+
+		$this->assertWPError( $result );
+		$this->assertContains( 'invalid_phone', $result->get_error_codes() );
+	}
+
+	/**
 	 * @testdox Should leave a phone number without invisible characters alone.
 	 */
 	public function test_does_not_alter_a_clean_phone(): void {
