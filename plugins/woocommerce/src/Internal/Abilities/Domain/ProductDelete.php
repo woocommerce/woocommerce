@@ -353,12 +353,12 @@ class ProductDelete extends ActionableAbility {
 				),
 				'id'      => array(
 					'type'        => 'integer',
-					'description' => __( 'ID of the product the call deleted.', 'woocommerce' ),
+					'description' => __( 'ID of the product.', 'woocommerce' ),
 				),
 				'status'  => array(
 					'type'        => 'string',
 					'enum'        => array( ProductStatus::TRASH, self::STATUS_DELETED ),
-					'description' => __( 'What happened to the product. "trash": moved to the trash with its variations, and can be restored. "deleted": permanently deleted with its variations, and cannot be restored.', 'woocommerce' ),
+					'description' => __( 'What happened to the product. "trash": the product was moved to the trash, and can be restored. "deleted": the product was permanently deleted, and cannot be restored.', 'woocommerce' ),
 				),
 			),
 			'additionalProperties' => false,
