@@ -495,61 +495,36 @@ class UcpIdempotency extends ControllerTestCase {
 	}
 
 	/**
-	 * Key order and whitespace do not change a fingerprint: a proxy re-serializing a
-	 * payload must not turn a genuine retry into a conflict.
+	 * A different payload, route or method is a different fingerprint, and so is the same
+	 * payload serialized differently: the body is compared as raw bytes, like `Content-Digest`.
 	 */
-	public function test_a_fingerprint_ignores_key_order_and_whitespace(): void {
-		$one = new \WP_REST_Request( 'PUT', '/wc/ucp/v1/carts/abc' );
-		$one->set_header( 'content-type', 'application/json' );
-		$one->set_body( '{"currency":"USD","line_items":[{"item":{"id":"1"},"quantity":2}]}' );
-
-		$two = new \WP_REST_Request( 'PUT', '/wc/ucp/v1/carts/abc' );
-		$two->set_header( 'content-type', 'application/json' );
-		$two->set_body( '{ "line_items" : [ { "quantity" : 2, "item" : { "id" : "1" } } ] , "currency" : "USD" }' );
-
-		$this->assertSame( RequestFingerprint::compute( $one ), RequestFingerprint::compute( $two ) );
-	}
-
-	/**
-	 * A different payload, route or method is a different fingerprint.
-	 */
-	public function test_a_fingerprint_follows_payload_route_and_method(): void {
+	public function test_a_fingerprint_follows_body_bytes_route_and_method(): void {
 		$base = new \WP_REST_Request( 'PUT', '/wc/ucp/v1/carts/abc' );
 		$base->set_header( 'content-type', 'application/json' );
-		$base->set_body( '{"quantity":1}' );
+		$base->set_body( '{"currency":"USD","quantity":1}' );
 
 		$other_payload = new \WP_REST_Request( 'PUT', '/wc/ucp/v1/carts/abc' );
 		$other_payload->set_header( 'content-type', 'application/json' );
-		$other_payload->set_body( '{"quantity":2}' );
+		$other_payload->set_body( '{"currency":"USD","quantity":2}' );
+
+		$other_bytes = new \WP_REST_Request( 'PUT', '/wc/ucp/v1/carts/abc' );
+		$other_bytes->set_header( 'content-type', 'application/json' );
+		$other_bytes->set_body( '{ "quantity" : 1 , "currency" : "USD" }' );
 
 		$other_route = new \WP_REST_Request( 'PUT', '/wc/ucp/v1/carts/def' );
 		$other_route->set_header( 'content-type', 'application/json' );
-		$other_route->set_body( '{"quantity":1}' );
+		$other_route->set_body( '{"currency":"USD","quantity":1}' );
 
 		$other_method = new \WP_REST_Request( 'POST', '/wc/ucp/v1/carts/abc' );
 		$other_method->set_header( 'content-type', 'application/json' );
-		$other_method->set_body( '{"quantity":1}' );
+		$other_method->set_body( '{"currency":"USD","quantity":1}' );
 
 		$fingerprint = RequestFingerprint::compute( $base );
 
 		$this->assertNotSame( $fingerprint, RequestFingerprint::compute( $other_payload ) );
+		$this->assertNotSame( $fingerprint, RequestFingerprint::compute( $other_bytes ) );
 		$this->assertNotSame( $fingerprint, RequestFingerprint::compute( $other_route ) );
 		$this->assertNotSame( $fingerprint, RequestFingerprint::compute( $other_method ) );
-	}
-
-	/**
-	 * A list keeps its order, since position carries meaning there.
-	 */
-	public function test_a_fingerprint_keeps_list_order(): void {
-		$one = new \WP_REST_Request( 'PUT', '/wc/ucp/v1/carts/abc' );
-		$one->set_header( 'content-type', 'application/json' );
-		$one->set_body( '{"line_items":[{"item":{"id":"1"}},{"item":{"id":"2"}}]}' );
-
-		$two = new \WP_REST_Request( 'PUT', '/wc/ucp/v1/carts/abc' );
-		$two->set_header( 'content-type', 'application/json' );
-		$two->set_body( '{"line_items":[{"item":{"id":"2"}},{"item":{"id":"1"}}]}' );
-
-		$this->assertNotSame( RequestFingerprint::compute( $one ), RequestFingerprint::compute( $two ) );
 	}
 
 	/**
