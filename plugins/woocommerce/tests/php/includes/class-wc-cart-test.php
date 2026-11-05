@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 
 /**
@@ -2163,6 +2164,26 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should clear the cart after payment_complete() cleared order_awaiting_payment, when the order sent to the gateway moved past payment.
+	 */
+	public function test_clear_cart_after_payment_reads_the_order_sent_to_gateway(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => OrderStatus::PENDING ) );
+		$order->set_cart_hash( WC()->cart->get_cart_hash() );
+		$order->save();
+
+		PaymentRecovery::remember_order_sent_to_gateway( $order->get_id() );
+		WC()->session->set( 'order_awaiting_payment', $order->get_id() );
+		$order->payment_complete( 'txn_died_in_transition' );
+
+		wc_clear_cart_after_payment();
+
+		$this->assertTrue( WC()->cart->is_empty(), 'The next page load should empty the cart of an order a card gateway already charged, so a retry cannot place it again.' );
+	}
+
+	/**
 	 * @testdox Should allow woocommerce_should_clear_cart_after_payment to override the final clear cart value.
 	 */
 	public function test_clear_cart_after_payment_filter_can_override_final_value(): void {
@@ -2821,6 +2842,61 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 1, $this->add_to_cart_quantity_filter_args[0] );
 		$this->assertEquals( $product->get_id(), $this->add_to_cart_quantity_filter_args[1] );
 		$this->assertEquals( $variation['variation_id'], $this->add_to_cart_quantity_filter_args[2] );
+	}
+
+	/**
+	 * @testdox Adding a variation to the cart keeps only the attributes its parent uses for variations.
+	 * @dataProvider parent_variation_attribute_provider
+	 *
+	 * @param bool  $used_for_variations Whether the parent's Color attribute is ticked "Used for variations".
+	 * @param array $expected            The variation data the cart item should keep.
+	 */
+	public function test_add_to_cart_keeps_only_parent_variation_attributes( bool $used_for_variations, array $expected ): void {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Color' );
+		$attribute->set_options( array( 'Red', 'Blue' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'color' => 'Red' ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+
+		// Save the parent again with the box ticked or unticked. Unticking it leaves the variation published and for sale.
+		$attribute = clone $attribute;
+		$attribute->set_variation( $used_for_variations );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$cart_item_key = WC()->cart->add_to_cart(
+			$variation->get_id(),
+			1,
+			0,
+			array(
+				'attribute_color' => 'Red',
+				'attribute_x'     => 'not an option of this product',
+			)
+		);
+
+		$this->assertNotFalse( $cart_item_key );
+		$this->assertSame( $expected, WC()->cart->get_cart_item( $cart_item_key )['variation'] );
+	}
+
+	/**
+	 * Provides whether the parent uses Color for variations, and the variation data the cart should keep.
+	 *
+	 * @return array<string, array{bool, array<string, string>}>
+	 */
+	public static function parent_variation_attribute_provider(): array {
+		return array(
+			'parent uses Color for variations'        => array( true, array( 'attribute_color' => 'Red' ) ),
+			'parent uses no attribute for variations' => array( false, array() ),
+		);
 	}
 
 	/**

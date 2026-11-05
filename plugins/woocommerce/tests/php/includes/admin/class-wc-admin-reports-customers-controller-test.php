@@ -182,6 +182,7 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_Unit_Test_Case {
 	public static function wpTearDownAfterClass() {
 		remove_action( 'action_scheduler_stored_action', array( self::class, 'track_import_action' ) );
 		WC_Helper_Reports::reset_stats_dbs();
+		WC_Helper_Shipping::delete_simple_flat_rate();
 		$action_store = ActionScheduler_Store::instance();
 		foreach ( self::$import_action_ids as $action_id ) {
 			$action_store->delete_action( $action_id );
