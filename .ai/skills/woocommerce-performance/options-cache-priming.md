@@ -102,7 +102,7 @@ Prime the bounded group that this consumer will read, rather than every settings
 
 ```php
 $option_names = array_map(
-    static fn( $id, $definition ) => $definition['option_key'] ?? "woocommerce_feature_{$id}_enabled",
+    static fn( $id, $definition ) => ! empty( $definition['option_key'] ) ? $definition['option_key'] : "woocommerce_feature_{$id}_enabled",
     array_keys( $this->registry ),
     $this->registry
 );
@@ -117,7 +117,7 @@ Do not broaden a request's work to every possible registry entry just because in
 
 `wp_prime_option_caches()` checks autoload and cache state itself. The query monitor may show only a subset of the supplied names because cached, negatively cached, or autoloaded keys can be skipped. That subset is expected; it is not evidence that the registry extraction failed.
 
-**Real-world example:** `FeaturesController::init_feature_definitions()` derives `woocommerce_feature_{id}_enabled` names and honors explicit `option_key` overrides before subsequent feature checks. Cold missing/non-autoloaded keys can be batched there; without that batch they may produce separate reads. It does not follow that every `feature_is_enabled()` call always causes SQL. [#65883](https://github.com/woocommerce/woocommerce/pull/65883) covers registry-derived feature/gateway keys.
+**Real-world example:** `FeaturesController::init_feature_definitions()` batches feature-option reads before subsequent checks. Match derived names to the consumer's fallback: `feature_is_enabled()` uses `woocommerce_feature_{id}_enabled` when `option_key` is empty. The mapper above mirrors that behavior; `??` only handles missing/null keys and would retain an empty string. Inspect existing priming as well as the reader rather than assuming they agree. Cold missing/non-autoloaded keys can be batched there; without that batch they may produce separate reads. It does not follow that every `feature_is_enabled()` call always causes SQL. [#65883](https://github.com/woocommerce/woocommerce/pull/65883) covers registry-derived feature/gateway keys.
 
 ---
 

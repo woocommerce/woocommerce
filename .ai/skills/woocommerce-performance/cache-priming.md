@@ -94,6 +94,8 @@ The variation metadata reads can use the warmed cache. That does not mean the en
 
 When `WC_Product_Variation` objects are already available, use their getters in the consumer's context, typically the default `'view'` context. `get_image_id()` returns a scalar; `get_gallery_image_ids()` returns an array. The initial load below is illustrative: reuse an existing loaded collection instead of loading it again.
 
+The marked filtering step is pseudocode. Replace it with the consumer's existing visibility and stock checks before collecting images; this example does not define a universal variation-visibility policy.
+
 ```php
 $variations = array();
 if ( ! empty( $variation_ids ) ) {
@@ -101,7 +103,7 @@ if ( ! empty( $variation_ids ) ) {
     $variations = array_filter( array_map( 'wc_get_product', $variation_ids ) );
 }
 
-// Apply the consumer's visibility and stock filters before collecting images.
+// Pseudocode: filter $variations using the consumer's visibility and stock checks.
 if ( ! empty( $variations ) ) {
     $attachment_groups = array();
     foreach ( $variations as $variation ) {
@@ -123,6 +125,8 @@ if ( ! empty( $variations ) ) {
 wc_get_container()->get( \Automattic\WooCommerce\Internal\Utilities\ProductUtil::class )
     ->prime_image_caches( array_values( $variations ) );
 ```
+
+The helper calls `_prime_post_caches( $image_ids )` with both term and metadata priming enabled. When the consumer needs attachment posts and metadata but not terms, the explicit `_prime_post_caches( $attachment_ids, false, true )` path above provides that narrower scope. Whether disabling term priming saves work depends on registered attachment taxonomies and cache state; the default flags do not imply an extra term query on every call.
 
 `WC_Product_Variation` extends `WC_Product`, so variation collections are accepted. Pass a numerically indexed copy: the current helper preserves collection keys before unpacking gallery arrays into `array_merge()`, which can fail for string-keyed collections. `array_values()` leaves the caller's keyed collection intact. An explicit collect-and-prime path can be appropriate when the consumer needs only featured images, a different getter context, or a narrower cache scope. A legacy `includes/` file is not by itself a reason to assume the DI container is unavailable; check the actual lifecycle and dependencies.
 
