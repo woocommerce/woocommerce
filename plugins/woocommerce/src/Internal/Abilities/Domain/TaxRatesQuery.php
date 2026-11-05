@@ -111,18 +111,18 @@ class TaxRatesQuery extends AbstractDomainAbility implements AbilityDefinition {
 	public static function execute( array $input ): array {
 		global $wpdb;
 
-		$page     = max( 1, (int) ( $input['page'] ?? 1 ) );
-		$per_page = min( 100, max( 1, (int) ( $input['per_page'] ?? 50 ) ) );
+		$page     = $input['page'] ?? 1;
+		$per_page = $input['per_page'] ?? 50;
 
 		$conditions = array( '1=1' );
-		if ( ! empty( $input['include'] ) ) {
-			$include      = array_map( 'intval', (array) $input['include'] );
+		if ( isset( $input['include'] ) ) {
+			$include      = $input['include'];
 			$placeholders = implode( ', ', array_fill( 0, count( $include ), '%d' ) );
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The placeholders are generated for each ID.
 			$conditions[] = $wpdb->prepare( "tax_rate_id IN ({$placeholders})", $include );
 		}
 		if ( isset( $input['class'] ) ) {
-			$tax_class = sanitize_title( (string) $input['class'] );
+			$tax_class = sanitize_title( $input['class'] );
 			if ( 'standard' !== $tax_class && ! in_array( $tax_class, \WC_Tax::get_tax_class_slugs(), true ) ) {
 				return array(
 					'rates'       => array(),
@@ -135,7 +135,7 @@ class TaxRatesQuery extends AbstractDomainAbility implements AbilityDefinition {
 			$conditions[] = $wpdb->prepare( 'tax_rate_class = %s', 'standard' === $tax_class ? '' : $tax_class );
 		}
 		if ( isset( $input['country'] ) ) {
-			$conditions[] = $wpdb->prepare( "tax_rate_country IN ( '', %s )", strtoupper( (string) $input['country'] ) );
+			$conditions[] = $wpdb->prepare( "tax_rate_country IN ( '', %s )", strtoupper( $input['country'] ) );
 		}
 		$where = implode( ' AND ', $conditions );
 

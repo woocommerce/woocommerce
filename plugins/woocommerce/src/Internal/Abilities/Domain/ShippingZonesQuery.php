@@ -96,7 +96,7 @@ class ShippingZonesQuery extends AbstractDomainAbility implements AbilityDefinit
 		$zones[] = new \WC_Shipping_Zone( 0 );
 
 		if ( isset( $input['include'] ) ) {
-			$include = array_map( 'intval', (array) $input['include'] );
+			$include = $input['include'];
 			$zones   = array_filter(
 				$zones,
 				static function ( \WC_Shipping_Zone $zone ) use ( $include ): bool {
