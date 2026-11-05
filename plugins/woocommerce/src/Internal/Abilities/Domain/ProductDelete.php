@@ -132,7 +132,7 @@ class ProductDelete extends ActionableAbility {
 	 */
 	protected function load( array $input ) {
 		$this->product_id = 0;
-		$this->force      = wc_string_to_bool( $input['force'] ?? false );
+		$this->force      = $input['force'] ?? false;
 		$this->parent     = null;
 		$this->deleting   = array();
 		$this->deleted    = array();

@@ -67,6 +67,11 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
+		$refusal = UcpUtils::refuse_non_json_payload( $request, UcpUtils::CAPABILITY_CART );
+		if ( null !== $refusal ) {
+			return $this->add_response_headers( $refusal );
+		}
+
 		if ( '' !== $this->route_cart_id( $request ) && '' === $this->validated_cart_id( $request ) ) {
 			return $this->add_response_headers( $this->ucp_not_found() );
 		}
