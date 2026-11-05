@@ -158,7 +158,7 @@ class WC_Structured_Data {
 		$types   = array();
 		$types[] = is_shop() || is_product_category() || is_product() ? 'product' : '';
 		$types[] = is_shop() && is_front_page() ? 'website' : '';
-		$types[] = $policy_page_id > 0 && is_page( $policy_page_id ) && ! doing_action( 'woocommerce_email_order_details' ) ? 'onlinestore' : '';
+		$types[] = $policy_page_id > 0 && ( is_page( $policy_page_id ) || is_product() ) && ! doing_action( 'woocommerce_email_order_details' ) ? 'onlinestore' : '';
 		$types[] = is_product() ? 'review' : '';
 		$types[] = 'breadcrumblist';
 		$types[] = 'order';
@@ -706,7 +706,7 @@ class WC_Structured_Data {
 	}
 
 	/**
-	 * Generates link-only return-policy data on the selected public policy page.
+	 * Generates link-only return-policy data on product pages and the selected public policy page.
 	 *
 	 * Hooked into `wp_footer` before structured data is output, so it cannot leak into order emails.
 	 *
@@ -714,7 +714,7 @@ class WC_Structured_Data {
 	 */
 	public function generate_online_store_data(): void {
 		$page_id = wc_get_page_id( 'refund_returns' );
-		if ( $page_id <= 0 || ! is_page( $page_id ) ) {
+		if ( $page_id <= 0 || ( ! is_page( $page_id ) && ! is_product() ) ) {
 			return;
 		}
 
@@ -739,7 +739,7 @@ class WC_Structured_Data {
 		);
 
 		/**
-		 * Filters the store and return-policy structured data on the policy page.
+		 * Filters the store and return-policy structured data.
 		 *
 		 * @since 11.3.0
 		 * @param array   $markup Structured data for the online store.
