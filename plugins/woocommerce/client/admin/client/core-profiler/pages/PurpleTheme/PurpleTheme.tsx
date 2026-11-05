@@ -99,7 +99,7 @@ export const PurpleTheme = ( {
 					</div>
 					<p className="woocommerce-profiler-purple-theme__note">
 						{ __(
-							'We’ll install Purple and activate it, so it becomes your store’s theme right away. You can switch back any time in Appearance > Themes.',
+							'We’ll install Purple and activate it, so it becomes your store’s theme right away.',
 							'woocommerce'
 						) }
 					</p>
