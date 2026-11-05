@@ -199,6 +199,64 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Linking a guest order must not recreate or reset download permissions.
+	 */
+	public function test_linking_guest_order_preserves_download_permissions() {
+		$customer_id = wc_create_new_customer( 'downloads@example.com', 'downloadcustomer', 'testpassword' );
+		$files       = array();
+		foreach ( array( 'revoked', 'exhausted', 'valid' ) as $file_id ) {
+			$file = new WC_Product_Download();
+			$file->set_id( $file_id );
+			$file->set_file( 'https://example.com/' . $file_id . '.pdf' );
+			$files[] = $file;
+		}
+		$product = new WC_Product_Simple();
+		$product->set_downloadable( true );
+		$product->set_download_limit( 2 );
+		$product->set_download_expiry( 30 );
+		$product->set_downloads( $files );
+		$product->save();
+
+		$order = new WC_Order();
+		$order->set_billing_email( 'downloads@example.com' );
+		$order->add_product( $product );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		wc_downloadable_product_permissions( $order->get_id() );
+
+		$store       = WC_Data_Store::load( 'customer-download' );
+		$permissions = $store->get_downloads( array( 'order_id' => $order->get_id() ) );
+		$this->assertCount( 3, $permissions );
+		$by_file = array();
+		foreach ( $permissions as $permission ) {
+			$by_file[ $permission->get_download_id() ] = $permission;
+		}
+		$by_file['revoked']->delete();
+		$by_file['exhausted']->set_downloads_remaining( 0 );
+		$by_file['exhausted']->set_download_count( 2 );
+		$by_file['exhausted']->save();
+		$expiry = $by_file['valid']->get_access_expires()->getTimestamp();
+
+		$this->assertSame( 1, wc_update_new_customer_past_orders( $customer_id ) );
+		$permissions = $store->get_downloads( array( 'order_id' => $order->get_id() ) );
+		$this->assertCount( 2, $permissions );
+		foreach ( $permissions as $permission ) {
+			$this->assertArrayHasKey( $permission->get_download_id(), $by_file );
+			$this->assertSame( $by_file[ $permission->get_download_id() ]->get_id(), $permission->get_id() );
+			$this->assertEquals( $customer_id, $permission->get_user_id() );
+			if ( 'exhausted' === $permission->get_download_id() ) {
+				$this->assertEquals( 0, $permission->get_downloads_remaining() );
+				$this->assertEquals( 2, $permission->get_download_count() );
+			} else {
+				$this->assertSame( 'valid', $permission->get_download_id() );
+				$this->assertEquals( 2, $permission->get_downloads_remaining() );
+				$this->assertSame( $expiry, $permission->get_access_expires()->getTimestamp() );
+			}
+		}
+		$this->assertCount( 1, wc_get_customer_available_downloads( $customer_id ) );
+	}
+
+	/**
 	 * Test wc_update_new_customer_past_orders with invalid or changed email.
 	 *
 	 * @since 3.1

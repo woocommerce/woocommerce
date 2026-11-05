@@ -993,6 +993,71 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Macao has no postal codes or subdivisions, so the postcode and state fields are hidden and optional.
+	 *
+	 * @testdox 'get_address_fields' hides the postcode and state for Macao, which uses neither.
+	 *
+	 * @return void
+	 */
+	public function test_get_address_fields_hides_postcode_and_state_for_macao() {
+		$fields = ( new WC_Countries() )->get_address_fields( 'MO', 'billing_' );
+
+		$this->assertTrue( $fields['billing_postcode']['hidden'] ?? false, 'Macao has no postal codes, so the field should be hidden.' );
+		$this->assertFalse( $fields['billing_postcode']['required'], 'Macao has no postal codes, so the field should not be required.' );
+		$this->assertTrue( $fields['billing_state']['hidden'] ?? false, 'Macao has no subdivisions, so the state should be hidden.' );
+		$this->assertFalse( $fields['billing_state']['required'], 'Macao has no subdivisions, so the state should not be required.' );
+	}
+
+	/**
+	 * @testdox 'get_formatted_address' outputs translated state names stored as HTML entities as text, including in uppercase.
+	 */
+	public function test_get_formatted_address_decodes_entity_encoded_state_names(): void {
+		$this->translate_strings( array( 'Ancona' => 'Anc&ocirc;ne' ) );
+		$this->use_address_format( 'IT', "{state}\n{state_upper}" );
+		$sut = new WC_Countries();
+
+		$address = $sut->get_formatted_address(
+			array(
+				'state'   => 'AN',
+				'country' => 'IT',
+			),
+			"\n"
+		);
+
+		$this->assertSame( "Ancône\nANCÔNE", $address, 'The state should not be output as entities, or escaped twice once uppercased.' );
+	}
+
+	/**
+	 * @testdox 'get_formatted_address' outputs country names stored as HTML entities as text, including in uppercase.
+	 */
+	public function test_get_formatted_address_decodes_entity_encoded_country_names(): void {
+		$this->use_address_format( 'CW', "{country}\n{country_upper}" );
+		$sut = new WC_Countries();
+
+		$address = $sut->get_formatted_address( array( 'country' => 'CW' ), "\n" );
+
+		$this->assertSame( "Curaçao\nCURAÇAO", $address, 'The country should not be output as entities, or escaped twice once uppercased.' );
+	}
+
+	/**
+	 * @testdox 'get_formatted_address' escapes markup in a translated state name after decoding its entities.
+	 */
+	public function test_get_formatted_address_escapes_markup_in_entity_encoded_state_names(): void {
+		$this->translate_strings( array( 'Ancona' => 'Anc&lt;b&gt;ne' ) );
+		$this->use_address_format( 'IT', '{state_upper}' );
+		$sut = new WC_Countries();
+
+		$address = $sut->get_formatted_address(
+			array(
+				'state'   => 'AN',
+				'country' => 'IT',
+			)
+		);
+
+		$this->assertSame( 'ANC&lt;B&gt;NE', $address, 'Decoded markup should be escaped again for output.' );
+	}
+
+	/**
 	 * Provider for `test_get_country_from_alpha_3_code`.
 	 *
 	 * @return array
@@ -1177,6 +1242,38 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	private function assert_switched_locale_stamps( WC_Countries $sut, $stamp ): void {
 		$this->assertSame( $stamp, $sut->get_countries()['US'], "Countries should use the $stamp locale cache." );
 		$this->assertSame( $stamp, $sut->get_country_locale()['US']['postcode']['label'], "Country locale settings should use the $stamp locale." );
+	}
+
+	/**
+	 * Translate WooCommerce strings, as a language pack would.
+	 *
+	 * @param array<string, string> $translations Translations keyed by the original string.
+	 */
+	private function translate_strings( array $translations ): void {
+		add_filter(
+			'gettext',
+			function ( $translation, $text, $domain ) use ( $translations ) {
+				return 'woocommerce' === $domain && isset( $translations[ $text ] ) ? $translations[ $text ] : $translation;
+			},
+			10,
+			3
+		);
+	}
+
+	/**
+	 * Use the given address format for a country.
+	 *
+	 * @param string $country Country code.
+	 * @param string $format  Address format.
+	 */
+	private function use_address_format( $country, $format ): void {
+		add_filter(
+			'woocommerce_localisation_address_formats',
+			function ( $formats ) use ( $country, $format ) {
+				$formats[ $country ] = $format;
+				return $formats;
+			}
+		);
 	}
 
 	/**

@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-utils';
+import {
+	test as base,
+	expect,
+	enableTestPlugin,
+	guestFile,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -24,6 +29,8 @@ const test = base.extend< { pageObject: CartPage } >( {
 } );
 
 test.describe( 'Shopper → Cart block', () => {
+	test.use( { storageState: guestFile } );
+
 	test( 'The discount label is only visible next to the discounted product', async ( {
 		pageObject,
 		frontendUtils,
@@ -63,12 +70,10 @@ test.describe( 'Shopper → Cart block', () => {
 
 	test( 'Products with updated prices should not display a discount label', async ( {
 		pageObject,
-		requestUtils,
+		context,
 		frontendUtils,
 	} ) => {
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-test-update-price'
-		);
+		await enableTestPlugin( context, 'update-price' );
 
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( DISCOUNTED_PRODUCT_NAME );

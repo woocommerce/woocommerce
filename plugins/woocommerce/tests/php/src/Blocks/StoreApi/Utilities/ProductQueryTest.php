@@ -379,6 +379,91 @@ class ProductQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Taxonomy filters work for product taxonomies that are also registered for other post types.
+	 */
+	public function test_taxonomy_filter_supports_taxonomy_registered_for_multiple_object_types(): void {
+		$taxonomy = 'test_multi_object_tax';
+		register_taxonomy( $taxonomy, array( 'product', 'product_variation' ) );
+
+		try {
+			$fixtures      = new FixtureData();
+			$alpha_product = $fixtures->get_simple_product( array( 'name' => 'Alpha product' ) );
+			$beta_product  = $fixtures->get_simple_product( array( 'name' => 'Beta product' ) );
+			wp_set_object_terms( $alpha_product->get_id(), 'alpha', $taxonomy );
+			wp_set_object_terms( $beta_product->get_id(), 'beta', $taxonomy );
+
+			$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+			$request->set_param( 'include', array( $alpha_product->get_id(), $beta_product->get_id() ) );
+			$request->set_param( '_unstable_tax_' . $taxonomy, array( 'alpha' ) );
+
+			$results = $this->product_query->get_results( $request );
+		} finally {
+			unregister_taxonomy( $taxonomy );
+		}
+
+		$this->assertSame( array( $alpha_product->get_id() ), $results['results'], 'Only the product assigned the requested term should be returned.' );
+	}
+
+	/**
+	 * @testdox Taxonomy filters on variations use terms for taxonomies that are registered for variations.
+	 */
+	public function test_variation_taxonomy_filter_supports_taxonomy_registered_for_variations(): void {
+		$taxonomy = 'test_multi_object_tax';
+		register_taxonomy( $taxonomy, array( 'product', 'product_variation' ) );
+
+		try {
+			$fixtures        = new FixtureData();
+			$parent_product  = $fixtures->get_variable_product( array() );
+			$alpha_variation = $fixtures->get_variation_product( $parent_product->get_id() );
+			$beta_variation  = $fixtures->get_variation_product( $parent_product->get_id() );
+			wp_set_object_terms( $alpha_variation->get_id(), 'alpha', $taxonomy );
+			wp_set_object_terms( $beta_variation->get_id(), 'beta', $taxonomy );
+
+			$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+			$request->set_param( 'type', 'variation' );
+			$request->set_param( 'include', array( $alpha_variation->get_id(), $beta_variation->get_id() ) );
+			$request->set_param( '_unstable_tax_' . $taxonomy, array( 'alpha' ) );
+
+			$results = $this->product_query->get_results( $request );
+		} finally {
+			unregister_taxonomy( $taxonomy );
+		}
+
+		$this->assertSame( array( $alpha_variation->get_id() ), $results['results'], 'Only the variation assigned the requested term should be returned.' );
+	}
+
+	/**
+	 * @testdox Attribute filters on variations use attribute meta even when the attribute taxonomy is registered for variations.
+	 */
+	public function test_variation_attribute_filter_uses_meta_when_attribute_is_registered_for_variations(): void {
+		$fixtures  = new FixtureData();
+		$attribute = $fixtures->get_product_attribute( 'variation-registered', array( 'red', 'blue' ) );
+		$taxonomy  = $attribute['attribute_taxonomy'];
+		register_taxonomy_for_object_type( $taxonomy, 'product_variation' );
+
+		$parent_product = $fixtures->get_variable_product( array(), array( $attribute ) );
+		$red_variation  = $fixtures->get_variation_product( $parent_product->get_id(), array( $taxonomy => 'red' ) );
+		$blue_variation = $fixtures->get_variation_product( $parent_product->get_id(), array( $taxonomy => 'blue' ) );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'type', 'variation' );
+		$request->set_param( 'include', array( $red_variation->get_id(), $blue_variation->get_id() ) );
+		$request->set_param(
+			'attributes',
+			array(
+				array(
+					'attribute' => $taxonomy,
+					'slug'      => array( 'red' ),
+				),
+			)
+		);
+
+		$results = $this->product_query->get_results( $request );
+
+		$this->assertSame( array( $red_variation->get_id() ), $results['results'], 'Only the variation with the requested attribute value should be returned.' );
+	}
+
+	/**
 	 * Get product IDs matched by a Store API slug filter.
 	 *
 	 * @param string $slug_filter Slug filter value.

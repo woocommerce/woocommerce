@@ -353,6 +353,35 @@ class Image extends Abstract_Block_Renderer {
 	}
 
 	/**
+	 * Add core's caption class to the caption element when it is missing.
+	 *
+	 * Image captions saved before WordPress 6.2 carry no class, and the email's caption styles key
+	 * off that class, so without it a saved caption color never reaches them.
+	 *
+	 * @param string $caption_html Caption HTML.
+	 * @return string Caption HTML carrying the caption class.
+	 */
+	private function add_caption_class( string $caption_html ): string {
+		if ( '' === $caption_html ) {
+			return $caption_html;
+		}
+
+		$html = new \WP_HTML_Tag_Processor( $caption_html );
+		if ( ! $html->next_tag( array( 'tag_name' => 'SPAN' ) ) ) {
+			return $caption_html;
+		}
+
+		$existing_class = trim( (string) ( $html->get_attribute( 'class' ) ?? '' ) );
+		$classes        = preg_split( '/\s+/', $existing_class, -1, PREG_SPLIT_NO_EMPTY );
+		if ( is_array( $classes ) && in_array( 'wp-element-caption', $classes, true ) ) {
+			return $caption_html;
+		}
+
+		$html->set_attribute( 'class', $existing_class ? $existing_class . ' wp-element-caption' : 'wp-element-caption' );
+		return $html->get_updated_html();
+	}
+
+	/**
 	 * This method configure the font size of the caption because it's set to 0 for the parent element to avoid unexpected white spaces
 	 * We try to use font-size passed down from the parent element $parsedBlock['email_attrs']['font-size'], but if it's not set, we use the default font-size from the email theme.
 	 *
@@ -549,6 +578,7 @@ class Image extends Abstract_Block_Renderer {
 		$figcaption      = $dom_helper->find_element( 'figcaption' );
 		$figcaption_html = $figcaption ? $dom_helper->get_outer_html( $figcaption ) : '';
 		$figcaption_html = str_replace( array( '<figcaption', '</figcaption>' ), array( '<span', '</span>' ), $figcaption_html );
+		$figcaption_html = $this->add_caption_class( $figcaption_html );
 
 		$anchor_tag            = $dom_helper->find_element( 'a' );
 		$anchor_tag_href       = $anchor_tag ? $dom_helper->get_attribute_value( $anchor_tag, 'href' ) : '';

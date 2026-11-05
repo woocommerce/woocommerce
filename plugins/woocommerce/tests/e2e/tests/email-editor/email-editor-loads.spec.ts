@@ -16,6 +16,9 @@ import {
 import { accessTheEmailEditor, openEmailPostInEditor } from '../../utils/email';
 import { setOption } from '../../utils/options';
 
+// WP 7.2 renamed "Preview in new tab" to "Preview" with an "(opens in a new tab)" icon label.
+const PREVIEW_IN_NEW_TAB = /^Preview (in new tab|\(opens in a new tab\))$/;
+
 test.describe(
 	'WooCommerce Email Editor Core',
 	{ lock: locks.EMAIL_FEATURE_FLAGS },
@@ -131,7 +134,7 @@ test.describe(
 			const [ newPage ] = await Promise.all( [
 				page.waitForEvent( 'popup' ), // Waits for the new tab to open
 				page
-					.getByRole( 'menuitem', { name: 'Preview in new tab' } )
+					.getByRole( 'menuitem', { name: PREVIEW_IN_NEW_TAB } )
 					.click(),
 			] );
 			try {
@@ -240,7 +243,7 @@ test.describe(
 				.click();
 			const page1Promise = page.waitForEvent( 'popup' );
 			await page
-				.getByRole( 'menuitem', { name: 'Preview in new tab' } )
+				.getByRole( 'menuitem', { name: PREVIEW_IN_NEW_TAB } )
 				.click();
 			const page1 = await page1Promise;
 			try {

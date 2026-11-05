@@ -95,6 +95,57 @@ class NotificationTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should list the variation's own attributes alongside the posted "Any" attributes.
+	 */
+	public function test_get_product_formatted_variation_list_merges_posted_attributes(): void {
+		$variable_product = \WC_Helper_Product::create_variation_product();
+		// The first variation only sets "size"; "colour" is left as "Any".
+		$variation_id = $variable_product->get_children()[0];
+
+		$notification = new Notification();
+		$notification->set_product_id( $variation_id );
+		$notification->set_user_email( 'test@example.com' );
+		$notification->save();
+
+		$this->assertSame( 'size: small', $notification->get_product_formatted_variation_list( true ), 'Without posted attributes only the fixed attributes should be listed' );
+
+		// Posted attributes only hold the "Any" values; "attribute_pa_stale" is not a variation attribute and must be dropped.
+		$notification->update_meta_data(
+			'posted_attributes',
+			array(
+				'attribute_pa_colour' => 'red',
+				'attribute_pa_stale'  => 'gone',
+			)
+		);
+		$notification->save();
+
+		$this->assertSame( 'size: small, colour: red', $notification->get_product_formatted_variation_list( true ), 'The fixed attribute should be kept and the posted "Any" attribute added' );
+	}
+
+	/**
+	 * @testdox Should keep the variation's fixed attribute value when a different value was posted for it.
+	 */
+	public function test_get_product_formatted_variation_list_keeps_fixed_attribute_over_posted(): void {
+		$variable_product = \WC_Helper_Product::create_variation_product();
+		// The first variation fixes "size" to "small"; "colour" is left as "Any".
+		$variation_id = $variable_product->get_children()[0];
+
+		$notification = new Notification();
+		$notification->set_product_id( $variation_id );
+		$notification->set_user_email( 'test@example.com' );
+		$notification->update_meta_data(
+			'posted_attributes',
+			array(
+				'attribute_pa_size'   => 'large',
+				'attribute_pa_colour' => 'red',
+			)
+		);
+		$notification->save();
+
+		$this->assertSame( 'size: small, colour: red', $notification->get_product_formatted_variation_list( true ), 'The fixed attribute should win over the posted value, while the "Any" attribute is filled in' );
+	}
+
+	/**
 	 * Test the get_product_permalink method.
 	 */
 	public function test_get_product_permalink() {
@@ -213,6 +264,60 @@ class NotificationTests extends \WC_Unit_Test_Case {
 		$this->assertIsString( $key );
 		$this->assertTrue( $notification->check_verification_key( $key ) );
 		$this->assertFalse( $notification->check_verification_key( 'invalid_key' ) );
+	}
+
+	/**
+	 * @testdox The stage key methods set the hash in memory and save nothing.
+	 */
+	public function test_stage_keys_save_nothing(): void {
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'test@example.com' );
+		$notification->save();
+
+		$verification_key = $notification->stage_verification_key();
+		$unsubscribe_key  = $notification->stage_unsubscribe_key();
+		$this->assertTrue( $notification->check_verification_key( $verification_key ) );
+		$this->assertTrue( $notification->check_unsubscribe_key( $unsubscribe_key ) );
+
+		$stored = new Notification( $notification->get_id() );
+		$this->assertFalse( $stored->check_verification_key( $verification_key ) );
+		$this->assertFalse( $stored->check_unsubscribe_key( $unsubscribe_key ) );
+	}
+
+	/**
+	 * @testdox A class that overrides the key methods keeps working through them, and the stage methods refuse it.
+	 */
+	public function test_stage_keys_refuse_a_class_that_has_not_adopted_them(): void {
+		// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
+		$notification = new class() extends Notification {
+			public function get_verification_key( bool $persist ): string {
+				return parent::get_verification_key( $persist );
+			}
+			public function get_unsubscribe_key( bool $persist ): string {
+				return parent::get_unsubscribe_key( $persist );
+			}
+		};
+		// phpcs:enable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'test@example.com' );
+		$notification->save();
+
+		$verification_key = $notification->get_verification_key( true );
+		$unsubscribe_key  = $notification->get_unsubscribe_key( true );
+		$stored           = new Notification( $notification->get_id() );
+		$this->assertTrue( $stored->check_verification_key( $verification_key ) );
+		$this->assertTrue( $stored->check_unsubscribe_key( $unsubscribe_key ) );
+
+		foreach ( array( 'stage_verification_key', 'stage_unsubscribe_key' ) as $stage_method ) {
+			try {
+				$notification->$stage_method();
+				$this->fail( $stage_method . ' did not refuse the class.' );
+			} catch ( \WC_Data_Exception $e ) {
+				$this->assertSame( 'woocommerce_data_staging_unsupported', $e->getErrorCode() );
+				$this->assertStringContainsString( $stage_method . '()', $e->getMessage() );
+			}
+		}
 	}
 
 	/**

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Always apply the offline payment methods' "Enable for shipping methods" setting at checkout, including on requests that reference an order.
