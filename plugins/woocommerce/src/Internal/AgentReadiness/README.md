@@ -88,7 +88,7 @@ robots.txt is loaded from the host root, only to find the sitemaps it lists. Its
 
 ## Failures per product
 
-`refresh_report()` stores what each product fails in product meta (`ProductFailures`), one row per check and per channel status, plus a `checked` row on every product the checks cover, passing ones included. `ProductsList` updates a product's rows when it is saved, except for a save that changes only stock or nothing, removes them when it is trashed, and adds the Products list filter and column. A covered product without rows was not tested, by the scan's product limit, and the column says so. The stored report's product counts are read from these rows, the total from the `checked` rows, so a product fixed, added or removed since the scan counts now. The example products per check can be out of date; the count links to the filtered Products list. A change to one product's GTIN can change another product's duplicate GTIN result; that one waits for the next scan.
+`refresh_report()` stores what each product fails in product meta (`ProductFailures`), one row per check and per channel status, plus a `checked` row on every product the checks cover, passing ones included. `ProductsList` updates a product's rows when it is saved, except for a save that changes only stock or nothing, removes them when it is trashed, and adds the Products list filter and column. A covered product without rows was not tested, by the scan's product limit, and the column says so. The classic product editor shows a notice with what the product fails, read when the page loads. The stored report's product counts are read from these rows, the total from the `checked` rows, so a product fixed, added or removed since the scan counts now. The example products per check can be out of date; the count links to the filtered Products list. The scan stores the GTINs more than one product shares in the report (`shared_gtins`, not returned by the report readers), so checking one product in the editor, on save or with the run ability doesn't read every published product. A change to one product's GTIN can change another product's duplicate GTIN result; that one waits for the next scan.
 
 ## What the store declares to agents
 
@@ -162,7 +162,7 @@ Per check, `channels` maps a channel id to the feed field and the effect, the sa
 
 On a store with 11,000 products, a scan (stopping at 5,000) took about 4 seconds and 144 MB. A product saved since the scan is already reflected in the counts, as described under Failures per product.
 
-`GET wc/v3/agent-readiness` returns `{ "report": <report or null>, "scan_pending": <bool>, "scan_stalled": <bool> }`, with `store_checks` read now; `scan_stalled` is true while a queued scan waits on a stalled Action Scheduler. Both routes need `manage_woocommerce` and exist only while the feature is enabled.
+`GET wc/v3/agent-readiness` returns `{ "report": <report or null>, "scan_pending": <bool>, "scan_stalled": <bool> }` from `AgentReadiness::get_served_report()`, so `store_checks` are read now; `scan_stalled` is true while a queued scan waits on a stalled Action Scheduler. Both routes need `manage_woocommerce` and exist only while the feature is enabled.
 
 The same shape is meant for every consumer: the Agentic commerce settings page, an outside scan of a store, and extensions that rank the findings by sales or offer fixes. Check and channel ids are stable keys.
 
@@ -172,7 +172,7 @@ The scan walks published simple and variable products shown in the shop catalog 
 
 While the feature is enabled, `AbilitiesLoader` registers these abilities in the WordPress Abilities API with the `Ability` class, which converts their input to the schema types. Their definition classes in this directory read the arguments from `ReadinessAbilities::registration_args()`. They show in REST and to MCP clients, for users with `manage_woocommerce`:
 
-- `woocommerce/get-agent-readiness` and `GET wc/v3/agent-readiness` both return `{ report, scan_pending, scan_stalled }` with `store_checks` read now (`AgentReadiness::get_store_checks()`): settings changed since the scan show their current state, and store output checks come from the stored report.
+- `woocommerce/get-agent-readiness` and `GET wc/v3/agent-readiness` both return `{ report, scan_pending, scan_stalled }` from `AgentReadiness::get_served_report()`: settings changed since the scan show their current state, and store output checks come from the stored report.
 - `woocommerce/run-agent-readiness-check` with `product_id` checks that product now (`check_product()`) and returns its failing checks with label and fix, and its status per channel. Without one it queues the background scan, like `POST wc/v3/agent-readiness/scan`, and returns `scan_pending`, `scan_stalled` and the current report's `generated_at`, so the agent knows when to read the report again, or that it won't change until scheduled actions run.
 
 ## Agentic commerce settings page

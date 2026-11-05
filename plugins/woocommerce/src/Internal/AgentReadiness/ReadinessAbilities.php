@@ -161,13 +161,9 @@ class ReadinessAbilities {
 	 */
 	public function get_report( $input = null ): array {
 		unset( $input );
-		$report = $this->agent_readiness->get_cached_report();
-		if ( null !== $report ) {
-			$report['store_checks'] = $this->agent_readiness->get_store_checks( $report );
-		}
 		$pending = $this->scheduled_scan->is_pending();
 		return array(
-			'report'       => $report,
+			'report'       => $this->agent_readiness->get_served_report(),
 			'scan_pending' => $pending,
 			'scan_stalled' => $pending && $this->scheduled_scan->is_stalled(),
 		);

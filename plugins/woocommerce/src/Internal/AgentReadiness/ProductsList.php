@@ -70,6 +70,7 @@ class ProductsList {
 		add_action( 'manage_product_posts_custom_column', array( $this, 'render_column' ), 10, 2 );
 		add_action( 'restrict_manage_posts', array( $this, 'render_filter' ) );
 		add_action( 'pre_get_posts', array( $this, 'apply_filter' ) );
+		add_action( 'admin_notices', array( $this, 'render_editor_notice' ) );
 	}
 
 	/**
@@ -242,6 +243,33 @@ class ProductsList {
 			'value' => sanitize_text_field( wp_unslash( $_GET[ self::FILTER_PARAM ] ) ),
 		);
 		$query->set( 'meta_query', $meta_query ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+	}
+
+	/**
+	 * On the product editor, name what the product fails and for which channels. Read now, so it goes after a fix is saved.
+	 *
+	 * @internal
+	 */
+	public function render_editor_notice(): void {
+		$screen = get_current_screen();
+		if ( null === $screen || 'post' !== $screen->base || 'product' !== $screen->post_type || 'add' === $screen->action || ! $this->enabled() ) {
+			return;
+		}
+		$post_id = get_the_ID();
+		$product = false !== $post_id ? wc_get_product( $post_id ) : null;
+		$result  = $product instanceof \WC_Product ? $this->agent_readiness->check_product( $product ) : null;
+		if ( null === $result || array() === $result['checks'] ) {
+			return;
+		}
+		$fixes    = $this->agent_readiness->get_check_fixes();
+		$channels = FeedChannels::all();
+		echo '<div class="notice notice-warning"><p>' . esc_html__( 'AI shopping agents may skip this product or find it harder to recommend:', 'woocommerce' ) . '</p><ul>';
+		foreach ( $result['checks'] as $id => $check_channels ) {
+			$names = array_column( array_intersect_key( $channels, $check_channels ), 'name' );
+			/* translators: 1: what to change on the product, 2: list of channel names, or "product page". */
+			echo '<li>' . esc_html( sprintf( __( '%1$s (%2$s)', 'woocommerce' ), $fixes[ $id ] ?? $id, array() === $names ? __( 'product page', 'woocommerce' ) : implode( ', ', $names ) ) ) . '</li>';
+		}
+		echo '</ul></div>';
 	}
 
 	/**
