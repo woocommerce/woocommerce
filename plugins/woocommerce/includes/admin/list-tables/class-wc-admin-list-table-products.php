@@ -6,6 +6,7 @@
  * @version  3.3.0
  */
 
+use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
@@ -494,9 +495,10 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		$filters = apply_filters(
 			'woocommerce_products_admin_list_table_filters',
 			array(
-				'product_category' => array( $this, 'render_products_category_filter' ),
-				'product_type'     => array( $this, 'render_products_type_filter' ),
-				'stock_status'     => array( $this, 'render_products_stock_status_filter' ),
+				'product_category'   => array( $this, 'render_products_category_filter' ),
+				'product_type'       => array( $this, 'render_products_type_filter' ),
+				'stock_status'       => array( $this, 'render_products_stock_status_filter' ),
+				'catalog_visibility' => array( $this, 'render_products_catalog_visibility_filter' ),
 			)
 		);
 
@@ -594,6 +596,39 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 
 		$output .= '</select>';
 		echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $output contains only fixed markup and escaped option values.
+	}
+
+	/**
+	 * Render the catalog visibility filter for the list table.
+	 *
+	 * @since 11.4.0
+	 */
+	private function render_products_catalog_visibility_filter(): void {
+		$current = $this->get_requested_catalog_visibility();
+		$output  = '<select name="catalog_visibility"><option value="">' . esc_html__( 'Filter by visibility', 'woocommerce' ) . '</option>';
+
+		foreach ( wc_get_product_visibility_options() as $value => $label ) {
+			$output .= '<option ' . selected( $value, $current, false ) . ' value="' . esc_attr( $value ) . '">' . esc_html( $label ) . '</option>';
+		}
+
+		$output .= '</select>';
+		echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $output contains only fixed markup and escaped option values.
+	}
+
+	/**
+	 * Get the catalog visibility the merchant picked in the filter.
+	 *
+	 * Returns an empty string when the request has no value or an unknown value. The list then shows all products.
+	 *
+	 * @return string
+	 */
+	private function get_requested_catalog_visibility(): string {
+		$value = wp_unslash( $_GET['catalog_visibility'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read-only filter. The code below checks the value against a fixed list.
+		if ( is_array( $value ) ) {
+			$value = reset( $value ); // The dropdown sends one value, so use the first one if the request has several.
+		}
+
+		return is_string( $value ) && array_key_exists( $value, wc_get_product_visibility_options() ) ? $value : '';
 	}
 
 	/**
@@ -696,6 +731,29 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		// Stock status filter.
 		if ( ! empty( $_GET['stock_status'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			add_filter( 'posts_clauses', array( $this, 'filter_stock_status_post_clauses' ) );
+		}
+
+		// Catalog visibility filter. The product data store saves each visibility as two terms, so check both to match one visibility exactly.
+		$catalog_visibility = $this->get_requested_catalog_visibility();
+		if ( '' !== $catalog_visibility ) {
+			$excluded_from_catalog = in_array( $catalog_visibility, array( CatalogVisibility::SEARCH, CatalogVisibility::HIDDEN ), true );
+			$excluded_from_search  = in_array( $catalog_visibility, array( CatalogVisibility::CATALOG, CatalogVisibility::HIDDEN ), true );
+
+			$query_vars['tax_query'][] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				'relation' => 'AND',
+				array(
+					'taxonomy' => 'product_visibility',
+					'field'    => 'slug',
+					'terms'    => 'exclude-from-catalog',
+					'operator' => $excluded_from_catalog ? 'IN' : 'NOT IN',
+				),
+				array(
+					'taxonomy' => 'product_visibility',
+					'field'    => 'slug',
+					'terms'    => 'exclude-from-search',
+					'operator' => $excluded_from_search ? 'IN' : 'NOT IN',
+				),
+			);
 		}
 
 		// Search using CRUD.
