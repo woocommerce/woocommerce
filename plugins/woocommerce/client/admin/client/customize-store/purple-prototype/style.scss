@@ -30,13 +30,12 @@
 		align-items: stretch;
 	}
 
-	// Kept at the previews' 4:3 shape and pinned to the top, so the image is never cropped and
-	// doesn't move when the text below the buttons changes.
+	// A fixed shape, centered, so the image is never cut off at the sides or stretched by the text.
 	&__media {
 		position: relative;
 		flex: 0 0 360px;
-		align-self: flex-start;
-		aspect-ratio: 4 / 3;
+		align-self: center;
+		aspect-ratio: 7 / 5;
 		border: 1px solid var(--wpds-color-stroke-surface-neutral);
 		border-radius: var(--wpds-border-radius-md);
 		overflow: hidden;
@@ -88,6 +87,21 @@
 		flex-direction: column;
 		align-items: flex-start;
 		gap: var(--wpds-dimension-gap-sm);
+	}
+
+	// Purple's preview shows in full at its 4:3 shape.
+	&--purple &__media {
+		aspect-ratio: 4 / 3;
+	}
+
+	// Extra room around the text, and space for a two-line note in every state, so the card
+	// keeps the same height while Purple installs or activates.
+	&--purple &__body {
+		padding-block: var(--wpds-dimension-padding-3xl);
+	}
+
+	&--purple &__footer {
+		min-height: calc(var(--wpds-dimension-size-lg) + var(--wpds-dimension-gap-sm) + 2 * var(--wpds-typography-line-height-xs));
 	}
 
 	&__description,
