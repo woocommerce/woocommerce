@@ -609,7 +609,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			if ( $this->is_order_meta_box_screen( $screen_id ) ) {
 				$default_location = wc_get_customer_default_location();
 
-				wp_enqueue_script( 'wc-admin-order-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-order' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'wc-backbone-modal', 'selectWoo', 'wc-clipboard', 'wp-a11y' ), $version );
+				wp_enqueue_script( 'wc-admin-order-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-order' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'wc-backbone-modal', 'selectWoo', 'wc-clipboard', 'wp-a11y', 'wp-i18n' ), $version );
+				wp_set_script_translations( 'wc-admin-order-meta-boxes', 'woocommerce' );
 				wp_localize_script(
 					'wc-admin-order-meta-boxes',
 					'woocommerce_admin_meta_boxes_order',
@@ -668,13 +669,10 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'remove_shipping_notice'                          => $remove_shipping_notice,
 					'i18n_select_items'                               => __( 'Please select some items.', 'woocommerce' ),
 					'i18n_do_refund'                                  => __( 'Are you sure you wish to process this refund? This action cannot be undone.', 'woocommerce' ),
-					'i18n_restock_enter_quantity'                     => __( 'Enter a quantity above to return items to stock.', 'woocommerce' ),
-					'i18n_restock_count_single'                       => __( '1 item will be restocked.', 'woocommerce' ),
-					/* translators: %qty%: number of items that will be returned to stock. */
-					'i18n_restock_count_plural'                       => __( '%qty% items will be restocked.', 'woocommerce' ),
-					'i18n_restock_none'                               => __( 'No items will be restocked.', 'woocommerce' ),
-					'i18n_restock_items_not_reduced'                  => __( 'Stock was not reduced for these items.', 'woocommerce' ),
-					'i18n_restock_order_not_reduced'                  => __( 'Stock was not reduced for this order.', 'woocommerce' ),
+					'i18n_restock_enter_quantity'                     => __( 'Enter a quantity above to return items to stock', 'woocommerce' ),
+					'i18n_restock_none'                               => __( 'No items will be restocked', 'woocommerce' ),
+					'i18n_restock_items_not_reduced'                  => __( 'Stock was not reduced for these items', 'woocommerce' ),
+					'i18n_restock_order_not_reduced'                  => __( 'Stock was not reduced for this order', 'woocommerce' ),
 					'i18n_delete_refund'                              => __( 'Are you sure you wish to delete this refund? This action cannot be undone.', 'woocommerce' ),
 					'i18n_delete_tax'                                 => __( 'Are you sure you wish to delete this tax column? This action cannot be undone.', 'woocommerce' ),
 					'i18n_no_title'                                   => __( '(no title)', 'woocommerce' ),

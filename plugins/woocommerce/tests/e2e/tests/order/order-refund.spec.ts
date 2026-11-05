@@ -84,7 +84,7 @@ test.describe.serial(
 			).toBeDisabled();
 			await expect(
 				page.locator( '#restock_refunded_items_description' )
-			).toHaveText( 'Stock was not reduced for this order.' );
+			).toHaveText( 'Stock was not reduced for this order' );
 
 			// Confirm values
 			await expect( page.locator( '.refund_line_total' ) ).toHaveValue(
@@ -257,7 +257,7 @@ test.describe(
 			).toBeChecked();
 			await expect(
 				page.locator( '#restock_refunded_items_description' )
-			).toHaveText( '2 items will be restocked.' );
+			).toHaveText( '2 items will be restocked' );
 			page.on( 'dialog', ( dialog ) => dialog.accept() );
 			await page.locator( '.do-manual-refund' ).click();
 

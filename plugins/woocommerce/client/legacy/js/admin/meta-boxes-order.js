@@ -364,6 +364,7 @@ jQuery( function ( $ ) {
 				.on( 'change', '.refund input.refund_line_total, .refund input.refund_line_tax', this.refunds.input_changed )
 				.on( 'change keyup', '.wc-order-refund-items #refund_amount', this.refunds.amount_changed )
 				.on( 'change', 'input.refund_order_item_qty', this.refunds.refund_quantity_changed )
+				.on( 'input', 'input.refund_order_item_qty', this.refunds.update_restock_checkbox )
 				.on( 'change', '#restock_refunded_items', this.refunds.update_restock_checkbox )
 
 				// Qty
@@ -1278,6 +1279,7 @@ jQuery( function ( $ ) {
 				var restock_qty        = 0;
 				var has_restockable    = false;
 				var has_other_quantity = false;
+				var last_checked;
 				var message;
 
 				if ( ! $checkbox.length ) {
@@ -1305,19 +1307,28 @@ jQuery( function ( $ ) {
 				restock_qty = parseFloat( restock_qty.toPrecision( 12 ) );
 
 				if ( restock_qty > 0 ) {
-					// Apply the default from the woocommerce_restock_refunded_items filter each time it becomes available.
+					// Restore the merchant's last choice, or the woocommerce_restock_refunded_items default the first time.
 					if ( $checkbox.prop( 'disabled' ) ) {
-						$checkbox.prop( 'disabled', false ).prop( 'checked', $checkbox.prop( 'defaultChecked' ) );
+						last_checked = $checkbox.data( 'restock-checked' );
+						$checkbox
+							.prop( 'disabled', false )
+							.prop( 'checked', undefined === last_checked ? $checkbox.prop( 'defaultChecked' ) : last_checked );
 					}
 
 					if ( ! $checkbox.prop( 'checked' ) ) {
 						message = woocommerce_admin_meta_boxes.i18n_restock_none;
-					} else if ( 1 === restock_qty ) {
-						message = woocommerce_admin_meta_boxes.i18n_restock_count_single;
 					} else {
-						message = woocommerce_admin_meta_boxes.i18n_restock_count_plural.replace( '%qty%', restock_qty );
+						message = wp.i18n.sprintf(
+							/* translators: %s: number of items that will be returned to stock. */
+							wp.i18n._n( '%s item will be restocked', '%s items will be restocked', restock_qty, 'woocommerce' ),
+							restock_qty
+						);
 					}
 				} else {
+					if ( ! $checkbox.prop( 'disabled' ) ) {
+						$checkbox.data( 'restock-checked', $checkbox.prop( 'checked' ) );
+					}
+
 					$checkbox.prop( 'disabled', true ).prop( 'checked', false );
 
 					if ( ! has_restockable ) {

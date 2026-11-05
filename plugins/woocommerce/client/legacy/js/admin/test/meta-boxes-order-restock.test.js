@@ -71,18 +71,24 @@ describe( 'Order refund restock checkbox', () => {
 		$.fn.selectWoo = jest.fn().mockReturnThis();
 		$.fn.stupidtable = jest.fn().mockReturnThis();
 		global.woocommerce_admin = { mon_decimal_point: '.' };
+		// English plural rules, matching what wp.i18n returns without a translation loaded.
+		global.wp = {
+			i18n: {
+				_n: ( single, plural, number ) =>
+					1 === number ? single : plural,
+				sprintf: ( format, value ) => format.replace( '%s', value ),
+			},
+		};
 		global.woocommerce_admin_meta_boxes = {
 			currency_format_num_decimals: 2,
 			rounding_precision: 6,
 			i18n_restock_enter_quantity:
-				'Enter a quantity above to return items to stock.',
-			i18n_restock_count_single: '1 item will be restocked.',
-			i18n_restock_count_plural: '%qty% items will be restocked.',
-			i18n_restock_none: 'No items will be restocked.',
+				'Enter a quantity above to return items to stock',
+			i18n_restock_none: 'No items will be restocked',
 			i18n_restock_items_not_reduced:
-				'Stock was not reduced for these items.',
+				'Stock was not reduced for these items',
 			i18n_restock_order_not_reduced:
-				'Stock was not reduced for this order.',
+				'Stock was not reduced for this order',
 		};
 
 		document.body.innerHTML = '<div id="woocommerce-order-items"></div>';
@@ -96,6 +102,7 @@ describe( 'Order refund restock checkbox', () => {
 		delete global.jQuery;
 		delete global.accounting;
 		delete global.woocommerce_admin;
+		delete global.wp;
 		delete global.woocommerce_admin_meta_boxes;
 	} );
 
@@ -106,7 +113,7 @@ describe( 'Order refund restock checkbox', () => {
 		expect( checkbox().disabled ).toBe( true );
 		expect( checkbox().checked ).toBe( false );
 		expect( description() ).toBe(
-			'Enter a quantity above to return items to stock.'
+			'Enter a quantity above to return items to stock'
 		);
 	} );
 
@@ -126,10 +133,10 @@ describe( 'Order refund restock checkbox', () => {
 		setRefundQty( 1, 1 );
 		expect( checkbox().disabled ).toBe( false );
 		expect( checkbox().checked ).toBe( true );
-		expect( description() ).toBe( '1 item will be restocked.' );
+		expect( description() ).toBe( '1 item will be restocked' );
 
 		setRefundQty( 2, 2 );
-		expect( description() ).toBe( '3 items will be restocked.' );
+		expect( description() ).toBe( '3 items will be restocked' );
 	} );
 
 	test( 'counts decimal quantities without floating point noise', () => {
@@ -139,7 +146,7 @@ describe( 'Order refund restock checkbox', () => {
 		setRefundQty( 1, 0.1 );
 		setRefundQty( 2, 0.2 );
 		expect( checkbox().disabled ).toBe( false );
-		expect( description() ).toBe( '0.3 items will be restocked.' );
+		expect( description() ).toBe( '0.3 items will be restocked' );
 	} );
 
 	test( 'does not round a small positive quantity down to zero', () => {
@@ -154,7 +161,7 @@ describe( 'Order refund restock checkbox', () => {
 		global.woocommerce_admin_meta_boxes.rounding_precision =
 			roundingPrecision;
 		expect( checkbox().disabled ).toBe( false );
-		expect( description() ).toBe( '0.001 items will be restocked.' );
+		expect( description() ).toBe( '0.001 items will be restocked' );
 	} );
 
 	test( 'keeps the merchant choice when unticked and quantities change', () => {
@@ -163,11 +170,43 @@ describe( 'Order refund restock checkbox', () => {
 		setRefundQty( 1, 1 );
 
 		$( checkbox() ).prop( 'checked', false ).trigger( 'change' );
-		expect( description() ).toBe( 'No items will be restocked.' );
+		expect( description() ).toBe( 'No items will be restocked' );
 
 		setRefundQty( 1, 2 );
 		expect( checkbox().checked ).toBe( false );
-		expect( description() ).toBe( 'No items will be restocked.' );
+		expect( description() ).toBe( 'No items will be restocked' );
+	} );
+
+	test( 'keeps the merchant untick when a quantity is cleared and entered again', () => {
+		renderOrderItems( { lines: [ 'yes' ] } );
+		openRefundPanel();
+		setRefundQty( 1, 1 );
+		$( checkbox() ).prop( 'checked', false ).trigger( 'change' );
+
+		setRefundQty( 1, '' );
+		setRefundQty( 1, 2 );
+		expect( checkbox().disabled ).toBe( false );
+		expect( checkbox().checked ).toBe( false );
+		expect( description() ).toBe( 'No items will be restocked' );
+	} );
+
+	test( 'updates while a quantity is typed, before the field loses focus', () => {
+		renderOrderItems( { lines: [ 'yes' ] } );
+		openRefundPanel();
+
+		const $qty = $(
+			'tr[data-order_item_id="1"] input.refund_order_item_qty'
+		);
+		$qty.val( '2' ).trigger( 'input' );
+		expect( checkbox().disabled ).toBe( false );
+		expect( checkbox().checked ).toBe( true );
+		expect( description() ).toBe( '2 items will be restocked' );
+
+		$qty.val( '' ).trigger( 'input' );
+		expect( checkbox().disabled ).toBe( true );
+		expect( description() ).toBe(
+			'Enter a quantity above to return items to stock'
+		);
 	} );
 
 	test( 'disables and unticks again when all quantities are cleared', () => {
@@ -179,7 +218,7 @@ describe( 'Order refund restock checkbox', () => {
 		expect( checkbox().disabled ).toBe( true );
 		expect( checkbox().checked ).toBe( false );
 		expect( description() ).toBe(
-			'Enter a quantity above to return items to stock.'
+			'Enter a quantity above to return items to stock'
 		);
 	} );
 
@@ -189,7 +228,7 @@ describe( 'Order refund restock checkbox', () => {
 		setRefundQty( 1, 1 );
 		setRefundQty( 2, 2 );
 
-		expect( description() ).toBe( '1 item will be restocked.' );
+		expect( description() ).toBe( '1 item will be restocked' );
 	} );
 
 	test( 'stays disabled when quantities are only on lines that cannot be restocked', () => {
@@ -199,9 +238,7 @@ describe( 'Order refund restock checkbox', () => {
 
 		expect( checkbox().disabled ).toBe( true );
 		expect( checkbox().checked ).toBe( false );
-		expect( description() ).toBe(
-			'Stock was not reduced for these items.'
-		);
+		expect( description() ).toBe( 'Stock was not reduced for these items' );
 	} );
 
 	test( 'stays disabled when no line in the order can be restocked', () => {
@@ -209,12 +246,12 @@ describe( 'Order refund restock checkbox', () => {
 		openRefundPanel();
 
 		expect( checkbox().disabled ).toBe( true );
-		expect( description() ).toBe( 'Stock was not reduced for this order.' );
+		expect( description() ).toBe( 'Stock was not reduced for this order' );
 
 		setRefundQty( 1, 1 );
 		expect( checkbox().disabled ).toBe( true );
 		expect( checkbox().checked ).toBe( false );
-		expect( description() ).toBe( 'Stock was not reduced for this order.' );
+		expect( description() ).toBe( 'Stock was not reduced for this order' );
 	} );
 
 	test( 'respects an unticked default from the woocommerce_restock_refunded_items filter', () => {
@@ -224,6 +261,6 @@ describe( 'Order refund restock checkbox', () => {
 
 		expect( checkbox().disabled ).toBe( false );
 		expect( checkbox().checked ).toBe( false );
-		expect( description() ).toBe( 'No items will be restocked.' );
+		expect( description() ).toBe( 'No items will be restocked' );
 	} );
 } );
