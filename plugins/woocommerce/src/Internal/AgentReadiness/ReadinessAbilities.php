@@ -65,7 +65,7 @@ class ReadinessAbilities {
 	 * @internal
 	 */
 	public function is_enabled(): bool {
-		return $this->features_controller->feature_is_enabled( StatusTab::FEATURE_ID );
+		return $this->features_controller->feature_is_enabled( AgenticCommerceSettings::FEATURE_ID );
 	}
 
 	/**
