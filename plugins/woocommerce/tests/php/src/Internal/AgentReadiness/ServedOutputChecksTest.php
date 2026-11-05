@@ -179,7 +179,7 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox llms.txt without a heading fails the format check; a broken store link fails, an unreachable one is couldn't check.
+	 * @testdox llms.txt without a heading fails the format check; a broken store link fails, an unreachable or blocked one is couldn't check, and a blocked llms.txt is too.
 	 */
 	public function test_llms_txt(): void {
 		$responses              = $this->good_store();
@@ -195,6 +195,17 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertNull( $this->results()['llms_txt_links_resolve'] );
 		$this->assertContains( '/llms.txt', $this->requested );
 		$this->assertTrue( $this->results()['open_graph_tags'], 'A slow link does not stop the other checks' );
+
+		$responses['/old/'] = array( 403, 'Blocked' );
+		$this->serve( $responses );
+		$this->assertNull( $this->results()['llms_txt_links_resolve'], 'A firewall refusing the store its own page is not a broken link' );
+
+		$responses['/llms.txt'] = array( 403, 'Blocked' );
+		$this->serve( $responses );
+		$results = $this->results();
+		$this->assertNull( $results['llms_txt_present'], 'A firewall refusing llms.txt is not a missing llms.txt' );
+		$this->assertNull( $results['llms_txt_valid'] );
+		$this->assertNull( $results['llms_txt_links_resolve'] );
 	}
 
 	/**
@@ -297,7 +308,7 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Checks for output WooCommerce doesn't build yet don't run, and are reported as pending with the issue that builds it.
+	 * @testdox Checks for output WooCommerce doesn't build yet don't run, and are reported as pending.
 	 */
 	public function test_pending_checks(): void {
 		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
@@ -307,9 +318,9 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 
 		foreach ( array( 'product_return_policy_schema', 'product_shipping_schema', 'product_buy_action_schema', 'ucp_checkout' ) as $id ) {
 			$this->assertNull( $checks[ $id ]['ok'], $id );
-			$this->assertNotSame( '', $checks[ $id ]['pending'], $id );
+			$this->assertTrue( $checks[ $id ]['pending'], $id );
 		}
-		$this->assertSame( '', $checks['open_graph_tags']['pending'] );
+		$this->assertFalse( $checks['open_graph_tags']['pending'] );
 	}
 
 	/**
