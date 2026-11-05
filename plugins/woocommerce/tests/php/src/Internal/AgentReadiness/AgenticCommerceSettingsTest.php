@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\AgenticCommerceSettings;
 use Automattic\WooCommerce\Internal\AgentReadiness\AgenticCommerceSettingsPage;
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
+use Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan;
 use WC_Admin_Settings;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
@@ -281,6 +282,58 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'aria-checked="true"', $html );
 		$this->assertStringContainsString( 'required setup checks below still need fixing.', $html );
 		$this->assertStringNotContainsString( 'AI agents can now find and shop your store.</p>', $html );
+	}
+
+	/**
+	 * @testdox The page shows each failing product check with its channel tags and example products, and a failing setup check says what to do.
+	 */
+	public function test_output_product_checks_and_store_check_detail(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		update_option( 'blog_public', '0' );
+		wc_get_container()->get( AgentReadiness::class )->refresh_report();
+
+		$html = $this->render_page();
+
+		$this->assertStringContainsString( 'Product checks', $html );
+		$this->assertStringContainsString( 'Required by ChatGPT', $html );
+		$this->assertStringContainsString( 'Harder to find on Google', $html );
+		$this->assertStringContainsString( 'post=' . $product->get_id(), $html );
+		$this->assertStringContainsString( 'Let search engines index your store', $html, 'Hidden from search engines is a Recommended setup step' );
+		$this->assertStringContainsString( 'Last checked', $html );
+	}
+
+	/**
+	 * @testdox While a scan waits, Run check is disabled and the page says so; once it stalls, the button stays disabled and the page says scheduled actions aren't running.
+	 */
+	public function test_output_run_pending_and_stalled(): void {
+		delete_option( AgentReadiness::REPORT_OPTION );
+		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
+
+		$html = $this->render_page();
+		$this->assertDoesNotMatchRegularExpression( '/wc-agentic-commerce-run"[^>]*disabled/', $html );
+		$this->assertStringNotContainsString( 'Product checks', $html, 'No product checks before the first scan' );
+
+		wc_get_container()->get( ScheduledScan::class )->queue();
+		$html = $this->render_page();
+		$this->assertStringContainsString( 'Checking your store in the background.', $html );
+		$this->assertMatchesRegularExpression( '/wc-agentic-commerce-run"[^>]*disabled/', $html );
+
+		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
+		$this->age_finished_actions();
+		as_schedule_single_action( time() - ScheduledScan::STALLED_AFTER - 60, ScheduledScan::RUN_NOW_HOOK, array(), ScheduledScan::GROUP );
+		$html = $this->render_page();
+		$this->assertStringContainsString( 'The check has not started because scheduled actions', $html );
+		$this->assertMatchesRegularExpression( '/wc-agentic-commerce-run"[^>]*disabled/', $html );
+		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
+	}
+
+	/**
+	 * Date every finished action an hour back, so only what the test does next
+	 * counts as recent queue activity.
+	 */
+	private function age_finished_actions(): void {
+		global $wpdb;
+		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}actionscheduler_actions SET last_attempt_gmt = %s WHERE status IN ( 'complete', 'failed', 'in-progress' )", gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) ) );
 	}
 
 	/**

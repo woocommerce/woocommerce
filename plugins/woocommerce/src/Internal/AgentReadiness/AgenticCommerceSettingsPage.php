@@ -52,18 +52,27 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	private UcpSwitch $ucp_switch;
 
 	/**
+	 * Background scan.
+	 *
+	 * @var ScheduledScan
+	 */
+	private ScheduledScan $scheduled_scan;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param StoreConditions $store_conditions Store conditions.
 	 * @param AgentReadiness  $agent_readiness  Readiness service.
 	 * @param UcpSwitch       $ucp_switch       UCP switch.
+	 * @param ScheduledScan   $scheduled_scan   Background scan.
 	 */
-	public function __construct( StoreConditions $store_conditions, AgentReadiness $agent_readiness, UcpSwitch $ucp_switch ) {
+	public function __construct( StoreConditions $store_conditions, AgentReadiness $agent_readiness, UcpSwitch $ucp_switch, ScheduledScan $scheduled_scan ) {
 		$this->id               = AgenticCommerceSettings::TAB;
 		$this->label            = __( 'Agentic commerce', 'woocommerce' );
 		$this->store_conditions = $store_conditions;
 		$this->agent_readiness  = $agent_readiness;
 		$this->ucp_switch       = $ucp_switch;
+		$this->scheduled_scan   = $scheduled_scan;
 
 		parent::__construct();
 
@@ -148,7 +157,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		$this->render_switch( $checks, count( $failing ) );
 		$this->render_visibility( $report );
 		$this->render_status( $checks, $this->ucp_switch->status( $failing ), count( $failing ) );
-		$this->render_readiness( array_slice( $this->agent_readiness->get_store_checks( $report, $checks ), count( $checks ) ), (bool) ( array_column( $checks, 'ok', 'id' )['launched'] ?? true ) );
+		$this->render_readiness( array_slice( $this->agent_readiness->get_store_checks( $report, $checks ), count( $checks ) ), (bool) ( array_column( $checks, 'ok', 'id' )['launched'] ?? true ), $report );
 
 		echo '<div class="wc-agentic-commerce-card wc-agentic-commerce-policies">';
 		parent::output();
@@ -205,12 +214,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		echo '<p>' . esc_html__( 'Agents see the same products shoppers see in your shop. To keep a product away from agents, set its catalog visibility to Hidden.', 'woocommerce' ) . '</p></div>';
 
 		if ( null === $report ) {
-			printf(
-				'<p class="wc-agentic-commerce-card__body">%1$s <a href="%2$s">%3$s</a></p></div>',
-				esc_html__( 'Product counts appear after the first agent readiness check.', 'woocommerce' ),
-				esc_url( admin_url( 'admin.php?page=wc-status&tab=' . StatusTab::TAB ) ),
-				esc_html__( 'Run the check', 'woocommerce' )
-			);
+			echo '<p class="wc-agentic-commerce-card__body">' . esc_html__( 'Product counts appear after the first agent readiness check.', 'woocommerce' ) . '</p></div>';
 			return;
 		}
 
@@ -261,6 +265,148 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		echo '</ul>';
 		echo '<p class="wc-agentic-commerce-card__footer">' . esc_html__( 'Simple and variable products only, for now.', 'woocommerce' ) . '</p>';
 		echo '</div>';
+	}
+
+	/**
+	 * "Run check" queues the background scan through wc/v3/agent-readiness/scan. While a scan
+	 * waits the button is disabled. When Action Scheduler looks stalled, the page says so;
+	 * the scan never runs in the request (WOOAI-1661).
+	 *
+	 * @param array<string, mixed>|null $report Stored report, or null before the first scan.
+	 */
+	private function render_run( ?array $report ): void {
+		$pending = $this->scheduled_scan->is_pending();
+		$stalled = $pending && $this->scheduled_scan->is_stalled();
+		$message = '';
+		if ( $stalled ) {
+			$message = __( 'The check has not started because scheduled actions do not seem to be running on this site. It runs once they do. See WooCommerce > Status > Scheduled Actions.', 'woocommerce' );
+		} elseif ( $pending ) {
+			$message = __( 'Checking your store in the background. Reload this page in a minute to see the result.', 'woocommerce' );
+		} elseif ( null !== $report && ! empty( $report['generated_at'] ) ) {
+			/* translators: %s: how long ago the check ran, e.g. "5 mins". */
+			$message = sprintf( __( 'Last checked %s ago.', 'woocommerce' ), human_time_diff( (int) strtotime( (string) $report['generated_at'] ) ) );
+		}
+		?>
+		<p>
+			<button type="button" class="button wc-agentic-commerce-run" <?php disabled( $pending ); ?>><?php esc_html_e( 'Run check', 'woocommerce' ); ?></button>
+			<span class="description wc-agentic-commerce-run-message" role="status"><?php echo esc_html( $message ); ?></span>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Per-channel product counts and each failing product check with example products.
+	 *
+	 * @param array<string, mixed> $report Stored report.
+	 */
+	private function render_product_checks( array $report ): void {
+		$channels = is_array( $report['channels'] ?? null ) ? $report['channels'] : array();
+		$failing  = array_filter(
+			is_array( $report['checks'] ?? null ) ? $report['checks'] : array(),
+			static fn( $check ): bool => is_array( $check ) && (int) ( $check['count'] ?? 0 ) > 0
+		);
+
+		echo '<div class="wc-agentic-commerce-card__section"><h3>' . esc_html__( 'Product checks', 'woocommerce' ) . '</h3>';
+		echo '<p>' . esc_html__( 'Checks your products against the product data specs of AI shopping channels, so agents such as ChatGPT, Google and Copilot can list and recommend them.', 'woocommerce' ) . '</p>';
+		if ( ! empty( $report['truncated'] ) ) {
+			/* translators: %d: number of products checked. */
+			echo '<div class="notice notice-info inline"><p>' . esc_html( sprintf( __( 'Only the %d most recently updated products were checked.', 'woocommerce' ), ProductScan::PRODUCT_LIMIT ) ) . '</p></div>';
+		}
+		?>
+		<table class="widefat striped wc-agentic-commerce-channels">
+			<thead>
+				<tr>
+					<th><?php esc_html_e( 'Channel', 'woocommerce' ); ?></th>
+					<th><?php esc_html_e( 'Can be listed', 'woocommerce' ); ?></th>
+					<th><?php esc_html_e( 'Missing a required field', 'woocommerce' ); ?></th>
+					<th><?php esc_html_e( 'Listed with gaps', 'woocommerce' ); ?></th>
+					<th><?php esc_html_e( 'Complete', 'woocommerce' ); ?></th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach ( $channels as $channel ) : ?>
+					<tr>
+						<td><a href="<?php echo esc_url( (string) $channel['url'] ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( (string) $channel['name'] ); ?></a><br /><span class="description"><?php echo esc_html( (string) $channel['spec'] ); ?></span></td>
+						<td><?php echo esc_html( number_format_i18n( (int) $channel['listable'] ) ); ?></td>
+						<td><?php echo esc_html( number_format_i18n( (int) $channel['not_listable'] ) ); ?></td>
+						<td><?php echo esc_html( number_format_i18n( (int) $channel['with_gaps'] ) ); ?></td>
+						<td><?php echo esc_html( number_format_i18n( (int) $channel['complete'] ) ); ?></td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody>
+		</table>
+		<?php
+		if ( empty( $failing ) ) {
+			echo '<p>' . esc_html__( 'Every product passed every check.', 'woocommerce' ) . '</p></div>';
+			return;
+		}
+		?>
+		<table class="widefat striped wc-agentic-commerce-product-checks">
+			<thead>
+				<tr>
+					<th><?php esc_html_e( 'Problem', 'woocommerce' ); ?></th>
+					<th><?php esc_html_e( 'Channels', 'woocommerce' ); ?></th>
+					<th><?php esc_html_e( 'Products', 'woocommerce' ); ?></th>
+					<th><?php esc_html_e( 'Examples', 'woocommerce' ); ?></th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach ( $failing as $check ) : ?>
+					<tr>
+						<td>
+							<strong><?php echo esc_html( (string) $check['label'] ); ?></strong>
+							<p><?php echo esc_html( (string) $check['why'] ); ?></p>
+							<p><a href="<?php echo esc_url( (string) $check['fix_url'] ); ?>"><?php echo esc_html( (string) $check['fix'] ); ?></a></p>
+						</td>
+						<td><?php echo empty( $check['channels'] ) ? esc_html__( 'Product page only', 'woocommerce' ) : wp_kses_post( implode( '<br />', $this->channel_tags( (array) $check['channels'], $channels ) ) ); ?></td>
+						<td><?php echo esc_html( number_format_i18n( (int) $check['count'] ) ); ?></td>
+						<td><?php echo wp_kses_post( implode( '<br />', $this->product_links( (array) ( $check['product_ids'] ?? array() ) ) ) ); ?></td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody>
+		</table>
+		</div>
+		<?php
+	}
+
+	/**
+	 * "Required by X" or "Harder to find on X" per channel.
+	 *
+	 * @param array $check_channels Field and effect by channel id.
+	 * @param array $channels       Channels from the report.
+	 * @return array<int, string> Escaped HTML.
+	 */
+	private function channel_tags( array $check_channels, array $channels ): array {
+		$tags = array();
+		foreach ( $check_channels as $channel_id => $spec ) {
+			$name = (string) ( $channels[ $channel_id ]['name'] ?? $channel_id );
+			if ( ReadinessRule::EFFECT_NOT_LISTABLE === ( $spec['effect'] ?? '' ) ) {
+				/* translators: %s: channel name, e.g. ChatGPT. */
+				$tags[] = '<mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--fix">' . esc_html( sprintf( __( 'Required by %s', 'woocommerce' ), $name ) ) . '</mark>';
+			} else {
+				/* translators: %s: channel name, e.g. ChatGPT. */
+				$tags[] = esc_html( sprintf( __( 'Harder to find on %s', 'woocommerce' ), $name ) );
+			}
+		}
+		return $tags;
+	}
+
+	/**
+	 * Edit links for the example products that still exist.
+	 *
+	 * @param array $product_ids Product ids.
+	 * @return array<int, string> Escaped HTML.
+	 */
+	private function product_links( array $product_ids ): array {
+		$links = array();
+		foreach ( array_slice( $product_ids, 0, AgentReadiness::PRODUCT_IDS_LIMIT ) as $product_id ) {
+			$url = get_edit_post_link( (int) $product_id, 'raw' );
+			if ( ! $url ) {
+				continue;
+			}
+			$links[] = '<a href="' . esc_url( $url ) . '">' . esc_html( get_the_title( (int) $product_id ) ) . '</a>';
+		}
+		return $links;
 	}
 
 	/**
@@ -389,18 +535,36 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
+	 * What a failing store check stops, from its `blocks` value.
+	 *
+	 * @param string $blocks listing, ucp or checkout.
+	 */
+	private static function blocks_text( string $blocks ): string {
+		$texts = array(
+			'listing'  => __( 'Affects every product on every channel.', 'woocommerce' ),
+			'ucp'      => __( 'Affects agents that use UCP.', 'woocommerce' ),
+			'checkout' => __( 'Affects agent checkout.', 'woocommerce' ),
+		);
+		return $texts[ $blocks ] ?? '';
+	}
+
+	/**
 	 * Agent readiness: the checks the last scan ran on what the store returns. They never
 	 * affect the switch, so they sit apart from the setup checks in Status.
 	 *
-	 * @param array<int, array{id:string,level:string,ok:bool|null,name:string,fix:string,fix_url:string}> $checks   Scanned checks.
-	 * @param bool                                                                                         $launched Whether the store is launched.
+	 * Run check sits at the top, and the product checks from the same scan at the bottom.
+	 *
+	 * @param array<int, array{id:string,level:string,ok:bool|null,blocks:string,name:string,why:string,fix:string,fix_url:string}> $checks   Scanned checks.
+	 * @param bool                                                                                                                  $launched Whether the store is launched.
+	 * @param array<string, mixed>|null                                                                                             $report   Stored report, or null before the first scan.
 	 */
-	private function render_readiness( array $checks, bool $launched ): void {
+	private function render_readiness( array $checks, bool $launched, ?array $report ): void {
 		?>
 		<div class="wc-agentic-commerce-card wc-agentic-commerce-readiness">
 			<div class="wc-agentic-commerce-card__header">
 				<h2><?php esc_html_e( 'Agent readiness', 'woocommerce' ); ?></h2>
 				<p><?php esc_html_e( 'What agents get when they visit your store, from the last check.', 'woocommerce' ); ?></p>
+				<?php $this->render_run( $report ); ?>
 			</div>
 			<?php if ( array() === $checks ) : ?>
 				<p class="wc-agentic-commerce-card__body"><?php esc_html_e( 'Results appear after the first agent readiness check.', 'woocommerce' ); ?></p>
@@ -418,7 +582,12 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 						?>
 						<li class="wc-agentic-commerce-check">
 							<mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--<?php echo esc_attr( $badge[0] ); ?>"><?php echo esc_html( $badge[1] ); ?></mark>
-							<span class="wc-agentic-commerce-check__text"><?php echo esc_html( $check['name'] ); ?></span>
+							<span class="wc-agentic-commerce-check__text">
+								<?php echo esc_html( $check['name'] ); ?>
+								<?php if ( false === $check['ok'] ) : ?>
+									<span class="description"><?php echo esc_html( trim( $check['why'] . ' ' . self::blocks_text( $check['blocks'] ) ) ); ?></span>
+								<?php endif; ?>
+							</span>
 							<?php if ( null === $check['ok'] ) : ?>
 								<span class="description"><?php echo $launched ? esc_html__( 'Your store could not load its own page. The next check tries again.', 'woocommerce' ) : esc_html__( 'Launch your store to run this check.', 'woocommerce' ); ?></span>
 							<?php elseif ( ! $check['ok'] && '' === $check['fix_url'] ) : ?>
@@ -430,6 +599,11 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 					<?php endforeach; ?>
 				</ul>
 			<?php endif; ?>
+			<?php
+			if ( null !== $report ) {
+				$this->render_product_checks( $report );
+			}
+			?>
 		</div>
 		<?php
 	}
@@ -533,7 +707,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
-	 * Load the switch and copy button script.
+	 * Load the script for the switch, Run check and the copy button.
 	 *
 	 * @param int $failing_required Number of failing required setup checks, for the message shown after turning UCP on.
 	 */
@@ -549,11 +723,13 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			self::SCRIPT_HANDLE,
 			'wcAgenticCommerceSettings',
 			array(
-				'path' => '/wc/v3/agent-readiness/ucp',
-				'i18n' => array(
+				'path'     => '/wc/v3/agent-readiness/ucp',
+				'scanPath' => '/wc/v3/agent-readiness/scan',
+				'i18n'     => array(
 					'on'          => self::on_message( $failing_required ),
 					'error'       => __( 'The setting could not be changed. Reload the page and try again.', 'woocommerce' ),
 					'copied'      => __( 'Copied', 'woocommerce' ),
+					'running'     => __( 'Checking your store in the background. Reload this page in a minute to see the result.', 'woocommerce' ),
 					'statusLabel' => self::status_labels(),
 				),
 			)
