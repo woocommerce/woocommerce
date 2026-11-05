@@ -86,7 +86,7 @@ class StoreOutputChecks {
 				'why'      => $check['why'],
 				'fix'      => $check['fix'],
 				'fix_url'  => $check['fix_url'],
-				'conflict' => false === $ok && ! empty( $check['conflict'] ),
+				'conflict' => $conflict,
 				'pending'  => $pending,
 				'seen_at'  => $conflict ? self::seen_at( (string) ( $check['seen_at'] ?? '' ), $responses ) : '',
 			);
@@ -1117,10 +1117,16 @@ class StoreOutputChecks {
 				return true;
 			}
 			if ( 1 !== preg_match( '#<sitemapindex.*?<loc>\s*(.+?)\s*</loc>#is', $response['body'], $first ) ) {
-				return false;
+				continue;
 			}
 			$child = $responses->get( html_entity_decode( $first[1], ENT_QUOTES | ENT_XML1 ) );
-			return null === $child || $child['status'] >= 500 ? null : 200 === $child['status'] && false !== stripos( $child['body'], '<lastmod' );
+			if ( null === $child || $child['status'] >= 500 ) {
+				$unknown = true;
+				continue;
+			}
+			if ( 200 === $child['status'] && false !== stripos( $child['body'], '<lastmod' ) ) {
+				return true;
+			}
 		}
 		return $unknown ? null : false;
 	}
@@ -1169,10 +1175,20 @@ class StoreOutputChecks {
 	 * @param string $html Page HTML.
 	 */
 	private static function images_have_alt( string $html ): bool {
-		$tags = new \WP_HTML_Tag_Processor( $html );
-		while ( $tags->next_tag( array( 'tag_name' => 'img' ) ) ) {
+		$tags     = new \WP_HTML_Tag_Processor( $html );
+		$noscript = 0;
+		while ( $tags->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
+			if ( 'NOSCRIPT' === $tags->get_tag() ) {
+				$noscript = max( 0, $noscript + ( $tags->is_tag_closer() ? -1 : 1 ) );
+				continue;
+			}
+			if ( 'IMG' !== $tags->get_tag() || $noscript > 0 || null !== $tags->get_attribute( 'alt' ) ) {
+				continue;
+			}
+			// A tracking pixel or an image hidden from assistive technology needs no alt.
+			$pixel  = '1' === (string) $tags->get_attribute( 'width' ) && '1' === (string) $tags->get_attribute( 'height' );
 			$hidden = 'true' === strtolower( (string) $tags->get_attribute( 'aria-hidden' ) ) || in_array( strtolower( (string) $tags->get_attribute( 'role' ) ), array( 'presentation', 'none' ), true );
-			if ( ! $hidden && null === $tags->get_attribute( 'alt' ) ) {
+			if ( ! $pixel && ! $hidden ) {
 				return false;
 			}
 		}
@@ -1317,7 +1333,12 @@ class StoreOutputChecks {
 		if ( array() === $prices ) {
 			return true;
 		}
-		$expected = array( (float) $product->get_price(), (float) wc_get_price_including_tax( $product ), (float) wc_get_price_excluding_tax( $product ) );
+		$excl     = (float) wc_get_price_excluding_tax( $product );
+		$expected = array( (float) $product->get_price(), (float) wc_get_price_including_tax( $product ), $excl );
+		// The page was served to one location; its tax may differ from the store's base rate.
+		foreach ( \WC_Tax::get_rates_for_tax_class( $product->get_tax_class() ) as $rate ) {
+			$expected[] = $excl * ( 1 + (float) $rate->tax_rate / 100 );
+		}
 		foreach ( $prices as $price ) {
 			foreach ( $expected as $amount ) {
 				if ( abs( $price - $amount ) < 0.01 ) {
@@ -1335,7 +1356,8 @@ class StoreOutputChecks {
 	 * @param StoreResponses $responses Store responses.
 	 */
 	private function reviews_marked_up( StoreResponses $responses ): ?bool {
-		if ( 'yes' !== get_option( 'woocommerce_enable_reviews', 'yes' ) ) {
+		// WooCommerce prints a rating only when ratings are on and the product has rated reviews; the rating count is stored per star, the average as a number.
+		if ( ! wc_review_ratings_enabled() ) {
 			return true;
 		}
 		// wc_get_products() ignores meta_query, so the reviewed product is looked up as a post.
@@ -1352,10 +1374,10 @@ class StoreOutputChecks {
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Five rows, once per background scan.
 				'meta_query'       => array(
 					array(
-						'key'     => '_wc_review_count',
+						'key'     => '_wc_average_rating',
 						'value'   => 0,
 						'compare' => '>',
-						'type'    => 'NUMERIC',
+						'type'    => 'DECIMAL',
 					),
 				),
 			)

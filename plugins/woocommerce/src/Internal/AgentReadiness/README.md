@@ -76,13 +76,13 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 | `content_in_raw_html` | The product page's text, without scripts or comments, has the product's name and its price as a whole amount. |
 | `no_noindex_directives` | No robots meta tag or `X-Robots-Tag` header on the home or product page sets `noindex`, `none`, `noai` or `noimageai`. |
 | `pages_public` | The home, shop and product page don't answer 401 or 403, or redirect to `wp-login.php` or My account. |
-| `sitemap_lastmod` | The first sitemap found, or the first one a sitemap index lists, has `lastmod` dates. |
+| `sitemap_lastmod` | A sitemap robots.txt names or at a default path, or the first one a sitemap index lists, has `lastmod` dates; every candidate is tried before it fails. |
 | `rss_feed` | The home page links to an RSS or Atom feed. |
 | `viewport_meta` | The home page has a viewport meta tag. |
 | `html_lang_and_charset` | The home page's `html` element has `lang`, and a meta tag or the `Content-Type` header gives a charset. |
-| `images_have_alt` | Every image on the home and product page has an `alt` attribute (empty counts); images hidden from assistive technology are skipped. |
+| `images_have_alt` | Every image on the home and product page has an `alt` attribute (empty counts); images hidden from assistive technology, 1×1 tracking pixels and `noscript` fallbacks are skipped. |
 | `single_h1` | The product page has exactly one `h1`. |
-| `schema_matches_product` | A Product item names the product and, for a product with one price, an offer has its price with or without tax; a failure shows as a likely conflict. |
+| `schema_matches_product` | A Product item names the product and, for a product with one price, an offer has its price with or without tax, at any tax rate of its tax class since the page was served to one location; a failure shows as a likely conflict. |
 | `product_gtin_jsonld` | The product's JSON-LD or its offers give a valid GTIN (`gtin`, `gtin8`, `gtin12`, `gtin13` or `gtin14`), from any source. Fails as a likely conflict only when the product's own GTIN is valid but the page gives none or an invalid one. Skipped when the product doesn't need one, or its own GTIN is missing or invalid: `missing_gtin` and `invalid_gtin` report those. |
 | `product_brand_jsonld` | The product's JSON-LD gives a brand, from any source. Fails as a likely conflict only when the product has a WooCommerce brand (`product_brand`), the only brand WooCommerce prints. A brand kept in an attribute or another plugin's taxonomy isn't printed by WooCommerce, so the check is skipped then and `missing_brand` reports the stored value. |
 | `product_review_markup` | The newest visible published product with reviews (of the five newest with reviews) has `aggregateRating` or `review` in its JSON-LD. Passes when reviews are off or no product has any. |
