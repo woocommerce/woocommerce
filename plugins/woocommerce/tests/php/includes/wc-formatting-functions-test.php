@@ -199,12 +199,8 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 
 		$result = wc_format_option_price_separators( $raw_value, array( 'id' => $option_id ), $raw_value );
 
-<<<<<<< HEAD
-		$this->assertEqualHTML( $expected, $result );
-=======
 		// Compare the separator as displayed, since WordPress 7.2's wp_kses() stores character references as the characters themselves.
 		$this->assertSame( $expected, html_entity_decode( $result, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
->>>>>>> a57ab51662 (Keep coupon codes matching after the WordPress 7.2 kses rewrite (#69765))
 
 		$errors = $this->get_wc_admin_settings_errors();
 
