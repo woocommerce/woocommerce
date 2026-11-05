@@ -1,6 +1,7 @@
 <?php
 declare( strict_types = 1 );
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 
 /**
@@ -1016,6 +1017,87 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		// Clean up.
 		$order->delete( true );
 		$product->delete( true );
+	}
+
+	/**
+	 * @testdox A simple product's structured data links to checkout and respects the offer filter.
+	 */
+	public function test_simple_product_schema_checkout_link(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$this->structured_data->generate_product_data( $product );
+		$markup = $this->structured_data->get_data()[0];
+		$url    = $markup['offers'][0]['checkoutPageURLTemplate'];
+
+		$this->assertSame( $url, $markup['potentialAction']['target']['urlTemplate'] );
+		wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+		$this->assertSame(
+			array(
+				'checkout-link' => '1',
+				'products'      => $product->get_id() . ':1',
+			),
+			$query
+		);
+
+		add_filter(
+			'woocommerce_structured_data_product_offer',
+			static function ( $offer ) {
+				unset( $offer['checkoutPageURLTemplate'] );
+				return $offer;
+			}
+		);
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$markup = $sut->get_data()[0];
+		$this->assertArrayNotHasKey( 'checkoutPageURLTemplate', $markup['offers'][0] );
+		$this->assertArrayNotHasKey( 'potentialAction', $markup );
+	}
+
+	/**
+	 * @testdox Only a fixed variation gets a checkout link in structured data.
+	 * @testWith ["", false]
+	 *           ["Large", true]
+	 *
+	 * @param string $variation_size Variation size, or an empty string for any size.
+	 * @param bool   $has_link       Whether a checkout link is expected.
+	 */
+	public function test_variation_schema_checkout_link( string $variation_size, bool $has_link ): void {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( array( 'Large' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Shirt' );
+		$product->set_status( ProductStatus::PUBLISH );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'size' => $variation_size ) );
+		$variation->set_regular_price( '20' );
+		$variation->set_status( ProductStatus::PUBLISH );
+		$variation->save();
+		WC_Product_Variable::sync( $product->get_id() );
+		$product = wc_get_product( $product->get_id() );
+
+		$previous_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		try {
+			$_GET = array( 'attribute_size' => 'Large' );
+			$this->structured_data->generate_product_data( $product );
+			$markup = $this->structured_data->get_data()[0];
+			if ( ! $has_link ) {
+				$this->assertArrayNotHasKey( 'checkoutPageURLTemplate', $markup['offers'][0] );
+				$this->assertArrayNotHasKey( 'potentialAction', $markup );
+				return;
+			}
+			$url = $markup['offers'][0]['checkoutPageURLTemplate'];
+			$this->assertSame( $url, $markup['potentialAction']['target']['urlTemplate'] );
+			wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+			$this->assertSame( $variation->get_id() . ':1', $query['products'] );
+		} finally {
+			$_GET = $previous_get;
+		}
 	}
 
 	/**

@@ -12,60 +12,9 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
  */
 class CheckoutLinkTest extends \WC_Unit_Test_Case {
 	/**
-	 * @testdox A simple product's structured data links to checkout and respects the offer filter.
+	 * @testdox A generated checkout link adds the selected variation to the cart.
 	 */
-	public function test_simple_product_schema_checkout_link(): void {
-		$product = \WC_Helper_Product::create_simple_product();
-		$sut     = new \WC_Structured_Data();
-		$sut->generate_product_data( $product );
-		$markup = $sut->get_data()[0];
-		$url    = $markup['offers'][0]['checkoutPageURLTemplate'];
-
-		$this->assertSame( $url, $markup['potentialAction']['target']['urlTemplate'] );
-		wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
-		$this->assertSame(
-			[
-				'checkout-link' => '1',
-				'products'      => $product->get_id() . ':1',
-			],
-			$query
-		);
-
-		$previous_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		try {
-			$_GET = wp_slash( $query );
-			$this->get_checkout_link_service()->get_checkout_link_test();
-			$items = array_values( WC()->cart->get_cart() );
-			$this->assertCount( 1, $items );
-			$this->assertSame( $product->get_id(), $items[0]['product_id'] );
-			$this->assertSame( 1, $items[0]['quantity'] );
-		} finally {
-			$_GET = $previous_get;
-		}
-
-		add_filter(
-			'woocommerce_structured_data_product_offer',
-			static function ( $offer ) {
-				unset( $offer['checkoutPageURLTemplate'] );
-				return $offer;
-			}
-		);
-		$sut = new \WC_Structured_Data();
-		$sut->generate_product_data( $product );
-		$markup = $sut->get_data()[0];
-		$this->assertArrayNotHasKey( 'checkoutPageURLTemplate', $markup['offers'][0] );
-		$this->assertArrayNotHasKey( 'potentialAction', $markup );
-	}
-
-	/**
-	 * @testdox Only a fixed variation gets a checkout link in structured data.
-	 * @testWith ["", false]
-	 *           ["Large", true]
-	 *
-	 * @param string $variation_size Variation size, or an empty string for any size.
-	 * @param bool   $has_link       Whether a checkout link is expected.
-	 */
-	public function test_variation_schema_checkout_link( string $variation_size, bool $has_link ): void {
+	public function test_generated_variation_checkout_link_adds_to_cart(): void {
 		$attribute = new \WC_Product_Attribute();
 		$attribute->set_name( 'Size' );
 		$attribute->set_options( [ 'Large' ] );
@@ -79,7 +28,7 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 
 		$variation = new \WC_Product_Variation();
 		$variation->set_parent_id( $product->get_id() );
-		$variation->set_attributes( [ 'size' => $variation_size ] );
+		$variation->set_attributes( [ 'size' => 'Large' ] );
 		$variation->set_regular_price( '20' );
 		$variation->set_status( ProductStatus::PUBLISH );
 		$variation->save();
@@ -91,17 +40,8 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 			$_GET = [ 'attribute_size' => 'Large' ];
 			$sut  = new \WC_Structured_Data();
 			$sut->generate_product_data( $product );
-			$markup = $sut->get_data()[0];
-			if ( ! $has_link ) {
-				$this->assertArrayNotHasKey( 'checkoutPageURLTemplate', $markup['offers'][0] );
-				$this->assertArrayNotHasKey( 'potentialAction', $markup );
-				return;
-			}
-			$url = $markup['offers'][0]['checkoutPageURLTemplate'];
-			$this->assertSame( $url, $markup['potentialAction']['target']['urlTemplate'] );
+			$url = $sut->get_data()[0]['offers'][0]['checkoutPageURLTemplate'];
 			wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
-			$this->assertSame( $variation->get_id() . ':1', $query['products'] );
-
 			$_GET = wp_slash( $query );
 			$this->get_checkout_link_service()->get_checkout_link_test();
 			$items = array_values( WC()->cart->get_cart() );
