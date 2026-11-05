@@ -416,11 +416,7 @@ final class WooCommerce {
 		$container->get( OrderLogsCleanupHelper::class );
 		$container->get( PaymentSettingsScreen::class );
 		$container->get( AbilitiesTracking::class );
-<<<<<<< HEAD
-=======
-		$container->get( OpenGraph::class );
 		$container->get( MenuIcons::class );
->>>>>>> 33439e2716 (Refresh WooCommerce admin icons for WordPress 7.2 (#70621))
 
 		/**
 		 * These classes have a register method for attaching hooks.
