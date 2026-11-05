@@ -860,6 +860,67 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Removing a coupon after the billing email changed releases the row this order added, not another order's row.
+	 */
+	public function test_remove_coupon_releases_identity_recorded_before_billing_email_changed() {
+		$coupon_code = 'remove_changed_email_test';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+
+		$order_a = WC_Helper_Order::create_order( 0 );
+		$order_a->set_billing_email( 'reserve@example.com' );
+		$order_a->set_status( OrderStatus::PENDING );
+		$order_a->save();
+		$order_a->apply_coupon( $coupon_code );
+
+		$order_b = WC_Helper_Order::create_order( 0 );
+		$order_b->set_billing_email( 'buyer@example.com' );
+		$order_b->set_status( OrderStatus::PENDING );
+		$order_b->save();
+		$order_b->apply_coupon( $coupon_code );
+
+		$order_a = wc_get_order( $order_a->get_id() );
+		$order_a->set_billing_email( 'buyer@example.com' );
+		$order_a->save();
+
+		$this->assertTrue( $order_a->remove_coupon( $coupon_code ) );
+
+		$coupon = new WC_Coupon( $coupon_code );
+		$this->assertSame( array( 'buyer@example.com' ), array_values( $coupon->get_used_by() ) );
+		$this->assertEquals( 1, $coupon->get_usage_count() );
+		$this->assertSame( '', (string) wc_get_order( $order_a->get_id() )->get_meta( '_coupon_usage_identities' ) );
+	}
+
+	/**
+	 * @testdox Removing a coupon after the order moved to another customer releases the original customer row, not the new customer's row.
+	 */
+	public function test_remove_coupon_after_order_moved_to_another_customer_releases_original_customer() {
+		$coupon_code = 'remove_moved_customer_test';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+		$customer_a = WC_Helper_Customer::create_customer( 'movedcustomera', 'hunter2', 'movedcustomera@example.com' );
+		$customer_b = WC_Helper_Customer::create_customer( 'movedcustomerb', 'hunter2', 'movedcustomerb@example.com' );
+
+		$order_a = WC_Helper_Order::create_order( $customer_a->get_id() );
+		$order_a->set_status( OrderStatus::PENDING );
+		$order_a->save();
+		$order_a->apply_coupon( $coupon_code );
+
+		$order_b = WC_Helper_Order::create_order( $customer_b->get_id() );
+		$order_b->set_status( OrderStatus::PENDING );
+		$order_b->save();
+		$order_b->apply_coupon( $coupon_code );
+
+		$order_a = wc_get_order( $order_a->get_id() );
+		$order_a->set_customer_id( $customer_b->get_id() );
+		$order_a->save();
+
+		$this->assertTrue( $order_a->remove_coupon( $coupon_code ) );
+
+		$coupon = new WC_Coupon( $coupon_code );
+		$this->assertSame( array( (string) $customer_b->get_id() ), array_values( $coupon->get_used_by() ) );
+		$this->assertEquals( 1, $coupon->get_usage_count() );
+	}
+
+	/**
 	 * Create a pending order with one $100 product whose line total was manually edited to $50.
 	 *
 	 * @return WC_Order
@@ -1744,7 +1805,8 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	 */
 	public static function provide_failed_order_item_delete_queries(): array {
 		return array(
-			'item metadata delete' => array( 'DELETE itemmeta FROM' ),
+			'item ID lookup'       => array( 'SELECT order_item_id FROM {prefix}woocommerce_order_items WHERE order_id' ),
+			'item metadata delete' => array( 'DELETE FROM {prefix}woocommerce_order_itemmeta' ),
 			'item row delete'      => array( 'DELETE FROM {prefix}woocommerce_order_items' ),
 		);
 	}
@@ -2861,5 +2923,64 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$order->save();
 
 		$this->assertSame( $status, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox save() records the exception when the order could not be persisted, and a later successful save() clears it.
+	 */
+	public function test_get_last_save_error_reports_a_failed_save_until_the_next_successful_one(): void {
+		$order = wc_create_order();
+		$this->assertNull( $order->get_last_save_error(), 'A successful save should report no error.' );
+
+		$fail = function () {
+			throw new Exception( 'Forced save failure' );
+		};
+		add_action( 'woocommerce_before_order_object_save', $fail );
+		$order->set_total( '5.00' );
+		$order->save();
+		remove_action( 'woocommerce_before_order_object_save', $fail );
+
+		$this->assertInstanceOf( Exception::class, $order->get_last_save_error() );
+		$this->assertSame( 'Forced save failure', $order->get_last_save_error()->getMessage() );
+
+		$order->save();
+
+		$this->assertNull( $order->get_last_save_error(), 'A later successful save should clear the error.' );
+		$this->assertSame( '5.00', wc_get_order( $order->get_id() )->get_total() );
+	}
+
+	/**
+	 * @testdox save() does not report a failure when only a woocommerce_after_order_object_save callback throws, since the order was already persisted.
+	 */
+	public function test_get_last_save_error_ignores_exceptions_from_after_save_callbacks(): void {
+		$order = wc_create_order();
+
+		$fail = function () {
+			throw new Exception( 'After-save callback failure' );
+		};
+		add_action( 'woocommerce_after_order_object_save', $fail );
+		$order->set_total( '7.00' );
+		$order->save();
+		remove_action( 'woocommerce_after_order_object_save', $fail );
+
+		$this->assertNull( $order->get_last_save_error() );
+		$this->assertSame( '7.00', wc_get_order( $order->get_id() )->get_total() );
+	}
+
+	/**
+	 * @testdox update_status() returns false when the order could not be saved.
+	 */
+	public function test_update_status_returns_false_when_the_save_fails(): void {
+		$order = wc_create_order();
+
+		$fail = function () {
+			throw new Exception( 'Forced save failure' );
+		};
+		add_action( 'woocommerce_before_order_object_save', $fail );
+		$result = $order->update_status( OrderStatus::PROCESSING );
+		remove_action( 'woocommerce_before_order_object_save', $fail );
+
+		$this->assertFalse( $result );
+		$this->assertTrue( $order->update_status( OrderStatus::PROCESSING ), 'update_status() should return true once the save succeeds.' );
 	}
 }

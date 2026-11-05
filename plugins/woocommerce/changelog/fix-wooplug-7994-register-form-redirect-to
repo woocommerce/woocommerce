@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Return shoppers to the `redirect_to` URL after they register from the My Account page, matching the existing login behavior.

@@ -25,9 +25,17 @@ jobs:
             - uses: './.github/actions/setup-woocommerce-monorepo'
               id: 'setup-monorepo'
               with:
-                  install: '@woocommerce/plugin-woocommerce...'
-                  pull-package-deps: '@woocommerce/plugin-woocommerce'
+                  install: 'false'
+                  pull-package-composer-deps: '@woocommerce/plugin-woocommerce'
                   php-version: '8.4'
+
+            - name: 'Install PHP dependencies'
+              working-directory: plugins/woocommerce
+              run: XDEBUG_MODE=off composer install --quiet
+
+            - name: 'Run PHPStan rule tests'
+              working-directory: plugins/woocommerce
+              run: composer test:phpstan-rules
 
             - name: 'Create tmp directory'
               working-directory: plugins/woocommerce

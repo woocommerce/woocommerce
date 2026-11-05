@@ -698,8 +698,8 @@ Display options in a dropdown.
 
 - **Name:** woocommerce/dropdown
 - **Category:** woocommerce
-- **Ancestor:** woocommerce/add-to-cart-with-options-variation-selector-attribute
-- **Supports:** interactivity, woocommerce (innerBlockDisplayStyle)
+- **Ancestor:** woocommerce/add-to-cart-with-options-variation-selector-attribute, woocommerce/product-filter-attribute, woocommerce/product-filter-taxonomy, woocommerce/product-filter-status
+- **Supports:** color (background, text), interactivity, woocommerce (innerBlockDisplayStyle)
 
 ## Email Content - woocommerce/email-content
 
@@ -1411,7 +1411,7 @@ Display the number of products on the archive page or search result page.
 
 - **Name:** woocommerce/product-results-count
 - **Category:** woocommerce
-- **Supports:** color (background, gradients, text), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, textAlign)
+- **Supports:** color (background, gradients, text), interactivity (clientNavigation, interactive), spacing (margin, padding), typography (fontSize, textAlign)
 
 ## Product Reviews - woocommerce/product-reviews
 

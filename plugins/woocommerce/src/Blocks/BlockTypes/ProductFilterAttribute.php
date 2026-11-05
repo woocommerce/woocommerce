@@ -125,6 +125,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 			$items[]        = array(
 				'type'               => 'attribute/' . $attribute_name,
 				'value'              => $term_object->slug,
+				'label'              => $term_name,
 				'activeLabel'        => sprintf( '%s: %s', $product_attributes_map[ $attribute_name ], $term_name ),
 				'attributeQueryType' => $query_types[ $attribute_name ] ?? 'or',
 			);
