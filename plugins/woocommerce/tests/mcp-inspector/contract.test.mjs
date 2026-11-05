@@ -19,6 +19,7 @@ import {
 	namesDefault,
 	restatesEnum,
 } from './lib/contract.mjs';
+import { seed } from './lib/fixtures.mjs';
 
 const NAMESPACE = 'woocommerce/';
 const CONCURRENCY = Number( process.env.MCP_INSPECTOR_CONCURRENCY ?? 4 );
@@ -199,17 +200,42 @@ describe(
 	}
 );
 
+const order = await seed( 'order', { key: 'contract' } );
+const product = await seed( 'product', { sku: 'mcp-contract' } );
+
+// Input is validated before the permission check, and a check that reads a record refuses everyone without one,
+// so this input is valid and names a real record.
+const PERMISSION_INPUT = {
+	'woocommerce/order-add-note': { id: order.id, note: 'Contract' },
+	'woocommerce/order-notes-query': { id: order.id },
+	'woocommerce/order-send-email': { id: order.id, email: 'invoice' },
+	'woocommerce/order-update': { id: order.id },
+	'woocommerce/order-update-status': { id: order.id, status: 'processing' },
+	'woocommerce/product-delete': { id: product.id },
+	'woocommerce/product-terms-query': { taxonomy: 'product_cat' },
+	'woocommerce/product-update': { id: product.id },
+};
+
 describe(
 	'every ability refuses a customer',
 	{ concurrency: CONCURRENCY },
 	() => {
 		for ( const { name } of infos ) {
 			test( name, async () => {
-				const { isError, payload } = await call(
-					name,
-					{},
-					{ user: CUSTOMER }
+				const input = PERMISSION_INPUT[ name ] ?? {};
+
+				assert.ok(
+					await seed( 'permission', {
+						user: ADMIN,
+						ability: name,
+						input,
+					} ),
+					'The admin is refused this input too, so it cannot show that the customer lacks the capability. Add input naming a real record to PERMISSION_INPUT.'
 				);
+
+				const { isError, payload } = await call( name, input, {
+					user: CUSTOMER,
+				} );
 
 				assert.equal( isError, true, JSON.stringify( payload ) );
 				assert.match( String( payload ), /permission/i );
