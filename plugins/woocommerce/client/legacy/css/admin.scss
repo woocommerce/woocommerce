@@ -2474,17 +2474,28 @@ body.woocommerce_page_wc-customer-stock-notifications {
 		top: 24px;
 		transform: translateY(-50%);
 
-		// Below WP admin's mobile breakpoint the title row is too narrow to share.
 		@media screen and (max-width: 782px) {
-			display: flex;
-			position: static;
-			margin-top: 8px;
-			transform: none;
+			right: 0;
 		}
 	}
 
 	.woocommerce-order-navigation__button {
 		text-decoration: none;
+
+		// Below WP admin's mobile breakpoint only chevrons fit beside the title; aria-label keeps the name.
+		@media screen and (max-width: 782px) {
+
+			&.components-button.has-icon.has-text {
+				justify-content: center;
+				height: 40px;
+				min-width: 40px;
+				padding: 0;
+			}
+
+			> span {
+				display: none;
+			}
+		}
 
 		// The design system only mutes the real :disabled state, and this is a span.
 		&[aria-disabled="true"] {
