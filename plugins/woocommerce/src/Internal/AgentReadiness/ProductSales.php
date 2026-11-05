@@ -37,7 +37,8 @@ class ProductSales {
 			return null;
 		}
 
-		$since    = gmdate( 'Y-m-d H:i:s', time() - self::DAYS * DAY_IN_SECONDS );
+		// The lookup tables store dates in the site's time zone.
+		$since    = ( new \DateTimeImmutable( '-' . self::DAYS . ' days', wp_timezone() ) )->format( 'Y-m-d H:i:s' );
 		$excluded = self::excluded_statuses();
 		// A filter may leave nothing to exclude, and `NOT IN ()` is not valid SQL.
 		$not_in = array() === $excluded ? '' : 'AND stats.status NOT IN ( ' . implode( ', ', array_fill( 0, count( $excluded ), '%s' ) ) . ' )';

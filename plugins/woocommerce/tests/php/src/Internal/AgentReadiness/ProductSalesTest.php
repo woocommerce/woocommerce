@@ -118,9 +118,32 @@ class ProductSalesTest extends WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_analytics_excluded_order_statuses', '__return_empty_array' );
 		global $wpdb;
 		$wpdb->update( $wpdb->prefix . 'wc_order_stats', array( 'status' => 'wc-awaiting-collecti' ), array( 'status' => 'wc-cancelled' ) );
-		add_filter( 'woocommerce_analytics_excluded_order_statuses', static fn(): array => array( 'awaiting-collection-at-store' ) );
+		$long = static fn(): array => array( 'awaiting-collection-at-store' );
+		add_filter( 'woocommerce_analytics_excluded_order_statuses', $long );
+		try {
+			$this->assertSame( 1, $this->sut->last_days()['orders'], 'The long status, stored cut short, is still left out' );
+		} finally {
+			remove_filter( 'woocommerce_analytics_excluded_order_statuses', $long );
+		}
+	}
 
-		$this->assertSame( 1, $this->sut->last_days()['orders'], 'The long status, stored cut short, is still left out' );
+	/**
+	 * @testdox The 90-day window follows the site's time zone, as the lookup tables store local dates.
+	 */
+	public function test_last_days_window_in_site_time_zone(): void {
+		$mug = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		try {
+			update_option( 'timezone_string', 'Pacific/Auckland' );
+			$this->order( array( array( $mug, 1 ) ), OrderStatus::COMPLETED, time() - 90 * DAY_IN_SECONDS - 6 * HOUR_IN_SECONDS );
+			$this->order( array( array( $mug, 2 ) ), OrderStatus::COMPLETED, time() - 90 * DAY_IN_SECONDS + 6 * HOUR_IN_SECONDS );
+
+			$sales = $this->sut->last_days();
+
+			$this->assertSame( 1, $sales['orders'], 'The older order is out, though its local date reads later than the UTC boundary' );
+			$this->assertEqualsWithDelta( 20.0, $sales['by_product'][ $mug->get_id() ] ?? 0.0, 0.01 );
+		} finally {
+			delete_option( 'timezone_string' );
+		}
 	}
 
 	/**

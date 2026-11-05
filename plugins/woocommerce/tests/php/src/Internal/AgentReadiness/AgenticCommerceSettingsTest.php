@@ -380,7 +380,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'product_jsonld_present name', $html );
 		$this->assertStringNotContainsString( 'sitemap_lists_products label', $html, 'A passed check keeps its passing title' );
 		$this->assertMatchesRegularExpression( '#<summary><span class="wc-agentic-commerce-more__show">Show 2 more checks</span><span class="wc-agentic-commerce-more__hide">Hide</span></summary>.*sitemap_lists_products name.*</details>#s', $html, 'Passed checks are folded behind Show / Hide' );
-		$this->assertStringContainsString( 'sitemap_lists_products why', $html, 'A passed scanned check keeps its why' );
+		$this->assertStringNotContainsString( 'sitemap_lists_products why', $html, 'A passed scanned check drops its failure-worded why too' );
 		$this->assertStringContainsString( 'Order confirmation emails are on', $html );
 		$this->assertStringNotContainsString( 'Shoppers who buy through an agent get no confirmation from your store.', $html, 'A passed setup step drops its failure-worded why, as in Status' );
 	}

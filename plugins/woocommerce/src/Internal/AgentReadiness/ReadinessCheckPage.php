@@ -802,8 +802,8 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				continue;
 			}
 			if ( $check['ok'] ) {
-				// A setup step's why describes the failure, so a passed one shows only its name, as in Status.
-				self::render_item( 'pass', esc_html( $check['name'] ), isset( $check['conflict'] ) ? array( esc_html( $check['why'] ) ) : array() );
+				// A check's why describes the failure, so a passed one shows only its name, as in Status.
+				self::render_item( 'pass', esc_html( $check['name'] ), array() );
 				continue;
 			}
 			$lines = array( esc_html( self::affects_text( $check ) ) );
