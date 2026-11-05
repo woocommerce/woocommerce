@@ -8,13 +8,13 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Admin\Features\Blueprint;
 
 use Automattic\WooCommerce\Admin\Features\Blueprint\RestApi;
+use WC_Unit_Test_Case;
 use WP_REST_Request;
-use WP_Test_REST_TestCase;
 
 /**
  * Unit tests for RestApi class.
  */
-class RestApiTest extends WP_Test_REST_TestCase {
+class RestApiTest extends WC_Unit_Test_Case {
 	/**
 	 * @var RestApi
 	 */
@@ -77,6 +77,7 @@ class RestApiTest extends WP_Test_REST_TestCase {
 	 * Clean up after each test.
 	 */
 	public function tearDown(): void {
+		$this->clear_rest_server();
 		parent::tearDown();
 		// Clean up global state.
 		unset( $_FILES['file'] );
@@ -105,9 +106,7 @@ class RestApiTest extends WP_Test_REST_TestCase {
 		}
 
 		try {
-			$server = rest_get_server();
-			add_action( 'rest_api_init', array( $this->rest_api, 'register_routes' ) );
-			do_action( 'rest_api_init', $server );
+			$server   = $this->create_rest_server_with_routes( array( array( $this->rest_api, 'register_routes' ) ) );
 			$response = $server->dispatch( new WP_REST_Request( 'GET', '/wc-admin/blueprint/import-allowed' ) );
 
 			$this->assertSame( 200, $response->get_status() );
