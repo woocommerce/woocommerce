@@ -88,7 +88,7 @@ robots.txt is loaded from the host root, only to find the sitemaps it lists. Its
 
 ## Failures per product
 
-`refresh_report()` stores what each product fails in product meta (`ProductFailures`), one row per check and per channel status, plus a `checked` row on every product the checks cover, passing ones included. `ProductsList` updates a product's rows when it is saved, except for a save that changes only stock, and adds the Products list filter and column. The stored report's product counts are read from these rows, the total from the `checked` rows, so a product fixed, added or removed since the scan counts now. The example products per check can be out of date; the count links to the filtered Products list. A change to one product's GTIN can change another product's duplicate GTIN result; that one waits for the next scan.
+`refresh_report()` stores what each product fails in product meta (`ProductFailures`), one row per check and per channel status, plus a `checked` row on every product the checks cover, passing ones included. `ProductsList` updates a product's rows when it is saved, except for a save that changes only stock or nothing, removes them when it is trashed, and adds the Products list filter and column. A covered product without rows was not tested, by the scan's product limit, and the column says so. The stored report's product counts are read from these rows, the total from the `checked` rows, so a product fixed, added or removed since the scan counts now. The example products per check can be out of date; the count links to the filtered Products list. A change to one product's GTIN can change another product's duplicate GTIN result; that one waits for the next scan.
 
 ## What the store declares to agents
 
