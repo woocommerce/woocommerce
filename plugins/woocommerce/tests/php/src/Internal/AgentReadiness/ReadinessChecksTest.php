@@ -97,6 +97,42 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A variable product fails when any published variation lacks its own GTIN; the parent needs none, and virtual or disabled variations are skipped.
+	 */
+	public function test_missing_gtin_per_variation(): void {
+		$sut      = new MissingGtinCheck();
+		$variable = WC_Helper_Product::create_variation_product();
+		$children = $variable->get_children();
+		$this->assertGreaterThan( 1, count( $children ) );
+		$this->assertTrue( $sut->fails( wc_get_product( $variable->get_id() ), $this->scan ), 'No variation has a GTIN' );
+
+		foreach ( $children as $i => $child_id ) {
+			update_post_meta( $child_id, '_global_unique_id', (string) ( 4006381333000 + $i ) );
+		}
+		$this->assertFalse( $sut->fails( wc_get_product( $variable->get_id() ), $this->scan ), 'Every variation has its own GTIN; the parent has none' );
+
+		$last = wc_get_product( end( $children ) );
+		delete_post_meta( $last->get_id(), '_global_unique_id' );
+		$this->assertTrue( $sut->fails( wc_get_product( $variable->get_id() ), $this->scan ), 'One variation has no GTIN of its own, even though the others do' );
+
+		$last = wc_get_product( $last->get_id() );
+		$last->set_virtual( true );
+		$last->save();
+		$this->assertFalse( $sut->fails( wc_get_product( $variable->get_id() ), $this->scan ), 'A virtual variation is not asked for a GTIN' );
+
+		$disabled = WC_Helper_Product::create_variation_product();
+		foreach ( $disabled->get_children() as $child_id ) {
+			wp_update_post(
+				array(
+					'ID'          => $child_id,
+					'post_status' => 'private',
+				)
+			);
+		}
+		$this->assertFalse( $sut->fails( wc_get_product( $disabled->get_id() ), $this->scan ), 'With every variation disabled, the parent is not asked for a GTIN' );
+	}
+
+	/**
 	 * @testdox A product with no GTIN but a brand and an MPN no longer counts against Google.
 	 */
 	public function test_missing_gtin_with_brand_and_mpn(): void {
