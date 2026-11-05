@@ -72,6 +72,11 @@ class ProductReviewTemplate extends AbstractBlock {
 
 			$children = $comment->get_children();
 
+			// Keep reply threads in conversation order (oldest first) when the top-level query is descending.
+			if ( ! empty( $children ) && 'desc' === strtolower( (string) get_option( 'comment_order' ) ) ) {
+				$children = array_reverse( $children );
+			}
+
 			/*
 			* We need to create the CSS classes BEFORE recursing into the children.
 			* This is because comment_class() uses globals like `$comment_alt`
@@ -120,21 +125,33 @@ class ProductReviewTemplate extends AbstractBlock {
 			return;
 		}
 
-		$comment_query = new WP_Comment_Query(
-			build_comment_query_vars_from_block( $block )
-		);
+		$comment_vars  = build_comment_query_vars_from_block( $block );
+		$comment_order = strtolower( (string) get_option( 'comment_order' ) );
+
+		// Fetch reviews in the configured sort order so pagination reflects the overall order
+		// instead of reversing each page individually.
+		$comment_vars['order'] = ( 'desc' === $comment_order ) ? 'DESC' : 'ASC';
+
+		// Core's helper pages as if the query were ASC. With DESC, the default "newest" page is page 1.
+		if ( 'DESC' === $comment_vars['order'] && ! get_query_var( 'cpage' ) ) {
+			$comment_vars['paged'] = 1;
+			set_query_var( 'cpage', 1 );
+		}
+
+		$comment_query = new WP_Comment_Query( $comment_vars );
 
 		// Get an array of comments for the current post.
 		$comments = $comment_query->get_comments();
-		if ( count( $comments ) === 0 ) {
+		if ( ! is_array( $comments ) || count( $comments ) === 0 ) {
 			return '';
 		}
 
-		$comment_order = get_option( 'comment_order' );
-
-		if ( 'desc' === $comment_order ) {
-			$comments = array_reverse( $comments );
-		}
+		$comments = array_filter(
+			$comments,
+			static function ( $comment ) {
+				return $comment instanceof WP_Comment;
+			}
+		);
 
 		$wrapper_attributes = get_block_wrapper_attributes();
 

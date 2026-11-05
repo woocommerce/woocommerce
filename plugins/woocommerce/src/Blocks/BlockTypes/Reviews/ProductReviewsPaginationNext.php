@@ -28,7 +28,17 @@ class ProductReviewsPaginationNext extends AbstractBlock {
 			return '';
 		}
 
-		$comment_vars     = build_comment_query_vars_from_block( $block );
+		$comment_vars  = build_comment_query_vars_from_block( $block );
+		$comment_order = strtolower( (string) get_option( 'comment_order' ) );
+
+		// With DESC ordering the default page is 1 (newest), so "Newer" walks toward lower pages.
+		if ( 'desc' === $comment_order ) {
+			$comment_vars['order'] = 'DESC';
+			if ( ! get_query_var( 'cpage' ) ) {
+				$comment_vars['paged'] = 1;
+			}
+		}
+
 		$max_page         = ( new \WP_Comment_Query( $comment_vars ) )->max_num_pages;
 		$default_label    = __( 'Newer Reviews', 'woocommerce' );
 		$label            = isset( $attributes['label'] ) && ! empty( $attributes['label'] ) ? $attributes['label'] : $default_label;
@@ -37,15 +47,20 @@ class ProductReviewsPaginationNext extends AbstractBlock {
 		$filter_link_attributes = static function () {
 			return get_block_wrapper_attributes();
 		};
-		add_filter( 'next_comments_link_attributes', $filter_link_attributes );
 
 		if ( $pagination_arrow ) {
 			$label .= $pagination_arrow;
 		}
 
-		$next_comments_link = get_next_comments_link( $label, $max_page, $comment_vars['paged'] ?? null );
-
-		remove_filter( 'next_posts_link_attributes', $filter_link_attributes );
+		if ( 'desc' === $comment_order ) {
+			add_filter( 'previous_comments_link_attributes', $filter_link_attributes );
+			$next_comments_link = get_previous_comments_link( $label, $comment_vars['paged'] ?? null );
+			remove_filter( 'previous_comments_link_attributes', $filter_link_attributes );
+		} else {
+			add_filter( 'next_comments_link_attributes', $filter_link_attributes );
+			$next_comments_link = get_next_comments_link( $label, $max_page, $comment_vars['paged'] ?? null );
+			remove_filter( 'next_comments_link_attributes', $filter_link_attributes );
+		}
 
 		if ( ! isset( $next_comments_link ) ) {
 			return '';

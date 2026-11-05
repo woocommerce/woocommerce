@@ -152,6 +152,177 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Ensure the comments_template_query_args filter sets the query order to DESC when the
+	 * comment_order option is "desc" and we're on a singular product page.
+	 */
+	public function test_order_product_reviews_query_args_uses_desc_when_option_is_desc(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$this->go_to( get_permalink( $product->get_id() ) );
+
+		$previous_option = get_option( 'comment_order' );
+		update_option( 'comment_order', 'desc' );
+		set_query_var( 'cpage', '' );
+
+		$args = WC_Comments::order_product_reviews_query_args(
+			array(
+				'order'   => 'ASC',
+				'post_id' => $product->get_id(),
+				'offset'  => 10,
+			)
+		);
+
+		$this->assertSame( 'DESC', $args['order'] );
+		$this->assertSame( 0, $args['offset'] );
+		$this->assertSame( 1, (int) get_query_var( 'cpage' ), 'DESC default page must navigate as page 1, not the ASC last page.' );
+
+		update_option( 'comment_order', $previous_option );
+		$this->go_to( '/' );
+	}
+
+	/**
+	 * Ensure the comments_template_query_args filter keeps the query order ASC when the option is "asc"
+	 * on a singular product page.
+	 */
+	public function test_order_product_reviews_query_args_uses_asc_when_option_is_asc(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$this->go_to( get_permalink( $product->get_id() ) );
+
+		$previous_option = get_option( 'comment_order' );
+		update_option( 'comment_order', 'asc' );
+
+		$args = WC_Comments::order_product_reviews_query_args(
+			array(
+				'order'   => 'DESC',
+				'post_id' => $product->get_id(),
+				'offset'  => 10,
+			)
+		);
+
+		$this->assertSame( 'ASC', $args['order'] );
+		$this->assertSame( 10, $args['offset'] );
+
+		update_option( 'comment_order', $previous_option );
+		$this->go_to( '/' );
+	}
+
+	/**
+	 * Ensure the comments_template_query_args filter does not override the order when not on a product page.
+	 */
+	public function test_order_product_reviews_query_args_skips_when_not_on_product(): void {
+		$post_id = wp_insert_post(
+			array(
+				'post_title'   => 'Blog Post',
+				'post_content' => 'Content',
+				'post_status'  => 'publish',
+				'post_type'    => 'post',
+			)
+		);
+		$this->go_to( get_permalink( $post_id ) );
+
+		$previous_option = get_option( 'comment_order' );
+		update_option( 'comment_order', 'desc' );
+
+		$args = WC_Comments::order_product_reviews_query_args(
+			array(
+				'order'   => 'ASC',
+				'post_id' => $post_id,
+			)
+		);
+
+		$this->assertSame( 'ASC', $args['order'] );
+
+		update_option( 'comment_order', $previous_option );
+		wp_delete_post( $post_id, true );
+		$this->go_to( '/' );
+	}
+
+	/**
+	 * Ensure a product singular view still skips when the queried comments belong to another post type.
+	 */
+	public function test_order_product_reviews_query_args_skips_non_product_post_id(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$post_id = wp_insert_post(
+			array(
+				'post_title'   => 'Blog Post',
+				'post_content' => 'Content',
+				'post_status'  => 'publish',
+				'post_type'    => 'post',
+			)
+		);
+
+		$this->go_to( get_permalink( $product->get_id() ) );
+
+		$previous_option = get_option( 'comment_order' );
+		update_option( 'comment_order', 'desc' );
+
+		$args = WC_Comments::order_product_reviews_query_args(
+			array(
+				'order'   => 'ASC',
+				'post_id' => $post_id,
+			)
+		);
+
+		$this->assertSame( 'ASC', $args['order'] );
+
+		update_option( 'comment_order', $previous_option );
+		wp_delete_post( $post_id, true );
+		$this->go_to( '/' );
+	}
+
+	/**
+	 * Ensure an explicit cpage keeps its ASC-computed offset when switching the query to DESC.
+	 */
+	public function test_order_product_reviews_query_args_keeps_offset_when_cpage_set(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$this->go_to( get_permalink( $product->get_id() ) );
+		set_query_var( 'cpage', 2 );
+
+		$previous_option = get_option( 'comment_order' );
+		update_option( 'comment_order', 'desc' );
+
+		$args = WC_Comments::order_product_reviews_query_args(
+			array(
+				'order'   => 'ASC',
+				'post_id' => $product->get_id(),
+				'offset'  => 5,
+			)
+		);
+
+		$this->assertSame( 'DESC', $args['order'] );
+		$this->assertSame( 5, $args['offset'] );
+		$this->assertSame( 2, (int) get_query_var( 'cpage' ), 'Explicit cpage must not be rewritten to page 1.' );
+
+		update_option( 'comment_order', $previous_option );
+		set_query_var( 'cpage', '' );
+		$this->go_to( '/' );
+	}
+
+	/**
+	 * Ensure the wp_list_comments arguments disable top-level reversal and keep reply threads
+	 * in conversation order when the query is descending.
+	 */
+	public function test_order_product_reviews_list_args_disables_reversal(): void {
+		$previous_option = get_option( 'comment_order' );
+		update_option( 'comment_order', 'desc' );
+
+		$args = WC_Comments::order_product_reviews_list_args( array( 'callback' => 'woocommerce_comments' ) );
+
+		$this->assertArrayHasKey( 'reverse_top_level', $args );
+		$this->assertFalse( $args['reverse_top_level'] );
+		$this->assertArrayHasKey( 'reverse_children', $args );
+		$this->assertTrue( $args['reverse_children'] );
+
+		update_option( 'comment_order', 'asc' );
+		$args = WC_Comments::order_product_reviews_list_args( array( 'callback' => 'woocommerce_comments' ) );
+		$this->assertFalse( $args['reverse_children'] );
+
+		update_option( 'comment_order', $previous_option );
+	}
+
+	/**
 	 * @testdox Should not increment the cached comment count for comment types excluded from the counts.
 	 *
 	 * @testWith ["action_log"]
