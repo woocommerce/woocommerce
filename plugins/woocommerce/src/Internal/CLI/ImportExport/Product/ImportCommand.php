@@ -124,7 +124,8 @@ final class ImportCommand {
 	 *
 	 * [--yes]
 	 * : Skip the confirmation prompt shown when a previous, possibly interrupted import
-	 * left placeholder products behind.
+	 * left placeholder products behind. Required in that case when reading the CSV from STDIN,
+	 * or with `--porcelain` or a `--format` other than `table`.
 	 *
 	 * There is no dry-run mode: the importer cannot parse a row without persisting
 	 * some of its effects (images, terms, attributes, placeholder and parent products
@@ -319,8 +320,10 @@ final class ImportCommand {
 				)
 			);
 
-			if ( $is_stdin && ! WP_CLI\Utils\get_flag_value( $assoc_args, 'yes', false ) ) {
-				WP_CLI::error( 'Re-run with --yes: the confirmation prompt cannot be answered while the CSV is read from STDIN.' );
+			$is_scripted_output = WP_CLI\Utils\get_flag_value( $assoc_args, 'porcelain', false ) || 'table' !== WP_CLI\Utils\get_flag_value( $assoc_args, 'format', 'table' );
+
+			if ( ( $is_stdin || $is_scripted_output ) && ! WP_CLI\Utils\get_flag_value( $assoc_args, 'yes', false ) ) {
+				WP_CLI::error( 'Re-run with --yes: the confirmation prompt cannot be used while the CSV is read from STDIN, or with --porcelain or a --format other than table.' );
 				return false;
 			}
 
@@ -434,7 +437,10 @@ final class ImportCommand {
 		}
 
 		// Machine-readable formats always print the report, so a clean run still outputs a parseable document.
-		if ( ! empty( $results['errors'] ) || 'table' !== $options['format'] ) {
+		if ( empty( $results['errors'] ) && 'yaml' === $options['format'] ) {
+			// The YAML formatter renders an empty list as a bare `---`, which parses as null.
+			WP_CLI::line( '[]' );
+		} elseif ( ! empty( $results['errors'] ) || 'table' !== $options['format'] ) {
 			WP_CLI\Utils\format_items( $options['format'], $results['errors'], array( 'row', 'code', 'message' ) );
 		}
 
