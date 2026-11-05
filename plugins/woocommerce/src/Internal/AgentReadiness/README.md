@@ -39,7 +39,7 @@ A channel whose spec does not ask for the field is left out of the check's map.
 | `title_too_long` | title, gaps | title, gaps | title, gaps |
 | `image_alt_text` | | | |
 
-`image_alt_text` (the main image has no alt text) is about the product page, not a feed: no channel's spec asks for it. A check with no channel map lists its products but doesn't change the channel totals. The rules filter can still remove it; a check whose channels the filter empties doesn't run.
+`image_alt_text` (the main image has no alt text) is about the product page, not a feed: no channel's spec asks for it. A check with no channel map lists its products but doesn't change the channel totals. The published rules file turns it off by leaving it out; list it with an empty `channels` object to keep it. The PHP filter can still remove it.
 
 A variable product with some priced variations fails `missing_regular_price` but counts as `gaps`, not `not_listable`, in the channel totals, since its priced variations still list.
 

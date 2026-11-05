@@ -136,9 +136,9 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A fetched rules file keeps a bundled check no channel asks for, such as image alt text.
+	 * @testdox A fetched rules file turns off a page check it leaves out, and keeps one listed with no channels.
 	 */
-	public function test_fetched_rules_keep_check_with_no_channels(): void {
+	public function test_fetched_rules_page_check_follows_the_file(): void {
 		$this->serve(
 			array(
 				'missing_brand' => array(
@@ -150,11 +150,23 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertTrue( $this->sut->refresh() );
-
 		$rules = $this->agent_readiness()->get_channel_rules();
-
-		$this->assertSame( array(), $rules['image_alt_text'] );
+		$this->assertArrayNotHasKey( 'image_alt_text', $rules, 'A page check the file leaves out does not run' );
 		$this->assertArrayNotHasKey( 'missing_images', $rules, 'A channel check the file leaves out still does not run' );
+
+		$this->serve(
+			array(
+				'missing_brand'  => array(
+					'google' => array(
+						'field'  => 'brand',
+						'effect' => 'not_listable',
+					),
+				),
+				'image_alt_text' => array(),
+			)
+		);
+		$this->assertTrue( $this->sut->refresh() );
+		$this->assertSame( array(), $this->agent_readiness()->get_channel_rules()['image_alt_text'] );
 	}
 
 	/**
@@ -464,7 +476,7 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		$this->assertIsArray( $file['checks'] );
 
 		$rules  = ( new AgentReadiness() )->get_default_rules();
-		$known  = array_keys( array_filter( $rules, static fn( ReadinessRule $rule ): bool => array() !== $rule->channels() ) );
+		$known  = array_keys( $rules );
 		$checks = array();
 		foreach ( $file['checks'] as $id => $check ) {
 			$this->assertContains( $id, $known, 'The file names a check the code does not have' );
@@ -474,6 +486,6 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 
 		$this->serve( $checks );
 		$this->sut->refresh();
-		$this->assertSame( array_keys( $rules ), array_keys( $this->agent_readiness()->get_channel_rules() ), 'A check no channel asks for runs too' );
+		$this->assertSame( $known, array_keys( $this->agent_readiness()->get_channel_rules() ) );
 	}
 }
