@@ -4526,6 +4526,7 @@ function wc_empty_cart_message() {
 function wc_page_no_robots( $robots ) {
 	return wc_get_container()->get( SearchEngineVisibility::class )->handle_wp_robots( $robots );
 }
+add_filter( 'wp_robots', 'wc_page_no_robots' );
 
 /**
  * Get a slug identifying the current theme.

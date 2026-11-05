@@ -20,12 +20,12 @@ defined( 'ABSPATH' ) || exit;
 class SearchEngineVisibility {
 
 	/**
-	 * Register the robots and sitemap filters.
+	 * Register the sitemap filter.
 	 *
 	 * @internal
 	 */
 	final public function init(): void {
-		add_filter( 'wp_robots', array( $this, 'handle_wp_robots' ) );
+		// Keep wp_robots registered in wc-template-functions.php through wc_page_no_robots() so extensions can remove it.
 		add_filter( 'wp_sitemaps_posts_query_args', array( $this, 'handle_wp_sitemaps_posts_query_args' ), 10, 2 );
 	}
 
