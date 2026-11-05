@@ -1699,12 +1699,13 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	public function test_sync_on_read_does_not_duplicate_postmeta() {
 		$this->enable_cot_sync();
 		$this->toggle_cot_feature_and_usage( true );
-		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 		$order = $this->create_complex_cot_order();
 		$order->add_meta_data( 'multi_meta', 'x' );
 		$order->add_meta_data( 'multi_meta', 'y' );
 		$order->add_meta_data( 'changed_meta', 'before' );
 		$order->save();
+		// Fixture saves can read the order, so enable sync-on-read only after setup.
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 
 		// Simulate direct writes to the posts table.
 		add_post_meta( $order->get_id(), 'new_meta', 'new_value' ); // add_meta path.
