@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Unit_Test_Case;
 
 /**
@@ -15,22 +16,42 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 	use HPOSToggleTrait;
 
 	/**
-	 * Whether the current test enabled HPOS.
+	 * The order storage that was active before the test.
 	 *
-	 * @var bool
+	 * @var bool|null
 	 */
-	private bool $hpos_enabled = false;
+	private ?bool $original_hpos = null;
 
 	/**
-	 * Restore posts storage when a test enabled HPOS.
+	 * Create the HPOS tables outside the test transaction, since DDL commits implicitly.
+	 *
+	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		unset( $factory );
+		$previous_hpos = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		try {
+			self::setup_cot_tables();
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() !== $previous_hpos ) {
+				OrderHelper::toggle_cot_feature_and_usage( $previous_hpos );
+			}
+		} finally {
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
+
+	/**
+	 * Restore the order storage a test switched.
 	 */
 	public function tearDown(): void {
 		try {
-			if ( $this->hpos_enabled ) {
-				$this->clean_up_cot_setup();
-				$this->hpos_enabled = false;
+			if ( null !== $this->original_hpos ) {
+				$this->toggle_cot_feature_and_usage( $this->original_hpos );
+				$this->original_hpos = null;
 			}
 		} finally {
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 			parent::tearDown();
 		}
 	}
@@ -120,14 +141,13 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Enable HPOS when requested.
+	 * Switch the order storage for the current test.
 	 *
 	 * @param bool $hpos Whether to use the custom orders table.
 	 */
 	private function use_storage( bool $hpos ): void {
-		if ( $hpos ) {
-			$this->setup_cot();
-			$this->hpos_enabled = true;
-		}
+		$this->original_hpos = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->toggle_cot_feature_and_usage( $hpos );
 	}
 }
