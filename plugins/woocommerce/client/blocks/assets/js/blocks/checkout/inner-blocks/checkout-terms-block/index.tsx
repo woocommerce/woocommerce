@@ -12,7 +12,7 @@ import metadata from './block.json';
 import './style.scss';
 
 /**
- * Hidden from the inserter: new checkouts use the terms settings on the Actions block. Existing checkouts keep this
+ * Hidden from the inserter: new checkouts use the Terms and Conditions settings on the Actions block. Existing checkouts keep this
  * block, and its settings offer a switch to the Actions block terms.
  */
 registerBlockType( metadata, {

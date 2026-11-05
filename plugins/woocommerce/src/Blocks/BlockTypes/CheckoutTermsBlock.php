@@ -6,7 +6,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 /**
  * CheckoutTermsBlock class.
  *
- * Terms are now settings on the Checkout Actions block, so this block is hidden from the inserter. Existing checkouts
+ * Terms and conditions are now settings on the Checkout's Actions block, so this block is hidden from the inserter. Existing checkouts
  * keep this block, and merchants can switch from it in the editor.
  */
 class CheckoutTermsBlock extends AbstractInnerBlock {

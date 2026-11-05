@@ -36,7 +36,7 @@ export const useCheckoutTermsBlocks = ( clientId: string ) =>
 	);
 
 /**
- * Recommends moving the Terms block's settings onto the Place order button, and does it in one click.
+ * Recommends moving the Terms and Conditions block's settings onto the Place order button, and does it in one click.
  */
 export const SwitchToActionsTermsNotice = ( {
 	clientId,
@@ -52,7 +52,7 @@ export const SwitchToActionsTermsNotice = ( {
 		return null;
 	}
 
-	// Replace the inner blocks in one change, so a single undo restores the Terms block.
+	// Replace the inner blocks in one change, so a single undo restores the Terms and Conditions block.
 	const switchTerms = () => {
 		const { getBlockRootClientId, getBlocks } =
 			registry.select( blockEditorStore );

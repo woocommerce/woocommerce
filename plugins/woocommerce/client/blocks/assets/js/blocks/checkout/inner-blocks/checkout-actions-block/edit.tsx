@@ -9,7 +9,12 @@ import {
 	RichText,
 	useBlockProps,
 } from '@wordpress/block-editor';
-import { PanelBody, TextControl, ToggleControl } from '@wordpress/components';
+import {
+	Disabled,
+	PanelBody,
+	TextControl,
+	ToggleControl,
+} from '@wordpress/components';
 import PageSelector from '@woocommerce/editor-components/page-selector';
 import { CHECKOUT_PAGE_ID } from '@woocommerce/block-settings';
 import {
@@ -64,7 +69,7 @@ export const Edit = ( {
 
 	const showPrice = blockProps.className.includes( 'is-style-with-price' );
 
-	// While the Terms block is in the checkout, it owns the terms.
+	// While the Terms and Conditions block is in the checkout, it owns the terms.
 	const { termsClientId } = useCheckoutTermsBlocks( clientId );
 
 	// Mirrors the frontend: a required checkbox goes above the button, consent text below it.
@@ -72,11 +77,13 @@ export const Edit = ( {
 		<div className="wc-block-checkout__terms">
 			{ termsCheckbox && (
 				<div className="wc-block-checkout__terms-checkbox-wrapper">
-					<CheckboxControl
-						id="terms-and-conditions"
-						checked={ false }
-						onChange={ () => undefined }
-					/>
+					<Disabled>
+						<CheckboxControl
+							id="terms-and-conditions"
+							checked={ false }
+							onChange={ () => undefined }
+						/>
+					</Disabled>
 				</div>
 			) }
 			<RichText

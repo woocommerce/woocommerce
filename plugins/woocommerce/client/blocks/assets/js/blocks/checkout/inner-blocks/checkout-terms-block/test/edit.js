@@ -205,7 +205,7 @@ describe( 'Edit', () => {
 			expect(
 				queryByText(
 					container,
-					/Show Terms and Conditions next to the Place order button/
+					'Show Terms and Conditions next to the Place order button. Your text and checkbox setting move to the Actions block.'
 				)
 			).toBeInTheDocument();
 			expect(

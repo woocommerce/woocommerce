@@ -428,7 +428,7 @@ Display a checkout form so your customers can submit orders.
 
 ## Actions - woocommerce/checkout-actions-block
 
-Allow customers to place their order.
+Place order button, with optional Terms and Conditions and Return to Cart links.
 
 - **Name:** woocommerce/checkout-actions-block
 - **Category:** woocommerce

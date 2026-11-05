@@ -183,7 +183,7 @@ class Checkout extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox New Checkout pages put terms on the Actions block instead of a Terms block.
+	 * @testdox New Checkout pages put terms on the Actions block instead of a Terms and Conditions block.
 	 */
 	public function test_default_checkout_page_content_uses_actions_terms(): void {
 		$method = new \ReflectionMethod( \WC_Install::class, 'get_checkout_block_content' );
@@ -191,7 +191,7 @@ class Checkout extends \WC_Unit_Test_Case {
 		$fields = parse_blocks( $method->invoke( null ) )[0]['innerBlocks'][0];
 		$attrs  = array_column( $fields['innerBlocks'], 'attrs', 'blockName' );
 
-		$this->assertArrayNotHasKey( 'woocommerce/checkout-terms-block', $attrs, 'No Terms block' );
+		$this->assertArrayNotHasKey( 'woocommerce/checkout-terms-block', $attrs, 'No Terms and Conditions block' );
 		$this->assertTrue( $attrs['woocommerce/checkout-actions-block']['showTerms'] ?? null, 'Actions block shows terms' );
 	}
 

@@ -249,12 +249,12 @@ describe( 'Checkout Actions Block Edit', () => {
 			mockCheckoutBlocks = [];
 		} );
 
-		it( 'hides terms settings and the switch notice while the Terms block is in the checkout', () => {
+		it( 'hides terms settings and the switch notice while the Terms and Conditions block is in the checkout', () => {
 			renderEdit();
 
 			expect(
 				screen.queryByText(
-					/Show Terms and Conditions next to the Place order button/
+					'Show Terms and Conditions next to the Place order button. Your text and checkbox setting move to the Actions block.'
 				)
 			).not.toBeInTheDocument();
 			expect(

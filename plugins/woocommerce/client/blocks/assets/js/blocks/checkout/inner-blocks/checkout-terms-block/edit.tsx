@@ -9,6 +9,7 @@ import {
 } from '@wordpress/block-editor';
 import { CheckboxControl } from '@woocommerce/blocks-components';
 import {
+	Disabled,
 	PanelBody,
 	ToggleControl,
 	Notice,
@@ -180,11 +181,13 @@ export const Edit = ( {
 				{ checkbox ? (
 					<>
 						<div className="wc-block-checkout__terms-checkbox-wrapper">
-							<CheckboxControl
-								id="terms-condition"
-								checked={ false }
-								onChange={ noop }
-							/>
+							<Disabled>
+								<CheckboxControl
+									id="terms-condition"
+									checked={ false }
+									onChange={ noop }
+								/>
+							</Disabled>
 						</div>
 						<RichText
 							value={ currentText }

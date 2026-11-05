@@ -537,7 +537,7 @@ test.describe( 'Merchant → Checkout', () => {
 			await editor.selectBlocks( blockSelectorInEditor );
 		} );
 
-		test( 'Merchant can switch from the Terms block to the Actions block terms', async ( {
+		test( 'Merchant can switch from the Terms and Conditions block to the Actions block terms', async ( {
 			editor,
 		} ) => {
 			await editor.selectBlocks(
@@ -553,7 +553,7 @@ test.describe( 'Merchant → Checkout', () => {
 			);
 			const terms = actionsBlock.locator( '.wc-block-checkout__terms' );
 
-			// While the Terms block is in the checkout, it owns the terms.
+			// While the Terms and Conditions block is in the checkout, it owns the terms.
 			await expect( showTermsToggle ).toHaveCount( 0 );
 			await expect(
 				editor.page.getByRole( 'button', {

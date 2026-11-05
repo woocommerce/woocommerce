@@ -201,7 +201,7 @@ describe( 'Checkout Actions Block', () => {
 			);
 		} );
 
-		it( 'keeps the Terms block wrapper class that extensions target', () => {
+		it( 'keeps the Terms and Conditions block wrapper class that extensions target', () => {
 			render( <Block { ...defaultProps } showTerms={ true } /> );
 
 			expect( screen.getByTestId( 'terms' ) ).toHaveClass(

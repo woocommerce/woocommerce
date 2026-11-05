@@ -894,7 +894,7 @@ apply_filters( 'woocommerce_checkout_show_terms', bool $show_terms )
 
 ### Description
 
-Returning false hides the terms on classic checkout and on the Checkout block's Actions block, for example when an extension shows its own legal checkboxes. Like classic checkout, this only runs on the frontend, where callbacks can rely on the cart being loaded.
+Returning false hides the terms and conditions on classic checkout and on the Checkout block's Actions block, for example when an extension shows its own legal checkboxes. Like classic checkout, this only runs on the frontend, where callbacks can rely on the cart being loaded.
 
 ### Parameters
 
