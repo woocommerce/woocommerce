@@ -63,19 +63,25 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A file counts as found, a 404 or a page a theme answers with does not.
+	 * @testdox A file counts as found; a 404, a page a theme answers with, or a 200 error a host answers with does not.
 	 */
 	public function test_files(): void {
 		$results = $this->results(
 			array(
 				'/ai.txt'                  => array( 200, 'User-Agent: *' ),
 				'/.well-known/agents.json' => array( 200, '<!doctype html><html></html>' ),
+				'/AGENTS.md'               => array( 200, '{"code":"not_found","message":"No route"}' ),
+				'/auth.md'                 => array( 200, 'Not found', array( 'content-type' => 'text/html; charset=UTF-8' ) ),
+				'/sitemap.md'              => array( 200, "\xEF\xBB\xBF<!doctype html><html></html>" ),
 			)
 		);
 
 		$this->assertTrue( $results['ai-txt'] );
 		$this->assertFalse( $results['agents-json'], 'A page is not a JSON document' );
 		$this->assertFalse( $results['security-txt'], 'A 404' );
+		$this->assertFalse( $results['agents-md'], 'A 200 JSON error is not a file' );
+		$this->assertFalse( $results['auth-md'], 'A 200 HTML answer is not a file' );
+		$this->assertFalse( $results['sitemap-md'], 'A page behind a byte order mark is not a file' );
 	}
 
 	/**
