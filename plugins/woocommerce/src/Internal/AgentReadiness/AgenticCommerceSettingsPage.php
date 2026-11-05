@@ -642,8 +642,8 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	/**
 	 * A table of store checks.
 	 *
-	 * @param array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool}> $checks   Checks.
-	 * @param bool|null                                                                                                                                          $launched Whether the store is launched.
+	 * @param array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,seen_at?:string,plugins?:array<int,string>}> $checks   Checks.
+	 * @param bool|null                                                                                                                                                                                     $launched Whether the store is launched.
 	 */
 	private function render_check_rows( array $checks, ?bool $launched ): void {
 		if ( array() === $checks ) {
@@ -675,6 +675,17 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 							<?php echo esc_html( $check['name'] ); ?>
 							<?php if ( false === $check['ok'] ) : ?>
 								<br /><span class="description"><?php echo esc_html( trim( ( $conflict ? __( 'Something on your store may be replacing this. If you just changed it, a page cache may show the old page for a while.', 'woocommerce' ) . ' ' : '' ) . $check['why'] . ' ' . self::blocks_text( $check['blocks'] ) ) ); ?></span>
+								<?php if ( $conflict && ! empty( $check['seen_at'] ) ) : ?>
+									<br /><span class="description"><?php esc_html_e( 'Seen on:', 'woocommerce' ); ?> <a href="<?php echo esc_url( $check['seen_at'] ); ?>"><?php echo esc_html( $check['seen_at'] ); ?></a></span>
+								<?php endif; ?>
+								<?php if ( $conflict && ! empty( $check['plugins'] ) ) : ?>
+									<br /><span class="description">
+										<?php
+										/* translators: %s: comma-separated plugin names. */
+										echo esc_html( sprintf( __( 'Active plugins that can output this: %s', 'woocommerce' ), implode( ', ', $check['plugins'] ) ) );
+										?>
+									</span>
+								<?php endif; ?>
 							<?php endif; ?>
 						</td>
 						<td>
@@ -722,9 +733,9 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 * affect the switch, so they sit apart from the setup checks in Status. Run check is
 	 * at the top, and the product checks sit under "Do they understand your products?".
 	 *
-	 * @param array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool}> $checks   Scanned checks.
-	 * @param bool                                                                                                                                                             $launched Whether the store is launched.
-	 * @param array<string, mixed>|null                                                                                                                                        $report   Stored report, or null before the first scan.
+	 * @param array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,seen_at?:string,plugins?:array<int,string>}> $checks   Scanned checks.
+	 * @param bool                                                                                                                                                                                                        $launched Whether the store is launched.
+	 * @param array<string, mixed>|null                                                                                                                                                                                   $report   Stored report, or null before the first scan.
 	 */
 	private function render_readiness( array $checks, bool $launched, ?array $report ): void {
 		$results = array_column( $checks, 'ok', 'id' );
