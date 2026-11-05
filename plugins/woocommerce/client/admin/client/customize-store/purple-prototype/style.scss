@@ -90,6 +90,11 @@
 		gap: var(--wpds-dimension-gap-sm);
 	}
 
+	// Room for the buttons and a two-line note in every state, so the card and its image crop don't shift while Purple installs or activates.
+	&--purple &__footer {
+		min-height: calc(var(--wpds-dimension-size-lg) + var(--wpds-dimension-gap-sm) + 2 * var(--wpds-typography-line-height-xs));
+	}
+
 	&__description,
 	&__helper {
 		color: var(--wpds-color-foreground-content-neutral-weak);
@@ -167,7 +172,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: var(--wpds-dimension-gap-md);
+		gap: var(--wpds-dimension-gap-xl);
 		padding-block: var(--wpds-dimension-padding-3xl) 48px;
 		text-align: center;
 	}
@@ -176,9 +181,16 @@
 		display: block;
 		width: 100%;
 		max-width: var(--wpds-dimension-surface-width-lg);
-		margin-block-end: var(--wpds-dimension-gap-md);
 		border: 1px solid var(--wpds-color-stroke-surface-neutral);
 		border-radius: var(--wpds-border-radius-md);
+	}
+
+	// Same title spacing as the theme cards.
+	&__header {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--wpds-dimension-gap-xs);
 	}
 
 	&__description {
@@ -191,7 +203,6 @@
 		justify-content: center;
 		align-items: center;
 		gap: var(--wpds-dimension-gap-md);
-		margin-block-start: var(--wpds-dimension-gap-md);
 	}
 }
 

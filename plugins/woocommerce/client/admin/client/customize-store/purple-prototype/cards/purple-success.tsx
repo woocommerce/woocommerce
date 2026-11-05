@@ -25,15 +25,20 @@ export const PurpleSuccess = ( { homeUrl }: { homeUrl: string } ) => (
 					'woocommerce'
 				) }
 			/>
-			<Text variant="heading-xl" render={ <h2 /> }>
-				{ __( "Purple is now your store's theme", 'woocommerce' ) }
-			</Text>
-			<Text className="purple-cys-success__description" render={ <p /> }>
-				{ __(
-					'Make it yours: pick colors and fonts, then edit your homepage and store pages.',
-					'woocommerce'
-				) }
-			</Text>
+			<div className="purple-cys-success__header">
+				<Text variant="heading-xl" render={ <h2 /> }>
+					{ __( "Purple is now your store's theme", 'woocommerce' ) }
+				</Text>
+				<Text
+					className="purple-cys-success__description"
+					render={ <p /> }
+				>
+					{ __(
+						'Make it yours: pick colors and fonts, then edit your homepage and store pages.',
+						'woocommerce'
+					) }
+				</Text>
+			</div>
 			<div className="purple-cys-success__actions">
 				<LinkButton href={ getSiteEditorUrl() }>
 					{ __( 'Customize in Site Editor', 'woocommerce' ) }
