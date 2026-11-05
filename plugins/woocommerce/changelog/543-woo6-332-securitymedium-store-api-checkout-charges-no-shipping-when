@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Calculate shipping at checkout when the address town or state is 0.
