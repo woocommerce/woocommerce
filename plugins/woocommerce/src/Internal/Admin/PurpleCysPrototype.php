@@ -38,10 +38,9 @@ class PurpleCysPrototype {
 	 * @var array<string, string[]>
 	 */
 	const SETTINGS = array(
-		'layout'       => array( 'stacked-images-left' ),
-		'state'        => array( 'real', 'default', 'installing', 'installed', 'activating', 'active', 'error' ),
-		// Whether the setup wizard treats the current theme as customized, which hides its Purple step.
-		'wizard_theme' => array( 'real', 'unchanged', 'customized' ),
+		'layout' => array( 'stacked-images-left' ),
+		// "real" is the default: Purple not installed, with real install and activate.
+		'state'  => array( 'real', 'installing', 'installed', 'activating', 'active', 'error' ),
 	);
 
 	/**
@@ -163,13 +162,12 @@ class PurpleCysPrototype {
 		$value = isset( $_GET['purple_cys_value'] ) ? sanitize_key( wp_unslash( $_GET['purple_cys_value'] ) ) : '';
 		$args  = array();
 
-		if ( 'reset' === $key ) {
+		// "Default" starts the real flow from the beginning, so Purple is removed if it's there.
+		if ( 'state' === $key && 'real' === $value && wp_get_theme( self::PURPLE_SLUG )->exists() ) {
 			$args['purple_cys_reset'] = $this->reset_purple() ? 'done' : 'failed';
-			// A forced state goes back to the start too, so the flow can be tested again.
-			if ( 'real' !== $this->get_settings()['state'] ) {
-				$this->save_setting( 'state', 'default' );
-			}
-		} elseif ( $this->save_setting( $key, $value ) && 'state' === $key ) {
+		}
+
+		if ( $this->save_setting( $key, $value ) && 'state' === $key ) {
 			// Start each picked state with the task matching it: done only when Purple is (or is
 			// faked as) active. Clicking any action on the CYS screen then marks it done.
 			$is_active = 'real' === $value ? self::PURPLE_SLUG === get_stylesheet() : 'active' === $value;
@@ -310,7 +308,7 @@ class PurpleCysPrototype {
 		update_option( self::CYS_TASK_OPTION, 'no' );
 
 		if ( 'real' !== $this->get_settings()['state'] ) {
-			$this->save_setting( 'state', 'default' );
+			$this->save_setting( 'state', 'real' );
 		}
 
 		$this->deactivate_wizard_extensions();
@@ -452,9 +450,7 @@ class PurpleCysPrototype {
 			'state' => array(
 				'label'   => __( 'Purple state', 'woocommerce' ),
 				'options' => array(
-					/* translators: %s: the real Purple state on this site, for example "installed, not active". */
-					'real'       => sprintf( __( 'Real (%s)', 'woocommerce' ), $this->get_real_state_label() ),
-					'default'    => __( 'Default', 'woocommerce' ),
+					'real'       => __( 'Default (not installed)', 'woocommerce' ),
 					'installing' => __( 'Installing', 'woocommerce' ),
 					'installed'  => __( 'Installed', 'woocommerce' ),
 					'activating' => __( 'Activating', 'woocommerce' ),
@@ -516,24 +512,6 @@ class PurpleCysPrototype {
 			)
 		);
 
-		$theme_options = array(
-			/* translators: %s: whether the current theme has been customized, for example "not customized". */
-			'real'       => sprintf( __( 'Current theme: real (%s)', 'woocommerce' ), $this->is_active_theme_customized() ? __( 'customized', 'woocommerce' ) : __( 'not customized', 'woocommerce' ) ),
-			'unchanged'  => __( 'Current theme: not customized', 'woocommerce' ),
-			'customized' => __( 'Current theme: customized (no Purple step)', 'woocommerce' ),
-		);
-		foreach ( $theme_options as $value => $label ) {
-			$wp_admin_bar->add_node(
-				array(
-					'id'     => $parent . '-wizard-theme-' . $value,
-					'parent' => $parent . '-wizard',
-					'title'  => $label,
-					'href'   => $this->get_action_url( 'wizard_theme', $value ),
-					'meta'   => array( 'class' => 'purple-cys-prototype-option' . ( $settings['wizard_theme'] === $value ? ' is-active' : '' ) ),
-				)
-			);
-		}
-
 		// The Purple step comes right after the extensions step, so open the wizard there.
 		$wp_admin_bar->add_node(
 			array(
@@ -551,47 +529,6 @@ class PurpleCysPrototype {
 				'meta'   => array( 'class' => 'purple-cys-prototype-option' ),
 			)
 		);
-
-		$wp_admin_bar->add_group(
-			array(
-				'id'     => $parent . '-reset-group',
-				'parent' => $parent,
-				'meta'   => array( 'class' => 'ab-sub-secondary purple-cys-prototype-group' ),
-			)
-		);
-
-		$wp_admin_bar->add_node(
-			array(
-				'id'     => $parent . '-reset',
-				'parent' => $parent . '-reset-group',
-				'title'  => __( 'Reset Purple', 'woocommerce' ),
-				'href'   => $this->get_action_url( 'reset' ),
-				'meta'   => array(
-					'class'   => 'purple-cys-prototype-option',
-					'onclick' => sprintf(
-						'return window.confirm(%s);',
-						wp_json_encode( __( 'Switch the site back to Twenty Twenty-Four and delete the Purple theme?', 'woocommerce' ) )
-					),
-				),
-			)
-		);
-	}
-
-	/**
-	 * Short label for the real Purple state on this site.
-	 *
-	 * @return string
-	 */
-	private function get_real_state_label(): string {
-		if ( self::PURPLE_SLUG === get_stylesheet() ) {
-			return __( 'active', 'woocommerce' );
-		}
-
-		if ( wp_get_theme( self::PURPLE_SLUG )->exists() ) {
-			return __( 'installed', 'woocommerce' );
-		}
-
-		return __( 'not installed', 'woocommerce' );
 	}
 
 	/**
@@ -626,66 +563,6 @@ class PurpleCysPrototype {
 	}
 
 	/**
-	 * Whether the setup wizard should treat the current theme as customized, so it skips the Purple step.
-	 * The "Current theme" option in the admin bar menu can override the real answer.
-	 *
-	 * @return bool
-	 */
-	private function is_theme_customized_for_wizard(): bool {
-		$override = $this->get_settings()['wizard_theme'];
-
-		if ( 'real' !== $override ) {
-			return 'customized' === $override;
-		}
-
-		return $this->is_active_theme_customized();
-	}
-
-	/**
-	 * Whether the merchant has changed the active theme: saved Site Editor styles, templates or
-	 * template parts for block themes, or Customizer changes for classic themes.
-	 *
-	 * @return bool
-	 */
-	private function is_active_theme_customized(): bool {
-		$theme = wp_get_theme();
-
-		if ( ! $theme->is_block_theme() ) {
-			$mods = get_theme_mods();
-			unset( $mods['custom_css_post_id'] );
-
-			return '' !== trim( wp_get_custom_css() ) || ! empty( array_filter( (array) $mods ) );
-		}
-
-		$user_styles = \WP_Theme_JSON_Resolver::get_user_data_from_wp_global_styles( $theme );
-		$styles_json = is_array( $user_styles ) && isset( $user_styles['post_content'] ) ? json_decode( (string) $user_styles['post_content'], true ) : null;
-
-		if ( is_array( $styles_json ) && ( ! empty( $styles_json['styles'] ) || ! empty( $styles_json['settings'] ) ) ) {
-			return true;
-		}
-
-		$saved_templates = get_posts(
-			array(
-				'post_type'      => array( 'wp_template', 'wp_template_part' ),
-				'post_status'    => 'publish',
-				'posts_per_page' => 1,
-				'fields'         => 'ids',
-				'no_found_rows'  => true,
-				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Prototype only, one small lookup.
-				'tax_query'      => array(
-					array(
-						'taxonomy' => 'wp_theme',
-						'field'    => 'name',
-						'terms'    => $theme->get_stylesheet(),
-					),
-				),
-			)
-		);
-
-		return ! empty( $saved_templates );
-	}
-
-	/**
 	 * Pass the prototype settings and the real theme state to the client.
 	 *
 	 * @param array $settings Shared settings.
@@ -710,7 +587,6 @@ class PurpleCysPrototype {
 					'screenshot'   => (string) $active_theme->get_screenshot(),
 					'isBlockTheme' => $active_theme->is_block_theme(),
 				),
-				'themeCustomized' => $this->is_theme_customized_for_wizard(),
 				'homeUrl'         => home_url( '/' ),
 				'ajaxUrl'         => admin_url( 'admin-ajax.php' ),
 				'nonce'           => wp_create_nonce( self::NONCE_ACTION ),

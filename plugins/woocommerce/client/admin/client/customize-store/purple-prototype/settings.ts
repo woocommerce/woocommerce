@@ -14,8 +14,6 @@ export type PurplePrototypeSettings = {
 	purpleSlug: string;
 	purpleInstalled: boolean;
 	purpleActive: boolean;
-	// The setup wizard skips its Purple step when the current theme has been customized.
-	themeCustomized: boolean;
 	activeTheme: {
 		name: string;
 		stylesheet: string;
@@ -33,7 +31,6 @@ const DEFAULT_SETTINGS: PurplePrototypeSettings = {
 	purpleSlug: 'purple',
 	purpleInstalled: false,
 	purpleActive: false,
-	themeCustomized: false,
 	activeTheme: {
 		name: 'Twenty Twenty-Four',
 		stylesheet: 'twentytwentyfour',

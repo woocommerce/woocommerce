@@ -30,11 +30,13 @@
 		align-items: stretch;
 	}
 
-	// The text column sets the card height, so the image is positioned out of the flow.
+	// Kept at the previews' 4:3 shape and pinned to the top, so the image is never cropped and
+	// doesn't move when the text below the buttons changes.
 	&__media {
 		position: relative;
-		// Narrow enough that the shorter cards' images don't look stretched next to Purple's.
 		flex: 0 0 360px;
+		align-self: flex-start;
+		aspect-ratio: 4 / 3;
 		border: 1px solid var(--wpds-color-stroke-surface-neutral);
 		border-radius: var(--wpds-border-radius-md);
 		overflow: hidden;
@@ -88,11 +90,6 @@
 		gap: var(--wpds-dimension-gap-sm);
 	}
 
-	// Room for the buttons and a two-line note in every state, so the card and its image crop don't shift while Purple installs or activates.
-	&--purple &__footer {
-		min-height: calc(var(--wpds-dimension-size-lg) + var(--wpds-dimension-gap-sm) + 2 * var(--wpds-typography-line-height-xs));
-	}
-
 	&__description,
 	&__helper {
 		color: var(--wpds-color-foreground-content-neutral-weak);
@@ -102,11 +99,6 @@
 		display: flex;
 		align-items: center;
 		gap: var(--wpds-dimension-gap-md);
-	}
-
-	// The other cards center shorter text in taller space, so this keeps the Purple card from feeling tighter.
-	&--purple &__body {
-		padding-block: var(--wpds-dimension-padding-3xl);
 	}
 
 	// The footer spans the text column, so an error notice can use the full width.
@@ -124,12 +116,6 @@
 	&__notice {
 		align-self: stretch;
 		margin-block-start: var(--wpds-dimension-gap-sm);
-	}
-
-
-	&--marketplace &__content,
-	&--current-theme &__content {
-		min-height: 240px;
 	}
 
 
@@ -158,7 +144,7 @@
 
 		&__media {
 			flex-basis: auto;
-			aspect-ratio: 3 / 2;
+			align-self: stretch;
 		}
 	}
 }
