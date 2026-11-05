@@ -293,9 +293,8 @@ class ProductDelete extends ActionableAbility {
 		unset( $subject );
 
 		return array(
-			'deleted' => true,
-			'id'      => $this->product_id,
-			'status'  => $this->force ? self::STATUS_DELETED : ProductStatus::TRASH,
+			'id'     => $this->product_id,
+			'status' => $this->force ? self::STATUS_DELETED : ProductStatus::TRASH,
 		);
 	}
 
@@ -347,15 +346,11 @@ class ProductDelete extends ActionableAbility {
 		return array(
 			'type'                 => 'object',
 			'properties'           => array(
-				'deleted' => array(
-					'type'        => 'boolean',
-					'description' => __( 'Whether the call succeeded. True for both a trash and a permanent delete; read status to tell them apart.', 'woocommerce' ),
-				),
-				'id'      => array(
+				'id'     => array(
 					'type'        => 'integer',
 					'description' => __( 'ID of the product.', 'woocommerce' ),
 				),
-				'status'  => array(
+				'status' => array(
 					'type'        => 'string',
 					'enum'        => array( ProductStatus::TRASH, self::STATUS_DELETED ),
 					'description' => __( 'What happened to the product. "trash": the product was moved to the trash, and can be restored. "deleted": the product was permanently deleted, and cannot be restored.', 'woocommerce' ),
