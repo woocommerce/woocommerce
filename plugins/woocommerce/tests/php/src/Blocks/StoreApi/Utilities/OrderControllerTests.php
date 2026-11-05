@@ -567,6 +567,7 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 			WC()->cart->empty_cart();
 			WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
 			$order = WC_Helper_Order::create_order();
+			$order->set_payment_method_title( 'Stale Title' );
 
 			$this->sut->update_order_from_cart( $order );
 
