@@ -6,12 +6,41 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
 /**
  * Class WC_Checkout
  */
 class WC_Checkout_Test extends \WC_Unit_Test_Case {
+	use LoggerSpyTrait;
+
+	/**
+	 * The least create_order() needs from a posted classic checkout form, paying by cash on delivery.
+	 */
+	private const COD_POSTED_DATA = array(
+		'payment_method' => WC_Gateway_COD::ID,
+		'billing_email'  => 'customer@example.com',
+	);
+
+	/**
+	 * Shipping fields the get_value tests copy from billing and read back, without the 'shipping_' prefix.
+	 */
+	private const PREFILLED_SHIPPING_FIELDS = array( 'first_name', 'country', 'state', 'postcode', 'city', 'address_1', 'address_2' );
+
+	/**
+	 * A shipping address in New York for Jane, saved to the account.
+	 */
+	private const SAVED_SHIPPING_ADDRESS = array(
+		'shipping_first_name' => 'Jane',
+		'shipping_country'    => 'US',
+		'shipping_state'      => 'NY',
+		'shipping_postcode'   => '11201',
+		'shipping_city'       => 'Brooklyn',
+		'shipping_address_1'  => '2 Shipping Avenue',
+		'shipping_address_2'  => 'Apt 2',
+	);
 
 	/**
 	 * @var object The system under test.
@@ -22,6 +51,16 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @var callable[] Callbacks registering extra checkout fields, all removed on tear down.
 	 */
 	private $extra_field_filters = array();
+
+	/**
+	 * @var WC_Session|null The session the test base installed, put back after a test swapped in a real handler.
+	 */
+	private $original_session;
+
+	/**
+	 * @var WC_Customer|null The customer the test base installed, put back after a test ran a full checkout into a fresh one.
+	 */
+	private $original_session_customer;
 
 	/**
 	 * @var array The customer's location and VAT exemption before each test, restored on tear down.
@@ -86,6 +125,17 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		}
 
 		$this->extra_field_filters = array();
+
+		if ( $this->original_session ) {
+			WC()->session                    = $this->original_session;
+			WC()->customer                   = $this->original_session_customer;
+			$this->original_session          = null;
+			$this->original_session_customer = null;
+		}
+
+		wp_set_current_user( 0 );
+		WC()->session->set( 'customer', null );
+		WC()->customer = new WC_Customer( 0, true );
 
 		$customer = WC()->customer;
 		$customer->set_billing_location( $this->original_customer[0], $this->original_customer[1] );
@@ -861,6 +911,264 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'update_session' keeps only posted shipping rates that are listed for their package key.
+	 */
+	public function test_update_session_ignores_posted_shipping_rates_that_are_not_listed(): void {
+		WC_Helper_Shipping::create_simple_flat_rate( 8 );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
+		$_POST         = array(
+			'billing_first_name' => 'Test',
+			'billing_last_name'  => 'Shopper',
+			'billing_phone'      => '5555555555',
+			'billing_email'      => 'shopper@example.com',
+			'billing_country'    => 'US',
+			'billing_state'      => 'NY',
+			'billing_postcode'   => '10001',
+			'billing_city'       => 'New York',
+			'billing_address_1'  => '1 Main St',
+			'shipping_method'    => array(
+				0       => 'local_pickup',
+				'extra' => 'local_pickup',
+			),
+			'payment_method'     => 'cod',
+		);
+
+		try {
+			$this->sut->update_session( $this->sut->get_posted_data() );
+		} finally {
+			$_POST = $original_post;
+			WC_Helper_Shipping::delete_simple_flat_rate();
+		}
+
+		$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
+
+		$this->assertArrayNotHasKey( 'extra', $chosen_methods, 'A posted choice for a key with no listed rates must not be saved.' );
+		$this->assertSame( 'legacy_flat_rate', $chosen_methods[0], 'A posted rate that is not listed must not replace the listed rate.' );
+	}
+
+	/**
+	 * @testdox 'update_session' taxes the posted shipping rate at the posted address when a pickup rate was chosen before and the item taxes do not change with the address.
+	 */
+	public function test_update_session_taxes_posted_shipping_rate_at_posted_address(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_based_on', 'shipping' );
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_shipping_tax_class', '' );
+
+		foreach ( array( array( 'US', 'CA', '10.0000', 'CA tax' ), array( 'GB', '', '20.0000', 'GB tax' ) ) as list( $country, $state, $rate, $name ) ) {
+			WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country'  => $country,
+					'tax_rate_state'    => $state,
+					'tax_rate'          => $rate,
+					'tax_rate_name'     => $name,
+					'tax_rate_priority' => '1',
+					'tax_rate_compound' => '0',
+					'tax_rate_shipping' => '1',
+					'tax_rate_order'    => '1',
+					'tax_rate_class'    => '',
+				)
+			);
+		}
+
+		$base_zone = new WC_Shipping_Zone();
+		$base_zone->set_zone_name( 'Store base' );
+		$base_zone->save();
+		$base_zone->add_location( 'US:CA', 'state' );
+		$base_zone->save();
+		$pickup_id = $base_zone->add_shipping_method( 'local_pickup' );
+
+		$delivery_zone = new WC_Shipping_Zone();
+		$delivery_zone->set_zone_name( 'Delivery' );
+		$delivery_zone->save();
+		$delivery_zone->add_location( 'GB', 'country' );
+		$delivery_zone->save();
+		$flat_rate_id = $delivery_zone->add_shipping_method( 'flat_rate' );
+		update_option(
+			"woocommerce_flat_rate_{$flat_rate_id}_settings",
+			array(
+				'title'      => 'Flat rate',
+				'tax_status' => 'taxable',
+				'cost'       => '5',
+			)
+		);
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'tax_status' => 'none' ) );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->customer->set_is_vat_exempt( false );
+		WC()->customer->set_billing_location( 'US', 'CA', '90001', 'Los Angeles' );
+		WC()->customer->set_shipping_location( 'US', 'CA', '90001', 'Los Angeles' );
+		WC()->cart->calculate_totals();
+		WC()->session->set( 'chosen_shipping_methods', array( "local_pickup:{$pickup_id}" ) );
+		WC()->cart->calculate_totals();
+
+		$this->assertSame( array( "local_pickup:{$pickup_id}" ), WC()->session->get( 'chosen_shipping_methods' ), 'The pickup rate must be the chosen rate at the store address.' );
+
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
+		$_POST         = array(
+			'billing_first_name' => 'Test',
+			'billing_last_name'  => 'Shopper',
+			'billing_phone'      => '5555555555',
+			'billing_email'      => 'shopper@example.com',
+			'billing_country'    => 'GB',
+			'billing_postcode'   => 'SW1A 1AA',
+			'billing_city'       => 'London',
+			'billing_address_1'  => '1 Main St',
+			'shipping_method'    => array( "flat_rate:{$flat_rate_id}" ),
+			'payment_method'     => 'cod',
+		);
+
+		try {
+			$this->sut->update_session( $this->sut->get_posted_data() );
+		} finally {
+			$_POST = $original_post;
+		}
+
+		$this->assertSame( array( "flat_rate:{$flat_rate_id}" ), WC()->session->get( 'chosen_shipping_methods' ), 'The posted rate must be the chosen rate.' );
+		$this->assertSame( 5.0, (float) WC()->cart->get_shipping_total(), 'The cart must be charged the posted rate.' );
+		$this->assertSame( 1.0, (float) WC()->cart->get_shipping_tax(), 'The shipping tax must be the tax of the posted address.' );
+	}
+
+	/**
+	 * @testdox 'process_customer' keeps the posted shipping rate, taxed at the posted address, when the checkout creates an account.
+	 *
+	 * @testWith ["GB", "", "SW1A 1AA", "London", 5.0, 1.0]
+	 *           ["US", "CA", "90001", "Los Angeles", 7.0, 0.7]
+	 *
+	 * @param string $country               Posted billing country.
+	 * @param string $state                 Posted billing state.
+	 * @param string $postcode              Posted billing postcode.
+	 * @param string $city                  Posted billing city.
+	 * @param float  $expected_shipping     Cost of the posted flat rate.
+	 * @param float  $expected_shipping_tax Tax of the posted flat rate at the posted address.
+	 */
+	public function test_process_customer_keeps_posted_shipping_rate_when_creating_an_account( string $country, string $state, string $postcode, string $city, float $expected_shipping, float $expected_shipping_tax ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_based_on', 'shipping' );
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_shipping_tax_class', '' );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
+
+		foreach ( array( array( 'US', 'CA', '10.0000', 'CA tax' ), array( 'GB', '', '20.0000', 'GB tax' ) ) as list( $rate_country, $rate_state, $rate, $name ) ) {
+			WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country'  => $rate_country,
+					'tax_rate_state'    => $rate_state,
+					'tax_rate'          => $rate,
+					'tax_rate_name'     => $name,
+					'tax_rate_priority' => '1',
+					'tax_rate_compound' => '0',
+					'tax_rate_shipping' => '1',
+					'tax_rate_order'    => '1',
+					'tax_rate_class'    => '',
+				)
+			);
+		}
+
+		$base_zone = new WC_Shipping_Zone();
+		$base_zone->set_zone_name( 'Store base' );
+		$base_zone->save();
+		$base_zone->add_location( 'US:CA', 'state' );
+		$base_zone->save();
+		$pickup_id = $base_zone->add_shipping_method( 'local_pickup' );
+
+		$delivery_zone = new WC_Shipping_Zone();
+		$delivery_zone->set_zone_name( 'Delivery' );
+		$delivery_zone->save();
+		$delivery_zone->add_location( 'GB', 'country' );
+		$delivery_zone->save();
+
+		$flat_rate_ids   = array(
+			'US' => $base_zone->add_shipping_method( 'flat_rate' ),
+			'GB' => $delivery_zone->add_shipping_method( 'flat_rate' ),
+		);
+		$flat_rate_costs = array(
+			'US' => '7',
+			'GB' => '5',
+		);
+		foreach ( $flat_rate_costs as $zone_country => $cost ) {
+			update_option(
+				"woocommerce_flat_rate_{$flat_rate_ids[ $zone_country ]}_settings",
+				array(
+					'title'      => 'Flat rate',
+					'tax_status' => 'taxable',
+					'cost'       => $cost,
+				)
+			);
+		}
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+
+		// Keep the session cookie in $_COOKIE, where the login reads it, instead of sending a header.
+		$cookie_name  = '';
+		$store_cookie = function ( $enabled, $name, $value ) use ( &$cookie_name ) {
+			$cookie_name             = $name;
+			$_COOKIE[ $cookie_name ] = $value;
+			return false;
+		};
+
+		$posted_rate      = "flat_rate:{$flat_rate_ids[ $country ]}";
+		$original_session = WC()->session;
+		$original_post    = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
+
+		try {
+			wp_set_current_user( 0 );
+			add_filter( 'woocommerce_set_cookie_enabled', $store_cookie, 10, 3 );
+			WC()->session = new WC_Session_Handler();
+			WC()->session->init_session_cookie();
+			WC()->session->set_customer_session_cookie( true );
+
+			$product = WC_Helper_Product::create_simple_product( true, array( 'tax_status' => 'none' ) );
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+			WC()->customer->set_is_vat_exempt( false );
+			WC()->customer->set_billing_location( 'US', 'CA', '90001', 'Los Angeles' );
+			WC()->customer->set_shipping_location( 'US', 'CA', '90001', 'Los Angeles' );
+			WC()->cart->calculate_totals();
+			WC()->session->set( 'chosen_shipping_methods', array( "local_pickup:{$pickup_id}" ) );
+			WC()->cart->calculate_totals();
+			WC()->session->save_data();
+
+			$this->assertSame( array( "local_pickup:{$pickup_id}" ), WC()->session->get( 'chosen_shipping_methods' ), 'The pickup rate must be the chosen rate at the store address.' );
+
+			$_POST = array(
+				'billing_first_name' => 'Test',
+				'billing_last_name'  => 'Shopper',
+				'billing_phone'      => '5555555555',
+				'billing_email'      => 'new-shopper@example.com',
+				'billing_country'    => $country,
+				'billing_state'      => $state,
+				'billing_postcode'   => $postcode,
+				'billing_city'       => $city,
+				'billing_address_1'  => '1 Main St',
+				'shipping_method'    => array( $posted_rate ),
+				'payment_method'     => 'cod',
+				'createaccount'      => '1',
+			);
+
+			$data = $this->sut->get_posted_data();
+			$this->sut->update_session( $data );
+			$this->sut->process_customer( $data );
+
+			$this->assertTrue( is_user_logged_in(), 'The checkout must create the account and log the customer in.' );
+			$this->assertSame( array( $posted_rate ), WC()->session->get( 'chosen_shipping_methods' ), 'The posted rate must still be the chosen rate after the login.' );
+			$this->assertSame( $expected_shipping, (float) WC()->cart->get_shipping_total(), 'The cart must be charged the posted rate.' );
+			$this->assertSame( $expected_shipping_tax, (float) WC()->cart->get_shipping_tax(), 'The shipping tax must be the tax of the posted address.' );
+		} finally {
+			remove_filter( 'woocommerce_set_cookie_enabled', $store_cookie, 10 );
+			if ( '' !== $cookie_name ) {
+				unset( $_COOKIE[ $cookie_name ] );
+			}
+			wp_set_current_user( 0 );
+			WC()->session = $original_session;
+			$_POST        = $original_post;
+		}
+	}
+
+	/**
 	 * @testdox 'validate_checkout' still accepts an order when a plugin deliberately turns off shipping calculation.
 	 */
 	public function test_validate_checkout_accepts_order_when_shipping_calculation_is_turned_off_by_filter(): void {
@@ -906,6 +1214,125 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( $sut->get_value( 'billing_country' ) );
 
 		WC()->customer = $orig_customer;
+	}
+
+	/**
+	 * Log in a customer named John with a billing address in California, and make them the session customer.
+	 *
+	 * @param array $saved_shipping Shipping props to save to the account.
+	 */
+	private function log_in_customer( array $saved_shipping ): void {
+		$customer = new WC_Customer( $this->factory->user->create( array( 'role' => 'customer' ) ) );
+		$customer->set_props(
+			array(
+				'billing_first_name' => 'John',
+				'billing_country'    => 'US',
+				'billing_state'      => 'CA',
+				'billing_postcode'   => '94103',
+				'billing_city'       => 'San Francisco',
+				'billing_address_1'  => '1 Billing Street',
+				'billing_address_2'  => 'Apt 1',
+			) + $saved_shipping
+		);
+		$customer->save();
+
+		wp_set_current_user( $customer->get_id() );
+		WC()->customer = new WC_Customer( $customer->get_id(), true );
+	}
+
+	/**
+	 * Copy the billing details over the session's shipping ones, as checkout does while "Ship to a different address?"
+	 * is unticked: checkout.js posts the billing address as the shipping one on every update, and submitting the form
+	 * copies the name too, even when validation then fails.
+	 */
+	private function copy_billing_to_shipping_in_session(): void {
+		foreach ( self::PREFILLED_SHIPPING_FIELDS as $field ) {
+			WC()->customer->{"set_shipping_$field"}( WC()->customer->{"get_billing_$field"}( 'edit' ) );
+		}
+
+		WC()->customer->save();
+	}
+
+	/**
+	 * Get the values checkout prefills the shipping fields with.
+	 *
+	 * @return array Values keyed by field name without the 'shipping_' prefix.
+	 */
+	private function get_shipping_prefill(): array {
+		$prefill = array();
+
+		foreach ( self::PREFILLED_SHIPPING_FIELDS as $field ) {
+			$prefill[ $field ] = $this->sut->get_value( "shipping_$field" );
+		}
+
+		return $prefill;
+	}
+
+	/**
+	 * @testdox 'get_value' prefills the saved shipping address when the session only holds the billing copy.
+	 */
+	public function test_get_value_prefills_saved_shipping_address_over_billing_copy(): void {
+		$this->log_in_customer( self::SAVED_SHIPPING_ADDRESS );
+		WC()->customer->set_billing_company( 'Session Company' );
+		$this->copy_billing_to_shipping_in_session();
+
+		$this->assertSame(
+			array(
+				'first_name' => 'Jane',
+				'country'    => 'US',
+				'state'      => 'NY',
+				'postcode'   => '11201',
+				'city'       => 'Brooklyn',
+				'address_1'  => '2 Shipping Avenue',
+				'address_2'  => 'Apt 2',
+			),
+			$this->get_shipping_prefill()
+		);
+		$this->assertSame( 'Session Company', $this->sut->get_value( 'billing_company' ), 'Billing fields should still come from the session.' );
+	}
+
+	/**
+	 * @testdox 'get_value' keeps a shipping address the customer entered during the session.
+	 */
+	public function test_get_value_keeps_shipping_address_entered_in_session(): void {
+		$this->log_in_customer( self::SAVED_SHIPPING_ADDRESS );
+		// What the cart shipping calculator stores for a customer with a billing name. It clears the street lines.
+		WC()->customer->set_shipping_location( 'US', 'WA', '98101', 'Seattle' );
+		WC()->customer->save();
+
+		$this->assertSame(
+			array(
+				'first_name' => 'Jane',
+				'country'    => 'US',
+				'state'      => 'WA',
+				'postcode'   => '98101',
+				'city'       => 'Seattle',
+				'address_1'  => null,
+				'address_2'  => null,
+			),
+			$this->get_shipping_prefill()
+		);
+	}
+
+	/**
+	 * @testdox 'get_value' keeps the billing copy when the customer has no saved shipping address.
+	 */
+	public function test_get_value_keeps_billing_copy_without_saved_shipping_address(): void {
+		$this->log_in_customer( array( 'shipping_first_name' => 'Jane' ) );
+		$this->copy_billing_to_shipping_in_session();
+
+		$this->assertSame(
+			array(
+				'first_name' => 'John',
+				'country'    => 'US',
+				'state'      => 'CA',
+				'postcode'   => '94103',
+				'city'       => 'San Francisco',
+				'address_1'  => '1 Billing Street',
+				'address_2'  => 'Apt 1',
+			),
+			$this->get_shipping_prefill()
+		);
 	}
 
 	/**
@@ -1939,6 +2366,525 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( WP_Error::class, $result, 'create_order() should return a WP_Error when line items were not persisted.' );
 		$this->assertSame( 'checkout-error', $result->get_error_code(), 'Error code should come from the checkout try/catch path.' );
 		$this->assertStringContainsString( 'Order items could not be saved', $result->get_error_message(), 'Error message should surface the defense-in-depth guard message.' );
+	}
+
+	/**
+	 * @testdox create_order() decides a repeat submit by the session order's status: "$status" leads to "$expected".
+	 *
+	 * @testWith ["processing", "refuse"]
+	 *           ["completed", "refuse"]
+	 *           ["on-hold", "refuse"]
+	 *           ["pending", "resume"]
+	 *           ["failed", "resume"]
+	 *           ["cancelled", "new-order"]
+	 *           ["refunded", "new-order"]
+	 *
+	 * @param string $status   Status the session order is in when the form is submitted again.
+	 * @param string $expected What create_order() does with it: refuse, resume or new-order.
+	 */
+	public function test_create_order_decides_a_repeat_submit_by_the_session_order_status( string $status, string $expected ): void {
+		$first_order_id = $this->leave_session_order_in_status( $status );
+
+		$result = $this->sut->create_order( self::COD_POSTED_DATA );
+
+		switch ( $expected ) {
+			case 'refuse':
+				$this->assertWPError( $result, 'A repeat submit for an order that went through must not build a new order.' );
+				$this->assertSame( 'checkout-order-already-placed', $result->get_error_code() );
+				$this->assertSame( array( 'order_id' => $first_order_id ), $result->get_error_data() );
+				$this->assertSame( array( $first_order_id ), $this->order_ids(), 'No second order should exist.' );
+				break;
+			case 'resume':
+				$this->assertSame( $first_order_id, $result, 'The order awaiting payment should be resumed.' );
+				break;
+			case 'new-order':
+				$this->assertNotWPError( $result );
+				$this->assertNotSame( $first_order_id, $result, 'A new order should be built.' );
+				break;
+			default:
+				$this->fail( "Unknown expectation '{$expected}'." );
+		}
+	}
+
+	/**
+	 * @testdox create_order() does not treat a status the site declares payable as a repeat submit.
+	 */
+	public function test_create_order_does_not_treat_a_site_declared_payable_status_as_a_repeat_submit(): void {
+		add_filter(
+			'woocommerce_valid_order_statuses_for_payment',
+			function ( $statuses ) {
+				$statuses[] = OrderStatus::ON_HOLD;
+
+				return $statuses;
+			}
+		);
+		$this->leave_session_order_in_status( OrderStatus::ON_HOLD );
+
+		$result = $this->sut->create_order( self::COD_POSTED_DATA );
+
+		$this->assertNotWPError( $result, 'An on-hold order the site still lets the shopper pay for is not a repeat submit.' );
+	}
+
+	/**
+	 * Leave the session the way a gateway that died right after its status change does: the order it points at
+	 * has the cart's hash and the given status, and the cart was never emptied.
+	 *
+	 * @param string $status Status to put the order in.
+	 * @return int The order ID.
+	 */
+	private function leave_session_order_in_status( string $status ): int {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->calculate_totals();
+
+		$order_id = $this->sut->create_order( self::COD_POSTED_DATA );
+		$this->assertNotWPError( $order_id );
+		WC()->session->set( 'order_awaiting_payment', $order_id );
+		wc_get_order( $order_id )->update_status( $status );
+
+		return $order_id;
+	}
+
+	/**
+	 * @testdox process_checkout() answers a repeat submit with the order-received redirect when the session order already moved past payment.
+	 */
+	public function test_process_checkout_answers_a_repeat_submit_with_the_order_received_redirect(): void {
+		$this->use_real_session();
+		$this->make_gateway_available( WC_Gateway_COD::ID );
+		// What a failure the checkout could not recover leaves behind: the session order moved on, the cart was never emptied.
+		$order = wc_get_order( $this->leave_session_order_in_status( OrderStatus::PROCESSING ) );
+		$this->post_checkout_form( WC_Gateway_COD::ID );
+
+		$response = $this->submit_checkout_over_ajax();
+
+		$this->assertSame( 'success', $response['result'] ?? null, wp_json_encode( $response ) );
+		$this->assertSame( $order->get_checkout_order_received_url(), $response['redirect'] ?? null );
+		$this->assertSame( array( $order->get_id() ), $this->order_ids(), 'The retry must not build a second order.' );
+		$this->assertStringContainsString( 'No second order was created', $this->latest_note( $order ), 'The merchant should see the repeat submit on the order.' );
+	}
+
+	/**
+	 * @testdox process_checkout() answers a repeat submit after a card gateway's payment_complete() cleared order_awaiting_payment and the request died.
+	 */
+	public function test_process_checkout_answers_a_repeat_submit_after_payment_complete_cleared_the_session(): void {
+		$this->use_real_session();
+		$this->make_gateway_available( WC_Gateway_COD::ID );
+		// What an exit inside a card gateway's status change leaves: the order paid, the older pointer cleared, the cart full.
+		$order = wc_get_order( $this->leave_session_order_in_status( OrderStatus::PENDING ) );
+		PaymentRecovery::remember_order_sent_to_gateway( $order->get_id() );
+		$order->payment_complete( 'txn_died_in_transition' );
+		$this->post_checkout_form( WC_Gateway_COD::ID );
+
+		$response = $this->submit_checkout_over_ajax();
+
+		$this->assertSame( 'success', $response['result'] ?? null, wp_json_encode( $response ) );
+		$this->assertSame( $order->get_checkout_order_received_url(), $response['redirect'] ?? null );
+		$this->assertSame( array( $order->get_id() ), $this->order_ids(), 'The retry must not build and charge a second order.' );
+	}
+
+	/**
+	 * @testdox process_checkout() answers a repeat submit before the stock check, when the first order took the last unit.
+	 */
+	public function test_process_checkout_answers_a_repeat_submit_before_the_stock_check(): void {
+		$this->use_real_session();
+		$this->make_gateway_available( WC_Gateway_COD::ID );
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'virtual'        => true,
+				'manage_stock'   => true,
+				'stock_quantity' => 1,
+			)
+		);
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->calculate_totals();
+		$order = wc_get_order( $this->sut->create_order( self::COD_POSTED_DATA ) );
+		PaymentRecovery::remember_order_sent_to_gateway( $order->get_id() );
+		$order->payment_complete( 'txn_took_the_last_unit' );
+		// The retry is a new request, so its cart holds the product as it is now: out of stock.
+		WC()->cart->get_cart_from_session();
+		$this->post_checkout_form( WC_Gateway_COD::ID );
+
+		$response = $this->submit_checkout_over_ajax();
+
+		$this->assertSame( 0, wc_get_product( $product->get_id() )->get_stock_quantity(), 'The first order took the last unit.' );
+		$this->assertSame( 'success', $response['result'] ?? null, 'The shopper should be sent to the order, not told the product sold out: ' . wp_json_encode( $response ) );
+		$this->assertSame( $order->get_checkout_order_received_url(), $response['redirect'] ?? null );
+	}
+
+	/**
+	 * @testdox process_checkout() answers a repeat submit for a free order whose request died after it moved past payment.
+	 */
+	public function test_process_checkout_answers_a_repeat_submit_for_a_free_order(): void {
+		$this->use_real_session();
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'virtual'       => true,
+				'regular_price' => 0,
+				'price'         => 0,
+			)
+		);
+		WC()->cart->add_to_cart( $product->get_id() );
+		$this->post_checkout_form( '' );
+		// A free order skips the gateway, but payment_complete() still runs its status change; a plugin dying there is the reported shape.
+		$die_in_transition = function () {
+			throw new Error( 'Call to a member function push_order() on null' );
+		};
+		add_action( 'woocommerce_order_status_processing', $die_in_transition );
+
+		try {
+			$this->submit_checkout_over_ajax();
+			$this->fail( 'A free order is not recovered on the first attempt, so the Error should escape.' );
+		} catch ( Error $e ) {
+			$this->assertSame( 'Call to a member function push_order() on null', $e->getMessage() );
+		}
+		remove_action( 'woocommerce_order_status_processing', $die_in_transition );
+		$order = wc_get_order( $this->order_ids()[0] ?? 0 );
+		$this->post_checkout_form( '' );
+
+		$response = $this->submit_checkout_over_ajax();
+
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertTrue( $order->has_status( OrderStatus::PROCESSING ), 'The first submit completed the free order before the request died.' );
+		$this->assertSame( 'success', $response['result'] ?? null, wp_json_encode( $response ) );
+		$this->assertSame( $order->get_checkout_order_received_url(), $response['redirect'] ?? null );
+		$this->assertSame( array( $order->get_id() ), $this->order_ids(), 'The retry must not build a second free order.' );
+	}
+
+	/**
+	 * @testdox process_checkout() recovers an order the gateway moved on when an Error is raised inside the status transition.
+	 */
+	public function test_process_checkout_recovers_an_order_the_gateway_moved_on_when_the_transition_throws(): void {
+		$this->use_real_session();
+		$this->make_gateway_available( WC_Gateway_BACS::ID );
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) )->get_id() );
+		$this->post_checkout_form( WC_Gateway_BACS::ID );
+		// BACS moves the order on-hold and only then empties the cart; a plugin dying in between is the reported shape.
+		add_action(
+			'woocommerce_order_status_on-hold',
+			function () {
+				throw new Error( 'Call to a member function push_order() on null' );
+			}
+		);
+
+		$response = $this->submit_checkout_over_ajax();
+
+		$order = wc_get_order( $this->order_ids()[0] ?? 0 );
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'success', $response['result'] ?? null, wp_json_encode( $response ) );
+		$this->assertSame( $order->get_checkout_order_received_url(), $response['redirect'] ?? null );
+		$this->assertTrue( $order->has_status( OrderStatus::ON_HOLD ), 'The status the gateway set must stand.' );
+		$this->assertTrue( WC()->cart->is_empty(), 'The cart the gateway never got to empty should be emptied.' );
+		$this->assertStringContainsString( 'push_order() on null', $this->latest_note( $order ), 'The merchant should see the failure on the order.' );
+		$this->assertLogged( 'error', 'push_order() on null' );
+		$this->assertLogged( 'error', __FILE__ );
+	}
+
+	/**
+	 * @testdox process_checkout() recovers when a gateway that calls payment_complete() dies inside the resulting status transition.
+	 */
+	public function test_process_checkout_recovers_when_a_payment_complete_gateway_dies_in_the_transition(): void {
+		$this->use_real_session();
+		$this->make_gateway_available(
+			$this->create_gateway(
+				'card_like',
+				function ( WC_Order $order ) {
+					$order->payment_complete( 'txn_1' );
+				}
+			)
+		);
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) )->get_id() );
+		$this->post_checkout_form( 'card_like' );
+		add_action(
+			'woocommerce_order_status_processing',
+			function () {
+				throw new Error( 'Call to a member function push_order() on null' );
+			}
+		);
+
+		$response = $this->submit_checkout_over_ajax();
+
+		$order = wc_get_order( $this->order_ids()[0] ?? 0 );
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'success', $response['result'] ?? null, wp_json_encode( $response ) );
+		$this->assertSame( $order->get_checkout_order_received_url(), $response['redirect'] ?? null );
+		$this->assertTrue( $order->has_status( OrderStatus::PROCESSING ) );
+		$this->assertTrue( WC()->cart->is_empty() );
+	}
+
+	/**
+	 * @testdox process_checkout() recovers when an Exception follows a successful payment result.
+	 */
+	public function test_process_checkout_recovers_when_an_exception_follows_payment(): void {
+		$this->use_real_session();
+		$this->make_gateway_available( WC_Gateway_BACS::ID );
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) )->get_id() );
+		$this->post_checkout_form( WC_Gateway_BACS::ID );
+		add_filter(
+			'woocommerce_payment_successful_result',
+			function () {
+				throw new Exception( 'Analytics integration timed out' );
+			}
+		);
+
+		$response = $this->submit_checkout_over_ajax();
+
+		$order = wc_get_order( $this->order_ids()[0] ?? 0 );
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'success', $response['result'] ?? null, wp_json_encode( $response ) );
+		$this->assertTrue( $order->has_status( OrderStatus::ON_HOLD ) );
+		$this->assertStringContainsString( 'Analytics integration timed out', $this->latest_note( $order ) );
+	}
+
+	/**
+	 * @testdox process_checkout() lets an Error raised before the gateway moved the order on escape unchanged.
+	 */
+	public function test_process_checkout_lets_an_error_raised_before_payment_escape(): void {
+		$this->use_real_session();
+		$this->make_gateway_available(
+			$this->create_gateway(
+				'exploding',
+				function () {
+					throw new Error( 'Gateway SDK not loaded' );
+				}
+			)
+		);
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) )->get_id() );
+		$this->post_checkout_form( 'exploding' );
+
+		try {
+			$this->submit_checkout_over_ajax();
+			$this->fail( 'An Error raised before payment should still reach the fatal handler.' );
+		} catch ( Error $e ) {
+			$this->assertSame( 'Gateway SDK not loaded', $e->getMessage() );
+		}
+
+		$order = wc_get_order( $this->order_ids()[0] ?? 0 );
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertTrue( $order->has_status( OrderStatus::PENDING ), 'Nothing moved the order on, so nothing should be recovered.' );
+		$this->assertFalse( WC()->cart->is_empty() );
+		$this->assertStringNotContainsString( 'after payment', $this->latest_note( $order ) );
+	}
+
+	/**
+	 * @testdox process_checkout() reports an Exception raised before the gateway moved the order on as a failure, as before.
+	 */
+	public function test_process_checkout_reports_an_exception_raised_before_payment_as_a_failure(): void {
+		$this->use_real_session();
+		$this->make_gateway_available(
+			$this->create_gateway(
+				'declining',
+				function () {
+					throw new Exception( 'Your card was declined.' );
+				}
+			)
+		);
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) )->get_id() );
+		$this->post_checkout_form( 'declining' );
+
+		$response = $this->submit_checkout_over_ajax();
+
+		$order = wc_get_order( $this->order_ids()[0] ?? 0 );
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'failure', $response['result'] ?? null, wp_json_encode( $response ) );
+		$this->assertStringContainsString( 'Your card was declined.', $response['messages'] ?? '' );
+		$this->assertTrue( $order->has_status( OrderStatus::PENDING ) );
+		$this->assertFalse( WC()->cart->is_empty(), 'The shopper should be able to try again with the same cart.' );
+	}
+
+	/**
+	 * @testdox process_checkout() remembers the order it hands to the gateway before the gateway runs.
+	 */
+	public function test_process_checkout_remembers_the_order_sent_to_gateway(): void {
+		$this->use_real_session();
+
+		$remembered_during_payment = null;
+		$this->make_gateway_available(
+			$this->create_gateway(
+				'recording',
+				function () use ( &$remembered_during_payment ) {
+					$remembered_during_payment = WC()->session->get( 'order_sent_to_gateway' );
+					throw new Exception( 'Stop after recording.' );
+				}
+			)
+		);
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) )->get_id() );
+		$this->post_checkout_form( 'recording' );
+
+		$this->submit_checkout_over_ajax();
+
+		$this->assertSame( $this->order_ids()[0] ?? null, $remembered_during_payment, 'The gateway should run with its order already remembered, so a request that dies inside it can be traced back.' );
+	}
+
+	/**
+	 * IDs of every order in the database, oldest first.
+	 *
+	 * @return int[]
+	 */
+	private function order_ids(): array {
+		return wc_get_orders(
+			array(
+				'return'  => 'ids',
+				'limit'   => -1,
+				'orderby' => 'ID',
+				'order'   => 'ASC',
+			)
+		);
+	}
+
+	/**
+	 * Content of the most recent note on an order, or an empty string.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return string
+	 */
+	private function latest_note( WC_Order $order ): string {
+		$notes = wc_get_order_notes(
+			array(
+				'order_id' => $order->get_id(),
+				'limit'    => 1,
+			)
+		);
+
+		return $notes[0]->content ?? '';
+	}
+
+	/**
+	 * Build a throwaway gateway whose process_payment() runs the given callback with the order, then reports success.
+	 *
+	 * @param string   $id              Gateway ID.
+	 * @param callable $process_payment Called with the WC_Order; throw from it to simulate a gateway failure.
+	 * @return WC_Payment_Gateway
+	 */
+	private function create_gateway( string $id, callable $process_payment ): WC_Payment_Gateway {
+		// phpcs:disable Generic.CodeAnalysis, Squiz.Commenting
+		return new class( $id, $process_payment ) extends WC_Payment_Gateway {
+			private $process_payment_callback;
+
+			public function __construct( string $id, callable $process_payment ) {
+				$this->id                       = $id;
+				$this->title                    = $id;
+				$this->enabled                  = 'yes';
+				$this->process_payment_callback = $process_payment;
+			}
+
+			public function process_payment( $order_id ) {
+				$order = wc_get_order( $order_id );
+				( $this->process_payment_callback )( $order );
+
+				return array(
+					'result'   => 'success',
+					'redirect' => $this->get_return_url( $order ),
+				);
+			}
+		};
+		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
+	}
+
+	/**
+	 * Swap the test base's in-memory session for a real handler, which is what process_order_payment() needs (it calls save_data()).
+	 *
+	 * The customer is swapped too, because a full checkout writes the posted address into it and nothing else resets that singleton.
+	 */
+	private function use_real_session(): void {
+		$this->original_session          = WC()->session;
+		$this->original_session_customer = WC()->customer;
+
+		WC()->session = new WC_Session_Handler();
+		WC()->session->init();
+		WC()->session->set_customer_session_cookie( true );
+		WC()->customer = new WC_Customer( 0, true );
+	}
+
+	/**
+	 * Make a gateway available at checkout without touching stored settings: a registered one by ID, or an instance.
+	 *
+	 * @param string|WC_Payment_Gateway $gateway Gateway ID or gateway object.
+	 */
+	private function make_gateway_available( $gateway ): void {
+		$gateway = $gateway instanceof WC_Payment_Gateway ? $gateway : WC()->payment_gateways()->payment_gateways()[ $gateway ];
+
+		add_filter(
+			'woocommerce_available_payment_gateways',
+			function ( $gateways ) use ( $gateway ) {
+				$gateways[ $gateway->id ] = $gateway;
+
+				return $gateways;
+			}
+		);
+	}
+
+	/**
+	 * Fill the request the way the classic checkout form posts it, for a guest buying a virtual product.
+	 *
+	 * Call it after use_real_session(): the nonce takes its logged-out user ID from the session, so one created
+	 * before the swap fails verification after it.
+	 *
+	 * @param string $payment_method Gateway ID.
+	 */
+	private function post_checkout_form( string $payment_method ): void {
+		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
+
+		$_POST    = array(
+			'woocommerce-process-checkout-nonce' => wp_create_nonce( 'woocommerce-process_checkout' ),
+			'payment_method'                     => $payment_method,
+			'billing_first_name'                 => 'Ada',
+			'billing_last_name'                  => 'Lovelace',
+			'billing_address_1'                  => '1 Analytical Engine Way',
+			'billing_city'                       => 'Los Angeles',
+			'billing_state'                      => 'CA',
+			'billing_postcode'                   => '90210',
+			'billing_country'                    => 'US',
+			'billing_email'                      => 'customer@example.com',
+			'billing_phone'                      => '555-555-5555',
+		);
+		$_REQUEST = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test fixture; the request carries the nonce created just above.
+	}
+
+	/**
+	 * Run process_checkout() as the checkout JS does, returning the JSON it answers with.
+	 *
+	 * Anything other than the wp_send_json() exit, such as an Error a hook raises, propagates to the caller.
+	 * The exit is an Error rather than an Exception because process_checkout() catches Exception itself.
+	 *
+	 * Cannot drive a gateway that returns success: its exit happens inside process_order_payment(), so
+	 * process_checkout() catches it and recovers it as a post-payment failure, and two JSON bodies come back.
+	 * Make the gateway throw before that point, or take the repeat-submit path, which exits outside the catch.
+	 *
+	 * @return array Decoded JSON response.
+	 */
+	private function submit_checkout_over_ajax(): array {
+		$throw_instead_of_dying = function () {
+			return function () {
+				throw new Error( 'wp_die' );
+			};
+		};
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		add_filter( 'wp_die_ajax_handler', $throw_instead_of_dying );
+		$outer_buffer_level = ob_get_level();
+		ob_start();
+
+		try {
+			$this->sut->process_checkout();
+			$this->fail( 'process_checkout() should end the request with wp_send_json().' );
+		} catch ( Error $e ) {
+			if ( 'wp_die' !== $e->getMessage() ) {
+				throw $e;
+			}
+			$output = (string) ob_get_clean();
+		} finally {
+			while ( ob_get_level() > $outer_buffer_level ) {
+				ob_end_clean();
+			}
+			remove_filter( 'wp_doing_ajax', '__return_true' );
+			remove_filter( 'wp_die_ajax_handler', $throw_instead_of_dying );
+		}
+
+		$decoded = json_decode( $output, true );
+		$this->assertIsArray( $decoded, $output );
+
+		return $decoded;
 	}
 
 	/**

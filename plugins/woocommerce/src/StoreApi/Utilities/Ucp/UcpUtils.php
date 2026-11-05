@@ -133,6 +133,50 @@ class UcpUtils {
 	}
 
 	/**
+	 * Refuse a request that brought a body or form fields under anything other than a JSON content type.
+	 *
+	 * A UCP request is a JSON document, so a form or query payload is never read in its
+	 * place. A bare request, such as a `cancel`, carries nothing and is not refused.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @param string           $capability One of the CAPABILITY_* constants.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @return \WP_REST_Response|null The 415 refusal, or null when the request may be read.
+	 */
+	public static function refuse_non_json_payload( \WP_REST_Request $request, string $capability ): ?\WP_REST_Response {
+		if ( $request->is_json_content_type() ) {
+			return null;
+		}
+
+		if ( '' === trim( (string) $request->get_body() ) && array() === $request->get_body_params() ) {
+			return null;
+		}
+
+		return self::error_response( $capability, 'VALIDATION_ERROR', __( 'UCP requests must be sent as application/json.', 'woocommerce' ), 'recoverable', 415 );
+	}
+
+	/**
+	 * Read a parameter from the JSON document alone.
+	 *
+	 * `get_param()` would also resolve it from the form body or the query string. UCP defines
+	 * the request as the document, so nothing carried elsewhere is allowed to act.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @param string           $name Parameter name.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @return mixed|null The value, or null when the document has none.
+	 */
+	public static function json_param( \WP_REST_Request $request, string $name ) {
+		$params = $request->get_json_params();
+
+		return is_array( $params ) && array_key_exists( $name, $params ) ? $params[ $name ] : null;
+	}
+
+	/**
 	 * Translate a cart error code into the UCP code closest to it.
 	 *
 	 * The cart names more reasons than UCP does, so the ones an agent can act on

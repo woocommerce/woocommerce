@@ -476,6 +476,38 @@ class UcpCart extends ControllerTestCase {
 	}
 
 	/**
+	 * Line items outside the JSON document do not act.
+	 */
+	public function test_line_items_in_the_query_string_are_ignored(): void {
+		$request = new \WP_REST_Request( 'POST', '/wc/ucp/v1/carts' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_header( 'Idempotency-Key', wp_generate_uuid4() );
+		$request->set_query_params( array( 'line_items' => array( $this->line_item( 0, 2 ) ) ) );
+		$request->set_body( '{}' );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'success', $response->get_data()['ucp']['status'] );
+		$this->assertSame( array(), $response->get_data()['line_items'] );
+	}
+
+	/**
+	 * A payload under any other content type is refused rather than read.
+	 */
+	public function test_a_non_json_payload_is_refused(): void {
+		$request = new \WP_REST_Request( 'POST', '/wc/ucp/v1/carts' );
+		$request->set_header( 'content-type', 'application/x-www-form-urlencoded' );
+		$request->set_body_params( array( 'line_items' => array( $this->line_item( 0, 2 ) ) ) );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 415, $response->get_status() );
+		$this->assertSame( 'error', $response->get_data()['ucp']['status'] );
+		$this->assertSame( 'VALIDATION_ERROR', $response->get_data()['messages'][0]['code'] );
+	}
+
+	/**
 	 * A cart reads back with the contents it was created with.
 	 */
 	public function test_get_cart_returns_the_same_contents(): void {

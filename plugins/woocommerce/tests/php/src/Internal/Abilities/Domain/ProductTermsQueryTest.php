@@ -9,6 +9,8 @@ namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
+use Automattic\WooCommerce\Abilities\Ability;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 
 /**
@@ -85,6 +87,86 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 			$this->assertSame( $value, $result['terms'][0][ $key ], $key );
 		}
 		$this->assertArrayNotHasKey( 'image', $result['terms'][0] );
+	}
+
+	/**
+	 * @testdox Should return term names with HTML entities decoded.
+	 */
+	public function test_decodes_term_names(): void {
+		$id = self::factory()->term->create(
+			array(
+				'taxonomy' => 'product_cat',
+				'name'     => 'Tools & Hardware',
+			)
+		);
+
+		$ability = new \WP_Ability( ProductTermsQuery::get_name(), ProductTermsQuery::get_registration_args() );
+		$result  = $ability->execute(
+			array(
+				'taxonomy' => 'product_cat',
+				'include'  => array( $id ),
+			)
+		);
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 'Tools & Hardware', $result['terms'][0]['name'] );
+	}
+
+	/**
+	 * @testdox Should find a term whose name holds an entity when searching for "$search".
+	 * @testWith ["Tools & Hardware"]
+	 *           ["Tools &amp; Hardware"]
+	 *           ["& Hard"]
+	 *           ["Hardware"]
+	 * @param string $search Search input.
+	 */
+	public function test_search_matches_names_with_entities( string $search ): void {
+		$id = self::factory()->term->create(
+			array(
+				'taxonomy' => 'product_cat',
+				'name'     => 'Tools & Hardware',
+			)
+		);
+
+		$this->assertSame( array( $id ), array_column( $this->search_categories( $search ), 'id' ) );
+	}
+
+	/**
+	 * @testdox Should not encode an already encoded search twice.
+	 */
+	public function test_search_does_not_double_encode(): void {
+		self::factory()->term->create(
+			array(
+				'taxonomy' => 'product_cat',
+				'name'     => 'Tools & Hardware',
+			)
+		);
+
+		$this->assertSame( array(), $this->search_categories( 'Tools &amp;amp; Hardware' ) );
+	}
+
+	/**
+	 * @testdox Should return the same term name as products-query.
+	 */
+	public function test_term_name_matches_products_query(): void {
+		$id      = self::factory()->term->create(
+			array(
+				'taxonomy' => 'product_cat',
+				'name'     => 'Tools & Hardware',
+			)
+		);
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_category_ids( array( $id ) );
+		$product->save();
+
+		$products_query = new \WP_Ability( ProductsQuery::get_name(), ProductsQuery::get_registration_args() );
+		$products       = $products_query->execute( array( 'id' => $product->get_id() ) );
+
+		$this->assertIsArray( $products );
+		$this->assertSame(
+			$products['products'][0]['categories'][0]['name'],
+			$this->search_categories( 'Hardware' )[0]['name']
+		);
 	}
 
 	/**
@@ -220,7 +302,7 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should parse boolean strings from older Abilities REST controllers.
+	 * @testdox Should read a boolean string on hide_empty as a boolean.
 	 * @testWith [false, 1]
 	 *           ["false", 1]
 	 *           [true, 0]
@@ -229,8 +311,9 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 	 * @param int         $expected_count Expected number of empty terms.
 	 */
 	public function test_hide_empty_boolean_input( $hide_empty, int $expected_count ): void {
-		$id     = self::factory()->term->create( array( 'taxonomy' => 'product_tag' ) );
-		$result = ProductTermsQuery::execute(
+		$id      = self::factory()->term->create( array( 'taxonomy' => 'product_tag' ) );
+		$ability = new Ability( ProductTermsQuery::get_name(), ProductTermsQuery::get_registration_args() );
+		$result  = $ability->execute(
 			array(
 				'taxonomy'   => 'product_tag',
 				'include'    => array( $id ),
@@ -239,6 +322,23 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 		);
 		$this->assertCount( $expected_count, $result['terms'] );
 		$this->assertSame( $expected_count, $result['total'] );
+	}
+
+	/**
+	 * @testdox Should publish the slug filter as a list, so the input schema has one type.
+	 */
+	public function test_slug_filter_is_a_list(): void {
+		$ability = new \WP_Ability( ProductTermsQuery::get_name(), ProductTermsQuery::get_registration_args() );
+
+		$this->assertSame( 'array', $ability->get_input_schema()['properties']['slug']['type'] );
+		$this->assertTrue(
+			$ability->validate_input(
+				array(
+					'taxonomy' => 'product_tag',
+					'slug'     => array( 'beta' ),
+				)
+			)
+		);
 	}
 
 	/**
@@ -265,10 +365,18 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 			array(
 				'taxonomy' => 'product_tag',
 				'product'  => $product->get_id(),
-				'slug'     => 'beta',
+				'slug'     => array( 'beta' ),
 			)
 		);
 		$this->assertSame( array( $second ), array_column( $result['terms'], 'id' ) );
+		$result = ProductTermsQuery::execute(
+			array(
+				'taxonomy' => 'product_tag',
+				'product'  => $product->get_id(),
+				'slug'     => array(),
+			)
+		);
+		$this->assertSame( array( $first, $second ), array_column( $result['terms'], 'id' ) );
 		$result = ProductTermsQuery::execute(
 			array(
 				'taxonomy' => 'product_tag',
@@ -277,6 +385,13 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 			)
 		);
 		$this->assertSame( array( $second ), array_column( $result['terms'], 'id' ) );
+		$result = ProductTermsQuery::execute(
+			array(
+				'taxonomy' => 'product_tag',
+				'slug'     => 'alpha,beta',
+			)
+		);
+		$this->assertSame( array( $first, $second ), array_column( $result['terms'], 'id' ) );
 		$result = ProductTermsQuery::execute(
 			array(
 				'taxonomy' => 'product_tag',
@@ -346,6 +461,33 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return the image title as stored, without texturized quotes and dashes.
+	 */
+	public function test_returns_plain_image_name(): void {
+		$id       = self::factory()->term->create( array( 'taxonomy' => 'product_cat' ) );
+		$image_id = self::factory()->post->create(
+			array(
+				'post_type'      => 'attachment',
+				'post_title'     => 'Bob\'s mug -- "x"',
+				'post_mime_type' => 'image/jpeg',
+				'guid'           => 'https://example.test/mug.jpg',
+			)
+		);
+		update_term_meta( $id, 'thumbnail_id', $image_id );
+
+		$ability = new \WP_Ability( ProductTermsQuery::get_name(), ProductTermsQuery::get_registration_args() );
+		$result  = $ability->execute(
+			array(
+				'taxonomy' => 'product_cat',
+				'include'  => array( $id ),
+			)
+		);
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 'Bob\'s mug -- "x"', $result['terms'][0]['image']['name'] );
+	}
+
+	/**
 	 * @testdox Should enforce read permissions and validate taxonomy and pagination through the ability.
 	 */
 	public function test_permissions_and_validation(): void {
@@ -408,14 +550,14 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 			static function () {
 				ExtensibleAbilities::register_field(
 					array(
-						'resource'     => 'product_term',
-						'namespace'    => 'test-ext',
-						'field'        => 'taxonomy',
-						'schema'       => array(
+						'resource'      => 'product_term',
+						'namespace'     => 'test-ext',
+						'field'         => 'taxonomy',
+						'output_schema' => array(
 							'type'  => 'string',
 							'title' => 'Taxonomy',
 						),
-						'get_callback' => static function ( \WP_Term $term ) {
+						'get_callback'  => static function ( \WP_Term $term ) {
 								return $term->taxonomy;
 						},
 					)
@@ -434,5 +576,24 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
 		$this->assertSame( $baseline, ProductTermsQuery::execute( $input ) );
 		$this->assertSame( $schema, ProductTermsQuery::get_registration_args()['output_schema'] );
+	}
+
+	/**
+	 * Product categories the ability returns for a search.
+	 *
+	 * @param string $search Search input.
+	 * @return array
+	 */
+	private function search_categories( string $search ): array {
+		$ability = new \WP_Ability( ProductTermsQuery::get_name(), ProductTermsQuery::get_registration_args() );
+		$result  = $ability->execute(
+			array(
+				'taxonomy' => 'product_cat',
+				'search'   => $search,
+			)
+		);
+		$this->assertIsArray( $result );
+
+		return $result['terms'];
 	}
 }

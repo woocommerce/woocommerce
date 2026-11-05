@@ -305,6 +305,39 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test the rendering stylesheet has no `:where()` selectors, which the CSS inliner skips, for a block link color.
+	 */
+	public function testItUnwrapsWhereSelectorsForBlockLinkColors(): void {
+		$add_link_color = function ( \WP_Theme_JSON $theme ): \WP_Theme_JSON {
+			$theme->merge(
+				new \WP_Theme_JSON(
+					array(
+						'version' => 3,
+						'styles'  => array(
+							'blocks' => array(
+								'core/paragraph' => array(
+									'elements' => array( 'link' => array( 'color' => array( 'text' => '#123456' ) ) ),
+								),
+							),
+						),
+					),
+					'custom'
+				)
+			);
+			return $theme;
+		};
+		add_filter( 'woocommerce_email_editor_theme_json', $add_link_color, 20 );
+
+		try {
+			$stylesheet = $this->di_container->get( Theme_Controller::class )->get_stylesheet_for_rendering();
+		} finally {
+			remove_filter( 'woocommerce_email_editor_theme_json', $add_link_color, 20 );
+		}
+		$this->assertStringContainsString( 'p a:not(.wp-element-button):not(.button-link):not(.product-button-link){color: #123456;}', $stylesheet );
+		$this->assertStringNotContainsString( ':where(', $stylesheet );
+	}
+
+	/**
 	 * Test if the theme controller returns correct preset variables map
 	 */
 	public function testItReturnsCorrectPresetVariablesMap(): void {

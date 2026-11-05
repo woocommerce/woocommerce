@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: WooCommerce E2E Test Helper
- * Description: Always-on utilities for the WooCommerce E2E suite: cookie-driven filter overrides, synchronous Action Scheduler processing, a REST API for feature flags, options, environment info and theme switching, and fixed overrides that remove production timing delays.
+ * Description: Always-on utilities for the WooCommerce E2E suite: cookie-driven filter overrides, synchronous Action Scheduler processing, a REST API for feature flags, options and theme switching, and fixed overrides that remove production timing delays.
  * Version: 1.0.0
  * Requires PHP: 7.4
  * Author: WooCommerce
@@ -120,8 +120,7 @@ add_action(
  * Test helper REST API
  * -----------------------------------------------------------------------------
  *
- * REST routes for toggling feature flags, setting/deleting options, reading environment info and
- * switching themes during a test.
+ * REST routes for toggling feature flags, setting/deleting options and switching themes during a test.
  */
 
 /**
@@ -164,16 +163,6 @@ function register_helper_api() {
 		array(
 			'methods'             => 'POST',
 			'callback'            => 'api_delete_option',
-			'permission_callback' => 'is_allowed',
-		)
-	);
-
-	register_rest_route(
-		'e2e-environment',
-		'/info',
-		array(
-			'methods'             => 'GET',
-			'callback'            => 'get_environment_info',
 			'permission_callback' => 'is_allowed',
 		)
 	);
@@ -282,25 +271,6 @@ function api_delete_option( WP_REST_Request $request ) {
  */
 function is_allowed() {
 	return current_user_can( 'manage_options' );
-}
-
-/**
- * Get environment info
- * @return WP_REST_Response
- */
-function get_environment_info() {
-	$data['Core'] = get_bloginfo( 'version' );
-	$data['PHP']  = sprintf( '%s.%s', PHP_MAJOR_VERSION, PHP_MINOR_VERSION );
-
-	$all_plugins = get_plugins();
-
-	foreach ( $all_plugins as $plugin_file => $plugin_data ) {
-		if ( is_plugin_active( $plugin_file ) ) {
-			$data[ $plugin_data['Name'] ] = $plugin_data['Version'];
-		}
-	}
-
-	return new WP_REST_Response( $data, 200 );
 }
 
 /**

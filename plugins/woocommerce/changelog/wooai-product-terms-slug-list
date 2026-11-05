@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+The product-terms-query slug filter and the orders-query status filter take a list only, so each input schema has one type.

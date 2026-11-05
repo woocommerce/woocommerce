@@ -99,9 +99,9 @@ class CatalogSearch extends AbstractCatalogRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		$query      = trim( (string) $request->get_param( 'query' ) );
-		$filters    = (array) ( $request->get_param( 'filters' ) ?? array() );
-		$pagination = (array) ( $request->get_param( 'pagination' ) ?? array() );
+		$query      = trim( (string) UcpUtils::json_param( $request, 'query' ) );
+		$filters    = (array) ( UcpUtils::json_param( $request, 'filters' ) ?? array() );
+		$pagination = (array) ( UcpUtils::json_param( $request, 'pagination' ) ?? array() );
 		$context    = $this->get_context( $request );
 
 		$invalid = $this->validate_search_input( $query, $filters );
