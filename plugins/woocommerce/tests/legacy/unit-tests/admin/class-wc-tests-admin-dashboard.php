@@ -205,7 +205,7 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'on-hold-orders', $widget_output );
 		$this->assertStringContainsString( 'page=wc-reports&#038;tab=stock&#038;report=low_in_stock', $widget_output );
 		$this->assertStringContainsString( 'page=wc-reports&#038;tab=stock&#038;report=out_of_stock', $widget_output );
-		$this->assertStringNotContainsString( 'page=wc-admin', $widget_output, 'No status widget link should point to Analytics while it is disabled.' );
+		$this->assertStringNotContainsString( 'path=%2Fanalytics', $widget_output, 'No status widget link should point to Analytics while it is disabled.' );
 	}
 
 	/**

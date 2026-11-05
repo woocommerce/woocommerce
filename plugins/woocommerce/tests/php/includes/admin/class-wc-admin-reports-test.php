@@ -88,14 +88,39 @@ final class WC_Admin_Reports_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_status_widget_report_instance_is_only_created_for_listeners(): void {
 		remove_all_actions( 'woocommerce_after_dashboard_status_widget' );
+		remove_all_filters( 'woocommerce_after_dashboard_status_widget_parameter' );
+		\WC_Admin_Reports::register_hook_handlers();
 
-		$this->assertNull( \WC_Admin_Reports::get_status_widget_report_instance( null ), 'No report should be created without listeners.' );
+		$this->assertNull( apply_filters( 'woocommerce_after_dashboard_status_widget_parameter', null ), 'No report should be created without listeners.' );
 
 		add_action( 'woocommerce_after_dashboard_status_widget', '__return_null' );
-		$reports = \WC_Admin_Reports::get_status_widget_report_instance( null );
+		$reports = apply_filters( 'woocommerce_after_dashboard_status_widget_parameter', null );
 
 		$this->assertIsObject( $reports, 'Listeners should still receive a legacy report.' );
 		$this->assertSame( 'WC_Admin_Report', get_class( $reports ) );
+	}
+
+	/**
+	 * @testdox Should pass a legacy report to another callback on the after status widget parameter filter.
+	 */
+	public function test_status_widget_report_instance_is_created_for_other_parameter_callbacks(): void {
+		remove_all_actions( 'woocommerce_after_dashboard_status_widget' );
+		remove_all_filters( 'woocommerce_after_dashboard_status_widget_parameter' );
+		\WC_Admin_Reports::register_hook_handlers();
+		$received = null;
+		add_filter(
+			'woocommerce_after_dashboard_status_widget_parameter',
+			function ( $reports ) use ( &$received ) {
+				$received = $reports;
+				return $reports;
+			},
+			20
+		);
+
+		apply_filters( 'woocommerce_after_dashboard_status_widget_parameter', null );
+
+		$this->assertIsObject( $received, 'Another callback on the filter should receive a legacy report.' );
+		$this->assertSame( 'WC_Admin_Report', get_class( $received ) );
 	}
 
 	/**

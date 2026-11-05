@@ -45,17 +45,7 @@ class WC_Admin_Reports {
 	 * @return mixed
 	 */
 	public static function maybe_replace_dashboard_status_widget_reports( $status_widget_reports ) {
-		global $wp_filter;
-
-		$hook           = $wp_filter['woocommerce_dashboard_status_widget_reports'] ?? null;
-		$callback_count = 0;
-		if ( $hook instanceof WP_Hook ) {
-			foreach ( $hook->callbacks as $callbacks ) {
-				$callback_count += count( $callbacks );
-			}
-		}
-
-		if ( $callback_count < 2 || ! is_array( $status_widget_reports ) ) {
+		if ( ! self::has_other_callbacks( 'woocommerce_dashboard_status_widget_reports' ) || ! is_array( $status_widget_reports ) ) {
 			return $status_widget_reports;
 		}
 
@@ -63,7 +53,9 @@ class WC_Admin_Reports {
 	}
 
 	/**
-	 * Provide a legacy report to `woocommerce_after_dashboard_status_widget` callbacks, but only when there are any.
+	 * Provide a legacy report to the status widget hooks, but only when another callback can receive it.
+	 *
+	 * That is a listener on `woocommerce_after_dashboard_status_widget`, or another callback on this filter.
 	 *
 	 * @internal
 	 * @since 11.4.0
@@ -72,11 +64,33 @@ class WC_Admin_Reports {
 	 * @return mixed
 	 */
 	public static function get_status_widget_report_instance( $reports ) {
-		if ( ! has_action( 'woocommerce_after_dashboard_status_widget' ) ) {
+		if ( ! has_action( 'woocommerce_after_dashboard_status_widget' ) && ! self::has_other_callbacks( 'woocommerce_after_dashboard_status_widget_parameter' ) ) {
 			return $reports;
 		}
 
 		return self::get_report_instance();
+	}
+
+	/**
+	 * Check whether a hook has callbacks besides the one of this class that is running it.
+	 *
+	 * @param string $hook_name Hook name.
+	 * @return bool
+	 */
+	private static function has_other_callbacks( string $hook_name ): bool {
+		global $wp_filter;
+
+		$hook = $wp_filter[ $hook_name ] ?? null;
+		if ( ! $hook instanceof WP_Hook ) {
+			return false;
+		}
+
+		$callback_count = 0;
+		foreach ( $hook->callbacks as $callbacks ) {
+			$callback_count += count( $callbacks );
+		}
+
+		return $callback_count > 1;
 	}
 
 	/**
