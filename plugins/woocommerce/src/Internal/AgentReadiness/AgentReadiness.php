@@ -286,7 +286,16 @@ class AgentReadiness {
 			return $report;
 		}
 		$counts = ProductFailures::counts();
-		foreach ( is_array( $report['checks'] ?? null ) ? $report['checks'] : array() as $index => $check ) {
+		$checks = is_array( $report['checks'] ?? null ) ? $report['checks'] : array();
+		// One query for the example products' meta, instead of one per product.
+		$example_ids = array();
+		foreach ( $checks as $check ) {
+			$example_ids = array_merge( $example_ids, array_map( 'intval', is_array( $check ) ? (array) ( $check['product_ids'] ?? array() ) : array() ) );
+		}
+		if ( array() !== $example_ids ) {
+			update_meta_cache( 'post', array_unique( $example_ids ) );
+		}
+		foreach ( $checks as $index => $check ) {
 			if ( ! is_array( $check ) || ! isset( $check['id'] ) ) {
 				continue;
 			}
