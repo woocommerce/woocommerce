@@ -1,8 +1,5 @@
 <%
-  const commitCount = Object.values( contributors ).reduce(
-    ( total, packageData ) => total + ( packageData.totalCommits ?? 0 ),
-    0
-  );
+  const commitCount = contributors[ 'WooCommerce Core' ]?.totalCommits ?? 0;
   const contributorDisplayVersion =
     typeof displayVersion !== 'undefined'
       ? displayVersion
