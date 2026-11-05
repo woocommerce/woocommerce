@@ -270,7 +270,7 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 				'tax_rate_name'     => 'MwSt',
 				'tax_rate_class'    => '',
 				'tax_rate_compound' => 0,
-				'tax_rate_shipping' => 0,
+				'tax_rate_shipping' => 1,
 			)
 		);
 		$reduced = \WC_Tax::_insert_tax_rate(
@@ -280,7 +280,7 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 				'tax_rate_name'     => 'MwSt reduced',
 				'tax_rate_class'    => 'reduced-rate',
 				'tax_rate_compound' => 1,
-				'tax_rate_shipping' => 1,
+				'tax_rate_shipping' => 0,
 			)
 		);
 		\WC_Tax::_update_tax_rate_postcodes( $reduced, '10115; 10117' );
@@ -298,9 +298,9 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 		$this->assertNotWPError( $result );
 		$this->assertSame( array( 'MwSt', 'MwSt reduced' ), array_column( $result['rates'], 'name' ) );
 		$this->assertFalse( $result['rates'][0]['compound'] );
-		$this->assertFalse( $result['rates'][0]['shipping'] );
+		$this->assertTrue( $result['rates'][0]['shipping'] );
 		$this->assertTrue( $result['rates'][1]['compound'] );
-		$this->assertTrue( $result['rates'][1]['shipping'] );
+		$this->assertFalse( $result['rates'][1]['shipping'] );
 		$this->assertSame( 'reduced-rate', $result['rates'][1]['class'] );
 		$this->assertSame( array( '10115', '10117' ), $result['rates'][1]['postcodes'] );
 
