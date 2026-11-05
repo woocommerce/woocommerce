@@ -124,7 +124,12 @@ class StoreOutputChecks {
 	 */
 	private function sitemap_lists_products( StoreResponses $responses ): ?bool {
 		$robots   = $this->robots_txt( $responses );
-		$listed   = null === $robots ? array() : array_slice( ( new RobotsTxt( $robots ) )->sitemaps(), 0, self::MAX_LISTED_SITEMAPS );
+		$listed   = null === $robots ? array() : array_values(
+			array_filter(
+				array_slice( ( new RobotsTxt( $robots ) )->sitemaps(), 0, self::MAX_LISTED_SITEMAPS ),
+				array( StoreResponses::class, 'is_store_url' )
+			)
+		);
 		$defaults = array( '/sitemap_index.xml', '/sitemap.xml' );
 		if ( function_exists( 'wp_sitemaps_get_server' ) && wp_sitemaps_get_server()->sitemaps_enabled() ) {
 			$defaults[] = '/wp-sitemap.xml';
@@ -158,6 +163,6 @@ class StoreOutputChecks {
 		}
 		// The fixed part of the product base, before a tag such as %product_cat%.
 		$base = trim( (string) strtok( (string) ( wc_get_permalink_structure()['product_base'] ?? '' ), '%' ), '/' );
-		return '' !== $base && 1 === preg_match( '#<loc>[^<]*/' . preg_quote( $base, '#' ) . '/[^<]*</loc>#i', $xml );
+		return '' !== $base && 1 === preg_match( '#<loc>[^<]*/' . preg_quote( $base, '#' ) . '/[^<]+</loc>#i', $xml );
 	}
 }
