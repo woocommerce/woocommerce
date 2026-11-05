@@ -37,6 +37,7 @@ wp wc [command] --help
 | [wc palt](/docs/wc-cli/wc-cli-commands/wc-palt/) | Commands for managing the product attributes lookup table. The table stores denormalized product attribute term data used to speed up catalog filtering. |
 | [wc payment_gateway](/docs/wc-cli/wc-cli-commands/wc-payment-gateway/) | Manage WooCommerce payment gateway resources. |
 | [wc product](/docs/wc-cli/wc-cli-commands/wc-product/) | Manage WooCommerce product resources. |
+| [wc product export](/docs/wc-cli/wc-cli-commands/wc-product-export/) | Export products to a CSV file using the same engine as the admin product exporter. |
 | [wc product_attribute](/docs/wc-cli/wc-cli-commands/wc-product-attribute/) | Manage WooCommerce product attribute resources. |
 | [wc product_attribute_term](/docs/wc-cli/wc-cli-commands/wc-product-attribute-term/) | Manage WooCommerce product attribute term resources. |
 | [wc product_cat](/docs/wc-cli/wc-cli-commands/wc-product-cat/) | Manage WooCommerce product category resources. |

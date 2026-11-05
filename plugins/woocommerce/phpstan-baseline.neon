@@ -1969,12 +1969,6 @@ parameters:
 			path: includes/admin/class-wc-admin-exporters.php
 
 		-
-			message: '#^Parameter \#1 \$product_category_to_export of method WC_Product_CSV_Exporter\:\:set_product_category_to_export\(\) expects string, list\<mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/admin/class-wc-admin-exporters.php
-
-		-
 			message: '#^Property WC_Admin_Exporters\:\:\$exporters \(array\<string\>\) does not accept array\<array\<string, list\<\$this\(WC_Admin_Exporters\)\|string\>\|string\>\|string\>\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -18842,12 +18836,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$term_ids of method WC_CSV_Exporter\:\:format_term_ids\(\) expects array, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/export/class-wc-product-csv-exporter.php
-
-		-
-			message: '#^Parameter \#2 \$array of function array_map expects array, string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/export/class-wc-product-csv-exporter.php
