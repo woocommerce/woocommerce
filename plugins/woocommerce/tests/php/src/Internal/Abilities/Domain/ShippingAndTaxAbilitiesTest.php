@@ -7,7 +7,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
-use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 
 /**
@@ -39,7 +38,7 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Start each test from empty registries, so the abilities build their schemas again.
+	 * Start each test from an empty abilities registry, so the abilities register again.
 	 */
 	public function setUp(): void {
 		global $wp_actions, $wpdb;
@@ -95,40 +94,10 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Turn the extensible abilities feature on and register a `test-ext.code` field on a resource.
-	 *
-	 * @param string   $resource_name Resource.
-	 * @param callable $get_callback  Field get_callback.
-	 */
-	private function add_test_field( string $resource_name, callable $get_callback ): void {
-		update_option( 'woocommerce_feature_' . ExtensibleAbilities::FEATURE_ID . '_enabled', 'yes' );
-		add_action(
-			'woocommerce_extensible_abilities_init',
-			static function () use ( $resource_name, $get_callback ) {
-				ExtensibleAbilities::register_field(
-					array(
-						'resource'      => $resource_name,
-						'namespace'     => 'test-ext',
-						'field'         => 'code',
-						'output_schema' => array( 'type' => 'string' ),
-						'get_callback'  => $get_callback,
-					)
-				);
-			}
-		);
-	}
-
-	/**
-	 * Drop every registered resource, field and ability, so the next read fires the init actions again.
+	 * Drop every registered ability, so the next read registers them again.
 	 */
 	private static function reset_registries(): void {
 		global $wp_actions;
-
-		foreach ( array( 'resources', 'fields', 'validators', 'syncs', 'filters' ) as $property ) {
-			$reflection = new \ReflectionProperty( ExtensibleAbilities::class, $property );
-			$reflection->setAccessible( true );
-			$reflection->setValue( null, array() );
-		}
 
 		foreach ( array( 'WP_Abilities_Registry', 'WP_Ability_Categories_Registry' ) as $registry ) {
 			if ( class_exists( $registry ) ) {
@@ -137,7 +106,7 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 				$instance->setValue( null, null );
 			}
 		}
-		unset( $wp_actions['wp_abilities_api_init'], $wp_actions['wp_abilities_api_categories_init'], $wp_actions['woocommerce_extensible_abilities_resources_init'], $wp_actions['woocommerce_extensible_abilities_init'] );
+		unset( $wp_actions['wp_abilities_api_init'], $wp_actions['wp_abilities_api_categories_init'] );
 	}
 
 	/**
@@ -169,53 +138,12 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should add extension fields to each zone while the feature is on.
+	 * @testdox Should return only the settings Core declares for its methods, not those added through the form fields filter.
 	 */
-	public function test_zones_take_extension_fields(): void {
-		$this->add_test_field(
-			'shipping_zone',
-			static function ( \WC_Shipping_Zone $zone ) {
-				return 'zone-' . $zone->get_id();
-			}
-		);
-
-		$result = $this->run_ability( 'woocommerce/shipping-zones-query', array( 'include' => array( 0 ) ) );
-
-		$this->assertSame( 'zone-0', $result['zones'][0]['extensions']['test-ext']['code'] );
-	}
-
-	/**
-	 * @testdox Should add extension fields to each shipping method while the feature is on.
-	 */
-	public function test_methods_take_extension_fields(): void {
-		$instance_id = ( new \WC_Shipping_Zone( 0 ) )->add_shipping_method( 'flat_rate' );
-		$this->add_test_field(
-			'shipping_method',
-			static function ( \WC_Shipping_Method $method ) {
-				return 'method-' . $method->get_instance_id();
-			}
-		);
-
-		$result = $this->run_ability( 'woocommerce/shipping-zones-query', array( 'include' => array( 0 ) ) );
-
-		$this->assertSame( "method-{$instance_id}", $result['zones'][0]['methods'][0]['extensions']['test-ext']['code'] );
-	}
-
-	/**
-	 * @testdox Should leave secret settings out of a method, also those declared through the form fields filter.
-	 */
-	public function test_method_settings_leave_out_secrets(): void {
+	public function test_core_method_settings_leave_out_added_fields(): void {
 		add_filter(
 			'woocommerce_shipping_instance_form_fields_flat_rate',
 			static function ( array $fields ): array {
-				$fields['carrier_login']   = array(
-					'title' => 'Carrier login',
-					'type'  => 'password',
-				);
-				$fields['carrier_api_key'] = array(
-					'title' => 'Carrier API key',
-					'type'  => 'text',
-				);
 				$fields['carrier_account'] = array(
 					'title' => 'Carrier account',
 					'type'  => 'text',
@@ -223,16 +151,13 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 				return $fields;
 			}
 		);
-		$zone        = new \WC_Shipping_Zone( 0 );
-		$instance_id = $zone->add_shipping_method( 'flat_rate' );
+		$instance_id = ( new \WC_Shipping_Zone( 0 ) )->add_shipping_method( 'flat_rate' );
 		update_option(
 			"woocommerce_flat_rate_{$instance_id}_settings",
 			array(
 				'cost'            => '4.50',
-				'carrier_login'   => 'canary-login',
-				'carrier_api_key' => 'canary-key',
-				'carrier_account' => 'ACME-1',
-				'undeclared'      => 'stale',
+				'carrier_account' => 'canary-account',
+				'undeclared'      => 'canary-stale',
 			)
 		);
 
@@ -240,23 +165,40 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 		$settings = (array) $result['zones'][0]['methods'][0]['settings'];
 
 		$this->assertSame( '4.50', $settings['cost'] );
-		$this->assertSame( 'ACME-1', $settings['carrier_account'] );
-		$this->assertArrayNotHasKey( 'carrier_login', $settings );
-		$this->assertArrayNotHasKey( 'carrier_api_key', $settings );
+		$this->assertArrayNotHasKey( 'carrier_account', $settings );
 		$this->assertArrayNotHasKey( 'undeclared', $settings );
 		$this->assertStringNotContainsString( 'canary', (string) wp_json_encode( $result ) );
 	}
 
 	/**
-	 * @testdox Should return zones and methods without extensions while the feature is off.
+	 * @testdox Should return no settings for a method from an extension, even one that extends a Core method.
 	 */
-	public function test_zones_and_methods_have_no_extensions_with_the_feature_off(): void {
-		( new \WC_Shipping_Zone( 0 ) )->add_shipping_method( 'flat_rate' );
+	public function test_extension_methods_have_no_settings(): void {
+		$carrier  = new class() extends \WC_Shipping_Flat_Rate {
+			/**
+			 * Give the subclass its own method ID.
+			 *
+			 * @param int $instance_id Instance ID.
+			 */
+			public function __construct( $instance_id = 0 ) {
+				parent::__construct( $instance_id );
+				$this->id = 'test_carrier';
+			}
+		};
+		$register = static function ( array $methods ) use ( $carrier ): array {
+			$methods['test_carrier'] = $carrier;
+			return $methods;
+		};
+		add_filter( 'woocommerce_shipping_methods', $register );
+		$instance_id = ( new \WC_Shipping_Zone( 0 ) )->add_shipping_method( 'test_carrier' );
+		update_option( "woocommerce_test_carrier_{$instance_id}_settings", array( 'cost' => 'canary-cost' ) );
 
 		$result = $this->run_ability( 'woocommerce/shipping-zones-query', array( 'include' => array( 0 ) ) );
+		remove_filter( 'woocommerce_shipping_methods', $register );
 
-		$this->assertArrayNotHasKey( 'extensions', $result['zones'][0] );
-		$this->assertArrayNotHasKey( 'extensions', $result['zones'][0]['methods'][0] );
+		$this->assertSame( 'test_carrier', $result['zones'][0]['methods'][0]['method_id'] );
+		$this->assertArrayNotHasKey( 'settings', $result['zones'][0]['methods'][0] );
+		$this->assertStringNotContainsString( 'canary', (string) wp_json_encode( $result ) );
 	}
 
 	/**

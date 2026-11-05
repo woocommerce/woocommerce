@@ -8,8 +8,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
-use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
-use Automattic\WooCommerce\Internal\Abilities\SecretFields;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -17,6 +15,11 @@ defined( 'ABSPATH' ) || exit;
  * Registers the ability that lists shipping zones with their locations and methods.
  */
 class ShippingZonesQuery extends AbstractDomainAbility implements AbilityDefinition {
+
+	/**
+	 * Methods whose settings are returned. Extensions keep credentials in method settings under any name.
+	 */
+	private const CORE_METHOD_CLASSES = array( \WC_Shipping_Flat_Rate::class, \WC_Shipping_Free_Shipping::class, \WC_Shipping_Local_Pickup::class );
 
 	/**
 	 * Get the ability name.
@@ -87,11 +90,11 @@ class ShippingZonesQuery extends AbstractDomainAbility implements AbilityDefinit
 	 * List shipping zones.
 	 *
 	 * @param array $input Ability input.
-	 * @return array|\WP_Error A WP_Error when an extension field fails.
+	 * @return array
 	 *
 	 * @since 11.4.0
 	 */
-	public static function execute( array $input ) {
+	public static function execute( array $input ): array {
 		$zones   = array_values( \WC_Shipping_Zones::get_shipping_zones() );
 		$zones[] = new \WC_Shipping_Zone( 0 );
 
@@ -105,16 +108,7 @@ class ShippingZonesQuery extends AbstractDomainAbility implements AbilityDefinit
 			);
 		}
 
-		$formatted = array();
-		foreach ( $zones as $zone ) {
-			$data = self::format_zone_for_response( $zone );
-			if ( is_wp_error( $data ) ) {
-				return $data;
-			}
-			$formatted[] = $data;
-		}
-
-		return array( 'zones' => $formatted );
+		return array( 'zones' => array_values( array_map( array( __CLASS__, 'format_zone_for_response' ), $zones ) ) );
 	}
 
 	/**
@@ -132,68 +126,55 @@ class ShippingZonesQuery extends AbstractDomainAbility implements AbilityDefinit
 	 * Format a zone for ability output.
 	 *
 	 * @param \WC_Shipping_Zone $zone Zone.
-	 * @return array|\WP_Error A WP_Error when an extension field fails.
+	 * @return array
 	 */
-	private static function format_zone_for_response( \WC_Shipping_Zone $zone ) {
-		$methods = array();
-		foreach ( $zone->get_shipping_methods() as $method ) {
-			$data = self::format_method( $method );
-			if ( is_wp_error( $data ) ) {
-				return $data;
-			}
-			$methods[] = $data;
-		}
-
-		return ExtensibleAbilities::add_fields_to_object(
-			array(
-				'id'        => $zone->get_id(),
-				'name'      => $zone->get_zone_name(),
-				'order'     => $zone->get_zone_order(),
-				'locations' => array_map(
-					static function ( $location ): array {
-						return array(
-							'code' => (string) $location->code,
-							'type' => (string) $location->type,
-						);
-					},
-					array_values( $zone->get_zone_locations() )
-				),
-				'methods'   => $methods,
+	private static function format_zone_for_response( \WC_Shipping_Zone $zone ): array {
+		return array(
+			'id'        => $zone->get_id(),
+			'name'      => $zone->get_zone_name(),
+			'order'     => $zone->get_zone_order(),
+			'locations' => array_map(
+				static function ( $location ): array {
+					return array(
+						'code' => (string) $location->code,
+						'type' => (string) $location->type,
+					);
+				},
+				array_values( $zone->get_zone_locations() )
 			),
-			'shipping_zone',
-			$zone
+			'methods'   => array_map( array( __CLASS__, 'format_method' ), array_values( $zone->get_shipping_methods() ) ),
 		);
 	}
 
 	/**
-	 * Format a shipping method of a zone. Settings keep the scalar values of declared fields only, without secrets.
+	 * Format a shipping method of a zone. Only Core methods get settings, limited to the
+	 * fields Core declares, since extensions can add fields to them through a filter.
 	 *
 	 * @param \WC_Shipping_Method $method Method.
-	 * @return array|\WP_Error A WP_Error when an extension field fails.
+	 * @return array
 	 */
-	private static function format_method( \WC_Shipping_Method $method ) {
-		$method->init_instance_settings();
-		$settings = array();
-		foreach ( (array) $method->get_instance_form_fields() as $key => $field ) {
-			$value = $method->instance_settings[ $key ] ?? null;
-			$type  = (string) ( $field['type'] ?? '' );
-			if ( is_scalar( $value ) && 'title' !== $key && ! SecretFields::is_secret( (string) $key, $type ) ) {
-				$settings[ $key ] = (string) $value;
+	private static function format_method( \WC_Shipping_Method $method ): array {
+		$data = array(
+			'instance_id' => (int) $method->get_instance_id(),
+			'method_id'   => (string) $method->id,
+			'title'       => (string) $method->get_title(),
+			'enabled'     => 'yes' === $method->enabled,
+			'order'       => (int) $method->method_order,
+		);
+
+		if ( in_array( get_class( $method ), self::CORE_METHOD_CLASSES, true ) ) {
+			$method->init_instance_settings();
+			$settings = array();
+			foreach ( array_keys( (array) $method->instance_form_fields ) as $key ) {
+				$value = $method->instance_settings[ $key ] ?? null;
+				if ( 'title' !== $key && is_scalar( $value ) ) {
+					$settings[ $key ] = (string) $value;
+				}
 			}
+			$data['settings'] = (object) $settings;
 		}
 
-		return ExtensibleAbilities::add_fields_to_object(
-			array(
-				'instance_id' => (int) $method->get_instance_id(),
-				'method_id'   => (string) $method->id,
-				'title'       => (string) $method->get_title(),
-				'enabled'     => 'yes' === $method->enabled,
-				'order'       => (int) $method->method_order,
-				'settings'    => (object) $settings,
-			),
-			'shipping_method',
-			$method
-		);
+		return $data;
 	}
 
 	/**
@@ -202,38 +183,35 @@ class ShippingZonesQuery extends AbstractDomainAbility implements AbilityDefinit
 	 * @return array
 	 */
 	private static function get_zone_output_schema(): array {
-		return ExtensibleAbilities::add_fields_schema(
-			array(
-				'type'                 => 'object',
-				'properties'           => array(
-					'id'        => array( 'type' => 'integer' ),
-					'name'      => array( 'type' => 'string' ),
-					'order'     => array( 'type' => 'integer' ),
-					'locations' => array(
-						'type'  => 'array',
-						'items' => array(
-							'type'                 => 'object',
-							'properties'           => array(
-								'code' => array(
-									'type'        => 'string',
-									'description' => __( 'Country code, COUNTRY:STATE, postcode pattern or continent code, by type.', 'woocommerce' ),
-								),
-								'type' => array(
-									'type' => 'string',
-									'enum' => array( 'country', 'state', 'postcode', 'continent' ),
-								),
+		return array(
+			'type'                 => 'object',
+			'properties'           => array(
+				'id'        => array( 'type' => 'integer' ),
+				'name'      => array( 'type' => 'string' ),
+				'order'     => array( 'type' => 'integer' ),
+				'locations' => array(
+					'type'  => 'array',
+					'items' => array(
+						'type'                 => 'object',
+						'properties'           => array(
+							'code' => array(
+								'type'        => 'string',
+								'description' => __( 'Country code, COUNTRY:STATE, postcode pattern or continent code, by type.', 'woocommerce' ),
 							),
-							'additionalProperties' => false,
+							'type' => array(
+								'type' => 'string',
+								'enum' => array( 'country', 'state', 'postcode', 'continent' ),
+							),
 						),
-					),
-					'methods'   => array(
-						'type'  => 'array',
-						'items' => self::get_method_output_schema(),
+						'additionalProperties' => false,
 					),
 				),
-				'additionalProperties' => false,
+				'methods'   => array(
+					'type'  => 'array',
+					'items' => self::get_method_output_schema(),
+				),
 			),
-			'shipping_zone'
+			'additionalProperties' => false,
 		);
 	}
 
@@ -243,24 +221,21 @@ class ShippingZonesQuery extends AbstractDomainAbility implements AbilityDefinit
 	 * @return array
 	 */
 	private static function get_method_output_schema(): array {
-		return ExtensibleAbilities::add_fields_schema(
-			array(
-				'type'                 => 'object',
-				'properties'           => array(
-					'instance_id' => array( 'type' => 'integer' ),
-					'method_id'   => array( 'type' => 'string' ),
-					'title'       => array( 'type' => 'string' ),
-					'enabled'     => array( 'type' => 'boolean' ),
-					'order'       => array( 'type' => 'integer' ),
-					'settings'    => array(
-						'type'                 => 'object',
-						'description'          => __( 'Method settings such as cost or min_amount, as stored.', 'woocommerce' ),
-						'additionalProperties' => array( 'type' => 'string' ),
-					),
+		return array(
+			'type'                 => 'object',
+			'properties'           => array(
+				'instance_id' => array( 'type' => 'integer' ),
+				'method_id'   => array( 'type' => 'string' ),
+				'title'       => array( 'type' => 'string' ),
+				'enabled'     => array( 'type' => 'boolean' ),
+				'order'       => array( 'type' => 'integer' ),
+				'settings'    => array(
+					'type'                 => 'object',
+					'description'          => __( 'Settings such as cost or min_amount, as stored. Only for the flat rate, free shipping and local pickup methods.', 'woocommerce' ),
+					'additionalProperties' => array( 'type' => 'string' ),
 				),
-				'additionalProperties' => false,
 			),
-			'shipping_method'
+			'additionalProperties' => false,
 		);
 	}
 }
