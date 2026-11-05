@@ -138,8 +138,12 @@ class WC_Query {
 				break;
 			case 'view-order':
 				$order = wc_get_order( $wp->query_vars['view-order'] );
-				/* translators: %s: order number */
-				$title = ( $order ) ? sprintf( __( 'Order #%s', 'woocommerce' ), $order->get_order_number() ) : '';
+				$title = '';
+				// Guest orders can pass the capability check for logged-out visitors because both use user ID 0.
+				if ( $order && is_user_logged_in() && current_user_can( 'view_order', $order->get_id() ) ) {
+					/* translators: %s: order number */
+					$title = sprintf( __( 'Order #%s', 'woocommerce' ), $order->get_order_number() );
+				}
 				break;
 			case 'downloads':
 				$title = __( 'Downloads', 'woocommerce' );
