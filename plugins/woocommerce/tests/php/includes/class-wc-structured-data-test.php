@@ -1,6 +1,8 @@
 <?php
 declare( strict_types = 1 );
 
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
+
 /**
  * Class WC_Structured_Data_Test.
  */
@@ -350,6 +352,91 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product schema includes usable gallery videos in order and omits them when disabled or without thumbnails.
+	 */
+	public function test_product_gallery_video_structured_data(): void {
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'yes' );
+		$uploads = wp_get_upload_dir();
+		$image   = wp_insert_attachment(
+			array( 'post_mime_type' => 'image/jpeg' ),
+			$uploads['basedir'] . '/product.jpg'
+		);
+		$poster  = wp_insert_attachment(
+			array( 'post_mime_type' => 'image/jpeg' ),
+			$uploads['basedir'] . '/poster.jpg'
+		);
+		$first   = wp_insert_attachment(
+			array(
+				'post_title'     => 'First video',
+				'post_mime_type' => 'video/mp4',
+				'post_date'      => '2024-01-02 03:04:05',
+				'post_date_gmt'  => '2024-01-02 03:04:05',
+			),
+			$uploads['basedir'] . '/first.mp4'
+		);
+		$second  = wp_insert_attachment(
+			array(
+				'post_title'     => 'Second video',
+				'post_mime_type' => 'video/mp4',
+				'post_date'      => '2024-02-03 04:05:06',
+				'post_date_gmt'  => '2024-02-03 04:05:06',
+			),
+			$uploads['basedir'] . '/second.mp4'
+		);
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( $image );
+		$product->save();
+		ProductMediaGallery::set_stored_video_gallery_items(
+			$product,
+			array(
+				array(
+					'id'       => $second,
+					'position' => 1,
+				),
+				array(
+					'id'        => $first,
+					'position'  => 0,
+					'poster_id' => $poster,
+				),
+			)
+		);
+
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$this->assertSame(
+			array(
+				array(
+					'@type'        => 'VideoObject',
+					'name'         => 'First video',
+					'contentUrl'   => wp_get_attachment_url( $first ),
+					'thumbnailUrl' => wp_get_attachment_image_url( $poster, 'full' ),
+					'uploadDate'   => '2024-01-02T03:04:05+00:00',
+				),
+				array(
+					'@type'        => 'VideoObject',
+					'name'         => 'Second video',
+					'contentUrl'   => wp_get_attachment_url( $second ),
+					'thumbnailUrl' => wp_get_attachment_image_url( $image, 'full' ),
+					'uploadDate'   => '2024-02-03T04:05:06+00:00',
+				),
+			),
+			$sut->get_data()[0]['subjectOf']
+		);
+
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'no' );
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$this->assertArrayNotHasKey( 'subjectOf', $sut->get_data()[0] );
+
+		update_option( ProductMediaGallery::ENABLE_OPTION_NAME, 'yes' );
+		$product->set_image_id( 0 );
+		$product->save();
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$this->assertSame( array( 'First video' ), array_column( $sut->get_data()[0]['subjectOf'], 'name' ) );
+	}
+
+	/**
 	 * @testdox Product schema includes zero MPNs, omits empty values, and preserves extension filters.
 	 * @testWith ["0"]
 	 *           [""]
@@ -684,15 +771,18 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test on-sale simple product offer reports the sale price at the offer top level.
+	 * @testdox An active sale offer includes the sale price and dates with daylight saving offsets.
 	 *
 	 * @return void
 	 */
 	public function test_simple_product_offer_on_sale_uses_sale_price_at_offer_level(): void {
+		update_option( 'timezone_string', 'America/New_York' );
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_regular_price( '100' );
 		$product->set_sale_price( '70' );
 		$product->set_price( '70' );
+		$product->set_date_on_sale_from( strtotime( '2020-01-01 12:00:00 UTC' ) );
+		$product->set_date_on_sale_to( strtotime( '2037-06-01 12:00:00 UTC' ) );
 		$product->save();
 
 		$this->structured_data->generate_product_data( $product );
@@ -704,6 +794,40 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( '70.00', $offer['price'] );
 		$this->assertEquals( '70.00', $offer['priceSpecification'][0]['price'] );
 		$this->assertEquals( get_woocommerce_currency(), $offer['priceCurrency'] );
+		$this->assertSame( '2020-01-01T07:00:00-05:00', $offer['validFrom'] );
+		$this->assertSame( '2037-06-01T08:00:00-04:00', $offer['validThrough'] );
+	}
+
+	/**
+	 * @testdox Sale dates are emitted only when configured and the sale is active.
+	 * @testWith ["active"]
+	 *           ["future"]
+	 *           ["expired"]
+	 *           ["unscheduled"]
+	 *
+	 * @param string $schedule Sale schedule to check.
+	 */
+	public function test_sale_offer_dates_with_manual_offset( string $schedule ): void {
+		update_option( 'timezone_string', '' );
+		update_option( 'gmt_offset', 5.5 );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '100' );
+		$product->set_sale_price( '70' );
+		$product->set_price( '70' );
+		if ( 'unscheduled' !== $schedule ) {
+			$product->set_date_on_sale_from( strtotime( 'future' === $schedule ? '+1 day' : '2020-01-01 12:00:00 UTC' ) );
+			$product->set_date_on_sale_to( strtotime( 'expired' === $schedule ? '-1 day' : '2037-06-01 12:00:00 UTC' ) );
+		}
+
+		$this->structured_data->generate_product_data( $product );
+		$offer = $this->structured_data->get_data()[0]['offers'][0];
+		if ( 'active' === $schedule ) {
+			$this->assertSame( '2020-01-01T17:30:00+05:30', $offer['validFrom'] );
+			$this->assertSame( '2037-06-01T17:30:00+05:30', $offer['validThrough'] );
+		} else {
+			$this->assertArrayNotHasKey( 'validFrom', $offer );
+			$this->assertArrayNotHasKey( 'validThrough', $offer );
+		}
 	}
 
 	/**
@@ -902,7 +1026,18 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_variable_product_with_selected_variation_uses_single_offer(): void {
+		update_option( 'timezone_string', 'UTC' );
 		$product = WC_Helper_Product::create_variation_product();
+		foreach ( $product->get_children() as $variation_id ) {
+			$variation = wc_get_product( $variation_id );
+			if ( 'DUMMY SKU VARIABLE HUGE RED 0' === $variation->get_sku() ) {
+				$variation->set_sale_price( '12' );
+				$variation->set_date_on_sale_from( strtotime( '2020-01-01 12:00:00 UTC' ) );
+				$variation->set_date_on_sale_to( strtotime( '2037-06-01 12:00:00 UTC' ) );
+				$variation->save();
+				break;
+			}
+		}
 		WC_Product_Variable::sync( $product->get_id() );
 		$product = wc_get_product( $product->get_id() );
 
@@ -917,7 +1052,9 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 			$offer = $data[0]['offers'][0];
 
 			$this->assertEquals( 'Offer', $offer['@type'] );
-			$this->assertEquals( '16.00', $offer['price'] );
+			$this->assertEquals( '12.00', $offer['price'] );
+			$this->assertSame( '2020-01-01T12:00:00+00:00', $offer['validFrom'] );
+			$this->assertSame( '2037-06-01T12:00:00+00:00', $offer['validThrough'] );
 			$this->assertArrayNotHasKey( 'lowPrice', $offer );
 			$this->assertArrayNotHasKey( 'highPrice', $offer );
 			$this->assertEquals( get_woocommerce_currency(), $offer['priceCurrency'] );
@@ -967,7 +1104,12 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_variable_product_without_full_selection_uses_aggregate_offer(): void {
-		$product = WC_Helper_Product::create_variation_product();
+		$product   = WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $product->get_children()[0] );
+		$variation->set_sale_price( '8' );
+		$variation->set_date_on_sale_from( strtotime( '-1 day' ) );
+		$variation->set_date_on_sale_to( strtotime( '+1 day' ) );
+		$variation->save();
 		WC_Product_Variable::sync( $product->get_id() );
 		$product = wc_get_product( $product->get_id() );
 
@@ -982,6 +1124,8 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 			$this->assertEquals( 'AggregateOffer', $offer['@type'] );
 			$this->assertArrayHasKey( 'lowPrice', $offer );
 			$this->assertArrayHasKey( 'highPrice', $offer );
+			$this->assertArrayNotHasKey( 'validFrom', $offer );
+			$this->assertArrayNotHasKey( 'validThrough', $offer );
 			$this->assertArrayNotHasKey( 'inProductGroupWithID', $data[0] );
 		} finally {
 			unset( $_GET['attribute_pa_size'] );
