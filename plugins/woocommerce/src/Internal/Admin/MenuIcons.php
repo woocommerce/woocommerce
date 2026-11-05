@@ -44,6 +44,7 @@ final class MenuIcons {
 	 * @return void
 	 */
 	public function handle_admin_menu_registration() {
+		// Keep explicit API checks until the WordPress PHPStan stubs include the icon API.
 		if ( ! $this->is_supported() || ! function_exists( 'wp_register_icon_collection' ) || ! function_exists( 'wp_register_icon' ) || ! class_exists( '\WP_Icon_Collections_Registry' ) || ! class_exists( '\WP_Icons_Registry' ) ) {
 			return;
 		}
