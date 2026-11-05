@@ -520,13 +520,13 @@ class WC_Structured_Data {
 			}
 
 			$checkout_url = $this->get_product_checkout_url( $product, $selected_variation );
-			if ( $checkout_url ) {
+			if ( null !== $checkout_url ) {
 				$markup_offer['checkoutPageURLTemplate'] = $checkout_url;
 			}
 
 			$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
 			$offer            = $markup['offers'][0];
-			if ( $checkout_url && is_array( $offer ) && 'Offer' === ( $offer['@type'] ?? null ) && is_string( $offer['checkoutPageURLTemplate'] ?? null ) && '' !== $offer['checkoutPageURLTemplate'] ) {
+			if ( null !== $checkout_url && is_array( $offer ) && 'Offer' === ( $offer['@type'] ?? null ) && is_string( $offer['checkoutPageURLTemplate'] ?? null ) && '' !== $offer['checkoutPageURLTemplate'] ) {
 				$markup['potentialAction'] = array(
 					'@type'  => 'BuyAction',
 					'target' => array(
@@ -1082,11 +1082,11 @@ class WC_Structured_Data {
 	 *
 	 * @param WC_Product                $product   Product shown on the page.
 	 * @param WC_Product_Variation|null $variation Selected variation, if any.
-	 * @return string Checkout URL, or an empty string if it cannot be represented.
+	 * @return string|null Checkout URL, or null if it cannot be represented.
 	 */
 	private function get_product_checkout_url( $product, $variation ) {
 		if ( ! $variation && ! $product->is_type( ProductType::SIMPLE ) ) {
-			return '';
+			return null;
 		}
 
 		$item = $variation ? $variation : $product;
@@ -1099,7 +1099,7 @@ class WC_Structured_Data {
 			! $item->is_in_stock() ||
 			! $item->has_enough_stock( 1 )
 		) {
-			return '';
+			return null;
 		}
 
 		$products = $item->get_id() . ':1';
@@ -1108,11 +1108,11 @@ class WC_Structured_Data {
 			foreach ( $product->get_variation_attributes() as $attribute_name => $options ) {
 				$key = wc_variation_attribute_name( $attribute_name );
 				if ( ! isset( $_GET[ $key ] ) || ! is_string( $_GET[ $key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-					return '';
+					return null;
 				}
 				$value = wc_clean( wp_unslash( $_GET[ $key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				if ( ! is_string( $value ) || ! is_array( $options ) || ! in_array( $value, $options, true ) ) {
-					return '';
+					return null;
 				}
 				$selected_attributes[ $key ] = $value;
 			}
@@ -1125,13 +1125,13 @@ class WC_Structured_Data {
 					$attribute = $attributes[ substr( $key, strlen( 'attribute_' ) ) ] ?? null;
 					$value     = $selected_attributes[ $key ] ?? null;
 					if ( ! $attribute instanceof WC_Product_Attribute || ! is_string( $value ) ) {
-						return '';
+						return null;
 					}
 					if ( ! $attribute->is_taxonomy() ) {
 						$value = htmlspecialchars( $value, ENT_QUOTES, 'UTF-8' );
 					}
 					if ( sanitize_key( $key ) !== $key || sanitize_text_field( $value ) !== $value ) {
-						return '';
+						return null;
 					}
 					$values[] = $key . '=' . str_replace( array( ',', ':', ';' ), array( '~,', '~:', '~;' ), $value );
 				}
