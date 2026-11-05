@@ -433,7 +433,8 @@ final class ImportCommand {
 			return;
 		}
 
-		if ( ! empty( $results['errors'] ) ) {
+		// Machine-readable formats always print the report, so a clean run still outputs a parseable document.
+		if ( ! empty( $results['errors'] ) || 'table' !== $options['format'] ) {
 			WP_CLI\Utils\format_items( $options['format'], $results['errors'], array( 'row', 'code', 'message' ) );
 		}
 
@@ -455,12 +456,19 @@ final class ImportCommand {
 			$results['failed']
 		);
 
-		if ( $options['strict'] && $results['failed'] > 0 ) {
+		$strict_failure = $options['strict'] && $results['failed'] > 0;
+
+		if ( 'table' !== $options['format'] ) {
+			// STDOUT holds only the machine-readable report.
+			fwrite( STDERR, $summary . PHP_EOL ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- WP_CLI has no plain STDERR logger.
+		} elseif ( $strict_failure ) {
 			WP_CLI::log( $summary );
-			WP_CLI::error( 'Import completed with failures.' );
-			return;
+		} else {
+			WP_CLI::success( $summary );
 		}
 
-		WP_CLI::success( $summary );
+		if ( $strict_failure ) {
+			WP_CLI::error( 'Import completed with failures.' );
+		}
 	}
 }

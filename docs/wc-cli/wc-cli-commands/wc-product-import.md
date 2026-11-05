@@ -29,7 +29,7 @@ Import products from a CSV file, or `-` to read from STDIN.
 
     Default: `100`
 
-- `--format=<format>` - Render the mapping preview or failure report as `table`, `csv`, `json`, or `yaml`.
+- `--format=<format>` - Render the mapping preview or failure report as `table`, `csv`, `json`, or `yaml`. With anything but `table`, an import always prints the report and writes its summary to STDERR.
 
     Default: `table`
 
