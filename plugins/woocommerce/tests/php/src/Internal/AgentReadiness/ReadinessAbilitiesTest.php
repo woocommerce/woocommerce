@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessAbilities;
+use Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
@@ -140,5 +141,22 @@ class ReadinessAbilitiesTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'sitemap_lists_products', $store_checks, 'Store output checks come from the stored report' );
 		$this->assertContains( 'missing_brand', array_column( $output['report']['checks'], 'id' ) );
 		$this->assertFalse( $output['scan_pending'] );
+		$this->assertFalse( $output['scan_stalled'] );
+	}
+
+	/**
+	 * @testdox A queued check that has stalled is reported as scan_stalled, so an agent stops waiting for it.
+	 */
+	public function test_report_says_when_the_scan_stalled(): void {
+		global $wpdb;
+		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
+		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}actionscheduler_actions SET last_attempt_gmt = %s WHERE status = 'complete'", gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) ) );
+		as_schedule_single_action( time() - ScheduledScan::STALLED_AFTER - 60, ScheduledScan::RUN_NOW_HOOK, array(), ScheduledScan::GROUP );
+
+		$output = wp_get_ability( ReadinessAbilities::GET_REPORT )->execute();
+
+		$this->assertTrue( $output['scan_pending'] );
+		$this->assertTrue( $output['scan_stalled'] );
+		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 	}
 }

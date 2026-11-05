@@ -115,12 +115,12 @@ class ReadinessAbilities implements RegisterHooksInterface {
 	}
 
 	/**
-	 * The stored report with store checks as they stand now, and whether a scan is pending.
+	 * The stored report with store checks as they stand now, whether a scan is pending, and whether it has stalled.
 	 *
 	 * @internal
 	 *
 	 * @param mixed $input Ability input; this ability takes none.
-	 * @return array{report:array<string,mixed>|null,scan_pending:bool}
+	 * @return array{report:array<string,mixed>|null,scan_pending:bool,scan_stalled:bool}
 	 */
 	public function get_report( $input = null ): array {
 		unset( $input );
@@ -128,9 +128,11 @@ class ReadinessAbilities implements RegisterHooksInterface {
 		if ( null !== $report ) {
 			$report['store_checks'] = $this->agent_readiness->get_store_checks( $report );
 		}
+		$pending = $this->scheduled_scan->is_pending();
 		return array(
 			'report'       => $report,
-			'scan_pending' => $this->scheduled_scan->is_pending(),
+			'scan_pending' => $pending,
+			'scan_stalled' => $pending && $this->scheduled_scan->is_stalled(),
 		);
 	}
 
@@ -242,6 +244,10 @@ class ReadinessAbilities implements RegisterHooksInterface {
 				'scan_pending' => array(
 					'type'        => 'boolean',
 					'description' => __( 'Whether a requested check has not finished yet.', 'woocommerce' ),
+				),
+				'scan_stalled' => array(
+					'type'        => 'boolean',
+					'description' => __( 'Whether the requested check has not started because scheduled actions are not running on the store. It stays queued and runs once they do; until then the report does not change.', 'woocommerce' ),
 				),
 			),
 		);
