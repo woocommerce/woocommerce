@@ -153,12 +153,13 @@ class ProductExporterTest extends WC_Unit_Test_Case {
 	public function test_run_cleans_up_temp_files(): void {
 		WC_Helper_Product::create_simple_product();
 
-		$destination = $this->new_temp_path();
+		$destination    = $this->new_temp_path();
+		$before_listing = glob( trailingslashit( get_temp_dir() ) . 'wc-product-export-*' );
 
 		$this->sut->run( $destination, array() );
 
-		$remaining = glob( trailingslashit( get_temp_dir() ) . 'wc-product-export-*' );
-		$this->assertSame( array(), $remaining, 'Temporary export files should be removed from the temp directory' );
+		$after_listing = glob( trailingslashit( get_temp_dir() ) . 'wc-product-export-*' );
+		$this->assertSame( $before_listing, $after_listing, 'Temporary export files should be removed from the temp directory' );
 	}
 
 	/**
@@ -191,8 +192,9 @@ class ProductExporterTest extends WC_Unit_Test_Case {
 	public function test_run_cleans_up_temp_files_when_a_batch_throws(): void {
 		WC_Helper_Product::create_simple_product();
 
-		$destination = $this->new_temp_path();
-		$callback    = function () {
+		$destination    = $this->new_temp_path();
+		$before_listing = glob( trailingslashit( get_temp_dir() ) . 'wc-product-export-*' );
+		$callback       = function () {
 			throw new \RuntimeException( 'Simulated failure mid-batch.' );
 		};
 
@@ -207,8 +209,8 @@ class ProductExporterTest extends WC_Unit_Test_Case {
 			remove_filter( 'woocommerce_product_export_row_data', $callback );
 		}
 
-		$remaining = glob( trailingslashit( get_temp_dir() ) . 'wc-product-export-*' );
-		$this->assertSame( array(), $remaining, 'Temporary export files should be removed even when a batch throws' );
+		$after_listing = glob( trailingslashit( get_temp_dir() ) . 'wc-product-export-*' );
+		$this->assertSame( $before_listing, $after_listing, 'Temporary export files should be removed even when a batch throws' );
 	}
 
 	/**
