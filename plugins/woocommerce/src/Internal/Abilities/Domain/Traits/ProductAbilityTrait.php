@@ -693,7 +693,7 @@ trait ProductAbilityTrait {
 	}
 
 	/**
-	 * Set supported product properties from ability input.
+	 * Set supported product properties from ability input. A refused value does not stop the other values, and every refusal comes back in one error.
 	 *
 	 * @param \WC_Product $product        Product object.
 	 * @param array       $input          Ability input.
@@ -701,9 +701,10 @@ trait ProductAbilityTrait {
 	 * @return null|\WP_Error
 	 */
 	protected static function set_product_props_from_input( \WC_Product $product, array $input, array $product_config ) {
+		$refused          = new \WP_Error();
 		$validation_error = self::validate_product_fields_for_config( $product, $input, $product_config );
 		if ( is_wp_error( $validation_error ) ) {
-			return $validation_error;
+			$refused->merge_from( $validation_error );
 		}
 
 		$setters = array(
@@ -750,10 +751,15 @@ trait ProductAbilityTrait {
 				? self::prepare_product_attributes( $product, $input[ $field ] )
 				: self::prepare_product_field_value( $field, $input[ $field ] );
 			if ( is_wp_error( $prepared_value ) ) {
-				return $prepared_value;
+				$refused->merge_from( $prepared_value );
+				continue;
 			}
 
-			$product->{$setter}( $prepared_value );
+			try {
+				$product->{$setter}( $prepared_value );
+			} catch ( \WC_Data_Exception $exception ) {
+				$refused->merge_from( self::get_product_data_exception_error( $exception ) );
+			}
 		}
 
 		foreach ( array( 'images', 'dimensions' ) as $field ) {
@@ -763,7 +769,8 @@ trait ProductAbilityTrait {
 
 			$prepared_value = self::prepare_product_field_value( $field, $input[ $field ] );
 			if ( is_wp_error( $prepared_value ) ) {
-				return $prepared_value;
+				$refused->merge_from( $prepared_value );
+				continue;
 			}
 
 			if ( 'images' === $field ) {
@@ -773,7 +780,7 @@ trait ProductAbilityTrait {
 			}
 		}
 
-		return null;
+		return $refused->has_errors() ? $refused : null;
 	}
 
 	/**
