@@ -103,7 +103,28 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 		add_filter( 'woocommerce_settings_pages', array( $this, 'add_endpoint_setting' ), 10, 1 );
 		add_action( 'woocommerce_account_' . OrderWithdrawalEndpoint::ENDPOINT_KEY . '_endpoint', array( $this, 'render_view' ) );
 
+		add_action( 'template_redirect', array( $this, 'maybe_set_404_for_endpoint_value' ) );
+
 		$this->email_preview->register();
+	}
+
+	/**
+	 * Return a 404 when the order withdrawal endpoint is requested with a trailing value.
+	 *
+	 * The endpoint never uses a value, so any tail would otherwise serve duplicate content.
+	 *
+	 * @since 11.4.0
+	 */
+	public function maybe_set_404_for_endpoint_value(): void {
+		global $wp, $wp_query;
+
+		if ( ! isset( $wp->query_vars[ OrderWithdrawalEndpoint::ENDPOINT_KEY ] ) || '' === $wp->query_vars[ OrderWithdrawalEndpoint::ENDPOINT_KEY ] ) {
+			return;
+		}
+
+		$wp_query->set_404();
+		status_header( 404 );
+		nocache_headers();
 	}
 
 	/**

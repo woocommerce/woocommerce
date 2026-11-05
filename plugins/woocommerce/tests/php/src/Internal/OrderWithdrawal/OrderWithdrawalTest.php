@@ -117,6 +117,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		parent::setUp();
 
 		$bootstrap = \WC_Unit_Tests_Bootstrap::instance();
+		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email.php';
 		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email-customer-order-withdrawal-requested.php';
 		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email-order-withdrawal-requested.php';
 
@@ -825,6 +826,37 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			remove_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
 			remove_action( 'before_delete_post', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
 			remove_action( 'woocommerce_privacy_remove_order_personal_data', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
+		}
+	}
+
+	/**
+	 * @testdox Should return a 404 only when the order withdrawal endpoint is requested with a trailing value.
+	 */
+	public function test_maybe_set_404_for_endpoint_value(): void {
+		global $wp, $wp_query;
+
+		$original_wp_query  = $wp_query;
+		$original_wp        = $wp;
+		$controller         = new OrderWithdrawalController();
+		$endpoint_key       = OrderWithdrawalEndpoint::ENDPOINT_KEY;
+		$wp                 = new \WP(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp->query_vars     = array( $endpoint_key => '' );
+		$wp_query           = new \WP_Query(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		try {
+			$controller->maybe_set_404_for_endpoint_value();
+			$this->assertFalse( $wp_query->is_404(), 'The bare endpoint URL should not return a 404.' );
+
+			$wp->query_vars = array();
+			$controller->maybe_set_404_for_endpoint_value();
+			$this->assertFalse( $wp_query->is_404(), 'Requests without the endpoint query var should not return a 404.' );
+
+			$wp->query_vars = array( $endpoint_key => 'some/trailing/path' );
+			$controller->maybe_set_404_for_endpoint_value();
+			$this->assertTrue( $wp_query->is_404(), 'The endpoint with a trailing value should return a 404.' );
+		} finally {
+			$wp       = $original_wp; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$wp_query = $original_wp_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 	}
 
