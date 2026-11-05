@@ -5,7 +5,7 @@
  * @package WooCommerce\Admin\Importers
  */
 
-use Automattic\WooCommerce\Internal\Admin\ImportExport\Product\ProductImportPlaceholderCleanup;
+use Automattic\WooCommerce\Internal\Admin\ImportExport\Product\ImportPlaceholders;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Internal\Utilities\URL;
@@ -331,7 +331,7 @@ class WC_Product_CSV_Importer_Controller {
 	 * @param int $cursor Highest placeholder ID earlier cleanup requests have examined.
 	 */
 	private static function dispatch_ajax_cleanup( int $cursor ): void {
-		$next_cursor = wc_get_container()->get( ProductImportPlaceholderCleanup::class )->cleanup_after_import( $cursor );
+		$next_cursor = wc_get_container()->get( ImportPlaceholders::class )->cleanup_after_import( $cursor );
 
 		$response = array(
 			'position'            => null === $next_cursor ? 'done' : self::CLEANUP_POSITION_PREFIX . $next_cursor,
@@ -411,7 +411,7 @@ class WC_Product_CSV_Importer_Controller {
 			}
 
 			if ( 0 === $params['start_pos'] ) {
-				wc_get_container()->get( ProductImportPlaceholderCleanup::class )->release_stranded_cleanup_claims();
+				wc_get_container()->get( ImportPlaceholders::class )->release_stranded_cleanup_claims();
 			}
 
 			include_once WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php';
