@@ -3006,13 +3006,47 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should still fall back to pending, without a warning, when the current status isn't registered either.
-	 * @testWith ["legacy-status"]
-	 *           ["auto-draft"]
-	 *
-	 * @param string $current_status A current status that isn't a registered order status.
+	 * @testdox Should keep a custom status whose plugin is no longer active when given an unregistered status.
 	 */
-	public function test_unregistered_status_falls_back_to_pending_when_current_status_is_unregistered( string $current_status ): void {
+	public function test_unregistered_status_keeps_a_custom_status_that_is_no_longer_registered(): void {
+		$add_custom_status = static function ( $statuses ) {
+			$statuses['wc-legacy-status'] = 'Legacy status';
+			return $statuses;
+		};
+		add_filter( 'wc_order_statuses', $add_custom_status );
+		register_post_status( 'wc-legacy-status', array( 'label' => 'Legacy status' ) );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( 'legacy-status' );
+		$order->save();
+
+		// Simulate deactivating the plugin that registered the status.
+		remove_filter( 'wc_order_statuses', $add_custom_status );
+		unset( $GLOBALS['wp_post_statuses']['wc-legacy-status'] );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertSame( 'legacy-status', $order->get_status( 'edit' ), 'The order should be stored with the custom status.' );
+
+		$pending_actions = did_action( 'woocommerce_order_status_pending' );
+		$changed_actions = did_action( 'woocommerce_order_status_changed' );
+
+		$this->setExpectedIncorrectUsage( 'WC_Abstract_Order::set_status' );
+		$order->update_status( 'not-a-status' );
+
+		$this->assertSame( 'legacy-status', wc_get_order( $order->get_id() )->get_status( 'edit' ), 'The order should keep its custom status.' );
+		$this->assertSame( $pending_actions, did_action( 'woocommerce_order_status_pending' ), 'No transition to pending should fire.' );
+		$this->assertSame( $changed_actions, did_action( 'woocommerce_order_status_changed' ), 'No status change should fire.' );
+	}
+
+	/**
+	 * @testdox Should still fall back to pending, without a warning, when the current status is empty or a special status.
+	 * @testWith ["auto-draft"]
+	 *           ["trash"]
+	 *           [""]
+	 *
+	 * @param string $current_status An empty or special current status.
+	 */
+	public function test_unregistered_status_falls_back_to_pending_when_current_status_is_empty_or_special( string $current_status ): void {
 		$order = new WC_Order();
 		$order->set_object_read( false );
 		$order->set_status( $current_status );
@@ -3020,7 +3054,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 		$order->set_status( 'not-a-status' );
 
-		$this->assertSame( OrderStatus::PENDING, $order->get_status(), 'An order without a registered status should fall back to pending.' );
+		$this->assertSame( OrderStatus::PENDING, $order->get_status(), 'An order with an empty or special status should fall back to pending.' );
 	}
 
 	/**
