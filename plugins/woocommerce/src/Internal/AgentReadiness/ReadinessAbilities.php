@@ -350,6 +350,10 @@ class ReadinessAbilities {
 									'why'     => array( 'type' => 'string' ),
 									'fix'     => array( 'type' => 'string' ),
 									'fix_url' => array( 'type' => 'string' ),
+									'pending' => array(
+										'type'        => 'boolean',
+										'description' => __( 'True for a check of output a coming WooCommerce update builds; it does not run yet.', 'woocommerce' ),
+									),
 								),
 							),
 						),

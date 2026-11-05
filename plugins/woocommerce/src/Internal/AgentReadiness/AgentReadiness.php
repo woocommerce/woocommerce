@@ -265,7 +265,7 @@ class AgentReadiness {
 	 *
 	 * @param array<string, mixed>|null                                                                                                               $report Stored report.
 	 * @param array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}>|null $live   Store conditions already read, or null to read them.
-	 * @return array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,pending?:string}>
+	 * @return array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,pending?:bool}>
 	 */
 	public function get_store_checks( ?array $report, ?array $live = null ): array {
 		$checks   = $live ?? $this->store_conditions->all();
@@ -284,7 +284,7 @@ class AgentReadiness {
 				'why'     => (string) ( $check['why'] ?? '' ),
 				'fix'     => (string) ( $check['fix'] ?? '' ),
 				'fix_url' => (string) ( $check['fix_url'] ?? '' ),
-				'pending' => (string) ( $check['pending'] ?? '' ),
+				'pending' => ! empty( $check['pending'] ),
 			);
 		}
 		return $checks;

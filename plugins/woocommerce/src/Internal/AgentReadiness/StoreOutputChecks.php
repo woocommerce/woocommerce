@@ -43,7 +43,7 @@ class StoreOutputChecks {
 	/**
 	 * Run every check. Each URL is requested at most once per call.
 	 *
-	 * @return array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,pending:string}>
+	 * @return array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,pending:bool}>
 	 */
 	public function all(): array {
 		$responses = new StoreResponses( $this->coming_soon_helper->is_site_live() );
@@ -51,9 +51,9 @@ class StoreOutputChecks {
 		$responses->home_page();
 		$results = array();
 		foreach ( $this->checks() as $check ) {
-			$pending = self::PENDING[ $check['id'] ] ?? '';
+			$pending = in_array( $check['id'], self::PENDING, true );
 			try {
-				$ok = '' === $pending ? ( $check['test'] )( $responses ) : null;
+				$ok = $pending ? null : ( $check['test'] )( $responses );
 			} catch ( \Throwable $e ) {
 				// Reported as couldn't check, so one broken check doesn't stop the scan.
 				$ok = null;
@@ -79,14 +79,16 @@ class StoreOutputChecks {
 	}
 
 	/**
-	 * Checks for output WooCommerce doesn't build yet, with the issue that builds it. They don't run
-	 * and are reported as pending, not failed; remove the entry when the output ships.
+	 * Checks for output WooCommerce doesn't build yet. They don't run and are reported as
+	 * pending, not failed; remove the entry when the output ships. The output is built by
+	 * WOOPRD-3912 (returns policy), WOOPRD-3908 (shipping), WOOPRD-3918 (buy action) and
+	 * WOOAI-1435 (UCP checkout).
 	 */
 	private const PENDING = array(
-		'product_return_policy_schema' => 'WOOPRD-3912',
-		'product_shipping_schema'      => 'WOOPRD-3908',
-		'product_buy_action_schema'    => 'WOOPRD-3918',
-		'ucp_checkout'                 => 'WOOAI-1435',
+		'product_return_policy_schema',
+		'product_shipping_schema',
+		'product_buy_action_schema',
+		'ucp_checkout',
 	);
 
 	private const MAX_LISTED_SITEMAPS = 5;
@@ -489,7 +491,7 @@ class StoreOutputChecks {
 	 */
 	private function with_llms_txt( StoreResponses $responses, callable $test ): ?bool {
 		$response = $responses->get( self::host_root( '/llms.txt' ) );
-		if ( null === $response || $response['status'] >= 500 ) {
+		if ( null === $response || self::blocked( $response['status'] ) ) {
 			return null;
 		}
 		$body = trim( $response['body'] );
@@ -525,13 +527,24 @@ class StoreOutputChecks {
 		$unknown = false;
 		foreach ( $links as $link ) {
 			$response = $responses->get( $link );
-			if ( null === $response || $response['status'] >= 500 ) {
+			if ( null === $response || self::blocked( $response['status'] ) ) {
 				$unknown = true;
 			} elseif ( $response['status'] >= 400 ) {
 				return false;
 			}
 		}
 		return $unknown ? null : true;
+	}
+
+	/**
+	 * Whether a status says the store's request to itself was refused or failed, not that the
+	 * page is missing: a server error, or a firewall or security plugin answering 401 or 403.
+	 * A check then reports couldn't check, as it does when the page times out.
+	 *
+	 * @param int $status HTTP status.
+	 */
+	private static function blocked( int $status ): bool {
+		return $status >= 500 || in_array( $status, array( 401, 403 ), true );
 	}
 
 	/**
