@@ -38,27 +38,23 @@ class DeclaredToAgents {
 				'found' => self::document_served( $responses, $document[1], $document[2] ),
 			);
 		}
-		$robots = $responses->get( StoreOutputChecks::host_root( '/robots.txt' ) );
-		$home   = $responses->home_page();
-		$page   = $responses->product_page();
-		$feed   = $responses->get( '/feed/' );
-		$lines  = array(
-			'feed-present'             => array( __( 'RSS or Atom feed', 'woocommerce' ), null === $feed || $feed['status'] >= 500 ? null : 200 === $feed['status'] && 1 === preg_match( '/<(rss|feed)[\s>]/i', $feed['body'] ) ),
-			'sameas-links'             => array( __( 'sameAs links in structured data', 'woocommerce' ), self::json_ld_has( $home, 'sameAs' ) ),
-			'site-search-action'       => array( __( 'SearchAction for on-site search', 'woocommerce' ), self::has_search_action( $home ) ),
-			'webmcp-forms-schema'      => array( __( 'Forms that expose declarative WebMCP', 'woocommerce' ), self::has_webmcp_form( $home, $page ) ),
-			'sitemap-lastmod'          => array( __( 'Sitemap has lastmod dates', 'woocommerce' ), self::sitemap_has_lastmod( $responses, $robots ) ),
-			'markdown-pages'           => array( __( 'Markdown version of pages (Accept: text/markdown)', 'woocommerce' ), self::is_markdown( self::markdown_answer( $responses ) ) ),
-			'markdown-alternate-link'  => array( __( 'Pages link to their Markdown version', 'woocommerce' ), self::page_matches( array( $home, $page ), '/<link\b(?=[^>]*\brel\s*=\s*["\']?[^"\'>]*\balternate\b)(?=[^>]*\btype\s*=\s*["\']?text\/markdown)/i' ) ),
-			'markdown-frontmatter'     => array( __( 'Markdown versions start with frontmatter', 'woocommerce' ), self::has_frontmatter( self::markdown_answer( $responses ) ) ),
-			'product-review-schema'    => array( __( 'Product review markup', 'woocommerce' ), null === $page ? null : self::product_has_reviews( $page['body'] ) ),
-			'code-block-language'      => array( __( 'Code blocks tagged with their language', 'woocommerce' ), self::page_matches( array( $home, $page ), '/<(?:pre|code)\b[^>]*\bclass\s*=\s*["\'][^"\']*\b(?:language|lang)-[\w+#-]+/i' ) ),
-			'editorial-metadata'       => array( __( 'Author and publish date', 'woocommerce' ), self::has_editorial_metadata( array( $home, $page ) ) ),
-			'site-search-autocomplete' => array( __( 'On-site search with autocomplete', 'woocommerce' ), self::page_matches( array( $home ), '/<input\b(?=[^>]*(?:\btype\s*=\s*["\']?search|\bname\s*=\s*["\']?s["\'\s\/>]))(?=[^>]*(?:\baria-autocomplete\s*=|\brole\s*=\s*["\']?combobox|\slist\s*=))/i' ) ),
-			'mcp-server-card'          => array( __( 'MCP server card', 'woocommerce' ), self::either( self::document_served( $responses, '/.well-known/mcp/server-card.json', array( self::class, 'is_mcp_server_card' ) ), self::document_served( $responses, '/.well-known/mcp.json', array( self::class, 'is_mcp_server_card' ) ) ) ),
+		$home  = $responses->home_page();
+		$page  = $responses->product_page();
+		$lines = array(
+			'sameas-links'                => array( __( 'sameAs links in structured data', 'woocommerce' ), self::json_ld_has( $home, 'sameAs' ) ),
+			'site-search-action'          => array( __( 'SearchAction for on-site search', 'woocommerce' ), self::has_search_action( $home ) ),
+			'webmcp-forms-schema'         => array( __( 'Forms that expose declarative WebMCP', 'woocommerce' ), self::has_webmcp_form( $home, $page ) ),
+			'markdown-pages'              => array( __( 'Markdown version of pages (Accept: text/markdown)', 'woocommerce' ), self::is_markdown( self::markdown_answer( $responses ) ) ),
+			'markdown-alternate-link'     => array( __( 'Pages link to their Markdown version', 'woocommerce' ), self::page_matches( array( $home, $page ), '/<link\b(?=[^>]*\brel\s*=\s*["\']?[^"\'>]*\balternate\b)(?=[^>]*\btype\s*=\s*["\']?text\/markdown)/i' ) ),
+			'markdown-frontmatter'        => array( __( 'Markdown versions start with frontmatter', 'woocommerce' ), self::has_frontmatter( self::markdown_answer( $responses ) ) ),
+			'link-header-agent-resources' => array( __( 'Link header pointing to the API catalog or llms.txt', 'woocommerce' ), self::links_agent_resources( $home ) ),
+			'code-block-language'         => array( __( 'Code blocks tagged with their language', 'woocommerce' ), self::page_matches( array( $home, $page ), '/<(?:pre|code)\b[^>]*\bclass\s*=\s*["\'][^"\']*\b(?:language|lang)-[\w+#-]+/i' ) ),
+			'editorial-metadata'          => array( __( 'Author and publish date', 'woocommerce' ), self::has_editorial_metadata( array( $home, $page ) ) ),
+			'site-search-autocomplete'    => array( __( 'On-site search with autocomplete', 'woocommerce' ), self::page_matches( array( $home ), '/<input\b(?=[^>]*(?:\btype\s*=\s*["\']?search|\bname\s*=\s*["\']?s["\'\s\/>]))(?=[^>]*(?:\baria-autocomplete\s*=|\brole\s*=\s*["\']?combobox|\slist\s*=))/i' ) ),
+			'mcp-server-card'             => array( __( 'MCP server card', 'woocommerce' ), self::either( self::document_served( $responses, '/.well-known/mcp/server-card.json', array( self::class, 'is_mcp_server_card' ) ), self::document_served( $responses, '/.well-known/mcp.json', array( self::class, 'is_mcp_server_card' ) ) ) ),
 			// Not read yet: DNS-AID needs a DNS lookup, and a feed product sync is set up outside the store's pages.
-			'dns-aid'                  => array( __( 'DNS for AI Discovery (DNS-AID)', 'woocommerce' ), null ),
-			'product-feed-automation'  => array( __( 'Automated product feed', 'woocommerce' ), null ),
+			'dns-aid'                     => array( __( 'DNS for AI Discovery (DNS-AID)', 'woocommerce' ), null ),
+			'product-feed-automation'     => array( __( 'Automated product feed', 'woocommerce' ), null ),
 		);
 		foreach ( $lines as $id => $line ) {
 			$items[] = array(
@@ -82,6 +78,7 @@ class DeclaredToAgents {
 			'agents-md'    => array( __( 'AGENTS.md', 'woocommerce' ), '/AGENTS.md' ),
 			'security-txt' => array( __( 'security.txt', 'woocommerce' ), '/.well-known/security.txt' ),
 			'auth-md'      => array( __( 'auth.md agent sign-in instructions', 'woocommerce' ), '/auth.md' ),
+			'llms-full'    => array( __( 'llms-full.txt', 'woocommerce' ), '/llms-full.txt' ),
 		);
 	}
 
@@ -94,6 +91,7 @@ class DeclaredToAgents {
 	private function documents(): array {
 		$has = static fn( string ...$keys ): callable => static fn( array $document ): bool => array() === array_diff( $keys, array_keys( array_filter( $document ) ) );
 		return array(
+			'api-catalog'              => array( __( 'API catalog', 'woocommerce' ), '/.well-known/api-catalog', $has( 'linkset' ) ),
 			'tdmrep'                   => array( __( 'TDMRep text-and-data-mining reservation', 'woocommerce' ), '/.well-known/tdmrep.json', static fn( array $document ): bool => isset( $document[0]['location'] ) ),
 			'a2a-agent-card'           => array( __( 'A2A Agent Card', 'woocommerce' ), '/.well-known/agent-card.json', $has( 'name', 'skills' ) ),
 			'agent-skills-index'       => array( __( 'Agent Skills index', 'woocommerce' ), '/.well-known/agent-skills/index.json', $has( 'skills' ) ),
@@ -216,36 +214,6 @@ class DeclaredToAgents {
 	}
 
 	/**
-	 * Whether the store's first sitemap has lastmod dates, in a sitemap index or in the first sitemap it lists.
-	 *
-	 * @param StoreResponses                                                  $responses Store responses.
-	 * @param array{status:int,body:string,headers:array<string,string>}|null $robots    The robots.txt response.
-	 */
-	private static function sitemap_has_lastmod( StoreResponses $responses, ?array $robots ): ?bool {
-		// Without robots.txt the store's own sitemap list isn't known.
-		$unknown = null === $robots || ( $robots['status'] >= 400 && 404 !== $robots['status'] );
-		foreach ( StoreOutputChecks::sitemap_urls( 200 === ( $robots['status'] ?? 0 ) ? $robots['body'] : '' ) as $url ) {
-			$response = $responses->get( $url );
-			if ( null === $response || $response['status'] >= 500 ) {
-				$unknown = true;
-				continue;
-			}
-			if ( 200 !== $response['status'] || 1 !== preg_match( '/<(urlset|sitemapindex)[\s>]/i', $response['body'] ) ) {
-				continue;
-			}
-			if ( false !== stripos( $response['body'], '<lastmod' ) ) {
-				return true;
-			}
-			if ( 1 !== preg_match( '#<sitemapindex.*?<loc>\s*(.+?)\s*</loc>#is', $response['body'], $first ) ) {
-				return false;
-			}
-			$child = $responses->get( html_entity_decode( $first[1], ENT_QUOTES | ENT_XML1 ) );
-			return null === $child || $child['status'] >= 500 ? null : 200 === $child['status'] && false !== stripos( $child['body'], '<lastmod' );
-		}
-		return $unknown ? null : false;
-	}
-
-	/**
 	 * The product page, or the home page without a product, asked for as Markdown.
 	 *
 	 * @param StoreResponses $responses Store responses.
@@ -358,16 +326,15 @@ class DeclaredToAgents {
 	}
 
 	/**
-	 * Whether the product page's JSON-LD has reviews or a rating.
+	 * Whether the page's Link header points to the API catalog or llms.txt.
 	 *
-	 * @param string $html Product page HTML.
+	 * @param array{status:int,body:string,headers:array<string,string>}|null $page Page, null when it didn't load.
 	 */
-	private static function product_has_reviews( string $html ): bool {
-		foreach ( JsonLd::items( $html, 'Product', 'ProductGroup' ) as $item ) {
-			if ( ! empty( $item['review'] ) || ! empty( $item['aggregateRating'] ) ) {
-				return true;
-			}
+	private static function links_agent_resources( ?array $page ): ?bool {
+		if ( null === $page ) {
+			return null;
 		}
-		return false;
+		$link = $page['headers']['link'] ?? '';
+		return 1 === preg_match( '/rel\s*=\s*"?[^";,]*\bapi-catalog\b/i', $link ) || false !== stripos( $link, '/llms.txt' );
 	}
 }

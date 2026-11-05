@@ -50,11 +50,25 @@ class StoreResponses {
 	private array $responses = array();
 
 	/**
+	 * How `get()` reached each URL: the redirects it followed, and where it stopped when it didn't follow one.
+	 *
+	 * @var array<string, array{count:int,stopped_at:string}>
+	 */
+	private array $redirects = array();
+
+	/**
 	 * The product whose page checks read, false when there is none, null until looked up.
 	 *
 	 * @var \WC_Product|false|null
 	 */
 	private $product = null;
+
+	/**
+	 * The category page's URL once looked up; '' when there is none.
+	 *
+	 * @var string|null
+	 */
+	private ?string $category_url = null;
 
 	/**
 	 * Constructor.
@@ -95,27 +109,56 @@ class StoreResponses {
 	}
 
 	/**
-	 * The response to a JSON POST to a URL on the store's host, such as a UCP endpoint. Redirects are not followed.
+	 * How many redirects `get()` followed for a URL, and the URL of a redirect it didn't follow ('' when none).
 	 *
-	 * @param string               $url  URL or path.
-	 * @param array<string, mixed> $body Request body.
-	 * @return array{status:int,body:string,headers:array<string,string>}|null Null when the store could not be reached.
+	 * @param string $url URL or path, as given to `get()`.
+	 * @return array{count:int,stopped_at:string}
 	 */
-	public function post_json( string $url, array $body ): ?array {
-		$url  = self::absolute( $url );
-		$json = (string) wp_json_encode( $body );
-		$key  = 'POST ' . $url . ' ' . $json;
-		if ( ! array_key_exists( $key, $this->responses ) ) {
-			$this->responses[ $key ] = $this->site_live && $this->is_store_url( $url ) ? $this->request(
-				$url,
-				array(
-					'method'  => 'POST',
-					'headers' => array( 'Content-Type' => 'application/json' ),
-					'body'    => $json,
+	public function redirects( string $url ): array {
+		return $this->redirects[ self::absolute( $url ) ] ?? array(
+			'count'      => 0,
+			'stopped_at' => '',
+		);
+	}
+
+	/**
+	 * The shop page, or null when there is none or it didn't answer 200.
+	 *
+	 * @return array{status:int,body:string,headers:array<string,string>}|null
+	 */
+	public function shop_page(): ?array {
+		$url = wc_get_page_permalink( 'shop', '' );
+		return '' === $url ? null : self::ok( $this->get( $url ) );
+	}
+
+	/**
+	 * The page of a product category with products: one of `product()`'s, else the store's largest. Null when
+	 * there is none or it didn't answer 200.
+	 *
+	 * @return array{status:int,body:string,headers:array<string,string>}|null
+	 */
+	public function category_page(): ?array {
+		if ( null === $this->category_url ) {
+			$product            = $this->product();
+			$ids                = null === $product ? array() : $product->get_category_ids();
+			$terms              = get_terms(
+				array_merge(
+					array(
+						'taxonomy'   => 'product_cat',
+						'hide_empty' => true,
+						'number'     => 1,
+					),
+					array() === $ids ? array(
+						'orderby' => 'count',
+						'order'   => 'DESC',
+					) : array( 'include' => $ids )
 				)
-			) : null;
+			);
+			$term               = is_array( $terms ) ? reset( $terms ) : false;
+			$url                = $term instanceof \WP_Term ? get_term_link( $term ) : '';
+			$this->category_url = is_string( $url ) ? $url : '';
 		}
-		return $this->responses[ $key ];
+		return '' === $this->category_url ? null : self::ok( $this->get( $this->category_url ) );
 	}
 
 	/**
@@ -191,8 +234,14 @@ class StoreResponses {
 	 * @return array{status:int,body:string,headers:array<string,string>}|null
 	 */
 	private function fetch( string $url ): ?array {
+		$asked = $url;
 		for ( $redirects = 0; $redirects <= self::MAX_REDIRECTS; $redirects++ ) {
+			$this->redirects[ $asked ] = array(
+				'count'      => $redirects,
+				'stopped_at' => '',
+			);
 			if ( ! $this->is_store_url( $url ) ) {
+				$this->redirects[ $asked ]['stopped_at'] = $url;
 				return null;
 			}
 			$response = $this->request( $url );
@@ -205,6 +254,7 @@ class StoreResponses {
 			}
 			$url = \WP_Http::make_absolute_url( $location, $url );
 			if ( is_string( wp_parse_url( $url, PHP_URL_QUERY ) ) ) {
+				$this->redirects[ $asked ]['stopped_at'] = $url;
 				return null;
 			}
 		}
@@ -242,7 +292,7 @@ class StoreResponses {
 			return null;
 		}
 		$headers = array();
-		foreach ( array( 'location', 'x-robots-tag', 'content-type', 'vary' ) as $name ) {
+		foreach ( array( 'location', 'x-robots-tag', 'content-type', 'vary', 'link' ) as $name ) {
 			$value = wp_remote_retrieve_header( $response, $name );
 			$value = is_array( $value ) ? implode( ', ', $value ) : (string) $value;
 			if ( '' !== $value ) {
