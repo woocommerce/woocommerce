@@ -4,7 +4,7 @@
 import '@wordpress/theme/design-tokens.css';
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { Badge, Text } from '@wordpress/ui';
+import { Badge } from '@wordpress/ui';
 
 /**
  * Internal dependencies
@@ -66,21 +66,18 @@ export const PurpleTheme = ( {
 						<Badge intent="informational">
 							{ __( 'Free theme', 'woocommerce' ) }
 						</Badge>
-						<Text variant="heading-xl" render={ <h2 /> }>
+						<h2 className="woocommerce-profiler-purple-theme__title">
 							{ __(
 								'Built by WooCommerce, for your store',
 								'woocommerce'
 							) }
-						</Text>
-						<Text
-							className="woocommerce-profiler-purple-theme__description"
-							render={ <p /> }
-						>
+						</h2>
+						<p className="woocommerce-profiler-purple-theme__description">
 							{ __(
 								'A free theme made for stores, so your shop looks polished from day one.',
 								'woocommerce'
 							) }
-						</Text>
+						</p>
 					</div>
 				</div>
 				<div className="woocommerce-profiler-purple-theme__footer">
@@ -91,19 +88,19 @@ export const PurpleTheme = ( {
 					>
 						{ __( 'Install Purple', 'woocommerce' ) }
 					</Button>
+					<Button
+						className="woocommerce-profiler-purple-theme__continue"
+						variant="tertiary"
+						onClick={ () => complete( false ) }
+					>
+						{ __( 'Keep my current theme', 'woocommerce' ) }
+					</Button>
 					<p className="woocommerce-profiler-purple-theme__note">
 						{ __(
 							'We’ll install Purple and activate it, so it becomes your store’s theme right away. You can switch back any time in Appearance > Themes.',
 							'woocommerce'
 						) }
 					</p>
-					<Button
-						className="woocommerce-profiler-purple-theme__keep"
-						variant="tertiary"
-						onClick={ () => complete( false ) }
-					>
-						{ __( 'Keep my current theme', 'woocommerce' ) }
-					</Button>
 				</div>
 			</div>
 		</div>
