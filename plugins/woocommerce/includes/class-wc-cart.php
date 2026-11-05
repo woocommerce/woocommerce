@@ -857,8 +857,42 @@ class WC_Cart extends WC_Legacy_Cart {
 				continue;
 			}
 
+			$other_applied_codes = array_values(
+				array_filter(
+					$applied_coupons,
+					static function ( $applied_code ) use ( $code ) {
+						return ! wc_is_same_coupon( $applied_code, $code );
+					}
+				)
+			);
+
+			/**
+			 * Filters which coupons to keep when an individual use coupon is applied.
+			 *
+			 * Honoured during revalidation so combinations retained through this filter are not
+			 * treated as conflicts after the individual-use setting changes.
+			 *
+			 * @since 2.6.0
+			 * @param array     $coupons_to_keep        Coupon codes to keep.
+			 * @param WC_Coupon $individual_use_coupon Individual use coupon.
+			 * @param array     $applied_coupons       Other applied coupon codes.
+			 */
+			$coupons_to_keep = apply_filters( 'woocommerce_apply_individual_use_coupon', array(), $individual_use_coupon, $other_applied_codes );
+
 			foreach ( $coupons as $other_code => $other_coupon ) {
 				if ( wc_is_same_coupon( $code, $other_code ) ) {
+					continue;
+				}
+
+				$retained = false;
+				foreach ( (array) $coupons_to_keep as $keep_code ) {
+					if ( wc_is_same_coupon( (string) $keep_code, $other_code ) ) {
+						$retained = true;
+						break;
+					}
+				}
+
+				if ( $retained ) {
 					continue;
 				}
 

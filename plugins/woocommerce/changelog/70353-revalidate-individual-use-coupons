@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Revalidate individual-use coupon combinations on cart and checkout so saved carts cannot keep a conflicting stack after the setting changes.
+Block checkout when a saved cart holds a conflicting individual-use coupon combination, while leaving the codes applied so the shopper can remove them.
