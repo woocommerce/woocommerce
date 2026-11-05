@@ -279,12 +279,24 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Whether a store check is a setup step (a setting, from StoreConditions) rather than a scanned
+	 * check from the stored report. Setup steps are worded as actions and can be Required; scanned
+	 * checks keep the report's wording. Only scanned checks carry a conflict flag: AgentReadiness
+	 * sets it on every one of them, so its absence is what marks a setup step.
+	 *
+	 * @param array<string, mixed> $check Store check.
+	 */
+	private static function is_setup_step( array $check ): bool {
+		return ! array_key_exists( 'conflict', $check );
+	}
+
+	/**
 	 * A failing store check's title: a setup step's action, or a scanned check's failing title.
 	 *
 	 * @param array{id:string,name:string,label?:string,why:string,fix_url:string,conflict?:bool} $check Store check.
 	 */
 	private static function check_title( array $check ): string {
-		if ( ! isset( $check['conflict'] ) ) {
+		if ( self::is_setup_step( $check ) ) {
 			return self::check_action( $check )[0];
 		}
 		return '' !== ( $check['label'] ?? '' ) ? (string) $check['label'] : $check['name'];
@@ -438,7 +450,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			if ( false !== $check['ok'] ) {
 				continue;
 			}
-			$is_step     = ! isset( $check['conflict'] );
+			$is_step     = self::is_setup_step( $check );
 			$action      = $is_step ? self::check_action( $check ) : array( self::check_title( $check ), $check['why'], $check['fix_url'] );
 			$link        = '' === $action[2] ? '' : '<a href="' . esc_url( $action[2] ) . '">' . self::fix_link_text( $action[2] ) . '</a>';
 			$is_required = $is_step && StoreConditions::LEVEL_REQUIRED === ( $check['level'] ?? '' );
@@ -478,8 +490,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'impact' => null === $share
 					/* translators: %s: number of products. */
 					? array( 'info', sprintf( _n( '%s product', '%s products', $count, 'woocommerce' ), number_format_i18n( $count ) ) )
-					/* translators: %s: share of sales, such as 18%. */
-					: array( 'info', sprintf( __( '%s of sales', 'woocommerce' ), self::percent( $share ) ) ),
+					: array( 'info', self::share_badge( $share ) ),
 				'link'   => self::products_link( $count, (string) ( $check['id'] ?? '' ), $linked ),
 				'share'  => $share,
 				'count'  => $count,
@@ -586,12 +597,30 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * @param int   $days  Days the share covers, or 0 to leave the period out.
 	 */
 	private static function sales_text( float $share, int $days ): string {
+		if ( 0.0 === $share ) {
+			/* translators: %d: number of days. */
+			return $days > 0 ? sprintf( __( 'No sales in the last %d days.', 'woocommerce' ), $days ) : __( 'No sales.', 'woocommerce' );
+		}
 		if ( $days > 0 ) {
 			/* translators: 1: share of sales, such as 18%, 2: number of days. */
 			return sprintf( __( '%1$s of your sales in the last %2$d days.', 'woocommerce' ), self::percent( $share ), $days );
 		}
 		/* translators: %s: share of sales, such as 18%. */
 		return sprintf( __( '%s of your sales.', 'woocommerce' ), self::percent( $share ) );
+	}
+
+	/**
+	 * The badge on a product issue with a share of sales: "18% of sales", or "No sales" when the
+	 * affected products sold nothing in the period.
+	 *
+	 * @param float $share Share from 0 to 1.
+	 */
+	private static function share_badge( float $share ): string {
+		if ( 0.0 === $share ) {
+			return __( 'No sales', 'woocommerce' );
+		}
+		/* translators: %s: share of sales, such as 18%. */
+		return sprintf( __( '%s of sales', 'woocommerce' ), self::percent( $share ) );
 	}
 
 	/**
@@ -807,7 +836,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				continue;
 			}
 			$lines = array( esc_html( self::affects_text( $check ) ) );
-			if ( ! isset( $check['conflict'] ) ) {
+			if ( self::is_setup_step( $check ) ) {
 				// A setup step, from StoreConditions: worded as in Status.
 				$action   = self::check_action( $check );
 				$required = StoreConditions::LEVEL_REQUIRED === $check['level'];

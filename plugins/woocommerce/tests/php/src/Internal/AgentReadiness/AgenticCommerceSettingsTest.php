@@ -511,6 +511,14 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '18% of sales</mark>', $fix_first[0] );
 		$this->assertStringContainsString( '18% of your sales in the last 90 days. missing_images why. missing_images fix.', $fix_first[0], 'The first share says over which period, then why and what to do' );
 		$this->assertStringContainsString( '5% of your sales. missing_brand why. missing_brand fix.', $fix_first[0], 'The next ones give only the share' );
+
+		$report['checks'][1]['sales_share'] = 0.0;
+		update_option( AgentReadiness::REPORT_OPTION, $report );
+		$html = $this->render_readiness();
+		$this->assertStringContainsString( 'No sales</mark>', $html, 'Products that sold nothing in the period say so, not 0%' );
+		$this->assertStringContainsString( 'No sales. missing_brand why. missing_brand fix.', $html );
+		$this->assertStringNotContainsString( '0% of', $html );
+		$report['checks'][1]['sales_share'] = 0.05;
 		$this->assertStringContainsString( 'Open settings</a>', $fix_first[0], 'A setup step links to where to fix it' );
 		$this->assertStringContainsString( '<p class="description">5 products</p>', $fix_first[0], 'A product issue names how many products it affects' );
 		$this->assertStringNotContainsString( 'under 1%', $html, 'Shares are in Fix first only, not on the product card' );
