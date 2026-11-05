@@ -623,9 +623,9 @@ abstract class ActionableAbility extends Ability {
 	}
 
 	/**
-	 * Put every refusal message into the first message, because an MCP client
-	 * shows only the first message of an error. The other codes and messages
-	 * stay as they are for the clients that read all of them.
+	 * Put every refusal message into the first message, once each, because an
+	 * MCP client shows only the first message of an error. The other codes and
+	 * messages stay as they are for the clients that read all of them.
 	 *
 	 * @param \WP_Error $refused Refusals in run order.
 	 * @return \WP_Error
@@ -633,7 +633,7 @@ abstract class ActionableAbility extends Ability {
 	private static function join_refusals( \WP_Error $refused ): \WP_Error {
 		$messages = $refused->get_error_messages();
 		if ( count( $messages ) > 1 ) {
-			$refused->errors[ $refused->get_error_code() ][0] = implode( ' ', $messages );
+			$refused->errors[ $refused->get_error_code() ][0] = implode( ' ', array_unique( $messages ) );
 		}
 
 		return $refused;
