@@ -3900,8 +3900,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $result );
-		$this->assertTrue( $result['deleted'] );
 		$this->assertSame( $product->get_id(), $result['id'] );
+		$this->assertSame( 'deleted', $result['status'] );
 		$this->assertNull( get_post( $product->get_id() ) );
 	}
 
@@ -3919,7 +3919,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $result );
-		$this->assertTrue( $result['deleted'] );
+		$this->assertSame( 'deleted', $result['status'] );
 		$this->assertNull( get_post( $variation_id ) );
 	}
 
@@ -3937,7 +3937,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $result );
-		$this->assertTrue( $result['deleted'] );
+		$this->assertSame( 'trash', $result['status'] );
 		$this->assertSame( 'trash', get_post_status( $product->get_id() ) );
 	}
 
