@@ -208,26 +208,29 @@ class ProductsListTest extends WC_Unit_Test_Case {
 		$pagenow                            = 'edit.php'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$_GET[ ProductsList::FILTER_PARAM ] = 'missing_images';
 
-		$query = new \WP_Query();
-		$query->set( 'post_type', 'product' );
-		$wp_the_query = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$this->sut->apply_filter( $query );
-		$this->assertSame( 'missing_images', $query->get( 'meta_query' )[0]['value'] );
+		try {
+			$query = new \WP_Query();
+			$query->set( 'post_type', 'product' );
+			$wp_the_query = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$this->sut->apply_filter( $query );
+			$this->assertSame( 'missing_images', $query->get( 'meta_query' )[0]['value'] );
 
-		$other = new \WP_Query();
-		$other->set( 'post_type', 'product' );
-		$this->sut->apply_filter( $other );
-		$this->assertSame( '', $other->get( 'meta_query' ) );
+			$other = new \WP_Query();
+			$other->set( 'post_type', 'product' );
+			$this->sut->apply_filter( $other );
+			$this->assertSame( '', $other->get( 'meta_query' ) );
 
-		update_option( 'woocommerce_feature_' . AgenticCommerceSettings::FEATURE_ID . '_enabled', 'no' );
-		$off = new \WP_Query();
-		$off->set( 'post_type', 'product' );
-		$wp_the_query = $off; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$this->sut->apply_filter( $off );
-		$this->assertSame( '', $off->get( 'meta_query' ), 'The filter stays off with the feature flag' );
-
-		list( $pagenow, $wp_the_query ) = $previous; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		unset( $GLOBALS['current_screen'] );
+			update_option( 'woocommerce_feature_' . AgenticCommerceSettings::FEATURE_ID . '_enabled', 'no' );
+			$off = new \WP_Query();
+			$off->set( 'post_type', 'product' );
+			$wp_the_query = $off; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$this->sut->apply_filter( $off );
+			$this->assertSame( '', $off->get( 'meta_query' ), 'The filter stays off with the feature flag' );
+		} finally {
+			// A failed assertion must not leave the next test on an admin products screen.
+			list( $pagenow, $wp_the_query ) = $previous; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			unset( $GLOBALS['current_screen'], $_GET[ ProductsList::FILTER_PARAM ] );
+		}
 	}
 
 	/**
