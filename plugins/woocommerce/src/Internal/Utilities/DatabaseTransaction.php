@@ -22,6 +22,9 @@ defined( 'ABSPATH' ) || exit;
  * When a caller started a transaction with wc_transaction_query() before run(), run() works in a savepoint
  * inside it, so the caller's commit or rollback decides the outcome, as on code without run().
  *
+ * When the database rolls the transaction back on its own, as on a deadlock, the queries that follow do not
+ * commit one by one: run() rolls them back too and returns a WP_Error, so a caller never reports a lost write.
+ *
  * Raw START TRANSACTION, COMMIT or ROLLBACK queries and DDL statements still end the transaction, because
  * MySQL commits before them.
  *
@@ -50,7 +53,7 @@ final class DatabaseTransaction {
 	 * runs in a savepoint.
 	 *
 	 * @param callable $callback Callback to run.
-	 * @return mixed What the callback returns.
+	 * @return mixed What the callback returns, or a WP_Error when the database rolled the transaction back.
 	 * @throws \Throwable What the callback throws, after the rollback.
 	 */
 	public static function run( callable $callback ) {
@@ -61,17 +64,32 @@ final class DatabaseTransaction {
 
 		$joined      = 0 === self::$depth && self::$caller_open;
 		$level       = $joined ? 1 : self::$depth;
+		$owned       = 0 === $level;
 		self::$depth = $level;
+		if ( $owned ) {
+			self::query( 'SET autocommit = 0' );
+		}
 		self::start();
 		try {
 			$result = $callback();
+			$kept   = self::end( $level, ! is_wp_error( $result ), self::$depth > $level );
 		} catch ( \Throwable $e ) {
 			self::end( $level, false );
-			self::$depth = $joined ? 0 : self::$depth;
 			throw $e;
+		} finally {
+			if ( $owned ) {
+				self::query( 'SET autocommit = 1' );
+			}
+			self::$depth = $joined ? 0 : self::$depth;
 		}
-		self::end( $level, ! is_wp_error( $result ) );
-		self::$depth = $joined ? 0 : self::$depth;
+
+		if ( ! $kept ) {
+			return new \WP_Error(
+				'woocommerce_transaction_rolled_back',
+				__( 'The change was not saved because another change was saved at the same time. Try again.', 'woocommerce' ),
+				array( 'status' => 409 )
+			);
+		}
 
 		return $result;
 	}
@@ -100,7 +118,10 @@ final class DatabaseTransaction {
 	 * case owns the transaction that every test runs in.
 	 */
 	public static function start(): void {
-		self::query( 0 === self::$depth ? 'START TRANSACTION' : 'SAVEPOINT wc_' . self::$depth );
+		if ( 0 === self::$depth ) {
+			self::query( 'START TRANSACTION' );
+		}
+		self::query( 'SAVEPOINT wc_' . self::$depth );
 		++self::$depth;
 	}
 
@@ -115,29 +136,43 @@ final class DatabaseTransaction {
 	}
 
 	/**
-	 * Close the given level and every level that a caller left open inside it.
+	 * Close the given level and every level that a caller left open inside it. A commit first releases the
+	 * savepoint of the level, which fails only when the database already rolled the transaction back.
 	 *
 	 * @param int  $level  Level to close. 0 is the transaction itself.
 	 * @param bool $commit Whether to keep the changes.
+	 * @param bool $open   False when a caller inside run() already closed the level, so its savepoint is gone.
+	 * @return bool False when a commit found the transaction rolled back.
 	 */
-	private static function end( int $level, bool $commit ): void {
+	private static function end( int $level, bool $commit, bool $open = true ): bool {
 		$level = max( 0, $level );
+		$kept  = ! $commit || ! $open || self::query( 'RELEASE SAVEPOINT wc_' . $level, true );
 		if ( 0 === $level ) {
-			self::query( $commit ? 'COMMIT' : 'ROLLBACK' );
-		} else {
-			self::query( ( $commit ? 'RELEASE SAVEPOINT wc_' : 'ROLLBACK TO SAVEPOINT wc_' ) . $level );
+			self::query( $commit && $kept ? 'COMMIT' : 'ROLLBACK' );
+		} elseif ( ! $commit ) {
+			self::query( 'ROLLBACK TO SAVEPOINT wc_' . $level );
 		}
 		self::$depth = $level;
+
+		return $kept;
 	}
 
 	/**
 	 * Send a transaction statement.
 	 *
-	 * @param string $sql Statement. The only variable part is an integer level.
+	 * @param string $sql   Statement. The only variable part is an integer level.
+	 * @param bool   $quiet Whether to keep an expected failure out of the output.
+	 * @return bool Whether the statement succeeded.
 	 */
-	private static function query( string $sql ): void {
+	private static function query( string $sql, bool $quiet = false ): bool {
 		global $wpdb;
 
-		$wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The only variable part is an integer level.
+		$suppress = $quiet ? $wpdb->suppress_errors() : null;
+		$result   = $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The only variable part is an integer level.
+		if ( null !== $suppress ) {
+			$wpdb->suppress_errors( $suppress );
+		}
+
+		return false !== $result;
 	}
 }

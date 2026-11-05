@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Report an error instead of success when two product changes made through abilities at the same time collide in the database.

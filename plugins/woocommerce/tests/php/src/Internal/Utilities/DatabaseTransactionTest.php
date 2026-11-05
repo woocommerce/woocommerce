@@ -23,6 +23,13 @@ class DatabaseTransactionTest extends WC_Unit_Test_Case {
 	private $statements = array();
 
 	/**
+	 * Statements that fail instead of running.
+	 *
+	 * @var string[]
+	 */
+	private $failing = array();
+
+	/**
 	 * Owned depth before the test.
 	 *
 	 * @var int
@@ -57,16 +64,16 @@ class DatabaseTransactionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Record a transaction statement, and send SELECT 1 in its place.
+	 * Record a transaction statement, and send SELECT 1 in its place, or a failing statement for those in $failing.
 	 *
 	 * @param string $query Query.
 	 * @return string
 	 */
 	public function record_statement( $query ) {
-		foreach ( array( 'START TRANSACTION', 'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'RELEASE SAVEPOINT' ) as $prefix ) {
+		foreach ( array( 'START TRANSACTION', 'COMMIT', 'ROLLBACK', 'SAVEPOINT', 'RELEASE SAVEPOINT', 'SET autocommit' ) as $prefix ) {
 			if ( 0 === strpos( $query, $prefix ) ) {
 				$this->statements[] = $query;
-				return 'SELECT 1';
+				return in_array( $query, $this->failing, true ) ? 'RELEASE SAVEPOINT wc_missing' : 'SELECT 1';
 			}
 		}
 		return $query;
@@ -101,7 +108,7 @@ class DatabaseTransactionTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'done', $result );
 		$this->assertSame(
-			array( 'START TRANSACTION', 'SAVEPOINT wc_1', 'SAVEPOINT wc_2', 'ROLLBACK TO SAVEPOINT wc_2', 'RELEASE SAVEPOINT wc_1', 'COMMIT' ),
+			array( 'SET autocommit = 0', 'START TRANSACTION', 'SAVEPOINT wc_0', 'SAVEPOINT wc_1', 'SAVEPOINT wc_2', 'ROLLBACK TO SAVEPOINT wc_2', 'RELEASE SAVEPOINT wc_1', 'RELEASE SAVEPOINT wc_0', 'COMMIT', 'SET autocommit = 1' ),
 			$this->statements
 		);
 		$this->assertFalse( DatabaseTransaction::is_open() );
@@ -119,7 +126,10 @@ class DatabaseTransactionTest extends WC_Unit_Test_Case {
 		);
 		wc_transaction_query( 'start' );
 
-		$this->assertSame( array( 'START TRANSACTION', 'SAVEPOINT wc_1', 'COMMIT', 'START TRANSACTION' ), $this->statements );
+		$this->assertSame(
+			array( 'SET autocommit = 0', 'START TRANSACTION', 'SAVEPOINT wc_0', 'SAVEPOINT wc_1', 'RELEASE SAVEPOINT wc_0', 'COMMIT', 'SET autocommit = 1', 'START TRANSACTION' ),
+			$this->statements
+		);
 	}
 
 	/**
@@ -140,7 +150,7 @@ class DatabaseTransactionTest extends WC_Unit_Test_Case {
 		DatabaseTransaction::run( static fn() => null );
 
 		$this->assertSame(
-			array( 'START TRANSACTION', 'SAVEPOINT wc_1', 'SAVEPOINT wc_2', 'RELEASE SAVEPOINT wc_2', 'RELEASE SAVEPOINT wc_1', 'SAVEPOINT wc_1', 'ROLLBACK TO SAVEPOINT wc_1', 'ROLLBACK', 'START TRANSACTION', 'COMMIT' ),
+			array( 'START TRANSACTION', 'SAVEPOINT wc_1', 'SAVEPOINT wc_2', 'RELEASE SAVEPOINT wc_2', 'RELEASE SAVEPOINT wc_1', 'SAVEPOINT wc_1', 'ROLLBACK TO SAVEPOINT wc_1', 'ROLLBACK', 'SET autocommit = 0', 'START TRANSACTION', 'SAVEPOINT wc_0', 'RELEASE SAVEPOINT wc_0', 'COMMIT', 'SET autocommit = 1' ),
 			$this->statements
 		);
 		$this->assertFalse( DatabaseTransaction::is_open() );
@@ -164,8 +174,60 @@ class DatabaseTransactionTest extends WC_Unit_Test_Case {
 			$this->assertSame( 'Disk full.', $e->getMessage() );
 		}
 
-		$this->assertSame( array( 'START TRANSACTION', 'ROLLBACK', 'START TRANSACTION', 'ROLLBACK' ), $this->statements );
+		$this->assertSame(
+			array( 'SET autocommit = 0', 'START TRANSACTION', 'SAVEPOINT wc_0', 'ROLLBACK', 'SET autocommit = 1', 'SET autocommit = 0', 'START TRANSACTION', 'SAVEPOINT wc_0', 'ROLLBACK', 'SET autocommit = 1' ),
+			$this->statements
+		);
 		$this->assertFalse( DatabaseTransaction::is_open() );
+	}
+
+	/**
+	 * @testdox run() should roll back and return a WP_Error when the database already rolled its transaction back.
+	 */
+	public function test_run_reports_a_transaction_the_database_rolled_back(): void {
+		$this->failing = array( 'RELEASE SAVEPOINT wc_0' );
+
+		$result = DatabaseTransaction::run( static fn() => 'done' );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_transaction_rolled_back', $result->get_error_code() );
+		$this->assertSame(
+			array( 'SET autocommit = 0', 'START TRANSACTION', 'SAVEPOINT wc_0', 'RELEASE SAVEPOINT wc_0', 'ROLLBACK', 'SET autocommit = 1' ),
+			$this->statements
+		);
+		$this->assertFalse( DatabaseTransaction::is_open() );
+	}
+
+	/**
+	 * @testdox run() should return a WP_Error when the database rolled back the transaction that a caller started.
+	 */
+	public function test_run_reports_a_rolled_back_caller_transaction(): void {
+		$this->failing = array( 'RELEASE SAVEPOINT wc_1' );
+		wc_transaction_query( 'start' );
+
+		$result = DatabaseTransaction::run( static fn() => 'done' );
+
+		$this->assertWPError( $result );
+		$this->assertSame( array( 'START TRANSACTION', 'SAVEPOINT wc_1', 'RELEASE SAVEPOINT wc_1' ), $this->statements );
+		$this->assertFalse( DatabaseTransaction::is_open() );
+	}
+
+	/**
+	 * @testdox run() should commit without a check when a caller inside it already committed the transaction.
+	 */
+	public function test_run_accepts_a_transaction_that_a_caller_committed(): void {
+		$result = DatabaseTransaction::run(
+			static function () {
+				wc_transaction_query( 'commit' );
+				return 'done';
+			}
+		);
+
+		$this->assertSame( 'done', $result );
+		$this->assertSame(
+			array( 'SET autocommit = 0', 'START TRANSACTION', 'SAVEPOINT wc_0', 'RELEASE SAVEPOINT wc_0', 'COMMIT', 'COMMIT', 'SET autocommit = 1' ),
+			$this->statements
+		);
 	}
 
 	/**
