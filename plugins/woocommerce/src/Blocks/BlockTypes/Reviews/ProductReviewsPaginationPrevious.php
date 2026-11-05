@@ -100,6 +100,18 @@ class ProductReviewsPaginationPrevious extends AbstractBlock {
 		$url .= '#comments';
 
 		/**
+		 * Filters the comments page number link for the current request.
+		 *
+		 * Applied so extensions that rewrite comment pagination URLs also affect this
+		 * DESC "Older Reviews" link, matching get_comments_pagenum_link().
+		 *
+		 * @since 2.7.0
+		 *
+		 * @param string $url The comments page number link.
+		 */
+		$url = apply_filters( 'get_comments_pagenum_link', $url );
+
+		/**
 		 * Filters the anchor tag attributes for the next comments page link.
 		 *
 		 * Reused here because DESC "Older Reviews" advances the page number the same way
