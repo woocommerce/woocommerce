@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Return a 404 for order withdrawal endpoint URLs that include a trailing path, preventing duplicate-content crawler traps.
