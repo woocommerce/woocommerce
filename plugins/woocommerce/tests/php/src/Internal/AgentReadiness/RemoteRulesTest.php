@@ -323,6 +323,36 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A channel whose field is not a string is dropped, so a malformed file does not warn.
+	 */
+	public function test_non_string_field_is_dropped(): void {
+		$this->serve(
+			array(
+				'title_too_long' => array(
+					'google'  => array(
+						'field'  => array( 'title' ),
+						'effect' => 'gaps',
+					),
+					'copilot' => array(
+						'effect' => 'gaps',
+					),
+					'chatgpt' => array(
+						'field'  => 'title',
+						'effect' => 'gaps',
+					),
+				),
+			)
+		);
+		$this->sut->refresh();
+
+		$rules = $this->agent_readiness()->get_channel_rules();
+
+		$this->assertArrayNotHasKey( 'google', $rules['title_too_long'] );
+		$this->assertArrayNotHasKey( 'copilot', $rules['title_too_long'] );
+		$this->assertSame( 'title', $rules['title_too_long']['chatgpt']['field'] );
+	}
+
+	/**
 	 * @testdox A report after a new rules file uses the new rules, even from the same instance.
 	 */
 	public function test_report_reads_rules_fetched_after_an_earlier_report(): void {

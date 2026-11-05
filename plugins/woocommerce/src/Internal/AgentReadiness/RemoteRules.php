@@ -12,8 +12,9 @@ defined( 'ABSPATH' ) || exit;
  * The file is the list of checks that run. Each id has to match a check in
  * code; an id the file leaves out does not run, and an id code does not know
  * is ignored. The file is fetched before each background scan: the daily run
- * and any scan that is asked for. Only a GET is made; no store data is sent. A
- * failed fetch keeps the last good copy, and with no copy the bundled checks apply.
+ * and any scan that is asked for. Only a GET is made; the request's user
+ * agent includes the site URL, as other WooCommerce.com polls do. A failed
+ * fetch keeps the last good copy, and with no copy the bundled checks apply.
  *
  * The file is fetched from PUBLISHED_URL, the same host as the payment gateway
  * suggestions; the woocommerce_agent_readiness_rules_url filter changes it.
@@ -114,8 +115,13 @@ class RemoteRules {
 			if ( ! is_array( $channels ) ) {
 				continue;
 			}
+			$rules[ $id ] = array();
 			foreach ( $channels as $channel => $spec ) {
 				if ( ! is_array( $spec ) ) {
+					continue;
+				}
+				$field = $spec['field'] ?? null;
+				if ( ! is_string( $field ) ) {
 					continue;
 				}
 				$effect = $spec['effect'] ?? null;
@@ -127,7 +133,7 @@ class RemoteRules {
 					}
 				}
 				$rules[ $id ][ $channel ] = array(
-					'field'  => (string) ( $spec['field'] ?? '' ),
+					'field'  => $field,
 					'effect' => $effect,
 				);
 			}
