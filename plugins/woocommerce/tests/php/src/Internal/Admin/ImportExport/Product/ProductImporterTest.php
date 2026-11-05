@@ -115,6 +115,52 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refresh the lock before a row once the refresh interval has passed.
+	 */
+	public function test_run_refreshes_the_lock_during_a_batch_when_due(): void {
+		$age = $this->get_lock_age_seen_by_first_row( MINUTE_IN_SECONDS );
+
+		$this->assertLessThan( MINUTE_IN_SECONDS, $age );
+	}
+
+	/**
+	 * @testdox Should not write the lock before a row while the last refresh is recent.
+	 */
+	public function test_run_does_not_refresh_the_lock_before_the_interval_has_passed(): void {
+		$age = $this->get_lock_age_seen_by_first_row( 0 );
+
+		$this->assertGreaterThanOrEqual( 5 * MINUTE_IN_SECONDS, $age );
+	}
+
+	/**
+	 * @testdox Should remove its lock refresh callback when a batch throws.
+	 */
+	public function test_run_removes_the_lock_refresh_callback_when_a_batch_throws(): void {
+		$hook  = 'woocommerce_product_import_before_import';
+		$count = static function () use ( $hook ): int {
+			global $wp_filter;
+			return count( $wp_filter[ $hook ]->callbacks[10] ?? array() );
+		};
+
+		$before = $count();
+		$throw  = static function (): void {
+			throw new \RuntimeException( 'Batch failed' );
+		};
+		add_action( $hook, $throw, 5 );
+
+		try {
+			$this->sut->run( $this->write_csv( "Type,SKU,Name\nsimple,IMPORT-RUNNER-THROW,Throwing\n" ), array( 'mapping' => $this->get_simple_mapping() ) );
+			$this->fail( 'Expected the batch to throw.' );
+		} catch ( \RuntimeException $exception ) {
+			$this->assertSame( 'Batch failed', $exception->getMessage() );
+		} finally {
+			remove_action( $hook, $throw, 5 );
+		}
+
+		$this->assertSame( $before, $count() );
+	}
+
+	/**
 	 * @testdox Should leave no placeholder-status posts behind after a variation's forward parent SKU reference resolves.
 	 */
 	public function test_run_leaves_no_placeholders_for_a_forward_parent_reference(): void {
@@ -233,6 +279,61 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 1, $results['imported_variations'] );
 		$this->assertSame( array( $child_id ), $results['imported_variation_ids'] );
+	}
+
+	/**
+	 * Get a mapping for the `Type,SKU,Name` CSV columns.
+	 *
+	 * @return array<string, string>
+	 */
+	private function get_simple_mapping(): array {
+		return array(
+			'Type' => 'type',
+			'SKU'  => 'sku',
+			'Name' => 'name',
+		);
+	}
+
+	/**
+	 * Import one row with the lock aged 5 minutes, and report the lock's age right after the importer's own callback runs.
+	 *
+	 * @param int $seconds_since_refresh How long ago the run should believe it last refreshed the lock.
+	 *
+	 * @return int The lock's age in seconds, as seen while the row is being imported.
+	 */
+	private function get_lock_age_seen_by_first_row( int $seconds_since_refresh ): int {
+		global $wpdb;
+
+		$hook = 'woocommerce_product_import_before_import';
+		$age  = -1;
+
+		$last_refresh = new \ReflectionProperty( ProductImporter::class, 'last_lock_refresh' );
+		$last_refresh->setAccessible( true );
+
+		$arrange = function () use ( $wpdb, $last_refresh, $seconds_since_refresh ): void {
+			$last_refresh->setValue( $this->sut, time() - $seconds_since_refresh );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->update(
+				$wpdb->options,
+				array( 'option_value' => ( time() - 5 * MINUTE_IN_SECONDS ) . ':' . ProductImportLock::HOLDER_CLI ),
+				array( 'option_name' => 'wc_product_importing' )
+			);
+		};
+		$observe = function () use ( &$age ): void {
+			$age = (int) $this->import_lock->get_age();
+		};
+
+		add_action( $hook, $arrange, 5 );
+		add_action( $hook, $observe, 20 );
+
+		try {
+			$this->sut->run( $this->write_csv( "Type,SKU,Name\nsimple,IMPORT-RUNNER-REFRESH,Refreshing\n" ), array( 'mapping' => $this->get_simple_mapping() ) );
+		} finally {
+			remove_action( $hook, $arrange, 5 );
+			remove_action( $hook, $observe, 20 );
+		}
+
+		return $age;
 	}
 
 	/**
