@@ -27,7 +27,7 @@
 	}
 
 	.woocommerce-profiler-heading__subtitle {
-		margin: 12px 0 48px 0 !important;
+		margin: 12px 0 32px 0 !important;
 	}
 }
 
@@ -43,10 +43,10 @@
 	background: $white;
 }
 
-// A shorter crop of the 4:3 preview (top kept), so the card takes less height.
+// The full 4:3 preview, so the section below the hero shows too.
 .woocommerce-profiler-purple-theme__image {
 	position: relative;
-	aspect-ratio: 16 / 9;
+	aspect-ratio: 4 / 3;
 	border-bottom: 1px solid $gray-200;
 	background: $gray-100;
 
@@ -60,57 +60,52 @@
 	}
 }
 
+// Same type and spacing as the Purple card in "Customize your store".
 .woocommerce-profiler-purple-theme__body {
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
-	gap: $gap-smaller;
-	padding: $gap-large;
-}
+	gap: var(--wpds-dimension-gap-xs);
+	padding: var(--wpds-dimension-padding-2xl);
+	text-align: start;
 
-.woocommerce-profiler-purple-theme__title {
-	margin: $gap-smallest 0 0;
-	font-size: 16px;
-	font-weight: 500;
-	line-height: 24px;
-	color: $gray-900;
+	h2,
+	p {
+		margin: 0;
+	}
+
+	> h2 {
+		margin-block-start: var(--wpds-dimension-gap-sm);
+	}
 }
 
 .woocommerce-profiler-purple-theme__description {
-	margin: 0;
-	font-size: 14px;
-	line-height: 20px;
-	color: $gray-700;
+	color: var(--wpds-color-foreground-content-neutral-weak);
 }
 
 .woocommerce-profiler-purple-theme__footer {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: $gap;
-	margin-block: 40px 48px;
+	margin-block: 32px 48px;
 	text-align: center;
-}
-
-.woocommerce-profiler-purple-theme__buttons {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: center;
-	gap: $gap-small;
 
 	// Same as the Continue button on the other wizard steps.
 	.woocommerce-profiler-purple-theme__continue {
 		justify-content: center;
-		min-width: 200px;
+		width: 200px;
 		height: 48px;
+		font-size: 14px;
+	}
+
+	.woocommerce-profiler-purple-theme__keep {
 		font-size: 14px;
 	}
 }
 
+// Like the note under Continue on the extensions step.
 .woocommerce-profiler-purple-theme__note {
-	max-width: 480px;
-	margin: 0;
+	margin-block: 16px 24px;
 	font-size: 12px;
-	line-height: 16px;
 	color: $gray-700;
 }

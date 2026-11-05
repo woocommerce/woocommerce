@@ -2140,10 +2140,19 @@ export const CoreProfilerController = ( {
 					return context.pluginsInstallationErrors.length > 0;
 				},
 				// Prototype only. Skip the step when Purple is already the store theme.
-				isPurpleThemeStepEnabled: () =>
-					Boolean(
-						window.wcAdminFeatures?.[ 'purple-cys-prototype' ]
-					) && ! getPurplePrototypeSettings().purpleActive,
+				// Only for stores that haven't customized their current theme, since the step
+				// installs and activates Purple.
+				isPurpleThemeStepEnabled: () => {
+					const { purpleActive, themeCustomized } =
+						getPurplePrototypeSettings();
+					return (
+						Boolean(
+							window.wcAdminFeatures?.[ 'purple-cys-prototype' ]
+						) &&
+						! purpleActive &&
+						! themeCustomized
+					);
+				},
 				userHasNoInstallPluginsPermission: ( { context } ) => {
 					return (
 						context?.currentUser?.capabilities.install_plugins !==

@@ -38,8 +38,10 @@ class PurpleCysPrototype {
 	 * @var array<string, string[]>
 	 */
 	const SETTINGS = array(
-		'layout' => array( 'stacked-images-left' ),
-		'state'  => array( 'real', 'default', 'installing', 'installed', 'activating', 'active', 'error' ),
+		'layout'       => array( 'stacked-images-left' ),
+		'state'        => array( 'real', 'default', 'installing', 'installed', 'activating', 'active', 'error' ),
+		// Whether the setup wizard treats the current theme as customized, which hides its Purple step.
+		'wizard_theme' => array( 'real', 'unchanged', 'customized' ),
 	);
 
 	/**
@@ -514,6 +516,24 @@ class PurpleCysPrototype {
 			)
 		);
 
+		$theme_options = array(
+			/* translators: %s: whether the current theme has been customized, for example "not customized". */
+			'real'       => sprintf( __( 'Current theme: real (%s)', 'woocommerce' ), $this->is_active_theme_customized() ? __( 'customized', 'woocommerce' ) : __( 'not customized', 'woocommerce' ) ),
+			'unchanged'  => __( 'Current theme: not customized', 'woocommerce' ),
+			'customized' => __( 'Current theme: customized (no Purple step)', 'woocommerce' ),
+		);
+		foreach ( $theme_options as $value => $label ) {
+			$wp_admin_bar->add_node(
+				array(
+					'id'     => $parent . '-wizard-theme-' . $value,
+					'parent' => $parent . '-wizard',
+					'title'  => $label,
+					'href'   => $this->get_action_url( 'wizard_theme', $value ),
+					'meta'   => array( 'class' => 'purple-cys-prototype-option' . ( $settings['wizard_theme'] === $value ? ' is-active' : '' ) ),
+				)
+			);
+		}
+
 		// The Purple step comes right after the extensions step, so open the wizard there.
 		$wp_admin_bar->add_node(
 			array(
@@ -606,6 +626,66 @@ class PurpleCysPrototype {
 	}
 
 	/**
+	 * Whether the setup wizard should treat the current theme as customized, so it skips the Purple step.
+	 * The "Current theme" option in the admin bar menu can override the real answer.
+	 *
+	 * @return bool
+	 */
+	private function is_theme_customized_for_wizard(): bool {
+		$override = $this->get_settings()['wizard_theme'];
+
+		if ( 'real' !== $override ) {
+			return 'customized' === $override;
+		}
+
+		return $this->is_active_theme_customized();
+	}
+
+	/**
+	 * Whether the merchant has changed the active theme: saved Site Editor styles, templates or
+	 * template parts for block themes, or Customizer changes for classic themes.
+	 *
+	 * @return bool
+	 */
+	private function is_active_theme_customized(): bool {
+		$theme = wp_get_theme();
+
+		if ( ! $theme->is_block_theme() ) {
+			$mods = get_theme_mods();
+			unset( $mods['custom_css_post_id'] );
+
+			return '' !== trim( wp_get_custom_css() ) || ! empty( array_filter( (array) $mods ) );
+		}
+
+		$user_styles = \WP_Theme_JSON_Resolver::get_user_data_from_wp_global_styles( $theme );
+		$styles_json = is_array( $user_styles ) && isset( $user_styles['post_content'] ) ? json_decode( (string) $user_styles['post_content'], true ) : null;
+
+		if ( is_array( $styles_json ) && ( ! empty( $styles_json['styles'] ) || ! empty( $styles_json['settings'] ) ) ) {
+			return true;
+		}
+
+		$saved_templates = get_posts(
+			array(
+				'post_type'      => array( 'wp_template', 'wp_template_part' ),
+				'post_status'    => 'publish',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'no_found_rows'  => true,
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Prototype only, one small lookup.
+				'tax_query'      => array(
+					array(
+						'taxonomy' => 'wp_theme',
+						'field'    => 'name',
+						'terms'    => $theme->get_stylesheet(),
+					),
+				),
+			)
+		);
+
+		return ! empty( $saved_templates );
+	}
+
+	/**
 	 * Pass the prototype settings and the real theme state to the client.
 	 *
 	 * @param array $settings Shared settings.
@@ -630,6 +710,7 @@ class PurpleCysPrototype {
 					'screenshot'   => (string) $active_theme->get_screenshot(),
 					'isBlockTheme' => $active_theme->is_block_theme(),
 				),
+				'themeCustomized' => $this->is_theme_customized_for_wizard(),
 				'homeUrl'         => home_url( '/' ),
 				'ajaxUrl'         => admin_url( 'admin-ajax.php' ),
 				'nonce'           => wp_create_nonce( self::NONCE_ACTION ),
