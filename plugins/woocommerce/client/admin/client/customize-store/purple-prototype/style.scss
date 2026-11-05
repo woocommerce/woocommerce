@@ -52,14 +52,36 @@
 		}
 	}
 
+	// Capped so lines stay readable on wide screens.
 	&__body {
 		flex: 1;
 		min-width: 0;
+		max-width: 560px;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 		align-items: flex-start;
-		gap: var(--wpds-dimension-gap-md);
+		gap: var(--wpds-dimension-gap-xl);
+	}
+
+	// The title sits close to its description, with more room before what follows.
+	&__header {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: var(--wpds-dimension-gap-xs);
+
+		// A badge above the title gets a little more room than the description below it.
+		> h2:not(:first-child) {
+			margin-block-start: var(--wpds-dimension-gap-xs);
+		}
+	}
+
+	&__footer {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: var(--wpds-dimension-gap-sm);
 	}
 
 	&__description,
@@ -73,8 +95,9 @@
 		gap: var(--wpds-dimension-gap-md);
 	}
 
-	&--purple &__actions {
-		margin-block-start: var(--wpds-dimension-gap-md);
+	// The other cards center shorter text in taller space, so this keeps the Purple card from feeling tighter.
+	&--purple &__body {
+		padding-block: var(--wpds-dimension-padding-3xl);
 	}
 
 	&--purple &__helper {

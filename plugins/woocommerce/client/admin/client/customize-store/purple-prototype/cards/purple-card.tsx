@@ -265,35 +265,44 @@ export const PurpleCard = ( props: PurpleCardProps ) => {
 				/>
 			}
 		>
-			<Badge intent={ copy.badgeIntent }>{ copy.badge }</Badge>
-			<Text variant="heading-xl" render={ <h2 /> }>
-				{ __( 'Built by WooCommerce, for your store', 'woocommerce' ) }
-			</Text>
-			<Text
-				className="purple-cys-theme-card__description"
-				render={ <p /> }
-			>
-				{ __(
-					'A free theme made for stores, so your shop looks polished from day one.',
-					'woocommerce'
-				) }
-			</Text>
-			<Benefits />
-			<div className="purple-cys-theme-card__actions">
-				<Actions { ...props } />
-			</div>
-			{ copy.helper && (
+			<div className="purple-cys-theme-card__header">
+				<Badge intent={ copy.badgeIntent }>{ copy.badge }</Badge>
+				<Text variant="heading-xl" render={ <h2 /> }>
+					{ __(
+						'Built by WooCommerce, for your store',
+						'woocommerce'
+					) }
+				</Text>
 				<Text
-					variant="body-sm"
-					className={ clsx( 'purple-cys-theme-card__helper', {
-						'is-error': state === 'error',
-					} ) }
+					className="purple-cys-theme-card__description"
 					render={ <p /> }
 				>
-					{ state === 'error' && <Icon icon={ error } size={ 16 } /> }
-					{ copy.helper }
+					{ __(
+						'A free theme made for stores, so your shop looks polished from day one.',
+						'woocommerce'
+					) }
 				</Text>
-			) }
+			</div>
+			<Benefits />
+			<div className="purple-cys-theme-card__footer">
+				<div className="purple-cys-theme-card__actions">
+					<Actions { ...props } />
+				</div>
+				{ copy.helper && (
+					<Text
+						variant="body-sm"
+						className={ clsx( 'purple-cys-theme-card__helper', {
+							'is-error': state === 'error',
+						} ) }
+						render={ <p /> }
+					>
+						{ state === 'error' && (
+							<Icon icon={ error } size={ 16 } />
+						) }
+						{ copy.helper }
+					</Text>
+				) }
+			</div>
 		</ThemeCard>
 	);
 };

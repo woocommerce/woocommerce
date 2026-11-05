@@ -22,20 +22,25 @@ export const CurrentThemeCard = ( { theme }: CurrentThemeCardProps ) => (
 			theme.screenshot ? <img src={ theme.screenshot } alt="" /> : null
 		}
 	>
-		<Badge>{ __( 'Current theme', 'woocommerce' ) }</Badge>
-		<Text variant="heading-lg" render={ <h2 /> }>
-			{ sprintf(
-				/* translators: %s: name of the active theme, for example "Twenty Twenty-Four". */
-				__( 'Keep %s', 'woocommerce' ),
-				theme.name
-			) }
-		</Text>
-		<Text className="purple-cys-theme-card__description" render={ <p /> }>
-			{ __(
-				'Stay with your current design and edit it in the Site Editor.',
-				'woocommerce'
-			) }
-		</Text>
+		<div className="purple-cys-theme-card__header">
+			<Badge>{ __( 'Current theme', 'woocommerce' ) }</Badge>
+			<Text variant="heading-lg" render={ <h2 /> }>
+				{ sprintf(
+					/* translators: %s: name of the active theme, for example "Twenty Twenty-Four". */
+					__( 'Keep %s', 'woocommerce' ),
+					theme.name
+				) }
+			</Text>
+			<Text
+				className="purple-cys-theme-card__description"
+				render={ <p /> }
+			>
+				{ __(
+					'Stay with your current design and edit it in the Site Editor.',
+					'woocommerce'
+				) }
+			</Text>
+		</div>
 		<div className="purple-cys-theme-card__actions">
 			<LinkButton
 				variant="outline"

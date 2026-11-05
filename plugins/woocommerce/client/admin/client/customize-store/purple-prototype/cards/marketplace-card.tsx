@@ -27,15 +27,20 @@ export const MarketplaceCard = () => (
 			</div>
 		}
 	>
-		<Text variant="heading-lg" render={ <h2 /> }>
-			{ __( 'Browse the Marketplace', 'woocommerce' ) }
-		</Text>
-		<Text className="purple-cys-theme-card__description" render={ <p /> }>
-			{ __(
-				'Hundreds of free and paid themes for every kind of store. Paid themes have a 30-day money-back guarantee.',
-				'woocommerce'
-			) }
-		</Text>
+		<div className="purple-cys-theme-card__header">
+			<Text variant="heading-lg" render={ <h2 /> }>
+				{ __( 'Browse the Marketplace', 'woocommerce' ) }
+			</Text>
+			<Text
+				className="purple-cys-theme-card__description"
+				render={ <p /> }
+			>
+				{ __(
+					'Hundreds of free and paid themes for every kind of store. Paid themes have a 30-day money-back guarantee.',
+					'woocommerce'
+				) }
+			</Text>
+		</div>
 		<div className="purple-cys-theme-card__actions">
 			<LinkButton variant="outline" href={ getMarketplaceThemesUrl() }>
 				{ __( 'Browse themes', 'woocommerce' ) }
