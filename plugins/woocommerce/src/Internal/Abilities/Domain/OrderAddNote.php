@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 
 defined( 'ABSPATH' ) || exit;
@@ -79,7 +80,7 @@ class OrderAddNote extends AbstractDomainAbility implements AbilityDefinition {
 			return $order;
 		}
 
-		$note = isset( $input['note'] ) ? trim( wp_kses_post( (string) $input['note'] ) ) : '';
+		$note = trim( wp_kses_post( $input['note'] ) );
 
 		if ( '' === $note ) {
 			return new \WP_Error(
@@ -91,7 +92,7 @@ class OrderAddNote extends AbstractDomainAbility implements AbilityDefinition {
 
 		$note_id = $order->add_order_note(
 			$note,
-			( (bool) ( $input['customer_note'] ?? false ) ) ? 1 : 0,
+			(int) ( $input['customer_note'] ?? false ),
 			get_current_user_id() > 0
 		);
 
@@ -103,9 +104,14 @@ class OrderAddNote extends AbstractDomainAbility implements AbilityDefinition {
 			);
 		}
 
+		$formatted = self::format_saved_order_for_response( $order );
+		if ( is_wp_error( $formatted ) ) {
+			return ExtensibleAbilities::saved_write_error( $formatted, 'order', $order->get_id(), array( 'note_id' => (int) $note_id ) );
+		}
+
 		return array(
 			'note_id' => (int) $note_id,
-			'order'   => self::format_order_for_response( $order, false ),
+			'order'   => $formatted,
 		);
 	}
 

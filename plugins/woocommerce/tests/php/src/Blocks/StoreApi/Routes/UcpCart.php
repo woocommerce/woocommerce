@@ -473,6 +473,37 @@ class UcpCart extends ControllerTestCase {
 	}
 
 	/**
+	 * Line items outside the JSON document do not act.
+	 */
+	public function test_line_items_in_the_query_string_are_ignored(): void {
+		$request = new \WP_REST_Request( 'POST', '/wc/ucp/v1/carts' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_query_params( array( 'line_items' => array( $this->line_item( 0, 2 ) ) ) );
+		$request->set_body( '{}' );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'success', $response->get_data()['ucp']['status'] );
+		$this->assertSame( array(), $response->get_data()['line_items'] );
+	}
+
+	/**
+	 * A payload under any other content type is refused rather than read.
+	 */
+	public function test_a_non_json_payload_is_refused(): void {
+		$request = new \WP_REST_Request( 'POST', '/wc/ucp/v1/carts' );
+		$request->set_header( 'content-type', 'application/x-www-form-urlencoded' );
+		$request->set_body_params( array( 'line_items' => array( $this->line_item( 0, 2 ) ) ) );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 415, $response->get_status() );
+		$this->assertSame( 'error', $response->get_data()['ucp']['status'] );
+		$this->assertSame( 'VALIDATION_ERROR', $response->get_data()['messages'][0]['code'] );
+	}
+
+	/**
 	 * A cart reads back with the contents it was created with.
 	 */
 	public function test_get_cart_returns_the_same_contents(): void {
@@ -806,16 +837,7 @@ class UcpCart extends ControllerTestCase {
 	 * A cart an extension preloaded is not written by a UCP create: it mints its own session.
 	 */
 	public function test_preloaded_cookie_session_is_not_written_by_create(): void {
-		// Stand in for an extension that loads the cart on `init`: a cookie session is in
-		// memory and the "loaded" marker is set, so the route's handler swap would be a no-op
-		// unless the route discards it first.
-		WC()->initialize_session();
-		WC()->initialize_cart();
-		WC()->cart->add_to_cart( self::$product_ids[0], 1 );
-		$GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] = 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulates an extension that already loaded the cart.
-
-		$this->assertInstanceOf( \WC_Session_Handler::class, WC()->session );
-		$cookie_customer = WC()->session->get_customer_id();
+		$cookie_customer = $this->preload_cookie_cart();
 
 		$response = $this->request( 'POST', '/carts', array( 'line_items' => array( $this->line_item( 1, 5 ) ) ) );
 		$data     = $response->get_data();
@@ -827,6 +849,49 @@ class UcpCart extends ControllerTestCase {
 		// token, not the preloaded cookie session, or the create clobbered that shopper's cart.
 		$written_customer = CartTokenUtils::get_cart_token_payload( $data['id'] )['user_id'];
 		$this->assertNotSame( $cookie_customer, $written_customer, 'A create must not write the preloaded cookie session.' );
+	}
+
+	/**
+	 * A UCP response carries the cache directive and none of the Store API browser headers.
+	 *
+	 * The parent's builder re-mints a `Cart-Token` for whatever session is in memory, so on
+	 * a not-found answer, built before the route binds a session, it would sign the cookie
+	 * session of the shopper whose browser the request rode in on.
+	 */
+	public function test_responses_carry_only_the_cache_directive(): void {
+		$expected = array( 'Cache-Control' => 'no-store' );
+
+		$this->preload_cookie_cart();
+
+		foreach ( array( array( 'GET', '' ), array( 'PUT', '' ), array( 'POST', '/cancel' ) ) as list( $method, $suffix ) ) {
+			$response = $this->request( $method, '/carts/not-a-real-token' . $suffix );
+
+			$this->assertSame( 'not_found', $response->get_data()['messages'][0]['code'], $method . $suffix );
+			$this->assertSame( $expected, $response->get_headers(), $method . $suffix . ' must not sign the preloaded session.' );
+		}
+
+		$created = $this->request( 'POST', '/carts', array( 'line_items' => array( $this->line_item( 1, 1 ) ) ) );
+		$this->assertSame( 'success', $created->get_data()['ucp']['status'] );
+		$this->assertSame( $expected, $created->get_headers(), 'create' );
+	}
+
+	/**
+	 * Stand in for an extension that loads the cart on `init`.
+	 *
+	 * Leaves a cookie session with one line in memory and the "loaded" marker set, so a
+	 * route's handler swap would be a no-op unless the route discards it first.
+	 *
+	 * @return string The preloaded session's customer id.
+	 */
+	private function preload_cookie_cart(): string {
+		WC()->initialize_session();
+		WC()->initialize_cart();
+		WC()->cart->add_to_cart( self::$product_ids[0], 1 );
+		$GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] = 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulates an extension that already loaded the cart.
+
+		$this->assertInstanceOf( \WC_Session_Handler::class, WC()->session );
+
+		return (string) WC()->session->get_customer_id();
 	}
 
 	/**

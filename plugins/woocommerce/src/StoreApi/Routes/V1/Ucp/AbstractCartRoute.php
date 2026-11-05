@@ -67,6 +67,11 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
+		$refusal = UcpUtils::refuse_non_json_payload( $request, UcpUtils::CAPABILITY_CART );
+		if ( null !== $refusal ) {
+			return $this->add_response_headers( $refusal );
+		}
+
 		if ( '' !== $this->route_cart_id( $request ) && '' === $this->validated_cart_id( $request ) ) {
 			return $this->add_response_headers( $this->ucp_not_found() );
 		}
@@ -79,6 +84,24 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			$this->restore_request_cart_token( $inherited_token );
 			remove_filter( 'woocommerce_session_handler', array( self::class, 'session_handler_class' ) );
 		}
+	}
+
+	/**
+	 * Send only the cache directive; the other Store API headers serve browser clients.
+	 *
+	 * A UCP client holds the cart credential as the path id and reads `id` from the body,
+	 * sends no nonce and keeps no hash-keyed cache. Leaving the parent's builder out also
+	 * keeps a `Cart-Token` for whatever session is in memory off an answer built before
+	 * the route binds one, such as the not-found refusal above.
+	 *
+	 * @param \WP_REST_Response $response The response object.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	protected function add_response_headers( \WP_REST_Response $response ) {
+		$response->header( 'Cache-Control', 'no-store' );
+
+		return $response;
 	}
 
 	/**
