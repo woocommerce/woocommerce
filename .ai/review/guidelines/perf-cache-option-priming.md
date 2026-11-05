@@ -10,18 +10,18 @@
 - #69319 / #69301: variable product transients.
 - #68043: N+1 in `wc_get_formatted_variation`.
 - #65883: feature-flag and gateway options.
-- Conditions and examples: [cache priming](../../skills/woocommerce-performance/cache-priming.md) and [option cache priming](../../skills/woocommerce-performance/options-cache-priming.md).
+- Rules from `.ai/skills/woocommerce-performance`.
 
-**What broke:** Cold per-ID loads and sequential option reads caused repeated queries in these paths. Existing cache coverage and the active storage backend determine whether another batch helps.
+**What broke:** Missing priming was fixed after release again and again: cold per-ID loads in loops and sequential reads of non-autoloaded or unsaved options each added a query per item.
 
 **Pattern to catch:**
 
-- Repeated cold post reads through `wc_get_product()` / `get_post()` without effective batching. For `wc_get_order()`, inspect the active WooCommerce data-store/bulk-order loader; `_prime_post_caches()` does not load HPOS tables.
-- Product images whose consumed attachment posts or metadata remain cold. Match the final rendered collection's featured/gallery IDs and getter behavior; `ProductUtil::prime_image_caches()` is one possible batch, not a mandatory helper.
-- Sequential cold non-autoloaded or missing option reads that a bounded `wp_prime_option_caches()` call can batch.
+- Loops calling `wc_get_product` / `get_post` per raw ID with no `_prime_post_caches`, bulk loader, or native batching argument. For `wc_get_order` the loader is the order data store's bulk path; `_prime_post_caches` does not load HPOS tables.
+- Product collections rendered with images and no attachment prime for the IDs the render path reads (`ProductUtil::prime_image_caches()` or an explicit `_prime_post_caches( $attachment_ids, false, true )`).
+- Sequential `get_option()` calls on non-autoloaded or unsaved options with no `wp_prime_option_caches` before the first read.
 - Removing an effective prime.
-- Duplicating proven cache coverage: inspect `WP_Query` cache flags and the final product IDs consumed after `get_items()` filters before calling a prime dead. Availability guards for priming helpers present in all supported WordPress versions are redundant.
+- Dead priming: after a full-post `WP_Query` with default cache flags, on `get_items()` product IDs the order loader already primed, or behind `is_callable` guards.
 
-**How to confirm:** Trace the first read, final ID set, query flags, and existing loader coverage. Check actual option existence, autoload state, and positive/negative cache entries; settings definitions alone do not establish stored state. Ordinary transient backing options need `! wp_using_ext_object_cache() && ! wp_installing()`. Site transients need the correct network-option API and network ID on multisite under the same storage guard. Missing names can grow the negative cache as new unique names accumulate, not on every repeated call.
+**How to confirm:** See where the IDs come from (`'fields' => 'ids'`, disabled cache flags, or full posts) and which IDs the consumer finally reads: items added by `woocommerce_order_get_items`, in-memory items, and variation parents are not covered by the order loader's prime. Check whether the options are saved and autoloaded (WC settings API options are once saved); a name already in `alloptions` or `notoptions` costs no SQL. Check transient names are primed only under `! wp_using_ext_object_cache() && ! wp_installing()`, and `_site_transient_*` names through `wp_prime_network_option_caches` on multisite paths.
 
-**Don't flag when:** The required data is already warm, including saved autoloaded options and order-item product IDs covered by an earlier prime. Do not exempt hook-added or in-memory items without checking coverage. Tests and fixtures remain out of scope.
+**Don't flag when:** Saved autoloaded options. Loads through order `get_items()` that the earlier prime covered. Tests and fixtures.

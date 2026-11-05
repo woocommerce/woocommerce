@@ -190,7 +190,7 @@ foreach ( $rows as $row ) {
 }
 ```
 
-**Source example:** `FilterData::get_stock_status_counts` in `src/Internal/ProductFilters/FilterData.php`. In [#69320](https://github.com/woocommerce/woocommerce/pull/69320), conditional DISTINCT counts preserve duplicate metadata and custom status keys. The [review retained the empty-status guard](https://github.com/woocommerce/woocommerce/pull/69320#discussion_r4337958438). Test empty, missing, duplicate and custom values rather than only ordinary populated fixtures.
+**Source examples:** `FilterData::get_stock_status_counts` in `src/Internal/ProductFilters/FilterData.php` uses the `GROUP BY` form above. `ProductQueryFilters::get_stock_status_counts` in `src/StoreApi/Utilities/ProductQueryFilters.php`, from [#69320](https://github.com/woocommerce/woocommerce/pull/69320), uses conditional DISTINCT counts that preserve duplicate metadata and custom status keys; its [review retained the empty-status guard](https://github.com/woocommerce/woocommerce/pull/69320#discussion_r4337958438). Test empty, missing, duplicate and custom values rather than only ordinary populated fixtures.
 
 ---
 
