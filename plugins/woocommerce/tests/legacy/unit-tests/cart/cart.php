@@ -1850,6 +1850,60 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Saved carts must revalidate individual-use when the setting changes after apply.
+	 */
+	public function test_check_cart_coupons_blocks_individual_use_after_setting_change() {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$coupon_one = WC_Helper_Coupon::create_coupon( 'combo1' );
+		$coupon_two = WC_Helper_Coupon::create_coupon( 'combo2' );
+
+		$this->assertTrue( WC()->cart->add_discount( $coupon_one->get_code() ) );
+		$this->assertTrue( WC()->cart->add_discount( $coupon_two->get_code() ) );
+		$this->assertCount( 2, WC()->cart->get_applied_coupons() );
+		$this->assertNull( WC()->cart->get_conflicting_individual_use_coupon() );
+
+		$coupon_one->set_individual_use( true );
+		$coupon_one->save();
+
+		wc_clear_notices();
+		WC()->cart->check_cart_coupons();
+
+		$this->assertNotNull( WC()->cart->get_conflicting_individual_use_coupon() );
+		$this->assertCount( 2, WC()->cart->get_applied_coupons(), 'Conflicting coupons should stay applied so the shopper can remove them.' );
+		$this->assertTrue( wc_has_notice( $coupon_one->get_coupon_error( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY ), 'error' ) );
+
+		WC()->cart->empty_cart();
+		wc_clear_notices();
+	}
+
+	/**
+	 * A lone individual-use coupon remains valid during cart checks.
+	 */
+	public function test_check_cart_coupons_allows_single_individual_use_coupon() {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$coupon = WC_Helper_Coupon::create_coupon( 'solo-iu' );
+		$coupon->set_individual_use( true );
+		$coupon->save();
+
+		$this->assertTrue( WC()->cart->add_discount( $coupon->get_code() ) );
+
+		wc_clear_notices();
+		WC()->cart->check_cart_coupons();
+
+		$this->assertNull( WC()->cart->get_conflicting_individual_use_coupon() );
+		$this->assertFalse( wc_has_notice( $coupon->get_coupon_error( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY ), 'error' ) );
+
+		WC()->cart->empty_cart();
+		wc_clear_notices();
+	}
+
+	/**
 	 * test_clone_cart.
 	 */
 	public function test_clone_cart() {
