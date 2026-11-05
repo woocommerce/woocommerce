@@ -9,10 +9,6 @@
 	const toggle = document.querySelector( '.wc-agentic-commerce-ucp-switch' );
 	const knob = toggle && toggle.querySelector( '.woocommerce-input-toggle' );
 	const message = document.querySelector( '.wc-agentic-commerce-ucp-message' );
-	const statusBadge = document.querySelector( '.wc-agentic-commerce-status' );
-	const accessSummary = document.querySelector(
-		'.wc-agentic-commerce-access-summary'
-	);
 
 	const render = ( enabled ) => {
 		toggle.setAttribute( 'aria-checked', enabled ? 'true' : 'false' );
@@ -20,17 +16,6 @@
 		knob.classList.toggle( 'woocommerce-input-toggle--disabled', ! enabled );
 	};
 
-	const renderStatus = ( status ) => {
-		if ( ! statusBadge || ! settings.i18n.statusLabel[ status ] ) {
-			return;
-		}
-		statusBadge.textContent = settings.i18n.statusLabel[ status ];
-		statusBadge.className = statusBadge.className.replace(
-			/wc-agentic-commerce-badge--\w+/,
-			'wc-agentic-commerce-badge--' +
-				( { active: 'pass', off: 'off', needs_attention: 'fix' }[ status ] || 'off' )
-		);
-	};
 
 	if ( toggle && knob && message ) {
 		toggle.addEventListener( 'click', async () => {
@@ -44,12 +29,9 @@
 					data: { enabled: enable },
 				} );
 				render( response.enabled );
-				renderStatus( response.status );
-				message.textContent = response.enabled ? settings.i18n.on : '';
-				if ( accessSummary ) {
-					accessSummary.textContent =
-						accessSummary.dataset[ response.enabled ? 'on' : 'off' ];
-				}
+				// Status, the landing card and Readiness check depend on the switch; reload to show them for the new state.
+				// Not reload(): after Save changes, that would post the settings form again.
+				window.location.assign( window.location.href.split( '#' )[ 0 ] );
 			} catch ( error ) {
 				render( ! enable );
 				message.textContent = ( error && error.message ) || settings.i18n.error;
@@ -77,6 +59,37 @@
 			}
 		} );
 	}
+
+	// "Hide" goes below an opened fold, as a button that closes it; without this script the summary toggles.
+	document.querySelectorAll( '.wc-agentic-commerce-more' ).forEach( ( details ) => {
+		const summary = details.querySelector( ':scope > summary' );
+		const label = summary && summary.querySelector( '.wc-agentic-commerce-more__hide' );
+		if ( ! label ) {
+			return;
+		}
+		const hide = document.createElement( 'button' );
+		hide.type = 'button';
+		hide.className = 'button-link wc-agentic-commerce-more__close';
+		hide.textContent = label.textContent;
+		hide.addEventListener( 'click', () => {
+			details.open = false;
+			summary.focus();
+		} );
+		details.append( hide );
+		details.classList.add( 'wc-agentic-commerce-more--js' );
+		// The summary hides once open, so focus moves to what it revealed.
+		details.addEventListener( 'toggle', () => {
+			const active = details.ownerDocument.activeElement;
+			if ( ! details.open || ( active !== summary && active !== details.ownerDocument.body ) ) {
+				return;
+			}
+			const revealed = summary.nextElementSibling;
+			if ( revealed && revealed !== hide ) {
+				revealed.tabIndex = -1;
+				revealed.focus();
+			}
+		} );
+	} );
 
 	document.querySelectorAll( '.wc-agentic-commerce-copy' ).forEach( ( button ) => {
 		button.addEventListener( 'click', async () => {

@@ -120,7 +120,7 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		$output_checks = new StoreOutputChecks();
 		$output_checks->init( new ComingSoonHelper() );
 		$agent_readiness = new AgentReadiness();
-		$agent_readiness->init( $store_conditions, $output_checks, $this->sut, wc_get_container()->get( \Automattic\WooCommerce\Internal\AgentReadiness\DeclaredToAgents::class ) );
+		$agent_readiness->init( $store_conditions, $output_checks, $this->sut, wc_get_container()->get( \Automattic\WooCommerce\Internal\AgentReadiness\DeclaredToAgents::class ), new \Automattic\WooCommerce\Internal\AgentReadiness\ProductSales() );
 		return $agent_readiness;
 	}
 

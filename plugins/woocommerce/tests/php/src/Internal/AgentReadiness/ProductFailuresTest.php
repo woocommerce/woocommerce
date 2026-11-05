@@ -27,6 +27,8 @@ class ProductFailuresTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		StoreOutputChecksTest::block_requests();
+		// Orders other tests left in the Analytics tables would count toward the sales share.
+		\WC_Helper_Reports::reset_stats_dbs();
 		$this->readiness = wc_get_container()->get( AgentReadiness::class );
 	}
 
@@ -95,6 +97,30 @@ class ProductFailuresTest extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertSame( 3, $this->check_count( 'missing_images' ) );
+	}
+
+	/**
+	 * @testdox A check's share of sales is dropped once its count changes after the scan, since it was measured on the products failing then.
+	 */
+	public function test_sales_share_dropped_when_count_changes(): void {
+		update_option( 'woocommerce_analytics_enabled', 'yes' );
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		for ( $i = 0; $i < \Automattic\WooCommerce\Internal\AgentReadiness\ProductSales::MIN_ORDERS; $i++ ) {
+			$order = wc_create_order();
+			$order->add_product( $product, 1 );
+			$order->set_status( 'completed' );
+			$order->calculate_totals();
+			$order->save();
+			\Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::sync_order( $order->get_id() );
+			\Automattic\WooCommerce\Admin\API\Reports\Products\DataStore::sync_order_products( $order->get_id() );
+		}
+		$share = fn(): ?float => array_column( (array) $this->readiness->get_cached_report()['checks'], 'sales_share', 'id' )['missing_images'];
+
+		$this->readiness->refresh_report();
+		$this->assertSame( 1.0, $share() );
+
+		ProductFailures::store( $product->get_id(), array() );
+		$this->assertNull( $share() );
 	}
 
 	/**

@@ -334,14 +334,13 @@ class DeclaredToAgentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox DNS-AID and an automated product feed are listed as not checked yet.
+	 * @testdox Only items the scan reads are listed: DNS-AID and an automated product feed would always be not checked.
 	 */
-	public function test_not_read_yet(): void {
+	public function test_lists_only_what_the_scan_reads(): void {
 		$results = $this->results( array() );
 
-		$this->assertArrayHasKey( 'dns-aid', $results );
-		$this->assertNull( $results['dns-aid'] );
-		$this->assertNull( $results['product-feed-automation'] );
+		$this->assertArrayNotHasKey( 'dns-aid', $results );
+		$this->assertArrayNotHasKey( 'product-feed-automation', $results );
 	}
 
 	/**

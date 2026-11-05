@@ -224,7 +224,7 @@ class ProductsList {
 	}
 
 	/**
-	 * Limit the Products list to the chosen problem.
+	 * Limit the Products list to the chosen problem, or to the products behind one of the settings page's counts.
 	 *
 	 * @internal
 	 *
@@ -236,11 +236,17 @@ class ProductsList {
 		if ( ! $query instanceof \WP_Query || ! is_admin() || 'edit.php' !== $pagenow || ! $query->is_main_query() || 'product' !== $query->get( 'post_type' ) || ! $this->enabled() || empty( $_GET[ self::FILTER_PARAM ] ) ) {
 			return;
 		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- A list filter that changes nothing.
+		$value = sanitize_text_field( wp_unslash( $_GET[ self::FILTER_PARAM ] ) );
+		if ( in_array( $value, array( ProductScan::COUNT_AVAILABLE, ProductScan::COUNT_HIDDEN, ProductScan::COUNT_UNSUPPORTED ), true ) ) {
+			$tax_query = array_merge( array_filter( (array) $query->get( 'tax_query' ) ), ProductScan::count_query( $value ) );
+			$query->set( 'tax_query', $tax_query ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			return;
+		}
 		$meta_query   = array_filter( (array) $query->get( 'meta_query' ) );
 		$meta_query[] = array(
 			'key'   => ProductFailures::META_KEY,
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- A list filter that changes nothing.
-			'value' => sanitize_text_field( wp_unslash( $_GET[ self::FILTER_PARAM ] ) ),
+			'value' => $value,
 		);
 		$query->set( 'meta_query', $meta_query ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 	}
