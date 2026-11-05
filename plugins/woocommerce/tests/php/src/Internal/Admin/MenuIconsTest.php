@@ -108,6 +108,7 @@ class MenuIconsTest extends WC_Unit_Test_Case {
 	 * @testdox Should fall back when an icon is not registered.
 	 */
 	public function test_missing_icon_falls_back(): void {
+		$this->require_icon_api();
 		$GLOBALS['wp_version'] = '7.2'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Exercise the missing-icon fallback on a supported version.
 		$this->assertSame( 'dashicons-archive', $this->sut->get_icon( 'woocommerce/missing', 'dashicons-archive' ) );
 	}
