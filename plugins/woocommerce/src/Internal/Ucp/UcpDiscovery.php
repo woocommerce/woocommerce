@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Internal\Ucp;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 /**
  * Serves the UCP discovery profile at `/.well-known/ucp`.
@@ -38,7 +38,7 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	public function register_feature_hooks(): void {
 		global $wp_rewrite;
 
-		$active = UcpUtils::is_enabled() && $wp_rewrite->using_permalinks();
+		$active = Utils::is_enabled() && $wp_rewrite->using_permalinks();
 
 		if ( $active ) {
 			add_rewrite_rule( self::RULE, 'index.php?' . self::QUERY_VAR . '=1', 'top' );
@@ -71,7 +71,7 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	 * @param string $feature_id Feature being toggled.
 	 */
 	public function maybe_flush_rewrite_rules( string $feature_id ): void {
-		if ( UcpUtils::FEATURE_ID === $feature_id ) {
+		if ( Utils::FEATURE_ID === $feature_id ) {
 			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 		}
 	}
@@ -111,15 +111,15 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	public function get_profile(): array {
 		return array(
 			'ucp'   => array(
-				'version'      => UcpUtils::VERSION,
+				'version'      => Utils::VERSION,
 				'services'     => array(
 					'dev.ucp.shopping' => array(
 						array(
-							'version'   => UcpUtils::VERSION,
+							'version'   => Utils::VERSION,
 							'transport' => 'rest',
 							'endpoint'  => rest_url( 'wc/ucp/v1' ),
-							'spec'      => 'https://ucp.dev/' . UcpUtils::VERSION . '/specification/overview',
-							'schema'    => 'https://ucp.dev/' . UcpUtils::VERSION . '/services/shopping/rest.openapi.json',
+							'spec'      => 'https://ucp.dev/' . Utils::VERSION . '/specification/overview',
+							'schema'    => 'https://ucp.dev/' . Utils::VERSION . '/services/shopping/rest.openapi.json',
 						),
 					),
 				),
@@ -127,7 +127,7 @@ final class UcpDiscovery implements RegisterHooksInterface {
 					static function ( array $declaration ): array {
 						return array( $declaration );
 					},
-					UcpUtils::capability_declarations()
+					Utils::capability_declarations()
 				),
 			),
 			'links' => array(

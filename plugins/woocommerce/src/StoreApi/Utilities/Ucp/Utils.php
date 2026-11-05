@@ -1,14 +1,14 @@
 <?php
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\StoreApi\Utilities;
+namespace Automattic\WooCommerce\StoreApi\Utilities\Ucp;
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * Shared helpers for the UCP (Universal Commerce Protocol) routes.
  */
-class UcpUtils {
+class Utils {
 	/**
 	 * UCP specification version these routes implement.
 	 */
