@@ -148,7 +148,7 @@ class ShippingZonesQuery extends AbstractDomainAbility implements AbilityDefinit
 
 	/**
 	 * Format a shipping method of a zone. Only Core methods get settings, limited to the
-	 * fields Core declares, since extensions can add fields to them through a filter.
+	 * fields Core declares, since extensions can add fields to them through filters.
 	 *
 	 * @param \WC_Shipping_Method $method Method.
 	 * @return array
@@ -162,11 +162,14 @@ class ShippingZonesQuery extends AbstractDomainAbility implements AbilityDefinit
 			'order'       => (int) $method->method_order,
 		);
 
-		if ( in_array( get_class( $method ), self::CORE_METHOD_CLASSES, true ) ) {
-			$method->init_instance_settings();
+		$class = get_class( $method );
+		if ( in_array( $class, self::CORE_METHOD_CLASSES, true ) ) {
+			// A fresh instance, since a woocommerce_shipping_zone_shipping_methods callback can change the zone's one.
+			$core = new $class( $method->get_instance_id() );
+			$core->init_instance_settings();
 			$settings = array();
-			foreach ( array_keys( (array) $method->instance_form_fields ) as $key ) {
-				$value = $method->instance_settings[ $key ] ?? null;
+			foreach ( array_keys( $core->instance_form_fields ) as $key ) {
+				$value = $core->instance_settings[ $key ] ?? null;
 				if ( 'title' !== $key && is_scalar( $value ) ) {
 					$settings[ $key ] = (string) $value;
 				}

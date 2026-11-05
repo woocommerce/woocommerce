@@ -171,6 +171,38 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should leave out a field that a zone methods filter adds to a Core method object.
+	 */
+	public function test_core_method_settings_leave_out_fields_added_to_the_zone_method(): void {
+		add_filter(
+			'woocommerce_shipping_zone_shipping_methods',
+			static function ( $methods ) {
+				foreach ( $methods as $method ) {
+					$method->instance_form_fields['carrier_account'] = array(
+						'title' => 'Carrier account',
+						'type'  => 'text',
+					);
+				}
+				return $methods;
+			}
+		);
+		$instance_id = ( new \WC_Shipping_Zone( 0 ) )->add_shipping_method( 'flat_rate' );
+		update_option(
+			"woocommerce_flat_rate_{$instance_id}_settings",
+			array(
+				'cost'            => '4.50',
+				'carrier_account' => 'canary-account',
+			)
+		);
+
+		$result   = $this->run_ability( 'woocommerce/shipping-zones-query', array( 'include' => array( 0 ) ) );
+		$settings = (array) $result['zones'][0]['methods'][0]['settings'];
+
+		$this->assertSame( '4.50', $settings['cost'] );
+		$this->assertArrayNotHasKey( 'carrier_account', $settings );
+	}
+
+	/**
 	 * @testdox Should return no settings for a method from an extension, even one that extends a Core method.
 	 */
 	public function test_extension_methods_have_no_settings(): void {
