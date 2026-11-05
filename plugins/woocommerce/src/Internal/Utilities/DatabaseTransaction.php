@@ -22,16 +22,23 @@ defined( 'ABSPATH' ) || exit;
  * When a caller started a transaction with wc_transaction_query() before run(), run() works in a savepoint
  * inside it, so the caller's commit or rollback decides the outcome, as on code without run().
  *
- * When the database rolls the transaction back on its own, as on a deadlock, the queries that follow do not
- * commit one by one: run() rolls them back too and returns a WP_Error, so a caller never reports a lost write.
+ * When a query inside run() hits a deadlock or a lock wait timeout, MySQL rolls back the transaction or that
+ * one query, so run() rolls back the rest and returns a WP_Error. When run() owns the transaction, autocommit
+ * is off while it runs, so the queries after a deadlock roll back too. Inside a transaction that a caller
+ * started, they commit one by one, as on code without run().
  *
  * Raw START TRANSACTION, COMMIT or ROLLBACK queries and DDL statements still end the transaction, because
- * MySQL commits before them.
+ * MySQL commits before them. The queries after them commit or roll back when run() ends.
  *
  * @internal
  * @since 11.4.0
  */
 final class DatabaseTransaction {
+
+	/**
+	 * MySQL error numbers of a lock wait timeout and a deadlock.
+	 */
+	private const LOST_WRITE_ERRNOS = array( 1205, 1213 );
 
 	/**
 	 * Number of open levels: the transaction, then one per savepoint. 0 when no transaction is owned.
@@ -48,12 +55,26 @@ final class DatabaseTransaction {
 	private static $caller_open = false;
 
 	/**
+	 * Whether the outermost run() watches its queries for a deadlock or a lock wait timeout.
+	 *
+	 * @var bool
+	 */
+	private static $watching = false;
+
+	/**
+	 * Whether a query inside the outermost run() hit a deadlock or a lock wait timeout.
+	 *
+	 * @var bool
+	 */
+	private static $lost = false;
+
+	/**
 	 * Run the callback in a transaction. Commit when it returns, roll back when it returns a WP_Error or
 	 * throws. Inside another run(), or inside a transaction that wc_transaction_query() started, the callback
 	 * runs in a savepoint.
 	 *
 	 * @param callable $callback Callback to run.
-	 * @return mixed What the callback returns, or a WP_Error when the database rolled the transaction back.
+	 * @return mixed What the callback returns, or a WP_Error when a query hit a deadlock or a lock wait timeout.
 	 * @throws \Throwable What the callback throws, after the rollback.
 	 */
 	public static function run( callable $callback ) {
@@ -64,26 +85,38 @@ final class DatabaseTransaction {
 
 		$joined      = 0 === self::$depth && self::$caller_open;
 		$level       = $joined ? 1 : self::$depth;
-		$owned       = 0 === $level;
+		$outermost   = ! self::$watching;
+		$autocommit  = 0 === $level && self::is_autocommit_on();
 		self::$depth = $level;
-		if ( $owned ) {
+		if ( $autocommit ) {
 			self::query( 'SET autocommit = 0' );
 		}
 		self::start();
+		if ( $outermost ) {
+			self::$lost     = false;
+			self::$watching = true;
+			add_filter( 'query', array( self::class, 'watch' ) );
+		}
 		try {
 			$result = $callback();
-			$kept   = self::end( $level, ! is_wp_error( $result ), self::$depth > $level );
+			self::end( $level, ! is_wp_error( $result ) );
+			$lost = self::$lost;
 		} catch ( \Throwable $e ) {
 			self::end( $level, false );
 			throw $e;
 		} finally {
-			if ( $owned ) {
+			if ( $outermost ) {
+				remove_filter( 'query', array( self::class, 'watch' ) );
+				self::$watching = false;
+				self::$lost     = false;
+			}
+			if ( $autocommit ) {
 				self::query( 'SET autocommit = 1' );
 			}
 			self::$depth = $joined ? 0 : self::$depth;
 		}
 
-		if ( ! $kept ) {
+		if ( $lost && ! is_wp_error( $result ) ) {
 			return new \WP_Error(
 				'woocommerce_transaction_rolled_back',
 				__( 'The change was not saved because another change was saved at the same time. Try again.', 'woocommerce' ),
@@ -113,15 +146,24 @@ final class DatabaseTransaction {
 	}
 
 	/**
+	 * Note a deadlock or a lock wait timeout of the previous query. WordPress applies the query filter before
+	 * it clears the error of the previous query.
+	 *
+	 * @param mixed $query Query, returned unchanged.
+	 * @return mixed
+	 */
+	public static function watch( $query ) {
+		self::check_last_error();
+		return $query;
+	}
+
+	/**
 	 * Start the transaction, or set a savepoint inside the open one. Other code uses run(). wc_transaction_query()
 	 * calls this method inside an open transaction, and the test bootstrap calls it one time, because the test
 	 * case owns the transaction that every test runs in.
 	 */
 	public static function start(): void {
-		if ( 0 === self::$depth ) {
-			self::query( 'START TRANSACTION' );
-		}
-		self::query( 'SAVEPOINT wc_' . self::$depth );
+		self::query( 0 === self::$depth ? 'START TRANSACTION' : 'SAVEPOINT wc_' . self::$depth );
 		++self::$depth;
 	}
 
@@ -136,25 +178,51 @@ final class DatabaseTransaction {
 	}
 
 	/**
-	 * Close the given level and every level that a caller left open inside it. A commit first releases the
-	 * savepoint of the level, which fails only when the database already rolled the transaction back.
+	 * Close the given level and every level that a caller left open inside it. After a deadlock or a lock wait
+	 * timeout, roll back instead of committing.
 	 *
 	 * @param int  $level  Level to close. 0 is the transaction itself.
 	 * @param bool $commit Whether to keep the changes.
-	 * @param bool $open   False when a caller inside run() already closed the level, so its savepoint is gone.
-	 * @return bool False when a commit found the transaction rolled back.
 	 */
-	private static function end( int $level, bool $commit, bool $open = true ): bool {
-		$level = max( 0, $level );
-		$kept  = ! $commit || ! $open || self::query( 'RELEASE SAVEPOINT wc_' . $level, true );
+	private static function end( int $level, bool $commit ): void {
+		self::check_last_error();
+		$commit = $commit && ! self::$lost;
+		$level  = max( 0, $level );
 		if ( 0 === $level ) {
-			self::query( $commit && $kept ? 'COMMIT' : 'ROLLBACK' );
-		} elseif ( ! $commit ) {
-			self::query( 'ROLLBACK TO SAVEPOINT wc_' . $level );
+			self::query( $commit ? 'COMMIT' : 'ROLLBACK' );
+		} else {
+			// A deadlock already dropped the savepoint, so rolling back to it is expected to fail.
+			self::query( ( $commit ? 'RELEASE SAVEPOINT wc_' : 'ROLLBACK TO SAVEPOINT wc_' ) . $level, self::$lost );
 		}
 		self::$depth = $level;
+	}
 
-		return $kept;
+	/**
+	 * Mark the transaction lost when the previous query hit a deadlock or a lock wait timeout. The message
+	 * check covers database drivers other than mysqli.
+	 */
+	private static function check_last_error(): void {
+		global $wpdb;
+
+		if ( ! self::$watching || self::$lost || empty( $wpdb->last_error ) ) {
+			return;
+		}
+
+		$dbh        = $wpdb instanceof \wpdb ? $wpdb->__get( 'dbh' ) : null;
+		$errno      = $dbh instanceof \mysqli ? mysqli_errno( $dbh ) : 0; // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysqli_errno -- wpdb does not expose the error number.
+		self::$lost = in_array( $errno, self::LOST_WRITE_ERRNOS, true )
+			|| 1 === preg_match( '/^(Deadlock found|Lock wait timeout exceeded)/', (string) $wpdb->last_error );
+	}
+
+	/**
+	 * Whether the connection commits each query on its own, which MySQL does by default.
+	 *
+	 * @return bool
+	 */
+	private static function is_autocommit_on(): bool {
+		global $wpdb;
+
+		return '1' === (string) $wpdb->get_var( 'SELECT @@autocommit' );
 	}
 
 	/**
@@ -162,17 +230,14 @@ final class DatabaseTransaction {
 	 *
 	 * @param string $sql   Statement. The only variable part is an integer level.
 	 * @param bool   $quiet Whether to keep an expected failure out of the output.
-	 * @return bool Whether the statement succeeded.
 	 */
-	private static function query( string $sql, bool $quiet = false ): bool {
+	private static function query( string $sql, bool $quiet = false ): void {
 		global $wpdb;
 
 		$suppress = $quiet ? $wpdb->suppress_errors() : null;
-		$result   = $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The only variable part is an integer level.
+		$wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The only variable part is an integer level.
 		if ( null !== $suppress ) {
 			$wpdb->suppress_errors( $suppress );
 		}
-
-		return false !== $result;
 	}
 }

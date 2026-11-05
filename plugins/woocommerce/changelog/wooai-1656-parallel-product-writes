@@ -1,4 +1,4 @@
 Significance: patch
-Type: fix
+Type: dev
+Comment: Fail ability writes that hit a deadlock in unreleased transaction code; nothing shipped is affected.
 
-Report an error instead of success when two product changes made through abilities at the same time collide in the database.
