@@ -1716,9 +1716,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( 'new_value', $refreshed_order->get_meta( 'new_meta' ) );
 		$this->assertEquals( 'after', $refreshed_order->get_meta( 'changed_meta' ) );
 
-		$this->assertEquals( array( 'new_value' ), get_post_meta( $order->get_id(), 'new_meta' ) );
-		$this->assertEquals( array( 'after' ), get_post_meta( $order->get_id(), 'changed_meta' ) );
-		$this->assertEquals( array( 'y', 'z' ), get_post_meta( $order->get_id(), 'multi_meta' ) );
+		$this->assertEquals( array( 'new_value' ), get_post_meta( $order->get_id(), 'new_meta', false ) );
+		$this->assertEquals( array( 'after' ), get_post_meta( $order->get_id(), 'changed_meta', false ) );
+		$this->assertEquals( array( 'y', 'z' ), get_post_meta( $order->get_id(), 'multi_meta', false ) );
 		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 

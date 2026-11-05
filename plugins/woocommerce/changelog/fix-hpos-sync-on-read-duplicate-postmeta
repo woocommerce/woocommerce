@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent duplicate order meta rows in the posts table when HPOS sync-on-read migrates meta values.
