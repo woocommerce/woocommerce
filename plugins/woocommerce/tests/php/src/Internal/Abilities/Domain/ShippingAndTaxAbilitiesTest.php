@@ -260,23 +260,27 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should list tax rates of every class and filter them by country and by class.
+	 * @testdox Should list tax rates of every class with their flags, and filter them by country and by class.
 	 */
 	public function test_tax_rates_filter_by_country(): void {
 		\WC_Tax::_insert_tax_rate(
 			array(
-				'tax_rate_country' => 'DE',
-				'tax_rate'         => '19.0000',
-				'tax_rate_name'    => 'MwSt',
-				'tax_rate_class'   => '',
+				'tax_rate_country'  => 'DE',
+				'tax_rate'          => '19.0000',
+				'tax_rate_name'     => 'MwSt',
+				'tax_rate_class'    => '',
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 0,
 			)
 		);
 		$reduced = \WC_Tax::_insert_tax_rate(
 			array(
-				'tax_rate_country' => 'DE',
-				'tax_rate'         => '7.0000',
-				'tax_rate_name'    => 'MwSt reduced',
-				'tax_rate_class'   => 'reduced-rate',
+				'tax_rate_country'  => 'DE',
+				'tax_rate'          => '7.0000',
+				'tax_rate_name'     => 'MwSt reduced',
+				'tax_rate_class'    => 'reduced-rate',
+				'tax_rate_compound' => 1,
+				'tax_rate_shipping' => 1,
 			)
 		);
 		\WC_Tax::_update_tax_rate_postcodes( $reduced, '10115; 10117' );
@@ -293,6 +297,10 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotWPError( $result );
 		$this->assertSame( array( 'MwSt', 'MwSt reduced' ), array_column( $result['rates'], 'name' ) );
+		$this->assertFalse( $result['rates'][0]['compound'] );
+		$this->assertFalse( $result['rates'][0]['shipping'] );
+		$this->assertTrue( $result['rates'][1]['compound'] );
+		$this->assertTrue( $result['rates'][1]['shipping'] );
 		$this->assertSame( 'reduced-rate', $result['rates'][1]['class'] );
 		$this->assertSame( array( '10115', '10117' ), $result['rates'][1]['postcodes'] );
 
