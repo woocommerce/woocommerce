@@ -371,7 +371,7 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox WooCommerce's own product JSON-LD is no conflict. One from another source, or a second one beside it, is, and the first failure says so.
+	 * @testdox WooCommerce's own product JSON-LD is no conflict, nor is none at all. One from another source, or a second one beside it, is, and the first failure says so.
 	 */
 	public function test_product_jsonld_conflict(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -384,6 +384,11 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 
 		$this->serve( array( $path => array( 200, self::page_with( array( $core ) ) ) ) );
 		$this->assertTrue( $this->results()['product_jsonld_from_core'] );
+		$this->assertFalse( array_column( $this->sut->all(), 'conflict', 'id' )['product_jsonld_from_core'], 'A passing check is no conflict' );
+
+		remove_all_filters( 'pre_http_request' );
+		$this->serve( array( $path => array( 200, self::page_with( array() ) ) ) );
+		$this->assertFalse( array_column( $this->sut->all(), 'conflict', 'id' )['product_jsonld_present'], 'Missing is not replaced' );
 
 		remove_all_filters( 'pre_http_request' );
 		$https = str_replace( 'http:', 'https:', $core );
