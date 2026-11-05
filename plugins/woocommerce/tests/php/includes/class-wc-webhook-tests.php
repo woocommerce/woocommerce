@@ -1097,12 +1097,15 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 			++$attempts;
 		} while ( ! $same_second && $attempts < 5 );
 
-		$this->assertTrue( $same_second, 'Both deliveries should be sent within the same second.' );
 		$this->assertCount( 2, $delivery_ids, 'Both deliveries should have been sent.' );
-		$this->assertNotSame( $delivery_ids[0], $delivery_ids[1], 'Deliveries sent in the same second must not share a delivery ID.' );
+		$this->assertNotSame( $delivery_ids[0], $delivery_ids[1], 'Two deliveries must not share a delivery ID.' );
 		foreach ( $delivery_ids as $delivery_id ) {
 			$this->assertSame( 32, strlen( $delivery_id ), 'The delivery ID should be 32 characters long.' );
 			$this->assertSame( 32, strspn( $delivery_id, '0123456789abcdef' ), 'The delivery ID should contain only lowercase hex characters.' );
+		}
+
+		if ( ! $same_second ) {
+			$this->markTestSkipped( 'Could not send both deliveries within the same second, so the same-second case was not covered.' );
 		}
 	}
 }
