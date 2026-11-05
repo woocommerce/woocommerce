@@ -386,6 +386,11 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
+		// Batch requests call this method directly, so the schema range is not enforced for them.
+		if ( isset( $request['rating'] ) && ( ! is_numeric( $request['rating'] ) || $request['rating'] < 0 || $request['rating'] > 5 ) ) {
+			return new WP_Error( 'woocommerce_rest_review_invalid_rating', __( 'Invalid review rating. It must be between 0 and 5.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
 		$prepared_review = $this->prepare_item_for_database( $request );
 		if ( is_wp_error( $prepared_review ) ) {
 			return $prepared_review;
@@ -554,6 +559,11 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 
 		if ( isset( $request['type'] ) && 'review' !== get_comment_type( $id ) ) {
 			return new WP_Error( 'woocommerce_rest_review_invalid_type', __( 'Sorry, you are not allowed to change the comment type.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		// Batch requests call this method directly, so the schema range is not enforced for them.
+		if ( isset( $request['rating'] ) && ( ! is_numeric( $request['rating'] ) || $request['rating'] < 0 || $request['rating'] > 5 ) ) {
+			return new WP_Error( 'woocommerce_rest_review_invalid_rating', __( 'Invalid review rating. It must be between 0 and 5.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$prepared_args = $this->prepare_item_for_database( $request );
@@ -959,7 +969,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 					'maximum'     => 5,
 					'context'     => array( 'view', 'edit' ),
 				),
-				'verified'        => array(
+				'verified'         => array(
 					'description' => __( 'Shows if the reviewer bought the product or not.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
