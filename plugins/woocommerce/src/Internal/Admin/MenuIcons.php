@@ -109,7 +109,7 @@ final class MenuIcons {
 		);
 		foreach ( $menu as $index => $item ) {
 			if ( isset( $item[2], $item[6], $icons[ $item[2] ] ) && $icons[ $item[2] ][0] === $item[6] ) {
-				$menu[ $index ][6] = $this->get_icon( $icons[ $item[2] ][1], $item[6] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Update only the menu icon.
+				$menu[ $index ][6] = $this->get_icon( $icons[ $item[2] ][1], $item[6] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- WordPress reads the $menu global when rendering the admin menu.
 			}
 		}
 	}
