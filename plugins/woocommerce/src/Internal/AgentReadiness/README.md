@@ -56,12 +56,13 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 
 ## Store output checks
 
-`StoreOutputChecks` runs in the background scan only. It loads the store's own pages as a logged-out visitor (`StoreResponses`): only URLs on the store's host, redirects followed on that host only, a 5 second timeout and 512 KB per response, each URL once per scan, nothing at all in coming soon mode. Its results go into the report's `store_checks` with the same keys, with `ok` set to `null` when the store couldn't load its own page ("Couldn't check"). They are always `recommended`, so they never block the UCP switch.
+`StoreOutputChecks` runs in the background scan only. It loads the store's own pages as a logged-out visitor (`StoreResponses`): only URLs on the store's host, redirects followed on that host only, a 5 second timeout and 512 KB per response, each URL once per scan, nothing at all in coming soon mode. Its results go into the report's `store_checks` with the same keys, with `ok` set to `null` when the check could not run ("Couldn't check"). They are always `recommended`, so they never block the UCP switch.
 
 | Id | Passes when |
 | --- | --- |
 | `sitemap_lists_products` | A sitemap listed in robots.txt, or `/wp-sitemap.xml`, `/sitemap_index.xml` or `/sitemap.xml`, names a product sitemap or product pages. |
-| `product_jsonld_present` | The newest product page has Product (or ProductGroup) JSON-LD that parses, from WooCommerce, an SEO plugin or the theme. |
+| `product_jsonld_from_core` | The product's JSON-LD is WooCommerce's own and isn't repeated; a failure shows as a likely conflict. |
+| `product_jsonld_present` | A recent product page has Product (or ProductGroup) JSON-LD that parses, from WooCommerce, an SEO plugin or the theme. |
 | `product_jsonld_required_fields` | That JSON-LD gives a name, an image and an offer, from one block or several. Skipped when the page has no Product JSON-LD. |
 | `product_offer_jsonld` | One of its offers has a price (`price`, `lowPrice` or a price specification, as a number or with a currency) and an availability. Skipped when the page has no Product JSON-LD. |
 | `llms_txt_present` | `/llms.txt` at the host root is served as text. |
@@ -83,7 +84,7 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 
 A check listed in `StoreOutputChecks::PENDING` tests output WooCommerce doesn't build yet. It doesn't run: it's reported with `ok` null and `pending` true, so it reads as coming soon, not as failed or couldn't check. Remove its entry when that output ships; the issues that build the output are in the comment on the list.
 
-robots.txt is loaded from the host root, only to find the sitemaps it lists. Its crawler rules aren't checked: a host or CDN can rewrite the file or block crawlers without it, and the store's request to itself skips both, so they wait for an outside view of the store (WOOPRD-3953). The sitemap check is "couldn't check" when robots.txt could not be read, or a candidate sitemap could not be loaded, and no fetched sitemap names products. A category sitemap does not count. Checks on the home and product page read the ones that loaded. The home page loads first; when it can't be reached, the scan makes no more requests, so a store that can't reach itself waits for one timeout. The product checks load one product page: the newest published, visible product without a password, among the five newest. With no such product, or when its page doesn't answer 200, they are "couldn't check".
+robots.txt is loaded from the host root, only to find the sitemaps it lists. Its crawler rules aren't checked: a host or CDN can rewrite the file or block crawlers without it, and the store's request to itself skips both, so they wait for an outside view of the store (WOOPRD-3953). The sitemap check is "couldn't check" when robots.txt could not be read, or a candidate sitemap could not be loaded, and no fetched sitemap names products. A category sitemap does not count. Checks on the home and product page read the ones that loaded. The home page loads first; when it can't be reached, the scan makes no more requests, so a store that can't reach itself waits for one timeout. The product checks load one product page: among the five newest published simple or variable products in the shop catalog, the newest with a price and no password, or the newest without a password when none of them has a price. With no such product, or when its page doesn't answer 200, they are "couldn't check".
 
 ## Report format
 
@@ -96,8 +97,8 @@ array(
 	'hidden_from_catalog' => 4,    // Not checked: catalog visibility "Search results only" or "Hidden", the merchant's choice.
 	'unsupported_types'   => 6,    // Not checked: grouped, external, subscription, bundle and other types agents can find but can't add to a cart yet.
 	'store_checks' => array(
-		// blocks: 'listing' (every product on every channel), 'ucp' (the catalog for UCP agents) or 'checkout' (agent orders).
-		// ok: true, false, or null when a store output check couldn't load the page.
+		// blocks: 'listing' (every product on every channel), 'discovery' (harder to find and read), 'ucp' (the catalog for UCP agents) or 'checkout' (agent orders).
+		// ok: true, false, or null when a store output check could not run.
 		array( 'id' => 'launched', 'ok' => true, 'blocks' => 'listing', 'level' => 'required', 'name' => '…', 'label' => '…', 'why' => '…', 'fix' => '…', 'fix_url' => '…' ),
 	),
 	'channels'     => array(
@@ -167,7 +168,7 @@ WooCommerce > Settings > Agentic commerce (`AgenticCommerceSettings`, `AgenticCo
 - The UCP switch, first. It saves through `POST wc/v3/agent-readiness/ucp` (`{ "enabled": true }`). A failing required check keeps it from being turned on, and that POST answers 409; turning it off still works. In coming soon mode the card says agents can't shop the store yet and links to Site visibility.
 - Product counts from the stored report (`products`, `hidden_from_catalog`, `unsupported_types`), each linking to a filtered product list.
 - Status: the store conditions from `StoreConditions`, the same list the readiness report shows, in three groups. Required lists failing `required` conditions (coming soon mode, HTTPS, permalinks, and the privacy, terms and refund and returns pages) and puts the status at Action needed; Recommended lists failing `recommended` ones, such as a missing shipping policy page; Done lists the passing ones by their passing state (`name`). Each open condition says what to do and links to it; a chosen policy page that isn't published links to its editor.
-- Agent readiness: the store output checks from the stored report, since they only run in the scan. They are never required, so they don't affect the switch or Status. A failing row adds why it matters and what it affects (`blocks`). The card has "Run check" with the time of the last run, and the product checks from the stored report: per-channel counts, and each failing check with its channels and up to 10 example products.
+- Agent readiness: the store output checks from the stored report, since they only run in the scan. Each check names the question it answers in `group` (`access`, `find`, `understand` or `buy`), and the card shows the checks under those four questions. They are never required, so they don't affect the switch or Status. A failing row adds why it matters and what it affects (`blocks`). The card has "Run check" with the time of the last run, and the product checks from the stored report: per-channel counts, and each failing check with its channels and up to 3 example products. The stored report still keeps up to 10 ids per check.
 - Store policy pages. Refund and returns, privacy and terms are the existing options, so they stay in sync with Advanced > Page setup and Settings > Privacy; shipping policy, FAQ and warranty are new. UCP sends each as a checkout link. The dropdowns list published pages only, and saving leaves a stored draft page in place.
 - The store address agents start from (`/.well-known/ucp`), with Copy.
 - Placeholders for parts that aren't built yet: Test your setup (WOOAI-1619) and Security (WOOAI-1620).
