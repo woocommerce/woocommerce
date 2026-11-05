@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Return the total number of matching results from the products and orders query abilities.
