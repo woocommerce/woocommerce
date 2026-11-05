@@ -321,6 +321,8 @@ public function process_payment( $order_id ) {
 }
 ```
 
+Before you call `$order->payment_complete()`, check that the amount paid matches the order total, because a merchant can change the total of an unpaid order.
+
 This check reads the order, so it works only when the retry reaches the same order. WooCommerce creates a new order, without the saved ID, when the cart or its total changed, when the order was cancelled, or when the session ended. A shopper who switches to another gateway also skips the check.
 
 ## Working with Payment Gateway Callbacks (such as PayPal IPN)
