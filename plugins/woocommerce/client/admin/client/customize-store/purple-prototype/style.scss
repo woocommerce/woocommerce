@@ -35,7 +35,7 @@
 		position: relative;
 		flex: 0 0 360px;
 		align-self: center;
-		aspect-ratio: 7 / 5;
+		aspect-ratio: 3 / 2;
 		border: 1px solid var(--wpds-color-stroke-surface-neutral);
 		border-radius: var(--wpds-border-radius-md);
 		overflow: hidden;
@@ -94,12 +94,8 @@
 		aspect-ratio: 4 / 3;
 	}
 
-	// Extra room around the text, and space for a two-line note in every state, so the card
-	// keeps the same height while Purple installs or activates.
-	&--purple &__body {
-		padding-block: var(--wpds-dimension-padding-3xl);
-	}
-
+	// Space for a two-line note in every state, so the card keeps the same height while Purple
+	// installs or activates.
 	&--purple &__footer {
 		min-height: calc(var(--wpds-dimension-size-lg) + var(--wpds-dimension-gap-sm) + 2 * var(--wpds-typography-line-height-xs));
 	}
