@@ -109,9 +109,14 @@ class WC_Comments {
 
 		$comment_args['order'] = ( 'desc' === strtolower( (string) get_option( 'comment_order' ) ) ) ? 'DESC' : 'ASC';
 
-		// Core computes the offset for the default newest page using ASC order. Start descending lists at offset 0.
+		/*
+		 * Core computes the offset for the default newest page using ASC order, then later assigns an unset
+		 * cpage to the last page when default_comments_page is newest. With a DESC query that first page of
+		 * results is page 1, so reset both the offset and the navigation page number together.
+		 */
 		if ( 'DESC' === $comment_args['order'] && ! get_query_var( 'cpage' ) ) {
 			$comment_args['offset'] = 0;
+			set_query_var( 'cpage', 1 );
 		}
 
 		return $comment_args;

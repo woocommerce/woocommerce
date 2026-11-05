@@ -135,6 +135,7 @@ class ProductReviewTemplate extends AbstractBlock {
 		// Core's helper pages as if the query were ASC. With DESC, the default "newest" page is page 1.
 		if ( 'DESC' === $comment_vars['order'] && ! get_query_var( 'cpage' ) ) {
 			$comment_vars['paged'] = 1;
+			set_query_var( 'cpage', 1 );
 		}
 
 		$comment_query = new WP_Comment_Query( $comment_vars );

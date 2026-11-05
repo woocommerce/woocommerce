@@ -45,8 +45,9 @@ class ProductReviewsPaginationPrevious extends AbstractBlock {
 
 		if ( 'desc' === $comment_order ) {
 			add_filter( 'next_comments_link_attributes', $filter_link_attributes );
-			$max_page               = ( new \WP_Comment_Query( $comment_vars ) )->max_num_pages;
-			$previous_comments_link = get_next_comments_link( $label, $max_page, $comment_vars['paged'] ?? null );
+			$max_page               = (int) ( new \WP_Comment_Query( $comment_vars ) )->max_num_pages;
+			$page                   = (int) ( $comment_vars['paged'] ?? 1 );
+			$previous_comments_link = $this->get_older_reviews_link_for_desc( $label, $page, $max_page );
 			remove_filter( 'next_comments_link_attributes', $filter_link_attributes );
 		} else {
 			add_filter( 'previous_comments_link_attributes', $filter_link_attributes );
@@ -54,11 +55,68 @@ class ProductReviewsPaginationPrevious extends AbstractBlock {
 			remove_filter( 'previous_comments_link_attributes', $filter_link_attributes );
 		}
 
-		if ( ! isset( $previous_comments_link ) ) {
+		if ( empty( $previous_comments_link ) ) {
 			return '';
 		}
 
 		return $previous_comments_link;
+	}
+
+	/**
+	 * Build an "Older Reviews" link for newest-first (DESC) pagination.
+	 *
+	 * Core's get_comments_pagenum_link() omits cpage when the target is the last page and
+	 * default_comments_page is newest. With DESC ordering that bare product URL means page 1,
+	 * so the final older page must always carry an explicit cpage.
+	 *
+	 * @param string $label    Link label.
+	 * @param int    $page     Current page number.
+	 * @param int    $max_page Total comment pages.
+	 * @return string
+	 */
+	private function get_older_reviews_link_for_desc( string $label, int $page, int $max_page ): string {
+		if ( $page < 1 ) {
+			$page = 1;
+		}
+
+		$next_page = $page + 1;
+		if ( $next_page > $max_page ) {
+			return '';
+		}
+
+		global $wp_rewrite;
+
+		$permalink = get_permalink();
+		if ( ! is_string( $permalink ) || '' === $permalink ) {
+			return '';
+		}
+
+		if ( $wp_rewrite->using_permalinks() ) {
+			$url = user_trailingslashit( trailingslashit( $permalink ) . $wp_rewrite->comments_pagination_base . '-' . $next_page, 'commentpaged' );
+		} else {
+			$url = add_query_arg( 'cpage', $next_page, $permalink );
+		}
+
+		$url .= '#comments';
+
+		/**
+		 * Filters the anchor tag attributes for the next comments page link.
+		 *
+		 * Reused here because DESC "Older Reviews" advances the page number the same way
+		 * get_next_comments_link() does for ASC "Newer" navigation.
+		 *
+		 * @since 2.7.0
+		 *
+		 * @param string $attributes Attributes for the anchor tag.
+		 */
+		$attr = apply_filters( 'next_comments_link_attributes', '' );
+
+		return sprintf(
+			'<a href="%1$s" %2$s>%3$s</a>',
+			esc_url( $url ),
+			$attr,
+			preg_replace( '/&([^#])(?![a-z]{1,8};)/i', '&#038;$1', $label )
+		);
 	}
 
 	/**

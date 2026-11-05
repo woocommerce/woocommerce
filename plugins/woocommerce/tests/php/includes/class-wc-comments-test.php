@@ -174,6 +174,7 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 
 		$this->assertSame( 'DESC', $args['order'] );
 		$this->assertSame( 0, $args['offset'] );
+		$this->assertSame( 1, (int) get_query_var( 'cpage' ), 'DESC default page must navigate as page 1, not the ASC last page.' );
 
 		update_option( 'comment_order', $previous_option );
 		$this->go_to( '/' );
@@ -292,6 +293,7 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 
 		$this->assertSame( 'DESC', $args['order'] );
 		$this->assertSame( 5, $args['offset'] );
+		$this->assertSame( 2, (int) get_query_var( 'cpage' ), 'Explicit cpage must not be rewritten to page 1.' );
 
 		update_option( 'comment_order', $previous_option );
 		set_query_var( 'cpage', '' );
