@@ -94,10 +94,10 @@
 		aspect-ratio: 4 / 3;
 	}
 
-	// Space for a two-line note in every state, so the card keeps the same height while Purple
-	// installs or activates.
-	&--purple &__footer {
-		min-height: calc(var(--wpds-dimension-size-lg) + var(--wpds-dimension-gap-sm) + 2 * var(--wpds-typography-line-height-xs));
+	// As tall as the text gets with a two-line note, so the card keeps the same height while
+	// Purple installs or activates, and shorter text stays centered.
+	&--purple &__body {
+		min-height: 280px;
 	}
 
 	&__description,
