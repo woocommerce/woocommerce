@@ -12,6 +12,126 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
  */
 class CheckoutLinkTest extends \WC_Unit_Test_Case {
 	/**
+	 * @testdox A simple product's structured data links to checkout and respects the offer filter.
+	 */
+	public function test_simple_product_schema_checkout_link(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$sut     = new \WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$markup = $sut->get_data()[0];
+		$url    = $markup['offers'][0]['checkoutPageURLTemplate'];
+
+		$this->assertSame( $url, $markup['potentialAction']['target']['urlTemplate'] );
+		wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+		$this->assertSame(
+			[
+				'checkout-link' => '1',
+				'products'      => $product->get_id() . ':1',
+			],
+			$query
+		);
+
+		$previous_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		try {
+			$_GET = wp_slash( $query );
+			$this->get_checkout_link_service()->get_checkout_link_test();
+			$items = array_values( WC()->cart->get_cart() );
+			$this->assertCount( 1, $items );
+			$this->assertSame( $product->get_id(), $items[0]['product_id'] );
+			$this->assertSame( 1, $items[0]['quantity'] );
+		} finally {
+			$_GET = $previous_get;
+		}
+
+		add_filter(
+			'woocommerce_structured_data_product_offer',
+			static function ( $offer ) {
+				unset( $offer['checkoutPageURLTemplate'] );
+				return $offer;
+			}
+		);
+		$sut = new \WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$markup = $sut->get_data()[0];
+		$this->assertArrayNotHasKey( 'checkoutPageURLTemplate', $markup['offers'][0] );
+		$this->assertArrayNotHasKey( 'potentialAction', $markup );
+	}
+
+	/**
+	 * @testdox A selected Any variation's schema link adds the chosen value to the cart.
+	 */
+	public function test_any_variation_schema_checkout_link(): void {
+		$attribute = new \WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( [ 'Large & Tall' ] );
+		$attribute->set_variation( true );
+
+		$product = new \WC_Product_Variable();
+		$product->set_name( 'Shirt' );
+		$product->set_status( ProductStatus::PUBLISH );
+		$product->set_attributes( [ $attribute ] );
+		$product->save();
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( [ 'size' => '' ] );
+		$variation->set_regular_price( '20' );
+		$variation->set_status( ProductStatus::PUBLISH );
+		$variation->save();
+		\WC_Product_Variable::sync( $product->get_id() );
+		$product = wc_get_product( $product->get_id() );
+
+		$previous_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		try {
+			$_GET = [ 'attribute_size' => 'Large & Tall' ];
+			$sut  = new \WC_Structured_Data();
+			$sut->generate_product_data( $product );
+			$markup = $sut->get_data()[0];
+			$url    = $markup['offers'][0]['checkoutPageURLTemplate'];
+			$this->assertSame( $url, $markup['potentialAction']['target']['urlTemplate'] );
+			wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+			$this->assertSame( $variation->get_id() . ':1', $query['products'] );
+			$this->assertSame( [ 'attribute_size' => 'Large &amp; Tall' ], json_decode( $query['wc_checkout_link_variation'], true ) );
+
+			$_GET = wp_slash( $query );
+			$this->get_checkout_link_service()->get_checkout_link_test();
+			$items = array_values( WC()->cart->get_cart() );
+			$this->assertCount( 1, $items );
+			$this->assertSame( $variation->get_id(), $items[0]['variation_id'] );
+			$this->assertSame( [ 'attribute_size' => 'Large & Tall' ], $items[0]['variation'] );
+		} finally {
+			$_GET = $previous_get;
+		}
+	}
+
+	/**
+	 * @testdox Invalid encoded variation data is rejected before adding a product.
+	 *
+	 * @testWith ["{"]
+	 *           ["{\"attribute_size\":[]}"]
+	 *           ["{\"size\":\"large\"}"]
+	 *
+	 * @param string $variation_data Invalid JSON or variation data.
+	 */
+	public function test_invalid_encoded_variation_data_is_rejected( string $variation_data ): void {
+		$product      = \WC_Helper_Product::create_simple_product();
+		$previous_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		try {
+			$_GET = wp_slash(
+				[
+					'products'                   => (string) $product->get_id(),
+					'wc_checkout_link_variation' => $variation_data,
+				]
+			);
+			$this->assertFalse( $this->get_checkout_link_service()->validate_checkout_link_test() );
+			$this->get_checkout_link_service()->get_checkout_link_test();
+			$this->assertTrue( WC()->cart->is_empty() );
+		} finally {
+			$_GET = $previous_get;
+		}
+	}
+
+	/**
 	 * @testdox Installing-mode requests queue the endpoint rewrite without replacing persisted rules.
 	 */
 	public function test_endpoint_rewrite_is_deferred_during_installing_mode(): void {
@@ -264,6 +384,15 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 	 */
 	private function get_checkout_link_service() {
 		return new class() extends CheckoutLink {
+			/**
+			 * Validate a checkout link for testing.
+			 *
+			 * @return bool Whether the link is valid.
+			 */
+			public function validate_checkout_link_test() {
+				return parent::validate_checkout_link();
+			}
+
 			/**
 			 * Get the checkout link for testing.
 			 *
