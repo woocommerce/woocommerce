@@ -35,7 +35,7 @@
 		position: relative;
 		flex: 0 0 360px;
 		align-self: center;
-		aspect-ratio: 3 / 2;
+		aspect-ratio: 16 / 9;
 		border: 1px solid var(--wpds-color-stroke-surface-neutral);
 		border-radius: var(--wpds-border-radius-md);
 		overflow: hidden;
@@ -116,11 +116,12 @@
 		align-self: stretch;
 	}
 
-	// Text is capped so lines stay short, while an error notice still spans the whole column.
+	// Text is capped so lines don't run to the card edge, while an error notice still spans the
+	// whole column. Wide enough for Purple's description to fit on one line.
 	&__header,
 	.purple-cys-benefits,
 	&__helper {
-		max-width: var(--wpds-dimension-surface-width-md);
+		max-width: 480px;
 	}
 
 	&__notice {
