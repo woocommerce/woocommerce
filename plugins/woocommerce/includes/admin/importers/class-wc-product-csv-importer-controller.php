@@ -471,7 +471,8 @@ class WC_Product_CSV_Importer_Controller {
 				)
 			);
 		} catch ( \Exception $e ) {
-			wp_send_json_error( array( 'message' => $e->getMessage() ) );
+			// Exception messages are HTML-escaped, and the import screen renders this one as plain text.
+			wp_send_json_error( array( 'message' => wp_specialchars_decode( $e->getMessage(), ENT_QUOTES ) ) );
 		}
 	}
 

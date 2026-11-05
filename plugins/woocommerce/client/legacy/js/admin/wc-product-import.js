@@ -79,6 +79,10 @@
 					} else {
 						$this.run_import();
 					}
+				} else if ( response.data && response.data.message ) {
+					$this.$form.empty().append(
+						$( '<div class="error inline"><p></p></div>' ).find( 'p' ).text( response.data.message ).end()
+					);
 				}
 			}
 		} ).fail( function( response ) {

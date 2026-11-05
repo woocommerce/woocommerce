@@ -621,6 +621,8 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 		$this->assertIsNumeric( $response['data']['position'] );
 		$this->assertSame( 1, $response['data']['imported'] );
 
+		$this->age_import_lock( ProductImportLock::HOLDER_ADMIN, 2 * MINUTE_IN_SECONDS + 1 );
+
 		$response = $this->dispatch_import_request( '0', $csv );
 
 		$first_products = wc_get_products(
@@ -658,10 +660,43 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox An admin import should start over a lock left by another admin import, so a merchant can retry after closing the tab.
+	 * @testdox A refused import should report its message as plain text, because the import screen does not decode HTML entities.
 	 */
-	public function test_first_batch_retakes_a_lock_held_by_an_admin_import(): void {
+	public function test_refused_batch_reports_a_plain_text_message(): void {
+		$this->assertTrue( wc_get_container()->get( ProductImportLock::class )->acquire( ProductImportLock::HOLDER_CLI ) );
+
+		$translate = static function ( $translation, $text ) {
+			return 0 === strpos( $text, 'Another product import' ) ? "Can't start" : $translation;
+		};
+		add_filter( 'gettext', $translate, 10, 2 );
+
+		try {
+			$response = $this->send_import_request( '0' );
+		} finally {
+			remove_filter( 'gettext', $translate, 10 );
+		}
+
+		$this->assertSame( "Can't start", $response['data']['message'] );
+	}
+
+	/**
+	 * @testdox An admin import should not start while another admin import holds the lock, so two runs cannot overlap.
+	 */
+	public function test_first_batch_is_refused_while_an_admin_import_holds_the_lock(): void {
 		$this->assertTrue( wc_get_container()->get( ProductImportLock::class )->acquire( ProductImportLock::HOLDER_ADMIN ) );
+
+		$response = $this->send_import_request( '0' );
+
+		$this->assertFalse( $response['success'] );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'marker-parent' ) );
+	}
+
+	/**
+	 * @testdox An admin import should start over an abandoned admin import's lock after 2 minutes, so a merchant can retry after closing the tab.
+	 */
+	public function test_first_batch_takes_over_an_abandoned_admin_lock(): void {
+		$this->assertTrue( wc_get_container()->get( ProductImportLock::class )->acquire( ProductImportLock::HOLDER_ADMIN ) );
+		$this->age_import_lock( ProductImportLock::HOLDER_ADMIN, 2 * MINUTE_IN_SECONDS + 1 );
 
 		$this->dispatch_import_request( '0' );
 
