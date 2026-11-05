@@ -300,7 +300,8 @@ class DeclaredToAgents {
 	}
 
 	/**
-	 * Whether a path answers with a file. A theme that answers every URL with a page has no such file.
+	 * Whether a path answers with a text file. A theme that answers every URL with a page, or a host
+	 * that answers unknown paths with a 200 JSON or HTML error, has no such file.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 * @param string         $path      Path from the host root.
@@ -310,8 +311,10 @@ class DeclaredToAgents {
 		if ( null === $response || $response['status'] >= 500 ) {
 			return null;
 		}
-		$body = ltrim( $response['body'] );
-		return 200 === $response['status'] && '' !== $body && '<' !== $body[0];
+		$body = ltrim( $response['body'], " \t\r\n\xEF\xBB\xBF" );
+		return 200 === $response['status'] && '' !== $body && '<' !== $body[0]
+			&& 0 !== stripos( $response['headers']['content-type'] ?? '', 'text/html' )
+			&& null === json_decode( $body );
 	}
 
 	/**
