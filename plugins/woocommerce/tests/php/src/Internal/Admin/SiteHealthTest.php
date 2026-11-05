@@ -102,6 +102,7 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 		$tests = $this->sut->handle_site_status_tests( array() );
 
 		$this->assertFalse( $tests['direct']['woocommerce_order_meta_table_size']['skip_cron'], 'The order metadata table size check should run during scheduled Site Health checks.' );
+		$this->assertTrue( $tests['direct']['woocommerce_template_overrides']['skip_cron'], 'Existing direct checks should remain excluded from scheduled Site Health checks.' );
 	}
 
 	/**
@@ -166,16 +167,23 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Order metadata table size check is inconclusive when table statistics are unavailable.
+	 * @testdox Order metadata table size check is inconclusive when either table's statistics are unavailable.
+	 * @testWith [null, null]
+	 *           [null, 1000000]
+	 *           [1000, null]
+	 *
+	 * @param int|null $order_rows Estimated rows in the orders table.
+	 * @param int|null $meta_rows  Estimated rows in the order metadata table.
 	 */
-	public function test_order_meta_table_size_check_is_inconclusive_without_statistics(): void {
+	public function test_order_meta_table_size_check_is_inconclusive_without_statistics( ?int $order_rows, ?int $meta_rows ): void {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
-		$this->use_hpos_table_statistics( null, null );
+		$this->use_hpos_table_statistics( $order_rows, $meta_rows );
 
 		$result = $this->sut->run_test( 'woocommerce_order_meta_table_size' );
 
 		$this->assertSame( 'recommended', $result['status'], 'Unavailable table statistics should be reported as inconclusive.' );
 		$this->assertSame( 'WooCommerce could not check the order metadata table size', $result['label'], 'The result should not claim that unavailable statistics were verified.' );
+		$this->assertSame( '<p>The database did not return row estimates for the order tables, so WooCommerce could not check the order metadata table size.</p>', $result['description'], 'The result should explain why the table size could not be checked.' );
 	}
 
 	/**

@@ -217,7 +217,7 @@ class SiteHealth {
 	 *   - badge: 'security' or 'performance'.
 	 *   - async: optional; true to run the test after the page loads, for checks that make loopback requests.
 	 *   - check: callable returning bool (true = good) or array (empty = good, otherwise context for description/actions).
-	 *   - skip_cron: whether to exclude the test from scheduled checks (defaults to true).
+	 *   - skip_cron: whether to exclude a direct test from scheduled checks (defaults to true).
 	 *   - good: result data when the check passes (label, description).
 	 *   - fail: result data when the check fails (status defaults to 'recommended', label, description, optional actions).
 	 *     Label, status, and description may be callables that receive the check context.
@@ -540,7 +540,7 @@ class SiteHealth {
 				'skip_cron' => false,
 				'check'     => fn() => $this->get_order_meta_table_size_issue(),
 				'good'      => array(
-					'label'       => __( 'WooCommerce order metadata table does not require attention', 'woocommerce' ),
+					'label'       => __( 'WooCommerce order metadata table passed the size check', 'woocommerce' ),
 					'description' => __( 'WooCommerce did not detect an unusually large order metadata table.', 'woocommerce' ),
 				),
 				'fail'      => array(
