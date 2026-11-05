@@ -211,8 +211,9 @@ class ProductsQueryTest extends WC_Unit_Test_Case {
 	 * @testdox Should return the exact total of matching products on partial, empty and out-of-range pages.
 	 */
 	public function test_returns_total_across_pages(): void {
+		$product_ids = array();
 		foreach ( range( 1, 11 ) as $i ) {
-			WC_Helper_Product::create_simple_product( true, array( 'name' => "Total product {$i}" ) );
+			$product_ids[] = WC_Helper_Product::create_simple_product( true, array( 'name' => "Total product {$i}" ) )->get_id();
 		}
 
 		$last = ProductsQuery::execute( array( 'page' => 2 ) );
@@ -227,8 +228,11 @@ class ProductsQueryTest extends WC_Unit_Test_Case {
 		$none = ProductsQuery::execute( array( 'search' => 'no-such-product-xyz' ) );
 		$this->assertSame( 0, $none['total'] );
 
-		$id = ProductsQuery::execute( array( 'id' => wc_get_products( array( 'limit' => 1, 'return' => 'ids' ) )[0] ) );
+		$id = ProductsQuery::execute( array( 'id' => $product_ids[0] ) );
 		$this->assertSame( 1, $id['total'] );
+
+		$schema = ProductsQuery::get_registration_args()['output_schema'];
+		$this->assertTrue( rest_validate_value_from_schema( $last, $schema, 'products' ) );
 	}
 
 	/**
