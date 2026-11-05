@@ -170,6 +170,12 @@ class WC_Admin_Permalink_Settings {
 			$base = $default_base;
 		}
 
+		// A former Default base can now appear as Custom; posting it back must preserve its bare form.
+		$stored_base = (string) ( $this->permalinks['product_base'] ?? '' );
+		if ( 'custom' === $posted_base && '/' . $stored_base === $base ) {
+			return $stored_base;
+		}
+
 		/*
 		 * A base equal to the Default structure is reported in Default's bare form. The Custom
 		 * base field is the next tab stop after the radio group and focusing it selects Custom
@@ -180,12 +186,6 @@ class WC_Admin_Permalink_Settings {
 		 * the bare slug works everywhere. Converging on the bare form keeps Default checked after
 		 * that keystroke and never persists the broken shape.
 		 */
-		// A former Default base can now appear as Custom; posting it back must preserve its bare form.
-		$stored_base = (string) ( $this->permalinks['product_base'] ?? '' );
-		if ( 'custom' === $posted_base && '/' . $stored_base === $base ) {
-			return $stored_base;
-		}
-
 		return '/' . $default_base === $base ? $default_base : $base;
 	}
 

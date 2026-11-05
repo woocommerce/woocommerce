@@ -3,17 +3,15 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Utilities;
 
-use WP_Textdomain_Registry;
 use WP_Translation_Controller;
 
 /**
  * Resolves the configured site locale and translates WooCommerce slugs into it.
  *
- * Values persisted site-wide, or compared against persisted values, must not depend on the
- * request locale: a temporary locale switch, an administrator's profile language, or a
- * multilingual plugin's `locale` filter would otherwise decide what gets stored.
+ * Persisted slugs must not depend on an administrator's language or a request's locale filter.
  *
- * @since 11.3.0
+ * @internal
+ * @since 11.4.0
  */
 class SiteLocale {
 
@@ -31,7 +29,7 @@ class SiteLocale {
 	 *
 	 * @return string Site locale, for example en_US.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 */
 	public static function get(): string {
 		if ( is_multisite() && wp_installing() ) {
@@ -56,36 +54,42 @@ class SiteLocale {
 	/**
 	 * Translate a WooCommerce slug into the site locale.
 	 *
-	 * The gettext filters still apply, so a slug customized through them is kept.
+	 * Translation loaders and gettext filters run in the site locale without changing request translations.
 	 *
 	 * @param string $slug Untranslated slug, translated with the `slug` context.
 	 * @return string Translated slug, or the untranslated one when no translation exists.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 */
 	public static function translate_slug( string $slug ): string {
+		global $l10n, $l10n_unloaded;
+
 		// A translation loader that reads the permalink settings would otherwise re-enter this lookup without end.
 		if ( self::$is_translating ) {
 			return $slug;
 		}
 
-		self::$is_translating = true;
-		$locale               = self::get();
-		$use_site_locale      = static fn() => $locale;
+		self::$is_translating       = true;
+		$locale                     = self::get();
+		$is_site_locale_request     = determine_locale() === $locale;
+		$use_site_locale            = static fn() => $locale;
+		$translation_controller     = WP_Translation_Controller::get_instance();
+		$previous_controller_locale = $translation_controller->get_locale();
+		$previous_translations      = $l10n;
+		$previous_unloaded          = $l10n_unloaded;
 
 		try {
+			add_filter( 'pre_determine_locale', $use_site_locale, PHP_INT_MAX );
+			add_filter( 'locale', $use_site_locale, PHP_INT_MAX );
+
 			$translated_slug = self::load_and_translate_slug( $slug, $locale );
 
-			if ( false === $translated_slug && determine_locale() === $locale ) {
-				// Nothing is registered for the site locale, so use a catalog a loader put in place for this request.
+			if ( false === $translated_slug && $is_site_locale_request ) {
+				// A loader may have supplied a request catalog without registering a translation file.
 				$translated_slug = get_translations_for_domain( 'woocommerce' )->translate( $slug, 'slug' );
 			}
 
 			$translated_slug = is_string( $translated_slug ) && '' !== $translated_slug ? $translated_slug : $slug;
-
-			// Filters that check the request locale should see the site locale here.
-			add_filter( 'pre_determine_locale', $use_site_locale, PHP_INT_MAX );
-			add_filter( 'locale', $use_site_locale, PHP_INT_MAX );
 
 			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment -- Both filters are documented in wp-includes/l10n.php.
 			$filtered_slug = apply_filters( 'gettext_with_context', $translated_slug, $slug, 'slug', 'woocommerce' );
@@ -94,6 +98,10 @@ class SiteLocale {
 		} finally {
 			remove_filter( 'pre_determine_locale', $use_site_locale, PHP_INT_MAX );
 			remove_filter( 'locale', $use_site_locale, PHP_INT_MAX );
+			$translation_controller->set_locale( $previous_controller_locale );
+			// A callback can load other text domains while the site locale is active.
+			$l10n                 = $previous_translations; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore all request catalogs, including domains loaded by callbacks.
+			$l10n_unloaded        = $previous_unloaded; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the request's just-in-time loading state.
 			self::$is_translating = false;
 		}
 
@@ -101,30 +109,26 @@ class SiteLocale {
 	}
 
 	/**
-	 * Translate a slug before restoring the request's translation catalog.
+	 * Load site-locale translations without merging the request's translation catalog.
 	 *
-	 * The load_textdomain() call also registers what it loads under the legacy $l10n global, so that global
-	 * is isolated while loading and restored afterwards, along with the controller's locale.
+	 * The load_textdomain() call otherwise imports an existing legacy MO file into the target locale.
 	 *
 	 * @param string $slug   Untranslated slug.
 	 * @param string $locale Locale to load.
 	 * @return string|false Translated slug, or false when no translation exists.
 	 */
 	private static function load_and_translate_slug( string $slug, string $locale ) {
-		global $l10n, $l10n_unloaded, $wp_textdomain_registry;
+		global $l10n, $wp_textdomain_registry;
 
 		$translation_controller = WP_Translation_Controller::get_instance();
 
-		if ( $translation_controller->is_textdomain_loaded( 'woocommerce', $locale ) || ! $wp_textdomain_registry instanceof WP_Textdomain_Registry ) {
+		if ( $translation_controller->is_textdomain_loaded( 'woocommerce', $locale ) ) {
 			return $translation_controller->translate( $slug, 'slug', 'woocommerce', $locale );
 		}
 
-		$translation_path           = $wp_textdomain_registry->get( 'woocommerce', $locale );
-		$custom_translation_file    = WP_LANG_DIR . '/woocommerce/woocommerce-' . $locale . '.mo';
-		$previous_controller_locale = $translation_controller->get_locale();
-		$had_previous_translations  = isset( $l10n['woocommerce'] );
-		$previous_translations      = $l10n['woocommerce'] ?? null;
-		$previous_unloaded          = $l10n_unloaded['woocommerce'] ?? null;
+		$translation_path        = $wp_textdomain_registry->get( 'woocommerce', $locale );
+		$custom_translation_file = WP_LANG_DIR . '/woocommerce/woocommerce-' . $locale . '.mo';
+		$previous_translations   = $l10n['woocommerce'] ?? null;
 
 		unset( $l10n['woocommerce'] );
 
@@ -145,14 +149,7 @@ class SiteLocale {
 			// Override loaders can supply a legacy catalog without populating the translation controller.
 			return false === $translated_slug && isset( $l10n['woocommerce'] ) ? $l10n['woocommerce']->translate( $slug, 'slug' ) : $translated_slug;
 		} finally {
-			$translation_controller->set_locale( $previous_controller_locale );
-			if ( null === $previous_unloaded ) {
-				unset( $l10n_unloaded['woocommerce'] );
-			} else {
-				$l10n_unloaded['woocommerce'] = $previous_unloaded; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the request's just-in-time loading state.
-			}
-
-			if ( $had_previous_translations ) {
+			if ( null !== $previous_translations ) {
 				$l10n['woocommerce'] = $previous_translations; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the translations isolated above.
 			} else {
 				unset( $l10n['woocommerce'] );

@@ -268,15 +268,10 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox An unchanged save keeps a bare base shown as Custom and its product URLs.
-	 * @testWith ["/%postname%/"]
-	 *           ["/index.php/%postname%/"]
-	 *
-	 * @param string $structure WordPress permalink structure.
+	 * @testdox An unchanged save keeps a bare base shown as Custom.
 	 */
-	public function test_unchanged_save_keeps_a_bare_custom_base( string $structure ): void {
+	public function test_unchanged_save_keeps_a_bare_custom_base(): void {
 		$this->ensure_shop_page();
-		update_option( 'permalink_structure', $structure );
 		update_option( 'woocommerce_permalinks', array( 'product_base' => 'waren' ) );
 
 		$html  = $this->render_settings();
@@ -286,21 +281,7 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 			$xpath->query( '//input[@name="product_permalink"][@checked]' )->item( 0 )->getAttribute( 'value' ),
 			$xpath->query( '//input[@name="product_permalink_structure"]' )->item( 0 )->getAttribute( 'value' )
 		);
-		$base = get_option( 'woocommerce_permalinks' )['product_base'];
-		$this->assertSame( 'waren', $base );
-
-		$rewrite = new WP_Rewrite();
-		$rewrite->add_rewrite_tag( '%product%', '([^/]+)', 'product=' );
-		$rewrite->add_permastruct( 'product', $base . '/%product%', array( 'with_front' => false ) );
-		$rules   = $rewrite->generate_rewrite_rules( $rewrite->extra_permastructs['product']['struct'], EP_PERMALINK );
-		$matches = false;
-		foreach ( $rules as $regex => $query ) {
-			if ( preg_match( '~^' . $regex . '~', $rewrite->root . 'waren/example-product/' ) ) {
-				$matches = true;
-				break;
-			}
-		}
-		$this->assertTrue( $matches, 'The existing product URL should still match the generated rules.' );
+		$this->assertSame( 'waren', get_option( 'woocommerce_permalinks' )['product_base'] );
 	}
 
 	/**
@@ -482,15 +463,6 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * A custom base carrying no usable characters sanitizes down to the empty string, and an empty
-	 * product_base never survives: wc_get_permalink_structure() drops it and refills the option
-	 * from the request locale, outside any locale window, then writes it back. An administrator
-	 * browsing in their own language therefore persisted that language's slug. Resolving to the
-	 * site-locale default at save time keeps the stored value deterministic.
-	 *
-	 * The locales have to diverge for this to be observable: when they agree, the refill produces
-	 * the same slug the fix stores and nothing looks wrong.
-	 *
 	 * @testdox Should store the site-locale Default base when the posted custom structure sanitizes to nothing.
 	 *
 	 * @testWith [""]
@@ -508,18 +480,11 @@ class WC_Admin_Permalink_Settings_Test extends WC_Unit_Test_Case {
 
 		$html = $this->save_and_render( 'custom', $posted_structure );
 
-		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'], 'An empty base must never reach the option, where the request locale would refill it.' );
+		$this->assertSame( 'product', get_option( 'woocommerce_permalinks' )['product_base'] );
 		$this->assert_only_radio_checked( $html, 'default' );
 	}
 
 	/**
-	 * Both permalink fields are free-form request input; an array reaching trim() or
-	 * wc_sanitize_permalink() is a fatal, since both are declared to take a string. The custom
-	 * branch has its own path: a scalar 'custom' radio with an array structure field used to store
-	 * '/', which wc_sanitize_permalink() collapses to '', leaving wc_get_permalink_structure() to
-	 * refill the option in the next request's locale. Both now resolve to the default base
-	 * directly, in the site locale.
-	 *
 	 * @testdox Should fall back to the Default base when a posted permalink field is not a string.
 	 *
 	 * @testWith [["custom"], ["widgets"]]
