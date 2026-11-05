@@ -835,13 +835,13 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	public function test_maybe_set_404_for_endpoint_value(): void {
 		global $wp, $wp_query;
 
-		$original_wp_query  = $wp_query;
-		$original_wp        = $wp;
-		$controller         = new OrderWithdrawalController();
-		$endpoint_key       = OrderWithdrawalEndpoint::ENDPOINT_KEY;
-		$wp                 = new \WP(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$wp->query_vars     = array( $endpoint_key => '' );
-		$wp_query           = new \WP_Query(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$original_wp_query = $wp_query;
+		$original_wp       = $wp;
+		$controller        = new OrderWithdrawalController();
+		$endpoint_key      = OrderWithdrawalEndpoint::ENDPOINT_KEY;
+		$wp                = new \WP(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp->query_vars    = array( $endpoint_key => '' );
+		$wp_query          = new \WP_Query(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		try {
 			$controller->maybe_set_404_for_endpoint_value();
