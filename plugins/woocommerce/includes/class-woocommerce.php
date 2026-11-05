@@ -54,7 +54,7 @@ use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\CustomerEmailVerification;
 use Automattic\WooCommerce\Internal\StructuredData\OpenGraph;
-use Automattic\WooCommerce\Internal\Sitemap;
+use Automattic\WooCommerce\Internal\SearchEngineVisibility;
 
 /**
  * Main WooCommerce Class.
@@ -423,7 +423,7 @@ final class WooCommerce {
 		$container->get( SettingsScreen::class );
 		$container->get( AbilitiesTracking::class );
 		$container->get( OpenGraph::class );
-		$container->get( Sitemap::class );
+		$container->get( SearchEngineVisibility::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.
