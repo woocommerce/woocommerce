@@ -263,7 +263,7 @@ class ProductsList {
 		}
 		$fixes    = $this->agent_readiness->get_check_fixes();
 		$channels = FeedChannels::all();
-		echo '<div class="notice notice-warning"><p>' . esc_html__( 'AI shopping agents may skip this product or find it harder to recommend:', 'woocommerce' ) . '</p><ul>';
+		echo '<div class="notice notice-warning"><p>' . esc_html__( 'AI shopping apps may skip this product or find it harder to recommend:', 'woocommerce' ) . '</p><ul>';
 		foreach ( $result['checks'] as $id => $check_channels ) {
 			$names = array_column( array_intersect_key( $channels, $check_channels ), 'name' );
 			/* translators: 1: what to change on the product, 2: list of channel names, or "product page". */
