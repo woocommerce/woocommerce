@@ -28,23 +28,28 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	 * Register hooks.
 	 */
 	public function register(): void {
-		add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'maybe_flush_rewrite_rules' ), 10, 1 );
+		add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'maybe_flush_rewrite_rules' ), 10, 2 );
 		add_action( 'init', array( $this, 'register_feature_hooks' ), 0, 0 );
 	}
 
 	/**
-	 * Register the rewrite rule and renderer when UCP is enabled and pretty permalinks are on.
+	 * Register the renderer, plus the rewrite rule when pretty permalinks are on, when UCP is enabled.
 	 */
 	public function register_feature_hooks(): void {
 		global $wp_rewrite;
 
-		if ( ! UcpUtils::is_enabled() || ! $wp_rewrite->using_permalinks() ) {
+		if ( ! UcpUtils::is_enabled() ) {
 			return;
 		}
 
-		add_rewrite_rule( self::RULE, 'index.php?' . self::QUERY_VAR . '=1', 'top' );
-		add_filter( 'query_vars', array( $this, 'add_query_var' ), 0 );
 		add_action( 'parse_request', array( $this, 'maybe_render' ), 0 );
+		add_action( 'admin_init', array( $this, 'maybe_sync_file' ) );
+		add_action( 'admin_notices', array( $this, 'maybe_render_notice' ) );
+
+		if ( $wp_rewrite->using_permalinks() ) {
+			add_rewrite_rule( self::RULE, 'index.php?' . self::QUERY_VAR . '=1', 'top' );
+			add_filter( 'query_vars', array( $this, 'add_query_var' ), 0 );
+		}
 	}
 
 	/**
@@ -59,14 +64,102 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Queue a rewrite rules flush when the UCP feature is toggled.
+	 * Queue a rewrite rules flush when the UCP feature is toggled, and remove the static file when it is turned off.
 	 *
 	 * @param string $feature_id Feature being toggled.
+	 * @param bool   $is_enabled Whether the feature is now enabled.
 	 */
-	public function maybe_flush_rewrite_rules( string $feature_id ): void {
-		if ( UcpUtils::FEATURE_ID === $feature_id ) {
-			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
+	public function maybe_flush_rewrite_rules( string $feature_id, bool $is_enabled = true ): void {
+		if ( UcpUtils::FEATURE_ID !== $feature_id ) {
+			return;
 		}
+
+		update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
+
+		$path = $this->get_file_path();
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable
+		if ( ! $is_enabled && is_file( $path ) && is_writable( $path ) ) {
+			wp_delete_file( $path );
+		}
+	}
+
+	/**
+	 * Keep the static discovery file in sync on admin screens: write it under plain permalinks, delete it under pretty ones.
+	 */
+	public function maybe_sync_file(): void {
+		global $wp_rewrite;
+
+		// admin_init also fires for anonymous admin-ajax.php/admin-post.php requests and on every heartbeat.
+		if ( wp_doing_ajax() || ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
+		$path = $this->get_file_path();
+		// phpcs:disable WordPress.WP.AlternativeFunctions
+		if ( $wp_rewrite->using_permalinks() ) {
+			if ( is_file( $path ) && is_writable( $path ) ) {
+				wp_delete_file( $path );
+			}
+			return;
+		}
+
+		$content  = (string) wp_json_encode( $this->get_profile(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+		$dir      = dirname( $path );
+		$writable = is_file( $path ) ? is_writable( $path ) : wp_mkdir_p( $dir ) && is_writable( $dir );
+		if ( $writable && ! ( is_file( $path ) && file_get_contents( $path ) === $content ) ) {
+			file_put_contents( $path, $content );
+		}
+		// phpcs:enable WordPress.WP.AlternativeFunctions
+	}
+
+	/**
+	 * Warn store managers when the discovery endpoint is unreachable or shadowed by a stale static file.
+	 */
+	public function maybe_render_notice(): void {
+		global $wp_rewrite;
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
+		$path = $this->get_file_path();
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable
+		$writable = is_writable( $path );
+		if ( $wp_rewrite->using_permalinks() ) {
+			if ( ! is_file( $path ) || $writable ) {
+				return;
+			}
+			/* translators: %1$s: discovery file path. */
+			$message = __( 'A static %1$s file is overriding the UCP discovery endpoint. Delete it or make it writable by the web server.', 'woocommerce' );
+		} else {
+			if ( $writable ) {
+				return;
+			}
+			/* translators: %1$s: discovery file path, %2$s: opening link tag, %3$s: closing link tag. */
+			$message = __( 'The UCP discovery endpoint /.well-known/ucp may not be reachable. %2$sEnable pretty permalinks%3$s, or make %1$s writable by the web server.', 'woocommerce' );
+		}
+
+		echo wp_kses_post(
+			'<div class="notice notice-warning"><p>'
+			. sprintf( $message, '<code>' . esc_html( $path ) . '</code>', '<a href="' . esc_url( admin_url( 'options-permalink.php' ) ) . '">', '</a>' )
+			. '</p></div>'
+		);
+	}
+
+	/**
+	 * Path of the static discovery file served under plain permalinks.
+	 *
+	 * @return string
+	 */
+	private function get_file_path(): string {
+		/**
+		 * Filters the path of the static UCP discovery file written when plain permalinks are active.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param string $path Absolute file path.
+		 */
+		return (string) apply_filters( 'woocommerce_ucp_discovery_file_path', ABSPATH . '.well-known/ucp' );
 	}
 
 	/**
@@ -76,7 +169,11 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	 */
 	public function maybe_render( \WP $wp ): void {
 		// Check the matched rule, not only the query var: WP also fills public query vars from $_GET/$_POST.
-		if ( self::RULE !== $wp->matched_rule || '1' !== ( $wp->query_vars[ self::QUERY_VAR ] ?? '' ) ) {
+		$rule_matched = self::RULE === $wp->matched_rule && '1' === ( $wp->query_vars[ self::QUERY_VAR ] ?? '' );
+		// Servers that route every path to index.php (nginx try_files) reach WP without a matching rule under plain permalinks.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		$path = untrailingslashit( (string) wp_parse_url( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH ) );
+		if ( ! $rule_matched && wp_parse_url( home_url( '/.well-known/ucp' ), PHP_URL_PATH ) !== $path ) {
 			return;
 		}
 
