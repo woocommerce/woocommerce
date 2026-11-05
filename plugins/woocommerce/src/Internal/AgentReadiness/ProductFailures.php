@@ -83,12 +83,12 @@ class ProductFailures {
 	}
 
 	/**
-	 * Every stored value of a product, `checked` included.
+	 * Every stored value of a product, `checked` included. Empty for a product no scan or save has tested.
 	 *
 	 * @param int $product_id Product id.
 	 * @return array<int, string>
 	 */
-	private static function stored( int $product_id ): array {
+	public static function stored( int $product_id ): array {
 		return array_map( 'strval', (array) get_post_meta( $product_id, self::META_KEY, false ) );
 	}
 

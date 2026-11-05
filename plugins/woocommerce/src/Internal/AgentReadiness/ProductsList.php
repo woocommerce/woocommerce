@@ -64,6 +64,8 @@ class ProductsList {
 	public function register(): void {
 		add_action( 'woocommerce_before_product_object_save', array( $this, 'handle_before_save' ) );
 		add_action( 'woocommerce_after_product_object_save', array( $this, 'handle_after_save' ) );
+		add_action( 'wp_trash_post', array( $this, 'handle_trash' ) );
+		add_action( 'untrashed_post', array( $this, 'handle_untrash' ) );
 		add_filter( 'manage_product_posts_columns', array( $this, 'add_column' ), 20 );
 		add_action( 'manage_product_posts_custom_column', array( $this, 'render_column' ), 10, 2 );
 		add_action( 'restrict_manage_posts', array( $this, 'render_filter' ) );
@@ -98,7 +100,7 @@ class ProductsList {
 			return;
 		}
 		$changes = array_keys( $product->get_changes() );
-		if ( array() !== $changes && array() === array_diff( $changes, self::STOCK_ONLY_CHANGES ) ) {
+		if ( array() === array_diff( $changes, self::STOCK_ONLY_CHANGES ) ) {
 			$this->stock_only_saves[ $product->get_id() ] = true;
 		}
 	}
@@ -126,6 +128,32 @@ class ProductsList {
 			return;
 		}
 		ProductFailures::store( $product_id, $result['checks'] );
+	}
+
+	/**
+	 * Remove a trashed product's rows: the list and the counts show published products.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $post_id Post id.
+	 */
+	public function handle_trash( $post_id ): void {
+		if ( 'product' === get_post_type( $post_id ) ) {
+			ProductFailures::forget( (int) $post_id );
+		}
+	}
+
+	/**
+	 * Test a restored product again.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $post_id Post id.
+	 */
+	public function handle_untrash( $post_id ): void {
+		if ( 'product' === get_post_type( $post_id ) ) {
+			$this->handle_after_save( wc_get_product( (int) $post_id ) );
+		}
 	}
 
 	/**
@@ -222,10 +250,14 @@ class ProductsList {
 	 * @param int $product_id Product id.
 	 */
 	private function status_text( int $product_id ): string {
-		$values = ProductFailures::for_product( $product_id );
-		if ( array() === $values ) {
+		$stored = ProductFailures::stored( $product_id );
+		if ( ! in_array( ProductFailures::CHECKED, $stored, true ) ) {
 			$product = wc_get_product( $product_id );
-			return $product instanceof \WC_Product && ProductScan::covers( $product ) ? __( 'Ready', 'woocommerce' ) : '–';
+			return $product instanceof \WC_Product && ProductScan::covers( $product ) ? __( 'Not checked', 'woocommerce' ) : '–';
+		}
+		$values = array_diff( $stored, array( ProductFailures::CHECKED ) );
+		if ( array() === $values ) {
+			return __( 'Ready', 'woocommerce' );
 		}
 		$names = static fn( string $status ): array => array_column(
 			array_filter(
