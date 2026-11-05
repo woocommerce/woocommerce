@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+UCP: Answer non-GET requests to /.well-known/ucp with a 405 that lists the allowed methods, and serve the discovery profile even when the UCP feature was enabled without a rewrite rules flush.
