@@ -133,8 +133,8 @@ test.describe(
 			await addProductToCart( page, product.id );
 			await page.goto( CLASSIC_CHECKOUT_PAGE.slug );
 
-			// Assert on the label: WooCommerce renders the payment-method radio
-			// input visually hidden, so only the label is "visible".
+			// Assert on the label: the theme may render the payment-method radio
+			// input as visually hidden, so only the label is "visible".
 			await expect(
 				page.locator( 'label[for="payment_method_paypal"]' )
 			).toBeVisible( visibilityOptions );
