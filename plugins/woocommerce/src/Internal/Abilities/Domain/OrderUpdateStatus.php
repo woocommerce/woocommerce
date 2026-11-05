@@ -11,8 +11,6 @@ use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
-use Automattic\WooCommerce\Internal\Orders\StagedMethod;
-use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -96,23 +94,7 @@ class OrderUpdateStatus extends ActionableAbility {
 	 * @return null|\WP_Error
 	 */
 	public function change( $subject, array $input ) {
-		if ( empty( $input['status'] ) ) {
-			return new \WP_Error(
-				'woocommerce_order_status_required',
-				__( 'Order status is required.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		$status = OrderUtil::remove_status_prefix( sanitize_key( $input['status'] ) );
-
-		if ( ! in_array( $status, self::get_query_order_status_slugs(), true ) ) {
-			return new \WP_Error(
-				'woocommerce_order_status_invalid',
-				__( 'Order status is invalid.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
+		$status = $input['status'];
 
 		if ( $status === $subject->get_status() ) {
 			return new \WP_Error(
@@ -138,24 +120,7 @@ class OrderUpdateStatus extends ActionableAbility {
 			return self::update_status( $subject, $status, self::get_note( $input ) );
 		}
 
-		$unstaged_class = StagedMethod::unstaged_class( $subject, 'update_status', 'stage_status' );
-		if ( null !== $unstaged_class ) {
-			return new \WP_Error(
-				'woocommerce_order_status_staging_unsupported',
-				sprintf(
-					/* translators: %s: PHP class name of the order. */
-					__( 'This order type does not support this change yet. The class %s overrides update_status() and needs to override stage_status() too.', 'woocommerce' ),
-					$unstaged_class
-				),
-				array( 'status' => 400 )
-			);
-		}
-
-		try {
-			$subject->stage_status( $status, self::get_note( $input ), true );
-		} catch ( \WC_Data_Exception $e ) {
-			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
-		}
+		$subject->stage_status( $status, self::get_note( $input ), true );
 
 		return null;
 	}

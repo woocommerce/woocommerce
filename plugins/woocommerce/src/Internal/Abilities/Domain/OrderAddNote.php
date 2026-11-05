@@ -80,7 +80,7 @@ class OrderAddNote extends AbstractDomainAbility implements AbilityDefinition {
 			return $order;
 		}
 
-		$note = isset( $input['note'] ) ? trim( wp_kses_post( (string) $input['note'] ) ) : '';
+		$note = trim( wp_kses_post( $input['note'] ) );
 
 		if ( '' === $note ) {
 			return new \WP_Error(
@@ -92,7 +92,7 @@ class OrderAddNote extends AbstractDomainAbility implements AbilityDefinition {
 
 		$note_id = $order->add_order_note(
 			$note,
-			( (bool) ( $input['customer_note'] ?? false ) ) ? 1 : 0,
+			(int) ( $input['customer_note'] ?? false ),
 			get_current_user_id() > 0
 		);
 
