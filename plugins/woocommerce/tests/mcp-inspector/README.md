@@ -9,7 +9,7 @@ There are two kinds of test:
     - No schema description lists its own `enum` values or names its default in prose.
     - Its schema stays within a token budget, estimated at four characters per token.
     - A readonly ability without required input runs with `{}`.
-    - A customer is refused.
+    - A customer is refused input that the admin passes the permission check with, so the refusal comes from the capability. An ability whose check reads a record needs an entry in `PERMISSION_INPUT`.
     - It has a behaviour test file in `abilities/`.
 - **`abilities/<name>.test.mjs`** tests one ability's behaviour: what it returns for a given input, and what it refuses.
 
