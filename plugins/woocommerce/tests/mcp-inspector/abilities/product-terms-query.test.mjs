@@ -83,7 +83,6 @@ describe( ABILITY, () => {
 		} );
 	} );
 
-	// Permission is checked against the taxonomy before the input is validated.
 	test( 'refuses a taxonomy that is not a product taxonomy', () =>
-		refused( ABILITY, { taxonomy: 'category' }, /permission/i ) );
+		refused( ABILITY, { taxonomy: 'category' }, /input\[taxonomy\]/ ) );
 } );
