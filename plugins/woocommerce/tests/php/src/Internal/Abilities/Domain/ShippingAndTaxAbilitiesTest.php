@@ -110,7 +110,7 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 						'resource'      => $resource_name,
 						'namespace'     => 'test-ext',
 						'field'         => 'code',
-						'output_schema' => array( 'type' => array( 'string', 'null' ) ),
+						'output_schema' => array( 'type' => 'string' ),
 						'get_callback'  => $get_callback,
 					)
 				);
@@ -124,7 +124,7 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 	private static function reset_registries(): void {
 		global $wp_actions;
 
-		foreach ( array( 'resources', 'fields', 'reported', 'validators', 'filters' ) as $property ) {
+		foreach ( array( 'resources', 'fields', 'validators', 'syncs', 'filters' ) as $property ) {
 			$reflection = new \ReflectionProperty( ExtensibleAbilities::class, $property );
 			$reflection->setAccessible( true );
 			$reflection->setValue( null, array() );
