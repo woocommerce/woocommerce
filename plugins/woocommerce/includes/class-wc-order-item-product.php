@@ -284,10 +284,13 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 *
 	 * @since 11.4.0
 	 *
+	 * @param WC_Product|null $product The product the line was created from. Defaults to the line's product, loaded by ID.
 	 * @return void
 	 */
-	public function record_tax_status() {
-		$product = $this->get_product();
+	public function record_tax_status( $product = null ) {
+		if ( ! $product instanceof WC_Product ) {
+			$product = $this->get_product();
+		}
 		if ( $product instanceof WC_Product ) {
 			$this->set_recorded_tax_status( $product->get_tax_status() );
 		}

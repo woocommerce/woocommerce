@@ -930,11 +930,32 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox add_product() records the product's tax status on the new line.
+	 * @testdox Clearing the recorded tax status removes the stored value, so the line follows the product again.
+	 */
+	public function test_clearing_the_recorded_tax_status_deletes_the_stored_value(): void {
+		$this->product->set_tax_status( ProductTaxStatus::NONE );
+		$this->product->save();
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $this->product );
+		$item->set_order_id( $this->order->get_id() );
+		$item->save();
+		$this->product->set_tax_status( ProductTaxStatus::SHIPPING );
+		$this->product->save();
+
+		$item->set_recorded_tax_status( '' );
+		$item->save();
+		$sut = new WC_Order_Item_Product( $item->get_id() );
+
+		$this->assertFalse( metadata_exists( 'order_item', $item->get_id(), '_product_tax_status' ) );
+		$this->assertSame( '', $sut->get_recorded_tax_status() );
+		$this->assertSame( ProductTaxStatus::SHIPPING, $sut->get_tax_status() );
+	}
+
+	/**
+	 * @testdox add_product() records the tax status of the product object it is given, including unsaved changes.
 	 */
 	public function test_add_product_records_the_tax_status(): void {
 		$this->product->set_tax_status( ProductTaxStatus::NONE );
-		$this->product->save();
 
 		$item_id = $this->order->add_product( $this->product, 1 );
 
@@ -942,13 +963,12 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Checkout records the product's tax status on each line it creates.
+	 * @testdox Checkout records the tax status of each cart product, including changes made to the cart product only.
 	 */
 	public function test_checkout_records_the_tax_status(): void {
-		$this->product->set_tax_status( ProductTaxStatus::NONE );
-		$this->product->save();
 		WC()->cart->empty_cart();
-		WC()->cart->add_to_cart( $this->product->get_id(), 1 );
+		$cart_item_key = WC()->cart->add_to_cart( $this->product->get_id(), 1 );
+		WC()->cart->get_cart_item( $cart_item_key )['data']->set_tax_status( ProductTaxStatus::NONE );
 		$order = new WC_Order();
 
 		WC()->checkout()->create_order_line_items( $order, WC()->cart );

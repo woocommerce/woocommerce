@@ -80,6 +80,8 @@ class WC_Order_Item_Product_Data_Store extends Abstract_WC_Order_Item_Type_Data_
 		$recorded_tax_status = $item->get_recorded_tax_status();
 		if ( '' !== $recorded_tax_status ) {
 			update_metadata( 'order_item', $id, '_product_tax_status', $recorded_tax_status );
+		} elseif ( metadata_exists( 'order_item', $id, '_product_tax_status' ) ) {
+			delete_metadata( 'order_item', $id, '_product_tax_status' );
 		}
 	}
 
