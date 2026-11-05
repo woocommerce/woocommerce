@@ -47,6 +47,7 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 		remove_action( 'parse_request', array( $this->sut, 'maybe_render' ), 0 );
 		remove_action( 'admin_init', array( $this->sut, 'maybe_sync_file' ) );
 		remove_action( 'admin_notices', array( $this->sut, 'maybe_render_notice' ) );
+		delete_option( 'woocommerce_queue_flush_rewrite_rules' );
 		if ( is_file( $this->file ) ) {
 			wp_delete_file( $this->file );
 		}
@@ -90,6 +91,32 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $expected ? 'index.php?' . UcpDiscovery::QUERY_VAR . '=1' : null, $wp_rewrite->extra_rules_top[ self::RULE ] ?? null );
 		$this->assertSame( $expected, in_array( UcpDiscovery::QUERY_VAR, apply_filters( 'query_vars', array() ), true ) );
 		$this->assertSame( 'yes' === $enabled ? 0 : false, has_action( 'parse_request', array( $this->sut, 'maybe_render' ) ) );
+	}
+
+	/**
+	 * @testdox register_feature_hooks queues a rewrite flush when the stored rules disagree with the feature flag.
+	 * @testWith ["yes", "present", false]
+	 *           ["yes", "missing", true]
+	 *           ["yes", "empty", false]
+	 *           ["no", "present", true]
+	 *
+	 * @param string $enabled  Feature option value.
+	 * @param string $stored   Whether the stored rules contain the rule, lack it, or are empty.
+	 * @param bool   $expected Whether a flush should be queued.
+	 */
+	public function test_register_feature_hooks_heals_stale_rewrite_rules( string $enabled, string $stored, bool $expected ): void {
+		update_option( 'woocommerce_feature_ucp_enabled', $enabled );
+		$this->set_permalink_structure( '/%postname%/' );
+		$rules = array( '^shop/?$' => 'index.php?post_type=product' );
+		if ( 'present' === $stored ) {
+			$rules[ self::RULE ] = 'index.php?' . UcpDiscovery::QUERY_VAR . '=1';
+		}
+		update_option( 'rewrite_rules', 'empty' === $stored ? array() : $rules );
+		update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
+
+		$this->sut->register_feature_hooks();
+
+		$this->assertSame( $expected ? 'yes' : 'no', get_option( 'woocommerce_queue_flush_rewrite_rules' ) );
 	}
 
 	/**
