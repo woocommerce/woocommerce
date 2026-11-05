@@ -90,6 +90,11 @@ parameters:
 			identifier: woocommerce.stagedWrite
 			message: '#^Method WC_Shipping_Zone::add_shipping_method\(\) writes outside save\(\)\.#'
 			path: includes/class-wc-shipping-zone.php
+		# PHPStan has no WP-CLI stubs, so it cannot see WP_CLI or its helper functions. Remove once stubs are added.
+		-
+			message: '#unknown class WP_CLI|Function WP_CLI\\Utils\\\w+ not found#'
+			paths:
+				- src/Internal/CLI/ImportExport/Product/ExportCommand.php
 	parallel:
 		maximumNumberOfProcesses: 4
 
