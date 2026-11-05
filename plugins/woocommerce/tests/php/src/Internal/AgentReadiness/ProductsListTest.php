@@ -62,6 +62,24 @@ class ProductsListTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Reading the report costs a few queries, however many example products the checks list.
+	 */
+	public function test_report_read_is_bounded(): void {
+		global $wpdb;
+		for ( $i = 0; $i < 6; $i++ ) {
+			WC_Helper_Product::create_simple_product();
+		}
+		$this->readiness->refresh_report();
+		wp_cache_flush();
+
+		$before = $wpdb->num_queries;
+		$report = $this->readiness->get_cached_report();
+
+		$this->assertCount( 6, array_column( (array) $report['checks'], 'product_ids', 'id' )['missing_images'], 'Six example products' );
+		$this->assertLessThanOrEqual( 4, $wpdb->num_queries - $before, 'The report option, the counts and one meta read' );
+	}
+
+	/**
 	 * @testdox Saving a product updates its rows and the report's counts, without another scan.
 	 */
 	public function test_save_updates_rows_and_counts(): void {
