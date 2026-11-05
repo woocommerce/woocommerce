@@ -206,16 +206,20 @@ class RegressionGuardChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A charset in the Content-Type header counts; an image hidden from assistive technology needs no alt.
+	 * @testdox A charset in the Content-Type header counts; an image hidden from assistive technology, a noscript fallback or a tracking pixel needs no alt.
 	 */
 	public function test_header_charset_and_hidden_images(): void {
 		$store      = $this->healthy_store();
-		$store['/'] = array( 200, '<html lang="de"><body><img src="x.gif" aria-hidden="true"></body></html>', array( 'content-type' => 'text/html; charset=UTF-8' ) );
+		$store['/'] = array( 200, '<html lang="de"><body><img src="x.gif" aria-hidden="true"><noscript><img src="pixel" /></noscript><img src="px.gif" width="1" height="1" style="display:none" /></body></html>', array( 'content-type' => 'text/html; charset=UTF-8' ) );
 
 		$results = $this->results( $store );
 
 		$this->assertTrue( $results['html_lang_and_charset'] );
-		$this->assertTrue( $results['images_have_alt'] );
+		$this->assertTrue( $results['images_have_alt'], 'A noscript fallback and a tracking pixel need no alt' );
+
+		remove_all_filters( 'pre_http_request' );
+		$store['/'] = array( 200, '<html lang="de"><body><noscript><img src="pixel" /></noscript><img src="hero.jpg"></body></html>', array( 'content-type' => 'text/html; charset=UTF-8' ) );
+		$this->assertFalse( $this->results( $store )['images_have_alt'], 'A visible image after the noscript block still needs alt' );
 	}
 
 	/**
@@ -246,16 +250,61 @@ class RegressionGuardChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A product with reviews needs a rating in its structured data.
+	 * @testdox A served price at another tax rate of the product's tax class matches: the page was served to one location.
+	 */
+	public function test_schema_price_at_another_tax_rate(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		$rate = \WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country' => 'DE',
+				'tax_rate'         => '25.0000',
+				'tax_rate_name'    => 'VAT',
+				'tax_rate_class'   => '',
+			)
+		);
+		try {
+			$path           = self::path( $this->product->get_permalink() );
+			$jsonld         = array(
+				'@type'  => 'Product',
+				'@id'    => $this->product->get_permalink() . '#product',
+				'name'   => $this->product->get_name(),
+				'offers' => array(
+					'@type'         => 'Offer',
+					'price'         => number_format( (float) $this->product->get_price() * 1.25, 2, '.', '' ),
+					'priceCurrency' => 'USD',
+					'availability'  => 'https://schema.org/InStock',
+				),
+			);
+			$store          = $this->healthy_store();
+			$store[ $path ] = array( 200, '<html><script type="application/ld+json">' . wp_json_encode( $jsonld ) . '</script><h1>' . $this->product->get_name() . '</h1></html>' );
+			$this->assertTrue( $this->results( $store )['schema_matches_product'] );
+		} finally {
+			\WC_Tax::_delete_tax_rate( $rate );
+			delete_option( 'woocommerce_calc_taxes' );
+		}
+	}
+
+	/**
+	 * @testdox A product with rated reviews needs a rating in its structured data; text-only reviews or ratings turned off need none.
 	 */
 	public function test_review_markup(): void {
+		update_option( 'woocommerce_enable_reviews', 'yes' );
+		update_option( 'woocommerce_enable_review_rating', 'yes' );
 		$reviewed = WC_Helper_Product::create_simple_product();
 		update_post_meta( $reviewed->get_id(), '_wc_review_count', 3 );
 		$path = self::path( $reviewed->get_permalink() );
 
 		$store          = $this->healthy_store();
 		$store[ $path ] = array( 200, '<script type="application/ld+json">{"@type":"Product","name":"Mug"}</script>' );
+		$this->assertTrue( $this->results( $store )['product_review_markup'], 'Reviews without a rating get no rating markup' );
+
+		update_post_meta( $reviewed->get_id(), '_wc_average_rating', '4.50' );
+		remove_all_filters( 'pre_http_request' );
 		$this->assertFalse( $this->results( $store )['product_review_markup'] );
+
+		update_option( 'woocommerce_enable_review_rating', 'no' );
+		remove_all_filters( 'pre_http_request' );
+		$this->assertTrue( $this->results( $store )['product_review_markup'], 'Ratings off: WooCommerce prints none' );
 
 		remove_all_filters( 'pre_http_request' );
 		$store[ $path ] = array( 200, '<script type="application/ld+json">{"@type":"Product","name":"Mug","aggregateRating":{"@type":"AggregateRating","ratingValue":"4.5","reviewCount":"3"}}</script>' );
@@ -266,14 +315,16 @@ class RegressionGuardChecksTest extends WC_Unit_Test_Case {
 	 * @testdox When the newest reviewed product is hidden, the next visible reviewed product is read.
 	 */
 	public function test_review_markup_skips_hidden_products(): void {
+		update_option( 'woocommerce_enable_reviews', 'yes' );
+		update_option( 'woocommerce_enable_review_rating', 'yes' );
 		$visible = WC_Helper_Product::create_simple_product();
-		update_post_meta( $visible->get_id(), '_wc_review_count', 2 );
+		update_post_meta( $visible->get_id(), '_wc_average_rating', '4.00' );
 		$visible->set_date_created( time() - HOUR_IN_SECONDS );
 		$visible->save();
 		$hidden = WC_Helper_Product::create_simple_product();
 		$hidden->set_catalog_visibility( 'hidden' );
 		$hidden->save();
-		update_post_meta( $hidden->get_id(), '_wc_review_count', 5 );
+		update_post_meta( $hidden->get_id(), '_wc_average_rating', '5.00' );
 
 		$store = $this->healthy_store();
 		$store[ self::path( $visible->get_permalink() ) ] = array( 200, '<script type="application/ld+json">{"@type":"Product","name":"Mug"}</script>' );
@@ -282,7 +333,7 @@ class RegressionGuardChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox lastmod is read from the sitemap robots.txt names, or from the first sitemap an index lists.
+	 * @testdox lastmod is read from the sitemaps robots.txt names and the default paths, or from the first sitemap an index lists; every candidate is tried.
 	 */
 	public function test_sitemap_lastmod_from_index(): void {
 		$child                    = home_url( '/products.xml' );
@@ -294,6 +345,10 @@ class RegressionGuardChecksTest extends WC_Unit_Test_Case {
 		remove_all_filters( 'pre_http_request' );
 		$store['/products.xml'] = array( 200, '<urlset><url><loc>a</loc></url></urlset>' );
 		$this->assertFalse( $this->results( $store )['sitemap_lastmod'] );
+
+		remove_all_filters( 'pre_http_request' );
+		$store['/sitemap.xml'] = array( 200, '<urlset><url><loc>a</loc><lastmod>2026-01-01</lastmod></url></urlset>' );
+		$this->assertTrue( $this->results( $store )['sitemap_lastmod'], 'The listed sitemap has no dates, a default one has' );
 	}
 
 	/**
