@@ -1138,7 +1138,7 @@ class CartController {
 	 * @throws RouteException Exception if invalid data is detected.
 	 *
 	 * @param array $request Add to cart request params.
-	 * @return \WC_Product Returns a product object if purchasable.
+	 * @return \WC_Product Product to add. Throws if it does not exist or is trashed.
 	 */
 	protected function get_product_for_cart( $request ) {
 		$product = wc_get_product( $request['id'] );

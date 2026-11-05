@@ -392,9 +392,9 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Add to cart reports an invalid attribute when the posted options match no variation, including an Any variation.
+	 * @testdox Add to cart rejects an attribute value outside the configured options, including when an Any variation exists.
 	 */
-	public function test_add_to_cart_reports_invalid_attribute_when_options_match_no_variation(): void {
+	public function test_add_to_cart_rejects_attribute_value_outside_options_when_any_variation_exists(): void {
 		$product   = new \WC_Product_Variable();
 		$attribute = new \WC_Product_Attribute();
 		$attribute->set_name( 'Color' );
@@ -409,7 +409,6 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 		$red->set_regular_price( '5' );
 		$red->save();
 
-		// An empty attribute is an Any variation: it accepts any configured option, and nothing else.
 		$any = new \WC_Product_Variation();
 		$any->set_parent_id( $product->get_id() );
 		$any->set_attributes( array( 'color' => '' ) );
