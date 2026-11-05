@@ -86,6 +86,14 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			);
 		}
 
+		if ( ! empty( $input['id'] ) && ! empty( $input['include'] ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_order_include_with_id',
+				__( 'Send either an id or include, not both.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
 		if ( ! empty( $input['id'] ) ) {
 			$order = self::get_order_from_input( $input );
 
@@ -163,9 +171,15 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			$args['exclude'] = array_merge( (array) ( $args['exclude'] ?? array() ), $extension_args['post__not_in'] );
 			unset( $extension_args['post__not_in'] );
 		}
-		if ( isset( $extension_args['post__in'] ) && ! empty( $args['exclude'] ) ) {
-			$include                    = array_values( array_diff( $extension_args['post__in'], (array) $args['exclude'] ) );
-			$extension_args['post__in'] = empty( $include ) ? array( 0 ) : $include;
+		// Both stores merge extension args recursively, which would add the extension IDs to include instead of intersecting them.
+		$include = empty( $input['include'] ) ? null : $input['include'];
+		if ( isset( $extension_args['post__in'] ) ) {
+			$include = null === $include ? $extension_args['post__in'] : array_intersect( $include, $extension_args['post__in'] );
+			unset( $extension_args['post__in'] );
+		}
+		if ( null !== $include ) {
+			$include          = array_values( array_diff( $include, (array) ( $args['exclude'] ?? array() ) ) );
+			$args['post__in'] = empty( $include ) ? array( 0 ) : $include;
 		}
 
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
@@ -269,6 +283,14 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 					'type'        => 'integer',
 					'description' => __( 'Filter by parent order ID.', 'woocommerce' ),
 					'minimum'     => 1,
+				),
+				'include'            => array(
+					'type'        => 'array',
+					'description' => __( 'Return only these order IDs. An empty list applies no ID filter.', 'woocommerce' ),
+					'items'       => array(
+						'type'    => 'integer',
+						'minimum' => 1,
+					),
 				),
 				'exclude'            => array(
 					'type'        => 'array',
