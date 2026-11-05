@@ -3068,9 +3068,9 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The most specific priced variation wins, and an Any variation ordered last accepts a combination only an unpriced variation defines.
+	 * @testdox Add to cart accepts any variation in the increasing-specificity list, and rejects a broader variation ordered after a closer match.
 	 */
-	public function test_add_to_cart_prefers_the_most_specific_visible_variation(): void {
+	public function test_add_to_cart_accepts_any_variation_in_the_specificity_list(): void {
 		$product = new WC_Product_Variable();
 		$color   = new WC_Product_Attribute();
 		$color->set_name( 'Color' );
@@ -3172,9 +3172,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 'Blue', $any_cart_item['variation']['attribute_color'], 'The posted Any color should be kept.' );
 		$this->assertSame( 'Large', $any_cart_item['variation']['attribute_size'], 'The posted Any size should be kept.' );
 
-		wc_clear_notices();
-
-		$broader_added = WC()->cart->add_to_cart(
+		$broader_key = WC()->cart->add_to_cart(
 			$product->get_id(),
 			1,
 			$red_any_size->get_id(),
@@ -3184,8 +3182,13 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertFalse( $broader_added, 'A broader variation should not accept a value a more specific variation defines.' );
-		$this->assertSame( 'The selected options belong to a different variation of this product.', wc_get_notices( 'error' )[0]['notice'] );
+		$this->assertNotFalse( $broader_key, 'A broader variation ordered before a closer match should accept those attributes.' );
+
+		$broader_item = WC()->cart->get_cart_item( (string) $broader_key );
+
+		$this->assertSame( $red_any_size->get_id(), $broader_item['variation_id'], 'The requested broader variation should be added.' );
+		$this->assertSame( 'Red', $broader_item['variation']['attribute_color'], 'The posted color should be kept.' );
+		$this->assertSame( 'Large', $broader_item['variation']['attribute_size'], 'The posted size should be kept.' );
 
 		wc_clear_notices();
 
@@ -3199,7 +3202,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertFalse( $any_added, 'An Any variation should not accept a value that belongs to another variation.' );
+		$this->assertFalse( $any_added, 'A broader variation ordered after a closer match should be rejected.' );
 		$this->assertSame( 'The selected options belong to a different variation of this product.', wc_get_notices( 'error' )[0]['notice'] );
 	}
 }

@@ -1277,17 +1277,16 @@ class CartController {
 	}
 
 	/**
-	 * Most specific visible variation that matches the attributes.
+	 * Visible variations that match the attributes, in menu order.
 	 *
-	 * More non-empty attributes win over a broader match, independent of menu order.
-	 * Empty stored values accept any posted value. An equal match keeps the requested variation.
+	 * Each variation is more specific than the previous one. An empty stored
+	 * attribute accepts any posted value. Any returned ID matches these attributes.
 	 *
-	 * @param \WC_Product $parent_product          Parent variable product.
-	 * @param array       $match_attributes        Attributes keyed by attribute_*.
-	 * @param int         $requested_variation_id  Variation the customer asked for.
-	 * @return int Matching variation ID, or 0 when no visible variation matches.
+	 * @param \WC_Product $parent_product   Parent variable product.
+	 * @param array       $match_attributes Attributes keyed by attribute_*.
+	 * @return int[] Matching variation IDs.
 	 */
-	private function find_visible_matching_variation( $parent_product, $match_attributes, $requested_variation_id ) {
+	private function find_visible_matching_variations( $parent_product, $match_attributes ) {
 		$child_ids = $parent_product->get_children();
 
 		if ( ! empty( $child_ids ) ) {
@@ -1295,8 +1294,8 @@ class CartController {
 			_prime_post_caches( $child_ids );
 		}
 
-		$best_variation_id = 0;
-		$best_specificity  = -1;
+		$matched_variation_ids = [];
+		$matched_specificity   = -1;
 
 		foreach ( $child_ids as $child_id ) {
 			$variation = wc_get_product( $child_id );
@@ -1322,18 +1321,15 @@ class CartController {
 				}
 			}
 
-			if ( ! $matches || $specificity < $best_specificity ) {
+			if ( ! $matches || $specificity <= $matched_specificity ) {
 				continue;
 			}
 
-			// Prefer a closer match, and keep the requested variation when specificity is equal.
-			if ( $specificity > $best_specificity || (int) $variation->get_id() === (int) $requested_variation_id ) {
-				$best_variation_id = $variation->get_id();
-				$best_specificity  = $specificity;
-			}
+			$matched_variation_ids[] = $variation->get_id();
+			$matched_specificity     = $specificity;
 		}
 
-		return $best_variation_id;
+		return $matched_variation_ids;
 	}
 
 	/**
@@ -1375,13 +1371,13 @@ class CartController {
 			}
 
 			// Keep attributes the request left out, so a partial selection is matched as this variation plus those posted values.
-			$match_attributes     = array_merge(
+			$match_attributes      = array_merge(
 				array_filter( wc_get_product_variation_attributes( $request['id'] ), 'wc_array_filter_default_attributes' ),
 				$request['variation']
 			);
-			$matched_variation_id = $this->find_visible_matching_variation( $parent_product, $match_attributes, $request['id'] );
+			$matched_variation_ids = $this->find_visible_matching_variations( $parent_product, $match_attributes );
 
-			if ( ! empty( $matched_variation_id ) && (int) $matched_variation_id !== (int) $request['id'] ) {
+			if ( ! empty( $matched_variation_ids ) && ! in_array( (int) $request['id'], $matched_variation_ids, true ) ) {
 				throw new RouteException(
 					'woocommerce_rest_invalid_variation_data',
 					esc_html__( 'The selected options belong to a different variation of this product.', 'woocommerce' ),

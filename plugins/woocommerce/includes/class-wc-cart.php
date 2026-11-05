@@ -1181,17 +1181,16 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
-	 * Most specific visible variation that matches the attributes.
+	 * Visible variations that match the attributes, in menu order.
 	 *
-	 * More non-empty attributes win over a broader match, independent of menu order.
-	 * Empty stored values accept any posted value. An equal match keeps the requested variation.
+	 * Each variation is more specific than the previous one. An empty stored
+	 * attribute accepts any posted value. Any returned ID matches these attributes.
 	 *
-	 * @param WC_Product $parent_product          Parent variable product.
-	 * @param array      $match_attributes        Attributes keyed by attribute_*.
-	 * @param int        $requested_variation_id  Variation the customer asked for.
-	 * @return int Matching variation ID, or 0 when no visible variation matches.
+	 * @param WC_Product $parent_product   Parent variable product.
+	 * @param array      $match_attributes Attributes keyed by attribute_*.
+	 * @return int[] Matching variation IDs.
 	 */
-	private function find_visible_matching_variation( $parent_product, $match_attributes, $requested_variation_id ) {
+	private function find_visible_matching_variations( $parent_product, $match_attributes ) {
 		$child_ids = $parent_product->get_children();
 
 		if ( ! empty( $child_ids ) ) {
@@ -1199,8 +1198,8 @@ class WC_Cart extends WC_Legacy_Cart {
 			_prime_post_caches( $child_ids );
 		}
 
-		$best_variation_id = 0;
-		$best_specificity  = -1;
+		$matched_variation_ids = array();
+		$matched_specificity   = -1;
 
 		foreach ( $child_ids as $child_id ) {
 			$variation = wc_get_product( $child_id );
@@ -1226,18 +1225,15 @@ class WC_Cart extends WC_Legacy_Cart {
 				}
 			}
 
-			if ( ! $matches || $specificity < $best_specificity ) {
+			if ( ! $matches || $specificity <= $matched_specificity ) {
 				continue;
 			}
 
-			// Prefer a closer match, and keep the requested variation when specificity is equal.
-			if ( $specificity > $best_specificity || (int) $variation->get_id() === (int) $requested_variation_id ) {
-				$best_variation_id = $variation->get_id();
-				$best_specificity  = $specificity;
-			}
+			$matched_variation_ids[] = $variation->get_id();
+			$matched_specificity     = $specificity;
 		}
 
-		return $best_variation_id;
+		return $matched_variation_ids;
 	}
 
 	/**
@@ -1335,9 +1331,9 @@ class WC_Cart extends WC_Legacy_Cart {
 					// @phpstan-ignore-next-line method.notFound Called via __call() on the underlying product data store instance.
 					$variation_id = $data_store->find_matching_product_variation( $parent_data, $posted_attributes );
 				} elseif ( ! empty( $posted_attributes ) ) {
-					$matched_variation_id = $this->find_visible_matching_variation( $parent_data, $posted_and_variation_attributes, $variation_id );
+					$matched_variation_ids = $this->find_visible_matching_variations( $parent_data, $posted_and_variation_attributes );
 
-					if ( ! empty( $matched_variation_id ) && (int) $matched_variation_id !== (int) $variation_id ) {
+					if ( ! empty( $matched_variation_ids ) && ! in_array( (int) $variation_id, $matched_variation_ids, true ) ) {
 						throw new Exception( __( 'The selected options belong to a different variation of this product.', 'woocommerce' ) );
 					}
 				}

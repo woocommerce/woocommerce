@@ -392,9 +392,9 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The most specific priced variation wins, and an Any variation ordered last accepts a combination only an unpriced variation defines.
+	 * @testdox Add to cart accepts any variation in the increasing-specificity list, and rejects a broader variation ordered after a closer match.
 	 */
-	public function test_add_to_cart_prefers_the_most_specific_visible_variation(): void {
+	public function test_add_to_cart_accepts_any_variation_in_the_specificity_list(): void {
 		$product = new \WC_Product_Variable();
 		$color   = new \WC_Product_Attribute();
 		$color->set_name( 'Color' );
@@ -508,28 +508,27 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 		$this->assertSame( 'Blue', $any_cart_item['variation']['attribute_color'], 'The posted Any color should be kept.' );
 		$this->assertSame( 'Large', $any_cart_item['variation']['attribute_size'], 'The posted Any size should be kept.' );
 
-		try {
-			( new CartController() )->add_to_cart(
-				array(
-					'id'        => $red_any_size->get_id(),
-					'quantity'  => 1,
-					'variation' => array(
-						array(
-							'attribute' => 'Color',
-							'value'     => 'Red',
-						),
-						array(
-							'attribute' => 'Size',
-							'value'     => 'Large',
-						),
+		$red_any_id   = ( new CartController() )->add_to_cart(
+			array(
+				'id'        => $red_any_size->get_id(),
+				'quantity'  => 1,
+				'variation' => array(
+					array(
+						'attribute' => 'Color',
+						'value'     => 'Red',
 					),
-				)
-			);
-			$this->fail( 'A broader variation should not accept a value a more specific variation defines.' );
-		} catch ( RouteException $exception ) {
-			$this->assertSame( 'woocommerce_rest_invalid_variation_data', $exception->getErrorCode() );
-			$this->assertSame( 'The selected options belong to a different variation of this product.', $exception->getMessage() );
-		}
+					array(
+						'attribute' => 'Size',
+						'value'     => 'Large',
+					),
+				),
+			)
+		);
+		$red_any_item = wc()->cart->get_cart_item( $red_any_id );
+
+		$this->assertSame( $red_any_size->get_id(), $red_any_item['variation_id'], 'A broader variation ordered before a closer match should be added.' );
+		$this->assertSame( 'Red', $red_any_item['variation']['attribute_color'], 'The posted color should be kept.' );
+		$this->assertSame( 'Large', $red_any_item['variation']['attribute_size'], 'The posted size should be kept.' );
 
 		try {
 			( new CartController() )->add_to_cart(
@@ -548,7 +547,7 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 					),
 				)
 			);
-			$this->fail( 'An Any variation should not accept a value that belongs to another variation.' );
+			$this->fail( 'A broader variation ordered after a closer match should be rejected.' );
 		} catch ( RouteException $exception ) {
 			$this->assertSame( 'woocommerce_rest_invalid_variation_data', $exception->getErrorCode() );
 			$this->assertSame( 'The selected options belong to a different variation of this product.', $exception->getMessage() );
