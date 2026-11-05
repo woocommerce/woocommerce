@@ -278,10 +278,10 @@ class WC_Structured_Data {
 			// price instead of the parent's AggregateOffer price range. This keeps the landing page's
 			// structured data consistent with the variation price and avoids Google Merchant Center
 			// "price mismatch" disapprovals. See https://github.com/woocommerce/woocommerce/issues/30799.
-			$selection           = $product->is_type( ProductType::VARIABLE ) ? $this->get_selected_variation_data( $product ) : null;
-			$selected_variation  = $selection['variation'] ?? null;
-			$selected_attributes = $selection['attributes'] ?? array();
-			$offer_source        = $selected_variation ? $selected_variation : $product;
+			$selected_variation = $product->is_type( ProductType::VARIABLE )
+				? $this->get_selected_variation( $product )
+				: null;
+			$offer_source       = $selected_variation ? $selected_variation : $product;
 
 			if ( $selected_variation ) {
 				// Reference the parent product group so variations stay grouped (Google `item_group_id`).
@@ -519,7 +519,7 @@ class WC_Structured_Data {
 				}
 			}
 
-			$checkout_url = $this->get_product_checkout_url( $product, $selected_variation, $selected_attributes );
+			$checkout_url = $this->get_product_checkout_url( $product, $selected_variation );
 			if ( $checkout_url ) {
 				$markup_offer['checkoutPageURLTemplate'] = $checkout_url;
 			}
@@ -1026,9 +1026,9 @@ class WC_Structured_Data {
 	 * AggregateOffer is used instead.
 	 *
 	 * @param WC_Product $product Variable product.
-	 * @return array{variation: WC_Product_Variation, attributes: array<string, string>}|null Selected variation and attributes, or null when not uniquely identified.
+	 * @return WC_Product_Variation|null The selected variation, or null when not uniquely identified.
 	 */
-	private function get_selected_variation_data( $product ) {
+	private function get_selected_variation( $product ) {
 		if ( ! $product instanceof WC_Product_Variable ) {
 			return null;
 		}
@@ -1040,22 +1040,16 @@ class WC_Structured_Data {
 		}
 
 		$match_attributes = array();
-		$valid_selection  = true;
 
 		foreach ( $variation_attributes as $attribute_name => $options ) {
 			$key = wc_variation_attribute_name( $attribute_name );
 
 			// Require every variation attribute to be specified so a single variation is identified.
-			if ( ! isset( $_GET[ $key ] ) || ! is_string( $_GET[ $key ] ) || '' === $_GET[ $key ] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			if ( ! isset( $_GET[ $key ] ) || '' === $_GET[ $key ] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				return null;
 			}
 
-			$value = wc_clean( wp_unslash( $_GET[ $key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			if ( ! is_string( $value ) ) {
-				return null;
-			}
-			$match_attributes[ $key ] = $value;
-			$valid_selection          = $valid_selection && is_array( $options ) && in_array( $value, $options, true );
+			$match_attributes[ $key ] = wc_clean( wp_unslash( $_GET[ $key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
 
 		$data_store = WC_Data_Store::load( 'product' );
@@ -1080,22 +1074,18 @@ class WC_Structured_Data {
 			return null;
 		}
 
-		return array(
-			'variation'  => $variation,
-			'attributes' => $valid_selection ? $match_attributes : array(),
-		);
+		return $variation;
 	}
 
 	/**
 	 * Get a checkout link for a simple product or selected variation.
 	 *
-	 * @param WC_Product                $product             Product shown on the page.
-	 * @param WC_Product_Variation|null $variation           Selected variation, if any.
-	 * @param array                     $selected_attributes Selected variation attributes.
+	 * @param WC_Product                $product   Product shown on the page.
+	 * @param WC_Product_Variation|null $variation Selected variation, if any.
 	 * @return string Checkout URL, or an empty string if it cannot be represented.
 	 */
-	private function get_product_checkout_url( $product, $variation, $selected_attributes ) {
-		if ( ( ! $variation && ! $product->is_type( ProductType::SIMPLE ) ) || ( $variation && empty( $selected_attributes ) ) ) {
+	private function get_product_checkout_url( $product, $variation ) {
+		if ( ! $variation && ! $product->is_type( ProductType::SIMPLE ) ) {
 			return '';
 		}
 
@@ -1114,6 +1104,19 @@ class WC_Structured_Data {
 
 		$products = $item->get_id() . ':1';
 		if ( $variation && $product instanceof WC_Product_Variable ) {
+			$selected_attributes = array();
+			foreach ( $product->get_variation_attributes() as $attribute_name => $options ) {
+				$key = wc_variation_attribute_name( $attribute_name );
+				if ( ! isset( $_GET[ $key ] ) || ! is_string( $_GET[ $key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					return '';
+				}
+				$value = wc_clean( wp_unslash( $_GET[ $key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				if ( ! is_string( $value ) || ! is_array( $options ) || ! in_array( $value, $options, true ) ) {
+					return '';
+				}
+				$selected_attributes[ $key ] = $value;
+			}
+
 			$any_attributes = array_keys( $variation->get_variation_attributes(), '', true );
 			if ( $any_attributes ) {
 				$values     = array();
