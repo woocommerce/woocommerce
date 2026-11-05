@@ -278,10 +278,9 @@ class WC_Structured_Data {
 			// price instead of the parent's AggregateOffer price range. This keeps the landing page's
 			// structured data consistent with the variation price and avoids Google Merchant Center
 			// "price mismatch" disapprovals. See https://github.com/woocommerce/woocommerce/issues/30799.
-			$selected_attributes = array();
-			$selected_variation  = $product->is_type( ProductType::VARIABLE )
-				? $this->get_selected_variation( $product, $selected_attributes )
-				: null;
+			$selection           = $product->is_type( ProductType::VARIABLE ) ? $this->get_selected_variation_data( $product ) : null;
+			$selected_variation  = $selection['variation'] ?? null;
+			$selected_attributes = $selection['attributes'] ?? array();
 			$offer_source        = $selected_variation ? $selected_variation : $product;
 
 			if ( $selected_variation ) {
@@ -1026,11 +1025,10 @@ class WC_Structured_Data {
 	 * single, purchasable variation. Partial or missing selections return null so the parent product's
 	 * AggregateOffer is used instead.
 	 *
-	 * @param WC_Product $product             Variable product.
-	 * @param array      $selected_attributes Receives the selected attributes.
-	 * @return WC_Product_Variation|null The selected variation, or null when not uniquely identified.
+	 * @param WC_Product $product Variable product.
+	 * @return array{variation: WC_Product_Variation, attributes: array<string, string>}|null Selected variation and attributes, or null when not uniquely identified.
 	 */
-	private function get_selected_variation( $product, &$selected_attributes ) {
+	private function get_selected_variation_data( $product ) {
 		if ( ! $product instanceof WC_Product_Variable ) {
 			return null;
 		}
@@ -1052,8 +1050,12 @@ class WC_Structured_Data {
 				return null;
 			}
 
-			$match_attributes[ $key ] = wc_clean( wp_unslash( $_GET[ $key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$valid_selection          = $valid_selection && is_array( $options ) && in_array( $match_attributes[ $key ], $options, true );
+			$value = wc_clean( wp_unslash( $_GET[ $key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			if ( ! is_string( $value ) ) {
+				return null;
+			}
+			$match_attributes[ $key ] = $value;
+			$valid_selection          = $valid_selection && is_array( $options ) && in_array( $value, $options, true );
 		}
 
 		$data_store = WC_Data_Store::load( 'product' );
@@ -1078,8 +1080,10 @@ class WC_Structured_Data {
 			return null;
 		}
 
-		$selected_attributes = $valid_selection ? $match_attributes : array();
-		return $variation;
+		return array(
+			'variation'  => $variation,
+			'attributes' => $valid_selection ? $match_attributes : array(),
+		);
 	}
 
 	/**
