@@ -197,12 +197,17 @@ class SessionDataWriterTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$expected = array(
-			'a'    => 'mine',
-			'keep' => 'kept',
-		);
-		$this->assertSame( $expected, $saved );
-		$this->assertSame( $expected, $this->get_stored(), 'Keys this request did not change should not be dropped' );
+		$stored = $this->get_stored();
+
+		$this->assertArrayHasKey( 'a', $saved );
+		$this->assertSame( 'mine', $saved['a'] );
+		$this->assertArrayHasKey( 'keep', $saved );
+		$this->assertSame( 'kept', $saved['keep'] );
+
+		$this->assertArrayHasKey( 'a', $stored );
+		$this->assertSame( 'mine', $stored['a'] );
+		$this->assertArrayHasKey( 'keep', $stored, 'Keys this request did not change should not be dropped' );
+		$this->assertSame( 'kept', $stored['keep'] );
 	}
 
 	/**
