@@ -662,6 +662,19 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
+			'agent_readiness'                      => array(
+				'name'                         => __( 'Agent readiness', 'woocommerce' ),
+				'description'                  => __(
+					'Check products against the product data specs of AI shopping channels under WooCommerce > Status.',
+					'woocommerce'
+				),
+				'enabled_by_default'           => false,
+				// Hidden while it is a preview.
+				'disable_ui'                   => true,
+				'is_experimental'              => true,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
 			'destroy-empty-sessions'               => array(
 				'name'                         => __( 'Clear Customer Sessions When Empty', 'woocommerce' ),
 				'description'                  => __(
