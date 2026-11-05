@@ -1394,4 +1394,65 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT payment_method FROM {$stats_table} WHERE order_id = %d", $order->get_id() ), ARRAY_A );
 		$this->assertSame( array( 'payment_method' => null ), $row, 'The row keeps a NULL payment method after a failed write.' );
 	}
+
+	/**
+	 * @testdox wc_update_1122_remove_objects_from_default_attributes should remove stored objects without creating them and keep plain text that only looks like one.
+	 */
+	public function test_wc_update_1122_remove_objects_from_default_attributes(): void {
+		global $wpdb;
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		ObjectInstantiationProbe::$was_unserialized = false;
+		// phpcs:disable WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+		$stored = array(
+			'object'     => serialize(
+				array(
+					'pa_color' => 'blue',
+					'probe'    => new ObjectInstantiationProbe(),
+				)
+			),
+			'unreadable' => 'a:1:{s:5:"probe";O:24:"ObjectInstantiationProbe":0:{}',
+			'only'       => serialize( new ObjectInstantiationProbe() ),
+			'broken'     => 'a:1:{s:4:"note";s:5:"TO: Größe";}',
+			'text'       => serialize( array( 'note' => 'O:8:"stdClass":0:{}' ) ),
+			'nested'     => serialize(
+				array(
+					'pa_color' => 'blue',
+					'list'     => array( new ObjectInstantiationProbe() ),
+				)
+			),
+			'recursive'  => 'a:2:{i:0;R:1;i:1;s:2:"O:";}',
+		);
+		// phpcs:enable WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+		$product_ids = array();
+		foreach ( $stored as $label => $meta_value ) {
+			$product_ids[ $label ] = wp_insert_post(
+				array(
+					'post_type'  => 'product',
+					'post_title' => $label,
+				)
+			);
+			// Stored directly, as only a corrupted row can hold an object.
+			$wpdb->insert(
+				$wpdb->postmeta,
+				array(
+					'post_id'    => $product_ids[ $label ],
+					'meta_key'   => '_default_attributes', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_value' => $meta_value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				)
+			);
+		}
+
+		wc_update_1122_remove_objects_from_default_attributes();
+
+		$read = fn( string $label ) => $wpdb->get_var( $wpdb->prepare( "SELECT meta_value FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_default_attributes'", $product_ids[ $label ] ) );
+		$this->assertFalse( ObjectInstantiationProbe::$was_unserialized, 'The migration must not create the stored objects' );
+		$this->assertSame( serialize( array( 'pa_color' => 'blue' ) ), $read( 'object' ), 'Objects are removed and string defaults kept' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+		$this->assertNull( $read( 'unreadable' ), 'A row holding an object that cannot be decoded is deleted' );
+		$this->assertNull( $read( 'only' ), 'A row that is only an object is deleted' );
+		$this->assertSame( $stored['broken'], $read( 'broken' ), 'A row that cannot be decoded but holds no object is kept' );
+		$this->assertSame( $stored['text'], $read( 'text' ), 'Text that only looks like an object is kept' );
+		$this->assertSame( serialize( array( 'pa_color' => 'blue' ) ), $read( 'nested' ), 'Objects nested in arrays are removed' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+		$this->assertSame( $stored['recursive'], $read( 'recursive' ), 'A self-referencing row without objects is kept, and does not stop the migration' );
+	}
 }

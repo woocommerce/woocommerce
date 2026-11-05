@@ -158,7 +158,7 @@ class WC_Structured_Data {
 		$types   = array();
 		$types[] = is_shop() || is_product_category() || is_product() ? 'product' : '';
 		$types[] = is_shop() && is_front_page() ? 'website' : '';
-		$types[] = $policy_page_id > 0 && is_page( $policy_page_id ) && ! doing_action( 'woocommerce_email_order_details' ) ? 'onlinestore' : '';
+		$types[] = $policy_page_id > 0 && ( is_page( $policy_page_id ) || is_product() ) && ! doing_action( 'woocommerce_email_order_details' ) ? 'onlinestore' : '';
 		$types[] = is_product() ? 'review' : '';
 		$types[] = 'breadcrumblist';
 		$types[] = 'order';
@@ -193,7 +193,7 @@ class WC_Structured_Data {
 		$data  = $this->get_structured_data( $types );
 
 		if ( $data ) {
-			echo '<script type="application/ld+json">' . wc_esc_json( wp_json_encode( $data, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ), true ) . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo '<script type="application/ld+json">' . wc_esc_json( wp_json_encode( $data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_SLASHES ), true ) . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 	}
 
@@ -609,6 +609,31 @@ class WC_Structured_Data {
 			);
 		}
 
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Reuse the breadcrumb filter.
+		$term_args  = apply_filters(
+			'woocommerce_breadcrumb_product_terms_args',
+			array(
+				'orderby' => 'parent',
+				'order'   => 'DESC',
+			)
+		);
+		$product_id = $product instanceof WC_Product_Variation ? $product->get_parent_id() : $product->get_id();
+		$terms      = is_array( $term_args ) ? wc_get_product_terms( $product_id, 'product_cat', $term_args ) : array();
+		if ( ! empty( $terms ) && is_array( $terms ) ) {
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Reuse the breadcrumb filter.
+			$term  = apply_filters( 'woocommerce_breadcrumb_main_term', reset( $terms ), $terms );
+			$names = array();
+			$seen  = array();
+			while ( $term instanceof WP_Term && 'product_cat' === $term->taxonomy && ! isset( $seen[ $term->term_id ] ) ) {
+				$seen[ $term->term_id ] = true;
+				$names[]                = html_entity_decode( $term->name, ENT_QUOTES, get_bloginfo( 'charset' ) );
+				if ( ! $term->parent ) {
+					$markup['category'] = implode( ' > ', array_reverse( $names ) );
+					break;
+				}
+				$term = get_term( $term->parent, 'product_cat' );
+			}
+		}
 		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
 	}
 
@@ -692,7 +717,7 @@ class WC_Structured_Data {
 	}
 
 	/**
-	 * Generates link-only return-policy data on the selected public policy page.
+	 * Generates link-only return-policy data on product pages and the selected public policy page.
 	 *
 	 * Hooked into `wp_footer` before structured data is output, so it cannot leak into order emails.
 	 *
@@ -700,7 +725,7 @@ class WC_Structured_Data {
 	 */
 	public function generate_online_store_data(): void {
 		$page_id = wc_get_page_id( 'refund_returns' );
-		if ( $page_id <= 0 || ! is_page( $page_id ) ) {
+		if ( $page_id <= 0 || ( ! is_page( $page_id ) && ! is_product() ) ) {
 			return;
 		}
 
@@ -725,7 +750,7 @@ class WC_Structured_Data {
 		);
 
 		/**
-		 * Filters the store and return-policy structured data on the policy page.
+		 * Filters the store and return-policy structured data.
 		 *
 		 * @since 11.3.0
 		 * @param array   $markup Structured data for the online store.
