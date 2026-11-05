@@ -955,9 +955,11 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 				'rating'           => array(
 					'description' => __( 'Review rating (0 to 5).', 'woocommerce' ),
 					'type'        => 'integer',
+					'minimum'     => 0,
+					'maximum'     => 5,
 					'context'     => array( 'view', 'edit' ),
 				),
-				'verified'         => array(
+				'verified'        => array(
 					'description' => __( 'Shows if the reviewer bought the product or not.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),

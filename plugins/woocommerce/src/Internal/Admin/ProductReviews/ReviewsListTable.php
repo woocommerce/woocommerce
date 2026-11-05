@@ -1226,7 +1226,7 @@ class ReviewsListTable extends WP_List_Table {
 		ob_start();
 
 		if ( ! empty( $rating ) && is_numeric( $rating ) ) {
-			$rating = (int) $rating;
+			$rating = max( 0, min( 5, (int) $rating ) );
 
 			$accessibility_label = sprintf(
 				/* translators: 1: number representing a rating */

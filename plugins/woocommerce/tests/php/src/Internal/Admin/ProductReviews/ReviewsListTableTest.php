@@ -520,6 +520,29 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox `column_rating` clamps a stored rating above 5 to 5 stars instead of failing.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::column_rating()
+	 *
+	 * @return void
+	 * @throws ReflectionException If the method does not exist.
+	 */
+	public function test_column_rating_clamps_rating_above_maximum(): void {
+		$list_table = $this->get_reviews_list_table();
+		$method     = ( new ReflectionClass( $list_table ) )->getMethod( 'column_rating' );
+		$method->setAccessible( true );
+
+		$review = $this->factory()->comment->create_and_get();
+		update_comment_meta( $review->comment_ID, 'rating', '6' );
+
+		ob_start();
+		$method->invokeArgs( $list_table, array( $review ) );
+		$output = trim( ob_get_clean() );
+
+		$this->assertSame( '<span aria-label="5 out of 5">&#9733;&#9733;&#9733;&#9733;&#9733;</span>', $output );
+	}
+
+	/**
 	 * @testdox `column_author` outputs the HTML column content displaying the review author in the product reviews list table.
 	 *
 	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\ReviewsListTable::column_author()
