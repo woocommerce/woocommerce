@@ -73,9 +73,7 @@
 					// Nothing was saved, so redraw from the model, which releases the table.
 					shippingMethod.trigger( 'rerender' );
 
-					// A row delete leaves a methods entry behind while marking the form clean, so
-					// ignore methods here exactly as the response does.
-					if ( _.isEmpty( _.omit( shippingMethod.changes, 'methods' ) ) ) {
+					if ( _.isEmpty( shippingMethod.changes ) ) {
 						// Saving an empty change set would just fail again, so clear the busy
 						// state without marking the form dirty.
 						$save_button.removeClass( 'is-busy' );
@@ -263,8 +261,6 @@
 				onDeleteRow: function( event ) {
 					var view    = event.data.view,
 						model   = view.model,
-						methods   = _.indexBy( model.get( 'methods' ), 'instance_id' ),
-						changes = {},
 						instance_id = $( this ).closest( 'tr' ).data( 'id' );
 
 					event.preventDefault();
@@ -279,6 +275,16 @@
 						shippingMethodView.block();
 						setRunning( model, true );
 
+						var onRemoveFailure = function() {
+							setRunning( model, false );
+							window.alert( data.strings.remove_method_failed );
+							shippingMethodView.unblock();
+							// The delete failed; restore Save if the form was dirty before it.
+							if ( shippingMethodView.needsUnloadConfirm ) {
+								$save_button.prop( 'disabled', false );
+							}
+						};
+
 						// Add method to zone via ajax call
 						$.post( {
 							url: ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?') + 'action=woocommerce_shipping_zone_remove_method',
@@ -287,31 +293,19 @@
 								instance_id: instance_id,
 								zone_id: data.zone_id,
 							},
-							success: function( { data } ) {
-								setRunning( model, false );
-								delete methods[instance_id];
-								changes.methods = changes.methods || data.methods;
-								model.set('methods', methods);
-								model.logChanges( changes );
-								// Zone edits can still be pending, so only mark the form clean when
-								// nothing else is left to save.
-								if ( _.isEmpty( _.omit( model.changes, 'methods' ) ) ) {
-									view.clearUnloadConfirmation();
-								} else {
-									$save_button.prop( 'disabled', false );
+							success: function( response, textStatus ) {
+								// A refused delete still arrives as HTTP 200, so check the payload
+								// before dropping the row.
+								if ( 'success' !== textStatus || ! response || ! response.success || ! response.data ) {
+									onRemoveFailure();
+									return;
 								}
-								view.render();
+
+								setRunning( model, false );
+								applyMethodRemoval( model, view, response, instance_id );
 								shippingMethodView.unblock();
 							},
-							error: function( jqXHR, textStatus, errorThrown ) {
-								setRunning( model, false );
-								window.alert( data.strings.remove_method_failed );
-								shippingMethodView.unblock();
-								// The delete failed; restore Save if the form was dirty before it.
-								if ( shippingMethodView.needsUnloadConfirm ) {
-									$save_button.prop( 'disabled', false );
-								}
-							},
+							error: onRemoveFailure,
 							dataType: 'json'
 						});
 					}
@@ -701,16 +695,10 @@
 				},
 				onAddShippingMethodSubmitted: function( event, target, posted_data, closeModal ) {
 					if ( 'wc-modal-add-shipping-method' === target ) {
-						if ( shippingMethod.isRunning ) {
-							return;
-						}
-
 						shippingMethodView.block();
 						setRunning( shippingMethod, true );
 
-						// Feedback only: the modal's Enter handler ignores the attribute, so the guard
-						// above is what prevents a second add request.
-						$('#btn-next').prop( 'disabled', true ).addClass( 'is-busy' );
+						$('#btn-next').addClass( 'is-busy' );
 
 						// Add method to zone via ajax call
 						$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_zone_add_method', {
@@ -726,7 +714,7 @@
 								! response.success ||
 								! response.data
 							) {
-								$( '#btn-next' ).prop( 'disabled', false ).removeClass( 'is-busy' );
+								$( '#btn-next' ).removeClass( 'is-busy' );
 								shippingMethod.onSaveFailure();
 								return;
 							}
@@ -791,7 +779,7 @@
 
 							$( document.body ).trigger( 'init_tooltips' );
 						}, 'json' ).fail( function() {
-							$( '#btn-next' ).prop( 'disabled', false ).removeClass( 'is-busy' );
+							$( '#btn-next' ).removeClass( 'is-busy' );
 							shippingMethod.onSaveFailure();
 						} );
 					}
@@ -875,7 +863,7 @@
 				},
 				validateFormArguments: function( event, target, data ) {
 					if ( target === 'wc-modal-add-shipping-method' ) {
-						if ( data.add_method_id ) {
+						if ( data.add_method_id && ! shippingMethod.isRunning ) {
 							const nextButton = document.getElementById( 'btn-next' );
 							nextButton.disabled = false;
 							nextButton.classList.remove( 'disabled' );
@@ -894,9 +882,21 @@
 
 							var view    = shippingMethodView,
 								model   = view.model,
-								methods   = _.indexBy( model.get( 'methods' ), 'instance_id' ),
-								changes = {},
 								instance_id = post_data.instance_id;
+
+							var onCleanupFailure = function() {
+								setRunning( shippingMethod, false );
+								window.alert( data.strings.remove_method_failed );
+								shippingMethodView.unblock();
+								// The method is still in the model and on the server, and the add deliberately
+								// skipped rendering it, so draw it now or the merchant cannot reach it. The
+								// delete handler's failure path must not render, as it never touched the model.
+								shippingMethodView.render();
+								// The cleanup failed; restore Save if the form was dirty before it.
+								if ( shippingMethodView.needsUnloadConfirm ) {
+									$save_button.prop( 'disabled', false );
+								}
+							};
 
 							// Remove method to zone via ajax call
 							$.post( {
@@ -906,31 +906,19 @@
 									instance_id: instance_id,
 									zone_id: data.zone_id,
 								},
-								success: function( { data } ) {
-									setRunning( shippingMethod, false );
-									delete methods[instance_id];
-									changes.methods = changes.methods || data.methods;
-									model.set('methods', methods);
-									model.logChanges( changes );
-									// Zone edits can still be pending, so only mark the form clean when
-									// nothing else is left to save.
-									if ( _.isEmpty( _.omit( model.changes, 'methods' ) ) ) {
-										view.clearUnloadConfirmation();
-									} else {
-										$save_button.prop( 'disabled', false );
+								success: function( response, textStatus ) {
+									// A refused removal still arrives as HTTP 200, so check the payload
+									// before treating the method as gone.
+									if ( 'success' !== textStatus || ! response || ! response.success || ! response.data ) {
+										onCleanupFailure();
+										return;
 									}
-									view.render();
+
+									setRunning( shippingMethod, false );
+									applyMethodRemoval( model, view, response, instance_id );
 									shippingMethodView.unblock();
 								},
-								error: function( jqXHR, textStatus, errorThrown ) {
-									setRunning( shippingMethod, false );
-									window.alert( data.strings.remove_method_failed );
-									shippingMethodView.unblock();
-									// The cleanup failed; restore Save if the form was dirty before it.
-									if ( shippingMethodView.needsUnloadConfirm ) {
-										$save_button.prop( 'disabled', false );
-									}
-								},
+								error: onCleanupFailure,
 								dataType: 'json'
 							});
 						}
@@ -952,14 +940,54 @@
 				el:       $tbody
 			} );
 
+		// Apply a completed removal. The response is the truth for which methods exist; the
+		// merchant's unsaved edits stay the truth for how the surviving ones look.
+		function applyMethodRemoval( model, view, response, instance_id ) {
+			// The removed row's pending edits are moot. 'methods' is a key logChanges seeds,
+			// not a row, so it never counts as a pending edit.
+			if ( model.changes.methods ) {
+				delete model.changes.methods[ instance_id ];
+				if ( _.isEmpty( _.omit( model.changes.methods, 'methods' ) ) ) {
+					delete model.changes.methods;
+				}
+			}
+
+			var pending = _.omit( model.changes.methods || {}, 'methods' ),
+				fresh   = _.indexBy( response.data.methods, 'instance_id' );
+
+			// Only these two are editable without a save, so only these may override the server.
+			_.each( pending, function( row, id ) {
+				if ( fresh[ id ] ) {
+					_.extend( fresh[ id ], _.pick( row, 'enabled', 'method_order' ) );
+				}
+			} );
+
+			model.set( 'methods', fresh );
+
+			if ( _.isEmpty( model.changes ) ) {
+				view.clearUnloadConfirmation();
+			} else {
+				$save_button.prop( 'disabled', false );
+			}
+			view.render();
+		}
+
 		// Lock or release the controls that start an operation. While one runs, the method rows
-		// stay blocked (via render()) and Save and Add method are disabled, so no second action can
-		// begin. Save re-enables through the unsaved-changes flow once nothing is running.
+		// stay blocked (via render()) and Save, Add method, the add modal's method selector and
+		// its Continue button are disabled, so no second action can begin. Save re-enables through
+		// the unsaved-changes flow, Continue through the modal's own validation.
 		function setRunning( model, running ) {
 			model.isRunning = running;
 			$add_method_button.prop( 'disabled', running );
+			// Disabled controls fire no input events, so validation cannot re-enable Continue mid-run.
+			$( '.wc-shipping-zone-method-selector' ).prop( 'disabled', running );
 			if ( running ) {
 				$save_button.prop( 'disabled', true );
+				$( '#btn-next' ).prop( 'disabled', true ).addClass( 'disabled' );
+			} else {
+				// Re-validate so Continue matches the selection the merchant already made.
+				// Continue sits in the footer, outside the form, so walk up to the dialog first.
+				$( '#btn-next' ).closest( '#wc-backbone-modal-dialog' ).find( 'form' ).trigger( 'input' );
 			}
 		}
 
