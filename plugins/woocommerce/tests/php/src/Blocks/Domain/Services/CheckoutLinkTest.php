@@ -59,11 +59,16 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox A selected Any variation's schema link adds the chosen value to the cart.
+	 * @testWith ["Large & Tall", "Large &amp~; Tall"]
+	 *           ["XL: Bold, ~; Tall", "XL~: Bold~, ~~; Tall"]
+	 *
+	 * @param string $value Selected attribute value.
+	 * @param string $encoded Encoded attribute value in products.
 	 */
-	public function test_any_variation_schema_checkout_link(): void {
+	public function test_any_variation_schema_checkout_link( string $value, string $encoded ): void {
 		$attribute = new \WC_Product_Attribute();
 		$attribute->set_name( 'Size' );
-		$attribute->set_options( [ 'Large & Tall' ] );
+		$attribute->set_options( [ $value ] );
 		$attribute->set_variation( true );
 
 		$product = new \WC_Product_Variable();
@@ -83,49 +88,21 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 
 		$previous_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		try {
-			$_GET = [ 'attribute_size' => 'Large & Tall' ];
+			$_GET = [ 'attribute_size' => $value ];
 			$sut  = new \WC_Structured_Data();
 			$sut->generate_product_data( $product );
 			$markup = $sut->get_data()[0];
 			$url    = $markup['offers'][0]['checkoutPageURLTemplate'];
 			$this->assertSame( $url, $markup['potentialAction']['target']['urlTemplate'] );
 			wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
-			$this->assertSame( $variation->get_id() . ':1', $query['products'] );
-			$this->assertSame( [ 'attribute_size' => 'Large &amp; Tall' ], json_decode( $query['wc_checkout_link_variation'], true ) );
+			$this->assertSame( $variation->get_id() . ':1:attribute_size=' . $encoded, $query['products'] );
 
 			$_GET = wp_slash( $query );
 			$this->get_checkout_link_service()->get_checkout_link_test();
 			$items = array_values( WC()->cart->get_cart() );
 			$this->assertCount( 1, $items );
 			$this->assertSame( $variation->get_id(), $items[0]['variation_id'] );
-			$this->assertSame( [ 'attribute_size' => 'Large & Tall' ], $items[0]['variation'] );
-		} finally {
-			$_GET = $previous_get;
-		}
-	}
-
-	/**
-	 * @testdox Invalid encoded variation data is rejected before adding a product.
-	 *
-	 * @testWith ["{"]
-	 *           ["{\"attribute_size\":[]}"]
-	 *           ["{\"size\":\"large\"}"]
-	 *
-	 * @param string $variation_data Invalid JSON or variation data.
-	 */
-	public function test_invalid_encoded_variation_data_is_rejected( string $variation_data ): void {
-		$product      = \WC_Helper_Product::create_simple_product();
-		$previous_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		try {
-			$_GET = wp_slash(
-				[
-					'products'                   => (string) $product->get_id(),
-					'wc_checkout_link_variation' => $variation_data,
-				]
-			);
-			$this->assertFalse( $this->get_checkout_link_service()->validate_checkout_link_test() );
-			$this->get_checkout_link_service()->get_checkout_link_test();
-			$this->assertTrue( WC()->cart->is_empty() );
+			$this->assertSame( [ 'attribute_size' => $value ], $items[0]['variation'] );
 		} finally {
 			$_GET = $previous_get;
 		}
@@ -384,15 +361,6 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 	 */
 	private function get_checkout_link_service() {
 		return new class() extends CheckoutLink {
-			/**
-			 * Validate a checkout link for testing.
-			 *
-			 * @return bool Whether the link is valid.
-			 */
-			public function validate_checkout_link_test() {
-				return parent::validate_checkout_link();
-			}
-
 			/**
 			 * Get the checkout link for testing.
 			 *

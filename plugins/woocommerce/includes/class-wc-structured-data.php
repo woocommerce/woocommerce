@@ -1108,10 +1108,7 @@ class WC_Structured_Data {
 			return '';
 		}
 
-		$args = array(
-			'checkout-link' => '1',
-			'products'      => rawurlencode( $item->get_id() . ':1' ),
-		);
+		$products = $item->get_id() . ':1';
 		if ( $variation && $product instanceof WC_Product_Variable ) {
 			$any_attributes = array_keys( $variation->get_variation_attributes(), '', true );
 			if ( $any_attributes ) {
@@ -1126,17 +1123,22 @@ class WC_Structured_Data {
 					if ( ! $attribute->is_taxonomy() ) {
 						$value = htmlspecialchars( $value, ENT_QUOTES, 'UTF-8' );
 					}
-					$values[ $key ] = $value;
+					if ( sanitize_key( $key ) !== $key || sanitize_text_field( $value ) !== $value ) {
+						return '';
+					}
+					$values[] = $key . '=' . str_replace( array( ',', ':', ';' ), array( '~,', '~:', '~;' ), $value );
 				}
-				$json = wp_json_encode( $values );
-				if ( ! is_string( $json ) ) {
-					return '';
-				}
-				$args['wc_checkout_link_variation'] = rawurlencode( $json );
+				$products .= ':' . implode( ';', $values );
 			}
 		}
 
-		return add_query_arg( $args, home_url( '/' ) );
+		return add_query_arg(
+			array(
+				'checkout-link' => '1',
+				'products'      => rawurlencode( $products ),
+			),
+			home_url( '/' )
+		);
 	}
 
 	/**

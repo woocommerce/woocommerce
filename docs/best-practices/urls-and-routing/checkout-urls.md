@@ -51,24 +51,6 @@ products=ABC~,123~:BLUE:1
 
 Existing links containing only product IDs and quantities continue to work.
 
-### Encoded variation data
-
-For a link with one product, `wc_checkout_link_variation` can carry variation data that contains characters the `products` format cannot represent. Its value is a URL-encoded JSON object. Use `attribute_`-prefixed names as keys and selected values as strings. Do not also include variation data in `products`.
-
-For custom attributes, HTML-encode the values before encoding the JSON. This preserves literal HTML entities when the cart processes the selection.
-
-```php
-$attributes = array( 'attribute_size' => htmlspecialchars( 'Large & Tall', ENT_QUOTES, 'UTF-8' ) );
-$json       = wp_json_encode( $attributes );
-$url        = add_query_arg(
-	array(
-		'products'                   => '123:1',
-		'wc_checkout_link_variation' => rawurlencode( $json ),
-	),
-	home_url( '/checkout-link/' )
-);
-```
-
 ### Coupon
 
 ```plaintext
