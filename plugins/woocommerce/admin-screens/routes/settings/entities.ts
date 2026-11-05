@@ -6,8 +6,9 @@ import { __ } from '@wordpress/i18n';
 export const ENTITY_KIND = 'woo_settings_payments';
 
 /**
- * A core-data entity config for a settings page. The page's URL segment is the entity name and
- * its record ID, and its fields are registered separately in `entity-fields/`.
+ * A core-data entity config for a settings page. The page's path after its area is the entity
+ * name, such as `cheque` or `cheque/customer_messages` for a sub-page, and its fields are
+ * registered separately in `entity-fields/`.
  */
 export interface SettingsEntityConfig {
 	kind: string;
@@ -16,6 +17,8 @@ export interface SettingsEntityConfig {
 	key: string;
 	label: string;
 	getTitle: () => string;
+	/** The REST record the page edits. Defaults to the entity name; a sub-page sets it to share its parent's record. */
+	recordId?: string;
 }
 
 /**

@@ -14,7 +14,7 @@ import { useParams } from '@wordpress/route';
 // eslint-disable-next-line @wordpress/use-recommended-components -- Fine on this experimental screen until the repo enables allowUseWithCaution.
 import { Button, Notice, Stack } from '@wordpress/ui';
 import { useViewConfig } from '@wordpress/views';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 /**
  * Internal dependencies
@@ -23,6 +23,7 @@ import type { SettingsRecord } from '../../entity-fields/types';
 import { getSection } from './entities';
 import type { SettingsEntityConfig, SettingsSection } from './entities';
 import { getEntityFields } from './entity-fields';
+import { getPageCrumbs, getPageName } from './pages';
 import './style.scss';
 
 const EMPTY_FORM: Form = { fields: [] };
@@ -51,28 +52,32 @@ function SettingsForm( {
 	config: SettingsEntityConfig;
 } ) {
 	const { kind, name, label } = config;
+	const recordId = config.recordId ?? name;
 	const { record, editedRecord, hasEdits, edit, save } =
-		useEntityRecord< SettingsRecord >( kind, name, name );
+		useEntityRecord< SettingsRecord >( kind, name, recordId );
 	const isNarrow = useViewportMatch( 'medium', '<' );
 	const { form } = useViewConfig( { kind, name } );
 	const [ notice, setNotice ] = useState< {
 		status: 'success' | 'error';
 		message: string;
 	} >();
-	const { fields, isSaving, loadError } = useSelect(
+	const { fields, isSaving, loadError, entities } = useSelect(
 		( select ) => {
 			const core = select( coreStore );
 			return {
 				fields: getEntityFields( select( editorStore ), kind, name ),
-				isSaving: core.isSavingEntityRecord( kind, name, name ),
+				isSaving: core.isSavingEntityRecord( kind, name, recordId ),
 				loadError: core.getResolutionError( 'getEntityRecord', [
 					kind,
 					name,
-					name,
+					recordId,
 				] ),
+				entities: core.getEntitiesConfig(
+					kind
+				) as SettingsEntityConfig[],
 			};
 		},
-		[ kind, name ]
+		[ kind, name, recordId ]
 	);
 	const data = editedRecord as SettingsRecord | undefined;
 	const { validity, isValid } = useFormValidity(
@@ -131,6 +136,17 @@ function SettingsForm( {
 			</Button>
 		</Stack>
 	);
+	const pageCrumbs = useMemo(
+		() =>
+			getPageCrumbs(
+				section.slug,
+				name,
+				( pageName ) =>
+					entities.find( ( entity ) => entity.name === pageName )
+						?.label
+			),
+		[ section.slug, name, entities ]
+	);
 	return (
 		<Page
 			ariaLabel={ label }
@@ -138,7 +154,7 @@ function SettingsForm( {
 				<Breadcrumbs
 					items={ [
 						{ label: section.label, to: sectionUrl },
-						{ label },
+						...pageCrumbs,
 					] }
 				/>
 			}
@@ -200,20 +216,27 @@ function SettingsForm( {
 }
 
 /**
- * Show the settings entity whose name matches the route, from the entity kind of the route's area.
+ * Show the settings entity whose name matches the route's path after its area, from the area's
+ * entity kind. Sub-pages are entities too, named after their full path.
  */
 function SettingsStage() {
-	const { section: slug, page }: { section?: string; page?: string } =
-		useParams( { strict: false } );
+	const {
+		section: slug,
+		page,
+		_splat: subPath,
+	}: { section?: string; page?: string; _splat?: string } = useParams( {
+		strict: false,
+	} );
 	const section = getSection( slug );
 	const kind = section?.kind;
+	const name = getPageName( page, subPath );
 	const config = useSelect(
 		( select ) =>
-			kind && page
-				? ( select( coreStore ).getEntityConfig( kind, page ) as
+			kind && name
+				? ( select( coreStore ).getEntityConfig( kind, name ) as
 						SettingsEntityConfig | undefined )
 				: undefined,
-		[ kind, page ]
+		[ kind, name ]
 	);
 	return section && config ? (
 		<SettingsForm
