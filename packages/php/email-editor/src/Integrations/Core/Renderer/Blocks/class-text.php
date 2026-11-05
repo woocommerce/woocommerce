@@ -27,7 +27,7 @@ class Text extends Abstract_Block_Renderer {
 	 */
 	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		// Do not render empty blocks.
-		if ( empty( trim( wp_strip_all_tags( $block_content ) ) ) ) {
+		if ( empty( trim( wp_strip_all_tags( $block_content ) ) ) && ! $this->has_personalization_tag( $block_content ) ) {
 			return '';
 		}
 
@@ -96,6 +96,21 @@ class Text extends Abstract_Block_Renderer {
 		);
 
 		return Table_Wrapper_Helper::render_table_wrapper( $block_content, $table_attrs, $cell_attrs );
+	}
+
+	/**
+	 * Checks whether the content contains a personalization tag, e.g. <!--[woocommerce/customer-first-name]-->.
+	 *
+	 * @param string $block_content Block content.
+	 */
+	private function has_personalization_tag( string $block_content ): bool {
+		$html = new \WP_HTML_Tag_Processor( $block_content );
+		while ( $html->next_token() ) {
+			if ( '#comment' === $html->get_token_type() && preg_match( '/^\[[a-zA-Z0-9\-\/]+(?:\s+.*)?\]$/s', trim( $html->get_modifiable_text() ) ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

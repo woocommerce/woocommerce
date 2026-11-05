@@ -2618,9 +2618,11 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	 */
 	public function test_create_without_explicit_prices_include_tax_keeps_default(): void {
 		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$previous_calc_tax = get_option( 'woocommerce_calc_taxes' );
 		$order             = null;
 
 		try {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
 			update_option( 'woocommerce_prices_include_tax', 'yes' );
 			$order = new WC_Order();
 			update_option( 'woocommerce_prices_include_tax', 'no' );
@@ -2644,6 +2646,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 				$order->delete( true );
 			}
 			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+			update_option( 'woocommerce_calc_taxes', $previous_calc_tax );
 		}
 	}
 
@@ -2687,9 +2690,11 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		global $wpdb;
 
 		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$previous_calc_tax = get_option( 'woocommerce_calc_taxes' );
 		$order             = new WC_Order();
 
 		try {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
 			update_option( 'woocommerce_prices_include_tax', 'yes' );
 			$this->switch_data_store( $order, $this->sut );
 			$order->save();
@@ -2716,6 +2721,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		} finally {
 			$order->delete( true );
 			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+			update_option( 'woocommerce_calc_taxes', $previous_calc_tax );
 		}
 	}
 
@@ -4742,5 +4748,38 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$this->assertNull( get_comment( $note_id ), 'Order note should be deleted' );
 		$this->assertEmpty( get_comment_meta( $note_id ), 'Commentmeta should be deleted along with the note' );
+	}
+
+	/**
+	 * @testdox An address value too long for its column fails the update before the order row is written, so the order is not left half saved.
+	 */
+	public function test_update_with_address_value_too_long_for_its_column_writes_nothing(): void {
+		global $wpdb;
+		$this->toggle_cot_feature_and_usage( true );
+		$this->disable_cot_sync();
+
+		$order = OrderHelper::create_order();
+		$order->set_total( '50.00' );
+		$order->set_billing_phone( '5551234' );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$order->set_total( '5.00' );
+		$order->set_billing_phone( str_repeat( '1', 101 ) );
+		$error = null;
+		try {
+			$this->sut->update( $order );
+		} catch ( \Exception $e ) {
+			$error = $e;
+		}
+
+		//phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$orders_table    = $this->sut::get_orders_table_name();
+		$addresses_table = $this->sut::get_addresses_table_name();
+		$this->assertSame( '50.00000000', $wpdb->get_var( $wpdb->prepare( "SELECT total_amount FROM {$orders_table} WHERE id = %d", $order_id ) ), 'The new total must not be written when the address row cannot be.' );
+		$this->assertSame( '5551234', $wpdb->get_var( $wpdb->prepare( "SELECT phone FROM {$addresses_table} WHERE order_id = %d AND address_type = 'billing'", $order_id ) ) );
+		//phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$this->assertInstanceOf( \Exception::class, $error, 'The update should throw when a value does not fit its column.' );
+		$this->assertStringContainsString( 'phone', $error->getMessage(), 'The error should name the column that is too long.' );
 	}
 }

@@ -892,6 +892,208 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Each checkout served by the same route instance works on its own order.
+	 */
+	public function test_checkouts_on_same_route_instance_use_their_own_orders() {
+		$fixtures     = new FixtureData();
+		$free_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Free Test Product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 0,
+				'virtual'       => true,
+			)
+		);
+
+		wc_empty_cart();
+		wc()->cart->add_to_cart( $free_product->get_id(), 1 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( array( 'billing_address' => (object) $this->get_fallback_billing_address() ) );
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$first_order_id = $response->get_data()['order_id'];
+		$this->assertTrue( wc_get_order( $first_order_id )->is_paid() );
+
+		wc_empty_cart();
+		wc()->cart->add_to_cart( self::$product_ids[2], 5 );
+
+		// Both dispatches go through the same registered route instance, which is also how the batch endpoint serves its children.
+		$billing_address              = $this->get_fallback_billing_address();
+		$billing_address['last_name'] = '';
+		$request                      = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( array( 'billing_address' => (object) $billing_address ) );
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 400, $response->get_status(), print_r( $response->get_data(), true ) );
+
+		$first_order = wc_get_order( $first_order_id );
+		$this->assertSame( 0.0, (float) $first_order->get_total() );
+		$this->assertCount( 1, $first_order->get_items() );
+	}
+
+	/**
+	 * @testdox Each checkout hands the gateway the payment data from its own request.
+	 */
+	public function test_each_checkout_hands_gateway_its_own_payment_data() {
+		$seen_payment_data = array();
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function ( $context ) use ( &$seen_payment_data ) {
+				$seen_payment_data[] = $context->payment_data['token'] ?? null;
+			}
+		);
+
+		foreach ( array( 'first', 'second' ) as $token ) {
+			wc_empty_cart();
+			wc()->cart->add_to_cart( self::$product_ids[2], 1 );
+
+			$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+			$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+			$request->set_body_params(
+				array(
+					'billing_address' => (object) $this->get_fallback_billing_address(),
+					'payment_method'  => WC_Gateway_BACS::ID,
+					'payment_data'    => array(
+						array(
+							'key'   => 'token',
+							'value' => $token,
+						),
+					),
+				)
+			);
+			$response = rest_get_server()->dispatch( $request );
+			$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		}
+
+		$this->assertSame( array( 'first', 'second' ), $seen_payment_data );
+	}
+
+	/**
+	 * @testdox Checkouts in one batch request each work on their own order.
+	 */
+	public function test_batch_checkouts_use_their_own_orders() {
+		$fixtures     = new FixtureData();
+		$free_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Free Test Product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 0,
+				'virtual'       => true,
+			)
+		);
+
+		wc_empty_cart();
+
+		$nonce        = wp_create_nonce( 'wc_store_api' );
+		$good_address = (object) $this->get_fallback_billing_address();
+		$bad_address  = $this->get_fallback_billing_address();
+		unset( $bad_address['last_name'] );
+		$bad_address = (object) array_merge( $bad_address, array( 'last_name' => '' ) );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/batch' );
+		$request->set_header( 'Nonce', $nonce );
+		$request->set_body_params(
+			array(
+				'requests' => array(
+					array(
+						'method'  => 'POST',
+						'path'    => '/wc/store/v1/cart/add-item',
+						'headers' => array( 'Nonce' => $nonce ),
+						'body'    => array(
+							'id'       => $free_product->get_id(),
+							'quantity' => 1,
+						),
+					),
+					array(
+						'method'  => 'POST',
+						'path'    => '/wc/store/v1/checkout',
+						'headers' => array( 'Nonce' => $nonce ),
+						'body'    => array( 'billing_address' => $good_address ),
+					),
+					array(
+						'method'  => 'POST',
+						'path'    => '/wc/store/v1/cart/add-item',
+						'headers' => array( 'Nonce' => $nonce ),
+						'body'    => array(
+							'id'       => self::$product_ids[2],
+							'quantity' => 5,
+						),
+					),
+					array(
+						'method'  => 'POST',
+						'path'    => '/wc/store/v1/checkout',
+						'headers' => array( 'Nonce' => $nonce ),
+						'body'    => array( 'billing_address' => $bad_address ),
+					),
+				),
+			)
+		);
+
+		$responses = rest_get_server()->dispatch( $request )->get_data()['responses'];
+
+		// The first checkout completes; the second is rejected.
+		$this->assertSame( 200, $responses[1]['status'], print_r( $responses[1]['body'], true ) );
+		$first_order_id = $responses[1]['body']['order_id'];
+		$this->assertSame( 400, $responses[3]['status'], print_r( $responses[3]['body'], true ) );
+
+		$first_order = wc_get_order( $first_order_id );
+		$this->assertTrue( $first_order->is_paid() );
+		$this->assertSame( 0.0, (float) $first_order->get_total() );
+		$this->assertCount( 1, $first_order->get_items() );
+	}
+
+	/**
+	 * @testdox A failed checkout request leaves other orders' reserved stock alone.
+	 */
+	public function test_failed_checkout_request_keeps_other_orders_reserved_stock() {
+		update_option( 'woocommerce_hold_stock_minutes', '60' );
+
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Reserved Stock Product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 10,
+			)
+		);
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 100 );
+		$product->save();
+
+		// First request: a pending order that holds reserved stock.
+		wc_empty_cart();
+		wc()->cart->add_to_cart( $product->get_id(), 3 );
+
+		$order = new \WC_Order();
+		$order->add_product( $product, 3 );
+		$order->set_status( OrderStatus::PENDING );
+		$order->set_cart_hash( wc()->cart->get_cart_hash() );
+		$order->calculate_totals();
+		$order->save();
+		wc_reserve_stock_for_order( $order );
+		wc()->session->set( 'store_api_draft_order', $order->get_id() );
+
+		$reserve = new \Automattic\WooCommerce\Checkout\Helpers\ReserveStock();
+		$this->assertSame( 3, $reserve->get_reserved_stock( $product, 0 ), 'Setup: the order should hold 3 reserved units.' );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$this->assertSame( 200, rest_get_server()->dispatch( $request )->get_status() );
+
+		// Second request on the same route instance fails early.
+		wc_empty_cart();
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( array( 'billing_address' => (object) $this->get_fallback_billing_address() ) );
+		$this->assertSame( 'woocommerce_rest_cart_empty', rest_get_server()->dispatch( $request )->get_data()['code'] );
+
+		// The first order still holds its reserved stock.
+		$this->assertSame( 3, $reserve->get_reserved_stock( $product, 0 ) );
+	}
+
+	/**
 	 * Billing address used by the shipping address fallback tests.
 	 *
 	 * @return array
@@ -3850,6 +4052,319 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Checkout stops when the draft order could not be saved.
+	 */
+	public function test_post_rejects_draft_order_when_save_fails(): void {
+		$order_id = $this->create_draft_order_then_remove_first_cart_line();
+		$this->fail_saves_of_order( $order_id );
+
+		$response = rest_get_server()->dispatch( $this->build_place_order_request() );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_checkout_order_not_saved', $response->get_data()['code'] );
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::CHECKOUT_DRAFT ), 'The order must not move on to payment.' );
+		$this->assertEmpty( WC()->session->get( 'store_api_draft_order' ), 'The order whose save failed must not stay in the session to be resumed.' );
+	}
+
+	/**
+	 * @testdox The next checkout after a failed save completes normally.
+	 */
+	public function test_post_after_failed_save_places_order(): void {
+		$order_id = $this->create_draft_order_then_remove_first_cart_line();
+		$fail     = $this->fail_saves_of_order( $order_id );
+		rest_get_server()->dispatch( $this->build_place_order_request() );
+		remove_action( 'woocommerce_update_order', $fail );
+
+		$response = rest_get_server()->dispatch( $this->build_place_order_request() );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$items = array_values( $order->get_items() );
+		$this->assertCount( 1, $items, 'The order should hold the cart line.' );
+		$this->assertSame( $this->products[1]->get_id(), $items[0]->get_product_id() );
+		$this->assertSame( (float) $items[0]->get_total() + (float) $order->get_shipping_total(), (float) $order->get_total() );
+	}
+
+	/**
+	 * @testdox Checkout stops before payment when setting the order to pending fails to save.
+	 */
+	public function test_post_rejects_order_when_pending_status_fails_to_save(): void {
+		$fail = function ( $order ) {
+			if ( $order->has_status( OrderStatus::PENDING ) ) {
+				throw new \Exception( 'Forced save failure' );
+			}
+		};
+		add_action( 'woocommerce_before_order_object_save', $fail );
+		$processed = false;
+		add_action(
+			'woocommerce_store_api_checkout_order_processed',
+			function () use ( &$processed ) {
+				$processed = true;
+			}
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_checkout_order_not_saved', $response->get_data()['code'] );
+		$this->assertFalse( $processed, 'The order must not reach the processed action or payment.' );
+		$this->assertEmpty( WC()->session->get( 'store_api_draft_order' ) );
+	}
+
+	/**
+	 * @testdox Checkout stops before payment when an extension's save of the order fails on $hook.
+	 * @testWith ["woocommerce_store_api_checkout_order_processed"]
+	 *           ["woocommerce_valid_order_statuses_for_payment"]
+	 *           ["woocommerce_order_needs_payment"]
+	 *
+	 * @param string $hook Action or filter that receives the order after its last save point.
+	 */
+	public function test_post_rejects_order_when_extension_save_fails_before_payment( string $hook ): void {
+		$order_id = 0;
+		$this->record_processed_order_id( $order_id );
+		add_filter(
+			$hook,
+			function ( $value, $order = null ) use ( &$order_id ) {
+				$order = $value instanceof \WC_Order ? $value : $order;
+				// The needs_payment() filters also run before the processed action, which the earlier save points cover.
+				if ( $order_id && $order instanceof \WC_Order ) {
+					$this->save_order_with_forced_failure( $order );
+				}
+				return $value;
+			},
+			10,
+			2
+		);
+		$payment_attempted = false;
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function () use ( &$payment_attempted ) {
+				$payment_attempted = true;
+			}
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_checkout_order_not_saved', $response->get_data()['code'] );
+		$this->assertFalse( $payment_attempted, 'Payment must not be attempted for an order that could not be saved.' );
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::PENDING ), 'The order must stay pending.' );
+		$this->assertEmpty( WC()->session->get( 'store_api_draft_order' ), 'The order whose save failed must not stay in the session to be resumed.' );
+	}
+
+	/**
+	 * @testdox Checkout of an order that needs no payment fails when marking it paid cannot save it.
+	 */
+	public function test_post_without_payment_rejects_order_when_payment_complete_fails_to_save(): void {
+		add_filter( 'woocommerce_order_needs_payment', '__return_false' );
+		$order_id = 0;
+		$this->record_processed_order_id( $order_id );
+		// As an extension saving invalid data from this filter would, make the payment_complete() save fail.
+		add_filter(
+			'woocommerce_payment_complete_order_status',
+			function ( $status ) use ( &$order_id ) {
+				if ( $order_id ) {
+					add_action(
+						'woocommerce_before_order_object_save',
+						function () {
+							throw new \Exception( 'Forced save failure' );
+						}
+					);
+				}
+				return $status;
+			}
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_checkout_order_not_saved', $response->get_data()['code'] );
+		$order = wc_get_order( $order_id );
+		$this->assertTrue( $order->has_status( OrderStatus::PENDING ), 'The order must stay pending.' );
+		$this->assertNull( $order->get_date_paid(), 'The order must not be marked paid.' );
+	}
+
+	/**
+	 * Record the ID of the order passed to the processed action, which also marks that the last save point has passed.
+	 *
+	 * @param int $order_id Set to the order ID when the action fires.
+	 */
+	private function record_processed_order_id( int &$order_id ): void {
+		$order_id = 0;
+		add_action(
+			'woocommerce_store_api_checkout_order_processed',
+			function ( $order ) use ( &$order_id ) {
+				$order_id = $order->get_id();
+			},
+			1
+		);
+	}
+
+	/**
+	 * Save the order while a callback makes the save fail, as saving a value too long for its column would.
+	 *
+	 * @param \WC_Order $order Order object.
+	 */
+	private function save_order_with_forced_failure( \WC_Order $order ): void {
+		$fail = function () {
+			throw new \Exception( 'Forced save failure' );
+		};
+		add_action( 'woocommerce_before_order_object_save', $fail );
+		$order->save();
+		remove_action( 'woocommerce_before_order_object_save', $fail );
+	}
+
+	/**
+	 * @testdox Updating the checkout with PATCH fails and forgets the draft order when the order cannot be saved.
+	 */
+	public function test_put_rejects_draft_order_that_fails_to_save(): void {
+		$order_id = $this->create_draft_order_then_remove_first_cart_line();
+		$this->fail_saves_of_order( $order_id );
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( array( 'customer_note' => 'Leave at the door' ) );
+		$this->simulate_fresh_request();
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_checkout_order_not_saved', $response->get_data()['code'] );
+		$this->assertEmpty( WC()->session->get( 'store_api_draft_order' ) );
+	}
+
+	/**
+	 * @testdox Pay for order stops before payment when the order cannot be saved.
+	 */
+	public function test_checkout_order_rejects_order_that_fails_to_save(): void {
+		$order    = \WC_Helper_Order::create_order( 0 );
+		$order_id = $order->get_id();
+		$this->fail_saves_of_order( $order_id );
+
+		$response = rest_get_server()->dispatch( $this->build_pay_for_order_request( $order ) );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_checkout_order_not_saved', $response->get_data()['code'] );
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::PENDING ), 'The order must not move on to payment.' );
+	}
+
+	/**
+	 * @testdox Pay for order stops before payment when an extension's save of the order fails on $hook.
+	 * @testWith ["woocommerce_store_api_checkout_order_processed"]
+	 *           ["woocommerce_valid_order_statuses_for_payment"]
+	 *           ["woocommerce_order_needs_payment"]
+	 *
+	 * @param string $hook Action or filter that receives the order after its last save point.
+	 */
+	public function test_checkout_order_rejects_order_when_extension_save_fails_before_payment( string $hook ): void {
+		$order        = \WC_Helper_Order::create_order( 0 );
+		$processed_id = 0;
+		$this->record_processed_order_id( $processed_id );
+		add_filter(
+			$hook,
+			function ( $value, $filtered_order = null ) use ( &$processed_id ) {
+				$filtered_order = $value instanceof \WC_Order ? $value : $filtered_order;
+				// The needs_payment() filters also run before the processed action, which the earlier save points cover.
+				if ( $processed_id && $filtered_order instanceof \WC_Order ) {
+					$this->save_order_with_forced_failure( $filtered_order );
+				}
+				return $value;
+			},
+			10,
+			2
+		);
+		$payment_attempted = false;
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function () use ( &$payment_attempted ) {
+				$payment_attempted = true;
+			}
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_pay_for_order_request( $order ) );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_checkout_order_not_saved', $response->get_data()['code'] );
+		$this->assertFalse( $payment_attempted, 'Payment must not be attempted for an order that could not be saved.' );
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::PENDING ), 'The order must stay pending.' );
+	}
+
+	/**
+	 * Build a pay for order request for an existing order, sending the order's own billing address.
+	 *
+	 * The order's own address keeps the request from being refused for re-pricing the order.
+	 *
+	 * @param \WC_Order $order Order to pay for.
+	 * @return \WP_REST_Request
+	 */
+	private function build_pay_for_order_request( \WC_Order $order ): \WP_REST_Request {
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_query_params(
+			array(
+				'key'           => $order->get_order_key(),
+				'billing_email' => $order->get_billing_email(),
+			)
+		);
+		$request->set_body_params(
+			array(
+				'billing_address' => $order->get_address( 'billing' ),
+				'payment_method'  => WC_Gateway_BACS::ID,
+			)
+		);
+		return $request;
+	}
+
+	/**
+	 * Store a draft order for the seeded cart, then remove one cart line.
+	 *
+	 * @return int Draft order ID.
+	 */
+	private function create_draft_order_then_remove_first_cart_line(): int {
+		// A registered but disabled gateway is refused after the draft order is stored.
+		$request = $this->build_valid_post_request();
+		$request->set_param( 'payment_method', 'cheque' );
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 400, $response->get_status() );
+
+		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
+		$this->assertCount( 2, wc_get_order( $order_id )->get_items(), 'The draft order should hold both cart lines.' );
+
+		wc()->cart->remove_cart_item( wc()->cart->generate_cart_id( $this->products[0]->get_id() ) );
+
+		return $order_id;
+	}
+
+	/**
+	 * Build a place order request for the current cart, as a new HTTP request would send it.
+	 *
+	 * @return \WP_REST_Request
+	 */
+	private function build_place_order_request(): \WP_REST_Request {
+		$request = $this->build_valid_post_request();
+		$params  = $request->get_body_params();
+		unset( $params['expected_total'] );
+		$request->set_body_params( $params );
+		$this->simulate_fresh_request();
+		return $request;
+	}
+
+	/**
+	 * Make every save of the given order fail, as a database error would.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return callable The callback added to woocommerce_update_order.
+	 */
+	private function fail_saves_of_order( int $order_id ): callable {
+		$fail = function ( $updated_order_id ) use ( $order_id ) {
+			if ( (int) $updated_order_id === $order_id ) {
+				throw new \Exception( 'Forced save failure' );
+			}
+		};
+		add_action( 'woocommerce_update_order', $fail );
+		return $fail;
+	}
+
+	/**
 	 * @testdox Checkout places a zero-total pending or failed order from the session instead of creating a new one.
 	 * @testWith ["pending"]
 	 *           ["failed"]
@@ -3874,16 +4389,25 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * @testdox Checkout does not reuse a zero-total order from the session once it has moved past awaiting payment.
+	 * @testdox Checkout answers with the zero-total order from the session, without placing another, once that order has moved past awaiting payment.
 	 */
-	public function test_post_does_not_reuse_completed_zero_total_order_from_session(): void {
+	public function test_post_answers_with_completed_zero_total_order_from_session(): void {
 		$this->apply_full_discount_coupon();
 		$order = $this->create_session_order_from_cart( OrderStatus::COMPLETED );
 
 		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
 
+		$order_ids = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+				'return' => 'ids',
+			)
+		);
+
 		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
-		$this->assertNotSame( $order->get_id(), (int) $response->get_data()['order_id'], 'A completed order must not be placed again.' );
+		$this->assertSame( array( $order->get_id() ), $order_ids, 'A completed order must not be placed again.' );
+		$this->assertSame( $order->get_checkout_order_received_url(), $response->get_data()['payment_result']['redirect_url'], 'The shopper should be sent to the order received page of the completed order.' );
 		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::COMPLETED ), 'The completed order should be left as it was.' );
 	}
 
@@ -3967,6 +4491,29 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$persisted_session_data = WC()->session->get_session_data();
 		$this->assertArrayHasKey( 'order_awaiting_payment', $persisted_session_data, 'Redirect payments should persist the order link in the shopper session.' );
 		$this->assertSame( $order_id, (int) $persisted_session_data['order_awaiting_payment'], 'Redirect payments should leave the persisted order linked to the shopper session.' );
+	}
+
+	/**
+	 * @testdox Store API checkout remembers the order it hands to the gateway before the gateway runs.
+	 */
+	public function test_post_remembers_the_order_sent_to_gateway(): void {
+		$remembered_during_payment = null;
+		$payment_handler           = function ( $context, $payment_result ) use ( &$remembered_during_payment ) {
+			unset( $context );
+			$remembered_during_payment = WC()->session->get( 'order_sent_to_gateway' );
+			$payment_result->set_status( 'success' );
+		};
+
+		add_action( 'woocommerce_rest_checkout_process_payment_with_context', $payment_handler, 1, 2 );
+
+		try {
+			$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+		} finally {
+			remove_action( 'woocommerce_rest_checkout_process_payment_with_context', $payment_handler, 1 );
+		}
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( (int) $response->get_data()['order_id'], $remembered_during_payment, 'The gateway should run with its order already remembered, so a request that dies inside it can be traced back.' );
 	}
 
 	/**
@@ -4337,6 +4884,106 @@ class Checkout extends \WP_Test_REST_TestCase {
 			$order_ids_after_retry,
 			'Retrying after a post-payment failure must not create a second paid order.'
 		);
+	}
+
+	/**
+	 * @testdox Retrying after the request died between payment_complete() and the cart being emptied does not place a second paid order.
+	 */
+	public function test_retry_after_the_request_died_post_payment_does_not_duplicate_the_order() {
+		// PHPUnit cannot survive a real exit, so arrange the state one leaves behind: the first
+		// POST stops before payment, as an exit inside the transition would stop before the
+		// catch, and the gateway's payment_complete() is then run on the order directly.
+		$stop_before_payment = function () {
+			throw new \Automattic\WooCommerce\StoreApi\Exceptions\RouteException(
+				'woocommerce_rest_checkout_payment_failed',
+				'Stands in for the request dying after payment_complete()',
+				400
+			);
+		};
+		add_action( 'woocommerce_store_api_checkout_order_processed', $stop_before_payment, 999 );
+
+		try {
+			rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		} finally {
+			remove_action( 'woocommerce_store_api_checkout_order_processed', $stop_before_payment, 999 );
+		}
+
+		$first_order_id = (int) WC()->session->get( 'store_api_draft_order' );
+		$this->assertGreaterThan( 0, $first_order_id, 'The session should point at the order the first attempt created.' );
+
+		$first_order = wc_get_order( $first_order_id );
+		$first_order->payment_complete( 'txn_died_after_payment' );
+
+		$this->assertFalse( wc_get_order( $first_order_id )->needs_payment(), 'The gateway took payment before the request died.' );
+		$this->assertFalse( WC()->cart->is_empty(), 'The request died before anything emptied the cart.' );
+		$this->assertSame( $first_order_id, (int) WC()->session->get( 'store_api_draft_order' ), 'payment_complete() leaves the Store API pointer in place.' );
+
+		$this->simulate_fresh_request();
+		$retry = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$order_ids_after_retry = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame(
+			array( $first_order_id ),
+			$order_ids_after_retry,
+			'Retrying after the request died post-payment must not create a second paid order. Retry answered: ' . print_r( $retry->get_data(), true )
+		);
+		$this->assertSame( $first_order_id, $retry->get_data()['order_id'], 'The retry should answer with the order that was already paid.' );
+		$this->assertSame( 'success', $retry->get_data()['payment_result']['payment_status'] );
+		$this->assertSame( wc_get_order( $first_order_id )->get_checkout_order_received_url(), $retry->get_data()['payment_result']['redirect_url'], 'The shopper should be sent to the order received page of the paid order.' );
+	}
+
+	/**
+	 * @testdox Retrying after the request died post-payment is answered with the paid order, not a stock error, when that order took the last unit.
+	 */
+	public function test_retry_after_the_paid_order_took_the_last_unit_is_answered_with_that_order() {
+		// Its own product rather than a class fixture, so enabling stock management here cannot
+		// leak into the other tests in this class.
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 1 );
+		$product->set_backorders( 'no' );
+		$product->save();
+		update_option( 'woocommerce_manage_stock', 'yes' );
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Same arrangement as the test above: the first POST stops before payment, then the gateway's
+		// payment_complete() runs on the order directly, which takes the last unit.
+		$stop_before_payment = function () {
+			throw new \Automattic\WooCommerce\StoreApi\Exceptions\RouteException(
+				'woocommerce_rest_checkout_payment_failed',
+				'Stands in for the request dying after payment_complete()',
+				400
+			);
+		};
+		add_action( 'woocommerce_store_api_checkout_order_processed', $stop_before_payment, 999 );
+
+		try {
+			rest_get_server()->dispatch( $this->build_checkout_post_request() );
+		} finally {
+			remove_action( 'woocommerce_store_api_checkout_order_processed', $stop_before_payment, 999 );
+		}
+
+		$first_order_id = (int) WC()->session->get( 'store_api_draft_order' );
+		wc_get_order( $first_order_id )->payment_complete( 'txn_took_the_last_unit' );
+		$this->assertSame( 0, wc_get_product( $product->get_id() )->get_stock_quantity(), 'The paid order took the last unit.' );
+
+		// The retry is a new request, so its cart holds the product as it is now: out of stock.
+		$this->simulate_fresh_request();
+		WC()->cart->get_cart_from_session();
+		$retry = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$this->assertEquals( 200, $retry->get_status(), 'The shopper should be sent to the order, not told the product sold out: ' . print_r( $retry->get_data(), true ) );
+		$this->assertSame( $first_order_id, $retry->get_data()['order_id'], 'The retry should answer with the order that took the last unit.' );
+		$this->assertSame( 'success', $retry->get_data()['payment_result']['payment_status'] );
 	}
 
 	/**

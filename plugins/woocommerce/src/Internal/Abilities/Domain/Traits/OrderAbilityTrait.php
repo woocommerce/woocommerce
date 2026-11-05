@@ -142,26 +142,31 @@ trait OrderAbilityTrait {
 				'total'                => array( 'type' => 'string' ),
 				'customer_id'          => array( 'type' => 'integer' ),
 				'billing_email'        => array(
-					'type'   => array( 'string', 'null' ),
-					'format' => 'email',
+					'type'        => 'string',
+					'format'      => 'email',
+					'description' => __( 'Billing email. Omitted when no billing email is set.', 'woocommerce' ),
 				),
 				'payment_method'       => array( 'type' => 'string' ),
 				'payment_method_title' => array( 'type' => 'string' ),
 				'date_created'         => array(
-					'type'   => array( 'string', 'null' ),
-					'format' => 'date-time',
+					'type'        => 'string',
+					'format'      => 'date-time',
+					'description' => __( 'Order creation date in the store timezone. Omitted when no creation date is available.', 'woocommerce' ),
 				),
 				'date_created_gmt'     => array(
-					'type'   => array( 'string', 'null' ),
-					'format' => 'date-time',
+					'type'        => 'string',
+					'format'      => 'date-time',
+					'description' => __( 'Order creation date in UTC. Omitted when no creation date is available.', 'woocommerce' ),
 				),
 				'date_modified'        => array(
-					'type'   => array( 'string', 'null' ),
-					'format' => 'date-time',
+					'type'        => 'string',
+					'format'      => 'date-time',
+					'description' => __( 'Order modification date in the store timezone. Omitted when no modification date is available.', 'woocommerce' ),
 				),
 				'date_modified_gmt'    => array(
-					'type'   => array( 'string', 'null' ),
-					'format' => 'date-time',
+					'type'        => 'string',
+					'format'      => 'date-time',
+					'description' => __( 'Order modification date in UTC. Omitted when no modification date is available.', 'woocommerce' ),
 				),
 				'line_items'           => array(
 					'type'        => 'array',
@@ -174,13 +179,33 @@ trait OrderAbilityTrait {
 								'name'         => array( 'type' => 'string' ),
 								'product_id'   => array( 'type' => 'integer' ),
 								'variation_id' => array( 'type' => 'integer' ),
-								'quantity'     => array( 'type' => 'integer' ),
+								'quantity'     => array( 'type' => 'number' ),
 								'subtotal'     => array( 'type' => 'string' ),
 								'total'        => array( 'type' => 'string' ),
 							),
 							'additionalProperties' => false,
 						),
 						'order_item'
+					),
+				),
+				'shipping'             => array(
+					'type'                 => 'object',
+					'description'          => __( 'Order shipping address. Countries use ISO 3166-1 alpha-2 codes, and states use WooCommerce state codes.', 'woocommerce' ),
+					'properties'           => array_fill_keys( self::shipping_address_fields(), array( 'type' => 'string' ) ),
+					'additionalProperties' => false,
+				),
+				'shipping_lines'       => array(
+					'type'        => 'array',
+					'description' => __( 'Order shipping lines. Present together with line_items.', 'woocommerce' ),
+					'items'       => array(
+						'type'                 => 'object',
+						'properties'           => array(
+							'id'           => array( 'type' => 'integer' ),
+							'method_id'    => array( 'type' => 'string' ),
+							'method_title' => array( 'type' => 'string' ),
+							'total'        => array( 'type' => 'string' ),
+						),
+						'additionalProperties' => false,
 					),
 				),
 			),
@@ -196,25 +221,7 @@ trait OrderAbilityTrait {
 	 * @return \WC_Order|\WP_Error
 	 */
 	protected static function get_order_from_input( array $input ) {
-		if ( empty( $input['id'] ) ) {
-			return new \WP_Error(
-				'woocommerce_order_id_required',
-				__( 'Order ID is required.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		$order_id = (int) $input['id'];
-
-		if ( $order_id < 1 ) {
-			return new \WP_Error(
-				'woocommerce_order_id_required',
-				__( 'Order ID is required.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		$order = wc_get_order( $order_id );
+		$order = wc_get_order( $input['id'] );
 
 		if ( ! $order instanceof \WC_Order ) {
 			return new \WP_Error(
@@ -273,13 +280,54 @@ trait OrderAbilityTrait {
 	}
 
 	/**
+	 * Format an order after a save, retaining the saved object if reloading fails.
+	 *
+	 * @param \WC_Order $order Saved order object.
+	 * @return array|\WP_Error
+	 */
+	protected static function format_saved_order_for_response( \WC_Order $order ) {
+		$stored = wc_get_order( $order->get_id() );
+
+		return self::format_order_for_response( $stored instanceof \WC_Order ? $stored : $order, false );
+	}
+
+	/**
+	 * Format orders for ability output. One order that fails returns its error.
+	 *
+	 * @param \WC_Order[] $orders             Order objects.
+	 * @param bool        $include_line_items Whether to include line items.
+	 * @return array|\WP_Error
+	 */
+	protected static function format_orders_for_response( array $orders, bool $include_line_items ) {
+		$formatted = array();
+		foreach ( $orders as $order ) {
+			$data = self::format_order_for_response( $order, $include_line_items );
+			if ( is_wp_error( $data ) ) {
+				return $data;
+			}
+			$formatted[] = $data;
+		}
+		return $formatted;
+	}
+
+	/**
+	 * The shipping address fields of the output. The woocommerce_get_order_address
+	 * filter can add other keys, and the closed output schema refuses them.
+	 *
+	 * @return string[]
+	 */
+	private static function shipping_address_fields(): array {
+		return array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'state', 'postcode', 'country', 'phone' );
+	}
+
+	/**
 	 * Format an order for ability output.
 	 *
 	 * @param \WC_Order $order              Order object.
-	 * @param bool      $include_line_items Whether to include line items.
-	 * @return array
+	 * @param bool      $include_line_items Whether to include line items and shipping lines.
+	 * @return array|\WP_Error A WP_Error when an extension field value does not match its schema.
 	 */
-	protected static function format_order_for_response( \WC_Order $order, bool $include_line_items ): array {
+	protected static function format_order_for_response( \WC_Order $order, bool $include_line_items ) {
 		$billing_email = $order->get_billing_email();
 
 		$data = array(
@@ -290,15 +338,11 @@ trait OrderAbilityTrait {
 				get_woocommerce_currency_symbol( $order->get_currency() ),
 				ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401
 			),
-			'total'                => $order->get_total(),
+			'total'                => self::format_amount_for_response( $order->get_total() ),
 			'customer_id'          => $order->get_customer_id(),
-			'billing_email'        => '' === $billing_email ? null : $billing_email,
 			'payment_method'       => $order->get_payment_method(),
 			'payment_method_title' => $order->get_payment_method_title(),
-			'date_created'         => wc_rest_prepare_date_response( $order->get_date_created(), false ),
-			'date_created_gmt'     => wc_rest_prepare_date_response( $order->get_date_created() ),
-			'date_modified'        => wc_rest_prepare_date_response( $order->get_date_modified(), false ),
-			'date_modified_gmt'    => wc_rest_prepare_date_response( $order->get_date_modified() ),
+			'shipping'             => array_intersect_key( $order->get_address( 'shipping' ), array_flip( self::shipping_address_fields() ) ),
 		);
 
 		if ( $include_line_items ) {
@@ -309,21 +353,52 @@ trait OrderAbilityTrait {
 					continue;
 				}
 
-				$data['line_items'][] = ExtensibleAbilities::add_fields_to_object(
+				$line_item = ExtensibleAbilities::add_fields_to_object(
 					array(
 						'id'           => $item->get_id(),
 						'name'         => $item->get_name(),
 						'product_id'   => $item->get_product_id(),
 						'variation_id' => $item->get_variation_id(),
 						'quantity'     => $item->get_quantity(),
-						'subtotal'     => $item->get_subtotal(),
-						'total'        => $item->get_total(),
+						'subtotal'     => self::format_amount_for_response( $item->get_subtotal() ),
+						'total'        => self::format_amount_for_response( $item->get_total() ),
 					),
 					'order_item',
 					$item
 				);
+				if ( is_wp_error( $line_item ) ) {
+					return $line_item;
+				}
+				$data['line_items'][] = $line_item;
 			}
+
+			$data['shipping_lines'] = array_values(
+				array_map(
+					static function ( \WC_Order_Item_Shipping $item ): array {
+						return array(
+							'id'           => $item->get_id(),
+							'method_id'    => $item->get_method_id(),
+							'method_title' => $item->get_method_title(),
+							'total'        => self::format_amount_for_response( $item->get_total() ),
+						);
+					},
+					$order->get_shipping_methods()
+				)
+			);
 		}
+
+		if ( '' !== $billing_email ) {
+			$data['billing_email'] = $billing_email;
+		}
+
+		$data += array_filter(
+			array(
+				'date_created'      => self::format_date_for_response( $order->get_date_created(), false ),
+				'date_created_gmt'  => self::format_date_for_response( $order->get_date_created() ),
+				'date_modified'     => self::format_date_for_response( $order->get_date_modified(), false ),
+				'date_modified_gmt' => self::format_date_for_response( $order->get_date_modified() ),
+			)
+		);
 
 		return ExtensibleAbilities::add_fields_to_object( $data, 'order', $order );
 	}

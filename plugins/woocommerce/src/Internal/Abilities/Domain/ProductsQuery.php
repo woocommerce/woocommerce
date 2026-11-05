@@ -23,6 +23,20 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 	use ProductAbilityTrait;
 
 	/**
+	 * Query var that limits a query to the children of these product types.
+	 */
+	private const PARENT_TYPES_QUERY_VAR = 'woocommerce_ability_parent_types';
+
+	/**
+	 * Taxonomies of the term filters, keyed by input property.
+	 */
+	private const TERM_FILTERS = array(
+		'category' => 'product_cat',
+		'tag'      => 'product_tag',
+		'brand'    => 'product_brand',
+	);
+
+	/**
 	 * Get the ability name.
 	 *
 	 * @return string
@@ -91,24 +105,21 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 				return $product;
 			}
 
-			if ( $product->is_type( ProductType::VARIATION ) ) {
-				return new \WP_Error(
-					'woocommerce_product_type_unsupported',
-					__( 'Product type is not supported by this ability.', 'woocommerce' ),
-					array( 'status' => 400 )
-				);
+			$products = self::format_products_for_response( array( $product ) );
+			if ( is_wp_error( $products ) ) {
+				return $products;
 			}
 
 			return array(
-				'products'    => array( self::format_product_for_response( $product ) ),
+				'products'    => $products,
 				'total_pages' => 1,
 				'page'        => 1,
 				'per_page'    => 1,
 			);
 		}
 
-		$page     = (int) ( $input['page'] ?? 1 );
-		$per_page = (int) ( $input['per_page'] ?? 10 );
+		$page     = $input['page'] ?? 1;
+		$per_page = $input['per_page'] ?? 10;
 		$args     = array(
 			'limit'    => $per_page,
 			'page'     => $page,
@@ -116,21 +127,35 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'return'   => 'objects',
 		);
 
-		foreach ( array( 'status', 'sku', 'stock_status' ) as $field ) {
+		foreach ( array( 'status', 'stock_status' ) as $field ) {
 			if ( ! empty( $input[ $field ] ) ) {
-				$args[ $field ] = wc_clean( $input[ $field ] );
+				$args[ $field ] = $input[ $field ];
 			}
 		}
 
-		if ( ! empty( $input['product_type_alias'] ) && is_scalar( $input['product_type_alias'] ) ) {
-			$product_type_alias = sanitize_text_field( (string) $input['product_type_alias'] );
-			$type_args          = self::get_product_query_args_for_alias( $product_type_alias );
+		if ( ! empty( $input['sku'] ) ) {
+			$args['sku'] = wc_clean( $input['sku'] );
+		}
 
-			if ( is_wp_error( $type_args ) ) {
-				return $type_args;
+		if ( isset( $input['type'] ) ) {
+			$args['type'] = $input['type'];
+			$parent_types = self::get_variation_subclass_parent_types()[ $input['type'] ] ?? array();
+
+			if ( ! empty( $parent_types ) ) {
+				$args['type']                         = ProductType::VARIATION;
+				$args[ self::PARENT_TYPES_QUERY_VAR ] = $parent_types;
 			}
+		}
 
-			$args = array_merge( $args, $type_args );
+		if ( ! empty( $input['parent_id'] ) ) {
+			$args['parent'] = $input['parent_id'];
+			$args['type']   = $args['type'] ?? ProductType::VARIATION;
+		}
+
+		foreach ( array( 'virtual', 'downloadable' ) as $field ) {
+			if ( isset( $input[ $field ] ) ) {
+				$args[ $field ] = $input[ $field ];
+			}
 		}
 
 		if ( ! empty( $input['search'] ) ) {
@@ -142,23 +167,80 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			return $extension_args;
 		}
 
+		foreach ( self::TERM_FILTERS as $field => $taxonomy ) {
+			if ( ! empty( $input[ $field ] ) ) {
+				$extension_args['tax_query'][] = array(
+					'taxonomy' => $taxonomy,
+					'field'    => 'term_id',
+					'terms'    => $input[ $field ],
+				);
+			}
+		}
+
 		$args[ AbilitiesLoader::EXTENSION_QUERY_VAR ] = $extension_args;
 
-		$results  = wc_get_products( $args );
+		add_filter( 'posts_where', array( __CLASS__, 'limit_to_parent_types' ), 10, 2 );
+		$results = wc_get_products( $args );
+		remove_filter( 'posts_where', array( __CLASS__, 'limit_to_parent_types' ) );
+
 		$products = is_object( $results ) && isset( $results->products ) ? $results->products : array();
 		$pages    = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : ( count( $products ) > 0 ? 1 : 0 );
 
+		$image_ids = array_unique( array_merge( array(), ...array_map( array( __CLASS__, 'get_product_image_ids' ), $products ) ) );
+		if ( ! empty( $image_ids ) ) {
+			_prime_post_caches( $image_ids );
+		}
+
+		$products = self::format_products_for_response( $products );
+		if ( is_wp_error( $products ) ) {
+			return $products;
+		}
+
 		return array(
-			'products'    => array_map(
-				static function ( $product ) {
-					return self::format_product_for_response( $product );
-				},
-				$products
-			),
+			'products'    => $products,
 			'total_pages' => $pages,
 			'page'        => $page,
 			'per_page'    => $per_page,
 		);
+	}
+
+	/**
+	 * Limit a query to the children of the product types in its query var.
+	 *
+	 * The limit is a subquery, so paging counts the right rows and no parent IDs
+	 * load into memory. Other queries do not have the query var, so a query that a
+	 * hook runs inside this ability's query stays the same.
+	 *
+	 * @internal
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string    $where WHERE clause.
+	 * @param \WP_Query $query Query.
+	 * @return string
+	 */
+	public static function limit_to_parent_types( $where, $query ) {
+		global $wpdb;
+
+		$parent_types = $query->get( self::PARENT_TYPES_QUERY_VAR );
+
+		if ( empty( $parent_types ) ) {
+			return $where;
+		}
+
+		$placeholders = implode( ', ', array_fill( 0, count( $parent_types ), '%s' ) );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		return $where . $wpdb->prepare(
+			" AND {$wpdb->posts}.post_parent IN (
+				SELECT tr.object_id FROM {$wpdb->term_relationships} tr
+				INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+				INNER JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
+				WHERE tt.taxonomy = 'product_type' AND t.slug IN ( {$placeholders} )
+			)",
+			$parent_types
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 	}
 
 	/**
@@ -170,7 +252,7 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function can_query_products( $input = array() ): bool {
-		$product_id = self::get_id_from_input( $input );
+		$product_id = self::get_product_permission_id( self::get_id_from_input( $input ) );
 
 		return wc_rest_check_post_permissions( 'product', 'read', $product_id );
 	}
@@ -184,37 +266,46 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 		$schema = array(
 			'type'                 => 'object',
 			'properties'           => array(
-				'id'                 => array(
+				'id'           => array(
 					'type'    => 'integer',
 					'minimum' => 1,
 				),
-				'search'             => array( 'type' => 'string' ),
-				'sku'                => array(
+				'search'       => array( 'type' => 'string' ),
+				'sku'          => array(
 					'type'        => 'string',
 					'description' => __( 'Limit results to products with SKUs that partially match this string. Use * to match products with any non-empty SKU.', 'woocommerce' ),
 				),
-				'status'             => array(
+				'status'       => array(
 					'type' => 'string',
 					'enum' => self::get_product_query_status_slugs(),
 				),
-				'product_type_alias' => array(
-					'type'        => 'string',
-					'description' => __(
-						'Filter by supported agent-facing product type alias. physical maps to simple shippable, non-downloadable products; virtual maps to simple non-shipping, non-downloadable products; digital maps to simple virtual/downloadable products; affiliate maps to the external product type; grouped maps to grouped.',
-						'woocommerce'
-					),
-					'enum'        => self::get_supported_product_type_aliases(),
+				'type'         => self::get_product_type_schema( array_values( array_unique( array_merge( array_keys( self::get_supported_product_type_configs() ), array_keys( self::get_variation_subclass_parent_types() ) ) ) ) ),
+				'parent_id'    => array(
+					'type'        => 'integer',
+					'description' => __( 'Limit results to the variations of this variable product.', 'woocommerce' ),
+					'minimum'     => 1,
 				),
-				'stock_status'       => array(
+				'virtual'      => array(
+					'type'        => 'boolean',
+					'description' => __( 'Limit results to products that are not shipped (true) or that are shipped (false).', 'woocommerce' ),
+				),
+				'downloadable' => array(
+					'type'        => 'boolean',
+					'description' => __( 'Limit results to products that have files to download (true) or that do not (false).', 'woocommerce' ),
+				),
+				'stock_status' => array(
 					'type' => 'string',
 					'enum' => array_keys( wc_get_product_stock_status_options() ),
 				),
-				'page'               => array(
+				'category'     => self::get_term_filter_input_schema( __( 'Only products in any of these product category IDs, including their child categories.', 'woocommerce' ) ),
+				'tag'          => self::get_term_filter_input_schema( __( 'Only products with any of these product tag IDs.', 'woocommerce' ) ),
+				'brand'        => self::get_term_filter_input_schema( __( 'Only products of any of these brand IDs, including their child brands.', 'woocommerce' ) ),
+				'page'         => array(
 					'type'    => 'integer',
 					'default' => 1,
 					'minimum' => 1,
 				),
-				'per_page'           => array(
+				'per_page'     => array(
 					'type'    => 'integer',
 					'default' => 10,
 					'minimum' => 1,
@@ -225,5 +316,22 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'default'              => array(),
 		);
 		return ExtensibleAbilities::add_query_filters_schema( $schema, 'product' );
+	}
+
+	/**
+	 * Schema of a filter that takes term IDs.
+	 *
+	 * @param string $description Filter description.
+	 * @return array
+	 */
+	private static function get_term_filter_input_schema( string $description ): array {
+		return array(
+			'type'        => 'array',
+			'description' => $description,
+			'items'       => array(
+				'type'    => 'integer',
+				'minimum' => 1,
+			),
+		);
 	}
 }

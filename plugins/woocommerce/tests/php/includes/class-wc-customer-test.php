@@ -156,6 +156,31 @@ class WC_Customer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_taxable_address uses the store address only for a pickup rate listed for a cart package.
+	 *
+	 * @testWith [ { "0": "local_pickup:2" }, { "0": [ "local_pickup:2", "flat_rate:1" ] }, "US" ]
+	 *           [ { "0": "local_pickup:2" }, { "0": [ "flat_rate:1" ] }, "GB" ]
+	 *           [ { "0": "flat_rate:1", "other": "local_pickup:2" }, { "0": [ "flat_rate:1" ], "other": [ "local_pickup:2" ] }, "GB" ]
+	 *
+	 * @param array  $chosen_methods   The `chosen_shipping_methods` session value.
+	 * @param array  $listed_rates     The `previous_shipping_methods` session value.
+	 * @param string $expected_country The expected taxable country.
+	 */
+	public function test_get_taxable_address_checks_chosen_pickup( array $chosen_methods, array $listed_rates, string $expected_country ): void {
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_tax_based_on', 'shipping' );
+		WC()->session->set( 'chosen_shipping_methods', $chosen_methods );
+		WC()->session->set( 'previous_shipping_methods', $listed_rates );
+
+		$customer = new WC_Customer();
+		$customer->set_shipping_country( 'GB' );
+		$customer->set_shipping_postcode( 'SW1A 2AA' );
+		$customer->set_shipping_city( 'London' );
+
+		$this->assertSame( $expected_country, $customer->get_taxable_address()[0] );
+	}
+
+	/**
 	 * Get a customer whose US shipping address has everything but a postcode.
 	 *
 	 * @return WC_Customer
