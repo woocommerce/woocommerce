@@ -38,10 +38,9 @@ class PurpleCysPrototype {
 	 * @var array<string, string[]>
 	 */
 	const SETTINGS = array(
-		'container' => array( 'task-page', 'modal' ),
-		'layout'    => array( 'stacked-images-left' ),
-		'state'     => array( 'real', 'default', 'installing', 'installed', 'activating', 'active', 'error' ),
-		'wizard'    => array( 'two-options', 'purple-only' ),
+		'layout' => array( 'stacked-images-left' ),
+		'state'  => array( 'real', 'default', 'installing', 'installed', 'activating', 'active', 'error' ),
+		'wizard' => array( 'two-options', 'purple-only' ),
 	);
 
 	/**
@@ -421,14 +420,7 @@ class PurpleCysPrototype {
 		);
 
 		$groups = array(
-			'container' => array(
-				'label'   => __( 'Container', 'woocommerce' ),
-				'options' => array(
-					'task-page' => __( 'Task page', 'woocommerce' ),
-					'modal'     => __( 'Modal', 'woocommerce' ),
-				),
-			),
-			'state'     => array(
+			'state' => array(
 				'label'   => __( 'Purple state', 'woocommerce' ),
 				'options' => array(
 					/* translators: %s: the real Purple state on this site, for example "installed, not active". */

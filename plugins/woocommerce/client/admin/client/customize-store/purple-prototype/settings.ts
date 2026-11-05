@@ -3,15 +3,12 @@
  */
 import { getAdminSetting } from '~/utils/admin-settings';
 
-export type PurpleContainer = 'task-page' | 'modal';
-
 export type PurpleLayout = 'stacked-images-left';
 
 export type PurpleState =
 	'default' | 'installing' | 'installed' | 'activating' | 'active' | 'error';
 
 export type PurplePrototypeSettings = {
-	container: PurpleContainer;
 	layout: PurpleLayout;
 	state: 'real' | PurpleState;
 	// Which version of the setup wizard's Purple step to show.
@@ -31,7 +28,6 @@ export type PurplePrototypeSettings = {
 };
 
 const DEFAULT_SETTINGS: PurplePrototypeSettings = {
-	container: 'task-page',
 	layout: 'stacked-images-left',
 	state: 'real',
 	wizard: 'two-options',
