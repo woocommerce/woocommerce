@@ -8,6 +8,7 @@
 declare( strict_types=1 );
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 
 /**
@@ -859,5 +860,149 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( $this->product->get_id(), $item->get_product()->get_id(), 'get_product() should resolve to the simple product once variation_id is cleared.' );
 		$this->assertSame( 'blue', $item->get_meta( 'color' ), 'Accepted behavior: the stale "color" attribute meta survives the switch because clearing it blindly could delete a merchant\'s own custom meta. Removing it is tracked in #66733.' );
+	}
+
+	/**
+	 * @testdox set_product() records the product's tax status on the line.
+	 */
+	public function test_set_product_records_the_tax_status(): void {
+		$this->product->set_tax_status( ProductTaxStatus::NONE );
+		$this->product->save();
+
+		$sut = new WC_Order_Item_Product();
+		$sut->set_product( $this->product );
+
+		$this->assertSame( ProductTaxStatus::NONE, $sut->get_recorded_tax_status() );
+		$this->assertSame( ProductTaxStatus::NONE, $sut->get_tax_status() );
+	}
+
+	/**
+	 * @testdox The recorded tax status is saved in internal item meta, out of the item's meta data and data.
+	 */
+	public function test_recorded_tax_status_is_stored_as_internal_meta(): void {
+		$this->product->set_tax_status( ProductTaxStatus::SHIPPING );
+		$this->product->save();
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $this->product );
+		$item->set_order_id( $this->order->get_id() );
+		$item->save();
+
+		$sut = new WC_Order_Item_Product( $item->get_id() );
+
+		$this->assertSame( ProductTaxStatus::SHIPPING, wc_get_order_item_meta( $item->get_id(), '_product_tax_status' ), 'The status is stored in the item meta table.' );
+		$this->assertSame( ProductTaxStatus::SHIPPING, $sut->get_recorded_tax_status(), 'The status is read back with the item.' );
+		$this->assertNotContains( '_product_tax_status', wp_list_pluck( $item->get_meta_data(), 'key' ), 'The status stays out of the meta data of the item that recorded it.' );
+		$this->assertNotContains( '_product_tax_status', wp_list_pluck( $sut->get_meta_data(), 'key' ), 'The status stays out of the meta data of a loaded item.' );
+		$this->assertArrayNotHasKey( 'product_tax_status', $sut->get_data(), 'The status is not part of the item data.' );
+	}
+
+	/**
+	 * @testdox A line keeps the tax status it was sold with when the product's status changes or the product is deleted.
+	 */
+	public function test_recorded_tax_status_survives_product_change_and_deletion(): void {
+		$this->product->set_tax_status( ProductTaxStatus::NONE );
+		$this->product->save();
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $this->product );
+		$item->set_order_id( $this->order->get_id() );
+		$item->save();
+
+		$this->product->set_tax_status( ProductTaxStatus::TAXABLE );
+		$this->product->save();
+		$this->assertSame( ProductTaxStatus::NONE, ( new WC_Order_Item_Product( $item->get_id() ) )->get_tax_status(), 'Changing the product does not change the sold line.' );
+
+		$this->product->delete( true );
+		$this->assertSame( ProductTaxStatus::NONE, ( new WC_Order_Item_Product( $item->get_id() ) )->get_tax_status(), 'Deleting the product does not make the sold line taxable.' );
+	}
+
+	/**
+	 * @testdox A line saved before the tax status was recorded keeps following the product.
+	 */
+	public function test_line_without_recorded_tax_status_follows_the_product(): void {
+		delete_metadata( 'order_item', $this->item->get_id(), '_product_tax_status' );
+		$this->product->set_tax_status( ProductTaxStatus::SHIPPING );
+		$this->product->save();
+
+		$sut = new WC_Order_Item_Product( $this->item->get_id() );
+
+		$this->assertSame( '', $sut->get_recorded_tax_status() );
+		$this->assertSame( ProductTaxStatus::SHIPPING, $sut->get_tax_status() );
+	}
+
+	/**
+	 * @testdox add_product() records the product's tax status on the new line.
+	 */
+	public function test_add_product_records_the_tax_status(): void {
+		$this->product->set_tax_status( ProductTaxStatus::NONE );
+		$this->product->save();
+
+		$item_id = $this->order->add_product( $this->product, 1 );
+
+		$this->assertSame( ProductTaxStatus::NONE, wc_get_order_item_meta( $item_id, '_product_tax_status' ) );
+	}
+
+	/**
+	 * @testdox Checkout records the product's tax status on each line it creates.
+	 */
+	public function test_checkout_records_the_tax_status(): void {
+		$this->product->set_tax_status( ProductTaxStatus::NONE );
+		$this->product->save();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $this->product->get_id(), 1 );
+		$order = new WC_Order();
+
+		WC()->checkout()->create_order_line_items( $order, WC()->cart );
+		$items = $order->get_items();
+		WC()->cart->empty_cart();
+
+		$this->assertCount( 1, $items );
+		$this->assertSame( ProductTaxStatus::NONE, current( $items )->get_recorded_tax_status() );
+	}
+
+	/**
+	 * @testdox Recalculating an order's taxes uses the tax status each line was sold with (#70045).
+	 */
+	public function test_calculate_totals_uses_the_recorded_tax_status(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '0',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+		$taxable = WC_Helper_Product::create_simple_product();
+		$exempt  = WC_Helper_Product::create_simple_product();
+		$exempt->set_tax_status( ProductTaxStatus::NONE );
+		$exempt->save();
+
+		$order = new WC_Order();
+		$order->add_product( $taxable, 1 );
+		$order->add_product( $exempt, 1 );
+		$order->calculate_totals();
+		$order->save();
+		$tax_at_sale = (float) $order->get_total_tax();
+
+		// The store later swaps the two products' tax statuses.
+		$taxable->set_tax_status( ProductTaxStatus::NONE );
+		$taxable->save();
+		$exempt->set_tax_status( ProductTaxStatus::TAXABLE );
+		$exempt->save();
+
+		$sut = wc_get_order( $order->get_id() );
+		$sut->calculate_totals();
+
+		$this->assertGreaterThan( 0.0, $tax_at_sale, 'Precondition: the taxable line was taxed at sale.' );
+		$this->assertSame( $tax_at_sale, (float) $sut->get_total_tax() );
+		foreach ( $sut->get_items() as $line ) {
+			$expected = $line->get_product_id() === $taxable->get_id() ? ProductTaxStatus::TAXABLE : ProductTaxStatus::NONE;
+			$this->assertSame( $expected, $line->get_tax_status() );
+		}
 	}
 }

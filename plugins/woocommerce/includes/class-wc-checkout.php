@@ -868,6 +868,7 @@ class WC_Checkout {
 			}
 
 			$item->set_backorder_meta();
+			$item->record_tax_status();
 
 			/**
 			 * Action hook to adjust item before save.
