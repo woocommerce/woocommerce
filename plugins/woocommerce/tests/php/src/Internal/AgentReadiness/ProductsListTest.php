@@ -118,6 +118,36 @@ class ProductsListTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A save that changes nothing doesn't test the product again.
+	 */
+	public function test_unchanged_save_is_skipped(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$this->readiness->refresh_report();
+		delete_post_meta( $product->get_id(), ProductFailures::META_KEY );
+
+		$product->save();
+
+		$this->assertSame( array(), ProductFailures::stored( $product->get_id() ) );
+	}
+
+	/**
+	 * @testdox Trashing a product removes its rows from the counts; restoring it tests it again.
+	 */
+	public function test_trash_and_restore(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$this->readiness->refresh_report();
+		$this->assertSame( 1, $this->check_count( 'missing_images' ) );
+
+		wp_trash_post( $product->get_id() );
+		$this->assertSame( array(), ProductFailures::stored( $product->get_id() ) );
+		$this->assertSame( 0, $this->check_count( 'missing_images' ) );
+
+		wp_untrash_post( $product->get_id() );
+		wp_publish_post( $product->get_id() );
+		$this->assertContains( 'missing_images', ProductFailures::for_product( $product->get_id() ) );
+	}
+
+	/**
 	 * @testdox Saving a variation updates its parent.
 	 */
 	public function test_variation_save_updates_parent(): void {
@@ -183,7 +213,7 @@ class ProductsListTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The column and filter appear after a scan and say where a product stands.
+	 * @testdox The column and filter appear after a scan and say where a product stands, including one the scan didn't test.
 	 */
 	public function test_column_and_filter(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -203,6 +233,11 @@ class ProductsListTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '(1)', $html );
 
 		delete_post_meta( $product->get_id(), ProductFailures::META_KEY );
+		ob_start();
+		$this->sut->render_column( 'agent_readiness', $product->get_id() );
+		$this->assertSame( 'Not checked', ob_get_clean(), 'No rows means the scan did not reach it' );
+
+		ProductFailures::store( $product->get_id(), array() );
 		ob_start();
 		$this->sut->render_column( 'agent_readiness', $product->get_id() );
 		$this->assertSame( 'Ready', ob_get_clean() );
