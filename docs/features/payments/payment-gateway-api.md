@@ -279,7 +279,7 @@ If an earlier request reached the provider but its response never came back, a n
 
 ### Store the transaction ID and check it before charging again
 
-Save the provider's transaction or payment intent ID on the order as soon as the provider returns it, before you wait for the outcome. On the next attempt, ask the provider for the status of that transaction, and create a new charge only if it confirms that the earlier one failed or never happened. In this sketch, `get_provider_status()` stands for your provider's status lookup. It returns `paid`, `failed` for a payment that failed or never happened, or `unknown` for anything else, such as a lookup that could not finish:
+Save the provider's transaction or payment intent ID on the order as soon as the provider returns it, before you wait for the outcome. On the next attempt, ask the provider for the status of that transaction, and create a new charge only if it confirms that the earlier one failed or never happened. In this sketch, `get_provider_status()` stands for your provider's status lookup. It returns `paid`, `pending` for a payment the provider accepted and will confirm later, `failed` for a payment that failed or never happened, or `unknown` for anything else, such as a lookup that could not finish:
 
 ```php
 public function process_payment( $order_id ) {
@@ -299,6 +299,16 @@ public function process_payment( $order_id ) {
             );
         }
 
+        // The provider accepted the payment and will confirm it later.
+        if ( 'pending' === $status ) {
+            $order->update_status( \Automattic\WooCommerce\Enums\OrderStatus::ON_HOLD, __( 'Awaiting payment confirmation', 'your-text-domain' ) );
+
+            return array(
+                'result'   => 'success',
+                'redirect' => $this->get_return_url( $order ),
+            );
+        }
+
         // The outcome is still open, so a new charge could take a second payment.
         if ( 'failed' !== $status ) {
             wc_add_notice( __( 'We could not confirm your payment yet. Try again in a few minutes.', 'your-text-domain' ), 'error' );
@@ -310,8 +320,6 @@ public function process_payment( $order_id ) {
     // No saved ID, or the earlier payment failed: create the payment, then save its ID on the order.
 }
 ```
-
-If the lookup shows that the provider accepted the payment and will confirm it later, set the order to **On-Hold** instead of returning a failure.
 
 This check reads the order, so it works only when the retry reaches the same order. WooCommerce creates a new order, without the saved ID, when the cart or its total changed, when the order was cancelled, or when the session ended. A shopper who switches to another gateway also skips the check.
 
