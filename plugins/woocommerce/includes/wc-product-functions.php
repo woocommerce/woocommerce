@@ -545,7 +545,7 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
 			foreach ( array_filter( array_keys( $variation_attributes ), 'taxonomy_exists' ) as $taxonomy ) {
 				$terms = get_the_terms( $parent_id, $taxonomy );
 				if ( is_array( $terms ) ) {
-					foreach ( array_filter( $terms, static fn( $term ) => $term instanceof \WP_Term ) as $term ) { // @phpstan-ignore instanceof.alwaysTrue (defensive checks agains get_the_terms filter)
+					foreach ( array_filter( $terms, static fn( $term ) => $term instanceof \WP_Term ) as $term ) {
 						$taxonomy_terms[ $taxonomy ][ $term->slug ] = $term;
 					}
 				}
@@ -2251,6 +2251,10 @@ function wc_update_product_lookup_tables() {
 		'tax_status', // When last column is updated, woocommerce_product_lookup_table_is_generating is updated.
 	);
 
+	if ( get_option( 'woocommerce_schema_version', 0 ) >= 1140 ) {
+		array_splice( $columns, 4, 0, array( 'mpn' ) );
+	}
+
 	foreach ( $columns as $index => $column ) {
 		if ( 'average_rating' === $column && ! $reviews_enabled ) {
 			continue;
@@ -2349,6 +2353,13 @@ function wc_update_product_lookup_tables_column( $column ) {
 						SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_manage_stock' AND meta_value = 'yes'
 					)
 				"
+			);
+			break;
+		case 'mpn':
+			$wpdb->query(
+				"UPDATE {$wpdb->wc_product_meta_lookup} lookup_table
+				LEFT JOIN {$wpdb->postmeta} meta ON lookup_table.product_id = meta.post_id AND meta.meta_key = '_mpn'
+				SET lookup_table.mpn = LEFT( COALESCE( meta.meta_value, '' ), 100 )"
 			);
 			break;
 		case 'sku':

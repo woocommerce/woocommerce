@@ -61,6 +61,19 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	}
 
 	/**
+	 * Refuse a non-JSON payload before the handler reads anything.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function get_response( \WP_REST_Request $request ) {
+		return UcpUtils::refuse_non_json_payload( $request, $this->get_capability() ) ?? parent::get_response( $request );
+	}
+
+	/**
 	 * Request body arguments accepted by this route.
 	 *
 	 * @return array
@@ -112,7 +125,7 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	 * @return array
 	 */
 	protected function get_context( \WP_REST_Request $request ): array {
-		$raw = $request->get_param( 'context' );
+		$raw = UcpUtils::json_param( $request, 'context' );
 
 		if ( ! is_array( $raw ) ) {
 			return array();
@@ -139,22 +152,7 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function ucp_error( string $code, string $message, string $severity, int $status ): \WP_REST_Response {
-		return new \WP_REST_Response(
-			array(
-				'ucp'      => $this->ucp_metadata( 'error' ),
-				'messages' => array(
-					array(
-						'type'         => 'error',
-						'code'         => $code,
-						'content'      => $message,
-						'severity'     => $severity,
-						'path'         => '$',
-						'content_type' => 'plain',
-					),
-				),
-			),
-			$status
-		);
+		return UcpUtils::error_response( $this->get_capability(), $code, $message, $severity, $status );
 	}
 
 	/**

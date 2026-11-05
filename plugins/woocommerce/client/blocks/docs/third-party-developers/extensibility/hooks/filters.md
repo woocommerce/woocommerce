@@ -372,23 +372,15 @@ apply_filters( 'woocommerce_add_to_cart_form_action', string $action_url )
 ## woocommerce_add_to_cart_quantity
 
 
-Filters the change the quantity to add to cart.
+This filter is documented in includes/class-wc-cart.php.
 
 ```php
-apply_filters( 'woocommerce_add_to_cart_quantity', int|float $default_quantity, int $product_id, int $variation_id )
+apply_filters( 'woocommerce_add_to_cart_quantity' )
 ```
-
-### Parameters
-
-| Argument | Type | Description |
-| -------- | ---- | ----------- |
-| $default_quantity | int, float | The default quantity. |
-| $product_id | int | The product id. |
-| $variation_id | int | The variation ID. Always 0 in this context. |
 
 ### Source
 
-- [Blocks/BlockTypes/ProductButton.php](../../../../../../src/Blocks/BlockTypes/ProductButton.php)
+- [StoreApi/Utilities/CartController.php](../../../../../../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -1219,18 +1211,11 @@ Allows backward compatibility with the `rest_request_after_callbacks` filter by 
 ## woocommerce_loop_add_to_cart_args
 
 
-Allow filtering of the add to cart button arguments.
+This filter is documented in includes/wc-template-functions.php.
 
 ```php
-apply_filters( 'woocommerce_loop_add_to_cart_args', array $args, \WC_Product $product )
+apply_filters( 'woocommerce_loop_add_to_cart_args' )
 ```
-
-### Parameters
-
-| Argument | Type | Description |
-| -------- | ---- | ----------- |
-| $args | array | Button arguments, with a `class` string and an `attributes` array. |
-| $product | \WC_Product | Product the button is rendered for. |
 
 ### Source
 
@@ -2061,7 +2046,7 @@ apply_filters( 'woocommerce_valid_order_statuses_for_payment', array $valid_orde
 
 ### Description
 
-The same filter WC_Order::needs_payment() applies. A status a site declares payable counts as awaiting payment here too, so a failure while the order is in it is reported rather than recovered as one that took payment.
+The same filter WC_Order::needs_payment() applies, so a zero-total order in a status the site declares payable can be resumed.
 
 ### Parameters
 
@@ -2072,7 +2057,6 @@ The same filter WC_Order::needs_payment() applies. A status a site declares paya
 
 ### Source
 
-- [StoreApi/Utilities/CheckoutTrait.php](../../../../../../src/StoreApi/Utilities/CheckoutTrait.php)
 - [StoreApi/Utilities/DraftOrderTrait.php](../../../../../../src/StoreApi/Utilities/DraftOrderTrait.php)
 
 ---

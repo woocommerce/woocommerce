@@ -68,6 +68,7 @@ final class ProductFilterStatus extends AbstractBlock {
 			$items[] = array(
 				'type'        => 'status',
 				'value'       => $status,
+				'label'       => $status_options[ $status ],
 				// translators: %s: availability.
 				'activeLabel' => sprintf( __( 'Availability: %s', 'woocommerce' ), $status_options[ $status ] ),
 			);

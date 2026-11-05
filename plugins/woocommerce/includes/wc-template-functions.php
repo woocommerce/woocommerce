@@ -1491,10 +1491,10 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 		}
 
 		/**
-		 * Filter to customize the arguments for the add to cart template for the loop.
+		 * Filter to customize the arguments for the add to cart button in the loop.
 		 *
-		 * @param array $args Arguments.
-		 *
+		 * @param array       $args    Arguments.
+		 * @param \WC_Product $product Product object.
 		 * @since 2.4.11
 		 */
 		$args = apply_filters( 'woocommerce_loop_add_to_cart_args', wp_parse_args( $args, $defaults ), $product );

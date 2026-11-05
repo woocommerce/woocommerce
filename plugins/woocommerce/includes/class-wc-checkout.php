@@ -8,12 +8,16 @@
  * @version 3.4.0
  */
 
+use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
+use Automattic\WooCommerce\Utilities\ShippingUtil;
+use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -33,6 +37,21 @@ class WC_Checkout {
 		'shipping_total',
 		'shipping_tax',
 	);
+
+	/**
+	 * Error code create_order() returns when the submit repeats one for an order that moved past payment.
+	 *
+	 * @var string
+	 */
+	private const ORDER_ALREADY_PLACED_ERROR = 'checkout-order-already-placed';
+
+	/**
+	 * Shipping address fields that checkout.js fills with the billing address while "Ship to a different address?" is
+	 * unticked. WC_AJAX::update_order_review() stores them on the session customer.
+	 *
+	 * @var string[]
+	 */
+	private const SHIPPING_FIELDS_COPIED_FROM_BILLING = array( 'country', 'state', 'postcode', 'city', 'address_1', 'address_2' );
 
 	/**
 	 * The single instance of the class.
@@ -56,11 +75,48 @@ class WC_Checkout {
 	protected $legacy_posted_data = array();
 
 	/**
-	 * Caches customer object. @see get_value.
+	 * Caches customer object.
+	 *
+	 * @see WC_Checkout::get_value()
 	 *
 	 * @var WC_Customer
 	 */
 	private $logged_in_customer = null;
+
+	/**
+	 * Caches the logged-in customer as saved to their account, without session changes.
+	 *
+	 * @see WC_Checkout::get_saved_customer_for_shipping_field()
+	 *
+	 * @var WC_Customer|null
+	 */
+	private $saved_customer = null;
+
+	/**
+	 * Order item types that set_data_from_cart() creates from the cart.
+	 *
+	 * @var string[]
+	 */
+	private const CART_ORDER_ITEM_TYPES = array(
+		OrderItemType::LINE_ITEM,
+		OrderItemType::FEE,
+		OrderItemType::SHIPPING,
+		OrderItemType::TAX,
+		OrderItemType::COUPON,
+	);
+
+	/**
+	 * Order meta that stores a hash of each cart section and a fingerprint of each item the cart created, so a resumed
+	 * order can keep the items that haven't changed since checkout.
+	 */
+	private const CART_ORDER_ITEMS_SNAPSHOT_META_KEY = '_cart_order_items_snapshot';
+
+	/**
+	 * Item types that create_order() kept on a resumed order, so set_data_from_cart() doesn't add them again.
+	 *
+	 * @var string[]
+	 */
+	private $kept_order_item_types = array();
 
 	/**
 	 * Gets the main WC_Checkout Instance.
@@ -412,8 +468,20 @@ class WC_Checkout {
 		try {
 			$order_id           = absint( WC()->session->get( 'order_awaiting_payment' ) );
 			$cart_hash          = WC()->cart->get_cart_hash();
+			$cart_hashes        = $this->get_cart_section_hashes();
 			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 			$order              = $order_id ? wc_get_order( $order_id ) : null;
+
+			// The gateway moved this order on but something died before the cart was
+			// emptied, so this submit is a repeat: a new order would charge the shopper twice.
+			$session_order = PaymentRecovery::get_session_order_moved_past_payment( $order_id );
+			if ( $session_order ) {
+				return new WP_Error(
+					self::ORDER_ALREADY_PLACED_ERROR,
+					__( 'This order has already been placed.', 'woocommerce' ),
+					array( 'order_id' => $session_order->get_id() )
+				);
+			}
 
 			/**
 			 * If there is an order pending payment, we can resume it here so
@@ -432,8 +500,24 @@ class WC_Checkout {
 				 */
 				do_action( 'woocommerce_resume_order', $order_id );
 
-				// Remove all items - we will re-add them later.
-				$order->remove_order_items();
+				/**
+				 * Filters whether a resumed classic checkout order keeps the items that haven't changed, so their IDs
+				 * stay the same. Kept items don't run the woocommerce_checkout_create_order_*_item hooks again. Return false
+				 * to remove every item and add it again from the cart.
+				 *
+				 * @since 11.4.0
+				 *
+				 * @param bool              $keep_items Whether to keep unchanged items. Default true.
+				 * @param WC_Abstract_Order $order      The resumed order.
+				 */
+				$keep_items = apply_filters( 'woocommerce_checkout_keep_order_items_on_resume', true, $order );
+
+				if ( true === $keep_items && $order instanceof WC_Order ) {
+					// The rest of the items are added again from the cart later.
+					$this->kept_order_item_types = $this->remove_changed_order_items( $order, $cart_hashes );
+				} else {
+					$order->remove_order_items();
+				}
 			} else {
 				$order = new WC_Order();
 			}
@@ -479,6 +563,12 @@ class WC_Checkout {
 				$order->calculate_cogs_total_value();
 			}
 
+			// Captured before woocommerce_checkout_create_order, so items extensions add or change there can be told apart.
+			$cart_order_items = array_map(
+				fn( WC_Order_Item $item ) => array( $item, $this->get_order_item_fingerprint( $item ) ),
+				$order->get_items( self::CART_ORDER_ITEM_TYPES )
+			);
+
 			/**
 			 * Action hook to adjust order before save.
 			 *
@@ -504,6 +594,9 @@ class WC_Checkout {
 				if ( ! $persisted_order || 0 === count( $persisted_order->get_items() ) ) {
 					throw new Exception( __( 'Order items could not be saved. Please try again.', 'woocommerce' ) );
 				}
+
+				$order->update_meta_data( self::CART_ORDER_ITEMS_SNAPSHOT_META_KEY, $this->get_cart_order_items_snapshot( $persisted_order, $cart_order_items, $cart_hashes ) );
+				$order->save_meta_data();
 			}
 
 			/**
@@ -532,6 +625,9 @@ class WC_Checkout {
 				do_action( 'woocommerce_checkout_order_exception', $order );
 			}
 			return new WP_Error( 'checkout-error', $e->getMessage() );
+		} finally {
+			// Reset on every path, including Errors, so a later set_data_from_cart() call adds every item type.
+			$this->kept_order_item_types = array();
 		}
 	}
 
@@ -551,12 +647,182 @@ class WC_Checkout {
 		$order->set_cart_tax( WC()->cart->get_cart_contents_tax() + WC()->cart->get_fee_tax() );
 		$order->set_shipping_tax( WC()->cart->get_shipping_tax() );
 		$order->set_total( WC()->cart->get_total( 'edit' ) );
-		$this->create_order_line_items( $order, WC()->cart );
-		$this->create_order_fee_lines( $order, WC()->cart );
-		$this->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping()->get_packages() );
-		$this->create_order_tax_lines( $order, WC()->cart );
-		$this->create_order_coupon_lines( $order, WC()->cart );
+		if ( $this->should_add_order_items( OrderItemType::LINE_ITEM ) ) {
+			$this->create_order_line_items( $order, WC()->cart );
+		}
+		if ( $this->should_add_order_items( OrderItemType::FEE ) ) {
+			$this->create_order_fee_lines( $order, WC()->cart );
+		}
+		if ( $this->should_add_order_items( OrderItemType::SHIPPING ) ) {
+			$this->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping()->get_packages() );
+		}
+		if ( $this->should_add_order_items( OrderItemType::TAX ) ) {
+			$this->create_order_tax_lines( $order, WC()->cart );
+		}
+		if ( $this->should_add_order_items( OrderItemType::COUPON ) ) {
+			$this->create_order_coupon_lines( $order, WC()->cart );
+		}
 	}
+
+	/**
+	 * Whether set_data_from_cart() should add items of a type, or keep the ones create_order() kept on a resumed order.
+	 *
+	 * @param string $item_type Order item type.
+	 * @return bool
+	 */
+	private function should_add_order_items( string $item_type ): bool {
+		return ! in_array( $item_type, $this->kept_order_item_types, true );
+	}
+
+	/**
+	 * Hashes each cart section that creates an order item type, using the Store API's cart hashes for fees, taxes and
+	 * coupons. Line items hash the cart's contents instead of the filterable cart hash, and shipping hashes the filtered
+	 * rate values that create_order_shipping_lines() copies, so filters can't hide a change to either.
+	 *
+	 * @return array<string, string> Hashes keyed by order item type.
+	 */
+	private function get_cart_section_hashes(): array {
+		$hashes         = ( new CartController() )->get_cart_hashes();
+		$shipping_rates = array_map(
+			fn( $rate ) => $rate instanceof WC_Shipping_Rate ? array( $rate->get_id(), $rate->get_label(), $rate->get_cost(), $rate->get_taxes(), $rate->get_meta_data() ) : $rate,
+			(array) WC()->cart->get_shipping_methods()
+		);
+
+		return array(
+			OrderItemType::LINE_ITEM => md5( (string) wp_json_encode( WC()->cart->get_cart_for_session() ) ),
+			OrderItemType::FEE       => $hashes['fees'],
+			OrderItemType::SHIPPING  => md5( (string) wp_json_encode( array( $shipping_rates, WC()->session->get( 'chosen_shipping_methods' ) ) ) ),
+			OrderItemType::TAX       => $hashes['taxes'],
+			OrderItemType::COUPON    => $hashes['coupons'],
+		);
+	}
+
+	/**
+	 * Builds the snapshot create_order() stores: the cart section hashes, and a fingerprint of each item the cart created,
+	 * read back from the saved order. An item that wasn't saved, or that an extension changed in
+	 * woocommerce_checkout_create_order, gets an empty fingerprint, so its type is rebuilt on resume.
+	 *
+	 * @param WC_Abstract_Order     $persisted_order  The order, read again after it was saved.
+	 * @param array[]               $cart_order_items Each item set_data_from_cart() added or kept, with its fingerprint before the hook.
+	 * @param array<string, string> $cart_hashes      Hashes from get_cart_section_hashes().
+	 * @return array{hashes: array<string, string>, items: array<string, array<int, string>>}
+	 */
+	private function get_cart_order_items_snapshot( WC_Abstract_Order $persisted_order, array $cart_order_items, array $cart_hashes ): array {
+		$persisted_items = $persisted_order->get_items( self::CART_ORDER_ITEM_TYPES );
+		$items           = array();
+		foreach ( $cart_order_items as list( $item, $fingerprint ) ) {
+			$persisted_item = $persisted_items[ $item->get_id() ] ?? null;
+			$is_unchanged   = $persisted_item && $fingerprint === $this->get_order_item_fingerprint( $item );
+
+			$items[ $item->get_type() ][ $item->get_id() ] = $is_unchanged ? $this->get_order_item_fingerprint( $persisted_item ) : '';
+		}
+
+		return array(
+			'hashes' => $cart_hashes,
+			'items'  => $items,
+		);
+	}
+
+	/**
+	 * Hashes an item's stored amounts and properties. Names and meta are left out, so renaming an item or adding meta
+	 * to it, as gateways do, doesn't count as a change.
+	 *
+	 * @param WC_Order_Item $item The order item.
+	 * @return string
+	 */
+	private function get_order_item_fingerprint( WC_Order_Item $item ): string {
+		// Include unsaved changes, so an item can be compared before and after it's saved.
+		$data = array_replace_recursive( $item->get_data(), $item->get_changes() );
+		unset( $data['id'], $data['order_id'], $data['name'], $data['meta_data'] );
+
+		return md5( (string) wp_json_encode( $this->sort_keys_recursively( $data ) ) );
+	}
+
+	/**
+	 * Sorts an array's keys at every level, since saving an item can reorder nested keys such as its taxes.
+	 *
+	 * @param array $data The array to sort.
+	 * @return array
+	 */
+	private function sort_keys_recursively( array $data ): array {
+		ksort( $data );
+		foreach ( $data as $key => $value ) {
+			if ( is_array( $value ) ) {
+				$data[ $key ] = $this->sort_keys_recursively( $value );
+			}
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Removes the items of a resumed order that changed, and returns the item types it kept.
+	 *
+	 * A type is kept when its cart section hash matches the snapshot and every item the cart created is still there with
+	 * the same fingerprint. Other items of a kept type, such as ones extensions add at checkout, are removed so they
+	 * aren't duplicated.
+	 *
+	 * @param WC_Order              $order       The resumed order.
+	 * @param array<string, string> $cart_hashes Hashes from get_cart_section_hashes().
+	 * @return string[] The kept item types.
+	 */
+	private function remove_changed_order_items( WC_Order $order, array $cart_hashes ): array {
+		global $wpdb;
+
+		$snapshot = $order->get_meta( self::CART_ORDER_ITEMS_SNAPSHOT_META_KEY );
+		if ( ! is_array( $snapshot ) || ! is_array( $snapshot['hashes'] ?? null ) || ! is_array( $snapshot['items'] ?? null ) ) {
+			$order->remove_order_items();
+			return array();
+		}
+
+		$kept_types = array();
+		foreach ( self::CART_ORDER_ITEM_TYPES as $item_type ) {
+			$cart_section_unchanged = ( $snapshot['hashes'][ $item_type ] ?? '' ) === $cart_hashes[ $item_type ];
+			$order_items            = $cart_section_unchanged ? $order->get_items( $item_type ) : array();
+			$snapshot_items         = (array) ( $snapshot['items'][ $item_type ] ?? array() );
+
+			if ( ! $cart_section_unchanged || ! $this->order_items_match_snapshot( $order_items, $snapshot_items ) ) {
+				$order->remove_order_items( $item_type );
+				continue;
+			}
+
+			$kept_types[] = $item_type;
+			foreach ( array_keys( array_diff_key( $order_items, $snapshot_items ) ) as $item_id ) {
+				$order->remove_item( $item_id );
+			}
+		}
+
+		// Read the types directly: get_items() only finds types registered with woocommerce_order_type_to_group, so it would miss some extension items.
+		$persisted_types = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT DISTINCT order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d",
+				$order->get_id()
+			)
+		);
+		foreach ( array_diff( $persisted_types, self::CART_ORDER_ITEM_TYPES ) as $item_type ) {
+			$order->remove_order_items( $item_type );
+		}
+
+		return $kept_types;
+	}
+
+	/**
+	 * Whether every item in the snapshot is still on the order with the same fingerprint.
+	 *
+	 * @param WC_Order_Item[]    $order_items    The order's items of one type, keyed by ID.
+	 * @param array<int, string> $snapshot_items Fingerprints of the items the cart created, keyed by ID.
+	 * @return bool
+	 */
+	private function order_items_match_snapshot( array $order_items, array $snapshot_items ): bool {
+		foreach ( $snapshot_items as $item_id => $fingerprint ) {
+			if ( ! isset( $order_items[ $item_id ] ) || (string) $fingerprint !== $this->get_order_item_fingerprint( $order_items[ $item_id ] ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	/**
 	 * Add line items to the order.
 	 *
@@ -1149,12 +1415,15 @@ class WC_Checkout {
 		array_walk( $address_fields, array( $this, 'set_customer_address_fields' ), $data );
 		WC()->customer->save();
 
+		// Calculate the rates for the posted address, so the posted choices are checked against them.
+		WC()->cart->calculate_shipping();
+
 		// Update customer shipping and payment method to posted method.
 		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
 		if ( is_array( $data['shipping_method'] ) ) {
 			foreach ( $data['shipping_method'] as $i => $value ) {
-				if ( ! is_string( $value ) ) {
+				if ( ! is_string( $value ) || ! ShippingUtil::is_shipping_rate_listed( $i, $value ) ) {
 					continue;
 				}
 				$chosen_shipping_methods[ $i ] = $value;
@@ -1185,6 +1454,7 @@ class WC_Checkout {
 
 		// Store Order ID in session, so it can be re-used after payment failure.
 		WC()->session->set( 'order_awaiting_payment', $order_id );
+		PaymentRecovery::remember_order_sent_to_gateway( (int) $order_id );
 
 		// We save the session early because if the payment gateway hangs
 		// the request will never finish, thus the session data will never be saved,
@@ -1268,6 +1538,77 @@ class WC_Checkout {
 	}
 
 	/**
+	 * Answer a repeat submit for an order that already moved past payment.
+	 *
+	 * The shopper is sent to the order received page, where wc_clear_cart_after_payment()
+	 * empties the cart the gateway left behind, instead of being charged for a second order.
+	 *
+	 * @since 11.4.0
+	 * @param WC_Order $order The order the session was awaiting payment for.
+	 */
+	protected function send_repeat_submit_response( WC_Order $order ): void {
+		PaymentRecovery::record_repeat_submit( $order );
+
+		wc_log_order_step(
+			'[Shortcode #6C] Repeat submit for an order that moved past payment, sending to the order received page',
+			array(
+				'order_object' => $order,
+				'redirected'   => ! wp_doing_ajax() ? 'yes' : 'no',
+			),
+			true
+		);
+
+		$this->send_order_received_response( $order );
+	}
+
+	/**
+	 * Record a failure raised after the gateway moved the order on and send the shopper to the order received page.
+	 *
+	 * Reporting a failure would send them back to place the order again, and every retry
+	 * pays for another order. PaymentRecovery empties the cart rather than leaving it to the
+	 * received page: after payment_complete() nothing in the session points at the order, so
+	 * if the shopper never lands there, a submit from the still-open form would build a new one.
+	 *
+	 * @since 11.4.0
+	 * @param WC_Order  $order The order, re-read after the failure.
+	 * @param Throwable $error The failure raised after the gateway ran.
+	 */
+	protected function recover_order_that_moved_past_payment( WC_Order $order, Throwable $error ): void {
+		PaymentRecovery::record_failure_after_payment( $order, $error, 'checkout' );
+
+		wc_log_order_step(
+			'[Shortcode #6D] Order moved past payment before a failure, sending to the order received page',
+			array(
+				'order_object' => $order,
+				'error'        => get_class( $error ) . ': ' . $error->getMessage(),
+				'redirected'   => ! wp_doing_ajax() ? 'yes' : 'no',
+			),
+			true
+		);
+
+		$this->send_order_received_response( $order );
+	}
+
+	/**
+	 * End the request by sending the shopper to the order received page: a redirect for the form post, JSON for the checkout JS.
+	 *
+	 * @param WC_Order $order Order object.
+	 */
+	private function send_order_received_response( WC_Order $order ): void {
+		if ( ! wp_doing_ajax() ) {
+			wp_safe_redirect( $order->get_checkout_order_received_url() );
+			exit;
+		}
+
+		wp_send_json(
+			array(
+				'result'   => 'success',
+				'redirect' => $order->get_checkout_order_received_url(),
+			)
+		);
+	}
+
+	/**
 	 * Create a new customer account if needed.
 	 *
 	 * @throws Exception When not able to create customer.
@@ -1306,6 +1647,11 @@ class WC_Checkout {
 					throw new Exception( apply_filters( 'woocommerce_registration_error_email_exists', __( 'An account is already registered with your email address. <a href="#" class="showlogin">Please log in.</a>', 'woocommerce' ), $data['billing_email'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				}
 				throw new Exception( $customer_id->get_error_message() ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			}
+
+			// Save the posted choices, because the login loads the session again from the database.
+			if ( is_callable( array( WC()->session, 'save_data' ) ) ) {
+				WC()->session->save_data();
 			}
 
 			wc_set_customer_auth_cookie( $customer_id );
@@ -1393,6 +1739,7 @@ class WC_Checkout {
 	 * Process the checkout after the confirm order button is pressed.
 	 *
 	 * @throws Exception When validation fails.
+	 * @throws Throwable When a gateway fails before it moved the order on; only an Error escapes, as before, since an Exception is caught below.
 	 */
 	public function process_checkout() {
 		try {
@@ -1441,6 +1788,13 @@ class WC_Checkout {
 
 			wc_log_order_step( '[Shortcode #2] Session updated with checkout data and totals calculated' );
 
+			// Answer a repeat submit before validation: the first order may have taken the last
+			// units, and the stock check would then turn the shopper away from an order they placed.
+			$session_order = PaymentRecovery::get_session_order_moved_past_payment( absint( WC()->session->get( 'order_awaiting_payment' ) ) );
+			if ( $session_order ) {
+				$this->send_repeat_submit_response( $session_order );
+			}
+
 			// Validate posted data and cart items before proceeding.
 			$this->validate_checkout( $posted_data, $errors );
 
@@ -1459,6 +1813,14 @@ class WC_Checkout {
 				$this->process_customer( $posted_data );
 				$order_id = $this->create_order( $posted_data );
 				$order    = wc_get_order( $order_id );
+
+				if ( is_wp_error( $order_id ) && self::ORDER_ALREADY_PLACED_ERROR === $order_id->get_error_code() ) {
+					$session_order = wc_get_order( $order_id->get_error_data()['order_id'] ?? 0 );
+
+					if ( $session_order instanceof WC_Order ) {
+						$this->send_repeat_submit_response( $session_order );
+					}
+				}
 
 				if ( is_wp_error( $order_id ) ) {
 					throw new Exception( $order_id->get_error_message() );
@@ -1503,8 +1865,23 @@ class WC_Checkout {
 				 */
 
 				if ( apply_filters( 'woocommerce_cart_needs_payment', $order->needs_payment(), WC()->cart ) ) {
-					$this->process_order_payment( $order_id, $posted_data['payment_method'] );
+					try {
+						$this->process_order_payment( $order_id, $posted_data['payment_method'] );
+					} catch ( Throwable $e ) {
+						// The gateway may have moved the order on already, say when a post-payment
+						// integration throws inside the status transition. Re-read it: the gateway
+						// changed the status on its own instance, so $order is stale.
+						$refreshed_order = wc_get_order( $order_id );
+
+						if ( ! $refreshed_order instanceof WC_Order || ! PaymentRecovery::order_moved_past_payment( $refreshed_order ) ) {
+							throw $e;
+						}
+
+						$this->recover_order_that_moved_past_payment( $refreshed_order, $e );
+					}
 				} else {
+					// No gateway runs, but payment_complete() still runs the status change a plugin can die in.
+					PaymentRecovery::remember_order_sent_to_gateway( (int) $order_id );
 					$this->process_order_without_payment( $order_id );
 				}
 			}
@@ -1551,19 +1928,15 @@ class WC_Checkout {
 			return $value;
 		}
 
-		/**
-		 * For logged in customers, pull data from their account rather than the session which may contain incomplete data.
-		 * Another reason is that WC sets shipping address to the billing address on the checkout updates unless the
-		 * "ship to another address" box is checked. @see issue #20975.
-		 */
 		$customer_object = false;
 
 		if ( is_user_logged_in() ) {
 			// Load customer object, but keep it cached to avoid reloading it multiple times.
 			if ( is_null( $this->logged_in_customer ) ) {
+				// Read through the session, so changes made earlier in the session and defaults such as the billing email prefill the form.
 				$this->logged_in_customer = new WC_Customer( get_current_user_id(), true );
 			}
-			$customer_object = $this->logged_in_customer;
+			$customer_object = $this->get_saved_customer_for_shipping_field( $input ) ?? $this->logged_in_customer;
 		}
 
 		if ( ! $customer_object ) {
@@ -1581,5 +1954,34 @@ class WC_Checkout {
 		}
 
 		return apply_filters( 'default_checkout_' . $input, $value, $input );
+	}
+
+	/**
+	 * Get the saved customer to prefill a shipping field from, when the session's shipping address is the billing copy.
+	 *
+	 * Prefilling from that copy would hide the shipping address saved to the account. Once the copy is detected, every
+	 * shipping field comes from the saved record, so the name and address shown belong together. A session address that
+	 * differs from billing still wins; one the customer typed to match billing looks the same as the copy.
+	 *
+	 * @param string $input Name of the input we want to grab data for, e.g. shipping_city.
+	 * @return WC_Customer|null The customer as saved to their account, or null to read the session.
+	 */
+	private function get_saved_customer_for_shipping_field( $input ): ?WC_Customer {
+		if ( 0 !== strpos( $input, 'shipping_' ) ) {
+			return null;
+		}
+
+		foreach ( self::SHIPPING_FIELDS_COPIED_FROM_BILLING as $field ) {
+			if ( $this->logged_in_customer->{"get_shipping_$field"}( 'edit' ) !== $this->logged_in_customer->{"get_billing_$field"}( 'edit' ) ) {
+				return null;
+			}
+		}
+
+		if ( is_null( $this->saved_customer ) ) {
+			$this->saved_customer = new WC_Customer( get_current_user_id() );
+		}
+
+		// A record without a country is not an address the customer can ship to, e.g. one holding only a name.
+		return '' !== $this->saved_customer->get_shipping_country( 'edit' ) ? $this->saved_customer : null;
 	}
 }

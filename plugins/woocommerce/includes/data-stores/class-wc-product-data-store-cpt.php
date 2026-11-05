@@ -36,6 +36,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		'_visibility',
 		'_sku',
 		'_global_unique_id',
+		'_mpn',
 		'_customs_commodity_code',
 		'_customs_country_of_origin',
 		'_customs_description',
@@ -453,6 +454,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$meta_key_to_props = array(
 			'_sku'                       => 'sku',
 			'_global_unique_id'          => 'global_unique_id',
+			'_mpn'                       => 'mpn',
 			'_regular_price'             => 'regular_price',
 			'_sale_price'                => 'sale_price',
 			'_price'                     => 'price',
@@ -492,7 +494,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$set_props = array();
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			$meta_value         = $post_meta_values[ $meta_key ][0] ?? null;
+			$meta_value = $post_meta_values[ $meta_key ][0] ?? null;
+
+			if ( '_default_attributes' === $meta_key && is_serialized( $meta_value ) ) {
+				// Default attributes only hold strings, so don't let a stored value create objects.
+				$default_attributes = @unserialize( trim( $meta_value ), array( 'allowed_classes' => false ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize -- Same as maybe_unserialize(), without objects.
+				// A whole-row object would otherwise be cast to an array of its class name and properties.
+				$set_props[ $prop ] = is_object( $default_attributes ) ? array() : $default_attributes;
+				continue;
+			}
+
 			$set_props[ $prop ] = maybe_unserialize( $meta_value ); // get_post_meta only unserializes single values.
 		}
 
@@ -742,6 +753,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$meta_key_to_props = array(
 			'_sku'                       => 'sku',
 			'_global_unique_id'          => 'global_unique_id',
+			'_mpn'                       => 'mpn',
 			'_regular_price'             => 'regular_price',
 			'_sale_price'                => 'sale_price',
 			'_sale_price_dates_from'     => 'date_on_sale_from',
@@ -975,7 +987,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		$props_in_lookup_table = array( 'sku', 'global_unique_id', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual', 'tax_status', 'tax_class' );
+		$props_in_lookup_table = array( 'sku', 'global_unique_id', 'mpn', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual', 'tax_status', 'tax_class' );
 		if ( $this->cogs_feature_is_enabled() ) {
 			$props_in_lookup_table[] = 'cogs_value';
 		}
@@ -1462,6 +1474,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * The exclusion must keep reading `_sale_price_dates_to` exactly the way
 	 * get_ending_sales() does, or a product ends up in neither queue. See the note there.
 	 *
+	 * Sale prices of '' and '0' are excluded because wc_apply_sale_state_for_product() skips
+	 * them, so the price never changes and the product would match on every run. '0.00' is
+	 * applied and settles, so it must stay matched: do not replace this with `> 0`.
+	 *
 	 * Keep the exclusion as NOT EXISTS: the LEFT JOIN ... IS NULL rewrite is faster on MariaDB
 	 * but materially slower on MySQL.
 	 *
@@ -1485,6 +1501,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					AND postmeta.meta_value > 0
 					AND postmeta.meta_value < %s
 					AND postmeta_2.meta_value != postmeta_3.meta_value
+					AND postmeta_3.meta_value NOT IN ( '', '0' )
 					AND NOT EXISTS (
 						SELECT 1 FROM {$wpdb->postmeta} as ended
 						WHERE ended.post_id = postmeta.post_id
@@ -2674,6 +2691,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 			if ( get_option( 'woocommerce_schema_version', 0 ) >= 920 ) {
 				$product_data['global_unique_id'] = get_post_meta( $id, '_global_unique_id', true );
+			}
+			if ( get_option( 'woocommerce_schema_version', 0 ) >= 1140 ) {
+				$raw_mpn = (string) get_post_meta( $id, '_mpn', true );
+				// Ensure we don't exceed lookup column size (varchar 100).
+				$product_data['mpn'] = mb_substr( $raw_mpn, 0, 100 );
 			}
 			return $product_data;
 		}

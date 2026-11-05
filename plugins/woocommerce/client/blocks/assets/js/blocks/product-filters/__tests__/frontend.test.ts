@@ -129,6 +129,7 @@ describe( 'product filters interactivity store', () => {
 			{
 				value: 'blue',
 				type: 'attribute/color',
+				label: 'blue',
 				activeLabel: 'Color: blue',
 			},
 		] );
@@ -163,6 +164,7 @@ describe( 'product filters interactivity store', () => {
 			{
 				value: 'gray',
 				type: 'attribute/color',
+				label: 'Gray',
 				activeLabel: 'Color: Gray',
 				attributeQueryType: 'or',
 			},
@@ -176,6 +178,44 @@ describe( 'product filters interactivity store', () => {
 
 		expect( context.activeFilters ).toEqual( [] );
 		expect( mockRegisteredStore.state.params ).toEqual( {} );
+	} );
+
+	it( 'retains unavailable selections and labels from existing filter payloads', () => {
+		if ( ! mockRegisteredStore ) {
+			throw new Error( 'Product filters store was not registered.' );
+		}
+		mockGetContext.mockReturnValue( {
+			filterType: 'attribute/color',
+			activeFilters: [
+				{
+					type: 'attribute/color',
+					value: 'blue',
+					activeLabel: 'Color: Blue',
+				},
+				{
+					type: 'attribute/color',
+					value: 'yellow',
+					label: 'Yellow',
+					activeLabel: 'Color: Yellow',
+				},
+				{
+					type: 'status',
+					value: 'instock',
+					label: 'In stock',
+					activeLabel: 'Availability: In stock',
+				},
+			],
+		} );
+		mockGetServerContext.mockReturnValue( {
+			items: [
+				{ type: 'attribute/color', value: 'blue', label: 'Blue' },
+			],
+		} );
+		expect(
+			mockRegisteredStore.state.selectedItems.map(
+				( item ) => item.label
+			)
+		).toEqual( [ 'Blue', 'Yellow' ] );
 	} );
 
 	it( 'returns no selectable items when server context items are not an array', () => {

@@ -637,10 +637,13 @@ class WC_Product_CSV_Importer_Controller {
 	public function handle_upload() {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce already verified in WC_Product_CSV_Importer_Controller::upload_form_handler()
 		$file_url = isset( $_POST['file_url'] ) ? wc_clean( wp_unslash( $_POST['file_url'] ) ) : '';
+		if ( ! is_string( $file_url ) ) {
+			$file_url = '';
+		}
 
 		try {
 			if ( ! empty( $file_url ) ) {
-				$path = ABSPATH . $file_url;
+				$path = FilesystemUtil::resolve_upload_file_path( $file_url );
 				self::validate_file_path( $path );
 			} else {
 				$csv_import_util = wc_get_container()->get( Automattic\WooCommerce\Internal\Admin\ImportExport\CSVUploadHelper::class );
@@ -779,6 +782,7 @@ class WC_Product_CSV_Importer_Controller {
 			__( 'Type', 'woocommerce' )                    => 'type',
 			__( 'SKU', 'woocommerce' )                     => 'sku',
 			__( 'GTIN, UPC, EAN, or ISBN', 'woocommerce' ) => 'global_unique_id',
+			__( 'MPN', 'woocommerce' )                     => 'mpn',
 			__( 'Name', 'woocommerce' )                    => 'name',
 			__( 'Published', 'woocommerce' )               => 'published',
 			__( 'Is featured?', 'woocommerce' )            => 'featured',
@@ -961,6 +965,7 @@ class WC_Product_CSV_Importer_Controller {
 			'type'               => __( 'Type', 'woocommerce' ),
 			'sku'                => __( 'SKU', 'woocommerce' ),
 			'global_unique_id'   => __( 'GTIN, UPC, EAN, or ISBN', 'woocommerce' ),
+			'mpn'                => __( 'MPN', 'woocommerce' ),
 			'name'               => __( 'Name', 'woocommerce' ),
 			'published'          => __( 'Published', 'woocommerce' ),
 			'featured'           => __( 'Is featured?', 'woocommerce' ),
