@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Adds Idempotency-Key handling to the experimental UCP cart endpoints, which are not enabled by default.
+Implement Idempotency-Key handling component, and add it to the UCP cart endpoints.

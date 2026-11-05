@@ -13,7 +13,7 @@ namespace Automattic\WooCommerce\StoreApi\Utilities\Ucp;
  * never read for reporting or analytics: a stored body is a shopper's basket. Rows are
  * deleted outright on expiry, never anonymised.
  */
-class UcpIdempotencyStore {
+class IdempotencyStore {
 	/**
 	 * A request owning the key is still running.
 	 */

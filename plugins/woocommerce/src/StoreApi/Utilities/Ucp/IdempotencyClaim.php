@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\StoreApi\Utilities\Ucp;
  * refused key is answered without loading a session — or hands back the claim the request
  * now owns, which `settle()` stores or releases according to the response.
  */
-final class UcpIdempotencyClaim {
+final class IdempotencyClaim {
 	/**
 	 * Key this request owns.
 	 *
@@ -81,7 +81,7 @@ final class UcpIdempotencyClaim {
 				return null;
 			}
 
-			return UcpUtils::error_response(
+			return Utils::error_response(
 				$capability,
 				'' === $key ? 'IDEMPOTENCY_KEY_REQUIRED' : 'IDEMPOTENCY_KEY_INVALID',
 				'' === $key
@@ -92,9 +92,9 @@ final class UcpIdempotencyClaim {
 			);
 		}
 
-		$fingerprint = UcpRequestFingerprint::compute( $request );
+		$fingerprint = RequestFingerprint::compute( $request );
 
-		$claimed = UcpIdempotencyStore::try_begin( $key, $fingerprint );
+		$claimed = IdempotencyStore::try_begin( $key, $fingerprint );
 
 		if ( true === $claimed ) {
 			return new self( $key );
@@ -106,7 +106,7 @@ final class UcpIdempotencyClaim {
 			return null;
 		}
 
-		$existing = UcpIdempotencyStore::find( $key );
+		$existing = IdempotencyStore::find( $key );
 
 		// The row went away between the two statements, which a refused write does as it releases
 		// its key. It is free again, so the claim is retried rather than reported as held.
@@ -116,8 +116,8 @@ final class UcpIdempotencyClaim {
 
 		// Past retention the record no longer answers for its key, whatever it was used for, so
 		// this request takes the row over. The sweep that would have dropped it runs daily.
-		if ( UcpIdempotencyStore::has_expired( $existing ) ) {
-			if ( UcpIdempotencyStore::try_reclaim_expired( $key, $fingerprint ) ) {
+		if ( IdempotencyStore::has_expired( $existing ) ) {
+			if ( IdempotencyStore::try_reclaim_expired( $key, $fingerprint ) ) {
 				return new self( $key );
 			}
 
@@ -127,7 +127,7 @@ final class UcpIdempotencyClaim {
 		}
 
 		if ( (string) $existing['request_fingerprint'] !== $fingerprint ) {
-			return UcpUtils::error_response(
+			return Utils::error_response(
 				$capability,
 				'IDEMPOTENCY_KEY_REUSED',
 				__( 'The Idempotency-Key was already used for a different request.', 'woocommerce' ),
@@ -136,10 +136,10 @@ final class UcpIdempotencyClaim {
 			);
 		}
 
-		if ( UcpIdempotencyStore::STATE_COMPLETED !== (string) $existing['state'] ) {
+		if ( IdempotencyStore::STATE_COMPLETED !== (string) $existing['state'] ) {
 			// A claim past the orphan window belonged to a process that died, so it may be taken
 			// over rather than waiting for the sweep. Only one of several callers wins.
-			if ( UcpIdempotencyStore::try_take_over_stale( $key, UcpIdempotencyStore::STALE_CLAIM_SECONDS ) ) {
+			if ( IdempotencyStore::try_take_over_stale( $key, IdempotencyStore::STALE_CLAIM_SECONDS ) ) {
 				return new self( $key );
 			}
 
@@ -159,7 +159,7 @@ final class UcpIdempotencyClaim {
 	 * @return \WP_REST_Response|self
 	 */
 	private static function claim_again( string $key, string $fingerprint, string $capability ) {
-		return true === UcpIdempotencyStore::try_begin( $key, $fingerprint ) ? new self( $key ) : self::in_flight( $capability );
+		return true === IdempotencyStore::try_begin( $key, $fingerprint ) ? new self( $key ) : self::in_flight( $capability );
 	}
 
 	/**
@@ -170,13 +170,13 @@ final class UcpIdempotencyClaim {
 	 */
 	public function settle( \WP_REST_Response $response ): \WP_REST_Response {
 		if ( self::is_replayable( $response ) ) {
-			UcpIdempotencyStore::finalize( $this->key, $response->get_status(), $response->get_data() );
+			IdempotencyStore::finalize( $this->key, $response->get_status(), $response->get_data() );
 
 			return $response;
 		}
 
 		// A failed request is released.
-		UcpIdempotencyStore::delete( $this->key );
+		IdempotencyStore::delete( $this->key );
 
 		return $response;
 	}
@@ -230,7 +230,7 @@ final class UcpIdempotencyClaim {
 	 * @return \WP_REST_Response
 	 */
 	private static function in_flight( string $capability ): \WP_REST_Response {
-		return UcpUtils::error_response(
+		return Utils::error_response(
 			$capability,
 			'IDEMPOTENCY_CONFLICT',
 			__( 'A request with this Idempotency-Key is still being processed.', 'woocommerce' ),

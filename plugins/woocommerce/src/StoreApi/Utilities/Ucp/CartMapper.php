@@ -13,7 +13,7 @@ use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
  * storefront. Stateless; the catalog's {@see \Automattic\WooCommerce\Internal\ProductFeed\Mapping\UcpProductMapper}
  * is the same idea for products.
  */
-class UcpCartMapper {
+class CartMapper {
 	/**
 	 * Build the UCP cart payload.
 	 *
@@ -170,7 +170,7 @@ class UcpCartMapper {
 		foreach ( $errors as $error ) {
 			$messages[] = array(
 				'type'         => 'warning',
-				'code'         => UcpUtils::cart_error_code( (string) ( $error['code'] ?? '' ) ),
+				'code'         => Utils::cart_error_code( (string) ( $error['code'] ?? '' ) ),
 				'content'      => (string) ( $error['message'] ?? '' ),
 				'severity'     => 'recoverable',
 				'path'         => '$.line_items',

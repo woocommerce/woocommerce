@@ -12,7 +12,7 @@ use Automattic\WooCommerce\Internal\Utilities\ArrayUtil;
  * comes from the decoded JSON with keys sorted, not the raw string, so the whitespace and key
  * order a proxy changes when it re-serialises cannot make a genuine retry look like a new request.
  */
-class UcpRequestFingerprint {
+class RequestFingerprint {
 	/**
 	 * Fingerprint a request.
 	 *

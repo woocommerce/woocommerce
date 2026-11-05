@@ -2029,7 +2029,7 @@ apply_filters( 'woocommerce_ucp_idempotency_enabled', bool $enabled )
 
 ### Source
 
-- [StoreApi/Utilities/Ucp/UcpIdempotencyClaim.php](../../../../../../src/StoreApi/Utilities/Ucp/UcpIdempotencyClaim.php)
+- [StoreApi/Utilities/Ucp/IdempotencyClaim.php](../../../../../../src/StoreApi/Utilities/Ucp/IdempotencyClaim.php)
 
 ---
 
@@ -2054,7 +2054,7 @@ How long a retry carrying the same key is answered from storage. One hour by def
 
 ### Source
 
-- [StoreApi/Utilities/Ucp/UcpIdempotencyStore.php](../../../../../../src/StoreApi/Utilities/Ucp/UcpIdempotencyStore.php)
+- [StoreApi/Utilities/Ucp/IdempotencyStore.php](../../../../../../src/StoreApi/Utilities/Ucp/IdempotencyStore.php)
 
 ---
 
@@ -2079,7 +2079,7 @@ True, the default, matches the UCP OpenAPI document, which declares the header r
 
 ### Source
 
-- [StoreApi/Utilities/Ucp/UcpIdempotencyClaim.php](../../../../../../src/StoreApi/Utilities/Ucp/UcpIdempotencyClaim.php)
+- [StoreApi/Utilities/Ucp/IdempotencyClaim.php](../../../../../../src/StoreApi/Utilities/Ucp/IdempotencyClaim.php)
 
 ---
 

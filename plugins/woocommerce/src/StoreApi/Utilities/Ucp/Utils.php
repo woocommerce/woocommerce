@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
 /**
  * Shared helpers for the UCP (Universal Commerce Protocol) routes.
  */
-class UcpUtils {
+class Utils {
 	/**
 	 * UCP specification version these routes implement.
 	 */

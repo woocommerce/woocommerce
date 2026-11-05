@@ -8,8 +8,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
 use Automattic\WooCommerce\StoreApi\Routes\V1\Ucp\AbstractCartRoute;
-use Automattic\WooCommerce\StoreApi\Utilities\Ucp\UcpIdempotencyStore;
-use Automattic\WooCommerce\StoreApi\Utilities\Ucp\UcpRequestFingerprint;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\IdempotencyStore;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\RequestFingerprint;
 
 /**
  * Tests for `Idempotency-Key` handling on the /wc/ucp/v1/carts writes.
@@ -225,7 +225,7 @@ class UcpIdempotency extends ControllerTestCase {
 		$wpdb->query(
 			$wpdb->prepare(
 				"UPDATE {$wpdb->prefix}wc_ucp_idempotency_keys SET completed_at = %s WHERE idempotency_key = %s",
-				gmdate( 'Y-m-d H:i:s', time() - ( UcpIdempotencyStore::retention_seconds() + 60 ) ),
+				gmdate( 'Y-m-d H:i:s', time() - ( IdempotencyStore::retention_seconds() + 60 ) ),
 				$key
 			)
 		);
@@ -263,7 +263,7 @@ class UcpIdempotency extends ControllerTestCase {
 		$request->set_body( wp_json_encode( $body ) );
 
 		// Stand in for a request that claimed the key and has not answered yet.
-		$this->assertTrue( UcpIdempotencyStore::try_begin( $key, UcpRequestFingerprint::compute( $request ) ) );
+		$this->assertTrue( IdempotencyStore::try_begin( $key, RequestFingerprint::compute( $request ) ) );
 
 		$response = $this->request( 'POST', '/carts', $body, $key );
 
@@ -280,7 +280,7 @@ class UcpIdempotency extends ControllerTestCase {
 
 		$this->assertSame( 400, $response->get_status() );
 		$this->assertSame( 0, $this->stored_record_count() );
-		$this->assertNull( UcpIdempotencyStore::find( $key ) );
+		$this->assertNull( IdempotencyStore::find( $key ) );
 	}
 
 	/**
@@ -361,10 +361,10 @@ class UcpIdempotency extends ControllerTestCase {
 		$orphaned = wp_generate_uuid4();
 		$finished = wp_generate_uuid4();
 
-		UcpIdempotencyStore::try_begin( $fresh, str_repeat( 'a', 64 ) );
-		UcpIdempotencyStore::try_begin( $orphaned, str_repeat( 'b', 64 ) );
-		UcpIdempotencyStore::try_begin( $finished, str_repeat( 'c', 64 ) );
-		UcpIdempotencyStore::finalize( $finished, 200, array( 'ok' => true ) );
+		IdempotencyStore::try_begin( $fresh, str_repeat( 'a', 64 ) );
+		IdempotencyStore::try_begin( $orphaned, str_repeat( 'b', 64 ) );
+		IdempotencyStore::try_begin( $finished, str_repeat( 'c', 64 ) );
+		IdempotencyStore::finalize( $finished, 200, array( 'ok' => true ) );
 
 		$stale = gmdate( 'Y-m-d H:i:s', time() - ( 2 * DAY_IN_SECONDS ) );
 
@@ -386,11 +386,11 @@ class UcpIdempotency extends ControllerTestCase {
 			)
 		);
 
-		UcpIdempotencyStore::cleanup();
+		IdempotencyStore::cleanup();
 
-		$this->assertNotNull( UcpIdempotencyStore::find( $fresh ) );
-		$this->assertNull( UcpIdempotencyStore::find( $orphaned ) );
-		$this->assertNull( UcpIdempotencyStore::find( $finished ) );
+		$this->assertNotNull( IdempotencyStore::find( $fresh ) );
+		$this->assertNull( IdempotencyStore::find( $orphaned ) );
+		$this->assertNull( IdempotencyStore::find( $finished ) );
 	}
 
 	/**
@@ -400,9 +400,9 @@ class UcpIdempotency extends ControllerTestCase {
 		$key         = wp_generate_uuid4();
 		$fingerprint = str_repeat( 'd', 64 );
 
-		$this->assertTrue( UcpIdempotencyStore::try_begin( $key, $fingerprint ) );
-		$this->assertFalse( UcpIdempotencyStore::try_begin( $key, $fingerprint ) );
-		$this->assertSame( UcpIdempotencyStore::STATE_IN_PROGRESS, UcpIdempotencyStore::find( $key )['state'] );
+		$this->assertTrue( IdempotencyStore::try_begin( $key, $fingerprint ) );
+		$this->assertFalse( IdempotencyStore::try_begin( $key, $fingerprint ) );
+		$this->assertSame( IdempotencyStore::STATE_IN_PROGRESS, IdempotencyStore::find( $key )['state'] );
 	}
 
 	/**
@@ -411,12 +411,12 @@ class UcpIdempotency extends ControllerTestCase {
 	public function test_a_stored_response_keeps_its_status(): void {
 		$key = wp_generate_uuid4();
 
-		UcpIdempotencyStore::try_begin( $key, str_repeat( 'e', 64 ) );
-		UcpIdempotencyStore::finalize( $key, 201, array( 'id' => 'cart-1' ) );
+		IdempotencyStore::try_begin( $key, str_repeat( 'e', 64 ) );
+		IdempotencyStore::finalize( $key, 201, array( 'id' => 'cart-1' ) );
 
-		$record = UcpIdempotencyStore::find( $key );
+		$record = IdempotencyStore::find( $key );
 
-		$this->assertSame( UcpIdempotencyStore::STATE_COMPLETED, $record['state'] );
+		$this->assertSame( IdempotencyStore::STATE_COMPLETED, $record['state'] );
 		$this->assertSame( 201, (int) $record['response_status'] );
 		$this->assertSame( array( 'id' => 'cart-1' ), json_decode( $record['response_body'], true ) );
 	}
@@ -434,7 +434,7 @@ class UcpIdempotency extends ControllerTestCase {
 		$two->set_header( 'content-type', 'application/json' );
 		$two->set_body( '{ "line_items" : [ { "quantity" : 2, "item" : { "id" : "1" } } ] , "currency" : "USD" }' );
 
-		$this->assertSame( UcpRequestFingerprint::compute( $one ), UcpRequestFingerprint::compute( $two ) );
+		$this->assertSame( RequestFingerprint::compute( $one ), RequestFingerprint::compute( $two ) );
 	}
 
 	/**
@@ -457,11 +457,11 @@ class UcpIdempotency extends ControllerTestCase {
 		$other_method->set_header( 'content-type', 'application/json' );
 		$other_method->set_body( '{"quantity":1}' );
 
-		$fingerprint = UcpRequestFingerprint::compute( $base );
+		$fingerprint = RequestFingerprint::compute( $base );
 
-		$this->assertNotSame( $fingerprint, UcpRequestFingerprint::compute( $other_payload ) );
-		$this->assertNotSame( $fingerprint, UcpRequestFingerprint::compute( $other_route ) );
-		$this->assertNotSame( $fingerprint, UcpRequestFingerprint::compute( $other_method ) );
+		$this->assertNotSame( $fingerprint, RequestFingerprint::compute( $other_payload ) );
+		$this->assertNotSame( $fingerprint, RequestFingerprint::compute( $other_route ) );
+		$this->assertNotSame( $fingerprint, RequestFingerprint::compute( $other_method ) );
 	}
 
 	/**
@@ -476,7 +476,7 @@ class UcpIdempotency extends ControllerTestCase {
 		$two->set_header( 'content-type', 'application/json' );
 		$two->set_body( '{"line_items":[{"item":{"id":"2"}},{"item":{"id":"1"}}]}' );
 
-		$this->assertNotSame( UcpRequestFingerprint::compute( $one ), UcpRequestFingerprint::compute( $two ) );
+		$this->assertNotSame( RequestFingerprint::compute( $one ), RequestFingerprint::compute( $two ) );
 	}
 
 	/**
@@ -547,14 +547,14 @@ class UcpIdempotency extends ControllerTestCase {
 		$request->set_header( 'content-type', 'application/json' );
 		$request->set_body( wp_json_encode( $body ) );
 
-		$this->assertTrue( UcpIdempotencyStore::try_begin( $key, UcpRequestFingerprint::compute( $request ) ) );
+		$this->assertTrue( IdempotencyStore::try_begin( $key, RequestFingerprint::compute( $request ) ) );
 
 		// Age the claim past the orphan window, as a process that died would leave it.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Ageing a row the test just created.
 		$wpdb->query(
 			$wpdb->prepare(
 				"UPDATE {$wpdb->prefix}wc_ucp_idempotency_keys SET created_at = %s WHERE idempotency_key = %s",
-				gmdate( 'Y-m-d H:i:s', time() - ( UcpIdempotencyStore::STALE_CLAIM_SECONDS + 60 ) ),
+				gmdate( 'Y-m-d H:i:s', time() - ( IdempotencyStore::STALE_CLAIM_SECONDS + 60 ) ),
 				$key
 			)
 		);
@@ -562,7 +562,7 @@ class UcpIdempotency extends ControllerTestCase {
 		$response = $this->request( 'POST', '/carts', $body, $key );
 
 		$this->assertSame( 200, $response->get_status() );
-		$this->assertSame( UcpIdempotencyStore::STATE_COMPLETED, UcpIdempotencyStore::find( $key )['state'] );
+		$this->assertSame( IdempotencyStore::STATE_COMPLETED, IdempotencyStore::find( $key )['state'] );
 	}
 
 	/**
@@ -576,7 +576,7 @@ class UcpIdempotency extends ControllerTestCase {
 		$request->set_header( 'content-type', 'application/json' );
 		$request->set_body( wp_json_encode( $body ) );
 
-		UcpIdempotencyStore::try_begin( $key, UcpRequestFingerprint::compute( $request ) );
+		IdempotencyStore::try_begin( $key, RequestFingerprint::compute( $request ) );
 
 		$response = $this->request( 'POST', '/carts', $body, $key );
 
@@ -596,9 +596,9 @@ class UcpIdempotency extends ControllerTestCase {
 		$running  = wp_generate_uuid4();
 		$finished = wp_generate_uuid4();
 
-		UcpIdempotencyStore::try_begin( $running, str_repeat( 'a', 64 ) );
-		UcpIdempotencyStore::try_begin( $finished, str_repeat( 'b', 64 ) );
-		UcpIdempotencyStore::finalize( $finished, 200, array( 'ok' => true ) );
+		IdempotencyStore::try_begin( $running, str_repeat( 'a', 64 ) );
+		IdempotencyStore::try_begin( $finished, str_repeat( 'b', 64 ) );
+		IdempotencyStore::finalize( $finished, 200, array( 'ok' => true ) );
 
 		// Older than the one-second window the filter sets, so the completed record is due
 		// for deletion while the claim beside it is seconds old.
@@ -611,10 +611,10 @@ class UcpIdempotency extends ControllerTestCase {
 			)
 		);
 
-		UcpIdempotencyStore::cleanup();
+		IdempotencyStore::cleanup();
 
-		$this->assertNotNull( UcpIdempotencyStore::find( $running ), 'A running claim must survive a shortened retention window.' );
-		$this->assertNull( UcpIdempotencyStore::find( $finished ) );
+		$this->assertNotNull( IdempotencyStore::find( $running ), 'A running claim must survive a shortened retention window.' );
+		$this->assertNull( IdempotencyStore::find( $finished ) );
 	}
 
 	/**
@@ -631,7 +631,7 @@ class UcpIdempotency extends ControllerTestCase {
 		$response = $this->request( 'POST', '/carts', $body, $key );
 
 		$this->assertGreaterThanOrEqual( 500, $response->get_status() );
-		$this->assertNull( UcpIdempotencyStore::find( $key ) );
+		$this->assertNull( IdempotencyStore::find( $key ) );
 
 		remove_action( 'woocommerce_add_to_cart', $fail );
 
