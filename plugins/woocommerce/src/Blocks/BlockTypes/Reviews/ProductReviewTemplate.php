@@ -72,6 +72,11 @@ class ProductReviewTemplate extends AbstractBlock {
 
 			$children = $comment->get_children();
 
+			// Keep reply threads in conversation order (oldest first) when the top-level query is descending.
+			if ( ! empty( $children ) && 'desc' === strtolower( (string) get_option( 'comment_order' ) ) ) {
+				$children = array_reverse( $children );
+			}
+
 			/*
 			* We need to create the CSS classes BEFORE recursing into the children.
 			* This is because comment_class() uses globals like `$comment_alt`
@@ -126,6 +131,11 @@ class ProductReviewTemplate extends AbstractBlock {
 		// Fetch reviews in the configured sort order so pagination reflects the overall order
 		// instead of reversing each page individually.
 		$comment_vars['order'] = ( 'desc' === $comment_order ) ? 'DESC' : 'ASC';
+
+		// Core's helper pages as if the query were ASC. With DESC, the default "newest" page is page 1.
+		if ( 'DESC' === $comment_vars['order'] && ! get_query_var( 'cpage' ) ) {
+			$comment_vars['paged'] = 1;
+		}
 
 		$comment_query = new WP_Comment_Query( $comment_vars );
 

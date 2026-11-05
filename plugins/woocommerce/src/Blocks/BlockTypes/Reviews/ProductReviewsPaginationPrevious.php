@@ -31,15 +31,28 @@ class ProductReviewsPaginationPrevious extends AbstractBlock {
 			$label = $pagination_arrow . $label;
 		}
 
+		$comment_vars  = build_comment_query_vars_from_block( $block );
+		$comment_order = strtolower( (string) get_option( 'comment_order' ) );
+
+		// With DESC ordering the default page is 1 (newest), so "Older" advances to higher pages.
+		if ( 'desc' === $comment_order && ! get_query_var( 'cpage' ) ) {
+			$comment_vars['paged'] = 1;
+		}
+
 		$filter_link_attributes = static function () {
 			return get_block_wrapper_attributes();
 		};
-		add_filter( 'previous_comments_link_attributes', $filter_link_attributes );
 
-		$comment_vars           = build_comment_query_vars_from_block( $block );
-		$previous_comments_link = get_previous_comments_link( $label, $comment_vars['paged'] ?? null );
-
-		remove_filter( 'previous_comments_link_attributes', $filter_link_attributes );
+		if ( 'desc' === $comment_order ) {
+			add_filter( 'next_comments_link_attributes', $filter_link_attributes );
+			$max_page               = ( new \WP_Comment_Query( $comment_vars ) )->max_num_pages;
+			$previous_comments_link = get_next_comments_link( $label, $max_page, $comment_vars['paged'] ?? null );
+			remove_filter( 'next_comments_link_attributes', $filter_link_attributes );
+		} else {
+			add_filter( 'previous_comments_link_attributes', $filter_link_attributes );
+			$previous_comments_link = get_previous_comments_link( $label, $comment_vars['paged'] ?? null );
+			remove_filter( 'previous_comments_link_attributes', $filter_link_attributes );
+		}
 
 		if ( ! isset( $previous_comments_link ) ) {
 			return '';

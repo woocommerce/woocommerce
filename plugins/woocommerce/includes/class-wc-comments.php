@@ -103,11 +103,16 @@ class WC_Comments {
 	 * @return array
 	 */
 	public static function order_product_reviews_query_args( $comment_args ) {
-		if ( ! is_singular( 'product' ) ) {
+		if ( ! is_singular( 'product' ) || empty( $comment_args['post_id'] ) || 'product' !== get_post_type( $comment_args['post_id'] ) ) {
 			return $comment_args;
 		}
 
 		$comment_args['order'] = ( 'desc' === strtolower( (string) get_option( 'comment_order' ) ) ) ? 'DESC' : 'ASC';
+
+		// Core computes the offset for the default newest page using ASC order. Start descending lists at offset 0.
+		if ( 'DESC' === $comment_args['order'] && ! get_query_var( 'cpage' ) ) {
+			$comment_args['offset'] = 0;
+		}
 
 		return $comment_args;
 	}
@@ -117,6 +122,7 @@ class WC_Comments {
 	 *
 	 * Because the comments_template_query_args filter fetches reviews in the final display order, the per-page
 	 * reversal that wp_list_comments() performs when comment_order=desc would otherwise break overall pagination.
+	 * Reply threads stay oldest-first (conversation order) by reversing children when the query is descending.
 	 *
 	 * @since 11.4.0
 	 * @param array $args Arguments passed to wp_list_comments() for product reviews.
@@ -124,7 +130,7 @@ class WC_Comments {
 	 */
 	public static function order_product_reviews_list_args( $args ) {
 		$args['reverse_top_level'] = false;
-		$args['reverse_children']  = false;
+		$args['reverse_children']  = ( 'desc' === strtolower( (string) get_option( 'comment_order' ) ) );
 
 		return $args;
 	}
