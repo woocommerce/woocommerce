@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\ImportExport\Product;
 
 use Automattic\WooCommerce\Internal\Admin\ImportExport\Product\ProductImportLock;
-use Automattic\WooCommerce\Internal\Admin\ImportExport\Product\ProductImportPlaceholderCleanup;
+use Automattic\WooCommerce\Internal\Admin\ImportExport\Product\ImportPlaceholders;
 use Automattic\WooCommerce\Internal\Admin\ImportExport\ImportLockedException;
 use Automattic\WooCommerce\Internal\Admin\ImportExport\Product\ProductImporter;
 use Automattic\WooCommerce\Internal\Admin\ImportExport\Product\MappingResolver;
@@ -50,7 +50,7 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 		$this->import_lock = new ProductImportLock();
 
 		$this->sut = new ProductImporter();
-		$this->sut->init( new MappingResolver(), $this->import_lock, new ProductImportPlaceholderCleanup() );
+		$this->sut->init( new MappingResolver(), $this->import_lock, new ImportPlaceholders() );
 	}
 
 	/**
@@ -118,7 +118,7 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 	 * @testdox Should refresh the lock before a row once the refresh interval has passed.
 	 */
 	public function test_run_refreshes_the_lock_during_a_batch_when_due(): void {
-		$age = $this->get_lock_age_seen_by_first_row( MINUTE_IN_SECONDS );
+		$age = $this->get_lock_age_seen_by_first_row( 5 * MINUTE_IN_SECONDS );
 
 		$this->assertLessThan( MINUTE_IN_SECONDS, $age );
 	}
@@ -127,9 +127,9 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 	 * @testdox Should not write the lock before a row while the last refresh is recent.
 	 */
 	public function test_run_does_not_refresh_the_lock_before_the_interval_has_passed(): void {
-		$age = $this->get_lock_age_seen_by_first_row( 0 );
+		$age = $this->get_lock_age_seen_by_first_row( 30 );
 
-		$this->assertGreaterThanOrEqual( 5 * MINUTE_IN_SECONDS, $age );
+		$this->assertGreaterThanOrEqual( 30, $age );
 	}
 
 	/**
@@ -193,7 +193,7 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 		$this->assertNotSame( 0, $child_id, 'The variation should have been created' );
 		$this->assertSame( 'publish', get_post_status( $parent_id ), 'The placeholder parent should have been turned into a published product' );
 		$this->assertSame( $parent_id, wp_get_post_parent_id( $child_id ), "The variation's parent should be the resolved parent product" );
-		$this->assertSame( 0, ( new ProductImportPlaceholderCleanup() )->count_pending_placeholders(), 'No placeholder products should remain once cleanup has run' );
+		$this->assertSame( 0, ( new ImportPlaceholders() )->count_pending_placeholders(), 'No placeholder products should remain once cleanup has run' );
 	}
 
 	/**
@@ -295,27 +295,23 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Import one row with the lock aged 5 minutes, and report the lock's age right after the importer's own callback runs.
+	 * Import one row with the lock aged as given, and report the lock's age right after the importer's own callback runs.
 	 *
-	 * @param int $seconds_since_refresh How long ago the run should believe it last refreshed the lock.
+	 * @param int $lock_age How long ago the lock should appear to have been refreshed, in seconds.
 	 *
 	 * @return int The lock's age in seconds, as seen while the row is being imported.
 	 */
-	private function get_lock_age_seen_by_first_row( int $seconds_since_refresh ): int {
+	private function get_lock_age_seen_by_first_row( int $lock_age ): int {
 		global $wpdb;
 
 		$hook = 'woocommerce_product_import_before_import';
 		$age  = -1;
 
-		$last_refresh = new \ReflectionProperty( ProductImporter::class, 'last_lock_refresh' );
-		$last_refresh->setAccessible( true );
-
-		$arrange = function () use ( $wpdb, $last_refresh, $seconds_since_refresh ): void {
-			$last_refresh->setValue( $this->sut, time() - $seconds_since_refresh );
+		$arrange = function () use ( $wpdb, $lock_age ): void {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->update(
 				$wpdb->options,
-				array( 'option_value' => ( time() - 5 * MINUTE_IN_SECONDS ) . ':' . ProductImportLock::HOLDER_CLI ),
+				array( 'option_value' => ( time() - $lock_age ) . ':' . ProductImportLock::HOLDER_CLI ),
 				array( 'option_name' => 'wc_product_importing' )
 			);
 		};
