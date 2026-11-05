@@ -243,11 +243,10 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 	 *
 	 * @since 11.4.0
 	 *
-	 * @param mixed $input The input parameters.
+	 * @param array $input The input parameters.
 	 * @return array|\WP_Error
 	 */
-	public static function execute( $input = null ) {
-		$input       = is_array( $input ) ? $input : array();
+	public static function execute( array $input = array() ) {
 		$status      = $input['status'] ?? 'approved';
 		$product_ids = array_values( array_unique( $input['product_ids'] ?? array() ) );
 		if ( ( $input['min_rating'] ?? 1 ) > ( $input['max_rating'] ?? 5 ) ) {
@@ -260,23 +259,27 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 		);
 
 		$filters           = $scope;
-		$filters['search'] = trim( (string) ( $input['search'] ?? '' ) );
+		$filters['search'] = trim( $input['search'] ?? '' );
 
 		if ( isset( $input['min_rating'] ) || isset( $input['max_rating'] ) ) {
-			$filters['min_rating'] = (int) ( $input['min_rating'] ?? 1 );
-			$filters['max_rating'] = (int) ( $input['max_rating'] ?? 5 );
+			$filters['min_rating'] = $input['min_rating'] ?? 1;
+			$filters['max_rating'] = $input['max_rating'] ?? 5;
 		}
 
 		$filters['include'] = $input['include'] ?? array();
-		$page               = (int) ( $input['page'] ?? 1 );
-		$per_page           = (int) ( $input['per_page'] ?? self::DEFAULT_LIMIT );
+		$page               = $input['page'] ?? 1;
+		$per_page           = $input['per_page'] ?? self::DEFAULT_LIMIT;
 		$matches            = self::query_reviews( $filters, $page, $per_page );
 		$total              = (int) $matches->found_comments;
 		$reviews            = array();
 		foreach ( $matches->comments as $comment ) {
 			$comment = get_comment( $comment );
 			if ( $comment ) {
-				$reviews[] = self::format_review( $comment, $scope );
+				$review = self::format_review( $comment, $scope );
+				if ( is_wp_error( $review ) ) {
+					return $review;
+				}
+				$reviews[] = $review;
 			}
 		}
 		$ratings    = self::get_rating_summary( $scope, $total );
@@ -391,9 +394,9 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 	 *
 	 * @param \WP_Comment $comment Review object.
 	 * @param array       $scope Product and status scope.
-	 * @return array
+	 * @return array|\WP_Error
 	 */
-	private static function format_review( \WP_Comment $comment, array $scope ): array {
+	private static function format_review( \WP_Comment $comment, array $scope ) {
 		$review = array(
 			'id'           => (int) $comment->comment_ID,
 			'date_created' => self::format_date( $comment->comment_date_gmt ),

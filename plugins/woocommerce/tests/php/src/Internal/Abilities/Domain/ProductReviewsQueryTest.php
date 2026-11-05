@@ -236,9 +236,14 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should expose review extension schema and WP_Comment fields only while the feature is enabled.
+	 * @testdox Should expose valid extension fields and propagate extension failures only while the feature is enabled.
+	 * @testWith ["valid", ""]
+	 *           ["invalid", "woocommerce_ability_field_output_invalid"]
+	 *           ["throws", "woocommerce_ability_extension_failed"]
+	 * @param string $behavior Extension callback behavior.
+	 * @param string $error_code Expected error for a failing callback.
 	 */
-	public function test_extension_fields(): void {
+	public function test_extension_fields( string $behavior, string $error_code ): void {
 		$saved = array();
 		foreach ( array( 'resources', 'fields' ) as $name ) {
 			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
@@ -260,15 +265,18 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 			do_action( 'woocommerce_extensible_abilities_resources_init' );
 			add_action(
 				'woocommerce_extensible_abilities_init',
-				static function () {
+				static function () use ( $behavior ) {
 					ExtensibleAbilities::register_field(
 						array(
 							'resource'      => 'product_review',
 							'namespace'     => 'test-ext',
 							'field'         => 'review_id',
 							'output_schema' => array( 'type' => 'integer' ),
-							'get_callback'  => static function ( \WP_Comment $comment ) {
-								return (int) $comment->comment_ID;
+							'get_callback'  => static function ( \WP_Comment $comment ) use ( $behavior ) {
+								if ( 'throws' === $behavior ) {
+									throw new \RuntimeException( 'Private extension failure details' );
+								}
+								return 'invalid' === $behavior ? 'not an integer' : (int) $comment->comment_ID;
 							},
 						)
 					);
@@ -276,7 +284,17 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 			);
 			do_action( 'woocommerce_extensible_abilities_init' );
 			$ability = new \WP_Ability( ProductReviewsQuery::get_name(), ProductReviewsQuery::get_registration_args() );
-			$result  = $ability->execute( $input );
+			if ( $error_code ) {
+				$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+			}
+			$result = $ability->execute( $input );
+			if ( $error_code ) {
+				$this->assertWPError( $result );
+				$this->assertSame( $error_code, $result->get_error_code() );
+				$this->assertSame( 500, rest_convert_error_to_response( $result )->get_status() );
+				$this->assertStringNotContainsString( 'Private extension failure details', $result->get_error_message() );
+				return;
+			}
 			$this->assertIsArray( $result );
 			$this->assertCount( 2, $result['reviews'] );
 			foreach ( $result['reviews'] as $review ) {

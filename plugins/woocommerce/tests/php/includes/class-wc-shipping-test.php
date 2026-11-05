@@ -13,6 +13,11 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * @var array The customer shipping address before the test.
+	 */
+	private $previous_shipping_address = array();
+
+	/**
 	 * Set up test
 	 *
 	 * @return void
@@ -22,12 +27,19 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 		$this->sut = new WC_Shipping();
 
 		update_option( 'woocommerce_shipping_debug_mode', 'yes' );
+
+		// Tests set the shipping address on WC()->customer, which outlives a test.
+		$this->previous_shipping_address = WC()->customer->get_shipping( 'edit' );
 	}
 
 	/**
 	 * Restore options.
 	 */
 	public function tearDown(): void {
+		foreach ( $this->previous_shipping_address as $key => $value ) {
+			WC()->customer->{"set_shipping_{$key}"}( $value );
+		}
+
 		parent::tearDown();
 
 		update_option( 'woocommerce_shipping_debug_mode', 'no' );
@@ -318,6 +330,68 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox a new customer tax address invalidates cached shipping rates for the same package only while taxes are enabled
+	 *
+	 * @testWith ["yes", 2]
+	 *           ["no", 1]
+	 *
+	 * @param string $calc_taxes             Value of the woocommerce_calc_taxes option.
+	 * @param int    $expected_calculations  Number of rate calculations for the two tax addresses.
+	 */
+	public function test_calculate_shipping_for_package_invalidates_cache_for_new_tax_address( string $calc_taxes, int $expected_calculations ) {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+		update_option( 'woocommerce_calc_taxes', $calc_taxes );
+		WC()->session->__unset( 'shipping_for_package_0' );
+
+		$filter_calls = 0;
+		$filter       = $this->get_package_rates_counter( $filter_calls );
+		$package      = $this->get_package_hash_test_package();
+
+		add_filter( 'woocommerce_package_rates', $filter, 10 );
+
+		$this->set_customer_tax_location( 'US', 'CA' );
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$this->set_customer_tax_location( 'GB', '' );
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$this->assertSame( $expected_calculations, $filter_calls );
+
+		remove_filter( 'woocommerce_package_rates', $filter, 10 );
+	}
+
+	/**
+	 * @testdox extensions can ignore the customer tax address for the shipping-rate cache hash
+	 */
+	public function test_calculate_shipping_for_package_allows_extensions_to_ignore_tax_address() {
+		update_option( 'woocommerce_shipping_debug_mode', 'no' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		WC()->session->__unset( 'shipping_for_package_0' );
+
+		$filter_calls          = 0;
+		$filter                = $this->get_package_rates_counter( $filter_calls );
+		$ignored_fields_filter = function ( array $ignored_fields ): array {
+			$ignored_fields[] = 'tax_location';
+			return $ignored_fields;
+		};
+		$package               = $this->get_package_hash_test_package();
+
+		add_filter( 'woocommerce_package_rates', $filter, 10 );
+		add_filter( 'woocommerce_shipping_package_hash_ignored_fields', $ignored_fields_filter );
+
+		$this->set_customer_tax_location( 'US', 'CA' );
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$this->set_customer_tax_location( 'GB', '' );
+		$this->sut->calculate_shipping_for_package( $package );
+
+		$this->assertSame( 1, $filter_calls );
+
+		remove_filter( 'woocommerce_shipping_package_hash_ignored_fields', $ignored_fields_filter );
+		remove_filter( 'woocommerce_package_rates', $filter, 10 );
+	}
+
+	/**
 	 * Data provider for test_package_rates_filter_error_handling.
 	 *
 	 * @return array[]
@@ -398,6 +472,17 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 				},
 			),
 		);
+	}
+
+	/**
+	 * Give the customer a shipping address that taxes apply to.
+	 *
+	 * @param string $country Country code.
+	 * @param string $state   State code.
+	 */
+	private function set_customer_tax_location( string $country, string $state ): void {
+		update_option( 'woocommerce_tax_based_on', 'shipping' );
+		WC()->customer->set_shipping_location( $country, $state, '00000', 'Test City' );
 	}
 
 	/**
