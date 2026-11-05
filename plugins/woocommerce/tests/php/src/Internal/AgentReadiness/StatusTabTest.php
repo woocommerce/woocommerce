@@ -67,7 +67,7 @@ class StatusTabTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox While a scan waits, the button is disabled and the tab says so; once it stalls, the button comes back with a warning.
+	 * @testdox While a scan waits, the button is disabled and the tab says so; once it stalls, the button stays disabled and the tab says scheduled actions aren't running.
 	 */
 	public function test_render_pending_and_stalled(): void {
 		delete_option( AgentReadiness::REPORT_OPTION );
@@ -84,8 +84,8 @@ class StatusTabTest extends WC_Unit_Test_Case {
 		as_schedule_single_action( time() - ScheduledScan::STALLED_AFTER - 60, ScheduledScan::RUN_NOW_HOOK, array(), ScheduledScan::GROUP );
 
 		$html = $this->render();
-		$this->assertStringContainsString( 'The background check has not started', $html );
-		$this->assertDoesNotMatchRegularExpression( '/name="wc_agent_readiness_run"[^>]*disabled/', $html );
+		$this->assertStringContainsString( 'The check has not started because scheduled actions', $html );
+		$this->assertMatchesRegularExpression( '/name="wc_agent_readiness_run"[^>]*disabled/', $html );
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 	}
 

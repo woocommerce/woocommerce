@@ -72,18 +72,18 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A scan still waiting past STALLED_AFTER runs in the next request instead of waiting.
+	 * @testdox A scan still waiting past STALLED_AFTER stays queued: a new request neither runs it nor queues another.
 	 */
-	public function test_stalled_scan_runs_now(): void {
-		WC_Helper_Product::create_simple_product();
+	public function test_stalled_scan_stays_queued(): void {
+		delete_option( AgentReadiness::REPORT_OPTION );
 		$this->age_finished_actions();
 		as_schedule_single_action( time() - ScheduledScan::STALLED_AFTER - 60, ScheduledScan::RUN_NOW_HOOK, array(), ScheduledScan::GROUP );
 		$this->assertTrue( $this->sut->is_stalled() );
 
 		$this->sut->queue();
 
-		$this->assertFalse( $this->sut->is_pending() );
-		$this->assertSame( 1, wc_get_container()->get( AgentReadiness::class )->get_cached_report()['products'] );
+		$this->assertNull( wc_get_container()->get( AgentReadiness::class )->get_cached_report(), 'The scan must not run in the request.' );
+		$this->assertCount( 1, $this->pending( ScheduledScan::RUN_NOW_HOOK ) );
 	}
 
 	/**

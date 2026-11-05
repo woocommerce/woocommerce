@@ -98,16 +98,18 @@ class ReadinessRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * The stored report and whether a scan is pending.
+	 * The stored report, whether a scan is pending, and whether it has stalled.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
-	 * @return array{report:array<string,mixed>|null,scan_pending:bool}
+	 * @return array{report:array<string,mixed>|null,scan_pending:bool,scan_stalled:bool}
 	 */
 	protected function get_status( WP_REST_Request $request ): array {
+		$pending = $this->scheduled_scan->is_pending();
 		return array(
 			'report'       => $this->agent_readiness->get_cached_report(),
-			'scan_pending' => $this->scheduled_scan->is_pending(),
+			'scan_pending' => $pending,
+			'scan_stalled' => $pending && $this->scheduled_scan->is_stalled(),
 		);
 	}
 
@@ -140,6 +142,12 @@ class ReadinessRestController extends RestApiControllerBase {
 			),
 			'scan_pending' => array(
 				'description' => __( 'Whether a requested scan has not finished yet.', 'woocommerce' ),
+				'type'        => 'boolean',
+				'context'     => array( 'view' ),
+				'readonly'    => true,
+			),
+			'scan_stalled' => array(
+				'description' => __( 'Whether the requested scan has not started because scheduled actions are not running. It stays queued and runs once they are.', 'woocommerce' ),
 				'type'        => 'boolean',
 				'context'     => array( 'view' ),
 				'readonly'    => true,

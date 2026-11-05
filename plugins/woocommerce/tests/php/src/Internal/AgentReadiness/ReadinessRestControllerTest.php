@@ -48,13 +48,9 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_get_returns_stored_report(): void {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness' ) );
 		$this->assertSame( 200, $response->get_status() );
-		$this->assertSame(
-			array(
-				'report'       => null,
-				'scan_pending' => false,
-			),
-			$response->get_data()
-		);
+		$this->assertNull( $response->get_data()['report'] );
+		$this->assertFalse( $response->get_data()['scan_pending'] );
+		$this->assertFalse( $response->get_data()['scan_stalled'] );
 
 		$report   = wc_get_container()->get( AgentReadiness::class )->refresh_report();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness' ) );
@@ -70,6 +66,24 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 202, $response->get_status() );
 		$this->assertTrue( $response->get_data()['scan_pending'] );
 		$this->assertTrue( as_has_scheduled_action( ScheduledScan::RUN_NOW_HOOK ) );
+		$this->assertFalse( $response->get_data()['scan_stalled'] );
+	}
+
+	/**
+	 * @testdox When the queued scan has stalled, POST leaves it queued and answers with scan_stalled.
+	 */
+	public function test_post_reports_stalled_scan(): void {
+		global $wpdb;
+		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}actionscheduler_actions SET last_attempt_gmt = %s WHERE status = 'complete'", gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) ) );
+		as_schedule_single_action( time() - ScheduledScan::STALLED_AFTER - 60, ScheduledScan::RUN_NOW_HOOK, array(), ScheduledScan::GROUP );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/agent-readiness/scan' ) );
+
+		$this->assertSame( 202, $response->get_status() );
+		$this->assertNull( $response->get_data()['report'], 'The scan must not run in the request.' );
+		$this->assertTrue( $response->get_data()['scan_pending'] );
+		$this->assertTrue( $response->get_data()['scan_stalled'] );
+		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 	}
 
 	/**

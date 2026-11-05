@@ -21,8 +21,10 @@ defined( 'ABSPATH' ) || exit;
  *
  * A requested scan that has not started 10 minutes after it was due, while no
  * other scheduled action has finished either, is taken as stalled (Action
- * Scheduler is not running on the site), and the next request runs the scan
- * in that request instead of waiting on it.
+ * Scheduler is not running on the site). It stays queued: the scan never runs
+ * in a page or REST request, where a large catalog could run out of time or
+ * slow the site. Splitting the product pass into one action per batch is
+ * WOOAI-1661.
  *
  * @since 11.4.0
  */
@@ -72,16 +74,9 @@ class ScheduledScan implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Queue a scan unless one is already waiting or running. When the waiting
-	 * one has stalled, drop it and run the scan now.
+	 * Queue a scan unless one is already waiting or running.
 	 */
 	public function queue(): void {
-		if ( $this->is_stalled() ) {
-			as_unschedule_all_actions( self::RUN_NOW_HOOK, array(), self::GROUP );
-			wc_set_time_limit( 0 );
-			$this->run();
-			return;
-		}
 		if ( ! $this->is_pending() ) {
 			// A single action due now rather than an async one, which has no date to tell a stalled scan by.
 			as_schedule_single_action( time(), self::RUN_NOW_HOOK, array(), self::GROUP );
