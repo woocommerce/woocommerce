@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Count customers who registered on the last day of the date range in the REST API sales report.

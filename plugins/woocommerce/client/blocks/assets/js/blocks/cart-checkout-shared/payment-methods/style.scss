@@ -45,6 +45,15 @@
 		padding-top: $gap-small;
 		padding-bottom: $gap-smaller;
 	}
+
+	// The radio circles turn red while the error shows.
+	.has-error .wc-block-components-radio-control__input {
+		border-color: $alert-red;
+
+		.has-dark-controls & {
+			border-color: color.adjust($alert-red, $lightness: 30%);
+		}
+	}
 }
 
 // Default size and alignment for payment method label images (e.g. gateway

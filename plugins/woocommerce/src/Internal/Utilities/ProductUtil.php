@@ -24,6 +24,24 @@ class ProductUtil {
 	public const OUTOFSTOCK_COUNT_TRANSIENT = 'wc_outofstock_count';
 
 	/**
+	 * Name prefixes of the transients kept for each product, followed by the product ID.
+	 *
+	 * Exposed as a constant so the "Clear transients" tool, which deletes these transients for
+	 * every product, stays in sync with the per-product invalidation below.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @var string[]
+	 */
+	public const PRODUCT_SPECIFIC_TRANSIENT_PREFIXES = array(
+		'wc_product_children_',
+		'wc_var_prices_',
+		'wc_related_',
+		'wc_child_has_weight_',
+		'wc_child_has_dimensions_',
+	);
+
+	/**
 	 * Get a product ID from a product, post, or numeric value.
 	 *
 	 * @since 11.3.0
@@ -131,16 +149,8 @@ class ProductUtil {
 
 		$product_ids = array_unique( array_filter( array_map( 'absint', $product_ids ) ) );
 
-		$product_specific_transient_names = array(
-			'wc_product_children_',
-			'wc_var_prices_',
-			'wc_related_',
-			'wc_child_has_weight_',
-			'wc_child_has_dimensions_',
-		);
-
 		foreach ( $product_ids as $product_id ) {
-			foreach ( $product_specific_transient_names as $transient ) {
+			foreach ( self::PRODUCT_SPECIFIC_TRANSIENT_PREFIXES as $transient ) {
 				delete_transient( $transient . $product_id );
 			}
 		}

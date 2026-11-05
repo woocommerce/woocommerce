@@ -315,6 +315,22 @@ class CartItems extends ControllerTestCase {
 	}
 
 	/**
+	 * Test updating an item with a quantity that is not a number is rejected and leaves the cart unchanged.
+	 */
+	public function test_update_item_rejects_non_numeric_quantity() {
+		$request = new \WP_REST_Request( 'PUT', '/wc/store/v1/cart/items/' . $this->keys[0] );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'quantity' => '1abc',
+			)
+		);
+
+		$this->assertAPIResponse( $request, 400, array( 'code' => 'rest_invalid_param' ) );
+		$this->assertSame( 2, wc()->cart->get_cart_item( $this->keys[0] )['quantity'] );
+	}
+
+	/**
 	 * Test delete item.
 	 */
 	public function test_delete_item() {
@@ -379,6 +395,27 @@ class CartItems extends ControllerTestCase {
 		$this->assertArrayHasKey( 'show_backorder_badge', $data );
 		$this->assertArrayHasKey( 'short_description', $data );
 		$this->assertArrayHasKey( 'catalog_visibility', $data );
+	}
+
+	/**
+	 * @testdox Cart item prices do not expose a sale price before the scheduled sale starts.
+	 */
+	public function test_cart_item_sale_price_is_hidden_until_scheduled_sale_starts(): void {
+		$product = ( new FixtureData() )->get_simple_product(
+			array(
+				'regular_price'     => 100,
+				'sale_price'        => 63.45,
+				'date_on_sale_from' => strtotime( '+1 year' ),
+			)
+		);
+		wc_empty_cart();
+		$key = wc()->cart->add_to_cart( $product->get_id() );
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart/items/' . $key ) );
+		$prices   = $response->get_data()['prices'];
+
+		$this->assertSame( '10000', $prices->sale_price );
+		$this->assertSame( $prices->raw_prices['price'], $prices->raw_prices['sale_price'] );
 	}
 
 	/**

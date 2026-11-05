@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Locator } from '@playwright/test';
-import { test as base, expect } from '@woocommerce/e2e-utils';
+import { test as base, expect, ProductTemplate } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -12,11 +12,12 @@ import { ProductGalleryPage } from './product-gallery.page';
 const blockData = {
 	name: 'woocommerce/product-gallery',
 	title: 'Product Gallery',
-	slug: 'single-product',
-	productPage: '/product/beanie/',
 };
 
-const test = base.extend< { pageObject: ProductGalleryPage } >( {
+const test = base.extend< {
+	pageObject: ProductGalleryPage;
+	beanieTemplate: ProductTemplate;
+} >( {
 	pageObject: async ( { page, editor, frontendUtils }, use ) => {
 		const pageObject = new ProductGalleryPage( {
 			page,
@@ -24,6 +25,9 @@ const test = base.extend< { pageObject: ProductGalleryPage } >( {
 			frontendUtils,
 		} );
 		await use( pageObject );
+	},
+	beanieTemplate: async ( { createProductTemplate }, use ) => {
+		await use( await createProductTemplate( 'beanie' ) );
 	},
 } );
 
@@ -67,15 +71,9 @@ const getThumbnailImageIdByNth = async (
 };
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, editor, requestUtils } ) => {
-		const template = await requestUtils.createTemplate( 'wp_template', {
-			slug: blockData.slug,
-			title: 'Custom Single Product',
-			content: 'placeholder',
-		} );
-
+	test.beforeEach( async ( { admin, editor, beanieTemplate } ) => {
 		await admin.visitSiteEditor( {
-			postId: template.id,
+			postId: beanieTemplate.template.id,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
@@ -90,6 +88,7 @@ test.describe( `${ blockData.name }`, () => {
 			page,
 			editor,
 			pageObject,
+			beanieTemplate,
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 
@@ -97,7 +96,7 @@ test.describe( `${ blockData.name }`, () => {
 				isOnlyCurrentEntityDirty: true,
 			} );
 
-			await page.goto( blockData.productPage );
+			await page.goto( beanieTemplate.productUrl );
 
 			const thumbnailsBlock = await pageObject.getThumbnailsBlock( {
 				page: 'frontend',
@@ -141,6 +140,7 @@ test.describe( `${ blockData.name }`, () => {
 			page,
 			editor,
 			pageObject,
+			beanieTemplate,
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 
@@ -148,7 +148,7 @@ test.describe( `${ blockData.name }`, () => {
 				isOnlyCurrentEntityDirty: true,
 			} );
 
-			await page.goto( blockData.productPage );
+			await page.goto( beanieTemplate.productUrl );
 
 			const initialViewerImageId = await pageObject.getViewerImageId();
 
@@ -195,6 +195,7 @@ test.describe( `${ blockData.name }`, () => {
 			page,
 			editor,
 			pageObject,
+			beanieTemplate,
 		} ) => {
 			await page.setViewportSize( { width: 800, height: 800 } );
 
@@ -204,7 +205,7 @@ test.describe( `${ blockData.name }`, () => {
 				isOnlyCurrentEntityDirty: true,
 			} );
 
-			await page.goto( blockData.productPage );
+			await page.goto( beanieTemplate.productUrl );
 
 			const initialViewerImageId = await pageObject.getViewerImageId();
 
@@ -260,6 +261,7 @@ test.describe( `${ blockData.name }`, () => {
 			pageObject,
 			page,
 			editor,
+			beanieTemplate,
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 			await editor.openDocumentSettingsSidebar();
@@ -270,7 +272,7 @@ test.describe( `${ blockData.name }`, () => {
 				isOnlyCurrentEntityDirty: true,
 			} );
 
-			await page.goto( blockData.productPage );
+			await page.goto( beanieTemplate.productUrl );
 
 			const viewerBlock = await pageObject.getViewerBlock( {
 				page: 'frontend',
@@ -287,6 +289,7 @@ test.describe( `${ blockData.name }`, () => {
 			pageObject,
 			page,
 			editor,
+			beanieTemplate,
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 			await editor.openDocumentSettingsSidebar();
@@ -295,7 +298,7 @@ test.describe( `${ blockData.name }`, () => {
 				isOnlyCurrentEntityDirty: true,
 			} );
 
-			await page.goto( blockData.productPage );
+			await page.goto( beanieTemplate.productUrl );
 
 			await expect( page.locator( 'dialog' ) ).toBeHidden();
 
@@ -359,6 +362,7 @@ test.describe( `${ blockData.name }`, () => {
 		editor,
 		pageObject,
 		page,
+		beanieTemplate,
 	} ) => {
 		await pageObject.addProductGalleryBlock( { cleanContent: true } );
 		await editor.saveSiteEditorEntities( {
@@ -373,7 +377,9 @@ test.describe( `${ blockData.name }`, () => {
 		await page.getByLabel( 'Open Navigation' ).click();
 
 		await page
-			.getByRole( 'button', { name: 'Custom Single Product' } )
+			.getByRole( 'button', {
+				name: beanieTemplate.template.title.rendered,
+			} )
 			.first()
 			.click();
 
@@ -388,13 +394,14 @@ test.describe( `${ blockData.name }`, () => {
 		page,
 		pageObject,
 		editor,
+		beanieTemplate,
 	} ) => {
 		await pageObject.addProductGalleryBlock( { cleanContent: true } );
 		await editor.saveSiteEditorEntities( {
 			isOnlyCurrentEntityDirty: true,
 		} );
 
-		await page.goto( blockData.productPage );
+		await page.goto( beanieTemplate.productUrl );
 
 		await page.setViewportSize( {
 			height: 667,
