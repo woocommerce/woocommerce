@@ -150,7 +150,7 @@ if ( ! wp_using_ext_object_cache() && ! wp_installing() ) {
 }
 ```
 
-**Site transients need a separate scope check.** Their external-cache group is `site-transient`. On multisite, their database fallback uses network options rather than the current site's options table. For database-backed site transients, use the appropriate network-option cache API and network ID where available; do not pass `_site_transient_*` names to `wp_prime_option_caches()` merely because they resemble ordinary transient names. On single-site, check the site-option fallback path.
+**Site transients need a separate scope check.** Their external-cache group is `site-transient`. On multisite, their database fallback uses network options rather than the current site's options table. For database-backed site transients, use `wp_prime_network_option_caches( $network_id, $keys )` with the consumer's network ID and backing-option names under the same storage guard above. On single-site, this helper delegates to `wp_prime_option_caches()`. Do not choose the ordinary option API merely because `_site_transient_*` names resemble ordinary transient names.
 
 **Audit rule:** inspect any priming list containing `_transient_`, `_transient_timeout_`, `_site_transient_`, or `_site_transient_timeout_` prefixes. Confirm the cache-backend guard, the site's single-site/multisite scope, and the API/cache namespace that the consumer actually uses. A prefix check alone is insufficient.
 
@@ -158,7 +158,7 @@ if ( ! wp_using_ext_object_cache() && ! wp_installing() ) {
 
 ## Notes
 
-`wp_prime_option_caches()` is a public WordPress function available in WooCommerce's supported WordPress versions, so a redundant availability guard is unnecessary here. For network options, use `wp_prime_network_option_caches( $network_id, $keys )` when it is available in the supported versions; check that API's availability separately instead of assuming it shares the ordinary option helper's introduction version.
+`wp_prime_option_caches()` and [`wp_prime_network_option_caches()`](https://developer.wordpress.org/reference/functions/wp_prime_network_option_caches/) are public WordPress functions available in every WordPress version this WooCommerce branch supports. They were introduced in WordPress 6.4 and 6.6 respectively, both below the required WordPress 7.0 minimum. Availability guards are unnecessary here.
 
 Consider both existence and autoload state, together with the current cache state:
 
