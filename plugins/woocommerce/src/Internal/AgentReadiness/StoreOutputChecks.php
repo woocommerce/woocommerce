@@ -283,7 +283,7 @@ class StoreOutputChecks {
 			array(
 				'id'      => 'no_noindex_directives',
 				'group'   => 'access',
-				'test'    => fn( StoreResponses $responses ): ?bool => $this->on_pages( $responses, static fn( string $html, array $headers ): bool => 1 !== preg_match( '/(?<![\w-])(noindex|none|noai|noimageai)(?![\w-])/', self::robots_rules( $html, $headers ) ) ),
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->on_pages( $responses, static fn( string $html, array $headers ): bool => 1 !== preg_match( '/(?<![\w:-])(noindex|none|noai|noimageai)(?![\w-])/', self::robots_rules( $html, $headers ) ) ),
 				'blocks'  => 'listing',
 				'name'    => __( 'Pages let search and AI crawlers index them', 'woocommerce' ),
 				'label'   => __( 'Pages ask search and AI crawlers not to index them', 'woocommerce' ),
