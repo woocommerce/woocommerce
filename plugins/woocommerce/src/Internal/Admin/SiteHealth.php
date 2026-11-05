@@ -551,7 +551,7 @@ class SiteHealth {
 						? __( 'The database did not return row estimates for the order tables, so WooCommerce could not check the order metadata table size.', 'woocommerce' )
 						: sprintf(
 							/* translators: 1: Estimated number of order metadata rows. 2: Estimated number of order rows. */
-							__( 'The estimated row counts are %1$s for the order metadata table and %2$s for the orders table. These estimates can be up to a day old. Excess order metadata can slow down checkout and order management. Ask your hosting provider or support team to investigate before deleting data.', 'woocommerce' ),
+							__( 'The estimated row counts are %1$s for the order metadata table and %2$s for the orders table. These are estimates and may be out of date. Excess order metadata can slow down checkout and order management. Ask your hosting provider or support team to investigate before deleting data.', 'woocommerce' ),
 							number_format_i18n( $context['meta_rows'] ),
 							number_format_i18n( $context['order_rows'] )
 						),
@@ -573,9 +573,20 @@ class SiteHealth {
 		$row_counts = array();
 
 		foreach ( array( OrdersTableDataStore::get_orders_table_name(), OrdersTableDataStore::get_meta_table_name() ) as $table ) {
-			// Naming the table lets a database drop-in route the query to the server that holds it.
+			// LIKE limits the lookup to the named table, unlike WHERE, which reads every table in the schema on MySQL 5.7 and MariaDB.
+			// Naming the table also lets a database drop-in route the query to the server that holds it. The name is not passed
+			// through esc_like() because drop-ins would then read it with a leftover backslash (see WordPress core ticket #57149).
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- This reads database-maintained table statistics during Site Health checks.
-			$status = $wpdb->get_row( $wpdb->prepare( 'SHOW TABLE STATUS WHERE Name = %s', $table ), ARRAY_A );
+			$statuses = $wpdb->get_results( $wpdb->prepare( 'SHOW TABLE STATUS LIKE %s', $table ), ARRAY_A );
+			$status   = null;
+
+			// LIKE treats `_` as a wildcard, so only use the row for this exact table.
+			foreach ( (array) $statuses as $row ) {
+				if ( isset( $row['Name'] ) && 0 === strcasecmp( $row['Name'], $table ) ) {
+					$status = $row;
+					break;
+				}
+			}
 
 			if ( ! is_array( $status ) || ! isset( $status['Rows'] ) || ! is_numeric( $status['Rows'] ) ) {
 				return null;
