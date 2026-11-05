@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
 
@@ -30,6 +31,11 @@ class ProductDelete extends ActionableAbility {
 	 * Ability name.
 	 */
 	public const ABILITY_NAME = 'woocommerce/product-delete';
+
+	/**
+	 * The result status of a forced delete, which leaves nothing to restore.
+	 */
+	private const STATUS_DELETED = 'deleted';
 
 	/**
 	 * ID of the product the call deletes, kept because a forced delete clears the object's ID.
@@ -84,12 +90,12 @@ class ProductDelete extends ActionableAbility {
 		return array(
 			'label'               => __( 'Delete product', 'woocommerce' ),
 			'description'         => __(
-				'Delete, trash, or restore a product.',
+				'Move a product to the trash, or delete it permanently.',
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::build_input_schema(),
-			'output_schema'       => self::get_delete_output_schema(),
+			'output_schema'       => self::build_output_schema(),
 			'permission_callback' => array( __CLASS__, 'can_delete_product' ),
 			'meta'                => array(
 				'show_in_rest' => true,
@@ -289,6 +295,7 @@ class ProductDelete extends ActionableAbility {
 		return array(
 			'deleted' => true,
 			'id'      => $this->product_id,
+			'status'  => $this->force ? self::STATUS_DELETED : ProductStatus::TRASH,
 		);
 	}
 
@@ -327,6 +334,33 @@ class ProductDelete extends ActionableAbility {
 				),
 			),
 			'required'             => array( 'id' ),
+			'additionalProperties' => false,
+		);
+	}
+
+	/**
+	 * Get the output schema.
+	 *
+	 * @return array
+	 */
+	private static function build_output_schema(): array {
+		return array(
+			'type'                 => 'object',
+			'properties'           => array(
+				'deleted' => array(
+					'type'        => 'boolean',
+					'description' => __( 'Whether the call succeeded. True for both a trash and a permanent delete; read status to tell them apart.', 'woocommerce' ),
+				),
+				'id'      => array(
+					'type'        => 'integer',
+					'description' => __( 'ID of the product the call deleted.', 'woocommerce' ),
+				),
+				'status'  => array(
+					'type'        => 'string',
+					'enum'        => array( ProductStatus::TRASH, self::STATUS_DELETED ),
+					'description' => __( 'What happened to the product. "trash": moved to the trash with its variations, and can be restored. "deleted": permanently deleted with its variations, and cannot be restored.', 'woocommerce' ),
+				),
+			),
 			'additionalProperties' => false,
 		);
 	}
