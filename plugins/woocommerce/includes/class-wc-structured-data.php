@@ -1102,47 +1102,20 @@ class WC_Structured_Data {
 			return null;
 		}
 
-		$products = $item->get_id() . ':1';
 		if ( $variation && $product instanceof WC_Product_Variable ) {
-			$selected_attributes = array();
-			foreach ( $product->get_variation_attributes() as $attribute_name => $options ) {
+			$attributes = $variation->get_variation_attributes();
+			foreach ( array_keys( $product->get_variation_attributes() ) as $attribute_name ) {
 				$key = wc_variation_attribute_name( $attribute_name );
-				if ( ! isset( $_GET[ $key ] ) || ! is_string( $_GET[ $key ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				if ( '' === ( $attributes[ $key ] ?? '' ) ) {
 					return null;
 				}
-				$value = wc_clean( wp_unslash( $_GET[ $key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				if ( ! is_string( $value ) || ! is_array( $options ) || ! in_array( $value, $options, true ) ) {
-					return null;
-				}
-				$selected_attributes[ $key ] = $value;
-			}
-
-			$any_attributes = array_keys( $variation->get_variation_attributes(), '', true );
-			if ( $any_attributes ) {
-				$values     = array();
-				$attributes = $product->get_attributes();
-				foreach ( $any_attributes as $key ) {
-					$attribute = $attributes[ substr( $key, strlen( 'attribute_' ) ) ] ?? null;
-					$value     = $selected_attributes[ $key ] ?? null;
-					if ( ! $attribute instanceof WC_Product_Attribute || ! is_string( $value ) ) {
-						return null;
-					}
-					if ( ! $attribute->is_taxonomy() ) {
-						$value = htmlspecialchars( $value, ENT_QUOTES, 'UTF-8' );
-					}
-					if ( sanitize_key( $key ) !== $key || sanitize_text_field( $value ) !== $value ) {
-						return null;
-					}
-					$values[] = $key . '=' . str_replace( array( ',', ':', ';' ), array( '~,', '~:', '~;' ), $value );
-				}
-				$products .= ':' . implode( ';', $values );
 			}
 		}
 
 		return add_query_arg(
 			array(
 				'checkout-link' => '1',
-				'products'      => rawurlencode( $products ),
+				'products'      => rawurlencode( $item->get_id() . ':1' ),
 			),
 			home_url( '/' )
 		);

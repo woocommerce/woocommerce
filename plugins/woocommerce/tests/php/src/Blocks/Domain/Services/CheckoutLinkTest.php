@@ -58,17 +58,17 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A selected Any variation's schema link adds the chosen value to the cart.
-	 * @testWith ["Large & Tall", "Large &amp~; Tall"]
-	 *           ["XL: Bold, ~; Tall", "XL~: Bold~, ~~; Tall"]
+	 * @testdox Only a fixed variation gets a checkout link in structured data.
+	 * @testWith ["", false]
+	 *           ["Large", true]
 	 *
-	 * @param string $value Selected attribute value.
-	 * @param string $encoded Encoded attribute value in products.
+	 * @param string $variation_size Variation size, or an empty string for any size.
+	 * @param bool   $has_link       Whether a checkout link is expected.
 	 */
-	public function test_any_variation_schema_checkout_link( string $value, string $encoded ): void {
+	public function test_variation_schema_checkout_link( string $variation_size, bool $has_link ): void {
 		$attribute = new \WC_Product_Attribute();
 		$attribute->set_name( 'Size' );
-		$attribute->set_options( [ $value ] );
+		$attribute->set_options( [ 'Large' ] );
 		$attribute->set_variation( true );
 
 		$product = new \WC_Product_Variable();
@@ -79,7 +79,7 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 
 		$variation = new \WC_Product_Variation();
 		$variation->set_parent_id( $product->get_id() );
-		$variation->set_attributes( [ 'size' => '' ] );
+		$variation->set_attributes( [ 'size' => $variation_size ] );
 		$variation->set_regular_price( '20' );
 		$variation->set_status( ProductStatus::PUBLISH );
 		$variation->save();
@@ -88,21 +88,26 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 
 		$previous_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		try {
-			$_GET = [ 'attribute_size' => $value ];
+			$_GET = [ 'attribute_size' => 'Large' ];
 			$sut  = new \WC_Structured_Data();
 			$sut->generate_product_data( $product );
 			$markup = $sut->get_data()[0];
-			$url    = $markup['offers'][0]['checkoutPageURLTemplate'];
+			if ( ! $has_link ) {
+				$this->assertArrayNotHasKey( 'checkoutPageURLTemplate', $markup['offers'][0] );
+				$this->assertArrayNotHasKey( 'potentialAction', $markup );
+				return;
+			}
+			$url = $markup['offers'][0]['checkoutPageURLTemplate'];
 			$this->assertSame( $url, $markup['potentialAction']['target']['urlTemplate'] );
 			wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
-			$this->assertSame( $variation->get_id() . ':1:attribute_size=' . $encoded, $query['products'] );
+			$this->assertSame( $variation->get_id() . ':1', $query['products'] );
 
 			$_GET = wp_slash( $query );
 			$this->get_checkout_link_service()->get_checkout_link_test();
 			$items = array_values( WC()->cart->get_cart() );
 			$this->assertCount( 1, $items );
 			$this->assertSame( $variation->get_id(), $items[0]['variation_id'] );
-			$this->assertSame( [ 'attribute_size' => $value ], $items[0]['variation'] );
+			$this->assertSame( [ 'attribute_size' => 'Large' ], $items[0]['variation'] );
 		} finally {
 			$_GET = $previous_get;
 		}
