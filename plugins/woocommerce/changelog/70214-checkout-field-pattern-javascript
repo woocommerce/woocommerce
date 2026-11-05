@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop an additional checkout field's pattern, when only PHP can compile it, from removing the whole checkout section.

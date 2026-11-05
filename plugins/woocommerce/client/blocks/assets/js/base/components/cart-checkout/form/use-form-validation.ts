@@ -25,6 +25,7 @@ import fastDeepEqual from 'fast-deep-equal/es6';
 /**
  * Internal dependencies
  */
+import { compileSchema } from './compile-schema';
 import { hasSchemaRules } from './utils';
 
 type FormErrors = Partial< {
@@ -89,6 +90,7 @@ const getErrorsMap = (
 };
 
 const EMPTY_OBJECT: FormErrors = {};
+
 /**
  * Combines address fields, including fields from the locale, and sorts them by index.
  */
@@ -204,11 +206,11 @@ export const useFormValidation = (
 				};
 				break;
 		}
-		const validate = parser.compile( schema );
+		const validate = compileSchema( parser, schema );
 		// AJV mutates validate function and errors to it, so we reach from it. Result only has a boolean value if errors are present.
-		const result = validate( data );
+		const result = validate ? validate( data ) : true;
 
-		if ( ! result && validate.errors ) {
+		if ( ! result && validate?.errors ) {
 			schemaErrorsMap = getErrorsMap( validate.errors, formFields );
 		} else {
 			schemaErrorsMap = EMPTY_OBJECT;

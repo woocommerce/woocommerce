@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep a checkout section usable when an additional checkout field's pattern is not a valid JavaScript regular expression.
