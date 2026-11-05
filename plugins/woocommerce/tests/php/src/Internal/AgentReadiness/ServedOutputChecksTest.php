@@ -410,7 +410,7 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox When something strips WooCommerce's Open Graph tags from the product page, the check flags a likely conflict, names the page and the active SEO plugin; with WooCommerce's tags turned off, the check isn't run.
+	 * @testdox When something strips WooCommerce's Open Graph tags from the product page, the check flags a likely conflict, names the page but no plugin, even with an SEO plugin active; with WooCommerce's tags turned off, the check isn't run.
 	 */
 	public function test_open_graph_conflict(): void {
 		$responses                          = $this->good_store();
@@ -423,7 +423,7 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $checks['open_graph_from_core']['ok'] );
 		$this->assertTrue( $checks['open_graph_from_core']['conflict'] );
 		$this->assertSame( (string) $this->product->get_permalink(), $checks['open_graph_from_core']['seen_at'] );
-		$this->assertSame( array( 'Yoast SEO' ), $checks['open_graph_from_core']['plugins'], 'Only plugins known to output Open Graph are named' );
+		$this->assertArrayNotHasKey( 'plugins', $checks['open_graph_from_core'], 'No plugin is named: a list of plugins goes stale' );
 		$this->assertSame( '', $checks['open_graph_tags']['seen_at'], 'Checks that are not conflicts carry no address' );
 
 		$this->serve( $this->good_store() );

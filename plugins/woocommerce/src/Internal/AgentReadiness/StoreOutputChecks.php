@@ -51,11 +51,11 @@ class StoreOutputChecks {
 	/**
 	 * Run every check. Each URL is requested at most once per set of responses.
 	 *
-	 * A likely conflict also names the address where it was seen and the active plugins known to
-	 * output the same thing, as a hint for the merchant.
+	 * A likely conflict also names the address where it was seen. It doesn't name a plugin: any list of
+	 * plugins goes stale, and several can change the same output.
 	 *
 	 * @param StoreResponses|null $responses Responses of the scan, or null for new ones.
-	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict:bool,pending:bool,seen_at:string,plugins:array<int,string>}>
+	 * @return array<int, array{id:string,ok:bool|null,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict:bool,pending:bool,seen_at:string}>
 	 */
 	public function all( ?StoreResponses $responses = null ): array {
 		$responses = $responses ?? $this->responses();
@@ -89,7 +89,6 @@ class StoreOutputChecks {
 				'conflict' => false === $ok && ! empty( $check['conflict'] ),
 				'pending'  => $pending,
 				'seen_at'  => $conflict ? self::seen_at( (string) ( $check['seen_at'] ?? '' ), $responses ) : '',
-				'plugins'  => $conflict ? self::active_output_plugins( (string) ( $check['plugins'] ?? '' ) ) : array(),
 			);
 		}
 		return $results;
@@ -108,31 +107,6 @@ class StoreOutputChecks {
 		'ucp_checkout',
 	);
 
-	/**
-	 * SEO plugins that write both product structured data and Open Graph tags, keyed by plugin file.
-	 */
-	private const SEO_PLUGINS = array(
-		'wordpress-seo/wp-seo.php'                    => 'Yoast SEO',
-		'wordpress-seo-premium/wp-seo-premium.php'    => 'Yoast SEO Premium',
-		'seo-by-rank-math/rank-math.php'              => 'Rank Math SEO',
-		'all-in-one-seo-pack/all_in_one_seo_pack.php' => 'All in One SEO',
-		'autodescription/autodescription.php'         => 'The SEO Framework',
-		'wp-seopress/seopress.php'                    => 'SEOPress',
-		'slim-seo/slim-seo.php'                       => 'Slim SEO',
-	);
-
-	/**
-	 * Plugins known to output the same thing a conflict check reads, by output, keyed by plugin file.
-	 * Shown next to a likely conflict as a hint, not as the cause.
-	 */
-	private const OUTPUT_PLUGINS = array(
-		'schema'     => self::SEO_PLUGINS + array(
-			'wp-schema-pro/wp-schema-pro.php' => 'Schema Pro',
-			'schema-and-structured-data-for-wp/structured-data-for-wp.php' => 'Schema & Structured Data for WP',
-		),
-		'open_graph' => self::SEO_PLUGINS + array( 'jetpack/jetpack.php' => 'Jetpack' ),
-	);
-
 	private const MAX_LISTED_SITEMAPS = 5;
 
 	private const MAX_LLMS_TXT_LINKS = 5;
@@ -145,7 +119,7 @@ class StoreOutputChecks {
 	/**
 	 * The checks, each with a test that returns true, false, or null for couldn't check.
 	 *
-	 * @return array<int, array{id:string,test:callable(StoreResponses):(bool|null),blocks:string,group:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict?:bool,seen_at?:string,plugins?:string}>
+	 * @return array<int, array{id:string,test:callable(StoreResponses):(bool|null),blocks:string,group:string,name:string,label:string,why:string,fix:string,fix_url:string,conflict?:bool,seen_at?:string}>
 	 */
 	protected function checks(): array {
 		$checks = array(
@@ -171,7 +145,6 @@ class StoreOutputChecks {
 				'fix'     => __( 'WooCommerce adds it to the product page. Check whether your theme or an SEO plugin turns WooCommerce\'s structured data off.', 'woocommerce' ),
 				'fix_url' => '',
 				'seen_at' => 'product',
-				'plugins' => 'schema',
 			),
 			array(
 				'id'       => 'product_jsonld_from_core',
@@ -185,7 +158,6 @@ class StoreOutputChecks {
 				'fix_url'  => '',
 				'conflict' => true,
 				'seen_at'  => 'product',
-				'plugins'  => 'schema',
 			),
 			array(
 				'id'      => 'product_jsonld_required_fields',
@@ -408,7 +380,32 @@ class StoreOutputChecks {
 				'fix_url'  => '',
 				'conflict' => true,
 				'seen_at'  => 'product',
-				'plugins'  => 'schema',
+			),
+			array(
+				'id'       => 'product_gtin_jsonld',
+				'group'    => 'understand',
+				'test'     => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): ?bool => array() === $products ? null : self::served_gtin_ok( $products, $responses->product() ) ),
+				'blocks'   => 'listing',
+				'name'     => __( 'Product structured data has a valid GTIN', 'woocommerce' ),
+				'label'    => __( 'Product structured data has no valid GTIN', 'woocommerce' ),
+				'why'      => __( 'Agents match products by GTIN, and the product page gives none or an invalid one.', 'woocommerce' ),
+				'fix'      => __( 'WooCommerce adds the GTIN from the product\'s GTIN field. If it\'s filled in, an SEO plugin or your theme is likely replacing it: check its schema settings.', 'woocommerce' ),
+				'fix_url'  => '',
+				'conflict' => true,
+				'seen_at'  => 'product',
+			),
+			array(
+				'id'       => 'product_brand_jsonld',
+				'group'    => 'understand',
+				'test'     => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): ?bool => array() === $products ? null : self::served_brand_ok( $products, $responses->product() ) ),
+				'blocks'   => 'listing',
+				'name'     => __( 'Product structured data has a brand', 'woocommerce' ),
+				'label'    => __( 'Product structured data has no brand', 'woocommerce' ),
+				'why'      => __( 'ChatGPT needs a brand to list a product. Your product has one, but the page gives agents none.', 'woocommerce' ),
+				'fix'      => __( 'WooCommerce adds the product\'s brand. Usually an SEO plugin or your theme replaces it: check its schema settings.', 'woocommerce' ),
+				'fix_url'  => '',
+				'conflict' => true,
+				'seen_at'  => 'product',
 			),
 			array(
 				'id'      => 'product_review_markup',
@@ -479,7 +476,6 @@ class StoreOutputChecks {
 				'fix_url'  => '',
 				'conflict' => true,
 				'seen_at'  => 'product',
-				'plugins'  => 'open_graph',
 			);
 		}
 		if ( ! UcpUtils::is_enabled() ) {
@@ -560,19 +556,6 @@ class StoreOutputChecks {
 		}
 		$product = $responses->product();
 		return null === $product ? '' : (string) $product->get_permalink();
-	}
-
-	/**
-	 * Names of the active plugins known to output something, in the order of OUTPUT_PLUGINS.
-	 *
-	 * @param string $output Key of OUTPUT_PLUGINS.
-	 * @return array<int, string>
-	 */
-	private static function active_output_plugins( string $output ): array {
-		if ( ! function_exists( 'is_plugin_active' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
-		return array_values( array_filter( self::OUTPUT_PLUGINS[ $output ] ?? array(), 'is_plugin_active', ARRAY_FILTER_USE_KEY ) );
 	}
 
 	/**
@@ -1037,6 +1020,16 @@ class StoreOutputChecks {
 	}
 
 	/**
+	 * A JSON-LD property that may repeat, as a list of its values.
+	 *
+	 * @param mixed $value The property.
+	 * @return array<int, mixed>
+	 */
+	private static function values( $value ): array {
+		return is_array( $value ) && wp_is_numeric_array( $value ) ? $value : array( $value );
+	}
+
+	/**
 	 * Whether a sitemap index names a product sitemap (product-sitemap.xml,
 	 * wp-sitemap-posts-product-1.xml), or a urlset lists a product page. A category
 	 * sitemap and a page that isn't a sitemap never count.
@@ -1202,6 +1195,101 @@ class StoreOutputChecks {
 	}
 
 	/**
+	 * Whether the page gives the product a valid GTIN, from WooCommerce or any other source. When it doesn't, a
+	 * failure only when WooCommerce would have printed one, the product's own valid GTIN; otherwise null, since
+	 * missing_gtin and invalid_gtin report the stored value.
+	 *
+	 * @param array<int, array<string, mixed>> $products Product items.
+	 * @param \WC_Product|null                 $product  The product of the page.
+	 */
+	private static function served_gtin_ok( array $products, ?\WC_Product $product ): ?bool {
+		if ( null === $product || ! ProductFields::needs_identifiers( $product ) ) {
+			return null;
+		}
+		foreach ( self::served_gtins( self::own_items( $products, $product ) ) as $gtin ) {
+			if ( ProductFields::is_valid_gtin( $gtin ) ) {
+				return true;
+			}
+		}
+		// WooCommerce prints the product's own GTIN on its page, never a variation's.
+		$own = (string) preg_replace( '/\D/', '', (string) $product->get_global_unique_id() );
+		return ProductFields::is_valid_gtin( $own ) ? false : null;
+	}
+
+	/**
+	 * GTINs the Product items and their offers give, digits only.
+	 *
+	 * @param array<int, array<string, mixed>> $products Product items.
+	 * @return array<int, string>
+	 */
+	private static function served_gtins( array $products ): array {
+		$gtins = array();
+		foreach ( array_merge( self::with_variants( $products ), self::offers( $products ) ) as $item ) {
+			foreach ( array( 'gtin', 'gtin8', 'gtin12', 'gtin13', 'gtin14' ) as $key ) {
+				foreach ( self::values( $item[ $key ] ?? null ) as $value ) {
+					$gtin = is_string( $value ) || is_int( $value ) ? (string) preg_replace( '/\D/', '', (string) $value ) : '';
+					if ( '' !== $gtin ) {
+						$gtins[] = $gtin;
+					}
+				}
+			}
+		}
+		return array_values( array_unique( $gtins ) );
+	}
+
+	/**
+	 * Whether the page gives a brand, from WooCommerce or any other source. When it doesn't, a failure only when
+	 * WooCommerce would have printed one: it prints the product's first WooCommerce brand. A brand kept in an
+	 * attribute or another plugin's taxonomy isn't printed by WooCommerce, so its absence is null, not a conflict.
+	 *
+	 * @param array<int, array<string, mixed>> $products Product items.
+	 * @param \WC_Product|null                 $product  The product of the page.
+	 */
+	private static function served_brand_ok( array $products, ?\WC_Product $product ): ?bool {
+		if ( null === $product ) {
+			return null;
+		}
+		foreach ( self::with_variants( self::own_items( $products, $product ) ) as $item ) {
+			foreach ( self::values( $item['brand'] ?? null ) as $brand ) {
+				$name = is_array( $brand ) ? ( $brand['name'] ?? null ) : $brand;
+				if ( is_string( $name ) && '' !== trim( $name ) ) {
+					return true;
+				}
+			}
+		}
+		if ( ! taxonomy_exists( 'product_brand' ) ) {
+			return null;
+		}
+		$terms = get_the_terms( $product->get_id(), 'product_brand' );
+		return is_array( $terms ) && array() !== $terms ? false : null;
+	}
+
+	/**
+	 * The Product items that name the product, or all of them when none does: another product on the page, such
+	 * as an upsell, doesn't count, but a page whose JSON-LD names the product differently is still judged.
+	 *
+	 * @param array<int, array<string, mixed>> $products Product items.
+	 * @param \WC_Product                      $product  The product of the page.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function own_items( array $products, \WC_Product $product ): array {
+		$named = self::naming( $products, $product );
+		return array() === $named ? $products : $named;
+	}
+
+	/**
+	 * The Product items whose name is the product's.
+	 *
+	 * @param array<int, array<string, mixed>> $products Product items.
+	 * @param \WC_Product                      $product  The product of the page.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function naming( array $products, \WC_Product $product ): array {
+		$name = strtolower( trim( html_entity_decode( $product->get_name(), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) );
+		return array_values( array_filter( $products, static fn( array $item ): bool => is_string( $item['name'] ?? null ) && strtolower( trim( html_entity_decode( $item['name'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) ) === $name ) );
+	}
+
+	/**
 	 * Whether a Product item names the product, and, for a product with one price, an offer has that price
 	 * with or without tax. Offers without a price aren't judged here: product_offer_jsonld reports them.
 	 *
@@ -1212,9 +1300,7 @@ class StoreOutputChecks {
 		if ( null === $product ) {
 			return null;
 		}
-		$name  = strtolower( trim( html_entity_decode( $product->get_name(), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) );
-		$named = array_filter( $products, static fn( array $item ): bool => is_string( $item['name'] ?? null ) && strtolower( trim( html_entity_decode( $item['name'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) ) === $name );
-		if ( array() === $named ) {
+		if ( array() === self::naming( $products, $product ) ) {
 			return false;
 		}
 		if ( '' === $product->get_price() || $product->is_type( 'variable' ) ) {

@@ -409,6 +409,121 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Results and conflict flags of the GTIN and brand checks after serving one product page.
+	 *
+	 * @param \WC_Product              $product Product whose page is served.
+	 * @param array<int, array|string> $blocks  JSON-LD blocks on the page.
+	 * @return array<string, bool|string|null>
+	 */
+	private function served_identifiers( \WC_Product $product, array $blocks ): array {
+		remove_all_filters( 'pre_http_request' );
+		$this->serve( array( self::path_of( $product ) => array( 200, self::page_with( $blocks ) ) ) );
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		return array(
+			'gtin'           => $checks['product_gtin_jsonld']['ok'],
+			'gtin_conflict'  => $checks['product_gtin_jsonld']['conflict'],
+			'brand'          => $checks['product_brand_jsonld']['ok'],
+			'brand_conflict' => $checks['product_brand_jsonld']['conflict'],
+			'brand_seen_at'  => $checks['product_brand_jsonld']['seen_at'],
+		);
+	}
+
+	/**
+	 * @testdox The GTIN check passes when the page gives a valid GTIN from any source, and flags a likely conflict only when the product's own valid GTIN is missing or replaced.
+	 */
+	public function test_served_gtin(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_global_unique_id( '4006381333931' );
+		$product->save();
+		$plugin = array(
+			'@type' => 'Product',
+			'name'  => $product->get_name(),
+		);
+
+		$this->assertTrue( $this->served_identifiers( $product, array( self::core_product_jsonld( $product ) ) )['gtin'], 'WooCommerce prints the GTIN' );
+
+		$result = $this->served_identifiers( $product, array( $plugin ) );
+		$this->assertFalse( $result['gtin'], 'A plugin replaced the JSON-LD without the GTIN' );
+		$this->assertTrue( $result['gtin_conflict'] );
+
+		$this->assertFalse( $this->served_identifiers( $product, array( $plugin + array( 'gtin13' => '4006381333932' ) ) )['gtin'], 'Another, invalid GTIN' );
+		$this->assertTrue( $this->served_identifiers( $product, array( $plugin + array( 'gtin13' => '4006381-333931' ) ) )['gtin'], 'Formatting alone is no conflict' );
+		$this->assertTrue( $this->served_identifiers( $product, array( $plugin + array( 'offers' => array( 'gtin' => 4006381333931 ) ) ) )['gtin'], 'A GTIN on the offer, as a number' );
+		$this->assertTrue( $this->served_identifiers( $product, array( $plugin + array( 'gtin13' => array( '4006381333931' ) ) ) )['gtin'], 'A GTIN given as a list' );
+		$upsell = array(
+			'@type'  => 'Product',
+			'name'   => 'Another product',
+			'gtin13' => '9780306406157',
+		);
+		$this->assertFalse( $this->served_identifiers( $product, array( $plugin, $upsell ) )['gtin'], 'Another product\'s GTIN on the page doesn\'t count' );
+
+		$product->set_global_unique_id( '' );
+		$product->save();
+		$this->assertTrue( $this->served_identifiers( $product, array( $plugin + array( 'gtin' => '4006381333931' ) ) )['gtin'], 'A plugin provides the GTIN the product lacks' );
+		$this->assertNull( $this->served_identifiers( $product, array( $plugin ) )['gtin'], 'Neither has one: missing_gtin reports it' );
+		$this->assertNull( $this->served_identifiers( $product, array( $plugin + array( 'gtin' => '123' ) ) )['gtin'], 'An invalid GTIN from elsewhere isn\'t a conflict when WooCommerce has none to print' );
+
+		$product->set_global_unique_id( '4006381333932' );
+		$product->save();
+		$this->assertNull( $this->served_identifiers( $product, array( self::core_product_jsonld( $product ) ) )['gtin'], 'The product\'s own invalid GTIN: invalid_gtin reports it' );
+
+		$product->set_virtual( true );
+		$product->save();
+		$this->assertNull( $this->served_identifiers( $product, array( $plugin ) )['gtin'], 'A virtual product needs no GTIN' );
+	}
+
+	/**
+	 * @testdox The brand check passes when the page gives a brand from any source, and fails only when the product has a WooCommerce brand the page doesn't give.
+	 */
+	public function test_served_brand(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$plugin  = array(
+			'@type' => 'Product',
+			'name'  => $product->get_name(),
+		);
+
+		$this->assertNull( $this->served_identifiers( $product, array( $plugin ) )['brand'], 'No brand anywhere: missing_brand reports it' );
+		$this->assertTrue( $this->served_identifiers( $product, array( $plugin + array( 'brand' => 'Acme' ) ) )['brand'], 'A plugin provides the brand, as text' );
+
+		$attribute = new \WC_Product_Attribute();
+		$attribute->set_name( 'Brand' );
+		$attribute->set_options( array( 'Acme' ) );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+		$this->assertNull( $this->served_identifiers( $product, array( $plugin ) )['brand'], 'WooCommerce doesn\'t print a brand attribute, so it isn\'t a conflict' );
+
+		wp_set_object_terms( $product->get_id(), 'Acme', 'product_brand' );
+		$result = $this->served_identifiers( $product, array( $plugin ) );
+		$this->assertFalse( $result['brand'], 'The WooCommerce brand is missing from the page' );
+		$this->assertTrue( $result['brand_conflict'] );
+		$this->assertSame( (string) $product->get_permalink(), $result['brand_seen_at'] );
+		$upsell = array(
+			'@type' => 'Product',
+			'name'  => 'Another product',
+			'brand' => 'Other',
+		);
+		$this->assertFalse( $this->served_identifiers( $product, array( $plugin, $upsell ) )['brand'], 'Another product\'s brand on the page doesn\'t count' );
+		$this->assertTrue( $this->served_identifiers( $product, array( self::core_product_jsonld( wc_get_product( $product->get_id() ) ) ) )['brand'], 'WooCommerce prints its brand' );
+		$this->assertTrue(
+			$this->served_identifiers(
+				$product,
+				array(
+					$plugin + array(
+						'brand' => array(
+							array(
+								'@type' => 'Brand',
+								'name'  => 'Acme',
+							),
+						),
+					),
+				)
+			)['brand'],
+			'A list of Brand items'
+		);
+		$this->assertFalse( $this->served_identifiers( $product, array( $plugin + array( 'brand' => array( 'name' => ' ' ) ) ) )['brand'], 'An empty brand name' );
+	}
+
+	/**
 	 * @testdox Product JSON-LD from an SEO plugin, in a @graph with its own types and offer list, passes in place of core's.
 	 */
 	public function test_seo_plugin_product_jsonld_passes(): void {
