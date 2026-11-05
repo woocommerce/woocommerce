@@ -36,7 +36,8 @@ Import products from a CSV file, or `-` to read from STDIN.
 - `--porcelain` - Output only imported and updated product IDs, one per line.
 - `--strict` - Exit with status 1 if any row failed.
 - `--yes` - Skip the confirmation prompt shown when a previous, possibly interrupted import left
-  placeholder products behind.
+  placeholder products behind. Required in that case when reading the CSV from STDIN, or with
+  `--porcelain` or a `--format` other than `table`.
 
 There is no dry-run mode: the importer cannot parse a row without persisting some of its effects
 (images, terms, attributes, and placeholder/parent products are written as rows are read). Test
