@@ -70,7 +70,7 @@ export const Edit = ( {
 
 	const showPrice = blockProps.className.includes( 'is-style-with-price' );
 
-	// While the deprecated Terms block is in the checkout, it owns the terms.
+	// While the Terms block is in the checkout, it owns the terms.
 	const { termsClientId } = useCheckoutTermsBlocks( clientId );
 
 	const isTermsDisabledByExtension = ! getSetting(
@@ -146,7 +146,7 @@ export const Edit = ( {
 
 				{ ! termsClientId && (
 					<PanelBody
-						title={ __( 'Terms and conditions', 'woocommerce' ) }
+						title={ __( 'Terms and Conditions', 'woocommerce' ) }
 					>
 						{ isTermsDisabledByExtension && (
 							<Notice

@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/checkout-terms-block",
 	"title": "Terms and Conditions",
-	"description": "Deprecated. We recommend switching to the terms settings on the Place order button.",
+	"description": "Ensure that customers agree to your Terms & Conditions and Privacy Policy.",
 	"category": "woocommerce",
 	"supports": {
 		"align": false,

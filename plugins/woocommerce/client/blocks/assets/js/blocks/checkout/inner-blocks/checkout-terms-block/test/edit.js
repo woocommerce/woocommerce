@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { render, queryByText, screen, fireEvent } from '@testing-library/react';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -11,6 +12,8 @@ import { Edit } from '../edit';
 const mockReplaceInnerBlocks = jest.fn();
 const mockSelectBlock = jest.fn();
 let mockCheckoutBlocks = [];
+
+jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
@@ -200,13 +203,18 @@ describe( 'Edit', () => {
 			expect( mockSelectBlock ).not.toHaveBeenCalled();
 
 			expect(
-				queryByText( container, /This block is deprecated/ )
+				queryByText(
+					container,
+					/Show Terms and Conditions next to the Place order button/
+				)
 			).toBeInTheDocument();
-			expect( queryByText( container, 'Switch' ) ).toBeInTheDocument();
+			expect(
+				queryByText( container, 'Switch to the Actions block' )
+			).toBeInTheDocument();
 
 			fireEvent.click(
 				screen.getByRole( 'button', {
-					name: 'Switch',
+					name: 'Switch to the Actions block',
 				} )
 			);
 
@@ -228,6 +236,10 @@ describe( 'Edit', () => {
 				false
 			);
 			expect( mockSelectBlock ).toHaveBeenCalledWith( 'actions-1' );
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'blocks_checkout_terms_migration',
+				{ transform_to: 'actions_block' }
+			);
 		}
 	);
 } );

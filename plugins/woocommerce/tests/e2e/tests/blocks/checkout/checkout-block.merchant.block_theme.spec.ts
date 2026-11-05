@@ -557,7 +557,7 @@ test.describe( 'Merchant → Checkout', () => {
 			await expect( showTermsToggle ).toHaveCount( 0 );
 			await expect(
 				editor.page.getByRole( 'button', {
-					name: 'Switch',
+					name: 'Switch to the Actions block',
 					exact: true,
 				} )
 			).toHaveCount( 0 );
@@ -567,7 +567,10 @@ test.describe( 'Merchant → Checkout', () => {
 			);
 
 			await editor.page
-				.getByRole( 'button', { name: 'Switch', exact: true } )
+				.getByRole( 'button', {
+					name: 'Switch to the Actions block',
+					exact: true,
+				} )
 				.click();
 
 			await expect(

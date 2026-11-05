@@ -638,7 +638,7 @@ Display shipping options and rates for your store.
 
 ## Terms and Conditions - woocommerce/checkout-terms-block
 
-Deprecated. We recommend switching to the terms settings on the Place order button.
+Ensure that customers agree to your Terms & Conditions and Privacy Policy.
 
 - **Name:** woocommerce/checkout-terms-block
 - **Category:** woocommerce

@@ -6,10 +6,8 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 /**
  * CheckoutTermsBlock class.
  *
- * Terms are now settings on the Checkout Actions block. Existing checkouts keep this block, and merchants can switch
- * from it in the editor.
- *
- * @deprecated 11.4.0 Use the terms settings on the Checkout Actions block.
+ * Terms are now settings on the Checkout Actions block, so this block is hidden from the inserter. Existing checkouts
+ * keep this block, and merchants can switch from it in the editor.
  */
 class CheckoutTermsBlock extends AbstractInnerBlock {
 	/**

@@ -122,11 +122,11 @@ const isBefore = ( a, b ) => {
 
 describe( 'Checkout Actions Block Edit', () => {
 	describe( 'terms and conditions', () => {
-		it( 'shows a "Show terms and conditions" toggle in a "Terms and conditions" panel', () => {
+		it( 'shows a "Show terms and conditions" toggle in a "Terms and Conditions" panel', () => {
 			renderEdit( { showTerms: false } );
 
 			expect(
-				screen.getByRole( 'button', { name: 'Terms and conditions' } )
+				screen.getByRole( 'button', { name: 'Terms and Conditions' } )
 			).toBeInTheDocument();
 			expect(
 				screen.getByRole( 'checkbox', {
@@ -306,10 +306,14 @@ describe( 'Checkout Actions Block Edit', () => {
 			renderEdit();
 
 			expect(
-				screen.queryByText( /This block is deprecated/ )
+				screen.queryByText(
+					/Show Terms and Conditions next to the Place order button/
+				)
 			).not.toBeInTheDocument();
 			expect(
-				screen.queryByRole( 'button', { name: 'Switch' } )
+				screen.queryByRole( 'button', {
+					name: 'Switch to the Actions block',
+				} )
 			).not.toBeInTheDocument();
 			expect(
 				screen.queryByRole( 'checkbox', {

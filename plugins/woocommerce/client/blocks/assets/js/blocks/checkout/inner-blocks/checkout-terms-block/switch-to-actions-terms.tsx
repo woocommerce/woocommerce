@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Notice } from '@wordpress/components';
+import { recordEvent } from '@woocommerce/tracks';
+import { UpgradeDowngradeNotice } from '@woocommerce/editor-components/upgrade-downgrade-notice';
 import { useDispatch, useRegistry, useSelect } from '@wordpress/data';
 import type { BlockInstance } from '@wordpress/blocks';
 import { store as blockEditorStore } from '@wordpress/block-editor';
@@ -35,7 +36,7 @@ export const useCheckoutTermsBlocks = ( clientId: string ) =>
 	);
 
 /**
- * Recommends moving the deprecated Terms block's settings onto the Place order button, and does it in one click.
+ * Recommends moving the Terms block's settings onto the Place order button, and does it in one click.
  */
 export const SwitchToActionsTermsNotice = ( {
 	clientId,
@@ -78,25 +79,22 @@ export const SwitchToActionsTermsNotice = ( {
 
 		replaceInnerBlocks( rootClientId, innerBlocks, false );
 		selectBlock( actionsClientId );
+		recordEvent( 'blocks_checkout_terms_migration', {
+			transform_to: 'actions_block',
+		} );
 	};
 
 	return (
-		<Notice
+		<UpgradeDowngradeNotice
 			className="wc-block-checkout__terms_notice"
-			status="warning"
 			isDismissible={ false }
-			actions={ [
-				{
-					label: __( 'Switch', 'woocommerce' ),
-					onClick: switchTerms,
-					variant: 'primary',
-				},
-			] }
+			actionLabel={ __( 'Switch to the Actions block', 'woocommerce' ) }
+			onActionClick={ switchTerms }
 		>
 			{ __(
-				'This block is deprecated. Terms and Conditions can now be shown next to the Place Order button in the Actions block.',
+				'Show Terms and Conditions next to the Place order button. Your text and checkbox setting move to the Actions block.',
 				'woocommerce'
 			) }
-		</Notice>
+		</UpgradeDowngradeNotice>
 	);
 };
