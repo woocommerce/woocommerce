@@ -106,6 +106,23 @@ class CheckoutLink {
 		$products_query = sanitize_text_field( $products_query );
 		$raw_products   = array_filter( $this->split_escaped( $products_query, ',' ) );
 		$products       = [];
+		$encoded_values = null;
+
+		if ( isset( $_GET['wc_checkout_link_variation'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$encoded = wp_unslash( $_GET['wc_checkout_link_variation'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			if ( ! is_string( $encoded ) || 1 !== count( $raw_products ) ) {
+				return [];
+			}
+			$encoded_values = json_decode( $encoded, true );
+			if ( ! is_array( $encoded_values ) || ! $encoded_values ) {
+				return [];
+			}
+			foreach ( $encoded_values as $key => $value ) {
+				if ( ! is_string( $key ) || 0 !== strpos( $key, 'attribute_' ) || ! is_string( $value ) || '' === $value ) {
+					return [];
+				}
+			}
+		}
 
 		foreach ( $raw_products as $raw_product ) {
 			$segments           = $this->split_escaped( $raw_product, ':', 4 );
@@ -113,6 +130,12 @@ class CheckoutLink {
 			$quantity           = '' !== ( $segments[1] ?? '' ) ? absint( $segments[1] ) : 1;
 			$variation_data     = $this->parse_product_data( $segments[2] ?? '' );
 			$cart_item_data     = $this->parse_product_data( $segments[3] ?? '' );
+			if ( null !== $encoded_values ) {
+				if ( $variation_data ) {
+					return [];
+				}
+				$variation_data = $encoded_values;
+			}
 
 			if ( ! $product_identifier || ! $quantity ) {
 				continue;
@@ -310,6 +333,7 @@ class CheckoutLink {
 					'products',
 					'coupon',
 					'checkout-link',
+					'wc_checkout_link_variation',
 				],
 				add_query_arg( wp_unslash( $_SERVER['QUERY_STRING'] ), '', $redirect_url ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			);
