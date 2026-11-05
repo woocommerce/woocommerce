@@ -111,15 +111,10 @@ class FulfillmentsPrivacy {
 			$shipment_rows = array();
 
 			foreach ( $shipments as $index => $shipment ) {
-				/* translators: %s: shipment number within the order. */
-				$label = $numbered ? _x( 'Shipment %s', 'fulfillment export field', 'woocommerce' ) : '';
-
 				$shipment_rows[] = array(
-					// Substituted rather than sprintf'd for the same reason the values are
-					// joined with literal punctuation: a locale that mangled the placeholder
-					// would throw and take the order's exported data with it.
 					'name'  => $numbered
-						? str_replace( '%s', number_format_i18n( $index + 1 ), $label )
+						/* translators: %s: shipment number within the order. */
+						? sprintf( _x( 'Shipment %s', 'fulfillment export field', 'woocommerce' ), number_format_i18n( $index + 1 ) )
 						: _x( 'Shipment', 'fulfillment export field', 'woocommerce' ),
 					'value' => $shipment,
 				);

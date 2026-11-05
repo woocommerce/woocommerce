@@ -546,7 +546,9 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 			);
 		}
 
-		$fulfillment_data = is_array( $fulfillment_data ) ? $fulfillment_data : array();
+		if ( is_wp_error( $fulfillment_data ) ) {
+			throw new \Exception( esc_html__( 'Failed to read fulfillment data.', 'woocommerce' ) );
+		}
 
 		// Create Fulfillment objects from the data.
 		$fulfillments = array();
