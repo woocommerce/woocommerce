@@ -124,11 +124,13 @@ class WC_Privacy_Erasers {
 
 		// Erased orders drop out of the query, so only retained orders from earlier pages are skipped.
 		$retained_key = 'wc_privacy_retained_orders_' . md5( $email_address );
-		$retained     = 1 < $page ? (int) get_transient( $retained_key ) : 0;
+		$retained     = 1 < $page ? (int) get_option( $retained_key, 0 ) : 0;
 
 		$order_query = array(
 			'limit'      => 10,
 			'offset'     => $retained,
+			'orderby'    => 'ID',
+			'order'      => 'ASC',
 			'customer'   => array( $email_address ),
 			'anonymized' => false,
 		);
@@ -160,9 +162,9 @@ class WC_Privacy_Erasers {
 		}
 
 		if ( $response['done'] ) {
-			delete_transient( $retained_key );
+			delete_option( $retained_key );
 		} else {
-			set_transient( $retained_key, $retained, DAY_IN_SECONDS );
+			update_option( $retained_key, $retained, false );
 		}
 
 		return $response;

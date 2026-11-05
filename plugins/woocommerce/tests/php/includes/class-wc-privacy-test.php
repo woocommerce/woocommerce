@@ -169,18 +169,66 @@ class WC_Privacy_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Create orders with distinct creation dates for a billing email.
+	 * @testdox The order eraser erases every order once when orders share the same creation date.
+	 *
+	 * @return void
+	 */
+	public function test_order_data_eraser_handles_orders_with_identical_dates(): void {
+		update_option( 'woocommerce_erasure_request_removes_order_data', 'yes' );
+		$order_ids    = $this->create_orders_for_email( 'guest@example.com', 25, 0 );
+		$retained_ids = array_slice( $order_ids, 5, 10 );
+		add_filter(
+			'woocommerce_privacy_erase_order_personal_data',
+			function ( $erase, $order ) use ( $retained_ids ) {
+				return in_array( $order->get_id(), $retained_ids, true ) ? false : $erase;
+			},
+			10,
+			2
+		);
+
+		$messages = $this->run_order_data_eraser( 'guest@example.com' );
+
+		$this->assertCount( 25, $messages, 'Each order is processed once.' );
+		foreach ( $order_ids as $order_id ) {
+			$expected = in_array( $order_id, $retained_ids, true ) ? '' : 'yes';
+			$this->assertSame( $expected, wc_get_order( $order_id )->get_meta( '_anonymized' ), "Order $order_id has the expected anonymized state." );
+		}
+	}
+
+	/**
+	 * @testdox The order eraser skips orders that are already anonymized but still match the email.
+	 *
+	 * @return void
+	 */
+	public function test_order_data_eraser_skips_anonymized_orders_matching_email(): void {
+		update_option( 'woocommerce_erasure_request_removes_order_data', 'yes' );
+		$order_ids = $this->create_orders_for_email( 'guest@example.com', 2 );
+		$order     = wc_get_order( $order_ids[0] );
+		$order->update_meta_data( '_anonymized', 'yes' );
+		$order->save();
+
+		$messages = $this->run_order_data_eraser( 'guest@example.com' );
+
+		$this->assertCount( 1, $messages, 'Only the order that is not anonymized is processed.' );
+		$this->assertSame( 'guest@example.com', wc_get_order( $order_ids[0] )->get_billing_email(), 'The anonymized order is not touched again.' );
+		$this->assertSame( 'yes', wc_get_order( $order_ids[1] )->get_meta( '_anonymized' ), 'The other order is anonymized.' );
+	}
+
+	/**
+	 * Create orders for a billing email, each created $step seconds before the previous one.
 	 *
 	 * @param string $email Billing email.
 	 * @param int    $count Number of orders.
+	 * @param int    $step  Seconds between the creation dates of consecutive orders.
 	 * @return int[] Order IDs.
 	 */
-	private function create_orders_for_email( string $email, int $count ): array {
+	private function create_orders_for_email( string $email, int $count, int $step = HOUR_IN_SECONDS ): array {
 		$order_ids = array();
+		$now       = time();
 		for ( $i = 0; $i < $count; $i++ ) {
 			$order = WC_Helper_Order::create_order( 0 );
 			$order->set_billing_email( $email );
-			$order->set_date_created( time() - $i * HOUR_IN_SECONDS );
+			$order->set_date_created( $now - $i * $step );
 			$order->save();
 			$order_ids[] = $order->get_id();
 		}
