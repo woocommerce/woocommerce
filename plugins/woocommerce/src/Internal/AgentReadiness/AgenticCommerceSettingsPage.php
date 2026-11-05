@@ -610,7 +610,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			<tbody>
 				<?php foreach ( $checks as $check ) : ?>
 					<?php
-					$conflict = false === $check['ok'] && ! empty( $check['conflict'] );
+					$conflict = ! empty( $check['conflict'] );
 					if ( ! empty( $check['pending'] ) ) {
 						$badge = array( 'off', __( 'Coming soon', 'woocommerce' ) );
 					} elseif ( null === $check['ok'] ) {
