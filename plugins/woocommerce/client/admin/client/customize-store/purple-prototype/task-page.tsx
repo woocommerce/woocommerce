@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Text } from '@wordpress/ui';
 import {
 	WooHeaderNavigationItem,
 	WooHeaderPageTitle,
@@ -31,9 +30,6 @@ export const TaskPage = ( {
 			<WooHeaderPageTitle>{ title }</WooHeaderPageTitle>
 			<div className="purple-cys-task-page">
 				<ResetNotice />
-				<Text variant="heading-xl" render={ <h1 /> }>
-					{ __( 'Choose how your store looks', 'woocommerce' ) }
-				</Text>
 				<ThemeOptions settings={ settings } />
 			</div>
 		</>
