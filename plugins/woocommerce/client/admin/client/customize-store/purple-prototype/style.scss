@@ -50,11 +50,9 @@
 		}
 	}
 
-	// Capped so lines stay short and the text doesn't run to the card edge.
 	&__body {
 		flex: 1;
 		min-width: 0;
-		max-width: var(--wpds-dimension-surface-width-md);
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
@@ -116,8 +114,16 @@
 		align-self: stretch;
 	}
 
+	// Text is capped so lines stay short, while an error notice still spans the whole column.
+	&__header,
+	.purple-cys-benefits,
+	&__helper {
+		max-width: var(--wpds-dimension-surface-width-md);
+	}
+
 	&__notice {
 		align-self: stretch;
+		margin-block-start: var(--wpds-dimension-gap-sm);
 	}
 
 
