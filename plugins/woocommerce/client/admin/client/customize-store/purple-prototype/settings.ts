@@ -11,8 +11,6 @@ export type PurpleState =
 export type PurplePrototypeSettings = {
 	layout: PurpleLayout;
 	state: 'real' | PurpleState;
-	// Which version of the setup wizard's Purple step to show.
-	wizard: 'two-options' | 'purple-only';
 	purpleSlug: string;
 	purpleInstalled: boolean;
 	purpleActive: boolean;
@@ -30,7 +28,6 @@ export type PurplePrototypeSettings = {
 const DEFAULT_SETTINGS: PurplePrototypeSettings = {
 	layout: 'stacked-images-left',
 	state: 'real',
-	wizard: 'two-options',
 	purpleSlug: 'purple',
 	purpleInstalled: false,
 	purpleActive: false,

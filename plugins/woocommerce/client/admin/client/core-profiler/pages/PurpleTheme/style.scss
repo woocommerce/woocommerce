@@ -31,28 +31,19 @@
 	}
 }
 
-.woocommerce-profiler-purple-theme__options {
-	display: grid;
-	grid-template-columns: repeat(2, minmax(300px, 500px));
-	gap: 20px;
-	justify-content: center;
-	width: 100%;
-
-	@include breakpoint("<782px") {
-		grid-template-columns: 1fr;
-	}
-}
-
 .woocommerce-profiler-purple-theme__option {
 	display: flex;
 	flex-direction: column;
+	width: 100%;
+	max-width: 480px;
+	margin-inline: auto;
 	border: 1px solid $gray-200;
 	border-radius: 4px;
 	overflow: hidden;
 	background: $white;
 }
 
-// A shorter crop of the 4:3 previews (top kept), so the cards take less height.
+// A shorter crop of the 4:3 preview (top kept), so the card takes less height.
 .woocommerce-profiler-purple-theme__image {
 	position: relative;
 	aspect-ratio: 16 / 9;
@@ -70,7 +61,6 @@
 }
 
 .woocommerce-profiler-purple-theme__body {
-	flex: 1;
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
@@ -78,26 +68,8 @@
 	padding: $gap-large;
 }
 
-// The badge sits on the title line, so both boxes keep the same layout.
-.woocommerce-profiler-purple-theme__title-row {
-	display: flex;
-	align-items: center;
-	gap: $gap-small;
-	width: 100%;
-
-	> span {
-		flex-shrink: 0;
-	}
-}
-
-.woocommerce-profiler-purple-theme__title-row.is-stacked {
-	flex-direction: column;
-	align-items: flex-start;
-	gap: $gap-smaller;
-}
-
 .woocommerce-profiler-purple-theme__title {
-	margin: 0;
+	margin: $gap-smallest 0 0;
 	font-size: 16px;
 	font-weight: 500;
 	line-height: 24px;
@@ -111,52 +83,34 @@
 	color: $gray-700;
 }
 
-// Pushed to the bottom so the buttons line up across the two boxes.
-.woocommerce-profiler-purple-theme__actions {
+.woocommerce-profiler-purple-theme__footer {
 	display: flex;
 	flex-direction: column;
-	align-items: flex-start;
-	gap: $gap-smaller;
-	margin-block-start: auto;
-	padding-block-start: $gap;
+	align-items: center;
+	gap: $gap;
+	margin-block: 40px 48px;
+	text-align: center;
+}
+
+.woocommerce-profiler-purple-theme__buttons {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: $gap-small;
+
+	// Same as the Continue button on the other wizard steps.
+	.woocommerce-profiler-purple-theme__continue {
+		justify-content: center;
+		min-width: 200px;
+		height: 48px;
+		font-size: 14px;
+	}
 }
 
 .woocommerce-profiler-purple-theme__note {
+	max-width: 480px;
 	margin: 0;
 	font-size: 12px;
 	line-height: 16px;
 	color: $gray-700;
 }
-
-.woocommerce-profiler-purple-theme__options {
-	margin-block-end: 48px;
-
-	// "Purple only" version: one card, centered.
-	&.is-purple-only {
-		grid-template-columns: minmax(300px, 480px);
-		margin-block-end: 0;
-	}
-}
-
-.woocommerce-profiler-purple-theme__footer {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	margin-block: 40px 48px;
-
-	// Same as the Continue button on the other wizard steps.
-	.woocommerce-profiler-purple-theme__continue {
-		justify-content: center;
-		width: 200px;
-		height: 48px;
-		font-size: 14px;
-	}
-
-	// The note sits close under Install Purple, with more room before "Keep my current theme".
-	gap: $gap-small;
-
-	.woocommerce-profiler-purple-theme__note + .woocommerce-profiler-purple-theme__continue {
-		margin-block-start: $gap-small;
-	}
-}
-
