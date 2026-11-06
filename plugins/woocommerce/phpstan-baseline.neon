@@ -40828,20 +40828,8 @@ parameters:
 			path: src/Admin/API/Reports/GenericQuery.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\GenericQuery\:\:__construct\(\) with return type void returns null but should not return anything\.$#'
-			identifier: return.void
-			count: 1
-			path: src/Admin/API/Reports/GenericQuery.php
-
-		-
 			message: '#^PHPDoc tag @extends has invalid value \(WC_Object_Query\:\:_construct\)\: Unexpected token "\:\:", expected ''\<'' at offset 174 on line 6$#'
 			identifier: phpDoc.parseError
-			count: 1
-			path: src/Admin/API/Reports/GenericQuery.php
-
-		-
-			message: '#^Result of method WC_Object_Query\:\:__construct\(\) \(void\) is used\.$#'
-			identifier: staticMethod.void
 			count: 1
 			path: src/Admin/API/Reports/GenericQuery.php
 
