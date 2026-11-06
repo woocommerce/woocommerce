@@ -102,6 +102,7 @@ class AgentReadiness {
 				$simple['variation_attributes_not_set'],
 				$simple['missing_variation_images'],
 				$simple['title_too_long'],
+				$simple['image_alt_text'],
 			) as $rule
 		) {
 			$rules[ $rule->id() ] = $rule;
@@ -127,6 +128,8 @@ class AgentReadiness {
 			$from_file = $this->without_empty( $this->sanitize_channel_rules( $this->remote_rules->channel_rules(), $bundled ) );
 			// A file with no check this code can run does not turn the bundled checks off.
 			$defaults = array() !== $from_file ? $from_file : $bundled;
+			// The file lists channel requirements, so a check no channel asks for stays.
+			$defaults += array_filter( $bundled, static fn( array $channels ): bool => array() === $channels );
 		} else {
 			$defaults = $bundled;
 		}
@@ -146,7 +149,15 @@ class AgentReadiness {
 		 */
 		$filtered = apply_filters( 'woocommerce_agent_readiness_rules', $defaults );
 
-		return is_array( $filtered ) ? $this->without_empty( $this->sanitize_channel_rules( $filtered, $bundled ) ) : $defaults;
+		if ( ! is_array( $filtered ) ) {
+			return $defaults;
+		}
+		// A check left with no valid channel doesn't run, as if the filter had removed it, unless it never had one.
+		return array_filter(
+			$this->sanitize_channel_rules( $filtered, $bundled ),
+			static fn( array $channels, $id ): bool => ! empty( $channels ) || empty( $bundled[ $id ] ),
+			ARRAY_FILTER_USE_BOTH
+		);
 	}
 
 	/**
