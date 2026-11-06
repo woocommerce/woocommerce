@@ -3,7 +3,6 @@
  */
 import clsx from 'clsx';
 import { sprintf, _n } from '@wordpress/i18n';
-import { decodeEntities } from '@wordpress/html-entities';
 // eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 import { __unstableStripHTML as stripHTML } from '@wordpress/dom';
 import { Label } from '@woocommerce/blocks-components';
@@ -174,8 +173,8 @@ const OrderSummaryItem = ( {
 				case 'quantity':
 					return String( quantity );
 				case 'productName':
-					// `name` is a raw HTML string; strip tags and decode entities for screen-reader text.
-					return stripHTML( decodeEntities( name ) );
+					// `name` is HTML; stripHTML removes tags and decodes entities once, matching the visible name.
+					return stripHTML( name );
 				case 'price':
 					return formatPrice( subtotalPrice, totalsCurrency );
 			}

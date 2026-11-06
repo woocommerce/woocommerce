@@ -97,4 +97,21 @@ describe( 'Order Summary', () => {
 			)
 		).toBeInTheDocument();
 	} );
+
+	it( 'keeps encoded angle brackets in the screen reader product name', () => {
+		render(
+			<OrderSummary
+				cartItems={ [
+					{
+						...previewCart.items[ 0 ],
+						name: 'Shirt &lt;XL&gt;',
+					},
+				] }
+			/>
+		);
+
+		expect(
+			screen.getByText( 'Total price for 2 Shirt <XL> items: $20.00' )
+		).toBeInTheDocument();
+	} );
 } );
