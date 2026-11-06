@@ -247,19 +247,20 @@ class ShippingDestinations {
 	 */
 	private function get_postcode_restriction( string $postcode, string $country, int &$range_budget ): array {
 		$postcode = trim( $postcode );
-		if ( preg_match( '/^([0-9]{1,9})\.\.\.([0-9]{1,9})$/D', $postcode, $matches ) && strlen( $matches[1] ) === strlen( $matches[2] ) && strcmp( $matches[1], $matches[2] ) <= 0 ) {
+		if ( preg_match( '/^([0-9]{1,9})\.\.\.([0-9]{1,9})$/D', $postcode, $matches ) ) {
 			$start = (int) $matches[1];
 			$end   = (int) $matches[2];
 			$count = $end - $start + 1;
-			if ( $count > $range_budget ) {
+			if ( $count <= 0 || $count > $range_budget ) {
 				return array();
 			}
 			$range_budget -= $count;
 			$codes         = array();
+			$rule          = (object) array( 'code' => $postcode );
 			for ( $number = $start; $number <= $end; $number++ ) {
 				$code      = str_pad( (string) $number, strlen( $matches[1] ), '0', STR_PAD_LEFT );
 				$formatted = wc_format_postcode( $code, $country );
-				if ( is_string( $formatted ) && wc_normalize_postcode( $formatted ) === $code ) {
+				if ( is_string( $formatted ) && wc_normalize_postcode( $formatted ) === $code && wc_postcode_location_matcher( $formatted, array( $rule ), 'code', 'code', $country ) ) {
 					$codes[] = $formatted;
 				}
 			}
