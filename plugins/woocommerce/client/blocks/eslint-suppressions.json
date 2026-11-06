@@ -24,11 +24,6 @@
       "count": 1
     }
   },
-  "assets/js/blocks/checkout/inner-blocks/checkout-terms-block/edit.tsx": {
-    "@wordpress/use-recommended-components": {
-      "count": 1
-    }
-  },
   "assets/js/blocks/classic-shortcode/index.tsx": {
     "@wordpress/use-recommended-components": {
       "count": 1
