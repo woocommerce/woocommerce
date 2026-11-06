@@ -4207,6 +4207,34 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should format a sent postcode, and keep a saved postcode that the update does not send.
+	 */
+	public function test_order_update_formats_only_a_sent_postcode(): void {
+		$order = $this->create_order_for_update( 'pending' );
+		$order->set_shipping_country( 'GB' );
+		$order->set_shipping_postcode( 'sw1a1aa' );
+		$order->save();
+		$ability = wp_get_ability( 'woocommerce/order-update' );
+
+		$ability->execute(
+			array(
+				'id'       => $order->get_id(),
+				'shipping' => array( 'city' => 'London' ),
+			)
+		);
+		$kept = wc_get_order( $order->get_id() )->get_shipping_postcode();
+		$ability->execute(
+			array(
+				'id'       => $order->get_id(),
+				'shipping' => array( 'postcode' => 'ec1a1bb' ),
+			)
+		);
+
+		$this->assertSame( 'sw1a1aa', $kept );
+		$this->assertSame( 'EC1A 1BB', wc_get_order( $order->get_id() )->get_shipping_postcode() );
+	}
+
+	/**
 	 * Invalid inputs for the order update ability.
 	 *
 	 * @return array<string, array{0: array, 1: string, 2: string}>

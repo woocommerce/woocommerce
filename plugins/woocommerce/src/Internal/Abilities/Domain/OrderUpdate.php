@@ -333,7 +333,7 @@ class OrderUpdate extends ActionableAbility {
 						)
 					);
 					unset( $address['postcode'] );
-				} else {
+				} elseif ( isset( $address['postcode'] ) ) {
 					$address['postcode'] = wc_format_postcode( $postcode, $country );
 				}
 			}
