@@ -34,11 +34,14 @@ class RemoteRules {
 	public const PUBLISHED_URL = 'https://woocommerce.com/wp-json/wccom/agent-readiness/1.0/rules.json';
 
 	/**
-	 * Fetch the rules file and store it when it is valid.
+	 * Fetch the rules file and store it when it is valid: at least one check
+	 * has a channel with a field and a valid effect, and, when known ids are
+	 * given, is one of them. Anything less keeps the last good copy.
 	 *
+	 * @param array<int, string>|null $known_ids Check ids the code can run; null accepts any id.
 	 * @return bool Whether a new copy was stored.
 	 */
-	public function refresh(): bool {
+	public function refresh( ?array $known_ids = null ): bool {
 		/**
 		 * Filters the URL of the agent readiness rules file. Empty means the bundled checks only.
 		 *
@@ -72,8 +75,13 @@ class RemoteRules {
 				$checks[ $id ] = $check['channels'];
 			}
 		}
-		// Nothing shaped like a check. Do not replace the last good copy with an empty list.
-		if ( array() === $checks ) {
+		// Nothing this code could run. Do not replace the last good copy with it.
+		$usable = array_filter(
+			$checks,
+			static fn( array $channels, string $id ): bool => ( null === $known_ids || in_array( $id, $known_ids, true ) ) && self::has_usable_channel( $channels ),
+			ARRAY_FILTER_USE_BOTH
+		);
+		if ( array() === $usable ) {
 			return false;
 		}
 		update_option(
@@ -85,6 +93,21 @@ class RemoteRules {
 			false
 		);
 		return true;
+	}
+
+	/**
+	 * Whether a check's channel map names a known channel with a string field and a valid effect.
+	 *
+	 * @param array<mixed> $channels Channel map from the file.
+	 */
+	private static function has_usable_channel( array $channels ): bool {
+		$known = FeedChannels::all();
+		foreach ( $channels as $channel => $spec ) {
+			if ( isset( $known[ $channel ] ) && is_array( $spec ) && is_string( $spec['field'] ?? null ) && in_array( $spec['effect'] ?? null, array( ReadinessRule::EFFECT_NOT_LISTABLE, ReadinessRule::EFFECT_GAPS ), true ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

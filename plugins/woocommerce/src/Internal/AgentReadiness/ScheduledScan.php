@@ -160,7 +160,7 @@ class ScheduledScan implements RegisterHooksInterface {
 		as_unschedule_all_actions( self::DAILY_HOOK, array(), self::GROUP );
 		as_schedule_single_action( time() + DAY_IN_SECONDS, self::DAILY_HOOK, array(), self::GROUP );
 
-		$this->remote_rules->refresh();
+		$this->remote_rules->refresh( array_keys( $this->agent_readiness->get_default_rules() ) );
 		$this->agent_readiness->refresh_report();
 	}
 }

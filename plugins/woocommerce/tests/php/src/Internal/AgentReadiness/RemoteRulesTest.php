@@ -423,6 +423,82 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A file whose checks have no usable channel keeps the last good copy, so the active checks and their effects stay.
+	 */
+	public function test_file_with_no_usable_channel_keeps_last_copy(): void {
+		$this->serve(
+			array(
+				'missing_brand' => array(
+					'google' => array(
+						'field'  => 'brand',
+						'effect' => 'not_listable',
+					),
+				),
+			)
+		);
+		$this->assertTrue( $this->sut->refresh() );
+		$before = $this->agent_readiness()->get_channel_rules();
+		$this->assertSame( array( 'missing_brand' ), array_keys( $before ) );
+
+		foreach (
+			array(
+				array(),
+				array( 'google' => array() ),
+				array(
+					'google' => array(
+						'field'  => 'brand',
+						'effect' => 'sometimes',
+					),
+				),
+				array(
+					'not_a_channel' => array(
+						'field'  => 'brand',
+						'effect' => 'not_listable',
+					),
+				),
+			) as $channels
+		) {
+			$this->serve( array( 'missing_brand' => $channels ) );
+			$this->assertFalse( $this->sut->refresh(), 'An unusable file is not stored: ' . wp_json_encode( $channels ) );
+		}
+
+		$this->assertSame( $before, $this->agent_readiness()->get_channel_rules() );
+		$this->assertSame( 'not_listable', $before['missing_brand']['google']['effect'] );
+	}
+
+	/**
+	 * @testdox Given the ids the code can run, a file naming only unknown checks keeps the last good copy.
+	 */
+	public function test_file_with_only_unknown_checks_keeps_last_copy(): void {
+		$known = array_keys( $this->agent_readiness()->get_default_rules() );
+		$this->serve(
+			array(
+				'title_too_long' => array(
+					'google' => array(
+						'field'  => 'title',
+						'effect' => 'not_listable',
+					),
+				),
+			)
+		);
+		$this->assertTrue( $this->sut->refresh( $known ) );
+
+		$this->serve(
+			array(
+				'not_a_check' => array(
+					'google' => array(
+						'field'  => 'x',
+						'effect' => 'not_listable',
+					),
+				),
+			)
+		);
+
+		$this->assertFalse( $this->sut->refresh( $known ) );
+		$this->assertSame( array( 'title_too_long' ), array_keys( $this->sut->channel_rules() ) );
+	}
+
+	/**
 	 * @testdox The shipped rules file names the same checks the code can run, and those are the ones that run.
 	 */
 	public function test_shipped_rules_file_is_a_subset_of_the_code(): void {
