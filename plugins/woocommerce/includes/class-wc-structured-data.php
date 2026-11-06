@@ -1099,14 +1099,8 @@ class WC_Structured_Data {
 			return null;
 		}
 
-		if ( $variation && $product instanceof WC_Product_Variable ) {
-			$attributes = $variation->get_variation_attributes();
-			foreach ( array_keys( $product->get_variation_attributes() ) as $attribute_name ) {
-				$key = wc_variation_attribute_name( $attribute_name );
-				if ( '' === ( $attributes[ $key ] ?? '' ) ) {
-					return null;
-				}
-			}
+		if ( $variation && in_array( '', wc_get_product_variation_attributes( $variation->get_id() ), true ) ) {
+			return null;
 		}
 
 		return add_query_arg(
