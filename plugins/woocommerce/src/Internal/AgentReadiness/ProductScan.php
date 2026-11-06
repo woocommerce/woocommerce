@@ -374,6 +374,33 @@ class ProductScan {
 	 * @param string $gtin Normalised GTIN.
 	 */
 	public function is_shared_gtin( string $gtin ): bool {
+		return isset( $this->shared_gtin_keys()[ ProductFields::gtin_key( $gtin ) ] );
+	}
+
+	/**
+	 * The GTIN keys more than one published product carries, for the scan to store.
+	 *
+	 * @return array<int, string>
+	 */
+	public function shared_gtins(): array {
+		return array_map( 'strval', array_keys( $this->shared_gtin_keys() ) );
+	}
+
+	/**
+	 * Use the shared GTIN keys a stored scan found, instead of reading every published product.
+	 *
+	 * @param array<int, mixed> $keys GTIN keys.
+	 */
+	public function use_shared_gtins( array $keys ): void {
+		$this->shared_gtins = array_fill_keys( array_map( 'strval', array_filter( $keys, 'is_scalar' ) ), true );
+	}
+
+	/**
+	 * Shared GTIN keys, read from the catalog the first time they're needed.
+	 *
+	 * @return array<string, bool>
+	 */
+	private function shared_gtin_keys(): array {
 		if ( null === $this->shared_gtins ) {
 			global $wpdb;
 
@@ -419,8 +446,7 @@ class ProductScan {
 
 			$this->shared_gtins = array_fill_keys( array_map( 'strval', $gtins ), true );
 		}
-
-		return isset( $this->shared_gtins[ ProductFields::gtin_key( $gtin ) ] );
+		return $this->shared_gtins;
 	}
 
 	/**
