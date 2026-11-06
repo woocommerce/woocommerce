@@ -291,6 +291,7 @@ public function process_payment( $order_id ) {
 
         // An earlier attempt took the payment before its request ended.
         if ( 'paid' === $status ) {
+            // Check the amount paid first, as described below this sketch.
             $order->payment_complete( $transaction_id );
 
             return array(
