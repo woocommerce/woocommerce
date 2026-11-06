@@ -8,8 +8,8 @@ use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * WooCommerce > Settings > AI tools. It opens on a landing page with an AI shopping card and a summary of
- * Readiness check; Manage opens AI shopping, with the UCP switch, what AI assistants can see, Status, the store
+ * WooCommerce > Settings > AI tools. It opens on the Overview, a React view with the AI shopping card and the
+ * Sales readiness card (settings-embed mounts it); Manage opens AI shopping, with the UCP switch, what AI assistants can see, Status, the store
  * policy fields, the store address and Security. The UCP switch saves on its own through
  * wc/v3/agent-readiness/ucp; the store policy fields save with Save changes. Only created by
  * AgenticCommerceSettings while the agent_readiness feature is enabled, after WC_Settings_Page has loaded.
@@ -42,7 +42,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	private AgentReadiness $agent_readiness;
 
 	/**
-	 * Readiness check, summed up on the landing page and linked from Status.
+	 * Sales readiness, linked from Status.
 	 *
 	 * @var ReadinessCheckPage
 	 */
@@ -53,7 +53,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 *
 	 * @param StoreConditions    $store_conditions Store conditions.
 	 * @param AgentReadiness     $agent_readiness  Readiness service.
-	 * @param ReadinessCheckPage $readiness_page   Readiness check.
+	 * @param ReadinessCheckPage $readiness_page   Sales readiness.
 	 */
 	public function __construct( StoreConditions $store_conditions, AgentReadiness $agent_readiness, ReadinessCheckPage $readiness_page ) {
 		$this->id               = AgenticCommerceSettings::TAB;
@@ -69,7 +69,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
-	 * The landing page and AI shopping.
+	 * The Overview and AI shopping.
 	 *
 	 * @return array<string, string>
 	 */
@@ -170,7 +170,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
-	 * Render the current section. The landing page has the AI shopping card and the Readiness check summary;
+	 * Render the current section. The Overview leaves a root for its React view;
 	 * AI shopping has the switch, what AI assistants can see, Status, the store policy fields, the store
 	 * address and Security.
 	 */
@@ -186,8 +186,8 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		if ( AgenticCommerceSettings::SHOPPING_SECTION !== $current_section ) {
 			// Cards only; nothing here saves with Save changes.
 			$GLOBALS['hide_save_button'] = true;
-			$this->render_shopping_card( $checks );
-			$this->readiness_page->render_summary( $report, $checks );
+			// The Overview is React: the settings-embed script mounts it here with wc/v3/agent-readiness/view.
+			echo '<div id="wc-agent-readiness-overview" class="wc-agent-readiness-overview"></div>';
 			echo '</div>';
 			return;
 		}
@@ -205,64 +205,6 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		$this->render_address();
 		$this->render_security();
 		echo '</div>';
-	}
-
-	/**
-	 * The landing page's AI shopping card: its badge, whether AI assistants can shop the store and how
-	 * many setup steps are left, and Manage, or Set up AI shopping while it is off.
-	 *
-	 * @param array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}> $checks Store conditions.
-	 */
-	private function render_shopping_card( array $checks ): void {
-		$enabled  = UcpUtils::is_enabled();
-		$left     = count( self::open_steps( $checks ) );
-		$blocked  = array() !== $this->store_conditions->failing_required( $checks );
-		$badge    = $this->status_badge( $checks );
-		$can_shop = $enabled && ! $blocked;
-		if ( ! $enabled && ! $blocked ) {
-			$text = __( 'Make your products available to AI shopping assistants.', 'woocommerce' );
-		} elseif ( 0 === $left ) {
-			$text = __( 'AI assistants can shop your store.', 'woocommerce' );
-		} else {
-			$text = sprintf(
-				/* translators: %d: number of setup steps left. */
-				$can_shop ? _n( 'AI assistants can shop your store. %d step left.', 'AI assistants can shop your store. %d steps left.', $left, 'woocommerce' ) : _n( 'AI assistants can\'t shop your store yet. %d step left.', 'AI assistants can\'t shop your store yet. %d steps left.', $left, 'woocommerce' ),
-				$left
-			);
-		}
-		echo '<div class="wc-agentic-commerce-card"><div class="wc-agentic-commerce-card__header wc-agentic-commerce-card__header--split"><h2>' . esc_html__( 'AI shopping', 'woocommerce' ) . '</h2>';
-		if ( 'off' !== $badge[0] ) {
-			echo ' <mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--' . esc_attr( $badge[0] ) . '">' . esc_html( $badge[1] ) . '</mark>';
-		}
-		echo '</div><p class="wc-agentic-commerce-card__body">' . esc_html( $text ) . '</p>';
-		echo '<p class="wc-agentic-commerce-card__body wc-agentic-commerce-card__actions"><a class="button" href="' . esc_url( AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ) ) . '">' . ( $enabled ? esc_html__( 'Manage', 'woocommerce' ) : esc_html__( 'Set up AI shopping', 'woocommerce' ) ) . '</a></p></div>';
-	}
-
-	/**
-	 * The AI shopping badge: Needs attention while a required step fails, even with UCP off,
-	 * otherwise Active or Off as UCP is.
-	 *
-	 * @param array<int, array{id:string,ok:bool,level:string}> $checks Store conditions.
-	 * @return array{0:string,1:string} Badge class and text.
-	 */
-	private function status_badge( array $checks ): array {
-		if ( array() !== $this->store_conditions->failing_required( $checks ) ) {
-			return array( 'check', __( 'Needs attention', 'woocommerce' ) );
-		}
-		return UcpUtils::is_enabled() ? array( 'pass', __( 'Active', 'woocommerce' ) ) : array( 'off', __( 'Off', 'woocommerce' ) );
-	}
-
-	/**
-	 * The setup steps still open, required ones first. UCP itself is the switch, so it is not a step.
-	 *
-	 * @param array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}> $checks Store conditions.
-	 * @return array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}>
-	 */
-	private static function open_steps( array $checks ): array {
-		$open = array_values( array_filter( $checks, static fn( array $check ): bool => 'ucp_on' !== $check['id'] && ! $check['ok'] ) );
-		// Required first; usort keeps the order within each level.
-		usort( $open, static fn( array $a, array $b ): int => ( StoreConditions::LEVEL_REQUIRED === $b['level'] ) <=> ( StoreConditions::LEVEL_REQUIRED === $a['level'] ) );
-		return $open;
 	}
 
 	/**
@@ -396,9 +338,9 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 */
 	private function render_status( array $checks, ?array $report ): void {
 		$done     = array_filter( $checks, static fn( array $check ): bool => 'ucp_on' !== $check['id'] && $check['ok'] );
-		$open     = self::open_steps( $checks );
+		$open     = ReadinessCheckPage::open_steps( $checks );
 		$required = count( array_filter( $open, static fn( array $check ): bool => StoreConditions::LEVEL_REQUIRED === $check['level'] ) );
-		$badge    = $this->status_badge( $checks );
+		$badge    = $this->readiness_page->shopping_badge( $checks );
 		if ( $required > 0 ) {
 			/* translators: %d: number of failing required setup steps. */
 			$summary = sprintf( _n( '%d required step to fix so AI assistants can shop your store.', '%d required steps to fix so AI assistants can shop your store.', $required, 'woocommerce' ), $required );
@@ -445,7 +387,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
-	 * The last row of Status: a link to Readiness check with how many issues it found.
+	 * The last row of Status: a link to Sales readiness with how many issues it found.
 	 *
 	 * @param array<string, mixed>|null                                                                                                     $report Stored report, or null before the first scan.
 	 * @param array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}> $checks Store conditions.
@@ -455,7 +397,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		printf(
 			'<ul class="wc-agentic-commerce-results"><li><a href="%1$s">%2$s</a> <mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--%3$s">%4$s</mark></li></ul>',
 			esc_url( ReadinessCheckPage::url() ),
-			esc_html__( 'Readiness check', 'woocommerce' ),
+			esc_html__( 'Sales readiness', 'woocommerce' ),
 			esc_attr( $badge[0] ),
 			esc_html( $badge[1] )
 		);

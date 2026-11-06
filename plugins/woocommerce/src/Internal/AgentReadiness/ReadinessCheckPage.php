@@ -10,9 +10,11 @@ use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Readiness check, while the agent_readiness feature is enabled: when the store was last checked, Fix first, then a
- * card per merchant question with the checks from the last scan. It is a page of its own, since it saves nothing,
- * with no menu item: it opens from Settings > AI tools, which stays highlighted, and its breadcrumb leads back there.
+ * Sales readiness, while the agent_readiness feature is enabled: when the store was last checked, Fix first,
+ * then a card per merchant question with the checks from the last scan. It is a WooCommerce Admin page
+ * under the WooCommerce menu, before Settings; the React page reads everything it shows from
+ * wc/v3/agent-readiness/view, which this class builds. The same builder gives the AI tools tab its
+ * Overview: the AI shopping card and the Sales readiness card with Fix first.
  *
  * @since 11.4.0
  */
@@ -20,10 +22,17 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 
 	use ReadinessMarkup;
 
-	public const PAGE_SLUG = 'wc-agent-readiness';
+	public const PAGE_ID = 'woocommerce-sales-readiness';
+
+	public const PATH = '/sales-readiness';
 
 	/**
-	 * Product checks that Readiness check leaves out: product image alt text repeats the images_have_alt store check.
+	 * The admin_menu priority: between WooCommerce's Reports (20) and Settings (50).
+	 */
+	public const MENU_PRIORITY = 30;
+
+	/**
+	 * Product checks that Sales readiness leaves out: product image alt text repeats the images_have_alt store check.
 	 */
 	private const HIDDEN_PRODUCT_CHECKS = array( 'image_alt_text' );
 
@@ -46,6 +55,17 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		'product_offer_jsonld'           => 'product_jsonld_present',
 		'llms_txt_valid'                 => 'llms_txt_present',
 		'llms_txt_links_resolve'         => 'llms_txt_present',
+	);
+
+	/**
+	 * Badge intents of the design system, by the badge class the PHP pages use.
+	 */
+	private const INTENTS = array(
+		'check' => 'medium',
+		'info'  => 'stable',
+		'pass'  => 'stable',
+		'off'   => 'none',
+		'fix'   => 'medium',
 	);
 
 	/**
@@ -75,13 +95,6 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * @var ScheduledScan
 	 */
 	private ScheduledScan $scheduled_scan;
-
-	/**
-	 * The page's screen id, once the menu has added it.
-	 *
-	 * @var string
-	 */
-	private string $screen_id = '';
 
 	/**
 	 * Initialize dependencies.
@@ -116,79 +129,46 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		if ( ! is_admin() || ! $this->features_controller->feature_is_enabled( AgenticCommerceSettings::FEATURE_ID ) ) {
 			return;
 		}
-		add_action( 'admin_menu', array( $this, 'handle_admin_menu' ) );
-		add_action( 'admin_head', array( $this, 'handle_admin_head' ) );
-		add_filter( 'woocommerce_screen_ids', array( $this, 'handle_woocommerce_screen_ids' ) );
+		// After Reports (20) and before Settings (50), as WooCommerce adds them.
+		add_action( 'admin_menu', array( $this, 'handle_admin_menu' ), self::MENU_PRIORITY );
 	}
 
 	/**
-	 * Add the page under WooCommerce. handle_admin_head() removes its menu item, once WordPress has used it to
-	 * check access, set the title and open the WooCommerce menu.
+	 * Register the WooCommerce Admin page under WooCommerce.
 	 *
 	 * @internal
 	 */
 	public function handle_admin_menu(): void {
-		$title = __( 'Readiness check', 'woocommerce' );
-		$hook  = add_submenu_page( 'woocommerce', $title, $title, 'manage_woocommerce', self::PAGE_SLUG, array( $this, 'output' ) );
-		if ( is_string( $hook ) ) {
-			$this->screen_id = $hook;
-			add_filter( 'submenu_file', array( $this, 'handle_submenu_file' ) );
+		if ( ! function_exists( 'wc_admin_register_page' ) ) {
+			return;
 		}
+		wc_admin_register_page(
+			array(
+				'id'         => self::PAGE_ID,
+				'parent'     => 'woocommerce',
+				'title'      => __( 'Sales readiness', 'woocommerce' ),
+				'path'       => self::PATH,
+				'capability' => 'manage_woocommerce',
+			)
+		);
 	}
 
 	/**
-	 * Remove the menu item before the menu prints: Settings > AI tools opens the page.
-	 *
-	 * @internal
+	 * The page's slug in the WooCommerce submenu.
 	 */
-	public function handle_admin_head(): void {
-		remove_submenu_page( 'woocommerce', self::PAGE_SLUG );
-	}
-
-	/**
-	 * Highlight WooCommerce > Settings on the page, since it opens from Settings > AI tools.
-	 *
-	 * @internal
-	 *
-	 * @param mixed $submenu_file Submenu slug.
-	 * @return mixed
-	 */
-	public function handle_submenu_file( $submenu_file ) {
-		return $this->is_current_screen() ? 'wc-settings' : $submenu_file;
-	}
-
-	/**
-	 * Whether the current admin screen is this page.
-	 */
-	private function is_current_screen(): bool {
-		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		return '' !== $this->screen_id && null !== $screen && $this->screen_id === $screen->id;
-	}
-
-	/**
-	 * Count the page as a WooCommerce screen, so the WooCommerce admin styles load on it.
-	 *
-	 * @internal
-	 *
-	 * @param mixed $screen_ids Screen ids.
-	 * @return mixed
-	 */
-	public function handle_woocommerce_screen_ids( $screen_ids ) {
-		if ( is_array( $screen_ids ) && '' !== $this->screen_id ) {
-			$screen_ids[] = $this->screen_id;
-		}
-		return $screen_ids;
+	private static function menu_slug(): string {
+		return 'wc-admin&path=' . self::PATH;
 	}
 
 	/**
 	 * Link to the page.
 	 */
 	public static function url(): string {
-		return admin_url( 'admin.php?page=' . self::PAGE_SLUG );
+		return admin_url( 'admin.php?page=' . self::menu_slug() );
 	}
 
 	/**
-	 * The badge for Readiness check as a whole, as AI shopping's Status card links to it: how many store and
+	 * The badge for Sales readiness as a whole, as AI shopping's Status card links to it: how many store and
 	 * product checks fail, each failing product check counting as one issue.
 	 *
 	 * @param array<string, mixed>|null                                                                                                     $report Stored report, or null before the first scan.
@@ -203,79 +183,126 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Render the page: a header with the breadcrumb back to AI tools, when the store was last checked with
-	 * Check again, Fix first, then a card per question.
+	 * The AI shopping badge: Needs attention while a required step fails, even with UCP off,
+	 * otherwise Active or Off as UCP is.
 	 *
-	 * @internal
+	 * @param array<int, array{id:string,ok:bool,level:string}> $checks Store conditions.
+	 * @return array{0:string,1:string} Badge class and text.
 	 */
-	public function output(): void {
+	public function shopping_badge( array $checks ): array {
+		if ( array() !== $this->store_conditions->failing_required( $checks ) ) {
+			return array( 'check', __( 'Needs attention', 'woocommerce' ) );
+		}
+		return UcpUtils::is_enabled() ? array( 'pass', __( 'Active', 'woocommerce' ) ) : array( 'off', __( 'Off', 'woocommerce' ) );
+	}
+
+	/**
+	 * The setup steps still open, required ones first. UCP itself is the switch, so it is not a step.
+	 *
+	 * @param array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}> $checks Store conditions.
+	 * @return array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}>
+	 */
+	public static function open_steps( array $checks ): array {
+		$open = array_values( array_filter( $checks, static fn( array $check ): bool => 'ucp_on' !== $check['id'] && ! $check['ok'] ) );
+		// Required first; usort keeps the order within each level.
+		usort( $open, static fn( array $a, array $b ): int => ( StoreConditions::LEVEL_REQUIRED === $b['level'] ) <=> ( StoreConditions::LEVEL_REQUIRED === $a['level'] ) );
+		return $open;
+	}
+
+	/**
+	 * Everything the Sales readiness page and the AI tools Overview show, as data for the React views:
+	 * when the store was last checked and the check button, Fix first, a section per question, the
+	 * declared items, and the Overview's AI shopping card.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function view(): array {
 		$report   = $this->agent_readiness->get_cached_report();
 		$checks   = $this->store_conditions->all();
 		$launched = (bool) ( array_column( $checks, 'ok', 'id' )['launched'] ?? true );
 		$visible  = $this->visible_store_checks( $report, $checks );
-
-		$this->enqueue_script();
-		echo '<div class="wc-agentic-commerce-page-header"><nav class="wc-agentic-commerce-breadcrumb" aria-label="' . esc_attr__( 'Breadcrumb', 'woocommerce' ) . '"><a href="' . esc_url( AgenticCommerceSettings::url() ) . '">' . esc_html__( 'AI tools', 'woocommerce' ) . '</a> <span aria-hidden="true">/</span> <span aria-current="page">' . esc_html__( 'Readiness check', 'woocommerce' ) . '</span></nav>';
-		echo '<p>' . esc_html__( 'See how AI assistants see your store, and what to improve.', 'woocommerce' ) . '</p></div>';
-		echo '<div class="wrap woocommerce wc-agentic-commerce"><h1 class="screen-reader-text">' . esc_html__( 'Readiness check', 'woocommerce' ) . '</h1><hr class="wp-header-end">';
-		echo '<div class="wc-agentic-commerce-card">';
-		if ( null === $report ) {
-			echo '<p class="wc-agentic-commerce-card__body">' . esc_html__( 'Run a check to see what AI assistants get when they visit your store and read your products.', 'woocommerce' ) . '</p>';
+		$pending  = $this->scheduled_scan->is_pending();
+		$stalled  = $pending && $this->scheduled_scan->is_stalled();
+		$message  = '';
+		if ( $stalled ) {
+			$message = __( 'The check has not started because scheduled actions do not seem to be running on this site. It runs once they do. See WooCommerce > Status > Scheduled Actions.', 'woocommerce' );
+		} elseif ( $pending ) {
+			$message = __( 'Checking your store in the background. Reload this page in a minute to see the result.', 'woocommerce' );
 		}
-		echo '<div class="wc-agentic-commerce-card__body wc-agentic-commerce-toolbar"><p>' . esc_html( self::last_checked( $report ) ) . '</p>';
-		$this->render_run( $report );
-		echo '</div></div>';
-		if ( null !== $report ) {
-			$this->render_fix_first( $visible, $report );
-			$this->render_readiness( $visible, $launched, $report );
-		}
-		echo '</div>';
+		$truncated = null !== $report && ! empty( $report['truncated'] )
+			/* translators: %s: number of products checked. */
+			? sprintf( __( 'Checked your %s most recently changed products.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ) )
+			: null;
+		return array(
+			'title'        => __( 'Sales readiness', 'woocommerce' ),
+			'description'  => __( 'See how AI assistants see your store, and what to improve.', 'woocommerce' ),
+			'last_checked' => self::last_checked( $report ),
+			'checked_note' => $truncated,
+			'intro'        => null === $report ? __( 'Run a check to see what AI assistants get when they visit your store and read your products.', 'woocommerce' ) : null,
+			'run'          => array(
+				'label'   => null === $report ? __( 'Run check', 'woocommerce' ) : __( 'Check again', 'woocommerce' ),
+				'pending' => $pending,
+				'message' => $message,
+			),
+			'fix_first'    => null === $report ? null : $this->fix_first( $visible, $report ),
+			'sections'     => null === $report ? array() : $this->sections( $visible, $launched, $report ),
+			'declared'     => null === $report ? null : self::declared( is_array( $report['declared'] ?? null ) ? $report['declared'] : array() ),
+			'overview'     => array(
+				'shopping' => $this->shopping_card( $checks ),
+				'view_all' => array(
+					'href' => self::url(),
+					'text' => __( 'View all checks', 'woocommerce' ),
+				),
+			),
+		);
 	}
 
 	/**
-	 * The Readiness check card on the AI tools landing page: a row per question with its badge, rows with
-	 * issues opening on what they are, then View all checks. Before the first check it offers Run check.
+	 * The Overview's AI shopping card: its badge, whether AI assistants can shop the store and how
+	 * many setup steps are left, and Manage, or Set up AI shopping while it is off.
 	 *
-	 * @param array<string, mixed>|null                                                                                                     $report Stored report, or null before the first scan.
 	 * @param array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}> $checks Store conditions.
+	 * @return array{title:string,badge:array{intent:string,text:string}|null,text:string,button:array{href:string,text:string}}
 	 */
-	public function render_summary( ?array $report, array $checks ): void {
-		echo '<div class="wc-agentic-commerce-card wc-agentic-commerce-summary">';
-		echo '<div class="wc-agentic-commerce-card__header"><h2>' . esc_html__( 'Readiness check', 'woocommerce' ) . '</h2>';
-		echo '<p>' . esc_html__( 'See how AI assistants see your store, and what to improve.', 'woocommerce' ) . '</p></div>';
-		if ( null === $report ) {
-			echo '<div class="wc-agentic-commerce-card__body wc-agentic-commerce-toolbar"><p>' . esc_html( self::last_checked( $report ) ) . '</p>';
-			$this->render_run( $report );
-			echo '</div></div>';
-			return;
+	private function shopping_card( array $checks ): array {
+		$enabled  = UcpUtils::is_enabled();
+		$left     = count( self::open_steps( $checks ) );
+		$blocked  = array() !== $this->store_conditions->failing_required( $checks );
+		$badge    = $this->shopping_badge( $checks );
+		$can_shop = $enabled && ! $blocked;
+		if ( ! $enabled && ! $blocked ) {
+			$text = __( 'Make your products available to AI shopping assistants.', 'woocommerce' );
+		} elseif ( 0 === $left ) {
+			$text = __( 'AI assistants can shop your store.', 'woocommerce' );
+		} else {
+			$text = sprintf(
+				/* translators: %d: number of setup steps left. */
+				$can_shop ? _n( 'AI assistants can shop your store. %d step left.', 'AI assistants can shop your store. %d steps left.', $left, 'woocommerce' ) : _n( 'AI assistants can\'t shop your store yet. %d step left.', 'AI assistants can\'t shop your store yet. %d steps left.', $left, 'woocommerce' ),
+				$left
+			);
 		}
-		$channels = is_array( $report['channels'] ?? null ) ? $report['channels'] : array();
-		$rows     = array();
-		foreach ( self::question_groups( $this->visible_store_checks( $report, $checks ) ) as $id => $group ) {
-			if ( 'buy' === $id ) {
-				$rows['products'] = array( self::products_question(), self::product_badge( $report ), array_map( static fn( array $check ): string => self::product_issue( $check, $channels )[0], self::failing_product_checks( $report ) ) );
-			}
-			$failing     = array_filter( $group[1], static fn( array $check ): bool => false === $check['ok'] );
-			$rows[ $id ] = array( $group[0], self::group_badge( $group[1] ), array_map( static fn( array $check ): string => self::check_title( $check ), array_values( $failing ) ) );
-		}
-		$declared = is_array( $report['declared'] ?? null ) ? $report['declared'] : array();
-		if ( array() !== array_filter( $declared, 'is_array' ) ) {
-			$rows['declared'] = array( self::declared_question(), array( 'info', self::declared_count( $declared ) ), array() );
-		}
-		echo '<ul class="wc-agentic-commerce-summary__rows">';
-		foreach ( $rows as $id => $row ) {
-			$head = '<span class="wc-agentic-commerce-summary__title">' . esc_html( $row[0] ) . '</span> <mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--' . esc_attr( $row[1][0] ) . '">' . esc_html( $row[1][1] ) . '</mark>';
-			if ( array() === $row[2] ) {
-				echo '<li><div class="wc-agentic-commerce-summary__row">' . wp_kses_post( $head ) . '</div></li>';
-				continue;
-			}
-			echo '<li><details><summary class="wc-agentic-commerce-summary__row">' . wp_kses_post( $head ) . '</summary><ul class="wc-agentic-commerce-summary__issues">';
-			foreach ( $row[2] as $title ) {
-				echo '<li><a href="' . esc_url( self::url() . '#wc-agentic-commerce-group-' . $id ) . '">' . esc_html( $title ) . '</a></li>';
-			}
-			echo '</ul></details></li>';
-		}
-		echo '</ul><p class="wc-agentic-commerce-card__body wc-agentic-commerce-card__actions"><a class="button" href="' . esc_url( self::url() ) . '">' . esc_html__( 'View all checks', 'woocommerce' ) . '</a></p></div>';
+		return array(
+			'title'  => __( 'AI shopping', 'woocommerce' ),
+			'badge'  => 'off' === $badge[0] ? null : self::badge_data( $badge ),
+			'text'   => $text,
+			'button' => array(
+				'href' => AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ),
+				'text' => $enabled ? __( 'Manage', 'woocommerce' ) : __( 'Set up AI shopping', 'woocommerce' ),
+			),
+		);
+	}
+
+	/**
+	 * A badge for the React views: the design system intent and the text.
+	 *
+	 * @param array{0:string,1:string} $badge Badge class and text.
+	 * @return array{intent:string,text:string}
+	 */
+	private static function badge_data( array $badge ): array {
+		return array(
+			'intent' => self::INTENTS[ $badge[0] ] ?? 'none',
+			'text'   => $badge[1],
+		);
 	}
 
 	/**
@@ -365,73 +392,62 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * "Run check" queues the background scan through wc/v3/agent-readiness/scan. While a scan
-	 * waits the button is disabled. When Action Scheduler looks stalled, the page says so;
-	 * the scan never runs in the request (WOOAI-1661).
-	 *
-	 * @param array<string, mixed>|null $report Stored report, or null before the first scan.
-	 */
-	private function render_run( ?array $report ): void {
-		$pending = $this->scheduled_scan->is_pending();
-		$stalled = $pending && $this->scheduled_scan->is_stalled();
-		$message = '';
-		if ( $stalled ) {
-			$message = __( 'The check has not started because scheduled actions do not seem to be running on this site. It runs once they do. See WooCommerce > Status > Scheduled Actions.', 'woocommerce' );
-		} elseif ( $pending ) {
-			$message = __( 'Checking your store in the background. Reload this page in a minute to see the result.', 'woocommerce' );
-		}
-		?>
-		<div class="wc-agentic-commerce-toolbar__action">
-			<button type="button" class="button wc-agentic-commerce-run" <?php disabled( $pending ); ?>><?php echo null === $report ? esc_html__( 'Run check', 'woocommerce' ) : esc_html__( 'Check again', 'woocommerce' ); ?></button>
-			<p class="description wc-agentic-commerce-run-message" role="status"><?php echo esc_html( $message ); ?></p>
-		</div>
-		<?php
-	}
-
-	/**
-	 * The product question of Readiness check: how many products each channel can list, then each
-	 * failing product check with what to do and a link to its products.
+	 * The product question: how many products each channel can list, then each failing product
+	 * check with what to do and a link to its products.
 	 *
 	 * @param array<string, mixed> $report Stored report.
+	 * @return array<string, mixed>
 	 */
-	private function render_product_checks( array $report ): void {
+	private function product_section( array $report ): array {
 		$failing  = self::failing_product_checks( $report );
 		$channels = is_array( $report['channels'] ?? null ) ? $report['channels'] : array();
 		$linked   = ! empty( $report['failures_stored'] );
-
-		self::open_question( 'products', self::products_question(), self::product_badge( $report ) );
-		if ( ! empty( $report['truncated'] ) ) {
-			/* translators: %d: number of products checked. */
-			echo '<div class="notice notice-info inline"><p>' . esc_html( sprintf( __( 'Only the %d most recently updated products were checked.', 'woocommerce' ), ProductScan::PRODUCT_LIMIT ) ) . '</p></div>';
-		}
-		echo '<ul class="wc-agentic-commerce-channels">';
-		foreach ( $channels as $channel_id => $channel ) {
-			$listed = sprintf(
-				/* translators: 1: number of products the channel can list, 2: number of products checked. */
-				esc_html__( '%1$s of %2$s can be listed', 'woocommerce' ),
-				'<strong>' . esc_html( number_format_i18n( (int) ( $channel['listable'] ?? 0 ) ) ) . '</strong>',
-				esc_html( number_format_i18n( (int) ( $report['products'] ?? 0 ) ) )
-			);
-			printf(
-				'<li><span>%1$s</span> <p>%2$s</p></li>',
-				esc_html( (string) ( $channel['name'] ?? $channel_id ) ),
-				wp_kses_post( $listed )
-			);
-		}
-		echo '</ul>';
-
-		if ( array() === $failing ) {
-			echo '<p class="wc-agentic-commerce-card__body">' . esc_html__( 'Every product passed every check.', 'woocommerce' ) . '</p>';
-			self::close_question();
-			return;
-		}
-		echo '<ul class="wc-agentic-commerce-items">';
+		$rows     = array();
 		foreach ( $failing as $check ) {
-			$issue = self::product_issue( $check, $channels );
-			self::render_item( 'open', esc_html( $issue[0] ), array( esc_html( $issue[1] ), self::products_link( (int) $check['count'], (string) ( $check['id'] ?? '' ), $linked ) ) );
+			$issue  = self::product_issue( $check, $channels );
+			$rows[] = self::row( 'open', $issue[0], array( $issue[1] ), self::products_link( (int) $check['count'], (string) ( $check['id'] ?? '' ), $linked ) );
 		}
-		echo '</ul>';
-		self::close_question();
+		$listed = array();
+		foreach ( $channels as $channel_id => $channel ) {
+			$listed[] = array(
+				'name'     => (string) ( $channel['name'] ?? $channel_id ),
+				'listable' => number_format_i18n( (int) ( $channel['listable'] ?? 0 ) ),
+				/* translators: %s: number of products checked. */
+				'of'       => sprintf( __( 'of %s can be listed', 'woocommerce' ), number_format_i18n( (int) ( $report['products'] ?? 0 ) ) ),
+			);
+		}
+		return array(
+			'id'       => 'products',
+			'title'    => self::products_question(),
+			'badge'    => self::badge_data( self::product_badge( $report ) ),
+			'note'     => null,
+			'channels' => $listed,
+			'rows'     => $rows,
+			'folded'   => array(),
+			'empty'    => array() === $failing ? __( 'Every product passed every check.', 'woocommerce' ) : null,
+		);
+	}
+
+	/**
+	 * One check row for the React views.
+	 *
+	 * @param string                              $state    open, required, unknown or pass.
+	 * @param string                              $title    Title.
+	 * @param array<int, string>                  $lines    Lines under the title; empty ones are dropped.
+	 * @param array{href:string,text:string}|null $link     Where to fix it, or the products it affects.
+	 * @param string                              $affects  "Affects: …" line, or ''.
+	 * @param array{href:string,text:string}|null $seen_at  The page a conflict was seen on.
+	 * @return array<string, mixed>
+	 */
+	private static function row( string $state, string $title, array $lines, ?array $link = null, string $affects = '', ?array $seen_at = null ): array {
+		return array(
+			'state'   => $state,
+			'title'   => $title,
+			'affects' => $affects,
+			'lines'   => array_values( array_filter( $lines, static fn( string $line ): bool => '' !== trim( $line ) ) ),
+			'link'    => $link,
+			'seen_at' => $seen_at,
+		);
 	}
 
 	/**
@@ -441,7 +457,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 *
 	 * @param array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label?:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,seen_at?:string}> $checks Store checks shown on the page.
 	 * @param array<string, mixed>                                                                                                                                                                           $report Stored report.
-	 * @return array<int, array{tier:int,title:string,why:string,impact:array{0:string,1:string}|null,link:string,share:float|null,count:int}> Escaped title and link HTML.
+	 * @return array<int, array{tier:int,title:string,why:string,impact:array{0:string,1:string}|null,link:array{href:string,text:string}|null,share:float|null,count:int}>
 	 */
 	private function fix_first_items( array $checks, array $report ): array {
 		$required = array();
@@ -452,7 +468,6 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			}
 			$is_step     = self::is_setup_step( $check );
 			$action      = $is_step ? self::check_action( $check ) : array( self::check_title( $check ), $check['why'], $check['fix_url'] );
-			$link        = '' === $action[2] ? '' : '<a href="' . esc_url( $action[2] ) . '">' . self::fix_link_text( $action[2] ) . '</a>';
 			$is_required = $is_step && StoreConditions::LEVEL_REQUIRED === ( $check['level'] ?? '' );
 			// Agents can't buy without these, or can't reach the store's pages at all.
 			$every_sale = in_array( $check['id'], self::STOPS_EVERY_SALE, true ) || ( 'listing' === $check['blocks'] && 'access' === ( $check['group'] ?? '' ) );
@@ -462,11 +477,11 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			}
 			$item = array(
 				'tier'   => $is_required ? 0 : ( $every_sale ? 1 : 2 ),
-				'title'  => esc_html( $action[0] ),
+				'title'  => $action[0],
 				'why'    => $action[1],
 				// The tier heading already says a non-required step stops every sale.
-				'impact' => $is_required ? array( 'check', __( 'Required', 'woocommerce' ) ) : ( $every_sale ? null : array( 'info', __( 'All products', 'woocommerce' ) ) ),
-				'link'   => $link,
+				'impact' => $is_required ? array( 'check', __( 'Required', 'woocommerce' ) ) : ( $every_sale ? null : array( 'off', __( 'All products', 'woocommerce' ) ) ),
+				'link'   => self::fix_link( $action[2] ),
 				'share'  => null,
 				'count'  => PHP_INT_MAX,
 			);
@@ -485,12 +500,12 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			$issue          = self::product_issue( $check, $channels );
 			$issues[]       = array(
 				'tier'   => $blocks_listing ? 2 : 3,
-				'title'  => esc_html( $issue[0] ),
+				'title'  => $issue[0],
 				'why'    => $issue[1],
 				'impact' => null === $share
 					/* translators: %s: number of products. */
-					? array( 'info', sprintf( _n( '%s product', '%s products', $count, 'woocommerce' ), number_format_i18n( $count ) ) )
-					: array( 'info', self::share_badge( $share ) ),
+					? array( 'off', sprintf( _n( '%s product', '%s products', $count, 'woocommerce' ), number_format_i18n( $count ) ) )
+					: array( 'off', self::share_badge( $share ) ),
 				'link'   => self::products_link( $count, (string) ( $check['id'] ?? '' ), $linked ),
 				'share'  => $share,
 				'count'  => $count,
@@ -502,17 +517,18 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * The Fix first card: numbered, under a heading for what each group of issues stops, with a line on
-	 * how it is ranked. A product issue's line starts with its share of sales. Nothing shows when there is
+	 * The Fix first card: items under a heading for what each group of issues stops, with a line on
+	 * how it is ranked. A product issue's line starts with its share of sales. Null when there is
 	 * nothing to fix.
 	 *
 	 * @param array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label?:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,seen_at?:string}> $checks Store checks shown on the page.
 	 * @param array<string, mixed>                                                                                                                                                                           $report Stored report.
+	 * @return array{title:string,ranking:string,items:array<int, array{tier:string,title:string,why:string,impact:array{intent:string,text:string}|null,link:array{href:string,text:string}|null}>}|null
 	 */
-	private function render_fix_first( array $checks, array $report ): void {
+	private function fix_first( array $checks, array $report ): ?array {
 		$items = $this->fix_first_items( $checks, $report );
 		if ( array() === $items ) {
-			return;
+			return null;
 		}
 		$tiers = array(
 			0 => __( 'Stops every sale', 'woocommerce' ),
@@ -521,38 +537,28 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			3 => __( 'Products that are harder to find', 'woocommerce' ),
 		);
 		$days  = (int) ( is_array( $report['sales'] ?? null ) ? ( $report['sales']['days'] ?? 0 ) : 0 );
-		echo '<div class="wc-agentic-commerce-card wc-agentic-commerce-fix-first" id="wc-agentic-commerce-fix-first">';
-		echo '<div class="wc-agentic-commerce-card__header"><h2>' . esc_html__( 'Fix first', 'woocommerce' ) . '</h2>';
-		echo '<p>' . esc_html( self::ranking_text( $report ) ) . '</p></div><ol class="wc-agentic-commerce-fix-first__list">';
-		$last  = null;
 		$first = true;
+		$list  = array();
 		foreach ( $items as $item ) {
-			$tier = $tiers[ $item['tier'] ];
-			if ( $tier !== $last ) {
-				echo '<li class="wc-agentic-commerce-fix-first__tier" aria-hidden="true">' . esc_html( $tier ) . '</li>';
-				$last = $tier;
-			}
 			$why = $item['why'];
 			if ( null !== $item['share'] ) {
 				// The first share says over which period; the rest only give the share.
 				$why   = trim( self::sales_text( $item['share'], $first ? $days : 0 ) . ' ' . $why );
 				$first = false;
 			}
-			echo '<li class="wc-agentic-commerce-fix-first__item"><span class="screen-reader-text">' . esc_html( $tier ) . ': </span>';
-			echo '<div class="wc-agentic-commerce-fix-first__head"><p class="wc-agentic-commerce-fix-first__title">' . wp_kses_post( $item['title'] ) . '</p>';
-			if ( null !== $item['impact'] ) {
-				echo '<mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--' . esc_attr( $item['impact'][0] ) . '">' . esc_html( $item['impact'][1] ) . '</mark>';
-			}
-			echo '</div>';
-			if ( '' !== $why ) {
-				echo '<p class="description">' . esc_html( $why ) . '</p>';
-			}
-			if ( '' !== $item['link'] ) {
-				echo '<p class="description">' . wp_kses_post( $item['link'] ) . '</p>';
-			}
-			echo '</li>';
+			$list[] = array(
+				'tier'   => $tiers[ $item['tier'] ],
+				'title'  => $item['title'],
+				'why'    => $why,
+				'impact' => null === $item['impact'] ? null : self::badge_data( $item['impact'] ),
+				'link'   => $item['link'],
+			);
 		}
-		echo '</ol></div>';
+		return array(
+			'title'   => __( 'Fix first', 'woocommerce' ),
+			'ranking' => self::ranking_text( $report ),
+			'items'   => $list,
+		);
 	}
 
 	/**
@@ -687,20 +693,27 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * "View N products", linked to the Products list filtered to them when each product's failures are stored.
+	 * "View N products", linked to the Products list filtered to them when each product's failures
+	 * are stored; "N products" with no link otherwise.
 	 *
 	 * @param int    $count  Number of products.
 	 * @param string $value  Stored failure value.
 	 * @param bool   $linked Whether the list can be filtered.
-	 * @return string Escaped HTML.
+	 * @return array{href:string,text:string}
 	 */
-	private static function products_link( int $count, string $value, bool $linked ): string {
+	private static function products_link( int $count, string $value, bool $linked ): array {
 		if ( ! $linked ) {
-			/* translators: %s: number of products. */
-			return esc_html( sprintf( _n( '%s product', '%s products', $count, 'woocommerce' ), number_format_i18n( $count ) ) );
+			return array(
+				'href' => '',
+				/* translators: %s: number of products. */
+				'text' => sprintf( _n( '%s product', '%s products', $count, 'woocommerce' ), number_format_i18n( $count ) ),
+			);
 		}
-		/* translators: %s: number of products. */
-		return '<a href="' . esc_url( ProductsList::url( $value ) ) . '">' . esc_html( sprintf( _n( 'View %s product', 'View %s products', $count, 'woocommerce' ), number_format_i18n( $count ) ) ) . '</a>';
+		return array(
+			'href' => ProductsList::url( $value ),
+			/* translators: %s: number of products. */
+			'text' => sprintf( _n( 'View %s product', 'View %s products', $count, 'woocommerce' ), number_format_i18n( $count ) ),
+		);
 	}
 
 	/**
@@ -753,30 +766,34 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 
 	/**
 	 * Protocols and files the store serves to agents, as information, never pass or fail: how many were
-	 * found, then every item behind a fold. With no items in the report there is no card.
+	 * found, then every item. Null with no items in the report.
 	 *
 	 * @param array $items Items from the report.
+	 * @return array{title:string,text:string,more:string,items:array<int, array{name:string,found:bool}>}|null
 	 */
-	private function render_declared( array $items ): void {
-		$items = array_filter( $items, 'is_array' );
+	private static function declared( array $items ): ?array {
+		$items = array_values( array_filter( $items, 'is_array' ) );
 		if ( array() === $items ) {
-			return;
+			return null;
 		}
-		self::open_question( 'declared', self::declared_question(), null );
-		/* translators: %s: how many items were found, such as "4 of 33 found". */
-		echo '<p class="wc-agentic-commerce-card__body">' . esc_html( sprintf( __( 'Optional files some AI tools look for. Nothing to fix. %s.', 'woocommerce' ), self::declared_count( $items ) ) ) . '</p>';
-		/* translators: %d: number of items. */
-		self::open_more( sprintf( _n( 'Show the %d item', 'Show the %d items', count( $items ), 'woocommerce' ), count( $items ) ) );
-		echo '<ul class="wc-agentic-commerce-items">';
-		foreach ( $items as $item ) {
-			self::render_item( true === ( $item['found'] ?? null ) ? 'pass' : 'off', esc_html( (string) ( $item['name'] ?? '' ) ), array() );
-		}
-		echo '</ul></details>';
-		self::close_question();
+		return array(
+			'title' => self::declared_question(),
+			/* translators: %s: how many items were found, such as "4 of 33 found". */
+			'text'  => sprintf( __( 'Optional files some AI tools look for. Nothing to fix. %s.', 'woocommerce' ), self::declared_count( $items ) ),
+			/* translators: %d: number of items. */
+			'more'  => sprintf( _n( 'Show the %d item', 'Show the %d items', count( $items ), 'woocommerce' ), count( $items ) ),
+			'items' => array_map(
+				static fn( array $item ): array => array(
+					'name'  => (string) ( $item['name'] ?? '' ),
+					'found' => true === ( $item['found'] ?? null ),
+				),
+				$items
+			),
+		);
 	}
 
 	/**
-	 * The declared items question's title, on its card and its landing page row.
+	 * The declared items question's title, on its card and its Overview row.
 	 */
 	private static function declared_question(): string {
 		return __( 'What does your store share with AI assistants?', 'woocommerce' );
@@ -788,8 +805,9 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 * @param array $items Items from the report.
 	 */
 	private static function declared_count( array $items ): string {
+		$found = array_filter( $items, static fn( $item ): bool => is_array( $item ) && true === ( $item['found'] ?? null ) );
 		/* translators: 1: number of items found, 2: number of items looked for. */
-		return sprintf( __( '%1$s of %2$s found', 'woocommerce' ), number_format_i18n( count( self::found_declared( $items ) ) ), number_format_i18n( count( array_filter( $items, 'is_array' ) ) ) );
+		return sprintf( __( '%1$s of %2$s found', 'woocommerce' ), number_format_i18n( count( $found ) ), number_format_i18n( count( array_filter( $items, 'is_array' ) ) ) );
 	}
 
 	/**
@@ -819,97 +837,70 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 *
 	 * @param array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,label?:string,why:string,fix:string,fix_url:string,conflict?:bool,seen_at?:string}> $checks   Checks.
 	 * @param bool|null                                                                                                                                                          $launched Whether the store is launched.
+	 * @return array<int, array<string, mixed>>
 	 */
-	private function render_check_rows( array $checks, ?bool $launched ): void {
-		if ( array() === $checks ) {
-			return;
-		}
-		echo '<ul class="wc-agentic-commerce-items">';
+	private static function check_rows( array $checks, ?bool $launched ): array {
+		$rows = array();
 		foreach ( $checks as $check ) {
 			if ( null === $check['ok'] ) {
-				self::render_item( 'unknown', esc_html( $check['name'] ), array( $launched ? esc_html__( 'This couldn\'t be checked. The next check tries again.', 'woocommerce' ) : esc_html__( 'Launch your store to run this check.', 'woocommerce' ) ) );
+				$rows[] = self::row( 'unknown', $check['name'], array( $launched ? __( 'This couldn\'t be checked. The next check tries again.', 'woocommerce' ) : __( 'Launch your store to run this check.', 'woocommerce' ) ) );
 				continue;
 			}
 			if ( $check['ok'] ) {
 				// A check's why describes the failure, so a passed one shows only its name, as in Status.
-				self::render_item( 'pass', esc_html( $check['name'] ), array() );
+				$rows[] = self::row( 'pass', $check['name'], array() );
 				continue;
 			}
-			$lines = array( esc_html( self::affects_text( $check ) ) );
 			if ( self::is_setup_step( $check ) ) {
 				// A setup step, from StoreConditions: worded as in Status.
 				$action   = self::check_action( $check );
 				$required = StoreConditions::LEVEL_REQUIRED === $check['level'];
-				$lines[]  = esc_html( $action[1] );
-				if ( '' !== $action[2] ) {
-					$lines[] = '<a href="' . esc_url( $action[2] ) . '">' . self::fix_link_text( $action[2] ) . '</a>';
-				}
-				self::render_item( $required ? 'required' : 'open', esc_html( $action[0] ) . ( $required ? ' <mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--check">' . esc_html__( 'Required', 'woocommerce' ) . '</mark>' : '' ), $lines );
+				$rows[]   = self::row( $required ? 'required' : 'open', $action[0], array( $action[1] ), self::fix_link( $action[2] ), self::affects_text( $check ) );
 				continue;
 			}
-			$lines[] = esc_html( $check['why'] );
-			if ( ! empty( $check['conflict'] ) && ! empty( $check['seen_at'] ) ) {
-				$lines[] = esc_html__( 'Seen on:', 'woocommerce' ) . ' <a href="' . esc_url( $check['seen_at'] ) . '">' . esc_html( $check['seen_at'] ) . '</a>';
-			}
-			$lines[] = esc_html( $check['fix'] );
-			if ( '' !== $check['fix_url'] ) {
-				$lines[] = '<a href="' . esc_url( $check['fix_url'] ) . '">' . self::fix_link_text( $check['fix_url'] ) . '</a>';
-			}
-			self::render_item( 'open', esc_html( self::check_title( $check ) ), $lines );
+			$seen_at = ! empty( $check['conflict'] ) && ! empty( $check['seen_at'] )
+				? array(
+					'href' => (string) $check['seen_at'],
+					'text' => (string) $check['seen_at'],
+				)
+				: null;
+			$rows[]  = self::row( 'open', self::check_title( $check ), array( $check['why'], $check['fix'] ), self::fix_link( $check['fix_url'] ), self::affects_text( $check ), $seen_at );
 		}
-		echo '</ul>';
+		return $rows;
 	}
 
 	/**
-	 * Open a question's card: its title and badge. The caller closes it with close_question().
+	 * A failing check's fix link: where it goes, or null without a URL.
 	 *
-	 * @param string                        $id    Group id, for the card's anchor.
-	 * @param string                        $title The question.
-	 * @param array{0:string,1:string}|null $badge Badge class and text, or null for none.
+	 * @param string $url Fix URL.
+	 * @return array{href:string,text:string}|null
 	 */
-	private static function open_question( string $id, string $title, ?array $badge ): void {
-		printf(
-			'<div class="wc-agentic-commerce-card wc-agentic-commerce-question" id="wc-agentic-commerce-group-%1$s"><div class="wc-agentic-commerce-card__header wc-agentic-commerce-card__header--split"><h2>%2$s</h2>%3$s</div>',
-			esc_attr( $id ),
-			esc_html( $title ),
-			null === $badge ? '' : ' <mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--' . esc_attr( $badge[0] ) . '">' . esc_html( $badge[1] ) . '</mark>'
+	private static function fix_link( string $url ): ?array {
+		if ( '' === $url ) {
+			return null;
+		}
+		return array(
+			'href' => $url,
+			'text' => self::fix_link_text( $url ),
 		);
-	}
-
-	/**
-	 * The declared protocols and files the store serves.
-	 *
-	 * @param array $items Items from the report.
-	 * @return array<int|string, array<string, mixed>>
-	 */
-	private static function found_declared( array $items ): array {
-		return array_filter( $items, static fn( $item ): bool => is_array( $item ) && true === ( $item['found'] ?? null ) );
-	}
-
-	/**
-	 * Close a question opened with open_question().
-	 */
-	private static function close_question(): void {
-		echo '</div>';
 	}
 
 	/**
 	 * The text of a failing check's fix link: where it goes.
 	 *
 	 * @param string $url Fix URL.
-	 * @return string Escaped text.
 	 */
 	private static function fix_link_text( string $url ): string {
 		if ( str_starts_with( $url, admin_url( 'upload.php' ) ) ) {
-			return esc_html__( 'Go to Media library', 'woocommerce' );
+			return __( 'Go to Media library', 'woocommerce' );
 		}
 		if ( str_starts_with( $url, admin_url( 'post.php' ) ) ) {
-			return esc_html__( 'Edit page', 'woocommerce' );
+			return __( 'Edit page', 'woocommerce' );
 		}
 		if ( str_starts_with( $url, admin_url( 'admin.php?page=wc-settings&tab=site-visibility' ) ) ) {
-			return esc_html__( 'Go to Site visibility', 'woocommerce' );
+			return __( 'Go to Site visibility', 'woocommerce' );
 		}
-		return str_starts_with( $url, admin_url() ) ? esc_html__( 'Open settings', 'woocommerce' ) : esc_html__( 'Learn how', 'woocommerce' );
+		return str_starts_with( $url, admin_url() ) ? __( 'Open settings', 'woocommerce' ) : __( 'Learn how', 'woocommerce' );
 	}
 
 	/**
@@ -945,34 +936,34 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * The questions under Fix first: a card per merchant question with the checks the last scan ran on
-	 * what the store returns, one for the product checks before the buying question, then what the store
-	 * shares. Inside a card, problems show first and passed checks are folded.
+	 * The sections under Fix first: one per merchant question with the checks the last scan ran on
+	 * what the store returns, the product checks before the buying question. Inside a section,
+	 * problems come first and passed checks are folded.
 	 *
 	 * @param array<int, array{id:string,ok:bool|null,blocks:string,group?:string,level:string,name:string,label?:string,why:string,fix:string,fix_url:string,conflict?:bool,pending?:bool,seen_at?:string}> $checks   Scanned checks to show.
 	 * @param bool                                                                                                                                                                                           $launched Whether the store is launched.
 	 * @param array<string, mixed>                                                                                                                                                                           $report   Stored report.
+	 * @return array<int, array<string, mixed>>
 	 */
-	private function render_readiness( array $checks, bool $launched, array $report ): void {
+	private function sections( array $checks, bool $launched, array $report ): array {
+		$sections = array();
 		foreach ( self::question_groups( $checks ) as $id => $group ) {
 			if ( 'buy' === $id ) {
-				$this->render_product_checks( $report );
+				$sections[] = $this->product_section( $report );
 			}
-			$folded = array_filter( $group[1], static fn( array $check ): bool => true === $check['ok'] );
-			self::open_question( $id, $group[0], self::group_badge( $group[1] ) );
-			if ( 'access' === $id && ! UcpUtils::is_enabled() ) {
-				echo '<p class="wc-agentic-commerce-card__body">' . esc_html__( 'Agent shopping is off, so the UCP checks don\'t run.', 'woocommerce' ) . '</p>';
-			}
-			$this->render_check_rows( array_diff_key( $group[1], $folded ), $launched );
-			if ( array() !== $folded ) {
-				/* translators: %d: number of checks. */
-				self::open_more( sprintf( _n( 'Show %d more check', 'Show %d more checks', count( $folded ), 'woocommerce' ), count( $folded ) ) );
-				$this->render_check_rows( $folded, $launched );
-				echo '</details>';
-			}
-			self::close_question();
+			$folded     = array_filter( $group[1], static fn( array $check ): bool => true === $check['ok'] );
+			$sections[] = array(
+				'id'       => $id,
+				'title'    => $group[0],
+				'badge'    => self::badge_data( self::group_badge( $group[1] ) ),
+				'note'     => 'access' === $id && ! UcpUtils::is_enabled() ? __( 'Agent shopping is off, so the UCP checks don\'t run.', 'woocommerce' ) : null,
+				'channels' => array(),
+				'rows'     => self::check_rows( array_values( array_diff_key( $group[1], $folded ) ), $launched ),
+				'folded'   => self::check_rows( array_values( $folded ), $launched ),
+				'empty'    => null,
+			);
 		}
-		$this->render_declared( is_array( $report['declared'] ?? null ) ? $report['declared'] : array() );
+		return $sections;
 	}
 
 	/**
@@ -998,7 +989,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	}
 
 	/**
-	 * The product question's title, on its card and its landing page row.
+	 * The product question's title.
 	 */
 	private static function products_question(): string {
 		return __( 'Can AI shopping apps list your products?', 'woocommerce' );

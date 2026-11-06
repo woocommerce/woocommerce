@@ -8,8 +8,9 @@ use Automattic\WooCommerce\Internal\Traits\ScriptDebug;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Markup that the AI tools tab and the Readiness check page share: check rows, their
- * badges and actions, folds, and the script for the switch, Check again and the copy button.
+ * Markup of the AI tools tab's AI shopping section, and the wording of setup steps that Sales
+ * readiness shares: check rows, their badges and actions, folds, and the script for the switch and the
+ * copy button.
  *
  * @since 11.4.0
  */
@@ -104,7 +105,7 @@ trait ReadinessMarkup {
 	}
 
 	/**
-	 * Load the script for the switch, Run check and the copy button.
+	 * Load the script for the switch and the copy button.
 	 */
 	private function enqueue_script(): void {
 		wp_enqueue_script(
@@ -118,12 +119,10 @@ trait ReadinessMarkup {
 			'wc-agentic-commerce-settings',
 			'wcAgenticCommerceSettings',
 			array(
-				'path'     => '/wc/v3/agent-readiness/ucp',
-				'scanPath' => '/wc/v3/agent-readiness/scan',
-				'i18n'     => array(
-					'error'   => __( 'The setting could not be changed. Reload the page and try again.', 'woocommerce' ),
-					'copied'  => __( 'Copied', 'woocommerce' ),
-					'running' => __( 'Checking your store in the background. Reload this page in a minute to see the result.', 'woocommerce' ),
+				'path' => '/wc/v3/agent-readiness/ucp',
+				'i18n' => array(
+					'error'  => __( 'The setting could not be changed. Reload the page and try again.', 'woocommerce' ),
+					'copied' => __( 'Copied', 'woocommerce' ),
 				),
 			)
 		);

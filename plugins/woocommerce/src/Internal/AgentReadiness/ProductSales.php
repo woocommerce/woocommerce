@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Each product's net sales over the last DAYS days, read from the Analytics order
- * lookup tables, so Readiness check can rank product problems by the sales they put
+ * lookup tables, so Sales readiness can rank product problems by the sales they put
  * at stake. Variations count toward their parent product. Orders are counted as
  * Analytics counts them, leaving out the statuses its settings exclude.
  *

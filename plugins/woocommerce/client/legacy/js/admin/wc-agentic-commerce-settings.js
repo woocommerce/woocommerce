@@ -29,7 +29,7 @@
 					data: { enabled: enable },
 				} );
 				render( response.enabled );
-				// Status, the landing card and Readiness check depend on the switch; reload to show them for the new state.
+				// Status, the Overview and Sales readiness depend on the switch; reload to show them for the new state.
 				// Not reload(): after Save changes, that would post the settings form again.
 				window.location.assign( window.location.href.split( '#' )[ 0 ] );
 			} catch ( error ) {
@@ -38,24 +38,6 @@
 			} finally {
 				toggle.disabled = false;
 				knob.classList.remove( 'woocommerce-input-toggle--loading' );
-			}
-		} );
-	}
-
-	const run = document.querySelector( '.wc-agentic-commerce-run' );
-	const runMessage = document.querySelector( '.wc-agentic-commerce-run-message' );
-	if ( run && runMessage ) {
-		run.addEventListener( 'click', async () => {
-			run.disabled = true;
-			try {
-				await window.wp.apiFetch( {
-					path: settings.scanPath,
-					method: 'POST',
-				} );
-				runMessage.textContent = settings.i18n.running;
-			} catch ( error ) {
-				run.disabled = false;
-				runMessage.textContent = ( error && error.message ) || settings.i18n.error;
 			}
 		} );
 	}

@@ -1,0 +1,3 @@
+Significance: minor
+Type: dev
+Comment: Rebuild the experimental Sales readiness page and the AI tools Overview as React views on the WordPress design system, fed by wc/v3/agent-readiness/view.

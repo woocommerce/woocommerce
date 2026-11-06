@@ -62,7 +62,7 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	private AgentReadiness $agent_readiness;
 
 	/**
-	 * Readiness check.
+	 * Sales readiness.
 	 *
 	 * @var ReadinessCheckPage
 	 */
@@ -76,7 +76,7 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	 * @param FeaturesController $features_controller Features controller.
 	 * @param StoreConditions    $store_conditions    Store conditions.
 	 * @param AgentReadiness     $agent_readiness     Readiness service.
-	 * @param ReadinessCheckPage $readiness_page      Readiness check.
+	 * @param ReadinessCheckPage $readiness_page      Sales readiness.
 	 */
 	final public function init( FeaturesController $features_controller, StoreConditions $store_conditions, AgentReadiness $agent_readiness, ReadinessCheckPage $readiness_page ): void {
 		$this->features_controller = $features_controller;

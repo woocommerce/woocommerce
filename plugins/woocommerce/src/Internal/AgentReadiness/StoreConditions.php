@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  * `ok` says whether the store is clear of the problem the label names, or is
  * null when it couldn't be checked (StoreOutputChecks); `name` is the check
  * worded as its passing state. `group` is the merchant question the check
- * answers on Readiness check, as for the store output checks.
+ * answers on Sales readiness, as for the store output checks.
  * `blocks` says what a failing condition stops: `listing` hides every product
  * on every channel, `ucp` hides the catalog from agents that use UCP,
  * `checkout` stops or weakens agent orders. A failing `required` condition
