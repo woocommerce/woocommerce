@@ -111,7 +111,7 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox clear_transients updates review count and rating data when a new review is added.
+	 * @testdox maybe_update_product_average_rating updates review count and rating data when a new review is added.
 	 */
 	public function test_maybe_update_product_average_rating_with_valid_product(): void {
 		$product    = WC_Helper_Product::create_simple_product();
@@ -127,7 +127,7 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox clear_transients skips product save when review count has not changed.
+	 * @testdox maybe_update_product_average_rating skips product save when review count has not changed.
 	 */
 	public function test_maybe_update_product_average_rating_skips_save_when_review_count_unchanged(): void {
 		$product    = WC_Helper_Product::create_simple_product();
