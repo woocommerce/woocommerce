@@ -60,7 +60,8 @@ final class ExportCommand {
 	 * : Comma-separated product category slugs.
 	 *
 	 * [--ids=<list>]
-	 * : Comma-separated product IDs.
+	 * : Comma-separated product IDs. Takes priority over `--types` and `--category`, which are
+	 * ignored. A variable product's variations are included.
 	 *
 	 * [--meta]
 	 * : Include custom meta columns.
@@ -123,6 +124,18 @@ final class ExportCommand {
 		if ( '-' === $destination && $porcelain ) {
 			WP_CLI::error( 'The --porcelain flag cannot be used with `-`, because STDOUT carries the CSV.' );
 			return;
+		}
+
+		// A filter that ends up empty would export the whole catalog, so a passed flag must yield values.
+		$filters = array(
+			'types'    => $types,
+			'category' => $category,
+		);
+
+		foreach ( $filters as $flag => $values ) {
+			if ( isset( $assoc_args[ $flag ] ) && empty( $values ) ) {
+				WP_CLI::error( sprintf( 'The --%s argument requires at least one value.', $flag ) );
+			}
 		}
 
 		$this->validate_columns( $columns );
