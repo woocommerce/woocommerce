@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 class WC_Product_Lookup_Refresh_Test extends WC_Unit_Test_Case {
 
 	/**
-	 * @testdox Should preserve a product data store's custom lookup prices after direct updates.
+	 * @testdox Should preserve a product data store's custom lookup prices after sales, stock and scheduled sale updates.
 	 * @testWith ["sales", 10]
 	 *           ["stock", 10]
 	 *           ["sale-start", 5]
