@@ -43,7 +43,7 @@ final class CallbackUtil {
 			try {
 				return self::get_closure_signature( $callback );
 			} catch ( \Exception $e ) {
-				return 'Closure@' . spl_object_hash( $callback );
+				return 'Closure@' . sprintf( '%016x0000000000000000', spl_object_id( $callback ) );
 			}
 		}
 
