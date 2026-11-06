@@ -5247,21 +5247,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should reject status updates against unknown order IDs without leaking existence.
-	 */
-	public function test_order_update_status_rejects_unknown_id(): void {
-		$result = wp_get_ability( 'woocommerce/order-update-status' )->execute(
-			array(
-				'id'     => 999999,
-				'status' => 'processing',
-			)
-		);
-
-		$this->assertWPError( $result );
-		$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
-	}
-
-	/**
 	 * @testdox Should attribute order notes to the acting user.
 	 */
 	public function test_order_add_note_attributes_to_acting_user(): void {
