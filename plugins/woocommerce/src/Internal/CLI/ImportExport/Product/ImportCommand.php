@@ -455,8 +455,9 @@ final class ImportCommand {
 	 */
 	private function report_summary( array $results, array $options ): void {
 		$summary = sprintf(
-			'imported %d, updated %d, skipped %d, failed %d.',
+			'imported %d, imported variations %d, updated %d, skipped %d, failed %d.',
 			$results['imported'],
+			$results['imported_variations'],
 			$results['updated'],
 			$results['skipped'],
 			$results['failed']

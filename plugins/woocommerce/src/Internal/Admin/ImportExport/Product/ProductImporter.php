@@ -237,14 +237,19 @@ final class ProductImporter {
 	 */
 	public function run_batch( string $file, array $options, int $position ): array {
 		$this->load_importer();
-		$this->validate_mapping( (array) ( $options['mapping'] ?? array() ) );
+		$mapping = (array) ( $options['mapping'] ?? array() );
+		$this->validate_mapping( $mapping );
 
 		$importer = WC_Product_CSV_Importer_Controller::get_importer(
 			$file,
 			array(
 				'start_pos'          => $position,
 				'lines'              => max( 1, (int) ( $options['batch_size'] ?? 100 ) ),
-				'mapping'            => (array) ( $options['mapping'] ?? array() ),
+				// The importer reads `from` and `to` keys as this shape, so a flat mapping would clash with CSV columns of those names.
+				'mapping'            => array(
+					'from' => array_keys( $mapping ),
+					'to'   => array_values( $mapping ),
+				),
 				'update_existing'    => ! empty( $options['update_existing'] ),
 				'delimiter'          => (string) ( $options['delimiter'] ?? ',' ),
 				'character_encoding' => (string) ( $options['character_encoding'] ?? 'UTF-8' ),
