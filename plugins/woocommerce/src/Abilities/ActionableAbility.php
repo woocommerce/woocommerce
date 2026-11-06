@@ -46,7 +46,7 @@ defined( 'ABSPATH' ) || exit;
  * variable parent derives from its variations, or a row in a table of the
  * extension. A sync also sees the objects the call deleted and the input of
  * the call. A refusal there rolls the call back too. When a query hits a
- * deadlock or a lock wait timeout, as with a parallel call, the call rolls
+ * deadlock, a lock wait timeout or a snapshot conflict with a parallel call, the call rolls
  * back and fails with a WP_Error instead of reporting the write. A rollback drops the
  * object caches of the objects the call saved or deleted. It does not undo what a sync
  * did outside the database, such as an HTTP request, and it does nothing on a

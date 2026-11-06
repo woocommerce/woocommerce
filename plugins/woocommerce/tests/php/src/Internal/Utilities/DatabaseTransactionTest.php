@@ -186,9 +186,10 @@ class DatabaseTransactionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox run() should roll back and return a WP_Error when a query inside it hits a deadlock or a lock wait timeout.
+	 * @testdox run() should roll back and return a WP_Error when a query inside it hits a deadlock, a lock wait timeout or a snapshot conflict.
 	 * @testWith ["Deadlock found when trying to get lock; try restarting transaction"]
 	 *           ["Lock wait timeout exceeded; try restarting transaction"]
+	 *           ["Record has changed since last read in table 'wp_options'; try restarting transaction"]
 	 *
 	 * @param string $error Database error of the failed query.
 	 */
