@@ -558,6 +558,202 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A new attribute's taxonomy is registered like on the next request, before the added hook runs.
+	 */
+	public function test_wc_create_attribute_registers_the_taxonomy_before_the_added_hook(): void {
+		global $wc_product_attributes;
+
+		$slug     = $this->get_unique_attribute_slug( 'new' );
+		$taxonomy = wc_attribute_taxonomy_name( $slug );
+		$term     = null;
+		add_action(
+			'woocommerce_attribute_added',
+			function () use ( $taxonomy, &$term ) {
+				$term = wp_insert_term( 'Red', $taxonomy );
+			}
+		);
+
+		$attribute_id = wc_create_attribute(
+			array(
+				'name' => 'Runtime color',
+				'slug' => $slug,
+			)
+		);
+
+		$this->assertIsInt( $attribute_id, 'The attribute should be created.' );
+		$this->assertIsArray( $term, 'A woocommerce_attribute_added listener should be able to add a term.' );
+
+		$wp_taxonomy = get_taxonomy( $taxonomy );
+		$this->assertInstanceOf( WP_Taxonomy::class, $wp_taxonomy, 'The taxonomy should be registered right away.' );
+		$this->assertFalse( $wp_taxonomy->public, 'An attribute without archives should not be public.' );
+		$this->assertFalse( $wp_taxonomy->hierarchical, 'Attribute taxonomies should not be hierarchical.' );
+		$this->assertTrue( $wp_taxonomy->show_ui, 'The taxonomy should have the admin UI, as on the next request.' );
+		$this->assertSame( 'manage_product_terms', $wp_taxonomy->cap->manage_terms, 'The taxonomy should use the product term capabilities.' );
+		$this->assertSame( 'Product Runtime color', $wp_taxonomy->labels->name, 'The taxonomy should use the attribute label.' );
+		$this->assertSame( (string) $attribute_id, $wc_product_attributes[ $taxonomy ]->attribute_id ?? null, 'The attribute should be in the $wc_product_attributes global.' );
+		$this->assertTrue( taxonomy_is_product_attribute( $taxonomy ), 'The taxonomy should be known as a product attribute.' );
+	}
+
+	/**
+	 * @testdox An attribute with archives is registered as a public taxonomy with its rewrite slug.
+	 */
+	public function test_wc_create_attribute_registers_a_public_taxonomy_for_attributes_with_archives(): void {
+		$slug = $this->get_unique_attribute_slug( 'public' );
+
+		wc_create_attribute(
+			array(
+				'name'         => 'Runtime public',
+				'slug'         => $slug,
+				'has_archives' => true,
+			)
+		);
+
+		$wp_taxonomy = get_taxonomy( wc_attribute_taxonomy_name( $slug ) );
+		$this->assertInstanceOf( WP_Taxonomy::class, $wp_taxonomy, 'The taxonomy should be registered right away.' );
+		$this->assertTrue( $wp_taxonomy->public, 'An attribute with archives should be public.' );
+		$this->assertStringEndsWith( '/' . $slug, $wp_taxonomy->rewrite['slug'], 'The rewrite slug should end with the attribute slug.' );
+	}
+
+	/**
+	 * @testdox Creating the same attribute slug twice in one request is rejected.
+	 */
+	public function test_wc_create_attribute_rejects_the_same_slug_twice_in_one_request(): void {
+		global $wpdb;
+
+		$slug = $this->get_unique_attribute_slug( 'dup' );
+
+		$first  = wc_create_attribute(
+			array(
+				'name' => 'First',
+				'slug' => $slug,
+			)
+		);
+		$second = wc_create_attribute(
+			array(
+				'name' => 'Second',
+				'slug' => $slug,
+			)
+		);
+
+		$this->assertIsInt( $first, 'The first attribute should be created.' );
+		$this->assertWPError( $second, 'The second attribute with the same slug should be rejected.' );
+		$this->assertSame( 'invalid_product_attribute_slug_already_exists', $second->get_error_code(), 'The error should say the slug is in use.' );
+		$this->assertSame(
+			'1',
+			$wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_name = %s", $slug ) ),
+			'Only one attribute row should exist for the slug.'
+		);
+	}
+
+	/**
+	 * @testdox Renaming an attribute slug registers the new taxonomy and removes the old one.
+	 */
+	public function test_wc_update_attribute_slug_rename_registers_the_new_taxonomy(): void {
+		global $wc_product_attributes;
+
+		$old_slug     = $this->get_unique_attribute_slug( 'old' );
+		$new_slug     = $this->get_unique_attribute_slug( 'new' );
+		$old_taxonomy = wc_attribute_taxonomy_name( $old_slug );
+		$new_taxonomy = wc_attribute_taxonomy_name( $new_slug );
+
+		$attribute_id = wc_create_attribute(
+			array(
+				'name' => 'Before rename',
+				'slug' => $old_slug,
+			)
+		);
+		$term         = wp_insert_term( 'Red', $old_taxonomy );
+		$this->assertIsArray( $term, 'A term should be added to the new attribute.' );
+
+		$result = wc_update_attribute(
+			$attribute_id,
+			array(
+				'name' => 'After rename',
+				'slug' => $new_slug,
+			)
+		);
+		$this->assertSame( $attribute_id, $result, 'The attribute should be updated.' );
+
+		$this->assertFalse( taxonomy_exists( $old_taxonomy ), 'The old taxonomy should be removed, as on the next request.' );
+		$this->assertArrayNotHasKey( $old_taxonomy, $wc_product_attributes, 'The old taxonomy should leave the $wc_product_attributes global.' );
+
+		$wp_taxonomy = get_taxonomy( $new_taxonomy );
+		$this->assertInstanceOf( WP_Taxonomy::class, $wp_taxonomy, 'The new taxonomy should be registered.' );
+		$this->assertSame( $new_taxonomy, $wp_taxonomy->name, 'The new taxonomy should be a real registration, not a copy of the old one.' );
+		$this->assertSame( 'Product After rename', $wp_taxonomy->labels->name, 'The new taxonomy should use the new label.' );
+		$this->assertArrayHasKey( $new_taxonomy, $wc_product_attributes, 'The new taxonomy should be in the $wc_product_attributes global.' );
+		$this->assertNotEmpty( term_exists( 'red', $new_taxonomy ), 'The moved term should be found in the new taxonomy.' );
+	}
+
+	/**
+	 * @testdox wc_update_attribute() should register the taxonomy again when archives are turned on or off.
+	 */
+	public function test_wc_update_attribute_has_archives_updates_registration(): void {
+		global $wc_product_attributes, $wp;
+
+		$slug     = $this->get_unique_attribute_slug( 'archive' );
+		$taxonomy = wc_attribute_taxonomy_name( $slug );
+		$id       = null;
+
+		try {
+			$id = wc_create_attribute(
+				array(
+					'name' => 'Archive toggle',
+					'slug' => $slug,
+				)
+			);
+			$this->assertIsInt( $id, 'The attribute should be created.' );
+			$this->assertFalse( get_taxonomy( $taxonomy )->public, 'The taxonomy should start private.' );
+
+			wc_update_attribute( $id, array( 'has_archives' => true ) );
+			$wp_taxonomy = get_taxonomy( $taxonomy );
+			$this->assertTrue( $wp_taxonomy->public, 'Turning archives on should make the taxonomy public.' );
+			$this->assertIsArray( $wp_taxonomy->rewrite, 'Turning archives on should add rewrite rules.' );
+			$this->assertContains( $taxonomy, $wp->public_query_vars, 'Turning archives on should add the query var.' );
+			$this->assertSame( 1, (int) $wc_product_attributes[ $taxonomy ]->attribute_public, 'The global should hold the new archive setting.' );
+
+			wc_update_attribute( $id, array( 'has_archives' => false ) );
+			$this->assertFalse( get_taxonomy( $taxonomy )->public, 'Turning archives off should make the taxonomy private again.' );
+			$this->assertNotContains( $taxonomy, $wp->public_query_vars, 'Turning archives off should remove the query var.' );
+		} finally {
+			$this->clean_up_attribute_test_state( array( $id ), $taxonomy );
+		}
+	}
+
+	/**
+	 * @testdox wc_create_attribute() should register the taxonomy from the saved row, after the woocommerce_attribute_taxonomies filter.
+	 */
+	public function test_wc_create_attribute_registers_the_filtered_attribute_row(): void {
+		$slug     = $this->get_unique_attribute_slug( 'filtered' );
+		$taxonomy = wc_attribute_taxonomy_name( $slug );
+		$id       = null;
+		$filter   = function ( $attributes ) use ( $slug ) {
+			foreach ( $attributes as $attribute ) {
+				if ( $slug === $attribute->attribute_name ) {
+					$attribute->attribute_label = 'Filtered label';
+				}
+			}
+			return $attributes;
+		};
+
+		add_filter( 'woocommerce_attribute_taxonomies', $filter );
+
+		try {
+			$id = wc_create_attribute(
+				array(
+					'name' => 'Saved label',
+					'slug' => $slug,
+				)
+			);
+			$this->assertIsInt( $id, 'The attribute should be created.' );
+			$this->assertSame( 'Filtered label', get_taxonomy( $taxonomy )->labels->singular_name, 'The taxonomy should use the filtered row, as init does.' );
+		} finally {
+			remove_filter( 'woocommerce_attribute_taxonomies', $filter );
+			$this->clean_up_attribute_test_state( array( $id ), $taxonomy );
+		}
+	}
+
+	/**
 	 * Test visual attribute type registration and persistence.
 	 *
 	 * @testdox Should have the `wc-visual` attribute type registered in block themes.

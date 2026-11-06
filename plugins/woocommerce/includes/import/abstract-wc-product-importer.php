@@ -847,8 +847,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @throws Exception If taxonomy cannot be loaded.
 	 */
 	public function get_attribute_taxonomy_id( $raw_name ) {
-		global $wpdb, $wc_product_attributes;
-
 		$attribute_name = $this->get_attribute_taxonomy_name_from_raw_name( $raw_name );
 		$attribute_id   = $this->get_existing_attribute_taxonomy_id( $raw_name );
 
@@ -870,32 +868,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		if ( is_wp_error( $attribute_id ) ) {
 			throw new Exception( $attribute_id->get_error_message(), 400 );
-		}
-
-		// Register as taxonomy while importing.
-		$taxonomy_name = wc_attribute_taxonomy_name( $attribute_name );
-		register_taxonomy(
-			$taxonomy_name,
-			apply_filters( 'woocommerce_taxonomy_objects_' . $taxonomy_name, array( 'product' ) ),
-			apply_filters(
-				'woocommerce_taxonomy_args_' . $taxonomy_name,
-				array(
-					'labels'       => array(
-						'name' => $raw_name,
-					),
-					'hierarchical' => true,
-					'show_ui'      => false,
-					'query_var'    => true,
-					'rewrite'      => false,
-				)
-			)
-		);
-
-		// Set product attributes global.
-		$wc_product_attributes = array();
-
-		foreach ( wc_get_attribute_taxonomies() as $taxonomy ) {
-			$wc_product_attributes[ wc_attribute_taxonomy_name( $taxonomy->attribute_name ) ] = $taxonomy;
 		}
 
 		return $attribute_id;
