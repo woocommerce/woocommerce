@@ -78,4 +78,23 @@ describe( 'Order Summary', () => {
 			screen.getByText( textContentMatcher( '$0.00' ), visibleOnly )
 		).toBeInTheDocument();
 	} );
+
+	it( 'renders the product name as plain text in the screen reader price', () => {
+		render(
+			<OrderSummary
+				cartItems={ [
+					{
+						...previewCart.items[ 0 ],
+						name: 'Salt &#038; Grandma&#8217;s <em>Jam</em>',
+					},
+				] }
+			/>
+		);
+
+		expect(
+			screen.getByText(
+				'Total price for 2 Salt & Grandma’s Jam items: $20.00'
+			)
+		).toBeInTheDocument();
+	} );
 } );
