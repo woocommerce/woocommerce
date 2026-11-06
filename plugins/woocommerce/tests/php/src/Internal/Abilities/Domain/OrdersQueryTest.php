@@ -135,6 +135,8 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 			)
 		);
 
+		$per_page = OrdersQuery::get_registration_args()['input_schema']['properties']['per_page'];
+		$this->assertArrayNotHasKey( 'default', $per_page, 'A client that fills in schema defaults would send 10 and page the included orders.' );
 		$this->assertEqualsCanonicalizing( $order_ids, array_column( $all_ids['orders'], 'id' ) );
 		$this->assertSame( 1, $all_ids['total_pages'] );
 		$this->assertCount( 10, $paged['orders'], 'An explicit per_page should still apply.' );
