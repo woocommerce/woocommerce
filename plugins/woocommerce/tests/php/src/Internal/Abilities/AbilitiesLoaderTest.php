@@ -161,6 +161,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			}
 		}
 
+		$this->register_domain_abilities();
+
 		foreach ( $this->original_action_counts as $action => $original_count ) {
 			if ( null !== $original_count ) {
 				$wp_actions[ $action ] = $original_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
