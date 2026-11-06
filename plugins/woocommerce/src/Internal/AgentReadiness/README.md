@@ -219,6 +219,18 @@ Fix first, a card of its own, lists the required setup steps that fail, then the
 
 Tracks event: `agentic_commerce_ucp_toggled` (`enabled`), sent only when the store allows tracking.
 
+### Tracking
+
+The React views send Tracks events through `@woocommerce/tracks` (`client/admin/client/sales-readiness/tracks.ts`), so they get the `wcadmin_` prefix and are sent only when the store allows usage tracking. `surface` is `page` (Sales readiness) or `overview` (AI tools). Check ids are the report's ids (`refund_policy`, `image`, `llms_txt`), never translated titles; `ReadinessCheckPage::view()` adds an `id` to every row and Fix first item for this. wc-admin's own `wcadmin_page_view` already counts visits to the page.
+
+| Event | When | Properties |
+| --- | --- | --- |
+| `wcadmin_sales_readiness_viewed` | The view first loads, once per visit | `surface`, `checked`, `pending`, `fix_first_count`, `open_count`, `required_count`, `unknown_count`, `pass_count` |
+| `wcadmin_sales_readiness_run_check_click` | Run check or Check again | `surface`, `first_check` |
+| `wcadmin_sales_readiness_link_click` | A fix link, View all checks, or Manage | `surface`, `area` (`fix_first`, `section`, `view_all`, `shopping`); for fixes `check_id`, plus `position` in Fix first or `section` and `state` in a section card |
+| `wcadmin_sales_readiness_fold_toggle` | Show more checks or Hide | `section` (a section id, or `declared`), `open` |
+| `wcadmin_sales_readiness_error` | The view can't load, or a check can't start | `surface`, `action` (`load` or `run`) |
+
 ## Updating rules
 
 The per-channel field and effect live in each check's `channels()`, and that is what runs until a rules file is stored. After that, `rules.json` is the list. The `woocommerce_agent_readiness_rules` filter still runs last; unknown channels and effects in what it returns are dropped.

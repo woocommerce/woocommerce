@@ -12,22 +12,28 @@ import { __, _n, sprintf } from '@wordpress/i18n';
  */
 import type { Declared, Section } from '../types';
 import { CheckRow, Row } from './check-row';
+import { trackReadiness } from '../tracks';
 
 /**
  * "Show N more checks" under what it folds, "Hide" once open.
  */
 export const Fold = ( {
 	label,
+	section,
 	children,
 }: {
 	label: string;
+	section: string;
 	children: ReactNode;
 } ) => {
 	const [ open, setOpen ] = useState( false );
 	return (
 		<Collapsible.Root
 			open={ open }
-			onOpenChange={ setOpen }
+			onOpenChange={ ( next: boolean ) => {
+				trackReadiness( 'fold_toggle', { section, open: next } );
+				setOpen( next );
+			} }
 			className="wc-sales-readiness-fold"
 		>
 			<Collapsible.Panel>{ children }</Collapsible.Panel>
@@ -96,12 +102,17 @@ export const SectionCard = ( { section }: { section: Section } ) => (
 			{ section.rows.length > 0 && (
 				<ul className="wc-sales-readiness-list">
 					{ section.rows.map( ( row ) => (
-						<CheckRow key={ row.title } row={ row } />
+						<CheckRow
+							key={ row.id }
+							row={ row }
+							section={ section.id }
+						/>
 					) ) }
 				</ul>
 			) }
 			{ section.folded.length > 0 && (
 				<Fold
+					section={ section.id }
 					label={ sprintf(
 						/* translators: %d: number of checks. */
 						_n(
@@ -115,7 +126,11 @@ export const SectionCard = ( { section }: { section: Section } ) => (
 				>
 					<ul className="wc-sales-readiness-list">
 						{ section.folded.map( ( row ) => (
-							<CheckRow key={ row.title } row={ row } />
+							<CheckRow
+								key={ row.id }
+								row={ row }
+								section={ section.id }
+							/>
 						) ) }
 					</ul>
 				</Fold>
@@ -139,7 +154,7 @@ export const DeclaredCard = ( { declared }: { declared: Declared } ) => (
 		</Card.Header>
 		<Card.Content>
 			<Text variant="body-md">{ declared.text }</Text>
-			<Fold label={ declared.more }>
+			<Fold label={ declared.more } section="declared">
 				<ul className="wc-sales-readiness-list">
 					{ declared.items.map( ( item ) => (
 						<Row

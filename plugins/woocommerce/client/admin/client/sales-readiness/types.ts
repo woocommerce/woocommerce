@@ -20,6 +20,8 @@ export interface ViewLink {
 export type RowState = 'open' | 'required' | 'unknown' | 'pass';
 
 export interface CheckRow {
+	/** The check's id, for tracking. */
+	id: string;
 	state: RowState;
 	/** What to do while the check fails, its passing title once it passes. */
 	title: string;
@@ -34,6 +36,8 @@ export interface CheckRow {
 }
 
 export interface FixFirstItem {
+	/** The check's id, for tracking. */
+	id: string;
 	tier: string;
 	/** Required, on the first tier's heading only. */
 	tier_badge: ViewBadge | null;
