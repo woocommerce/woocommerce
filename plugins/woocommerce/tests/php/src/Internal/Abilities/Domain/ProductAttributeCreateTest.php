@@ -9,9 +9,8 @@ namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Internal\Abilities\Ability;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductAttributeCreate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductAttributesQuery;
-use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
-use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
 /**
@@ -140,16 +139,15 @@ class ProductAttributeCreateTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should let product-update turn a simple product into a variable one with two new global attributes and four priced variations.
+	 * @testdox Should let product-create make a variable product with two new global attributes and four priced variations.
 	 */
-	public function test_product_update_uses_created_attributes(): void {
+	public function test_product_create_uses_created_attributes(): void {
 		$color = $this->sut->execute( array( 'name' => 'Test Color' ) )['attribute'];
 		$size  = $this->sut->execute( array( 'name' => 'Test Size' ) )['attribute'];
 		foreach ( array( $color, $size ) as $attribute ) {
 			// WooCommerce registers attribute taxonomies on init, which already ran.
 			register_taxonomy( $attribute['slug'], array( 'product' ), array( 'hierarchical' => false ) );
 		}
-		$product    = WC_Helper_Product::create_simple_product();
 		$prices     = array(
 			'red-s'  => '10.00',
 			'red-m'  => '11.00',
@@ -173,11 +171,11 @@ class ProductAttributeCreateTest extends WC_Unit_Test_Case {
 				'regular_price' => $price,
 			);
 		}
-		$update = new ProductUpdate( ProductUpdate::ABILITY_NAME, ProductUpdate::get_registration_args() );
+		$create = new ProductCreate( ProductCreate::ABILITY_NAME, ProductCreate::get_registration_args() );
 
-		$result = $update->execute(
+		$result = $create->execute(
 			array(
-				'id'         => $product->get_id(),
+				'name'       => 'Test Shirt',
 				'type'       => 'variable',
 				'attributes' => array(
 					array(
@@ -195,7 +193,7 @@ class ProductAttributeCreateTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $result );
-		$saved = wc_get_product( $product->get_id() );
+		$saved = wc_get_product( $result['product']['id'] );
 		$this->assertInstanceOf( \WC_Product_Variable::class, $saved );
 		$this->assertCount( 4, $saved->get_children() );
 		$this->assertSame( array( 'red', 'blue' ), wc_get_product_terms( $saved->get_id(), $color['slug'], array( 'fields' => 'slugs' ) ) );
@@ -217,13 +215,12 @@ class ProductAttributeCreateTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should refuse a product write that names a global attribute that does not exist.
 	 */
-	public function test_product_update_refuses_unknown_global_attribute(): void {
-		$product = WC_Helper_Product::create_simple_product();
-		$update  = new ProductUpdate( ProductUpdate::ABILITY_NAME, ProductUpdate::get_registration_args() );
+	public function test_product_create_refuses_unknown_global_attribute(): void {
+		$create = new ProductCreate( ProductCreate::ABILITY_NAME, ProductCreate::get_registration_args() );
 
-		$result = $update->execute(
+		$result = $create->execute(
 			array(
-				'id'         => $product->get_id(),
+				'name'       => 'Test Shirt',
 				'type'       => 'variable',
 				'attributes' => array(
 					array(
