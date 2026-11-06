@@ -1337,7 +1337,8 @@ class StoreOutputChecks {
 		$excl     = (float) wc_get_price_excluding_tax( $product );
 		$expected = array( (float) $product->get_price(), (float) wc_get_price_including_tax( $product ), $excl );
 		// The page was served to one location; its tax may differ from the store's base rate.
-		foreach ( \WC_Tax::get_rates_for_tax_class( $product->get_tax_class() ) as $rate ) {
+		$rates = \WC_Tax::get_rates_for_tax_class( $product->get_tax_class() );
+		foreach ( is_array( $rates ) ? $rates : array() as $rate ) {
 			$expected[] = $excl * ( 1 + (float) $rate->tax_rate / 100 );
 		}
 		foreach ( $prices as $price ) {
