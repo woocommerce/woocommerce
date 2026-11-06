@@ -116,13 +116,18 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 		$child_id = current( $product->get_children() );
 		$product->set_downloads( array() );
 
-		$as_get_scheduled_actions_invoked = false;
+		$as_get_scheduled_actions_invoked  = false;
+		$as_schedule_single_action_invoked = false;
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'as_get_scheduled_actions' => function ( $args, $return_format ) use ( &$as_get_scheduled_actions_invoked ) {
+				'as_get_scheduled_actions'  => function ( $args, $return_format ) use ( &$as_get_scheduled_actions_invoked ) {
 					unset( $args, $return_format );
 					$as_get_scheduled_actions_invoked = true;
 					return array();
+				},
+				'as_schedule_single_action' => function ( $timestamp, $hook, $args ) use ( &$as_schedule_single_action_invoked ) {
+					unset( $timestamp, $hook, $args );
+					$as_schedule_single_action_invoked = true;
 				},
 			)
 		);
@@ -131,6 +136,7 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 		$this->sut->maybe_schedule_adjust_download_permissions( $product );
 
 		$this->assertFalse( $as_get_scheduled_actions_invoked );
+		$this->assertFalse( $as_schedule_single_action_invoked );
 		$this->assertFalse( wp_cache_get( $child_id, 'posts' ) );
 	}
 
