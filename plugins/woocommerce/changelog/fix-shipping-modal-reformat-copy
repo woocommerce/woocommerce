@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Shipping method modal: re-opening it without reloading the page no longer formats the cost a second time, which turned 6500 into 7 when the thousand separator is a dot.
+Fix a wrong shipping method cost when its settings are re-opened before a page reload.
