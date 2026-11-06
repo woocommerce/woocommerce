@@ -509,7 +509,7 @@ class WC_Structured_Data {
 				$markup_offer['priceCurrency'] = $currency;
 			}
 
-			if ( ( ! $product->is_type( array( ProductType::VARIABLE, ProductType::GROUPED ) ) || $selected_variation ) && $offer_source->needs_shipping() ) {
+			if ( ( ! $product->is_type( array( ProductType::VARIABLE, ProductType::GROUPED ) ) || $selected_variation ) && ! $offer_source->is_type( ProductType::EXTERNAL ) && $offer_source->needs_shipping() ) {
 				$shipping_details = wc_get_container()->get( ShippingDestinations::class )->get_shipping_details();
 				if ( $shipping_details ) {
 					$markup_offer['shippingDetails'] = $shipping_details;

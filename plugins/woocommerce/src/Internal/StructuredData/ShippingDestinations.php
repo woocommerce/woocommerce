@@ -118,12 +118,17 @@ class ShippingDestinations {
 					$areas[ $country ] = array( '*' => true );
 				}
 			}
-			$postcode_rules = array();
+			$postcode_rules  = array();
+			$postcode_ranges = array();
 			foreach ( $postcodes as $postcode ) {
-				$postcode_rules[] = (object) array(
-					'zone_id'       => 1,
-					'location_code' => $postcode,
-				);
+				if ( false !== strpos( $postcode, '...' ) ) {
+					$postcode_ranges[] = (object) array(
+						'zone_id'       => 1,
+						'location_code' => $postcode,
+					);
+				} else {
+					$postcode_rules[ $postcode ] = true;
+				}
 			}
 
 			$destinations = array();
@@ -137,8 +142,9 @@ class ShippingDestinations {
 					$previous = $this->get_claims( $claimed[ $country ] ?? array(), $state );
 					if ( ! isset( $claimed[ $country ][ $state ] ) ) {
 						$claimed[ $country ][ $state ] = array(
-							'all'   => false,
-							'rules' => array(),
+							'all'    => false,
+							'rules'  => array(),
+							'ranges' => array(),
 						);
 					}
 					$region = array(
@@ -182,7 +188,8 @@ class ShippingDestinations {
 							}
 						}
 					}
-					$claimed[ $country ][ $state ]['rules'] = array_merge( $claimed[ $country ][ $state ]['rules'], $postcode_rules );
+					$claimed[ $country ][ $state ]['rules'] += $postcode_rules;
+					$claimed[ $country ][ $state ]['ranges'] = array_merge( $claimed[ $country ][ $state ]['ranges'], $postcode_ranges );
 					if ( $exact ) {
 						$region['postalCode'] = array_values( array_unique( $exact ) );
 						$destinations[]       = $region;
@@ -240,8 +247,22 @@ class ShippingDestinations {
 	 * @return bool
 	 */
 	private function postcode_is_claimed( array $claims, string $postcode, string $country ): bool {
+		$matches = null;
 		foreach ( $claims as $claim ) {
-			if ( ! empty( $claim['all'] ) || wc_postcode_location_matcher( $postcode, $claim['rules'], 'zone_id', 'location_code', $country ) ) {
+			if ( ! empty( $claim['all'] ) ) {
+				return true;
+			}
+			if ( $claim['rules'] ) {
+				if ( null === $matches ) {
+					$matches = array_map( 'wc_clean', wc_get_wildcard_postcodes( wc_normalize_postcode( $postcode ), $country ) );
+				}
+				foreach ( $matches as $match ) {
+					if ( isset( $claim['rules'][ $match ] ) ) {
+						return true;
+					}
+				}
+			}
+			if ( $claim['ranges'] && wc_postcode_location_matcher( $postcode, $claim['ranges'], 'zone_id', 'location_code', $country ) ) {
 				return true;
 			}
 		}
