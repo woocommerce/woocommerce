@@ -67,6 +67,7 @@ jobs:
         run: |
           docker info --format '{{json .DriverStatus}}' | jq -e '.[] | select(.[0] == "driver-type" and .[1] == "io.containerd.snapshotter.v1")'
           docker buildx inspect > "$BENCH_RESULTS/builder.txt"
+          grep -Eq '^Driver:[[:space:]]+docker$' "$BENCH_RESULTS/builder.txt"
       - name: Restore image layers
         id: cache
         if: contains(fromJSON('["cache-warm","cache-miss","cache-incompatible"]'), inputs.variant)

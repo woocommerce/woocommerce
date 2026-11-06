@@ -27,6 +27,7 @@ jobs:
           overwrite: true
 
   cold:
+    name: cold (1, cache-cold)
     needs: inputs
     uses: ./.github/workflows/phpunit-startup-sample.yml
     with:
