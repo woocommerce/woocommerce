@@ -193,4 +193,28 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 		$this->assertNotWPError( $result );
 		$this->assertSame( '20', ( new \WC_Coupon( $coupon->get_id() ) )->get_amount() );
 	}
+
+	/**
+	 * @testdox Should preserve expiry instants when the store uses a non-UTC timezone.
+	 * @testWith ["2030-01-01T12:00:00.123+01:00", 1893495600]
+	 *           ["20300101", 1893452400]
+	 * @param string $expiry Expiry input.
+	 * @param int    $timestamp Expected stored instant.
+	 */
+	public function test_expiry_normalization( string $expiry, int $timestamp ): void {
+		update_option( 'timezone_string', 'Europe/Madrid' );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$class   = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponCreate::class;
+		$ability = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
+		$result  = $ability->execute(
+			array(
+				'code'         => 'normalized-expiry',
+				'date_expires' => $expiry,
+			)
+		);
+		$this->assertNotWPError( $result );
+		$coupon = new \WC_Coupon( $result['coupon']['id'] );
+		$this->assertSame( $timestamp, $coupon->get_date_expires()->getTimestamp() );
+	}
+
 }

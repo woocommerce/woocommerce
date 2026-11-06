@@ -223,6 +223,7 @@ trait CouponAbilityTrait {
 			if ( $date['error_count'] || $date['warning_count'] || ! $date['year'] || ! $date['month'] || ! $date['day'] ) {
 				return new \WP_Error( 'woocommerce_ability_coupon_invalid_expiry', __( 'Expiry must be a valid date or datetime.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
+			$input['date_expires'] = ( new \DateTimeImmutable( $input['date_expires'], wp_timezone() ) )->getTimestamp();
 		}
 
 		if ( isset( $input['code'] ) ) {
