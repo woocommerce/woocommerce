@@ -2470,12 +2470,12 @@ body.woocommerce_page_wc-customer-stock-notifications {
 		align-items: center;
 		gap: 8px;
 		position: absolute;
-		right: 20px;
+		inset-inline-end: 20px;
 		top: 24px;
 		transform: translateY(-50%);
 
 		@media screen and (max-width: 782px) {
-			right: 0;
+			inset-inline-end: 0;
 		}
 	}
 
