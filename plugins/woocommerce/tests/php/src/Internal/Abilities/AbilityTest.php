@@ -5,9 +5,9 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Tests\Abilities;
+namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 
-use Automattic\WooCommerce\Abilities\Ability;
+use Automattic\WooCommerce\Internal\Abilities\Ability;
 
 /**
  * Tests for the Ability class.
