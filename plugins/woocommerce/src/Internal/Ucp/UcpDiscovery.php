@@ -90,7 +90,9 @@ final class UcpDiscovery implements RegisterHooksInterface {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 		if ( ! in_array( $_SERVER['REQUEST_METHOD'] ?? '', array( 'GET', 'HEAD' ), true ) ) {
 			// RFC 9110 requires a 405 to name the allowed methods.
-			header( 'Allow: GET, HEAD' );
+			if ( ! headers_sent() ) {
+				header( 'Allow: GET, HEAD' );
+			}
 			status_header( 405 );
 			exit;
 		}
