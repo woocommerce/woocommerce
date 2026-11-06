@@ -11445,13 +11445,13 @@ parameters:
 		-
 			message: '#^Cannot call method get_id\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 2
 			path: includes/class-wc-form-handler.php
 
 		-
 			message: '#^Cannot call method get_order_key\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 1
 			path: includes/class-wc-form-handler.php
 
 		-
