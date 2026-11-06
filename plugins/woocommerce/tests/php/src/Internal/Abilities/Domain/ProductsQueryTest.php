@@ -208,6 +208,53 @@ class ProductsQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return the exact total of matching products on partial, empty and out-of-range pages.
+	 */
+	public function test_returns_total_across_pages(): void {
+		$product_ids = array();
+		foreach ( range( 1, 11 ) as $i ) {
+			$product_ids[] = WC_Helper_Product::create_simple_product( true, array( 'name' => "Total product {$i}" ) )->get_id();
+		}
+
+		$last = ProductsQuery::execute( array( 'page' => 2 ) );
+		$this->assertSame( 11, $last['total'] );
+		$this->assertSame( 2, $last['total_pages'] );
+		$this->assertCount( 1, $last['products'] );
+
+		$beyond = ProductsQuery::execute( array( 'page' => 3 ) );
+		$this->assertSame( array(), $beyond['products'] );
+		$this->assertSame( 11, $beyond['total'], 'An out-of-range page should keep the matching total.' );
+
+		$none = ProductsQuery::execute( array( 'search' => 'no-such-product-xyz' ) );
+		$this->assertSame( 0, $none['total'] );
+
+		$id = ProductsQuery::execute( array( 'id' => $product_ids[0] ) );
+		$this->assertSame( 1, $id['total'] );
+
+		$schema = ProductsQuery::get_registration_args()['output_schema'];
+		$this->assertTrue( rest_validate_value_from_schema( $last, $schema, 'products' ) );
+	}
+
+	/**
+	 * @testdox Should narrow the total with extension query filters.
+	 */
+	public function test_total_follows_extension_query_filter(): void {
+		$kept     = WC_Helper_Product::create_simple_product();
+		$excluded = WC_Helper_Product::create_simple_product();
+
+		$callback = static function ( $args ) use ( $excluded ) {
+			$args['post__not_in'] = array( $excluded->get_id() );
+			return $args;
+		};
+		add_filter( 'woocommerce_product_data_store_cpt_get_products_query', $callback );
+		$result = ProductsQuery::execute( array() );
+		remove_filter( 'woocommerce_product_data_store_cpt_get_products_query', $callback );
+
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( $kept->get_id(), $result['products'][0]['id'] );
+	}
+
+	/**
 	 * @testdox Should match the output schema when listing products.
 	 */
 	public function test_list_output_matches_schema(): void {
