@@ -17,11 +17,13 @@ import {
 	SHIPPING_ENABLED,
 } from '@woocommerce/block-settings';
 import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
+import { flushSync, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import Block from './block';
+import { startCheckoutLayoutTransition } from '../../layout-transition';
 import attributes from './attributes';
 
 const FrontendBlock = ( {
@@ -57,6 +59,11 @@ const FrontendBlock = ( {
 	const { setPrefersCollection } = useDispatch( checkoutStoreDescriptor );
 	const { selectShippingRate } = useDispatch( cartStore );
 	const { needsShipping, isCollectable, shippingRates } = useShippingData();
+	// The view transition applies the change a frame or two after the click. Until then, show the shopper's
+	// choice on the toggle itself, so it's selected straight away.
+	const [ pendingMethod, setPendingMethod ] = useState< string | null >(
+		null
+	);
 
 	// Note that display logic is also found in plugins/woocommerce/client/blocks/assets/js/blocks/checkout/inner-blocks/register-components.ts
 	// where the block is not registered if the conditions are not met.
@@ -70,7 +77,7 @@ const FrontendBlock = ( {
 		return null;
 	}
 
-	const onChange = ( method: string ) => {
+	const applyMethod = ( method: string ) => {
 		if ( method === 'pickup' ) {
 			void setPrefersCollection( true );
 		} else {
@@ -91,6 +98,22 @@ const FrontendBlock = ( {
 		}
 	};
 
+	// The address and pickup sections swap, so the sections below slide instead of jumping.
+	const onChange = ( method: string ) => {
+		if (
+			startCheckoutLayoutTransition( () =>
+				flushSync( () => {
+					setPendingMethod( null );
+					applyMethod( method );
+				} )
+			)
+		) {
+			setPendingMethod( method );
+		} else {
+			applyMethod( method );
+		}
+	};
+
 	return (
 		<FormStep
 			id="shipping-method"
@@ -104,7 +127,10 @@ const FrontendBlock = ( {
 			showStepNumber={ showFormStepNumbers }
 		>
 			<Block
-				checked={ prefersCollection ? 'pickup' : 'shipping' }
+				checked={
+					pendingMethod ??
+					( prefersCollection ? 'pickup' : 'shipping' )
+				}
 				onChange={ onChange }
 				showPrice={ showPrice }
 				showIcon={ showIcon }

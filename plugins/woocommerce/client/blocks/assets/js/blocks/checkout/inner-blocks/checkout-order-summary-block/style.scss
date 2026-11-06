@@ -129,7 +129,8 @@
 		.wc-block-components-checkout-order-summary__content {
 			display: none;
 
-			&.is-open {
+			&.is-open,
+			&.is-closing {
 				border-bottom: 1px solid $universal-border-light;
 				display: block;
 
@@ -137,6 +138,42 @@
 					border-top: none;
 				}
 			}
+
+			&.is-open {
+				// Restarts on every open, as `display: none` removes the animation.
+				@include motion-safe {
+					animation: wc-block-checkout-order-summary-reveal var(--wpds-motion-duration-lg) var(--wpds-motion-easing-expressive);
+				}
+			}
+
+			// Held hidden until the content moves to the checkout actions.
+			&.is-closing {
+				@include motion-safe {
+					animation: wc-block-checkout-order-summary-conceal motion-exit(lg) var(--wpds-motion-easing-expressive) forwards;
+				}
+			}
 		}
+	}
+}
+
+@keyframes wc-block-checkout-order-summary-reveal {
+	from {
+		clip-path: inset(0 0 100% 0);
+		opacity: 0;
+	}
+	to {
+		clip-path: inset(0);
+		opacity: 1;
+	}
+}
+
+@keyframes wc-block-checkout-order-summary-conceal {
+	from {
+		clip-path: inset(0);
+		opacity: 1;
+	}
+	to {
+		clip-path: inset(0 0 100% 0);
+		opacity: 0;
 	}
 }

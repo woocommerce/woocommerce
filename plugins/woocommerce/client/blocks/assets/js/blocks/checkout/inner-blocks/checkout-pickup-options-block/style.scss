@@ -85,3 +85,19 @@
 		}
 	}
 }
+
+// Pickup locations fade up in sequence when they appear, as shipping options do.
+.wp-block-woocommerce-checkout-pickup-options-block .wc-block-components-radio-control__option {
+	@include motion-stagger-index();
+
+	@include motion-safe {
+		animation: wc-pickup-option-enter var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive) motion-stagger-delay() backwards;
+	}
+}
+
+@keyframes wc-pickup-option-enter {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+}

@@ -2,6 +2,7 @@
  * External dependencies
  */
 import clsx from 'clsx';
+import type { RefObject } from 'react';
 
 /**
  * Internal dependencies
@@ -17,11 +18,13 @@ export const AddressWrapper = ( {
 	addressCard,
 	addressForm,
 	shouldAnimate = false,
+	wrapperRef,
 }: {
 	isEditing: boolean;
 	addressCard: JSX.Element;
 	addressForm: JSX.Element;
 	shouldAnimate?: boolean;
+	wrapperRef?: RefObject< HTMLDivElement >;
 } ): JSX.Element => {
 	const wrapperClasses = clsx(
 		'wc-block-components-address-address-wrapper',
@@ -32,7 +35,7 @@ export const AddressWrapper = ( {
 	);
 
 	return (
-		<div className={ wrapperClasses }>
+		<div className={ wrapperClasses } ref={ wrapperRef }>
 			<div className="wc-block-components-address-card-wrapper">
 				{ addressCard }
 			</div>

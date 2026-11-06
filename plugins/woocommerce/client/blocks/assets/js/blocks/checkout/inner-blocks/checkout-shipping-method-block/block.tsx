@@ -5,10 +5,20 @@ import { __ } from '@wordpress/i18n';
 import { useShippingData } from '@woocommerce/base-context/hooks';
 import clsx from 'clsx';
 import { Icon, store, shipping } from '@wordpress/icons';
-import { useEffect } from '@wordpress/element';
+import {
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from '@wordpress/element';
+import type { CSSProperties } from 'react';
 import { cartStore, validationStore } from '@woocommerce/block-data';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { isPackageRateCollectable } from '@woocommerce/base-utils';
+import { useReducedMotion } from '@wordpress/compose';
+import {
+	isPackageRateCollectable,
+	onAnimationsFinished,
+} from '@woocommerce/base-utils';
 import { getSetting } from '@woocommerce/settings';
 import { Button } from '@ariakit/react';
 import { shippingAddressHasValidationErrors } from '@woocommerce/block-data/cart/utils';
@@ -183,15 +193,81 @@ const Block = ( {
 		'localPickupText',
 		localPickupText || defaultLocalPickupText
 	);
+	const containerRef = useRef< HTMLDivElement >( null );
+	const indicatorRef = useRef< HTMLSpanElement >( null );
+	const previousChecked = useRef( checked );
+	const isReducedMotion = useReducedMotion();
+	const [ indicatorStyle, setIndicatorStyle ] =
+		useState< CSSProperties | null >( null );
+
+	// When the selection changes, slide a copy of the selected style from the old option to the new one.
+	// It only exists while moving, so the resting markup and styles are unchanged.
+	useLayoutEffect( () => {
+		const from = previousChecked.current;
+		previousChecked.current = checked;
+		const container = containerRef.current;
+		if ( ! container || from === checked || isReducedMotion ) {
+			return;
+		}
+		// Options render in a fixed order: shipping, then pickup.
+		const options = container.querySelectorAll< HTMLElement >(
+			':scope > .wc-block-checkout__shipping-method-option'
+		);
+		const fromOption = options[ from === 'pickup' ? 1 : 0 ];
+		const toOption = options[ checked === 'pickup' ? 1 : 0 ];
+		if ( ! fromOption || ! toOption ) {
+			return;
+		}
+		const fromRect = fromOption.getBoundingClientRect();
+		const toRect = toOption.getBoundingClientRect();
+		const containerRect = container.getBoundingClientRect();
+		const offsetX = fromRect.left - toRect.left;
+		const offsetY = fromRect.top - toRect.top;
+		const isHorizontal = Math.abs( offsetX ) >= Math.abs( offsetY );
+		setIndicatorStyle( {
+			left: toRect.left - containerRect.left,
+			top: toRect.top - containerRect.top,
+			width: toRect.width,
+			height: toRect.height,
+			'--wc-shipping-method-indicator-offset': `${ offsetX }px, ${ offsetY }px`,
+			'--wc-shipping-method-indicator-stretch': isHorizontal
+				? 'var(--wc-stretch-along), var(--wc-stretch-across)'
+				: 'var(--wc-stretch-across), var(--wc-stretch-along)',
+		} as CSSProperties );
+	}, [ checked, isReducedMotion ] );
+
+	// Remove the indicator once its slide has finished.
+	useLayoutEffect( () => {
+		if ( ! indicatorStyle ) {
+			return;
+		}
+		return onAnimationsFinished( indicatorRef.current, () =>
+			setIndicatorStyle( null )
+		);
+	}, [ indicatorStyle ] );
 
 	return (
 		<div
+			ref={ containerRef }
 			id="shipping-method"
 			// components-button-group is here for backwards compatibility, in case themes or plugins rely on it.
-			className="components-button-group wc-block-checkout__shipping-method-container"
+			className={ clsx(
+				'components-button-group wc-block-checkout__shipping-method-container',
+				{ 'is-moving': indicatorStyle !== null }
+			) }
 			role="radiogroup"
 			aria-label={ __( 'Shipping method', 'woocommerce' ) }
 		>
+			{ indicatorStyle && (
+				<span
+					ref={ indicatorRef }
+					aria-hidden="true"
+					className="wc-block-checkout__shipping-method-indicator"
+					style={ indicatorStyle }
+				>
+					<span className="wc-block-checkout__shipping-method-indicator-pill" />
+				</span>
+			) }
 			<ShippingSelector
 				checked={ checked }
 				onClick={ () => {

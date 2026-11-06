@@ -4,6 +4,8 @@
 import { TotalsFooterItem } from '@woocommerce/base-components/cart-checkout';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
+import { usePresence } from '@woocommerce/base-hooks';
+import { useMergeRefs } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
 import {
@@ -14,7 +16,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import clsx from 'clsx';
-import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
+import RollingPrice from '@woocommerce/base-components/rolling-price';
 /**
  * Internal dependencies
  */
@@ -29,7 +31,7 @@ const FrontendBlock = ( {
 	children: JSX.Element | JSX.Element[];
 	className?: string;
 } ): JSX.Element | null => {
-	const { cartTotals } = useStoreCart();
+	const { cartTotals, cartIsLoading } = useStoreCart();
 	const {
 		isOpen,
 		hasContainerWidth,
@@ -52,6 +54,11 @@ const FrontendBlock = ( {
 		useState< HTMLDivElement | null >( null );
 	const [ isContentReady, setIsContentReady ] = useState( false );
 	const checkoutActionsTopBeforeMove = useRef< number | null >( null );
+	// Auto-close moves content that is already off-screen, so it skips the exit animation.
+	const [ isAutoClosed, setIsAutoClosed ] = useState( false );
+	const { transition, ref: presenceRef } =
+		usePresence< HTMLDivElement >( isOpen );
+	const inlineHostRef = useMergeRefs( [ setInlineHost, presenceRef ] );
 	const [ contentContainer ] = useState( () => {
 		const container = document.createElement( 'div' );
 		container.className =
@@ -61,7 +68,12 @@ const FrontendBlock = ( {
 
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 	const totalPrice = parseInt( cartTotals.total_price, 10 );
-	const showInline = ! hasContainerWidth || isLarge || isOpen;
+	if ( isOpen && isAutoClosed ) {
+		setIsAutoClosed( false );
+	}
+	// Content stays inline while it animates out, then moves to the checkout actions.
+	const isClosing = transition === 'exiting' && ! isAutoClosed;
+	const showInline = ! hasContainerWidth || isLarge || isOpen || isClosing;
 
 	useEffect( () => {
 		if (
@@ -90,6 +102,7 @@ const FrontendBlock = ( {
 				if ( ! isTitleVisible && areCheckoutActionsNear ) {
 					checkoutActionsTopBeforeMove.current =
 						checkoutActionsAnchor.getBoundingClientRect().top;
+					setIsAutoClosed( true );
 					closeSummary();
 				}
 			},
@@ -152,7 +165,8 @@ const FrontendBlock = ( {
 					className={ clsx(
 						'wc-block-components-checkout-order-summary__title',
 						{
-							'is-open': isOpen,
+							// Keep the open styling until the content has finished wiping out.
+							'is-open': isOpen || isClosing,
 						}
 					) }
 					{ ...toggleProps }
@@ -164,24 +178,28 @@ const FrontendBlock = ( {
 					>
 						{ __( 'Order summary', 'woocommerce' ) }
 					</p>
-					<FormattedMonetaryAmount
+					<RollingPrice
 						currency={ totalsCurrency }
 						value={ totalPrice }
 						className="wc-block-components-checkout-order-summary__title-price"
+						animate={ ! cartIsLoading }
 					/>
 					<span className="wc-block-components-checkout-order-summary__title-icon">
 						<Icon icon={ isOpen ? chevronUp : chevronDown } />
 					</span>
 				</div>
 				<div
-					ref={ setInlineHost }
+					ref={ inlineHostRef }
 					className={ clsx(
 						'wc-block-components-checkout-order-summary__content',
 						{
 							'is-open': isOpen,
+							'is-closing': isClosing,
 						}
 					) }
 					id={ ariaControlsId }
+					// React 18 has no `inert` prop; an empty string sets the attribute.
+					{ ...( isClosing ? { inert: '' } : {} ) }
 				/>
 			</div>
 			<CheckoutOrderSummaryFill>

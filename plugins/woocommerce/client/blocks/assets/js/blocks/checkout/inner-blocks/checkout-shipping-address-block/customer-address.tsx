@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import {
+	flushSync,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from '@wordpress/element';
 import { Form } from '@woocommerce/base-components/cart-checkout';
 import {
 	useCheckoutAddress,
@@ -17,6 +23,7 @@ import { ADDRESS_FORM_KEYS } from '@woocommerce/block-settings';
  * Internal dependencies
  */
 import AddressWrapper from '../../address-wrapper';
+import { startCheckoutLayoutTransition } from '../../layout-transition';
 import AddressCard from '../../address-card';
 
 const CustomerAddress = () => {
@@ -30,6 +37,7 @@ const CustomerAddress = () => {
 	} = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
 	const [ shouldAnimate, setShouldAnimate ] = useState( false );
+	const wrapperRef = useRef< HTMLDivElement >( null );
 
 	const { isInitialized } = useCustomerData();
 
@@ -87,6 +95,16 @@ const CustomerAddress = () => {
 	);
 
 	const handleEditClick = useCallback( () => {
+		// Grow the card into the form with a view transition where supported; otherwise fall back to the
+		// `.is-animated` CSS reveal.
+		if (
+			startCheckoutLayoutTransition(
+				() => flushSync( () => setEditingShippingAddress( true ) ),
+				{ element: wrapperRef.current, name: 'wc-shipping-address' }
+			)
+		) {
+			return;
+		}
 		setShouldAnimate( true );
 		setEditingShippingAddress( true );
 	}, [ setEditingShippingAddress ] );
@@ -95,6 +113,7 @@ const CustomerAddress = () => {
 		<AddressWrapper
 			isEditing={ editingShippingAddress }
 			shouldAnimate={ shouldAnimate }
+			wrapperRef={ wrapperRef }
 			addressCard={
 				<AddressCard
 					address={ shippingAddress }

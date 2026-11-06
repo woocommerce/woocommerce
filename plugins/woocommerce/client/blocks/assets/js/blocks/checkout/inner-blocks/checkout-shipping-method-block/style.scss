@@ -53,6 +53,54 @@ $component-background-hover: color-mix(in srgb, currentColor 12%, transparent);
 	}
 }
 
+// While the selection moves, the indicator carries the selected style from the old option to the new one,
+// so the options themselves drop it. The indicator renders before the options, so their content paints on top.
+.wc-block-checkout__shipping-method-container.is-moving {
+	position: relative;
+
+	.wc-block-checkout__shipping-method-option--selected {
+		border-color: transparent;
+		background: transparent;
+	}
+}
+
+.wc-block-checkout__shipping-method-indicator {
+	position: absolute;
+	pointer-events: none;
+	@include motion-safe {
+		animation: wc-shipping-method-indicator-move var(--wpds-motion-duration-lg) var(--wpds-motion-easing-balanced);
+	}
+}
+
+// Stretches along the direction of travel while moving and settles back to its size (rule 5).
+.wc-block-checkout__shipping-method-indicator-pill {
+	display: block;
+	box-sizing: border-box;
+	height: 100%;
+	border: 2px solid currentColor;
+	border-radius: $universal-border-radius;
+	background: $input-background-light;
+	@include motion-safe {
+		animation: wc-shipping-method-indicator-stretch var(--wpds-motion-duration-lg) var(--wpds-motion-easing-balanced);
+	}
+
+	.has-dark-controls & {
+		background: $input-background-dark;
+	}
+}
+
+@keyframes wc-shipping-method-indicator-move {
+	from {
+		transform: translate(var(--wc-shipping-method-indicator-offset));
+	}
+}
+
+@keyframes wc-shipping-method-indicator-stretch {
+	50% {
+		transform: scale(var(--wc-shipping-method-indicator-stretch));
+	}
+}
+
 .wc-block-checkout__shipping-method-option-title-wrapper {
 	display: flex;
 	flex-direction: row;

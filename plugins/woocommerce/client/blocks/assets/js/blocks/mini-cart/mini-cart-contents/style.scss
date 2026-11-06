@@ -119,6 +119,25 @@ h2.wc-block-mini-cart__title {
 	}
 }
 
+// Items fade up in sequence each time the drawer opens, while it slides in. Skipped while the drawer
+// shows its loading placeholder.
+.wc-block-components-drawer__screen-overlay--with-slide-in:not(.is-loading) .wc-block-mini-cart__products-table .wc-block-cart-items__row {
+	@include motion-stagger-index();
+
+	> td {
+		@include motion-safe {
+			animation: wc-mini-cart-item-enter var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive) motion-stagger-delay() backwards;
+		}
+	}
+}
+
+@keyframes wc-mini-cart-item-enter {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+}
+
 .wc-block-mini-cart__footer {
 	border-top: 1px solid $universal-border-light;
 	padding: $gap-large $gap;

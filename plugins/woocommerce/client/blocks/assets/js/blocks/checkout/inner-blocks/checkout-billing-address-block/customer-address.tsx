@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { useCallback, useEffect } from '@wordpress/element';
+import {
+	flushSync,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from '@wordpress/element';
 import { Form } from '@woocommerce/base-components/cart-checkout';
 import {
 	useCheckoutAddress,
@@ -17,6 +23,7 @@ import { ADDRESS_FORM_KEYS } from '@woocommerce/block-settings';
  * Internal dependencies
  */
 import AddressWrapper from '../../address-wrapper';
+import { startCheckoutLayoutTransition } from '../../layout-transition';
 import AddressCard from '../../address-card';
 
 const CustomerAddress = () => {
@@ -30,6 +37,8 @@ const CustomerAddress = () => {
 	} = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
 	const { isInitialized } = useCustomerData();
+	const [ shouldAnimate, setShouldAnimate ] = useState( false );
+	const wrapperRef = useRef< HTMLDivElement >( null );
 
 	const { validationErrors } = useSelect(
 		( select ) => {
@@ -87,11 +96,29 @@ const CustomerAddress = () => {
 	return (
 		<AddressWrapper
 			isEditing={ editingBillingAddress }
+			shouldAnimate={ shouldAnimate }
+			wrapperRef={ wrapperRef }
 			addressCard={
 				<AddressCard
 					address={ billingAddress }
 					target="billing"
 					onEdit={ () => {
+						// Same as the shipping address: grow the card into the form where supported.
+						if (
+							startCheckoutLayoutTransition(
+								() =>
+									flushSync( () =>
+										setEditingBillingAddress( true )
+									),
+								{
+									element: wrapperRef.current,
+									name: 'wc-billing-address',
+								}
+							)
+						) {
+							return;
+						}
+						setShouldAnimate( true );
 						setEditingBillingAddress( true );
 					} }
 					isExpanded={ editingBillingAddress }
