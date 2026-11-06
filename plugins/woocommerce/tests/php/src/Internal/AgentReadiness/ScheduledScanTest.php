@@ -72,6 +72,25 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Two requests that both see no pending scan, as when they run at the same time, still queue one scan.
+	 */
+	public function test_racing_requests_queue_once(): void {
+		$racing = new class() extends ScheduledScan {
+			/**
+			 * Each request checked before the other's scan was saved.
+			 */
+			public function is_pending(): bool {
+				return false;
+			}
+		};
+
+		$racing->queue();
+		$racing->queue();
+
+		$this->assertCount( 1, $this->pending( ScheduledScan::RUN_NOW_HOOK ) );
+	}
+
+	/**
 	 * @testdox A scan still waiting past STALLED_AFTER stays queued: a new request neither runs it nor queues another.
 	 */
 	public function test_stalled_scan_stays_queued(): void {

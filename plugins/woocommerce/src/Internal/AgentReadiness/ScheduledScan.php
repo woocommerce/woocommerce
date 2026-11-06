@@ -79,7 +79,8 @@ class ScheduledScan implements RegisterHooksInterface {
 	public function queue(): void {
 		if ( ! $this->is_pending() ) {
 			// A single action due now rather than an async one, which has no date to tell a stalled scan by.
-			as_schedule_single_action( time(), self::RUN_NOW_HOOK, array(), self::GROUP );
+			// Unique, so two requests that both found nothing pending still queue one scan.
+			as_schedule_single_action( time(), self::RUN_NOW_HOOK, array(), self::GROUP, true );
 		}
 	}
 

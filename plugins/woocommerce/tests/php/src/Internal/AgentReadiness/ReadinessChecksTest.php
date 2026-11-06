@@ -255,6 +255,25 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A variable product with no main image passes when a published variation has its own image, and fails when none does.
+	 */
+	public function test_missing_images_counts_variation_images(): void {
+		$sut      = SimpleCheck::table()['missing_images'];
+		$variable = WC_Helper_Product::create_variation_product();
+		$variable->set_image_id( 0 );
+		$variable->save();
+		$variable = wc_get_product( $variable->get_id() );
+
+		$this->assertTrue( $sut->fails( $variable, $this->scan ), 'No image on the product or any variation' );
+
+		$variation = wc_get_product( $variable->get_children()[0] );
+		$variation->set_image_id( self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg' ) ) );
+		$variation->save();
+
+		$this->assertFalse( $sut->fails( wc_get_product( $variable->get_id() ), $this->scan ), 'A variation with its own image can be listed' );
+	}
+
+	/**
 	 * @testdox An image under 500 pixels on either side fails; one without recorded size does not.
 	 */
 	public function test_image_too_small_reads_attachment_size(): void {

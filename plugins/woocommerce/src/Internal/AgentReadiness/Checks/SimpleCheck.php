@@ -77,7 +77,18 @@ final class SimpleCheck extends AbstractReadinessCheck {
 					'fix'   => __( 'Add a main product image.', 'woocommerce' ),
 				),
 				self::fields( array( 'image_url', 'image_link', 'imageLink' ), self::EFFECT_NOT_LISTABLE ),
-				static fn( \WC_Product $product ): bool => 0 === ProductFields::image_id( $product )
+				static function ( \WC_Product $product ): bool {
+					if ( 0 !== ProductFields::image_id( $product ) ) {
+						return false;
+					}
+					// Each variation lists as its own item with its own image, so one image on a variation is enough.
+					foreach ( ProductFields::variations( $product ) as $variation ) {
+						if ( 0 !== ProductFields::image_id( $variation ) ) {
+							return false;
+						}
+					}
+					return true;
+				}
 			),
 			new self(
 				'missing_product_text',
