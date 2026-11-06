@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make the Add to Cart button's screen reader label match its "N in cart" text once a product is in the cart.

@@ -36,6 +36,8 @@
 - [woocommerce_cart_contents_changed](#woocommerce_cart_contents_changed)
 - [woocommerce_cart_item_permalink](#woocommerce_cart_item_permalink)
 - [woocommerce_checkout_must_be_logged_in_message](#woocommerce_checkout_must_be_logged_in_message)
+- [woocommerce_checkout_show_terms](#woocommerce_checkout_show_terms)
+- [woocommerce_default_payment_method](#woocommerce_default_payment_method)
 - [woocommerce_delete_expired_draft_orders_batch_size](#woocommerce_delete_expired_draft_orders_batch_size)
 - [woocommerce_disable_compatibility_layer](#woocommerce_disable_compatibility_layer)
 - [woocommerce_filter_fields_for_order_confirmation](#woocommerce_filter_fields_for_order_confirmation)
@@ -371,23 +373,15 @@ apply_filters( 'woocommerce_add_to_cart_form_action', string $action_url )
 ## woocommerce_add_to_cart_quantity
 
 
-Filters the change the quantity to add to cart.
+This filter is documented in includes/class-wc-cart.php.
 
 ```php
-apply_filters( 'woocommerce_add_to_cart_quantity', int|float $default_quantity, int $product_id, int $variation_id )
+apply_filters( 'woocommerce_add_to_cart_quantity' )
 ```
-
-### Parameters
-
-| Argument | Type | Description |
-| -------- | ---- | ----------- |
-| $default_quantity | int, float | The default quantity. |
-| $product_id | int | The product id. |
-| $variation_id | int | The variation ID. Always 0 in this context. |
 
 ### Source
 
-- [Blocks/BlockTypes/ProductButton.php](../../../../../../src/Blocks/BlockTypes/ProductButton.php)
+- [StoreApi/Utilities/CartController.php](../../../../../../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -889,6 +883,57 @@ apply_filters( 'woocommerce_checkout_must_be_logged_in_message', string $message
 
 ---
 
+## woocommerce_checkout_show_terms
+
+
+Filters whether checkout shows the terms and conditions.
+
+```php
+apply_filters( 'woocommerce_checkout_show_terms', bool $show_terms )
+```
+
+### Description
+
+Returning false hides the terms and conditions on classic checkout and on the Checkout block's Actions block, for example when an extension shows its own legal checkboxes. Like classic checkout, this only runs on the frontend, where callbacks can rely on the cart being loaded.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $show_terms | bool | Whether to show the terms and conditions. |
+
+### Source
+
+- [Blocks/BlockTypes/Checkout.php](../../../../../../src/Blocks/BlockTypes/Checkout.php)
+
+---
+
+## woocommerce_default_payment_method
+
+
+Filters the payment method the Checkout block starts with.
+
+```php
+apply_filters( 'woocommerce_default_payment_method', string $payment_method, array $available_gateways )
+```
+
+### Description
+
+Return a gateway id from `$available_gateways` to preselect it, or an empty string to select nothing; any other value selects nothing. Attach the callback by `init` at the latest.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $payment_method | string | Gateway id WooCommerce would preselect: the customer's default saved card's gateway, the method remembered in the session, or the first enabled gateway; '' when there is none. |
+| $available_gateways | array | Gateways available for this cart, keyed by id. |
+
+### Source
+
+- [StoreApi/Utilities/PaymentUtils.php](../../../../../../src/StoreApi/Utilities/PaymentUtils.php)
+
+---
+
 ## woocommerce_delete_expired_draft_orders_batch_size
 
 
@@ -1192,18 +1237,11 @@ Allows backward compatibility with the `rest_request_after_callbacks` filter by 
 ## woocommerce_loop_add_to_cart_args
 
 
-Allow filtering of the add to cart button arguments.
+This filter is documented in includes/wc-template-functions.php.
 
 ```php
-apply_filters( 'woocommerce_loop_add_to_cart_args', array $args, \WC_Product $product )
+apply_filters( 'woocommerce_loop_add_to_cart_args' )
 ```
-
-### Parameters
-
-| Argument | Type | Description |
-| -------- | ---- | ----------- |
-| $args | array | Button arguments, with a `class` string and an `attributes` array. |
-| $product | \WC_Product | Product the button is rendered for. |
 
 ### Source
 
@@ -2034,7 +2072,7 @@ apply_filters( 'woocommerce_valid_order_statuses_for_payment', array $valid_orde
 
 ### Description
 
-The same filter WC_Order::needs_payment() applies. A status a site declares payable counts as awaiting payment here too, so a failure while the order is in it is reported rather than recovered as one that took payment.
+The same filter WC_Order::needs_payment() applies, so a zero-total order in a status the site declares payable can be resumed.
 
 ### Parameters
 
@@ -2045,7 +2083,7 @@ The same filter WC_Order::needs_payment() applies. A status a site declares paya
 
 ### Source
 
-- [StoreApi/Utilities/CheckoutTrait.php](../../../../../../src/StoreApi/Utilities/CheckoutTrait.php)
+- [StoreApi/Utilities/DraftOrderTrait.php](../../../../../../src/StoreApi/Utilities/DraftOrderTrait.php)
 
 ---
 

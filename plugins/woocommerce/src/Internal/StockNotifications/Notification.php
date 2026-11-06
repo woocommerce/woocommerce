@@ -483,20 +483,48 @@ class Notification extends \WC_Data {
 	 * @return bool True if the key is valid, false otherwise.
 	 */
 	public function check_verification_key( string $key ): bool {
+		return $this->verification_key_matches( $key ) && ! $this->is_verification_key_expired();
+	}
+
+	/**
+	 * Check whether the given key matches the stored verification key hash, ignoring expiration.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $key The key to check.
+	 * @return bool True if a verification key is stored and the given key matches it, false otherwise.
+	 */
+	public function verification_key_matches( string $key ): bool {
 		$action_key = (string) $this->get_meta( 'verification_action_key' );
 
 		if ( ! str_contains( $action_key, ':' ) ) {
 			return false;
 		}
 
-		list( $timestamp, $hash ) = explode( ':', $action_key, 2 );
+		list( , $hash ) = explode( ':', $action_key, 2 );
 
-		$threshold = Config::get_verification_expiration_time_threshold();
-		if ( time() - (int) $timestamp > $threshold ) {
+		return wp_verify_fast_hash( $key, $hash );
+	}
+
+	/**
+	 * Check whether the stored verification key is past its expiration time.
+	 *
+	 * A missing or malformed key is not reported as expired.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return bool True if a verification key is stored and has expired, false otherwise.
+	 */
+	public function is_verification_key_expired(): bool {
+		$action_key = (string) $this->get_meta( 'verification_action_key' );
+
+		if ( ! str_contains( $action_key, ':' ) ) {
 			return false;
 		}
 
-		return wp_verify_fast_hash( $key, $hash );
+		list( $timestamp ) = explode( ':', $action_key, 2 );
+
+		return time() - (int) $timestamp > Config::get_verification_expiration_time_threshold();
 	}
 
 	/**
@@ -506,12 +534,30 @@ class Notification extends \WC_Data {
 	 * @return string The generated verification key.
 	 */
 	public function get_verification_key( bool $persist ): string {
-		$key = wp_generate_password( 20, false );
-		$this->update_meta_data( 'verification_action_key', time() . ':' . wp_fast_hash( $key ) );
+		$key = $this->write_through(
+			function () {
+				return $this->stage_verification_key();
+			}
+		);
 
 		if ( $persist ) {
 			$this->save();
 		}
+
+		return $key;
+	}
+
+	/**
+	 * Generate a verification key and set its hash in memory. The next save() writes it.
+	 *
+	 * @since 11.4.0
+	 * @return string The generated verification key.
+	 */
+	public function stage_verification_key(): string {
+		$this->refuse_unstaged_override( 'get_verification_key', 'stage_verification_key' );
+
+		$key = wp_generate_password( 20, false );
+		$this->update_meta_data( 'verification_action_key', time() . ':' . wp_fast_hash( $key ) );
 
 		return $key;
 	}
@@ -537,12 +583,58 @@ class Notification extends \WC_Data {
 	 * @return string The generated unsubscribe key.
 	 */
 	public function get_unsubscribe_key( bool $persist ): string {
-		$key = wp_generate_password( 20, false );
-		$this->update_meta_data( 'unsubscribe_action_key', wp_fast_hash( $key ) );
+		$key = $this->write_through(
+			function () {
+				return $this->stage_unsubscribe_key();
+			}
+		);
 
 		if ( $persist ) {
 			$this->save();
 		}
+
+		return $key;
+	}
+
+	/**
+	 * Whether any meta changes are pending a save.
+	 *
+	 * Mirrors the checks in `save_meta_data()`, so meta marked for deletion counts,
+	 * unlike `get_meta_data()`.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return bool
+	 */
+	public function has_meta_changes(): bool {
+		if ( is_null( $this->meta_data ) ) {
+			return false;
+		}
+
+		foreach ( $this->meta_data as $meta ) {
+			if ( is_null( $meta->value ) ) {
+				if ( ! empty( $meta->id ) ) {
+					return true;
+				}
+			} elseif ( empty( $meta->id ) || $meta->get_changes() ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Generate an unsubscribe key and set its hash in memory. The next save() writes it.
+	 *
+	 * @since 11.4.0
+	 * @return string The generated unsubscribe key.
+	 */
+	public function stage_unsubscribe_key(): string {
+		$this->refuse_unstaged_override( 'get_unsubscribe_key', 'stage_unsubscribe_key' );
+
+		$key = wp_generate_password( 20, false );
+		$this->update_meta_data( 'unsubscribe_action_key', wp_fast_hash( $key ) );
 
 		return $key;
 	}

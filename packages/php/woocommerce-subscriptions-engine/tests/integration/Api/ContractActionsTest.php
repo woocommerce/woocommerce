@@ -214,7 +214,7 @@ class ContractActionsTest extends EngineIntegrationTestCase {
 	 * An active contract owned by the test extension.
 	 */
 	private function create_contract(): ContractView {
-		return Contracts::create(
+		return $this->create_released(
 			array(
 				'extension_slug' => self::EXTENSION_SLUG,
 				'status'         => 'active',

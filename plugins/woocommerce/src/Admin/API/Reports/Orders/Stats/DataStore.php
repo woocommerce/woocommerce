@@ -338,7 +338,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @param array    $params                  Query limit parameters.
 	 * @param stdClass $data                    Reference to the data object to fill.
 	 * @param int      $expected_interval_count Number of expected intervals.
-	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
+	 * @return stdClass|\WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
 	 */
 	public function get_noncached_stats_data( $query_args, $params, &$data, $expected_interval_count ) {
 		global $wpdb;
@@ -545,6 +545,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		// Defense-in-depth: also checked in OrdersScheduler::import(), but
 		// update() can be called directly outside of the import flow.
 		if ( OrdersScheduler::is_test_order( $order ) ) {
+			return -1;
+		}
+
+		// Same defense-in-depth for records the import conditions filter excludes. A failed check
+		// writes nothing either, and reports a failed sync rather than a skip.
+		$excluded = OrdersScheduler::is_excluded_from_import( (int) $order->get_id() );
+		if ( null === $excluded ) {
+			return false;
+		}
+		if ( $excluded ) {
 			return -1;
 		}
 

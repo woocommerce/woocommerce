@@ -365,12 +365,21 @@ class WC_Install {
 			// Run again to cancel all pattern fetch jobs now that scheduling is disabled.
 			'wc_update_1040_cleanup_legacy_ptk_patterns_fetching',
 		),
+		'11.2.2'   => array(
+			'wc_update_1122_remove_objects_from_default_attributes',
+		),
 		'11.3.0'   => array(
 			'wc_update_1130_set_legacy_variation_price_hash_option',
 			'wc_update_1130_delete_unpublished_variation_lookup_rows',
 			'wc_update_1130_split_tax_lookup_taxable_amount',
 			'wc_update_1130_delete_stock_notification_sync_notice_option',
 			'wc_update_1130_backfill_order_stats_payment_method',
+		),
+		'11.4.0'   => array(
+			'wc_update_1140_re_enable_autoload_options',
+			'wc_update_1140_add_mpn_to_product_lookup_table',
+			// Run again for stores whose database was already at 11.3.0 or later, as they skip the 11.2.2 key.
+			'wc_update_1122_remove_objects_from_default_attributes',
 		),
 	);
 
@@ -2056,6 +2065,7 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   `product_id` bigint(20) NOT NULL,
   `sku` varchar(100) NULL default '',
   `global_unique_id` varchar(100) NULL default '',
+  `mpn` varchar(100) NOT NULL DEFAULT '',
   `virtual` tinyint(1) NULL default 0,
   `downloadable` tinyint(1) NULL default 0,
   `min_price` decimal(19,4) NULL default NULL,
@@ -2076,7 +2086,8 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   KEY `onsale` (`onsale`),
   KEY min_max_price (`min_price`, `max_price`),
   KEY sku (sku(50)),
-  KEY global_unique_id (global_unique_id(50))
+  KEY global_unique_id (global_unique_id(50)),
+  KEY mpn (mpn(50))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
   tax_rate_class_id bigint(20) unsigned NOT NULL auto_increment,
@@ -3204,7 +3215,7 @@ EOT;
 <!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
 <!-- /wp:woocommerce/product-image -->
 
-<!-- wp:post-title {"textAlign":"center","isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}},"typography":{"lineHeight":"1.4"}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
+<!-- wp:post-title {"textAlign":"center","isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}},"typography":{"lineHeight":"1.4"}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-title"} /-->
 
 <!-- wp:woocommerce/product-price {"textAlign":"center","fontSize":"small"} /-->
 
@@ -3322,11 +3333,7 @@ EOT;
 <div class="wp-block-woocommerce-checkout-order-note-block"></div>
 <!-- /wp:woocommerce/checkout-order-note-block -->
 
-<!-- wp:woocommerce/checkout-terms-block -->
-<div class="wp-block-woocommerce-checkout-terms-block"></div>
-<!-- /wp:woocommerce/checkout-terms-block -->
-
-<!-- wp:woocommerce/checkout-actions-block -->
+<!-- wp:woocommerce/checkout-actions-block {"showTerms":true} -->
 <div class="wp-block-woocommerce-checkout-actions-block"></div>
 <!-- /wp:woocommerce/checkout-actions-block --></div>
 <!-- /wp:woocommerce/checkout-fields-block -->

@@ -61,13 +61,16 @@ class ProductTemplate extends AbstractBlock {
 
 		$classnames = '';
 		if ( isset( $block->context['displayLayout'] ) && isset( $block->context['query'] ) ) {
-			$classnames = 'is-product-collection-layout-' . $block->context['displayLayout']['type'] . ' ';
+			$type    = $block->context['displayLayout']['type'] ?? '';
+			$columns = $block->context['displayLayout']['columns'] ?? null;
 
-			if ( isset( $block->context['displayLayout']['type'] ) && 'flex' === $block->context['displayLayout']['type'] ) {
+			$classnames = 'is-product-collection-layout-' . $type . ' ';
+
+			if ( 'flex' === $type && ! empty( $columns ) ) {
 				if ( isset( $block->context['displayLayout']['shrinkColumns'] ) && $block->context['displayLayout']['shrinkColumns'] ) {
-					$classnames = "wc-block-product-template__responsive columns-{$block->context['displayLayout']['columns']}";
+					$classnames = "wc-block-product-template__responsive columns-{$columns}";
 				} else {
-					$classnames = "is-flex-container columns-{$block->context['displayLayout']['columns']}";
+					$classnames = "is-flex-container columns-{$columns}";
 				}
 			}
 		}
@@ -107,14 +110,13 @@ class ProductTemplate extends AbstractBlock {
 
 			// Use an early priority so that other 'render_block_context' filters have access to the values.
 			add_filter( 'render_block_context', $filter_block_context, 1 );
-			// Render the inner blocks of the Post Template block with `dynamic` set to `false` to prevent calling
-			// `render_callback` and ensure that no wrapper markup is included.
-			$block_content = (
-				new WP_Block(
-					$block_instance,
-					$block->context
-				)
-			)->render( array( 'dynamic' => false ) );
+
+			$inner_block = new WP_Block( $block_instance, $block->context );
+			// core/null has no uses_context, so preserve the collection marker for descendant checks.
+			$inner_block->context['isProductCollectionInnerBlock'] = $block->context['isProductCollectionInnerBlock'] ?? false;
+
+			// Render only the inner blocks, without the Product Template callback or wrapper.
+			$block_content = $inner_block->render( array( 'dynamic' => false ) );
 			remove_filter( 'render_block_context', $filter_block_context, 1 );
 
 			// Load product into the shared products store.
@@ -169,22 +171,19 @@ class ProductTemplate extends AbstractBlock {
 	/**
 	 * Determines whether a block list contains a block that uses the featured image.
 	 *
-	 * @param WP_Block_List $inner_blocks Inner block instance.
-	 *
+	 * @param \WP_Block_List $inner_blocks Inner block instance.
 	 * @return bool Whether the block list contains a block that uses the featured image.
 	 */
 	protected function block_core_post_template_uses_featured_image( $inner_blocks ) {
+		// Extended replica from upstreams' block_core_post_template_uses_featured_image function.
 		foreach ( $inner_blocks as $block ) {
-			if ( 'core/post-featured-image' === $block->name ) {
+			if ( 'core/post-featured-image' === $block->name || 'woocommerce/product-image' === $block->name ) {
 				return true;
 			}
-			if (
-			'core/cover' === $block->name &&
-			! empty( $block->attributes['useFeaturedImage'] )
-			) {
+			if ( 'core/cover' === $block->name && ! empty( $block->attributes['useFeaturedImage'] ) ) {
 				return true;
 			}
-			if ( $block->inner_blocks && block_core_post_template_uses_featured_image( $block->inner_blocks ) ) {
+			if ( $block->inner_blocks && $this->block_core_post_template_uses_featured_image( $block->inner_blocks ) ) {
 				return true;
 			}
 		}

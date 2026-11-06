@@ -1,0 +1,7 @@
+{
+  "src/components/customer-feedback-simple/customer-feedback-simple.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  }
+}

@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Include active sale dates in product structured data so shopping agents can see when sale prices apply.
