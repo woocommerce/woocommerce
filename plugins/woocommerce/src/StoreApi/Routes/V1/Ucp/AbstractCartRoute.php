@@ -7,8 +7,8 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute as StoreApiCartR
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\SessionHandler;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpCartMapper;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\CartMapper;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 /**
  * Shared behaviour of the UCP cart routes.
@@ -51,7 +51,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return array
 	 */
 	protected function ucp_metadata( string $status ): array {
-		return UcpUtils::response_metadata( UcpUtils::CAPABILITY_CART, $status );
+		return Utils::response_metadata( Utils::CAPABILITY_CART, $status );
 	}
 
 	/**
@@ -67,7 +67,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
-		$refusal = UcpUtils::refuse_non_json_payload( $request, UcpUtils::CAPABILITY_CART );
+		$refusal = Utils::refuse_non_json_payload( $request, Utils::CAPABILITY_CART );
 		if ( null !== $refusal ) {
 			return $this->add_response_headers( $refusal );
 		}
@@ -297,7 +297,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		return new \WP_REST_Response(
 			array_merge(
 				array( 'ucp' => $this->ucp_metadata( 'success' ) ),
-				( new UcpCartMapper() )->build_cart( $this->cart_item_response(), $cart_id, $context )
+				( new CartMapper() )->build_cart( $this->cart_item_response(), $cart_id, $context )
 			),
 			200
 		);
@@ -328,7 +328,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function ucp_error( string $code, string $message, string $severity, int $status, string $path = '$' ): \WP_REST_Response {
-		return UcpUtils::error_response( UcpUtils::CAPABILITY_CART, $code, $message, $severity, $status, $path );
+		return Utils::error_response( Utils::CAPABILITY_CART, $code, $message, $severity, $status, $path );
 	}
 
 	/**
@@ -349,7 +349,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		$message = (string) $error->get_error_message();
 
 		return $this->ucp_error(
-			UcpUtils::cart_error_code( (string) $error->get_error_code(), 'TRANSPORT_ERROR' ),
+			Utils::cart_error_code( (string) $error->get_error_code(), 'TRANSPORT_ERROR' ),
 			'' !== $message ? $message : __( 'The cart could not be loaded. Please try again.', 'woocommerce' ),
 			$status >= 500 ? 'unrecoverable' : 'recoverable',
 			$status
@@ -365,7 +365,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function ucp_not_found(): \WP_REST_Response {
-		return UcpUtils::error_response( UcpUtils::CAPABILITY_CART, 'not_found', __( 'Cart not found.', 'woocommerce' ), 'unrecoverable', 200, '$.id' );
+		return Utils::error_response( Utils::CAPABILITY_CART, 'not_found', __( 'Cart not found.', 'woocommerce' ), 'unrecoverable', 200, '$.id' );
 	}
 
 	/**
@@ -503,7 +503,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			}
 
 			return $this->ucp_error(
-				UcpUtils::cart_error_code( $error->getErrorCode() ),
+				Utils::cart_error_code( $error->getErrorCode() ),
 				$error->getMessage(),
 				'recoverable',
 				200,

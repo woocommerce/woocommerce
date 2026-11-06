@@ -5,7 +5,7 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Abilities;
+namespace Automattic\WooCommerce\Internal\Abilities;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -15,6 +15,7 @@ defined( 'ABSPATH' ) || exit;
  * WordPress 7.2 converts valid ability input to the schema types with
  * WP_Ability::coerce_input() before the callbacks run. This class backports
  * that method, so the callbacks get converted input on WordPress 7.0 and 7.1 too.
+ * It also prepares the input for callers that call check_permissions() directly.
  *
  * @since 11.4.0
  */
@@ -46,11 +47,9 @@ class Ability extends \WP_Ability {
 	/**
 	 * Apply the schema default, validate and convert the input, then check the permissions.
 	 *
-	 * Callers such as the MCP adapter call this method directly with raw input. The
-	 * permission callback then gets the same input as through execute().
-	 *
-	 * Remove this override when WooCommerce requires a WordPress version that fixes
-	 * https://core.trac.wordpress.org/ticket/66482.
+	 * Some callers, such as older MCP adapter versions, call this method directly with
+	 * raw input. The permission callback then gets the same input as through execute().
+	 * Input that is already prepared passes through unchanged.
 	 *
 	 * @since 11.4.0
 	 *
