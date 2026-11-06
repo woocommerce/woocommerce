@@ -280,7 +280,7 @@ abstract class ActionableAbility extends Ability {
 				$refused
 			);
 		}
-		if ( $refused->has_errors() ) {
+		if ( $core_refused || $refused->has_errors() ) {
 			return self::join_refusals( $refused );
 		}
 
