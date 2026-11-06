@@ -15,15 +15,27 @@ export const VIEW_PATH = '/wc/v3/agent-readiness/view';
 export const SCAN_PATH = '/wc/v3/agent-readiness/scan';
 
 /**
+ * How often the view is read again while a check is pending, so its results show once it finishes.
+ */
+export const POLL_MS = 5000;
+
+/**
+ * How long a pending check is polled for. The pending message already says when a check is stuck.
+ */
+export const POLL_FOR_MS = 10 * 60 * 1000;
+
+/**
  * Loads the view, and queues a check: the scan runs in the background, so after
- * queuing it the view is read again for the pending message. Records one viewed
- * event per mount, the Run check click, and failures.
+ * queuing it the view is read again for the pending message, and then every
+ * POLL_MS while the check is pending, so the results replace it when it finishes.
+ * Records one viewed event per mount, the Run check click, and failures.
  */
 export function useReadinessView( surface: Surface ) {
 	const [ view, setView ] = useState< ReadinessView | null >( null );
 	const [ error, setError ] = useState< string | null >( null );
 	const [ running, setRunning ] = useState( false );
 	const viewed = useRef( false );
+	const pendingSince = useRef< number | null >( null );
 
 	const load = useCallback( async () => {
 		try {
@@ -50,6 +62,19 @@ export function useReadinessView( surface: Surface ) {
 	useEffect( () => {
 		void load();
 	}, [ load ] );
+
+	useEffect( () => {
+		if ( ! view?.run.pending ) {
+			pendingSince.current = null;
+			return;
+		}
+		pendingSince.current ??= Date.now();
+		if ( Date.now() - pendingSince.current >= POLL_FOR_MS ) {
+			return;
+		}
+		const timer = setTimeout( () => void load(), POLL_MS );
+		return () => clearTimeout( timer );
+	}, [ view, load ] );
 
 	const runCheck = useCallback( async () => {
 		trackReadiness( 'run_check_click', {

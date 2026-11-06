@@ -11,6 +11,7 @@ import { __ } from '@wordpress/i18n';
 import './sales-readiness.scss';
 import { useReadinessView } from './use-readiness-view';
 import { FixFirstList } from './components/fix-first';
+import { RunStatus } from './components/run-status';
 import { trackReadiness } from './tracks';
 
 /**
@@ -89,15 +90,7 @@ export default function SalesReadinessOverview() {
 							>
 								{ view.last_checked }
 							</Text>
-							{ view.run.message && (
-								<Text
-									variant="body-sm"
-									className="wc-sales-readiness__muted"
-									role="status"
-								>
-									{ view.run.message }
-								</Text>
-							) }
+							<RunStatus run={ view.run } />
 							<div className="wc-sales-readiness-card__actions">
 								<Button
 									variant="secondary"

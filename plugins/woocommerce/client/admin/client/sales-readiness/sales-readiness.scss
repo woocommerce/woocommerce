@@ -186,6 +186,10 @@
 		gap: 2px;
 	}
 
+	&__status .components-spinner {
+		margin: 0;
+	}
+
 	&__intro {
 		display: block;
 		margin-block-end: 12px;

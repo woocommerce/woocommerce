@@ -88,6 +88,7 @@ export interface ReadinessView {
 	run: {
 		label: string;
 		pending: boolean;
+		stalled: boolean;
 		message: string;
 	};
 	fix_first: FixFirst | null;

@@ -243,7 +243,7 @@ class ReadinessRestController extends RestApiControllerBase {
 				'context' => array( 'view' ),
 			),
 			'run'          => array(
-				'description' => __( 'The check button: its label, whether a check is pending, and a status message.', 'woocommerce' ),
+				'description' => __( 'The check button: its label, whether a check is pending or stalled, and a status message.', 'woocommerce' ),
 				'type'        => 'object',
 				'context'     => array( 'view' ),
 			),

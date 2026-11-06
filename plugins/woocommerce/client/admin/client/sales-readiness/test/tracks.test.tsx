@@ -24,7 +24,7 @@ const checkedView: ReadinessView = {
 	last_checked: 'Last checked today',
 	checked_note: null,
 	intro: null,
-	run: { label: 'Check again', pending: false, message: '' },
+	run: { label: 'Check again', pending: false, stalled: false, message: '' },
 	fix_first: {
 		title: 'Fix first',
 		ranking: 'Ranked by products.',
@@ -248,7 +248,12 @@ describe( 'Sales readiness tracking', () => {
 			...checkedView,
 			intro: 'Run a check.',
 			fix_first: null,
-			run: { label: 'Run check', pending: false, message: '' },
+			run: {
+				label: 'Run check',
+				pending: false,
+				stalled: false,
+				message: '',
+			},
 		};
 		mockedApiFetch.mockImplementation( ( { method } ) =>
 			method === 'POST'
