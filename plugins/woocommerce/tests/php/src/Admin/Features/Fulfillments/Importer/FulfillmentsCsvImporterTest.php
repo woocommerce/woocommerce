@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Importer;
 
+require_once __DIR__ . '/FulfillmentsCsvReadTracker.php';
+
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\FulfillmentsCsvImporter;
 
@@ -29,6 +31,9 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	 */
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
+		if ( ! in_array( 'wcimp', stream_get_wrappers(), true ) ) {
+			stream_wrapper_register( 'wcimp', FulfillmentsCsvReadTracker::class );
+		}
 		self::$original_fulfillments_flag = get_option( 'woocommerce_feature_fulfillments_enabled' );
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
 		$controller = wc_get_container()->get( FulfillmentsController::class );
@@ -357,19 +362,23 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox parse_headers counts rows past the cap by one so the caller can reject the file.
+	 * @testdox A file larger than the cap stops at 5,001 rows and does not read the rest.
 	 */
-	public function test_parse_headers_counts_one_row_past_the_cap(): void {
-		$csv = "order_number,tracking_number,shipment_provider\n";
-		for ( $i = 1; $i <= FulfillmentsCsvImporter::MAX_IMPORT_ROWS + 50; $i++ ) {
-			$csv .= "1,CAP-{$i},ups\n";
+	public function test_parse_headers_stops_before_the_rest_of_an_over_cap_file(): void {
+		$prefix = "order_number,tracking_number,shipment_provider\n";
+		for ( $i = 1; $i <= FulfillmentsCsvImporter::MAX_IMPORT_ROWS + 2; $i++ ) {
+			$prefix .= "1,OVER-{$i},ups\n";
 		}
-		$file = $this->make_csv( $csv );
+		$tail = str_repeat( "9,TAIL,ups\n", 200000 );
+		$path = $this->make_csv( $prefix . $tail );
 
-		$parsed = ( new FulfillmentsCsvImporter( $file ) )->parse_headers();
+		FulfillmentsCsvReadTracker::$max_position = 0;
+		$parsed                                   = ( new FulfillmentsCsvImporter( 'wcimp://' . $path ) )->parse_headers();
 
 		$this->assertSame( FulfillmentsCsvImporter::MAX_IMPORT_ROWS + 1, $parsed['total'] );
-		$this->assertTrue( $parsed['total_capped'], 'A file larger than the cap must not report an exact total' );
+		$this->assertTrue( $parsed['total_capped'], 'MAX+2 data rows must set the sentinel and stop' );
+		$this->assertLessThan( filesize( $path ), FulfillmentsCsvReadTracker::$max_position, 'The tail past the cap must not be read' );
+		$this->assertLessThan( strlen( $prefix ) + 65536, FulfillmentsCsvReadTracker::$max_position, 'Reading must stop within one read-ahead of the proving row' );
 	}
 
 	/**
@@ -380,6 +389,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		for ( $i = 1; $i <= FulfillmentsCsvImporter::MAX_IMPORT_ROWS + 1; $i++ ) {
 			$csv .= "1,EXACT-{$i},ups\n";
 		}
+		$csv .= "\n,,,\n";
 
 		$parsed = ( new FulfillmentsCsvImporter( $this->make_csv( $csv ) ) )->parse_headers();
 
@@ -589,12 +599,14 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Windows-1252 text is converted at the shared read boundary, and valid UTF-8 is left unchanged.
+	 *
+	 * UTF-8 is detected with a byte checker, not mbstring. Conversion uses
+	 * mb_convert_encoding when that exists, otherwise iconv. This environment
+	 * has mbstring, so the iconv-only branch and the neither-available branch
+	 * are not executed. When neither converter exists, an invalid file returns
+	 * unsupported_encoding instead of the raw bytes.
 	 */
 	public function test_character_encoding_is_normalized_for_prepare_and_row_reads(): void {
-		if ( ! function_exists( 'mb_check_encoding' ) || ! function_exists( 'mb_convert_encoding' ) ) {
-			$this->markTestSkipped( 'The mbstring extension is required for this test.' );
-		}
-
 		$utf8_file = $this->make_csv( "caf\xC3\xA9,tracking_number,shipment_provider\n1,Spediteur M\xC3\xBCller,ups\n" );
 		$utf8      = ( new FulfillmentsCsvImporter( $utf8_file ) )->parse_headers();
 		$this->assertSame( 'café', $utf8['headers'][0], 'Valid UTF-8 headers must not be reinterpreted as Windows-1252' );
@@ -607,12 +619,45 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 
 		$legacy_file = $this->make_csv( "order_number,tracking_number,shipment_provider\n1,\xC3\xA9,Spediteur M\xFCller\n" );
 		$legacy      = ( new FulfillmentsCsvImporter( $legacy_file ) )->parse_headers();
-		$legacy_rows = ( new FulfillmentsCsvImporter( $legacy_file ) )->read_data_rows( 0, 1 );
+		$can_convert = function_exists( 'mb_convert_encoding' ) || function_exists( 'iconv' );
+		if ( ! $can_convert ) {
+			$this->assertSame( 'unsupported_encoding', $legacy['error']['code'], 'Invalid text must not be returned raw when it cannot be converted' );
+			return;
+		}
 
+		$legacy_rows = ( new FulfillmentsCsvImporter( $legacy_file ) )->read_data_rows( 0, 1 );
 		$this->assertSame( 'Ã©', $legacy['sample'][1], 'Once the file is not UTF-8, every cell is converted from Windows-1252' );
 		$this->assertSame( 'Spediteur Müller', $legacy['sample'][2] );
-		$this->assertTrue( mb_check_encoding( $legacy['sample'][2], 'UTF-8' ) );
 		$this->assertSame( $legacy['sample'], $legacy_rows['rows'][0]['cells'], 'Prepare and the row reader must decode the same text' );
+	}
+
+	/**
+	 * @testdox A resumed read keeps BOM-stripped offsets and the file-level encoding.
+	 */
+	public function test_read_data_rows_resume_keeps_bom_offset_and_encoding(): void {
+		if ( ! function_exists( 'mb_convert_encoding' ) && ! function_exists( 'iconv' ) ) {
+			$this->markTestSkipped( 'Windows-1252 conversion is unavailable in this environment.' );
+		}
+
+		$file = $this->make_csv( "\xEF\xBB\xBForder_number,tracking_number,shipment_provider\n1,ONE,M\xFCller\n2,\xC3\xA9,TWO\n" );
+		$sut  = new FulfillmentsCsvImporter( $file );
+
+		$first = $sut->read_data_rows( 0, 1 );
+		$this->assertSame( 'order_number', $first['headers'][0], 'The BOM must not remain on the header' );
+		$this->assertSame( 'Müller', $first['rows'][0]['cells'][2] );
+
+		$second = $sut->read_data_rows(
+			0,
+			1,
+			array(
+				'byte_offset'   => $first['byte_offset'],
+				'record_number' => $first['next_record_number'],
+			)
+		);
+		$this->assertSame( 'order_number', $second['headers'][0], 'Resuming must strip the BOM before seeking' );
+		$this->assertSame( 'Ã©', $second['rows'][0]['cells'][1], 'A later row must use the same Windows-1252 decision as the first row' );
+		$this->assertSame( 'TWO', $second['rows'][0]['cells'][2] );
+		$this->assertSame( $first['next_record_number'], $second['rows'][0]['row_number'] );
 	}
 
 	/**
