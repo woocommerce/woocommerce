@@ -4,9 +4,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\StructuredData;
 
-use WC_Data_Store;
 use WC_Shipping_Zone;
-use WC_Shipping_Zone_Data_Store;
 use WC_Shipping_Zones;
 
 /**
@@ -19,12 +17,11 @@ class ShippingDestinations {
 	 * @return array Shipping details.
 	 */
 	public function get_shipping_details(): array {
-		if ( ! function_exists( 'WC' ) || ! WC() || ! wc_shipping_enabled() ) {
+		if ( ! wc_shipping_enabled() || has_filter( 'woocommerce_get_zone_criteria' ) ) {
 			return array();
 		}
 
-		$components      = get_object_vars( WC() );
-		$country_service = $components['countries'] ?? null;
+		$country_service = WC()->countries;
 		if ( ! $country_service instanceof \WC_Countries ) {
 			return array();
 		}
@@ -57,170 +54,150 @@ class ShippingDestinations {
 
 		$zones    = WC_Shipping_Zones::get_shipping_zones();
 		$zones[0] = new WC_Shipping_Zone( 0 );
-		$store    = WC_Data_Store::load( 'shipping-zone' );
-		$batched  = WC_Shipping_Zone_Data_Store::class === $store->get_current_class_name();
-		if ( $batched ) {
-			ShippingMethodBatch::begin( array_keys( $zones ) );
-		}
 
 		$details = array();
 		$claimed = array();
 		// Limit the size of the generated markup when expanding postcode ranges.
 		$range_budget = 1000;
-		$uncertain    = false;
-		try {
-			foreach ( $zones as $zone ) {
-				// Checkout matches stored locations, while the view getter applies a filter.
-				$unfiltered_locations = has_filter( 'woocommerce_shipping_zone_get_zone_locations' ) ? wp_json_encode( $zone->get_zone_locations( 'edit' ) ) : null;
-				$locations            = $zone->get_zone_locations();
-				if ( ! is_array( $locations ) ) {
-					return $details;
+		foreach ( $zones as $zone ) {
+			$locations = $zone->get_zone_locations( 'edit' );
+			if ( ! is_array( $locations ) ) {
+				return array();
+			}
+			$areas     = array();
+			$postcodes = array();
+			$has_area  = false;
+			foreach ( $locations as $location ) {
+				if ( ! is_object( $location ) || ! isset( $location->type, $location->code ) || ! is_string( $location->code ) ) {
+					return array();
 				}
-				if ( null !== $unfiltered_locations && ( false === $unfiltered_locations || wp_json_encode( $locations ) !== $unfiltered_locations ) ) {
-					// Continue processing so later shipping filters still run.
-					$uncertain = true;
+				$code = $location->code;
+				switch ( $location->type ) {
+					case 'postcode':
+						$postcodes[] = $code;
+						break;
+					case 'country':
+						$has_area = true;
+						if ( isset( $countries[ $code ] ) ) {
+							$areas[ $code ] = array( '*' => true );
+						}
+						break;
+					case 'state':
+						$has_area = true;
+						$parts    = explode( ':', $code, 2 );
+						if ( 2 === count( $parts ) && isset( $countries[ $parts[0] ] ) && '' !== $parts[1] && ! isset( $areas[ $parts[0] ]['*'] ) ) {
+							$areas[ $parts[0] ][ $parts[1] ] = true;
+						}
+						break;
+					case 'continent':
+						$has_area = true;
+						$members  = $continents[ $code ]['countries'] ?? array();
+						if ( ! is_array( $members ) ) {
+							return array();
+						}
+						foreach ( $members as $country ) {
+							if ( is_string( $country ) && isset( $countries[ $country ] ) && ( $country_continents[ $country ] ?? null ) === $code ) {
+								$areas[ $country ] = array( '*' => true );
+							}
+						}
+						break;
+					default:
+						// A custom location type cannot be mapped without its matching rules.
+						return array();
 				}
-				$areas     = array();
-				$postcodes = array();
-				$has_area  = false;
-				foreach ( $locations as $location ) {
-					if ( ! is_object( $location ) || ! isset( $location->type, $location->code ) || ! is_string( $location->code ) ) {
-						return $details;
-					}
-					$code = $location->code;
-					switch ( $location->type ) {
-						case 'postcode':
-							$postcodes[] = $code;
-							break;
-						case 'country':
-							$has_area = true;
-							if ( isset( $countries[ $code ] ) ) {
-								$areas[ $code ] = array( '*' => true );
-							}
-							break;
-						case 'state':
-							$has_area = true;
-							$parts    = explode( ':', $code, 2 );
-							if ( 2 === count( $parts ) && isset( $countries[ $parts[0] ] ) && '' !== $parts[1] && ! isset( $areas[ $parts[0] ]['*'] ) ) {
-								$areas[ $parts[0] ][ $parts[1] ] = true;
-							}
-							break;
-						case 'continent':
-							$has_area = true;
-							$members  = $continents[ $code ]['countries'] ?? array();
-							if ( ! is_array( $members ) ) {
-									return $details;
-							}
-							foreach ( $members as $country ) {
-								if ( is_string( $country ) && isset( $countries[ $country ] ) && ( $country_continents[ $country ] ?? null ) === $code ) {
-									$areas[ $country ] = array( '*' => true );
-								}
-							}
-							break;
-						default:
-							// A custom location type cannot be mapped without its matching rules.
-							return $details;
-					}
+			}
+			if ( ! $has_area ) {
+				foreach ( $countries as $country => $name ) {
+					$areas[ $country ] = array( '*' => true );
 				}
-				if ( ! $has_area ) {
-					foreach ( $countries as $country => $name ) {
-						$areas[ $country ] = array( '*' => true );
-					}
-				}
+			}
+			$postcode_rules = array();
+			foreach ( $postcodes as $postcode ) {
+				$postcode_rules[] = (object) array(
+					'zone_id'       => 1,
+					'location_code' => $postcode,
+				);
+			}
 
-				$destinations = array();
-				foreach ( $areas as $country => $states ) {
-					$restrictions    = array();
-					$country_budget  = intdiv( $range_budget, count( $states ) );
-					$starting_budget = $country_budget;
-					foreach ( $postcodes as $postcode ) {
-						$restrictions[] = $this->get_postcode_restriction( $postcode, $country, $country_budget );
-					}
-					$range_budget -= ( $starting_budget - $country_budget ) * count( $states );
-					foreach ( array_keys( $states ) as $state ) {
-						$state    = (string) $state;
-						$previous = $this->get_claims( $claimed[ $country ] ?? array(), $state );
-						if ( ! isset( $claimed[ $country ][ $state ] ) ) {
-							$claimed[ $country ][ $state ] = array(
-								'all'     => false,
-								'unknown' => false,
-								'codes'   => array(),
-							);
-						}
-						$region = array(
-							'@type'          => 'DefinedRegion',
-							'addressCountry' => $country,
+			$destinations = array();
+			foreach ( $areas as $country => $states ) {
+				$restrictions    = array();
+				$country_budget  = intdiv( $range_budget, count( $states ) );
+				$starting_budget = $country_budget;
+				foreach ( $postcodes as $postcode ) {
+					$restrictions[] = $this->get_postcode_restriction( $postcode, $country, $country_budget );
+				}
+				$range_budget -= ( $starting_budget - $country_budget ) * count( $states );
+				foreach ( array_keys( $states ) as $state ) {
+					$state    = (string) $state;
+					$previous = $this->get_claims( $claimed[ $country ] ?? array(), $state );
+					if ( ! isset( $claimed[ $country ][ $state ] ) ) {
+						$claimed[ $country ][ $state ] = array(
+							'all'   => false,
+							'rules' => array(),
 						);
-						if ( '*' !== $state ) {
-							$region['addressRegion'] = $state;
-						}
-						if ( ! $postcodes ) {
-							if ( ! $previous ) {
-								$destinations[] = $region;
-							} elseif ( '*' === $state ) {
-								$known_states = $country_service->get_states( $country );
-								if ( is_array( $known_states ) ) {
-									foreach ( array_keys( $known_states ) as $known_state ) {
-										$known_state = (string) $known_state;
-										if ( '' !== $known_state && '*' !== $known_state && ! $this->get_claims( $previous, $known_state ) ) {
-											$destinations[] = $region + array( 'addressRegion' => $known_state );
-										}
+					}
+					$region = array(
+						'@type'          => 'DefinedRegion',
+						'addressCountry' => $country,
+					);
+					if ( '*' !== $state ) {
+						$region['addressRegion'] = $state;
+					}
+					if ( ! $postcodes ) {
+						if ( ! $previous ) {
+							$destinations[] = $region;
+						} elseif ( '*' === $state ) {
+							$known_states = $country_service->get_states( $country );
+							if ( is_array( $known_states ) ) {
+								foreach ( array_keys( $known_states ) as $known_state ) {
+									$known_state = (string) $known_state;
+									if ( '' !== $known_state && '*' !== $known_state && ! $this->get_claims( $previous, $known_state ) ) {
+										$destinations[] = $region + array( 'addressRegion' => $known_state );
 									}
 								}
 							}
-							$claimed[ $country ][ $state ]['all'] = true;
-							continue;
 						}
-						$exact = array();
-						// Earlier zones take precedence even when they have no shipping methods.
-						foreach ( $restrictions as $restriction ) {
-							if ( isset( $restriction['postalCodePrefix'] ) && ! $previous ) {
-								$destinations[] = $region + $restriction;
-							}
-							$codes = $restriction['postalCodes'] ?? ( isset( $restriction['postalCode'] ) ? array( $restriction['postalCode'] ) : array() );
-							foreach ( $codes as $code ) {
-								$normalized = wc_normalize_postcode( $code );
-								if ( ! $this->postcode_is_claimed( $previous, $normalized ) ) {
-									$exact[] = $code;
-								}
-								if ( isset( $restriction['postalCode'] ) ) {
-									$claimed[ $country ][ $state ]['codes'][ $normalized ] = true;
-								}
-							}
-							if ( ! isset( $restriction['postalCode'] ) ) {
-								$claimed[ $country ][ $state ]['unknown'] = true;
-							}
-						}
-						if ( $exact ) {
-							$region['postalCode'] = array_values( array_unique( $exact ) );
-							$destinations[]       = $region;
-						}
-					}
-				}
-
-				if ( ! $destinations ) {
-					continue;
-				}
-				$methods = $zone->get_shipping_methods( true );
-				if ( ! is_array( $methods ) ) {
-					continue;
-				}
-				foreach ( $methods as $method ) {
-					if ( ! $method instanceof \WC_Shipping_Method || ! $method->is_enabled() || 'local_pickup' === $method->id || $method->supports( 'local-pickup' ) ) {
+						$claimed[ $country ][ $state ]['all'] = true;
 						continue;
 					}
-					if ( ! $uncertain ) {
-						$details[] = array(
-							'@type'               => 'OfferShippingDetails',
-							'shippingDestination' => $destinations,
-						);
+					$exact = array();
+					// Earlier zones take precedence even when they have no shipping methods.
+					foreach ( $restrictions as $restriction ) {
+						if ( isset( $restriction['postalCodePrefix'] ) && ! $previous ) {
+							$destinations[] = $region + $restriction;
+						}
+						$codes = $restriction['postalCodes'] ?? ( isset( $restriction['postalCode'] ) ? array( $restriction['postalCode'] ) : array() );
+						foreach ( $codes as $code ) {
+							if ( ! $this->postcode_is_claimed( $previous, $code, $country ) ) {
+								$exact[] = $code;
+							}
+						}
 					}
-					break;
+					$claimed[ $country ][ $state ]['rules'] = array_merge( $claimed[ $country ][ $state ]['rules'], $postcode_rules );
+					if ( $exact ) {
+						$region['postalCode'] = array_values( array_unique( $exact ) );
+						$destinations[]       = $region;
+					}
 				}
 			}
-		} finally {
-			if ( $batched ) {
-				ShippingMethodBatch::end();
+
+			if ( ! $destinations ) {
+				continue;
+			}
+			$methods = $zone->get_shipping_methods( true );
+			if ( ! is_array( $methods ) ) {
+				continue;
+			}
+			foreach ( $methods as $method ) {
+				if ( ! $method instanceof \WC_Shipping_Method || ! $method->is_enabled() || 'local_pickup' === $method->id || $method->supports( 'local-pickup' ) ) {
+					continue;
+				}
+				$details[] = array(
+					'@type'               => 'OfferShippingDetails',
+					'shippingDestination' => $destinations,
+				);
+				break;
 			}
 		}
 		return $details;
@@ -250,12 +227,13 @@ class ShippingDestinations {
 	 * Check whether an earlier zone might match a postcode.
 	 *
 	 * @param array  $claims Earlier claims.
-	 * @param string $postcode Normalized postcode.
+	 * @param string $postcode Postcode.
+	 * @param string $country Country code.
 	 * @return bool
 	 */
-	private function postcode_is_claimed( array $claims, string $postcode ): bool {
+	private function postcode_is_claimed( array $claims, string $postcode, string $country ): bool {
 		foreach ( $claims as $claim ) {
-			if ( ! empty( $claim['all'] ) || ! empty( $claim['unknown'] ) || isset( $claim['codes'][ $postcode ] ) ) {
+			if ( ! empty( $claim['all'] ) || wc_postcode_location_matcher( $postcode, $claim['rules'], 'zone_id', 'location_code', $country ) ) {
 				return true;
 			}
 		}

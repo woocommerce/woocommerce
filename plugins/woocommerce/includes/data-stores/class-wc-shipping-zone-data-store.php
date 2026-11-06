@@ -5,8 +5,6 @@
  * @package WooCommerce\DataStores
  */
 
-use Automattic\WooCommerce\Internal\StructuredData\ShippingMethodBatch;
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -214,13 +212,6 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	 */
 	public function get_methods( $zone_id, $enabled_only ) {
 		global $wpdb;
-
-		if ( $enabled_only && __CLASS__ === get_class( $this ) && class_exists( ShippingMethodBatch::class, false ) ) {
-			$methods = ShippingMethodBatch::take( $zone_id );
-			if ( null !== $methods ) {
-				return $methods;
-			}
-		}
 
 		if ( $enabled_only ) {
 			$raw_methods_sql = "SELECT method_id, method_order, instance_id, is_enabled FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE zone_id = %d AND is_enabled = 1";
