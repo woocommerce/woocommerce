@@ -67,6 +67,16 @@ class MappingResolverTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should leave an empty header unmapped and unreported, even when UNKNOWN_META is requested.
+	 */
+	public function test_resolve_leaves_empty_header_unmapped(): void {
+		$result = $this->sut->resolve( array( 'SKU', '' ), array(), MappingResolver::UNKNOWN_META );
+
+		$this->assertSame( '', $result['mapping'][''] );
+		$this->assertNotContains( '', $result['unknown'] );
+	}
+
+	/**
 	 * @testdox Should let an override win over the auto-mapped target.
 	 */
 	public function test_resolve_override_wins_over_auto_map(): void {

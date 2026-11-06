@@ -282,6 +282,29 @@ class ProductImporterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should import a CSV whose columns are named from and to.
+	 */
+	public function test_run_imports_a_csv_with_from_and_to_columns(): void {
+		$file = $this->write_csv( "Type,SKU,Name,from,to\nsimple,IMPORT-RUNNER-FROM-TO,From To Product,a,b\n" );
+
+		$results = $this->sut->run(
+			$file,
+			array(
+				'mapping' => array_merge(
+					$this->get_simple_mapping(),
+					array(
+						'from' => 'meta:from',
+						'to'   => 'meta:to',
+					)
+				),
+			)
+		);
+
+		$this->assertSame( 1, $results['imported'] );
+		$this->assertSame( 'a', wc_get_product( wc_get_product_id_by_sku( 'IMPORT-RUNNER-FROM-TO' ) )->get_meta( 'from' ) );
+	}
+
+	/**
 	 * Get a mapping for the `Type,SKU,Name` CSV columns.
 	 *
 	 * @return array<string, string>
