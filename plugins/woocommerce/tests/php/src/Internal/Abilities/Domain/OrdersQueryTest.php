@@ -107,19 +107,13 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should apply no ID filter when include is an empty list.
-	 *
-	 * @dataProvider storage_modes
-	 * @param bool $hpos Whether to use the custom orders table.
+	 * @testdox Should refuse an empty include list instead of returning every order.
 	 */
-	public function test_empty_include_applies_no_filter( bool $hpos ): void {
-		$this->use_storage( $hpos );
-		$first  = OrderHelper::create_order();
-		$second = OrderHelper::create_order();
+	public function test_refuses_empty_include(): void {
+		$schema = OrdersQuery::get_registration_args()['input_schema'];
 
-		$result = OrdersQuery::execute( array( 'include' => array() ) );
-
-		$this->assertEqualsCanonicalizing( array( $first->get_id(), $second->get_id() ), array_column( $result['orders'], 'id' ) );
+		$this->assertWPError( rest_validate_value_from_schema( array( 'include' => array() ), $schema, 'input' ) );
+		$this->assertTrue( rest_validate_value_from_schema( array( 'include' => array( 1 ) ), $schema, 'input' ) );
 	}
 
 	/**

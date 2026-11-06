@@ -286,7 +286,8 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 				),
 				'include'            => array(
 					'type'        => 'array',
-					'description' => __( 'Return only these order IDs. An empty list applies no ID filter. Results are still paged, so set per_page to the number of IDs, up to 100.', 'woocommerce' ),
+					'description' => __( 'Return only these order IDs. Results are still paged, so set per_page to the number of IDs, up to 100.', 'woocommerce' ),
+					'minItems'    => 1,
 					'items'       => array(
 						'type'    => 'integer',
 						'minimum' => 1,
