@@ -57,14 +57,14 @@ export const Task = ( { query, task }: TaskProps ) => {
 
 	const onComplete = useCallback(
 		( options: Record< string, unknown > ) => {
-			optimisticallyCompleteTask( id );
+			void optimisticallyCompleteTask( id );
 			getHistory().push(
 				options && options.redirectPath
 					? options.redirectPath
 					: getNewPath( {}, '/', {} )
 			);
-			invalidateResolutionForStoreSelector( 'getTaskLists' );
-			updateBadge();
+			void invalidateResolutionForStoreSelector( 'getTaskLists' );
+			void updateBadge();
 		},
 		[
 			id,

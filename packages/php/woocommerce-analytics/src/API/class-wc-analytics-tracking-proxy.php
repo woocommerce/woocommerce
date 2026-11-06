@@ -41,7 +41,9 @@ class WC_Analytics_Tracking_Proxy extends \WC_REST_Controller {
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'track_events' ),
-					'permission_callback' => '__return_true', // no need to check permissions
+					// Unauthenticated front-end event endpoint. track_events() validates consent
+					// and records events without client-supplied server-owned properties.
+					'permission_callback' => '__return_true',
 					'schema'              => array( $this, 'get_public_item_schema' ),
 				),
 			)
@@ -55,6 +57,16 @@ class WC_Analytics_Tracking_Proxy extends \WC_REST_Controller {
 	 * @return \WP_REST_Response|\WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function track_events( $request ) {
+		// Cached pages can still post here after proxy tracking is disabled; return a
+		// visible error instead of losing the event to a 404.
+		if ( ! Features::is_proxy_tracking_enabled() ) {
+			return new \WP_Error(
+				'proxy_tracking_disabled',
+				'Proxy tracking is not enabled on this site.',
+				array( 'status' => 403 )
+			);
+		}
+
 		// Check consent before processing any events
 		if ( ! Consent_Manager::has_analytics_consent() ) {
 			return new \WP_REST_Response(
@@ -74,6 +86,11 @@ class WC_Analytics_Tracking_Proxy extends \WC_REST_Controller {
 			$events = array( $events );
 		}
 
+		// Limit unauthenticated callers to a bounded number of pixel requests.
+		if ( count( $events ) > WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST ) {
+			$events = array_slice( $events, 0, WC_Analytics_Tracking::MAX_CLIENT_EVENTS_PER_REQUEST, true );
+		}
+
 		$results    = array();
 		$has_errors = false;
 
@@ -91,7 +108,7 @@ class WC_Analytics_Tracking_Proxy extends \WC_REST_Controller {
 			// Validate event name and properties.
 			$event_name = $event['event_name'] ?? null;
 			$properties = $event['properties'] ?? array();
-			if ( ! $event_name || ! is_array( $properties ) ) {
+			if ( ! $event_name || ! is_string( $event_name ) || ! is_array( $properties ) ) {
 				$results[ $index ] = array(
 					'success' => false,
 					'error'   => 'Missing event_name or invalid properties',
@@ -100,7 +117,7 @@ class WC_Analytics_Tracking_Proxy extends \WC_REST_Controller {
 				continue;
 			}
 
-			$result = WC_Analytics_Tracking::record_event( $event_name, $properties );
+			$result = WC_Analytics_Tracking::record_client_event( $event_name, $properties );
 
 			if ( is_wp_error( $result ) ) {
 				$results[ $index ] = array(

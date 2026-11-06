@@ -139,7 +139,7 @@ const Edit = ( {
 			isAdditionalProductDataEmpty( product ) &&
 			accordionItemClientId
 		) {
-			removeBlock( accordionItemClientId );
+			void removeBlock( accordionItemClientId );
 		}
 	}, [ wasBlockJustInserted, accordionItemClientId, product, removeBlock ] );
 

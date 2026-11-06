@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Build a WooCommerce plugin artifact once and share it across local browser, API, and performance test jobs.

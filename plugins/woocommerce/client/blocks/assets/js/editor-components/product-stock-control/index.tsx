@@ -85,11 +85,11 @@ const ProductStockControl = ( {
 					? /* translators: %s stock status. */ __(
 							'Stock status "%s" visible.',
 							'woocommerce'
-					  )
+						)
 					: /* translators: %s stock status. */ __(
 							'Stock status "%s" hidden.',
 							'woocommerce'
-					  );
+						);
 				return (
 					<ToggleControl
 						label={ option.label }

@@ -16,6 +16,9 @@ interface Brand {
 	thumbnailFileName: string;
 }
 
+const productBrandsPageUrl =
+	'wp-admin/edit-tags.php?taxonomy=product_brand&post_type=product';
+
 test.use( { storageState: ADMIN_STATE_PATH } );
 
 test( 'Merchant can add brands', async ( { page } ) => {
@@ -26,9 +29,7 @@ test( 'Merchant can add brands', async ( { page } ) => {
 	 * This is to workaround the hover menu for now.
 	 */
 	const goToBrandsPage = async () => {
-		await page.goto(
-			'wp-admin/edit-tags.php?taxonomy=product_brand&post_type=product'
-		);
+		await page.goto( productBrandsPageUrl );
 
 		// Wait for the Brands page to load.
 		// This is needed so that checking for existing brands would work.
@@ -142,6 +143,11 @@ test( 'Merchant can add brands', async ( { page } ) => {
 			.filter( { hasText: name } )
 			.first()
 			.click();
+
+		// The delete confirm is bound by a footer script on DOM ready. Clicking
+		// "Delete" before the page has loaded follows the link with no dialog and
+		// leaves the listener below to fire on the next delete.
+		await page.waitForURL( /term\.php/ );
 
 		// After clicking the "Delete" button, there will be a confirmation dialog.
 		page.once( 'dialog', ( dialog ) => {

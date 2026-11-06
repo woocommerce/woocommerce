@@ -35,38 +35,29 @@ test.describe( 'Product Collection: Collections', () => {
 		await expect( pageObject.products ).toHaveCount( 0 );
 	} );
 
-	// When creating reviews programmatically the ratings are not propagated
-	// properly so products order by rating is undeterministic in test env.
-	// eslint-disable-next-line playwright/no-skipped-test
-	test.skip( 'Top Rated Products collection can be added and displays proper products', async ( {
+	test( 'Top Rated Products collection can be added and displays proper products', async ( {
 		pageObject,
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock( 'topRated' );
-
 		const topRatedProducts = [
-			'V Neck T Shirt',
+			'V-Neck T-Shirt',
 			'Hoodie',
 			'Hoodie with Logo',
 			'T-Shirt',
 			'Beanie',
 		];
 
-		await expect( pageObject.products ).toHaveCount( 5 );
 		await expect( pageObject.productTitles ).toHaveText( topRatedProducts );
 
 		await pageObject.publishAndGoToFrontend();
 
-		await expect( pageObject.products ).toHaveCount( 5 );
+		await expect( pageObject.productTitles ).toHaveText( topRatedProducts );
 	} );
 
-	// There's no orders in test env so the order of Best Sellers
-	// is undeterministic in test env. Requires further work.
-	// eslint-disable-next-line playwright/no-skipped-test
-	test.skip( 'Best Sellers collection can be added and displays proper products', async ( {
+	test( 'Best Sellers collection can be added and displays proper products', async ( {
 		pageObject,
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock( 'bestSellers' );
-
 		const bestSellersProducts = [
 			'Album',
 			'Hoodie',
@@ -75,14 +66,15 @@ test.describe( 'Product Collection: Collections', () => {
 			'T-Shirt with Logo',
 		];
 
-		await expect( pageObject.products ).toHaveCount( 5 );
 		await expect( pageObject.productTitles ).toHaveText(
 			bestSellersProducts
 		);
 
 		await pageObject.publishAndGoToFrontend();
 
-		await expect( pageObject.products ).toHaveCount( 5 );
+		await expect( pageObject.productTitles ).toHaveText(
+			bestSellersProducts
+		);
 	} );
 
 	test( 'On Sale Products collection can be added and displays proper products', async ( {
@@ -126,7 +118,7 @@ test.describe( 'Product Collection: Collections', () => {
 		await expect( pageObject.products ).toHaveCount( 4 );
 	} );
 
-	test( 'Product Catalog collection can be added in post and syncs query with template', async ( {
+	test( 'Product Catalog collection can be added in post with a local query', async ( {
 		pageObject,
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock( 'productCatalog' );
@@ -135,10 +127,7 @@ test.describe( 'Product Collection: Collections', () => {
 			.locateSidebarSettings()
 			.getByLabel( SELECTORS.usePageContextControl );
 
-		await expect( queryTypeLocator.getByLabel( 'Default' ) ).toBeChecked();
-		await expect(
-			queryTypeLocator.getByLabel( 'Custom' )
-		).not.toBeChecked();
+		await expect( queryTypeLocator ).toBeHidden();
 		await expect( pageObject.products ).toHaveCount( 9 );
 
 		await pageObject.publishAndGoToFrontend();

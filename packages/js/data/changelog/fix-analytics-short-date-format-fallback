@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Import store: format the default import date with the validated short date format.

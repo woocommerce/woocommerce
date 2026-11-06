@@ -9,7 +9,7 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
  * Internal dependencies
  */
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { expect, test as baseTest } from '../../fixtures/fixtures';
+import { expect, test as baseTest, locks } from '../../fixtures/fixtures';
 import { admin } from '../../test-data/data';
 import { expectEmail, expectEmailContent } from '../../utils/email';
 import { setFeatureEmailImprovementsFlag } from './helpers/set-email-improvements-feature-flag';
@@ -17,19 +17,10 @@ import { setFeatureEmailImprovementsFlag } from './helpers/set-email-improvement
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
 	order: async ( { restApi }, use ) => {
-		let order;
-
-		await restApi
-			.post( `${ WC_API_PATH }/orders`, {
-				status: 'processing',
-				billing: { email: faker.internet.exampleEmail() },
-			} )
-			.then( ( response ) => {
-				order = response.data;
-			} )
-			.catch( ( error ) => {
-				console.error( error );
-			} );
+		const { data: order } = await restApi.post( `${ WC_API_PATH }/orders`, {
+			status: 'processing',
+			billing: { email: faker.internet.exampleEmail() },
+		} );
 
 		await use( order );
 
@@ -40,6 +31,10 @@ const test = baseTest.extend( {
 } );
 
 test.beforeEach( async ( { baseURL } ) => {
+	await setFeatureEmailImprovementsFlag( baseURL, 'no' );
+} );
+
+test.afterAll( async ( { baseURL } ) => {
 	await setFeatureEmailImprovementsFlag( baseURL, 'no' );
 } );
 
@@ -69,73 +64,113 @@ test.beforeEach( async ( { baseURL } ) => {
 		content: 'Thanks for reading',
 	},
 ].forEach( ( { role, status, subject, content } ) => {
-	test( `${ role } receives email for ${ status } order`, async ( {
-		page,
-		restApi,
-		order,
-	} ) => {
-		// Inject the order id into the expected subject and make it a regex
-		const subjectRegex = new RegExp(
-			subject.replace( 'ORDER_ID', `${ order.id }` )
-		);
-
-		await restApi
-			.put( `${ WC_API_PATH }/orders/${ order.id }`, {
-				status,
-			} )
-			.catch( ( error ) => {
-				console.error( error );
-			} );
-
-		let orderStatus;
-		await restApi
-			.get( `${ WC_API_PATH }/orders/${ order.id }` )
-			.then( ( response ) => {
-				orderStatus = response.data.status;
-			} );
-
-		await expect( orderStatus ).toEqual( status );
-
-		let emailRow;
-		await test.step( 'check the email exists', async () => {
-			emailRow = await expectEmail(
-				page,
-				role === 'customer' ? order.billing.email : admin.email,
-				subjectRegex
+	test(
+		`${ role } receives email for ${ status } order`,
+		{ lock: locks.EMAIL_FEATURE_FLAGS },
+		async ( { page, restApi, order } ) => {
+			// Inject the order id into the expected subject and make it a regex
+			const subjectRegex = new RegExp(
+				subject.replace( 'ORDER_ID', `${ order.id }` )
 			);
+
+			const { data: updatedOrder } = await restApi.put(
+				`${ WC_API_PATH }/orders/${ order.id }`,
+				{ status }
+			);
+
+			expect( updatedOrder.status ).toEqual( status );
+
+			const emailRow = await test.step( 'check the email exists', () =>
+				expectEmail(
+					page,
+					role === 'customer' ? order.billing.email : admin.email,
+					subjectRegex
+				) );
+
+			await test.step( 'check the email content', async () => {
+				await emailRow
+					.getByRole( 'button', { name: 'View log' } )
+					.click();
+
+				await expectEmailContent(
+					page,
+					role === 'customer' ? order.billing.email : admin.email,
+					subjectRegex,
+					content
+				);
+			} );
+		}
+	);
+} );
+
+test(
+	'Merchant can resend order details to customer',
+	{ lock: locks.EMAIL_FEATURE_FLAGS },
+	async ( { order, page } ) => {
+		await page.goto(
+			`wp-admin/admin.php?page=wc-orders&action=edit&id=${ order.id }`
+		);
+		await page
+			.locator( 'li#actions > select' )
+			.selectOption( 'send_order_details' );
+		await page.locator( 'button.wc-reload' ).click();
+		await expect(
+			page.locator( '#message' ).filter( { hasText: 'Order updated' } )
+		).toBeVisible();
+
+		await expectEmail(
+			page,
+			order.billing.email,
+			new RegExp( `Details for order #${ order.id }` )
+		);
+	}
+);
+
+test(
+	'Zero cost shipping method keeps its title in the order email',
+	{ lock: locks.EMAIL_FEATURE_FLAGS },
+	async ( { baseURL, page, restApi } ) => {
+		const methodName = 'Shipping TBD';
+		const billingEmail = faker.internet.exampleEmail();
+
+		await setFeatureEmailImprovementsFlag( baseURL, 'yes' );
+
+		const { data: order } = await restApi.post( `${ WC_API_PATH }/orders`, {
+			status: 'processing',
+			billing: { email: billingEmail },
+			shipping_lines: [
+				{
+					method_id: 'flat_rate',
+					method_title: methodName,
+					total: '0.00',
+				},
+			],
 		} );
 
-		await test.step( 'check the email content', async () => {
+		try {
+			const emailRow = await expectEmail(
+				page,
+				billingEmail,
+				/order has been received/
+			);
 			await emailRow.getByRole( 'button', { name: 'View log' } ).click();
 
-			await expectEmailContent(
-				page,
-				role === 'customer' ? order.billing.email : admin.email,
-				subjectRegex,
-				content
+			const shippingRow = page
+				.locator( '#wp-mail-logging-modal-content-body-content' )
+				.locator( 'iframe' )
+				.contentFrame()
+				.locator( 'tr.order-totals-shipping' );
+
+			await expect( shippingRow.locator( 'td' ) ).toContainText(
+				methodName
 			);
-		} );
-	} );
-} );
-
-test( 'Merchant can resend order details to customer', async ( {
-	order,
-	page,
-} ) => {
-	await page.goto(
-		`wp-admin/admin.php?page=wc-orders&action=edit&id=${ order.id }`
-	);
-	await page
-		.locator( 'li#actions > select' )
-		.selectOption( 'send_order_details' );
-	await page.locator( 'button.wc-reload' ).click();
-	await expect(
-		page.locator( '#message' ).filter( { hasText: 'Order updated' } )
-	).toBeVisible();
-
-	await expectEmail(
-		page,
-		order.billing.email,
-		new RegExp( `Details for order #${ order.id }` )
-	);
-} );
+			await expect( shippingRow.locator( 'td' ) ).not.toContainText(
+				'Free!'
+			);
+		} finally {
+			await restApi.delete( `${ WC_API_PATH }/orders/${ order.id }`, {
+				force: true,
+			} );
+		}
+	}
+);

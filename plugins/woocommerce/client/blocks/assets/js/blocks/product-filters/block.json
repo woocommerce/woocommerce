@@ -29,20 +29,34 @@
 			},
 			"allowEditing": false
 		},
+		"position": {
+			"sticky": true
+		},
 		"spacing": {
 			"blockGap": true
 		}
 	},
 	"textdomain": "woocommerce",
-	"usesContext": [ "postId", "query", "queryId", "forcePageReload" ],
+	"usesContext": [
+		"postId",
+		"query",
+		"queryId",
+		"collection",
+		"productCollectionLocation",
+		"forcePageReload"
+	],
 	"attributes": {
 		"isPreview": {
 			"type": "boolean",
 			"default": false
 		},
-		"showFilterDrawer": {
-			"type": "boolean",
-			"default": true
+		"overlayMode": {
+			"type": "string",
+			"enum": [ "off", "mobile", "always" ]
+		},
+		"overlayPosition": {
+			"type": "string",
+			"enum": [ "left", "right" ]
 		}
 	},
 	"example": {

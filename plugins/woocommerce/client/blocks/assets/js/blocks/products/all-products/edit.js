@@ -22,7 +22,7 @@ import { withDispatch, withSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Icon, grid } from '@wordpress/icons';
-import { getBlockMap } from '@woocommerce/atomic-utils';
+import { getBlockMap } from '@woocommerce/utils/get-block-map';
 import { blocksConfig } from '@woocommerce/block-settings';
 import GridLayoutControl from '@woocommerce/editor-components/grid-layout-control';
 import { previewProducts } from '@woocommerce/resource-previews';

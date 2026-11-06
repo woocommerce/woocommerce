@@ -159,4 +159,119 @@ class WC_Admin_Tests_API_Reports_Export extends WC_REST_Unit_Test_Case {
 		$this->assertStringMatchesFormat( '%s/wc-analytics/reports/taxes/export/%d/status', $status['_links']['self'][0]['href'] );
 		remove_filter( 'wc_tax_enabled', '__return_true' );
 	}
+
+	/**
+	 * @testdox Should reject an export whose report_args.orderby is outside the report's enum.
+	 */
+	public function test_export_rejects_orderby_outside_enum() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'POST', '/wc-analytics/reports/orders/export' );
+		$request->set_body_params( array( 'report_args' => array( 'orderby' => 'date,(SELECT SLEEP(3))' ) ) );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status(), 'An orderby outside the enum must be rejected.' );
+		$this->assertEquals( 'rest_invalid_param', $data['code'], 'The rejection must be a parameter validation error.' );
+		$this->assertArrayHasKey( 'report_args', $data['data']['params'], 'The report_args parameter must be flagged as invalid.' );
+		$this->assertStringContainsString( 'orderby', $data['data']['params']['report_args'], 'The failure must point at the orderby key.' );
+	}
+
+	/**
+	 * @testdox Should accept an export whose report_args.orderby is in the report's enum.
+	 */
+	public function test_export_accepts_orderby_in_enum() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'POST', '/wc-analytics/reports/orders/export' );
+		$request->set_body_params( array( 'report_args' => array( 'orderby' => 'net_total' ) ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status(), 'An orderby in the enum must be accepted.' );
+	}
+
+	/**
+	 * @testdox Should fail closed and reject an export for an unresolvable report type.
+	 */
+	public function test_export_rejects_unresolvable_report_type() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'POST', '/wc-analytics/reports/bogus/export' );
+		$request->set_body_params( array( 'report_args' => array( 'orderby' => 'date' ) ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status(), 'An unresolvable report type must be rejected.' );
+	}
+
+	/**
+	 * @testdox Should enforce the report schema when queue_report_export is called directly.
+	 */
+	public function test_direct_queue_report_export_enforces_schema() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$valid_rows = \Automattic\WooCommerce\Admin\ReportExporter::queue_report_export(
+			'export-valid',
+			'orders',
+			array( 'orderby' => 'net_total' )
+		);
+		$this->assertGreaterThan( 0, $valid_rows, 'A valid orderby should export the available rows.' );
+
+		$injected_rows = \Automattic\WooCommerce\Admin\ReportExporter::queue_report_export(
+			'export-injected',
+			'orders',
+			array( 'orderby' => 'date,(SELECT SLEEP(3))' )
+		);
+		$this->assertEquals( 0, $injected_rows, 'An orderby outside the enum must not be exported, even off the REST route.' );
+	}
+
+	/**
+	 * @testdox Should still export when the batch limit filter exceeds the schema per_page maximum.
+	 */
+	public function test_export_allows_batch_limit_above_schema_maximum() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		// The report schema caps per_page at 100; the batch size is ours and may exceed it.
+		add_filter( 'woocommerce_admin_orders_report_export_batch_limit', array( $this, 'return_large_batch_limit' ) );
+
+		$rows = \Automattic\WooCommerce\Admin\ReportExporter::queue_report_export(
+			'export-big-batch',
+			'orders',
+			array( 'orderby' => 'net_total' )
+		);
+
+		remove_filter( 'woocommerce_admin_orders_report_export_batch_limit', array( $this, 'return_large_batch_limit' ) );
+
+		$this->assertGreaterThan( 0, $rows, 'A batch limit above the schema per_page maximum must still export.' );
+	}
+
+	/**
+	 * Batch limit filter callback returning a value above the schema per_page maximum.
+	 *
+	 * @return int
+	 */
+	public function return_large_batch_limit() {
+		return 500;
+	}
 }

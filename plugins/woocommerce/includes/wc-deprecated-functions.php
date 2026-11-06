@@ -90,7 +90,7 @@ function wc_deprecated_hook( $hook, $version, $replacement = null, $message = nu
  * When catching an exception, this allows us to log it if unexpected.
  *
  * @since 3.3.0
- * @param Exception $exception_object The exception object.
+ * @param Throwable $exception_object The exception (or error) object.
  * @param string    $function The function which threw exception.
  * @param array     $args The args passed to the function.
  * @return void
@@ -1111,32 +1111,6 @@ function wc_get_customer_avatar_url( $email ) {
 function wc_get_core_supported_themes() {
 	wc_deprecated_function( 'wc_get_core_supported_themes()', '3.3' );
 	return array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
-}
-
-/**
- * Get min/max price meta query args.
- *
- * @deprecated 3.6.0
- * @since 3.0.0
- * @param array $args Min price and max price arguments.
- * @return array
- */
-function wc_get_min_max_price_meta_query( $args ) {
-	wc_deprecated_function( 'wc_get_min_max_price_meta_query()', '3.6' );
-
-	$current_min_price = isset( $args['min_price'] ) ? floatval( $args['min_price'] ) : 0;
-	$current_max_price = isset( $args['max_price'] ) ? floatval( $args['max_price'] ) : PHP_INT_MAX;
-
-	return apply_filters(
-		'woocommerce_get_min_max_price_meta_query',
-		array(
-			'key'     => '_price',
-			'value'   => array( $current_min_price, $current_max_price ),
-			'compare' => 'BETWEEN',
-			'type'    => 'DECIMAL(10,' . wc_get_price_decimals() . ')',
-		),
-		$args
-	);
 }
 
 /**

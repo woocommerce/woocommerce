@@ -14,7 +14,7 @@ function enhanceButtonsBlock() {
 			...( current.supports ?? {} ),
 			layout: false, // disable block editor's layouts
 			// enable email editor's reduced flex email layout
-			__experimentalEmailFlexLayout: true, // eslint-disable-line
+			__experimentalEmailFlexLayout: true,
 		},
 	} ) );
 }

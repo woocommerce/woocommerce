@@ -59,9 +59,9 @@ export const withOnboardingHydration = ( data: {
 					! isResolvingGroup &&
 					! hasFinishedResolutionGroup
 				) {
-					startResolution( 'getProfileItems', [] );
-					setProfileItems( profileItems, true );
-					finishResolution( 'getProfileItems', [] );
+					void startResolution( 'getProfileItems', [] );
+					void setProfileItems( profileItems, true );
+					void finishResolution( 'getProfileItems', [] );
 
 					hydratedProfileItems = true;
 				}

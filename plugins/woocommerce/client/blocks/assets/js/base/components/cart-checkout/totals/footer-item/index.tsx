@@ -3,7 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
-import { createInterpolateElement } from '@wordpress/element';
+import { createInterpolateElement, Fragment } from '@wordpress/element';
 import {
 	FormattedMonetaryAmount,
 	TotalsItem,
@@ -22,7 +22,6 @@ import {
 	Currency,
 	LooselyMustHave,
 } from '@woocommerce/types';
-import { formatPrice } from '@woocommerce/price-format';
 import { hasSelectedShippingRate } from '@woocommerce/base-utils';
 import { Skeleton } from '@woocommerce/base-components/skeleton';
 import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';
@@ -76,7 +75,7 @@ const TotalsFooterItem = ( {
 
 	// Prepare props to pass to the applyCheckoutFilter filter.
 	// We need to pluck out receiveCart.
-	// eslint-disable-next-line no-unused-vars
+
 	const { receiveCart, ...cart } = useStoreCart();
 	const { isLoading } = useOrderSummaryLoadingState();
 
@@ -111,20 +110,29 @@ const TotalsFooterItem = ( {
 
 	const parsedTaxValue = parseInt( totalTax, 10 );
 
+	const taxLinesList = (
+		<>
+			{ taxLines?.map( ( { name, price, rate }, index ) => (
+				<Fragment key={ `${ name }-${ rate }` }>
+					{ index > 0 && ', ' }
+					<FormattedMonetaryAmount
+						className="wc-block-components-totals-footer-item-tax-value"
+						currency={ currency }
+						value={ price }
+					/>
+					{ ` ${ name }` }
+				</Fragment>
+			) ) }
+		</>
+	);
+
 	const description =
 		taxLines && taxLines.length > 0
 			? sprintf(
 					/* translators: %s is a list of tax rates */
 					__( 'Including %s', 'woocommerce' ),
-					taxLines
-						.map( ( { name, price } ) => {
-							return `${ formatPrice(
-								price,
-								currency
-							) } ${ name }`;
-						} )
-						.join( ', ' )
-			  )
+					'<TaxLines/>'
+				)
 			: __( 'Including <TaxAmount/> in taxes', 'woocommerce' );
 
 	const hasSelectedRates = hasSelectedShippingRate( cart.shippingRates );
@@ -136,7 +144,10 @@ const TotalsFooterItem = ( {
 				height="1em"
 				width="45px"
 				tag="span"
-				ariaMessage={ __( 'Loading price… ', 'woocommerce' ) }
+				ariaMessage={
+					// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
+					__( 'Loading price… ', 'woocommerce' )
+				}
 			/>
 		</>
 	);
@@ -167,6 +178,7 @@ const TotalsFooterItem = ( {
 												value={ parsedTaxValue }
 											/>
 										),
+										TaxLines: taxLinesList,
 									} ) }
 								</>
 							</DelayedContentWithSkeleton>

@@ -33,8 +33,8 @@ class ProductDetails extends AbstractBlock {
 		 * @hook woocommerce_product_details_hooked_blocks
 		 *
 		 * @since 10.0.0
-		 * @param {array} $hooked_blocks The blocks that are hooked into the Product Details block.
-		 * @return {array} The blocks that are hooked into the Product Details block.
+		 * @param array $hooked_blocks The blocks that are hooked into the Product Details block.
+		 * @return array The blocks that are hooked into the Product Details block.
 		 */
 		$hooked_blocks = apply_filters( 'woocommerce_product_details_hooked_blocks', [] );
 

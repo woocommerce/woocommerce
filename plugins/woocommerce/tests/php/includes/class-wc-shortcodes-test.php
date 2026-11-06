@@ -476,4 +476,22 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 
 		$this->assertMatchesRegularExpression( '/This content is password[- ]protected/', $product_page );
 	}
+
+	/**
+	 * @testdox The shop_messages shortcode should render queued notices inside the shared notices wrapper.
+	 */
+	public function test_shop_messages_shortcode_uses_notices_wrapper(): void {
+		wc_clear_notices();
+		wc_add_notice( 'Shortcode notice.', 'success' );
+
+		$markup = WC_Shortcodes::shop_messages();
+
+		$this->assertStringStartsWith(
+			'<div class="woocommerce woocommerce-notices-wrapper">',
+			$markup,
+			'The shortcode should keep the woocommerce class and add the notices wrapper class on the same element.'
+		);
+		$this->assertStringContainsString( 'Shortcode notice.', $markup );
+		$this->assertSame( 0, wc_notice_count(), 'Rendering the shortcode should clear the notice queue.' );
+	}
 }

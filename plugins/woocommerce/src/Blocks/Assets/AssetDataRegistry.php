@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
+use Automattic\WooCommerce\Internal\Utilities\PriceSeparators;
 use Exception;
 use InvalidArgumentException;
 
@@ -86,11 +87,13 @@ class AssetDataRegistry {
 			'adminUrl'               => admin_url(),
 			'countries'              => WC()->countries->get_countries(),
 			'currency'               => $this->get_currency_data(),
+			'currentSiteId'          => get_current_blog_id(),
 			'currentUserId'          => get_current_user_id(),
 			'currentUserIsAdmin'     => current_user_can( 'manage_woocommerce' ),
 			'currentThemeIsFSETheme' => wp_is_block_theme(),
 			'dateFormat'             => wc_date_format(),
 			'homeUrl'                => esc_url( home_url( '/' ) ),
+			'isMultisite'            => is_multisite(),
 			'locale'                 => $this->get_locale_data(),
 			'isRemoteLoggingEnabled' => wc_get_container()->get( RemoteLogger::class )->is_remote_logging_allowed(),
 			'dashboardUrl'           => wc_get_account_endpoint_url( 'dashboard' ),
@@ -119,8 +122,8 @@ class AssetDataRegistry {
 			'precision'         => wc_get_price_decimals(),
 			'symbol'            => html_entity_decode( get_woocommerce_currency_symbol( $currency ) ),
 			'symbolPosition'    => get_option( 'woocommerce_currency_pos' ),
-			'decimalSeparator'  => wc_get_price_decimal_separator(),
-			'thousandSeparator' => wc_get_price_thousand_separator(),
+			'decimalSeparator'  => PriceSeparators::get_decimal(),
+			'thousandSeparator' => PriceSeparators::get_thousand(),
 			'priceFormat'       => html_entity_decode( get_woocommerce_price_format() ),
 		];
 	}
@@ -256,6 +259,7 @@ class AssetDataRegistry {
 		$core_data                                 = $this->get_core_data();
 		$core_data['experimentalWcRestApiV4']      = Features::is_enabled( 'rest-api-v4' );
 		$core_data['experimentalCartSaveForLater'] = FeaturesUtil::feature_is_enabled( 'cart_save_for_later' );
+		$core_data['preloadedApiRequestPaths']     = array_keys( $this->preloaded_api_requests );
 		// note this WILL wipe any data already registered to these keys because they are protected.
 		$this->data = array_replace_recursive( $settings, $core_data );
 	}
@@ -424,7 +428,7 @@ class AssetDataRegistry {
 	protected function add_data( $key, $data ) {
 		if ( ! is_string( $key ) ) {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-			trigger_error( esc_html__( 'Key for the data being registered must be a string', 'woocommerce' ), E_USER_WARNING );
+			trigger_error( esc_html( 'Key for the data being registered must be a string' ), E_USER_WARNING );
 			return;
 		}
 		if ( $this->exists( $key ) ) {
@@ -432,7 +436,7 @@ class AssetDataRegistry {
 		}
 		if ( isset( $this->data[ $key ] ) ) {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-			trigger_error( esc_html__( 'Overriding existing data with an already registered key is not allowed', 'woocommerce' ), E_USER_WARNING );
+			trigger_error( esc_html( 'Overriding existing data with an already registered key is not allowed' ), E_USER_WARNING );
 			return;
 		}
 		if ( \is_callable( $data ) ) {

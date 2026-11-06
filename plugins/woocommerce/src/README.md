@@ -66,7 +66,7 @@ composer update
 
 ## The container
 
-WooCommerce uses a [PSR-11](https://www.php-fig.org/psr/psr-11/) compatible container for retrieving instances of all the classes in this directory by using the [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) pattern. This container is very simple: explicit class registration is not needed, any class in the `Automattic\Woocommerce` namespace can be retrieved and reflection is used to locate and instantiate classes and their dependencies.
+WooCommerce uses a [PSR-11](https://www.php-fig.org/psr/psr-11/) compatible container for retrieving instances of all the classes in this directory by using the [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) pattern. This container is very simple: explicit class registration is not needed, any class in the `Automattic\WooCommerce` namespace can be retrieved and reflection is used to locate and instantiate classes and their dependencies.
 
 The container assumes that all the retrieved classes are single-instance classes: the class will be instantiated the first time it's requested, and further requests will serve a cached version of the created instance. Thus for data-only classes for which multiple instances may be needed, instances should be created directly with `new` instead.
 
@@ -139,11 +139,11 @@ function wc_function_that_needs_service_1() {
 
 This is also the recommended approach when moving code from `includes` to `src` while keeping the existing entry points for the old code in place for compatibility.
 
-Worth noting: the container will throw a `ContainerException` when receiving a request for retrieving a class that doesn't exist or is not in the `Automattic\Woocommerce` namespace, or when there's an error preventing the instantiation (for example the class doesn't have a public constructor). You can use the container `has` method to verify that a given class can actually be retrieved, but this method will only verify that the class exists and is in the correct namespace.
+Worth noting: the container will throw a `ContainerException` when receiving a request for retrieving a class that doesn't exist or is not in the `Automattic\WooCommerce` namespace, or when there's an error preventing the instantiation (for example the class doesn't have a public constructor). You can use the container `has` method to verify that a given class can actually be retrieved, but this method will only verify that the class exists and is in the correct namespace.
 
 #### A note on legacy classes
 
-The container is intended for retrieving **only** classes in the `src` folder, or put another way, classes in the `Automattic\Woocommerce` namespace. An attempt to retrieve a class that is not in that namespace will throw an exception.
+The container is intended for retrieving **only** classes in the `src` folder, or put another way, classes in the `Automattic\WooCommerce` namespace. An attempt to retrieve a class that is not in that namespace will throw an exception.
 
 This implies that classes outside `src` can't be dependency-injected, and thus must not be used as type hints in `init` arguments. There are mechanisms in place to interact with "outside" code (including code from the `includes` folder and third-party code) in a way that makes it easy to write unit tests - see [The `LegacyProxy` class](#the-legacyproxy-class).
 

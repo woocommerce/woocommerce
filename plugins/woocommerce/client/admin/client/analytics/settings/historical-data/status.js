@@ -54,7 +54,7 @@ function HistoricalDataStatus( { importDate, status } ) {
 						// @todo The date formatting should be localized ( 'll' ), but this is currently broken in Gutenberg.
 						// See https://github.com/WordPress/gutenberg/issues/12626 for details.
 						moment( importDate ).format( 'YYYY-MM-DD' )
-				  ),
+					),
 	} );
 
 	return (

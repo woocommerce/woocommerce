@@ -8,6 +8,7 @@ import {
 	isItemDataEntryVisible,
 	isLastVisibleEntry,
 	buildCartItemDataAttr,
+	renderEntryFieldHTML,
 } from '../item-data';
 
 /**
@@ -395,5 +396,70 @@ describe( 'buildCartItemDataAttr tests', () => {
 			value: 'Red',
 			className: 'wc-block-components-product-details__color',
 		} );
+	} );
+} );
+
+describe( 'renderEntryFieldHTML tests', () => {
+	let el: HTMLElement;
+
+	beforeEach( () => {
+		el = document.createElement( 'span' );
+	} );
+
+	test( 'renders the display field as real markup', () => {
+		renderEntryFieldHTML(
+			el,
+			entry( 'Engraving', 'Best Wishes', {
+				display: '<em>Best Wishes</em>',
+			} ),
+			'value'
+		);
+
+		expect( el.querySelectorAll( 'em' ) ).toHaveLength( 1 );
+		expect( el.querySelector( 'em' )?.textContent ).toBe( 'Best Wishes' );
+	} );
+
+	test( 'decodes entity-encoded characters in the value', () => {
+		renderEntryFieldHTML( el, entry( 'Size', '1 &lt; 2' ), 'value' );
+
+		expect( el.textContent ).toBe( '1 < 2' );
+	} );
+
+	test( 'leaves entity-encoded tags as text instead of DOM elements', () => {
+		renderEntryFieldHTML(
+			el,
+			entry( 'Note', '&lt;b&gt;important&lt;/b&gt;' ),
+			'value'
+		);
+
+		expect( el.querySelectorAll( 'b' ) ).toHaveLength( 0 );
+		expect( el.textContent ).toBe( '<b>important</b>' );
+	} );
+
+	test( 'suffixes the name field with a colon', () => {
+		renderEntryFieldHTML( el, entry( 'Gift Message' ), 'name' );
+
+		expect( el.textContent ).toBe( 'Gift Message:' );
+	} );
+
+	test( 'writes nothing when there is no usable field value', () => {
+		el.innerHTML = 'untouched';
+
+		renderEntryFieldHTML( el, malformed(), 'value' );
+		renderEntryFieldHTML( el, malformed(), 'name' );
+		renderEntryFieldHTML( el, undefined, 'value' );
+
+		expect( el.innerHTML ).toBe( 'untouched' );
+	} );
+
+	test( 'applies the format callback before writing', () => {
+		renderEntryFieldHTML(
+			el,
+			entry( 'Size', '1 &lt; 2' ),
+			'value',
+			( html ) => `${ html }…`
+		);
+
+		expect( el.textContent ).toBe( '1 < 2…' );
 	} );
 } );

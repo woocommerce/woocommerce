@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Keep the Mini-Cart Interactivity API behavior enabled without a legacy feature flag.

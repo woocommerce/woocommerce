@@ -23,6 +23,7 @@ jobs:
   check-feature-freeze-event:
     name: Check for Feature Freeze events today
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       should-run: ${{ steps.check-feature-freeze-event.outputs.should-run }}
     steps:
@@ -74,6 +75,7 @@ jobs:
     needs: check-feature-freeze-event
     if: ${{ needs.check-feature-freeze-event.outputs.should-run == 'true' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       nextReleaseBranch: ${{ steps.calculate-versions.outputs.nextReleaseBranch }}
       nextReleaseVersion: ${{ steps.calculate-versions.outputs.nextReleaseVersion }}
@@ -128,6 +130,7 @@ jobs:
   run-feature-freeze:
     name: Perform feature freeze
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: prepare-for-feature-freeze
     steps:
       - name: Checkout trunk
@@ -168,6 +171,7 @@ jobs:
   cleanup-milestones:
     name: Clean up old and completed milestones
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [prepare-for-feature-freeze, run-feature-freeze]
     steps:
       - name: Close completed milestones
@@ -175,7 +179,7 @@ jobs:
         with:
           script: |
             const nextTrunkMainVersion = '${{ needs.prepare-for-feature-freeze.outputs.nextTrunkMainVersion }}'; // e.g. '10.5'
-            const minVersionToKeep     = Number( nextTrunkMainVersion ) - 0.2; // e.g. 10.3
+            const minVersionToKeep     = Number( ( nextTrunkMainVersion - 0.2 ).toFixed( 1 ) ); // e.g. 10.3
 
             const { data: latestMilestones } = await github.rest.issues.listMilestones( {
               owner: context.repo.owner,
@@ -224,6 +228,7 @@ jobs:
   publish-dev-release:
     name: 'Publish -dev release'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [prepare-for-feature-freeze, build-dev-release]
     outputs:
       release-zip: ${{ steps.publish-release.outputs.release-zip }}
@@ -243,6 +248,7 @@ jobs:
   notify-slack:
     name: Notify Slack
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [publish-dev-release, prepare-for-feature-freeze]
     outputs:
       message-ts: ${{ steps.notify-success.outputs.ts }}
@@ -268,7 +274,7 @@ jobs:
             // Find open PRs with milestone matching the next release version.
             try {
               const { data: prs } = await github.rest.search.issuesAndPullRequests( {
-                q: `repo:${context.repo.owner}/${context.repo.repo} is:pr is:open milestone:"${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}"`,
+                q: `repo:${context.repo.owner}/${context.repo.repo} is:pr is:open draft:false milestone:"${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}"`,
                 sort: 'created',
                 order: 'desc',
                 per_page: 11
@@ -324,6 +330,7 @@ jobs:
   trigger-webhook:
     name: Trigger Release Webhook
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [publish-dev-release, prepare-for-feature-freeze]
     steps:
       - name: Trigger Feature Freeze Webhook
@@ -383,6 +390,7 @@ jobs:
   notify-slack-on-failure:
     name: Notify Slack on Failure
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [ check-feature-freeze-event, prepare-for-feature-freeze, run-feature-freeze, cleanup-milestones, bump-version-in-trunk, build-dev-release, publish-dev-release, notify-slack, trigger-webhook ]
     if: always() && ((contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')))
     steps:

@@ -72,13 +72,13 @@ The checkout-field aliases are implemented in [`functions.php`](https://github.c
 
 | Interface | Status and purpose |
 | --- | --- |
-| `__experimentalRegisterProductCollection` | Registers a Product Collection collection. It is experimental and can change without notice. See [`register-product-collection.tsx`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/blocks-registry/product-collection/register-product-collection.tsx). |
-| `__experimentalDeRegisterPaymentMethod` | Deregisters a payment method. It is primarily used by tests. See [`registry.ts`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/blocks-registry/payment-methods/registry.ts). |
-| `__experimentalDeRegisterExpressPaymentMethod` | Deregisters an express payment method. It is primarily used by tests. See [`registry.ts`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/blocks-registry/payment-methods/registry.ts). |
+| `__experimentalRegisterProductCollection` | Registers a Product Collection collection. It is experimental and can change without notice. See [`register-product-collection.tsx`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/packages/public-api/blocks-registry/product-collection/register-product-collection.tsx). |
+| `__experimentalDeRegisterPaymentMethod` | Deregisters a payment method. It is primarily used by tests. See [`registry.ts`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/packages/public-api/blocks-registry/payment-methods/registry.ts). |
+| `__experimentalDeRegisterExpressPaymentMethod` | Deregisters an express payment method. It is primarily used by tests. See [`registry.ts`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/packages/public-api/blocks-registry/payment-methods/registry.ts). |
 | `__experimentalRegisterCheckoutFilters` | Deprecated alias for `registerCheckoutFilters`. |
 | `__experimentalApplyCheckoutFilter` | Deprecated alias for `applyCheckoutFilter`. |
 
-The deprecated Checkout Filter aliases are implemented in the [`filter-registry`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/packages/checkout/filter-registry/index.ts).
+The deprecated Checkout Filter aliases are implemented in the [`filter-registry`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/packages/public-api/blocks-checkout/filter-registry/index.ts).
 
 ### SlotFills
 
@@ -89,7 +89,7 @@ The deprecated Checkout Filter aliases are implemented in the [`filter-registry`
 | `ExperimentalOrderLocalPickupPackages` | `__experimentalOrderLocalPickupPackages` | Inside the Checkout pickup options. |
 | `ExperimentalDiscountsMeta` | `__experimentalDiscountsMeta` | Below each discount in the Cart and Checkout totals. |
 
-See the [available SlotFills](https://github.com/woocommerce/woocommerce/blob/trunk/docs/block-development/extensible-blocks/cart-and-checkout-blocks/available-slot-fills.md) and the [checkout components source](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/client/blocks/packages/checkout/components) for their current props and placement.
+See the [available SlotFills](https://github.com/woocommerce/woocommerce/blob/trunk/docs/block-development/extensible-blocks/cart-and-checkout-blocks/available-slot-fills.md) and the [checkout components source](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/client/blocks/packages/public-api/blocks-checkout/components) for their current props and placement.
 
 ### Store events
 
@@ -101,8 +101,11 @@ See the [available SlotFills](https://github.com/woocommerce/woocommerce/blob/tr
 | `experimental__woocommerce_blocks-cart-view-link` | `product` |
 | `experimental__woocommerce_blocks-cart-remove-item` | `product`, `quantity` |
 | `experimental__woocommerce_blocks-cart-set-item-quantity` | `product`, `quantity` |
+| `experimental__woocommerce_blocks-cart-updated` | `storeCart`, `previousStoreCart` |
 | `experimental__woocommerce_blocks-product-view-link` | `product` |
 | `experimental__woocommerce_blocks-product-list-render` | `products`, `listName` |
+
+`experimental__woocommerce_blocks-cart-updated` is emitted by the `wc/store/cart` data store instead of `useStoreEvents`. It fires each time a cart from a Store API response is applied to the store, after cart notices are shown and items that left the cart are no longer marked as pending delete.
 
 Examples:
 
@@ -132,6 +135,16 @@ wp.hooks.addAction(
 );
 
 wp.hooks.addAction(
+	'experimental__woocommerce_blocks-cart-updated',
+	'plugin/namespace',
+	( { storeCart, previousStoreCart } ) => {
+		console.log(
+			`The cart went from ${ previousStoreCart.itemsCount } to ${ storeCart.itemsCount } items`
+		);
+	}
+);
+
+wp.hooks.addAction(
 	'experimental__woocommerce_blocks-product-view-link',
 	'plugin/namespace',
 	( { product } ) => {
@@ -147,6 +160,9 @@ Checkout events use the `experimental__woocommerce_blocks-checkout-` prefix. `di
 | Action | Additional parameters |
 | --- | --- |
 | `experimental__woocommerce_blocks-checkout-submit` | None |
+| `experimental__woocommerce_blocks-checkout-cart-render` | None |
+| `experimental__woocommerce_blocks-checkout-mini-cart-open` | None |
+| `experimental__woocommerce_blocks-checkout-mini-cart-close` | None |
 | `experimental__woocommerce_blocks-checkout-set-selected-shipping-rate` | `shippingRateId` |
 | `experimental__woocommerce_blocks-checkout-set-active-payment-method` | `paymentMethodSlug` |
 | `experimental__woocommerce_blocks-checkout-render-checkout-form` | None |

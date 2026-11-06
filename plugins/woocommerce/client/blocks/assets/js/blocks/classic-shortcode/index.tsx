@@ -83,7 +83,7 @@ const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
 						replaceBlock,
 						selectBlock,
 					} );
-					createInfoNotice(
+					void createInfoNotice(
 						__(
 							'Classic shortcode transformed to blocks.',
 							'woocommerce'
@@ -109,7 +109,7 @@ const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
 										if ( ! cartCheckoutBlock ) {
 											return;
 										}
-										replaceBlock(
+										void replaceBlock(
 											cartCheckoutBlock.clientId,
 											createBlock(
 												'woocommerce/classic-shortcode',
@@ -199,7 +199,7 @@ const Edit = ( { clientId, attributes }: BlockEditProps< Attributes > ) => {
 		{
 			a: (
 				// Suppress the warning as this <a> will be interpolated into the string with content.
-				// eslint-disable-next-line jsx-a11y/anchor-has-content
+
 				<ExternalLink href="https://woocommerce.com/document/woocommerce-store-editing/customizing-cart-and-checkout/" />
 			),
 		}

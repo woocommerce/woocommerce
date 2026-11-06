@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Product Filters: expand hierarchical taxonomy filters with get_term_children() instead of a child_of query per chosen term.

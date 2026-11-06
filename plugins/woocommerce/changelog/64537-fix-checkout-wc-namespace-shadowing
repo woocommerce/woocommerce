@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-fix: using window.wc instead of wc in classic checkout so they no longer break when a third-party script shadows the global wc binding.

@@ -62,6 +62,7 @@ const editorTarget: SendTestEmailTarget = {
 	endpoint: 'editor',
 	postId: 123,
 	emailType: 'WC_Email_New_Order',
+	emailTypeId: 'new_order',
 };
 
 const settingsTarget: SendTestEmailTarget = {
@@ -101,6 +102,34 @@ describe( 'useSendTestEmail + SendTestEmailForm', () => {
 			target: { value: 'merchant@example.com' },
 		} );
 		expect( sendButton ).toBeEnabled();
+	} );
+
+	it( 'editor target without a post: posts the email type so the server renders the file template', async () => {
+		apiFetchMock.mockResolvedValue( { success: true, result: true } );
+
+		render(
+			<Harness
+				target={ { ...editorTarget, postId: null } }
+				source="email_listing"
+			/>
+		);
+
+		enterEmailAndSend( 'merchant@example.com' );
+
+		await waitFor( () =>
+			expect(
+				screen.getByText( 'Test email sent successfully!' )
+			).toBeInTheDocument()
+		);
+
+		expect( apiFetchMock ).toHaveBeenCalledWith( {
+			path: '/woocommerce-email-editor/v1/send_preview_email',
+			method: 'POST',
+			data: {
+				email: 'merchant@example.com',
+				emailType: 'new_order',
+			},
+		} );
 	} );
 
 	it( 'editor target: posts the post ID to the email editor endpoint and shows the success notice', async () => {

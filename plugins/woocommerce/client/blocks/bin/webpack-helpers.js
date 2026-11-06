@@ -8,9 +8,12 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 const CHECK_CIRCULAR_DEPS = process.env.CHECK_CIRCULAR_DEPS || false;
 const ASSET_CHECK = process.env.ASSET_CHECK === 'true';
 
-// See also @woocommerce/dependency-extraction-webpack-plugin/assets/packages. It will backfill any missing
-// mapping here and any duplicates are because of switched between Woo and WordPress versions of the plugin.
-// As of 2026 it's Woo version to address pnpm peer dependencies related issues to support filesystem cache.
+// See also @woocommerce/dependency-extraction-webpack-plugin/assets/packages and
+// docs/internal-developers/enqueueable-packages/README.md. They should stay in sync with this map.
+// The dependency extraction plugin will backfill any missing mapping here. Duplicates exist because
+// this file has switched between Woo and WordPress versions of the plugin.
+// As of 2026, it uses the Woo version to address pnpm peer dependency issues and support
+// filesystem cache.
 const wcDepMap = {
 	'@woocommerce/tracks': false, // Bundle; do not externalize
 	'@woocommerce/blocks-registry': [ 'wc', 'wcBlocksRegistry' ],
@@ -25,6 +28,7 @@ const wcDepMap = {
 	'@woocommerce/blocks-components': [ 'wc', 'blocksComponents' ],
 	'@woocommerce/types': [ 'wc', 'wcTypes' ],
 	'@woocommerce/sanitize': [ 'wc', 'sanitize' ],
+	'@woocommerce/entities': [ 'wc', 'wcEntities' ],
 };
 const wcHandleMap = {
 	'@woocommerce/tracks': false, // Bundle; no PHP handle needed
@@ -40,19 +44,16 @@ const wcHandleMap = {
 	'@woocommerce/blocks-components': 'wc-blocks-components',
 	'@woocommerce/types': 'wc-types',
 	'@woocommerce/sanitize': 'wc-sanitize',
+	'@woocommerce/entities': 'wc-entities',
 };
 
 const getAlias = ( options = {} ) => {
 	let { pathPart } = options;
 	pathPart = pathPart ? `${ pathPart }/` : '';
 	return {
-		'@woocommerce/atomic-blocks': path.resolve(
+		'@woocommerce/product-elements': path.resolve(
 			__dirname,
-			`../assets/js/${ pathPart }atomic/blocks`
-		),
-		'@woocommerce/atomic-utils': path.resolve(
-			__dirname,
-			`../assets/js/${ pathPart }atomic/utils`
+			`../assets/js/${ pathPart }blocks/product-elements-blocks`
 		),
 		'@woocommerce/base-components': path.resolve(
 			__dirname,
@@ -73,6 +74,26 @@ const getAlias = ( options = {} ) => {
 		'@woocommerce/base-utils': path.resolve(
 			__dirname,
 			`../assets/js/${ pathPart }base/utils/`
+		),
+		'@woocommerce/block-data': path.resolve(
+			__dirname,
+			`../packages/public-api/block-data`
+		),
+		'@woocommerce/blocks-checkout': path.resolve(
+			__dirname,
+			`../packages/public-api/blocks-checkout`
+		),
+		'@woocommerce/blocks-checkout-events': path.resolve(
+			__dirname,
+			`../packages/public-api/blocks-checkout-events`
+		),
+		'@woocommerce/blocks-components': path.resolve(
+			__dirname,
+			`../packages/public-api/blocks-components`
+		),
+		'@woocommerce/blocks-registry': path.resolve(
+			__dirname,
+			`../packages/public-api/blocks-registry`
 		),
 		'@woocommerce/blocks': path.resolve(
 			__dirname,
@@ -95,11 +116,30 @@ const getAlias = ( options = {} ) => {
 			__dirname,
 			`../assets/js/${ pathPart }previews/`
 		),
-		'@woocommerce/types': path.resolve( __dirname, `../assets/js/types/` ),
+		'@woocommerce/price-format': path.resolve(
+			__dirname,
+			`../packages/public-api/price-format`
+		),
+		'@woocommerce/settings': path.resolve(
+			__dirname,
+			`../packages/public-api/settings`
+		),
+		'@woocommerce/shared-context': path.resolve(
+			__dirname,
+			`../packages/public-api/shared-context`
+		),
+		'@woocommerce/shared-hocs': path.resolve(
+			__dirname,
+			`../packages/public-api/shared-hocs`
+		),
+		'@woocommerce/types': path.resolve(
+			__dirname,
+			`../packages/public-api/types/`
+		),
 		'@woocommerce/utils': path.resolve( __dirname, `../assets/js/utils/` ),
 		'@woocommerce/entities': path.resolve(
 			__dirname,
-			`../assets/js/entities/`
+			`../packages/internal/entities/`
 		),
 		'react/jsx-dev-runtime': require.resolve( 'react/jsx-dev-runtime' ),
 		'react/jsx-runtime': require.resolve( 'react/jsx-runtime' ),

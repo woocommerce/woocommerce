@@ -107,9 +107,9 @@ export const WooPaymentsResetAccountModal = ( {
 					provider_extension_slug: wooPaymentsExtensionSlug,
 				} );
 				// Refresh the providers store.
-				invalidatePaymentGateways( 'getPaymentProviders' );
+				void invalidatePaymentGateways( 'getPaymentProviders' );
 				// Refresh the WooPayments in-context onboarding store.
-				invalidateWooPaymentsOnboarding( 'getOnboardingData' );
+				void invalidateWooPaymentsOnboarding( 'getOnboardingData' );
 			} )
 			.catch( () => {
 				recordPaymentsEvent( 'provider_reset_onboarding_failed', {
@@ -128,7 +128,7 @@ export const WooPaymentsResetAccountModal = ( {
 									'woocommerce'
 								),
 								'WooPayments'
-						  )
+							)
 						: sprintf(
 								/* translators: %s: Provider name */
 								__(
@@ -136,7 +136,7 @@ export const WooPaymentsResetAccountModal = ( {
 									'woocommerce'
 								),
 								'WooPayments'
-						  ),
+							),
 					{
 						isDismissible: true,
 					}
@@ -164,7 +164,7 @@ export const WooPaymentsResetAccountModal = ( {
 						'woocommerce'
 					),
 					'WooPayments'
-			  )
+				)
 			: sprintf(
 					/* translators: %s: Provider name */
 					__(
@@ -172,7 +172,7 @@ export const WooPaymentsResetAccountModal = ( {
 						'woocommerce'
 					),
 					'WooPayments'
-			  );
+				);
 		if ( isEmbeddedResetFlow ) {
 			// If resetting the account from NOX, override the content.
 			content = sprintf(

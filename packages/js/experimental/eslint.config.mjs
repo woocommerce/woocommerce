@@ -2,15 +2,15 @@
  * Internal dependencies
  */
 import woocommerce from '@woocommerce/eslint-config';
+import { coreModules } from '@woocommerce/eslint-config/core-modules.js';
 
 export default [
 	...woocommerce,
 	{
 		settings: {
 			'import/core-modules': [
-				'@woocommerce/components',
-				'@wordpress/components',
-				'@storybook/react',
+				...coreModules,
+				'@storybook/react-webpack5',
 				'react-transition-group/CSSTransition',
 				'dompurify',
 			],

@@ -51,7 +51,7 @@ function RemoteLogging() {
 			}
 		};
 
-		fetchRemoteLoggingStatus();
+		void fetchRemoteLoggingStatus();
 	}, [] );
 
 	const toggleRemoteLogging = async () => {

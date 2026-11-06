@@ -28,6 +28,21 @@ class AssetDataRegistry extends \WP_UnitTestCase {
 		$this->assertEmpty( $this->registry->get() );
 	}
 
+	/**
+	 * @testdox Currency data decodes HTML entities in the price separators.
+	 */
+	public function test_currency_data_decodes_separator_entities() {
+		update_option( 'woocommerce_price_thousand_sep', '&nbsp;' );
+		update_option( 'woocommerce_price_decimal_sep', '&#44;' );
+
+		$method = new \ReflectionMethod( $this->registry, 'get_currency_data' );
+		$method->setAccessible( true );
+		$currency_data = $method->invoke( $this->registry );
+
+		$this->assertSame( "\u{00A0}", $currency_data['thousandSeparator'] );
+		$this->assertSame( ',', $currency_data['decimalSeparator'] );
+	}
+
 	public function test_add_data() {
 		$this->registry->add( 'test', 'foo' );
 		$this->assertEquals( [ 'test' => 'foo' ], $this->registry->get() );
@@ -173,5 +188,27 @@ class AssetDataRegistry extends \WP_UnitTestCase {
 		} finally {
 			$features_controller->change_feature_enable( 'cart_save_for_later', $original_enabled );
 		}
+	}
+
+	/**
+	 * @testdox `preloadedApiRequestPaths` lists the paths passed to hydrate_api_request(), once each.
+	 */
+	public function test_preloaded_api_request_paths_lists_hydrated_paths() {
+		$this->registry->hydrate_api_request( '/wc/store/v1/cart' );
+		$this->registry->hydrate_api_request( '/wc/store/v1/test' );
+		$this->registry->hydrate_api_request( '/wc/store/v1/cart' );
+
+		$this->registry->initialize_core_data();
+
+		$this->assertSame( array( '/wc/store/v1/cart', '/wc/store/v1/test' ), $this->registry->get()['preloadedApiRequestPaths'] );
+	}
+
+	/**
+	 * @testdox `preloadedApiRequestPaths` is an empty list when nothing was preloaded.
+	 */
+	public function test_preloaded_api_request_paths_is_empty_without_hydration() {
+		$this->registry->initialize_core_data();
+
+		$this->assertSame( array(), $this->registry->get()['preloadedApiRequestPaths'] );
 	}
 }

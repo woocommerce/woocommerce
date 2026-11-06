@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Product abilities: create, update and delete variable products with their variations in one call, with every save of a call rolled back when one fails.

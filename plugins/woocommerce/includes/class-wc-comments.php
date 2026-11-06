@@ -88,6 +88,7 @@ class WC_Comments {
 
 		// Validate product reviews if requires verified owners.
 		add_action( 'pre_comment_on_post', array( __CLASS__, 'validate_product_review_verified_owners' ) );
+		add_filter( 'pre_comment_approved', array( __CLASS__, 'handle_pre_comment_approved' ), 99, 2 );
 	}
 
 	/**
@@ -224,7 +225,7 @@ class WC_Comments {
 	 */
 	public static function check_comment_rating( $comment_data ) {
 		// If posting a comment (not trackback etc) and not logged in.
-		if ( ! is_admin() && isset( $_POST['comment_post_ID'], $_POST['rating'], $comment_data['comment_type'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) && empty( $_POST['rating'] ) && self::is_default_comment_type( $comment_data['comment_type'] ) && wc_review_ratings_enabled() && wc_review_ratings_required() ) { // WPCS: input var ok, CSRF ok.
+		if ( ! is_admin() && isset( $_POST['comment_post_ID'], $_POST['rating'], $comment_data['comment_type'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) && empty( $_POST['rating'] ) && self::is_default_comment_type( $comment_data['comment_type'] ) && wc_review_ratings_enabled() && wc_review_ratings_required() ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Anonymous product reviews are submitted through the core comment form, which carries no WooCommerce nonce; the post ID is read through absint() and the rating is only tested for emptiness.
 			wp_die( esc_html__( 'Please rate the product.', 'woocommerce' ) );
 			exit;
 		}
@@ -237,13 +238,25 @@ class WC_Comments {
 	 * @param int $comment_id Comment ID.
 	 */
 	public static function add_comment_rating( $comment_id ) {
-		if ( isset( $_POST['rating'], $_POST['comment_post_ID'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) ) { // WPCS: input var ok, CSRF ok.
-			if ( ! $_POST['rating'] || $_POST['rating'] > 5 || $_POST['rating'] < 0 ) { // WPCS: input var ok, CSRF ok, sanitization ok.
+		if ( isset( $_POST['rating'], $_POST['comment_post_ID'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Anonymous product reviews are submitted through the core comment form, which carries no WooCommerce nonce; the post ID is read through absint().
+			$raw_rating = is_scalar( $_POST['rating'] ) ? wp_unslash( $_POST['rating'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Anonymous product reviews are submitted through the core comment form, which carries no WooCommerce nonce; the value is range checked and cast to an integer below.
+
+			// Stored ratings are whole numbers from 1 to 5. Numeric input is range checked before it
+			// is truncated, so 0.5 and 5.9 are rejected rather than stored as 0 and 5, while 4.7
+			// still stores 4 as before.
+			if ( is_numeric( $raw_rating ) && ( $raw_rating < 1 || $raw_rating > 5 ) ) {
 				return;
 			}
-			add_comment_meta( $comment_id, 'rating', intval( $_POST['rating'] ), true ); // WPCS: input var ok, CSRF ok.
 
-			$post_id = isset( $_POST['comment_post_ID'] ) ? absint( $_POST['comment_post_ID'] ) : 0; // WPCS: input var ok, CSRF ok.
+			$rating = intval( $raw_rating );
+
+			if ( $rating < 1 || $rating > 5 ) {
+				return;
+			}
+
+			add_comment_meta( $comment_id, 'rating', $rating, true );
+
+			$post_id = isset( $_POST['comment_post_ID'] ) ? absint( $_POST['comment_post_ID'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Anonymous product reviews are submitted through the core comment form, which carries no WooCommerce nonce; the post ID is read through absint().
 			if ( $post_id ) {
 				self::clear_transients( $post_id );
 			}
@@ -329,7 +342,7 @@ class WC_Comments {
 	 * @return bool
 	 */
 	private static function is_comment_excluded_from_wp_comment_counts( $comment ) {
-		return in_array( $comment->comment_type, array( 'action_log', 'order_note', 'webhook_delivery' ), true )
+		return in_array( $comment->comment_type, array( 'action_log', 'note', 'order_note', 'webhook_delivery' ), true )
 			|| get_post_type( $comment->comment_post_ID ) === 'product';
 	}
 
@@ -628,7 +641,7 @@ class WC_Comments {
 		);
 
 		foreach ( $raw_counts as $count ) {
-			$counts[ $count->meta_value ] = absint( $count->meta_value_count ); // WPCS: slow query ok.
+			$counts[ $count->meta_value ] = absint( $count->meta_value_count );
 		}
 
 		return $counts;
@@ -642,7 +655,7 @@ class WC_Comments {
 	 * @return array
 	 */
 	public static function update_comment_type( $comment_data ) {
-		if ( ! is_admin() && isset( $_POST['comment_post_ID'], $comment_data['comment_type'] ) && self::is_default_comment_type( $comment_data['comment_type'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) ) { // WPCS: input var ok, CSRF ok.
+		if ( ! is_admin() && isset( $_POST['comment_post_ID'], $comment_data['comment_type'] ) && self::is_default_comment_type( $comment_data['comment_type'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Anonymous product reviews are submitted through the core comment form, which carries no WooCommerce nonce; the post ID is read through absint().
 			$comment_data['comment_type'] = 'review';
 		}
 
@@ -655,18 +668,7 @@ class WC_Comments {
 	 * @param int $comment_post_id Post ID.
 	 */
 	public static function validate_product_review_verified_owners( $comment_post_id ) {
-		// Only validate if option is enabled.
-		if ( 'yes' !== get_option( 'woocommerce_review_rating_verification_required' ) ) {
-			return;
-		}
-
-		// Validate only products.
-		if ( 'product' !== get_post_type( $comment_post_id ) ) {
-			return;
-		}
-
-		// Skip if is a verified owner.
-		if ( wc_customer_bought_product( '', get_current_user_id(), $comment_post_id ) ) {
+		if ( ! self::is_review_blocked_for_current_user( absint( $comment_post_id ) ) ) {
 			return;
 		}
 
@@ -674,9 +676,52 @@ class WC_Comments {
 			esc_html__( 'Only logged in customers who have purchased this product may leave a review.', 'woocommerce' ),
 			esc_html__( 'Reviews can only be left by "verified owners"', 'woocommerce' ),
 			array(
-				'code' => 403,
+				'response' => 403,
 			)
 		);
+	}
+
+	/**
+	 * Apply the verified-owner rule to product comments that skip the review form, such as REST and XML-RPC.
+	 *
+	 * Review-type comments are skipped: only the review form, checked above, and WooCommerce's own review
+	 * endpoints create them. REST refuses other comment types and XML-RPC sends none.
+	 *
+	 * @internal
+	 *
+	 * @param int|string|WP_Error $approved     Approval status, or an error from an earlier check.
+	 * @param array               $comment_data Comment data.
+	 * @return int|string|WP_Error
+	 */
+	public static function handle_pre_comment_approved( $approved, $comment_data ) {
+		if ( is_wp_error( $approved ) || ! is_array( $comment_data ) || ! self::is_default_comment_type( $comment_data['comment_type'] ?? '' ) ) {
+			return $approved;
+		}
+
+		$comment_post_id = absint( $comment_data['comment_post_ID'] ?? 0 );
+		if ( ! self::is_review_blocked_for_current_user( $comment_post_id ) || current_user_can( 'edit_post', $comment_post_id ) ) {
+			return $approved;
+		}
+
+		return new WP_Error(
+			'woocommerce_review_verified_owner_required',
+			__( 'Only logged in customers who have purchased this product may leave a review.', 'woocommerce' ),
+			array( 'status' => 403 )
+		);
+	}
+
+	/**
+	 * Whether the "verified owners" review setting stops the current user from commenting on a product.
+	 *
+	 * Checks the logged-in user, never the author name or email sent with the comment.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return bool
+	 */
+	private static function is_review_blocked_for_current_user( int $post_id ): bool {
+		return 'yes' === get_option( 'woocommerce_review_rating_verification_required' )
+			&& 'product' === get_post_type( $post_id )
+			&& ! wc_customer_bought_product( '', get_current_user_id(), $post_id );
 	}
 
 	/**

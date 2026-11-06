@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin;
 
+use Automattic\WooCommerce\Admin\ReportExporter;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
 use Automattic\WooCommerce\Internal\Admin\FeaturePlugin;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
@@ -140,6 +141,35 @@ class FeaturePluginTest extends WC_Unit_Test_Case {
 		}
 
 		$this->assertSame( 0, $translation_count, 'The bootstrap gate should not translate WooCommerce feature definitions.' );
+	}
+
+	/**
+	 * @testdox Serving and expiring existing exports stays enabled when Analytics is disabled.
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_export_files_are_still_handled_when_analytics_is_disabled(): void {
+		$export_hook        = ReportExporter::get_action( 'export_report' );
+		$scheduler_hook     = ReportExporter::get_action( 'schedule_action' );
+		$scheduler_callback = array( ReportExporter::class, 'do_action_or_reschedule' );
+		$download_callback  = array( ReportExporter::class, 'download_export_file' );
+		$cleanup_callback   = array( ReportExporter::class, 'delete_expired_exports' );
+
+		$this->assertIsString( $export_hook, 'The export hook should be defined.' );
+		$this->assertIsString( $scheduler_hook, 'The scheduler hook should be defined.' );
+
+		remove_action( $export_hook, $scheduler_callback, 10 );
+		remove_action( $scheduler_hook, $scheduler_callback, 10 );
+		remove_action( 'admin_init', $download_callback, 10 );
+		remove_action( 'wc_admin_daily', $cleanup_callback, 10 );
+		update_option( Analytics::TOGGLE_OPTION_NAME, 'no' );
+
+		FeaturePlugin::instance()->includes();
+
+		$this->assertSame( 10, has_action( 'admin_init', $download_callback ), 'Links that were already emailed should keep working.' );
+		$this->assertSame( 10, has_action( 'wc_admin_daily', $cleanup_callback ), 'Existing exports should still expire.' );
+		$this->assertFalse( has_action( $export_hook, $scheduler_callback ), 'Export generation should stay disabled.' );
+		$this->assertFalse( has_action( $scheduler_hook, $scheduler_callback ), 'Export scheduling should stay disabled.' );
 	}
 
 	/**

@@ -2,7 +2,6 @@
 namespace Automattic\WooCommerce\Blocks\Utils;
 
 use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
-use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 
 /**
  * Utility methods used for the Product Gallery block.
@@ -17,7 +16,7 @@ class ProductGalleryUtils {
 	 */
 	public static function get_all_image_ids( $product ) {
 		if ( ! $product instanceof \WC_Product ) {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Invalid product object.', 'woocommerce' ), '9.8.0' );
+			wc_doing_it_wrong( __FUNCTION__, 'Invalid product object.', '9.8.0' );
 			return array();
 		}
 
@@ -66,7 +65,7 @@ class ProductGalleryUtils {
 	 */
 	public static function get_all_media_items( $product ) {
 		if ( ! $product instanceof \WC_Product ) {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Invalid product object.', 'woocommerce' ), '10.9.0' );
+			wc_doing_it_wrong( __FUNCTION__, 'Invalid product object.', '10.9.0' );
 			return array();
 		}
 
@@ -209,7 +208,7 @@ class ProductGalleryUtils {
 
 		if ( 'dialog' === $video_location ) {
 			unset( $attrs['autoplay'] );
-			$attrs['data-wp-init--dialog-video-playback'] = 'callbacks.initDialogVideoPlayback';
+			$attrs['data-wp-init---dialog-video-playback'] = 'callbacks.initDialogVideoPlayback';
 		}
 
 		if ( ! empty( $media['poster_id'] ) && ! empty( $media['poster_src'] ) ) {
@@ -366,7 +365,7 @@ class ProductGalleryUtils {
 		$variation_image_ids = array();
 
 		if ( ! $product instanceof \WC_Product ) {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Invalid product object.', 'woocommerce' ), '9.8.0' );
+			wc_doing_it_wrong( __FUNCTION__, 'Invalid product object.', '9.8.0' );
 			return $variation_image_ids;
 		}
 
@@ -398,7 +397,7 @@ class ProductGalleryUtils {
 		$variation_gallery_data = array();
 
 		if ( ! $product instanceof \WC_Product ) {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Invalid product object.', 'woocommerce' ), '10.8.0' );
+			wc_doing_it_wrong( __FUNCTION__, 'Invalid product object.', '10.8.0' );
 			return $variation_gallery_data;
 		}
 
@@ -423,6 +422,7 @@ class ProductGalleryUtils {
 		$parent_gallery_ids    = array_filter( $parent_gallery_ids, 'wp_attachment_is_image' );
 		$parent_gallery_extras = array_values( array_diff( $parent_gallery_ids, array( $parent_featured_id ) ) );
 
+		// Performance note: meta-based optimization (populating images from metas) was evaluated and dismissed due to impact to complexity ratio.
 		foreach ( $variations as $variation_id ) {
 			$variation_id = (int) $variation_id;
 			$entry        = self::build_variation_gallery_entry( $variation_id, $parent_featured_id, $parent_gallery_extras );
@@ -442,7 +442,7 @@ class ProductGalleryUtils {
 	 * Decision tree (variation chosen):
 	 * - no variation images → parent featured + parent gallery
 	 * - own featured only → variation featured + parent gallery extras
-	 * - own featured + gallery (flag on) → variation images only
+	 * - own featured + gallery → variation images only
 	 * - gallery only, no own featured (potential AVI shape) → parent featured + variation gallery
 	 *
 	 * @param int   $variation_id          Variation post ID.
@@ -460,12 +460,9 @@ class ProductGalleryUtils {
 		$featured_id    = (int) $variation->get_image_id();
 		$featured_valid = $featured_id && wp_attachment_is_image( $featured_id );
 
-		$variation_gallery_ids = array();
-		if ( VariationGalleryPackage::is_enabled() ) {
-			$variation_gallery_ids = array_map( 'intval', $variation->get_gallery_image_ids() );
-			$variation_gallery_ids = array_filter( $variation_gallery_ids, 'wp_attachment_is_image' );
-			$variation_gallery_ids = array_values( $variation_gallery_ids );
-		}
+		$variation_gallery_ids = array_map( 'intval', $variation->get_gallery_image_ids() );
+		$variation_gallery_ids = array_filter( $variation_gallery_ids, 'wp_attachment_is_image' );
+		$variation_gallery_ids = array_values( $variation_gallery_ids );
 
 		// No images from variation - full parent fallback.
 		if ( ! $featured_valid && empty( $variation_gallery_ids ) ) {

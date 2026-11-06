@@ -513,7 +513,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 			$wp_admin_dir    = StringUtil::normalize_local_path_slashes( ABSPATH . 'wp-admin' );
 
 			return array(
-				'WooCommerce error message' => array(
+				'WooCommerce error message'           => array(
 					'Error in ' . $wc_plugin_dir . 'includes/class-wc-cart.php',
 					array(
 						'source'    => 'fatal-errors',
@@ -521,7 +521,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 					),
 					false,
 				),
-				'Third-party error message' => array(
+				'Third-party error message'           => array(
 					'Error in /plugins/some-other-plugin/file.php',
 					array(
 						'source'    => 'fatal-errors',
@@ -529,7 +529,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 					),
 					true,
 				),
-				'WooCommerce backtrace'     => array(
+				'WooCommerce backtrace'               => array(
 					'Some error message',
 					array(
 						'source'    => 'fatal-errors',
@@ -541,7 +541,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 					),
 					false,
 				),
-				'Third-party backtrace'     => array(
+				'Third-party backtrace'               => array(
 					'Some error message',
 					array(
 						'source'    => 'fatal-errors',
@@ -553,7 +553,39 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 					),
 					true,
 				),
-				'Non-fatal-errors source'   => array(
+				'Store API WooCommerce error message' => array(
+					'Store API request failed in Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Cart: TypeError: Some error message in ' . $wc_plugin_dir . 'src/Utilities/NumberUtil.php:54',
+					array(
+						'source'    => 'store-api',
+						'backtrace' => array( '#0 /plugins/some-other-plugin/file.php(24): Automattic\\WooCommerce\\Utilities\\NumberUtil::round(1.5, \'x\')' ),
+					),
+					false,
+				),
+				'Store API WooCommerce backtrace'     => array(
+					'Store API request failed in Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Cart: TypeError: Some error message in /plugins/some-other-plugin/file.php:10',
+					array(
+						'source'    => 'store-api',
+						'backtrace' => array(
+							'#0 ' . $wp_includes_dir . 'class-wp-hook.php(353): {closure}(Object(WC_Cart))',
+							'#1 ' . $wc_plugin_dir . 'includes/class-wc-cart.php(2269): do_action(\'woocommerce_cart_calculate_fees\')',
+							'#2 /plugins/some-other-plugin/file.php(10): WC_Cart->calculate_fees()',
+						),
+					),
+					false,
+				),
+				'Store API third-party backtrace'     => array(
+					'Store API request failed in Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Cart: TypeError: Some error message in /plugins/some-other-plugin/file.php:10',
+					array(
+						'source'    => 'store-api',
+						'backtrace' => array(
+							'/plugins/some-other-plugin/other-file.php',
+							$wp_includes_dir . 'class-wp-hook.php',
+							$wc_plugin_dir . 'includes/class-wc-cart.php',
+						),
+					),
+					true,
+				),
+				'Non-fatal-errors source'             => array(
 					'Some error message',
 					array(
 						'source'    => 'other-source',
@@ -561,7 +593,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 					),
 					false,
 				),
-				'Missing backtrace'         => array(
+				'Missing backtrace'                   => array(
 					'Some error message',
 					array( 'source' => 'fatal-errors' ),
 					true,

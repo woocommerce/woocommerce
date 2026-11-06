@@ -84,8 +84,9 @@ class ProductSpecifications extends AbstractBlock {
 					foreach ( $attribute_values as $attribute_value ) {
 						$value_name = esc_html( $attribute_value->name );
 
-						if ( $attribute_taxonomy->attribute_public ) {
-							$values[] = '<a href="' . esc_url( get_term_link( $attribute_value->term_id, $attribute->get_name() ) ) . '" rel="tag">' . $value_name . '</a>';
+						if ( $attribute_taxonomy && $attribute_taxonomy->attribute_public ) {
+							$term_link = get_term_link( $attribute_value->term_id, $attribute->get_name() );
+							$values[]  = is_wp_error( $term_link ) ? $value_name : '<a href="' . esc_url( $term_link ) . '" rel="tag">' . $value_name . '</a>';
 						} else {
 							$values[] = $value_name;
 						}
