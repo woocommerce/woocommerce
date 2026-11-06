@@ -85,6 +85,9 @@ class CouponUpdate extends ActionableAbility {
 	 */
 	protected function change( $subject, array $input ) {
 		if ( isset( $input['status'] ) ) {
+			if ( 'publish' === $input['status'] && $subject->get_date_created() && $subject->get_date_created()->getTimestamp() > time() ) {
+				$subject->set_date_created( time() );
+			}
 			$subject->set_status( $input['status'] );
 		}
 		$result = self::set_coupon_props_from_input( $subject, $input );

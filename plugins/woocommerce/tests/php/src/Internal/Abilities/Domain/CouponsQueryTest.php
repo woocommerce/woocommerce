@@ -217,4 +217,27 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $timestamp, $coupon->get_date_expires()->getTimestamp() );
 	}
 
+	/**
+	 * @testdox Should publish a scheduled coupon in storage as well as in its response.
+	 */
+	public function test_publish_scheduled_coupon(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'publish-scheduled' );
+		$coupon->set_date_created( time() + DAY_IN_SECONDS );
+		$coupon->set_status( 'future' );
+		$coupon->save();
+		$class   = \Automattic\WooCommerce\Internal\Abilities\Domain\CouponUpdate::class;
+		$ability = new $class( $class::ABILITY_NAME, $class::get_registration_args() );
+		$result  = $ability->execute(
+			array(
+				'id'     => $coupon->get_id(),
+				'status' => 'publish',
+			)
+		);
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'publish', $result['coupon']['status'] );
+		$this->assertSame( 'publish', ( new \WC_Coupon( $coupon->get_id() ) )->get_status() );
+	}
+
 }
