@@ -20,6 +20,8 @@ export interface ViewLink {
 export type RowState = 'open' | 'required' | 'unknown' | 'pass';
 
 export interface CheckRow {
+	/** The check's id, for tracking. */
+	id: string;
 	state: RowState;
 	title: string;
 	/** "Affects: …", or ''. */
@@ -30,6 +32,8 @@ export interface CheckRow {
 }
 
 export interface FixFirstItem {
+	/** The check's id, for tracking. */
+	id: string;
 	tier: string;
 	title: string;
 	why: string;
