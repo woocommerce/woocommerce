@@ -12,28 +12,33 @@ import './sales-readiness.scss';
 import { useReadinessView } from './use-readiness-view';
 import { FixFirstList } from './components/fix-first';
 import { RunStatus } from './components/run-status';
+import { trackReadiness } from './tracks';
 
 /**
  * WooCommerce > Settings > AI tools, the Overview: the AI shopping card, then the Sales readiness
  * card with Fix first and a link to every check.
  */
 export default function SalesReadinessOverview() {
-	const { view, error, running, runCheck } = useReadinessView();
+	const { view, error, running, runCheck } = useReadinessView( 'overview' );
 
-	if ( error ) {
-		return (
+	if ( ! view ) {
+		return error ? (
 			<Notice status="error" isDismissible={ false }>
 				{ error }
 			</Notice>
+		) : (
+			<Spinner />
 		);
-	}
-	if ( ! view ) {
-		return <Spinner />;
 	}
 	const { shopping, view_all: viewAll } = view.overview;
 
 	return (
 		<div className="wc-sales-readiness wc-sales-readiness--overview">
+			{ error && (
+				<Notice status="error" isDismissible={ false }>
+					{ error }
+				</Notice>
+			) }
 			<Card.Root className="wc-sales-readiness-card">
 				<Card.Header>
 					<div className="wc-sales-readiness-card__head">
@@ -51,6 +56,12 @@ export default function SalesReadinessOverview() {
 						<Button
 							variant="secondary"
 							href={ shopping.button.href }
+							onClick={ () =>
+								trackReadiness( 'link_click', {
+									surface: 'overview',
+									area: 'shopping',
+								} )
+							}
 						>
 							{ shopping.button.text }
 						</Button>
@@ -103,6 +114,7 @@ export default function SalesReadinessOverview() {
 									</Text>
 									<FixFirstList
 										items={ view.fix_first.items }
+										surface="overview"
 									/>
 								</>
 							) : (
@@ -117,6 +129,12 @@ export default function SalesReadinessOverview() {
 								<Button
 									variant="secondary"
 									href={ viewAll.href }
+									onClick={ () =>
+										trackReadiness( 'link_click', {
+											surface: 'overview',
+											area: 'view_all',
+										} )
+									}
 								>
 									{ viewAll.text }
 								</Button>

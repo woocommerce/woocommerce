@@ -10,13 +10,22 @@ import type { ReactNode } from 'react';
  * Internal dependencies
  */
 import type { CheckRow as CheckRowData, ViewBadge, ViewLink } from '../types';
+import { trackReadiness } from '../tracks';
 
 /**
  * A line that is a link when it has a URL, plain text otherwise.
  */
-export const RowLink = ( { link }: { link: ViewLink } ) =>
+export const RowLink = ( {
+	link,
+	onClick,
+}: {
+	link: ViewLink;
+	onClick?: () => void;
+} ) =>
 	link.href ? (
-		<Link href={ link.href }>{ link.text }</Link>
+		<Link href={ link.href } onClick={ onClick }>
+			{ link.text }
+		</Link>
 	) : (
 		<Text variant="body-sm" className="wc-sales-readiness__muted">
 			{ link.text }
@@ -84,7 +93,13 @@ export const Row = ( {
 /**
  * One check: its state, what it affects, why it matters, what to do and where.
  */
-export const CheckRow = ( { row }: { row: CheckRowData } ) => {
+export const CheckRow = ( {
+	row,
+	section,
+}: {
+	row: CheckRowData;
+	section: string;
+} ) => {
 	const states: Record< CheckRowData[ 'state' ], string > = {
 		open: __( 'Issue:', 'woocommerce' ),
 		required: __( 'Issue:', 'woocommerce' ),
@@ -107,8 +122,7 @@ export const CheckRow = ( { row }: { row: CheckRowData } ) => {
 		>
 			{ row.affects && (
 				<Text variant="body-sm" className="wc-sales-readiness__muted">
-					<strong>{ __( 'Affects:', 'woocommerce' ) }</strong>{ ' ' }
-					{ row.affects.replace( /^[^:]*:\s*/, '' ) }
+					{ row.affects }
 				</Text>
 			) }
 			{ row.lines.map( ( line ) => (
@@ -128,7 +142,18 @@ export const CheckRow = ( { row }: { row: CheckRowData } ) => {
 			) }
 			{ row.link && (
 				<div className="wc-sales-readiness-row__link">
-					<RowLink link={ row.link } />
+					<RowLink
+						link={ row.link }
+						onClick={ () =>
+							trackReadiness( 'link_click', {
+								surface: 'page',
+								area: 'section',
+								section,
+								check_id: row.id,
+								state: row.state,
+							} )
+						}
+					/>
 				</div>
 			) }
 		</Row>

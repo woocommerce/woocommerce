@@ -16,9 +16,12 @@ import {
 import { RunStatus } from '../components/run-status';
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
+jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 const mockFetch = apiFetch as unknown as jest.Mock;
 
 const view = ( pending: boolean, label = 'Run check' ) => ( {
+	sections: [],
+	fix_first: null,
 	run: { label, pending, stalled: false, message: '' },
 } );
 
@@ -40,7 +43,7 @@ describe( 'useReadinessView', () => {
 			.mockResolvedValueOnce( view( true ) )
 			.mockResolvedValueOnce( view( true ) )
 			.mockResolvedValueOnce( view( false, 'Check again' ) );
-		const { result } = renderHook( () => useReadinessView() );
+		const { result } = renderHook( () => useReadinessView( 'page' ) );
 		await act( async () => jest.advanceTimersByTime( 0 ) );
 		await act( async () => result.current.runCheck() );
 		expect( result.current.view?.run.pending ).toBe( true );
@@ -56,14 +59,14 @@ describe( 'useReadinessView', () => {
 
 	it( 'does not poll when nothing is pending', async () => {
 		mockFetch.mockImplementation( async () => view( false ) );
-		renderHook( () => useReadinessView() );
+		renderHook( () => useReadinessView( 'page' ) );
 		await act( async () => jest.advanceTimersByTime( POLL_MS * 3 ) );
 		expect( viewCalls() ).toBe( 1 );
 	} );
 
 	it( 'stops polling a check that stays pending', async () => {
 		mockFetch.mockImplementation( async () => view( true ) );
-		renderHook( () => useReadinessView() );
+		renderHook( () => useReadinessView( 'page' ) );
 		await act( async () => jest.advanceTimersByTime( 0 ) );
 		for ( let i = 0; i < POLL_FOR_MS / POLL_MS + 5; i++ ) {
 			await act( async () => jest.advanceTimersByTime( POLL_MS ) );

@@ -71,10 +71,6 @@
 	margin: 0;
 	padding: 0;
 
-	&__group {
-		margin: 0;
-	}
-
 	> .wc-sales-readiness-row + .wc-sales-readiness-row {
 		border-block-start: 1px solid var(--wc-sr-stroke);
 	}
@@ -88,7 +84,7 @@
 	padding: 16px 0 4px;
 	border-block-start: 1px solid var(--wc-sr-stroke);
 
-	.wc-sales-readiness-list__group:first-child > & {
+	&:first-child {
 		border-block-start: 0;
 		padding-block-start: 12px;
 	}
