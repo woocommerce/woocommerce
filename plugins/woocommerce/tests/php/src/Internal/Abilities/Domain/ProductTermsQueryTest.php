@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
-use Automattic\WooCommerce\Abilities\Ability;
+use Automattic\WooCommerce\Internal\Abilities\Ability;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 
 /**

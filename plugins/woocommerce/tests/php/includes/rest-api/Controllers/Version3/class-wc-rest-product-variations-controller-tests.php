@@ -40,6 +40,54 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	private $variation_orderby_clauses = array();
 
 	/**
+	 * @testdox The variation API resolves term names using the registered taxonomy for non-Latin attributes.
+	 * @testWith ["v3", "χρώμα", "κόκκινο"]
+	 *           ["v3", "χρώμα", "ερυθρό"]
+	 *           ["v3", "color", "red"]
+	 *           ["v2", "χρώμα", "κόκκινο"]
+	 *           ["v2", "χρώμα", "ερυθρό"]
+	 *           ["v2", "color", "red"]
+	 * @param string $version REST API version.
+	 * @param string $attribute_name Attribute name.
+	 * @param string $term_slug Term slug, which may differ from the term name.
+	 */
+	public function test_create_variation_with_non_latin_attribute( string $version, string $attribute_name, string $term_slug ): void {
+		if ( 'v2' === $version ) {
+			$controller = new WC_REST_Product_Variations_V2_Controller();
+			$controller->register_routes();
+		}
+
+		$attribute = WC_Helper_Product::create_product_attribute_object( $attribute_name, array( 'Κόκκινο' ) );
+		$term_id   = $attribute->get_options()[0];
+		wp_update_term( $term_id, $attribute->get_name(), array( 'slug' => $term_slug ) );
+		$term = get_term( $term_id, $attribute->get_name() );
+
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$request = new WP_REST_Request( 'POST', "/wc/{$version}/products/{$product->get_id()}/variations" );
+		$request->set_body_params(
+			array(
+				'regular_price' => '10',
+				'attributes'    => array(
+					array(
+						'id'     => $attribute->get_id(),
+						'option' => 'Κόκκινο',
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 201, $response->get_status() );
+		$data      = $response->get_data();
+		$variation = wc_get_product( $data['id'] );
+
+		$this->assertSame( array( sanitize_title( $attribute->get_name() ) => $term->slug ), $variation->get_attributes(), 'The API must save the actual term slug, including custom slugs.' );
+		$this->assertSame( 'Κόκκινο', $data['attributes'][0]['option'], 'The API must return the term name rather than its slug.' );
+	}
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {

@@ -1,6 +1,6 @@
 # WooCommerce abilities
 
-The Core abilities live in `Domain/`. `AbilitiesLoader` registers them with `Automattic\WooCommerce\Abilities\Ability` or a subclass of `ActionableAbility`. Two PHPStan rules keep it that way.
+The Core abilities live in `Domain/`. `AbilitiesLoader` registers them with `Ability` or a subclass of `ActionableAbility`. Two PHPStan rules keep it that way.
 
 ## Trust the input schema
 
