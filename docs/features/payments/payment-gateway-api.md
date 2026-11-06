@@ -275,7 +275,7 @@ Avoid holding an order in a custom status while the outcome is open. The `woocom
 
 Within the shopper's checkout session, when an order with a total above zero is **Pending payment** or **Failed** and the cart has not changed, WooCommerce calls `process_payment()` for the same order each time the shopper submits checkout.
 
-If an earlier request reached the provider but its response never came back, a new charge request can take a second payment. Use the provider's idempotency support, such as an idempotency key or one payment object reused for the order, so that a repeated request returns the first result instead of creating a new charge. Save the key on the order before you send the request, so a retry can reuse it even when no transaction ID came back. Change the key only after the provider confirms that the attempt failed, even if it returned no transaction ID. Remove any failed transaction ID at the same time, otherwise the next retry reads the old failed ID instead of checking the new attempt.
+If an earlier request reached the provider but its response never came back, a new charge request can take a second payment. Use the provider's idempotency support, such as an idempotency key or one payment object reused for the order, so that a repeated request returns the first result instead of creating a new charge. Keep the key the same for every retry of an order until the provider confirms that the attempt failed, even if it returned no transaction ID. Remove any failed transaction ID at the same time, otherwise the next retry reads the old failed ID instead of checking the new attempt.
 
 ### Store the transaction ID and check it before charging again
 
@@ -317,10 +317,10 @@ public function process_payment( $order_id ) {
             return array( 'result' => 'failure' );
         }
 
-        // The earlier payment failed: remove its transaction ID and idempotency key from the order.
+        // The earlier payment failed: remove its transaction ID and change the idempotency key.
     }
 
-    // Save a new idempotency key if the order has none, create the payment with the saved key, then save its ID on the order.
+    // Create the payment with the order's idempotency key, then save its ID on the order.
 }
 ```
 
