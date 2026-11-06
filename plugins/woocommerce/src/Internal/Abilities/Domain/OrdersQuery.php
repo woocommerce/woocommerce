@@ -139,9 +139,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 		$args['status'] = array_map( array( __CLASS__, 'prepare_status_arg' ), (array) $args['status'] );
 
-		if ( ! empty( $input['orderby'] ) ) {
-			$args['orderby'] = self::prepare_orderby_arg( $input['orderby'] );
-		}
+		$args = array_merge( $args, self::prepare_orderby_args( $input['orderby'] ?? 'date', $input['order'] ?? 'desc' ) );
 
 		foreach ( array( 'customer_id', 'parent' ) as $field ) {
 			if ( isset( $input[ $field ] ) ) {
@@ -485,23 +483,41 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	}
 
 	/**
-	 * Prepare orderby values for wc_get_orders across HPOS and legacy storage.
-	 *
-	 * Values not present in the map are already accepted by wc_get_orders for
-	 * both storage engines and pass through unchanged.
+	 * Sort args for wc_get_orders that end on the order ID, so orders that tie on the
+	 * sort field keep one order across pages. Posts storage sorts the total only when
+	 * orderby is the plain string, so the total needs its meta key here.
 	 *
 	 * @param string $orderby Input orderby value.
-	 * @return string
+	 * @param string $order   Input sort direction.
+	 * @return array<string, mixed>
 	 */
-	private static function prepare_orderby_arg( string $orderby ): string {
-		$orderby_map = array(
-			'id' => 'ID',
-		);
+	private static function prepare_orderby_args( string $orderby, string $order ): array {
+		$order = strtoupper( $order );
 
-		if ( 'date_modified' === $orderby ) {
-			return OrderUtil::custom_orders_table_usage_is_enabled() ? 'date_modified' : 'post_modified';
+		if ( 'id' === $orderby ) {
+			return array( 'orderby' => array( 'ID' => $order ) );
 		}
 
-		return $orderby_map[ $orderby ] ?? $orderby;
+		$hpos = OrderUtil::custom_orders_table_usage_is_enabled();
+		if ( 'total' === $orderby && ! $hpos ) {
+			return array(
+				'orderby'  => array(
+					'meta_value_num' => $order,
+					'ID'             => $order,
+				),
+				'meta_key' => '_order_total', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- The same join the data store uses for its own total sort.
+			);
+		}
+
+		if ( 'date_modified' === $orderby && ! $hpos ) {
+			$orderby = 'post_modified';
+		}
+
+		return array(
+			'orderby' => array(
+				$orderby => $order,
+				'ID'     => $order,
+			),
+		);
 	}
 }

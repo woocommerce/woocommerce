@@ -596,4 +596,43 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 
 		return $result['terms'];
 	}
+
+	/**
+	 * @testdox Should return each term exactly once across pages when terms share a name, paging by $paging.
+	 * @testWith ["page"]
+	 *           ["offset"]
+	 * @param string $paging Paging input.
+	 */
+	public function test_pages_terms_with_the_same_name_once_each( string $paging ): void {
+		$ids = array();
+		for ( $i = 0; $i < 5; $i++ ) {
+			$parent = self::factory()->term->create(
+				array(
+					'taxonomy' => 'product_cat',
+					'name'     => 'Parent ' . $i,
+				)
+			);
+			$ids[]  = self::factory()->term->create(
+				array(
+					'taxonomy' => 'product_cat',
+					'name'     => 'Twin',
+					'parent'   => $parent,
+				)
+			);
+		}
+
+		$paged = array();
+		for ( $page = 1; $page <= 3; $page++ ) {
+			$input  = array(
+				'taxonomy' => 'product_cat',
+				'search'   => 'Twin',
+				'per_page' => 2,
+			);
+			$input += 'page' === $paging ? array( 'page' => $page ) : array( 'offset' => ( $page - 1 ) * 2 );
+			$result = ProductTermsQuery::execute( $input );
+			$paged  = array_merge( $paged, array_column( $result['terms'], 'id' ) );
+		}
+
+		$this->assertSame( $ids, $paged, 'Terms with the same name should be sorted by ID.' );
+	}
 }
