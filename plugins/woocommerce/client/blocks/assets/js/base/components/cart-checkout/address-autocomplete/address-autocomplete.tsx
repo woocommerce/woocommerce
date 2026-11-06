@@ -15,6 +15,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect, useState, useRef } from '@wordpress/element';
 import { AddressFormType, getSettingWithCoercion } from '@woocommerce/settings';
 import { useCheckoutAddress } from '@woocommerce/base-context';
+import { usePresence } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -457,6 +458,17 @@ export const AddressAutocomplete = ( {
 		selectedSuggestion >= 0
 			? `suggestion-item-${ addressType }-${ selectedSuggestion }`
 			: undefined;
+	const isSuggestionsOpen = searchValue.length >= 3 && suggestions.length > 0;
+	const {
+		isPresent: isSuggestionsPresent,
+		transition: suggestionsTransition,
+		ref: suggestionsRef,
+	} = usePresence< HTMLDivElement >( isSuggestionsOpen );
+	// While the list animates out, keep showing the suggestions it closed with.
+	const shownSuggestions = useRef( suggestions );
+	if ( isSuggestionsOpen ) {
+		shownSuggestions.current = suggestions;
+	}
 
 	return (
 		<div className="wc-block-components-address-autocomplete-container">
@@ -484,10 +496,12 @@ export const AddressAutocomplete = ( {
 					) : null
 				}
 			/>
-			{ searchValue.length >= 3 && suggestions.length > 0 ? (
+			{ isSuggestionsPresent ? (
 				<Suggestions
+					containerRef={ suggestionsRef }
+					isClosing={ suggestionsTransition === 'exiting' }
 					selectedSuggestion={ selectedSuggestion }
-					suggestions={ suggestions }
+					suggestions={ shownSuggestions.current }
 					branding={ activeProviderBranding }
 					addressType={ addressType }
 					onSuggestionClick={ handleSuggestionClick }

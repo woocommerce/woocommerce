@@ -51,3 +51,104 @@
 		display: none;
 	}
 }
+
+// Grid and clipping only apply while animating, so the resting layout is
+// unchanged and focus rings are not clipped. The `div` outranks consumers
+// that set `display: flex` on the panel, such as Checkout shipping packages.
+div.wc-block-components-panel:is(.is-opening, .is-closing) {
+	display: grid;
+	grid-template-rows: auto 1fr;
+	// Clip only below the panel, where the collapsing content overflows.
+	clip-path: inset(-100vmax -100vmax 0 -100vmax);
+
+	> .wc-block-components-panel__content {
+		min-block-size: 0;
+	}
+}
+
+div.wc-block-components-panel.is-opening {
+	@include motion-safe {
+		animation: wc-block-components-panel-open var(--wpds-motion-duration-lg) var(--wpds-motion-easing-balanced);
+	}
+
+	> .wc-block-components-panel__content {
+		@include motion-safe {
+			animation: wc-block-components-panel-content-in var(--wpds-motion-duration-lg) var(--wpds-motion-easing-expressive);
+		}
+	}
+
+	// The gap below the button grows with the content, instead of appearing all at once before it.
+	> .wc-block-components-panel__button {
+		@include motion-safe {
+			animation: wc-block-components-panel-gap-open var(--wpds-motion-duration-lg) var(--wpds-motion-easing-balanced);
+		}
+	}
+}
+
+div.wc-block-components-panel.is-closing {
+	@include motion-safe {
+		animation: wc-block-components-panel-close motion-exit(lg) var(--wpds-motion-easing-balanced) forwards;
+	}
+
+	> .wc-block-components-panel__content {
+		@include motion-safe {
+			animation: wc-block-components-panel-content-out motion-exit(lg) var(--wpds-motion-easing-expressive) forwards;
+		}
+	}
+
+	// …and shrinks with it, so nothing snaps when the content unmounts.
+	> .wc-block-components-panel__button {
+		@include motion-safe {
+			animation: wc-block-components-panel-gap-close motion-exit(lg) var(--wpds-motion-easing-balanced) forwards;
+		}
+	}
+}
+
+// Keep the open gap until the content unmounts. Low specificity so consumers
+// that remove the gap from the open button still win.
+:where(.wc-block-components-panel.is-closing) > .wc-block-components-panel__button {
+	margin-block-end: $gap-smaller * 2;
+}
+
+@keyframes wc-block-components-panel-open {
+	from {
+		grid-template-rows: auto 0fr;
+	}
+	to {
+		grid-template-rows: auto 1fr;
+	}
+}
+
+@keyframes wc-block-components-panel-close {
+	from {
+		grid-template-rows: auto 1fr;
+	}
+	to {
+		grid-template-rows: auto 0fr;
+	}
+}
+
+@keyframes wc-block-components-panel-content-in {
+	from {
+		opacity: 0;
+	}
+}
+
+@keyframes wc-block-components-panel-content-out {
+	to {
+		opacity: 0;
+	}
+}
+
+// Each animates from or to the button's own gap, so consumers that remove the gap aren't given one.
+@keyframes wc-block-components-panel-gap-open {
+	from {
+		margin-block-end: 0;
+	}
+}
+
+@keyframes wc-block-components-panel-gap-close {
+	to {
+		margin-block-end: 0;
+	}
+}

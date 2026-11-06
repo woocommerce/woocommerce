@@ -3,3 +3,19 @@
 	margin: $gap-smallest 0 0;
 	padding: 0;
 }
+
+// A newly applied coupon's chip pulses once to confirm it was added.
+.wp-block-woocommerce-cart,
+.wp-block-woocommerce-checkout {
+	.wc-block-components-totals-discount__coupon-list-item.is-newly-applied {
+		@include motion-safe {
+			animation: wc-totals-discount-coupon-pulse var(--wpds-motion-duration-lg) var(--wpds-motion-easing-balanced);
+		}
+	}
+}
+
+@keyframes wc-totals-discount-coupon-pulse {
+	50% {
+		transform: scale(var(--wc-scale-pulse-peak));
+	}
+}

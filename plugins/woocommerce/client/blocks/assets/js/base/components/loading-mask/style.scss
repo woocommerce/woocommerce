@@ -15,3 +15,10 @@
 		opacity: 0.25;
 	}
 }
+
+// The content wrapper keeps this class whether or not it's loading, so the dim transitions both ways.
+.wc-block-components-loading-mask__content {
+	@include motion-safe {
+		transition: opacity var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle);
+	}
+}

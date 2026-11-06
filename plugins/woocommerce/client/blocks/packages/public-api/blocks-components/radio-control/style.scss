@@ -242,7 +242,9 @@ $content-padding-left: calc($gap + 24px + $gap-smaller);
 		&[disabled] {
 			cursor: not-allowed;
 			opacity: 0.5;
-			transition: opacity 200ms ease;
+			@include motion-safe {
+				transition: opacity var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle);
+			}
 		}
 	}
 }

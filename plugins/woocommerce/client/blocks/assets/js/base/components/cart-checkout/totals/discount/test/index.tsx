@@ -28,6 +28,11 @@ jest.mock( '@woocommerce/blocks-checkout', () => ( {
 	applyCheckoutFilter: jest.fn(),
 } ) );
 
+// The real store module needs full settings, which this suite mocks away.
+jest.mock( '@woocommerce/block-data', () => ( {
+	cartStore: 'wc/store/cart',
+} ) );
+
 // Mock the core components to verify they're called with correct props
 const mockRemovableChip = jest.fn();
 const mockTotalsItem = jest.fn();

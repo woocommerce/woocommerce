@@ -128,7 +128,9 @@ table.wc-block-cart-items {
 		&.is-disabled {
 			opacity: 0.5;
 			pointer-events: none;
-			transition: opacity 200ms ease;
+			@include motion-safe {
+				transition: opacity var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle);
+			}
 		}
 	}
 
@@ -258,5 +260,25 @@ table.wc-block-cart-items {
 				}
 			}
 		}
+	}
+}
+
+// Line items fade up in sequence when they mount. `[data-cart-item-key]` skips the skeleton rows. The cells animate
+// rather than the `<tr>`, so transforms work in both the table and grid layouts and the row's own opacity
+// (`.is-disabled`) is never overridden.
+.wp-block-woocommerce-cart .wc-block-cart-items__row[data-cart-item-key] {
+	@include motion-stagger-index();
+
+	> td {
+		@include motion-safe {
+			animation: wc-cart-line-item-enter var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive) motion-stagger-delay() backwards;
+		}
+	}
+}
+
+@keyframes wc-cart-line-item-enter {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
 	}
 }

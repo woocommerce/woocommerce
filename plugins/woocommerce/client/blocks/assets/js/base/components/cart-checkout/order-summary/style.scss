@@ -140,3 +140,33 @@
 		padding-top: $gap-smallest;
 	}
 }
+
+// Checkout items fade up in sequence when they mount (the skeleton wrapper is skipped), and each quantity badge
+// lands --wpds-motion-duration-xs after its item.
+.wp-block-woocommerce-checkout .wc-block-components-order-summary__content:not(.wc-block-components-skeleton) > .wc-block-components-order-summary-item {
+	@include motion-stagger-index();
+	@include motion-safe {
+		animation: wc-order-summary-item-enter var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive) motion-stagger-delay() backwards;
+	}
+
+	.wc-block-components-order-summary-item__quantity {
+		@include motion-safe {
+			animation: wc-order-summary-item-quantity-enter var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive) motion-stagger-delay(1) backwards;
+		}
+	}
+}
+
+@keyframes wc-order-summary-item-enter {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+}
+
+// Repeats the badge's resting translate so it stays pinned to the image corner while it scales in.
+@keyframes wc-order-summary-item-quantity-enter {
+	from {
+		opacity: 0;
+		transform: translate(50%, -50%) scale(0.8);
+	}
+}

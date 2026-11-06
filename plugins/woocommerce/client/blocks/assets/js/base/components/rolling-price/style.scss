@@ -1,0 +1,37 @@
+.wc-block-components-rolling-price {
+	// Equal-width digits, so the columns don't change width as they roll.
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+.wc-block-components-rolling-price__characters {
+	display: inline-flex;
+	vertical-align: bottom;
+
+	> span {
+		display: block;
+		height: 1lh;
+		// Keep the space between the price and a symbol such as " ر.س", which would collapse at the edge of its block.
+		white-space: pre;
+	}
+}
+
+.wc-block-components-rolling-price__digit {
+	overflow: hidden;
+}
+
+.wc-block-components-rolling-price__strip {
+	display: block;
+	transform: translateY(calc(var(--wc-rolling-price-digit) * -1lh));
+
+	> span {
+		display: block;
+		height: 1lh;
+	}
+
+	.wc-block-components-rolling-price:not(.is-static) & {
+		@include motion-safe {
+			transition: transform var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive);
+		}
+	}
+}

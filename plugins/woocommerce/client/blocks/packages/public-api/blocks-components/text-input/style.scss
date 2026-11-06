@@ -20,18 +20,21 @@
 		left: $gap-smaller * 1.25;
 		top: 25px;
 		transform-origin: top left;
-		transition: all 200ms ease;
 		margin: 0;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		max-width: calc(100% - #{2 * $gap-small});
 		cursor: text;
+		// `top` animates with the scale, as it did before: themes and extensions position the label with `top`.
+		@include motion-safe {
+			transition:
+				top var(--wpds-motion-duration-sm) var(--wpds-motion-easing-balanced),
+				transform var(--wpds-motion-duration-sm) var(--wpds-motion-easing-balanced),
+				color var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle);
+		}
 
 		.has-dark-controls & {
 			color: $input-placeholder-dark;
-		}
-		@media screen and (prefers-reduced-motion: reduce) {
-			transition: none;
 		}
 	}
 
@@ -56,6 +59,11 @@
 		color: $input-text-light;
 
 		height: 50px;
+
+		// The focus border's colour fades, as in WPDS; its width still changes at once.
+		@include motion-safe {
+			transition: border-color var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle);
+		}
 
 		&:focus-within {
 			background-color: $input-background-light;
@@ -83,18 +91,16 @@
 		&::-webkit-datetime-edit {
 			// Focusing the input would cause browsers to highlight the dd before it's done animating, so we hide it as well.
 			opacity: 0;
-			transition: none;
+			@include motion-safe {
+				transition: none;
+			}
 		}
 	}
 
 	// We delay the reveal so the mask doesn't sit behind the label while it floats up.
 	input[type="date"]::-webkit-datetime-edit {
-		transition: opacity 150ms ease 150ms;
-	}
-
-	@media screen and (prefers-reduced-motion: reduce) {
-		input[type="date"]::-webkit-datetime-edit {
-			transition: none;
+		@include motion-safe {
+			transition: opacity var(--wpds-motion-duration-sm) var(--wpds-motion-easing-expressive) var(--wpds-motion-duration-sm);
 		}
 	}
 

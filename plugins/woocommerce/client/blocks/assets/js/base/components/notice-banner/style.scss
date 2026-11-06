@@ -66,7 +66,9 @@
 			opacity: 0.7;
 			text-decoration-line: underline;
 			text-underline-position: under;
-			transition: all 0.2s ease-in-out;
+			@include motion-safe {
+				transition: opacity var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle);
+			}
 
 			&:hover,
 			&:focus,

@@ -6,6 +6,7 @@ import clsx from 'clsx';
 import { Icon, chevronUp, chevronDown } from '@wordpress/icons';
 import type { ReactNode, ReactElement } from 'react';
 import { Button } from '@ariakit/react';
+import { usePresence } from '@woocommerce/base-hooks';
 import deprecated from '@wordpress/deprecated';
 /**
  * Internal dependencies
@@ -43,6 +44,10 @@ const Panel = ( {
 		[ isOpen, setIsOpen ] = state;
 	}
 
+	const { isPresent, transition, ref } =
+		usePresence< HTMLDivElement >( isOpen );
+	const isClosing = transition === 'exiting';
+
 	if ( titleTag ) {
 		deprecated( "Panel component's titleTag prop", {
 			since: '9.4.0',
@@ -51,10 +56,13 @@ const Panel = ( {
 
 	return (
 		<div
+			ref={ ref }
 			role={ headingLevel ? 'heading' : undefined }
 			aria-level={ headingLevel ? headingLevel : undefined }
 			className={ clsx( className, 'wc-block-components-panel', {
 				'has-border': hasBorder,
+				'is-opening': transition === 'entering',
+				'is-closing': isClosing,
 			} ) }
 		>
 			<Button
@@ -70,8 +78,12 @@ const Panel = ( {
 				/>
 				{ title }
 			</Button>
-			{ isOpen && (
-				<div className="wc-block-components-panel__content">
+			{ isPresent && (
+				<div
+					className="wc-block-components-panel__content"
+					// React 18 has no `inert` prop; an empty string sets the attribute.
+					{ ...( isClosing ? { inert: '' } : {} ) }
+				>
 					{ children }
 				</div>
 			) }

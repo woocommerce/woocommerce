@@ -1,6 +1,8 @@
 /**
  * External dependencies
  */
+import clsx from 'clsx';
+import type { Ref } from 'react';
 import { AddressAutocompleteResult } from '@woocommerce/types';
 import { decodeEntities } from '@wordpress/html-entities';
 import { sanitizeHTML } from '@woocommerce/sanitize';
@@ -67,12 +69,16 @@ export const Suggestions = ( {
 	selectedSuggestion,
 	addressType,
 	onSuggestionClick,
+	containerRef,
+	isClosing = false,
 }: {
 	suggestions: AddressAutocompleteResult[];
 	branding?: string;
 	selectedSuggestion: number;
 	addressType: string;
 	onSuggestionClick: ( suggestionId: string ) => void;
+	containerRef?: Ref< HTMLDivElement >;
+	isClosing?: boolean;
 } ) => {
 	if ( ! suggestions ) {
 		return null;
@@ -82,9 +88,15 @@ export const Suggestions = ( {
 
 	return (
 		<div
-			className="wc-block-components-address-autocomplete-suggestions"
+			ref={ containerRef }
+			className={ clsx(
+				'wc-block-components-address-autocomplete-suggestions',
+				{ 'is-closing': isClosing }
+			) }
 			role="region"
 			aria-live="polite"
+			// React 18 has no `inert` prop; an empty string sets the attribute.
+			{ ...( isClosing ? { inert: '' } : {} ) }
 		>
 			<ul
 				className="suggestions-list"

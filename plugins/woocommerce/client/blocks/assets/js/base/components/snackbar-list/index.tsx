@@ -3,6 +3,7 @@
  */
 import clsx from 'clsx';
 import type { NoticeType } from '@woocommerce/types';
+import { onAnimationsFinished } from '@woocommerce/base-utils';
 import { useReducedMotion } from '@wordpress/compose';
 import { useRef } from '@wordpress/element';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
@@ -66,7 +67,9 @@ const SnackbarList = ( {
 						return (
 							<CSSTransition
 								key={ 'snackbar-' + notice.id }
-								timeout={ 500 }
+								addEndListener={ ( node, done ) => {
+									onAnimationsFinished( node, done );
+								} }
 								classNames="notice-transition"
 							>
 								<Snackbar

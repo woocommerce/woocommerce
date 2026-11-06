@@ -5,7 +5,9 @@
 	justify-content: center;
 	text-align: center;
 	position: relative;
-	transition: box-shadow 0.1s linear;
+	@include motion-safe {
+		transition: box-shadow var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle);
+	}
 
 	&:focus {
 		box-shadow: 0 0 0 2px $studio-blue;
@@ -79,6 +81,28 @@ body:not(.woocommerce-block-theme-has-button-styles)
 
 		&:hover:not(:disabled):not([aria-disabled="true"]) {
 			opacity: 0.9;
+		}
+	}
+}
+
+// Press feedback, limited to the Cart, Checkout, and Mini-Cart blocks.
+.wp-block-woocommerce-cart,
+.wp-block-woocommerce-checkout,
+.wc-block-mini-cart__drawer {
+	.wc-block-components-button:not(.is-link) {
+		// This replaces any `transition` the theme sets on buttons, so colours fade here too: themes such as
+		// Kadence fade a button's colours on hover.
+		@include motion-safe {
+			transition:
+				transform var(--wpds-motion-duration-sm) var(--wpds-motion-easing-expressive),
+				box-shadow var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle),
+				background-color var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle),
+				border-color var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle),
+				color var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle);
+		}
+
+		&:active:not(:disabled):not([aria-disabled="true"]) {
+			transform: scale(var(--wc-scale-press));
 		}
 	}
 }

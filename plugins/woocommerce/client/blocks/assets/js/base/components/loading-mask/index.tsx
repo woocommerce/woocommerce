@@ -33,7 +33,7 @@ const LoadingMask = ( {
 		>
 			{ isLoading && showSpinner && <Spinner /> }
 			<div
-				className={ clsx( {
+				className={ clsx( 'wc-block-components-loading-mask__content', {
 					'wc-block-components-loading-mask__children': isLoading,
 				} ) }
 				aria-hidden={ isLoading }

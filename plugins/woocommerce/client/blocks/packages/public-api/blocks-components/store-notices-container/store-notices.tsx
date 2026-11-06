@@ -93,7 +93,11 @@ const StoreNotices = ( {
 
 		if ( newErrorIds.length && containerRef?.scrollIntoView ) {
 			containerRef.scrollIntoView( {
-				behavior: 'smooth',
+				behavior: window.matchMedia?.(
+					'(prefers-reduced-motion: reduce)'
+				)?.matches
+					? 'instant'
+					: 'smooth',
 			} );
 		}
 	}, [ errorIds, previousErrorIds, ref ] );

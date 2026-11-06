@@ -1,5 +1,3 @@
-$drawer-animation-duration: 0.3s;
-
 @keyframes fadein {
 	from {
 		opacity: 0;
@@ -37,21 +35,26 @@ $drawer-animation-duration: 0.3s;
 	position: fixed;
 	right: 0;
 	top: 0;
-	transition: opacity $drawer-animation-duration;
 	z-index: 9999;
 	opacity: 1;
+	@include motion-safe {
+		transition: opacity motion-exit(lg) var(--wpds-motion-easing-expressive);
+	}
 }
 
 .wc-block-components-drawer__screen-overlay--with-slide-out {
-	transition: opacity $drawer-animation-duration;
+	@include motion-safe {
+		transition: opacity motion-exit(lg) var(--wpds-motion-easing-expressive);
+	}
 }
 
 // We can't use transition for the slide-in animation because the element
 // doesn't exist in the DOM when not open. Instead, use an animation that
 // is triggered when the element is appended to the DOM.
 .wc-block-components-drawer__screen-overlay--with-slide-in {
-	animation-duration: $drawer-animation-duration;
-	animation-name: fadein;
+	@include motion-safe {
+		animation: fadein var(--wpds-motion-duration-lg) var(--wpds-motion-easing-expressive);
+	}
 }
 
 .wc-block-components-drawer__screen-overlay--is-hidden {
@@ -77,34 +80,28 @@ $drawer-animation-duration: 0.3s;
 
 .wc-block-components-drawer__screen-overlay--with-slide-out
 	.wc-block-components-drawer {
-	transition: transform $drawer-animation-duration;
+	@include motion-safe {
+		transition: transform motion-exit(lg) var(--wpds-motion-easing-expressive);
+	}
 }
 
 .wc-block-components-drawer__screen-overlay--with-slide-in
 	.wc-block-components-drawer {
-	animation-duration: $drawer-animation-duration;
-	animation-name: slidein;
+	@include motion-safe {
+		animation: slidein var(--wpds-motion-duration-lg) var(--wpds-motion-easing-expressive);
+	}
 }
 
 .wc-block-components-drawer__screen-overlay--with-slide-in
 	.wc-block-components-drawer:dir(rtl) {
-	animation-name: rtlslidein;
+	@include motion-safe {
+		animation-name: rtlslidein;
+	}
 }
 
 .wc-block-components-drawer__screen-overlay--is-hidden
 	.wc-block-components-drawer {
 	transform: translateX(0);
-}
-
-@media screen and (prefers-reduced-motion: reduce) {
-	.wc-block-components-drawer__screen-overlay {
-		animation-name: none !important;
-		transition: none !important;
-	}
-	.wc-block-components-drawer {
-		animation-name: none !important;
-		transition: none !important;
-	}
 }
 
 // Important rules are needed to reset button styles.
