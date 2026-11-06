@@ -1181,6 +1181,69 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
+	 * Visible variations that match the attributes, in menu order.
+	 *
+	 * Each variation is more specific than the previous one. An empty stored
+	 * attribute accepts any posted value. Out-of-stock variations are skipped
+	 * when the catalog hides them. Every returned ID matches these attributes.
+	 *
+	 * @param WC_Product $parent_product   Parent variable product.
+	 * @param array      $match_attributes Attributes keyed by attribute_*.
+	 * @return int[] Matching variation IDs.
+	 */
+	private function find_visible_matching_variations( $parent_product, $match_attributes ) {
+		$child_ids = $parent_product->get_children();
+
+		if ( ! empty( $child_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $child_ids );
+		}
+
+		$hide_out_of_stock_items = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' );
+		$matched_variation_ids   = array();
+		$matched_specificity     = -1;
+
+		foreach ( $child_ids as $child_id ) {
+			$variation = wc_get_product( $child_id );
+
+			if ( ! $variation instanceof WC_Product_Variation || ! $variation->variation_is_visible() ) {
+				continue;
+			}
+
+			// The product form omits these variations, so they must not claim the posted attributes.
+			if ( $hide_out_of_stock_items && ! $variation->is_in_stock() ) {
+				continue;
+			}
+
+			$matches     = true;
+			$specificity = 0;
+
+			foreach ( $variation->get_variation_attributes() as $attribute_key => $attribute_value ) {
+				// An empty stored value means this variation accepts any posted value.
+				if ( '' === $attribute_value ) {
+					continue;
+				}
+
+				++$specificity;
+
+				if ( ! array_key_exists( $attribute_key, $match_attributes ) || $match_attributes[ $attribute_key ] !== $attribute_value ) {
+					$matches = false;
+					break;
+				}
+			}
+
+			if ( ! $matches || $specificity <= $matched_specificity ) {
+				continue;
+			}
+
+			$matched_variation_ids[] = $variation->get_id();
+			$matched_specificity     = $specificity;
+		}
+
+		return $matched_variation_ids;
+	}
+
+	/**
 	 * Add a product to the cart.
 	 *
 	 * @throws Exception Plugins can throw an exception to prevent adding to cart.
@@ -1271,8 +1334,15 @@ class WC_Cart extends WC_Legacy_Cart {
 
 				// If no variation ID is set, attempt to get a variation ID from posted attributes.
 				if ( empty( $variation_id ) ) {
-					$data_store   = WC_Data_Store::load( 'product' );
+					$data_store = WC_Data_Store::load( 'product' );
+					// @phpstan-ignore-next-line method.notFound Called via __call() on the underlying product data store instance.
 					$variation_id = $data_store->find_matching_product_variation( $parent_data, $posted_attributes );
+				} elseif ( ! empty( $posted_attributes ) ) {
+					$matched_variation_ids = $this->find_visible_matching_variations( $parent_data, $posted_and_variation_attributes );
+
+					if ( ! empty( $matched_variation_ids ) && ! in_array( (int) $variation_id, $matched_variation_ids, true ) ) {
+						throw new Exception( __( 'The selected options belong to a different variation of this product.', 'woocommerce' ) );
+					}
 				}
 
 				// Do we have a variation ID?

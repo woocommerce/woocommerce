@@ -1138,12 +1138,12 @@ class CartController {
 	 * @throws RouteException Exception if invalid data is detected.
 	 *
 	 * @param array $request Add to cart request params.
-	 * @return \WC_Product|Error Returns a product object if purchasable.
+	 * @return \WC_Product Returns a product object if purchasable.
 	 */
 	protected function get_product_for_cart( $request ) {
 		$product = wc_get_product( $request['id'] );
 
-		if ( ! $product || ProductStatus::TRASH === $product->get_status() ) {
+		if ( ! $product instanceof \WC_Product || ProductStatus::TRASH === $product->get_status() ) {
 			throw new RouteException(
 				'woocommerce_rest_cart_invalid_product',
 				sprintf(
@@ -1277,6 +1277,69 @@ class CartController {
 	}
 
 	/**
+	 * Visible variations that match the attributes, in menu order.
+	 *
+	 * Each variation is more specific than the previous one. An empty stored
+	 * attribute accepts any posted value. Out-of-stock variations are skipped
+	 * when the catalog hides them. Every returned ID matches these attributes.
+	 *
+	 * @param \WC_Product $parent_product   Parent variable product.
+	 * @param array       $match_attributes Attributes keyed by attribute_*.
+	 * @return int[] Matching variation IDs.
+	 */
+	private function find_visible_matching_variations( $parent_product, $match_attributes ) {
+		$child_ids = $parent_product->get_children();
+
+		if ( ! empty( $child_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $child_ids );
+		}
+
+		$hide_out_of_stock_items = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' );
+		$matched_variation_ids   = [];
+		$matched_specificity     = -1;
+
+		foreach ( $child_ids as $child_id ) {
+			$variation = wc_get_product( $child_id );
+
+			if ( ! $variation instanceof \WC_Product_Variation || ! $variation->variation_is_visible() ) {
+				continue;
+			}
+
+			// The product form omits these variations, so they must not claim the posted attributes.
+			if ( $hide_out_of_stock_items && ! $variation->is_in_stock() ) {
+				continue;
+			}
+
+			$matches     = true;
+			$specificity = 0;
+
+			foreach ( $variation->get_variation_attributes() as $attribute_key => $attribute_value ) {
+				// An empty stored value means this variation accepts any posted value.
+				if ( '' === $attribute_value ) {
+					continue;
+				}
+
+				++$specificity;
+
+				if ( ! array_key_exists( $attribute_key, $match_attributes ) || $match_attributes[ $attribute_key ] !== $attribute_value ) {
+					$matches = false;
+					break;
+				}
+			}
+
+			if ( ! $matches || $specificity <= $matched_specificity ) {
+				continue;
+			}
+
+			$matched_variation_ids[] = $variation->get_id();
+			$matched_specificity     = $specificity;
+		}
+
+		return $matched_variation_ids;
+	}
+
+	/**
 	 * If variations are set, validate and format the values ready to add to the cart.
 	 *
 	 * @throws RouteException Exception if invalid data is detected.
@@ -1300,6 +1363,34 @@ class CartController {
 		// If we have a parent product, find the variation ID.
 		if ( $product->is_type( ProductType::VARIABLE ) ) {
 			$request['id'] = $this->get_variation_id_from_variation_data( $request, $product );
+		}
+
+		// A variation can be added by ID alone. Posted attributes are checked only when the request includes them.
+		if ( $product->is_type( ProductType::VARIATION ) && ! empty( $request['variation'] ) ) {
+			$parent_product = wc_get_product( $product->get_parent_id() );
+
+			if ( ! $parent_product instanceof \WC_Product ) {
+				throw new RouteException(
+					'woocommerce_rest_cart_invalid_product',
+					esc_html__( 'Cart item is invalid.', 'woocommerce' ),
+					400
+				);
+			}
+
+			// Keep attributes the request left out, so a partial selection is matched as this variation plus those posted values.
+			$match_attributes      = array_merge(
+				array_filter( wc_get_product_variation_attributes( $request['id'] ), 'wc_array_filter_default_attributes' ),
+				$request['variation']
+			);
+			$matched_variation_ids = $this->find_visible_matching_variations( $parent_product, $match_attributes );
+
+			if ( ! empty( $matched_variation_ids ) && ! in_array( (int) $request['id'], $matched_variation_ids, true ) ) {
+				throw new RouteException(
+					'woocommerce_rest_invalid_variation_data',
+					esc_html__( 'The selected options belong to a different variation of this product.', 'woocommerce' ),
+					400
+				);
+			}
 		}
 
 		// Now we have a variation ID, get the valid set of attributes for this variation. They will have an attribute_ prefix since they are from meta.

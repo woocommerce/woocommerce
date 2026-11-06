@@ -8,6 +8,7 @@
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 
 /**
@@ -860,7 +861,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$product   = new WC_Product_Variable();
 		$attribute = new WC_Product_Attribute();
 		$attribute->set_name( 'Finish' );
-		$attribute->set_options( array( 'Black%20White', 'Gloss' ) );
+		$attribute->set_options( array( 'Black%20White', 'Blue%20Green' ) );
 		$attribute->set_visible( true );
 		$attribute->set_variation( true );
 		$product->set_name( 'Percent Escape Product' );
@@ -886,10 +887,10 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$any_variation->set_regular_price( '10' );
 		$any_variation->save();
 
-		$any_cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $any_variation->get_id(), array( 'attribute_finish' => 'Black%20White' ) );
+		$any_cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $any_variation->get_id(), array( 'attribute_finish' => 'Blue%20Green' ) );
 
 		$this->assertNotFalse( $any_cart_item_key, 'A posted value for an Any attribute must validate against the configured options.' );
-		$this->assertSame( 'Black%20White', WC()->cart->get_cart_item( $any_cart_item_key )['variation']['attribute_finish'], 'The percent escape must survive sanitization on the Any path too.' );
+		$this->assertSame( 'Blue%20Green', WC()->cart->get_cart_item( $any_cart_item_key )['variation']['attribute_finish'], 'The percent escape must survive sanitization on the Any path too.' );
 	}
 
 	/**
@@ -3062,5 +3063,190 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			$skipped_child->delete( true );
 			$first_child->delete( true );
 		}
+	}
+
+	/**
+	 * @testdox Add to cart accepts any variation in the increasing-specificity list, and rejects a broader variation ordered after a closer match.
+	 */
+	public function test_add_to_cart_accepts_any_variation_in_the_specificity_list(): void {
+		$product = new WC_Product_Variable();
+		$color   = new WC_Product_Attribute();
+		$color->set_name( 'Color' );
+		$color->set_options( array( 'Red', 'Blue' ) );
+		$color->set_variation( true );
+		$size = new WC_Product_Attribute();
+		$size->set_name( 'Size' );
+		$size->set_options( array( 'Large' ) );
+		$size->set_variation( true );
+		$product->set_attributes( array( $color, $size ) );
+		$product->save();
+
+		// Red/any size is first. Blue/Large has no price. Any is last.
+		$red_any_size = new WC_Product_Variation();
+		$red_any_size->set_parent_id( $product->get_id() );
+		$red_any_size->set_attributes(
+			array(
+				'color' => 'Red',
+				'size'  => '',
+			)
+		);
+		$red_any_size->set_regular_price( '5' );
+		$red_any_size->set_menu_order( 0 );
+		$red_any_size->save();
+
+		$blue_large = new WC_Product_Variation();
+		$blue_large->set_parent_id( $product->get_id() );
+		$blue_large->set_attributes(
+			array(
+				'color' => 'Blue',
+				'size'  => 'Large',
+			)
+		);
+		$blue_large->set_menu_order( 1 );
+		$blue_large->save();
+
+		$red_large = new WC_Product_Variation();
+		$red_large->set_parent_id( $product->get_id() );
+		$red_large->set_attributes(
+			array(
+				'color' => 'Red',
+				'size'  => 'Large',
+			)
+		);
+		$red_large->set_regular_price( '8' );
+		$red_large->set_menu_order( 2 );
+		$red_large->save();
+
+		$any = new WC_Product_Variation();
+		$any->set_parent_id( $product->get_id() );
+		$any->set_attributes(
+			array(
+				'color' => '',
+				'size'  => '',
+			)
+		);
+		$any->set_regular_price( '10' );
+		$any->set_menu_order( 3 );
+		$any->save();
+
+		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $red_large->get_id() );
+
+		$this->assertNotFalse( $cart_item_key, 'The variation should be added when no attributes are posted.' );
+
+		$cart_item = WC()->cart->get_cart_item( (string) $cart_item_key );
+
+		$this->assertSame( $red_large->get_id(), $cart_item['variation_id'], 'The requested variation should be added.' );
+		$this->assertSame( 'Red', $cart_item['variation']['attribute_color'], 'The variation color should be kept.' );
+		$this->assertSame( 'Large', $cart_item['variation']['attribute_size'], 'The variation size should be kept.' );
+
+		$red_large_key = WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$red_large->get_id(),
+			array(
+				'attribute_color' => 'Red',
+				'attribute_size'  => 'Large',
+			)
+		);
+
+		$this->assertNotFalse( $red_large_key, 'The specific variation should be added when a broader variation is ordered first.' );
+		$this->assertSame( $red_large->get_id(), WC()->cart->get_cart_item( (string) $red_large_key )['variation_id'] );
+
+		$any_cart_item_key = WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$any->get_id(),
+			array(
+				'attribute_color' => 'Blue',
+				'attribute_size'  => 'Large',
+			)
+		);
+
+		$this->assertNotFalse( $any_cart_item_key, 'An Any variation should accept a value that only an unpriced variation defines.' );
+
+		$any_cart_item = WC()->cart->get_cart_item( (string) $any_cart_item_key );
+
+		$this->assertSame( $any->get_id(), $any_cart_item['variation_id'] );
+		$this->assertSame( 'Blue', $any_cart_item['variation']['attribute_color'], 'The posted Any color should be kept.' );
+		$this->assertSame( 'Large', $any_cart_item['variation']['attribute_size'], 'The posted Any size should be kept.' );
+
+		$broader_key = WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$red_any_size->get_id(),
+			array(
+				'attribute_color' => 'Red',
+				'attribute_size'  => 'Large',
+			)
+		);
+
+		$this->assertNotFalse( $broader_key, 'A broader variation ordered before a closer match should accept those attributes.' );
+
+		$broader_item = WC()->cart->get_cart_item( (string) $broader_key );
+
+		$this->assertSame( $red_any_size->get_id(), $broader_item['variation_id'], 'The requested broader variation should be added.' );
+		$this->assertSame( 'Red', $broader_item['variation']['attribute_color'], 'The posted color should be kept.' );
+		$this->assertSame( 'Large', $broader_item['variation']['attribute_size'], 'The posted size should be kept.' );
+
+		wc_clear_notices();
+
+		$any_added = WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$any->get_id(),
+			array(
+				'attribute_color' => 'Red',
+				'attribute_size'  => 'Large',
+			)
+		);
+
+		$this->assertFalse( $any_added, 'A broader variation ordered after a closer match should be rejected.' );
+		$this->assertSame( 'The selected options belong to a different variation of this product.', wc_get_notices( 'error' )[0]['notice'] );
+	}
+
+	/**
+	 * @testdox Add to cart accepts an Any variation when an earlier match is hidden because it is out of stock.
+	 */
+	public function test_add_to_cart_accepts_any_variation_when_earlier_match_is_out_of_stock(): void {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+
+		$product = new WC_Product_Variable();
+		$color   = new WC_Product_Attribute();
+		$color->set_name( 'Color' );
+		$color->set_options( array( 'Red', 'Blue' ) );
+		$color->set_variation( true );
+		$product->set_attributes( array( $color ) );
+		$product->save();
+
+		$red = new WC_Product_Variation();
+		$red->set_parent_id( $product->get_id() );
+		$red->set_attributes( array( 'color' => 'Red' ) );
+		$red->set_regular_price( '10' );
+		$red->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$red->set_menu_order( 0 );
+		$red->save();
+
+		$any = new WC_Product_Variation();
+		$any->set_parent_id( $product->get_id() );
+		$any->set_attributes( array( 'color' => '' ) );
+		$any->set_regular_price( '5' );
+		$any->set_menu_order( 1 );
+		$any->save();
+
+		$cart_item_key = WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$any->get_id(),
+			array(
+				'attribute_color' => 'Red',
+			)
+		);
+
+		$this->assertNotFalse( $cart_item_key, 'An Any variation should be added when the closer match is hidden as out of stock.' );
+
+		$cart_item = WC()->cart->get_cart_item( (string) $cart_item_key );
+
+		$this->assertSame( $any->get_id(), $cart_item['variation_id'], 'The in-stock Any variation should be added.' );
+		$this->assertSame( 'Red', $cart_item['variation']['attribute_color'], 'The posted color should be kept.' );
 	}
 }
