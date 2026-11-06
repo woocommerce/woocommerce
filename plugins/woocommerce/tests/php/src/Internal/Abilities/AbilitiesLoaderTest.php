@@ -4216,13 +4216,16 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$order->save();
 		$ability = wp_get_ability( 'woocommerce/order-update' );
 
-		$ability->execute(
+		$result = $ability->execute(
 			array(
 				'id'       => $order->get_id(),
 				'shipping' => array( 'city' => 'London' ),
 			)
 		);
-		$kept = wc_get_order( $order->get_id() )->get_shipping_postcode();
+		$this->assertNotWPError( $result );
+		$saved = wc_get_order( $order->get_id() );
+		$kept  = $saved->get_shipping_postcode();
+		$this->assertSame( 'London', $saved->get_shipping_city() );
 		$ability->execute(
 			array(
 				'id'       => $order->get_id(),
