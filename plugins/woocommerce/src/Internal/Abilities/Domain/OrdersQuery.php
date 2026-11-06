@@ -172,18 +172,30 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			$args['exclude'] = array_merge( (array) ( $args['exclude'] ?? array() ), $extension_args['post__not_in'] );
 			unset( $extension_args['post__not_in'] );
 		}
+
+		$hpos = OrderUtil::custom_orders_table_usage_is_enabled();
+
 		// Both stores merge extension args recursively, which would add the extension IDs to include instead of intersecting them.
 		$include = empty( $input['include'] ) ? null : $input['include'];
 		if ( isset( $extension_args['post__in'] ) ) {
 			$include = null === $include ? $extension_args['post__in'] : array_intersect( $include, $extension_args['post__in'] );
 			unset( $extension_args['post__in'] );
 		}
+		if ( ! empty( $input['search'] ) ) {
+			if ( $hpos ) {
+				$args['s'] = $input['search'];
+			} else {
+				// Posts storage matches `s` against post title and content only, which orders leave empty.
+				$matches = wc_order_search( $input['search'] );
+				$include = null === $include ? $matches : array_intersect( $include, $matches );
+			}
+		}
 		if ( null !== $include ) {
 			$include          = array_values( array_diff( $include, (array) ( $args['exclude'] ?? array() ) ) );
 			$args['post__in'] = empty( $include ) ? array( 0 ) : $include;
 		}
 
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+		if ( $hpos ) {
 			$args = array_merge_recursive( $args, $extension_args );
 		} else {
 			$args[ AbilitiesLoader::EXTENSION_QUERY_VAR ] = $extension_args;
@@ -279,6 +291,11 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 				'billing_email'      => array(
 					'type'   => 'string',
 					'format' => 'email',
+				),
+				'search'             => array(
+					'type'        => 'string',
+					'description' => __( 'Find orders whose billing or shipping details (name, email, phone, address) or item names (products, shipping methods, fees, coupons) contain this text. A short term such as "Free" can match many orders, so add customer_id or other filters to narrow the results.', 'woocommerce' ),
+					'pattern'     => '\S',
 				),
 				'parent'             => array(
 					'type'        => 'integer',
