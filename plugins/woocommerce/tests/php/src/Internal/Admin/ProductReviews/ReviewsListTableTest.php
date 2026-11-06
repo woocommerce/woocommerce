@@ -516,6 +516,7 @@ class ReviewsListTableTest extends WC_Unit_Test_Case {
 			'4 stars'                 => array( '4', '<span aria-label="4 out of 5">&#9733;&#9733;&#9733;&#9733;&#9734;</span>' ),
 			'5 stars'                 => array( '5', '<span aria-label="5 out of 5">&#9733;&#9733;&#9733;&#9733;&#9733;</span>' ),
 			'2.5 stars (rounds down)' => array( '2.5', '<span aria-label="2 out of 5">&#9733;&#9733;&#9734;&#9734;&#9734;</span>' ),
+			'negative rating'         => array( '-1', '<span aria-label="0 out of 5">&#9734;&#9734;&#9734;&#9734;&#9734;</span>' ),
 		);
 	}
 
