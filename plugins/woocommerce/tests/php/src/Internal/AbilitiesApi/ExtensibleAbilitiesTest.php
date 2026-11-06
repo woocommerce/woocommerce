@@ -226,11 +226,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 * @return array<string, mixed>
 	 */
 	private static function nullable( array $schema ): array {
-		$schema['type'] = array( $schema['type'], 'null' );
-		if ( isset( $schema['enum'] ) ) {
-			$schema['enum'][] = null;
-		}
-		return $schema;
+		$top = array_intersect_key( $schema, array( 'description' => true ) );
+		return $top + array( 'anyOf' => array( array_diff_key( $schema, $top ), array( 'type' => 'null' ) ) );
 	}
 
 	/**
@@ -1066,7 +1063,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$resources = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
 		$resources->setAccessible( true );
-		$this->assertSame( array( 'product', 'order', 'order_item', 'product_term' ), array_keys( $resources->getValue() ) );
+		$this->assertSame( array( 'product', 'order', 'order_item', 'product_term', 'product_review' ), array_keys( $resources->getValue() ) );
 	}
 
 	/**
@@ -1298,14 +1295,216 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Schemas without a type, for a field input and for a query filter.
+	 * Schemas without a type, or with an anyOf branch without one type name, for a field input and for a query filter.
 	 *
 	 * @return array<string, array{0: array<string, mixed>}>
 	 */
 	public function provider_malformed_schemas(): array {
 		return array(
-			'no type'            => array( array( 'description' => 'x' ) ),
-			'anyOf without type' => array( array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ),
+			'no type'                => array( array( 'description' => 'x' ) ),
+			'empty anyOf'            => array( array( 'anyOf' => array() ) ),
+			'anyOf branch type list' => array( array( 'anyOf' => array( array( 'type' => array( 'string', 'null' ) ), array( 'type' => 'integer' ) ) ) ),
+			'anyOf branch no type'   => array( array( 'anyOf' => array( array( 'type' => 'string' ), array( 'enum' => array( 'a' ) ) ) ) ),
+			'anyOf branch bad type'  => array( array( 'anyOf' => array( array( 'type' => 'integre' ), array( 'type' => 'null' ) ) ) ),
+			'anyOf with named keys'  => array(
+				array(
+					'anyOf' => array(
+						'a' => array( 'type' => 'string' ),
+						'b' => array( 'type' => 'null' ),
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * @testdox Should refuse a field whose input schema has a list of types or an unknown type at the top level.
+	 * @testWith [["string", "null"]]
+	 *           ["integre"]
+	 *
+	 * @param mixed $type Top-level type of the input schema.
+	 */
+	public function test_a_top_level_type_list_in_an_input_schema_is_refused( $type ): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		AbilitiesLoader::register_core_resources();
+
+		ExtensibleAbilities::register_field(
+			array(
+				'resource'      => 'order',
+				'namespace'     => 'refused',
+				'field'         => 'value',
+				'output_schema' => array( 'type' => 'string' ),
+				'get_callback'  => '__return_null',
+				'input_schema'  => array( 'type' => $type ),
+				'set_callback'  => '__return_null',
+			)
+		);
+
+		$this->assertArrayNotHasKey( 'refused', ExtensibleAbilities::get_fields( 'order' ) );
+	}
+
+	/**
+	 * @testdox Should keep the WordPress message for an anyOf under a top-level type whose branches do not each have their own type name.
+	 * @testWith [[{"enum":["small"]},{"enum":["large"]}]]
+	 *           [[{"type":["integer","null"]},{"type":"null"}]]
+	 *           [[{"type":"string","enum":["small"]},{"type":"string","pattern":"^x"}]]
+	 *
+	 * @param array $any_of The anyOf branches.
+	 */
+	public function test_an_any_of_branch_without_a_type_keeps_the_wordpress_message( array $any_of ): void {
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $any_of ) {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'product',
+						'namespace'    => 'untyped',
+						'field'        => 'size',
+						'input_schema' => array(
+							'type'  => 'string',
+							'anyOf' => $any_of,
+						),
+						'set_callback' => '__return_null',
+					)
+				);
+			}
+		);
+		$this->reset_registries();
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$refused = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'untyped' => array( 'size' => 'huge' ) ),
+			)
+		);
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'extensions.untyped.size does not match any of the expected formats.', $refused->get_data()['message'] );
+	}
+
+	/**
+	 * @testdox Should name each anyOf type once when several branches share a type and the value matches none.
+	 */
+	public function test_an_any_of_type_mismatch_names_each_type_once(): void {
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'product',
+						'namespace'    => 'shared',
+						'field'        => 'size',
+						'input_schema' => array(
+							'anyOf' => array(
+								array(
+									'type' => 'string',
+									'enum' => array( 'small' ),
+								),
+								array(
+									'type'    => 'string',
+									'pattern' => '^x',
+								),
+								array( 'type' => 'null' ),
+							),
+						),
+						'set_callback' => '__return_null',
+					)
+				);
+			}
+		);
+		$this->reset_registries();
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$refused = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'shared' => array( 'size' => 7 ) ),
+			)
+		);
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'extensions.shared.size is not of type string,null.', $refused->get_data()['message'] );
+	}
+
+	/**
+	 * @testdox Should register a field whose input schema is an anyOf of single types, publish it as declared and pass null or a typed value to the set_callback.
+	 */
+	public function test_an_any_of_input_schema_takes_null_and_a_typed_value(): void {
+		$input_schema = array(
+			'description' => 'Days of the trial.',
+			'anyOf'       => array( array( 'type' => 'integer' ), array( 'type' => 'null' ) ),
+		);
+		$received     = array();
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $input_schema, &$received ) {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'product',
+						'namespace'    => 'nullable',
+						'field'        => 'days',
+						'input_schema' => $input_schema,
+						'set_callback' => static function ( \WC_Data $data, $value ) use ( &$received ) {
+							unset( $data );
+							$received[] = $value;
+						},
+					)
+				);
+			}
+		);
+		$this->reset_registries();
+		$product = \WC_Helper_Product::create_simple_product();
+		$write   = fn( $value ) => $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'nullable' => array( 'days' => $value ) ),
+			)
+		);
+
+		$published = $this->get_ability( 'woocommerce/product-update' )['input_schema']['properties']['extensions']['properties']['nullable']['properties']['days'];
+		$this->assertSame( $input_schema, $published );
+		$this->assertSame( 200, $write( 7 )->get_status() );
+		$this->assertSame( 200, $write( null )->get_status() );
+		$refused = $write( 'many' );
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertStringContainsString( 'extensions.nullable.days', $refused->get_data()['message'] );
+		$this->assertSame( array( 7, null ), $received );
+
+		$received = array();
+		$result   = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'nullable' => array( 'days' => '8' ) ),
+			)
+		);
+		$this->assertNotWPError( $result );
+		$this->assertSame( array( 8 ), $received, 'A direct call gets the value cast to the integer branch.' );
+	}
+
+	/**
+	 * @testdox Should refuse a query filter schema that has an anyOf and no top-level type.
+	 */
+	public function test_a_query_filter_schema_needs_a_type_even_with_an_any_of(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_query_filter' );
+		AbilitiesLoader::register_core_resources();
+
+		ExtensibleAbilities::register_query_filter(
+			array(
+				'resource'  => 'order',
+				'namespace' => 'refused',
+				'filter'    => 'value',
+				'schema'    => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ),
+				'callback'  => '__return_empty_array',
+			)
+		);
+
+		$this->assertSame(
+			array( 'type' => 'object' ),
+			ExtensibleAbilities::add_query_filters_schema( array( 'type' => 'object' ), 'order' )
 		);
 	}
 
@@ -1314,14 +1513,19 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	public function test_valid_schemas_are_published_as_declared(): void {
 		$input_schemas = array(
-			'type_list'   => array( 'type' => array( 'string', 'null' ) ),
+			'nullable'    => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ),
 			'any_of'      => array(
 				'type'       => 'object',
 				'properties' => array( 'a' => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ),
 			),
 			'enum_null'   => array(
-				'type' => array( 'string', 'null' ),
-				'enum' => array( 'a', null ),
+				'anyOf' => array(
+					array(
+						'type' => 'string',
+						'enum' => array( 'a' ),
+					),
+					array( 'type' => 'null' ),
+				),
 			),
 			'enum_mixed'  => array(
 				'type' => 'string',
@@ -2200,7 +2404,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 *           [{"nope":{}}, "No extension registered the namespace \"nope\" for this ability. Remove it from the input, or use a namespace from the input schema."]
 	 *           [{"other_ext":{"cuont":3}}, "The extension namespace \"other_ext\" has no field \"cuont\". The fields you can write in this namespace are: count, size. Use one of them, or remove \"other_ext.cuont\" from the input."]
 	 *           [{"test-ext":{"code":"A2"}}, "The extension field \"test-ext.code\" is read-only. Remove it from the input."]
-	 *           [{"other_ext":{"size":"huge"}}, "extensions.other_ext.size is not one of small, large, and null."]
+	 *           [{"other_ext":{"size":"huge"}}, "extensions.other_ext.size does not match the expected format. Reason: extensions.other_ext.size is not one of small and large."]
 	 *
 	 * @param array  $extensions Value of the `extensions` input.
 	 * @param string $message    Expected error message.
@@ -2321,7 +2525,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$result = wp_get_ability( $ability )->execute( $input );
 
 		$this->assertSame(
-			'extensions.other_ext.size is not one of small, large, and null. variations[0]: extensions.other_ext.count is not of type integer,null. variations[1]: No extension registered the namespace "nope" for this ability. Remove it from the input, or use a namespace from the input schema.',
+			'extensions.other_ext.size does not match the expected format. Reason: extensions.other_ext.size is not one of small and large. variations[0]: extensions.other_ext.count is not of type integer,null. variations[1]: No extension registered the namespace "nope" for this ability. Remove it from the input, or use a namespace from the input schema.',
 			$result->get_error_message()
 		);
 		$this->assertSame( 0, $validated );
@@ -2754,7 +2958,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 400, $refused->get_status() );
 		$this->assertStringEndsWith( 'test_keep', $refused->get_data()['code'] );
 		$this->assertInstanceOf( \WC_Product::class, wc_get_product( $kept->get_id() ) );
-		$this->assertTrue( $deleted['deleted'] );
+		$this->assertSame( 'deleted', $deleted['status'] );
 		$this->assertFalse( wc_get_product( $created['product']['id'] ) );
 		$this->assertNull( get_post( $created['product']['variation_ids'][0] ), 'The variations go with the parent.' );
 	}
@@ -2876,7 +3080,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 400, $refused->get_status() );
 		$this->assertSame( 'Keep it.', $refused->get_data()['message'] );
 		$this->assertInstanceOf( \WC_Product_Variable::class, $after );
-		$this->assertTrue( $deleted['deleted'] );
+		$this->assertSame( 'deleted', $deleted['status'] );
 		foreach ( $created['product']['variation_ids'] as $variation_id ) {
 			$this->assertSame( array( 'woocommerce/product-delete', true ), $seen[ $variation_id ] );
 		}
@@ -3276,7 +3480,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( array( 'small', 'large', null ), $schema['enum'] );
+		$this->assertSame( array( 'small', 'large' ), $schema['anyOf'][0]['enum'] );
+		$this->assertSame( array( 'type' => 'null' ), $schema['anyOf'][1] );
 		$this->assertSame( 400, $rejected->get_status() );
 		$this->assertFalse( wc_get_product( $product->get_id() )->meta_exists( '_test_size' ) );
 	}
@@ -3298,7 +3503,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( array( 'string', 'null' ), $schema['properties']['test-ext']['properties']['color']['type'] );
+		$this->assertSame( array( 'string', 'null' ), array_column( $schema['properties']['test-ext']['properties']['color']['anyOf'], 'type' ) );
 		$this->assertArrayNotHasKey( 'code', $schema['properties']['test-ext']['properties'] );
 		$this->assertSame( 'Pencil', wc_get_product( $product->get_id() )->get_name() );
 		$this->assertSame( array( 'color' => 'green' ), $output['extensions']['test-ext'] );
@@ -3349,6 +3554,45 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 500, $response->get_status() );
 		$this->assertSame( 'woocommerce_ability_save_failed', $response->get_data()['code'] );
 		$this->assertStringNotContainsString( 'Storage text.', wp_json_encode( $response->get_data() ) );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * @testdox Should save nothing when change() returns a WP_Error without errors.
+	 */
+	public function test_an_empty_error_from_change_saves_nothing(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$ability = new class(
+			'test-ext/product-rename',
+			array(
+				'label'               => 'Rename product',
+				'description'         => 'Renames a product.',
+				'category'            => 'woocommerce',
+				'output_schema'       => array( 'type' => 'object' ),
+				'permission_callback' => '__return_true',
+			)
+		) extends TestProductRenameAbility {
+			/**
+			 * Rename the product, then refuse with an empty error.
+			 *
+			 * @param \WC_Product $subject Product.
+			 * @param array       $input   Ability input.
+			 * @return \WP_Error
+			 */
+			protected function change( $subject, array $input ) {
+				parent::change( $subject, $input );
+				return new \WP_Error();
+			}
+		};
+
+		$result = $ability->execute_change(
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		);
+
+		$this->assertWPError( $result );
 		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
 	}
 
@@ -3443,14 +3687,14 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$schema     = $this->get_ability( $name )['input_schema'];
 			$extensions = $schema['properties']['extensions']['properties'];
 
-			$this->assertSame( array( 'string', 'null' ), $extensions['test-ext']['properties']['color']['type'] );
-			$this->assertSame( array( 'integer', 'null' ), $extensions['other_ext']['properties']['count']['type'] );
+			$this->assertSame( array( 'string', 'null' ), array_column( $extensions['test-ext']['properties']['color']['anyOf'], 'type' ) );
+			$this->assertSame( array( 'integer', 'null' ), array_column( $extensions['other_ext']['properties']['count']['anyOf'], 'type' ) );
 			$this->assertArrayNotHasKey( 'code', $extensions['test-ext']['properties'] );
 			$this->assertSame( 2, substr_count( wp_json_encode( $schema ), '"color"' ) );
 			$this->assertArrayNotHasKey( 'oneOf', $schema );
 		}
 		$order = $this->get_ability( 'woocommerce/order-update-status' )['input_schema'];
-		$this->assertSame( array( 'string', 'null' ), $order['properties']['extensions']['properties']['test-ext']['properties']['gift_message']['type'] );
+		$this->assertSame( array( 'string', 'null' ), array_column( $order['properties']['extensions']['properties']['test-ext']['properties']['gift_message']['anyOf'], 'type' ) );
 		$delete = $this->get_ability( 'woocommerce/product-delete' )['input_schema'];
 		$this->assertArrayNotHasKey( 'extensions', $delete['properties'], 'A delete writes no extension fields.' );
 	}
@@ -4126,6 +4370,64 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 'test-ext:test_refused', $refused->get_data()['code'] );
 		$this->assertSame( 'Lisbon', $saved->get_shipping_city() );
 		$this->assertSame( 'high', $saved->get_meta( '_test_priority' ) );
+	}
+
+	/**
+	 * @testdox Should show an order validator the saved address fields that Core refuses, and save nothing.
+	 */
+	public function test_an_order_validator_sees_the_saved_values_of_refused_address_fields(): void {
+		$seen = array();
+		$this->register_validator(
+			'order',
+			'test-ext',
+			static function ( \WC_Order $order ) use ( &$seen ) {
+				$seen[] = array( $order->get_shipping_country(), $order->get_shipping_state(), $order->get_shipping_postcode(), $order->get_shipping_city() );
+				return null;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$order = \WC_Helper_Order::create_order();
+		$order->set_shipping_country( 'US' );
+		$order->set_shipping_state( 'CA' );
+		$order->set_shipping_postcode( '94110' );
+		$order->set_shipping_city( 'Before' );
+		$order->save();
+
+		$bad_country  = $this->run_ability_response(
+			'woocommerce/order-update',
+			array(
+				'id'       => $order->get_id(),
+				'shipping' => array(
+					'country'  => 'XX',
+					'state'    => 'ZZ',
+					'postcode' => 'nope',
+					'city'     => 'After',
+				),
+			)
+		);
+		$bad_postcode = $this->run_ability_response(
+			'woocommerce/order-update',
+			array(
+				'id'       => $order->get_id(),
+				'shipping' => array(
+					'postcode' => 'not a zip',
+					'city'     => 'After',
+				),
+			)
+		);
+
+		$this->assertSame( 400, $bad_country->get_status() );
+		$this->assertSame( 400, $bad_postcode->get_status() );
+		$this->assertSame(
+			array(
+				array( 'US', 'CA', '94110', 'After' ),
+				array( 'US', 'CA', '94110', 'After' ),
+			),
+			$seen
+		);
+		wp_cache_flush();
+		$this->assertSame( 'Before', wc_get_order( $order->get_id() )->get_shipping_city() );
 	}
 
 	/**
@@ -4816,7 +5118,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$this->assertSame( 400, $response->get_status() );
 		$this->assertSame( 'first_ext:test_first_refused', $data['code'] );
-		$this->assertSame( 'First refused.', $data['message'] );
+		$this->assertSame( 'First refused. Second refused.', $data['message'] );
 		$this->assertSame( 'first_ext', $data['data']['namespace'] );
 		$this->assertCount( 1, $data['additional_errors'] );
 		$this->assertSame( 'second_ext:test_second_refused', $data['additional_errors'][0]['code'] );
@@ -4850,7 +5152,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		)->get_data();
 
 		$this->assertSame( 'first_ext:test_refused', $data['code'] );
-		$this->assertSame( 'first_ext refused.', $data['message'] );
+		$this->assertSame( 'first_ext refused. second_ext refused.', $data['message'] );
 		$this->assertSame( 'first_ext', $data['data']['namespace'] );
 		$this->assertCount( 1, $data['additional_errors'] );
 		$this->assertSame( 'second_ext:test_refused', $data['additional_errors'][0]['code'] );
@@ -4883,7 +5185,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		)->get_data();
 
 		$this->assertSame( 'ns:test_refused', $data['code'] );
-		$this->assertSame( 'name refused.', $data['message'] );
+		$this->assertSame( 'name refused. price refused.', $data['message'] );
 		$this->assertSame( 'name', $data['data']['field'] );
 		$this->assertCount( 1, $data['additional_errors'] );
 		$this->assertSame( 'ns:test_refused:2', $data['additional_errors'][0]['code'] );
@@ -5118,6 +5420,62 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 'test-ext:test_bad_value:2', $data['additional_errors'][0]['code'] );
 		$this->assertSame( 'extensions.test-ext.second', $data['additional_errors'][0]['data']['field'] );
 		$this->assertSame( 'other_ext:test_bad_size', $data['additional_errors'][1]['code'] );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * @testdox Should return every Core refusal with the field and validator refusals in one message, and save nothing.
+	 */
+	public function test_core_refusals_come_with_field_and_validator_refusals(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		\WC_Helper_Product::create_simple_product( true, array( 'sku' => 'TAKEN' ) );
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'product',
+						'namespace'     => 'test-ext',
+						'field'         => 'note',
+						'output_schema' => array( 'type' => 'string' ),
+						'input_schema'  => array( 'type' => 'string' ),
+						'get_callback'  => '__return_null',
+						'set_callback'  => static fn() => new \WP_Error( 'test_bad_note', 'Note refused.' ),
+					)
+				);
+			}
+		);
+		$seen_name = null;
+		$this->register_validator(
+			'product',
+			'other_ext',
+			static function ( \WC_Product $subject ) use ( &$seen_name ) {
+				$seen_name = $subject->get_name();
+				return new \WP_Error( 'test_refused', 'Validator refused.' );
+			}
+		);
+
+		$response = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'           => $product->get_id(),
+				'name'         => 'Pencil',
+				'sku'          => 'TAKEN',
+				'external_url' => 'https://example.com',
+				'extensions'   => array( 'test-ext' => array( 'note' => 'x' ) ),
+			)
+		);
+
+		$data = $response->get_data();
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame(
+			array( 'woocommerce_product_field_unsupported', 'product_invalid_sku', 'test-ext:test_bad_note', 'other_ext:test_refused' ),
+			array_merge( array( $data['code'] ), array_column( $data['additional_errors'], 'code' ) ),
+			'Core refusals come first, then the field and validator refusals, in run order.'
+		);
+		$this->assertStringStartsWith( 'The simple product type does not take external_url.', $data['message'] );
+		$this->assertStringEndsWith( 'Note refused. Validator refused.', $data['message'], 'The first message names every refusal, because MCP clients show only that one.' );
+		$this->assertSame( 'Pencil', $seen_name, 'The validator sees the values that Core accepted.' );
 		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
 	}
 

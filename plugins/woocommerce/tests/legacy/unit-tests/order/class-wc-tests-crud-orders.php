@@ -1363,15 +1363,11 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 * @param WC_Order $order Order to save.
 	 */
 	private function save_with_failed_write( WC_Order $order ): void {
-		$fail = static function () {
-			throw new Exception( 'Disk full.' );
-		};
-		add_action( 'woocommerce_before_order_object_save', $fail );
-		try {
-			$order->save();
-		} finally {
-			remove_action( 'woocommerce_before_order_object_save', $fail );
-		}
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				$order->save();
+			}
+		);
 		$this->assertInstanceOf( Exception::class, $order->get_last_save_error() );
 	}
 
@@ -1447,6 +1443,294 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$order->save();
 		$this->assertSame( 1, did_action( 'woocommerce_order_status_changed' ) - $changed );
 		$this->assertSame( 1, did_action( 'woocommerce_order_status_pending_to_processing' ) - $transition );
+	}
+
+	/**
+	 * Run a callback while a listener makes every order write fail.
+	 *
+	 * @param callable $callback Callback to run.
+	 * @return mixed What the callback returns.
+	 */
+	private function with_failed_writes( callable $callback ) {
+		$fail = static function () {
+			throw new Exception( 'Disk full.' );
+		};
+		add_action( 'woocommerce_before_order_object_save', $fail );
+		try {
+			return $callback();
+		} finally {
+			remove_action( 'woocommerce_before_order_object_save', $fail );
+		}
+	}
+
+	/**
+	 * @testdox payment_complete() returns false and fires no payment or status hook when the order write fails.
+	 */
+	public function test_payment_complete_stops_when_the_write_fails(): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid    = did_action( 'woocommerce_payment_complete' );
+		$changed = did_action( 'woocommerce_order_status_changed' );
+
+		$result = $this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+
+		$this->assertFalse( $result );
+		$this->assertSame( 0, did_action( 'woocommerce_payment_complete' ) - $paid );
+		$this->assertSame( 0, did_action( 'woocommerce_order_status_changed' ) - $changed );
+		$stored = wc_get_order( $order->get_id() );
+		$this->assertSame( OrderStatus::PENDING, $stored->get_status() );
+		$this->assertNull( $stored->get_date_paid() );
+	}
+
+	/**
+	 * @testdox A failed payment_complete() write adds one error note and no payment note.
+	 */
+	public function test_payment_complete_adds_one_error_note_when_the_write_fails(): void {
+		$order = new WC_Order();
+		$order->save();
+
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), 'content' );
+		$this->assertCount( 1, $notes );
+		$this->assertStringContainsString( 'Disk full.', $notes[0] );
+	}
+
+	/**
+	 * @testdox The retry after a failed payment_complete() fires woocommerce_payment_complete when the note listener throws.
+	 */
+	public function test_payment_complete_retry_fires_its_action_when_the_note_listener_throws(): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid = did_action( 'woocommerce_payment_complete' );
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+		$throw = static function () {
+			throw new Exception( 'Note listener failed.' );
+		};
+		add_action( 'woocommerce_order_note_added', $throw );
+
+		try {
+			$order->save();
+		} finally {
+			remove_action( 'woocommerce_order_note_added', $throw );
+		}
+
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $paid );
+	}
+
+	/**
+	 * @testdox The retry after a failed payment_complete() fires its action when the status moved to another paid status.
+	 */
+	public function test_payment_complete_retry_fires_its_action_after_a_move_to_another_paid_status(): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid = did_action( 'woocommerce_payment_complete' );
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+		$this->assertSame( OrderStatus::COMPLETED, $order->get_status() );
+
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $paid );
+	}
+
+	/**
+	 * @testdox The retry after a failed payment_complete() logs a throwing payment listener and keeps the other callbacks.
+	 */
+	public function test_payment_complete_retry_logs_a_throwing_payment_listener(): void {
+		$order = new WC_Order();
+		$order->save();
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+		$order->stage_order_note( 'Staged after the failed call.' );
+		$throw = static function () {
+			throw new Exception( 'Payment listener failed.' );
+		};
+		add_action( 'woocommerce_payment_complete', $throw );
+
+		try {
+			$order->save();
+		} finally {
+			remove_action( 'woocommerce_payment_complete', $throw );
+		}
+
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), 'content' );
+		$this->assertContains( 'Payment complete event failed. Payment listener failed.', $notes );
+		$this->assertContains( 'Staged after the failed call.', $notes );
+		$this->assertSame( OrderStatus::COMPLETED, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox payment_complete() still fires woocommerce_payment_complete when adding the payment note throws.
+	 */
+	public function test_payment_complete_fires_its_action_when_the_payment_note_throws(): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid  = did_action( 'woocommerce_payment_complete' );
+		$throw = static function ( $comment_id ) {
+			if ( 'Payment complete.' === get_comment( $comment_id )->comment_content ) {
+				throw new Exception( 'Note listener failed.' );
+			}
+		};
+		add_action( 'woocommerce_order_note_added', $throw );
+
+		$result = $order->payment_complete( '12345' );
+
+		remove_action( 'woocommerce_order_note_added', $throw );
+		$this->assertTrue( $result );
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $paid );
+		$this->assertSame( OrderStatus::COMPLETED, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox woocommerce_payment_complete fires once, when a save after a failed payment_complete() succeeds.
+	 */
+	public function test_payment_complete_fires_its_hook_after_a_failed_write_is_retried(): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid = did_action( 'woocommerce_payment_complete' );
+
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+		$order->save();
+		$order->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $paid );
+		$this->assertSame( OrderStatus::COMPLETED, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox A payment_complete() retry after a failed write fires its payment hook and note once.
+	 */
+	public function test_payment_complete_retry_after_a_failed_write_reports_the_payment_once(): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid = did_action( 'woocommerce_payment_complete' );
+
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+		$order->set_status( OrderStatus::PENDING );
+		$this->assertTrue( $order->payment_complete( '12345' ) );
+
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $paid );
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), 'content' );
+		$this->assertCount( 1, array_keys( $notes, 'Payment complete.', true ) );
+	}
+
+	/**
+	 * @testdox A payment_complete() retry after a failed staged payment adds only the note of the retry.
+	 */
+	public function test_payment_complete_retry_after_a_failed_staged_payment_adds_one_note(): void {
+		$order = new WC_Order();
+		$order->set_payment_method_title( 'Cheque' );
+		$order->save();
+
+		$order->stage_payment_complete( 'first' );
+		$this->with_failed_writes( array( $order, 'save' ) );
+		$order->set_status( OrderStatus::PENDING );
+		$this->assertTrue( $order->payment_complete( 'second' ) );
+
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), 'content' );
+		$this->assertNotContains( 'Payment via Cheque (first).', $notes );
+		$this->assertCount( 1, array_keys( $notes, 'Payment via Cheque (second).', true ) );
+	}
+
+	/**
+	 * @testdox payment_complete() adds no payment note when the order write fails.
+	 */
+	public function test_payment_complete_adds_no_payment_note_when_the_write_fails(): void {
+		$order = new WC_Order();
+		$order->save();
+
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), 'content' );
+		$this->assertNotContains( 'Payment complete.', $notes );
+	}
+
+	/**
+	 * @testdox A save after a failed payment_complete() fires no payment hook when the status changed in between.
+	 */
+	public function test_payment_complete_drops_its_hook_when_the_status_changes_after_a_failed_write(): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid = did_action( 'woocommerce_payment_complete' );
+
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+		$order->set_status( OrderStatus::FAILED );
+		$order->save();
+
+		$this->assertSame( 0, did_action( 'woocommerce_payment_complete' ) - $paid );
+		$this->assertSame( OrderStatus::FAILED, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox update_taxes() does not write the tax items when the order write fails.
+	 */
+	public function test_update_taxes_does_not_write_tax_items_when_the_write_fails(): void {
+		$rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country' => '',
+				'tax_rate'         => '10.0000',
+				'tax_rate_name'    => 'TAX',
+				'tax_rate_order'   => '1',
+			)
+		);
+		$order   = new WC_Order();
+		$product = new WC_Order_Item_Product();
+		$product->set_taxes(
+			array(
+				'total'    => array( $rate_id => '1' ),
+				'subtotal' => array( $rate_id => '1' ),
+			)
+		);
+		$order->add_item( $product );
+		$order->update_taxes();
+		$tax_item = current( $order->get_taxes() );
+		$this->assertSame( 1.0, (float) $tax_item->get_tax_total() );
+
+		$product->set_taxes(
+			array(
+				'total'    => array( $rate_id => '2' ),
+				'subtotal' => array( $rate_id => '2' ),
+			)
+		);
+		$this->with_failed_writes( array( $order, 'update_taxes' ) );
+
+		$this->assertSame( 1.0, (float) ( new WC_Order_Item_Tax( $tax_item->get_id() ) )->get_tax_total() );
 	}
 
 	/**

@@ -354,7 +354,7 @@ class RestApi {
 	 * @return \WP_REST_Response
 	 */
 	public function get_import_allowed() {
-		$can_import = $this->can_import_blueprint();
+		$can_import = true === $this->check_import_permission() && $this->can_import_blueprint();
 
 		return rest_ensure_response(
 			array(

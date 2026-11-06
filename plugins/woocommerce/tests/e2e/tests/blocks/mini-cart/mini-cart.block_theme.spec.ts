@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { test, expect, BlockData, wpCLI } from '@woocommerce/e2e-utils';
+import {
+	test,
+	expect,
+	BlockData,
+	enableTestPlugin,
+	wpCLI,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -188,19 +194,24 @@ test.describe( `${ blockData.name } Block`, () => {
 		await checkProductLink( page );
 	} );
 
-	test( 'should render the product table with no client-side error for a product with no item data', async ( {
+	test( 'should render the product table and its item data with no client-side error', async ( {
 		page,
+		context,
 		frontendUtils,
 		miniCartUtils,
 	} ) => {
+		// The fixture plugin adds `woocommerce_get_item_data` entries to every
+		// cart item, so this test covers the whole wiring: the PHP filter, the
+		// Store API `item_data` field, and the Interactivity API render. How
+		// each entry is normalized is covered by the unit tests for
+		// `mini-cart/utils/item-data`.
+		await enableTestPlugin( context, 'item-data-display' );
+
 		const pageErrors: string[] = [];
 		const consoleErrors: string[] = [];
 
 		// Register listeners before navigating so nothing that happens during
-		// the mini-cart's render is missed. This product has no variation and
-		// no `woocommerce_get_item_data` additions (no fixture plugin is
-		// activated in this describe block), which is the plain rendering
-		// path the item-data/separator getters must not throw on.
+		// the mini-cart's render is missed.
 		page.on( 'pageerror', ( error ) => {
 			pageErrors.push( error.message );
 		} );
@@ -230,6 +241,15 @@ test.describe( `${ blockData.name } Block`, () => {
 		await expect(
 			page.getByLabel( 'Quantity of Polo in your cart.' )
 		).toHaveValue( '1' );
+
+		// The filtered entries reach the rendered table.
+		const dialog = page.getByRole( 'dialog' );
+		await expect(
+			dialog.locator( '.wc-block-components-product-details__name' )
+		).toContainText( [ 'Gift Message' ] );
+		await expect(
+			dialog.locator( '.wc-block-components-product-details__value' )
+		).toContainText( [ 'Happy Birthday!' ] );
 
 		expect( pageErrors ).toEqual( [] );
 		expect( consoleErrors ).toEqual( [] );
@@ -511,15 +531,13 @@ test.describe( `${ blockData.name } Block (variation attributes)`, () => {
 		},
 	} );
 
-	test( 'should decode entities in variation attributes rendered via data-wp-text', async ( {
+	test( 'should render variation attributes in the products table', async ( {
 		page,
 		frontendUtils,
 		miniCartUtils,
 	} ) => {
-		// Create a variable product with an attribute value containing an
-		// ampersand, which the API returns as "&amp;". The data-wp-text
-		// path (textContent) relies on the textarea entity-decode step to
-		// display "Red & Blue" instead of literal "Red &amp; Blue".
+		// The API returns the ampersand as "&amp;", so this also checks that
+		// the variation branch of the table decodes it.
 		const cliOutput = await wpCLI(
 			`wc product create --user=1 --name="Test Variable" --type="variable" --attributes='${ JSON.stringify(
 				[
@@ -535,58 +553,24 @@ test.describe( `${ blockData.name } Block (variation attributes)`, () => {
 		const productId = cliOutput.stdout.match(
 			/Created product (\d+)/
 		)?.[ 1 ];
-		await wpCLI(
+		const variationOutput = await wpCLI(
 			`wc product_variation create --user=1 "${ productId }" --regular_price="10" --attributes='${ JSON.stringify(
 				[ { name: 'Shade', option: 'Red & Blue' } ]
 			) }'`
 		);
+		const variationId = variationOutput.stdout.match(
+			/Created product_variation (\d+)/
+		)?.[ 1 ];
 
-		// Navigate to the product page and add the variation to cart.
-		await page.goto( `/product/test-variable/` );
-		await page
-			.getByLabel( 'Shade', { exact: true } )
-			.selectOption( 'Red & Blue' );
-
-		// The classic variable-product Add to cart button only registers a
-		// selection once the variations script has processed it. Until then the
-		// hidden `variation_id` input stays at "0" and clicking is a silent
-		// no-op (the disabled state is class-based, which Playwright's
-		// actionability checks ignore). Wait for the variation to be registered
-		// (a positive, non-zero variation id) before clicking.
-		// That is necessary but not sufficient: the script sets `variation_id`
-		// synchronously and only drops the `disabled` class ~300ms later, from a
-		// setTimeout, so wait for the button to be enabled as well. Clicking in
-		// that window hits the guard that raises a window.alert Playwright
-		// silently dismisses, and the form never submits.
-		await expect( page.locator( 'input.variation_id' ) ).toHaveValue(
-			/^[1-9][0-9]*$/
+		// Add the variation through the classic add-to-cart URL, since the
+		// product page form is not what this test covers.
+		await page.goto(
+			`/?add-to-cart=${ productId }&variation_id=${ variationId }`
 		);
-		const addToCartButton = page.getByRole( 'button', {
-			name: 'Add to cart',
-			exact: true,
-		} );
-		await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
-		await addToCartButton.click();
-
-		// Wait for a definitive "added to cart" confirmation before navigating
-		// to the shop. The single-product Add to cart is a form submission; if
-		// we navigate away before it settles the item may not be in the cart
-		// when the mini-cart opens, which is what makes the assertions below
-		// race the add-to-cart request. Scope to the success notice (role=alert)
-		// so we don't match unrelated page text.
-		await expect(
-			page.getByRole( 'alert' ).getByText( /added to your cart/i )
-		).toBeVisible();
-
-		// Open the mini-cart.
 		await frontendUtils.goToShop();
 		await miniCartUtils.openMiniCart();
 
 		const dialog = page.getByRole( 'dialog' );
-		await expect( dialog ).toBeVisible();
-
-		// Variation attributes are rendered via data-wp-text (textContent).
-		// The entity "&amp;" should be decoded to "&".
 		await expect(
 			dialog.locator( '.wc-block-components-product-details__name' )
 		).toContainText( [ 'Shade' ] );

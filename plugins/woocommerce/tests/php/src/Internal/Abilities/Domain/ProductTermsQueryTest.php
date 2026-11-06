@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Ability;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 
 /**
@@ -301,7 +302,7 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should parse boolean strings from older Abilities REST controllers.
+	 * @testdox Should read a boolean string on hide_empty as a boolean.
 	 * @testWith [false, 1]
 	 *           ["false", 1]
 	 *           [true, 0]
@@ -310,8 +311,9 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 	 * @param int         $expected_count Expected number of empty terms.
 	 */
 	public function test_hide_empty_boolean_input( $hide_empty, int $expected_count ): void {
-		$id     = self::factory()->term->create( array( 'taxonomy' => 'product_tag' ) );
-		$result = ProductTermsQuery::execute(
+		$id      = self::factory()->term->create( array( 'taxonomy' => 'product_tag' ) );
+		$ability = new Ability( ProductTermsQuery::get_name(), ProductTermsQuery::get_registration_args() );
+		$result  = $ability->execute(
 			array(
 				'taxonomy'   => 'product_tag',
 				'include'    => array( $id ),
