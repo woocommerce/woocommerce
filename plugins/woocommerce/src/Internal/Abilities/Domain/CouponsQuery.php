@@ -109,6 +109,14 @@ class CouponsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'ID'   => 'DESC',
 		);
 		$query           = new \WP_Query( $args );
+		$total           = (int) $query->found_posts;
+		if ( empty( $query->posts ) && $page > 1 ) {
+			$args['paged']          = 1;
+			$args['posts_per_page'] = 1;
+			$args['fields']         = 'ids';
+			$count_query            = new \WP_Query( $args );
+			$total                  = (int) $count_query->found_posts;
+		}
 
 		return array(
 			'coupons'     => array_map(
@@ -117,8 +125,8 @@ class CouponsQuery extends AbstractDomainAbility implements AbilityDefinition {
 				},
 				$query->posts
 			),
-			'total'       => (int) $query->found_posts,
-			'total_pages' => (int) $query->max_num_pages,
+			'total'       => $total,
+			'total_pages' => (int) ceil( $total / $per_page ),
 			'page'        => $page,
 			'per_page'    => $per_page,
 		);

@@ -240,4 +240,24 @@ class CouponsQueryTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'publish', ( new \WC_Coupon( $coupon->get_id() ) )->get_status() );
 	}
 
+	/**
+	 * @testdox Should retain totals when the requested page is beyond the last match.
+	 */
+	public function test_out_of_range_totals(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'one-match' );
+		$coupon->save();
+		$ability = new \WP_Ability( CouponsQuery::get_name(), CouponsQuery::get_registration_args() );
+		$result  = $ability->execute(
+			array(
+				'include'  => array( $coupon->get_id() ),
+				'page'     => 2,
+				'per_page' => 1,
+			)
+		);
+		$this->assertSame( array(), $result['coupons'] );
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( 1, $result['total_pages'] );
+	}
 }
