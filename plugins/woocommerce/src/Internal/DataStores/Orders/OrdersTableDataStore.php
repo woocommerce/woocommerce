@@ -827,13 +827,17 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 
 		// The data comes from the other datastore, so don't backfill the meta changes to the posts table.
 		// Otherwise, with sync enabled, each re-added meta is written to wp_postmeta again and duplicated.
+		// Only clear the marker if it was set here, so a nested call for the same order doesn't remove it early.
+		$was_syncing_on_read                              = isset( self::$sync_on_read_order_ids[ $order->get_id() ] );
 		self::$sync_on_read_order_ids[ $order->get_id() ] = true;
 		add_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', '__return_false' );
 		try {
 			$hpos_order->save_meta_data();
 		} finally {
 			remove_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', '__return_false' );
-			unset( self::$sync_on_read_order_ids[ $order->get_id() ] );
+			if ( ! $was_syncing_on_read ) {
+				unset( self::$sync_on_read_order_ids[ $order->get_id() ] );
+			}
 		}
 
 		$db_rows = $this->get_db_rows_for_order( $hpos_order, 'update', true );

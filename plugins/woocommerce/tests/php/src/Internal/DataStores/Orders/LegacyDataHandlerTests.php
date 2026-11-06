@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\LegacyDataHandler;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Enums\OrderStatus;
@@ -299,5 +300,29 @@ class LegacyDataHandlerTests extends \WC_Unit_Test_Case {
 		$this->assertSame( 'value', $order_hpos->get_meta( 'backfill_meta', true, 'edit' ) );
 
 		$this->disable_cot_sync();
+	}
+
+	/**
+	 * @testdox update_order_from_object() keeps the sync-on-read marker of an outer call for the same order.
+	 */
+	public function test_update_order_from_object_preserves_outer_sync_on_read_marker() {
+		$this->enable_cot_sync();
+		$order = new \WC_Order();
+		$order->save();
+
+		$property = new \ReflectionProperty( OrdersTableDataStore::class, 'sync_on_read_order_ids' );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$property->setAccessible( true );
+		}
+		$original = $property->getValue();
+		$property->setValue( null, array( $order->get_id() => true ) );
+
+		try {
+			wc_get_container()->get( OrdersTableDataStore::class )->update_order_from_object( $order );
+			$this->assertArrayHasKey( $order->get_id(), $property->getValue() );
+		} finally {
+			$property->setValue( null, $original );
+			$this->disable_cot_sync();
+		}
 	}
 }
