@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Blocks\AssetsController;
 use Automattic\WooCommerce\Blocks\BlockPatterns;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\BlockTemplatesController;
+use Automattic\WooCommerce\Blocks\BlockTypesLazyController;
 use Automattic\WooCommerce\Blocks\BlockTypesController;
 use Automattic\WooCommerce\Blocks\CoreBreadcrumbsCompatibility;
 use Automattic\WooCommerce\Blocks\DependencyDetection;
@@ -286,11 +287,20 @@ class Bootstrap {
 			}
 		);
 		$this->container->register(
-			BlockTypesController::class,
+			BlockTypesLazyController::class,
 			function ( Container $container ) {
 				$asset_api           = $container->get( AssetApi::class );
 				$asset_data_registry = $container->get( AssetDataRegistry::class );
-				return new BlockTypesController( $asset_api, $asset_data_registry );
+				return new BlockTypesLazyController( $asset_api, $asset_data_registry );
+			}
+		);
+		$this->container->register(
+			BlockTypesController::class,
+			function ( Container $container ) {
+				$asset_api              = $container->get( AssetApi::class );
+				$asset_data_registry    = $container->get( AssetDataRegistry::class );
+				$lazy_blocks_controller = $container->get( BlockTypesLazyController::class );
+				return new BlockTypesController( $asset_api, $asset_data_registry, $lazy_blocks_controller );
 			}
 		);
 		$this->container->register(
