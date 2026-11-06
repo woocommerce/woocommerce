@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Guard the Allow header on UCP discovery 405 responses with headers_sent(); unreleased code, no production change.
+
+
