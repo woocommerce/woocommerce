@@ -15,7 +15,8 @@ defined( 'ABSPATH' ) || exit;
  *
  * `ok` says whether the store is clear of the problem the label names, or is
  * null when it couldn't be checked (StoreOutputChecks); `name` is the check
- * worded as its passing state.
+ * worded as its passing state. `group` is the merchant question the check
+ * answers on Sales readiness, as for the store output checks.
  * `blocks` says what a failing condition stops: `listing` hides every product
  * on every channel, `ucp` hides the catalog from agents that use UCP,
  * `checkout` stops or weakens agent orders. A failing `required` condition
@@ -50,7 +51,7 @@ class StoreConditions {
 	/**
 	 * Every condition with its current state.
 	 *
-	 * @return array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}>
+	 * @return array<int, array{id:string,ok:bool,blocks:string,group:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}>
 	 */
 	public function all(): array {
 		global $wp_rewrite;
@@ -60,12 +61,13 @@ class StoreConditions {
 			'id'      => $id,
 			'ok'      => self::is_published_page( (int) get_option( $option ) ),
 			'blocks'  => 'checkout',
+			'group'   => 'buy',
 			'level'   => $level,
 			'name'    => $name,
 			'label'   => $label,
 			'why'     => $why,
-			'fix'     => __( 'Choose a published page under WooCommerce > Settings > Agentic commerce.', 'woocommerce' ),
-			'fix_url' => $settings_url( AgenticCommerceSettings::TAB ) . '#' . $option,
+			'fix'     => __( 'Choose a published page under WooCommerce > Settings > AI tools > AI shopping.', 'woocommerce' ),
+			'fix_url' => AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ) . '#' . $option,
 		);
 
 		return array(
@@ -73,6 +75,7 @@ class StoreConditions {
 				'id'      => 'launched',
 				'ok'      => $this->coming_soon_helper->is_site_live(),
 				'blocks'  => 'listing',
+				'group'   => 'access',
 				'level'   => self::LEVEL_REQUIRED,
 				'name'    => __( 'Store is launched', 'woocommerce' ),
 				'label'   => __( 'Store is in coming soon mode', 'woocommerce' ),
@@ -84,6 +87,7 @@ class StoreConditions {
 				'id'      => 'search_visible',
 				'ok'      => '0' !== (string) get_option( 'blog_public', '1' ),
 				'blocks'  => 'listing',
+				'group'   => 'find',
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'Search engines can index the store', 'woocommerce' ),
 				'label'   => __( 'Store is hidden from search engines', 'woocommerce' ),
@@ -95,17 +99,19 @@ class StoreConditions {
 				'id'      => 'ucp_on',
 				'ok'      => UcpUtils::is_enabled(),
 				'blocks'  => 'ucp',
+				'group'   => 'access',
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'Universal Commerce Protocol (UCP) is on', 'woocommerce' ),
 				'label'   => __( 'Universal Commerce Protocol (UCP) is off', 'woocommerce' ),
 				'why'     => __( 'Shopping agents that use UCP cannot read your catalog.', 'woocommerce' ),
-				'fix'     => __( 'Turn on "Let AI agents shop your store" under WooCommerce > Settings > Agentic commerce.', 'woocommerce' ),
-				'fix_url' => $settings_url( AgenticCommerceSettings::TAB ),
+				'fix'     => __( 'Turn on "Allow AI assistants to shop your store" under WooCommerce > Settings > AI tools > AI shopping.', 'woocommerce' ),
+				'fix_url' => AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ),
 			),
 			array(
 				'id'      => 'https',
 				'ok'      => wc_site_is_https(),
 				'blocks'  => 'ucp',
+				'group'   => 'access',
 				'level'   => self::LEVEL_REQUIRED,
 				'name'    => __( 'Site uses HTTPS', 'woocommerce' ),
 				'label'   => __( 'Site does not use HTTPS', 'woocommerce' ),
@@ -117,6 +123,7 @@ class StoreConditions {
 				'id'      => 'pretty_permalinks',
 				'ok'      => $wp_rewrite->using_permalinks(),
 				'blocks'  => 'ucp',
+				'group'   => 'access',
 				'level'   => self::LEVEL_REQUIRED,
 				'name'    => __( 'Permalinks are not set to Plain', 'woocommerce' ),
 				'label'   => __( 'Permalinks are set to Plain', 'woocommerce' ),
@@ -157,6 +164,7 @@ class StoreConditions {
 				'id'      => 'payment_method',
 				'ok'      => $this->payment_method_enabled(),
 				'blocks'  => 'checkout',
+				'group'   => 'buy',
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'A payment method is turned on', 'woocommerce' ),
 				'label'   => __( 'No payment method is turned on', 'woocommerce' ),
@@ -168,6 +176,7 @@ class StoreConditions {
 				'id'      => 'guest_checkout',
 				'ok'      => ! $this->registration_required(),
 				'blocks'  => 'checkout',
+				'group'   => 'buy',
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'Guest checkout is allowed', 'woocommerce' ),
 				'label'   => __( 'Guest checkout is off', 'woocommerce' ),
@@ -179,6 +188,7 @@ class StoreConditions {
 				'id'      => 'order_emails',
 				'ok'      => $this->order_confirmation_email_enabled(),
 				'blocks'  => 'checkout',
+				'group'   => 'buy',
 				'level'   => self::LEVEL_RECOMMENDED,
 				'name'    => __( 'Order confirmation emails are on', 'woocommerce' ),
 				'label'   => __( 'Order confirmation emails are off', 'woocommerce' ),

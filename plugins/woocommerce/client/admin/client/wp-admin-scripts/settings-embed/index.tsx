@@ -5,7 +5,7 @@
 /**
  * External dependencies
  */
-import { createRoot } from '@wordpress/element';
+import { createRoot, lazy, Suspense } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -72,6 +72,27 @@ const renderPaymentsSettings = () => {
 	} );
 };
 
+const SalesReadinessOverview = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "sales-readiness-overview" */ '~/sales-readiness/overview'
+		)
+);
+
+/**
+ * WooCommerce > Settings > AI tools opens on the Overview, which the PHP tab leaves a root for.
+ */
+const renderSalesReadinessOverview = () => {
+	const root = document.getElementById( 'wc-agent-readiness-overview' );
+	if ( root ) {
+		createRoot( root ).render(
+			<Suspense fallback={ null }>
+				<SalesReadinessOverview />
+			</Suspense>
+		);
+	}
+};
+
 const registerSlotFills = () => {
 	possiblyRenderSettingsSlots();
 	registerTaxSettingsConflictErrorFill();
@@ -100,4 +121,5 @@ const registerSlotFills = () => {
 };
 
 renderPaymentsSettings();
+renderSalesReadinessOverview();
 registerSlotFills();

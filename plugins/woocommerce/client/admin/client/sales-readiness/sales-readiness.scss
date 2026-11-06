@@ -1,0 +1,201 @@
+// Sales readiness page and the AI tools Overview. Tokens from the design system; the build injects their fallbacks.
+
+.wc-sales-readiness {
+	--wc-sr-muted: var(--wpds-color-foreground-content-neutral-weak);
+	--wc-sr-stroke: var(--wpds-color-stroke-surface-neutral-weak);
+	--wc-sr-link: var(--wpds-color-foreground-interactive-brand);
+
+	color: var(--wpds-color-foreground-content-neutral);
+
+	&__header {
+		background: var(--wpds-color-background-surface-neutral-strong);
+		border-block-end: 1px solid var(--wc-sr-stroke);
+		padding: 16px 24px;
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	&__title {
+		display: block;
+	}
+
+	&__content {
+		max-width: 720px;
+		margin: 24px auto;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		padding: 0 16px;
+	}
+
+	&__muted {
+		color: var(--wc-sr-muted);
+	}
+
+	&--overview {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		max-width: 720px;
+	}
+}
+
+.wc-sales-readiness-card {
+	&__head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		width: 100%;
+	}
+
+	&__actions {
+		margin-block-start: 16px;
+	}
+
+	.wc-sales-readiness-list + .wc-sales-readiness-fold,
+	.wc-sales-readiness-channels + .wc-sales-readiness-list {
+		border-block-start: 1px solid var(--wc-sr-stroke);
+	}
+}
+
+.wc-sales-readiness-overview__heading {
+	display: block;
+	font-weight: 600;
+	margin-block-start: 12px;
+}
+
+.wc-sales-readiness-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+
+	&__group {
+		margin: 0;
+	}
+
+	> .wc-sales-readiness-row + .wc-sales-readiness-row {
+		border-block-start: 1px solid var(--wc-sr-stroke);
+	}
+}
+
+.wc-sales-readiness-tier {
+	display: block;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--wc-sr-muted);
+	padding: 16px 0 4px;
+	border-block-start: 1px solid var(--wc-sr-stroke);
+
+	.wc-sales-readiness-list__group:first-child > & {
+		border-block-start: 0;
+		padding-block-start: 12px;
+	}
+}
+
+.wc-sales-readiness-row {
+	display: flex;
+	gap: 12px;
+	padding: 12px 0;
+	margin: 0;
+
+	&__marker {
+		flex: 0 0 auto;
+		width: 20px;
+		height: 20px;
+		margin-block-start: 1px;
+		border: 1.5px dashed var(--wpds-color-stroke-surface-neutral);
+		border-radius: 50%;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
+
+		&--done {
+			border: 0;
+			color: var(--wpds-color-foreground-content-success);
+		}
+	}
+
+	&__body {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	&__head {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 12px;
+	}
+
+	&__title {
+		font-weight: 500;
+
+		&--done {
+			color: var(--wc-sr-muted);
+			font-weight: 400;
+		}
+	}
+
+	&__link {
+		margin-block-start: 4px;
+	}
+}
+
+.wc-sales-readiness-channels {
+	list-style: none;
+	margin: 0 0 8px;
+	padding: 4px 0 16px;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+	gap: 16px;
+
+	li {
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	&__name {
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--wc-sr-muted);
+	}
+
+	&__count {
+		font-size: 20px;
+		font-weight: 500;
+	}
+}
+
+.wc-sales-readiness-fold {
+	padding-block-start: 8px;
+}
+
+.wc-sales-readiness-checked {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+
+	> div {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	&__status .components-spinner {
+		margin: 0;
+	}
+
+	&__intro {
+		display: block;
+		margin-block-end: 12px;
+	}
+}

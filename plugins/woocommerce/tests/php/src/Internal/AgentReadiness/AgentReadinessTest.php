@@ -32,12 +32,14 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		parent::setUp();
 		// Report tests stay offline: store output checks would load the test site's pages.
 		StoreOutputChecksTest::block_requests();
+		// Orders other tests left in the Analytics tables would count toward the sales share.
+		\WC_Helper_Reports::reset_stats_dbs();
 		$store_conditions = new StoreConditions();
 		$store_conditions->init( new ComingSoonHelper() );
 		$output_checks = new StoreOutputChecks();
 		$output_checks->init( new ComingSoonHelper() );
 		$this->sut = new AgentReadiness();
-		$this->sut->init( $store_conditions, $output_checks, new RemoteRules(), wc_get_container()->get( \Automattic\WooCommerce\Internal\AgentReadiness\DeclaredToAgents::class ) );
+		$this->sut->init( $store_conditions, $output_checks, new RemoteRules(), wc_get_container()->get( \Automattic\WooCommerce\Internal\AgentReadiness\DeclaredToAgents::class ), new \Automattic\WooCommerce\Internal\AgentReadiness\ProductSales() );
 	}
 
 	/**
@@ -74,7 +76,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$output_checks->init( new ComingSoonHelper() );
 		$store_conditions = new StoreConditions();
 		$store_conditions->init( new ComingSoonHelper() );
-		$this->sut->init( $store_conditions, $output_checks, new RemoteRules(), wc_get_container()->get( \Automattic\WooCommerce\Internal\AgentReadiness\DeclaredToAgents::class ) );
+		$this->sut->init( $store_conditions, $output_checks, new RemoteRules(), wc_get_container()->get( \Automattic\WooCommerce\Internal\AgentReadiness\DeclaredToAgents::class ), new \Automattic\WooCommerce\Internal\AgentReadiness\ProductSales() );
 		add_filter( 'pre_http_request', static fn() => new \WP_Error( 'http_request_failed', 'Timed out' ) );
 
 		$checks = array_column( $this->sut->get_report()['store_checks'], null, 'id' );
@@ -96,9 +98,9 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 
 		$report = $this->sut->get_report();
 
-		$this->assertSame( array( 'generated_at', 'products', 'hidden_from_catalog', 'unsupported_types', 'store_checks', 'declared', 'channels', 'checks', 'truncated' ), array_keys( $report ) );
+		$this->assertSame( array( 'generated_at', 'products', 'hidden_from_catalog', 'unsupported_types', 'store_checks', 'declared', 'channels', 'checks', 'truncated', 'sales' ), array_keys( $report ) );
 		$this->assertFalse( $report['truncated'] );
-		$this->assertSame( array( 'id', 'ok', 'blocks', 'level', 'name', 'label', 'why', 'fix', 'fix_url' ), array_keys( $report['store_checks'][0] ) );
+		$this->assertSame( array( 'id', 'ok', 'blocks', 'group', 'level', 'name', 'label', 'why', 'fix', 'fix_url' ), array_keys( $report['store_checks'][0] ) );
 		$this->assertSame( array( 'chatgpt', 'google', 'copilot' ), array_keys( $report['channels'] ) );
 		$this->assertSame(
 			array( 'name', 'spec', 'url', 'listable', 'not_listable', 'with_gaps', 'complete' ),
@@ -107,7 +109,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 
 		$checks = array_column( $report['checks'], null, 'id' );
 		$this->assertSame(
-			array( 'id', 'label', 'why', 'fix', 'channels', 'count', 'product_ids', 'fix_url' ),
+			array( 'id', 'label', 'why', 'fix', 'channels', 'count', 'product_ids', 'sales_share', 'fix_url' ),
 			array_keys( $checks['missing_brand'] )
 		);
 		$this->assertSame( 1, $checks['missing_brand']['count'] );
@@ -239,6 +241,45 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$this->assertSame( 0, $checks['missing_brand']['count'], 'The Google brand covers the only channel left' );
 		$this->assertArrayNotHasKey( 'missing_brand', $result['checks'] );
 		$this->assertNotContains( 'missing_brand', $this->sut->get_failing_check_ids( $product ) );
+	}
+
+	/**
+	 * @testdox Each check carries the share of the last 90 days' sales on its failing products, from Analytics, once there are enough orders to rank by.
+	 */
+	public function test_report_sales_share(): void {
+		update_option( 'woocommerce_analytics_enabled', 'yes' );
+		if ( ! taxonomy_exists( 'product_brand' ) ) {
+			register_taxonomy( 'product_brand', 'product' );
+		}
+		$branded   = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$unbranded = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 30 ) );
+		wp_set_object_terms( $branded->get_id(), 'Acme', 'product_brand' );
+		$place_order = function () use ( $branded, $unbranded ): void {
+			$order = wc_create_order();
+			$order->add_product( $branded, 1 );
+			$order->add_product( $unbranded, 1 );
+			$order->set_status( 'completed' );
+			$order->calculate_totals();
+			$order->save();
+			\Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::sync_order( $order->get_id() );
+			\Automattic\WooCommerce\Admin\API\Reports\Products\DataStore::sync_order_products( $order->get_id() );
+		};
+		for ( $i = 1; $i < \Automattic\WooCommerce\Internal\AgentReadiness\ProductSales::MIN_ORDERS; $i++ ) {
+			$place_order();
+		}
+
+		$report = $this->sut->get_report();
+		$this->assertNull( array_column( $report['checks'], null, 'id' )['missing_brand']['sales_share'], 'Too few orders to rank by' );
+		$this->assertSame( 19, $report['sales']['orders'] );
+
+		$place_order();
+		$report = $this->sut->get_report();
+		$checks = array_column( $report['checks'], null, 'id' );
+
+		$this->assertSame( 1, $checks['missing_brand']['count'] );
+		$this->assertEqualsWithDelta( 0.75, $checks['missing_brand']['sales_share'], 0.0001, '30 of 40 in sales has no brand' );
+		$this->assertSame( 90, $report['sales']['days'] );
+		$this->assertSame( 20, $report['sales']['orders'] );
 	}
 
 	/**
