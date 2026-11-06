@@ -39,6 +39,13 @@ class ScheduledScan implements RegisterHooksInterface {
 	public const STALLED_AFTER = 10 * MINUTE_IN_SECONDS;
 
 	/**
+	 * How long a daily scan marked running still counts as pending. A process killed mid-scan
+	 * leaves it running until Action Scheduler's cleanup marks it failed (after 5 minutes, on a
+	 * queue run), so this frees Run check even when that cleanup does not run.
+	 */
+	public const RUNNING_FOR = 10 * MINUTE_IN_SECONDS;
+
+	/**
 	 * Features controller.
 	 *
 	 * @var FeaturesController
@@ -85,8 +92,8 @@ class ScheduledScan implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Whether a requested scan has not finished yet, or the daily scan is running now. The next
-	 * daily scan, still waiting for its date, doesn't count.
+	 * Whether a requested scan has not finished yet, or the daily scan started running in the
+	 * last RUNNING_FOR seconds. The next daily scan, still waiting for its date, doesn't count.
 	 */
 	public function is_pending(): bool {
 		if ( ActionSchedulerUtil::has_scheduled_action( self::RUN_NOW_HOOK, array(), self::GROUP ) ) {
@@ -94,10 +101,12 @@ class ScheduledScan implements RegisterHooksInterface {
 		}
 		$running_daily = as_get_scheduled_actions(
 			array(
-				'hook'     => self::DAILY_HOOK,
-				'group'    => self::GROUP,
-				'status'   => \ActionScheduler_Store::STATUS_RUNNING,
-				'per_page' => 1,
+				'hook'             => self::DAILY_HOOK,
+				'group'            => self::GROUP,
+				'status'           => \ActionScheduler_Store::STATUS_RUNNING,
+				'modified'         => new \DateTime( '@' . ( time() - self::RUNNING_FOR ) ),
+				'modified_compare' => '>=',
+				'per_page'         => 1,
 			),
 			'ids'
 		);

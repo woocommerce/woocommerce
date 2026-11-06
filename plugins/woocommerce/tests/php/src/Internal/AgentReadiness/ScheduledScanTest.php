@@ -106,6 +106,24 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A daily scan left running for over RUNNING_FOR, as when its process was killed, no longer blocks Run check.
+	 */
+	public function test_abandoned_daily_scan_is_not_pending(): void {
+		global $wpdb;
+		$running = as_schedule_single_action( time(), ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP );
+		\ActionScheduler::store()->log_execution( $running );
+		$wpdb->update(
+			$wpdb->actionscheduler_actions,
+			array( 'last_attempt_gmt' => gmdate( 'Y-m-d H:i:s', time() - ScheduledScan::RUNNING_FOR - 60 ) ),
+			array( 'action_id' => $running )
+		);
+
+		$this->assertFalse( $this->sut->is_pending() );
+		$this->sut->queue();
+		$this->assertCount( 1, $this->pending( ScheduledScan::RUN_NOW_HOOK ), 'Run check queues a scan' );
+	}
+
+	/**
 	 * @testdox A scan still waiting past STALLED_AFTER stays queued: a new request neither runs it nor queues another.
 	 */
 	public function test_stalled_scan_stays_queued(): void {
