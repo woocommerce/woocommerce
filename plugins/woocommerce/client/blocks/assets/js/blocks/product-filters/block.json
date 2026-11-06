@@ -57,6 +57,9 @@
 		"overlayPosition": {
 			"type": "string",
 			"enum": [ "left", "right" ]
+		},
+		"overlayButtonFullWidth": {
+			"type": "boolean"
 		}
 	},
 	"example": {
