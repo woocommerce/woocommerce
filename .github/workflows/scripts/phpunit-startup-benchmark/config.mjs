@@ -27,7 +27,16 @@ function prepare( {
 		throw new Error( `Unknown variant: ${ variant }` );
 	}
 	compose = structuredClone( compose );
-	dockerfiles = { ...dockerfiles };
+	const activeFiles = new Set(
+		Object.values( compose.services ).map(
+			( service ) => service.build?.dockerfile
+		)
+	);
+	dockerfiles = Object.fromEntries(
+		Object.entries( dockerfiles ).filter( ( [ name ] ) =>
+			activeFiles.has( name )
+		)
+	);
 	const pin = ( name ) => {
 		const pinned = manifest.images[ name ];
 		if ( ! pinned || ! /@sha256:[a-f0-9]{64}$/.test( pinned ) ) {

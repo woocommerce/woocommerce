@@ -160,3 +160,14 @@ test( 'missing cache retains a buildable fresh environment and unpinned images f
 		/Unpinned image/
 	);
 } );
+
+test( 'disabled test-stack Dockerfiles are excluded from pinning and caching', () => {
+	const input = fixture();
+	input.dockerfiles[ 'Tests-CLI.Dockerfile' ] = 'FROM wordpress:cli\n';
+	const result = prepare( input );
+	assert.equal( result.dockerfiles[ 'Tests-CLI.Dockerfile' ], undefined );
+	assert.match(
+		result.dockerfiles[ 'CLI.Dockerfile' ],
+		/FROM wordpress:cli-php8.5@sha256:/
+	);
+} );
