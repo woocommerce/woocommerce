@@ -62,7 +62,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	 */
 	private const INTENTS = array(
 		'check' => 'medium',
-		'info'  => 'stable',
+		'info'  => 'informational',
 		'pass'  => 'stable',
 		'off'   => 'none',
 		'fix'   => 'medium',

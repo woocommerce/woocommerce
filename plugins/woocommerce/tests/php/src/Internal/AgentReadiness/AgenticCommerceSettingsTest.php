@@ -385,7 +385,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		);
 		$this->assertSame(
 			array(
-				'intent' => 'stable',
+				'intent' => 'informational',
 				'text'   => 'All passed',
 			),
 			$sections['find']['badge']
@@ -469,7 +469,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		);
 		$this->assertSame(
 			array(
-				'intent' => 'stable',
+				'intent' => 'informational',
 				'text'   => 'All passed',
 			),
 			array_column( $view['sections'], 'badge', 'id' )['find'],
@@ -708,6 +708,12 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'All passed', $text( array( $row( true ), $row( true ) ) ) );
 		$this->assertSame( 'No issues', $text( array( $row( true ), $row( null ) ) ), 'A check that could not run is not an issue, nor a pass' );
 		$this->assertSame( 'Not checked yet', $text( array() ) );
+
+		$map = new \ReflectionMethod( ReadinessCheckPage::class, 'badge_data' );
+		$map->setAccessible( true );
+		$this->assertSame( 'informational', $map->invoke( null, $badge->invoke( null, array( $row( true ) ) ) )['intent'], 'All passed stays neutral' );
+		$this->assertSame( 'informational', $map->invoke( null, $badge->invoke( null, array( $row( true ), $row( null ) ) ) )['intent'], 'No issues is not a pass' );
+		$this->assertSame( 'stable', $map->invoke( null, array( 'pass', 'Active' ) )['intent'] );
 	}
 
 	/**
@@ -747,6 +753,15 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'main image has no alt text', $json, 'Store readiness covers alt text' );
 		$this->assertStringNotContainsString( 'post=' . $product->get_id(), $json, 'No example products' );
 		$this->assertStringContainsString( 'Let search engines index your store', $this->render_page(), 'Hidden from search engines is a Recommended setup step' );
+		$this->assertNull( $view['checked_note'] );
+
+		$stored              = get_option( AgentReadiness::REPORT_OPTION );
+		$stored['truncated'] = true;
+		update_option( AgentReadiness::REPORT_OPTION, $stored );
+		$this->assertSame(
+			sprintf( 'Checked your %s most recently changed products.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
+			$this->view()['checked_note']
+		);
 	}
 
 	/**
@@ -802,7 +817,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame( '1 issue', $badges['find']['text'] );
 		$this->assertSame(
 			array(
-				'intent' => 'stable',
+				'intent' => 'informational',
 				'text'   => 'All passed',
 			),
 			$badges['access']
