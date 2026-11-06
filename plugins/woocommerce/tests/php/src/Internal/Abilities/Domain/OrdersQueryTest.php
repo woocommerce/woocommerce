@@ -7,6 +7,8 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use WC_Helper_Order;
+use WC_Helper_Product;
 use WC_Unit_Test_Case;
 
 /**
@@ -176,6 +178,113 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should find a customer's orders by first name, last name or the start of the billing email.
+	 *
+	 * @testWith [true, "Jane"]
+	 *           [true, "doe"]
+	 *           [true, "jane.doe@"]
+	 *           [false, "Jane"]
+	 *           [false, "doe"]
+	 *           [false, "jane.doe@"]
+	 *
+	 * @param bool   $hpos   Whether to use the custom orders table.
+	 * @param string $search Search text.
+	 */
+	public function test_search_matches_customer( bool $hpos, string $search ): void {
+		$this->use_storage( $hpos );
+		$jane = $this->create_customer_order( 'Jane', 'Doe', 'jane.doe@example.com' );
+		$this->create_customer_order( 'John', 'Smith', 'john@example.com' );
+
+		$result = OrdersQuery::execute( array( 'search' => $search ) );
+
+		$this->assertSame( array( $jane ), array_column( $result['orders'], 'id' ) );
+	}
+
+	/**
+	 * @testdox Should find orders by the name of an ordered product.
+	 *
+	 * @dataProvider storage_modes
+	 * @param bool $hpos Whether to use the custom orders table.
+	 */
+	public function test_search_matches_product_name( bool $hpos ): void {
+		$this->use_storage( $hpos );
+		$this->create_customer_order( 'Jane', 'Doe', 'jane.doe@example.com' );
+		$mug = $this->create_customer_order( 'John', 'Smith', 'john@example.com', 'Enamel mug' );
+
+		$result = OrdersQuery::execute( array( 'search' => 'Enamel' ) );
+
+		$this->assertSame( array( $mug ), array_column( $result['orders'], 'id' ) );
+	}
+
+	/**
+	 * @testdox Should return no orders when nothing matches the search.
+	 *
+	 * @dataProvider storage_modes
+	 * @param bool $hpos Whether to use the custom orders table.
+	 */
+	public function test_search_without_matches_returns_nothing( bool $hpos ): void {
+		$this->use_storage( $hpos );
+		$this->create_customer_order( 'Jane', 'Doe', 'jane.doe@example.com' );
+
+		$result = OrdersQuery::execute( array( 'search' => 'Nobody' ) );
+
+		$this->assertSame( array(), $result['orders'] );
+		$this->assertSame( 0, $result['total_pages'] );
+	}
+
+	/**
+	 * @testdox Should apply include, customer_id and exclude to the orders a search matches.
+	 *
+	 * @dataProvider storage_modes
+	 * @param bool $hpos Whether to use the custom orders table.
+	 */
+	public function test_search_combines_with_other_filters( bool $hpos ): void {
+		$this->use_storage( $hpos );
+		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		$guest       = $this->create_customer_order( 'Jane', 'Doe', 'jane.doe@example.com' );
+		$first       = $this->create_customer_order( 'Jane', 'Doe', 'jane.doe@example.com', null, $customer_id );
+		$second      = $this->create_customer_order( 'Jane', 'Doe', 'jane.doe@example.com', null, $customer_id );
+		$john        = $this->create_customer_order( 'John', 'Smith', 'john@example.com' );
+
+		$included    = OrdersQuery::execute(
+			array(
+				'search'  => 'Jane',
+				'include' => array( $guest, $john ),
+			)
+		);
+		$by_customer = OrdersQuery::execute(
+			array(
+				'search'      => 'Jane',
+				'customer_id' => $customer_id,
+			)
+		);
+		$excluded    = OrdersQuery::execute(
+			array(
+				'search'  => 'Jane',
+				'exclude' => array( $first ),
+			)
+		);
+
+		$this->assertSame( array( $guest ), array_column( $included['orders'], 'id' ), 'A search should narrow an include list, not add to it.' );
+		$this->assertEqualsCanonicalizing( array( $first, $second ), array_column( $by_customer['orders'], 'id' ) );
+		$this->assertEqualsCanonicalizing( array( $guest, $second ), array_column( $excluded['orders'], 'id' ) );
+	}
+
+	/**
+	 * @testdox Should refuse a search that is empty or only whitespace.
+	 *
+	 * @testWith [""]
+	 *           ["  "]
+	 *
+	 * @param string $search Search text.
+	 */
+	public function test_refuses_blank_search( string $search ): void {
+		$schema = OrdersQuery::get_registration_args()['input_schema'];
+
+		$this->assertWPError( rest_validate_value_from_schema( array( 'search' => $search ), $schema, 'input' ) );
+	}
+
+	/**
 	 * Switch the order storage for the current test.
 	 *
 	 * @param bool $hpos Whether to use the custom orders table.
@@ -184,5 +293,33 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 		$this->original_hpos = OrderUtil::custom_orders_table_usage_is_enabled();
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		$this->toggle_cot_feature_and_usage( $hpos );
+	}
+
+	/**
+	 * Create an order with one product and the given billing and shipping names.
+	 *
+	 * @param string      $first_name   Billing first name.
+	 * @param string      $last_name    Billing last name.
+	 * @param string      $email        Billing email.
+	 * @param string|null $product_name Name of the ordered product, or null for the helper's default.
+	 * @param int         $customer_id  Customer ID, 0 for a guest.
+	 * @return int Order ID.
+	 */
+	private function create_customer_order( string $first_name, string $last_name, string $email, ?string $product_name = null, int $customer_id = 0 ): int {
+		$product = WC_Helper_Product::create_simple_product();
+		if ( null !== $product_name ) {
+			$product->set_name( $product_name );
+			$product->save();
+		}
+
+		$order = WC_Helper_Order::create_order( $customer_id, $product );
+		$order->set_billing_first_name( $first_name );
+		$order->set_billing_last_name( $last_name );
+		$order->set_billing_email( $email );
+		$order->set_shipping_first_name( $first_name );
+		$order->set_shipping_last_name( $last_name );
+		$order->save();
+
+		return $order->get_id();
 	}
 }
