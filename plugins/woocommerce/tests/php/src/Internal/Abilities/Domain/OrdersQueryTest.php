@@ -118,7 +118,7 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return every included order in one page when per_page is not sent.
+	 * @testdox Should return every included order in one page when per_page is not sent, counting each remaining ID once.
 	 */
 	public function test_include_without_per_page_returns_one_page(): void {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
@@ -135,11 +135,26 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 			)
 		);
 
+		$deduped = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'include' => array( $order_ids[0], $order_ids[0], $order_ids[1] ),
+				'exclude' => array( $order_ids[1] ),
+			)
+		);
+		$all_out = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'include' => array( $order_ids[0] ),
+				'exclude' => array( $order_ids[0] ),
+			)
+		);
+
 		$per_page = OrdersQuery::get_registration_args()['input_schema']['properties']['per_page'];
 		$this->assertArrayNotHasKey( 'default', $per_page, 'A client that fills in schema defaults would send 10 and page the included orders.' );
 		$this->assertEqualsCanonicalizing( $order_ids, array_column( $all_ids['orders'], 'id' ) );
 		$this->assertSame( 1, $all_ids['total_pages'] );
 		$this->assertCount( 10, $paged['orders'], 'An explicit per_page should still apply.' );
+		$this->assertSame( 1, $deduped['per_page'], 'Duplicate and excluded IDs should not count toward the default per_page.' );
+		$this->assertSame( 1, $all_out['per_page'], 'The default per_page should stay at least 1 when every ID is excluded.' );
 	}
 
 	/**
