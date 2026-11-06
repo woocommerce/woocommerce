@@ -118,8 +118,8 @@ class ShippingDestinations {
 					$areas[ $country ] = array( '*' => true );
 				}
 			}
-			$postcode_rules  = array();
-			$postcode_ranges = array();
+			$postcode_patterns = array();
+			$postcode_ranges   = array();
 			foreach ( $postcodes as $postcode ) {
 				if ( false !== strpos( $postcode, '...' ) ) {
 					$postcode_ranges[] = (object) array(
@@ -127,7 +127,7 @@ class ShippingDestinations {
 						'location_code' => $postcode,
 					);
 				} else {
-					$postcode_rules[ $postcode ] = true;
+					$postcode_patterns[ $postcode ] = true;
 				}
 			}
 
@@ -142,9 +142,9 @@ class ShippingDestinations {
 					$previous = $this->get_claims( $claimed[ $country ] ?? array(), $state );
 					if ( ! isset( $claimed[ $country ][ $state ] ) ) {
 						$claimed[ $country ][ $state ] = array(
-							'all'    => false,
-							'rules'  => array(),
-							'ranges' => array(),
+							'all'      => false,
+							'patterns' => array(),
+							'ranges'   => array(),
 						);
 					}
 					$region = array(
@@ -171,13 +171,15 @@ class ShippingDestinations {
 						$claimed[ $country ][ $state ]['all'] = true;
 						continue;
 					}
-					$exact = array();
 					// Earlier zones take precedence even when they have no shipping methods.
+					$claimed[ $country ][ $state ]['patterns'] += $postcode_patterns;
+					$claimed[ $country ][ $state ]['ranges']    = array_merge( $claimed[ $country ][ $state ]['ranges'], $postcode_ranges );
+					// A postcode alone may include addresses outside the state.
+					if ( '*' !== $state ) {
+						continue;
+					}
+					$exact = array();
 					foreach ( $restrictions as $restriction ) {
-						// A postcode alone may include addresses outside the state.
-						if ( '*' !== $state ) {
-							continue;
-						}
 						if ( ! $previous && ( isset( $restriction['postalCodePrefix'] ) || isset( $restriction['postalCodeRange'] ) ) ) {
 							$destinations[] = $region + $restriction;
 						}
@@ -188,8 +190,6 @@ class ShippingDestinations {
 							}
 						}
 					}
-					$claimed[ $country ][ $state ]['rules'] += $postcode_rules;
-					$claimed[ $country ][ $state ]['ranges'] = array_merge( $claimed[ $country ][ $state ]['ranges'], $postcode_ranges );
 					if ( $exact ) {
 						$region['postalCode'] = array_values( array_unique( $exact ) );
 						$destinations[]       = $region;
@@ -247,17 +247,18 @@ class ShippingDestinations {
 	 * @return bool
 	 */
 	private function postcode_is_claimed( array $claims, string $postcode, string $country ): bool {
-		$matches = null;
+		$candidates = null;
 		foreach ( $claims as $claim ) {
 			if ( ! empty( $claim['all'] ) ) {
 				return true;
 			}
-			if ( $claim['rules'] ) {
-				if ( null === $matches ) {
-					$matches = array_map( 'wc_clean', wc_get_wildcard_postcodes( wc_normalize_postcode( $postcode ), $country ) );
+			if ( $claim['patterns'] ) {
+				if ( null === $candidates ) {
+					// Use the same postcode candidates as WooCommerce's zone matcher.
+					$candidates = array_map( 'wc_clean', wc_get_wildcard_postcodes( wc_normalize_postcode( $postcode ), $country ) );
 				}
-				foreach ( $matches as $match ) {
-					if ( isset( $claim['rules'][ $match ] ) ) {
+				foreach ( $candidates as $candidate ) {
+					if ( isset( $claim['patterns'][ $candidate ] ) ) {
 						return true;
 					}
 				}
