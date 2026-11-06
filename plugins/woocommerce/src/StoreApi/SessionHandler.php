@@ -60,7 +60,8 @@ final class SessionHandler extends WC_Session {
 	/**
 	 * Process the token header to load the correct session.
 	 *
-	 * Verifies the signature here rather than trusting the caller that selected this handler.
+	 * Checks the token here rather than trusting the caller that selected this handler: the signature, and that a
+	 * registered customer's token is only used while that customer is logged in.
 	 */
 	protected function init_session_from_token() {
 		if ( ! CartTokenUtils::validate_cart_token_for_current_user( $this->token ) ) {

@@ -27,4 +27,4 @@ The same method will allow you to checkout using a `Cart-Token` on the `/checkou
 
 ## Logged-in customers
 
-A `Cart-Token` returned to a guest works on its own. A `Cart-Token` returned while a customer is logged in only works while that customer is still logged in, so it stops working when they log out. Send it alongside the customer's authentication, for example an application password. If it's sent without that authentication, the Store API ignores the token and treats the request as if no token was sent.
+A `Cart-Token` for a guest cart works on its own. A `Cart-Token` for a customer account's cart only works while that customer is logged in, so it stops working when they log out. Send it alongside the customer's authentication, for example an application password. If it's sent without that authentication, or while a different customer is logged in, the Store API ignores the token and treats the request as if no token was sent.

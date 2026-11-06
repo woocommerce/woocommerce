@@ -41,7 +41,7 @@ class Authentication {
 	}
 
 	/**
-	 * Use the Store API session handler when a valid Cart-Token is present.
+	 * Use the Store API session handler when the request has a Cart-Token the current user can use.
 	 *
 	 * @since 10.6.0
 	 * @param string $handler Session handler class name.
