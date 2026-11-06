@@ -12,6 +12,8 @@ declare( strict_types = 1 );
  */
 class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 
+	private const PAYABLE_STATUS = 'awaiting-pay';
+
 	/**
 	 * Gateway `enabled` values before the test switched them, keyed by gateway ID.
 	 *
@@ -322,7 +324,7 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_order_pay_shows_notice_for_custom_payable_status_without_stock(): void {
 		$this->enable_gateways( array( WC_Gateway_BACS::ID ) );
-		$this->register_payable_status( 'awaiting-pay' );
+		$this->register_payable_status( self::PAYABLE_STATUS );
 		$product = WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -332,9 +334,9 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 			)
 		);
 		$order   = WC_Helper_Order::create_order( 0, $product );
-		$order->set_status( 'awaiting-pay' );
+		$order->set_status( self::PAYABLE_STATUS );
 		$order->save();
-		$this->assertTrue( $order->has_status( 'awaiting-pay' ), 'Setup: the order keeps the custom status.' );
+		$this->assertTrue( $order->has_status( self::PAYABLE_STATUS ), 'Setup: the order keeps the custom status.' );
 
 		$output = $this->render_pay_page( $order );
 

@@ -8,7 +8,6 @@ use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\Caches\ProductCache;
-use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Helper_Product;
@@ -19,8 +18,6 @@ use WC_Unit_Test_Case;
 
 /**
  * Tests for the failed order stock rule and reservation on ReserveStock.
- *
- * Every test runs with HPOS on and off, because the hold query has one status list per storage.
  */
 class ReserveStockFailedOrderTest extends WC_Unit_Test_Case {
 	use HPOSToggleTrait;
@@ -47,16 +44,7 @@ class ReserveStockFailedOrderTest extends WC_Unit_Test_Case {
 	 * Ensure permanent HPOS tables exist before per-test transactions start.
 	 */
 	public static function wpSetUpBeforeClass(): void {
-		$previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
-		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
-		try {
-			self::setup_cot_tables();
-			if ( OrderUtil::custom_orders_table_usage_is_enabled() !== $previous_hpos_state ) {
-				OrderHelper::toggle_cot_feature_and_usage( $previous_hpos_state );
-			}
-		} finally {
-			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
-		}
+		self::setup_cot_tables();
 	}
 
 	/**
@@ -83,13 +71,15 @@ class ReserveStockFailedOrderTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		global $wpdb;
 
-		$wpdb->query( "DELETE FROM {$wpdb->wc_reserved_stock}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		try {
+			$wpdb->query( "DELETE FROM {$wpdb->wc_reserved_stock}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-		$this->clean_up_cot_setup();
-		$this->toggle_cot_feature_and_usage( $this->prev_hpos_enabled );
-		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
-
-		parent::tearDown();
+			$this->clean_up_cot_setup();
+			$this->toggle_cot_feature_and_usage( $this->prev_hpos_enabled );
+			remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**
@@ -294,7 +284,7 @@ class ReserveStockFailedOrderTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A retry of the same order refreshes its own hold instead of failing on it.
+	 * @testdox A retry of the same order refreshes its own hold instead of failing on it, the zero affected rows fallback is covered by test_retry_keeps_own_hold_when_stock_dropped_below_it.
 	 * @dataProvider provider_hpos
 	 *
 	 * @param bool $hpos Whether the orders table is authoritative.
@@ -313,9 +303,7 @@ class ReserveStockFailedOrderTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * The failed order path refuses this retry through the rule, so the edge of the insert is pinned through reserve_stock_for_order().
-	 *
-	 * @testdox A retry of the plain reservation keeps its own hold when the stock dropped below it in the meantime.
+	 * @testdox A retry through reserve_stock_for_order() keeps its own hold when the stock dropped below it, the failed order path refuses that retry through the rule.
 	 * @dataProvider provider_hpos
 	 *
 	 * @param bool $hpos Whether the orders table is authoritative.
@@ -442,7 +430,7 @@ class ReserveStockFailedOrderTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '(3 available)', $error['message'] );
 
 		$this->set_stock( $parent, 4 );
-		// A cached variation instance keeps the parent stock it was read with, and a parent save does not evict it.
+		// A parent save does not evict cached variation instances, which keep the parent stock they were read with.
 		foreach ( $variations as $variation ) {
 			wc_get_container()->get( ProductCache::class )->remove( $variation->get_id() );
 		}

@@ -66,10 +66,24 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	private array $registered_checkout_fields = array();
 
 	/**
+	 * Billing props of `WC()->customer` before the test, since pay_action() copies the order's address onto it.
+	 *
+	 * @var array<string, string>
+	 */
+	private array $original_customer_billing = array();
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		$this->original_customer_billing = array(
+			'billing_country'  => WC()->customer->get_billing_country(),
+			'billing_state'    => WC()->customer->get_billing_state(),
+			'billing_postcode' => WC()->customer->get_billing_postcode(),
+			'billing_city'     => WC()->customer->get_billing_city(),
+		);
 
 		$this->original_request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_url( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : null;
 
@@ -109,6 +123,9 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		wp_set_current_user( 0 );
 		wc_clear_notices();
 		WC()->session = $this->original_session;
+
+		WC()->customer->set_props( $this->original_customer_billing );
+		WC()->customer->save();
 
 		foreach ( $this->registered_checkout_fields as $field_id ) {
 			__internal_woocommerce_blocks_deregister_checkout_field( $field_id );
