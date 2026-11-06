@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Block checkout when a saved cart holds a conflicting individual-use coupon combination, while leaving the codes applied so the shopper can remove them.

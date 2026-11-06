@@ -824,6 +824,94 @@ class WC_Cart extends WC_Legacy_Cart {
 				$this->remove_coupon( $code );
 			}
 		}
+
+		$conflicting_coupon = $this->get_conflicting_individual_use_coupon();
+		if ( $conflicting_coupon ) {
+			$conflicting_coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY );
+		}
+	}
+
+	/**
+	 * Find an individual-use coupon that cannot remain applied with the other cart coupons.
+	 *
+	 * Applied when a coupon's individual-use setting changes after it was already in the cart.
+	 * Returns the conflicting coupon so callers can surface an error without removing codes.
+	 *
+	 * @since 11.4.0
+	 * @return WC_Coupon|null
+	 */
+	public function get_conflicting_individual_use_coupon() {
+		$applied_coupons = $this->get_applied_coupons();
+
+		if ( count( $applied_coupons ) < 2 ) {
+			return null;
+		}
+
+		$coupons = array();
+		foreach ( $applied_coupons as $code ) {
+			$coupons[ $code ] = new WC_Coupon( $code );
+		}
+
+		foreach ( $coupons as $code => $individual_use_coupon ) {
+			if ( ! $individual_use_coupon->get_individual_use() ) {
+				continue;
+			}
+
+			$other_applied_codes = array_values(
+				array_filter(
+					$applied_coupons,
+					static function ( $applied_code ) use ( $code ) {
+						return ! wc_is_same_coupon( $applied_code, $code );
+					}
+				)
+			);
+
+			/**
+			 * Filters which coupons to keep when an individual use coupon is applied.
+			 *
+			 * Honoured during revalidation so combinations retained through this filter are not
+			 * treated as conflicts after the individual-use setting changes.
+			 *
+			 * @since 2.6.0
+			 * @param array     $coupons_to_keep        Coupon codes to keep.
+			 * @param WC_Coupon $individual_use_coupon Individual use coupon.
+			 * @param array     $applied_coupons       Other applied coupon codes.
+			 */
+			$coupons_to_keep = apply_filters( 'woocommerce_apply_individual_use_coupon', array(), $individual_use_coupon, $other_applied_codes );
+
+			foreach ( $coupons as $other_code => $other_coupon ) {
+				if ( wc_is_same_coupon( $code, $other_code ) ) {
+					continue;
+				}
+
+				$retained = false;
+				foreach ( (array) $coupons_to_keep as $keep_code ) {
+					if ( wc_is_same_coupon( (string) $keep_code, $other_code ) ) {
+						$retained = true;
+						break;
+					}
+				}
+
+				if ( $retained ) {
+					continue;
+				}
+
+				/**
+				 * Filters whether a coupon can remain applied alongside an individual use coupon.
+				 *
+				 * @since 2.6.0
+				 * @param bool      $apply_with_individual_use_coupon Defaults to false.
+				 * @param WC_Coupon $other_coupon                     Coupon applied alongside the individual use coupon.
+				 * @param WC_Coupon $individual_use_coupon            Individual use coupon already applied to the cart.
+				 * @param array     $applied_coupons                  Applied coupon codes.
+				 */
+				if ( false === apply_filters( 'woocommerce_apply_with_individual_use_coupon', false, $other_coupon, $individual_use_coupon, $applied_coupons ) ) {
+					return $individual_use_coupon;
+				}
+			}
+		}
+
+		return null;
 	}
 
 	/**
