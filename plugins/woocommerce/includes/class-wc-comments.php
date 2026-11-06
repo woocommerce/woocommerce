@@ -284,6 +284,7 @@ class WC_Comments {
 	 * @deprecated 11.4.0
 	 *
 	 * @param int $post_id Post ID.
+	 * @return void
 	 */
 	public static function clear_transients( $post_id ) {
 		wc_deprecated_function( __METHOD__, '11.4.0' );
