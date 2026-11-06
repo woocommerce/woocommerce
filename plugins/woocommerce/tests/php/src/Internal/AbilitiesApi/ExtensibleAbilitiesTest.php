@@ -3558,6 +3558,45 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should save nothing when change() returns a WP_Error without errors.
+	 */
+	public function test_an_empty_error_from_change_saves_nothing(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$ability = new class(
+			'test-ext/product-rename',
+			array(
+				'label'               => 'Rename product',
+				'description'         => 'Renames a product.',
+				'category'            => 'woocommerce',
+				'output_schema'       => array( 'type' => 'object' ),
+				'permission_callback' => '__return_true',
+			)
+		) extends TestProductRenameAbility {
+			/**
+			 * Rename the product, then refuse with an empty error.
+			 *
+			 * @param \WC_Product $subject Product.
+			 * @param array       $input   Ability input.
+			 * @return \WP_Error
+			 */
+			protected function change( $subject, array $input ) {
+				parent::change( $subject, $input );
+				return new \WP_Error();
+			}
+		};
+
+		$result = $ability->execute_change(
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
 	 * @testdox Should return a fixed 500 error when the order write fails, though the order's save() catches the exception.
 	 */
 	public function test_a_failed_order_write_returns_a_fixed_error(): void {
