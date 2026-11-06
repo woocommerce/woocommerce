@@ -110,6 +110,23 @@
 	}
 }
 
+// On small screens the buttons span the full width and the note aligns left, like Continue
+// and its note on the extensions step.
+@include breakpoint("<782px") {
+	.woocommerce-profiler-purple-theme__footer {
+		align-items: stretch;
+		text-align: start;
+	}
+
+	.woocommerce-profiler-purple-theme__buttons {
+		flex-direction: column;
+
+		.woocommerce-profiler-purple-theme__continue {
+			width: 100%;
+		}
+	}
+}
+
 // Like the note under Continue on the extensions step.
 .woocommerce-profiler-purple-theme__note {
 	margin: $gap-small 0 0;
