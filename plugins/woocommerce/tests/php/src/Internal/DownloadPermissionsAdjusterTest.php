@@ -3,6 +3,8 @@
  * DownloadPermissionsAdjusterTest class file.
  */
 
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Tests\Internal;
 
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
@@ -37,11 +39,10 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 		);
 		add_filter(
 			'woocommerce_downloadable_file_exists',
-			function ( $exists, $filename ) {
+			function () {
 				return true;
 			},
-			10,
-			2
+			10
 		);
 
 		// In these tests, we are not directly concerned with Approved Download Directory functionality.
@@ -92,10 +93,10 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'as_get_scheduled_actions'  => function ( $args, $return_format ) use ( &$as_get_scheduled_actions_invoked ) {
+				'as_get_scheduled_actions'  => function () use ( &$as_get_scheduled_actions_invoked ) {
 					$as_get_scheduled_actions_invoked = true;
 				},
-				'as_schedule_single_action' => function ( $timestamp, $hook, $args ) use ( &$as_schedule_single_action_invoked ) {
+				'as_schedule_single_action' => function () use ( &$as_schedule_single_action_invoked ) {
 					$as_schedule_single_action_invoked = true;
 				},
 			)
@@ -120,13 +121,11 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 		$as_schedule_single_action_invoked = false;
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'as_get_scheduled_actions'  => function ( $args, $return_format ) use ( &$as_get_scheduled_actions_invoked ) {
-					unset( $args, $return_format );
+				'as_get_scheduled_actions'  => function () use ( &$as_get_scheduled_actions_invoked ) {
 					$as_get_scheduled_actions_invoked = true;
 					return array();
 				},
-				'as_schedule_single_action' => function ( $timestamp, $hook, $args ) use ( &$as_schedule_single_action_invoked ) {
-					unset( $timestamp, $hook, $args );
+				'as_schedule_single_action' => function () use ( &$as_schedule_single_action_invoked ) {
 					$as_schedule_single_action_invoked = true;
 				},
 			)
@@ -149,11 +148,11 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'as_get_scheduled_actions'  => function ( $args, $return_format ) use ( &$as_get_scheduled_actions_args ) {
-					$as_get_scheduled_actions_args = $args;
+				'as_get_scheduled_actions'  => function ( $params ) use ( &$as_get_scheduled_actions_args ) {
+					$as_get_scheduled_actions_args = $params;
 					return array( 1 );
 				},
-				'as_schedule_single_action' => function ( $timestamp, $hook, $args ) use ( &$as_schedule_single_action_invoked ) {
+				'as_schedule_single_action' => function () use ( &$as_schedule_single_action_invoked ) {
 					$as_schedule_single_action_invoked = true;
 				},
 			)
@@ -180,7 +179,7 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'as_get_scheduled_actions'  => function ( $params, $return_format ) use ( &$as_get_scheduled_actions_args ) {
+				'as_get_scheduled_actions'  => function ( $params ) use ( &$as_get_scheduled_actions_args ) {
 					$as_get_scheduled_actions_args = $params;
 					return array();
 				},
@@ -188,7 +187,8 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 					$as_schedule_single_action_args = array( $timestamp, $hook, $args );
 				},
 				'time'                      => function () {
-					return 0; },
+					return 0;
+				},
 			)
 		);
 
