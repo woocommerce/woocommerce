@@ -12,6 +12,12 @@ on:
       wave:
         type: string
         required: true
+      builder:
+        type: string
+        default: docker-container
+      cache-sample:
+        type: number
+        default: 0
 
 permissions:
   contents: read
@@ -51,18 +57,23 @@ jobs:
           daemon-config: |
             {"max-download-attempts": 10, "max-concurrent-downloads": 3}
       - name: Start cache-capable builder
-        if: startsWith(inputs.variant, 'cache-')
+        if: startsWith(inputs.variant, 'cache-') && inputs.builder == 'docker-container'
         run: |
           buildkit_image=$(jq -r '.images["moby/buildkit:buildx-stable-1"]' "$BENCH_INPUTS")
           docker buildx create --name benchmark --driver docker-container --driver-opt "image=$buildkit_image" --driver-opt default-load=true --use --bootstrap
           echo 'BUILDX_BUILDER=benchmark' >> "$GITHUB_ENV"
+      - name: Check native cache support
+        if: startsWith(inputs.variant, 'cache-') && inputs.builder == 'docker'
+        run: |
+          docker info --format '{{json .DriverStatus}}' | jq -e '.[] | select(.[0] == "driver-type" and .[1] == "io.containerd.snapshotter.v1")'
+          docker buildx inspect > "$BENCH_RESULTS/builder.txt"
       - name: Restore image layers
         id: cache
         if: contains(fromJSON('["cache-warm","cache-miss","cache-incompatible"]'), inputs.variant)
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ env.BENCH_CACHE }}
-          key: phpunit-benchmark-v1-${{ github.run_id }}-${{ hashFiles('benchmark-inputs.json', 'pnpm-lock.yaml') }}-${{ inputs.sample }}${{ inputs.variant == 'cache-miss' && '-deliberate-miss' || '' }}
+          key: phpunit-benchmark-v1-${{ github.run_id }}-${{ hashFiles('benchmark-inputs.json', 'pnpm-lock.yaml') }}-${{ inputs.cache-sample || inputs.sample }}${{ inputs.variant == 'cache-miss' && '-deliberate-miss' || '' }}
       - name: Check cache delivery
         if: contains(fromJSON('["cache-warm","cache-incompatible"]'), inputs.variant)
         env:
@@ -79,7 +90,7 @@ jobs:
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ env.BENCH_CACHE }}
-          key: phpunit-benchmark-v1-${{ github.run_id }}-${{ hashFiles('benchmark-inputs.json', 'pnpm-lock.yaml') }}-${{ inputs.sample }}
+          key: phpunit-benchmark-v1-${{ github.run_id }}-${{ hashFiles('benchmark-inputs.json', 'pnpm-lock.yaml') }}-${{ inputs.cache-sample || inputs.sample }}
       - name: End all-in setup timing
         run: date +%s.%N > "$BENCH_RESULTS/setup-end"
       - name: Record runtime and verify fixtures

@@ -1,0 +1,57 @@
+name: PHPUnit startup native-cache benchmark
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ci/benchmark-phpunit-startup]
+
+permissions:
+  contents: read
+
+jobs:
+  inputs:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[native-benchmark]')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Check harness
+        run: node --test .github/workflows/scripts/phpunit-startup-benchmark/*.test.mjs
+      - name: Resolve identical inputs for every sample
+        run: node .github/workflows/scripts/phpunit-startup-benchmark/resolve.mjs benchmark-inputs.json
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: benchmark-inputs
+          path: benchmark-inputs.json
+          retention-days: 7
+          overwrite: true
+
+  cold:
+    needs: inputs
+    uses: ./.github/workflows/phpunit-startup-sample.yml
+    with:
+      sample: 1
+      variant: cache-cold
+      wave: cold
+      builder: docker
+
+  warm:
+    needs: cold
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        sample: [1, 2, 3]
+        variant: [baseline, cache-warm]
+        include:
+          - sample: 1
+            variant: cache-miss
+          - sample: 1
+            variant: cache-incompatible
+    uses: ./.github/workflows/phpunit-startup-sample.yml
+    with:
+      sample: ${{ matrix.sample }}
+      cache-sample: 1
+      variant: ${{ matrix.variant }}
+      wave: warm
+      builder: docker
