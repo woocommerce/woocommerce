@@ -149,6 +149,7 @@ final class BlockTypesController {
 
 	/**
 	 * Register blocks, hooking up assets and render functions as needed.
+	 *
 	 * @return void
 	 */
 	public function register_blocks() {

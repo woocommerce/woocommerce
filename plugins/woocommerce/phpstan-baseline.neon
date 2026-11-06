@@ -50584,12 +50584,6 @@ parameters:
 			path: src/Blocks/BlockTypesController.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypesController\:\:register_blocks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypesController.php
-
-		-
 			message: '#^Parameter \#1 \$str of function strtolower expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
