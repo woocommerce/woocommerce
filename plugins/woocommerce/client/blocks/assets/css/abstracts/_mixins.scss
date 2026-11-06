@@ -55,12 +55,6 @@ $fontSizes: (
 @mixin spinner-animation() {
 	@keyframes spinner__animation {
 		0% {
-			animation-timing-function: cubic-bezier(
-				0.5856,
-				0.0703,
-				0.4143,
-				0.9297
-			);
 			transform: rotate(0deg);
 		}
 		100% {
@@ -119,11 +113,10 @@ $fontSizes: (
 		);
 		transform: translateX(-100%);
 		@include loading-animation();
-		animation: loading__animation 1.5s ease-in-out infinite;
-	}
 
-	@media screen and (prefers-reduced-motion: reduce) {
-		animation: none;
+		@include motion-safe {
+			animation: loading__animation 1.5s ease-in-out infinite;
+		}
 	}
 }
 
@@ -366,10 +359,8 @@ $fontSizes: (
 			color-mix(in srgb, currentColor 5%, transparent) 50%,
 			transparent 100%
 		);
-		animation: wc-skeleton-shimmer 1.25s infinite;
-
-		@media (prefers-reduced-motion: reduce) {
-			animation: none;
+		@include motion-safe {
+			animation: wc-skeleton-shimmer 1.25s infinite;
 		}
 	}
 
@@ -381,17 +372,13 @@ $fontSizes: (
 }
 
 @mixin skeleton-animation-fade() {
-	transition: background-color 0.2s ease;
-
-	&::after {
-		transition: background-color 0.2s ease;
+	@include motion-safe {
+		transition: background-color var(--wpds-motion-duration-md) var(--wpds-motion-easing-subtle);
 	}
 
-	@media (prefers-reduced-motion: reduce) {
-		transition: background-color 0.2s ease;
-
-		&::after {
-			transition: background-color 0.2s ease;
+	&::after {
+		@include motion-safe {
+			transition: background-color var(--wpds-motion-duration-md) var(--wpds-motion-easing-subtle);
 		}
 	}
 }
@@ -405,6 +392,37 @@ $fontSizes: (
 	display: flex;
 	justify-content: flex-start;
 	align-items: flex-start;
+}
+
+// Adds motion only for shoppers who haven't asked for reduced motion, as WPDS components do. Anything
+// inside must be motion alone, so the resting state still renders without it.
+@mixin motion-safe() {
+	@media not (prefers-reduced-motion) {
+		@content;
+	}
+}
+
+// Sets --wc-motion-index on sibling rows so entrances can stagger by index × --wpds-motion-duration-xs.
+// Rows past $cap share the last index, which caps the total stagger at about 300ms.
+@mixin motion-stagger-index($cap: 7) {
+	@for $i from 1 to $cap {
+		&:nth-child(#{$i}) {
+			--wc-motion-index: #{$i - 1};
+		}
+	}
+	&:nth-child(n + #{$cap}) {
+		--wc-motion-index: #{$cap - 1};
+	}
+}
+
+// Stagger delay for the row at --wc-motion-index, plus $extra settle steps of --wpds-motion-duration-xs.
+@function motion-stagger-delay($extra: 0) {
+	@return calc((var(--wc-motion-index) + #{$extra}) * var(--wpds-motion-duration-xs));
+}
+
+// Exit duration for an entrance that uses --wpds-motion-duration-$step: exits run shorter by --wc-motion-exit-ratio.
+@function motion-exit($step) {
+	@return calc(var(--wpds-motion-duration-#{$step}) * var(--wc-motion-exit-ratio));
 }
 
 @keyframes wc-skeleton-shimmer {

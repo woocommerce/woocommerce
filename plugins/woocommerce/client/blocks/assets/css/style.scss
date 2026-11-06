@@ -1,5 +1,15 @@
 :root {
 	--wc-separator-color: color-mix(in srgb, currentColor 20%, transparent);
+
+	// Motion constants with no WordPress Design System equivalent. Durations and easings come straight
+	// from --wpds-motion-*. See docs/contributors/motion.md.
+	--wc-motion-exit-ratio: 0.8;
+	--wc-scale-press: 0.97;
+	--wc-scale-pulse-peak: 1.05;
+	--wc-stretch-along: 1.12;
+	--wc-stretch-across: 0.893; // 1 / 1.12, so the area stays the same.
+	--wc-scale-icon-from: 0.8;
+	--wc-blur-icon: 4px;
 }
 
 body.wc-modal--open {
