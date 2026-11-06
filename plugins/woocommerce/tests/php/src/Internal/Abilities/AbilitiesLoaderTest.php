@@ -427,8 +427,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			}
 			$description = $schema['properties']['type']['description'];
 			$this->assertStringContainsString( 'Fields each type takes.', $description );
-			$this->assertStringContainsString( 'external: name, sku, description, short_description, status, regular_price, sale_price, external_url, button_text', $description );
-			$this->assertStringContainsString( 'grouped: name, sku, description, short_description, status, grouped_products', $description );
+			$this->assertStringContainsString( 'external: name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, regular_price, sale_price, date_on_sale_from, date_on_sale_to, tax_status, external_url, button_text', $description );
+			$this->assertStringContainsString( 'grouped: name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, grouped_products', $description );
 			$this->assertStringEndsWith( 'Applies to: grouped.', $schema['properties']['grouped_products']['description'] );
 			$this->assertStringContainsString( 'Applies to: ', $schema['properties']['regular_price']['description'] );
 			$this->assertStringNotContainsString( 'Applies to: ', $schema['properties']['sku']['description'] ?? '' );
@@ -1874,7 +1874,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( '9.00', $subscription['product']['regular_price'] );
 		$this->assertWPError( $bundle_price );
 		$this->assertSame( 'woocommerce_product_field_unsupported', $bundle_price->get_error_code() );
-		$this->assertSame( 'The test-bundle product type does not take regular_price. It takes name, sku, description, short_description, status, virtual, downloadable.', $bundle_price->get_error_message() );
+		$this->assertSame( 'The test-bundle product type does not take regular_price. It takes name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, virtual, downloadable, weight, dimensions, shipping_class.', $bundle_price->get_error_message() );
 	}
 
 	/**
@@ -3194,7 +3194,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_product_field_unsupported', $result->get_error_code() );
-		$this->assertSame( 'The grouped product type does not take regular_price. It takes name, sku, description, short_description, status, grouped_products.', $result->get_error_message() );
+		$this->assertSame( 'The grouped product type does not take regular_price. It takes name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, grouped_products.', $result->get_error_message() );
 	}
 
 	/**
@@ -3900,8 +3900,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $result );
-		$this->assertTrue( $result['deleted'] );
 		$this->assertSame( $product->get_id(), $result['id'] );
+		$this->assertSame( 'deleted', $result['status'] );
 		$this->assertNull( get_post( $product->get_id() ) );
 	}
 
@@ -3919,7 +3919,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $result );
-		$this->assertTrue( $result['deleted'] );
+		$this->assertSame( 'deleted', $result['status'] );
 		$this->assertNull( get_post( $variation_id ) );
 	}
 
@@ -3937,7 +3937,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $result );
-		$this->assertTrue( $result['deleted'] );
+		$this->assertSame( 'trash', $result['status'] );
 		$this->assertSame( 'trash', get_post_status( $product->get_id() ) );
 	}
 
