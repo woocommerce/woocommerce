@@ -269,7 +269,7 @@ WooCommerce reads an order's status to decide whether it still needs payment. Or
 
 While the shopper may still need to pay, for example after a lost response or a status lookup that could not finish, leave the order **Pending payment**. When stock management is on, WooCommerce cancels unpaid orders after the hold stock time, 60 minutes by default, so use **Pending payment** for short waits only. If the provider accepted the payment and will confirm it later, set the order to **On-Hold** and send the shopper to the order received page. If the payment fails, leave the order **Pending payment** or set it to **Failed**, so the shopper can pay again.
 
-Avoid holding an order in a custom status while the outcome is open. The `woocommerce_valid_order_statuses_for_payment` filter can make a custom status payable, but only the block checkout then retries on the same order, setting it back to **Pending payment**. The classic checkout creates a new order, which does not carry the transaction ID saved on the earlier one.
+Avoid holding an order in a custom status while the outcome is open. The `woocommerce_valid_order_statuses_for_payment` filter can make a custom status payable, but when the shopper submits checkout again, only the block checkout stays on the same order, setting it back to **Pending payment**. The classic checkout creates a new order, which does not carry the transaction ID saved on the earlier one.
 
 ### Make process_payment() safe to repeat
 
