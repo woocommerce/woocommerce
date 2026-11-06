@@ -26,7 +26,7 @@ class ItemQuantityLimits {
 	/**
 	 * Get the minimum quantity accepted for an existing order item in the admin editor.
 	 *
-	 * @since 11.4.0
+	 * @since 11.2.0
 	 * @param WC_Order_Item        $item    Line item being edited.
 	 * @param WC_Product|bool|null $product The item's product when the caller already
 	 *                                      resolved it; null to resolve it here.
@@ -63,7 +63,8 @@ class ItemQuantityLimits {
 	 *
 	 * Plugins can still narrow or modify the step with 'woocommerce_quantity_input_step_admin'.
 	 *
-	 * @since 11.4.0
+	 * @since 11.2.0
+	 * @since 11.4.0 Decimal stores preserve custom product steps; the filter always receives a numeric step.
 	 * @param WC_Order_Item        $item    Line item being edited.
 	 * @param WC_Product|bool|null $product The item's product when the caller already
 	 *                                      resolved it; null to resolve it here.
@@ -90,24 +91,15 @@ class ItemQuantityLimits {
 		 */
 		$filtered_step = apply_filters( 'woocommerce_quantity_input_step_admin', $base_step, $product, 'edit' );
 
-		if ( 'any' === $filtered_step ) {
+		$step_num = $this->resolve_step( $filtered_step, $base_step );
+
+		if ( null === $step_num ) {
 			return 'any';
-		}
-
-		$step_num = is_numeric( $filtered_step ) && (float) $filtered_step > 0 ? (float) $filtered_step : $base_step;
-
-		if ( ! wc_is_stock_amount_integer() ) {
-			// On decimal stores, if no custom step is defined (product step is 1.0 and the filter did not
-			// change it), allow any decimal quantity.
-			if ( abs( $step_num - 1.0 ) < 0.000001 && abs( $base_step - 1.0 ) < 0.000001 ) {
-				return 'any';
-			}
 		}
 
 		// If the stored quantity does not align with the step, fall back to 'any'
 		// so existing orders remain editable and do not block the admin form submission.
-		$division = ( $stored_qty - $min_val ) / $step_num;
-		if ( abs( $division - round( $division ) ) > 0.000001 ) {
+		if ( ! $this->is_step_aligned( $stored_qty, $min_val, $step_num ) ) {
 			return 'any';
 		}
 
@@ -117,7 +109,8 @@ class ItemQuantityLimits {
 	/**
 	 * Validate the quantity requested for a product being added to an order.
 	 *
-	 * @since 11.4.0
+	 * @since 11.2.0
+	 * @since 11.4.0 Decimal stores preserve custom product steps; the filter always receives a numeric step.
 	 * @param float      $qty     Requested quantity.
 	 * @param WC_Product $product Product being added.
 	 * @return void
@@ -149,25 +142,48 @@ class ItemQuantityLimits {
 		 */
 		$filtered_step = apply_filters( 'woocommerce_quantity_input_step_admin', $base_step, $product, 'add' );
 
+		$step_num = $this->resolve_step( $filtered_step, $base_step );
+
+		if ( null !== $step_num && ! $this->is_step_aligned( $qty, $min, $step_num ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- step_mismatch_exception() strips and decodes the message for a JS alert.
+			throw $this->step_mismatch_exception( $product->get_name(), $step_num );
+		}
+	}
+
+	/**
+	 * Resolve the effective step from the filtered value.
+	 *
+	 * @param mixed $filtered_step Value returned by 'woocommerce_quantity_input_step_admin'.
+	 * @param float $base_step     The product's numeric purchase step.
+	 * @return float|null Step to enforce, or null when any quantity is accepted.
+	 */
+	private function resolve_step( $filtered_step, float $base_step ): ?float {
 		if ( 'any' === $filtered_step ) {
-			return;
+			return null;
 		}
 
 		$step_num = is_numeric( $filtered_step ) && (float) $filtered_step > 0 ? (float) $filtered_step : $base_step;
 
-		if ( ! wc_is_stock_amount_integer() ) {
-			// On decimal stores, if no custom step is defined (product step is 1.0 and the filter did not
-			// change it), allow any decimal quantity.
-			if ( abs( $step_num - 1.0 ) < 0.000001 && abs( $base_step - 1.0 ) < 0.000001 ) {
-				return;
-			}
+		// On decimal stores, an unchanged default step of 1 accepts any decimal quantity.
+		if ( ! wc_is_stock_amount_integer() && abs( $step_num - 1.0 ) < 0.000001 && abs( $base_step - 1.0 ) < 0.000001 ) {
+			return null;
 		}
 
-		$division = ( $qty - $min ) / $step_num;
-		if ( abs( $division - round( $division ) ) > 0.000001 ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- step_mismatch_exception() strips and decodes the message for a JS alert.
-			throw $this->step_mismatch_exception( $product->get_name(), $step_num );
-		}
+		return $step_num;
+	}
+
+	/**
+	 * Whether a quantity is a whole multiple of the step, counted from the minimum.
+	 *
+	 * @param float $qty  Quantity.
+	 * @param float $min  Minimum quantity.
+	 * @param float $step Step (greater than zero).
+	 * @return bool
+	 */
+	private function is_step_aligned( float $qty, float $min, float $step ): bool {
+		$division = ( $qty - $min ) / $step;
+
+		return abs( $division - round( $division ) ) <= 0.000001;
 	}
 
 	/**
@@ -175,7 +191,7 @@ class ItemQuantityLimits {
 	 *
 	 * Item ids that do not belong to the given order are ignored.
 	 *
-	 * @since 11.4.0
+	 * @since 11.2.0
 	 * @param WC_Order $order The order the posted items belong to.
 	 * @param array    $items Posted items, as parsed from the serialized form data
 	 *                        (the same shape wc_save_order_items receives).
@@ -226,8 +242,7 @@ class ItemQuantityLimits {
 
 			if ( 'any' !== $step ) {
 				$step_num = (float) $step;
-				$division = ( $qty - $min ) / $step_num;
-				if ( abs( $division - round( $division ) ) > 0.000001 ) {
+				if ( ! $this->is_step_aligned( $qty, $min, $step_num ) ) {
 					// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- step_mismatch_exception() strips and decodes the message for a JS alert.
 					throw $this->step_mismatch_exception( $item->get_name(), $step_num );
 				}
@@ -243,7 +258,7 @@ class ItemQuantityLimits {
 	 * any resulting markup is stripped. The name-embedding exceptions in the
 	 * AJAX handlers apply the same treatment.
 	 *
-	 * @since 11.4.0
+	 * @since 11.2.0
 	 * @param string $name Product or order item name.
 	 * @param float  $min  Minimum accepted quantity.
 	 * @return \Exception
@@ -271,7 +286,6 @@ class ItemQuantityLimits {
 	 * HTML: entities are decoded first so stored names read naturally, then
 	 * any resulting markup is stripped.
 	 *
-	 * @since 11.4.0
 	 * @param string $name Product or order item name.
 	 * @param float  $step Allowed stepping value.
 	 * @return \Exception
