@@ -315,6 +315,74 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An order created from the cart keeps the cart's shipping tax when a rate is taxed again in one class and the split had a small part in another.
+	 */
+	public function test_rate_taxed_again_in_one_class_with_a_small_part_keeps_the_cart_tax(): void {
+		$this->enable_split();
+		$products = $this->create_products( array( array( '', ProductTaxStatus::TAXABLE, 99, false ), array( $this->create_tax_class( 'Five', '5.0000' ), ProductTaxStatus::TAXABLE, 1, false ) ) );
+		add_filter(
+			'woocommerce_package_rates',
+			function ( $rates ) {
+				foreach ( $rates as $rate ) {
+					$rate->set_cost( 5 );
+					$rate->set_taxes( WC_Tax::calc_shipping_tax( 5, WC_Tax::get_shipping_tax_rates() ) );
+				}
+				return $rates;
+			}
+		);
+
+		$this->fill_cart( $products );
+		WC()->cart->calculate_totals();
+		$order = $this->create_order_from_cart();
+
+		// 20% of 5.00. The split scaled to 5.00 would charge 0.9925, close enough to pass for the cart's tax if only rounding were allowed for.
+		$this->assertEqualsWithDelta( 1.0, (float) WC()->cart->get_shipping_tax(), 0.001 );
+		$this->assertEqualsWithDelta( 1.0, (float) $order->get_shipping_tax(), 0.001 );
+	}
+
+	/**
+	 * @testdox An order created from the cart keeps the cart's shipping tax when a rate's cost and split taxes are scaled.
+	 *
+	 * @testWith [false, 0.3]
+	 *           [true, 0.25]
+	 *
+	 * @param bool  $including_tax Whether shipping costs are entered with tax.
+	 * @param float $expected      Expected shipping tax.
+	 */
+	public function test_rate_with_scaled_cost_keeps_the_cart_tax( bool $including_tax, float $expected ): void {
+		$this->enable_split();
+		if ( $including_tax ) {
+			add_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
+		}
+		$products = $this->create_products( array( array( '', ProductTaxStatus::TAXABLE, 10, false ), array( 'zero-rate', ProductTaxStatus::TAXABLE, 90, false ) ) );
+		add_filter(
+			'woocommerce_package_rates',
+			function ( $rates ) {
+				foreach ( $rates as $rate ) {
+					$rate->set_cost( $rate->get_cost() * 1.5 );
+					$rate->set_taxes(
+						array_map(
+							function ( $tax ) {
+								return $tax * 1.5;
+							},
+							$rate->get_taxes()
+						)
+					);
+				}
+				return $rates;
+			}
+		);
+
+		$this->fill_cart( $products );
+		WC()->cart->calculate_totals();
+		$order = $this->create_order_from_cart();
+
+		// 1.5 times the tax on the standard rate tenth of 10.00: 20% of 1.00, or the 20% included in 1.00.
+		$this->assertEqualsWithDelta( $expected, (float) WC()->cart->get_shipping_tax(), 0.001 );
+		$this->assertEqualsWithDelta( $expected, (float) $order->get_shipping_tax(), 0.001 );
+	}
+
+	/**
 	 * @testdox Recalculating an order saves the unrounded costs it taxed on the shipping line.
 	 */
 	public function test_recalculate_saves_the_costs_it_taxed(): void {
