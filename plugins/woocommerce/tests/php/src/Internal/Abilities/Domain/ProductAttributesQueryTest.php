@@ -109,6 +109,16 @@ class ProductAttributesQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should accept a call without input.
+	 */
+	public function test_accepts_no_input(): void {
+		$result = $this->sut->execute();
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 1, $result['page'] );
+	}
+
+	/**
 	 * @testdox Should refuse a customer.
 	 */
 	public function test_refuses_customer(): void {

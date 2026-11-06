@@ -616,6 +616,41 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should page through global attribute terms in the order set on the attribute, as product-attributes-query lists them.
+	 */
+	public function test_pages_global_attribute_terms_in_attribute_order(): void {
+		$attribute = \WC_Helper_Product::create_attribute( 'Test Shade', array( 'Amber', 'Bronze', 'Coral' ) );
+		foreach ( $attribute['term_ids'] as $index => $term_id ) {
+			update_term_meta( $term_id, 'order', 3 - $index );
+		}
+		$ability = new Ability( ProductTermsQuery::get_name(), ProductTermsQuery::get_registration_args() );
+
+		$first  = $ability->execute(
+			array(
+				'taxonomy' => 'pa_test-shade',
+				'per_page' => 2,
+			)
+		);
+		$second = $ability->execute(
+			array(
+				'taxonomy' => 'pa_test-shade',
+				'per_page' => 2,
+				'page'     => 2,
+			)
+		);
+		$named  = $ability->execute(
+			array(
+				'taxonomy' => 'pa_test-shade',
+				'orderby'  => 'name',
+			)
+		);
+
+		$this->assertSame( array( 'Coral', 'Bronze' ), wp_list_pluck( $first['terms'], 'name' ) );
+		$this->assertSame( array( 'Amber' ), wp_list_pluck( $second['terms'], 'name' ) );
+		$this->assertSame( array( 'Amber', 'Bronze', 'Coral' ), wp_list_pluck( $named['terms'], 'name' ), 'An explicit orderby still applies.' );
+	}
+
+	/**
 	 * @testdox Should tell a store manager that a global attribute taxonomy does not exist.
 	 */
 	public function test_refuses_unknown_global_attribute_taxonomy(): void {
