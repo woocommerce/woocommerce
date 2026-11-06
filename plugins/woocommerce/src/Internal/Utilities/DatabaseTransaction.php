@@ -179,8 +179,7 @@ final class DatabaseTransaction {
 
 	/**
 	 * Close the given level and every level that a caller left open inside it. After an error that lost the
-	 * write, roll back instead of committing. The COMMIT itself can lose the write too, as Galera reports a
-	 * certification conflict.
+	 * write, roll back instead of committing. A COMMIT can fail too, when Galera finds a certification conflict.
 	 *
 	 * @param int  $level  Level to close. 0 is the transaction itself.
 	 * @param bool $commit Whether to keep the changes.
