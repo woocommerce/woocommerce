@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Hide order numbers from account page titles when visitors cannot view the order.
