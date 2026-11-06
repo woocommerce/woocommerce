@@ -89,7 +89,8 @@ final class MappingResolver {
 			$target = isset( $auto_mapped[ $header ] ) ? $auto_mapped[ $header ] : '';
 
 			// get_auto_mapped_columns() leaves an unrecognised header as its own lowercased text, unless that text happens to be a valid key such as `sku`.
-			if ( ! isset( $overrides[ $header ] ) && strtolower( $header ) === $target && ! $this->is_valid_target( $target ) ) {
+			// An empty header, such as from a trailing comma, has no name to report or map to meta, so it stays unmapped.
+			if ( '' !== $header && ! isset( $overrides[ $header ] ) && strtolower( $header ) === $target && ! $this->is_valid_target( $target ) ) {
 				$unknown[] = $header;
 				$target    = self::UNKNOWN_META === $unknown_mode ? 'meta:' . $header : '';
 			}
