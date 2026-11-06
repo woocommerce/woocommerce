@@ -66,6 +66,18 @@ Type-aware rules — anything requiring `languageOptions.parserOptions.projectSe
 
 Do not register your own copy of `eslint-plugin-import` or `eslint-plugin-react`. Neither supports ESLint v10, and they are consumed only as the `fixupPluginRules`-wrapped instances that `@wordpress/eslint-plugin` registers. A second copy is fatal (`Cannot redefine plugin`), since Flat Config keys plugins by object identity. Configure their rules on the inherited plugins instead.
 
+## Editors
+
+eslint is not publicly hoisted to the repository root — each package declares its own copy, so that a package's resolved version is the one it asks for rather than whichever copy reached the root first. An editor that looks for eslint at the workspace root therefore finds nothing. In VS Code, point the ESLint extension at a workspace that declares it:
+
+```json
+"eslint.nodePath": "tools/eslint-config/node_modules"
+```
+
+`.vscode/` is gitignored, so this belongs in your own workspace settings rather than in the repository.
+
+The plugin README's [Editors](../../packages/js/eslint-plugin/README.md#editors) section covers `eslint.workingDirectories`, which makes the extension resolve one config per package instead of one from the window root. Both settings are usually wanted together.
+
 ## See also
 
 - [`@woocommerce/eslint-plugin`](../../packages/js/eslint-plugin/README.md) — the public ruleset, including its Flat Config migration guide.

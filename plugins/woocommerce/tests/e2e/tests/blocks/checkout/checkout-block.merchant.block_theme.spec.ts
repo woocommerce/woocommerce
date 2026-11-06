@@ -37,16 +37,6 @@ const blockData: BlockData = {
 	},
 };
 
-const testsFailingOnWordPress71 = new Set( [
-	'renders without crashing and can only be inserted once',
-	'Merchant can see T&S and Privacy Policy links with checkbox',
-	'can enable dark mode inputs',
-	'Company input visibility and optional and required can be toggled',
-	'Apartment input visibility and optional and required can be toggled',
-	'Phone input visibility and optional and required can be toggled',
-	'Return to cart link is visible and can be toggled',
-] );
-
 const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 	checkoutPageObject: async ( { page }, use ) => {
 		const pageObject = new CheckoutPage( {
@@ -60,14 +50,7 @@ test.describe( 'Merchant → Checkout', () => {
 	// `as string` is safe here because we know the variable is a string, it is defined above.
 	const blockSelectorInEditor = blockData.selectors.editor.block as string;
 
-	test.beforeEach( async ( { admin, editor, wpCoreVersion }, testInfo ) => {
-		test.skip(
-			wpCoreVersion === 7.1 &&
-				testsFailingOnWordPress71.has( testInfo.title ),
-			'Currently broken with WordPress 7.1 beta 1 and requires upstream patch. ' +
-				'See: https://github.com/WordPress/gutenberg/pull/80026#issuecomment-5003222851'
-		);
-
+	test.beforeEach( async ( { admin, editor } ) => {
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
 			postType: 'wp_template',
@@ -552,6 +535,54 @@ test.describe( 'Merchant → Checkout', () => {
 		test.beforeEach( async ( { editor } ) => {
 			await editor.openDocumentSettingsSidebar();
 			await editor.selectBlocks( blockSelectorInEditor );
+		} );
+
+		test( 'Merchant can switch from the Terms and Conditions block to the Actions block terms', async ( {
+			editor,
+		} ) => {
+			await editor.selectBlocks(
+				`${ blockSelectorInEditor } .wp-block-woocommerce-checkout-actions-block`
+			);
+
+			const showTermsToggle = editor.page.getByLabel(
+				'Show terms and conditions',
+				{ exact: true }
+			);
+			const actionsBlock = await editor.getBlockByName(
+				'woocommerce/checkout-actions-block'
+			);
+			const terms = actionsBlock.locator( '.wc-block-checkout__terms' );
+
+			// While the Terms and Conditions block is in the checkout, it owns the terms.
+			await expect( showTermsToggle ).toHaveCount( 0 );
+			await expect(
+				editor.page.getByRole( 'button', {
+					name: 'Switch to the Actions block',
+					exact: true,
+				} )
+			).toHaveCount( 0 );
+
+			await editor.selectBlocks(
+				`${ blockSelectorInEditor } .wp-block-woocommerce-checkout-terms-block`
+			);
+
+			await editor.page
+				.getByRole( 'button', {
+					name: 'Switch to the Actions block',
+					exact: true,
+				} )
+				.click();
+
+			await expect(
+				editor.canvas.locator(
+					'[data-type="woocommerce/checkout-terms-block"]'
+				)
+			).toHaveCount( 0 );
+			await expect( showTermsToggle ).toBeChecked();
+			await expect( terms ).toBeVisible();
+
+			await showTermsToggle.uncheck();
+			await expect( terms ).toBeHidden();
 		} );
 
 		test( 'Return to cart link is visible and can be toggled', async ( {

@@ -9,9 +9,9 @@
  */
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
-use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -111,6 +111,9 @@ class WC_Product_Variable extends WC_Product {
 	public function get_variation_prices( $for_display = false ) {
 		/** @var array<string,array<int,float>> $prices */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 		$prices = $this->data_store->read_price_data( $this, $for_display );
+		if ( ! is_array( $prices ) ) {
+			return $prices;
+		}
 
 		// Performance note: loose != compares key/value pairs regardless of order, so a re-sort is only triggered when prices actually change.
 		$cache_key = $for_display ? 'for_display:1' : 'for_display:0';
@@ -192,7 +195,7 @@ class WC_Product_Variable extends WC_Product {
 
 			if ( $min_price !== $max_price ) {
 				$price = wc_format_price_range( $min_price, $max_price );
-			} elseif ( $this->is_on_sale() && $min_reg_price === $max_reg_price ) {
+			} elseif ( $min_reg_price === $max_reg_price && $this->is_on_sale() ) {
 				$price = wc_format_sale_price( wc_price( $max_reg_price ), wc_price( $min_price ) );
 			} else {
 				$price = wc_price( $min_price );
@@ -349,6 +352,7 @@ class WC_Product_Variable extends WC_Product {
 			_prime_post_caches( $variation_ids );
 		}
 
+		// Performance note: meta-based optimization (skipping out-of-stock variations) was evaluated and dismissed due to impact to complexity ratio.
 		foreach ( $variation_ids as $variation_id ) {
 			$variation = wc_get_product( $variation_id );
 
@@ -394,27 +398,31 @@ class WC_Product_Variable extends WC_Product {
 	 * @return bool
 	 */
 	public function has_purchasable_variations() {
-		$variation_ids = $this->get_children();
-
+		/**
+		 * If you are evaluating performance, introducing a transient is not a viable solution.
+		 *
+		 * - The transient improves the 95th percentile (P95) load time of the product page by approximately 10%, but does not affect the median.
+		 * - The transient breaks backward compatibility. The woocommerce_is_purchasable filter from \WC_Product::is_purchasable is used by
+		 *   extensions to control product purchasability based on user role, membership, geolocation, or login status.
+		 *
+		 * Meta-based optimization (skipping out-of-stock variations) was evaluated and dismissed due to impact to complexity ratio.
+		 */
+		$has_purchasable_variations = false;
+		$variation_ids              = $this->get_children();
 		if ( ! empty( $variation_ids ) ) {
 			// Prime caches to reduce future queries.
 			_prime_post_caches( $variation_ids );
-		}
 
-		foreach ( $variation_ids as $variation_id ) {
-
-			$variation = wc_get_product( $variation_id );
-
-			if ( ! $variation || ! $variation->is_purchasable() || ! $variation->is_in_stock() ) {
-				continue;
+			foreach ( $variation_ids as $variation_id ) {
+				$variation = wc_get_product( $variation_id );
+				if ( $variation && $variation->is_purchasable() && $variation->is_in_stock() ) {
+					$has_purchasable_variations = true;
+					break;
+				}
 			}
-
-			// We found at least one available variation, so return true.
-			return true;
 		}
 
-		// There were either no variations, or they were hidden because of the "continues" above.
-		return false;
+		return $has_purchasable_variations;
 	}
 
 	/**
@@ -432,24 +440,20 @@ class WC_Product_Variable extends WC_Product {
 			return false;
 		}
 
-		$variation_featured_id    = (int) $variation->get_image_id();
-		$variation_featured_valid = $variation_featured_id && wp_attachment_is_image( $variation_featured_id );
-		$parent_featured_id       = (int) $this->get_image_id();
-		$parent_featured_valid    = $parent_featured_id && wp_attachment_is_image( $parent_featured_id );
+		$variation_featured_id           = (int) $variation->get_image_id();
+		$variation_featured_is_inherited = ! $variation->get_image_id( 'edit' ) && (int) ( $variation->get_parent_data()['image_id'] ?? 0 ) === $variation_featured_id;
+		$variation_featured_valid        = ! $variation_featured_is_inherited && $variation_featured_id && wp_attachment_is_image( $variation_featured_id );
+		$parent_featured_id              = (int) $this->get_image_id();
+		$parent_featured_valid           = $parent_featured_id && wp_attachment_is_image( $parent_featured_id );
 
-		$variation_gallery_image_ids = array();
+		$variation_gallery_image_ids = array_values(
+			array_filter(
+				array_map( 'intval', $variation->get_gallery_image_ids() ),
+				'wp_attachment_is_image'
+			)
+		);
 		$variation_gallery_html      = '';
 
-		if ( VariationGalleryPackage::is_enabled() ) {
-			$variation_gallery_image_ids = array_values(
-				array_filter(
-					array_map( 'intval', $variation->get_gallery_image_ids() ),
-					'wp_attachment_is_image'
-				)
-			);
-		}
-
-		// Prefer variation-owned images over the parent fallback.
 		if ( $variation_featured_valid ) {
 			$selected_image_id = $variation_featured_id;
 		} elseif ( ! empty( $variation_gallery_image_ids ) ) {
@@ -470,8 +474,19 @@ class WC_Product_Variable extends WC_Product {
 			$variation_gallery_html = wc_get_product_gallery_html( $this, $gallery_html_ids );
 		}
 
-		// See if prices should be shown for each variation after selection.
-		$show_variation_price = apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === '' || $this->get_variation_sale_price( 'min' ) !== $this->get_variation_sale_price( 'max' ) || $this->get_variation_regular_price( 'min' ) !== $this->get_variation_regular_price( 'max' ), $this, $variation );
+		// A suffix like {price_including_tax} only shows on the chosen variation's price, so show that price even when all prices match.
+		$has_variation_only_suffix = wc_tax_enabled() && ProductTaxStatus::TAXABLE === $variation->get_tax_status() && str_contains( (string) get_option( 'woocommerce_price_display_suffix' ), '{' );
+
+		/**
+		 * Filters whether the variation price is shown after the variation is selected.
+		 *
+		 * @since 2.4.0
+		 *
+		 * @param bool                 $show_variation_price Whether to show the variation price.
+		 * @param WC_Product_Variable  $product              The variable product.
+		 * @param WC_Product_Variation $variation            The variation.
+		 */
+		$show_variation_price = apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === '' || $has_variation_only_suffix || $this->get_variation_sale_price( 'min' ) !== $this->get_variation_sale_price( 'max' ) || $this->get_variation_regular_price( 'min' ) !== $this->get_variation_regular_price( 'max' ), $this, $variation );
 
 		return apply_filters(
 			'woocommerce_available_variation',

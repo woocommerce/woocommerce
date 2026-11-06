@@ -5,7 +5,6 @@
  */
 import { dispatch } from '@wordpress/data';
 import { addFilter, addAction } from '@wordpress/hooks';
-import { __ } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
 import {
 	initializeEditor,
@@ -16,6 +15,7 @@ import {
  * Internal dependencies
  */
 import { NAME_SPACE } from './constants';
+import { registerWooEmailSaveButton } from './save-button';
 import { modifyTemplateSidebar } from './templates';
 import { modifySidebar } from './sidebar_settings';
 import { registerEmailValidationRules } from './email-validation';
@@ -29,10 +29,6 @@ import {
 
 import './style.scss';
 import './update-banner.scss';
-
-addFilter( 'woocommerce_email_editor_send_button_label', NAME_SPACE, () =>
-	__( 'Save email', 'woocommerce' )
-);
 
 addFilter(
 	'woocommerce_email_editor_check_sending_method_configuration_link',
@@ -86,6 +82,9 @@ registerIntegrationStore();
 modifySidebar();
 modifyTemplateSidebar();
 registerEmailValidationRules();
+// Replace the editor's Publish/Save button with a Save button that publishes
+// lazily created email posts in the background (WOOPLUG-6171).
+registerWooEmailSaveButton();
 
 // Register the review-update plugin (RSM-143). Mounts the review drawer
 // into the email editor — its open / close state is driven by the
@@ -115,7 +114,7 @@ if (
 		'wc_email_review_drawer'
 	) === '1'
 ) {
-	dispatch( INTEGRATION_STORE_NAME ).openReviewDrawer();
+	void dispatch( INTEGRATION_STORE_NAME ).openReviewDrawer();
 
 	// Strip the param from the URL so a refresh doesn't re-trigger the
 	// drawer auto-open. RSM-141 §5.2.
@@ -125,9 +124,22 @@ if (
 }
 
 /**
- * Register the reset notification email content entity action for the woo_email post type.
+ * The reset notification email content entity action for the woo_email post type.
  * This action allows users to reset the email content to the original state as distributed by the plugin.
+ * From WordPress 7.2 the action is registered on the server (Integration::register_entity_actions())
+ * and the email editor's script module reads its JavaScript parts from this filter.
  */
+addFilter(
+	'woocommerce_email_editor_entity_actions',
+	`${ NAME_SPACE }/reset-notification-email-content`,
+	( actions: Record< string, unknown > ) => ( {
+		...actions,
+		'reset-notification-email-content':
+			getResetNotificationEmailContentAction(),
+	} )
+);
+
+// Up to WordPress 7.1 the action is registered on the client.
 const registerResetNotificationEmailContentAction = ( postType: string ) => {
 	if ( postType !== 'woo_email' ) {
 		return;

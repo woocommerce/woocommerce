@@ -1016,6 +1016,31 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should pass image attributes to the placeholder image filter.
+	 */
+	public function test_wc_placeholder_img_filter_receives_attributes() {
+		$captured_attr = null;
+		$attr          = array(
+			'class' => 'custom-class',
+			'alt'   => 'Custom alt',
+		);
+		$filter        = function ( $image_html, $size, $dimensions, $filter_attr = null ) use ( &$captured_attr ) {
+			$captured_attr = $filter_attr;
+
+			return $image_html;
+		};
+
+		add_filter( 'woocommerce_placeholder_img', $filter, 10, 4 );
+		try {
+			wc_placeholder_img( 'woocommerce_thumbnail', $attr );
+		} finally {
+			remove_filter( 'woocommerce_placeholder_img', $filter, 10 );
+		}
+
+		$this->assertSame( $attr, $captured_attr );
+	}
+
+	/**
 	 * @testdox Should use the filtered placeholder source for an attachment placeholder.
 	 */
 	public function test_wc_placeholder_img_uses_filtered_src_for_attachment_placeholder() {
@@ -1123,9 +1148,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_get_min_max_price_meta_query()
-	 *
-	 * @expectedDeprecated wc_get_min_max_price_meta_query()
+	 * @testdox wc_get_min_max_price_meta_query() builds a _price meta query without a deprecation notice.
 	 */
 	public function test_wc_get_min_max_price_meta_query() {
 		$meta_query = wc_get_min_max_price_meta_query(

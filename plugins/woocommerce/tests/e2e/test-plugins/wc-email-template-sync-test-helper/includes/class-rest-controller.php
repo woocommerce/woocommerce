@@ -18,9 +18,9 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Helper REST endpoints exposed under /wc-email-test-helper/v1/ for Playwright E2E tests.
  *
- * Health endpoint is open; every other route requires manage_options. The plugin's location
- * under tests/e2e/test-plugins/ — only mounted via .wp-env.e2e.json for the test environment —
- * provides the second layer of defense.
+ * Every route requires manage_options. The plugin's location under tests/e2e/test-plugins/ —
+ * only mounted via .wp-env.e2e.json for the test environment — provides the second layer
+ * of defense.
  */
 class REST_Controller {
 
@@ -30,16 +30,6 @@ class REST_Controller {
 	 * Register all REST routes.
 	 */
 	public function register_routes(): void {
-		register_rest_route(
-			self::NAMESPACE,
-			'/health',
-			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'health' ),
-				'permission_callback' => '__return_true',
-			)
-		);
-
 		register_rest_route(
 			self::NAMESPACE,
 			'/reset-post/(?P<email_id>[a-z0-9_]+)',
@@ -105,6 +95,29 @@ class REST_Controller {
 
 		register_rest_route(
 			self::NAMESPACE,
+			'/sync-enabled-emails',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'sync_enabled_emails' ),
+				'permission_callback' => array( self::class, 'require_admin' ),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/merchant-edited-blocks/(?P<post_id>\d+)',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'merchant_edited_blocks' ),
+				'permission_callback' => array( self::class, 'require_admin' ),
+				'args'                => array(
+					'post_id' => array( 'sanitize_callback' => 'absint' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
 			'/seed-bulk',
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
@@ -120,33 +133,6 @@ class REST_Controller {
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'trigger_sweep' ),
 				'permission_callback' => array( self::class, 'require_admin' ),
-			)
-		);
-
-		register_rest_route(
-			self::NAMESPACE,
-			'/trigger-backfill',
-			array(
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'trigger_backfill' ),
-				'permission_callback' => array( self::class, 'require_admin' ),
-			)
-		);
-
-		register_rest_route(
-			self::NAMESPACE,
-			'/tracks',
-			array(
-				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_tracks' ),
-					'permission_callback' => array( self::class, 'require_admin' ),
-				),
-				array(
-					'methods'             => WP_REST_Server::DELETABLE,
-					'callback'            => array( $this, 'clear_tracks' ),
-					'permission_callback' => array( self::class, 'require_admin' ),
-				),
 			)
 		);
 
@@ -172,25 +158,8 @@ class REST_Controller {
 	}
 
 	/**
-	 * Health probe. Tests call this in beforeAll to confirm the helper plugin is loaded.
-	 *
-	 * @param WP_REST_Request $request The REST request (unused; REST callback signature requires it).
-	 * @return WP_REST_Response
-	 */
-	public function health( WP_REST_Request $request ): WP_REST_Response {
-		unset( $request );
-		return new WP_REST_Response(
-			array(
-				'ok'      => true,
-				'version' => '1.0.0',
-			),
-			200
-		);
-	}
-
-	/**
-	 * Delete the woo_email post for the given email type, clear template manager state +
-	 * transient, then regenerate synchronously.
+	 * Delete the woo_email post for the given email type, clear template manager state,
+	 * then recreate a published post from the file template synchronously.
 	 *
 	 * @param WP_REST_Request $request The REST request. Expects `email_id` route parameter.
 	 * @return WP_REST_Response
@@ -207,18 +176,36 @@ class REST_Controller {
 
 		$manager->delete_email_template( $email_id );
 
-		delete_transient( 'wc_email_editor_initial_templates_generated' );
+		$email = $manager->get_email_by_id( $email_id );
+		if ( ! $email instanceof \WC_Email ) {
+			return new WP_REST_Response(
+				array( 'error' => "Unknown email_id {$email_id}" ),
+				404
+			);
+		}
 
 		$generator = new \Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator();
-		$generator->init_default_transactional_emails();
-		$new_post_id = (int) $generator->generate_email_template_if_not_exists( $email_id );
 
-		if ( $new_post_id <= 0 ) {
+		try {
+			$new_post_id = $generator->create_draft( $email );
+		} catch ( \Exception $e ) {
 			return new WP_REST_Response(
-				array( 'error' => "Failed to regenerate woo_email post for {$email_id}" ),
+				array( 'error' => "Failed to regenerate woo_email post for {$email_id}: " . $e->getMessage() ),
 				500
 			);
 		}
+
+		wp_update_post(
+			array(
+				'ID'          => $new_post_id,
+				'post_status' => 'publish',
+			)
+		);
+
+		// The Integration transition_post_status hook writes the mapping on publish
+		// in this live environment; save it explicitly as well so this endpoint's
+		// callers can rely on the mapping regardless of hook registration order.
+		$manager->save_email_template_post_id( $email_id, $new_post_id );
 
 		return new WP_REST_Response( array( 'post_id' => $new_post_id ), 200 );
 	}
@@ -315,6 +302,68 @@ class REST_Controller {
 			array(
 				'post_id' => $post_id,
 				'meta'    => get_post_meta( $post_id ),
+			),
+			200
+		);
+	}
+
+	/**
+	 * List the email IDs enrolled in template sync, so a test can cover every shipped template.
+	 *
+	 * @param WP_REST_Request $request The REST request (unused).
+	 * @return WP_REST_Response
+	 */
+	public function sync_enabled_emails( WP_REST_Request $request ): WP_REST_Response {
+		unset( $request );
+
+		$registry = \Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncRegistry::get_sync_enabled_emails();
+
+		return new WP_REST_Response( array( 'email_ids' => array_map( 'strval', array_keys( $registry ) ) ), 200 );
+	}
+
+	/**
+	 * Run the change summary's own "did the merchant edit this block?" rule on a post,
+	 * comparing its content with the stored base render block by block. Lets a test
+	 * assert that a save the merchant made no edits in leaves every block untouched.
+	 *
+	 * @param WP_REST_Request $request The REST request. Expects `post_id` route parameter.
+	 * @return WP_REST_Response
+	 */
+	public function merchant_edited_blocks( WP_REST_Request $request ): WP_REST_Response {
+		$post_id = (int) $request->get_param( 'post_id' );
+		$post    = get_post( $post_id );
+
+		if ( ! $post ) {
+			return new WP_REST_Response( array( 'error' => "Post {$post_id} not found" ), 404 );
+		}
+
+		$summary = \Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateChangeSummary::class;
+		$base    = (string) get_post_meta( $post_id, \Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, true );
+
+		$base_records = $summary::flatten_blocks( parse_blocks( $base ) );
+		$post_records = $summary::flatten_blocks( parse_blocks( (string) $post->post_content ) );
+
+		$edited = array();
+		foreach ( $base_records as $i => $base_record ) {
+			$post_record = $post_records[ $i ] ?? null;
+			if ( null !== $post_record && ! $summary::merchant_changed( $base_record, $post_record ) ) {
+				continue;
+			}
+			$edited[] = array(
+				'index'          => $i,
+				'block'          => $base_record['name'],
+				'text'           => $base_record['inner_text'],
+				'attrs_changed'  => null === $post_record || $base_record['attrs_hash'] !== $post_record['attrs_hash'],
+				'markup_changed' => null === $post_record || $base_record['inner_html_hash'] !== $post_record['inner_html_hash'],
+			);
+		}
+
+		return new WP_REST_Response(
+			array(
+				'post_id'     => $post_id,
+				'base_blocks' => count( $base_records ),
+				'post_blocks' => count( $post_records ),
+				'edited'      => $edited,
 			),
 			200
 		);
@@ -500,101 +549,6 @@ class REST_Controller {
 	}
 
 	/**
-	 * Run the legacy-post backfill inline, then snapshot a count of stamped posts.
-	 * Production `run()` returns false unconditionally — value reported back is for caller
-	 * convenience only. Tests assert via meta snapshots before/after.
-	 *
-	 * WC_Tracks::record_event() short-circuits when site tracking is disabled (the
-	 * default in wp-env), so it never reaches the woocommerce_tracks_event_properties
-	 * filter that Tracks_Recorder hooks into. To capture the _backfill_completed event
-	 * reliably we inject a custom recorder via set_event_recorder() that writes
-	 * directly to the Tracks_Recorder log option, then restore the default (null)
-	 * after the backfill completes.
-	 *
-	 * @param WP_REST_Request $request The REST request (unused).
-	 * @return WP_REST_Response
-	 */
-	public function trigger_backfill( WP_REST_Request $request ): WP_REST_Response {
-		unset( $request );
-
-		// Inject a direct-write recorder so _backfill_completed lands in the log
-		// even when WC_Tracks::record_event() is disabled for the test environment.
-		// The recorder is gated on the same wc_test_tracks_enabled option that
-		// Tracks_Recorder uses, so it only fires when a spy is active and the log
-		// stays empty for tests that don't attach a spy.
-		//
-		// Event names get the 'wcadmin_' prefix to match WC_Tracks::PREFIX — that's
-		// what server-side events are dispatched as via WC_Tracks::record_event().
-		// The TRACKS_EVENTS constants in classifications.ts expect the prefixed name.
-		\Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncTracker::set_event_recorder(
-			static function ( string $event_name, array $payload ): void {
-				if ( 'yes' !== get_option( Tracks_Recorder::ENABLED_OPTION, 'no' ) ) {
-					return;
-				}
-				$log = get_option( Tracks_Recorder::LOG_OPTION, array() );
-				if ( ! is_array( $log ) ) {
-					$log = array();
-				}
-				$log[] = array(
-					'name'         => 'wcadmin_' . $event_name,
-					'properties'   => $payload,
-					'timestamp_ms' => (int) ( microtime( true ) * 1000 ),
-				);
-				update_option( Tracks_Recorder::LOG_OPTION, $log, false );
-			}
-		);
-
-		$ran = \Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncBackfill::run();
-
-		// Restore the default recorder so subsequent calls don't double-log via
-		// both the injected recorder and any future WC_Tracks path.
-		\Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncTracker::set_event_recorder( null );
-
-		global $wpdb;
-		$stamped = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT COUNT(DISTINCT post_id) FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value <> ''",
-				\Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY
-			)
-		);
-
-		return new WP_REST_Response(
-			array(
-				'ran'     => (bool) $ran,
-				'stamped' => $stamped,
-			),
-			200
-		);
-	}
-
-	/**
-	 * Return the in-option Tracks event log captured by Tracks_Recorder.
-	 *
-	 * @param WP_REST_Request $request The REST request (unused).
-	 * @return WP_REST_Response
-	 */
-	public function get_tracks( WP_REST_Request $request ): WP_REST_Response {
-		unset( $request );
-		$log = get_option( Tracks_Recorder::LOG_OPTION, array() );
-		return new WP_REST_Response(
-			array( 'events' => is_array( $log ) ? $log : array() ),
-			200
-		);
-	}
-
-	/**
-	 * Clear the Tracks event log option so the next read starts empty.
-	 *
-	 * @param WP_REST_Request $request The REST request (unused).
-	 * @return WP_REST_Response
-	 */
-	public function clear_tracks( WP_REST_Request $request ): WP_REST_Response {
-		unset( $request );
-		delete_option( Tracks_Recorder::LOG_OPTION );
-		return new WP_REST_Response( array( 'cleared' => true ), 200 );
-	}
-
-	/**
 	 * Write a typed value to a WordPress option, preserving array/object structure.
 	 * Body shape: `{ "option_name": string, "option_value": mixed }`. Unlike the
 	 * shared `e2e-options/update` endpoint, this preserves arrays and nested objects
@@ -635,7 +589,7 @@ class REST_Controller {
 	}
 
 	/**
-	 * Permission callback used by every non-health endpoint. Requires the manage_options
+	 * Permission callback used by every endpoint. Requires the manage_options
 	 * capability. The plugin is only mounted in test environments via .wp-env.e2e.json — it
 	 * does not ship in any production WooCommerce build — which provides the second
 	 * layer of defense.

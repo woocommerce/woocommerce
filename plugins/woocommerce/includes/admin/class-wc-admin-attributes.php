@@ -36,11 +36,11 @@ class WC_Admin_Attributes {
 		$action = '';
 
 		// Action to perform: add, edit, delete or none.
-		if ( ! empty( $_POST['add_new_attribute'] ) ) { // WPCS: CSRF ok.
+		if ( ! empty( $_POST['add_new_attribute'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Action helpers verify nonces; fields are normalized before CRUD.
 			$action = 'add';
-		} elseif ( ! empty( $_POST['save_attribute'] ) && ! empty( $_GET['edit'] ) ) { // WPCS: CSRF ok.
+		} elseif ( ! empty( $_POST['save_attribute'] ) && ! empty( $_GET['edit'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.NonceVerification.Recommended -- Action helpers verify nonces; fields are normalized before CRUD.
 			$action = 'edit';
-		} elseif ( ! empty( $_GET['delete'] ) ) {
+		} elseif ( ! empty( $_GET['delete'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Action helpers verify nonces; fields are normalized before CRUD.
 			$action = 'delete';
 		}
 
@@ -75,11 +75,11 @@ class WC_Admin_Attributes {
 	 */
 	private static function get_posted_attribute() {
 		$attribute = array(
-			'attribute_label'   => isset( $_POST['attribute_label'] ) ? wc_clean( wp_unslash( $_POST['attribute_label'] ) ) : '', // WPCS: input var ok, CSRF ok.
-			'attribute_name'    => isset( $_POST['attribute_name'] ) ? wc_sanitize_taxonomy_name( wp_unslash( $_POST['attribute_name'] ) ) : '', // WPCS: input var ok, CSRF ok, sanitization ok.
-			'attribute_type'    => isset( $_POST['attribute_type'] ) ? wc_clean( wp_unslash( $_POST['attribute_type'] ) ) : 'select', // WPCS: input var ok, CSRF ok.
-			'attribute_orderby' => isset( $_POST['attribute_orderby'] ) ? wc_clean( wp_unslash( $_POST['attribute_orderby'] ) ) : '', // WPCS: input var ok, CSRF ok.
-			'attribute_public'  => isset( $_POST['attribute_public'] ) ? 1 : 0, // WPCS: input var ok, CSRF ok.
+			'attribute_label'   => isset( $_POST['attribute_label'] ) ? wc_clean( wp_unslash( $_POST['attribute_label'] ) ) : '', // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Action helpers verify nonces; fields are normalized before CRUD.
+			'attribute_name'    => isset( $_POST['attribute_name'] ) ? wc_sanitize_taxonomy_name( wp_unslash( $_POST['attribute_name'] ) ) : '', // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Action helpers verify nonces; fields are normalized before CRUD.
+			'attribute_type'    => isset( $_POST['attribute_type'] ) ? wc_clean( wp_unslash( $_POST['attribute_type'] ) ) : 'select', // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Action helpers verify nonces; fields are normalized before CRUD.
+			'attribute_orderby' => isset( $_POST['attribute_orderby'] ) ? wc_clean( wp_unslash( $_POST['attribute_orderby'] ) ) : '', // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Action helpers verify nonces; fields are normalized before CRUD.
+			'attribute_public'  => isset( $_POST['attribute_public'] ) ? 1 : 0, // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Action helpers verify nonces; fields are normalized before CRUD.
 		);
 
 		if ( empty( $attribute['attribute_type'] ) ) {

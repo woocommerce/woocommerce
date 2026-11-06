@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 use WC_Unit_Test_Case;
 
 /**
@@ -30,6 +31,11 @@ class ProductFilterTaxonomyTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		// The container keeps the product_cat hierarchy map across tests, and nothing here clears it when
+		// terms are created or deleted. Clear it before and after, so this class neither reads a stale
+		// map nor leaves its own behind.
+		wc_get_container()->get( TaxonomyHierarchyData::class )->clear_cache( 'product_cat' );
+
 		add_filter( 'woocommerce_pre_product_filter_data', array( $this, 'filter_product_filter_data' ), 10, 4 );
 	}
 
@@ -42,6 +48,8 @@ class ProductFilterTaxonomyTest extends WC_Unit_Test_Case {
 		foreach ( $this->term_ids as $term_id ) {
 			wp_delete_term( $term_id, 'product_cat' );
 		}
+
+		wc_get_container()->get( TaxonomyHierarchyData::class )->clear_cache( 'product_cat' );
 
 		parent::tearDown();
 	}

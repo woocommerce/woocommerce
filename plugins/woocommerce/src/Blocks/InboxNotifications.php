@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Admin\Notes\Notes;
  * A class used to display inbox messages to merchants in the WooCommerce Admin dashboard.
  *
  * @package Automattic\WooCommerce\Blocks
- * @since x.x.x
+ * @since 8.5.0
  */
 class InboxNotifications {
 

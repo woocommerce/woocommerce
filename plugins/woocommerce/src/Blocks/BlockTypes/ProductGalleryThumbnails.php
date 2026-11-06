@@ -83,9 +83,10 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			data-wp-class--wc-block-product-gallery-thumbnails--overflow-right="context.thumbnailsOverflow.right">
 			<div
 				class="wc-block-product-gallery-thumbnails__scrollable"
-				data-wp-init--init-resize-observer="callbacks.initResizeObserver"
-				data-wp-init--hide-ghost-overflow="callbacks.hideGhostOverflow"
+				data-wp-init---init-resize-observer="callbacks.initResizeObserver"
+				data-wp-init---hide-ghost-overflow="callbacks.hideGhostOverflow"
 				data-wp-on--scroll="actions.onScroll"
+				aria-label="<?php esc_attr_e( 'Image thumbnails', 'woocommerce' ); ?>"
 				role="listbox">
 				<?php foreach ( $product_gallery_media as $index => $media ) : ?>
 					<?php

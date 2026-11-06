@@ -19,7 +19,7 @@ const TimelineGroup = ( {
 	timezone,
 } ) => {
 	const groupClassName = clsx( 'woocommerce-timeline-group', className );
-	const itemsToTimlineItem = ( item, itemIndex ) => {
+	const itemsToTimelineItem = ( item, itemIndex ) => {
 		const itemKey = group.title + '-' + itemIndex;
 		return (
 			<TimelineItem
@@ -39,7 +39,7 @@ const TimelineGroup = ( {
 			<ul>
 				{ group.items
 					.sort( sortByDateUsing( orderBy ) )
-					.map( itemsToTimlineItem ) }
+					.map( itemsToTimelineItem ) }
 			</ul>
 			<hr />
 		</li>

@@ -4,6 +4,7 @@
 *.md    text    eol=lf
 *.json  text    eol=lf
 *.yml   text    eol=lf
+*.yaml  text    eol=lf
 
 # Force LF In Code Files
 *.php   text    eol=lf
@@ -11,6 +12,13 @@
 *.jsx   text    eol=lf
 *.ts    text    eol=lf
 *.tsx   text    eol=lf
+*.mjs   text    eol=lf
+*.cjs   text    eol=lf
 *.css   text    eol=lf
 *.scss  text    eol=lf
 *.flf   text    eol=lf
+
+# Force LF In Files Executed Or Parsed By Build Tooling
+# Shell scripts fail with CRLF, and `git apply` rejects patches with CRLF hunks.
+*.sh    text    eol=lf
+*.patch text    eol=lf

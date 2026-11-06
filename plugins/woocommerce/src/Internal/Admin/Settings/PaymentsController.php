@@ -3,6 +3,10 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
+use Automattic\WooCommerce\Blocks\Package as BlocksPackage;
+use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Internal\Admin\MenuIcons;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Throwable;
@@ -67,7 +71,7 @@ class PaymentsController {
 		}
 
 		$menu_title = esc_html__( 'Payments', 'woocommerce' );
-		$menu_icon  = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4NTIiIGhlaWdodD0iNjg0Ij48cGF0aCBmaWxsPSIjYTJhYWIyIiBkPSJNODIgODZ2NTEyaDY4NFY4NlptMCA1OThjLTQ4IDAtODQtMzgtODQtODZWODZDLTIgMzggMzQgMCA4MiAwaDY4NGM0OCAwIDg0IDM4IDg0IDg2djUxMmMwIDQ4LTM2IDg2LTg0IDg2em0zODQtNTU2djQ0aDg2djg0SDM4MnY0NGgxMjhjMjQgMCA0MiAxOCA0MiA0MnYxMjhjMCAyNC0xOCA0Mi00MiA0MmgtNDR2NDRoLTg0di00NGgtODZ2LTg0aDE3MHYtNDRIMzM4Yy0yNCAwLTQyLTE4LTQyLTQyVjIxNGMwLTI0IDE4LTQyIDQyLTQyaDQ0di00NHoiLz48L3N2Zz4=';
+		$menu_icon  = wc_get_container()->get( MenuIcons::class )->get_icon( 'core-admin/payment', 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4NTIiIGhlaWdodD0iNjg0Ij48cGF0aCBmaWxsPSIjYTJhYWIyIiBkPSJNODIgODZ2NTEyaDY4NFY4NlptMCA1OThjLTQ4IDAtODQtMzgtODQtODZWODZDLTIgMzggMzQgMCA4MiAwaDY4NGM0OCAwIDg0IDM4IDg0IDg2djUxMmMwIDQ4LTM2IDg2LTg0IDg2em0zODQtNTU2djQ0aDg2djg0SDM4MnY0NGgxMjhjMjQgMCA0MiAxOCA0MiA0MnYxMjhjMCAyNC0xOCA0Mi00MiA0MmgtNDR2NDRoLTg0di00NGgtODZ2LTg0aDE3MHYtNDRIMzM4Yy0yNCAwLTQyLTE4LTQyLTQyVjIxNGMwLTI0IDE4LTQyIDQyLTQyaDQ0di00NHoiLz48L3N2Zz4=' );
 		// Link to the Payments settings page.
 		$menu_path = 'admin.php?page=wc-settings&tab=checkout&from=' . Payments::FROM_PAYMENTS_MENU_ITEM;
 
@@ -147,7 +151,39 @@ class PaymentsController {
 		}
 		$settings[ Payments::PAYMENTS_NOX_PROFILE_KEY ]['business_country_code'] = $this->payments->get_country();
 
+		global $current_tab;
+
+		// Add the gateways that are not available in the Checkout block, but only when the store uses it.
+		if ( 'checkout' === $current_tab && CartCheckoutUtils::is_checkout_block_default() ) {
+			$settings['woocommerce_checkout_block_compatibility'] = array(
+				'incompatible_gateway_ids' => $this->get_gateway_ids_incompatible_with_checkout_block(),
+			);
+		}
+
 		return $settings;
+	}
+
+	/**
+	 * Get the IDs of the payment gateways that have no Checkout block payment method integration.
+	 *
+	 * The enabled state of the gateways is not taken into account.
+	 *
+	 * Matching is by integration name: a gateway counts as compatible when a registered
+	 * Checkout block payment method integration has the same name as the gateway ID.
+	 * Integrations registered only on the front end are not visible here, so their gateways are listed too.
+	 *
+	 * @return string[] The list of gateway IDs.
+	 */
+	private function get_gateway_ids_incompatible_with_checkout_block(): array {
+		$registered_payment_method_names = array_map(
+			static fn( $payment_method ) => $payment_method->get_name(),
+			BlocksPackage::container()->get( PaymentMethodRegistry::class )->get_all_registered()
+		);
+
+		// `payment_gateways()` is keyed by gateway ID; pluck the IDs as a plain list for the diff below.
+		$gateway_ids = wp_list_pluck( WC()->payment_gateways()->payment_gateways(), 'id' );
+
+		return array_values( array_diff( $gateway_ids, $registered_payment_method_names ) );
 	}
 
 	/**

@@ -162,7 +162,9 @@ class RestApi {
 	public function check_import_permission() {
 		if (
 			! current_user_can( 'manage_woocommerce' ) ||
-			! current_user_can( 'manage_options' )
+			! current_user_can( 'manage_options' ) ||
+			// Blueprint imports can change network-wide settings, so require super admin on multisite.
+			( is_multisite() && ! is_super_admin() )
 		) {
 			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot import WooCommerce Blueprints.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
@@ -352,7 +354,7 @@ class RestApi {
 	 * @return \WP_REST_Response
 	 */
 	public function get_import_allowed() {
-		$can_import = $this->can_import_blueprint();
+		$can_import = true === $this->check_import_permission() && $this->can_import_blueprint();
 
 		return rest_ensure_response(
 			array(

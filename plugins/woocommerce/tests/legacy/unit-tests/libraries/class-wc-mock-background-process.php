@@ -45,7 +45,7 @@ class WC_Mock_Background_Process extends WC_Background_Process {
 	}
 
 	/**
-	 * Rerturns the batch data.
+	 * Returns the batch data.
 	 *
 	 * @return void
 	 */

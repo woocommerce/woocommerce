@@ -78,6 +78,9 @@ declare global {
 				woocommerce_payments_nox_profile?: {
 					business_country_code: string;
 				};
+				woocommerce_checkout_block_compatibility?: {
+					incompatible_gateway_ids: string[];
+				};
 				wcpay_welcome_page_connect_nonce: string;
 				currentUserData: {
 					first_name: string;
@@ -112,14 +115,12 @@ declare global {
 			};
 		};
 		wcAdminFeatures: DeprecatedWcAdminFeatureFlags & {
-			'product-data-views': boolean;
 			'experimental-blocks': boolean;
 			'minified-js': boolean;
 			'settings-ui': boolean;
 			'store-alerts': boolean;
 			'rest-api-v4': boolean;
 			'order-detail-redesign': boolean;
-			'product-variations-classic-redesign': boolean;
 		};
 		wp: {
 			updates?: {

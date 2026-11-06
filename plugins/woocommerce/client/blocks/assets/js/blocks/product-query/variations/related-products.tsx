@@ -5,7 +5,7 @@ import { BlockAttributes, InnerBlockTemplate } from '@wordpress/blocks';
 import { Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { stacks } from '@woocommerce/icons';
-import { registerProductBlockType } from '@woocommerce/atomic-utils';
+import { registerProductBlockType } from '@woocommerce/utils/register-product-block-type';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isBoolean } from '@woocommerce/types';
 
@@ -15,7 +15,7 @@ import { isBoolean } from '@woocommerce/types';
 import { QUERY_LOOP_ID } from '../constants';
 
 import { VARIATION_NAME as PRODUCT_TEMPLATE_ID } from './elements/product-template';
-import { VARIATION_NAME as PRODUCT_TITLE_ID } from './elements/product-title';
+import { PRODUCT_TITLE_VARIATION_NAME } from '../../product-elements-blocks/variations/constants';
 
 const VARIATION_NAME = 'woocommerce/related-products';
 
@@ -87,7 +87,7 @@ export const INNER_BLOCKS_TEMPLATE: InnerBlockTemplate[] = [
 					level: 3,
 					fontSize: 'medium',
 					isLink: true,
-					__woocommerceNamespace: PRODUCT_TITLE_ID,
+					__woocommerceNamespace: PRODUCT_TITLE_VARIATION_NAME,
 				},
 				[],
 			],

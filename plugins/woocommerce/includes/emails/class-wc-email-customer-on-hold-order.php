@@ -53,7 +53,7 @@ if ( ! class_exists( 'WC_Email_Customer_On_Hold_Order', false ) ) :
 
 			if ( $this->block_email_editor_enabled ) {
 				$this->title       = __( 'Order on hold', 'woocommerce' );
-				$this->description = __( 'Notifies customers when their order is pending payment confirmation.', 'woocommerce' );
+				$this->description = __( 'Notifies customers when their order is on hold while the next required step is completed.', 'woocommerce' );
 			}
 		}
 
@@ -78,7 +78,7 @@ if ( ! class_exists( 'WC_Email_Customer_On_Hold_Order', false ) ) :
 		 */
 		public function get_default_heading() {
 			if ( $this->block_email_editor_enabled ) {
-				return __( 'Payment confirmation pending', 'woocommerce' );
+				return __( 'Your order is on hold', 'woocommerce' );
 			}
 			return __( 'Thank you for your order', 'woocommerce' );
 		}

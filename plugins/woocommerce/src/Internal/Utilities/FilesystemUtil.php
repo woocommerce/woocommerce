@@ -106,7 +106,7 @@ class FilesystemUtil {
 
 		_doing_it_wrong(
 			__METHOD__,
-			esc_html__( 'WP_Filesystem_Direct could not be loaded. Falling back to the configured FS_METHOD; operations on the uploads directory may fail if FS_METHOD is misconfigured.', 'woocommerce' ),
+			esc_html( 'WP_Filesystem_Direct could not be loaded. Falling back to the configured FS_METHOD; operations on the uploads directory may fail if FS_METHOD is misconfigured.' ),
 			'11.0.0'
 		);
 
@@ -311,6 +311,79 @@ class FilesystemUtil {
 		if ( ! $is_valid_file ) {
 			throw new \Exception( esc_html__( 'File path is not a valid upload path.', 'woocommerce' ) );
 		}
+	}
+
+	/**
+	 * Resolve a user-supplied file path to an absolute path on the server.
+	 *
+	 * Relative paths are tried against the WordPress root (ABSPATH), the
+	 * directory containing wp-content (the site root on hosts where wp-content
+	 * lives outside of ABSPATH, e.g. installs with a symlinked core), and the
+	 * uploads directory, in that order; the first candidate that is readable
+	 * AND within a location permitted by validate_upload_file_path() (ABSPATH
+	 * or the uploads directory) wins. Absolute local paths are used as-is when
+	 * they qualify. Stream URLs are never used as-is: probing a user-supplied
+	 * stream (e.g. phar://) with is_readable() can trigger wrapper side
+	 * effects, and stream-backed uploads (e.g. s3://) are already reachable
+	 * through the uploads-basedir candidate.
+	 *
+	 * The resolution bases are intentionally broader than the validation
+	 * allowlist (e.g. the site root is tried so that `wp-content/uploads/x.csv`
+	 * resolves on symlinked-core hosts), so a readable candidate outside the
+	 * allowlist is skipped rather than returned; callers should still pass the
+	 * result through validate_upload_file_path() before use.
+	 *
+	 * @internal
+	 *
+	 * @param string $file_path The path to resolve, as entered by the user.
+	 * @return string The resolved path. Falls back to the path relative to
+	 *                ABSPATH when no candidate qualifies, so validation of
+	 *                the returned value fails with the usual error.
+	 */
+	public static function resolve_upload_file_path( string $file_path ): string {
+		$abspath        = (string) Constants::get_constant( 'ABSPATH' );
+		$wp_content_dir = (string) Constants::get_constant( 'WP_CONTENT_DIR' );
+		$candidates     = array();
+
+		// path_is_absolute() calls realpath(), which throws on NUL bytes.
+		if ( false !== strpos( $file_path, "\0" ) ) {
+			return $abspath . $file_path; // Let validate_upload_file_path() reject it with the usual error.
+		}
+
+		// The stream check must come first: path_is_absolute() probes streams
+		// with is_file(), which must not run on user-supplied stream URLs.
+		if ( ! wp_is_stream( $file_path ) && path_is_absolute( $file_path ) ) {
+			$candidates[] = $file_path;
+		}
+
+		$bases = array(
+			$abspath,
+			trailingslashit( dirname( $wp_content_dir ) ),
+		);
+
+		$upload_dir = wp_get_upload_dir();
+		if ( false === $upload_dir['error'] ) {
+			$bases[] = trailingslashit( $upload_dir['basedir'] );
+		}
+
+		foreach ( $bases as $base ) {
+			$candidates[] = $base . $file_path;
+		}
+
+		$wp_filesystem = self::get_wp_filesystem_direct();
+		foreach ( $candidates as $candidate ) {
+			if ( ! $wp_filesystem->is_readable( $candidate ) ) {
+				continue;
+			}
+			try {
+				self::validate_upload_file_path( $candidate );
+				return $candidate;
+			} catch ( \Exception $e ) {
+				continue;
+			}
+		}
+
+		return $abspath . $file_path;
 	}
 
 	/**

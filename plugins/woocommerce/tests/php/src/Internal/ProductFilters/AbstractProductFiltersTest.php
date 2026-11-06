@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
+use Automattic\WooCommerce\Internal\ProductFilters\Params;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use WC_Product;
 use WC_Product_Variable;
@@ -105,6 +106,9 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Runs before each test.
+	 *
+	 * `parent::setUp()` is reached through `set_up_test_case()`, which exists so subclasses
+	 * can control where the per-test transaction starts relative to fixture creation.
 	 */
 	public function setUp(): void {
 		$this->set_up_test_case();
@@ -114,6 +118,19 @@ abstract class AbstractProductFiltersTest extends \WC_Unit_Test_Case {
 		} else {
 			$this->set_up_product_filter_fixtures();
 		}
+
+		// The map is static, so it can arrive already warmed by whichever class ran before this one.
+		$this->clear_params_cache();
+	}
+
+	/**
+	 * Reset the static taxonomy param map held by Params.
+	 */
+	protected function clear_params_cache(): void {
+		$reflection      = new \ReflectionClass( Params::class );
+		$params_property = $reflection->getProperty( 'params' );
+		$params_property->setAccessible( true );
+		$params_property->setValue( array() );
 	}
 
 	/**

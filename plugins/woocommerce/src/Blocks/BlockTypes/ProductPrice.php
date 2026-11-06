@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 
 /**
@@ -65,7 +66,8 @@ class ProductPrice extends AbstractBlock {
 		$product = wc_get_product( $post_id );
 
 		if ( $product ) {
-			$styles_and_classes = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
+			$wrapper_class      = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
+			$styles_and_classes = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes', 'margin' ) );
 
 			$is_descendant_of_product_collection       = isset( $block->context['query']['isProductCollectionBlock'] );
 			$is_descendant_of_grouped_product_selector = isset( $block->context['isDescendantOfGroupedProductSelector'] );
@@ -76,15 +78,16 @@ class ProductPrice extends AbstractBlock {
 				/** @var \WC_Product_Variable $product */
 				$prices_vary = $product->get_variation_sale_price( 'min' ) !== $product->get_variation_sale_price( 'max' )
 					|| $product->get_variation_regular_price( 'min' ) !== $product->get_variation_regular_price( 'max' );
+				// A suffix like {price_including_tax} only shows on the chosen variation's price, so switch to it even when all prices match.
+				$has_variation_only_suffix = wc_tax_enabled() && ProductTaxStatus::TAXABLE === $product->get_tax_status() && str_contains( (string) get_option( 'woocommerce_price_display_suffix' ), '{' );
 
-				if ( ! $prices_vary ) {
+				if ( ! $prices_vary && ! $has_variation_only_suffix ) {
 					$is_interactive = false;
 				}
 			}
 
 			$wrapper_attributes     = array(
-				'style' => $styles_and_classes['styles'] ?? '',
-				'class' => $styles_and_classes['classes'] ?? '',
+				'class' => $wrapper_class,
 			);
 			$interactive_attributes = '';
 			$context_directive      = '';
@@ -101,11 +104,13 @@ class ProductPrice extends AbstractBlock {
 			}
 
 			return sprintf(
-				'<div %1$s %2$s><div class="wc-block-components-product-price wc-block-grid__product-price" %3$s>
-					%4$s
+				'<div %1$s %2$s><div class="wc-block-components-product-price wc-block-grid__product-price %3$s" style="%4$s" %5$s>
+					%6$s
 				</div></div>',
 				get_block_wrapper_attributes( $wrapper_attributes ),
 				$context_directive,
+				esc_attr( $styles_and_classes['classes'] ?? '' ),
+				esc_attr( $styles_and_classes['styles'] ?? '' ),
 				$interactive_attributes,
 				$product->get_price_html()
 			);

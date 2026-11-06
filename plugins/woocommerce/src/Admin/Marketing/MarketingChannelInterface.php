@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Admin\Marketing;
 /**
  * MarketingChannelInterface interface
  *
- * @since x.x.x
+ * @since 7.4.0
  */
 interface MarketingChannelInterface {
 	public const PRODUCT_LISTINGS_NOT_APPLICABLE   = 'not-applicable';

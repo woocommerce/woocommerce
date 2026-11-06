@@ -48,6 +48,7 @@ class WCAdminAssets {
 	public function __construct() {
 		Features::get_instance();
 		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'register_deprecated_scripts_and_styles' ) );
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'inject_wc_settings_dependencies' ), 14 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ), 15 );
@@ -61,6 +62,16 @@ class WCAdminAssets {
 	 */
 	public static function get_path( $ext ) {
 		return ( $ext === 'css' ) ? WC_ADMIN_DIST_CSS_FOLDER : WC_ADMIN_DIST_JS_FOLDER;
+	}
+
+	/**
+	 * Registers deprecated scripts and styles.
+	 *
+	 * @return void
+	 */
+	public static function register_deprecated_scripts_and_styles() {
+		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		wp_register_style( 'wc-admin-layout', false );
 	}
 
 	/**
@@ -89,10 +100,12 @@ class WCAdminAssets {
 	public static function get_url( $file, $ext ) {
 		$suffix = '';
 
-		// Potentially enqueue minified JavaScript.
+		// Potentially enqueue minified JavaScript, but only if the minified file exists.
+		// Core builds do not ship minified JS files, so this also guards against the
+		// 'minified-js' feature being force-enabled (e.g. via WooCommerce Beta Tester).
 		if ( $ext === 'js' ) {
 			$script_debug = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG;
-			$suffix       = self::should_use_minified_js_file( $script_debug ) ? '.min' : '';
+			$suffix       = self::should_use_minified_js_file( $script_debug ) && is_readable( WC_ADMIN_ABSPATH . self::get_path( $ext ) . $file . '.min.' . $ext ) ? '.min' : '';
 		}
 
 		return plugins_url( self::get_path( $ext ) . $file . $suffix . '.' . $ext, WC_ADMIN_PLUGIN_FILE );
@@ -251,8 +264,11 @@ class WCAdminAssets {
 		wp_enqueue_style( 'wc-onboarding' );
 
 		if ( PageController::is_settings_page() ) {
-			$this->register_script( 'wp-admin-scripts', 'settings-embed', true, $this->get_settings_ui_script_dependencies() );
-			$this->register_style( 'settings-embed', 'style', array( 'wp-components' ) );
+			$settings_ui_dependencies = $this->get_settings_ui_script_dependencies();
+			$design_tokens_handle     = $this->get_design_tokens_handle();
+			$this->register_script( 'wp-admin-scripts', 'settings-embed', true, $settings_ui_dependencies );
+			$this->register_style( 'settings-embed', 'style', array( 'wp-components', $design_tokens_handle ) );
+			$this->enqueue_settings_ui_style( $settings_ui_dependencies );
 		}
 
 		// Preload our assets.
@@ -314,7 +330,6 @@ class WCAdminAssets {
 			'wc-store-data',
 			'wc-currency',
 			'wc-navigation',
-			'wc-experimental-products-app',
 			'wc-settings-ui',
 			'wc-remote-logging',
 			'wc-sanitize',
@@ -331,7 +346,6 @@ class WCAdminAssets {
 			'wc-date',
 			'wc-components',
 			'wc-customer-effort-score',
-			'wc-experimental-products-app',
 			'wc-experimental',
 			'wc-navigation',
 			'wc-settings-ui',
@@ -379,13 +393,7 @@ class WCAdminAssets {
 		// Register the CSS styles.
 		$styles = array(
 			array(
-				'handle' => 'wc-admin-layout',
-			),
-			array(
 				'handle' => 'wc-components',
-			),
-			array(
-				'handle' => 'wc-experimental-products-app',
 			),
 			array(
 				'handle' => 'wc-customer-effort-score',
@@ -395,10 +403,17 @@ class WCAdminAssets {
 			),
 			array(
 				'handle'       => WC_ADMIN_APP,
-				'dependencies' => array( 'wc-components', 'wc-admin-layout', 'wc-customer-effort-score', 'wp-components', 'wc-experimental' ),
+				'dependencies' => array( 'wc-components', 'wc-customer-effort-score', 'wp-components', 'wc-experimental' ),
 			),
 			array(
 				'handle' => 'wc-onboarding',
+			),
+			array(
+				'handle'       => 'wc-settings-ui',
+				'dependencies' => array( 'wp-components' ),
+			),
+			array(
+				'handle' => 'wc-design-tokens',
 			),
 		);
 
@@ -439,20 +454,46 @@ class WCAdminAssets {
 			}
 
 			$context = SettingsUIRequestContext::get_current();
+			if ( ! $context || $context->has_script_handles_failed() ) {
+				return array();
+			}
+
+			$dependencies = array_merge(
+				array( 'wc-settings-ui' ),
+				$context->get_script_handles()
+			);
+
+			return array_values( array_unique( $dependencies ) );
 		} catch ( \Throwable $e ) {
 			return array();
 		}
+	}
 
-		if ( ! $context ) {
-			return array();
+	/**
+	 * Get the handle of the WordPress Design System tokens stylesheet.
+	 *
+	 * Uses the `wp-theme` style registered by WordPress 7.1+ or the Gutenberg plugin when available,
+	 * and falls back to the copy of the tokens bundled with WooCommerce otherwise. The caller lists
+	 * the handle as a style dependency, so WordPress enqueues it.
+	 *
+	 * @return string The style handle.
+	 */
+	private function get_design_tokens_handle(): string {
+		// The bundled fallback (and the `design-tokens` wp-admin-script) can be removed once WP 7.1 is the minimum supported version.
+		return wp_style_is( 'wp-theme', 'registered' ) ? 'wp-theme' : 'wc-design-tokens';
+	}
+
+	/**
+	 * Enqueue the Settings UI package style when its runtime dependency resolves.
+	 *
+	 * @param array $dependencies Resolved Settings UI script dependencies.
+	 */
+	private function enqueue_settings_ui_style( array $dependencies ): void {
+		if ( ! in_array( 'wc-settings-ui', $dependencies, true ) || ! wp_style_is( 'wc-settings-ui', 'registered' ) ) {
+			return;
 		}
 
-		$dependencies = array_merge(
-			array( 'wc-settings-ui' ),
-			$context->get_script_handles()
-		);
-
-		return array_values( array_unique( $dependencies ) );
+		wp_enqueue_style( 'wc-settings-ui' );
 	}
 
 	/**
@@ -466,7 +507,6 @@ class WCAdminAssets {
 				'wc-csv',
 				'wc-currency',
 				'wc-customer-effort-score',
-				'wc-experimental-products-app',
 				'wc-navigation',
 				// NOTE: This should be removed when Gutenberg is updated and
 				// the notices package is removed from WooCommerce Admin.

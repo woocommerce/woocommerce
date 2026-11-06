@@ -35,7 +35,7 @@ class DefaultPaymentGateways {
 		'payubiz'                                         => 6,
 		'square_credit_card'                              => 6,
 		'klarna_payments'                                 => 6,
-		// Klarna Checkout.
+		// Kustom Checkout.
 		'kco'                                             => 6,
 		'paystack'                                        => 6,
 		'eway'                                            => 7,
@@ -213,10 +213,10 @@ class DefaultPaymentGateways {
 			),
 			array(
 				'id'                  => 'kco',
-				'title'               => __( 'Klarna Checkout', 'woocommerce' ),
+				'title'               => __( 'Kustom Checkout', 'woocommerce' ),
 				'content'             => __( 'Choose the payment that you want, pay now, pay later or slice it. No credit card numbers, no passwords, no worries.', 'woocommerce' ),
-				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/klarna-black.png',
-				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/klarna.png',
+				'image'               => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/icons/kustom-checkout.svg',
+				'image_72x72'         => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/icons/kustom-checkout.svg',
 				'plugins'             => array( 'klarna-checkout-for-woocommerce' ),
 				'is_visible'          => array(
 					self::get_rules_for_countries(

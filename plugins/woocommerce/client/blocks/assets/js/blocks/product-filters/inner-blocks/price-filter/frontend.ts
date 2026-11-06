@@ -3,6 +3,7 @@
  */
 import type { HTMLElementEvent } from '@woocommerce/types';
 import * as iAPI from '@wordpress/interactivity';
+import type { RangeInputParentStore } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -10,7 +11,6 @@ import * as iAPI from '@wordpress/interactivity';
 import type { ProductFiltersContext } from '../../types';
 import type { ProductFiltersStore } from '../../frontend';
 import { formatPrice, getCurrency } from '../../utils/price-currency';
-import type { RangeInputParentStore } from '../../../../types/type-defs/range-input';
 import { PRODUCT_FILTERS_STORE_NAME } from '../../constants';
 
 const { store, getContext, getServerContext, getConfig } = iAPI;
@@ -71,7 +71,7 @@ const productFilterPriceStore = {
 				? getServerContext< ProductFilterPriceContext >()
 				: getContext< ProductFilterPriceContext >();
 			const { activePriceLabelTemplates } = getConfig();
-			if ( min && min > minRange && max && max < maxRange )
+			if ( min && min > minRange && max && max < maxRange ) {
 				return {
 					activeValue: `${ min }|${ max }`,
 					activeLabel: activePriceLabelTemplates.minAndMax
@@ -84,6 +84,7 @@ const productFilterPriceStore = {
 							formatPrice( max, getCurrency( { minorUnit: 0 } ) )
 						),
 				};
+			}
 
 			if ( min && min > minRange ) {
 				return {
@@ -140,8 +141,12 @@ const productFilterPriceStore = {
 				price.max = value;
 			}
 
-			if ( price.min === minRange ) price.min = 0;
-			if ( price.max === maxRange ) price.max = 0;
+			if ( price.min === minRange ) {
+				price.min = 0;
+			}
+			if ( price.max === maxRange ) {
+				price.max = 0;
+			}
 
 			context.activeFilters = context.activeFilters.filter(
 				( item ) => item.type !== 'price'
@@ -173,7 +178,7 @@ const productFilterPriceStore = {
 };
 
 // Compile-time protocol conformance check.
-// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+
 productFilterPriceStore satisfies RangeInputParentStore;
 
 export type ProductFilterPriceStore = typeof productFilterPriceStore;

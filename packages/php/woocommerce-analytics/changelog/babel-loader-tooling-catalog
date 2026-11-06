@@ -1,0 +1,3 @@
+Significance: patch
+Type: changed
+Comment: Manage Babel loader in the shared tooling catalog; no production change.
