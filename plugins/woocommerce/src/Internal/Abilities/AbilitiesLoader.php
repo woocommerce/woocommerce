@@ -27,6 +27,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZonesQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\TaxRatesQuery;
+use Automattic\WooCommerce\Internal\AgentReadiness\ReportAbility;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -65,6 +66,7 @@ class AbilitiesLoader {
 		ProductUpdate::class,
 		ShippingZonesQuery::class,
 		TaxRatesQuery::class,
+		ReportAbility::class,
 	);
 
 	/**
