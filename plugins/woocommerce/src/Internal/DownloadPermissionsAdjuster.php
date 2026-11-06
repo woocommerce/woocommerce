@@ -44,7 +44,7 @@ class DownloadPermissionsAdjuster {
 			return;
 		}
 
-		// Permission adjustment cannot copy grants without parent download files.
+		// No parent files means there is nothing to copy onto variations, so skip loading the children.
 		if ( ! $product->get_downloads() ) {
 			return;
 		}
