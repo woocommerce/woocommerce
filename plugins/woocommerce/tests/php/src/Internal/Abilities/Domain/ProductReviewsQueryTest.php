@@ -261,6 +261,9 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 	 * @testdox Should format UTC dates and verified purchases, and handle missing dates and empty pages.
 	 */
 	public function test_dates_verified_and_empty_results(): void {
+		$schema = $this->sut->get_output_schema()['properties']['reviews']['items']['properties']['date_created'];
+		$this->assertSame( 'string', $schema['type'] );
+		$this->assertSame( 'date-time', $schema['format'] );
 		$product = \WC_Helper_Product::create_simple_product()->get_id();
 		$id      = $this->review( $product, 4 );
 		update_comment_meta( $id, 'verified', 1 );
@@ -273,7 +276,7 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 		$wpdb->update( $wpdb->comments, array( 'comment_date_gmt' => '0000-00-00 00:00:00' ), array( 'comment_ID' => $id ) );
 		clean_comment_cache( $id );
 		$result = $this->sut->execute();
-		$this->assertNull( $result['reviews'][0]['date_created'] );
+		$this->assertArrayNotHasKey( 'date_created', $result['reviews'][0] );
 		$result = $this->sut->execute( array( 'page' => 2 ) );
 		$this->assertSame( array(), $result['reviews'] );
 		$this->assertSame( 1, $result['total'] );

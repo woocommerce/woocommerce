@@ -131,7 +131,10 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 							'id'           => array( 'type' => 'integer' ),
 							'product_id'   => array( 'type' => 'integer' ),
 							'product_name' => array( 'type' => 'string' ),
-							'date_created' => array( 'type' => array( 'string', 'null' ) ),
+							'date_created' => array(
+								'type'   => 'string',
+								'format' => 'date-time',
+							),
 							'rating'       => array( 'type' => 'integer' ),
 							'verified'     => array( 'type' => 'boolean' ),
 							'status'       => array( 'type' => 'string' ),
@@ -397,13 +400,16 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 	 * @return array|\WP_Error
 	 */
 	private static function format_review( \WP_Comment $comment, array $scope ) {
-		$review = array(
-			'id'           => (int) $comment->comment_ID,
-			'date_created' => self::format_date( $comment->comment_date_gmt ),
-			'rating'       => (int) get_comment_meta( (int) $comment->comment_ID, 'rating', true ),
-			'verified'     => (bool) get_comment_meta( (int) $comment->comment_ID, 'verified', true ),
-			'review'       => wp_strip_all_tags( (string) $comment->comment_content ),
+		$review       = array(
+			'id'       => (int) $comment->comment_ID,
+			'rating'   => (int) get_comment_meta( (int) $comment->comment_ID, 'rating', true ),
+			'verified' => (bool) get_comment_meta( (int) $comment->comment_ID, 'verified', true ),
+			'review'   => wp_strip_all_tags( (string) $comment->comment_content ),
 		);
+		$date_created = self::format_date( $comment->comment_date_gmt );
+		if ( null !== $date_created ) {
+			$review['date_created'] = $date_created;
+		}
 		if ( 1 !== count( $scope['product_ids'] ) ) {
 			$review['product_id']   = (int) $comment->comment_post_ID;
 			$review['product_name'] = (string) get_post_field( 'post_title', (int) $comment->comment_post_ID, 'raw' );
