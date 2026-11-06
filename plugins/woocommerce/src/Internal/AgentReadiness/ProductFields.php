@@ -234,6 +234,26 @@ class ProductFields {
 	}
 
 	/**
+	 * The image a channel lists the product with: its own, or, for a variable product with none,
+	 * the first published variation's own image. 0 when there is neither.
+	 *
+	 * @param \WC_Product $product Product.
+	 */
+	public static function listing_image_id( \WC_Product $product ): int {
+		$image_id = self::image_id( $product );
+		if ( 0 !== $image_id ) {
+			return $image_id;
+		}
+		foreach ( self::variations( $product ) as $variation ) {
+			$image_id = self::image_id( $variation );
+			if ( 0 !== $image_id ) {
+				return $image_id;
+			}
+		}
+		return 0;
+	}
+
+	/**
 	 * The featured image's attachment id, or 0 when it is unset or the
 	 * attachment no longer exists.
 	 *

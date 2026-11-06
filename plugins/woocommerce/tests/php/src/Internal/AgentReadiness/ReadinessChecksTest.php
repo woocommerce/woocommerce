@@ -255,7 +255,7 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A variable product with no main image passes when a published variation has its own image, and fails when none does.
+	 * @testdox A variable product with no main image is listed with a published variation's own image, which is also checked for size.
 	 */
 	public function test_missing_images_counts_variation_images(): void {
 		$sut      = SimpleCheck::table()['missing_images'];
@@ -271,6 +271,15 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 		$variation->save();
 
 		$this->assertFalse( $sut->fails( wc_get_product( $variable->get_id() ), $this->scan ), 'A variation with its own image can be listed' );
+
+		wp_update_attachment_metadata(
+			$variation->get_image_id(),
+			array(
+				'width'  => 300,
+				'height' => 300,
+			)
+		);
+		$this->assertTrue( ( new ImageTooSmallCheck() )->fails( wc_get_product( $variable->get_id() ), $this->scan ), 'The variation image it lists with is checked for size' );
 	}
 
 	/**

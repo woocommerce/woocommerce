@@ -85,10 +85,23 @@ class ScheduledScan implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Whether a requested scan has not finished yet.
+	 * Whether a requested scan has not finished yet, or the daily scan is running now. The next
+	 * daily scan, still waiting for its date, doesn't count.
 	 */
 	public function is_pending(): bool {
-		return ActionSchedulerUtil::has_scheduled_action( self::RUN_NOW_HOOK, array(), self::GROUP );
+		if ( ActionSchedulerUtil::has_scheduled_action( self::RUN_NOW_HOOK, array(), self::GROUP ) ) {
+			return true;
+		}
+		$running_daily = as_get_scheduled_actions(
+			array(
+				'hook'     => self::DAILY_HOOK,
+				'group'    => self::GROUP,
+				'status'   => \ActionScheduler_Store::STATUS_RUNNING,
+				'per_page' => 1,
+			),
+			'ids'
+		);
+		return array() !== $running_daily;
 	}
 
 	/**

@@ -91,6 +91,21 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A running daily scan counts as pending, so Run check queues nothing; the next daily scan, not yet due, doesn't.
+	 */
+	public function test_running_daily_scan_is_pending(): void {
+		as_schedule_single_action( time() + DAY_IN_SECONDS, ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP );
+		$this->assertFalse( $this->sut->is_pending(), 'A daily scan waiting for tomorrow is not pending' );
+
+		$running = as_schedule_single_action( time(), ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP );
+		\ActionScheduler::store()->log_execution( $running );
+
+		$this->assertTrue( $this->sut->is_pending(), 'A running daily scan is pending' );
+		$this->sut->queue();
+		$this->assertCount( 0, $this->pending( ScheduledScan::RUN_NOW_HOOK ) );
+	}
+
+	/**
 	 * @testdox A scan still waiting past STALLED_AFTER stays queued: a new request neither runs it nor queues another.
 	 */
 	public function test_stalled_scan_stays_queued(): void {

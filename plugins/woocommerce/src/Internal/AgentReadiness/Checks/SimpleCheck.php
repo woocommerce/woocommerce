@@ -77,18 +77,8 @@ final class SimpleCheck extends AbstractReadinessCheck {
 					'fix'   => __( 'Add a main product image.', 'woocommerce' ),
 				),
 				self::fields( array( 'image_url', 'image_link', 'imageLink' ), self::EFFECT_NOT_LISTABLE ),
-				static function ( \WC_Product $product ): bool {
-					if ( 0 !== ProductFields::image_id( $product ) ) {
-						return false;
-					}
-					// Each variation lists as its own item with its own image, so one image on a variation is enough.
-					foreach ( ProductFields::variations( $product ) as $variation ) {
-						if ( 0 !== ProductFields::image_id( $variation ) ) {
-							return false;
-						}
-					}
-					return true;
-				}
+				// Each variation lists as its own item with its own image, so one image on a variation is enough.
+				static fn( \WC_Product $product ): bool => 0 === ProductFields::listing_image_id( $product )
 			),
 			new self(
 				'missing_product_text',
@@ -135,7 +125,7 @@ final class SimpleCheck extends AbstractReadinessCheck {
 				'missing_variation_images',
 				array(
 					'label' => __( 'Variable products with variations missing images', 'woocommerce' ),
-					'why'   => __( 'Each variation lists as its own item; without its own image it shows the parent image, which may not match the color or finish.', 'woocommerce' ),
+					'why'   => __( 'Each variation lists as its own item; without its own image it shows the parent image, which may not match the color or finish, or no image when the product has none.', 'woocommerce' ),
 					'fix'   => __( 'Add an image to each variation.', 'woocommerce' ),
 				),
 				self::fields( array( 'image_url', 'image_link', 'imageLink' ), self::EFFECT_GAPS ),

@@ -87,7 +87,7 @@ class ImageTooSmallCheck extends AbstractReadinessCheck {
 	 * @param ProductScan $scan    Catalog-wide lookups.
 	 */
 	public function fails( \WC_Product $product, ProductScan $scan ): bool {
-		$image_id = ProductFields::image_id( $product );
+		$image_id = ProductFields::listing_image_id( $product );
 		if ( 0 === $image_id ) {
 			return false;
 		}
