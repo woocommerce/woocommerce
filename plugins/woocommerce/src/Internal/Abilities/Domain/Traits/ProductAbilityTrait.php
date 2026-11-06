@@ -276,73 +276,146 @@ trait ProductAbilityTrait {
 	 */
 	private static function get_product_mutation_field_schemas( bool $for_variation = false ): array {
 		return array(
-			'name'              => array(
+			'name'               => array(
 				'type'        => 'string',
 				'description' => __( 'Required, except on a variation, which takes its name from its parent.', 'woocommerce' ),
 			),
-			'parent_id'         => array(
+			'parent_id'          => array(
 				'type'        => 'integer',
 				'description' => __( 'ID of the variable product this variation belongs to.', 'woocommerce' ),
 				'minimum'     => 1,
 			),
-			'attributes'        => self::get_product_attributes_schema( $for_variation ),
-			'variations'        => array( 'type' => 'array' ),
-			'sku'               => array( 'type' => 'string' ),
-			'regular_price'     => array(
+			'attributes'         => self::get_product_attributes_schema( $for_variation ),
+			'variations'         => array( 'type' => 'array' ),
+			'sku'                => array( 'type' => 'string' ),
+			'regular_price'      => array(
 				'type'        => 'string',
 				'description' => __( 'Decimal price as a string, without a currency symbol or thousand separators.', 'woocommerce' ),
 				'pattern'     => self::get_product_price_input_pattern(),
 			),
-			'sale_price'        => array(
+			'sale_price'         => array(
 				'type'        => 'string',
 				'description' => __( 'Decimal price as a string, without a currency symbol or thousand separators.', 'woocommerce' ),
 				'pattern'     => self::get_product_price_input_pattern(),
 			),
-			'description'       => array(
+			'description'        => array(
 				'type'        => 'string',
 				'description' => __( 'Product description content. Safe HTML is allowed.', 'woocommerce' ),
 			),
-			'short_description' => array(
+			'short_description'  => array(
 				'type'        => 'string',
 				'description' => __( 'Short product description content. Safe HTML is allowed.', 'woocommerce' ),
 			),
-			'status'            => array(
+			'status'             => array(
 				'type' => 'string',
 				'enum' => $for_variation ? self::get_variation_status_slugs() : self::get_product_mutation_status_slugs(),
 			),
-			'virtual'           => array(
+			'virtual'            => array(
 				'type'        => 'boolean',
 				'description' => __( 'Whether the product is not shipped.', 'woocommerce' ),
 			),
-			'downloadable'      => array(
+			'downloadable'       => array(
 				'type'        => 'boolean',
 				'description' => __( 'Whether the product gives the customer files to download.', 'woocommerce' ),
 			),
-			'manage_stock'      => array( 'type' => 'boolean' ),
-			'stock_quantity'    => array(
+			'manage_stock'       => array( 'type' => 'boolean' ),
+			'stock_quantity'     => array(
 				'type'        => self::get_product_stock_quantity_schema_type(),
 				'description' => __( 'Available stock quantity when product-level stock management is used.', 'woocommerce' ),
 			),
-			'stock_status'      => array(
+			'stock_status'       => array(
 				'type' => 'string',
 				'enum' => array_keys( wc_get_product_stock_status_options() ),
 			),
-			'external_url'      => array(
+			'external_url'       => array(
 				'type'        => 'string',
 				'description' => __( 'External destination URL for external products.', 'woocommerce' ),
 				'format'      => 'uri',
 			),
-			'button_text'       => array(
+			'button_text'        => array(
 				'type'        => 'string',
 				'description' => __( 'Button text for external products.', 'woocommerce' ),
 			),
-			'grouped_products'  => array(
+			'grouped_products'   => array(
 				'type'        => 'array',
 				'description' => __( 'Product IDs to include as children of a grouped product.', 'woocommerce' ),
 				'items'       => array(
 					'type'    => 'integer',
 					'minimum' => 1,
 				),
+			),
+			'categories'         => self::get_product_id_list_input_schema( __( 'Category IDs, replacing the current ones. Empty means the default category.', 'woocommerce' ) ),
+			'tags'               => self::get_product_id_list_input_schema( __( 'Tag IDs, replacing the current ones.', 'woocommerce' ) ),
+			'brands'             => self::get_product_id_list_input_schema( __( 'Brand IDs, replacing the current ones.', 'woocommerce' ) ),
+			'images'             => self::get_product_id_list_input_schema( __( 'Image attachment IDs, replacing the current ones. The first is the featured image.', 'woocommerce' ) ),
+			'catalog_visibility' => array(
+				'type' => 'string',
+				'enum' => array_keys( wc_get_product_visibility_options() ),
+			),
+			'featured'           => array( 'type' => 'boolean' ),
+			'date_on_sale_from'  => array(
+				'type'        => 'string',
+				'description' => __( 'Store time, YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS. Empty removes it.', 'woocommerce' ),
+				'pattern'     => self::get_product_date_input_pattern(),
+			),
+			'date_on_sale_to'    => array(
+				'type'        => 'string',
+				'description' => __( 'Store time, YYYY-MM-DD to end with that day or YYYY-MM-DDTHH:MM:SS. Empty removes it.', 'woocommerce' ),
+				'pattern'     => self::get_product_date_input_pattern(),
+			),
+			'tax_status'         => array(
+				'type' => 'string',
+				'enum' => array( ProductTaxStatus::TAXABLE, ProductTaxStatus::SHIPPING, ProductTaxStatus::NONE ),
+			),
+			'sold_individually'  => array(
+				'type'        => 'boolean',
+				'description' => __( 'Limit to one per order.', 'woocommerce' ),
+			),
+			'weight'             => array(
+				'type'        => 'string',
+				'description' => sprintf(
+					/* translators: %s: weight unit, such as kg. */
+					__( 'Decimal in %s. Empty removes it.', 'woocommerce' ),
+					get_option( 'woocommerce_weight_unit' )
+				),
+				'pattern'     => self::get_product_measurement_input_pattern(),
+			),
+			'dimensions'         => array(
+				'type'                 => 'object',
+				'description'          => sprintf(
+					/* translators: %s: dimension unit, such as cm. */
+					__( 'Decimals in %s. Only the keys sent change.', 'woocommerce' ),
+					get_option( 'woocommerce_dimension_unit' )
+				),
+				'properties'           => array_fill_keys(
+					array( 'length', 'width', 'height' ),
+					array(
+						'type'    => 'string',
+						'pattern' => self::get_product_measurement_input_pattern(),
+					)
+				),
+				'additionalProperties' => false,
+			),
+			'shipping_class'     => array(
+				'type'        => 'string',
+				'description' => __( 'Shipping class slug. Empty removes it.', 'woocommerce' ),
+			),
+		);
+	}
+
+	/**
+	 * Schema of an input that takes positive IDs.
+	 *
+	 * @param string $description Field description.
+	 * @return array
+	 */
+	private static function get_product_id_list_input_schema( string $description ): array {
+		return array(
+			'type'        => 'array',
+			'description' => $description,
+			'items'       => array(
+				'type'    => 'integer',
+				'minimum' => 1,
 			),
 		);
 	}
@@ -428,7 +501,7 @@ trait ProductAbilityTrait {
 
 		$fields        = self::get_common_product_mutation_fields();
 		$product_props = array();
-		$price_fields  = array( 'regular_price', 'sale_price' );
+		$price_fields  = array( 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'tax_status' );
 		$stock_fields  = array( 'manage_stock', 'stock_quantity', 'stock_status' );
 
 		if ( is_a( $classname, \WC_Product_Variation::class, true ) ) {
@@ -439,7 +512,7 @@ trait ProductAbilityTrait {
 				$fields = array_values( array_diff( $fields, array( 'attributes' ) ) );
 			}
 		} elseif ( is_a( $classname, \WC_Product_Variable::class, true ) ) {
-			$fields = array_merge( $fields, array( 'attributes', 'variations' ) );
+			$fields = array_merge( $fields, array( 'attributes', 'variations', 'tax_status', 'sold_individually', 'weight', 'dimensions', 'shipping_class' ) );
 		} elseif ( is_a( $classname, \WC_Product_External::class, true ) ) {
 			$fields        = array_merge( $fields, $price_fields, array( 'external_url', 'button_text' ) );
 			$product_props = array(
@@ -456,10 +529,10 @@ trait ProductAbilityTrait {
 				'stock_quantity' => '',
 			);
 		} else {
-			$fields = array_merge( $fields, array( 'virtual', 'downloadable' ) );
+			$fields = array_merge( $fields, array( 'virtual', 'downloadable', 'weight', 'dimensions', 'shipping_class' ) );
 
 			if ( is_a( $classname, \WC_Product_Simple::class, true ) ) {
-				$fields = array_merge( $fields, $price_fields, $stock_fields );
+				$fields = array_merge( $fields, $price_fields, $stock_fields, array( 'sold_individually' ) );
 			}
 		}
 
@@ -544,7 +617,7 @@ trait ProductAbilityTrait {
 	 * @return array<int, string>
 	 */
 	private static function get_common_product_mutation_fields(): array {
-		return array( 'name', 'sku', 'description', 'short_description', 'status' );
+		return array( 'name', 'sku', 'description', 'short_description', 'status', 'categories', 'tags', 'brands', 'images', 'catalog_visibility', 'featured' );
 	}
 
 	/**
@@ -606,25 +679,7 @@ trait ProductAbilityTrait {
 	 * @return \WC_Product|\WP_Error
 	 */
 	protected static function get_product_from_input( array $input ) {
-		if ( empty( $input['id'] ) ) {
-			return new \WP_Error(
-				'woocommerce_product_id_required',
-				__( 'Product ID is required.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		$product_id = (int) $input['id'];
-
-		if ( $product_id < 1 ) {
-			return new \WP_Error(
-				'woocommerce_product_id_required',
-				__( 'Product ID is required.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		$product = wc_get_product( $product_id );
+		$product = wc_get_product( $input['id'] );
 
 		if ( ! $product ) {
 			return new \WP_Error(
@@ -652,23 +707,34 @@ trait ProductAbilityTrait {
 		}
 
 		$setters = array(
-			'parent_id'         => 'set_parent_id',
-			'name'              => 'set_name',
-			'sku'               => 'set_sku',
-			'regular_price'     => 'set_regular_price',
-			'sale_price'        => 'set_sale_price',
-			'description'       => 'set_description',
-			'short_description' => 'set_short_description',
-			'status'            => 'set_status',
-			'virtual'           => 'set_virtual',
-			'downloadable'      => 'set_downloadable',
-			'manage_stock'      => 'set_manage_stock',
-			'stock_quantity'    => 'set_stock_quantity',
-			'stock_status'      => 'set_stock_status',
-			'external_url'      => 'set_product_url',
-			'button_text'       => 'set_button_text',
-			'grouped_products'  => 'set_children',
-			'attributes'        => 'set_attributes',
+			'parent_id'          => 'set_parent_id',
+			'name'               => 'set_name',
+			'sku'                => 'set_sku',
+			'regular_price'      => 'set_regular_price',
+			'sale_price'         => 'set_sale_price',
+			'description'        => 'set_description',
+			'short_description'  => 'set_short_description',
+			'status'             => 'set_status',
+			'virtual'            => 'set_virtual',
+			'downloadable'       => 'set_downloadable',
+			'manage_stock'       => 'set_manage_stock',
+			'stock_quantity'     => 'set_stock_quantity',
+			'stock_status'       => 'set_stock_status',
+			'external_url'       => 'set_product_url',
+			'button_text'        => 'set_button_text',
+			'grouped_products'   => 'set_children',
+			'attributes'         => 'set_attributes',
+			'categories'         => 'set_category_ids',
+			'tags'               => 'set_tag_ids',
+			'brands'             => 'set_brand_ids',
+			'catalog_visibility' => 'set_catalog_visibility',
+			'featured'           => 'set_featured',
+			'date_on_sale_from'  => 'set_date_on_sale_from',
+			'date_on_sale_to'    => 'set_date_on_sale_to',
+			'tax_status'         => 'set_tax_status',
+			'sold_individually'  => 'set_sold_individually',
+			'weight'             => 'set_weight',
+			'shipping_class'     => 'set_shipping_class_id',
 		);
 
 		foreach ( $setters as $field => $setter ) {
@@ -690,6 +756,23 @@ trait ProductAbilityTrait {
 			$product->{$setter}( $prepared_value );
 		}
 
+		foreach ( array( 'images', 'dimensions' ) as $field ) {
+			if ( ! in_array( $field, $product_config['fields'], true ) || ! array_key_exists( $field, $input ) ) {
+				continue;
+			}
+
+			$prepared_value = self::prepare_product_field_value( $field, $input[ $field ] );
+			if ( is_wp_error( $prepared_value ) ) {
+				return $prepared_value;
+			}
+
+			if ( 'images' === $field ) {
+				self::set_product_images( $product, $prepared_value );
+			} else {
+				self::set_product_dimensions( $product, $prepared_value );
+			}
+		}
+
 		return null;
 	}
 
@@ -702,7 +785,7 @@ trait ProductAbilityTrait {
 	 * @return null|\WP_Error
 	 */
 	protected static function check_publish_permission( ?\WC_Product $product, array $input ) {
-		$status = isset( $input['status'] ) ? sanitize_key( (string) $input['status'] ) : '';
+		$status = $input['status'] ?? '';
 		if (
 			! in_array( $status, array( ProductStatus::PUBLISH, ProductStatus::FUTURE, ProductStatus::PRIVATE ), true )
 			|| ( $product && $product->get_status() === $status )
@@ -834,8 +917,8 @@ trait ProductAbilityTrait {
 
 		foreach ( array_values( $items ) as $index => $item ) {
 			$position = $index + 1;
-			$id       = (int) ( $item['id'] ?? 0 );
-			$delete   = wc_string_to_bool( $item['delete'] ?? false );
+			$id       = $item['id'] ?? 0;
+			$delete   = $item['delete'] ?? false;
 
 			if ( $delete && ( $id <= 0 || count( $item ) > 2 ) ) {
 				return new \WP_Error(
@@ -1064,11 +1147,11 @@ trait ProductAbilityTrait {
 				if ( isset( $item['options'] ) ) {
 					return self::get_invalid_product_attributes_error();
 				}
-				$key = empty( $item['id'] ) ? sanitize_title( (string) ( $item['name'] ?? '' ) ) : wc_attribute_taxonomy_name_by_id( (int) $item['id'] );
+				$key = empty( $item['id'] ) ? sanitize_title( $item['name'] ?? '' ) : wc_attribute_taxonomy_name_by_id( $item['id'] );
 				if ( '' === $key ) {
 					return self::get_invalid_product_attributes_error();
 				}
-				$attributes[ $key ] = isset( $item['option'] ) ? wc_clean( (string) $item['option'] ) : '';
+				$attributes[ $key ] = isset( $item['option'] ) ? wc_clean( $item['option'] ) : '';
 			}
 			return $attributes;
 		}
@@ -1077,14 +1160,14 @@ trait ProductAbilityTrait {
 		foreach ( $value as $position => $item ) {
 			$options  = array_map( 'sanitize_text_field', $item['options'] ?? array() );
 			$taxonomy = self::get_global_attribute_taxonomy( $item );
-			$name     = '' === $taxonomy ? sanitize_text_field( trim( (string) ( $item['name'] ?? '' ) ) ) : $taxonomy;
-			if ( '' === $taxonomy && ( ! empty( $item['id'] ) || wc_string_to_bool( $item['global'] ?? false ) ) ) {
+			$name     = '' === $taxonomy ? sanitize_text_field( trim( $item['name'] ?? '' ) ) : $taxonomy;
+			if ( '' === $taxonomy && ( ! empty( $item['id'] ) || ( $item['global'] ?? false ) ) ) {
 				return new \WP_Error(
 					'woocommerce_product_attributes_invalid',
 					sprintf(
 						/* translators: %s: attribute name or id. */
 						__( 'There is no global attribute "%s".', 'woocommerce' ),
-						(string) ( $item['id'] ?? $item['name'] ?? '' )
+						$item['id'] ?? $item['name'] ?? ''
 					),
 					array( 'status' => 400 )
 				);
@@ -1131,11 +1214,11 @@ trait ProductAbilityTrait {
 	 */
 	private static function get_global_attribute_taxonomy( array $item ): string {
 		if ( ! empty( $item['id'] ) ) {
-			return wc_attribute_taxonomy_name_by_id( (int) $item['id'] );
+			return wc_attribute_taxonomy_name_by_id( $item['id'] );
 		}
 
 		$name = trim( $item['name'] ?? '' );
-		if ( ! wc_string_to_bool( $item['global'] ?? false ) || '' === $name ) {
+		if ( ! ( $item['global'] ?? false ) || '' === $name ) {
 			return '';
 		}
 
@@ -1266,6 +1349,35 @@ trait ProductAbilityTrait {
 	}
 
 	/**
+	 * Set the featured image from the first ID and the gallery from the rest.
+	 *
+	 * @param \WC_Product     $product   Product object.
+	 * @param array<int, int> $image_ids Attachment IDs.
+	 */
+	private static function set_product_images( \WC_Product $product, array $image_ids ): void {
+		$product->set_image_id( $image_ids[0] ?? '' );
+		$product->set_gallery_image_ids( array_slice( $image_ids, 1 ) );
+	}
+
+	/**
+	 * Set only the dimensions in the input, so the others keep their value.
+	 *
+	 * @param \WC_Product           $product    Product object.
+	 * @param array<string, string> $dimensions Dimensions keyed by length, width or height.
+	 */
+	private static function set_product_dimensions( \WC_Product $product, array $dimensions ): void {
+		$setters = array(
+			'length' => 'set_length',
+			'width'  => 'set_width',
+			'height' => 'set_height',
+		);
+
+		foreach ( array_intersect_key( $dimensions, $setters ) as $dimension => $value ) {
+			$product->{$setters[ $dimension ]}( $value );
+		}
+	}
+
+	/**
 	 * Apply product type configuration to a product object.
 	 *
 	 * @param \WC_Product $product        Product object.
@@ -1326,46 +1438,45 @@ trait ProductAbilityTrait {
 	 * @return mixed|\WP_Error
 	 */
 	private static function prepare_product_field_value( string $field, $value ) {
-		if ( in_array( $field, array( 'name', 'description', 'short_description' ), true ) && is_string( $value ) ) {
+		if ( in_array( $field, array( 'name', 'description', 'short_description' ), true ) ) {
 			return wp_filter_post_kses( $value );
 		}
 
-		if ( 'status' === $field && is_string( $value ) ) {
-			return sanitize_key( $value );
-		}
-
-		if ( 'external_url' === $field && is_string( $value ) ) {
-			return esc_url_raw( $value );
+		if ( in_array( $field, array( 'status', 'stock_status', 'external_url' ), true ) ) {
+			return $value;
 		}
 
 		if ( in_array( $field, array( 'regular_price', 'sale_price' ), true ) ) {
-			return self::prepare_product_price_value( $value );
+			return wc_format_decimal( $value );
 		}
 
-		if ( 'grouped_products' === $field ) {
-			if ( ! is_array( $value ) ) {
-				return new \WP_Error(
-					'woocommerce_product_grouped_products_invalid',
-					__( 'Grouped product IDs must be positive integers.', 'woocommerce' ),
-					array( 'status' => 400 )
-				);
-			}
+		$term_taxonomies = array(
+			'categories' => 'product_cat',
+			'tags'       => 'product_tag',
+			'brands'     => 'product_brand',
+		);
+		if ( isset( $term_taxonomies[ $field ] ) ) {
+			return self::prepare_product_term_ids( $field, $value, $term_taxonomies[ $field ] );
+		}
 
-			$grouped_product_ids = array();
+		if ( 'images' === $field ) {
+			return self::prepare_product_image_ids( $value );
+		}
 
-			foreach ( $value as $product_id ) {
-				if ( ! rest_is_integer( $product_id ) || (int) $product_id < 1 ) {
-					return new \WP_Error(
-						'woocommerce_product_grouped_products_invalid',
-						__( 'Grouped product IDs must be positive integers.', 'woocommerce' ),
-						array( 'status' => 400 )
-					);
-				}
+		if ( in_array( $field, array( 'date_on_sale_from', 'date_on_sale_to' ), true ) ) {
+			return self::prepare_product_sale_date( $field, $value );
+		}
 
-				$grouped_product_ids[] = (int) $product_id;
-			}
+		if ( 'weight' === $field ) {
+			return wc_format_decimal( $value );
+		}
 
-			return $grouped_product_ids;
+		if ( 'dimensions' === $field ) {
+			return array_map( 'wc_format_decimal', $value );
+		}
+
+		if ( 'shipping_class' === $field ) {
+			return self::prepare_product_shipping_class_id( $value );
 		}
 
 		if ( is_string( $value ) ) {
@@ -1376,23 +1487,131 @@ trait ProductAbilityTrait {
 	}
 
 	/**
-	 * Prepare a product price before passing it to the product setter.
+	 * Check that every ID is a term of the taxonomy.
 	 *
-	 * @param mixed $value Price value.
+	 * @param string $field    Input field, for the error message.
+	 * @param int[]  $value    Term IDs.
+	 * @param string $taxonomy Taxonomy.
+	 * @return array<int, int>|\WP_Error
+	 */
+	private static function prepare_product_term_ids( string $field, array $value, string $taxonomy ) {
+		$term_ids = array_values( array_unique( $value ) );
+
+		$missing_ids = array_filter( $term_ids, static fn( int $term_id ): bool => ! get_term( $term_id, $taxonomy ) instanceof \WP_Term );
+
+		if ( ! empty( $missing_ids ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_product_term_not_found',
+				sprintf(
+					/* translators: 1: input field, such as categories. 2: comma-separated term IDs. */
+					__( 'These %1$s do not exist: %2$s.', 'woocommerce' ),
+					$field,
+					implode( ', ', $missing_ids )
+				),
+				array( 'status' => 400 )
+			);
+		}
+
+		return $term_ids;
+	}
+
+	/**
+	 * Check that every ID is an image attachment.
+	 *
+	 * @param int[] $value Attachment IDs.
+	 * @return array<int, int>|\WP_Error
+	 */
+	private static function prepare_product_image_ids( array $value ) {
+		$image_ids = array_values( array_unique( $value ) );
+
+		$invalid_ids = array_filter( $image_ids, static fn( int $image_id ): bool => ! wp_attachment_is_image( $image_id ) );
+
+		if ( ! empty( $invalid_ids ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_product_image_invalid',
+				sprintf(
+					/* translators: %s: comma-separated attachment IDs. */
+					__( 'These IDs are not images in the media library: %s.', 'woocommerce' ),
+					implode( ', ', $invalid_ids )
+				),
+				array( 'status' => 400 )
+			);
+		}
+
+		return $image_ids;
+	}
+
+	/**
+	 * A sale date in store time. A date-only end keeps the sale running until the end of that day.
+	 *
+	 * @param string $field Input field.
+	 * @param string $value Date string, or empty to remove the date.
 	 * @return string|\WP_Error
 	 */
-	private static function prepare_product_price_value( $value ) {
-		if ( ! is_scalar( $value ) || is_bool( $value ) ) {
-			return self::get_invalid_product_price_error();
+	private static function prepare_product_sale_date( string $field, string $value ) {
+		$is_real_date = checkdate( (int) substr( $value, 5, 2 ), (int) substr( $value, 8, 2 ), (int) substr( $value, 0, 4 ) );
+
+		if ( '' !== $value && ! $is_real_date ) {
+			return new \WP_Error(
+				'woocommerce_ability_product_date_invalid',
+				__( 'Sale dates must be real dates and times, such as 2030-01-31 or 2030-01-31T18:30:00.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
 		}
 
-		$value = trim( (string) $value );
-
-		if ( 1 !== preg_match( '/' . self::get_product_price_input_pattern() . '/', $value ) ) {
-			return self::get_invalid_product_price_error();
+		if ( 'date_on_sale_to' === $field && 10 === strlen( $value ) ) {
+			return $value . ' 23:59:59';
 		}
 
-		return wc_format_decimal( $value );
+		return $value;
+	}
+
+	/**
+	 * Get a schema-compatible pattern for sale date inputs.
+	 *
+	 * @return string
+	 */
+	private static function get_product_date_input_pattern(): string {
+		return '^(?:[0-9]{4}-[0-9]{2}-[0-9]{2}(?:[T ](?:[01][0-9]|2[0-3]):[0-5][0-9](?::[0-5][0-9])?)?)?$';
+	}
+
+	/**
+	 * Get the term ID of a shipping class slug, or 0 for an empty slug.
+	 *
+	 * @param string $value Shipping class slug.
+	 * @return int|\WP_Error
+	 */
+	private static function prepare_product_shipping_class_id( string $value ) {
+		if ( '' === $value ) {
+			return 0;
+		}
+
+		$term = get_term_by( 'slug', sanitize_title( $value ), 'product_shipping_class' );
+
+		if ( ! $term instanceof \WP_Term ) {
+			return new \WP_Error(
+				'woocommerce_ability_product_shipping_class_not_found',
+				sprintf(
+					/* translators: %s: shipping class slug sent in the input. */
+					__( 'Shipping class "%s" not found. Send the slug of an existing shipping class, or an empty string to remove it.', 'woocommerce' ),
+					$value
+				),
+				array( 'status' => 400 )
+			);
+		}
+
+		return $term->term_id;
+	}
+
+	/**
+	 * Get a schema-compatible pattern for non-negative weight and dimension inputs.
+	 *
+	 * @return string
+	 */
+	private static function get_product_measurement_input_pattern(): string {
+		$decimal_separators = preg_quote( implode( '', self::get_product_price_decimal_separators() ), '/' );
+
+		return '^(?:[0-9]+(?:[' . $decimal_separators . '][0-9]+)?|[' . $decimal_separators . '][0-9]+|)$';
 	}
 
 	/**
@@ -1433,19 +1652,6 @@ trait ProductAbilityTrait {
 					}
 				)
 			)
-		);
-	}
-
-	/**
-	 * Get an invalid product price error.
-	 *
-	 * @return \WP_Error
-	 */
-	private static function get_invalid_product_price_error(): \WP_Error {
-		return new \WP_Error(
-			'woocommerce_product_price_invalid',
-			__( 'Product prices must be decimal strings without currency symbols or thousand separators.', 'woocommerce' ),
-			array( 'status' => 400 )
 		);
 	}
 
@@ -1549,47 +1755,50 @@ trait ProductAbilityTrait {
 		$permalink        = $product->get_permalink();
 
 		$data = array(
-			'id'                => $product->get_id(),
-			'name'              => $product->get_name(),
-			'slug'              => $product->get_slug(),
-			'type'              => $product->get_type(),
-			'status'            => $product->get_status(),
-			'sku'               => $product->get_sku(),
-			'currency'          => get_woocommerce_currency(),
-			'currency_symbol'   => html_entity_decode(
+			'id'                 => $product->get_id(),
+			'name'               => $product->get_name(),
+			'slug'               => $product->get_slug(),
+			'type'               => $product->get_type(),
+			'status'             => $product->get_status(),
+			'sku'                => $product->get_sku(),
+			'currency'           => get_woocommerce_currency(),
+			'currency_symbol'    => html_entity_decode(
 				get_woocommerce_currency_symbol(),
 				ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401
 			),
-			'price'             => self::format_amount_for_response( $product->get_price() ),
-			'regular_price'     => self::format_amount_for_response( $product->get_regular_price() ),
-			'sale_price'        => self::format_amount_for_response( $product->get_sale_price() ),
-			'on_sale'           => (bool) $product->is_on_sale(),
-			'stock_status'      => $product->get_stock_status(),
-			'manage_stock'      => (bool) $product->get_manage_stock(),
-			'virtual'           => (bool) $product->get_virtual(),
-			'downloadable'      => (bool) $product->get_downloadable(),
-			'grouped_products'  => $product instanceof \WC_Product_Grouped ? array_map( 'absint', $product->get_children( 'edit' ) ) : array(),
-			'categories'        => self::format_product_terms_for_response( $product->get_category_ids( 'edit' ), 'product_cat' ),
-			'tags'              => self::format_product_terms_for_response( $product->get_tag_ids( 'edit' ), 'product_tag' ),
-			'brands'            => self::format_product_terms_for_response( $product->get_brand_ids( 'edit' ), 'product_brand' ),
-			'description'       => $product->get_description(),
-			'short_description' => $product->get_short_description(),
-			'images'            => self::format_product_images_for_response( $product ),
-			'weight'            => $product->get_weight(),
-			'dimensions'        => array(
+			'price'              => self::format_amount_for_response( $product->get_price() ),
+			'regular_price'      => self::format_amount_for_response( $product->get_regular_price() ),
+			'sale_price'         => self::format_amount_for_response( $product->get_sale_price() ),
+			'on_sale'            => (bool) $product->is_on_sale(),
+			'stock_status'       => $product->get_stock_status(),
+			'manage_stock'       => (bool) $product->get_manage_stock(),
+			'sold_individually'  => (bool) $product->get_sold_individually(),
+			'virtual'            => (bool) $product->get_virtual(),
+			'downloadable'       => (bool) $product->get_downloadable(),
+			'grouped_products'   => $product instanceof \WC_Product_Grouped ? array_map( 'absint', $product->get_children( 'edit' ) ) : array(),
+			'categories'         => self::format_product_terms_for_response( $product->get_category_ids( 'edit' ), 'product_cat' ),
+			'tags'               => self::format_product_terms_for_response( $product->get_tag_ids( 'edit' ), 'product_tag' ),
+			'brands'             => self::format_product_terms_for_response( $product->get_brand_ids( 'edit' ), 'product_brand' ),
+			'catalog_visibility' => $product->get_catalog_visibility(),
+			'featured'           => (bool) $product->get_featured(),
+			'description'        => $product->get_description(),
+			'short_description'  => $product->get_short_description(),
+			'images'             => self::format_product_images_for_response( $product ),
+			'weight'             => $product->get_weight(),
+			'dimensions'         => array(
 				'length' => $product->get_length(),
 				'width'  => $product->get_width(),
 				'height' => $product->get_height(),
 			),
-			'shipping_required' => (bool) $product->needs_shipping(),
-			'shipping_class'    => $product->get_shipping_class(),
-			'shipping_class_id' => $product->get_shipping_class_id(),
-			'tax_status'        => $product->get_tax_status(),
-			'tax_class'         => $product->get_tax_class(),
-			'backorders'        => $product->get_backorders(),
-			'parent_id'         => (int) $product->get_parent_id(),
-			'attributes'        => self::format_product_attributes( $product ),
-			'variation_ids'     => $product instanceof \WC_Product_Variable ? self::read_variation_children( $product, false )['all'] : array(),
+			'shipping_required'  => (bool) $product->needs_shipping(),
+			'shipping_class'     => $product->get_shipping_class(),
+			'shipping_class_id'  => $product->get_shipping_class_id(),
+			'tax_status'         => $product->get_tax_status(),
+			'tax_class'          => $product->get_tax_class(),
+			'backorders'         => $product->get_backorders(),
+			'parent_id'          => (int) $product->get_parent_id(),
+			'attributes'         => self::format_product_attributes( $product ),
+			'variation_ids'      => $product instanceof \WC_Product_Variable ? self::read_variation_children( $product, false )['all'] : array(),
 		);
 
 		if ( false !== $permalink ) {
@@ -1614,6 +1823,8 @@ trait ProductAbilityTrait {
 
 		$data += array_filter(
 			array(
+				'date_on_sale_from' => self::format_date_for_response( $product->get_date_on_sale_from( 'edit' ), false ),
+				'date_on_sale_to'   => self::format_date_for_response( $product->get_date_on_sale_to( 'edit' ), false ),
 				'date_created'      => self::format_date_for_response( $product->get_date_created(), false ),
 				'date_created_gmt'  => self::format_date_for_response( $product->get_date_created() ),
 				'date_modified'     => self::format_date_for_response( $product->get_date_modified(), false ),
@@ -1810,74 +2021,85 @@ trait ProductAbilityTrait {
 		return array(
 			'type'                 => 'object',
 			'properties'           => array(
-				'id'                => array( 'type' => 'integer' ),
-				'name'              => array( 'type' => 'string' ),
-				'slug'              => array( 'type' => 'string' ),
-				'permalink'         => array(
+				'id'                 => array( 'type' => 'integer' ),
+				'name'               => array( 'type' => 'string' ),
+				'slug'               => array( 'type' => 'string' ),
+				'permalink'          => array(
 					'type'        => 'string',
 					'description' => __( 'Product permalink. Omitted when no public permalink is available.', 'woocommerce' ),
 					'format'      => 'uri',
 				),
-				'type'              => array(
+				'type'               => array(
 					'type'        => 'string',
 					'description' => __( 'Internal product type slug, such as simple, external, grouped, variable or variation.', 'woocommerce' ),
 				),
-				'status'            => array(
+				'status'             => array(
 					'type' => 'string',
 					'enum' => self::get_product_output_status_slugs(),
 				),
-				'sku'               => array( 'type' => 'string' ),
-				'currency'          => array(
+				'sku'                => array( 'type' => 'string' ),
+				'currency'           => array(
 					'type' => 'string',
 					'enum' => array_keys( get_woocommerce_currencies() ),
 				),
-				'currency_symbol'   => array( 'type' => 'string' ),
-				'price'             => array(
+				'currency_symbol'    => array( 'type' => 'string' ),
+				'price'              => array(
 					'type'        => 'string',
 					'description' => __( 'Decimal price as a string, without a currency symbol.', 'woocommerce' ),
 				),
-				'regular_price'     => array(
+				'regular_price'      => array(
 					'type'        => 'string',
 					'description' => __( 'Decimal price as a string, without a currency symbol.', 'woocommerce' ),
 				),
-				'sale_price'        => array(
+				'sale_price'         => array(
 					'type'        => 'string',
 					'description' => __( 'Decimal price as a string, without a currency symbol.', 'woocommerce' ),
 				),
-				'on_sale'           => array(
+				'on_sale'            => array(
 					'type'        => 'boolean',
 					'description' => __( 'Whether the sale price applies now, taking the sale dates into account.', 'woocommerce' ),
 				),
-				'stock_status'      => array(
+				'date_on_sale_from'  => array(
+					'type'        => 'string',
+					'description' => __( 'Start of the sale in the store timezone. Omitted when the sale has no start date.', 'woocommerce' ),
+					'format'      => 'date-time',
+				),
+				'date_on_sale_to'    => array(
+					'type'        => 'string',
+					'description' => __( 'End of the sale in the store timezone. Omitted when the sale has no end date.', 'woocommerce' ),
+					'format'      => 'date-time',
+				),
+				'stock_status'       => array(
 					'type' => 'string',
 					'enum' => array_keys( wc_get_product_stock_status_options() ),
 				),
-				'stock_quantity'    => array(
+				'stock_quantity'     => array(
 					'type'        => self::get_product_stock_quantity_schema_type(),
 					'description' => __( 'Current stock quantity. Omitted when no stock quantity is set.', 'woocommerce' ),
 				),
-				'manage_stock'      => array( 'type' => 'boolean' ),
-				'virtual'           => array( 'type' => 'boolean' ),
-				'downloadable'      => array( 'type' => 'boolean' ),
-				'external_url'      => array(
+				'manage_stock'       => array( 'type' => 'boolean' ),
+				'sold_individually'  => array( 'type' => 'boolean' ),
+				'virtual'            => array( 'type' => 'boolean' ),
+				'downloadable'       => array( 'type' => 'boolean' ),
+				'external_url'       => array(
 					'type'        => 'string',
 					'description' => __( 'External product URL. Omitted when the product is not external or no URL is set.', 'woocommerce' ),
 					'format'      => 'uri',
 				),
-				'button_text'       => array(
+				'button_text'        => array(
 					'type'        => 'string',
 					'description' => __( 'Button text. Omitted when the product is not external or no button text is set.', 'woocommerce' ),
 				),
-				'grouped_products'  => array(
+				'grouped_products'   => array(
 					'type'        => 'array',
 					'description' => __( 'Product IDs included as children of a grouped product.', 'woocommerce' ),
 					'items'       => array( 'type' => 'integer' ),
 				),
-				'parent_id'         => array(
+				'parent_id'          => array(
 					'type'        => 'integer',
 					'description' => __( 'ID of the variable product of a variation, or 0.', 'woocommerce' ),
 				),
-				'attributes'        => array(
+				'attributes'         => array(
 					'type'        => 'array',
 					'description' => __( 'Attributes with their options on a product, or the option each attribute picks on a variation. For a global attribute the options are term slugs.', 'woocommerce' ),
 					'items'       => array(
@@ -1906,12 +2128,17 @@ trait ProductAbilityTrait {
 						'additionalProperties' => false,
 					),
 				),
-				'categories'        => self::get_product_terms_output_schema(),
-				'tags'              => self::get_product_terms_output_schema(),
-				'brands'            => self::get_product_terms_output_schema(),
-				'description'       => array( 'type' => 'string' ),
-				'short_description' => array( 'type' => 'string' ),
-				'images'            => array(
+				'categories'         => self::get_product_terms_output_schema(),
+				'tags'               => self::get_product_terms_output_schema(),
+				'brands'             => self::get_product_terms_output_schema(),
+				'catalog_visibility' => array(
+					'type' => 'string',
+					'enum' => array_keys( wc_get_product_visibility_options() ),
+				),
+				'featured'           => array( 'type' => 'boolean' ),
+				'description'        => array( 'type' => 'string' ),
+				'short_description'  => array( 'type' => 'string' ),
+				'images'             => array(
 					'type'        => 'array',
 					'description' => __( 'Featured image first, then the gallery.', 'woocommerce' ),
 					'items'       => array(
@@ -1928,7 +2155,7 @@ trait ProductAbilityTrait {
 						'additionalProperties' => false,
 					),
 				),
-				'weight'            => array(
+				'weight'             => array(
 					'type'        => 'string',
 					'description' => sprintf(
 						/* translators: %s: weight unit, such as kg. */
@@ -1936,7 +2163,7 @@ trait ProductAbilityTrait {
 						get_option( 'woocommerce_weight_unit' )
 					),
 				),
-				'dimensions'        => array(
+				'dimensions'         => array(
 					'type'                 => 'object',
 					'description'          => sprintf(
 						/* translators: %s: dimension unit, such as cm. */
@@ -1950,52 +2177,52 @@ trait ProductAbilityTrait {
 					),
 					'additionalProperties' => false,
 				),
-				'shipping_required' => array( 'type' => 'boolean' ),
-				'shipping_class'    => array(
+				'shipping_required'  => array( 'type' => 'boolean' ),
+				'shipping_class'     => array(
 					'type'        => 'string',
 					'description' => __( 'Shipping class slug, or empty when the product has none.', 'woocommerce' ),
 				),
-				'shipping_class_id' => array(
+				'shipping_class_id'  => array(
 					'type'        => 'integer',
 					'description' => __( 'Shipping class term ID, or 0 when the product has none.', 'woocommerce' ),
 				),
-				'tax_status'        => array(
+				'tax_status'         => array(
 					'type' => 'string',
 					'enum' => array( ProductTaxStatus::TAXABLE, ProductTaxStatus::SHIPPING, ProductTaxStatus::NONE ),
 				),
-				'tax_class'         => array(
+				'tax_class'          => array(
 					'type'        => 'string',
 					'description' => __( 'Tax class slug, or empty for the standard rate.', 'woocommerce' ),
 				),
-				'backorders'        => array(
+				'backorders'         => array(
 					'type' => 'string',
 					'enum' => array_keys( wc_get_product_backorder_options() ),
 				),
-				'low_stock_amount'  => array(
+				'low_stock_amount'   => array(
 					'type'        => self::get_product_stock_quantity_schema_type(),
 					'description' => __( 'Low stock threshold of the product. Omitted when the store-wide threshold applies.', 'woocommerce' ),
 				),
-				'variation_ids'     => array(
+				'variation_ids'      => array(
 					'type'        => 'array',
 					'description' => __( 'IDs of the variations of a variable product.', 'woocommerce' ),
 					'items'       => array( 'type' => 'integer' ),
 				),
-				'date_created'      => array(
+				'date_created'       => array(
 					'type'        => 'string',
 					'format'      => 'date-time',
 					'description' => __( 'Product creation date in the store timezone. Omitted when no creation date is available.', 'woocommerce' ),
 				),
-				'date_created_gmt'  => array(
+				'date_created_gmt'   => array(
 					'type'        => 'string',
 					'format'      => 'date-time',
 					'description' => __( 'Product creation date in UTC. Omitted when no creation date is available.', 'woocommerce' ),
 				),
-				'date_modified'     => array(
+				'date_modified'      => array(
 					'type'        => 'string',
 					'format'      => 'date-time',
 					'description' => __( 'Product modification date in the store timezone. Omitted when no modification date is available.', 'woocommerce' ),
 				),
-				'date_modified_gmt' => array(
+				'date_modified_gmt'  => array(
 					'type'        => 'string',
 					'format'      => 'date-time',
 					'description' => __( 'Product modification date in UTC. Omitted when no modification date is available.', 'woocommerce' ),

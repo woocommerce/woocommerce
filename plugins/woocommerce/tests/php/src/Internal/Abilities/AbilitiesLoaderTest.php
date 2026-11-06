@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 
+use Automattic\WooCommerce\Abilities\Ability;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesCategories;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
@@ -426,8 +427,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			}
 			$description = $schema['properties']['type']['description'];
 			$this->assertStringContainsString( 'Fields each type takes.', $description );
-			$this->assertStringContainsString( 'external: name, sku, description, short_description, status, regular_price, sale_price, external_url, button_text', $description );
-			$this->assertStringContainsString( 'grouped: name, sku, description, short_description, status, grouped_products', $description );
+			$this->assertStringContainsString( 'external: name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, regular_price, sale_price, date_on_sale_from, date_on_sale_to, tax_status, external_url, button_text', $description );
+			$this->assertStringContainsString( 'grouped: name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, grouped_products', $description );
 			$this->assertStringEndsWith( 'Applies to: grouped.', $schema['properties']['grouped_products']['description'] );
 			$this->assertStringContainsString( 'Applies to: ', $schema['properties']['regular_price']['description'] );
 			$this->assertStringNotContainsString( 'Applies to: ', $schema['properties']['sku']['description'] ?? '' );
@@ -1342,6 +1343,42 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should add a private order note when customer_note is the string false.
+	 */
+	public function test_order_add_note_reads_string_false_as_a_private_note(): void {
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+
+		$result = wp_get_ability( 'woocommerce/order-add-note' )->execute(
+			array(
+				'id'            => $order->get_id(),
+				'note'          => 'Packed.',
+				'customer_note' => 'false',
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertCount(
+			0,
+			wc_get_order_notes(
+				array(
+					'order_id' => $order->get_id(),
+					'type'     => 'customer',
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox Should register every Core ability with the WooCommerce Ability class.
+	 */
+	public function test_core_abilities_use_the_ability_class(): void {
+		foreach ( array( 'woocommerce/products-query', 'woocommerce/order-add-note', 'woocommerce/product-update' ) as $name ) {
+			$this->assertInstanceOf( Ability::class, wp_get_ability( $name ), $name );
+		}
+	}
+
+	/**
 	 * @testdox Should reject negative entity IDs during schema validation.
 	 *
 	 * @dataProvider provider_negative_entity_id_inputs
@@ -1837,7 +1874,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( '9.00', $subscription['product']['regular_price'] );
 		$this->assertWPError( $bundle_price );
 		$this->assertSame( 'woocommerce_product_field_unsupported', $bundle_price->get_error_code() );
-		$this->assertSame( 'The test-bundle product type does not take regular_price. It takes name, sku, description, short_description, status, virtual, downloadable.', $bundle_price->get_error_message() );
+		$this->assertSame( 'The test-bundle product type does not take regular_price. It takes name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, virtual, downloadable, weight, dimensions, shipping_class.', $bundle_price->get_error_message() );
 	}
 
 	/**
@@ -2648,6 +2685,17 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should check the permissions of a direct call with a numeric string id or no input, as the MCP adapter sends them.
+	 */
+	public function test_check_permissions_converts_raw_input(): void {
+		$order   = \WC_Helper_Order::create_order();
+		$ability = wp_get_ability( 'woocommerce/orders-query' );
+
+		$this->assertTrue( $ability->check_permissions( array( 'id' => (string) $order->get_id() ) ), 'A numeric string id is converted.' );
+		$this->assertTrue( $ability->check_permissions( null ), 'No input gets the schema default.' );
+	}
+
+	/**
 	 * @testdox Should read string false on the attribute flags of a product as false.
 	 */
 	public function test_product_create_reads_string_false_attribute_flags(): void {
@@ -3120,7 +3168,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should reject invalid grouped product IDs before setting children.
 	 */
 	public function test_product_create_rejects_invalid_grouped_product_ids(): void {
-		$result = wp_get_ability( 'woocommerce/product-create' )->execute_change(
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
 				'name'             => 'Invalid Grouped Product',
 				'type'             => 'grouped',
@@ -3129,7 +3177,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_product_grouped_products_invalid', $result->get_error_code() );
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
 	}
 
 	/**
@@ -3146,7 +3194,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_product_field_unsupported', $result->get_error_code() );
-		$this->assertSame( 'The grouped product type does not take regular_price. It takes name, sku, description, short_description, status, grouped_products.', $result->get_error_message() );
+		$this->assertSame( 'The grouped product type does not take regular_price. It takes name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, grouped_products.', $result->get_error_message() );
 	}
 
 	/**
@@ -3852,8 +3900,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $result );
-		$this->assertTrue( $result['deleted'] );
 		$this->assertSame( $product->get_id(), $result['id'] );
+		$this->assertSame( 'deleted', $result['status'] );
 		$this->assertNull( get_post( $product->get_id() ) );
 	}
 
@@ -3871,7 +3919,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $result );
-		$this->assertTrue( $result['deleted'] );
+		$this->assertSame( 'deleted', $result['status'] );
 		$this->assertNull( get_post( $variation_id ) );
 	}
 
@@ -3889,7 +3937,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $result );
-		$this->assertTrue( $result['deleted'] );
+		$this->assertSame( 'trash', $result['status'] );
 		$this->assertSame( 'trash', get_post_status( $product->get_id() ) );
 	}
 

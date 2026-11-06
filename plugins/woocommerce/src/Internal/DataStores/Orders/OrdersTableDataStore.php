@@ -3673,7 +3673,7 @@ CREATE TABLE $meta_table (
 		$delete_meta     = $this->data_store_meta->delete_meta( $object, $meta );
 		$changes_applied = $this->after_meta_change( $object, $meta );
 
-		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() && isset( $meta->key ) ) {
+		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && ! isset( self::$sync_on_read_order_ids[ $object->get_id() ] ) && $this->should_backfill_post_record() && isset( $meta->key ) ) {
 			self::$backfilling_order_ids[] = $object->get_id();
 			if ( is_object( $meta->value ) && '__PHP_Incomplete_Class' === get_class( $meta->value ) ) {
 				$meta_value = maybe_serialize( $meta->value );
@@ -3708,15 +3708,17 @@ CREATE TABLE $meta_table (
 	 * @return int|bool  meta ID or false on failure
 	 */
 	public function add_meta( &$object, $meta ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
-		$add_meta        = $this->data_store_meta->add_meta( $object, $meta );
-		$meta->id        = $add_meta;
-		$changes_applied = $this->after_meta_change( $object, $meta );
+		$add_meta = $this->data_store_meta->add_meta( $object, $meta );
+		$meta->id = $add_meta;
 
-		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
+		// Write the post meta before after_meta_change(): a full order save there would add any later meta first.
+		if ( $object instanceof WC_Abstract_Order && ! isset( self::$sync_on_read_order_ids[ $object->get_id() ] ) && $this->should_backfill_post_record() ) {
 			self::$backfilling_order_ids[] = $object->get_id();
 			add_post_meta( $object->get_id(), $meta->key, $meta->value );
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
 		}
+
+		$this->after_meta_change( $object, $meta );
 
 		return $add_meta;
 	}
@@ -3733,7 +3735,7 @@ CREATE TABLE $meta_table (
 		$update_meta     = $this->data_store_meta->update_meta( $object, $meta );
 		$changes_applied = $this->after_meta_change( $object, $meta );
 
-		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
+		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && ! isset( self::$sync_on_read_order_ids[ $object->get_id() ] ) && $this->should_backfill_post_record() ) {
 			self::$backfilling_order_ids[] = $object->get_id();
 			update_post_meta( $object->get_id(), $meta->key, $meta->value );
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
