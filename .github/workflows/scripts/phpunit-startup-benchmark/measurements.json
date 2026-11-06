@@ -1,0 +1,637 @@
+{
+  "separate_builder": {
+    "run_id": 42301707199,
+    "revision": "e7273f90cfcc51f9855d1124493ba6364cef7d23",
+    "attempt": 1,
+    "samples": [
+      {
+        "wave": "cold",
+        "sample": 1,
+        "variant": "cleanup",
+        "job_id": 128181031553,
+        "conclusion": "success",
+        "setup_seconds": 73.913,
+        "startup_seconds": 62.533,
+        "tests_seconds": 11.068,
+        "job_seconds": 133.0,
+        "cache_imports": [],
+        "cached_steps": 13,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "cold",
+        "sample": 1,
+        "variant": "baseline",
+        "job_id": 128181031620,
+        "conclusion": "success",
+        "setup_seconds": 86.302,
+        "startup_seconds": 73.104,
+        "tests_seconds": 13.07,
+        "job_seconds": 148.0,
+        "cache_imports": [],
+        "cached_steps": 14,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "cold",
+        "sample": 1,
+        "variant": "cache-cold",
+        "job_id": 128181031869,
+        "conclusion": "success",
+        "setup_seconds": 106.319,
+        "startup_seconds": 88.058,
+        "tests_seconds": 16.855,
+        "job_seconds": 174.0,
+        "cache_imports": [],
+        "cache_bytes": 521443476,
+        "cached_steps": 14,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "cold",
+        "sample": 2,
+        "variant": "baseline",
+        "job_id": 128182068488,
+        "conclusion": "success",
+        "setup_seconds": 77.938,
+        "startup_seconds": 65.123,
+        "tests_seconds": 16.814,
+        "job_seconds": 144.0,
+        "cache_imports": [],
+        "cached_steps": 14,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "cold",
+        "sample": 2,
+        "variant": "cleanup",
+        "job_id": 128182172694,
+        "conclusion": "success",
+        "setup_seconds": 82.168,
+        "startup_seconds": 68.826,
+        "tests_seconds": 13.306,
+        "job_seconds": 154.0,
+        "cache_imports": [],
+        "cached_steps": 13,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "cold",
+        "sample": 2,
+        "variant": "cache-cold",
+        "job_id": 128182373955,
+        "conclusion": "success",
+        "setup_seconds": 116.461,
+        "startup_seconds": 95.866,
+        "tests_seconds": 17.082,
+        "job_seconds": 193.0,
+        "cache_imports": [],
+        "cache_bytes": 521443637,
+        "cached_steps": 14,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "cold",
+        "sample": 3,
+        "variant": "baseline",
+        "job_id": 128183147227,
+        "conclusion": "success",
+        "setup_seconds": 97.003,
+        "startup_seconds": 84.761,
+        "tests_seconds": 13.753,
+        "job_seconds": 158.0,
+        "cache_imports": [],
+        "cached_steps": 14,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "cold",
+        "sample": 3,
+        "variant": "cleanup",
+        "job_id": 128183326130,
+        "conclusion": "success",
+        "setup_seconds": 72.721,
+        "startup_seconds": 61.325,
+        "tests_seconds": 8.934,
+        "job_seconds": 129.0,
+        "cache_imports": [],
+        "cached_steps": 13,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "cold",
+        "sample": 3,
+        "variant": "cache-cold",
+        "job_id": 128183816108,
+        "conclusion": "success",
+        "setup_seconds": 114.811,
+        "startup_seconds": 94.875,
+        "tests_seconds": 16.929,
+        "job_seconds": 188.0,
+        "cache_imports": [],
+        "cache_bytes": 521443137,
+        "cached_steps": 14,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "warm",
+        "sample": 1,
+        "variant": "baseline",
+        "job_id": 128185261170,
+        "conclusion": "success",
+        "setup_seconds": 78.628,
+        "startup_seconds": 67.564,
+        "tests_seconds": 9.212,
+        "job_seconds": 132.0,
+        "cache_imports": [],
+        "cached_steps": 14,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "warm",
+        "sample": 1,
+        "variant": "cache-warm",
+        "job_id": 128185261292,
+        "conclusion": "success",
+        "setup_seconds": 92.962,
+        "startup_seconds": 70.977,
+        "tests_seconds": 10.592,
+        "job_seconds": 151.0,
+        "cache_imports": [
+          "wordpress",
+          "cli"
+        ],
+        "cache_bytes": 521443476,
+        "cached_steps": 55,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "warm",
+        "sample": 2,
+        "variant": "baseline",
+        "job_id": 128186292994,
+        "conclusion": "success",
+        "setup_seconds": 78.811,
+        "startup_seconds": 65.241,
+        "tests_seconds": 9.498,
+        "job_seconds": 136.0,
+        "cache_imports": [],
+        "cached_steps": 14,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "warm",
+        "sample": 2,
+        "variant": "cache-warm",
+        "job_id": 128186431954,
+        "conclusion": "success",
+        "setup_seconds": 73.84,
+        "startup_seconds": 56.517,
+        "tests_seconds": 16.047,
+        "job_seconds": 140.0,
+        "cache_imports": [
+          "wordpress",
+          "cli"
+        ],
+        "cache_bytes": 521443637,
+        "cached_steps": 55,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "warm",
+        "sample": 3,
+        "variant": "baseline",
+        "job_id": 128187289991,
+        "conclusion": "success",
+        "setup_seconds": 73.318,
+        "startup_seconds": 62.511,
+        "tests_seconds": 15.886,
+        "job_seconds": 133.0,
+        "cache_imports": [],
+        "cached_steps": 14,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "warm",
+        "sample": 3,
+        "variant": "cache-warm",
+        "job_id": 128187457920,
+        "conclusion": "success",
+        "setup_seconds": 98.521,
+        "startup_seconds": 71.116,
+        "tests_seconds": 10.992,
+        "job_seconds": 165.0,
+        "cache_imports": [
+          "wordpress",
+          "cli"
+        ],
+        "cache_bytes": 521443137,
+        "cached_steps": 55,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "warm",
+        "sample": 1,
+        "variant": "cache-miss",
+        "job_id": 128188294351,
+        "conclusion": "success",
+        "setup_seconds": 96.742,
+        "startup_seconds": 82.735,
+        "tests_seconds": 16.442,
+        "job_seconds": 163.0,
+        "cache_imports": [],
+        "cached_steps": 14,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "warm",
+        "sample": 1,
+        "variant": "cache-incompatible",
+        "job_id": 128188710043,
+        "conclusion": "success",
+        "setup_seconds": 102.523,
+        "startup_seconds": 82.651,
+        "tests_seconds": 16.475,
+        "job_seconds": 171.0,
+        "cache_imports": [],
+        "cache_bytes": 521443476,
+        "cached_steps": 14,
+        "test_totals": [
+          89,
+          307
+        ]
+      }
+    ],
+    "medians": {
+      "cold/cleanup": {
+        "setup_seconds": 73.913,
+        "startup_seconds": 62.533,
+        "tests_seconds": 11.068,
+        "job_seconds": 133.0
+      },
+      "cold/baseline": {
+        "setup_seconds": 86.302,
+        "startup_seconds": 73.104,
+        "tests_seconds": 13.753,
+        "job_seconds": 148.0
+      },
+      "cold/cache-cold": {
+        "setup_seconds": 114.811,
+        "startup_seconds": 94.875,
+        "tests_seconds": 16.929,
+        "job_seconds": 188.0
+      },
+      "warm/baseline": {
+        "setup_seconds": 78.628,
+        "startup_seconds": 65.241,
+        "tests_seconds": 9.498,
+        "job_seconds": 133.0
+      },
+      "warm/cache-warm": {
+        "setup_seconds": 92.962,
+        "startup_seconds": 70.977,
+        "tests_seconds": 10.992,
+        "job_seconds": 151.0
+      },
+      "warm/cache-miss": {
+        "setup_seconds": 96.742,
+        "startup_seconds": 82.735,
+        "tests_seconds": 16.442,
+        "job_seconds": 163.0
+      },
+      "warm/cache-incompatible": {
+        "setup_seconds": 102.523,
+        "startup_seconds": 82.651,
+        "tests_seconds": 16.475,
+        "job_seconds": 171.0
+      }
+    },
+    "total_runner_seconds": 2634.0,
+    "runtime_matches_all_samples": true,
+    "runtime_sha256": {
+      "php.json": "431ae4fa54e98cd4422b3eb3b3cfa72b50a02e8dd6c04d1f09ed7365907fc60d",
+      "wordpress-version.txt": "31f0ea2ada9617b8008fbce87921ae2861d9b70546be3fefff5a1595b39a0da2",
+      "database-version.txt": "59a0cf1e2a51551b28da3d19bb020a958132d23d387a6e17bea7e61e58fbd73b",
+      "themes.json": "cf975a2c752f2731d8652debfe41cff4e405757e94b044eef09c77a36ff78499",
+      "fixtures.txt": "f56006eee80b6b2c0679d076520c9a98f3a7a7a2550d7dad0351ce051d3b92ae",
+      "checkout-sha": "71264ffefe95e698a4014a40f1b9a0985125bdcbe553af9c5cf63414e8069deb",
+      "inputs.json": "b7e7fbf2cbbc5a514b75bcbc55ada63b163465eaa83e80610fc45832a759a8eb"
+    },
+    "observed_cache_archive_bytes": 518789133
+  },
+  "native_builder": {
+    "run_id": 42304030592,
+    "revision": "1a55f05a659bdf8eee4a0a2a6fe19664b4ab8935",
+    "attempt": 1,
+    "samples": [
+      {
+        "wave": "cold",
+        "sample": 1,
+        "variant": "cache-cold",
+        "job_id": 128188899625,
+        "conclusion": "success",
+        "setup_seconds": 111.341,
+        "startup_seconds": 97.164,
+        "tests_seconds": 9.852,
+        "job_seconds": 172.0,
+        "cache_imports": [],
+        "cache_bytes": 521443502,
+        "cached_steps": 14,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "warm",
+        "sample": 1,
+        "variant": "cache-warm",
+        "job_id": 128190147087,
+        "conclusion": "success",
+        "setup_seconds": 67.019,
+        "startup_seconds": 52.023,
+        "tests_seconds": 17.107,
+        "job_seconds": 132.0,
+        "cache_imports": [
+          "wordpress",
+          "cli"
+        ],
+        "cache_bytes": 521443502,
+        "cached_steps": 55,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "warm",
+        "sample": 1,
+        "variant": "baseline",
+        "job_id": 128190147293,
+        "conclusion": "success",
+        "setup_seconds": 77.165,
+        "startup_seconds": 66.459,
+        "tests_seconds": 16.493,
+        "job_seconds": 148.0,
+        "cache_imports": [],
+        "cached_steps": 14,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "warm",
+        "sample": 2,
+        "variant": "baseline",
+        "job_id": 128191110120,
+        "conclusion": "success",
+        "setup_seconds": 104.043,
+        "startup_seconds": 85.806,
+        "tests_seconds": 14.205,
+        "job_seconds": 177.0,
+        "cache_imports": [],
+        "cached_steps": 14,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "warm",
+        "sample": 2,
+        "variant": "cache-warm",
+        "job_id": 128191224910,
+        "conclusion": "success",
+        "setup_seconds": 78.799,
+        "startup_seconds": 56.557,
+        "tests_seconds": 17.661,
+        "job_seconds": 159.0,
+        "cache_imports": [
+          "wordpress",
+          "cli"
+        ],
+        "cache_bytes": 521443502,
+        "cached_steps": 55,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "warm",
+        "sample": 3,
+        "variant": "baseline",
+        "job_id": 128192359933,
+        "conclusion": "success",
+        "setup_seconds": 86.524,
+        "startup_seconds": 75.365,
+        "tests_seconds": 9.514,
+        "job_seconds": 147.0,
+        "cache_imports": [],
+        "cached_steps": 14,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "warm",
+        "sample": 3,
+        "variant": "cache-warm",
+        "job_id": 128192363042,
+        "conclusion": "success",
+        "setup_seconds": 76.24,
+        "startup_seconds": 60.343,
+        "tests_seconds": 10.414,
+        "job_seconds": 133.0,
+        "cache_imports": [
+          "wordpress",
+          "cli"
+        ],
+        "cache_bytes": 521443502,
+        "cached_steps": 55,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "warm",
+        "sample": 1,
+        "variant": "cache-miss",
+        "job_id": 128193340546,
+        "conclusion": "success",
+        "setup_seconds": 114.277,
+        "startup_seconds": 101.996,
+        "tests_seconds": 12.857,
+        "job_seconds": 182.0,
+        "cache_imports": [],
+        "cached_steps": 14,
+        "test_totals": [
+          89,
+          307
+        ]
+      },
+      {
+        "wave": "warm",
+        "sample": 1,
+        "variant": "cache-incompatible",
+        "job_id": 128193440497,
+        "conclusion": "success",
+        "setup_seconds": 131.48,
+        "startup_seconds": 111.632,
+        "tests_seconds": 13.347,
+        "job_seconds": 203.0,
+        "cache_imports": [],
+        "cache_bytes": 521443502,
+        "cached_steps": 14,
+        "test_totals": [
+          89,
+          307
+        ]
+      }
+    ],
+    "medians": {
+      "cold/cache-cold": {
+        "setup_seconds": 111.341,
+        "startup_seconds": 97.164,
+        "tests_seconds": 9.852,
+        "job_seconds": 172.0
+      },
+      "warm/cache-warm": {
+        "setup_seconds": 76.24,
+        "startup_seconds": 56.557,
+        "tests_seconds": 17.107,
+        "job_seconds": 133.0
+      },
+      "warm/baseline": {
+        "setup_seconds": 86.524,
+        "startup_seconds": 75.365,
+        "tests_seconds": 14.205,
+        "job_seconds": 148.0
+      },
+      "warm/cache-miss": {
+        "setup_seconds": 114.277,
+        "startup_seconds": 101.996,
+        "tests_seconds": 12.857,
+        "job_seconds": 182.0
+      },
+      "warm/cache-incompatible": {
+        "setup_seconds": 131.48,
+        "startup_seconds": 111.632,
+        "tests_seconds": 13.347,
+        "job_seconds": 203.0
+      }
+    },
+    "total_runner_seconds": 1474.0,
+    "runtime_matches_all_samples": true,
+    "runtime_sha256": {
+      "php.json": "431ae4fa54e98cd4422b3eb3b3cfa72b50a02e8dd6c04d1f09ed7365907fc60d",
+      "wordpress-version.txt": "31f0ea2ada9617b8008fbce87921ae2861d9b70546be3fefff5a1595b39a0da2",
+      "database-version.txt": "59a0cf1e2a51551b28da3d19bb020a958132d23d387a6e17bea7e61e58fbd73b",
+      "themes.json": "cf975a2c752f2731d8652debfe41cff4e405757e94b044eef09c77a36ff78499",
+      "fixtures.txt": "f56006eee80b6b2c0679d076520c9a98f3a7a7a2550d7dad0351ce051d3b92ae",
+      "checkout-sha": "b7ce750359972be84919978359c07085ca45334c8211370063fbc0a29a506cc8",
+      "inputs.json": "b7e7fbf2cbbc5a514b75bcbc55ada63b163465eaa83e80610fc45832a759a8eb"
+    },
+    "observed_cache_archive_bytes": 518801564
+  },
+  "diagnostics": [
+    {
+      "run_id": 42300041265,
+      "total_runner_seconds": 304,
+      "reason": "Unused test-stack Dockerfile pinning failure"
+    },
+    {
+      "run_id": 42300526007,
+      "total_runner_seconds": 503,
+      "reason": "Bake external cache-export entitlement failure"
+    },
+    {
+      "run_id": 42301016754,
+      "total_runner_seconds": 821,
+      "reason": "Corrected nonrepresentative direct-Compose baseline"
+    }
+  ],
+  "native_rerun": {
+    "run_id": 42304030592,
+    "revision": "1a55f05a659bdf8eee4a0a2a6fe19664b4ab8935",
+    "attempt": 2,
+    "samples": [
+      {
+        "wave": "warm",
+        "sample": 1,
+        "variant": "cache-warm",
+        "job_id": 128195136863,
+        "conclusion": "success",
+        "setup_seconds": 86.393,
+        "startup_seconds": 68.772,
+        "tests_seconds": 12.9,
+        "job_seconds": 155.0,
+        "cache_imports": [
+          "wordpress",
+          "cli"
+        ],
+        "cache_bytes": 521443502,
+        "cached_steps": 55,
+        "test_totals": [
+          89,
+          307
+        ]
+      }
+    ],
+    "runtime_matches_original": true,
+    "total_runner_seconds": 155,
+    "note": "Only the warm sample 1 job executed again. GitHub carries prior jobs into the attempt metadata; their original durations are not counted twice."
+  },
+  "total_investigation_runner_seconds": 5891.0
+}

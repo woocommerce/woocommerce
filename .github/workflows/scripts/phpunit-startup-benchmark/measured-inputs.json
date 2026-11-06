@@ -1,0 +1,14 @@
+{
+  "wordpress": "https://wordpress.org/wordpress-7.1.4.zip",
+  "themes": [
+    "https://downloads.wordpress.org/theme/storefront.4.6.2.zip",
+    "https://downloads.wordpress.org/theme/twentytwentytwo.2.2.zip"
+  ],
+  "images": {
+    "wordpress:php8.5": "wordpress:php8.5@sha256:63f89c89eeba29421a2660ccc87be392e6d72148724d92fa3d0756e9700786b9",
+    "wordpress:cli-php8.5": "wordpress:cli-php8.5@sha256:d16fa67b450f61a8e16d738e502f29dd30daa08c5e7d2bc39a1e32ec29815aed",
+    "mariadb:lts": "mariadb:lts@sha256:d46e102fa8b9b72bfcdeb56f9dd538742092119dc8b11f31fe662605cd234cd9",
+    "phpmyadmin": "phpmyadmin@sha256:f54a37b908b26caa7032c4eb0c7f3495fdd90208a06eed9c4b2c8e691dd1662c",
+    "moby/buildkit:buildx-stable-1": "moby/buildkit:buildx-stable-1@sha256:c5f8862f52499773af85bc07695b2379ef08e8002352b0df2c4864c91d78dabe"
+  }
+}

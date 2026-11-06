@@ -1,6 +1,6 @@
 # PHPUnit startup benchmark
 
-This experiment measures the complete cost of preparing one PHP 8.5 PHPUnit environment on fresh `ubuntu-24.04` runners. It does not change the normal CI workflow. Results and a rollout recommendation will accompany the benchmark PR.
+This experiment measures the complete cost of preparing one PHP 8.5 PHPUnit environment on fresh `ubuntu-24.04` runners. It does not change the normal CI workflow. Read the [measured results and shipping recommendation](results.md), with individual samples in [measurements.json](measurements.json).
 
 ## Comparisons
 
@@ -8,7 +8,7 @@ This experiment measures the complete cost of preparing one PHP 8.5 PHPUnit envi
 | --- | --- |
 | `baseline` | Normal wp-env setup with the experiment's pinned WordPress, theme versions, and image digests. |
 | `cleanup` | Excludes disabled phpMyAdmin from the image pull and omits the global PHPUnit installations. WooCommerce still invokes its own vendor PHPUnit. |
-| `cache-cold` | Builds normal images with a dedicated Buildx builder, exports their layers, and saves them to the Actions cache. |
+| `cache-cold` | Builds normal images with the experiment's selected builder, exports their layers, and saves them to the Actions cache. |
 | `cache-warm` | Restores the matching layers on a fresh runner and imports them into the Compose builds. |
 | `cache-miss` | Requests a nonexistent Actions cache and builds a fresh environment. |
 | `cache-incompatible` | Restores a real cache but changes its compatibility identity, requiring a fresh build. |
