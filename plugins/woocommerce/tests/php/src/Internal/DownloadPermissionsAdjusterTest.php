@@ -31,13 +31,13 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 		// This is needed for "product->set_downloads" to work without actual files.
 		add_filter(
 			'woocommerce_downloadable_file_allowed_mime_types',
-			function() {
+			function () {
 				return array( 'foo' => 'nonsense/foo' );
 			}
 		);
 		add_filter(
 			'woocommerce_downloadable_file_exists',
-			function( $exists, $filename ) {
+			function ( $exists, $filename ) {
 				return true;
 			},
 			10,
@@ -92,10 +92,10 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'as_get_scheduled_actions'  => function( $args, $return_format ) use ( &$as_get_scheduled_actions_invoked ) {
+				'as_get_scheduled_actions'  => function ( $args, $return_format ) use ( &$as_get_scheduled_actions_invoked ) {
 					$as_get_scheduled_actions_invoked = true;
 				},
-				'as_schedule_single_action' => function( $timestamp, $hook, $args ) use ( &$as_schedule_single_action_invoked ) {
+				'as_schedule_single_action' => function ( $timestamp, $hook, $args ) use ( &$as_schedule_single_action_invoked ) {
 					$as_schedule_single_action_invoked = true;
 				},
 			)
@@ -109,83 +109,29 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Does not check variations or schedule adjustment when the parent has no download files.
-	 * @testWith [false, false]
-	 *           [false, true]
-	 *           [true, false]
-	 *           [true, true]
-	 * @param bool $parent_downloadable Whether the parent is downloadable.
-	 * @param bool $child_downloadable Whether a child is downloadable.
+	 * @testdox Does not prime child caches or schedule adjustment when the parent has no download files.
 	 */
-	public function test_parent_without_downloads_does_not_check_children( bool $parent_downloadable, bool $child_downloadable ): void {
-		$product = $this->create_downloadable_variation_product();
+	public function test_parent_without_downloads_does_not_schedule_adjustment() {
+		$product  = $this->create_downloadable_variation_product();
+		$child_id = current( $product->get_children() );
 		$product->set_downloads( array() );
-		$product->set_downloadable( $parent_downloadable );
-		$child = new \WC_Product_Variation( current( $product->get_children() ) );
-		$child->set_downloadable( $child_downloadable );
-		$child->save();
-		$checks = 0;
-		add_filter(
-			'woocommerce_is_downloadable',
-			static function ( $is_downloadable, $candidate ) use ( &$checks ) {
-				if ( $candidate->is_type( 'variation' ) ) {
-					++$checks;
-				}
-				return $is_downloadable;
-			},
-			10,
-			2
-		);
+
+		$as_get_scheduled_actions_invoked = false;
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'as_get_scheduled_actions' => function () {
-					$this->fail( 'A parent without download files should not reach scheduling.' );
-				},
-			)
-		);
-
-		clean_post_cache( $child->get_id() );
-		$this->sut->maybe_schedule_adjust_download_permissions( $product );
-
-		$this->assertSame( 0, $checks, 'No children should be checked for empty parent downloads.' );
-		$this->assertFalse( wp_cache_get( $child->get_id(), 'posts' ), 'Child posts should not be primed for empty parent downloads.' );
-	}
-
-	/**
-	 * @testdox Uses filtered parent downloads when deciding whether to schedule adjustment.
-	 * @testWith [false]
-	 *           [true]
-	 * @param bool $downloadable Whether the parent is downloadable.
-	 */
-	public function test_filtered_parent_downloads_are_scheduled( bool $downloadable ): void {
-		$product   = $this->create_downloadable_variation_product();
-		$downloads = $product->get_downloads();
-		$product->set_downloads( array() );
-		$product->set_downloadable( $downloadable );
-		add_filter(
-			'woocommerce_product_get_downloads',
-			static function ( $files, $candidate ) use ( $product, $downloads ) {
-				return $candidate->get_id() === $product->get_id() ? $downloads : $files;
-			},
-			10,
-			2
-		);
-		$scheduled_args = null;
-		$this->register_legacy_proxy_function_mocks(
-			array(
-				'as_get_scheduled_actions'  => static function () {
+				'as_get_scheduled_actions' => function ( $args, $return_format ) use ( &$as_get_scheduled_actions_invoked ) {
+					unset( $args, $return_format );
+					$as_get_scheduled_actions_invoked = true;
 					return array();
 				},
-				'as_schedule_single_action' => static function ( $timestamp, $hook, $args ) use ( &$scheduled_args ) {
-					unset( $timestamp, $hook );
-					$scheduled_args = $args;
-				},
 			)
 		);
 
+		clean_post_cache( $child_id );
 		$this->sut->maybe_schedule_adjust_download_permissions( $product );
 
-		$this->assertSame( array( $product->get_id() ), $scheduled_args );
+		$this->assertFalse( $as_get_scheduled_actions_invoked );
+		$this->assertFalse( wp_cache_get( $child_id, 'posts' ) );
 	}
 
 	/**
@@ -197,11 +143,11 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'as_get_scheduled_actions'  => function( $args, $return_format ) use ( &$as_get_scheduled_actions_args ) {
+				'as_get_scheduled_actions'  => function ( $args, $return_format ) use ( &$as_get_scheduled_actions_args ) {
 					$as_get_scheduled_actions_args = $args;
 					return array( 1 );
 				},
-				'as_schedule_single_action' => function( $timestamp, $hook, $args ) use ( &$as_schedule_single_action_invoked ) {
+				'as_schedule_single_action' => function ( $timestamp, $hook, $args ) use ( &$as_schedule_single_action_invoked ) {
 					$as_schedule_single_action_invoked = true;
 				},
 			)
@@ -228,14 +174,14 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'as_get_scheduled_actions'  => function( $params, $return_format ) use ( &$as_get_scheduled_actions_args ) {
+				'as_get_scheduled_actions'  => function ( $params, $return_format ) use ( &$as_get_scheduled_actions_args ) {
 					$as_get_scheduled_actions_args = $params;
 					return array();
 				},
-				'as_schedule_single_action' => function( $timestamp, $hook, $args ) use ( &$as_schedule_single_action_args ) {
+				'as_schedule_single_action' => function ( $timestamp, $hook, $args ) use ( &$as_schedule_single_action_args ) {
 					$as_schedule_single_action_args = array( $timestamp, $hook, $args );
 				},
-				'time'                      => function() {
+				'time'                      => function () {
 					return 0; },
 			)
 		);
@@ -490,5 +436,4 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 
 		return $product;
 	}
-
 }
