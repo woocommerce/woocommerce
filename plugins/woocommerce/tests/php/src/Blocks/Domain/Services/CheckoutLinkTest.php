@@ -12,6 +12,48 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
  */
 class CheckoutLinkTest extends \WC_Unit_Test_Case {
 	/**
+	 * @testdox A generated checkout link adds the selected variation to the cart.
+	 */
+	public function test_generated_variation_checkout_link_adds_to_cart(): void {
+		$attribute = new \WC_Product_Attribute();
+		$attribute->set_name( 'Size' );
+		$attribute->set_options( [ 'Large' ] );
+		$attribute->set_variation( true );
+
+		$product = new \WC_Product_Variable();
+		$product->set_name( 'Shirt' );
+		$product->set_status( ProductStatus::PUBLISH );
+		$product->set_attributes( [ $attribute ] );
+		$product->save();
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( [ 'size' => 'Large' ] );
+		$variation->set_regular_price( '20' );
+		$variation->set_status( ProductStatus::PUBLISH );
+		$variation->save();
+		\WC_Product_Variable::sync( $product->get_id() );
+		$product = wc_get_product( $product->get_id() );
+
+		$previous_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		try {
+			$_GET = [ 'attribute_size' => 'Large' ];
+			$sut  = new \WC_Structured_Data();
+			$sut->generate_product_data( $product );
+			$url = $sut->get_data()[0]['offers'][0]['checkoutPageURLTemplate'];
+			wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+			$_GET = wp_slash( $query );
+			$this->get_checkout_link_service()->get_checkout_link_test();
+			$items = array_values( WC()->cart->get_cart() );
+			$this->assertCount( 1, $items );
+			$this->assertSame( $variation->get_id(), $items[0]['variation_id'] );
+			$this->assertSame( [ 'attribute_size' => 'Large' ], $items[0]['variation'] );
+		} finally {
+			$_GET = $previous_get;
+		}
+	}
+
+	/**
 	 * @testdox Installing-mode requests queue the endpoint rewrite without replacing persisted rules.
 	 */
 	public function test_endpoint_rewrite_is_deferred_during_installing_mode(): void {
