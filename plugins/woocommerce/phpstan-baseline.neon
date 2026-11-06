@@ -12757,13 +12757,13 @@ parameters:
 			path: includes/class-wc-order.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this          Order object\.\)\: Unexpected token "\$this", expected variable at offset 192 on line 6$#'
+			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this          Order object\.\)\: Unexpected token "\$this", expected variable at offset 187 on line 6$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: includes/class-wc-order.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this          Order object\.\)\: Unexpected token "\$this", expected variable at offset 187 on line 6$#'
+			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this          Order object\.\)\: Unexpected token "\$this", expected variable at offset 192 on line 6$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: includes/class-wc-order.php
@@ -66883,12 +66883,6 @@ parameters:
 			path: src/StoreApi/Utilities/CartController.php
 
 		-
-			message: '#^Call to method is_type\(\) on an unknown class Automattic\\WooCommerce\\StoreApi\\Utilities\\Error\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/StoreApi/Utilities/CartController.php
-
-		-
 			message: '#^Cannot call method get_id\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -66951,12 +66945,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Utilities\\CartController\:\:get_draft_order\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/StoreApi/Utilities/CartController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Utilities\\CartController\:\:get_product_for_cart\(\) has invalid return type Automattic\\WooCommerce\\StoreApi\\Utilities\\Error\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/StoreApi/Utilities/CartController.php
 
@@ -67063,42 +67051,6 @@ parameters:
 			path: src/StoreApi/Utilities/CartController.php
 
 		-
-			message: '#^Parameter \#1 \$product of function wc_get_cart_item_data_hash expects WC_Product, Automattic\\WooCommerce\\StoreApi\\Utilities\\Error\|WC_Product given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Utilities/CartController.php
-
-		-
-			message: '#^Parameter \#1 \$product of method Automattic\\WooCommerce\\StoreApi\\Utilities\\CartController\:\:get_product_id\(\) expects WC_Product, Automattic\\WooCommerce\\StoreApi\\Utilities\\Error\|WC_Product given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/StoreApi/Utilities/CartController.php
-
-		-
-			message: '#^Parameter \#1 \$product of method Automattic\\WooCommerce\\StoreApi\\Utilities\\CartController\:\:get_variable_product_attributes\(\) expects WC_Product, Automattic\\WooCommerce\\StoreApi\\Utilities\\Error\|WC_Product given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Utilities/CartController.php
-
-		-
-			message: '#^Parameter \#1 \$product of method Automattic\\WooCommerce\\StoreApi\\Utilities\\CartController\:\:get_variation_id\(\) expects WC_Product, Automattic\\WooCommerce\\StoreApi\\Utilities\\Error\|WC_Product given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/StoreApi/Utilities/CartController.php
-
-		-
-			message: '#^Parameter \#1 \$product of method Automattic\\WooCommerce\\StoreApi\\Utilities\\CartController\:\:validate_add_to_cart\(\) expects WC_Product, Automattic\\WooCommerce\\StoreApi\\Utilities\\Error\|WC_Product given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Utilities/CartController.php
-
-		-
-			message: '#^Parameter \#1 \$product of method Automattic\\WooCommerce\\StoreApi\\Utilities\\QuantityLimits\:\:get_add_to_cart_limits\(\) expects WC_Product, Automattic\\WooCommerce\\StoreApi\\Utilities\\Error\|WC_Product given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/StoreApi/Utilities/CartController.php
-
-		-
 			message: '#^Parameter \#1 \$str of function md5 expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 4
@@ -67106,12 +67058,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$text of function esc_html expects string, int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Utilities/CartController.php
-
-		-
-			message: '#^Parameter \#2 \$product of method Automattic\\WooCommerce\\StoreApi\\Utilities\\CartController\:\:get_variation_id_from_variation_data\(\) expects WC_Product, Automattic\\WooCommerce\\StoreApi\\Utilities\\Error\|WC_Product given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/StoreApi/Utilities/CartController.php
