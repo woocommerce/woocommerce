@@ -211,6 +211,53 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should break ranking ties by product ID, including at the output cap.
+	 */
+	public function test_ranking_ties_are_deterministic(): void {
+		$rank = new \ReflectionMethod( ProductReviewsQuery::class, 'rank' );
+		$rank->setAccessible( true );
+		$rows = array(
+			array(
+				'product_id'     => 3,
+				'average_rating' => 3.0,
+				'review_count'   => 1,
+			),
+			array(
+				'product_id'     => 2,
+				'average_rating' => 3.0,
+				'review_count'   => 2,
+			),
+			array(
+				'product_id'     => 1,
+				'average_rating' => 3.0,
+				'review_count'   => 1,
+			),
+			array(
+				'product_id'     => 4,
+				'average_rating' => 1.0,
+				'review_count'   => 1,
+			),
+			array(
+				'product_id'     => 5,
+				'average_rating' => 0.0,
+				'review_count'   => 3,
+			),
+		);
+		$this->assertSame( array( 4, 2, 1, 3, 5 ), array_column( $rank->invoke( null, $rows ), 'product_id' ) );
+		$rows     = array_map(
+			static fn( $id ) => array(
+				'product_id'     => $id,
+				'average_rating' => 3.0,
+				'review_count'   => 1,
+			),
+			range( 202, 1 )
+		);
+		$expected = array_merge( range( 1, 100 ), range( 103, 202 ) );
+		$this->assertSame( $expected, array_column( $rank->invoke( null, $rows ), 'product_id' ) );
+		$this->assertSame( $expected, array_column( $rank->invoke( null, array_reverse( $rows ) ), 'product_id' ) );
+	}
+
+	/**
 	 * @testdox Should format UTC dates and verified purchases, and handle missing dates and empty pages.
 	 */
 	public function test_dates_verified_and_empty_results(): void {

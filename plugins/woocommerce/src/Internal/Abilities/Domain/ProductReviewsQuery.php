@@ -508,7 +508,7 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 	}
 
 	/**
-	 * Order per-product entries worst-rated first and cut them to the cap.
+	 * Order products by rating, review count, then product ID, and apply the cap.
 	 *
 	 * Unrated products sort last. Above the cap, retain both ends of the rated ranking.
 	 *
@@ -523,7 +523,10 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 					return 0.0 === $a['average_rating'] ? 1 : -1;
 				}
 				if ( $a['average_rating'] === $b['average_rating'] ) {
-					return $b['review_count'] - $a['review_count'];
+					if ( $a['review_count'] !== $b['review_count'] ) {
+						return $b['review_count'] - $a['review_count'];
+					}
+					return $a['product_id'] <=> $b['product_id'];
 				}
 				return $a['average_rating'] < $b['average_rating'] ? -1 : 1;
 			}
