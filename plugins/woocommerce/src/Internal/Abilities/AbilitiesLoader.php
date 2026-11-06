@@ -31,6 +31,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZonesQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\TaxRatesQuery;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReportAbility;
+use Automattic\WooCommerce\Internal\AgentReadiness\RunCheckAbility;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -70,6 +71,7 @@ class AbilitiesLoader {
 		ProductDelete::class,
 		ProductUpdate::class,
 		ReportAbility::class,
+		RunCheckAbility::class,
 		ShippingZonesQuery::class,
 		TaxRatesQuery::class,
 		CustomersQuery::class,

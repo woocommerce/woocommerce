@@ -105,6 +105,7 @@ class ReadinessAbilitiesTest extends WC_Unit_Test_Case {
 	public function test_registered_only_with_feature(): void {
 		$this->assertTrue( wp_has_ability( ReadinessAbilities::GET_REPORT ) );
 		$this->assertInstanceOf( Ability::class, wp_get_ability( ReadinessAbilities::GET_REPORT ) );
+		$this->assertInstanceOf( Ability::class, wp_get_ability( ReadinessAbilities::RUN_CHECK ) );
 		$meta = wp_get_ability( ReadinessAbilities::GET_REPORT )->get_meta();
 		$this->assertTrue( $meta['mcp']['public'] );
 		$this->assertTrue( $meta['annotations']['readonly'] );
