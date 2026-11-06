@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
@@ -331,6 +332,111 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_ability_order_search_empty', $result->get_error_code() );
 		$this->assertSame( 400, $result->get_error_data()['status'] );
+	}
+
+	/**
+	 * @testdox Should return each order exactly once across pages when orders tie on $orderby $order, with HPOS $hpos.
+	 * @testWith [true, "date", "desc"]
+	 *           [true, "date_modified", "asc"]
+	 *           [true, "total", "asc"]
+	 *           [true, "id", "desc"]
+	 *           [false, "date", "desc"]
+	 *           [false, "date_modified", "asc"]
+	 *           [false, "total", "asc"]
+	 *           [false, "id", "desc"]
+	 * @param bool   $hpos    Whether to use the custom orders table.
+	 * @param string $orderby Sort field.
+	 * @param string $order   Sort direction.
+	 */
+	public function test_pages_tied_orders_once_each( bool $hpos, string $orderby, string $order ): void {
+		$this->use_storage( $hpos );
+		$ids = array();
+		for ( $i = 0; $i < 7; $i++ ) {
+			$ids[] = $this->create_dated_order( 10 );
+		}
+		$this->set_modified_date( $ids, $hpos );
+
+		$paged = array();
+		for ( $page = 1; $page <= 3; $page++ ) {
+			$result = OrdersQuery::execute(
+				array(
+					'orderby'  => $orderby,
+					'order'    => $order,
+					'page'     => $page,
+					'per_page' => 3,
+				)
+			);
+			$this->assertIsArray( $result );
+			$paged = array_merge( $paged, array_column( $result['orders'], 'id' ) );
+		}
+
+		if ( 'desc' === $order ) {
+			rsort( $ids );
+		}
+		$this->assertSame( $ids, $paged, 'Tied orders should be sorted by ID in the requested direction.' );
+	}
+
+	/**
+	 * @testdox Should sort orders by total.
+	 *
+	 * @dataProvider storage_modes
+	 * @param bool $hpos Whether to use the custom orders table.
+	 */
+	public function test_sorts_by_total( bool $hpos ): void {
+		$this->use_storage( $hpos );
+		$thirty = $this->create_dated_order( 30 );
+		$ten    = $this->create_dated_order( 10 );
+		$twenty = $this->create_dated_order( 20 );
+
+		$result = OrdersQuery::execute(
+			array(
+				'orderby' => 'total',
+				'order'   => 'asc',
+			)
+		);
+
+		$this->assertSame( array( $ten, $twenty, $thirty ), array_column( $result['orders'], 'id' ) );
+	}
+
+	/**
+	 * Create a processing order with a fixed creation date.
+	 *
+	 * @param float $total Order total.
+	 * @return int
+	 */
+	private function create_dated_order( float $total ): int {
+		$order = wc_create_order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->set_date_created( '2026-01-01T10:00:00' );
+		$order->set_total( $total );
+		$order->save();
+
+		return $order->get_id();
+	}
+
+	/**
+	 * Give orders one modified date in the table the query reads, since saving an order sets it to now.
+	 *
+	 * @param int[] $ids  Order IDs.
+	 * @param bool  $hpos Whether the custom orders table stores the orders.
+	 */
+	private function set_modified_date( array $ids, bool $hpos ): void {
+		global $wpdb;
+
+		foreach ( $ids as $id ) {
+			if ( $hpos ) {
+				$wpdb->update( OrderUtil::get_table_for_orders(), array( 'date_updated_gmt' => '2026-01-02 10:00:00' ), array( 'id' => $id ) );
+			} else {
+				$wpdb->update(
+					$wpdb->posts,
+					array(
+						'post_modified'     => '2026-01-02 10:00:00',
+						'post_modified_gmt' => '2026-01-02 10:00:00',
+					),
+					array( 'ID' => $id )
+				);
+			}
+		}
 	}
 
 	/**
