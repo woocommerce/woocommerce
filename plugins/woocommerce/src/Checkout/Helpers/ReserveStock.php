@@ -185,12 +185,12 @@ final class ReserveStock {
 		$quantities = array();
 
 		foreach ( $order->get_items() as $item ) {
-			if ( ! $item instanceof \WC_Order_Item_Product ) {
+			if ( ! $item || ! is_callable( array( $item, 'get_product' ) ) ) {
 				continue;
 			}
 
 			$product = $item->get_product();
-			if ( ! $product instanceof \WC_Product ) {
+			if ( ! $product ) {
 				continue;
 			}
 
