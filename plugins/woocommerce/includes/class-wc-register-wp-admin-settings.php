@@ -200,6 +200,10 @@ class WC_Register_WP_Admin_Settings {
 			'option_key'  => $setting['option_key'],
 		);
 
+		if ( is_array( $setting['abilities'] ?? null ) ) {
+			$new_setting['abilities'] = $setting['abilities'];
+		}
+
 		if ( isset( $setting['default'] ) ) {
 			$new_setting['default'] = $setting['default'];
 		}

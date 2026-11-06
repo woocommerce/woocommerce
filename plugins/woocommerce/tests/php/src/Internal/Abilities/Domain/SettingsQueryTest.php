@@ -101,25 +101,19 @@ class SettingsQueryTest extends \WC_Unit_Test_Case {
 					'default'    => 'secret-sentinel',
 				);
 				$settings[] = array(
+					'abilities'  => array( 'read' => true ),
 					'id'         => 'password',
 					'type'       => 'password',
 					'option_key' => 'test_secret',
 					'default'    => 'secret-sentinel',
 				);
 				$settings[] = array(
+					'abilities'  => array( 'read' => true ),
 					'id'         => 'mode',
 					'type'       => 'text',
 					'option_key' => 'test_mode',
 				);
 				return $settings;
-			}
-		);
-		add_filter(
-			'woocommerce_ability_settings_allowed_options',
-			static function ( $options ) use ( $group ) {
-				$options[ $group ]['mode']     = 'test_mode';
-				$options[ $group ]['password'] = 'test_secret';
-				return $options;
 			}
 		);
 		update_option( 'test_secret', 'secret-sentinel' );
@@ -144,15 +138,15 @@ class SettingsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not follow an extension's replacement option key for a Core setting.
+	 * @testdox Should let an extension opt a Core setting out at its definition.
 	 */
-	public function test_option_alias_is_not_trusted(): void {
+	public function test_core_setting_can_opt_out(): void {
 		add_filter(
-			'woocommerce_settings-general',
+			'woocommerce_general_settings',
 			static function ( $settings ) {
 				foreach ( $settings as &$setting ) {
 					if ( 'woocommerce_currency' === $setting['id'] ) {
-						$setting['option_key'] = 'test_secret';
+						$setting['abilities']['read'] = false;
 					}
 				}
 				return $settings;
@@ -167,6 +161,45 @@ class SettingsQueryTest extends \WC_Unit_Test_Case {
 			)
 		);
 		$this->assertSame( 0, $result['total'] );
+	}
+
+	/**
+	 * @testdox Should only expose a field when its definition explicitly opts in with boolean true.
+	 * @testWith [null, false]
+	 *           [true, false]
+	 *           [{}, false]
+	 *           [{"read": "true"}, false]
+	 *           [{"read": 1}, false]
+	 *           [{"read": false}, false]
+	 *           [{"read": true}, true]
+	 * @param mixed $abilities Field metadata.
+	 * @param bool  $expected Whether the field is readable.
+	 */
+	public function test_definition_opt_in( $abilities, bool $expected ): void {
+		add_filter(
+			'woocommerce_general_settings',
+			static function ( $settings ) use ( $abilities ) {
+				$settings[] = array(
+					'id'        => 'extension_mode',
+					'title'     => 'Extension mode',
+					'type'      => 'text',
+					'default'   => 'sandbox',
+					'abilities' => $abilities,
+				);
+				return $settings;
+			}
+		);
+		$result = wp_get_ability( 'woocommerce/settings-query' )->execute(
+			array(
+				'group'   => 'general',
+				'include' => array( 'extension_mode' ),
+			)
+		);
+		$this->assertIsArray( $result );
+		$this->assertSame( $expected ? 1 : 0, $result['total'] );
+		if ( $expected ) {
+			$this->assertSame( 'sandbox', $result['settings'][0]['value'] );
+		}
 	}
 
 	/**
