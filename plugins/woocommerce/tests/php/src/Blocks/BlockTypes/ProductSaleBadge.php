@@ -24,7 +24,7 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 			$product->set_regular_price( '10' );
 			$product_id = $product->save();
 
-			$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/product-sale-badge /--><!-- /wp:woocommerce/single-product -->' );
+			$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-sale-badge /--></div><!-- /wp:woocommerce/single-product -->' );
 
 			$this->assertStringNotContainsString( 'wp-block-woocommerce-product-sale-badge', $markup, 'The outer Sale Badge block should be omitted.' );
 			$this->assertStringNotContainsString( 'wc-block-components-product-sale-badge', $markup, 'The Sale Badge component should be omitted.' );
@@ -61,10 +61,14 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 			$product->set_sale_price( '5' );
 			$product_id = $product->save();
 
-			$markup         = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/product-sale-badge {"align":"' . $align . '"} /--><!-- /wp:woocommerce/single-product -->' );
+			$markup         = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-sale-badge {"align":"' . $align . '"} /--></div><!-- /wp:woocommerce/single-product -->' );
 			$expected_class = 'wc-block-components-product-sale-badge--align-' . $align;
 
-			$this->assertStringContainsString( $expected_class, $markup );
+			if ( '' === $align ) {
+				$this->assertStringNotContainsString( 'wc-block-components-product-sale-badge--align-', $markup );
+			} else {
+				$this->assertStringContainsString( $expected_class, $markup );
+			}
 			foreach ( array_diff( array( 'left', 'center', 'right' ), array( $align ) ) as $other_align ) {
 				$this->assertStringNotContainsString(
 					'wc-block-components-product-sale-badge--align-' . $other_align,
@@ -97,10 +101,62 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 		$product->set_sale_price( '15' );
 		$product->save();
 
-		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-sale-badge ' . wp_json_encode( (object) $attributes ) . ' /--><!-- /wp:woocommerce/single-product -->' );
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-sale-badge ' . wp_json_encode( (object) $attributes ) . ' /--></div><!-- /wp:woocommerce/single-product -->' );
 
-		$this->assertStringContainsString( 'wc-block-components-product-sale-badge__text" aria-hidden="true">' . $expected . '</span>', $markup );
-		$this->assertStringContainsString( 'screen-reader-text">Product on sale: ' . $expected . '</span>', $markup );
+		$this->assert_sale_badge_labels( $markup, $expected );
+	}
+
+	/**
+	 * @testdox Product Sale Badge applies margins once while preserving its inner badge styles.
+	 */
+	public function test_product_sale_badge_applies_margins_once(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '20' );
+		$product->set_sale_price( '15' );
+		$product->save();
+
+		$attributes = array(
+			'style' => array(
+				'spacing'    => array(
+					'margin' => array(
+						'top'    => '32px',
+						'right'  => '16px',
+						'bottom' => '48px',
+						'left'   => '24px',
+					),
+				),
+				'color'      => array(
+					'text'       => '#123456',
+					'background' => '#abcdef',
+				),
+				'border'     => array(
+					'color'  => '#654321',
+					'width'  => '3px',
+					'radius' => '8px',
+				),
+				'typography' => array(
+					'fontSize'   => '24px',
+					'lineHeight' => '1.5',
+				),
+			),
+		);
+		$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-sale-badge ' . wp_json_encode( $attributes ) . ' /--></div><!-- /wp:woocommerce/single-product -->' );
+		$html       = new \WP_HTML_Tag_Processor( $markup );
+
+		$this->assertTrue( $html->next_tag( array( 'class_name' => 'wp-block-woocommerce-product-sale-badge' ) ) );
+		$this->assertStringNotContainsString( 'margin', (string) $html->get_attribute( 'style' ), 'The wrapper must not duplicate the inner badge margins.' );
+		$this->assertTrue( $html->next_tag( array( 'class_name' => 'wc-block-components-product-sale-badge' ) ) );
+		$style = str_replace( ' ', '', (string) $html->get_attribute( 'style' ) );
+
+		foreach ( $attributes['style']['spacing']['margin'] as $side => $value ) {
+			$this->assertStringContainsString( 'margin-' . $side . ':' . $value . ';', $style );
+		}
+		foreach ( array( 'color:#123456;', 'background-color:#abcdef;', 'border-color:#654321;', 'border-width:3px;', 'border-radius:8px;', 'line-height:1.5;' ) as $declaration ) {
+			$this->assertStringContainsString( $declaration, $style, 'Supported styles should remain on the inner badge.' );
+		}
+		// WordPress may resolve the custom font size to a fluid clamp() value.
+		$font_size = (string) wp_get_typography_font_size_value( array( 'size' => $attributes['style']['typography']['fontSize'] ) );
+		$this->assertStringContainsString( 'font-size:' . str_replace( ' ', '', $font_size ) . ';', $style, 'The resolved font size should remain on the inner badge.' );
 	}
 
 	/**
@@ -149,12 +205,12 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 		$priced->set_sale_price( $sale );
 		$priced->save();
 
-		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-sale-badge {"badgeContent":"' . $mode . '"} /--><!-- /wp:woocommerce/single-product -->' );
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-sale-badge {"badgeContent":"' . $mode . '"} /--></div><!-- /wp:woocommerce/single-product -->' );
 
 		if ( '' === $expected ) {
 			$this->assertStringNotContainsString( 'wc-block-components-product-sale-badge', $markup, 'Zero-rounded percentage badges should be omitted.' );
 		} else {
-			$this->assertStringContainsString( 'aria-hidden="true">' . $expected . '</span>', $markup );
+			$this->assert_sale_badge_labels( $markup, $expected );
 		}
 	}
 
@@ -200,9 +256,8 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 				'prefix'       => 'Save ',
 				'suffix'       => ' off',
 			);
-			$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-sale-badge ' . wp_json_encode( $attributes ) . ' /--><!-- /wp:woocommerce/single-product -->' );
-			$this->assertStringContainsString( 'wc-block-components-product-sale-badge__text" aria-hidden="true">' . $expected . '</span>', $markup );
-			$this->assertStringContainsString( 'screen-reader-text">Product on sale: ' . $expected . '</span>', $markup );
+			$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-sale-badge ' . wp_json_encode( $attributes ) . ' /--></div><!-- /wp:woocommerce/single-product -->' );
+			$this->assert_sale_badge_labels( $markup, $expected );
 		}
 	}
 
@@ -226,9 +281,8 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 			'prefix'       => 'Save ',
 			'suffix'       => ' off',
 		);
-		$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-sale-badge ' . wp_json_encode( $attributes ) . ' /--><!-- /wp:woocommerce/single-product -->' );
-		$this->assertStringContainsString( 'aria-hidden="true">' . $expected . '</span>', $markup );
-		$this->assertStringContainsString( 'screen-reader-text">Product on sale: ' . $expected . '</span>', $markup );
+		$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-sale-badge ' . wp_json_encode( $attributes ) . ' /--></div><!-- /wp:woocommerce/single-product -->' );
+		$this->assert_sale_badge_labels( $markup, $expected );
 	}
 
 	/**
@@ -285,13 +339,48 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 					$variable->get_id() => 'Up to $24.00',
 				) as $product_id => $expected
 			) {
-				$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/product-sale-badge {"badgeContent":"amount"} /--><!-- /wp:woocommerce/single-product -->' );
-				$this->assertStringContainsString( 'wc-block-components-product-sale-badge__text" aria-hidden="true">' . $expected . '</span>', $markup );
+				$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-sale-badge {"badgeContent":"amount"} /--></div><!-- /wp:woocommerce/single-product -->' );
+				$this->assert_sale_badge_labels( $markup, $expected );
 			}
 		} finally {
 			\WC_Tax::_delete_tax_rate( $tax_id );
 			remove_filter( 'wc_tax_enabled', '__return_true' );
 		}
+	}
+
+	/**
+	 * @testdox Variable badges bind their labels and visibility to Interactivity API state.
+	 */
+	public function test_variable_badge_interactivity(): void {
+		$product   = \WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $product->get_children()[0] );
+		$variation->set_sale_price( '5' );
+		$variation->save();
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-sale-badge {"badgeContent":"percentage","prefix":"Save ","suffix":" off"} /--></div><!-- /wp:woocommerce/single-product -->' );
+		$html   = new \WP_HTML_Tag_Processor( $markup );
+		$html->next_tag( array( 'class_name' => 'wp-block-woocommerce-product-sale-badge' ) );
+		$context = json_decode( $html->get_attribute( 'data-wp-context' ), true );
+		$this->assertSame( 'woocommerce/product-sale-badge', $html->get_attribute( 'data-wp-interactive' ) );
+		$this->assertSame( 'state.isSaleBadgeHidden', $html->get_attribute( 'data-wp-bind--hidden' ) );
+		$this->assertSame( 'Up to 50%', $context['saleBadgeText'] );
+		$this->assertSame( 'percentage', $context['badgeContent'] );
+		$this->assertSame( 'Save ', $context['prefix'] );
+		$this->assertStringContainsString( 'data-wp-text="state.saleBadgeText"', $markup );
+		$this->assertStringContainsString( 'data-wp-text="state.saleBadgeScreenReaderText"', $markup );
+		$this->assertStringContainsString( '>Up to 50%</span>', $markup );
+	}
+
+	/**
+	 * Assert visible and screen-reader sale badge labels without depending on attribute order.
+	 *
+	 * @param string $markup Rendered block markup.
+	 * @param string $expected Expected badge text.
+	 */
+	private function assert_sale_badge_labels( string $markup, string $expected ): void {
+		$this->assertStringContainsString( 'wc-block-components-product-sale-badge__text', $markup );
+		$this->assertStringContainsString( 'aria-hidden="true"', $markup );
+		$this->assertStringContainsString( '>' . $expected . '</span>', $markup );
+		$this->assertStringContainsString( 'Product on sale: ' . $expected . '</span>', $markup );
 	}
 
 	/**
@@ -301,6 +390,7 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 	 */
 	public function provider_product_sale_badge_alignment(): array {
 		return array(
+			'empty'  => array( '' ),
 			'left'   => array( 'left' ),
 			'center' => array( 'center' ),
 			'right'  => array( 'right' ),
@@ -316,7 +406,7 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 		$product->set_regular_price( 10 );
 		$product->set_sale_price( 5 );
 		$product_id = $product->save();
-		$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/product-sale-badge /--><!-- /wp:woocommerce/single-product -->' );
+		$markup     = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-sale-badge /--></div><!-- /wp:woocommerce/single-product -->' );
 
 		$this->assertStringContainsString( 'wp-block-woocommerce-product-sale-badge', $markup, 'The Single Product Block contains the Product Sale Badge block.' );
 		$this->assertStringContainsString( 'Sale', $markup, 'The Product Sale Badge block contains the sale text.' );
@@ -349,7 +439,7 @@ class ProductSaleBadge extends \WP_UnitTestCase {
 			2
 		);
 
-		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/product-sale-badge /--><!-- /wp:woocommerce/single-product -->' );
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><div class="wp-block-woocommerce-single-product woocommerce"><!-- wp:woocommerce/product-sale-badge /--></div><!-- /wp:woocommerce/single-product -->' );
 
 		$this->assertStringContainsString( 'wp-block-woocommerce-product-sale-badge', $markup, 'The Single Product Block contains the Product Sale Badge block.' );
 		$this->assertStringContainsString( 'Special Offer!', $markup, 'The Product Sale Badge block contains the custom sale text.' );

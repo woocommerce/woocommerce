@@ -124,7 +124,7 @@ class Controller extends AbstractController {
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_fulfillment' ),
 					'permission_callback' => array( $this, 'check_permission_for_fulfillments' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_update_args(),
 				),
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
@@ -341,7 +341,14 @@ class Controller extends AbstractController {
 			if ( $fulfillment_id ) {
 				try {
 					$fulfillment = new Fulfillment( $fulfillment_id );
-					$order       = wc_get_order( (int) $fulfillment->get_entity_id() );
+					if ( $fulfillment->get_id() && WC_Order::class !== $fulfillment->get_entity_type() ) {
+						return new WP_Error(
+							'woocommerce_rest_invalid_entity_type',
+							esc_html__( 'The entity type must be "order".', 'woocommerce' ),
+							array( 'status' => WP_Http::BAD_REQUEST )
+						);
+					}
+					$order = wc_get_order( (int) $fulfillment->get_entity_id() );
 				} catch ( ApiException $ex ) {
 					return new WP_Error(
 						$ex->getErrorCode(),
@@ -420,6 +427,21 @@ class Controller extends AbstractController {
 	}
 
 	/**
+	 * Get the writable args for the update route.
+	 *
+	 * A fulfillment's identity and parent order come from the route, not the body, so entity_id and
+	 * entity_type are not writable on edit. They stay required on create, where the parent is taken
+	 * from the body.
+	 *
+	 * @return array The update endpoint args.
+	 */
+	private function get_update_args(): array {
+		$args = $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE );
+		unset( $args['entity_id'], $args['entity_type'] );
+		return $args;
+	}
+
+	/**
 	 * Get the item response for a fulfillment.
 	 *
 	 * @param mixed           $item    The fulfillment item.
@@ -489,7 +511,7 @@ class Controller extends AbstractController {
 		if ( ! is_array( $providers ) ) {
 			_doing_it_wrong(
 				'woocommerce_rest_prepare_fulfillments_providers',
-				esc_html__( 'The filter must return an array of providers.', 'woocommerce' ),
+				esc_html( 'The filter must return an array of providers.' ),
 				'10.5.0'
 			);
 			$providers = array();
@@ -532,7 +554,7 @@ class Controller extends AbstractController {
 		if ( $has_invalid ) {
 			_doing_it_wrong(
 				'woocommerce_rest_prepare_fulfillments_providers',
-				esc_html__( 'Some providers were removed because they are missing required keys (label, icon, value, url).', 'woocommerce' ),
+				esc_html( 'Some providers were removed because they are missing required keys (label, icon, value, url).' ),
 				'10.5.0'
 			);
 		}

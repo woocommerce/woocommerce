@@ -300,6 +300,80 @@ describe( 'createMutationQueue', () => {
 		} );
 	} );
 
+	describe( 'onProcessingChange callback', () => {
+		it( 'is called with true once when a cycle starts and with false once its server state is committed', async () => {
+			global.fetch = createMockFetch( [
+				{ status: 200, body: { value: 1 } },
+				{ status: 200, body: { value: 2 } },
+			] );
+			const calls: Array< { isProcessing: boolean; value: number } > = [];
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				...stateHandler,
+				onProcessingChange: ( isProcessing ) => {
+					calls.push( { isProcessing, value: mockState.value } );
+				},
+			} );
+
+			const requests = Promise.all( [
+				queue.submit( { path: '/a', method: 'POST' } ),
+				queue.submit( { path: '/b', method: 'POST' } ),
+			] );
+			expect( calls ).toEqual( [ { isProcessing: true, value: 0 } ] );
+
+			await requests;
+
+			expect( calls ).toEqual( [
+				{ isProcessing: true, value: 0 },
+				{ isProcessing: false, value: 2 },
+			] );
+		} );
+
+		it( 'is called with false when every request in the cycle failed', async () => {
+			global.fetch = createFailingFetch( new Error( 'Network error' ) );
+			const onProcessingChange = jest.fn();
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				...stateHandler,
+				onProcessingChange,
+			} );
+
+			await queue
+				.submit( { path: '/a', method: 'POST' } )
+				.catch( () => undefined );
+
+			expect( onProcessingChange.mock.calls ).toEqual( [
+				[ true ],
+				[ false ],
+			] );
+		} );
+
+		it( 'logs a callback error without interrupting the cycle', async () => {
+			global.fetch = createMockFetch( [
+				{ status: 200, body: { value: 1 } },
+			] );
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				...stateHandler,
+				onProcessingChange: () => {
+					throw new Error( 'Callback error' );
+				},
+			} );
+
+			await queue.submit( { path: '/a', method: 'POST' } );
+
+			expect( mockState.value ).toBe( 1 );
+			expect( queue.getStatus().isProcessing ).toBe( false );
+			expect( console ).toHaveErrored();
+		} );
+	} );
+
 	describe( 'onCycleSettled callback', () => {
 		it( 'is invoked exactly once per cycle, synchronously while isProcessing is still true', async () => {
 			const mockFetch = createMockFetch( [

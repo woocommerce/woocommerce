@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
@@ -364,9 +365,21 @@ class WC_Install {
 			// Run again to cancel all pattern fetch jobs now that scheduling is disabled.
 			'wc_update_1040_cleanup_legacy_ptk_patterns_fetching',
 		),
+		'11.2.2'   => array(
+			'wc_update_1122_remove_objects_from_default_attributes',
+		),
 		'11.3.0'   => array(
 			'wc_update_1130_set_legacy_variation_price_hash_option',
 			'wc_update_1130_delete_unpublished_variation_lookup_rows',
+			'wc_update_1130_split_tax_lookup_taxable_amount',
+			'wc_update_1130_delete_stock_notification_sync_notice_option',
+			'wc_update_1130_backfill_order_stats_payment_method',
+		),
+		'11.4.0'   => array(
+			'wc_update_1140_re_enable_autoload_options',
+			'wc_update_1140_add_mpn_to_product_lookup_table',
+			// Run again for stores whose database was already at 11.3.0 or later, as they skip the 11.2.2 key.
+			'wc_update_1122_remove_objects_from_default_attributes',
 		),
 	);
 
@@ -1485,7 +1498,8 @@ class WC_Install {
 	net_total double DEFAULT 0 NOT NULL,
 	returning_customer tinyint(1) DEFAULT NULL,
 	status varchar(20) NOT NULL,
-	customer_id bigint(20) unsigned NOT NULL" .
+	customer_id bigint(20) unsigned NOT NULL,
+	payment_method varchar(100) DEFAULT NULL" .
 		( $should_have_fulfillment_column ? ',
 	fulfillment_status varchar(50) DEFAULT NULL' : '' ) . ',
 	PRIMARY KEY (order_id),
@@ -1494,7 +1508,8 @@ class WC_Install {
 	KEY status (status)' .
 		( $should_have_fulfillment_column ? ',
 	KEY fulfillment_status (fulfillment_status)' : '' ) . ",
-	KEY idx_date_paid_status_parent (date_paid, status, parent_id)
+	KEY idx_date_paid_status_parent (date_paid, status, parent_id),
+	KEY idx_payment_method_date_paid_status (payment_method, date_paid, status)
 ) $collate;";
 	}
 
@@ -1814,6 +1829,8 @@ class WC_Install {
 
 		// Clear table caches.
 		delete_transient( 'wc_attribute_taxonomies' );
+		TaxesDataStore::flush_lookup_columns_cache();
+		OrdersStatsDataStore::flush_payment_method_column_cache();
 
 		return $db_delta_result;
 	}
@@ -2048,6 +2065,7 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   `product_id` bigint(20) NOT NULL,
   `sku` varchar(100) NULL default '',
   `global_unique_id` varchar(100) NULL default '',
+  `mpn` varchar(100) NOT NULL DEFAULT '',
   `virtual` tinyint(1) NULL default 0,
   `downloadable` tinyint(1) NULL default 0,
   `min_price` decimal(19,4) NULL default NULL,
@@ -2068,7 +2086,8 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   KEY `onsale` (`onsale`),
   KEY min_max_price (`min_price`, `max_price`),
   KEY sku (sku(50)),
-  KEY global_unique_id (global_unique_id(50))
+  KEY global_unique_id (global_unique_id(50)),
+  KEY mpn (mpn(50))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
   tax_rate_class_id bigint(20) unsigned NOT NULL auto_increment,
@@ -2133,6 +2152,8 @@ CREATE TABLE {$wpdb->prefix}wc_order_tax_lookup (
 	order_tax double DEFAULT 0 NOT NULL,
 	total_tax double DEFAULT 0 NOT NULL,
 	taxable_amount double DEFAULT 0 NOT NULL,
+	order_taxable_amount double DEFAULT NULL,
+	shipping_taxable_amount double DEFAULT NULL,
 	PRIMARY KEY (order_id, tax_rate_id, order_item_id),
 	KEY tax_rate_id (tax_rate_id),
 	KEY date_created (date_created)
@@ -3194,7 +3215,7 @@ EOT;
 <!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
 <!-- /wp:woocommerce/product-image -->
 
-<!-- wp:post-title {"textAlign":"center","isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}},"typography":{"lineHeight":"1.4"}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
+<!-- wp:post-title {"textAlign":"center","isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}},"typography":{"lineHeight":"1.4"}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-title"} /-->
 
 <!-- wp:woocommerce/product-price {"textAlign":"center","fontSize":"small"} /-->
 

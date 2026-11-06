@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update the bundled react-router-dom library from version 6 to 7 to fix reported security issues.

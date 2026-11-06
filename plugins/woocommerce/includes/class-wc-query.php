@@ -138,8 +138,12 @@ class WC_Query {
 				break;
 			case 'view-order':
 				$order = wc_get_order( $wp->query_vars['view-order'] );
-				/* translators: %s: order number */
-				$title = ( $order ) ? sprintf( __( 'Order #%s', 'woocommerce' ), $order->get_order_number() ) : '';
+				$title = '';
+				// Guest orders can pass the capability check for logged-out visitors because both use user ID 0.
+				if ( $order && is_user_logged_in() && current_user_can( 'view_order', $order->get_id() ) ) {
+					/* translators: %s: order number */
+					$title = sprintf( __( 'Order #%s', 'woocommerce' ), $order->get_order_number() );
+				}
 				break;
 			case 'downloads':
 				$title = __( 'Downloads', 'woocommerce' );
@@ -505,7 +509,7 @@ class WC_Query {
 			// Performance note: post caches has been already primed, hence the loop operates on in-memory data.
 			foreach ( $posts as $post ) {
 				$terms = $post instanceof \WP_Post ? get_object_term_cache( $post->ID, 'product_type' ) : null;
-				$terms = array_filter( is_array( $terms ) ? $terms : array(), static fn ( $term ) => $term instanceof \WP_Term ); // @phpstan-ignore instanceof.alwaysTrue (defensive checks against filters)
+				$terms = array_filter( is_array( $terms ) ? $terms : array(), static fn ( $term ) => $term instanceof \WP_Term );
 				if ( ! empty( $terms ) && ProductType::VARIABLE === current( $terms )->slug ) {
 					$product_id = $post->ID;
 
@@ -608,6 +612,15 @@ class WC_Query {
 	 * @param WP_Query $q Query instance.
 	 */
 	public function product_query( $q ) {
+		// Prime caches to reduce future queries.
+		wp_prime_option_caches(
+			array(
+				'woocommerce_default_catalog_orderby',
+				'woocommerce_catalog_columns',
+				'woocommerce_catalog_rows',
+			)
+		);
+
 		if ( ! is_feed() ) {
 			$ordering = $this->get_catalog_ordering_args();
 			$q->set( 'orderby', $ordering['orderby'] );

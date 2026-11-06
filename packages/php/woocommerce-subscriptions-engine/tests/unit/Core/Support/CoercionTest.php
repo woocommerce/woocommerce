@@ -40,6 +40,15 @@ class CoercionTest extends TestCase {
 		$this->assertSame( array(), Coercion::coerce_string_keyed( array() ) );
 	}
 
+	public function test_coerce_nullable_string_keyed_keeps_an_array_and_nulls_anything_else(): void {
+		// PHP stores an integer-like string key as an int, so a list stays a list.
+		$this->assertSame( array( 'a' ), Coercion::coerce_nullable_string_keyed( array( 'a' ) ) );
+		$this->assertSame( array( 'period' => 'month' ), Coercion::coerce_nullable_string_keyed( array( 'period' => 'month' ) ) );
+		$this->assertSame( array(), Coercion::coerce_nullable_string_keyed( array() ) );
+		$this->assertNull( Coercion::coerce_nullable_string_keyed( null ) );
+		$this->assertNull( Coercion::coerce_nullable_string_keyed( 'monthly' ) );
+	}
+
 	/**
 	 * @dataProvider provide_non_arrays
 	 *
