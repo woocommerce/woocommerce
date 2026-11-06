@@ -4429,15 +4429,9 @@ parameters:
 			path: includes/admin/list-tables/class-wc-admin-list-table-orders.php
 
 		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_product_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/admin/list-tables/class-wc-admin-list-table-orders.php
-
-		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_total\(\)\.$#'
 			identifier: method.notFound
-			count: 2
+			count: 1
 			path: includes/admin/list-tables/class-wc-admin-list-table-orders.php
 
 		-
@@ -10508,12 +10502,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#2 \$user_id of function wc_customer_bought_product expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-comments.php
-
-		-
-			message: '#^Parameter \#3 \$args of function wp_die expects array\{response\?\: int, link_url\?\: string, link_text\?\: string, back_link\?\: bool, text_direction\?\: string, charset\?\: string, code\?\: string, exit\?\: bool\}\|int, array\{code\: 403\} given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/class-wc-comments.php
@@ -35182,12 +35170,6 @@ parameters:
 			path: includes/wc-user-functions.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:delete_by_order_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-user-functions.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:get_downloads_for_customer\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -35195,12 +35177,6 @@ parameters:
 
 		-
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_order_key\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-user-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:has_downloadable_item\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: includes/wc-user-functions.php

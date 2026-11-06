@@ -2958,7 +2958,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 400, $refused->get_status() );
 		$this->assertStringEndsWith( 'test_keep', $refused->get_data()['code'] );
 		$this->assertInstanceOf( \WC_Product::class, wc_get_product( $kept->get_id() ) );
-		$this->assertTrue( $deleted['deleted'] );
+		$this->assertSame( 'deleted', $deleted['status'] );
 		$this->assertFalse( wc_get_product( $created['product']['id'] ) );
 		$this->assertNull( get_post( $created['product']['variation_ids'][0] ), 'The variations go with the parent.' );
 	}
@@ -3080,7 +3080,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 400, $refused->get_status() );
 		$this->assertSame( 'Keep it.', $refused->get_data()['message'] );
 		$this->assertInstanceOf( \WC_Product_Variable::class, $after );
-		$this->assertTrue( $deleted['deleted'] );
+		$this->assertSame( 'deleted', $deleted['status'] );
 		foreach ( $created['product']['variation_ids'] as $variation_id ) {
 			$this->assertSame( array( 'woocommerce/product-delete', true ), $seen[ $variation_id ] );
 		}
