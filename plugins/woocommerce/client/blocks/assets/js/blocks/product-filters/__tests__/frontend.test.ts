@@ -450,6 +450,239 @@ describe( 'product filters interactivity store', () => {
 		}
 	);
 
+	describe( 'focus after navigation', () => {
+		const CHIP_SELECTOR =
+			'.wc-block-product-filter-removable-chips__remove';
+		let root: HTMLDivElement;
+		let offsetParentSpy: jest.SpyInstance;
+
+		beforeEach( () => {
+			root = document.createElement( 'div' );
+			root.className = 'wc-block-product-filters';
+			root.innerHTML =
+				'<input id="attribute/color-blue" type="checkbox" value="blue">';
+			document.body.append( root );
+			offsetParentSpy = jest
+				.spyOn( HTMLElement.prototype, 'offsetParent', 'get' )
+				.mockReturnValue( document.body );
+			const context = { params: {}, activeFilters: [] };
+			mockGetContext.mockReturnValue( context );
+			mockGetServerContext.mockReturnValue( context );
+			mockGetConfig.mockReturnValue( {
+				canonicalUrl: 'https://example.com/shop/',
+			} );
+			if ( ! mockRegisteredStore ) {
+				throw new Error( 'Product filters store was not registered.' );
+			}
+			Object.defineProperty( mockRegisteredStore.state, 'params', {
+				get: () => ( { filter_color: 'blue' } ),
+			} );
+		} );
+
+		afterEach( () => {
+			root.remove();
+			offsetParentSpy.mockRestore();
+		} );
+
+		const startNavigation = () => {
+			if ( ! mockRegisteredStore ) {
+				throw new Error( 'Product filters store was not registered.' );
+			}
+			mockGetElement.mockReturnValue( { ref: root } );
+			const iterator = mockRegisteredStore.actions.navigate();
+			iterator.next();
+			iterator.next( {
+				actions: { navigate: jest.fn() },
+			} as unknown as typeof import( '@wordpress/interactivity-router' ) );
+			return iterator;
+		};
+
+		it( 'restores the checkbox when the router replaces its region', () => {
+			root.querySelector( 'input' )?.focus();
+			const iterator = startNavigation();
+			const replacement = root.cloneNode( true ) as HTMLDivElement;
+			root.replaceWith( replacement );
+			root = replacement;
+			iterator.next();
+
+			expect( root.ownerDocument.activeElement ).toBe(
+				root.querySelector( 'input' )
+			);
+		} );
+
+		it( 'only restores focus for the latest overlapping navigation', () => {
+			root.querySelector( 'input' )?.focus();
+			const older = startNavigation();
+			Object.defineProperty( mockRegisteredStore?.state, 'params', {
+				get: () => ( { filter_color: 'red' } ),
+			} );
+			const newer = startNavigation();
+			root.innerHTML = root.innerHTML;
+
+			older.next();
+			expect( root.ownerDocument.activeElement ).toBe( document.body );
+
+			newer.next();
+			expect( root.ownerDocument.activeElement ).toBe(
+				root.querySelector( 'input' )
+			);
+		} );
+
+		it( 'moves to the next chip after the focused chip is removed', () => {
+			root.innerHTML = `
+				<div class="wc-block-product-filter-removable-chips">
+					<button class="wc-block-product-filter-removable-chips__remove" aria-label="Remove Blue">Blue</button>
+					<button class="wc-block-product-filter-removable-chips__remove" aria-label="Remove Gray">Gray</button>
+				</div>`;
+			root.querySelector( 'button' )?.focus();
+			const iterator = startNavigation();
+			root.querySelector( 'button' )?.remove();
+			iterator.next();
+
+			expect( root.ownerDocument.activeElement ).toBe(
+				root.querySelector( 'button' )
+			);
+		} );
+
+		it.each( [ 'range', 'text' ] )(
+			'restores the correct price %s input without an id',
+			( type ) => {
+				root.innerHTML = `
+					<input type="range" aria-label="Minimum price">
+					<input type="range" aria-label="Maximum price">
+					<input type="text" aria-label="Minimum price">
+					<input type="text" aria-label="Maximum price">`;
+				const selector = `input[type="${ type }"][aria-label="Maximum price"]`;
+				root.querySelector< HTMLInputElement >( selector )?.focus();
+				const iterator = startNavigation();
+				root.innerHTML = root.innerHTML;
+				iterator.next();
+
+				expect( root.ownerDocument.activeElement ).toBe(
+					root.querySelector( selector )
+				);
+			}
+		);
+
+		it( 'restores focus in the originating filters instance', () => {
+			const otherRoot = root.cloneNode( true ) as HTMLDivElement;
+			root.before( otherRoot );
+			try {
+				root.querySelector( 'input' )?.focus();
+				const iterator = startNavigation();
+				const replacement = root.cloneNode( true ) as HTMLDivElement;
+				root.replaceWith( replacement );
+				root = replacement;
+				iterator.next();
+
+				expect( root.ownerDocument.activeElement ).toBe(
+					root.querySelector( 'input' )
+				);
+				expect( root.ownerDocument.activeElement ).not.toBe(
+					otherRoot.querySelector( 'input' )
+				);
+			} finally {
+				otherRoot.remove();
+			}
+		} );
+
+		it( 'uses Clear filters when there is no following chip', () => {
+			root.innerHTML = `
+				<button class="wc-block-product-filter-removable-chips__remove">Blue</button>
+				<div class="wc-block-product-filter-clear-button"><button>Clear filters</button></div>`;
+			root.querySelector( 'button' )?.focus();
+			const iterator = startNavigation();
+			root.querySelector( 'button' )?.remove();
+			iterator.next();
+
+			expect( root.ownerDocument.activeElement ).toBe(
+				root.querySelector( 'button' )
+			);
+		} );
+
+		it( 'uses the results count when Clear filters disappears', () => {
+			const count = document.createElement( 'p' );
+			count.className = 'wp-block-woocommerce-product-results-count';
+			count.textContent = 'Showing all 4 results';
+			root.after( count );
+			try {
+				root.innerHTML =
+					'<div class="wc-block-product-filter-clear-button"><button>Clear filters</button></div>';
+				root.querySelector( 'button' )?.focus();
+				const iterator = startNavigation();
+				root.innerHTML = '';
+				iterator.next();
+
+				expect( count.ownerDocument.activeElement ).toBe( count );
+				expect( count.getAttribute( 'tabindex' ) ).toBe( '-1' );
+				count.blur();
+				expect( count.hasAttribute( 'tabindex' ) ).toBe( false );
+			} finally {
+				count.remove();
+			}
+		} );
+
+		it( 'keeps the last-chip fallback inside an open overlay', () => {
+			root.innerHTML = `
+				<section class="wc-block-product-filters__overlay-dialog" aria-modal="true">
+					<button>Close</button>
+					<button class="wc-block-product-filter-removable-chips__remove">Blue</button>
+				</section>`;
+			root.querySelector< HTMLButtonElement >( CHIP_SELECTOR )?.focus();
+			const iterator = startNavigation();
+			root.querySelector( CHIP_SELECTOR )?.remove();
+			iterator.next();
+
+			expect( root.ownerDocument.activeElement ).toBe(
+				root.querySelector( 'button' )
+			);
+			expect(
+				root.querySelector( 'button' )?.hasAttribute( 'tabindex' )
+			).toBe( false );
+		} );
+
+		it( 'leaves a preserved control focused without focusing it again', () => {
+			const input = root.querySelector( 'input' ) as HTMLInputElement;
+			input.focus();
+			const focusSpy = jest.spyOn( input, 'focus' );
+			const iterator = startNavigation();
+			iterator.next();
+
+			expect( input.ownerDocument.activeElement ).toBe( input );
+			expect( focusSpy ).not.toHaveBeenCalled();
+		} );
+
+		it( 'does not restore focus after a failed navigation', () => {
+			root.querySelector( 'input' )?.focus();
+			const iterator = startNavigation();
+			root.innerHTML = root.innerHTML;
+
+			expect( () =>
+				iterator.throw( new Error( 'Navigation failed' ) )
+			).toThrow( 'Navigation failed' );
+			expect( root.ownerDocument.activeElement ).not.toBe(
+				root.querySelector( 'input' )
+			);
+		} );
+
+		it( 'does not take focus back when the shopper moves elsewhere', () => {
+			const outside = document.createElement( 'button' );
+			document.body.append( outside );
+			try {
+				root.querySelector( 'input' )?.focus();
+				const iterator = startNavigation();
+				outside.focus();
+				root.innerHTML =
+					'<input id="attribute/color-blue" type="checkbox" value="blue">';
+				iterator.next();
+
+				expect( outside.ownerDocument.activeElement ).toBe( outside );
+			} finally {
+				outside.remove();
+			}
+		} );
+	} );
+
 	it.each( [ 0, 17 ] )(
 		'scopes navigation and clearing to collection %i',
 		( queryId ) => {
