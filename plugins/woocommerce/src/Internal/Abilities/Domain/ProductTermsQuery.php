@@ -98,12 +98,16 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 
 		$page     = $input['page'] ?? 1;
 		$per_page = $input['per_page'] ?? 10;
-		$args     = array_merge(
-			array(
-				'hide_empty' => false,
-				'orderby'    => 'name',
-				'order'      => 'asc',
-			),
+		$defaults = array(
+			'hide_empty' => false,
+			'order'      => 'asc',
+		);
+		// Without an orderby, WooCommerce sorts attribute terms in the order set on the attribute.
+		if ( ! taxonomy_is_product_attribute( $input['taxonomy'] ) ) {
+			$defaults['orderby'] = 'name';
+		}
+		$args = array_merge(
+			$defaults,
 			array_intersect_key( $input, array_flip( array( 'taxonomy', 'include', 'exclude', 'search', 'slug', 'parent', 'hide_empty', 'orderby', 'order' ) ) )
 		);
 		if ( isset( $input['slug'] ) ) {
@@ -262,9 +266,9 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 					'default' => false,
 				),
 				'orderby'    => array(
-					'type'    => 'string',
-					'enum'    => array( 'id', 'include', 'name', 'slug', 'term_group', 'description', 'count' ),
-					'default' => 'name',
+					'description' => __( 'Defaults to name, or for a pa_* taxonomy to the order set on the attribute.', 'woocommerce' ),
+					'type'        => 'string',
+					'enum'        => array( 'id', 'include', 'name', 'slug', 'term_group', 'description', 'count' ),
 				),
 				'order'      => array(
 					'type'    => 'string',

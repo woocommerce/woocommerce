@@ -173,6 +173,7 @@ class ProductAttributesQuery extends AbstractDomainAbility implements AbilityDef
 				),
 			),
 			'additionalProperties' => false,
+			'default'              => array(),
 		);
 	}
 }
