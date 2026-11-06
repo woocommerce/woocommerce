@@ -35,8 +35,8 @@ class RemoteRules {
 
 	/**
 	 * Fetch the rules file and store it when it is valid: at least one check
-	 * has a channel with a field and a valid effect, and, when known ids are
-	 * given, is one of them. Anything less keeps the last good copy.
+	 * has a channel with a field, a valid effect and valid dated effects, and,
+	 * when known ids are given, is one of them. Anything less keeps the last good copy.
 	 *
 	 * @param array<int, string>|null $known_ids Check ids the code can run; null accepts any id.
 	 * @return bool Whether a new copy was stored.
@@ -96,18 +96,49 @@ class RemoteRules {
 	}
 
 	/**
-	 * Whether a check's channel map names a known channel with a string field and a valid effect.
+	 * Whether a check's channel map names a known channel with a string field, a valid effect,
+	 * and, when it has effect_from, only valid dated effects.
 	 *
 	 * @param array<mixed> $channels Channel map from the file.
 	 */
 	private static function has_usable_channel( array $channels ): bool {
 		$known = FeedChannels::all();
 		foreach ( $channels as $channel => $spec ) {
-			if ( isset( $known[ $channel ] ) && is_array( $spec ) && is_string( $spec['field'] ?? null ) && in_array( $spec['effect'] ?? null, array( ReadinessRule::EFFECT_NOT_LISTABLE, ReadinessRule::EFFECT_GAPS ), true ) ) {
+			if ( ! isset( $known[ $channel ] ) || ! is_array( $spec ) || ! is_string( $spec['field'] ?? null ) || ! self::is_effect( $spec['effect'] ?? null ) ) {
+				continue;
+			}
+			$dates = $spec['effect_from'] ?? array();
+			if ( is_array( $dates ) && count( $dates ) === count( self::valid_dates( $dates ) ) ) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Whether a value is an effect the code applies.
+	 *
+	 * @param mixed $effect Effect from the file.
+	 */
+	private static function is_effect( $effect ): bool {
+		return in_array( $effect, array( ReadinessRule::EFFECT_NOT_LISTABLE, ReadinessRule::EFFECT_GAPS ), true );
+	}
+
+	/**
+	 * The effect_from entries keyed by a Y-m-d date with a valid effect, in date order.
+	 *
+	 * @param array<mixed> $dates effect_from map from the file.
+	 * @return array<string, string>
+	 */
+	private static function valid_dates( array $dates ): array {
+		$valid = array();
+		foreach ( $dates as $from => $effect ) {
+			if ( 1 === preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) $from ) && self::is_effect( $effect ) ) {
+				$valid[ (string) $from ] = $effect;
+			}
+		}
+		ksort( $valid );
+		return $valid;
 	}
 
 	/**
@@ -121,7 +152,8 @@ class RemoteRules {
 
 	/**
 	 * Channel maps by check id from the stored file, with each effect_from
-	 * date already applied for the given day. Empty when nothing is stored.
+	 * date already applied for the given day; a dated entry with a bad date or
+	 * effect is ignored. Empty when nothing is stored.
 	 *
 	 * @param int|null $now Unix time to resolve dates for; defaults to now.
 	 * @return array<string, array<string, array{field:string,effect:string}>>
@@ -148,8 +180,7 @@ class RemoteRules {
 					continue;
 				}
 				$effect = $spec['effect'] ?? null;
-				$dates  = isset( $spec['effect_from'] ) && is_array( $spec['effect_from'] ) ? $spec['effect_from'] : array();
-				ksort( $dates );
+				$dates  = isset( $spec['effect_from'] ) && is_array( $spec['effect_from'] ) ? self::valid_dates( $spec['effect_from'] ) : array();
 				foreach ( $dates as $from => $later ) {
 					if ( $today >= (string) $from ) {
 						$effect = $later;

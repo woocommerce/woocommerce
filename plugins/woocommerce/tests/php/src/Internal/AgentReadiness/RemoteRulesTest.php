@@ -180,6 +180,32 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A bad dated effect on one channel does not change that channel's effect when another channel makes the file usable.
+	 */
+	public function test_bad_effect_from_on_one_channel_is_ignored(): void {
+		$this->serve(
+			array(
+				'missing_brand' => array(
+					'google'  => array(
+						'field'       => 'brand',
+						'effect'      => 'not_listable',
+						'effect_from' => array( '2020-01-01' => 'typo' ),
+					),
+					'chatgpt' => array(
+						'field'  => 'brand',
+						'effect' => 'gaps',
+					),
+				),
+			)
+		);
+		$this->assertTrue( $this->sut->refresh() );
+
+		$rules = $this->sut->channel_rules()['missing_brand'];
+		$this->assertSame( 'not_listable', $rules['google']['effect'] );
+		$this->assertSame( 'gaps', $rules['chatgpt']['effect'] );
+	}
+
+	/**
 	 * @testdox A failed fetch before any copy is stored is reported as a failure, and the bundled checks run.
 	 */
 	public function test_failed_fetch_with_no_copy_uses_bundled_checks(): void {
@@ -454,6 +480,27 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 					'not_a_channel' => array(
 						'field'  => 'brand',
 						'effect' => 'not_listable',
+					),
+				),
+				array(
+					'google' => array(
+						'field'       => 'brand',
+						'effect'      => 'not_listable',
+						'effect_from' => array( '2020-01-01' => 'typo' ),
+					),
+				),
+				array(
+					'google' => array(
+						'field'       => 'brand',
+						'effect'      => 'not_listable',
+						'effect_from' => array( 'soon' => 'gaps' ),
+					),
+				),
+				array(
+					'google' => array(
+						'field'       => 'brand',
+						'effect'      => 'not_listable',
+						'effect_from' => 'gaps',
 					),
 				),
 			) as $channels
