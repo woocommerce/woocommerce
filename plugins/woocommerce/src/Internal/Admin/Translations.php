@@ -164,11 +164,13 @@ class Translations {
 			if ( empty( $combined_translation_data ) ) {
 				// Use the first translation file as the base structure.
 				$combined_translation_data = $chunk_data;
+				// Files made with `wp i18n make-json` keep their strings under "messages", not the text domain.
+				$domain_key = isset( $chunk_data['locale_data']['woocommerce'] ) ? 'woocommerce' : 'messages';
 			} else {
 				// Combine all messages from all chunk files.
-				$combined_translation_data['locale_data']['woocommerce'] = array_merge(
-					$combined_translation_data['locale_data']['woocommerce'],
-					$chunk_data['locale_data']['woocommerce']
+				$combined_translation_data['locale_data'][ $domain_key ] = array_merge(
+					$combined_translation_data['locale_data'][ $domain_key ] ?? array(),
+					$chunk_data['locale_data'][ $domain_key ] ?? array()
 				);
 			}
 		}
