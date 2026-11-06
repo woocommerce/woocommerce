@@ -209,6 +209,25 @@ class DatabaseTransactionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox run() should roll back and return a WP_Error when a query fails with a lost-write error number and a message in another wording.
+	 */
+	public function test_run_rolls_back_after_a_lost_write_error_number(): void {
+		$result = DatabaseTransaction::run(
+			static function () {
+				global $wpdb;
+				$suppress = $wpdb->suppress_errors();
+				$wpdb->query( "SIGNAL SQLSTATE '45000' SET MYSQL_ERRNO = 1020, MESSAGE_TEXT = 'Snapshot conflict'" );
+				$wpdb->suppress_errors( $suppress );
+				return 'done';
+			}
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_transaction_rolled_back', $result->get_error_code() );
+		$this->assertSame( array( 'SELECT @@autocommit', 'SET autocommit = 0', 'START TRANSACTION', 'ROLLBACK', 'SET autocommit = 1' ), $this->statements );
+	}
+
+	/**
 	 * @testdox run() should notice a deadlock that later queries inside it would clear.
 	 */
 	public function test_run_notices_a_deadlock_before_later_queries(): void {
