@@ -49,7 +49,7 @@ Only published simple and variable products are checked, the types agents suppor
 - Products hidden from the shop catalog (catalog visibility "Search results only" or "Hidden"). Agents see the products shoppers see in the shop, so hiding one is the merchant's choice, not a problem.
 - Products of any other type: grouped, external, subscription, booking, bundle and so on. A product keeps its stored type when its plugin is inactive, so it stays in this group.
 
-Store-wide conditions (`StoreConditions`) are reported first because they affect every product: coming soon mode and "Discourage search engines" hide the products, UCP off and Plain permalinks (no `/.well-known/ucp`) hide the catalog from UCP agents, and guest checkout off stops agents placing orders. Each condition's `blocks` says which, so a reader can tell a hidden store from one agents can't buy from.
+Store-wide conditions (`StoreConditions`) are reported first because they affect every product: coming soon mode and "Discourage search engines" hide the products, UCP off, no HTTPS and Plain permalinks (no `/.well-known/ucp`) hide the catalog from UCP agents, and guest checkout off stops agents placing orders. Missing policy pages and order emails off weaken agent orders. Each condition's `blocks` says which, so a reader can tell a hidden store from one agents can't buy from.
 
 ## Report format
 
@@ -60,10 +60,10 @@ array(
 	'generated_at' => '2026-10-28T12:00:00+00:00',
 	'products'            => 120,  // Published simple and variable products checked.
 	'hidden_from_catalog' => 4,    // Not checked: catalog visibility "Search results only" or "Hidden", the merchant's choice.
-	'unsupported_types'   => 6,    // Not checked: grouped, external, subscription, bundle and other types agents don't support yet.
+	'unsupported_types'   => 6,    // Not checked: grouped, external, subscription, bundle and other types agents can find but can't add to a cart yet.
 	'store_checks' => array(
 		// blocks: 'listing' (every product on every channel), 'ucp' (the catalog for UCP agents) or 'checkout' (agent orders).
-		array( 'id' => 'launched', 'ok' => true, 'blocks' => 'listing', 'label' => '…', 'why' => '…', 'fix' => '…' ),
+		array( 'id' => 'launched', 'ok' => true, 'blocks' => 'listing', 'level' => 'required', 'name' => '…', 'label' => '…', 'why' => '…', 'fix' => '…', 'fix_url' => '…' ),
 	),
 	'channels'     => array(
 		'chatgpt' => array(
@@ -117,6 +117,19 @@ Product changes don't update the stored report: a fixed product leaves it at the
 The same shape is meant for every consumer: this Status tab, an outside scan of a store, and extensions that rank the findings by sales or offer fixes. Check and channel ids are stable keys.
 
 The scan walks published simple and variable products shown in the shop catalog in batches of 200, most recently modified first, primes meta, terms, images and variations per batch, and stops at 5,000 products.
+
+## Agentic commerce settings page
+
+WooCommerce > Settings > Agentic commerce (`AgenticCommerceSettings`, `AgenticCommerceSettingsPage`) shows while the feature is enabled. It follows the WOOPRD-3796 design, one card per part:
+
+- The UCP switch, first. It saves through `POST wc/v3/agent-readiness/ucp` (`{ "enabled": true }`). A failing required check keeps it from being turned on, and that POST answers 409; turning it off still works. In coming soon mode the card says agents can't shop the store yet and links to Site visibility.
+- Product counts from the stored report (`products`, `hidden_from_catalog`, `unsupported_types`), each linking to a filtered product list.
+- Status: the store conditions from `StoreConditions`, the same list the readiness report shows, in three groups. Required lists failing `required` conditions (coming soon mode, HTTPS, permalinks, and the privacy, terms and refund and returns pages) and puts the status at Action needed; Recommended lists failing `recommended` ones, such as a missing shipping policy page; Done lists the passing ones by their passing state (`name`). Each open condition says what to do and links to it; a chosen policy page that isn't published links to its editor.
+- Store policy pages. Refund and returns, privacy and terms are the existing options, so they stay in sync with Advanced > Page setup and Settings > Privacy; shipping policy, FAQ and warranty are new. UCP sends each as a checkout link. The dropdowns list published pages only, and saving leaves a stored draft page in place.
+- The store address agents start from (`/.well-known/ucp`), with Copy.
+- Placeholders for parts that aren't built yet: Test your setup (WOOAI-1619) and Security (WOOAI-1620).
+
+Tracks event: `agentic_commerce_ucp_toggled` (`enabled`), sent only when the store allows tracking.
 
 ## Updating rules
 
