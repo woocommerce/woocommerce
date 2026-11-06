@@ -26,8 +26,8 @@ export function downloadCsv( filename: string, content: string ): void {
 
 /**
  * Split CSV text into records, honoring quoted fields (including embedded
- * delimiters, escaped quotes and newlines), so record indexes line up with
- * the row numbers the importer reports.
+ * delimiters, escaped quotes and newlines). Indexes match the importer's
+ * physical record numbers, so blank lines stay in the result.
  */
 export function parseCsvRecords( text: string, delimiter: string ): string[][] {
 	// A quote delimiter would collide with the quoting rules below.
@@ -104,9 +104,18 @@ function escapeCsvField( value: string, delimiter: string ): string {
 }
 
 /**
+ * A record is blank when every cell is empty once trimmed, including a
+ * line of commas (`,,,`) or whitespace. Matches the server reader.
+ */
+function isBlankRecord( record: string[] ): boolean {
+	return record.every( ( cell ) => cell.trim() === '' );
+}
+
+/**
  * Build a CSV of the failed rows in their original columns plus a reason
- * column, ready to send back to whoever produced the file. Row numbers are
- * 1-based with the header as row 1, matching the importer's report.
+ * column, ready to send back to whoever produced the file. `row` is the
+ * 1-based physical record number, including blank records. The header is
+ * the first record that is not blank.
  */
 export function buildFailedRowsCsv(
 	fileText: string,
@@ -115,14 +124,15 @@ export function buildFailedRowsCsv(
 ): string {
 	const effectiveDelimiter = delimiter || ',';
 	const records = parseCsvRecords( fileText, effectiveDelimiter );
-	const header = records[ 0 ] ?? [];
+	const header =
+		records.find( ( record ) => ! isBlankRecord( record ) ) ?? [];
 
 	const out: string[][] = [
 		[ ...header, __( 'Import error', 'woocommerce' ) ],
 	];
 	failedRows.forEach( ( row ) => {
-		// Should be unreachable, but mark the anomaly instead of emitting a
-		// reason with no columns.
+		// Physical index, including blank records. A missing index means the
+		// report names a row the file does not have.
 		const record = records[ row.row - 1 ] ?? [
 			__( '(original row unavailable)', 'woocommerce' ),
 		];

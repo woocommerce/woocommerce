@@ -4,6 +4,19 @@
 import { buildFailedRowsCsv, parseCsvRecords } from '../csv';
 import type { ImporterRowResult } from '../../data/types';
 
+function failedRow(
+	row: number,
+	message = 'Order not found for order number "9".'
+): ImporterRowResult {
+	return {
+		row,
+		status: 'failed',
+		code: 'order_not_found',
+		message,
+		order_number: '9',
+	};
+}
+
 describe( 'parseCsvRecords', () => {
 	it( 'splits simple rows on the delimiter', () => {
 		expect( parseCsvRecords( 'a,b,c\n1,2,3', ',' ) ).toEqual( [
@@ -50,6 +63,22 @@ describe( 'parseCsvRecords', () => {
 			[ 'a', 'b' ],
 			[ '1', '2' ],
 			[ '3', '4' ],
+		] );
+	} );
+
+	it( 'keeps blank, comma-only and whitespace-only records at their physical indexes', () => {
+		expect(
+			parseCsvRecords(
+				'\n,,,\norder,tracking\n   \n" \t ", \n1,2\n',
+				','
+			)
+		).toEqual( [
+			[ '' ],
+			[ '', '', '', '' ],
+			[ 'order', 'tracking' ],
+			[ '   ' ],
+			[ ' \t ', ' ' ],
+			[ '1', '2' ],
 		] );
 	} );
 } );
@@ -119,5 +148,73 @@ describe( 'buildFailedRowsCsv', () => {
 		expect( csv.split( '\r\n' )[ 1 ] ).toContain(
 			'(original row unavailable)'
 		);
+	} );
+
+	it( 'uses the first nonblank record as the header after a leading blank line', () => {
+		const csv = buildFailedRowsCsv(
+			'\norder,tracking\n1,T-1\n9,T-2\n',
+			',',
+			[ failedRow( 4 ) ]
+		);
+
+		expect( csv.split( '\r\n' ) ).toEqual( [
+			'order,tracking,Import error',
+			'9,T-2,"Order not found for order number ""9""."',
+		] );
+	} );
+
+	it( 'treats a leading comma-only row as blank', () => {
+		const csv = buildFailedRowsCsv(
+			',,,\norder,tracking\n1,T-1\n9,T-2\n',
+			',',
+			[ failedRow( 4 ) ]
+		);
+
+		expect( csv.split( '\r\n' ) ).toEqual( [
+			'order,tracking,Import error',
+			'9,T-2,"Order not found for order number ""9""."',
+		] );
+	} );
+
+	it( 'treats whitespace-only rows as blank and does not trim real cells', () => {
+		// Physical rows: spaces, quoted tab, header, comma-separated
+		// whitespace, then the failed row with its own surrounding spaces.
+		const csv = buildFailedRowsCsv(
+			'   \n" \t "\norder,tracking\n , \t , \n 9 , FAIL \n',
+			',',
+			[ failedRow( 5, 'Missing order' ) ]
+		);
+
+		expect( csv.split( '\r\n' ) ).toEqual( [
+			'order,tracking,Import error',
+			' 9 , FAIL ,Missing order',
+		] );
+	} );
+
+	it( 'keeps the physical row when blank rows sit between data', () => {
+		const csv = buildFailedRowsCsv(
+			'order,tracking\n1,T-1\n\n9,T-2\n2,T-3\n',
+			',',
+			[ failedRow( 4 ) ]
+		);
+
+		expect( csv.split( '\r\n' ) ).toEqual( [
+			'order,tracking,Import error',
+			'9,T-2,"Order not found for order number ""9""."',
+		] );
+	} );
+
+	it( 'numbers failed rows by physical record, including leading and in-file blanks', () => {
+		const file = '\n,,,\norder,tracking\n1,T-1\n\n   \n9,T-2\n2,T-3\n';
+		const csv = buildFailedRowsCsv( file, ',', [
+			failedRow( 7, 'First failure' ),
+			failedRow( 8, 'Second failure' ),
+		] );
+
+		expect( csv.split( '\r\n' ) ).toEqual( [
+			'order,tracking,Import error',
+			'9,T-2,First failure',
+			'2,T-3,Second failure',
+		] );
 	} );
 } );
