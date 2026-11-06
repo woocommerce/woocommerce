@@ -115,7 +115,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 		}
 
 		$page     = $input['page'] ?? 1;
-		$per_page = $input['per_page'] ?? 10;
+		$per_page = $input['per_page'] ?? ( empty( $input['include'] ) ? 10 : count( $input['include'] ) );
 		$args     = array(
 			'limit'    => $per_page,
 			'page'     => $page,
@@ -286,8 +286,9 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 				),
 				'include'            => array(
 					'type'        => 'array',
-					'description' => __( 'Return only these order IDs. Results are still paged, so set per_page to the number of IDs, up to 100.', 'woocommerce' ),
+					'description' => __( 'Return only these order IDs, up to 100. Without per_page, they come back in one page.', 'woocommerce' ),
 					'minItems'    => 1,
+					'maxItems'    => 100,
 					'items'       => array(
 						'type'    => 'integer',
 						'minimum' => 1,

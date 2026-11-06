@@ -107,13 +107,37 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should refuse an empty include list instead of returning every order.
+	 * @testdox Should refuse an include list that is empty or longer than 100 IDs.
 	 */
-	public function test_refuses_empty_include(): void {
+	public function test_refuses_include_outside_size_limits(): void {
 		$schema = OrdersQuery::get_registration_args()['input_schema'];
 
-		$this->assertWPError( rest_validate_value_from_schema( array( 'include' => array() ), $schema, 'input' ) );
-		$this->assertTrue( rest_validate_value_from_schema( array( 'include' => array( 1 ) ), $schema, 'input' ) );
+		$this->assertWPError( rest_validate_value_from_schema( array( 'include' => array() ), $schema, 'input' ), 'An empty list should be refused instead of returning every order.' );
+		$this->assertWPError( rest_validate_value_from_schema( array( 'include' => range( 1, 101 ) ), $schema, 'input' ) );
+		$this->assertTrue( rest_validate_value_from_schema( array( 'include' => range( 1, 100 ) ), $schema, 'input' ) );
+	}
+
+	/**
+	 * @testdox Should return every included order in one page when per_page is not sent.
+	 */
+	public function test_include_without_per_page_returns_one_page(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$order_ids = array();
+		foreach ( range( 1, 15 ) as $unused ) {
+			$order_ids[] = OrderHelper::create_order()->get_id();
+		}
+
+		$all_ids = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'include' => $order_ids ) );
+		$paged   = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'include'  => $order_ids,
+				'per_page' => 10,
+			)
+		);
+
+		$this->assertEqualsCanonicalizing( $order_ids, array_column( $all_ids['orders'], 'id' ) );
+		$this->assertSame( 1, $all_ids['total_pages'] );
+		$this->assertCount( 10, $paged['orders'], 'An explicit per_page should still apply.' );
 	}
 
 	/**

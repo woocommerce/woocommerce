@@ -513,7 +513,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should keep the orders whose IDs every filter returns, from data that is not meta, still apply Core's exclude, and narrow Core's include, with HPOS and with posts storage.
+	 * @testdox Should keep the orders whose IDs every filter returns, from data that is not meta, still apply Core's exclude, and narrow Core's include both ways, with HPOS and with posts storage.
 	 * @testWith [true, false]
 	 *           [true, true]
 	 *           [false, false]
@@ -562,6 +562,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$both_out = $this->run_ability( 'woocommerce/orders-query', array( 'exclude' => array( $other->get_id() ) ) + $filters( array( 'without' => array( $orders['plain'] ) ) ) );
 			$narrowed = $this->run_ability( 'woocommerce/orders-query', array( 'include' => array( $orders['gift'], $other->get_id() ) ) + $filters( array( 'contains_product' => $coffee->get_id() ) ) );
 			$disjoint = $this->run_ability( 'woocommerce/orders-query', array( 'include' => array( $other->get_id() ) ) + $filters( array( 'contains_product' => $coffee->get_id() ) ) );
+			$minus    = $this->run_ability( 'woocommerce/orders-query', array( 'include' => array( $orders['gift'], $orders['plain'] ) ) + $filters( array( 'without' => array( $orders['plain'] ) ) ) );
 
 			$this->assertEqualsCanonicalizing( array_values( $orders ), array_column( $contains['orders'], 'id' ) );
 			$this->assertSame( array( $orders['gift'] ), array_column( $both['orders'], 'id' ) );
@@ -571,6 +572,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$this->assertSame( array( $orders['gift'] ), array_column( $both_out['orders'], 'id' ) );
 			$this->assertSame( array( $orders['gift'] ), array_column( $narrowed['orders'], 'id' ), 'An extension filter should narrow include, not widen it.' );
 			$this->assertSame( array(), $disjoint['orders'], 'An extension filter that shares no ID with include should return no orders.' );
+			$this->assertSame( array( $orders['gift'] ), array_column( $minus['orders'], 'id' ), 'IDs an extension filter excludes should leave include.' );
 		} finally {
 			remove_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_contains_product_filter' ) );
 			remove_all_filters( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
