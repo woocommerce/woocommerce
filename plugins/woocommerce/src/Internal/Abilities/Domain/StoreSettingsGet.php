@@ -43,7 +43,6 @@ class StoreSettingsGet implements AbilityDefinition {
 			'category'            => 'woocommerce',
 			'input_schema'        => array(
 				'type'                 => 'object',
-				'properties'           => array(),
 				'default'              => array(),
 				'additionalProperties' => false,
 			),
