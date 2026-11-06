@@ -203,6 +203,109 @@ class SettingsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should use the same value precedence as the admin field without reading an overridden option.
+	 * @testWith [{}, "stored", true]
+	 *           [{"value": null}, "stored", true]
+	 *           [{"value": "supplied"}, "supplied", false]
+	 *           [{"value": ""}, "", false]
+	 *           [{"value": false}, false, false]
+	 *           [{"value": 0}, 0, false]
+	 *           [{"value": "supplied", "fixed_value": "fixed"}, "fixed", false]
+	 *           [{"value": "supplied", "fixed_value": null}, "supplied", false]
+	 *           [{"fixed_value": false}, false, false]
+	 * @param array $metadata Value metadata.
+	 * @param mixed $expected Expected value.
+	 * @param bool  $reads_option Whether the option should be read.
+	 */
+	public function test_definition_values( array $metadata, $expected, bool $reads_option ): void {
+		update_option( 'extension_value', 'stored' );
+		$reads = 0;
+		add_filter(
+			'pre_option_extension_value',
+			static function ( $value ) use ( &$reads ) {
+				++$reads;
+				return $value;
+			}
+		);
+		add_filter(
+			'woocommerce_general_settings',
+			static function ( $settings ) use ( $metadata ) {
+				$settings[] = $metadata + array(
+					'id'        => 'extension_value',
+					'type'      => 'text',
+					'abilities' => array( 'read' => true ),
+				);
+				return $settings;
+			}
+		);
+		$result = wp_get_ability( 'woocommerce/settings-query' )->execute(
+			array(
+				'group'   => 'general',
+				'include' => array( 'extension_value' ),
+			)
+		);
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( $expected, $result['settings'][0]['value'] );
+		$this->assertSame( $reads_option ? 1 : 0, $reads );
+
+		$rest_settings = ( new \WC_REST_Setting_Options_Controller() )->get_group_settings( 'general' );
+		$rest_setting  = array_column( $rest_settings, null, 'id' )['extension_value'];
+		$this->assertSame( 'stored', $rest_setting['value'] );
+		$this->assertArrayNotHasKey( 'fixed_value', $rest_setting );
+		$this->assertArrayNotHasKey( 'abilities', $rest_setting );
+	}
+
+	/**
+	 * @testdox Should read additional tax classes from their definition rather than a missing option.
+	 */
+	public function test_additional_tax_classes(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		delete_option( 'woocommerce_tax_classes' );
+		\WC_Tax::create_tax_class( 'Ability fixture' );
+		$result = wp_get_ability( 'woocommerce/settings-query' )->execute(
+			array(
+				'group'   => 'tax',
+				'include' => array( 'woocommerce_tax_classes' ),
+			)
+		);
+		$this->assertSame( 1, $result['total'] );
+		$this->assertStringContainsString( 'Ability fixture', $result['settings'][0]['value'] );
+		$this->assertSame( implode( "\n", \WC_Tax::get_tax_classes() ), $result['settings'][0]['value'] );
+	}
+
+	/**
+	 * @testdox Should still exclude unsafe fields and shapes when values are supplied by definitions.
+	 * @testWith ["password", true, "secret"]
+	 *           ["text", false, "secret"]
+	 *           ["text", true, {"api_key": "secret"}]
+	 * @param string $type Field type.
+	 * @param bool   $read Read opt-in.
+	 * @param mixed  $value Supplied value.
+	 */
+	public function test_supplied_values_do_not_bypass_exclusions( string $type, bool $read, $value ): void {
+		add_filter(
+			'woocommerce_general_settings',
+			static function ( $settings ) use ( $type, $read, $value ) {
+				$settings[] = array(
+					'id'          => 'extension_secret',
+					'type'        => $type,
+					'abilities'   => array( 'read' => $read ),
+					'value'       => $value,
+					'fixed_value' => $value,
+				);
+				return $settings;
+			}
+		);
+		$result = wp_get_ability( 'woocommerce/settings-query' )->execute(
+			array(
+				'group'   => 'general',
+				'include' => array( 'extension_secret' ),
+			)
+		);
+		$this->assertSame( 0, $result['total'] );
+	}
+
+	/**
 	 * @testdox Should omit unexpected associative values that could contain nested secrets.
 	 */
 	public function test_unexpected_value_shape(): void {

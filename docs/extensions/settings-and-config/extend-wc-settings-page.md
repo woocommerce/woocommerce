@@ -389,4 +389,6 @@ The same metadata works on email form fields exposed through a settings group. I
 
 Fields without explicit opt-in are omitted, even when requested by ID. Password fields are always omitted, including when `read` is `true`. Never opt in API keys, tokens or other secrets stored in text fields. Review defaults and choices as well as stored values, since the ability can return all three. Supported values are scalars, lists of scalars and the retention-period object with `number` and `unit` members; other object shapes are omitted.
 
+The group read uses a non-null `fixed_value` first, then a non-null `value` supplied by the definition, then the stored option and its default. This follows the admin field value precedence and supports settings such as additional tax classes that are not stored as options. Supplied values still require read opt-in and pass the same password and value-shape checks. Existing REST settings reads retain their current behavior.
+
 This metadata controls the group read, not the fixed `woocommerce/store-settings-get` summary. Only `read` is supported; there is no per-field personal-data sharing control yet. Opt-in allows the field to be returned to authorized callers without a separate PII check.

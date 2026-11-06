@@ -88,6 +88,10 @@ class SettingsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			if ( ! empty( $input['include'] ) && ! in_array( $id, $input['include'], true ) ) {
 				continue;
 			}
+			if ( isset( $setting['fixed_value'] ) || isset( $setting['value'] ) ) {
+				$readable[] = $setting;
+				continue;
+			}
 			if ( is_string( $key ) ) {
 				$option_names[] = explode( '[', $key, 2 )[0];
 			} elseif ( is_array( $key ) && 2 === count( $key ) && is_string( $key[0] ?? null ) && is_string( $key[1] ?? null ) ) {
@@ -102,9 +106,11 @@ class SettingsQuery extends AbstractDomainAbility implements AbilityDefinition {
 		$items = array();
 		foreach ( $readable as $setting ) {
 			$id      = $setting['id'];
-			$key     = $setting['option_key'];
+			$key     = $setting['option_key'] ?? null;
 			$default = $setting['default'] ?? '';
-			if ( is_string( $key ) ) {
+			if ( isset( $setting['fixed_value'] ) || isset( $setting['value'] ) ) {
+				$value = $setting['fixed_value'] ?? $setting['value'];
+			} elseif ( is_string( $key ) ) {
 				$value = \WC_Admin_Settings::get_option( $key, $default );
 			} else {
 				$option = get_option( $key[0], array() );
