@@ -928,8 +928,9 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		wc_get_container()->get( ScheduledScan::class )->queue();
 		$run = $this->view()['run'];
-		$this->assertStringStartsWith( 'Checking your store in the background.', $run['message'] );
+		$this->assertSame( 'Checking your store.', $run['message'], 'Read out to screen readers; the page shows a spinner' );
 		$this->assertTrue( $run['pending'] );
+		$this->assertFalse( $run['stalled'], 'A queued check is not stalled, so the page keeps polling' );
 
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 		$this->age_finished_actions();
@@ -937,6 +938,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$run = $this->view()['run'];
 		$this->assertStringStartsWith( 'The check has not started because scheduled actions', $run['message'] );
 		$this->assertTrue( $run['pending'] );
+		$this->assertTrue( $run['stalled'], 'and the page stops showing a spinner' );
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 	}
 

@@ -8,6 +8,7 @@ import { Button } from '@wordpress/components';
  * Internal dependencies
  */
 import type { ReadinessView } from '../types';
+import { RunStatus } from './run-status';
 
 interface CheckedCardProps {
 	view: ReadinessView;
@@ -51,15 +52,7 @@ export const CheckedCard = ( { view, running, onRun }: CheckedCardProps ) => (
 					{ view.run.label }
 				</Button>
 			</div>
-			{ view.run.message && (
-				<Text
-					variant="body-sm"
-					className="wc-sales-readiness__muted"
-					role="status"
-				>
-					{ view.run.message }
-				</Text>
-			) }
+			<RunStatus run={ view.run } />
 		</Card.Content>
 	</Card.Root>
 );

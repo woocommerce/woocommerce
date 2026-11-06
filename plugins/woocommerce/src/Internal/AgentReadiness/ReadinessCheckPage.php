@@ -227,7 +227,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		if ( $stalled ) {
 			$message = __( 'The check has not started because scheduled actions do not seem to be running on this site. It runs once they do. See WooCommerce > Status > Scheduled Actions.', 'woocommerce' );
 		} elseif ( $pending ) {
-			$message = __( 'Checking your store in the background. Reload this page in a minute to see the result.', 'woocommerce' );
+			$message = __( 'Checking your store.', 'woocommerce' );
 		}
 		$truncated = null !== $report && ! empty( $report['truncated'] )
 			/* translators: %s: number of products checked. */
@@ -242,6 +242,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 			'run'          => array(
 				'label'   => null === $report ? __( 'Run check', 'woocommerce' ) : __( 'Check again', 'woocommerce' ),
 				'pending' => $pending,
+				'stalled' => $stalled,
 				'message' => $message,
 			),
 			'fix_first'    => null === $report ? null : $this->fix_first( $visible, $report ),
