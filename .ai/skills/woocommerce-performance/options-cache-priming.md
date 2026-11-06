@@ -229,6 +229,6 @@ Autoload moves cost into bootstrap payload. Use it for suitably bounded, frequen
 
 Check installation defaults, existing stored values, the migration, and every later writer. In [#69693](https://github.com/woocommerce/woocommerce/pull/69693), settings saves undid an earlier autoload migration because the definitions still disabled autoload. A migration alone does not establish a lasting policy. Prefer WordPress option APIs for cache coherence and target the options that still exist.
 
-Do not materialize a missing option merely to avoid a read until its absence semantics are understood. Absence can select a dynamic default, unlike a stored false or zero. The [#70409 review](https://github.com/woocommerce/woocommerce/pull/70409#discussion_r4423848691) identified that distinction for HPOS background synchronization; check absence behavior before adopting the proposed stored default.
+Do not materialize a missing option merely to avoid a read until its absence semantics are understood. Absence can select a dynamic default, unlike a stored false or zero. An automated review comment on [#70409](https://github.com/woocommerce/woocommerce/pull/70409#discussion_r4423848691) (open at the time of writing) raised that distinction for HPOS background synchronization; check absence behavior before adopting the proposed stored default.
 
 For invalidation, background warming, and persistent counters, also read [database operations](database-operations.md#make-caching-and-scheduling-correct-across-their-lifecycle).

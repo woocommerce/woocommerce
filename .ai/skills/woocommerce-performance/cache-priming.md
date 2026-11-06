@@ -20,11 +20,11 @@ if ( ! empty( $product_ids ) ) {
 
 Use integer IDs from a validated source. Place the prime before the first read of the batch, usually immediately before the loop or `array_map`. If an intervening hook actually consumes the same IDs, prime before that hook so its callbacks also benefit. Preserve hook timing and overridable methods when changing the loading path.
 
-`_prime_post_caches()` warms WordPress posts and, depending on its arguments, terms and post metadata. It is not an HPOS order-table loader: a loop using `wc_get_order()` needs the WooCommerce bulk-order/data-store path for the active backend, not a blanket post-cache prime. See pattern 6 for the separate product reads made through order line items.
+`_prime_post_caches()` warms WordPress posts and, depending on its arguments, terms and post metadata. It loads orders only on the posts store, never the HPOS tables. Replace a `wc_get_order()` loop with the bulk path for the active backend: `wc_get_orders( array( 'include' => $order_ids, 'limit' => count( $order_ids ) ) )` or `WC_Order_Factory::get_orders( $order_ids )`, which resolve `OrderCache` hits, batch the data store's reads, and prime line items and their products. See pattern 6 for the separate product reads made through order line items.
 
 The helper is available in WooCommerce's supported WordPress versions; an availability guard is unnecessary in this project. An empty guard makes optional batches clear, but the helper also short-circuits empty input. It batches uncached post reads and can prime related metadata and terms; the query count depends on cache state and term work, so do not promise exactly two queries regardless of collection size.
 
-Select the term/meta flags from downstream reads. [#54984](https://github.com/woocommerce/woocommerce/pull/54984) benefited from post-only priming; [#61057](https://github.com/woocommerce/woocommerce/pull/61057) found full term/meta priming faster for product responses. Neither result establishes universal flag values for every consumer.
+Select the term/meta flags from downstream reads. `wc_get_product()` reads the post, its metadata, and the `product_type` and `product_visibility` terms, so prime products with both flags on (the default). Image rendering reads `_wp_attachment_metadata` but no attachment terms, so prime attachments with `( $attachment_ids, false, true )`. [#54984](https://github.com/woocommerce/woocommerce/pull/54984) benefited from post-only priming; [#61057](https://github.com/woocommerce/woocommerce/pull/61057) found full term/meta priming faster for product responses. Neither result establishes universal flag values for every consumer.
 
 Add a comment when placement or a cache dependency needs explanation. A comment that only restates the prime call is not required.
 
@@ -128,7 +128,7 @@ wc_get_container()->get( \Automattic\WooCommerce\Internal\Utilities\ProductUtil:
 
 The helper calls `_prime_post_caches( $image_ids )` with both term and metadata priming enabled. When the consumer needs attachment posts and metadata but not terms, the explicit `_prime_post_caches( $attachment_ids, false, true )` path above provides that narrower scope. Whether disabling term priming saves work depends on registered attachment taxonomies and cache state; the default flags do not imply an extra term query on every call.
 
-`WC_Product_Variation` extends `WC_Product`, so variation collections are accepted. Pass a numerically indexed copy: the current helper preserves collection keys before unpacking gallery arrays into `array_merge()`, which can fail for string-keyed collections. `array_values()` leaves the caller's keyed collection intact. An explicit collect-and-prime path can be appropriate when the consumer needs only featured images, a different getter context, or a narrower cache scope. A legacy `includes/` file is not by itself a reason to assume the DI container is unavailable; check the actual lifecycle and dependencies.
+`WC_Product_Variation` extends `WC_Product`, so variation collections are accepted. Pass a numerically indexed copy: as of WooCommerce 11.x the helper keeps the caller's keys before unpacking gallery arrays into `array_merge()`, which fails for string-keyed collections. Read the helper before relying on this; once it re-indexes its input, `array_values()` becomes unnecessary and this note should go. An explicit collect-and-prime path can be appropriate when the consumer needs only featured images, a different getter context, or a narrower cache scope. A legacy `includes/` file is not by itself a reason to assume the DI container is unavailable; check the actual lifecycle and dependencies.
 
 **Scope priming to attachment IDs your code actually accesses.** Calls such as `get_post()`, `wp_attachment_is_image()`, `wp_get_attachment_image_src()`, and `get_the_title()` can load attachment records or metadata. Merely returning integer image IDs, such as a response's `gallery_image_ids`, does not need attachment hydration. [#63006](https://github.com/woocommerce/woocommerce/pull/63006) and [#69319](https://github.com/woocommerce/woocommerce/pull/69319) illustrate collection-specific placement.
 
@@ -164,7 +164,7 @@ Audit each entry point and its existing loading behavior. One path may already b
 - `woocommerce_upsell_display()` ↔ an upsells block that renders the same products.
 - Legacy template functions ↔ Store API schema handlers.
 
-Prefer a shared loading boundary when its bounded callers benefit. Keep priming before the first actual consumer, without moving broad hydration into global initialization simply to reduce a later query count. [#65276](https://github.com/woocommerce/woocommerce/pull/65276) warms only the page records needed by later checks.
+Prefer a shared loading boundary when its bounded callers benefit. Keep priming before the first actual consumer, without moving broad hydration into global initialization simply to reduce a later query count. [#65276](https://github.com/woocommerce/woocommerce/pull/65276) batches the page records that later `is_page` checks read, with term and meta priming off.
 
 ---
 
@@ -273,7 +273,7 @@ That is a conditional example, not a general order-loading recipe. Either term o
 
 Large batches can reduce round trips while increasing memory, bytes fetched, or unwanted hydration. Keep batches bounded to the page or collection being consumed. Measure the actual endpoint in cold and warm states, with and without persistent object caching, and with representative collection sizes.
 
-Do not infer a full-page improvement from an isolated method benchmark. [#69100](https://github.com/woocommerce/woocommerce/pull/69100#issuecomment-5912552732) rejected a fast path after consumer-level measurements.
+Do not infer a full-page improvement from an isolated method benchmark. [#69100](https://github.com/woocommerce/woocommerce/pull/69100#issuecomment-5912552732) rejected a variation fast path after page-level measurements showed no consumer gain.
 
 For hierarchical term priming, maintain a visited set and termination behavior for malformed or cyclic data. A few extra queries are preferable to a nonterminating traversal ([#70278](https://github.com/woocommerce/woocommerce/pull/70278#discussion_r4386236231)).
 

@@ -6,9 +6,9 @@
 
 Record the eligible entities and the unit being counted: orders, parent products, variations, terms, or metadata rows. Check publication, visibility, stock, custom statuses/types, NULLs, duplicate metadata, missing rows, ordering, pagination, and result types. HPOS and posts storage can require different plans and predicates.
 
-A count must describe the same population as its corresponding ID selector. Two counts added together may intentionally count an overlapping row twice; one ordered CASE counts it at most once. Moving a branch's condition into a shared WHERE can remove rows another branch previously included. Exercise a truth table of the old and new predicates before pursuing small per-row CPU savings. The [#69360 review](https://github.com/woocommerce/woocommerce/pull/69360#discussion_r4445338840) supplies a counterexample to a proposed CASE simplification; the proposal alone is not an equivalence proof.
+A count must describe the same population as its corresponding ID selector. Two counts added together may intentionally count an overlapping row twice; one ordered CASE counts it at most once. Moving a branch's condition into a shared WHERE can remove rows another branch previously included. Exercise a truth table of the old and new predicates before pursuing small per-row CPU savings. The [#69360 review](https://github.com/woocommerce/woocommerce/pull/69360#discussion_r4445338840) (open at the time of writing) supplies a counterexample to a proposed CASE simplification; the proposal alone is not an equivalence proof.
 
-SQL equality also depends on collation and coercion. Case-insensitive comparisons can merge distinct custom status strings. A row count equal to the number of children does not prove each child is represented when metadata allows duplicates. For exact agreement, establish identity coverage and comparison semantics; a bounded ID/value read followed by strict PHP comparison may be clearer. The [child-stock review](https://github.com/woocommerce/woocommerce/pull/68546#discussion_r4445639644) illustrates these identity/collation questions; its proposed rewrite is not a general equivalence proof.
+SQL equality also depends on collation and coercion. Case-insensitive comparisons can merge distinct custom status strings. A row count equal to the number of children does not prove each child is represented when metadata allows duplicates. For exact agreement, establish identity coverage and comparison semantics; a bounded ID/value read followed by strict PHP comparison may be clearer. The [#68546 review](https://github.com/woocommerce/woocommerce/pull/68546#discussion_r4445639644) (open at the time of writing) illustrates these identity/collation questions; its proposed rewrite is not a general equivalence proof.
 
 Moving grouping/deduplication between SQL and PHP also changes equality and key normalization. [#66853](https://github.com/woocommerce/woocommerce/pull/66853) repaired batched variation-attribute keys using the existing WordPress canonicalization, not the SQL LOWER described in its stale body. Validate filter results before introducing stricter array operations, while preserving the established return contract: [#66810](https://github.com/woocommerce/woocommerce/pull/66810) restored legacy pass-through rather than silently converting malformed values to an empty array.
 
@@ -148,9 +148,9 @@ The engine chooses the semijoin strategy. IN does not force materialization or g
 
 First ask whether the caller needs an exact count. For batch continuation, compare a one-item next-batch query or equivalent existence check before optimizing a full count; [#38165](https://github.com/woocommerce/woocommerce/pull/38165) removed repeated pending-work counts this way. Preserve error and no-progress handling, and measure no-match and near-completion cases: LIMIT bounds returned rows, not examined rows. Keep exact totals where another consumer needs them, such as a progress display.
 
-When repeated queries scan substantially the same bounded population, compare GROUP BY or conditional aggregation. Several selective point lookups can be cheaper than an unrestricted aggregate. Keep requested status/term predicates, zero buckets, original result types and COUNT versus COUNT DISTINCT semantics.
+When repeated queries scan the same bounded population and every requested bucket is consumed, use one GROUP BY or conditional aggregation; keep per-value point lookups only when one or two buckets are consumed. Keep requested status/term predicates, zero buckets, original result types and COUNT versus COUNT DISTINCT semantics.
 
-The following comparison assumes nonempty, validated product IDs and canonical stock-status values, with the same eligibility and freshness established for both paths. Custom values need separate checks for SQL collation versus PHP array-key equality before grouping:
+The following comparison assumes nonempty, validated product IDs and canonical stock-status values, with the same eligibility and freshness established for both paths. Map grouped rows back to buckets with a strict string comparison against the canonical list (`wc_get_product_stock_status_options()`), not SQL collation, so custom values do not merge:
 
 ```php
 if ( empty( $statuses ) ) {
@@ -269,7 +269,7 @@ WHERE items.order_id IN (
 
 **Scope of the example:** Both query shapes must use the same qualifying orders. The displayed subquery is account-ID-only for illustration; an API promising email/guest purchases must preserve that union too (Pattern E). Pairing predicates correctly does not guarantee a faster plan.
 
-**Source example:** Legacy path of `wc_customer_bought_product()` in `includes/wc-user-functions.php`, [#63995](https://github.com/woocommerce/woocommerce/pull/63995), read with its later correction in Pattern E.
+**Source example:** Legacy path of `wc_customer_bought_product()` in `includes/wc-user-functions.php`, [#63995](https://github.com/woocommerce/woocommerce/pull/63995), read with its later correction in Pattern E. The same function's HPOS branch queries `wc_orders` columns; this example is the posts-store branch only.
 
 ---
 
@@ -383,11 +383,11 @@ FROM (
 ) AS bounds;
 ```
 
-Table names here are illustrative; use the runtime table name. NULL guards preserve MIN/MAX's non-NULL semantics; the outer aggregate preserves one NULL-valued result row on empty/all-NULL input. Backdated orders mean ID order cannot substitute for date order.
+Table names here are illustrative; use the runtime table name. Add `AND col IS NOT NULL` to both probes whenever the column is nullable (it is on `wc_orders.date_created_gmt`): `MIN`/`MAX` skip NULLs while `ORDER BY ASC` returns them first. On a `NOT NULL` column the guard is redundant but harmless. In both cases keep the outer `MIN()/MAX()` so empty input still yields one row. Backdated orders mean ID order cannot substitute for date order.
 
 A composite `(type,status,date)` index is not globally date-ordered when status varies. In [#63039](https://github.com/woocommerce/woocommerce/pull/63039), the probes selected the separate `date_created` index and applied residual filters. Two returned dates do not mean two examined rows: a long run of ineligible records can make a probe expensive. Do not add an index automatically to enable this rewrite; evaluate its operational cost separately. [MySQL ORDER BY optimization](https://dev.mysql.com/doc/refman/8.4/en/order-by-optimization.html).
 
-**Source example:** `ListTable` in `src/Internal/Admin/Orders/ListTable.php` ([#63039](https://github.com/woocommerce/woocommerce/pull/63039)); verify the current implementation and the NULL/result-shape conditions above.
+**Source example:** `ListTable` in `src/Internal/Admin/Orders/ListTable.php` ([#63039](https://github.com/woocommerce/woocommerce/pull/63039)); the shipped query omits the `IS NOT NULL` guards although the column is nullable; verify the current implementation against the conditions above.
 
 **Table scope:** HPOS and posts-authoritative storage have different columns and indexes. Verify the target table rather than treating the similarly named `type_status_date` indexes as interchangeable. Adding an index is a separate design decision; account for writes, build cost and migration states using [database operations](database-operations.md).
 

@@ -1,6 +1,6 @@
 ---
 name: woocommerce-performance
-description: Identify performance issues in WooCommerce PHP code. Use when writing or reviewing code that loads collections of post-based objects (products, orders), renders product lists with images, reads multiple options in a loop or method, or writes SQL queries involving joins, aggregates, meta lookups, or range queries, and changes to indexes, bulk writes, cache invalidation, maintenance jobs or deferred initialization.
+description: Identify performance issues in WooCommerce PHP code. Use when writing or reviewing code that loads collections of post-based objects (products, attachments, posts-store orders), renders product lists with images, reads multiple options in a loop or method, or writes SQL queries involving joins, aggregates, meta lookups, or range queries, and changes to indexes, bulk writes, cache invalidation, maintenance jobs or deferred initialization.
 ---
 
 # WooCommerce Performance
@@ -9,7 +9,7 @@ Optimize the work required by the caller while preserving its data and extension
 
 ## Post Cache Priming — [cache-priming.md](cache-priming.md)
 
-Use when writing or reviewing code that loads collections of post-based objects (products, orders) or renders product lists with images. Covers `_prime_post_caches()` usage patterns — as a generation and review guide. Trace the actual cache layer and loading path before adding or removing a prime; HPOS orders are not post-based objects.
+Use when writing or reviewing code that loads collections of post-based objects (products, attachments, posts-store orders) or renders product lists with images. Covers `_prime_post_caches()` usage patterns — as a generation and review guide. Trace the actual cache layer and loading path before adding or removing a prime; HPOS orders are not post-based objects.
 
 ## Options Cache Priming — [options-cache-priming.md](options-cache-priming.md)
 
