@@ -15,7 +15,7 @@ This experiment measures the complete cost of preparing one PHP 8.5 PHPUnit envi
 
 The first wave collects three baseline, cleanup, and cold-cache samples. The second collects three paired baseline/warm samples and two fallback checks. Its dependency on the first wave is experimental ordering, not a proposed production job dependency. Cold-cache jobs also run the tests; there is no separate image producer whose cost can disappear from the comparison.
 
-Every variant uses Compose's direct BuildKit integration (`COMPOSE_BAKE=false`), which honors `BUILDX_BUILDER` and Compose's cache import/export settings. This avoids Bake's additional filesystem entitlement for exporting outside the build context. The cold wave cancels its remaining samples if a job fails, so a broken harness cannot repeat across the whole matrix.
+Baseline and cleanup retain normal CI's Bake build path. Cache variants use Compose's direct BuildKit integration (`COMPOSE_BAKE=false`), which honors `BUILDX_BUILDER` and Compose's cache import/export settings. This avoids Bake's additional filesystem entitlement for exporting outside the build context. The comparison includes that integration change and its costs; it does not isolate cache lookup alone. The cold wave cancels its remaining samples if a job fails, so a broken harness cannot repeat across the whole matrix.
 
 `start.mjs` wraps wp-env's Docker-file writer for this process only. Every variant receives the same input pins; only the selected transformation differs. Image caches include generated Dockerfile content, build arguments, platform, and lockfile in their identity. Databases, volumes, WordPress installations, and the checked-out plugin are never cached.
 
