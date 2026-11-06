@@ -1,0 +1,112 @@
+name: PHPUnit startup sample
+
+on:
+  workflow_call:
+    inputs:
+      variant:
+        type: string
+        required: true
+      sample:
+        type: number
+        required: true
+      wave:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  sample:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      BENCH_VARIANT: ${{ inputs.variant }}
+      BENCH_INPUTS: ${{ github.workspace }}/benchmark-inputs.json
+      BENCH_RESULTS: ${{ github.workspace }}/benchmark-results
+      COMPOSE_BAKE: 'true'
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: benchmark-inputs
+      - name: Install Monorepo
+        uses: ./.github/actions/setup-woocommerce-monorepo
+        with:
+          install: '@woocommerce/plugin-woocommerce...'
+          build: '@woocommerce/plugin-woocommerce'
+          build-type: backend
+          pull-package-deps: '@woocommerce/plugin-woocommerce'
+      - name: Begin all-in setup timing
+        run: |
+          mkdir -p "$BENCH_RESULTS"
+          echo "BENCH_CACHE=$RUNNER_TEMP/phpunit-image-cache" >> "$GITHUB_ENV"
+          echo "WP_ENV_HOME=$RUNNER_TEMP/benchmark-wp-env" >> "$GITHUB_ENV"
+          date +%s.%N > "$BENCH_RESULTS/setup-start"
+          git rev-parse HEAD > "$BENCH_RESULTS/checkout-sha"
+          cp "$BENCH_INPUTS" "$BENCH_RESULTS/inputs.json"
+      - name: Set up Docker as in normal PHPUnit CI
+        uses: docker/setup-docker-action@6d7cfa65f60a9dda7b46e5513fa982536f3c9877 # v5.3.0
+        with:
+          daemon-config: |
+            {"max-download-attempts": 10, "max-concurrent-downloads": 3}
+      - name: Start cache-capable builder
+        if: startsWith(inputs.variant, 'cache-')
+        run: |
+          buildkit_image=$(jq -r '.images["moby/buildkit:buildx-stable-1"]' "$BENCH_INPUTS")
+          docker buildx create --name benchmark --driver docker-container --driver-opt "image=$buildkit_image" --driver-opt default-load=true --use --bootstrap
+          echo 'BUILDX_BUILDER=benchmark' >> "$GITHUB_ENV"
+      - name: Restore image layers
+        id: cache
+        if: contains(fromJSON('["cache-warm","cache-miss","cache-incompatible"]'), inputs.variant)
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.BENCH_CACHE }}
+          key: phpunit-benchmark-v1-${{ github.run_id }}-${{ hashFiles('benchmark-inputs.json', 'pnpm-lock.yaml') }}-${{ inputs.sample }}${{ inputs.variant == 'cache-miss' && '-deliberate-miss' || '' }}
+      - name: Check cache delivery
+        if: contains(fromJSON('["cache-warm","cache-incompatible"]'), inputs.variant)
+        env:
+          CACHE_HIT: ${{ steps.cache.outputs.cache-hit }}
+        run: test "$CACHE_HIT" = true
+      - name: Start test environment
+        run: |
+          set -o pipefail
+          date +%s.%N > "$BENCH_RESULTS/startup-start"
+          node .github/workflows/scripts/phpunit-startup-benchmark/start.mjs 2>&1 | tee "$BENCH_RESULTS/startup.log"
+          date +%s.%N > "$BENCH_RESULTS/startup-end"
+      - name: Save image layers
+        if: inputs.variant == 'cache-cold'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.BENCH_CACHE }}
+          key: phpunit-benchmark-v1-${{ github.run_id }}-${{ hashFiles('benchmark-inputs.json', 'pnpm-lock.yaml') }}-${{ inputs.sample }}
+      - name: End all-in setup timing
+        run: date +%s.%N > "$BENCH_RESULTS/setup-end"
+      - name: Record runtime and verify fixtures
+        run: |
+          compose=$(jq -r .dockerComposeConfigPath "$BENCH_RESULTS/environment.json")
+          docker version > "$BENCH_RESULTS/docker-version.txt"
+          docker compose version >> "$BENCH_RESULTS/docker-version.txt"
+          docker buildx version >> "$BENCH_RESULTS/docker-version.txt"
+          docker compose -f "$compose" exec -T cli php -r 'echo json_encode(["php"=>PHP_VERSION,"extensions"=>get_loaded_extensions(),"ini"=>ini_get_all(null,false)], JSON_PRETTY_PRINT);' > "$BENCH_RESULTS/php.json"
+          docker compose -f "$compose" exec -T cli wp core version > "$BENCH_RESULTS/wordpress-version.txt"
+          docker compose -f "$compose" exec -T cli wp theme list --format=json > "$BENCH_RESULTS/themes.json"
+          docker compose -f "$compose" exec -T cli test -f /var/www/sample.csv
+          docker compose -f "$compose" exec -T cli test -f /var/www/html/wp-content/plugins/woocommerce/vendor/bin/phpunit
+          docker compose -f "$compose" exec -T cli sha256sum /var/www/sample.csv /var/www/html/wp-content/plugins/woocommerce/woocommerce.php > "$BENCH_RESULTS/fixtures.txt"
+          docker compose -f "$compose" exec -T cli wp db query 'SELECT VERSION();' > "$BENCH_RESULTS/database-version.txt"
+          if [ -d "$BENCH_CACHE" ]; then du -sb "$BENCH_CACHE" > "$BENCH_RESULTS/cache-bytes.txt"; fi
+      - name: Run representative existing PHPUnit tests
+        run: |
+          set -o pipefail
+          date +%s.%N > "$BENCH_RESULTS/tests-start"
+          pnpm --filter=@woocommerce/plugin-woocommerce test:php:env:hpos-off -- --filter 'WC_Tests_Product_CSV_Importer|WC_Tests_API_Product::|WC_Tests_Template_Functions' 2>&1 | tee "$BENCH_RESULTS/tests.log"
+          date +%s.%N > "$BENCH_RESULTS/tests-end"
+      - name: Save benchmark evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: benchmark-${{ inputs.wave }}-${{ inputs.sample }}-${{ inputs.variant }}-attempt-${{ github.run_attempt }}
+          path: benchmark-results
+          if-no-files-found: error
+          retention-days: 7
