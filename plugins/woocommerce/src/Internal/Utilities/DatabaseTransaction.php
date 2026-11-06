@@ -113,7 +113,7 @@ final class DatabaseTransaction {
 			if ( $autocommit ) {
 				self::query( 'SET autocommit = 1' );
 			}
-			self::$depth = $joined ? 0 : self::$depth;
+			self::$depth = $joined ? 0 : $level;
 		}
 
 		if ( $lost && ! is_wp_error( $result ) ) {

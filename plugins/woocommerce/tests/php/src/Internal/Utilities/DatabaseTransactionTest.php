@@ -350,6 +350,38 @@ class DatabaseTransactionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox run() should own no transaction after a query filter throws on its rollback, so the next run() starts one.
+	 */
+	public function test_run_owns_no_transaction_after_its_rollback_throws(): void {
+		$throw_on_rollback = static function ( $query ) {
+			if ( 'ROLLBACK' === $query ) {
+				throw new \RuntimeException( 'Rollback refused.' );
+			}
+			return $query;
+		};
+		add_filter( 'query', $throw_on_rollback, 0 );
+		try {
+			DatabaseTransaction::run(
+				static function () {
+					throw new \RuntimeException( 'Disk full.' );
+				}
+			);
+			$this->fail( 'The exception should reach the caller.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertSame( 'Rollback refused.', $e->getMessage() );
+		} finally {
+			remove_filter( 'query', $throw_on_rollback, 0 );
+		}
+
+		$this->assertFalse( DatabaseTransaction::is_open() );
+
+		$this->statements = array();
+		DatabaseTransaction::run( static fn() => null );
+
+		$this->assertSame( array( 'SELECT @@autocommit', 'SET autocommit = 0', 'START TRANSACTION', 'COMMIT', 'SET autocommit = 1' ), $this->statements );
+	}
+
+	/**
 	 * @testdox run() should leave autocommit alone when the connection already has it off.
 	 */
 	public function test_run_keeps_autocommit_off(): void {
