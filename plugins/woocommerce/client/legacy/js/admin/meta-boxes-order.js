@@ -392,7 +392,7 @@ jQuery( function ( $ ) {
 				.on( 'wc_backbone_modal_loaded', this.backbone.init )
 				.on( 'wc_backbone_modal_before_response', this.backbone.validate_response )
 				.on( 'wc_backbone_modal_response', this.backbone.response )
-				.on( 'click', '#woocommerce-order-actions button.save_order, #publish', function( event ) {
+				.on( 'click', '#woocommerce-order-actions button.save_order', function( event ) {
 					if ( ! wc_meta_boxes_order_items.validate_quantity_inputs() ) {
 						event.preventDefault();
 						return false;
