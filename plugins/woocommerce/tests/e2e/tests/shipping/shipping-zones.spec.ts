@@ -507,9 +507,9 @@ test( 'retries a failed save whose only pending change is a method toggle', asyn
 	expect( methods.data[ 0 ].enabled ).toBe( false );
 } );
 
-// Regression: adding a method replaces the table from the server, so an unsaved toggle described
-// a row nobody could see and the add's own save wrote it to the database without being asked.
-test( 'does not apply an unsaved method toggle when a method is added', async ( {
+// Adding a method replaces the table from the server, so the unsaved toggle has to be laid back
+// over that list and saved with the add, as pending zone edits are.
+test( 'saves an unsaved method toggle along with a method that is added', async ( {
 	page,
 	restApi,
 	zone,
@@ -547,8 +547,58 @@ test( 'does not apply an unsaved method toggle when a method is added', async ( 
 		( method: { method_id: string } ) => method.method_id === 'flat_rate'
 	);
 
-	expect( flatRate.enabled ).toBe( true );
+	expect( flatRate.enabled ).toBe( false );
+	await expect(
+		page.locator( '.wc-shipping-zone-method-enabled a' ).first()
+	).toHaveText( 'No' );
 	expect( dialogMessages ).toEqual( [] );
+} );
+
+// Cancelling the settings modal of a method that was just added removes it again. That cleanup
+// must leave the toggle the table still shows pending, not overwrite it with the server's rows.
+test( 'keeps an unsaved method toggle pending when the settings of an added method are cancelled', async ( {
+	page,
+	restApi,
+	zone,
+} ) => {
+	await openZone( page, zone.name );
+
+	await page.locator( '.wc-shipping-zone-method-enabled a' ).first().click();
+	await expect(
+		page.locator( '.wc-shipping-zone-method-enabled a' ).first()
+	).toHaveText( 'No' );
+
+	await openAddMethodModal( page );
+	await page.getByText( 'Free shipping', { exact: true } ).click();
+	await page.getByRole( 'button', { name: 'Continue' } ).click();
+	await expect( page.locator( '#btn-ok' ) ).toBeVisible();
+
+	const removeMethodResponse = page.waitForResponse( ( response ) =>
+		response
+			.url()
+			.includes( 'action=woocommerce_shipping_zone_remove_method' )
+	);
+	await page.keyboard.press( 'Escape' );
+	await removeMethodResponse;
+	await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
+
+	await expect(
+		page.locator( '.wc-shipping-zone-method-enabled a' ).first()
+	).toHaveText( 'No' );
+	await expect( page.locator( '#submit' ) ).toBeEnabled();
+
+	await Promise.all( [
+		page.waitForResponse( ( response ) =>
+			isSaveChanges( new URL( response.url() ) )
+		),
+		page.locator( '#submit' ).click(),
+	] );
+
+	const methods = await restApi.get(
+		`${ WC_API_PATH }/shipping/zones/${ zone.id }/methods`
+	);
+	expect( methods.data ).toHaveLength( 1 );
+	expect( methods.data[ 0 ].enabled ).toBe( false );
 } );
 
 // Regression: adding a method with a settings modal marks the form dirty through the model's

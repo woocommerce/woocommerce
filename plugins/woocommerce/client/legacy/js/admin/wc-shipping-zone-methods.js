@@ -702,11 +702,15 @@
 							// Avoid triggering a rerender here because we don't want to show the method
 							// in the table in case merchant doesn't finish flow.
 
-							shippingMethodView.model.set( 'methods', response.data.methods );
+							// The server list replaces the rows, so lay the unsaved toggles and order back over it;
+							// they stay pending and are saved with the next save.
+							_.each( _.omit( shippingMethodView.model.changes.methods, 'methods' ), function( row, id ) {
+								if ( response.data.methods[ id ] ) {
+									_.extend( response.data.methods[ id ], _.pick( row, 'enabled', 'method_order' ) );
+								}
+							} );
 
-							// That server list replaces what the table shows, so a pending method edit
-							// now describes a row nobody can see and must not ride along on the next save.
-							shippingMethodView.model.changes = _.omit( shippingMethodView.model.changes, 'methods' );
+							shippingMethodView.model.set( 'methods', response.data.methods );
 
 							// Setting 'methods' above marks the form dirty, which on the modal branch below
 							// still has to warn about navigating away from unfinished settings, so only
@@ -860,7 +864,6 @@
 							var view    = shippingMethodView,
 								model   = view.model,
 								methods   = _.indexBy( model.get( 'methods' ), 'instance_id' ),
-								changes = {},
 								instance_id = post_data.instance_id;
 
 							// Remove method to zone via ajax call
@@ -871,12 +874,22 @@
 									instance_id: instance_id,
 									zone_id: data.zone_id,
 								},
-								success: function( { data } ) {
+								success: function() {
 									delete methods[instance_id];
-									changes.methods = changes.methods || data.methods;
 									model.set('methods', methods);
-									model.logChanges( changes );
-									view.clearUnloadConfirmation();
+
+									// Keep the merchant's pending edits: writing the server's rows over them
+									// would revert a toggle the table still shows.
+									if ( model.changes.methods ) {
+										delete model.changes.methods[ instance_id ];
+										if ( _.isEmpty( _.omit( model.changes.methods, 'methods' ) ) ) {
+											delete model.changes.methods;
+										}
+									}
+
+									if ( _.isEmpty( model.changes ) ) {
+										view.clearUnloadConfirmation();
+									}
 									view.render();
 									shippingMethodView.unblock();
 								},
