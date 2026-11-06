@@ -22,8 +22,8 @@ defined( 'ABSPATH' ) || exit;
  * When a caller started a transaction with wc_transaction_query() before run(), run() works in a savepoint
  * inside it, so the caller's commit or rollback decides the outcome, as on code without run().
  *
- * When a query inside run() hits a deadlock or a lock wait timeout, MySQL rolls back the transaction or that
- * one query, so run() rolls back the rest and returns a WP_Error. When run() owns the transaction, autocommit
+ * When a query inside run() hits a deadlock, a lock wait timeout or a MariaDB snapshot conflict, the database
+ * rolls back the transaction or that one query, so run() rolls back the rest and returns a WP_Error. When run() owns the transaction, autocommit
  * is off while it runs, so the queries after a deadlock roll back too. Inside a transaction that a caller
  * started, they commit one by one, as on code without run().
  *
@@ -36,9 +36,9 @@ defined( 'ABSPATH' ) || exit;
 final class DatabaseTransaction {
 
 	/**
-	 * MySQL error numbers of a lock wait timeout and a deadlock.
+	 * Error numbers of a snapshot conflict (MariaDB with innodb_snapshot_isolation), a lock wait timeout and a deadlock.
 	 */
-	private const LOST_WRITE_ERRNOS = array( 1205, 1213 );
+	private const LOST_WRITE_ERRNOS = array( 1020, 1205, 1213 );
 
 	/**
 	 * Number of open levels: the transaction, then one per savepoint. 0 when no transaction is owned.
@@ -55,14 +55,14 @@ final class DatabaseTransaction {
 	private static $caller_open = false;
 
 	/**
-	 * Whether the outermost run() watches its queries for a deadlock or a lock wait timeout.
+	 * Whether the outermost run() watches its queries for an error that lost the write.
 	 *
 	 * @var bool
 	 */
 	private static $watching = false;
 
 	/**
-	 * Whether a query inside the outermost run() hit a deadlock or a lock wait timeout.
+	 * Whether a query inside the outermost run() hit an error that lost the write.
 	 *
 	 * @var bool
 	 */
@@ -74,7 +74,7 @@ final class DatabaseTransaction {
 	 * runs in a savepoint.
 	 *
 	 * @param callable $callback Callback to run.
-	 * @return mixed What the callback returns, or a WP_Error when a query hit a deadlock or a lock wait timeout.
+	 * @return mixed What the callback returns, or a WP_Error when a query hit an error that lost the write.
 	 * @throws \Throwable What the callback throws, after the rollback.
 	 */
 	public static function run( callable $callback ) {
@@ -146,8 +146,8 @@ final class DatabaseTransaction {
 	}
 
 	/**
-	 * Note a deadlock or a lock wait timeout of the previous query. WordPress applies the query filter before
-	 * it clears the error of the previous query.
+	 * Note an error of the previous query that lost the write. WordPress applies the query filter before it
+	 * clears the error of the previous query.
 	 *
 	 * @param mixed $query Query, returned unchanged.
 	 * @return mixed
@@ -178,8 +178,8 @@ final class DatabaseTransaction {
 	}
 
 	/**
-	 * Close the given level and every level that a caller left open inside it. After a deadlock or a lock wait
-	 * timeout, roll back instead of committing.
+	 * Close the given level and every level that a caller left open inside it. After an error that lost the
+	 * write, roll back instead of committing.
 	 *
 	 * @param int  $level  Level to close. 0 is the transaction itself.
 	 * @param bool $commit Whether to keep the changes.
@@ -198,8 +198,8 @@ final class DatabaseTransaction {
 	}
 
 	/**
-	 * Mark the transaction lost when the previous query hit a deadlock or a lock wait timeout. The message
-	 * check covers database drivers other than mysqli.
+	 * Mark the transaction lost when the previous query hit one of LOST_WRITE_ERRNOS. The server ends the
+	 * message of each with "try restarting transaction", which covers database drivers other than mysqli.
 	 */
 	private static function check_last_error(): void {
 		global $wpdb;
@@ -211,7 +211,7 @@ final class DatabaseTransaction {
 		$dbh        = $wpdb instanceof \wpdb ? $wpdb->__get( 'dbh' ) : null;
 		$errno      = $dbh instanceof \mysqli ? mysqli_errno( $dbh ) : 0; // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysqli_errno -- wpdb does not expose the error number.
 		self::$lost = in_array( $errno, self::LOST_WRITE_ERRNOS, true )
-			|| 1 === preg_match( '/^(Deadlock found|Lock wait timeout exceeded)/', (string) $wpdb->last_error );
+			|| 1 === preg_match( '/try restarting transaction$/', (string) $wpdb->last_error );
 	}
 
 	/**
