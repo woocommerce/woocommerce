@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
+use Automattic\WooCommerce\Abilities\Ability;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessAbilities;
 use Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan;
@@ -89,17 +91,18 @@ class ReadinessAbilitiesTest extends WC_Unit_Test_Case {
 		if ( wp_has_ability( ReadinessAbilities::GET_REPORT ) ) {
 			wp_unregister_ability( ReadinessAbilities::GET_REPORT );
 		}
-		$callback = array( $this->sut, 'register_abilities' );
+		$callback = array( AbilitiesLoader::class, 'register_abilities' );
 		add_action( 'wp_abilities_api_init', $callback );
 		do_action( 'wp_abilities_api_init' );
 		remove_action( 'wp_abilities_api_init', $callback );
 	}
 
 	/**
-	 * @testdox The abilities are registered only while the feature is enabled.
+	 * @testdox AbilitiesLoader registers the abilities with the Ability class, only while the feature is enabled.
 	 */
 	public function test_registered_only_with_feature(): void {
 		$this->assertTrue( wp_has_ability( ReadinessAbilities::GET_REPORT ) );
+		$this->assertInstanceOf( Ability::class, wp_get_ability( ReadinessAbilities::GET_REPORT ) );
 		$meta = wp_get_ability( ReadinessAbilities::GET_REPORT )->get_meta();
 		$this->assertTrue( $meta['mcp']['public'] );
 		$this->assertTrue( $meta['annotations']['readonly'] );

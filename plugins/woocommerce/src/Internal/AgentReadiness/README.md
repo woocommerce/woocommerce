@@ -134,7 +134,7 @@ The scan walks published simple and variable products shown in the shop catalog 
 
 ## Abilities
 
-While the feature is enabled, `ReadinessAbilities` registers abilities in the WordPress Abilities API, shown in REST and to MCP clients, for users with `manage_woocommerce`:
+While the feature is enabled, `AbilitiesLoader` registers these abilities in the WordPress Abilities API with the `Ability` class, which converts their input to the schema types. Their definition classes in this directory read the arguments from `ReadinessAbilities::registration_args()`. They show in REST and to MCP clients, for users with `manage_woocommerce`:
 
 - `woocommerce/get-agent-readiness` and `GET wc/v3/agent-readiness` both return `{ report, scan_pending, scan_stalled }` with `store_checks` read now (`AgentReadiness::get_store_checks()`): settings changed since the scan show their current state, and store output checks come from the stored report.
 

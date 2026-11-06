@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
-use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -13,9 +12,12 @@ defined( 'ABSPATH' ) || exit;
  * readiness report. Registered only while the agent_readiness feature is
  * enabled, and only for users who can manage WooCommerce.
  *
+ * AbilitiesLoader registers them through the definition classes in this directory,
+ * which read their arguments from registration_args().
+ *
  * @since 11.4.0
  */
-class ReadinessAbilities implements RegisterHooksInterface {
+class ReadinessAbilities {
 
 	public const GET_REPORT = 'woocommerce/get-agent-readiness';
 
@@ -56,53 +58,52 @@ class ReadinessAbilities implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Register the abilities when the Abilities API is ready: the WordPress 6.9 action, and the Abilities API plugin's before it.
-	 */
-	public function register(): void {
-		add_action( 'abilities_api_init', array( $this, 'register_abilities' ) );
-		add_action( 'wp_abilities_api_init', array( $this, 'register_abilities' ) );
-	}
-
-	/**
-	 * Register the abilities while the feature is enabled.
+	 * Whether the abilities are registered: while the feature is enabled.
 	 *
 	 * @internal
 	 */
-	public function register_abilities(): void {
-		if ( ! function_exists( 'wp_register_ability' ) || ! $this->features_controller->feature_is_enabled( StatusTab::FEATURE_ID ) ) {
-			return;
-		}
-		if ( ! wp_has_ability( self::GET_REPORT ) ) {
-			wp_register_ability(
-				self::GET_REPORT,
-				array(
-					'label'               => __( 'Get agent readiness', 'woocommerce' ),
-					'description'         => __( 'Read the last agent readiness check: store settings and pages that keep AI shopping agents from finding or buying products, and product problems per channel (ChatGPT, Google, Copilot), each with why it matters and what to change. Store settings are read now; product results come from the last background check.', 'woocommerce' ),
-					'category'            => 'woocommerce',
-					'input_schema'        => array(
-						'type'                 => 'object',
-						'properties'           => array(),
-						'additionalProperties' => false,
-						'default'              => array(),
+	public function is_enabled(): bool {
+		return $this->features_controller->feature_is_enabled( StatusTab::FEATURE_ID );
+	}
+
+	/**
+	 * Registration arguments of an ability, for the definition class AbilitiesLoader registers it with.
+	 *
+	 * @internal
+	 *
+	 * @param string $name Ability name.
+	 * @return array<string, mixed>
+	 */
+	public function registration_args( string $name ): array {
+		if ( self::GET_REPORT === $name ) {
+			return array(
+				'label'               => __( 'Get agent readiness', 'woocommerce' ),
+				'description'         => __( 'Read the last agent readiness check: store settings and pages that keep AI shopping agents from finding or buying products, and product problems per channel (ChatGPT, Google, Copilot), each with why it matters and what to change. Store settings are read now; product results come from the last background check.', 'woocommerce' ),
+				'category'            => 'woocommerce',
+				'input_schema'        => array(
+					'type'                 => 'object',
+					'properties'           => array(),
+					'additionalProperties' => false,
+					'default'              => array(),
+				),
+				'output_schema'       => self::report_schema(),
+				'execute_callback'    => array( $this, 'get_report' ),
+				'permission_callback' => array( $this, 'can_manage' ),
+				'meta'                => array(
+					'show_in_rest' => true,
+					'mcp'          => array(
+						'public' => true,
+						'type'   => 'tool',
 					),
-					'output_schema'       => self::report_schema(),
-					'execute_callback'    => array( $this, 'get_report' ),
-					'permission_callback' => array( $this, 'can_manage' ),
-					'meta'                => array(
-						'show_in_rest' => true,
-						'mcp'          => array(
-							'public' => true,
-							'type'   => 'tool',
-						),
-						'annotations'  => array(
-							'readonly'    => true,
-							'idempotent'  => true,
-							'destructive' => false,
-						),
+					'annotations'  => array(
+						'readonly'    => true,
+						'idempotent'  => true,
+						'destructive' => false,
 					),
-				)
+				),
 			);
 		}
+		return array();
 	}
 
 	/**
