@@ -165,6 +165,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$this->assertSame( array( 'Order ID', 'Tracking', 'Carrier', 'URL', 'Items' ), $parsed['headers'] );
 		$this->assertSame( array( '12345', '1Z999AA', 'UPS', 'https://example.com', 'SKU-A:1' ), $parsed['sample'] );
 		$this->assertSame( 2, $parsed['total'] );
+		$this->assertFalse( $parsed['total_capped'], 'A file under the cap has an exact total' );
 		$this->assertSame( ',', $parsed['delimiter'] );
 
 		$mapping = $parsed['detected_mapping'];
@@ -368,6 +369,37 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$parsed = ( new FulfillmentsCsvImporter( $file ) )->parse_headers();
 
 		$this->assertSame( FulfillmentsCsvImporter::MAX_IMPORT_ROWS + 1, $parsed['total'] );
+		$this->assertTrue( $parsed['total_capped'], 'A file larger than the cap must not report an exact total' );
+	}
+
+	/**
+	 * @testdox A file with exactly one row past the cap still reports that exact total.
+	 */
+	public function test_parse_headers_exact_total_one_row_past_the_cap_is_not_a_sentinel(): void {
+		$csv = "order_number,tracking_number,shipment_provider\n";
+		for ( $i = 1; $i <= FulfillmentsCsvImporter::MAX_IMPORT_ROWS + 1; $i++ ) {
+			$csv .= "1,EXACT-{$i},ups\n";
+		}
+
+		$parsed = ( new FulfillmentsCsvImporter( $this->make_csv( $csv ) ) )->parse_headers();
+
+		$this->assertSame( FulfillmentsCsvImporter::MAX_IMPORT_ROWS + 1, $parsed['total'] );
+		$this->assertFalse( $parsed['total_capped'], 'Exactly 5,001 data rows is a real total, not the over-cap sentinel' );
+	}
+
+	/**
+	 * @testdox Blank rows do not count toward the import cap.
+	 */
+	public function test_parse_headers_does_not_count_blank_rows_toward_the_cap(): void {
+		$csv = "order_number,tracking_number,shipment_provider\n";
+		for ( $i = 1; $i <= FulfillmentsCsvImporter::MAX_IMPORT_ROWS; $i++ ) {
+			$csv .= "1,CAP-{$i},ups\n,,,\n";
+		}
+
+		$parsed = ( new FulfillmentsCsvImporter( $this->make_csv( $csv ) ) )->parse_headers();
+
+		$this->assertSame( FulfillmentsCsvImporter::MAX_IMPORT_ROWS, $parsed['total'] );
+		$this->assertFalse( $parsed['total_capped'], 'Blank rows between data rows must not push the file over the cap' );
 	}
 
 	/**
@@ -462,5 +494,213 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'error', $parsed );
 		$this->assertSame( 'file_not_readable', $parsed['error']['code'] );
+	}
+
+	/**
+	 * @testdox Rows whose cells all trim to empty are blank, including ",,," and whitespace.
+	 */
+	public function test_blank_rows_include_empty_fields_and_whitespace(): void {
+		$file = $this->make_csv( ",,,\n   \norder_number,tracking_number,shipment_provider\n , , \n1,ROW-1,ups\n\t\t\t\n0,0,ups\n,,,\n" );
+
+		$parsed = ( new FulfillmentsCsvImporter( $file ) )->parse_headers();
+		$read   = ( new FulfillmentsCsvImporter( $file ) )->read_data_rows( 0, 10 );
+
+		$this->assertArrayNotHasKey( 'error', $parsed );
+		$this->assertSame( array( 'order_number', 'tracking_number', 'shipment_provider' ), $parsed['headers'] );
+		$this->assertSame( 2, $parsed['total'], 'Only the two non-blank data rows count' );
+		$this->assertSame( array( '1', 'ROW-1', 'ups' ), $parsed['sample'] );
+		$this->assertSame( $parsed['total'], $read['consumed'] );
+		$this->assertSame(
+			array(
+				array(
+					'row_number' => 5,
+					'cells'      => array( '1', 'ROW-1', 'ups' ),
+				),
+				array(
+					'row_number' => 7,
+					'cells'      => array( '0', '0', 'ups' ),
+				),
+			),
+			$read['rows'],
+			'Physical record numbers keep the leading blanks, the header, and the blank data rows'
+		);
+		$this->assertSame( 3, $read['header_row_number'] );
+		$this->assertTrue( $read['eof'] );
+	}
+
+	/**
+	 * @testdox Offset fast-forward and a resumed byte offset both count only real data rows.
+	 */
+	public function test_read_data_rows_skips_and_resumes_on_real_data_rows(): void {
+		$file = $this->make_csv( "\norder_number,tracking_number,shipment_provider\n\n1,ONE,ups\n,,,\n , , \n2,TWO,ups\n\n3,THREE,ups\n" );
+		$sut  = new FulfillmentsCsvImporter( $file );
+
+		$first = $sut->read_data_rows( 0, 1 );
+		$this->assertSame( 4, $first['rows'][0]['row_number'], 'The first data row keeps its physical record number' );
+		$this->assertSame( array( '1', 'ONE', 'ups' ), $first['rows'][0]['cells'] );
+		$this->assertSame( 1, $first['consumed'] );
+		$this->assertSame( 0, $first['skipped'] );
+		$this->assertFalse( $first['eof'] );
+		$this->assertSame( 7, $first['next_record_number'], 'The saved record number moves past the blank rows after the first data row' );
+
+		$resumed = $sut->read_data_rows(
+			0,
+			1,
+			array(
+				'byte_offset'   => $first['byte_offset'],
+				'record_number' => $first['next_record_number'],
+			)
+		);
+		$this->assertSame( array( '2', 'TWO', 'ups' ), $resumed['rows'][0]['cells'] );
+		$this->assertSame( 7, $resumed['rows'][0]['row_number'] );
+
+		$skipped = $sut->read_data_rows( 1, 1 );
+		$this->assertSame( $resumed['rows'], $skipped['rows'], 'Skipping one data row lands on the same record as the byte offset' );
+		$this->assertSame( 1, $skipped['skipped'] );
+		$this->assertSame( 1, $skipped['consumed'] );
+		$this->assertFalse( $skipped['eof'] );
+
+		$rest = $sut->read_data_rows(
+			0,
+			10,
+			array(
+				'byte_offset'   => $resumed['byte_offset'],
+				'record_number' => $resumed['next_record_number'],
+			)
+		);
+		$this->assertSame( array( '3', 'THREE', 'ups' ), $rest['rows'][0]['cells'] );
+		$this->assertTrue( $rest['eof'], 'Trailing blank rows are not another data row' );
+		$this->assertSame( 1, $rest['consumed'] );
+	}
+
+	/**
+	 * @testdox A CR-only file is rejected and the merchant is told to re-save it as CSV.
+	 */
+	public function test_cr_only_line_endings_are_rejected(): void {
+		$file   = $this->make_csv( "order_number,tracking_number,shipment_provider\r1,CR-1,ups\r2,CR-2,ups\r" );
+		$parsed = ( new FulfillmentsCsvImporter( $file ) )->parse_headers();
+		$read   = ( new FulfillmentsCsvImporter( $file ) )->read_data_rows( 0, 10 );
+
+		$this->assertSame( 'cr_line_endings', $parsed['error']['code'] );
+		$this->assertStringContainsString( 'Re-save', $parsed['error']['message'] );
+		$this->assertStringContainsString( 'CSV', $parsed['error']['message'] );
+		$this->assertSame( 'cr_line_endings', $read['error']['code'] );
+	}
+
+	/**
+	 * @testdox Windows-1252 text is converted at the shared read boundary, and valid UTF-8 is left unchanged.
+	 */
+	public function test_character_encoding_is_normalized_for_prepare_and_row_reads(): void {
+		if ( ! function_exists( 'mb_check_encoding' ) || ! function_exists( 'mb_convert_encoding' ) ) {
+			$this->markTestSkipped( 'The mbstring extension is required for this test.' );
+		}
+
+		$utf8_file = $this->make_csv( "caf\xC3\xA9,tracking_number,shipment_provider\n1,Spediteur M\xC3\xBCller,ups\n" );
+		$utf8      = ( new FulfillmentsCsvImporter( $utf8_file ) )->parse_headers();
+		$this->assertSame( 'café', $utf8['headers'][0], 'Valid UTF-8 headers must not be reinterpreted as Windows-1252' );
+		$this->assertSame( 'Spediteur Müller', $utf8['sample'][1] );
+
+		$euro    = "\xE2\x82\xAC";
+		$padding = str_repeat( 'a', 9000 );
+		$long    = ( new FulfillmentsCsvImporter( $this->make_csv( "order_number,tracking_number,shipment_provider\n1,{$padding}{$euro}{$padding},ups\n" ) ) )->parse_headers();
+		$this->assertSame( $padding . $euro . $padding, $long['sample'][1], 'A multibyte character past a read boundary must stay valid UTF-8' );
+
+		$legacy_file = $this->make_csv( "order_number,tracking_number,shipment_provider\n1,\xC3\xA9,Spediteur M\xFCller\n" );
+		$legacy      = ( new FulfillmentsCsvImporter( $legacy_file ) )->parse_headers();
+		$legacy_rows = ( new FulfillmentsCsvImporter( $legacy_file ) )->read_data_rows( 0, 1 );
+
+		$this->assertSame( 'Ã©', $legacy['sample'][1], 'Once the file is not UTF-8, every cell is converted from Windows-1252' );
+		$this->assertSame( 'Spediteur Müller', $legacy['sample'][2] );
+		$this->assertTrue( mb_check_encoding( $legacy['sample'][2], 'UTF-8' ) );
+		$this->assertSame( $legacy['sample'], $legacy_rows['rows'][0]['cells'], 'Prepare and the row reader must decode the same text' );
+	}
+
+	/**
+	 * @testdox An enclosure fgetcsv() would misread falls back to the double quote.
+	 */
+	public function test_unusable_enclosure_values_fall_back_to_double_quote(): void {
+		$csv = "order_number,tracking_number,shipment_provider\n1042,\"1Z999,AA\",\"Acme, Inc\"\n";
+		foreach ( array( "\n", "\r", ',', "\x80" ) as $enclosure ) {
+			$parsed = ( new FulfillmentsCsvImporter( $this->make_csv( $csv ), array( 'enclosure' => $enclosure ) ) )->parse_headers();
+			$this->assertSame( array( '1042', '1Z999,AA', 'Acme, Inc' ), $parsed['sample'], 'A line break, the delimiter, or a non-ASCII enclosure must not split quoted fields' );
+		}
+
+		$this->assertSame( '"', FulfillmentsCsvImporter::normalize_enclosure( ';', ';' ) );
+		$semicolon = "\"order_number\";\"tracking_number\";\"shipment_provider\"\n\"1\";\"TRACK; 1\";\"ups\"\n";
+		$parsed    = ( new FulfillmentsCsvImporter(
+			$this->make_csv( $semicolon ),
+			array(
+				'delimiter' => ';',
+				'enclosure' => ';',
+			)
+		) )->parse_headers();
+		$this->assertSame( ';', $parsed['delimiter'] );
+		$this->assertSame( array( '1', 'TRACK; 1', 'ups' ), $parsed['sample'] );
+	}
+
+	/**
+	 * @testdox A one-byte enclosure other than the delimiter is kept.
+	 */
+	public function test_single_quote_enclosure_is_preserved(): void {
+		$csv    = "'order_number','tracking_number','shipment_provider'\n'1','TRACK, 1','ups'\n";
+		$parsed = ( new FulfillmentsCsvImporter( $this->make_csv( $csv ), array( 'enclosure' => "'" ) ) )->parse_headers();
+
+		$this->assertSame( array( 'order_number', 'tracking_number', 'shipment_provider' ), $parsed['headers'] );
+		$this->assertSame( array( '1', 'TRACK, 1', 'ups' ), $parsed['sample'] );
+	}
+
+	/**
+	 * @testdox mapping_to_header_map keeps the first column for a repeated canonical key.
+	 */
+	public function test_mapping_to_header_map_keeps_the_first_duplicate_canonical_key(): void {
+		$map = FulfillmentsCsvImporter::mapping_to_header_map(
+			array(
+				0   => 'order_number',
+				1   => 'order_number',
+				2   => '',
+				3   => ' tracking_number ',
+				'4' => 'shipment_provider',
+				5   => 12,
+			)
+		);
+
+		$this->assertSame(
+			array(
+				'order_number'      => 0,
+				'tracking_number'   => 3,
+				'shipment_provider' => 4,
+			),
+			$map,
+			'Empty and non-string targets are ignored, and the first duplicate canonical key wins'
+		);
+	}
+
+	/**
+	 * @testdox find_missing_required_columns reports order number, tracking number, and shipment provider.
+	 */
+	public function test_find_missing_required_columns_reports_the_required_set(): void {
+		$this->assertSame(
+			array(),
+			FulfillmentsCsvImporter::find_missing_required_columns(
+				array(
+					'order_number'      => 0,
+					'tracking_number'   => 1,
+					'shipment_provider' => 2,
+					'tracking_url'      => 3,
+					'items'             => 4,
+				)
+			)
+		);
+		$this->assertSame(
+			array( 'order_number', 'shipment_provider' ),
+			FulfillmentsCsvImporter::find_missing_required_columns(
+				array(
+					'tracking_number' => 1,
+					'tracking_url'    => 3,
+					'items'           => 4,
+				)
+			),
+			'Optional columns do not satisfy a missing required column'
+		);
 	}
 }
