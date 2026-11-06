@@ -285,8 +285,9 @@ class HposOrderExportHandler {
 		// Source-site customer and payment token IDs can refer to unrelated accounts on import.
 		$excluded_keys = array( '_customer_user', '_payment_tokens', '_edit_lock', '_billing_address_index', '_shipping_address_index', DataSynchronizer::DELETED_RECORD_META_KEY );
 		foreach ( $meta_rows as $meta ) {
-			if ( ! array_key_exists( $meta->meta_key, $core_meta ) && ! in_array( $meta->meta_key, $excluded_keys, true ) ) {
-				self::write_post_meta( $order_id, $meta->meta_key, (string) $meta->meta_value );
+			$key = $meta->meta_key ?? null;
+			if ( is_string( $key ) && '' !== $key && ! array_key_exists( $key, $core_meta ) && ! in_array( $key, $excluded_keys, true ) ) {
+				self::write_post_meta( $order_id, $key, (string) $meta->meta_value );
 			}
 		}
 

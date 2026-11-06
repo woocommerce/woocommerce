@@ -114,6 +114,18 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 		$order->add_meta_data( 'label', 'B' );
 		$order->add_meta_data( '_export_skip', 'secret' );
 		$order->save();
+
+		global $wpdb;
+		$wpdb->insert(
+			OrdersTableDataStore::get_meta_table_name(),
+			array(
+				'order_id'   => $order->get_id(),
+				'meta_key'   => null, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Insert one legacy fixture row.
+				'meta_value' => 'Value without a key', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Insert one legacy fixture row.
+			)
+		);
+		wp_cache_flush();
+
 		$note_id = $order->add_order_note( 'Packed ]]> & ready', 1 );
 		add_comment_meta( $note_id, '123', array( 'carrier' => 'A & B' ) );
 		add_comment_meta( $note_id, '_export_skip', 'secret' );
@@ -136,6 +148,7 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 		$this->assertSame( '12.50', $xpath->evaluate( 'string(wp:postmeta[wp:meta_key = "_order_total"]/wp:meta_value)', $item ) );
 		$this->assertSame( 2.0, $xpath->evaluate( 'count(wp:postmeta[wp:meta_key = "label"])', $item ) );
 		$this->assertSame( 0.0, $xpath->evaluate( 'count(wp:postmeta[wp:meta_key = "_customer_user"] | .//wp:meta_key[. = "_export_skip"])', $item ) );
+		$this->assertSame( 0.0, $xpath->evaluate( 'count(wp:postmeta[wp:meta_value = "Value without a key"])', $item ) );
 
 		$note = $xpath->query( 'wp:comment[wp:commentmeta/wp:meta_key = "123"]', $item )->item( 0 );
 		$this->assertNotNull( $note );
