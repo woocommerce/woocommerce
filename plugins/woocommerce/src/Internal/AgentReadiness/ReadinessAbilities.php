@@ -394,6 +394,18 @@ class ReadinessAbilities {
 								),
 							),
 						),
+						'declared'            => array(
+							'type'        => 'array',
+							'description' => __( 'Protocols and files the store declares to agents. Information only: found or not found, never a problem.', 'woocommerce' ),
+							'items'       => array(
+								'type'       => 'object',
+								'properties' => array(
+									'id'    => array( 'type' => 'string' ),
+									'name'  => array( 'type' => 'string' ),
+									'found' => array( 'type' => array( 'boolean', 'null' ) ),
+								),
+							),
+						),
 						'truncated'           => array( 'type' => 'boolean' ),
 					),
 				),
