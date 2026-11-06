@@ -351,6 +351,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 					'default'     => '',
 				),
 				'additional_content' => array(
+					'abilities'   => array( 'read' => true ),
 					'title'       => __( 'Additional content', 'woocommerce' ),
 					'description' => __( 'Text to appear below the main email content.', 'woocommerce' ) . ' ' . $placeholder_text,
 					'css'         => 'width:400px; height: 75px;',
@@ -360,6 +361,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 					'desc_tip'    => true,
 				),
 				'email_type'         => array(
+					'abilities'   => array( 'read' => true ),
 					'title'       => __( 'Email type', 'woocommerce' ),
 					'type'        => 'select',
 					'description' => __( 'Choose which format of email to send.', 'woocommerce' ),

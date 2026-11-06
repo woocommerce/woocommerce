@@ -23,6 +23,9 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\StoreSettingsGet;
+use Automattic\WooCommerce\Internal\Abilities\Domain\SettingsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\SettingsGroupsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZonesQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\TaxRatesQuery;
 
@@ -58,6 +61,9 @@ class AbilitiesLoader {
 		ProductCreate::class,
 		ProductDelete::class,
 		ProductUpdate::class,
+		StoreSettingsGet::class,
+		SettingsQuery::class,
+		SettingsGroupsQuery::class,
 		ShippingZonesQuery::class,
 		TaxRatesQuery::class,
 	);
