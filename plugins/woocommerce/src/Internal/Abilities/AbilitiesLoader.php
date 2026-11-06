@@ -24,6 +24,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReportAbility;
+use Automattic\WooCommerce\Internal\AgentReadiness\RunCheckAbility;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -58,6 +59,7 @@ class AbilitiesLoader {
 		ProductDelete::class,
 		ProductUpdate::class,
 		ReportAbility::class,
+		RunCheckAbility::class,
 	);
 
 	/**
