@@ -13,6 +13,9 @@ use WC_Shipping_Zones;
  * @internal
  */
 class ShippingDestinations {
+	/** Maximum postcode rules across all zone and country combinations. */
+	private const MAX_POSTCODE_RULE_COUNTRY_PAIRS = 10000;
+
 	/** Maximum number of postcodes to expand from ranges. */
 	private const MAX_RANGE_POSTCODES = 1000;
 
@@ -62,8 +65,9 @@ class ShippingDestinations {
 		$zones    = WC_Shipping_Zones::get_shipping_zones();
 		$zones[0] = new WC_Shipping_Zone( 0 );
 
-		$details = array();
-		$claimed = array();
+		$details             = array();
+		$claimed             = array();
+		$postcode_rule_count = 0;
 		// Limit the size of the generated markup when expanding postcode ranges.
 		$range_count = 0;
 		foreach ( $zones as $zone ) {
@@ -117,6 +121,10 @@ class ShippingDestinations {
 				foreach ( $countries as $country => $name ) {
 					$areas[ $country ] = array( '*' => true );
 				}
+			}
+			$postcode_rule_count += count( $postcodes ) * count( $areas );
+			if ( $postcode_rule_count > self::MAX_POSTCODE_RULE_COUNTRY_PAIRS ) {
+				return array();
 			}
 			$postcode_patterns = array();
 			$postcode_ranges   = array();
