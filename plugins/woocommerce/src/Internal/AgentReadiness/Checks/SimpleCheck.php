@@ -78,7 +78,7 @@ final class SimpleCheck extends AbstractReadinessCheck {
 				),
 				self::fields( array( 'image_url', 'image_link', 'imageLink' ), self::EFFECT_NOT_LISTABLE ),
 				// Each variation lists as its own item with its own image, so one image on a variation is enough.
-				static fn( \WC_Product $product ): bool => 0 === ProductFields::listing_image_id( $product )
+				static fn( \WC_Product $product ): bool => array() === ProductFields::listing_image_ids( $product )
 			),
 			new self(
 				'missing_product_text',

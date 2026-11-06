@@ -234,23 +234,19 @@ class ProductFields {
 	}
 
 	/**
-	 * The image a channel lists the product with: its own, or, for a variable product with none,
-	 * the first published variation's own image. 0 when there is neither.
+	 * The images a channel lists the product with: its own, or, for a variable product, each
+	 * published variation's image (its own, else the parent's), since every variation lists as
+	 * an item. Empty when there is none.
 	 *
 	 * @param \WC_Product $product Product.
+	 * @return int[]
 	 */
-	public static function listing_image_id( \WC_Product $product ): int {
-		$image_id = self::image_id( $product );
-		if ( 0 !== $image_id ) {
-			return $image_id;
+	public static function listing_image_ids( \WC_Product $product ): array {
+		$variations = self::variations( $product );
+		if ( array() === $variations ) {
+			$variations = array( $product );
 		}
-		foreach ( self::variations( $product ) as $variation ) {
-			$image_id = self::image_id( $variation );
-			if ( 0 !== $image_id ) {
-				return $image_id;
-			}
-		}
-		return 0;
+		return array_values( array_filter( array_unique( array_map( array( self::class, 'image_id' ), $variations ) ) ) );
 	}
 
 	/**
