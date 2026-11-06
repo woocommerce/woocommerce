@@ -354,6 +354,10 @@ class ReadinessAbilities {
 										'type'        => 'boolean',
 										'description' => __( 'On output checks: true for a check of output a coming WooCommerce update builds; it does not run yet.', 'woocommerce' ),
 									),
+									'seen_at'  => array(
+										'type'        => 'string',
+										'description' => __( 'On a likely conflict: the address where it was seen.', 'woocommerce' ),
+									),
 								),
 							),
 						),
