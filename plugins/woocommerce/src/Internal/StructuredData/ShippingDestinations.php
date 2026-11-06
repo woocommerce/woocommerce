@@ -9,6 +9,8 @@ use WC_Shipping_Zones;
 
 /**
  * Builds shipping destinations from the store's shipping zones.
+ *
+ * @internal
  */
 class ShippingDestinations {
 	/** Maximum number of postcodes to expand from ranges. */
@@ -16,6 +18,8 @@ class ShippingDestinations {
 
 	/**
 	 * Get destinations that can be described without widening a zone.
+	 *
+	 * @since 11.4.0
 	 *
 	 * @return array Shipping details.
 	 */
