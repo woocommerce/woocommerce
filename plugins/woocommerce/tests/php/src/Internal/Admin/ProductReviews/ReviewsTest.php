@@ -343,7 +343,6 @@ class ReviewsTest extends WC_Unit_Test_Case {
 
 			// The container hands out one shared Reviews instance, and tear_down() does not reset it.
 			$property->setValue( $reviews, $previous_list_table );
-			remove_all_filters( 'woocommerce_product_reviews_list_table' );
 		}
 
 		$this->assertStringContainsString( '<form id="reviews-filter" method="get">', $output );

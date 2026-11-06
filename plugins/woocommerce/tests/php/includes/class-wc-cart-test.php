@@ -1627,44 +1627,33 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$default_shipping_cost_requires_address = get_option( 'woocommerce_shipping_cost_requires_address', 'no' );
 		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
 
-		// The customer object survives the test, so remember the address this test found.
-		$previous_shipping_country  = WC()->cart->get_customer()->get_shipping_country();
-		$previous_shipping_state    = WC()->cart->get_customer()->get_shipping_state();
-		$previous_shipping_city     = WC()->cart->get_customer()->get_shipping_city();
-		$previous_shipping_postcode = WC()->cart->get_customer()->get_shipping_postcode();
+		WC()->cart->empty_cart();
+		$this->assertFalse( WC()->cart->show_shipping() );
 
-		$product = null;
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		try {
-			WC()->cart->empty_cart();
-			$this->assertFalse( WC()->cart->show_shipping() );
+		// Country that does not require state.
+		WC()->cart->get_customer()->set_shipping_country( 'LB' );
+		WC()->cart->get_customer()->set_shipping_state( '' );
+		WC()->cart->get_customer()->set_shipping_city( 'Test' );
+		WC()->cart->get_customer()->set_shipping_postcode( '12345' );
+		$this->assertTrue( WC()->cart->show_shipping() );
 
-			$product = WC_Helper_Product::create_simple_product();
-			WC()->cart->add_to_cart( $product->get_id(), 1 );
+		// Country that does not require postcode.
+		WC()->cart->get_customer()->set_shipping_country( 'NG' );
+		WC()->cart->get_customer()->set_shipping_state( 'AB' );
+		WC()->cart->get_customer()->set_shipping_city( 'Test' );
+		WC()->cart->get_customer()->set_shipping_postcode( '' );
+		$this->assertTrue( WC()->cart->show_shipping() );
 
-			// Country that does not require state.
-			WC()->cart->get_customer()->set_shipping_country( 'LB' );
-			WC()->cart->get_customer()->set_shipping_state( '' );
-			WC()->cart->get_customer()->set_shipping_city( 'Test' );
-			WC()->cart->get_customer()->set_shipping_postcode( '12345' );
-			$this->assertTrue( WC()->cart->show_shipping() );
-
-			// Country that does not require postcode.
-			WC()->cart->get_customer()->set_shipping_country( 'NG' );
-			WC()->cart->get_customer()->set_shipping_state( 'AB' );
-			WC()->cart->get_customer()->set_shipping_city( 'Test' );
-			WC()->cart->get_customer()->set_shipping_postcode( '' );
-			$this->assertTrue( WC()->cart->show_shipping() );
-		} finally {
-			update_option( 'woocommerce_shipping_cost_requires_address', $default_shipping_cost_requires_address );
-			if ( $product ) {
-				$product->delete( true );
-			}
-			WC()->cart->get_customer()->set_shipping_country( $previous_shipping_country );
-			WC()->cart->get_customer()->set_shipping_state( $previous_shipping_state );
-			WC()->cart->get_customer()->set_shipping_city( $previous_shipping_city );
-			WC()->cart->get_customer()->set_shipping_postcode( $previous_shipping_postcode );
-		}
+		// Reset.
+		update_option( 'woocommerce_shipping_cost_requires_address', $default_shipping_cost_requires_address );
+		$product->delete( true );
+		WC()->cart->get_customer()->set_shipping_country( 'GB' );
+		WC()->cart->get_customer()->set_shipping_state( '' );
+		WC()->cart->get_customer()->set_shipping_city( 'Test' );
+		WC()->cart->get_customer()->set_shipping_postcode( '' );
 	}
 
 	/**
@@ -1700,7 +1689,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	 * @see https://github.com/woocommerce/woocommerce/issues/58864
 	 */
 	public function test_coupon_discount_amount_case_sensitivity() {
-		$old_calc_taxes = get_option( 'woocommerce_calc_taxes', 'no' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 
 		$tax_rate = array(
@@ -1714,17 +1702,13 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			'tax_rate_order'    => '1',
 		);
 
-		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
+		WC_Tax::_insert_tax_rate( $tax_rate );
 
 		// Rates are only ever found for a customer with a country, and the customer object
 		// carries whatever address the test before this one left on it.
-		$previous_shipping_country = WC()->customer->get_shipping_country();
-		$previous_billing_country  = WC()->customer->get_billing_country();
+		$previous_billing_country = WC()->customer->get_billing_country();
 		WC()->customer->set_shipping_country( 'GB' );
 		WC()->customer->set_billing_country( 'GB' );
-
-		$product = null;
-		$coupon  = null;
 
 		try {
 			// Create a product to add to cart.
@@ -1766,21 +1750,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			$tax_amount_upper = WC()->cart->get_coupon_discount_tax_amount( 'TESTCOUPON123' );
 			$this->assertEquals( 2.00, $tax_amount_upper, 'get_coupon_discount_tax_amount should return correct value with uppercase code' );
 		} finally {
-			WC()->cart->empty_cart();
-			WC()->cart->remove_coupons();
-			if ( $product ) {
-				$product->delete( true );
-			}
-			if ( $coupon ) {
-				$coupon->delete( true );
-			}
-
-			update_option( 'woocommerce_calc_taxes', $old_calc_taxes );
-			WC()->customer->set_shipping_country( $previous_shipping_country );
 			WC()->customer->set_billing_country( $previous_billing_country );
-			if ( $tax_rate_id ) {
-				WC_Tax::_delete_tax_rate( $tax_rate_id );
-			}
 		}
 	}
 

@@ -1013,12 +1013,9 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 		global $wp_rest_server;
 
 		$previous_rest_server = $wp_rest_server;
-		$wp_rest_server       = new \WP_REST_Server();
 
 		try {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This test invokes the production route-registration action.
-			do_action( 'rest_api_init', $wp_rest_server );
-			$this->email_api_controller->register_routes();
+			$this->create_rest_server_with_routes( array( array( $this->email_api_controller, 'register_routes' ) ) );
 
 			$routes = $wp_rest_server->get_routes();
 		} finally {
@@ -1045,12 +1042,9 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 		global $wp_rest_server;
 
 		$previous_rest_server = $wp_rest_server;
-		$wp_rest_server       = new \WP_REST_Server();
 
 		try {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This test invokes the production route-registration action.
-			do_action( 'rest_api_init', $wp_rest_server );
-			$this->email_api_controller->register_routes();
+			$this->create_rest_server_with_routes( array( array( $this->email_api_controller, 'register_routes' ) ) );
 
 			$routes = $wp_rest_server->get_routes();
 		} finally {
