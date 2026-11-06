@@ -179,7 +179,8 @@ final class DatabaseTransaction {
 
 	/**
 	 * Close the given level and every level that a caller left open inside it. After an error that lost the
-	 * write, roll back instead of committing.
+	 * write, roll back instead of committing. The COMMIT itself can lose the write too, as Galera reports a
+	 * certification conflict.
 	 *
 	 * @param int  $level  Level to close. 0 is the transaction itself.
 	 * @param bool $commit Whether to keep the changes.
@@ -194,6 +195,7 @@ final class DatabaseTransaction {
 			// A deadlock already dropped the savepoint, so rolling back to it is expected to fail.
 			self::query( ( $commit ? 'RELEASE SAVEPOINT wc_' : 'ROLLBACK TO SAVEPOINT wc_' ) . $level, self::$lost );
 		}
+		self::check_last_error();
 		self::$depth = $level;
 	}
 

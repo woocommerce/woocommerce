@@ -263,6 +263,65 @@ class DatabaseTransactionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox run() should return a WP_Error when its COMMIT hits a conflict, as Galera reports a certification failure.
+	 */
+	public function test_run_fails_when_the_commit_hits_a_deadlock(): void {
+		global $wpdb;
+		$real = $wpdb;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- A real COMMIT cannot be made to fail here.
+		$wpdb = new class() {
+			/**
+			 * Error of the latest query.
+			 *
+			 * @var string
+			 */
+			public $last_error = '';
+
+			/**
+			 * Run the query filter first, as wpdb does, and fail COMMIT the way Galera does.
+			 *
+			 * @param string $query Query.
+			 * @return bool
+			 */
+			public function query( $query ) {
+				apply_filters( 'query', $query );
+				$this->last_error = 'COMMIT' === $query ? 'Deadlock found when trying to get lock; try restarting transaction' : '';
+				return false;
+			}
+
+			/**
+			 * Report autocommit on.
+			 *
+			 * @param string $query Query.
+			 * @return string
+			 */
+			public function get_var( $query ) {
+				$this->query( $query );
+				return '1';
+			}
+
+			/**
+			 * Errors are never suppressed.
+			 *
+			 * @return bool
+			 */
+			public function suppress_errors() {
+				return false;
+			}
+		};
+
+		try {
+			$result = DatabaseTransaction::run( static fn() => 'done' );
+		} finally {
+			$wpdb = $real; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restores the real connection.
+		}
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_transaction_rolled_back', $result->get_error_code() );
+		$this->assertSame( array( 'SELECT @@autocommit', 'SET autocommit = 0', 'START TRANSACTION', 'COMMIT', 'SET autocommit = 1' ), $this->statements );
+	}
+
+	/**
 	 * @testdox run() should commit, and return what the callback returned, when a caller inside it already committed.
 	 */
 	public function test_run_commits_after_a_caller_committed(): void {
