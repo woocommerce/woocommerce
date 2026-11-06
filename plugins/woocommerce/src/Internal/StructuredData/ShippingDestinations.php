@@ -164,9 +164,6 @@ class ShippingDestinations {
 					$exact = array();
 					// Earlier zones take precedence even when they have no shipping methods.
 					foreach ( $restrictions as $restriction ) {
-						if ( isset( $restriction['postalCodePrefix'] ) && ! $previous ) {
-							$destinations[] = $region + $restriction;
-						}
 						$codes = $restriction['postalCodes'] ?? ( isset( $restriction['postalCode'] ) ? array( $restriction['postalCode'] ) : array() );
 						foreach ( $codes as $code ) {
 							if ( ! $this->postcode_is_claimed( $previous, $code, $country ) ) {
@@ -250,10 +247,6 @@ class ShippingDestinations {
 	 */
 	private function get_postcode_restriction( string $postcode, string $country, int &$range_budget ): array {
 		$postcode = trim( $postcode );
-		// These countries insert a hyphen only after the first five characters.
-		if ( in_array( $country, array( 'US', 'PR', 'MN' ), true ) && ! has_filter( 'woocommerce_format_postcode' ) && preg_match( '/^([0-9]{1,5})\*$/D', $postcode, $matches ) ) {
-			return array( 'postalCodePrefix' => $matches[1] );
-		}
 		if ( preg_match( '/^([0-9]{1,9})\.\.\.([0-9]{1,9})$/D', $postcode, $matches ) && strlen( $matches[1] ) === strlen( $matches[2] ) && strcmp( $matches[1], $matches[2] ) <= 0 ) {
 			$start = (int) $matches[1];
 			$end   = (int) $matches[2];
