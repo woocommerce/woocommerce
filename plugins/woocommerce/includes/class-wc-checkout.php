@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
+use Automattic\WooCommerce\Utilities\ShippingUtil;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 
 defined( 'ABSPATH' ) || exit;
@@ -45,6 +46,14 @@ class WC_Checkout {
 	private const ORDER_ALREADY_PLACED_ERROR = 'checkout-order-already-placed';
 
 	/**
+	 * Shipping address fields that checkout.js fills with the billing address while "Ship to a different address?" is
+	 * unticked. WC_AJAX::update_order_review() stores them on the session customer.
+	 *
+	 * @var string[]
+	 */
+	private const SHIPPING_FIELDS_COPIED_FROM_BILLING = array( 'country', 'state', 'postcode', 'city', 'address_1', 'address_2' );
+
+	/**
 	 * The single instance of the class.
 	 *
 	 * @var WC_Checkout|null
@@ -66,11 +75,22 @@ class WC_Checkout {
 	protected $legacy_posted_data = array();
 
 	/**
-	 * Caches customer object. @see get_value.
+	 * Caches customer object.
+	 *
+	 * @see WC_Checkout::get_value()
 	 *
 	 * @var WC_Customer
 	 */
 	private $logged_in_customer = null;
+
+	/**
+	 * Caches the logged-in customer as saved to their account, without session changes.
+	 *
+	 * @see WC_Checkout::get_saved_customer_for_shipping_field()
+	 *
+	 * @var WC_Customer|null
+	 */
+	private $saved_customer = null;
 
 	/**
 	 * Order item types that set_data_from_cart() creates from the cart.
@@ -1395,12 +1415,15 @@ class WC_Checkout {
 		array_walk( $address_fields, array( $this, 'set_customer_address_fields' ), $data );
 		WC()->customer->save();
 
+		// Calculate the rates for the posted address, so the posted choices are checked against them.
+		WC()->cart->calculate_shipping();
+
 		// Update customer shipping and payment method to posted method.
 		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
 		if ( is_array( $data['shipping_method'] ) ) {
 			foreach ( $data['shipping_method'] as $i => $value ) {
-				if ( ! is_string( $value ) ) {
+				if ( ! is_string( $value ) || ! ShippingUtil::is_shipping_rate_listed( $i, $value ) ) {
 					continue;
 				}
 				$chosen_shipping_methods[ $i ] = $value;
@@ -1624,6 +1647,11 @@ class WC_Checkout {
 					throw new Exception( apply_filters( 'woocommerce_registration_error_email_exists', __( 'An account is already registered with your email address. <a href="#" class="showlogin">Please log in.</a>', 'woocommerce' ), $data['billing_email'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				}
 				throw new Exception( $customer_id->get_error_message() ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			}
+
+			// Save the posted choices, because the login loads the session again from the database.
+			if ( is_callable( array( WC()->session, 'save_data' ) ) ) {
+				WC()->session->save_data();
 			}
 
 			wc_set_customer_auth_cookie( $customer_id );
@@ -1900,19 +1928,15 @@ class WC_Checkout {
 			return $value;
 		}
 
-		/**
-		 * For logged in customers, pull data from their account rather than the session which may contain incomplete data.
-		 * Another reason is that WC sets shipping address to the billing address on the checkout updates unless the
-		 * "ship to another address" box is checked. @see issue #20975.
-		 */
 		$customer_object = false;
 
 		if ( is_user_logged_in() ) {
 			// Load customer object, but keep it cached to avoid reloading it multiple times.
 			if ( is_null( $this->logged_in_customer ) ) {
+				// Read through the session, so changes made earlier in the session and defaults such as the billing email prefill the form.
 				$this->logged_in_customer = new WC_Customer( get_current_user_id(), true );
 			}
-			$customer_object = $this->logged_in_customer;
+			$customer_object = $this->get_saved_customer_for_shipping_field( $input ) ?? $this->logged_in_customer;
 		}
 
 		if ( ! $customer_object ) {
@@ -1930,5 +1954,34 @@ class WC_Checkout {
 		}
 
 		return apply_filters( 'default_checkout_' . $input, $value, $input );
+	}
+
+	/**
+	 * Get the saved customer to prefill a shipping field from, when the session's shipping address is the billing copy.
+	 *
+	 * Prefilling from that copy would hide the shipping address saved to the account. Once the copy is detected, every
+	 * shipping field comes from the saved record, so the name and address shown belong together. A session address that
+	 * differs from billing still wins; one the customer typed to match billing looks the same as the copy.
+	 *
+	 * @param string $input Name of the input we want to grab data for, e.g. shipping_city.
+	 * @return WC_Customer|null The customer as saved to their account, or null to read the session.
+	 */
+	private function get_saved_customer_for_shipping_field( $input ): ?WC_Customer {
+		if ( 0 !== strpos( $input, 'shipping_' ) ) {
+			return null;
+		}
+
+		foreach ( self::SHIPPING_FIELDS_COPIED_FROM_BILLING as $field ) {
+			if ( $this->logged_in_customer->{"get_shipping_$field"}( 'edit' ) !== $this->logged_in_customer->{"get_billing_$field"}( 'edit' ) ) {
+				return null;
+			}
+		}
+
+		if ( is_null( $this->saved_customer ) ) {
+			$this->saved_customer = new WC_Customer( get_current_user_id() );
+		}
+
+		// A record without a country is not an address the customer can ship to, e.g. one holding only a name.
+		return '' !== $this->saved_customer->get_shipping_country( 'edit' ) ? $this->saved_customer : null;
 	}
 }

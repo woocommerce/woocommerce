@@ -3,7 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
-use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 /**
  * UCP `POST /catalog/lookup` route.
@@ -50,7 +50,7 @@ class CatalogLookup extends AbstractCatalogRoute {
 	 * @return string
 	 */
 	protected function get_capability(): string {
-		return UcpUtils::CAPABILITY_CATALOG_LOOKUP;
+		return Utils::CAPABILITY_CATALOG_LOOKUP;
 	}
 
 	/**
@@ -84,7 +84,7 @@ class CatalogLookup extends AbstractCatalogRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		$raw_ids = $request->get_param( 'ids' );
+		$raw_ids = Utils::json_param( $request, 'ids' );
 
 		if ( ! is_array( $raw_ids ) || empty( $raw_ids ) ) {
 			return $this->ucp_error( 'VALIDATION_ERROR', __( 'ids is required.', 'woocommerce' ), 'recoverable', 400 );

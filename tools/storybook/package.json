@@ -42,7 +42,7 @@
 		"react": "18.3.x",
 		"react-dom": "18.3.x",
 		"storybook": "10.6.5",
-		"typescript": "5.7.x",
+		"typescript": "catalog:tooling",
 		"webpack": "catalog:tooling"
 	}
 }
