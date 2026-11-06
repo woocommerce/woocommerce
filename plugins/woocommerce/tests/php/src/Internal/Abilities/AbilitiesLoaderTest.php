@@ -1089,6 +1089,87 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return a not-found error naming the order ID when an order mutation receives an unknown order ID.
+	 *
+	 * @dataProvider provider_order_storage_engines
+	 *
+	 * @param bool $hpos_enabled Whether HPOS/COT should be enabled for the test.
+	 */
+	public function test_order_mutations_return_not_found_for_unknown_id( bool $hpos_enabled ): void {
+		$this->set_order_storage_for_test( $hpos_enabled );
+
+		foreach ( $this->get_order_mutation_inputs( 999999 ) as $ability_id => $input ) {
+			$result = wp_get_ability( $ability_id )->execute( $input );
+
+			$this->assertWPError( $result, "{$ability_id} should refuse an unknown order ID." );
+			$this->assertSame( 'woocommerce_ability_order_not_found', $result->get_error_code(), "{$ability_id} should name the missing order, not refuse permission." );
+			$this->assertStringContainsString( '999999', $result->get_error_message() );
+		}
+	}
+
+	/**
+	 * @testdox Should refuse permission for an unknown order ID to users who cannot read orders.
+	 */
+	public function test_order_mutations_refuse_unknown_id_to_users_without_order_access(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+
+		foreach ( $this->get_order_mutation_inputs( 999999 ) as $ability_id => $input ) {
+			$result = wp_get_ability( $ability_id )->execute( $input );
+
+			$this->assertWPError( $result, "{$ability_id} should refuse a user without order access." );
+			$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+		}
+	}
+
+	/**
+	 * @testdox Should refuse permission when an order mutation receives the ID of a refund.
+	 */
+	public function test_order_mutations_refuse_id_of_refund(): void {
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$refund                    = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 1,
+			)
+		);
+
+		foreach ( $this->get_order_mutation_inputs( $refund->get_id() ) as $ability_id => $input ) {
+			$result = wp_get_ability( $ability_id )->execute( $input );
+
+			$this->assertWPError( $result, "{$ability_id} should refuse a refund ID." );
+			$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+		}
+	}
+
+	/**
+	 * Valid input for each order mutation ability, keyed by ability ID.
+	 *
+	 * @param int $order_id Order ID to send.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function get_order_mutation_inputs( int $order_id ): array {
+		return array(
+			'woocommerce/order-send-email'    => array(
+				'id'    => $order_id,
+				'email' => 'invoice',
+			),
+			'woocommerce/order-update'        => array(
+				'id'       => $order_id,
+				'shipping' => array( 'city' => 'Springfield' ),
+			),
+			'woocommerce/order-update-status' => array(
+				'id'     => $order_id,
+				'status' => 'processing',
+			),
+			'woocommerce/order-add-note'      => array(
+				'id'   => $order_id,
+				'note' => 'A note.',
+			),
+		);
+	}
+
+	/**
 	 * @testdox Should require publish_products to transition an existing draft to statuses that publish capability protects.
 	 *
 	 * @dataProvider provider_product_statuses_requiring_publish_cap
@@ -4101,7 +4182,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$result = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'id' => 999999 ) );
 
 		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_order_not_found', $result->get_error_code() );
+		$this->assertSame( 'woocommerce_ability_order_not_found', $result->get_error_code() );
 	}
 
 	/**
@@ -4800,7 +4881,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$result = wp_get_ability( 'woocommerce/order-notes-query' )->execute( array( 'id' => 999999 ) );
 
 		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_order_not_found', $result->get_error_code() );
+		$this->assertSame( 'woocommerce_ability_order_not_found', $result->get_error_code() );
 	}
 
 	/**
