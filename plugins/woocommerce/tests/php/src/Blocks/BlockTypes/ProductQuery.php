@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductQueryMock;
+use Automattic\WooCommerce\Blocks\SharedStores\ProductsStore;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use WC_Helper_Product;
 
@@ -18,72 +19,92 @@ class ProductQuery extends \WP_UnitTestCase {
 
 	/**
 	 * @testdox Should add Interactivity API context only to valid product loop items.
-	 *
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
 	 */
 	public function test_add_iapi_context_updates_only_valid_product_loop_items(): void {
-		$product_ids   = array();
-		$product_ids[] = WC_Helper_Product::create_simple_product()->get_id();
-		$product_ids[] = WC_Helper_Product::create_simple_product()->get_id();
-		$post_id       = self::factory()->post->create();
-
-		$markup = sprintf(
-			'<ul><li id="first-product" class="wp-block-post post-%1$d"></li><li id="second-product" class="extra wp-block-post post-%2$d"></li><li id="missing-id" class="wp-block-post"></li><li id="malformed-id" class="wp-block-post post-not-a-number"></li><li id="non-product" class="wp-block-post post-%3$d"></li></ul>',
-			$product_ids[0],
-			$product_ids[1],
-			$post_id
-		);
-
-		$this->assertSame(
-			$markup,
-			$this->block_instance->add_iapi_context(
-				$markup,
-				array( 'attrs' => array( '__woocommerceNamespace' => 'another-block' ) )
-			),
-			'A different block namespace should leave the markup byte-identical.'
-		);
-
-		$processed_markup = $this->block_instance->add_iapi_context(
-			$markup,
-			array( 'attrs' => array( '__woocommerceNamespace' => 'woocommerce/product-query/product-template' ) )
-		);
-		$processor        = new \WP_HTML_Tag_Processor( $processed_markup );
-		$items            = array();
-
-		while ( $processor->next_tag( array( 'tag_name' => 'LI' ) ) ) {
-			$items[ $processor->get_attribute( 'id' ) ] = array(
-				'interactive' => $processor->get_attribute( 'data-wp-interactive' ),
-				'context'     => $processor->get_attribute( 'data-wp-context' ),
-				'key'         => $processor->get_attribute( 'data-wp-key' ),
-			);
+		// These stores outlive the WordPress database rollback.
+		$products_store = new \ReflectionClass( ProductsStore::class );
+		$previous_store = array();
+		foreach ( array( 'products', 'getters_registered' ) as $name ) {
+			$property = $products_store->getProperty( $name );
+			$property->setAccessible( true );
+			$previous_store[ $name ] = $property->getValue();
 		}
 
-		foreach (
-			array(
-				'first-product'  => $product_ids[0],
-				'second-product' => $product_ids[1],
-			) as $item_id => $product_id
-		) {
-			$this->assertSame( 'woocommerce/products', $items[ $item_id ]['interactive'] );
-			$this->assertSame( 'product-item-' . $product_id, $items[ $item_id ]['key'] );
-			$context = $items[ $item_id ]['context'];
-			$this->assertIsString( $context );
-			list( $namespace, $json_context ) = explode( '::', $context, 2 );
-			$this->assertSame( 'woocommerce/products', $namespace );
+		$interactivity  = wp_interactivity();
+		$state_property = new \ReflectionProperty( $interactivity, 'state_data' );
+		$state_property->setAccessible( true );
+		$previous_state = $state_property->getValue( $interactivity );
+
+		try {
+			$product_ids   = array();
+			$product_ids[] = WC_Helper_Product::create_simple_product()->get_id();
+			$product_ids[] = WC_Helper_Product::create_simple_product()->get_id();
+			$post_id       = self::factory()->post->create();
+
+			$markup = sprintf(
+				'<ul><li id="first-product" class="wp-block-post post-%1$d"></li><li id="second-product" class="extra wp-block-post post-%2$d"></li><li id="missing-id" class="wp-block-post"></li><li id="malformed-id" class="wp-block-post post-not-a-number"></li><li id="non-product" class="wp-block-post post-%3$d"></li></ul>',
+				$product_ids[0],
+				$product_ids[1],
+				$post_id
+			);
+
 			$this->assertSame(
-				array(
-					'productId'   => $product_id,
-					'variationId' => null,
+				$markup,
+				$this->block_instance->add_iapi_context(
+					$markup,
+					array( 'attrs' => array( '__woocommerceNamespace' => 'another-block' ) )
 				),
-				json_decode( $json_context, true )
+				'A different block namespace should leave the markup byte-identical.'
 			);
-		}
 
-		foreach ( array( 'missing-id', 'malformed-id', 'non-product' ) as $item_id ) {
-			$this->assertNull( $items[ $item_id ]['interactive'], "$item_id should not become interactive." );
-			$this->assertNull( $items[ $item_id ]['context'], "$item_id should not receive product context." );
-			$this->assertNull( $items[ $item_id ]['key'], "$item_id should not receive an Interactivity API key." );
+			$processed_markup = $this->block_instance->add_iapi_context(
+				$markup,
+				array( 'attrs' => array( '__woocommerceNamespace' => 'woocommerce/product-query/product-template' ) )
+			);
+			$processor        = new \WP_HTML_Tag_Processor( $processed_markup );
+			$items            = array();
+
+			while ( $processor->next_tag( array( 'tag_name' => 'LI' ) ) ) {
+				$items[ $processor->get_attribute( 'id' ) ] = array(
+					'interactive' => $processor->get_attribute( 'data-wp-interactive' ),
+					'context'     => $processor->get_attribute( 'data-wp-context' ),
+					'key'         => $processor->get_attribute( 'data-wp-key' ),
+				);
+			}
+
+			foreach (
+				array(
+					'first-product'  => $product_ids[0],
+					'second-product' => $product_ids[1],
+				) as $item_id => $product_id
+			) {
+				$this->assertSame( 'woocommerce/products', $items[ $item_id ]['interactive'] );
+				$this->assertSame( 'product-item-' . $product_id, $items[ $item_id ]['key'] );
+				$context = $items[ $item_id ]['context'];
+				$this->assertIsString( $context );
+				list( $namespace, $json_context ) = explode( '::', $context, 2 );
+				$this->assertSame( 'woocommerce/products', $namespace );
+				$this->assertSame(
+					array(
+						'productId'   => $product_id,
+						'variationId' => null,
+					),
+					json_decode( $json_context, true )
+				);
+			}
+
+			foreach ( array( 'missing-id', 'malformed-id', 'non-product' ) as $item_id ) {
+				$this->assertNull( $items[ $item_id ]['interactive'], "$item_id should not become interactive." );
+				$this->assertNull( $items[ $item_id ]['context'], "$item_id should not receive product context." );
+				$this->assertNull( $items[ $item_id ]['key'], "$item_id should not receive an Interactivity API key." );
+			}
+		} finally {
+			foreach ( $previous_store as $name => $value ) {
+				$property = $products_store->getProperty( $name );
+				$property->setAccessible( true );
+				$property->setValue( null, $value );
+			}
+			$state_property->setValue( $interactivity, $previous_state );
 		}
 	}
 
@@ -613,6 +634,9 @@ class ProductQuery extends \WP_UnitTestCase {
 		$args    = array();
 		$request = $this->build_request();
 
+		// The term is created on install, so its id depends on what the site already holds.
+		$excluded_from_catalog = wc_get_product_visibility_term_ids()['exclude-from-catalog'];
+
 		$updated_query = $this->block_instance->update_rest_query( $args, $request );
 
 		$this->assertContainsEquals(
@@ -629,7 +653,7 @@ class ProductQuery extends \WP_UnitTestCase {
 				array(
 					'taxonomy' => 'product_visibility',
 					'field'    => 'term_taxonomy_id',
-					'terms'    => array( 0 ),
+					'terms'    => array( $excluded_from_catalog ),
 					'operator' => 'NOT IN',
 				),
 			),
@@ -651,6 +675,9 @@ class ProductQuery extends \WP_UnitTestCase {
 		);
 		$stock_status = array( ProductStockStatus::IN_STOCK, ProductStockStatus::OUT_OF_STOCK );
 		$request      = $this->build_request( $on_sale, $attributes, $stock_status );
+
+		// The term is created on install, so its id depends on what the site already holds.
+		$excluded_from_catalog = wc_get_product_visibility_term_ids()['exclude-from-catalog'];
 
 		$updated_query = $this->block_instance->update_rest_query( $args, $request );
 
@@ -674,7 +701,7 @@ class ProductQuery extends \WP_UnitTestCase {
 				array(
 					'taxonomy' => 'product_visibility',
 					'field'    => 'term_taxonomy_id',
-					'terms'    => array( 0 ),
+					'terms'    => array( $excluded_from_catalog ),
 					'operator' => 'NOT IN',
 				),
 			),
