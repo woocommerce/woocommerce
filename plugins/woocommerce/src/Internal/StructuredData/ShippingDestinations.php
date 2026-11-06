@@ -164,6 +164,13 @@ class ShippingDestinations {
 					$exact = array();
 					// Earlier zones take precedence even when they have no shipping methods.
 					foreach ( $restrictions as $restriction ) {
+						// A postcode alone may include addresses outside the state.
+						if ( '*' !== $state ) {
+							continue;
+						}
+						if ( ! $previous && ( isset( $restriction['postalCodePrefix'] ) || isset( $restriction['postalCodeRange'] ) ) ) {
+							$destinations[] = $region + $restriction;
+						}
 						$codes = $restriction['postalCodes'] ?? ( isset( $restriction['postalCode'] ) ? array( $restriction['postalCode'] ) : array() );
 						foreach ( $codes as $code ) {
 							if ( ! $this->postcode_is_claimed( $previous, $code, $country ) ) {
@@ -247,10 +254,27 @@ class ShippingDestinations {
 	 */
 	private function get_postcode_restriction( string $postcode, string $country, int &$range_budget ): array {
 		$postcode = trim( $postcode );
+		if ( ! has_filter( 'woocommerce_format_postcode' ) ) {
+			if ( in_array( $country, array( 'US', 'PR', 'MN' ), true ) && preg_match( '/^([0-9]{1,5})\*$/D', $postcode, $matches ) ) {
+				return array( 'postalCodePrefix' => $matches[1] );
+			}
+			if ( 'GB' === $country && preg_match( '/^([A-Z]{1,2}[0-9][A-Z0-9]? )\*$/D', $postcode, $matches ) ) {
+				return array( 'postalCodePrefix' => $matches[1] );
+			}
+		}
 		if ( preg_match( '/^([0-9]{1,9})\.\.\.([0-9]{1,9})$/D', $postcode, $matches ) ) {
 			$start = (int) $matches[1];
 			$end   = (int) $matches[2];
 			$count = $end - $start + 1;
+			if ( $count > 1 && $count > $range_budget && in_array( $country, array( 'AU', 'NZ' ), true ) && 4 === strlen( $matches[1] ) && 4 === strlen( $matches[2] ) && ! has_filter( 'woocommerce_format_postcode' ) ) {
+				return array(
+					'postalCodeRange' => array(
+						'@type'           => 'PostalCodeRangeSpecification',
+						'postalCodeBegin' => $matches[1],
+						'postalCodeEnd'   => $matches[2],
+					),
+				);
+			}
 			if ( $count <= 0 || $count > $range_budget ) {
 				return array();
 			}
