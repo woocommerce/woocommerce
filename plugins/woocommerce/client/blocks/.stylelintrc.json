@@ -1,7 +1,8 @@
 {
 	"extends": "@wordpress/stylelint-config/scss-stylistic",
 	"plugins": [
-		"@wordpress/theme/stylelint-plugins/no-token-fallback-values"
+		"@wordpress/theme/stylelint-plugins/no-token-fallback-values",
+		"./bin/stylelint-plugins/motion.js"
 	],
 	"reportNeedlessDisables": true,
 	"rules": {
@@ -24,5 +25,28 @@
 			true,
 			{ "ignoreFunctions": [ "calc", "var" ] }
 		]
-	}
+	},
+	"overrides": [
+		{
+			"files": [
+				"assets/js/blocks/cart/**/*.scss",
+				"assets/js/blocks/checkout/**/*.scss",
+				"assets/js/blocks/mini-cart/**/*.scss",
+				"assets/js/blocks/cart-checkout-shared/**/*.scss",
+				"assets/js/base/components/button/**/*.scss",
+				"assets/js/base/components/drawer/**/*.scss",
+				"assets/js/base/components/notice-banner/**/*.scss",
+				"assets/js/base/components/snackbar-list/**/*.scss",
+				"assets/js/base/components/loading-mask/**/*.scss",
+				"assets/js/base/components/rolling-price/**/*.scss",
+				"assets/js/base/components/cart-checkout/**/*.scss",
+				"packages/public-api/blocks-components/**/*.scss",
+				"assets/css/abstracts/_mixins.scss"
+			],
+			"rules": {
+				"woocommerce/motion-safe": true,
+				"woocommerce/motion-tokens": true
+			}
+		}
+	]
 }
