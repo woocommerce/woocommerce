@@ -41,8 +41,7 @@ class WC_Comments {
 		add_action( 'comment_post', array( __CLASS__, 'add_comment_rating' ), 1 );
 		add_action( 'comment_moderation_recipients', array( __CLASS__, 'comment_moderation_recipients' ), 10, 2 );
 
-		// Clear transients.
-		add_action( 'wp_update_comment_count', array( __CLASS__, 'clear_transients' ) );
+		add_action( 'wp_update_comment_count', array( __CLASS__, 'maybe_update_product_average_rating' ) );
 
 		// Secure order notes.
 		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_order_comments' ) );
@@ -257,7 +256,7 @@ class WC_Comments {
 
 			$post_id = isset( $_POST['comment_post_ID'] ) ? absint( $_POST['comment_post_ID'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Anonymous product reviews are submitted through the core comment form, which carries no WooCommerce nonce; the post ID is read through absint().
 			if ( $post_id ) {
-				self::clear_transients( $post_id );
+				self::maybe_update_product_average_rating( $post_id );
 			}
 		}
 	}
@@ -282,10 +281,36 @@ class WC_Comments {
 	/**
 	 * Ensure product average rating and review count is kept up to date.
 	 *
+	 * @deprecated 11.4.0
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	public static function clear_transients( $post_id ) {
+		wc_deprecated_function( __METHOD__, '11.4.0' );
+		$post_id = absint( $post_id );
+		if ( 0 === $post_id || 'product' !== get_post_type( $post_id ) ) {
+			return;
+		}
+
+		$product = wc_get_product( $post_id );
+		if ( $product instanceof WC_Product ) {
+			$product->set_rating_counts( self::get_rating_counts_for_product( $product ) );
+			$product->set_average_rating( self::get_average_rating_for_product( $product ) );
+			$product->set_review_count( self::get_review_count_for_product( $product ) );
+			$product->save();
+		}
+	}
+
+	/**
+	 * Ensure product average rating and review count is kept up to date (the logic is subject of change; no BC guarantees).
+	 *
+	 * @internal
+	 * @since 11.4.0
+	 *
 	 * @param int $post_id Post ID.
 	 * @return void
 	 */
-	public static function clear_transients( $post_id ) {
+	public static function maybe_update_product_average_rating( $post_id ) {
 		$product_id = absint( $post_id );
 		$product    = ( $product_id && 'product' === get_post_type( $product_id ) ) ? wc_get_product( $product_id ) : false;
 		// Performance note: save triggers products cache invalidation cascade, hence perform it only if necessary.
