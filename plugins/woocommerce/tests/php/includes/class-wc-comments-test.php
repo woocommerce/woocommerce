@@ -92,6 +92,8 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 	 * Test clear_transients with valid product ID.
 	 */
 	public function test_clear_transients_with_valid_product() {
+		$this->setExpectedDeprecated( 'WC_Comments::clear_transients' );
+
 		$product    = WC_Helper_Product::create_simple_product();
 		$product_id = $product->get_id();
 
@@ -148,10 +150,10 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 	 * Test clear_transients with invalid product ID.
 	 */
 	public function test_clear_transients_with_invalid_product_id() {
+		$this->setExpectedDeprecated( 'WC_Comments::clear_transients' );
+
 		$invalid_product_id = 99999;
 
-		// This should not cause any errors or exceptions.
-		$this->expectNotToPerformAssertions();
 		WC_Comments::clear_transients( $invalid_product_id );
 	}
 
@@ -159,6 +161,8 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 	 * Test clear_transients with non-product post ID.
 	 */
 	public function test_clear_transients_with_non_product_post() {
+		$this->setExpectedDeprecated( 'WC_Comments::clear_transients' );
+
 		// Create a regular post (not a product).
 		$post_id = wp_insert_post(
 			array(
@@ -169,8 +173,6 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 			)
 		);
 
-		// This should not cause any errors or exceptions.
-		$this->expectNotToPerformAssertions();
 		WC_Comments::clear_transients( $post_id );
 
 		// Clean up.
