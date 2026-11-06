@@ -11,6 +11,9 @@ use WC_Shipping_Zones;
  * Builds shipping destinations from the store's shipping zones.
  */
 class ShippingDestinations {
+	/** Maximum number of postcodes to expand from ranges. */
+	private const MAX_RANGE_POSTCODES = 1000;
+
 	/**
 	 * Get destinations that can be described without widening a zone.
 	 *
@@ -58,7 +61,7 @@ class ShippingDestinations {
 		$details = array();
 		$claimed = array();
 		// Limit the size of the generated markup when expanding postcode ranges.
-		$range_budget = 1000;
+		$range_count = 0;
 		foreach ( $zones as $zone ) {
 			$locations = $zone->get_zone_locations( 'edit' );
 			if ( ! is_array( $locations ) ) {
@@ -121,13 +124,10 @@ class ShippingDestinations {
 
 			$destinations = array();
 			foreach ( $areas as $country => $states ) {
-				$restrictions    = array();
-				$country_budget  = intdiv( $range_budget, count( $states ) );
-				$starting_budget = $country_budget;
+				$restrictions = array();
 				foreach ( $postcodes as $postcode ) {
-					$restrictions[] = $this->get_postcode_restriction( $postcode, $country, $country_budget );
+					$restrictions[] = $this->get_postcode_restriction( $postcode, $country, $range_count, count( $states ) );
 				}
-				$range_budget -= ( $starting_budget - $country_budget ) * count( $states );
 				foreach ( array_keys( $states ) as $state ) {
 					$state    = (string) $state;
 					$previous = $this->get_claims( $claimed[ $country ] ?? array(), $state );
@@ -249,10 +249,11 @@ class ShippingDestinations {
 	 *
 	 * @param string $postcode Zone postcode rule.
 	 * @param string $country Country code.
-	 * @param int    $range_budget Remaining postcodes that can be expanded from ranges.
+	 * @param int    $range_count Postcodes expanded from ranges so far.
+	 * @param int    $state_count Number of states receiving the postcodes.
 	 * @return array Postcode property, or an empty array when unsupported.
 	 */
-	private function get_postcode_restriction( string $postcode, string $country, int &$range_budget ): array {
+	private function get_postcode_restriction( string $postcode, string $country, int &$range_count, int $state_count ): array {
 		$postcode = trim( $postcode );
 		if ( ! has_filter( 'woocommerce_format_postcode' ) ) {
 			if ( in_array( $country, array( 'US', 'PR', 'MN' ), true ) && preg_match( '/^([0-9]{1,5})\*$/D', $postcode, $matches ) ) {
@@ -266,7 +267,7 @@ class ShippingDestinations {
 			$start = (int) $matches[1];
 			$end   = (int) $matches[2];
 			$count = $end - $start + 1;
-			if ( $count > 1 && $count > $range_budget && in_array( $country, array( 'AU', 'NZ' ), true ) && 4 === strlen( $matches[1] ) && 4 === strlen( $matches[2] ) && ! has_filter( 'woocommerce_format_postcode' ) ) {
+			if ( $count > 1 && $range_count + $count * $state_count > self::MAX_RANGE_POSTCODES && in_array( $country, array( 'AU', 'NZ' ), true ) && 4 === strlen( $matches[1] ) && 4 === strlen( $matches[2] ) && ! has_filter( 'woocommerce_format_postcode' ) ) {
 				return array(
 					'postalCodeRange' => array(
 						'@type'           => 'PostalCodeRangeSpecification',
@@ -275,12 +276,12 @@ class ShippingDestinations {
 					),
 				);
 			}
-			if ( $count <= 0 || $count > $range_budget ) {
+			if ( $count <= 0 || $range_count + $count * $state_count > self::MAX_RANGE_POSTCODES ) {
 				return array();
 			}
-			$range_budget -= $count;
-			$codes         = array();
-			$rule          = (object) array( 'code' => $postcode );
+			$range_count += $count * $state_count;
+			$codes        = array();
+			$rule         = (object) array( 'code' => $postcode );
 			for ( $number = $start; $number <= $end; $number++ ) {
 				$code      = str_pad( (string) $number, strlen( $matches[1] ), '0', STR_PAD_LEFT );
 				$formatted = wc_format_postcode( $code, $country );
