@@ -159,13 +159,6 @@ final class BlockTypesController {
 		self::$register_blocks_has_run = true;
 		$this->register_block_metadata();
 
-		/**
-		 * | | Lazy | Eager | Ratio |
-		 * |---|---|---|---|
-		 * | **Local** | 2.74 ms (49 blocks, 0.056 ms/block) | 10.74 ms (127 blocks, 0.085 ms/block) | 1.5× |
-		 * | **Atomic** | 3.2 ms (49 blocks, 0.065 ms/block) | 28.0 ms (127 blocks, 0.220 ms/block) | 3.4× |
-		 */
-
 		$block_classes = array_map( static fn( $type ) => __NAMESPACE__ . '\\BlockTypes\\' . $type, $this->get_block_types() );
 		$block_classes = array_diff( $block_classes, $this->lazy_blocks_controller->register_blocks( $block_classes ) );
 		foreach ( $block_classes as $block_type_class ) {

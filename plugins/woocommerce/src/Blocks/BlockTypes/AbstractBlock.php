@@ -150,7 +150,7 @@ abstract class AbstractBlock {
 
 		$this->integration_registry->initialize( $this->block_name . '_block' );
 
-		// Performance note: is the block is lazily loadable, it's type has been already registered and we can skip this step.
+		// Performance note: if the block is lazily loadable, it's type has been already registered.
 		if ( ! Package::container()->get( BlockTypesLazyController::class )->is_registered( static::class ) ) {
 			$this->register_block_type();
 		}
