@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
@@ -2884,7 +2885,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 409, $response->get_status() );
 		$this->assertSame( 'woocommerce_transaction_rolled_back', $response->get_data()['code'] );
-		$this->assertSame( 'publish', get_post_status( $product->get_id() ) );
+		$this->assertSame( ProductStatus::PUBLISH, get_post_status( $product->get_id() ) );
 	}
 
 	/**
