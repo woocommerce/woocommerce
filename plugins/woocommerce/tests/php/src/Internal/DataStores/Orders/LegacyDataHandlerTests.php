@@ -280,4 +280,24 @@ class LegacyDataHandlerTests extends \WC_Unit_Test_Case {
 		$this->assertEquals( $order_cpt->get_meta( 'other_meta', true, 'edit' ), $order_hpos->get_meta( 'other_meta', true, 'edit' ) );
 	}
 
+	/**
+	 * @testdox Partial backfill of meta from posts to HPOS with sync enabled doesn't duplicate the meta in the posts table.
+	 */
+	public function test_backfill_meta_to_hpos_with_sync_does_not_duplicate_post_meta() {
+		$this->enable_cot_sync();
+		$order = new \WC_Order();
+		$order->save();
+
+		add_post_meta( $order->get_id(), 'backfill_meta', 'value' );
+
+		$this->sut->backfill_order_to_datastore( $order->get_id(), 'posts', 'hpos', array( 'meta_keys' => array( 'backfill_meta' ) ) );
+
+		$this->assertSame( array( 'value' ), get_post_meta( $order->get_id(), 'backfill_meta', false ) );
+
+		$order_hpos = $this->sut->get_order_from_datastore( $order->get_id(), 'hpos' );
+		$this->assertCount( 1, $order_hpos->get_meta( 'backfill_meta', false, 'edit' ) );
+		$this->assertSame( 'value', $order_hpos->get_meta( 'backfill_meta', true, 'edit' ) );
+
+		$this->disable_cot_sync();
+	}
 }
