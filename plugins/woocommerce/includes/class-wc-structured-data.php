@@ -1091,11 +1091,8 @@ class WC_Structured_Data {
 
 		$item = $variation ? $variation : $product;
 		if (
-			ProductStatus::PUBLISH !== $product->get_status() ||
-			ProductStatus::PUBLISH !== $item->get_status() ||
-			! $product->is_visible() ||
-			! $product->is_purchasable() ||
-			( $variation && ( ! $variation->is_purchasable() || ! $variation->variation_is_active() ) ) ||
+			! $item->is_publicly_viewable() ||
+			! $item->is_purchasable() ||
 			! $item->is_in_stock() ||
 			! $item->has_enough_stock( 1 )
 		) {
