@@ -837,11 +837,15 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 
 		$original_wp_query = $wp_query;
 		$original_wp       = $wp;
+		$original_vars     = WC()->query->query_vars;
 		$controller        = new OrderWithdrawalController();
 		$endpoint_key      = OrderWithdrawalEndpoint::ENDPOINT_KEY;
 		$wp                = new \WP(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$wp->query_vars    = array( $endpoint_key => '' );
 		$wp_query          = new \WP_Query(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$this->enable_feature();
+		WC()->query->query_vars = array( $endpoint_key => $endpoint_key );
 
 		try {
 			$controller->maybe_set_404_for_endpoint_value();
@@ -854,8 +858,22 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$wp->query_vars = array( $endpoint_key => 'some/trailing/path' );
 			$controller->maybe_set_404_for_endpoint_value();
 			$this->assertTrue( $wp_query->is_404(), 'The endpoint with a trailing value should return a 404.' );
+
+			// A View order request whose slug matches the withdrawal key must not be a 404.
+			$wp_query               = new \WP_Query(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			WC()->query->query_vars = array(
+				'view-order'  => 'order-withdrawal',
+				$endpoint_key => $endpoint_key,
+			);
+			$wp->query_vars         = array(
+				'view-order'  => '123',
+				$endpoint_key => '123',
+			);
+			$controller->maybe_set_404_for_endpoint_value();
+			$this->assertFalse( $wp_query->is_404(), 'A View order request should not return a 404.' );
 		} finally {
-			$wp       = $original_wp; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			WC()->query->query_vars = $original_vars;
+			$wp                     = $original_wp; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			$wp_query = $original_wp_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 	}

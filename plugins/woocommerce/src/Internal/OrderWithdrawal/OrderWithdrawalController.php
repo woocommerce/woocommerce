@@ -118,6 +118,10 @@ final class OrderWithdrawalController implements RegisterHooksInterface {
 	public function maybe_set_404_for_endpoint_value(): void {
 		global $wp, $wp_query;
 
+		if ( ! $this->is_endpoint_request() ) {
+			return;
+		}
+
 		if ( ! isset( $wp->query_vars[ OrderWithdrawalEndpoint::ENDPOINT_KEY ] ) || '' === $wp->query_vars[ OrderWithdrawalEndpoint::ENDPOINT_KEY ] ) {
 			return;
 		}
