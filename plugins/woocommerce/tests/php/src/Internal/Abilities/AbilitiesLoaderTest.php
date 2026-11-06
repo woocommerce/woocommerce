@@ -4167,6 +4167,77 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return every address and line refusal of an order update in one message, and save nothing.
+	 */
+	public function test_order_update_returns_every_refusal_in_one_message(): void {
+		$order = $this->create_order_for_update( 'pending' );
+		$order->set_shipping_country( 'US' );
+		$order->set_shipping_city( 'Before' );
+		$order->save();
+
+		$result = wp_get_ability( 'woocommerce/order-update' )->execute(
+			array(
+				'id'           => $order->get_id(),
+				'billing'      => array( 'email' => 'not-an-email' ),
+				'shipping'     => array(
+					'city'     => 'After',
+					'postcode' => 'not a zip',
+				),
+				'remove_items' => array( 999999 ),
+				'line_items'   => array( array( 'quantity' => 2 ), array( 'quantity' => 3 ) ),
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame(
+			array(
+				'woocommerce_ability_order_billing_email_invalid',
+				'woocommerce_ability_order_shipping_postcode_invalid',
+				'woocommerce_ability_order_line_not_found',
+				'woocommerce_ability_order_line_item_target_invalid',
+			),
+			$result->get_error_codes()
+		);
+		$message = $result->get_error_message();
+		foreach ( array( 'valid address', 'format of that country', 'include_line_items', 'product_id' ) as $hint ) {
+			$this->assertStringContainsString( $hint, $message );
+		}
+		$this->assertSame( 1, substr_count( $message, 'Each entry in line_items' ), 'A repeated refusal shows once in the message.' );
+		$this->assertSame( 'Before', wc_get_order( $order->get_id() )->get_shipping_city() );
+	}
+
+	/**
+	 * @testdox Should format a sent postcode, and keep a saved postcode that the update does not send.
+	 */
+	public function test_order_update_formats_only_a_sent_postcode(): void {
+		$order = $this->create_order_for_update( 'pending' );
+		$order->set_shipping_country( 'GB' );
+		$order->set_shipping_postcode( 'sw1a1aa' );
+		$order->save();
+		$ability = wp_get_ability( 'woocommerce/order-update' );
+
+		$result = $ability->execute(
+			array(
+				'id'       => $order->get_id(),
+				'shipping' => array( 'city' => 'London' ),
+			)
+		);
+		$this->assertNotWPError( $result );
+		$saved = wc_get_order( $order->get_id() );
+		$kept  = $saved->get_shipping_postcode();
+		$this->assertSame( 'London', $saved->get_shipping_city() );
+		$ability->execute(
+			array(
+				'id'       => $order->get_id(),
+				'shipping' => array( 'postcode' => 'ec1a1bb' ),
+			)
+		);
+
+		$this->assertSame( 'sw1a1aa', $kept );
+		$this->assertSame( 'EC1A 1BB', wc_get_order( $order->get_id() )->get_shipping_postcode() );
+	}
+
+	/**
 	 * Invalid inputs for the order update ability.
 	 *
 	 * @return array<string, array{0: array, 1: string, 2: string}>

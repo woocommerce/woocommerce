@@ -4334,6 +4334,64 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should show an order validator the saved address fields that Core refuses, and save nothing.
+	 */
+	public function test_an_order_validator_sees_the_saved_values_of_refused_address_fields(): void {
+		$seen = array();
+		$this->register_validator(
+			'order',
+			'test-ext',
+			static function ( \WC_Order $order ) use ( &$seen ) {
+				$seen[] = array( $order->get_shipping_country(), $order->get_shipping_state(), $order->get_shipping_postcode(), $order->get_shipping_city() );
+				return null;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$order = \WC_Helper_Order::create_order();
+		$order->set_shipping_country( 'US' );
+		$order->set_shipping_state( 'CA' );
+		$order->set_shipping_postcode( '94110' );
+		$order->set_shipping_city( 'Before' );
+		$order->save();
+
+		$bad_country  = $this->run_ability_response(
+			'woocommerce/order-update',
+			array(
+				'id'       => $order->get_id(),
+				'shipping' => array(
+					'country'  => 'XX',
+					'state'    => 'ZZ',
+					'postcode' => 'nope',
+					'city'     => 'After',
+				),
+			)
+		);
+		$bad_postcode = $this->run_ability_response(
+			'woocommerce/order-update',
+			array(
+				'id'       => $order->get_id(),
+				'shipping' => array(
+					'postcode' => 'not a zip',
+					'city'     => 'After',
+				),
+			)
+		);
+
+		$this->assertSame( 400, $bad_country->get_status() );
+		$this->assertSame( 400, $bad_postcode->get_status() );
+		$this->assertSame(
+			array(
+				array( 'US', 'CA', '94110', 'After' ),
+				array( 'US', 'CA', '94110', 'After' ),
+			),
+			$seen
+		);
+		wp_cache_flush();
+		$this->assertSame( 'Before', wc_get_order( $order->get_id() )->get_shipping_city() );
+	}
+
+	/**
 	 * @testdox Should recalculate with calculate_totals() after the save when the feature is off.
 	 */
 	public function test_order_update_uses_the_saving_totals_with_the_feature_off(): void {
@@ -5021,7 +5079,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$this->assertSame( 400, $response->get_status() );
 		$this->assertSame( 'first_ext:test_first_refused', $data['code'] );
-		$this->assertSame( 'First refused.', $data['message'] );
+		$this->assertSame( 'First refused. Second refused.', $data['message'] );
 		$this->assertSame( 'first_ext', $data['data']['namespace'] );
 		$this->assertCount( 1, $data['additional_errors'] );
 		$this->assertSame( 'second_ext:test_second_refused', $data['additional_errors'][0]['code'] );
@@ -5055,7 +5113,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		)->get_data();
 
 		$this->assertSame( 'first_ext:test_refused', $data['code'] );
-		$this->assertSame( 'first_ext refused.', $data['message'] );
+		$this->assertSame( 'first_ext refused. second_ext refused.', $data['message'] );
 		$this->assertSame( 'first_ext', $data['data']['namespace'] );
 		$this->assertCount( 1, $data['additional_errors'] );
 		$this->assertSame( 'second_ext:test_refused', $data['additional_errors'][0]['code'] );
@@ -5088,7 +5146,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		)->get_data();
 
 		$this->assertSame( 'ns:test_refused', $data['code'] );
-		$this->assertSame( 'name refused.', $data['message'] );
+		$this->assertSame( 'name refused. price refused.', $data['message'] );
 		$this->assertSame( 'name', $data['data']['field'] );
 		$this->assertCount( 1, $data['additional_errors'] );
 		$this->assertSame( 'ns:test_refused:2', $data['additional_errors'][0]['code'] );
@@ -5323,6 +5381,62 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 'test-ext:test_bad_value:2', $data['additional_errors'][0]['code'] );
 		$this->assertSame( 'extensions.test-ext.second', $data['additional_errors'][0]['data']['field'] );
 		$this->assertSame( 'other_ext:test_bad_size', $data['additional_errors'][1]['code'] );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * @testdox Should return every Core refusal with the field and validator refusals in one message, and save nothing.
+	 */
+	public function test_core_refusals_come_with_field_and_validator_refusals(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		\WC_Helper_Product::create_simple_product( true, array( 'sku' => 'TAKEN' ) );
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'product',
+						'namespace'     => 'test-ext',
+						'field'         => 'note',
+						'output_schema' => array( 'type' => 'string' ),
+						'input_schema'  => array( 'type' => 'string' ),
+						'get_callback'  => '__return_null',
+						'set_callback'  => static fn() => new \WP_Error( 'test_bad_note', 'Note refused.' ),
+					)
+				);
+			}
+		);
+		$seen_name = null;
+		$this->register_validator(
+			'product',
+			'other_ext',
+			static function ( \WC_Product $subject ) use ( &$seen_name ) {
+				$seen_name = $subject->get_name();
+				return new \WP_Error( 'test_refused', 'Validator refused.' );
+			}
+		);
+
+		$response = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'           => $product->get_id(),
+				'name'         => 'Pencil',
+				'sku'          => 'TAKEN',
+				'external_url' => 'https://example.com',
+				'extensions'   => array( 'test-ext' => array( 'note' => 'x' ) ),
+			)
+		);
+
+		$data = $response->get_data();
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame(
+			array( 'woocommerce_product_field_unsupported', 'product_invalid_sku', 'test-ext:test_bad_note', 'other_ext:test_refused' ),
+			array_merge( array( $data['code'] ), array_column( $data['additional_errors'], 'code' ) ),
+			'Core refusals come first, then the field and validator refusals, in run order.'
+		);
+		$this->assertStringStartsWith( 'The simple product type does not take external_url.', $data['message'] );
+		$this->assertStringEndsWith( 'Note refused. Validator refused.', $data['message'], 'The first message names every refusal, because MCP clients show only that one.' );
+		$this->assertSame( 'Pencil', $seen_name, 'The validator sees the values that Core accepted.' );
 		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
 	}
 

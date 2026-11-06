@@ -160,7 +160,8 @@ class ExtensibleAbilities {
 	 *                                  null. Required with `set_callback`.
 	 *     @type callable $set_callback Optional. Receives the object and the value, and changes the object
 	 *                                  in memory, when an ability creates or updates the object. It returns a
-	 *                                  WP_Error to reject the value, and then nothing is saved. A field without
+	 *                                  WP_Error to reject the value, and then nothing is saved. It also runs
+	 *                                  after Core refuses another value of the primary object. A field without
 	 *                                  it cannot be written. Required with `input_schema`. Rules:
 	 *                                  1. It only sets values in memory. It does not save, send email
 	 *                                     or make HTTP requests.
@@ -590,8 +591,10 @@ class ExtensibleAbilities {
 	 *                               already used gets a numeric suffix, as `<namespace>:<code>:2`. The error
 	 *                               gets the namespace in its data, and the 400 status when it has no status.
 	 *                               Its message can name the ability or screen to use instead. Validators also
-	 *                               run after a field callback refuses a value, so the client gets the field
-	 *                               refusals and the validator refusals together. Rules:
+	 *                               run after a field callback or Core refuses a value, so the client gets every
+	 *                               refusal together, with all messages in the first one. After a Core refusal
+	 *                               they run on the primary object only, which keeps the values Core refused at
+	 *                               their old values. Rules:
 	 *                               1. It only reads. It does not change the object, save, send email or
 	 *                                  make HTTP requests.
 	 *                               2. It checks the ability name when the extension's own abilities
