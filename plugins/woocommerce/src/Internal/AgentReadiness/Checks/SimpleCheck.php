@@ -149,7 +149,7 @@ final class SimpleCheck extends AbstractReadinessCheck {
 				static fn( \WC_Product $product ): bool => mb_strlen( $product->get_name() ) > self::TITLE_MAX_LENGTH
 			),
 		);
-		$by_id  = array();
+		$by_id = array();
 		foreach ( $checks as $check ) {
 			$by_id[ $check->id() ] = $check;
 		}
