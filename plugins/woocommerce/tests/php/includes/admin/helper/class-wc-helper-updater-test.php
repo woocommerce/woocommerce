@@ -456,6 +456,60 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A failed update check should keep the forced auto-update only while the cached data is fresh, as the flag and the package links come from the same response.
+	 *
+	 * @testWith [10, true]
+	 *           [11.5, false]
+	 *
+	 * @param float $age_in_hours       How long ago the cached update check was made.
+	 * @param bool  $expect_autoupdate Whether the forced auto-update is expected to be kept.
+	 */
+	public function test_update_check_failure_keeps_forced_autoupdate_only_while_cache_is_fresh( float $age_in_hours, bool $expect_autoupdate ): void {
+		$payload = array(
+			123 => array(
+				'product_id' => 123,
+				'file_id'    => 'abc123',
+			),
+		);
+
+		ksort( $payload );
+
+		set_transient(
+			'_woocommerce_helper_updates',
+			array(
+				'hash'     => md5( wp_json_encode( $payload ) ),
+				'updated'  => time() - (int) ( $age_in_hours * HOUR_IN_SECONDS ),
+				'products' => array(
+					123 => array(
+						'version'    => '1.2.3',
+						'autoupdate' => true,
+					),
+				),
+				'errors'   => array(),
+			),
+			WEEK_IN_SECONDS
+		);
+
+		$http_mock = static function () {
+			return new WP_Error( 'http_request_failed', 'cURL error 28: Operation timed out' );
+		};
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			$result = $this->call_update_check( $payload );
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$expected = array( 123 => array( 'version' => '1.2.3' ) );
+		if ( $expect_autoupdate ) {
+			$expected[123]['autoupdate'] = true;
+		}
+
+		$this->assertSame( $expected, $result );
+	}
+
+	/**
 	 * @testdox A failed update check with nothing cached should return no products and not cache the empty result.
 	 */
 	public function test_update_check_without_cache_returns_nothing_when_request_fails(): void {
