@@ -288,6 +288,36 @@ class WC_Admin_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Only the Orders export download skips the admin output buffer.
+	 * @testWith ["shop_order", 0]
+	 *           ["post", 1]
+	 *           ["all", 1]
+	 *
+	 * @param string $content        The requested export content.
+	 * @param int    $expected_delta Expected change in the output buffer level.
+	 */
+	public function test_buffer_skips_only_order_export_downloads( string $content, int $expected_delta ): void {
+		$pagenow = $GLOBALS['pagenow'] ?? null;
+		$level   = ob_get_level();
+
+		try {
+			$GLOBALS['pagenow'] = 'export.php'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$_GET               = array(
+				'download' => 'true',
+				'content'  => $content,
+			);
+
+			$this->sut->buffer();
+			$this->assertSame( $level + $expected_delta, ob_get_level(), "Unexpected output buffer level for the {$content} export download." );
+		} finally {
+			while ( ob_get_level() > $level ) {
+				ob_end_clean();
+			}
+			$GLOBALS['pagenow'] = $pagenow; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+	}
+
+	/**
 	 * Invokes prevent_admin_access() with a synthetic request and returns its redirect location.
 	 *
 	 * @param int                 $user_id         Current user ID.

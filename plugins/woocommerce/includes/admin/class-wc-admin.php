@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
+use Automattic\WooCommerce\Internal\Admin\ImportExport\HposOrderExportHandler;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -59,6 +60,11 @@ class WC_Admin {
 	 * Output buffering allows admin screens to make redirects later on.
 	 */
 	public function buffer() {
+		// HPOS order export downloads stream their own response.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Check the request mode only.
+		if ( 'export.php' === ( $GLOBALS['pagenow'] ?? '' ) && isset( $_GET['download'] ) && 'shop_order' === sanitize_key( wp_unslash( $_GET['content'] ?? '' ) ) ) {
+			return;
+		}
 		ob_start();
 	}
 
@@ -117,6 +123,9 @@ class WC_Admin {
 		}
 
 		switch ( $screen->id ) {
+			case 'export':
+				wc_get_container()->get( HposOrderExportHandler::class );
+				break;
 			case 'dashboard':
 			case 'dashboard-network':
 				include __DIR__ . '/class-wc-admin-dashboard-setup.php';
