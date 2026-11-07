@@ -440,7 +440,7 @@ jQuery( function ( $ ) {
 			$( this ).hide();
 			$wrap.find( '.sale_schedule' ).show();
 			$wrap.find( '.sale_price_dates_fields' ).hide();
-			$wrap.find( '.sale_price_dates_fields' ).find( 'input' ).val( '' );
+			$wrap.find( '.sale_price_dates_fields' ).find( 'input' ).val( '' ).trigger( 'change' );
 
 			return false;
 		}
