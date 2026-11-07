@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve unanimous registered custom stock statuses when synchronizing variable products.
