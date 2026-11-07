@@ -435,6 +435,7 @@ class Edit {
 		<?php
 		if ( 'edit_order' === $this->current_action ) {
 			echo ' <a href="' . esc_url( $new_page_url ) . '" class="page-title-action">' . esc_html( $post_type->labels->add_new ) . '</a>';
+			OrderNavigation::render( $this->order );
 		}
 		?>
 		<hr class="wp-header-end">
