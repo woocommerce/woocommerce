@@ -82,9 +82,21 @@ export type CheckboxProps< Values, Value > = Omit<
 	'value' | 'selected'
 >;
 
+export type TextControlProps< Values, Value > = Omit<
+	InputProps< Values, Value >,
+	'checked' | 'selected'
+>;
+
+export type RadioControlProps< Values, Value > = Omit<
+	InputProps< Values, Value >,
+	'value' | 'checked' | 'selected'
+> & {
+	selected: string | undefined;
+};
+
 export type SelectControlProps< Values, Value > = Omit<
 	InputProps< Values, Value >,
-	'value'
+	'value' | 'checked' | 'selected'
 > & {
 	value: string | undefined;
 };
@@ -126,6 +138,14 @@ export type FormContextType< Values extends Record< string, any > = any > = {
 		name: P,
 		inputProps?: ConsumerInputProps< Values >
 	) => SelectControlProps< Values, Values[ P ] >;
+	getTextControlProps: < P extends keyof Values >(
+		name: P,
+		inputProps?: ConsumerInputProps< Values >
+	) => TextControlProps< Values, Values[ P ] >;
+	getRadioControlProps: < P extends keyof Values >(
+		name: P,
+		inputProps?: ConsumerInputProps< Values >
+	) => RadioControlProps< Values, Values[ P ] >;
 	resetForm: (
 		newInitialValues?: Values,
 		newTouchedFields?:
