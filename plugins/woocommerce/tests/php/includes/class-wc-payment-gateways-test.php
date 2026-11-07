@@ -14,6 +14,13 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * `enabled` values the set_current_gateway() tests switched on the shared gateway instances, keyed by gateway ID.
+	 *
+	 * @var array<string, string>
+	 */
+	private $original_gateway_enabled = array();
+
+	/**
 	 * Setup, enable payment gateways Cash on delivery and direct bank deposit.
 	 */
 	public function setUp(): void {
@@ -27,14 +34,173 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 		$container = wc_get_container();
 		$container->reset_all_resolved();
 		$this->sut = new WC_Payment_Gateways();
+
+		// The mock session is one object for the whole run and the base class never clears this key.
+		WC()->session->set( 'chosen_payment_method', null );
 	}
 
 	/**
-	 * Tear down test fixtures.
+	 * Tear down test fixtures, restoring the shared gateway instances and the session choice the base class doesn't reset.
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
-		delete_option( 'jetpack_activation_source' );
+		try {
+			parent::tearDown();
+		} finally {
+			delete_option( 'jetpack_activation_source' );
+
+			foreach ( $this->original_gateway_enabled as $gateway_id => $enabled ) {
+				WC()->payment_gateways()->payment_gateways()[ $gateway_id ]->enabled = $enabled;
+			}
+			$this->original_gateway_enabled = array();
+
+			foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
+				$gateway->chosen = false;
+			}
+
+			WC()->session->set( 'chosen_payment_method', null );
+		}
+	}
+
+	/**
+	 * @testdox set_current_gateway() should mark the first available gateway without a session choice or a callback, as before.
+	 */
+	public function test_set_current_gateway_marks_the_first_available_gateway_without_a_callback(): void {
+		$this->enable_gateways( array( WC_Gateway_BACS::ID, WC_Gateway_COD::ID ) );
+		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
+
+		$this->sut->set_current_gateway( $gateways );
+
+		$this->assertSame( array( WC_Gateway_BACS::ID ), $this->get_current_gateways( $gateways ) );
+	}
+
+	/**
+	 * @testdox set_current_gateway() should mark the gateway chosen in the session without a callback, as before.
+	 */
+	public function test_set_current_gateway_marks_the_session_choice_without_a_callback(): void {
+		$this->enable_gateways( array( WC_Gateway_BACS::ID, WC_Gateway_COD::ID ) );
+		WC()->session->set( 'chosen_payment_method', WC_Gateway_COD::ID );
+		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
+
+		$this->sut->set_current_gateway( $gateways );
+
+		$this->assertSame( array( WC_Gateway_COD::ID ), $this->get_current_gateways( $gateways ) );
+	}
+
+	/**
+	 * @testdox set_current_gateway() should mark the first available gateway when WooCommerce's own answer is enabled but not available for the cart, as before.
+	 */
+	public function test_set_current_gateway_falls_back_to_the_first_available_gateway_without_a_callback(): void {
+		$this->enable_gateways( array( WC_Gateway_BACS::ID, WC_Gateway_COD::ID ) );
+		add_filter( 'woocommerce_available_payment_gateways', array( $this, 'hide_bacs' ) );
+		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
+
+		$this->sut->set_current_gateway( $gateways );
+
+		$this->assertSame( array( WC_Gateway_COD::ID ), $this->get_current_gateways( $gateways ) );
+	}
+
+	/**
+	 * @testdox set_current_gateway() should mark the gateway the default payment method callback picks, or nothing for an empty answer.
+	 * @testWith ["cod", ["cod"]]
+	 *           ["", []]
+	 *
+	 * @param string   $answer   What the callback returns.
+	 * @param string[] $expected Gateway IDs expected to be current.
+	 */
+	public function test_set_current_gateway_follows_the_default_payment_method_callback( string $answer, array $expected ): void {
+		$this->enable_gateways( array( WC_Gateway_BACS::ID, WC_Gateway_COD::ID ) );
+		add_filter(
+			'woocommerce_default_payment_method',
+			function () use ( $answer ) {
+				return $answer;
+			}
+		);
+		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
+
+		$this->sut->set_current_gateway( $gateways );
+
+		$this->assertSame( $expected, $this->get_current_gateways( $gateways ) );
+	}
+
+	/**
+	 * @testdox set_current_gateway() should keep the session choice over a default payment method callback that returns nothing.
+	 */
+	public function test_set_current_gateway_keeps_the_session_choice_over_the_callback(): void {
+		$this->enable_gateways( array( WC_Gateway_BACS::ID, WC_Gateway_COD::ID ) );
+		WC()->session->set( 'chosen_payment_method', WC_Gateway_COD::ID );
+		add_filter( 'woocommerce_default_payment_method', '__return_empty_string' );
+		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
+
+		$this->sut->set_current_gateway( $gateways );
+
+		$this->assertSame( array( WC_Gateway_COD::ID ), $this->get_current_gateways( $gateways ) );
+	}
+
+	/**
+	 * @testdox set_current_gateway() should follow the default payment method callback when the session choice is not available for the cart.
+	 */
+	public function test_set_current_gateway_follows_the_callback_when_the_session_choice_is_unavailable(): void {
+		$this->enable_gateways( array( WC_Gateway_BACS::ID, WC_Gateway_COD::ID ) );
+		WC()->session->set( 'chosen_payment_method', WC_Gateway_COD::ID );
+		add_filter( 'woocommerce_available_payment_gateways', array( $this, 'hide_cod' ) );
+		add_filter( 'woocommerce_default_payment_method', '__return_empty_string' );
+		$gateways = WC()->payment_gateways()->get_available_payment_gateways();
+
+		$this->sut->set_current_gateway( $gateways );
+
+		$this->assertSame( array(), $this->get_current_gateways( $gateways ) );
+	}
+
+	/**
+	 * Hide BACS from the available gateways while it stays enabled.
+	 *
+	 * @param array $gateways Available gateways keyed by ID.
+	 * @return array
+	 */
+	public function hide_bacs( $gateways ) {
+		unset( $gateways[ WC_Gateway_BACS::ID ] );
+		return $gateways;
+	}
+
+	/**
+	 * Hide COD from the available gateways, as a shipping restriction would, while it stays enabled.
+	 *
+	 * @param array $gateways Available gateways keyed by ID.
+	 * @return array
+	 */
+	public function hide_cod( $gateways ) {
+		unset( $gateways[ WC_Gateway_COD::ID ] );
+		return $gateways;
+	}
+
+	/**
+	 * Enable the given gateways on the shared instances, remembering their previous state.
+	 *
+	 * @param string[] $gateway_ids Gateway IDs to enable.
+	 */
+	private function enable_gateways( array $gateway_ids ): void {
+		foreach ( $gateway_ids as $gateway_id ) {
+			$gateway                                       = WC()->payment_gateways()->payment_gateways()[ $gateway_id ];
+			$this->original_gateway_enabled[ $gateway_id ] = $gateway->enabled;
+			$gateway->enabled                              = 'yes';
+		}
+	}
+
+	/**
+	 * IDs of the gateways marked as current.
+	 *
+	 * @param WC_Payment_Gateway[] $gateways Gateways keyed by ID.
+	 * @return string[]
+	 */
+	private function get_current_gateways( array $gateways ): array {
+		return array_keys(
+			array_filter(
+				$gateways,
+				function ( $gateway ) {
+					return (bool) $gateway->chosen;
+				}
+			)
+		);
 	}
 
 	/**

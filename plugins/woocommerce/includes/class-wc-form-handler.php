@@ -781,7 +781,7 @@ class WC_Form_Handler {
 						$payment_method_id = isset( $_POST['payment_method'] ) ? wc_clean( wp_unslash( $_POST['payment_method'] ) ) : false;
 
 						if ( ! $payment_method_id ) {
-							throw new Exception( __( 'Invalid payment method.', 'woocommerce' ) );
+							throw new Exception( __( 'Please select a payment method.', 'woocommerce' ) );
 						}
 
 						$available_gateways = WC()->payment_gateways->get_available_payment_gateways();

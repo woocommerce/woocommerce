@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\Payments as SettingsPaymentsS
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -402,6 +403,13 @@ class WC_Payment_Gateways {
 	/**
 	 * Set the current, active gateway.
 	 *
+	 * The shopper's session choice wins while it is in `$gateways`; otherwise the default from
+	 * PaymentUtils::get_checkout_payment_method(), which runs the `woocommerce_default_payment_method`
+	 * filter. An empty answer leaves no gateway current. WooCommerce's own answer can name a gateway
+	 * that isn't in `$gateways`, for example the first enabled one when it isn't available for this
+	 * cart; the first of `$gateways` is current then, as before. Without a session the first of
+	 * `$gateways` is current and the filter isn't asked, as before.
+	 *
 	 * @param array $gateways Available payment gateways.
 	 */
 	public function set_current_gateway( $gateways ) {
@@ -413,9 +421,13 @@ class WC_Payment_Gateways {
 		$current_gateway = false;
 
 		if ( WC()->session ) {
-			$current = WC()->session->get( 'chosen_payment_method' );
+			$current = PaymentUtils::get_checkout_payment_method();
 
-			if ( $current && isset( $gateways[ $current ] ) ) {
+			if ( '' === $current ) {
+				return;
+			}
+
+			if ( isset( $gateways[ $current ] ) ) {
 				$current_gateway = $gateways[ $current ];
 			}
 		}
