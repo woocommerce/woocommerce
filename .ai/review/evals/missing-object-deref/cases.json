@@ -1,0 +1,77 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G08A-v3",
+			"path": "plugins/woocommerce/includes/class-wc-missing-object-deref.php",
+			"before": {
+				"file": "fixtures/G08A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G08A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-missing-object-deref.php",
+						"lines": [
+							5,
+							5
+						],
+						"anchor": "    return $product->get_sku();"
+					}
+				]
+			}
+		},
+		{
+			"id": "G08B-v3",
+			"path": "plugins/woocommerce/includes/class-wc-missing-object-deref.php",
+			"before": {
+				"file": "fixtures/G08B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G08B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-missing-object-deref.php",
+						"lines": [
+							5,
+							6
+						],
+						"anchor": "    if ( ! $variation->get_parent_id() ) { return ''; }"
+					}
+				]
+			}
+		},
+		{
+			"id": "G08C-v3",
+			"path": "plugins/woocommerce/includes/class-wc-missing-object-deref.php",
+			"before": {
+				"file": "fixtures/G08C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G08C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G08D-v3",
+			"path": "plugins/woocommerce/includes/class-wc-missing-object-deref.php",
+			"before": {
+				"file": "fixtures/G08D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G08D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

@@ -1,0 +1,77 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G40A-v3",
+			"path": "plugins/woocommerce/includes/class-wc-download-auth.php",
+			"before": {
+				"file": "fixtures/G40A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G40A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-download-auth.php",
+						"lines": [
+							7,
+							7
+						],
+						"anchor": "    if ( ! is_string( $stored ) || '' === $stored || $stored != $token ) { wp_send_json_error( array(), 403 ); return; }"
+					}
+				]
+			}
+		},
+		{
+			"id": "G40B-v4",
+			"path": "plugins/woocommerce/includes/class-wc-download-auth.php",
+			"before": {
+				"file": "fixtures/G40B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G40B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-download-auth.php",
+						"lines": [
+							8,
+							9
+						],
+						"anchor": "    hash_equals( $expected, $mac );"
+					}
+				]
+			}
+		},
+		{
+			"id": "G40C-v3",
+			"path": "plugins/woocommerce/includes/class-wc-download-auth.php",
+			"before": {
+				"file": "fixtures/G40C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G40C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G40D-v3",
+			"path": "plugins/woocommerce/includes/class-wc-download-auth.php",
+			"before": {
+				"file": "fixtures/G40D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G40D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

@@ -1,0 +1,77 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G10A-v3",
+			"path": "plugins/woocommerce/src/Internal/DataStores/Orders/OrderMetaSynchronizer.php",
+			"before": {
+				"file": "fixtures/G10A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G10A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/src/Internal/DataStores/Orders/OrderMetaSynchronizer.php",
+						"lines": [
+							5,
+							5
+						],
+						"anchor": "        if ( $hpos === $cpt ) { return; }"
+					}
+				]
+			}
+		},
+		{
+			"id": "G10B-v3",
+			"path": "plugins/woocommerce/src/Internal/DataStores/Orders/OrderMetaSynchronizer.php",
+			"before": {
+				"file": "fixtures/G10B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G10B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/src/Internal/DataStores/Orders/OrderMetaSynchronizer.php",
+						"lines": [
+							5,
+							5
+						],
+						"anchor": "        $status = preg_replace( '/^wc-/', '', $post->post_status );"
+					}
+				]
+			}
+		},
+		{
+			"id": "G10C-v3",
+			"path": "plugins/woocommerce/src/Internal/DataStores/Orders/OrderMetaSynchronizer.php",
+			"before": {
+				"file": "fixtures/G10C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G10C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G10D-v3",
+			"path": "plugins/woocommerce/src/Internal/DataStores/Orders/OrderMetaSynchronizer.php",
+			"before": {
+				"file": "fixtures/G10D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G10D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}
