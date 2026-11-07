@@ -78,13 +78,13 @@ jobs:
           sudo systemctl kill --kill-who=main --signal=HUP docker
           for _attempt in $(seq 1 20); do
             sudo journalctl -u docker --since "$since" --no-pager | tee "$BENCH_RESULTS/daemon-reload.log" >/dev/null
-            if grep 'Reloaded configuration' "$BENCH_RESULTS/daemon-reload.log" | grep -Eq '"max-download-attempts"[[:space:]]*:[[:space:]]*10' && grep 'Reloaded configuration' "$BENCH_RESULTS/daemon-reload.log" | grep -Eq '"max-concurrent-downloads"[[:space:]]*:[[:space:]]*3'; then
+            if grep 'Reloaded configuration' "$BENCH_RESULTS/daemon-reload.log" | tr -d '\\' | grep -Eq '"max-download-attempts"[[:space:]]*:[[:space:]]*10' && grep 'Reloaded configuration' "$BENCH_RESULTS/daemon-reload.log" | tr -d '\\' | grep -Eq '"max-concurrent-downloads"[[:space:]]*:[[:space:]]*3'; then
               break
             fi
             sleep 0.5
           done
-          grep 'Reloaded configuration' "$BENCH_RESULTS/daemon-reload.log" | grep -Eq '"max-download-attempts"[[:space:]]*:[[:space:]]*10'
-          grep 'Reloaded configuration' "$BENCH_RESULTS/daemon-reload.log" | grep -Eq '"max-concurrent-downloads"[[:space:]]*:[[:space:]]*3'
+          grep 'Reloaded configuration' "$BENCH_RESULTS/daemon-reload.log" | tr -d '\\' | grep -Eq '"max-download-attempts"[[:space:]]*:[[:space:]]*10'
+          grep 'Reloaded configuration' "$BENCH_RESULTS/daemon-reload.log" | tr -d '\\' | grep -Eq '"max-concurrent-downloads"[[:space:]]*:[[:space:]]*3'
           test "$before" = "$(systemctl show docker --property MainPID --value)"
           docker info > "$BENCH_RESULTS/daemon-info.txt"
       - name: Start cache-capable builder
