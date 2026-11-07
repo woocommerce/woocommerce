@@ -758,13 +758,24 @@ class CustomOrdersTableController {
 
 				if ( ! $is_dangerous ) {
 					$sync_message[] = wp_kses_data(
-						__( "You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>. There are currently orders out of sync.", 'woocommerce' ),
+						__( "If you'd like to switch order data storage, run a one-time sync below first. That option becomes available once the sync finishes.", 'woocommerce' ),
 					);
 				}
 
+				$sync_target = $this->data_synchronizer->custom_orders_table_is_authoritative()
+					? __( 'WordPress posts storage', 'woocommerce' )
+					: __( 'High-performance order storage', 'woocommerce' );
+
 				$sync_message[] = sprintf(
-					'<a href="%1$s" class="button-link">%2$s</a>',
+					'<a href="%1$s" class="button-link wc-hpos-sync-now" data-confirm-message="%2$s">%3$s</a>',
 					esc_url( $sync_now_url ),
+					esc_attr(
+						sprintf(
+							/* translators: %s: name of the order storage system orders will be copied into. */
+							__( 'This syncs any orders that still need syncing into %s. Continue?', 'woocommerce' ),
+							$sync_target
+						)
+					),
 					__( 'Sync orders now', 'woocommerce' )
 				);
 			}
