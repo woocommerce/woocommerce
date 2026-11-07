@@ -874,7 +874,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		} finally {
 			WC()->query->query_vars = $original_vars;
 			$wp                     = $original_wp; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-			$wp_query = $original_wp_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$wp_query               = $original_wp_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 	}
 
