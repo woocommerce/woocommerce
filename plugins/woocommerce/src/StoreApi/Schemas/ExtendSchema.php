@@ -59,6 +59,13 @@ final class ExtendSchema {
 	private $payment_requirements = [];
 
 	/**
+	 * The Store API request being responded to, passed to data callbacks.
+	 *
+	 * @var \WP_REST_Request<array<string, mixed>>|null
+	 */
+	private $request = null;
+
+	/**
 	 * Constructor
 	 *
 	 * @param Formatters $formatters An instance of the formatters class.
@@ -186,6 +193,21 @@ final class ExtendSchema {
 	}
 
 	/**
+	 * Sets the Store API request being responded to, so data callbacks can receive it.
+	 *
+	 * @internal
+	 *
+	 * @param \WP_REST_Request<array<string, mixed>>|null $request Request object, or null when no request is being responded to.
+	 * @return \WP_REST_Request<array<string, mixed>>|null The previously set request.
+	 */
+	public function set_request( ?\WP_REST_Request $request ) {
+		$previous_request = $this->request;
+		$this->request    = $request;
+
+		return $previous_request;
+	}
+
+	/**
 	 * Get callback for a specific endpoint and namespace.
 	 *
 	 * @param string $namespace The namespace to get callbacks for.
@@ -212,6 +234,8 @@ final class ExtendSchema {
 	/**
 	 * Returns the registered endpoint data
 	 *
+	 * Data callbacks receive the passed arguments followed by the current WP_REST_Request, or null outside a Store API request.
+	 *
 	 * @param string $endpoint    A valid identifier.
 	 * @param array  $passed_args Passed arguments from the Schema class.
 	 * @return object Returns an casted object with registered endpoint data.
@@ -219,6 +243,7 @@ final class ExtendSchema {
 	 */
 	public function get_endpoint_data( $endpoint, array $passed_args = [] ) {
 		$registered_data = [];
+		$passed_args[]   = $this->request;
 
 		if ( isset( $this->extend_data[ $endpoint ] ) ) {
 			foreach ( $this->extend_data[ $endpoint ] as $namespace => $callbacks ) {

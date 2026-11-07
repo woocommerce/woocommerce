@@ -88,6 +88,36 @@ class Products extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Product data callbacks receive the dispatched request, and the previous request is restored afterwards.
+	 */
+	public function test_data_callback_receives_the_dispatched_request(): void {
+		$received_request = null;
+		$this->mock_extend->register_endpoint_data(
+			array(
+				'endpoint'      => 'product',
+				'namespace'     => 'test-plugin',
+				'data_callback' => function ( $product, $request ) use ( &$received_request ) {
+					unset( $product ); // Avoid parameter not used PHPCS errors.
+					$received_request = $request;
+					return array();
+				},
+			)
+		);
+		$schemas = new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend );
+		$route   = new \Automattic\WooCommerce\StoreApi\Routes\V1\ProductsById( $schemas, $schemas->get( 'product' ) );
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $this->products[0]->get_id() );
+		$request->set_param( 'id', $this->products[0]->get_id() );
+		$previous_request = new \WP_REST_Request( 'GET', '/wc/store/v1/cart' );
+		$this->mock_extend->set_request( $previous_request );
+
+		$response = $route->get_response( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $request, $received_request, 'The data callback should receive the dispatched request.' );
+		$this->assertSame( $previous_request, $this->mock_extend->set_request( null ), 'The previous request should be restored after the response.' );
+	}
+
+	/**
 	 * Test getting item.
 	 */
 	public function test_get_item() {
