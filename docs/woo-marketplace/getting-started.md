@@ -20,7 +20,7 @@ We are looking for products that:
 
 - Solve real merchant problems
 - Are secure, well-documented, and well-maintained
-- Follow [security](https://developer.wordpress.org/apis/security/), [development](/docs/extensions/best-practices-extensions/extension-development-best-practices/), and [user experience](/docs/extensions/ux-guidelines-extensions/best-practices/) best practices
+- Follow [security](https://developer.wordpress.org/apis/security/), [development](/docs/extensions/best-practices-extensions/extension-development-best-practices/), and [user experience](/docs/extensions/ux-guidelines-extensions/) best practices
 - Offer high-quality merchant support
 - Include [a clear and sustainable monetization model](/docs/woo-marketplace/monetization-expectations/), whether through direct sales, subscriptions, or another approach
 
@@ -35,7 +35,7 @@ To join the WooCommerce Marketplace, vendors must offer high-quality, secure pro
 ### Step 1: Prepare your product
 
 1. Build and thoroughly test your extension or theme.
-2. Ensure it meets our [technical](/docs/extensions/best-practices-extensions/extension-development-best-practices/), [user experience](/docs/extensions/ux-guidelines-extensions/best-practices/) (UX), and [security standards](https://developer.wordpress.org/apis/security/).
+2. Ensure it meets our [technical](/docs/extensions/best-practices-extensions/extension-development-best-practices/), [user experience](/docs/extensions/ux-guidelines-extensions/) (UX), and [security standards](https://developer.wordpress.org/apis/security/).
 3. Write clear and comprehensive [documentation](/docs/extensions/best-practices-extensions/support-and-documentation/).
 
 ### Step 2: Apply for a Marketplace partner account
