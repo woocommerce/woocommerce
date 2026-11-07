@@ -1,0 +1,828 @@
+name: 'PR experiment: read-only seed lookup batching'
+
+on:
+  pull_request:
+    # Repeat the original Actions run explicitly; later PR pushes do not rerun it.
+    types: [opened]
+    paths:
+      - '.github/workflows/pr-ci-seed-experiment.yml'
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: pr-seed-lookup-experiment-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  SOURCE_SHA: b9cfe5fb160c4c261e442e0bc118dac70293d657
+  WP_ENV_CORE: https://downloads.wordpress.org/release/wordpress-7.1.4.zip
+  WP_VERSION: '7.1.4'
+  WP_ENV_PHP_VERSION: '8.3'
+  CI: 'true'
+  BASE_URL: http://localhost:8086
+  FORCE_COLOR: '1'
+
+jobs:
+  e2e:
+    name: 'Blocks shard 1/2: ${{ matrix.arm }}'
+    if: ${{ github.repository == 'woocommerce/woocommerce' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'research/pr-ci-speedups' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - arm: lookup-screen
+            seed: instrumented
+    env:
+      SEED_MODE: ${{ matrix.seed }}
+    steps:
+      - name: 'Checkout identical source'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+
+      - name: 'Setup pnpm'
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          cache: false
+
+      - name: 'Setup Node'
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: ''
+          package-manager-cache: false
+
+      - name: 'Setup PHP (normal build host)'
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '7.4'
+          coverage: none
+
+      - name: 'Identify pnpm store'
+        run: echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - name: 'Restore pnpm downloads (no save)'
+        id: pnpm-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.PNPM_STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore Node build cache (no save)'
+        id: node-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ./node_modules/.cache
+          key: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore Composer downloads (no save)'
+        id: composer-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/composer/files
+          key: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('packages/*/*/composer.lock', 'plugins/*/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore browser downloads (no save)'
+        id: browser-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright/
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-playwright-
+
+      - name: 'Install the same full browser dependencies'
+        run: pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile
+
+      - name: 'Download the pinned prior ZIP and reference'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          artifact-ids: '13091420550'
+          run-id: '41325210761'
+          github-token: ${{ github.token }}
+          digest-mismatch: error
+          merge-multiple: true
+          path: ${{ github.workspace }}/woocommerce-plugin-artifact
+
+      - name: 'Verify the pinned ZIP and reference hashes'
+        working-directory: ${{ github.workspace }}/woocommerce-plugin-artifact
+        run: |
+          echo 'f76b05633fd4f00eedda134de830bc2e2142c5eaee0883a86ef8ea449271fe47  woocommerce.zip' | sha256sum --check
+          echo 'aef6b245e1cf3f6d787329873e0a30c4b54a59125e2c960adb85deaad9f1774b  reference-discovery.json' | sha256sum --check
+
+      - name: 'Discover the unchanged Blocks shard'
+        id: discovery
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: ${{ runner.temp }}/e2e-setup/discovery-raw.json
+          DISCOVERY_DIRECTORY: ${{ runner.temp }}/e2e-setup
+        shell: bash
+        run: |
+          mkdir -p "$DISCOVERY_DIRECTORY"
+          NODE_OPTIONS="${NODE_OPTIONS:-} --conditions=wc-source" pnpm --filter='@woocommerce/plugin-woocommerce' exec playwright test --config=tests/e2e/playwright.config.ts --project=blocks-parallel --shard=1/2 --list --reporter=json
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const report = JSON.parse(fs.readFileSync(process.env.PLAYWRIGHT_JSON_OUTPUT_FILE, 'utf8'));
+          if (report.errors?.length) throw new Error(JSON.stringify(report.errors));
+          const tests = [];
+          function visit(suites, parents = []) {
+            for (const suite of suites || []) {
+              const titles = [...parents, suite.title];
+              for (const spec of suite.specs || []) {
+                for (const test of spec.tests || []) {
+                  tests.push({
+                    title: [...titles, spec.title], file: spec.file,
+                    line: spec.line, column: spec.column,
+                    projectName: test.projectName, projectId: test.projectId,
+                  });
+                }
+              }
+              visit(suite.suites, titles);
+            }
+          }
+          visit(report.suites);
+          if (!tests.length) throw new Error('No tests were discovered');
+          tests.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+          const manifest = {
+            workers: report.config.workers,
+            projects: report.config.projects.map(({name, retries, repeatEach}) => ({name, retries, repeatEach})),
+            tests,
+          };
+          fs.writeFileSync(path.join(process.env.DISCOVERY_DIRECTORY, 'discovery.json'), JSON.stringify(manifest, null, 2) + '\n');
+          console.log(`Discovered ${tests.length} tests with ${manifest.workers} configured workers`);
+          NODE
+
+
+      - name: 'Require identical discovery and execution settings'
+        run: |
+          cmp "$RUNNER_TEMP/e2e-setup/discovery.json" "$GITHUB_WORKSPACE/woocommerce-plugin-artifact/reference-discovery.json"
+          sha256sum "$RUNNER_TEMP/e2e-setup/discovery.json"
+
+      - name: 'Prepare WooCommerce plugin artifact'
+        run: |
+          unzip -q "$GITHUB_WORKSPACE/woocommerce-plugin-artifact/woocommerce.zip" -d "$GITHUB_WORKSPACE/woocommerce-plugin-artifact"
+          test -f "$GITHUB_WORKSPACE/woocommerce-plugin-artifact/woocommerce/woocommerce.php"
+
+      - name: 'Use WooCommerce plugin artifact in wp-env'
+        env:
+          PLUGIN_PATH: ${{ github.workspace }}/woocommerce-plugin-artifact/woocommerce
+          WP_ENV_CONFIG_PATH: ${{ github.workspace }}/plugins/woocommerce
+        run: |
+          node .github/workflows/scripts/override-wp-env-plugins.js
+          echo "WC_SHARED_PLUGIN_BUILD_PATH=$PLUGIN_PATH" >> "$GITHUB_ENV"
+
+      - name: 'Prepare runner-only lookup screen and prove source preservation'
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/seed-experiment/results"
+          cat > "$RUNNER_TEMP/seed-experiment/batch.php" <<'SEED_HELPER_BATCH'
+          <?php
+          // Invoked through wp eval-file: outer --user sets the bootstrap context.
+          $group = $args[0] ?? '';
+          if (!in_array($group, ['default', 'admin'], true)) {
+              throw new RuntimeException('Unknown batch context');
+          }
+          $expected = $group === 'admin' ? 1 : 0;
+          $before = get_current_user_id();
+          if ($before !== $expected) {
+              throw new RuntimeException('Unexpected outer user: ' . $before);
+          }
+          $commands = json_decode(file_get_contents(__DIR__ . '/commands.json'), true, 512, JSON_THROW_ON_ERROR);
+          $results = [];
+          foreach ($commands as $key => $entry) {
+              if ($entry['group'] !== $group) {
+                  continue;
+              }
+              $result = WP_CLI::runcommand($entry['canonical'], ['launch' => false, 'return' => 'all', 'exit_error' => false]);
+              if (!is_object($result) || !isset($result->return_code, $result->stdout, $result->stderr)) {
+                  throw new RuntimeException('Unexpected runcommand response for ' . $key);
+              }
+              $after = get_current_user_id();
+              $results[$key] = ['stdout' => rtrim($result->stdout, "\n"), 'stderr' => $result->stderr, 'return_code' => $result->return_code];
+              if ($result->return_code !== 0 || $after !== $expected) {
+                  throw new RuntimeException('Command failed or changed user for ' . $key . ': ' . json_encode([$after, $results[$key]]));
+              }
+          }
+          WP_CLI::line(json_encode(['user_before' => $before, 'user_after' => get_current_user_id(), 'results' => $results], JSON_THROW_ON_ERROR));
+          SEED_HELPER_BATCH
+          cat > "$RUNNER_TEMP/seed-experiment/argv.php" <<'SEED_HELPER_ARGV'
+          <?php
+          echo json_encode(array_slice($argv, 1), JSON_THROW_ON_ERROR);
+          SEED_HELPER_ARGV
+          cat > "$RUNNER_TEMP/seed-experiment/parser.php" <<'SEED_HELPER_PARSER'
+          <?php
+          $commands = json_decode(file_get_contents(__DIR__ . '/commands.json'), true, 512, JSON_THROW_ON_ERROR);
+          $proof = [];
+          foreach ($commands as $key => $entry) {
+              $proof[$key] = [
+                  'original_parsed' => \WP_CLI\Utils\parse_str_to_argv($entry['command']),
+                  'canonical_parsed' => \WP_CLI\Utils\parse_str_to_argv($entry['canonical']),
+              ];
+          }
+          WP_CLI::line(json_encode($proof, JSON_THROW_ON_ERROR));
+          SEED_HELPER_PARSER
+          cat > "$RUNNER_TEMP/seed-experiment/common.php" <<'SEED_HELPER_COMMON'
+          <?php
+          function execute_lookup_process($command) {
+              $started = hrtime(true);
+              $process = proc_open($command, [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+              if (!is_resource($process)) {
+                  throw new RuntimeException('Could not start: ' . $command);
+              }
+              fclose($pipes[0]);
+              $stdout = stream_get_contents($pipes[1]);
+              fclose($pipes[1]);
+              $stderr = stream_get_contents($pipes[2]);
+              fclose($pipes[2]);
+              $code = proc_close($process);
+              return ['stdout' => rtrim($stdout, "\n"), 'stderr' => $stderr, 'return_code' => $code, 'seconds' => (hrtime(true) - $started) / 1e9];
+          }
+
+          function lookup_value($result) {
+              return ['stdout' => $result['stdout'], 'stderr' => $result['stderr'], 'return_code' => $result['return_code']];
+          }
+
+          function require_lookup_success($key, $result) {
+              $pattern = $key === 'attribute_ids' ? '/^[1-9][0-9]*(?:[ \t]+[1-9][0-9]*)*$/D' : '/^[1-9][0-9]*$/D';
+              if ($result['return_code'] !== 0 || !preg_match($pattern, $result['stdout'])) {
+                  throw new RuntimeException('Lookup failed or returned non-ID output for ' . $key . ': ' . json_encode($result));
+              }
+          }
+
+          function save_seed_evidence($name, $data) {
+              file_put_contents(__DIR__ . '/results/' . $name, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . "\n");
+          }
+
+          function capture_seed_checkpoint($label) {
+              $dump = execute_lookup_process('wp db export - --skip-comments --skip-dump-date --order-by-primary --quiet');
+              if ($dump['return_code'] !== 0 || $dump['stderr'] !== '') {
+                  throw new RuntimeException('Could not fingerprint database; export status=' . $dump['return_code'] . ' stderr=' . $dump['stderr']);
+              }
+              if (!preg_match('/^[a-z0-9-]+$/D', $label)) {
+                  throw new RuntimeException('Invalid private checkpoint label');
+              }
+              $privateDirectory = __DIR__ . '/private-dumps';
+              if (!is_dir($privateDirectory) && !mkdir($privateDirectory, 0700)) {
+                  throw new RuntimeException('Could not create private checkpoint directory');
+              }
+              $privatePath = $privateDirectory . '/' . $label . '.sql';
+              $previousUmask = umask(0077);
+              $written = file_put_contents($privatePath, $dump['stdout']);
+              umask($previousUmask);
+              if ($written !== strlen($dump['stdout']) || !chmod($privatePath, 0600)) {
+                  throw new RuntimeException('Could not retain private checkpoint');
+              }
+              $prefix = execute_lookup_process('wp config get table_prefix');
+              if ($prefix['return_code'] !== 0 || $prefix['stderr'] !== '' || !preg_match('/^[A-Za-z0-9_$]+$/D', $prefix['stdout'])) {
+                  throw new RuntimeException('Could not determine a safe database prefix');
+              }
+              $query = 'SELECT option_id, HEX(option_name), HEX(autoload), SHA2(option_value, 256) FROM `' . $prefix['stdout'] . 'options` ORDER BY option_id';
+              $options = execute_lookup_process('wp db query --batch --skip-column-names ' . escapeshellarg($query));
+              if ($options['return_code'] !== 0 || $options['stderr'] !== '') {
+                  throw new RuntimeException('Could not capture option metadata');
+              }
+              $privateOptionsPath = $privateDirectory . '/' . $label . '.options';
+              $previousUmask = umask(0077);
+              $written = file_put_contents($privateOptionsPath, $options['stdout']);
+              umask($previousUmask);
+              if ($written !== strlen($options['stdout']) || !chmod($privateOptionsPath, 0600)) {
+                  throw new RuntimeException('Could not retain private option metadata');
+              }
+              $tableRows = [];
+              if (preg_match_all('/^INSERT INTO `([^`]+)`.*$/m', $dump['stdout'], $matches, PREG_SET_ORDER)) {
+                  foreach ($matches as $match) {
+                      $tableRows[$match[1]][] = hash('sha256', $match[0]);
+                  }
+              }
+              $uploads = dirname(__DIR__) . '/wp-content/uploads';
+              if (!is_dir($uploads)) {
+                  throw new RuntimeException('Uploads directory is absent');
+              }
+              $files = [];
+              $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($uploads, FilesystemIterator::SKIP_DOTS));
+              foreach ($iterator as $file) {
+                  if ($file->isFile()) {
+                      $relative = substr($file->getPathname(), strlen($uploads) + 1);
+                      $files[$relative] = ['bytes' => $file->getSize(), 'sha256' => hash_file('sha256', $file->getPathname())];
+                  }
+              }
+              ksort($files);
+              return ['database_sha256' => hash('sha256', $dump['stdout']), 'database_bytes' => strlen($dump['stdout']), 'table_insert_sha256' => $tableRows, 'uploads' => $files];
+          }
+          function seed_db_query($sql) {
+              $result = execute_lookup_process('wp db query --batch --skip-column-names ' . escapeshellarg($sql));
+              if ($result['return_code'] !== 0 || $result['stderr'] !== '') {
+                  throw new RuntimeException('Database query failed');
+              }
+              return $result['stdout'];
+          }
+
+          function seed_options_table() {
+              $prefix = execute_lookup_process('wp config get table_prefix');
+              if ($prefix['return_code'] !== 0 || $prefix['stderr'] !== '' || !preg_match('/^[A-Za-z0-9_$]+$/D', $prefix['stdout'])) {
+                  throw new RuntimeException('Could not determine a safe database prefix');
+              }
+              return '`' . $prefix['stdout'] . 'options`';
+          }
+
+          function seed_timeout() {
+              $value = seed_db_query("SELECT CONCAT('present:', HEX(option_value)) FROM " . seed_options_table() . " WHERE BINARY option_name = BINARY '_transient_timeout_wc_term_counts'");
+              if ($value === '') {
+                  return null;
+              }
+              if (!preg_match('/^present:([0-9A-F]*)$/D', $value, $match)) {
+                  throw new RuntimeException('Invalid term-count timeout result');
+              }
+              return hex2bin($match[1]);
+          }
+
+          function restore_seed_checkpoint($label, $expected, $verifyLabel) {
+              if (!preg_match('/^[a-z0-9-]+$/D', $label)) {
+                  throw new RuntimeException('Invalid restore label');
+              }
+              $path = __DIR__ . '/private-dumps/' . $label . '.sql';
+              if (!is_file($path) || hash_file('sha256', $path) !== $expected['database_sha256']) {
+                  throw new RuntimeException('Private restore checkpoint missing or corrupt');
+              }
+              $result = execute_lookup_process('wp db import ' . escapeshellarg($path) . ' --quiet');
+              if ($result['return_code'] !== 0 || $result['stderr'] !== '') {
+                  throw new RuntimeException('Database checkpoint restore failed');
+              }
+              $actual = capture_seed_checkpoint($verifyLabel);
+              if ($actual !== $expected) {
+                  throw new RuntimeException('Restored database or uploads do not match checkpoint');
+              }
+          }
+
+          function seed_validate_expiry($expiry, $start, $end) {
+              if (!preg_match('/^[1-9][0-9]*$/D', $expiry) || strlen($expiry) > 10) {
+                  throw new RuntimeException('Invalid term-count timeout');
+              }
+              $expiry = (int) $expiry;
+              $month = 30 * 24 * 60 * 60;
+              if ($expiry < $start + $month || $expiry > $end + $month) {
+                  throw new RuntimeException('Term-count timeout outside arm bounds');
+              }
+              return $expiry;
+          }
+
+          function seed_comparison_state($label, $raw, $start, $end) {
+              $expiry = seed_timeout();
+              if ($expiry === null) {
+                  return ['state' => $raw, 'expiry' => null, 'normalized' => false];
+              }
+              $expiry = seed_validate_expiry($expiry, $start, $end);
+              $table = seed_options_table();
+              $where = " WHERE BINARY option_name = BINARY '_transient_timeout_wc_term_counts'";
+              try {
+                  seed_db_query("UPDATE $table SET option_value = '1000000000'" . $where);
+                  if (seed_timeout() !== '1000000000') {
+                      throw new RuntimeException('Could not set comparison timeout');
+                  }
+                  $comparison = capture_seed_checkpoint($label . '-comparison');
+              } finally {
+                  seed_db_query("UPDATE $table SET option_value = '" . $expiry . "'" . $where);
+                  if (seed_timeout() !== (string) $expiry) {
+                      throw new RuntimeException('Could not restore original timeout');
+                  }
+              }
+              $restored = capture_seed_checkpoint($label . '-raw-restored');
+              if ($restored !== $raw) {
+                  throw new RuntimeException('Raw after-state changed during comparison');
+              }
+              return ['state' => $comparison, 'expiry' => $expiry, 'normalized' => true];
+          }
+          SEED_HELPER_COMMON
+          cat > "$RUNNER_TEMP/seed-experiment/prepare.py" <<'SEED_HELPER_PREPARE'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import shutil
+          import shlex
+
+          workspace = Path(os.environ['GITHUB_WORKSPACE'])
+          runtime = Path(os.environ['RUNNER_TEMP']) / 'seed-experiment'
+          original_dir = workspace / 'plugins/woocommerce/tests/e2e/bin/blocks/scripts'
+          source = (original_dir / 'products.sh').read_text()
+          source_hash = hashlib.sha256(source.encode()).hexdigest()
+          expected_hash = '1cfc277c5ccbc5d58ffa703ff4c7de38e63b5aa31807c7c73690615f118bdff8'
+          assert source_hash == expected_hash, 'The pinned products.sh hash changed'
+          pattern = re.compile(r'^([a-zA-Z0-9_]+)=\$\(wp ((?:post list|wc product_cat list|wc product_attribute list) .*)\)$', re.M)
+          matches = list(pattern.finditer(source))
+          expected_keys = ['clothing_category_id', 'tshirts_category_id', 'hoodies_category_id', 'hoodie_product_id', 'image1', 'image2', 'image3', 'beanie_product_id', 'album_product_id', 'cap_product_id', 'tshirt_with_logo_product_id', 'sunglasses_product_id', 'attribute_ids']
+          assert [match[1] for match in matches] == expected_keys, 'Unexpected lookup assignment sites'
+          commands = {match[1]: {'command': match[2], 'argv': shlex.split(match[2]), 'canonical': shlex.join(shlex.split(match[2])), 'group': 'admin' if '--user=1' in match[2] else 'default'} for match in matches}
+          assert sum(entry['group'] == 'admin' for entry in commands.values()) == 4
+          assert sum(entry['group'] == 'default' for entry in commands.values()) == 9
+          runtime.mkdir(exist_ok=True)
+          (runtime / 'results').mkdir(exist_ok=True)
+          (runtime / 'commands.json').write_text(json.dumps(commands, indent=2) + '\n')
+          shutil.copytree(original_dir, runtime / 'scripts', dirs_exist_ok=True)
+          replacements = {}
+          candidate = source
+          for match in matches:
+              replacement = match[1] + '=$(php /var/www/html/seed-experiment/verify.php ' + match[1] + ')'
+              assert candidate.count(match[0]) == 1
+              candidate = candidate.replace(match[0], replacement, 1)
+              replacements[replacement] = match[0]
+          anchor = 'wp wc tool run regenerate_product_lookup_tables --user=1\n'
+          injection = '\nphp /var/www/html/seed-experiment/screen.php\n'
+          assert candidate.count(anchor) == 1
+          candidate = candidate.replace(anchor, anchor + injection, 1)
+          reconstructed = candidate.replace(injection, '', 1)
+          for replacement, original in replacements.items():
+              assert reconstructed.count(replacement) == 1
+              reconstructed = reconstructed.replace(replacement, original, 1)
+          assert reconstructed == source, 'Unrelated source bytes were changed'
+          (runtime / 'scripts/products.sh').write_text(candidate)
+          proof = {'source_sha256': source_hash, 'reconstruction_sha256': hashlib.sha256(reconstructed.encode()).hexdigest(), 'lookup_count': len(matches), 'default_user_count': 9, 'admin_user_count': 4, 'all_other_source_bytes_preserved': True, 'commands': commands}
+          (runtime / 'results/source-proof.json').write_text(json.dumps(proof, indent=2) + '\n')
+          target = workspace / 'plugins/woocommerce/.wp-env.e2e.override.json'
+          override = json.loads(target.read_text())
+          if os.environ['SEED_MODE'] == 'instrumented':
+              override['mappings']['seed-experiment'] = str(runtime)
+              override['mappings']['wp-content/plugins/woocommerce/blocks-bin/playwright/scripts'] = str(runtime / 'scripts')
+          target.write_text(json.dumps(override, indent=2) + '\n')
+          print(json.dumps({'mode': os.environ['SEED_MODE'], **proof}, indent=2))
+          SEED_HELPER_PREPARE
+          cat > "$RUNNER_TEMP/seed-experiment/screen.php" <<'SEED_HELPER_SCREEN'
+          <?php
+          require __DIR__ . '/common.php';
+          $commands = json_decode(file_get_contents(__DIR__ . '/commands.json'), true, 512, JSON_THROW_ON_ERROR);
+          $report = ['checkpoint' => 'Immediately after original product import and lookup-table regeneration', 'cache_note' => 'OS and database caches may be warm; the identical raw input with a cold term-count transient is restored before every arm. Pair order alternates.', 'pairs' => []];
+          try {
+              $version = execute_lookup_process('wp --version');
+              if ($version['return_code'] !== 0 || $version['stderr'] !== '') {
+                  throw new RuntimeException('Could not identify WP-CLI version');
+              }
+              $parser = execute_lookup_process('wp eval-file ' . escapeshellarg(__DIR__ . '/parser.php'));
+              if ($parser['return_code'] !== 0 || $parser['stderr'] !== '') {
+                  throw new RuntimeException('Could not capture WP-CLI parser arguments');
+              }
+              $parsed = json_decode($parser['stdout'], true, 512, JSON_THROW_ON_ERROR);
+              $proof = ['wp_cli_version' => $version['stdout'], 'commands' => [], 'accepted' => true];
+              foreach ($commands as $key => $entry) {
+                  $shell = execute_lookup_process('php ' . escapeshellarg(__DIR__ . '/argv.php') . ' ' . $entry['command']);
+                  if ($shell['return_code'] !== 0 || $shell['stderr'] !== '') {
+                      throw new RuntimeException('Could not capture shell arguments for ' . $key);
+                  }
+                  $actual = json_decode($shell['stdout'], true, 512, JSON_THROW_ON_ERROR);
+                  $valid = isset($parsed[$key]['original_parsed'], $parsed[$key]['canonical_parsed']) && $actual === $entry['argv'] && $parsed[$key]['canonical_parsed'] === $actual;
+                  $proof['commands'][$key] = ['shell_argv' => $actual, 'expected_argv' => $entry['argv'], 'original_parsed' => $parsed[$key]['original_parsed'] ?? null, 'canonical_parsed' => $parsed[$key]['canonical_parsed'] ?? null, 'accepted' => $valid];
+                  $proof['accepted'] = $proof['accepted'] && $valid;
+              }
+              save_seed_evidence('argument-proof.json', $proof);
+              if (!$proof['accepted']) {
+                  throw new RuntimeException('Shell and in-process arguments do not match');
+              }
+              foreach (['default' => '', 'admin' => '--user=1 '] as $group => $outer) {
+                  $context = execute_lookup_process('wp ' . $outer . 'eval ' . escapeshellarg('echo get_current_user_id();'));
+                  $expected = $group === 'admin' ? '1' : '0';
+                  if ($context['return_code'] !== 0 || $context['stdout'] !== $expected) {
+                      throw new RuntimeException('Unexpected original command context: ' . json_encode($context));
+                  }
+                  $report['original_contexts'][$group] = $context;
+              }
+              $checkpoint = capture_seed_checkpoint('input');
+              if (seed_timeout() !== null) {
+                  throw new RuntimeException('Expected a cold term-count timeout at the input checkpoint');
+              }
+              $reference = null;
+              $lastOriginal = null;
+              for ($pair = 0; $pair < 3; $pair++) {
+                  $sample = ['pair' => $pair + 1, 'order' => $pair % 2 === 0 ? ['original', 'batch'] : ['batch', 'original']];
+                  foreach ($sample['order'] as $mode) {
+                      $label = 'pair-' . ($pair + 1) . '-' . $mode;
+                      restore_seed_checkpoint('input', $checkpoint, $label . '-before');
+                      $before = $checkpoint;
+                      $armStart = time();
+                      $started = hrtime(true);
+                      $values = [];
+                      $processes = [];
+                      if ($mode === 'original') {
+                          foreach ($commands as $key => $entry) {
+                              $result = execute_lookup_process('wp ' . $entry['command']);
+                              require_lookup_success($key, $result);
+                              $values[$key] = lookup_value($result);
+                              $processes[$key] = $result;
+                          }
+                      } else {
+                          foreach (['default' => '', 'admin' => '--user=1 '] as $group => $outer) {
+                              $result = execute_lookup_process('wp ' . $outer . 'eval-file ' . escapeshellarg(__DIR__ . '/batch.php') . ' ' . escapeshellarg($group));
+                              if ($result['return_code'] !== 0 || $result['stderr'] !== '') {
+                                  throw new RuntimeException('Batch driver failed: ' . json_encode($result));
+                              }
+                              $decoded = json_decode($result['stdout'], true, 512, JSON_THROW_ON_ERROR);
+                              $expected = $group === 'admin' ? 1 : 0;
+                              if ($decoded['user_before'] !== $expected || $decoded['user_after'] !== $expected) {
+                                  throw new RuntimeException('Batch context mismatch');
+                              }
+                              foreach ($decoded['results'] as $key => $value) {
+                                  require_lookup_success($key, $value);
+                                  $values[$key] = $value;
+                              }
+                              $processes[$group] = $result;
+                          }
+                      }
+                      $seconds = (hrtime(true) - $started) / 1e9;
+                      $armEnd = time();
+                      $after = capture_seed_checkpoint($label . '-after');
+                      if ($before['uploads'] !== $after['uploads']) {
+                          throw new RuntimeException('Lookup arm changed uploads');
+                      }
+                      $comparison = seed_comparison_state($label, $after, $armStart, $armEnd);
+                      if ($mode === 'original') {
+                          $lastOriginal = ['label' => $label . '-after', 'state' => $after];
+                      }
+                      ksort($values);
+                      $expectedKeys = array_keys($commands);
+                      sort($expectedKeys);
+                      if (array_keys($values) !== $expectedKeys) {
+                          throw new RuntimeException('Incomplete lookup map');
+                      }
+                      if ($reference !== null && $values !== $reference) {
+                          $report['outcome'] = 'rejected-lookup-difference';
+                          save_seed_evidence('mismatch.json', ['reference' => $reference, 'actual' => $values, 'pair' => $pair + 1, 'mode' => $mode]);
+                          throw new RuntimeException('Lookup stdout/stderr/status changed');
+                      }
+                      $reference = $values;
+                      $sample[$mode] = ['seconds' => $seconds, 'process_count' => count($processes), 'processes' => $processes, 'checkpoint_before' => $before, 'checkpoint_after' => $after, 'comparison' => $comparison, 'arm_start' => $armStart, 'arm_end' => $armEnd];
+                      echo 'seed-lookup-sample ' . json_encode(['pair' => $pair + 1, 'mode' => $mode, 'seconds' => $seconds, 'process_count' => count($processes)]) . "\n";
+                  }
+                  $sample['raw_after_equal'] = $sample['original']['checkpoint_after'] === $sample['batch']['checkpoint_after'];
+                  $sample['allowed_normalization'] = '_transient_timeout_wc_term_counts value only; fixed comparison value 1000000000; expiry must lie within arm start/end plus 30 days';
+                  if ($sample['original']['comparison']['normalized'] !== $sample['batch']['comparison']['normalized'] || $sample['original']['comparison']['state'] !== $sample['batch']['comparison']['state']) {
+                      $report['outcome'] = 'rejected-post-state-difference';
+                      save_seed_evidence('state-mismatch.json', ['original' => $sample['original'], 'batch' => $sample['batch'], 'pair' => $pair + 1]);
+                      throw new RuntimeException('Original and batch post-states differ');
+                  }
+                  $sample['saved_seconds'] = $sample['original']['seconds'] - $sample['batch']['seconds'];
+                  $report['pairs'][] = $sample;
+              }
+              restore_seed_checkpoint($lastOriginal['label'], $lastOriginal['state'], 'continuation-restored');
+              $report['lookup_values'] = $reference;
+              $report['accepted'] = true;
+              $report['outcome'] = 'accepted-screen-only';
+              save_seed_evidence('lookup-cache.json', $reference);
+          } catch (Throwable $error) {
+              $report['accepted'] = false;
+              $report['outcome'] = $report['outcome'] ?? 'inconclusive-command-or-validation-error';
+              $report['error'] = $error->getMessage();
+              fwrite(STDERR, $error->getMessage() . "\n");
+          } finally {
+              save_seed_evidence('screen.json', $report);
+          }
+          exit($report['accepted'] ? 0 : 1);
+          SEED_HELPER_SCREEN
+          cat > "$RUNNER_TEMP/seed-experiment/verify.php" <<'SEED_HELPER_VERIFY'
+          <?php
+          require __DIR__ . '/common.php';
+          $key = $argv[1] ?? '';
+          $commands = json_decode(file_get_contents(__DIR__ . '/commands.json'), true, 512, JSON_THROW_ON_ERROR);
+          $cache = json_decode(file_get_contents(__DIR__ . '/results/lookup-cache.json'), true, 512, JSON_THROW_ON_ERROR);
+          if (!isset($commands[$key], $cache[$key])) {
+              throw new RuntimeException('Unknown lookup: ' . $key);
+          }
+          $actual = execute_lookup_process('wp ' . $commands[$key]['command']);
+          fwrite(STDERR, $actual['stderr']);
+          require_lookup_success($key, $actual);
+          $equal = lookup_value($actual) === $cache[$key];
+          file_put_contents(__DIR__ . '/results/original-position-parity.jsonl', json_encode(['key' => $key, 'command' => $commands[$key]['command'], 'actual' => $actual, 'cached' => $cache[$key], 'equal' => $equal], JSON_THROW_ON_ERROR) . "\n", FILE_APPEND);
+          if (!$equal) {
+              fwrite(STDERR, 'Original-position lookup changed for ' . $key . "\n");
+              exit(1);
+          }
+          echo $cache[$key]['stdout'];
+          SEED_HELPER_VERIFY
+          python3 "$RUNNER_TEMP/seed-experiment/prepare.py"
+          chmod -R a+rwX "$RUNNER_TEMP/seed-experiment"
+
+      - name: 'Configure Docker as in CI'
+        uses: docker/setup-docker-action@6d7cfa65f60a9dda7b46e5513fa982536f3c9877 # v5.3.0
+        with:
+          daemon-config: |
+            {
+              "max-download-attempts": 10,
+              "max-concurrent-downloads": 3
+            }
+
+      - name: 'Start the normal Blocks environment, seeds and browser installation'
+        id: environment
+        run: pnpm --filter='@woocommerce/plugin-woocommerce' env:start:blocks
+
+      - name: 'Diagnose checkpoint changes without publishing SQL'
+        if: ${{ !cancelled() && steps.environment.outcome == 'failure' && matrix.seed == 'instrumented' }}
+        shell: bash
+        run: |
+          sudo --preserve-env=RUNNER_TEMP python3 <<'PYTHON'
+          import difflib
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import re
+
+          root = Path(os.environ['RUNNER_TEMP']) / 'seed-experiment'
+
+          def digest(data):
+              return hashlib.sha256(data).hexdigest()
+
+          def describe(data):
+              lines = data.splitlines(keepends=True)
+              metadata = []
+              sections = {}
+              table = None
+              kind = 'other'
+              quote = None
+              block_comment = False
+              statement = False
+              for index, line in enumerate(lines):
+                  # Only recognize headers outside a previous SQL statement or literal.
+                  if not statement and quote is None and not block_comment:
+                      create = re.match(rb'^CREATE TABLE `([A-Za-z0-9_$]+)`', line)
+                      insert = re.match(rb'^INSERT INTO `([A-Za-z0-9_$]+)`', line)
+                      if create or insert:
+                          table = (create or insert)[1].decode('ascii')
+                          kind = 'schema' if create else 'insert'
+                          statement = True
+                      elif line.startswith((b'--', b'/*', b'#')):
+                          kind = 'directive-or-comment'
+                      else:
+                          kind = 'other'
+                  info = {'line': index + 1, 'table': table, 'kind': kind,
+                          'bytes': len(line), 'sha256': digest(line)}
+                  if kind == 'schema' and quote is None and not block_comment:
+                      field = re.match(rb'^\s+`([A-Za-z0-9_$]+)`', line)
+                      if field:
+                          info['field'] = field[1].decode('ascii')
+                      counter = re.match(rb'^\)\s+ENGINE=[A-Za-z0-9_]+\s+AUTO_INCREMENT=(\d+)(?:\s|;)', line)
+                      if counter:
+                          info['auto_increment'] = int(counter[1])
+                  metadata.append(info)
+                  sections.setdefault(table, []).append(line)
+                  if not statement:
+                      continue
+                  i = 0
+                  while i < len(line):
+                      char = line[i]
+                      following = line[i + 1] if i + 1 < len(line) else None
+                      if block_comment:
+                          if char == 42 and following == 47:
+                              block_comment = False
+                              i += 2
+                              continue
+                      elif quote is not None:
+                          if char == 92:
+                              i += 2
+                              continue
+                          if char == quote:
+                              if following == quote:
+                                  i += 2
+                                  continue
+                              quote = None
+                      elif char in (39, 34, 96):
+                          quote = char
+                      elif char == 47 and following == 42:
+                          block_comment = True
+                          i += 2
+                          continue
+                      elif char == 35 or (char == 45 and following == 45 and (i + 2 == len(line) or line[i + 2] in b' \t\r\n')):
+                          break
+                      elif char == 59:
+                          statement = False
+                      i += 1
+              section_hashes = [
+                  {'table': name, 'bytes': sum(map(len, chunks)),
+                   'lines': len(chunks), 'sha256': digest(b''.join(chunks))}
+                  for name, chunks in sections.items()
+              ]
+              return lines, metadata, section_hashes
+
+          def option_inventory(path):
+              entries = {}
+              for line in path.read_bytes().splitlines():
+                  columns = line.split(b'\t')
+                  if len(columns) != 4 or not re.fullmatch(rb'[1-9][0-9]*', columns[0]) or not re.fullmatch(rb'[0-9A-Fa-f]{64}', columns[3]):
+                      raise ValueError('Invalid private option metadata')
+                  option_id = int(columns[0])
+                  if option_id in entries:
+                      raise ValueError('Duplicate option ID')
+                  entries[option_id] = {
+                      'id': option_id,
+                      'name': bytes.fromhex(columns[1].decode('ascii')).decode('utf-8'),
+                      'autoload': bytes.fromhex(columns[2].decode('ascii')).decode('utf-8'),
+                      'value_sha256': columns[3].decode('ascii').lower(),
+                  }
+              return entries
+
+          def changed_options(before, after):
+              return [{'before': before.get(key), 'after': after.get(key)}
+                      for key in sorted(before.keys() | after.keys())
+                      if before.get(key) != after.get(key)]
+
+          report = {'raw_sql_uploaded': False, 'normalization_applied': False, 'comparisons': []}
+          for before_path in sorted((root / 'private-dumps').glob('*-before.sql')):
+              after_path = before_path.with_name(before_path.name.replace('-before.sql', '-after.sql'))
+              if not after_path.exists():
+                  continue
+              before = before_path.read_bytes()
+              after = after_path.read_bytes()
+              before_lines, before_meta, before_sections = describe(before)
+              after_lines, after_meta, after_sections = describe(after)
+              changes = []
+              for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(None, before_lines, after_lines, autojunk=False).get_opcodes():
+                  if tag != 'equal':
+                      changes.append({'operation': tag, 'before': before_meta[i1:i2], 'after': after_meta[j1:j2]})
+              report['comparisons'].append({
+                  'checkpoint': before_path.stem.removesuffix('-before'),
+                  'before_bytes': len(before), 'after_bytes': len(after),
+                  'before_sha256': digest(before), 'after_sha256': digest(after),
+                  'before_table_sections': before_sections, 'after_table_sections': after_sections,
+                  'changed_line_metadata': changes,
+                  'changed_options': changed_options(
+                      option_inventory(before_path.with_suffix('.options')),
+                      option_inventory(after_path.with_suffix('.options')),
+                  ),
+              })
+          result_path = root / 'results' / 'checkpoint-diagnostics.json'
+          result_path.parent.mkdir(parents=True, exist_ok=True)
+          result_path.write_text(json.dumps(report, indent=2) + '\n')
+          print(json.dumps(report, indent=2))
+          PYTHON
+
+      - name: 'Require all original-position lookup checks before browser tests'
+        if: ${{ matrix.seed == 'instrumented' }}
+        shell: bash
+        run: |
+          python3 <<'PYTHON'
+          import json
+          import os
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP']) / 'seed-experiment'
+          screen = json.loads((root / 'results/screen.json').read_text())
+          assert screen['accepted'] and len(screen['pairs']) == 3
+          commands = json.loads((root / 'commands.json').read_text())
+          checks = [json.loads(line) for line in (root / 'results/original-position-parity.jsonl').read_text().splitlines()]
+          assert len(checks) == 13
+          assert [check['key'] for check in checks] == list(commands)
+          assert all(check['equal'] for check in checks)
+          assert all(check['command'] == commands[check['key']]['command'] for check in checks)
+          print('All 13 cached values match exact original commands at their original positions.')
+          PYTHON
+
+      - name: 'Run the unchanged full Blocks parallel shard'
+        id: tests
+        run: pnpm --filter='@woocommerce/plugin-woocommerce' test:e2e:blocks:parallel --shard=1/2
+
+      - name: 'Record arm and screening outcome'
+        if: ${{ always() }}
+        env:
+          ARM: ${{ matrix.arm }}
+          RESULT: ${{ job.status }}
+          ENVIRONMENT_RESULT: ${{ steps.environment.outcome }}
+          TEST_RESULT: ${{ steps.tests.outcome }}
+        run: |
+          {
+            echo "Arm: $ARM; result: $RESULT; source: $SOURCE_SHA"
+            echo "PHP: $WP_ENV_PHP_VERSION; WordPress: $WP_VERSION; seed mode: $SEED_MODE"
+            echo "Environment: $ENVIRONMENT_RESULT; tests: $TEST_RESULT"
+            echo 'Project blocks-parallel; shard 1/2; workers/retries and every seed mutation unchanged.'
+            echo 'Instrumented arm includes screening, fingerprint and original-position verification overhead.'
+            echo 'Only individual lookup-pair timings estimate startup savings; this run cannot establish whole-setup improvement.'
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [[ -f "$RUNNER_TEMP/seed-experiment/results/screen.json" ]]; then
+            python3 <<'PYTHON'
+          import json
+          import os
+          from pathlib import Path
+          report = json.loads((Path(os.environ['RUNNER_TEMP']) / 'seed-experiment/results/screen.json').read_text())
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write('\nLookup screen accepted: ' + str(report['accepted']) + '\n\n')
+              for pair in report['pairs']:
+                  summary.write(f"Pair {pair['pair']} ({','.join(pair['order'])}): original {pair['original']['seconds']:.3f}s; batch {pair['batch']['seconds']:.3f}s; saved {pair['saved_seconds']:.3f}s\n\n")
+              if report.get('error'):
+                  summary.write('Screen error: ' + report['error'] + '\n')
+          PYTHON
+          fi
+
+      - name: 'Upload only small run-local screening evidence'
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: seed-lookup-evidence-${{ matrix.arm }}-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/seed-experiment/results/
+            ${{ runner.temp }}/e2e-setup/discovery.json
+          if-no-files-found: error
+          retention-days: 3
+          overwrite: true

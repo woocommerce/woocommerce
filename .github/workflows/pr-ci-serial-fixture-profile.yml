@@ -1,0 +1,362 @@
+name: 'PR profile: serial Blocks fixture restores'
+
+on:
+  pull_request:
+    types: [opened]
+    paths:
+      - '.github/workflows/pr-ci-serial-fixture-profile.yml'
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: pr-serial-fixture-profile-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  SOURCE_SHA: b9cfe5fb160c4c261e442e0bc118dac70293d657
+  WP_ENV_CORE: https://downloads.wordpress.org/release/wordpress-7.1.4.zip
+  WP_VERSION: '7.1.4'
+  WP_ENV_PHP_VERSION: '8.3'
+  CI: 'true'
+  BASE_URL: http://localhost:8086
+  FORCE_COLOR: '1'
+
+jobs:
+  e2e:
+    name: 'Profile existing Blocks serial shard 1/8'
+    if: ${{ github.repository == 'woocommerce/woocommerce' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'research/pr-ci-speedups' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: 'Checkout identical source'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+
+      - name: 'Setup pnpm'
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          cache: false
+
+      - name: 'Setup Node'
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: ''
+          package-manager-cache: false
+
+      - name: 'Setup PHP (normal build host)'
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '7.4'
+          coverage: none
+
+      - name: 'Identify pnpm store'
+        run: echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - name: 'Restore pnpm downloads (no save)'
+        id: pnpm-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.PNPM_STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore Node build cache (no save)'
+        id: node-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ./node_modules/.cache
+          key: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore Composer downloads (no save)'
+        id: composer-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/composer/files
+          key: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('packages/*/*/composer.lock', 'plugins/*/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore browser downloads (no save)'
+        id: browser-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright/
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-playwright-
+
+      - name: 'Install the same full browser dependencies'
+        run: pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile
+
+      - name: 'Download the pinned prior ZIP and reference'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          artifact-ids: '13091420550'
+          run-id: '41325210761'
+          github-token: ${{ github.token }}
+          digest-mismatch: error
+          merge-multiple: true
+          path: ${{ github.workspace }}/woocommerce-plugin-artifact
+
+      - name: 'Verify the pinned ZIP and reference hashes'
+        working-directory: ${{ github.workspace }}/woocommerce-plugin-artifact
+        run: |
+          echo 'f76b05633fd4f00eedda134de830bc2e2142c5eaee0883a86ef8ea449271fe47  woocommerce.zip' | sha256sum --check
+          echo 'aef6b245e1cf3f6d787329873e0a30c4b54a59125e2c960adb85deaad9f1774b  reference-discovery.json' | sha256sum --check
+
+      - name: 'Discover the unchanged Blocks serial shard'
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: ${{ runner.temp }}/serial-fixtures/discovery-raw.json
+          DISCOVERY_DIRECTORY: ${{ runner.temp }}/serial-fixtures
+        shell: bash
+        run: |
+          mkdir -p "$DISCOVERY_DIRECTORY"
+          NODE_OPTIONS="${NODE_OPTIONS:-} --conditions=wc-source" pnpm --filter='@woocommerce/plugin-woocommerce' exec playwright test --config=tests/e2e/playwright.config.ts --project=blocks-serial --shard=1/8 --list --reporter=json
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const report = JSON.parse(fs.readFileSync(process.env.PLAYWRIGHT_JSON_OUTPUT_FILE, 'utf8'));
+          if (report.errors?.length) throw new Error(JSON.stringify(report.errors));
+          const tests = [];
+          function visit(suites, parents = []) {
+            for (const suite of suites || []) {
+              const titles = [...parents, suite.title];
+              for (const spec of suite.specs || []) {
+                for (const test of spec.tests || []) {
+                  tests.push({
+                    title: [...titles, spec.title], file: spec.file,
+                    line: spec.line, column: spec.column,
+                    projectName: test.projectName, projectId: test.projectId,
+                  });
+                }
+              }
+              visit(suite.suites, titles);
+            }
+          }
+          visit(report.suites);
+          if (tests.filter(t => t.projectName === 'blocks-serial').length !== 35 || tests.filter(t => t.projectName === 'blocks setup').length !== 1 || tests.length !== 36) throw new Error('Expected 35 serial tests and one setup test');
+          tests.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+          const manifest = {
+            workers: report.config.workers,
+            projects: report.config.projects.map(({name, retries, repeatEach, workers}) => ({name, retries, repeatEach, workers})),
+            tests,
+          };
+          fs.writeFileSync(path.join(process.env.DISCOVERY_DIRECTORY, 'discovery.json'), JSON.stringify(manifest, null, 2) + '\n');
+          console.log(`Discovered ${tests.length} tests with ${manifest.workers} configured workers`);
+          NODE
+
+
+      - name: 'Save the uninstrumented discovery'
+        run: cp "$RUNNER_TEMP/serial-fixtures/discovery.json" "$RUNNER_TEMP/serial-fixtures/discovery-before.json"
+
+      - name: 'Prepare WooCommerce plugin artifact'
+        run: |
+          unzip -q "$GITHUB_WORKSPACE/woocommerce-plugin-artifact/woocommerce.zip" -d "$GITHUB_WORKSPACE/woocommerce-plugin-artifact"
+          test -f "$GITHUB_WORKSPACE/woocommerce-plugin-artifact/woocommerce/woocommerce.php"
+
+      - name: 'Use WooCommerce plugin artifact in wp-env'
+        env:
+          PLUGIN_PATH: ${{ github.workspace }}/woocommerce-plugin-artifact/woocommerce
+          WP_ENV_CONFIG_PATH: ${{ github.workspace }}/plugins/woocommerce
+        run: |
+          node .github/workflows/scripts/override-wp-env-plugins.js
+          echo "WC_SHARED_PLUGIN_BUILD_PATH=$PLUGIN_PATH" >> "$GITHUB_ENV"
+
+      - name: 'Configure Docker as in CI'
+        uses: docker/setup-docker-action@6d7cfa65f60a9dda7b46e5513fa982536f3c9877 # v5.3.0
+        with:
+          daemon-config: |
+            {
+              "max-download-attempts": 10,
+              "max-concurrent-downloads": 3
+            }
+
+      - name: 'Start the normal Blocks environment, seeds and browser installation'
+        id: environment
+        run: pnpm --filter='@woocommerce/plugin-woocommerce' env:start:blocks
+
+      - name: 'Prepare exact-match restore timing wrapper'
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/serial-fixtures/bin"
+          echo "SERIAL_REAL_DOCKER=$(command -v docker)" >> "$GITHUB_ENV"
+          echo "SERIAL_RESTORE_LOG=$RUNNER_TEMP/serial-fixtures/restores.jsonl" >> "$GITHUB_ENV"
+          cat > "$RUNNER_TEMP/serial-fixtures/bin/docker" <<'PY'
+          #!/usr/bin/env python3
+          import json
+          import os
+          import re
+          import signal
+          import subprocess
+          import sys
+          import time
+
+          args = sys.argv[1:]
+          real = os.environ['SERIAL_REAL_DOCKER']
+          matched = (
+              len(args) == 9 and args[:3] == ['exec', '--workdir', '/var/www/html']
+              and re.fullmatch(r'[a-f0-9]{12,64}', args[3]) is not None
+              and args[4:] == ['sh', '-c', 'wp db reset --yes && wp db import "$1"',
+                               'restore-blocks-database', 'blocks_e2e.sql']
+          )
+          if not matched:
+              os.execv(real, [real, *args])
+
+          child = None
+          pending = []
+
+          def forward(signum, _frame):
+              if child is None:
+                  pending.append(signum)
+              else:
+                  try:
+                      child.send_signal(signum)
+                  except ProcessLookupError:
+                      pass
+
+          for signum in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP, signal.SIGQUIT,
+                         signal.SIGUSR1, signal.SIGUSR2):
+              signal.signal(signum, forward)
+          started = time.monotonic_ns()
+          child = subprocess.Popen([real, *args])
+          for signum in pending:
+              forward(signum, None)
+          status = child.wait()
+          row = json.dumps({'kind': 'restore', 'elapsed_seconds': (time.monotonic_ns() - started) / 1e9,
+                            'returncode': status}) + '\n'
+          fd = os.open(os.environ['SERIAL_RESTORE_LOG'], os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
+          try:
+              os.write(fd, row.encode())
+          finally:
+              os.close(fd)
+          if status < 0:
+              signal.signal(-status, signal.SIG_DFL)
+              os.kill(os.getpid(), -status)
+          sys.exit(status)
+          PY
+          chmod +x "$RUNNER_TEMP/serial-fixtures/bin/docker"
+          : > "$RUNNER_TEMP/serial-fixtures/restores.jsonl"
+
+      - name: 'Discover with the wrapper available'
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: ${{ runner.temp }}/serial-fixtures/discovery-raw.json
+          DISCOVERY_DIRECTORY: ${{ runner.temp }}/serial-fixtures
+        shell: bash
+        run: |
+          export PATH="$RUNNER_TEMP/serial-fixtures/bin:$PATH"
+          mkdir -p "$DISCOVERY_DIRECTORY"
+          NODE_OPTIONS="${NODE_OPTIONS:-} --conditions=wc-source" pnpm --filter='@woocommerce/plugin-woocommerce' exec playwright test --config=tests/e2e/playwright.config.ts --project=blocks-serial --shard=1/8 --list --reporter=json
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const report = JSON.parse(fs.readFileSync(process.env.PLAYWRIGHT_JSON_OUTPUT_FILE, 'utf8'));
+          if (report.errors?.length) throw new Error(JSON.stringify(report.errors));
+          const tests = [];
+          function visit(suites, parents = []) {
+            for (const suite of suites || []) {
+              const titles = [...parents, suite.title];
+              for (const spec of suite.specs || []) {
+                for (const test of spec.tests || []) {
+                  tests.push({
+                    title: [...titles, spec.title], file: spec.file,
+                    line: spec.line, column: spec.column,
+                    projectName: test.projectName, projectId: test.projectId,
+                  });
+                }
+              }
+              visit(suite.suites, titles);
+            }
+          }
+          visit(report.suites);
+          if (tests.filter(t => t.projectName === 'blocks-serial').length !== 35 || tests.filter(t => t.projectName === 'blocks setup').length !== 1 || tests.length !== 36) throw new Error('Expected 35 serial tests and one setup test');
+          tests.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+          const manifest = {
+            workers: report.config.workers,
+            projects: report.config.projects.map(({name, retries, repeatEach, workers}) => ({name, retries, repeatEach, workers})),
+            tests,
+          };
+          fs.writeFileSync(path.join(process.env.DISCOVERY_DIRECTORY, 'discovery.json'), JSON.stringify(manifest, null, 2) + '\n');
+          console.log(`Discovered ${tests.length} tests with ${manifest.workers} configured workers`);
+          NODE
+
+
+      - name: 'Require identical discovery'
+        run: cmp "$RUNNER_TEMP/serial-fixtures/discovery-before.json" "$RUNNER_TEMP/serial-fixtures/discovery.json"
+
+      - name: 'Run the unchanged serial shard with restore timing'
+        id: tests
+        shell: bash
+        run: |
+          export PATH="$RUNNER_TEMP/serial-fixtures/bin:$PATH"
+          pnpm --filter='@woocommerce/plugin-woocommerce' test:e2e:blocks:serial --shard=1/8
+
+      - name: 'Reconcile restore timings with every executed test'
+        if: ${{ always() && steps.tests.outcome != 'skipped' }}
+        shell: bash
+        run: |
+          python3 <<'PY'
+          import json
+          import math
+          import os
+          from pathlib import Path
+          import statistics
+          import subprocess
+
+          root = Path(os.environ['RUNNER_TEMP']) / 'serial-fixtures'
+          rows = [json.loads(line) for line in (root / 'restores.jsonl').read_text().splitlines()]
+          reports = list(Path('plugins/woocommerce/tests/e2e/test-results').glob('test-results-*.json'))
+          if len(reports) != 1:
+              raise RuntimeError(f'Expected one execution report, found {len(reports)}')
+          report = json.loads(reports[0].read_text())
+          attempts = {'blocks-serial': [], 'blocks setup': []}
+          def visit(suites):
+              for suite in suites:
+                  for spec in suite.get('specs', []):
+                      for test in spec.get('tests', []):
+                          project = test.get('projectName')
+                          if project not in attempts:
+                              raise RuntimeError(f'Unexpected project {project}')
+                          attempts[project].extend(r['status'] for r in test.get('results', []))
+                  visit(suite.get('suites', []))
+          visit(report['suites'])
+          durations = sorted(row['elapsed_seconds'] for row in rows)
+          successful = sum(row['returncode'] == 0 for row in rows)
+          summary = {
+              'source': os.environ['SOURCE_SHA'], 'serial_test_attempts': attempts['blocks-serial'],
+              'setup_attempts': attempts['blocks setup'], 'restore_calls': len(rows),
+              'successful_restores': successful,
+              'restore_seconds': {'sum': sum(durations), 'median': statistics.median(durations) if durations else None,
+                                  'p95': durations[math.ceil(0.95 * len(durations)) - 1] if durations else None,
+                                  'max': max(durations) if durations else None},
+              'scope': 'Reset plus import including Docker exec; wrapper startup and logging are outside each timed envelope.',
+          }
+          cid = Path('plugins/woocommerce/tests/e2e/.state/blocks-cli-container-id').read_text().strip()
+          digest = subprocess.check_output([os.environ['SERIAL_REAL_DOCKER'], 'exec', '--workdir', '/var/www/html', cid,
+                                           'sha256sum', 'blocks_e2e.sql'], text=True).split()[0]
+          size = subprocess.check_output([os.environ['SERIAL_REAL_DOCKER'], 'exec', '--workdir', '/var/www/html', cid,
+                                         'stat', '-c', '%s', 'blocks_e2e.sql'], text=True).strip()
+          summary['snapshot'] = {'sha256': digest, 'bytes': int(size)}
+          (root / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as output:
+              output.write('Serial fixture profiling: unchanged project/shard 1/8.\n\n```json\n' + json.dumps(summary, indent=2) + '\n```\n')
+          assert attempts['blocks-serial'] == ['passed'] * 35, 'A skip, retry or failed attempt makes this profile incomplete'
+          assert attempts['blocks setup'] == ['passed'], 'Expected one successful setup without a per-test restore'
+          assert len(rows) == successful == 35, 'Expected one successful restore per serial test, excluding setup'
+          PY
+
+      - name: 'Upload only manifests and safe profiling evidence'
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: serial-fixture-profile-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/serial-fixtures/discovery-before.json
+            ${{ runner.temp }}/serial-fixtures/discovery.json
+            ${{ runner.temp }}/serial-fixtures/restores.jsonl
+            ${{ runner.temp }}/serial-fixtures/summary.json
+          if-no-files-found: error
+          retention-days: 3

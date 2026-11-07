@@ -1,0 +1,119 @@
+name: 'PR experiment: PHP UTC validation'
+
+on:
+  pull_request:
+    types: [opened]
+    paths:
+      - '.github/workflows/pr-ci-php-utc-validation.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-php-utc-validation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  SOURCE_SHA: b9cfe5fb160c4c261e442e0bc118dac70293d657
+  # The official version-check API returned this stable release for the trial.
+  WP_ENV_CORE: https://downloads.wordpress.org/release/wordpress-7.1.4.zip
+  WP_VERSION: '7.1.4'
+  WP_ENV_PHP_VERSION: '8.3'
+  FORCE_COLOR: '1'
+
+jobs:
+  php-independent:
+    name: 'Validate unchanged fulfillment UTC assertion'
+    if: ${{ github.repository == 'woocommerce/woocommerce' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'research/pr-ci-speedups' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 'Checkout identical source'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+
+      - name: 'Setup pnpm'
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+
+      - name: 'Setup Node'
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: ''
+
+      - name: 'Setup PHP (normal backend host)'
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '7.4'
+          coverage: none
+
+      - name: 'Identify pnpm store'
+        run: echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - name: 'Restore backend pnpm downloads (no save)'
+        id: pnpm-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.PNPM_STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:backend-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:backend-
+
+      - name: 'Restore backend Composer downloads (no save)'
+        id: composer-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/composer/files
+          key: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:backend-${{ hashFiles('packages/*/*/composer.lock', 'plugins/*/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:backend-
+
+      - name: 'Install normal backend dependencies'
+        shell: bash
+        run: |
+          composer install --working-dir=./plugins/woocommerce --quiet &
+          composer_pid=$!
+          pnpm_status=0
+          pnpm install --filter='@woocommerce/plugin-woocommerce' --frozen-lockfile --ignore-scripts || pnpm_status=$?
+          composer_status=0
+          wait "$composer_pid" || composer_status=$?
+          if [[ "$pnpm_status" -ne 0 ]]; then
+            exit "$pnpm_status"
+          fi
+          exit "$composer_status"
+
+      - name: 'Build normal backend feature config'
+        env:
+          BROWSERSLIST_IGNORE_OLD_DATA: 'true'
+        run: pnpm --filter='@woocommerce/admin-library' build:project:feature-config
+
+      - name: 'Configure Docker as in CI'
+        uses: docker/setup-docker-action@6d7cfa65f60a9dda7b46e5513fa982536f3c9877 # v5.3.0
+        with:
+          daemon-config: |
+            {
+              "max-download-attempts": 10,
+              "max-concurrent-downloads": 3
+            }
+
+      - name: 'Start source PHP test environment'
+        run: pnpm --filter='@woocommerce/plugin-woocommerce' env:test --debug
+
+      - name: 'Run the unchanged UTC assertion'
+        timeout-minutes: 5
+        run: pnpm --filter='@woocommerce/plugin-woocommerce' test:php:env --filter=test_data_store_persists_dates_in_utc_under_non_utc_site_timezone
+
+      - name: 'Record PHP result'
+        if: ${{ always() }}
+        env:
+          RESULT: ${{ job.status }}
+          PNPM_HIT: ${{ steps.pnpm-cache.outputs.cache-hit }}
+          COMPOSER_HIT: ${{ steps.composer-cache.outputs.cache-hit }}
+        run: |
+          {
+            echo "Source: $SOURCE_SHA"
+            echo "PHP: $WP_ENV_PHP_VERSION; WordPress: $WP_VERSION ($WP_ENV_CORE)"
+            echo "Result: $RESULT"
+            echo "Exact cache hits: pnpm=$PNPM_HIT composer=$COMPOSER_HIT"
+            echo 'Compare job/step API timestamps for dependency wait, runner queue and execution separately.'
+          } >> "$GITHUB_STEP_SUMMARY"

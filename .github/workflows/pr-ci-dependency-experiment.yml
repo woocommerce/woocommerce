@@ -1,0 +1,471 @@
+name: 'PR experiment: Browser dependency closure'
+
+on:
+  pull_request:
+    # Repeat the original Actions run explicitly; later PR pushes do not rerun it.
+    types: [opened]
+    paths:
+      - '.github/workflows/pr-ci-dependency-experiment.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-dependency-experiment-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  SOURCE_SHA: b9cfe5fb160c4c261e442e0bc118dac70293d657
+  WP_ENV_CORE: https://downloads.wordpress.org/release/wordpress-7.1.4.zip
+  WP_VERSION: '7.1.4'
+  WP_ENV_PHP_VERSION: '8.3'
+  CI: 'true'
+  BASE_URL: http://localhost:8086
+  FORCE_COLOR: '1'
+
+jobs:
+  plugin-build:
+    name: 'Record full-install discovery reference'
+    if: ${{ github.repository == 'woocommerce/woocommerce' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'research/pr-ci-speedups' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 'Checkout identical source'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+
+      - name: 'Setup pnpm'
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          cache: false
+
+      - name: 'Setup Node'
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: ''
+          package-manager-cache: false
+
+      - name: 'Setup PHP (normal build host)'
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '7.4'
+          coverage: none
+
+      - name: 'Identify pnpm store'
+        run: echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - name: 'Restore pnpm downloads (no save)'
+        id: pnpm-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.PNPM_STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore Node build cache (no save)'
+        id: node-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ./node_modules/.cache
+          key: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore Composer downloads (no save)'
+        id: composer-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/composer/files
+          key: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('packages/*/*/composer.lock', 'plugins/*/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Install normal full-build dependencies'
+        run: pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile
+
+      - &discover-shard
+        name: 'Discover the unchanged Blocks shard'
+        id: discovery
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: ${{ runner.temp }}/e2e-setup/discovery-raw.json
+          DISCOVERY_DIRECTORY: ${{ runner.temp }}/e2e-setup
+        shell: bash
+        run: |
+          mkdir -p "$DISCOVERY_DIRECTORY"
+          NODE_OPTIONS="${NODE_OPTIONS:-} --conditions=wc-source" pnpm --filter='@woocommerce/plugin-woocommerce' exec playwright test --config=tests/e2e/playwright.config.ts --project=blocks-parallel --shard=1/2 --list --reporter=json
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const report = JSON.parse(fs.readFileSync(process.env.PLAYWRIGHT_JSON_OUTPUT_FILE, 'utf8'));
+          if (report.errors?.length) throw new Error(JSON.stringify(report.errors));
+          const tests = [];
+          function visit(suites, parents = []) {
+            for (const suite of suites || []) {
+              const titles = [...parents, suite.title];
+              for (const spec of suite.specs || []) {
+                for (const test of spec.tests || []) {
+                  tests.push({
+                    title: [...titles, spec.title], file: spec.file,
+                    line: spec.line, column: spec.column,
+                    projectName: test.projectName, projectId: test.projectId,
+                  });
+                }
+              }
+              visit(suite.suites, titles);
+            }
+          }
+          visit(report.suites);
+          if (!tests.length) throw new Error('No tests were discovered');
+          tests.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+          const manifest = {
+            workers: report.config.workers,
+            projects: report.config.projects.map(({name, retries, repeatEach}) => ({name, retries, repeatEach})),
+            tests,
+          };
+          fs.writeFileSync(path.join(process.env.DISCOVERY_DIRECTORY, 'discovery.json'), JSON.stringify(manifest, null, 2) + '\n');
+          console.log(`Discovered ${tests.length} tests with ${manifest.workers} configured workers`);
+          NODE
+
+      - name: 'Upload the reference within this run'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dependency-reference-${{ github.run_id }}
+          path: ${{ runner.temp }}/e2e-setup/discovery.json
+          if-no-files-found: error
+          retention-days: 3
+          overwrite: true
+
+  e2e:
+    name: 'Install repetition ${{ matrix.trial }}: ${{ matrix.arm }}'
+    needs: plugin-build
+    if: ${{ github.repository == 'woocommerce/woocommerce' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'research/pr-ci-speedups' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        arm: [baseline, fixture-closure]
+        trial: [1, 2, 3]
+    steps:
+      - name: 'Checkout identical source'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+
+      - name: 'Setup pnpm'
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          cache: false
+
+      - name: 'Setup Node'
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: .nvmrc
+          cache: ''
+          package-manager-cache: false
+
+      - name: 'Setup PHP (normal build host)'
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '7.4'
+          coverage: none
+
+      - name: 'Identify pnpm store'
+        run: echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - name: 'Restore pnpm downloads (no save)'
+        id: pnpm-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.PNPM_STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore Node build cache (no save)'
+        id: node-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ./node_modules/.cache
+          key: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-node-cache-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore Composer downloads (no save)'
+        id: composer-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/composer/files
+          key: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-${{ hashFiles('packages/*/*/composer.lock', 'plugins/*/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-@woocommerce/plugin-woocommerce-build:full-
+
+      - name: 'Restore browser downloads (no save)'
+        id: browser-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright/
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-playwright-
+
+      - name: 'Install browser dependencies'
+        env:
+          ARM: ${{ matrix.arm }}
+        run: |
+          node --version
+          pnpm --version
+          sha256sum pnpm-lock.yaml
+          if [[ "$ARM" == 'baseline' ]]; then
+            pnpm --filter='@woocommerce/plugin-woocommerce...' list --depth=-1 --json > "$RUNNER_TEMP/dependency-workspaces.json"
+            /usr/bin/time -f '{"seconds":%e,"rss_kb":%M}' -o "$RUNNER_TEMP/dependency-install.json" pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile
+          elif [[ "$ARM" == 'fixture-closure' ]]; then
+            pnpm --filter='@woocommerce/plugin-woocommerce' --filter='@woocommerce/e2e-utils-playwright...' list --depth=-1 --json > "$RUNNER_TEMP/dependency-workspaces.json"
+            /usr/bin/time -f '{"seconds":%e,"rss_kb":%M}' -o "$RUNNER_TEMP/dependency-install.json" pnpm install --filter='@woocommerce/plugin-woocommerce' --filter='@woocommerce/e2e-utils-playwright...' --frozen-lockfile
+          else
+            exit 1
+          fi
+          cat "$RUNNER_TEMP/dependency-install.json"
+          python3 <<'PY'
+          import json, os
+          from pathlib import Path
+          selected = json.loads((Path(os.environ['RUNNER_TEMP']) / 'dependency-workspaces.json').read_text())
+          names = sorted(p['name'] for p in selected)
+          assert {'@woocommerce/plugin-woocommerce', '@woocommerce/e2e-utils-playwright'} <= set(names), names
+          print('Selected workspaces:', names)
+          PY
+
+      - name: 'Download the full-install discovery reference'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: dependency-reference-${{ github.run_id }}
+          path: ${{ github.workspace }}/dependency-reference
+
+      - *discover-shard
+
+      - name: 'Require identical discovery and execution settings'
+        run: |
+          cmp "$RUNNER_TEMP/e2e-setup/discovery.json" "$GITHUB_WORKSPACE/dependency-reference/discovery.json"
+          sha256sum "$RUNNER_TEMP/e2e-setup/discovery.json"
+
+      - name: 'Create an empty detached worktree with the populated pnpm store'
+        id: warm-worktree
+        run: |
+          mkdir -p "$RUNNER_TEMP/dependency-warm"
+          warm_tree=$(mktemp -d "$RUNNER_TEMP/dependency-warm-worktree.XXXXXX")
+          printf '%s\n' "$warm_tree" > "$RUNNER_TEMP/dependency-warm/worktree-path.txt"
+          git worktree add --detach "$warm_tree" "$SOURCE_SHA"
+          echo "WARM_WORKTREE=$warm_tree" >> "$GITHUB_ENV"
+          WARM_WORKTREE="$warm_tree" python3 <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          original = pathlib.Path(os.environ['GITHUB_WORKSPACE']).resolve()
+          tree = pathlib.Path(os.environ['WARM_WORKTREE']).resolve()
+          evidence = pathlib.Path(os.environ['RUNNER_TEMP']) / 'dependency-warm'
+          def output(cwd, *command):
+              return subprocess.check_output(command, cwd=cwd, text=True).strip()
+          def identity(cwd):
+              return {
+                  'source': output(cwd, 'git', 'rev-parse', 'HEAD'),
+                  'lock_sha256': hashlib.sha256((cwd / 'pnpm-lock.yaml').read_bytes()).hexdigest(),
+                  'pnpm': output(cwd, 'pnpm', '--version'),
+                  'node': output(cwd, 'node', '--version'),
+                  'php': output(cwd, 'php', '-r', 'echo PHP_VERSION;'),
+                  'composer': output(cwd, 'composer', '--version', '--no-ansi'),
+                  'store': str(pathlib.Path(output(cwd, 'pnpm', 'store', 'path', '--silent')).resolve()),
+              }
+          cold = identity(original)
+          warm = identity(tree)
+          if cold != warm or warm['source'] != os.environ['SOURCE_SHA']:
+              raise RuntimeError('Warm worktree changed source, lock, toolchain or global pnpm store')
+          if pathlib.Path(os.environ['PNPM_STORE_PATH']).resolve() != pathlib.Path(warm['store']):
+              raise RuntimeError('Warm worktree does not use the restored/populated pnpm store')
+          status = output(tree, 'git', 'status', '--porcelain=v1', '--untracked-files=all', '--ignored=matching')
+          if status:
+              raise RuntimeError('Fresh worktree has tracked changes or generated/untracked files: ' + status)
+          for directory, subdirs, files in os.walk(tree):
+              if 'node_modules' in subdirs:
+                  raise RuntimeError('Fresh worktree already contains node_modules: ' + directory)
+          store = pathlib.Path(warm['store'])
+          if not store.is_dir() or not any(files for _, _, files in os.walk(store)):
+              raise RuntimeError('The pnpm store is empty after the cold install')
+          if (tree / 'node_modules/.cache').exists():
+              raise RuntimeError('Fresh worktree already has a workspace build cache')
+          (evidence / 'identity.json').write_text(json.dumps({
+              'cold': cold, 'warm': warm, 'fresh_status': status,
+              'node_modules_present_before_install': False,
+              'workspace_build_cache_present_before_install': False,
+              'store_populated_before_install': True,
+              'measurement': 'fresh workspace install with warm global store; cache restoration excluded',
+          }, indent=2) + '\n')
+          PY
+
+      - name: 'Install into the fresh worktree using only the warm global store'
+        id: warm-install
+        working-directory: ${{ env.WARM_WORKTREE }}
+        env:
+          ARM: ${{ matrix.arm }}
+        run: |
+          set -o pipefail
+          if [[ "$ARM" == 'baseline' ]]; then
+            pnpm --filter='@woocommerce/plugin-woocommerce...' list --depth=-1 --json > "$RUNNER_TEMP/dependency-warm/workspaces.json"
+            /usr/bin/time -f '{"seconds":%e,"rss_kb":%M}' -o "$RUNNER_TEMP/dependency-warm/install.json" pnpm install --filter='@woocommerce/plugin-woocommerce...' --frozen-lockfile 2>&1 | tee "$RUNNER_TEMP/dependency-warm/install.log"
+          elif [[ "$ARM" == 'fixture-closure' ]]; then
+            pnpm --filter='@woocommerce/plugin-woocommerce' --filter='@woocommerce/e2e-utils-playwright...' list --depth=-1 --json > "$RUNNER_TEMP/dependency-warm/workspaces.json"
+            /usr/bin/time -f '{"seconds":%e,"rss_kb":%M}' -o "$RUNNER_TEMP/dependency-warm/install.json" pnpm install --filter='@woocommerce/plugin-woocommerce' --filter='@woocommerce/e2e-utils-playwright...' --frozen-lockfile 2>&1 | tee "$RUNNER_TEMP/dependency-warm/install.log"
+          else
+            exit 1
+          fi
+          cat "$RUNNER_TEMP/dependency-warm/install.json"
+
+      - name: 'Require actual package reuse in the fresh worktree'
+        id: warm-reuse
+        run: |
+          python3 <<'PY'
+          import json, os, pathlib, re
+          root = pathlib.Path(os.environ['RUNNER_TEMP'])
+          evidence = root / 'dependency-warm'
+          log = (evidence / 'install.log').read_text()
+          log = re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]', '', log)
+          progress = re.findall(r'^Progress: resolved (\d+), reused (\d+), downloaded (\d+), added (\d+)(, done)?\s*$', log, re.MULTILINE)
+          if not progress or not progress[-1][4]:
+              raise RuntimeError('No completed root-install progress counters; warm-store reuse is unverified')
+          resolved, reused, downloaded, added = map(int, progress[-1][:4])
+          metrics = {'resolved': resolved, 'reused': reused, 'downloaded': downloaded, 'added': added}
+          (evidence / 'reuse.json').write_text(json.dumps(metrics, indent=2) + '\n')
+          if not (resolved > 0 and reused > 0 and added > 0 and downloaded == 0):
+              raise RuntimeError('Fresh warm-store install did not reuse packages without downloads: ' + str(metrics))
+          cold = sorted(package['name'] for package in json.loads((root / 'dependency-workspaces.json').read_text()))
+          warm = sorted(package['name'] for package in json.loads((evidence / 'workspaces.json').read_text()))
+          if cold != warm:
+              raise RuntimeError('Warm install selected different workspaces')
+          print(json.dumps(metrics))
+          PY
+
+      - name: 'Discover the unchanged Blocks shard in the warm worktree'
+        id: warm-discovery
+        working-directory: ${{ env.WARM_WORKTREE }}
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: ${{ runner.temp }}/dependency-warm/discovery-raw.json
+          DISCOVERY_DIRECTORY: ${{ runner.temp }}/dependency-warm
+        shell: bash
+        run: |
+          mkdir -p "$DISCOVERY_DIRECTORY"
+          NODE_OPTIONS="${NODE_OPTIONS:-} --conditions=wc-source" pnpm --filter='@woocommerce/plugin-woocommerce' exec playwright test --config=tests/e2e/playwright.config.ts --project=blocks-parallel --shard=1/2 --list --reporter=json
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const report = JSON.parse(fs.readFileSync(process.env.PLAYWRIGHT_JSON_OUTPUT_FILE, 'utf8'));
+          if (report.errors?.length) throw new Error(JSON.stringify(report.errors));
+          const tests = [];
+          function visit(suites, parents = []) {
+            for (const suite of suites || []) {
+              const titles = [...parents, suite.title];
+              for (const spec of suite.specs || []) {
+                for (const test of spec.tests || []) {
+                  tests.push({
+                    title: [...titles, spec.title], file: spec.file,
+                    line: spec.line, column: spec.column,
+                    projectName: test.projectName, projectId: test.projectId,
+                  });
+                }
+              }
+              visit(suite.suites, titles);
+            }
+          }
+          visit(report.suites);
+          if (!tests.length) throw new Error('No tests were discovered');
+          tests.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+          const manifest = {
+            workers: report.config.workers,
+            projects: report.config.projects.map(({name, retries, repeatEach}) => ({name, retries, repeatEach})),
+            tests,
+          };
+          fs.writeFileSync(path.join(process.env.DISCOVERY_DIRECTORY, 'discovery.json'), JSON.stringify(manifest, null, 2) + '\n');
+          console.log(`Discovered ${tests.length} tests with ${manifest.workers} configured workers`);
+          NODE
+
+      - name: 'Require warm discovery to match the same full-install reference'
+        id: warm-parity
+        run: |
+          cmp "$RUNNER_TEMP/dependency-warm/discovery.json" "$GITHUB_WORKSPACE/dependency-reference/discovery.json"
+          sha256sum "$RUNNER_TEMP/dependency-warm/discovery.json"
+
+      - name: 'Record arm outcome'
+        if: ${{ always() }}
+        env:
+          ARM: ${{ matrix.arm }}
+          RESULT: ${{ job.status }}
+          DISCOVERY_RESULT: ${{ steps.discovery.outcome }}
+          WARM_WORKTREE_RESULT: ${{ steps.warm-worktree.outcome }}
+          WARM_INSTALL_RESULT: ${{ steps.warm-install.outcome }}
+          WARM_REUSE_RESULT: ${{ steps.warm-reuse.outcome }}
+          WARM_DISCOVERY_RESULT: ${{ steps.warm-discovery.outcome }}
+          WARM_PARITY_RESULT: ${{ steps.warm-parity.outcome }}
+          PNPM_MATCH: ${{ steps.pnpm-cache.outputs.cache-matched-key }}
+          COMPOSER_MATCH: ${{ steps.composer-cache.outputs.cache-matched-key }}
+          PNPM_HIT: ${{ steps.pnpm-cache.outputs.cache-hit }}
+          NODE_HIT: ${{ steps.node-cache.outputs.cache-hit }}
+          COMPOSER_HIT: ${{ steps.composer-cache.outputs.cache-hit }}
+          BROWSER_HIT: ${{ steps.browser-cache.outputs.cache-hit }}
+        run: |
+          {
+            echo "Arm: $ARM; result: $RESULT; source: $SOURCE_SHA"
+            echo "PHP: $WP_ENV_PHP_VERSION; WordPress: $WP_VERSION"
+            echo "Cold discovery: $DISCOVERY_RESULT; installation-only timing repetition"
+            echo "Warm worktree: $WARM_WORKTREE_RESULT; install: $WARM_INSTALL_RESULT; reuse: $WARM_REUSE_RESULT; discovery: $WARM_DISCOVERY_RESULT; parity: $WARM_PARITY_RESULT"
+            echo 'Warm timing measures fresh-workspace install with warm global store; excludes cache download/extraction.'
+            if [[ -f "$RUNNER_TEMP/dependency-warm/install.json" ]]; then cat "$RUNNER_TEMP/dependency-warm/install.json"; fi
+            if [[ -f "$RUNNER_TEMP/dependency-warm/reuse.json" ]]; then cat "$RUNNER_TEMP/dependency-warm/reuse.json"; fi
+            echo "Exact cache hits: pnpm=$PNPM_HIT node=$NODE_HIT composer=$COMPOSER_HIT browser=$BROWSER_HIT"
+            echo "Matched cache keys: pnpm=$PNPM_MATCH composer=$COMPOSER_MATCH"
+            echo 'Project blocks-parallel; shard 1/2 discovery unchanged. Full browser validation: run 41322899450.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 'Upload only the small discovery manifest'
+        if: ${{ !cancelled() && steps.discovery.outcome == 'success' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dependency-discovery-${{ matrix.arm }}-${{ matrix.trial }}-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/e2e-setup/discovery.json
+            ${{ runner.temp }}/dependency-install.json
+            ${{ runner.temp }}/dependency-workspaces.json
+          if-no-files-found: error
+          retention-days: 3
+          overwrite: true
+
+      - name: 'Upload distinct warm-store evidence'
+        if: ${{ !cancelled() && steps.warm-worktree.outcome == 'success' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dependency-warm-${{ matrix.arm }}-${{ matrix.trial }}-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/dependency-warm/identity.json
+            ${{ runner.temp }}/dependency-warm/workspaces.json
+            ${{ runner.temp }}/dependency-warm/install.json
+            ${{ runner.temp }}/dependency-warm/install.log
+            ${{ runner.temp }}/dependency-warm/reuse.json
+            ${{ runner.temp }}/dependency-warm/discovery.json
+          if-no-files-found: error
+          retention-days: 3
+          overwrite: true
+
+      - name: 'Remove only this trial’s detached worktree after evidence capture'
+        if: ${{ always() }}
+        run: |
+          python3 <<'PY'
+          import os, pathlib, subprocess
+          root = pathlib.Path(os.environ['RUNNER_TEMP']).resolve()
+          record = root / 'dependency-warm/worktree-path.txt'
+          if not record.is_file():
+              raise SystemExit(0)
+          tree = pathlib.Path(record.read_text().strip()).resolve()
+          if tree.parent != root or not tree.name.startswith('dependency-warm-worktree.'):
+              raise RuntimeError('Refusing cleanup outside this trial’s temporary worktree')
+          entries = subprocess.check_output(['git', 'worktree', 'list', '--porcelain'], text=True).split('\n\n')
+          entry = next((value for value in entries if value and value.splitlines()[0] == 'worktree ' + str(tree)), None)
+          if entry is None:
+              raise SystemExit(0)
+          if 'detached' not in entry.splitlines() or 'HEAD ' + os.environ['SOURCE_SHA'] not in entry.splitlines():
+              raise RuntimeError('Refusing cleanup of a worktree with a different source or branch')
+          subprocess.run(['git', 'worktree', 'remove', '--force', str(tree)], check=True)
+          PY
