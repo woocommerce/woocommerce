@@ -1035,7 +1035,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return bool
 	 */
 	public function is_valid_status( string $status ): bool {
-		return in_array( 'wc-' . OrderUtil::remove_status_prefix( $status ), $this->get_valid_statuses(), true );
+		$unprefixed = OrderUtil::remove_status_prefix( $status );
+		if ( strlen( 'wc-' . $unprefixed ) > 20 ) {
+			return false;
+		}
+
+		return in_array( 'wc-' . $unprefixed, $this->get_valid_statuses(), true );
 	}
 
 	/**
@@ -1118,6 +1123,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Set order status.
 	 *
+	 * Custom order status slugs should not exceed 17 characters (excluding the 'wc-' prefix),
+	 * as database columns store a maximum of 20 characters.
+	 *
 	 * @since 3.0.0
 	 * @param string $new_status Status to change the order to. No internal wc- prefix is required.
 	 * @return array details of change
@@ -1130,8 +1138,25 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// If setting the status, ensure it's set to a valid status.
 		if ( true === $this->object_read ) {
-			// Only allow valid new status.
-			if (
+			if ( strlen( 'wc-' . $new_status ) > 20 ) {
+				wc_doing_it_wrong(
+					__METHOD__,
+					sprintf(
+						'Order status "%1$s" exceeds the maximum storage limit of %2$d characters and cannot be stored.',
+						esc_html( $new_status ),
+						20
+					),
+					'11.4.0'
+				);
+
+				$stored_status = $this->get_status( 'edit' );
+				if ( $stored_status && ! in_array( $stored_status, $status_exceptions, true ) && strlen( 'wc-' . $stored_status ) <= 20 ) {
+					$new_status = $stored_status;
+					$old_status = $stored_status;
+				} else {
+					$new_status = OrderStatus::PENDING;
+				}
+			} elseif (
 				! in_array( 'wc-' . $new_status, $this->get_valid_statuses(), true )
 				&& ! in_array( $new_status, $status_exceptions, true )
 			) {

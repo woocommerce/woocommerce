@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent custom order status truncation by warning on overlength registered statuses and guarding order status updates against exceeding the 20-character database limit.

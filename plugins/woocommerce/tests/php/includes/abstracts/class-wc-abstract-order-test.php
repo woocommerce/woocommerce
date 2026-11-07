@@ -2898,8 +2898,9 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should warn when an order is saved with a status that exceeds the storage limit.
 	 */
-	public function test_saving_an_order_with_a_too_long_status_warns() {
-		$this->setExpectedIncorrectUsage( 'Abstract_WC_Order_Data_Store_CPT::get_post_status' );
+	public function test_saving_an_order_with_a_too_long_status_warns(): void {
+		$this->setExpectedIncorrectUsage( 'wc_get_order_statuses' );
+		$this->setExpectedIncorrectUsage( 'WC_Abstract_Order::set_status' );
 
 		// 'wc-' + 18 characters = 21, one over the 20-character storage limit.
 		$status = str_repeat( 'a', 18 );
@@ -2908,6 +2909,51 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( $status );
 		$order->save();
+
+		$this->assertSame( OrderStatus::PENDING, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox Should preserve existing status and warn when updating an order to a status that exceeds the storage limit.
+	 */
+	public function test_updating_an_existing_order_to_a_too_long_status_preserves_status(): void {
+		$this->setExpectedIncorrectUsage( 'wc_get_order_statuses' );
+		$this->setExpectedIncorrectUsage( 'WC_Abstract_Order::set_status' );
+
+		// 'wc-' + 23 characters = 26, well over the 20-character storage limit.
+		$status = 'awaiting-carrier-pickup';
+		$this->register_custom_order_status( $status );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		$this->assertSame( OrderStatus::PROCESSING, $order->get_status() );
+
+		$order->update_status( $status );
+
+		$this->assertSame( OrderStatus::PROCESSING, $order->get_status() );
+		$this->assertSame( OrderStatus::PROCESSING, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox is_valid_status should reject statuses exceeding the storage limit.
+	 */
+	public function test_is_valid_status_rejects_statuses_exceeding_storage_limit(): void {
+		$this->setExpectedIncorrectUsage( 'wc_get_order_statuses' );
+
+		$valid_limit_status = str_repeat( 'a', 17 );
+		$too_long_status    = str_repeat( 'b', 18 );
+
+		$this->register_custom_order_status( $valid_limit_status );
+		$this->register_custom_order_status( $too_long_status );
+
+		$order = new WC_Order();
+
+		$this->assertTrue( $order->is_valid_status( $valid_limit_status ) );
+		$this->assertTrue( $order->is_valid_status( 'wc-' . $valid_limit_status ) );
+		$this->assertFalse( $order->is_valid_status( $too_long_status ) );
+		$this->assertFalse( $order->is_valid_status( 'wc-' . $too_long_status ) );
 	}
 
 	/**
