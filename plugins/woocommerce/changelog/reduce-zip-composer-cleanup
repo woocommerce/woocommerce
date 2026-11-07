@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Stop generating the unused optimized Composer classmaps in the release build and remove the composer/installers plugin and installed.json from the shipped zip.
