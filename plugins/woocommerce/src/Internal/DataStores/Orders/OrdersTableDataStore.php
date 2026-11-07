@@ -3404,8 +3404,16 @@ FROM $order_meta_table
 				);
 			} else {
 				$query_vars['meta_query'][] = array(
-					'key'     => '_anonymized',
-					'compare' => 'NOT EXISTS',
+					'relation' => 'OR',
+					array(
+						'key'     => '_anonymized',
+						'compare' => 'NOT EXISTS',
+					),
+					array(
+						'key'     => '_anonymized',
+						'value'   => 'yes',
+						'compare' => '!=',
+					),
 				);
 			}
 		}

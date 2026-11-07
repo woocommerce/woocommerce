@@ -1016,8 +1016,16 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				);
 			} else {
 				$wp_query_args['meta_query'][] = array(
-					'key'     => '_anonymized',
-					'compare' => 'NOT EXISTS',
+					'relation' => 'OR',
+					array(
+						'key'     => '_anonymized',
+						'compare' => 'NOT EXISTS',
+					),
+					array(
+						'key'     => '_anonymized',
+						'value'   => 'yes',
+						'compare' => '!=',
+					),
 				);
 			}
 		}

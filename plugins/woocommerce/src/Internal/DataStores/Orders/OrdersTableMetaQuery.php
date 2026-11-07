@@ -102,6 +102,13 @@ class OrdersTableMetaQuery {
 	private $table_aliases = array();
 
 	/**
+	 * Whether the meta query has a NOT EXISTS clause. If so, all JOINs are LEFT JOINs so orders without metadata aren't excluded.
+	 *
+	 * @var bool
+	 */
+	private $has_not_exists_clause = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param OrdersTableQuery $q The main query being performed.
@@ -347,9 +354,31 @@ class OrdersTableMetaQuery {
 			return;
 		}
 
+		$this->has_not_exists_clause = $this->contains_not_exists_clause( $this->queries );
+
 		$queries     = $this->queries;
 		$sql_where   = $this->process( $queries );
 		$this->where = $sql_where;
+	}
+
+	/**
+	 * Checks whether a sanitized meta query has a NOT EXISTS clause at any level.
+	 *
+	 * @param array $q A sanitized meta query array.
+	 * @return bool TRUE if a clause uses NOT EXISTS, FALSE otherwise.
+	 */
+	private function contains_not_exists_clause( array $q ): bool {
+		foreach ( $q as $key => $arg ) {
+			if ( 'relation' === $key || ! is_array( $arg ) ) {
+				continue;
+			}
+
+			if ( $this->is_atomic( $arg ) ? 'NOT EXISTS' === $arg['compare'] : $this->contains_not_exists_clause( $arg ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -433,7 +462,9 @@ class OrdersTableMetaQuery {
 			}
 		}
 
-		return "INNER JOIN {$this->meta_table} AS {$alias} ON ( {$this->orders_table}.id = {$alias}.order_id )";
+		$join_type = $this->has_not_exists_clause ? 'LEFT JOIN' : 'INNER JOIN';
+
+		return "{$join_type} {$this->meta_table} AS {$alias} ON ( {$this->orders_table}.id = {$alias}.order_id )";
 	}
 
 	/**
