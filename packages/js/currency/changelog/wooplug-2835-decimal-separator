@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use the configured decimal separator when formatting currency values without a symbol.

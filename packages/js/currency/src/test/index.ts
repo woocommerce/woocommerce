@@ -94,6 +94,26 @@ describe( 'currency.formatDecimalString', () => {
 		expect( currency.formatDecimalString( '19.80' ) ).toBe( '19.80' );
 	} );
 
+	it( 'should use the configured decimal separator without adding thousands separators', () => {
+		const currency = Currency( {
+			decimalSeparator: ',',
+			thousandSeparator: '.',
+			precision: 2,
+		} );
+		expect( currency.formatDecimalString( 12.34 ) ).toBe( '12,34' );
+		expect( currency.formatDecimalString( '1234.567' ) ).toBe( '1234,57' );
+		expect( currency.formatDecimalString( -12.3 ) ).toBe( '-12,30' );
+		expect( currency.formatDecimalString( 0 ) ).toBe( '0,00' );
+
+		currency.setCurrency( { decimalSeparator: ':', precision: 3 } );
+		expect( currency.formatDecimalString( 12.34 ) ).toBe( '12:340' );
+	} );
+
+	it( 'should not add a decimal separator for zero precision', () => {
+		const currency = Currency( { decimalSeparator: ',', precision: 0 } );
+		expect( currency.formatDecimalString( 12.6 ) ).toBe( '13' );
+	} );
+
 	it( "should return empty string when given an input that isn't a number", () => {
 		const currency = Currency();
 		expect( currency.formatDecimalString( 'abc' ) ).toBe( '' );
