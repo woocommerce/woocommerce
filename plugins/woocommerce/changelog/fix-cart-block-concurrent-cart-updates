@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Cart and Checkout blocks: send cart and checkout changes one request at a time, so quick changes to quantities, the shipping rate, the address or the payment method are no longer lost.
