@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Allow decimal quantity for order items in the admin order editor.
