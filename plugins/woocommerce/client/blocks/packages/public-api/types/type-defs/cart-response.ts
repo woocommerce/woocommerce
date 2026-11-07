@@ -13,6 +13,9 @@ export interface CartResponseTotalsItem extends CurrencyResponse {
 export interface CartResponseCouponItem {
 	code: string;
 	discount_type: string;
+	// Optional so adding it does not break consumers that construct this type. Absent means
+	// removable, which is the safe default for a response from a server that does not send it.
+	is_removable?: boolean;
 	totals: CartResponseTotalsItem;
 }
 

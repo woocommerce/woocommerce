@@ -2,4 +2,9 @@
 	list-style: none;
 	margin: $gap-smallest 0 0;
 	padding: 0;
+
+	// Auto-applied coupons have no 16px remove button, so match its height to keep chips the same size.
+	.wc-block-components-chip:not(.is-removable) .wc-block-components-chip__text {
+		line-height: 16px;
+	}
 }
