@@ -158,12 +158,14 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 		add_filter( 'query', $query_filter );
 
 		try {
-			$tests = $this->sut->handle_site_status_tests( array() );
+			$tests  = $this->sut->handle_site_status_tests( array() );
+			$result = $this->sut->run_test( 'woocommerce_order_meta_table_size' );
 		} finally {
 			remove_filter( 'query', $query_filter );
 		}
 
 		$this->assertArrayNotHasKey( 'woocommerce_order_meta_table_size', $tests['direct'], 'The HPOS-specific check should be omitted when HPOS is disabled.' );
+		$this->assertSame( array(), $result, 'Running the HPOS-specific check should return no result when HPOS is disabled.' );
 		$this->assertSame( 0, $statistics_queries, 'The HPOS table statistics query should not run when HPOS is disabled.' );
 	}
 
