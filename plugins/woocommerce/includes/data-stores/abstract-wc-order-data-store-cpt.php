@@ -541,6 +541,20 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	}
 
 	/**
+	 * Clear cached refund totals for an order.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param int $order_id Parent order ID.
+	 */
+	protected function clear_refund_total_caches( int $order_id ): void {
+		$cache_prefix = WC_Cache_Helper::get_cache_prefix( 'orders' );
+		foreach ( array( 'total_refunded', 'total_tax_refunded', 'total_shipping_refunded', 'total_shipping_tax_refunded' ) as $cache_key ) {
+			wp_cache_delete( $cache_prefix . $cache_key . $order_id, 'orders' );
+		}
+	}
+
+	/**
 	 * Read order items of a specific type from the database for this order.
 	 *
 	 * @param  WC_Order $order Order object.
