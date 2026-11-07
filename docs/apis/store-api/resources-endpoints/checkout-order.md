@@ -22,6 +22,8 @@ POST /wc/store/v1/checkout/{ORDER_ID}
 | `payment_method`   | string |   Yes    | The ID of the payment method being used to process the payment.     |
 | `payment_data`     | array  |    No    | Data to pass through to the payment method when processing payment. |
 
+When an order has no address yet and no shipping destination to preserve, its billing address is also used as its shipping address. Any `shipping_address` sent for such an order is ignored. A physical order with an existing shipping line keeps its submitted shipping address even when store shipping is unavailable.
+
 ```sh
 curl --header "Nonce: 12345" --request POST https://example-store.com/wp-json/wc/store/v1/checkout/{ORDER_ID} -d '{"key":"wc_order_oFmQYREzh9Tfv","billing_email":"admin@example.com","payment_method":"cheque","billing_address":{...},"shipping_address":{...}'
 ```

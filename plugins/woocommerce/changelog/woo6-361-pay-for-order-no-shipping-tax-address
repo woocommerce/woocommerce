@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Tax an order that needs no shipping and has no address yet at its billing address when it is paid through the Store API.
