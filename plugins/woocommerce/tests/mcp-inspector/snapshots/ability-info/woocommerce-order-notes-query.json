@@ -1,0 +1,64 @@
+{
+	"name": "woocommerce/order-notes-query",
+	"label": "Query order notes",
+	"description": "List every note of an order, newest first.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"id": {
+				"type": "integer",
+				"description": "Order ID.",
+				"minimum": 1
+			}
+		},
+		"required": [
+			"id"
+		],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"notes": {
+				"type": "array",
+				"items": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "integer"
+						},
+						"author": {
+							"type": "string"
+						},
+						"date_created": {
+							"type": "string",
+							"format": "date-time",
+							"description": "Note creation date. Omitted when no creation date is available."
+						},
+						"note": {
+							"type": "string"
+						},
+						"customer_note": {
+							"type": "boolean"
+						}
+					},
+					"additionalProperties": false
+				}
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": true,
+			"destructive": false,
+			"idempotent": true
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}
