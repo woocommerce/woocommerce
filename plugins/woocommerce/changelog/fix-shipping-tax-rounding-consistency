@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep checkout and order totals consistent when shipping tax falls on a rounding boundary.
