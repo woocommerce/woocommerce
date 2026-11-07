@@ -480,6 +480,20 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox New stores split shipping tax by cart item value, and keep the shipping tax class as it was.
+	 */
+	public function test_newly_installed_splits_shipping_tax(): void {
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+		update_option( 'woocommerce_split_shipping_tax_by_item_value', 'no' );
+
+		\WC_Install::split_shipping_tax_for_newly_installed();
+
+		$this->assertNotFalse( has_action( 'woocommerce_newly_installed', array( \WC_Install::class, 'split_shipping_tax_for_newly_installed' ) ) );
+		$this->assertSame( 'yes', get_option( 'woocommerce_split_shipping_tax_by_item_value' ) );
+		$this->assertSame( 'inherit', get_option( 'woocommerce_shipping_tax_class' ) );
+	}
+
+	/**
 	 * Test that order stats table schema includes fulfillment_status column for new installations with fulfillments feature enabled.
 	 *
 	 * @return void
