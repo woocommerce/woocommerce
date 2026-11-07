@@ -52,6 +52,7 @@ final class SettingsScreen {
 		add_action( 'admin_head', array( $this, 'handle_admin_head' ) );
 		add_filter( 'submenu_file', array( $this, 'handle_submenu_file' ) );
 		add_action( 'in_admin_header', array( $this, 'handle_in_admin_header' ), PHP_INT_MAX );
+		add_filter( 'woocommerce_navigation_is_connected_page', array( $this, 'handle_is_connected_page' ), 20 );
 	}
 
 	/**
@@ -137,6 +138,22 @@ final class SettingsScreen {
 			remove_all_actions( 'admin_notices' );
 			remove_all_actions( 'all_admin_notices' );
 		}
+	}
+
+	/**
+	 * Keep the WooCommerce admin header off the screen.
+	 *
+	 * Core adds it to screens whose ID starts with `woocommerce_page_wc-settings-`, which matches this page's slug.
+	 *
+	 * @internal
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param mixed $is_connected_page Whether the current page is connected.
+	 * @return mixed
+	 */
+	public function handle_is_connected_page( $is_connected_page ) {
+		return $this->is_current_page() ? false : $is_connected_page;
 	}
 
 	/**
