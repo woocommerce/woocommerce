@@ -22,6 +22,7 @@ import { getAdminLink } from '@woocommerce/settings';
 import { ordersStore, itemsStore } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { CurrencyContext, CurrencyFactory } from '@woocommerce/currency';
+import { formatValue } from '@woocommerce/number';
 
 /**
  * Internal dependencies
@@ -69,7 +70,12 @@ const renderEmptyCard = () => {
 	);
 };
 
-function renderOrders( orders, customers, getFormattedOrderTotal ) {
+function renderOrders(
+	orders,
+	customers,
+	getFormattedOrderTotal,
+	numberConfig
+) {
 	if ( orders.length === 0 ) {
 		return renderEmptyCard();
 	}
@@ -173,14 +179,18 @@ function renderOrders( orders, customers, getFormattedOrderTotal ) {
 					<div>
 						<span>
 							{ sprintf(
-								/* translators: %d: number of products */
+								/* translators: %s: formatted number of products */
 								_n(
-									'%d product',
-									'%d products',
+									'%s product',
+									'%s products',
 									productsCount,
 									'woocommerce'
 								),
-								productsCount
+								formatValue(
+									numberConfig,
+									'number',
+									productsCount
+								)
 							) }
 						</span>
 						<span>
@@ -349,7 +359,12 @@ function OrdersPanel( { unreadOrdersCount, orderStatuses } ) {
 						lines={ 1 }
 					/>
 				) : (
-					renderOrders( orders, customerList, getFormattedOrderTotal )
+					renderOrders(
+						orders,
+						customerList,
+						getFormattedOrderTotal,
+						storeCurrency
+					)
 				) }
 			</Section>
 		</>
