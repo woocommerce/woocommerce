@@ -131,6 +131,8 @@ class WC_Tracks_Event {
 			return '';
 		}
 
+		$validated = is_object( $validated ) ? get_object_vars( $validated ) : $validated;
+
 		return esc_url_raw( WC_Tracks_Client::PIXEL . '?' . http_build_query( $validated ) );
 	}
 
