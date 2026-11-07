@@ -43,6 +43,7 @@
 		"@wordpress/route": "catalog:wp-min",
 		"@wordpress/ui": "catalog:wp-bundled",
 		"@wordpress/views": "catalog:wp-bundled",
+		"@wordpress/warning": "catalog:wp-min",
 		"react": "18.3.x",
 		"react-dom": "18.3.x"
 	},

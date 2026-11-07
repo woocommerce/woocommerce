@@ -14,15 +14,16 @@ import { useParams } from '@wordpress/route';
 // eslint-disable-next-line @wordpress/use-recommended-components -- Fine on this experimental screen until the repo enables allowUseWithCaution.
 import { Button, Notice, Stack } from '@wordpress/ui';
 import { useViewConfig } from '@wordpress/views';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 /**
  * Internal dependencies
  */
 import type { SettingsRecord } from '../../entity-fields/types';
-import { ENTITY_KIND } from './entities';
-import type { SettingsEntityConfig } from './entities';
+import { getSection } from './entities';
+import type { SettingsEntityConfig, SettingsSection } from './entities';
 import { getEntityFields } from './entity-fields';
+import { getPageCrumbs, getPageName } from './pages';
 import './style.scss';
 
 const EMPTY_FORM: Form = { fields: [] };
@@ -43,30 +44,40 @@ function getErrorMessage( error: unknown, fallback: string ): string {
 /**
  * Render and save one settings entity using WordPress entity and form APIs.
  */
-function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
+function SettingsForm( {
+	section,
+	config,
+}: {
+	section: SettingsSection;
+	config: SettingsEntityConfig;
+} ) {
 	const { kind, name, label } = config;
+	const recordId = config.recordId ?? name;
 	const { record, editedRecord, hasEdits, edit, save } =
-		useEntityRecord< SettingsRecord >( kind, name, name );
+		useEntityRecord< SettingsRecord >( kind, name, recordId );
 	const isNarrow = useViewportMatch( 'medium', '<' );
 	const { form } = useViewConfig( { kind, name } );
 	const [ notice, setNotice ] = useState< {
 		status: 'success' | 'error';
 		message: string;
 	} >();
-	const { fields, isSaving, loadError } = useSelect(
+	const { fields, isSaving, loadError, entities } = useSelect(
 		( select ) => {
 			const core = select( coreStore );
 			return {
 				fields: getEntityFields( select( editorStore ), kind, name ),
-				isSaving: core.isSavingEntityRecord( kind, name, name ),
+				isSaving: core.isSavingEntityRecord( kind, name, recordId ),
 				loadError: core.getResolutionError( 'getEntityRecord', [
 					kind,
 					name,
-					name,
+					recordId,
 				] ),
+				entities: core.getEntitiesConfig(
+					kind
+				) as SettingsEntityConfig[],
 			};
 		},
-		[ kind, name ]
+		[ kind, name, recordId ]
 	);
 	const data = editedRecord as SettingsRecord | undefined;
 	const { validity, isValid } = useFormValidity(
@@ -98,10 +109,7 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 	const hasLoadError = !! loadError;
 	const isReady = ! hasLoadError && !! data && !! form;
 	// Breadcrumbs link through the router, which only leaves the screen for an absolute URL.
-	const paymentsUrl = new URL(
-		'admin.php?page=wc-settings&tab=checkout',
-		window.location.href
-	).toString();
+	const sectionUrl = new URL( section.url, window.location.href ).toString();
 	const formActions = (
 		<Stack direction="row" gap="sm" justify="end">
 			<Button
@@ -128,17 +136,25 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 			</Button>
 		</Stack>
 	);
+	const pageCrumbs = useMemo(
+		() =>
+			getPageCrumbs(
+				section.slug,
+				name,
+				( pageName ) =>
+					entities.find( ( entity ) => entity.name === pageName )
+						?.label
+			),
+		[ section.slug, name, entities ]
+	);
 	return (
 		<Page
 			ariaLabel={ label }
 			breadcrumbs={
 				<Breadcrumbs
 					items={ [
-						{
-							label: __( 'Payments', 'woocommerce' ),
-							to: paymentsUrl,
-						},
-						{ label },
+						{ label: section.label, to: sectionUrl },
+						...pageCrumbs,
 					] }
 				/>
 			}
@@ -200,20 +216,34 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 }
 
 /**
- * Show the settings entity whose name matches the route, as registered with addEntities().
+ * Show the settings entity whose name matches the route's path after its area, from the area's
+ * entity kind. Sub-pages are entities too, named after their full path.
  */
 function SettingsStage() {
-	const { page }: { page?: string } = useParams( { strict: false } );
+	const {
+		section: slug,
+		page,
+		_splat: subPath,
+	}: { section?: string; page?: string; _splat?: string } = useParams( {
+		strict: false,
+	} );
+	const section = getSection( slug );
+	const kind = section?.kind;
+	const name = getPageName( page, subPath );
 	const config = useSelect(
 		( select ) =>
-			page
-				? ( select( coreStore ).getEntityConfig( ENTITY_KIND, page ) as
+			kind && name
+				? ( select( coreStore ).getEntityConfig( kind, name ) as
 						SettingsEntityConfig | undefined )
 				: undefined,
-		[ page ]
+		[ kind, name ]
 	);
-	return config ? (
-		<SettingsForm key={ config.name } config={ config } />
+	return section && config ? (
+		<SettingsForm
+			key={ config.name }
+			section={ section }
+			config={ config }
+		/>
 	) : null;
 }
 
