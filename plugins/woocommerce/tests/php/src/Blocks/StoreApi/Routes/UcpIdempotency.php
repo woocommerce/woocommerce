@@ -7,7 +7,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
-use Automattic\WooCommerce\StoreApi\Routes\V1\Ucp\AbstractCartRoute;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\IdempotencyClaim;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\IdempotencyStore;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\RequestFingerprint;
@@ -15,18 +14,13 @@ use Automattic\WooCommerce\StoreApi\Utilities\Ucp\RequestFingerprint;
 /**
  * Tests for `Idempotency-Key` handling on the /wc/ucp/v1/carts writes.
  */
-class UcpIdempotency extends ControllerTestCase {
+class UcpIdempotency extends UcpCartTestCase {
 	/**
 	 * Published product IDs shared by the class, oldest first.
 	 *
 	 * @var int[]
 	 */
 	private static $product_ids = array();
-
-	/**
-	 * Option behind the `ucp` feature.
-	 */
-	private const FEATURE_OPTION = 'woocommerce_feature_ucp_enabled';
 
 	/**
 	 * Create the fixtures the whole class shares.
@@ -63,30 +57,6 @@ class UcpIdempotency extends ControllerTestCase {
 	public static function wpTearDownAfterClass(): void {
 		self::delete_class_fixture_products( self::$product_ids );
 		self::$product_ids = array();
-	}
-
-	/**
-	 * Enable the UCP routes and rebuild the REST server so they register.
-	 */
-	protected function setUp(): void {
-		parent::setUp();
-
-		update_option( self::FEATURE_OPTION, 'yes' );
-		$this->initialize_store_api_server();
-	}
-
-	/**
-	 * Clear the request state the database rollback does not cover.
-	 */
-	protected function tearDown(): void {
-		unset( $_SERVER['HTTP_CART_TOKEN'] );
-
-		// The session is loaded once per process, so a cancel in one test would mark the next test's cart cancelled.
-		if ( WC()->session ) {
-			WC()->session->set( AbstractCartRoute::CANCELLED_SESSION_KEY, null );
-		}
-
-		parent::tearDown();
 	}
 
 	/**
