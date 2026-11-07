@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep sold-individually products limited to one per order when added through a checkout link.
