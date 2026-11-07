@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
+
 /**
  * UCP `POST /carts` route.
  */
@@ -67,7 +69,7 @@ class Carts extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		$line_items = $request->get_param( 'line_items' );
+		$line_items = Utils::json_param( $request, 'line_items' );
 
 		if ( null !== $line_items ) {
 			$desired = $this->parse_line_items( $line_items );

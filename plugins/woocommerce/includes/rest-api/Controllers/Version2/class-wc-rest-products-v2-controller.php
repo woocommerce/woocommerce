@@ -739,7 +739,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 
 				// Taxonomy-based attributes are prefixed with `pa_`, otherwise simply `attribute_`.
 				if ( 0 === strpos( $attribute_name, 'attribute_pa_' ) ) {
-					$option_term  = get_term_by( 'slug', $attribute, $name );
+					$option_term  = get_term_by( 'slug', $attribute, rawurldecode( $name ) );
 					$attributes[] = array(
 						'id'     => wc_attribute_taxonomy_id_by_name( $name ),
 						'name'   => $this->get_attribute_taxonomy_name( $name, $_product ),
@@ -1473,6 +1473,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 
 			foreach ( $images as $index => $image ) {
 				$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
+				$is_new_upload = false;
 
 				if ( 0 === $attachment_id && isset( $image['src'] ) ) {
 					$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
@@ -1486,9 +1487,14 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					}
 
 					$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $product->get_id() );
+					$is_new_upload = true;
 				}
 
 				if ( ! wp_attachment_is_image( $attachment_id ) ) {
+					if ( $is_new_upload && $attachment_id > 0 ) {
+						wp_delete_attachment( $attachment_id, true );
+					}
+
 					/* translators: %s: attachment id */
 					throw new WC_REST_Exception( 'woocommerce_product_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 );
 				}

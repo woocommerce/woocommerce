@@ -365,6 +365,9 @@ class WC_Install {
 			// Run again to cancel all pattern fetch jobs now that scheduling is disabled.
 			'wc_update_1040_cleanup_legacy_ptk_patterns_fetching',
 		),
+		'11.2.2'   => array(
+			'wc_update_1122_remove_objects_from_default_attributes',
+		),
 		'11.3.0'   => array(
 			'wc_update_1130_set_legacy_variation_price_hash_option',
 			'wc_update_1130_delete_unpublished_variation_lookup_rows',
@@ -375,6 +378,8 @@ class WC_Install {
 		'11.4.0'   => array(
 			'wc_update_1140_re_enable_autoload_options',
 			'wc_update_1140_add_mpn_to_product_lookup_table',
+			// Run again for stores whose database was already at 11.3.0 or later, as they skip the 11.2.2 key.
+			'wc_update_1122_remove_objects_from_default_attributes',
 		),
 	);
 
@@ -3328,11 +3333,7 @@ EOT;
 <div class="wp-block-woocommerce-checkout-order-note-block"></div>
 <!-- /wp:woocommerce/checkout-order-note-block -->
 
-<!-- wp:woocommerce/checkout-terms-block -->
-<div class="wp-block-woocommerce-checkout-terms-block"></div>
-<!-- /wp:woocommerce/checkout-terms-block -->
-
-<!-- wp:woocommerce/checkout-actions-block -->
+<!-- wp:woocommerce/checkout-actions-block {"showTerms":true} -->
 <div class="wp-block-woocommerce-checkout-actions-block"></div>
 <!-- /wp:woocommerce/checkout-actions-block --></div>
 <!-- /wp:woocommerce/checkout-fields-block -->

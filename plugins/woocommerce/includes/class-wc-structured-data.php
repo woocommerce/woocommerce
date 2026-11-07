@@ -12,6 +12,7 @@
  * @version 3.0.0
  */
 
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -158,7 +159,7 @@ class WC_Structured_Data {
 		$types   = array();
 		$types[] = is_shop() || is_product_category() || is_product() ? 'product' : '';
 		$types[] = is_shop() && is_front_page() ? 'website' : '';
-		$types[] = $policy_page_id > 0 && is_page( $policy_page_id ) && ! doing_action( 'woocommerce_email_order_details' ) ? 'onlinestore' : '';
+		$types[] = $policy_page_id > 0 && ( is_page( $policy_page_id ) || is_product() ) && ! doing_action( 'woocommerce_email_order_details' ) ? 'onlinestore' : '';
 		$types[] = is_product() ? 'review' : '';
 		$types[] = 'breadcrumblist';
 		$types[] = 'order';
@@ -193,7 +194,7 @@ class WC_Structured_Data {
 		$data  = $this->get_structured_data( $types );
 
 		if ( $data ) {
-			echo '<script type="application/ld+json">' . wc_esc_json( wp_json_encode( $data, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ), true ) . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo '<script type="application/ld+json">' . wc_esc_json( wp_json_encode( $data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_SLASHES ), true ) . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 	}
 
@@ -460,7 +461,8 @@ class WC_Structured_Data {
 						? wc_get_price_including_tax( $offer_source, array( 'price' => $offer_source->get_sale_price() ) )
 						: wc_get_price_excluding_tax( $offer_source, array( 'price' => $offer_source->get_sale_price() ) );
 					if ( $offer_source->get_date_on_sale_to() ) {
-						$sale_price_valid_until = gmdate( 'Y-m-d', $offer_source->get_date_on_sale_to()->getTimestamp() );
+						$sale_date_to           = clone $offer_source->get_date_on_sale_to();
+						$sale_price_valid_until = (string) $sale_date_to->setTimezone( wp_timezone() )->format( 'Y-m-d' );
 					}
 
 					// We add the sale price to the top of the array so it's the first offer.
@@ -504,6 +506,17 @@ class WC_Structured_Data {
 				)
 			) {
 				$markup_offer['priceCurrency'] = $currency;
+			}
+
+			if ( ( ! $product->is_type( array( ProductType::VARIABLE, ProductType::GROUPED ) ) || $selected_variation ) && $offer_source->is_on_sale() ) {
+				$date_on_sale_from = $offer_source->get_date_on_sale_from();
+				$date_on_sale_to   = $offer_source->get_date_on_sale_to();
+				if ( $date_on_sale_from ) {
+					$markup_offer['validFrom'] = ( clone $date_on_sale_from )->setTimezone( wp_timezone() )->format( DATE_ATOM );
+				}
+				if ( $date_on_sale_to ) {
+					$markup_offer['validThrough'] = ( clone $date_on_sale_to )->setTimezone( wp_timezone() )->format( DATE_ATOM );
+				}
 			}
 
 			$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
@@ -598,8 +611,113 @@ class WC_Structured_Data {
 			);
 		}
 
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Reuse the breadcrumb filter.
+		$term_args  = apply_filters(
+			'woocommerce_breadcrumb_product_terms_args',
+			array(
+				'orderby' => 'parent',
+				'order'   => 'DESC',
+			)
+		);
+		$product_id = $product instanceof WC_Product_Variation ? $product->get_parent_id() : $product->get_id();
+		$terms      = is_array( $term_args ) ? wc_get_product_terms( $product_id, 'product_cat', $term_args ) : array();
+		if ( ! empty( $terms ) && is_array( $terms ) ) {
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Reuse the breadcrumb filter.
+			$term  = apply_filters( 'woocommerce_breadcrumb_main_term', reset( $terms ), $terms );
+			$names = array();
+			$seen  = array();
+			while ( $term instanceof WP_Term && 'product_cat' === $term->taxonomy && ! isset( $seen[ $term->term_id ] ) ) {
+				$seen[ $term->term_id ] = true;
+				$names[]                = html_entity_decode( $term->name, ENT_QUOTES, get_bloginfo( 'charset' ) );
+				if ( ! $term->parent ) {
+					$markup['category'] = implode( ' > ', array_reverse( $names ) );
+					break;
+				}
+				$term = get_term( $term->parent, 'product_cat' );
+			}
+		}
+
+		$videos = $this->get_product_gallery_video_data( $product );
+		if ( $videos ) {
+			$markup['subjectOf'] = $videos;
+		}
+
 		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
 	}
+
+	/**
+	 * Get structured data for usable uploaded gallery videos.
+	 *
+	 * @param WC_Product $product Product data.
+	 * @return array Video data.
+	 */
+	private function get_product_gallery_video_data( $product ) {
+		if ( ! ProductMediaGallery::is_feature_enabled() ) {
+			return array();
+		}
+
+		$videos = ProductMediaGallery::get_stored_video_gallery_items( $product );
+		if ( ! $videos ) {
+			return array();
+		}
+
+		$ids = array_filter( array_map( 'absint', array_merge( array_column( $videos, 'id' ), array_column( $videos, 'poster_id' ) ) ) );
+		if ( $ids ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( array_unique( $ids ) );
+		}
+
+		$video_data = array();
+		foreach ( ProductMediaGallery::get_product_media_gallery_items( $product ) as $item ) {
+			if ( 'video' !== $item['media_type'] ) {
+				continue;
+			}
+
+			$id         = (int) $item['id'];
+			$attachment = get_post( $id );
+			if ( ! $attachment || 'attachment' !== $attachment->post_type ) {
+				continue;
+			}
+			$url       = wp_get_attachment_url( $id );
+			$date      = get_post_datetime( $attachment, 'date', 'gmt' );
+			$poster_id = (int) ( $item['poster_id'] ?? 0 );
+			$thumbnail = $poster_id ? wp_get_attachment_image_url( $poster_id, 'full' ) : false;
+			if ( ! $thumbnail && $product->get_image_id() ) {
+				$thumbnail = wp_get_attachment_image_url( (int) $product->get_image_id(), 'full' );
+			}
+			$name = trim( wp_strip_all_tags( $attachment->post_title ) );
+			$name = $name ? $name : trim( wp_strip_all_tags( $product->get_name() ) );
+			if ( ! $url || ! $thumbnail || ! $date || ! $name ) {
+				continue;
+			}
+
+			$video       = array(
+				'@type'        => 'VideoObject',
+				'name'         => $name,
+				'contentUrl'   => $url,
+				'thumbnailUrl' => $thumbnail,
+				'uploadDate'   => $date->format( DATE_ATOM ),
+			);
+			$description = trim( wp_strip_all_tags( $attachment->post_content ) );
+			if ( $description ) {
+				$video['description'] = $description;
+			}
+			/**
+			 * Video attachment metadata.
+			 *
+			 * @var array<string, mixed>|false $metadata
+			 */
+			$metadata = wp_get_attachment_metadata( $id );
+			$length   = is_array( $metadata ) ? ( $metadata['length'] ?? null ) : null;
+			if ( is_int( $length ) && 0 < $length ) {
+				$video['duration'] = 'PT' . (int) $length . 'S';
+			}
+			$video_data[] = $video;
+		}
+
+		return $video_data;
+	}
+
 
 	/**
 	 * Generates Review structured data.
@@ -681,7 +799,7 @@ class WC_Structured_Data {
 	}
 
 	/**
-	 * Generates link-only return-policy data on the selected public policy page.
+	 * Generates link-only return-policy data on product pages and the selected public policy page.
 	 *
 	 * Hooked into `wp_footer` before structured data is output, so it cannot leak into order emails.
 	 *
@@ -689,7 +807,7 @@ class WC_Structured_Data {
 	 */
 	public function generate_online_store_data(): void {
 		$page_id = wc_get_page_id( 'refund_returns' );
-		if ( $page_id <= 0 || ! is_page( $page_id ) ) {
+		if ( $page_id <= 0 || ( ! is_page( $page_id ) && ! is_product() ) ) {
 			return;
 		}
 
@@ -714,7 +832,7 @@ class WC_Structured_Data {
 		);
 
 		/**
-		 * Filters the store and return-policy structured data on the policy page.
+		 * Filters the store and return-policy structured data.
 		 *
 		 * @since 11.3.0
 		 * @param array   $markup Structured data for the online store.

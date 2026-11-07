@@ -36,6 +36,7 @@
 - [woocommerce_cart_contents_changed](#woocommerce_cart_contents_changed)
 - [woocommerce_cart_item_permalink](#woocommerce_cart_item_permalink)
 - [woocommerce_checkout_must_be_logged_in_message](#woocommerce_checkout_must_be_logged_in_message)
+- [woocommerce_checkout_show_terms](#woocommerce_checkout_show_terms)
 - [woocommerce_default_payment_method](#woocommerce_default_payment_method)
 - [woocommerce_delete_expired_draft_orders_batch_size](#woocommerce_delete_expired_draft_orders_batch_size)
 - [woocommerce_disable_compatibility_layer](#woocommerce_disable_compatibility_layer)
@@ -879,6 +880,31 @@ apply_filters( 'woocommerce_checkout_must_be_logged_in_message', string $message
 ### Source
 
 - [StoreApi/Routes/V1/Checkout.php](../../../../../../src/StoreApi/Routes/V1/Checkout.php)
+
+---
+
+## woocommerce_checkout_show_terms
+
+
+Filters whether checkout shows the terms and conditions.
+
+```php
+apply_filters( 'woocommerce_checkout_show_terms', bool $show_terms )
+```
+
+### Description
+
+Returning false hides the terms and conditions on classic checkout and on the Checkout block's Actions block, for example when an extension shows its own legal checkboxes. Like classic checkout, this only runs on the frontend, where callbacks can rely on the cart being loaded.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $show_terms | bool | Whether to show the terms and conditions. |
+
+### Source
+
+- [Blocks/BlockTypes/Checkout.php](../../../../../../src/Blocks/BlockTypes/Checkout.php)
 
 ---
 
@@ -2046,7 +2072,7 @@ apply_filters( 'woocommerce_valid_order_statuses_for_payment', array $valid_orde
 
 ### Description
 
-The same filter WC_Order::needs_payment() applies. A status a site declares payable counts as awaiting payment here too, so a failure while the order is in it is reported rather than recovered as one that took payment.
+The same filter WC_Order::needs_payment() applies, so a zero-total order in a status the site declares payable can be resumed.
 
 ### Parameters
 
@@ -2057,7 +2083,6 @@ The same filter WC_Order::needs_payment() applies. A status a site declares paya
 
 ### Source
 
-- [StoreApi/Utilities/CheckoutTrait.php](../../../../../../src/StoreApi/Utilities/CheckoutTrait.php)
 - [StoreApi/Utilities/DraftOrderTrait.php](../../../../../../src/StoreApi/Utilities/DraftOrderTrait.php)
 
 ---

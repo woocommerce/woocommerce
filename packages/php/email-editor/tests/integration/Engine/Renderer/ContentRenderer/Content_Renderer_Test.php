@@ -181,6 +181,108 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test block link styles through the complete rendering pipeline.
+	 *
+	 * @testdox Block link colors from theme.json are inlined and palette presets are resolved.
+	 * @testWith ["#123456"]
+	 *           ["var:preset|color|author-link"]
+	 *
+	 * @param string $color Theme.json link color.
+	 */
+	public function test_render_inlines_block_link_colors( string $color ): void {
+		add_filter( 'woocommerce_email_editor_site_style_sync_enabled', '__return_false' );
+		add_filter(
+			'woocommerce_email_editor_theme_json',
+			static function ( $theme ) use ( $color ) {
+				$theme->merge(
+					new \WP_Theme_JSON(
+						array(
+							'version'  => 3,
+							'settings' => array(
+								'color' => array(
+									'palette' => array(
+										array(
+											'slug'  => 'author-link',
+											'name'  => 'Author link',
+											'color' => '#123456',
+										),
+									),
+								),
+							),
+							'styles'   => array(
+								'elements' => array( 'link' => array( 'color' => array( 'text' => '#654321' ) ) ),
+								'blocks'   => array(
+									'core/post-author' => array(
+										'elements' => array( 'link' => array( 'color' => array( 'text' => $color ) ) ),
+									),
+								),
+							),
+						),
+						'custom'
+					)
+				);
+				return $theme;
+			}
+		);
+		$author_id = $this->factory->user->create( array( 'display_name' => 'Email author' ) );
+		$this->assertIsInt( $author_id );
+		wp_update_post(
+			array(
+				'ID'          => $this->email_post->ID,
+				'post_author' => $author_id,
+			)
+		);
+		$email_post = get_post( $this->email_post->ID );
+		$this->assertInstanceOf( \WP_Post::class, $email_post );
+		$this->email_post  = $email_post;
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-author {"isLink":true,"showAvatar":false} /-->';
+
+		$content = $this->renderer->render( $this->email_post, $template );
+		$styles  = $this->getStylesValueForTag( $content, 'a' );
+
+		$this->assertStringContainsString( '<a ', $content, 'The Post Author block should render a link.' );
+		$this->assertIsString( $styles, 'The author link should have inline styles.' );
+		$this->assertStringContainsString( 'color: #123456', $styles, 'The block link color should be inlined as its palette value.' );
+		$this->assertStringNotContainsString( 'var(', $styles, 'The sent link should not depend on CSS custom properties.' );
+	}
+
+	/**
+	 * Test the existing root and layout selector behavior after normalization.
+	 *
+	 * @testdox Root and layout selectors keep their exclusions and existing inline colors.
+	 * @testWith [":root :where(.selector-test a:where(:not(.alignfull)))"]
+	 *           [".selector-test > :where(:not(.alignleft):not(.alignright):not(.alignfull))"]
+	 *
+	 * @param string $selector WordPress root or layout selector.
+	 */
+	public function test_render_inlines_root_and_layout_selectors( string $selector ): void {
+		add_filter(
+			'woocommerce_email_content_renderer_styles',
+			static function ( $styles ) use ( $selector ) {
+				return $styles . $selector . ' { color: #123456; }';
+			}
+		);
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:paragraph --><p class="selector-test"><a href="https://example.com">Link</a><a class="alignfull" href="https://example.com">Excluded</a><a style="color:#abcdef" href="https://example.com">Custom color</a></p><!-- /wp:paragraph -->';
+
+		$content = $this->renderer->render( $this->email_post, $template );
+		$html    = new \WP_HTML_Tag_Processor( $content );
+		$colors  = array();
+		while ( $html->next_tag( array( 'tag_name' => 'a' ) ) ) {
+			$style    = $html->get_attribute( 'style' );
+			$colors[] = is_string( $style ) ? $style : '';
+		}
+
+		$this->assertCount( 3, $colors, 'All three links should render.' );
+		$this->assertStringContainsString( 'color: #123456', $colors[0], 'The root or layout selector should inline its color.' );
+		$this->assertStringNotContainsString( '#123456', $colors[1], 'The alignfull link must stay excluded.' );
+		$this->assertStringContainsString( 'color: #abcdef', $colors[2], 'The explicit inline color must retain precedence.' );
+	}
+
+	/**
 	 * Test render_without_css_inline() returns HTML and collected CSS.
 	 */
 	public function testRenderWithoutCssInlineReturnsArray(): void {
@@ -689,6 +791,219 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'padding-left:30px', $result );
 		$this->assertStringContainsString( 'padding-right:40px', $result );
 		\WP_Block_Type_Registry::get_instance()->unregister( 'test/asymmetric-padding-block' );
+	}
+
+	/**
+	 * Test a link color set on a block in the editor, which WordPress prints in the block-supports stylesheet, is inlined.
+	 */
+	public function testItInlinesALinkColorSetOnABlock(): void {
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+		$email_post        = $this->create_email_post( '<!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"var:preset|color|vivid-red"}}}}} --><p class="has-link-color">Read <a href="https://example.com">more</a></p><!-- /wp:paragraph -->' );
+
+		try {
+			$rendered = $this->renderer->render( $email_post, $template );
+		} finally {
+			\WP_Style_Engine_CSS_Rules_Store::remove_all_stores();
+		}
+
+		$this->assertStringContainsString( 'color: #cf2e2e', (string) $this->getStylesValueForTag( $rendered, 'a' ) );
+	}
+
+	/**
+	 * Test the content styles filter still receives the layout rule in the `*:not(…)` form released versions passed to it.
+	 */
+	public function testItPassesTheLayoutRuleToTheContentFilterInItsReleasedForm(): void {
+		$selector = '.wp-container-core-columns-is-layout-1 > :where(:not(.alignleft):not(.alignright):not(.alignfull))';
+		wp_style_engine_get_stylesheet_from_css_rules(
+			array(
+				array(
+					'rules_group'  => '',
+					'selector'     => $selector,
+					'declarations' => array( 'max-width' => '321px' ),
+				),
+			),
+			array( 'context' => 'block-supports' )
+		);
+		$received = '';
+		$capture  = static function ( string $styles ) use ( &$received ): string {
+			$received = $styles;
+			return $styles;
+		};
+		add_filter( 'woocommerce_email_content_renderer_styles', $capture );
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+
+		try {
+			$this->renderer->render_without_css_inline( $this->email_post, $template );
+		} finally {
+			remove_filter( 'woocommerce_email_content_renderer_styles', $capture );
+			$store = \WP_Style_Engine_CSS_Rules_Store::get_store( 'block-supports' );
+			if ( $store instanceof \WP_Style_Engine_CSS_Rules_Store ) {
+				$store->remove_rule( $selector );
+			}
+		}
+
+		$this->assertStringContainsString( '.wp-container-core-columns-is-layout-1 > *:not(.alignleft):not(.alignright):not(.alignfull)', $received );
+	}
+
+	/**
+	 * Test content styles added through the filter are inlined when they use `:where()`.
+	 */
+	public function testItInlinesFilteredContentStylesWithWhere(): void {
+		$add_styles = static function ( string $styles ): string {
+			return $styles . '.wp-block-paragraph :where(a){color: #0a0b0c;}';
+		};
+		add_filter( 'woocommerce_email_content_renderer_styles', $add_styles );
+
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+		$email_post        = $this->create_email_post( '<!-- wp:paragraph --><p class="wp-block-paragraph">Read <a href="https://example.com">more</a></p><!-- /wp:paragraph -->' );
+
+		try {
+			$rendered = $this->renderer->render( $email_post, $template );
+		} finally {
+			remove_filter( 'woocommerce_email_content_renderer_styles', $add_styles );
+		}
+
+		$this->assertStringContainsString( 'color: #0a0b0c', (string) $this->getStylesValueForTag( $rendered, 'a' ) );
+	}
+
+	/**
+	 * Test a link color set on a Paragraph wins over the link color of the Group around it, when both are set in the editor.
+	 *
+	 * Both rules have the same weight, so the inner block's rule wins because WordPress prints it later.
+	 */
+	public function testItUsesTheInnerBlockLinkColorInsideAGroupWithALinkColor(): void {
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+		$email_post        = $this->create_email_post( '<!-- wp:group {"style":{"elements":{"link":{"color":{"text":"#123456"}}}}} --><div class="wp-block-group has-link-color"><!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"#654321"}}}}} --><p class="has-link-color">Read <a href="https://example.com">more</a></p><!-- /wp:paragraph --></div><!-- /wp:group -->' );
+
+		try {
+			$rendered = $this->renderer->render( $email_post, $template );
+		} finally {
+			\WP_Style_Engine_CSS_Rules_Store::remove_all_stores();
+		}
+
+		$this->assertStringContainsString( 'color: #654321', (string) $this->getStylesValueForTag( $rendered, 'a' ) );
+	}
+
+	/**
+	 * Test a Site Title link keeps inheriting its color inside a Group that has a link color, as in the editor.
+	 */
+	public function testItKeepsTheSiteTitleLinkColorInsideAGroupWithALinkColor(): void {
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+		$email_post        = $this->create_email_post( '<!-- wp:group {"style":{"elements":{"link":{"color":{"text":"#123456"}}}}} --><div class="wp-block-group has-link-color"><!-- wp:site-title {"isLink":true} /--></div><!-- /wp:group -->' );
+
+		try {
+			$rendered = $this->renderer->render( $email_post, $template );
+		} finally {
+			\WP_Style_Engine_CSS_Rules_Store::remove_all_stores();
+		}
+
+		// The Site Title is the only link in this email.
+		$site_title_link_styles = (string) $this->getStylesValueForTag( $rendered, 'a' );
+		$this->assertStringContainsString( 'color: inherit', $site_title_link_styles );
+		$this->assertStringNotContainsString( '#123456', $site_title_link_styles );
+	}
+
+	/**
+	 * Test a link color set on the Site Title itself shows, also inside a Group that has a link color.
+	 */
+	public function testItUsesTheSiteTitleOwnLinkColor(): void {
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+		$email_post        = $this->create_email_post( '<!-- wp:group {"style":{"elements":{"link":{"color":{"text":"#123456"}}}}} --><div class="wp-block-group has-link-color"><!-- wp:site-title {"isLink":true,"style":{"elements":{"link":{"color":{"text":"#ab1234"}}}}} /--></div><!-- /wp:group -->' );
+
+		try {
+			$rendered = $this->renderer->render( $email_post, $template );
+		} finally {
+			\WP_Style_Engine_CSS_Rules_Store::remove_all_stores();
+		}
+
+		// The Site Title is the only link in this email.
+		$site_title_link_styles = (string) $this->getStylesValueForTag( $rendered, 'a' );
+		$this->assertStringContainsString( 'color: #ab1234', $site_title_link_styles );
+		$this->assertStringContainsString( 'text-decoration: none', $site_title_link_styles );
+	}
+
+	/**
+	 * Test a link color set on a block does not reach the buttons inside it.
+	 */
+	public function testItKeepsBlockLinkColorsOffButtons(): void {
+		$theme_json_filter = static function ( \WP_Theme_JSON $theme ): \WP_Theme_JSON {
+			$theme->merge(
+				new \WP_Theme_JSON(
+					array(
+						'version' => 3,
+						'styles'  => array(
+							'blocks' => array(
+								'core/group' => array( 'elements' => array( 'link' => array( 'color' => array( 'text' => '#123456' ) ) ) ),
+							),
+						),
+					),
+					'custom'
+				)
+			);
+			return $theme;
+		};
+		add_filter( 'woocommerce_email_editor_theme_json', $theme_json_filter );
+
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+		$email_post        = $this->create_email_post( '<!-- wp:group --><div class="wp-block-group"><!-- wp:buttons --><div class="wp-block-buttons"><!-- wp:button --><div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="https://example.com">Buy</a></div><!-- /wp:button --></div><!-- /wp:buttons --></div><!-- /wp:group -->' );
+
+		// Register core/button with its email renderer, as testItAppliesASavedCaptionColorToAnImageCaption does for core/image.
+		$core_integration = $this->di_container->get( Core_Initializer::class );
+		$core_integration->initialize();
+		$registry       = \WP_Block_Type_Registry::get_instance();
+		$original_block = $registry->get_registered( 'core/button' );
+		$this->assertInstanceOf( \WP_Block_Type::class, $original_block );
+		$registry->unregister( 'core/button' );
+		register_block_type(
+			'core/button',
+			$core_integration->update_block_settings(
+				array(
+					'title'    => $original_block->title,
+					'name'     => $original_block->name,
+					'category' => $original_block->category,
+					'supports' => $original_block->supports ?? array(),
+				)
+			)
+		);
+
+		try {
+			$rendered = $this->renderer->render( $email_post, $template );
+		} finally {
+			$registry->unregister( 'core/button' );
+			$registry->register( $original_block );
+			remove_filter( 'woocommerce_email_editor_theme_json', $theme_json_filter );
+		}
+
+		$button_styles = (string) $this->getStylesValueForTag( $rendered, 'a' );
+		$this->assertStringContainsString( 'color: #fff', $button_styles );
+		$this->assertStringNotContainsString( '#123456', $button_styles );
+	}
+
+	/**
+	 * Create an email post with the given content.
+	 *
+	 * @param string $content Post content.
+	 */
+	private function create_email_post( string $content ): \WP_Post {
+		$email_post_id = $this->factory->post->create( array( 'post_content' => $content ) );
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( \WP_Post::class, $email_post );
+		return $email_post;
 	}
 
 	/**
