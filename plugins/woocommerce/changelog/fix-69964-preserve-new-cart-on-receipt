@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve a new cart when shoppers revisit an earlier order confirmation.
