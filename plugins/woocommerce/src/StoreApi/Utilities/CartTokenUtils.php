@@ -54,6 +54,30 @@ class CartTokenUtils {
 	}
 
 	/**
+	 * Validate the cart token and check it can be used by the current user.
+	 *
+	 * Guest tokens work for anyone. A token for a registered customer only works while that customer is logged in, so it
+	 * stops working on logout, the same as the session cookie.
+	 *
+	 * @since 11.4.0
+	 * @param string $cart_token The cart token.
+	 * @return bool
+	 */
+	public static function validate_cart_token_for_current_user( string $cart_token ): bool {
+		if ( ! self::validate_cart_token( $cart_token ) ) {
+			return false;
+		}
+
+		$customer_id = (string) self::get_cart_token_payload( $cart_token )['user_id'];
+
+		if ( '' === $customer_id || 't_' === substr( $customer_id, 0, 2 ) ) {
+			return true;
+		}
+
+		return is_user_logged_in() && (string) get_current_user_id() === $customer_id;
+	}
+
+	/**
 	 * Get the cart token payload.
 	 *
 	 * Returns an empty payload unless the signature validates.
