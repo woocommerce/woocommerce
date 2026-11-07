@@ -225,8 +225,9 @@ trait OrderAbilityTrait {
 
 		if ( ! $order instanceof \WC_Order ) {
 			return new \WP_Error(
-				'woocommerce_order_not_found',
-				__( 'Order not found.', 'woocommerce' ),
+				'woocommerce_ability_order_not_found',
+				/* translators: %d: order ID. */
+				sprintf( __( 'Order %d does not exist. Use the woocommerce/orders-query ability to find the order ID.', 'woocommerce' ), $input['id'] ),
 				array( 'status' => 404 )
 			);
 		}
@@ -264,8 +265,9 @@ trait OrderAbilityTrait {
 
 	/**
 	 * Check a permission against the actual type of an order. An order whose
-	 * type the abilities do not support fails. An ID with no order is checked
-	 * as `shop_order`.
+	 * type the abilities do not support fails. An ID with no order passes for
+	 * users who can read orders, so the ability can return its not-found error;
+	 * orders-query already tells those users which IDs exist.
 	 *
 	 * @param int    $order_id Order ID.
 	 * @param string $context  Permission context, such as `read` or `edit`.
@@ -273,7 +275,10 @@ trait OrderAbilityTrait {
 	 */
 	protected static function check_order_permission( int $order_id, string $context ): bool {
 		$type = OrderUtil::get_order_type( $order_id );
-		$type = $type ? $type : 'shop_order';
+
+		if ( ! $type ) {
+			return wc_rest_check_post_permissions( 'shop_order', 'read' );
+		}
 
 		return in_array( $type, self::get_order_type_slugs(), true )
 			&& wc_rest_check_post_permissions( $type, $context, $order_id );
