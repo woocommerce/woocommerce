@@ -183,3 +183,36 @@
 .woocommerce.wc-block-store-notices.alignwide {
 	max-width: var(--wp--style--global--wide-size);
 }
+
+// Animated instead of the banner's padding, which is `!important`, so keyframes can't change it.
+@property --wc-notice-banner-padding-block {
+	syntax: "<length>";
+	inherits: false;
+	initial-value: 0;
+}
+
+// The grid lays the banner out as its flex row does.
+.wp-block-woocommerce-cart,
+.wp-block-woocommerce-checkout {
+	.wc-block-components-notice-banner {
+		@include motion-collapse(
+			wc-notice-banner,
+			md,
+			("--wc-notice-banner-padding-block": 0, border-block-width: 0, margin-block: 0),
+			(opacity: 0, transform: translateY(-$gap-smallest))
+		) {
+			--wc-notice-banner-padding-block: #{$gap};
+			grid-template-columns: auto minmax(0, 1fr);
+			grid-auto-columns: auto;
+			grid-auto-flow: column;
+			padding-block: var(--wc-notice-banner-padding-block) !important;
+			overflow: clip;
+
+			// The icon's `height: 100%` would fill the grid row; in the flex row it keeps its own size.
+			> svg {
+				block-size: auto;
+				align-self: start;
+			}
+		}
+	}
+}

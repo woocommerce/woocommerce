@@ -33,3 +33,28 @@
 		}
 	}
 }
+
+// Sections fade up in sequence on load (rules 1, 3). Fixed slots, not nth-child, because themes wrap and reorder
+// these blocks; billing settles a step after shipping (rule 6). Lives here because Status opens the template.
+$wc-order-confirmation-slots: (
+	"status": 0,
+	"status-description": 1,
+	"summary": 1,
+	"create-account": 2,
+	"totals-wrapper": 3,
+	"downloads-wrapper": 4,
+	"shipping-wrapper": 5,
+	"billing-wrapper": 6,
+	"additional-information": 6,
+	"additional-fields-wrapper": 6,
+);
+
+@each $name, $slot in $wc-order-confirmation-slots {
+	.wc-block-order-confirmation-#{$name}:not(.editor-styles-wrapper *) {
+		--wc-motion-index: #{$slot};
+
+		@include motion-safe {
+			animation: wc-fade-up var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive) motion-stagger-delay() backwards;
+		}
+	}
+}

@@ -17,7 +17,10 @@ import {
 } from '@woocommerce/blocks-checkout';
 import { getSetting } from '@woocommerce/settings';
 import { useMemo } from '@wordpress/element';
-import { useStoreCart } from '@woocommerce/base-context/hooks';
+import {
+	useStoreCart,
+	useSettledOrderSummaryValue,
+} from '@woocommerce/base-context/hooks';
 import { CartItem, isString } from '@woocommerce/types';
 import { calculateSaleAmount } from '@woocommerce/base-utils';
 import { dinero, transformScale, toSnapshot } from 'dinero.js';
@@ -53,7 +56,7 @@ const OrderSummaryItem = ( {
 		variation,
 		totals,
 		extensions,
-	} = cartItem;
+	} = useSettledOrderSummaryValue( cartItem );
 
 	// Prepare props to pass to the applyCheckoutFilter filter.
 	// We need to pluck out receiveCart.
@@ -261,11 +264,13 @@ const OrderSummaryItem = ( {
 						currency={ totalsCurrency }
 						format={ productPriceFormat }
 						price={ subtotalPrice }
+						animate
 					/>
 					<ProductSaleBadge
 						currency={ priceCurrency }
 						saleAmount={ saleAmountSingle * quantity }
 						format={ saleBadgePriceFormat }
+						animate
 					/>
 				</div>
 			</div>

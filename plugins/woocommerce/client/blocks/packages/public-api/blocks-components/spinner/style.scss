@@ -24,15 +24,12 @@
 		border: 0.2em solid currentColor;
 		border-left-color: transparent;
 		@include spinner-animation();
-		// stylelint-disable-next-line woocommerce/motion-safe -- The spinner keeps turning under reduced motion (Woo rule); see the block below.
+		// stylelint-disable-next-line woocommerce/motion-safe -- Loaders keep turning under reduced motion, in steps.
 		animation: spinner__animation 1s infinite
 			cubic-bezier(0.5856, 0.0703, 0.4143, 0.9297);
 
-		// Reduced motion: a lower "frame rate" rather than stopping the loader.
 		@media (prefers-reduced-motion: reduce) {
-			// stylelint-disable-next-line woocommerce/motion-tokens -- Loaders keep their own loop durations.
-			animation-duration: 1.6s;
-			animation-timing-function: steps(8);
+			animation: spinner__animation 1.6s infinite steps(8);
 		}
 	}
 }

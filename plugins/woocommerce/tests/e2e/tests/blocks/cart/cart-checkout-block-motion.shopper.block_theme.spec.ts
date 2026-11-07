@@ -31,10 +31,8 @@ declare global {
 	}
 }
 
-/**
- * Logs the animations, transitions, and view transitions that start in the Cart and Checkout blocks. Looping
- * animations, such as the spinner, are left out: they keep running under reduced motion on purpose.
- */
+// Logs motion that starts in the Cart and Checkout blocks, except looping animations such as the spinner,
+// which keep running under reduced motion on purpose.
 const recordMotion = async ( page: Page ) => {
 	await page.addInitScript( () => {
 		window.wcMotionLog = [];
@@ -95,10 +93,7 @@ const getMotionLog = async ( page: Page ) => {
 	return page.evaluate( () => window.wcMotionLog );
 };
 
-/**
- * Opens and closes the coupon form in the Cart, then switches the Checkout billing address between "same as
- * shipping" and its own form. Returns what moved on each page.
- */
+// Opens and closes the Cart coupon form, then toggles the Checkout billing address. Returns what moved on each page.
 const openAndCloseCartAndCheckoutSections = async (
 	page: Page,
 	frontendUtils: FrontendUtils,
@@ -167,8 +162,6 @@ test.describe( 'Shopper → Cart and Checkout motion', () => {
 		frontendUtils,
 		checkoutPageObject,
 	} ) => {
-		await page.emulateMedia( { reducedMotion: 'reduce' } );
-
 		const motion = await openAndCloseCartAndCheckoutSections(
 			page,
 			frontendUtils,

@@ -24,6 +24,13 @@ $border-width: 1px;
 			// 150 is the minimum width of the button; allows for
 			min-width: 150px;
 
+			// Buttons fade in when they replace their loading skeleton, whose items have no id.
+			&[id^="express-payment-method-"] {
+				@include motion-safe {
+					animation: wc-fade-in var(--wpds-motion-duration-md) var(--wpds-motion-easing-subtle);
+				}
+			}
+
 			&:focus-within::after,
 			&.wc-block-components-express-payment__event-button--focused::after {
 				border: 2px solid $studio-blue;

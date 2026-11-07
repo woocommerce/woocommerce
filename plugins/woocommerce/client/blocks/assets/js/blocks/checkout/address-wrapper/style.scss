@@ -26,7 +26,7 @@
 
 			.wc-block-components-address-form-wrapper {
 				@include motion-safe {
-					animation: wc-block-components-address-form-reveal var(--wpds-motion-duration-lg) var(--wpds-motion-easing-expressive);
+					animation: wc-clip-reveal var(--wpds-motion-duration-lg) var(--wpds-motion-easing-expressive);
 				}
 			}
 		}
@@ -55,16 +55,5 @@
 		.wc-block-components-address-card-wrapper {
 			opacity: 1;
 		}
-	}
-}
-
-@keyframes wc-block-components-address-form-reveal {
-	from {
-		clip-path: inset(0 0 100% 0);
-		opacity: 0;
-	}
-	to {
-		clip-path: inset(0);
-		opacity: 1;
 	}
 }

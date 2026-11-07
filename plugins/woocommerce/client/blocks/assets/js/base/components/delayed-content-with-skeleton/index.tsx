@@ -22,18 +22,17 @@ export interface DelayedContentWithSkeletonProps {
 	skeleton: ReactNode;
 }
 
+// When the current loading phase started. Shared, so skeletons that mount partway through a phase, such as a
+// new totals row, end with the others instead of on their own clock.
+let phaseStartedAt = 0;
+
 /**
- * Component that ensures skeleton children are displayed for a minimum duration
- * to prevent jarring quick flashes when content loads fast
+ * Whether to show a skeleton: while `isLoading`, and for a minimum duration from the start of the loading phase,
+ * to prevent jarring quick flashes when content loads fast.
  */
-export const DelayedContentWithSkeleton = ( {
-	children,
-	isLoading,
-	skeleton,
-}: DelayedContentWithSkeletonProps ): JSX.Element => {
+export const useDelayedSkeleton = ( isLoading: boolean ): boolean => {
 	const disableMotion = useReducedMotion();
 	const [ showSkeleton, setShowSkeleton ] = useState( isLoading );
-	const [ startTime, setStartTime ] = useState< number | null >( null );
 
 	useEffect( () => {
 		// If motion is disabled, just sync with isLoading state
@@ -43,18 +42,19 @@ export const DelayedContentWithSkeleton = ( {
 		}
 
 		// For motion-enabled, use the delay logic
-		const MIN_DISPLAY_TIME = 2000;
+		const MIN_DISPLAY_TIME = 300;
 		let timer: ReturnType< typeof setTimeout >;
 
 		if ( isLoading ) {
 			setShowSkeleton( true );
-			setStartTime( Date.now() );
-		} else if ( startTime ) {
-			const elapsed = Date.now() - startTime;
+			if ( Date.now() - phaseStartedAt >= MIN_DISPLAY_TIME ) {
+				phaseStartedAt = Date.now();
+			}
+		} else {
+			const elapsed = Date.now() - phaseStartedAt;
 			const remainingTime = Math.max( 0, MIN_DISPLAY_TIME - elapsed );
 			timer = setTimeout( () => {
 				setShowSkeleton( false );
-				setStartTime( null );
 			}, remainingTime );
 		}
 
@@ -63,7 +63,21 @@ export const DelayedContentWithSkeleton = ( {
 				clearTimeout( timer );
 			}
 		};
-	}, [ isLoading, startTime, disableMotion ] );
+	}, [ isLoading, disableMotion ] );
+
+	return showSkeleton;
+};
+
+/**
+ * Component that ensures skeleton children are displayed for a minimum duration
+ * to prevent jarring quick flashes when content loads fast
+ */
+export const DelayedContentWithSkeleton = ( {
+	children,
+	isLoading,
+	skeleton,
+}: DelayedContentWithSkeletonProps ): JSX.Element => {
+	const showSkeleton = useDelayedSkeleton( isLoading );
 
 	return <>{ showSkeleton ? skeleton : children }</>;
 };

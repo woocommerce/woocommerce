@@ -2,16 +2,16 @@
  * External dependencies
  */
 import { act, render, screen } from '@testing-library/react';
-import { useReducedMotion } from '@wordpress/compose';
 
 /**
  * Internal dependencies
  */
 import { usePresence } from '../use-presence';
 
+// The Jest matchMedia mock reports reduced motion, under which usePresence never sets a transition.
 jest.mock( '@wordpress/compose', () => ( {
 	...jest.requireActual( '@wordpress/compose' ),
-	useReducedMotion: jest.fn(),
+	useReducedMotion: () => false,
 } ) );
 
 // jsdom doesn't animate, so each `getAnimations()` call returns one animation that the test finishes by hand.
@@ -22,12 +22,13 @@ const finishAnimation = async ( index: number ) => {
 	} );
 };
 
-const Content = ( { isOpen }: { isOpen: boolean } ) => {
-	const { isPresent, transition, ref } =
-		usePresence< HTMLDivElement >( isOpen );
+const Content = ( { isOpen, label }: { isOpen: boolean; label: string } ) => {
+	const { isPresent, className, ref, data } = usePresence( isOpen, {
+		data: label,
+	} );
 	return isPresent ? (
-		<div ref={ ref } data-testid="content">
-			{ transition ?? 'idle' }
+		<div ref={ ref } data-testid="content" className={ className }>
+			{ data }
 		</div>
 	) : null;
 };
@@ -37,7 +38,6 @@ describe( 'usePresence', () => {
 
 	beforeEach( () => {
 		pendingFinishes = [];
-		jest.mocked( useReducedMotion ).mockReturnValue( false );
 		Element.prototype.getAnimations = () => {
 			const { promise, resolve } = Promise.withResolvers< Animation >();
 			pendingFinishes.push( () => resolve( {} as Animation ) );
@@ -54,34 +54,27 @@ describe( 'usePresence', () => {
 		Element.prototype.getAnimations = getAnimations;
 	} );
 
-	it( 'renders open content without a transition on first render', () => {
-		render( <Content isOpen={ true } /> );
-
-		expect( screen.getByTestId( 'content' ) ).toHaveTextContent( 'idle' );
-	} );
-
 	it( 'marks content as entering until its animations finish', async () => {
-		const { rerender } = render( <Content isOpen={ false } /> );
+		const { rerender } = render( <Content isOpen={ false } label="a" /> );
 
-		rerender( <Content isOpen={ true } /> );
+		rerender( <Content isOpen={ true } label="a" /> );
 
-		expect( screen.getByTestId( 'content' ) ).toHaveTextContent(
-			'entering'
-		);
+		expect( screen.getByTestId( 'content' ) ).toHaveClass( 'is-entering' );
 
 		await finishAnimation( 0 );
 
-		expect( screen.getByTestId( 'content' ) ).toHaveTextContent( 'idle' );
+		expect( screen.getByTestId( 'content' ) ).not.toHaveClass(
+			'is-entering'
+		);
 	} );
 
-	it( 'keeps closing content mounted until its animations finish', async () => {
-		const { rerender } = render( <Content isOpen={ true } /> );
+	it( 'keeps closing content mounted, with the data it closed with, until its animations finish', async () => {
+		const { rerender } = render( <Content isOpen={ true } label="a" /> );
 
-		rerender( <Content isOpen={ false } /> );
+		rerender( <Content isOpen={ false } label="b" /> );
 
-		expect( screen.getByTestId( 'content' ) ).toHaveTextContent(
-			'exiting'
-		);
+		expect( screen.getByTestId( 'content' ) ).toHaveClass( 'is-exiting' );
+		expect( screen.getByTestId( 'content' ) ).toHaveTextContent( 'a' );
 
 		await finishAnimation( 0 );
 
@@ -89,30 +82,32 @@ describe( 'usePresence', () => {
 	} );
 
 	it( 'stays mounted when reopened while closing, even after the closing animation ends', async () => {
-		const { rerender } = render( <Content isOpen={ true } /> );
+		const { rerender } = render( <Content isOpen={ true } label="a" /> );
 
-		rerender( <Content isOpen={ false } /> );
-		rerender( <Content isOpen={ true } /> );
+		rerender( <Content isOpen={ false } label="a" /> );
+		rerender( <Content isOpen={ true } label="a" /> );
 		await finishAnimation( 0 );
 
-		expect( screen.getByTestId( 'content' ) ).toHaveTextContent(
-			'entering'
-		);
+		expect( screen.getByTestId( 'content' ) ).toHaveClass( 'is-entering' );
 
 		await finishAnimation( 1 );
 
-		expect( screen.getByTestId( 'content' ) ).toHaveTextContent( 'idle' );
+		expect( screen.getByTestId( 'content' ) ).not.toHaveClass(
+			'is-entering'
+		);
 	} );
 
-	it( 'mounts and unmounts straight away with reduced motion', () => {
-		jest.mocked( useReducedMotion ).mockReturnValue( true );
-		const { rerender } = render( <Content isOpen={ false } /> );
+	it( 'mounts and unmounts straight away when nothing animates', () => {
+		Element.prototype.getAnimations = () => [];
+		const { rerender } = render( <Content isOpen={ false } label="a" /> );
 
-		rerender( <Content isOpen={ true } /> );
+		rerender( <Content isOpen={ true } label="a" /> );
 
-		expect( screen.getByTestId( 'content' ) ).toHaveTextContent( 'idle' );
+		expect( screen.getByTestId( 'content' ) ).not.toHaveClass(
+			'is-entering'
+		);
 
-		rerender( <Content isOpen={ false } /> );
+		rerender( <Content isOpen={ false } label="a" /> );
 
 		expect( screen.queryByTestId( 'content' ) ).not.toBeInTheDocument();
 	} );

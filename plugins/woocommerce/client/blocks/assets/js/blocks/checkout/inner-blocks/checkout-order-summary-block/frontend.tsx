@@ -3,7 +3,10 @@
  */
 import { TotalsFooterItem } from '@woocommerce/base-components/cart-checkout';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
-import { useStoreCart } from '@woocommerce/base-context/hooks';
+import {
+	useStoreCart,
+	useSettledOrderSummaryValue,
+} from '@woocommerce/base-context/hooks';
 import { usePresence } from '@woocommerce/base-hooks';
 import { useMergeRefs } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
@@ -31,7 +34,8 @@ const FrontendBlock = ( {
 	children: JSX.Element | JSX.Element[];
 	className?: string;
 } ): JSX.Element | null => {
-	const { cartTotals, cartIsLoading } = useStoreCart();
+	const { cartTotals, cartIsLoading } =
+		useSettledOrderSummaryValue( useStoreCart() );
 	const {
 		isOpen,
 		hasContainerWidth,
@@ -54,10 +58,7 @@ const FrontendBlock = ( {
 		useState< HTMLDivElement | null >( null );
 	const [ isContentReady, setIsContentReady ] = useState( false );
 	const checkoutActionsTopBeforeMove = useRef< number | null >( null );
-	// Auto-close moves content that is already off-screen, so it skips the exit animation.
-	const [ isAutoClosed, setIsAutoClosed ] = useState( false );
-	const { transition, ref: presenceRef } =
-		usePresence< HTMLDivElement >( isOpen );
+	const { transition, ref: presenceRef } = usePresence( isOpen );
 	const inlineHostRef = useMergeRefs( [ setInlineHost, presenceRef ] );
 	const [ contentContainer ] = useState( () => {
 		const container = document.createElement( 'div' );
@@ -68,11 +69,11 @@ const FrontendBlock = ( {
 
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 	const totalPrice = parseInt( cartTotals.total_price, 10 );
-	if ( isOpen && isAutoClosed ) {
-		setIsAutoClosed( false );
-	}
-	// Content stays inline while it animates out, then moves to the checkout actions.
-	const isClosing = transition === 'exiting' && ! isAutoClosed;
+	// Content stays inline while it animates out, then moves to the checkout actions. Auto-close (which sets
+	// `checkoutActionsTopBeforeMove`) moves content that is already off-screen, so it skips the exit animation.
+	const isClosing =
+		transition === 'exiting' &&
+		checkoutActionsTopBeforeMove.current === null;
 	const showInline = ! hasContainerWidth || isLarge || isOpen || isClosing;
 
 	useEffect( () => {
@@ -102,7 +103,6 @@ const FrontendBlock = ( {
 				if ( ! isTitleVisible && areCheckoutActionsNear ) {
 					checkoutActionsTopBeforeMove.current =
 						checkoutActionsAnchor.getBoundingClientRect().top;
-					setIsAutoClosed( true );
 					closeSummary();
 				}
 			},
@@ -165,7 +165,6 @@ const FrontendBlock = ( {
 					className={ clsx(
 						'wc-block-components-checkout-order-summary__title',
 						{
-							// Keep the open styling until the content has finished wiping out.
 							'is-open': isOpen || isClosing,
 						}
 					) }
@@ -194,7 +193,7 @@ const FrontendBlock = ( {
 						'wc-block-components-checkout-order-summary__content',
 						{
 							'is-open': isOpen,
-							'is-closing': isClosing,
+							'is-exiting': isClosing,
 						}
 					) }
 					id={ ariaControlsId }

@@ -2,17 +2,31 @@
 	// Equal-width digits, so the columns don't change width as they roll.
 	font-variant-numeric: tabular-nums;
 	white-space: nowrap;
+	// Each column stacks its digits one line apart and moves by whole lines. A fractional line height lets the
+	// browser round each stacked line differently from the move, so lower digits land a little off; whole pixels
+	// keep every digit in line.
+	--wc-rolling-price-line: 1lh;
+
+	@supports (width: round(1.5px, 1px)) {
+		--wc-rolling-price-line: round(1lh, 1px);
+	}
 }
 
 .wc-block-components-rolling-price__characters {
 	display: inline-flex;
 	vertical-align: bottom;
+	line-height: var(--wc-rolling-price-line);
 
 	> span {
 		display: block;
-		height: 1lh;
+		height: var(--wc-rolling-price-line);
 		// Keep the space between the price and a symbol such as " ر.س", which would collapse at the edge of its block.
 		white-space: pre;
+	}
+
+	// The characters are generated content, so the price's text stays the same as a plain price's.
+	> [data-text]::before {
+		content: attr(data-text);
 	}
 }
 
@@ -22,11 +36,12 @@
 
 .wc-block-components-rolling-price__strip {
 	display: block;
-	transform: translateY(calc(var(--wc-rolling-price-digit) * -1lh));
+	transform: translateY(calc(var(--wc-rolling-price-digit) * -1 * var(--wc-rolling-price-line)));
+	white-space: pre;
 
-	> span {
-		display: block;
-		height: 1lh;
+	// One digit per line, 0 at the top.
+	&::before {
+		content: "0\A 1\A 2\A 3\A 4\A 5\A 6\A 7\A 8\A 9";
 	}
 
 	.wc-block-components-rolling-price:not(.is-static) & {

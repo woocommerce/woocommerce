@@ -14,11 +14,8 @@ import {
 import type { CSSProperties } from 'react';
 import { cartStore, validationStore } from '@woocommerce/block-data';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useReducedMotion } from '@wordpress/compose';
-import {
-	isPackageRateCollectable,
-	onAnimationsFinished,
-} from '@woocommerce/base-utils';
+import { isPackageRateCollectable } from '@woocommerce/base-utils';
+import { onAnimationsFinished } from '@woocommerce/base-utils/on-animations-finished';
 import { getSetting } from '@woocommerce/settings';
 import { Button } from '@ariakit/react';
 import { shippingAddressHasValidationErrors } from '@woocommerce/block-data/cart/utils';
@@ -196,47 +193,46 @@ const Block = ( {
 	const containerRef = useRef< HTMLDivElement >( null );
 	const indicatorRef = useRef< HTMLSpanElement >( null );
 	const previousChecked = useRef( checked );
-	const isReducedMotion = useReducedMotion();
 	const [ indicatorStyle, setIndicatorStyle ] =
 		useState< CSSProperties | null >( null );
 
-	// When the selection changes, slide a copy of the selected style from the old option to the new one.
-	// It only exists while moving, so the resting markup and styles are unchanged.
+	// Slide a copy of the selected style from the old option to the new one. It only exists while moving, so the
+	// resting markup is unchanged; with no animation (reduced motion) it's removed before it paints.
 	useLayoutEffect( () => {
 		const from = previousChecked.current;
 		previousChecked.current = checked;
 		const container = containerRef.current;
-		if ( ! container || from === checked || isReducedMotion ) {
+		if ( ! container || from === checked ) {
 			return;
 		}
-		// Options render in a fixed order: shipping, then pickup.
-		const options = container.querySelectorAll< HTMLElement >(
-			':scope > .wc-block-checkout__shipping-method-option'
+		// Shipping renders first, then pickup.
+		const options = container.querySelectorAll(
+			'.wc-block-checkout__shipping-method-option'
 		);
-		const fromOption = options[ from === 'pickup' ? 1 : 0 ];
-		const toOption = options[ checked === 'pickup' ? 1 : 0 ];
-		if ( ! fromOption || ! toOption ) {
+		const fromRect =
+			options[ from === 'pickup' ? 1 : 0 ]?.getBoundingClientRect();
+		const toRect =
+			options[ checked === 'pickup' ? 1 : 0 ]?.getBoundingClientRect();
+		if ( ! fromRect || ! toRect ) {
 			return;
 		}
-		const fromRect = fromOption.getBoundingClientRect();
-		const toRect = toOption.getBoundingClientRect();
 		const containerRect = container.getBoundingClientRect();
 		const offsetX = fromRect.left - toRect.left;
 		const offsetY = fromRect.top - toRect.top;
-		const isHorizontal = Math.abs( offsetX ) >= Math.abs( offsetY );
 		setIndicatorStyle( {
 			left: toRect.left - containerRect.left,
 			top: toRect.top - containerRect.top,
 			width: toRect.width,
 			height: toRect.height,
-			'--wc-shipping-method-indicator-offset': `${ offsetX }px, ${ offsetY }px`,
-			'--wc-shipping-method-indicator-stretch': isHorizontal
-				? 'var(--wc-stretch-along), var(--wc-stretch-across)'
-				: 'var(--wc-stretch-across), var(--wc-stretch-along)',
+			'--wc-shipping-method-indicator-offset': `${ offsetX }px ${ offsetY }px`,
+			// 1.12 along the travel and 1 / 1.12 across it, so the area stays the same (rule 5).
+			'--wc-shipping-method-indicator-stretch':
+				Math.abs( offsetX ) >= Math.abs( offsetY )
+					? '1.12 0.893'
+					: '0.893 1.12',
 		} as CSSProperties );
-	}, [ checked, isReducedMotion ] );
+	}, [ checked ] );
 
-	// Remove the indicator once its slide has finished.
 	useLayoutEffect( () => {
 		if ( ! indicatorStyle ) {
 			return;
@@ -251,10 +247,7 @@ const Block = ( {
 			ref={ containerRef }
 			id="shipping-method"
 			// components-button-group is here for backwards compatibility, in case themes or plugins rely on it.
-			className={ clsx(
-				'components-button-group wc-block-checkout__shipping-method-container',
-				{ 'is-moving': indicatorStyle !== null }
-			) }
+			className="components-button-group wc-block-checkout__shipping-method-container"
 			role="radiogroup"
 			aria-label={ __( 'Shipping method', 'woocommerce' ) }
 		>
@@ -264,9 +257,7 @@ const Block = ( {
 					aria-hidden="true"
 					className="wc-block-checkout__shipping-method-indicator"
 					style={ indicatorStyle }
-				>
-					<span className="wc-block-checkout__shipping-method-indicator-pill" />
-				</span>
+				/>
 			) }
 			<ShippingSelector
 				checked={ checked }

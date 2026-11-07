@@ -186,6 +186,18 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 		if ( getSetting( 'displayCartPricesIncludingTax', false ) ) {
 			lineSubtotal += parseInt( totals.line_subtotal_tax, 10 );
 		}
+		// While a new quantity saves, show the unit price times that quantity, but only when the saved total is
+		// exactly that. Pricing that isn't linear, such as quantity discounts, waits for the server instead.
+		const unitScale =
+			10 ** ( prices.raw_prices.precision - totalsCurrency.minorUnit );
+		const linePriceFor = ( itemQuantity: number ) =>
+			Math.round(
+				( parseInt( prices.raw_prices.price, 10 ) * itemQuantity ) /
+					unitScale
+			);
+		if ( linePriceFor( lineItem.quantity ) === lineSubtotal ) {
+			lineSubtotal = linePriceFor( quantity );
+		}
 		const subtotalPrice = dinero( {
 			amount: lineSubtotal,
 			currency: USD,
@@ -429,12 +441,14 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 							currency={ totalsCurrency }
 							format={ productPriceFormat }
 							price={ toSnapshot( subtotalPrice ).amount }
+							animate
 						/>
 
 						<ProductSaleBadge
 							currency={ priceCurrency }
 							saleAmount={ saleAmountSingle * quantity }
 							format={ saleBadgePriceFormat }
+							animate
 						/>
 					</div>
 				</td>

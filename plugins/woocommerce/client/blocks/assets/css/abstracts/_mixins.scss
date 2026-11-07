@@ -394,16 +394,26 @@ $fontSizes: (
 	align-items: flex-start;
 }
 
-// Adds motion only for shoppers who haven't asked for reduced motion, as WPDS components do. Anything
-// inside must be motion alone, so the resting state still renders without it.
+@keyframes wc-skeleton-shimmer {
+	100% {
+		transform: translateX(100%);
+	}
+}
+
+// Woo motion constants with no WPDS token.
+$wc-motion-exit-ratio: 0.8;
+$wc-scale-press: 0.97;
+$wc-scale-pulse-peak: 1.05;
+$wc-scale-icon-from: 0.8;
+$wc-blur-icon: 4px;
+
 @mixin motion-safe() {
 	@media not (prefers-reduced-motion) {
 		@content;
 	}
 }
 
-// Sets --wc-motion-index on sibling rows so entrances can stagger by index × --wpds-motion-duration-xs.
-// Rows past $cap share the last index, which caps the total stagger at about 300ms.
+// Sets --wc-motion-index on sibling rows; rows past $cap share the last index.
 @mixin motion-stagger-index($cap: 7) {
 	@for $i from 1 to $cap {
 		&:nth-child(#{$i}) {
@@ -415,18 +425,59 @@ $fontSizes: (
 	}
 }
 
-// Stagger delay for the row at --wc-motion-index, plus $extra settle steps of --wpds-motion-duration-xs.
 @function motion-stagger-delay($extra: 0) {
 	@return calc((var(--wc-motion-index) + #{$extra}) * var(--wpds-motion-duration-xs));
 }
 
-// Exit duration for an entrance that uses --wpds-motion-duration-$step: exits run shorter by --wc-motion-exit-ratio.
-@function motion-exit($step) {
-	@return calc(var(--wpds-motion-duration-#{$step}) * var(--wc-motion-exit-ratio));
+@function motion-duration($step) {
+	@return var(--wpds-motion-duration-#{$step});
 }
 
-@keyframes wc-skeleton-shimmer {
-	100% {
-		transform: translateX(100%);
+@function motion-exit($step) {
+	@return calc(motion-duration($step) * #{$wc-motion-exit-ratio});
+}
+
+// Grows in (`is-entering`) or collapses (`is-exiting`) from no height and $collapsed, fading with $fade if set.
+@mixin motion-collapse($name, $step, $collapsed, $fade: null) {
+	$grow: #{$name}-grow motion-duration($step) var(--wpds-motion-easing-balanced);
+	$collapse: #{$name}-collapse motion-exit($step) var(--wpds-motion-easing-balanced) forwards;
+	@if $fade {
+		$grow: $grow, #{$name}-in motion-duration($step) var(--wpds-motion-easing-expressive);
+		$collapse: $collapse, #{$name}-out motion-exit($step) var(--wpds-motion-easing-expressive) forwards;
+	}
+
+	&:is(.is-entering, .is-exiting) {
+		display: grid;
+		grid-template-rows: 1fr;
+		@content;
+
+		> * {
+			min-block-size: 0;
+		}
+	}
+
+	&.is-entering {
+		@include motion-safe {
+			animation: $grow;
+		}
+	}
+
+	&.is-exiting {
+		@include motion-safe {
+			animation: $collapse;
+		}
+	}
+
+	$rows: map.merge((grid-template-rows: 0fr), $collapsed);
+	@each $suffix, $at, $properties in ("grow" from $rows) ("collapse" to $rows) ("in" from $fade) ("out" to $fade) {
+		@if $properties {
+			@keyframes #{$name}-#{$suffix} {
+				#{$at} {
+					@each $property, $value in $properties {
+						#{$property}: $value;
+					}
+				}
+			}
+		}
 	}
 }

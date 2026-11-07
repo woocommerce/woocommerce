@@ -44,9 +44,7 @@ const Panel = ( {
 		[ isOpen, setIsOpen ] = state;
 	}
 
-	const { isPresent, transition, ref } =
-		usePresence< HTMLDivElement >( isOpen );
-	const isClosing = transition === 'exiting';
+	const presence = usePresence( isOpen );
 
 	if ( titleTag ) {
 		deprecated( "Panel component's titleTag prop", {
@@ -56,14 +54,15 @@ const Panel = ( {
 
 	return (
 		<div
-			ref={ ref }
+			ref={ presence.ref }
 			role={ headingLevel ? 'heading' : undefined }
 			aria-level={ headingLevel ? headingLevel : undefined }
-			className={ clsx( className, 'wc-block-components-panel', {
-				'has-border': hasBorder,
-				'is-opening': transition === 'entering',
-				'is-closing': isClosing,
-			} ) }
+			className={ clsx(
+				className,
+				'wc-block-components-panel',
+				presence.className,
+				{ 'has-border': hasBorder }
+			) }
 		>
 			<Button
 				render={ <div /> }
@@ -78,11 +77,13 @@ const Panel = ( {
 				/>
 				{ title }
 			</Button>
-			{ isPresent && (
+			{ presence.isPresent && (
 				<div
 					className="wc-block-components-panel__content"
 					// React 18 has no `inert` prop; an empty string sets the attribute.
-					{ ...( isClosing ? { inert: '' } : {} ) }
+					{ ...( presence.transition === 'exiting'
+						? { inert: '' }
+						: {} ) }
 				>
 					{ children }
 				</div>

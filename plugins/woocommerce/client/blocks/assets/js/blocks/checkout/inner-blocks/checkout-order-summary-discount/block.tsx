@@ -8,6 +8,7 @@ import {
 	useStoreCartCoupons,
 	useStoreCart,
 	useOrderSummaryLoadingState,
+	useTotalsRow,
 } from '@woocommerce/base-context/hooks';
 import { ExperimentalDiscountsMeta } from '@woocommerce/blocks-checkout';
 
@@ -25,7 +26,14 @@ const DiscountSlotFill = (): JSX.Element => {
 };
 
 const Block = ( { className = '' }: { className?: string } ): JSX.Element => {
-	const { cartTotals, cartCoupons } = useStoreCart();
+	// Matches when `TotalsDiscount` renders anything.
+	const { cartTotals, cartCoupons, wrapperProps } = useTotalsRow(
+		useStoreCart(),
+		className,
+		( cart ) =>
+			cart.cartCoupons.length > 0 ||
+			!! parseInt( cart.cartTotals.total_discount, 10 )
+	);
 	const { removeCoupon, isRemovingCoupon } =
 		useStoreCartCoupons( 'wc/checkout' );
 	const { isLoading } = useOrderSummaryLoadingState();
@@ -33,7 +41,7 @@ const Block = ( { className = '' }: { className?: string } ): JSX.Element => {
 
 	return (
 		<>
-			<TotalsWrapper className={ className }>
+			<TotalsWrapper { ...wrapperProps }>
 				<TotalsDiscount
 					cartCoupons={ cartCoupons }
 					currency={ totalsCurrency }

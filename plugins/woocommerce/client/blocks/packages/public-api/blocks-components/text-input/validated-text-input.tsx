@@ -304,9 +304,10 @@ const ValidatedTextInput = forwardRef<
 				}
 				type={ type }
 				feedback={
-					showError && hasError ? (
+					// Without other feedback the error stays mounted, rendering nothing, so it can animate out.
+					showError && ( hasError || ! feedback ) ? (
 						<ValidationInputError
-							errorMessage={ passedErrorMessage }
+							errorMessage={ hasError ? passedErrorMessage : '' }
 							propertyName={ errorIdString }
 							elementId={ errorIdString }
 						/>

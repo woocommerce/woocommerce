@@ -1,0 +1,45 @@
+// Cart and Checkout layout changes (layout-transition.ts), scoped to their view transition type.
+@include motion-safe {
+	:root:active-view-transition-type(wc-layout) {
+		// Sections move to their new positions and sizes, clipped so growing content is revealed (rules 9, 20).
+		// The clip margin keeps focus rings and borders at a section's edge, such as a checkbox's, from being cut off.
+		&::view-transition-group(*) {
+			animation-duration: var(--wpds-motion-duration-lg);
+			animation-timing-function: var(--wpds-motion-easing-balanced);
+			overflow: clip;
+			overflow-clip-margin: 4px;
+		}
+
+		// Moving sections show their live content, so animations inside them keep playing. The page doesn't fade.
+		&::view-transition-old(*),
+		&::view-transition-old(root) {
+			animation: none;
+			opacity: 0;
+		}
+
+		&::view-transition-new(*),
+		&::view-transition-new(root) {
+			animation: none;
+		}
+
+		// Sections that appear or go wipe in step with the slide (rule 17).
+		&::view-transition-new(*):only-child {
+			animation: wc-clip-reveal var(--wpds-motion-duration-lg) var(--wpds-motion-easing-balanced);
+		}
+
+		&::view-transition-old(*):only-child {
+			animation: wc-clip-conceal var(--wpds-motion-duration-lg) var(--wpds-motion-easing-balanced) forwards;
+			opacity: 1;
+		}
+
+		// The morphing element (an address card growing into its form) crossfades (rules 16, 20).
+		&::view-transition-new(wc-layout-morph) {
+			animation: wc-fade-in var(--wpds-motion-duration-lg) var(--wpds-motion-easing-expressive);
+		}
+
+		&::view-transition-old(wc-layout-morph) {
+			animation: wc-fade-out motion-exit(lg) var(--wpds-motion-easing-expressive) forwards;
+			opacity: 1;
+		}
+	}
+}

@@ -11,6 +11,7 @@ import type { Currency } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
+import RollingPrice from '../rolling-price';
 import './style.scss';
 
 interface PriceRangeProps {
@@ -238,10 +239,16 @@ export interface ProductPriceProps {
 	 * Custom styles to apply to the price wrapper.
 	 */
 	style?: React.CSSProperties | undefined;
+	/**
+	 * Roll the digits to the new value when a single price changes in place, such as a cart line total after a
+	 * quantity change. Sale prices and ranges ignore it.
+	 */
+	animate?: boolean | undefined;
 }
 
 const ProductPrice = ( {
 	align,
+	animate = false,
 	className,
 	currency,
 	format = '<price/>',
@@ -305,6 +312,18 @@ const ProductPrice = ( {
 				minPrice={ minPrice }
 				priceClassName={ priceClassName }
 				priceStyle={ priceStyle }
+			/>
+		);
+	} else if ( ( price || price === 0 ) && animate && currency?.code ) {
+		priceComponent = (
+			<RollingPrice
+				className={ clsx(
+					'wc-block-components-product-price__value',
+					priceClassName
+				) }
+				currency={ currency as Currency }
+				value={ price }
+				style={ priceStyle }
 			/>
 		);
 	} else if ( price || price === 0 ) {

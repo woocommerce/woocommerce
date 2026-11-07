@@ -51,6 +51,9 @@
 			transform var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive);
 	}
 }
+.notice-transition-enter-done {
+	max-height: auto;
+}
 .notice-transition-exit {
 	opacity: 1;
 }

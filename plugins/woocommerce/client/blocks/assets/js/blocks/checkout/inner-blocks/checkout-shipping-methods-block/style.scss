@@ -22,19 +22,11 @@
 	}
 }
 
-// Shipping options fade up in sequence when they appear: on load, after an address is entered, or when
-// switching back from pickup. Options are keyed by rate, so refreshing the rates doesn't replay this.
+// Options are keyed by rate, so refreshing rates doesn't replay this.
 .wp-block-woocommerce-checkout-shipping-methods-block .wc-block-components-radio-control__option {
 	@include motion-stagger-index();
 
 	@include motion-safe {
-		animation: wc-shipping-option-enter var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive) motion-stagger-delay() backwards;
-	}
-}
-
-@keyframes wc-shipping-option-enter {
-	from {
-		opacity: 0;
-		transform: translateY(4px);
+		animation: wc-fade-up var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive) motion-stagger-delay() backwards;
 	}
 }

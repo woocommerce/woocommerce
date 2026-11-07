@@ -29,23 +29,24 @@
 	"overrides": [
 		{
 			"files": [
-				"assets/js/blocks/cart/**/*.scss",
-				"assets/js/blocks/checkout/**/*.scss",
-				"assets/js/blocks/mini-cart/**/*.scss",
-				"assets/js/blocks/cart-checkout-shared/**/*.scss",
-				"assets/js/base/components/button/**/*.scss",
-				"assets/js/base/components/drawer/**/*.scss",
-				"assets/js/base/components/notice-banner/**/*.scss",
-				"assets/js/base/components/snackbar-list/**/*.scss",
-				"assets/js/base/components/loading-mask/**/*.scss",
-				"assets/js/base/components/rolling-price/**/*.scss",
-				"assets/js/base/components/cart-checkout/**/*.scss",
+				"assets/js/blocks/{cart,checkout,cart-checkout-shared,order-confirmation}/**/*.scss",
+				"assets/js/base/{components/{button,notice-banner,snackbar-list,loading-mask,rolling-price,cart-checkout,skeleton,quantity-selector},utils}/**/*.scss",
 				"packages/public-api/blocks-components/**/*.scss",
 				"assets/css/abstracts/_mixins.scss"
 			],
 			"rules": {
 				"woocommerce/motion-safe": true,
-				"woocommerce/motion-tokens": true
+				"declaration-property-value-disallowed-list": [
+					{
+						"/^(transition|animation)/": [
+							"/^(?![\\s\\S]*infinite)([\\s\\S]*[\\s,(])?[\\d.]*[1-9][\\d.]*m?s\\b/"
+						],
+						"/^transition/": [ "/(^|,)\\s*all\\b/" ]
+					},
+					{
+						"message": "Use WPDS motion duration tokens instead of literal times (loops excepted), and list transitioned properties instead of \"all\". See docs/contributors/motion.md."
+					}
+				]
 			}
 		}
 	]

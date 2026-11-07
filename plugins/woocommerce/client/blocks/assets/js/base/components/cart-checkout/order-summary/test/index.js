@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import { render, within } from '@testing-library/react';
 import { previewCart } from '@woocommerce/resource-previews';
 
 /**
@@ -10,8 +10,15 @@ import { previewCart } from '@woocommerce/resource-previews';
 import OrderSummary from '../index';
 import { textContentMatcher } from '../../../../../../../tests/utils/find-by-text';
 
-// The screen reader label repeats the price, so only the visible one is queried.
-const visibleOnly = { ignore: 'script, style, .screen-reader-text' };
+// The line total rolls its digits, which are drawn by CSS, so its price is read from the element's text.
+const lineTotal = () =>
+	within(
+		/** @type {HTMLElement} */ (
+			document.querySelector(
+				'.wc-block-cart-item__total-price-and-sale-badge-wrapper'
+			)
+		)
+	);
 
 jest.mock( '@woocommerce/base-context', () => ( {
 	...jest.requireActual( '@woocommerce/base-context' ),
@@ -46,7 +53,7 @@ describe( 'Order Summary', () => {
 		);
 
 		expect(
-			screen.getByText( textContentMatcher( '16€' ), visibleOnly )
+			lineTotal().getByText( textContentMatcher( '16€' ) )
 		).toBeInTheDocument();
 	} );
 
@@ -75,7 +82,7 @@ describe( 'Order Summary', () => {
 		);
 
 		expect(
-			screen.getByText( textContentMatcher( '$0.00' ), visibleOnly )
+			lineTotal().getByText( textContentMatcher( '$0.00' ) )
 		).toBeInTheDocument();
 	} );
 } );

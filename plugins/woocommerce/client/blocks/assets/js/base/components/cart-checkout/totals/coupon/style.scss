@@ -44,10 +44,34 @@
 				visibility: visible;
 			}
 		}
+
+		// The spinner swaps in while the label fades (rules 16, 18). The spinner sits inside the label and
+		// draws with `color`, so only the text fill fades.
+		&--loading .wc-block-components-button__text {
+			@include motion-safe {
+				animation: wc-coupon-label-out motion-exit(md) var(--wpds-motion-easing-expressive);
+			}
+		}
+
+		&--loading .wc-block-components-spinner {
+			@include motion-safe {
+				animation: wc-icon-in var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive);
+			}
+		}
 	}
 }
 
 .wc-block-components-totals-coupon__content {
 	flex-direction: column;
 	position: relative;
+}
+
+@keyframes wc-coupon-label-out {
+	from {
+		visibility: visible;
+	}
+	to {
+		visibility: visible;
+		-webkit-text-fill-color: transparent;
+	}
 }

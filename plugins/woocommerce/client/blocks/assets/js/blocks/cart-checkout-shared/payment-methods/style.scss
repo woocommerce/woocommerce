@@ -3,6 +3,13 @@
 }
 
 .wc-block-checkout__payment-method {
+	// The payment methods fade in when they replace the loading skeleton.
+	.wc-block-components-radio-control {
+		@include motion-safe {
+			animation: wc-fade-in var(--wpds-motion-duration-md) var(--wpds-motion-easing-subtle);
+		}
+	}
+
 	.wc-block-components-radio-control__option::after {
 		content: none;
 	}

@@ -4,6 +4,8 @@
 import { ValidatedTextInput } from '@woocommerce/blocks-components';
 import { useState, Fragment, useCallback, useEffect } from '@wordpress/element';
 import { usePrevious } from '@woocommerce/base-hooks';
+import { ADDRESS_FORM_SECTIONS } from '@woocommerce/base-utils/layout-transition';
+import { startLayoutChange } from '@woocommerce/base-utils/use-pending-layout-change';
 import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@ariakit/react';
 import { getFieldLabel } from '@woocommerce/blocks-checkout';
@@ -70,7 +72,12 @@ const AddressLine2Field = ( {
 						className={
 							'wc-block-components-address-form__address_2-toggle'
 						}
-						onClick={ () => setIsFieldVisible( true ) }
+						onClick={ () =>
+							startLayoutChange(
+								() => setIsFieldVisible( true ),
+								{ sections: ADDRESS_FORM_SECTIONS }
+							)
+						}
 					>
 						{ sprintf(
 							// translators: %s: address 2 field label.

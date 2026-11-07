@@ -16,6 +16,10 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 		isRemovingCoupon: false,
 	} ) ),
 	useOrderSummaryLoadingState: jest.fn( () => ( { isLoading: false } ) ),
+	useTotalsRow: ( cart: object, className: string ) => ( {
+		...cart,
+		wrapperProps: { className },
+	} ),
 } ) );
 
 const mockSlotRender = jest.fn( () => <div data-testid="discount-slot" /> );

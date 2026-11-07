@@ -96,6 +96,25 @@
 	padding: 0.4em 0;
 }
 
+.wp-block-woocommerce-cart,
+.wp-block-woocommerce-checkout {
+	.wc-block-components-quantity-selector {
+		.wc-block-components-quantity-selector__button {
+			@include motion-safe {
+				transition:
+					opacity var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle),
+					box-shadow var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle);
+			}
+		}
+
+		input.wc-block-components-quantity-selector__input {
+			@include motion-safe {
+				transition: opacity var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle);
+			}
+		}
+	}
+}
+
 .theme-twentyseventeen {
 	.wc-block-components-quantity-selector
 		.wc-block-components-quantity-selector__button {

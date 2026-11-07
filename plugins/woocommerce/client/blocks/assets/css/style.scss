@@ -1,15 +1,55 @@
 :root {
 	--wc-separator-color: color-mix(in srgb, currentColor 20%, transparent);
+}
 
-	// Motion constants with no WordPress Design System equivalent. Durations and easings come straight
-	// from --wpds-motion-*. See docs/contributors/motion.md.
-	--wc-motion-exit-ratio: 0.8;
-	--wc-scale-press: 0.97;
-	--wc-scale-pulse-peak: 1.05;
-	--wc-stretch-along: 1.12;
-	--wc-stretch-across: 0.893; // 1 / 1.12, so the area stays the same.
-	--wc-scale-icon-from: 0.8;
-	--wc-blur-icon: 4px;
+// Shared motion keyframes for every block that depends on this stylesheet.
+@keyframes wc-fade-in {
+	from {
+		opacity: 0;
+	}
+}
+
+@keyframes wc-fade-out {
+	to {
+		opacity: 0;
+	}
+}
+
+@keyframes wc-fade-up {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+}
+
+@keyframes wc-clip-reveal {
+	from {
+		clip-path: inset(0 0 100% 0);
+		opacity: 0;
+	}
+	to {
+		clip-path: inset(0);
+		opacity: 1;
+	}
+}
+
+@keyframes wc-clip-conceal {
+	from {
+		clip-path: inset(0);
+		opacity: 1;
+	}
+	to {
+		clip-path: inset(0 0 100% 0);
+		opacity: 0;
+	}
+}
+
+@keyframes wc-icon-in {
+	from {
+		opacity: 0;
+		transform: scale($wc-scale-icon-from);
+		filter: blur($wc-blur-icon);
+	}
 }
 
 body.wc-modal--open {

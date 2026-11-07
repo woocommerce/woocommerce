@@ -55,15 +55,13 @@ const PaymentMethodRequiredError = ( {
 		};
 	}, [ paymentMethodRequired, setValidationErrors, clearValidationError ] );
 
-	// The wrapper is always there so the options don't remount when the error comes and goes.
+	// The wrapper is always there so the options don't remount, and the error so it can animate out.
 	return (
 		<>
 			<div className={ visibleMessage ? 'has-error' : undefined }>
 				{ children }
 			</div>
-			{ visibleMessage && (
-				<ValidationInputError errorMessage={ visibleMessage } />
-			) }
+			<ValidationInputError errorMessage={ visibleMessage } />
 		</>
 	);
 };

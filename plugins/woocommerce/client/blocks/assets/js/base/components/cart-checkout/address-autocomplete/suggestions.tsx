@@ -70,7 +70,7 @@ export const Suggestions = ( {
 	addressType,
 	onSuggestionClick,
 	containerRef,
-	isClosing = false,
+	isExiting = false,
 }: {
 	suggestions: AddressAutocompleteResult[];
 	branding?: string;
@@ -78,7 +78,7 @@ export const Suggestions = ( {
 	addressType: string;
 	onSuggestionClick: ( suggestionId: string ) => void;
 	containerRef?: Ref< HTMLDivElement >;
-	isClosing?: boolean;
+	isExiting?: boolean;
 } ) => {
 	if ( ! suggestions ) {
 		return null;
@@ -91,12 +91,12 @@ export const Suggestions = ( {
 			ref={ containerRef }
 			className={ clsx(
 				'wc-block-components-address-autocomplete-suggestions',
-				{ 'is-closing': isClosing }
+				{ 'is-exiting': isExiting }
 			) }
 			role="region"
 			aria-live="polite"
 			// React 18 has no `inert` prop; an empty string sets the attribute.
-			{ ...( isClosing ? { inert: '' } : {} ) }
+			{ ...( isExiting ? { inert: '' } : {} ) }
 		>
 			<ul
 				className="suggestions-list"

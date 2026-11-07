@@ -30,3 +30,15 @@
 .wc-block-components-select + .wc-block-components-validation-error {
 	margin-bottom: $gap-large;
 }
+
+// The gap above the error, and below it after a select, collapses with it.
+.wp-block-woocommerce-cart,
+.wp-block-woocommerce-checkout {
+	.wc-block-components-validation-error {
+		@include motion-collapse(wc-validation-error, md, (padding-block-start: 0, margin-block-end: 0), (opacity: 0)) {
+			min-block-size: 0;
+			// Clip only below the error, leaving room for the icon, which overflows its line.
+			clip-path: inset(-100vmax -100vmax -0.25em);
+		}
+	}
+}

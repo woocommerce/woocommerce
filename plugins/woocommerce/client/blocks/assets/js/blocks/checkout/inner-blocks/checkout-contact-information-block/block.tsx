@@ -16,6 +16,8 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { checkoutStore } from '@woocommerce/block-data';
 import { CONTACT_FORM_KEYS } from '@woocommerce/block-settings';
 import { Form } from '@woocommerce/base-components/cart-checkout';
+import { ADDRESS_FORM_SECTIONS } from '@woocommerce/base-utils/layout-transition';
+import { usePendingLayoutChange } from '@woocommerce/base-utils/use-pending-layout-change';
 
 /**
  * Internal dependencies
@@ -33,6 +35,8 @@ const CreateAccountUI = (): React.ReactElement | null => {
 	} );
 	const { __internalSetShouldCreateAccount, __internalSetCustomerPassword } =
 		useDispatch( checkoutStore );
+	const [ pendingChecked, withLayoutChange ] =
+		usePendingLayoutChange< boolean >( ADDRESS_FORM_SECTIONS );
 
 	// Work out what fields need to be displayed for the current shopper.
 	const allowGuestCheckout = getSetting( 'checkoutAllowsGuest', false );
@@ -73,11 +77,11 @@ const CreateAccountUI = (): React.ReactElement | null => {
 						__( 'Create an account with %s', 'woocommerce' ),
 						getSetting( 'siteTitle', '' )
 					) }
-					checked={ shouldCreateAccount }
-					onChange={ ( value ) => {
+					checked={ pendingChecked ?? shouldCreateAccount }
+					onChange={ withLayoutChange( ( value ) => {
 						void __internalSetShouldCreateAccount( value );
 						void __internalSetCustomerPassword( '' );
-					} }
+					} ) }
 				/>
 			) }
 			{ showCreateAccountPassword && <CreatePassword /> }

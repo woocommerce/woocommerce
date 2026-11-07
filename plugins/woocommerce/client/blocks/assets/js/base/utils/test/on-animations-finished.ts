@@ -26,62 +26,38 @@ const elementWith = ( ...animations: FakeAnimation[] ) =>
 		getAnimations: () => animations.map( ( { animation } ) => animation ),
 	} ) as unknown as Element;
 
-const flushPromises = () => {
-	const { promise, resolve } = Promise.withResolvers< void >();
-	setTimeout( resolve );
-	return promise;
-};
+const flushPromises = () =>
+	new Promise< void >( ( resolve ) => setTimeout( resolve ) );
 
 describe( 'onAnimationsFinished', () => {
-	it( 'calls back straight away when there is no element or nothing is animating', () => {
+	it( 'calls back straight away when nothing finite is animating', () => {
 		const callback = jest.fn();
 
 		onAnimationsFinished( null, callback );
 		onAnimationsFinished( document.createElement( 'div' ), callback );
-		onAnimationsFinished( elementWith(), callback );
+		onAnimationsFinished(
+			elementWith( createAnimation( Infinity ) ),
+			callback
+		);
 
 		expect( callback ).toHaveBeenCalledTimes( 3 );
 	} );
 
-	it( 'waits for every finite animation to finish', async () => {
+	it( 'waits for every finite animation to finish or be cancelled, ignoring loops', async () => {
 		const first = createAnimation();
 		const second = createAnimation();
 		const callback = jest.fn();
 
-		onAnimationsFinished( elementWith( first, second ), callback );
+		onAnimationsFinished(
+			elementWith( first, createAnimation( Infinity ), second ),
+			callback
+		);
 		first.finish();
 		await flushPromises();
 
 		expect( callback ).not.toHaveBeenCalled();
 
-		second.finish();
-		await flushPromises();
-
-		expect( callback ).toHaveBeenCalledTimes( 1 );
-	} );
-
-	it( 'ignores looping animations, which never finish', async () => {
-		const spinner = createAnimation( Infinity );
-		const fade = createAnimation();
-		const callback = jest.fn();
-
-		onAnimationsFinished( elementWith( spinner ), callback );
-
-		expect( callback ).toHaveBeenCalledTimes( 1 );
-
-		onAnimationsFinished( elementWith( spinner, fade ), callback );
-		fade.finish();
-		await flushPromises();
-
-		expect( callback ).toHaveBeenCalledTimes( 2 );
-	} );
-
-	it( 'still calls back when an animation is cancelled instead of finishing', async () => {
-		const animation = createAnimation();
-		const callback = jest.fn();
-
-		onAnimationsFinished( elementWith( animation ), callback );
-		animation.cancel();
+		second.cancel();
 		await flushPromises();
 
 		expect( callback ).toHaveBeenCalledTimes( 1 );
@@ -91,11 +67,7 @@ describe( 'onAnimationsFinished', () => {
 		const animation = createAnimation();
 		const callback = jest.fn();
 
-		const cancel = onAnimationsFinished(
-			elementWith( animation ),
-			callback
-		);
-		cancel();
+		onAnimationsFinished( elementWith( animation ), callback )();
 		animation.finish();
 		await flushPromises();
 

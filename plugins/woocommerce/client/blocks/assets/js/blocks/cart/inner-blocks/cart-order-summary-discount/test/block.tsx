@@ -22,6 +22,10 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 			isLoading: false,
 		};
 	} ),
+	useTotalsRow: ( cart: object, className: string ) => ( {
+		...cart,
+		wrapperProps: { className },
+	} ),
 } ) );
 
 // Mock the ExperimentalDiscountsMeta to track when slot is rendered

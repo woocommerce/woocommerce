@@ -88,24 +88,20 @@ This file is part of the WooCommerce Blocks autocomplete. If editing shortcode, 
 	}
 }
 
-// Opens and closes like WPDS dropdowns: a 4px slide from the field with a quick linear fade.
-// The exit slides back toward the field. Exits use their own keyframes, because reusing the
-// entrance's name would not restart a finished animation.
+// Slides 4px from the field with a quick linear fade, like WPDS dropdowns, and back on exit. Exits use
+// their own keyframes because reusing the entrance's name would not restart a finished animation.
 .wc-block-components-address-autocomplete-suggestions {
 	@include motion-safe {
 		animation:
 			wc-address-suggestions-slide-in var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive),
-			wc-address-suggestions-fade-in var(--wpds-motion-duration-sm) linear;
+			wc-fade-in var(--wpds-motion-duration-sm) linear;
 	}
 
-	&.is-closing {
-		opacity: 0;
-		transform: translateY(-4px);
-
+	&.is-exiting {
 		@include motion-safe {
 			animation:
-				wc-address-suggestions-slide-out motion-exit(md) var(--wpds-motion-easing-expressive),
-				wc-address-suggestions-fade-out motion-exit(sm) linear;
+				wc-address-suggestions-slide-out motion-exit(md) var(--wpds-motion-easing-expressive) forwards,
+				wc-fade-out motion-exit(sm) linear forwards;
 		}
 	}
 }
@@ -116,20 +112,8 @@ This file is part of the WooCommerce Blocks autocomplete. If editing shortcode, 
 	}
 }
 
-@keyframes wc-address-suggestions-fade-in {
-	from {
-		opacity: 0;
-	}
-}
-
 @keyframes wc-address-suggestions-slide-out {
-	from {
-		transform: none;
-	}
-}
-
-@keyframes wc-address-suggestions-fade-out {
-	from {
-		opacity: 1;
+	to {
+		transform: translateY(-4px);
 	}
 }

@@ -50,6 +50,34 @@
 	}
 }
 
+// The container's margins grow in with its first notice and collapse with its last.
+.wp-block-woocommerce-cart,
+.wp-block-woocommerce-checkout {
+	.wc-block-components-notices:has(> .is-entering):not(:has(> :not(.is-entering))) {
+		@include motion-safe {
+			animation: wc-notices-grow var(--wpds-motion-duration-md) var(--wpds-motion-easing-balanced);
+		}
+	}
+
+	.wc-block-components-notices:has(> .is-exiting):not(:has(> :not(.is-exiting))) {
+		@include motion-safe {
+			animation: wc-notices-collapse motion-exit(md) var(--wpds-motion-easing-balanced) forwards;
+		}
+	}
+}
+
+@keyframes wc-notices-grow {
+	from {
+		margin-block: 0;
+	}
+}
+
+@keyframes wc-notices-collapse {
+	to {
+		margin-block: 0;
+	}
+}
+
 // @todo Either move notice style fixes to Woo core, or take full control over notice component styling in blocks.
 .theme-twentytwentyone,
 .theme-twentytwenty {

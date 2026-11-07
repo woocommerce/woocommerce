@@ -2,8 +2,8 @@
  * External dependencies
  */
 import clsx from 'clsx';
-import { Children } from '@wordpress/element';
-import type { ReactNode } from 'react';
+import { Children, forwardRef } from '@wordpress/element';
+import type { ForwardedRef, ReactNode } from 'react';
 
 /**
  * Internal dependencies
@@ -17,20 +17,20 @@ export interface TotalsWrapperProps {
 	className?: string;
 }
 
-const TotalsWrapper = ( {
-	children,
-	slotWrapper = false,
-	className,
-}: TotalsWrapperProps ): JSX.Element | null => {
+const TotalsWrapper = (
+	{ children, slotWrapper = false, className }: TotalsWrapperProps,
+	ref: ForwardedRef< HTMLDivElement >
+): JSX.Element | null => {
 	return Children.count( children ) ? (
 		<div
 			className={ clsx( className, 'wc-block-components-totals-wrapper', {
 				'slot-wrapper': slotWrapper,
 			} ) }
+			ref={ ref }
 		>
 			{ children }
 		</div>
 	) : null;
 };
 
-export default TotalsWrapper;
+export default forwardRef( TotalsWrapper );

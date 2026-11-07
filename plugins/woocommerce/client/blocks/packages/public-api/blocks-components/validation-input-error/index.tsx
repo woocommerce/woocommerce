@@ -1,8 +1,10 @@
 /**
  * External dependencies
  */
+import clsx from 'clsx';
 import { useSelect } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
+import { usePresence } from '@woocommerce/base-hooks';
 import { Icon, cautionFilled } from '@wordpress/icons';
 
 /**
@@ -37,15 +39,32 @@ export const ValidationInputError = ( {
 		if ( validationError?.message && ! validationError?.hidden ) {
 			errorMessage = validationError.message;
 		} else {
-			return null;
+			errorMessage = '';
 		}
 	}
 
+	// Also enters when its field mounts with it, and keeps its last message, hidden from assistive tech, as it leaves.
+	const presence = usePresence( !! errorMessage, {
+		data: errorMessage,
+		enterOnMount: true,
+	} );
+	if ( ! presence.isPresent ) {
+		return null;
+	}
+
 	return (
-		<div className="wc-block-components-validation-error" role="alert">
-			<p id={ validationErrorId }>
+		<div
+			ref={ presence.ref }
+			className={ clsx(
+				'wc-block-components-validation-error',
+				presence.className
+			) }
+			role="alert"
+			aria-hidden={ errorMessage ? undefined : true }
+		>
+			<p id={ errorMessage ? validationErrorId : undefined }>
 				<Icon icon={ cautionFilled } />
-				<span>{ errorMessage }</span>
+				<span>{ presence.data }</span>
 			</p>
 		</div>
 	);

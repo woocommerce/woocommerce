@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Fragment, flushSync, useState } from '@wordpress/element';
+import { Fragment } from '@wordpress/element';
 import { useEffectOnce } from 'usehooks-ts';
 import {
 	useCheckoutAddress,
@@ -17,13 +17,13 @@ import Noninteractive from '@woocommerce/base-components/noninteractive';
 import type { BillingAddress } from '@woocommerce/settings';
 import { getSetting } from '@woocommerce/settings';
 import { emptyAddressFields } from '@woocommerce/base-utils';
+import { usePendingLayoutChange } from '@woocommerce/base-utils/use-pending-layout-change';
 import type { CartResponseBillingAddress } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import CustomerAddress from './customer-address';
-import { startCheckoutLayoutTransition } from '../../layout-transition';
 
 const Block = (): JSX.Element => {
 	const {
@@ -37,11 +37,8 @@ const Block = (): JSX.Element => {
 	} = useCheckoutAddress();
 	const { isEditor } = useEditorContext();
 	const isGuest = getSetting( 'currentUserId' ) === 0;
-	// The view transition applies the change a frame or two after the click. Until then, show the shopper's
-	// choice on the checkbox itself, so it ticks straight away.
-	const [ pendingChecked, setPendingChecked ] = useState< boolean | null >(
-		null
-	);
+	const [ pendingChecked, withLayoutChange ] =
+		usePendingLayoutChange< boolean >();
 
 	// Syncs the billing address with the shipping address.
 	const syncBillingWithShipping = () => {
@@ -106,28 +103,15 @@ const Block = (): JSX.Element => {
 				className="wc-block-checkout__use-address-for-billing"
 				label={ __( 'Use same address for billing', 'woocommerce' ) }
 				checked={ pendingChecked ?? useShippingAsBilling }
-				onChange={ ( checked: boolean ) => {
-					const update = () => {
-						setPendingChecked( null );
-						setUseShippingAsBilling( checked );
-						if ( checked ) {
-							syncBillingWithShipping();
-						} else {
-							setEditingBillingAddress( true );
-							clearBillingAddress( billingAddress );
-						}
-					};
-					// The billing address appears or disappears, so the sections below slide instead of jumping.
-					if (
-						startCheckoutLayoutTransition( () =>
-							flushSync( update )
-						)
-					) {
-						setPendingChecked( checked );
+				onChange={ withLayoutChange( ( checked: boolean ) => {
+					setUseShippingAsBilling( checked );
+					if ( checked ) {
+						syncBillingWithShipping();
 					} else {
-						update();
+						setEditingBillingAddress( true );
+						clearBillingAddress( billingAddress );
 					}
-				} }
+				} ) }
 			/>
 		</>
 	);

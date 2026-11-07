@@ -3,13 +3,15 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
-import { useEffect, useRef } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import { select, subscribe } from '@wordpress/data';
 import { cartStore } from '@woocommerce/block-data';
+import { usePresenceList } from '@woocommerce/base-hooks/use-presence-list';
 import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { RemovableChip, TotalsItem } from '@woocommerce/blocks-components';
 import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import { getSetting } from '@woocommerce/settings';
+import type { RemovableChipProps } from '@woocommerce/blocks-components/chip/removable-chip';
 import {
 	CartResponseCouponItemWithLabel,
 	CartTotalsItem,
@@ -43,9 +45,8 @@ const filteredCartCouponsFilterArg = {
 
 const toCouponKey = ( code: string ) => code.trim().toLowerCase();
 
-// Codes the shopper has applied since the page loaded; their chips pulse once when they appear. This is tracked
-// from the store rather than on mount because the cart unmounts this component while it has no coupons, so a
-// first coupon would otherwise look like one that was applied before the page loaded.
+// Codes the shopper has applied since the page loaded. Tracked from the store, not on mount, because the cart unmounts
+// this component while it has no coupons, so a first coupon would otherwise look like one from before the page loaded.
 const appliedCouponKeys = new Set< string >();
 let pendingCouponKey = '';
 subscribe( () => {
@@ -56,8 +57,7 @@ subscribe( () => {
 		appliedCouponKeys.add( pendingCouponKey );
 		return;
 	}
-	// Once the request settles, forget a code that didn't make it into the cart, so a rejected code can't
-	// pulse later.
+	// Once the request settles, forget a code that didn't make it into the cart, so it can't pulse later.
 	if (
 		pendingCouponKey &&
 		! cart
@@ -70,6 +70,29 @@ subscribe( () => {
 	}
 	pendingCouponKey = '';
 }, cartStore );
+
+// A chip pulses once, keeping the class while mounted, if the shopper just applied its code.
+const CouponChip = ( {
+	code,
+	className,
+	...props
+}: RemovableChipProps & { code: string } ) => {
+	const [ isNewlyApplied ] = useState( () =>
+		appliedCouponKeys.has( toCouponKey( code ) )
+	);
+	useEffect( () => {
+		appliedCouponKeys.delete( toCouponKey( code ) );
+	} );
+	return (
+		<RemovableChip
+			className={ clsx(
+				className,
+				isNewlyApplied && 'is-newly-applied'
+			) }
+			{ ...props }
+		/>
+	);
+};
 
 const TotalsDiscount = ( {
 	cartCoupons = [],
@@ -91,27 +114,15 @@ const TotalsDiscount = ( {
 		defaultValue: cartCoupons,
 	} );
 
-	// A chip pulses when it first appears for a code the shopper just applied, and keeps the class while mounted so
-	// re-renders don't cut the animation short. Existing chips never pulse, even if the same code is re-submitted.
-	const renderedCouponCodes = useRef< string[] >( [] );
-	const pulsingCouponCodes = useRef< string[] >( [] );
-	const couponCodes = filteredCartCoupons.map( ( { code } ) => code );
-	const newlyAppliedCouponCodes = couponCodes.filter(
-		( code ) =>
-			pulsingCouponCodes.current.includes( code ) ||
-			( ! renderedCouponCodes.current.includes( code ) &&
-				appliedCouponKeys.has( toCouponKey( code ) ) )
+	// A removed chip stays where it was until it has animated out.
+	const listRef = useRef< HTMLUListElement >( null );
+	const displayedCoupons = usePresenceList(
+		listRef,
+		filteredCartCoupons,
+		( { code } ) => code
 	);
 
-	useEffect( () => {
-		couponCodes.forEach( ( code ) =>
-			appliedCouponKeys.delete( toCouponKey( code ) )
-		);
-		pulsingCouponCodes.current = newlyAppliedCouponCodes;
-		renderedCouponCodes.current = couponCodes;
-	} );
-
-	if ( ! discountValue && filteredCartCoupons.length === 0 ) {
+	if ( ! discountValue && displayedCoupons.length === 0 ) {
 		return null;
 	}
 
@@ -128,7 +139,7 @@ const TotalsDiscount = ( {
 			className="wc-block-components-totals-discount"
 			currency={ currency }
 			description={
-				filteredCartCoupons.length !== 0 && (
+				displayedCoupons.length !== 0 && (
 					<LoadingMask
 						screenReaderLabel={ __(
 							'Removing coupon…',
@@ -137,19 +148,21 @@ const TotalsDiscount = ( {
 						isLoading={ isRemovingCoupon }
 						showSpinner={ false }
 					>
-						<ul className="wc-block-components-totals-discount__coupon-list">
-							{ filteredCartCoupons.map( ( cartCoupon ) => {
+						<ul
+							className="wc-block-components-totals-discount__coupon-list"
+							ref={ listRef }
+						>
+							{ displayedCoupons.map( ( displayed ) => {
+								const cartCoupon = displayed.item;
+								const isExiting =
+									displayed.className === 'is-exiting';
 								return (
-									<RemovableChip
+									<CouponChip
 										key={ 'coupon-' + cartCoupon.code }
+										code={ cartCoupon.code }
 										className={ clsx(
 											'wc-block-components-totals-discount__coupon-list-item',
-											{
-												'is-newly-applied':
-													newlyAppliedCouponCodes.includes(
-														cartCoupon.code
-													),
-											}
+											{ 'is-exiting': isExiting }
 										) }
 										text={ cartCoupon.label }
 										screenReaderText={ sprintf(
@@ -157,7 +170,9 @@ const TotalsDiscount = ( {
 											__( 'Coupon: %s', 'woocommerce' ),
 											cartCoupon.label
 										) }
-										disabled={ isRemovingCoupon }
+										disabled={
+											isRemovingCoupon || isExiting
+										}
 										onRemove={ () => {
 											removeCoupon( cartCoupon.code );
 										} }

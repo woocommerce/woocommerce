@@ -12,10 +12,26 @@
 			animation: wc-totals-discount-coupon-pulse var(--wpds-motion-duration-lg) var(--wpds-motion-easing-balanced);
 		}
 	}
+
+	// A removed coupon's chip shrinks and fades out before it leaves (rule 15).
+	.wc-block-components-totals-discount__coupon-list-item.is-exiting {
+		pointer-events: none;
+
+		@include motion-safe {
+			animation: wc-totals-discount-coupon-exit motion-exit(md) var(--wpds-motion-easing-expressive) forwards;
+		}
+	}
 }
 
 @keyframes wc-totals-discount-coupon-pulse {
 	50% {
-		transform: scale(var(--wc-scale-pulse-peak));
+		transform: scale($wc-scale-pulse-peak);
+	}
+}
+
+@keyframes wc-totals-discount-coupon-exit {
+	to {
+		opacity: 0;
+		transform: scale($wc-scale-icon-from);
 	}
 }

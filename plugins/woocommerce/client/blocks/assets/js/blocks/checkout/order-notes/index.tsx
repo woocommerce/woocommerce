@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import { CheckboxControl, Textarea } from '@woocommerce/blocks-components';
+import { usePendingLayoutChange } from '@woocommerce/base-utils/use-pending-layout-change';
 
 /**
  * Internal dependencies
@@ -28,14 +29,16 @@ const CheckoutOrderNotes = ( {
 	// text entered previously by the user when the checkbox is re-enabled
 	// while keeping the context clean if the checkbox is disabled.
 	const [ hiddenOrderNotesText, setHiddenOrderNotesText ] = useState( '' );
+	const [ pendingChecked, withLayoutChange ] =
+		usePendingLayoutChange< boolean >();
 
 	return (
 		<div className="wc-block-checkout__add-note">
 			<CheckboxControl
 				disabled={ disabled }
 				label={ __( 'Add a note to your order', 'woocommerce' ) }
-				checked={ withOrderNotes }
-				onChange={ ( isChecked ) => {
+				checked={ pendingChecked ?? withOrderNotes }
+				onChange={ withLayoutChange( ( isChecked ) => {
 					setWithOrderNotes( isChecked );
 					if ( isChecked ) {
 						// When re-enabling the checkbox, store in context the
@@ -51,7 +54,7 @@ const CheckoutOrderNotes = ( {
 						onChange( '' );
 						setHiddenOrderNotesText( value );
 					}
-				} }
+				} ) }
 			/>
 			{ withOrderNotes && (
 				<Textarea

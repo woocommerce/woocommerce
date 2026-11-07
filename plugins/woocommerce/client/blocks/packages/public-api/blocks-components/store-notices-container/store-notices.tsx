@@ -3,13 +3,20 @@
  */
 import { _n } from '@wordpress/i18n';
 import clsx from 'clsx';
-import { useRef, useEffect, RawHTML } from '@wordpress/element';
+import {
+	useRef,
+	useEffect,
+	Children,
+	cloneElement,
+	RawHTML,
+} from '@wordpress/element';
 import { sanitizeHTML } from '@woocommerce/sanitize';
 import { useDispatch } from '@wordpress/data';
-import { usePrevious } from '@woocommerce/base-hooks';
+import { usePrevious, usePresenceList } from '@woocommerce/base-hooks';
 import { decodeEntities } from '@wordpress/html-entities';
 import type { NoticeStatus, NoticeType } from '@woocommerce/types';
 import type { NoticeBannerProps } from '@woocommerce/base-components/notice-banner';
+import type { ReactElement, ReactNode, RefObject } from 'react';
 
 /**
  * Internal dependencies
@@ -45,6 +52,30 @@ const StoreNoticeList = ( {
 		) ) }
 	</ul>
 );
+
+// Keeps removed notices mounted while they animate out.
+const NoticesContainer = ( {
+	containerRef,
+	className,
+	children,
+}: {
+	containerRef: RefObject< HTMLDivElement >;
+	className: string;
+	children: ReactNode;
+} ): JSX.Element => {
+	const notices = usePresenceList(
+		containerRef,
+		Children.toArray( children ) as ReactElement[],
+		( notice ) => String( notice.key )
+	);
+	return (
+		<div ref={ containerRef } className={ className }>
+			{ notices.map( ( { item, className: motionClassName } ) =>
+				cloneElement( item, { className: motionClassName } )
+			) }
+		</div>
+	);
+};
 
 const StoreNotices = ( {
 	className,
@@ -128,8 +159,8 @@ const StoreNotices = ( {
 	};
 
 	return (
-		<div
-			ref={ ref }
+		<NoticesContainer
+			containerRef={ ref }
 			className={ clsx( className, 'wc-block-components-notices' ) }
 		>
 			{ nonDismissibleNotices.map( ( notice ) => (
@@ -200,7 +231,7 @@ const StoreNotices = ( {
 					);
 				}
 			) }
-		</div>
+		</NoticesContainer>
 	);
 };
 

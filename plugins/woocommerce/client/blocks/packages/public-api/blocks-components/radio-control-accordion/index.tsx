@@ -23,6 +23,8 @@ export interface RadioControlAccordionProps {
 		content: JSX.Element;
 	} >;
 	selected: string | null;
+	// Which option's content is open, if not `selected`: e.g. the previous value while a layout transition applies.
+	openValue?: string | null;
 	// Should the selected option be highlighted with a border?
 	highlightChecked?: boolean;
 }
@@ -32,6 +34,7 @@ const RadioControlAccordion = ( {
 	instanceId,
 	id,
 	selected,
+	openValue,
 	onChange,
 	options = [],
 	highlightChecked = false,
@@ -65,6 +68,10 @@ const RadioControlAccordion = ( {
 				const hasOptionContent =
 					typeof option === 'object' && 'content' in option;
 				const checked = option.value === selected;
+				const isOpen =
+					openValue === undefined
+						? checked
+						: option.value === openValue;
 				const name = `radio-control-${ radioControlId }`;
 				return (
 					<div
@@ -88,7 +95,7 @@ const RadioControlAccordion = ( {
 								}
 							} }
 						/>
-						{ hasOptionContent && checked && (
+						{ hasOptionContent && isOpen && (
 							<div
 								id={ `${ name }-${ option.value }__content` }
 								className={ clsx(

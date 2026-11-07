@@ -88,7 +88,7 @@ module.exports = {
 		'@woocommerce/base-context(.*)$': 'assets/js/base/context/$1',
 		'@woocommerce/base-hocs(.*)$': 'assets/js/base/hocs/$1',
 		'@woocommerce/base-hooks(.*)$': 'assets/js/base/hooks/$1',
-		'@woocommerce/base-utils(.*)$': 'assets/js/base/utils',
+		'@woocommerce/base-utils(.*)$': 'assets/js/base/utils/$1',
 		'^@woocommerce/block-data/(.*)$': 'packages/public-api/block-data/$1',
 		'^@woocommerce/block-data$': 'packages/public-api/block-data',
 		'@woocommerce/resource-previews': 'assets/js/previews',

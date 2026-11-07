@@ -458,17 +458,10 @@ export const AddressAutocomplete = ( {
 		selectedSuggestion >= 0
 			? `suggestion-item-${ addressType }-${ selectedSuggestion }`
 			: undefined;
-	const isSuggestionsOpen = searchValue.length >= 3 && suggestions.length > 0;
-	const {
-		isPresent: isSuggestionsPresent,
-		transition: suggestionsTransition,
-		ref: suggestionsRef,
-	} = usePresence< HTMLDivElement >( isSuggestionsOpen );
-	// While the list animates out, keep showing the suggestions it closed with.
-	const shownSuggestions = useRef( suggestions );
-	if ( isSuggestionsOpen ) {
-		shownSuggestions.current = suggestions;
-	}
+	const shownSuggestions = usePresence(
+		searchValue.length >= 3 && suggestions.length > 0,
+		{ data: suggestions }
+	);
 
 	return (
 		<div className="wc-block-components-address-autocomplete-container">
@@ -496,12 +489,12 @@ export const AddressAutocomplete = ( {
 					) : null
 				}
 			/>
-			{ isSuggestionsPresent ? (
+			{ shownSuggestions.isPresent ? (
 				<Suggestions
-					containerRef={ suggestionsRef }
-					isClosing={ suggestionsTransition === 'exiting' }
+					containerRef={ shownSuggestions.ref }
+					isExiting={ shownSuggestions.transition === 'exiting' }
 					selectedSuggestion={ selectedSuggestion }
-					suggestions={ shownSuggestions.current }
+					suggestions={ shownSuggestions.data }
 					branding={ activeProviderBranding }
 					addressType={ addressType }
 					onSuggestionClick={ handleSuggestionClick }

@@ -53,9 +53,9 @@ $component-background-hover: color-mix(in srgb, currentColor 12%, transparent);
 	}
 }
 
-// While the selection moves, the indicator carries the selected style from the old option to the new one,
-// so the options themselves drop it. The indicator renders before the options, so their content paints on top.
-.wc-block-checkout__shipping-method-container.is-moving {
+// While the selection moves, the indicator carries the selected style, so the options drop it.
+// The indicator renders before the options, so their content paints on top.
+.wc-block-checkout__shipping-method-container:has(> .wc-block-checkout__shipping-method-indicator) {
 	position: relative;
 
 	.wc-block-checkout__shipping-method-option--selected {
@@ -64,24 +64,18 @@ $component-background-hover: color-mix(in srgb, currentColor 12%, transparent);
 	}
 }
 
+// Slides to the new option, stretching along the way and settling back to its size (rules 5, 9).
 .wc-block-checkout__shipping-method-indicator {
 	position: absolute;
-	pointer-events: none;
-	@include motion-safe {
-		animation: wc-shipping-method-indicator-move var(--wpds-motion-duration-lg) var(--wpds-motion-easing-balanced);
-	}
-}
-
-// Stretches along the direction of travel while moving and settles back to its size (rule 5).
-.wc-block-checkout__shipping-method-indicator-pill {
-	display: block;
 	box-sizing: border-box;
-	height: 100%;
 	border: 2px solid currentColor;
 	border-radius: $universal-border-radius;
 	background: $input-background-light;
+	pointer-events: none;
 	@include motion-safe {
-		animation: wc-shipping-method-indicator-stretch var(--wpds-motion-duration-lg) var(--wpds-motion-easing-balanced);
+		animation:
+			wc-shipping-method-indicator-move var(--wpds-motion-duration-lg) var(--wpds-motion-easing-balanced),
+			wc-shipping-method-indicator-stretch var(--wpds-motion-duration-lg) var(--wpds-motion-easing-balanced);
 	}
 
 	.has-dark-controls & {
@@ -91,13 +85,13 @@ $component-background-hover: color-mix(in srgb, currentColor 12%, transparent);
 
 @keyframes wc-shipping-method-indicator-move {
 	from {
-		transform: translate(var(--wc-shipping-method-indicator-offset));
+		translate: var(--wc-shipping-method-indicator-offset);
 	}
 }
 
 @keyframes wc-shipping-method-indicator-stretch {
 	50% {
-		transform: scale(var(--wc-shipping-method-indicator-stretch));
+		scale: var(--wc-shipping-method-indicator-stretch);
 	}
 }
 

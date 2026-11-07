@@ -1,13 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	flushSync,
-	useCallback,
-	useEffect,
-	useRef,
-	useState,
-} from '@wordpress/element';
+import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { Form } from '@woocommerce/base-components/cart-checkout';
 import {
 	useCheckoutAddress,
@@ -18,12 +12,12 @@ import type { ShippingAddress } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
 import { ADDRESS_FORM_KEYS } from '@woocommerce/block-settings';
+import { startLayoutChange } from '@woocommerce/base-utils/use-pending-layout-change';
 
 /**
  * Internal dependencies
  */
 import AddressWrapper from '../../address-wrapper';
-import { startCheckoutLayoutTransition } from '../../layout-transition';
 import AddressCard from '../../address-card';
 
 const CustomerAddress = () => {
@@ -95,18 +89,14 @@ const CustomerAddress = () => {
 	);
 
 	const handleEditClick = useCallback( () => {
-		// Grow the card into the form with a view transition where supported; otherwise fall back to the
-		// `.is-animated` CSS reveal.
+		// Grow the card into the form where supported; otherwise fall back to the `.is-animated` CSS reveal.
 		if (
-			startCheckoutLayoutTransition(
-				() => flushSync( () => setEditingShippingAddress( true ) ),
-				{ element: wrapperRef.current, name: 'wc-shipping-address' }
-			)
+			! startLayoutChange( () => setEditingShippingAddress( true ), {
+				morph: wrapperRef.current,
+			} )
 		) {
-			return;
+			setShouldAnimate( true );
 		}
-		setShouldAnimate( true );
-		setEditingShippingAddress( true );
 	}, [ setEditingShippingAddress ] );
 
 	return (

@@ -1,34 +1,41 @@
 /**
  * External dependencies
  */
-import { useReducedMotion } from '@wordpress/compose';
 import { useLayoutEffect, useRef, useState } from '@wordpress/element';
-import { onAnimationsFinished } from '@woocommerce/base-utils';
+import { useReducedMotion } from '@wordpress/compose';
+import { onAnimationsFinished } from '@woocommerce/base-utils/on-animations-finished';
 
-export type PresenceTransition = 'entering' | 'exiting' | null;
+type Transition = 'entering' | 'exiting' | null;
 
 /**
- * Keeps content mounted while it animates out. When `isOpen` changes, `transition` is `entering` or
- * `exiting` until the animations on the element in `ref` finish. With reduced motion it stays `null`,
- * so content mounts and unmounts straight away.
- *
- * @param isOpen Whether the content should be shown.
+ * Keeps content mounted while it animates out. `transition` (and `className`) stays set until the animations on
+ * `ref` finish; under reduced motion it's never set. While exiting, `data` is the last `options.data` seen while
+ * open, so the content doesn't empty out as it leaves. `enterOnMount` also enters when mounted open.
  */
-export const usePresence = < T extends Element >( isOpen: boolean ) => {
+export const usePresence = <
+	T extends Element = HTMLDivElement,
+	D = undefined,
+>(
+	isOpen: boolean,
+	{ data, enterOnMount = false }: { data?: D; enterOnMount?: boolean } = {}
+) => {
 	const isReducedMotion = useReducedMotion();
 	const ref = useRef< T >( null );
+	const shownData = useRef( data );
 	const [ wasOpen, setWasOpen ] = useState( isOpen );
-	const [ transition, setTransition ] =
-		useState< PresenceTransition >( null );
+	const [ transition, setTransition ] = useState< Transition >(
+		enterOnMount && isOpen && ! isReducedMotion ? 'entering' : null
+	);
 
 	// Set in the same render as the change, so closing content never unmounts for a frame first.
 	if ( isOpen !== wasOpen ) {
 		setWasOpen( isOpen );
-		let nextTransition: PresenceTransition = null;
 		if ( ! isReducedMotion ) {
-			nextTransition = isOpen ? 'entering' : 'exiting';
+			setTransition( isOpen ? 'entering' : 'exiting' );
 		}
-		setTransition( nextTransition );
+	}
+	if ( isOpen ) {
+		shownData.current = data;
 	}
 
 	useLayoutEffect( () => {
@@ -38,5 +45,12 @@ export const usePresence = < T extends Element >( isOpen: boolean ) => {
 		return onAnimationsFinished( ref.current, () => setTransition( null ) );
 	}, [ transition ] );
 
-	return { isPresent: isOpen || transition === 'exiting', transition, ref };
+	const isExiting = transition === 'exiting';
+	return {
+		isPresent: isOpen || isExiting,
+		transition,
+		className: transition ? ( `is-${ transition }` as const ) : undefined,
+		ref,
+		data: ( isExiting ? shownData.current : data ) as D,
+	};
 };

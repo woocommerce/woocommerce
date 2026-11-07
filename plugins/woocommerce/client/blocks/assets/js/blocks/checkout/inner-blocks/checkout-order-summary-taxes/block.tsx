@@ -6,6 +6,7 @@ import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
 	useStoreCart,
 	useOrderSummaryLoadingState,
+	useTotalsRow,
 } from '@woocommerce/base-context';
 import { getSetting } from '@woocommerce/settings';
 
@@ -16,11 +17,17 @@ const Block = ( {
 	className: string;
 	showRateAfterTaxName: boolean;
 } ): JSX.Element | null => {
-	const { cartTotals } = useStoreCart();
 	const { isLoading } = useOrderSummaryLoadingState();
 	const displayCartPricesIncludingTax = getSetting(
 		'displayCartPricesIncludingTax',
 		false
+	);
+	const { cartTotals, wrapperProps } = useTotalsRow(
+		useStoreCart(),
+		className,
+		( cart ) =>
+			! displayCartPricesIncludingTax &&
+			parseInt( cart.cartTotals.total_tax, 10 ) > 0
 	);
 
 	if (
@@ -33,7 +40,7 @@ const Block = ( {
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 
 	return (
-		<TotalsWrapper className={ className }>
+		<TotalsWrapper { ...wrapperProps }>
 			<TotalsTaxes
 				showRateAfterTaxName={ showRateAfterTaxName }
 				currency={ totalsCurrency }

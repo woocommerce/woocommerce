@@ -25,7 +25,7 @@
 		text-overflow: ellipsis;
 		max-width: calc(100% - #{2 * $gap-small});
 		cursor: text;
-		// `top` animates with the scale, as it did before: themes and extensions position the label with `top`.
+		// Themes and extensions position the label with `top`, so it animates too.
 		@include motion-safe {
 			transition:
 				top var(--wpds-motion-duration-sm) var(--wpds-motion-easing-balanced),
@@ -60,7 +60,6 @@
 
 		height: 50px;
 
-		// The focus border's colour fades, as in WPDS; its width still changes at once.
 		@include motion-safe {
 			transition: border-color var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle);
 		}
@@ -91,9 +90,7 @@
 		&::-webkit-datetime-edit {
 			// Focusing the input would cause browsers to highlight the dd before it's done animating, so we hide it as well.
 			opacity: 0;
-			@include motion-safe {
-				transition: none;
-			}
+			transition: none;
 		}
 	}
 
