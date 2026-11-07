@@ -75,11 +75,7 @@ class ClassicVariationGalleryAdmin implements RegisterHooksInterface {
 				'announceReorder'  => __( 'Variation gallery order updated.', 'woocommerce' ),
 				'announcePrimary'  => __( 'New primary image set.', 'woocommerce' ),
 				'removeLabel'      => __( 'Remove image', 'woocommerce' ),
-				'countZero'        => __( 'No images yet', 'woocommerce' ),
-				/* translators: %d: number of variation gallery images */
-				'countSingular'    => __( '%d image', 'woocommerce' ),
-				/* translators: %d: number of variation gallery images */
-				'countPlural'      => __( '%d images', 'woocommerce' ),
+				'addTileLabel'     => __( 'Add images to variation gallery', 'woocommerce' ),
 				'primaryLabel'     => __( 'Primary', 'woocommerce' ),
 				/* translators: %d: gallery image position */
 				'thumbLabel'       => __( 'Show gallery image %d', 'woocommerce' ),
@@ -120,21 +116,10 @@ class ClassicVariationGalleryAdmin implements RegisterHooksInterface {
 			data-variation-id="<?php echo esc_attr( (string) $variation->ID ); ?>"
 		>
 			<div class="wc-variation-gallery-field__header">
-				<div class="wc-variation-gallery-field__title-block">
-					<strong class="wc-variation-gallery-field__title">
-						<?php esc_html_e( 'Variation gallery', 'woocommerce' ); ?>
-					</strong>
-					<span class="wc-variation-gallery-field__count" aria-live="polite">
-						<?php echo esc_html( $this->get_count_text( $count ) ); ?>
-					</span>
-				</div>
-				<button
-					type="button"
-					class="button-link wc-variation-gallery-manage"
-					aria-label="<?php esc_attr_e( 'Manage variation gallery images', 'woocommerce' ); ?>"
-				>
-					<?php esc_html_e( 'Manage', 'woocommerce' ); ?>
-				</button>
+				<span class="wc-variation-gallery-field__title">
+					<?php esc_html_e( 'Variation gallery', 'woocommerce' ); ?>
+				</span>
+				<?php echo wc_help_tip( __( 'First image is used as the primary. Drag to reorder.', 'woocommerce' ) ); ?>
 			</div>
 
 			<div class="wc-variation-gallery-field__hero" data-active-index="0">
@@ -159,11 +144,8 @@ class ClassicVariationGalleryAdmin implements RegisterHooksInterface {
 				<?php foreach ( $image_ids as $index => $image_id ) : ?>
 					<?php $this->render_thumbnail( $image_id, 0 === $index ); ?>
 				<?php endforeach; ?>
+				<?php $this->render_add_tile(); ?>
 			</ul>
-
-			<p class="wc-variation-gallery-field__hint"<?php echo 0 === $count ? ' hidden' : ''; ?>>
-				<?php esc_html_e( 'First image is used as the primary. Drag to reorder.', 'woocommerce' ); ?>
-			</p>
 
 			<input
 				type="hidden"
@@ -339,21 +321,25 @@ class ClassicVariationGalleryAdmin implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Get the image count label shown beside the field title.
+	 * Render the trailing "add images" tile in the thumbnail list.
 	 *
-	 * @param int $count Number of images.
-	 * @return string
+	 * Shares the `wc-variation-gallery-manage` class with the empty-state
+	 * CTA so the same delegated click handler opens the media picker.
+	 *
+	 * @return void
 	 */
-	private function get_count_text( int $count ): string {
-		if ( 0 === $count ) {
-			return __( 'No images yet', 'woocommerce' );
-		}
-
-		return sprintf(
-			/* translators: %d number of variation gallery images */
-			_n( '%d image', '%d images', $count, 'woocommerce' ),
-			$count
-		);
+	private function render_add_tile(): void {
+		?>
+		<li class="wc-variation-gallery-add">
+			<button
+				type="button"
+				class="wc-variation-gallery-add__button wc-variation-gallery-manage"
+				aria-label="<?php esc_attr_e( 'Add images to variation gallery', 'woocommerce' ); ?>"
+			>
+				<span class="dashicons dashicons-plus-alt2" aria-hidden="true"></span>
+			</button>
+		</li>
+		<?php
 	}
 
 	/**
