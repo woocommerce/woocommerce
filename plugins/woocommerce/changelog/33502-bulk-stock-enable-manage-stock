@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+The variations bulk "Stock" action can now enable stock management on variations that do not manage stock yet.
