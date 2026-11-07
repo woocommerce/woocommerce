@@ -5,7 +5,9 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
+use Automattic\WooCommerce\Blocks\BlockTypesLazyController;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
+use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Features\BlockEditorUnifiedAssets;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
@@ -145,8 +147,14 @@ abstract class AbstractBlock {
 			_doing_it_wrong( __METHOD__, esc_html( 'Block name is required.' ), '4.5.0' );
 			return false;
 		}
+
 		$this->integration_registry->initialize( $this->block_name . '_block' );
-		$this->register_block_type();
+
+		// Performance note: if the block is lazily loadable, it's type has been already registered.
+		if ( ! Package::container()->get( BlockTypesLazyController::class )->is_registered( static::class ) ) {
+			$this->register_block_type();
+		}
+
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 	}
 

@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Blocks;
 
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\BlockTypesController as TestedBlockTypesController;
+use Automattic\WooCommerce\Blocks\BlockTypesLazyController;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
 use WC_Unit_Test_Case;
@@ -32,7 +33,8 @@ class BlockTypesController extends WC_Unit_Test_Case {
 
 		$this->block_types_controller = new TestedBlockTypesController(
 			Package::container()->get( Api::class ),
-			new AssetDataRegistryMock( Package::container()->get( API::class ) )
+			new AssetDataRegistryMock( Package::container()->get( API::class ) ),
+			Package::container()->get( BlockTypesLazyController::class )
 		);
 	}
 
