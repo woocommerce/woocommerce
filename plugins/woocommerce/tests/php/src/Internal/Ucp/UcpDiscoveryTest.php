@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Ucp;
 
 use Automattic\WooCommerce\Internal\Ucp\UcpDiscovery;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 /**
  * Tests for the `/.well-known/ucp` discovery profile.
@@ -56,15 +56,15 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The profile points at the local UCP REST namespace and lists every capability UcpUtils declares.
+	 * @testdox The profile points at the local UCP REST namespace and lists every capability Utils declares.
 	 */
 	public function test_profile_shape(): void {
 		$profile = $this->sut->get_profile();
 
 		$this->assertSame( array( 'ucp', 'links' ), array_keys( $profile ) );
-		$this->assertSame( UcpUtils::VERSION, $profile['ucp']['version'] );
+		$this->assertSame( Utils::VERSION, $profile['ucp']['version'] );
 		$this->assertSame( rest_url( 'wc/ucp/v1' ), $profile['ucp']['services']['dev.ucp.shopping'][0]['endpoint'] );
-		$declarations = UcpUtils::capability_declarations();
+		$declarations = Utils::capability_declarations();
 		$this->assertSame( array_keys( $declarations ), array_keys( $profile['ucp']['capabilities'] ) );
 		foreach ( $declarations as $capability => $declaration ) {
 			$this->assertSame( array( $declaration ), $profile['ucp']['capabilities'][ $capability ] );
@@ -103,7 +103,7 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 		$this->sut->maybe_flush_rewrite_rules( 'some_other_feature' );
 		$this->assertSame( 'no', get_option( 'woocommerce_queue_flush_rewrite_rules' ) );
 
-		$this->sut->maybe_flush_rewrite_rules( UcpUtils::FEATURE_ID );
+		$this->sut->maybe_flush_rewrite_rules( Utils::FEATURE_ID );
 		$this->assertSame( 'yes', get_option( 'woocommerce_queue_flush_rewrite_rules' ) );
 	}
 
@@ -121,7 +121,7 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 
 		$this->set_permalink_structure( '' );
 		$this->sut->maybe_sync_file();
-		$this->sut->maybe_flush_rewrite_rules( UcpUtils::FEATURE_ID, false );
+		$this->sut->maybe_flush_rewrite_rules( Utils::FEATURE_ID, false );
 		$this->assertFileDoesNotExist( $this->file );
 	}
 

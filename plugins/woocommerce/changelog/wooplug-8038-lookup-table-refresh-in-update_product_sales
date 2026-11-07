@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve bundle and composite price ranges after sales, stock changes, and scheduled sales.

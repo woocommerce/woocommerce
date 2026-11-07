@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Internal\Ucp;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 /**
  * Serves the UCP discovery profile at `/.well-known/ucp`.
@@ -38,7 +38,7 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	public function register_feature_hooks(): void {
 		global $wp_rewrite;
 
-		$enabled = UcpUtils::is_enabled();
+		$enabled = Utils::is_enabled();
 		$active  = $enabled && $wp_rewrite->using_permalinks();
 
 		if ( $enabled ) {
@@ -71,7 +71,7 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	 * @param bool   $is_enabled Whether the feature is now enabled.
 	 */
 	public function maybe_flush_rewrite_rules( string $feature_id, bool $is_enabled = true ): void {
-		if ( UcpUtils::FEATURE_ID !== $feature_id ) {
+		if ( Utils::FEATURE_ID !== $feature_id ) {
 			return;
 		}
 
@@ -190,7 +190,9 @@ final class UcpDiscovery implements RegisterHooksInterface {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 		if ( ! in_array( $_SERVER['REQUEST_METHOD'] ?? '', array( 'GET', 'HEAD' ), true ) ) {
 			// RFC 9110 requires a 405 to name the allowed methods.
-			header( 'Allow: GET, HEAD' );
+			if ( ! headers_sent() ) {
+				header( 'Allow: GET, HEAD' );
+			}
 			status_header( 405 );
 			exit;
 		}
@@ -211,15 +213,15 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	public function get_profile(): array {
 		return array(
 			'ucp'   => array(
-				'version'      => UcpUtils::VERSION,
+				'version'      => Utils::VERSION,
 				'services'     => array(
 					'dev.ucp.shopping' => array(
 						array(
-							'version'   => UcpUtils::VERSION,
+							'version'   => Utils::VERSION,
 							'transport' => 'rest',
 							'endpoint'  => rest_url( 'wc/ucp/v1' ),
-							'spec'      => 'https://ucp.dev/' . UcpUtils::VERSION . '/specification/overview',
-							'schema'    => 'https://ucp.dev/' . UcpUtils::VERSION . '/services/shopping/rest.openapi.json',
+							'spec'      => 'https://ucp.dev/' . Utils::VERSION . '/specification/overview',
+							'schema'    => 'https://ucp.dev/' . Utils::VERSION . '/services/shopping/rest.openapi.json',
 						),
 					),
 				),
@@ -227,7 +229,7 @@ final class UcpDiscovery implements RegisterHooksInterface {
 					static function ( array $declaration ): array {
 						return array( $declaration );
 					},
-					UcpUtils::capability_declarations()
+					Utils::capability_declarations()
 				),
 			),
 			'links' => array(

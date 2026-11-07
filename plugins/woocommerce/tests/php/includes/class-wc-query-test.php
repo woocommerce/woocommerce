@@ -8,6 +8,50 @@ declare( strict_types = 1 );
 class WC_Query_Test extends \WC_Unit_Test_Case {
 
 	/**
+	 * @testdox View order titles disclose the order number only to customers who can view the order.
+	 * @testWith ["owner", true, "Order #CUSTOM-123"]
+	 *           ["other_customer", true, ""]
+	 *           ["logged_out", true, ""]
+	 *           ["owner", false, ""]
+	 *           ["logged_out", true, "", true]
+	 *
+	 * @param string $viewer         The customer viewing the endpoint.
+	 * @param bool   $order_exists   Whether the requested order exists.
+	 * @param string $expected_title The expected endpoint title.
+	 * @param bool   $guest_order    Whether the order belongs to a guest.
+	 */
+	public function test_get_view_order_endpoint_title( string $viewer, bool $order_exists, string $expected_title, bool $guest_order = false ): void {
+		$owner_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		$order_id = PHP_INT_MAX;
+
+		if ( $order_exists ) {
+			$order = new WC_Order();
+			$order->set_customer_id( $guest_order ? 0 : $owner_id );
+			$order_id = $order->save();
+		}
+
+		$user_id = $owner_id;
+		if ( 'other_customer' === $viewer ) {
+			$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		} elseif ( 'logged_out' === $viewer ) {
+			$user_id = 0;
+		}
+		wp_set_current_user( $user_id );
+
+		add_filter(
+			'woocommerce_order_number',
+			static function () {
+				return 'CUSTOM-123';
+			}
+		);
+
+		$this->go_to( '/?view-order=' . $order_id );
+		$sut = new WC_Query();
+
+		$this->assertSame( $expected_title, $sut->get_endpoint_title( 'view-order' ), 'Only an authorized customer should see the order number in the endpoint title.' );
+	}
+
+	/**
 	 * @testdox 'price_filter_post_clauses' generates the proper 'where' clause when there are 'max_price' and 'min_price' arguments in the query.
 	 */
 	public function test_price_filter_post_clauses_creates_the_proper_where_clause() {
