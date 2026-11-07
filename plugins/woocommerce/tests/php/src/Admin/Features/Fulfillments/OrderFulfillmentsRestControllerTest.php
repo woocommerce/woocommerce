@@ -708,6 +708,34 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A fulfillment read back from the database reports is_fulfilled as a boolean.
+	 */
+	public function test_get_fulfillments_is_fulfilled_is_boolean() {
+		$order       = WC_Helper_Order::create_order( get_current_user_id() );
+		$unfulfilled = FulfillmentsHelper::create_fulfillment( array( 'entity_id' => $order->get_id() ) );
+		$fulfilled   = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_id'    => $order->get_id(),
+				'status'       => 'fulfilled',
+				'is_fulfilled' => true,
+			)
+		);
+
+		wp_set_current_user( 1 );
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() . '/fulfillments' );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( WP_Http::OK, $response->get_status() );
+
+		$is_fulfilled = array_column( $response->get_data(), 'is_fulfilled', 'id' );
+		$this->assertFalse( $is_fulfilled[ $unfulfilled->get_id() ], 'A stored "0" comes back as false, not the string "0"' );
+		$this->assertTrue( $is_fulfilled[ $fulfilled->get_id() ] );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() . '/fulfillments/' . $unfulfilled->get_id() );
+		$response = $this->server->dispatch( $request );
+		$this->assertFalse( $response->get_data()['is_fulfilled'] );
+	}
+
+	/**
 	 * Test getting a single fulfillment with an invalid order ID.
 	 */
 	public function test_get_fulfillment_invalid_order_id() {
