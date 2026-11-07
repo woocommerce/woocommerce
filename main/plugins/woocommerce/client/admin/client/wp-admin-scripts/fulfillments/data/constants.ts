@@ -1,0 +1,11 @@
+export const SHIPPING_OPTION_META_KEY = '_shipping_option';
+export const TRACKING_NUMBER_META_KEY = '_tracking_number';
+export const TRACKING_URL_META_KEY = '_tracking_url';
+export const SHIPMENT_PROVIDER_META_KEY = '_shipment_provider';
+export const PROVIDER_NAME_META_KEY = '_provider_name';
+export const ITEMS_META_KEY = '_items';
+export const SHIPMENT_OPTION_TRACKING_NUMBER = 'tracking-number';
+export const SHIPMENT_OPTION_MANUAL_ENTRY = 'manual-entry';
+export const SHIPMENT_OPTION_NO_INFO = 'no-info';
+export const SHIPMENT_OPTION_DEFAULT = SHIPMENT_OPTION_TRACKING_NUMBER;
+export const WC_ORDER_CLASS = 'WC_Order';

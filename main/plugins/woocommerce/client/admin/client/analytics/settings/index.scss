@@ -1,0 +1,15 @@
+
+
+.woocommerce-settings__wrapper {
+	@include breakpoint( ">782px" ) {
+		padding: 0 ($gap - 3);
+	}
+}
+
+.woocommerce-settings__actions {
+	margin-bottom: $gap-largest;
+
+	button {
+		margin-right: $gap;
+	}
+}

@@ -1,0 +1,136 @@
+// Space above the first line of a section, applied to both columns so the
+// details heading and the first control start on the same line. Declared once
+// so the two cannot drift apart — previously the heading took wp-admin's
+// default h2 margin and the controls carried a hand-tuned counter-nudge.
+$settings-section-leading: $gap;
+
+.settings-layout {
+	margin: 48px 12px 0;
+	display: flex;
+	flex-flow: row;
+
+	@include breakpoint( "<960px" ) {
+		flex-flow: column;
+	}
+
+	// Styling for the form actions in the payment settings section.
+	.form__actions {
+		display: flex;
+		flex-direction: row-reverse;
+	}
+
+	// Fix to remove box shadow from settings cards.
+	.settings-card__wrapper {
+		box-shadow: none;
+	}
+}
+
+.settings-form {
+	width: 80%;
+}
+
+.settings-section {
+	display: flex;
+	align-items: flex-start;
+	flex-flow: row;
+
+	&:not(&:last-child) {
+		margin-bottom: 24px;
+	}
+
+	@include breakpoint( "<782px" ) {
+		flex-flow: column;
+	}
+
+	&__details {
+		flex: 0 0 33%;
+		margin: 0 24px 0 0;
+
+		@include breakpoint( "<782px" ) {
+			margin: 0 0 40px 0;
+			max-width: 328px;
+		}
+
+		h2 {
+			font-size: 16px;
+			line-height: 24px;
+			// Stated rather than inherited from wp-admin, so the controls
+			// column has a fixed value to align against.
+			margin-top: $settings-section-leading;
+		}
+
+		p {
+			font-size: 13px;
+			line-height: 20px;
+			margin: 12px 0;
+		}
+
+		> :last-child {
+			margin-bottom: 0;
+		}
+	}
+
+	&__icons {
+		> li {
+			display: inline-block;
+			margin: 0 5px 0 0;
+		}
+
+		svg {
+			border-radius: 2px;
+			box-shadow: 0 0 0 1px #ddd;
+			height: auto;
+			width: 38px;
+		}
+	}
+
+	&__controls {
+		margin-top: $settings-section-leading;
+		flex: 1 1 auto;
+
+		// The columns stack here, so there is no heading to align against.
+		@include breakpoint( "<782px" ) {
+			margin-top: 0;
+		}
+	}
+
+	.form-field:not(:first-child) {
+		margin-top: 24px;
+	}
+}
+
+// These controls used to carry their own 32px bottom margins, from before the
+// forms moved to DataForm. DataForm spaces its fields with a gap, so those
+// margins stacked on top of it and every field ended up 48px apart. The gap is
+// now the only thing setting that rhythm.
+.components-base-control {
+	+ .components-base-control__help {
+		margin-top: 0;
+		margin-bottom: 0;
+	}
+}
+
+.woocommerce-tree-select-control {
+	&__control {
+		margin-bottom: 0;
+	}
+
+	&__label {
+		font-size: 11px;
+		font-weight: 500;
+		line-height: 1.4;
+		color: $gray-700;
+		text-transform: uppercase;
+		display: block;
+		margin-bottom: calc(8px);
+		padding: 0;
+	}
+
+	&__help {
+		// Matches the 8px that Gutenberg's own help text sits below its field.
+		// No bottom margin, for the same reason as the base control above: the
+		// DataForm gap already separates this field from the next.
+		margin-top: calc(8px);
+		margin-bottom: 0;
+	}
+}

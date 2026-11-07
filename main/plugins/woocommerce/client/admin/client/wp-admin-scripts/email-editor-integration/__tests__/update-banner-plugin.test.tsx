@@ -1,0 +1,110 @@
+/**
+ * External dependencies
+ */
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
+/**
+ * Internal dependencies
+ */
+import { UpdateBannerPlugin } from '../update-banner-plugin';
+
+// ---- useUpdateBanner mock -------------------------------------------------
+//
+// Drive the plugin's render decision from the test by overriding the
+// hook's return value. Each test sets `useUpdateBannerMock` to the
+// shape it wants, then renders the plugin; the mock is consulted on
+// render and again after the rAF in the impl, so changing it
+// per-test is sufficient.
+const useUpdateBannerMock = jest.fn();
+jest.mock( '../hooks/use-update-banner', () => ( {
+	useUpdateBanner: () => useUpdateBannerMock(),
+} ) );
+
+const baseHookReturn = {
+	shouldRender: false,
+	summary: null,
+	isLoadingSummary: false,
+	summaryError: null,
+	applyState: 'idle' as const,
+	canApply: true,
+	canReview: true,
+	disabledReason: null,
+	hasConflicts: false,
+	expanded: false,
+	toggleExpanded: jest.fn(),
+	apply: jest.fn(),
+	openReview: jest.fn(),
+	dismiss: jest.fn(),
+	autoDismiss: jest.fn(),
+};
+
+describe( 'UpdateBannerPlugin', () => {
+	beforeEach( () => {
+		// Reset the DOM between tests so the canvas selector / body
+		// fallback assertions stay isolated.
+		document.body.innerHTML = '';
+		useUpdateBannerMock.mockReset();
+	} );
+
+	it( 'returns null when shouldRender is false', () => {
+		useUpdateBannerMock.mockReturnValue( {
+			...baseHookReturn,
+			shouldRender: false,
+		} );
+
+		const { container } = render( <UpdateBannerPlugin /> );
+		expect( container.firstChild ).toBeNull();
+	} );
+
+	it( 'portals the banner into the editor canvas target when present', () => {
+		const target = document.createElement( 'div' );
+		target.className = 'edit-post-visual-editor';
+		document.body.appendChild( target );
+
+		useUpdateBannerMock.mockReturnValue( {
+			...baseHookReturn,
+			shouldRender: true,
+		} );
+
+		render( <UpdateBannerPlugin /> );
+
+		expect( within( target ).getByRole( 'status' ) ).toBeInTheDocument();
+	} );
+
+	it( 'falls back to document.body when no canvas target is present', () => {
+		useUpdateBannerMock.mockReturnValue( {
+			...baseHookReturn,
+			shouldRender: true,
+		} );
+
+		render( <UpdateBannerPlugin /> );
+
+		expect( screen.getByRole( 'status' ).parentElement ).toBe(
+			document.body
+		);
+	} );
+
+	it( 'wires the banner dismiss control to dismiss, not autoDismiss', async () => {
+		const dismiss = jest.fn();
+		const autoDismiss = jest.fn();
+		useUpdateBannerMock.mockReturnValue( {
+			...baseHookReturn,
+			shouldRender: true,
+			dismiss,
+			autoDismiss,
+		} );
+
+		render( <UpdateBannerPlugin /> );
+
+		await userEvent.click(
+			screen.getByRole( 'button', { name: 'Dismiss for this session' } )
+		);
+
+		// The two callbacks differ in one observable way: only `dismiss` reports
+		// the `_dismissed` Tracks event, so the × in the default banner has to
+		// reach `dismiss` and leave `autoDismiss` untouched.
+		expect( dismiss ).toHaveBeenCalledTimes( 1 );
+		expect( autoDismiss ).not.toHaveBeenCalled();
+	} );
+} );

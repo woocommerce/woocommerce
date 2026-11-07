@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PluginsTermsOfService should render TOS message when Jetpack is selected 1`] = `
+<p
+  class="woocommerce-profiler-plugins-jetpack-agreement"
+>
+  By installing 
+  <span>
+    Jetpack
+  </span>
+   plugin for free you agree to our 
+  <a
+    data-link-type="external"
+    href="https://wordpress.com/tos/"
+    target="_blank"
+  >
+    Terms of Service
+  </a>
+  .
+</p>
+`;
+
+exports[`PluginsTermsOfService should render TOS message with multiple plugins when more than one plugin with TOS is selected 1`] = `
+<p
+  class="woocommerce-profiler-plugins-jetpack-agreement"
+>
+  By installing 
+  <span>
+    Jetpack
+  </span>
+  , 
+  <span>
+    WooCommerce Shipping
+  </span>
+  , and 
+  <span>
+    WooCommerce Tax
+  </span>
+   plugins for free you agree to our 
+  <a
+    data-link-type="external"
+    href="https://wordpress.com/tos/"
+    target="_blank"
+  >
+    Terms of Service
+  </a>
+  .
+</p>
+`;
+
+exports[`PluginsTermsOfService should render TOS message with multiple plugins when more than one plugin with TOS is selected 2`] = `
+<p
+  class="woocommerce-profiler-plugins-jetpack-agreement"
+>
+  By installing 
+  <span>
+    Jetpack
+  </span>
+  , 
+  <span>
+    WooCommerce Shipping
+  </span>
+  , and 
+  <span>
+    WooCommerce Tax
+  </span>
+   plugins for free you agree to our 
+  <a
+    data-link-type="external"
+    href="https://wordpress.com/tos/"
+    target="_blank"
+  >
+    Terms of Service
+  </a>
+  .
+</p>
+`;
