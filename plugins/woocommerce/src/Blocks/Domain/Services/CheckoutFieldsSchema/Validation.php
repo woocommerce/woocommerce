@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema;
 
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
 use Automattic\WooCommerce\Internal\Checkout\DateFormatLimitParser;
+use Automattic\WooCommerce\Internal\Checkout\JavaScriptPattern;
 use Opis\JsonSchema\Errors\ErrorFormatter;
 use Opis\JsonSchema\Errors\ValidationError;
 use Opis\JsonSchema\Parsers\DefaultVocabulary;
@@ -219,7 +220,63 @@ class Validation {
 			return new WP_Error( 'woocommerce_rest_checkout_invalid_field_schema', self::format_schema_error( $error ) );
 		}
 
+		$unsupported_pattern = self::find_unsupported_pattern( $rules );
+		if ( null !== $unsupported_pattern ) {
+			return $unsupported_pattern;
+		}
+
 		return true;
+	}
+
+	/**
+	 * Reports the first `pattern` the browser cannot compile.
+	 *
+	 * The meta schema only checks that Opis compiles the pattern as PCRE, but the
+	 * checkout block compiles it with AJV as a JavaScript `RegExp` with the `u`
+	 * flag, which is stricter. A pattern the browser rejects would otherwise
+	 * register silently and throw when a shopper fills the field in.
+	 *
+	 * @param mixed  $rules The rules to walk.
+	 * @param string $path  The path to the rules, for the error message.
+	 * @return WP_Error|null An error describing the pattern, or null when every pattern is usable.
+	 */
+	private static function find_unsupported_pattern( $rules, string $path = '' ) {
+		if ( ! is_array( $rules ) ) {
+			return null;
+		}
+
+		foreach ( $rules as $keyword => $value ) {
+			$child_path = $path . '/' . $keyword;
+
+			if ( 'pattern' === $keyword && is_string( $value ) ) {
+				$unsupported = JavaScriptPattern::find_unsupported_construct( $value );
+
+				if ( null !== $unsupported ) {
+					return new WP_Error(
+						'woocommerce_rest_checkout_invalid_field_schema',
+						sprintf(
+							'At "%s": The pattern "%s" is not a valid JavaScript regular expression, %s. Patterns are compiled in the browser with the JavaScript `u` flag, so they must be valid ECMA-262.',
+							rawurldecode( $child_path ),
+							$value,
+							$unsupported
+						)
+					);
+				}
+
+				continue;
+			}
+
+			// A $data reference holds a pointer, not a pattern to compile.
+			if ( is_array( $value ) && ! array_key_exists( '$data', $value ) ) {
+				$nested = self::find_unsupported_pattern( $value, $child_path );
+
+				if ( null !== $nested ) {
+					return $nested;
+				}
+			}
+		}
+
+		return null;
 	}
 
 	/**

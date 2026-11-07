@@ -431,6 +431,74 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox A field whose pattern JavaScript cannot compile is not registered.
+	 *
+	 * @testWith ["^[0-9]{3}\\-[0-9]{4}$"]
+	 *           ["(?i)^abc$"]
+	 *           ["^\\@x$"]
+	 *           ["\\Aabc\\z"]
+	 *           ["^a++$"]
+	 *           ["^[[:alpha:]]+$"]
+	 *
+	 * @param string $pattern The pattern the browser cannot compile.
+	 */
+	public function test_field_with_pattern_javascript_rejects_is_not_registered( string $pattern ) {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
+
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'         => 'plugin-namespace/unsupported-pattern',
+				'label'      => 'Unsupported pattern',
+				'location'   => 'order',
+				'validation' => array(
+					'type'    => 'string',
+					'pattern' => $pattern,
+				),
+			)
+		);
+
+		$this->assertArrayNotHasKey( 'plugin-namespace/unsupported-pattern', $this->controller->get_additional_fields() );
+	}
+
+	/**
+	 * @testdox A pattern both engines accept does not block registration.
+	 */
+	public function test_field_with_pattern_both_engines_accept_is_registered() {
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'         => 'plugin-namespace/supported-pattern',
+				'label'      => 'Supported pattern',
+				'location'   => 'order',
+				'validation' => array(
+					'type'    => 'string',
+					'pattern' => '^[A-Z]{2}[0-9]{8,12}$',
+				),
+			)
+		);
+
+		$this->assertArrayHasKey( 'plugin-namespace/supported-pattern', $this->controller->get_additional_fields() );
+	}
+
+	/**
+	 * @testdox An unsupported pattern in a $data reference is not read as a pattern.
+	 */
+	public function test_unsupported_pattern_behind_data_reference_is_ignored() {
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'         => 'plugin-namespace/pattern-from-field',
+				'label'      => 'Pattern from another field',
+				'location'   => 'order',
+				'validation' => array(
+					'type'    => 'string',
+					'pattern' => array( '$data' => '1/plugin~1other-field' ),
+				),
+			)
+		);
+
+		$this->assertArrayHasKey( 'plugin-namespace/pattern-from-field', $this->controller->get_additional_fields() );
+	}
+
+	/**
 	 * @testdox Date comparison schemas default to date strings and keep supplied keywords.
 	 *
 	 * @testWith [[], "string"]

@@ -15,6 +15,7 @@ import fastDeepEqual from 'fast-deep-equal/es6';
  * Internal dependencies
  */
 import prepareFormFields from './prepare-form-fields';
+import { compileSchema } from './compile-schema';
 import { hasSchemaRules } from './utils';
 
 /**
@@ -61,13 +62,16 @@ export const useFormFields = < T extends keyof FormFields >(
 					schema = defaultConfig.required;
 				}
 
-				try {
-					const result = parser.validate( schema, data );
-					field.required = result;
-				} catch ( error ) {
-					if ( CURRENT_USER_IS_ADMIN ) {
-						// eslint-disable-next-line no-console
-						console.error( error );
+				const validate = compileSchema( parser, schema );
+
+				if ( validate ) {
+					try {
+						field.required = validate( data );
+					} catch ( error ) {
+						if ( CURRENT_USER_IS_ADMIN ) {
+							// eslint-disable-next-line no-console
+							console.error( error );
+						}
 					}
 				}
 			}
@@ -89,13 +93,16 @@ export const useFormFields = < T extends keyof FormFields >(
 					schema = defaultConfig.hidden;
 				}
 
-				try {
-					const result = parser.validate( schema, data );
-					field.hidden = result;
-				} catch ( error ) {
-					if ( CURRENT_USER_IS_ADMIN ) {
-						// eslint-disable-next-line no-console
-						console.error( error );
+				const validate = compileSchema( parser, schema );
+
+				if ( validate ) {
+					try {
+						field.hidden = validate( data );
+					} catch ( error ) {
+						if ( CURRENT_USER_IS_ADMIN ) {
+							// eslint-disable-next-line no-console
+							console.error( error );
+						}
 					}
 				}
 			}
