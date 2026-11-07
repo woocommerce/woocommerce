@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Document where a new enumerator belongs and add a test that keeps src/Enums/README.md in step with the classes in that directory.
