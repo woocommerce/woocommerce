@@ -10,6 +10,7 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use DOMDocument;
 use DOMXPath;
+use ReflectionClassConstant;
 use ReflectionMethod;
 use WC_Order;
 use WC_Unit_Test_Case;
@@ -40,6 +41,14 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Restore the order storage settings.
+	 */
+	public function tearDown(): void {
+		$this->clean_up_cot_setup();
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox Leaves the response to WordPress when the order post type disables export.
 	 */
 	public function test_honors_order_post_type_export_opt_out(): void {
@@ -67,6 +76,44 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Leaves the response to WordPress when compatibility mode is on.
+	 */
+	public function test_leaves_export_to_wordpress_when_sync_is_enabled(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		set_current_screen( 'export' );
+		$this->enable_cot_sync();
+
+		add_filter(
+			'export_wp_filename',
+			function () {
+				$this->fail( 'The HPOS handler started an export while compatibility mode was on.' );
+			}
+		);
+
+		try {
+			$this->expectOutputString( '' );
+			$this->sut->handle_export_wp( array( 'content' => 'shop_order' ) );
+		} finally {
+			set_current_screen( 'front' );
+		}
+	}
+
+	/**
+	 * @testdox Exports the stored order total when the current price decimals would round it.
+	 */
+	public function test_exports_stored_total_without_current_rounding(): void {
+		$order = $this->create_order();
+		global $wpdb;
+		$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'total_amount' => '12.505' ), array( 'id' => $order->get_id() ) );
+		update_option( 'woocommerce_price_num_decimals', 0 );
+		wp_cache_flush();
+
+		$xpath = $this->export();
+
+		$this->assertSame( '12.505', $xpath->evaluate( 'string(/rss/channel/item/wp:postmeta[wp:meta_key = "_order_total"]/wp:meta_value)' ), 'The export should keep the stored total, not the rounded one.' );
+	}
+
+	/**
 	 * @testdox Exports each current order once across batches, even when legacy copies remain.
 	 */
 	public function test_exports_only_current_orders_across_batches(): void {
@@ -81,7 +128,8 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'shop_order', get_post_type( $deleted_id ) );
 
 		$expected_ids = array( (string) $mirrored->get_id() );
-		for ( $i = 0; $i < 21; ++$i ) {
+		$batch_size   = ( new ReflectionClassConstant( HposOrderExportHandler::class, 'BATCH_SIZE' ) )->getValue();
+		for ( $i = 0; $i <= $batch_size; ++$i ) {
 			$expected_ids[] = (string) $this->create_order()->get_id();
 		}
 		$legacy_status_id = (int) end( $expected_ids );
@@ -103,10 +151,12 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_exports_order_fields_and_metadata(): void {
 		update_option( 'timezone_string', 'America/New_York' );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 
 		$order = $this->create_order();
 		$order->set_date_created( 1705312800 );
 		$order->set_customer_id( 123 );
+		$order->set_order_key( 'wc_order_export_test' );
 		$order->set_billing_first_name( '山田 & Jane' );
 		$order->set_shipping_city( 'New York' );
 		$order->set_customer_note( 'Gift ]]> & card 🎁' );
@@ -138,13 +188,17 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_order_get_total', 'floatval' );
 
 		$xpath = $this->export();
-		$item  = $xpath->query( '/rss/channel/item' )->item( 0 );
+		$this->assertSame( 1.0, $xpath->evaluate( 'count(/rss/channel/generator)' ), 'The rss2_head action should add the generator to the channel.' );
+		$item = $xpath->query( '/rss/channel/item' )->item( 0 );
 		$this->assertSame( 'wc-processing', $xpath->evaluate( 'string(wp:status)', $item ) );
 		$this->assertSame( '2024-01-15 05:00:00', $xpath->evaluate( 'string(wp:post_date)', $item ) );
 		$this->assertSame( '2024-01-15 10:00:00', $xpath->evaluate( 'string(wp:post_date_gmt)', $item ) );
 		$this->assertSame( 'Gift ]]> & card 🎁', $xpath->evaluate( 'string(excerpt:encoded)', $item ) );
 		$this->assertSame( '山田 & Jane', $xpath->evaluate( 'string(wp:postmeta[wp:meta_key = "_billing_first_name"]/wp:meta_value)', $item ) );
 		$this->assertSame( 'New York', $xpath->evaluate( 'string(wp:postmeta[wp:meta_key = "_shipping_city"]/wp:meta_value)', $item ) );
+		$this->assertSame( wp_get_current_user()->user_login, $xpath->evaluate( 'string(dc:creator)', $item ), 'An empty author makes the WordPress importer warn about every order.' );
+		$this->assertSame( 'wc_order_export_test', $xpath->evaluate( 'string(wp:post_password)', $item ) );
+		$this->assertStringContainsString( 'New York', $xpath->evaluate( 'string(wp:postmeta[wp:meta_key = "_shipping_address_index"]/wp:meta_value)', $item ), 'Order search on the importing site reads the address index.' );
 		$this->assertSame( '12.50', $xpath->evaluate( 'string(wp:postmeta[wp:meta_key = "_order_total"]/wp:meta_value)', $item ) );
 		$this->assertSame( 2.0, $xpath->evaluate( 'count(wp:postmeta[wp:meta_key = "label"])', $item ) );
 		$this->assertSame( 0.0, $xpath->evaluate( 'count(wp:postmeta[wp:meta_key = "_customer_user"] | .//wp:meta_key[. = "_export_skip"])', $item ) );
@@ -192,8 +246,9 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 		$document = new DOMDocument();
 		$this->assertTrue( $document->loadXML( $xml ) );
 		$xpath = new DOMXPath( $document );
-		$xpath->registerNamespace( 'wp', 'https://wordpress.org/export/1.2/' );
-		$xpath->registerNamespace( 'excerpt', 'https://wordpress.org/export/1.2/excerpt/' );
+		$xpath->registerNamespace( 'wp', 'http://wordpress.org/export/1.2/' );
+		$xpath->registerNamespace( 'excerpt', 'http://wordpress.org/export/1.2/excerpt/' );
+		$xpath->registerNamespace( 'dc', 'http://purl.org/dc/elements/1.1/' );
 		return $xpath;
 	}
 }

@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\ImportExport;
 
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
@@ -23,7 +24,7 @@ class HposOrderExportHandler {
 	/**
 	 * Number of orders loaded at a time.
 	 */
-	private const BATCH_SIZE = 20;
+	private const BATCH_SIZE = 100;
 
 	/**
 	 * The HPOS controller.
@@ -47,6 +48,13 @@ class HposOrderExportHandler {
 	private OrdersTableDataStoreMeta $meta_store;
 
 	/**
+	 * The order object cache.
+	 *
+	 * @var OrderCache
+	 */
+	private OrderCache $order_cache;
+
+	/**
 	 * Register the export hook.
 	 */
 	public function __construct() {
@@ -61,11 +69,13 @@ class HposOrderExportHandler {
 	 * @param CustomOrdersTableController $controller The HPOS controller.
 	 * @param DataSynchronizer            $synchronizer The order data synchronizer.
 	 * @param OrdersTableDataStoreMeta    $meta_store The HPOS meta data store.
+	 * @param OrderCache                  $order_cache The order object cache.
 	 */
-	final public function init( CustomOrdersTableController $controller, DataSynchronizer $synchronizer, OrdersTableDataStoreMeta $meta_store ): void {
+	final public function init( CustomOrdersTableController $controller, DataSynchronizer $synchronizer, OrdersTableDataStoreMeta $meta_store, OrderCache $order_cache ): void {
 		$this->controller   = $controller;
 		$this->synchronizer = $synchronizer;
 		$this->meta_store   = $meta_store;
+		$this->order_cache  = $order_cache;
 	}
 
 	/**
@@ -103,6 +113,12 @@ class HposOrderExportHandler {
 		header( 'Content-Type: text/xml; charset=UTF-8' );
 		header( 'Content-Disposition: attachment; filename="' . sanitize_file_name( $filename ) . '"' );
 
+		wc_set_time_limit( 0 );
+
+		// Loading an order writes it to the object cache. Keep the order object, order data and order meta groups
+		// in memory for this request, so the export does not push every order through a persistent cache.
+		wp_cache_add_non_persistent_groups( array( $this->order_cache->get_object_type(), 'orders_data', 'orders_meta' ) );
+
 		// Core exports post rows after rss2_head, including mirrors that can be stale or deleted in HPOS.
 		$this->stream_export();
 		exit;
@@ -117,10 +133,11 @@ class HposOrderExportHandler {
 		echo "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
 		?>
 <rss version="2.0"
-	xmlns:excerpt="https://wordpress.org/export/1.2/excerpt/"
+	xmlns:excerpt="http://wordpress.org/export/1.2/excerpt/"
 	xmlns:content="http://purl.org/rss/1.0/modules/content/"
+	xmlns:wfw="http://wellformedweb.org/CommentAPI/"
 	xmlns:dc="http://purl.org/dc/elements/1.1/"
-	xmlns:wp="https://wordpress.org/export/1.2/">
+	xmlns:wp="http://wordpress.org/export/1.2/">
 <channel>
 		<?php
 		self::write_fields(
@@ -134,6 +151,9 @@ class HposOrderExportHandler {
 			)
 		);
 
+		/** This action is documented in wp-includes/feed-rss2.php. */
+		do_action( 'rss2_head' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment -- WordPress core action.
+
 		$table   = OrdersTableDataStore::get_orders_table_name();
 		$last_id = 0;
 
@@ -141,11 +161,11 @@ class HposOrderExportHandler {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- The table name comes from the order data store.
 		$max_id = (int) $wpdb->get_var( "SELECT MAX(id) FROM $table" );
 		while ( $last_id < $max_id ) {
-			// Select the stored status so unregistered statuses also survive export.
+			// Select the stored status and total so unregistered statuses and the stored total precision survive export.
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Stream IDs and statuses in primary key order.
 			$batch = $wpdb->get_results(
 				$wpdb->prepare(
-					"SELECT id, status FROM $table WHERE id > %d AND id <= %d AND type = %s AND status <> %s ORDER BY id LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table name comes from the order data store.
+					"SELECT id, status, total_amount FROM $table WHERE id > %d AND id <= %d AND type = %s AND status <> %s ORDER BY id LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table name comes from the order data store.
 					$last_id,
 					$max_id,
 					'shop_order',
@@ -175,7 +195,7 @@ class HposOrderExportHandler {
 					continue;
 				}
 				$id = $order->get_id();
-				$this->export_order_to_xml( $order, $batch[ $id ]->status, $order_meta[ $id ] ?? array(), $notes[ $id ] ?? array(), $note_meta );
+				$this->export_order_to_xml( $order, $batch[ $id ]->status, (string) ( $batch[ $id ]->total_amount ?? '' ), $order_meta[ $id ] ?? array(), $notes[ $id ] ?? array(), $note_meta );
 			}
 
 			if ( wp_cache_supports( 'flush_runtime' ) ) {
@@ -230,11 +250,12 @@ class HposOrderExportHandler {
 	 *
 	 * @param WC_Order                $order The order.
 	 * @param string                  $status The stored status.
+	 * @param string                  $stored_total The stored order total.
 	 * @param \stdClass[]             $meta_rows Raw HPOS metadata.
 	 * @param \stdClass[]             $notes Comments on this order.
 	 * @param array<int, \stdClass[]> $note_meta Raw metadata by comment ID.
 	 */
-	private function export_order_to_xml( WC_Order $order, string $status, array $meta_rows, array $notes, array $note_meta ): void {
+	private function export_order_to_xml( WC_Order $order, string $status, string $stored_total, array $meta_rows, array $notes, array $note_meta ): void {
 		$order_id     = $order->get_id();
 		$date_created = $order->get_date_created( 'edit' );
 		$date_updated = $order->get_date_modified( 'edit' ) ?? $date_created;
@@ -254,7 +275,8 @@ class HposOrderExportHandler {
 				'title'                => apply_filters( 'the_title_export', $title ),
 				'link'                 => $link,
 				'pubDate'              => $date_created ? gmdate( 'D, d M Y H:i:s +0000', $date_created->getTimestamp() ) : '',
-				'dc:creator'           => '',
+				// The WordPress importer warns about every item that has no author.
+				'dc:creator'           => wp_get_current_user()->user_login,
 				'guid'                 => $link,
 				'description'          => '',
 				'content:encoded'      => apply_filters( 'the_content_export', '' ),
@@ -271,19 +293,19 @@ class HposOrderExportHandler {
 				'wp:post_parent'       => $order->get_parent_id( 'edit' ),
 				'wp:menu_order'        => 0,
 				'wp:post_type'         => 'shop_order',
-				'wp:post_password'     => '',
+				'wp:post_password'     => $order->get_order_key( 'edit' ),
 				'wp:is_sticky'         => 0,
 			)
 		);
 		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment, WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
-		$core_meta = self::get_core_meta( $order );
+		$core_meta = self::get_core_meta( $order, $stored_total );
 		foreach ( $core_meta as $key => $value ) {
 			self::write_post_meta( $order_id, $key, (string) maybe_serialize( $value ) );
 		}
 
 		// Source-site customer and payment token IDs can refer to unrelated accounts on import.
-		$excluded_keys = array( '_customer_user', '_payment_tokens', '_edit_lock', '_billing_address_index', '_shipping_address_index', DataSynchronizer::DELETED_RECORD_META_KEY );
+		$excluded_keys = array( '_customer_user', '_payment_tokens', '_edit_lock', '_edit_last', DataSynchronizer::DELETED_RECORD_META_KEY );
 		foreach ( $meta_rows as $meta ) {
 			$key = $meta->meta_key ?? null;
 			if ( is_string( $key ) && '' !== $key && ! array_key_exists( $key, $core_meta ) && ! in_array( $key, $excluded_keys, true ) ) {
@@ -324,14 +346,16 @@ class HposOrderExportHandler {
 	 * Project HPOS order properties onto the keys used by legacy order posts.
 	 *
 	 * @param WC_Order $order The order.
+	 * @param string   $stored_total The stored order total.
 	 * @return array
 	 */
-	private static function get_core_meta( WC_Order $order ): array {
+	private static function get_core_meta( WC_Order $order, string $stored_total ): array {
 		$data = $order->get_base_data();
 		$meta = array(
 			'_order_currency'       => $data['currency'],
 			'_order_version'        => $data['version'],
-			'_order_total'          => $data['total'],
+			// Loading an order rounds its total to the current price decimals, so keep the stored value when they differ.
+			'_order_total'          => (float) $stored_total === (float) $data['total'] ? $data['total'] : wc_format_decimal( $stored_total, false, true ),
 			'_order_tax'            => $data['cart_tax'],
 			'_order_shipping'       => $data['shipping_total'],
 			'_order_shipping_tax'   => $data['shipping_tax'],
