@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Count hierarchical REST term collections from the same get_terms() population so empty parents with non-empty children stay paginated.
