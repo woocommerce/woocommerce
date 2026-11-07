@@ -40,7 +40,7 @@ export default function ScheduledUpdatesPromotionNotice() {
 	};
 
 	return (
-		<div className="notice notice-info is-dismissible">
+		<div className="notice notice-info is-dismissible inline">
 			<Button
 				variant="tertiary"
 				aria-label={ __( 'Dismiss this notice.', 'woocommerce' ) }
