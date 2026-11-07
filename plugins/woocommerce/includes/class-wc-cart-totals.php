@@ -92,6 +92,20 @@ final class WC_Cart_Totals {
 	protected $coupon_discount_tax_totals = array();
 
 	/**
+	 * Gross coupon discounts keyed by coupon and cart item.
+	 *
+	 * @var array
+	 */
+	private $coupon_discounts = array();
+
+	/**
+	 * Coupon tax discounts keyed by coupon and cart item.
+	 *
+	 * @var array
+	 */
+	private $coupon_discount_taxes = array();
+
+	/**
 	 * Should taxes be calculated?
 	 *
 	 * @var boolean
@@ -681,7 +695,11 @@ final class WC_Cart_Totals {
 		$this->calculate_item_subtotals();
 		$this->calculate_discounts();
 
+		$tax_adjustments         = array();
+		$has_legacy_price_filter = has_filter( 'woocommerce_get_discounted_price' );
+
 		foreach ( $this->items as $item_key => $item ) {
+			unset( $this->cart->cart_contents[ $item_key ]['line_discount_tax_adjusted'] );
 			$item->total     = $this->get_discounted_price_in_cents( $item_key );
 			$item->total_tax = 0;
 
@@ -706,8 +724,28 @@ final class WC_Cart_Totals {
 				$item->total_tax = array_sum( array_map( array( $this, 'round_line_tax' ), $item->taxes ) );
 
 				if ( $item->price_includes_tax ) {
-					// Use unrounded taxes so we can re-calculate from the orders screen accurately later.
-					$item->total = $item->total - array_sum( $item->taxes );
+					$gross_total = $item->total;
+					$item->total = $gross_total - array_sum( $item->taxes );
+
+					// Legacy price filters can add discounts outside the coupon allocation.
+					if ( ! $has_legacy_price_filter && ! empty( $this->coupon_discount_totals[ $item_key ] ) && ! self::round_at_subtotal() ) {
+						$adjusted_total = self::round_item_subtotal( $gross_total ) - $item->total_tax;
+						$subtotal       = self::round_item_subtotal( $item->subtotal ) + $item->subtotal_tax;
+
+						// Retain the gross price only when the same rounded taxes survive order recalculation.
+						if (
+							self::round_item_subtotal( $item->total ) !== $adjusted_total &&
+							self::round_item_subtotal( $item->price ) === $subtotal &&
+							array_map( array( $this, 'round_line_tax' ), WC_Tax::calc_tax( $adjusted_total, $item->tax_rates, false ) ) === array_map( array( $this, 'round_line_tax' ), $item->taxes )
+						) {
+							$allocated_taxes = $this->allocate_coupon_tax( $item_key, $item->subtotal_tax - $item->total_tax );
+							if ( null !== $allocated_taxes ) {
+								$item->total                  = $adjusted_total;
+								$tax_adjustments[ $item_key ] = $allocated_taxes;
+								$this->cart->cart_contents[ $item_key ]['line_discount_tax_adjusted'] = true;
+							}
+						}
+					}
 				}
 			}
 
@@ -715,6 +753,8 @@ final class WC_Cart_Totals {
 			$this->cart->cart_contents[ $item_key ]['line_total']             = wc_remove_number_precision( $item->total );
 			$this->cart->cart_contents[ $item_key ]['line_tax']               = wc_remove_number_precision( $item->total_tax );
 		}
+
+		$this->adjust_coupon_taxes( $tax_adjustments );
 
 		$items_total = $this->get_rounded_items_total( $this->get_values_for_total( 'total' ) );
 
@@ -808,12 +848,13 @@ final class WC_Cart_Totals {
 			$discounts->apply_coupon( $coupon );
 		}
 
+		$this->coupon_discounts      = $discounts->get_discounts( true );
 		$coupon_discount_amounts     = $discounts->get_discounts_by_coupon( true );
 		$coupon_discount_tax_amounts = array();
 
 		// See how much tax was 'discounted' per item and per coupon.
 		if ( $this->calculate_tax ) {
-			foreach ( $discounts->get_discounts( true ) as $coupon_code => $coupon_discounts ) {
+			foreach ( $this->coupon_discounts as $coupon_code => $coupon_discounts ) {
 				$coupon_discount_tax_amounts[ $coupon_code ] = 0;
 
 				foreach ( $coupon_discounts as $item_key => $coupon_discount ) {
@@ -822,6 +863,8 @@ final class WC_Cart_Totals {
 					if ( $item->product->is_taxable() ) {
 						// Item subtotals were sent, so set 3rd param.
 						$item_tax = array_sum( WC_Tax::calc_tax( $coupon_discount, $item->tax_rates, $item->price_includes_tax ) );
+
+						$this->coupon_discount_taxes[ $coupon_code ][ $item_key ] = $item_tax;
 
 						// Sum total tax.
 						$coupon_discount_tax_amounts[ $coupon_code ] += $item_tax;
@@ -838,6 +881,15 @@ final class WC_Cart_Totals {
 		$this->coupon_discount_totals     = (array) $discounts->get_discounts_by_item( true );
 		$this->coupon_discount_tax_totals = $coupon_discount_tax_amounts;
 
+		$this->set_discount_totals( $coupon_discount_amounts );
+	}
+
+	/**
+	 * Store coupon discounts and their cart summaries.
+	 *
+	 * @param array $coupon_discount_amounts Net coupon discounts in minor units.
+	 */
+	private function set_discount_totals( $coupon_discount_amounts ): void {
 		if ( wc_prices_include_tax() ) {
 			$this->set_total( 'discounts_total', array_sum( $this->coupon_discount_totals ) - array_sum( $this->coupon_discount_tax_totals ) );
 			$this->set_total( 'discounts_tax_total', array_sum( $this->coupon_discount_tax_totals ) );
@@ -847,11 +899,93 @@ final class WC_Cart_Totals {
 		}
 
 		$this->cart->set_coupon_discount_totals( wc_remove_number_precision_deep( $coupon_discount_amounts ) );
-		$this->cart->set_coupon_discount_tax_totals( wc_remove_number_precision_deep( $coupon_discount_tax_amounts ) );
+		$this->cart->set_coupon_discount_tax_totals( wc_remove_number_precision_deep( $this->coupon_discount_tax_totals ) );
 
 		// Add totals to cart object. Note: Discount total for cart is excl tax.
 		$this->cart->set_discount_total( $this->get_total( 'discounts_total' ) );
 		$this->cart->set_discount_tax( $this->get_total( 'discounts_tax_total' ) );
+	}
+
+	/**
+	 * Allocate a line's tax reduction without changing any coupon's gross discount.
+	 *
+	 * @param string $item_key Cart item key.
+	 * @param float  $tax_discount Tax reduction in minor units.
+	 * @return array|null Coupon tax amounts, or null when no whole-unit allocation is possible.
+	 */
+	private function allocate_coupon_tax( $item_key, $tax_discount ) {
+		$discounts = array();
+		foreach ( $this->coupon_discounts as $coupon_code => $items ) {
+			$amount = $items[ $item_key ] ?? 0;
+			if ( 0 < $amount ) {
+				if ( (float) floor( $amount ) !== (float) $amount ) {
+					return null;
+				}
+				$discounts[ $coupon_code ] = $amount;
+			}
+		}
+
+		$total = array_sum( $discounts );
+		if ( ! $total || 0 > $tax_discount || $tax_discount > $total || (float) floor( $tax_discount ) !== (float) $tax_discount ) {
+			return null;
+		}
+
+		$allocated  = array();
+		$remainders = array();
+		$remaining  = $tax_discount;
+		foreach ( $discounts as $coupon_code => $amount ) {
+			$share                      = $tax_discount * $amount / $total;
+			$allocated[ $coupon_code ]  = floor( $share );
+			$remainders[ $coupon_code ] = $share - $allocated[ $coupon_code ];
+			$remaining                 -= $allocated[ $coupon_code ];
+		}
+
+		$positions = array_flip( array_keys( $discounts ) );
+		uksort(
+			$remainders,
+			static function ( $first, $second ) use ( $remainders, $positions ) {
+				$remainder_order = $remainders[ $second ] <=> $remainders[ $first ];
+				return 0 !== $remainder_order ? $remainder_order : $positions[ $first ] <=> $positions[ $second ];
+			}
+		);
+		foreach ( array_keys( $remainders ) as $coupon_code ) {
+			if ( $remaining <= 0 ) {
+				break;
+			}
+			++$allocated[ $coupon_code ];
+			--$remaining;
+		}
+		return $allocated;
+	}
+
+	/**
+	 * Match coupon summaries to the tax allocated to corrected inclusive lines.
+	 *
+	 * @param array $adjustments Coupon tax amounts keyed by cart item and coupon.
+	 */
+	private function adjust_coupon_taxes( $adjustments ): void {
+		if ( ! $adjustments ) {
+			return;
+		}
+
+		$coupon_totals    = (array) wc_add_number_precision_deep( $this->cart->get_coupon_discount_totals(), false );
+		$adjusted_coupons = array();
+		foreach ( $adjustments as $item_key => $taxes ) {
+			foreach ( $taxes as $coupon_code => $tax ) {
+				$adjusted_coupons[ $coupon_code ]                  = true;
+				$difference                                        = $tax - $this->coupon_discount_taxes[ $coupon_code ][ $item_key ];
+				$this->coupon_discount_tax_totals[ $coupon_code ] += $difference;
+				$coupon_totals[ $coupon_code ]                    -= $difference;
+			}
+		}
+
+		foreach ( array_keys( $adjusted_coupons ) as $coupon_code ) {
+			$gross_discount                                   = $coupon_totals[ $coupon_code ] + $this->coupon_discount_tax_totals[ $coupon_code ];
+			$this->coupon_discount_tax_totals[ $coupon_code ] = wc_cart_round_discount( $this->coupon_discount_tax_totals[ $coupon_code ], 0 );
+			$coupon_totals[ $coupon_code ]                    = $gross_discount - $this->coupon_discount_tax_totals[ $coupon_code ];
+		}
+
+		$this->set_discount_totals( $coupon_totals );
 	}
 
 	/**
