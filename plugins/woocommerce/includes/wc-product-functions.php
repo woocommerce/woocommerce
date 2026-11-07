@@ -1486,10 +1486,26 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 
 		$original_transient = $transient;
 		if ( $transient && is_array( $transient ) ) {
+			if ( ( $transient[ $query_args ] ?? null ) !== $related_posts ) {
+				unset( $transient[ $query_args ] );
+			}
 			$transient[ $query_args ] = $related_posts;
 		} else {
 			$transient = array( $query_args => $related_posts );
 		}
+
+		// Drop the oldest queries when over budget, but keep the latest two so large alternating queries remain cacheable.
+		$size_limit = wp_using_ext_object_cache() ? 65536 : 8192;
+		$size       = 0;
+		$kept       = array();
+		foreach ( array_reverse( $transient, true ) as $query => $posts ) {
+			$size += strlen( maybe_serialize( array( $query => $posts ) ) );
+			if ( count( $kept ) >= 2 && $size > $size_limit ) {
+				break;
+			}
+			$kept[ $query ] = $posts;
+		}
+		$transient = array_reverse( $kept, true );
 
 		if ( $original_transient !== $transient ) {
 			set_transient( $transient_name, $transient, DAY_IN_SECONDS );
