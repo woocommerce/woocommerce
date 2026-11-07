@@ -389,7 +389,10 @@
 
 					event.preventDefault();
 
-					method.settings_html = shippingMethodView.reformatSettingsHTML( method.settings_html );
+					// Format a copy, so the model keeps the HTML from the server and the next open does not format it again.
+					method = _.extend( {}, method, {
+						settings_html: shippingMethodView.reformatSettingsHTML( method.settings_html )
+					} );
 
 					$( this ).WCBackboneModal({
 						template : 'wc-modal-shipping-method-settings',
@@ -708,7 +711,9 @@
 							shippingMethodView.unblock();
 
 							if ( method.settings_html ) {
-								method.settings_html = shippingMethodView.reformatSettingsHTML( method.settings_html );
+								method = _.extend( {}, method, {
+									settings_html: shippingMethodView.reformatSettingsHTML( method.settings_html )
+								} );
 
 								// Pop up next modal
 								$( this ).WCBackboneModal({
