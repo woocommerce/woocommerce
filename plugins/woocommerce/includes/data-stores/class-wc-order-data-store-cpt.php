@@ -544,7 +544,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
-	 * Get unpaid orders after a certain date,
+	 * Get unpaid orders last updated before the specified date.
 	 *
 	 * @param  int $date Timestamp.
 	 * @return array
