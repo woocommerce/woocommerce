@@ -580,6 +580,215 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should render the value saved through a nested field name instead of the default.
+	 */
+	public function test_output_fields_renders_value_saved_through_nested_field_name(): void {
+		$options = array(
+			array(
+				'id'         => 'test_nested_one',
+				'field_name' => 'test_nested_options[one]',
+				'type'       => 'text',
+				'default'    => 'default value',
+			),
+		);
+
+		WC_Admin_Settings::save_fields( $options, array( 'test_nested_options' => array( 'one' => 'saved value' ) ) );
+
+		$this->assertSame( array( 'one' => 'saved value' ), get_option( 'test_nested_options' ) );
+		$this->assertStringContainsString( 'value="saved value"', $this->render_fields( $options ) );
+	}
+
+	/**
+	 * @testdox Should read through the field name only when a value is stored there, and through the ID otherwise.
+	 *
+	 * @dataProvider field_name_read_data
+	 *
+	 * @param array  $stored_options Options to store, keyed by option name.
+	 * @param mixed  $field_name     Field name of the rendered field.
+	 * @param string $expected       Value the rendered input should carry.
+	 */
+	public function test_output_fields_reads_through_field_name_or_id( array $stored_options, $field_name, string $expected ): void {
+		foreach ( $stored_options as $option_name => $option_value ) {
+			update_option( $option_name, $option_value );
+		}
+
+		$output = $this->render_fields(
+			array(
+				array(
+					'id'         => 'test_field_id',
+					'field_name' => $field_name,
+					'type'       => 'text',
+					'default'    => 'default value',
+				),
+			)
+		);
+
+		$this->assertStringContainsString( 'value="' . $expected . '"', $output );
+	}
+
+	/**
+	 * Data provider for test_output_fields_reads_through_field_name_or_id().
+	 *
+	 * @return array<string, array{array<string, mixed>, mixed, string}>
+	 */
+	public static function field_name_read_data(): array {
+		$id_value = array( 'test_field_id' => 'id value' );
+
+		return array(
+			'plain name'                => array( array( 'test_plain' => 'plain value' ) + $id_value, 'test_plain', 'plain value' ),
+			'empty value under name'    => array( array( 'test_plain' => '' ) + $id_value, 'test_plain', '' ),
+			'zero under nested name'    => array( array( 'test_parent' => array( 'key' => '0' ) ) + $id_value, 'test_parent[key]', '0' ),
+			'setting named 0'           => array( array( 'test_parent' => array( 0 => 'other value' ) ) + $id_value, 'test_parent[0]', 'id value' ),
+			'option named 0'            => array( $id_value, '0', 'id value' ),
+			'option named 0 with space' => array( $id_value, ' 0', 'id value' ),
+			'rewritten option name'     => array( array( 'test_dotted_options' => array( 'one' => 'rewritten value' ) ) + $id_value, 'test.dotted options[one]', 'rewritten value' ),
+			'encoded nested key'        => array( array( 'test_parent' => array( 'A' => 'decoded value' ) ) + $id_value, 'test_parent[%41]', 'decoded value' ),
+			'nothing stored under name' => array( $id_value, 'test_parent[key]', 'id value' ),
+			'two levels'                => array( array( 'test_parent' => array( 'deep' => array( 'leaf' => 'deep value' ) ) ) + $id_value, 'test_parent[deep][leaf]', 'id value' ),
+			'string option'             => array( array( 'test_string' => 'abc' ) + $id_value, 'test_string[0]', 'id value' ),
+			'object value under key'    => array( array( 'test_object' => array( 'key' => new stdClass() ) ) + $id_value, 'test_object[key]', 'id value' ),
+			'name split by &'           => array( array( 'test_split' => array( 'key' => 'other value' ) ) + $id_value, 'test_split&other[key]', 'id value' ),
+		);
+	}
+
+	/**
+	 * @testdox Should pass the ID value to a custom field type that save_fields() hands to a legacy update action.
+	 */
+	public function test_output_fields_reads_through_id_for_types_with_legacy_update_action(): void {
+		update_option( 'test_field_id', 'id value' );
+		update_option( 'test_parent', array( 'key' => 'nested value' ) );
+		add_action( 'woocommerce_update_option_test_legacy_type', function () {} );
+		$received = null;
+		add_action(
+			'woocommerce_admin_field_test_legacy_type',
+			function ( $field ) use ( &$received ) {
+				$received = $field['value'];
+			}
+		);
+
+		$this->render_fields(
+			array(
+				array(
+					'id'         => 'test_field_id',
+					'field_name' => 'test_parent[key]',
+					'type'       => 'test_legacy_type',
+					'default'    => 'default value',
+				),
+			)
+		);
+
+		$this->assertSame( 'id value', $received );
+	}
+
+	/**
+	 * @testdox Should render an explicit empty value without reading the stored values.
+	 */
+	public function test_output_fields_renders_explicit_value_over_stored_values(): void {
+		update_option( 'test_field_id', 'id value' );
+		update_option( 'test_parent', array( 'key' => 'nested value' ) );
+
+		$output = $this->render_fields(
+			array(
+				array(
+					'id'         => 'test_field_id',
+					'field_name' => 'test_parent[key]',
+					'type'       => 'text',
+					'default'    => 'default value',
+					'value'      => '',
+				),
+			)
+		);
+
+		$this->assertStringContainsString( 'value=""', $output );
+	}
+
+	/**
+	 * @testdox Should render the value saved through a nested field name for a field with an empty ID.
+	 */
+	public function test_output_fields_renders_value_saved_for_empty_id(): void {
+		$options = array(
+			array(
+				'id'         => '',
+				'field_name' => 'test_parent[key]',
+				'type'       => 'text',
+				'default'    => 'default value',
+			),
+		);
+
+		WC_Admin_Settings::save_fields( $options, array( 'test_parent' => array( 'key' => 'saved value' ) ) );
+
+		$this->assertSame( array( 'key' => 'saved value' ), get_option( 'test_parent' ) );
+		$this->assertStringContainsString( 'value="saved value"', $this->render_fields( $options ) );
+	}
+
+	/**
+	 * @testdox Should read a field with is_option set to false through its ID, not through its field name.
+	 */
+	public function test_output_fields_reads_non_option_field_through_id(): void {
+		update_option( 'test_field_id', 'id value' );
+		update_option( 'test_parent', array( 'key' => 'nested value' ) );
+
+		$output = $this->render_fields(
+			array(
+				array(
+					'id'         => 'test_field_id',
+					'field_name' => 'test_parent[key]',
+					'type'       => 'text',
+					'default'    => 'default value',
+					'is_option'  => false,
+				),
+			)
+		);
+
+		$this->assertStringContainsString( 'value="id value"', $output );
+	}
+
+	/**
+	 * @testdox Should pass the default to a custom field without an ID, even when a value is stored under its field name.
+	 */
+	public function test_output_fields_passes_default_to_id_less_custom_field(): void {
+		update_option( 'test_parent', array( 'rules' => array( 'stored rule' ) ) );
+
+		$received = null;
+		add_action(
+			'woocommerce_admin_field_test_custom',
+			function ( $field ) use ( &$received ) {
+				$received = $field['value'];
+			}
+		);
+
+		$this->render_fields(
+			array(
+				array(
+					'type'       => 'test_custom',
+					'field_name' => 'test_parent[rules]',
+					'default'    => 'default value',
+				),
+			)
+		);
+
+		$this->assertSame( 'default value', $received );
+	}
+
+	/**
+	 * Render settings fields and return the output.
+	 *
+	 * @param array $options Field definitions.
+	 * @return string
+	 */
+	private function render_fields( array $options ): string {
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields( $options );
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		return $output;
+	}
+
+	/**
 	 * @testdox Should render each stored General setting back into its own form field.
 	 */
 	public function test_output_fields_renders_stored_general_setting_values(): void {
