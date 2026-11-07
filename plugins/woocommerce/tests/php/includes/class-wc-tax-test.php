@@ -418,6 +418,41 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return shipping tax rates for the standard tax class when the cart was never loaded.
+	 */
+	public function test_get_shipping_tax_rates_without_cart(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'Test Sales Tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+
+		// WooCommerce only loads the cart on front-end requests, so WC()->cart is null
+		// during WP-Cron, REST API and non-AJAX admin requests.
+		$cart      = WC()->cart;
+		WC()->cart = null;
+
+		try {
+			$shipping_rates = WC_Tax::get_shipping_tax_rates();
+		} finally {
+			WC()->cart = $cart;
+		}
+
+		$this->assertArrayHasKey( $tax_rate_id, $shipping_rates, 'A missing cart should resolve the standard tax class, like an empty cart does' );
+		$this->assertEquals( '10.0000', $shipping_rates[ $tax_rate_id ]['rate'], 'The standard shipping rate should be returned' );
+	}
+
+	/**
 	 * Test get_shipping_tax_class_from_cart_items returns null for no taxable items.
 	 */
 	public function test_get_shipping_tax_class_from_cart_items_no_taxable_items() {
