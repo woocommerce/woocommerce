@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Fulfillments: a Complete orders setting (off by default) marks a processing order completed once all of its items are fulfilled, and the Edit Order page now refreshes the fulfillment and order status badges after a change in the side panel.
