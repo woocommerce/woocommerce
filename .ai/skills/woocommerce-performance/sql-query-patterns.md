@@ -358,6 +358,61 @@ FROM (
 
 ---
 
+## Pattern I — Keyset paging on `wp_postmeta` scans the whole table (flag this)
+
+Paging through one meta key in `meta_id` order looks index-friendly but isn't. The `meta_key` index is a prefix index (`meta_key(191)`), so it can't return rows in `meta_id` order. For `meta_key = … AND meta_id > N ORDER BY meta_id LIMIT …` the optimizer picks a range scan on `PRIMARY` instead, which reads `wp_postmeta` in primary-key order until it has collected a batch. Across all batches that is a scan of the whole table, `meta_value` included. Forcing the `meta_key` index doesn't help: each batch then filesorts every remaining match.
+
+```php
+// Avoid: EXPLAIN shows key=PRIMARY and rows≈the whole table.
+$rows = $wpdb->get_results(
+	$wpdb->prepare(
+		"SELECT meta_id, post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_id > %d ORDER BY meta_id LIMIT 500",
+		$meta_key,
+		$last_meta_id
+	)
+);
+```
+
+Instead, collect the matching IDs from the `meta_key` index in one query, then read rows by primary key in chunks:
+
+```php
+$meta_ids = $wpdb->get_col( $wpdb->prepare( "SELECT meta_id FROM {$wpdb->postmeta} WHERE meta_key = %s", $meta_key ) );
+
+foreach ( array_chunk( array_map( 'absint', $meta_ids ), 500 ) as $chunk ) {
+	$rows = $wpdb->get_results( "SELECT meta_id, post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_id IN (" . implode( ',', $chunk ) . ')' );
+	// ...
+}
+```
+
+If the key matches a very large number of rows, add a narrowing condition (for example a `LIKE` on `meta_value`) to the ID query, so the ID list stays small. The same applies to `wp_usermeta`, `wp_termmeta` and `wp_commentmeta`, which share the prefix index. In one measurement on a 2M-row `wp_postmeta` table, a pass over a key with no matching rows took about 1.1 s with keyset paging and about 90 ms with the ID query.
+
+---
+
+## Pattern J — One `UPDATE` per row in a loop (flag this)
+
+Writing rows one at a time in a loop is the write-side version of Pattern D. Each statement commits on its own, and a commit costs far more than the row change. In one measurement, rewriting 100,000 `wp_postmeta` rows one `UPDATE` at a time took about 53 s, long enough to time out a web request.
+
+When every row gets the same value, use one `UPDATE … WHERE meta_id IN (…)` per chunk. When each row gets its own value, use a `CASE` per chunk, and keep any per-row condition (such as "only if the value hasn't changed since it was read") in the `WHERE` clause:
+
+```php
+$cases  = array();
+$values = array();
+$ids    = array();
+foreach ( $rows as $row ) {
+	$cases[]  = $wpdb->prepare( 'WHEN %d THEN %s', $row->meta_id, $new_value_for_row );
+	$values[] = $wpdb->prepare( 'WHEN %d THEN %s', $row->meta_id, $row->meta_value );
+	$ids[]    = (int) $row->meta_id;
+}
+
+if ( $ids ) {
+	$wpdb->query( "UPDATE {$wpdb->postmeta} SET meta_value = CASE meta_id " . implode( ' ', $cases ) . ' END WHERE meta_id IN (' . implode( ',', $ids ) . ') AND meta_value = CASE meta_id ' . implode( ' ', $values ) . ' END' );
+}
+```
+
+The same 100,000 rows took about 1.7 s in chunks of 500. A batched statement carries every value it writes, so estimate its size when rows can be large: it must stay under the server's `max_allowed_packet` (4 MB by default on MySQL 5.7). Typical meta rows are a few hundred bytes, so 500-row chunks are far below that, and no extra size cap is needed. Direct writes like these bypass the meta API, so clear the affected objects' meta cache afterwards (`wp_cache_delete_multiple( $post_ids, 'post_meta' )`).
+
+---
+
 ## Summary checklist
 
 When writing or reviewing a SQL query:
@@ -372,4 +427,6 @@ When writing or reviewing a SQL query:
 - [ ] Does a `wp_posts + wp_postmeta` join fetch data available in `wc_product_meta_lookup`? Use the lookup table if the regeneration guard passes. (Pattern G)
 - [ ] Does any dynamic `IN (...)` list guard against empty input and sanitize values? (Cross-cutting)
 - [ ] Does the query compute `MIN(col)` or `MAX(col)` over a large indexed table? Use `UNION ALL + LIMIT 1` if WHERE + ORDER BY share a composite index and the column is `NOT NULL` (or both branches add `AND col IS NOT NULL`). (Pattern H)
+- [ ] Does the query page through a meta table with `meta_key = … AND meta_id > N ORDER BY meta_id LIMIT …`? It scans the whole table; collect IDs from the `meta_key` index first. (Pattern I)
+- [ ] Does a loop issue one `UPDATE` (or `$wpdb->update()`) per row? Batch it per chunk with `IN (…)` or `CASE`. (Pattern J)
 - [ ] After applying any optimization, verify the execution plan changed as expected with `EXPLAIN` — check `type`, `key`, `rows`, and `Extra` columns before and after.

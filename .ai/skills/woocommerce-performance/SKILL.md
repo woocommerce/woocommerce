@@ -15,4 +15,4 @@ Use when writing or reviewing code that reads multiple non-autoloaded options in
 
 ## SQL Query Patterns — [sql-query-patterns.md](sql-query-patterns.md)
 
-Use when writing or reviewing any SQL query in WooCommerce PHP code. Covers: redundant posts joins, fan-out JOIN on `wp_term_relationships`, N-query loops, OR index-merge, cross-product meta conditions, multi-fan join decoupling, WooCommerce lookup table preference (`wc_product_meta_lookup`, `wc_product_attributes_lookup`), and MIN/MAX full-scan elimination.
+Use when writing or reviewing any SQL query in WooCommerce PHP code. Covers: redundant posts joins, fan-out JOIN on `wp_term_relationships`, N-query loops, OR index-merge, cross-product meta conditions, multi-fan join decoupling, WooCommerce lookup table preference (`wc_product_meta_lookup`, `wc_product_attributes_lookup`), MIN/MAX full-scan elimination, keyset paging on meta tables, and per-row `UPDATE` loops.
