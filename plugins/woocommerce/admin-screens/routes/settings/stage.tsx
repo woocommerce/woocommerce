@@ -5,7 +5,7 @@ import { Breadcrumbs, Page } from '@wordpress/admin-ui';
 import { Spinner } from '@wordpress/components';
 import { useViewportMatch } from '@wordpress/compose';
 import { store as coreStore, useEntityRecord } from '@wordpress/core-data';
-import { useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
 import { DataForm, useFormValidity } from '@wordpress/dataviews';
 import type { Form } from '@wordpress/dataviews';
@@ -21,11 +21,13 @@ import { useState } from 'react';
  */
 import type { SettingsRecord } from '../../entity-fields/types';
 import { ENTITY_KIND } from './entities';
-import type { SettingsEntityConfig } from './entities';
+import type { RelatedEntity, SettingsEntityConfig } from './entities';
 import { getEntityFields } from './entity-fields';
 import './style.scss';
 
 const EMPTY_FORM: Form = { fields: [] };
+
+const NO_RELATED: RelatedEntity[] = [];
 
 /**
  * Use REST error messages without assuming requests reject with Error instances.
@@ -45,42 +47,147 @@ function getErrorMessage( error: unknown, fallback: string ): string {
  */
 function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 	const { kind, name, label } = config;
+	const related = config.related ?? NO_RELATED;
 	const { record, editedRecord, hasEdits, edit, save } =
 		useEntityRecord< SettingsRecord >( kind, name, name );
+	const { editEntityRecord, saveEditedEntityRecord } =
+		useDispatch( coreStore );
 	const isNarrow = useViewportMatch( 'medium', '<' );
 	const { form } = useViewConfig( { kind, name } );
 	const [ notice, setNotice ] = useState< {
 		status: 'success' | 'error';
 		message: string;
 	} >();
-	const { fields, isSaving, loadError } = useSelect(
+	const { fields, ownIsSaving, ownLoadError, ...relatedValues } = useSelect(
 		( select ) => {
 			const core = select( coreStore );
+			// One top-level key per related value, so useSelect can tell nothing changed.
+			const state: Record< string, unknown > = {};
+			related.forEach(
+				( { kind: relatedKind, name: relatedName, recordId } ) => {
+					state[ `${ relatedName }:record` ] = core.getEntityRecord(
+						relatedKind,
+						relatedName,
+						recordId
+					);
+					state[ `${ relatedName }:editedRecord` ] =
+						core.getEditedEntityRecord(
+							relatedKind,
+							relatedName,
+							recordId
+						);
+					state[ `${ relatedName }:hasEdits` ] =
+						core.hasEditsForEntityRecord(
+							relatedKind,
+							relatedName,
+							recordId
+						);
+					state[ `${ relatedName }:isSaving` ] =
+						core.isSavingEntityRecord(
+							relatedKind,
+							relatedName,
+							recordId
+						);
+					state[ `${ relatedName }:loadError` ] =
+						core.getResolutionError( 'getEntityRecord', [
+							relatedKind,
+							relatedName,
+							recordId,
+						] );
+				}
+			);
 			return {
+				...state,
 				fields: getEntityFields( select( editorStore ), kind, name ),
-				isSaving: core.isSavingEntityRecord( kind, name, name ),
-				loadError: core.getResolutionError( 'getEntityRecord', [
+				ownIsSaving: core.isSavingEntityRecord( kind, name, name ),
+				ownLoadError: core.getResolutionError( 'getEntityRecord', [
 					kind,
 					name,
 					name,
 				] ),
 			};
 		},
-		[ kind, name ]
+		[ kind, name, related ]
 	);
-	const data = editedRecord as SettingsRecord | undefined;
+	const relatedState: Record< string, unknown > = relatedValues;
+	const relatedRecords = related.map( ( entity ) => ( {
+		...entity,
+		record: relatedState[ `${ entity.name }:record` ] as
+			SettingsRecord | undefined,
+		editedRecord: relatedState[ `${ entity.name }:editedRecord` ] as
+			SettingsRecord | false | undefined,
+		hasEdits: !! relatedState[ `${ entity.name }:hasEdits` ],
+		isSaving: !! relatedState[ `${ entity.name }:isSaving` ],
+		loadError: relatedState[ `${ entity.name }:loadError` ],
+	} ) );
+	const isSaving =
+		ownIsSaving || relatedRecords.some( ( entry ) => entry.isSaving );
+	const loadError =
+		ownLoadError ??
+		relatedRecords.find( ( entry ) => entry.loadError )?.loadError;
+	const hasAnyEdits =
+		hasEdits || relatedRecords.some( ( entry ) => entry.hasEdits );
+	// Fields read each related record under its entity name.
+	const ownRecord = editedRecord as SettingsRecord | undefined;
+	const data =
+		ownRecord &&
+		relatedRecords.every( ( entry ) => entry.editedRecord && entry.record )
+			? {
+					...ownRecord,
+					...Object.fromEntries(
+						relatedRecords.map( ( entry ) => [
+							entry.name,
+							entry.editedRecord,
+						] )
+					),
+				}
+			: undefined;
+	const onChange = ( edits: SettingsRecord ) => {
+		const relatedNames = related.map( ( entity ) => entity.name );
+		related.forEach( ( entity ) => {
+			const relatedEdits = edits[ entity.name ];
+			if ( relatedEdits && typeof relatedEdits === 'object' ) {
+				void editEntityRecord(
+					entity.kind,
+					entity.name,
+					entity.recordId,
+					relatedEdits
+				);
+			}
+		} );
+		const ownEdits = Object.fromEntries(
+			Object.entries( edits ).filter(
+				( [ key ] ) => ! relatedNames.includes( key )
+			)
+		);
+		if ( Object.keys( ownEdits ).length ) {
+			edit( ownEdits );
+		}
+	};
 	const { validity, isValid } = useFormValidity(
 		data ?? {},
 		fields,
 		form ?? EMPTY_FORM
 	);
 	const saveSettings = async () => {
-		if ( isSaving || ! hasEdits || ! isValid ) {
+		if ( isSaving || ! hasAnyEdits || ! isValid ) {
 			return;
 		}
 		setNotice( undefined );
 		try {
-			await save();
+			await Promise.all( [
+				hasEdits && save(),
+				...relatedRecords
+					.filter( ( entry ) => entry.hasEdits )
+					.map( ( entry ) =>
+						saveEditedEntityRecord(
+							entry.kind,
+							entry.name,
+							entry.recordId,
+							{ throwOnError: true }
+						)
+					),
+			] );
 			setNotice( {
 				status: 'success',
 				message: __( 'Settings saved.', 'woocommerce' ),
@@ -107,10 +214,20 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 			<Button
 				variant="outline"
 				size="compact"
-				disabled={ isSaving || ! hasEdits }
+				disabled={ isSaving || ! hasAnyEdits }
 				onClick={ () => {
 					if ( record ) {
 						edit( record );
+						relatedRecords.forEach( ( entry ) => {
+							if ( entry.record ) {
+								void editEntityRecord(
+									entry.kind,
+									entry.name,
+									entry.recordId,
+									entry.record
+								);
+							}
+						} );
 						setNotice( undefined );
 					}
 				} }
@@ -121,7 +238,7 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 				variant="solid"
 				size="compact"
 				loading={ isSaving }
-				disabled={ isSaving || ! hasEdits || ! isValid }
+				disabled={ isSaving || ! hasAnyEdits || ! isValid }
 				onClick={ () => void saveSettings() }
 			>
 				{ __( 'Save changes', 'woocommerce' ) }
@@ -188,7 +305,7 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 						onChange={ ( edits ) => {
 							if ( ! isSaving ) {
 								setNotice( undefined );
-								edit( edits );
+								onChange( edits );
 							}
 						} }
 					/>
