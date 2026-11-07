@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Allow filtering customers by registration date in the REST API with `before` and `after`.
