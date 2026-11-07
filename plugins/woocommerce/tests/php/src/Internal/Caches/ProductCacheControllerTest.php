@@ -69,6 +69,7 @@ class ProductCacheControllerTest extends \WC_Unit_Test_Case {
 	private function unhook_controller( ProductCacheController $controller ): void {
 		remove_action( 'init', array( $controller, 'on_init' ), 0 );
 		remove_action( 'clean_post_cache', array( $controller, 'invalidate_product_cache_on_clean' ), 10 );
+		remove_action( 'set_object_terms', array( $controller, 'invalidate_product_cache_by_terms' ), 10 );
 		remove_action( 'updated_post_meta', array( $controller, 'invalidate_product_cache_by_meta' ), 10 );
 		remove_action( 'added_post_meta', array( $controller, 'invalidate_product_cache_by_meta' ), 10 );
 		remove_action( 'deleted_post_meta', array( $controller, 'invalidate_product_cache_by_meta' ), 10 );
@@ -210,6 +211,30 @@ class ProductCacheControllerTest extends \WC_Unit_Test_Case {
 		// Verify fresh data is returned.
 		$fresh_product = wc_get_product( $product_id );
 		$this->assertEquals( 'Updated Name', $fresh_product->get_name(), 'Should return updated name' );
+	}
+
+	/**
+	 * @testdox Direct changes to product visibility terms invalidate the cached product.
+	 */
+	public function test_cache_invalidated_on_visibility_terms_change(): void {
+		$this->enable_feature();
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_catalog_visibility( 'hidden' );
+		$product->save();
+		$product_id = $product->get_id();
+
+		$this->product_cache->remove( $product_id );
+		$this->assertFalse( wc_get_product( $product_id )->is_visible() );
+		$this->assertTrue( $this->product_cache->is_cached( $product_id ) );
+
+		wp_set_post_terms( $product_id, array( 'unrelated-tag' ), 'product_tag' );
+		$this->assertTrue( $this->product_cache->is_cached( $product_id ), 'Other taxonomies should not invalidate the product cache' );
+
+		wp_set_post_terms( $product_id, array(), 'product_visibility' );
+
+		$this->assertFalse( $this->product_cache->is_cached( $product_id ), 'Direct term changes should invalidate the product cache' );
+		$this->assertTrue( wc_get_product( $product_id )->is_visible(), 'Product visibility should reflect the new terms' );
 	}
 
 	/**
