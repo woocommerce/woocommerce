@@ -89,6 +89,18 @@ export type Store = {
 	};
 };
 
+type WindowWithApiFetch = Window & {
+	wp?: {
+		apiFetch?: (
+			options: RequestInit & {
+				path: string;
+				headers: Record< string, string >;
+				parse: false;
+			}
+		) => Promise< Response >;
+	};
+};
+
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
@@ -120,24 +132,53 @@ const ensureListState = (
  * refreshed from the `Nonce` response header on every subsequent request,
  * so the server-side enforcement (landing in a follow-up PR) can be
  * flipped on without rewriting the client.
+ *
+ * When `wp.apiFetch` is on the page the request goes through it, so plugins
+ * can filter it with `wp.apiFetch.use()`. Script modules can't depend on the
+ * `wp-api-fetch` script, so we only use it when something else loaded it.
  */
 async function restRequest< T >(
 	state: Store[ 'state' ],
 	path: string,
 	init: RequestInit = {}
 ): Promise< T | null > {
-	const headers = new Headers( init.headers );
-	headers.set( 'Content-Type', 'application/json' );
+	// Plain object, as apiFetch middlewares spread `options.headers`.
+	const headers: Record< string, string > = {
+		'Content-Type': 'application/json',
+	};
 	if ( state.nonce ) {
-		headers.set( 'Nonce', state.nonce );
+		headers.Nonce = state.nonce;
 	}
 
-	const response = await fetch( `${ state.restUrl }${ path }`, {
-		...init,
-		headers,
-		cache: 'no-store',
-		credentials: 'include',
-	} );
+	const apiFetch = ( window as WindowWithApiFetch ).wp?.apiFetch;
+	let response: Response;
+
+	if ( apiFetch ) {
+		try {
+			response = await apiFetch( {
+				...init,
+				// Same as the wc-blocks-middleware: keep the site locale
+				// instead of the `_locale=user` apiFetch adds by default.
+				path: `${ path }?_locale=site`,
+				headers,
+				cache: 'no-store',
+				parse: false,
+			} );
+		} catch ( error ) {
+			// apiFetch throws the raw Response on non-2xx when `parse` is false.
+			if ( ! ( error instanceof Response ) ) {
+				throw error;
+			}
+			response = error;
+		}
+	} else {
+		response = await fetch( `${ state.restUrl }${ path }`, {
+			...init,
+			headers,
+			cache: 'no-store',
+			credentials: 'include',
+		} );
+	}
 
 	const nextNonce = response.headers.get( 'Nonce' );
 	if ( nextNonce ) {

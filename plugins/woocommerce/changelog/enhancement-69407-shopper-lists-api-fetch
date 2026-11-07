@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Send wishlist and saved-for-later requests through wp.apiFetch when it is loaded, so plugins can add request middleware.
