@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.7.0
+ * @version 11.3.0
  *
  * @var bool $show_downloads Controls whether the downloads table should be rendered.
  */
@@ -103,8 +103,10 @@ if ( $show_downloads ) {
 		<?php
 		if ( ! empty( $fulfillments ) ) {
 			foreach ( $fulfillments as $index => $fulfillment ) {
-				// Skip if the fulfillment is not fulfilled.
-				if ( ! $fulfillment->get_is_fulfilled() ) {
+				$pickup_location = FulfillmentUtils::get_fulfillment_pickup_location( $fulfillment );
+				$is_ready        = FulfillmentUtils::STATUS_READY_FOR_PICKUP === $fulfillment->get_status();
+				// Skip if the fulfillment is not fulfilled, unless it is waiting for the customer to pick it up.
+				if ( ! $fulfillment->get_is_fulfilled() && ! $is_ready ) {
 					continue;
 				}
 				$fulfillment_items = FulfillmentUtils::get_fulfillment_items( $order, $fulfillment );
@@ -114,8 +116,17 @@ if ( $show_downloads ) {
 			<tr>
 				<th colspan="2" class="woocommerce-table__product-name product-name">
 					<?php
-					/* translators: %s is the shipment index */
-					printf( esc_html__( 'Shipment %s', 'woocommerce' ), intval( $index ) + 1 );
+					if ( $is_ready && null !== $pickup_location ) {
+						/* translators: %s: pickup location name */
+						printf( esc_html__( 'Ready for pickup at %s', 'woocommerce' ), esc_html( $pickup_location['name'] ) );
+					} elseif ( $is_ready ) {
+						esc_html_e( 'Ready for pickup', 'woocommerce' );
+					} elseif ( FulfillmentUtils::STATUS_PICKED_UP === $fulfillment->get_status() ) {
+						esc_html_e( 'Picked up', 'woocommerce' );
+					} else {
+						/* translators: %s is the shipment index */
+						printf( esc_html__( 'Shipment %s', 'woocommerce' ), intval( $index ) + 1 );
+					}
 					?>
 				</th>
 			</tr>

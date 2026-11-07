@@ -40,6 +40,14 @@ jest.mock( '../../action-buttons/remove-button', () => () => (
 jest.mock( '../../action-buttons/update-button', () => () => (
 	<button data-testid="update-button">Update</button>
 ) );
+jest.mock( '../../action-buttons/pickup-buttons', () => ( {
+	ReadyForPickupButton: () => (
+		<button data-testid="ready-for-pickup-button">Ready for pickup</button>
+	),
+	PickedUpButton: () => (
+		<button data-testid="picked-up-button">Mark picked up</button>
+	),
+} ) );
 jest.mock( '../item-selector', () => () => (
 	<div data-testid="item-selector" />
 ) );
@@ -283,5 +291,95 @@ describe( 'FulfillmentEditor', () => {
 
 		// Verify the component renders without errors when expanded
 		expect( screen.getByText( 'Fulfillment #1' ) ).toBeInTheDocument();
+	} );
+
+	describe( 'local pickup', () => {
+		const pickupMeta = [
+			{ id: 4, key: '_pickup_location', value: 'Main Street store' },
+			{
+				id: 5,
+				key: '_pickup_address',
+				value: '123 Main Street, Austin, TX 78701',
+			},
+		];
+		const pickupProps = ( status, isFulfilled ) => {
+			const fulfillment = {
+				...mockProps.fulfillment,
+				status,
+				is_fulfilled: isFulfilled,
+				meta_data: [
+					...mockProps.fulfillment.meta_data,
+					...pickupMeta,
+				],
+			};
+			return {
+				...mockProps,
+				expanded: true,
+				fulfillment,
+				fulfillments: [ fulfillment ],
+			};
+		};
+
+		it( 'offers Ready for pickup and Mark picked up on a draft', () => {
+			render(
+				<FulfillmentEditor { ...pickupProps( 'unfulfilled', false ) } />
+			);
+
+			expect(
+				screen.getByText( 'Pickup Information' )
+			).toBeInTheDocument();
+			expect(
+				screen.getByText( 'Main Street store' )
+			).toBeInTheDocument();
+			expect(
+				screen.getByTestId( 'ready-for-pickup-button' )
+			).toBeInTheDocument();
+			expect(
+				screen.getByTestId( 'picked-up-button' )
+			).toBeInTheDocument();
+			expect(
+				screen.queryByTestId( 'fulfill-items-button' )
+			).not.toBeInTheDocument();
+			expect(
+				screen.getByTestId( 'fulfillment-customer-notification-form' )
+			).toBeInTheDocument();
+		} );
+
+		it( 'offers only Mark picked up once the items are ready, without another notification', () => {
+			render(
+				<FulfillmentEditor
+					{ ...pickupProps( 'ready_for_pickup', false ) }
+				/>
+			);
+
+			expect(
+				screen.getByTestId( 'picked-up-button' )
+			).toBeInTheDocument();
+			expect(
+				screen.queryByTestId( 'ready-for-pickup-button' )
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByTestId( 'fulfill-items-button' )
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByTestId( 'fulfillment-customer-notification-form' )
+			).not.toBeInTheDocument();
+		} );
+
+		it( 'offers no pickup steps once the items are picked up', () => {
+			render(
+				<FulfillmentEditor { ...pickupProps( 'picked_up', true ) } />
+			);
+
+			expect(
+				screen.getByText( 'Pickup Information' )
+			).toBeInTheDocument();
+			expect(
+				screen.queryByTestId( 'ready-for-pickup-button' )
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByTestId( 'picked-up-button' )
+			).not.toBeInTheDocument();
+		} );
 	} );
 } );

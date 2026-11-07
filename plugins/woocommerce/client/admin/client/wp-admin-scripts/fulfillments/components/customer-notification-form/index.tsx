@@ -19,7 +19,7 @@ import { useFulfillmentContext } from '../../context/fulfillment-context';
 export default function CustomerNotificationBox( {
 	type = 'fulfill',
 }: {
-	type: 'fulfill' | 'update' | 'remove';
+	type: 'fulfill' | 'update' | 'remove' | 'pickup';
 } ) {
 	const { notifyCustomer, setNotifyCustomer, customerNote, setCustomerNote } =
 		useFulfillmentContext();
@@ -28,6 +28,7 @@ export default function CustomerNotificationBox( {
 	const headerStrings = useMemo( () => {
 		return {
 			fulfill: __( 'Fulfillment notification', 'woocommerce' ),
+			pickup: __( 'Pickup notification', 'woocommerce' ),
 			remove: __( 'Removal update', 'woocommerce' ),
 			update: __( 'Update notification', 'woocommerce' ),
 		};
@@ -37,6 +38,10 @@ export default function CustomerNotificationBox( {
 		return {
 			fulfill: __(
 				'Automatically send an email to the customer when the selected items are fulfilled.',
+				'woocommerce'
+			),
+			pickup: __(
+				'Automatically send an email to the customer when the selected items are ready for pickup.',
 				'woocommerce'
 			),
 			remove: __(
