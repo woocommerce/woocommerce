@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Confirm product is a WC_Product object in WC_Products_Tracking before accessing attributes.
