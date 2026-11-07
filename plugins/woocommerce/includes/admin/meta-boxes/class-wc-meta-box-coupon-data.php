@@ -162,6 +162,19 @@ class WC_Meta_Box_Coupon_Data {
 					)
 				);
 
+				// Maximum discount.
+				woocommerce_wp_text_input(
+					array(
+						'id'          => 'maximum_discount',
+						'label'       => __( 'Maximum discount', 'woocommerce' ),
+						'placeholder' => __( 'No maximum', 'woocommerce' ),
+						'description' => __( 'The most this percentage coupon can take off the order. Leave blank for no maximum.', 'woocommerce' ),
+						'data_type'   => 'price',
+						'desc_tip'    => true,
+						'value'       => $coupon->get_maximum_discount( 'edit' ),
+					)
+				);
+
 				// Individual use.
 				woocommerce_wp_checkbox(
 					array(
@@ -385,6 +398,7 @@ class WC_Meta_Box_Coupon_Data {
 				'exclude_sale_items'          => isset( $_POST['exclude_sale_items'] ),
 				'minimum_amount'              => wc_format_decimal( $_POST['minimum_amount'] ),
 				'maximum_amount'              => wc_format_decimal( $_POST['maximum_amount'] ),
+				'maximum_discount'            => wc_format_decimal( wp_unslash( $_POST['maximum_discount'] ?? '' ) ), // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce checked in WC_Admin_Meta_Boxes::save_meta_boxes().
 				'email_restrictions'          => array_filter( array_map( 'trim', explode( ',', wc_clean( $_POST['customer_email'] ) ) ) ),
 			)
 		);

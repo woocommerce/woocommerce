@@ -31,6 +31,8 @@ jQuery(function( $ ) {
 				$( '#coupon_amount' ).removeClass( 'wc_input_decimal' ).addClass( 'wc_input_price' );
 			}
 
+			$( '.maximum_discount_field' ).toggle( 'percent' === select_val );
+
 			if ( select_val !== 'fixed_cart' ) {
 				$( '.limit_usage_to_x_items_field' ).show();
 			} else {
