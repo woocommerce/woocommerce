@@ -6,8 +6,7 @@ namespace Automattic\WooCommerce\StoreApi\Utilities\Ucp;
 /**
  * The `Idempotency-Key` a UCP write runs under.
  *
- * `for_request()` settles a request before anything else runs — a replay, a conflict or a
- * refused key is answered without loading a session — or hands back the claim the request
+ * `for_request()` settles a request before anything else runs, or hands back the claim the request
  * now owns, which `settle()` stores or releases according to the response.
  */
 final class IdempotencyClaim {
@@ -41,16 +40,13 @@ final class IdempotencyClaim {
 	/**
 	 * Settle the `Idempotency-Key` a request carries, before the request runs.
 	 *
-	 * Reads only: a `GET` changes nothing, so a retry needs no key and is never stored.
-	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @param string           $capability UCP capability the route serves, for a refusal's envelope.
 	 *
 	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 *
 	 * @return \WP_REST_Response|self|null A response settling the request on its own, the
-	 *         claim the request now owns, or null when it runs under no key: a read, a
-	 *         keyless write in lenient mode, or a disabled gate.
+	 *         claim the request now owns, or null when it runs under no key.
 	 */
 	public static function for_request( \WP_REST_Request $request, string $capability ) {
 		if ( in_array( strtoupper( (string) $request->get_method() ), array( 'GET', 'HEAD' ), true ) ) {
@@ -71,9 +67,8 @@ final class IdempotencyClaim {
 		/**
 		 * Filters whether a UCP write must carry an `Idempotency-Key`.
 		 *
-		 * True, the default, matches the UCP OpenAPI document, which declares the header
-		 * required on every mutating cart operation: a missing or malformed key is refused
-		 * at 400. False honours a key when one is sent and lets a keyless write through.
+		 * True, the default, matches the UCP specs, and returns 400 for a missing or malformed key.
+		 * False honors a key when one is sent and lets a keyless write through.
 		 *
 		 * @since 11.4.0
 		 *
@@ -199,10 +194,6 @@ final class IdempotencyClaim {
 	/**
 	 * Whether a response may be stored for replay.
 	 *
-	 * A refusal is not: UCP reports one at 200 with `ucp.status` set to `error`, and the route
-	 * rolls back. Nothing happened, so a retry must run again — once the stock is back or the
-	 * quantity corrected, a stored refusal would stand in the corrected request's way.
-	 *
 	 * @param \WP_REST_Response $response Response to inspect.
 	 * @return bool
 	 */
@@ -220,9 +211,6 @@ final class IdempotencyClaim {
 
 	/**
 	 * Replay a stored response.
-	 *
-	 * The original status is repeated, since that is the contract the first call published;
-	 * the `Idempotency-Replayed` header is what sets a replay apart from a fresh answer.
 	 *
 	 * @param array<string, mixed> $existing Stored record.
 	 * @return \WP_REST_Response

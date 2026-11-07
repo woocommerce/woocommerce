@@ -5,13 +5,6 @@ namespace Automattic\WooCommerce\StoreApi\Utilities\Ucp;
 
 /**
  * Persists UCP `Idempotency-Key` records.
- *
- * `try_begin()` claims a key with an atomic `INSERT IGNORE` on the UNIQUE key column, so one
- * of several concurrent requests owns processing and the rest replay or conflict.
- *
- * A record answers a retry of the request that created it and nothing else, so this table is
- * never read for reporting or analytics: a stored body is a shopper's basket. Rows are
- * deleted outright on expiry, never anonymised.
  */
 class IdempotencyStore {
 	/**
@@ -78,9 +71,6 @@ class IdempotencyStore {
 	/**
 	 * Run a write against the record table, reporting a failure instead of swallowing it.
 	 *
-	 * A missing table, a deadlock or a dropped connection must not read as an ordinary
-	 * outcome, so the error is logged and the result handed back.
-	 *
 	 * @param string $sql Prepared statement to run.
 	 * @return bool False when the query itself failed.
 	 */
@@ -102,9 +92,6 @@ class IdempotencyStore {
 
 	/**
 	 * Take over a claim whose owner has gone away.
-	 *
-	 * The `UPDATE` is the test: the row lock serialises competing takeovers and the `created_at`
-	 * predicate matches only the first, so exactly one caller wins — as in `try_begin()`.
 	 *
 	 * @param string $key Idempotency key.
 	 * @param int    $stale_after_seconds Age past which an unanswered claim may be taken over.
@@ -130,10 +117,6 @@ class IdempotencyStore {
 
 	/**
 	 * Reclaim a completed record past retention for a new request.
-	 *
-	 * The row is reset in place rather than deleted and re-inserted, so the `UPDATE` is the
-	 * test as in `try_take_over_stale()`: the `completed_at` predicate matches only the first
-	 * of several competing retries. The stored body is cleared with it.
 	 *
 	 * @param string $key Idempotency key.
 	 * @param string $fingerprint Fingerprint of the request now claiming the key.
@@ -186,9 +169,6 @@ class IdempotencyStore {
 	/**
 	 * Store the response a completed request produced.
 	 *
-	 * The status is kept beside the body because a replay has to repeat the original one,
-	 * which is not always 200.
-	 *
 	 * @param string $key Idempotency key.
 	 * @param int    $status HTTP status of the response.
 	 * @param mixed  $data Response body, JSON encoded on the way in.
@@ -214,9 +194,6 @@ class IdempotencyStore {
 	/**
 	 * Drop a record, releasing the key.
 	 *
-	 * Used when the response is not replayable, so that a retry reprocesses instead of
-	 * being answered from storage.
-	 *
 	 * @param string $key Idempotency key.
 	 * @return void
 	 */
@@ -239,8 +216,7 @@ class IdempotencyStore {
 	public static function retention_seconds(): int {
 		/**
 		 * Filters how long a completed UCP idempotency record is kept, in seconds.
-		 *
-		 * The UCP spec requires at least 24 hours: https://ucp.dev/2026-04-08/specification/checkout-rest/
+		 * The UCP spec requires at least 24 hours.
 		 *
 		 * @since 11.4.0
 		 *

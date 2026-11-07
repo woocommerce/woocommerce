@@ -2070,7 +2070,7 @@ apply_filters( 'woocommerce_ucp_idempotency_retention_seconds', int $seconds )
 
 ### Description
 
-How long a retry carrying the same key is answered from storage. The UCP spec requires at least 24 hours: https://ucp.dev/2026-04-08/specification/checkout-rest/
+How long a retry carrying the same key is answered from storage. The [UCP spec](https://ucp.dev/2026-04-08/specification/checkout-rest/) requires at least 24 hours.
 
 ### Parameters
 
