@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add the `woocommerce_hydration_api_request_path` filter to change the Store API paths that blocks preload, e.g. to add a language.

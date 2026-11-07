@@ -35,6 +35,13 @@ class AssetDataRegistry {
 	private $preloaded_api_requests = [];
 
 	/**
+	 * Paths passed to hydrate_api_request(), before filtering, as keys.
+	 *
+	 * @var array
+	 */
+	private $preloaded_api_request_paths = [];
+
+	/**
 	 * Lazy data is an array of closures that will be invoked just before
 	 * asset data is generated for the enqueued script.
 	 *
@@ -259,7 +266,7 @@ class AssetDataRegistry {
 		$core_data                                 = $this->get_core_data();
 		$core_data['experimentalWcRestApiV4']      = Features::is_enabled( 'rest-api-v4' );
 		$core_data['experimentalCartSaveForLater'] = FeaturesUtil::feature_is_enabled( 'cart_save_for_later' );
-		$core_data['preloadedApiRequestPaths']     = array_keys( $this->preloaded_api_requests );
+		$core_data['preloadedApiRequestPaths']     = array_keys( $this->preloaded_api_request_paths );
 		// note this WILL wipe any data already registered to these keys because they are protected.
 		$this->data = array_replace_recursive( $settings, $core_data );
 	}
@@ -327,8 +334,12 @@ class AssetDataRegistry {
 	 * @param string $path REST API path to preload.
 	 */
 	public function hydrate_api_request( $path ) {
-		if ( ! isset( $this->preloaded_api_requests[ $path ] ) ) {
-			$this->preloaded_api_requests[ $path ] = Package::container()->get( Hydration::class )->get_rest_api_response_data( $path );
+		$this->preloaded_api_request_paths[ $path ] = true;
+
+		$request_path = $this->filter_api_request_path( $path );
+
+		if ( ! isset( $this->preloaded_api_requests[ $request_path ] ) ) {
+			$this->preloaded_api_requests[ $request_path ] = Package::container()->get( Hydration::class )->get_rest_api_response_data( $request_path );
 		}
 	}
 
@@ -350,6 +361,8 @@ class AssetDataRegistry {
 			);
 		}
 
+		$path = $this->filter_api_request_path( $path );
+
 		$this->add(
 			$key,
 			function () use ( $path ) {
@@ -360,6 +373,25 @@ class AssetDataRegistry {
 				return $response['body'] ?? '';
 			}
 		);
+	}
+
+	/**
+	 * Filters a REST API path before it is hydrated.
+	 *
+	 * @param string $path REST API path to preload.
+	 * @return string The filtered path, or the original path if the filter returns an invalid value.
+	 */
+	private function filter_api_request_path( $path ) {
+		/**
+		 * Filters a REST API path before it is hydrated, e.g. to add the language a multilingual plugin adds on the client.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param string $path REST API path to preload, e.g. '/wc/store/v1/cart'.
+		 */
+		$filtered_path = apply_filters( 'woocommerce_hydration_api_request_path', $path );
+
+		return is_string( $filtered_path ) && '' !== $filtered_path ? $filtered_path : $path;
 	}
 
 	/**

@@ -204,6 +204,74 @@ class AssetDataRegistry extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox `woocommerce_hydration_api_request_path` filter changes the preloaded request path but not `preloadedApiRequestPaths`.
+	 */
+	public function test_hydration_api_request_path_filter_changes_preloaded_request_path(): void {
+		add_filter(
+			'woocommerce_hydration_api_request_path',
+			function ( $path ) {
+				return add_query_arg( 'lang', 'fr', $path );
+			}
+		);
+
+		$this->registry->hydrate_api_request( '/wc/store/v1/cart' );
+		$this->registry->initialize_core_data();
+
+		$this->assertSame( array( '/wc/store/v1/cart?lang=fr' ), array_keys( $this->get_preloaded_api_requests() ) );
+		$this->assertSame( array( '/wc/store/v1/cart' ), $this->registry->get()['preloadedApiRequestPaths'] );
+	}
+
+	/**
+	 * @testdox Hydrating data reuses the response preloaded for the filtered path.
+	 */
+	public function test_hydrate_data_from_api_request_reuses_response_preloaded_for_filtered_path(): void {
+		add_filter(
+			'woocommerce_hydration_api_request_path',
+			function ( $path ) {
+				return add_query_arg( 'lang', 'fr', $path );
+			}
+		);
+		$dispatch_count = 0;
+		add_filter(
+			'woocommerce_hydration_dispatch_request',
+			function ( $result ) use ( &$dispatch_count ) {
+				++$dispatch_count;
+				return $result;
+			}
+		);
+
+		$this->registry->hydrate_api_request( '/wc/store/v1/cart' );
+		$this->registry->hydrate_data_from_api_request( 'cartData', '/wc/store/v1/cart' );
+		$this->registry->execute_lazy_data();
+
+		$this->assertSame( 1, $dispatch_count );
+		$this->assertSame( $this->get_preloaded_api_requests()['/wc/store/v1/cart?lang=fr']['body'], $this->registry->get()['cartData'] );
+	}
+
+	/**
+	 * @testdox `woocommerce_hydration_api_request_path` filter falls back to the original path on an invalid value.
+	 */
+	public function test_hydration_api_request_path_filter_ignores_invalid_value(): void {
+		add_filter( 'woocommerce_hydration_api_request_path', '__return_null' );
+
+		$this->registry->hydrate_api_request( '/wc/store/v1/cart' );
+
+		$this->assertSame( array( '/wc/store/v1/cart' ), array_keys( $this->get_preloaded_api_requests() ) );
+	}
+
+	/**
+	 * Returns the preloaded API requests passed to the client preloading middleware.
+	 *
+	 * @return array
+	 */
+	private function get_preloaded_api_requests(): array {
+		$property = new \ReflectionProperty( \Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry::class, 'preloaded_api_requests' );
+		$property->setAccessible( true );
+
+		return $property->getValue( $this->registry );
+	}
+
+	/**
 	 * @testdox `preloadedApiRequestPaths` is an empty list when nothing was preloaded.
 	 */
 	public function test_preloaded_api_request_paths_is_empty_without_hydration() {
