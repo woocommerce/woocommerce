@@ -48,7 +48,7 @@ class SessionDataWriter {
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
 		$value = $wpdb->get_var( $wpdb->prepare( "SELECT session_value FROM {$table} WHERE session_key = %s", $session_key ) );
 
-		if ( '' !== $wpdb->last_error ) {
+		if ( null === $value || '' !== $wpdb->last_error ) {
 			// Without the stored row there is nothing to apply the changes to, so save this request's whole session.
 			return $this->replace( $table, $session_key, $expiry, $current );
 		}

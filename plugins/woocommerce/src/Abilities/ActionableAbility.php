@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Abilities;
 
+use Automattic\WooCommerce\Internal\Abilities\Ability;
 use Automattic\WooCommerce\Internal\Caches\ProductCache;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseTransaction;
 
@@ -89,7 +90,7 @@ abstract class ActionableAbility extends Ability {
 	 *
 	 * @param \WC_Data $subject Primary object to change.
 	 * @param array    $input   Ability input.
-	 * @return null|\WP_Error|array<int, array{0: \WC_Data, 1: array, 2?: string}> A WP_Error rejects the change, and nothing is saved. An array lists the secondary objects.
+	 * @return null|\WP_Error|array<int, array{0: \WC_Data, 1: array, 2?: string}> A WP_Error rejects the change, and nothing is saved. The field writes and the validators of the primary object still run, so the client gets their refusals in the same error. An array lists the secondary objects.
 	 */
 	abstract protected function change( $subject, array $input );
 
@@ -208,13 +209,16 @@ abstract class ActionableAbility extends Ability {
 			return $updates;
 		}
 
+		$refused = new \WP_Error();
 		try {
 			$changed = $this->change( $subject, $input );
 		} catch ( \WC_Data_Exception $e ) {
-			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
+			$changed = new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		}
-		if ( is_wp_error( $changed ) ) {
-			return $changed;
+		$core_refused = is_wp_error( $changed );
+		if ( $core_refused ) {
+			$refused->merge_from( $changed );
+			$changed = null;
 		}
 
 		$objects = array( array( $subject, $updates, $this->get_resource() ) );
@@ -251,12 +255,11 @@ abstract class ActionableAbility extends Ability {
 			$objects[] = array( $secondary[0], $fields, $resource_name );
 		}
 
-		$refused = new \WP_Error();
 		foreach ( $objects as list( $object, $fields ) ) {
 			$this->apply_fields( $object, $fields, $refused );
 		}
 
-		$deleting = $this->get_objects_to_delete();
+		$deleting = $core_refused ? array() : $this->get_objects_to_delete();
 		$staged   = array_column( $objects, 0 );
 		$to_check = $objects;
 		foreach ( $deleting as $object ) {
@@ -277,8 +280,8 @@ abstract class ActionableAbility extends Ability {
 				$refused
 			);
 		}
-		if ( $refused->has_errors() ) {
-			return $refused;
+		if ( $core_refused || $refused->has_errors() ) {
+			return self::join_refusals( $refused );
 		}
 
 		try {
@@ -598,7 +601,8 @@ abstract class ActionableAbility extends Ability {
 	 * `<namespace>:<code>`, so refusals with the same code keep their own data.
 	 * When the code is already taken in the same namespace, it gets a numeric
 	 * suffix, as `<namespace>:<code>:2`. The errors keep the run order, so the
-	 * first rejection gives the response its code, message and status.
+	 * first rejection gives the response its code and status, and
+	 * join_refusals() puts every message into the first one.
 	 *
 	 * @param \WP_Error $rejected  Rejection from run_callback().
 	 * @param string    $extension Extension that owns the callback.
@@ -616,6 +620,23 @@ abstract class ActionableAbility extends Ability {
 			}
 			$refused->add_data( array_merge( $rejected->get_error_data( $code ), array( 'namespace' => $extension ) ), $key );
 		}
+	}
+
+	/**
+	 * Put every refusal message into the first message, once each, because an
+	 * MCP client shows only the first message of an error. The other codes and
+	 * messages stay as they are for the clients that read all of them.
+	 *
+	 * @param \WP_Error $refused Refusals in run order.
+	 * @return \WP_Error
+	 */
+	private static function join_refusals( \WP_Error $refused ): \WP_Error {
+		$messages = $refused->get_error_messages();
+		if ( count( $messages ) > 1 ) {
+			$refused->errors[ $refused->get_error_code() ][0] = implode( ' ', array_unique( $messages ) );
+		}
+
+		return $refused;
 	}
 
 	/**

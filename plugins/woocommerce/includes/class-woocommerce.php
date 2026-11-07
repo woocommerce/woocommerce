@@ -38,6 +38,7 @@ use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\Email\DeferredEmailQueue;
 use Automattic\WooCommerce\Internal\Email\EmailLogger;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
+use Automattic\WooCommerce\Internal\Admin\MenuIcons;
 use Automattic\WooCommerce\Internal\Admin\OrderMilestoneEasterEgg;
 use Automattic\WooCommerce\Internal\Admin\Screens\AdminScreens;
 use Automattic\WooCommerce\Internal\Admin\Screens\Settings\ChequeSettings;
@@ -422,6 +423,7 @@ final class WooCommerce {
 		$container->get( SettingsScreen::class );
 		$container->get( AbilitiesTracking::class );
 		$container->get( OpenGraph::class );
+		$container->get( MenuIcons::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.
@@ -446,12 +448,16 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\PushNotifications\PushNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\PointOfSaleEmailHandler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\UnpaidOrderTimeoutMarker::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Orders\ProductSales::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\POSController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\StockNotifications\StockNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ScheduledSalePriceReconciler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Ucp\UcpDiscovery::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\StatusTab::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductDownloads\DownloadableFileAttachments::class )->register();
 
@@ -675,6 +681,13 @@ final class WooCommerce {
 
 	/**
 	 * Returns true if the request is a store REST API or UCP API request.
+	 *
+	 * The UCP namespace counts as one: like the Store API it returns data rather than rendered
+	 * pages, so callers can skip the same work — block and template registration, site tracking.
+	 *
+	 * This is a rendering decision only. StoreApi\Authentication keeps its own, narrower check
+	 * and does not treat UCP as Store API: its filters assume a browser client with a nonce,
+	 * which a UCP agent never sends, so UCP routes must not inherit them.
 	 *
 	 * @return bool
 	 */
