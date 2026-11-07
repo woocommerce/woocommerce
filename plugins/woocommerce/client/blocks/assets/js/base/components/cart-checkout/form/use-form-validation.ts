@@ -128,6 +128,8 @@ export const useFormValidation = (
 				values = data.customer.address || {};
 				break;
 			case 'contact':
+				values = data.customer.additional_fields || {};
+				break;
 			case 'order':
 				values = data.checkout.additional_fields || {};
 				break;
@@ -183,6 +185,19 @@ export const useFormValidation = (
 						type: 'object',
 						properties: {
 							billing_address: {
+								type: 'object',
+								properties: partialSchema,
+							},
+						},
+					},
+				};
+				break;
+			case 'contact':
+				schema.properties = {
+					customer: {
+						type: 'object',
+						properties: {
+							additional_fields: {
 								type: 'object',
 								properties: partialSchema,
 							},
