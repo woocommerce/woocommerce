@@ -893,4 +893,106 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertFalse( ObjectInstantiationProbe::$was_unserialized, 'Stored product meta must not instantiate objects' );
 		$this->assertSame( array( 'size' => 'small' ), $product->get_default_attributes(), 'Scalar default attributes should still load' );
 	}
+
+	/**
+	 * @testdox Malformed date args return no products instead of a fatal error.
+	 *
+	 * @dataProvider malformed_date_arg_provider
+	 * @param string $date_key   The date query var.
+	 * @param mixed  $date_value The malformed value.
+	 */
+	public function test_malformed_date_arg_returns_no_products( string $date_key, $date_value ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_date_created( '2000-01-01T10:00:00' );
+		$product->set_date_on_sale_from( '2000-01-01T10:00:00' );
+		$product->save();
+
+		$this->assertSame(
+			array( $product->get_id() ),
+			wc_get_products(
+				array(
+					$date_key => '2000-01-01',
+					'return'  => 'ids',
+				)
+			),
+			'A valid date should match the product'
+		);
+
+		$queried_products = wc_get_products(
+			array(
+				$date_key => $date_value,
+				'return'  => 'ids',
+			)
+		);
+
+		$this->assertSame( array(), $queried_products, 'A malformed date should not match any product' );
+	}
+
+	/**
+	 * Data provider for test_malformed_date_arg_returns_no_products.
+	 *
+	 * @return array
+	 */
+	public function malformed_date_arg_provider(): array {
+		return array(
+			'post column, array'       => array( 'date_created', array( '2000-01-01' ) ),
+			'post column, empty array' => array( 'date_created', array() ),
+			'post column, object'      => array( 'date_created', new stdClass() ),
+			'sale date, array'         => array( 'date_on_sale_from', array( '2000-01-01' ) ),
+		);
+	}
+
+	/**
+	 * @testdox A Stringable date arg still matches products, as it did before the malformed date guard.
+	 */
+	public function test_stringable_date_arg_matches_product(): void {
+		$product = new WC_Product_Simple();
+		$product->set_date_created( '2000-01-01T10:00:00' );
+		$product->save();
+		$other_product = new WC_Product_Simple();
+		$other_product->set_date_created( '2001-01-01T10:00:00' );
+		$other_product->save();
+
+		// A named class, because WP_Query serializes its query vars and anonymous classes cannot be serialized.
+		$date = new WC_Product_Data_Store_CPT_Test_Stringable( '2000-01-01' );
+
+		$this->assertSame(
+			array( $product->get_id() ),
+			wc_get_products(
+				array(
+					'date_created' => $date,
+					'return'       => 'ids',
+				)
+			)
+		);
+	}
+}
+
+// phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound -- Test double.
+/**
+ * A Stringable value for date query tests.
+ */
+class WC_Product_Data_Store_CPT_Test_Stringable {
+	/**
+	 * The string value.
+	 *
+	 * @var string
+	 */
+	private $value;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param string $value The string value.
+	 */
+	public function __construct( string $value ) {
+		$this->value = $value;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function __toString(): string {
+		return $this->value;
+	}
 }
