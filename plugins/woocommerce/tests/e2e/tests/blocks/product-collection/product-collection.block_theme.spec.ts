@@ -582,5 +582,37 @@ test.describe( 'Product Collection', () => {
 				'option update woocommerce_default_catalog_orderby menu_order'
 			);
 		} );
+
+		test( 'products per page applies to the whole shop page', async ( {
+			page,
+			pageObject,
+			editor,
+		} ) => {
+			await pageObject.goToEditorTemplate();
+			await pageObject.focusProductCollection();
+
+			const productsPerPageInput = pageObject
+				.locateSidebarSettings()
+				.getByRole( 'spinbutton', { name: 'Products per page' } );
+			await expect( productsPerPageInput ).toBeVisible();
+
+			await productsPerPageInput.fill( '5' );
+			await pageObject.refreshLocators( 'editor' );
+			await expect( pageObject.products ).toHaveCount( 5 );
+
+			await editor.saveSiteEditorEntities();
+			await pageObject.goToProductCatalogFrontend();
+
+			// The shop query uses this number, so pagination and the results count match the products shown.
+			await expect( pageObject.products ).toHaveCount( 5 );
+			await expect( pageObject.pagination ).toBeVisible();
+			await expect(
+				page.locator( '.wc-block-product-results-count' )
+			).toHaveText( /Showing 1[-–]5 of \d+ results/ );
+
+			await wpCLI(
+				'option delete woocommerce_catalog_products_per_page'
+			);
+		} );
 	} );
 } );
