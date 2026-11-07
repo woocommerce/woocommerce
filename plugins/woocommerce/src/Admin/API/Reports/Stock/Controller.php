@@ -135,6 +135,18 @@ class Controller extends GenericController implements ExportableInterface {
 		remove_filter( 'posts_groupby', array( __CLASS__, 'add_wp_query_group_by' ), 10 );
 		remove_filter( 'posts_clauses', array( __CLASS__, 'add_wp_query_orderby' ), 10 );
 
+		/**
+		 * Fires after a page of stock report products is loaded, before its items are prepared.
+		 *
+		 * Lets code that adds fields to the report load their data with one query per page.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param array           $products The products on this page.
+		 * @param WP_REST_Request $request  The request.
+		 */
+		do_action( 'woocommerce_analytics_stock_report_products_loaded', $query_results['objects'], $request );
+
 		$objects = array();
 		foreach ( $query_results['objects'] as $object ) {
 			$data      = $this->prepare_item_for_response( $object, $request );
