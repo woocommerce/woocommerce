@@ -22,7 +22,7 @@ class WC_Order_Item_Product_Data_Store extends Abstract_WC_Order_Item_Type_Data_
 	 * @since 3.0.0
 	 * @var array
 	 */
-	protected $internal_meta_keys = array( '_product_id', '_variation_id', '_qty', '_tax_class', '_line_subtotal', '_line_subtotal_tax', '_line_total', '_line_tax', '_line_tax_data' );
+	protected $internal_meta_keys = array( '_product_id', '_variation_id', '_qty', '_tax_class', '_line_subtotal', '_line_subtotal_tax', '_line_total', '_line_tax', '_line_tax_data', '_product_tax_status' );
 
 	/**
 	 * Read/populate data properties specific to this order item.
@@ -44,6 +44,9 @@ class WC_Order_Item_Product_Data_Store extends Abstract_WC_Order_Item_Type_Data_
 				'taxes'        => get_metadata( 'order_item', $id, '_line_tax_data', true ),
 			)
 		);
+		if ( $item instanceof WC_Order_Item_Product ) {
+			$item->set_recorded_tax_status( get_metadata( 'order_item', $id, '_product_tax_status', true ) );
+		}
 		$item->set_object_read( true );
 	}
 
@@ -72,6 +75,13 @@ class WC_Order_Item_Product_Data_Store extends Abstract_WC_Order_Item_Type_Data_
 
 		foreach ( $props_to_update as $meta_key => $prop ) {
 			update_metadata( 'order_item', $id, $meta_key, $item->{"get_$prop"}( 'edit' ) );
+		}
+
+		$recorded_tax_status = $item->get_recorded_tax_status();
+		if ( '' !== $recorded_tax_status ) {
+			update_metadata( 'order_item', $id, '_product_tax_status', $recorded_tax_status );
+		} elseif ( metadata_exists( 'order_item', $id, '_product_tax_status' ) ) {
+			delete_metadata( 'order_item', $id, '_product_tax_status' );
 		}
 	}
 

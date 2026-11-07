@@ -36,6 +36,15 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	public $legacy_cart_item_key;
 
 	/**
+	 * The product's tax status when the line was created, or an empty string when it was not recorded.
+	 *
+	 * Not a prop: the data store keeps it in the internal `_product_tax_status` item meta, out of the item's data and meta data.
+	 *
+	 * @var string
+	 */
+	private $recorded_tax_status = '';
+
+	/**
 	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
 	 *
 	 * @since 3.0.0
@@ -267,6 +276,47 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		}
 		$this->set_name( $product->get_name() );
 		$this->set_tax_class( $product->get_tax_class() );
+		$this->set_recorded_tax_status( $product->get_tax_status() );
+	}
+
+	/**
+	 * Record the product's current tax status on the line, so later tax recalculations use the status it was sold with.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param WC_Product|null $product The product the line was created from. Defaults to the line's product, loaded by ID.
+	 * @return void
+	 */
+	public function record_tax_status( $product = null ) {
+		if ( ! $product instanceof WC_Product ) {
+			$product = $this->get_product();
+		}
+		if ( $product instanceof WC_Product ) {
+			$this->set_recorded_tax_status( $product->get_tax_status() );
+		}
+	}
+
+	/**
+	 * Get the tax status recorded when the line was created.
+	 *
+	 * @internal For the order item data store.
+	 *
+	 * @return string The recorded status, or an empty string when none was recorded.
+	 */
+	public function get_recorded_tax_status() {
+		return $this->recorded_tax_status;
+	}
+
+	/**
+	 * Set the tax status recorded for the line. Values that are not a product tax status clear it.
+	 *
+	 * @internal For the order item data store.
+	 *
+	 * @param string $tax_status Product tax status.
+	 * @return void
+	 */
+	public function set_recorded_tax_status( $tax_status ) {
+		$this->recorded_tax_status = in_array( $tax_status, array( ProductTaxStatus::TAXABLE, ProductTaxStatus::SHIPPING, ProductTaxStatus::NONE ), true ) ? $tax_status : '';
 	}
 
 	/**
@@ -510,6 +560,11 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @return string
 	 */
 	public function get_tax_status() {
+		if ( '' !== $this->recorded_tax_status ) {
+			return $this->recorded_tax_status;
+		}
+
+		// Lines saved before the status was recorded follow the product, as they always have.
 		$product = $this->get_product();
 		return $product ? $product->get_tax_status() : ProductTaxStatus::TAXABLE;
 	}
