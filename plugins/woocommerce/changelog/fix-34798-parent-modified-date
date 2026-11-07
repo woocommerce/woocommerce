@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update the order modified date when only totals or other meta-stored order data change on stores using posts storage.
