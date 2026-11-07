@@ -32,6 +32,49 @@ wp_create_nonce( 'wc_store_api' )
 
 There is no other mechanism in place for creating nonces.
 
+## Sending the nonce from JavaScript
+
+Pass a nonce and the Store API URL to your script from PHP:
+
+```php
+wp_add_inline_script(
+	'my-store-script',
+	'const myStoreApi = ' . wp_json_encode(
+		array(
+			'nonce' => wp_create_nonce( 'wc_store_api' ),
+			'root'  => esc_url_raw( rest_url( 'wc/store/v1/' ) ),
+		)
+	) . ';',
+	'before'
+);
+```
+
+Then send it in the `Nonce` header, and keep the updated value the response returns:
+
+```js
+let nonce = myStoreApi.nonce;
+
+async function addToCart( id, quantity ) {
+	const response = await fetch( `${ myStoreApi.root }cart/add-item`, {
+		method: 'POST',
+		credentials: 'same-origin',
+		headers: {
+			'Content-Type': 'application/json',
+			Nonce: nonce,
+		},
+		body: JSON.stringify( { id, quantity } ),
+	} );
+
+	nonce = response.headers.get( 'Nonce' ) || nonce;
+
+	return response.json();
+}
+
+addToCart( 100, 1 );
+```
+
+`credentials: 'same-origin'` sends the cookies that identify the customer's cart session.
+
 ## Disabling Nonces for Development
 
 If you want to test REST endpoints without providing a nonce, you can use the following filter:
