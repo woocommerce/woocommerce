@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent invalid order status updates from resetting an order's existing status to pending, including custom statuses from deactivated plugins.
