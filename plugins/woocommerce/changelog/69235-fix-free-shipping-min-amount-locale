@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop offering free shipping below the minimum order amount when the minimum was saved in the store's number format.
