@@ -2,7 +2,8 @@
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
-use Automattic\WooCommerce\StoreApi\Exceptions\InvalidStockLevelsInCartException;
+use Automattic\WooCommerce\Internal\Orders\PaymentStock;
+use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderAuthorizationTrait;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
@@ -98,8 +99,7 @@ class CheckoutOrder extends AbstractCartRoute {
 	 * 3. Validate Order
 	 * 4. Process Payment
 	 *
-	 * @throws RouteException On error.
-	 * @throws InvalidStockLevelsInCartException On error.
+	 * @throws RouteException On payment or stock errors.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
@@ -171,6 +171,11 @@ class CheckoutOrder extends AbstractCartRoute {
 		$this->validate_order_was_saved();
 
 		if ( $needs_payment ) {
+			try {
+				wc_get_container()->get( PaymentStock::class )->reserve_stock_for_payment( $this->get_order_or_throw() );
+			} catch ( ReserveStockException $e ) {
+				throw new RouteException( esc_attr( $e->getErrorCode() ), esc_html( $e->getMessage() ), (int) $e->getCode() );
+			}
 			$this->process_payment( $request, $payment_result );
 		} else {
 			$this->process_without_payment( $request, $payment_result );
