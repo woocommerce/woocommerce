@@ -49,19 +49,19 @@
 		"simple-git": "catalog:tooling"
 	},
 	"devDependencies": {
-		"@types/jest": "29.5.x",
+		"@types/jest": "catalog:tooling",
 		"@types/node": "^24.1.0",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"copy-webpack-plugin": "catalog:tooling",
-		"eslint": "^10.0.0",
-		"jest": "29.5.x",
+		"eslint": "catalog:tooling",
+		"jest": "catalog:tooling",
 		"replace": "^1.2.2",
-		"ts-jest": "29.1.x",
+		"ts-jest": "catalog:tooling",
 		"ts-loader": "9.5.x",
-		"typescript": "5.7.x",
+		"typescript": "catalog:tooling",
 		"webpack": "catalog:tooling",
-		"webpack-cli": "5.1.x"
+		"webpack-cli": "catalog:tooling"
 	},
 	"engines": {
 		"node": "^24.15.0"

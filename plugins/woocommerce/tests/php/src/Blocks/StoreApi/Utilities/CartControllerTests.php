@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
+use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -77,6 +78,27 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 		$class->normalize_cart();
 		$this->assertEquals( 6, wc()->cart->get_cart_item( $product_key )['quantity'] );
 		remove_all_filters( 'woocommerce_store_api_product_quantity_multiple_of' );
+		wc()->cart->empty_cart();
+	}
+
+	/**
+	 * Test set_cart_item_quantity stores the normalized quantity that was validated, not the raw value.
+	 */
+	public function test_set_cart_item_quantity_stores_normalized_quantity() {
+		$class    = new CartController();
+		$fixtures = new FixtureData();
+
+		$product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Test Product 1',
+				'regular_price' => 10,
+			)
+		);
+
+		$product_key = wc()->cart->add_to_cart( $product->get_id(), 1 );
+		$class->set_cart_item_quantity( $product_key, '3abc' );
+
+		$this->assertSame( 3, wc()->cart->get_cart_item( $product_key )['quantity'] );
 		wc()->cart->empty_cart();
 	}
 
@@ -367,5 +389,49 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 
 		$this->assertSame( array( 1, $product->get_id(), (int) $variation['variation_id'] ), $captured );
 		$this->assertSame( 4, wc()->cart->get_cart_item( $cart_id )['quantity'] );
+	}
+
+	/**
+	 * @testdox Add to cart rejects an attribute value outside the configured options, including when an Any variation exists.
+	 */
+	public function test_add_to_cart_rejects_attribute_value_outside_options_when_any_variation_exists(): void {
+		$product   = new \WC_Product_Variable();
+		$attribute = new \WC_Product_Attribute();
+		$attribute->set_name( 'Color' );
+		$attribute->set_options( array( 'Red', 'Blue' ) );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$red = new \WC_Product_Variation();
+		$red->set_parent_id( $product->get_id() );
+		$red->set_attributes( array( 'color' => 'Red' ) );
+		$red->set_regular_price( '5' );
+		$red->save();
+
+		$any = new \WC_Product_Variation();
+		$any->set_parent_id( $product->get_id() );
+		$any->set_attributes( array( 'color' => '' ) );
+		$any->set_regular_price( '4' );
+		$any->save();
+
+		try {
+			( new CartController() )->add_to_cart(
+				array(
+					'id'        => $product->get_id(),
+					'quantity'  => 1,
+					'variation' => array(
+						array(
+							'attribute' => 'Color',
+							'value'     => 'Green',
+						),
+					),
+				)
+			);
+			$this->fail( 'Posting an attribute value that is not an option should be rejected, including when an Any variation exists.' );
+		} catch ( RouteException $exception ) {
+			$this->assertSame( 'woocommerce_rest_invalid_variation_data', $exception->getErrorCode() );
+			$this->assertStringContainsString( 'Invalid value posted for Color', $exception->getMessage() );
+		}
 	}
 }

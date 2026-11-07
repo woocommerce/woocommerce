@@ -76,12 +76,20 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function execute( array $input ) {
-		$include_line_items = (bool) ( $input['include_line_items'] ?? false );
+		$include_line_items = $input['include_line_items'] ?? false;
 
 		if ( ! empty( $input['id'] ) && ! empty( $input['filters'] ) ) {
 			return new \WP_Error(
 				'woocommerce_ability_filters_with_id',
 				__( 'Send either an id or filters, not both.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( ! empty( $input['id'] ) && ! empty( $input['include'] ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_order_include_with_id',
+				__( 'Send either an id or include, not both.', 'woocommerce' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -106,9 +114,10 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			);
 		}
 
-		$page     = (int) ( $input['page'] ?? 1 );
-		$per_page = (int) ( $input['per_page'] ?? 10 );
-		$args     = array(
+		$page             = $input['page'] ?? 1;
+		$default_per_page = empty( $input['include'] ) ? 10 : max( 1, count( array_diff( array_unique( $input['include'] ), $input['exclude'] ?? array() ) ) );
+		$per_page         = $input['per_page'] ?? $default_per_page;
+		$args             = array(
 			'limit'    => $per_page,
 			'page'     => $page,
 			'paginate' => true,
@@ -117,12 +126,12 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 		);
 
 		foreach ( array( 'billing_email', 'order' ) as $field ) {
-			if ( ! empty( $input[ $field ] ) && is_scalar( $input[ $field ] ) ) {
-				$args[ $field ] = wc_clean( (string) $input[ $field ] );
+			if ( ! empty( $input[ $field ] ) ) {
+				$args[ $field ] = $input[ $field ];
 			}
 		}
 
-		$args['status'] = array_map( 'wc_clean', array_map( 'strval', wp_parse_list( $input['status'] ?? array() ) ) );
+		$args['status'] = $input['status'] ?? array();
 
 		if ( empty( $args['status'] ) ) {
 			$args['status'] = 'shop_order' === $args['type'] ? self::get_allowed_order_status_slugs() : self::get_query_order_status_slugs();
@@ -130,19 +139,18 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 		$args['status'] = array_map( array( __CLASS__, 'prepare_status_arg' ), (array) $args['status'] );
 
-		if ( ! empty( $input['orderby'] ) && is_scalar( $input['orderby'] ) ) {
-			$orderby         = sanitize_text_field( (string) $input['orderby'] );
-			$args['orderby'] = self::prepare_orderby_arg( $orderby );
+		if ( ! empty( $input['orderby'] ) ) {
+			$args['orderby'] = self::prepare_orderby_arg( $input['orderby'] );
 		}
 
 		foreach ( array( 'customer_id', 'parent' ) as $field ) {
 			if ( isset( $input[ $field ] ) ) {
-				$args[ $field ] = (int) $input[ $field ];
+				$args[ $field ] = $input[ $field ];
 			}
 		}
 
-		if ( ! empty( $input['exclude'] ) && is_array( $input['exclude'] ) ) {
-			$args['exclude'] = array_map( 'intval', $input['exclude'] );
+		if ( ! empty( $input['exclude'] ) ) {
+			$args['exclude'] = $input['exclude'];
 		}
 
 		$created_date_arg = self::build_created_date_arg( $input );
@@ -164,9 +172,15 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			$args['exclude'] = array_merge( (array) ( $args['exclude'] ?? array() ), $extension_args['post__not_in'] );
 			unset( $extension_args['post__not_in'] );
 		}
-		if ( isset( $extension_args['post__in'] ) && ! empty( $args['exclude'] ) ) {
-			$include                    = array_values( array_diff( $extension_args['post__in'], (array) $args['exclude'] ) );
-			$extension_args['post__in'] = empty( $include ) ? array( 0 ) : $include;
+		// Both stores merge extension args recursively, which would add the extension IDs to include instead of intersecting them.
+		$include = empty( $input['include'] ) ? null : $input['include'];
+		if ( isset( $extension_args['post__in'] ) ) {
+			$include = null === $include ? $extension_args['post__in'] : array_intersect( $include, $extension_args['post__in'] );
+			unset( $extension_args['post__in'] );
+		}
+		if ( null !== $include ) {
+			$include          = array_values( array_diff( $include, (array) ( $args['exclude'] ?? array() ) ) );
+			$args['post__in'] = empty( $include ) ? array( 0 ) : $include;
 		}
 
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
@@ -215,7 +229,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			return self::check_order_permission( $order_id, 'read' );
 		}
 
-		$type = is_array( $input ) ? self::get_order_type_from_input( $input ) : 'shop_order';
+		$type = self::get_order_type_from_input( $input );
 
 		return wc_rest_check_post_permissions( $type, 'read' );
 	}
@@ -227,9 +241,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @return string
 	 */
 	private static function get_order_type_from_input( array $input ): string {
-		$type = $input['type'] ?? 'shop_order';
-
-		return is_string( $type ) && in_array( $type, self::get_order_type_slugs(), true ) ? $type : 'shop_order';
+		return $input['type'] ?? 'shop_order';
 	}
 
 	/**
@@ -272,6 +284,16 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 					'type'        => 'integer',
 					'description' => __( 'Filter by parent order ID.', 'woocommerce' ),
 					'minimum'     => 1,
+				),
+				'include'            => array(
+					'type'        => 'array',
+					'description' => __( 'Return only these order IDs, up to 100. IDs that don\'t match type or status are left out. Without per_page, they come back in one page.', 'woocommerce' ),
+					'minItems'    => 1,
+					'maxItems'    => 100,
+					'items'       => array(
+						'type'    => 'integer',
+						'minimum' => 1,
+					),
 				),
 				'exclude'            => array(
 					'type'        => 'array',
@@ -323,10 +345,10 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 					'minimum' => 1,
 				),
 				'per_page'           => array(
-					'type'    => 'integer',
-					'default' => 10,
-					'minimum' => 1,
-					'maximum' => 100,
+					'type'        => 'integer',
+					'description' => __( 'Orders per page. Defaults to 10, or to the number of IDs in include.', 'woocommerce' ),
+					'minimum'     => 1,
+					'maximum'     => 100,
 				),
 			),
 			'additionalProperties' => false,
@@ -400,8 +422,8 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @return array{0: int|null, 1: int|null}|null Null when neither field is set, or when a provided value is not a valid date-time.
 	 */
 	private static function resolve_date_range_timestamps( array $input, string $after_field, string $before_field ): ?array {
-		$after  = isset( $input[ $after_field ] ) && is_string( $input[ $after_field ] ) ? sanitize_text_field( $input[ $after_field ] ) : '';
-		$before = isset( $input[ $before_field ] ) && is_string( $input[ $before_field ] ) ? sanitize_text_field( $input[ $before_field ] ) : '';
+		$after  = $input[ $after_field ] ?? '';
+		$before = $input[ $before_field ] ?? '';
 
 		if ( '' === $after && '' === $before ) {
 			return null;
