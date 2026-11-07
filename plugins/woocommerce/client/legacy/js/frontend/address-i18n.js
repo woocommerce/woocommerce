@@ -80,7 +80,17 @@ jQuery( function( $ ) {
 				}
 
 				// Required. A field the locale hides is not required, as on the server.
-				if ( typeof fieldLocale.required !== 'undefined' ) {
+				// Phone required comes from the store setting and filters, not from
+				// the country, so remember the state the server rendered the first
+				// time we see it and restore that on later country changes. A locale
+				// can still hide the field, which also clears required.
+				if ( 'phone' === key ) {
+					if ( typeof field.data( 'address-i18n-required' ) === 'undefined' ) {
+						field.data( 'address-i18n-required', field.hasClass( 'validate-required' ) );
+					}
+
+					field_is_required( field, true === field.data( 'address-i18n-required' ) && true !== fieldLocale.hidden );
+				} else if ( typeof fieldLocale.required !== 'undefined' ) {
 					field_is_required( field, fieldLocale.required && true !== fieldLocale.hidden );
 				} else {
 					field_is_required( field, false );
