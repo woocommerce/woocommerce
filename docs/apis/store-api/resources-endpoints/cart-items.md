@@ -1,5 +1,7 @@
 # Cart Items API
 
+Requests that add, update, or delete cart items require a valid [Nonce Token](/docs/apis/store-api/nonce-tokens) or [Cart Token](/docs/apis/store-api/cart-tokens). The examples below use a `CART_TOKEN` environment variable containing the Cart Token for the cart to change. Obtain one from the response headers of a `GET /cart` request.
+
 ## List Cart Items
 
 ```http
@@ -333,12 +335,14 @@ POST /cart/items/
 | Attribute   | Type    | Required | Description                                                                                          |
 | :---------- | :------ | :------: | :--------------------------------------------------------------------------------------------------- |
 | `id`        | integer |   Yes    | The cart item product or variation ID.                                                               |
-| `quantity`  | integer |   Yes    | Quantity of this item in the cart.                                                                   |
-| `variation` | array   |   Yes    | Chosen attributes (for variations) containing an array of objects with keys `attribute` and `value`. |
+| `quantity`  | number  |   No     | Quantity to add. Defaults to the product’s minimum quantity.                                         |
+| `variation` | array   |   No     | Chosen attributes for a variation, as objects with `attribute` and `value` keys.                      |
 
 ```sh
-curl --request POST https://example-store.com/wp-json/wc/store/v1/cart/items?id=100&quantity=1
+curl --header "Cart-Token: $CART_TOKEN" --request POST "https://example-store.com/wp-json/wc/store/v1/cart/items?id=100&quantity=1"
 ```
+
+When adding a variable product by its parent ID, provide the selected variation attributes. For a specific variation whose attributes are fixed, you can pass its variation ID without repeating those attributes. If a variation uses an Any attribute, provide a valid selection for that attribute even when passing the variation ID. Missing or mismatched selections return a `400` error.
 
 For an example response, see [Single Cart Item](#single-cart-item).
 
@@ -355,11 +359,15 @@ PUT /cart/items/:key
 | Attribute  | Type    | Required | Description                        |
 | :--------- | :------ | :------: | :--------------------------------- |
 | `key`      | string  |   Yes    | The key of the cart item to edit.  |
-| `quantity` | integer |   Yes    | Quantity of this item in the cart. |
+| `quantity` | number  |   No     | New quantity of this item in the cart. |
 
 ```sh
-curl --request PUT https://example-store.com/wp-json/wc/store/v1/cart/items/e369853df766fa44e1ed0ff613f563bd?quantity=10
+curl --header "Cart-Token: $CART_TOKEN" --request PUT "https://example-store.com/wp-json/wc/store/v1/cart/items/e369853df766fa44e1ed0ff613f563bd?quantity=10"
 ```
+
+Starting with WooCommerce 11.2.2, a nonnumeric `quantity` returns a `400` error and leaves the cart unchanged. WooCommerce normalizes numeric values with `wc_stock_amount()` and validates them against the product’s quantity limits. By default, stock amounts are converted to integers; extensions can change this behavior.
+
+If an update returns `401` or `403`, check that the Cart Token or nonce is valid for the current cart session. For a `409` response, check that the item key belongs to that cart. For a `400` response, check that the quantity is numeric and meets the product’s quantity limits.
 
 For an example response, see [Single Cart Item](#single-cart-item).
 
@@ -376,7 +384,7 @@ DELETE /cart/items/:key
 | `key`     | string |   Yes    | The key of the cart item to edit. |
 
 ```sh
-curl --request DELETE https://example-store.com/wp-json/wc/store/v1/cart/items/e369853df766fa44e1ed0ff613f563bd
+curl --header "Cart-Token: $CART_TOKEN" --request DELETE "https://example-store.com/wp-json/wc/store/v1/cart/items/e369853df766fa44e1ed0ff613f563bd"
 ```
 
 ## Delete All Cart Items
@@ -390,7 +398,7 @@ DELETE /cart/items/
 There are no extra parameters needed to use this endpoint.
 
 ```sh
-curl --request DELETE https://example-store.com/wp-json/wc/store/v1/cart/items
+curl --header "Cart-Token: $CART_TOKEN" --request DELETE "https://example-store.com/wp-json/wc/store/v1/cart/items"
 ```
 
 **Example response:**
