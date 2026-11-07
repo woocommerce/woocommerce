@@ -134,6 +134,24 @@ class CheckoutLink {
 				continue;
 			}
 
+			$product = wc_get_product( $product_id );
+
+			if ( $product && $product->is_sold_individually() ) {
+				/**
+				 * Filters the cart item data kept for a sold-individually product or variation added via a checkout link.
+				 *
+				 * Empty by default, so repeated adds of the same product share one cart item and the one-per-order
+				 * limit holds. Returning data lets it vary, so the limit is no longer guaranteed.
+				 *
+				 * @since 11.4.1
+				 *
+				 * @param array       $cart_item_data Cart item data to keep. Empty by default.
+				 * @param array       $raw_cart_item_data Cart item data parsed from the link, before stripping.
+				 * @param \WC_Product $product The resolved product or variation.
+				 */
+				$cart_item_data = (array) apply_filters( 'woocommerce_checkout_link_sold_individually_cart_item_data', [], $cart_item_data, $product );
+			}
+
 			$variation = array_map(
 				function ( $key, $value ) {
 					return [
