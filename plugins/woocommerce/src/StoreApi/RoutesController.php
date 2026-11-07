@@ -85,12 +85,16 @@ class RoutesController {
 			],
 			'ucp'           => [
 				// Universal Commerce Protocol endpoints, gated by Utils::is_enabled().
-				Routes\V1\Ucp\CatalogSearch::IDENTIFIER  => Routes\V1\Ucp\CatalogSearch::class,
-				Routes\V1\Ucp\CatalogLookup::IDENTIFIER  => Routes\V1\Ucp\CatalogLookup::class,
-				Routes\V1\Ucp\CatalogProduct::IDENTIFIER => Routes\V1\Ucp\CatalogProduct::class,
-				Routes\V1\Ucp\Carts::IDENTIFIER          => Routes\V1\Ucp\Carts::class,
-				Routes\V1\Ucp\CartsById::IDENTIFIER      => Routes\V1\Ucp\CartsById::class,
-				Routes\V1\Ucp\CartsCancel::IDENTIFIER    => Routes\V1\Ucp\CartsCancel::class,
+				Routes\V1\Ucp\CatalogSearch::IDENTIFIER    => Routes\V1\Ucp\CatalogSearch::class,
+				Routes\V1\Ucp\CatalogLookup::IDENTIFIER    => Routes\V1\Ucp\CatalogLookup::class,
+				Routes\V1\Ucp\CatalogProduct::IDENTIFIER   => Routes\V1\Ucp\CatalogProduct::class,
+				Routes\V1\Ucp\Carts::IDENTIFIER            => Routes\V1\Ucp\Carts::class,
+				Routes\V1\Ucp\CartsById::IDENTIFIER        => Routes\V1\Ucp\CartsById::class,
+				Routes\V1\Ucp\CartsCancel::IDENTIFIER      => Routes\V1\Ucp\CartsCancel::class,
+				Routes\V1\Ucp\CheckoutSessions::IDENTIFIER => Routes\V1\Ucp\CheckoutSessions::class,
+				Routes\V1\Ucp\CheckoutSessionsById::IDENTIFIER => Routes\V1\Ucp\CheckoutSessionsById::class,
+				Routes\V1\Ucp\CheckoutSessionsComplete::IDENTIFIER => Routes\V1\Ucp\CheckoutSessionsComplete::class,
+				Routes\V1\Ucp\CheckoutSessionsCancel::IDENTIFIER => Routes\V1\Ucp\CheckoutSessionsCancel::class,
 			],
 		];
 	}

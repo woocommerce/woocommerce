@@ -51,7 +51,16 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return array
 	 */
 	protected function ucp_metadata( string $status ): array {
-		return Utils::response_metadata( Utils::CAPABILITY_CART, $status );
+		return Utils::response_metadata( $this->capability(), $status );
+	}
+
+	/**
+	 * The capability this route answers for, named in every envelope it sends.
+	 *
+	 * @return string One of the Utils::CAPABILITY_* constants.
+	 */
+	protected function capability(): string {
+		return Utils::CAPABILITY_CART;
 	}
 
 	/**
@@ -67,7 +76,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	public function get_response( \WP_REST_Request $request ) {
-		$refusal = Utils::refuse_non_json_payload( $request, Utils::CAPABILITY_CART );
+		$refusal = Utils::refuse_non_json_payload( $request, $this->capability() );
 		if ( null !== $refusal ) {
 			return $this->add_response_headers( $refusal );
 		}
@@ -308,7 +317,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 *
 	 * @return array
 	 */
-	private function cart_item_response(): array {
+	protected function cart_item_response(): array {
 		// Nested values are stdClass; decode through JSON for uniform array access.
 		return (array) json_decode( (string) wp_json_encode( $this->schema->get_item_response( $this->cart_controller->get_cart_for_response() ) ), true );
 	}
@@ -328,7 +337,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function ucp_error( string $code, string $message, string $severity, int $status, string $path = '$' ): \WP_REST_Response {
-		return Utils::error_response( Utils::CAPABILITY_CART, $code, $message, $severity, $status, $path );
+		return Utils::error_response( $this->capability(), $code, $message, $severity, $status, $path );
 	}
 
 	/**
