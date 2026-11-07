@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the database update notice from offering to run an update that is still finishing in the background.
