@@ -45,7 +45,9 @@ defined( 'ABSPATH' ) || exit;
  * adds write what the saved objects imply elsewhere, such as the price range a
  * variable parent derives from its variations, or a row in a table of the
  * extension. A sync also sees the objects the call deleted and the input of
- * the call. A refusal there rolls the call back too. A rollback drops the
+ * the call. A refusal there rolls the call back too. When a query hits a
+ * deadlock, a lock wait timeout or a snapshot conflict with a parallel call, the call rolls
+ * back and fails with a WP_Error instead of reporting the write. A rollback drops the
  * object caches of the objects the call saved or deleted. It does not undo what a sync
  * did outside the database, such as an HTTP request, and it does nothing on a
  * table engine without transactions. The other steps must not save, send email
