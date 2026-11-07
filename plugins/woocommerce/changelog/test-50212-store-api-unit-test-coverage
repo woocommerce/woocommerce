@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add Store API unit test coverage for customer address updates and shipping rate selection.

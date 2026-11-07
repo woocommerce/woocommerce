@@ -212,4 +212,59 @@ class CartSelectShippingRate extends ControllerTestCase {
 		$this->assertSame( 404, $result['status'], 'With shipping disabled the route should refuse the selection.' );
 		$this->assertSame( 'woocommerce_rest_shipping_disabled', $result['data']['code'], 'And say why.' );
 	}
+	/**
+	 * @testdox Changing the selected shipping rate recalculates cart totals and fires the select action.
+	 */
+	public function test_changing_shipping_rate_updates_cart_totals_and_fires_action(): void {
+		$first  = 'flat_rate:' . $this->instances[0];
+		$second = 'flat_rate:' . $this->instances[1];
+
+		// Pre-condition: Select first rate and verify initial shipping total is 500 and total price is 1500.
+		$initial_result = $this->select(
+			array(
+				'package_id' => 0,
+				'rate_id'    => $first,
+			)
+		);
+		$this->assertSame( 200, $initial_result['status'] );
+		$initial_totals = (array) $initial_result['data']['totals'];
+		$this->assertSame( '500', $initial_totals['total_shipping'] );
+		$this->assertSame( '1500', $initial_totals['total_price'] );
+
+		$action_fired        = false;
+		$captured_package_id = null;
+		$captured_rate_id    = null;
+		$captured_request    = null;
+
+		add_action(
+			'woocommerce_store_api_cart_select_shipping_rate',
+			function ( $package_id, $rate_id, $request ) use ( &$action_fired, &$captured_package_id, &$captured_rate_id, &$captured_request ) {
+				$action_fired        = true;
+				$captured_package_id = $package_id;
+				$captured_rate_id    = $rate_id;
+				$captured_request    = $request;
+			},
+			10,
+			3
+		);
+
+		// Switch selection to the second rate ($9).
+		$updated_result = $this->select(
+			array(
+				'package_id' => 0,
+				'rate_id'    => $second,
+			)
+		);
+
+		$this->assertSame( 200, $updated_result['status'] );
+		$this->assertTrue( $action_fired, 'woocommerce_store_api_cart_select_shipping_rate action should fire on rate selection.' );
+		$this->assertSame( '0', (string) $captured_package_id );
+		$this->assertSame( $second, $captured_rate_id );
+		$this->assertInstanceOf( \WP_REST_Request::class, $captured_request );
+
+		// Verify totals were recalculated to reflect the new rate cost ($9 shipping, $19 total).
+		$updated_totals = (array) $updated_result['data']['totals'];
+		$this->assertSame( '900', $updated_totals['total_shipping'] );
+		$this->assertSame( '1900', $updated_totals['total_price'] );
+	}
 }
