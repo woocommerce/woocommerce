@@ -60,8 +60,9 @@ class WC_Admin {
 	 * Output buffering allows admin screens to make redirects later on.
 	 */
 	public function buffer() {
-		// Export downloads stream their own response.
-		if ( 'export.php' === ( $GLOBALS['pagenow'] ?? '' ) && isset( $_GET['download'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Check the request mode only.
+		// HPOS order export downloads stream their own response.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Check the request mode only.
+		if ( 'export.php' === ( $GLOBALS['pagenow'] ?? '' ) && isset( $_GET['download'] ) && 'shop_order' === sanitize_key( wp_unslash( $_GET['content'] ?? '' ) ) ) {
 			return;
 		}
 		ob_start();
