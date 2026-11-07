@@ -15,6 +15,9 @@ on:
       builder:
         type: string
         default: docker-container
+      daemon:
+        type: string
+        default: isolated
       cache-sample:
         type: number
         default: 0
@@ -52,10 +55,38 @@ jobs:
           git rev-parse HEAD > "$BENCH_RESULTS/checkout-sha"
           cp "$BENCH_INPUTS" "$BENCH_RESULTS/inputs.json"
       - name: Set up Docker as in normal PHPUnit CI
+        if: inputs.daemon == 'isolated'
         uses: docker/setup-docker-action@6d7cfa65f60a9dda7b46e5513fa982536f3c9877 # v5.3.0
         with:
           daemon-config: |
             {"max-download-attempts": 10, "max-concurrent-downloads": 3}
+      - name: Configure existing Docker daemon
+        if: inputs.daemon == 'existing'
+        run: |
+          set -euo pipefail
+          before=$(systemctl show docker --property MainPID --value)
+          test "$before" -gt 0
+          since=$(date --iso-8601=seconds)
+          if sudo test -f /etc/docker/daemon.json; then
+            sudo cat /etc/docker/daemon.json | tee "$RUNNER_TEMP/docker-original.json" >/dev/null
+          else
+            echo '{}' > "$RUNNER_TEMP/docker-original.json"
+          fi
+          jq '. + {"max-download-attempts": 10, "max-concurrent-downloads": 3}' "$RUNNER_TEMP/docker-original.json" > "$RUNNER_TEMP/docker-benchmark.json"
+          sudo dockerd --validate --config-file "$RUNNER_TEMP/docker-benchmark.json"
+          sudo install -m 644 "$RUNNER_TEMP/docker-benchmark.json" /etc/docker/daemon.json
+          sudo systemctl kill --kill-who=main --signal=HUP docker
+          for _attempt in $(seq 1 20); do
+            sudo journalctl -u docker --since "$since" --no-pager | tee "$BENCH_RESULTS/daemon-reload.log" >/dev/null
+            if grep 'Reloaded configuration' "$BENCH_RESULTS/daemon-reload.log" | grep -Eq '"max-download-attempts"[[:space:]]*:[[:space:]]*10' && grep 'Reloaded configuration' "$BENCH_RESULTS/daemon-reload.log" | grep -Eq '"max-concurrent-downloads"[[:space:]]*:[[:space:]]*3'; then
+              break
+            fi
+            sleep 0.5
+          done
+          grep 'Reloaded configuration' "$BENCH_RESULTS/daemon-reload.log" | grep -Eq '"max-download-attempts"[[:space:]]*:[[:space:]]*10'
+          grep 'Reloaded configuration' "$BENCH_RESULTS/daemon-reload.log" | grep -Eq '"max-concurrent-downloads"[[:space:]]*:[[:space:]]*3'
+          test "$before" = "$(systemctl show docker --property MainPID --value)"
+          docker info > "$BENCH_RESULTS/daemon-info.txt"
       - name: Start cache-capable builder
         if: startsWith(inputs.variant, 'cache-') && inputs.builder == 'docker-container'
         run: |

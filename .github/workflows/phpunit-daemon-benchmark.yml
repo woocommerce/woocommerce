@@ -1,0 +1,32 @@
+name: PHPUnit existing-daemon benchmark
+on:
+  workflow_dispatch:
+  push:
+    branches: [ci/benchmark-existing-docker]
+permissions:
+  contents: read
+jobs:
+  inputs:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[daemon-benchmark]')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - run: node .github/workflows/scripts/phpunit-startup-benchmark/resolve.mjs benchmark-inputs.json
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: benchmark-inputs
+          path: benchmark-inputs.json
+          retention-days: 7
+  compare:
+    needs: inputs
+    strategy:
+      fail-fast: true
+      matrix:
+        daemon: [isolated, existing]
+    uses: ./.github/workflows/phpunit-startup-sample.yml
+    with:
+      sample: 1
+      variant: baseline
+      wave: ${{ matrix.daemon }}
+      daemon: ${{ matrix.daemon }}
