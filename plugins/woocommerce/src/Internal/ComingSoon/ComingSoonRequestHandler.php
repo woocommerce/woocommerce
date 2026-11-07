@@ -272,7 +272,7 @@ class ComingSoonRequestHandler {
 
 	/**
 	 * Filters the theme.json data to add Coming Soon fonts.
-	 * This runs after child theme merging to ensure parent theme fonts are included.
+	 * Parent theme fonts are copied only when the child theme declares none.
 	 *
 	 * @param WP_Theme_JSON_Data $theme_json The theme json data object.
 	 * @return WP_Theme_JSON_Data The filtered theme json data.
@@ -281,33 +281,17 @@ class ComingSoonRequestHandler {
 		$theme_data = $theme_json->get_data();
 		$font_data  = $theme_data['settings']['typography']['fontFamilies']['theme'] ?? array();
 
-		// Check if the current theme is a child theme. And if so, merge the parent theme fonts with the existing fonts.
-		if ( wp_get_theme()->parent() ) {
-			$parent_theme           = wp_get_theme()->parent();
-			$parent_theme_json_file = $parent_theme->get_file_path( 'theme.json' );
-
-			if ( is_readable( $parent_theme_json_file ) ) {
-				$parent_theme_json_data = json_decode( file_get_contents( $parent_theme_json_file ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-
-				if ( isset( $parent_theme_json_data['settings']['typography']['fontFamilies'] ) ) {
-					$parent_fonts = $parent_theme_json_data['settings']['typography']['fontFamilies'];
-
-					// Merge parent theme fonts with existing fonts.
-					foreach ( $parent_fonts as $parent_font ) {
-						$found = false;
-						foreach ( $font_data as $existing_font ) {
-							if ( isset( $parent_font['name'] ) && isset( $existing_font['name'] ) &&
-							$parent_font['name'] === $existing_font['name'] ) {
-								$found = true;
-								break;
-							}
-						}
-
-						if ( ! $found ) {
-							$font_data[] = $parent_font;
-						}
-					}
+		// Child themes that declare no fonts inherit the parent theme's fonts, as WordPress does without Coming Soon.
+		// Check the child's own theme.json, since earlier filters may already have added fonts to $font_data.
+		$theme        = wp_get_theme();
+		$parent_theme = $theme->parent();
+		if ( $parent_theme && empty( $this->read_theme_json_fonts( $theme->get_stylesheet_directory() . '/theme.json' ) ) ) {
+			$existing_slugs = array_column( $font_data, 'slug' );
+			foreach ( $this->read_theme_json_fonts( $parent_theme->get_stylesheet_directory() . '/theme.json' ) as $parent_font ) {
+				if ( ! is_array( $parent_font ) || in_array( $parent_font['slug'] ?? null, $existing_slugs, true ) ) {
+					continue;
 				}
+				$font_data[] = $parent_font;
 			}
 		}
 
@@ -398,6 +382,29 @@ class ComingSoonRequestHandler {
 		);
 		$theme_json->update_with( $new_data );
 		return $theme_json;
+	}
+
+	/**
+	 * Reads the font presets a theme.json file declares.
+	 *
+	 * @param string $theme_json_file Path to a theme.json file.
+	 * @return array Font presets, or an empty array when the file is missing or declares none.
+	 */
+	private function read_theme_json_fonts( string $theme_json_file ): array {
+		if ( ! is_readable( $theme_json_file ) ) {
+			return array();
+		}
+
+		$theme_json_data = json_decode( file_get_contents( $theme_json_file ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		if ( ! is_array( $theme_json_data ) ) {
+			return array();
+		}
+
+		// Read the file the way WordPress does, so data it ignores, such as a file without a schema version, declares no fonts.
+		$theme_json = new \WP_Theme_JSON( $theme_json_data, 'theme' );
+		$fonts      = $theme_json->get_raw_data()['settings']['typography']['fontFamilies']['theme'] ?? array();
+
+		return is_array( $fonts ) ? $fonts : array();
 	}
 
 	/**
