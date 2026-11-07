@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update the Mini-Cart when an extension changes the cart with `extensionCartUpdate` on pages without the Cart or Checkout blocks.
