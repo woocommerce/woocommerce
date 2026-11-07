@@ -69,6 +69,26 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_get_order_statuses() warns when a custom status exceeds 20 characters.
+	 *
+	 * @since 11.4.0
+	 * @expectedIncorrectUsage wc_get_order_statuses
+	 */
+	public function test_wc_get_order_statuses_warns_for_keys_exceeding_storage_limit() {
+		$callback = static function ( $statuses ) {
+			$statuses['wc-overlength-status-slug'] = 'Overlength status';
+			return $statuses;
+		};
+		add_filter( 'wc_order_statuses', $callback );
+
+		$statuses = wc_get_order_statuses();
+
+		remove_filter( 'wc_order_statuses', $callback );
+
+		$this->assertArrayHasKey( 'wc-overlength-status-slug', $statuses );
+	}
+
+	/**
 	 * Test wc_is_order_status().
 	 *
 	 * @since 2.3.0
