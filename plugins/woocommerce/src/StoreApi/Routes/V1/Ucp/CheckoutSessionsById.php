@@ -91,8 +91,8 @@ class CheckoutSessionsById extends AbstractCheckoutRoute {
 	/**
 	 * Update a checkout.
 	 *
-	 * A change drops an earlier escalation: its order no longer matches the cart, so the
-	 * status is derived again and `complete` hands off afresh.
+	 * A change drops an earlier escalation and cancels its unpaid order, which no longer
+	 * matches the cart, so the status is derived again and `complete` hands off afresh.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
@@ -113,6 +113,7 @@ class CheckoutSessionsById extends AbstractCheckoutRoute {
 			return $error;
 		}
 
+		$state = $this->cancel_handed_off_order( $state, __( 'UCP checkout session changed after payment was handed off.', 'woocommerce' ) );
 		unset( $state['status'], $state['continue_url'] );
 		$this->save_checkout_state( $state );
 

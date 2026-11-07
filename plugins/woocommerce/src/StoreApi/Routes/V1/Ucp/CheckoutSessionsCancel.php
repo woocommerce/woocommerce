@@ -3,7 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
-use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\CheckoutMapper;
 
 /**
@@ -70,13 +69,9 @@ class CheckoutSessionsCancel extends AbstractCheckoutRoute {
 			return $state;
 		}
 
-		$order = empty( $state['order_id'] ) ? null : wc_get_order( (int) $state['order_id'] );
-		if ( $order instanceof \WC_Order && $order->has_status( OrderStatus::PENDING ) ) {
-			$order->update_status( OrderStatus::CANCELLED, __( 'UCP checkout session canceled.', 'woocommerce' ) );
-		}
-
-		$state['status'] = CheckoutMapper::STATUS_CANCELED;
+		$state = $this->cancel_handed_off_order( $state, __( 'UCP checkout session canceled.', 'woocommerce' ) );
 		unset( $state['continue_url'] );
+		$state['status'] = CheckoutMapper::STATUS_CANCELED;
 		$this->save_checkout_state( $state );
 
 		return $this->checkout_response( $this->route_cart_id( $request ), $state );

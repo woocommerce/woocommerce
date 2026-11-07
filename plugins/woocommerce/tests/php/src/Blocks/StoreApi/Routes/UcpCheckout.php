@@ -249,16 +249,26 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox An update replaces the lines.
+	 * @testdox An update replaces the lines and cancels an order already handed off for the old ones.
 	 */
 	public function test_update_replaces_line_items(): void {
 		$created = $this->create_ready_checkout();
+		$this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' );
+		$handed_off = (int) WC()->session->get( 'store_api_draft_order' );
 
 		$data = $this->request( 'PUT', '/checkout-sessions/' . $created['id'], array( 'line_items' => array( $this->line_item( 1, 2 ) ) ) )->get_data();
 
 		$this->assertCount( 1, $data['line_items'] );
 		$this->assertSame( (string) self::$product_ids[1], $data['line_items'][0]['item']['id'] );
 		$this->assertSame( 2, $data['line_items'][0]['quantity'] );
+		$this->assertSame( 'ready_for_complete', $data['status'] );
+		$this->assertTrue( wc_get_order( $handed_off )->has_status( OrderStatus::CANCELLED ), 'An order for the old lines must no longer be payable.' );
+		$this->assertNotSame( $handed_off, (int) WC()->session->get( 'store_api_draft_order' ) );
+
+		// An order cancelled behind the checkout's back, as the hold-stock timer does, drops the hand-off.
+		$this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' );
+		wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) )->update_status( OrderStatus::CANCELLED );
+		$this->assertSame( 'ready_for_complete', $this->request( 'GET', '/checkout-sessions/' . $created['id'] )->get_data()['status'] );
 	}
 
 	/**

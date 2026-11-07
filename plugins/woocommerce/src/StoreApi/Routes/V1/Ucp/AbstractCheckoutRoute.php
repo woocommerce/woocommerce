@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\CheckoutMapper;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
@@ -87,7 +88,8 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	 * The bound session's checkout state, with the order filled in once the buyer has paid it.
 	 *
 	 * Paying happens in the browser, outside this session, so `completed` is read off the
-	 * order rather than stored.
+	 * order rather than stored. An order that can no longer be paid, such as one the hold-stock
+	 * timer cancelled, drops the hand-off so the status derives again.
 	 *
 	 * @return array<string, mixed>|null Null when the session holds no checkout.
 	 */
@@ -106,7 +108,36 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 				'id'            => (string) $order->get_id(),
 				'permalink_url' => $order->get_checkout_order_received_url(),
 			);
+		} elseif ( ! empty( $state['order_id'] ) && ! ( $order instanceof \WC_Order && $order->has_status( array( OrderStatus::PENDING, OrderStatus::FAILED, OrderStatus::ON_HOLD ) ) ) ) {
+			// Status list rather than needs_payment(): that is false for a zero-total order, and
+			// on-hold is a payment the buyer made that the store has yet to confirm.
+			unset( $state['status'], $state['continue_url'], $state['order_id'] );
 		}
+
+		return $state;
+	}
+
+	/**
+	 * Cancel the order handed to the buyer while it is still unpaid, and forget it.
+	 *
+	 * Once the checkout changes or ends, that order no longer matches it and must not be paid.
+	 *
+	 * @param array<string, mixed> $state Checkout state.
+	 * @param string               $note Order note explaining the cancellation.
+	 * @return array<string, mixed> The state without `order_id`.
+	 */
+	protected function cancel_handed_off_order( array $state, string $note ): array {
+		$order = empty( $state['order_id'] ) ? null : wc_get_order( (int) $state['order_id'] );
+
+		if ( $order instanceof \WC_Order && $order->has_status( OrderStatus::PENDING ) ) {
+			$order->update_status( OrderStatus::CANCELLED, $note );
+
+			if ( (int) $this->get_draft_order_id() === $order->get_id() ) {
+				$this->set_draft_order_id( 0 );
+			}
+		}
+
+		unset( $state['order_id'] );
 
 		return $state;
 	}
