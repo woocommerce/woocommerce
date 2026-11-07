@@ -28,11 +28,13 @@ class Summary extends AbstractOrderConfirmationBlock {
 			return '';
 		}
 
+		$email = $order->get_billing_email();
+
 		$content  = '<ul class="wc-block-order-confirmation-summary-list">';
 		$content .= $this->render_summary_row( __( 'Order #:', 'woocommerce' ), $order->get_order_number() );
 		$content .= $this->render_summary_row( __( 'Date:', 'woocommerce' ), wc_format_datetime( $order->get_date_created() ) );
 		$content .= $this->render_summary_row( __( 'Total:', 'woocommerce' ), $order->get_formatted_order_total() );
-		$content .= $this->render_summary_row( __( 'Email:', 'woocommerce' ), $order->get_billing_email() );
+		$content .= $this->render_summary_row( __( 'Email:', 'woocommerce' ), $email ? '<code class="woocommerce-email">' . esc_html( $email ) . '</code>' : '' );
 		$content .= $this->render_summary_row( __( 'Payment:', 'woocommerce' ), $order->get_payment_method_title() );
 		$content .= '</ul>';
 

@@ -1539,6 +1539,15 @@ p.demo_store,
 			line-height: 1.75;
 			position: absolute;
 		}
+
+		// The email sits in <code> so wptexturize() leaves it unchanged; show it as plain text.
+		code.woocommerce-email {
+			font: inherit;
+			color: inherit;
+			background: none;
+			border: 0;
+			padding: 0;
+		}
 	}
 
 	/**
