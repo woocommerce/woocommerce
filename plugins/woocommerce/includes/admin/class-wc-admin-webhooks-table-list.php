@@ -204,7 +204,10 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 */
 	protected function get_bulk_actions() {
 		return array(
-			'delete' => __( 'Delete permanently', 'woocommerce' ),
+			'activate'   => __( 'Activate', 'woocommerce' ),
+			'deactivate' => __( 'Deactivate', 'woocommerce' ),
+			'pause'      => __( 'Pause', 'woocommerce' ),
+			'delete'     => __( 'Delete permanently', 'woocommerce' ),
 		);
 	}
 
@@ -224,6 +227,21 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 
 			if ( 'delete' === $action ) {
 				WC_Admin_Webhooks::bulk_delete( $webhooks );
+			} else {
+				$statuses = array(
+					'activate'   => 'active',
+					'deactivate' => 'disabled',
+					'pause'      => 'paused',
+				);
+
+				if ( isset( $statuses[ $action ] ) ) {
+					$updated = WC_Admin_Webhooks::bulk_update_status( $webhooks, $statuses[ $action ] );
+					// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce checked above.
+					$status = isset( $_GET['status'] ) ? '&status=' . sanitize_key( wp_unslash( $_GET['status'] ) ) : '';
+
+					wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks' . $status . '&bulk_updated=' . $updated ) );
+					exit();
+				}
 			}
 		}
 	}
@@ -238,7 +256,7 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		echo '<div class="tablenav ' . esc_attr( $which ) . '">';
 
 		if ( $this->has_items() ) {
-			echo '<div class="alignleft actions bulkactions">';
+			echo '<div class="alignleft actions bulkactions wc-settings-prevent-change-event">';
 			$this->bulk_actions( $which );
 			echo '</div>';
 		}

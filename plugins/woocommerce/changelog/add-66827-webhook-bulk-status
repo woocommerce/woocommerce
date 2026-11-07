@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Activate, deactivate, or pause multiple webhooks at once from the Webhooks settings page.
