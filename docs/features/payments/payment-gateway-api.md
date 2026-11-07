@@ -219,6 +219,24 @@ $order->add_order_note( __('IPN payment completed', 'woothemes') );
 - If the order fails and has already been created, set to **Failed**
 - If payment is complete, let WooCommerce handle the status and use `$order->payment_complete()`. WooCommerce will use either **Completed** or **Processing** status and handle stock. Call it only after the payment provider confirms the payment: see [Retries and uncertain outcomes](#retries-and-uncertain-outcomes).
 
+### Recording test or live mode
+
+Since WooCommerce 11.4, gateways can record whether an order was paid in test or live mode with `$order->set_payment_mode()`. WooCommerce never sets it, so an order whose gateway doesn't call it has no mode. Read it back with `$order->get_payment_mode()`, which returns `PaymentMode::TEST`, `PaymentMode::LIVE` or an empty string.
+
+Call it on every charge, when the gateway picks its test or live credentials and before it saves the order. That includes checkout, the pay-for-order page, subscription renewals, and charges completed by webhooks or other off-session requests. Record `live` too, so each order says which mode it was paid in.
+
+```php
+use Automattic\WooCommerce\Enums\PaymentMode;
+
+// Gateways that support WooCommerce versions before 11.4 need this check.
+if ( method_exists( $order, 'set_payment_mode' ) ) {
+    $order->set_payment_mode( $this->testmode ? PaymentMode::TEST : PaymentMode::LIVE );
+}
+$order->save();
+```
+
+When an order is saved with another payment method ID, WooCommerce clears its mode, so a mode from a failed attempt doesn't carry over to a retry with another gateway. A mode set on the same order object before the switch is kept. If your gateway changes the order's payment method ID in a later request, such as a redirect return or a webhook, call `set_payment_mode()` again in that request before saving.
+
 ## Notes on Direct Gateways
 
 If you are creating an advanced, direct gateway (i.e., one that takes payment on the actual checkout page), there are additional steps involved. First, you need to set has_fields to true in the gateway constructor:
