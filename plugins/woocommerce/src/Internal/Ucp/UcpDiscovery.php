@@ -25,6 +25,16 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	public const RULE = '^\.well-known/ucp/?$';
 
 	/**
+	 * Rel of the profile link identifying WooCommerce; also marks the static file as one WooCommerce wrote.
+	 */
+	public const LINK_REL = 'woocommerce';
+
+	/**
+	 * Href of the WooCommerce profile link.
+	 */
+	private const LINK_HREF = 'https://developer.woocommerce.com/docs/';
+
+	/**
 	 * Register hooks.
 	 */
 	public function register(): void {
@@ -78,7 +88,7 @@ final class UcpDiscovery implements RegisterHooksInterface {
 		update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 
 		$path = $this->get_file_path();
-		if ( ! $is_enabled && $this->is_deletable( $path ) ) {
+		if ( ! $is_enabled && $this->is_deletable( $path ) && $this->is_owned( $path ) ) {
 			wp_delete_file( $path );
 		}
 	}
@@ -96,6 +106,10 @@ final class UcpDiscovery implements RegisterHooksInterface {
 
 		$path = $this->get_file_path();
 		// phpcs:disable WordPress.WP.AlternativeFunctions
+		if ( is_file( $path ) && ! $this->is_owned( $path ) ) {
+			return;
+		}
+
 		if ( $wp_rewrite->using_permalinks() ) {
 			if ( $this->is_deletable( $path ) ) {
 				wp_delete_file( $path );
@@ -122,9 +136,13 @@ final class UcpDiscovery implements RegisterHooksInterface {
 			return;
 		}
 
-		$path = $this->get_file_path();
-		if ( $wp_rewrite->using_permalinks() ) {
-			if ( ! is_file( $path ) || $this->is_deletable( $path ) ) {
+		$path   = $this->get_file_path();
+		$exists = is_file( $path );
+		if ( $exists && ! $this->is_owned( $path ) ) {
+			/* translators: %1$s: discovery file path. */
+			$message = __( 'A %1$s file not created by WooCommerce is overriding the UCP discovery endpoint served by WooCommerce.', 'woocommerce' );
+		} elseif ( $wp_rewrite->using_permalinks() ) {
+			if ( ! $exists || $this->is_deletable( $path ) ) {
 				return;
 			}
 			/* translators: %1$s: discovery file path. */
@@ -154,6 +172,19 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	private function is_deletable( string $path ): bool {
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable
 		return is_file( $path ) && is_writable( dirname( $path ) );
+	}
+
+	/**
+	 * Whether the static file was written by WooCommerce. Unreadable or non-JSON files count as not owned.
+	 *
+	 * @param string $path Absolute file path.
+	 * @return bool
+	 */
+	private function is_owned( string $path ): bool {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$profile = is_file( $path ) ? json_decode( (string) file_get_contents( $path ), true ) : null;
+		$links   = $profile['links'] ?? null;
+		return is_array( $links ) && in_array( self::LINK_REL, array_column( $links, 'rel' ), true );
 	}
 
 	/**
@@ -236,6 +267,10 @@ final class UcpDiscovery implements RegisterHooksInterface {
 				array(
 					'rel'  => 'self',
 					'href' => home_url( '/.well-known/ucp' ),
+				),
+				array(
+					'rel'  => self::LINK_REL,
+					'href' => self::LINK_HREF,
 				),
 			),
 		);
