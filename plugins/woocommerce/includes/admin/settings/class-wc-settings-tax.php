@@ -83,12 +83,12 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			'standard' => __( 'Standard rates', 'woocommerce' ),
 		);
 
-		// Get tax classes and display as links.
-		$tax_classes = WC_Tax::get_tax_classes();
+		// Get tax classes and display as links, keyed by their stored slug rather than a sanitized name.
+		$tax_rate_classes = WC_Tax::get_tax_rate_classes();
 
-		foreach ( $tax_classes as $class ) {
+		foreach ( $tax_rate_classes as $tax_rate_class ) {
 			/* translators: $s tax rate section name */
-			$sections[ sanitize_title( $class ) ] = sprintf( __( '%s rates', 'woocommerce' ), $class );
+			$sections[ $tax_rate_class->slug ] = sprintf( __( '%s rates', 'woocommerce' ), $tax_rate_class->name );
 		}
 
 		return $sections;
@@ -186,7 +186,9 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	public function output_tax_rates() {
 		global $current_section;
 
-		$current_class = self::get_current_tax_class();
+		$current_tax_rate_class = self::get_current_tax_rate_class();
+		$current_class          = $current_tax_rate_class ? $current_tax_rate_class->slug : '';
+		$current_class_name     = $current_tax_rate_class ? $current_tax_rate_class->name : '';
 
 		$countries = array();
 		foreach ( WC()->countries->get_allowed_countries() as $value => $label ) {
@@ -267,23 +269,31 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get tax class being edited.
+	 * Get the tax rate class (name and slug) matching the current section.
+	 *
+	 * @return stdClass|null The tax rate class, or null if the current section isn't a custom tax class.
+	 */
+	private static function get_current_tax_rate_class() {
+		global $current_section;
+
+		foreach ( WC_Tax::get_tax_rate_classes() as $tax_rate_class ) {
+			if ( $tax_rate_class->slug === $current_section ) {
+				return $tax_rate_class;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get the slug of the tax class being edited.
 	 *
 	 * @return string
 	 */
 	private static function get_current_tax_class() {
-		global $current_section;
+		$tax_rate_class = self::get_current_tax_rate_class();
 
-		$tax_classes   = WC_Tax::get_tax_classes();
-		$current_class = '';
-
-		foreach ( $tax_classes as $class ) {
-			if ( sanitize_title( $class ) === $current_section ) {
-				$current_class = $class;
-			}
-		}
-
-		return $current_class;
+		return $tax_rate_class ? $tax_rate_class->slug : '';
 	}
 
 	/**
@@ -329,7 +339,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- this is called via "do_action('woocommerce_settings_save_'...") in base class, where nonce is verified first.
 		global $wpdb;
 
-		$current_class = sanitize_title( self::get_current_tax_class() );
+		$current_class = self::get_current_tax_class();
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.NonceVerification.Missing
 		$posted_countries = wc_clean( wp_unslash( $_POST['tax_rate_country'] ) );
 
