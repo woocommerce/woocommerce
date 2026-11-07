@@ -7,6 +7,7 @@
 
 declare( strict_types = 1 );
 
+use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 require_once WC_ABSPATH . 'includes/admin/list-tables/class-wc-admin-list-table-products.php';
@@ -709,6 +710,54 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 			'quoted phrase'  => array( '"%s"' ),
 			'first OR group' => array( '%s OR Missing Lantern' ),
 			'later OR group' => array( 'Missing Lantern OR %s' ),
+		);
+	}
+
+	/**
+	 * @testdox Products list catalog visibility filter lists only products with exactly that visibility: $visibility.
+	 * @dataProvider catalog_visibility_provider
+	 *
+	 * @param string $visibility The catalog visibility to filter by.
+	 */
+	public function test_catalog_visibility_filter_matches_exact_visibility( string $visibility ): void {
+		$product_ids = array();
+		foreach ( array_keys( $this->catalog_visibility_provider() ) as $value ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_catalog_visibility( $value );
+			$product_ids[ $value ] = $product->save();
+		}
+
+		$original_get               = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
+		$_GET['catalog_visibility'] = $visibility;
+
+		try {
+			$query_vars = $this->sut->request_query(
+				array(
+					'post_type'      => 'product',
+					'post_status'    => 'any',
+					'posts_per_page' => -1,
+					'fields'         => 'ids',
+				)
+			);
+			$results    = array_map( 'intval', ( new WP_Query( $query_vars ) )->get_posts() );
+		} finally {
+			$_GET = $original_get; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		}
+
+		$this->assertSame( array( $product_ids[ $visibility ] ), $results );
+	}
+
+	/**
+	 * Catalog visibility values.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function catalog_visibility_provider(): array {
+		return array(
+			'visible' => array( CatalogVisibility::VISIBLE ),
+			'catalog' => array( CatalogVisibility::CATALOG ),
+			'search'  => array( CatalogVisibility::SEARCH ),
+			'hidden'  => array( CatalogVisibility::HIDDEN ),
 		);
 	}
 
