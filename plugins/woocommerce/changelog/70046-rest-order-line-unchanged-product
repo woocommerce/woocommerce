@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Updating an order line over the REST API with its own product no longer resets the line's name, tax class and variation to the product's current values.

@@ -24,6 +24,7 @@ use WC_REST_Exception;
 use WC_Order;
 use WP_REST_Request;
 use WP_Http;
+use WC_Product;
 use WC_Order_Item_Product;
 use WC_Order_Item_Shipping;
 use WC_Order_Item_Fee;
@@ -357,10 +358,31 @@ class UpdateUtils {
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_line_item_data( $request_data, $action = 'create', $item = null ) {
-		$item    = is_null( $item ) ? new WC_Order_Item_Product( ! empty( $request_data['id'] ) ? $request_data['id'] : '' ) : $item;
-		$product = wc_get_product( $this->get_product_id_from_line_item( $request_data, $action ) );
+		$item                 = is_null( $item ) ? new WC_Order_Item_Product( ! empty( $request_data['id'] ) ? $request_data['id'] : '' ) : $item;
+		$product              = wc_get_product( $this->get_product_id_from_line_item( $request_data, $action ) );
+		$current_product_id   = $item instanceof WC_Order_Item_Product ? (int) $item->get_product_id( 'edit' ) : 0;
+		$current_variation_id = $item instanceof WC_Order_Item_Product ? (int) $item->get_variation_id( 'edit' ) : 0;
 
-		if ( $product && $product !== $item->get_product() ) {
+		// An update that names the line's own product (its variation, or the parent alone) has nothing
+		// to copy from it: set_product() would replace the line's name, tax class and variation with the
+		// product's current values, on paid orders too (#70046). The object comparison below never spots
+		// that case, since both sides are loaded afresh. A variation that no longer exists, or an explicit
+		// variation_id of 0, still demotes the line to its parent.
+		// A variation line reads back with the variation in `product_id` and the parent's SKU when it
+		// inherits one, and that SKU resolves to the parent: echoing the line names its own parent too.
+		$names_own_parent = $current_variation_id
+			&& $product instanceof WC_Product
+			&& $product->get_id() === $current_product_id
+			&& array_key_exists( 'product_id', $request_data )
+			&& in_array( (int) $request_data['product_id'], array( $current_product_id, $current_variation_id ), true )
+			&& ( ! array_key_exists( 'variation_id', $request_data ) || (int) $request_data['variation_id'] === $current_variation_id );
+		$current_product  = $item->get_product();
+		$keeps_product    = 'update' === $action
+			&& $product instanceof WC_Product
+			&& ( $names_own_parent || $product->get_id() === ( $current_variation_id ? $current_variation_id : $current_product_id ) )
+			&& ( ! $current_variation_id || 'product_variation' === get_post_type( $current_variation_id ) );
+
+		if ( $product && ! $keeps_product && $product !== $current_product ) {
 			$item->set_product( $product );
 
 			if ( 'create' === $action ) {
