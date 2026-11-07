@@ -35,6 +35,11 @@ class Utils {
 	const CAPABILITY_CART = 'dev.ucp.shopping.cart';
 
 	/**
+	 * Capability served by the `/checkout-sessions` routes.
+	 */
+	const CAPABILITY_CHECKOUT = 'dev.ucp.shopping.checkout';
+
+	/**
 	 * Whether the UCP routes are registered.
 	 *
 	 * @return bool
@@ -84,6 +89,11 @@ class Utils {
 				'version' => self::VERSION,
 				'spec'    => 'https://ucp.dev/' . self::VERSION . '/specification/cart',
 				'schema'  => 'https://ucp.dev/' . self::VERSION . '/schemas/shopping/cart.json',
+			),
+			self::CAPABILITY_CHECKOUT       => array(
+				'version' => self::VERSION,
+				'spec'    => 'https://ucp.dev/' . self::VERSION . '/specification/checkout',
+				'schema'  => 'https://ucp.dev/' . self::VERSION . '/schemas/shopping/checkout.json',
 			),
 		);
 	}
