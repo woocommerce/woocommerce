@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Fulfillments: a Preparing status with a Start preparing button in the side panel, a Preparing customer email, a fulfillment status transition hook for integrations, and a progress strip ( Order received, Preparing, Shipped or Ready for pickup, Delivered or Picked up ) on the order received and My Account order pages.

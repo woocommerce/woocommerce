@@ -53,7 +53,8 @@ class FulfillmentsRenderer {
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_components' ) );
 		// Hook into the order details page to render the fulfillment badges.
 		add_action( 'woocommerce_admin_order_data_header_right', array( $this, 'render_order_details_badges' ) );
-		// Hook into the order details before order table to render the fulfillment customer details.
+		// Hook into the order details before order table to render the progress steps, then the fulfillment customer details.
+		add_action( 'woocommerce_order_details_before_order_table', array( $this, 'render_fulfillment_progress' ), 5 );
 		add_action( 'woocommerce_order_details_before_order_table', array( $this, 'render_fulfillment_customer_details' ) );
 		// Initialize the renderer for bulk actions.
 		add_action( 'admin_init', array( $this, 'init_admin_hooks' ) );
@@ -331,6 +332,28 @@ class FulfillmentsRenderer {
 	}
 
 	/**
+	 * Render the customer-facing progress steps ( Received, Preparing, Ready for pickup or Shipped,
+	 * Picked up or Delivered ) above the order table on the order received and My Account order pages.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param WC_Order $order The order object.
+	 */
+	public function render_fulfillment_progress( WC_Order $order ): void {
+		$steps = FulfillmentUtils::get_order_progress_steps( $order, $this->maybe_read_fulfillments( $order ) );
+		if ( empty( $steps ) ) {
+			return;
+		}
+		wc_get_template(
+			'order/order-fulfillment-progress.php',
+			array(
+				'order' => $order,
+				'steps' => $steps,
+			)
+		);
+	}
+
+	/**
 	 * Render the fulfillment customer details in the order details page.
 	 *
 	 * @param WC_Order $order The order object.
@@ -442,6 +465,7 @@ class FulfillmentsRenderer {
 			'currency_symbols'           => get_woocommerce_currency_symbols(),
 			'fulfillment_statuses'       => FulfillmentUtils::get_fulfillment_statuses(),
 			'order_fulfillment_statuses' => FulfillmentUtils::get_order_fulfillment_statuses(),
+			'local_pickup_method_ids'    => \Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils::get_local_pickup_method_ids(),
 		);
 
 		wp_localize_script( 'wc-admin-fulfillments', 'wcFulfillmentSettings', $fulfillment_settings );

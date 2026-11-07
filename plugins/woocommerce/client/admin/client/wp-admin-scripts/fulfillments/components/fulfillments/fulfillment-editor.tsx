@@ -29,7 +29,20 @@ import ShipmentViewer from '../shipment-form/shipment-viewer';
 import ShipmentForm from '../shipment-form';
 import { ShipmentFormProvider } from '../../context/shipment-form-context';
 import MetadataViewer from '../metadata-viewer';
-import { getFulfillmentLockState } from '../../utils/fulfillment-utils';
+import {
+	getFulfillmentLockState,
+	getFulfillmentPickupLocation,
+} from '../../utils/fulfillment-utils';
+import PickupInformation from '../pickup-information';
+import {
+	PickedUpButton,
+	ReadyForPickupButton,
+} from '../action-buttons/pickup-buttons';
+import StartPreparingButton from '../action-buttons/preparing-button';
+import {
+	FULFILLMENT_STATUS_PREPARING,
+	FULFILLMENT_STATUS_READY_FOR_PICKUP,
+} from '../../data/constants';
 import LockLabel from '../user-interface/lock-label';
 
 interface FulfillmentEditorProps {
@@ -64,6 +77,13 @@ export default function FulfillmentEditor( {
 	);
 
 	const fulfillmentLockState = getFulfillmentLockState( fulfillment );
+	const pickupLocation = getFulfillmentPickupLocation( fulfillment );
+	const isReadyForPickup =
+		fulfillment.status === FULFILLMENT_STATUS_READY_FOR_PICKUP;
+	const isPreparing = fulfillment.status === FULFILLMENT_STATUS_PREPARING;
+	// A draft can still be started; a fulfillment that is preparing, ready or fulfilled has moved past that step.
+	const canStartPreparing =
+		! fulfillment.is_fulfilled && ! isPreparing && ! isReadyForPickup;
 
 	// Reset error when order changes
 	useEffect( () => {
@@ -183,20 +203,32 @@ export default function FulfillmentEditor( {
 							}
 						>
 							<ItemSelector editMode={ isEditing } />
-							{ isEditing && <ShipmentForm /> }
+							{ pickupLocation && (
+								<PickupInformation
+									location={ pickupLocation }
+								/>
+							) }
+							{ ! pickupLocation && isEditing && (
+								<ShipmentForm />
+							) }
+							{ ! pickupLocation && ! isEditing && (
+								<ShipmentViewer />
+							) }
 							{ ! isEditing && (
-								<>
-									<ShipmentViewer />
-									<MetadataViewer
-										fulfillment={ fulfillment }
-									/>
-								</>
+								<MetadataViewer fulfillment={ fulfillment } />
 							) }
-							{ ( ( fulfillment.is_fulfilled && isEditing ) ||
-								( ! fulfillment.is_fulfilled &&
-									! isEditing ) ) && (
-								<CustomerNotificationBox type="update" />
-							) }
+							{ pickupLocation &&
+								! fulfillment.is_fulfilled &&
+								! isReadyForPickup &&
+								! isEditing && (
+									<CustomerNotificationBox type="pickup" />
+								) }
+							{ ! pickupLocation &&
+								( ( fulfillment.is_fulfilled && isEditing ) ||
+									( ! fulfillment.is_fulfilled &&
+										! isEditing ) ) && (
+									<CustomerNotificationBox type="update" />
+								) }
 							{ fulfillmentLockState.isLocked ? (
 								<div className="woocommerce-fulfillment-item-lock-container">
 									<LockLabel
@@ -212,11 +244,35 @@ export default function FulfillmentEditor( {
 													setIsEditing( true );
 												} }
 											/>
-											{ ! fulfillment.is_fulfilled && (
-												<FulfillItemsButton
+											{ canStartPreparing && (
+												<StartPreparingButton
 													setError={ setError }
 												/>
 											) }
+											{ ! fulfillment.is_fulfilled &&
+												! pickupLocation && (
+													<FulfillItemsButton
+														setError={ setError }
+													/>
+												) }
+											{ ! fulfillment.is_fulfilled &&
+												pickupLocation &&
+												! isReadyForPickup && (
+													<ReadyForPickupButton
+														setError={ setError }
+													/>
+												) }
+											{ ! fulfillment.is_fulfilled &&
+												pickupLocation && (
+													<PickedUpButton
+														variant={
+															isReadyForPickup
+																? 'primary'
+																: 'secondary'
+														}
+														setError={ setError }
+													/>
+												) }
 										</>
 									) : (
 										<>
