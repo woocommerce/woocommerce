@@ -12,6 +12,8 @@ declare( strict_types = 1 );
  */
 class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 
+	private const PAYABLE_STATUS = 'awaiting-pay';
+
 	/**
 	 * Gateway `enabled` values before the test switched them, keyed by gateway ID.
 	 *
@@ -315,5 +317,59 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $checked, 'Exactly one gateway should be pre-selected on the pay page.' );
 		$this->assertNotContains( WC_Gateway_Cheque::ID, $checked );
 		$this->assertStringNotContainsString( 'id="payment_method_' . WC_Gateway_Cheque::ID . '"', $output );
+	}
+
+	/**
+	 * @testdox The pay page should show the stock notice and no pay form for a custom payable status order whose items sold out.
+	 */
+	public function test_order_pay_shows_notice_for_custom_payable_status_without_stock(): void {
+		$this->enable_gateways( array( WC_Gateway_BACS::ID ) );
+		$this->register_payable_status( self::PAYABLE_STATUS );
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 1,
+				'backorders'     => 'no',
+			)
+		);
+		$order   = WC_Helper_Order::create_order( 0, $product );
+		$order->set_status( self::PAYABLE_STATUS );
+		$order->save();
+		$this->assertTrue( $order->has_status( self::PAYABLE_STATUS ), 'Setup: the order keeps the custom status.' );
+
+		$output = $this->render_pay_page( $order );
+
+		$this->assertStringContainsString( 'in stock to fulfill your order (1 available)', $output );
+		$this->assertStringNotContainsString( 'woocommerce-pay-nonce', $output, 'The pay form should not render for an order that cannot be paid.' );
+	}
+
+	/**
+	 * Registers a custom status the shopper can pay from.
+	 *
+	 * @param string $status Status slug without the wc- prefix.
+	 */
+	private function register_payable_status( string $status ): void {
+		register_post_status(
+			'wc-' . $status,
+			array(
+				'label'  => 'Awaiting pay',
+				'public' => false,
+			)
+		);
+		add_filter(
+			'wc_order_statuses',
+			function ( $statuses ) use ( $status ) {
+				$statuses[ 'wc-' . $status ] = 'Awaiting pay';
+				return $statuses;
+			}
+		);
+		add_filter(
+			'woocommerce_valid_order_statuses_for_payment',
+			function ( $statuses ) use ( $status ) {
+				$statuses[] = $status;
+				return $statuses;
+			}
+		);
 	}
 }
