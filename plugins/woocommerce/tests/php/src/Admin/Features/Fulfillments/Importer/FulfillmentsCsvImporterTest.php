@@ -768,6 +768,27 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A UTF-16 file is rejected with or without a BOM and the merchant is told to re-save it as UTF-8.
+	 */
+	public function test_utf16_files_are_rejected(): void {
+		$text  = "order_number,tracking_number,shipment_provider\n101,1Z1,ups\n";
+		$utf16 = '';
+		foreach ( str_split( $text ) as $char ) {
+			$utf16 .= $char . "\0";
+		}
+
+		foreach ( array( "\xFF\xFE" . $utf16, $utf16, "\xFE\xFF" . strrev( $utf16 ) ) as $content ) {
+			$file   = $this->make_csv( $content );
+			$parsed = ( new FulfillmentsCsvImporter( $file ) )->parse_headers();
+			$read   = ( new FulfillmentsCsvImporter( $file ) )->read_data_rows( 0, 10 );
+
+			$this->assertSame( 'utf16_encoding', $parsed['error']['code'] ?? null, 'UTF-16 must be rejected instead of parsed into unmappable headers' );
+			$this->assertStringContainsString( 'UTF-8', $parsed['error']['message'] );
+			$this->assertSame( 'utf16_encoding', $read['error']['code'] ?? null, 'The row reader must reject the same file' );
+		}
+	}
+
+	/**
 	 * @testdox Stream paths without a readable file are rejected like any other unreadable path.
 	 */
 	public function test_unreadable_stream_paths_are_rejected(): void {

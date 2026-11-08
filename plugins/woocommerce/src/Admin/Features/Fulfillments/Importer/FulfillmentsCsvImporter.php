@@ -19,8 +19,8 @@ defined( 'ABSPATH' ) || exit;
  * so error messages can point at the row in the file.
  *
  * Cells are decoded one at a time: valid UTF-8 is kept and anything else is read as
- * Windows-1252, so a file that mixes both still comes out right. CR-only files are
- * rejected with a message asking the merchant to re-save the file.
+ * Windows-1252, so a file that mixes both still comes out right. UTF-16 and CR-only
+ * files are rejected with a message asking the merchant to re-save the file.
  *
  * @internal
  * @since 11.4.0
@@ -90,7 +90,7 @@ class FulfillmentsCsvImporter {
 	private const TAB_SPELLINGS = array( '\t', '\\\\t', 'tab' );
 
 	/**
-	 * Bytes read at a time while checking for CR-only line endings.
+	 * Bytes read at a time while checking the file for UTF-16 and CR-only line endings.
 	 */
 	private const INSPECT_CHUNK_BYTES = 8192;
 
@@ -429,7 +429,7 @@ class FulfillmentsCsvImporter {
 	}
 
 	/**
-	 * Open the CSV and reject a CR-only file.
+	 * Open the CSV and reject a UTF-16 or CR-only file.
 	 *
 	 * The handle is left at byte 0. The caller strips a BOM.
 	 *
@@ -449,6 +449,16 @@ class FulfillmentsCsvImporter {
 			return $this->error( 'file_open_failed', __( 'Could not open file.', 'woocommerce' ) );
 		}
 
+		if ( $this->is_utf16( $handle ) ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing the handle opened above.
+			fclose( $handle );
+			// Excel's "Unicode Text" export. fgetcsv() would return cells with a NUL after every character.
+			return $this->error(
+				'utf16_encoding',
+				__( 'This file is saved as UTF-16 and cannot be read. Re-save it as a UTF-8 CSV and try again.', 'woocommerce' )
+			);
+		}
+
 		if ( $this->is_cr_only( $handle ) ) {
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing the handle opened above.
 			fclose( $handle );
@@ -464,6 +474,26 @@ class FulfillmentsCsvImporter {
 			'handle'    => $handle,
 			'delimiter' => $delimiter,
 		);
+	}
+
+	/**
+	 * Whether the file is UTF-16, judged from its first bytes.
+	 *
+	 * A UTF-16 BOM, or a NUL byte anywhere in the first chunk, is enough: a UTF-8
+	 * CSV never contains NUL, while UTF-16 text has one after every ASCII character.
+	 *
+	 * @param resource $handle Open file handle.
+	 * @return bool
+	 */
+	private function is_utf16( $handle ): bool {
+		rewind( $handle );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread -- Reading the handle opened by the caller.
+		$chunk = fread( $handle, self::INSPECT_CHUNK_BYTES );
+		if ( ! is_string( $chunk ) || '' === $chunk ) {
+			return false;
+		}
+		$bom = substr( $chunk, 0, 2 );
+		return "\xFF\xFE" === $bom || "\xFE\xFF" === $bom || false !== strpos( $chunk, "\0" );
 	}
 
 	/**
