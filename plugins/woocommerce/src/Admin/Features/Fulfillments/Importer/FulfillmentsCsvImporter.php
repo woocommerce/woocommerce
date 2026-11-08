@@ -20,7 +20,9 @@ defined( 'ABSPATH' ) || exit;
  *
  * Cells are decoded one at a time: valid UTF-8 is kept and anything else is read as
  * Windows-1252, so a file that mixes both still comes out right. UTF-16 and CR-only
- * files are rejected with a message asking the merchant to re-save the file.
+ * files are rejected with a message asking the merchant to re-save the file. Every cell
+ * is trimmed, and a data row shorter than the header is padded with empty strings, so a
+ * consumer can index a row by header position without a guard.
  *
  * @internal
  * @since 11.4.0
@@ -188,6 +190,8 @@ class FulfillmentsCsvImporter {
 	 * Parse the CSV header row and return metadata sufficient to drive the column-mapping UI.
 	 *
 	 * Streams the file, counting non-blank data rows and keeping the first as a sample.
+	 * `sample` has at least as many entries as `headers`: a short row is padded with empty
+	 * strings and a longer row keeps its extra cells. Header and data cells are trimmed.
 	 * Blank records before the header and between data rows are skipped. Does not fail
 	 * when required canonical columns cannot be auto-detected; the caller can present
 	 * the mapping UI so the user resolves it manually.
@@ -259,7 +263,10 @@ class FulfillmentsCsvImporter {
 	 * real data rows. Blank records, including ",,," and whitespace-only rows, are not
 	 * returned and do not count, but `byte_offset` still moves past them to the next
 	 * data row (or to the end of the file). Each returned row's `row_number` is its
-	 * 1-based physical record number, counting the header and blank records.
+	 * 1-based physical record number, counting the header and blank records. Each row's
+	 * `cells` has at least `count( headers )` entries: a short row is padded with empty
+	 * strings so `$cells[ $index ]` is always a string for a mapped column, and a longer
+	 * row keeps its extra cells. Every cell is trimmed.
 	 *
 	 * Pass a previous result's `byte_offset` and `next_record_number` to resume without
 	 * reading the skipped rows again. `byte_offset` 0 always starts at the beginning.
@@ -340,6 +347,7 @@ class FulfillmentsCsvImporter {
 		}
 
 		$last_row_number = (int) $header['row_number'];
+		$width           = count( $header['cells'] );
 
 		if ( $byte_offset > 0 ) {
 			// Drop the header generator before seeking so it cannot read again from the new position.
@@ -376,7 +384,7 @@ class FulfillmentsCsvImporter {
 				}
 				$rows[] = array(
 					'row_number' => (int) $record['row_number'],
-					'cells'      => $record['cells'],
+					'cells'      => $this->pad_row( $record['cells'], $width ),
 				);
 				++$consumed;
 			}
@@ -553,7 +561,7 @@ class FulfillmentsCsvImporter {
 			}
 			++$total;
 			if ( 1 === $total ) {
-				$sample = $record['cells'];
+				$sample = $this->pad_row( $record['cells'], count( $header['cells'] ) );
 			}
 			if ( $total > self::MAX_IMPORT_ROWS ) {
 				$extra        = $this->next_data_record( $records );
@@ -636,7 +644,11 @@ class FulfillmentsCsvImporter {
 	}
 
 	/**
-	 * Turn one fgetcsv() record into UTF-8 strings.
+	 * Turn one fgetcsv() record into trimmed UTF-8 strings.
+	 *
+	 * Leading and trailing ASCII whitespace is removed from every cell, so "1042, 1Z999, ups"
+	 * yields the same values as "1042,1Z999,ups" and a tracking number or carrier slug
+	 * never carries a stray space into a URL or a lookup.
 	 *
 	 * Each cell is judged on its own: valid UTF-8 is kept, anything else is read as
 	 * Windows-1252. A Windows-1252 cell whose high bytes happen to form valid UTF-8,
@@ -649,7 +661,7 @@ class FulfillmentsCsvImporter {
 	private function normalize_cells( array $record ): array {
 		$cells = array();
 		foreach ( $record as $value ) {
-			$cell = is_scalar( $value ) ? (string) $value : '';
+			$cell = is_scalar( $value ) ? trim( (string) $value ) : '';
 			if ( '' !== $cell && ! self::is_utf8( $cell ) ) {
 				$converted = $this->convert_windows_1252( $cell );
 				if ( null === $converted ) {
@@ -662,6 +674,20 @@ class FulfillmentsCsvImporter {
 			$cells[] = $cell;
 		}
 		return $cells;
+	}
+
+	/**
+	 * Pad a data row with empty strings up to the header width.
+	 *
+	 * A line with fewer fields than the header comes back from fgetcsv() as a shorter
+	 * record, which would leave a mapped index undefined. Extra cells on a longer row are kept.
+	 *
+	 * @param array<int, string> $cells Decoded row.
+	 * @param int                $width Number of header cells.
+	 * @return array<int, string>
+	 */
+	private function pad_row( array $cells, int $width ): array {
+		return count( $cells ) < $width ? array_pad( $cells, $width, '' ) : $cells;
 	}
 
 	/**
@@ -864,17 +890,18 @@ class FulfillmentsCsvImporter {
 	}
 
 	/**
-	 * Whether every cell in a decoded row trims to empty.
+	 * Whether every cell in a decoded row is empty.
 	 *
-	 * A blank line, a row of empty fields such as ",,,", and a whitespace-only row
-	 * are all blank. A cell whose trimmed text is "0" is not.
+	 * Cells arrive trimmed from normalize_cells(), so a blank line, a row of empty
+	 * fields such as ",,,", and a whitespace-only row are all blank. A cell holding
+	 * "0" is not.
 	 *
 	 * @param array<int, string> $row Decoded row.
 	 * @return bool
 	 */
 	private function is_blank_row( array $row ): bool {
 		foreach ( $row as $cell ) {
-			if ( '' !== trim( $cell ) ) {
+			if ( '' !== $cell ) {
 				return false;
 			}
 		}

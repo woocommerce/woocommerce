@@ -878,4 +878,72 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 			$this->assertSame( 'file_not_readable', $parsed['error']['code'] ?? null, "{$path} must not bypass the readability check" );
 		}
 	}
+
+	/**
+	 * @testdox A data row shorter than the header is padded with empty strings in the sample and in read rows.
+	 */
+	public function test_short_rows_are_padded_to_the_header_width(): void {
+		$file = $this->make_csv(
+			"order_number,tracking_number,shipment_provider,tracking_url\n"
+			. "1042,1Z999\n"
+			. "1043,1Z998,ups,https://example.com/t,extra\n"
+			. "1044\n"
+		);
+
+		$parsed = ( new FulfillmentsCsvImporter( $file ) )->parse_headers();
+		$this->assertSame( array( '1042', '1Z999', '', '' ), $parsed['sample'], 'The sample must have one entry per header cell' );
+		$this->assertSame( 3, $parsed['total'] );
+
+		$read = ( new FulfillmentsCsvImporter( $file ) )->read_data_rows( 0, 10 );
+		$this->assertCount( 3, $read['rows'] );
+		$this->assertSame( array( '1042', '1Z999', '', '' ), $read['rows'][0]['cells'], 'A two-cell row must be padded to four cells' );
+		$this->assertSame( array( '1043', '1Z998', 'ups', 'https://example.com/t', 'extra' ), $read['rows'][1]['cells'], 'A longer row keeps its extra cell' );
+		$this->assertSame( array( '1044', '', '', '' ), $read['rows'][2]['cells'], 'A one-cell row must be padded to four cells' );
+
+		$header_map = FulfillmentsCsvImporter::mapping_to_header_map( $parsed['detected_mapping'] );
+		foreach ( $read['rows'] as $row ) {
+			foreach ( $header_map as $canonical => $index ) {
+				$this->assertIsString( $row['cells'][ $index ], "Row {$row['row_number']} must have a string at the {$canonical} index" );
+			}
+		}
+
+		$first   = ( new FulfillmentsCsvImporter( $file ) )->read_data_rows( 0, 1 );
+		$resumed = ( new FulfillmentsCsvImporter( $file ) )->read_data_rows(
+			0,
+			10,
+			array(
+				'byte_offset'   => $first['byte_offset'],
+				'record_number' => $first['next_record_number'],
+			)
+		);
+		$this->assertSame( array( '1044', '', '', '' ), $resumed['rows'][1]['cells'], 'Padding must apply on the resume path too' );
+	}
+
+	/**
+	 * @testdox Header and data cells are trimmed on both the prepare and the row-read path.
+	 */
+	public function test_cells_are_trimmed_in_headers_sample_and_rows(): void {
+		$file = $this->make_csv(
+			" order_number , Tracking ,Carrier\n"
+			. "1042, 1Z999 , ups \n"
+			. "\t1043 ,\" 1Z998 \",\"usps\"\n"
+		);
+
+		$parsed = ( new FulfillmentsCsvImporter( $file ) )->parse_headers();
+		$this->assertSame( array( 'order_number', 'Tracking', 'Carrier' ), $parsed['headers'], 'Header cells must be trimmed' );
+		$this->assertSame( array( '1042', '1Z999', 'ups' ), $parsed['sample'], 'Sample cells must be trimmed' );
+		$this->assertSame(
+			array(
+				0 => 'order_number',
+				1 => 'tracking_number',
+				2 => 'shipment_provider',
+			),
+			$parsed['detected_mapping']
+		);
+
+		$read = ( new FulfillmentsCsvImporter( $file ) )->read_data_rows( 0, 10 );
+		$this->assertSame( array( '1042', '1Z999', 'ups' ), $read['rows'][0]['cells'] );
+		$this->assertSame( array( '1043', '1Z998', 'usps' ), $read['rows'][1]['cells'], 'Whitespace inside a quoted cell and a leading tab are trimmed too' );
+		$this->assertSame( $parsed['headers'], $read['headers'], 'Both paths must return the same trimmed headers' );
+	}
 }
