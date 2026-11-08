@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 /**
  * Tests for the woocommerce_template_args filter.
  *
- * @package WooCommerce\\Tests\\Includes
+ * @package WooCommerce\Tests\Includes
  */
 class WC_Template_Args_Filter_Test extends WC_Unit_Test_Case {
 
