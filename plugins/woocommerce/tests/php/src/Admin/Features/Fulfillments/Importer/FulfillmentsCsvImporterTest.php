@@ -750,6 +750,87 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The prepare total and a chunked read agree on every blank-line shape and every chunk size.
+	 */
+	public function test_prepare_total_matches_a_chunked_read_across_blank_line_shapes(): void {
+		$csv  = "\n";
+		$csv .= ",,,\n";
+		$csv .= "order_number,tracking_number,shipment_provider\n";
+		$csv .= "1,ONE,ups\n";
+		$csv .= "\n";
+		$csv .= "2,TWO,ups\n";
+		$csv .= ",,,\n";
+		$csv .= "3,THREE,ups\n";
+		$csv .= "4,FOUR,ups\n";
+		$csv .= " , , \n";
+		$csv .= "\n";
+		$csv .= "5,FIVE,ups\n";
+		$csv .= "6,SIX,ups\n";
+		$csv .= "\n\n";
+		$file = $this->make_csv( $csv );
+		$sut  = new FulfillmentsCsvImporter( $file );
+
+		$parsed = $sut->parse_headers();
+		$this->assertSame( 6, $parsed['total'], 'Six real data rows, blank records excluded' );
+
+		$whole = $sut->read_data_rows( 0, 100 );
+		$this->assertSame( array( 4, 6, 8, 9, 12, 13 ), array_column( $whole['rows'], 'row_number' ), 'Row numbers are the physical record numbers in the file' );
+		$this->assertSame( 3, $whole['header_row_number'] );
+
+		for ( $chunk = 1; $chunk <= 8; $chunk++ ) {
+			$rows    = array();
+			$options = array();
+			$calls   = 0;
+			do {
+				$result = $sut->read_data_rows( 0, $chunk, $options );
+				$this->assertArrayNotHasKey( 'error', $result, "Chunk size {$chunk} must read cleanly" );
+				$rows    = array_merge( $rows, $result['rows'] );
+				$options = array(
+					'byte_offset'   => $result['byte_offset'],
+					'record_number' => $result['next_record_number'],
+				);
+				++$calls;
+			} while ( ! $result['eof'] && $calls < 50 );
+
+			$this->assertSame( $parsed['total'], count( $rows ), "Chunk size {$chunk} must return exactly the prepare total" );
+			$this->assertSame( $whole['rows'], $rows, "Chunk size {$chunk} must return the same rows and row numbers as one read" );
+		}
+	}
+
+	/**
+	 * @testdox A blank record on the chunk boundary is neither returned nor counted on resume.
+	 */
+	public function test_blank_record_on_a_chunk_boundary_is_skipped_once(): void {
+		$file = $this->make_csv( "order_number,tracking_number,shipment_provider\n1,ONE,ups\n2,TWO,ups\n,,,\n\n3,THREE,ups\n" );
+		$sut  = new FulfillmentsCsvImporter( $file );
+
+		$first = $sut->read_data_rows( 0, 2 );
+		$this->assertSame( array( 2, 3 ), array_column( $first['rows'], 'row_number' ) );
+		$this->assertFalse( $first['eof'], 'A real row remains after the blank records' );
+		$this->assertSame( 6, $first['next_record_number'], 'The resume point is the next real row, past both blank records' );
+
+		$second = $sut->read_data_rows(
+			0,
+			2,
+			array(
+				'byte_offset'   => $first['byte_offset'],
+				'record_number' => $first['next_record_number'],
+			)
+		);
+		$this->assertSame(
+			array(
+				array(
+					'row_number' => 6,
+					'cells'      => array( '3', 'THREE', 'ups' ),
+				),
+			),
+			$second['rows']
+		);
+		$this->assertSame( 1, $second['consumed'] );
+		$this->assertTrue( $second['eof'] );
+	}
+
+	/**
 	 * @testdox Cells are decoded one at a time, so UTF-8 and Windows-1252 text in the same file both come out right.
 	 */
 	public function test_mixed_encoding_file_decodes_each_cell_on_its_own(): void {
