@@ -837,7 +837,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 
 		$original_wp_query = $wp_query;
 		$original_wp       = $wp;
-		$original_vars     = WC()->query->query_vars;
+		$original_query    = WC()->query;
 		$controller        = new OrderWithdrawalController();
 		$endpoint_key      = OrderWithdrawalEndpoint::ENDPOINT_KEY;
 		$wp                = new \WP(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -845,6 +845,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$wp_query          = new \WP_Query(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		$this->enable_feature();
+		WC()->query             = new \WC_Query();
 		WC()->query->query_vars = array( $endpoint_key => $endpoint_key );
 
 		try {
@@ -872,9 +873,9 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$controller->maybe_set_404_for_endpoint_value();
 			$this->assertFalse( $wp_query->is_404(), 'A View order request should not return a 404.' );
 		} finally {
-			WC()->query->query_vars = $original_vars;
-			$wp                     = $original_wp; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-			$wp_query               = $original_wp_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			WC()->query = $original_query;
+			$wp         = $original_wp; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			$wp_query   = $original_wp_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 	}
 
