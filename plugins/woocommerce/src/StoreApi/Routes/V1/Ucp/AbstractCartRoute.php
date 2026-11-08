@@ -8,6 +8,7 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\SessionHandler;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\CartMapper;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\IdempotencyClaim;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 /**
@@ -55,10 +56,12 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	}
 
 	/**
-	 * Refuse an id this store never signed, and restore the token slot afterwards.
+	 * Answer the request, under the `Idempotency-Key` it carries.
 	 *
-	 * The slot is per-process, so leaving it set would bind the next dispatch in the same
-	 * process — an internal `rest_do_request()`, or a test — to this cart's session.
+	 * A payload the route cannot read is refused before the key is claimed, so a 415 never
+	 * touches the store. After that the key is settled before anything else runs: a replay
+	 * must not load a session or resolve a cart id, since a retried `cancel` has to return the
+	 * stored response rather than the `not_found` its own first run left behind.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
@@ -72,6 +75,31 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			return $this->add_response_headers( $refusal );
 		}
 
+		$claim = IdempotencyClaim::for_request( $request, Utils::CAPABILITY_CART );
+
+		if ( $claim instanceof \WP_REST_Response ) {
+			// The gate answers without reaching the parent, so it stamps the cache directive itself.
+			return $this->add_response_headers( $claim );
+		}
+
+		$response = $this->dispatch_ucp_request( $request );
+
+		return null === $claim ? $response : $claim->settle( $response );
+	}
+
+	/**
+	 * Refuse an id this store never signed, and restore the token slot afterwards.
+	 *
+	 * The slot is per-process, so leaving it set would bind the next dispatch in the same
+	 * process — an internal `rest_do_request()`, or a test — to this cart's session.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @return \WP_REST_Response
+	 */
+	private function dispatch_ucp_request( \WP_REST_Request $request ): \WP_REST_Response {
 		if ( '' !== $this->route_cart_id( $request ) && '' === $this->validated_cart_id( $request ) ) {
 			return $this->add_response_headers( $this->ucp_not_found() );
 		}

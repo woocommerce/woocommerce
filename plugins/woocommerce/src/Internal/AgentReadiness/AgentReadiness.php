@@ -26,9 +26,9 @@ class AgentReadiness {
 	public const PRODUCT_IDS_LIMIT = 10;
 
 	/**
-	 * Transient holding the last report.
+	 * Option holding the last report, kept until the next scan replaces it.
 	 */
-	public const REPORT_TRANSIENT = 'woocommerce_agent_readiness_report';
+	public const REPORT_OPTION = 'woocommerce_agent_readiness_report';
 
 	/**
 	 * Store-wide conditions.
@@ -200,18 +200,18 @@ class AgentReadiness {
 	 * @return array<string, mixed>|null
 	 */
 	public function get_cached_report(): ?array {
-		$report = get_transient( self::REPORT_TRANSIENT );
+		$report = get_option( self::REPORT_OPTION );
 		return is_array( $report ) ? $report : null;
 	}
 
 	/**
-	 * Run the report and store it for an hour.
+	 * Run the report and store it. Not autoloaded: only the readiness screens read it.
 	 *
 	 * @return array<string, mixed>
 	 */
 	public function refresh_report(): array {
 		$report = $this->get_report();
-		set_transient( self::REPORT_TRANSIENT, $report, HOUR_IN_SECONDS );
+		update_option( self::REPORT_OPTION, $report, false );
 		return $report;
 	}
 
