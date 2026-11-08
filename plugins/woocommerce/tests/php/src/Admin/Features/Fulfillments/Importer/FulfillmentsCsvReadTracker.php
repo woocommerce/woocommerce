@@ -22,11 +22,45 @@ class FulfillmentsCsvReadTracker {
 	public static $max_position = 0;
 
 	/**
+	 * Stream context PHP assigns to the wrapper instance.
+	 *
+	 * @var resource|null
+	 */
+	public $context;
+
+	/**
 	 * Underlying file handle.
 	 *
 	 * @var resource|null
 	 */
 	public $handle;
+
+	/**
+	 * Strip the wcimp:// prefix from a stream URL.
+	 *
+	 * @param string $path Stream URL.
+	 * @return string Real file path.
+	 */
+	private static function real_path( string $path ): string {
+		$prefix = 'wcimp://';
+		return 0 === strpos( $path, $prefix ) ? substr( $path, strlen( $prefix ) ) : $path;
+	}
+
+	/**
+	 * Stat the real file so is_readable() and file_exists() work on the stream URL.
+	 *
+	 * @param string $path  Stream URL.
+	 * @param int    $flags Stat flags.
+	 * @return array<int|string, int>|false
+	 */
+	public function url_stat( $path, $flags ) {
+		$file = self::real_path( (string) $path );
+		if ( ! file_exists( $file ) ) {
+			return false;
+		}
+		$stat = ( $flags & STREAM_URL_STAT_LINK ) ? lstat( $file ) : stat( $file );
+		return is_array( $stat ) ? $stat : false;
+	}
 
 	/**
 	 * Open the real file named after the wcimp:// prefix.
@@ -39,10 +73,8 @@ class FulfillmentsCsvReadTracker {
 	 */
 	public function stream_open( $path, $mode, $options, &$opened_path ) {
 		unset( $mode, $options, $opened_path );
-		$prefix = 'wcimp://';
-		$file   = 0 === strpos( (string) $path, $prefix ) ? substr( (string) $path, strlen( $prefix ) ) : (string) $path;
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- The wrapper has to open the fixture the parser streams.
-		$handle = fopen( $file, 'rb' );
+		$handle = fopen( self::real_path( (string) $path ), 'rb' );
 		if ( false === $handle ) {
 			return false;
 		}

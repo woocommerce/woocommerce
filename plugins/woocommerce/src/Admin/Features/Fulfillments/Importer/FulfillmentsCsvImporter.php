@@ -18,6 +18,10 @@ defined( 'ABSPATH' ) || exit;
  * Blank records still advance the file position and keep their physical record numbers
  * so error messages can point at the row in the file.
  *
+ * Cells are decoded one at a time: valid UTF-8 is kept and anything else is read as
+ * Windows-1252, so a file that mixes both still comes out right. CR-only files are
+ * rejected with a message asking the merchant to re-save the file.
+ *
  * @internal
  * @since 11.4.0
  */
@@ -62,7 +66,10 @@ class FulfillmentsCsvImporter {
 	private array $options;
 
 	/**
-	 * Set when a Windows-1252 cell could not be converted to UTF-8.
+	 * Set when a cell that is not UTF-8 could not be converted from Windows-1252.
+	 *
+	 * Only happens when neither mbstring nor iconv is loaded. mbstring maps every
+	 * Windows-1252 byte, so with it loaded the flag never trips.
 	 *
 	 * @var bool
 	 */
@@ -83,7 +90,7 @@ class FulfillmentsCsvImporter {
 	private const TAB_SPELLINGS = array( '\t', '\\\\t', 'tab' );
 
 	/**
-	 * Bytes read at a time while checking line endings and encoding.
+	 * Bytes read at a time while checking for CR-only line endings.
 	 */
 	private const INSPECT_CHUNK_BYTES = 8192;
 
@@ -216,26 +223,12 @@ class FulfillmentsCsvImporter {
 		$handle = $opened['handle'];
 		try {
 			$this->strip_bom( $handle );
-			$summary = $this->read_header_summary( $handle, $opened['delimiter'], false );
+			$summary = $this->read_header_summary( $handle, $opened['delimiter'] );
 			if ( isset( $summary['error'] ) ) {
 				return $summary;
 			}
-
-			// Judge encoding from the bytes this count actually read. The tail past the
-			// cap is left unread, so a later Windows-1252 byte cannot change this result.
-			if ( ! $this->range_is_utf8( $handle, (int) $summary['end_offset'] ) ) {
-				if ( ! $this->can_convert_windows_1252() ) {
-					return $this->unsupported_encoding_error();
-				}
-				rewind( $handle );
-				$this->strip_bom( $handle );
-				$summary = $this->read_header_summary( $handle, $opened['delimiter'], true );
-				if ( isset( $summary['error'] ) ) {
-					return $summary;
-				}
-				if ( $this->conversion_failed ) {
-					return $this->unsupported_encoding_error();
-				}
+			if ( $this->conversion_failed ) {
+				return $this->unsupported_encoding_error();
 			}
 
 			$header_map       = $this->build_header_map( $summary['headers'] );
@@ -310,16 +303,10 @@ class FulfillmentsCsvImporter {
 
 		$handle = $opened['handle'];
 		try {
-			$from_windows_1252 = $this->file_needs_windows_1252( $handle );
-			if ( null === $from_windows_1252 ) {
-				return $this->unsupported_encoding_error();
-			}
-
 			// Byte offsets are positions after a leading BOM has been removed. Strip
 			// it on every open, including a resume, before seeking to one of them.
-			rewind( $handle );
 			$this->strip_bom( $handle );
-			$result = $this->read_data_window( $handle, $from_windows_1252, $opened['delimiter'], $offset, $limit, $byte_offset, $options );
+			$result = $this->read_data_window( $handle, $opened['delimiter'], $offset, $limit, $byte_offset, $options );
 			if ( isset( $result['error'] ) ) {
 				return $result;
 			}
@@ -336,18 +323,17 @@ class FulfillmentsCsvImporter {
 	/**
 	 * Read one window of data rows from a handle already past its BOM.
 	 *
-	 * @param resource             $handle             Open handle.
-	 * @param bool                 $from_windows_1252  Whether cells are converted from Windows-1252.
-	 * @param string               $delimiter          Delimiter passed to fgetcsv().
-	 * @param int                  $offset             Real data rows to skip.
-	 * @param int                  $limit              Maximum real data rows to return.
-	 * @param int                  $byte_offset        Resume position, or 0 to start after the header.
-	 * @param array<string, mixed> $options            Resume options. Uses record_number when $byte_offset is set.
+	 * @param resource             $handle      Open handle.
+	 * @param string               $delimiter   Delimiter passed to fgetcsv().
+	 * @param int                  $offset      Real data rows to skip.
+	 * @param int                  $limit       Maximum real data rows to return.
+	 * @param int                  $byte_offset Resume position, or 0 to start after the header.
+	 * @param array<string, mixed> $options     Resume options. Uses record_number when $byte_offset is set.
 	 * @return array<string, mixed>
 	 */
-	private function read_data_window( $handle, bool $from_windows_1252, string $delimiter, int $offset, int $limit, int $byte_offset, array $options ): array {
+	private function read_data_window( $handle, string $delimiter, int $offset, int $limit, int $byte_offset, array $options ): array {
 		$this->conversion_failed = false;
-		$records                 = $this->read_records( $handle, $from_windows_1252, $delimiter, 1 );
+		$records                 = $this->read_records( $handle, $delimiter, 1 );
 		$header                  = $this->next_data_record( $records );
 		if ( null === $header ) {
 			return $this->error( 'empty_csv', __( 'CSV file is empty.', 'woocommerce' ) );
@@ -362,7 +348,7 @@ class FulfillmentsCsvImporter {
 				return $this->error( 'byte_offset_invalid', __( 'Could not resume reading the CSV file.', 'woocommerce' ) );
 			}
 			$record_number   = isset( $options['record_number'] ) ? max( 1, (int) $options['record_number'] ) : 1;
-			$records         = $this->read_records( $handle, $from_windows_1252, $delimiter, $record_number );
+			$records         = $this->read_records( $handle, $delimiter, $record_number );
 			$last_row_number = $record_number - 1;
 		}
 
@@ -445,7 +431,7 @@ class FulfillmentsCsvImporter {
 	/**
 	 * Open the CSV and reject a CR-only file.
 	 *
-	 * The handle is left at byte 0. The caller strips a BOM and decides encoding.
+	 * The handle is left at byte 0. The caller strips a BOM.
 	 *
 	 * @param string $delimiter_override Delimiter override. Empty uses the constructor delimiter.
 	 * @return array{handle: resource, delimiter: string}|array{error: array{code:string, message:string}}
@@ -453,7 +439,7 @@ class FulfillmentsCsvImporter {
 	private function open_csv( string $delimiter_override ): array {
 		$delimiter = '' === $delimiter_override ? $this->options['delimiter'] : self::normalize_delimiter( $delimiter_override );
 
-		if ( ! $this->uses_registered_stream( $this->file ) && ! is_readable( $this->file ) ) {
+		if ( ! is_readable( $this->file ) ) {
 			return $this->error( 'file_not_readable', __( 'File is not readable.', 'woocommerce' ) );
 		}
 
@@ -478,22 +464,6 @@ class FulfillmentsCsvImporter {
 			'handle'    => $handle,
 			'delimiter' => $delimiter,
 		);
-	}
-
-	/**
-	 * Whether a path uses a stream wrapper registered in this process.
-	 *
-	 * The is_readable() function is false for those paths even when fopen() can open them.
-	 *
-	 * @param string $path File path or stream URL.
-	 * @return bool
-	 */
-	private function uses_registered_stream( string $path ): bool {
-		$separator = strpos( $path, '://' );
-		if ( false === $separator || 0 === $separator ) {
-			return false;
-		}
-		return in_array( substr( $path, 0, $separator ), stream_get_wrappers(), true );
 	}
 
 	/**
@@ -531,14 +501,13 @@ class FulfillmentsCsvImporter {
 	 * Exactly that many data rows, or that many followed only by blanks, leaves
 	 * total_capped false.
 	 *
-	 * @param resource $handle             Open handle positioned after a BOM strip.
-	 * @param string   $delimiter          Delimiter passed to fgetcsv().
-	 * @param bool     $from_windows_1252  Whether cell text must be converted.
-	 * @return array{error: array{code:string, message:string}}|array{headers: array<int, string>, sample: array<int, string>, total: int, total_capped: bool, end_offset: int}
+	 * @param resource $handle    Open handle positioned after a BOM strip.
+	 * @param string   $delimiter Delimiter passed to fgetcsv().
+	 * @return array{error: array{code:string, message:string}}|array{headers: array<int, string>, sample: array<int, string>, total: int, total_capped: bool}
 	 */
-	private function read_header_summary( $handle, string $delimiter, bool $from_windows_1252 ): array {
+	private function read_header_summary( $handle, string $delimiter ): array {
 		$this->conversion_failed = false;
-		$records                 = $this->read_records( $handle, $from_windows_1252, $delimiter, 1 );
+		$records                 = $this->read_records( $handle, $delimiter, 1 );
 		$header                  = $this->next_data_record( $records );
 		if ( null === $header ) {
 			return $this->error( 'empty_csv', __( 'CSV file is empty.', 'woocommerce' ) );
@@ -563,171 +532,12 @@ class FulfillmentsCsvImporter {
 			}
 		}
 
-		unset( $records );
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_ftell -- Position of the handle opened by the caller.
-		$end_offset = ftell( $handle );
-
 		return array(
 			'headers'      => $header['cells'],
 			'sample'       => $sample,
 			'total'        => $total,
 			'total_capped' => $total_capped,
-			'end_offset'   => false === $end_offset ? 0 : (int) $end_offset,
 		);
-	}
-
-	/**
-	 * Whether the whole file must be read as Windows-1252.
-	 *
-	 * Stops at the first byte sequence that is not UTF-8. Returns null when the
-	 * file is not UTF-8 and neither mbstring nor iconv can convert it.
-	 *
-	 * @param resource $handle Open file handle.
-	 * @return bool|null True for Windows-1252, false for UTF-8, null when conversion is impossible.
-	 */
-	private function file_needs_windows_1252( $handle ): ?bool {
-		rewind( $handle );
-		$state   = $this->fresh_utf8_state();
-		$is_utf8 = true;
-		while ( ! feof( $handle ) ) {
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread -- Reading the handle opened by the caller.
-			$chunk = fread( $handle, self::INSPECT_CHUNK_BYTES );
-			if ( ! is_string( $chunk ) || '' === $chunk ) {
-				break;
-			}
-			if ( ! $this->accept_utf8( $chunk, $state ) ) {
-				$is_utf8 = false;
-				break;
-			}
-		}
-		if ( $is_utf8 && $this->utf8_state_complete( $state ) ) {
-			return false;
-		}
-		return $this->can_convert_windows_1252() ? true : null;
-	}
-
-	/**
-	 * Whether the leading $length bytes of the file are valid UTF-8.
-	 *
-	 * Does not read past $length, so a capped parse does not scan the rest of the file.
-	 *
-	 * @param resource $handle Open file handle.
-	 * @param int      $length Number of bytes at the start of the file to check.
-	 * @return bool
-	 */
-	private function range_is_utf8( $handle, int $length ): bool {
-		rewind( $handle );
-		$state = $this->fresh_utf8_state();
-		$left  = $length;
-		while ( $left > 0 ) {
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread -- Reading the handle opened by the caller.
-			$chunk = fread( $handle, min( self::INSPECT_CHUNK_BYTES, $left ) );
-			if ( ! is_string( $chunk ) || '' === $chunk ) {
-				return false;
-			}
-			$left -= strlen( $chunk );
-			if ( ! $this->accept_utf8( $chunk, $state ) ) {
-				return false;
-			}
-		}
-		return $this->utf8_state_complete( $state );
-	}
-
-	/**
-	 * Initial state for accept_utf8().
-	 *
-	 * @return array{need: int, first: int, seen: int}
-	 */
-	private function fresh_utf8_state(): array {
-		return array(
-			'need'  => 0,
-			'first' => 0,
-			'seen'  => 0,
-		);
-	}
-
-	/**
-	 * Feed bytes to a UTF-8 checker, keeping a character split across chunks.
-	 *
-	 * The check rejects overlong encodings and UTF-16 surrogates. It does not
-	 * rewrite the bytes.
-	 *
-	 * @param string                                  $bytes Bytes to check.
-	 * @param array{need: int, first: int, seen: int} $state Checker state.
-	 * @return bool Whether these bytes are valid UTF-8 so far.
-	 */
-	private function accept_utf8( string $bytes, array &$state ): bool {
-		$length = strlen( $bytes );
-		for ( $index = 0; $index < $length; $index++ ) {
-			if ( ! $this->accept_utf8_byte( ord( $bytes[ $index ] ), $state ) ) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Whether one byte continues a valid UTF-8 sequence.
-	 *
-	 * @param int                                     $byte  Byte value, 0-255.
-	 * @param array{need: int, first: int, seen: int} $state Checker state.
-	 * @return bool
-	 */
-	private function accept_utf8_byte( int $byte, array &$state ): bool {
-		if ( $state['need'] > 0 ) {
-			if ( $byte < 0x80 || $byte > 0xBF ) {
-				return false;
-			}
-			if ( 1 === $state['seen'] ) {
-				$first = $state['first'];
-				if ( ( 0xE0 === $first && $byte < 0xA0 ) || ( 0xED === $first && $byte >= 0xA0 ) ) {
-					return false;
-				}
-				if ( ( 0xF0 === $first && $byte < 0x90 ) || ( 0xF4 === $first && $byte >= 0x90 ) ) {
-					return false;
-				}
-			}
-			++$state['seen'];
-			--$state['need'];
-			return true;
-		}
-
-		if ( $byte <= 0x7F ) {
-			return true;
-		}
-		if ( $byte >= 0xC2 && $byte <= 0xDF ) {
-			$state['need'] = 1;
-		} elseif ( $byte >= 0xE0 && $byte <= 0xEF ) {
-			$state['need'] = 2;
-		} elseif ( $byte >= 0xF0 && $byte <= 0xF4 ) {
-			$state['need'] = 3;
-		} else {
-			return false;
-		}
-		$state['first'] = $byte;
-		$state['seen']  = 1;
-		return true;
-	}
-
-	/**
-	 * Whether a UTF-8 checker is not waiting for the rest of a character.
-	 *
-	 * @param array{need: int, first: int, seen: int} $state Checker state.
-	 * @return bool
-	 */
-	private function utf8_state_complete( array $state ): bool {
-		return 0 === $state['need'];
-	}
-
-	/**
-	 * Whether Windows-1252 text can be converted to UTF-8 here.
-	 *
-	 * The mbstring extension is preferred. iconv is the fallback. UTF-8 detection does not use either.
-	 *
-	 * @return bool
-	 */
-	private function can_convert_windows_1252(): bool {
-		return function_exists( 'mb_convert_encoding' ) || function_exists( 'iconv' );
 	}
 
 	/**
@@ -746,12 +556,11 @@ class FulfillmentsCsvImporter {
 	 * Yield each physical CSV record, with blank rows flagged and cells decoded.
 	 *
 	 * @param resource $handle             Open file handle positioned at the first record to read.
-	 * @param bool     $from_windows_1252  Whether cell text must be converted from Windows-1252.
 	 * @param string   $delimiter          Delimiter passed to fgetcsv().
 	 * @param int      $next_record_number Physical record number to assign to the first record read.
 	 * @return \Generator<int, array{row_number:int, cells:array<int, string>, blank:bool, start:int}>
 	 */
-	private function read_records( $handle, bool $from_windows_1252, string $delimiter, int $next_record_number ): \Generator {
+	private function read_records( $handle, string $delimiter, int $next_record_number ): \Generator {
 		while ( true ) {
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_ftell -- Position of the handle opened by the caller.
 			$start = ftell( $handle );
@@ -764,7 +573,7 @@ class FulfillmentsCsvImporter {
 				break;
 			}
 
-			$cells = $this->normalize_cells( $record, $from_windows_1252 );
+			$cells = $this->normalize_cells( $record );
 			yield array(
 				'row_number' => $next_record_number,
 				'cells'      => $cells,
@@ -788,65 +597,30 @@ class FulfillmentsCsvImporter {
 		while ( $records->valid() ) {
 			$record = $records->current();
 			$records->next();
-			$normalized = $this->normalize_record( $record );
-			if ( null === $normalized ) {
-				continue;
-			}
-			$last_row_number = $normalized['row_number'];
-			if ( ! $normalized['blank'] ) {
-				return $normalized;
+			$last_row_number = $record['row_number'];
+			if ( ! $record['blank'] ) {
+				return $record;
 			}
 		}
 		return null;
 	}
 
 	/**
-	 * Check that a generator record has the shape read_records() yields.
-	 *
-	 * @param mixed $record Raw generator value.
-	 * @return array{row_number:int, cells:array<int, string>, blank:bool, start:int}|null
-	 */
-	private function normalize_record( $record ): ?array {
-		if ( ! is_array( $record ) ) {
-			return null;
-		}
-
-		$row_number = $record['row_number'] ?? null;
-		$cells      = $record['cells'] ?? null;
-		$blank      = $record['blank'] ?? null;
-		$start      = $record['start'] ?? null;
-		if ( ! is_int( $row_number ) || ! is_array( $cells ) || ! is_bool( $blank ) || ! is_int( $start ) ) {
-			return null;
-		}
-
-		$string_cells = array();
-		foreach ( $cells as $cell ) {
-			if ( ! is_string( $cell ) ) {
-				return null;
-			}
-			$string_cells[] = $cell;
-		}
-
-		return array(
-			'row_number' => $row_number,
-			'cells'      => $string_cells,
-			'blank'      => $blank,
-			'start'      => $start,
-		);
-	}
-
-	/**
 	 * Turn one fgetcsv() record into UTF-8 strings.
 	 *
-	 * @param array<int, string|null> $record            Raw record.
-	 * @param bool                    $from_windows_1252 Whether the file was not valid UTF-8.
+	 * Each cell is judged on its own: valid UTF-8 is kept, anything else is read as
+	 * Windows-1252. A Windows-1252 cell whose high bytes happen to form valid UTF-8,
+	 * such as a literal "Ã©", is kept as UTF-8; that is rarer than a file that mixes
+	 * both encodings.
+	 *
+	 * @param array<int, string|null> $record Raw record.
 	 * @return array<int, string>
 	 */
-	private function normalize_cells( array $record, bool $from_windows_1252 ): array {
+	private function normalize_cells( array $record ): array {
 		$cells = array();
 		foreach ( $record as $value ) {
 			$cell = is_scalar( $value ) ? (string) $value : '';
-			if ( $from_windows_1252 ) {
+			if ( '' !== $cell && ! self::is_utf8( $cell ) ) {
 				$converted = $this->convert_windows_1252( $cell );
 				if ( null === $converted ) {
 					$this->conversion_failed = true;
@@ -858,6 +632,21 @@ class FulfillmentsCsvImporter {
 			$cells[] = $cell;
 		}
 		return $cells;
+	}
+
+	/**
+	 * Whether a string is well-formed UTF-8.
+	 *
+	 * Both checks reject overlong sequences, surrogate halves and stray high bytes.
+	 *
+	 * @param string $value Bytes to check.
+	 * @return bool
+	 */
+	private static function is_utf8( string $value ): bool {
+		if ( function_exists( 'mb_check_encoding' ) ) {
+			return mb_check_encoding( $value, 'UTF-8' );
+		}
+		return 1 === preg_match( '//u', $value );
 	}
 
 	/**

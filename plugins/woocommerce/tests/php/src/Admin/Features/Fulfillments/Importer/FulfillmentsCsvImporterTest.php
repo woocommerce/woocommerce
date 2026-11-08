@@ -598,12 +598,12 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Windows-1252 text is converted at the shared read boundary, and valid UTF-8 is left unchanged.
+	 * @testdox Windows-1252 cells are converted at the shared read boundary, and valid UTF-8 cells are left unchanged.
 	 *
-	 * UTF-8 is detected with a byte checker, not mbstring. Conversion uses
+	 * Each cell is checked for well-formed UTF-8 on its own. Conversion uses
 	 * mb_convert_encoding when that exists, otherwise iconv. This environment
 	 * has mbstring, so the iconv-only branch and the neither-available branch
-	 * are not executed. When neither converter exists, an invalid file returns
+	 * are not executed. When neither converter exists, an invalid cell returns
 	 * unsupported_encoding instead of the raw bytes.
 	 */
 	public function test_character_encoding_is_normalized_for_prepare_and_row_reads(): void {
@@ -626,13 +626,13 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		}
 
 		$legacy_rows = ( new FulfillmentsCsvImporter( $legacy_file ) )->read_data_rows( 0, 1 );
-		$this->assertSame( 'Ã©', $legacy['sample'][1], 'Once the file is not UTF-8, every cell is converted from Windows-1252' );
-		$this->assertSame( 'Spediteur Müller', $legacy['sample'][2] );
+		$this->assertSame( 'é', $legacy['sample'][1], 'A valid UTF-8 cell is kept even when another cell in the row is Windows-1252' );
+		$this->assertSame( 'Spediteur Müller', $legacy['sample'][2], 'A Windows-1252 cell is converted on its own' );
 		$this->assertSame( $legacy['sample'], $legacy_rows['rows'][0]['cells'], 'Prepare and the row reader must decode the same text' );
 	}
 
 	/**
-	 * @testdox A resumed read keeps BOM-stripped offsets and the file-level encoding.
+	 * @testdox A resumed read keeps BOM-stripped offsets and decodes each cell on its own.
 	 */
 	public function test_read_data_rows_resume_keeps_bom_offset_and_encoding(): void {
 		if ( ! function_exists( 'mb_convert_encoding' ) && ! function_exists( 'iconv' ) ) {
@@ -655,7 +655,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 			)
 		);
 		$this->assertSame( 'order_number', $second['headers'][0], 'Resuming must strip the BOM before seeking' );
-		$this->assertSame( 'Ã©', $second['rows'][0]['cells'][1], 'A later row must use the same Windows-1252 decision as the first row' );
+		$this->assertSame( 'é', $second['rows'][0]['cells'][1], 'A valid UTF-8 cell in a later row is kept as it is' );
 		$this->assertSame( 'TWO', $second['rows'][0]['cells'][2] );
 		$this->assertSame( $first['next_record_number'], $second['rows'][0]['row_number'] );
 	}
@@ -747,5 +747,33 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 			),
 			'Optional columns do not satisfy a missing required column'
 		);
+	}
+
+	/**
+	 * @testdox Cells are decoded one at a time, so UTF-8 and Windows-1252 text in the same file both come out right.
+	 */
+	public function test_mixed_encoding_file_decodes_each_cell_on_its_own(): void {
+		if ( ! function_exists( 'mb_convert_encoding' ) && ! function_exists( 'iconv' ) ) {
+			$this->markTestSkipped( 'Windows-1252 conversion is unavailable in this environment.' );
+		}
+
+		$file = $this->make_csv( "order_number,tracking_number,shipment_provider\n101,1Z1,Spediteur M\xC3\xBCller\n102,1Z2,Caf\xE9\n" );
+
+		$parsed = ( new FulfillmentsCsvImporter( $file ) )->parse_headers();
+		$this->assertSame( 'Spediteur Müller', $parsed['sample'][2], 'A valid UTF-8 cell must not be re-decoded because another row is Windows-1252' );
+
+		$rows = ( new FulfillmentsCsvImporter( $file ) )->read_data_rows( 0, 2 );
+		$this->assertSame( 'Spediteur Müller', $rows['rows'][0]['cells'][2] );
+		$this->assertSame( 'Café', $rows['rows'][1]['cells'][2], 'A Windows-1252 cell is converted on its own' );
+	}
+
+	/**
+	 * @testdox Stream paths without a readable file are rejected like any other unreadable path.
+	 */
+	public function test_unreadable_stream_paths_are_rejected(): void {
+		foreach ( array( 'php://memory', 'data://text/plain,order_number%0A1%0A' ) as $path ) {
+			$parsed = ( new FulfillmentsCsvImporter( $path ) )->parse_headers();
+			$this->assertSame( 'file_not_readable', $parsed['error']['code'] ?? null, "{$path} must not bypass the readability check" );
+		}
 	}
 }
