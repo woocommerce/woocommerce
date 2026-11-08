@@ -328,12 +328,16 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 
 	/**
 	 * Filters arguments passed to a WooCommerce template before rendering.
+     * @since 11.4.0
 	 *
 	 * @param array  $args          Template arguments.
 	 * @param string $template_name Template name.
 	 * @param string $template_path Template path.
 	 */
-	$args = apply_filters( 'woocommerce_template_args', $args, $template_name, $template_path );
+	$filtered_args = apply_filters( 'woocommerce_template_args', $args, $template_name, $template_path );
+	if ( is_array( $filtered_args ) ) {
+		$args = $filtered_args;
+	}
 
 	$action_args = array(
 		'template_name' => $template_name,
