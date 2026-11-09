@@ -22,6 +22,9 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZonesQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\TaxRatesQuery;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -52,9 +55,12 @@ class AbilitiesLoader {
 		PaymentGatewaysQuery::class,
 		ProductsQuery::class,
 		ProductTermsQuery::class,
+		ProductReviewsQuery::class,
 		ProductCreate::class,
 		ProductDelete::class,
 		ProductUpdate::class,
+		ShippingZonesQuery::class,
+		TaxRatesQuery::class,
 	);
 
 	/**
@@ -108,7 +114,7 @@ class AbilitiesLoader {
 	 * @since 11.3.0
 	 */
 	public static function register_core_resources(): void {
-		foreach ( array( 'product', 'order', 'order_item', 'product_term' ) as $resource_name ) {
+		foreach ( array( 'product', 'order', 'order_item', 'product_term', 'product_review' ) as $resource_name ) {
 			ExtensibleAbilities::register_resource( $resource_name );
 		}
 	}
@@ -223,6 +229,8 @@ class AbilitiesLoader {
 			$args = $class_name::get_registration_args();
 			if ( $is_actionable ) {
 				$args['ability_class'] = $class_name;
+			} elseif ( $is_core_ability ) {
+				$args['ability_class'] = Ability::class;
 			}
 
 			$registered_ability = wp_register_ability( $ability_name, $args );

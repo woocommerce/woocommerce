@@ -141,7 +141,8 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @uses self::stage_payment_complete()
 	 * @param string $transaction_id Optional transaction id to store in post meta.
-	 * @return bool success
+	 * @return bool False when the order is not saved yet, the order write fails or a listener throws. True otherwise,
+	 *              also when the order status does not let the payment complete.
 	 */
 	public function payment_complete( $transaction_id = '' ) {
 		if ( ! $this->get_id() ) { // Order must exist.
@@ -155,6 +156,9 @@ class WC_Order extends WC_Abstract_Order {
 				}
 			);
 		} catch ( Exception $e ) {
+			if ( $e === $this->get_last_save_error() ) {
+				return false;
+			}
 			/**
 			 * If there was an error completing the payment, log to a file and add an order note so the admin can take action.
 			 */
@@ -177,12 +181,15 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Make the in-memory changes of payment_complete(): the transaction ID, the paid date and the payment
-	 * complete status. Leave the payment note and woocommerce_payment_complete to the next save(), which adds
-	 * the note before it writes and fires the action after it writes. payment_complete() runs this method
-	 * through write_through(), so it adds the note, saves and fires the action right away, as it always did.
+	 * complete status. Leave woocommerce_pre_payment_complete, the session's order_awaiting_payment flag, the
+	 * payment note and woocommerce_payment_complete to the next save(), which runs the first two before it
+	 * writes and adds the note and fires the action after it writes. payment_complete() runs this method through
+	 * write_through(), so it runs all of them and saves right away. When that save fails, the method throws, and
+	 * the note and the action wait for the next save that writes the order with the same status or a paid one.
 	 *
 	 * When the order status is not one that payment can complete, the order does not change, the
-	 * woocommerce_payment_complete_order_status_<status> action fires right away, and the method returns false.
+	 * woocommerce_payment_complete_order_status_<status> action fires right away, the method adds nothing for
+	 * the next save(), and it returns false.
 	 *
 	 * An order that is not saved yet does not change, and the method returns false.
 	 *
@@ -192,6 +199,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @since 11.4.0
 	 * @param string $transaction_id Optional transaction ID to store.
 	 * @return bool True when the order has changes for save() to write.
+	 * @throws Exception When payment_complete() runs this method and the order write fails.
 	 */
 	public function stage_payment_complete( $transaction_id = '' ) {
 		$this->refuse_unstaged_override( 'payment_complete', 'stage_payment_complete' );
@@ -200,17 +208,23 @@ class WC_Order extends WC_Abstract_Order {
 			return false;
 		}
 
-		/**
-		 * Fires before the payment of an order is completed.
-		 *
-		 * @param int    $order_id       Order ID.
-		 * @param string $transaction_id Transaction ID passed to payment_complete().
-		 * @since 2.1.0
-		 */
-		do_action( 'woocommerce_pre_payment_complete', $this->get_id(), $transaction_id );
+		$pre_payment_complete = static function ( $order_id, $transaction_id ) {
+			/**
+			 * Fires before the payment of an order is completed.
+			 *
+			 * @param int    $order_id       Order ID.
+			 * @param string $transaction_id Transaction ID passed to payment_complete().
+			 * @since 2.1.0
+			 */
+			do_action( 'woocommerce_pre_payment_complete', $order_id, $transaction_id );
 
-		if ( WC()->session ) {
-			WC()->session->set( 'order_awaiting_payment', false );
+			if ( WC()->session ) {
+				WC()->session->set( 'order_awaiting_payment', false );
+			}
+		};
+
+		if ( $this->writing_through ) {
+			$this->write_or_defer( 'pre_payment_complete', $pre_payment_complete, array( $this->get_id(), $transaction_id ) );
 		}
 
 		/**
@@ -232,6 +246,13 @@ class WC_Order extends WC_Abstract_Order {
 			do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id(), $transaction_id );
 			return false;
 		}
+
+		if ( ! $this->writing_through ) {
+			$this->defer_to_save( 'pre_payment_complete', $pre_payment_complete, array( $this->get_id(), $transaction_id ) );
+		}
+
+		$this->defer_to_save( 'payment_complete', null );
+		$this->defer_to_save( 'payment_complete_note', null );
 
 		if ( ! empty( $transaction_id ) ) {
 			$this->set_transaction_id( $transaction_id );
@@ -258,9 +279,52 @@ class WC_Order extends WC_Abstract_Order {
 
 		$this->set_status( $next_status, false );
 
-		$this->write_or_defer( 'payment_complete_note', array( $this, 'add_order_note' ), array( $payment_complete_note, false, false, array( 'note_group' => OrderNoteGroup::PAYMENT ) ) );
 		$this->save_if_writing_through();
-		$this->write_or_defer( 'payment_complete', 'do_action', array( 'woocommerce_payment_complete', $this->get_id(), $transaction_id ), true );
+
+		$add_note    = function () use ( $payment_complete_note ) {
+			try {
+				$this->add_order_note( $payment_complete_note, 0, false, array( 'note_group' => OrderNoteGroup::PAYMENT ) );
+			} catch ( Exception $e ) {
+				wc_get_logger()->error(
+					sprintf( 'Error adding the payment note for order #%d', $this->get_id() ),
+					array(
+						'order' => $this,
+						'error' => $e,
+					)
+				);
+			}
+		};
+		$action_args = array( 'woocommerce_payment_complete', $this->get_id(), $transaction_id );
+		$save_error  = $this->writing_through ? $this->get_last_save_error() : null;
+		if ( null !== $save_error ) {
+			$paid_status = $this->get_status();
+			$this->defer_to_save(
+				'payment_complete',
+				function () use ( $paid_status, $add_note, $action_args ) {
+					if ( ! $this->has_status( $paid_status ) && ! $this->is_paid() ) {
+						return;
+					}
+					$add_note();
+					try {
+						call_user_func_array( 'do_action', $action_args );
+					} catch ( Exception $e ) {
+						wc_get_logger()->error(
+							sprintf( 'Error completing payment for order #%d', $this->get_id() ),
+							array(
+								'order' => $this,
+								'error' => $e,
+							)
+						);
+						$this->add_order_note( __( 'Payment complete event failed.', 'woocommerce' ) . ' ' . $e->getMessage(), 0, false, array( 'note_group' => OrderNoteGroup::ERROR ) );
+					}
+				},
+				array(),
+				true
+			);
+			throw $save_error;
+		}
+		$this->write_or_defer( 'payment_complete_note', $add_note, array(), true );
+		$this->write_or_defer( 'payment_complete', 'do_action', $action_args, true );
 
 		return true;
 	}
@@ -507,7 +571,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @param string $new_status    Status to change the order to. No internal wc- prefix is required.
 	 * @param string $note          Optional note to add.
 	 * @param bool   $manual        Is this a manual order status change?.
-	 * @return bool
+	 * @return bool Whether the order was saved with the new status.
 	 */
 	public function update_status( $new_status, $note = '', $manual = false ) {
 		if ( ! $this->get_id() ) { // Order must exist.
@@ -536,7 +600,9 @@ class WC_Order extends WC_Abstract_Order {
 			$this->add_order_note( __( 'Update status event failed.', 'woocommerce' ) . ' ' . $e->getMessage(), false, false, array( 'note_group' => OrderNoteGroup::ERROR ) );
 			return false;
 		}
-		return true;
+
+		// save() swallows its own exceptions, so check whether it could persist the order.
+		return null === $this->get_last_save_error();
 	}
 
 	/**

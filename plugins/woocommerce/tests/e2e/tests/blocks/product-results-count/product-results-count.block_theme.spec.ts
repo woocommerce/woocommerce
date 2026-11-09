@@ -44,4 +44,21 @@ test.describe( `${ blockData.slug } Block`, () => {
 			await requestUtils.revertTemplate( 'wp_template', template.id );
 		}
 	} );
+
+	test( 'announces the new count to screen readers after sorting', async ( {
+		page,
+	} ) => {
+		await page.goto( '/shop/' );
+
+		await page
+			.getByRole( 'combobox', { name: 'Shop order' } )
+			.selectOption( 'price' );
+
+		await expect( page ).toHaveURL(
+			( url ) => url.searchParams.get( 'orderby' ) === 'price'
+		);
+		await expect( page.locator( '#a11y-speak-polite' ) ).toHaveText(
+			/^Showing .+ results Sorted by price: low to high/
+		);
+	} );
 } );

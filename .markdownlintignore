@@ -8,3 +8,4 @@ packages/php/woocommerce-analytics/CHANGELOG.md
 /CLAUDE.md
 plugins/woocommerce/packages/action-scheduler/CLAUDE.md
 plugins/woocommerce/tests/php/src/CLAUDE.md
+plugins/woocommerce/src/Internal/Abilities/CLAUDE.md

@@ -8,6 +8,8 @@ Only `Routes/V4/` is the experimental v4 API. Other code in this directory is sh
 
 - `Refunds/`: the version-neutral refund engine used by the wc/v3 refund endpoints and the v4 routes.
 - `ProductRequestPreparationTrait.php`: used by the wc/v2 and wc/v3 product endpoints.
+- `OrderLineItemValidationTrait.php`: used by the wc/v1, wc/v2 and wc/v3 order endpoints.
+- `InteractiveSessionCheck.php`: used by the wc-admin plugin and onboarding endpoints.
 
 `Routes/V4/Orders/OrderLineMetaValidator.php` is also used by the wc/v2 and wc/v3 order endpoints. Move it out of `Routes/V4/` before removing the v4 routes.
 

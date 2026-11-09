@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Let AI agents fetch several orders by ID in one request with the include input of the woocommerce/orders-query ability.
