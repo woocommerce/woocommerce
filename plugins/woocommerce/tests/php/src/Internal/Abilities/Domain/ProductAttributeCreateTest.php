@@ -215,7 +215,7 @@ class ProductAttributeCreateTest extends WC_Unit_Test_Case {
 		$saved = wc_get_product( $result['product']['id'] );
 		$this->assertInstanceOf( \WC_Product_Variable::class, $saved );
 		$this->assertCount( 4, $saved->get_children() );
-		$this->assertSame( array( 'red', 'blue' ), wc_get_product_terms( $saved->get_id(), $color['slug'], array( 'fields' => 'slugs' ) ) );
+		$this->assertEqualsCanonicalizing( array( 'red', 'blue' ), wc_get_product_terms( $saved->get_id(), $color['slug'], array( 'fields' => 'slugs' ) ) );
 		$saved_prices = array();
 		foreach ( $saved->get_children() as $child_id ) {
 			$variation = wc_get_product( $child_id );
