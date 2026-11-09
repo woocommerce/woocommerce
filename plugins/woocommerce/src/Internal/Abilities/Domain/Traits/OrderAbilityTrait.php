@@ -186,22 +186,22 @@ trait OrderAbilityTrait {
 				'date_paid'            => array(
 					'type'        => 'string',
 					'format'      => 'date-time',
-					'description' => __( 'Payment date in the store timezone. Omitted when the order is not paid.', 'woocommerce' ),
+					'description' => __( 'When the order was paid, in the store timezone. Kept after later status changes, such as a refund. Omitted when the order was never paid.', 'woocommerce' ),
 				),
 				'date_paid_gmt'        => array(
 					'type'        => 'string',
 					'format'      => 'date-time',
-					'description' => __( 'Payment date in UTC. Omitted when the order is not paid.', 'woocommerce' ),
+					'description' => __( 'When the order was paid, in UTC. Kept after later status changes, such as a refund. Omitted when the order was never paid.', 'woocommerce' ),
 				),
 				'date_completed'       => array(
 					'type'        => 'string',
 					'format'      => 'date-time',
-					'description' => __( 'Completion date in the store timezone. Omitted when the order is not completed.', 'woocommerce' ),
+					'description' => __( 'When the order was completed, in the store timezone. Kept after later status changes, such as a refund. Omitted when the order was never completed.', 'woocommerce' ),
 				),
 				'date_completed_gmt'   => array(
 					'type'        => 'string',
 					'format'      => 'date-time',
-					'description' => __( 'Completion date in UTC. Omitted when the order is not completed.', 'woocommerce' ),
+					'description' => __( 'When the order was completed, in UTC. Kept after later status changes, such as a refund. Omitted when the order was never completed.', 'woocommerce' ),
 				),
 				'line_items'           => array(
 					'type'        => 'array',
