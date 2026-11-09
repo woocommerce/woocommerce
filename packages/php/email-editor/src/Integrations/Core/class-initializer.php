@@ -120,20 +120,28 @@ class Initializer {
 	/**
 	 * Stop WordPress from adding loading, decoding, srcset and sizes to images in the email.
 	 *
-	 * Apple Mail never loads images marked loading="lazy". The late priority keeps the removal from
-	 * touching a callback another plugin added.
+	 * Apple Mail never loads images marked loading="lazy".
 	 */
 	public function disable_web_image_attributes(): void {
-		add_filter( 'wp_get_loading_optimization_attributes', '__return_empty_array', PHP_INT_MAX );
-		add_filter( 'wp_calculate_image_srcset_meta', '__return_empty_array', PHP_INT_MAX );
+		add_filter( 'wp_get_loading_optimization_attributes', array( $this, 'get_no_image_attributes' ), PHP_INT_MAX );
+		add_filter( 'wp_calculate_image_srcset_meta', array( $this, 'get_no_image_attributes' ), PHP_INT_MAX );
+	}
+
+	/**
+	 * Filter callback that gives WordPress no image attributes or srcset data to work with.
+	 *
+	 * @return array Empty array.
+	 */
+	public function get_no_image_attributes(): array {
+		return array();
 	}
 
 	/**
 	 * Let WordPress add its image attributes again once the email has rendered.
 	 */
 	public function restore_web_image_attributes(): void {
-		remove_filter( 'wp_get_loading_optimization_attributes', '__return_empty_array', PHP_INT_MAX );
-		remove_filter( 'wp_calculate_image_srcset_meta', '__return_empty_array', PHP_INT_MAX );
+		remove_filter( 'wp_get_loading_optimization_attributes', array( $this, 'get_no_image_attributes' ), PHP_INT_MAX );
+		remove_filter( 'wp_calculate_image_srcset_meta', array( $this, 'get_no_image_attributes' ), PHP_INT_MAX );
 	}
 
 	/**
