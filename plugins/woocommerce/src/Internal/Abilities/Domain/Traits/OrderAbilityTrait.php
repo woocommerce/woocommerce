@@ -186,22 +186,22 @@ trait OrderAbilityTrait {
 				'date_paid'            => array(
 					'type'        => 'string',
 					'format'      => 'date-time',
-					'description' => __( 'When the order was paid, in the store timezone. Kept after later status changes, such as a refund. Omitted when the order was never paid.', 'woocommerce' ),
+					'description' => __( 'Payment date in the store timezone. Kept after a later status change, such as a refund. Omitted when never paid.', 'woocommerce' ),
 				),
 				'date_paid_gmt'        => array(
 					'type'        => 'string',
 					'format'      => 'date-time',
-					'description' => __( 'When the order was paid, in UTC. Kept after later status changes, such as a refund. Omitted when the order was never paid.', 'woocommerce' ),
+					'description' => __( 'date_paid in UTC.', 'woocommerce' ),
 				),
 				'date_completed'       => array(
 					'type'        => 'string',
 					'format'      => 'date-time',
-					'description' => __( 'When the order was completed, in the store timezone. Kept after later status changes, such as a refund. Omitted when the order was never completed.', 'woocommerce' ),
+					'description' => __( 'Completion date in the store timezone. Kept after a later status change, such as a refund. Omitted when never completed.', 'woocommerce' ),
 				),
 				'date_completed_gmt'   => array(
 					'type'        => 'string',
 					'format'      => 'date-time',
-					'description' => __( 'When the order was completed, in UTC. Kept after later status changes, such as a refund. Omitted when the order was never completed.', 'woocommerce' ),
+					'description' => __( 'date_completed in UTC.', 'woocommerce' ),
 				),
 				'line_items'           => array(
 					'type'        => 'array',
@@ -289,16 +289,15 @@ trait OrderAbilityTrait {
 	}
 
 	/**
-	 * Schema of one kind of order line other than line items, all present only when include_lines is true.
+	 * Schema of one kind of order line other than line items. The include_lines input describes when they are present.
 	 *
 	 * @param array $properties Properties of one line.
 	 * @return array
 	 */
 	private static function get_order_lines_schema( array $properties ): array {
 		return array(
-			'type'        => 'array',
-			'description' => __( 'Only present when include_lines is true.', 'woocommerce' ),
-			'items'       => array(
+			'type'  => 'array',
+			'items' => array(
 				'type'                 => 'object',
 				'properties'           => $properties,
 				'additionalProperties' => false,
