@@ -607,7 +607,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		$current = $this->get_requested_catalog_visibility();
 		$output  = '<select name="catalog_visibility"><option value="">' . esc_html__( 'Filter by visibility', 'woocommerce' ) . '</option>';
 
-		foreach ( wc_get_product_visibility_options() as $value => $label ) {
+		foreach ( $this->get_catalog_visibility_filter_options() as $value => $label ) {
 			$output .= '<option ' . selected( $value, $current, false ) . ' value="' . esc_attr( $value ) . '">' . esc_html( $label ) . '</option>';
 		}
 
@@ -628,7 +628,22 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			$value = reset( $value ); // The dropdown sends one value, so use the first one if the request has several.
 		}
 
-		return is_string( $value ) && array_key_exists( $value, wc_get_product_visibility_options() ) ? $value : '';
+		return is_string( $value ) && array_key_exists( $value, $this->get_catalog_visibility_filter_options() ) ? $value : '';
+	}
+
+	/**
+	 * Get the catalog visibility options the filter can list products by.
+	 *
+	 * Keeps the labels and removals from the woocommerce_product_visibility_options filter, but drops values that
+	 * extensions add. The product data store only saves the four core values, so the query cannot match any other value.
+	 *
+	 * @return array<string, string> Option labels keyed by catalog visibility value.
+	 */
+	private function get_catalog_visibility_filter_options(): array {
+		$options   = wc_get_product_visibility_options();
+		$supported = array( CatalogVisibility::VISIBLE, CatalogVisibility::CATALOG, CatalogVisibility::SEARCH, CatalogVisibility::HIDDEN );
+
+		return is_array( $options ) ? array_intersect_key( $options, array_flip( $supported ) ) : array();
 	}
 
 	/**

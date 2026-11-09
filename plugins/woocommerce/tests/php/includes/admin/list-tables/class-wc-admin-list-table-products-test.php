@@ -748,6 +748,44 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Products list catalog visibility filter ignores a visibility value an extension adds.
+	 */
+	public function test_catalog_visibility_filter_ignores_extension_value(): void {
+		$visible = WC_Helper_Product::create_simple_product();
+		$hidden  = WC_Helper_Product::create_simple_product();
+		$hidden->set_catalog_visibility( CatalogVisibility::HIDDEN );
+		$hidden->save();
+
+		$add_option = static function ( $options ) {
+			$options['members-only'] = 'Members only';
+			return $options;
+		};
+		add_filter( 'woocommerce_product_visibility_options', $add_option );
+
+		$original_get               = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
+		$_GET['catalog_visibility'] = 'members-only';
+
+		try {
+			$query_vars = $this->sut->request_query(
+				array(
+					'post_type'      => 'product',
+					'post_status'    => 'any',
+					'posts_per_page' => -1,
+					'fields'         => 'ids',
+					'orderby'        => 'ID',
+					'order'          => 'ASC',
+				)
+			);
+			$results    = array_map( 'intval', ( new WP_Query( $query_vars ) )->get_posts() );
+		} finally {
+			$_GET = $original_get; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			remove_filter( 'woocommerce_product_visibility_options', $add_option );
+		}
+
+		$this->assertSame( array( $visible->get_id(), $hidden->get_id() ), $results );
+	}
+
+	/**
 	 * Catalog visibility values.
 	 *
 	 * @return array<string, array{string}>
