@@ -22,10 +22,12 @@
 			return;
 		}
 		statusBadge.textContent = settings.i18n.statusLabel[ status ];
-		statusBadge.className = statusBadge.className.replace(
-			/wc-agentic-commerce-badge--\w+/,
-			'wc-agentic-commerce-badge--' +
-				( { active: 'pass', off: 'off', needs_attention: 'fix' }[ status ] || 'off' )
+		const badges = { active: 'pass', off: 'off', needs_attention: 'fix' };
+		Object.values( badges ).forEach( ( badge ) =>
+			statusBadge.classList.remove( 'wc-agentic-commerce-badge--' + badge )
+		);
+		statusBadge.classList.add(
+			'wc-agentic-commerce-badge--' + ( badges[ status ] || 'off' )
 		);
 	};
 
