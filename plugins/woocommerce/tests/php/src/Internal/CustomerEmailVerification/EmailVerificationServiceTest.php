@@ -62,13 +62,14 @@ class EmailVerificationServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Legacy one-argument calls do not verify the account, consume its pending key, or fire the hook.
+	 * @testdox Legacy one-argument calls report incorrect usage without changing verification state.
 	 */
 	public function test_mark_verified_without_expected_email(): void {
 		$user_id    = wc_create_new_customer( 'legacy@example.com', 'legacyuser', 'pw' );
 		$key        = $this->sut->create_verification_key( $user_id );
 		$hook_calls = did_action( 'woocommerce_customer_email_verified' );
 
+		$this->setExpectedIncorrectUsage( EmailVerificationService::class . '::mark_verified' );
 		$this->sut->mark_verified( $user_id );
 
 		$this->assertFalse( $this->sut->is_verified( $user_id ), 'An omitted expected email must not verify the account' );
