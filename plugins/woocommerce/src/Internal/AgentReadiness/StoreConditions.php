@@ -55,7 +55,7 @@ class StoreConditions {
 		$settings_url = static fn( string $tab ): string => admin_url( 'admin.php?page=wc-settings&tab=' . $tab );
 		$policy_page  = static fn( string $id, string $option, string $name, string $label, string $why, string $level = self::LEVEL_REQUIRED ): array => array(
 			'id'      => $id,
-			'ok'      => self::is_published_page( (int) get_option( $option ) ),
+			'ok'      => self::is_policy_page( (int) get_option( $option ) ),
 			'blocks'  => 'checkout',
 			'level'   => $level,
 			'name'    => $name,
@@ -129,7 +129,8 @@ class StoreConditions {
 				AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION,
 				__( 'Refund and returns page is selected', 'woocommerce' ),
 				__( 'No refund and returns page', 'woocommerce' ),
-				__( 'Agents link shoppers to your return terms before they buy.', 'woocommerce' )
+				__( 'Agents link shoppers to your return terms before they buy.', 'woocommerce' ),
+				self::LEVEL_RECOMMENDED
 			),
 			$policy_page(
 				'shipping_policy_page',
@@ -181,12 +182,27 @@ class StoreConditions {
 	}
 
 	/**
-	 * Whether a page id points at a published page.
+	 * Whether a page id is a published page other than the cart, checkout, shop or My account page.
 	 *
 	 * @param int $page_id Page id.
 	 */
-	public static function is_published_page( int $page_id ): bool {
-		return $page_id > 0 && 'page' === get_post_type( $page_id ) && 'publish' === get_post_status( $page_id );
+	public static function is_policy_page( int $page_id ): bool {
+		return $page_id > 0 && 'page' === get_post_type( $page_id ) && 'publish' === get_post_status( $page_id ) && ! in_array( $page_id, self::store_page_ids(), true );
+	}
+
+	/**
+	 * The cart, checkout, shop and My account pages, which can't be a policy page.
+	 * Advanced > Page setup leaves them out of its terms and refund fields too.
+	 *
+	 * @return array<int, int>
+	 */
+	public static function store_page_ids(): array {
+		return array_values(
+			array_filter(
+				array_map( 'wc_get_page_id', array( 'cart', 'checkout', 'shop', 'myaccount' ) ),
+				static fn ( $page_id ) => $page_id > 0
+			)
+		);
 	}
 
 	/**

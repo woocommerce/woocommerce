@@ -47,17 +47,17 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A draft or trashed refund page fails its check like an unset one.
+	 * @testdox A draft or trashed terms page fails its check like an unset one; only privacy and terms are required, as the UCP spec names them.
 	 *
 	 * @testWith ["draft"]
 	 *           ["trash"]
 	 *
-	 * @param string $post_status Status of the selected refund page.
+	 * @param string $post_status Status of the selected terms page.
 	 */
 	public function test_unpublished_policy_page_fails( string $post_status ): void {
 		self::make_store_ready();
 		update_option(
-			AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION,
+			AgenticCommerceSettings::TERMS_PAGE_OPTION,
 			self::factory()->post->create(
 				array(
 					'post_type'   => 'page',
@@ -68,12 +68,34 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 
 		$checks = array_column( $this->sut->all(), null, 'id' );
 
-		$this->assertFalse( $checks['refund_returns_page']['ok'] );
-		$this->assertSame( StoreConditions::LEVEL_REQUIRED, $checks['refund_returns_page']['level'] );
-		$this->assertSame( array( 'refund_returns_page' ), $this->sut->failing_required() );
+		$this->assertFalse( $checks['terms_page']['ok'] );
+		$this->assertSame( array( 'terms_page' ), $this->sut->failing_required() );
 		$this->assertSame( StoreConditions::LEVEL_REQUIRED, $checks['privacy_page']['level'] );
-		$this->assertSame( StoreConditions::LEVEL_REQUIRED, $checks['terms_page']['level'] );
+		$this->assertSame( StoreConditions::LEVEL_RECOMMENDED, $checks['refund_returns_page']['level'], 'The refund and returns page is only recommended' );
 		$this->assertSame( StoreConditions::LEVEL_RECOMMENDED, $checks['shipping_policy_page']['level'], 'The shipping policy page is only recommended' );
+	}
+
+	/**
+	 * @testdox A store page chosen as the terms page under Advanced > Page setup fails the terms check.
+	 *
+	 * @testWith ["cart"]
+	 *           ["shop"]
+	 *           ["myaccount"]
+	 *
+	 * @param string $store_page Store page used as the terms page.
+	 */
+	public function test_store_page_fails_terms_check( string $store_page ): void {
+		self::make_store_ready();
+		$page = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'woocommerce_' . $store_page . '_page_id', $page );
+		update_option( AgenticCommerceSettings::TERMS_PAGE_OPTION, $page );
+
+		$this->assertSame( array( 'terms_page' ), $this->sut->failing_required() );
 	}
 
 	/**

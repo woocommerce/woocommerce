@@ -274,6 +274,29 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A store page set as the terms page under Advanced > Page setup is listed, and saving the tab keeps it.
+	 */
+	public function test_save_keeps_store_page_set_as_terms_page(): void {
+		$cart = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Cart',
+			)
+		);
+		update_option( 'woocommerce_cart_page_id', $cart );
+		update_option( AgenticCommerceSettings::TERMS_PAGE_OPTION, $cart );
+
+		$settings = $this->page()->get_settings_for_section( '' );
+		$terms    = current( wp_list_filter( $settings, array( 'id' => AgenticCommerceSettings::TERMS_PAGE_OPTION ) ) );
+		$this->assertSame( 'Cart (Store page)', $terms['options'][ (string) $cart ] );
+
+		WC_Admin_Settings::save_fields( $settings, array( AgenticCommerceSettings::TERMS_PAGE_OPTION => (string) $cart ) );
+
+		$this->assertSame( $cart, (int) get_option( AgenticCommerceSettings::TERMS_PAGE_OPTION ) );
+	}
+
+	/**
 	 * @testdox Clearing a published page on the tab clears it everywhere.
 	 */
 	public function test_save_clears_published_page(): void {

@@ -78,7 +78,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 * @return array<int, array<string, mixed>>
 	 */
 	protected function get_settings_for_default_section() {
-		$store_pages = self::store_page_ids();
+		$store_pages = StoreConditions::store_page_ids();
 		$pages       = array( '' => __( 'Select a page…', 'woocommerce' ) );
 		$published   = get_pages(
 			array(
@@ -92,10 +92,12 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		$page_field = static function ( string $option, string $title, string $desc = '' ) use ( $pages, $store_pages ): array {
 			$options = $pages;
 			$stored  = get_post( (int) get_option( $option ) );
-			if ( $stored instanceof \WP_Post && 'page' === $stored->post_type && ! isset( $options[ (string) $stored->ID ] ) && ! in_array( $stored->ID, $store_pages, true ) ) {
+			// A stored page that can't be chosen here stays listed, so saving another field keeps it.
+			if ( $stored instanceof \WP_Post && 'page' === $stored->post_type && ! isset( $options[ (string) $stored->ID ] ) ) {
 				$status = get_post_status_object( $stored->post_status );
-				/* translators: 1: page title, 2: page status, such as Draft. */
-				$options[ (string) $stored->ID ] = sprintf( __( '%1$s (%2$s)', 'woocommerce' ), $stored->post_title, $status ? $status->label : $stored->post_status );
+				$state  = in_array( $stored->ID, $store_pages, true ) ? __( 'Store page', 'woocommerce' ) : ( $status ? $status->label : $stored->post_status );
+				/* translators: 1: page title, 2: page status, such as Draft, or "Store page". */
+				$options[ (string) $stored->ID ] = sprintf( __( '%1$s (%2$s)', 'woocommerce' ), $stored->post_title, $state );
 			}
 			return array(
 				'title'              => $title,
@@ -175,25 +177,10 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		if ( 0 === $page_id ) {
 			return '';
 		}
-		if ( ! in_array( $page_id, self::store_page_ids(), true ) && StoreConditions::is_published_page( $page_id ) ) {
+		if ( StoreConditions::is_policy_page( $page_id ) ) {
 			return (string) $page_id;
 		}
 		return null;
-	}
-
-	/**
-	 * The cart, checkout, shop and My account pages, which can't be a policy page.
-	 * Advanced > Page setup leaves them out of its terms and refund fields too.
-	 *
-	 * @return array<int, int>
-	 */
-	private static function store_page_ids(): array {
-		return array_values(
-			array_filter(
-				array_map( 'wc_get_page_id', array( 'cart', 'checkout', 'shop', 'myaccount' ) ),
-				static fn ( $page_id ) => $page_id > 0
-			)
-		);
 	}
 
 	/**
