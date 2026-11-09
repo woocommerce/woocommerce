@@ -392,9 +392,9 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 	 */
 	public function test_sorts_by_total( bool $hpos ): void {
 		$this->use_storage( $hpos );
-		$thirty = $this->create_dated_order( 30 );
-		$ten    = $this->create_dated_order( 10 );
-		$twenty = $this->create_dated_order( 20 );
+		$hundred = $this->create_dated_order( 100 );
+		$nine    = $this->create_dated_order( 9 );
+		$ten     = $this->create_dated_order( 10 );
 
 		$result = OrdersQuery::execute(
 			array(
@@ -403,7 +403,7 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( array( $ten, $twenty, $thirty ), array_column( $result['orders'], 'id' ) );
+		$this->assertSame( array( $nine, $ten, $hundred ), array_column( $result['orders'], 'id' ) );
 	}
 
 	/**
