@@ -250,7 +250,8 @@ const personalizationTagsLiveContentUpdate = createHigherOrderComponent(
 		if (
 			name === 'core/paragraph' ||
 			name === 'core/heading' ||
-			name === 'core/list-item'
+			name === 'core/list-item' ||
+			name === 'core/preformatted'
 		) {
 			return (
 				<BlockEdit
