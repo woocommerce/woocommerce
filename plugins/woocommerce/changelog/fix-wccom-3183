@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop WooCommerce.com extension auto-updates from failing on expired download links after a failed update check.
