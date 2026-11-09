@@ -996,6 +996,8 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		$webhook = $this->create_failing_webhook();
 		$fired   = did_action( 'woocommerce_webhook_disabled_due_delivery_failures' );
 
+		$this->http_responder = fn() => $this->mock_http_response( 200 );
+
 		$webhook->stage_delivery_result( 500 );
 		$webhook->set_status( 'active' );
 		$webhook->save();
