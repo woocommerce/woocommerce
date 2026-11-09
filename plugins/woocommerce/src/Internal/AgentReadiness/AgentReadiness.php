@@ -195,21 +195,6 @@ class AgentReadiness {
 	}
 
 	/**
-	 * Drop checks left with no valid channel.
-	 *
-	 * @param array<string, array<string, array{field:string,effect:string}>> $rules Channel map by check id.
-	 * @return array<string, array<string, array{field:string,effect:string}>>
-	 */
-	private function without_empty( array $rules ): array {
-		return array_filter(
-			$rules,
-			static function ( array $channels ): bool {
-				return array() !== $channels;
-			}
-		);
-	}
-
-	/**
 	 * Run every check over the catalog.
 	 *
 	 * @return array{generated_at:string,products:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool}
