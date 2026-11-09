@@ -796,6 +796,27 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tracker data includes the number of customers with stored Application Passwords.
+	 */
+	public function test_customer_application_password_user_count(): void {
+		$get_user_counts = new ReflectionMethod( WC_Tracker::class, 'get_user_counts' );
+		$get_user_counts->setAccessible( true );
+		$initial_count = $get_user_counts->invoke( null )['customer_application_password_users'];
+
+		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		$admin_id    = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$empty_id    = self::factory()->user->create( array( 'role' => 'customer' ) );
+
+		$this->assertIsArray( WP_Application_Passwords::create_new_application_password( $customer_id, array( 'name' => 'Customer credential' ) ) );
+		$this->assertIsArray( WP_Application_Passwords::create_new_application_password( $admin_id, array( 'name' => 'Administrator credential' ) ) );
+		update_user_meta( $empty_id, WP_Application_Passwords::USERMETA_KEY_APPLICATION_PASSWORDS, array() );
+
+		$updated_count = $get_user_counts->invoke( null )['customer_application_password_users'];
+
+		$this->assertSame( $initial_count + 1, $updated_count, 'Only current customers with a stored credential should be counted' );
+	}
+
+	/**
 	 * @testDox Test tracking data records snapshot generation time.
 	 */
 	public function test_get_tracking_data_snapshot_generation_time() {
