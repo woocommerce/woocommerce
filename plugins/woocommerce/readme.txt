@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 11.3.0-rc.1 2026-XX-XX =
+= 11.3.0-rc.1 2026-11-09 =
 
 **WooCommerce**
 
@@ -388,6 +388,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Store API: reject an address change on the pay-for-order checkout endpoint when it would alter the order's shipping cost or tax. [#70364](https://github.com/woocommerce/woocommerce/pull/70364)
 * Fix - Store API reviews endpoint: include avatars data only if they are enabled on the site [#70521](https://github.com/woocommerce/woocommerce/pull/70521)
 * Fix - Strengthen download permission ID checks [#70334](https://github.com/woocommerce/woocommerce/pull/70334)
+* Fix - Keep coupon codes with special characters working on WordPress 7.2, show `&` correctly in the coupon editor, and fix a critical error with some codes containing `<`. [#70683](https://github.com/woocommerce/woocommerce/pull/70683)
 * Add - Add ActionableAbility to the experimental extensible abilities feature. With it on, product create and product update accept extension fields under extensions.<namespace>.<field>, and save Core and extension fields one time. [#69681](https://github.com/woocommerce/woocommerce/pull/69681)
 * Add - Add a location filter to the Analytics Taxes report, narrowing the report, its summary and its export to a country or a state. [#68839](https://github.com/woocommerce/woocommerce/pull/68839)
 * Add - Add an admin notice about the upcoming PHP 8.1 requirement in WooCommerce 11.6 for stores running an older PHP version. [#69094](https://github.com/woocommerce/woocommerce/pull/69094)
@@ -494,6 +495,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Enhancement - Update sale badges to show the discount for the selected product variation. [#69596](https://github.com/woocommerce/woocommerce/pull/69596)
 * Enhancement - Update the site visibility badge default when changing store visibility. [#67992](https://github.com/woocommerce/woocommerce/pull/67992)
 * Enhancement - Use consistent markup for classic notices by wrapping them all in `woocommerce-notices-wrapper`. [#68716](https://github.com/woocommerce/woocommerce/pull/68716)
+* Enhancement - Refresh WooCommerce admin menu icons to match WordPress 7.2 while keeping existing icons on older versions. [#70729](https://github.com/woocommerce/woocommerce/pull/70729)
 
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
