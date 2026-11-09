@@ -301,15 +301,11 @@ class Post_Content_Test extends \Email_Editor_Integration_Test_Case {
 			array( 'postId' => $post_id )
 		);
 
-		add_filter( 'wp_calculate_image_srcset_meta', '__return_empty_array', PHP_INT_MAX );
 		do_action( 'woocommerce_email_editor_render_start' );
 		$rendered         = ( new Post_Content() )->render_stateless( array(), '', $block );
 		$attachment_image = wp_get_attachment_image( $attachment_id, 'full' );
 		do_action( 'woocommerce_email_editor_render_end' );
-		$other_plugin_filter_kept = has_filter( 'wp_calculate_image_srcset_meta', '__return_empty_array' );
-		remove_filter( 'wp_calculate_image_srcset_meta', '__return_empty_array', PHP_INT_MAX );
 
-		$this->assertSame( PHP_INT_MAX, $other_plugin_filter_kept, 'Another plugin\'s identical filter must survive the render.' );
 		$this->assertSame( 4, substr_count( $rendered, '<img' ) );
 		$this->assertStringContainsString( '<img', $attachment_image );
 		$this->assertStringNotContainsString( 'srcset=', $attachment_image );
@@ -347,5 +343,19 @@ class Post_Content_Test extends \Email_Editor_Integration_Test_Case {
 		}
 		$this->assertStringContainsString( 'src="https://test.com/image.jpg"', $rendered );
 		$this->assertStringContainsString( 'width="600"', $rendered );
+	}
+
+	/**
+	 * Test that ending the render keeps a filter another plugin registered with a shared WordPress callback.
+	 */
+	public function testItKeepsAnotherPluginsImageFilterAfterRender(): void {
+		add_filter( 'wp_calculate_image_srcset_meta', '__return_empty_array', PHP_INT_MAX );
+
+		do_action( 'woocommerce_email_editor_render_start' );
+		do_action( 'woocommerce_email_editor_render_end' );
+		$priority = has_filter( 'wp_calculate_image_srcset_meta', '__return_empty_array' );
+		remove_filter( 'wp_calculate_image_srcset_meta', '__return_empty_array', PHP_INT_MAX );
+
+		$this->assertSame( PHP_INT_MAX, $priority );
 	}
 }

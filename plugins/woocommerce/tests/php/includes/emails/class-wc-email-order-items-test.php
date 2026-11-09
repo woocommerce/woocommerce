@@ -53,9 +53,9 @@ class WC_Email_Order_Items_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Order item images carry no web-only loading attributes while an email is sending.
+	 * @testdox Order item images are not lazy loaded while an email is sending.
 	 */
-	public function test_order_item_image_has_no_web_only_attributes_while_sending(): void {
+	public function test_order_item_image_is_not_lazy_loaded_while_sending(): void {
 		$order             = WC_Helper_Order::create_order();
 		$this->order_ids[] = $order->get_id();
 
@@ -85,8 +85,29 @@ class WC_Email_Order_Items_Test extends \WC_Unit_Test_Case {
 		$email->sending = false;
 
 		$this->assertStringContainsString( '<img', $content );
-		foreach ( array( 'loading=', 'decoding=', 'srcset=', 'sizes=' ) as $attribute ) {
-			$this->assertStringNotContainsString( $attribute, $content );
-		}
+		$this->assertStringNotContainsString( 'loading=', $content );
+	}
+
+	/**
+	 * @testdox Web-only attributes are removed from attachment images while an email is sending.
+	 */
+	public function test_web_only_attributes_are_removed_while_sending(): void {
+		$email          = new WC_Email();
+		$email->sending = true;
+
+		$attributes     = $email->prevent_lazy_loading_on_attachment(
+			array(
+				'src'           => 'https://example.com/image.jpg',
+				'loading'       => 'lazy',
+				'decoding'      => 'async',
+				'fetchpriority' => 'high',
+				'srcset'        => 'https://example.com/image.jpg 300w',
+				'sizes'         => '100vw',
+			)
+		);
+		$email->sending = false;
+
+		$this->assertSame( 'https://example.com/image.jpg', $attributes['src'] );
+		$this->assertEmpty( array_intersect_key( $attributes, array_flip( array( 'loading', 'decoding', 'fetchpriority', 'srcset', 'sizes' ) ) ) );
 	}
 }
