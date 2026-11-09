@@ -185,6 +185,11 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 */
 	public function tearDown(): void {
 		try {
+			// Function and static-method mocks are process-wide. Reset them here so the test
+			// that installs one is the last to see it, including when the next test extends a
+			// WordPress base class that never runs setUp() on this hierarchy.
+			CodeHacker::reset_hacks();
+
 			$this->clear_wc_singleton_state();
 		} finally {
 			// The parent teardown must always run: it rolls back the database
@@ -219,6 +224,14 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 
 		if ( isset( WC()->session ) ) {
 			wc_clear_notices();
+		}
+
+		if ( WC()->session instanceof WC_Session ) {
+			// The session row is rolled back but the session object keeps what it loaded, which no longer matches
+			// storage. Make its next save a full write instead of a merge against that stale snapshot.
+			( function () {
+				$this->replace_session_on_save();
+			} )->call( WC()->session );
 		}
 
 		if ( isset( WC()->countries ) ) {

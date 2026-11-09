@@ -231,6 +231,8 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 		}
 
 		if ( isset( $request['image'] ) ) {
+			$is_new_upload = false;
+
 			if ( empty( $request['image']['id'] ) && ! empty( $request['image']['src'] ) ) {
 				$upload = wc_rest_upload_image_from_url( esc_url_raw( $request['image']['src'] ) );
 
@@ -238,7 +240,8 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 					return $upload;
 				}
 
-				$image_id = wc_rest_set_uploaded_image_as_attachment( $upload );
+				$image_id      = wc_rest_set_uploaded_image_as_attachment( $upload );
+				$is_new_upload = true;
 			} else {
 				$image_id = isset( $request['image']['id'] ) ? absint( $request['image']['id'] ) : 0;
 			}
@@ -262,6 +265,10 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 					);
 				}
 			} else {
+				if ( $is_new_upload && $image_id > 0 ) {
+					wp_delete_attachment( $image_id, true );
+				}
+
 				delete_term_meta( $id, 'thumbnail_id' );
 			}
 		}

@@ -332,6 +332,8 @@ Do not import these user-facing strings from `block.json`, pass JSON properties 
 
 ## Interactivity API Stores
 
+Before changing WooCommerce Interactivity API stores or blocks that use them, please read the [Woo iAPI stores README](plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/README.md).```
+
 Most WooCommerce Interactivity API stores are **private by design**. Exception: the `woocommerce/product-filters` store is public for Product Filters inner-block extensibility.
 
 For private stores:

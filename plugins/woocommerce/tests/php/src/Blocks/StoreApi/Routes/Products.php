@@ -112,7 +112,7 @@ class Products extends ControllerTestCase {
 		$this->assertEquals( $this->products[0]->is_purchasable(), $data['is_purchasable'] );
 		$this->assertEquals( $this->products[0]->is_in_stock(), $data['is_in_stock'] );
 		$this->assertEquals( $this->products[0]->add_to_cart_text(), $data['add_to_cart']->text );
-		$this->assertEquals( $this->products[0]->add_to_cart_description(), $data['add_to_cart']->description );
+		$this->assertEqualHTML( $this->products[0]->add_to_cart_description(), $data['add_to_cart']->description );
 		$this->assertEquals( $this->products[0]->single_add_to_cart_text(), $data['add_to_cart']->single_text );
 		$this->assertEquals( $this->products[0]->is_on_sale(), $data['on_sale'] );
 		$this->assertEquals( $this->products[0]->get_weight(), $data['weight'] );
@@ -130,6 +130,34 @@ class Products extends ControllerTestCase {
 		$this->assertNotEmpty( wp_parse_url( $data['images'][0]->thumbnail, PHP_URL_HOST ) );
 
 		wp_delete_attachment( $image_id, true );
+	}
+
+	/**
+	 * @testdox Sale price is only returned while the sale is active.
+	 */
+	public function test_sale_price_is_hidden_until_scheduled_sale_starts(): void {
+		$fixtures  = new FixtureData();
+		$scheduled = $fixtures->get_simple_product(
+			array(
+				'regular_price'     => 100,
+				'sale_price'        => 63.45,
+				'date_on_sale_from' => strtotime( '+1 year' ),
+				'date_on_sale_to'   => strtotime( '+1 year +3 days' ),
+			)
+		);
+		$active    = $fixtures->get_simple_product(
+			array(
+				'regular_price' => 100,
+				'sale_price'    => 70,
+			)
+		);
+
+		$scheduled_prices = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $scheduled->get_id() ) )->get_data()['prices'];
+		$active_prices    = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $active->get_id() ) )->get_data()['prices'];
+
+		$this->assertSame( '10000', $scheduled_prices->price );
+		$this->assertSame( '10000', $scheduled_prices->sale_price, 'A sale that has not started must not expose its sale price.' );
+		$this->assertSame( '7000', $active_prices->sale_price, 'An active sale returns its sale price.' );
 	}
 
 	/**
@@ -394,6 +422,31 @@ class Products extends ControllerTestCase {
 
 		$this->assertIsArray( $data['images'] );
 		$this->assertCount( 0, $data['images'] );
+	}
+
+	/**
+	 * @testdox The featured image is returned only once when it is also part of the product gallery.
+	 */
+	public function test_featured_image_in_gallery_is_not_duplicated(): void {
+		$fixtures    = new FixtureData();
+		$featured_id = $fixtures->create_image_attachment();
+		$gallery_id  = $fixtures->create_image_attachment();
+		$product     = $fixtures->get_simple_product(
+			array(
+				'name'              => 'Test Product 1',
+				'regular_price'     => 10,
+				'image_id'          => $featured_id,
+				'gallery_image_ids' => array( $featured_id, $gallery_id ),
+			)
+		);
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_id() ) );
+
+		$this->assertSame(
+			array( $featured_id, $gallery_id ),
+			wp_list_pluck( $response->get_data()['images'], 'id' ),
+			'The featured image should be listed first and only once.'
+		);
 	}
 
 	/**

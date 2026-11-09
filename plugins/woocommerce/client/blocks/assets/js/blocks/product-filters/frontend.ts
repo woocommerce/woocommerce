@@ -62,6 +62,7 @@ function selectFilter( item: ValidFilterOptionItem ) {
 	const newActiveFilter: ActiveFilterItem = {
 		value: item.value,
 		type: item.type,
+		label: getFilterLabel( item ),
 		activeLabel: context.activeLabelTemplate.replace(
 			'{{label}}',
 			getFilterLabel( item )
@@ -161,6 +162,23 @@ const productFiltersStore = {
 					uid: `${ item.type }/${ item.value }`,
 				} ) );
 		},
+		get selectedItems(): FilterOptionItem[] {
+			const { filterType } = getContext< ProductFiltersContext >();
+			return state.activeFilters
+				.filter( ( item ) => item.type === filterType )
+				.map( ( item ) => ( {
+					...item,
+					id: `${ item.type }-${ item.value }`,
+					label: decodeHtmlEntities(
+						item.label ??
+							state.selectableItems.find(
+								( option ) => option.value === item.value
+							)?.label ??
+							item.activeLabel
+					),
+					selected: true,
+				} ) );
+		},
 		get selectableItems() {
 			// Items are server-owned (narrow on every navigation); read
 			// from server context so they refresh post-navigation.
@@ -180,6 +198,14 @@ const productFiltersStore = {
 						filter.type === item.type && filter.value === item.value
 				),
 			} ) );
+		},
+		get overlayDialogRole() {
+			const { isOverlayOpened } = getContext< ProductFiltersContext >();
+			return isOverlayOpened ? 'dialog' : null;
+		},
+		get overlayDialogAriaModal() {
+			const { isOverlayOpened } = getContext< ProductFiltersContext >();
+			return isOverlayOpened ? true : null;
 		},
 	},
 	actions: {

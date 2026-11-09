@@ -22,6 +22,7 @@ class FulfillmentsController {
 		FulfillmentsRenderer::class,
 		FulfillmentsSettings::class,
 		OrderFulfillmentsRestController::class,
+		FulfillmentsPrivacy::class,
 	);
 
 	/**
@@ -52,7 +53,11 @@ class FulfillmentsController {
 		// because the woocommerce_data_stores filter can fire before the 'init' action
 		// (e.g. from WC Payments during 'plugins_loaded'), and feature_is_enabled() would
 		// trigger translation loading too early, causing _load_textdomain_just_in_time warnings.
-		if ( 'yes' !== get_option( 'woocommerce_feature_fulfillments_enabled', 'no' ) ) {
+		$feature_enabled = 'yes' === get_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
+
+		// A store that created fulfillments and then disabled the feature still holds that
+		// data, so the store stays registered for the privacy export and eraser to read it.
+		if ( ! $feature_enabled && ! get_option( 'woocommerce_fulfillments_db_tables_created', false ) ) {
 			return $data_stores;
 		}
 
@@ -69,6 +74,12 @@ class FulfillmentsController {
 
 		// If fulfillments feature is not enabled, do not add the DB tables, and don't register the controller.
 		if ( ! $features_controller->feature_is_enabled( 'fulfillments' ) ) {
+			// A store that created fulfillments before the feature was disabled still holds
+			// tracking data that can resolve to a delivery address, so both export and
+			// erasure keep working.
+			if ( get_option( 'woocommerce_fulfillments_db_tables_created', false ) ) {
+				$container->get( FulfillmentsPrivacy::class )->register();
+			}
 			return;
 		}
 

@@ -23,6 +23,7 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\ShippingUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -187,6 +188,7 @@ class WC_AJAX {
 			'save_order_items',
 			'load_order_items',
 			'add_order_note',
+			'get_order_notes',
 			'delete_order_note',
 			'json_search_order_metakeys',
 			'json_search_tax_rates',
@@ -344,7 +346,7 @@ class WC_AJAX {
 
 		if ( is_array( $posted_shipping_methods ) ) {
 			foreach ( $posted_shipping_methods as $i => $value ) {
-				if ( ! is_string( $value ) ) {
+				if ( ! is_string( $value ) || ! ShippingUtil::is_shipping_rate_listed( $i, $value ) ) {
 					continue;
 				}
 				$chosen_shipping_methods[ $i ] = $value;
@@ -427,7 +429,7 @@ class WC_AJAX {
 
 		if ( is_array( $posted_shipping_methods ) ) {
 			foreach ( $posted_shipping_methods as $i => $value ) {
-				if ( ! is_string( $value ) ) {
+				if ( ! is_string( $value ) || ! ShippingUtil::is_shipping_rate_listed( $i, $value ) ) {
 					continue;
 				}
 				$chosen_shipping_methods[ $i ] = $value;
@@ -669,6 +671,11 @@ class WC_AJAX {
 		}
 
 		if ( ! $variable_product->is_viewable() ) {
+			wp_die();
+		}
+
+		// Match the product page, which shows variation details only after the product password is entered.
+		if ( post_password_required( $variable_product->get_id() ) ) {
 			wp_die();
 		}
 
@@ -1318,13 +1325,42 @@ class WC_AJAX {
 
 			$order = wc_get_order( $order_id );
 
+			// Coupons already on the order were applied before these items existed, so apply them again to include the new items.
+			if ( ! empty( $added_items ) && $order instanceof WC_Order && $order->get_items( 'coupon' ) ) {
+				// recalculate_coupons() uses the saved address for discounts and taxes, so give it the address typed in the editor without saving it.
+				$use_editor_tax_location = null;
+				if ( ! empty( $tax_location['country'] ) ) {
+					$editor_tax_location     = $order->get_taxable_location( $tax_location );
+					$use_editor_tax_location = function ( $location, $location_order ) use ( $order, $editor_tax_location ) {
+						return $location_order->get_id() === $order->get_id() ? $editor_tax_location : $location;
+					};
+					add_filter( 'woocommerce_order_get_tax_location', $use_editor_tax_location, PHP_INT_MAX, 2 );
+				}
+
+				// When prices include tax, the discount is taken from the price with tax, so the new items need their tax first.
+				if ( $order->get_prices_include_tax() ) {
+					$order->calculate_taxes();
+				}
+
+				$order->recalculate_coupons();
+
+				if ( $use_editor_tax_location ) {
+					remove_filter( 'woocommerce_order_get_tax_location', $use_editor_tax_location, PHP_INT_MAX );
+				}
+			}
+
 			// Get HTML to return.
 			ob_start();
 			include __DIR__ . '/admin/meta-boxes/views/html-order-items.php';
 			$items_html = ob_get_clean();
 
 			ob_start();
-			$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			if ( isset( $_POST['paginate_notes'] ) ) {
+				$pagination = WC_Meta_Box_Order_Notes::get_page( (int) $order_id );
+				$notes      = $pagination['notes'];
+			} else {
+				$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			}
 			include __DIR__ . '/admin/meta-boxes/views/html-order-notes.php';
 			$notes_html = ob_get_clean();
 
@@ -1372,13 +1408,23 @@ class WC_AJAX {
 			);
 
 			if ( strstr( $amount, '%' ) ) {
-				// Refresh totals so the discount total is current. The percentage applies to
-				// the items after discounts, excluding tax, shipping and other fees.
+				// Not needed for the base, which reads stored line totals. Kept so callbacks on the order
+				// totals hooks still run before the fee is added.
 				$order->calculate_totals( false );
 				$formatted_amount = $amount;
 				$percent          = floatval( trim( $amount, '%' ) );
-				$base             = (float) $order->get_subtotal() - (float) $order->get_discount_total( 'edit' );
-				$amount           = NumberUtil::round( $base * ( $percent / 100 ), wc_get_price_decimals() );
+
+				// The percentage applies to the line items after discounts, excluding tax, shipping and
+				// other fees. Read their stored totals so a filtered order subtotal can't change the fee,
+				// and round them as the order subtotal does.
+				$line_totals = array();
+				foreach ( $order->get_items() as $item ) {
+					if ( is_callable( array( $item, 'get_total' ) ) ) {
+						$line_totals[] = wc_add_number_precision( (float) $item->get_total( 'edit' ), false );
+					}
+				}
+				$base   = wc_remove_number_precision( $order::get_rounded_items_total( $line_totals ) );
+				$amount = NumberUtil::round( $base * ( $percent / 100 ), wc_get_price_decimals() );
 			} else {
 				$amount           = floatval( $amount );
 				$formatted_amount = wc_price( $amount, array( 'currency' => $order->get_currency() ) );
@@ -1559,7 +1605,12 @@ class WC_AJAX {
 			$response['html'] = ob_get_clean();
 
 			ob_start();
-			$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			if ( isset( $_POST['paginate_notes'] ) ) {
+				$pagination = WC_Meta_Box_Order_Notes::get_page( (int) $order_id );
+				$notes      = $pagination['notes'];
+			} else {
+				$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			}
 			include __DIR__ . '/admin/meta-boxes/views/html-order-notes.php';
 			$response['notes_html'] = ob_get_clean();
 
@@ -1669,7 +1720,12 @@ class WC_AJAX {
 			$items_html = ob_get_clean();
 
 			ob_start();
-			$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			if ( isset( $_POST['paginate_notes'] ) ) {
+				$pagination = WC_Meta_Box_Order_Notes::get_page( (int) $order_id );
+				$notes      = $pagination['notes'];
+			} else {
+				$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			}
 			include __DIR__ . '/admin/meta-boxes/views/html-order-notes.php';
 			$notes_html = ob_get_clean();
 
@@ -1779,7 +1835,12 @@ class WC_AJAX {
 			$items_html = ob_get_clean();
 
 			ob_start();
-			$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			if ( isset( $_POST['paginate_notes'] ) ) {
+				$pagination = WC_Meta_Box_Order_Notes::get_page( (int) $order_id );
+				$notes      = $pagination['notes'];
+			} else {
+				$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			}
 			include __DIR__ . '/admin/meta-boxes/views/html-order-notes.php';
 			$notes_html = ob_get_clean();
 
@@ -1882,6 +1943,16 @@ class WC_AJAX {
 			<?php
 		}
 		wp_die();
+	}
+
+	/**
+	 * Get a rendered page of order notes via AJAX.
+	 *
+	 * @since 11.3.0
+	 * @return void
+	 */
+	public static function get_order_notes() {
+		WC_Meta_Box_Order_Notes::get_order_notes();
 	}
 
 	/**
@@ -2896,7 +2967,12 @@ class WC_AJAX {
 		$response               = array();
 
 		try {
-			$order      = wc_get_order( $order_id );
+			$order = wc_get_order( $order_id );
+
+			if ( ! $order instanceof WC_Order ) {
+				throw new Exception( __( 'Invalid order ID.', 'woocommerce' ) );
+			}
+
 			$max_refund = wc_format_decimal( $order->get_total() - $order->get_total_refunded(), wc_get_price_decimals() );
 
 			if ( ( ! $refund_amount && ( wc_format_decimal( 0, wc_get_price_decimals() ) !== $refund_amount ) ) || $max_refund < $refund_amount || 0 > $refund_amount ) {
@@ -2918,8 +2994,27 @@ class WC_AJAX {
 					'refund_tax'   => array(),
 				);
 			}
+			$order_items = $order->get_items();
 			foreach ( $line_item_qtys as $item_id => $qty ) {
-				$line_items[ $item_id ]['qty'] = max( $qty, 0 );
+				$qty = max( $qty, 0 );
+
+				// Enforce the refund input's max here, because this AJAX request skips browser validation.
+				// Rounding drops float noise when the woocommerce_stock_amount filter allows fractional quantities.
+				if ( $qty > 0 && isset( $order_items[ $item_id ] ) ) {
+					$remaining_qty = NumberUtil::round( abs( $order_items[ $item_id ]->get_quantity() ) - abs( $order->get_qty_refunded_for_item( $item_id ) ), WC_ROUNDING_PRECISION );
+
+					if ( $qty > $remaining_qty ) {
+						throw new Exception(
+							sprintf(
+								/* translators: %s: remaining refundable quantity */
+								__( 'Line item quantity cannot be greater than the remaining refundable quantity (%s).', 'woocommerce' ),
+								$remaining_qty
+							)
+						);
+					}
+				}
+
+				$line_items[ $item_id ]['qty'] = $qty;
 			}
 			foreach ( $line_item_totals as $item_id => $total ) {
 				$line_items[ $item_id ]['refund_total'] = wc_format_decimal( $total );
