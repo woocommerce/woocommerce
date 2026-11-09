@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsPrivacy;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\FulfillmentsImporterRestController;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\ImportSession;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use WC_Unit_Test_Case;
@@ -74,6 +75,23 @@ class FulfillmentsControllerTest extends WC_Unit_Test_Case {
 		$this->sut->register();
 
 		$this->assertSame( 10, has_action( ImportSession::CLEANUP_HOOK, array( ImportSession::class, 'handle_cleanup_hook' ) ), 'register() must attach the cleanup handler at priority 10 while the feature is off' );
+	}
+
+	/**
+	 * @testdox Should register the import REST controller only while the feature flag is on.
+	 */
+	public function test_initialize_fulfillments_registers_import_rest_controller_only_when_enabled(): void {
+		$importer = wc_get_container()->get( FulfillmentsImporterRestController::class );
+		$callback = array( $importer, 'handle_woocommerce_rest_api_get_rest_namespaces' );
+		remove_filter( 'woocommerce_rest_api_get_rest_namespaces', $callback );
+
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
+		$this->sut->initialize_fulfillments();
+		$this->assertFalse( has_filter( 'woocommerce_rest_api_get_rest_namespaces', $callback ), 'The prepare route must not be registered while the feature is off' );
+
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
+		$this->sut->initialize_fulfillments();
+		$this->assertSame( 10, has_filter( 'woocommerce_rest_api_get_rest_namespaces', $callback ), 'The prepare route is registered once the feature is on' );
 	}
 
 	/**
