@@ -276,7 +276,8 @@ trait OrderAbilityTrait {
 	protected static function check_order_permission( int $order_id, string $context ): bool {
 		$type = OrderUtil::get_order_type( $order_id );
 
-		if ( ! in_array( $type, wc_get_order_types(), true ) ) {
+		// Check the registry: wc_get_order() still loads a type that the wc_order_types filter hides.
+		if ( ! $type || ! wc_get_order_type( $type ) ) {
 			return wc_rest_check_post_permissions( 'shop_order', 'edit' === $context ? 'batch' : $context );
 		}
 
