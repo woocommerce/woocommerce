@@ -86,6 +86,14 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			);
 		}
 
+		if ( ! empty( $input['id'] ) && ! empty( $input['include'] ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_order_include_with_id',
+				__( 'Send either an id or include, not both.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
 		if ( ! empty( $input['id'] ) ) {
 			$order = self::get_order_from_input( $input );
 
@@ -106,9 +114,10 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			);
 		}
 
-		$page     = $input['page'] ?? 1;
-		$per_page = $input['per_page'] ?? 10;
-		$args     = array(
+		$page             = $input['page'] ?? 1;
+		$default_per_page = empty( $input['include'] ) ? 10 : max( 1, count( array_diff( array_unique( $input['include'] ), $input['exclude'] ?? array() ) ) );
+		$per_page         = $input['per_page'] ?? $default_per_page;
+		$args             = array(
 			'limit'    => $per_page,
 			'page'     => $page,
 			'paginate' => true,
@@ -163,9 +172,15 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			$args['exclude'] = array_merge( (array) ( $args['exclude'] ?? array() ), $extension_args['post__not_in'] );
 			unset( $extension_args['post__not_in'] );
 		}
-		if ( isset( $extension_args['post__in'] ) && ! empty( $args['exclude'] ) ) {
-			$include                    = array_values( array_diff( $extension_args['post__in'], (array) $args['exclude'] ) );
-			$extension_args['post__in'] = empty( $include ) ? array( 0 ) : $include;
+		// Both stores merge extension args recursively, which would add the extension IDs to include instead of intersecting them.
+		$include = empty( $input['include'] ) ? null : $input['include'];
+		if ( isset( $extension_args['post__in'] ) ) {
+			$include = null === $include ? $extension_args['post__in'] : array_intersect( $include, $extension_args['post__in'] );
+			unset( $extension_args['post__in'] );
+		}
+		if ( null !== $include ) {
+			$include          = array_values( array_diff( $include, (array) ( $args['exclude'] ?? array() ) ) );
+			$args['post__in'] = empty( $include ) ? array( 0 ) : $include;
 		}
 
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
@@ -270,6 +285,16 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 					'description' => __( 'Filter by parent order ID.', 'woocommerce' ),
 					'minimum'     => 1,
 				),
+				'include'            => array(
+					'type'        => 'array',
+					'description' => __( 'Return only these order IDs, up to 100. IDs that don\'t match type or status are left out. Without per_page, they come back in one page.', 'woocommerce' ),
+					'minItems'    => 1,
+					'maxItems'    => 100,
+					'items'       => array(
+						'type'    => 'integer',
+						'minimum' => 1,
+					),
+				),
 				'exclude'            => array(
 					'type'        => 'array',
 					'description' => __( 'Order IDs to exclude from the results.', 'woocommerce' ),
@@ -320,10 +345,10 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 					'minimum' => 1,
 				),
 				'per_page'           => array(
-					'type'    => 'integer',
-					'default' => 10,
-					'minimum' => 1,
-					'maximum' => 100,
+					'type'        => 'integer',
+					'description' => __( 'Orders per page. Defaults to 10, or to the number of IDs in include.', 'woocommerce' ),
+					'minimum'     => 1,
+					'maximum'     => 100,
 				),
 			),
 			'additionalProperties' => false,
