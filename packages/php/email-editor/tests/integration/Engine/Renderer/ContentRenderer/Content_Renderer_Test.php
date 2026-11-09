@@ -362,6 +362,26 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * The Gutenberg plugin replaces core's typography callback with its own; that one is removed during rendering too.
+	 */
+	public function testItRemovesGutenbergTypographySupportWhileRendering(): void {
+		require_once __DIR__ . '/gutenberg-typography-support-stub.php';
+		add_filter( 'render_block', 'gutenberg_render_typography_support', 10, 2 );
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+
+		try {
+			$content = $this->renderer->render( $this->email_post, $template );
+			$this->assertStringContainsString( 'Hello!', $content );
+			$this->assertStringNotContainsString( 'gutenberg-typography-support', $content );
+			$this->assertSame( 10, has_filter( 'render_block', 'gutenberg_render_typography_support' ) );
+		} finally {
+			remove_filter( 'render_block', 'gutenberg_render_typography_support', 10 );
+		}
+	}
+
+	/**
 	 * Fluid typography would turn font sizes into clamp(), which many email clients can’t read.
 	 * The email keeps the static px size.
 	 */

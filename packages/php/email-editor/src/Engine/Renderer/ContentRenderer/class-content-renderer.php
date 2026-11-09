@@ -155,11 +155,17 @@ class Content_Renderer {
 	}
 
 	/**
-	 * Priority of core's typography support filter while it's removed for email rendering, or false.
-	 *
-	 * @var int|false
+	 * Typography support callbacks that turn font sizes into fluid clamp() values: core's, and the
+	 * Gutenberg plugin's, which replaces core's when the plugin is active.
 	 */
-	private $typography_support_priority = false;
+	private const TYPOGRAPHY_SUPPORT_CALLBACKS = array( 'wp_render_typography_support', 'gutenberg_render_typography_support' );
+
+	/**
+	 * Priorities of the typography support callbacks removed for email rendering, by callback name.
+	 *
+	 * @var array<string, int>
+	 */
+	private array $removed_typography_support = array();
 
 	/**
 	 * Initialize the content renderer
@@ -170,11 +176,14 @@ class Content_Renderer {
 		add_filter( 'render_block', array( $this, 'render_block' ), 10, 2 );
 		add_filter( 'block_parser_class', array( $this, 'block_parser' ) );
 
-		// Core's typography support turns font sizes into fluid clamp() values, which many email
-		// clients can’t read. Keep the static sizes while the email renders.
-		$this->typography_support_priority = has_filter( 'render_block', 'wp_render_typography_support' );
-		if ( false !== $this->typography_support_priority ) {
-			remove_filter( 'render_block', 'wp_render_typography_support', $this->typography_support_priority );
+		// Typography support turns font sizes into fluid clamp() values, which many email clients
+		// can’t read. Keep the static sizes while the email renders.
+		foreach ( self::TYPOGRAPHY_SUPPORT_CALLBACKS as $callback ) {
+			$priority = has_filter( 'render_block', $callback );
+			if ( false !== $priority ) {
+				remove_filter( 'render_block', $callback, $priority );
+				$this->removed_typography_support[ $callback ] = $priority;
+			}
 		}
 		add_filter( 'woocommerce_email_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
 
@@ -568,10 +577,12 @@ class Content_Renderer {
 	private function reset(): void {
 		remove_filter( 'render_block', array( $this, 'render_block' ) );
 		remove_filter( 'block_parser_class', array( $this, 'block_parser' ) );
-		if ( false !== $this->typography_support_priority ) {
-			add_filter( 'render_block', 'wp_render_typography_support', $this->typography_support_priority, 2 );
-			$this->typography_support_priority = false;
+		foreach ( $this->removed_typography_support as $callback => $priority ) {
+			if ( is_callable( $callback ) ) {
+				add_filter( 'render_block', $callback, $priority, 2 );
+			}
 		}
+		$this->removed_typography_support = array();
 		remove_filter( 'woocommerce_email_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
 
 		$this->post_content_width = null;
