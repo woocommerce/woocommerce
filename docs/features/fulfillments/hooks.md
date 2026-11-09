@@ -5,7 +5,7 @@ sidebar_label: Hooks
 
 # Order fulfillments hooks
 
-WooCommerce exposes lifecycle hooks, status filters, provider filters, notification actions, and email template hooks for order fulfillments. These hooks let extensions validate fulfillment data, synchronize external systems, customize tracking behavior, and adjust merchant or customer-facing output.
+WooCommerce exposes lifecycle hooks, status filters, provider filters, notification actions, email template hooks, and a CSV importer filter for order fulfillments. These hooks let extensions validate fulfillment data, synchronize external systems, customize tracking behavior, adjust merchant or customer-facing output, and accept header names from warehouse exports.
 
 ## Data lifecycle filters
 
@@ -148,4 +148,23 @@ add_filter( 'woocommerce_privacy_remove_fulfillment_personal_data_meta', functio
 
     return $meta_keys;
 }, 10, 2 );
+```
+
+## CSV importer filters
+
+The fulfillments CSV importer recognizes five canonical columns. This filter lets a store accept the header names used by its warehouse or 3PL exports when the importer auto-detects the column mapping.
+
+Aliases are normalized before matching (lowercase, with runs of non-alphanumeric characters replaced by `_`), so `PO Number` and `po_number` are the same alias. Keys that are not one of the five canonical columns are ignored, non-string aliases are dropped, and if nothing usable is left the default aliases are used.
+
+| Hook | Purpose |
+| --- | --- |
+| `woocommerce_fulfillments_csv_importer_column_aliases` | Change the accepted header names for `order_number`, `tracking_number`, `shipment_provider`, `tracking_url`, and `items`. Receives the alias map and returns the modified map. |
+
+```php
+add_filter( 'woocommerce_fulfillments_csv_importer_column_aliases', function( $aliases ) {
+    $aliases['order_number'][]      = 'PO Number';
+    $aliases['shipment_provider'][] = 'Ship Via';
+
+    return $aliases;
+} );
 ```
