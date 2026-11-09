@@ -156,12 +156,80 @@ class ProductAttributeCreate extends AbstractDomainAbility implements AbilityDef
 			return new \WP_Error( 'woocommerce_ability_product_attribute_create_failed', __( 'The attribute was created but could not be read back.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
+		self::register_attribute_taxonomy( $attributes[ 'id:' . $id ] );
+
 		$attribute = self::format_product_attribute( $attributes[ 'id:' . $id ], 0 );
 		if ( is_wp_error( $attribute ) ) {
 			return $attribute;
 		}
 
 		return array( 'attribute' => $attribute );
+	}
+
+	/**
+	 * Register the attribute taxonomy for the rest of this request.
+	 *
+	 * WooCommerce registers attribute taxonomies on init only. Without this, a product
+	 * write later in the same request, such as the next call of a stdio MCP session,
+	 * saves the product without the attribute's terms and reports no error.
+	 *
+	 * @param \stdClass $attribute Row of wc_get_attribute_taxonomies().
+	 * @return void
+	 */
+	private static function register_attribute_taxonomy( \stdClass $attribute ): void {
+		global $wc_product_attributes;
+
+		$taxonomy = wc_attribute_taxonomy_name( (string) $attribute->attribute_name );
+		if ( taxonomy_exists( $taxonomy ) ) {
+			return;
+		}
+
+		$label  = (string) $attribute->attribute_label;
+		$public = 1 === (int) $attribute->attribute_public;
+		register_taxonomy(
+			$taxonomy,
+			/**
+			 * Filters the object types of a global attribute taxonomy.
+			 *
+			 * @since 2.3.0
+			 * @param array $object_types Object types.
+			 */
+			apply_filters( "woocommerce_taxonomy_objects_{$taxonomy}", array( 'product' ) ),
+			/**
+			 * Filters the registration arguments of a global attribute taxonomy.
+			 *
+			 * @since 2.3.0
+			 * @param array $args Taxonomy arguments.
+			 */
+			apply_filters(
+				"woocommerce_taxonomy_args_{$taxonomy}",
+				array(
+					'hierarchical'          => false,
+					'update_count_callback' => '_update_post_term_count',
+					'labels'                => array(
+						'name'          => $label,
+						'singular_name' => $label,
+					),
+					'show_ui'               => true,
+					'show_in_quick_edit'    => false,
+					'show_in_menu'          => false,
+					'meta_box_cb'           => false,
+					'query_var'             => $public,
+					'rewrite'               => false,
+					'sort'                  => false,
+					'public'                => $public,
+					'show_in_nav_menus'     => false,
+					'capabilities'          => array(
+						'manage_terms' => 'manage_product_terms',
+						'edit_terms'   => 'edit_product_terms',
+						'delete_terms' => 'delete_product_terms',
+						'assign_terms' => 'assign_product_terms',
+					),
+				)
+			)
+		);
+
+		$wc_product_attributes[ $taxonomy ] = $attribute;
 	}
 
 	/**

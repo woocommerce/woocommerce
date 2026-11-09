@@ -26,13 +26,33 @@ class ProductAttributeCreateTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * Taxonomies registered before the test, so the ones it registers can be removed.
+	 *
+	 * @var string[]
+	 */
+	private array $taxonomies_before;
+
+	/**
 	 * Set up the ability and an administrator.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->taxonomies_before = get_taxonomies();
 		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
 		$this->sut = new Ability( ProductAttributeCreate::get_name(), ProductAttributeCreate::get_registration_args() );
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+	}
+
+	/**
+	 * Unregister the taxonomies the test registered, which the database rollback leaves behind.
+	 */
+	public function tearDown(): void {
+		global $wc_product_attributes;
+		foreach ( array_diff( get_taxonomies(), $this->taxonomies_before ) as $taxonomy ) {
+			unregister_taxonomy( $taxonomy );
+			unset( $wc_product_attributes[ $taxonomy ] );
+		}
+		parent::tearDown();
 	}
 
 	/**
@@ -51,6 +71,7 @@ class ProductAttributeCreateTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $attribute['has_archives'] );
 		$this->assertSame( array(), $attribute['terms'] );
 		$this->assertSame( $attribute['id'], wc_attribute_taxonomy_id_by_name( 'color' ) );
+		$this->assertTrue( taxonomy_exists( 'pa_color' ), 'Later writes in this request can assign its terms.' );
 	}
 
 	/**
@@ -140,15 +161,11 @@ class ProductAttributeCreateTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should let product-create make a variable product with two new global attributes and four priced variations.
+	 * @testdox Should let product-create, in the same request, make a variable product with two new global attributes and four priced variations.
 	 */
 	public function test_product_create_uses_created_attributes(): void {
-		$color = $this->sut->execute( array( 'name' => 'Test Color' ) )['attribute'];
-		$size  = $this->sut->execute( array( 'name' => 'Test Size' ) )['attribute'];
-		foreach ( array( $color, $size ) as $attribute ) {
-			// WooCommerce registers attribute taxonomies on init, which already ran.
-			register_taxonomy( $attribute['slug'], array( 'product' ), array( 'hierarchical' => false ) );
-		}
+		$color      = $this->sut->execute( array( 'name' => 'Test Color' ) )['attribute'];
+		$size       = $this->sut->execute( array( 'name' => 'Test Size' ) )['attribute'];
 		$prices     = array(
 			'red-s'  => '10.00',
 			'red-m'  => '11.00',
