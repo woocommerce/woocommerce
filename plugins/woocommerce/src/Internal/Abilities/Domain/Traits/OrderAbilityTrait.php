@@ -225,7 +225,7 @@ trait OrderAbilityTrait {
 
 		if ( ! $order instanceof \WC_Order ) {
 			return new \WP_Error(
-				'woocommerce_ability_order_not_found',
+				'woocommerce_order_not_found',
 				/* translators: %d: order ID. */
 				sprintf( __( 'Order %d does not exist. Use the woocommerce/orders-query ability to find the order ID.', 'woocommerce' ), $input['id'] ),
 				array( 'status' => 404 )

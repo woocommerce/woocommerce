@@ -1105,7 +1105,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				$result = wp_get_ability( $ability_id )->execute( $input );
 
 				$this->assertWPError( $result, "{$ability_id} should refuse ID {$id}." );
-				$this->assertSame( 'woocommerce_ability_order_not_found', $result->get_error_code(), "{$ability_id} should name missing order {$id}, not refuse permission." );
+				$this->assertSame( 'woocommerce_order_not_found', $result->get_error_code(), "{$ability_id} should name missing order {$id}, not refuse permission." );
 				$this->assertStringContainsString( (string) $id, $result->get_error_message() );
 			}
 		}
@@ -4239,7 +4239,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$result = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'id' => 999999 ) );
 
 		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_ability_order_not_found', $result->get_error_code() );
+		$this->assertSame( 'woocommerce_order_not_found', $result->get_error_code() );
 	}
 
 	/**
@@ -4938,7 +4938,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$result = wp_get_ability( 'woocommerce/order-notes-query' )->execute( array( 'id' => 999999 ) );
 
 		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_ability_order_not_found', $result->get_error_code() );
+		$this->assertSame( 'woocommerce_order_not_found', $result->get_error_code() );
 	}
 
 	/**
