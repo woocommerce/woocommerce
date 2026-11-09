@@ -274,7 +274,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A store page set as the terms page under Advanced > Page setup is listed, and saving the tab keeps it.
+	 * @testdox A store page set as the terms page under Advanced > Page setup is listed, saving the tab keeps it, and Status asks for another page.
 	 */
 	public function test_save_keeps_store_page_set_as_terms_page(): void {
 		$cart = self::factory()->post->create(
@@ -290,6 +290,9 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$settings = $this->page()->get_settings_for_section( '' );
 		$terms    = current( wp_list_filter( $settings, array( 'id' => AgenticCommerceSettings::TERMS_PAGE_OPTION ) ) );
 		$this->assertSame( 'Cart (Store page)', $terms['options'][ (string) $cart ] );
+		$html = $this->render_page();
+		$this->assertStringContainsString( 'Choose a terms and conditions page', $html );
+		$this->assertStringNotContainsString( 'Publish your terms and conditions page', $html );
 
 		WC_Admin_Settings::save_fields( $settings, array( AgenticCommerceSettings::TERMS_PAGE_OPTION => (string) $cart ) );
 

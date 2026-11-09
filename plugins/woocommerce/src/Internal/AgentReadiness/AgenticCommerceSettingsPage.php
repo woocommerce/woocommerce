@@ -388,7 +388,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 
 	/**
 	 * What an open check asks the merchant to do: the action, the button text and where it goes.
-	 * A policy page that is chosen but not published links to its editor.
+	 * A policy page that is chosen but not published links to its editor; a published store page asks for another page.
 	 *
 	 * @param array{id:string,label:string,fix_url:string} $check Store condition.
 	 * @return array{0:string,1:string,2:string}
@@ -402,7 +402,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		);
 		if ( isset( $policies[ $check['id'] ] ) ) {
 			$page_id = (int) get_option( $policies[ $check['id'] ][0] );
-			$edit    = $page_id > 0 && get_post( $page_id ) ? (string) get_edit_post_link( $page_id, 'raw' ) : '';
+			$edit    = $page_id > 0 && get_post( $page_id ) && 'publish' !== get_post_status( $page_id ) ? (string) get_edit_post_link( $page_id, 'raw' ) : '';
 			return '' !== $edit
 				? array( $policies[ $check['id'] ][1], __( 'Review and publish', 'woocommerce' ), $edit )
 				: array( $policies[ $check['id'] ][2], __( 'Choose a page', 'woocommerce' ), $check['fix_url'] );
