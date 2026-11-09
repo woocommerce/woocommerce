@@ -235,6 +235,30 @@ class StatusTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The order is said to be received only once when the order details are hidden.
+	 */
+	public function test_hidden_order_details_say_order_received_once(): void {
+		$order = \WC_Helper_Order::create_order();
+		// No order key in the request, so the order details are hidden.
+		set_query_var( 'order-received', $order->get_id() );
+		$sut = new class() extends StatusBlock {
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			public function __construct() {
+			}
+
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			public function render_proxy(): string {
+				return (string) $this->render( array(), '', null );
+			}
+		};
+
+		$text = wp_strip_all_tags( $sut->render_proxy() );
+
+		$this->assertSame( 1, substr_count( $text, 'has been received' ), "The order should be said to be received once. Output: $text" );
+		$this->assertStringContainsString( 'A confirmation will be sent to your email address.', $text, 'The notice should still mention the email confirmation.' );
+	}
+
+	/**
 	 * Create a failed order for a block test.
 	 *
 	 * @param string $payment_method Payment method ID.
