@@ -183,7 +183,8 @@ use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\ImportSession;
 add_action( 'woocommerce_fulfillments_import_session_cleanup', 'log_abandoned_import', 10, 4 );
 
 function log_abandoned_import( $user_id, $token, $file, $attachment_id ) {
-    if ( ImportSession::load( $user_id, $token ) ) {
+    // Action Scheduler stores the arguments, so cast them before calling a typed method.
+    if ( ImportSession::load( (int) $user_id, (string) $token ) ) {
         return; // Still live: the default handler reschedules the cleanup.
     }
     error_log( sprintf( 'Import session %s of user %d was abandoned', $token, $user_id ) );
