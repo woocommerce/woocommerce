@@ -46,6 +46,13 @@ class Html2Text_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test the first preformatted line keeps its indentation too
+	 */
+	public function test_preformatted_first_line_keeps_indentation(): void {
+		$this->assertEquals( "Before\n\n  first\n  second\n\nAfter", Html2Text::convert( "<p>Before</p><pre>  first\n  second</pre><p>After</p>" ) );
+	}
+
+	/**
 	 * Test anchor links with drop_links option
 	 */
 	public function test_anchors_drop_links(): void {

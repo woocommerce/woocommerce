@@ -410,9 +410,13 @@ class Html2Text {
 			case 'h6':
 			case 'ol':
 			case 'ul':
-			case 'pre':
 				// Add two newlines.
 				$output = "\n\n";
+				break;
+
+			case 'pre':
+				// Add two newlines. The second is armored like newlines inside pre, to keep the first line's indentation.
+				$output = "\n\r";
 				break;
 
 			case 'td':
