@@ -88,11 +88,15 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 		$page             = $input['page'] ?? 1;
 		$per_page         = $input['per_page'] ?? $default_per_page;
 		$role             = $input['role'] ?? 'customer';
+		$order            = strtoupper( $input['order'] ?? 'desc' );
 		$args             = array(
 			'number'  => $per_page,
 			'paged'   => $page,
-			'orderby' => 'id' === ( $input['orderby'] ?? 'registered_date' ) ? 'ID' : 'registered',
-			'order'   => strtoupper( $input['order'] ?? 'desc' ),
+			// Registration dates have one-second precision, so ID keeps users registered in the same second in a stable order across pages.
+			'orderby' => 'id' === ( $input['orderby'] ?? 'registered_date' ) ? array( 'ID' => $order ) : array(
+				'registered' => $order,
+				'ID'         => $order,
+			),
 			'fields'  => 'ID',
 		);
 		if ( 'all' !== $role ) {

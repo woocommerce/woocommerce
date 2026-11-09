@@ -118,6 +118,40 @@ class CustomersQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should order customers registered in the same second by ID, so pages neither repeat nor skip them.
+	 * @testWith ["desc"]
+	 *           ["asc"]
+	 * @param string $order Sort direction.
+	 */
+	public function test_same_second_registrations_page_by_id( string $order ): void {
+		$ids = array();
+		for ( $i = 0; $i < 3; $i++ ) {
+			$ids[] = self::factory()->user->create(
+				array(
+					'role'            => 'customer',
+					'user_registered' => '2026-01-01 00:00:00',
+				)
+			);
+		}
+		if ( 'desc' === $order ) {
+			$ids = array_reverse( $ids );
+		}
+
+		$pages = array();
+		for ( $page = 1; $page <= 3; $page++ ) {
+			$result = $this->sut->execute(
+				array(
+					'order'    => $order,
+					'per_page' => 1,
+					'page'     => $page,
+				)
+			);
+			$pages  = array_merge( $pages, array_column( $result['customers'], 'id' ) );
+		}
+		$this->assertSame( $ids, $pages );
+	}
+
+	/**
 	 * @testdox Should return the IDs in include in one page, minus the IDs in exclude.
 	 */
 	public function test_include_and_exclude(): void {
