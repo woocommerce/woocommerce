@@ -247,7 +247,11 @@ const personalizationTagsLiveContentUpdate = createHigherOrderComponent(
 					// RichText selected the end of the typed tag, which the shorter content no longer reaches.
 					const { clientId: selectedId, offset } =
 						select( blockEditorStore ).getSelectionStart();
-					if ( selectedId === clientId && offset !== undefined ) {
+					if (
+						replacedContent !== newAttributes.content &&
+						selectedId === clientId &&
+						offset !== undefined
+					) {
 						const newOffset = getOffsetAfterTagReplacement(
 							newAttributes.content,
 							replacedContent,
