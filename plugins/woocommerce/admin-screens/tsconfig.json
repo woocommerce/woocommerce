@@ -17,8 +17,15 @@
 		"noFallthroughCasesInSwitch": true,
 		"noPropertyAccessFromIndexSignature": true,
 		"noUnusedLocals": true,
-		"noUnusedParameters": true
+		"noUnusedParameters": true,
+		"composite": true
 	},
-	"include": [ "**/*.ts", "**/*.tsx" ],
-	"exclude": [ "node_modules" ]
+	"include": [
+		"**/*.ts",
+		"**/*.tsx"
+	],
+	"exclude": [
+		"node_modules"
+	],
+	"references": []
 }

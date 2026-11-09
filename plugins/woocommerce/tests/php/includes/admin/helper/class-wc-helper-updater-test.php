@@ -976,6 +976,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 * @testdox Connect notice is skipped when Core already renders an update row for the plugin.
 	 */
 	public function test_connect_notice_is_skipped_when_core_renders_an_update_row(): void {
+		$this->mock_plugin_row_update_check();
 		$this->prepare_plugins_screen();
 
 		$transient                                     = new stdClass();
@@ -1064,6 +1065,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 * @testdox Purchase notice links to the product page when the connected account holds no subscription.
 	 */
 	public function test_purchase_notice_renders_without_a_subscription(): void {
+		$this->mock_plugin_row_update_check();
 		$this->prepare_plugins_screen();
 		$this->set_subscriptions( array() );
 
@@ -1655,6 +1657,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 * @testdox Subscription notice is skipped when Core already renders an update row for the plugin.
 	 */
 	public function test_subscription_notice_is_skipped_when_core_renders_an_update_row(): void {
+		$this->mock_plugin_row_update_check();
 		$this->prepare_plugins_screen();
 		$this->set_subscriptions( array() );
 
@@ -2308,6 +2311,22 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Keep fixture transient writes from contacting the public update service.
+	 */
+	private function mock_plugin_row_update_check(): void {
+		$this->http_responder = static function ( $request, $url ) {
+			if ( 'POST' !== ( $request['method'] ?? '' ) || 'https://woocommerce.com/wp-json/helper/1.0/update-check-public' !== $url ) {
+				return false;
+			}
+
+			return array(
+				'response' => array( 'code' => 200 ),
+				'body'     => wp_json_encode( array() ),
+			);
+		};
+	}
+
+	/**
 	 * Mock WC_Helper_API response for testing.
 	 *
 	 * @param false|array|WP_Error $preempt A preemptive return value of an HTTP request.
@@ -2512,5 +2531,64 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 				'access_token' => 'token',
 			)
 		);
+	}
+
+	/**
+	 * @testdox The plugin row asks for a download on a local store connected to production WooCommerce.com, and for a one-click install otherwise.
+	 *
+	 * @testWith ["http://localhost:8888", "https://woocommerce.com/wp-json/helper/1.0", "upload it to update"]
+	 *           ["http://localhost:8888", "https://woocommerce.test/wp-json/helper/1.0", "Install WooCommerce.com Update Manager"]
+	 *
+	 * @param string $home     Store home URL.
+	 * @param string $api_base Helper API base URL.
+	 * @param string $expected Text the plugin row should contain.
+	 */
+	public function test_plugin_row_message_offers_download_on_manual_install( string $home, string $api_base, string $expected ): void {
+		if ( WC_Woo_Update_Manager_Plugin::is_plugin_installed() ) {
+			$this->markTestSkipped( 'The Update Manager is installed in this environment.' );
+		}
+
+		$output = $this->with_store_urls(
+			$home,
+			$api_base,
+			static function () {
+				ob_start();
+				WC_Helper_Updater::add_install_marketplace_plugin_message( array(), (object) array( 'package' => '' ) );
+				return ob_get_clean();
+			}
+		);
+
+		$this->assertStringContainsString( $expected, $output );
+	}
+
+	/**
+	 * Run a callback with the given home URL and Helper API base.
+	 *
+	 * @param string   $home     Store home URL.
+	 * @param string   $api_base Helper API base URL.
+	 * @param callable $callback Code to run.
+	 * @return mixed The callback's return value.
+	 */
+	private function with_store_urls( string $home, string $api_base, callable $callback ) {
+		// wp-env defines WP_HOME, so the home option alone doesn't change home_url().
+		add_filter(
+			'home_url',
+			static function () use ( $home ) {
+				return $home;
+			}
+		);
+		$api_base_filter = static function () use ( $api_base ) {
+			return $api_base;
+		};
+		add_filter( 'woocommerce_helper_api_base', $api_base_filter );
+		WC_Helper_API::load();
+
+		try {
+			return $callback();
+		} finally {
+			// The static API base outlives the hook restore, so reload it without the test's filter.
+			remove_filter( 'woocommerce_helper_api_base', $api_base_filter );
+			WC_Helper_API::load();
+		}
 	}
 }

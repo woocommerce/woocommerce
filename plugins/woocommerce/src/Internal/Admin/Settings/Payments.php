@@ -254,7 +254,7 @@ class Payments {
 	 */
 	public function get_country(): string {
 		$user_nox_meta = get_user_meta( get_current_user_id(), self::PAYMENTS_NOX_PROFILE_KEY, true );
-		if ( ! empty( $user_nox_meta['business_country_code'] ) ) {
+		if ( is_array( $user_nox_meta ) && ! empty( $user_nox_meta['business_country_code'] ) ) {
 			return $user_nox_meta['business_country_code'];
 		}
 
@@ -271,10 +271,8 @@ class Payments {
 
 		$user_payments_nox_profile = get_user_meta( get_current_user_id(), self::PAYMENTS_NOX_PROFILE_KEY, true );
 
-		if ( empty( $user_payments_nox_profile ) ) {
+		if ( ! is_array( $user_payments_nox_profile ) ) {
 			$user_payments_nox_profile = array();
-		} else {
-			$user_payments_nox_profile = maybe_unserialize( $user_payments_nox_profile );
 		}
 		$user_payments_nox_profile['business_country_code'] = $location;
 

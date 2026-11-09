@@ -670,7 +670,7 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 		// The caption is wrapped in a centered div (matching content-editor.css),
 		// anchored to the caption text so the assertion cannot pass on the video
 		// renderer's own centered play-button wrapper.
-		$this->assertStringContainsString( '<div style="text-align: center; margin-top: 8px;">My <strong>video</strong> caption</div>', $rendered );
+		$this->assertStringContainsString( '<div class="wp-element-caption" style="text-align: center; margin-top: 8px;">My <strong>video</strong> caption</div>', $rendered );
 		// The caption is appended after the embed output.
 		$thumbnail_pos = strpos( $rendered, 'img.youtube.com' );
 		$caption_pos   = strpos( $rendered, 'My <strong>video</strong> caption' );
@@ -722,7 +722,7 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 
 		// The caption text is wrapped and appended, and the <img> is gone however
 		// the sanitizer disposed of it, so the trailing "</div>" completes nothing.
-		$this->assertStringContainsString( '<div style="text-align: center; margin-top: 8px;">caption', $rendered );
+		$this->assertStringContainsString( '<div class="wp-element-caption" style="text-align: center; margin-top: 8px;">caption', $rendered );
 		$this->assertStringNotContainsString( '<img', $rendered );
 	}
 

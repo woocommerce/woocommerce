@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Use the filterable coupon-removed message from `WC_Coupon::get_coupon_message()` when removing a coupon via AJAX.
