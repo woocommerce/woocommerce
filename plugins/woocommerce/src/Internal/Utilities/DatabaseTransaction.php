@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Utilities;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -119,7 +120,7 @@ final class DatabaseTransaction {
 		if ( $lost && ! is_wp_error( $result ) ) {
 			return new \WP_Error(
 				'woocommerce_transaction_rolled_back',
-				__( 'The change was not saved because another change was saved at the same time. Try again.', 'woocommerce' ),
+				__( 'The change might not have been saved because another change ran at the same time. Check it and try again.', 'woocommerce' ),
 				array( 'status' => 409 )
 			);
 		}
@@ -212,7 +213,7 @@ final class DatabaseTransaction {
 		$dbh        = $wpdb instanceof \wpdb ? $wpdb->__get( 'dbh' ) : null;
 		$errno      = $dbh instanceof \mysqli ? mysqli_errno( $dbh ) : 0; // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysqli_errno -- wpdb does not expose the error number.
 		self::$lost = in_array( $errno, self::LOST_WRITE_ERRNOS, true )
-			|| 1 === preg_match( '/try restarting transaction$/', (string) $wpdb->last_error );
+			|| StringUtil::ends_with( rtrim( (string) $wpdb->last_error ), 'try restarting transaction' );
 	}
 
 	/**
