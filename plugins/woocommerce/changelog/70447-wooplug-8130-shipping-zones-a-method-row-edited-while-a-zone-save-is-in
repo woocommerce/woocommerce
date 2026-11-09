@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Keep shipping zone actions locked during an operation, keep unsaved edits after a delete, and report failed removals.
+Stop losing unsaved shipping method changes made while another action is still running, and report method removals that fail.
