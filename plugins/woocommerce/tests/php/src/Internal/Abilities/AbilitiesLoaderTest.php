@@ -1089,34 +1089,46 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return a not-found error naming the order ID when an order mutation receives an unknown order ID.
+	 * @testdox Should return a not-found error naming the ID when an order mutation receives an ID that is not an order.
 	 *
 	 * @dataProvider provider_order_storage_engines
 	 *
 	 * @param bool $hpos_enabled Whether HPOS/COT should be enabled for the test.
 	 */
-	public function test_order_mutations_return_not_found_for_unknown_id( bool $hpos_enabled ): void {
+	public function test_order_mutations_return_not_found_for_id_that_is_not_an_order( bool $hpos_enabled ): void {
 		$this->set_order_storage_for_test( $hpos_enabled );
+		$product                     = \WC_Helper_Product::create_simple_product();
+		$this->created_product_ids[] = $product->get_id();
 
-		foreach ( $this->get_order_mutation_inputs( 999999 ) as $ability_id => $input ) {
-			$result = wp_get_ability( $ability_id )->execute( $input );
+		foreach ( array( 999999, $product->get_id() ) as $id ) {
+			foreach ( $this->get_order_mutation_inputs( $id ) as $ability_id => $input ) {
+				$result = wp_get_ability( $ability_id )->execute( $input );
 
-			$this->assertWPError( $result, "{$ability_id} should refuse an unknown order ID." );
-			$this->assertSame( 'woocommerce_ability_order_not_found', $result->get_error_code(), "{$ability_id} should name the missing order, not refuse permission." );
-			$this->assertStringContainsString( '999999', $result->get_error_message() );
+				$this->assertWPError( $result, "{$ability_id} should refuse ID {$id}." );
+				$this->assertSame( 'woocommerce_ability_order_not_found', $result->get_error_code(), "{$ability_id} should name missing order {$id}, not refuse permission." );
+				$this->assertStringContainsString( (string) $id, $result->get_error_message() );
+			}
 		}
 	}
 
 	/**
-	 * @testdox Should refuse permission for an unknown order ID to users who cannot read orders.
+	 * @testdox Should refuse permission for an unknown order ID to users who cannot edit orders.
+	 *
+	 * @testWith ["customer"]
+	 *           ["read_private_shop_orders"]
+	 *
+	 * @param string $role_or_cap Role of the user, or the only capability added to a subscriber.
 	 */
-	public function test_order_mutations_refuse_unknown_id_to_users_without_order_access(): void {
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+	public function test_order_mutations_refuse_unknown_id_to_users_who_cannot_edit_orders( string $role_or_cap ): void {
+		$user_id = 'customer' === $role_or_cap
+			? self::factory()->user->create( array( 'role' => 'customer' ) )
+			: $this->create_user_with_caps( array( $role_or_cap ) );
+		wp_set_current_user( $user_id );
 
 		foreach ( $this->get_order_mutation_inputs( 999999 ) as $ability_id => $input ) {
 			$result = wp_get_ability( $ability_id )->execute( $input );
 
-			$this->assertWPError( $result, "{$ability_id} should refuse a user without order access." );
+			$this->assertWPError( $result, "{$ability_id} should refuse a user who cannot edit orders." );
 			$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
 		}
 	}

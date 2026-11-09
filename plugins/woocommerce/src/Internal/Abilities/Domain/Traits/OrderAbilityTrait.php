@@ -265,9 +265,9 @@ trait OrderAbilityTrait {
 
 	/**
 	 * Check a permission against the actual type of an order. An order whose
-	 * type the abilities do not support fails. An ID with no order passes for
-	 * users who can read orders, so the ability can return its not-found error;
-	 * orders-query already tells those users which IDs exist.
+	 * type the abilities do not support fails. An ID that is not an order passes
+	 * for users who could act on any order, so they get the not-found error
+	 * instead of a permission error.
 	 *
 	 * @param int    $order_id Order ID.
 	 * @param string $context  Permission context, such as `read` or `edit`.
@@ -276,8 +276,8 @@ trait OrderAbilityTrait {
 	protected static function check_order_permission( int $order_id, string $context ): bool {
 		$type = OrderUtil::get_order_type( $order_id );
 
-		if ( ! $type ) {
-			return wc_rest_check_post_permissions( 'shop_order', 'read' );
+		if ( ! in_array( $type, wc_get_order_types(), true ) ) {
+			return wc_rest_check_post_permissions( 'shop_order', 'edit' === $context ? 'batch' : $context );
 		}
 
 		return in_array( $type, self::get_order_type_slugs(), true )
