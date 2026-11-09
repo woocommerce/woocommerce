@@ -178,42 +178,65 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should find a customer's orders by first name, last name or the start of the billing email.
+	 * Search terms that each match one detail of the order that create_detailed_order() builds, on both storages.
 	 *
-	 * @testWith [true, "Jane"]
-	 *           [true, "doe"]
-	 *           [true, "jane.doe@"]
-	 *           [false, "Jane"]
-	 *           [false, "doe"]
-	 *           [false, "jane.doe@"]
+	 * @return array<string, array{0: bool, 1: string}>
+	 */
+	public function search_terms(): array {
+		$terms = array(
+			'first name'         => 'Jane',
+			'last name'          => 'doe',
+			'start of the email' => 'jane.doe@',
+			'product name'       => 'Enamel',
+			'billing address'    => 'Elm Street',
+			'phone'              => '0199-44',
+			'shipping name'      => 'Robin',
+			'shipping line'      => 'Courier',
+			'fee name'           => 'Gift wrap',
+			'coupon code'        => 'spring10',
+			'padded term'        => ' Enamel ',
+		);
+
+		$cases = array();
+		foreach ( $this->storage_modes() as $storage => list( $hpos ) ) {
+			foreach ( $terms as $detail => $term ) {
+				$cases[ "$detail, $storage" ] = array( $hpos, $term );
+			}
+		}
+		return $cases;
+	}
+
+	/**
+	 * @testdox Should find an order by each customer and item detail the search input describes.
 	 *
+	 * @dataProvider search_terms
 	 * @param bool   $hpos   Whether to use the custom orders table.
 	 * @param string $search Search text.
 	 */
-	public function test_search_matches_customer( bool $hpos, string $search ): void {
+	public function test_search_matches_order_details( bool $hpos, string $search ): void {
 		$this->use_storage( $hpos );
-		$jane = $this->create_customer_order( 'Jane', 'Doe', 'jane.doe@example.com' );
+		$order = $this->create_detailed_order();
 		$this->create_customer_order( 'John', 'Smith', 'john@example.com' );
 
 		$result = OrdersQuery::execute( array( 'search' => $search ) );
 
-		$this->assertSame( array( $jane ), array_column( $result['orders'], 'id' ) );
+		$this->assertSame( array( $order ), array_column( $result['orders'], 'id' ) );
 	}
 
 	/**
-	 * @testdox Should find orders by the name of an ordered product.
+	 * @testdox Should find an order by its order number.
 	 *
 	 * @dataProvider storage_modes
 	 * @param bool $hpos Whether to use the custom orders table.
 	 */
-	public function test_search_matches_product_name( bool $hpos ): void {
+	public function test_search_matches_order_number( bool $hpos ): void {
 		$this->use_storage( $hpos );
-		$this->create_customer_order( 'Jane', 'Doe', 'jane.doe@example.com' );
-		$mug = $this->create_customer_order( 'John', 'Smith', 'john@example.com', 'Enamel mug' );
+		$this->create_customer_order( 'John', 'Smith', 'john@example.com' );
+		$order = $this->create_customer_order( 'Jane', 'Doe', 'jane.doe@example.com' );
 
-		$result = OrdersQuery::execute( array( 'search' => 'Enamel' ) );
+		$result = OrdersQuery::execute( array( 'search' => (string) $order ) );
 
-		$this->assertSame( array( $mug ), array_column( $result['orders'], 'id' ) );
+		$this->assertContains( $order, array_column( $result['orders'], 'id' ) );
 	}
 
 	/**
@@ -271,17 +294,22 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should refuse a search that is empty or only whitespace.
+	 * @testdox Should refuse a search with no text to match, including "0", which the order queries treat as no search.
 	 *
 	 * @testWith [""]
 	 *           ["  "]
+	 *           ["0"]
+	 *           [" 0 "]
+	 *           ["<b></b>"]
 	 *
 	 * @param string $search Search text.
 	 */
-	public function test_refuses_blank_search( string $search ): void {
-		$schema = OrdersQuery::get_registration_args()['input_schema'];
+	public function test_refuses_search_without_text( string $search ): void {
+		$result = OrdersQuery::execute( array( 'search' => $search ) );
 
-		$this->assertWPError( rest_validate_value_from_schema( array( 'search' => $search ), $schema, 'input' ) );
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_order_search_empty', $result->get_error_code() );
+		$this->assertSame( 400, $result->get_error_data()['status'] );
 	}
 
 	/**
@@ -293,6 +321,34 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 		$this->original_hpos = OrderUtil::custom_orders_table_usage_is_enabled();
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		$this->toggle_cot_feature_and_usage( $hpos );
+	}
+
+	/**
+	 * Create Jane Doe's order, whose address, phone, shipping name and item names appear in no other test order.
+	 *
+	 * @return int Order ID.
+	 */
+	private function create_detailed_order(): int {
+		$order = wc_get_order( $this->create_customer_order( 'Jane', 'Doe', 'jane.doe@example.com', 'Enamel mug' ) );
+		$order->set_billing_address_1( '42 Elm Street' );
+		$order->set_billing_phone( '0199-4477' );
+		$order->set_shipping_first_name( 'Robin' );
+
+		$shipping = new \WC_Order_Item_Shipping();
+		$shipping->set_method_title( 'Courier express' );
+		$order->add_item( $shipping );
+
+		$fee = new \WC_Order_Item_Fee();
+		$fee->set_name( 'Gift wrap' );
+		$order->add_item( $fee );
+
+		$coupon = new \WC_Order_Item_Coupon();
+		$coupon->set_code( 'spring10' );
+		$order->add_item( $coupon );
+
+		$order->save();
+
+		return $order->get_id();
 	}
 
 	/**
