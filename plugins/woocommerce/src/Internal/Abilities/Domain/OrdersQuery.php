@@ -94,6 +94,25 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			);
 		}
 
+		if ( ! empty( $input['id'] ) && isset( $input['search'] ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_order_search_with_id',
+				__( 'Send either an id or search, not both.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Cleaned as wc_order_search() does, which also drops %-encoded octets such as "%ab", so both storages search the same term.
+		// The order queries skip an empty() `s`, which includes "0".
+		$search = isset( $input['search'] ) ? trim( str_replace( 'Order #', '', sanitize_text_field( $input['search'] ) ) ) : null;
+		if ( '' === $search || '0' === $search ) {
+			return new \WP_Error(
+				'woocommerce_ability_order_search_empty',
+				__( 'Send search with text to match, or leave it out to list all orders. A search of only "0" is not supported.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
 		if ( ! empty( $input['id'] ) ) {
 			$order = self::get_order_from_input( $input );
 
@@ -172,18 +191,30 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			$args['exclude'] = array_merge( (array) ( $args['exclude'] ?? array() ), $extension_args['post__not_in'] );
 			unset( $extension_args['post__not_in'] );
 		}
+
+		$hpos = OrderUtil::custom_orders_table_usage_is_enabled();
+
 		// Both stores merge extension args recursively, which would add the extension IDs to include instead of intersecting them.
 		$include = empty( $input['include'] ) ? null : $input['include'];
 		if ( isset( $extension_args['post__in'] ) ) {
 			$include = null === $include ? $extension_args['post__in'] : array_intersect( $include, $extension_args['post__in'] );
 			unset( $extension_args['post__in'] );
 		}
+		if ( null !== $search ) {
+			if ( $hpos ) {
+				$args['s'] = $search;
+			} else {
+				// Posts storage matches `s` against post title and content only, which orders leave empty.
+				$matches = wc_order_search( $search );
+				$include = null === $include ? $matches : array_intersect( $include, $matches );
+			}
+		}
 		if ( null !== $include ) {
 			$include          = array_values( array_diff( $include, (array) ( $args['exclude'] ?? array() ) ) );
 			$args['post__in'] = empty( $include ) ? array( 0 ) : $include;
 		}
 
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+		if ( $hpos ) {
 			$args = array_merge_recursive( $args, $extension_args );
 		} else {
 			$args[ AbilitiesLoader::EXTENSION_QUERY_VAR ] = $extension_args;
@@ -279,6 +310,10 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 				'billing_email'      => array(
 					'type'   => 'string',
 					'format' => 'email',
+				),
+				'search'             => array(
+					'type'        => 'string',
+					'description' => __( 'Find orders by order number, or whose billing or shipping details (name, email, phone, address) or item names (products, shipping methods, fees, coupons) contain this text. With HPOS it also matches the transaction ID, and with the HPOS full-text index on it matches only the start of a word. A short term such as "Free" can match many orders, so add customer_id or other filters to narrow the results.', 'woocommerce' ),
 				),
 				'parent'             => array(
 					'type'        => 'integer',
