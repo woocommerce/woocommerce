@@ -38,6 +38,38 @@ class FulfillmentsControllerTest extends WC_Unit_Test_Case {
 	private $original_tables_created;
 
 	/**
+	 * Feature flag value before the class enabled the feature.
+	 *
+	 * @var mixed
+	 */
+	private static $class_fulfillments_flag;
+
+	/**
+	 * Create the fulfillment tables once, outside the per-test transaction.
+	 *
+	 * initialize_fulfillments() creates the tables lazily when the flag is on. That is
+	 * DDL, which must not run inside a test transaction, so it runs here first.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::$class_fulfillments_flag = get_option( 'woocommerce_feature_fulfillments_enabled' );
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
+		$controller = wc_get_container()->get( FulfillmentsController::class );
+		$controller->register();
+		$controller->initialize_fulfillments();
+	}
+
+	/**
+	 * Restore the feature flag the class changed.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		if ( false === self::$class_fulfillments_flag ) {
+			delete_option( 'woocommerce_feature_fulfillments_enabled' );
+		} else {
+			update_option( 'woocommerce_feature_fulfillments_enabled', self::$class_fulfillments_flag );
+		}
+	}
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {

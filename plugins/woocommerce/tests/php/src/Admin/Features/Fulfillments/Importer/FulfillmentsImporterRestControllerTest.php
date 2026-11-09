@@ -37,20 +37,6 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 	private array $temp_files = array();
 
 	/**
-	 * Attachment posts created by tests; removed in tearDown.
-	 *
-	 * @var array<int, int>
-	 */
-	private array $attachments = array();
-
-	/**
-	 * Sessions created via ImportSession that need explicit cleanup.
-	 *
-	 * @var array<int, ImportSession>
-	 */
-	private array $sessions = array();
-
-	/**
 	 * The System Under Test.
 	 *
 	 * @var FulfillmentsImporterRestController
@@ -111,17 +97,12 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Clean up files, attachments, sessions and container replacements created during the test.
+	 * Clean up files and container replacements created during the test.
+	 *
+	 * Sessions, attachments and scheduled actions are database rows the test
+	 * transaction rolls back; files and container state are not.
 	 */
 	public function tearDown(): void {
-		foreach ( $this->sessions as $session ) {
-			$session->delete();
-		}
-		$this->sessions = array();
-		foreach ( $this->attachments as $attachment_id ) {
-			wp_delete_attachment( $attachment_id, true );
-		}
-		$this->attachments = array();
 		foreach ( $this->temp_files as $path ) {
 			if ( file_exists( $path ) ) {
 				wp_delete_file( $path );
@@ -151,7 +132,7 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Create an attachment post for a staged file and track it for cleanup.
+	 * Create an attachment post for a staged file.
 	 *
 	 * @param string $file Absolute path of the staged file.
 	 * @return int
@@ -166,12 +147,11 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 		);
 		$this->assertIsInt( $attachment_id );
 		$this->assertGreaterThan( 0, $attachment_id );
-		$this->attachments[] = $attachment_id;
 		return $attachment_id;
 	}
 
 	/**
-	 * Open a session for the admin user over a staged file and track it for cleanup.
+	 * Open a session for the admin user over a staged file.
 	 *
 	 * @param string $file          Absolute path of the staged file.
 	 * @param int    $attachment_id Attachment post for the file.
@@ -189,7 +169,6 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 			$attachment_id
 		);
 		$this->assertTrue( $session->persisted() );
-		$this->sessions[] = $session;
 		return $session;
 	}
 
@@ -325,15 +304,8 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * @return mixed
 	 */
 	private function prepare_with_staged_file( string $file, int $attachment_id = 0, ?callable $on_stage = null ) {
-		$sut      = $this->make_controller_with_staged_file( $file, $attachment_id, $on_stage );
-		$response = $this->invoke( 'handle_prepare', $this->make_prepare_request(), $sut );
-		if ( is_array( $response ) && isset( $response['token'] ) ) {
-			$session = ImportSession::load( get_current_user_id(), (string) $response['token'] );
-			if ( $session instanceof ImportSession ) {
-				$this->sessions[] = $session;
-			}
-		}
-		return $response;
+		$sut = $this->make_controller_with_staged_file( $file, $attachment_id, $on_stage );
+		return $this->invoke( 'handle_prepare', $this->make_prepare_request(), $sut );
 	}
 
 	/**
@@ -449,7 +421,6 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertIsArray( $response );
 		$session = ImportSession::load( get_current_user_id(), (string) $response['token'] );
 		$this->assertNotNull( $session );
-		$this->sessions[] = $session;
 		$this->assertTrue( $session->notify_customer() );
 		$this->assertFalse( $session->update_existing() );
 	}
@@ -682,7 +653,6 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 		);
 		$session = ImportSession::load( get_current_user_id(), (string) $data['token'] );
 		$this->assertNotNull( $session );
-		$this->sessions[] = $session;
 		$this->assertSame( "\t", $session->delimiter() );
 		$this->assertFileExists( $staged );
 	}
