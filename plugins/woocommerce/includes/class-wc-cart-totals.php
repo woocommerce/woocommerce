@@ -268,9 +268,9 @@ final class WC_Cart_Totals {
 				$split_values = null;
 
 				if ( $item->object instanceof WC_Shipping_Rate ) {
-					// A rate with no split of its own, such as one taxed per item, is split by the items of the cart being totalled, as the order line made from it is.
+					// A rate with no split of its own, such as one taxed per item or taxed again in one class, is split by the items of the cart being totalled, as the order line made from it is.
 					$shipping_tax_split = wc_get_container()->get( ShippingTaxSplit::class );
-					$split_values       = $shipping_tax_split->get_rate_values( $item->object ) ?? $shipping_tax_split->get_package_values( array( 'contents' => $this->cart->get_cart() ) );
+					$split_values       = $shipping_tax_split->get_rate_values( $item->object, $this->cart->get_cart_item_tax_classes() ) ?? $shipping_tax_split->get_package_values( array( 'contents' => $this->cart->get_cart() ) );
 				}
 
 				$item_costs = null === $split_values ? array( reset( $item_tax_classes ) => $item->total ) : ShippingTaxSplit::split_cost( (float) $item->total, $split_values );

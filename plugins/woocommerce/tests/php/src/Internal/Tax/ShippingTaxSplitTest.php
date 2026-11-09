@@ -341,6 +341,87 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An order created from the cart keeps the cart's shipping tax when a rate keeps its cost and is taxed again in one class.
+	 *
+	 * @testWith [1, 2.0]
+	 *           [2, 4.0]
+	 *
+	 * @param int   $package_count Number of packages, each with a 10.00 rate.
+	 * @param float $expected      Expected shipping tax.
+	 */
+	public function test_rate_taxed_again_in_one_class_at_the_same_cost_keeps_the_cart_tax( int $package_count, float $expected ): void {
+		$this->enable_split();
+		$products = $this->create_products( array( array( '', ProductTaxStatus::TAXABLE, 10, false ), array( 'zero-rate', ProductTaxStatus::TAXABLE, 90, false ) ) );
+		if ( 2 === $package_count ) {
+			$this->split_packages_by_product( $products[0]->get_id() );
+		}
+		add_filter(
+			'woocommerce_package_rates',
+			function ( $rates ) {
+				foreach ( $rates as $rate ) {
+					$rate->set_taxes( WC_Tax::calc_shipping_tax( $rate->get_cost(), WC_Tax::get_shipping_tax_rates() ) );
+				}
+				return $rates;
+			}
+		);
+
+		$this->fill_cart( $products, array_fill( 0, $package_count, 'flat_rate' ) );
+		WC()->cart->calculate_totals();
+		$order = $this->create_order_from_cart();
+
+		// 20% of each whole 10.00, as the cart charged, also on the package holding only the zero rate item.
+		$this->assertEqualsWithDelta( $expected, (float) WC()->cart->get_shipping_tax(), 0.001 );
+		$this->assertEqualsWithDelta( $expected, (float) $order->get_shipping_tax(), 0.001 );
+	}
+
+	/**
+	 * @testdox A negative fee gets the same tax in the cart and the order when a rate keeps its cost and is taxed again in one class.
+	 *
+	 * @testWith [1, -0.2]
+	 *           [2, -0.35]
+	 *
+	 * @param int   $package_count Number of packages, each with a 10.00 rate.
+	 * @param float $expected      Expected fee tax.
+	 */
+	public function test_negative_fee_tax_with_a_rate_taxed_again_in_one_class( int $package_count, float $expected ): void {
+		$this->enable_split();
+		$products = $this->create_products( array( array( '', ProductTaxStatus::TAXABLE, 10, false ), array( 'zero-rate', ProductTaxStatus::TAXABLE, 90, false ) ) );
+		if ( 2 === $package_count ) {
+			$this->split_packages_by_product( $products[0]->get_id() );
+		}
+		add_filter(
+			'woocommerce_package_rates',
+			function ( $rates ) {
+				foreach ( $rates as $rate ) {
+					$rate->set_taxes( WC_Tax::calc_shipping_tax( $rate->get_cost(), WC_Tax::get_shipping_tax_rates() ) );
+				}
+				return $rates;
+			}
+		);
+		add_action(
+			'woocommerce_cart_calculate_fees',
+			function ( $cart ) {
+				$cart->add_fee( 'Discount', -10, true );
+			}
+		);
+
+		$this->fill_cart( $products, array_fill( 0, $package_count, 'flat_rate' ) );
+		WC()->cart->calculate_totals();
+		$fees  = WC()->cart->get_fees();
+		$order = $this->create_order_from_cart();
+		WC()->checkout()->create_order_fee_lines( $order, WC()->cart );
+		$order->calculate_totals();
+		$order_fees = $order->get_fees();
+		$order_fee  = reset( $order_fees );
+		$this->assertInstanceOf( WC_Order_Item_Fee::class, $order_fee );
+
+		// A rate taxed in one class is split by the items on both sides, 1.00 of its 10.00 standard rate. A package holding only
+		// the standard rate item keeps its split, so with 2 packages standard rate items and shipping are 21 of the 120: 20% of -1.75.
+		$this->assertEqualsWithDelta( $expected, (float) reset( $fees )->tax, 0.001 );
+		$this->assertEqualsWithDelta( $expected, (float) $order_fee->get_total_tax(), 0.001 );
+	}
+
+	/**
 	 * @testdox An order created from the cart keeps the cart's shipping tax when a rate's cost and split taxes are scaled.
 	 *
 	 * @testWith [false, 0.3]

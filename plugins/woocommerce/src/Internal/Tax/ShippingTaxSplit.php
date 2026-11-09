@@ -115,29 +115,32 @@ class ShippingTaxSplit {
 	}
 
 	/**
-	 * Get the value per tax class a shipping rate was split by.
+	 * Get the value per tax class a shipping rate was split by, while its taxes are still split by it.
+	 *
+	 * A rate taxed again in one class after the split, such as in 'woocommerce_package_rates', has no split of its own, like the order line made from it.
 	 *
 	 * @since 11.4.0
 	 *
-	 * @param \WC_Shipping_Rate $rate Shipping rate.
-	 * @return array<string, float>|null Value per tax class, or null when the split is off or the rate was not split.
+	 * @param \WC_Shipping_Rate $rate        Shipping rate.
+	 * @param string[]          $tax_classes Tax classes of the taxable items in the cart the rate is for.
+	 * @return array<string, float>|null Value per tax class, or null when the split is off or the rate is not split.
 	 */
-	public function get_rate_values( \WC_Shipping_Rate $rate ): ?array {
+	public function get_rate_values( \WC_Shipping_Rate $rate, array $tax_classes ): ?array {
 		if ( ! $this->is_enabled() ) {
 			return null;
 		}
 
 		$costs = $rate->get_meta_data()[ self::COSTS_META_KEY ] ?? null;
 
-		return is_array( $costs ) ? self::get_positive_values( $costs ) : null;
+		return is_array( $costs ) ? self::get_costs_scaled_to_tax( $costs, (float) $rate->get_cost(), (float) NumberUtil::array_sum( $rate->get_taxes() ), $tax_classes ) : null;
 	}
 
 	/**
 	 * Save the order's item values on a shipping line made at checkout, so a recalculation can tell when the items change.
 	 *
-	 * The order's line items are made from the cart first, so these are the cart's values. A line whose saved costs no longer add up to its
-	 * cost came from a rate changed after it was split, such as in 'woocommerce_package_rates'. If its tax is nearer to what the split scaled to the
-	 * new cost charges than to one class, the costs are scaled to match. Otherwise they are dropped and the line is taxed in one class, as the cart taxed it.
+	 * The order's line items are made from the cart first, so these are the cart's values. A rate can be changed after it was split, such as in
+	 * 'woocommerce_package_rates', so the line keeps its saved costs, scaled to its cost if that changed, only while its tax is nearer to what they
+	 * charge than to one class. Otherwise they are dropped and the line is taxed in one class, as the cart taxed it.
 	 *
 	 * @since 11.4.0
 	 *
@@ -148,12 +151,12 @@ class ShippingTaxSplit {
 	public function save_checkout_values( \WC_Order_Item_Shipping $item, \WC_Abstract_Order $order ): void {
 		$costs = $item->get_meta( self::COSTS_META_KEY );
 
-		if ( is_array( $costs ) && NumberUtil::round( abs( NumberUtil::array_sum( $costs ) - (float) $item->get_total() ), wc_get_price_decimals() ) > 0 ) {
-			$scaled_costs = $this->get_costs_scaled_to_line_tax( $costs, $item, $order );
+		if ( is_array( $costs ) ) {
+			$scaled_costs = self::get_costs_scaled_to_tax( $costs, (float) $item->get_total(), (float) $item->get_total_tax(), $order->get_items_tax_classes() );
 
 			if ( null === $scaled_costs ) {
 				$item->delete_meta_data( self::COSTS_META_KEY );
-			} else {
+			} elseif ( NumberUtil::round( abs( NumberUtil::array_sum( $costs ) - (float) $item->get_total() ), wc_get_price_decimals() ) > 0 ) {
 				$item->update_meta_data( self::COSTS_META_KEY, $scaled_costs );
 			}
 		}
@@ -366,38 +369,38 @@ class ShippingTaxSplit {
 	}
 
 	/**
-	 * Scale a rate's saved costs to its line's cost, when the line's tax is nearer to what the scaled costs are taxed than to what one class charges.
+	 * Scale a rate's saved costs to its cost, when its tax is nearer to what the scaled costs are taxed than to what one class charges.
 	 *
-	 * A callback that scales a rate's cost and taxes, such as for a surcharge or another currency, keeps the split. One that taxes the new cost in one class does not.
-	 * The cart charged the rate's taxes, so they tell the two apart. The one class is the one the order taxes the line in without the split.
+	 * A callback that scales a rate's cost and taxes, such as for a surcharge or another currency, keeps the split. One that taxes the cost in one class,
+	 * changed or not, does not. The cart charged the rate's taxes, so they tell the two apart. The cart and the order ask the same of a rate and the line
+	 * made from it, so they agree on it. The one class is the one an order taxes shipping in without the split.
 	 *
-	 * @param array                   $costs Cost per tax class saved on the rate.
-	 * @param \WC_Order_Item_Shipping $item  Shipping line made from the rate.
-	 * @param \WC_Abstract_Order      $order Order being created, with its line items.
-	 * @return array<string, float>|null Scaled cost per tax class, or null when the line is taxed in one class.
+	 * @param array    $costs       Cost per tax class saved on the rate.
+	 * @param float    $cost        Cost of the rate, or of the shipping line made from it.
+	 * @param float    $tax         Tax of the rate or the shipping line.
+	 * @param string[] $tax_classes Tax classes of the taxable items in the cart or order.
+	 * @return array<string, float>|null Scaled cost per tax class, or null when the cost is taxed in one class.
 	 */
-	private function get_costs_scaled_to_line_tax( array $costs, \WC_Order_Item_Shipping $item, \WC_Abstract_Order $order ): ?array {
+	private static function get_costs_scaled_to_tax( array $costs, float $cost, float $tax, array $tax_classes ): ?array {
 		$costs = self::get_positive_values( $costs );
-		$total = (float) $item->get_total();
 
-		if ( null === $costs || $total <= 0 ) {
+		if ( null === $costs || $cost <= 0 ) {
 			return null;
 		}
 
-		$scaled_costs = self::split_cost( $total, $costs, false );
+		$scaled_costs = self::split_cost( $cost, $costs, false );
 		$split_tax    = 0.0;
 
-		foreach ( $scaled_costs as $tax_class => $cost ) {
+		foreach ( $scaled_costs as $tax_class => $class_cost ) {
 			if ( self::NON_TAXABLE !== $tax_class ) {
-				$split_tax += self::get_net_shipping_tax( $cost, (string) $tax_class );
+				$split_tax += self::get_net_shipping_tax( $class_cost, (string) $tax_class );
 			}
 		}
 
-		$order_classes = array_intersect( array_merge( array( '' ), \WC_Tax::get_tax_class_slugs() ), $order->get_items_tax_classes() );
-		$one_class_tax = $order_classes ? self::get_net_shipping_tax( $total, (string) current( $order_classes ) ) : 0.0;
-		$line_tax      = (float) $item->get_total_tax();
+		$one_classes   = array_intersect( array_merge( array( '' ), \WC_Tax::get_tax_class_slugs() ), $tax_classes );
+		$one_class_tax = $one_classes ? self::get_net_shipping_tax( $cost, (string) current( $one_classes ) ) : 0.0;
 
-		return abs( $line_tax - $split_tax ) <= abs( $line_tax - $one_class_tax ) ? $scaled_costs : null;
+		return abs( $tax - $split_tax ) <= abs( $tax - $one_class_tax ) ? $scaled_costs : null;
 	}
 
 	/**
