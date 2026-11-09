@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/checkout-actions-block",
 	"title": "Actions",
-	"description": "Allow customers to place their order.",
+	"description": "Place order button, with optional Terms and Conditions and Return to Cart links.",
 	"category": "woocommerce",
 	"supports": {
 		"align": false,
@@ -34,6 +34,15 @@
 		"priceSeparator": {
 			"type": "string",
 			"default": "·"
+		},
+		"showTerms": {
+			"type": "boolean"
+		},
+		"termsCheckbox": {
+			"type": "boolean"
+		},
+		"termsText": {
+			"type": "string"
 		}
 	},
 	"parent": [ "woocommerce/checkout-fields-block" ],

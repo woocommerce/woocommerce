@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Treat an empty min_price or max_price in shop URLs and the products REST API as no limit; e.g. ?min_price=30&max_price= now returns products from 30 up instead of none. With a blank price, the price filter widget no longer shows a maximum of 0 and the shop no longer hides subcategories.
