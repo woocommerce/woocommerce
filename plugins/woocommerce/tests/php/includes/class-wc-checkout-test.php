@@ -256,6 +256,36 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A logged in customer's cart stays empty after a zero-total order instead of coming back from the saved cart.
+	 */
+	public function test_process_order_without_payment_clears_logged_in_customers_saved_cart(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+
+		$order = wc_create_order();
+		$order->save();
+
+		add_filter(
+			'woocommerce_checkout_no_payment_needed_redirect',
+			function () {
+				throw new RuntimeException( 'Stop the test before checkout sends its redirect.' );
+			}
+		);
+
+		try {
+			$this->sut->process_order_without_payment( $order->get_id() );
+			$this->fail( 'Checkout should reach its no-payment redirect.' );
+		} catch ( RuntimeException $exception ) {
+			$this->assertSame( 'Stop the test before checkout sends its redirect.', $exception->getMessage() );
+		}
+
+		// Load the cart the way the order received page does on the next request.
+		WC()->cart->get_cart_from_session();
+
+		$this->assertTrue( WC()->cart->is_empty(), 'The purchased items should not be restored from the saved cart.' );
+	}
+
+	/**
 	 * @testdox A logged in customer's VAT exemption should survive checkout saving their account.
 	 */
 	public function test_process_customer_keeps_logged_in_customer_vat_exemption(): void {

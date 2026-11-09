@@ -1559,7 +1559,11 @@ class WC_Checkout {
 		}
 
 		$order->payment_complete();
-		wc_empty_cart();
+
+		// Delete the saved cart too, or the next page load restores it and the order received page keeps it, as it no longer matches this order.
+		if ( WC()->cart ) {
+			WC()->cart->empty_cart();
+		}
 
 		wc_log_order_step(
 			'[Shortcode #6B] Order processed without payment',
