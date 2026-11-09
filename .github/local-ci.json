@@ -86,12 +86,12 @@
       "run": [ "pnpm", "--filter={project}", "{command}" ]
     },
     {
-      "id": "php-unit-8.1",
-      "$comment": "PHPUnit without wp-env, on the PHP version the job name gives. Jobs with a test environment have [WP ...] in their names: the core plugin's are the php-cells rule's, and the rest are left to CI.",
+      "id": "php-unit",
+      "$comment": "PHPUnit without wp-env. The test job installs PHP 7.4 for every unit:php job (setup-woocommerce-monorepo's default), so this runs on 7.4 whatever the job name says. Jobs with a test environment have [WP ...] in their names: the core plugin's are the php-cells rule's, and the rest are left to CI.",
       "type": "unit:php",
       "namePrefix": "PHP: 8.1 ",
       "exclude": [ "[WP " ],
-      "image": "php8.1",
+      "image": "php7.4",
       "sampleRate": 10,
       "prepare": {
         "$comment": "Mirrors setup-woocommerce-monorepo with install='<project>...' and build-type=backend.",
@@ -133,7 +133,7 @@
     "build": { "context": ".github/local-ci", "dockerfile": "php.Dockerfile", "args": { "PHP_IMAGE": "php:8.3-cli-bookworm@sha256:cdb77e306d6bb99db40e513fbe036ecc6c53b575cbcb7e581387845fef26d755" } },
     "images": {
       "php8.3": { "build": { "context": ".github/local-ci", "dockerfile": "php.Dockerfile", "args": { "PHP_IMAGE": "php:8.3-cli-bookworm@sha256:cdb77e306d6bb99db40e513fbe036ecc6c53b575cbcb7e581387845fef26d755" } } },
-      "php8.1": { "build": { "context": ".github/local-ci", "dockerfile": "php.Dockerfile", "args": { "PHP_IMAGE": "php:8.1-cli-bookworm@sha256:482717722f08d9a6c2b4f98c40bfee6d7935bd1a17fef928881ecd5884dfd76e" } } }
+      "php7.4": { "build": { "context": ".github/local-ci", "dockerfile": "php.Dockerfile", "args": { "PHP_IMAGE": "php:7.4-cli-bullseye@sha256:620a6b9f4d4feef2210026172570465e9d0c1de79766418d3affd09190a7fda5" } } }
     }
   },
 
