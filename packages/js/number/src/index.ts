@@ -151,3 +151,5 @@ export function parseNumber(
 
 	return Number.parseFloat( parsedValue ).toFixed( parsedPrecision );
 }
+
+// live receipt test marker
