@@ -155,6 +155,27 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A late scan on a queue that recently failed or started another action is not stalled.
+	 * @testWith ["failed"]
+	 *           ["running"]
+	 *
+	 * @param string $state What happened to the other action.
+	 */
+	public function test_late_scan_on_a_queue_running_other_actions_is_not_stalled( string $state ): void {
+		$this->age_finished_actions();
+		as_schedule_single_action( time() - ScheduledScan::STALLED_AFTER - 60, ScheduledScan::RUN_NOW_HOOK, array(), ScheduledScan::GROUP );
+		$other = as_schedule_single_action( time() - 60, 'woocommerce_agent_readiness_test_other' );
+		if ( 'failed' === $state ) {
+			\ActionScheduler::store()->mark_failure( $other );
+		} else {
+			\ActionScheduler::store()->log_execution( $other );
+		}
+
+		$this->assertFalse( $this->sut->is_stalled() );
+		as_unschedule_all_actions( 'woocommerce_agent_readiness_test_other' );
+	}
+
+	/**
 	 * @testdox A scan queued just now is pending, not stalled, and has a due date.
 	 */
 	public function test_fresh_scan_is_not_stalled(): void {
@@ -270,11 +291,11 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Date every finished action an hour back, so only what the test does next
-	 * counts as recent queue activity.
+	 * Date every finished, failed or running action an hour back, so only what the
+	 * test does next counts as recent queue activity.
 	 */
 	private function age_finished_actions(): void {
 		global $wpdb;
-		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}actionscheduler_actions SET last_attempt_gmt = %s WHERE status = 'complete'", gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) ) );
+		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}actionscheduler_actions SET last_attempt_gmt = %s WHERE status IN ( 'complete', 'failed', 'in-progress' )", gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) ) );
 	}
 }

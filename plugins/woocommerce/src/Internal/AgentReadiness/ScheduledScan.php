@@ -124,8 +124,8 @@ class ScheduledScan implements RegisterHooksInterface {
 
 	/**
 	 * Whether a requested scan is still waiting to start STALLED_AFTER seconds
-	 * after it was due, and no other action has finished in that time either. A
-	 * queue that is only behind is still running, so its scan stays queued.
+	 * after it was due, and no other action has finished, failed or started in that
+	 * time either. A queue that is only behind is still running, so its scan stays queued.
 	 */
 	public function is_stalled(): bool {
 		if ( ! function_exists( 'as_next_scheduled_action' ) ) {
@@ -136,16 +136,16 @@ class ScheduledScan implements RegisterHooksInterface {
 		if ( ! is_int( $due ) || time() - $due <= self::STALLED_AFTER ) {
 			return false;
 		}
-		$recently_finished = as_get_scheduled_actions(
+		$recently_run = as_get_scheduled_actions(
 			array(
-				'status'           => \ActionScheduler_Store::STATUS_COMPLETE,
+				'status'           => array( \ActionScheduler_Store::STATUS_COMPLETE, \ActionScheduler_Store::STATUS_FAILED, \ActionScheduler_Store::STATUS_RUNNING ),
 				'modified'         => new \DateTime( '@' . ( time() - self::STALLED_AFTER ) ),
 				'modified_compare' => '>=',
 				'per_page'         => 1,
 			),
 			'ids'
 		);
-		return empty( $recently_finished );
+		return empty( $recently_run );
 	}
 
 	/**
