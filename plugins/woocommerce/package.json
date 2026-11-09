@@ -157,7 +157,9 @@
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [],
-					"onlyForDependencies": [],
+					"onlyForDependencies": [
+						"@woocommerce/email-editor-config"
+					],
 					"changes": [
 						"client/admin/config/*.json",
 						"client/blocks/packages/public-api/blocks-checkout/utils/validation/test/postcode-validation-fixtures.json",
@@ -189,7 +191,9 @@
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [],
-					"onlyForDependencies": [],
+					"onlyForDependencies": [
+						"@woocommerce/email-editor-config"
+					],
 					"changes": [
 						"client/admin/config/*.json",
 						"client/blocks/packages/public-api/blocks-checkout/utils/validation/test/postcode-validation-fixtures.json",
@@ -221,7 +225,9 @@
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [],
-					"onlyForDependencies": [],
+					"onlyForDependencies": [
+						"@woocommerce/email-editor-config"
+					],
 					"changes": [
 						"client/admin/config/*.json",
 						"client/blocks/packages/public-api/blocks-checkout/utils/validation/test/postcode-validation-fixtures.json",
@@ -1535,6 +1541,7 @@
 		"@typescript-eslint/eslint-plugin": "^8.63.0",
 		"@typescript-eslint/parser": "^8.63.0",
 		"@woocommerce/e2e-utils-playwright": "workspace:*",
+		"@woocommerce/email-editor-config": "workspace:*",
 		"@woocommerce/eslint-config": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-build": "workspace:*",

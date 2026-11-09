@@ -2635,6 +2635,9 @@ importers:
       '@woocommerce/e2e-utils-playwright':
         specifier: workspace:*
         version: link:../../packages/js/e2e-utils-playwright
+      '@woocommerce/email-editor-config':
+        specifier: workspace:*
+        version: link:../../packages/php/email-editor
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../tools/eslint-config
