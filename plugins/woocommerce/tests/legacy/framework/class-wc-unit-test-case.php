@@ -293,8 +293,8 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		WC()->shipping()->unregister_shipping_methods();
 
 		if ( $this->customer_at_setup ) {
-			// Tests swap in a customer for another user, or change addresses, tax exemption and
-			// other props through setters, which also leave entries in the change set. Put back
+			// Tests swap in a customer for another user, or change addresses, tax exemption, meta
+			// and other props through setters, which also leave entries in the change set. Put back
 			// the setUp() instance with its exact state, so later tests start from the same one.
 			WC()->customer = $this->customer_at_setup;
 			self::customer_state( $this->customer_at_setup, $this->customer_state_at_setup );
@@ -309,16 +309,21 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @return array<string, mixed> The state as it was before any write.
 	 */
 	private static function customer_state( WC_Customer $customer, ?array $state = null ): array {
-		$access = function ( ?array $state ): array {
+		// update_meta_data() changes WC_Meta_Data objects in place, so the saved state keeps its own copies.
+		// Null means the meta was never read, and writing it back makes the next read reload it.
+		$copy_meta = static fn ( $meta ) => is_array( $meta ) ? array_map( static fn ( WC_Meta_Data $item ) => clone $item, $meta ) : $meta;
+
+		$access = function ( ?array $state ) use ( $copy_meta ): array {
 			$current = array(
 				'id'                  => $this->id,
 				'data'                => $this->data,
 				'changes'             => $this->changes,
+				'meta_data'           => $copy_meta( $this->meta_data ),
 				'is_vat_exempt'       => $this->is_vat_exempt,
 				'calculated_shipping' => $this->calculated_shipping,
 			);
 			foreach ( (array) $state as $prop => $value ) {
-				$this->$prop = $value;
+				$this->$prop = 'meta_data' === $prop ? $copy_meta( $value ) : $value;
 			}
 			return $current;
 		};

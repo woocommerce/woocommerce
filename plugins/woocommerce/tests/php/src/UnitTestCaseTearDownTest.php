@@ -139,6 +139,34 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Meta a test adds to or changes on the setUp() customer does not outlive the test.
+	 */
+	public function test_clear_wc_singleton_state_restores_the_customer_meta(): void {
+		$customer    = WC()->customer;
+		$saved_state = new \ReflectionProperty( \WC_Unit_Test_Case::class, 'customer_state_at_setup' );
+		$saved_state->setAccessible( true );
+		$read_state = new \ReflectionMethod( \WC_Unit_Test_Case::class, 'customer_state' );
+		$read_state->setAccessible( true );
+		$state_at_setup = $saved_state->getValue( $this );
+
+		try {
+			// Save a state that already holds meta, so the change below edits a meta object in place.
+			$customer->update_meta_data( '_restored_key', 'original' );
+			$saved_state->setValue( $this, $read_state->invoke( null, $customer ) );
+
+			$customer->update_meta_data( '_restored_key', 'changed' );
+			$customer->add_meta_data( '_added_key', 'added' );
+
+			$this->clear_wc_singleton_state();
+
+			$this->assertSame( 'original', $customer->get_meta( '_restored_key' ), 'Meta changed in place should be back to its saved value.' );
+			$this->assertSame( '', $customer->get_meta( '_added_key' ), 'Meta the test added should be gone.' );
+		} finally {
+			$saved_state->setValue( $this, $state_at_setup );
+		}
+	}
+
+	/**
 	 * @testdox $_SERVER changes, including the REQUEST_URI that go_to() sets, do not outlive the test.
 	 */
 	public function test_restore_server_superglobal_undoes_server_changes(): void {
