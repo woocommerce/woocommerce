@@ -53,6 +53,7 @@ class Initializer {
 		'core/list',
 		'core/list-item',
 		'core/paragraph',
+		'core/preformatted',
 		'core/quote',
 		'core/spacer',
 		'core/social-link',
@@ -207,6 +208,7 @@ class Initializer {
 		switch ( $block_name ) {
 			case 'core/heading':
 			case 'core/paragraph':
+			case 'core/preformatted':
 			case 'core/site-title':
 			case 'core/post-title':
 				$renderer = new Text();

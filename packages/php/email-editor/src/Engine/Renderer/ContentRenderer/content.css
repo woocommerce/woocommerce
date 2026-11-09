@@ -25,6 +25,12 @@ p {
 	margin: 0;
 }
 
+pre {
+	font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+	margin: 0;
+	white-space: pre-wrap;
+}
+
 h1,
 h2,
 h3,
