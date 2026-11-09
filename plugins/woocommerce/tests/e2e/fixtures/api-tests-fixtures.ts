@@ -8,7 +8,7 @@ import { test as base, expect, request } from '@playwright/test';
  */
 import { admin } from '../test-data/data';
 import { encodeCredentials } from '../utils/plugin-utils';
-import { tags } from './fixtures';
+import { tags, locks } from './fixtures';
 
 export const test = base.extend( {
 	extraHTTPHeaders: {
@@ -20,4 +20,4 @@ export const test = base.extend( {
 	},
 } );
 
-export { expect, tags, request };
+export { expect, tags, locks, request };

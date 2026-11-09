@@ -6,6 +6,7 @@ import {
 	expect,
 	request as apiRequest,
 	tags,
+	locks,
 } from '../../../fixtures/api-tests-fixtures';
 import { setOption } from '../../../utils/options';
 import { countries, currencies, stateOptions } from '../../../data/settings';
@@ -31,7 +32,7 @@ const disableEmailImprovementsFeature = async () => {
 };
 
 test.describe( 'Settings API tests: CRUD', () => {
-	test.describe( 'List all settings groups', () => {
+	test.describe( 'List all settings groups', { lock: locks.EMAIL_FEATURE_FLAGS }, () => {
 		test.beforeAll( disableEmailImprovementsFeature );
 		test( 'can retrieve all settings groups', async ( { request } ) => {
 			// call API to retrieve all settings groups
@@ -1825,7 +1826,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 		} );
 	} );
 
-	test.describe( 'List all Email New Order settings', () => {
+	test.describe( 'List all Email New Order settings', { lock: locks.EMAIL_FEATURE_FLAGS }, () => {
 		test.beforeAll( enableEmailImprovementsFeature );
 		test.afterAll( disableEmailImprovementsFeature );
 		test(
@@ -1967,7 +1968,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 		);
 	} );
 
-	test.describe( 'List all Email Failed Order settings', () => {
+	test.describe( 'List all Email Failed Order settings', { lock: locks.EMAIL_FEATURE_FLAGS }, () => {
 		test.beforeAll( enableEmailImprovementsFeature );
 		test.afterAll( disableEmailImprovementsFeature );
 		test(
@@ -2110,7 +2111,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 		);
 	} );
 
-	test.describe( 'List all Email Customer On Hold Order settings', () => {
+	test.describe( 'List all Email Customer On Hold Order settings', { lock: locks.EMAIL_FEATURE_FLAGS }, () => {
 		test.beforeAll( enableEmailImprovementsFeature );
 		test.afterAll( disableEmailImprovementsFeature );
 		test( 'can retrieve all email customer on hold order settings', async ( {
@@ -2233,7 +2234,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 		} );
 	} );
 
-	test.describe( 'List all Email Customer Processing Order settings', () => {
+	test.describe( 'List all Email Customer Processing Order settings', { lock: locks.EMAIL_FEATURE_FLAGS }, () => {
 		test.beforeAll( enableEmailImprovementsFeature );
 		test.afterAll( disableEmailImprovementsFeature );
 		test( 'can retrieve all email customer processing order settings', async ( {
@@ -2356,7 +2357,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 		} );
 	} );
 
-	test.describe( 'List all Email Customer Completed Order settings', () => {
+	test.describe( 'List all Email Customer Completed Order settings', { lock: locks.EMAIL_FEATURE_FLAGS }, () => {
 		test.beforeAll( enableEmailImprovementsFeature );
 		test.afterAll( disableEmailImprovementsFeature );
 		test( 'can retrieve all email customer completed order settings', async ( {
@@ -2479,7 +2480,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 		} );
 	} );
 
-	test.describe( 'List all Email Customer Refunded Order settings', () => {
+	test.describe( 'List all Email Customer Refunded Order settings', { lock: locks.EMAIL_FEATURE_FLAGS }, () => {
 		test.beforeAll( enableEmailImprovementsFeature );
 		test.afterAll( disableEmailImprovementsFeature );
 		test( 'can retrieve all email customer refunded order settings', async ( {
@@ -2632,7 +2633,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 		} );
 	} );
 
-	test.describe( 'List all Email Customer Invoice settings', () => {
+	test.describe( 'List all Email Customer Invoice settings', { lock: locks.EMAIL_FEATURE_FLAGS }, () => {
 		test.beforeAll( enableEmailImprovementsFeature );
 		test.afterAll( disableEmailImprovementsFeature );
 		test( 'can retrieve all email customer invoice settings', async ( {
@@ -2758,7 +2759,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 		} );
 	} );
 
-	test.describe( 'List all Email Customer Note settings', () => {
+	test.describe( 'List all Email Customer Note settings', { lock: locks.EMAIL_FEATURE_FLAGS }, () => {
 		test.beforeAll( enableEmailImprovementsFeature );
 		test.afterAll( disableEmailImprovementsFeature );
 		test( 'can retrieve all email customer note settings', async ( {
@@ -2881,7 +2882,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 		} );
 	} );
 
-	test.describe( 'List all Email Customer Reset Password settings', () => {
+	test.describe( 'List all Email Customer Reset Password settings', { lock: locks.EMAIL_FEATURE_FLAGS }, () => {
 		test.beforeAll( enableEmailImprovementsFeature );
 		test.afterAll( disableEmailImprovementsFeature );
 		test( 'can retrieve all email customer reset password settings', async ( {
@@ -2975,7 +2976,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 		} );
 	} );
 
-	test.describe( 'List all Email Customer New Account settings', () => {
+	test.describe( 'List all Email Customer New Account settings', { lock: locks.EMAIL_FEATURE_FLAGS }, () => {
 		test.beforeAll( enableEmailImprovementsFeature );
 		test.afterAll( disableEmailImprovementsFeature );
 		test( 'can retrieve all email customer new account settings', async ( {
