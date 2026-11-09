@@ -147,6 +147,21 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox When the UCP option can't be saved, POST ucp answers with an error, not with failing checks.
+	 */
+	public function test_ucp_switch_reports_a_failed_save(): void {
+		StoreConditionsTest::make_store_ready();
+		update_option( 'woocommerce_feature_ucp_enabled', 'no' );
+		add_filter( 'pre_update_option_woocommerce_feature_ucp_enabled', static fn( $value, $old_value ) => $old_value, 10, 2 );
+
+		$response = $this->dispatch_ucp( true );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'woocommerce_ucp_not_changed', $response->get_data()['code'] );
+		$this->assertSame( 'no', get_option( 'woocommerce_feature_ucp_enabled' ) );
+	}
+
+	/**
 	 * @testdox Turning UCP off works while a required check fails.
 	 */
 	public function test_ucp_switch_off_with_failing_check(): void {

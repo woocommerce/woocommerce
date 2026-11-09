@@ -74,7 +74,7 @@ class UcpSwitch {
 		}
 
 		return array(
-			'enabled'        => $enable,
+			'enabled'        => UcpUtils::is_enabled(),
 			'status'         => $this->status( $failing ),
 			'failing_checks' => $failing,
 		);

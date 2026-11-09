@@ -164,6 +164,13 @@ class ReadinessRestController extends RestApiControllerBase {
 	protected function set_ucp_enabled( WP_REST_Request $request ) {
 		$enable = (bool) $request->get_param( 'enabled' );
 		$result = $this->ucp_switch->set_enabled( $enable );
+		if ( $enable && ! $result['enabled'] && array() === $result['failing_checks'] ) {
+			return new \WP_Error(
+				'woocommerce_ucp_not_changed',
+				__( 'UCP could not be turned on. Try again.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
 		if ( $enable && ! $result['enabled'] ) {
 			return new \WP_Error(
 				'woocommerce_ucp_required_checks_failing',
