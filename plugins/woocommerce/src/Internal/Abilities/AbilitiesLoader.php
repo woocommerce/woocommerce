@@ -116,7 +116,7 @@ class AbilitiesLoader {
 	 * @since 11.3.0
 	 */
 	public static function register_core_resources(): void {
-		foreach ( array( 'product', 'order', 'order_item', 'product_term', 'product_review' ) as $resource_name ) {
+		foreach ( array( 'product', 'order', 'order_item', 'product_term', 'product_review', 'customer' ) as $resource_name ) {
 			ExtensibleAbilities::register_resource( $resource_name );
 		}
 	}
