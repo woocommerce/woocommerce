@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the order received page from saying the order was received twice when the order details are hidden.
