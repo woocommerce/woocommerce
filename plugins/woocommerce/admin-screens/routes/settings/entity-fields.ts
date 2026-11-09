@@ -1,15 +1,12 @@
 /**
  * External dependencies
  */
-import { dispatch } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
-import type { Field } from '@wordpress/dataviews';
 import { __dangerousOptInToUnstableAPIsOnlyForCoreModules } from '@wordpress/private-apis';
 
 /**
  * Internal dependencies
  */
-import type { SettingsField } from '../../entity-fields/types';
+import type { SettingsField } from '../../packages/entity-fields/src/types';
 
 // The editor's field registry is private. This logic will be replaced once the Field Collection API is available.
 const { unlock } = __dangerousOptInToUnstableAPIsOnlyForCoreModules(
@@ -17,36 +14,15 @@ const { unlock } = __dangerousOptInToUnstableAPIsOnlyForCoreModules(
 	'@wordpress/routes'
 );
 
-interface EntityFieldActions {
-	registerEntityField: < Item >(
-		kind: string,
-		name: string,
-		field: Field< Item >
-	) => void;
-}
-
 interface EntityFieldSelectors {
 	getEntityFields: ( kind: string, name: string ) => SettingsField[];
+	hasFinishedResolution: ( selector: string, args: unknown[] ) => boolean;
+	getResolutionError: ( selector: string, args: unknown[] ) => unknown;
 }
 
 /**
- * Add fields to an entity in the editor's field registry.
- */
-export function registerEntityFields< Item >(
-	kind: string,
-	name: string,
-	fields: Field< Item >[]
-): void {
-	const { registerEntityField } = unlock< EntityFieldActions >(
-		dispatch( editorStore )
-	);
-	fields.forEach( ( field ) => {
-		registerEntityField( kind, name, field );
-	} );
-}
-
-/**
- * Read an entity's fields from the editor store's selectors.
+ * Read an entity's fields from the editor store's selectors. The editor loads them from the
+ * fields registered on the server, with the JavaScript parts of their script modules.
  */
 export function getEntityFields(
 	editorSelectors: unknown,
@@ -57,4 +33,25 @@ export function getEntityFields(
 		kind,
 		name
 	);
+}
+
+/**
+ * Whether the editor has finished loading an entity's fields, and the error if loading failed.
+ */
+export function getEntityFieldsStatus(
+	editorSelectors: unknown,
+	kind: string,
+	name: string
+): { hasLoaded: boolean; error: unknown } {
+	const selectors = editorSelectors as EntityFieldSelectors;
+	return {
+		hasLoaded: selectors.hasFinishedResolution( 'getEntityFields', [
+			kind,
+			name,
+		] ),
+		error: selectors.getResolutionError( 'getEntityFields', [
+			kind,
+			name,
+		] ),
+	};
 }

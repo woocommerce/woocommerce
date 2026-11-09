@@ -1,2 +1,7 @@
 # wp-build output, a symlink to ../assets/client/routes
 /build
+
+# Transpiled wp-build packages
+/packages/*/build
+/packages/*/build-module
+/packages/*/build-types

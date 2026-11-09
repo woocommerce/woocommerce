@@ -22,12 +22,38 @@ defined( 'ABSPATH' ) || exit;
 final class ChequeSettings {
 
 	/**
-	 * Register the layout.
+	 * Register the fields and the layout.
 	 *
 	 * @internal
 	 */
 	public function __construct() {
+		add_action( 'wp_entity_fields_api_init', array( $this, 'handle_wp_entity_fields_api_init' ) );
 		add_filter( 'get_entity_view_config_woo_settings_payments_cheque', array( $this, 'handle_get_entity_view_config_woo_settings_payments_cheque' ) );
+	}
+
+	/**
+	 * Register the cheque fields with the Entity fields API, from the collection wp-build copies
+	 * out of `admin-screens/packages/entity-fields`.
+	 *
+	 * @internal
+	 *
+	 * @since 11.4.0
+	 */
+	public function handle_wp_entity_fields_api_init(): void {
+		$directory = $this->get_fields_directory();
+		if ( ! Features::is_enabled( AdminScreens::FEATURE_FLAG ) || ! function_exists( 'wp_register_entity_field_collection' ) || ! is_dir( $directory ) ) {
+			return;
+		}
+		wp_register_entity_field_collection( $directory );
+	}
+
+	/**
+	 * Path to the built cheque field collection.
+	 *
+	 * @return string
+	 */
+	private function get_fields_directory(): string {
+		return WC_ABSPATH . 'assets/client/routes/scripts/entity-fields/cheque';
 	}
 
 	/**
