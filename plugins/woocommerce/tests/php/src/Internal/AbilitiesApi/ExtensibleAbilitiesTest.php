@@ -582,6 +582,49 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return only the orders that both a search and an extension's ID filter match, with HPOS and with posts storage.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos Whether HPOS is on.
+	 */
+	public function test_search_intersects_with_order_ids_filter( bool $hpos ): void {
+		$original = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->toggle_cot_feature_and_usage( $hpos );
+		add_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_contains_product_filter' ) );
+
+		try {
+			$coffee = \WC_Helper_Product::create_simple_product();
+			$orders = array();
+			foreach ( array(
+				'jane_coffee' => array( 'Jane', $coffee ),
+				'jane_other'  => array( 'Jane', null ),
+				'john_coffee' => array( 'John', $coffee ),
+			) as $key => list( $first_name, $product ) ) {
+				$order = \WC_Helper_Order::create_order( 0, $product );
+				$order->set_billing_first_name( $first_name );
+				$order->save();
+				$orders[ $key ] = $order->get_id();
+			}
+
+			$result = $this->run_ability(
+				'woocommerce/orders-query',
+				array(
+					'search'  => 'Jane',
+					'filters' => array( 'extensions' => array( 'test-ext' => array( 'contains_product' => $coffee->get_id() ) ) ),
+				)
+			);
+
+			$this->assertSame( array( $orders['jane_coffee'] ), array_column( $result['orders'], 'id' ) );
+		} finally {
+			remove_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_contains_product_filter' ) );
+			$this->toggle_cot_feature_and_usage( $original );
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
+
+	/**
 	 * Register an order filter that reads order items, which are not meta, and returns order IDs,
 	 * and one that excludes the order IDs it receives.
 	 *
@@ -2369,6 +2412,25 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 'on-hold', $saved->get_status() );
 		$this->assertSame( 'Happy birthday', $saved->get_meta( '_test_gift_message' ) );
 		$this->assertSame( 'Happy birthday', $updated['order']['extensions']['test-ext']['gift_message'] );
+	}
+
+	/**
+	 * @testdox Should keep backslashes and quotes in the name and descriptions of a created product.
+	 */
+	public function test_product_create_keeps_backslashes_in_post_fields(): void {
+		$created = $this->run_ability(
+			'woocommerce/product-create',
+			array(
+				'name'              => 'Cable 1\\2" it\'s',
+				'description'       => 'Path C:\\temp',
+				'short_description' => 'Short C:\\temp',
+			)
+		);
+		$post    = get_post( $created['product']['id'] );
+
+		$this->assertSame( 'Cable 1\\2" it\'s', $post->post_title, 'The stored name should keep its backslash and quotes.' );
+		$this->assertSame( 'Path C:\\temp', $post->post_content, 'The stored description should keep its backslash.' );
+		$this->assertSame( 'Short C:\\temp', $post->post_excerpt, 'The stored short description should keep its backslash.' );
 	}
 
 	/**
