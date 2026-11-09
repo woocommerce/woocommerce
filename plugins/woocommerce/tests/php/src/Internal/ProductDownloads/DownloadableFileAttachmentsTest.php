@@ -252,6 +252,36 @@ class DownloadableFileAttachmentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox GUIDs work with plugins that read the GUID while filtering the attached file, and shortcuts to downloadable files stay hidden.
+	 */
+	public function test_guid_with_attached_file_filter_that_reads_the_guid(): void {
+		// Like Real Media Library: a shortcut attachment's GUID ends in ?sc=<source ID>, and its file is read from the source.
+		add_filter(
+			'get_post_metadata',
+			static function ( $value, $object_id, $meta_key, $single ) {
+				if ( '_wp_attached_file' !== $meta_key || ! preg_match( '/\?sc=(\d+)$/', get_the_guid( $object_id ), $matches ) ) {
+					return $value;
+				}
+				$file = get_post_meta( (int) $matches[1], '_wp_attached_file', $single );
+				return $single ? array( $file ) : $file;
+			},
+			10,
+			4
+		);
+		$shortcut_id = self::factory()->attachment->create_object(
+			array(
+				'post_mime_type' => 'application/pdf',
+				'guid'           => 'http://example.org/ebook.pdf?sc=' . $this->downloadable_file_id,
+			)
+		);
+		wp_set_current_user( 0 );
+
+		$this->assertSame( get_post_field( 'guid', $this->image_id ), get_the_guid( $this->image_id ), 'Regular attachments should keep their GUID.' );
+		$this->assertSame( add_query_arg( 'attachment_id', $this->downloadable_file_id, home_url( '/' ) ), get_the_guid( $this->downloadable_file_id ), 'Visitors should not get the file URL as the GUID.' );
+		$this->assertSame( add_query_arg( 'attachment_id', $shortcut_id, home_url( '/' ) ), get_the_guid( $shortcut_id ), 'Shortcuts to downloadable product files should be hidden too.' );
+	}
+
+	/**
 	 * @testdox Previous and next image links to downloadable product files are left out for visitors.
 	 * @testWith ["previous_image_link"]
 	 *           ["next_image_link"]

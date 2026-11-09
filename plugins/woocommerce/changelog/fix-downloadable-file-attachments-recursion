@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix out-of-memory errors on pages with media on stores that also run Real Media Library.
