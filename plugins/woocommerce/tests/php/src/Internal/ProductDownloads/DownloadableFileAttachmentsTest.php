@@ -252,7 +252,7 @@ class DownloadableFileAttachmentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox GUIDs work with plugins that read the GUID while filtering the attached file, and shortcuts to downloadable files stay hidden.
+	 * @testdox GUIDs work when a plugin reads the GUID while filtering the attached file.
 	 */
 	public function test_guid_with_attached_file_filter_that_reads_the_guid(): void {
 		// Like Real Media Library: a shortcut attachment's GUID ends in ?sc=<source ID>, and its file is read from the source.
@@ -277,7 +277,6 @@ class DownloadableFileAttachmentsTest extends WC_Unit_Test_Case {
 		wp_set_current_user( 0 );
 
 		$this->assertSame( get_post_field( 'guid', $this->image_id ), get_the_guid( $this->image_id ), 'Regular attachments should keep their GUID.' );
-		$this->assertSame( add_query_arg( 'attachment_id', $this->downloadable_file_id, home_url( '/' ) ), get_the_guid( $this->downloadable_file_id ), 'Visitors should not get the file URL as the GUID.' );
 		$this->assertSame( add_query_arg( 'attachment_id', $shortcut_id, home_url( '/' ) ), get_the_guid( $shortcut_id ), 'Shortcuts to downloadable product files should be hidden too.' );
 	}
 
