@@ -513,7 +513,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should keep the orders whose IDs every filter returns, from data that is not meta, and still apply Core's exclude, with HPOS and with posts storage.
+	 * @testdox Should keep the orders whose IDs every filter returns, from data that is not meta, still apply Core's exclude, and narrow Core's include both ways, with HPOS and with posts storage.
 	 * @testWith [true, false]
 	 *           [true, true]
 	 *           [false, false]
@@ -560,6 +560,9 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$without  = $this->run_ability( 'woocommerce/orders-query', $filters( array( 'without' => array( $orders['plain'] ) ) ) );
 			$excluded = $this->run_ability( 'woocommerce/orders-query', array( 'exclude' => array( $orders['gift'] ) ) + $filters( array( 'contains_product' => $coffee->get_id() ) ) );
 			$both_out = $this->run_ability( 'woocommerce/orders-query', array( 'exclude' => array( $other->get_id() ) ) + $filters( array( 'without' => array( $orders['plain'] ) ) ) );
+			$narrowed = $this->run_ability( 'woocommerce/orders-query', array( 'include' => array( $orders['gift'], $other->get_id() ) ) + $filters( array( 'contains_product' => $coffee->get_id() ) ) );
+			$disjoint = $this->run_ability( 'woocommerce/orders-query', array( 'include' => array( $other->get_id() ) ) + $filters( array( 'contains_product' => $coffee->get_id() ) ) );
+			$minus    = $this->run_ability( 'woocommerce/orders-query', array( 'include' => array( $orders['gift'], $orders['plain'] ) ) + $filters( array( 'without' => array( $orders['plain'] ) ) ) );
 
 			$this->assertEqualsCanonicalizing( array_values( $orders ), array_column( $contains['orders'], 'id' ) );
 			$this->assertSame( array( $orders['gift'] ), array_column( $both['orders'], 'id' ) );
@@ -567,6 +570,9 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$this->assertEqualsCanonicalizing( array( $orders['gift'], $other->get_id() ), array_column( $without['orders'], 'id' ) );
 			$this->assertSame( array( $orders['plain'] ), array_column( $excluded['orders'], 'id' ) );
 			$this->assertSame( array( $orders['gift'] ), array_column( $both_out['orders'], 'id' ) );
+			$this->assertSame( array( $orders['gift'] ), array_column( $narrowed['orders'], 'id' ), 'An extension filter should narrow include, not widen it.' );
+			$this->assertSame( array(), $disjoint['orders'], 'An extension filter that shares no ID with include should return no orders.' );
+			$this->assertSame( array( $orders['gift'] ), array_column( $minus['orders'], 'id' ), 'IDs an extension filter excludes should leave include.' );
 		} finally {
 			remove_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_contains_product_filter' ) );
 			remove_all_filters( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
@@ -1063,7 +1069,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$resources = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
 		$resources->setAccessible( true );
-		$this->assertSame( array( 'product', 'order', 'order_item', 'product_term' ), array_keys( $resources->getValue() ) );
+		$this->assertSame( array( 'product', 'order', 'order_item', 'product_term', 'product_review' ), array_keys( $resources->getValue() ) );
 	}
 
 	/**
@@ -2366,6 +2372,25 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep backslashes and quotes in the name and descriptions of a created product.
+	 */
+	public function test_product_create_keeps_backslashes_in_post_fields(): void {
+		$created = $this->run_ability(
+			'woocommerce/product-create',
+			array(
+				'name'              => 'Cable 1\\2" it\'s',
+				'description'       => 'Path C:\\temp',
+				'short_description' => 'Short C:\\temp',
+			)
+		);
+		$post    = get_post( $created['product']['id'] );
+
+		$this->assertSame( 'Cable 1\\2" it\'s', $post->post_title, 'The stored name should keep its backslash and quotes.' );
+		$this->assertSame( 'Path C:\\temp', $post->post_content, 'The stored description should keep its backslash.' );
+		$this->assertSame( 'Short C:\\temp', $post->post_excerpt, 'The stored short description should keep its backslash.' );
+	}
+
+	/**
 	 * @testdox Should save nothing when a value is rejected, does not match its schema, or belongs to a read-only field.
 	 */
 	public function test_a_rejected_value_saves_nothing(): void {
@@ -2958,7 +2983,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 400, $refused->get_status() );
 		$this->assertStringEndsWith( 'test_keep', $refused->get_data()['code'] );
 		$this->assertInstanceOf( \WC_Product::class, wc_get_product( $kept->get_id() ) );
-		$this->assertTrue( $deleted['deleted'] );
+		$this->assertSame( 'deleted', $deleted['status'] );
 		$this->assertFalse( wc_get_product( $created['product']['id'] ) );
 		$this->assertNull( get_post( $created['product']['variation_ids'][0] ), 'The variations go with the parent.' );
 	}
@@ -3080,7 +3105,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 400, $refused->get_status() );
 		$this->assertSame( 'Keep it.', $refused->get_data()['message'] );
 		$this->assertInstanceOf( \WC_Product_Variable::class, $after );
-		$this->assertTrue( $deleted['deleted'] );
+		$this->assertSame( 'deleted', $deleted['status'] );
 		foreach ( $created['product']['variation_ids'] as $variation_id ) {
 			$this->assertSame( array( 'woocommerce/product-delete', true ), $seen[ $variation_id ] );
 		}
@@ -3554,6 +3579,45 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 500, $response->get_status() );
 		$this->assertSame( 'woocommerce_ability_save_failed', $response->get_data()['code'] );
 		$this->assertStringNotContainsString( 'Storage text.', wp_json_encode( $response->get_data() ) );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * @testdox Should save nothing when change() returns a WP_Error without errors.
+	 */
+	public function test_an_empty_error_from_change_saves_nothing(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$ability = new class(
+			'test-ext/product-rename',
+			array(
+				'label'               => 'Rename product',
+				'description'         => 'Renames a product.',
+				'category'            => 'woocommerce',
+				'output_schema'       => array( 'type' => 'object' ),
+				'permission_callback' => '__return_true',
+			)
+		) extends TestProductRenameAbility {
+			/**
+			 * Rename the product, then refuse with an empty error.
+			 *
+			 * @param \WC_Product $subject Product.
+			 * @param array       $input   Ability input.
+			 * @return \WP_Error
+			 */
+			protected function change( $subject, array $input ) {
+				parent::change( $subject, $input );
+				return new \WP_Error();
+			}
+		};
+
+		$result = $ability->execute_change(
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		);
+
+		$this->assertWPError( $result );
 		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
 	}
 
@@ -4334,6 +4398,64 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should show an order validator the saved address fields that Core refuses, and save nothing.
+	 */
+	public function test_an_order_validator_sees_the_saved_values_of_refused_address_fields(): void {
+		$seen = array();
+		$this->register_validator(
+			'order',
+			'test-ext',
+			static function ( \WC_Order $order ) use ( &$seen ) {
+				$seen[] = array( $order->get_shipping_country(), $order->get_shipping_state(), $order->get_shipping_postcode(), $order->get_shipping_city() );
+				return null;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$order = \WC_Helper_Order::create_order();
+		$order->set_shipping_country( 'US' );
+		$order->set_shipping_state( 'CA' );
+		$order->set_shipping_postcode( '94110' );
+		$order->set_shipping_city( 'Before' );
+		$order->save();
+
+		$bad_country  = $this->run_ability_response(
+			'woocommerce/order-update',
+			array(
+				'id'       => $order->get_id(),
+				'shipping' => array(
+					'country'  => 'XX',
+					'state'    => 'ZZ',
+					'postcode' => 'nope',
+					'city'     => 'After',
+				),
+			)
+		);
+		$bad_postcode = $this->run_ability_response(
+			'woocommerce/order-update',
+			array(
+				'id'       => $order->get_id(),
+				'shipping' => array(
+					'postcode' => 'not a zip',
+					'city'     => 'After',
+				),
+			)
+		);
+
+		$this->assertSame( 400, $bad_country->get_status() );
+		$this->assertSame( 400, $bad_postcode->get_status() );
+		$this->assertSame(
+			array(
+				array( 'US', 'CA', '94110', 'After' ),
+				array( 'US', 'CA', '94110', 'After' ),
+			),
+			$seen
+		);
+		wp_cache_flush();
+		$this->assertSame( 'Before', wc_get_order( $order->get_id() )->get_shipping_city() );
+	}
+
+	/**
 	 * @testdox Should recalculate with calculate_totals() after the save when the feature is off.
 	 */
 	public function test_order_update_uses_the_saving_totals_with_the_feature_off(): void {
@@ -5021,7 +5143,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$this->assertSame( 400, $response->get_status() );
 		$this->assertSame( 'first_ext:test_first_refused', $data['code'] );
-		$this->assertSame( 'First refused.', $data['message'] );
+		$this->assertSame( 'First refused. Second refused.', $data['message'] );
 		$this->assertSame( 'first_ext', $data['data']['namespace'] );
 		$this->assertCount( 1, $data['additional_errors'] );
 		$this->assertSame( 'second_ext:test_second_refused', $data['additional_errors'][0]['code'] );
@@ -5055,7 +5177,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		)->get_data();
 
 		$this->assertSame( 'first_ext:test_refused', $data['code'] );
-		$this->assertSame( 'first_ext refused.', $data['message'] );
+		$this->assertSame( 'first_ext refused. second_ext refused.', $data['message'] );
 		$this->assertSame( 'first_ext', $data['data']['namespace'] );
 		$this->assertCount( 1, $data['additional_errors'] );
 		$this->assertSame( 'second_ext:test_refused', $data['additional_errors'][0]['code'] );
@@ -5088,7 +5210,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		)->get_data();
 
 		$this->assertSame( 'ns:test_refused', $data['code'] );
-		$this->assertSame( 'name refused.', $data['message'] );
+		$this->assertSame( 'name refused. price refused.', $data['message'] );
 		$this->assertSame( 'name', $data['data']['field'] );
 		$this->assertCount( 1, $data['additional_errors'] );
 		$this->assertSame( 'ns:test_refused:2', $data['additional_errors'][0]['code'] );
@@ -5323,6 +5445,62 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 'test-ext:test_bad_value:2', $data['additional_errors'][0]['code'] );
 		$this->assertSame( 'extensions.test-ext.second', $data['additional_errors'][0]['data']['field'] );
 		$this->assertSame( 'other_ext:test_bad_size', $data['additional_errors'][1]['code'] );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * @testdox Should return every Core refusal with the field and validator refusals in one message, and save nothing.
+	 */
+	public function test_core_refusals_come_with_field_and_validator_refusals(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		\WC_Helper_Product::create_simple_product( true, array( 'sku' => 'TAKEN' ) );
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'product',
+						'namespace'     => 'test-ext',
+						'field'         => 'note',
+						'output_schema' => array( 'type' => 'string' ),
+						'input_schema'  => array( 'type' => 'string' ),
+						'get_callback'  => '__return_null',
+						'set_callback'  => static fn() => new \WP_Error( 'test_bad_note', 'Note refused.' ),
+					)
+				);
+			}
+		);
+		$seen_name = null;
+		$this->register_validator(
+			'product',
+			'other_ext',
+			static function ( \WC_Product $subject ) use ( &$seen_name ) {
+				$seen_name = $subject->get_name();
+				return new \WP_Error( 'test_refused', 'Validator refused.' );
+			}
+		);
+
+		$response = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'           => $product->get_id(),
+				'name'         => 'Pencil',
+				'sku'          => 'TAKEN',
+				'external_url' => 'https://example.com',
+				'extensions'   => array( 'test-ext' => array( 'note' => 'x' ) ),
+			)
+		);
+
+		$data = $response->get_data();
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame(
+			array( 'woocommerce_product_field_unsupported', 'product_invalid_sku', 'test-ext:test_bad_note', 'other_ext:test_refused' ),
+			array_merge( array( $data['code'] ), array_column( $data['additional_errors'], 'code' ) ),
+			'Core refusals come first, then the field and validator refusals, in run order.'
+		);
+		$this->assertStringStartsWith( 'The simple product type does not take external_url.', $data['message'] );
+		$this->assertStringEndsWith( 'Note refused. Validator refused.', $data['message'], 'The first message names every refusal, because MCP clients show only that one.' );
+		$this->assertSame( 'Pencil', $seen_name, 'The validator sees the values that Core accepted.' );
 		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
 	}
 

@@ -264,16 +264,28 @@ class ProductScan {
 			false,
 			true
 		);
-		$placeholders = implode( ',', array_fill( 0, count( $product_ids ), '%d' ) );
-		_prime_post_caches(
+		$placeholders  = implode( ',', array_fill( 0, count( $product_ids ), '%d' ) );
+		$variation_ids = array_map(
+			'intval',
 			$wpdb->get_col(
 				$wpdb->prepare(
 					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- One %d placeholder per product.
 					"SELECT ID FROM {$wpdb->posts} WHERE post_type = 'product_variation' AND post_parent IN ({$placeholders})",
 					array_map( 'intval', $product_ids )
 				)
+			)
+		);
+		_prime_post_caches( $variation_ids, true, true );
+
+		// The variations' own images, which a variable product with no image of its own is listed with.
+		_prime_post_caches(
+			array_filter(
+				array_map(
+					static fn( int $variation_id ): int => (int) get_post_meta( $variation_id, '_thumbnail_id', true ),
+					$variation_ids
+				)
 			),
-			true,
+			false,
 			true
 		);
 	}

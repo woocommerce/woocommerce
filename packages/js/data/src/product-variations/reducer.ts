@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { Reducer } from 'redux';
-
-/**
  * Internal dependencies
  */
 import { Actions } from './actions';
@@ -12,16 +7,16 @@ import { ResourceState } from '../crud/reducer';
 import { getRequestIdentifier } from '../crud/utils';
 import CRUD_ACTIONS from './crud-actions';
 
-const reducer: Reducer< ResourceState, Actions > = (
-	state = {
+const reducer = (
+	state: ResourceState = {
 		items: {},
 		data: {},
 		itemsCount: {},
 		errors: {},
 		requesting: {},
 	},
-	payload
-) => {
+	payload: Actions
+): ResourceState => {
 	if ( payload && 'type' in payload ) {
 		switch ( payload.type ) {
 			case TYPES.GENERATE_VARIATIONS_REQUEST:
