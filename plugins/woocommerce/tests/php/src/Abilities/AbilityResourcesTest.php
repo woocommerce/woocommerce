@@ -1081,7 +1081,6 @@ class AbilityResourcesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	public function test_an_unresolved_ref_is_refused(): void {
 		$this->setExpectedIncorrectUsage( AbilityResources::class . '::register_field' );
-		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
 		AbilitiesLoader::register_core_resources();
 		$this->register_resources( 'ticket' );
 
@@ -1353,9 +1352,87 @@ class AbilityResourcesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should share registrations across both APIs without letting an extension replace a root field.
+	 */
+	public function test_field_registration_uses_one_registry(): void {
+		$this->setExpectedIncorrectUsage( AbilityResources::class . '::register_field' );
+		AbilitiesLoader::register_core_resources();
+		$personal = array(
+			'schema'          => array( 'type' => 'string' ),
+			'get_callback'    => static fn() => 'private@example.test',
+			'personal_data'   => true,
+			'update_callback' => '__return_null',
+		);
+		AbilityResources::register_field( 'order', 'email', $personal, 'test-ext' );
+		ExtensibleAbilities::register_field(
+			'order',
+			'test-ext',
+			'email',
+			array(
+				'schema'       => array( 'type' => 'string' ),
+				'get_callback' => static fn() => 'replacement',
+			)
+		);
+		ExtensibleAbilities::register_field(
+			'order',
+			'test-ext',
+			'billing_email',
+			array(
+				'schema'       => array( 'type' => 'string' ),
+				'get_callback' => static fn() => 'extension value',
+			)
+		);
+		$this->withhold_personal_data();
+		$order = new \WC_Order();
+		$order->set_billing_email( 'core@example.test' );
+
+		$output = AbilityResources::output_data( 'order', $order );
+		$schema = AbilityResources::output_schema( 'order' )['properties'];
+
+		$this->assertArrayNotHasKey( 'billing_email', $output );
+		$this->assertArrayNotHasKey( 'billing_email', $schema );
+		$this->assertArrayNotHasKey( 'email', $output['extensions']['test-ext'] );
+		$this->assertArrayNotHasKey( 'email', $schema['extensions']['properties']['test-ext']['properties'] );
+		$this->assertSame( 'extension value', $output['extensions']['test-ext']['billing_email'] );
+		$fields = ExtensibleAbilities::get_fields( 'order' );
+		$this->assertTrue( $fields['test-ext']['email']['personal_data'] );
+		$this->assertSame( '__return_null', $fields['test-ext']['email']['update_callback'] );
+		$this->assertFalse( $fields['test-ext']['billing_email']['personal_data'] );
+	}
+
+	/**
+	 * @testdox Should invalidate output fields when either API adds a field and hide extensions while disabled.
+	 */
+	public function test_registry_cache_and_extension_feature_gate(): void {
+		AbilitiesLoader::register_core_resources();
+		$this->assertArrayNotHasKey( 'extensions', AbilityResources::output_schema( 'order' )['properties'] );
+		$field = array(
+			'schema'       => array( 'type' => 'string' ),
+			'get_callback' => static fn() => 'visible',
+		);
+		AbilityResources::register_field( 'order', 'first', $field, 'test-ext' );
+		$this->assertArrayHasKey( 'first', AbilityResources::output_schema( 'order' )['properties']['extensions']['properties']['test-ext']['properties'] );
+		ExtensibleAbilities::register_field( 'order', 'test-ext', 'second', $field );
+		$this->assertArrayHasKey( 'second', AbilityResources::output_schema( 'order' )['properties']['extensions']['properties']['test-ext']['properties'] );
+
+		update_option( 'woocommerce_feature_' . ExtensibleAbilities::FEATURE_ID . '_enabled', 'no' );
+		ExtensibleAbilities::register_field( 'order', 'test-ext', 'disabled', $field );
+		$this->withhold_personal_data();
+		$schema = AbilityResources::output_schema( 'order' )['properties'];
+		$output = AbilityResources::output_data( 'order', new \WC_Order() );
+
+		$this->assertArrayNotHasKey( 'disabled', ExtensibleAbilities::get_fields( 'order' )['test-ext'] );
+		$this->assertArrayNotHasKey( 'extensions', $schema );
+		$this->assertArrayNotHasKey( 'extensions', $output );
+		$this->assertArrayNotHasKey( 'billing_email', $schema );
+		$this->assertArrayNotHasKey( 'billing_email', $output );
+	}
+
+	/**
 	 * @testdox Should refuse a field with invalid arguments, and keep the first registration of a namespace and field.
 	 */
 	public function test_invalid_and_duplicate_fields_are_refused(): void {
+		$this->setExpectedIncorrectUsage( AbilityResources::class . '::register_field' );
 		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
 		$valid = array(
 			'schema'       => array( 'type' => 'string' ),
@@ -1366,6 +1443,7 @@ class AbilityResourcesTest extends \WC_REST_Unit_Test_Case {
 
 		ExtensibleAbilities::register_field( 'order', 'test-ext', 'note', $valid );
 		ExtensibleAbilities::register_field( 'order', 'Test Ext', 'note', $valid );
+		ExtensibleAbilities::register_field( 'order', '', 'billing_email', $valid );
 		ExtensibleAbilities::register_field( 'order', '0', 'note', $valid );
 		ExtensibleAbilities::register_field( 'order', 'test-ext', '', $valid );
 		ExtensibleAbilities::register_field( 'order', 'test-ext', '123', $valid );

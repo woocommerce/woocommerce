@@ -10,7 +10,6 @@ namespace Automattic\WooCommerce\Tests\Abilities;
 use Automattic\WooCommerce\Abilities\AbilityResources;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\PersonalData;
-use Automattic\WooCommerce\Internal\Abilities\ResourceFields;
 
 /**
  * The registries keep their state for the whole request, and all tests run in one request.
@@ -40,14 +39,16 @@ trait AbilityRegistriesTrait {
 		$shared = new \ReflectionProperty( PersonalData::class, 'shared' );
 		$shared->setAccessible( true );
 		$shared->setValue( null, array() );
-		ResourceFields::forget();
+		$output_fields = new \ReflectionProperty( AbilityResources::class, 'output_fields' );
+		$output_fields->setAccessible( true );
+		$output_fields->setValue( null, array() );
 	}
 
 	/**
 	 * Empty every static array that the registries keep, so array properties added later are reset too.
 	 */
 	protected static function reset_ability_resources(): void {
-		foreach ( array( AbilityResources::class, ExtensibleAbilities::class, PersonalData::class, ResourceFields::class ) as $class ) {
+		foreach ( array( AbilityResources::class, ExtensibleAbilities::class, PersonalData::class ) as $class ) {
 			foreach ( ( new \ReflectionClass( $class ) )->getProperties( \ReflectionProperty::IS_STATIC ) as $property ) {
 				$property->setAccessible( true );
 				if ( is_array( $property->getValue() ) ) {

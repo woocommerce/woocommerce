@@ -8,14 +8,13 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Abilities;
 
 use Automattic\WooCommerce\Internal\Abilities\RegistrationChecks;
-use Automattic\WooCommerce\Internal\Abilities\ResourceFields;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Registry of the resources that abilities return, such as `order`, and of their root fields.
+ * Registry of the resources that abilities return, such as `order`, and of their fields.
  * Abilities build their output and output schema from it. PersonalData leaves out the fields
- * the store withholds, and ExtensibleAbilities adds the fields of extensions under `extensions`.
+ * the store withholds. Extension fields appear under `extensions`.
  *
  * Extensions register resources in `woocommerce_extensible_abilities_resources_init`, which fires
  * only while the experimental `extensible_abilities` feature is on.
@@ -25,7 +24,7 @@ defined( 'ABSPATH' ) || exit;
 class AbilityResources {
 
 	/**
-	 * Whether each registered resource still accepts root fields. Only the code that registers a resource adds them, right after.
+	 * Whether each resource accepts root fields. Core closes its root fields before extension registration.
 	 *
 	 * @var array<string, bool>
 	 */
@@ -39,14 +38,22 @@ class AbilityResources {
 	private static bool $registering_core = false;
 
 	/**
-	 * Fields at the root of a resource, keyed by resource, then field.
+	 * Fields keyed by resource, namespace, then field. The empty namespace holds root fields.
 	 *
-	 * @var array<string, array<string, array<string, mixed>>>
+	 * @var array<string, array<string, array<string, array<string, mixed>>>>
 	 */
 	private static array $fields = array();
 
 	/**
-	 * `$ref` targets that were missing, so each is reported once.
+	 * Output fields keyed by resource and feature state. Personal data is decided once per request, so a list
+	 * of objects reuses the fields of the first one.
+	 *
+	 * @var array<string, array<string, array<string, mixed>>>
+	 */
+	private static array $output_fields = array();
+
+	/**
+	 * Missing `$ref` targets and invalid extension values, reported once each.
 	 *
 	 * @var array<string, bool>
 	 */
@@ -78,8 +85,8 @@ class AbilityResources {
 	}
 
 	/**
-	 * Register a field at the root of a resource. Only the code that registers the resource adds root fields,
-	 * right after registering it. Extensions add their fields with ExtensibleAbilities::register_field().
+	 * Register a root or namespaced field. Root fields close after the resource registration phase.
+	 * ExtensibleAbilities delegates extension fields here with a non-empty namespace.
 	 *
 	 * @since 11.4.0
 	 *
@@ -96,18 +103,23 @@ class AbilityResources {
 	 *     @type callable $get_callback  Receives the object and returns the value. Read the given object, not the
 	 *                                   database: an ability can format an object before it is saved.
 	 *     @type bool     $personal_data Optional. Whether the value is personal data, such as an email address. It is left
-	 *                                   out of the output and the output schema while the store withholds personal data.
+	 *                                   out of the output and the output schema while the store withholds personal data. Defaults to false.
+	 *     @type callable $update_callback Optional. Namespaced fields only. Changes the object in memory.
 	 * }
+	 * @param string $extension_namespace     Optional. Extension namespace, or empty for a root field.
 	 */
-	public static function register_field( string $resource_name, string $field, array $args ): void {
+	public static function register_field( string $resource_name, string $field, array $args, string $extension_namespace = '' ): void {
 		$slugs = array(
 			'resource_name' => $resource_name,
 			'field'         => $field,
 		);
+		if ( '' !== $extension_namespace ) {
+			$slugs['namespace'] = $extension_namespace;
+		}
 		if ( ! RegistrationChecks::has_slugs( __METHOD__, $slugs ) ) {
 			return;
 		}
-		if ( isset( $args['namespace'] ) || isset( $args['update_callback'] ) ) {
+		if ( isset( $args['namespace'] ) || ( '' === $extension_namespace && isset( $args['update_callback'] ) ) ) {
 			wc_doing_it_wrong( __METHOD__, 'Register a field with a namespace or an update_callback with ExtensibleAbilities::register_field().', '11.4.0' );
 			return;
 		}
@@ -115,13 +127,27 @@ class AbilityResources {
 			RegistrationChecks::report_unregistered( __METHOD__, $resource_name );
 			return;
 		}
-		if ( ! self::$resources[ $resource_name ] ) {
+		if ( '' === $extension_namespace && ! self::$resources[ $resource_name ] ) {
 			wc_doing_it_wrong(
 				__METHOD__,
-				sprintf( 'Only the code that registers the "%s" resource adds fields at its root, right after registering it. Extensions add fields with ExtensibleAbilities::register_field().', $resource_name ),
+				sprintf( 'Root fields of the "%s" resource are closed. Extensions add namespaced fields with ExtensibleAbilities::register_field().', $resource_name ),
 				'11.4.0'
 			);
 			return;
+		}
+		if ( '' !== $extension_namespace ) {
+			if ( did_action( 'woocommerce_extensible_abilities_init' ) && ! doing_action( 'woocommerce_extensible_abilities_init' ) ) {
+				wc_doing_it_wrong( __METHOD__, 'Register extension fields before the abilities build their schemas.', '11.4.0' );
+				return;
+			}
+			if ( is_array( $args['schema'] ?? null ) && RegistrationChecks::contains_ref( $args['schema'] ) ) {
+				wc_doing_it_wrong( __METHOD__, 'A "$ref" is only allowed in a root field.', '11.4.0' );
+				return;
+			}
+			if ( isset( $args['update_callback'] ) && ! is_callable( $args['update_callback'] ) ) {
+				wc_doing_it_wrong( __METHOD__, 'The "update_callback" argument must be callable.', '11.4.0' );
+				return;
+			}
 		}
 		if ( ! RegistrationChecks::has_field_args( __METHOD__, $args, ! ( is_array( $args['schema'] ?? null ) && self::has_ref( $args['schema'] ) ) ) ) {
 			return;
@@ -130,23 +156,29 @@ class AbilityResources {
 			wc_doing_it_wrong( __METHOD__, 'A "$ref" is only allowed at the top of a field schema, under "items" or under "properties".', '11.4.0' );
 			return;
 		}
-		if ( 'extensions' === $field ) {
+		if ( '' === $extension_namespace && 'extensions' === $field ) {
 			wc_doing_it_wrong( __METHOD__, 'The field name "extensions" is reserved for the fields that extensions add.', '11.4.0' );
 			return;
 		}
-		if ( isset( self::$fields[ $resource_name ][ $field ] ) ) {
-			RegistrationChecks::report_duplicate( __METHOD__, $field, $resource_name );
+		if ( isset( self::$fields[ $resource_name ][ $extension_namespace ][ $field ] ) ) {
+			RegistrationChecks::report_duplicate( __METHOD__, '' === $extension_namespace ? $field : $extension_namespace . '.' . $field, $resource_name );
 			return;
 		}
 
-		self::$fields[ $resource_name ][ $field ] = array(
+		self::$fields[ $resource_name ][ $extension_namespace ][ $field ] = array(
 			'resource'      => $resource_name,
 			'field'         => $field,
 			'schema'        => $args['schema'],
 			'get_callback'  => $args['get_callback'],
 			'personal_data' => $args['personal_data'] ?? false,
 		);
-		ResourceFields::forget();
+		if ( '' !== $extension_namespace ) {
+			self::$fields[ $resource_name ][ $extension_namespace ][ $field ]['namespace'] = $extension_namespace;
+			if ( isset( $args['update_callback'] ) ) {
+				self::$fields[ $resource_name ][ $extension_namespace ][ $field ]['update_callback'] = $args['update_callback'];
+			}
+		}
+		self::forget_output_fields();
 	}
 
 	/**
@@ -444,7 +476,7 @@ class AbilityResources {
 	 */
 	private static function get_output_fields( array $args ): array {
 		$resource_name = (string) $args['resource'];
-		$fields        = ResourceFields::for_output( $resource_name, self::$fields[ $resource_name ] ?? array() );
+		$fields        = self::fields_for_output( $resource_name );
 		if ( isset( $args['fields'] ) ) {
 			$fields = array_intersect_key( $fields, array_flip( (array) $args['fields'] ) );
 		}
@@ -466,5 +498,169 @@ class AbilityResources {
 			sprintf( 'A "$ref" points to the "%s" resource, which is not registered.', $resource_name ),
 			'11.4.0'
 		);
+	}
+
+	/**
+	 * Extension fields, including writable fields withheld from output.
+	 *
+	 * @internal
+	 * @param string $resource_name Resource.
+	 * @return array<string, array<string, array<string, mixed>>>
+	 */
+	public static function get_extension_fields( string $resource_name ): array {
+		$fields = self::$fields[ $resource_name ] ?? array();
+		unset( $fields[''] );
+		return $fields;
+	}
+
+	/**
+	 * Fields to output for a resource. Cached until a field is registered.
+	 *
+	 * @param string $resource_name Resource.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private static function fields_for_output( string $resource_name ): array {
+		$enabled = ExtensibleAbilities::is_enabled();
+		$key     = $resource_name . ( $enabled ? '|extensions' : '' );
+		if ( ! isset( self::$output_fields[ $key ] ) ) {
+			$fields           = self::withhold( self::$fields[ $resource_name ][''] ?? array(), $resource_name );
+			$extension_fields = $enabled ? self::get_output_extension_fields( $resource_name ) : array();
+			if ( ! empty( $extension_fields ) ) {
+				$fields['extensions'] = self::get_extensions_field( $resource_name, $extension_fields );
+			}
+			self::$output_fields[ $key ] = $fields;
+		}
+		return self::$output_fields[ $key ];
+	}
+
+	/**
+	 * Drop the cached output fields after a field is registered.
+	 */
+	private static function forget_output_fields(): void {
+		self::$output_fields = array();
+	}
+
+	/**
+	 * The fields without those flagged as personal data, while the resource withholds them.
+	 *
+	 * @param array<string, array<string, mixed>> $fields        Field arguments keyed by field.
+	 * @param string                              $resource_name Resource.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private static function withhold( array $fields, string $resource_name ): array {
+		$personal = array_filter( $fields, static fn( array $field_args ) => ! empty( $field_args['personal_data'] ) );
+		if ( empty( $personal ) || PersonalData::is_shared( $resource_name ) ) {
+			return $fields;
+		}
+		return array_diff_key( $fields, $personal );
+	}
+
+	/**
+	 * Extension fields to output, after withholding personal data. Empty namespaces are dropped.
+	 *
+	 * @param string $resource_name Resource.
+	 * @return array<string, array<string, array<string, mixed>>>
+	 */
+	private static function get_output_extension_fields( string $resource_name ): array {
+		$extension_fields = array_map(
+			static fn( array $fields ) => self::withhold( $fields, $resource_name ),
+			self::get_extension_fields( $resource_name )
+		);
+		return array_filter( $extension_fields );
+	}
+
+	/**
+	 * The `extensions` field, whose value holds the extension fields keyed by namespace, then field.
+	 * It is left out of an output where no extension field has a value.
+	 *
+	 * @param string $resource_name    Resource.
+	 * @param array  $extension_fields Output fields keyed by namespace.
+	 * @return array<string, mixed>
+	 */
+	private static function get_extensions_field( string $resource_name, array $extension_fields ): array {
+		$schema = array(
+			'type'                 => 'object',
+			'description'          => __( 'Values that extensions add, keyed by extension namespace, then field.', 'woocommerce' ),
+			'additionalProperties' => false,
+		);
+		foreach ( $extension_fields as $extension_namespace => $fields ) {
+			$schema['properties'][ $extension_namespace ] = array(
+				'type'                 => 'object',
+				'properties'           => array_map( static fn( array $field_args ) => $field_args['schema'], $fields ),
+				'additionalProperties' => false,
+			);
+		}
+		return array(
+			'resource'      => $resource_name,
+			'field'         => 'extensions',
+			'schema'        => $schema,
+			'get_callback'  => static fn( $subject ) => self::get_values( $resource_name, $extension_fields, $subject ),
+			'omit_if_empty' => true,
+		);
+	}
+
+	/**
+	 * Extension field values of an object, keyed by namespace, then field. Values are cast to their schema.
+	 * A field that throws or fails its schema is left out.
+	 *
+	 * @param string $resource_name    Resource.
+	 * @param array  $extension_fields Output fields keyed by namespace.
+	 * @param mixed  $subject          Object to read.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private static function get_values( string $resource_name, array $extension_fields, $subject ): array {
+		$values = array();
+		foreach ( $extension_fields as $extension_namespace => $fields ) {
+			foreach ( $fields as $field => $args ) {
+				try {
+					$value = call_user_func( $args['get_callback'], $subject );
+				} catch ( \Throwable $e ) {
+					wc_get_logger()->error(
+						sprintf( 'Ability field "%s.%s" of "%s" failed: %s', $extension_namespace, $field, $resource_name, $e->getMessage() ),
+						array( 'source' => 'extensible-abilities' )
+					);
+					continue;
+				}
+				if ( ! self::matches_schema( $args, $value ) ) {
+					continue;
+				}
+				$sanitized = rest_sanitize_value_from_schema( $value, $args['schema'], $field );
+				if ( ! is_wp_error( $sanitized ) ) {
+					$values[ $extension_namespace ][ $field ] = $sanitized;
+				}
+			}
+		}
+		return $values;
+	}
+
+	/**
+	 * Whether a value matches its field schema. A mismatch other than null is logged and reported once per field.
+	 *
+	 * @param array<string, mixed> $args  Field arguments.
+	 * @param mixed                $value Value that the get_callback returned.
+	 * @return bool
+	 */
+	private static function matches_schema( array $args, $value ): bool {
+		$valid = rest_validate_value_from_schema( $value, $args['schema'], $args['field'] );
+		if ( true === $valid ) {
+			return true;
+		}
+
+		$key = 'field.' . $args['resource'] . '.' . $args['namespace'] . '.' . $args['field'];
+		if ( null === $value || isset( self::$reported[ $key ] ) ) {
+			return false;
+		}
+
+		self::$reported[ $key ] = true;
+		$message                = sprintf(
+			'Ability field "%1$s.%2$s" of "%3$s" was left out because its value does not match its schema: %4$s',
+			$args['namespace'],
+			$args['field'],
+			$args['resource'],
+			$valid->get_error_message()
+		);
+		wc_get_logger()->error( $message, array( 'source' => 'extensible-abilities' ) );
+		wc_doing_it_wrong( ExtensibleAbilities::class . '::register_field', $message, '11.4.0' );
+		return false;
 	}
 }

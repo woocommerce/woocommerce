@@ -8,7 +8,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Abilities;
 
 use Automattic\WooCommerce\Internal\Abilities\RegistrationChecks;
-use Automattic\WooCommerce\Internal\Abilities\ResourceFields;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -33,13 +32,6 @@ class ExtensibleAbilities {
 	 * Query arguments that a filter callback can return.
 	 */
 	private const QUERY_ARG_KEYS = array( 'meta_query', 'tax_query', 'include_ids', 'exclude_ids' );
-
-	/**
-	 * Extension fields, keyed by resource, namespace, then field.
-	 *
-	 * @var array<string, array<string, array<string, array<string, mixed>>>>
-	 */
-	private static array $fields = array();
 
 	/**
 	 * Query filters keyed by resource, then namespace, then filter name.
@@ -98,34 +90,9 @@ class ExtensibleAbilities {
 		if ( ! self::can_register( __METHOD__, 'field', $slugs ) ) {
 			return;
 		}
-		if ( ! RegistrationChecks::has_field_args( __METHOD__, $args, true ) ) {
-			return;
+		if ( self::is_enabled() ) {
+			AbilityResources::register_field( $resource_name, $field, $args, $extension_namespace );
 		}
-		if ( RegistrationChecks::contains_ref( $args['schema'] ) ) {
-			wc_doing_it_wrong( __METHOD__, 'A "$ref" is only allowed in a field that AbilityResources::register_field() adds at the root of a resource.', '11.4.0' );
-			return;
-		}
-		if ( isset( $args['update_callback'] ) && ! is_callable( $args['update_callback'] ) ) {
-			wc_doing_it_wrong( __METHOD__, 'The "update_callback" argument must be callable.', '11.4.0' );
-			return;
-		}
-		if ( isset( self::$fields[ $resource_name ][ $extension_namespace ][ $field ] ) ) {
-			RegistrationChecks::report_duplicate( __METHOD__, $extension_namespace . '.' . $field, $resource_name );
-			return;
-		}
-
-		$record = array(
-			'resource'      => $resource_name,
-			'field'         => $field,
-			'schema'        => $args['schema'],
-			'get_callback'  => $args['get_callback'],
-			'personal_data' => $args['personal_data'] ?? false,
-		);
-		if ( isset( $args['update_callback'] ) ) {
-			$record['update_callback'] = $args['update_callback'];
-		}
-		self::$fields[ $resource_name ][ $extension_namespace ][ $field ] = array_merge( $record, array( 'namespace' => $extension_namespace ) );
-		ResourceFields::forget();
 	}
 
 	/**
@@ -213,7 +180,7 @@ class ExtensibleAbilities {
 	 * @return array<string, array<string, array<string, mixed>>>
 	 */
 	public static function get_fields( string $resource_name ): array {
-		return self::$fields[ $resource_name ] ?? array();
+		return AbilityResources::get_extension_fields( $resource_name );
 	}
 
 	/**
