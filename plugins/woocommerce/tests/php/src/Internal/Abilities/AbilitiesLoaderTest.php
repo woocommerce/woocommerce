@@ -1160,6 +1160,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_order_mutations_refuse_order_of_type_hidden_by_filter(): void {
 		global $wc_order_types, $post_type_meta_caps, $wpdb;
 
+		// The posts data store refuses to read a type that the filter hides, so only HPOS can load the order.
+		$this->set_order_storage_for_test( true );
 		$meta_caps = $post_type_meta_caps;
 		wc_register_order_type(
 			'shop_test_hidden',
@@ -1208,18 +1210,18 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->set_order_storage_for_test( true );
 		$order                     = \WC_Helper_Order::create_order();
 		$this->created_order_ids[] = $order->get_id();
-		$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'type' => 'shop_test_unregistered' ), array( 'id' => $order->get_id() ) );
+		$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'type' => 'shop_test_unreg' ), array( 'id' => $order->get_id() ) );
 		wp_cache_flush();
 		add_filter(
 			'woocommerce_order_class',
 			static function ( $class_name, $order_type ) {
-				return 'shop_test_unregistered' === $order_type ? \WC_Order::class : $class_name;
+				return 'shop_test_unreg' === $order_type ? \WC_Order::class : $class_name;
 			},
 			10,
 			2
 		);
 
-		$this->assertSame( 'shop_test_unregistered', OrderUtil::get_order_type( $order->get_id() ) );
+		$this->assertSame( 'shop_test_unreg', OrderUtil::get_order_type( $order->get_id() ) );
 		$this->assertInstanceOf( \WC_Order::class, wc_get_order( $order->get_id() ) );
 
 		foreach ( $this->get_order_mutation_inputs( $order->get_id() ) as $ability_id => $input ) {
