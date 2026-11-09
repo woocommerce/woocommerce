@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop creating a duplicate order when a customer retries a checkout that already went through but showed an error.

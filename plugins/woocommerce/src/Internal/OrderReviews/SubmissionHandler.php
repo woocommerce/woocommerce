@@ -15,8 +15,10 @@ use WC_Order;
  * Handles the AJAX submission of the Review Order form.
  *
  * One comment per rated row, with per-row outcome reported back so a single
- * row's failure cannot block the rest. Guests submit with the order key;
- * logged-in customers must own the order.
+ * row's failure cannot block the rest. A guest order is submitted with the
+ * order key; an order that belongs to a registered customer needs that
+ * customer's session, and the store's `comment_registration` setting is
+ * honoured here because `wp_new_comment()` does not apply it.
  *
  * @internal Just for internal use.
  *
@@ -109,9 +111,9 @@ class SubmissionHandler {
 			wp_send_json_error( array( 'message' => __( 'Order not found.', 'woocommerce' ) ), 404 );
 		}
 
-		// Logged-in user must own the order. Guests with the right key still pass.
+		// Signed in as somebody else: say so, the way the page does.
 		if ( $order->get_customer_id() && is_user_logged_in() && get_current_user_id() !== $order->get_customer_id() ) {
-			wp_send_json_error( array( 'message' => __( 'Order not found.', 'woocommerce' ) ), 404 );
+			wp_send_json_error( array( 'message' => __( 'This order belongs to a different account, so you cannot review it.', 'woocommerce' ) ), 403 );
 		}
 
 		// Reuse the same eligibility filter the page-load endpoint uses so the
@@ -125,6 +127,17 @@ class SubmissionHandler {
 
 		if ( ! in_array( $order->get_status(), $eligible_statuses, true ) ) {
 			wp_send_json_error( array( 'message' => __( 'Order not found.', 'woocommerce' ) ), 404 );
+		}
+
+		// Below the status check, matching `Endpoint::is_authorised()`: an order
+		// the page would 404 has to answer the same way here rather than reply
+		// that a sign-in would help.
+		if ( Endpoint::requires_owner_login( $order ) ) {
+			wp_send_json_error( array( 'message' => __( 'Please log in to your account to review this order.', 'woocommerce' ) ), 403 );
+		}
+
+		if ( Endpoint::requires_registered_account() ) {
+			wp_send_json_error( array( 'message' => __( 'You must be logged in to post a review.', 'woocommerce' ) ), 403 );
 		}
 
 		$results = $this->process_rows( $order, $rows_in );

@@ -21,9 +21,12 @@ on:
 permissions: {}
 
 # One sentinel at a time; cron and manual dispatches must not race the variable.
+# A new run cancels the one in progress, so a stuck run cannot block later
+# ticks. The script writes the variable last, so a cancelled run leaves either
+# the old or the new value.
 concurrency:
   group: 'ci-queue-sentinel'
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   evaluate:

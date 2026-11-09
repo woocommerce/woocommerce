@@ -109,6 +109,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	protected $updated_props = array();
 
+	/**
+	 * Lookup refreshes currently handed off to a product-type store, keyed by blog and product ID.
+	 *
+	 * @var array<string, bool>
+	 */
+	private static $refreshing_lookup_table = array();
+
 
 	/**
 	 * Method to obtain DB lock on SKU to make sure we only
@@ -494,7 +501,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$set_props = array();
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			$meta_value         = $post_meta_values[ $meta_key ][0] ?? null;
+			$meta_value = $post_meta_values[ $meta_key ][0] ?? null;
+
+			if ( '_default_attributes' === $meta_key && is_serialized( $meta_value ) ) {
+				// Default attributes only hold strings, so don't let a stored value create objects.
+				$default_attributes = @unserialize( trim( $meta_value ), array( 'allowed_classes' => false ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize -- Same as maybe_unserialize(), without objects.
+				// A whole-row object would otherwise be cast to an array of its class name and properties.
+				$set_props[ $prop ] = is_object( $default_attributes ) ? array() : $default_attributes;
+				continue;
+			}
+
 			$set_props[ $prop ] = maybe_unserialize( $meta_value ); // get_post_meta only unserializes single values.
 		}
 
@@ -996,11 +1012,36 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Refresh the product meta lookup table row for a given product.
 	 *
+	 * When the product type's data store extends this one, the refresh runs there so its lookup data is used.
+	 *
 	 * @since 10.8.0
 	 * @param int $product_id Product ID.
 	 * @return void
 	 */
 	public function refresh_product_lookup_table( int $product_id ): void {
+		$product_id = absint( $product_id );
+		if ( ! $product_id ) {
+			return;
+		}
+		$refresh_key = get_current_blog_id() . ':' . $product_id;
+
+		// Custom stores can delegate back here through a different store instance.
+		if ( empty( self::$refreshing_lookup_table[ $refresh_key ] ) ) {
+			$product_type = WC_Product_Factory::get_product_type( $product_id );
+			$data_store   = WC_Data_Store::load( is_string( $product_type ) ? 'product-' . $product_type : 'product' );
+
+			// Only hand off to a more specific store, so a customized generic store keeps its own lookup data.
+			if ( is_subclass_of( $data_store->get_current_class_name(), get_class( $this ) ) ) {
+				self::$refreshing_lookup_table[ $refresh_key ] = true;
+				try {
+					$data_store->__call( 'refresh_product_lookup_table', array( $product_id ) );
+				} finally {
+					unset( self::$refreshing_lookup_table[ $refresh_key ] );
+				}
+				return;
+			}
+		}
+
 		$this->update_lookup_table( $product_id, 'wc_product_meta_lookup' );
 	}
 
@@ -1465,6 +1506,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * The exclusion must keep reading `_sale_price_dates_to` exactly the way
 	 * get_ending_sales() does, or a product ends up in neither queue. See the note there.
 	 *
+	 * Sale prices of '' and '0' are excluded because wc_apply_sale_state_for_product() skips
+	 * them, so the price never changes and the product would match on every run. '0.00' is
+	 * applied and settles, so it must stay matched: do not replace this with `> 0`.
+	 *
 	 * Keep the exclusion as NOT EXISTS: the LEFT JOIN ... IS NULL rewrite is faster on MariaDB
 	 * but materially slower on MySQL.
 	 *
@@ -1488,6 +1533,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					AND postmeta.meta_value > 0
 					AND postmeta.meta_value < %s
 					AND postmeta_2.meta_value != postmeta_3.meta_value
+					AND postmeta_3.meta_value NOT IN ( '', '0' )
 					AND NOT EXISTS (
 						SELECT 1 FROM {$wpdb->postmeta} as ended
 						WHERE ended.post_id = postmeta.post_id
@@ -1853,7 +1899,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// Sometimes I wonder if it shouldn't be part of update_lookup_table.
 		wp_cache_delete( $product_id_with_stock, 'post_meta' );
 
-		$this->update_lookup_table( $product_id_with_stock, 'wc_product_meta_lookup' );
+		$this->refresh_product_lookup_table( absint( $product_id_with_stock ) );
 	}
 
 	/**
@@ -1922,7 +1968,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// Sometimes I wonder if it shouldn't be part of update_lookup_table.
 		wp_cache_delete( $product_id_with_stock, 'post_meta' );
 
-		$this->update_lookup_table( $product_id_with_stock, 'wc_product_meta_lookup' );
+		$this->refresh_product_lookup_table( absint( $product_id_with_stock ) );
 
 		/**
 		 * Fire an action for this direct update so it can be detected by other code.
@@ -1986,7 +2032,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		wp_cache_delete( $product_id, 'post_meta' );
 
-		$this->update_lookup_table( $product_id, 'wc_product_meta_lookup' );
+		$this->refresh_product_lookup_table( absint( $product_id ) );
 
 		/**
 		 * Fire an action for this direct update so it can be detected by other code.

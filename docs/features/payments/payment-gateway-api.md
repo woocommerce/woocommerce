@@ -217,7 +217,7 @@ $order->add_order_note( __('IPN payment completed', 'woothemes') );
 
 - If the order has completed but the admin needs to manually verify payment, use **On-Hold**
 - If the order fails and has already been created, set to **Failed**
-- If payment is complete, let WooCommerce handle the status and use `$order->payment_complete()`. WooCommerce will use either **Completed** or **Processing** status and handle stock.
+- If payment is complete, let WooCommerce handle the status and use `$order->payment_complete()`. WooCommerce will use either **Completed** or **Processing** status and handle stock. Call it only after the payment provider confirms the payment: see [Retries and uncertain outcomes](#retries-and-uncertain-outcomes).
 
 ## Notes on Direct Gateways
 
@@ -258,6 +258,75 @@ return array(
     'redirect' => $this->get_return_url( $order )
 );
 ```
+
+## Retries and uncertain outcomes
+
+A checkout request can end after the payment provider accepts a payment but before the shopper reaches the order received page, for example on a timeout, a lost connection, or a fatal error in code that runs after the payment. The shopper may then submit checkout again for the same order. Follow these practices so that a retry of the same order does not charge the shopper twice.
+
+### Set the order status to match the payment
+
+WooCommerce reads an order's status to decide whether it still needs payment. Orders in a payable status, **Pending payment** or **Failed** by default, can be paid again when their total is above zero. From WooCommerce 11.4, once your gateway moves an order out of those statuses, for example with `$order->payment_complete()` or by setting it to **On-Hold**, checkout treats the payment step as done. If checkout fails after that point, or the shopper submits the same cart again, WooCommerce sends the shopper to the order received page of the existing order instead of asking them to pay again. The exceptions are draft, **Cancelled**, **Refunded** and trashed orders, for which checkout does not treat the payment step as done. On earlier versions, a repeat submit creates a new order and calls `process_payment()` again.
+
+While the shopper may still need to pay, for example after a lost response or a status lookup that could not finish, leave the order **Pending payment**. When stock management is on, WooCommerce cancels unpaid orders after the hold stock time, 60 minutes by default, so use **Pending payment** for short waits only. If the provider accepted the payment and will confirm it later, set the order to **On-Hold** and send the shopper to the order received page. If the payment fails, leave the order **Pending payment** or set it to **Failed**, so the shopper can pay again.
+
+Avoid holding an order in a custom status while the outcome is open. The `woocommerce_valid_order_statuses_for_payment` filter can make a custom status payable, but when the shopper submits checkout again, only the block checkout stays on the same order, setting it back to **Pending payment**. The classic checkout creates a new order, which does not carry the transaction ID saved on the earlier one.
+
+### Make process_payment() safe to repeat
+
+Within the shopper's checkout session, when an order with a total above zero is **Pending payment** or **Failed** and the cart has not changed, WooCommerce calls `process_payment()` for the same order each time the shopper submits checkout.
+
+If an earlier request reached the provider but its response never came back, a new charge request can take a second payment. Use the provider's idempotency support, such as an idempotency key or one payment object reused for the order, so that a repeated request returns the first result instead of creating a new charge. Keep the key the same for every retry of an order until the provider confirms that the attempt failed, even if it returned no transaction ID. Remove any failed transaction ID at the same time, otherwise the next retry reads the old failed ID instead of checking the new attempt.
+
+### Store the transaction ID and check it before charging again
+
+Save the provider's transaction or payment intent ID on the order as soon as the provider returns it, before you wait for the outcome. On the next attempt, ask the provider for the status of that transaction, and create a new charge only if it confirms that the earlier one failed or never happened. In this sketch, `get_provider_status()` stands for your provider's status lookup. It returns `paid`, `pending` for a payment the provider accepted and will confirm later, `failed` for a payment that failed or never happened, or `unknown` for anything else, such as a lookup that could not finish:
+
+```php
+public function process_payment( $order_id ) {
+    $order          = wc_get_order( $order_id );
+    $transaction_id = $order->get_meta( '_your_gateway_transaction_id' );
+
+    if ( $transaction_id ) {
+        $status = $this->get_provider_status( $transaction_id );
+
+        // An earlier attempt took the payment before its request ended.
+        if ( 'paid' === $status ) {
+            // Check the amount paid first, as described below this sketch.
+            $order->payment_complete( $transaction_id );
+
+            return array(
+                'result'   => 'success',
+                'redirect' => $this->get_return_url( $order ),
+            );
+        }
+
+        // The provider accepted the payment and will confirm it later.
+        if ( 'pending' === $status ) {
+            $order->update_status( \Automattic\WooCommerce\Enums\OrderStatus::ON_HOLD, __( 'Awaiting payment confirmation', 'your-text-domain' ) );
+
+            return array(
+                'result'   => 'success',
+                'redirect' => $this->get_return_url( $order ),
+            );
+        }
+
+        // The outcome is still open, so a new charge could take a second payment.
+        if ( 'failed' !== $status ) {
+            wc_add_notice( __( 'We could not confirm your payment yet. Try again in a few minutes.', 'your-text-domain' ), 'error' );
+
+            return array( 'result' => 'failure' );
+        }
+
+        // The earlier payment failed: remove its transaction ID and change the idempotency key.
+    }
+
+    // Create the payment with the order's idempotency key, then save its ID on the order.
+}
+```
+
+Before you call `$order->payment_complete()`, check that the amount paid matches the order total, because a merchant can change the total of an unpaid order. If they differ, do not complete the order or create a new charge: set it to **On-Hold** so the merchant can review it.
+
+The saved ID check reads the order, so it works only when the retry reaches the same order. WooCommerce creates a new order, without the saved ID, when the cart or its total changed, when the order was cancelled, or when the session ended. A shopper who switches to another gateway also skips the check.
 
 ## Working with Payment Gateway Callbacks (such as PayPal IPN)
 

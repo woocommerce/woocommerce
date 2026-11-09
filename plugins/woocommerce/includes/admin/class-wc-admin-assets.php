@@ -537,7 +537,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 				$params = array(
 					'strings' => array(
-						'allow_reviews' => esc_js( __( 'Enable reviews', 'woocommerce' ) ),
+						'allow_reviews'           => esc_js( __( 'Enable reviews', 'woocommerce' ) ),
+						'some_products_have_term' => esc_js( __( 'Some selected products have this term', 'woocommerce' ) ),
 					),
 				);
 
@@ -608,7 +609,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			if ( $this->is_order_meta_box_screen( $screen_id ) ) {
 				$default_location = wc_get_customer_default_location();
 
-				wp_enqueue_script( 'wc-admin-order-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-order' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'wc-backbone-modal', 'selectWoo', 'wc-clipboard', 'wp-a11y' ), $version );
+				wp_enqueue_script( 'wc-admin-order-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-order' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'wc-backbone-modal', 'selectWoo', 'wc-clipboard', 'wp-a11y', 'wp-i18n' ), $version );
+				wp_set_script_translations( 'wc-admin-order-meta-boxes', 'woocommerce' );
 				wp_localize_script(
 					'wc-admin-order-meta-boxes',
 					'woocommerce_admin_meta_boxes_order',
@@ -667,6 +669,10 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'remove_shipping_notice'                          => $remove_shipping_notice,
 					'i18n_select_items'                               => __( 'Please select some items.', 'woocommerce' ),
 					'i18n_do_refund'                                  => __( 'Are you sure you wish to process this refund? This action cannot be undone.', 'woocommerce' ),
+					'i18n_restock_enter_quantity'                     => __( 'Enter a quantity above to return items to stock', 'woocommerce' ),
+					'i18n_restock_none'                               => __( 'No items will be restocked', 'woocommerce' ),
+					'i18n_restock_items_not_reduced'                  => __( 'Stock was not reduced for these items', 'woocommerce' ),
+					'i18n_restock_order_not_reduced'                  => __( 'Stock was not reduced for this order', 'woocommerce' ),
 					'i18n_delete_refund'                              => __( 'Are you sure you wish to delete this refund? This action cannot be undone.', 'woocommerce' ),
 					'i18n_delete_tax'                                 => __( 'Are you sure you wish to delete this tax column? This action cannot be undone.', 'woocommerce' ),
 					'i18n_no_title'                                   => __( '(no title)', 'woocommerce' ),
@@ -730,7 +736,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_product_variable_tip'                       => __( '<b>Variable –</b> a product with variations, each of which may have a different SKU, price, stock option, etc. For example, a t-shirt available in different colors and/or sizes.', 'woocommerce' ),
 					'i18n_product_other_tip'                          => __( 'Product types define available product details and attributes, such as downloadable files and variations. They’re also used for analytics and inventory management.', 'woocommerce' ),
 					'i18n_product_description_tip'                    => __( 'Describe this product. What makes it unique? What are its most important features?', 'woocommerce' ),
-					'i18n_product_short_description_tip'              => __( 'Summarize this product in 1-2 short sentences. We’ll show it at the top of the page.', 'woocommerce' ),
+					'i18n_product_short_description_tip'              => __( 'Summarize this product in 1-2 short sentences.', 'woocommerce' ),
 					'i18n_save_attribute_variation_tip'               => __( 'Make sure you enter the name and values for each attribute.', 'woocommerce' ),
 					/* translators: %1$s: maximum file size */
 					'i18n_product_image_tip'                          => sprintf( __( 'For best results, upload JPEG or PNG files that are 1000 by 1000 pixels or larger. Maximum upload file size: %1$s.', 'woocommerce' ), size_format( wp_max_upload_size() ) ),

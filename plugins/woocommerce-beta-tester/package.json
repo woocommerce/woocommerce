@@ -19,13 +19,13 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/env": "catalog:tooling",
 		"@wordpress/scripts": "catalog:tooling",
-		"eslint": "^10.0.0",
+		"eslint": "catalog:tooling",
 		"globals": "^16.5.0",
 		"prettier": "catalog:tooling",
 		"react": "18.3.x",
 		"react-dom": "18.3.x",
 		"ts-loader": "9.5.x",
-		"typescript": "5.7.x",
+		"typescript": "catalog:tooling",
 		"uglify-js": "^3.17.4"
 	},
 	"dependencies": {

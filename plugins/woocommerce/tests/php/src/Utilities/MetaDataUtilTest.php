@@ -182,7 +182,7 @@ class MetaDataUtilTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox `update` uses default_id for entries without an id, updating that metadata row in place.
 	 */
-	public function test_update_passes_default_id(): void {
+	public function test_update_uses_default_id_to_rewrite_the_row_in_place(): void {
 		$order = wc_create_order();
 		$order->add_meta_data( 'original_key', 'original_value' );
 		$order->save();

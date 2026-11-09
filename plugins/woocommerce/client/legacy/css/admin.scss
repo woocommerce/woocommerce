@@ -938,6 +938,20 @@ table.wc_status_table--tools {
 	}
 }
 
+// Adapted from WordPress Core's indeterminate checkbox styles.
+#bulk-edit ul.product_cat-checklist input[type="checkbox"]:indeterminate::before,
+#bulk-edit ul.product_brand-checklist input[type="checkbox"]:indeterminate::before {
+	content: "";
+	border-block-start: 2px solid #808080;
+	width: 65%;
+	height: 2px;
+	position: absolute;
+	inset-block-start: calc(50% + 1px);
+	inset-inline: 0;
+	margin-inline: auto;
+	transform: translateY(-50%);
+}
+
 #woocommerce-fields.inline-edit-col {
 	clear: left;
 
@@ -1629,6 +1643,19 @@ body.woocommerce_page_wc-customer-stock-notifications {
 
 		.label-highlight {
 			font-weight: 700;
+		}
+
+		.restock-refunded-items {
+
+			.total {
+				vertical-align: top;
+			}
+
+			.description {
+				margin: 0;
+				font-size: 12px;
+				line-height: 1.5;
+			}
 		}
 	}
 
@@ -8848,6 +8875,7 @@ table.bar_chart {
 				margin: 0;
 			}
 
+			// Unused by core; kept for third-party importers that still output this markup.
 			.woocommerce-importer-file-url-field-wrapper {
 				border: 1px solid #ddd;
 				box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.07);
@@ -8875,6 +8903,11 @@ table.bar_chart {
 					display: inline-block;
 					min-width: 100%;
 				}
+			}
+
+			small code {
+				font-size: inherit;
+				white-space: nowrap;
 			}
 		}
 
