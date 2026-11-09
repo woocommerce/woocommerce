@@ -72,16 +72,9 @@ class UcpCatalog extends ControllerTestCase {
 	 * Enable the UCP routes before the REST server is built.
 	 */
 	protected function setUp(): void {
-		update_option( self::FEATURE_OPTION, 'yes' );
 		parent::setUp();
-	}
-
-	/**
-	 * Restore the default disabled state.
-	 */
-	protected function tearDown(): void {
-		delete_option( self::FEATURE_OPTION );
-		parent::tearDown();
+		update_option( self::FEATURE_OPTION, 'yes' );
+		$this->initialize_store_api_server();
 	}
 
 	/**
@@ -237,6 +230,37 @@ class UcpCatalog extends ControllerTestCase {
 		$data     = $response->get_data();
 
 		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'error', $data['ucp']['status'] );
+		$this->assertSame( 'VALIDATION_ERROR', $data['messages'][0]['code'] );
+	}
+
+	/**
+	 * Input outside the JSON document does not act.
+	 */
+	public function test_lookup_ids_in_the_query_string_are_ignored(): void {
+		$request = new \WP_REST_Request( 'POST', '/wc/ucp/v1/catalog/lookup' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_query_params( array( 'ids' => array( (string) self::$product_ids[0] ) ) );
+		$request->set_body( '{}' );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'VALIDATION_ERROR', $response->get_data()['messages'][0]['code'] );
+	}
+
+	/**
+	 * A payload under any other content type is refused rather than read.
+	 */
+	public function test_a_non_json_payload_is_refused(): void {
+		$request = new \WP_REST_Request( 'POST', '/wc/ucp/v1/catalog/lookup' );
+		$request->set_header( 'content-type', 'application/x-www-form-urlencoded' );
+		$request->set_body_params( array( 'ids' => array( (string) self::$product_ids[0] ) ) );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 415, $response->get_status() );
 		$this->assertSame( 'error', $data['ucp']['status'] );
 		$this->assertSame( 'VALIDATION_ERROR', $data['messages'][0]['code'] );
 	}

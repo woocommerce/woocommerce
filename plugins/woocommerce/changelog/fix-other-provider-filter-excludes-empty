@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Stop listing fulfillments without a shipping provider under the "Other" shipping provider filter.

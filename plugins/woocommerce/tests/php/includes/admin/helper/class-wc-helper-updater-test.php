@@ -271,6 +271,58 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Cached update data should be reused only while its presigned package links are still valid.
+	 *
+	 * @testWith [10, 0]
+	 *           [11.5, 1]
+	 *
+	 * @param float $age_in_hours      How long ago the cached update check was made.
+	 * @param int   $expected_requests How many update-check requests are expected.
+	 */
+	public function test_update_check_reuses_cache_only_within_package_link_lifetime( float $age_in_hours, int $expected_requests ): void {
+		$payload = array(
+			123 => array(
+				'product_id' => 123,
+				'file_id'    => 'abc123',
+			),
+		);
+
+		ksort( $payload );
+
+		set_transient(
+			'_woocommerce_helper_updates',
+			array(
+				'hash'     => md5( wp_json_encode( $payload ) ),
+				'updated'  => time() - (int) ( $age_in_hours * HOUR_IN_SECONDS ),
+				'products' => array( 123 => array( 'version' => '1.2.3' ) ),
+				'errors'   => array(),
+			),
+			WEEK_IN_SECONDS
+		);
+
+		$requests  = 0;
+		$http_mock = static function () use ( &$requests ) {
+			++$requests;
+			return array(
+				'response' => array(
+					'code'    => 200,
+					'message' => 'OK',
+				),
+				'body'     => wp_json_encode( array( 123 => array( 'version' => '1.3.0' ) ) ),
+			);
+		};
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			$this->call_update_check( $payload );
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$this->assertSame( $expected_requests, $requests );
+	}
+
+	/**
 	 * @testdox A rate-limited update check should keep the cached products instead of caching the empty result.
 	 */
 	public function test_update_check_preserves_cache_when_rate_limited(): void {
@@ -401,6 +453,60 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 1, $requests, 'A check inside the backoff window should not call the API, even after the installed version changed' );
 		$this->assertGreaterThan( time(), $backoff_until, 'A failed check should record a backoff window' );
 		$this->assertLessThanOrEqual( time() + 15 * MINUTE_IN_SECONDS, $backoff_until, 'The backoff after a failed check should be short' );
+	}
+
+	/**
+	 * @testdox A failed update check should keep the forced auto-update only while the cached data is fresh, as the flag and the package links come from the same response.
+	 *
+	 * @testWith [10, true]
+	 *           [11.5, false]
+	 *
+	 * @param float $age_in_hours       How long ago the cached update check was made.
+	 * @param bool  $expect_autoupdate Whether the forced auto-update is expected to be kept.
+	 */
+	public function test_update_check_failure_keeps_forced_autoupdate_only_while_cache_is_fresh( float $age_in_hours, bool $expect_autoupdate ): void {
+		$payload = array(
+			123 => array(
+				'product_id' => 123,
+				'file_id'    => 'abc123',
+			),
+		);
+
+		ksort( $payload );
+
+		set_transient(
+			'_woocommerce_helper_updates',
+			array(
+				'hash'     => md5( wp_json_encode( $payload ) ),
+				'updated'  => time() - (int) ( $age_in_hours * HOUR_IN_SECONDS ),
+				'products' => array(
+					123 => array(
+						'version'    => '1.2.3',
+						'autoupdate' => true,
+					),
+				),
+				'errors'   => array(),
+			),
+			WEEK_IN_SECONDS
+		);
+
+		$http_mock = static function () {
+			return new WP_Error( 'http_request_failed', 'cURL error 28: Operation timed out' );
+		};
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			$result = $this->call_update_check( $payload );
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$expected = array( 123 => array( 'version' => '1.2.3' ) );
+		if ( $expect_autoupdate ) {
+			$expected[123]['autoupdate'] = true;
+		}
+
+		$this->assertSame( $expected, $result );
 	}
 
 	/**
@@ -976,6 +1082,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 * @testdox Connect notice is skipped when Core already renders an update row for the plugin.
 	 */
 	public function test_connect_notice_is_skipped_when_core_renders_an_update_row(): void {
+		$this->mock_plugin_row_update_check();
 		$this->prepare_plugins_screen();
 
 		$transient                                     = new stdClass();
@@ -1064,6 +1171,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 * @testdox Purchase notice links to the product page when the connected account holds no subscription.
 	 */
 	public function test_purchase_notice_renders_without_a_subscription(): void {
+		$this->mock_plugin_row_update_check();
 		$this->prepare_plugins_screen();
 		$this->set_subscriptions( array() );
 
@@ -1655,6 +1763,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 * @testdox Subscription notice is skipped when Core already renders an update row for the plugin.
 	 */
 	public function test_subscription_notice_is_skipped_when_core_renders_an_update_row(): void {
+		$this->mock_plugin_row_update_check();
 		$this->prepare_plugins_screen();
 		$this->set_subscriptions( array() );
 
@@ -2308,6 +2417,22 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Keep fixture transient writes from contacting the public update service.
+	 */
+	private function mock_plugin_row_update_check(): void {
+		$this->http_responder = static function ( $request, $url ) {
+			if ( 'POST' !== ( $request['method'] ?? '' ) || 'https://woocommerce.com/wp-json/helper/1.0/update-check-public' !== $url ) {
+				return false;
+			}
+
+			return array(
+				'response' => array( 'code' => 200 ),
+				'body'     => wp_json_encode( array() ),
+			);
+		};
+	}
+
+	/**
 	 * Mock WC_Helper_API response for testing.
 	 *
 	 * @param false|array|WP_Error $preempt A preemptive return value of an HTTP request.
@@ -2512,5 +2637,64 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 				'access_token' => 'token',
 			)
 		);
+	}
+
+	/**
+	 * @testdox The plugin row asks for a download on a local store connected to production WooCommerce.com, and for a one-click install otherwise.
+	 *
+	 * @testWith ["http://localhost:8888", "https://woocommerce.com/wp-json/helper/1.0", "upload it to update"]
+	 *           ["http://localhost:8888", "https://woocommerce.test/wp-json/helper/1.0", "Install WooCommerce.com Update Manager"]
+	 *
+	 * @param string $home     Store home URL.
+	 * @param string $api_base Helper API base URL.
+	 * @param string $expected Text the plugin row should contain.
+	 */
+	public function test_plugin_row_message_offers_download_on_manual_install( string $home, string $api_base, string $expected ): void {
+		if ( WC_Woo_Update_Manager_Plugin::is_plugin_installed() ) {
+			$this->markTestSkipped( 'The Update Manager is installed in this environment.' );
+		}
+
+		$output = $this->with_store_urls(
+			$home,
+			$api_base,
+			static function () {
+				ob_start();
+				WC_Helper_Updater::add_install_marketplace_plugin_message( array(), (object) array( 'package' => '' ) );
+				return ob_get_clean();
+			}
+		);
+
+		$this->assertStringContainsString( $expected, $output );
+	}
+
+	/**
+	 * Run a callback with the given home URL and Helper API base.
+	 *
+	 * @param string   $home     Store home URL.
+	 * @param string   $api_base Helper API base URL.
+	 * @param callable $callback Code to run.
+	 * @return mixed The callback's return value.
+	 */
+	private function with_store_urls( string $home, string $api_base, callable $callback ) {
+		// wp-env defines WP_HOME, so the home option alone doesn't change home_url().
+		add_filter(
+			'home_url',
+			static function () use ( $home ) {
+				return $home;
+			}
+		);
+		$api_base_filter = static function () use ( $api_base ) {
+			return $api_base;
+		};
+		add_filter( 'woocommerce_helper_api_base', $api_base_filter );
+		WC_Helper_API::load();
+
+		try {
+			return $callback();
+		} finally {
+			// The static API base outlives the hook restore, so reload it without the test's filter.
+			remove_filter( 'woocommerce_helper_api_base', $api_base_filter );
+			WC_Helper_API::load();
+		}
 	}
 }

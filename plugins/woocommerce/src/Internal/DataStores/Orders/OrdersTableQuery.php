@@ -696,30 +696,39 @@ class OrdersTableQuery {
 	 */
 	private function sanitize_status(): void {
 		$valid_statuses = array_keys( wc_get_order_statuses() );
+		$status_arg     = $this->args['status'] ?? array();
 
-		if ( empty( $this->args['status'] ) ) {
-			$this->args['status'] = array();
+		// A supplied '0' is not a missing status; it falls through to the no-match check below.
+		if ( empty( $status_arg ) && '0' !== $status_arg ) {
+			$status_arg = array( 'any' );
 		}
 
-		if ( ! is_array( $this->args['status'] ) ) {
-			$this->args['status'] = array( $this->args['status'] );
-		}
+		// Only strings are accepted as statuses.
+		$statuses = is_array( $status_arg ) ? $status_arg : ( is_string( $status_arg ) ? explode( ',', $status_arg ) : array() );
+		$statuses = array_map( 'strtolower', array_map( 'trim', array_filter( $statuses, 'is_string' ) ) );
 
-		if ( empty( $this->args['status'] ) || in_array( 'any', $this->args['status'], true ) ) {
+		if ( in_array( 'any', $statuses, true ) ) {
 			// Querying for 'any' status or empty status, filter to valid statuses from wc_get_order_statuses(),
 			// excluding statuses marked as exclude_from_search (e.g. checkout-draft) to match WP_Query behavior.
-			$exclude              = get_post_stati( array( 'exclude_from_search' => true ) );
-			$this->args['status'] = array_diff( $valid_statuses, $exclude );
-		} elseif ( in_array( 'all', $this->args['status'], true ) ) {
+			$exclude  = get_post_stati( array( 'exclude_from_search' => true ) );
+			$statuses = array_diff( $valid_statuses, $exclude );
+		} elseif ( in_array( 'all', $statuses, true ) ) {
 			// Querying for 'all' status does not filter by status at all.
 			$this->args['status'] = array();
+			return;
 		}
 
-		foreach ( $this->args['status'] as &$status ) {
+		foreach ( $statuses as &$status ) {
 			$status = in_array( 'wc-' . $status, $valid_statuses, true ) ? 'wc-' . $status : $status;
 		}
+		unset( $status );
 
-		$this->args['status'] = array_unique( array_filter( $this->args['status'] ) );
+		$this->args['status'] = array_unique( array_filter( $statuses ) );
+
+		// Nothing usable is left (e.g. only non-strings or '0' were given). Match no orders instead of skipping the status condition.
+		if ( empty( $this->args['status'] ) ) {
+			$this->where[] = '1=0';
+		}
 	}
 
 	/**

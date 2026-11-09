@@ -434,6 +434,9 @@ function wc_downloadable_file_permission( $download_id, $product, $order, $qty =
 	if ( is_numeric( $product ) ) {
 		$product = wc_get_product( $product );
 	}
+	if ( ! $product instanceof WC_Product ) {
+		return false;
+	}
 	$download = new WC_Customer_Download();
 	$download->set_download_id( $download_id );
 	$download->set_product_id( $product->get_id() );
@@ -466,7 +469,7 @@ function wc_downloadable_file_permission( $download_id, $product, $order, $qty =
 function wc_downloadable_product_permissions( $order_id, $force = false ) {
 	$order = wc_get_order( $order_id );
 
-	if ( ! $order || ( $order->get_data_store()->get_download_permissions_granted( $order ) && ! $force ) ) {
+	if ( ! $order instanceof WC_Order || ( $order->get_data_store()->get_download_permissions_granted( $order ) && ! $force ) ) {
 		return;
 	}
 
@@ -474,9 +477,20 @@ function wc_downloadable_product_permissions( $order_id, $force = false ) {
 		return;
 	}
 
+	$refunded_item_ids = array();
+	foreach ( $order->get_refunds() as $refund ) {
+		foreach ( $refund->get_items() as $refund_item ) {
+			$refunded_item_ids[] = absint( $refund_item->get_meta( '_refunded_item_id' ) );
+		}
+	}
+
 	$line_items = $order->get_items();
 	if ( count( $line_items ) > 0 ) {
 		foreach ( $line_items as $item ) {
+			if ( in_array( $item->get_id(), $refunded_item_ids, true ) ) {
+				continue;
+			}
+
 			$product = $item->get_product();
 
 			if ( $product && $product->exists() && $product->is_downloadable() ) {
@@ -635,6 +649,12 @@ function wc_create_refund( $args = array() ) {
 				$class         = get_class( $item );
 				$refunded_item = new $class( $item );
 				$refunded_item->set_id( 0 );
+
+				// Copied metadata needs new IDs so refund changes cannot update or delete the original item's metadata.
+				foreach ( $refunded_item->get_meta_data() as $meta ) {
+					$meta->id = 0;
+				}
+
 				$refunded_item->add_meta_data( '_refunded_item_id', $item_id, true );
 				$refunded_item->set_total( wc_format_refund_total( $refund_total ) );
 				$refunded_item->set_taxes(
@@ -1070,6 +1090,9 @@ function wc_update_coupon_usage_counts( $order_id ) {
 	}
 
 	if ( count( $coupon_codes ) > 0 ) {
+		$identities = $order->get_meta( '_coupon_usage_identities' );
+		$identities = is_array( $identities ) ? $identities : array();
+
 		foreach ( $coupon_codes as $code ) {
 			$coupon  = new WC_Coupon( $code );
 			$used_by = $order->get_user_id();
@@ -1080,13 +1103,23 @@ function wc_update_coupon_usage_counts( $order_id ) {
 
 			switch ( $action ) {
 				case 'reduce':
-					$coupon->decrease_usage_count( $used_by );
+					$coupon->decrease_usage_count( $identities[ $coupon->get_id() ] ?? $used_by );
 					break;
 				case 'increase':
 					$coupon->increase_usage_count( $used_by, $order );
+					if ( $coupon->get_id() ) {
+						$identities[ $coupon->get_id() ] = $used_by;
+					}
 					break;
 			}
 		}
+
+		if ( 'increase' === $action && $identities ) {
+			$order->update_meta_data( '_coupon_usage_identities', $identities );
+		} elseif ( 'reduce' === $action ) {
+			$order->delete_meta_data( '_coupon_usage_identities' );
+		}
+		$order->save_meta_data();
 		wc_release_coupons_for_order( $order );
 	}
 }
@@ -1131,8 +1164,9 @@ function wc_cancel_unpaid_orders() {
 	}
 
 	// Schedule the next event using Action Scheduler if available, otherwise fall back to WordPress cron.
+	// Not unique: this runs inside the action itself, and a unique check would see the in-progress run and schedule nothing.
 	if ( function_exists( 'as_schedule_single_action' ) ) {
-		as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', false );
+		as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce' );
 	} else {
 		wp_schedule_single_event( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 	}

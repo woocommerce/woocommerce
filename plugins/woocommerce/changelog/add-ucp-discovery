@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Serve the UCP discovery profile at /.well-known/ucp when the UCP feature is enabled.

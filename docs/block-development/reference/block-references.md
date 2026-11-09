@@ -428,13 +428,13 @@ Display a checkout form so your customers can submit orders.
 
 ## Actions - woocommerce/checkout-actions-block
 
-Allow customers to place their order.
+Place order button, with optional Terms and Conditions and Return to Cart links.
 
 - **Name:** woocommerce/checkout-actions-block
 - **Category:** woocommerce
 - **Parent:** woocommerce/checkout-fields-block
 - **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
-- **Attributes:** cartPageId, className, lock, priceSeparator, showReturnToCart
+- **Attributes:** cartPageId, className, lock, priceSeparator, showReturnToCart, showTerms, termsCheckbox, termsText
 
 ## Additional information - woocommerce/checkout-additional-information-block
 
@@ -643,7 +643,7 @@ Ensure that customers agree to your Terms & Conditions and Privacy Policy.
 - **Name:** woocommerce/checkout-terms-block
 - **Category:** woocommerce
 - **Parent:** woocommerce/checkout-fields-block
-- **Supports:** ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
+- **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** checkbox, className, showSeparator, text
 
 ## Checkout Totals - woocommerce/checkout-totals-block
@@ -698,8 +698,8 @@ Display options in a dropdown.
 
 - **Name:** woocommerce/dropdown
 - **Category:** woocommerce
-- **Ancestor:** woocommerce/add-to-cart-with-options-variation-selector-attribute
-- **Supports:** interactivity, woocommerce (innerBlockDisplayStyle)
+- **Ancestor:** woocommerce/add-to-cart-with-options-variation-selector-attribute, woocommerce/product-filter-attribute, woocommerce/product-filter-taxonomy, woocommerce/product-filter-status
+- **Supports:** color (background, text), interactivity, woocommerce (innerBlockDisplayStyle)
 
 ## Email Content - woocommerce/email-content
 
@@ -1411,7 +1411,7 @@ Display the number of products on the archive page or search result page.
 
 - **Name:** woocommerce/product-results-count
 - **Category:** woocommerce
-- **Supports:** color (background, gradients, text), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, textAlign)
+- **Supports:** color (background, gradients, text), interactivity (clientNavigation, interactive), spacing (margin, padding), typography (fontSize, textAlign)
 
 ## Product Reviews - woocommerce/product-reviews
 

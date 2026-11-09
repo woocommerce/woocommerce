@@ -35,6 +35,7 @@ import {
 	SetPreviewState,
 	ProductCollectionUIStatesInEditor,
 	CoreCollectionNames,
+	LayoutOptions,
 } from './types';
 import {
 	coreQueryPaginationBlockName,
@@ -496,8 +497,33 @@ export const getDefaultQueryForSettingsSection = (
 	pages: DEFAULT_QUERY.pages,
 } );
 
-export const getDefaultDisplayLayout = () =>
-	DEFAULT_ATTRIBUTES.displayLayout as ProductCollectionDisplayLayout;
+export const getDefaultDisplayLayout =
+	(): Required< ProductCollectionDisplayLayout > =>
+		DEFAULT_ATTRIBUTES.displayLayout as Required< ProductCollectionDisplayLayout >;
+
+/**
+ * Drop column settings the current layout does not use.
+ * Stack and Carousel ignore `columns` and `shrinkColumns`, so those keys are
+ * left out of the attributes that get saved in the block comment.
+ */
+export function sanitizeDisplayLayout(
+	displayLayout?: Partial< ProductCollectionDisplayLayout > | null
+): ProductCollectionDisplayLayout {
+	if (
+		displayLayout?.type === LayoutOptions.STACK ||
+		displayLayout?.type === LayoutOptions.CAROUSEL
+	) {
+		return { type: displayLayout.type };
+	}
+
+	const defaults = getDefaultDisplayLayout();
+
+	return {
+		type: displayLayout?.type ?? defaults.type,
+		columns: displayLayout?.columns ?? defaults.columns,
+		shrinkColumns: displayLayout?.shrinkColumns ?? defaults.shrinkColumns,
+	};
+}
 
 export const getDefaultSettings = (
 	currentAttributes: ProductCollectionAttributes
@@ -585,7 +611,7 @@ export const useGetProduct = ( productId: number | undefined ) => {
 						productId
 					) ) as ProductResponseItem;
 					setProduct( fetchedProduct );
-				} catch ( error ) {
+				} catch {
 					setProduct( null );
 				} finally {
 					setIsLoading( false );

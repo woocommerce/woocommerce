@@ -23,6 +23,7 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\ShippingUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -345,7 +346,7 @@ class WC_AJAX {
 
 		if ( is_array( $posted_shipping_methods ) ) {
 			foreach ( $posted_shipping_methods as $i => $value ) {
-				if ( ! is_string( $value ) ) {
+				if ( ! is_string( $value ) || ! ShippingUtil::is_shipping_rate_listed( $i, $value ) ) {
 					continue;
 				}
 				$chosen_shipping_methods[ $i ] = $value;
@@ -428,7 +429,7 @@ class WC_AJAX {
 
 		if ( is_array( $posted_shipping_methods ) ) {
 			foreach ( $posted_shipping_methods as $i => $value ) {
-				if ( ! is_string( $value ) ) {
+				if ( ! is_string( $value ) || ! ShippingUtil::is_shipping_rate_listed( $i, $value ) ) {
 					continue;
 				}
 				$chosen_shipping_methods[ $i ] = $value;
@@ -670,6 +671,11 @@ class WC_AJAX {
 		}
 
 		if ( ! $variable_product->is_viewable() ) {
+			wp_die();
+		}
+
+		// Match the product page, which shows variation details only after the product password is entered.
+		if ( post_password_required( $variable_product->get_id() ) ) {
 			wp_die();
 		}
 
@@ -1402,13 +1408,23 @@ class WC_AJAX {
 			);
 
 			if ( strstr( $amount, '%' ) ) {
-				// Refresh totals so the discount total is current. The percentage applies to
-				// the items after discounts, excluding tax, shipping and other fees.
+				// Not needed for the base, which reads stored line totals. Kept so callbacks on the order
+				// totals hooks still run before the fee is added.
 				$order->calculate_totals( false );
 				$formatted_amount = $amount;
 				$percent          = floatval( trim( $amount, '%' ) );
-				$base             = (float) $order->get_subtotal() - (float) $order->get_discount_total( 'edit' );
-				$amount           = NumberUtil::round( $base * ( $percent / 100 ), wc_get_price_decimals() );
+
+				// The percentage applies to the line items after discounts, excluding tax, shipping and
+				// other fees. Read their stored totals so a filtered order subtotal can't change the fee,
+				// and round them as the order subtotal does.
+				$line_totals = array();
+				foreach ( $order->get_items() as $item ) {
+					if ( is_callable( array( $item, 'get_total' ) ) ) {
+						$line_totals[] = wc_add_number_precision( (float) $item->get_total( 'edit' ), false );
+					}
+				}
+				$base   = wc_remove_number_precision( $order::get_rounded_items_total( $line_totals ) );
+				$amount = NumberUtil::round( $base * ( $percent / 100 ), wc_get_price_decimals() );
 			} else {
 				$amount           = floatval( $amount );
 				$formatted_amount = wc_price( $amount, array( 'currency' => $order->get_currency() ) );
@@ -2951,7 +2967,12 @@ class WC_AJAX {
 		$response               = array();
 
 		try {
-			$order      = wc_get_order( $order_id );
+			$order = wc_get_order( $order_id );
+
+			if ( ! $order instanceof WC_Order ) {
+				throw new Exception( __( 'Invalid order ID.', 'woocommerce' ) );
+			}
+
 			$max_refund = wc_format_decimal( $order->get_total() - $order->get_total_refunded(), wc_get_price_decimals() );
 
 			if ( ( ! $refund_amount && ( wc_format_decimal( 0, wc_get_price_decimals() ) !== $refund_amount ) ) || $max_refund < $refund_amount || 0 > $refund_amount ) {
@@ -2973,8 +2994,27 @@ class WC_AJAX {
 					'refund_tax'   => array(),
 				);
 			}
+			$order_items = $order->get_items();
 			foreach ( $line_item_qtys as $item_id => $qty ) {
-				$line_items[ $item_id ]['qty'] = max( $qty, 0 );
+				$qty = max( $qty, 0 );
+
+				// Enforce the refund input's max here, because this AJAX request skips browser validation.
+				// Rounding drops float noise when the woocommerce_stock_amount filter allows fractional quantities.
+				if ( $qty > 0 && isset( $order_items[ $item_id ] ) ) {
+					$remaining_qty = NumberUtil::round( abs( $order_items[ $item_id ]->get_quantity() ) - abs( $order->get_qty_refunded_for_item( $item_id ) ), WC_ROUNDING_PRECISION );
+
+					if ( $qty > $remaining_qty ) {
+						throw new Exception(
+							sprintf(
+								/* translators: %s: remaining refundable quantity */
+								__( 'Line item quantity cannot be greater than the remaining refundable quantity (%s).', 'woocommerce' ),
+								$remaining_qty
+							)
+						);
+					}
+				}
+
+				$line_items[ $item_id ]['qty'] = $qty;
 			}
 			foreach ( $line_item_totals as $item_id => $total ) {
 				$line_items[ $item_id ]['refund_total'] = wc_format_decimal( $total );

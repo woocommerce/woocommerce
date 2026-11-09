@@ -1156,6 +1156,8 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		if ( is_array( $variation ) && ! empty( $variation ) ) {
+			// Sort for consistent item identification regardless of attribute order.
+			ksort( $variation );
 			$variation_key = '';
 			foreach ( $variation as $key => $value ) {
 				$variation_key .= trim( $key ) . trim( $value );
@@ -1231,6 +1233,10 @@ class WC_Cart extends WC_Legacy_Cart {
 			if ( $product_data->is_type( ProductType::VARIATION ) ) {
 				$missing_attributes = array();
 				$parent_data        = wc_get_product( $product_data->get_parent_id() );
+
+				if ( ! $parent_data instanceof WC_Product ) {
+					throw new Exception( __( 'Sorry, this product cannot be added to the cart.', 'woocommerce' ) );
+				}
 
 				$variation_attributes = $product_data->get_variation_attributes();
 				// Filter out 'any' variations, which are empty, as they need to be explicitly specified while adding to cart.
@@ -1308,9 +1314,10 @@ class WC_Cart extends WC_Legacy_Cart {
 					} elseif ( '' === $valid_value ) {
 						$missing_attributes[] = wc_attribute_label( $attribute['name'] );
 					}
-
-					$variation = $attributes;
 				}
+
+				// Keep only the checked attributes. This also drops posted values when the parent has no variation attributes.
+				$variation = $attributes;
 				if ( ! empty( $missing_attributes ) ) {
 					/* translators: %s: Attribute name. */
 					throw new Exception( sprintf( _n( '%s is a required field', '%s are required fields', count( $missing_attributes ), 'woocommerce' ), wc_format_list_of_items( $missing_attributes ) ) );

@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsPrivacy;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use WC_Unit_Test_Case;
 
 /**
@@ -27,11 +29,19 @@ class FulfillmentsControllerTest extends WC_Unit_Test_Case {
 	private $original_fulfillments_flag;
 
 	/**
+	 * Original value of the fulfillment tables marker.
+	 *
+	 * @var mixed
+	 */
+	private $original_tables_created;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->original_fulfillments_flag = get_option( 'woocommerce_feature_fulfillments_enabled' );
+		$this->original_tables_created    = get_option( 'woocommerce_fulfillments_db_tables_created' );
 		$this->sut                        = wc_get_container()->get( FulfillmentsController::class );
 	}
 
@@ -43,6 +53,11 @@ class FulfillmentsControllerTest extends WC_Unit_Test_Case {
 			delete_option( 'woocommerce_feature_fulfillments_enabled' );
 		} else {
 			update_option( 'woocommerce_feature_fulfillments_enabled', $this->original_fulfillments_flag );
+		}
+		if ( false === $this->original_tables_created ) {
+			delete_option( 'woocommerce_fulfillments_db_tables_created' );
+		} else {
+			update_option( 'woocommerce_fulfillments_db_tables_created', $this->original_tables_created );
 		}
 		parent::tearDown();
 	}
@@ -60,14 +75,32 @@ class FulfillmentsControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not register the order-fulfillment data store when feature is disabled.
+	 * @testdox Should not register the order-fulfillment data store when the feature is disabled and the tables were never created.
 	 */
 	public function test_register_data_stores_when_feature_disabled(): void {
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
+		delete_option( 'woocommerce_fulfillments_db_tables_created' );
 
 		$result = $this->sut->register_data_stores( array() );
 
 		$this->assertArrayNotHasKey( 'order-fulfillment', $result, 'Data store should not be registered when feature is disabled' );
+	}
+
+	/**
+	 * @testdox Should register the order-fulfillment data store when the feature is disabled but its tables exist.
+	 */
+	public function test_register_data_stores_when_feature_disabled_but_tables_exist(): void {
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
+		update_option( 'woocommerce_fulfillments_db_tables_created', true );
+
+		$result = $this->sut->register_data_stores( array() );
+
+		$this->assertArrayHasKey(
+			'order-fulfillment',
+			$result,
+			'Fulfillment data left behind by the disabled feature still has to be readable for the privacy export'
+		);
+		$this->assertSame( FulfillmentsDataStore::class, $result['order-fulfillment'] );
 	}
 
 	/**
@@ -89,12 +122,75 @@ class FulfillmentsControllerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_register_data_stores_preserves_existing_stores_when_disabled(): void {
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
+		delete_option( 'woocommerce_fulfillments_db_tables_created' );
 		$existing = array( 'some-store' => 'SomeStoreClass' );
 
 		$result = $this->sut->register_data_stores( $existing );
 
 		$this->assertArrayHasKey( 'some-store', $result, 'Existing data stores should be preserved' );
 		$this->assertArrayNotHasKey( 'order-fulfillment', $result );
+	}
+
+	/**
+	 * @testdox Should keep both privacy hooks registered when the feature is disabled.
+	 */
+	public function test_initialize_fulfillments_registers_privacy_hooks_when_feature_disabled(): void {
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
+		update_option( 'woocommerce_fulfillments_db_tables_created', true );
+
+		// Both branches of initialize_fulfillments() register these hooks, so confirm which one
+		// is under test rather than letting the enabled branch satisfy the assertions.
+		$this->assertFalse(
+			wc_get_container()->get( FeaturesController::class )->feature_is_enabled( 'fulfillments' ),
+			'This test covers the disabled branch.'
+		);
+
+		// The container instance is shared, so clear both hooks before asserting that the
+		// disabled path puts them back.
+		$privacy = wc_get_container()->get( FulfillmentsPrivacy::class );
+		remove_action( 'woocommerce_privacy_remove_order_personal_data', array( $privacy, 'remove_fulfillment_personal_data' ) );
+		remove_filter( 'woocommerce_privacy_export_order_personal_data', array( $privacy, 'export_order_fulfillment_data' ) );
+
+		$this->sut->initialize_fulfillments();
+
+		$this->assertNotFalse(
+			has_action( 'woocommerce_privacy_remove_order_personal_data', array( $privacy, 'remove_fulfillment_personal_data' ) ),
+			'Tracking data left behind by the disabled feature should still be erasable'
+		);
+		$this->assertNotFalse(
+			has_filter( 'woocommerce_privacy_export_order_personal_data', array( $privacy, 'export_order_fulfillment_data' ) ),
+			'An access request should still return tracking data the disabled feature left behind'
+		);
+	}
+
+	/**
+	 * @testdox Should register no privacy hooks when the feature is disabled and the tables were never created.
+	 */
+	public function test_initialize_fulfillments_registers_no_privacy_hooks_without_tables(): void {
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
+		delete_option( 'woocommerce_fulfillments_db_tables_created' );
+
+		// Without the marker the enabled branch would drop and recreate the fulfillment tables,
+		// and DDL commits implicitly, so the base class transaction could not roll it back.
+		$this->assertFalse(
+			wc_get_container()->get( FeaturesController::class )->feature_is_enabled( 'fulfillments' ),
+			'This test covers the disabled branch.'
+		);
+
+		$privacy = wc_get_container()->get( FulfillmentsPrivacy::class );
+		remove_action( 'woocommerce_privacy_remove_order_personal_data', array( $privacy, 'remove_fulfillment_personal_data' ) );
+		remove_filter( 'woocommerce_privacy_export_order_personal_data', array( $privacy, 'export_order_fulfillment_data' ) );
+
+		$this->sut->initialize_fulfillments();
+
+		$this->assertFalse(
+			has_action( 'woocommerce_privacy_remove_order_personal_data', array( $privacy, 'remove_fulfillment_personal_data' ) ),
+			'A store that never created the tables has no fulfillment data to erase'
+		);
+		$this->assertFalse(
+			has_filter( 'woocommerce_privacy_export_order_personal_data', array( $privacy, 'export_order_fulfillment_data' ) ),
+			'A store that never created the tables has no fulfillment data to export'
+		);
 	}
 
 	/**

@@ -858,4 +858,39 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$store->update_product_sales( $product_id, 30.5, 'set' );
 		$this->assertSame( '30.500000', get_post_meta( $product_id, 'total_sales', true ) );
 	}
+
+	/**
+	 * @testdox Default attributes stored as a single object should load as empty, not as the object's class name.
+	 */
+	public function test_read_product_data_ignores_default_attributes_stored_as_an_object(): void {
+		$product = new WC_Product_Variable();
+		$product->save();
+		update_post_meta( $product->get_id(), '_default_attributes', new ObjectInstantiationProbe() );
+
+		$product = new WC_Product_Variable( $product->get_id() );
+
+		$this->assertSame( array(), $product->get_default_attributes() );
+	}
+
+	/**
+	 * @testdox Reading a product should not create objects from serialized product meta.
+	 */
+	public function test_read_product_data_does_not_unserialize_objects(): void {
+		ObjectInstantiationProbe::$was_unserialized = false;
+		$product                                    = new WC_Product_Variable();
+		$product->save();
+		update_post_meta(
+			$product->get_id(),
+			'_default_attributes',
+			array(
+				'probe' => new ObjectInstantiationProbe(),
+				'size'  => 'small',
+			)
+		);
+
+		$product = new WC_Product_Variable( $product->get_id() );
+
+		$this->assertFalse( ObjectInstantiationProbe::$was_unserialized, 'Stored product meta must not instantiate objects' );
+		$this->assertSame( array( 'size' => 'small' ), $product->get_default_attributes(), 'Scalar default attributes should still load' );
+	}
 }

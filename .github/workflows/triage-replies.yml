@@ -7,47 +7,6 @@ on:
 permissions: {}
 
 jobs:
-    add-dev-comment:
-        if: "github.event.label.name == 'needs: developer feedback'"
-        runs-on: ubuntu-latest
-        timeout-minutes: 5
-        permissions:
-            issues: write
-        steps:
-            - name: Add developer feedback comment
-              uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
-              with:
-                  github-token: ${{ secrets.GITHUB_TOKEN }}
-                  script: |
-                      github.rest.issues.createComment({
-                        issue_number: context.issue.number,
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        body: 'Hi @${{ github.event.issue.user.login }},\n\n\
-                        Thank you for opening the issue! It requires further feedback from the WooCommerce Core team.\n\n\
-                        We are adding the `needs developer feedback` label to this issue so that the Core team could take a look.\n\n\
-                        Please note it may take a few days for them to get to this issue. Thank you for your patience.'
-                      })
-    add-reproduction-comment:
-        if: "github.event.label.name == 'status: reproduction'"
-        runs-on: ubuntu-latest
-        timeout-minutes: 5
-        permissions:
-            issues: write
-        steps:
-            - name: Add needs reproduction comment
-              uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
-              with:
-                  github-token: ${{ secrets.GITHUB_TOKEN }}
-                  script: |
-                      github.rest.issues.createComment({
-                        issue_number: context.issue.number,
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        body: 'We are adding the `status: needs reproduction` label to this issue to try reproduce it on the \
-                        current released version of WooCommerce.\n\n\
-                        Thank you for your patience.'
-                      })
     add-support-comment:
         if: "github.event.label.name == 'type: support request'"
         runs-on: ubuntu-latest
@@ -77,6 +36,44 @@ jobs:
                         If we missed something, please leave a comment and we will take a second look.'
                       })
             - name: Close support request issue
+              uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  script: |
+                      github.rest.issues.update({
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            issue_number: context.issue.number,
+                            state: 'closed',
+                            state_reason: 'not_planned'
+                          })
+    add-feature-request-comment:
+        if: "github.event.label.name == 'type: feature request'"
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        permissions:
+            issues: write
+        steps:
+            - name: Add feature request comment
+              uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  script: |
+                      github.rest.issues.createComment({
+                        issue_number: context.issue.number,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        body: "Hi @${{ github.event.issue.user.login }},\n\n\
+                        Thank you for the suggestion! GitHub issues are for bugs and smaller improvements, \
+                        and this looks like a larger feature request.\n\n\
+                        Ideas like this belong on the [WooCommerce feature request board](https://woocommerce.com/feature-requests/), \
+                        where other users can vote for them and add their own use cases. \
+                        That's how we gauge demand and decide what to build next. \
+                        Please add your request there, and feel free to link back to this issue.\n\n\
+                        We are closing this issue for now. \
+                        If you feel we misjudged the size and it's actually a small change, please leave a comment and we will take a second look."
+                      })
+            - name: Close feature request issue
               uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -122,7 +119,8 @@ jobs:
                             owner: context.repo.owner,
                             repo: context.repo.repo,
                             issue_number: context.issue.number,
-                            state: 'closed'
+                            state: 'closed',
+                            state_reason: 'not_planned'
                           })
     fill-template-comment:
         if: "github.event.label.name == 'needs: template'"

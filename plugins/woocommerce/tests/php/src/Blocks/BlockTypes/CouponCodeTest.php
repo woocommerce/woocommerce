@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Tests\Blocks\Helpers\BlockTypeRegistryTrait;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\CouponCodeMock;
 use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
@@ -12,6 +13,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering
  * Tests for the CouponCode block type.
  */
 class CouponCodeTest extends \WC_Unit_Test_Case {
+	use BlockTypeRegistryTrait;
 
 	/**
 	 * Mock instance of the CouponCode block.
@@ -33,14 +35,7 @@ class CouponCodeTest extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$registry = \WP_Block_Type_Registry::get_instance();
-
-		// The base test case registers the original again after the test.
-		if ( $registry->is_registered( 'woocommerce/coupon-code' ) ) {
-			$registry->unregister( 'woocommerce/coupon-code' );
-		}
-
-		$this->mock = new CouponCodeMock();
+		$this->mock = $this->replace_block_type( 'woocommerce/coupon-code', static fn () => new CouponCodeMock() );
 
 		$theme_controller        = Email_Editor_Container::container()->get( Theme_Controller::class );
 		$this->rendering_context = new Rendering_Context( $theme_controller->get_theme(), array() );

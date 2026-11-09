@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 use Automattic\WooCommerce\Blocks\BlockTypes\MiniCart as MiniCartBlock;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Tests\Blocks\Helpers\BlockTypeRegistryTrait;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\MiniCartMock;
@@ -15,6 +16,7 @@ use Automattic\WooCommerce\Tests\Blocks\Mocks\MiniCartMock;
  * @since $VID:$
  */
 class MiniCart extends \WC_Unit_Test_Case {
+	use BlockTypeRegistryTrait;
 
 	/**
 	 * Mock instance of the MiniCart block.
@@ -114,14 +116,7 @@ class MiniCart extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$registry = \WP_Block_Type_Registry::get_instance();
-
-		// The base test case registers the original again after the test.
-		if ( $registry->is_registered( 'woocommerce/mini-cart' ) ) {
-			$registry->unregister( 'woocommerce/mini-cart' );
-		}
-
-		$this->mock = new MiniCartMock();
+		$this->mock = $this->replace_block_type( 'woocommerce/mini-cart', static fn () => new MiniCartMock() );
 
 		$fixtures       = new FixtureData();
 		$this->products = array(

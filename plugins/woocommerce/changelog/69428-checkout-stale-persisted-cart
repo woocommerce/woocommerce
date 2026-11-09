@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix the Cart and Checkout blocks showing an outdated cart, such as the wrong shipping method, on sites that delay scripts.
