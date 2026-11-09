@@ -95,8 +95,12 @@ class ProductAttributeCreate extends AbstractDomainAbility implements AbilityDef
 
 		$name_slug = wc_attribute_taxonomy_slug( $name );
 		// A slug of only punctuation sanitizes to nothing, and wc_create_attribute() then makes one from the name.
-		$slug        = wc_attribute_taxonomy_slug( $input['slug'] ?? '' );
-		$slug        = '' === $slug ? $name_slug : $slug;
+		$slug = wc_attribute_taxonomy_slug( $input['slug'] ?? '' );
+		$slug = '' === $slug ? $name_slug : $slug;
+		// wc_create_attribute() stores an empty slug as a row that no attribute read returns.
+		if ( '' === $slug ) {
+			return new \WP_Error( 'woocommerce_ability_product_attribute_slug_empty', __( 'The attribute needs a slug with letters or numbers. Send one, or a name that has some.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
 		$existing_id = wc_attribute_taxonomy_id_by_name( $slug );
 		// wc_create_attribute() only checks registered taxonomies, which misses an attribute created earlier in this request.
 		if ( $existing_id > 0 ) {
