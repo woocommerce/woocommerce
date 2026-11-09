@@ -225,6 +225,33 @@ class UnitTestCaseTearDownTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The restores leave state alone for a test whose setUp() never reached the base class.
+	 */
+	public function test_restores_leave_state_alone_when_setup_did_not_run(): void {
+		// Like a test that skips in setUp() before calling parent::setUp(): PHPUnit still runs its tearDown().
+		$case = new class( 'placeholder' ) extends \WC_Unit_Test_Case {
+			/**
+			 * Run the three restores on a case that saved no state.
+			 */
+			public function restore_without_setup(): void {
+				$this->restore_server_superglobal();
+				$this->restore_constant_overrides();
+				$this->restore_block_type_registry();
+			}
+		};
+		Constants::set_constant( 'WC_TEARDOWN_TEST_KEPT', 'kept' );
+		$server      = $_SERVER;
+		$overrides   = Constants::$set_constants;
+		$block_types = \WP_Block_Type_Registry::get_instance()->get_all_registered();
+
+		$case->restore_without_setup();
+
+		$this->assertSame( $server, $_SERVER, '$_SERVER should be left as it was.' );
+		$this->assertSame( $overrides, Constants::$set_constants, 'Constants overrides should be left as they were.' );
+		$this->assertSame( $block_types, \WP_Block_Type_Registry::get_instance()->get_all_registered(), 'The block type registry should be left as it was.' );
+	}
+
+	/**
 	 * @testdox Setup unregisters a pa_* taxonomy an earlier test left without an attribute row.
 	 */
 	public function test_setup_drops_a_leftover_attribute_taxonomy(): void {

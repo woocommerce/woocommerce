@@ -64,25 +64,25 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	private $customer_state_at_setup = array();
 
 	/**
-	 * $_SERVER at setUp().
+	 * $_SERVER at setUp(), or null until setUp() saves it.
 	 *
-	 * @var array<string, mixed>
+	 * @var array<string, mixed>|null
 	 */
-	private $server_at_setup = array();
+	private $server_at_setup = null;
 
 	/**
-	 * Constants::$set_constants at setUp().
+	 * Constants::$set_constants at setUp(), or null until setUp() saves it.
 	 *
-	 * @var array<string, mixed>
+	 * @var array<string, mixed>|null
 	 */
-	private $constant_overrides_at_setup = array();
+	private $constant_overrides_at_setup = null;
 
 	/**
-	 * The registered block types at setUp(), by name.
+	 * The registered block types at setUp(), by name, or null until setUp() saves them.
 	 *
-	 * @var array<string, WP_Block_Type>
+	 * @var array<string, WP_Block_Type>|null
 	 */
-	private $block_types_at_setup = array();
+	private $block_types_at_setup = null;
 
 	/**
 	 * Enable synchronous product attribute lookup updates for test fixtures.
@@ -228,6 +228,8 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 */
 	public function tearDown(): void {
 		try {
+			// PHPUnit runs tearDown() even when a subclass skips the test before calling parent::setUp().
+			// Each restore then finds no saved state and leaves the current one alone.
 			$this->restore_server_superglobal();
 			$this->restore_constant_overrides();
 			$this->restore_block_type_registry();
@@ -336,6 +338,10 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * reads the request URI, client IP or user agent would otherwise see the previous test's values.
 	 */
 	protected function restore_server_superglobal(): void {
+		if ( null === $this->server_at_setup ) {
+			return;
+		}
+
 		$_SERVER = $this->server_at_setup;
 	}
 
@@ -344,6 +350,10 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * store, so one a test forgets to clear would otherwise apply to every later test.
 	 */
 	protected function restore_constant_overrides(): void {
+		if ( null === $this->constant_overrides_at_setup ) {
+			return;
+		}
+
 		Constants::$set_constants = $this->constant_overrides_at_setup;
 	}
 
@@ -352,6 +362,10 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * register again the ones it removed. The registry is a singleton that outlives the test.
 	 */
 	protected function restore_block_type_registry(): void {
+		if ( null === $this->block_types_at_setup ) {
+			return;
+		}
+
 		$registry = WP_Block_Type_Registry::get_instance();
 
 		foreach ( $registry->get_all_registered() as $name => $block_type ) {
