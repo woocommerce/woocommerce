@@ -14,6 +14,7 @@ use Automattic\WooCommerce\StoreApi\Utilities\ArrayUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\StoreApi\Utilities\NoticeHandler;
 use Automattic\WooCommerce\StoreApi\Utilities\QuantityLimits;
+use Automattic\WooCommerce\Utilities\ShippingUtil;
 use WP_Error;
 
 /**
@@ -266,6 +267,8 @@ class CartController {
 			throw new RouteException( 'woocommerce_rest_cart_invalid_product', esc_html__( 'Cart item is invalid.', 'woocommerce' ), 404 );
 		}
 
+		// Normalize the raw value so it's properly stored.
+		$quantity            = wc_stock_amount( $quantity );
 		$quantity_validation = ( new QuantityLimits() )->validate_cart_item_quantity( $quantity, $cart_item );
 
 		if ( is_wp_error( $quantity_validation ) ) {
@@ -936,11 +939,13 @@ class CartController {
 	/**
 	 * Selects a shipping rate.
 	 *
+	 * The rate must be listed for the package. Other choices are ignored.
+	 *
 	 * @param int|string $package_id ID of the package to choose a rate for.
 	 * @param string     $rate_id ID of the rate being chosen.
 	 */
 	public function select_shipping_rate( $package_id, $rate_id ) {
-		if ( ! is_string( $rate_id ) ) {
+		if ( ! is_string( $rate_id ) || ! ShippingUtil::is_shipping_rate_listed( $package_id, $rate_id ) ) {
 			return;
 		}
 		$cart                        = $this->get_cart_instance();
@@ -1133,12 +1138,12 @@ class CartController {
 	 * @throws RouteException Exception if invalid data is detected.
 	 *
 	 * @param array $request Add to cart request params.
-	 * @return \WC_Product|Error Returns a product object if purchasable.
+	 * @return \WC_Product Product to add. Throws if it does not exist or is trashed.
 	 */
 	protected function get_product_for_cart( $request ) {
 		$product = wc_get_product( $request['id'] );
 
-		if ( ! $product || ProductStatus::TRASH === $product->get_status() ) {
+		if ( ! $product instanceof \WC_Product || ProductStatus::TRASH === $product->get_status() ) {
 			throw new RouteException(
 				'woocommerce_rest_cart_invalid_product',
 				sprintf(

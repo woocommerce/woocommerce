@@ -7,8 +7,9 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute as StoreApiCartR
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\SessionHandler;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpCartMapper;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\CartMapper;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\IdempotencyClaim;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 /**
  * Shared behaviour of the UCP cart routes.
@@ -51,7 +52,39 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return array
 	 */
 	protected function ucp_metadata( string $status ): array {
-		return UcpUtils::response_metadata( UcpUtils::CAPABILITY_CART, $status );
+		return Utils::response_metadata( Utils::CAPABILITY_CART, $status );
+	}
+
+	/**
+	 * Answer the request, under the `Idempotency-Key` it carries.
+	 *
+	 * A payload the route cannot read is refused before the key is claimed, so a 415 never
+	 * touches the store. After that the key is settled before anything else runs: a replay
+	 * must not load a session or resolve a cart id, since a retried `cancel` has to return the
+	 * stored response rather than the `not_found` its own first run left behind.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function get_response( \WP_REST_Request $request ) {
+		$refusal = Utils::refuse_non_json_payload( $request, Utils::CAPABILITY_CART );
+		if ( null !== $refusal ) {
+			return $this->add_response_headers( $refusal );
+		}
+
+		$claim = IdempotencyClaim::for_request( $request, Utils::CAPABILITY_CART );
+
+		if ( $claim instanceof \WP_REST_Response ) {
+			// The gate answers without reaching the parent, so it stamps the cache directive itself.
+			return $this->add_response_headers( $claim );
+		}
+
+		$response = $this->dispatch_ucp_request( $request );
+
+		return null === $claim ? $response : $claim->settle( $response );
 	}
 
 	/**
@@ -66,7 +99,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 *
 	 * @return \WP_REST_Response
 	 */
-	public function get_response( \WP_REST_Request $request ) {
+	private function dispatch_ucp_request( \WP_REST_Request $request ): \WP_REST_Response {
 		if ( '' !== $this->route_cart_id( $request ) && '' === $this->validated_cart_id( $request ) ) {
 			return $this->add_response_headers( $this->ucp_not_found() );
 		}
@@ -79,6 +112,24 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			$this->restore_request_cart_token( $inherited_token );
 			remove_filter( 'woocommerce_session_handler', array( self::class, 'session_handler_class' ) );
 		}
+	}
+
+	/**
+	 * Send only the cache directive; the other Store API headers serve browser clients.
+	 *
+	 * A UCP client holds the cart credential as the path id and reads `id` from the body,
+	 * sends no nonce and keeps no hash-keyed cache. Leaving the parent's builder out also
+	 * keeps a `Cart-Token` for whatever session is in memory off an answer built before
+	 * the route binds one, such as the not-found refusal above.
+	 *
+	 * @param \WP_REST_Response $response The response object.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	protected function add_response_headers( \WP_REST_Response $response ) {
+		$response->header( 'Cache-Control', 'no-store' );
+
+		return $response;
 	}
 
 	/**
@@ -274,7 +325,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		return new \WP_REST_Response(
 			array_merge(
 				array( 'ucp' => $this->ucp_metadata( 'success' ) ),
-				( new UcpCartMapper() )->build_cart( $this->cart_item_response(), $cart_id, $context )
+				( new CartMapper() )->build_cart( $this->cart_item_response(), $cart_id, $context )
 			),
 			200
 		);
@@ -305,7 +356,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function ucp_error( string $code, string $message, string $severity, int $status, string $path = '$' ): \WP_REST_Response {
-		return UcpUtils::error_response( UcpUtils::CAPABILITY_CART, $code, $message, $severity, $status, $path );
+		return Utils::error_response( Utils::CAPABILITY_CART, $code, $message, $severity, $status, $path );
 	}
 
 	/**
@@ -326,7 +377,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		$message = (string) $error->get_error_message();
 
 		return $this->ucp_error(
-			UcpUtils::cart_error_code( (string) $error->get_error_code(), 'TRANSPORT_ERROR' ),
+			Utils::cart_error_code( (string) $error->get_error_code(), 'TRANSPORT_ERROR' ),
 			'' !== $message ? $message : __( 'The cart could not be loaded. Please try again.', 'woocommerce' ),
 			$status >= 500 ? 'unrecoverable' : 'recoverable',
 			$status
@@ -342,7 +393,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function ucp_not_found(): \WP_REST_Response {
-		return UcpUtils::error_response( UcpUtils::CAPABILITY_CART, 'not_found', __( 'Cart not found.', 'woocommerce' ), 'unrecoverable', 200, '$.id' );
+		return Utils::error_response( Utils::CAPABILITY_CART, 'not_found', __( 'Cart not found.', 'woocommerce' ), 'unrecoverable', 200, '$.id' );
 	}
 
 	/**
@@ -480,7 +531,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			}
 
 			return $this->ucp_error(
-				UcpUtils::cart_error_code( $error->getErrorCode() ),
+				Utils::cart_error_code( $error->getErrorCode() ),
 				$error->getMessage(),
 				'recoverable',
 				200,

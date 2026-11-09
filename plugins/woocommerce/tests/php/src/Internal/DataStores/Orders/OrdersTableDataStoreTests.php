@@ -1631,12 +1631,14 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	public function test_read_with_direct_meta_write() {
 		$this->toggle_cot_feature_and_usage( true );
 		$this->enable_cot_sync();
-		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 		$order = $this->create_complex_cot_order();
 
 		$post_object = get_post( $order->get_id() );
 		// Make sure that COT sync is enabled, by checking that this is not placeholder post.
 		$this->assertTrue( get_post_type( $post_object->ID ) === 'shop_order' );
+
+		// Fixture saves can read the order, so enable sync-on-read only after setup.
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 
 		// simulate direct write.
 		update_post_meta( $post_object->ID, 'my_custom_meta', array( 'key' => 'value' ) );
@@ -1656,7 +1658,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	public function test_read_multiple_with_direct_write() {
 		$this->enable_cot_sync();
 		$this->toggle_cot_feature_and_usage( true );
-		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 		$order       = $this->create_complex_cot_order();
 		$order_total = $order->get_total();
 		$order->add_meta_data( 'custom_meta_1', 'custom_value_1' );
@@ -1665,6 +1666,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order->save();
 		$post_object = get_post( $order->get_id() );
 		assert( get_post_type( $post_object->ID ) === 'shop_order' );
+
+		// Fixture saves can read the order, so enable sync-on-read only after setup.
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 
 		// simulate direct write.
 		update_post_meta( $post_object->ID, '_order_total', $order_total + 100 ); // core table.
@@ -1690,12 +1694,45 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testDox Sync-on-read does not write duplicate rows back to wp_postmeta when migrating meta.
+	 */
+	public function test_sync_on_read_does_not_duplicate_postmeta() {
+		$this->enable_cot_sync();
+		$this->toggle_cot_feature_and_usage( true );
+		$order = $this->create_complex_cot_order();
+		$order->add_meta_data( 'multi_meta', 'x' );
+		$order->add_meta_data( 'multi_meta', 'y' );
+		$order->add_meta_data( 'changed_meta', 'before' );
+		$order->save();
+		// Fixture saves can read the order, so enable sync-on-read only after setup.
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
+
+		// Simulate direct writes to the posts table.
+		add_post_meta( $order->get_id(), 'new_meta', 'new_value' ); // add_meta path.
+		update_post_meta( $order->get_id(), 'changed_meta', 'after' ); // update_meta path.
+		delete_post_meta( $order->get_id(), 'multi_meta', 'x' ); // delete_meta path.
+		add_post_meta( $order->get_id(), 'multi_meta', 'z' );
+
+		$refreshed_order = new WC_Order();
+		$refreshed_order->set_id( $order->get_id() );
+		$this->switch_data_store( $refreshed_order, $this->sut );
+		$this->sut->read( $refreshed_order );
+
+		$this->assertEquals( 'new_value', $refreshed_order->get_meta( 'new_meta' ) );
+		$this->assertEquals( 'after', $refreshed_order->get_meta( 'changed_meta' ) );
+
+		$this->assertEquals( array( 'new_value' ), get_post_meta( $order->get_id(), 'new_meta', false ) );
+		$this->assertEquals( array( 'after' ), get_post_meta( $order->get_id(), 'changed_meta', false ) );
+		$this->assertEquals( array( 'y', 'z' ), get_post_meta( $order->get_id(), 'multi_meta', false ) );
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
+	}
+
+	/**
 	 * @testDox Test that we are able to correctly detect when order and post are out of sync.
 	 */
 	public function test_is_post_different_from_order() {
 		$this->toggle_cot_feature_and_usage( true );
 		$this->enable_cot_sync();
-		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 		$order                         = $this->create_complex_cot_order();
 		$post_order_comparison_closure = function ( $order ) {
 			$post_order = $this->get_post_orders_for_ids( array( $order->get_id() => $order ) )[ $order->get_id() ];
@@ -1704,6 +1741,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		};
 		// No changes, post and order should be same.
 		$this->assertFalse( $post_order_comparison_closure->call( $this->sut, $order ) );
+
+		// Fixture saves can read the order, so enable sync-on-read only after setup.
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 
 		// Simulate direct write.
 		update_post_meta( $order->get_id(), 'my_custom_meta', array( 'key' => 'value' ) );
@@ -2618,9 +2658,11 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	 */
 	public function test_create_without_explicit_prices_include_tax_keeps_default(): void {
 		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$previous_calc_tax = get_option( 'woocommerce_calc_taxes' );
 		$order             = null;
 
 		try {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
 			update_option( 'woocommerce_prices_include_tax', 'yes' );
 			$order = new WC_Order();
 			update_option( 'woocommerce_prices_include_tax', 'no' );
@@ -2644,6 +2686,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 				$order->delete( true );
 			}
 			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+			update_option( 'woocommerce_calc_taxes', $previous_calc_tax );
 		}
 	}
 
@@ -2687,9 +2730,11 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		global $wpdb;
 
 		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$previous_calc_tax = get_option( 'woocommerce_calc_taxes' );
 		$order             = new WC_Order();
 
 		try {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
 			update_option( 'woocommerce_prices_include_tax', 'yes' );
 			$this->switch_data_store( $order, $this->sut );
 			$order->save();
@@ -2716,6 +2761,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		} finally {
 			$order->delete( true );
 			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+			update_option( 'woocommerce_calc_taxes', $previous_calc_tax );
 		}
 	}
 
@@ -3712,6 +3758,25 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$post_meta = get_post_meta( $order->get_id(), 'test_key2' );
 		$this->assertTrue( in_array( 'test_value4', $post_meta, true ) );
 		$this->assertFalse( in_array( 'test_value5', $post_meta, true ) );
+	}
+
+	/**
+	 * @testdox Multi-value meta keeps its order in the posts table when a meta save triggers a full order save.
+	 */
+	public function test_multi_value_meta_order_is_synced_when_meta_save_triggers_order_save(): void {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$order = WC_Helper_Order::create_order();
+		// An earlier modified date makes the first add_meta() call trigger a full order save.
+		$order->set_date_modified( gmdate( 'Y-m-d H:i:s', strtotime( '-2 day' ) ) );
+		$order->save();
+
+		$order->add_meta_data( 'test_key', 'test_value1' );
+		$order->add_meta_data( 'test_key', 'test_value2' );
+		$order->save_meta_data();
+
+		$this->assertSame( array( 'test_value1', 'test_value2' ), get_post_meta( $order->get_id(), 'test_key', false ) );
 	}
 
 	/**
@@ -4742,5 +4807,38 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$this->assertNull( get_comment( $note_id ), 'Order note should be deleted' );
 		$this->assertEmpty( get_comment_meta( $note_id ), 'Commentmeta should be deleted along with the note' );
+	}
+
+	/**
+	 * @testdox An address value too long for its column fails the update before the order row is written, so the order is not left half saved.
+	 */
+	public function test_update_with_address_value_too_long_for_its_column_writes_nothing(): void {
+		global $wpdb;
+		$this->toggle_cot_feature_and_usage( true );
+		$this->disable_cot_sync();
+
+		$order = OrderHelper::create_order();
+		$order->set_total( '50.00' );
+		$order->set_billing_phone( '5551234' );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$order->set_total( '5.00' );
+		$order->set_billing_phone( str_repeat( '1', 101 ) );
+		$error = null;
+		try {
+			$this->sut->update( $order );
+		} catch ( \Exception $e ) {
+			$error = $e;
+		}
+
+		//phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$orders_table    = $this->sut::get_orders_table_name();
+		$addresses_table = $this->sut::get_addresses_table_name();
+		$this->assertSame( '50.00000000', $wpdb->get_var( $wpdb->prepare( "SELECT total_amount FROM {$orders_table} WHERE id = %d", $order_id ) ), 'The new total must not be written when the address row cannot be.' );
+		$this->assertSame( '5551234', $wpdb->get_var( $wpdb->prepare( "SELECT phone FROM {$addresses_table} WHERE order_id = %d AND address_type = 'billing'", $order_id ) ) );
+		//phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$this->assertInstanceOf( \Exception::class, $error, 'The update should throw when a value does not fit its column.' );
+		$this->assertStringContainsString( 'phone', $error->getMessage(), 'The error should name the column that is too long.' );
 	}
 }

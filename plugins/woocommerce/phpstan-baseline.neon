@@ -4429,15 +4429,9 @@ parameters:
 			path: includes/admin/list-tables/class-wc-admin-list-table-orders.php
 
 		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_product_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/admin/list-tables/class-wc-admin-list-table-orders.php
-
-		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_total\(\)\.$#'
 			identifier: method.notFound
-			count: 2
+			count: 1
 			path: includes/admin/list-tables/class-wc-admin-list-table-orders.php
 
 		-
@@ -10513,12 +10507,6 @@ parameters:
 			path: includes/class-wc-comments.php
 
 		-
-			message: '#^Parameter \#3 \$args of function wp_die expects array\{response\?\: int, link_url\?\: string, link_text\?\: string, back_link\?\: bool, text_direction\?\: string, charset\?\: string, code\?\: string, exit\?\: bool\}\|int, array\{code\: 403\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-comments.php
-
-		-
 			message: '#^Parameter \#3 \$product_id of function wc_customer_bought_product expects int, string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -12757,7 +12745,7 @@ parameters:
 			path: includes/class-wc-order.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this                     Order object\.\)\: Unexpected token "\$this", expected variable at offset 193 on line 5$#'
+			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this                     Order object\.\)\: Unexpected token "\$this", expected variable at offset 189 on line 5$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: includes/class-wc-order.php
@@ -12769,13 +12757,13 @@ parameters:
 			path: includes/class-wc-order.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this          Order object\.\)\: Unexpected token "\$this", expected variable at offset 192 on line 6$#'
+			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this          Order object\.\)\: Unexpected token "\$this", expected variable at offset 187 on line 6$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: includes/class-wc-order.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this          Order object\.\)\: Unexpected token "\$this", expected variable at offset 197 on line 6$#'
+			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this          Order object\.\)\: Unexpected token "\$this", expected variable at offset 192 on line 6$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: includes/class-wc-order.php
@@ -12825,7 +12813,7 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$is_customer_note of method WC_Order\:\:add_order_note\(\) expects int, false given\.$#'
 			identifier: argument.type
-			count: 5
+			count: 4
 			path: includes/class-wc-order.php
 
 		-
@@ -12949,12 +12937,6 @@ parameters:
 			path: includes/class-wc-post-data.php
 
 		-
-			message: '#^Access to an undefined property object\:\:\$taxonomy\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/class-wc-post-data.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:delete_by_order_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -12988,12 +12970,6 @@ parameters:
 			message: '#^Cannot access property \$slug on WP_Term\|false\.$#'
 			identifier: property.nonObject
 			count: 3
-			path: includes/class-wc-post-data.php
-
-		-
-			message: '#^Cannot access property \$taxonomy on WP_Term\|false\.$#'
-			identifier: property.nonObject
-			count: 1
 			path: includes/class-wc-post-data.php
 
 		-
@@ -15644,12 +15620,6 @@ parameters:
 
 		-
 			message: '#^Method WC_Webhook\:\:enqueue\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-webhook.php
-
-		-
-			message: '#^Method WC_Webhook\:\:failed_delivery\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/class-wc-webhook.php
@@ -28057,12 +28027,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-buttons-controller.php
 
 		-
-			message: '#^Access to an undefined property WooCommerce\:\:\$checkout\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-standard-controller.php
-
-		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_instance_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -28070,24 +28034,6 @@ parameters:
 
 		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_method_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-standard-controller.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_product\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-standard-controller.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_product_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-standard-controller.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_variation_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-standard-controller.php
@@ -34006,12 +33952,6 @@ parameters:
 			path: includes/wc-order-functions.php
 
 		-
-			message: '#^Parameter \#3 \$order of function wc_downloadable_file_permission expects WC_Order, WC_Order\|WC_Order_Refund given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:add_metadata\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -35230,12 +35170,6 @@ parameters:
 			path: includes/wc-user-functions.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:delete_by_order_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-user-functions.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:get_downloads_for_customer\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -35243,12 +35177,6 @@ parameters:
 
 		-
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_order_key\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-user-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:has_downloadable_item\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: includes/wc-user-functions.php
@@ -40900,20 +40828,8 @@ parameters:
 			path: src/Admin/API/Reports/GenericQuery.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\GenericQuery\:\:__construct\(\) with return type void returns null but should not return anything\.$#'
-			identifier: return.void
-			count: 1
-			path: src/Admin/API/Reports/GenericQuery.php
-
-		-
 			message: '#^PHPDoc tag @extends has invalid value \(WC_Object_Query\:\:_construct\)\: Unexpected token "\:\:", expected ''\<'' at offset 174 on line 6$#'
 			identifier: phpDoc.parseError
-			count: 1
-			path: src/Admin/API/Reports/GenericQuery.php
-
-		-
-			message: '#^Result of method WC_Object_Query\:\:__construct\(\) \(void\) is used\.$#'
-			identifier: staticMethod.void
 			count: 1
 			path: src/Admin/API/Reports/GenericQuery.php
 
@@ -66955,12 +66871,6 @@ parameters:
 			path: src/StoreApi/Utilities/CartController.php
 
 		-
-			message: '#^Call to method is_type\(\) on an unknown class Automattic\\WooCommerce\\StoreApi\\Utilities\\Error\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/StoreApi/Utilities/CartController.php
-
-		-
 			message: '#^Cannot call method get_id\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -67023,12 +66933,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Utilities\\CartController\:\:get_draft_order\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/StoreApi/Utilities/CartController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Utilities\\CartController\:\:get_product_for_cart\(\) has invalid return type Automattic\\WooCommerce\\StoreApi\\Utilities\\Error\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/StoreApi/Utilities/CartController.php
 
@@ -67135,42 +67039,6 @@ parameters:
 			path: src/StoreApi/Utilities/CartController.php
 
 		-
-			message: '#^Parameter \#1 \$product of function wc_get_cart_item_data_hash expects WC_Product, Automattic\\WooCommerce\\StoreApi\\Utilities\\Error\|WC_Product given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Utilities/CartController.php
-
-		-
-			message: '#^Parameter \#1 \$product of method Automattic\\WooCommerce\\StoreApi\\Utilities\\CartController\:\:get_product_id\(\) expects WC_Product, Automattic\\WooCommerce\\StoreApi\\Utilities\\Error\|WC_Product given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/StoreApi/Utilities/CartController.php
-
-		-
-			message: '#^Parameter \#1 \$product of method Automattic\\WooCommerce\\StoreApi\\Utilities\\CartController\:\:get_variable_product_attributes\(\) expects WC_Product, Automattic\\WooCommerce\\StoreApi\\Utilities\\Error\|WC_Product given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Utilities/CartController.php
-
-		-
-			message: '#^Parameter \#1 \$product of method Automattic\\WooCommerce\\StoreApi\\Utilities\\CartController\:\:get_variation_id\(\) expects WC_Product, Automattic\\WooCommerce\\StoreApi\\Utilities\\Error\|WC_Product given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/StoreApi/Utilities/CartController.php
-
-		-
-			message: '#^Parameter \#1 \$product of method Automattic\\WooCommerce\\StoreApi\\Utilities\\CartController\:\:validate_add_to_cart\(\) expects WC_Product, Automattic\\WooCommerce\\StoreApi\\Utilities\\Error\|WC_Product given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Utilities/CartController.php
-
-		-
-			message: '#^Parameter \#1 \$product of method Automattic\\WooCommerce\\StoreApi\\Utilities\\QuantityLimits\:\:get_add_to_cart_limits\(\) expects WC_Product, Automattic\\WooCommerce\\StoreApi\\Utilities\\Error\|WC_Product given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/StoreApi/Utilities/CartController.php
-
-		-
 			message: '#^Parameter \#1 \$str of function md5 expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 4
@@ -67178,12 +67046,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$text of function esc_html expects string, int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Utilities/CartController.php
-
-		-
-			message: '#^Parameter \#2 \$product of method Automattic\\WooCommerce\\StoreApi\\Utilities\\CartController\:\:get_variation_id_from_variation_data\(\) expects WC_Product, Automattic\\WooCommerce\\StoreApi\\Utilities\\Error\|WC_Product given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/StoreApi/Utilities/CartController.php

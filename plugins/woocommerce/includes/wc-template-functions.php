@@ -3774,7 +3774,12 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 		if ( false === $args['selected'] && $args['attribute'] && $args['product'] instanceof WC_Product ) {
 			$selected_key = 'attribute_' . sanitize_title( $args['attribute'] );
 			// phpcs:disable WordPress.Security.NonceVerification.Recommended
-			$args['selected'] = isset( $_REQUEST[ $selected_key ] ) ? wc_clean( wp_unslash( $_REQUEST[ $selected_key ] ) ) : $args['product']->get_variation_default_attribute( $args['attribute'] );
+			if ( isset( $_REQUEST[ $selected_key ] ) && is_string( $_REQUEST[ $selected_key ] ) ) {
+				// Taxonomy term slugs may contain percent-encoded characters, which wc_clean() removes.
+				$args['selected'] = taxonomy_exists( $args['attribute'] ) ? sanitize_title( wp_unslash( $_REQUEST[ $selected_key ] ) ) : wc_clean( wp_unslash( $_REQUEST[ $selected_key ] ) );
+			} else {
+				$args['selected'] = $args['product']->get_variation_default_attribute( $args['attribute'] );
+			}
 			// phpcs:enable WordPress.Security.NonceVerification.Recommended
 		}
 

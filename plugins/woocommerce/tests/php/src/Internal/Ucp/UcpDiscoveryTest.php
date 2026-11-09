@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Ucp;
 
 use Automattic\WooCommerce\Internal\Ucp\UcpDiscovery;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 /**
  * Tests for the `/.well-known/ucp` discovery profile.
@@ -35,19 +35,20 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 		unset( $wp_rewrite->extra_rules_top[ self::RULE ] );
 		remove_filter( 'query_vars', array( $this->sut, 'add_query_var' ), 0 );
 		remove_action( 'parse_request', array( $this->sut, 'maybe_render' ), 0 );
+		delete_option( 'woocommerce_queue_flush_rewrite_rules' );
 		parent::tearDown();
 	}
 
 	/**
-	 * @testdox The profile points at the local UCP REST namespace and lists every capability UcpUtils declares.
+	 * @testdox The profile points at the local UCP REST namespace and lists every capability Utils declares.
 	 */
 	public function test_profile_shape(): void {
 		$profile = $this->sut->get_profile();
 
 		$this->assertSame( array( 'ucp', 'links' ), array_keys( $profile ) );
-		$this->assertSame( UcpUtils::VERSION, $profile['ucp']['version'] );
+		$this->assertSame( Utils::VERSION, $profile['ucp']['version'] );
 		$this->assertSame( rest_url( 'wc/ucp/v1' ), $profile['ucp']['services']['dev.ucp.shopping'][0]['endpoint'] );
-		$declarations = UcpUtils::capability_declarations();
+		$declarations = Utils::capability_declarations();
 		$this->assertSame( array_keys( $declarations ), array_keys( $profile['ucp']['capabilities'] ) );
 		foreach ( $declarations as $capability => $declaration ) {
 			$this->assertSame( array( $declaration ), $profile['ucp']['capabilities'][ $capability ] );
@@ -78,6 +79,32 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox register_feature_hooks queues a rewrite flush when the stored rules disagree with the feature flag.
+	 * @testWith ["yes", "present", false]
+	 *           ["yes", "missing", true]
+	 *           ["yes", "empty", false]
+	 *           ["no", "present", true]
+	 *
+	 * @param string $enabled  Feature option value.
+	 * @param string $stored   Whether the stored rules contain the rule, lack it, or are empty.
+	 * @param bool   $expected Whether a flush should be queued.
+	 */
+	public function test_register_feature_hooks_heals_stale_rewrite_rules( string $enabled, string $stored, bool $expected ): void {
+		update_option( 'woocommerce_feature_ucp_enabled', $enabled );
+		$this->set_permalink_structure( '/%postname%/' );
+		$rules = array( '^shop/?$' => 'index.php?post_type=product' );
+		if ( 'present' === $stored ) {
+			$rules[ self::RULE ] = 'index.php?' . UcpDiscovery::QUERY_VAR . '=1';
+		}
+		update_option( 'rewrite_rules', 'empty' === $stored ? array() : $rules );
+		update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
+
+		$this->sut->register_feature_hooks();
+
+		$this->assertSame( $expected ? 'yes' : 'no', get_option( 'woocommerce_queue_flush_rewrite_rules' ) );
+	}
+
+	/**
 	 * @testdox Toggling the UCP feature queues a rewrite rules flush.
 	 */
 	public function test_feature_toggle_queues_flush(): void {
@@ -86,7 +113,7 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 		$this->sut->maybe_flush_rewrite_rules( 'some_other_feature' );
 		$this->assertSame( 'no', get_option( 'woocommerce_queue_flush_rewrite_rules' ) );
 
-		$this->sut->maybe_flush_rewrite_rules( UcpUtils::FEATURE_ID );
+		$this->sut->maybe_flush_rewrite_rules( Utils::FEATURE_ID );
 		$this->assertSame( 'yes', get_option( 'woocommerce_queue_flush_rewrite_rules' ) );
 	}
 
