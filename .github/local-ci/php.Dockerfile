@@ -36,5 +36,9 @@ RUN ln -s ../lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
 	&& ln -s ../lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
 	&& npm install --global pnpm@10.33.0 && npm cache clean --force
 
+# No USER: gh local-ci picks the user. On Linux it runs jobs as the host's
+# uid:gid and hands it the volumes first; elsewhere the daemon maps file
+# ownership, so the image default is enough.
+#
 # PHPStan analyses with --memory-limit=2G; the CLI default is 128M.
 RUN echo "memory_limit = -1" > "$PHP_INI_DIR/conf.d/local-ci.ini"

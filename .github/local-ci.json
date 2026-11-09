@@ -87,7 +87,7 @@
     },
     {
       "id": "php-unit",
-      "$comment": "PHPUnit without wp-env. The test job installs PHP 7.4 for every unit:php job (setup-woocommerce-monorepo's default), so this runs on 7.4 whatever the job name says. Jobs with a test environment have [WP ...] in their names: the core plugin's are the php-cells rule's, and the rest are left to CI.",
+      "$comment": "PHPUnit without wp-env. The test job installs PHP 7.4 for every unit:php job (setup-woocommerce-monorepo's default), so this runs on 7.4 whatever the job name says. gh local-ci runs a rule that names an image only with --docker, so a receipt for it never comes from the host's PHP. Jobs with a test environment have [WP ...] in their names: the core plugin's are the php-cells rule's, and the rest are left to CI.",
       "type": "unit:php",
       "namePrefix": "PHP: 8.1 ",
       "exclude": [ "[WP " ],
@@ -120,6 +120,7 @@
       ],
       "serial": "wp-env",
       "enabledByDefault": false,
+      "sampleRate": 10,
       "prepare": {
         "$comment": "Ports 92xx so the worktree's wp-env cells never collide with cells started from the developer's checkout.",
         "env": { "TEST_PHP_CI_PORT_BASE": "92" }
