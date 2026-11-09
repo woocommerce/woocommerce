@@ -320,4 +320,28 @@ class Post_Content_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'srcset=', $after_render, 'Web pages rendered after the email keep responsive images.' );
 		$this->assertStringContainsString( 'decoding=', $after_render, 'Web pages rendered after the email keep loading attributes.' );
 	}
+
+	/**
+	 * Test that web-only attributes already saved in the post content are removed from every image.
+	 */
+	public function testItRemovesSavedWebOnlyImageAttributes(): void {
+		$image   = '<img src="https://test.com/image.jpg" alt="Alt" width="600" height="300" loading="lazy" decoding="async" fetchpriority="low" srcset="https://test.com/image.jpg 600w" sizes="100vw">';
+		$post_id = self::factory()->post->create( array( 'post_content' => $image . $image ) );
+		$block   = new \WP_Block(
+			array(
+				'blockName' => 'core/post-content',
+				'attrs'     => array(),
+			),
+			array( 'postId' => $post_id )
+		);
+
+		$rendered = ( new Post_Content() )->render_stateless( array(), '', $block );
+
+		$this->assertSame( 2, substr_count( $rendered, '<img' ) );
+		foreach ( array( 'loading=', 'decoding=', 'fetchpriority=', 'srcset=', 'sizes=' ) as $attribute ) {
+			$this->assertStringNotContainsString( $attribute, $rendered );
+		}
+		$this->assertStringContainsString( 'src="https://test.com/image.jpg"', $rendered );
+		$this->assertStringContainsString( 'width="600"', $rendered );
+	}
 }
