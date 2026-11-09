@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Declare `redux` as a dependency so the published TypeScript types resolve.
+Remove direct Redux type imports so the published TypeScript types resolve without a Redux dependency.
