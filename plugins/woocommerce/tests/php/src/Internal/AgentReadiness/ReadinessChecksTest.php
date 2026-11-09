@@ -255,6 +255,77 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A variable product with no main image is listed with a published variation's own image, which is also checked for size.
+	 */
+	public function test_missing_images_counts_variation_images(): void {
+		$sut      = SimpleCheck::table()['missing_images'];
+		$variable = WC_Helper_Product::create_variation_product();
+		$variable->set_image_id( 0 );
+		$variable->save();
+		$variable = wc_get_product( $variable->get_id() );
+
+		$this->assertTrue( $sut->fails( $variable, $this->scan ), 'No image on the product or any variation' );
+
+		$variation = wc_get_product( $variable->get_children()[0] );
+		$variation->set_image_id( self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg' ) ) );
+		$variation->save();
+
+		$this->assertFalse( $sut->fails( wc_get_product( $variable->get_id() ), $this->scan ), 'A variation with its own image can be listed' );
+
+		wp_update_attachment_metadata(
+			$variation->get_image_id(),
+			array(
+				'width'  => 300,
+				'height' => 300,
+			)
+		);
+		$this->assertTrue( ( new ImageTooSmallCheck() )->fails( wc_get_product( $variable->get_id() ), $this->scan ), 'The variation image it lists with is checked for size' );
+	}
+
+	/**
+	 * @testdox A variable product fails the image size check when any variation lists with a small image, whatever the variation order.
+	 */
+	public function test_image_too_small_checks_every_variation_image(): void {
+		$sut        = new ImageTooSmallCheck();
+		$image      = function ( int $size ): int {
+			$id = self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg' ) );
+			wp_update_attachment_metadata(
+				$id,
+				array(
+					'width'  => $size,
+					'height' => $size,
+				)
+			);
+			return $id;
+		};
+		$variable   = WC_Helper_Product::create_variation_product();
+		$variations = array_slice( $variable->get_children(), 0, 2 );
+		$variable->set_image_id( 0 );
+		$variable->save();
+
+		foreach ( array( array( 800, 100 ), array( 100, 800 ) ) as $sizes ) {
+			foreach ( $variations as $i => $variation_id ) {
+				$variation = wc_get_product( $variation_id );
+				$variation->set_image_id( $image( $sizes[ $i ] ) );
+				$variation->save();
+			}
+			$this->assertTrue( $sut->fails( wc_get_product( $variable->get_id() ), $this->scan ), implode( ' x ', $sizes ) . ': a small variation image fails in either order' );
+		}
+
+		foreach ( $variable->get_children() as $variation_id ) {
+			$variation = wc_get_product( $variation_id );
+			$variation->set_image_id( $image( 800 ) );
+			$variation->save();
+		}
+		$this->assertFalse( $sut->fails( wc_get_product( $variable->get_id() ), $this->scan ), 'All variation images are large enough' );
+
+		$variable = wc_get_product( $variable->get_id() );
+		$variable->set_image_id( $image( 100 ) );
+		$variable->save();
+		$this->assertFalse( $sut->fails( wc_get_product( $variable->get_id() ), $this->scan ), 'A small parent image no variation lists with is not counted' );
+	}
+
+	/**
 	 * @testdox An image under 500 pixels on either side fails; one without recorded size does not.
 	 */
 	public function test_image_too_small_reads_attachment_size(): void {
