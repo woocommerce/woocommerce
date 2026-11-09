@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Restore visibility and purchasability of published products whose post_parent points at a missing or non-product post

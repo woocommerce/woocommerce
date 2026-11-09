@@ -75,6 +75,7 @@ const emailType: EmailType = {
 	email_key: 'wc_email_new_order',
 	email_class_name: 'WC_Email_New_Order',
 	post_id: '123',
+	block_editor_supported: true,
 	file_template_preview_url:
 		'https://example.test/wp-admin/?preview_woo_block_email=true&email_id=new_order&_wpnonce=abc',
 	recipients: {
@@ -161,6 +162,27 @@ describe( 'ListView', () => {
 			);
 		} );
 
+		it( 'navigates to the classic settings section for emails the block editor does not support', async () => {
+			const classicEmail = {
+				...emailType,
+				id: 'customer_stock_notification_verify',
+				email_key: 'wc_email_customer_stock_notification_verify',
+				post_id: '',
+				postStatus: null,
+				block_editor_supported: false,
+				file_template_preview_url: null,
+			};
+			render( <ListView emailTypes={ [ classicEmail ] } /> );
+
+			await getAction( 'edit' )?.callback?.( [ classicEmail ] );
+
+			expect( mockRecreateEmailPost ).not.toHaveBeenCalled();
+			expect( window.location.href ).toBe(
+				'https://example.test/wp-admin/admin.php?page=wc-settings&tab=email&section=wc_email_customer_stock_notification_verify'
+			);
+			expect( mockCreateErrorNotice ).not.toHaveBeenCalled();
+		} );
+
 		it( 'does not navigate and surfaces an error notice when the post could not be created', async () => {
 			mockRecreateEmailPost.mockResolvedValue( null );
 			const emailWithoutPost = {
@@ -205,6 +227,7 @@ describe( 'ListView', () => {
 					...emailType,
 					post_id: '',
 					postStatus: null,
+					block_editor_supported: true,
 					file_template_preview_url: null,
 				} )
 			).toBe( false );
@@ -215,6 +238,7 @@ describe( 'ListView', () => {
 					...emailType,
 					postStatus: 'publish',
 					link: 'https://example.test/?woo_email=new-order',
+					block_editor_supported: true,
 					file_template_preview_url: null,
 				} )
 			).toBe( true );
@@ -223,6 +247,7 @@ describe( 'ListView', () => {
 					...emailType,
 					postStatus: 'publish',
 					link: '',
+					block_editor_supported: true,
 					file_template_preview_url: null,
 				} )
 			).toBe( false );
@@ -230,6 +255,7 @@ describe( 'ListView', () => {
 				isEligible?.( {
 					...emailType,
 					postStatus: 'draft',
+					block_editor_supported: true,
 					file_template_preview_url: null,
 				} )
 			).toBe( false );

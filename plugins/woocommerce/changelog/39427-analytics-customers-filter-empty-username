@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Allow the Analytics customers report API to exclude customers without a username, such as guests.

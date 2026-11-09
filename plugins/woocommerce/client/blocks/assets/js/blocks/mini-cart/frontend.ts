@@ -25,12 +25,13 @@ import {
  * Internal dependencies
  */
 import type { CartItem, Currency } from '@woocommerce/types';
+import { getFocusableElements } from '../../utils/get-focusable-elements';
 import { translateJQueryEventToNative } from '../../base/stores/woocommerce/legacy-events';
 import {
-	getEntryFieldRaw,
 	isItemDataEntryVisible,
 	isLastVisibleEntry,
 	buildCartItemDataAttr,
+	renderEntryFieldHTML,
 } from './utils/item-data';
 import type { ItemData, CartItemDataAttr } from './utils/item-data';
 
@@ -106,6 +107,7 @@ export type MiniCart = {
 		isOpen: boolean;
 		totalItemsInCart: number;
 		formattedSubtotal: string;
+		isCartUpdating: boolean;
 		badgeIsVisible: boolean;
 		cartIsEmpty: boolean;
 		drawerRole: string | null;
@@ -123,6 +125,7 @@ export type MiniCart = {
 		closeDrawer: () => void;
 		overlayCloseDrawer: ( e: MouseEvent ) => void;
 		handleOverlayKeydown: ( e: KeyboardEvent ) => void;
+		preventCheckoutWhileUpdating: ( e: MouseEvent ) => void;
 	};
 	callbacks: {
 		markAsHydrated: () => void;
@@ -150,28 +153,25 @@ const trimWords = ( html: string, maxWords = 15 ): string => {
 	return words.slice( 0, maxWords ).join( ' ' ) + '…';
 };
 
-const focusableSelectors = `
-	a[href],
-	input:not([disabled]):not([type="hidden"]):not([aria-hidden]),
-	select:not([disabled]):not([aria-hidden]),
-	textarea:not([disabled]):not([aria-hidden]),
-	button:not([disabled]):not([aria-hidden]),
-	[contenteditable],
-	[tabindex]:not([tabindex^="-"])
-`;
-
-const getFocusableElements = ( container: HTMLElement | null ) =>
-	container
-		? Array.from(
-				container.querySelectorAll< HTMLElement >( focusableSelectors )
-		  ).filter( ( el ) => el.offsetParent !== null )
-		: [];
-
 const { state: woocommerceState, actions } = store< WooCommerce >(
 	'woocommerce',
 	{},
 	{ lock: universalLock }
 );
+
+const dispatchCheckoutEvent = ( eventName: string ) => {
+	try {
+		window.wp.hooks.doAction(
+			`experimental__woocommerce_blocks-checkout-${ eventName }`,
+			{ storeCart: woocommerceState.cart }
+		);
+	} catch ( e ) {
+		// eslint-disable-next-line no-console
+		console.error( e );
+	}
+};
+
+let previousIsOpen: boolean | undefined;
 
 const { state: miniCartState, actions: miniCartActions } = store< MiniCart >(
 	'woocommerce/mini-cart',
@@ -209,10 +209,10 @@ store< MiniCart >(
 
 				const subtotal = displayCartPriceIncludingTax
 					? parseInt( woocommerceState.cart.totals.total_items, 10 ) +
-					  parseInt(
+						parseInt(
 							woocommerceState.cart.totals.total_items_tax,
 							10
-					  )
+						)
 					: parseInt( woocommerceState.cart.totals.total_items, 10 );
 
 				const normalizedCurrency = normalizeCurrencyResponse(
@@ -221,6 +221,11 @@ store< MiniCart >(
 				);
 
 				return formatPriceWithCurrency( subtotal, normalizedCurrency );
+			},
+
+			// The subtotal comes from the server, so it's out of date until a cart update finishes.
+			get isCartUpdating(): boolean {
+				return !! woocommerceState.isCartUpdating;
 			},
 
 			get drawerRole() {
@@ -303,6 +308,13 @@ store< MiniCart >(
 				state.miniCartButtonRef?.focus();
 			},
 
+			// The checkout button is a link, so it can't be disabled natively.
+			preventCheckoutWhileUpdating: withSyncEvent( ( e: MouseEvent ) => {
+				if ( state.isCartUpdating ) {
+					e.preventDefault();
+				}
+			} ),
+
 			overlayCloseDrawer( e: MouseEvent ) {
 				// Only close the drawer if the overlay itself was clicked.
 				if ( e.target === e.currentTarget ) {
@@ -382,12 +394,20 @@ store< MiniCart >(
 							document.documentElement.clientWidth +
 							'px',
 					} );
+					if ( previousIsOpen === false ) {
+						dispatchCheckoutEvent( 'mini-cart-open' );
+					}
 				} else {
 					Object.assign( document.body.style, {
 						overflow: '',
 						paddingRight: 0,
 					} );
+					if ( previousIsOpen === true ) {
+						dispatchCheckoutEvent( 'mini-cart-close' );
+					}
 				}
+
+				previousIsOpen = state.isOpen;
 			},
 
 			focusFirstElement() {
@@ -417,14 +437,6 @@ function resolveDataItemAttr(): ItemData | undefined {
 	} >();
 
 	return itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
-}
-
-/**
- * Returns the raw API value for an item_data field. Used by both innerHTML
- * callbacks and the cartItemDataAttr getter.
- */
-function getItemDataRaw( field: 'name' | 'value' ): string {
-	return getEntryFieldRaw( resolveDataItemAttr(), field );
 }
 
 const { state: cartItemState } = store(
@@ -703,7 +715,7 @@ const { state: cartItemState } = store(
 
 				const totalLinePrice = displayCartPriceIncludingTax
 					? parseInt( totals.line_subtotal, 10 ) +
-					  parseInt( totals.line_subtotal_tax, 10 )
+						parseInt( totals.line_subtotal_tax, 10 )
 					: parseInt( totals.line_subtotal, 10 );
 
 				const price = formatPriceWithCurrency(
@@ -753,16 +765,18 @@ const { state: cartItemState } = store(
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				return ( window.wc as any )?.blocksCheckout?.applyCheckoutFilter
 					? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-					  ( window.wc as any ).blocksCheckout.applyCheckoutFilter( {
-							filterName: 'showRemoveItemLink',
-							defaultValue: true,
-							extensions: cartItemState.cartItem.extensions,
-							arg: {
-								context: 'cart',
-								cartItem: cartItemState.cartItem,
-								cart: woocommerceState.cart,
-							},
-					  } )
+						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
+							{
+								filterName: 'showRemoveItemLink',
+								defaultValue: true,
+								extensions: cartItemState.cartItem.extensions,
+								arg: {
+									context: 'cart',
+									cartItem: cartItemState.cartItem,
+									cart: woocommerceState.cart,
+								},
+							}
+						)
 					: true;
 			},
 
@@ -938,18 +952,22 @@ const { state: cartItemState } = store(
 
 			itemDataNameInnerHTML() {
 				const { ref } = getElement();
-				const raw = getItemDataRaw( 'name' );
-				if ( ref && raw ) {
-					ref.innerHTML = trimWords( raw + ':' );
-				}
+				renderEntryFieldHTML(
+					ref,
+					resolveDataItemAttr(),
+					'name',
+					trimWords
+				);
 			},
 
 			itemDataValueInnerHTML() {
 				const { ref } = getElement();
-				const raw = getItemDataRaw( 'value' );
-				if ( ref && raw ) {
-					ref.innerHTML = trimWords( raw );
-				}
+				renderEntryFieldHTML(
+					ref,
+					resolveDataItemAttr(),
+					'value',
+					trimWords
+				);
 			},
 
 			filterCartItemClass() {

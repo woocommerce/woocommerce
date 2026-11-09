@@ -318,6 +318,40 @@ class ControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox PUT keeps the fulfillment on its own order and ignores a different entity_id in the body.
+	 */
+	public function test_update_fulfillment_does_not_reparent_via_entity_id(): void {
+		wp_set_current_user( self::$admin_user_id );
+
+		$other_order = WC_Helper_Order::create_order( self::$customer_user_id );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				$this->get_test_fulfillment_data(
+					array( 'entity_id' => (string) $other_order->get_id() )
+				)
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), 'The update must succeed so the reparenting guard is actually exercised.' );
+
+		$reloaded = new Fulfillment( $this->test_fulfillment->get_id() );
+		$this->assertSame(
+			(string) $this->test_order->get_id(),
+			$reloaded->get_entity_id(),
+			'A PUT must not move the fulfillment to a different order via the request body.'
+		);
+		$this->assertSame(
+			WC_Order::class,
+			$reloaded->get_entity_type(),
+			'A PUT must not change the fulfillment entity type via the request body.'
+		);
+	}
+
+	/**
 	 * Test delete_fulfillment endpoint
 	 */
 	public function test_delete_fulfillment_success() {
@@ -493,6 +527,31 @@ class ControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The update endpoint schema does not expose the route-derived identity fields as writable.
+	 */
+	public function test_update_fulfillment_schema_excludes_identity_fields(): void {
+		wp_set_current_user( self::$admin_user_id );
+
+		$request  = new WP_REST_Request( 'OPTIONS', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertArrayHasKey( 'endpoints', $data );
+		$put_endpoint = array_filter(
+			$data['endpoints'],
+			function ( $endpoint ) {
+				return in_array( 'PUT', $endpoint['methods'], true );
+			}
+		);
+		$this->assertNotEmpty( $put_endpoint );
+		$put_endpoint = reset( $put_endpoint );
+		$this->assertArrayHasKey( 'args', $put_endpoint );
+		$this->assertArrayNotHasKey( 'entity_id', $put_endpoint['args'], 'A fulfillment cannot be reparented on edit, so entity_id must not be a writable update field.' );
+		$this->assertArrayNotHasKey( 'entity_type', $put_endpoint['args'], 'A fulfillment cannot be reparented on edit, so entity_type must not be a writable update field.' );
+		$this->assertArrayHasKey( 'status', $put_endpoint['args'], 'Mutable fields such as status must remain writable on edit.' );
+	}
+
+	/**
 	 * Test error response format
 	 */
 	public function test_error_response_format() {
@@ -576,5 +635,104 @@ class ControllerTest extends WC_Unit_Test_Case {
 			),
 			$overrides
 		);
+	}
+
+	/**
+	 * Create a second customer who owns a fresh order and fulfillment.
+	 *
+	 * @return array{user_id:int, order:WC_Order, fulfillment:Fulfillment}
+	 */
+	private function create_other_customer_with_fulfillment(): array {
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		$order   = WC_Helper_Order::create_order( $user_id );
+		$ff      = FulfillmentsHelper::create_fulfillment( array( 'entity_id' => $order->get_id() ) );
+
+		return array(
+			'user_id'     => $user_id,
+			'order'       => $order,
+			'fulfillment' => $ff,
+		);
+	}
+
+	/**
+	 * @testdox The item route checks the fulfillment's own order when an order_id is passed.
+	 */
+	public function test_item_route_checks_fulfillment_order_when_order_id_given(): void {
+		$other_customer = $this->create_other_customer_with_fulfillment();
+		wp_set_current_user( $other_customer['user_id'] );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
+		$request->set_query_params( array( 'order_id' => $other_customer['order']->get_id() ) );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 403, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_api_v4_fulfillments_cannot_view', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox The item route checks the fulfillment's own order when no order_id is passed.
+	 */
+	public function test_item_route_checks_fulfillment_order_without_order_id(): void {
+		$other_customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $other_customer_id );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 403, $response->get_status() );
+	}
+
+	/**
+	 * @testdox A customer can read the fulfillment on their own order.
+	 */
+	public function test_customer_can_read_own_fulfillment(): void {
+		wp_set_current_user( self::$customer_user_id );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $this->test_fulfillment->get_id(), $response->get_data()['id'] );
+	}
+
+	/**
+	 * @testdox The collection read checks the order_id order only.
+	 */
+	public function test_collection_read_ignores_fulfillment_id_param(): void {
+		$other_customer = $this->create_other_customer_with_fulfillment();
+		wp_set_current_user( $other_customer['user_id'] );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments' );
+		$request->set_query_params(
+			array(
+				'order_id'       => $this->test_order->get_id(),
+				'fulfillment_id' => $other_customer['fulfillment']->get_id(),
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 403, $response->get_status() );
+	}
+
+	/**
+	 * @testdox The item route returns the fulfillment named in the URL.
+	 */
+	public function test_item_route_uses_fulfillment_id_from_url(): void {
+		$other_customer = $this->create_other_customer_with_fulfillment();
+		wp_set_current_user( $other_customer['user_id'] );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $other_customer['fulfillment']->get_id() );
+		$request->set_query_params( array( 'fulfillment_id' => $this->test_fulfillment->get_id() ) );
+		$response = rest_get_server()->dispatch( $request );
+
+		$data = $response->get_data();
+		$this->assertNotEquals(
+			$this->test_fulfillment->get_id(),
+			$data['id'] ?? null,
+			'The item route should return the fulfillment from the URL, not the fulfillment_id query param.'
+		);
+		if ( 200 === $response->get_status() ) {
+			$this->assertEquals( $other_customer['fulfillment']->get_id(), $data['id'] );
+		}
 	}
 }

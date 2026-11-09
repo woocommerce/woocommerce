@@ -54,11 +54,8 @@
 				"@testing-library/*",
 				"@typescript-eslint/*",
 				"@wordpress/autop",
-				"@wordpress/prettier-config",
 				"@wordpress/private-apis",
-				"@wordpress/scripts",
 				"@wordpress/style-engine",
-				"@wordpress/stylelint-config",
 				"eslint*"
 			],
 			"packages": [
@@ -72,8 +69,7 @@
 				"@wordpress/core-data",
 				"@wordpress/data",
 				"@wordpress/editor",
-				"@wordpress/notices",
-				"@wordpress/postcss-plugins-preset"
+				"@wordpress/notices"
 			],
 			"packages": [
 				"@woocommerce/internal-build"
@@ -109,19 +105,48 @@
 			]
 		},
 		{
-			"label": "Direct Babel build tooling shared across workspace packages",
+			"label": "Shared build tooling",
 			"dependencyTypes": [
 				"prod",
 				"dev"
 			],
 			"dependencies": [
-				"@babel/core",
 				"@babel/cli",
+				"@babel/core",
 				"@babel/plugin-syntax-jsx",
 				"@babel/preset-env",
 				"@babel/preset-react",
 				"@babel/preset-typescript",
-				"@babel/runtime"
+				"@babel/runtime",
+				"@jest/globals",
+				"@types/jest",
+				"@wordpress/env",
+				"@wordpress/postcss-plugins-preset",
+				"@wordpress/prettier-config",
+				"@wordpress/scripts",
+				"babel-jest",
+				"babel-loader",
+				"babel-plugin-transform-react-remove-prop-types",
+				"copy-webpack-plugin",
+				"css-loader",
+				"eslint",
+				"jest",
+				"jest-circus",
+				"jest-cli",
+				"jest-environment-jsdom",
+				"jest-environment-node",
+				"jest-fixed-jsdom",
+				"mini-css-extract-plugin",
+				"postcss",
+				"postcss-loader",
+				"prettier",
+				"rimraf",
+				"sass-loader",
+				"simple-git",
+				"ts-jest",
+				"typescript",
+				"webpack",
+				"webpack-cli"
 			],
 			"packages": [
 				"**"
@@ -129,14 +154,17 @@
 			"policy": "catalog"
 		},
 		{
-			"label": "Babel dependencies: babel-plugin-transform-react-remove-prop-types - reduce build artifacts size",
-			"dependencies": [
-				"babel-plugin-transform-react-remove-prop-types"
+			"label": "Preserve public ESLint peer compatibility ranges",
+			"dependencyTypes": [
+				"peer"
 			],
-			"pinVersion": "0.4.24",
+			"dependencies": [
+				"eslint"
+			],
 			"packages": [
 				"**"
-			]
+			],
+			"isIgnored": true
 		},
 		{
 			"label": "React-related dependencies: React 18",
@@ -180,87 +208,6 @@
 		},
 		{
 			"dependencies": [
-				"typescript"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "5.7.x"
-		},
-		{
-			"dependencies": [
-				"jest-fixed-jsdom"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^0.0.10"
-		},
-		{
-			"label": "ESLint dev target. Peer deps are excluded so @woocommerce/eslint-plugin can peer the wider `^9 || ^10` range.",
-			"dependencyTypes": [
-				"prod",
-				"dev"
-			],
-			"dependencies": [
-				"eslint"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^10.0.0"
-		},
-		{
-			"dependencyTypes": [
-				"prod",
-				"dev"
-			],
-			"dependencies": [
-				"webpack"
-			],
-			"packages": [
-				"**"
-			],
-			"policy": "catalog"
-		},
-		{
-			"dependencies": [
-				"webpack-cli"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "5.1.x"
-		},
-		{
-			"dependencies": [
-				"webpack-dev-server"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "4.15.x"
-		},
-		{
-			"dependencies": [
-				"babel-loader"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "9.2.x"
-		},
-		{
-			"dependencies": [
-				"css-loader"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "6.11.x"
-		},
-		{
-			"dependencies": [
 				"ignore-loader"
 			],
 			"packages": [
@@ -288,15 +235,6 @@
 		},
 		{
 			"dependencies": [
-				"copy-webpack-plugin"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "13.0.x"
-		},
-		{
-			"dependencies": [
 				"progress-bar-webpack-plugin"
 			],
 			"packages": [
@@ -321,15 +259,6 @@
 				"**"
 			],
 			"pinVersion": "2.0.x"
-		},
-		{
-			"dependencies": [
-				"mini-css-extract-plugin"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "2.9.x"
 		},
 		{
 			"dependencies": [
@@ -378,7 +307,6 @@
 		},
 		{
 			"dependencies": [
-				"@wordpress/scripts",
 				"@wordpress/jest-console",
 				"@wordpress/e2e-test-utils"
 			],
@@ -409,30 +337,12 @@
 		},
 		{
 			"dependencies": [
-				"@wordpress/prettier-config"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "4.49.0"
-		},
-		{
-			"dependencies": [
 				"@wordpress/eslint-plugin"
 			],
 			"packages": [
 				"**"
 			],
 			"pinVersion": "25.6.0"
-		},
-		{
-			"dependencies": [
-				"@wordpress/env"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "11.9.0"
 		},
 		{
 			"label": "Ensure @woocommerce/* dependencies are locked to the monorepo itself - except certain dependencies (migration pending).",
@@ -466,7 +376,6 @@
 				"@wordpress/browserslist-config",
 				"@wordpress/dependency-extraction-webpack-plugin",
 				"@wordpress/jest-preset-default",
-				"@wordpress/postcss-plugins-preset",
 				"@wordpress/postcss-themes"
 			],
 			"packages": [
@@ -542,61 +451,12 @@
 		},
 		{
 			"dependencies": [
-				"postcss-loader"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "4.3.x"
-		},
-		{
-			"dependencyTypes": [
-				"prod",
-				"dev"
-			],
-			"dependencies": [
-				"postcss"
-			],
-			"packages": [
-				"**"
-			],
-			"policy": "catalog"
-		},
-		{
-			"dependencies": [
 				"rtlcss"
 			],
 			"packages": [
 				"**"
 			],
 			"pinVersion": "4.3.x"
-		},
-		{
-			"dependencies": [
-				"rimraf"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "5.0.5"
-		},
-		{
-			"dependencies": [
-				"sass-loader"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "10.5.x"
-		},
-		{
-			"dependencies": [
-				"simple-git"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "^3.21.0"
 		},
 		{
 			"dependencyTypes": [
@@ -619,53 +479,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^9.0.1"
-		},
-		{
-			"label": "Testing related dependencies: React 18",
-			"dependencies": [
-				"@jest/test-sequencer",
-				"@types/jest",
-				"jest",
-				"jest-cli",
-				"jest-circus",
-				"jest-each",
-				"jest-environment-jsdom",
-				"jest-environment-node",
-				"babel-jest"
-			],
-			"packages": [
-				"@woocommerce/block-library",
-				"@woocommerce/storybook"
-			],
-			"pinVersion": "29.5.x"
-		},
-		{
-			"label": "Testing related dependencies: React 17",
-			"dependencies": [
-				"@jest/test-sequencer",
-				"@types/jest",
-				"jest",
-				"jest-cli",
-				"jest-circus",
-				"jest-each",
-				"jest-environment-jsdom",
-				"jest-environment-node",
-				"babel-jest"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "29.5.x"
-		},
-		{
-			"dependencies": [
-				"ts-jest"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "29.1.x"
+			"pinVersion": "^11.1.1"
 		},
 		{
 			"dependencies": [
@@ -683,7 +497,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^3.2.6"
+			"pinVersion": "3.4.17"
 		},
 		{
 			"dependencies": [

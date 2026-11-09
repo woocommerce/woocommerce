@@ -324,7 +324,7 @@ class FulfillmentOrderNotes {
 	 */
 	private function format_tracking( Fulfillment $fulfillment ): string {
 		$tracking_number   = $fulfillment->get_tracking_number();
-		$shipping_provider = $fulfillment->get_shipment_provider();
+		$shipping_provider = FulfillmentUtils::get_provider_display_name( $fulfillment );
 		$tracking_url      = $fulfillment->get_tracking_url();
 
 		if ( null === $tracking_number ) {
@@ -333,7 +333,7 @@ class FulfillmentOrderNotes {
 
 		$parts = array( $tracking_number );
 
-		if ( null !== $shipping_provider ) {
+		if ( '' !== $shipping_provider ) {
 			$parts[] = sprintf(
 				/* translators: %s: shipping provider name */
 				__( 'Provider: %s', 'woocommerce' ),

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the product count up to date when browsing a shop page that was opened with sorting or filters in its URL.

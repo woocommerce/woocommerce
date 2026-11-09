@@ -129,6 +129,22 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
+	 * @testdox Request-derived URLs retain only shared allowlisted query parameters.
+	 */
+	public function test_server_details_retain_only_shared_allowlisted_query_parameters(): void {
+		$_SERVER['REQUEST_SCHEME'] = 'https';
+		$_SERVER['HTTP_HOST']      = 'example.com';
+		$_SERVER['REQUEST_URI']    = '/wp-json/wc/v3/products?utm_source=google&orderby=price&aff=partner&utm_campaign=spring&per_page=20';
+		$_SERVER['HTTP_REFERER']   = 'https://example.com/wp-admin/admin.php?page=wc-admin&utm_medium=referral#activity';
+
+		$details = WC_Analytics_Tracking::get_server_details();
+
+		$this->assertSame( 'https://example.com/wp-json/wc/v3/products?utm_source=google&aff=partner&utm_campaign=spring', $details['_dl'] );
+		$this->assertSame( 'https://example.com/wp-admin/admin.php?page=wc-admin&utm_medium=referral', $details['_dr'] );
+		$this->assertSame( 'https://example.com/wp-admin/admin.php?page=wc-admin&utm_medium=referral', $details['_via_ref'] );
+	}
+
+	/**
 	 * The strip removes reserved names and leaves everything else — including
 	 * arbitrary event-specific properties — untouched.
 	 */
@@ -694,9 +710,9 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Keep typical client payloads unchanged.
+	 * @testdox Keep typical client payloads while retaining only attribution parameters.
 	 */
-	public function test_a_realistic_client_payload_is_not_capped(): void {
+	public function test_a_realistic_client_payload_retains_only_attribution_parameters(): void {
 		$properties = array(
 			'pi'  => 731,
 			'pn'  => 'Some Reasonably Long Product Name With Words',
@@ -705,10 +721,13 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 			'pp'  => 115.81,
 			'_lg' => 'en-GB',
 			'_dl' => 'https://example.com/product/some-reasonably-long-product-slug/?utm_source=x',
-			'_dr' => 'https://example.com/shop/page/3/',
+			'_dr' => 'https://example.com/shop/page/3/?ref=email#products',
 		);
+		$expected        = $properties;
+		$expected['_dl'] = 'https://example.com/product/some-reasonably-long-product-slug/?utm_source=x';
+		$expected['_dr'] = 'https://example.com/shop/page/3/?ref=email';
 
-		$this->assertSame( $properties, WC_Analytics_Tracking::sanitize_client_properties( $properties ) );
+		$this->assertSame( $expected, WC_Analytics_Tracking::sanitize_client_properties( $properties ) );
 	}
 
 	/**
@@ -874,9 +893,9 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Trim long referrers without dropping the event.
+	 * @testdox Strip long referrer query strings without dropping the event.
 	 */
-	public function test_a_long_referer_costs_its_own_tail_not_the_event(): void {
+	public function test_a_long_referer_query_is_stripped_without_dropping_the_event(): void {
 		$_COOKIE['tk_ai']        = 'test-visitor-id-1234567890ab';
 		$_SERVER['HTTP_REFERER'] = 'https://example.com/?q=' . str_repeat( 'a', 5000 );
 		$this->reset_pixel_batch_queue();
@@ -888,22 +907,24 @@ class WC_Analytics_Tracking_Reserved_Props_Test extends BaseTestCase {
 		$props = $this->get_queued_pixel_props();
 
 		$this->assertSame( '42', $props['pi'] ?? null, 'The event payload must survive intact.' );
-		$this->assertStringEndsWith( '…', $props['_dr'] ?? '', 'The referer is what gets trimmed.' );
+		$this->assertSame( 'https://example.com/', $props['_dr'] ?? null );
+		$this->assertSame( 'https://example.com/', $props['_via_ref'] ?? null );
 
 		$this->reset_pixel_batch_queue();
 	}
 
 	/**
-	 * Preserve common ad-click landing URLs.
+	 * @testdox Preserve allowlisted parameters in common ad-click landing URLs.
 	 */
-	public function test_an_ad_click_landing_url_survives_untouched(): void {
-		$url = 'https://example.com/product-category/clothing/mens-shirts/?utm_source=google&utm_medium=cpc&utm_campaign=spring&gclid=Cj0KCQjw1viWBhD0ARIsAAM_oKnLQ8example1234567890abcdefghij&fbclid=IwAR2example1234567890abcdefghijklmnop';
+	public function test_an_ad_click_landing_url_preserves_allowlisted_parameters(): void {
+		$url      = 'https://example.com/product-category/clothing/mens-shirts/?utm_source=google&utm_medium=cpc&utm_campaign=spring&color=blue&gclid=Cj0KCQjw1viWBhD0ARIsAAM_oKnLQ8example1234567890abcdefghij&fbclid=IwAR2example1234567890abcdefghijklmnop';
+		$expected = 'https://example.com/product-category/clothing/mens-shirts/?utm_source=google&utm_medium=cpc&utm_campaign=spring&gclid=Cj0KCQjw1viWBhD0ARIsAAM_oKnLQ8example1234567890abcdefghij&fbclid=IwAR2example1234567890abcdefghijklmnop';
 
 		$this->assertGreaterThan( 200, mb_strlen( $url ), 'A fixture under the old cap would prove nothing.' );
 
 		$sanitized = WC_Analytics_Tracking::sanitize_client_properties( array( '_dl' => $url ) );
 
-		$this->assertSame( $url, $sanitized['_dl'] ?? null );
+		$this->assertSame( $expected, $sanitized['_dl'] ?? null );
 	}
 
 	/**

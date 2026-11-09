@@ -13,11 +13,11 @@
 	"dependencies": {
 		"@types/node": "^24.1.0",
 		"@tsconfig/node16": "^1.0.4",
-		"@wordpress/env": "11.9.0",
+		"@wordpress/env": "catalog:tooling",
 		"commander": "9.5.0",
 		"chalk": "^4.1.2",
 		"inquirer": "^7.1.0",
-		"simple-git": "^3.21.0",
+		"simple-git": "catalog:tooling",
 		"ts-node": "^10.9.2",
 		"tslib": "^2.6.2"
 	},

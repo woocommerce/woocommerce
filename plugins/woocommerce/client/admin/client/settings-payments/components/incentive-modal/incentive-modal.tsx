@@ -140,7 +140,7 @@ export const IncentiveModal = ( {
 			provider,
 			onboardingUrl,
 			provider.plugin.status === 'not_installed'
-				? provider._links?.attach?.href ?? null
+				? ( provider._links?.attach?.href ?? null )
 				: null,
 			'wc_settings_payments__incentive_modal'
 		);

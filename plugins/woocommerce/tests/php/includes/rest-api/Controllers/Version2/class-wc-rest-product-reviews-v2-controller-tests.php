@@ -1,5 +1,6 @@
 <?php
 
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 
 /**
@@ -84,6 +85,119 @@ class WC_REST_Product_Reviews_V2_Controller_Test extends WC_REST_Unit_Test_case 
 
 		$this->assertSame( 200, $zero_response->get_status() );
 		$this->assertSame( 3, (int) get_comment_meta( $review_id, 'rating', true ) );
+	}
+
+	/**
+	 * Review content that must be stored exactly as sent.
+	 *
+	 * @return array
+	 */
+	public function provide_review_content_with_slashes(): array {
+		return array(
+			'quotes'    => array( 'It\'s "great"' ),
+			'backslash' => array( 'Cable 1\\2 inch' ),
+			'mixed'     => array( 'It\'s a 1\\2" cable' ),
+		);
+	}
+
+	/**
+	 * @testdox The wc/v2 update route stores quotes and backslashes in review content as sent.
+	 * @dataProvider provide_review_content_with_slashes
+	 *
+	 * @param string $content Review content.
+	 */
+	public function test_wc_v2_update_item_stores_review_content_as_sent( string $content ): void {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+		$review_id  = $this->create_v2_review( $product_id );
+
+		$update = new WP_REST_Request( 'PUT', '/wc/v2/products/' . $product_id . '/reviews/' . $review_id );
+		$update->set_body_params( array( 'review' => $content ) );
+		$response = $this->server->dispatch( $update );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $content, get_comment( $review_id )->comment_content );
+	}
+
+	/**
+	 * @testdox The wc/v2 batch route stores quotes and backslashes in updated review content as sent.
+	 * @dataProvider provide_review_content_with_slashes
+	 *
+	 * @param string $content Review content.
+	 */
+	public function test_wc_v2_batch_update_stores_review_content_as_sent( string $content ): void {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+		$review_id  = $this->create_v2_review( $product_id );
+
+		$batch = new WP_REST_Request( 'POST', '/wc/v2/products/' . $product_id . '/reviews/batch' );
+		$batch->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'     => $review_id,
+						'review' => $content,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $batch );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $content, get_comment( $review_id )->comment_content );
+	}
+
+	/**
+	 * Create a review through the wc/v2 route.
+	 *
+	 * @param int $product_id Product ID.
+	 * @return int Review ID.
+	 */
+	private function create_v2_review( int $product_id ): int {
+		$create = new WP_REST_Request( 'POST', '/wc/v2/products/' . $product_id . '/reviews' );
+		$create->set_body_params(
+			array(
+				'review' => 'First draft.',
+				'name'   => 'Jane Smith',
+				'email'  => 'jane.smith@example.org',
+				'rating' => 5,
+			)
+		);
+		$created = $this->server->dispatch( $create );
+
+		$this->assertSame( 201, $created->get_status() );
+
+		return (int) $created->get_data()['id'];
+	}
+
+	/**
+	 * @testdox Creating a review eagerly populates the verified-owner meta at creation time, not lazily during response preparation.
+	 */
+	public function test_create_item_populates_verified_meta(): void {
+		$product = ProductHelper::create_simple_product();
+		$order   = OrderHelper::create_order( 0, $product );
+		$order->set_billing_email( 'jane.smith@example.org' );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		// Stub prepare_item_for_response so it cannot backfill the meta as a side effect.
+		$sut = new class() extends WC_REST_Product_Reviews_V2_Controller {
+			public function prepare_item_for_response( $review, $request ) { // phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+				return rest_ensure_response( array( 'id' => (int) $review->comment_ID ) );
+			}
+		};
+
+		$request = new WP_REST_Request( 'POST', '/wc/v2/products/' . $product->get_id() . '/reviews' );
+		$request->set_param( 'product_id', $product->get_id() );
+		$request->set_param( 'review', 'Great product, would buy again.' );
+		$request->set_param( 'name', 'Jane Smith' );
+		$request->set_param( 'email', 'jane.smith@example.org' );
+		$request->set_param( 'rating', 5 );
+
+		$response = $sut->create_item( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assertSame( '1', get_comment_meta( $response->get_data()['id'], 'verified', true ), 'The verified meta must be populated eagerly at creation time.' );
 	}
 
 	/**

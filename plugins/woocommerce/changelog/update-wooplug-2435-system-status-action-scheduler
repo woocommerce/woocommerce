@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Show which Action Scheduler copy is running, where it is loaded from, and a warning when it lacks features WooCommerce needs, in the System Status Report and REST API.

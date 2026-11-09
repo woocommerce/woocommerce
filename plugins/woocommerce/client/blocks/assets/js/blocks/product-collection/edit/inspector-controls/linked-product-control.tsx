@@ -235,11 +235,11 @@ const LinkedProductControl = ( {
 			? __(
 					'Linked products will be pulled from the product a shopper is currently viewing',
 					'woocommerce'
-			  )
+				)
 			: __(
 					'Select a product to pull the linked products from',
 					'woocommerce'
-			  );
+				);
 
 	const handleRadioControlChange = ( newValue: string ) => {
 		if ( ! isProductReferenceType( newValue ) ) {
@@ -262,7 +262,7 @@ const LinkedProductControl = ( {
 					? {
 							...restQuery,
 							productReference: prevReference.current,
-					  }
+						}
 					: restQuery,
 			} );
 		}

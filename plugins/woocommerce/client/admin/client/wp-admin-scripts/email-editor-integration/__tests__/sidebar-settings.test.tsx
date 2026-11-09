@@ -98,8 +98,8 @@ import { modifySidebar } from '../sidebar_settings';
 
 const defaultWooCommerceData: WooCommerceData = {
 	recipient: 'merchant@example.com',
-	cc: null,
-	bcc: null,
+	cc: '',
+	bcc: '',
 	preheader: 'Order update preview',
 	email_type: 'new_order',
 	subject: 'New order',
@@ -108,6 +108,7 @@ const defaultWooCommerceData: WooCommerceData = {
 	default_subject: 'Default subject',
 	is_manual: false,
 	enabled: true,
+	send_on_unpaid_timeout: null,
 };
 
 const RichTextWithButton = ( {
@@ -314,14 +315,14 @@ describe( 'Email editor sidebar settings', () => {
 		mockEntityState.woocommerceData = {
 			...defaultWooCommerceData,
 			recipient: null,
-			cc: null,
-			bcc: null,
+			cc: '',
+			bcc: '',
 		};
 		mockEntityState.editedWooCommerceData = {
 			...defaultWooCommerceData,
 			recipient: null,
-			cc: null,
-			bcc: null,
+			cc: '',
+			bcc: '',
 			unrelated_setting: 'preserved',
 		};
 		const { rerender, SidebarSettings, EmailStatus } = renderSettings( {
@@ -423,5 +424,84 @@ describe( 'Email editor sidebar settings', () => {
 		expect(
 			screen.getByDisplayValue( 'team@example.com' )
 		).toBeInTheDocument();
+	} );
+
+	describe( 'automatic cancellations toggle', () => {
+		const toggleName =
+			'Send this email when an unpaid order is cancelled automatically';
+
+		const setSendOnUnpaidTimeout = ( value: boolean ) => {
+			mockEntityState.woocommerceData = {
+				...defaultWooCommerceData,
+				send_on_unpaid_timeout: value,
+			};
+			mockEntityState.editedWooCommerceData = {
+				...defaultWooCommerceData,
+				send_on_unpaid_timeout: value,
+				unrelated_setting: 'preserved',
+			};
+		};
+
+		it( 'shows the automatic cancellations toggle checked when the email supports it', () => {
+			setSendOnUnpaidTimeout( true );
+			renderSettings();
+
+			expect(
+				screen.getByRole( 'checkbox', { name: toggleName } )
+			).toBeChecked();
+			expect(
+				screen.getByText(
+					'Unpaid orders are cancelled automatically when the “Hold stock (minutes)” limit in Settings › Products › Inventory is reached.'
+				)
+			).toBeInTheDocument();
+		} );
+
+		it( 'saves the toggle as a boolean and keeps other settings', async () => {
+			setSendOnUnpaidTimeout( true );
+			renderSettings();
+			const initialEditedWooCommerceData = {
+				...mockEntityState.editedWooCommerceData,
+			};
+
+			await userEvent.click(
+				screen.getByRole( 'checkbox', { name: toggleName } )
+			);
+
+			expect( mockEditEntityRecord ).toHaveBeenLastCalledWith(
+				'postType',
+				'woo_email',
+				'42',
+				{
+					woocommerce_data: {
+						...initialEditedWooCommerceData,
+						send_on_unpaid_timeout: false,
+					},
+				}
+			);
+			expect(
+				screen.getByRole( 'checkbox', { name: toggleName } )
+			).not.toBeChecked();
+		} );
+
+		it.each( [
+			[ 'null', null ],
+			[ 'missing', undefined ],
+		] )(
+			'hides the toggle when the email has no such setting (%s)',
+			( _label, value ) => {
+				const data: WooCommerceData = { ...defaultWooCommerceData };
+				if ( value === undefined ) {
+					delete data.send_on_unpaid_timeout;
+				} else {
+					data.send_on_unpaid_timeout = value;
+				}
+				mockEntityState.woocommerceData = data;
+				renderSettings();
+
+				expect(
+					screen.queryByRole( 'checkbox', { name: /unpaid order/ } )
+				).toBeNull();
+			}
+		);
 	} );
 } );

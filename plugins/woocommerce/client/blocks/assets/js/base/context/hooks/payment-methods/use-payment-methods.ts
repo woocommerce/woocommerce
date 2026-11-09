@@ -94,7 +94,7 @@ const usePaymentMethodState = (
 };
 
 export const usePaymentMethods = ():
-	| PaymentMethodState
-	| ExpressPaymentMethodState => usePaymentMethodState( false );
+	PaymentMethodState | ExpressPaymentMethodState =>
+	usePaymentMethodState( false );
 export const useExpressPaymentMethods = (): ExpressPaymentMethodState =>
 	usePaymentMethodState( true );

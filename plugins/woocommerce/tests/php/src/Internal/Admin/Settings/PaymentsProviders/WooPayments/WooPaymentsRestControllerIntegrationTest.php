@@ -1242,6 +1242,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		$this->mock_wpcom_connection_manager
 			->expects( $this->once() )
 			->method( 'try_registration' )
+			->with( true, false )
 			->willReturn( true );
 
 		// Act.
@@ -1255,6 +1256,224 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 		$data = $response->get_data();
 		$this->assertArrayHasKey( 'success', $data );
 		$this->assertTrue( $data['success'] );
+	}
+
+	/**
+	 * Test that the WPCOM connection authorize action registers the store and returns the authorization URL.
+	 */
+	public function test_handle_onboarding_wpcom_connection_authorize() {
+		// Arrange.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->atLeastOnce() )
+			->method( 'is_connected' )
+			->willReturn( false );
+		// The merchant clicked to connect, so the attempt must not be held back by an earlier failure.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->once() )
+			->method( 'try_registration' )
+			->with( true, true )
+			->willReturn( true );
+
+		// Act.
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$request->set_param( 'source', 'test_source' );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertTrue( $data['success'] );
+		$this->assertSame( 'https://wordpress.com/auth?query=some_query', $data['url'] );
+	}
+
+	/**
+	 * @testdox Rejects authorization without registering the store while onboarding is locked.
+	 */
+	public function test_handle_onboarding_wpcom_connection_authorize_when_locked(): void {
+		update_option( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY, $this->current_time );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->never() )
+			->method( 'try_registration' );
+
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( \WP_Http::CONFLICT, $response->get_status() );
+		$this->assertSame( 'woocommerce_woopayments_onboarding_locked', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Preserves valid sources and defaults missing or unknown authorization sources.
+	 * @testWith [null, "settings_payments"]
+	 *           ["", "settings_payments"]
+	 *           ["unknown", "settings_payments"]
+	 *           ["settings_payments", "settings_payments"]
+	 *           ["lys", "lys"]
+	 *
+	 * @param string|null $source The requested onboarding source.
+	 * @param string      $expected_source The source included in the return URL.
+	 */
+	public function test_handle_onboarding_wpcom_connection_authorize_source( ?string $source, string $expected_source ): void {
+		$this->mock_wpcom_connection_manager->method( 'is_connected' )->willReturn( true );
+		$this->mock_wpcom_connection_manager->expects( $this->never() )->method( 'try_registration' );
+
+		$return_url = '';
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'get_wpcom_connection_authorization' => function ( string $url ) use ( &$return_url ) {
+						$return_url = $url;
+						return array(
+							'success' => true,
+							'url'     => 'https://wordpress.com/auth',
+						);
+					},
+				),
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		if ( null !== $source ) {
+			$request->set_param( 'source', $source );
+		}
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( \WP_Http::OK, $response->get_status() );
+		wp_parse_str( (string) wp_parse_url( $return_url, PHP_URL_QUERY ), $query );
+		$this->assertSame( $expected_source, $query['source'] ?? null );
+	}
+
+	/**
+	 * Test that the WPCOM connection authorize action reports a failed registration.
+	 */
+	public function test_handle_onboarding_wpcom_connection_authorize_registration_error() {
+		// Arrange.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->atLeastOnce() )
+			->method( 'is_connected' )
+			->willReturn( false );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->once() )
+			->method( 'try_registration' )
+			->willReturn( new \WP_Error( 'siteurl_private_ip', 'The site URL is a private IP address.' ) );
+
+		// Act.
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( \WP_Http::INTERNAL_SERVER_ERROR, $response->get_status() );
+		$this->assertSame( 'The site URL is a private IP address.', $response->get_data()['message'] );
+	}
+
+	/**
+	 * @testdox Rejects authorization without registering the store when WooPayments is outdated.
+	 */
+	public function test_handle_onboarding_wpcom_connection_authorize_when_extension_outdated(): void {
+		Constants::set_constant( 'WCPAY_VERSION_NUMBER', '1.0.0' );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->never() )
+			->method( 'try_registration' );
+
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( \WP_Http::FORBIDDEN, $response->get_status() );
+		$this->assertSame( 'woocommerce_woopayments_onboarding_extension_version', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Reports a failure without generating the authorization URL when registration returns false.
+	 */
+	public function test_handle_onboarding_wpcom_connection_authorize_registration_returns_false(): void {
+		$this->mock_wpcom_connection_manager->method( 'is_connected' )->willReturn( false );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->once() )
+			->method( 'try_registration' )
+			->willReturn( false );
+		$authorization_requested = false;
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'get_wpcom_connection_authorization' => function () use ( &$authorization_requested ) {
+						$authorization_requested = true;
+						return array(
+							'success' => true,
+							'url'     => 'https://wordpress.com/auth',
+						);
+					},
+				),
+			)
+		);
+
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( \WP_Http::INTERNAL_SERVER_ERROR, $response->get_status() );
+		$this->assertSame( 'Failed to register the store with WordPress.com.', $response->get_data()['message'] );
+		$this->assertFalse( $authorization_requested, 'The authorization URL should not be generated for an unregistered store' );
+	}
+
+	/**
+	 * @testdox Reports the first authorization error, or a fallback message, when the authorization URL cannot be generated.
+	 * @testWith [{"success": false, "errors": ["Jetpack is in offline mode."]}, "Jetpack is in offline mode."]
+	 *           [{"success": true, "url": ""}, "Failed to generate the WordPress.com authorization URL."]
+	 *
+	 * @param array  $authorization    The result of generating the authorization URL.
+	 * @param string $expected_message The expected error message.
+	 */
+	public function test_handle_onboarding_wpcom_connection_authorize_authorization_error( array $authorization, string $expected_message ): void {
+		$this->mock_wpcom_connection_manager->method( 'is_connected' )->willReturn( true );
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'get_wpcom_connection_authorization' => function () use ( $authorization ) {
+						return $authorization;
+					},
+				),
+			)
+		);
+
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( \WP_Http::INTERNAL_SERVER_ERROR, $response->get_status() );
+		$this->assertSame( 'woocommerce_woopayments_onboarding_action_error', $response->get_data()['code'] );
+		$this->assertSame( $expected_message, $response->get_data()['message'] );
+	}
+
+	/**
+	 * @testdox Returns the original registration error code and data without changing the HTTP error status.
+	 * @testWith ["siteurl_private_ip"]
+	 *           ["wpcom_5??"]
+	 *
+	 * @param string $registration_error_code The Jetpack registration error code.
+	 */
+	public function test_handle_onboarding_wpcom_connection_authorize_registration_error_code( string $registration_error_code ): void {
+		$this->mock_wpcom_connection_manager->method( 'is_connected' )->willReturn( false );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->once() )
+			->method( 'try_registration' )
+			->willReturn(
+				new \WP_Error(
+					$registration_error_code,
+					'Registration failed.',
+					array(
+						'detail' => 'Diagnostic data',
+						'status' => 400,
+					)
+				)
+			);
+
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( \WP_Http::INTERNAL_SERVER_ERROR, $response->get_status() );
+		$this->assertSame( 'woocommerce_woopayments_onboarding_action_error', $data['code'] );
+		$this->assertSame( $registration_error_code, $data['data']['registration_error_code'] ?? null );
+		$this->assertSame( 'Diagnostic data', $data['data']['detail'] ?? null );
 	}
 
 	/**

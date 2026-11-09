@@ -109,7 +109,7 @@ export function buildChartData(
 						'YYYY-MM-DD'
 					),
 					secondaryInterval,
-			  ] )
+				] )
 			: []
 	);
 
@@ -177,7 +177,7 @@ export function buildChartData(
 				dayAfter.month() === 1 && dayAfter.date() === 29
 					? secondaryIntervalsByDate.get(
 							dayAfter.format( 'YYYY-MM-DD' )
-					  )
+						)
 					: undefined;
 			if ( leapDayInterval ) {
 				secondaryValue +=

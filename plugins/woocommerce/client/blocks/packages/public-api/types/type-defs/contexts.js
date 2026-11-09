@@ -150,7 +150,6 @@
  * @property {number}  id      Error ID.
  * @property {string}  message Error message.
  * @property {boolean} hidden  Error visibility.
- *
  */
 
 /**

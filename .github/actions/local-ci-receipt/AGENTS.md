@@ -1,7 +1,7 @@
 # Live test runbook
 
 Run this for any change to `receipt.js`, `action.yml`, the `ci.yml` receipt
-step or its `if:` guards, or `.github/local-ci.json`. It is the action's only
+step, its `if:` guards or the comparison step, or `.github/local-ci.json`. It is the action's only
 test: it proves the consumer end to end in real CI without touching trunk.
 Budget: ~30 minutes, mostly waiting. Everything created here is deleted at
 the end.
@@ -75,36 +75,6 @@ on `FEATURE`, cherry-pick onto **both** scratch branches (the head config must
 stay byte-identical to the base config), run `gh local-ci run --push` on the
 child again (new head → new receipts), and re-check.
 
-## 4b. PHP cells (opt-in)
-
-PHP unit cells are `unit:php` jobs for `@woocommerce/plugin-woocommerce`;
-the rule in `.github/local-ci.json` is opt-in and hands each cell to
-`bin/test-php-ci.sh`. On the child:
-
-```sh
-printf '\n// live receipt test marker\n' >> plugins/woocommerce/tests/php/includes/wc-core-functions-test.php
-git commit -am "Touch a core PHP test for the live receipt test" --no-verify
-gh local-ci plan --include=unit:php   # the 4 core cells with `bash bin/test-php-ci.sh --cell …` commands, plus the JavaScript jobs from §2
-gh local-ci run --include=unit:php --push
-```
-
-Cells run one after another (about 25 min; the first run builds a wp-env
-instance per cell, on ports 92xx, in the tool's worktree). Then, for each
-`PHP: … [unit:php]` job on the PR run: conclusion `success`, about 10 s,
-with `Install Monorepo`, both `Start Test Environment` steps and
-`Run tests (unit:php)` skipped, and the `substituted=true` line in the log.
-Check the step conclusions, not just the log line; a dropped guard on the
-`increase max-download-attempts` step leaves the job green but slower:
-
-```sh
-gh api repos/woocommerce/woocommerce/actions/jobs/<job id> --jq '.steps[] | "\(.conclusion)\t\(.name)"'
-```
-
-A cell that failed locally gets a failure receipt and the job runs in full
-with `reason=newest receipt … is not a success` in the log.
-Stop any cells you started yourself with `pnpm test:php:ci` first; they share
-Docker memory with the worktree's.
-
 ## 5. Kill switch
 
 Set the repository variable to `1`, then trigger a **new** run (a re-run
@@ -130,7 +100,36 @@ change), commit, push. Expected on every JavaScript job:
 `substituted=false reason=.github/local-ci.json differs between the pull
 request and the base branch; config changes always get full CI`.
 
-## 7. Record and clean up
+## 7. Parity
+
+On both scratch branches, set `"sampleRate": 100` on the JavaScript unit
+rule (the head config must stay byte-identical to the base), commit and
+push the base, then run `gh local-ci run --push` on the child.
+
+- **Agree.** Every JavaScript unit job runs in full and logs
+  `substituted=false reason=parity sample: bucket N < sampleRate 100; …`.
+  The step `Compare with the local CI receipt` adds a
+  `local-ci-parity result=agree` notice and a job summary section.
+- **Local pass, CI fail.** On the child, add a throwaway test to
+  `packages/js/number` that expects `process.platform` to be `'darwin'`.
+  Run `gh local-ci run --push` natively on macOS (not `--docker`). Expected
+  on `@woocommerce/number`: an error annotation
+  `local-ci-parity result=mismatch local=success ci=failure`, the job red,
+  and the summary linking the receipt.
+- **Failed receipt.** Change the expectation to `'linux'` and run
+  `gh local-ci run`; the receipt fails. Push with `git push --no-verify`.
+  Expected: a warning annotation
+  `local-ci-parity result=mismatch local=failure ci=success kind=failed-receipt`.
+- **Inconclusive.** Re-run the job and cancel the run while `Run tests`
+  is going. Expected: `local-ci-parity result=inconclusive ci=cancelled`.
+- **Determinism.** Re-run one sampled job. Its bucket is unchanged and
+  matches the one-liner in README.md.
+- **Rate 0.** Set `"sampleRate": 0` on both branches and run again. Jobs
+  are substituted as in step 4, and the comparison step is skipped.
+
+Remove the throwaway test before cleaning up.
+
+## 8. Record and clean up
 
 Add a row per run to the evidence document in the tool repository
 (`docs/evidence-<date>.md`): run URL, what was set, the decision line, the

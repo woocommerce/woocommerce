@@ -11,9 +11,11 @@ import { Edit, Save } from './edit';
 import metadata from './block.json';
 import './style.scss';
 
-registerBlockType( 'woocommerce/checkout-terms-block', {
-	apiVersion: metadata.apiVersion,
-	title: metadata.title,
+/**
+ * Hidden from the inserter: new checkouts use the Terms and Conditions settings on the Actions block. Existing checkouts keep this
+ * block, and its settings offer a switch to the Actions block terms.
+ */
+registerBlockType( metadata, {
 	icon: {
 		src: (
 			<Icon
