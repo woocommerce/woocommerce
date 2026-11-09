@@ -10,8 +10,13 @@ h2.has-background,
 h3.has-background,
 h4.has-background,
 h5.has-background,
-h6.has-background {
+h6.has-background,
+pre.has-background {
 	padding: 16px 24px;
+}
+
+pre {
+	font-family: 'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace;
 }
 
 /* Specific padding for list elements */
