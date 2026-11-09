@@ -98,10 +98,18 @@ class EmailVerificationService {
 			return;
 		}
 
-		$account_email  = $this->get_account_email( $user_id );
-		$expected_email = null !== $expected_email ? strtolower( $expected_email ) : null;
+		if ( null === $expected_email ) {
+			wc_get_logger()->debug(
+				'EmailVerificationService::mark_verified() skipped verification because no expected email was provided. Callers must pass the email address proven by their verification flow as the second argument.',
+				array( 'source' => 'customer-email-verification' )
+			);
+			return;
+		}
 
-		if ( null === $expected_email || null === $account_email || $expected_email !== $account_email ) {
+		$account_email  = $this->get_account_email( $user_id );
+		$expected_email = strtolower( $expected_email );
+
+		if ( null === $account_email || $expected_email !== $account_email ) {
 			return;
 		}
 
