@@ -99,9 +99,10 @@ class EmailVerificationService {
 		}
 
 		if ( null === $expected_email ) {
-			wc_get_logger()->debug(
-				'EmailVerificationService::mark_verified() skipped verification because no expected email was provided. Callers must pass the email address proven by their verification flow as the second argument.',
-				array( 'source' => 'customer-email-verification' )
+			_doing_it_wrong(
+				__METHOD__,
+				'Verification was skipped because no expected email was provided. Pass the email address proven by the verification flow as the second argument.',
+				'11.3.0'
 			);
 			return;
 		}
