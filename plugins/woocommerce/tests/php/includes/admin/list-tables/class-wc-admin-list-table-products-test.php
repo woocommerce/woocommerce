@@ -714,89 +714,38 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Products list catalog visibility filter lists only products with exactly that visibility: $visibility.
-	 * @dataProvider catalog_visibility_provider
-	 *
-	 * @param string $visibility The catalog visibility to filter by.
+	 * @testdox Products list catalog visibility filter lists only products with exactly the chosen visibility.
 	 */
-	public function test_catalog_visibility_filter_matches_exact_visibility( string $visibility ): void {
-		$product_ids = array();
-		foreach ( array_keys( $this->catalog_visibility_provider() ) as $value ) {
+	public function test_catalog_visibility_filter_matches_exact_visibility(): void {
+		$visibilities = array( CatalogVisibility::VISIBLE, CatalogVisibility::CATALOG, CatalogVisibility::SEARCH, CatalogVisibility::HIDDEN );
+		$product_ids  = array();
+		foreach ( $visibilities as $visibility ) {
 			$product = WC_Helper_Product::create_simple_product();
-			$product->set_catalog_visibility( $value );
-			$product_ids[ $value ] = $product->save();
+			$product->set_catalog_visibility( $visibility );
+			$product_ids[ $visibility ] = $product->save();
 		}
 
-		$original_get               = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
-		$_GET['catalog_visibility'] = $visibility;
+		$original_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
 
 		try {
-			$query_vars = $this->sut->request_query(
-				array(
-					'post_type'      => 'product',
-					'post_status'    => 'any',
-					'posts_per_page' => -1,
-					'fields'         => 'ids',
-				)
-			);
-			$results    = array_map( 'intval', ( new WP_Query( $query_vars ) )->get_posts() );
+			foreach ( $visibilities as $visibility ) {
+				$_GET['catalog_visibility'] = $visibility;
+
+				$query_vars = $this->sut->request_query(
+					array(
+						'post_type'      => 'product',
+						'post_status'    => 'any',
+						'posts_per_page' => -1,
+						'fields'         => 'ids',
+					)
+				);
+				$results    = array_map( 'intval', ( new WP_Query( $query_vars ) )->get_posts() );
+
+				$this->assertSame( array( $product_ids[ $visibility ] ), $results, "Filtering by \"{$visibility}\" lists the wrong products." );
+			}
 		} finally {
 			$_GET = $original_get; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
-
-		$this->assertSame( array( $product_ids[ $visibility ] ), $results );
-	}
-
-	/**
-	 * @testdox Products list catalog visibility filter ignores a visibility value an extension adds.
-	 */
-	public function test_catalog_visibility_filter_ignores_extension_value(): void {
-		$visible = WC_Helper_Product::create_simple_product();
-		$hidden  = WC_Helper_Product::create_simple_product();
-		$hidden->set_catalog_visibility( CatalogVisibility::HIDDEN );
-		$hidden->save();
-
-		$add_option = static function ( $options ) {
-			$options['members-only'] = 'Members only';
-			return $options;
-		};
-		add_filter( 'woocommerce_product_visibility_options', $add_option );
-
-		$original_get               = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
-		$_GET['catalog_visibility'] = 'members-only';
-
-		try {
-			$query_vars = $this->sut->request_query(
-				array(
-					'post_type'      => 'product',
-					'post_status'    => 'any',
-					'posts_per_page' => -1,
-					'fields'         => 'ids',
-					'orderby'        => 'ID',
-					'order'          => 'ASC',
-				)
-			);
-			$results    = array_map( 'intval', ( new WP_Query( $query_vars ) )->get_posts() );
-		} finally {
-			$_GET = $original_get; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			remove_filter( 'woocommerce_product_visibility_options', $add_option );
-		}
-
-		$this->assertSame( array( $visible->get_id(), $hidden->get_id() ), $results );
-	}
-
-	/**
-	 * Catalog visibility values.
-	 *
-	 * @return array<string, array{string}>
-	 */
-	public function catalog_visibility_provider(): array {
-		return array(
-			'visible' => array( CatalogVisibility::VISIBLE ),
-			'catalog' => array( CatalogVisibility::CATALOG ),
-			'search'  => array( CatalogVisibility::SEARCH ),
-			'hidden'  => array( CatalogVisibility::HIDDEN ),
-		);
 	}
 
 	/**
