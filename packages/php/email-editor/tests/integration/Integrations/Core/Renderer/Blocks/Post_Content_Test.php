@@ -262,4 +262,57 @@ class Post_Content_Test extends \Email_Editor_Integration_Test_Case {
 		wp_delete_post( $post_id, true );
 		wp_delete_post( $original_post_id, true );
 	}
+
+	/**
+	 * Test that WordPress adds no web-only image attributes to post content while an email renders.
+	 */
+	public function testItAddsNoWebOnlyImageAttributesDuringEmailRender(): void {
+		$attachment_id = self::factory()->attachment->create_object(
+			array(
+				'file'           => '2026/11/image.jpg',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$this->assertIsInt( $attachment_id );
+		wp_update_attachment_metadata(
+			$attachment_id,
+			array(
+				'width'  => 1200,
+				'height' => 600,
+				'file'   => '2026/11/image.jpg',
+				'sizes'  => array(
+					'medium' => array(
+						'file'      => 'image-300x150.jpg',
+						'width'     => 300,
+						'height'    => 150,
+						'mime-type' => 'image/jpeg',
+					),
+				),
+			)
+		);
+		$image_url = (string) wp_get_attachment_url( $attachment_id );
+		$image     = sprintf( '<p><img class="wp-image-%d" src="%s" width="1200" height="600" alt=""></p>', $attachment_id, $image_url );
+		$post_id   = self::factory()->post->create( array( 'post_content' => str_repeat( $image, 4 ) ) );
+		$block     = new \WP_Block(
+			array(
+				'blockName' => 'core/post-content',
+				'attrs'     => array(),
+			),
+			array( 'postId' => $post_id )
+		);
+
+		do_action( 'woocommerce_email_editor_render_start' );
+		$rendered = ( new Post_Content() )->render_stateless( array(), '', $block );
+		do_action( 'woocommerce_email_editor_render_end' );
+
+		$this->assertSame( 4, substr_count( $rendered, '<img' ) );
+		$this->assertStringNotContainsString( 'loading=', $rendered );
+		$this->assertStringNotContainsString( 'decoding=', $rendered );
+		$this->assertStringNotContainsString( 'srcset=', $rendered );
+		$this->assertStringNotContainsString( 'sizes=', $rendered );
+
+		$after_render = wp_filter_content_tags( sprintf( '<img class="wp-image-%d" src="%s" width="1200" height="600" alt="">', $attachment_id, $image_url ) );
+		$this->assertStringContainsString( 'srcset=', $after_render, 'Web pages rendered after the email keep responsive images.' );
+		$this->assertStringContainsString( 'decoding=', $after_render, 'Web pages rendered after the email keep loading attributes.' );
+	}
 }

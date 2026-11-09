@@ -106,6 +106,8 @@ class Initializer {
 		add_filter( 'woocommerce_email_editor_theme_json', array( $this, 'adjust_theme_json' ), 10, 1 );
 		add_filter( 'safe_style_css', array( $this, 'allow_styles' ) );
 		add_action( 'woocommerce_email_editor_render_start', array( $this, 'reset_renderers' ) );
+		add_action( 'woocommerce_email_editor_render_start', array( $this, 'disable_web_image_attributes' ) );
+		add_action( 'woocommerce_email_editor_render_end', array( $this, 'restore_web_image_attributes' ) );
 	}
 
 	/**
@@ -113,6 +115,25 @@ class Initializer {
 	 */
 	public function reset_renderers(): void {
 		$this->renderers = array();
+	}
+
+	/**
+	 * Stop WordPress from adding loading, decoding, srcset and sizes to images in the email.
+	 *
+	 * Apple Mail never loads images marked loading="lazy". The late priority makes this win over
+	 * other callbacks and keeps the removal from touching a callback another plugin added.
+	 */
+	public function disable_web_image_attributes(): void {
+		add_filter( 'wp_get_loading_optimization_attributes', '__return_empty_array', PHP_INT_MAX );
+		add_filter( 'wp_img_tag_add_srcset_and_sizes_attr', '__return_false', PHP_INT_MAX );
+	}
+
+	/**
+	 * Let WordPress add its image attributes again once the email has rendered.
+	 */
+	public function restore_web_image_attributes(): void {
+		remove_filter( 'wp_get_loading_optimization_attributes', '__return_empty_array', PHP_INT_MAX );
+		remove_filter( 'wp_img_tag_add_srcset_and_sizes_attr', '__return_false', PHP_INT_MAX );
 	}
 
 	/**
