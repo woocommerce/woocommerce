@@ -196,7 +196,7 @@ export type MyCustomSelectors = CrudSelectors<
 
 
 // index.ts
-import { Reducer } from 'redux';
+import type { AnyAction } from '../crud/types';
 import { createCrudDataStore } from '../crud';
 import { ResourceState } from '../crud/reducer';
 import * as actions from './actions';
@@ -210,7 +210,7 @@ export const store = createCrudDataStore<MyCustomActions, MyCustomSelectors>({
     pluralResourceName: 'MyCustomResources',
     namespace: '/my/rest/namespace',
     storeConfig: {
-        reducer: reducer as Reducer<ResourceState>,
+        reducer: reducer as (state: ResourceState | undefined, action: AnyAction) => ResourceState,
         actions: actions as MyCustomActions,
         selectors: selectors as MyCustomSelectors,
     },
