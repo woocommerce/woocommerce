@@ -227,13 +227,11 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @since 11.1.0
 	 */
 	public function tearDown(): void {
-		// These only put back saved values and don't throw, so they run first, ahead of the
-		// cleanup that can.
-		$this->restore_server_superglobal();
-		$this->restore_constant_overrides();
-		$this->restore_block_type_registry();
-
 		try {
+			$this->restore_server_superglobal();
+			$this->restore_constant_overrides();
+			$this->restore_block_type_registry();
+
 			// Function and static-method mocks are process-wide. Reset them here so the test
 			// that installs one is the last to see it, including when the next test extends a
 			// WordPress base class that never runs setUp() on this hierarchy.
