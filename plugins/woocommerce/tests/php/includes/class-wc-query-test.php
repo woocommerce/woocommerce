@@ -8,6 +8,30 @@ declare( strict_types = 1 );
 class WC_Query_Test extends \WC_Unit_Test_Case {
 
 	/**
+	 * The query string before each test.
+	 *
+	 * @var array
+	 */
+	private $original_get;
+
+	/**
+	 * Saves the query string, which these tests change, and clears the layered nav cache that is_filtered() reads.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->original_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		WC_Query::reset_chosen_attributes();
+	}
+
+	/**
+	 * Restores the query string so the price params don't reach later tests.
+	 */
+	public function tearDown(): void {
+		$_GET = $this->original_get;
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox View order titles disclose the order number only to customers who can view the order.
 	 * @testWith ["owner", true, "Order #CUSTOM-123"]
 	 *           ["other_customer", true, ""]
@@ -77,6 +101,59 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 		$expected = '(WHERE CLAUSE) AND NOT (200.000000<wc_product_meta_lookup.min_price OR 100.000000>wc_product_meta_lookup.max_price ) ';
 
 		$this->assertEquals( $expected, $args['where'] );
+	}
+
+	/**
+	 * @testdox 'price_filter_post_clauses' treats an empty 'min_price' or 'max_price' as if it were not in the query.
+	 *
+	 * @testWith [{"min_price": "100", "max_price": ""}]
+	 *           [{"min_price": "100", "max_price": " "}]
+	 *           [{"min_price": "", "max_price": ""}]
+	 *
+	 * @param array $params The price filter query string parameters.
+	 */
+	public function test_price_filter_post_clauses_ignores_empty_prices( array $params ) {
+		// phpcs:disable Squiz.Commenting
+		$wp_query = new class() {
+			public function is_main_query() {
+				return true;
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		$sut  = new WC_Query();
+		$args = array(
+			'join'  => '(JOIN CLAUSE)',
+			'where' => '(WHERE CLAUSE)',
+		);
+
+		$_GET     = array_filter(
+			$params,
+			function ( $value ) {
+				return '' !== trim( $value );
+			}
+		);
+		$expected = $sut->price_filter_post_clauses( $args, $wp_query );
+
+		$_GET = $params;
+		$this->assertSame( $expected, $sut->price_filter_post_clauses( $args, $wp_query ) );
+	}
+
+	/**
+	 * @testdox 'is_filtered' ignores a blank 'min_price' or 'max_price' and counts a set one.
+	 *
+	 * @testWith [{"max_price": ""}, false]
+	 *           [{"min_price": " ", "max_price": ""}, false]
+	 *           [{"max_price": "0"}, true]
+	 *           [{"min_price": "30", "max_price": ""}, true]
+	 *           [{"max_price": ["1"]}, true]
+	 *
+	 * @param array $params   The price filter query string parameters.
+	 * @param bool  $expected Whether products count as filtered.
+	 */
+	public function test_is_filtered_ignores_blank_prices( array $params, bool $expected ) {
+		$_GET = $params;
+		$this->assertSame( $expected, is_filtered() );
 	}
 
 	/**
