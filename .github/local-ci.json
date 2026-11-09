@@ -4,7 +4,7 @@
   "host": "github.com",
   "repository": "woocommerce/woocommerce",
   "app": { "clientId": "Iv23lix7ORqAqQLsB13K", "appId": 4830646 },
-  "baseBranch": "trunk",
+  "baseBranch": "test/local-ci-base-1242",
   "receiptPrefix": "local-ci/v1: ",
 
   "enabled": true,
@@ -92,7 +92,7 @@
       "namePrefix": "PHP: 8.1 ",
       "exclude": [ "[WP " ],
       "image": "php7.4",
-      "sampleRate": 10,
+      "sampleRate": 100,
       "prepare": {
         "$comment": "Mirrors setup-woocommerce-monorepo with install='<project>...' and build-type=backend.",
         "env": { "CI": "true", "GITHUB_ACTIONS": "true", "BROWSERSLIST_IGNORE_OLD_DATA": "true" },
@@ -120,7 +120,7 @@
       ],
       "serial": "wp-env",
       "enabledByDefault": false,
-      "sampleRate": 10,
+      "sampleRate": 100,
       "prepare": {
         "$comment": "Ports 92xx so the worktree's wp-env cells never collide with cells started from the developer's checkout.",
         "env": { "TEST_PHP_CI_PORT_BASE": "92" }
