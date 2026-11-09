@@ -120,12 +120,12 @@ class Initializer {
 	/**
 	 * Stop WordPress from adding loading, decoding, srcset and sizes to images in the email.
 	 *
-	 * Apple Mail never loads images marked loading="lazy". The late priority makes this win over
-	 * other callbacks and keeps the removal from touching a callback another plugin added.
+	 * Apple Mail never loads images marked loading="lazy". The late priority keeps the removal from
+	 * touching a callback another plugin added.
 	 */
 	public function disable_web_image_attributes(): void {
 		add_filter( 'wp_get_loading_optimization_attributes', '__return_empty_array', PHP_INT_MAX );
-		add_filter( 'wp_img_tag_add_srcset_and_sizes_attr', '__return_false', PHP_INT_MAX );
+		add_filter( 'wp_calculate_image_srcset_meta', '__return_empty_array', PHP_INT_MAX );
 	}
 
 	/**
@@ -133,7 +133,7 @@ class Initializer {
 	 */
 	public function restore_web_image_attributes(): void {
 		remove_filter( 'wp_get_loading_optimization_attributes', '__return_empty_array', PHP_INT_MAX );
-		remove_filter( 'wp_img_tag_add_srcset_and_sizes_attr', '__return_false', PHP_INT_MAX );
+		remove_filter( 'wp_calculate_image_srcset_meta', '__return_empty_array', PHP_INT_MAX );
 	}
 
 	/**

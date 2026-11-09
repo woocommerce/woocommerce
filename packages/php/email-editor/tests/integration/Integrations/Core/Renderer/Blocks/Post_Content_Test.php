@@ -302,10 +302,15 @@ class Post_Content_Test extends \Email_Editor_Integration_Test_Case {
 		);
 
 		do_action( 'woocommerce_email_editor_render_start' );
-		$rendered = ( new Post_Content() )->render_stateless( array(), '', $block );
+		$rendered         = ( new Post_Content() )->render_stateless( array(), '', $block );
+		$attachment_image = wp_get_attachment_image( $attachment_id, 'full' );
 		do_action( 'woocommerce_email_editor_render_end' );
 
 		$this->assertSame( 4, substr_count( $rendered, '<img' ) );
+		$this->assertStringContainsString( '<img', $attachment_image );
+		$this->assertStringNotContainsString( 'srcset=', $attachment_image );
+		$this->assertStringNotContainsString( 'sizes=', $attachment_image );
+		$this->assertStringNotContainsString( 'loading=', $attachment_image );
 		$this->assertStringNotContainsString( 'loading=', $rendered );
 		$this->assertStringNotContainsString( 'decoding=', $rendered );
 		$this->assertStringNotContainsString( 'srcset=', $rendered );
