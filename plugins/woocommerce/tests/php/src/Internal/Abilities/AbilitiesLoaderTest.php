@@ -537,6 +537,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$this->assertSame( 'array', $input['status']['type'] );
 			$this->assertContains( 'test-active', $input['status']['items']['enum'] );
 			$this->assertContains( 'test-active', $output['status']['enum'] );
+			$this->assertContains( 'shop_test_contract', $output['type']['enum'], 'An order of a registered type should pass the output schema.' );
 
 			$query_args = $this->capture_order_query_args(
 				array(
@@ -4625,8 +4626,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$query = wp_get_ability( 'woocommerce/orders-query' )->execute(
 			array(
-				'id'                 => $order->get_id(),
-				'include_line_items' => true,
+				'id'            => $order->get_id(),
+				'include_lines' => true,
 			)
 		);
 		$this->assertSame( 'Pickup', $query['orders'][0]['shipping_lines'][1]['method_title'] );
