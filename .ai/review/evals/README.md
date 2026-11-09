@@ -2,7 +2,7 @@
 
 This corpus covers 40 review guidelines with two bug cases and at least two safe boundary cases per guideline, for 161 registered cases. The SQL suite also retains a separate safe-batching example, G25E-v1, alongside its neutral refactor control. The root `ai-review-config.json` links each guideline to its suite. The `perf-blocking-remote-call` guideline is outside this corpus.
 
-The committed suites contain these 161 snapshot cases. [Optional prepared pairs](#optional-prepared-pair) add historical patch cases in separate generated checkouts.
+The committed suites contain these 161 snapshot cases. [Optional prepared pairs](#event-name-contract-pair) add historical patch cases in separate generated checkouts.
 
 ## Set up the runner
 
@@ -71,16 +71,6 @@ Each fixture directory contains before and after source files. The suite's `path
 The runner creates an isolated Git repository containing the case file and configured review prompts. It does not copy the whole WooCommerce checkout. Include the surrounding code needed to establish a case's behavior in its before and after files.
 
 All current `finding` expectations use `locations`, which require the finding's primary file and line to match a listed location. A `quiet` expectation requires no findings, including suppressed ones. The runner also supports legacy `contains` checks, but these suites do not use them. An `introduced_by` anchor alone cannot satisfy it. Inspect the finding's reasoning against the fixture before treating the automated score as evidence of detection. Routing alone does not determine whether a case passes.
-
-## Optional prepared pair
-
-`public-php-api-bc` includes an optional [pair of eval cases](public-php-api-bc/groups/internal-helpers-and-extension-contracts/README.md). The cases cover a historical MCP false-positive regression and a Stripe positive control.
-
-The committed suite does not register these cases. The runner does not discover `cases.template.json` automatically. `prepare.py` creates a new, separate checkout and registers both cases and their group there. That checkout contains 163 cases.
-
-Grouping does not change the default selection. Always pass `--group internal-helpers-and-extension-contracts` when running the prepared pair.
-
-The prepared pair needs a CLI checkout with native patch replay, historical `base_commit` and `groups` support. The CLI version string does not identify these features. Check that `a8c-review eval --help` lists `--group`, then run `--plan` on the prepared checkout. The group README lists the source prerequisites and exact commands.
 
 ## Event-name contract pair
 

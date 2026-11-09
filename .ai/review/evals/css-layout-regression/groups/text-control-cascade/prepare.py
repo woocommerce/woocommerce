@@ -15,7 +15,8 @@ from urllib.request import urlopen
 
 PACKAGE = Path(__file__).resolve().parent
 SUITE = Path('.ai/review/evals') / PACKAGE.parents[1].name
-ENV = dict(os.environ, GIT_NO_LAZY_FETCH='1', GIT_TERMINAL_PROMPT='0')
+ENV = dict(os.environ, GIT_NO_LAZY_FETCH='1', GIT_TERMINAL_PROMPT='0',
+           GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM='1')
 
 
 def git(repo, *args, env=None, input=None):

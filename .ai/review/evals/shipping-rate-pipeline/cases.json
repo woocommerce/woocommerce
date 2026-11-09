@@ -20,6 +20,14 @@
 							3
 						],
 						"anchor": "    $rates = apply_filters( 'woocommerce_package_rates', $rates, $package );"
+					},
+					{
+						"file": "plugins/woocommerce/includes/class-wc-shipping.php",
+						"lines": [
+							16,
+							16
+						],
+						"anchor": "    return $rates;"
 					}
 				]
 			}
