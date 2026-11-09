@@ -42,7 +42,7 @@
 						"composer.json",
 						"composer.lock",
 						"**/*.php",
-						"phpunit.xml",
+						"phpunit*.xml.dist",
 						".wp-env.json"
 					],
 					"testEnv": {
@@ -65,7 +65,7 @@
 						"composer.json",
 						"composer.lock",
 						"**/*.php",
-						"phpunit.xml",
+						"phpunit*.xml.dist",
 						".wp-env.json"
 					],
 					"testEnv": {
