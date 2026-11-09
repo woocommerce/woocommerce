@@ -295,6 +295,32 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A shop manager cannot see or change the WordPress privacy policy page.
+	 */
+	public function test_privacy_page_needs_manage_privacy_options(): void {
+		$privacy   = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		$published = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, $privacy );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
+
+		$settings = $this->page()->get_settings_for_section( '' );
+		WC_Admin_Settings::save_fields( $settings, array( AgenticCommerceSettings::PRIVACY_PAGE_OPTION => (string) $published ) );
+
+		$this->assertNotContains( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, array_column( $settings, 'id' ) );
+		$this->assertSame( $privacy, (int) get_option( AgenticCommerceSettings::PRIVACY_PAGE_OPTION ) );
+	}
+
+	/**
 	 * @testdox The switch stays disabled until the required checks pass.
 	 */
 	public function test_switch_disabled_until_required_checks_pass(): void {
