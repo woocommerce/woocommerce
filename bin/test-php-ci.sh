@@ -215,6 +215,7 @@ wait "$composer_pid" || composer_status=$?
 run pnpm --filter=@woocommerce/admin-library build:project:feature-config
 
 # A fresh CI database has no leftover scheduled actions; phpunit never drops these tables.
+# wp-env writes wp-tests-config.php as a copy of wp-config.php, so PHPUnit uses the wp_ prefix, not wptests_.
 truncate_action_scheduler() {
 	local config="$1" tables sql
 	tables="$(WC_TEST_ENV_CONFIG="$config" pnpm --filter="$project" --silent wp-env:test run cli wp db tables 'wp_actionscheduler_*' --all-tables-with-prefix --format=csv | tr -d '\r')" || return 1
