@@ -90,10 +90,10 @@ class EmailVerificationService {
 	 * @since 11.0.0
 	 *
 	 * @param int         $user_id        WordPress user ID.
-	 * @param string|null $expected_email Email address proven by the verification flow.
+	 * @param string|null $expected_email Email address proven by the verification flow. If omitted or null, no verification is performed.
 	 * @return void
 	 */
-	public function mark_verified( int $user_id, ?string $expected_email ): void {
+	public function mark_verified( int $user_id, ?string $expected_email = null ): void {
 		if ( $this->is_verified( $user_id ) ) {
 			return;
 		}
