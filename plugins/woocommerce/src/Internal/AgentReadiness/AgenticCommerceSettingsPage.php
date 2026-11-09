@@ -421,12 +421,11 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 				: array( $policies[ $check['id'] ][2], __( 'Choose a page', 'woocommerce' ), $check['fix_url'] );
 		}
 		$actions = array(
-			'launched'          => array( __( 'Take your store out of coming soon mode', 'woocommerce' ), __( 'Go to Site visibility', 'woocommerce' ) ),
-			'https'             => array( __( 'Move your store to HTTPS', 'woocommerce' ), __( 'Learn how', 'woocommerce' ) ),
-			'pretty_permalinks' => array( __( 'Choose a permalink structure other than Plain', 'woocommerce' ), __( 'Open permalinks', 'woocommerce' ) ),
-			'search_visible'    => array( __( 'Let search engines index your store', 'woocommerce' ), __( 'Open settings', 'woocommerce' ) ),
-			'guest_checkout'    => array( __( 'Allow guest checkout', 'woocommerce' ), __( 'Open settings', 'woocommerce' ) ),
-			'order_emails'      => array( __( 'Turn on order confirmation emails', 'woocommerce' ), __( 'Open settings', 'woocommerce' ) ),
+			'launched'       => array( __( 'Take your store out of coming soon mode', 'woocommerce' ), __( 'Go to Site visibility', 'woocommerce' ) ),
+			'https'          => array( __( 'Move your store to HTTPS', 'woocommerce' ), __( 'Learn how', 'woocommerce' ) ),
+			'search_visible' => array( __( 'Let search engines index your store', 'woocommerce' ), __( 'Open settings', 'woocommerce' ) ),
+			'guest_checkout' => array( __( 'Allow guest checkout', 'woocommerce' ), __( 'Open settings', 'woocommerce' ) ),
+			'order_emails'   => array( __( 'Turn on order confirmation emails', 'woocommerce' ), __( 'Open settings', 'woocommerce' ) ),
 		);
 		$action  = $actions[ $check['id'] ] ?? array( $check['label'], __( 'Open settings', 'woocommerce' ) );
 		return array( $action[0], $action[1], $check['fix_url'] );

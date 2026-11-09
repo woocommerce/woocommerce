@@ -33,7 +33,6 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 		as_unschedule_all_actions( ScheduledScan::DAILY_HOOK );
 		remove_filter( 'pre_option_woocommerce_feature_agent_readiness_enabled', array( __CLASS__, 'enabled' ) );
-		$this->set_permalink_structure( '' );
 		parent::tearDown();
 	}
 
@@ -116,7 +115,7 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox POST ucp answers 409 and leaves UCP off while a required setup check fails.
 	 */
 	public function test_ucp_switch_blocked_by_failing_check(): void {
-		StoreConditionsTest::make_store_ready( $this );
+		StoreConditionsTest::make_store_ready();
 		update_option( 'woocommerce_coming_soon', 'yes' );
 		update_option( 'woocommerce_feature_ucp_enabled', 'no' );
 
@@ -133,7 +132,7 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox POST ucp turns UCP on once the required checks pass, and off again.
 	 */
 	public function test_ucp_switch_on_and_off(): void {
-		StoreConditionsTest::make_store_ready( $this );
+		StoreConditionsTest::make_store_ready();
 
 		$response = $this->dispatch_ucp( true );
 		$this->assertSame( 200, $response->get_status() );
@@ -163,7 +162,7 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox A user without manage_woocommerce can't switch UCP.
 	 */
 	public function test_ucp_switch_requires_manage_woocommerce(): void {
-		StoreConditionsTest::make_store_ready( $this );
+		StoreConditionsTest::make_store_ready();
 		update_option( 'woocommerce_feature_ucp_enabled', 'no' );
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
 

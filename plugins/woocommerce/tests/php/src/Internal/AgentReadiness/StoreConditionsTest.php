@@ -28,21 +28,10 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Restore plain permalinks, which live on the global rewrite object outside the rollback.
-	 */
-	public function tearDown(): void {
-		try {
-			$this->set_permalink_structure( '' );
-		} finally {
-			parent::tearDown();
-		}
-	}
-
-	/**
 	 * @testdox With every required check passing, nothing blocks the switch.
 	 */
 	public function test_no_failing_required_checks_on_a_ready_store(): void {
-		self::make_store_ready( $this );
+		self::make_store_ready();
 
 		$this->assertSame( array(), $this->sut->failing_required() );
 	}
@@ -51,7 +40,7 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	 * @testdox Coming soon mode is required.
 	 */
 	public function test_coming_soon_required(): void {
-		self::make_store_ready( $this );
+		self::make_store_ready();
 		update_option( 'woocommerce_coming_soon', 'yes' );
 
 		$this->assertSame( array( 'launched' ), $this->sut->failing_required() );
@@ -66,7 +55,7 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	 * @param string $post_status Status of the selected refund page.
 	 */
 	public function test_unpublished_policy_page_fails( string $post_status ): void {
-		self::make_store_ready( $this );
+		self::make_store_ready();
 		update_option(
 			AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION,
 			self::factory()->post->create(
@@ -88,16 +77,15 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Plain permalinks are required; guest checkout is only recommended.
+	 * @testdox Guest checkout off is only recommended, so it doesn't block the switch.
 	 */
 	public function test_store_conditions_checks(): void {
-		self::make_store_ready( $this );
-		$this->set_permalink_structure( '' );
+		self::make_store_ready();
 		update_option( 'woocommerce_enable_guest_checkout', 'no' );
 
 		$checks = array_column( $this->sut->all(), null, 'id' );
 
-		$this->assertSame( array( 'pretty_permalinks' ), $this->sut->failing_required() );
+		$this->assertSame( array(), $this->sut->failing_required() );
 		$this->assertFalse( $checks['guest_checkout']['ok'] );
 		$this->assertSame( StoreConditions::LEVEL_RECOMMENDED, $checks['guest_checkout']['level'] );
 	}
@@ -132,7 +120,7 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	 * @testdox HTTPS is required.
 	 */
 	public function test_https_required(): void {
-		self::make_store_ready( $this );
+		self::make_store_ready();
 		remove_all_filters( 'pre_option_home' );
 		update_option( 'home', 'http://example.org' );
 
@@ -140,13 +128,10 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Make every required check pass: store launched, HTTPS home URL and pretty permalinks.
-	 *
-	 * @param WC_Unit_Test_Case $test_case Test case, for its permalink helper.
+	 * Make every required check pass: store launched, HTTPS home URL and the policy pages.
 	 */
-	public static function make_store_ready( WC_Unit_Test_Case $test_case ): void {
+	public static function make_store_ready(): void {
 		add_filter( 'pre_option_home', static fn() => 'https://example.org' );
-		$test_case->set_permalink_structure( '/%postname%/' );
 		update_option( 'woocommerce_coming_soon', 'no' );
 		$page = wp_insert_post(
 			array(

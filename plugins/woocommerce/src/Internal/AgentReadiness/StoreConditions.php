@@ -52,8 +52,6 @@ class StoreConditions {
 	 * @return array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}>
 	 */
 	public function all(): array {
-		global $wp_rewrite;
-
 		$settings_url = static fn( string $tab ): string => admin_url( 'admin.php?page=wc-settings&tab=' . $tab );
 		$policy_page  = static fn( string $id, string $option, string $name, string $label, string $why, string $level = self::LEVEL_REQUIRED ): array => array(
 			'id'      => $id,
@@ -111,17 +109,6 @@ class StoreConditions {
 				'why'     => __( 'Agents only send shoppers to a secure checkout.', 'woocommerce' ),
 				'fix'     => __( 'Move the site to HTTPS; your host can usually turn it on.', 'woocommerce' ),
 				'fix_url' => wp_get_update_https_url(),
-			),
-			array(
-				'id'      => 'pretty_permalinks',
-				'ok'      => $wp_rewrite->using_permalinks(),
-				'blocks'  => 'ucp',
-				'level'   => self::LEVEL_REQUIRED,
-				'name'    => __( 'Permalinks are not set to Plain', 'woocommerce' ),
-				'label'   => __( 'Permalinks are set to Plain', 'woocommerce' ),
-				'why'     => __( 'Your store does not serve the UCP discovery file at /.well-known/ucp, so agents cannot find your catalog and checkout.', 'woocommerce' ),
-				'fix'     => __( 'Choose any permalink structure other than Plain under Settings > Permalinks.', 'woocommerce' ),
-				'fix_url' => admin_url( 'options-permalink.php' ),
 			),
 			$policy_page(
 				'privacy_page',

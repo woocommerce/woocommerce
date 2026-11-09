@@ -42,7 +42,6 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		try {
 			set_current_screen( 'front' );
-			$this->set_permalink_structure( '' );
 		} finally {
 			parent::tearDown();
 		}
@@ -137,7 +136,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	 * @testdox With every required check passing, open checks are only Recommended and passing ones are Done.
 	 */
 	public function test_output_on_a_ready_store(): void {
-		StoreConditionsTest::make_store_ready( $this );
+		StoreConditionsTest::make_store_ready();
 
 		$html = $this->render_page();
 
@@ -329,7 +328,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$blocked = $this->render_page();
 		$this->assertMatchesRegularExpression( '/<button[^>]*wc-agentic-commerce-ucp-switch[^>]*disabled=([\'"])disabled\\1/', $blocked );
 
-		StoreConditionsTest::make_store_ready( $this );
+		StoreConditionsTest::make_store_ready();
 		$ready = $this->render_page();
 		$this->assertDoesNotMatchRegularExpression( '/<button[^>]*wc-agentic-commerce-ucp-switch[^>]*disabled=([\'"])disabled\\1/', $ready );
 	}
