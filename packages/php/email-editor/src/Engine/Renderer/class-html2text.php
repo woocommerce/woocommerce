@@ -527,8 +527,8 @@ class Html2Text {
 				break;
 
 			case 'br':
-				// Add one line.
-				$output .= "\n";
+				// Add one line. Inside pre it is armored like other newlines, to keep the next line's indentation.
+				$output .= $in_pre ? "\r" : "\n";
 				break;
 
 			case 'div':

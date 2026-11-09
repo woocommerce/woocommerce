@@ -39,6 +39,13 @@ class Html2Text_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test a line break tag inside preformatted text keeps the next line's indentation
+	 */
+	public function test_preformatted_line_break_tag_keeps_indentation(): void {
+		$this->assertEquals( "one\n    two", Html2Text::convert( '<pre>one<br>    two</pre>' ) );
+	}
+
+	/**
 	 * Test anchor links with drop_links option
 	 */
 	public function test_anchors_drop_links(): void {
