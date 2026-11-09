@@ -127,6 +127,14 @@ class CustomersQuery extends AbstractDomainAbility implements AbilityDefinition 
 			try {
 				$customer = new \WC_Customer( $user_id );
 			} catch ( \Exception $e ) {
+				wc_get_logger()->warning(
+					'The customers-query ability skipped a user that does not load as a customer, so total counts more customers than it returns.',
+					array(
+						'source'        => 'woocommerce-abilities',
+						'user_id'       => $user_id,
+						'error_message' => $e->getMessage(),
+					)
+				);
 				continue;
 			}
 			$formatted = self::format_customer( $customer );
