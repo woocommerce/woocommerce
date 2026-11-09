@@ -148,6 +148,28 @@ class WC_Session_Concurrency_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A session cookie that fails verification is dropped from the request, so the visitor has no session.
+	 */
+	public function test_unverifiable_session_cookie_is_not_treated_as_a_session(): void {
+		$cookie_name             = 'wp_woocommerce_session_' . COOKIEHASH;
+		$_COOKIE[ $cookie_name ] = 't_0123456789abcdef0123456789abcd|' . ( time() + DAY_IN_SECONDS ) . '|' . ( time() + HOUR_IN_SECONDS ) . '|invalidhash';
+
+		// Avoid sending headers from the test process.
+		add_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+
+		try {
+			$handler = new WC_Session_Handler();
+			$handler->init_session_cookie();
+
+			$this->assertArrayNotHasKey( $cookie_name, $_COOKIE, 'The unverifiable cookie should be removed from the request' );
+			$this->assertFalse( $handler->has_session(), 'An unverifiable cookie should not count as a session' );
+		} finally {
+			remove_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+			unset( $_COOKIE[ $cookie_name ] );
+		}
+	}
+
+	/**
 	 * Seeds the session, then interleaves two requests: load A, load B, save A, save B.
 	 *
 	 * @param string $handler_class Session handler class.
