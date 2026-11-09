@@ -34,6 +34,17 @@ trait DomainAbilityHelpers {
 	}
 
 	/**
+	 * Get a price or total as a string, because the output schema declares Core
+	 * amount fields as strings. The getters can return an int or a float.
+	 *
+	 * @param mixed $amount Value from a getter of the object.
+	 * @return mixed
+	 */
+	protected static function format_amount_for_response( $amount ) {
+		return is_int( $amount ) ? (string) $amount : wc_float_to_string( $amount );
+	}
+
+	/**
 	 * Get a collection output schema.
 	 *
 	 * @param string $collection_key Collection property key.
@@ -88,28 +99,12 @@ trait DomainAbilityHelpers {
 	}
 
 	/**
-	 * Get a delete output schema.
-	 *
-	 * @return array
-	 */
-	protected static function get_delete_output_schema(): array {
-		return array(
-			'type'                 => 'object',
-			'properties'           => array(
-				'deleted' => array( 'type' => 'boolean' ),
-				'id'      => array( 'type' => 'integer' ),
-			),
-			'additionalProperties' => false,
-		);
-	}
-
-	/**
 	 * Get an ID value from ability input.
 	 *
 	 * @param mixed $input Ability input.
 	 * @return int
 	 */
 	protected static function get_id_from_input( $input ): int {
-		return is_array( $input ) && ! empty( $input['id'] ) ? (int) $input['id'] : 0;
+		return $input['id'] ?? 0;
 	}
 }

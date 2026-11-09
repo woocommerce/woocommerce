@@ -20,6 +20,7 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\WeightUnit;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
+use Automattic\WooCommerce\Internal\RestApi\ProductImageUploadCleanupTrait;
 use Automattic\WooCommerce\Internal\RestApi\ProductRequestPreparationTrait;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\I18nUtil;
@@ -46,6 +47,7 @@ defined( 'ABSPATH' ) || exit;
 class Controller extends WC_REST_Products_V2_Controller {
 
 	use CogsAwareRestControllerTrait;
+	use ProductImageUploadCleanupTrait;
 	use ProductRequestPreparationTrait;
 
 	/**
@@ -115,13 +117,6 @@ class Controller extends WC_REST_Products_V2_Controller {
 	 * @var array
 	 */
 	private $stock_quantity_filter = array();
-
-	/**
-	 * Stores attachment IDs processed during the current request for potential cleanup.
-	 *
-	 * @var array
-	 */
-	private $processed_attachment_ids_for_request = array();
 
 	/**
 	 * Register the routes for products.
@@ -971,6 +966,10 @@ class Controller extends WC_REST_Products_V2_Controller {
 				}
 
 				if ( ! wp_attachment_is_image( $attachment_id ) ) {
+					if ( $is_new_upload && $attachment_id > 0 ) {
+						wp_delete_attachment( $attachment_id, true );
+					}
+
 					/* translators: %s: image ID */
 					throw new WC_REST_Exception( 'woocommerce_product_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				}

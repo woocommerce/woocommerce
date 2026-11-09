@@ -9,6 +9,7 @@ use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\DocumentObject;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use WC_Customer;
 
 /**
@@ -61,12 +62,34 @@ trait CheckoutTrait {
 	}
 
 	/**
+	 * Stops the request when the order could not be saved, removing a draft order from the session so a later
+	 * request does not resume it.
+	 *
+	 * @throws RouteException When the order is missing or its last save failed.
+	 */
+	private function validate_order_was_saved(): void {
+		$order = $this->get_order_or_throw();
+		$this->forget_draft_order_if_not_saved( $order );
+
+		if ( null === $order->get_last_save_error() ) {
+			return;
+		}
+
+		throw new RouteException(
+			'woocommerce_rest_checkout_order_not_saved',
+			esc_html__( 'Your order could not be saved. Please try again.', 'woocommerce' ),
+			500
+		);
+	}
+
+	/**
 	 * For orders which do not require payment, just update status.
 	 *
 	 * Deliberately no recovery of the kind process_payment() does: nothing was charged, so a
 	 * failure costs the shopper only a retry, and claiming success would be the worse outcome.
 	 *
-	 * @throws RouteException If the order is missing or a cancelled unpaid order would be marked paid.
+	 * @throws RouteException If the order is missing, a cancelled unpaid order would be marked paid, or the order
+	 *                        could not be saved.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @param PaymentResult    $payment_result Payment result object.
@@ -84,6 +107,7 @@ trait CheckoutTrait {
 		}
 
 		$order->payment_complete();
+		$this->validate_order_was_saved();
 
 		// Mark the payment as successful.
 		$payment_result->set_status( 'success' );
@@ -104,6 +128,7 @@ trait CheckoutTrait {
 
 		$session = WC()->session;
 		$session->set( 'order_awaiting_payment', $order->get_id() );
+		PaymentRecovery::remember_order_sent_to_gateway( $order->get_id() );
 		// Persist before invoking gateways because redirects or stalled requests may prevent the session from being saved on shutdown.
 		if ( is_callable( array( $session, 'save_data' ) ) ) {
 			$session->save_data();
@@ -147,9 +172,9 @@ trait CheckoutTrait {
 			 * Re-read first: a gateway that advanced the order may have done so on its own
 			 * instance, leaving the one held above reporting a stale status.
 			 */
-			$order = $this->refresh_order( $order );
+			$order = PaymentRecovery::refresh_order( $order );
 
-			if ( $this->order_moved_past_payment( $order ) ) {
+			if ( PaymentRecovery::order_moved_past_payment( $order ) ) {
 				$this->recover_order_that_took_payment( $order, $e, $result_for_recovery );
 				return;
 			}
@@ -177,62 +202,6 @@ trait CheckoutTrait {
 	}
 
 	/**
-	 * Re-reads the order so its status reflects whatever the gateway persisted, falling back
-	 * to the in-memory order when it can no longer be read.
-	 *
-	 * @param \WC_Order $order Order object.
-	 * @return \WC_Order
-	 */
-	private function refresh_order( \WC_Order $order ): \WC_Order {
-		$refreshed_order = wc_get_order( $order->get_id() );
-
-		return $refreshed_order instanceof \WC_Order ? $refreshed_order : $order;
-	}
-
-	/**
-	 * Whether the order has moved beyond the point of awaiting payment.
-	 *
-	 * An order reaches a gateway awaiting payment or as a draft, so any other status means
-	 * something moved it on. This is about the status, not the money: an order parked on-hold
-	 * for review counts, because sending the shopper back to place it again would be wrong.
-	 *
-	 * The statuses a site declares payable count as awaiting payment, so a custom status an
-	 * extension parks the order in before the gateway runs is not mistaken for a paid one.
-	 * Not needs_payment(): that folds in the order total, and a fully discounted order that
-	 * failed would then keep its stock and coupon holds.
-	 *
-	 * @param \WC_Order $order Order object.
-	 * @return bool
-	 */
-	private function order_moved_past_payment( \WC_Order $order ): bool {
-		/**
-		 * Filter the valid order statuses for payment.
-		 *
-		 * The same filter WC_Order::needs_payment() applies. A status a site declares payable
-		 * counts as awaiting payment here too, so a failure while the order is in it is reported
-		 * rather than recovered as one that took payment.
-		 *
-		 * @since 11.2.0
-		 *
-		 * @param array     $valid_order_statuses Array of valid order statuses for payment.
-		 * @param \WC_Order $order                Order object.
-		 */
-		$payable_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( OrderStatus::PENDING, OrderStatus::FAILED ), $order );
-
-		return ! $order->has_status(
-			array_merge(
-				(array) $payable_statuses,
-				array(
-					OrderStatus::CHECKOUT_DRAFT,
-					OrderStatus::CANCELLED,
-					OrderStatus::REFUNDED,
-					OrderStatus::TRASH,
-				)
-			)
-		);
-	}
-
-	/**
 	 * Records a failure that happened after payment was taken and reports the checkout as
 	 * successful, so the shopper is sent to the order confirmation rather than back to retry.
 	 *
@@ -241,30 +210,7 @@ trait CheckoutTrait {
 	 * @param PaymentResult $payment_result Payment result object.
 	 */
 	private function recover_order_that_took_payment( \WC_Order $order, \Throwable $error, PaymentResult $payment_result ): void {
-		/*
-		 * The failure goes in the message, not the context: the file handler renders context with
-		 * wp_json_encode(), and neither WC_Order nor Throwable exposes public properties, so the
-		 * objects alone would write an empty {}. This is now the only log of the error.
-		 */
-		wc_get_logger()->error(
-			sprintf(
-				'Checkout for order #%1$d failed after payment was taken: %2$s: %3$s in %4$s:%5$d',
-				$order->get_id(),
-				get_class( $error ),
-				$error->getMessage(),
-				$error->getFile(),
-				$error->getLine()
-			),
-			array( 'source' => 'store-api' )
-		);
-
-		$order->add_order_note(
-			sprintf(
-				/* translators: %s: the error that was raised after payment was taken. */
-				__( 'Checkout could not be completed after payment was taken: %s', 'woocommerce' ),
-				wp_strip_all_tags( $error->getMessage() )
-			)
-		);
+		PaymentRecovery::record_failure_after_payment( $order, $error, 'store-api' );
 
 		$payment_result->set_status( 'success' );
 
@@ -289,16 +235,6 @@ trait CheckoutTrait {
 		if ( ! isset( $payment_details['redirect'] ) ) {
 			$payment_details['redirect'] = $payment_result->get_redirect_url();
 			$payment_result->set_payment_details( $payment_details );
-		}
-
-		/*
-		 * The gateway never reached the point where it empties the cart, so do it here: otherwise
-		 * the shopper lands on the confirmation with the order still in their cart and can place
-		 * it again. Only when the cart still belongs to this order, since pay-for-order shares
-		 * this trait with an unrelated cart. Same guard as wc_clear_cart_after_payment().
-		 */
-		if ( WC()->cart && $order->has_cart_hash( WC()->cart->get_cart_hash() ) ) {
-			WC()->cart->empty_cart();
 		}
 	}
 
@@ -418,6 +354,7 @@ trait CheckoutTrait {
 
 		if ( $persist ) {
 			$order->save();
+			$this->validate_order_was_saved();
 		}
 	}
 

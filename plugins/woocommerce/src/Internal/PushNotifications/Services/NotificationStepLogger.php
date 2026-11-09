@@ -169,6 +169,33 @@ class NotificationStepLogger {
 	}
 
 	/**
+	 * Records a step of a maintenance job that belongs to no notification,
+	 * such as the stale token cleanup.
+	 *
+	 * Written under the module's own source, and not switched off with step
+	 * logging, since it is the only record of what a job deleted.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string $step    Machine-readable step name, e.g. `stale_token_cleanup`.
+	 * @param string $outcome Machine-readable outcome, e.g. `completed`.
+	 * @param array  $context Extra fields to store with the line.
+	 * @return void
+	 */
+	public function log_maintenance_step( string $step, string $outcome, array $context = array() ): void {
+		try {
+			$context['step']           = $step;
+			$context['outcome']        = $outcome;
+			$context['source']         = PushNotifications::FEATURE_NAME;
+			$context['remote-logging'] = false;
+
+			wc_get_logger()->info( self::format_message( $step, $outcome ), self::bound( $context ) );
+		} catch ( Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			// Deliberately ignored: a logging failure must not affect the job.
+		}
+	}
+
+	/**
 	 * Records a failure that happened before a notification could be
 	 * identified, such as a loopback request that failed authorization.
 	 *
