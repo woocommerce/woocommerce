@@ -53,9 +53,9 @@ class WC_Email_Order_Items_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Order item images are not marked for lazy loading.
+	 * @testdox Order item images carry no web-only loading attributes while an email is sending.
 	 */
-	public function test_order_item_image_is_not_lazy_loaded(): void {
+	public function test_order_item_image_has_no_web_only_attributes_while_sending(): void {
 		$order             = WC_Helper_Order::create_order();
 		$this->order_ids[] = $order->get_id();
 
@@ -79,9 +79,14 @@ class WC_Email_Order_Items_Test extends \WC_Unit_Test_Case {
 			$product->save();
 		}
 
-		$content = wc_get_email_order_items( $order, array( 'show_image' => true ) );
+		$email          = new WC_Email();
+		$email->sending = true;
+		$content        = wc_get_email_order_items( $order, array( 'show_image' => true ) );
+		$email->sending = false;
 
 		$this->assertStringContainsString( '<img', $content );
-		$this->assertStringNotContainsString( 'loading=', $content );
+		foreach ( array( 'loading=', 'decoding=', 'srcset=', 'sizes=' ) as $attribute ) {
+			$this->assertStringNotContainsString( $attribute, $content );
+		}
 	}
 }

@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 11.4.0
+ * @version 11.2.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -45,7 +45,7 @@ foreach ( $items as $item_id => $item ) :
 	if ( is_object( $product ) ) {
 		$sku           = $product->get_sku();
 		$purchase_note = $product->get_purchase_note();
-		$image         = $product->get_image( $image_size, array( 'loading' => false ) );
+		$image         = $product->get_image( $image_size );
 	}
 
 	/**

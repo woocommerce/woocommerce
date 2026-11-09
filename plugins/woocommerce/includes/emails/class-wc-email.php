@@ -1873,6 +1873,9 @@ class WC_Email extends WC_Settings_API {
 			return $attributes;
 		}
 
+		// Apple Mail does not load images marked loading="lazy", and the others do nothing in email.
+		unset( $attributes['loading'], $attributes['decoding'], $attributes['srcset'], $attributes['sizes'] );
+
 		// Skip classes to prevent lazy loading plugins from applying lazy loading.
 		// These are the most common skip classes used by popular lazy loading plugins.
 		$skip_classes = array( 'skip-lazy', 'no-lazyload', 'lazyload-disabled', 'no-lazy', 'skip-lazyload' );
