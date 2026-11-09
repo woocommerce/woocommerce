@@ -129,6 +129,7 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	public function test_uses_billing_address_when_legacy_local_pickup_is_left_in_session(): void {
 		$this->add_product_to_cart( true );
 		WC()->session->set( 'chosen_shipping_methods', array( 'local_pickup:1' ) );
+		WC()->session->set( 'previous_shipping_methods', array( array( 'local_pickup:1' ) ) );
 		$this->set_checkout_context();
 
 		$result = $this->customer->get_taxable_address();
@@ -726,6 +727,8 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 			)
 		);
 		WC()->session->set( 'chosen_shipping_methods', array( 'pickup_location:0' ) );
+		// A chosen method only counts when its rate was listed for the package.
+		WC()->session->set( 'previous_shipping_methods', array( array( 'pickup_location:0' ) ) );
 	}
 
 	/**
