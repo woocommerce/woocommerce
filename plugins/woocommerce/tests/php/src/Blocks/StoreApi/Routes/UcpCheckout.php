@@ -113,6 +113,8 @@ class UcpCheckout extends ControllerTestCase {
 	private function request( string $method, string $path, array $body = array() ) {
 		$request = new \WP_REST_Request( $method, '/wc/ucp/v1' . $path );
 		$request->set_header( 'content-type', 'application/json' );
+		// A write needs a key of its own; the key itself is the UcpIdempotency suite's concern.
+		$request->set_header( 'Idempotency-Key', wp_generate_uuid4() );
 		$request->set_body( wp_json_encode( $body ) );
 
 		return rest_get_server()->dispatch( $request );
@@ -162,16 +164,17 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
-	 * Create a checkout holding one mug, with everything it needs to complete.
+	 * Create a checkout holding one mug, or the given line item, with everything it needs to complete.
 	 *
+	 * @param array|null $line_item Line item to check out instead of the mug.
 	 * @return array The response data.
 	 */
-	private function create_ready_checkout(): array {
+	private function create_ready_checkout( ?array $line_item = null ): array {
 		$response = $this->request(
 			'POST',
 			'/checkout-sessions',
 			array(
-				'line_items'       => array( $this->line_item( 0, 1 ) ),
+				'line_items'       => array( $line_item ?? $this->line_item( 0, 1 ) ),
 				'buyer'            => array( 'email' => 'buyer@example.com' ),
 				'shipping_address' => array(
 					'street_address'   => '1 Main St',
@@ -301,6 +304,98 @@ class UcpCheckout extends ControllerTestCase {
 		$this->assertSame( 'completed', $paid['status'] );
 		$this->assertSame( (string) $order->get_id(), $paid['order']['id'] );
 		$this->assertSame( 409, $this->request( 'PUT', '/checkout-sessions/' . $created['id'], array() )->get_status() );
+	}
+
+	/**
+	 * @testdox Complete holds the order's stock, as the payment page trusts a pending order to have.
+	 */
+	public function test_complete_holds_stock(): void {
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 3,
+			)
+		);
+		$created = $this->create_ready_checkout(
+			array(
+				'item'     => array( 'id' => (string) $product->get_id() ),
+				'quantity' => 2,
+			)
+		);
+
+		$this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' );
+
+		$this->assertSame( 2, wc_get_held_stock_quantity( $product ) );
+	}
+
+	/**
+	 * @testdox Complete refuses a checkout whose stock another order took first and hands over no payable order.
+	 */
+	public function test_complete_refuses_stock_it_cannot_hold(): void {
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 1,
+			)
+		);
+		$created = $this->create_ready_checkout(
+			array(
+				'item'     => array( 'id' => (string) $product->get_id() ),
+				'quantity' => 1,
+			)
+		);
+
+		// A rival checkout takes the last unit after this cart was checked and before its order is held.
+		$rival = wc_create_order();
+		$rival->add_product( $product, 1 );
+		$rival->save();
+		$hold_rival = static function () use ( $rival, &$hold_rival ) {
+			remove_action( 'woocommerce_order_before_calculate_totals', $hold_rival );
+			wc_reserve_stock_for_order( $rival );
+		};
+		add_action( 'woocommerce_order_before_calculate_totals', $hold_rival );
+		$response = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'out_of_stock', $response->get_data()['messages'][0]['code'] );
+
+		$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
+		$this->assertTrue( $order->has_status( OrderStatus::CHECKOUT_DRAFT ), 'A refused hold must not leave a payable order.' );
+		$this->assertSame( 0, wc_get_held_stock_quantity( $product, $rival->get_id() ) );
+	}
+
+	/**
+	 * @testdox Stock that ran short after the cart was built is reported, not absorbed by lowering the quantity.
+	 */
+	public function test_stock_shortfall_is_reported_not_absorbed(): void {
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 3,
+			)
+		);
+		$created = $this->create_ready_checkout(
+			array(
+				'item'     => array( 'id' => (string) $product->get_id() ),
+				'quantity' => 2,
+			)
+		);
+
+		wc_update_product_stock( $product, 1 );
+		$this->simulate_new_request( $created['id'] );
+
+		$read = $this->request( 'GET', '/checkout-sessions/' . $created['id'] )->get_data();
+		$this->assertSame( 2, $read['line_items'][0]['quantity'], 'The agent asked for 2 and must still see 2.' );
+		$this->assertSame( 'incomplete', $read['status'] );
+		$this->assertContains( 'out_of_stock', array_column( $read['messages'], 'code' ) );
+
+		$completed = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' )->get_data();
+		$this->assertSame( 'incomplete', $completed['status'] );
+		$this->assertArrayNotHasKey( 'continue_url', $completed );
+		$this->assertEmpty( WC()->session->get( 'store_api_draft_order' ) );
 	}
 
 	/**

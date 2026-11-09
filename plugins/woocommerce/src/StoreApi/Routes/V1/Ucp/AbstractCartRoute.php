@@ -163,13 +163,24 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * The parent picks the Store API session handler from a `Cart-Token` header. UCP
 	 * carries that token in the path, so it is promoted to the header first.
 	 *
+	 * The parent also lowers each line to the stock left before handling the request. No
+	 * human watches a UCP cart and `complete` carries no expected total, so a shortfall is
+	 * left in place for cart validation to report instead of being absorbed.
+	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
 	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 *
+	 * @throws \RuntimeException When a previous cart session load failed.
+	 * @throws \Throwable When the cart cannot be loaded.
+	 *
 	 * @return void
 	 */
 	protected function load_cart_session( \WP_REST_Request $request ) {
+		if ( WC()->cart instanceof \WC_Cart && ! \WC_Cart_Session::are_updates_enabled_for_cart( WC()->cart ) ) {
+			throw new \RuntimeException( 'The cart is unavailable after its session failed to load.' );
+		}
+
 		$cart_id = $this->validated_cart_id( $request );
 
 		if ( '' === $cart_id ) {
@@ -199,7 +210,16 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			$this->discard_preloaded_cart_session();
 		}
 
-		parent::load_cart_session( $request );
+		try {
+			$this->cart_controller->load_cart();
+		} catch ( \Throwable $error ) {
+			// The parent's flag: a later load in the same process must refuse, not reuse, this cart.
+			if ( WC()->cart instanceof \WC_Cart ) {
+				\WC_Cart_Session::set_updates_enabled_for_cart( WC()->cart, false );
+			}
+
+			throw $error;
+		}
 	}
 
 	/**

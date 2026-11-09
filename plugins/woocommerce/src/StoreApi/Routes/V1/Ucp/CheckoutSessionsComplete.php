@@ -3,8 +3,10 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
+use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\CheckoutMapper;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 /**
  * UCP `POST /checkout-sessions/{id}/complete` route.
@@ -56,6 +58,8 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 	 *
 	 * No payment is taken through the API, so `payment` is ignored. The cart becomes a pending
 	 * order, the Store API draft order of this session, and `continue_url` is its payment page.
+	 * Stock is held for the order first, as the Store API checkout does, because the payment
+	 * page trusts a pending order's stock to be held and checks nothing itself.
 	 * A checkout that is not ready yet is returned as it is, with messages naming what is missing.
 	 *
 	 * @param \WP_REST_Request $request Request object.
@@ -86,15 +90,24 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 			$order = $this->order_controller->create_order_from_cart();
 		}
 
-		// The payment page only takes an order awaiting payment, which a checkout draft is not.
-		$order->set_status( OrderStatus::PENDING );
-		$order->save();
-
 		if ( ! $order->get_id() ) {
 			return $this->ucp_error( 'TRANSPORT_ERROR', __( 'The order could not be created. Please try again.', 'woocommerce' ), 'recoverable', 500 );
 		}
 
+		// Remembered before the hold so a refused hold leaves a draft the next attempt reuses.
 		$this->set_draft_order_id( $order->get_id() );
+
+		try {
+			wc_reserve_stock_for_order( $order );
+		} catch ( ReserveStockException $e ) {
+			// The hold failed on stock another checkout took since the cart was last checked, so
+			// the order stays a draft, which the payment page refuses, and the agent re-reads the cart.
+			return $this->ucp_error( Utils::cart_error_code( (string) $e->getErrorCode() ), wp_specialchars_decode( $e->getMessage(), ENT_QUOTES ), 'recoverable', 200, '$.line_items' );
+		}
+
+		// The payment page only takes an order awaiting payment, which a checkout draft is not.
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
 
 		$state = array_merge(
 			$state,

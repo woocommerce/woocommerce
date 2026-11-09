@@ -193,7 +193,7 @@ class Utils {
 	 * differently — retry smaller, fix the quantity, or re-read the cart — stay apart
 	 * and the rest collapse.
 	 *
-	 * @param string $code Store API error code.
+	 * @param string $code Store API or stock reservation error code.
 	 * @param string $fallback UCP code for a cart error UCP has no closer name for.
 	 * @return string One of `out_of_stock`, `not_found`, `invalid_quantity` or the fallback.
 	 */
@@ -202,6 +202,8 @@ class Utils {
 			case 'woocommerce_rest_product_out_of_stock':
 			case 'woocommerce_rest_product_partially_out_of_stock':
 			case 'woocommerce_rest_product_too_many_in_cart':
+			case 'woocommerce_product_out_of_stock':
+			case 'woocommerce_product_not_enough_stock':
 				return 'out_of_stock';
 			case 'woocommerce_rest_cart_invalid_key':
 				return 'not_found';
