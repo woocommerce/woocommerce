@@ -103,7 +103,7 @@ class ProductAttributesQuery extends AbstractDomainAbility implements AbilityDef
 				array_filter(
 					$attributes,
 					static fn( $attribute ) => false !== stripos( (string) $attribute->attribute_label, $search )
-						|| false !== stripos( (string) $attribute->attribute_name, $search )
+						|| false !== stripos( wc_attribute_taxonomy_name( (string) $attribute->attribute_name ), $search )
 				)
 			);
 		}

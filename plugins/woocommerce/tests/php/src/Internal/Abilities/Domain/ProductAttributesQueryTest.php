@@ -92,8 +92,9 @@ class ProductAttributesQueryTest extends WC_Unit_Test_Case {
 			$ids[] = WC_Helper_Product::create_attribute( $name, array() )['attribute_id'];
 		}
 
-		$search = $this->sut->execute( array( 'search' => 'test fin' ) );
-		$page   = $this->sut->execute(
+		$search  = $this->sut->execute( array( 'search' => 'test fin' ) );
+		$by_slug = $this->sut->execute( array( 'search' => 'pa_test-fin' ) );
+		$page    = $this->sut->execute(
 			array(
 				'include'  => $ids,
 				'per_page' => 2,
@@ -103,6 +104,7 @@ class ProductAttributesQueryTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( array( 'Test Finish' ), wp_list_pluck( $search['attributes'], 'name' ) );
 		$this->assertSame( 1, $search['total'] );
+		$this->assertSame( array( 'Test Finish' ), wp_list_pluck( $by_slug['attributes'], 'name' ), 'The search matches the slug as the output returns it.' );
 		$this->assertSame( 3, $page['total'] );
 		$this->assertSame( 2, $page['total_pages'] );
 		$this->assertSame( array( 'Test Pattern' ), wp_list_pluck( $page['attributes'], 'name' ), 'Attributes are sorted by slug.' );
