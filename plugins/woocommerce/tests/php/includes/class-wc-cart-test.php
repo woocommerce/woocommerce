@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Checkout\PaymentRecovery;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 
 /**
@@ -220,6 +221,30 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		WC()->session->set( 'wc_notices', null );
 		$product->delete( true );
+	}
+
+	/**
+	 * @testdox generate_cart_id should not depend on the order the variation attributes are listed in
+	 */
+	public function test_generate_cart_id_ignores_variation_attribute_order(): void {
+		$this->assertSame(
+			WC()->cart->generate_cart_id(
+				1,
+				2,
+				array(
+					'attribute_pa_size'   => 'small',
+					'attribute_pa_colour' => 'red',
+				)
+			),
+			WC()->cart->generate_cart_id(
+				1,
+				2,
+				array(
+					'attribute_pa_colour' => 'red',
+					'attribute_pa_size'   => 'small',
+				)
+			)
+		);
 	}
 
 	/**
@@ -1664,7 +1689,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	 * @see https://github.com/woocommerce/woocommerce/issues/58864
 	 */
 	public function test_coupon_discount_amount_case_sensitivity() {
-		$old_calc_taxes = get_option( 'woocommerce_calc_taxes', 'no' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 
 		$tax_rate = array(
@@ -1678,57 +1702,55 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			'tax_rate_order'    => '1',
 		);
 
-		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
+		WC_Tax::_insert_tax_rate( $tax_rate );
 
-		// Create a product to add to cart.
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_regular_price( 100 );
-		$product->save();
+		// Rates are only ever found for a customer with a country, and the customer object
+		// carries whatever address the test before this one left on it.
+		$previous_billing_country = WC()->customer->get_billing_country();
+		WC()->customer->set_shipping_country( 'GB' );
+		WC()->customer->set_billing_country( 'GB' );
 
-		// Create a coupon with uppercase code.
-		$coupon = WC_Helper_Coupon::create_coupon( 'TESTCOUPON123' );
-		$coupon->set_discount_type( 'fixed_cart' );
-		$coupon->set_amount( 10 );
-		$coupon->save();
+		try {
+			// Create a product to add to cart.
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_regular_price( 100 );
+			$product->save();
 
-		// Add product to cart.
-		WC()->cart->add_to_cart( $product->get_id(), 1 );
-		WC()->cart->calculate_totals();
+			// Create a coupon with uppercase code.
+			$coupon = WC_Helper_Coupon::create_coupon( 'TESTCOUPON123' );
+			$coupon->set_discount_type( 'fixed_cart' );
+			$coupon->set_amount( 10 );
+			$coupon->save();
 
-		// Apply the coupon using lowercase code.
-		$applied = WC()->cart->apply_coupon( 'testcoupon123' );
-		$this->assertTrue( $applied, 'Coupon should be applied successfully with lowercase code' );
+			// Add product to cart.
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+			WC()->cart->calculate_totals();
 
-		// Verify the coupon is in applied coupons (should be stored in original case).
-		$applied_coupons = WC()->cart->get_applied_coupons();
-		$this->assertContains( 'testcoupon123', $applied_coupons, 'Coupon should be stored in provided case' );
+			// Apply the coupon using lowercase code.
+			$applied = WC()->cart->apply_coupon( 'testcoupon123' );
+			$this->assertTrue( $applied, 'Coupon should be applied successfully with lowercase code' );
 
-		// Test get_coupon_discount_amount with lowercase code.
-		$discount_amount = WC()->cart->get_coupon_discount_amount( 'testcoupon123' );
-		$this->assertEquals( 10.00, $discount_amount, 'get_coupon_discount_amount should return correct value with lowercase code' );
+			// Verify the coupon is in applied coupons (should be stored in original case).
+			$applied_coupons = WC()->cart->get_applied_coupons();
+			$this->assertContains( 'testcoupon123', $applied_coupons, 'Coupon should be stored in provided case' );
 
-		// Test get_coupon_discount_amount with uppercase code.
-		$discount_amount_upper = WC()->cart->get_coupon_discount_amount( 'TESTCOUPON123' );
-		$this->assertEquals( 10.00, $discount_amount_upper, 'get_coupon_discount_amount should return correct value with uppercase code' );
+			// Test get_coupon_discount_amount with lowercase code.
+			$discount_amount = WC()->cart->get_coupon_discount_amount( 'testcoupon123' );
+			$this->assertEquals( 10.00, $discount_amount, 'get_coupon_discount_amount should return correct value with lowercase code' );
 
-		// Test get_coupon_discount_tax_amount with lowercase code.
-		$tax_amount = WC()->cart->get_coupon_discount_tax_amount( 'testcoupon123' );
-		$this->assertEquals( 2.00, $tax_amount, 'get_coupon_discount_tax_amount should return correct value with lowercase code' );
+			// Test get_coupon_discount_amount with uppercase code.
+			$discount_amount_upper = WC()->cart->get_coupon_discount_amount( 'TESTCOUPON123' );
+			$this->assertEquals( 10.00, $discount_amount_upper, 'get_coupon_discount_amount should return correct value with uppercase code' );
 
-		// Test get_coupon_discount_tax_amount with uppercase code.
-		$tax_amount_upper = WC()->cart->get_coupon_discount_tax_amount( 'TESTCOUPON123' );
-		$this->assertEquals( 2.00, $tax_amount_upper, 'get_coupon_discount_tax_amount should return correct value with uppercase code' );
+			// Test get_coupon_discount_tax_amount with lowercase code.
+			$tax_amount = WC()->cart->get_coupon_discount_tax_amount( 'testcoupon123' );
+			$this->assertEquals( 2.00, $tax_amount, 'get_coupon_discount_tax_amount should return correct value with lowercase code' );
 
-		// Clean up.
-		WC()->cart->empty_cart();
-		WC()->cart->remove_coupons();
-		$product->delete( true );
-		$coupon->delete( true );
-
-		// Restore global state.
-		update_option( 'woocommerce_calc_taxes', $old_calc_taxes );
-		if ( $tax_rate_id ) {
-			WC_Tax::_delete_tax_rate( $tax_rate_id );
+			// Test get_coupon_discount_tax_amount with uppercase code.
+			$tax_amount_upper = WC()->cart->get_coupon_discount_tax_amount( 'TESTCOUPON123' );
+			$this->assertEquals( 2.00, $tax_amount_upper, 'get_coupon_discount_tax_amount should return correct value with uppercase code' );
+		} finally {
+			WC()->customer->set_billing_country( $previous_billing_country );
 		}
 	}
 
@@ -2136,6 +2158,26 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 				WC_Helper_Order::delete_order( $order->get_id() );
 			}
 		}
+	}
+
+	/**
+	 * @testdox Should clear the cart after payment_complete() cleared order_awaiting_payment, when the order sent to the gateway moved past payment.
+	 */
+	public function test_clear_cart_after_payment_reads_the_order_sent_to_gateway(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => OrderStatus::PENDING ) );
+		$order->set_cart_hash( WC()->cart->get_cart_hash() );
+		$order->save();
+
+		PaymentRecovery::remember_order_sent_to_gateway( $order->get_id() );
+		WC()->session->set( 'order_awaiting_payment', $order->get_id() );
+		$order->payment_complete( 'txn_died_in_transition' );
+
+		wc_clear_cart_after_payment();
+
+		$this->assertTrue( WC()->cart->is_empty(), 'The next page load should empty the cart of an order a card gateway already charged, so a retry cannot place it again.' );
 	}
 
 	/**
@@ -2797,6 +2839,61 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 1, $this->add_to_cart_quantity_filter_args[0] );
 		$this->assertEquals( $product->get_id(), $this->add_to_cart_quantity_filter_args[1] );
 		$this->assertEquals( $variation['variation_id'], $this->add_to_cart_quantity_filter_args[2] );
+	}
+
+	/**
+	 * @testdox Adding a variation to the cart keeps only the attributes its parent uses for variations.
+	 * @dataProvider parent_variation_attribute_provider
+	 *
+	 * @param bool  $used_for_variations Whether the parent's Color attribute is ticked "Used for variations".
+	 * @param array $expected            The variation data the cart item should keep.
+	 */
+	public function test_add_to_cart_keeps_only_parent_variation_attributes( bool $used_for_variations, array $expected ): void {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Color' );
+		$attribute->set_options( array( 'Red', 'Blue' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'color' => 'Red' ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+
+		// Save the parent again with the box ticked or unticked. Unticking it leaves the variation published and for sale.
+		$attribute = clone $attribute;
+		$attribute->set_variation( $used_for_variations );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$cart_item_key = WC()->cart->add_to_cart(
+			$variation->get_id(),
+			1,
+			0,
+			array(
+				'attribute_color' => 'Red',
+				'attribute_x'     => 'not an option of this product',
+			)
+		);
+
+		$this->assertNotFalse( $cart_item_key );
+		$this->assertSame( $expected, WC()->cart->get_cart_item( $cart_item_key )['variation'] );
+	}
+
+	/**
+	 * Provides whether the parent uses Color for variations, and the variation data the cart should keep.
+	 *
+	 * @return array<string, array{bool, array<string, string>}>
+	 */
+	public static function parent_variation_attribute_provider(): array {
+		return array(
+			'parent uses Color for variations'        => array( true, array( 'attribute_color' => 'Red' ) ),
+			'parent uses no attribute for variations' => array( false, array() ),
+		);
 	}
 
 	/**

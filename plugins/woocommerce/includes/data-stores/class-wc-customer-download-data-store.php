@@ -459,7 +459,12 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 		}
 
 		if ( $args['download_id'] ) {
-			$query[] = $wpdb->prepare( 'AND download_id = %s', $args['download_id'] );
+			// Keep the indexed lookup while requiring an exact match before ordering and limiting the results.
+			$query[] = $wpdb->prepare(
+				'AND download_id = %s AND CAST(download_id AS BINARY) = CAST(%s AS BINARY)',
+				$args['download_id'],
+				$args['download_id']
+			);
 		}
 
 		$orderby     = in_array( $args['orderby'], $valid_fields, true ) ? $args['orderby'] : 'permission_id';

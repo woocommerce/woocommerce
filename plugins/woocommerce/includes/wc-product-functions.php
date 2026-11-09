@@ -545,7 +545,7 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
 			foreach ( array_filter( array_keys( $variation_attributes ), 'taxonomy_exists' ) as $taxonomy ) {
 				$terms = get_the_terms( $parent_id, $taxonomy );
 				if ( is_array( $terms ) ) {
-					foreach ( array_filter( $terms, static fn( $term ) => $term instanceof \WP_Term ) as $term ) { // @phpstan-ignore instanceof.alwaysTrue (defensive checks agains get_the_terms filter)
+					foreach ( array_filter( $terms, static fn( $term ) => $term instanceof \WP_Term ) as $term ) {
 						$taxonomy_terms[ $taxonomy ][ $term->slug ] = $term;
 					}
 				}
@@ -2153,8 +2153,8 @@ function wc_products_array_orderby_price( $a, $b ) {
  * @return array
  */
 function wc_get_min_max_price_meta_query( $args ) {
-	$current_min_price = isset( $args['min_price'] ) ? floatval( $args['min_price'] ) : 0;
-	$current_max_price = isset( $args['max_price'] ) ? floatval( $args['max_price'] ) : PHP_INT_MAX;
+	$current_min_price = isset( $args['min_price'] ) && '' !== $args['min_price'] ? floatval( $args['min_price'] ) : 0;
+	$current_max_price = isset( $args['max_price'] ) && '' !== $args['max_price'] ? floatval( $args['max_price'] ) : PHP_INT_MAX;
 
 	/**
 	 * Filters the meta query used to match products by price.

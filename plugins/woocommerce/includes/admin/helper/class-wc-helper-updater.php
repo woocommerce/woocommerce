@@ -759,17 +759,26 @@ class WC_Helper_Updater {
 		}
 
 		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_installed() ) {
+			if ( WC_Woo_Update_Manager_Plugin::needs_manual_install() ) {
+				/* translators: 1: Woo Update Manager plugin download URL */
+				$message = __( ' <a href="%1$s">Download the WooCommerce.com Update Manager</a> and upload it to update.', 'woocommerce' );
+				$url     = WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_DOWNLOAD_URL;
+			} else {
+				/* translators: 1: Woo Update Manager plugin install URL */
+				$message = __( ' <a href="%1$s">Install WooCommerce.com Update Manager</a> to update.', 'woocommerce' );
+				$url     = WC_Woo_Update_Manager_Plugin::generate_install_url();
+			}
+
 			printf(
 				wp_kses(
-					/* translators: 1: Woo Update Manager plugin install URL */
-					__( ' <a href="%1$s">Install WooCommerce.com Update Manager</a> to update.', 'woocommerce' ),
+					$message,
 					array(
 						'a' => array(
 							'href' => array(),
 						),
 					)
 				),
-				esc_url( WC_Woo_Update_Manager_Plugin::generate_install_url() ),
+				esc_url( $url ),
 			);
 			return;
 		}
@@ -1088,13 +1097,18 @@ class WC_Helper_Updater {
 
 	/**
 	 * Whether cached update data is recent enough to use without a new check. The cache is kept
-	 * for a week so a failed check has something to fall back on, but it's only fresh for 12 hours.
+	 * for a week so a failed check has something to fall back on, but it's only fresh for 11 hours.
+	 *
+	 * The package URLs in the response are presigned links that WooCommerce.com sets to expire
+	 * 12 hours after the check, so the cache has to stop being fresh before they do. Otherwise
+	 * a twice-daily update run, which starts about 12 hours after the last check, could be handed
+	 * links that have just expired.
 	 *
 	 * @param array $data The cached update data.
 	 * @return bool
 	 */
 	private static function is_fresh_update_data( array $data ): bool {
-		return isset( $data['updated'] ) && is_numeric( $data['updated'] ) && (int) $data['updated'] > time() - 12 * HOUR_IN_SECONDS;
+		return isset( $data['updated'] ) && is_numeric( $data['updated'] ) && (int) $data['updated'] > time() - 11 * HOUR_IN_SECONDS;
 	}
 
 	/**
