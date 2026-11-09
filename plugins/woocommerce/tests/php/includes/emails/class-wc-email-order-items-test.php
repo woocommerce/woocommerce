@@ -51,4 +51,37 @@ class WC_Email_Order_Items_Test extends \WC_Unit_Test_Case {
 			'Thumbnail column should reserve the image width plus the email improvements image gap.'
 		);
 	}
+
+	/**
+	 * @testdox Order item images are not marked for lazy loading.
+	 */
+	public function test_order_item_image_is_not_lazy_loaded(): void {
+		$order             = WC_Helper_Order::create_order();
+		$this->order_ids[] = $order->get_id();
+
+		$attachment_id = self::factory()->attachment->create_object(
+			array(
+				'file'           => '2026/11/image.jpg',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		wp_update_attachment_metadata(
+			$attachment_id,
+			array(
+				'width'  => 48,
+				'height' => 48,
+				'file'   => '2026/11/image.jpg',
+			)
+		);
+		foreach ( $order->get_items() as $item ) {
+			$product = $item->get_product();
+			$product->set_image_id( $attachment_id );
+			$product->save();
+		}
+
+		$content = wc_get_email_order_items( $order, array( 'show_image' => true ) );
+
+		$this->assertStringContainsString( '<img', $content );
+		$this->assertStringNotContainsString( 'loading=', $content );
+	}
 }
