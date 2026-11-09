@@ -144,10 +144,8 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'type'     => self::get_order_type_from_input( $input ),
 		);
 
-		foreach ( array( 'billing_email', 'order' ) as $field ) {
-			if ( ! empty( $input[ $field ] ) ) {
-				$args[ $field ] = $input[ $field ];
-			}
+		if ( ! empty( $input['billing_email'] ) ) {
+			$args['billing_email'] = $input['billing_email'];
 		}
 
 		$args['status'] = $input['status'] ?? array();

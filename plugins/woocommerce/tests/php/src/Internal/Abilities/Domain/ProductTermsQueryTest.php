@@ -675,12 +675,14 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return each term exactly once across pages when terms share a name, paging by $paging.
-	 * @testWith ["page"]
-	 *           ["offset"]
+	 * @testdox Should return each term exactly once across pages when terms share a name, paging by $paging in $order order.
+	 * @testWith ["page", "asc"]
+	 *           ["page", "desc"]
+	 *           ["offset", "asc"]
 	 * @param string $paging Paging input.
+	 * @param string $order  Sort direction.
 	 */
-	public function test_pages_terms_with_the_same_name_once_each( string $paging ): void {
+	public function test_pages_terms_with_the_same_name_once_each( string $paging, string $order ): void {
 		$ids = array();
 		for ( $i = 0; $i < 5; $i++ ) {
 			$parent = self::factory()->term->create(
@@ -703,6 +705,7 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 			$input  = array(
 				'taxonomy' => 'product_cat',
 				'search'   => 'Twin',
+				'order'    => $order,
 				'per_page' => 2,
 			);
 			$input += 'page' === $paging ? array( 'page' => $page ) : array( 'offset' => ( $page - 1 ) * 2 );
@@ -710,6 +713,9 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 			$paged  = array_merge( $paged, array_column( $result['terms'], 'id' ) );
 		}
 
-		$this->assertSame( $ids, $paged, 'Terms with the same name should be sorted by ID.' );
+		if ( 'desc' === $order ) {
+			rsort( $ids );
+		}
+		$this->assertSame( $ids, $paged, 'Terms with the same name should be sorted by ID in the requested direction.' );
 	}
 }

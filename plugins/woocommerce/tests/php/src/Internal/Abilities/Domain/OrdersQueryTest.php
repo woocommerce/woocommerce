@@ -336,13 +336,21 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should return each order exactly once across pages when orders tie on $orderby $order, with HPOS $hpos.
-	 * @testWith [true, "date", "desc"]
+	 * @testWith [true, "date", "asc"]
+	 *           [true, "date", "desc"]
 	 *           [true, "date_modified", "asc"]
+	 *           [true, "date_modified", "desc"]
 	 *           [true, "total", "asc"]
+	 *           [true, "total", "desc"]
+	 *           [true, "id", "asc"]
 	 *           [true, "id", "desc"]
+	 *           [false, "date", "asc"]
 	 *           [false, "date", "desc"]
 	 *           [false, "date_modified", "asc"]
+	 *           [false, "date_modified", "desc"]
 	 *           [false, "total", "asc"]
+	 *           [false, "total", "desc"]
+	 *           [false, "id", "asc"]
 	 *           [false, "id", "desc"]
 	 * @param bool   $hpos    Whether to use the custom orders table.
 	 * @param string $orderby Sort field.
