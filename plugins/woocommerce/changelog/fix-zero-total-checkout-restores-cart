@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Empty a logged-in customer's cart after a free order (such as one with a 100% coupon), instead of restoring its items.
