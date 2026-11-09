@@ -10,6 +10,7 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\RestApi\OrderLineItemValidationTrait;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -26,6 +27,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	use CogsAwareTrait;
+	use OrderLineItemValidationTrait;
 
 	/**
 	 * Endpoint namespace.
@@ -114,6 +116,8 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		$order     = new WC_Order( $id );
 		$schema    = $this->get_item_schema();
 		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
+
+		$this->check_new_line_item_products( $request['line_items'] );
 
 		$item_types = array( 'shipping_lines', 'line_items', 'fee_lines' );
 

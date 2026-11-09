@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -64,7 +64,7 @@ class StoreConditions {
 			),
 			array(
 				'id'     => 'ucp_on',
-				'ok'     => UcpUtils::is_enabled(),
+				'ok'     => Utils::is_enabled(),
 				'blocks' => 'ucp',
 				'label'  => __( 'Universal Commerce Protocol (UCP) is off', 'woocommerce' ),
 				'why'    => __( 'Shopping agents that use UCP cannot read your catalog.', 'woocommerce' ),

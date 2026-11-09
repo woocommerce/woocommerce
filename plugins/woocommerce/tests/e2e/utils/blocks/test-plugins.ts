@@ -16,9 +16,6 @@ import { BASE_URL } from './constants';
 export const COOKIE_GATED_TEST_PLUGINS = [
 	'additional-checkout-fields',
 	'item-data-display',
-	'item-data-display-hidden',
-	'item-data-display-malformed',
-	'item-data-display-mixed',
 	'locale-hide-country',
 	'product-collection-compatibility-layer',
 	'single-product-template-compatibility-layer',
