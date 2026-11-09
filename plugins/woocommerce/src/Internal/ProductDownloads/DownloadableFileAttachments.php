@@ -38,11 +38,11 @@ class DownloadableFileAttachments implements RegisterHooksInterface {
 	private const DIRECTORY = 'woocommerce_uploads/';
 
 	/**
-	 * Whether a downloadable file check is running, so hooks it fires again don't start another one.
+	 * Whether is_downloadable_file() is reading an attachment's file path, so hooks the read fires again skip the check.
 	 *
 	 * @var bool
 	 */
-	private bool $is_checking_file = false;
+	private bool $in_progress = false;
 
 	/**
 	 * Register hooks and filters.
@@ -264,17 +264,17 @@ class DownloadableFileAttachments implements RegisterHooksInterface {
 	 */
 	private function is_downloadable_file( int $attachment_id ): bool {
 		// Checking the post type first skips a meta lookup for the posts that comment and GUID hooks run on.
-		if ( $this->is_checking_file || $attachment_id <= 0 || 'attachment' !== get_post_type( $attachment_id ) ) {
+		if ( $this->in_progress || $attachment_id <= 0 || 'attachment' !== get_post_type( $attachment_id ) ) {
 			return false;
 		}
 
 		// Plugins can filter the meta read below with a function that fires these hooks again, such as get_the_guid().
-		$this->is_checking_file = true;
+		$this->in_progress = true;
 		try {
 			// Case-insensitive to match the SQL LIKE used for REST API collections.
 			return 0 === stripos( (string) get_post_meta( $attachment_id, '_wp_attached_file', true ), self::DIRECTORY );
 		} finally {
-			$this->is_checking_file = false;
+			$this->in_progress = false;
 		}
 	}
 
