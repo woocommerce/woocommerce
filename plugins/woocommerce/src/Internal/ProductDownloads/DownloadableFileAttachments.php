@@ -38,7 +38,8 @@ class DownloadableFileAttachments implements RegisterHooksInterface {
 	private const DIRECTORY = 'woocommerce_uploads/';
 
 	/**
-	 * Whether is_downloadable_file() is reading an attachment's file path, so hooks the read fires again skip the check.
+	 * True while is_downloadable_file() reads an attachment's file path. Checks that the read triggers again return
+	 * false instead of recursing, so every attachment counts as visible during that read.
 	 *
 	 * @var bool
 	 */
