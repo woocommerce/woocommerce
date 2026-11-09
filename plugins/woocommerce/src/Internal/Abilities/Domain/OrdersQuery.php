@@ -94,8 +94,17 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			);
 		}
 
-		// wc_order_search() cleans the term this way, so HPOS gets the same term. The order queries skip an empty() `s`, which includes "0".
-		$search = isset( $input['search'] ) ? sanitize_text_field( $input['search'] ) : null;
+		if ( ! empty( $input['id'] ) && isset( $input['search'] ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_order_search_with_id',
+				__( 'Send either an id or search, not both.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Cleaned as wc_order_search() does, which also drops %-encoded octets such as "%ab", so both storages search the same term.
+		// The order queries skip an empty() `s`, which includes "0".
+		$search = isset( $input['search'] ) ? trim( str_replace( 'Order #', '', sanitize_text_field( $input['search'] ) ) ) : null;
 		if ( '' === $search || '0' === $search ) {
 			return new \WP_Error(
 				'woocommerce_ability_order_search_empty',

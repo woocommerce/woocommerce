@@ -224,7 +224,7 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should find an order by its order number.
+	 * @testdox Should find an order by its order number, with or without an "Order #" prefix.
 	 *
 	 * @dataProvider storage_modes
 	 * @param bool $hpos Whether to use the custom orders table.
@@ -234,9 +234,29 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 		$this->create_customer_order( 'John', 'Smith', 'john@example.com' );
 		$order = $this->create_customer_order( 'Jane', 'Doe', 'jane.doe@example.com' );
 
-		$result = OrdersQuery::execute( array( 'search' => (string) $order ) );
+		$number   = OrdersQuery::execute( array( 'search' => (string) $order ) );
+		$prefixed = OrdersQuery::execute( array( 'search' => 'Order #' . $order ) );
 
-		$this->assertContains( $order, array_column( $result['orders'], 'id' ) );
+		$this->assertContains( $order, array_column( $number['orders'], 'id' ) );
+		$this->assertContains( $order, array_column( $prefixed['orders'], 'id' ), 'An "Order #" prefix should match on both storages.' );
+	}
+
+	/**
+	 * @testdox Should refuse an id together with search.
+	 */
+	public function test_refuses_id_with_search(): void {
+		$order = OrderHelper::create_order();
+
+		$result = OrdersQuery::execute(
+			array(
+				'id'     => $order->get_id(),
+				'search' => 'Jane',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_order_search_with_id', $result->get_error_code() );
+		$this->assertSame( 400, $result->get_error_data()['status'] );
 	}
 
 	/**
@@ -301,6 +321,7 @@ class OrdersQueryTest extends WC_Unit_Test_Case {
 	 *           ["0"]
 	 *           [" 0 "]
 	 *           ["<b></b>"]
+	 *           ["Order #"]
 	 *
 	 * @param string $search Search text.
 	 */
