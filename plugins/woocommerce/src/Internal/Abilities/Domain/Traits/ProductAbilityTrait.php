@@ -1445,8 +1445,8 @@ trait ProductAbilityTrait {
 	 * @return mixed|\WP_Error
 	 */
 	private static function prepare_product_field_value( string $field, $value ) {
-		if ( in_array( $field, array( 'name', 'description', 'short_description' ), true ) ) {
-			return wp_filter_post_kses( $value );
+		if ( in_array( $field, array( 'name', 'description', 'short_description' ), true ) && is_string( $value ) ) {
+			return wp_kses_post( $value );
 		}
 
 		if ( in_array( $field, array( 'status', 'stock_status', 'external_url' ), true ) ) {

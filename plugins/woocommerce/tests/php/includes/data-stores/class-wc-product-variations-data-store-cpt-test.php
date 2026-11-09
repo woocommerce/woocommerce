@@ -327,6 +327,36 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Creating and updating a variation keeps backslashes from the parent name in its title.
+	 */
+	public function test_create_and_update_keep_backslashes_in_variation_title(): void {
+		$parent = WC_Helper_Product::create_variation_product();
+		$parent->set_name( 'Cable 1\\2 inch' );
+		$parent->save();
+
+		// Record the title WordPress stores, before read() repairs a mismatched title.
+		$stored_titles = array();
+		add_filter(
+			'wp_insert_post_data',
+			function ( $data ) use ( &$stored_titles ) {
+				if ( 'product_variation' === $data['post_type'] ) {
+					$stored_titles[] = wp_unslash( $data['post_title'] );
+				}
+				return $data;
+			},
+			PHP_INT_MAX
+		);
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $parent->get_id() );
+		$variation->save();
+		$variation->set_menu_order( 5 );
+		$variation->save();
+
+		$this->assertSame( array( 'Cable 1\\2 inch', 'Cable 1\\2 inch' ), $stored_titles, 'Creating and updating the variation should both store the backslash from the parent name.' );
+	}
+
+	/**
 	 * Create a variable product and return one of its variations.
 	 *
 	 * @return WC_Product_Variation The variation created.
