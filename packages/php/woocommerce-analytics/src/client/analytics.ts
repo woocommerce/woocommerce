@@ -278,3 +278,5 @@ export class Analytics {
 		}
 	}
 }
+
+// live receipt test marker
