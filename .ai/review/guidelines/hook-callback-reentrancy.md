@@ -4,11 +4,9 @@
 
 - #70198 (11.3.0 RC-1, rolled back on Atomic): a `get_the_guid` callback read `_wp_attached_file` meta. Real Media Library's `get_post_metadata` callback for that key calls `get_the_guid()`, so stores running both ran out of memory on most pages with media. Fixed in #70782.
 
-**What broke:** A new callback read data that other plugins filter, and one of those plugins' callbacks called back into the original hook. The two recursed until PHP hit its memory limit on every request that reached the hook. Neither plugin was wrong alone, so in-tree tests and greps showed nothing.
-
 **Pattern to catch:** A hunk adds or changes a callback that, inside the callback, reads filtered data or calls something that fires the same hook. The risk is higher when:
 
-- the hook runs many times per request: `get_the_guid`, `attachment_link`, `post_link`, `the_permalink`, `the_content`, `get_post_metadata`, `option_*`, `user_has_cap`, `map_meta_cap`, `home_url`;
+- the hook runs many times per request. The following examples are not an exclusive list, but are examples of types of hooks that might be affected. `get_the_guid`, `attachment_link`, `post_link`, `the_permalink`, `the_content`, `get_post_metadata`, `option_*`, `user_has_cap`, `map_meta_cap`, `home_url`;
 - the read is post, user, or term meta, an option, a permalink or GUID, `current_user_can()`, or `home_url()`;
 - the read happens before cheap checks such as the post type or values the hook already passed in.
 
