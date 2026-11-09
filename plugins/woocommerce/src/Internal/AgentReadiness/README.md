@@ -100,7 +100,7 @@ array(
 
 Channel specs change faster than WooCommerce releases, so each background scan first fetches a published rules file (`RemoteRules`). Only a GET of the file is made; the request's user agent includes the site URL, as other WooCommerce.com polls do. The `woocommerce_agent_readiness_rules_url` filter changes the URL; an empty URL turns the fetch off. With no stored file, or a failed fetch, the bundled checks run.
 
-The file has a `version` and a `checks` object. The ids in `checks` are the checks that run, and each one has to match a check shipped in code. An id the file leaves out does not run. An id code does not know, an unknown channel, or an effect other than `not_listable` or `gaps` is dropped. A check left with no valid channel does not run. With no stored file, or a file that names nothing this code can run, the bundled checks run. A failed or malformed fetch keeps the last good copy (option `woocommerce_agent_readiness_remote_rules`).
+The file has a `version` and a `checks` object. The ids in `checks` are the checks that run, and each one has to match a check shipped in code. An id the file leaves out does not run. An id code does not know, or an unknown channel, is dropped. A check whose entry has a known channel with a missing field, an effect other than `not_listable` or `gaps`, or a bad `effect_from` runs with its bundled channels, so a typo never turns a check off. With no stored file, or a file that names nothing this code can run, the bundled checks run. A failed or malformed fetch keeps the last good copy (option `woocommerce_agent_readiness_remote_rules`).
 
 Per check, `channels` maps a channel id to the feed field and the effect, the same shape as the `woocommerce_agent_readiness_rules` filter. A channel entry may carry `effect_from` (`{ "2027-01-31": "not_listable" }`) for a spec change announced ahead. The filter runs last, so it can still drop a check or put a bundled one back. The file cannot add a check the code has never seen: that still needs a class.
 
@@ -120,7 +120,7 @@ The scan walks published simple and variable products shown in the shop catalog 
 
 ## Updating rules
 
-The per-channel field and effect live in each check's `channels()`, and that is what runs until a rules file is stored. After that, `rules.json` is the list. The `woocommerce_agent_readiness_rules` filter still runs last. Unknown channels and effects are dropped.
+The per-channel field and effect live in each check's `channels()`, and that is what runs until a rules file is stored. After that, `rules.json` is the list. The `woocommerce_agent_readiness_rules` filter still runs last; unknown channels and effects in what it returns are dropped.
 
 ## Product feeds
 

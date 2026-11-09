@@ -11,10 +11,13 @@ defined( 'ABSPATH' ) || exit;
  *
  * The file is the list of checks that run. Each id has to match a check in
  * code; an id the file leaves out does not run, and an id code does not know
- * is ignored. The file is fetched before each background scan: the daily run
- * and any scan that is asked for. Only a GET is made; the request's user
- * agent includes the site URL, as other WooCommerce.com polls do. A failed
- * fetch keeps the last good copy, and with no copy the bundled checks apply.
+ * is ignored. A check whose entry has a malformed channel runs with its
+ * bundled channels instead.
+ *
+ * The file is fetched before each background scan: the daily run and any
+ * scan that is asked for. Only a GET is made; the request's user agent
+ * includes the site URL, as other WooCommerce.com polls do. A failed fetch
+ * keeps the last good copy, and with no copy the bundled checks apply.
  *
  * The file is fetched from PUBLISHED_URL, the same host as the payment gateway
  * suggestions; the woocommerce_agent_readiness_rules_url filter changes it.
@@ -29,14 +32,14 @@ class RemoteRules {
 	public const OPTION = 'woocommerce_agent_readiness_remote_rules';
 
 	/**
-	 * Where the file will be served, once that endpoint exists.
+	 * Default rules file URL. While it answers with an error, such as a 404, the bundled checks run.
 	 */
 	public const PUBLISHED_URL = 'https://woocommerce.com/wp-json/wccom/agent-readiness/1.0/rules.json';
 
 	/**
-	 * Fetch the rules file and store it when it is valid: at least one check
-	 * has a channel with a field, a valid effect and valid dated effects, and,
-	 * when known ids are given, is one of them. Anything less keeps the last good copy.
+	 * Fetch the rules file and store it when at least one check entry is valid
+	 * (see is_valid_check()) and, when known ids are given, is one of them.
+	 * Anything less keeps the last good copy.
 	 *
 	 * @param array<int, string>|null $known_ids Check ids the code can run; null accepts any id.
 	 * @return bool Whether a new copy was stored.
@@ -69,16 +72,17 @@ class RemoteRules {
 			return false;
 		}
 
+		// A malformed entry is kept with no channels, so its check runs with the bundled ones rather than not at all.
 		$checks = array();
 		foreach ( $rules['checks'] as $id => $check ) {
-			if ( is_string( $id ) && is_array( $check ) && isset( $check['channels'] ) && is_array( $check['channels'] ) ) {
-				$checks[ $id ] = $check['channels'];
+			if ( is_string( $id ) ) {
+				$checks[ $id ] = is_array( $check ) && isset( $check['channels'] ) && is_array( $check['channels'] ) ? $check['channels'] : array();
 			}
 		}
 		// Nothing this code could run. Do not replace the last good copy with it.
 		$usable = array_filter(
 			$checks,
-			static fn( array $channels, string $id ): bool => ( null === $known_ids || in_array( $id, $known_ids, true ) ) && self::has_usable_channel( $channels ),
+			static fn( array $channels, string $id ): bool => ( null === $known_ids || in_array( $id, $known_ids, true ) ) && self::is_valid_check( $channels ),
 			ARRAY_FILTER_USE_BOTH
 		);
 		if ( array() === $usable ) {
@@ -96,23 +100,24 @@ class RemoteRules {
 	}
 
 	/**
-	 * Whether a check's channel map names a known channel with a string field, a valid effect,
-	 * and, when it has effect_from, only valid dated effects.
+	 * Whether a check's channel map names at least one known channel, and every
+	 * known channel has a string field, a valid effect and, when effect_from is
+	 * present, only Y-m-d dates with valid effects. Unknown channels are ignored.
 	 *
 	 * @param array<mixed> $channels Channel map from the file.
 	 */
-	private static function has_usable_channel( array $channels ): bool {
-		$known = FeedChannels::all();
-		foreach ( $channels as $channel => $spec ) {
-			if ( ! isset( $known[ $channel ] ) || ! is_array( $spec ) || ! is_string( $spec['field'] ?? null ) || ! self::is_effect( $spec['effect'] ?? null ) ) {
-				continue;
+	private static function is_valid_check( array $channels ): bool {
+		$known = array_intersect_key( $channels, FeedChannels::all() );
+		foreach ( $known as $spec ) {
+			if ( ! is_array( $spec ) || ! is_string( $spec['field'] ?? null ) || ! self::is_effect( $spec['effect'] ?? null ) ) {
+				return false;
 			}
-			$dates = $spec['effect_from'] ?? array();
-			if ( is_array( $dates ) && count( $dates ) === count( self::valid_dates( $dates ) ) ) {
-				return true;
+			$dates = array_key_exists( 'effect_from', $spec ) ? $spec['effect_from'] : array();
+			if ( ! is_array( $dates ) || count( $dates ) !== count( self::valid_dates( $dates ) ) ) {
+				return false;
 			}
 		}
-		return false;
+		return array() !== $known;
 	}
 
 	/**
@@ -152,8 +157,9 @@ class RemoteRules {
 
 	/**
 	 * Channel maps by check id from the stored file, with each effect_from
-	 * date already applied for the given day; a dated entry with a bad date or
-	 * effect is ignored. Empty when nothing is stored.
+	 * date already applied for the given day. A check whose entry is not
+	 * valid (see is_valid_check()) maps to an empty array, so the bundled
+	 * channels run for it. Empty when nothing is stored.
 	 *
 	 * @param int|null $now Unix time to resolve dates for; defaults to now.
 	 * @return array<string, array<string, array{field:string,effect:string}>>
@@ -167,27 +173,19 @@ class RemoteRules {
 		$today = gmdate( 'Y-m-d', $now ?? time() );
 		$rules = array();
 		foreach ( $stored['checks'] as $id => $channels ) {
-			if ( ! is_array( $channels ) ) {
+			$rules[ $id ] = array();
+			if ( ! is_array( $channels ) || ! self::is_valid_check( $channels ) ) {
 				continue;
 			}
-			$rules[ $id ] = array();
-			foreach ( $channels as $channel => $spec ) {
-				if ( ! is_array( $spec ) ) {
-					continue;
-				}
-				$field = $spec['field'] ?? null;
-				if ( ! is_string( $field ) ) {
-					continue;
-				}
-				$effect = $spec['effect'] ?? null;
-				$dates  = isset( $spec['effect_from'] ) && is_array( $spec['effect_from'] ) ? self::valid_dates( $spec['effect_from'] ) : array();
-				foreach ( $dates as $from => $later ) {
-					if ( $today >= (string) $from ) {
+			foreach ( array_intersect_key( $channels, FeedChannels::all() ) as $channel => $spec ) {
+				$effect = $spec['effect'];
+				foreach ( self::valid_dates( $spec['effect_from'] ?? array() ) as $from => $later ) {
+					if ( $today >= $from ) {
 						$effect = $later;
 					}
 				}
 				$rules[ $id ][ $channel ] = array(
-					'field'  => $field,
+					'field'  => $spec['field'],
 					'effect' => $effect,
 				);
 			}

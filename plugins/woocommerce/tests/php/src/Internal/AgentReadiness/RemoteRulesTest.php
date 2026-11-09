@@ -180,29 +180,62 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A bad dated effect on one channel does not change that channel's effect when another channel makes the file usable.
+	 * @testdox A check entry with a malformed channels map, channel or dated effect runs with its bundled channels, while the file's valid checks apply.
 	 */
-	public function test_bad_effect_from_on_one_channel_is_ignored(): void {
+	public function test_malformed_check_entry_uses_bundled_channels(): void {
 		$this->serve(
 			array(
-				'missing_brand' => array(
+				'title_too_long'  => array(
+					'google' => array(
+						'field'  => 'title',
+						'effect' => 'gaps',
+					),
+				),
+				'missing_brand'   => array(
+					'google' => array(
+						'field'  => 'brand',
+						'effect' => 'sometimes',
+					),
+				),
+				'image_too_small' => array(
 					'google'  => array(
-						'field'       => 'brand',
-						'effect'      => 'not_listable',
-						'effect_from' => array( '2020-01-01' => 'typo' ),
+						'field'       => 'image_link',
+						'effect'      => 'gaps',
+						'effect_from' => array( '2027-1-31' => 'not_listable' ),
 					),
 					'chatgpt' => array(
-						'field'  => 'brand',
+						'field'  => 'image_link',
 						'effect' => 'gaps',
 					),
 				),
 			)
 		);
+		$this->answer['body'] = (string) wp_json_encode(
+			array_merge_recursive(
+				json_decode( $this->answer['body'], true ),
+				array(
+					'checks' => array(
+						'missing_gtin'   => array( 'channel' => array() ),
+						'missing_images' => 'google',
+					),
+				)
+			)
+		);
 		$this->assertTrue( $this->sut->refresh() );
 
-		$rules = $this->sut->channel_rules()['missing_brand'];
-		$this->assertSame( 'not_listable', $rules['google']['effect'] );
-		$this->assertSame( 'gaps', $rules['chatgpt']['effect'] );
+		$agent_readiness = $this->agent_readiness();
+		$defaults        = $agent_readiness->get_default_rules();
+		$rules           = $agent_readiness->get_channel_rules();
+
+		$this->assertSame( $defaults['missing_gtin']->channels(), $rules['missing_gtin'], 'A misspelled channels key runs the bundled channels' );
+		$this->assertSame( $defaults['missing_images']->channels(), $rules['missing_images'], 'A non-object entry runs the bundled channels' );
+		unset( $rules['missing_gtin'], $rules['missing_images'] );
+		$ids = array_keys( $rules );
+		sort( $ids );
+		$this->assertSame( array( 'image_too_small', 'missing_brand', 'title_too_long' ), $ids, 'Only the file\'s checks run' );
+		$this->assertSame( $defaults['missing_brand']->channels(), $rules['missing_brand'], 'A bad effect runs the bundled channels' );
+		$this->assertSame( $defaults['image_too_small']->channels(), $rules['image_too_small'], 'A bad date runs the bundled channels' );
+		$this->assertSame( array( 'google' ), array_keys( $rules['title_too_long'] ), 'The valid entry still applies' );
 	}
 
 	/**
@@ -298,7 +331,7 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Unknown checks, channels and effects in the file never reach the rules filter, an entry with nothing valid does not run, and the filter still has the last word.
+	 * @testdox Unknown checks and channels in the file never reach the rules filter, an entry with a bad effect runs its bundled channels, and the filter still has the last word.
 	 */
 	public function test_file_is_sanitized_and_filter_wins(): void {
 		$this->serve(
@@ -341,17 +374,18 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 
 		$rules = $this->agent_readiness()->get_channel_rules();
 
+		$bundled = $this->agent_readiness()->get_default_rules()['title_too_long']->channels();
 		$this->assertArrayNotHasKey( 'not_a_check', $seen );
-		$this->assertArrayNotHasKey( 'title_too_long', $seen, 'Nothing valid left: the check does not run' );
+		$this->assertSame( $bundled, $seen['title_too_long'], 'A malformed entry runs the bundled channels' );
 		$this->assertSame( 'not_listable', $seen['missing_gtin']['google']['effect'], 'The filter sees the file\'s valid values' );
-		$this->assertArrayNotHasKey( 'title_too_long', $rules );
+		$this->assertSame( $bundled, $rules['title_too_long'] );
 		$this->assertSame( 'gaps', $rules['missing_gtin']['google']['effect'] );
 	}
 
 	/**
-	 * @testdox A channel whose field is not a string is dropped, so a malformed file does not warn.
+	 * @testdox A channel whose field is missing or not a string makes its check run with the bundled channels, so a malformed file does not warn.
 	 */
-	public function test_non_string_field_is_dropped(): void {
+	public function test_non_string_field_uses_bundled_channels(): void {
 		$this->serve(
 			array(
 				'title_too_long' => array(
@@ -359,23 +393,32 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 						'field'  => array( 'title' ),
 						'effect' => 'gaps',
 					),
-					'copilot' => array(
-						'effect' => 'gaps',
-					),
 					'chatgpt' => array(
 						'field'  => 'title',
 						'effect' => 'gaps',
 					),
 				),
+				'missing_gtin'   => array(
+					'copilot' => array(
+						'effect' => 'gaps',
+					),
+				),
+				'missing_brand'  => array(
+					'google' => array(
+						'field'  => 'brand',
+						'effect' => 'gaps',
+					),
+				),
 			)
 		);
-		$this->sut->refresh();
+		$this->assertTrue( $this->sut->refresh() );
 
-		$rules = $this->agent_readiness()->get_channel_rules();
+		$agent_readiness = $this->agent_readiness();
+		$defaults        = $agent_readiness->get_default_rules();
+		$rules           = $agent_readiness->get_channel_rules();
 
-		$this->assertArrayNotHasKey( 'google', $rules['title_too_long'] );
-		$this->assertArrayNotHasKey( 'copilot', $rules['title_too_long'] );
-		$this->assertSame( 'title', $rules['title_too_long']['chatgpt']['field'] );
+		$this->assertSame( $defaults['title_too_long']->channels(), $rules['title_too_long'] );
+		$this->assertSame( $defaults['missing_gtin']->channels(), $rules['missing_gtin'] );
 	}
 
 	/**
@@ -501,6 +544,23 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 						'field'       => 'brand',
 						'effect'      => 'not_listable',
 						'effect_from' => 'gaps',
+					),
+				),
+				array(
+					'google' => array(
+						'field'       => 'brand',
+						'effect'      => 'not_listable',
+						'effect_from' => null,
+					),
+				),
+				array(
+					'google'  => array(
+						'field'  => 'brand',
+						'effect' => 'sometimes',
+					),
+					'chatgpt' => array(
+						'field'  => 'brand',
+						'effect' => 'gaps',
 					),
 				),
 			) as $channels
