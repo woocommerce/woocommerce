@@ -1200,6 +1200,37 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse permission when an order mutation receives an order whose unregistered type an extension gives an order class.
+	 */
+	public function test_order_mutations_refuse_order_of_unregistered_type_with_class(): void {
+		global $wpdb;
+
+		$this->set_order_storage_for_test( true );
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'type' => 'shop_test_unregistered' ), array( 'id' => $order->get_id() ) );
+		wp_cache_flush();
+		add_filter(
+			'woocommerce_order_class',
+			static function ( $class_name, $order_type ) {
+				return 'shop_test_unregistered' === $order_type ? \WC_Order::class : $class_name;
+			},
+			10,
+			2
+		);
+
+		$this->assertSame( 'shop_test_unregistered', OrderUtil::get_order_type( $order->get_id() ) );
+		$this->assertInstanceOf( \WC_Order::class, wc_get_order( $order->get_id() ) );
+
+		foreach ( $this->get_order_mutation_inputs( $order->get_id() ) as $ability_id => $input ) {
+			$result = wp_get_ability( $ability_id )->execute( $input );
+
+			$this->assertWPError( $result, "{$ability_id} should refuse an order whose type is not registered." );
+			$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+		}
+	}
+
+	/**
 	 * Valid input for each order mutation ability, keyed by ability ID.
 	 *
 	 * @param int $order_id Order ID to send.
