@@ -54,17 +54,25 @@ if [[ $list -eq 0 && $all -eq 0 && ${#cells[@]} -eq 0 ]]; then
 	usage
 fi
 [[ "$jobs" =~ ^[1-9][0-9]*$ ]] || usage
-# A receipt says the whole CI job passed, so gh local-ci may not narrow the run.
+# gh local-ci (https://github.com/woocommerce/gh-local-ci) runs CI jobs on a
+# developer's machine and sets LOCAL_CI=1; its receipt lets CI skip the job
+# (.github/actions/local-ci-receipt/README.md). A receipt says the whole CI
+# job passed, so a run under it may not narrow the tests.
 if [[ "${LOCAL_CI:-}" == "1" && ( ${#tests[@]} -gt 0 || ${#phpunit_args[@]} -gt 0 ) ]]; then
 	echo "error: test selection is not allowed under gh local-ci; a receipt covers the whole job" >&2
 	exit 2
 fi
 
+caller_dir="$PWD"
 cd "$(dirname "$0")/.."
 tmp="$(mktemp -d)"
 keep_tmp=0
 # shellcheck disable=SC2329 # invoked by the trap
-cleanup() { [[ $keep_tmp -eq 1 ]] || rm -rf "$tmp"; }
+cleanup() {
+	# Put back a jobs.json someone saved at the root before the planner overwrote it.
+	[[ ! -e "$tmp/jobs.json.saved" ]] || mv -f "$tmp/jobs.json.saved" jobs.json
+	[[ $keep_tmp -eq 1 ]] || rm -rf "$tmp"
+}
 trap cleanup EXIT
 
 # --tests selectors -> phpunit arguments: an optional suite plus --filter
@@ -79,13 +87,25 @@ for t in ${tests[@]+"${tests[@]}"}; do
 	if [[ "$t" == suite:* ]]; then
 		[[ -z "$test_suite" ]] || { echo "error: only one suite: selector" >&2; usage; }
 		test_suite="${t#suite:}"
-	elif [[ -d "$project_dir/${t#"$project_dir"/}" ]]; then
+		[[ -n "$test_suite" ]] || usage
+		continue
+	fi
+	# A path may be relative to where the script was run from, the repository root or the plugin.
+	path=""
+	for candidate in "$caller_dir/$t" "$t" "$project_dir/${t#"$project_dir"/}"; do
+		[[ "$t" == /* ]] && candidate="$t"
+		if [[ -e "$candidate" ]]; then
+			path="$candidate"
+			break
+		fi
+	done
+	if [[ -d "$path" ]]; then
 		# phpunit only picks *Test.php out of a directory and this repo's files end in -test.php.
 		echo "error: '$t' is a directory; select a test file, a class, or suite:<name>" >&2
 		usage
-	elif [[ -f "$project_dir/${t#"$project_dir"/}" ]]; then
+	elif [[ -f "$path" ]]; then
 		# phpunit wants a file's class named after the file; this repo's are not, so select the classes it declares.
-		classes="$(grep -oE '^(final |abstract )?class +[A-Za-z0-9_]+' "$project_dir/${t#"$project_dir"/}" | awk '{print $NF}' || true)"
+		classes="$(grep -oE '^(final |abstract )?class +[A-Za-z0-9_]+' "$path" | awk '{print $NF}' || true)"
 		[[ -n "$classes" ]] || { echo "error: no test class found in '$t'" >&2; usage; }
 		for c in $classes; do filters+=( "(^|\\\\)$c\\b" ); done
 	elif [[ "$t" =~ $identifier ]]; then
@@ -113,8 +133,11 @@ run() {
 field() { printf '%s' "$1" | cut -f"$2"; }
 
 # Cells, one per line: index, name, command, start, port, slug, env (k=v;k=v).
+# The planner always writes jobs.json at the root.
+[[ ! -e jobs.json ]] || mv jobs.json "$tmp/jobs.json.saved"
 run pnpm utils ci-jobs --event pull_request --json >/dev/null
 mv jobs.json "$tmp/jobs.json"
+[[ ! -e "$tmp/jobs.json.saved" ]] || mv "$tmp/jobs.json.saved" jobs.json
 # shellcheck disable=SC2016 # node source, not shell
 node -e '
 	const jobs = require( process.argv[ 1 ] ).test.filter(
@@ -271,14 +294,13 @@ run_group() {
 }
 
 : > "$tmp/results.tsv"
-running=0
+# Start the next group as soon as any one finishes. macOS's bash 3.2 has no
+# `wait -n`, so poll the running jobs instead.
 for slug in "${group_slugs[@]}"; do
+	while [[ $(jobs -pr | wc -l) -ge $jobs ]]; do
+		sleep 1
+	done
 	run_group "$slug" &
-	running=$(( running + 1 ))
-	if [[ $running -ge $jobs ]]; then
-		wait
-		running=0
-	fi
 done
 wait
 
