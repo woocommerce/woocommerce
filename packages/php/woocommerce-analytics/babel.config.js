@@ -8,3 +8,5 @@ module.exports = api =>
 				],
 			}
 		: {};
+
+// live receipt test marker
