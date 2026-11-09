@@ -30,6 +30,15 @@ class Html2Text_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test inline formatting does not split a preformatted line, and later lines keep their indentation
+	 */
+	public function test_preformatted_text_keeps_lines_and_indentation(): void {
+		$html = "<p>Before</p><pre>one <a href=\"https://example.com\">link</a> <em>two</em> three\n\tfour</pre>";
+
+		$this->assertEquals( "Before\n\none [link](https://example.com) two three\n\tfour", Html2Text::convert( $html ) );
+	}
+
+	/**
 	 * Test anchor links with drop_links option
 	 */
 	public function test_anchors_drop_links(): void {

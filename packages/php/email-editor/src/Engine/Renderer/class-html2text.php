@@ -356,7 +356,7 @@ class Html2Text {
 			// Replace whitespace characters with a space (equivalent to \s).
 			if ( $in_pre ) {
 				// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-				$text = "\n" . trim( self::render_text( $node->wholeText ), "\n\r\t " ) . "\n";
+				$text = self::render_text( $node->wholeText );
 
 				// Remove trailing whitespace only.
 				$result = preg_replace( "/[ \t]*\n/im", "\n", $text );
