@@ -17,6 +17,8 @@ parameters:
 	bootstrapFiles:
 		- vendor/autoload.php
 		- tests/Tools/phpstan/StagedWriteRule.php
+		- tests/Tools/phpstan/AbilityClassRule.php
+		- tests/Tools/phpstan/AbilityRegistrationRule.php
 	scanDirectories:
 		- vendor/wordpress/abilities-api
 		- packages/action-scheduler
@@ -94,5 +96,13 @@ parameters:
 services:
 	-
 		class: Automattic\WooCommerce\Testing\Tools\phpstan\StagedWriteRule
+		tags:
+			- phpstan.rules.rule
+	-
+		class: Automattic\WooCommerce\Testing\Tools\phpstan\AbilityClassRule
+		tags:
+			- phpstan.rules.rule
+	-
+		class: Automattic\WooCommerce\Testing\Tools\phpstan\AbilityRegistrationRule
 		tags:
 			- phpstan.rules.rule

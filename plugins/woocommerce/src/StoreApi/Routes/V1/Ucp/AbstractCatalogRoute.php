@@ -6,7 +6,7 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 use Automattic\WooCommerce\Internal\ProductFeed\Mapping\UcpProductMapper;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractRoute;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\Ucp\UcpProductSchema;
-use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 /**
  * Shared behaviour of the UCP catalog routes.
@@ -27,7 +27,7 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	private $mapper;
 
 	/**
-	 * The UCP capability this route serves, one of the UcpUtils::CAPABILITY_* constants.
+	 * The UCP capability this route serves, one of the Utils::CAPABILITY_* constants.
 	 *
 	 * @return string
 	 */
@@ -40,7 +40,7 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	 * @return array
 	 */
 	protected function ucp_metadata( string $status ): array {
-		return UcpUtils::response_metadata( $this->get_capability(), $status );
+		return Utils::response_metadata( $this->get_capability(), $status );
 	}
 
 	/**
@@ -58,6 +58,19 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 			),
 			'schema' => array( $this->schema, 'get_public_item_schema' ),
 		);
+	}
+
+	/**
+	 * Refuse a non-JSON payload before the handler reads anything.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function get_response( \WP_REST_Request $request ) {
+		return Utils::refuse_non_json_payload( $request, $this->get_capability() ) ?? parent::get_response( $request );
 	}
 
 	/**
@@ -112,7 +125,7 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	 * @return array
 	 */
 	protected function get_context( \WP_REST_Request $request ): array {
-		$raw = $request->get_param( 'context' );
+		$raw = Utils::json_param( $request, 'context' );
 
 		if ( ! is_array( $raw ) ) {
 			return array();
@@ -139,7 +152,7 @@ abstract class AbstractCatalogRoute extends AbstractRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function ucp_error( string $code, string $message, string $severity, int $status ): \WP_REST_Response {
-		return UcpUtils::error_response( $this->get_capability(), $code, $message, $severity, $status );
+		return Utils::error_response( $this->get_capability(), $code, $message, $severity, $status );
 	}
 
 	/**

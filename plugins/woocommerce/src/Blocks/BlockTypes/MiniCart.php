@@ -231,6 +231,10 @@ class MiniCart extends AbstractBlock {
 			$template_part_edit_uri
 		);
 
+		// Performance note: prevent populating 'paymentMethodSortOrder' in '\Automattic\WooCommerce\Blocks\Payments\Api::add_payment_method_script_data',
+		// which initializes all registered payment gateways (triggers bulk autoloading and objects allocations; some environments not handling this well).
+		$this->asset_data_registry->add( 'paymentMethodSortOrder', array() );
+
 		/**
 		 * Fires after cart block data is registered.
 		 *

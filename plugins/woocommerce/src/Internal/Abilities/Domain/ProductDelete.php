@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
 
@@ -30,6 +31,11 @@ class ProductDelete extends ActionableAbility {
 	 * Ability name.
 	 */
 	public const ABILITY_NAME = 'woocommerce/product-delete';
+
+	/**
+	 * The result status of a forced delete, which leaves nothing to restore.
+	 */
+	private const STATUS_DELETED = 'deleted';
 
 	/**
 	 * ID of the product the call deletes, kept because a forced delete clears the object's ID.
@@ -84,12 +90,12 @@ class ProductDelete extends ActionableAbility {
 		return array(
 			'label'               => __( 'Delete product', 'woocommerce' ),
 			'description'         => __(
-				'Delete, trash, or restore a product.',
+				'Move a product to the trash, or delete it permanently.',
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::build_input_schema(),
-			'output_schema'       => self::get_delete_output_schema(),
+			'output_schema'       => self::build_output_schema(),
 			'permission_callback' => array( __CLASS__, 'can_delete_product' ),
 			'meta'                => array(
 				'show_in_rest' => true,
@@ -132,7 +138,7 @@ class ProductDelete extends ActionableAbility {
 	 */
 	protected function load( array $input ) {
 		$this->product_id = 0;
-		$this->force      = wc_string_to_bool( $input['force'] ?? false );
+		$this->force      = $input['force'] ?? false;
 		$this->parent     = null;
 		$this->deleting   = array();
 		$this->deleted    = array();
@@ -241,6 +247,8 @@ class ProductDelete extends ActionableAbility {
 			)
 		);
 
+		_prime_post_caches( $variation_ids );
+
 		/** @var \WC_Product_Variation[] $variations */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 		$variations = array_map( 'wc_get_product', $variation_ids );
 
@@ -285,8 +293,8 @@ class ProductDelete extends ActionableAbility {
 		unset( $subject );
 
 		return array(
-			'deleted' => true,
-			'id'      => $this->product_id,
+			'id'     => $this->product_id,
+			'status' => $this->force ? self::STATUS_DELETED : ProductStatus::TRASH,
 		);
 	}
 
@@ -325,6 +333,29 @@ class ProductDelete extends ActionableAbility {
 				),
 			),
 			'required'             => array( 'id' ),
+			'additionalProperties' => false,
+		);
+	}
+
+	/**
+	 * Get the output schema.
+	 *
+	 * @return array
+	 */
+	private static function build_output_schema(): array {
+		return array(
+			'type'                 => 'object',
+			'properties'           => array(
+				'id'     => array(
+					'type'        => 'integer',
+					'description' => __( 'ID of the product.', 'woocommerce' ),
+				),
+				'status' => array(
+					'type'        => 'string',
+					'enum'        => array( ProductStatus::TRASH, self::STATUS_DELETED ),
+					'description' => __( 'What happened to the product. "trash": the product was moved to the trash, and can be restored. "deleted": the product was permanently deleted, and cannot be restored.', 'woocommerce' ),
+				),
+			),
 			'additionalProperties' => false,
 		);
 	}

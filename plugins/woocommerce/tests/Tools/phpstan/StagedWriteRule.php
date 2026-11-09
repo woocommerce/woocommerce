@@ -59,9 +59,9 @@ final class StagedWriteRule implements Rule {
 	/**
 	 * Report the method when it writes and calls no stage method.
 	 *
-	 * @param Node  $node  Method node.
-	 * @param Scope $scope Scope of the method.
-	 * @return array
+	 * @param InClassMethodNode $node  Method node.
+	 * @param Scope             $scope Scope of the method.
+	 * @return list<\PHPStan\Rules\IdentifierRuleError>
 	 */
 	public function processNode( Node $node, Scope $scope ): array {
 		$class  = $node->getClassReflection();
@@ -98,7 +98,7 @@ final class StagedWriteRule implements Rule {
 				continue;
 			}
 
-			if ( ! $call->name instanceof Identifier ) {
+			if ( ! $call instanceof MethodCall || ! $call->name instanceof Identifier ) {
 				continue;
 			}
 

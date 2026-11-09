@@ -34,11 +34,26 @@ program
 			currentRef,
 			previousRef
 		);
+		const contributorNames = Array.from(
+			new Set(
+				Object.values( contributors ).flatMap( ( packageData ) =>
+					packageData.contributors
+						.map( ( contributor ) => contributor.login )
+						.filter(
+							( login ): login is string =>
+								typeof login === 'string' && login.length > 0
+						)
+				)
+			)
+		).sort( ( firstContributor, secondContributor ) =>
+			firstContributor.localeCompare( secondContributor )
+		);
 
 		Logger.endTask();
 
 		const html = await renderTemplate( 'contributors.ejs', {
 			contributors,
+			contributorNames,
 		} );
 
 		const tmpFile = join(
@@ -48,6 +63,7 @@ program
 
 		await writeFile( tmpFile, html );
 
+		Logger.notice( `Contributors counted: ${ contributorNames.length }` );
 		Logger.notice( `Contributors HTML generated at ${ tmpFile }` );
 	} );
 

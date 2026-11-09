@@ -105,7 +105,7 @@ class ProductCreate extends ActionableAbility {
 
 		$product_type = $input['type'] ?? ProductType::SIMPLE;
 
-		if ( ProductType::VARIATION !== $product_type && '' === trim( (string) ( $input['name'] ?? '' ) ) ) {
+		if ( ProductType::VARIATION !== $product_type && '' === trim( $input['name'] ?? '' ) ) {
 			return new \WP_Error(
 				'woocommerce_product_name_required',
 				__( 'A product needs a name.', 'woocommerce' ),
@@ -114,7 +114,7 @@ class ProductCreate extends ActionableAbility {
 		}
 
 		if ( ProductType::VARIATION === $product_type ) {
-			$parent = wc_get_product( (int) ( $input['parent_id'] ?? 0 ) );
+			$parent = wc_get_product( $input['parent_id'] ?? 0 );
 			if ( ! $parent instanceof \WC_Product_Variable ) {
 				return new \WP_Error(
 					'woocommerce_product_parent_invalid',
@@ -230,7 +230,7 @@ class ProductCreate extends ActionableAbility {
 			return true;
 		}
 
-		$parent_id = (int) ( $input['parent_id'] ?? 0 );
+		$parent_id = $input['parent_id'] ?? 0;
 
 		return $parent_id > 0 && wc_rest_check_post_permissions( 'product', 'edit', $parent_id );
 	}
