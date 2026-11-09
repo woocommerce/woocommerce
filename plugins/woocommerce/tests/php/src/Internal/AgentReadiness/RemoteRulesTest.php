@@ -169,7 +169,7 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 						'field'       => 'image_link',
 						'effect'      => 'gaps',
 						'effect_from' => array(
-							'2027-06-01' => 'rejected',
+							'2027-06-01' => 'gaps',
 							'2027-01-31' => 'not_listable',
 						),
 					),
@@ -182,7 +182,7 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'gaps', $effect( '2027-01-30' ) );
 		$this->assertSame( 'not_listable', $effect( '2027-01-31' ) );
 		$this->assertSame( 'not_listable', $effect( '2027-05-31' ) );
-		$this->assertSame( 'rejected', $effect( '2027-06-01' ), 'Dates are applied in order, not file order' );
+		$this->assertSame( 'gaps', $effect( '2027-06-01' ), 'Dates are applied in order, not file order' );
 	}
 
 	/**
