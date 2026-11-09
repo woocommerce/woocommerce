@@ -99,7 +99,7 @@ class EmailVerificationService {
 		}
 
 		if ( null === $expected_email ) {
-			_doing_it_wrong(
+			wc_doing_it_wrong(
 				__METHOD__,
 				'Verification was skipped because no expected email was provided. Pass the email address proven by the verification flow as the second argument.',
 				'11.3.0'
