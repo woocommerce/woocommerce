@@ -221,25 +221,7 @@ trait OrderAbilityTrait {
 	 * @return \WC_Order|\WP_Error
 	 */
 	protected static function get_order_from_input( array $input ) {
-		if ( empty( $input['id'] ) ) {
-			return new \WP_Error(
-				'woocommerce_order_id_required',
-				__( 'Order ID is required.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		$order_id = (int) $input['id'];
-
-		if ( $order_id < 1 ) {
-			return new \WP_Error(
-				'woocommerce_order_id_required',
-				__( 'Order ID is required.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		$order = wc_get_order( $order_id );
+		$order = wc_get_order( $input['id'] );
 
 		if ( ! $order instanceof \WC_Order ) {
 			return new \WP_Error(

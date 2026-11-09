@@ -267,6 +267,8 @@ class CartController {
 			throw new RouteException( 'woocommerce_rest_cart_invalid_product', esc_html__( 'Cart item is invalid.', 'woocommerce' ), 404 );
 		}
 
+		// Normalize the raw value so it's properly stored.
+		$quantity            = wc_stock_amount( $quantity );
 		$quantity_validation = ( new QuantityLimits() )->validate_cart_item_quantity( $quantity, $cart_item );
 
 		if ( is_wp_error( $quantity_validation ) ) {
@@ -1136,12 +1138,12 @@ class CartController {
 	 * @throws RouteException Exception if invalid data is detected.
 	 *
 	 * @param array $request Add to cart request params.
-	 * @return \WC_Product|Error Returns a product object if purchasable.
+	 * @return \WC_Product Product to add. Throws if it does not exist or is trashed.
 	 */
 	protected function get_product_for_cart( $request ) {
 		$product = wc_get_product( $request['id'] );
 
-		if ( ! $product || ProductStatus::TRASH === $product->get_status() ) {
+		if ( ! $product instanceof \WC_Product || ProductStatus::TRASH === $product->get_status() ) {
 			throw new RouteException(
 				'woocommerce_rest_cart_invalid_product',
 				sprintf(

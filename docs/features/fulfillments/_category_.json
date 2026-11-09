@@ -1,0 +1,10 @@
+{
+    "position": 6,
+    "label": "Order fulfillments",
+    "collapsible": true,
+    "collapsed": true,
+    "link": {
+        "type": "doc",
+        "id": "README"
+    }
+}
