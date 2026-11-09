@@ -314,8 +314,23 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			);
 		}
 
+		// On multisite WordPress hooks fix_import_form_size() onto this filter on every request
+		// but defines it in wp-admin/includes/ms.php, which only wp-admin loads.
+		if ( is_multisite() && ! function_exists( 'fix_import_form_size' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/ms.php';
+		}
+
 		/** This filter is documented in wp-admin/includes/import.php. */
 		$upload_limit = (int) apply_filters( 'import_upload_size_limit', wp_max_upload_size() ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+
+		// On multisite the limit is the site's remaining upload space, so 0 means no space left.
+		if ( $upload_limit <= 0 ) {
+			return new WP_Error(
+				'woocommerce_fulfillments_import_file_too_large',
+				__( 'This site has no upload space left for the file.', 'woocommerce' ),
+				array( 'status' => WP_Http::REQUEST_ENTITY_TOO_LARGE )
+			);
+		}
 
 		// PHP reports a file it refused for size with error 1 or 2 and size 0, so the error
 		// code is checked before the size, or the merchant would get the generic message.
@@ -353,7 +368,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 				)
 			);
 		}
-		if ( $upload_limit > 0 && $file_size > $upload_limit ) {
+		if ( $file_size > $upload_limit ) {
 			return $this->file_too_large_error( $upload_limit );
 		}
 

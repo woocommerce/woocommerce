@@ -1118,7 +1118,7 @@ curl -X POST "https://example.com/wp-json/wc/v3/fulfillments/import/prepare" \
 Error codes specific to this endpoint:
 
 -   `woocommerce_fulfillments_import_no_file` (`400`) - No file was uploaded.
--   `woocommerce_fulfillments_import_file_too_large` (`413`) - The file exceeds the upload size limit, including a file PHP itself refused for its size.
+-   `woocommerce_fulfillments_import_file_too_large` (`413`) - The file exceeds the upload size limit, including a file PHP itself refused for its size, or the site has no upload space left (multisite quota).
 -   `woocommerce_fulfillments_import_upload_failed` (`400` or `500`) - The file could not be staged, is not a CSV, or was stored outside the import directory.
 -   `woocommerce_fulfillments_csv_parse_error` (`400`) - The file is empty, unreadable, not valid UTF-8, saved as UTF-16 or with CR-only line endings, or has no data rows. The error `data.reason` carries the importer's code.
 -   `woocommerce_fulfillments_import_too_many_rows` (`413`) - The file has more than 5,000 data rows.

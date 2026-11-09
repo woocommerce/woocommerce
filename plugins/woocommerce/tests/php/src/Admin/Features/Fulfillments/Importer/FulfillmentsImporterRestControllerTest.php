@@ -856,6 +856,30 @@ class FulfillmentsImporterRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A zero upload limit, which multisite reports when the site is out of upload space, rejects the upload with a 413.
+	 */
+	public function test_prepare_rejects_upload_when_no_upload_space_is_left(): void {
+		$no_space = static function () {
+			return 0;
+		};
+		add_filter( 'import_upload_size_limit', $no_space );
+
+		try {
+			$request = $this->make_prepare_request();
+			$request->set_file_params( $this->file_params( 'small.csv', UPLOAD_ERR_OK, 20 ) );
+
+			$response = $this->invoke( 'handle_prepare', $request );
+		} finally {
+			remove_filter( 'import_upload_size_limit', $no_space );
+		}
+
+		$this->assertInstanceOf( \WP_Error::class, $response );
+		$this->assertSame( 'woocommerce_fulfillments_import_file_too_large', $response->get_error_code() );
+		$this->assertSame( 413, $response->get_error_data()['status'] );
+		$this->assertStringContainsString( 'no upload space', $response->get_error_message() );
+	}
+
+	/**
 	 * @testdox handle_prepare rejects uploads above the filtered size limit.
 	 */
 	public function test_prepare_rejects_file_above_size_limit(): void {
