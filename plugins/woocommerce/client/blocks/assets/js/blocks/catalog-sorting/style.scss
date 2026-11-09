@@ -9,22 +9,6 @@
 		vertical-align: middle;
 	}
 
-	select.orderby {
-		field-sizing: content;
-		font-size: inherit;
-		font-family: inherit;
-		font-weight: inherit;
-		font-style: inherit;
-		letter-spacing: inherit;
-		vertical-align: middle;
-	}
-
-	&.has-text-color {
-		select.orderby {
-			color: inherit;
-		}
-	}
-
 	.woocommerce-ordering {
 		margin: auto;
 	}
