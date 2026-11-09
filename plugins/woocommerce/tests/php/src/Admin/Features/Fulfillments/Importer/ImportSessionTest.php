@@ -377,6 +377,52 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox delete_staged_file() removes a staged file and the attachment that points at it.
+	 */
+	public function test_delete_staged_file_removes_file_and_matching_attachment(): void {
+		$file          = $this->make_staged_file();
+		$attachment_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'Fulfillments import test CSV',
+				'post_mime_type' => 'text/csv',
+			),
+			$file
+		);
+		$this->assertGreaterThan( 0, $attachment_id );
+
+		$this->assertTrue( ImportSession::delete_staged_file( $file, (int) $attachment_id ) );
+
+		$this->assertFileDoesNotExist( $file );
+		$this->assertNull( get_post( $attachment_id ), 'The attachment post must go with the file' );
+		$this->assertTrue( ImportSession::delete_staged_file( $file, (int) $attachment_id ), 'A second call for a file that is already gone is a no-op' );
+	}
+
+	/**
+	 * @testdox delete_staged_file() refuses a path outside wc-imports and keeps its attachment, even when the file is missing.
+	 */
+	public function test_delete_staged_file_refuses_path_outside_import_dir(): void {
+		$media = trailingslashit( wp_upload_dir()['basedir'] ) . 'wc-fulfillments-import-' . wp_generate_uuid4() . '.jpg';
+		file_put_contents( $media, 'not a csv' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture write.
+		$this->temp_files[] = $media;
+		$attachment_id      = wp_insert_attachment(
+			array(
+				'post_title'     => 'Media the importer must not touch',
+				'post_mime_type' => 'image/jpeg',
+			),
+			$media
+		);
+		$this->assertGreaterThan( 0, $attachment_id );
+
+		$this->assertFalse( ImportSession::delete_staged_file( $media, (int) $attachment_id ) );
+		$this->assertFileExists( $media, 'A file outside wc-imports must not be deleted' );
+		$this->assertNotNull( get_post( $attachment_id ), 'Its attachment must not be deleted' );
+
+		wp_delete_file( $media );
+		$this->assertFalse( ImportSession::delete_staged_file( $media, (int) $attachment_id ), 'The containment check must run for a missing file too' );
+		$this->assertNotNull( get_post( $attachment_id ), 'An attachment outside wc-imports must survive even when its file is gone' );
+	}
+
+	/**
 	 * @testdox delete() removes the session record, its index pointer and its cleanup action.
 	 */
 	public function test_delete_removes_session_and_cleanup_action(): void {

@@ -104,8 +104,8 @@ final class ImportSession {
 	 * The session active at this moment is retired here (transient and cleanup action
 	 * dropped) and exposed through replaced(), so the caller deletes the staged file and
 	 * attachment of exactly that session. When the new session cannot be stored, or its
-	 * cleanup cannot be scheduled, it is dropped again and persisted() reports false; the
-	 * caller then removes the new staged file as well.
+	 * cleanup cannot be scheduled, its record and index pointer are removed again and
+	 * persisted() reports false; the caller then removes the new staged file as well.
 	 *
 	 * @since 11.4.0
 	 *
@@ -113,7 +113,7 @@ final class ImportSession {
 	 * @param string             $file          Absolute path to the staged CSV file.
 	 * @param string             $delimiter     Effective delimiter (resolved by parse_headers()).
 	 * @param array<int, string> $headers       Header row.
-	 * @param int                $total         Total number of CSV records after the header.
+	 * @param int                $total         Number of non-blank data rows after the header.
 	 * @param bool               $notify        Whether to fire customer notifications during the import run.
 	 * @param bool               $update        Whether to update existing fulfillments on tracking-number match.
 	 * @param int                $attachment_id Attachment post created for the staged CSV by the upload handler.
@@ -153,8 +153,9 @@ final class ImportSession {
 		$session->replaced = $replaced;
 
 		// A staged file without a scheduled cleanup would stay behind forever, so a session
-		// whose cleanup cannot be scheduled is not kept.
-		if ( $session->persist() && ! self::schedule_cleanup( $user_id, $token, $file, max( 0, $attachment_id ), self::TTL ) ) {
+		// that cannot be stored, or whose cleanup cannot be scheduled, is not kept. persist()
+		// writes the index pointer even when the payload write fails, so delete() runs for both.
+		if ( ! $session->persist() || ! self::schedule_cleanup( $user_id, $token, $file, max( 0, $attachment_id ), self::TTL ) ) {
 			$session->delete();
 			$session->persisted = false;
 		}
@@ -298,29 +299,44 @@ final class ImportSession {
 			return;
 		}
 
-		if ( ! file_exists( $file ) && $attachment_id <= 0 ) {
-			return;
+		self::delete_staged_file( $file, $attachment_id );
+	}
+
+	/**
+	 * Delete a staged CSV and the attachment post created for it.
+	 *
+	 * This is the one place a staged file read back from stored state (a session payload or
+	 * an Action Scheduler argument) is deleted, so the containment rule lives here: the path
+	 * must resolve inside the wc-imports directory, and the check runs for a missing file too
+	 * because the attachment delete does not need the file. An attachment is only deleted
+	 * while it still points at that path, so a tampered ID cannot remove unrelated media.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string $file          Absolute path to the staged CSV.
+	 * @param int    $attachment_id Attachment post created for the staged CSV; 0 when none.
+	 * @return bool False when the path was refused, true otherwise.
+	 */
+	public static function delete_staged_file( string $file, int $attachment_id = 0 ): bool {
+		if ( '' === $file || ( ! file_exists( $file ) && $attachment_id <= 0 ) ) {
+			return true;
 		}
 
-		// The Action Scheduler payload is persisted, so refuse to delete anything that does not
-		// resolve inside the import directory even if the args were tampered with. The check
-		// runs for a missing file too, because the attachment delete below does not need it.
 		if ( ! self::is_staged_path( $file ) ) {
 			wc_get_logger()->warning(
-				sprintf( 'Refusing to clean up staged fulfillments import file outside the import directory: %s', $file ),
+				sprintf( 'Refusing to delete a staged fulfillments import file outside the import directory: %s', $file ),
 				array( 'source' => 'fulfillments-importer' )
 			);
-			return;
+			return false;
 		}
 
-		// Deleting the attachment also removes its file; only honor IDs that still
-		// point at the staged path so a tampered ID cannot delete unrelated media.
 		if ( $attachment_id > 0 && get_attached_file( $attachment_id ) === $file ) {
 			wp_delete_attachment( $attachment_id, true );
 		}
 		if ( file_exists( $file ) ) {
 			wp_delete_file( $file );
 		}
+		return true;
 	}
 
 	/**
@@ -591,7 +607,7 @@ final class ImportSession {
 	}
 
 	/**
-	 * Total number of CSV records after the header.
+	 * Number of non-blank data rows after the header, as counted at prepare time.
 	 *
 	 * @since 11.4.0
 	 *
