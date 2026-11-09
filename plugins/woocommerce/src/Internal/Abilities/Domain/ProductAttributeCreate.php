@@ -93,7 +93,10 @@ class ProductAttributeCreate extends AbstractDomainAbility implements AbilityDef
 			return new \WP_Error( 'woocommerce_ability_product_attribute_name_empty', __( 'The attribute name is empty.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
-		$slug        = wc_attribute_taxonomy_slug( $input['slug'] ?? $name );
+		$name_slug = wc_attribute_taxonomy_slug( $name );
+		// A slug of only punctuation sanitizes to nothing, and wc_create_attribute() then makes one from the name.
+		$slug        = wc_attribute_taxonomy_slug( $input['slug'] ?? '' );
+		$slug        = '' === $slug ? $name_slug : $slug;
 		$existing_id = wc_attribute_taxonomy_id_by_name( $slug );
 		// wc_create_attribute() only checks registered taxonomies, which misses an attribute created earlier in this request.
 		if ( $existing_id > 0 ) {
@@ -109,7 +112,6 @@ class ProductAttributeCreate extends AbstractDomainAbility implements AbilityDef
 		}
 
 		// Product writes resolve a name by its sanitized slug first, then by label ignoring case.
-		$name_slug = wc_attribute_taxonomy_slug( $name );
 		foreach ( wc_get_attribute_taxonomies() as $attribute ) {
 			if ( 0 === strcasecmp( (string) $attribute->attribute_label, $name ) ) {
 				return new \WP_Error(

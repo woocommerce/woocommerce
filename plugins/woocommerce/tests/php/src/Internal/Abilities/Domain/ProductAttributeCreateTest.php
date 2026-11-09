@@ -79,6 +79,7 @@ class ProductAttributeCreateTest extends WC_Unit_Test_Case {
 	 *           ["TEST COLOR", "other-color", "woocommerce_ability_product_attribute_name_exists"]
 	 *           ["Shade", "test-color", "woocommerce_ability_product_attribute_name_ambiguous"]
 	 *           ["Test Colour", "shade", "woocommerce_ability_product_attribute_name_ambiguous"]
+	 *           ["Test Color!", "!!!", "woocommerce_ability_product_attribute_name_ambiguous"]
 	 *           ["Type", "type", "woocommerce_ability_product_attribute_slug_reserved"]
 	 *           ["Long", "abcdefghijklmnopqrstuvwxyz0123", "woocommerce_ability_product_attribute_slug_too_long"]
 	 *           ["<b></b>", "blank", "woocommerce_ability_product_attribute_name_empty"]
