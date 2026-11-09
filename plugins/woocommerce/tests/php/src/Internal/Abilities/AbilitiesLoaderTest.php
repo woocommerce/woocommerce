@@ -1014,6 +1014,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'woocommerce/payment-gateways-query',
 				array(),
 			),
+			'customers-query'        => array(
+				'woocommerce/customers-query',
+				array(),
+			),
 		);
 	}
 
