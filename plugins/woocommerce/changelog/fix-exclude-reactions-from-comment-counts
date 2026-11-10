@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Exclude block editor note reactions from the cached comment counts.
