@@ -22,9 +22,6 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		 */
 		private $sut;
 
-		/** @var array<string, mixed> Jetpack constant overrides before the test. */
-		private array $initial_constant_overrides = array();
-
 		/** @var array<string, array{exists: bool, value: mixed}> Namespace mock globals before the test. */
 		private array $initial_mock_globals = array();
 
@@ -35,7 +32,6 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		 */
 		public function setUp(): void {
 			parent::setUp();
-			$this->initial_constant_overrides = Constants::$set_constants;
 			foreach ( array( 'mock_filter_input', 'mock_return' ) as $global_name ) {
 				$this->initial_mock_globals[ $global_name ] = array(
 					'exists' => array_key_exists( $global_name, $GLOBALS ),
@@ -52,7 +48,6 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		 */
 		public function tearDown(): void {
 			try {
-				Constants::$set_constants = $this->initial_constant_overrides;
 				foreach ( $this->initial_mock_globals as $global_name => $state ) {
 					if ( $state['exists'] ) {
 						$GLOBALS[ $global_name ] = $state['value'];
