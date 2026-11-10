@@ -98,6 +98,9 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	 * @testdox The page shows the three counts from the stored report, the switch and failing checks.
 	 */
 	public function test_output_with_report_and_failing_checks(): void {
+		remove_all_filters( 'pre_option_home' );
+		update_option( 'woocommerce_coming_soon', 'yes' );
+		update_option( 'home', 'http://example.org' );
 		WC_Helper_Product::create_simple_product();
 		WC_Helper_Product::create_external_product();
 		wc_get_container()->get( AgentReadiness::class )->refresh_report();
@@ -148,6 +151,21 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A missing policy page is recommended, so it does not block the switch or the required group.
+	 */
+	public function test_missing_policy_page_is_recommended(): void {
+		StoreConditionsTest::make_store_ready();
+		delete_option( AgenticCommerceSettings::PRIVACY_PAGE_OPTION );
+
+		$html = $this->render_page();
+
+		$this->assertStringNotContainsString( 'wc-agentic-commerce-check--required', $html );
+		$this->assertMatchesRegularExpression( '/wc-agentic-commerce-group--recommended.*Choose a privacy policy page/s', $html );
+		$this->assertStringContainsString( 'Everything agents need is set up.', $html );
+		$this->assertDoesNotMatchRegularExpression( '/<button[^>]*wc-agentic-commerce-ucp-switch[^>]*disabled=([\'"])disabled\\1/', $html );
+	}
+
+	/**
 	 * @testdox In coming soon mode the switch card says so and links to Site visibility.
 	 */
 	public function test_output_coming_soon_notice_in_switch_card(): void {
@@ -182,6 +200,9 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	 */
 	public function test_output_switch_on_with_failing_checks(): void {
 		$page = $this->page();
+		remove_all_filters( 'pre_option_home' );
+		update_option( 'woocommerce_coming_soon', 'yes' );
+		update_option( 'home', 'http://example.org' );
 		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
 
 		ob_start();

@@ -47,7 +47,7 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A draft or trashed terms page fails its check like an unset one; only privacy and terms are required, as the UCP spec names them.
+	 * @testdox A draft or trashed terms page fails its check like an unset one. Policy pages are recommended, so they don't block UCP.
 	 *
 	 * @testWith ["draft"]
 	 *           ["trash"]
@@ -69,10 +69,11 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 		$checks = array_column( $this->sut->all(), null, 'id' );
 
 		$this->assertFalse( $checks['terms_page']['ok'] );
-		$this->assertSame( array( 'terms_page' ), $this->sut->failing_required() );
-		$this->assertSame( StoreConditions::LEVEL_REQUIRED, $checks['privacy_page']['level'] );
-		$this->assertSame( StoreConditions::LEVEL_RECOMMENDED, $checks['refund_returns_page']['level'], 'The refund and returns page is only recommended' );
-		$this->assertSame( StoreConditions::LEVEL_RECOMMENDED, $checks['shipping_policy_page']['level'], 'The shipping policy page is only recommended' );
+		$this->assertSame( array(), $this->sut->failing_required() );
+		$this->assertSame( StoreConditions::LEVEL_RECOMMENDED, $checks['privacy_page']['level'] );
+		$this->assertSame( StoreConditions::LEVEL_RECOMMENDED, $checks['terms_page']['level'] );
+		$this->assertSame( StoreConditions::LEVEL_RECOMMENDED, $checks['refund_returns_page']['level'] );
+		$this->assertSame( StoreConditions::LEVEL_RECOMMENDED, $checks['shipping_policy_page']['level'] );
 	}
 
 	/**
@@ -95,7 +96,11 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_' . $store_page . '_page_id', $page );
 		update_option( AgenticCommerceSettings::TERMS_PAGE_OPTION, $page );
 
-		$this->assertSame( array( 'terms_page' ), $this->sut->failing_required() );
+		$checks = array_column( $this->sut->all(), null, 'id' );
+
+		$this->assertFalse( $checks['terms_page']['ok'] );
+		$this->assertSame( StoreConditions::LEVEL_RECOMMENDED, $checks['terms_page']['level'] );
+		$this->assertSame( array(), $this->sut->failing_required() );
 	}
 
 	/**
@@ -150,7 +155,8 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Make every required check pass: store launched, HTTPS home URL and the policy pages.
+	 * Make every required check pass: the store is launched and the home URL is HTTPS.
+	 * Privacy, terms and the refund page are set so those checks count as done.
 	 */
 	public static function make_store_ready(): void {
 		add_filter( 'pre_option_home', static fn() => 'https://example.org' );

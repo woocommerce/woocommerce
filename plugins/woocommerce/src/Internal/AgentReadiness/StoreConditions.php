@@ -53,11 +53,11 @@ class StoreConditions {
 	 */
 	public function all(): array {
 		$settings_url = static fn( string $tab ): string => admin_url( 'admin.php?page=wc-settings&tab=' . $tab );
-		$policy_page  = static fn( string $id, string $option, string $name, string $label, string $why, string $level = self::LEVEL_REQUIRED ): array => array(
+		$policy_page  = static fn( string $id, string $option, string $name, string $label, string $why ): array => array(
 			'id'      => $id,
 			'ok'      => self::is_policy_page( (int) get_option( $option ) ),
 			'blocks'  => 'checkout',
-			'level'   => $level,
+			'level'   => self::LEVEL_RECOMMENDED,
 			'name'    => $name,
 			'label'   => $label,
 			'why'     => $why,
@@ -129,16 +129,14 @@ class StoreConditions {
 				AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION,
 				__( 'Refund and returns page is selected', 'woocommerce' ),
 				__( 'No refund and returns page', 'woocommerce' ),
-				__( 'Agents link shoppers to your return terms before they buy.', 'woocommerce' ),
-				self::LEVEL_RECOMMENDED
+				__( 'Agents link shoppers to your return terms before they buy.', 'woocommerce' )
 			),
 			$policy_page(
 				'shipping_policy_page',
 				AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION,
 				__( 'Shipping policy page is selected', 'woocommerce' ),
 				__( 'No shipping policy page', 'woocommerce' ),
-				__( 'Shoppers ask agents about delivery times and costs.', 'woocommerce' ),
-				self::LEVEL_RECOMMENDED
+				__( 'Shoppers ask agents about delivery times and costs.', 'woocommerce' )
 			),
 			array(
 				'id'      => 'guest_checkout',
