@@ -837,6 +837,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Applied when a coupon's individual-use setting changes after it was already in the cart.
 	 * Returns the conflicting coupon so callers can surface an error without removing codes.
 	 *
+	 * New public method — subclasses that already declare the same name with a different
+	 * signature would fail PHP inheritance checks; none are known in core or first-party code.
+	 *
 	 * @since 11.4.0
 	 * @return WC_Coupon|null
 	 */

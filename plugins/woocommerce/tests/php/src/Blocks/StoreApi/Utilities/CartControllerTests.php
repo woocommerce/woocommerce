@@ -436,9 +436,9 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Store API cart validation should reject individual-use conflicts left in a saved cart.
+	 * @testdox Store API cart validation rejects individual-use conflicts left in a saved cart.
 	 */
-	public function test_validate_cart_coupons_blocks_individual_use_after_setting_change() {
+	public function test_validate_cart_coupons_blocks_individual_use_after_setting_change(): void {
 		$fixtures = new FixtureData();
 		$product  = $fixtures->get_simple_product(
 			array(
@@ -469,6 +469,46 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 		}
 
 		$this->assertCount( 2, wc()->cart->get_applied_coupons() );
+		wc()->cart->empty_cart();
+	}
+
+	/**
+	 * @testdox Store API cart validation allows coupons retained via woocommerce_apply_individual_use_coupon.
+	 */
+	public function test_validate_cart_coupons_allows_coupons_retained_with_individual_use(): void {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Retained Coupon Product',
+				'regular_price' => 100,
+			)
+		);
+
+		wc()->cart->empty_cart();
+		wc()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$keep_coupon = \WC_Helper_Coupon::create_coupon( 'store-api-keep-me' );
+		$iu_coupon   = \WC_Helper_Coupon::create_coupon( 'store-api-iu-keep' );
+		$iu_coupon->set_individual_use( true );
+		$iu_coupon->save();
+
+		$retain_filter = static function () {
+			return array( 'store-api-keep-me' );
+		};
+
+		$this->assertTrue( wc()->cart->add_discount( $keep_coupon->get_code() ) );
+
+		add_filter( 'woocommerce_apply_individual_use_coupon', $retain_filter );
+		$this->assertTrue( wc()->cart->add_discount( $iu_coupon->get_code() ) );
+		$this->assertCount( 2, wc()->cart->get_applied_coupons() );
+
+		$controller = new CartController();
+		$controller->validate_cart_coupons();
+
+		$this->assertNull( wc()->cart->get_conflicting_individual_use_coupon() );
+		$this->assertCount( 2, wc()->cart->get_applied_coupons() );
+
+		remove_filter( 'woocommerce_apply_individual_use_coupon', $retain_filter );
 		wc()->cart->empty_cart();
 	}
 }
