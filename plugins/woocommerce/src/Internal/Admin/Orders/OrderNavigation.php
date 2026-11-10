@@ -145,7 +145,7 @@ class OrderNavigation {
 	}
 
 	/**
-	 * Renders a single button: an active link, or a disabled span at the end of the sequence.
+	 * Renders a single button: an active link, or a disabled button at the end of the sequence.
 	 *
 	 * @param string|null $url        URL for the button, or null when disabled.
 	 * @param string      $text       Visible text.
@@ -166,7 +166,7 @@ class OrderNavigation {
 
 		if ( null === $url ) {
 			?>
-			<span class="<?php echo esc_attr( $class ); ?>" aria-disabled="true" aria-label="<?php echo esc_attr( $aria_label ); ?>"><?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Both parts are escaped above. ?></span>
+			<button type="button" class="<?php echo esc_attr( $class ); ?>" disabled aria-label="<?php echo esc_attr( $aria_label ); ?>"><?php echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Both parts are escaped above. ?></button>
 			<?php
 		} else {
 			?>

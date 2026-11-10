@@ -123,7 +123,8 @@ class OrderNavigationTest extends WC_Unit_Test_Case {
 
 		$markup = $this->get_markup( $orders[0] );
 
-		$this->assertStringContainsString( 'aria-disabled="true" aria-label="Newer order"', $markup, 'Newer is disabled on the newest order' );
+		$this->assertStringContainsString( '<button type="button"', $markup, 'The disabled state is a real button' );
+		$this->assertStringContainsString( 'disabled aria-label="Newer order"', $markup, 'Newer is disabled on the newest order' );
 		$this->assertMatchesRegularExpression( '/<a href="[^"]*id=' . $orders[1]->get_id() . '"[^>]*aria-label="Older order"/', $markup, 'Older links to the next order back' );
 	}
 

@@ -2496,13 +2496,6 @@ body.woocommerce_page_wc-customer-stock-notifications {
 				display: none;
 			}
 		}
-
-		// The design system only mutes the real :disabled state, and this is a span.
-		&[aria-disabled="true"] {
-			color: $gray-700;
-			cursor: default;
-			pointer-events: none;
-		}
 	}
 
 	html[dir="rtl"] & .woocommerce-order-navigation__button svg {
