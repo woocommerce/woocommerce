@@ -247,6 +247,25 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Rendering the order received page should leave the cart alone, as wc_clear_cart_after_payment() decides whether to empty it.
+	 */
+	public function test_order_received_does_not_empty_the_cart(): void {
+		global $wp;
+
+		$order = WC_Helper_Order::create_order( 0 );
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+
+		$wp->query_vars['order-received'] = $order->get_id();
+		$_GET['key']                      = $order->get_order_key();
+
+		ob_start();
+		WC_Shortcode_Checkout::output( array() );
+		ob_end_clean();
+
+		$this->assertSame( 1, WC()->cart->get_cart_contents_count(), 'An unrelated cart, or one the woocommerce_should_clear_cart_after_payment filter kept, should survive the page.' );
+	}
+
+	/**
 	 * @testdox The pay page should pre-select the method a merchant assigned to an admin-created order, keeping the others available.
 	 */
 	public function test_order_pay_preselects_merchant_assigned_gateway_for_admin_orders(): void {

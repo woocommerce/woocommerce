@@ -88,6 +88,19 @@ class WC_Cart_Functions_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_empty_cart() should delete a logged-in customer's saved cart, so its items aren't loaded back.
+	 */
+	public function test_wc_empty_cart_deletes_saved_cart(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+
+		wc_empty_cart();
+		WC()->cart->get_cart_from_session();
+
+		$this->assertTrue( WC()->cart->is_empty(), 'The items should not be loaded back from the saved cart.' );
+	}
+
+	/**
 	 * Creates a cart with a coupon and renders its discount HTML.
 	 *
 	 * @return string

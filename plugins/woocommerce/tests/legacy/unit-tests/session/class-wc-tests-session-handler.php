@@ -186,6 +186,34 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An expired session for a logged-in customer should reset the loaded cart but keep their saved cart, so the cart can be rebuilt.
+	 */
+	public function test_destroy_session_cookie_expired_keeps_logged_in_customers_saved_cart(): void {
+		$customer_id = WC_Helper_Customer::create_customer()->get_id();
+		wp_set_current_user( $customer_id );
+		$cart_item_key = WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+
+		$handler = $this
+			->getMockBuilder( WC_Session_Handler::class )
+			->setMethods( array( 'get_session_cookie' ) )
+			->getMock();
+
+		$handler
+			->method( 'get_session_cookie' )
+			->willReturn( array( (string) $customer_id, time() - 10000, time() - 1000, '' ) );
+
+		add_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+
+		$handler->init_session_cookie();
+
+		remove_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+
+		$saved_cart = get_user_meta( $customer_id, '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
+		$this->assertArrayHasKey( $cart_item_key, $saved_cart['cart'] ?? array(), 'The saved cart should survive the session reset.' );
+		$this->assertTrue( WC()->cart->is_empty(), 'The loaded cart should be reset with the session.' );
+	}
+
+	/**
 	 * @testdox Test that session from cookie is destroyed if user is logged out.
 	 */
 	public function test_destroy_session_user_logged_out() {

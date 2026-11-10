@@ -606,9 +606,9 @@ class WC_Session_Handler extends WC_Session {
 	public function forget_session() {
 		wc_setcookie( $this->_cookie, '', time() - YEAR_IN_SECONDS, $this->use_secure_cookie(), true );
 
-		if ( ! is_admin() ) {
-			include_once WC_ABSPATH . 'includes/wc-cart-functions.php';
-			wc_empty_cart();
+		// Reset the loaded cart so this request can't write it back. Keep the saved cart, which rebuilds a logged-in customer's cart after an expired or mismatched session.
+		if ( ! is_admin() && WC()->cart instanceof WC_Cart ) {
+			WC()->cart->empty_cart( false );
 		}
 
 		$this->_data        = array();
