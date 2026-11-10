@@ -1,0 +1,128 @@
+{
+	"name": "woocommerce/tax-rates-query",
+	"label": "Query tax rates",
+	"description": "List the tax rates of every tax class, in the order of the tax settings.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"include": {
+				"type": "array",
+				"description": "Return only these tax rate IDs.",
+				"minItems": 1,
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				}
+			},
+			"country": {
+				"type": "string",
+				"description": "Two-letter country code. Rates for every country are included too.",
+				"pattern": "^[A-Za-z]{2}$"
+			},
+			"class": {
+				"type": "string",
+				"description": "Tax class slug; standard for the standard rates."
+			},
+			"page": {
+				"type": "integer",
+				"default": 1,
+				"minimum": 1
+			},
+			"per_page": {
+				"type": "integer",
+				"default": 50,
+				"minimum": 1,
+				"maximum": 100
+			}
+		},
+		"additionalProperties": false,
+		"default": []
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"rates": {
+				"type": "array",
+				"description": "Returned rates for the current page.",
+				"items": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "integer"
+						},
+						"country": {
+							"type": "string",
+							"description": "Empty for every country."
+						},
+						"state": {
+							"type": "string"
+						},
+						"postcodes": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						},
+						"cities": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						},
+						"rate": {
+							"type": "string",
+							"description": "Percentage as a decimal string."
+						},
+						"name": {
+							"type": "string"
+						},
+						"priority": {
+							"type": "integer"
+						},
+						"compound": {
+							"type": "boolean"
+						},
+						"shipping": {
+							"type": "boolean",
+							"description": "Whether the rate also applies to shipping."
+						},
+						"class": {
+							"type": "string"
+						}
+					},
+					"additionalProperties": false
+				}
+			},
+			"total_pages": {
+				"type": "integer",
+				"description": "Total number of result pages available for the current query."
+			},
+			"page": {
+				"type": "integer",
+				"description": "Current result page."
+			},
+			"per_page": {
+				"type": "integer",
+				"description": "Maximum number of items requested per page."
+			},
+			"total": {
+				"type": "integer",
+				"description": "Total number of matching rates across all pages."
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": true,
+			"destructive": false,
+			"idempotent": true
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}
