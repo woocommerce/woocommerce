@@ -163,3 +163,5 @@ class Default_Email_Editor_Logger implements Email_Editor_Logger_Interface {
 		error_log( $entry . PHP_EOL, 3, $this->log_file );
 	}
 }
+
+// Live receipt test marker.

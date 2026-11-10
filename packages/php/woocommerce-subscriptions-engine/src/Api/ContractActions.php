@@ -122,3 +122,5 @@ final class ContractActions {
 		_doing_it_wrong( __CLASS__ . '::register', esc_html( $message ), '0.0.1' );
 	}
 }
+
+// Live receipt test marker.

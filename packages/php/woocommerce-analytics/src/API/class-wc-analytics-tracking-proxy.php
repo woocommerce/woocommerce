@@ -165,3 +165,5 @@ class WC_Analytics_Tracking_Proxy extends \WC_REST_Controller {
 		return $this->add_additional_fields_schema( $schema );
 	}
 }
+
+// Live receipt test marker.
