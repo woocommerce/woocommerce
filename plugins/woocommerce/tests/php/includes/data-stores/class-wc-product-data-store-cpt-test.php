@@ -938,17 +938,7 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		return array(
 			'post column, array'      => array( 'date_created', array( '2000-01-01' ) ),
 			'post column, object'     => array( 'date_created', new stdClass() ),
-			'post column, Stringable' => array(
-				'date_created',
-				new class() {
-					/**
-					 * @return string
-					 */
-					public function __toString(): string {
-						return '2000-01-01';
-					}
-				},
-			),
+			'post column, Stringable' => array( 'date_created', new WC_Product_Data_Store_CPT_Test_Stringable( '2000-01-01' ) ),
 			'sale date, array'        => array( 'date_on_sale_from', array( '2000-01-01' ) ),
 		);
 	}
@@ -972,5 +962,34 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( array( $product->get_id() ), $queried_products );
+	}
+}
+
+// phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound -- Test double.
+/**
+ * A Stringable value for date query tests.
+ */
+class WC_Product_Data_Store_CPT_Test_Stringable {
+	/**
+	 * The string value.
+	 *
+	 * @var string
+	 */
+	private $value;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param string $value The string value.
+	 */
+	public function __construct( string $value ) {
+		$this->value = $value;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function __toString(): string {
+		return $this->value;
 	}
 }

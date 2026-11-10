@@ -2096,17 +2096,36 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			'date, object'               => array( 'date_paid', new stdClass() ),
 			'customer, object'           => array( 'customer', new stdClass() ),
 			'customer, object in array'  => array( 'customer', array( 1, new stdClass() ) ),
-			'customer, Stringable email' => array(
-				'customer',
-				new class() {
-					/**
-					 * @return string
-					 */
-					public function __toString(): string {
-						return 'admin@example.org';
-					}
-				},
-			),
+			'customer, Stringable email' => array( 'customer', new WC_Order_Data_Store_CPT_Test_Stringable( 'admin@example.org' ) ),
 		);
+	}
+}
+
+// phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound -- Test double.
+/**
+ * A Stringable value for customer query tests.
+ */
+class WC_Order_Data_Store_CPT_Test_Stringable {
+	/**
+	 * The string value.
+	 *
+	 * @var string
+	 */
+	private $value;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param string $value The string value.
+	 */
+	public function __construct( string $value ) {
+		$this->value = $value;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function __toString(): string {
+		return $this->value;
 	}
 }
