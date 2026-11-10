@@ -1918,7 +1918,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox wc_order_search() respects configured, filtered, unlimited, and invalid result limits.
+	 * @testdox wc_order_search() returns every match by default and applies the filtered limit before the results filter.
 	 *
 	 * @since 11.4.0
 	 */
@@ -1933,25 +1933,24 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 			$order->save();
 		}
 
-		$search_limit         = 2;
-		$limit_search_results = static function () use ( &$search_limit ) {
-			return $search_limit;
-		};
-
 		$order_ids = array_map(
 			static function ( $order ) {
 				return $order->get_id();
 			},
 			$orders
 		);
+		$newest_first = array_reverse( $order_ids );
 
-		$posts_per_page = get_option( 'posts_per_page' );
+		$search_limit         = 2;
+		$limit_search_results = static function () use ( &$search_limit ) {
+			return $search_limit;
+		};
+
+		$this->assertSame( $newest_first, wc_order_search( 'Jeroen' ), 'The search should not be limited by default' );
+
+		add_filter( 'woocommerce_order_search_limit', $limit_search_results );
 		try {
-			update_option( 'posts_per_page', 1 );
-			$this->assertSame( array( $order_ids[2] ), wc_order_search( 'Jeroen' ) );
-
-			add_filter( 'woocommerce_order_search_limit', $limit_search_results );
-			$this->assertSame( array( $order_ids[2], $order_ids[1] ), wc_order_search( 'Jeroen' ) );
+			$this->assertSame( array( $order_ids[2], $order_ids[1] ), wc_order_search( 'Jeroen' ), 'A positive limit should cap the results' );
 
 			$search_results_filter = OrderUtil::custom_orders_table_usage_is_enabled()
 				? 'woocommerce_cot_shop_order_search_results'
@@ -1962,30 +1961,35 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 			};
 			add_filter( $search_results_filter, $append_search_result );
 			try {
-				$this->assertSame( array( $order_ids[2], $order_ids[1] ), wc_order_search( 'Jeroen' ) );
+				$this->assertSame( $newest_first, wc_order_search( 'Jeroen' ), 'IDs added by the results filter should not be cut by the limit' );
 			} finally {
 				remove_filter( $search_results_filter, $append_search_result );
 			}
 
+			$search_limit = 0;
+			$this->assertSame( array(), wc_order_search( 'Jeroen' ), 'A limit of 0 should return no results' );
+
 			$search_limit = -1;
-			$this->assertSame( array( $order_ids[2], $order_ids[1], $order_ids[0] ), wc_order_search( 'Jeroen' ) );
+			$this->assertSame( $newest_first, wc_order_search( 'Jeroen' ), 'A limit of -1 should mean no limit' );
 
 			$search_limit = -2;
-			$this->assertSame( array( $order_ids[2] ), wc_order_search( 'Jeroen' ) );
+			$this->assertSame( $newest_first, wc_order_search( 'Jeroen' ), 'Any negative limit should mean no limit' );
+
+			$search_limit = 'not a number';
+			$this->assertSame( $newest_first, wc_order_search( 'Jeroen' ), 'A non-numeric limit should mean no limit' );
 		} finally {
 			remove_filter( 'woocommerce_order_search_limit', $limit_search_results );
-			update_option( 'posts_per_page', $posts_per_page );
 		}
 	}
 
 	/**
-	 * @testdox wc_order_search() excludes newer non-order posts before applying the CPT candidate limit.
+	 * @testdox wc_order_search() excludes newer non-order posts before applying the CPT limit.
 	 *
 	 * @since 11.4.0
 	 */
 	public function test_wc_order_search_limit_excludes_non_order_posts() {
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$this->markTestSkipped( 'CPT candidate SQL is not used when HPOS is enabled.' );
+			$this->markTestSkipped( 'The CPT search SQL is not used when HPOS is enabled.' );
 		}
 
 		$orders = array(
@@ -1997,36 +2001,80 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 			$order->save();
 		}
 
-		$order_ids         = array_map(
-			static function ( $order ) {
-				return $order->get_id();
-			},
-			$orders
+		$inserted_post_id = wp_insert_post(
+			array(
+				'post_date'     => '2025-01-03 00:00:00',
+				'post_date_gmt' => '2025-01-03 00:00:00',
+				'post_status'   => 'publish',
+				'post_title'    => 'Jeroen',
+				'post_type'     => 'post',
+			),
+			true
 		);
-		$posts_per_page    = get_option( 'posts_per_page' );
-		$non_order_post_id = 0;
-		try {
-			$inserted_post_id = wp_insert_post(
-				array(
-					'post_date'     => '2025-01-03 00:00:00',
-					'post_date_gmt' => '2025-01-03 00:00:00',
-					'post_status'   => 'publish',
-					'post_title'    => 'Jeroen',
-					'post_type'     => 'post',
-				),
-				true
-			);
-			$this->assertNotWPError( $inserted_post_id );
-			$non_order_post_id = absint( $inserted_post_id );
-			update_post_meta( $non_order_post_id, '_billing_last_name', 'Jeroen' );
+		$this->assertNotWPError( $inserted_post_id );
+		update_post_meta( $inserted_post_id, '_billing_last_name', 'Jeroen' );
 
-			update_option( 'posts_per_page', 1 );
-			$this->assertSame( array( $order_ids[1] ), wc_order_search( 'Jeroen' ) );
+		$limit_to_one = static function () {
+			return 1;
+		};
+		add_filter( 'woocommerce_order_search_limit', $limit_to_one );
+		try {
+			$this->assertSame( array( $orders[1]->get_id() ), wc_order_search( 'Jeroen' ) );
 		} finally {
-			if ( $non_order_post_id ) {
-				wp_delete_post( $non_order_post_id, true );
-			}
-			update_option( 'posts_per_page', $posts_per_page );
+			remove_filter( 'woocommerce_order_search_limit', $limit_to_one );
+		}
+	}
+
+	/**
+	 * @testdox wc_order_search() on CPT still finds trashed orders, with and without a limit.
+	 *
+	 * @since 11.4.0
+	 */
+	public function test_wc_order_search_finds_trashed_orders() {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'The CPT search SQL is not used when HPOS is enabled.' );
+		}
+
+		$order    = $this->create_order();
+		$order_id = $order->get_id();
+		$order->delete();
+		$this->assertSame( 'trash', get_post_status( $order_id ) );
+
+		$this->assertSame( array( $order_id ), wc_order_search( 'Jeroen' ) );
+
+		$limit_to_one = static function () {
+			return 1;
+		};
+		add_filter( 'woocommerce_order_search_limit', $limit_to_one );
+		try {
+			$this->assertSame( array( $order_id ), wc_order_search( 'Jeroen' ) );
+		} finally {
+			remove_filter( 'woocommerce_order_search_limit', $limit_to_one );
+		}
+	}
+
+	/**
+	 * @testdox wc_order_search() on CPT accepts search fields with string keys.
+	 *
+	 * @since 11.4.0
+	 */
+	public function test_wc_order_search_with_keyed_search_fields() {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'The CPT search SQL is not used when HPOS is enabled.' );
+		}
+
+		$order = $this->create_order();
+
+		$keyed_search_fields = static function ( $search_fields ) {
+			$search_fields['last_name'] = '_billing_last_name';
+			$search_fields['empty']     = '';
+			return $search_fields;
+		};
+		add_filter( 'woocommerce_shop_order_search_fields', $keyed_search_fields );
+		try {
+			$this->assertSame( array( $order->get_id() ), wc_order_search( 'Jeroen' ) );
+		} finally {
+			remove_filter( 'woocommerce_shop_order_search_fields', $keyed_search_fields );
 		}
 	}
 

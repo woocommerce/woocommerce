@@ -1,4 +1,4 @@
-Significance: patch
+Significance: minor
 Type: performance
 
-Limit order search result sets consistently across HPOS and legacy storage to avoid loading excessive matching order IDs.
+Add the woocommerce_order_search_limit filter so order searches can cap how many matching orders are loaded.
