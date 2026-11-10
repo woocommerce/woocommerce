@@ -129,6 +129,24 @@ class ProductReviewUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep a trashed spam review as spam on restore.
+	 */
+	public function test_trashing_spam_keeps_it_spam_on_restore(): void {
+		$id = $this->review( 'spam' );
+
+		$this->sut->execute(
+			array(
+				'id'     => $id,
+				'status' => 'trash',
+			)
+		);
+
+		$this->assertSame( 'spam', get_comment_meta( $id, '_wp_trash_meta_status', true ) );
+		wp_untrash_comment( $id );
+		$this->assertSame( 'spam', get_comment( $id )->comment_approved );
+	}
+
+	/**
 	 * @testdox Should change nothing when the review already has the status $status.
 	 *
 	 * @testWith ["approved"]
@@ -256,7 +274,25 @@ class ProductReviewUpdateTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( 'woocommerce_ability_product_review_status_locked', $result->get_error_code() );
+		$this->assertStringContainsString( 'Restore the product', $result->get_error_message() );
 		$this->assertSame( 'post-trashed', get_comment( $id )->comment_approved );
+
+		$custom = $this->review( 'approved', array( 'comment_post_ID' => \WC_Helper_Product::create_simple_product()->get_id() ) );
+		wp_update_comment(
+			array(
+				'comment_ID'       => $custom,
+				'comment_approved' => 'custom-status',
+			)
+		);
+		$result = $this->sut->execute(
+			array(
+				'id'     => $custom,
+				'status' => 'hold',
+			)
+		);
+
+		$this->assertSame( 'woocommerce_ability_product_review_status_locked', $result->get_error_code() );
+		$this->assertStringNotContainsString( 'Restore the product', $result->get_error_message(), 'Only a trashed product needs restoring.' );
 	}
 
 	/**

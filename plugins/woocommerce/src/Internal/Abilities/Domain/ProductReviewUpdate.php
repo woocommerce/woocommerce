@@ -93,7 +93,10 @@ class ProductReviewUpdate extends AbstractDomainAbility implements AbilityDefini
 		if ( ! array_key_exists( $previous, self::get_review_statuses() ) ) {
 			return new \WP_Error(
 				'woocommerce_ability_product_review_status_locked',
-				__( 'The product of this review is in the trash. Restore the product to moderate its reviews.', 'woocommerce' ),
+				'post-trashed' === $previous
+					? __( 'The product of this review is in the trash. Restore the product to moderate its reviews.', 'woocommerce' )
+					/* translators: %s: stored comment status. */
+					: sprintf( __( 'The review has the status "%s", which this ability cannot change.', 'woocommerce' ), $previous ),
 				array( 'status' => 409 )
 			);
 		}
@@ -110,7 +113,9 @@ class ProductReviewUpdate extends AbstractDomainAbility implements AbilityDefini
 		if ( ! $saved instanceof \WP_Comment ) {
 			return new \WP_Error(
 				'woocommerce_ability_product_review_status_failed',
-				__( 'The review status was changed, but the review could not be read back.', 'woocommerce' ),
+				$changed
+					? __( 'The review status was changed, but the review could not be read back.', 'woocommerce' )
+					: __( 'The review could not be read back.', 'woocommerce' ),
 				array( 'status' => 500 )
 			);
 		}
@@ -159,8 +164,9 @@ class ProductReviewUpdate extends AbstractDomainAbility implements AbilityDefini
 			}
 		}
 
-		$ok      = true;
-		$current = self::get_review_status( $review );
+		$ok       = true;
+		$previous = self::get_review_status( $review );
+		$current  = $previous;
 		if ( ProductReviewStatus::TRASH === $current ) {
 			$ok      = wp_untrash_comment( $review_id );
 			$current = self::get_current_status( $review_id, $current );
@@ -188,10 +194,17 @@ class ProductReviewUpdate extends AbstractDomainAbility implements AbilityDefini
 			return null;
 		}
 
+		$data = array( 'status' => 500 );
+		// Leaving trash or spam can succeed before the final move fails, so the review is no longer where it was.
+		if ( $current !== $previous ) {
+			$data['saved']          = true;
+			$data['current_status'] = $current;
+		}
+
 		return new \WP_Error(
 			'woocommerce_ability_product_review_status_failed',
 			is_wp_error( $ok ) ? $ok->get_error_message() : __( 'Failed to update the review status.', 'woocommerce' ),
-			array( 'status' => 500 )
+			$data
 		);
 	}
 
