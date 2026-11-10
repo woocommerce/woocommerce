@@ -44,8 +44,8 @@ class Coupon_Code_Generator {
 	 * @return string The generated coupon code, or empty string on failure.
 	 */
 	public function generate_coupon( $coupon_code, $attrs, $rendering_context ): string {
-		if ( is_string( $coupon_code ) && '' !== $coupon_code ) {
-			return $coupon_code;
+		if ( is_scalar( $coupon_code ) && '' !== (string) $coupon_code ) {
+			return (string) $coupon_code;
 		}
 		if ( ! $rendering_context instanceof Rendering_Context ) {
 			return '';

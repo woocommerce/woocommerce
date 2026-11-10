@@ -45,6 +45,13 @@ class CouponCodeGeneratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Keeps a numeric code from an earlier filter as a string.
+	 */
+	public function test_keeps_numeric_code(): void {
+		$this->assertSame( '123', $this->sut->generate_coupon( 123, array(), $this->context() ) );
+	}
+
+	/**
 	 * @testdox Returns no code when the filter gets no rendering context.
 	 */
 	public function test_without_rendering_context_returns_empty(): void {

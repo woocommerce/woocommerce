@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\EmailEditor\Renderer\Blocks;
 
+use Automattic\WooCommerce\EmailEditor\Bootstrap;
+use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Renderer\Blocks\Coupon_Code;
 use WC_Unit_Test_Case;
@@ -57,12 +59,40 @@ class CouponCodeTest extends WC_Unit_Test_Case {
 	 * @testdox Keeps an existing coupon code without generating one.
 	 */
 	public function test_existing_coupon_is_kept(): void {
-		$this->generate_code( 'NEVER-USED' );
+		$generated = false;
+		add_filter(
+			'woocommerce_coupon_code_block_auto_generate',
+			function ( $code ) use ( &$generated ) {
+				$generated = true;
+				return $code;
+			}
+		);
 
 		$html = $this->sut->render( '<div class="coupon">SUMMER</div>', $this->parsed_block( array( 'source' => 'existing' ) ), $this->context() );
 
 		$this->assertStringContainsString( '<div class="coupon">SUMMER</div>', $html );
-		$this->assertStringNotContainsString( 'NEVER-USED', $html );
+		$this->assertFalse( $generated, 'No coupon should be generated for an existing coupon.' );
+	}
+
+	/**
+	 * @testdox Puts a coupon from WooCommerce's generator into a sent email.
+	 */
+	public function test_woocommerce_generator_fills_the_code(): void {
+		// Starts the email editor as WooCommerce does when the block email editor feature is on.
+		Email_Editor_Container::container()->get( Bootstrap::class )->init();
+
+		$html = $this->render( array() );
+
+		$this->assertMatchesRegularExpression( '/<div class="coupon">[a-z0-9]{4}-[a-z0-9]{6}-[a-z0-9]{4}<\/div>/i', $html );
+	}
+
+	/**
+	 * @testdox Renders no coupon when a filter returns something other than a code.
+	 */
+	public function test_non_scalar_code_renders_no_coupon(): void {
+		$this->generate_code( array( 'not', 'a', 'code' ) );
+
+		$this->assertStringNotContainsString( 'class="coupon"', $this->render( array() ) );
 	}
 
 	/**
@@ -83,9 +113,9 @@ class CouponCodeTest extends WC_Unit_Test_Case {
 	/**
 	 * Makes code generation return a fixed value.
 	 *
-	 * @param string $code Generated code.
+	 * @param mixed $code Generated code.
 	 */
-	private function generate_code( string $code ): void {
+	private function generate_code( $code ): void {
 		remove_all_filters( 'woocommerce_coupon_code_block_auto_generate' );
 		add_filter(
 			'woocommerce_coupon_code_block_auto_generate',
