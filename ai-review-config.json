@@ -231,7 +231,8 @@
 			],
 			"personas": [
 				"regression"
-			]
+			],
+			"evals": ".ai/review/evals/hook-callback-reentrancy/cases.json"
 		},
 		{
 			"name": "php-loose-type-juggling",

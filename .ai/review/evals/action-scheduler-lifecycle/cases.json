@@ -48,7 +48,7 @@
 			}
 		},
 		{
-			"id": "G06D-v4",
+			"id": "G06D-v5",
 			"path": "plugins/woocommerce/includes/class-wc-action-scheduler-lifecycle.php",
 			"before": {
 				"file": "fixtures/G06D/before.php"

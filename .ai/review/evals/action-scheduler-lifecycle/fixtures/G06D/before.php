@@ -19,7 +19,8 @@ final class Order_Export_Queue {
     public function run( $order_id ) {
         $order = wc_get_order( $order_id );
         if ( ! $order ) { return; }
-        update_post_meta( $order->get_id(), '_last_exported_status', $order->get_status() );
+        $order->update_meta_data( '_last_exported_status', $order->get_status() );
+        $order->save();
     }
 }
 

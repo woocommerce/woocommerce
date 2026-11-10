@@ -25,7 +25,7 @@
 			}
 		},
 		{
-			"id": "G14B-v3",
+			"id": "G14B-v4",
 			"path": "plugins/woocommerce/includes/email-bootstrap.php",
 			"before": {
 				"file": "fixtures/G14B/before.php"
@@ -39,7 +39,7 @@
 					{
 						"file": "plugins/woocommerce/includes/email-bootstrap.php",
 						"lines": [
-							14,
+							12,
 							14
 						],
 						"anchor": "}, 1 );"

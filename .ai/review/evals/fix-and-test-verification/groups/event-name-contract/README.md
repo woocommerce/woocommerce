@@ -23,7 +23,7 @@ python3 .ai/review/evals/fix-and-test-verification/groups/event-name-contract/pr
 
 The script checks the original patch and both patch hashes. It uses local Git objects and creates a separate checkout. Keep both input repositories available while using that checkout.
 
-The generated checkout registers this pair alongside the 161 default cases. Preparation never calls a model or changes an input repository.
+The generated checkout registers this pair alongside the 165 default cases. Preparation never calls a model or changes an input repository.
 
 ```sh
 a8c-review eval --path /path/to/new-event-name-contract-checkout \

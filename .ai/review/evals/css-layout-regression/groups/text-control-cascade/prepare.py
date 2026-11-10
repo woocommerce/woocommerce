@@ -75,6 +75,7 @@ def main():
         raise ValueError('Historical source objects are incomplete')
     original = git(args.source_repo, 'diff', '--binary', '--full-index',
                    '--no-ext-diff', '--no-textconv', '--no-color',
+                   '--src-prefix=a/', '--dst-prefix=b/', '-U3',
                    pins['base'], pins['head'], '--')
     if original != (PACKAGE / 'original.patch').read_bytes():
         raise ValueError('Original patch differs from the pinned source change')

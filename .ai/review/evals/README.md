@@ -1,8 +1,8 @@
 # AI review guideline evals
 
-This corpus covers 40 review guidelines with two bug cases and at least two safe boundary cases per guideline, for 161 registered cases. The SQL suite also retains a separate safe-batching example, G25E-v1, alongside its neutral refactor control. The root `ai-review-config.json` links each guideline to its suite. The `perf-blocking-remote-call` guideline is outside this corpus.
+This corpus covers 41 review guidelines with two bug cases and at least two safe boundary cases per guideline, for 165 registered cases. The SQL suite also retains a separate safe-batching example, G25E-v1, alongside its neutral refactor control. The root `ai-review-config.json` links each guideline to its suite. The `perf-blocking-remote-call`, `order-storage-access`, and `payment-callbacks` guidelines are outside this corpus.
 
-The committed suites contain these 161 snapshot cases. [Optional prepared pairs](#event-name-contract-pair) add historical patch cases in separate generated checkouts.
+The committed suites contain these 165 snapshot cases. [Optional prepared pairs](#event-name-contract-pair) add historical patch cases in separate generated checkouts.
 
 ## Set up the runner
 
@@ -52,7 +52,7 @@ a8c-review eval
 a8c-review eval --guideline sql-clause-filter-contract
 ```
 
-`--plan` validates the definitions and reads the fixtures without calling models. In the committed checkout it reports 161 cases. Live runs inherit this repository's reviewers, models, and prompt content. Named-guideline evaluation requires a CLI version that confirms the full named guideline reaches its configured reviewers before inference. Older V0 execution uses ordinary review selection and can omit that guideline. They require credentials for both the configured Claude and Codex engines. No model override is introduced by these suites.
+`--plan` validates the definitions and reads the fixtures without calling models. In the committed checkout it reports 165 cases. Live runs inherit this repository's reviewers, models, and prompt content. Named-guideline evaluation requires a CLI version that confirms the full named guideline reaches its configured reviewers before inference. Older V0 execution uses ordinary review selection and can omit that guideline. They require credentials for both the configured Claude and Codex engines. No model override is introduced by these suites.
 
 An unfiltered `eval` selects every registered case. Use `--guideline`, `--case` or `--group` to narrow the selection.
 
@@ -76,13 +76,15 @@ All current `finding` expectations use `locations`, which require the finding's 
 
 The optional [event-name pair](fix-and-test-verification/groups/event-name-contract/README.md) tests whether the reviewer distinguishes documented inputs from incidental coercion.
 
-Its preparation script creates a separate 163-case checkout from committed policy files and existing local source objects. The default 161 cases remain unchanged.
+Its preparation script creates a separate 167-case checkout from committed policy files and existing local source objects. The default 165 cases remain unchanged.
+
+The [hook re-entrancy suite](hook-callback-reentrancy/README.md) also includes a bounded local behavior check.
 
 ## CSS cascade pair
 
 The optional [TextControl cascade pair](css-layout-regression/groups/text-control-cascade/README.md) checks the prior computed styles before reporting a new sizing regression.
 
-It replays the complete historical patch and a collapsed-input control from the same parent. Its preparation script creates a separate 163-case checkout. The default 161 cases remain unchanged.
+It replays the complete historical patch and a collapsed-input control from the same parent. Its preparation script creates a separate 167-case checkout. The default 165 cases remain unchanged.
 
 ## Adding cases
 
@@ -109,7 +111,7 @@ Each entry in `groups` references IDs already declared in `cases`:
 { "id": "example-group", "regression": "G00E-example-v1", "controls": ["G00A-example-v1"] }
 ```
 
-Groups require a CLI checkout that supports them. Earlier versions reject a suite containing `groups`. Check that `a8c-review eval --help` lists `--group` before running such a suite. Suites without `groups`, including the committed 161 cases, also run on earlier inline-case versions.
+Groups require a CLI checkout that supports them. Earlier versions reject a suite containing `groups`. Check that `a8c-review eval --help` lists `--group` before running such a suite. Suites without `groups`, including the committed 165 cases, also run on earlier inline-case versions.
 
 ## Limitations
 
@@ -126,15 +128,15 @@ These cases exercise review behavior on selected changes. They do not measure pr
 | [php-loose-type-juggling](php-loose-type-juggling/cases.json) | G03A-v3, G03B-v3 | G03C-v3, G03D-v3 |
 | [public-php-api-bc](public-php-api-bc/cases.json) | G04A-v3, G04B-v3 | G04C-v3, G04D-v3 |
 | [upgrade-time-class-load](upgrade-time-class-load/cases.json) | G05A-v3, G05B-v3 | G05C-v3, G05D-v3 |
-| [action-scheduler-lifecycle](action-scheduler-lifecycle/cases.json) | G06A-v3, G06B-v3 | G06D-v4, G06C-v6 |
+| [action-scheduler-lifecycle](action-scheduler-lifecycle/cases.json) | G06A-v3, G06B-v3 | G06D-v5, G06C-v6 |
 | [request-input-validation](request-input-validation/cases.json) | G07A-v4, G07B-v3 | G07C-v3, G07D-v4 |
 | [missing-object-deref](missing-object-deref/cases.json) | G08A-v3, G08B-v3 | G08C-v3, G08D-v3 |
 | [meta-option-value-semantics](meta-option-value-semantics/cases.json) | G09A-v3, G09B-v3 | G09C-v3, G09D-v3 |
-| [hpos-sync-on-read](hpos-sync-on-read/cases.json) | G10A-v3, G10B-v3 | G10C-v3, G10D-v3 |
+| [hpos-sync-on-read](hpos-sync-on-read/cases.json) | G10A-v3, G10B-v4 | G10C-v3, G10D-v3 |
 | [migration-upgrade-state](migration-upgrade-state/cases.json) | G11A-v3, G11B-v3 | G11C-v3, G11D-v3 |
-| [proxy-predicate-inference](proxy-predicate-inference/cases.json) | G12A-v4, G12B-v3 | G12C-v3, G12D-v7 |
+| [proxy-predicate-inference](proxy-predicate-inference/cases.json) | G12A-v4, G12B-v3 | G12C-v3, G12D-v8 |
 | [wc-query-shop-front-page](wc-query-shop-front-page/cases.json) | G13A-v3, G13B-v3 | G13C-v4, G13D-v3 |
-| [request-lifecycle-state](request-lifecycle-state/cases.json) | G14A-v3, G14B-v3 | G14C-v3, G14D-v3 |
+| [request-lifecycle-state](request-lifecycle-state/cases.json) | G14A-v3, G14B-v4 | G14C-v3, G14D-v3 |
 | [template-and-js-default](template-and-js-default/cases.json) | G15A-v3, G15B-v3 | G15C-v3, G15D-v3 |
 | [rest-response-contract](rest-response-contract/cases.json) | G16A-v3, G16B-v3 | G16C-v4, G16D-v3 |
 | [session-cart-persistence](session-cart-persistence/cases.json) | G17A-v3, G17B-v3 | G17C-v3, G17D-v3 |
@@ -145,7 +147,7 @@ These cases exercise review behavior on selected changes. They do not measure pr
 | [cache-invalidation-and-poisoning](cache-invalidation-and-poisoning/cases.json) | G22A-v3, G22B-v3 | G22C-v4, G22D-v3 |
 | [perf-refactor-semantic-drift](perf-refactor-semantic-drift/cases.json) | G23A-v6, G23B-v4 | G23C-v3, G23D-v3 |
 | [fix-and-test-verification](fix-and-test-verification/cases.json) | G24A-v3, G24B-v3 | G24C-v4, G24D-v3 |
-| [perf-sql-query-shape](perf-sql-query-shape/cases.json) | G25A-v4, G25B-v3 | G25D-v3, G25C-v7, G25E-v1 |
+| [perf-sql-query-shape](perf-sql-query-shape/cases.json) | G25A-v4, G25B-v3 | G25D-v3, G25C-v8, G25E-v1 |
 | [perf-cache-option-priming](perf-cache-option-priming/cases.json) | G26A-v3, G26B-v6 | G26C-v3, G26D-v3 |
 | [perf-hot-path-eager-work](perf-hot-path-eager-work/cases.json) | G27A-v4, G27B-v4 | G27C-v4, G27D-v4 |
 | [script-handle-loading-contract](script-handle-loading-contract/cases.json) | G28A-v3, G28B-v4 | G28C-v3, G28D-v4 |
@@ -161,3 +163,4 @@ These cases exercise review behavior on selected changes. They do not measure pr
 | [sec-order-cart-ownership](sec-order-cart-ownership/cases.json) | G38B-v3, G38A-v5 | G38C-v3, G38D-v3 |
 | [sec-sanitize-and-escape](sec-sanitize-and-escape/cases.json) | G39B-v3, G39A-v6 | G39C-v3, G39D-v3 |
 | [sec-auth-tokens-and-cookies](sec-auth-tokens-and-cookies/cases.json) | G40A-v3, G40B-v4 | G40C-v3, G40D-v3 |
+| [hook-callback-reentrancy](hook-callback-reentrancy/cases.json) | G41A-v1, G41B-v1 | G41C-v1, G41D-v1 |
