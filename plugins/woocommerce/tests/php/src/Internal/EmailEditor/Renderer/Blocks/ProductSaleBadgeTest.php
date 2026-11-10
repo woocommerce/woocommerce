@@ -76,20 +76,22 @@ class ProductSaleBadgeTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Places the badge according to its alignment.
-	 * @testWith ["left", "margin-right:auto;"]
-	 *           ["center", "margin-left:auto;margin-right:auto;"]
-	 *           ["right", "margin-left:auto;"]
+	 * @testdox Places the badge according to its alignment, and on the left for any other value.
+	 * @testWith ["left", "text-align:left;", "margin-right:auto;"]
+	 *           ["center", "text-align:center;", "margin-left:auto;margin-right:auto;"]
+	 *           ["right", "text-align:right;", "margin-left:auto;"]
+	 *           ["justify", "text-align:left;", "margin-right:auto;"]
 	 *
-	 * @param string $align    Block alignment.
-	 * @param string $expected Margin styles on the badge.
+	 * @param string $align      Block alignment.
+	 * @param string $text_align Text alignment of the badge.
+	 * @param string $margins    Margins that position the badge.
 	 */
-	public function test_badge_follows_alignment( string $align, string $expected ): void {
+	public function test_badge_follows_alignment( string $align, string $text_align, string $margins ): void {
 		$html = $this->render( $this->product->get_id(), array( 'align' => $align ) );
 
-		$this->assertStringContainsString( "text-align:{$align};", $html );
-		$this->assertStringContainsString( "position:static;{$expected}", $html );
-		$this->assertStringContainsString( 'align="' . $align . '"', $html );
+		$this->assertSame( 1, preg_match( '/<span class="wc-block-components-product-sale-badge__text" style="([^"]*)"/', $html, $matches ) );
+		$this->assertStringContainsString( $text_align, $matches[1] );
+		$this->assertStringEndsWith( 'position:static;' . $margins, $matches[1] );
 	}
 
 	/**
