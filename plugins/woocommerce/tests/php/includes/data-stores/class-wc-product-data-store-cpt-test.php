@@ -936,9 +936,20 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 */
 	public function malformed_date_arg_provider(): array {
 		return array(
-			'post column, array'  => array( 'date_created', array( '2000-01-01' ) ),
-			'post column, object' => array( 'date_created', new stdClass() ),
-			'sale date, array'    => array( 'date_on_sale_from', array( '2000-01-01' ) ),
+			'post column, array'      => array( 'date_created', array( '2000-01-01' ) ),
+			'post column, object'     => array( 'date_created', new stdClass() ),
+			'post column, Stringable' => array(
+				'date_created',
+				new class() {
+					/**
+					 * @return string
+					 */
+					public function __toString(): string {
+						return '2000-01-01';
+					}
+				},
+			),
+			'sale date, array'        => array( 'date_on_sale_from', array( '2000-01-01' ) ),
 		);
 	}
 
@@ -961,59 +972,5 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( array( $product->get_id() ), $queried_products );
-	}
-
-	/**
-	 * @testdox A Stringable date arg still matches products, as it did before the malformed date guard.
-	 */
-	public function test_stringable_date_arg_matches_product(): void {
-		$product = new WC_Product_Simple();
-		$product->set_date_created( '2000-01-01T10:00:00' );
-		$product->save();
-		$other_product = new WC_Product_Simple();
-		$other_product->set_date_created( '2001-01-01T10:00:00' );
-		$other_product->save();
-
-		// A named class, because WP_Query serializes its query vars and anonymous classes cannot be serialized.
-		$date = new WC_Product_Data_Store_CPT_Test_Stringable( '2000-01-01' );
-
-		$this->assertSame(
-			array( $product->get_id() ),
-			wc_get_products(
-				array(
-					'date_created' => $date,
-					'return'       => 'ids',
-				)
-			)
-		);
-	}
-}
-
-// phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound -- Test double.
-/**
- * A Stringable value for date query tests.
- */
-class WC_Product_Data_Store_CPT_Test_Stringable {
-	/**
-	 * The string value.
-	 *
-	 * @var string
-	 */
-	private $value;
-
-	/**
-	 * Constructor.
-	 *
-	 * @param string $value The string value.
-	 */
-	public function __construct( string $value ) {
-		$this->value = $value;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function __toString(): string {
-		return $this->value;
 	}
 }

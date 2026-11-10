@@ -485,8 +485,8 @@ class OrdersTableQuery {
 			$is_local   = in_array( $date_key, $local_date_keys, true );
 			$date_value = $this->args[ $date_key ];
 
-			// These raise a TypeError from strtotime() below; an Exception makes the data store return no orders.
-			if ( is_array( $date_value ) || ( is_object( $date_value ) && ! method_exists( $date_value, '__toString' ) ) ) {
+			// Only strings, numbers and WC_DateTime are valid; an Exception makes the data store return no orders.
+			if ( is_array( $date_value ) || ( is_object( $date_value ) && ! $date_value instanceof \WC_DateTime ) ) {
 				throw new \Exception( 'Invalid date_query' );
 			}
 

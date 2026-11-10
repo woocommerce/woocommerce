@@ -197,7 +197,7 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Date args that cannot be used as a string return no orders instead of a fatal error.
+	 * @testdox Malformed date args return no orders instead of a fatal error.
 	 *
 	 * @dataProvider malformed_date_arg_provider
 	 * @param string $date_key   The date query var.
@@ -237,21 +237,32 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	 */
 	public function malformed_date_arg_provider(): array {
 		return array(
-			'local key, array'  => array( 'date_created', array( '2000-01-01' ) ),
-			'local key, object' => array( 'date_created', new \stdClass() ),
-			'GMT key, array'    => array( 'date_paid_gmt', array( '2000-01-01' ) ),
-			'GMT key, object'   => array( 'date_paid_gmt', new \stdClass() ),
+			'local key, array'      => array( 'date_created', array( '2000-01-01' ) ),
+			'local key, object'     => array( 'date_created', new \stdClass() ),
+			'local key, Stringable' => array(
+				'date_created',
+				new class() {
+					/**
+					 * @return string
+					 */
+					public function __toString(): string {
+						return '2000-01-01';
+					}
+				},
+			),
+			'GMT key, array'        => array( 'date_paid_gmt', array( '2000-01-01' ) ),
+			'GMT key, object'       => array( 'date_paid_gmt', new \stdClass() ),
 		);
 	}
 
 	/**
-	 * @testdox Date args that are objects with a string form still match orders.
+	 * @testdox WC_DateTime date args match orders.
 	 *
-	 * @dataProvider stringable_date_arg_provider
-	 * @param string $date_key   The date query var.
-	 * @param object $date_value The date object.
+	 * @dataProvider date_time_arg_provider
+	 * @param string       $date_key   The date query var.
+	 * @param \WC_DateTime $date_value The date.
 	 */
-	public function test_stringable_date_arg_matches_order( string $date_key, $date_value ): void {
+	public function test_date_time_arg_matches_order( string $date_key, $date_value ): void {
 		$orders = $this->create_orders_with_different_dates();
 
 		$queried_orders = wc_get_orders(
@@ -265,27 +276,16 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Data provider for test_stringable_date_arg_matches_order.
+	 * Data provider for test_date_time_arg_matches_order.
 	 *
 	 * @return array
 	 */
-	public function stringable_date_arg_provider(): array {
+	public function date_time_arg_provider(): array {
 		$date_time = new \WC_DateTime( '2000-01-01T10:00:00', new \DateTimeZone( 'UTC' ) );
 
 		return array(
 			'local key, WC_DateTime' => array( 'date_created', $date_time ),
 			'GMT key, WC_DateTime'   => array( 'date_created_gmt', $date_time ),
-			'local key, Stringable'  => array(
-				'date_created',
-				new class() {
-					/**
-					 * @return string
-					 */
-					public function __toString(): string {
-						return '2000-01-01';
-					}
-				},
-			),
 		);
 	}
 

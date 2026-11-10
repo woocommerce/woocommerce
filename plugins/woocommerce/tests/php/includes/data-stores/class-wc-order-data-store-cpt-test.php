@@ -2066,28 +2066,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A Stringable customer email still matches the order, as it did before the malformed customer guard.
-	 */
-	public function test_stringable_customer_email_matches_order(): void {
-		$order = WC_Helper_Order::create_order( 1 );
-		$order->set_billing_email( 'stringable@example.com' );
-		$order->save();
-
-		// A named class, because WP_Query serializes its query vars and anonymous classes cannot be serialized.
-		$email = new WC_Order_Data_Store_CPT_Test_Stringable( 'stringable@example.com' );
-
-		$this->assertSame(
-			array( $order->get_id() ),
-			wc_get_orders(
-				array(
-					'customer' => $email,
-					'return'   => 'ids',
-				)
-			)
-		);
-	}
-
-	/**
 	 * @testdox An empty date array applies no date filter, like an unset date arg.
 	 */
 	public function test_empty_date_array_applies_no_date_filter(): void {
@@ -2114,39 +2092,21 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 */
 	public function malformed_query_arg_provider(): array {
 		return array(
-			'date, array'               => array( 'date_created', array( '2000-01-01' ) ),
-			'date, object'              => array( 'date_paid', new stdClass() ),
-			'customer, object'          => array( 'customer', new stdClass() ),
-			'customer, object in array' => array( 'customer', array( 1, new stdClass() ) ),
+			'date, array'                => array( 'date_created', array( '2000-01-01' ) ),
+			'date, object'               => array( 'date_paid', new stdClass() ),
+			'customer, object'           => array( 'customer', new stdClass() ),
+			'customer, object in array'  => array( 'customer', array( 1, new stdClass() ) ),
+			'customer, Stringable email' => array(
+				'customer',
+				new class() {
+					/**
+					 * @return string
+					 */
+					public function __toString(): string {
+						return 'admin@example.org';
+					}
+				},
+			),
 		);
-	}
-}
-
-// phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound -- Test double.
-/**
- * A Stringable value for customer query tests.
- */
-class WC_Order_Data_Store_CPT_Test_Stringable {
-	/**
-	 * The string value.
-	 *
-	 * @var string
-	 */
-	private $value;
-
-	/**
-	 * Constructor.
-	 *
-	 * @param string $value The string value.
-	 */
-	public function __construct( string $value ) {
-		$this->value = $value;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function __toString(): string {
-		return $this->value;
 	}
 }
