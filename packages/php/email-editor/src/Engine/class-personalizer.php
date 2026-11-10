@@ -187,6 +187,10 @@ class Personalizer {
 				$token           = $this->parse_token( $modifiable_text );
 				$tag             = $this->tags_registry->get_by_token( $token['token'] );
 				if ( ! $tag ) {
+					// In plain text the comment would be shown to the recipient, so an unresolved tag is removed.
+					if ( self::RENDERING_CONTEXT_TEXT === $rendering_context && '' !== $token['token'] ) {
+						$content_processor->replace_token( '' );
+					}
 					continue;
 				}
 
@@ -235,7 +239,29 @@ class Personalizer {
 		}
 
 		$content_processor->flush_updates();
-		return $content_processor->get_updated_html();
+		$content = $content_processor->get_updated_html();
+
+		if ( self::RENDERING_CONTEXT_TEXT === $rendering_context ) {
+			$content = $this->personalize_text_link_targets( $content );
+		}
+		return $content;
+	}
+
+	/**
+	 * Replace tags in the "[text](url)" link targets that the Renderer's text version contains.
+	 *
+	 * @param string $content Plain-text content.
+	 * @return string The content with link targets personalized.
+	 */
+	private function personalize_text_link_targets( string $content ): string {
+		return (string) preg_replace_callback(
+			'/\]\(([^()\s]+)\)/',
+			function ( array $matches ): string {
+				$url = $this->personalize_href_tokens( $matches[1] );
+				return null === $url ? $matches[0] : '](' . $url . ')';
+			},
+			$content
+		);
 	}
 
 	/**

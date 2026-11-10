@@ -129,6 +129,8 @@ The Personalizer passes the context of each replacement to the tag callback unde
 | `Personalizer::RENDERING_CONTEXT_TEXT` | Plain-text output (subject, preheader, plain-text body, `<title>`) | Raw plain text. No HTML markup, no entities, no escaping. |
 | `Personalizer::RENDERING_CONTEXT_HREF` | A link URL (`href`) | A raw, unescaped URL — do not pre-escape; URL escaping is applied when the attribute is written. |
 
+In the text rendering context the Personalizer also replaces tags in the `[text](url)` link targets of the Renderer's plain-text version (in the href rendering context), and removes a tag token it cannot resolve, because a comment would be shown to the recipient as text.
+
 If the value is a URL *component* rather than a whole URL (e.g. an email address embedded in a query string), `rawurlencode()` it in the callback — the Personalizer cannot tell the difference.
 
 Inspecting the rendering context is optional — a callback that ignores it simply returns the same value for every destination. A tag that serves different content per destination can switch on the key:

@@ -57,13 +57,6 @@ class Renderer {
 	private Process_Manager $process_manager;
 
 	/**
-	 * Personalization tags registry
-	 *
-	 * @var Personalization_Tags_Registry
-	 */
-	private Personalization_Tags_Registry $personalization_tags_registry;
-
-	/**
 	 * Map of placeholders to full HTML comment tags for restoration.
 	 *
 	 * @var array
@@ -81,8 +74,10 @@ class Renderer {
 	 * @param Templates                     $templates Templates.
 	 * @param Css_Inliner                   $css_inliner CSS Inliner.
 	 * @param Theme_Controller              $theme_controller Theme controller.
-	 * @param Personalization_Tags_Registry $personalization_tags_registry Personalization tags registry.
+	 * @param Personalization_Tags_Registry $personalization_tags_registry Personalization tags registry. No longer used.
 	 * @param Process_Manager               $process_manager Process manager.
+	 *
+	 * @phpstan-ignore constructor.unusedParameter (The registry is no longer needed, but integrators construct the Renderer directly, so the signature stays.)
 	 */
 	public function __construct(
 		Content_Renderer $content_renderer,
@@ -92,12 +87,11 @@ class Renderer {
 		Personalization_Tags_Registry $personalization_tags_registry,
 		Process_Manager $process_manager
 	) {
-		$this->content_renderer              = $content_renderer;
-		$this->templates                     = $templates;
-		$this->theme_controller              = $theme_controller;
-		$this->css_inliner                   = $css_inliner;
-		$this->personalization_tags_registry = $personalization_tags_registry;
-		$this->process_manager               = $process_manager;
+		$this->content_renderer = $content_renderer;
+		$this->templates        = $templates;
+		$this->theme_controller = $theme_controller;
+		$this->css_inliner      = $css_inliner;
+		$this->process_manager  = $process_manager;
 	}
 
 	/**
@@ -264,6 +258,7 @@ class Renderer {
 
 		// Preserve personalization tags by temporarily replacing them with unique placeholders.
 		$template = $this->preserve_personalization_tags( $template );
+		$template = $this->use_link_tags_as_href( $template );
 
 		$result = Html2Text::convert( (string) $template, array( 'ignore_errors' => true ) );
 		if ( ! $result ) {
@@ -277,44 +272,42 @@ class Renderer {
 	}
 
 	/**
+	 * Copies a link's data-link-href (a tag used as the whole URL) into its href, so the text version
+	 * keeps the tag as the link target and the Personalizer can replace it there.
+	 *
+	 * @param string $template HTML template.
+	 * @return string
+	 */
+	private function use_link_tags_as_href( string $template ): string {
+		$processor = new \WP_HTML_Tag_Processor( $template );
+		while ( $processor->next_tag( array( 'tag_name' => 'a' ) ) ) {
+			$data_link_href = $processor->get_attribute( 'data-link-href' );
+			if ( is_string( $data_link_href ) && '' !== $data_link_href ) {
+				$processor->set_attribute( 'href', $data_link_href );
+			}
+		}
+		return $processor->get_updated_html();
+	}
+
+	/**
 	 * Preserves personalization tags by replacing them with unique placeholders (not inside comments).
 	 *
 	 * @param string $template HTML template.
 	 * @return string
 	 */
 	private function preserve_personalization_tags( string $template ): string {
-		$all_registered_tags                    = $this->personalization_tags_registry->get_all();
 		$this->personalization_tag_placeholders = array();
 		$counter                                = 0;
 
-		$base_tokens    = array(); // All the tokens used in the email, e.g. [woocommerce/customer-username].
-		$token_prefixes = array(); // All the used prefixes, e.g. woocommerce, mailpoet, etc.
-		foreach ( $all_registered_tags as $tag ) {
-			$token                 = $tag->get_token(); // E.g. [woocommerce/customer-username].
-			$base_tokens[ $token ] = true;
-			// Remove brackets for regex matching, escape for regex.
-			$token_prefixes[] = preg_quote( substr( $token, 1, -1 ), '/' );
-		}
-
-		if ( empty( $token_prefixes ) ) {
-			return $template;
-		}
-
-		// Match all of the code comments that look like a personalization tags.
-		$pattern = '/<!--\[(' . implode( '|', $token_prefixes ) . ')(?:\s+[^\]]*)?\]-->/';
-
+		// Match every comment that looks like a personalization tag, registered or not: a plugin may
+		// register its tags only before personalizing, and Html2Text would drop the comment.
 		$template = preg_replace_callback(
-			$pattern,
-			function ( $matches ) use ( &$counter, $base_tokens ) {
-				// $matches[1] is the token without brackets, add brackets for lookup.
-				$base_token = '[' . $matches[1] . ']';
-				if ( isset( $base_tokens[ $base_token ] ) ) {
-					$placeholder = 'PERSONALIZATION_TAG_PLACEHOLDER_' . $counter;
-					$this->personalization_tag_placeholders[ $placeholder ] = $matches[0];
-					++$counter;
-					return $placeholder;
-				}
-				return $matches[0];
+			'/<!--\[[a-zA-Z0-9\-\/]+(?:\s+[^\]]*)?\]-->/',
+			function ( $matches ) use ( &$counter ) {
+				$placeholder = 'PERSONALIZATION_TAG_PLACEHOLDER_' . $counter;
+				$this->personalization_tag_placeholders[ $placeholder ] = $matches[0];
+				++$counter;
+				return $placeholder;
 			},
 			$template
 		);

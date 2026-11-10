@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep personalization tags in plain-text emails, including in links, and hide tags that cannot be filled in.

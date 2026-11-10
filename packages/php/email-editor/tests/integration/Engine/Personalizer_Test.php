@@ -723,6 +723,38 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test that a tag token that cannot be resolved leaves nothing visible in the text rendering context,
+	 * where an HTML comment is shown to the recipient as text.
+	 */
+	public function testUnresolvedTagLeavesNoCommentInTextContext(): void {
+		$this->assertSame( 'Hi , welcome.', $this->personalizer->personalize_content( 'Hi <!--[other-plugin/first-name]-->, welcome.', Personalizer::RENDERING_CONTEXT_TEXT ) );
+		$this->assertSame( '<p>Hi <!--[other-plugin/first-name]-->, welcome.</p>', $this->personalizer->personalize_content( '<p>Hi <!--[other-plugin/first-name]-->, welcome.</p>' ) );
+		// A comment that is not a tag token is left alone.
+		$this->assertSame( 'Hi <!-- note -->', $this->personalizer->personalize_content( 'Hi <!-- note -->', Personalizer::RENDERING_CONTEXT_TEXT ) );
+	}
+
+	/**
+	 * Test that only the link targets of the text version are personalized, not tag-like text elsewhere.
+	 */
+	public function testTextContextPersonalizesOnlyLinkTargets(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Store URL',
+				'woocommerce/store-url',
+				'Store',
+				function () {
+					return 'https://example.com';
+				}
+			)
+		);
+
+		$this->assertSame(
+			'Type [woocommerce/store-url] or visit [the store](https://example.com).',
+			$this->personalizer->personalize_content( 'Type [woocommerce/store-url] or visit [the store](http://%5Bwoocommerce/store-url%5D).', Personalizer::RENDERING_CONTEXT_TEXT )
+		);
+	}
+
+	/**
 	 * Test that the reserved rendering context key cannot be injected via set_context().
 	 */
 	public function testRenderingContextKeyIsReserved(): void {

@@ -9,6 +9,7 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
+use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use Automattic\WooCommerce\EmailEditor\Engine\Templates\Utils;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
@@ -767,5 +768,72 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			$this->assertStringContainsString( $token, $rendered['text'], "Tag {$index} was not restored in the text version." );
 			$this->assertStringContainsString( $token, $rendered['html'], "Tag {$index} was not restored in the HTML version." );
 		}
+	}
+
+	/**
+	 * Render the given post content with a registry holding one tag, and return the registry and the text version.
+	 *
+	 * @param string $content Post content.
+	 * @return array{0: Personalization_Tags_Registry, 1: string}
+	 */
+	private function render_with_link_tag( string $content ): array {
+		$registry = new Personalization_Tags_Registry(
+			$this->di_container->get( \Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger::class )
+		);
+		$registry->register(
+			new Personalization_Tag(
+				'Account URL',
+				'[renderer-test/account-url]',
+				'Renderer Test',
+				function () {
+					return 'https://shop.example/account?a=1&b=2';
+				}
+			)
+		);
+		$this->renderer = $this->getServiceWithOverrides(
+			Renderer::class,
+			array(
+				'personalization_tags_registry' => $registry,
+			)
+		);
+
+		$templates_registry = \WP_Block_Templates_Registry::get_instance();
+		if ( ! $templates_registry->is_registered( 'renderer-tests//test-email-template-plain-text' ) ) {
+			$templates_registry->register(
+				'renderer-tests//test-email-template-plain-text',
+				array(
+					'title'       => 'Test Email Template',
+					'description' => 'A test email template.',
+					'content'     => '<!-- wp:group --><div class="wp-block-group"><!-- wp:post-content /--></div><!-- /wp:group -->',
+				)
+			);
+		}
+
+		$rendered = $this->renderer->render_from_content( $content, 'test-email-template-plain-text', 'Subject', 'Preheader' );
+		return array( $registry, (string) $rendered['text'] );
+	}
+
+	/**
+	 * Test that a tag whose plugin did not register it before rendering stays in the text version,
+	 * so it can still be personalized later instead of disappearing.
+	 */
+	public function testItKeepsTagsUnknownAtRenderTimeInTextVersion(): void {
+		list( , $text ) = $this->render_with_link_tag( '<!-- wp:paragraph --><p>Hi <!--[other-plugin/first-name]-->, welcome.</p><!-- /wp:paragraph -->' );
+		$this->assertStringContainsString( 'Hi <!--[other-plugin/first-name]-->, welcome.', $text );
+	}
+
+	/**
+	 * Test that a tag used in a link URL is personalized in the text version, as it is in the HTML version.
+	 */
+	public function testItPersonalizesLinkTagsInTextVersion(): void {
+		list( $registry, $text ) = $this->render_with_link_tag(
+			// The editor writes data-link-href links without an href; a button keeps href="#" next to it.
+			'<!-- wp:paragraph --><p>See <a href="http://[renderer-test/account-url]">My account</a>, <a data-link-href="[renderer-test/account-url]" contenteditable="false">Orders</a> or <a href="#" data-link-href="[renderer-test/account-url]">Returns</a>.</p><!-- /wp:paragraph -->'
+		);
+		$personalizer = new Personalizer( $registry );
+		$this->assertStringContainsString(
+			'See [My account](https://shop.example/account?a=1&b=2), [Orders](https://shop.example/account?a=1&b=2) or [Returns](https://shop.example/account?a=1&b=2).',
+			$personalizer->personalize_content( $text, Personalizer::RENDERING_CONTEXT_TEXT )
+		);
 	}
 }
