@@ -65,9 +65,19 @@ class Renderer_Snapshot_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertInstanceOf( \WP_Post::class, $post );
 
 		$rendered = $this->di_container->get( Renderer::class )->render( $post, 'Subject', 'Preheader', 'en_US' );
-		$actual   = $this->normalize( $rendered['html'] );
 
-		$snapshot = __DIR__ . "/snapshots/{$name}.html";
+		$this->assertMatchesSnapshot( "{$name}.html", $this->normalize( $rendered['html'] ) );
+		$this->assertMatchesSnapshot( "{$name}.txt", $this->normalize( $rendered['text'] ) );
+	}
+
+	/**
+	 * Compares the output with a stored snapshot, or stores it when updating snapshots.
+	 *
+	 * @param string $file   Snapshot file name.
+	 * @param string $actual Rendered output.
+	 */
+	private function assertMatchesSnapshot( string $file, string $actual ): void {
+		$snapshot = __DIR__ . "/snapshots/{$file}";
 		if ( getenv( 'UPDATE_EMAIL_SNAPSHOTS' ) ) {
 			file_put_contents( $snapshot, $actual ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- writes a test snapshot.
 		}
@@ -99,7 +109,7 @@ class Renderer_Snapshot_Test extends \Email_Editor_Integration_Test_Case {
 			$settings = $initializer->update_block_settings( array( 'name' => $block_type->name ) );
 			if ( isset( $settings['render_email_callback'] ) ) {
 				$block_type->set_props( array( 'render_email_callback' => $settings['render_email_callback'] ) );
-				$this->wired_block_types[]         = $block_type;
+				$this->wired_block_types[] = $block_type;
 			}
 		}
 	}
