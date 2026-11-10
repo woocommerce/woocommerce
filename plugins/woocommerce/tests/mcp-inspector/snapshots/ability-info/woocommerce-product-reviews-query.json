@@ -1,0 +1,192 @@
+{
+	"name": "woocommerce/product-reviews-query",
+	"label": "Query product reviews",
+	"description": "Read product reviews, ratings and moderation status. Search matches review text only, never reviewer identity. Summary and per-product ranking cover all reviews in the requested product/status scope, ignoring search, rating range and include. Unrated reviews have rating zero and do not affect averages. Ranking is worst first; above 200 products it keeps the 100 worst and 100 best rated. Text searches omit the ranking. Requested products without reviews and unknown product IDs are reported separately. Reviewer identity is withheld.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"product_ids": {
+				"type": "array",
+				"description": "Only return reviews for these products, and scope the summary and the ranking to them. Omit it to cover every product.",
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				},
+				"minItems": 1,
+				"maxItems": 200
+			},
+			"search": {
+				"type": "string",
+				"description": "Free-text search across review content."
+			},
+			"status": {
+				"type": "string",
+				"description": "Review moderation status. \"hold\" is reviews awaiting moderation.",
+				"enum": [
+					"approved",
+					"hold",
+					"spam",
+					"trash",
+					"all"
+				],
+				"default": "approved"
+			},
+			"min_rating": {
+				"type": "integer",
+				"description": "Only return reviews with at least this star rating. Use with max_rating to find unhappy customers.",
+				"minimum": 1,
+				"maximum": 5
+			},
+			"max_rating": {
+				"type": "integer",
+				"description": "Only return reviews with at most this star rating.",
+				"minimum": 1,
+				"maximum": 5
+			},
+			"include": {
+				"type": "array",
+				"description": "Limit matching reviews to these review IDs. Summary and ranking still cover the product scope.",
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				},
+				"minItems": 1,
+				"maxItems": 200
+			},
+			"page": {
+				"type": "integer",
+				"minimum": 1,
+				"default": 1
+			},
+			"per_page": {
+				"type": "integer",
+				"minimum": 1,
+				"maximum": 200,
+				"default": 20
+			}
+		},
+		"default": [],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"status": {
+				"type": "string"
+			},
+			"count": {
+				"type": "integer"
+			},
+			"total": {
+				"type": "integer"
+			},
+			"page": {
+				"type": "integer"
+			},
+			"per_page": {
+				"type": "integer"
+			},
+			"total_pages": {
+				"type": "integer"
+			},
+			"summary": {
+				"type": "object",
+				"properties": {
+					"average_rating": {
+						"type": "number"
+					},
+					"total_reviews": {
+						"type": "integer"
+					},
+					"matching_reviews": {
+						"type": "integer"
+					},
+					"total_products": {
+						"type": "integer"
+					}
+				}
+			},
+			"search_scope": {
+				"type": "string"
+			},
+			"products_without_reviews": {
+				"type": "array",
+				"items": {
+					"type": "integer"
+				}
+			},
+			"unknown_product_ids": {
+				"type": "array",
+				"items": {
+					"type": "integer"
+				}
+			},
+			"by_product": {
+				"type": "array",
+				"items": {
+					"type": "object",
+					"properties": {
+						"product_id": {
+							"type": "integer"
+						},
+						"product_name": {
+							"type": "string"
+						},
+						"review_count": {
+							"type": "integer"
+						},
+						"average_rating": {
+							"type": "number"
+						}
+					}
+				}
+			},
+			"reviews": {
+				"type": "array",
+				"items": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "integer"
+						},
+						"product_id": {
+							"type": "integer"
+						},
+						"product_name": {
+							"type": "string"
+						},
+						"date_created": {
+							"type": "string",
+							"format": "date-time"
+						},
+						"rating": {
+							"type": "integer"
+						},
+						"verified": {
+							"type": "boolean"
+						},
+						"status": {
+							"type": "string"
+						},
+						"review": {
+							"type": "string"
+						}
+					}
+				}
+			}
+		}
+	},
+	"meta": {
+		"annotations": {
+			"readonly": true,
+			"destructive": false,
+			"idempotent": true
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

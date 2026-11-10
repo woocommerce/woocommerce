@@ -1,0 +1,144 @@
+{
+	"name": "woocommerce/product-attributes-query",
+	"label": "Query product attributes",
+	"description": "Find the global product attributes, such as Color or Size, with their terms. Use include to retrieve specific attribute IDs.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"include": {
+				"description": "Limit results to these attribute IDs. Use one ID to retrieve a single attribute.",
+				"type": "array",
+				"minItems": 1,
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				}
+			},
+			"search": {
+				"description": "Match part of the attribute label or slug, ignoring case.",
+				"type": "string"
+			},
+			"terms_per_attribute": {
+				"description": "Most terms to return per attribute. Use zero for none.",
+				"type": "integer",
+				"minimum": 0,
+				"maximum": 100,
+				"default": 25
+			},
+			"page": {
+				"type": "integer",
+				"minimum": 1,
+				"default": 1
+			},
+			"per_page": {
+				"type": "integer",
+				"minimum": 1,
+				"maximum": 50,
+				"default": 10
+			},
+			"offset": {
+				"type": "integer",
+				"minimum": 0
+			}
+		},
+		"additionalProperties": false,
+		"default": []
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"attributes": {
+				"type": "array",
+				"description": "Returned attributes for the current page.",
+				"items": {
+					"type": "object",
+					"properties": {
+						"id": {
+							"type": "integer"
+						},
+						"name": {
+							"type": "string",
+							"description": "Label. Product writes accept it as the name of a global attribute."
+						},
+						"slug": {
+							"type": "string",
+							"description": "Taxonomy of the attribute terms, such as pa_color."
+						},
+						"type": {
+							"type": "string"
+						},
+						"order_by": {
+							"type": "string",
+							"description": "Default sort order of the terms."
+						},
+						"has_archives": {
+							"type": "boolean"
+						},
+						"term_count": {
+							"type": "integer",
+							"description": "Number of terms. Use product-terms-query with the slug as taxonomy to page through more terms than terms lists."
+						},
+						"terms": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "integer"
+									},
+									"name": {
+										"type": "string"
+									},
+									"slug": {
+										"type": "string"
+									},
+									"description": {
+										"type": "string"
+									},
+									"menu_order": {
+										"type": "integer"
+									},
+									"count": {
+										"type": "integer"
+									}
+								},
+								"additionalProperties": false
+							}
+						}
+					},
+					"additionalProperties": false
+				}
+			},
+			"total_pages": {
+				"type": "integer",
+				"description": "Total number of result pages available for the current query."
+			},
+			"page": {
+				"type": "integer",
+				"description": "Current result page."
+			},
+			"per_page": {
+				"type": "integer",
+				"description": "Maximum number of items requested per page."
+			},
+			"total": {
+				"type": "integer",
+				"description": "Total number of matching attributes across all pages."
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": true,
+			"destructive": false,
+			"idempotent": true
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}

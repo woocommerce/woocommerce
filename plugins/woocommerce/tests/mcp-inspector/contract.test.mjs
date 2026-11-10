@@ -211,6 +211,7 @@ const PERMISSION_INPUT = {
 	'woocommerce/order-send-email': { id: order.id, email: 'invoice' },
 	'woocommerce/order-update': { id: order.id },
 	'woocommerce/order-update-status': { id: order.id, status: 'processing' },
+	'woocommerce/product-attribute-create': { name: 'MCP permission check' },
 	'woocommerce/product-delete': { id: product.id },
 	'woocommerce/product-terms-query': { taxonomy: 'product_cat' },
 	'woocommerce/product-update': { id: product.id },
