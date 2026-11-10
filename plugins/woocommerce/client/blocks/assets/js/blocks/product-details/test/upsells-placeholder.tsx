@@ -78,6 +78,9 @@ describe( 'UpsellsPlaceholder', () => {
 				name: 'woocommerce/product-collection',
 				attributes: expect.objectContaining( {
 					align: 'wide',
+					collection: 'woocommerce/product-collection/upsells',
+					queryContextIncludes: [ 'collection' ],
+					hideControls: [ 'inherit' ],
 					query: expect.objectContaining( { perPage: 5 } ),
 					displayLayout: expect.objectContaining( { columns: 5 } ),
 				} ),

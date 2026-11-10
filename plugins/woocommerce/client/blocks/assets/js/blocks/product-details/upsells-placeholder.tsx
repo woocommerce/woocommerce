@@ -92,6 +92,8 @@ const UpsellsPlaceholder = ( { clientId }: { clientId: string } ) => {
 					...( typeof align === 'string' && align !== ''
 						? { align }
 						: {} ),
+					collection: upsellsCollection.name,
+					hideControls: [ 'inherit' ],
 				},
 				createBlocksFromInnerBlocksTemplate(
 					upsellsCollection.innerBlocks
