@@ -798,4 +798,12 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		);
 		$this->assertStringNotContainsString( '[other-plugin/url]', $personalized );
 	}
+
+	/**
+	 * Test that bold text made of only a tag gets no bold markers, so an empty tag value leaves no stray "**".
+	 */
+	public function testItDoesNotMarkBoldTagsInTextVersion(): void {
+		list( , $text ) = $this->render_with_link_tag( '<!-- wp:paragraph --><p>Username: <strong><!--[other-plugin/username]--></strong>, <strong>Bold</strong></p><!-- /wp:paragraph -->' );
+		$this->assertStringContainsString( 'Username: <!--[other-plugin/username]-->, *Bold*', $text );
+	}
 }
