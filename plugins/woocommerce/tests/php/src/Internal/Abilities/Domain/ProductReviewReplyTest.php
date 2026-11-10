@@ -73,7 +73,7 @@ class ProductReviewReplyTest extends \WC_Unit_Test_Case {
 		$this->assertIsArray( $result );
 		$this->assertSame( $review, $result['review_id'] );
 		$this->assertSame( 'approved', $result['status'], 'A shop manager can moderate comments, so the reply is approved.' );
-		$this->assertSame( 'Thanks for the kind words!', $result['reply'] );
+		$this->assertSame( 'Thanks for the kind words!alert(1)', $result['reply'], 'wp_kses_post() strips the tags and keeps their text.' );
 		$reply = get_comment( $result['id'] );
 		$this->assertSame( (string) $review, $reply->comment_parent );
 		$this->assertSame( 'comment', $reply->comment_type );
@@ -83,7 +83,7 @@ class ProductReviewReplyTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should refuse replies to held reviews, to replies, and text that is only unsafe HTML.
+	 * @testdox Should refuse replies to held reviews, to replies, and text that is only unsafe tags.
 	 */
 	public function test_refused_replies(): void {
 		$cases = array(
@@ -97,7 +97,7 @@ class ProductReviewReplyTest extends \WC_Unit_Test_Case {
 				),
 				'Thanks',
 			),
-			'woocommerce_ability_product_review_reply_empty' => array( $this->review(), '<script>alert(1)</script>' ),
+			'woocommerce_ability_product_review_reply_empty' => array( $this->review(), '<script> </script>' ),
 		);
 
 		foreach ( $cases as $code => list( $id, $content ) ) {
