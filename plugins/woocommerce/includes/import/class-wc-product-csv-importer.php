@@ -424,7 +424,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 					return new WP_Error(
 						'parent_id' === $field ? 'woocommerce_product_importer_variation_parent_not_variable' : 'woocommerce_product_importer_unresolved_relationship_sku',
 						/* translators: %s: SKU of the product referenced by the CSV row. */
-						sprintf( esc_html__( 'No product matches the relationship SKU "%s".', 'woocommerce' ), esc_html( $sku ) )
+						sprintf( esc_html__( 'No product was found with the SKU "%s".', 'woocommerce' ), esc_html( $sku ) )
 					);
 				}
 
