@@ -38,6 +38,7 @@ class Html2Text {
 			'ignore_errors' => false,
 			'drop_links'    => false,
 			'char_set'      => 'auto',
+			'mark_bold'     => false,
 		);
 	}
 
@@ -619,6 +620,14 @@ class Html2Text {
 
 			case 'li':
 				$output .= "\n";
+				break;
+
+			case 'b':
+			case 'strong':
+				// Mark bold text as *text*, keeping the whitespace around it outside the markers.
+				if ( $options['mark_bold'] && '' !== trim( $output ) ) {
+					$output = (string) preg_replace( '/^(\s*)(.*?)(\s*)$/s', '$1*$2*$3', $output );
+				}
 				break;
 
 			case 'blockquote':

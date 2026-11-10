@@ -550,8 +550,8 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			),
 			'strong_emphasis'     => array(
 				'<!-- wp:paragraph --><p>This is <strong>important</strong> and <em>emphasized</em> text.</p><!-- /wp:paragraph -->',
-				'This is important and emphasized text.',
-				'Strong and emphasis tags converted to plain text',
+				'This is *important* and emphasized text.',
+				'Bold text is marked with asterisks, emphasis is plain text',
 			),
 			'line_breaks'         => array(
 				'<!-- wp:paragraph --><p>Line one<br>Line two<br/>Line three</p><!-- /wp:paragraph -->',

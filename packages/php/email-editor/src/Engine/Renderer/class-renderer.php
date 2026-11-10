@@ -259,7 +259,13 @@ class Renderer {
 		// Preserve personalization tags by temporarily replacing them with unique placeholders.
 		$template = $this->preserve_personalization_tags( $template );
 
-		$result = Html2Text::convert( (string) $template, array( 'ignore_errors' => true ) );
+		$result = Html2Text::convert(
+			(string) $template,
+			array(
+				'ignore_errors' => true,
+				'mark_bold'     => true,
+			)
+		);
 		if ( ! $result ) {
 			return '';
 		}
