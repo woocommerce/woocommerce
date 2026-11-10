@@ -543,10 +543,10 @@ class WC_Form_Handler {
 		}
 
 		/**
-		 * Fires before a customer's copied address is saved, so extensions can reject it by adding an error notice.
+		 * Fires before a customer's copied address is saved, so extensions can stop the save by adding an error notice.
 		 *
-		 * Unlike woocommerce_after_save_address_validation, there's no submitted form, so read the copied values from
-		 * the customer instead of the request.
+		 * There's no submitted form, so read the copied values from the customer instead of the request. A stopped copy
+		 * opens the edit address form filled with the copied address, and saving it runs woocommerce_after_save_address_validation.
 		 *
 		 * @since 11.4.0
 		 *
@@ -560,7 +560,7 @@ class WC_Form_Handler {
 		// Open the edit form filled with the copied address instead, so the customer only fixes what the errors point to.
 		if ( 0 < wc_notice_count( 'error' ) ) {
 			wc_add_notice( __( 'Review the copied address below, then save it.', 'woocommerce' ), 'notice' );
-			wp_safe_redirect( add_query_arg( 'copy-address-from', $source_type, wc_get_endpoint_url( 'edit-address', wc_edit_address_i18n( $target_type ), wc_get_page_permalink( 'myaccount' ) ) ) );
+			wp_safe_redirect( add_query_arg( 'copy-address-from', $source_type, wc_get_endpoint_url( 'edit-address', $target_type, wc_get_page_permalink( 'myaccount' ) ) ) );
 			exit;
 		}
 
