@@ -107,6 +107,11 @@ final class UcpDiscovery implements RegisterHooksInterface {
 			return;
 		}
 
+		// One file under ABSPATH cannot hold a profile per site, so multisite requires pretty permalinks.
+		if ( is_multisite() ) {
+			return;
+		}
+
 		$content  = (string) wp_json_encode( $this->get_profile(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
 		$dir      = dirname( $path );
 		$writable = is_file( $path ) ? is_writable( $path ) : wp_mkdir_p( $dir ) && is_writable( $dir );
@@ -135,7 +140,7 @@ final class UcpDiscovery implements RegisterHooksInterface {
 			$message = __( 'A static %1$s file is overriding the UCP discovery endpoint. Delete it or make its directory writable by the web server.', 'woocommerce' );
 		} else {
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable
-			if ( is_writable( $path ) ) {
+			if ( is_multisite() || is_writable( $path ) ) {
 				return;
 			}
 			/* translators: %1$s: discovery file path, %2$s: opening link tag, %3$s: closing link tag. */
