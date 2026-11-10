@@ -401,6 +401,68 @@ class DatabaseTransactionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox run() should turn autocommit back on and own no transaction after a query filter throws on its start.
+	 */
+	public function test_run_restores_autocommit_after_its_start_throws(): void {
+		$throw_on_start = static function ( $query ) {
+			if ( 'START TRANSACTION' === $query ) {
+				throw new \RuntimeException( 'Start refused.' );
+			}
+			return $query;
+		};
+		add_filter( 'query', $throw_on_start, 0 );
+		$called = false;
+		try {
+			DatabaseTransaction::run(
+				static function () use ( &$called ) {
+					$called = true;
+				}
+			);
+			$this->fail( 'The exception should reach the caller.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertSame( 'Start refused.', $e->getMessage() );
+		} finally {
+			remove_filter( 'query', $throw_on_start, 0 );
+		}
+
+		$this->assertFalse( $called, 'The callback should not run without a transaction.' );
+		$this->assertSame( array( 'SELECT @@autocommit', 'SET autocommit = 0', 'SET autocommit = 1' ), $this->statements );
+		$this->assertFalse( DatabaseTransaction::is_open() );
+		$this->assertFalse( has_filter( 'query', array( DatabaseTransaction::class, 'watch' ) ) );
+	}
+
+	/**
+	 * @testdox run() should roll back no savepoint after a query filter throws on setting it.
+	 */
+	public function test_run_rolls_back_no_savepoint_after_setting_it_throws(): void {
+		$throw_on_savepoint = static function ( $query ) {
+			if ( 0 === strpos( $query, 'SAVEPOINT' ) ) {
+				throw new \RuntimeException( 'Savepoint refused.' );
+			}
+			return $query;
+		};
+
+		$inner_error = null;
+		DatabaseTransaction::run(
+			static function () use ( $throw_on_savepoint, &$inner_error ) {
+				add_filter( 'query', $throw_on_savepoint, 0 );
+				try {
+					DatabaseTransaction::run( static fn() => null );
+				} catch ( \RuntimeException $e ) {
+					$inner_error = $e->getMessage();
+				} finally {
+					remove_filter( 'query', $throw_on_savepoint, 0 );
+				}
+				return null;
+			}
+		);
+
+		$this->assertSame( 'Savepoint refused.', $inner_error );
+		$this->assertSame( array( 'SELECT @@autocommit', 'SET autocommit = 0', 'START TRANSACTION', 'COMMIT', 'SET autocommit = 1' ), $this->statements );
+		$this->assertFalse( DatabaseTransaction::is_open() );
+	}
+
+	/**
 	 * @testdox run() should leave autocommit alone when the connection already has it off.
 	 */
 	public function test_run_keeps_autocommit_off(): void {
