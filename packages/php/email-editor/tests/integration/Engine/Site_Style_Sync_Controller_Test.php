@@ -17,6 +17,13 @@ use WP_Theme_JSON;
  * Class Site_Style_Sync_Controller_Test
  */
 class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Case {
+	/**
+	 * Theme that was active before the test.
+	 *
+	 * @var string
+	 */
+	private string $previous_theme = '';
+
 
 	/**
 	 * Site Style Sync Controller instance.
@@ -32,9 +39,20 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		parent::setUp();
 
 		// Switch theme for easier testing theme colors.
+		$this->previous_theme = get_stylesheet();
 		switch_theme( 'twentytwentyfour' );
 
 		$this->controller = new Site_Style_Sync_Controller();
+	}
+
+	/**
+	 * Switch back to the theme from before the test and drop its cached styles,
+	 * which the database rollback does not reset.
+	 */
+	public function tearDown(): void {
+		switch_theme( $this->previous_theme );
+		\WP_Theme_JSON_Resolver::clean_cached_data();
+		parent::tearDown();
 	}
 
 	/**
