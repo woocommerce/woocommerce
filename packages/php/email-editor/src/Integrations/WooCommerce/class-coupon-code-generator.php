@@ -32,18 +32,18 @@ class Coupon_Code_Generator {
 	 * Initialize the generator by registering the filter hook.
 	 */
 	public function init(): void {
-		add_filter( 'woocommerce_coupon_code_block_auto_generate', array( $this, 'generate_coupon' ), 10, 3 );
+		add_filter( 'woocommerce_coupon_code_block_auto_generate', array( $this, 'filter_coupon_code' ), 10, 3 );
 	}
 
 	/**
-	 * Generate a WooCommerce coupon from block attributes.
+	 * Filter callback: checks the values another callback may have changed, then generates a coupon.
 	 *
 	 * @param mixed $coupon_code       The coupon code (empty if not yet generated).
 	 * @param mixed $attrs             Block attributes.
 	 * @param mixed $rendering_context The rendering context.
-	 * @return string The generated coupon code, or empty string on failure.
+	 * @return string The coupon code, or empty string on failure.
 	 */
-	public function generate_coupon( $coupon_code, $attrs, $rendering_context ): string {
+	public function filter_coupon_code( $coupon_code, $attrs, $rendering_context ): string {
 		if ( is_scalar( $coupon_code ) && '' !== (string) $coupon_code ) {
 			return (string) $coupon_code;
 		}
@@ -51,17 +51,22 @@ class Coupon_Code_Generator {
 			return '';
 		}
 
-		return $this->create_coupon( is_array( $attrs ) ? $attrs : array(), $rendering_context );
+		return $this->generate_coupon( '', is_array( $attrs ) ? $attrs : array(), $rendering_context );
 	}
 
 	/**
-	 * Create a coupon from block attributes, or return the placeholder in a preview.
+	 * Generate a WooCommerce coupon from block attributes.
 	 *
+	 * @param string            $coupon_code       The coupon code (empty if not yet generated).
 	 * @param array             $attrs             Block attributes.
 	 * @param Rendering_Context $rendering_context The rendering context.
-	 * @return string The coupon code, or empty string on failure.
+	 * @return string The generated coupon code, or empty string on failure.
 	 */
-	private function create_coupon( array $attrs, Rendering_Context $rendering_context ): string {
+	public function generate_coupon( string $coupon_code, array $attrs, Rendering_Context $rendering_context ): string {
+		if ( ! empty( $coupon_code ) ) {
+			return $coupon_code;
+		}
+
 		if ( $rendering_context->get( 'is_user_preview' ) ) {
 			return Coupon_Code::COUPON_CODE_PLACEHOLDER;
 		}

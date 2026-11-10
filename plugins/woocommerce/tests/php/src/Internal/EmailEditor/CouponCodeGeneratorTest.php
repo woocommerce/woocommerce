@@ -39,7 +39,7 @@ class CouponCodeGeneratorTest extends WC_Unit_Test_Case {
 	 * @testdox Generates a code when an earlier filter returned something other than a string.
 	 */
 	public function test_non_string_code_from_filter_generates_a_code(): void {
-		$code = $this->sut->generate_coupon( null, 'not-an-array', $this->context() );
+		$code = $this->sut->filter_coupon_code( null, 'not-an-array', $this->context() );
 
 		$this->assertNotSame( 0, wc_get_coupon_id_by_code( $code ) );
 	}
@@ -48,14 +48,14 @@ class CouponCodeGeneratorTest extends WC_Unit_Test_Case {
 	 * @testdox Keeps a numeric code from an earlier filter as a string.
 	 */
 	public function test_keeps_numeric_code(): void {
-		$this->assertSame( '123', $this->sut->generate_coupon( 123, array(), $this->context() ) );
+		$this->assertSame( '123', $this->sut->filter_coupon_code( 123, array(), $this->context() ) );
 	}
 
 	/**
 	 * @testdox Returns no code when the filter gets no rendering context.
 	 */
 	public function test_without_rendering_context_returns_empty(): void {
-		$this->assertSame( '', $this->sut->generate_coupon( '', array(), null ) );
+		$this->assertSame( '', $this->sut->filter_coupon_code( '', array(), null ) );
 	}
 
 	/**
