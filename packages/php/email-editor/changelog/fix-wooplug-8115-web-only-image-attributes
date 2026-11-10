@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove web-only image attributes such as lazy loading from emails, so images load in Apple Mail.
