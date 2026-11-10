@@ -640,6 +640,16 @@ trait Woo_Analytics_Trait {
 	}
 
 	/**
+	 * Get the number of products in an order, counted the same way as get_cart_items_count().
+	 *
+	 * @param \WC_Order $order Order.
+	 * @return int
+	 */
+	public function get_order_items_count( $order ) {
+		return count( $order->get_items() );
+	}
+
+	/**
 	 * Retrieves the breadcrumb trail as an array of page titles.
 	 *
 	 * This function attempts to generate a hierarchical breadcrumb trail for the current page or post.

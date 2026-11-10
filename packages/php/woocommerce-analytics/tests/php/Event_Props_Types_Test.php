@@ -45,11 +45,21 @@ class Event_Props_Types_Test extends BaseTestCase {
 	}
 
 	/**
+	 * Test that the order confirmation products_count counts order lines, not their quantities.
+	 */
+	public function test_order_items_count_counts_products_not_quantities(): void {
+		$order = new \WC_Order();
+		$order->set_items( array( 'fabric', 'buttons' ) );
+
+		$this->assertSame( 2, ( new Universal() )->get_order_items_count( $order ) );
+	}
+
+	/**
 	 * Price values and the pp prop they should produce; null means no pp prop.
 	 *
 	 * @return array
 	 */
-	public function price_provider(): array {
+	public static function price_provider(): array {
 		return array(
 			'decimal price'  => array( '19.99', 19.99 ),
 			'whole price'    => array( '10', 10.0 ),
