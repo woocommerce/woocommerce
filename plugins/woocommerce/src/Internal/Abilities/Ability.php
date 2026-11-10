@@ -12,10 +12,10 @@ defined( 'ABSPATH' ) || exit;
 /**
  * The base class of the WooCommerce abilities.
  *
- * WordPress 7.2 converts valid ability input to the schema types with
- * WP_Ability::coerce_input() before the callbacks run. This class backports
- * that method, so the callbacks get converted input on WordPress 7.0 and 7.1 too.
- * It also prepares the input for callers that call check_permissions() directly.
+ * WordPress 7.2 prepares the ability input with WP_Ability::prepare_input() before
+ * the callbacks run. This class backports that method, so the callbacks get converted
+ * input on WordPress 7.0 and 7.1 too. It also prepares the input for callers that
+ * call check_permissions() directly.
  *
  * @since 11.4.0
  */
@@ -27,8 +27,8 @@ class Ability extends \WP_Ability {
 	 *
 	 * Invalid input stays unchanged, so validate_input() refuses it as before.
 	 *
-	 * Remove this override, coerce_input() and get_input_error() when WooCommerce
-	 * requires WordPress 7.2, because WP_Ability::execute() converts the input there.
+	 * Remove this override, prepare_input(), sanitize_input() and get_input_error()
+	 * when WooCommerce requires WordPress 7.2.
 	 *
 	 * @since 11.4.0
 	 *
@@ -37,15 +37,15 @@ class Ability extends \WP_Ability {
 	 */
 	final public function normalize_input( $input = null ) {
 		$input = parent::normalize_input( $input );
-		if ( method_exists( \WP_Ability::class, 'coerce_input' ) || null === $input || is_wp_error( $input ) || is_wp_error( $this->validate_input( $input ) ) ) {
+		if ( method_exists( \WP_Ability::class, 'prepare_input' ) || null === $input || is_wp_error( $input ) || is_wp_error( $this->validate_input( $input ) ) ) {
 			return $input;
 		}
 
-		return $this->coerce_input( $input );
+		return $this->sanitize_input( $input );
 	}
 
 	/**
-	 * Apply the schema default, validate and convert the input, then check the permissions.
+	 * Prepare the input, then check the permissions.
 	 *
 	 * Some callers, such as older MCP adapter versions, call this method directly with
 	 * raw input. The permission callback then gets the same input as through execute().
@@ -57,6 +57,23 @@ class Ability extends \WP_Ability {
 	 * @return bool|\WP_Error Whether the ability has the necessary permission, or the input error.
 	 */
 	final public function check_permissions( $input = null ) {
+		$input = $this->prepare_input( $input );
+		if ( is_wp_error( $input ) ) {
+			return $input;
+		}
+
+		return parent::check_permissions( $input );
+	}
+
+	/**
+	 * Normalize, validate and convert the input, the same way WordPress 7.2 does.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param mixed $input Optional. The raw input provided for the ability. Default `null`.
+	 * @return mixed|\WP_Error The prepared input, or a WP_Error when any step fails.
+	 */
+	public function prepare_input( $input = null ) {
 		$input = $this->normalize_input( $input );
 		if ( is_wp_error( $input ) ) {
 			return $input;
@@ -67,12 +84,7 @@ class Ability extends \WP_Ability {
 			return $is_valid;
 		}
 
-		$input = $this->coerce_input( $input );
-		if ( is_wp_error( $input ) ) {
-			return $input;
-		}
-
-		return parent::check_permissions( $input );
+		return $this->sanitize_input( $input );
 	}
 
 	/**
@@ -86,7 +98,7 @@ class Ability extends \WP_Ability {
 	 * @param mixed $input Validated ability input.
 	 * @return mixed|\WP_Error The converted input, or a WP_Error when it cannot be converted.
 	 */
-	public function coerce_input( $input ) {
+	protected function sanitize_input( $input ) {
 		$schema = $this->get_input_schema();
 		if ( null === $input || empty( $schema ) ) {
 			return $input;
