@@ -141,14 +141,37 @@ class OrderCreateTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should give an order without a status the default status that an extension sets.
+	 * @testdox Should move an order without a status from pending to the default status that an extension sets, and reduce the stock.
+	 *
+	 * @dataProvider feature_states
+	 * @param bool $enabled Whether the extensible abilities feature is on.
 	 */
-	public function test_uses_the_filtered_default_status(): void {
+	public function test_uses_the_filtered_default_status( bool $enabled ): void {
+		$this->set_feature( $enabled );
 		add_filter( 'woocommerce_default_order_status', static fn() => OrderStatus::ON_HOLD );
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 10,
+			)
+		);
+		$held    = did_action( 'woocommerce_order_status_pending_to_on-hold' );
 
-		$result = $this->execute( array( 'customer_note' => 'Hold it.' ) );
+		$result = $this->execute(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 2,
+					),
+				),
+			)
+		);
 
 		$this->assertSame( OrderStatus::ON_HOLD, wc_get_order( $result['order']['id'] )->get_status() );
+		$this->assertSame( $held + 1, did_action( 'woocommerce_order_status_pending_to_on-hold' ) );
+		$this->assertSame( 8, wc_get_product( $product->get_id() )->get_stock_quantity() );
 	}
 
 	/**
@@ -190,6 +213,32 @@ class OrderCreateTest extends WC_Unit_Test_Case {
 			),
 			$error->get_error_codes()
 		);
+		$this->assertEqualsCanonicalizing( $before, $this->get_order_ids() );
+	}
+
+	/**
+	 * @testdox Should roll back the saved order when its status cannot be set with the feature off.
+	 */
+	public function test_rolls_back_the_order_when_the_status_change_fails(): void {
+		$this->set_feature( false );
+		$before = $this->get_order_ids();
+		add_action(
+			'woocommerce_before_order_object_save',
+			static function ( \WC_Order $order ): void {
+				if ( $order->get_id() && OrderStatus::PROCESSING === $order->get_status() ) {
+					throw new \Exception( 'Forced status save failure' );
+				}
+			}
+		);
+
+		$error = $this->execute_error(
+			array(
+				'status'        => OrderStatus::PROCESSING,
+				'customer_note' => 'Phone order.',
+			)
+		);
+
+		$this->assertSame( 'woocommerce_order_status_update_failed', $error->get_error_code() );
 		$this->assertEqualsCanonicalizing( $before, $this->get_order_ids() );
 	}
 

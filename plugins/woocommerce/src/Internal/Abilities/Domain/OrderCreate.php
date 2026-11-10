@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderEditTrait;
@@ -16,8 +17,8 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderEditTrait;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * The WooCommerce order create ability. The order starts with the default status, pending, and moves to the
- * sent status on its save, so the status hooks run as on the order screen: a paid status reduces the stock
+ * The WooCommerce order create ability. The order starts at pending and moves to the sent or default
+ * status on its save, so the status hooks run as on the order screen: a paid status reduces the stock
  * and sends the emails.
  */
 class OrderCreate extends ActionableAbility {
@@ -123,6 +124,10 @@ class OrderCreate extends ActionableAbility {
 	public function change( $subject, array $input ) {
 		$this->reset_line_changes();
 		$this->status = $input['status'] ?? $subject->get_status();
+		// Start at pending without recording a transition, so a filtered default such as on-hold still runs its status hooks.
+		$subject->set_object_read( false );
+		$subject->set_status( OrderStatus::PENDING );
+		$subject->set_object_read( true );
 
 		$refused = new \WP_Error();
 		if ( isset( $input['customer_id'] ) ) {
@@ -179,7 +184,7 @@ class OrderCreate extends ActionableAbility {
 	}
 
 	/**
-	 * Save the order. With the feature off, the order saves with the default status and its lines, is recalculated with the
+	 * Save the order. With the feature off, the order saves as pending with its lines, is recalculated with the
 	 * methods that save, and then moves to its status with WC_Order::update_status(), which needs an order ID.
 	 *
 	 * @param \WC_Order $subject New order.
@@ -205,13 +210,8 @@ class OrderCreate extends ActionableAbility {
 			return null;
 		}
 
-		try {
-			$updated = $subject->update_status( $this->status, '', true );
-		} catch ( \Exception $e ) {
-			$updated = false;
-		}
-
-		return $updated ? null : new \WP_Error(
+		// The error rolls back the pending order that parent::save() wrote.
+		return $subject->update_status( $this->status, '', true ) ? null : new \WP_Error(
 			'woocommerce_order_status_update_failed',
 			__( 'The order was not created, because its status could not be set.', 'woocommerce' ),
 			array( 'status' => 500 )
