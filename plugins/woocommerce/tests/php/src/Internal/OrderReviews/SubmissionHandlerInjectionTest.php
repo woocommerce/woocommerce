@@ -908,9 +908,9 @@ class SubmissionHandlerInjectionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A moderator confirming an auto-rejected review as spam blocks further resubmission.
+	 * @testdox After a moderator confirms an auto-rejected review as spam, a resubmission is accepted and held for moderation.
 	 */
-	public function test_moderator_confirming_an_auto_rejected_review_blocks_resubmission(): void {
+	public function test_resubmission_after_moderator_confirmed_spam_is_held(): void {
 		update_option( 'disallowed_keys', 'casino-bonus' );
 		$built = $this->make_order();
 
@@ -928,7 +928,7 @@ class SubmissionHandlerInjectionTest extends WC_Unit_Test_Case {
 		$comment_id = (int) $response['data']['results'][0]['comment_id'];
 
 		// A moderator confirms the automatic rejection as spam; that transition
-		// clears the automatic tag, so the verdict becomes final.
+		// clears the automatic tag.
 		wp_spam_comment( $comment_id );
 		update_option( 'disallowed_keys', '' );
 
@@ -944,32 +944,37 @@ class SubmissionHandlerInjectionTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( 'update_failed', $retry['data']['results'][0]['error'] ?? null );
+		$this->assertSame( 'pending_moderation', $retry['data']['results'][0]['status'] ?? null );
+		$this->assertNotSame( $comment_id, (int) $retry['data']['results'][0]['comment_id'] );
 	}
 
 	/**
-	 * @testdox A moderator's trash verdict still blocks the customer from resubmitting.
+	 * @testdox A resubmission after the store trashed the review, or deleted it for good, is held for moderation.
 	 */
-	public function test_moderator_rejection_still_blocks_resubmission(): void {
+	public function test_resubmission_after_removed_review_is_held_for_moderation(): void {
 		$built  = $this->make_order();
 		$review = $this->submit_single_review( $built, 'A genuine review.' );
 
-		// A moderator trashes it; this is not an automatic pipeline verdict.
-		wp_trash_comment( (int) $review->comment_ID );
-
-		$response = $this->submit(
-			$built['order'],
+		$rows = array(
 			array(
-				array(
-					'product_id'    => $built['product_id'],
-					'order_item_id' => $built['item_id'],
-					'rating'        => 5,
-					'text'          => 'Trying again.',
-				),
-			)
+				'product_id'    => $built['product_id'],
+				'order_item_id' => $built['item_id'],
+				'rating'        => 5,
+				'text'          => 'Trying again.',
+			),
 		);
 
-		$this->assertSame( 'update_failed', $response['data']['results'][0]['error'] ?? null );
+		// A moderator trashes it; the customer can review again, held for moderation.
+		wp_trash_comment( (int) $review->comment_ID );
+		$response = $this->submit( $built['order'], $rows );
+		$this->assertSame( 'pending_moderation', $response['data']['results'][0]['status'] ?? null );
+
+		// The removed rows are deleted for good; the next review is still not a first review.
+		wp_delete_comment( (int) $review->comment_ID, true );
+		wp_delete_comment( (int) $response['data']['results'][0]['comment_id'], true );
+		$rows[0]['text'] = 'Trying a third time.';
+		$response        = $this->submit( $built['order'], $rows );
+		$this->assertSame( 'pending_moderation', $response['data']['results'][0]['status'] ?? null );
 	}
 
 	/**
