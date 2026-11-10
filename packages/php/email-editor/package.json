@@ -44,7 +44,10 @@
 						"composer.lock",
 						"**/*.php",
 						"phpunit*.xml.dist",
-						".wp-env.json"
+						".wp-env.json",
+						"src/**/*.css",
+						"src/**/*.json",
+						"tests/**/*.html"
 					],
 					"testEnv": {
 						"start": "env:test",
@@ -67,7 +70,10 @@
 						"composer.lock",
 						"**/*.php",
 						"phpunit*.xml.dist",
-						".wp-env.json"
+						".wp-env.json",
+						"src/**/*.css",
+						"src/**/*.json",
+						"tests/**/*.html"
 					],
 					"testEnv": {
 						"start": "env:test",
