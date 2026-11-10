@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 11.3.0-rc.2 2026-XX-XX =
+= 11.3.0-rc.2 2026-11-10 =
 
 **WooCommerce**
 
@@ -389,6 +389,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Store API reviews endpoint: include avatars data only if they are enabled on the site [#70521](https://github.com/woocommerce/woocommerce/pull/70521)
 * Fix - Strengthen download permission ID checks [#70334](https://github.com/woocommerce/woocommerce/pull/70334)
 * Fix - Keep coupon codes with special characters working on WordPress 7.2, show `&` correctly in the coupon editor, and fix a critical error with some codes containing `<`. [#70683](https://github.com/woocommerce/woocommerce/pull/70683)
+* Fix - Exclude block editor note reactions from the cached comment counts. [#70795](https://github.com/woocommerce/woocommerce/pull/70795)
+* Fix - Prevent account activation crashes with extensions that verify customer emails using the legacy one-argument call. [#70808](https://github.com/woocommerce/woocommerce/pull/70808)
 * Add - Add ActionableAbility to the experimental extensible abilities feature. With it on, product create and product update accept extension fields under extensions.<namespace>.<field>, and save Core and extension fields one time. [#69681](https://github.com/woocommerce/woocommerce/pull/69681)
 * Add - Add a location filter to the Analytics Taxes report, narrowing the report, its summary and its export to a country or a state. [#68839](https://github.com/woocommerce/woocommerce/pull/68839)
 * Add - Add an admin notice about the upcoming PHP 8.1 requirement in WooCommerce 11.6 for stores running an older PHP version. [#69094](https://github.com/woocommerce/woocommerce/pull/69094)
@@ -436,6 +438,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Simplify and align the empty cart state in the Cart and Mini-Cart blocks. [#68560](https://github.com/woocommerce/woocommerce/pull/68560)
 * Update - Use a consistent style for external links in the Payments settings incentive messages, badges, and "More payment options" link. [#69269](https://github.com/woocommerce/woocommerce/pull/69269)
 * Update - Warn stores on PHP older than 8.1 that their PHP version may be affected by critical security vulnerabilities, and recommend the latest PHP 8.3 release. [#70196](https://github.com/woocommerce/woocommerce/pull/70196)
+* Update - Update the Klarna Payments description in payment settings to clarify the available ways to pay. [#70775](https://github.com/woocommerce/woocommerce/pull/70775)
 * Dev - Add a developer notice when feature definitions are accessed while they are being initialized. [#68922](https://github.com/woocommerce/woocommerce/pull/68922)
 * Dev - Add the woocommerce_reports_cache_expiration filter to change how long Analytics report data is cached. [#69288](https://github.com/woocommerce/woocommerce/pull/69288)
 * Dev - Add unit test coverage for the Product Categories List block attributes: display style, product count, category images, hierarchy, and empty categories. [#68600](https://github.com/woocommerce/woocommerce/pull/68600)
