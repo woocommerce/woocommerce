@@ -120,13 +120,13 @@ const UpsellsPlaceholder = ( { clientId }: { clientId: string } ) => {
 						void migrateToBlock();
 					} }
 				>
-					{ __( 'Migrate to block', 'woocommerce' ) }
+					{ __( 'Switch to the Upsells block', 'woocommerce' ) }
 				</Button>,
 			] }
-			className="wc-block-components-actions"
+			className="wc-block-components-actions wc-block-product-details__upsells-placeholder"
 		>
 			{ __(
-				'The Product Details blocks automatically display product upsells. If you want more customizability options, migrate to the Upsells block.',
+				'The Product Details block automatically displays product upsells. If you want more customization options, switch to the Upsells block.',
 				'woocommerce'
 			) }
 		</Warning>
