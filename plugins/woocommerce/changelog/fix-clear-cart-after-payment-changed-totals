@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Empty the cart after payment even when a coupon or price changed while the shopper was at the payment gateway.
