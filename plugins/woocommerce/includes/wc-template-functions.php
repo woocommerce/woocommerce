@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Internal\SearchEngineVisibility;
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -4521,25 +4522,6 @@ function wc_empty_cart_message() {
 
 /**
  * Disable search engines indexing core, dynamic, cart/checkout pages.
- *
- * @todo Deprecated this function after dropping support for WP 5.6.
- * @since 3.2.0
- * @return void
- */
-function wc_page_noindex() {
-	// wp_no_robots is deprecated since WP 5.7.
-	if ( function_exists( 'wp_robots_no_robots' ) ) {
-		return;
-	}
-
-	if ( is_page( wc_get_page_id( 'cart' ) ) || is_page( wc_get_page_id( 'checkout' ) ) || is_page( wc_get_page_id( 'myaccount' ) ) ) {
-		wp_no_robots();
-	}
-}
-add_action( 'wp_head', 'wc_page_noindex' );
-
-/**
- * Disable search engines indexing core, dynamic, cart/checkout pages.
  * Uses "wp_robots" filter introduced in WP 5.7.
  *
  * @since 5.0.0
@@ -4547,11 +4529,7 @@ add_action( 'wp_head', 'wc_page_noindex' );
  * @return array Filtered robots directives.
  */
 function wc_page_no_robots( $robots ) {
-	if ( is_page( wc_get_page_id( 'cart' ) ) || is_page( wc_get_page_id( 'checkout' ) ) || is_page( wc_get_page_id( 'myaccount' ) ) ) {
-		return wp_robots_no_robots( $robots );
-	}
-
-	return $robots;
+	return wc_get_container()->get( SearchEngineVisibility::class )->handle_wp_robots( $robots );
 }
 add_filter( 'wp_robots', 'wc_page_no_robots' );
 
