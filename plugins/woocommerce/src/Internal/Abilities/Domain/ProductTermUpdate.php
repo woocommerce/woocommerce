@@ -52,7 +52,7 @@ class ProductTermUpdate extends AbstractDomainAbility implements AbilityDefiniti
 				),
 				'annotations'  => array(
 					'readonly'    => false,
-					'idempotent'  => true,
+					'idempotent'  => false,
 					'destructive' => true,
 				),
 			),

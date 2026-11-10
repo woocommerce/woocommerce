@@ -297,7 +297,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			),
 			'woocommerce/product-term-update'      => array(
 				'readonly'    => false,
-				'idempotent'  => true,
+				'idempotent'  => false,
 				'destructive' => true,
 			),
 			'woocommerce/product-create'           => array(
