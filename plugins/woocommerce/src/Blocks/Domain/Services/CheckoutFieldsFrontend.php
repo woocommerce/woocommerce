@@ -193,10 +193,14 @@ class CheckoutFieldsFrontend {
 		$document_object->set_context( $address_type . '_address' );
 		$fields = $this->checkout_fields_controller->get_contextual_fields_for_location( 'address', $document_object );
 
+		// After a copy that couldn't be saved as is, fill the form from the other address.
+		$copy_source = \WC_Form_Handler::get_copy_address_form_source( $address_type );
+		$values_from = $copy_source ? $copy_source : $address_type;
+
 		foreach ( $fields as $key => $field ) {
 			$field_key                      = CheckoutFields::get_group_key( $address_type ) . $key;
 			$address[ $field_key ]          = $field;
-			$address[ $field_key ]['value'] = $this->checkout_fields_controller->get_field_from_object( $key, $customer, $address_type );
+			$address[ $field_key ]['value'] = $this->checkout_fields_controller->get_field_from_object( $key, $customer, $values_from );
 
 			$address[ $field_key ] = $this->checkout_fields_controller->prepare_form_field( $address[ $field_key ] );
 		}

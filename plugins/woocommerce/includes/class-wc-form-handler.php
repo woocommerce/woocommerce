@@ -392,6 +392,35 @@ class WC_Form_Handler {
 	}
 
 	/**
+	 * Get the address type to fill an empty edit address form from, after a copy that couldn't be saved as is.
+	 *
+	 * Only reads the current customer's own saved addresses into their form, so the request needs no nonce.
+	 *
+	 * @since 11.4.0
+	 * @internal For use by WooCommerce only.
+	 *
+	 * @param string $address_type Address type being edited; 'billing' or 'shipping'.
+	 * @return string The other address type, or an empty string when the form keeps its saved values.
+	 */
+	public static function get_copy_address_form_source( $address_type ) {
+		$source_types = array(
+			'billing'  => 'shipping',
+			'shipping' => 'billing',
+		);
+		$source_type  = isset( $_GET['copy-address-from'] ) ? sanitize_key( wp_unslash( $_GET['copy-address-from'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only, see the description above.
+
+		if ( '' === $source_type || ! is_string( $address_type ) || ( $source_types[ $address_type ] ?? '' ) !== $source_type ) {
+			return '';
+		}
+
+		if ( wc_get_account_formatted_address( $address_type ) || ! wc_get_account_formatted_address( $source_type ) ) {
+			return '';
+		}
+
+		return $source_type;
+	}
+
+	/**
 	 * Copy the saved billing address into an empty shipping address, or vice versa, from the My Account addresses page.
 	 *
 	 * The target address is only written when it has not been set up yet, so a stale link cannot overwrite an address.
@@ -528,8 +557,10 @@ class WC_Form_Handler {
 		 */
 		do_action( 'woocommerce_before_copy_address_save', $user_id, $target_type, $source_type, $customer );
 
+		// Open the edit form filled with the copied address instead, so the customer only fixes what the errors point to.
 		if ( 0 < wc_notice_count( 'error' ) ) {
-			wp_safe_redirect( $redirect_url );
+			wc_add_notice( __( 'Review the copied address below, then save it.', 'woocommerce' ), 'notice' );
+			wp_safe_redirect( add_query_arg( 'copy-address-from', $source_type, wc_get_endpoint_url( 'edit-address', wc_edit_address_i18n( $target_type ), wc_get_page_permalink( 'myaccount' ) ) ) );
 			exit;
 		}
 
