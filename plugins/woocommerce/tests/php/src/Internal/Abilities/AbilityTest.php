@@ -39,6 +39,7 @@ class AbilityTest extends \WC_Unit_Test_Case {
 					'type'                 => 'object',
 					'additionalProperties' => false,
 					'properties'           => array(
+						'text'  => array( 'type' => 'string' ),
 						'flag'  => array( 'type' => 'boolean' ),
 						'count' => array( 'type' => 'integer' ),
 						'ids'   => array(
@@ -141,26 +142,28 @@ class AbilityTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should pass converted input to the permission callback when check_permissions() is called directly.
+	 * @testdox Should prepare raw input before calling check_permissions() directly.
 	 */
-	public function test_check_permissions_converts_the_input(): void {
-		$result = $this->get_ability()->check_permissions(
+	public function test_prepares_input_for_a_direct_permission_check(): void {
+		$sut      = $this->get_ability();
+		$prepared = $sut->prepare_input(
 			array(
 				'flag'  => 'false',
 				'count' => '5',
 			)
 		);
 
-		$this->assertTrue( $result );
+		$this->assertNotWPError( $prepared );
+		$this->assertTrue( $sut->check_permissions( $prepared ) );
 		$this->assertSame( false, $this->received['permission']['flag'] );
 		$this->assertSame( 5, $this->received['permission']['count'] );
 	}
 
 	/**
-	 * @testdox Should refuse invalid input in check_permissions() and not run the permission callback.
+	 * @testdox Should refuse invalid input during preparation and not run the permission callback.
 	 */
-	public function test_check_permissions_refuses_invalid_input(): void {
-		$result = $this->get_ability()->check_permissions( array( 'flag' => 'maybe' ) );
+	public function test_prepare_input_refuses_invalid_input(): void {
+		$result = $this->get_ability()->prepare_input( array( 'flag' => 'maybe' ) );
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
@@ -180,5 +183,149 @@ class AbilityTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( $once, $ability->normalize_input( $once ) );
+	}
+
+	/**
+	 * Entry points that prepare input before checking permissions.
+	 *
+	 * @return array<string, array{0: bool}>
+	 */
+	public function provider_preparation_entry_points(): array {
+		return array(
+			'execute'           => array( false ),
+			'direct permission' => array( true ),
+		);
+	}
+
+	/**
+	 * @testdox Should normalize once and give the permission and execution callbacks the same input.
+	 * @dataProvider provider_preparation_entry_points
+	 *
+	 * @param bool $direct_permission Whether to prepare input for a direct permission check.
+	 */
+	public function test_prepares_input_once_with_a_non_idempotent_filter( bool $direct_permission ): void {
+		if ( version_compare( get_bloginfo( 'version' ), '7.1-alpha', '<' ) ) {
+			$this->markTestSkipped( 'The normalization filter requires WordPress 7.1.' );
+		}
+
+		$sut   = $this->get_ability();
+		$calls = 0;
+		add_filter(
+			'wp_ability_normalize_input',
+			static function ( $input, $name ) use ( &$calls ) {
+				if ( 'test/convert-input' === $name ) {
+					++$calls;
+					$input['text'] = htmlspecialchars( $input['text'], ENT_QUOTES, 'UTF-8', true );
+				}
+				return $input;
+			},
+			10,
+			2
+		);
+
+		$input = array( 'text' => '&' );
+		if ( $direct_permission ) {
+			$prepared = $sut->prepare_input( $input );
+			$this->assertNotWPError( $prepared );
+			$this->assertTrue( $sut->check_permissions( $prepared ) );
+		} else {
+			$this->assertNotWPError( $sut->execute( $input ) );
+			$this->assertSame( '&amp;', $this->received['execute']['text'] );
+		}
+
+		$this->assertSame( 1, $calls );
+		$this->assertSame( '&amp;', $this->received['permission']['text'] );
+	}
+
+	/**
+	 * @testdox Should preserve normalization errors without calling either callback.
+	 * @dataProvider provider_preparation_entry_points
+	 *
+	 * @param bool $direct_permission Whether to prepare input for a direct permission check.
+	 */
+	public function test_preserves_normalization_errors( bool $direct_permission ): void {
+		if ( version_compare( get_bloginfo( 'version' ), '7.1-alpha', '<' ) ) {
+			$this->markTestSkipped( 'The normalization filter requires WordPress 7.1.' );
+		}
+
+		$sut   = $this->get_ability();
+		$error = new \WP_Error( 'test_normalization_error', 'Cannot normalize this input.' );
+		add_filter(
+			'wp_ability_normalize_input',
+			static function ( $input, $name ) use ( $error ) {
+				return 'test/convert-input' === $name ? $error : $input;
+			},
+			10,
+			2
+		);
+
+		$result = $direct_permission ? $sut->prepare_input( array() ) : $sut->execute( array() );
+
+		$this->assertSame( $error, $result );
+		$this->assertArrayNotHasKey( 'permission', $this->received );
+		$this->assertArrayNotHasKey( 'execute', $this->received );
+	}
+
+	/**
+	 * @testdox Should sanitize once when preparing input, including on older WordPress versions.
+	 * @dataProvider provider_preparation_entry_points
+	 *
+	 * @param bool $direct_permission Whether to prepare input for a direct permission check.
+	 */
+	public function test_sanitizes_input_once( bool $direct_permission ): void {
+		$sut = new class(
+			'test/count-sanitization',
+			array(
+				'label'               => 'Count sanitization',
+				'description'         => 'Count calls to the real sanitizer.',
+				'category'            => 'woocommerce',
+				'input_schema'        => array( 'type' => 'boolean' ),
+				'permission_callback' => '__return_true',
+				'execute_callback'    => static function ( $input ) {
+					return $input;
+				},
+			)
+		) extends Ability {
+			/**
+			 * Number of sanitizer calls.
+			 *
+			 * @var int
+			 */
+			public $sanitizations = 0;
+
+			/**
+			 * Count calls while retaining the actual schema sanitization.
+			 *
+			 * @param mixed $input Validated input.
+			 * @return mixed|\WP_Error
+			 */
+			protected function sanitize_input( $input ) {
+				++$this->sanitizations;
+				return parent::sanitize_input( $input );
+			}
+		};
+
+		if ( $direct_permission ) {
+			$prepared = $sut->prepare_input( 'false' );
+			$this->assertFalse( $prepared );
+			$this->assertTrue( $sut->check_permissions( $prepared ) );
+		} else {
+			$this->assertFalse( $sut->execute( 'false' ) );
+		}
+
+		$this->assertSame( 1, $sut->sanitizations );
+	}
+
+	/**
+	 * @testdox Should reject conversion failures in prepare_input before any callback runs.
+	 */
+	public function test_prepare_input_refuses_conversion_errors(): void {
+		$sut    = $this->get_ability();
+		$result = $sut->prepare_input( array( 'ids' => array( '1', '01' ) ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+		$this->assertArrayNotHasKey( 'permission', $this->received );
+		$this->assertArrayNotHasKey( 'execute', $this->received );
 	}
 }
