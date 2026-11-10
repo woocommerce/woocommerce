@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep prices set by pricing extensions on products with a scheduled sale, instead of resetting them to the sale or regular price.
