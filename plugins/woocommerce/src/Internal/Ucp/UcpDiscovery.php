@@ -70,7 +70,10 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	 * @param string $feature_id Feature being toggled.
 	 * @param bool   $is_enabled Whether the feature is now enabled.
 	 */
-	public function maybe_flush_rewrite_rules( string $feature_id, bool $is_enabled = true ): void {
+	public function maybe_flush_rewrite_rules( $feature_id, $is_enabled = true ): void {
+		$feature_id = (string) $feature_id;
+		$is_enabled = (bool) $is_enabled;
+
 		if ( Utils::FEATURE_ID !== $feature_id ) {
 			return;
 		}
