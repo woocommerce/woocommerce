@@ -2,25 +2,35 @@
 # Lint branch
 #
 # Runs eslint, comparing the current branch to its "base" or "parent" branch.
-# The base branch defaults to trunk, but another branch name can be specified as an
-# optional positional argument.
+# The base branch defaults to origin/trunk. A different base can be specified as
+# the first argument; all remaining arguments are passed to ESLint.
 #
-# Example:
+# Examples:
 # ./eslint-branch.sh base-branch
+# ./eslint-branch.sh --fix
+# ./eslint-branch.sh base-branch --fix
 
-baseBranch=${1:-"origin/trunk"}
+baseBranch="origin/trunk"
+if (( $# > 0 )) && [[ "$1" != -* ]]; then
+    baseBranch=${1:-"origin/trunk"}
+    shift
+fi
+mergeBase=$(git merge-base HEAD "$baseBranch") || exit $?
 
-# shellcheck disable=SC2046
-changedFiles=$(git diff $(git merge-base HEAD $baseBranch) --relative --name-only --diff-filter=d -- '*.js' '*.jsx' '*.ts' '*.tsx')
+# Skip source paths covered by the dedicated admin and blocks lint jobs.
+changedFiles=()
+while IFS= read -r -d '' file; do
+    changedFiles+=("$file")
+done < <(git diff "$mergeBase" --relative --name-only -z --diff-filter=d -- \
+    '*.js' '*.jsx' '*.ts' '*.tsx' \
+    ':(exclude)client/admin/client/**' \
+    ':(exclude)client/blocks/assets/**' \
+    ':(exclude)client/blocks/packages/**' \
+    ':(exclude)client/blocks/tests/**')
 
-# Only complete this if changed files are detected.
-if [[ -z $changedFiles ]]; then
+if (( ${#changedFiles[@]} == 0 )); then
     echo "No changed files detected."
     exit 0
 fi
 
-# A changed client/blocks file is linted with that package's own flat config,
-# whose import/webpack resolver loads its webpack.config.js. That config only
-# exports an iterable when WP_EXPERIMENTAL_MODULES is set, matching its lint:js.
-# shellcheck disable=SC2086
-WP_EXPERIMENTAL_MODULES=true pnpm eslint $changedFiles
+WP_EXPERIMENTAL_MODULES=true pnpm eslint "${changedFiles[@]}" "$@"
