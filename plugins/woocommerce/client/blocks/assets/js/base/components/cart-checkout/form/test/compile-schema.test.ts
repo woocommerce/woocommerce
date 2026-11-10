@@ -1,12 +1,21 @@
 /**
  * External dependencies
  */
+import { renderHook } from '@testing-library/react';
+import { useSchemaParser } from '@woocommerce/base-hooks';
+import type { KeyedFormFields } from '@woocommerce/settings';
 import Ajv from 'ajv';
 
 /**
  * Internal dependencies
  */
 import { compileSchema, hasUncompilablePattern } from '../compile-schema';
+import { useFormValidation } from '../use-form-validation';
+
+jest.mock( '@woocommerce/base-hooks', () => ( {
+	useSchemaParser: jest.fn(),
+	usePrevious: jest.fn(),
+} ) );
 
 const createParser = () =>
 	new Ajv( {
@@ -90,21 +99,63 @@ describe( 'compileSchema', () => {
 		expect( patterns ).toEqual( [ pattern ] );
 	} );
 
-	it( 'keeps validating the fields whose patterns are fine', () => {
-		const parser = createParser();
+	it.each( [
+		{ pattern: '^[a-z]+\\-$' },
+		{ patternProperties: { '^[a-z]+\\-$': { type: 'string' } } },
+	] )( 'keeps sibling fields in form validation with %j', ( validation ) => {
+		// Field.validation is typed as a document schema even for scalar field rules.
+		const fields = [
+			{
+				key: 'ns/bad',
+				label: 'Bad field',
+				required: true,
+				validation,
+			},
+			{
+				key: 'ns/good',
+				label: 'Good field',
+				required: true,
+				validation: { pattern: '^[0-9]{5}$' },
+			},
+			{
+				key: 'ns/matching',
+				label: 'Matching field',
+				required: true,
+				validation: { const: { $data: '1/ns~1good' } },
+			},
+		].map( ( field, index ) => ( {
+			...field,
+			optionalLabel: field.label,
+			autocomplete: 'off',
+			hidden: false,
+			index,
+		} ) ) as unknown as KeyedFormFields;
+		jest.mocked( useSchemaParser ).mockReturnValue( {
+			parser: createParser(),
+			data: {
+				cart: {},
+				customer: {},
+				checkout: {
+					create_account: false,
+					customer_note: '',
+					payment_method: 'cod',
+					additional_fields: {
+						'ns/bad': 'anything',
+						'ns/good': 'invalid',
+						'ns/matching': 'different',
+					},
+				},
+			},
+		} );
 
-		compileSchema( parser, schemaWithPattern( '(?i)^abc$' ) );
-
-		const validate = compileSchema(
-			parser,
-			schemaWithPattern( '^[0-9]{3}-[0-9]{4}$' )
+		const { result } = renderHook( () =>
+			useFormValidation( fields, 'order' )
 		);
 
-		expect(
-			validate?.( {
-				checkout: { additional_fields: { 'member/number': 'nope' } },
-			} )
-		).toBe( false );
+		expect( result.current.errors ).toEqual( {
+			'ns/good': 'good field must match the pattern ^[0-9]{5}$',
+			'ns/matching': 'matching field is invalid',
+		} );
 	} );
 } );
 
@@ -137,22 +188,63 @@ describe( 'hasUncompilablePattern', () => {
 		};
 
 		expect( hasUncompilablePattern( schema ) ).toBe( false );
+		const validate = compileSchema( createParser(), schema );
+		expect(
+			validate?.( { 'member/number': '123-4567', other: '\\-' } )
+		).toBe( false );
 	} );
 
-	it( 'reports one bad field without hiding a good one', () => {
+	it( 'detects patterns in patternProperties keys and subschemas', () => {
 		const schema = {
 			type: 'object',
-			properties: {
-				'ns/good': { type: 'string', pattern: '^[0-9]{5}$' },
-				'ns/bad': { type: 'string', pattern: '^[0-9]{3}\\-[0-9]{4}$' },
+			patternProperties: {
+				'^[a-z]+\\-$': { type: 'string' },
 			},
 		};
 
 		expect( hasUncompilablePattern( schema ) ).toBe( true );
-		// The good field on its own is still compilable, which is what lets the
-		// caller drop the bad field and keep the good one in browser validation.
-		expect( hasUncompilablePattern( schema.properties[ 'ns/good' ] ) ).toBe(
-			false
+		expect(
+			hasUncompilablePattern( {
+				patternProperties: {
+					'^[a-z]+-$': { pattern: '\\@' },
+				},
+			} )
+		).toBe( true );
+	} );
+
+	it( 'does not read instance data as schemas', () => {
+		const value = { pattern: '\\@', patternProperties: { '\\-': {} } };
+		const schema = {
+			type: 'object',
+			properties: { pattern: { const: '\\@' } },
+			const: value,
+			enum: [ value ],
+			default: value,
+			examples: [ value ],
+		};
+
+		expect( hasUncompilablePattern( schema ) ).toBe( false );
+		const validate = compileSchema( createParser(), schema );
+		expect( validate?.( value ) ).toBe( true );
+		expect( validate?.( { pattern: 'different' } ) ).toBe( false );
+	} );
+
+	it( 'finds patterns in nested schemas and tuple items', () => {
+		expect(
+			hasUncompilablePattern( {
+				anyOf: [
+					{ not: { properties: { pattern: { pattern: '\\@' } } } },
+				],
+			} )
+		).toBe( true );
+		expect(
+			hasUncompilablePattern( { items: [ { pattern: '\\@' } ] } )
+		).toBe( true );
+		expect( hasUncompilablePattern( { items: { pattern: '\\@' } } ) ).toBe(
+			true
 		);
+		expect(
+			hasUncompilablePattern( { properties: { pattern: false } } )
+		).toBe( false );
 	} );
 } );

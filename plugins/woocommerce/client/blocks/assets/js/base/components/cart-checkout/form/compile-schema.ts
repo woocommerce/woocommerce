@@ -17,7 +17,7 @@ const reportedPatterns = new Set< string >();
  * @return The patterns found.
  */
 const collectPatterns = ( schema: unknown ): string[] => {
-	if ( ! schema || typeof schema !== 'object' ) {
+	if ( ! schema || typeof schema !== 'object' || Array.isArray( schema ) ) {
 		return [];
 	}
 
@@ -27,10 +27,41 @@ const collectPatterns = ( schema: unknown ): string[] => {
 				return typeof value === 'string' ? [ value ] : [];
 			}
 
-			return Array.isArray( value ) ||
-				( value && typeof value === 'object' )
-				? collectPatterns( value )
-				: [];
+			if ( ! value || typeof value !== 'object' ) {
+				return [];
+			}
+
+			// Only schema keywords contain rules; const, enum and annotations hold data.
+			switch ( key ) {
+				case 'patternProperties':
+					return [
+						...Object.keys( value ),
+						...Object.values( value ).flatMap( collectPatterns ),
+					];
+				case 'properties':
+				case 'definitions':
+				case '$defs':
+				case 'dependencies':
+				case 'allOf':
+				case 'anyOf':
+				case 'oneOf':
+					return Object.values( value ).flatMap( collectPatterns );
+				case 'items':
+					return Array.isArray( value )
+						? value.flatMap( collectPatterns )
+						: collectPatterns( value );
+				case 'additionalItems':
+				case 'additionalProperties':
+				case 'contains':
+				case 'propertyNames':
+				case 'not':
+				case 'if':
+				case 'then':
+				case 'else':
+					return collectPatterns( value );
+				default:
+					return [];
+			}
 		}
 	);
 };
@@ -48,8 +79,8 @@ export type CompiledSchema = ( ( data: unknown ) => boolean ) & {
 /**
  * Whether the browser can compile every pattern in a schema.
  *
- * `pattern` is compiled as a JavaScript `RegExp` with the `u` flag, so this is
- * the same check AJV makes, without needing a parser to hand.
+ * `pattern` values and `patternProperties` keys are compiled with the `u` flag,
+ * so this is the same check AJV makes, without needing a parser to hand.
  *
  * @param schema The schema to check.
  * @return True when at least one pattern is one the browser rejects.

@@ -22,6 +22,9 @@ class ValidationTest extends WP_UnitTestCase {
 	 *           [{"format": "date", "formatMaximum": "2026-02-30"}, "/formatMaximum", "date"]
 	 *           [{"format": "date", "formatMinimum": {"$data": "not-a-pointer"}}, "/formatMinimum/$data", "json-pointer"]
 	 *           [{"anyOf": [{"maxLength": -1}]}, "/anyOf/0/maxLength", "0"]
+	 *           [{"anyOf": [{"not": {"properties": {"pattern": {"pattern": "\\@"}}}}]}, "/anyOf/0/not/properties/pattern/pattern", "JavaScript"]
+	 *           [{"items": {"pattern": "\\@"}}, "/items/pattern", "JavaScript"]
+	 *           [{"items": [{"pattern": "\\@"}]}, "/items/0/pattern", "JavaScript"]
 	 *
 	 * @param array  $rules  The invalid schema.
 	 * @param string $path   The expected keyword path.

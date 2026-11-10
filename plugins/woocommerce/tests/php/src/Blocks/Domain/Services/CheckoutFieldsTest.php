@@ -442,7 +442,7 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 	 *
 	 * @param string $pattern The pattern the browser cannot compile.
 	 */
-	public function test_field_with_pattern_javascript_rejects_is_not_registered( string $pattern ) {
+	public function test_field_with_pattern_javascript_rejects_is_not_registered( string $pattern ): void {
 		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
 
 		woocommerce_register_additional_checkout_field(
@@ -457,13 +457,13 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 			)
 		);
 
-		$this->assertArrayNotHasKey( 'plugin-namespace/unsupported-pattern', $this->controller->get_additional_fields() );
+		$this->assertArrayNotHasKey( 'plugin-namespace/unsupported-pattern', $this->controller->get_additional_fields(), 'A pattern the browser cannot compile must block registration.' );
 	}
 
 	/**
 	 * @testdox A pattern both engines accept does not block registration.
 	 */
-	public function test_field_with_pattern_both_engines_accept_is_registered() {
+	public function test_field_with_pattern_both_engines_accept_is_registered(): void {
 		woocommerce_register_additional_checkout_field(
 			array(
 				'id'         => 'plugin-namespace/supported-pattern',
@@ -476,13 +476,13 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 			)
 		);
 
-		$this->assertArrayHasKey( 'plugin-namespace/supported-pattern', $this->controller->get_additional_fields() );
+		$this->assertArrayHasKey( 'plugin-namespace/supported-pattern', $this->controller->get_additional_fields(), 'A pattern both engines accept must remain registered.' );
 	}
 
 	/**
 	 * @testdox An unsupported pattern in a $data reference is not read as a pattern.
 	 */
-	public function test_unsupported_pattern_behind_data_reference_is_ignored() {
+	public function test_unsupported_pattern_behind_data_reference_is_ignored(): void {
 		woocommerce_register_additional_checkout_field(
 			array(
 				'id'         => 'plugin-namespace/pattern-from-field',
@@ -495,7 +495,31 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 			)
 		);
 
-		$this->assertArrayHasKey( 'plugin-namespace/pattern-from-field', $this->controller->get_additional_fields() );
+		$this->assertArrayHasKey( 'plugin-namespace/pattern-from-field', $this->controller->get_additional_fields(), 'A $data pointer must not be checked as a literal pattern.' );
+	}
+
+	/**
+	 * @testdox Schema instance data with a property named pattern does not block registration.
+	 */
+	public function test_pattern_in_instance_data_does_not_block_registration(): void {
+		$value = array( 'pattern' => '\\@' );
+
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'         => 'plugin-namespace/pattern-in-data',
+				'label'      => 'Pattern in data',
+				'location'   => 'order',
+				'validation' => array(
+					'type'     => 'object',
+					'const'    => $value,
+					'enum'     => array( $value ),
+					'default'  => $value,
+					'examples' => array( $value ),
+				),
+			)
+		);
+
+		$this->assertArrayHasKey( 'plugin-namespace/pattern-in-data', $this->controller->get_additional_fields(), 'Instance data must not be checked as a regular expression.' );
 	}
 
 	/**

@@ -266,9 +266,25 @@ class Validation {
 				continue;
 			}
 
-			// A $data reference holds a pointer, not a pattern to compile.
-			if ( is_array( $value ) && ! array_key_exists( '$data', $value ) ) {
-				$nested = self::find_unsupported_pattern( $value, $child_path );
+			if ( ! is_array( $value ) ) {
+				continue;
+			}
+
+			// Only schema keywords contain rules; const, enum and annotations hold data.
+			$subschemas = [];
+			if (
+				in_array( $keyword, [ 'properties', 'patternProperties', 'definitions', '$defs', 'dependencies', 'allOf', 'anyOf', 'oneOf' ], true ) ||
+				( 'items' === $keyword && isset( $value[0] ) )
+			) {
+				foreach ( $value as $key => $subschema ) {
+					$subschemas[ $child_path . '/' . $key ] = $subschema;
+				}
+			} elseif ( in_array( $keyword, [ 'items', 'additionalItems', 'additionalProperties', 'contains', 'propertyNames', 'not', 'if', 'then', 'else' ], true ) ) {
+				$subschemas[ $child_path ] = $value;
+			}
+
+			foreach ( $subschemas as $subschema_path => $subschema ) {
+				$nested = self::find_unsupported_pattern( $subschema, $subschema_path );
 
 				if ( null !== $nested ) {
 					return $nested;

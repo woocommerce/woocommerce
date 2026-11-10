@@ -225,7 +225,7 @@ final class JavaScriptPattern {
 
 		if ( 'u' === $escape ) {
 			if ( 0 === strpos( $rest, '{' ) ) {
-				return self::has_braced_hex( $rest, 1 ) ? null : 'an incomplete unicode escape, which JavaScript does not support';
+				return self::has_braced_hex( $rest, 0 ) ? null : 'an incomplete unicode escape, which JavaScript does not support';
 			}
 
 			$digits = substr( $rest, 0, 4 );
@@ -269,7 +269,9 @@ final class JavaScriptPattern {
 			return false;
 		}
 
-		return 1 === preg_match( '/^\{[^}]+\}/', $text );
+		$close = strpos( $text, '}' );
+
+		return false !== $close && $close > 1;
 	}
 
 	/**

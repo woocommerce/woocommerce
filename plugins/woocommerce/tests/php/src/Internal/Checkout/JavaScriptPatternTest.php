@@ -75,6 +75,8 @@ class JavaScriptPatternTest extends WC_Unit_Test_Case {
 	 *           ["^\\u0041$"]
 	 *           ["(?i:abc)"]
 	 *           [""]
+	 *           ["\\u{1}"]
+	 *           ["\\u{A}"]
 	 *           ["\\u{1F600}"]
 	 *           ["\\p{Script=Greek}"]
 	 *           ["(?i-s:a)"]
