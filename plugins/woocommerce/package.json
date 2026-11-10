@@ -153,9 +153,6 @@
 					"**/*.{js,jsx,ts,tsx}"
 				],
 				"ignore": [
-					"{,**/}*.md",
-					"{,**/}readme.txt",
-					"{,**/}changelog/!(*.ts|*.tsx|*.js|*.jsx|*.mjs|*.cjs|*.php|*.json|*.scss|*.css)",
 					"client/admin/client/**/*.{js,jsx,ts,tsx}",
 					"client/blocks/{assets,packages,tests}/**/*.{js,jsx,ts,tsx}"
 				]
