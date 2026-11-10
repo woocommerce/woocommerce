@@ -7,7 +7,7 @@
 		"properties": {
 			"type": {
 				"type": "string",
-				"description": "Product type, from the product types that WooCommerce and extensions register. Fields each type takes. simple: name, sku, description, short_description, status, virtual, downloadable, regular_price, sale_price, manage_stock, stock_quantity, stock_status; grouped: name, sku, description, short_description, status, grouped_products; external: name, sku, description, short_description, status, regular_price, sale_price, external_url, button_text; variable: name, sku, description, short_description, status, attributes, variations; variation: sku, description, status, virtual, downloadable, attributes, regular_price, sale_price, manage_stock, stock_quantity, stock_status, parent_id. A product without a type is simple.",
+				"description": "Product type, from the product types that WooCommerce and extensions register. Fields each type takes. simple: name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, virtual, downloadable, weight, dimensions, shipping_class, regular_price, sale_price, date_on_sale_from, date_on_sale_to, tax_status, manage_stock, stock_quantity, stock_status, sold_individually; grouped: name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, grouped_products; external: name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, regular_price, sale_price, date_on_sale_from, date_on_sale_to, tax_status, external_url, button_text; variable: name, sku, description, short_description, status, categories, tags, brands, images, catalog_visibility, featured, attributes, variations, tax_status, sold_individually, weight, dimensions, shipping_class; variation: sku, description, status, virtual, downloadable, attributes, regular_price, sale_price, manage_stock, stock_quantity, stock_status, parent_id. A product without a type is simple.",
 				"enum": [
 					"simple",
 					"grouped",
@@ -241,6 +241,103 @@
 					"type": "integer",
 					"minimum": 1
 				}
+			},
+			"categories": {
+				"type": "array",
+				"description": "Category IDs, replacing the current ones. Empty means the default category. Applies to: simple, grouped, external, variable.",
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				}
+			},
+			"tags": {
+				"type": "array",
+				"description": "Tag IDs, replacing the current ones. Applies to: simple, grouped, external, variable.",
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				}
+			},
+			"brands": {
+				"type": "array",
+				"description": "Brand IDs, replacing the current ones. Applies to: simple, grouped, external, variable.",
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				}
+			},
+			"images": {
+				"type": "array",
+				"description": "Image attachment IDs, replacing the current ones. The first is the featured image. Applies to: simple, grouped, external, variable.",
+				"items": {
+					"type": "integer",
+					"minimum": 1
+				}
+			},
+			"catalog_visibility": {
+				"type": "string",
+				"enum": [
+					"visible",
+					"catalog",
+					"search",
+					"hidden"
+				],
+				"description": "Applies to: simple, grouped, external, variable."
+			},
+			"featured": {
+				"type": "boolean",
+				"description": "Applies to: simple, grouped, external, variable."
+			},
+			"date_on_sale_from": {
+				"type": "string",
+				"description": "Store time, YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS. Empty removes it. Applies to: simple, external.",
+				"pattern": "^(?:[0-9]{4}-[0-9]{2}-[0-9]{2}(?:[T ](?:[01][0-9]|2[0-3]):[0-5][0-9](?::[0-5][0-9])?)?)?$"
+			},
+			"date_on_sale_to": {
+				"type": "string",
+				"description": "Store time, YYYY-MM-DD to end with that day or YYYY-MM-DDTHH:MM:SS. Empty removes it. Applies to: simple, external.",
+				"pattern": "^(?:[0-9]{4}-[0-9]{2}-[0-9]{2}(?:[T ](?:[01][0-9]|2[0-3]):[0-5][0-9](?::[0-5][0-9])?)?)?$"
+			},
+			"tax_status": {
+				"type": "string",
+				"enum": [
+					"taxable",
+					"shipping",
+					"none"
+				],
+				"description": "Applies to: simple, external, variable."
+			},
+			"sold_individually": {
+				"type": "boolean",
+				"description": "Limit to one per order. Applies to: simple, variable."
+			},
+			"weight": {
+				"type": "string",
+				"description": "Decimal in lbs. Empty removes it. Applies to: simple, variable.",
+				"pattern": "^(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+|)$"
+			},
+			"dimensions": {
+				"type": "object",
+				"description": "Decimals in in. Only the keys sent change. Applies to: simple, variable.",
+				"properties": {
+					"length": {
+						"type": "string",
+						"pattern": "^(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+|)$"
+					},
+					"width": {
+						"type": "string",
+						"pattern": "^(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+|)$"
+					},
+					"height": {
+						"type": "string",
+						"pattern": "^(?:[0-9]+(?:[\\.][0-9]+)?|[\\.][0-9]+|)$"
+					}
+				},
+				"additionalProperties": false
+			},
+			"shipping_class": {
+				"type": "string",
+				"description": "Shipping class slug. Empty removes it. Applies to: simple, variable."
 			}
 		},
 		"additionalProperties": false
@@ -472,6 +569,16 @@
 						"type": "boolean",
 						"description": "Whether the sale price applies now, taking the sale dates into account."
 					},
+					"date_on_sale_from": {
+						"type": "string",
+						"description": "Start of the sale in the store timezone. Omitted when the sale has no start date.",
+						"format": "date-time"
+					},
+					"date_on_sale_to": {
+						"type": "string",
+						"description": "End of the sale in the store timezone. Omitted when the sale has no end date.",
+						"format": "date-time"
+					},
 					"stock_status": {
 						"type": "string",
 						"enum": [
@@ -485,6 +592,9 @@
 						"description": "Current stock quantity. Omitted when no stock quantity is set."
 					},
 					"manage_stock": {
+						"type": "boolean"
+					},
+					"sold_individually": {
 						"type": "boolean"
 					},
 					"virtual": {
@@ -603,6 +713,18 @@
 							},
 							"additionalProperties": false
 						}
+					},
+					"catalog_visibility": {
+						"type": "string",
+						"enum": [
+							"visible",
+							"catalog",
+							"search",
+							"hidden"
+						]
+					},
+					"featured": {
+						"type": "boolean"
 					},
 					"description": {
 						"type": "string"
@@ -945,6 +1067,16 @@
 							"type": "boolean",
 							"description": "Whether the sale price applies now, taking the sale dates into account."
 						},
+						"date_on_sale_from": {
+							"type": "string",
+							"description": "Start of the sale in the store timezone. Omitted when the sale has no start date.",
+							"format": "date-time"
+						},
+						"date_on_sale_to": {
+							"type": "string",
+							"description": "End of the sale in the store timezone. Omitted when the sale has no end date.",
+							"format": "date-time"
+						},
 						"stock_status": {
 							"type": "string",
 							"enum": [
@@ -958,6 +1090,9 @@
 							"description": "Current stock quantity. Omitted when no stock quantity is set."
 						},
 						"manage_stock": {
+							"type": "boolean"
+						},
+						"sold_individually": {
 							"type": "boolean"
 						},
 						"virtual": {
@@ -1076,6 +1211,18 @@
 								},
 								"additionalProperties": false
 							}
+						},
+						"catalog_visibility": {
+							"type": "string",
+							"enum": [
+								"visible",
+								"catalog",
+								"search",
+								"hidden"
+							]
+						},
+						"featured": {
+							"type": "boolean"
 						},
 						"description": {
 							"type": "string"

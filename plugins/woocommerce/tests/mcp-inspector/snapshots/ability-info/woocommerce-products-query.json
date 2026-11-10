@@ -328,6 +328,16 @@
 							"type": "boolean",
 							"description": "Whether the sale price applies now, taking the sale dates into account."
 						},
+						"date_on_sale_from": {
+							"type": "string",
+							"description": "Start of the sale in the store timezone. Omitted when the sale has no start date.",
+							"format": "date-time"
+						},
+						"date_on_sale_to": {
+							"type": "string",
+							"description": "End of the sale in the store timezone. Omitted when the sale has no end date.",
+							"format": "date-time"
+						},
 						"stock_status": {
 							"type": "string",
 							"enum": [
@@ -341,6 +351,9 @@
 							"description": "Current stock quantity. Omitted when no stock quantity is set."
 						},
 						"manage_stock": {
+							"type": "boolean"
+						},
+						"sold_individually": {
 							"type": "boolean"
 						},
 						"virtual": {
@@ -459,6 +472,18 @@
 								},
 								"additionalProperties": false
 							}
+						},
+						"catalog_visibility": {
+							"type": "string",
+							"enum": [
+								"visible",
+								"catalog",
+								"search",
+								"hidden"
+							]
+						},
+						"featured": {
+							"type": "boolean"
 						},
 						"description": {
 							"type": "string"
