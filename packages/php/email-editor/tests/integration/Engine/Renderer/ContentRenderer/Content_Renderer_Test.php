@@ -1040,6 +1040,6 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$content           = $this->renderer->render( $email_post, $template );
 
 		$this->assertSame( 1, preg_match( '/<strong[^>]*>Bold text<\/strong>/', $content, $strong ) );
-		$this->assertStringContainsString( 'font-weight: bold', $strong[0] );
+		$this->assertMatchesRegularExpression( '/style="[^"]*font-weight:\s*bold\s*(;|")/', $strong[0] );
 	}
 }
