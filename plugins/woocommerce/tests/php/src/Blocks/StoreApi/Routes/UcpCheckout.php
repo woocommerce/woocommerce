@@ -275,6 +275,37 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox A failed payment attempt the buyer could retry is cancelled when the checkout is canceled or changed.
+	 * @dataProvider provider_requests_that_drop_the_hand_off
+	 *
+	 * @param string $method Request method.
+	 * @param string $path   Route path after the checkout id.
+	 * @param array  $body   Request body.
+	 */
+	public function test_failed_order_is_cancelled_with_the_hand_off( string $method, string $path, array $body ): void {
+		$created = $this->create_ready_checkout();
+		$this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' );
+		$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
+		$order->update_status( OrderStatus::FAILED );
+		$this->assertTrue( $order->needs_payment(), 'The payment page retries a failed order.' );
+
+		$this->assertSame( 200, $this->request( $method, '/checkout-sessions/' . $created['id'] . $path, $body )->get_status() );
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::CANCELLED ) );
+	}
+
+	/**
+	 * Requests that end the hand-off of an order.
+	 *
+	 * @return array<string, array{string, string, array}>
+	 */
+	public function provider_requests_that_drop_the_hand_off(): array {
+		return array(
+			'cancel' => array( 'POST', '/cancel', array() ),
+			'update' => array( 'PUT', '', array( 'buyer' => array( 'email' => 'other@example.com' ) ) ),
+		);
+	}
+
+	/**
 	 * @testdox Complete hands off a pending order's payment page, which a later request reads back, and paying it completes the checkout.
 	 */
 	public function test_complete_escalates_and_persists(): void {

@@ -118,7 +118,7 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	}
 
 	/**
-	 * Cancel the order handed to the buyer while it is still unpaid, and forget it.
+	 * Cancel the order handed to the buyer while its payment page would still take it, and forget it.
 	 *
 	 * Once the checkout changes or ends, that order no longer matches it and must not be paid.
 	 *
@@ -129,11 +129,17 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	protected function cancel_handed_off_order( array $state, string $note ): array {
 		$order = empty( $state['order_id'] ) ? null : wc_get_order( (int) $state['order_id'] );
 
-		if ( $order instanceof \WC_Order && $order->has_status( OrderStatus::PENDING ) ) {
-			$order->update_status( OrderStatus::CANCELLED, $note );
+		if ( $order instanceof \WC_Order ) {
+			// The payment page's own list, so a failed attempt the buyer could retry is closed too.
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Core's hook, documented in WC_Order::needs_payment().
+			$payable = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( OrderStatus::PENDING, OrderStatus::FAILED ), $order );
 
-			if ( (int) $this->get_draft_order_id() === $order->get_id() ) {
-				$this->set_draft_order_id( 0 );
+			if ( $order->has_status( $payable ) ) {
+				$order->update_status( OrderStatus::CANCELLED, $note );
+
+				if ( (int) $this->get_draft_order_id() === $order->get_id() ) {
+					$this->set_draft_order_id( 0 );
+				}
 			}
 		}
 
