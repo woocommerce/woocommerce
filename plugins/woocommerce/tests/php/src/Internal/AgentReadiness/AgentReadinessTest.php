@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRule;
+use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
 use WC_Helper_Product;
@@ -30,7 +31,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$store_conditions = new StoreConditions();
 		$store_conditions->init( new ComingSoonHelper() );
 		$this->sut = new AgentReadiness();
-		$this->sut->init( $store_conditions );
+		$this->sut->init( $store_conditions, new RemoteRules() );
 	}
 
 	/**
@@ -43,7 +44,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( array( 'generated_at', 'products', 'hidden_from_catalog', 'unsupported_types', 'store_checks', 'channels', 'checks', 'truncated' ), array_keys( $report ) );
 		$this->assertFalse( $report['truncated'] );
-		$this->assertSame( array( 'id', 'ok', 'blocks', 'label', 'why', 'fix' ), array_keys( $report['store_checks'][0] ) );
+		$this->assertSame( array( 'id', 'ok', 'blocks', 'level', 'name', 'label', 'why', 'fix', 'fix_url' ), array_keys( $report['store_checks'][0] ) );
 		$this->assertSame( array( 'chatgpt', 'google', 'copilot' ), array_keys( $report['channels'] ) );
 		$this->assertSame(
 			array( 'name', 'spec', 'url', 'listable', 'not_listable', 'with_gaps', 'complete' ),
@@ -95,6 +96,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'missing_brand', $checks );
 		$this->assertSame( ReadinessRule::EFFECT_NOT_LISTABLE, $checks['missing_gtin']['channels']['google']['effect'] );
 		$this->assertArrayNotHasKey( 'bing', $checks['missing_gtin']['channels'] );
+		$this->assertSame( array( 'chatgpt', 'copilot', 'google' ), array_values( array_intersect( array( 'chatgpt', 'copilot', 'google' ), array_keys( $checks['missing_gtin']['channels'] ) ) ), 'Channels the filter left alone are kept' );
 		$this->assertArrayNotHasKey( 'google', $checks['title_too_long']['channels'] );
 		$this->assertArrayNotHasKey( 'uncategorised', $checks, 'A check with no valid channel left does not run' );
 	}

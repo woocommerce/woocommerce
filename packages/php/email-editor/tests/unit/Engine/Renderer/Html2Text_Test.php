@@ -255,6 +255,25 @@ class Html2Text_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * An element with the separator attribute becomes a row of dashes.
+	 */
+	public function test_separator_attribute_renders_dashes(): void {
+		$result = Html2Text::convert( '<p>Above</p><table data-email-separator="1"><tr><td>&nbsp;</td></tr></table><p>Below</p>' );
+
+		$this->assertMatchesRegularExpression( '/Above\s+-{20,}\s+Below/', $result );
+	}
+
+	/**
+	 * A separator-like class name is not the marker, so the block keeps its text.
+	 */
+	public function test_separator_class_name_keeps_content(): void {
+		$result = Html2Text::convert( '<div class="email-block-separator"><p>Hello</p></div>' );
+
+		$this->assertStringContainsString( 'Hello', $result );
+		$this->assertStringNotContainsString( '-----', $result );
+	}
+
+	/**
 	 * Test default options
 	 */
 	public function test_default_options(): void {

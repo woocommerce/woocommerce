@@ -34,6 +34,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 	private const CANONICAL_ABILITY_IDS = array(
 		'woocommerce/product-terms-query',
+		'woocommerce/product-attributes-query',
+		'woocommerce/product-attribute-create',
 		'woocommerce/products-query',
 		'woocommerce/product-create',
 		'woocommerce/product-update',
@@ -268,57 +270,67 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_canonical_ability_annotations_match_intent(): void {
 		$expectations = array(
-			'woocommerce/products-query'         => array(
+			'woocommerce/products-query'           => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
 			),
-			'woocommerce/product-create'         => array(
-				'readonly'    => false,
-				'idempotent'  => false,
-				'destructive' => false,
-			),
-			'woocommerce/product-update'         => array(
-				'readonly'    => false,
-				'idempotent'  => false,
-				'destructive' => true,
-			),
-			'woocommerce/product-delete'         => array(
-				'readonly'    => false,
-				'idempotent'  => true,
-				'destructive' => true,
-			),
-			'woocommerce/orders-query'           => array(
+			'woocommerce/product-attributes-query' => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
 			),
-			'woocommerce/order-send-email'       => array(
+			'woocommerce/product-attribute-create' => array(
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => false,
 			),
-			'woocommerce/order-update'           => array(
-				'readonly'    => false,
-				'idempotent'  => false,
-				'destructive' => true,
-			),
-			'woocommerce/order-update-status'    => array(
-				'readonly'    => false,
-				'idempotent'  => false,
-				'destructive' => true,
-			),
-			'woocommerce/order-add-note'         => array(
+			'woocommerce/product-create'           => array(
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => false,
 			),
-			'woocommerce/order-notes-query'      => array(
+			'woocommerce/product-update'           => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
+			),
+			'woocommerce/product-delete'           => array(
+				'readonly'    => false,
+				'idempotent'  => true,
+				'destructive' => true,
+			),
+			'woocommerce/orders-query'             => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
 			),
-			'woocommerce/payment-gateways-query' => array(
+			'woocommerce/order-send-email'         => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/order-update'             => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
+			),
+			'woocommerce/order-update-status'      => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
+			),
+			'woocommerce/order-add-note'           => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/order-notes-query'        => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/payment-gateways-query'   => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
@@ -1086,6 +1098,177 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$this->assertWPError( $result, "{$ability_id} should reject users without object-level access." );
 			$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
 		}
+	}
+
+	/**
+	 * @testdox Should return a not-found error naming the ID when an order mutation receives an ID that is not an order.
+	 *
+	 * @dataProvider provider_order_storage_engines
+	 *
+	 * @param bool $hpos_enabled Whether HPOS/COT should be enabled for the test.
+	 */
+	public function test_order_mutations_return_not_found_for_id_that_is_not_an_order( bool $hpos_enabled ): void {
+		$this->set_order_storage_for_test( $hpos_enabled );
+		$product                     = \WC_Helper_Product::create_simple_product();
+		$this->created_product_ids[] = $product->get_id();
+
+		foreach ( array( 999999, $product->get_id() ) as $id ) {
+			foreach ( $this->get_order_mutation_inputs( $id ) as $ability_id => $input ) {
+				$result = wp_get_ability( $ability_id )->execute( $input );
+
+				$this->assertWPError( $result, "{$ability_id} should refuse ID {$id}." );
+				$this->assertSame( 'woocommerce_order_not_found', $result->get_error_code(), "{$ability_id} should name missing order {$id}, not refuse permission." );
+				$this->assertStringContainsString( (string) $id, $result->get_error_message() );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should refuse permission for an unknown order ID to users who cannot edit orders.
+	 *
+	 * @testWith ["customer"]
+	 *           ["read_private_shop_orders"]
+	 *
+	 * @param string $role_or_cap Role of the user, or the only capability added to a subscriber.
+	 */
+	public function test_order_mutations_refuse_unknown_id_to_users_who_cannot_edit_orders( string $role_or_cap ): void {
+		$user_id = 'customer' === $role_or_cap
+			? self::factory()->user->create( array( 'role' => 'customer' ) )
+			: $this->create_user_with_caps( array( $role_or_cap ) );
+		wp_set_current_user( $user_id );
+
+		foreach ( $this->get_order_mutation_inputs( 999999 ) as $ability_id => $input ) {
+			$result = wp_get_ability( $ability_id )->execute( $input );
+
+			$this->assertWPError( $result, "{$ability_id} should refuse a user who cannot edit orders." );
+			$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+		}
+	}
+
+	/**
+	 * @testdox Should refuse permission when an order mutation receives the ID of a refund.
+	 */
+	public function test_order_mutations_refuse_id_of_refund(): void {
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$refund                    = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 1,
+			)
+		);
+
+		foreach ( $this->get_order_mutation_inputs( $refund->get_id() ) as $ability_id => $input ) {
+			$result = wp_get_ability( $ability_id )->execute( $input );
+
+			$this->assertWPError( $result, "{$ability_id} should refuse a refund ID." );
+			$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+		}
+	}
+
+	/**
+	 * @testdox Should refuse permission when an order mutation receives an order whose type the wc_order_types filter hides.
+	 */
+	public function test_order_mutations_refuse_order_of_type_hidden_by_filter(): void {
+		global $wc_order_types, $post_type_meta_caps, $wpdb;
+
+		// The posts data store refuses to read a type that the filter hides, so only HPOS can load the order.
+		$this->set_order_storage_for_test( true );
+		$meta_caps = $post_type_meta_caps;
+		wc_register_order_type(
+			'shop_test_hidden',
+			array(
+				'capability_type'          => 'shop_test_hidden',
+				'exclude_from_order_views' => true,
+				'add_order_meta_boxes'     => false,
+			)
+		);
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$wpdb->update( $wpdb->posts, array( 'post_type' => 'shop_test_hidden' ), array( 'ID' => $order->get_id() ) );
+		$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'type' => 'shop_test_hidden' ), array( 'id' => $order->get_id() ) );
+		clean_post_cache( $order->get_id() );
+		wp_cache_flush();
+		add_filter(
+			'wc_order_types',
+			static function ( $types ) {
+				return array_values( array_diff( $types, array( 'shop_test_hidden' ) ) );
+			}
+		);
+
+		try {
+			$this->assertSame( 'shop_test_hidden', OrderUtil::get_order_type( $order->get_id() ) );
+			$this->assertInstanceOf( \WC_Order::class, wc_get_order( $order->get_id() ) );
+
+			foreach ( $this->get_order_mutation_inputs( $order->get_id() ) as $ability_id => $input ) {
+				$result = wp_get_ability( $ability_id )->execute( $input );
+
+				$this->assertWPError( $result, "{$ability_id} should refuse an order whose type is hidden." );
+				$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+			}
+		} finally {
+			unset( $wc_order_types['shop_test_hidden'] );
+			unregister_post_type( 'shop_test_hidden' );
+			$post_type_meta_caps = $meta_caps; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- unregister_post_type() removes the shop_order meta caps too.
+		}
+	}
+
+	/**
+	 * @testdox Should refuse permission when an order mutation receives an order whose unregistered type an extension gives an order class.
+	 */
+	public function test_order_mutations_refuse_order_of_unregistered_type_with_class(): void {
+		global $wpdb;
+
+		$this->set_order_storage_for_test( true );
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'type' => 'shop_test_unreg' ), array( 'id' => $order->get_id() ) );
+		wp_cache_flush();
+		add_filter(
+			'woocommerce_order_class',
+			static function ( $class_name, $order_type ) {
+				return 'shop_test_unreg' === $order_type ? \WC_Order::class : $class_name;
+			},
+			10,
+			2
+		);
+
+		$this->assertSame( 'shop_test_unreg', OrderUtil::get_order_type( $order->get_id() ) );
+		$this->assertInstanceOf( \WC_Order::class, wc_get_order( $order->get_id() ) );
+
+		foreach ( $this->get_order_mutation_inputs( $order->get_id() ) as $ability_id => $input ) {
+			$result = wp_get_ability( $ability_id )->execute( $input );
+
+			$this->assertWPError( $result, "{$ability_id} should refuse an order whose type is not registered." );
+			$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+		}
+	}
+
+	/**
+	 * Valid input for each order mutation ability, keyed by ability ID.
+	 *
+	 * @param int $order_id Order ID to send.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function get_order_mutation_inputs( int $order_id ): array {
+		return array(
+			'woocommerce/order-send-email'    => array(
+				'id'    => $order_id,
+				'email' => 'invoice',
+			),
+			'woocommerce/order-update'        => array(
+				'id'       => $order_id,
+				'shipping' => array( 'city' => 'Springfield' ),
+			),
+			'woocommerce/order-update-status' => array(
+				'id'     => $order_id,
+				'status' => 'processing',
+			),
+			'woocommerce/order-add-note'      => array(
+				'id'   => $order_id,
+				'note' => 'A note.',
+			),
+		);
 	}
 
 	/**
@@ -5236,21 +5419,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotWPError( $result );
 		$this->assertTrue( $manual_update_observed );
-	}
-
-	/**
-	 * @testdox Should reject status updates against unknown order IDs without leaking existence.
-	 */
-	public function test_order_update_status_rejects_unknown_id(): void {
-		$result = wp_get_ability( 'woocommerce/order-update-status' )->execute(
-			array(
-				'id'     => 999999,
-				'status' => 'processing',
-			)
-		);
-
-		$this->assertWPError( $result );
-		$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
 	}
 
 	/**
