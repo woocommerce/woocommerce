@@ -301,18 +301,20 @@ class AbilityResources {
 			$output = self::format_object( $ref_args, $value, $resolving );
 			return array() === $output ? new \stdClass() : $output;
 		}
-		if ( ! is_array( $value ) || ! self::has_ref( $schema ) ) {
+		if ( ( ! is_array( $value ) && ! is_object( $value ) ) || ! self::has_ref( $schema ) ) {
 			return $value;
 		}
-		if ( isset( $schema['items'] ) && is_array( $schema['items'] ) ) {
+		if ( is_array( $value ) && isset( $schema['items'] ) && is_array( $schema['items'] ) ) {
 			return array_map( static fn( $item ) => self::format_value( $schema['items'], $item, $resolving ), array_values( $value ) );
 		}
+		$is_object = is_object( $value );
+		$value     = $is_object ? get_object_vars( $value ) : $value;
 		foreach ( $value as $key => $property ) {
 			if ( isset( $schema['properties'][ $key ] ) && is_array( $schema['properties'][ $key ] ) ) {
 				$value[ $key ] = self::format_value( $schema['properties'][ $key ], $property, $resolving );
 			}
 		}
-		return $value;
+		return $is_object ? (object) $value : $value;
 	}
 
 	/**

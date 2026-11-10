@@ -252,6 +252,64 @@ class NestedResourcesTest extends DomainAbilityTestCase {
 	}
 
 	/**
+	 * @testdox Should withhold nested personal fields in object containers without changing the source object.
+	 * @testWith [false]
+	 *           [true]
+	 * @param bool $shared Whether personal data is shared.
+	 */
+	public function test_object_containers_resolve_nested_resources( bool $shared ): void {
+		$this->filter_personal_data( static fn() => $shared );
+		$schema = array(
+			'type'       => 'object',
+			'properties' => array(
+				'customers' => array(
+					'type'  => 'array',
+					'items' => array(
+						'type'       => 'object',
+						'properties' => array( 'customer' => array( '$ref' => 'test_customer' ) ),
+					),
+				),
+			),
+		);
+		$source = (object) array(
+			'customers' => array(
+				(object) array(
+					'customer' => array(
+						'id'    => 3,
+						'email' => 'jane@example.test',
+					),
+				),
+			),
+		);
+		AbilityResources::register_field(
+			'test_order',
+			'container',
+			array(
+				'schema'       => $schema,
+				'get_callback' => static fn() => $source,
+			)
+		);
+
+		$direct   = AbilityResources::resolve_output( $schema, $source );
+		$resource = AbilityResources::output_data(
+			'test_order',
+			array(
+				'id'       => 1,
+				'customer' => null,
+			)
+		);
+
+		foreach ( array( $direct, $resource['container'] ) as $output ) {
+			$this->assertInstanceOf( \stdClass::class, $output );
+			$this->assertInstanceOf( \stdClass::class, $output->customers[0] );
+			$this->assertSame( 3, $output->customers[0]->customer['id'] );
+			$this->assertSame( $shared, array_key_exists( 'email', $output->customers[0]->customer ) );
+			$this->assertTrue( rest_validate_value_from_schema( $output, AbilityResources::resolve_schema( $schema ) ) );
+		}
+		$this->assertSame( 'jane@example.test', $source->customers[0]->customer['email'] );
+	}
+
+	/**
 	 * Formatted values keyed like an ability output, with the order under `order`.
 	 *
 	 * @param array<string, mixed> $values Values, with the order under `order`.
