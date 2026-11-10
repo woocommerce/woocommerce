@@ -403,21 +403,44 @@ class WC_Form_Handler {
 	 * @return string The other address type, or an empty string when the form keeps its saved values.
 	 */
 	public static function get_copy_address_form_source( $address_type ) {
-		$source_types = array(
-			'billing'  => 'shipping',
-			'shipping' => 'billing',
-		);
-		$source_type  = isset( $_GET['copy-address-from'] ) ? sanitize_key( wp_unslash( $_GET['copy-address-from'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only, see the description above.
+		$source_type = isset( $_GET['copy-address-from'] ) ? sanitize_key( wp_unslash( $_GET['copy-address-from'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only, see the description above.
 
-		if ( '' === $source_type || ! is_string( $address_type ) || ( $source_types[ $address_type ] ?? '' ) !== $source_type ) {
+		if ( '' === $source_type || self::get_copy_address_source_type( $address_type ) !== $source_type ) {
 			return '';
 		}
 
-		if ( wc_get_account_formatted_address( $address_type ) || ! wc_get_account_formatted_address( $source_type ) ) {
+		if ( ! self::can_copy_address( $address_type, $source_type, get_current_user_id() ) ) {
 			return '';
 		}
 
 		return $source_type;
+	}
+
+	/**
+	 * Get the address type that a copy into the given address type reads from.
+	 *
+	 * @param mixed $target_type Address type being filled.
+	 * @return string 'shipping' for 'billing', 'billing' for 'shipping', or an empty string for any other value.
+	 */
+	private static function get_copy_address_source_type( $target_type ): string {
+		$source_types = array(
+			'billing'  => 'shipping',
+			'shipping' => 'billing',
+		);
+
+		return is_string( $target_type ) ? ( $source_types[ $target_type ] ?? '' ) : '';
+	}
+
+	/**
+	 * Check that the target address is empty and the source address is saved, so a copy can't overwrite an address.
+	 *
+	 * @param string $target_type Address type being filled.
+	 * @param string $source_type Address type being copied.
+	 * @param int    $user_id     Customer ID.
+	 * @return bool
+	 */
+	private static function can_copy_address( string $target_type, string $source_type, int $user_id ): bool {
+		return ! wc_get_account_formatted_address( $target_type, $user_id ) && wc_get_account_formatted_address( $source_type, $user_id );
 	}
 
 	/**
@@ -450,14 +473,11 @@ class WC_Form_Handler {
 		}
 
 		$target_type  = sanitize_key( wp_unslash( $_GET['copy-address'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The nonce is verified below.
-		$source_types = array(
-			'billing'  => 'shipping',
-			'shipping' => 'billing',
-		);
+		$source_type  = self::get_copy_address_source_type( $target_type );
 		$redirect_url = wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) );
 		$nonce_value  = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : '';
 
-		if ( ! isset( $source_types[ $target_type ] ) ) {
+		if ( '' === $source_type ) {
 			wc_add_notice( __( 'The address could not be copied. Please try again.', 'woocommerce' ), 'error' );
 			wp_safe_redirect( $redirect_url );
 			exit;
@@ -469,9 +489,7 @@ class WC_Form_Handler {
 			exit;
 		}
 
-		$source_type = $source_types[ $target_type ];
-
-		if ( wc_get_account_formatted_address( $target_type, $user_id ) || ! wc_get_account_formatted_address( $source_type, $user_id ) ) {
+		if ( ! self::can_copy_address( $target_type, $source_type, $user_id ) ) {
 			wp_safe_redirect( $redirect_url );
 			exit;
 		}
