@@ -236,14 +236,15 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 
 				if ( isset( $statuses[ $action ] ) ) {
 					$updated = WC_Admin_Webhooks::bulk_update_status( $webhooks, $statuses[ $action ] );
+					// add_query_arg() drops false arguments but keeps empty ones, so use false when neither applies.
 					// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce checked above.
-					$status = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : '';
+					$status = ! empty( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : false;
 
 					wp_safe_redirect(
 						add_query_arg(
 							array(
 								'status'       => $status,
-								'bulk_updated' => $updated,
+								'bulk_updated' => $updated > 0 ? $updated : false,
 							),
 							admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks' )
 						)

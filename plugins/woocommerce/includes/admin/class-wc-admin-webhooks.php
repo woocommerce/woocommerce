@@ -172,8 +172,9 @@ class WC_Admin_Webhooks {
 		}
 
 		$qty = count( $webhooks );
+		// add_query_arg() drops false arguments but keeps empty ones, so use false when no filter is set.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$status = isset( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : '';
+		$status = ! empty( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : false;
 
 		wp_safe_redirect(
 			add_query_arg(

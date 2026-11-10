@@ -139,25 +139,13 @@ class WC_Admin_Webhooks_Test extends WC_Unit_Test_Case {
 			'webhook'  => array( $webhook->get_id() ),
 			'_wpnonce' => wp_create_nonce( 'woocommerce-settings' ),
 		);
-		$redirect = '';
-
-		add_filter(
-			'wp_redirect',
-			static function ( $location ) use ( &$redirect ) {
-				$redirect = $location;
-				throw new RuntimeException( 'Redirect intercepted.' );
+		$sut      = new WC_Admin_Webhooks_Table_List();
+		$redirect = $this->capture_redirect(
+			static function () use ( $sut ) {
+				$sut->process_bulk_action();
 			}
 		);
 
-		$sut = new WC_Admin_Webhooks_Table_List();
-
-		try {
-			$sut->process_bulk_action();
-		} catch ( RuntimeException $exception ) {
-			$this->assertSame( 'Redirect intercepted.', $exception->getMessage(), 'The bulk action should reach its redirect.' );
-		}
-
-		$this->assertNotEmpty( $redirect, 'The action should redirect to the webhook list.' );
 		$this->assertSame( wp_parse_url( admin_url( 'admin.php' ), PHP_URL_PATH ), wp_parse_url( $redirect, PHP_URL_PATH ), 'The redirect should use the admin path.' );
 		parse_str( wp_parse_url( $redirect, PHP_URL_QUERY ), $query );
 		$this->assertSame(
@@ -177,6 +165,93 @@ class WC_Admin_Webhooks_Test extends WC_Unit_Test_Case {
 		} else {
 			$this->assertNull( wc_get_webhook( $webhook->get_id() ), 'The selected webhook should be deleted.' );
 		}
+	}
+
+	/**
+	 * @testdox Bulk status changes drop the status filter and the count when neither applies.
+	 */
+	public function test_process_bulk_action_without_filter_or_changes(): void {
+		$webhook = $this->create_webhook( 'paused' );
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+
+		$_GET     = array();
+		$_REQUEST = array(
+			'action'   => 'pause',
+			'webhook'  => array( $webhook->get_id() ),
+			'_wpnonce' => wp_create_nonce( 'woocommerce-settings' ),
+		);
+
+		$sut      = new WC_Admin_Webhooks_Table_List();
+		$redirect = $this->capture_redirect(
+			static function () use ( $sut ) {
+				$sut->process_bulk_action();
+			}
+		);
+
+		parse_str( wp_parse_url( $redirect, PHP_URL_QUERY ), $query );
+		$this->assertSame(
+			array(
+				'page'    => 'wc-settings',
+				'tab'     => 'advanced',
+				'section' => 'webhooks',
+			),
+			$query,
+			'A bulk action that changes nothing should add neither a status filter nor a count.'
+		);
+	}
+
+	/**
+	 * @testdox Deleting webhooks without a status filter omits the status parameter.
+	 */
+	public function test_bulk_delete_without_status_filter(): void {
+		$webhook = $this->create_webhook( 'paused' );
+		$_GET    = array();
+
+		$redirect = $this->capture_redirect(
+			static function () use ( $webhook ) {
+				WC_Admin_Webhooks::bulk_delete( array( $webhook->get_id() ) );
+			}
+		);
+
+		parse_str( wp_parse_url( $redirect, PHP_URL_QUERY ), $query );
+		$this->assertSame(
+			array(
+				'page'    => 'wc-settings',
+				'tab'     => 'advanced',
+				'section' => 'webhooks',
+				'deleted' => '1',
+			),
+			$query,
+			'An unfiltered delete should not add an empty status filter.'
+		);
+	}
+
+	/**
+	 * Run a callback that redirects and return the location it redirected to.
+	 *
+	 * @param callable $callback Callback expected to redirect.
+	 * @return string
+	 */
+	private function capture_redirect( callable $callback ): string {
+		$redirect = '';
+
+		add_filter(
+			'wp_redirect',
+			static function ( $location ) use ( &$redirect ) {
+				$redirect = $location;
+				throw new RuntimeException( 'Redirect intercepted.' );
+			}
+		);
+
+		try {
+			$callback();
+		} catch ( RuntimeException $exception ) {
+			$this->assertSame( 'Redirect intercepted.', $exception->getMessage(), 'The action should reach its redirect.' );
+		}
+
+		$this->assertNotEmpty( $redirect, 'The action should redirect to the webhook list.' );
+
+		return $redirect;
 	}
 
 	/**
