@@ -40,6 +40,54 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	private $variation_orderby_clauses = array();
 
 	/**
+	 * @testdox The variation API resolves term names using the registered taxonomy for non-Latin attributes.
+	 * @testWith ["v3", "χρώμα", "κόκκινο"]
+	 *           ["v3", "χρώμα", "ερυθρό"]
+	 *           ["v3", "color", "red"]
+	 *           ["v2", "χρώμα", "κόκκινο"]
+	 *           ["v2", "χρώμα", "ερυθρό"]
+	 *           ["v2", "color", "red"]
+	 * @param string $version REST API version.
+	 * @param string $attribute_name Attribute name.
+	 * @param string $term_slug Term slug, which may differ from the term name.
+	 */
+	public function test_create_variation_with_non_latin_attribute( string $version, string $attribute_name, string $term_slug ): void {
+		if ( 'v2' === $version ) {
+			$controller = new WC_REST_Product_Variations_V2_Controller();
+			$controller->register_routes();
+		}
+
+		$attribute = WC_Helper_Product::create_product_attribute_object( $attribute_name, array( 'Κόκκινο' ) );
+		$term_id   = $attribute->get_options()[0];
+		wp_update_term( $term_id, $attribute->get_name(), array( 'slug' => $term_slug ) );
+		$term = get_term( $term_id, $attribute->get_name() );
+
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$request = new WP_REST_Request( 'POST', "/wc/{$version}/products/{$product->get_id()}/variations" );
+		$request->set_body_params(
+			array(
+				'regular_price' => '10',
+				'attributes'    => array(
+					array(
+						'id'     => $attribute->get_id(),
+						'option' => 'Κόκκινο',
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 201, $response->get_status() );
+		$data      = $response->get_data();
+		$variation = wc_get_product( $data['id'] );
+
+		$this->assertSame( array( sanitize_title( $attribute->get_name() ) => $term->slug ), $variation->get_attributes(), 'The API must save the actual term slug, including custom slugs.' );
+		$this->assertSame( 'Κόκκινο', $data['attributes'][0]['option'], 'The API must return the term name rather than its slug.' );
+	}
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
@@ -1127,6 +1175,40 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 			);
 		}
 		$this->assertSame( 1, $parent_product_children_deletes, 'Parent variation transients should be deleted once per batch.' );
+	}
+
+	/**
+	 * @testdox Preparing an update for a variation deleted mid-request returns an invalid ID error instead of a fatal error.
+	 *
+	 * @testWith ["WC_REST_Product_Variations_Controller"]
+	 *           ["WC_REST_Product_Variations_V2_Controller"]
+	 *
+	 * @param string $controller_class The variations controller class under test.
+	 */
+	public function test_prepare_object_returns_error_when_variation_deleted( string $controller_class ): void {
+		$parent       = WC_Helper_Product::create_variation_product();
+		$variation_id = (int) $parent->get_children()[0];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $parent->get_id() . '/variations/' . $variation_id );
+		$request->set_url_params(
+			array(
+				'product_id' => $parent->get_id(),
+				'id'         => $variation_id,
+			)
+		);
+		$request->set_body_params( array( 'regular_price' => '9.99' ) );
+
+		// Simulate a concurrent deletion between the update_item() guard and preparation.
+		wp_delete_post( $variation_id, true );
+
+		$controller     = new $controller_class();
+		$prepare_method = new ReflectionMethod( $controller, 'prepare_object_for_database' );
+		$prepare_method->setAccessible( true );
+		$result = $prepare_method->invoke( $controller, $request, false );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_rest_product_variation_invalid_id', $result->get_error_code() );
+		$this->assertSame( 404, $result->get_error_data()['status'] );
 	}
 
 	/**
