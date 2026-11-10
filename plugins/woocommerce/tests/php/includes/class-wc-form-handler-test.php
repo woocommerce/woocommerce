@@ -921,6 +921,52 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The copied edit form evaluates conditional fields against its displayed values in the destination context.
+	 *
+	 * @testWith ["shipping", "billing", "country", "US"]
+	 *           ["billing", "shipping", "country", "US"]
+	 *           ["shipping", "billing", "test-namespace/gate-code", "1234"]
+	 *           ["billing", "shipping", "test-namespace/gate-code", "1234"]
+	 * @covers \Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsFrontend::edit_address_fields()
+	 *
+	 * @param string $source_type Address type copied from.
+	 * @param string $target_type Address type being edited.
+	 * @param string $condition_field Field controlling visibility and whether the field is required.
+	 * @param string $condition_value Value that makes the field visible and required.
+	 */
+	public function test_edit_address_form_evaluates_conditions_against_copied_values( string $source_type, string $target_type, string $condition_field, string $condition_value ): void {
+		$this->register_checkout_field(
+			array(
+				'id'       => 'test-namespace/gate-code',
+				'label'    => 'Gate code',
+				'location' => 'address',
+			)
+		);
+		$condition = array( 'properties' => array( $condition_field => array( 'const' => $condition_value ) ) );
+		$this->register_checkout_field(
+			array(
+				'id'       => 'test-namespace/tax-id',
+				'label'    => 'Tax ID',
+				'location' => 'address',
+				'hidden'   => array( 'customer' => array( 'properties' => array( 'address' => array( 'not' => $condition ) ) ) ),
+				'required' => array( 'customer' => array( 'properties' => array( $target_type . '_address' => $condition ) ) ),
+			)
+		);
+		$customer        = $this->create_customer_with_address( $source_type );
+		$checkout_fields = Package::container()->get( CheckoutFields::class );
+		$checkout_fields->persist_field_for_customer( 'test-namespace/gate-code', '1234', $customer, $source_type );
+		$customer->save();
+
+		$fields    = $this->get_edit_address_form_fields( $target_type, $source_type );
+		$field_key = CheckoutFields::get_group_key( $target_type ) . 'test-namespace/tax-id';
+
+		$this->assertArrayHasKey( $field_key, $fields, 'A conditional field matching the copied values should be visible.' );
+		$this->assertTrue( $fields[ $field_key ]['required'], 'Required rules should use the copied values in the destination address context.' );
+		$this->assertSame( '', $fields[ $field_key ]['value'], 'The missing value should be left for the customer to fill in.' );
+		$this->assertSame( '', ( new WC_Customer( $customer->get_id() ) )->{"get_{$target_type}_country"}(), 'Rendering the copied form should not save the destination address.' );
+	}
+
+	/**
 	 * @testdox The edit address form gives a Checkout block address field the edited address's default when the copied address has no value.
 	 *
 	 * @covers \Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsFrontend::edit_address_fields()

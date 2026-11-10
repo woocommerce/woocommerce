@@ -186,27 +186,37 @@ class CheckoutFieldsFrontend {
 	 * @return array Updated address fields.
 	 */
 	public function edit_address_fields( $address, $address_type ) {
-		$customer = new WC_Customer( get_current_user_id() );
+		$customer      = new WC_Customer( get_current_user_id() );
+		$copy_source   = \WC_Form_Handler::get_copy_address_form_source( $address_type );
+		$copied_values = [];
+		$request_data  = [];
 
-		$document_object = new DocumentObject();
+		if ( $copy_source ) {
+			foreach ( array_keys( $this->checkout_fields_controller->get_fields_for_location( 'address' ) ) as $key ) {
+				// Defaults are computed for the address being edited, rather than the copied address.
+				$value                 = $this->checkout_fields_controller->get_field_from_object( $key, $customer, $copy_source, false );
+				$copied_values[ $key ] = '' === $value ? $this->checkout_fields_controller->get_field_from_object( $key, $customer, $address_type ) : $value;
+			}
+
+			$address_values = $copied_values;
+			foreach ( $address as $key => $field ) {
+				if ( 0 === strpos( $key, $address_type . '_' ) ) {
+					$address_values[ substr( $key, strlen( $address_type ) + 1 ) ] = $field['value'] ?? '';
+				}
+			}
+
+			$request_data = [ 'customer' => [ $address_type . '_address' => $address_values ] ];
+		}
+
+		$document_object = new DocumentObject( $request_data );
 		$document_object->set_customer( $customer );
 		$document_object->set_context( $address_type . '_address' );
 		$fields = $this->checkout_fields_controller->get_contextual_fields_for_location( 'address', $document_object );
 
-		// After a copy that couldn't be saved as is, fill the form from the other address.
-		$copy_source = \WC_Form_Handler::get_copy_address_form_source( $address_type );
-
 		foreach ( $fields as $key => $field ) {
-			$field_key = CheckoutFields::get_group_key( $address_type ) . $key;
-			// Defaults are skipped for the copied address so they are only ever computed for the address being edited.
-			$value = $copy_source ? $this->checkout_fields_controller->get_field_from_object( $key, $customer, $copy_source, false ) : '';
-
-			if ( '' === $value ) {
-				$value = $this->checkout_fields_controller->get_field_from_object( $key, $customer, $address_type );
-			}
-
+			$field_key                      = CheckoutFields::get_group_key( $address_type ) . $key;
 			$address[ $field_key ]          = $field;
-			$address[ $field_key ]['value'] = $value;
+			$address[ $field_key ]['value'] = $copied_values[ $key ] ?? $this->checkout_fields_controller->get_field_from_object( $key, $customer, $address_type );
 
 			$address[ $field_key ] = $this->checkout_fields_controller->prepare_form_field( $address[ $field_key ] );
 		}
