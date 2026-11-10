@@ -145,6 +145,10 @@ class Product_Price extends Abstract_Product_Block_Renderer {
 		$min_price = $product->get_variation_price( 'min', true );
 		$max_price = $product->get_variation_price( 'max', true );
 
+		if ( (float) $min_price === (float) $max_price ) {
+			return sprintf( '<span>%s</span>', wc_price( (float) $min_price, array( 'in_span' => false ) ) );
+		}
+
 		return sprintf(
 			'<span>%s — %s</span>',
 			wc_price( (float) $min_price, array( 'in_span' => false ) ),

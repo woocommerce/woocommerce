@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show a single price instead of a range for variable products whose variations all cost the same in block emails.
