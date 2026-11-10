@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\Checkout;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Throwable;
+use WC_Cart;
 use WC_Order;
 
 defined( 'ABSPATH' ) || exit;
@@ -37,6 +38,16 @@ final class PaymentRecovery {
 	public const ORDER_SENT_TO_GATEWAY = 'order_sent_to_gateway';
 
 	/**
+	 * Session key holding a fingerprint of the cart's items and quantities when ORDER_SENT_TO_GATEWAY was set.
+	 *
+	 * It leaves out totals, so a coupon, price or tax that changes after checkout doesn't make the
+	 * order's own cart look like a different one. Emptying the cart clears it.
+	 *
+	 * @var string
+	 */
+	public const CART_SENT_TO_GATEWAY = 'cart_sent_to_gateway';
+
+	/**
 	 * Remembers the order a checkout is about to hand to the gateway.
 	 *
 	 * @since 11.4.0
@@ -46,7 +57,52 @@ final class PaymentRecovery {
 	public static function remember_order_sent_to_gateway( int $order_id ): void {
 		if ( WC()->session ) {
 			WC()->session->set( self::ORDER_SENT_TO_GATEWAY, $order_id );
+			WC()->session->set( self::CART_SENT_TO_GATEWAY, WC()->cart instanceof WC_Cart ? self::get_cart_items_fingerprint( WC()->cart ) : null );
 		}
+	}
+
+	/**
+	 * Whether the cart is the one the order was placed from.
+	 *
+	 * For the order this session sent to the gateway, compares the items and quantities recorded at
+	 * checkout, so a coupon or price that changed since doesn't count as a different cart. Any other
+	 * order, such as one paid from its payment link, is compared by its cart hash.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return bool
+	 */
+	public static function cart_belongs_to_order( WC_Order $order ): bool {
+		$cart = WC()->cart;
+
+		if ( ! $cart instanceof WC_Cart ) {
+			return false;
+		}
+
+		$session     = WC()->session;
+		$fingerprint = $session ? $session->get( self::CART_SENT_TO_GATEWAY ) : null;
+
+		if ( $session && is_string( $fingerprint ) && '' !== $fingerprint && absint( $session->get( self::ORDER_SENT_TO_GATEWAY ) ) === $order->get_id() ) {
+			return hash_equals( $fingerprint, self::get_cart_items_fingerprint( $cart ) );
+		}
+
+		return $order->has_cart_hash( $cart->get_cart_hash() );
+	}
+
+	/**
+	 * Fingerprint of the cart's items and quantities, without prices, coupons or taxes.
+	 *
+	 * Cart item keys already cover the product, variation, attributes and extension cart item data.
+	 *
+	 * @param WC_Cart $cart Cart object.
+	 * @return string
+	 */
+	private static function get_cart_items_fingerprint( WC_Cart $cart ): string {
+		$quantities = array_map( 'strval', wp_list_pluck( $cart->get_cart_contents(), 'quantity' ) );
+		ksort( $quantities );
+
+		return md5( (string) wp_json_encode( $quantities ) );
 	}
 
 	/**
@@ -183,7 +239,7 @@ final class PaymentRecovery {
 		 * second tab both reach here with an unrelated cart. Same guard as
 		 * wc_clear_cart_after_payment().
 		 */
-		if ( WC()->cart && $order->has_cart_hash( WC()->cart->get_cart_hash() ) ) {
+		if ( self::cart_belongs_to_order( $order ) ) {
 			WC()->cart->empty_cart();
 		}
 	}

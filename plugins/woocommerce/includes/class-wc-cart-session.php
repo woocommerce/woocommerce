@@ -381,6 +381,7 @@ final class WC_Cart_Session {
 		$wc_session->set( 'removed_cart_contents', null );
 		$wc_session->set( 'order_awaiting_payment', null );
 		$wc_session->set( PaymentRecovery::ORDER_SENT_TO_GATEWAY, null );
+		$wc_session->set( PaymentRecovery::CART_SENT_TO_GATEWAY, null );
 		$wc_session->set( 'store_api_draft_order', null );
 		$wc_session->set( 'shipping_method_counts', null );
 		$wc_session->set( 'previous_shipping_methods', null );

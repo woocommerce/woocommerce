@@ -236,7 +236,7 @@ function wc_clear_cart_after_payment() {
 
 	// If the order is different from the cart, don't clear the cart. This can happen if the user has multiple tabs open and completes a different order than the one in the cart.
 	if ( $should_clear_cart_after_payment && $order instanceof WC_Order && ! WC()->cart->is_empty() ) {
-		$should_clear_cart_after_payment = $order->has_cart_hash( WC()->cart->get_cart_hash() );
+		$should_clear_cart_after_payment = PaymentRecovery::cart_belongs_to_order( $order );
 	}
 
 	/**
