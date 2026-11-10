@@ -29,6 +29,13 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	protected $store_namespace = 'woocommerce/products';
 
 	/**
+	 * The general Interactivity API store namespace that also receives the raw product data.
+	 *
+	 * @var string
+	 */
+	protected $shared_namespace = 'woocommerce';
+
+	/**
 	 * Captured original Hydration registry entry for restoration in tearDown.
 	 *
 	 * @var mixed
@@ -36,11 +43,17 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	protected $original_hydration_registry_entry = null;
 
 	/**
-	 * Start from empty ProductsStore statics, since block renders in other test classes fill them.
+	 * Start every test from empty ProductsStore caches and empty Interactivity
+	 * API state. Earlier test classes can leave the static caches filled
+	 * (`products`, `product_variations`, `loaded_variation_parents`,
+	 * `getters_registered`) and the global WP_Interactivity_API state populated
+	 * (`state_data`, `config_data`, `derived_state_closures`), which would make
+	 * a loader skip its write or a state assertion read foreign data.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->reset_products_store_static_state();
+		$this->reset_interactivity_state();
 	}
 
 	/**
@@ -430,6 +443,118 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		$this->assertSame( $product->get_name(), $resolved['name'] );
 
 		$product->delete( true );
+	}
+
+	/**
+	 * @testdox load_product() seeds the woocommerce state with the loaded product, keyed by its ID.
+	 */
+	public function test_load_product_seeds_woocommerce_namespace(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$id      = $product->get_id();
+
+		TestedProductsStore::load_product( $this->consent, $id );
+
+		$state = wp_interactivity_state( $this->shared_namespace );
+
+		$this->assertArrayHasKey( 'products', $state );
+		$this->assertArrayHasKey( $id, $state['products'] );
+		$this->assertSame( $id, $state['products'][ $id ]['id'] );
+		$this->assertSame( $product->get_name(), $state['products'][ $id ]['name'] );
+	}
+
+	/**
+	 * @testdox load_purchasable_child_products() seeds purchasable children into the woocommerce state and leaves non-purchasable ones out.
+	 */
+	public function test_load_purchasable_child_products_seeds_woocommerce_namespace(): void {
+		$purchasable     = WC_Helper_Product::create_simple_product();
+		$non_purchasable = WC_Helper_Product::create_simple_product();
+
+		$grouped = new WC_Product_Grouped();
+		$grouped->set_name( 'Grouped With Mixed Children' );
+		$grouped->set_children( array( $purchasable->get_id(), $non_purchasable->get_id() ) );
+		$grouped->save();
+
+		$this->inject_hydration(
+			$this->create_counting_hydration(
+				array(
+					'body' => array(
+						array(
+							'id'             => $purchasable->get_id(),
+							'name'           => 'Purchasable',
+							'is_purchasable' => true,
+						),
+						array(
+							'id'             => $non_purchasable->get_id(),
+							'name'           => 'Not Purchasable',
+							'is_purchasable' => false,
+						),
+					),
+				)
+			)
+		);
+
+		TestedProductsStore::load_purchasable_child_products( $this->consent, $grouped->get_id() );
+
+		$state = wp_interactivity_state( $this->shared_namespace );
+
+		$this->assertArrayHasKey( 'products', $state );
+		$this->assertArrayHasKey( $purchasable->get_id(), $state['products'] );
+		$this->assertSame( $purchasable->get_id(), $state['products'][ $purchasable->get_id() ]['id'] );
+		$this->assertSame( 'Purchasable', $state['products'][ $purchasable->get_id() ]['name'] );
+		$this->assertArrayNotHasKey( $non_purchasable->get_id(), $state['products'] );
+	}
+
+	/**
+	 * @testdox load_purchasable_child_products() leaves an empty products value in the woocommerce state when no child is purchasable.
+	 */
+	public function test_load_purchasable_child_products_without_purchasable_child_seeds_empty_woocommerce_products(): void {
+		$child = WC_Helper_Product::create_simple_product();
+
+		$grouped = new WC_Product_Grouped();
+		$grouped->set_name( 'Grouped Without Purchasable Children' );
+		$grouped->set_children( array( $child->get_id() ) );
+		$grouped->save();
+
+		$this->inject_hydration(
+			$this->create_counting_hydration(
+				array(
+					'body' => array(
+						array(
+							'id'             => $child->get_id(),
+							'name'           => 'Not Purchasable',
+							'is_purchasable' => false,
+						),
+					),
+				)
+			)
+		);
+
+		$result = TestedProductsStore::load_purchasable_child_products( $this->consent, $grouped->get_id() );
+
+		$state = wp_interactivity_state( $this->shared_namespace );
+
+		$this->assertSame( array(), $result );
+		$this->assertArrayHasKey( 'products', $state );
+		$this->assertSame( array(), $state['products'] );
+	}
+
+	/**
+	 * @testdox load_variations() seeds every returned variation into the woocommerce state, keyed by its ID.
+	 */
+	public function test_load_variations_seeds_woocommerce_namespace(): void {
+		$product = WC_Helper_Product::create_variation_product();
+
+		$variations = TestedProductsStore::load_variations( $this->consent, $product->get_id() );
+
+		$state = wp_interactivity_state( $this->shared_namespace );
+
+		$this->assertNotEmpty( $variations );
+		$this->assertArrayHasKey( 'productVariations', $state );
+
+		foreach ( $variations as $variation_id => $variation ) {
+			$this->assertArrayHasKey( $variation_id, $state['productVariations'] );
+			$this->assertSame( $variation['id'], $state['productVariations'][ $variation_id ]['id'] );
+		}
 	}
 
 	/**
