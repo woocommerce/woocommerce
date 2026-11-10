@@ -47,6 +47,7 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 		remove_action( 'parse_request', array( $this->sut, 'maybe_render' ), 0 );
 		remove_action( 'admin_init', array( $this->sut, 'maybe_sync_file' ) );
 		remove_action( 'admin_notices', array( $this->sut, 'maybe_render_notice' ) );
+		remove_action( 'deactivate_' . plugin_basename( WC_PLUGIN_FILE ), array( $this->sut, 'delete_file' ) );
 		delete_option( 'woocommerce_queue_flush_rewrite_rules' );
 		if ( is_file( $this->file ) ) {
 			chmod( dirname( $this->file ), 0755 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
@@ -108,7 +109,7 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The static file is written under plain permalinks, removed under pretty ones, and removed when UCP is turned off.
+	 * @testdox The static file is written under plain permalinks, removed under pretty ones, and removed when UCP is turned off or WooCommerce is deactivated.
 	 */
 	public function test_sync_file(): void {
 		$this->set_permalink_structure( '' );
@@ -122,6 +123,12 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 		$this->set_permalink_structure( '' );
 		$this->sut->maybe_sync_file();
 		$this->sut->maybe_flush_rewrite_rules( Utils::FEATURE_ID, false );
+		$this->assertFileDoesNotExist( $this->file );
+
+		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
+		$this->sut->register_feature_hooks();
+		$this->sut->maybe_sync_file();
+		do_action( 'deactivate_' . plugin_basename( WC_PLUGIN_FILE ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		$this->assertFileDoesNotExist( $this->file );
 	}
 

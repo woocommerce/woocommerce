@@ -52,6 +52,7 @@ final class UcpDiscovery implements RegisterHooksInterface {
 			add_action( 'parse_request', array( $this, 'maybe_render' ), 0 );
 			add_action( 'admin_init', array( $this, 'maybe_sync_file' ) );
 			add_action( 'admin_notices', array( $this, 'maybe_render_notice' ) );
+			register_deactivation_hook( WC_PLUGIN_FILE, array( $this, 'delete_file' ) );
 		}
 
 		if ( $active ) {
@@ -87,8 +88,17 @@ final class UcpDiscovery implements RegisterHooksInterface {
 
 		update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 
+		if ( ! $is_enabled ) {
+			$this->delete_file();
+		}
+	}
+
+	/**
+	 * Remove the static discovery file, which the web server would otherwise keep serving without WooCommerce.
+	 */
+	public function delete_file(): void {
 		$path = $this->get_file_path();
-		if ( ! $is_enabled && $this->is_deletable( $path ) ) {
+		if ( $this->is_deletable( $path ) ) {
 			wp_delete_file( $path );
 		}
 	}
@@ -105,12 +115,8 @@ final class UcpDiscovery implements RegisterHooksInterface {
 			return;
 		}
 
-		$path = $this->get_file_path();
-		// phpcs:disable WordPress.WP.AlternativeFunctions
 		if ( $wp_rewrite->using_permalinks() ) {
-			if ( $this->is_deletable( $path ) ) {
-				wp_delete_file( $path );
-			}
+			$this->delete_file();
 			return;
 		}
 
@@ -119,6 +125,8 @@ final class UcpDiscovery implements RegisterHooksInterface {
 			return;
 		}
 
+		$path = $this->get_file_path();
+		// phpcs:disable WordPress.WP.AlternativeFunctions
 		$content  = (string) wp_json_encode( $this->get_profile(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
 		$dir      = dirname( $path );
 		$writable = is_file( $path ) ? is_writable( $path ) : wp_mkdir_p( $dir ) && is_writable( $dir );
