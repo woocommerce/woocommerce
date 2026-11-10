@@ -115,6 +115,33 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An update that references a trashed upsell by SKU reports an error and keeps the existing link and price.
+	 */
+	public function test_import_rejects_update_with_trashed_upsell_sku(): void {
+		$upsell = WC_Helper_Product::create_simple_product( true, array( 'sku' => 'trashed-upsell' ) );
+		$source = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => '10',
+				'upsell_ids'    => array( $upsell->get_id() ),
+			)
+		);
+		wp_trash_post( $upsell->get_id() );
+		$this->assertSame( ProductStatus::TRASH, get_post_status( $upsell->get_id() ) );
+
+		$result = $this->import_relationship_updates( "id,regular_price,upsell_ids\n{$source->get_id()},20,trashed-upsell\n" );
+
+		$this->assertEmpty( $result['updated'] );
+		$this->assertCount( 1, $result['failed'] );
+		$this->assertSame( 'woocommerce_product_importer_unresolved_relationship_sku', $result['failed'][0]->get_error_code() );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'trashed-upsell' ), 'The import must not create a placeholder for the trashed SKU.' );
+		$updated_source = wc_get_product( $source->get_id() );
+		$this->assertInstanceOf( WC_Product_Simple::class, $updated_source );
+		$this->assertSame( array( $upsell->get_id() ), $updated_source->get_upsell_ids() );
+		$this->assertSame( '10', $updated_source->get_regular_price() );
+	}
+
+	/**
 	 * @testdox A parsed-data filter can supply a replacement for an unresolved relationship.
 	 */
 	public function test_import_respects_filtered_relationship(): void {
