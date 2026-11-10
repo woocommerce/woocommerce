@@ -753,6 +753,12 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 			$this->personalizer->personalize_content( 'Type [woocommerce/store-url] or visit [the store](http://%5Bwoocommerce/store-url%5D).', Personalizer::RENDERING_CONTEXT_TEXT )
 		);
 
+		// A target with parentheses, as in Wikipedia-style URLs, is still personalized.
+		$this->assertSame(
+			'See [the article](https://example.org/a_(b)?ref=https://example.com).',
+			$this->personalizer->personalize_content( 'See [the article](https://example.org/a_(b)?ref=[woocommerce/store-url]).', Personalizer::RENDERING_CONTEXT_TEXT )
+		);
+
 		// A tag value that looks like a link target is inserted as it is, not personalized again.
 		$this->tags_registry->register(
 			new Personalization_Tag(

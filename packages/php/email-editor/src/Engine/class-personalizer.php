@@ -288,15 +288,16 @@ class Personalizer {
 
 	/**
 	 * Replace tags in the "[text](url)" link targets of the Renderer's text version. Only the "](url)" part
-	 * is matched, so link text with tags or brackets does not matter. A target that is only a tag that
-	 * cannot be resolved is dropped, leaving "[text]", so no raw tag reaches the recipient.
+	 * is matched, so link text with tags or brackets does not matter; the URL may hold one level of "(…)".
+	 * A target that is only a tag that cannot be resolved is dropped, leaving "[text]", so no raw tag
+	 * reaches the recipient.
 	 *
 	 * @param string $content Plain-text content.
 	 * @return string The content with link targets personalized.
 	 */
 	private function personalize_text_link_targets( string $content ): string {
 		return (string) preg_replace_callback(
-			'/\]\((\[[^\]]+\]|[^()\s]+)\)/',
+			'/\]\((\[[^\]]+\]|(?:[^()\s]++|\([^()\s]*\))++)\)/',
 			function ( array $matches ): string {
 				$url = $this->personalize_href_tokens( $matches[1] );
 				if ( null !== $url ) {
