@@ -785,11 +785,9 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			] );
 
 			await runAction(
-				actions.addCartItem( {
-					id: 42,
+				actions.updateCartItem( {
 					key: 'server-key-abc',
 					quantity: 5,
-					type: 'simple',
 				} )
 			);
 
