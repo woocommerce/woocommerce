@@ -345,13 +345,20 @@ trait Woo_Analytics_Trait {
 	 * @return array
 	 */
 	public function get_product_details( $product ) {
-		return array(
+		$details = array(
 			'pi' => $product->get_id(),
 			'pn' => $product->get_title(),
 			'pc' => $this->get_product_categories_concatenated( $product ),
-			'pp' => $product->get_price(),
 			'pt' => $product->get_type(),
 		);
+
+		// get_price() is a string, and empty for a product without a price.
+		$price = $product->get_price();
+		if ( is_numeric( $price ) ) {
+			$details['pp'] = (float) $price;
+		}
+
+		return $details;
 	}
 
 	/**
@@ -620,7 +627,7 @@ trait Woo_Analytics_Trait {
 	}
 
 	/**
-	 * Get number of items in the cart
+	 * Get the number of products in the cart, not the sum of their quantities, which can be fractional.
 	 *
 	 * @return int
 	 */
@@ -629,7 +636,7 @@ trait Woo_Analytics_Trait {
 		if ( $cart === null ) {
 			return 0;
 		}
-		return $cart->get_cart_contents_count();
+		return count( $cart->get_cart() );
 	}
 
 	/**

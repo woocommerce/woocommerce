@@ -44,14 +44,24 @@ if ( ! function_exists( 'WC' ) ) {
 	 * @return object Mock WooCommerce object.
 	 */
 	function WC() {
-		return new class() {
+		global $wc_cart_mock;
+		$wc       = new class() {
 			/**
 			 * Session property.
 			 *
 			 * @var object|null
 			 */
 			public $session = null;
+
+			/**
+			 * Cart property, set from the `$wc_cart_mock` global.
+			 *
+			 * @var object|null
+			 */
+			public $cart = null;
 		};
+		$wc->cart = $wc_cart_mock ?? null;
+		return $wc;
 	}
 }
 

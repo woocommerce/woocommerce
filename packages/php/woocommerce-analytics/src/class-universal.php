@@ -654,7 +654,7 @@ class Universal {
 					'oi'                       => $order->get_id(),
 					'order_value'              => $order->get_subtotal(),
 					'order_total'              => $order->get_total(),
-					'products_count'           => $order->get_item_count(),
+					'products_count'           => count( $order->get_items() ),
 					'total_discount'           => $order->get_discount_total(),
 					'total_shipping'           => $order->get_shipping_total(),
 					'total_tax'                => $order->get_total_tax(),
