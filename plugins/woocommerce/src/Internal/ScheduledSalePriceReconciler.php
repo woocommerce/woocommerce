@@ -80,8 +80,9 @@ class ScheduledSalePriceReconciler implements RegisterHooksInterface {
 			return $price;
 		}
 
-		// Respect runtime price changes made through set_price().
-		if ( array_key_exists( 'price', $product->get_changes() ) ) {
+		// Respect runtime prices set through set_price(), including ones equal to the stored price,
+		// which get_changes() doesn't record.
+		if ( $product->has_runtime_price() || array_key_exists( 'price', $product->get_changes() ) ) {
 			return $price;
 		}
 

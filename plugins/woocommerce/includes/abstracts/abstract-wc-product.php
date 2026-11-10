@@ -129,6 +129,13 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	protected $supports = array();
 
 	/**
+	 * Whether set_price() was called after the product was read, so the price is a runtime override.
+	 *
+	 * @var bool
+	 */
+	private $has_runtime_price = false;
+
+	/**
 	 * Get the product if ID is passed, otherwise the product is new and empty.
 	 * This class should NOT be instantiated, but the wc_get_product() function
 	 * should be used. It is possible, but the wc_get_product() is preferred.
@@ -1052,7 +1059,21 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return void
 	 */
 	public function set_price( $price ) {
+		if ( $this->object_read ) {
+			$this->has_runtime_price = true;
+		}
 		$this->set_prop( 'price', wc_format_decimal( $price ) );
+	}
+
+	/**
+	 * Whether the active price was set at runtime with set_price() since the product was read or last saved.
+	 *
+	 * @internal For the scheduled-sale price reconciler.
+	 * @since 11.4.0
+	 * @return bool
+	 */
+	public function has_runtime_price(): bool {
+		return $this->has_runtime_price;
 	}
 
 	/**
@@ -1696,6 +1717,9 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			$changeset = null;
 			$this->data_store->create( $this );
 		}
+
+		// The price is persisted now. Reset here rather than in after_data_store_save_or_update(), which subclasses override.
+		$this->has_runtime_price = false;
 
 		$this->after_data_store_save_or_update( $state );
 

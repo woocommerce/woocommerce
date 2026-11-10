@@ -835,6 +835,80 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A runtime price equal to the stale stored sale price is not overridden after a scheduled sale ends.
+	 */
+	public function test_scheduled_sale_active_price_respects_equal_runtime_price_after_sale_ends(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '215' );
+		$product->set_sale_price( '193.50' );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+		$product->save();
+
+		// End time elapses without the AS event running, so _price stays at the sale price.
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 5 );
+		clean_post_cache( $product->get_id() );
+
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( 215, $product->get_price(), 'Without an override, the ended sale should be reconciled to the regular price.' );
+
+		// An extension sets the same value that is already stored.
+		$product->set_price( '193.50' );
+		$this->assertArrayNotHasKey( 'price', $product->get_changes(), 'An equal value should not be recorded as a change.' );
+
+		$this->assertEquals( 193.50, $product->get_price(), 'The runtime price should be kept, not reconciled to the regular price (215).' );
+	}
+
+	/**
+	 * @testdox A runtime price equal to the stale stored regular price is not overridden after a scheduled sale starts.
+	 */
+	public function test_scheduled_sale_active_price_respects_equal_runtime_price_after_sale_starts(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '215' );
+		$product->set_sale_price( '193.50' );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + 2 * HOUR_IN_SECONDS ) );
+		$product->save();
+
+		// Start time elapses without the AS event running, so _price stays at the regular price.
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 5 );
+		clean_post_cache( $product->get_id() );
+
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( 193.50, $product->get_price(), 'Without an override, the started sale should be reconciled to the sale price.' );
+
+		// An extension sets the same value that is already stored.
+		$product->set_price( '215' );
+		$this->assertArrayNotHasKey( 'price', $product->get_changes(), 'An equal value should not be recorded as a change.' );
+
+		$this->assertEquals( 215, $product->get_price(), 'The runtime price should be kept, not reconciled to the sale price (193.50).' );
+	}
+
+	/**
+	 * @testdox Saving a product clears its runtime price override, so a stale stored price is reconciled again.
+	 */
+	public function test_scheduled_sale_active_price_reconciles_again_after_runtime_price_is_saved(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '215' );
+		$product->set_sale_price( '193.50' );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+		$product->save();
+
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 5 );
+		clean_post_cache( $product->get_id() );
+
+		$product = wc_get_product( $product->get_id() );
+		$product->set_price( '193.50' );
+		$this->assertTrue( $product->has_runtime_price(), 'set_price() should mark the price as a runtime override.' );
+
+		$product->save();
+
+		$this->assertFalse( $product->has_runtime_price(), 'Saving should clear the runtime override.' );
+		$this->assertEquals( 215, $product->get_price(), 'Once saved, the stale stored price should be reconciled to the regular price again.' );
+	}
+
+	/**
 	 * @testdox An external product reconciles like a simple product.
 	 */
 	public function test_scheduled_sale_active_price_heals_external_product(): void {
