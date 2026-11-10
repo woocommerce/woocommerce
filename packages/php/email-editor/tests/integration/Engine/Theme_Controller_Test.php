@@ -66,12 +66,11 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Switch back to the theme from before the test and drop its cached styles,
-	 * which the database rollback does not reset.
+	 * Switch back to the theme from before the test. Switching also clears WordPress's
+	 * cached theme styles, which the database rollback does not reset.
 	 */
 	public function tearDown(): void {
 		switch_theme( $this->previous_theme );
-		\WP_Theme_JSON_Resolver::clean_cached_data();
 		parent::tearDown();
 	}
 

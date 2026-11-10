@@ -24,7 +24,6 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 	 */
 	private string $previous_theme = '';
 
-
 	/**
 	 * Site Style Sync Controller instance.
 	 *
@@ -46,12 +45,11 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 	}
 
 	/**
-	 * Switch back to the theme from before the test and drop its cached styles,
-	 * which the database rollback does not reset.
+	 * Switch back to the theme from before the test. Switching also clears WordPress's
+	 * cached theme styles, which the database rollback does not reset.
 	 */
 	public function tearDown(): void {
 		switch_theme( $this->previous_theme );
-		\WP_Theme_JSON_Resolver::clean_cached_data();
 		parent::tearDown();
 	}
 
