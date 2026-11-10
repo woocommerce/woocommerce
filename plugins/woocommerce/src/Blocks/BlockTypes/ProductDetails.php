@@ -13,6 +13,11 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
  */
 class ProductDetails extends AbstractBlock {
 	/**
+	 * Option that records a migration from automatic upsells to the Upsells block.
+	 */
+	private const UPSELLS_MIGRATED_OPTION = 'woocommerce_product_upsells_migrated_to_block';
+
+	/**
 	 * Block name.
 	 *
 	 * @var string
@@ -26,6 +31,7 @@ class ProductDetails extends AbstractBlock {
 	 */
 	protected function initialize() {
 		parent::initialize();
+		add_action( 'rest_api_init', array( $this, 'register_upsell_migration_setting' ) );
 
 		/**
 		 * Filter the blocks that are hooked into the Product Details block.
@@ -52,6 +58,35 @@ class ProductDetails extends AbstractBlock {
 	 */
 	protected function get_block_type_script( $key = null ) {
 		return null;
+	}
+
+	/**
+	 * Register the option that records an upsells migration.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @internal
+	 */
+	public function register_upsell_migration_setting(): void {
+		register_setting(
+			'options',
+			self::UPSELLS_MIGRATED_OPTION,
+			array(
+				'type'              => 'string',
+				'label'             => __( 'Product upsells in the Product Details block', 'woocommerce' ),
+				'description'       => __( 'Whether product upsells should we displayed in the Product Details block.', 'woocommerce' ),
+				'default'           => 'no',
+				'show_in_rest'      => array(
+					'schema' => array(
+						'type' => 'string',
+						'enum' => array( 'yes', 'no' ),
+					),
+				),
+				'sanitize_callback' => static function ( $value ) {
+					return 'yes' === $value ? 'yes' : 'no';
+				},
+			)
+		);
 	}
 
 	/**

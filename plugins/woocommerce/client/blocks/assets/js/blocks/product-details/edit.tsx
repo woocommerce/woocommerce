@@ -23,9 +23,11 @@ import { getInnerBlockByName } from '@woocommerce/utils';
 /**
  * Internal dependencies
  */
+import { useIsDescendentOfSingleProductTemplate } from '../product-elements-blocks/shared/use-is-descendent-of-single-product-template';
 import { ProductDetailsEditProps } from './types';
 import { getTemplate, isAdditionalProductDataEmpty } from './utils';
 import { LegacyProductDetailsPreview } from './legacy-preview';
+import UpsellsPlaceholder from './upsells-placeholder';
 import './editor.scss';
 
 /**
@@ -55,6 +57,9 @@ const Edit = ( {
 }: ProductDetailsEditProps ) => {
 	const blockProps = useBlockProps();
 	const { hideTabTitle } = attributes;
+	const { isDescendentOfSingleProductTemplate } =
+		useIsDescendentOfSingleProductTemplate();
+	const showUpsellsPlaceholder = isDescendentOfSingleProductTemplate;
 
 	const product = useSelect(
 		( select ) => {
@@ -161,7 +166,16 @@ const Edit = ( {
 	}
 
 	if ( hasInnerBlocks || wasBlockJustInserted ) {
-		return <div { ...innerBlocksProps } />;
+		const { children, ...innerBlocksWrapperProps } = innerBlocksProps;
+
+		return (
+			<div { ...innerBlocksWrapperProps }>
+				{ children }
+				{ showUpsellsPlaceholder && (
+					<UpsellsPlaceholder clientId={ clientId } />
+				) }
+			</div>
+		);
 	}
 
 	return (
@@ -185,6 +199,9 @@ const Edit = ( {
 			<Disabled>
 				<LegacyProductDetailsPreview hideTabTitle={ hideTabTitle } />
 			</Disabled>
+			{ showUpsellsPlaceholder && (
+				<UpsellsPlaceholder clientId={ clientId } />
+			) }
 		</div>
 	);
 };
