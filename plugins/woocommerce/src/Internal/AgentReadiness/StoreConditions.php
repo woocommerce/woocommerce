@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
+use Automattic\WooCommerce\Internal\Ucp\UcpDiscovery;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 defined( 'ABSPATH' ) || exit;
@@ -109,6 +110,17 @@ class StoreConditions {
 				'why'     => __( 'Agents only send shoppers to a secure checkout.', 'woocommerce' ),
 				'fix'     => __( 'Move the site to HTTPS; your host can usually turn it on.', 'woocommerce' ),
 				'fix_url' => wp_get_update_https_url(),
+			),
+			array(
+				'id'      => 'ucp_discovery',
+				'ok'      => UcpDiscovery::can_serve(),
+				'blocks'  => 'ucp',
+				'level'   => self::LEVEL_REQUIRED,
+				'name'    => __( 'Store can serve the UCP address', 'woocommerce' ),
+				'label'   => __( 'Permalinks stop the store serving the UCP address', 'woocommerce' ),
+				'why'     => __( 'With Plain permalinks, or ones that start with index.php, the store can\'t serve /.well-known/ucp, so agents can\'t find your catalog.', 'woocommerce' ),
+				'fix'     => __( 'Choose a permalink structure other than Plain, without index.php, under Settings > Permalinks.', 'woocommerce' ),
+				'fix_url' => admin_url( 'options-permalink.php' ),
 			),
 			$policy_page(
 				'privacy_page',

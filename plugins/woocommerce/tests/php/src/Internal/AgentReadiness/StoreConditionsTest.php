@@ -155,10 +155,28 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Make every required check pass: the store is launched and the home URL is HTTPS.
+	 * @testdox Plain and index.php permalinks are required to change, since the store can't serve /.well-known/ucp with them.
+	 *
+	 * @testWith [""]
+	 *           ["/index.php/%postname%/"]
+	 *
+	 * @param string $structure Permalink structure.
+	 */
+	public function test_plain_permalinks_required( string $structure ): void {
+		global $wp_rewrite;
+		self::make_store_ready();
+		$wp_rewrite->set_permalink_structure( $structure );
+
+		$this->assertSame( array( 'ucp_discovery' ), $this->sut->failing_required() );
+	}
+
+	/**
+	 * Make every required check pass: the store is launched, the home URL is HTTPS and permalinks aren't Plain.
 	 * Privacy, terms and the refund page are set so those checks count as done.
 	 */
 	public static function make_store_ready(): void {
+		global $wp_rewrite;
+		$wp_rewrite->set_permalink_structure( '/%postname%/' );
 		add_filter( 'pre_option_home', static fn() => 'https://example.org' );
 		update_option( 'woocommerce_coming_soon', 'no' );
 		$page = wp_insert_post(

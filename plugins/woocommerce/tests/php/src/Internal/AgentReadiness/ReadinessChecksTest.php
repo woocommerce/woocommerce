@@ -405,6 +405,7 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 				'search_visible'       => 'listing',
 				'ucp_on'               => 'ucp',
 				'https'                => 'ucp',
+				'ucp_discovery'        => 'ucp',
 				'privacy_page'         => 'checkout',
 				'terms_page'           => 'checkout',
 				'refund_returns_page'  => 'checkout',
