@@ -3,7 +3,7 @@
  */
 import type { CountryData } from '@woocommerce/types';
 
-type Constants = typeof import('../constants');
+type Constants = typeof import( '../constants' );
 
 const countryData: Record< string, CountryData > = {
 	US: {

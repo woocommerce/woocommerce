@@ -6,16 +6,17 @@ import {
 	ProductDataContextProvider,
 } from '@woocommerce/shared-context';
 import { ProductResponseItem } from '@woocommerce/types';
+import { noticeContexts } from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
  */
-import { Block as ProductImage } from '../../../atomic/blocks/product-elements/image/block';
-import { Block as ProductName } from '../../../atomic/blocks/product-elements/title/block';
-import { Block as ProductRating } from '../../../atomic/blocks/product-elements/rating-stars/block';
-import { Block as ProductPrice } from '../../../atomic/blocks/product-elements/price/block';
-import { Block as ProductButton } from '../../../atomic/blocks/product-elements/button/block';
-import { ImageSizing } from '../../../atomic/blocks/product-elements/image/types';
+import { Block as ProductImage } from '../../product-elements-blocks/image/block';
+import { Block as ProductName } from '../../product-elements-blocks/title/block';
+import { Block as ProductRating } from '../../product-elements-blocks/rating-stars/block';
+import { Block as ProductPrice } from '../../product-elements-blocks/price/block';
+import { Block as ProductButton } from '../../product-elements-blocks/button/block';
+import { ImageSizing } from '../../product-elements-blocks/image/types';
 
 interface CrossSellsProductProps {
 	product: ProductResponseItem;
@@ -60,7 +61,7 @@ const CartCrossSellsProduct = ( {
 						/>
 						<ProductPrice />
 					</div>
-					<ProductButton />
+					<ProductButton noticeContext={ noticeContexts.CART } />
 				</ProductDataContextProvider>
 			</InnerBlockLayoutContextProvider>
 		</div>

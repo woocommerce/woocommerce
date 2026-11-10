@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Hide the postcode field and make the state optional for Qatar at checkout.

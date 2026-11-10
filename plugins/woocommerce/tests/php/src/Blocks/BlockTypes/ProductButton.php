@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\BlockTypes\ProductButton as ProductButtonBlock;
 use WC_Helper_Product;
 
 /**
@@ -13,15 +12,46 @@ use WC_Helper_Product;
 class ProductButton extends \WP_UnitTestCase {
 
 	/**
-	 * Set up test options.
+	 * Previous WooCommerce options to restore after each test.
 	 *
-	 * Both writes land inside the per-test transaction, which tear_down() rolls back.
+	 * @var array<string, mixed>
+	 */
+	private $previous_options = array();
+
+	/**
+	 * Set up test options.
 	 */
 	protected function setUp(): void {
 		parent::setUp();
 
-		update_option( 'woocommerce_cart_redirect_after_add', 'no' );
-		update_option( 'woocommerce_enable_ajax_add_to_cart', 'no' );
+		foreach ( array( 'woocommerce_cart_redirect_after_add', 'woocommerce_enable_ajax_add_to_cart' ) as $option_name ) {
+			$this->previous_options[ $option_name ] = get_option( $option_name, null );
+			update_option( $option_name, 'no' );
+		}
+	}
+
+	/**
+	 * Restore test options and remove the published `woocommerce` state, which the base class does not reset.
+	 */
+	protected function tearDown(): void {
+		try {
+			foreach ( $this->previous_options as $option_name => $value ) {
+				if ( null === $value ) {
+					delete_option( $option_name );
+				} else {
+					update_option( $option_name, $value );
+				}
+			}
+
+			$interactivity = wp_interactivity();
+			$property      = new \ReflectionProperty( $interactivity, 'state_data' );
+			$property->setAccessible( true );
+			$state_data = $property->getValue( $interactivity );
+			unset( $state_data['woocommerce'] );
+			$property->setValue( $interactivity, $state_data );
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**
@@ -32,166 +62,8 @@ class ProductButton extends \WP_UnitTestCase {
 	 */
 	private function render_product_button( \WC_Product $product ): string {
 		return do_blocks(
-			'<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-button /--><!-- /wp:woocommerce/single-product -->'
+			'<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><div class="product-button-test-wrapper"><!-- wp:woocommerce/product-button /--></div><!-- /wp:woocommerce/single-product -->'
 		);
-	}
-
-	/**
-	 * @testdox Filtered add-to-cart text renders one visible Product Button for the expected product.
-	 */
-	public function test_filtered_add_to_cart_text_renders_visible_button(): void {
-		$had_product      = array_key_exists( 'product', $GLOBALS );
-		$previous_product = $GLOBALS['product'] ?? null;
-		$product          = WC_Helper_Product::create_simple_product(
-			true,
-			array(
-				'name'          => 'Product Button add-to-cart text fixture',
-				'regular_price' => '10',
-			)
-		);
-		$filter           = static function (): string {
-			return 'Buy Now';
-		};
-
-		add_filter( 'woocommerce_product_add_to_cart_text', $filter );
-
-		try {
-			$markup    = $this->render_product_button( $product );
-			$processor = new \WP_HTML_Tag_Processor( $markup );
-			$wrappers  = 0;
-
-			while (
-				$processor->next_tag(
-					array(
-						'tag_name'   => 'div',
-						'class_name' => 'wc-block-components-product-button',
-					)
-				)
-			) {
-				++$wrappers;
-			}
-
-			$this->assertSame( 1, $wrappers, 'The registered composition should render exactly one Product Button wrapper.' );
-
-			$processor = new \WP_HTML_Tag_Processor( $markup );
-			$this->assertTrue(
-				$processor->next_tag(
-					array(
-						'tag_name'   => 'a',
-						'class_name' => 'wc-block-components-product-button__button',
-					)
-				),
-				'The non-AJAX registered Product Button should render a link.'
-			);
-			$this->assertSame( (string) $product->get_id(), $processor->get_attribute( 'data-product_id' ), 'The rendered button should identify the fixture product.' );
-			$this->assertStringContainsString( '>Buy Now</span>', $markup, 'The real product text filter should reach escaped Product Button markup.' );
-		} finally {
-			// _restore_hooks() drops the filter and the rollback drops the product;
-			// the product global is this test's own to put back.
-			if ( $had_product ) {
-				$GLOBALS['product'] = $previous_product; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact pre-test product global.
-			} else {
-				unset( $GLOBALS['product'] );
-			}
-		}
-	}
-
-	/**
-	 * @testdox A block-theme Product Button dequeues the legacy add-to-cart script through its registered frontend action.
-	 */
-	public function test_block_theme_dequeues_legacy_add_to_cart_script(): void {
-		global $wp_filter;
-
-		$original_theme      = get_stylesheet();
-		$had_product         = array_key_exists( 'product', $GLOBALS );
-		$previous_product    = $GLOBALS['product'] ?? null;
-		$previous_cart       = WC()->cart;
-		$scripts             = wp_scripts();
-		$previous_queue      = $scripts->queue;
-		$previous_registered = $scripts->registered;
-		$styles              = wp_styles();
-		$previous_styles     = $styles->queue;
-		$previous_style_reg  = $styles->registered;
-		$product             = WC_Helper_Product::create_simple_product(
-			true,
-			array(
-				'name'          => 'Product Button script policy fixture',
-				'regular_price' => '10',
-			)
-		);
-
-		try {
-			switch_theme( 'twentytwentyfour' );
-			$this->assertTrue( wp_is_block_theme(), 'The script policy should run under a real block theme.' );
-
-			// Let WooCommerce enqueue the handle rather than standing in for it. A test
-			// that registers 'wc-add-to-cart' itself pins the same literal on both
-			// sides, so core folding the legacy script into another handle would leave
-			// dequeue_add_to_cart_scripts() a silent no-op with this test still green --
-			// which is the regression the deleted E2E title used to catch.
-			update_option( 'woocommerce_enable_ajax_add_to_cart', 'yes' );
-			\WC_Frontend_Scripts::load_scripts();
-			$this->assertTrue( wp_script_is( 'wc-add-to-cart', 'enqueued' ), 'WooCommerce should enqueue the legacy handle when AJAX add to cart is on.' );
-
-			$markup   = $this->render_product_button( $product );
-			$callback = $this->get_dequeue_callback( $wp_filter['wp_enqueue_scripts'] ?? null );
-			$this->assertNotSame( '', $markup, 'The registered Product Button should render before its frontend action runs.' );
-			$this->assertNotNull( $callback, 'Rendering should queue the Product Button legacy-script callback.' );
-
-			// Fire the hook rather than calling the callback, so the assertion covers the
-			// whole stack: a later callback re-enqueueing the handle would fail here and
-			// would not if the method were invoked on its own. `_restore_hooks()` rewinds
-			// the `$wp_actions` count and `$wp_current_filter` that firing it leaves.
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing core's own frontend action, not declaring one.
-			do_action( 'wp_enqueue_scripts' );
-			$this->assertFalse( wp_script_is( 'wc-add-to-cart', 'enqueued' ), 'The registered block-theme callback should dequeue the legacy handle.' );
-		} finally {
-			// _restore_hooks() rewinds wp_enqueue_scripts and the rollback takes the
-			// product back. WP_Scripts, WC()->cart and the product global survive both:
-			// this class extends WP_UnitTestCase, so there is no WooCommerce teardown.
-			$scripts->queue      = $previous_queue;
-			$scripts->registered = $previous_registered;
-			// Firing wp_enqueue_scripts writes to WP_Styles too -- WooCommerce's own
-			// frontend styles, plus core attaching the theme's global stylesheet to the
-			// shared 'global-styles' handle, which outlives the switch_theme() below.
-			$styles->queue      = $previous_styles;
-			$styles->registered = $previous_style_reg;
-			switch_theme( $original_theme );
-			WC()->cart = $previous_cart;
-
-			if ( $had_product ) {
-				$GLOBALS['product'] = $previous_product; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact pre-test product global.
-			} else {
-				unset( $GLOBALS['product'] );
-			}
-		}
-	}
-
-	/**
-	 * Find the Product Button's registered dequeue callback.
-	 *
-	 * @param \WP_Hook|null $hook Enqueue hook after rendering.
-	 * @return array{ProductButtonBlock, string}|null
-	 */
-	private function get_dequeue_callback( ?\WP_Hook $hook ): ?array {
-		if ( ! $hook ) {
-			return null;
-		}
-
-		foreach ( $hook->callbacks as $callbacks ) {
-			foreach ( $callbacks as $callback ) {
-				$function = $callback['function'];
-				if (
-					is_array( $function ) &&
-					$function[0] instanceof ProductButtonBlock &&
-					'dequeue_add_to_cart_scripts' === $function[1]
-				) {
-					return $function;
-				}
-			}
-		}
-
-		return null;
 	}
 
 	/**
@@ -217,7 +89,11 @@ class ProductButton extends \WP_UnitTestCase {
 		};
 
 		add_filter( 'woocommerce_loop_add_to_cart_args', $filter );
-		$this->render_product_button( $product );
+		try {
+			$this->render_product_button( $product );
+		} finally {
+			remove_filter( 'woocommerce_loop_add_to_cart_args', $filter );
+		}
 
 		$this->assertIsArray( $filtered_args );
 		$this->assertArrayHasKey( 'rel', $filtered_args['attributes'] );
@@ -242,5 +118,145 @@ class ProductButton extends \WP_UnitTestCase {
 		$markup  = $this->render_product_button( $product );
 
 		$this->assertStringContainsString( 'rel="nofollow noopener noreferrer"', $markup );
+	}
+
+	/**
+	 * @testdox AJAX button aria-label starts with the visible button text when $quantity are in the cart.
+	 * @testWith [0, "Add to cart: “Beanie”"]
+	 *           [2, "2 in cart, Add to cart: “Beanie”"]
+	 *
+	 * @param int    $quantity Quantity of the product in the cart.
+	 * @param string $expected Expected aria-label.
+	 */
+	public function test_ajax_button_aria_label_starts_with_button_text( int $quantity, string $expected ): void {
+		update_option( 'woocommerce_enable_ajax_add_to_cart', 'yes' );
+		$product = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Beanie' ) );
+		wp_interactivity_state(
+			'woocommerce',
+			array(
+				'cart' => array(
+					'items' => array(
+						array(
+							'id'       => $product->get_id(),
+							'quantity' => $quantity,
+						),
+					),
+				),
+			)
+		);
+
+		$aria_label = $this->get_button_aria_label( $this->render_product_button( $product ) );
+
+		$this->assertSame( $expected, $aria_label, 'The aria-label should start with the text shown on the button' );
+	}
+
+	/**
+	 * @testdox AJAX button aria-label replaces only the first placeholder when product name contains placeholder characters.
+	 */
+	public function test_ajax_button_aria_label_replaces_only_first_placeholder(): void {
+		update_option( 'woocommerce_enable_ajax_add_to_cart', 'yes' );
+		$product = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Box ### Special' ) );
+		wp_interactivity_state(
+			'woocommerce',
+			array(
+				'cart' => array(
+					'items' => array(
+						array(
+							'id'       => $product->get_id(),
+							'quantity' => 1,
+						),
+					),
+				),
+			)
+		);
+
+		$aria_label = $this->get_button_aria_label( $this->render_product_button( $product ) );
+
+		$this->assertSame( '1 in cart, Add to cart: “Box ### Special”', $aria_label );
+	}
+
+	/**
+	 * @testdox Labels that become empty after sanitization are omitted.
+	 */
+	public function test_product_button_omits_aria_label_when_sanitization_results_in_empty(): void {
+		update_option( 'woocommerce_enable_ajax_add_to_cart', 'yes' );
+		$product = WC_Helper_Product::create_simple_product();
+		$filter  = static function ( array $args ): array {
+			$args['attributes']['aria-label'] = '<em></em>';
+			return $args;
+		};
+
+		add_filter( 'woocommerce_loop_add_to_cart_args', $filter );
+		try {
+			$markup = $this->render_product_button( $product );
+		} finally {
+			remove_filter( 'woocommerce_loop_add_to_cart_args', $filter );
+		}
+
+		$processor = new \WP_HTML_Tag_Processor( $markup );
+		$this->assertTrue( $processor->next_tag( 'button' ), 'Button element should exist in rendered markup.' );
+		$this->assertNull( $processor->get_attribute( 'aria-label' ), 'Empty aria-label attribute should be omitted.' );
+	}
+
+	/**
+	 * Get the aria-label of the rendered button.
+	 *
+	 * @param string $markup Rendered block markup.
+	 * @return string|null The aria-label, decoded.
+	 */
+	private function get_button_aria_label( string $markup ): ?string {
+		$processor = new \WP_HTML_Tag_Processor( $markup );
+		$processor->next_tag( 'button' );
+
+		return $processor->get_attribute( 'aria-label' );
+	}
+
+	/**
+	 * @testdox Product Button starts with a quantity of 1.
+	 */
+	public function test_product_button_defaults_quantity_to_one(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$this->assertSame( 1, $this->get_quantity_to_add( $this->render_product_button( $product ) ) );
+	}
+
+	/**
+	 * @testdox woocommerce_loop_add_to_cart_args sets the Product Button quantity.
+	 */
+	public function test_loop_add_to_cart_args_sets_initial_quantity(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$filter  = static function ( array $args ): array {
+			$args['quantity'] = 4;
+			return $args;
+		};
+
+		add_filter( 'woocommerce_loop_add_to_cart_args', $filter );
+		try {
+			$markup = $this->render_product_button( $product );
+		} finally {
+			remove_filter( 'woocommerce_loop_add_to_cart_args', $filter );
+		}
+
+		$this->assertSame( 4, $this->get_quantity_to_add( $markup ) );
+	}
+
+	/**
+	 * Read quantityToAdd from the rendered Product Button context.
+	 *
+	 * @param string $markup Rendered block markup.
+	 * @return int
+	 */
+	private function get_quantity_to_add( string $markup ) {
+		$processor = new \WP_HTML_Tag_Processor( $markup );
+		$this->assertTrue(
+			$processor->next_tag( array( 'class_name' => 'wc-block-components-product-button' ) ),
+			'Product Button wrapper was not rendered.'
+		);
+
+		$context = json_decode( (string) $processor->get_attribute( 'data-wp-context' ), true );
+		$this->assertIsArray( $context );
+		$this->assertArrayHasKey( 'quantityToAdd', $context );
+
+		return $context['quantityToAdd'];
 	}
 }

@@ -27,11 +27,11 @@ const NoReviewsPlaceholder = ( {
 				? __(
 						'No reviews are visible with the current offset. Reduce the offset to display reviews.',
 						'woocommerce'
-				  )
+					)
 				: __(
 						'This block lists reviews for products from selected categories. The selected categories do not have any reviews yet, but they will show up here when they do.',
 						'woocommerce'
-				  ) }
+					) }
 		</Placeholder>
 	);
 };

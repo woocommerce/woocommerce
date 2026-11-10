@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Allow additional date fields in Checkout block to use JSON Schema in validation.

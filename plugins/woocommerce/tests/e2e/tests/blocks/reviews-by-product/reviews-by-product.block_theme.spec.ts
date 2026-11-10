@@ -38,4 +38,54 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 				.getByText( hoodieReviews[ 0 ].review )
 		).toBeVisible();
 	} );
+
+	test( 'can skip reviews with an offset in the editor and frontend', async ( {
+		page,
+		admin,
+		frontendUtils,
+		editor,
+	} ) => {
+		await admin.createNewPost();
+		await editor.insertBlock( { name: BLOCK_NAME } );
+		const productCheckbox = editor.canvas.getByLabel(
+			'Hoodie, has 3 reviews'
+		);
+		await productCheckbox.click();
+		await expect( productCheckbox ).toBeChecked();
+
+		await editor.canvas.getByRole( 'button', { name: 'Done' } ).click();
+
+		await editor.openDocumentSettingsSidebar();
+		const sidebarSettings = page.getByRole( 'region', {
+			name: 'Editor settings',
+		} );
+
+		await sidebarSettings
+			.getByRole( 'spinbutton', { name: 'Offset' } )
+			.fill( '1' );
+
+		await expect(
+			editor.canvas.getByText( hoodieReviews[ 0 ].review )
+		).toBeVisible();
+		await expect(
+			editor.canvas.getByText( hoodieReviews[ 1 ].review )
+		).toBeVisible();
+		await expect(
+			editor.canvas.getByText( hoodieReviews[ 2 ].review )
+		).toBeHidden();
+
+		await editor.publishAndVisitPost();
+
+		const block = await frontendUtils.getBlockByName( BLOCK_NAME );
+
+		await expect(
+			block.getByText( hoodieReviews[ 0 ].review )
+		).toBeVisible();
+		await expect(
+			block.getByText( hoodieReviews[ 1 ].review )
+		).toBeVisible();
+		await expect(
+			block.getByText( hoodieReviews[ 2 ].review )
+		).toBeHidden();
+	} );
 } );

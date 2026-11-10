@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Cart and Checkout blocks: give the order summary a fixed 360px column and hold the single-column layout until there is room for both columns, so mid-range viewports are no longer cramped.

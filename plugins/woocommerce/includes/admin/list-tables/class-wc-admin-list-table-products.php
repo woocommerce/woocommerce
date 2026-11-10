@@ -6,6 +6,7 @@
  * @version  3.3.0
  */
 
+use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
@@ -67,6 +68,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		// Use hooks to prime various caches and improve products page performance.
 		add_action( 'load-edit.php', array( $this, 'prime_status_counts_cache' ) );
 		add_filter( 'the_posts', array( $this, 'prime_thumbnail_caches' ), 10, 2 );
+		add_filter( 'the_posts', array( $this, 'prime_variable_products_transients' ), 10, 2 );
 
 		$cogs_controller              = wc_get_container()->get( CostOfGoodsSoldController::class );
 		$this->cogs_is_enabled        = $cogs_controller->feature_is_enabled();
@@ -107,6 +109,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Prime featured image caches for product queries to avoid individual queries during rendering.
 	 *
 	 * @since 10.9.0
+	 * @internal
 	 *
 	 * @param \WP_Post[] $posts Posts from WP Query.
 	 * @param \WP_Query  $query Current query.
@@ -115,6 +118,48 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	public function prime_thumbnail_caches( $posts, $query ) {
 		if ( $query instanceof \WP_Query && 'product' === $query->get( 'post_type' ) ) {
 			update_post_thumbnail_cache( $query );
+		}
+
+		return $posts;
+	}
+
+	/**
+	 * Prime transient option caches for variable products in bulk to avoid per-product queries during rendering.
+	 *
+	 * @since 11.3.0
+	 * @internal
+	 *
+	 * @param \WP_Post[] $posts Posts from WP Query.
+	 * @param \WP_Query  $query Current query.
+	 * @return array
+	 */
+	public function prime_variable_products_transients( $posts, $query ) {
+		if ( $query instanceof \WP_Query && 'product' === $query->get( 'post_type' ) && ! wp_using_ext_object_cache() ) {
+			$options = array();
+			// Performance note: post caches has been already primed, hence the loop operates on in-memory data.
+			foreach ( $posts as $post ) {
+				$terms = $post instanceof \WP_Post ? get_object_term_cache( $post->ID, 'product_type' ) : null;
+				$terms = array_filter( is_array( $terms ) ? $terms : array(), static fn ( $term ) => $term instanceof \WP_Term );
+				if ( ! empty( $terms ) && ProductType::VARIABLE === current( $terms )->slug ) {
+					$product_id = $post->ID;
+
+					// See also \WC_Product_Variable_Data_Store_CPT::read_product_data and sync with it when neccessary.
+					$options[] = '_transient_wc_var_prices_' . $product_id;
+					$options[] = '_transient_timeout_wc_var_prices_' . $product_id;
+					$options[] = '_transient_wc_product_children_' . $product_id;
+					$options[] = '_transient_timeout_wc_product_children_' . $product_id;
+					$options[] = '_transient_wc_child_has_weight_' . $product_id;
+					$options[] = '_transient_timeout_wc_child_has_weight_' . $product_id;
+					$options[] = '_transient_wc_child_has_dimensions_' . $product_id;
+					$options[] = '_transient_timeout_wc_child_has_dimensions_' . $product_id;
+					$options[] = '_transient_wc_related_' . $product_id;
+					$options[] = '_transient_timeout_wc_related_' . $product_id;
+				}
+			}
+
+			if ( ! empty( $options ) ) {
+				wp_prime_option_caches( $options );
+			}
 		}
 
 		return $posts;
@@ -450,9 +495,10 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		$filters = apply_filters(
 			'woocommerce_products_admin_list_table_filters',
 			array(
-				'product_category' => array( $this, 'render_products_category_filter' ),
-				'product_type'     => array( $this, 'render_products_type_filter' ),
-				'stock_status'     => array( $this, 'render_products_stock_status_filter' ),
+				'product_category'   => array( $this, 'render_products_category_filter' ),
+				'product_type'       => array( $this, 'render_products_type_filter' ),
+				'stock_status'       => array( $this, 'render_products_stock_status_filter' ),
+				'catalog_visibility' => array( $this, 'render_products_catalog_visibility_filter' ),
 			)
 		);
 
@@ -550,6 +596,54 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 
 		$output .= '</select>';
 		echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $output contains only fixed markup and escaped option values.
+	}
+
+	/**
+	 * Render the catalog visibility filter for the list table.
+	 *
+	 * @since 11.4.0
+	 */
+	private function render_products_catalog_visibility_filter(): void {
+		$current = $this->get_requested_catalog_visibility();
+		$output  = '<select name="catalog_visibility"><option value="">' . esc_html__( 'Filter by visibility', 'woocommerce' ) . '</option>';
+
+		foreach ( $this->get_catalog_visibility_filter_options() as $value => $label ) {
+			$output .= '<option ' . selected( $value, $current, false ) . ' value="' . esc_attr( $value ) . '">' . esc_html( $label ) . '</option>';
+		}
+
+		$output .= '</select>';
+		echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $output contains only fixed markup and escaped option values.
+	}
+
+	/**
+	 * Get the catalog visibility the merchant picked in the filter.
+	 *
+	 * Returns an empty string when the request has no value or an unknown value. The list then shows all products.
+	 *
+	 * @return string
+	 */
+	private function get_requested_catalog_visibility(): string {
+		$value = wp_unslash( $_GET['catalog_visibility'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read-only filter. The code below checks the value against a fixed list.
+		if ( is_array( $value ) ) {
+			$value = reset( $value ); // The dropdown sends one value, so use the first one if the request has several.
+		}
+
+		return is_string( $value ) && array_key_exists( $value, $this->get_catalog_visibility_filter_options() ) ? $value : '';
+	}
+
+	/**
+	 * Get the catalog visibility options the filter can list products by.
+	 *
+	 * Keeps the labels and removals from the woocommerce_product_visibility_options filter, but drops values that
+	 * extensions add. The product data store only saves the four core values, so the query cannot match any other value.
+	 *
+	 * @return array<string, string> Option labels keyed by catalog visibility value.
+	 */
+	private function get_catalog_visibility_filter_options(): array {
+		$options   = wc_get_product_visibility_options();
+		$supported = array( CatalogVisibility::VISIBLE, CatalogVisibility::CATALOG, CatalogVisibility::SEARCH, CatalogVisibility::HIDDEN );
+
+		return is_array( $options ) ? array_intersect_key( $options, array_flip( $supported ) ) : array();
 	}
 
 	/**
@@ -654,13 +748,26 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			add_filter( 'posts_clauses', array( $this, 'filter_stock_status_post_clauses' ) );
 		}
 
-		// Shipping class taxonomy.
-		if ( ! empty( $_GET['product_shipping_class'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$query_vars['tax_query'][] = array(
-				'taxonomy' => 'product_shipping_class',
-				'field'    => 'slug',
-				'terms'    => sanitize_title( wp_unslash( $_GET['product_shipping_class'] ) ),
-				'operator' => 'IN',
+		// Catalog visibility filter. The product data store saves each visibility as two terms, so check both to match one visibility exactly.
+		$catalog_visibility = $this->get_requested_catalog_visibility();
+		if ( '' !== $catalog_visibility ) {
+			$excluded_from_catalog = in_array( $catalog_visibility, array( CatalogVisibility::SEARCH, CatalogVisibility::HIDDEN ), true );
+			$excluded_from_search  = in_array( $catalog_visibility, array( CatalogVisibility::CATALOG, CatalogVisibility::HIDDEN ), true );
+
+			$query_vars['tax_query'][] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				'relation' => 'AND',
+				array(
+					'taxonomy' => 'product_visibility',
+					'field'    => 'slug',
+					'terms'    => 'exclude-from-catalog',
+					'operator' => $excluded_from_catalog ? 'IN' : 'NOT IN',
+				),
+				array(
+					'taxonomy' => 'product_visibility',
+					'field'    => 'slug',
+					'terms'    => 'exclude-from-search',
+					'operator' => $excluded_from_search ? 'IN' : 'NOT IN',
+				),
 			);
 		}
 
@@ -677,6 +784,22 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				$query_vars['product_search_default_order'] = $default_search_order;
 			}
 			unset( $query_vars['s'] );
+		}
+
+		// Shipping class taxonomy. Drop the query var so core adds no direct-product tax condition (which
+		// would exclude a variable product whose variation alone uses the class), and carry the slug on a
+		// private marker so the replacement clause applies only to this query, via a subquery that also
+		// matches those parents.
+		if ( ! empty( $_GET['product_shipping_class'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			unset( $query_vars['product_shipping_class'] );
+
+			$shipping_class = wp_unslash( $_GET['product_shipping_class'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			if ( is_array( $shipping_class ) ) {
+				$shipping_class = reset( $shipping_class ); // Single-select filter: the first value wins.
+			}
+
+			$query_vars['wc_shipping_class_filter'] = is_string( $shipping_class ) ? sanitize_title( $shipping_class ) : '';
+			add_filter( 'posts_clauses', array( $this, 'filter_shipping_class_post_clauses' ), 10, 2 );
 		}
 
 		return $query_vars;
@@ -943,6 +1066,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		remove_filter( 'posts_clauses', array( $this, 'filter_downloadable_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'filter_virtual_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'filter_stock_status_post_clauses' ) );
+		remove_filter( 'posts_clauses', array( $this, 'filter_shipping_class_post_clauses' ) );
 		if ( $this->use_cogs_lookup_column ) {
 			remove_filter( 'posts_clauses', array( $this, 'order_by_cogs_value_asc_post_clauses' ) );
 			remove_filter( 'posts_clauses', array( $this, 'order_by_cogs_value_desc_post_clauses' ) );
@@ -1132,6 +1256,63 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_status=%s ', $stock_status );
 			}
 		}
+		return $args;
+	}
+
+	/**
+	 * Restrict the products list to a shipping class, including variable products whose variations use it.
+	 *
+	 * The taxonomy applies to both products and variations, but this list shows only products, so a matching
+	 * variation is resolved to its parent. Only published variations qualify their parent, matching the
+	 * catalog's out-of-stock filter. The slug is read from the query's own marker so the clause applies only
+	 * to the marked list query and not to any other query that runs while the filter is registered.
+	 *
+	 * @since 11.3.0
+	 * @param array    $args  SQL clause pieces (join, where, etc).
+	 * @param WP_Query $query The query being filtered.
+	 * @return array
+	 */
+	public function filter_shipping_class_post_clauses( $args, $query ) {
+		global $wpdb;
+
+		if ( ! isset( $query->query_vars['wc_shipping_class_filter'] ) ) {
+			return $args;
+		}
+
+		$shipping_class = $query->query_vars['wc_shipping_class_filter'];
+		if ( ! is_string( $shipping_class ) || '' === $shipping_class ) {
+			// Marked query with an empty or invalid slug: keep the filter active but match nothing.
+			$args['where'] .= ' AND 0 = 1 ';
+			return $args;
+		}
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$args['where'] .= $wpdb->prepare(
+			" AND {$wpdb->posts}.ID IN (
+				SELECT DISTINCT
+					CASE
+						WHEN shipping_class_posts.post_type = 'product_variation' THEN shipping_class_posts.post_parent
+						ELSE shipping_class_posts.ID
+					END
+				FROM {$wpdb->term_relationships} shipping_class_tr
+				INNER JOIN {$wpdb->term_taxonomy} shipping_class_tt
+					ON shipping_class_tt.term_taxonomy_id = shipping_class_tr.term_taxonomy_id
+					AND shipping_class_tt.taxonomy = 'product_shipping_class'
+				INNER JOIN {$wpdb->terms} shipping_class_terms
+					ON shipping_class_terms.term_id = shipping_class_tt.term_id
+					AND shipping_class_terms.slug = %s
+				INNER JOIN {$wpdb->posts} shipping_class_posts
+					ON shipping_class_posts.ID = shipping_class_tr.object_id
+				WHERE shipping_class_posts.post_type = 'product'
+					OR (
+						shipping_class_posts.post_type = 'product_variation'
+						AND shipping_class_posts.post_status = 'publish'
+					)
+			) ",
+			$shipping_class
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
 		return $args;
 	}
 

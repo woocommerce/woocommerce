@@ -188,7 +188,7 @@ describe( 'TaskListItem', () => {
 		} );
 	} );
 
-	it( 'should call dismissTask and trigger a notice when dismissing a task', () => {
+	it( 'should call dismissTask and trigger a notice when dismissing a task', async () => {
 		const { getByRole } = render(
 			<TaskListItem
 				task={ { ...task } }
@@ -197,8 +197,8 @@ describe( 'TaskListItem', () => {
 				setExpandedTask={ () => {} }
 			/>
 		);
-		act( () => {
-			userEvent.click( getByRole( 'button', { name: 'Dismiss' } ) );
+		await act( async () => {
+			await userEvent.click( getByRole( 'button', { name: 'Dismiss' } ) );
 		} );
 		expect( mockDispatch.dismissTask ).toHaveBeenCalledWith( task.id );
 		expect( mockDispatch.createNotice ).toHaveBeenCalled();
@@ -210,7 +210,7 @@ describe( 'TaskListItem', () => {
 		);
 	} );
 
-	it( 'should trigger tasklist_click event when clicking tasklist item', () => {
+	it( 'should trigger tasklist_click event when clicking tasklist item', async () => {
 		render(
 			<TaskListItem
 				task={ { ...task } }
@@ -219,8 +219,8 @@ describe( 'TaskListItem', () => {
 				setExpandedTask={ () => {} }
 			/>
 		);
-		act( () => {
-			userEvent.click( screen.getByText( task.title ) );
+		await act( async () => {
+			await userEvent.click( screen.getByText( task.title ) );
 		} );
 
 		expect( recordEvent ).toHaveBeenCalledWith( 'tasklist_click', {
@@ -229,7 +229,7 @@ describe( 'TaskListItem', () => {
 		} );
 	} );
 
-	it( 'should call trackClick when clicking tasklist item', () => {
+	it( 'should call trackClick when clicking tasklist item', async () => {
 		const trackClick = jest.fn();
 		render(
 			<TaskListItem
@@ -241,14 +241,14 @@ describe( 'TaskListItem', () => {
 			/>
 		);
 
-		act( () => {
-			userEvent.click( screen.getByText( task.title ) );
+		await act( async () => {
+			await userEvent.click( screen.getByText( task.title ) );
 		} );
 
 		expect( trackClick ).toHaveBeenCalledTimes( 1 );
 	} );
 
-	it( 'should call trackClick before expanding expandable tasklist item', () => {
+	it( 'should call trackClick before expanding expandable tasklist item', async () => {
 		const trackClick = jest.fn();
 		const setExpandedTask = jest.fn();
 		render(
@@ -261,8 +261,8 @@ describe( 'TaskListItem', () => {
 			/>
 		);
 
-		act( () => {
-			userEvent.click( screen.getByText( task.title ) );
+		await act( async () => {
+			await userEvent.click( screen.getByText( task.title ) );
 		} );
 
 		expect( trackClick ).toHaveBeenCalledTimes( 1 );
@@ -346,7 +346,7 @@ describe( 'TaskListItem', () => {
 		expect( onTaskSkip ).not.toHaveBeenCalled();
 	} );
 
-	it( 'should call snoozeTask and trigger a notice when snoozing a task', () => {
+	it( 'should call snoozeTask and trigger a notice when snoozing a task', async () => {
 		const { getByRole } = render(
 			<TaskListItem
 				task={ { ...task } }
@@ -355,8 +355,8 @@ describe( 'TaskListItem', () => {
 				setExpandedTask={ () => {} }
 			/>
 		);
-		act( () => {
-			userEvent.click( getByRole( 'button', { name: 'Snooze' } ) );
+		await act( async () => {
+			await userEvent.click( getByRole( 'button', { name: 'Snooze' } ) );
 		} );
 		expect( mockDispatch.snoozeTask ).toHaveBeenCalledWith( task.id );
 		expect( mockDispatch.createNotice ).toHaveBeenCalled();

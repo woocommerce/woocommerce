@@ -2,6 +2,7 @@
  * External dependencies
  */
 import moment from 'moment';
+import { resetLocaleData, setLocaleData } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -29,6 +30,27 @@ describe( 'import reducer', () => {
 		expect( state ).toEqual( defaultState );
 		expect( state ).not.toBe( defaultState );
 	} );
+
+	it.each( [
+		[ 'DD/MM/YYYY', 'DD/MM/YYYY' ],
+		[ 'D/M/YYYY', 'DD/MM/YYYY' ],
+		[ 'MM/DD/RRRR', 'MM/DD/YYYY' ],
+	] )(
+		'formats the default import date with the %s translation as %s',
+		( translation, format ) => {
+			// A single-digit day and month, so "D/M/YYYY" and "DD/MM/YYYY" differ.
+			jest.useFakeTimers().setSystemTime(
+				new Date( '2026-03-05T12:00:00' )
+			);
+			setLocaleData( { 'MM/DD/YYYY': [ translation ] }, 'woocommerce' );
+			// @ts-expect-error reducer action should not be empty but it is
+			const state = reducer( undefined, {} );
+			resetLocaleData();
+
+			expect( state.period.date ).toBe( moment().format( format ) );
+			jest.useRealTimers();
+		}
+	);
 
 	it( 'should handle SET_IMPORT_STATUS', () => {
 		const query = Date.now();

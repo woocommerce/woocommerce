@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Leverage is_admin() gate when initializing analytics to avoid running admin-specific logic and queries in non-admin contexts.

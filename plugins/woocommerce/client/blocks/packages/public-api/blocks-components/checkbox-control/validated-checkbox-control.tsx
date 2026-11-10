@@ -23,8 +23,10 @@ import './style.scss';
 import { ValidationInputError } from '../validation-input-error';
 import { getValidityMessageForInput } from '../../blocks-checkout/utils';
 
-export interface ValidatedCheckboxControlProps
-	extends Omit< InputHTMLAttributes< HTMLInputElement >, 'onChange' > {
+export interface ValidatedCheckboxControlProps extends Omit<
+	InputHTMLAttributes< HTMLInputElement >,
+	'onChange'
+> {
 	// Unique instance ID. id will be used instead if provided.
 	instanceId?: string;
 	// id to use for the error message. If not provided, an id will be generated.
@@ -39,8 +41,7 @@ export interface ValidatedCheckboxControlProps
 	errorMessage?: string;
 	// Custom validation function that is run on change. Use setCustomValidity to set an error message.
 	customValidation?:
-		| ( ( inputObject: HTMLInputElement ) => boolean )
-		| undefined;
+		( ( inputObject: HTMLInputElement ) => boolean ) | undefined;
 	// Custom validation message to display when validity is false. Given the input element. Expected to use inputObject.validity.
 	customValidityMessage?: ( validity: ValidityState ) => string;
 	// Whether validation should run on mount.

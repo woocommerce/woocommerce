@@ -205,6 +205,115 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Missing checkboxes stay hidden while saved answers are shown.
+	 * @testWith [null, "", null]
+	 *           [false, false, "No"]
+	 *           [true, true, "Yes"]
+	 *
+	 * @param bool|null   $saved_value Checkbox answer, or null for a missing value.
+	 * @param bool|string $expected_value Expected raw value.
+	 * @param string|null $expected_display Expected display value, or null for a hidden field.
+	 */
+	public function test_order_checkbox_values( ?bool $saved_value, $expected_value, ?string $expected_display ): void {
+		$order = new \WC_Order();
+		$key   = 'plugin-namespace/leave-on-porch';
+
+		if ( null !== $saved_value ) {
+			$this->controller->persist_field_for_order( $key, $saved_value, $order, 'other', false );
+		}
+
+		$this->assertSame( $expected_value, $this->controller->get_field_from_object( $key, $order ), 'Missing values must remain distinct from saved unchecked answers.' );
+
+		$fields = $this->controller->get_order_additional_fields_with_values( $order, 'order', 'other', 'view' );
+		if ( null === $expected_display ) {
+			$this->assertArrayNotHasKey( $key, $fields, 'A missing checkbox must not appear on the order.' );
+		} else {
+			$this->assertArrayHasKey( $key, $fields, 'A saved checkbox must appear on the order.' );
+			$this->assertSame( $expected_display, $fields[ $key ]['value'] );
+		}
+	}
+
+	/**
+	 * @testdox Order fields use saved values and never apply checkout defaults.
+	 * @testWith ["text", null, null, null]
+	 *           ["text", "", null, null]
+	 *           ["text", "Saved answer", "Saved answer", "Saved answer"]
+	 *           ["text", "0", "0", "0"]
+	 *           ["checkbox", null, null, null]
+	 *           ["checkbox", "", null, null]
+	 *           ["checkbox", "0", false, "No"]
+	 *           ["checkbox", "1", true, "Yes"]
+	 *
+	 * @param string           $type Field type.
+	 * @param string|null      $saved_value Saved answer, or null for a missing value.
+	 * @param bool|string|null $expected_edit Expected edit value, or null for an omitted field.
+	 * @param string|null      $expected_view Expected display value, or null for an omitted field.
+	 */
+	public function test_order_fields_do_not_use_defaults( string $type, ?string $saved_value, $expected_edit, ?string $expected_view ): void {
+		$key = 'plugin-namespace/default-address-field';
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'       => $key,
+				'label'    => 'Default address field',
+				'location' => 'address',
+				'type'     => $type,
+			)
+		);
+
+		$default_calls = 0;
+		add_filter(
+			"woocommerce_get_default_value_for_{$key}",
+			static function () use ( &$default_calls ) {
+				++$default_calls;
+				return '1';
+			}
+		);
+
+		$order = new \WC_Order();
+		if ( null !== $saved_value ) {
+			$this->controller->persist_field_for_order( $key, $saved_value, $order, 'billing', false );
+		}
+
+		$this->assertSame( $expected_edit ?? '', $this->controller->get_field_from_object( $key, $order, 'billing', false ), 'The reader must preserve saved values when defaults are disabled.' );
+
+		$expected_values = array(
+			'edit' => $expected_edit,
+			'view' => $expected_view,
+		);
+		foreach ( $expected_values as $context => $expected ) {
+			$fields = $this->controller->get_order_additional_fields_with_values( $order, 'address', 'billing', $context );
+			if ( null === $expected ) {
+				$this->assertArrayNotHasKey( $key, $fields, 'Missing and empty answers must not be replaced by defaults.' );
+			} else {
+				$this->assertArrayHasKey( $key, $fields, 'Saved answers must remain available.' );
+				$this->assertSame( $expected, $fields[ $key ]['value'] );
+			}
+		}
+
+		$this->assertSame( 0, $default_calls, 'Reading order fields must not call the default-value filter.' );
+	}
+
+	/**
+	 * @testdox Checkbox defaults still apply when no value is saved.
+	 * @testWith ["0", false]
+	 *           ["1", true]
+	 *
+	 * @param string $default_value Filtered default value.
+	 * @param bool   $expected_value Expected checkbox value.
+	 */
+	public function test_missing_checkbox_uses_filtered_default( string $default_value, bool $expected_value ): void {
+		$key = 'plugin-namespace/leave-on-porch';
+		add_filter(
+			"woocommerce_get_default_value_for_{$key}",
+			static function () use ( $default_value ) {
+				return $default_value;
+			}
+		);
+
+		$this->assertSame( $expected_value, $this->controller->get_field_from_object( $key, new \WC_Order() ), 'The default-value filter must still supply checkbox values.' );
+	}
+
+	/**
 	 * @testdox Date fields can be registered, with their constraints stored as registered.
 	 */
 	public function test_date_fields_can_be_registered() {

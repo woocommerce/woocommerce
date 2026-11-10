@@ -1,5 +1,6 @@
 <?php
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
@@ -122,6 +123,83 @@ class WC_REST_Order_V2_Controller_Test extends WC_REST_Unit_Test_case {
 		$response = ( new WC_REST_Orders_V2_Controller() )->prepare_object_for_response( $order, new WP_REST_Request() );
 		$this->assertArrayHasKey( 'id', $response->data );
 		$this->assertEquals( $order->get_id(), $response->data['id'] );
+	}
+
+	/**
+	 * @testdox Coupon discounts in the V2 order response are rounded to the requested decimal precision.
+	 *
+	 * @testWith [0, "1", "0"]
+	 *           [3, "1.235", "0.235"]
+	 *           [5, "1.23460", "0.23460"]
+	 *
+	 * @param int    $dp                    Requested decimal precision.
+	 * @param string $expected_discount     Expected formatted discount.
+	 * @param string $expected_discount_tax Expected formatted discount tax.
+	 */
+	public function test_coupon_lines_respect_decimal_precision( int $dp, string $expected_discount, string $expected_discount_tax ) {
+		$order  = new WC_Order();
+		$coupon = new WC_Order_Item_Coupon();
+		$coupon->set_code( 'precision-coupon' );
+		$coupon->set_discount( '1.2346' );
+		$coupon->set_discount_tax( '0.2346' );
+		$order->add_item( $coupon );
+		$order->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v2/orders/' . $order->get_id() );
+		$request->set_param( 'dp', $dp );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $expected_discount, $data['coupon_lines'][0]['discount'] );
+		$this->assertSame( $expected_discount_tax, $data['coupon_lines'][0]['discount_tax'] );
+	}
+
+	/**
+	 * Test that `order_item_display_meta` keeps a variation attribute whose value only appears in the
+	 * parent product name.
+	 */
+	public function test_order_item_display_meta_keeps_attribute_matching_the_parent_name() {
+		// Three attributes keep the attribute list out of the variation title, so it is just "Vienna Black"
+		// and the "black" colour must not be treated as already shown.
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Vienna Black',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '1',
+				'pa_colour' => 'black',
+			),
+			array(
+				'size'   => array( 'small', 'huge' ),
+				'number' => array( '0', '1' ),
+				'colour' => array( 'black', 'white' ),
+			)
+		);
+
+		try {
+			$order = new WC_Order();
+			$order->add_product( $variation, 1 );
+			$order->save();
+
+			$request = new WP_REST_Request( 'GET', '/wc/v2/orders/' . $order->get_id() );
+			$request->set_param( 'order_item_display_meta', 'true' );
+			$response = $this->server->dispatch( $request );
+
+			$this->assertEquals( 200, $response->get_status() );
+
+			$response_data = $response->get_data();
+			$line_item     = current( $response_data['line_items'] );
+
+			$this->assertSame( 'Vienna Black', $line_item['name'] );
+			$this->assertSame(
+				array( 'pa_size', 'pa_number', 'pa_colour' ),
+				wp_list_pluck( $line_item['meta_data'], 'key' ),
+				'Every selected attribute is returned when the item name shows none of them.'
+			);
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
 	}
 
 	/**
@@ -385,6 +463,49 @@ class WC_REST_Order_V2_Controller_Test extends WC_REST_Unit_Test_case {
 				},
 			),
 		);
+	}
+
+	/**
+	 * @testdox PUT /wc/v2/orders/<id> with a deleted product leaves earlier new items and their stock unchanged.
+	 */
+	public function test_v2_update_order_with_deleted_product_saves_no_earlier_items(): void {
+		$order = wc_create_order();
+		$order->add_product( WC_Helper_Product::create_simple_product() );
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+		$stocked = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 10,
+			)
+		);
+
+		$deleted    = WC_Helper_Product::create_simple_product();
+		$deleted_id = $deleted->get_id();
+		$deleted->delete( true );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v2/orders/' . $order->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'line_items' => array(
+						array(
+							'product_id' => $stocked->get_id(),
+							'quantity'   => 2,
+						),
+						array( 'product_id' => $deleted_id ),
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), 'The request should be rejected.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'], 'The error should name the invalid product.' );
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_items(), 'The order should keep only its original line item.' );
+		$this->assertSame( 10, wc_get_product( $stocked->get_id() )->get_stock_quantity(), 'The stock should not change.' );
 	}
 
 	/**

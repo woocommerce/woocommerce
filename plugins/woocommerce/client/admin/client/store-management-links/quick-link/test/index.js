@@ -29,7 +29,7 @@ describe( 'QuickLink', () => {
 		);
 	} );
 
-	it( 'attaches a click handler to the link if it is passed', () => {
+	it( 'attaches a click handler to the link if it is passed', async () => {
 		const clickHandler = jest.fn();
 
 		const { queryByRole } = render(
@@ -43,7 +43,7 @@ describe( 'QuickLink', () => {
 		);
 
 		const link = queryByRole( 'link' );
-		userEvent.click( link );
+		await userEvent.click( link );
 		expect( clickHandler ).toHaveBeenCalled();
 	} );
 } );

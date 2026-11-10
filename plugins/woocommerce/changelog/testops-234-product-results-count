@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Add Jest coverage for the Product Results Count block's registration and PHPUnit coverage for its rendered result count. No E2E test is removed.

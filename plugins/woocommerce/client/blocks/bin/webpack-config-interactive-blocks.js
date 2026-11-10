@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports -- Webpack loads this configuration as CommonJS. */
 /**
  * External dependencies
  */
@@ -41,11 +42,19 @@ const entries = {
 	...editorStyleEntries,
 	// Product elements frontend module. Share by several blocks.
 	'woocommerce/product-elements':
-		'./assets/js/atomic/blocks/product-elements/frontend.ts',
+		'./assets/js/blocks/product-elements-blocks/frontend.ts',
+	// Sale badge frontend module. Built separately so collection badges can
+	// skip loading variation-only label logic.
+	'woocommerce/product-sale-badge':
+		'./assets/js/blocks/product-elements-blocks/sale-badge/frontend.ts',
 	// Add to cart with options quantity selector frontend module used by the
 	// Product Quantity block and the Grouped Product Selector block.
 	'woocommerce/add-to-cart-with-options-quantity-selector':
 		'./assets/js/blocks/add-to-cart-with-options/quantity-selector/frontend.ts',
+	// Product Collection store part for cart-referencing collections
+	// (cross-sells, upsells). Conditionally enqueued.
+	'woocommerce/product-collection-cart-reference':
+		'./assets/js/blocks/product-collection/cart-reference-frontend.ts',
 	// Other
 	'@woocommerce/stores/woocommerce/cart':
 		'./assets/js/base/stores/woocommerce/cart.ts',

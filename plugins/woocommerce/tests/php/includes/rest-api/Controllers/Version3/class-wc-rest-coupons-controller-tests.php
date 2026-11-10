@@ -344,4 +344,40 @@ class WC_REST_Coupons_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assert_incomplete_meta_data_handled_correctly( new \WC_Coupon( $coupon->get_id() ) );
 	}
+
+	/**
+	 * @testdox Creating and updating a coupon keeps backslashes and quotes in its code and description.
+	 */
+	public function test_create_and_update_coupon_keep_backslashes_in_post_fields(): void {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/coupons' );
+		$request->set_body_params(
+			array(
+				'code'        => 'save\\10',
+				'description' => 'Path C:\\temp, it\'s "quoted"',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+		$post = get_post( $response->get_data()['id'] );
+		$this->assertSame( 'save\\10', $response->get_data()['code'], 'The response code should keep its backslash.' );
+		$this->assertSame( 'save\\10', $post->post_title, 'The stored code should keep its backslash.' );
+		$this->assertSame( 'Path C:\\temp, it\'s "quoted"', $post->post_excerpt, 'The stored description should keep its backslash and quotes.' );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/coupons/' . $post->ID );
+		$request->set_body_params(
+			array(
+				'code'        => 'save\\20',
+				'description' => 'Path D:\\temp, it\'s "quoted"',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$post = get_post( $post->ID );
+		$this->assertSame( 'save\\20', $post->post_title, 'The updated code should keep its backslash.' );
+		$this->assertSame( 'Path D:\\temp, it\'s "quoted"', $post->post_excerpt, 'The updated description should keep its backslash and quotes.' );
+	}
 }

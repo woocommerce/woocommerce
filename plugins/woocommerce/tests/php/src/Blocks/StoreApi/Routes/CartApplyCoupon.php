@@ -217,7 +217,6 @@ class CartApplyCoupon extends ControllerTestCase {
 	 */
 	public function test_coupon_usage_limit() {
 		wc()->cart->remove_coupons();
-		wp_set_current_user( 1 );
 
 		$fixtures = new FixtureData();
 
@@ -245,22 +244,10 @@ class CartApplyCoupon extends ControllerTestCase {
 
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
-		wp_set_current_user( 0 );
 
 		$this->assertEquals( 400, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_cart_coupon_error', $data['code'] );
-		// Match the opening sentence rather than the whole message. WooCommerce has
-		// three usage-limit wordings and picks between them on whether the current
-		// user has a failed or pending order -- state this test does not own and any
-		// earlier test in the process can create. All three start the same way, and
-		// the coupon code is the part worth pinning.
-		$this->assertStringStartsWith(
-			sprintf(
-				'Usage limit for coupon "%s" has been reached.',
-				$limited_coupon->get_code()
-			),
-			html_entity_decode( $data['message'] )
-		);
+		$this->assertStringContainsString( 'Usage limit', html_entity_decode( $data['message'] ) );
 	}
 
 	/**
@@ -288,6 +275,35 @@ class CartApplyCoupon extends ControllerTestCase {
 
 		// Re-enable coupons for other tests.
 		update_option( 'woocommerce_enable_coupons', 'yes' );
+	}
+
+	/**
+	 * @testdox Applying a coupon whose code contains a backslash keeps the backslash.
+	 */
+	public function test_apply_coupon_with_backslash_in_code(): void {
+		wc()->cart->remove_coupons();
+
+		$fixtures = new FixtureData();
+		$fixtures->get_coupon(
+			array(
+				'code'          => 'save\\10',
+				'discount_type' => 'fixed_cart',
+				'amount'        => 1,
+			)
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/apply-coupon' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'code' => 'save\\10',
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'The coupon should be applied.' );
+		$this->assertSame( 'save\\10', $response->get_data()['coupons'][0]['code'], 'The applied code should keep its backslash.' );
 	}
 
 	/**

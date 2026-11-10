@@ -1,10 +1,4 @@
 /**
- * External dependencies
- */
-
-import type { Reducer } from 'redux';
-
-/**
  * Internal dependencies
  */
 import TYPES from './action-types';
@@ -55,7 +49,7 @@ const getUpdatedTaskLists = (
 			? Object.keys( taskLists )
 			: Object.keys( taskLists ).filter(
 					( taskListId ) => taskListId === scopedTaskListId
-			  );
+				);
 
 	return taskListIds.reduce(
 		( lists, taskListId ) => {
@@ -79,10 +73,10 @@ const getUpdatedTaskLists = (
 	);
 };
 
-const reducer: Reducer< OnboardingState, Action > = (
-	state = defaultState,
-	action
-) => {
+const reducer = (
+	state: OnboardingState = defaultState,
+	action: Action
+): OnboardingState => {
 	switch ( action.type ) {
 		case TYPES.SET_PROFILE_ITEMS:
 			return {

@@ -8,7 +8,7 @@ const contentWithHeading = ( content, heading, headingLevel = 'h3' ) => {
 		? [
 				{ [ headingLevel ]: heading },
 				{ html: docblockToMarkdown( content ) },
-		  ]
+			]
 		: [];
 };
 

@@ -423,12 +423,12 @@ class ProductCollectionPage {
 
 	async addFilter(
 		name:
-			| 'Show Hand-picked'
+			| 'Hand-Picked'
 			| 'Keyword'
-			| 'Show product categories'
-			| 'Show product tags'
-			| 'Show Product Brands'
-			| 'Show Product Attributes'
+			| 'Product Categories'
+			| 'Product Tags'
+			| 'Product Brands'
+			| 'Product Attributes'
 			| 'Featured'
 			| 'Created'
 			| 'Price Range'
@@ -438,7 +438,7 @@ class ProductCollectionPage {
 			.click();
 		await this.page
 			.getByRole( 'menuitemcheckbox', {
-				name,
+				name: new RegExp( name, 'i' ),
 			} )
 			.click();
 		await this.page
@@ -830,31 +830,6 @@ class ProductCollectionPage {
 		} else {
 			await this.initializeLocatorsForFrontend();
 		}
-	}
-
-	async getProductPermalinkPaths(): Promise< string[] > {
-		return this.productTitles
-			.getByRole( 'link' )
-			.evaluateAll( ( links ) =>
-				links.map(
-					( link ) =>
-						new URL( ( link as HTMLAnchorElement ).href ).pathname
-				)
-			);
-	}
-
-	async getProductCollectionQuery() {
-		return this.page.evaluate( () => {
-			const block = window.wp.data
-				.select( 'core/block-editor' )
-				.getBlocks()
-				.find(
-					( candidate: { name: string } ) =>
-						candidate.name === 'woocommerce/product-collection'
-				);
-
-			return block?.attributes.query ?? {};
-		} );
 	}
 
 	private async initializeLocatorsForEditor() {

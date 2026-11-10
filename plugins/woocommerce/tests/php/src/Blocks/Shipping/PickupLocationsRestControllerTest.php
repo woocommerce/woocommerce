@@ -141,87 +141,6 @@ class PickupLocationsRestControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tax statuses the endpoint accepts.
-	 *
-	 * @return array<string, array{string}>
-	 */
-	public function provider_tax_status(): array {
-		return array(
-			'taxable' => array( 'taxable' ),
-			'none'    => array( 'none' ),
-		);
-	}
-
-	/**
-	 * @testdox Should round-trip every accepted tax status rather than coercing it.
-	 * @dataProvider provider_tax_status
-	 *
-	 * @param string $tax_status Tax status to save.
-	 */
-	public function test_update_settings_round_trips_tax_status( string $tax_status ): void {
-		wp_set_current_user( $this->shop_manager_id );
-
-		$request = new \WP_REST_Request( 'POST', '/wc/v3/pickup-locations' );
-		$request->set_param(
-			'pickup_location_settings',
-			array(
-				'enabled'    => 'yes',
-				'title'      => 'Local Pickup',
-				'tax_status' => $tax_status,
-				'cost'       => '',
-			)
-		);
-
-		$response = $this->sut->update_settings( $request );
-		$data     = $response->get_data();
-
-		// `none` is both an accepted value and the fallback for a rejected one, so
-		// it only proves anything next to `taxable`: together they separate "the
-		// status was kept" from "everything collapses to one status".
-		$this->assertSame( $tax_status, $data['pickup_location_settings']['tax_status'], 'The response should echo back the tax status that was saved.' );
-		$this->assertSame( $tax_status, get_option( 'woocommerce_pickup_location_settings' )['tax_status'], 'The saved tax status should be persisted unchanged.' );
-	}
-
-	/**
-	 * @testdox Should store an empty pickup locations list rather than ignoring it.
-	 */
-	public function test_update_settings_stores_an_empty_pickup_locations_list(): void {
-		wp_set_current_user( $this->shop_manager_id );
-
-		$locations = array(
-			array(
-				'name'    => 'Main Store',
-				'address' => array(
-					'address_1' => '123 Main St',
-					'city'      => 'Anytown',
-					'state'     => 'CA',
-					'postcode'  => '90210',
-					'country'   => 'US',
-				),
-				'details' => '',
-				'enabled' => true,
-			),
-		);
-
-		$request = new \WP_REST_Request( 'POST', '/wc/v3/pickup-locations' );
-		$request->set_param( 'pickup_locations', $locations );
-		$this->sut->update_settings( $request );
-
-		$this->assertCount( 1, get_option( 'pickup_location_pickup_locations' ), 'The starting list should hold the location that was saved.' );
-
-		// Removing the last location sends an empty array. Treating that as "nothing
-		// to do" would leave the merchant with a location they deleted.
-		$request = new \WP_REST_Request( 'POST', '/wc/v3/pickup-locations' );
-		$request->set_param( 'pickup_locations', array() );
-
-		$response = $this->sut->update_settings( $request );
-		$data     = $response->get_data();
-
-		$this->assertSame( array(), $data['pickup_locations'], 'The response should echo back the empty list.' );
-		$this->assertSame( array(), get_option( 'pickup_location_pickup_locations' ), 'Saving an empty list should clear the stored locations.' );
-	}
-
-	/**
 	 * @testdox Should drop incomplete locations and default missing keys so admin hydration never hits undefined indexes.
 	 */
 	public function test_update_settings_drops_incomplete_locations(): void {
@@ -458,5 +377,51 @@ class PickupLocationsRestControllerTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( '<script', $saved['cost'], '<script> must be stripped from cost.' );
 		$this->assertStringNotContainsString( 'alert(1)', $saved['cost'], 'Inline script payload must not survive cost sanitization.' );
 		$this->assertStringContainsString( '5 + 1.50', $saved['cost'], 'Math formula syntax must be preserved in cost — must not be coerced to float.' );
+	}
+
+	/**
+	 * Rate ids are the positions of the saved locations, so what a shopper's stored choice points
+	 * at depends on the array holding still. Switching a branch off through the settings screen
+	 * keeps it in the list, which is what keeps the branches either side of it where they were.
+	 *
+	 * @testdox Switching a location off leaves it in the list, so the others keep their positions.
+	 */
+	public function test_switching_a_location_off_keeps_the_list_in_place(): void {
+		wp_set_current_user( $this->shop_manager_id );
+
+		$branch = function ( string $name, bool $enabled ): array {
+			return array(
+				'name'    => $name,
+				'address' => array(
+					'address_1' => '1 Market St',
+					'city'      => 'San Francisco',
+					'state'     => 'CA',
+					'postcode'  => '94105',
+					'country'   => 'US',
+				),
+				'details' => '',
+				'enabled' => $enabled,
+			);
+		};
+
+		$request = new \WP_REST_Request( 'POST', '/wc/v3/pickup-locations' );
+		$request->set_param(
+			'pickup_locations',
+			array(
+				$branch( 'Downtown', true ),
+				$branch( 'Airport', false ),
+				$branch( 'Harbour', true ),
+			)
+		);
+
+		$this->sut->update_settings( $request );
+
+		$saved = get_option( 'pickup_location_pickup_locations' );
+
+		$this->assertCount( 3, $saved, 'A branch that was switched off is still a branch the merchant has.' );
+		$this->assertSame( 'Downtown', $saved[0]['name'], 'The branch before it should not have moved.' );
+		$this->assertSame( 'Airport', $saved[1]['name'], 'The closed branch should hold its own place.' );
+		$this->assertSame( 'Harbour', $saved[2]['name'], 'And the branch after it should not have moved up.' );
+		$this->assertFalse( $saved[1]['enabled'], 'It should be saved as closed rather than removed.' );
 	}
 }

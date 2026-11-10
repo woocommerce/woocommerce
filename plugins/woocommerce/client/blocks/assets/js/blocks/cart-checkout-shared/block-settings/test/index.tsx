@@ -1,50 +1,52 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
+import type { ReactNode } from 'react';
 
 /**
  * Internal dependencies
  */
-import { BlockSettings } from '../index';
+import { BlockSettings } from '..';
 
 jest.mock( '@wordpress/block-editor', () => ( {
-	...jest.requireActual( '@wordpress/block-editor' ),
-	InspectorControls: jest.fn( ( { children } ) => <div>{ children }</div> ),
+	InspectorControls: ( { children }: { children: ReactNode } ) => children,
 } ) );
 
-describe( 'Cart and Checkout block settings', () => {
-	it.each( [
-		{ initialValue: false, expectedValue: true },
-		{ initialValue: true, expectedValue: false },
-	] )(
-		'maps hasDarkControls=$initialValue to $expectedValue',
-		async ( { initialValue, expectedValue } ) => {
-			const user = userEvent.setup();
-			const setAttributes = jest.fn();
+describe( 'Cart and checkout block settings', () => {
+	it( 'shows dark mode but not step numbers for the cart', () => {
+		render(
+			<BlockSettings
+				attributes={ {} }
+				setAttributes={ jest.fn() }
+				blockType="cart"
+			/>
+		);
 
-			render(
-				<BlockSettings
-					attributes={ {
-						hasDarkControls: initialValue,
-						showFormStepNumbers: false,
-					} }
-					setAttributes={ setAttributes }
-				/>
-			);
+		expect(
+			screen.getByLabelText( 'Dark mode inputs' )
+		).toBeInTheDocument();
+		expect(
+			screen.queryByLabelText( 'Show form step numbers' )
+		).toBeNull();
+	} );
 
-			const darkModeToggle = screen.getByRole( 'checkbox', {
-				name: 'Dark mode inputs',
-			} );
-			expect( darkModeToggle ).toHaveProperty( 'checked', initialValue );
+	it( 'allows checkout step numbers to be changed', () => {
+		const setAttributes = jest.fn();
+		render(
+			<BlockSettings
+				attributes={ { showFormStepNumbers: false } }
+				setAttributes={ setAttributes }
+				blockType="checkout"
+			/>
+		);
 
-			await user.click( darkModeToggle );
-
-			expect( setAttributes ).toHaveBeenCalledTimes( 1 );
-			expect( setAttributes ).toHaveBeenCalledWith( {
-				hasDarkControls: expectedValue,
-			} );
-		}
-	);
+		fireEvent.click( screen.getByLabelText( 'Show form step numbers' ) );
+		expect( setAttributes ).toHaveBeenCalledWith( {
+			showFormStepNumbers: true,
+		} );
+		expect(
+			screen.getByLabelText( 'Dark mode inputs' )
+		).toBeInTheDocument();
+	} );
 } );

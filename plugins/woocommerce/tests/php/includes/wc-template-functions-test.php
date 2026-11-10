@@ -8,6 +8,47 @@ declare( strict_types = 1 );
  */
 class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 	/**
+	 * @testdox Cart links preselect taxonomy variations with non-Latin term slugs.
+	 * @testWith ["color", "Κόκκινο"]
+	 *           ["χρώμα", "Κόκκινο"]
+	 *           ["color", "Red"]
+	 * @param string $attribute_name Attribute name.
+	 * @param string $term_name Term name.
+	 */
+	public function test_variation_dropdown_preselects_attribute_from_permalink( string $attribute_name, string $term_name ): void {
+		$attribute = WC_Helper_Product::create_product_attribute_object( $attribute_name, array( $term_name ) );
+		$product   = new WC_Product_Variable();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+		$term = $attribute->get_terms()[0];
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( sanitize_title( $attribute->get_name() ) => $term->slug ) );
+		$variation->save();
+
+		$previous_request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserve request state for the test.
+		parse_str( wp_parse_url( $variation->get_permalink(), PHP_URL_QUERY ), $query );
+		$_REQUEST = wp_slash( $query ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Simulate following the variation permalink.
+		ob_start();
+		try {
+			wc_dropdown_variation_attribute_options(
+				array(
+					'product'   => $product,
+					'attribute' => $attribute->get_name(),
+					'options'   => array( $term->slug ),
+				)
+			);
+			$html = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+			$_REQUEST = $previous_request;
+		}
+
+		$this->assertMatchesRegularExpression( '/value="' . preg_quote( $term->slug, '/' ) . '"\s+selected=/', $html, 'The linked variation must be selected in the dropdown.' );
+	}
+
+	/**
 	 * Render the loop add-to-cart template for a product.
 	 *
 	 * @param WC_Product $test_product Product to render.
@@ -356,5 +397,83 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 
 		$this->assertSame( array(), $warnings, 'Rendering the attributes should not raise warnings.' );
 		$this->assertStringContainsString( 'Matte', $markup );
+	}
+
+	/**
+	 * @testdox wc_dropdown_variation_attribute_options keeps a percent-escaped custom option value raw and decodes its label.
+	 */
+	public function test_variation_dropdown_decodes_custom_option_label_but_keeps_value_raw(): void {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Finish' );
+		$attribute->set_options( array( 'Black%20White', 'Gloss' ) );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		ob_start();
+		wc_dropdown_variation_attribute_options(
+			array(
+				'options'   => array( 'Black%20White', 'Gloss' ),
+				'attribute' => 'Finish',
+				'product'   => $product,
+				'selected'  => 'Black%20White',
+				'name'      => 'attribute_finish',
+			)
+		);
+		$html = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'value="Black%20White"', $html, 'The option value must stay raw so the posted value still matches.' );
+		$this->assertStringContainsString( '>Black White<', $html, 'The option label must be decoded to match the cart and order.' );
+		$this->assertStringNotContainsString( '>Black%20White<', $html, 'The percent-escaped label must not be displayed.' );
+	}
+
+	/**
+	 * @testdox Displaying product attributes renders plain text when a term link cannot be resolved.
+	 */
+	public function test_display_product_attributes_does_not_crash_for_deleted_term(): void {
+		global $wc_product_attributes;
+
+		$previous_attributes = $wc_product_attributes;
+		$attribute           = WC_Helper_Product::create_product_attribute_object( 'Archive Finish', array( 'Matte & Gloss' ) );
+		$taxonomy            = $attribute->get_name();
+
+		try {
+			$wc_product_attributes[ $taxonomy ]->attribute_public = true;
+
+			$product = new WC_Product_Simple();
+			$product->set_attributes( array( $attribute ) );
+
+			$term = get_term( $attribute->get_options()[0], $taxonomy );
+			wp_delete_term( $term->term_id, $taxonomy );
+
+			add_filter( 'woocommerce_get_product_terms', static fn() => array( $term ) );
+			ob_start();
+			wc_display_product_attributes( $product );
+			$markup = (string) ob_get_clean();
+		} finally {
+			unregister_taxonomy( $taxonomy );
+			$wc_product_attributes = $previous_attributes;
+		}
+
+		$this->assertStringContainsString( 'Matte &amp; Gloss', $markup, 'The term name should be rendered as escaped text.' );
+		$this->assertStringNotContainsString( '<a ', $markup, 'The deleted term should not be linked.' );
+	}
+
+	/**
+	 * @testdox The empty cart message should be wrapped in the shared notices wrapper.
+	 */
+	public function test_empty_cart_message_uses_notices_wrapper(): void {
+		ob_start();
+		wc_empty_cart_message();
+		$markup = (string) ob_get_clean();
+
+		$this->assertStringContainsString(
+			'<div class="woocommerce-notices-wrapper wc-empty-cart-message">',
+			$markup,
+			'The empty cart message should keep its own class and gain the notices wrapper class.'
+		);
+		$this->assertStringContainsString( 'Your cart is currently empty.', $markup );
 	}
 }

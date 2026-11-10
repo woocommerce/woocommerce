@@ -238,7 +238,7 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 		$extensions = $this->sut->get_country_extensions( 'MX' );
 
 		// Assert.
-		$this->assertCount( 7, $extensions );
+		$this->assertCount( 6, $extensions );
 		$this->assertSame(
 			array(
 				PaymentsExtensionSuggestions::STRIPE,
@@ -247,7 +247,6 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 				PaymentsExtensionSuggestions::VISA,
 				PaymentsExtensionSuggestions::PAYPAL_WALLET,
 				PaymentsExtensionSuggestions::KLARNA,
-				PaymentsExtensionSuggestions::HELIOPAY,
 			),
 			array_column( $extensions, 'id' )
 		);
@@ -337,7 +336,6 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 				PaymentsExtensionSuggestions::PAYPAL_FULL_STACK,
 				PaymentsExtensionSuggestions::VISA,
 				PaymentsExtensionSuggestions::PAYPAL_WALLET,
-				PaymentsExtensionSuggestions::HELIOPAY,
 			),
 			array_column( $extensions, 'id' ),
 			"Mercado Pago should be the first suggestion in {$country_code}, with Visa demoted."
@@ -418,7 +416,6 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 				PaymentsExtensionSuggestions::PAYPAL_FULL_STACK,
 				PaymentsExtensionSuggestions::VISA,
 				PaymentsExtensionSuggestions::PAYPAL_WALLET,
-				PaymentsExtensionSuggestions::HELIOPAY,
 			),
 			array_column( $extensions, 'id' )
 		);

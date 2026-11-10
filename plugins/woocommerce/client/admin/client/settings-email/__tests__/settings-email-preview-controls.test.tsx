@@ -4,20 +4,31 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import apiFetch from '@wordpress/api-fetch';
+import { createSlotFill, SlotFillProvider } from '@wordpress/components';
+import { registerPlugin } from '@wordpress/plugins';
 
 /**
  * Internal dependencies
  */
+import { SETTINGS_SLOT_FILL_CONSTANT } from '~/settings/settings-slots';
 import { EmailPreviewHeader } from '../settings-email-preview-header';
 import { emailPreviewNonce } from '../settings-email-preview-nonce';
 import { EmailPreviewType } from '../settings-email-preview-type';
+import {
+	registerSettingsEmailPreviewFill,
+	type EmailTypes,
+} from '../settings-email-preview-slotfill';
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
+jest.mock( '@wordpress/plugins', () => ( {
+	registerPlugin: jest.fn(),
+} ) );
 jest.mock( '../settings-email-preview-nonce', () => ( {
 	emailPreviewNonce: jest.fn(),
 } ) );
 
 const apiFetchMock = apiFetch as unknown as jest.Mock;
+const registerPluginMock = registerPlugin as jest.Mock;
 const emailPreviewNonceMock = emailPreviewNonce as jest.MockedFunction<
 	typeof emailPreviewNonce
 >;
@@ -202,6 +213,79 @@ describe( 'Email preview header', () => {
 
 		await waitFor( () =>
 			expect( apiFetchMock ).toHaveBeenCalledTimes( 1 )
+		);
+	} );
+} );
+
+describe( 'Email preview fill', () => {
+	const { Slot } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
+	const previewUrl =
+		'http://example.com/wp-admin/?preview_woocommerce_mail=true';
+
+	// Mount the fill the way WC_Settings_Emails does: print the slot element
+	// with its data attributes, register the plugin, then render the plugin's
+	// element into a matching slot.
+	const renderPreviewFill = ( emailTypes: EmailTypes ) => {
+		const mount = document.createElement( 'div' );
+		mount.id = 'wc_settings_email_preview_slotfill';
+		mount.setAttribute( 'data-preview-url', previewUrl );
+		mount.setAttribute( 'data-email-types', JSON.stringify( emailTypes ) );
+		mount.setAttribute( 'data-email-setting-ids', '[]' );
+		document.body.appendChild( mount );
+
+		registerSettingsEmailPreviewFill();
+
+		expect( registerPluginMock ).toHaveBeenCalledTimes( 1 );
+		const [ , settings ] = registerPluginMock.mock.calls[ 0 ];
+
+		return render(
+			<SlotFillProvider>
+				<Slot />
+				{ settings.render() }
+			</SlotFillProvider>
+		);
+	};
+
+	beforeEach( () => {
+		apiFetchMock.mockResolvedValue( { subject: 'Preview subject' } );
+		emailPreviewNonceMock.mockReturnValue( 'preview-nonce' );
+	} );
+
+	afterEach( () => {
+		document.body.innerHTML = '';
+		registerPluginMock.mockClear();
+		apiFetchMock.mockReset();
+		emailPreviewNonceMock.mockReset();
+	} );
+
+	it( 'previews the only email type without offering the type select', async () => {
+		renderPreviewFill( [
+			{ label: 'Reset password', value: resetPasswordType },
+		] );
+
+		expect(
+			await screen.findByTitle( 'Email preview frame' )
+		).toHaveAttribute(
+			'src',
+			`${ previewUrl }&type=${ resetPasswordType }`
+		);
+		expect( screen.queryByLabelText( 'Email preview type' ) ).toBeNull();
+	} );
+
+	it( 'offers the type select when more than one email type is previewable', async () => {
+		renderPreviewFill( [
+			{ label: 'Processing order', value: processingOrderType },
+			{ label: 'Reset password', value: resetPasswordType },
+		] );
+
+		expect(
+			await screen.findByTitle( 'Email preview frame' )
+		).toHaveAttribute(
+			'src',
+			`${ previewUrl }&type=${ processingOrderType }`
+		);
+		expect( screen.getByLabelText( 'Email preview type' ) ).toHaveValue(
+			processingOrderType
 		);
 	} );
 } );

@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\Emails\OrderWithdrawalEmailPreview;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController;
+use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalEndpoint;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormProcessor;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormState;
 use Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalFormView;
@@ -25,7 +26,6 @@ use WC_Unit_Test_Case;
 class OrderWithdrawalTest extends WC_Unit_Test_Case {
 
 	private const FEATURE_OPTION                      = 'woocommerce_feature_order_withdrawal_enabled';
-	private const ENDPOINT_OPTION                     = 'woocommerce_myaccount_order_withdrawal_endpoint';
 	private const FLUSH_QUEUE_OPTION                  = 'woocommerce_queue_flush_rewrite_rules';
 	private const MISSING_OPTION_MARK                 = '__woocommerce_order_withdrawal_missing_option__';
 	private const ORDER_WITHDRAWAL_REQUESTED_META_KEY = '_order_withdrawal_requested';
@@ -128,7 +128,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$this->original_remote_addr        = $this->had_remote_addr ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : null;
 		$this->original_session            = WC()->session;
 		$this->original_feature_option     = get_option( self::FEATURE_OPTION, self::MISSING_OPTION_MARK );
-		$this->original_endpoint_option    = get_option( self::ENDPOINT_OPTION, self::MISSING_OPTION_MARK );
+		$this->original_endpoint_option    = get_option( OrderWithdrawalEndpoint::ENDPOINT_OPTION, self::MISSING_OPTION_MARK );
 		$this->original_flush_queue_option = get_option( self::FLUSH_QUEUE_OPTION, self::MISSING_OPTION_MARK );
 
 		if ( ! WC()->session ) {
@@ -140,7 +140,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$_SERVER['REMOTE_ADDR']    = '203.0.113.10';
 		$this->clear_order_withdrawal_rate_limits();
 		$this->disable_feature();
-		delete_option( self::ENDPOINT_OPTION );
+		delete_option( OrderWithdrawalEndpoint::ENDPOINT_OPTION );
 		delete_option( self::FLUSH_QUEUE_OPTION );
 		wc_clear_notices();
 	}
@@ -164,7 +164,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		}
 
 		$this->restore_option( self::FEATURE_OPTION, $this->original_feature_option );
-		$this->restore_option( self::ENDPOINT_OPTION, $this->original_endpoint_option );
+		$this->restore_option( OrderWithdrawalEndpoint::ENDPOINT_OPTION, $this->original_endpoint_option );
 		$this->restore_option( self::FLUSH_QUEUE_OPTION, $this->original_flush_queue_option );
 		wc_clear_notices();
 		$this->clear_order_withdrawal_rate_limits();
@@ -423,9 +423,9 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$second_state         = $this->sut->process_current_request();
 			$second_error_notices = wc_get_notices( 'error' );
 
-			$this->assertSame( 'review', $second_state->screen, 'Duplicate matched submissions should not leave behind a rate limit.' );
-			$this->assertCount( 1, $second_error_notices, 'The second duplicate submission should add only the duplicate-order error notice.' );
-			$this->assertStringContainsString( 'already been submitted for this order', $second_error_notices[0]['notice'], 'The released rate limit should allow duplicate-order validation to run again.' );
+			$this->assertSame( 'review', $second_state->screen, 'Duplicate matched submissions should remain on the review screen when rate limited.' );
+			$this->assertCount( 1, $second_error_notices, 'The second duplicate submission should add only the rate-limit error notice.' );
+			$this->assertStringContainsString( 'Please wait before submitting another withdrawal request.', $second_error_notices[0]['notice'], 'Duplicate matched submissions should remain rate limited.' );
 		} finally {
 			$capture['remove']();
 		}
@@ -680,8 +680,11 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 	 */
 	public function test_controller_registers_order_deletion_cleanup_hooks(): void {
 		$controller    = new OrderWithdrawalController();
+		$notification  = new OrderWithdrawalFeatureHighlightNotification();
 		$email_preview = new OrderWithdrawalEmailPreview();
-		$controller->init( $this->sut, new OrderWithdrawalFormView(), new OrderWithdrawalFeatureHighlightNotification(), $email_preview );
+		$endpoint      = new OrderWithdrawalEndpoint();
+		$notification->init( $endpoint );
+		$controller->init( $this->sut, new OrderWithdrawalFormView(), $notification, $email_preview, $endpoint );
 
 		try {
 			$controller->register();
@@ -689,10 +692,12 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 
 			$this->assertNotFalse( has_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ) );
 			$this->assertNotFalse( has_action( 'before_delete_post', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ) ) );
+			$this->assertNotFalse( has_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $notification, 'possibly_add_enabled_note' ) ) );
 			$this->assertFalse( has_filter( 'woocommerce_prepare_email_for_preview', array( $email_preview, 'prepare_email_for_preview' ) ) );
 		} finally {
 			remove_action( 'init', array( $controller, 'register_feature_hooks' ), 0 );
 			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $controller, 'maybe_flush_rewrite_rules' ), 10 );
+			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $notification, 'possibly_add_enabled_note' ), 10 );
 			remove_filter( 'woocommerce_prepare_email_for_preview', array( $email_preview, 'prepare_email_for_preview' ), 10 );
 			remove_filter( 'woocommerce_get_query_vars', array( $controller, 'add_query_var' ), 10 );
 			remove_filter( 'woocommerce_endpoint_order-withdrawal_title', array( $controller, 'get_endpoint_title' ), 10 );
@@ -748,8 +753,10 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$controller    = new OrderWithdrawalController();
 		$notification  = new OrderWithdrawalFeatureHighlightNotification();
 		$email_preview = new OrderWithdrawalEmailPreview();
+		$endpoint      = new OrderWithdrawalEndpoint();
 
-		$controller->init( $this->sut, new OrderWithdrawalFormView(), $notification, $email_preview );
+		$notification->init( $endpoint );
+		$controller->init( $this->sut, new OrderWithdrawalFormView(), $notification, $email_preview, $endpoint );
 
 		try {
 			$controller->register();
@@ -764,6 +771,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		} finally {
 			remove_action( 'init', array( $controller, 'register_feature_hooks' ), 0 );
 			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $controller, 'maybe_flush_rewrite_rules' ), 10 );
+			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $notification, 'possibly_add_enabled_note' ), 10 );
 			remove_filter( 'woocommerce_prepare_email_for_preview', array( $email_preview, 'prepare_email_for_preview' ), 10 );
 			remove_filter( 'woocommerce_get_query_vars', array( $controller, 'add_query_var' ), 10 );
 			remove_filter( 'woocommerce_endpoint_order-withdrawal_title', array( $controller, 'get_endpoint_title' ), 10 );
@@ -785,12 +793,15 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$controller    = new OrderWithdrawalController();
 		$notification  = new OrderWithdrawalFeatureHighlightNotification();
 		$email_preview = new OrderWithdrawalEmailPreview();
+		$endpoint      = new OrderWithdrawalEndpoint();
 
+		$notification->init( $endpoint );
 		$controller->init(
 			$this->sut,
 			new OrderWithdrawalFormView(),
 			$notification,
-			$email_preview
+			$email_preview,
+			$endpoint
 		);
 
 		try {
@@ -808,6 +819,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		} finally {
 			remove_action( 'init', array( $controller, 'register_feature_hooks' ), 0 );
 			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $controller, 'maybe_flush_rewrite_rules' ), 10 );
+			remove_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $notification, 'possibly_add_enabled_note' ), 10 );
 			remove_action( 'update_option_woocommerce_coming_soon', array( $notification, 'maybe_add_note_when_store_goes_live' ), 10 );
 			remove_action( 'wc_admin_daily', array( $notification, 'possibly_add_note' ), 10 );
 			remove_action( 'woocommerce_before_delete_order', array( $this->sut, 'delete_order_withdrawal_inbox_note_for_order' ), 10 );
@@ -835,7 +847,7 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$this->assertSame( 'review', $state->screen, 'Email failures should keep the submitted details on the review screen.' );
 			$this->assertCount( 2, $capture['captures'], 'The processor should attempt both notification emails before surfacing the failure.' );
 			$this->assertNotEmpty( $error_notices, 'Email failures should add an error notice.' );
-			$this->assertStringContainsString( 'We could not submit your withdrawal request.', $error_notices[0]['notice'], 'The error notice should tell the user the submission did not complete.' );
+			$this->assertStringContainsString( 'We could not submit your withdrawal request. Please try again in 30 seconds or contact us if the problem continues.', $error_notices[0]['notice'], 'The error notice should tell the user when they can retry the submission.' );
 			$this->assertFalse( $this->order_has_note_containing( $order, 'Order withdrawal requested' ), 'Email failures should not add a retryable request to the order notes.' );
 
 			$updated_order = wc_get_order( $order->get_id() );
@@ -857,10 +869,10 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 			$second_state         = $this->sut->process_current_request();
 			$second_error_notices = wc_get_notices( 'error' );
 
-			$this->assertSame( 'review', $second_state->screen, 'Email failures should not leave behind a rate limit.' );
-			$this->assertCount( 4, $capture['captures'], 'The second failed submission should attempt notification emails again.' );
-			$this->assertNotEmpty( $second_error_notices, 'The second email failure should add an error notice.' );
-			$this->assertStringContainsString( 'We could not submit your withdrawal request.', $second_error_notices[0]['notice'], 'The released rate limit should allow email delivery to be attempted again.' );
+			$this->assertSame( 'review', $second_state->screen, 'Rate-limited submissions should remain on the review screen.' );
+			$this->assertCount( 2, $capture['captures'], 'The rate limit should prevent another email delivery attempt.' );
+			$this->assertNotEmpty( $second_error_notices, 'The rate-limited submission should add an error notice.' );
+			$this->assertStringContainsString( 'Please wait before submitting another withdrawal request.', $second_error_notices[0]['notice'], 'The rate limit should prevent an immediate retry.' );
 		} finally {
 			$capture['remove']();
 		}

@@ -12,7 +12,10 @@ namespace Automattic\Woocommerce_Analytics;
 
 use Automattic\Jetpack\Device_Detection;
 use Automattic\Jetpack\Device_Detection\User_Agent_Info;
+use Automattic\Woocommerce_Analytics;
 use WP_Error;
+use function Automattic\TracksSharedUtils\sanitize_url;
+use function Automattic\TracksSharedUtils\url_props;
 
 /**
  * WooCommerce Analytics Tracking class
@@ -459,17 +462,18 @@ class WC_Analytics_Tracking {
 		$blog_details = self::get_blog_details();
 
 		return array(
-			'ui'             => $blog_user_id,
-			'blog_id'        => $blog_details['blog_id'] ?? null,
-			'store_id'       => $blog_details['store_id'] ?? null,
-			'url'            => $blog_details['url'] ?? null,
-			'woo_version'    => $blog_details['wc_version'] ?? null,
-			'wp_version'     => get_bloginfo( 'version' ),
-			'store_admin'    => count( array_intersect( array( 'administrator', 'shop_manager' ), wp_get_current_user()->roles ) ) > 0 ? 1 : 0,
-			'device'         => self::get_device_type(),
-			'store_currency' => $blog_details['store_currency'] ?? null,
-			'timezone'       => wp_timezone_string(),
-			'is_guest'       => ( $blog_user_id === null || $blog_user_id === 0 ) ? 1 : 0,
+			'ui'              => $blog_user_id,
+			'blog_id'         => $blog_details['blog_id'] ?? null,
+			'store_id'        => $blog_details['store_id'] ?? null,
+			'url'             => $blog_details['url'] ?? null,
+			'woo_version'     => $blog_details['wc_version'] ?? null,
+			'wp_version'      => get_bloginfo( 'version' ),
+			'store_admin'     => count( array_intersect( array( 'administrator', 'shop_manager' ), wp_get_current_user()->roles ) ) > 0 ? 1 : 0,
+			'device'          => self::get_device_type(),
+			'store_currency'  => $blog_details['store_currency'] ?? null,
+			'timezone'        => wp_timezone_string(),
+			'is_guest'        => ( $blog_user_id === null || $blog_user_id === 0 ) ? 1 : 0,
+			'package_version' => Woocommerce_Analytics::PACKAGE_VERSION,
 		);
 	}
 
@@ -530,7 +534,7 @@ class WC_Analytics_Tracking {
 		$all_properties = array_merge( $properties, $required_properties );
 
 		foreach ( $all_properties as $key => $value ) {
-			$all_properties[ $key ] = self::flatten_property_value( $value );
+			$all_properties[ $key ] = Pixel_Builder::flatten_property_value( $value );
 		}
 
 		return $all_properties;
@@ -607,13 +611,21 @@ class WC_Analytics_Tracking {
 			$event_properties = array_slice( $event_properties, 0, self::MAX_CLIENT_PROPERTIES_PER_EVENT, true );
 		}
 
-		$values = array();
-		$costs  = array();
+		$values         = array();
+		$costs          = array();
+		$url_properties = array_fill_keys( url_props(), true );
 
 		foreach ( $event_properties as $key => $value ) {
 			// Dropped, not truncated: two long names could truncate to the same key.
 			if ( ! self::is_valid_client_name( $key ) || ! Pixel_Builder::prop_name_is_valid( $key ) ) {
 				continue;
+			}
+
+			if ( isset( $url_properties[ $key ] ) ) {
+				if ( ! is_string( $value ) ) {
+					continue;
+				}
+				$value = sanitize_url( $value );
 			}
 
 			// Arrays are flattened later by get_properties(); bound their members too.
@@ -680,44 +692,18 @@ class WC_Analytics_Tracking {
 	}
 
 	/**
-	 * Reduce one property value to the string that goes into the pixel URL.
-	 *
-	 * The payload budget uses this same conversion to measure array values accurately.
-	 *
-	 * @since 0.18.0
-	 *
-	 * @param mixed $value Property value.
-	 * @return mixed The scalar it serializes to; non-array values are returned as-is.
-	 */
-	private static function flatten_property_value( $value ) {
-		if ( ! is_array( $value ) ) {
-			return $value;
-		}
-
-		if ( empty( $value ) ) {
-			return '';
-		}
-
-		if ( array_keys( $value ) === range( 0, count( $value ) - 1 ) ) {
-			return rawurlencode( implode( ',', $value ) );
-		}
-
-		return wp_json_encode( $value, JSON_UNESCAPED_SLASHES );
-	}
-
-	/**
 	 * Bytes one value contributes to the pixel URL.
 	 *
 	 * @since 0.18.0
 	 *
 	 * @param mixed $value Already-capped client value.
-	 * @return int Byte count after `flatten_property_value()` and the encoding
+	 * @return int Byte count after `Pixel_Builder::flatten_property_value()` and the encoding
 	 *             `http_build_query()` applies on top of it.
 	 */
 	private static function measure_client_value( $value ) {
 		// Match http_build_query()'s RFC1738 encoding.
 		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.urlencode_urlencode -- Deliberate: mirrors http_build_query()'s RFC1738 encoding so the budget measures the bytes the finished URL carries.
-		return strlen( urlencode( (string) self::flatten_property_value( $value ) ) );
+		return strlen( urlencode( (string) Pixel_Builder::flatten_property_value( $value ) ) );
 	}
 
 	/**
@@ -891,17 +877,17 @@ class WC_Analytics_Tracking {
 			'_via_ua' => isset( $_SERVER['HTTP_USER_AGENT'] ) ? $clean( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			'_via_ip' => self::get_user_ip_address(),
 			'_lg'     => isset( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ? substr( sanitize_text_field( wp_unslash( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ), 0, 5 ) : '',
-			'_dr'     => isset( $_SERVER['HTTP_REFERER'] ) ? $clean( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : '', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			'_dr'     => isset( $_SERVER['HTTP_REFERER'] ) && is_string( $_SERVER['HTTP_REFERER'] ) ? sanitize_url( sanitize_text_field( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) ) : '', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		);
 
 		// Build the document location URL.
-		$uri         = isset( $_SERVER['REQUEST_URI'] ) ? $clean( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$host        = isset( $_SERVER['HTTP_HOST'] ) ? $clean( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$data['_dl'] = isset( $_SERVER['REQUEST_SCHEME'] ) ? $clean( wp_unslash( $_SERVER['REQUEST_SCHEME'] ) ) . '://' . $host . $uri : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$uri         = isset( $_SERVER['REQUEST_URI'] ) && is_string( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$host        = isset( $_SERVER['HTTP_HOST'] ) && is_string( $_SERVER['HTTP_HOST'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$data['_dl'] = isset( $_SERVER['REQUEST_SCHEME'] ) && is_string( $_SERVER['REQUEST_SCHEME'] ) ? sanitize_url( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_SCHEME'] ) ) . '://' . $host . $uri ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		// Add _via_ref (referrer) for backward compatibility.
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$data['_via_ref'] = isset( $_SERVER['HTTP_REFERER'] ) ? $clean( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : '';
+		$data['_via_ref'] = isset( $_SERVER['HTTP_REFERER'] ) && is_string( $_SERVER['HTTP_REFERER'] ) ? sanitize_url( sanitize_text_field( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) ) : '';
 
 		// Headers are caller-supplied, and the referer lands here twice. Uncapped, one
 		// long Referer pushes the finished URL past MAX_PIXEL_URL_LENGTH and costs the

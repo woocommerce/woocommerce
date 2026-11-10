@@ -106,9 +106,8 @@ const ConvertTemplate = ( { blockifyConfig, clientId, attributes } ) => {
 								{
 									label: __( 'Undo', 'woocommerce' ),
 									onClick: () => {
-										const clientIds = pickBlockClientIds(
-											getBlocks()
-										);
+										const clientIds =
+											pickBlockClientIds( getBlocks() );
 
 										void replaceBlocks(
 											clientIds,

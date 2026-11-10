@@ -19,6 +19,9 @@ test.describe( `${ blockData.slug } Block`, () => {
 		const blockLocator = await editor.getBlockByName( blockData.slug );
 		await blockLocator.getByText( 'Music' ).click();
 		await blockLocator.getByText( 'Done' ).click();
+		// The inner blocks are added after the category loads. Publishing
+		// before that saves the block without its title and button.
+		await expect( blockLocator.getByText( 'Shop now' ) ).toBeVisible();
 		await editor.publishAndVisitPost();
 		const blockLocatorFrontend = await frontendUtils.getBlockByName(
 			blockData.slug
@@ -32,71 +35,34 @@ test.describe( `${ blockData.slug } Block`, () => {
 
 	test( 'image can be edited', async ( { editor, admin, requestUtils } ) => {
 		let editedMediaId: number | undefined;
-		let productId: string | undefined;
-		let categoryId: string | undefined;
-		let originalCategoryIds: string[] | undefined;
 		const media = await requestUtils.uploadMedia(
 			path.resolve( __dirname, '../../../test-data/images/image-01.png' )
 		);
 
 		try {
-			await test.step( 'Create a product category with an image', async () => {
-				const productCliOutput = await wpCLI(
-					`post list --post_type=product --title=Cap --field=ID`
+			const cliOutput = await wpCLI(
+				'term list product_cat --slug=music --field=term_id'
+			);
+			const categoryId = Number(
+				cliOutput.stdout.match( /^[1-9]\d*$/m )?.[ 0 ]
+			);
+			if ( ! categoryId ) {
+				throw new Error(
+					`Failed to find the Music category: ${ cliOutput.stdout }`
 				);
-				productId = productCliOutput.stdout.match( /^\d+$/m )?.[ 0 ];
-				if ( ! productId ) {
-					throw new Error(
-						`Failed to find Cap product: ${ productCliOutput.stdout }`
-					);
-				}
+			}
 
-				// `wc product update --categories` replaces the list rather than
-				// appending to it, so Cap's own categories have to come back below.
-				//
-				// npm writes its own banner to stdout ahead of the command output,
-				// and a product with no categories prints nothing at all, so the
-				// value goes inside a marker that can be matched on its own line.
-				// The banner echoes the command back, marker text included, but
-				// always behind a "> " prefix, which the anchor excludes.
-				const categoriesCliOutput = await wpCLI(
-					`eval 'echo "CATEGORY_IDS[" . implode( ",", wp_get_post_terms( ${ productId }, "product_cat", array( "fields" => "ids" ) ) ) . "]";'`
-				);
-				const capturedCategoryIds = categoriesCliOutput.stdout.match(
-					/^CATEGORY_IDS\[([\d,]*)\]$/m
-				);
-				if ( ! capturedCategoryIds ) {
-					throw new Error(
-						`Failed to read Cap's product categories: ${ categoriesCliOutput.stdout }`
-					);
-				}
-				originalCategoryIds = capturedCategoryIds[ 1 ]
-					.split( ',' )
-					.filter( Boolean );
-
-				// --porcelain prints only the new term id. Match it on its own line,
-				// like productId above: without that, the last number anywhere in
-				// stdout wins, and this id is force-deleted in the finally below.
-				const categoryCliOutput = await wpCLI(
-					`wc product_cat create --name="Test Category" --slug="test-category" --image='{ "id": ${ media.id } }' --porcelain --user=1`
-				);
-				categoryId =
-					categoryCliOutput.stdout.match( /^[1-9]\d*$/m )?.[ 0 ];
-				if ( ! categoryId ) {
-					throw new Error(
-						`Failed to read the created category id: ${ categoryCliOutput.stdout }`
-					);
-				}
-				await wpCLI(
-					`wc product update ${ productId } --categories='[ { "id": ${ categoryId } } ]' --user=1`
-				);
-			} );
-
+			// The block's own image overrides the category image, so the test
+			// does not change any category that other specs read.
 			await admin.createNewPost();
-			await editor.insertBlock( { name: blockData.slug } );
-			const blockLocator = await editor.getBlockByName( blockData.slug );
-			await blockLocator.getByText( 'Test Category' ).click();
-			await blockLocator.getByText( 'Done' ).click();
+			await editor.insertBlock( {
+				name: blockData.slug,
+				attributes: {
+					categoryId,
+					mediaId: media.id,
+					mediaSrc: media.source_url,
+				},
+			} );
 			await editor.clickBlockToolbarButton( 'Edit category image' );
 			await editor.clickBlockToolbarButton( 'Rotate' );
 			const editImageResponse = editor.page.waitForResponse(
@@ -119,36 +85,15 @@ test.describe( `${ blockData.slug } Block`, () => {
 			}
 			editedMediaId = editedMedia.id;
 			await expect(
-				editor.canvas.locator(
-					'img[alt="Test Category"][src*="-edited"]'
-				)
+				editor.canvas.locator( 'img[alt="Music"][src*="-edited"]' )
 			).toBeVisible();
 		} finally {
 			try {
-				if ( productId && originalCategoryIds ) {
-					const categories = originalCategoryIds
-						.map( ( id ) => `{ "id": ${ id } }` )
-						.join( ', ' );
-					await wpCLI(
-						`wc product update ${ productId } --categories='[ ${ categories } ]' --user=1`
-					);
+				if ( editedMediaId !== undefined ) {
+					await requestUtils.deleteMedia( editedMediaId );
 				}
 			} finally {
-				try {
-					if ( categoryId ) {
-						await wpCLI(
-							`wc product_cat delete ${ categoryId } --force=true --user=1`
-						);
-					}
-				} finally {
-					try {
-						if ( editedMediaId !== undefined ) {
-							await requestUtils.deleteMedia( editedMediaId );
-						}
-					} finally {
-						await requestUtils.deleteMedia( media.id );
-					}
-				}
+				await requestUtils.deleteMedia( media.id );
 			}
 		}
 	} );

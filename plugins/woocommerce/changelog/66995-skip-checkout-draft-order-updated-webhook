@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop sending "Order updated" webhooks for draft orders created during checkout, so they no longer arrive before "Order created".

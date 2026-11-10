@@ -26,6 +26,17 @@
 		"html": false,
 		"align": [ "wide", "full" ],
 		"anchor": true,
+		"spacing": {
+			"padding": true,
+			"margin": true
+		},
+		"__experimentalBorder": {
+			"color": true,
+			"style": true,
+			"width": true,
+			"radius": true
+		},
+		"shadow": true,
 		"color": {
 			"gradients": true,
 			"link": true,

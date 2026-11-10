@@ -128,6 +128,40 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test a border color slug the palette defines is rendered.
+	 */
+	public function testItRendersResolvableBorderColorSlug(): void {
+		$parsed_table                             = $this->parsed_table;
+		$parsed_table['innerHTML']                = $this->simple_table_content;
+		$parsed_table['attrs']['borderColor']     = 'vivid-purple';
+		$parsed_table['attrs']['style']['border'] = array( 'width' => '2px' );
+
+		$rendered = $this->table_renderer->render( $this->simple_table_content, $parsed_table, $this->rendering_context );
+		$this->assertStringContainsString( 'solid #9b51e0', $rendered );
+	}
+
+	/**
+	 * Test a border color slug the palette cannot resolve falls back to the table's own color.
+	 *
+	 * Two things are pinned. The slug must not reach the markup: sanitize_color() accepts a bare
+	 * identifier through its permissive named-color branch. And the border must not be black:
+	 * sanitize_color() turns the empty string the slug resolves to into `#000000`, which is why
+	 * get_custom_border_color() reports no color rather than sanitizing.
+	 */
+	public function testItFallsBackToTableColorForUnresolvableBorderColorSlug(): void {
+		$parsed_table                             = $this->parsed_table;
+		$parsed_table['innerHTML']                = $this->simple_table_content;
+		$parsed_table['email_attrs']['color']     = '#abcdef';
+		$parsed_table['attrs']['borderColor']     = 'theme-4';
+		$parsed_table['attrs']['style']['border'] = array( 'width' => '2px' );
+
+		$rendered = $this->table_renderer->render( $this->simple_table_content, $parsed_table, $this->rendering_context );
+		$this->assertStringContainsString( 'solid #abcdef', $rendered );
+		$this->assertStringNotContainsString( 'theme-4', $rendered );
+		$this->assertStringNotContainsString( 'solid #000000', $rendered );
+	}
+
+	/**
 	 * Test it uses RTL default wrapper and cell alignment when alignment is absent.
 	 */
 	public function testItRendersTableWithRtlDefaultAlignment(): void {
@@ -248,7 +282,7 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 		$rendered = $this->table_renderer->render( $table_with_caption, $parsed_table, $this->rendering_context );
 
 		// Check that the caption content is preserved with proper styling outside the table.
-		$this->assertStringContainsString( '<div style="text-align: center; margin-top: 8px;', $rendered );
+		$this->assertStringContainsString( '<div class="wp-element-caption" style="text-align: center; margin-top: 8px;', $rendered );
 		$this->assertStringContainsString( '>Table caption text</div>', $rendered );
 		// Check that the caption is not inside the table element.
 		$this->assertStringNotContainsString( '<caption', $rendered );
@@ -554,7 +588,7 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 		$rendered = $this->table_renderer->render( $table_with_caption, $parsed_table, $this->rendering_context );
 
 		// Check that the caption appears outside the table as a div.
-		$this->assertStringContainsString( '<div style="text-align: center; margin-top: 8px;', $rendered );
+		$this->assertStringContainsString( '<div class="wp-element-caption" style="text-align: center; margin-top: 8px;', $rendered );
 		$this->assertStringContainsString( '>Table caption text</div>', $rendered );
 		// Check that the caption is not inside the table element.
 		$this->assertStringNotContainsString( '<caption', $rendered );

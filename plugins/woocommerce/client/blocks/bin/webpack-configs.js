@@ -63,7 +63,7 @@ const getSharedPlugins = ( {
 					exclude: /[\/\\](node_modules|build|docs|vendor)[\/\\]/,
 					cwd: process.cwd(),
 					failOnError: 'warn',
-			  } )
+				} )
 			: false,
 		// The WP_BUNDLE_ANALYZER global variable enables a utility that represents bundle
 		// content as a convenient interactive zoomable treemap.
@@ -193,9 +193,7 @@ const getMainConfig = ( options = {} ) => {
 							presets: [ '@wordpress/babel-preset-default' ],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
 									: false,
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -256,8 +254,9 @@ const getMainConfig = ( options = {} ) => {
 							if (
 								metadata.parent &&
 								! genericBlocks[ blockName ]
-							)
+							) {
 								return `./inner-blocks/${ blockName }/block.json`;
+							}
 							return `./${ blockName }/block.json`;
 						},
 					},
@@ -321,9 +320,7 @@ const getFrontConfig = ( options = {} ) => {
 							],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
 									: false,
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -413,9 +410,7 @@ const getPaymentsConfig = ( options = {} ) => {
 							],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
 									: false,
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -494,9 +489,7 @@ const getExtensionsConfig = ( options = {} ) => {
 							],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
 									: false,
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -575,9 +568,7 @@ const getSiteEditorConfig = ( options = {} ) => {
 							],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
 									: false,
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -696,9 +687,7 @@ const getStylingConfig = ( options = {} ) => {
 							presets: [ '@wordpress/babel-preset-default' ],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
 									: false,
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -830,9 +819,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 							],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
 									: false,
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -862,7 +849,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 					},
 					base: {
 						// A refined include blocks and settings that are shared between cart and checkout that produces the smallest possible bundle.
-						test: /assets[\\/]js[\\/](settings|previews|base|utils|blocks[\\/]cart-checkout-shared|icons)|packages[\\/]public-api[\\/](block-data|blocks-checkout|blocks-components|settings)[\\/]|atomic[\\/]utils/,
+						test: /assets[\\/]js[\\/](settings|previews|base|utils|blocks[\\/]cart-checkout-shared|icons)|packages[\\/]public-api[\\/](block-data|blocks-checkout|blocks-components|settings)[\\/]/,
 						name: 'wc-cart-checkout-base',
 						chunks: 'all',
 						enforce: true,

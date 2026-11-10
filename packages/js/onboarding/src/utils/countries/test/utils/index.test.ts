@@ -1,6 +1,3 @@
-/* eslint-disable camelcase */
-/* eslint-disable no-undef */
-
 /**
  * Internal dependencies
  */

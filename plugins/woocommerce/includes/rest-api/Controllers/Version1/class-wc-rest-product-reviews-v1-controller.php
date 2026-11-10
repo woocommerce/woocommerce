@@ -298,13 +298,29 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		 * @param WP_REST_Request $request          Request used to insert the comment.
 		 */
 		$prepared_review = apply_filters( 'rest_pre_insert_product_review', $prepared_review, $request );
+		if ( is_wp_error( $prepared_review ) ) {
+			return $prepared_review;
+		}
 
-		$product_review_id = wp_insert_comment( $prepared_review );
+		$prepared_review = wp_parse_args(
+			(array) $prepared_review,
+			array(
+				'comment_content'      => '',
+				'comment_author'       => '',
+				'comment_author_email' => '',
+				'comment_author_url'   => '',
+				'comment_author_IP'    => '',
+				'comment_agent'        => '',
+			)
+		);
+
+		$product_review_id = wp_insert_comment( wp_filter_comment( wp_slash( $prepared_review ) ) );
 		if ( ! $product_review_id ) {
 			return new WP_Error( 'rest_product_review_failed_create', __( 'Creating product review failed.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
-		update_comment_meta( $product_review_id, 'rating', ( ! empty( $request['rating'] ) ? $request['rating'] : '0' ) );
+		update_comment_meta( $product_review_id, 'rating', ! empty( $request['rating'] ) ? $request['rating'] : '0' );
+		wc_review_is_from_verified_owner( $product_review_id );
 
 		$product_review = get_comment( $product_review_id );
 
@@ -383,8 +399,9 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		/*
 		 * Zero means no comment-table row changed; false is the actual update failure. A rating-only
 		 * request legitimately returns zero while still storing comment_meta and refreshing counts.
+		 * wp_update_comment() expects slashed data, like wp_insert_comment() in create_item().
 		 */
-		$updated = wp_update_comment( $prepared_review );
+		$updated = wp_update_comment( wp_slash( $prepared_review ) );
 		if ( false === $updated ) {
 			return new WP_Error( 'rest_product_review_failed_edit', __( 'Updating product review failed.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
