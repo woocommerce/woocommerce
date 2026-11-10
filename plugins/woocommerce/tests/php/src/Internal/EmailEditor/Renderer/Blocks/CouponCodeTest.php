@@ -88,9 +88,14 @@ class CouponCodeTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Renders no coupon when a filter returns something other than a code.
+	 * @testWith [["not", "a", "code"]]
+	 *           [0]
+	 *           ["0"]
+	 *
+	 * @param mixed $code Value the filter returns.
 	 */
-	public function test_non_scalar_code_renders_no_coupon(): void {
-		$this->generate_code( array( 'not', 'a', 'code' ) );
+	public function test_non_code_value_renders_no_coupon( $code ): void {
+		$this->generate_code( $code );
 
 		$this->assertStringNotContainsString( 'class="coupon"', $this->render( array() ) );
 	}

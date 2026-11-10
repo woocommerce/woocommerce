@@ -59,7 +59,8 @@ class Coupon_Code extends Abstract_Block_Renderer {
 			);
 
 			$coupon_code = is_scalar( $coupon_code ) ? (string) $coupon_code : '';
-			if ( '' === $coupon_code ) {
+			// "0" means no code, as in Coupon_Code_Generator::generate_coupon().
+			if ( '' === $coupon_code || '0' === $coupon_code ) {
 				return '';
 			}
 
