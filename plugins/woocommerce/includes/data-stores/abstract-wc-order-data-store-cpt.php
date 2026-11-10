@@ -1140,7 +1140,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				foreach ( $existing_meta_data[ $meta_key ] as $meta_value ) {
 					$unserialized_value = maybe_unserialize( $meta_value );
 					if ( is_object( $unserialized_value ) && '__PHP_Incomplete_Class' === get_class( $unserialized_value ) ) {
-						// WordPress can't slash an incomplete object, so delete the raw row directly.
+						// WordPress can't slash an incomplete object, so delete the raw row directly (the delete_post_meta hooks are intentionally skipped).
 						$wpdb->delete(
 							_get_meta_table( 'post' ),
 							array(
