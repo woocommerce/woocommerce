@@ -11,7 +11,8 @@
 #
 # Install mirrors the "backend" path of setup-woocommerce-monorepo; cells,
 # versions and commands come from `pnpm utils ci-jobs`, as in CI. Cells start
-# without `--update` so they stay warm; `--fresh` starts them as CI does.
+# without `--update` so they stay warm, unless their WordPress is not the
+# version the cell needs; `--fresh` starts them as CI does.
 # One invocation at a time.
 
 set -euo pipefail
@@ -230,6 +231,21 @@ cell_env() {
 	[[ -n "$1" ]] && printf '%s\n' "${1//;/$'\n'}"
 }
 
+# The WordPress version a cell must test. The planner gives "latest" cells a fixed latest.zip URL,
+# so a warm instance keeps the release it first downloaded; ask the API what latest is today.
+wanted_wp_version() {
+	local version
+	version="$(cell_env "$1" | sed -n 's/^WP_VERSION=//p')"
+	[[ "$version" == latest ]] || { printf '%s' "$version"; return; }
+	curl -fsS https://api.wordpress.org/core/version-check/1.7/ | node -e '
+		let s = ""; process.stdin.on( "data", ( c ) => ( s += c ) ).on( "end", () => process.stdout.write( JSON.parse( s ).offers[ 0 ].current ) );
+	'
+}
+
+installed_wp_version() {
+	WC_TEST_ENV_CONFIG="$1" pnpm --filter="$project" --silent wp-env:test run cli wp core version 2>/dev/null | tr -d '\r' | tail -n 1
+}
+
 # Start each distinct instance once. WP_ENV_PORT would override every cell's port.
 unset WP_ENV_PORT WP_ENV_MYSQL_PORT
 started=()
@@ -252,6 +268,17 @@ for index in "${selected[@]}"; do
 		CI=true WC_TEST_ENV_CONFIG="$config" run env ${envs[@]+"${envs[@]}"} pnpm --filter="$project" $(field "$row" 4)
 	else
 		CI=true WC_TEST_ENV_CONFIG="$config" run env ${envs[@]+"${envs[@]}"} pnpm --filter="$project" wp-env:test start
+	fi
+	want="$(wanted_wp_version "$(field "$row" 7)")" || { echo "error: could not resolve the WordPress version for $slug" >&2; exit 1; }
+	have="$(installed_wp_version "$config")"
+	if [[ -n "$want" && "$have" != "$want" ]]; then
+		echo "instance $slug has WordPress ${have:-unknown}, the cell needs $want; updating" >&2
+		CI=true WC_TEST_ENV_CONFIG="$config" run env ${envs[@]+"${envs[@]}"} pnpm --filter="$project" wp-env:test start --update
+		have="$(installed_wp_version "$config")"
+		if [[ "$have" != "$want" ]]; then
+			echo "error: instance $slug still has WordPress ${have:-unknown} after --update, not $want" >&2
+			exit 1
+		fi
 	fi
 	echo "instance $slug ready in $(( $(date +%s) - start_at ))s (port $(field "$row" 5))" >&2
 done
