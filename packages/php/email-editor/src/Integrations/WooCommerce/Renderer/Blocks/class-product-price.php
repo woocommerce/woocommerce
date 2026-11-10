@@ -123,7 +123,7 @@ class Product_Price extends Abstract_Product_Block_Renderer {
 		if ( $product->is_on_sale() && '' !== $sale_price ) {
 			return $this->format_sale_price( (float) $regular_price, (float) $sale_price );
 		}
-		return $this->format_price_range( (float) $regular_price, (float) $regular_price );
+		return $this->format_price( (float) $regular_price );
 	}
 
 	/**
@@ -160,7 +160,7 @@ class Product_Price extends Abstract_Product_Block_Renderer {
 		$prices = array();
 		foreach ( $product->get_children() as $child_id ) {
 			$child = wc_get_product( $child_id );
-			if ( $child && $child->get_price() !== '' ) {
+			if ( $child && $child->is_visible() && $child->get_price() !== '' ) {
 				$prices[] = wc_get_price_to_display( $child, array( 'price' => (float) $child->get_price() ) );
 			}
 		}
@@ -188,6 +188,16 @@ class Product_Price extends Abstract_Product_Block_Renderer {
 	}
 
 	/**
+	 * Format a single price.
+	 *
+	 * @param float $price Price.
+	 * @return string
+	 */
+	private function format_price( float $price ): string {
+		return sprintf( '<span>%s</span>', wc_price( $price, array( 'in_span' => false ) ) );
+	}
+
+	/**
 	 * Format a price range, or a single price when both ends are equal, as the shop does.
 	 *
 	 * @param float $min_price Lowest price.
@@ -196,7 +206,7 @@ class Product_Price extends Abstract_Product_Block_Renderer {
 	 */
 	private function format_price_range( float $min_price, float $max_price ): string {
 		if ( $min_price === $max_price ) {
-			return sprintf( '<span>%s</span>', wc_price( $min_price, array( 'in_span' => false ) ) );
+			return $this->format_price( $min_price );
 		}
 
 		return sprintf(

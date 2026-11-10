@@ -161,6 +161,25 @@ class ProductPriceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Leaves items that are not published out of a grouped product's price range.
+	 */
+	public function test_grouped_product_ignores_unpublished_items(): void {
+		$draft   = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => 1,
+				'price'         => 1,
+				'status'        => 'draft',
+			)
+		);
+		$grouped = new \WC_Product_Grouped();
+		$grouped->set_children( array( $draft->get_id(), WC_Helper_Product::create_simple_product()->get_id() ) );
+		$grouped->save();
+
+		$this->assertSame( '$10.00', $this->text( $this->render( $grouped->get_id() ) ) );
+	}
+
+	/**
 	 * Renders the block for a product.
 	 *
 	 * @param int $product_id Product ID in the block context.

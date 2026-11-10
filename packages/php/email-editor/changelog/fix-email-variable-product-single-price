@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Show product prices in block emails as the shop does: one price for equal grouped items, sale prices for variable products, none when unpriced.
+Show the right prices in block emails for grouped products, variable products on sale, and unpriced products.
