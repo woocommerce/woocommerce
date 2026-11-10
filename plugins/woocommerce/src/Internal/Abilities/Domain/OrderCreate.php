@@ -289,6 +289,7 @@ class OrderCreate extends ActionableAbility {
 					),
 				),
 			),
+			'required'             => array( 'line_items' ),
 			'additionalProperties' => false,
 		);
 	}

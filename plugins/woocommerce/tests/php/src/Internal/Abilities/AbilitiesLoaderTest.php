@@ -1097,7 +1097,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			),
 			'order-create'             => array(
 				'woocommerce/order-create',
-				array( 'customer_note' => 'Denied' ),
+				array( 'line_items' => array( array( 'product_id' => 1 ) ) ),
 			),
 			'order-update'             => array(
 				'woocommerce/order-update',

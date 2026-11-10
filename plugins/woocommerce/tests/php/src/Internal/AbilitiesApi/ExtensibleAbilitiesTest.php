@@ -4529,6 +4529,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			'woocommerce/order-create',
 			array(
 				'shipping'   => array( 'city' => 'Closed' ),
+				'line_items' => array( array( 'product_id' => $product->get_id() ) ),
 				'extensions' => array( 'test-ext' => array( 'priority' => 'low' ) ),
 			)
 		);

@@ -231,7 +231,8 @@ class OrderCreateTest extends WC_Unit_Test_Case {
 	 */
 	public function test_rolls_back_the_order_when_the_status_change_fails(): void {
 		$this->set_feature( false );
-		$before = $this->get_order_ids();
+		$before  = $this->get_order_ids();
+		$product = WC_Helper_Product::create_simple_product();
 		add_action(
 			'woocommerce_before_order_object_save',
 			static function ( \WC_Order $order ): void {
@@ -243,8 +244,8 @@ class OrderCreateTest extends WC_Unit_Test_Case {
 
 		$error = $this->execute_error(
 			array(
-				'status'        => OrderStatus::PROCESSING,
-				'customer_note' => 'Phone order.',
+				'status'     => OrderStatus::PROCESSING,
+				'line_items' => array( array( 'product_id' => $product->get_id() ) ),
 			)
 		);
 
@@ -253,18 +254,19 @@ class OrderCreateTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should refuse a shipping line without a method title and a line item without a product.
+	 * @testdox Should refuse an input without a line item, a shipping line without a method title, and a line item without a product.
 	 *
-	 * @testWith ["shipping_lines", {"total": "3"}]
-	 *           ["line_items", {"quantity": 2}]
+	 * @testWith [{}]
+	 *           [{"customer_note": "Call back."}]
+	 *           [{"line_items": [{"product_id": 1}], "shipping_lines": [{"total": "3"}]}]
+	 *           [{"line_items": [{"quantity": 2}]}]
 	 *
-	 * @param string $field Input field.
-	 * @param array  $line  Line sent in the field.
+	 * @param array $input Ability input.
 	 */
-	public function test_schema_requires_line_targets( string $field, array $line ): void {
+	public function test_schema_refuses_missing_lines( array $input ): void {
 		$schema = wp_get_ability( OrderCreate::ABILITY_NAME )->get_input_schema();
 
-		$this->assertWPError( rest_validate_value_from_schema( array( $field => array( $line ) ), $schema, 'input' ) );
+		$this->assertWPError( rest_validate_value_from_schema( $input, $schema, 'input' ) );
 	}
 
 	/**
