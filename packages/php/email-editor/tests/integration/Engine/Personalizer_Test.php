@@ -880,6 +880,12 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 		);
 		$this->assertSame( '"abc', end( $received ) );
 
+		// An unclosed quote must not swallow a second tag in the same link.
+		$this->assertSame(
+			'<a href="https://example.com/?c=spring&#038;d=spring">Link</a>',
+			$this->personalizer->personalize_content( '<a href="https://example.com/?c=[test/campaign note=&quot;abc]&amp;d=[test/campaign note=&quot;x&quot;]">Link</a>' )
+		);
+
 		// A tag used as the whole URL drops the protocol the editor forces in front of it.
 		$this->tags_registry->register(
 			new Personalization_Tag(

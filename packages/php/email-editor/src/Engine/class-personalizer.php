@@ -27,13 +27,14 @@ class Personalizer {
 
 	/**
 	 * Regex pattern for the optional arguments part of a tag token inside a link, e.g. ` default="a [2026]"`.
-	 * A value quoted right after "=" is consumed whole, so a "]" inside it does not end the token, while an
-	 * apostrophe inside an unquoted value (O'Brien) is a plain character. The possessive quantifier stops
+	 * A value quoted right after "=" and closed before a space or "]" is consumed whole, so a "]" inside it
+	 * does not end the token, while an apostrophe inside an unquoted value (O'Brien) and a quote that is
+	 * never closed are plain characters. The possessive quantifier stops
 	 * backtracking, which keeps the scan linear.
 	 *
 	 * @internal Shared with the Renderer, which protects tag tokens in the plain-text version; not a public API.
 	 */
-	public const TAG_ARGUMENTS_PATTERN = '(?:\s(?:=(?:"[^"]*"|\'[^\']*\')|[^\]])*+)?';
+	public const TAG_ARGUMENTS_PATTERN = '(?:\s(?:=(?:"[^"]*"(?=[\s\]])|\'[^\']*\'(?=[\s\]]))|[^\]])*+)?';
 
 	/**
 	 * Rendering context for HTML content. Tag values are rendered into HTML markup.
