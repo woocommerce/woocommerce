@@ -50,47 +50,133 @@ class WC_Admin_Webhooks_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Bulk activation pings a pending webhook without blocking the request.
+	 * @testdox Bulk activation preserves the normal ping verification lifecycle.
+	 * @testWith [200, false]
+	 *           [500, true]
+	 *           [0, true]
+	 *
+	 * @param int  $response_code    Ping response code, or zero for a connection error.
+	 * @param bool $pending_delivery Expected pending delivery state.
 	 */
-	public function test_bulk_activate_pings_webhooks_without_blocking(): void {
+	public function test_bulk_activate_preserves_ping_verification( int $response_code, bool $pending_delivery ): void {
+		$pending       = $this->create_webhook( 'disabled', true );
+		$verified      = $this->create_webhook( 'paused' );
 		$captured_args = array();
 
-		$capture = function ( $response, $parsed_args ) use ( &$captured_args ) {
-			$captured_args[] = $parsed_args;
+		add_filter(
+			'pre_http_request',
+			static function ( $response, $parsed_args ) use ( &$captured_args, $response_code ) {
+				$captured_args[] = $parsed_args;
 
-			// A real non-blocking request returns immediately with no response code.
-			// Mirror that so the test exercises the production path instead of a
-			// synthetic success that would clear pending_delivery on its own.
-			$code = empty( $parsed_args['blocking'] ) ? false : 200;
+				return $response_code ? array(
+					'response' => array( 'code' => $response_code ),
+					'body'     => '',
+				) : new WP_Error( 'http_request_failed', 'Connection refused.' );
+			},
+			10,
+			2
+		);
 
-			return array(
-				'response' => array( 'code' => $code ),
-				'body'     => '',
-			);
-		};
+		$updated = WC_Admin_Webhooks::bulk_update_status( array( $pending->get_id(), $verified->get_id() ), 'active' );
 
-		add_filter( 'pre_http_request', $capture, 10, 2 );
+		$this->assertSame( 2, $updated, 'Both webhook statuses should be updated.' );
+		$this->assertSame( 'active', wc_get_webhook( $pending->get_id() )->get_status(), 'The pending webhook should be active.' );
+		$this->assertSame( 'active', wc_get_webhook( $verified->get_id() )->get_status(), 'The verified webhook should be active.' );
+		$this->assertSame(
+			$pending_delivery,
+			wc_get_webhook( $pending->get_id() )->get_pending_delivery(),
+			'Only a successful ping should clear pending delivery.'
+		);
+		$this->assertFalse( wc_get_webhook( $verified->get_id() )->get_pending_delivery(), 'The verified webhook should remain verified.' );
+		$this->assertCount( 1, $captured_args, 'Only the pending webhook should be pinged.' );
+		$this->assertTrue( $captured_args[0]['blocking'], 'Bulk activation should preserve the default HTTP arguments.' );
+	}
+
+	/**
+	 * @testdox Bulk update notices only report changed webhooks.
+	 * @testWith [0, []]
+	 *           [1, ["1 webhook updated."]]
+	 *           [2, ["2 webhooks updated."]]
+	 *
+	 * @param int   $updated  Number of changed webhooks.
+	 * @param array $expected Expected notices.
+	 */
+	public function test_bulk_update_notices( int $updated, array $expected ): void {
+		$messages = new ReflectionProperty( WC_Admin_Settings::class, 'messages' );
+		$messages->setAccessible( true );
+		$original_messages = $messages->getValue();
+		$messages->setValue( null, array() );
+		$_GET = array( 'bulk_updated' => $updated );
 
 		try {
-			$webhook = $this->create_webhook( 'disabled', true );
+			WC_Admin_Webhooks::notices();
 
-			$updated = WC_Admin_Webhooks::bulk_update_status( array( $webhook->get_id() ), 'active' );
+			$this->assertSame( $expected, $messages->getValue(), 'Only positive update counts should produce a success notice.' );
 		} finally {
-			remove_filter( 'pre_http_request', $capture, 10 );
+			$messages->setValue( null, $original_messages );
 		}
+	}
 
-		$this->assertSame( 1, $updated, 'The pending webhook should be activated.' );
-		$this->assertSame( 'active', wc_get_webhook( $webhook->get_id() )->get_status(), 'The webhook should be active.' );
-		$this->assertNotEmpty( $captured_args, 'Activating a pending webhook should send a delivery ping.' );
+	/**
+	 * @testdox Bulk actions preserve the status filter when redirecting.
+	 * @testWith ["activate", "disabled", "active", "bulk_updated"]
+	 *           ["disable", "active", "disabled", "bulk_updated"]
+	 *           ["pause", "active", "paused", "bulk_updated"]
+	 *           ["delete", "paused", "", "deleted"]
+	 *
+	 * @param string $action         Selected action.
+	 * @param string $initial_status Initial webhook status.
+	 * @param string $new_status     Expected status, or empty for deletion.
+	 * @param string $count_key      Redirect count parameter.
+	 */
+	public function test_process_bulk_action( string $action, string $initial_status, string $new_status, string $count_key ): void {
+		$webhook = $this->create_webhook( $initial_status );
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
 
-		foreach ( $captured_args as $args ) {
-			$this->assertFalse( $args['blocking'], 'Bulk activation pings must not block the request.' );
-		}
-
-		$this->assertFalse(
-			wc_get_webhook( $webhook->get_id() )->get_pending_delivery(),
-			'Bulk activation should clear pending delivery so the webhook does not re-ping on every later save.'
+		$_GET     = array( 'status' => $initial_status );
+		$_REQUEST = array(
+			'action'   => $action,
+			'webhook'  => array( $webhook->get_id() ),
+			'_wpnonce' => wp_create_nonce( 'woocommerce-settings' ),
 		);
+		$redirect = '';
+
+		add_filter(
+			'wp_redirect',
+			static function ( $location ) use ( &$redirect ) {
+				$redirect = $location;
+				throw new RuntimeException( 'Redirect intercepted.' );
+			}
+		);
+
+		$sut = new WC_Admin_Webhooks_Table_List();
+
+		try {
+			$sut->process_bulk_action();
+		} catch ( RuntimeException $exception ) {
+			$this->assertSame( 'Redirect intercepted.', $exception->getMessage(), 'The bulk action should reach its redirect.' );
+		}
+
+		$this->assertNotEmpty( $redirect, 'The action should redirect to the webhook list.' );
+		$this->assertSame( wp_parse_url( admin_url( 'admin.php' ), PHP_URL_PATH ), wp_parse_url( $redirect, PHP_URL_PATH ), 'The redirect should use the admin path.' );
+		parse_str( wp_parse_url( $redirect, PHP_URL_QUERY ), $query );
+		$this->assertSame(
+			array(
+				'page'     => 'wc-settings',
+				'tab'      => 'advanced',
+				'section'  => 'webhooks',
+				'status'   => $initial_status,
+				$count_key => '1',
+			),
+			$query,
+			'The redirect should preserve the status filter and report the changed count.'
+		);
+
+		if ( $new_status ) {
+			$this->assertSame( $new_status, wc_get_webhook( $webhook->get_id() )->get_status(), 'The requested status should be saved.' );
+		} else {
+			$this->assertNull( wc_get_webhook( $webhook->get_id() ), 'The selected webhook should be deleted.' );
+		}
 	}
 
 	/**
@@ -106,8 +192,12 @@ class WC_Admin_Webhooks_Test extends WC_Unit_Test_Case {
 		$webhook->set_topic( 'order.created' );
 		$webhook->set_delivery_url( 'https://example.com/webhook' );
 		$webhook->set_status( $status );
-		$webhook->set_pending_delivery( $pending_delivery );
 		$webhook->save();
+
+		if ( ! $pending_delivery ) {
+			$webhook->set_pending_delivery( false );
+			$webhook->save();
+		}
 
 		return $webhook;
 	}
