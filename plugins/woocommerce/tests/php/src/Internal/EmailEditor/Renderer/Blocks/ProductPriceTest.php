@@ -107,6 +107,25 @@ class ProductPriceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Still shows the struck-through price when a filter returns equal prices of different types.
+	 */
+	public function test_variable_product_on_sale_with_mixed_price_types(): void {
+		$product = $this->create_variable_product( array( 20, 20 ), 15 );
+		add_filter(
+			'woocommerce_variation_prices',
+			function ( $prices ) {
+				foreach ( array( 'price', 'regular_price', 'sale_price' ) as $key ) {
+					$ids                       = array_keys( $prices[ $key ] );
+					$prices[ $key ][ $ids[0] ] = (float) $prices[ $key ][ $ids[0] ];
+				}
+				return $prices;
+			}
+		);
+
+		$this->assertMatchesRegularExpression( '/<del[^>]*>.*20\.00.*<\/del><span>.*15\.00.*<\/span>/s', $this->render( $product->get_id() ) );
+	}
+
+	/**
 	 * @testdox Shows no price for a variable product whose variations have no price.
 	 */
 	public function test_variable_product_without_prices_shows_no_price(): void {

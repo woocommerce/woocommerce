@@ -143,7 +143,9 @@ class Product_Price extends Abstract_Product_Block_Renderer {
 
 		$min_regular_price = $product->get_variation_regular_price( 'min', true );
 		$max_regular_price = $product->get_variation_regular_price( 'max', true );
-		if ( $product->is_on_sale() && $min_price === $max_price && $min_regular_price === $max_regular_price ) {
+		$one_price         = is_numeric( $max_price ) && (float) $min_price === (float) $max_price;
+		$one_regular_price = is_numeric( $min_regular_price ) && is_numeric( $max_regular_price ) && (float) $min_regular_price === (float) $max_regular_price;
+		if ( $product->is_on_sale() && $one_price && $one_regular_price ) {
 			return $this->format_sale_price( (float) $min_regular_price, (float) $min_price );
 		}
 
