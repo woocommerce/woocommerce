@@ -47992,12 +47992,6 @@ parameters:
 			path: src/Blocks/BlockTypes/Checkout.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\CheckoutActionsBlock\:\:initialize\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/CheckoutActionsBlock.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\CheckoutActionsBlock\:\:register_style_variations\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -50549,12 +50543,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypesController\:\:register_block_patterns\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypesController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypesController\:\:register_blocks\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Blocks/BlockTypesController.php
