@@ -123,7 +123,9 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 			$args['object_ids'] = array( $input['product'] );
 		}
 
+		add_filter( 'terms_clauses', array( __CLASS__, 'add_id_tiebreak' ), PHP_INT_MAX );
 		$terms = get_terms( $args );
+		remove_filter( 'terms_clauses', array( __CLASS__, 'add_id_tiebreak' ), PHP_INT_MAX );
 		if ( is_wp_error( $terms ) ) {
 			return $terms;
 		}
@@ -159,6 +161,27 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 			'page'        => isset( $input['offset'] ) ? (int) floor( $args['offset'] / $per_page ) + 1 : $page,
 			'per_page'    => $per_page,
 		);
+	}
+
+	/**
+	 * End the sort on the term ID, so terms that tie on the sort field keep one order
+	 * across pages. Runs last, so other terms_clauses callbacks can't drop it.
+	 *
+	 * @internal
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array $clauses Term query clauses.
+	 * @return array
+	 */
+	public static function add_id_tiebreak( $clauses ) {
+		if ( ! is_array( $clauses ) || empty( $clauses['orderby'] ) || ! is_string( $clauses['orderby'] ) ) {
+			return $clauses;
+		}
+
+		$clauses['orderby'] .= ' ' . ( $clauses['order'] ?? '' ) . ', t.term_id';
+
+		return $clauses;
 	}
 
 	/**

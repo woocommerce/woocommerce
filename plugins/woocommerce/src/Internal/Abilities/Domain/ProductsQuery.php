@@ -125,6 +125,10 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'page'     => $page,
 			'paginate' => true,
 			'return'   => 'objects',
+			'orderby'  => array(
+				'date' => 'DESC',
+				'ID'   => 'DESC',
+			),
 		);
 
 		foreach ( array( 'status', 'stock_status' ) as $field ) {
