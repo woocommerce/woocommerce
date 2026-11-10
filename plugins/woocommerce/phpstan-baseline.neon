@@ -18489,7 +18489,7 @@ parameters:
 		-
 			message: '#^Access to property \$AltBody on an unknown class PHPMailer\.$#'
 			identifier: class.notFound
-			count: 4
+			count: 2
 			path: includes/emails/class-wc-email.php
 
 		-

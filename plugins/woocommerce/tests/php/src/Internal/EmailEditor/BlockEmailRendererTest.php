@@ -11,6 +11,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
 use Automattic\WooCommerce\Internal\EmailEditor\Integration;
 use Automattic\WooCommerce\Internal\EmailEditor\Package;
+use Automattic\WooCommerce\Internal\EmailEditor\TransactionalEmailPersonalizer;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 /**
  * Tests for the BlockEmailRenderer class.
@@ -420,6 +421,85 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_transactional_emails_for_block_editor', array( $this, 'register_fake_block_editor_email_ids' ) );
 		WCTransactionalEmailPostsManager::get_instance()->clear_caches();
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );
+	}
+
+	/**
+	 * @testdox Multipart emails take their plain text part from the block email, not the legacy plain template.
+	 */
+	public function testMultipartPlainTextComesFromTheBlockEmail(): void {
+		$this->skip_if_unsupported_environment();
+
+		$alt_body = $this->send_multipart_test_email( true );
+
+		$this->assertStringContainsString( 'Test Paragraph.', $alt_body );
+		$this->assertStringContainsString( 'Order details', $alt_body );
+		$this->assertStringNotContainsString( 'Legacy plain content', $alt_body );
+	}
+
+	/**
+	 * @testdox Multipart emails keep the legacy plain template when the block email editor is off.
+	 */
+	public function testMultipartPlainTextUsesLegacyTemplateWithoutBlockEmails(): void {
+		$alt_body = $this->send_multipart_test_email( false );
+
+		$this->assertStringContainsString( 'Legacy plain content', $alt_body );
+		$this->assertStringNotContainsString( 'Test Paragraph.', $alt_body );
+	}
+
+	/**
+	 * Build the test email's content as a multipart send does, and return the plain text part.
+	 *
+	 * @param bool $block_email_editor_enabled Whether the email uses the block email editor.
+	 */
+	private function send_multipart_test_email( bool $block_email_editor_enabled ): string {
+		$email = new class() extends \WC_Email {
+			/**
+			 * Set up the test email.
+			 */
+			public function __construct() {
+				$this->id             = 'test_email';
+				$this->template_block = 'emails/block/default-block-content.php';
+				parent::__construct();
+				$this->email_type = 'multipart';
+			}
+
+			/**
+			 * Legacy plain template content.
+			 */
+			public function get_content_plain() {
+				return 'Legacy plain content';
+			}
+
+			/**
+			 * Legacy HTML template content.
+			 */
+			public function get_content_html() {
+				return 'Legacy HTML content';
+			}
+
+			/**
+			 * Order details the block email shows.
+			 */
+			public function get_block_editor_email_template_content() {
+				return 'Order details';
+			}
+		};
+		// The feature flag is read when the email is built, so set what the constructor would.
+		$email->block_email_editor_enabled = $block_email_editor_enabled;
+		$email->personalizer               = wc_get_container()->get( TransactionalEmailPersonalizer::class );
+		$this->personalizer->set_context(
+			array(
+				'wc_email'        => $email,
+				'recipient_email' => 'customer@test.com',
+			)
+		);
+
+		require_once ABSPATH . WPINC . '/PHPMailer/PHPMailer.php';
+		$mailer = new \PHPMailer\PHPMailer\PHPMailer();
+		$email->get_content();
+		$email->handle_multipart( $mailer );
+
+		return $mailer->AltBody; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 	}
 
 	/**

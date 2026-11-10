@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Html2Text;
 use Automattic\WooCommerce\Internal\Email\EmailHeaders;
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
 use Automattic\WooCommerce\Internal\EmailEditor\TransactionalEmailPersonalizer;
@@ -297,6 +298,13 @@ class WC_Email extends WC_Settings_API {
 	public $block_email_editor_enabled;
 
 	/**
+	 * HTML of the block email being sent, used for the plain text part of multipart emails.
+	 *
+	 * @var string|null
+	 */
+	private $block_email_html_content = null;
+
+	/**
 	 * Whether Cc/Bcc recipients can be configured for this email.
 	 *
 	 * False for emails that carry a credential such as a password reset key.
@@ -379,13 +387,13 @@ class WC_Email extends WC_Settings_API {
 			return $mailer;
 		}
 
+		$alt_body = '';
 		if ( 'multipart' === $this->get_email_type() ) {
-			$mailer->AltBody = wordwrap( // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-				preg_replace( $this->plain_search, $this->plain_replace, wp_strip_all_tags( $this->get_content_plain() ) )
-			);
-		} else {
-			$mailer->AltBody = ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+			$alt_body = null !== $this->block_email_html_content
+				? Html2Text::convert( $this->block_email_html_content, array( 'ignore_errors' => true ) )
+				: wordwrap( preg_replace( $this->plain_search, $this->plain_replace, wp_strip_all_tags( $this->get_content_plain() ) ) );
 		}
+		$mailer->AltBody = $alt_body; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
 		$this->sending = false;
 		return $mailer;
@@ -911,7 +919,8 @@ class WC_Email extends WC_Settings_API {
 	public function get_content() {
 		$this->sending = true;
 
-		$block_email_content = $this->get_block_email_html_content();
+		$block_email_content            = $this->get_block_email_html_content();
+		$this->block_email_html_content = $block_email_content ? $block_email_content : null;
 		if ( $block_email_content ) {
 			$this->email_type = 'plain' === $this->email_type ? 'html' : $this->email_type;
 			return $block_email_content;
