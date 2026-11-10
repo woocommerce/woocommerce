@@ -26197,6 +26197,12 @@ parameters:
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
 
 		-
+			message: '#^Parameter \#1 \$sku of method WC_Product\:\:set_sku\(\) expects string, array\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
+
+		-
 			message: '#^Parameter \#1 \$title of function sanitize_title expects string, array\|string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -29038,6 +29044,12 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
 
 		-
+			message: '#^Parameter \#1 \$global_unique_id of method WC_Product\:\:set_global_unique_id\(\) expects string, array\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
+
+		-
 			message: '#^Parameter \#1 \$product of method WC_REST_Product_Variations_Controller\:\:delete_unmatched_product_variations\(\) expects WC_Product, WC_Product\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -29063,6 +29075,12 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$request of method WC_REST_Product_Variations_Controller\:\:set_cogs_info_in_product_object\(\) expects Automattic\\WooCommerce\\Internal\\CostOfGoodsSold\\WP_Rest_Request, WP_REST_Request given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
+
+		-
+			message: '#^Parameter \#1 \$sku of method WC_Product\:\:set_sku\(\) expects string, array\|string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php

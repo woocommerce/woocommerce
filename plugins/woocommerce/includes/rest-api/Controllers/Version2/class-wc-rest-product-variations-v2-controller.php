@@ -409,7 +409,7 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 
 		// SKU.
 		if ( isset( $request['sku'] ) ) {
-			$variation->set_sku( sanitize_text_field( $request['sku'] ) );
+			$variation->set_sku( wc_clean( $request['sku'] ) );
 		}
 
 		// Thumbnail.
