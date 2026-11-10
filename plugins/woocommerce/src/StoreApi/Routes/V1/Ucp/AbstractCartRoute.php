@@ -93,7 +93,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 			return $this->add_response_headers( $refusal );
 		}
 
-		$claim = IdempotencyClaim::for_request( $request, Utils::CAPABILITY_CART );
+		$claim = IdempotencyClaim::for_request( $request, $this->capability() );
 
 		if ( $claim instanceof \WP_REST_Response ) {
 			// The gate answers without reaching the parent, so it stamps the cache directive itself.
