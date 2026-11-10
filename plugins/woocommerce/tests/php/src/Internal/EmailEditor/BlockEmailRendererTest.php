@@ -437,6 +437,22 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The multipart plain text includes content added by the woocommerce_mail_content filter.
+	 */
+	public function testMultipartPlainTextIncludesFilteredContent(): void {
+		$this->skip_if_unsupported_environment();
+		$add_content = static function ( $content ) {
+			return str_replace( '</body>', '<p>Added by filter</p></body>', $content );
+		};
+		add_filter( 'woocommerce_mail_content', $add_content );
+
+		$alt_body = $this->send_multipart_test_email( true );
+		remove_filter( 'woocommerce_mail_content', $add_content );
+
+		$this->assertStringContainsString( 'Added by filter', $alt_body );
+	}
+
+	/**
 	 * @testdox Multipart emails keep the legacy plain template when the block email editor is off.
 	 */
 	public function testMultipartPlainTextUsesLegacyTemplateWithoutBlockEmails(): void {
@@ -447,7 +463,7 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Build the test email's content as a multipart send does, and return the plain text part.
+	 * Send the test email as a multipart email and return its plain text part.
 	 *
 	 * @param bool $block_email_editor_enabled Whether the email uses the block email editor.
 	 */
@@ -494,12 +510,19 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 			)
 		);
 
-		require_once ABSPATH . WPINC . '/PHPMailer/PHPMailer.php';
-		$mailer = new \PHPMailer\PHPMailer\PHPMailer();
-		$email->get_content();
-		$email->handle_multipart( $mailer );
+		reset_phpmailer_instance();
+		$email->send( 'customer@test.com', 'Test subject', $email->get_content(), '', array() );
 
-		return $mailer->AltBody; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		// The plain text part is cleared after sending, so read it from the sent message.
+		$sent  = tests_retrieve_phpmailer_instance()->get_sent();
+		$parts = preg_split( '/^--b\d=_\S+\r?$/m', $sent->body );
+		foreach ( $parts as $part ) {
+			if ( false !== stripos( $part, 'Content-Type: text/plain' ) ) {
+				return quoted_printable_decode( $part );
+			}
+		}
+
+		return '';
 	}
 
 	/**

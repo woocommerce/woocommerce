@@ -1291,6 +1291,10 @@ class WC_Email extends WC_Settings_API {
 		add_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
 
 		$message              = apply_filters( 'woocommerce_mail_content', $this->style_inline( $message ) );
+		if ( null !== $this->block_email_html_content ) {
+			// Build the plain text part from the HTML that is actually sent.
+			$this->block_email_html_content = $message;
+		}
 		$mail_callback        = apply_filters( 'woocommerce_mail_callback', 'wp_mail', $this );
 		$mail_callback_params = apply_filters( 'woocommerce_mail_callback_params', array( $to, wp_specialchars_decode( $subject ), $message, $headers, $attachments ), $this );
 		$return               = $mail_callback( ...$mail_callback_params );
