@@ -394,7 +394,8 @@ class WC_Form_Handler {
 	/**
 	 * Get the address type to fill an empty edit address form from, after a copy that couldn't be saved as is.
 	 *
-	 * Only reads the current customer's own saved addresses into their form, so the request needs no nonce.
+	 * Nothing is saved until the customer submits the form, which has its own nonce, and it only shows the
+	 * current customer's own addresses, so this read-only request needs no nonce.
 	 *
 	 * @since 11.4.0
 	 * @internal For use by WooCommerce only.
