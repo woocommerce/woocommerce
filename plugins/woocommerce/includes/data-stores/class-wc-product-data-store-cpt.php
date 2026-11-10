@@ -1096,9 +1096,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( $force || array_key_exists( 'category_ids', $changes ) ) {
 			$categories = $product->get_category_ids( 'edit' );
 
-			if ( empty( $categories ) && get_option( 'default_product_cat', 0 ) ) {
-				$categories = array( get_option( 'default_product_cat', 0 ) );
-				$product->set_category_ids( $categories );
+			if ( empty( $categories ) ) {
+				$default_category_id = (int) get_option( 'default_product_cat', 0 );
+
+				// WordPress skips term IDs that no longer exist, so only a stored default goes on the object.
+				if ( $default_category_id && term_exists( $default_category_id, 'product_cat' ) ) {
+					$categories = array( $default_category_id );
+					$product->set_category_ids( $categories );
+				}
 			}
 
 			wp_set_post_terms( $product->get_id(), $categories, 'product_cat', false );

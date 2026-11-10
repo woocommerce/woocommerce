@@ -240,6 +240,32 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Saving a product without categories leaves the object without categories when the default category no longer exists.
+	 */
+	public function test_product_save_without_categories_skips_deleted_default_category(): void {
+		$deleted_category_id = self::factory()->term->create(
+			array(
+				'taxonomy' => 'product_cat',
+				'name'     => 'Deleted default category',
+			)
+		);
+		wp_delete_term( $deleted_category_id, 'product_cat' );
+		add_filter(
+			'pre_option_default_product_cat',
+			function () use ( $deleted_category_id ) {
+				return $deleted_category_id;
+			}
+		);
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Orphaned scarf' );
+		$product->save();
+
+		$this->assertSame( array(), wp_get_post_terms( $product->get_id(), 'product_cat', array( 'fields' => 'ids' ) ), 'WordPress should skip the deleted default category' );
+		$this->assertSame( array(), $product->get_category_ids( 'edit' ), 'The saved object should not have a category that was not stored' );
+	}
+
+	/**
 	 * @testdox Publishing a draft product puts the slug WordPress generated on the object, so renaming it later keeps the permalink.
 	 */
 	public function test_product_update_syncs_slug_generated_on_publish(): void {
