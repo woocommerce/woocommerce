@@ -25,6 +25,13 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	public const RULE = '^\.well-known/ucp/?$';
 
 	/**
+	 * Whether this request's write of the static file failed or came up short.
+	 *
+	 * @var bool
+	 */
+	private bool $write_failed = false;
+
+	/**
 	 * Register hooks.
 	 */
 	public function register(): void {
@@ -116,13 +123,14 @@ final class UcpDiscovery implements RegisterHooksInterface {
 		$dir      = dirname( $path );
 		$writable = is_file( $path ) ? is_writable( $path ) : wp_mkdir_p( $dir ) && is_writable( $dir );
 		if ( $writable && ! ( is_file( $path ) && file_get_contents( $path ) === $content ) ) {
-			file_put_contents( $path, $content );
+			// A full disk can leave a truncated file behind while the path stays writable.
+			$this->write_failed = strlen( $content ) !== file_put_contents( $path, $content );
 		}
 		// phpcs:enable WordPress.WP.AlternativeFunctions
 	}
 
 	/**
-	 * Warn store managers when the discovery endpoint is unreachable or shadowed by a stale static file.
+	 * Warn store managers when the discovery endpoint is unreachable, shadowed by a stale static file, or served from a failed write.
 	 */
 	public function maybe_render_notice(): void {
 		global $wp_rewrite;
@@ -138,6 +146,9 @@ final class UcpDiscovery implements RegisterHooksInterface {
 			}
 			/* translators: %1$s: discovery file path. */
 			$message = __( 'A static %1$s file is overriding the UCP discovery endpoint. Delete it or make its directory writable by the web server.', 'woocommerce' );
+		} elseif ( $this->write_failed ) {
+			/* translators: %1$s: discovery file path. */
+			$message = __( 'The UCP discovery file %1$s could not be written completely, so /.well-known/ucp may return an invalid profile. Check the available disk space on the server.', 'woocommerce' );
 		} else {
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable
 			if ( is_multisite() || is_writable( $path ) ) {
