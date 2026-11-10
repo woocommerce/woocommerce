@@ -12,6 +12,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { useCollectionData } from '@woocommerce/base-context/hooks';
+import { usePreviewMode } from '@woocommerce/base-hooks';
 import { objectHasProp } from '@woocommerce/types';
 import type { SelectableItemsContext } from '@woocommerce/types';
 
@@ -103,27 +104,23 @@ function createHierarchicalList(
 const Edit = ( props: EditProps ) => {
 	const { attributes: blockAttributes } = props;
 
-	const {
-		taxonomy,
-		isPreview,
-		displayStyle,
-		showCounts,
-		sortOrder,
-		hideEmpty,
-	} = blockAttributes;
+	const { taxonomy, displayStyle, showCounts, sortOrder, hideEmpty } =
+		blockAttributes;
+
+	const isPreviewMode = usePreviewMode();
 
 	const [ termOptions, setTermOptions ] = useState< FilterOptionItem[] >(
-		isPreview
+		isPreviewMode
 			? sortFilterOptions( [ ...termOptionsPreview ], sortOrder )
 			: []
 	);
 	const [ isOptionsLoading, setIsOptionsLoading ] =
-		useState< boolean >( ! isPreview );
+		useState< boolean >( ! isPreviewMode );
 
 	// Fetch taxonomy terms using WordPress core data
 	const { taxonomyTerms, isTermsLoading } = useSelect(
 		( select ) => {
-			if ( isPreview || ! taxonomy ) {
+			if ( isPreviewMode || ! taxonomy ) {
 				return EMPTY_TAXONOMY_TERMS_RESULT;
 			}
 
@@ -147,19 +144,19 @@ const Edit = ( props: EditProps ) => {
 				] ),
 			};
 		},
-		[ taxonomy, hideEmpty, isPreview ]
+		[ taxonomy, hideEmpty, isPreviewMode ]
 	);
 
 	// Fetch taxonomy counts using the updated useCollectionData hook
 	const { data: filteredCounts, isLoading: isFilterCountsLoading } =
 		useCollectionData( {
-			queryTaxonomy: isPreview ? undefined : taxonomy,
+			queryTaxonomy: isPreviewMode ? undefined : taxonomy,
 			queryState: {},
 			isEditor: true,
 		} );
 
 	useEffect( () => {
-		if ( isPreview ) {
+		if ( isPreviewMode ) {
 			// In preview mode, use the preview data directly
 			const previewItems = termOptionsPreview.map( ( item ) => {
 				if ( showCounts ) {
@@ -234,7 +231,7 @@ const Edit = ( props: EditProps ) => {
 		sortOrder,
 		hideEmpty,
 		showCounts,
-		isPreview,
+		isPreviewMode,
 		isTermsLoading,
 		isFilterCountsLoading,
 	] );
@@ -264,7 +261,7 @@ const Edit = ( props: EditProps ) => {
 		}
 	);
 
-	const isLoading = isPreview
+	const isLoading = isPreviewMode
 		? false
 		: isTermsLoading || isFilterCountsLoading || isOptionsLoading;
 
@@ -284,7 +281,7 @@ const Edit = ( props: EditProps ) => {
 		);
 	}
 
-	if ( ! isLoading && ! isPreview && taxonomyTerms.length === 0 ) {
+	if ( ! isLoading && ! isPreviewMode && taxonomyTerms.length === 0 ) {
 		return (
 			<div { ...innerBlocksProps }>
 				<TaxonomyFilterInspectorControls { ...props } />
@@ -312,7 +309,7 @@ const Edit = ( props: EditProps ) => {
 					value={ {
 						'woocommerce/selectableItems': {
 							items:
-								termOptions.length === 0 && isPreview
+								termOptions.length === 0 && isPreviewMode
 									? termOptionsPreview
 									: termOptions,
 							selectionMode: 'multiple' as const,
