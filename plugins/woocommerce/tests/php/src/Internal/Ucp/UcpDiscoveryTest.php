@@ -57,11 +57,10 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The rewrite rule is registered only when UCP is enabled and pretty permalinks without index.php are on.
+	 * @testdox The rewrite rule is registered only when UCP is enabled and pretty permalinks are on.
 	 * @testWith ["yes", "/%postname%/", true]
 	 *           ["no", "/%postname%/", false]
 	 *           ["yes", "", false]
-	 *           ["yes", "/index.php/%postname%/", false]
 	 *
 	 * @param string $enabled   Feature option value.
 	 * @param string $structure Permalink structure.

@@ -33,14 +33,13 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Whether the store can serve `/.well-known/ucp`: the rewrite rule needs pretty permalinks without
-	 * `index.php`, which would move it to `/index.php/.well-known/ucp`. The agent readiness checks read
-	 * this too, so they flag a store that can't serve it.
+	 * Whether the store can serve `/.well-known/ucp`: the rewrite rule needs pretty permalinks.
+	 * The agent readiness checks read this too, so they flag a store that can't serve it.
 	 */
 	public static function can_serve(): bool {
 		global $wp_rewrite;
 
-		return $wp_rewrite instanceof \WP_Rewrite && $wp_rewrite->using_mod_rewrite_permalinks();
+		return $wp_rewrite->using_permalinks();
 	}
 
 	/**

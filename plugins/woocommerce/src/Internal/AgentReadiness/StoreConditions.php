@@ -117,9 +117,9 @@ class StoreConditions {
 				'blocks'  => 'ucp',
 				'level'   => self::LEVEL_REQUIRED,
 				'name'    => __( 'Store can serve the UCP address', 'woocommerce' ),
-				'label'   => __( 'Permalinks stop the store serving the UCP address', 'woocommerce' ),
-				'why'     => __( 'With Plain permalinks, or ones that start with index.php, the store can\'t serve /.well-known/ucp, so agents can\'t find your catalog.', 'woocommerce' ),
-				'fix'     => __( 'Choose a permalink structure other than Plain, without index.php, under Settings > Permalinks.', 'woocommerce' ),
+				'label'   => __( 'Permalinks are set to Plain', 'woocommerce' ),
+				'why'     => __( 'With Plain permalinks the store can\'t serve /.well-known/ucp, so agents can\'t find your catalog.', 'woocommerce' ),
+				'fix'     => __( 'Choose any permalink structure other than Plain under Settings > Permalinks.', 'woocommerce' ),
 				'fix_url' => admin_url( 'options-permalink.php' ),
 			),
 			$policy_page(

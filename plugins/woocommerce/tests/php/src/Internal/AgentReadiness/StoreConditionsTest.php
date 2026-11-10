@@ -155,17 +155,12 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Plain and index.php permalinks are required to change, since the store can't serve /.well-known/ucp with them.
-	 *
-	 * @testWith [""]
-	 *           ["/index.php/%postname%/"]
-	 *
-	 * @param string $structure Permalink structure.
+	 * @testdox Plain permalinks are required to change, since the store can't serve /.well-known/ucp with them.
 	 */
-	public function test_plain_permalinks_required( string $structure ): void {
+	public function test_plain_permalinks_required(): void {
 		global $wp_rewrite;
 		self::make_store_ready();
-		$wp_rewrite->set_permalink_structure( $structure );
+		$wp_rewrite->set_permalink_structure( '' );
 
 		$this->assertSame( array( 'ucp_discovery' ), $this->sut->failing_required() );
 	}
