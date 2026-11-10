@@ -352,10 +352,11 @@ trait Woo_Analytics_Trait {
 			'pt' => $product->get_type(),
 		);
 
-		// get_price() is a string, and empty for a product without a price.
+		// get_price() is empty for a product without a price. Kept a string: PHP 7.4 writes
+		// a float into the pixel URL with the locale's decimal separator (19,99).
 		$price = $product->get_price();
 		if ( is_numeric( $price ) ) {
-			$details['pp'] = (float) $price;
+			$details['pp'] = $price;
 		}
 
 		return $details;

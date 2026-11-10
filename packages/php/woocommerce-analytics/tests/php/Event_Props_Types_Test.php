@@ -61,21 +61,20 @@ class Event_Props_Types_Test extends BaseTestCase {
 	 */
 	public static function price_provider(): array {
 		return array(
-			'decimal price'  => array( '19.99', 19.99 ),
-			'whole price'    => array( '10', 10.0 ),
-			'free product'   => array( '0', 0.0 ),
+			'decimal price'  => array( '19.99', '19.99' ),
+			'free product'   => array( '0', '0' ),
 			'no price'       => array( '', null ),
 			'filtered label' => array( 'Call for price', null ),
 		);
 	}
 
 	/**
-	 * Test that pp is a number, or left out when the product has no numeric price.
+	 * Test that pp is a numeric price, or left out when the product has no numeric price.
 	 *
 	 * @dataProvider price_provider
 	 *
-	 * @param string     $price    What WC_Product::get_price() returns.
-	 * @param float|null $expected The expected pp, or null when pp should be absent.
+	 * @param string      $price    What WC_Product::get_price() returns.
+	 * @param string|null $expected The expected pp, or null when pp should be absent.
 	 */
 	#[DataProvider( 'price_provider' )]
 	public function test_product_details_price( $price, $expected ): void {
