@@ -1140,17 +1140,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				foreach ( $existing_meta_data[ $meta_key ] as $meta_value ) {
 					$unserialized_value = maybe_unserialize( $meta_value );
 					if ( is_object( $unserialized_value ) && '__PHP_Incomplete_Class' === get_class( $unserialized_value ) ) {
-						// WordPress can't slash an incomplete object, so delete the raw row directly (the delete_post_meta hooks are intentionally skipped).
-						$wpdb->delete(
-							_get_meta_table( 'post' ),
-							array(
-								'post_id'    => $order->get_id(),
-								'meta_key'   => $meta_key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-								'meta_value' => $meta_value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-							),
-							array( '%d', '%s', '%s' )
-						);
-						wp_cache_delete( $order->get_id(), 'post_meta' );
+						$this->delete_incomplete_class_post_meta( $order->get_id(), (string) $meta_key, $meta_value );
 						continue;
 					}
 					delete_post_meta( $order->get_id(), $meta_key, $unserialized_value );
@@ -1159,6 +1149,33 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		}
 
 		$this->update_post_meta( $order );
+	}
+
+	/**
+	 * Deletes a post meta row whose value unserializes to `__PHP_Incomplete_Class`.
+	 *
+	 * WordPress can't slash such a value, so the row is deleted by its raw value and the delete_post_meta hooks don't fire.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param int    $post_id   Post ID.
+	 * @param string $meta_key  Meta key.
+	 * @param string $raw_value Serialized meta value, as stored in the database.
+	 */
+	protected function delete_incomplete_class_post_meta( int $post_id, string $meta_key, string $raw_value ): void {
+		global $wpdb;
+
+		$wpdb->delete(
+			_get_meta_table( 'post' ),
+			array(
+				'post_id'    => $post_id,
+				'meta_key'   => $meta_key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_value' => $raw_value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			),
+			array( '%d', '%s', '%s' )
+		);
+		wp_cache_delete( $post_id, 'post_meta' );
+		wp_cache_set_posts_last_changed();
 	}
 
 	/**
