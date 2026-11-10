@@ -18,6 +18,7 @@
 		"test:unit": "composer run-script test:unit",
 		"test:php:ci": "pnpm test:unit && pnpm test:integration",
 		"test:integration": "composer run-script test:integration",
+		"test:update-email-snapshots": "wp-env run tests-cli --env-cwd=wp-content/plugins/email-editor env UPDATE_EMAIL_SNAPSHOTS=1 ./vendor/bin/phpunit --configuration phpunit-integration.xml.dist --filter Renderer_Snapshot_Test",
 		"build:composer-package": "bash tasks/build-package.sh"
 	},
 	"license": "GPL-2.0-or-later",
@@ -43,7 +44,12 @@
 						"composer.lock",
 						"**/*.php",
 						"phpunit*.xml.dist",
-						".wp-env.json"
+						".wp-env.json",
+						"src/**/*.css",
+						"src/**/*.json",
+						"src/**/*.html",
+						"tests/**/*.html",
+						"tests/**/*.txt"
 					],
 					"testEnv": {
 						"start": "env:test",
@@ -66,7 +72,12 @@
 						"composer.lock",
 						"**/*.php",
 						"phpunit*.xml.dist",
-						".wp-env.json"
+						".wp-env.json",
+						"src/**/*.css",
+						"src/**/*.json",
+						"src/**/*.html",
+						"tests/**/*.html",
+						"tests/**/*.txt"
 					],
 					"testEnv": {
 						"start": "env:test",
