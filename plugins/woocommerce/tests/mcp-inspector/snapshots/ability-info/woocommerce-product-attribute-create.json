@@ -1,0 +1,124 @@
+{
+	"name": "woocommerce/product-attribute-create",
+	"label": "Create product attribute",
+	"description": "Create a global product attribute, such as Color or Size. Product writes then use it by ID or name, with global set to true, and create its terms from the options they send.",
+	"input_schema": {
+		"type": "object",
+		"properties": {
+			"name": {
+				"description": "Label shown to shoppers, such as Color.",
+				"type": "string",
+				"minLength": 1
+			},
+			"slug": {
+				"description": "Slug without the pa_ prefix. Defaults to one made from the name.",
+				"type": "string",
+				"minLength": 1
+			},
+			"type": {
+				"type": "string",
+				"enum": [
+					"select"
+				],
+				"default": "select"
+			},
+			"order_by": {
+				"description": "Default sort order of the terms. name_num sorts names as numbers.",
+				"type": "string",
+				"enum": [
+					"menu_order",
+					"name",
+					"name_num",
+					"id"
+				],
+				"default": "menu_order"
+			},
+			"has_archives": {
+				"description": "Give each term a public archive page.",
+				"type": "boolean",
+				"default": false
+			}
+		},
+		"required": [
+			"name"
+		],
+		"additionalProperties": false
+	},
+	"output_schema": {
+		"type": "object",
+		"properties": {
+			"attribute": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"name": {
+						"type": "string",
+						"description": "Label. Product writes accept it as the name of a global attribute."
+					},
+					"slug": {
+						"type": "string",
+						"description": "Taxonomy of the attribute terms, such as pa_color."
+					},
+					"type": {
+						"type": "string"
+					},
+					"order_by": {
+						"type": "string",
+						"description": "Default sort order of the terms."
+					},
+					"has_archives": {
+						"type": "boolean"
+					},
+					"term_count": {
+						"type": "integer",
+						"description": "Number of terms. Use product-terms-query with the slug as taxonomy to page through more terms than terms lists."
+					},
+					"terms": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"properties": {
+								"id": {
+									"type": "integer"
+								},
+								"name": {
+									"type": "string"
+								},
+								"slug": {
+									"type": "string"
+								},
+								"description": {
+									"type": "string"
+								},
+								"menu_order": {
+									"type": "integer"
+								},
+								"count": {
+									"type": "integer"
+								}
+							},
+							"additionalProperties": false
+						}
+					}
+				},
+				"additionalProperties": false
+			}
+		},
+		"additionalProperties": false
+	},
+	"meta": {
+		"annotations": {
+			"readonly": false,
+			"destructive": false,
+			"idempotent": false
+		},
+		"show_in_rest": true,
+		"mcp": {
+			"public": true,
+			"type": "tool"
+		},
+		"public": false
+	}
+}
