@@ -259,7 +259,7 @@ class Personalizer {
 				if ( self::RENDERING_CONTEXT_HTML === $rendering_context && Personalization_Tag::VALUE_TYPE_TEXT === $tag->get_value_type() ) {
 					$value = esc_html( $value );
 				} elseif ( self::RENDERING_CONTEXT_TEXT === $rendering_context && Personalization_Tag::VALUE_TYPE_HTML === $tag->get_value_type() ) {
-					$value = $this->convert_html_value_to_text( (string) $value );
+					$value = $this->convert_html_value_to_text( $value );
 				}
 				$value = $this->intercept_value( (string) $value, trim( $modifiable_text ), $rendering_context );
 				$content_processor->replace_token( $value );
