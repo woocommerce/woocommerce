@@ -437,19 +437,26 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The multipart plain text includes content added by the woocommerce_mail_content filter.
+	 * @testdox The multipart plain text includes content added by the woocommerce_mail_content and wp_mail filters.
 	 */
 	public function testMultipartPlainTextIncludesFilteredContent(): void {
 		$this->skip_if_unsupported_environment();
 		$add_content = static function ( $content ) {
 			return str_replace( '</body>', '<p>Added by filter</p></body>', $content );
 		};
+		$add_to_mail = static function ( $atts ) {
+			$atts['message'] = str_replace( '</body>', '<p>Added by wp_mail</p></body>', $atts['message'] );
+			return $atts;
+		};
 		add_filter( 'woocommerce_mail_content', $add_content );
+		add_filter( 'wp_mail', $add_to_mail );
 
 		$alt_body = $this->send_multipart_test_email( true );
 		remove_filter( 'woocommerce_mail_content', $add_content );
+		remove_filter( 'wp_mail', $add_to_mail );
 
 		$this->assertStringContainsString( 'Added by filter', $alt_body );
+		$this->assertStringContainsString( 'Added by wp_mail', $alt_body );
 	}
 
 	/**
