@@ -10,11 +10,13 @@
 	}
 
 	.woocommerce-ordering {
+		display: flex;
+		gap: 0.25em;
 		margin: auto;
 	}
-}
 
-:where(.wc-block-catalog-sorting select.orderby) {
-	field-sizing: content;
-	font-size: inherit;
+	:where(select.orderby) {
+		field-sizing: content;
+		font-size: inherit;
+	}
 }
