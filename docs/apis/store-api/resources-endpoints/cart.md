@@ -29,6 +29,7 @@ All endpoints under `/cart` (listed in this doc) return responses in the same fo
 	"items": [
 		{
 			"key": "a5771bce93e200c36f7cd9dfd0e5deaa",
+			"parent_item_key": null,
 			"id": 38,
 			"quantity": 1,
 			"quantity_limits": {
@@ -96,6 +97,7 @@ All endpoints under `/cart` (listed in this doc) return responses in the same fo
 		},
 		{
 			"key": "b6d767d2f8ed5d21a44b0e5886680cb9",
+			"parent_item_key": null,
 			"id": 22,
 			"quantity": 1,
 			"quantity_limits": {

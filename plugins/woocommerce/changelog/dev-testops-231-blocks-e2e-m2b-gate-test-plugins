@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Gate Blocks e2e test plugins by cookie and move more specs to the parallel project; no production change.

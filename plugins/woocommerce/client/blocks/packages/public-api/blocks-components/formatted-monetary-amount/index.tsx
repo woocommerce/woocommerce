@@ -17,8 +17,10 @@ import { decodeHtmlEntities } from '@woocommerce/utils';
  */
 import './style.scss';
 
-export interface FormattedMonetaryAmountProps
-	extends Omit< NumericFormatProps, 'onValueChange' | 'displayType' > {
+export interface FormattedMonetaryAmountProps extends Omit<
+	NumericFormatProps,
+	'onValueChange' | 'displayType'
+> {
 	className?: string;
 	displayType?: NumericFormatProps[ 'displayType' ] | undefined;
 	allowNegative?: boolean;
@@ -231,7 +233,7 @@ const FormattedMonetaryAmount = ( {
 		? ( values: NumberFormatValues ) => {
 				const minorUnitValue = +values.value * 10 ** currency.minorUnit;
 				onValueChange( minorUnitValue );
-		  }
+			}
 		: () => void 0;
 
 	return (

@@ -13,6 +13,16 @@ import {
 	getItemUpdateError,
 } from './selectors';
 
+/**
+ * A store action with arbitrary properties, compatible with existing Redux actions.
+ */
+export type AnyAction = {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	type: any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	[ extraProps: string ]: any;
+};
+
 export type IdType = number | string;
 
 export type IdQuery =
@@ -61,7 +71,7 @@ export type CrudActions<
 				? WithRequiredProperty<
 						Partial< MutableProperties >,
 						RequiredFields
-				  >
+					>
 				: Partial< MutableProperties >,
 			options?: CrudActionOptions
 		) => ItemType;
@@ -137,20 +147,19 @@ export type CrudSelectors<
 	WPDataSelectors;
 
 export type MapSelectors< Type, ResourceName, ParamType, ReturnType > = {
-	[ Property in keyof Type as `get${ Capitalize<
-		string & ResourceName
-	> }${ Capitalize< string & Property > }` ]: (
-		state: unknown,
-		x?: ParamType
-	) => ReturnType;
+	[
+		Property in keyof Type as `get${ Capitalize<
+			string & ResourceName
+		> }${ Capitalize< string & Property > }`
+	]: ( state: unknown, x?: ParamType ) => ReturnType;
 };
 
 export type MapActions< Type, ResourceName, ReturnType > = {
-	[ Property in keyof Type as `${ Lowercase<
-		string & Property
-	> }${ Capitalize< string & ResourceName > }` ]: Type[ Property ] extends (
-		...args: infer P
-	) => unknown
+	[
+		Property in keyof Type as `${ Lowercase<
+			string & Property
+		> }${ Capitalize< string & ResourceName > }`
+	]: Type[ Property ] extends ( ...args: infer P ) => unknown
 		? ( ...args: P ) => ReturnType
 		: never;
 };

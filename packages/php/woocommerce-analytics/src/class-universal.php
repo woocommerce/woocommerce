@@ -114,6 +114,9 @@ class Universal {
 					proxy: <?php echo $is_proxy_tracking_enabled ? 'true' : 'false'; ?>,
 				};
 
+				// A delay-JS plugin can hold back the consent API script, so the client cannot rely on its functions to know it has to wait.
+				wcAnalytics.consentManaged = <?php echo Consent_Manager::is_consent_managed() ? 'true' : 'false'; ?>;
+
 				wcAnalytics.breadcrumbs = <?php echo wp_json_encode( $this->get_breadcrumb_titles(), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP ); ?>;
 
 				// Page context flags.

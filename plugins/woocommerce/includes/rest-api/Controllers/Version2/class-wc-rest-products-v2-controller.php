@@ -458,13 +458,26 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 
 		// Filter by on sale products.
 		if ( is_bool( $request['on_sale'] ) ) {
-			$on_sale_key = $request['on_sale'] ? 'post__in' : 'post__not_in';
 			$on_sale_ids = wc_get_product_ids_on_sale();
 
 			// Use 0 when there's no on sale products to avoid return all products.
 			$on_sale_ids = empty( $on_sale_ids ) ? array( 0 ) : $on_sale_ids;
 
-			$args[ $on_sale_key ] += $on_sale_ids;
+			if ( $request['on_sale'] || ! empty( $args['post__in'] ) ) {
+				$post_in = empty( $args['post__in'] ) ? $on_sale_ids : $args['post__in'];
+
+				// WP_Query ignores post__not_in when post__in is set, so the on_sale filter and exclude are applied to post__in.
+				if ( $request['on_sale'] ) {
+					$post_in = array_intersect( $post_in, $on_sale_ids );
+				} else {
+					$post_in = array_diff( $post_in, $on_sale_ids );
+				}
+				$post_in = array_diff( $post_in, (array) $args['post__not_in'] );
+
+				$args['post__in'] = empty( $post_in ) ? array( 0 ) : array_values( $post_in );
+			} else {
+				$args['post__not_in'] = array_merge( (array) $args['post__not_in'], $on_sale_ids );
+			}
 		}
 
 		// Force the post_type argument, since it's not a user input variable.
@@ -541,8 +554,8 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 			$attachment_ids[] = $product->get_image_id();
 		}
 
-		// Add gallery images.
-		$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_image_ids() );
+		// Add gallery images, skipping the featured image if it is also in the gallery.
+		$attachment_ids = array_merge( $attachment_ids, array_diff( $product->get_gallery_image_ids(), $attachment_ids ) );
 
 		if ( ! empty( $attachment_ids ) ) {
 			// Prime caches to reduce future queries.
@@ -726,7 +739,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 
 				// Taxonomy-based attributes are prefixed with `pa_`, otherwise simply `attribute_`.
 				if ( 0 === strpos( $attribute_name, 'attribute_pa_' ) ) {
-					$option_term  = get_term_by( 'slug', $attribute, $name );
+					$option_term  = get_term_by( 'slug', $attribute, rawurldecode( $name ) );
 					$attributes[] = array(
 						'id'     => wc_attribute_taxonomy_id_by_name( $name ),
 						'name'   => $this->get_attribute_taxonomy_name( $name, $_product ),
@@ -885,6 +898,9 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					break;
 				case 'sku':
 					$base_data['sku'] = $product->get_sku( $context );
+					break;
+				case 'mpn':
+					$base_data['mpn'] = $product->get_mpn( $context );
 					break;
 				case 'price':
 					$base_data['price'] = $product->get_price( $context );
@@ -1092,17 +1108,17 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 
 		// Post title.
 		if ( isset( $request['name'] ) ) {
-			$product->set_name( wp_filter_post_kses( $request['name'] ) );
+			$product->set_name( wp_kses_post( $request['name'] ) );
 		}
 
 		// Post content.
 		if ( isset( $request['description'] ) ) {
-			$product->set_description( wp_filter_post_kses( $request['description'] ) );
+			$product->set_description( wp_kses_post( $request['description'] ) );
 		}
 
 		// Post excerpt.
 		if ( isset( $request['short_description'] ) ) {
-			$product->set_short_description( wp_filter_post_kses( $request['short_description'] ) );
+			$product->set_short_description( wp_kses_post( $request['short_description'] ) );
 		}
 
 		// Post status.
@@ -1161,6 +1177,11 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		// SKU.
 		if ( isset( $request['sku'] ) ) {
 			$product->set_sku( wc_clean( $request['sku'] ) );
+		}
+
+		// MPN.
+		if ( isset( $request['mpn'] ) ) {
+			$product->set_mpn( sanitize_text_field( $request['mpn'] ) );
 		}
 
 		// Attributes.
@@ -1452,6 +1473,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 
 			foreach ( $images as $index => $image ) {
 				$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
+				$is_new_upload = false;
 
 				if ( 0 === $attachment_id && isset( $image['src'] ) ) {
 					$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
@@ -1465,9 +1487,14 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					}
 
 					$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $product->get_id() );
+					$is_new_upload = true;
 				}
 
 				if ( ! wp_attachment_is_image( $attachment_id ) ) {
+					if ( $is_new_upload && $attachment_id > 0 ) {
+						wp_delete_attachment( $attachment_id, true );
+					}
+
 					/* translators: %s: attachment id */
 					throw new WC_REST_Exception( 'woocommerce_product_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 );
 				}
@@ -1923,6 +1950,11 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				),
 				'sku'                   => array(
 					'description' => __( 'Unique identifier.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'mpn'                   => array(
+					'description' => __( 'Manufacturer part number.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),

@@ -103,9 +103,11 @@ trait ShippingMethodRestrictionsTrait {
 		$shipping_methods = array();
 
 		// Get shipping methods from the order being paid, or from the cart. The order-pay query var can be set by
-		// the client, and wc-ajax checkout requests always check out the cart, so ignore it on those requests.
-		$is_order_pay = is_wc_endpoint_url( 'order-pay' ) && ! Constants::is_true( 'WC_DOING_AJAX' );
-		$order        = $is_order_pay ? wc_get_order( absint( get_query_var( 'order-pay' ) ) ) : false;
+		// the client, and wc-ajax handlers always work on the cart, so ignore it while one is running. The pay form
+		// is processed on `wp`, before wc-ajax handlers run, so it keeps using the order even if wc-ajax is sent.
+		$wc_ajax_action = get_query_var( 'wc-ajax' );
+		$is_order_pay   = is_wc_endpoint_url( 'order-pay' ) && ! ( $wc_ajax_action && doing_action( 'wc_ajax_' . $wc_ajax_action ) );
+		$order          = $is_order_pay ? wc_get_order( absint( get_query_var( 'order-pay' ) ) ) : false;
 
 		if ( $order ) {
 			$shipping_methods = $order->get_shipping_methods();

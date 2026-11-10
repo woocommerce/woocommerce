@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
+import NoticeBanner from '@woocommerce/base-components/notice-banner';
 import {
 	useExpressPaymentMethods,
 	usePaymentMethodInterface,
@@ -42,7 +43,7 @@ const ExpressPaymentMethods = () => {
 		? {
 				height: buttonHeight,
 				borderRadius: buttonBorderRadius,
-		  }
+			}
 		: undefined;
 
 	const { activePaymentMethod, paymentMethodData } = useSelect(
@@ -180,25 +181,53 @@ const ExpressPaymentMethods = () => {
 				const expressPaymentMethod = isEditor
 					? paymentMethod.edit
 					: paymentMethod.content;
-				return isValidElement( expressPaymentMethod ) ? (
+				const itemId = `express-payment-method-${ id }`;
+				// Each method gets its own error boundary so one broken button doesn't take down the others. A
+				// broken button shows an inline error in the editor and is hidden on the storefront.
+				const errorFallback = isEditor ? (
 					<ExpressPayItem
-						key={ id }
-						id={ `express-payment-method-${ id }` }
-						className={ clsx( {
-							'wc-block-components-express-payment__event-button--focused':
-								focusedExpressPaymentMethod === id,
-						} ) }
+						id={ itemId }
+						style={
+							buttonAttributes
+								? {
+										minHeight: `${ buttonAttributes.height }px`,
+									}
+								: undefined
+						}
 					>
-						{ cloneElement( expressPaymentMethod, {
-							...paymentMethodInterface,
-							onClick: onExpressPaymentClick( id ),
-							onClose: onExpressPaymentClose,
-							onError: onExpressPaymentError,
-							setExpressPaymentError:
-								deprecatedSetExpressPaymentError,
-							buttonAttributes,
-						} ) }
+						<NoticeBanner status="error" isDismissible={ false }>
+							{ sprintf(
+								/* translators: %s: express payment method title, e.g. "Apple Pay". */
+								__( "%s couldn't load.", 'woocommerce' ),
+								paymentMethod.title
+							) }
+						</NoticeBanner>
 					</ExpressPayItem>
+				) : null;
+				return isValidElement( expressPaymentMethod ) ? (
+					<PaymentMethodErrorBoundary
+						key={ id }
+						isEditor={ isEditor }
+						fallback={ errorFallback }
+					>
+						<ExpressPayItem
+							id={ itemId }
+							className={ clsx( {
+								'wc-block-components-express-payment__event-button--focused':
+									focusedExpressPaymentMethod === id,
+							} ) }
+						>
+							{ cloneElement( expressPaymentMethod, {
+								...paymentMethodInterface,
+								onClick: onExpressPaymentClick( id ),
+								onClose: onExpressPaymentClose,
+								onError: onExpressPaymentError,
+								setExpressPaymentError:
+									deprecatedSetExpressPaymentError,
+								buttonAttributes,
+							} ) }
+						</ExpressPayItem>
+					</PaymentMethodErrorBoundary>
 				) : null;
 			} )
 		) : (
@@ -208,14 +237,12 @@ const ExpressPaymentMethods = () => {
 		);
 
 	return (
-		<PaymentMethodErrorBoundary isEditor={ isEditor }>
-			<ExpressPayWrapper
-				className="wc-block-components-express-payment__event-buttons"
-				ref={ expressPaymentWrapperRef }
-			>
-				{ content }
-			</ExpressPayWrapper>
-		</PaymentMethodErrorBoundary>
+		<ExpressPayWrapper
+			className="wc-block-components-express-payment__event-buttons"
+			ref={ expressPaymentWrapperRef }
+		>
+			{ content }
+		</ExpressPayWrapper>
 	);
 };
 

@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Internal\Admin\FeaturePlugin;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseTransaction;
 use Automattic\WooCommerce\Internal\VariationGallery\Migration as VariationGalleryMigration;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
@@ -92,6 +93,14 @@ class WC_Unit_Tests_Bootstrap {
 		// load the WP testing environment.
 		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
 
+		/*
+		 * WordPress 7.2's test bootstrap deletes its isolated upload directory after loading, by
+		 * which point wp_upload_dir() has memoised the path as created, so nothing recreates it.
+		 */
+		if ( version_compare( $GLOBALS['wp_version'], '7.2-alpha', '>=' ) ) {
+			wp_mkdir_p( wp_upload_dir()['path'] );
+		}
+
 		// Ensure theme install tests use direct filesystem method.
 		if ( ! defined( 'FS_METHOD' ) ) {
 			define( 'FS_METHOD', 'direct' );
@@ -104,6 +113,7 @@ class WC_Unit_Tests_Bootstrap {
 		$this->initialize_dependency_injection();
 
 		$this->maybe_initialize_hpos();
+		$this->register_ddl_guard();
 
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.PHP.DiscouragedPHPFunctions
 		error_reporting( error_reporting() & ~E_DEPRECATED );
@@ -188,6 +198,23 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
+	 * Fail tests that run DDL inside their transaction. WC_DDL_GUARD=report lists
+	 * offenders instead, for seeding and triage, and is ignored when CI is set so
+	 * the guard always enforces there. There is no off switch: tests declare DDL
+	 * with @ddlInTransaction, and the shrink-only allowlist holds the rest.
+	 */
+	private function register_ddl_guard() {
+		$mode = WC_DDL_In_Transaction_Guard::MODE_ENFORCE;
+		if ( WC_DDL_In_Transaction_Guard::MODE_REPORT === getenv( 'WC_DDL_GUARD' ) && ! getenv( 'CI' ) ) {
+			$mode = WC_DDL_In_Transaction_Guard::MODE_REPORT;
+		}
+		WC_DDL_In_Transaction_Guard::register(
+			include $this->tests_dir . '/framework/ddl-in-transaction-allowlist.php',
+			$mode
+		);
+	}
+
+	/**
 	 * Configure the order datastore based on the DISABLE_HPOS environment variable.
 	 *
 	 * @return void
@@ -233,7 +260,6 @@ class WC_Unit_Tests_Bootstrap {
 	 */
 	public function load_wc() {
 		define( 'WC_TAX_ROUNDING_MODE', 'auto' );
-		define( 'WC_USE_TRANSACTIONS', false );
 
 		update_option( 'woocommerce_enable_coupons', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
@@ -241,6 +267,11 @@ class WC_Unit_Tests_Bootstrap {
 
 		require_once $this->plugin_dir . '/woocommerce.php';
 		FeaturePlugin::instance()->init();
+
+		// The test case wraps each test in a transaction that it rolls back. Own
+		// that transaction one time, so every transaction in a test becomes a
+		// savepoint inside it, and a rollback in the code under test is real.
+		DatabaseTransaction::start();
 	}
 
 	/**
@@ -313,6 +344,7 @@ class WC_Unit_Tests_Bootstrap {
 		// test cases.
 		require_once $this->tests_dir . '/includes/wp-http-testcase.php';
 		require_once $this->tests_dir . '/framework/class-wc-unit-test-case.php';
+		require_once $this->tests_dir . '/framework/class-wc-ddl-in-transaction-guard.php';
 		require_once $this->tests_dir . '/framework/class-wc-rest-unit-test-case.php';
 
 		// Helpers.
@@ -337,6 +369,7 @@ class WC_Unit_Tests_Bootstrap {
 		require_once dirname( $this->tests_dir ) . '/php/helpers/MetaDataAssertionTrait.php';
 		require_once dirname( $this->tests_dir ) . '/php/helpers/CorePayPalGatewayTrait.php';
 		require_once dirname( $this->tests_dir ) . '/php/helpers/ImageAttachmentTrait.php';
+		require_once dirname( $this->tests_dir ) . '/php/helpers/InterleavedStatusOrdersTrait.php';
 	}
 
 	/**

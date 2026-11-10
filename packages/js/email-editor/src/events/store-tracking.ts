@@ -8,7 +8,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { recordEvent, isEventTrackingEnabled } from '.';
+import { recordEvent, isEventTrackingEnabled } from './event-pipeline';
 
 /**
  * Handler functions for tracking individual events recorder by the listening to store actions.
@@ -75,7 +75,6 @@ const trackSetRenderingMode = ( renderingMode: string ) => {
 		return;
 	}
 	const isPreviewDropdownOpened = !! document.querySelector(
-		// eslint-disable-next-line @wordpress/i18n-text-domain
 		`[aria-label="${ __( 'View options' ) }"]`
 	);
 	// We want to track the event only from the dropdown.

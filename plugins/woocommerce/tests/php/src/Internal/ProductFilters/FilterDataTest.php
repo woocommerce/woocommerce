@@ -2,6 +2,9 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
@@ -55,12 +58,69 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	}
 
 	/**
+	 * @testdox Missing variations are excluded from lookup counts, including after changing the option.
+	 */
+	public function test_attribute_counts_exclude_missing_variations(): void {
+		$product                = wc_get_product( $this->products[4]->get_id() );
+		$blue                   = get_term_by( 'slug', 'blue-slug', 'pa_color' )->term_id;
+		$attributes             = $product->get_attributes();
+		$attributes['pa_color'] = clone $attributes['pa_color'];
+		$attributes['pa_color']->set_options( array_merge( $attributes['pa_color']->get_options(), array( $blue ) ) );
+		$product->set_attributes( $attributes );
+		$product->save();
+		wc_get_container()->get( LookupDataStore::class )->create_data_for_product( $product );
+		$query_vars = array(
+			'post_type' => 'product',
+			'post__in'  => array( $product->get_id() ),
+		);
+
+		foreach ( array(
+			'yes' => 0,
+			'no'  => 1,
+		) as $lookup => $expected ) {
+			update_option( 'woocommerce_attribute_lookup_enabled', $lookup );
+			$counts = $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
+			$this->assertSame( $expected, $counts[ $blue ] ?? 0, 'Lookup option: ' . $lookup );
+		}
+	}
+
+	/**
 	 * @testdox Test price range without filter.
 	 */
 	public function test_get_filtered_price_with_default_query() {
 		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
 
 		$this->test_get_filtered_price_with( $wp_query );
+	}
+
+	/**
+	 * @testdox Product filter caches reflect the current user's product visibility.
+	 */
+	public function test_filter_cache_separates_staff_and_visitors(): void {
+		$private    = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'status'        => ProductStatus::PRIVATE,
+				'regular_price' => 4321,
+				'price'         => 4321,
+			)
+		);
+		$query_vars = array(
+			'post_type' => 'product',
+			'post__in'  => array( $this->products[1]->get_id(), $private->get_id() ),
+		);
+		$manager    = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
+		wp_set_current_user( $manager );
+		$price = $this->sut->get_filtered_price( $query_vars );
+		$this->assertSame( 4321.0, (float) $price['max_price'] );
+
+		wp_set_current_user( 0 );
+		$price = $this->sut->get_filtered_price( $query_vars );
+		$this->assertSame( 20.0, (float) $price['max_price'] );
+
+		// Stock has no cached counts yet, so this also checks the shared product-ID cache.
+		$stock = $this->sut->get_stock_status_counts( $query_vars, array( ProductStockStatus::IN_STOCK ) );
+		$this->assertSame( 1, $stock[ ProductStockStatus::IN_STOCK ] );
 	}
 
 	/**
@@ -83,15 +143,15 @@ class FilterDataTest extends AbstractProductFiltersTest {
 		$key_method->setAccessible( true );
 
 		$rename = static function ( array $params ): array {
-			$params['product_brand'] = 'wc_brands';
+			$params['taxonomy']['product_brand'] = 'wc_brands';
 			return $params;
 		};
-		add_filter( 'woocommerce_product_filter_taxonomy_params', $rename );
+		add_filter( 'woocommerce_product_filter_params', $rename );
 
 		$renamed_key = $key_method->invoke( $this->sut, $query_vars, 'price' );
 		$unfiltered  = (array) $this->sut->get_filtered_price( $query_vars );
 
-		remove_filter( 'woocommerce_product_filter_taxonomy_params', $rename );
+		remove_filter( 'woocommerce_product_filter_params', $rename );
 		$this->clear_params_cache();
 
 		$this->assertNotSame( $renamed_key, $key_method->invoke( $this->sut, $query_vars, 'price' ) );

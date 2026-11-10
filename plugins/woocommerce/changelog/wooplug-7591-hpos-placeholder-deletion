@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep order items intact on HPOS stores when an order's placeholder post is deleted through WordPress functions.

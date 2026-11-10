@@ -106,7 +106,9 @@ describe( 'SettingsPaymentsMain', () => {
 		);
 
 		expect(
-			screen.getByRole( 'link', { name: 'More payment options' } )
+			screen.getByRole( 'link', {
+				name: 'More payment options (opens in a new tab)',
+			} )
 		).toHaveAttribute(
 			'href',
 			'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations&country=BR'

@@ -480,12 +480,12 @@ export const getPluginActionErrorMessage = (
 					/* translators: %s: payment provider name (e.g. Visa Acceptance Solutions) */
 					__( 'Could not install %s.', 'woocommerce' ),
 					title
-			  )
+				)
 			: sprintf(
 					/* translators: %s: payment provider name (e.g. Visa Acceptance Solutions) */
 					__( 'Could not activate %s.', 'woocommerce' ),
 					title
-			  );
+				);
 
 	const rejection =
 		typeof error === 'object' && error !== null

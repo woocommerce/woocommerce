@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Admin;
 
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
@@ -69,7 +70,9 @@ class ListTable extends \WP_List_Table {
 	/**
 	 * Eligibility service.
 	 *
-	 * @var EligibilityService
+	 * @deprecated 11.3.0 No longer used by this class. Will be removed in a future version.
+	 *
+	 * @var EligibilityService|null
 	 */
 	public $eligibility_service;
 
@@ -77,6 +80,8 @@ class ListTable extends \WP_List_Table {
 	 * Init.
 	 *
 	 * @internal
+	 *
+	 * @deprecated 11.3.0 No longer used by this class. Will be removed in a future version.
 	 *
 	 * @param EligibilityService $eligibility_service Eligibility service.
 	 */
@@ -200,8 +205,8 @@ class ListTable extends \WP_List_Table {
 			return;
 		}
 
-		$name                     = $product->get_name();
-		$formatted_variation_list = $this->get_product_formatted_variation_list( true );
+		$name                     = $product->get_title();
+		$formatted_variation_list = $notification->get_product_formatted_variation_list( true );
 
 		if ( $formatted_variation_list ) {
 			/* translators: product name, identifier */
@@ -377,8 +382,10 @@ class ListTable extends \WP_List_Table {
 			$filter  = absint( wp_unslash( $_GET['customer_stock_notifications_product_filter'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$product = wc_get_product( $filter );
 			if ( $product instanceof \WC_Product ) {
-				$target_ids               = $this->eligibility_service->get_target_product_ids( $product );
-				$query_args['product_id'] = $target_ids;
+				$children                 = $product->get_children();
+				$query_args['product_id'] = $product->is_type( ProductType::VARIABLE )
+					? array_merge( array( $product->get_id() ), is_array( $children ) ? $children : array() )
+					: array( $product->get_id() );
 			} else {
 				NotificationsPage::add_notice( __( 'Invalid product selected.', 'woocommerce' ), 'error' );
 			}

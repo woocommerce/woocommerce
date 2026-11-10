@@ -246,7 +246,7 @@ export const pluginInstallerMachine = createMachine(
 								(
 									event as DoneActorEvent< InstallAndActivateSuccessResponse >
 								 ).output.data.install_time[
-									plugin.replace( ':alt', '' )
+									getPluginSlug( plugin )
 								] || 0,
 						},
 					];

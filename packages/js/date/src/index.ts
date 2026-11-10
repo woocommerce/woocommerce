@@ -1249,6 +1249,48 @@ export function getDateFormatsForInterval(
 	}
 }
 
+const defaultShortDateFormat = 'MM/DD/YYYY';
+
+/**
+ * Pads single "D" and "M" tokens to "DD" and "MM", leaving literals, "Do",
+ * "DDD" and the month name tokens alone. Strict parsing rejects a
+ * leading zero for "D" and "M", but the hint and formatted dates both pad.
+ *
+ * @param {string} format Moment.js date format.
+ * @return {string} Format with single day and month tokens padded.
+ */
+function padShortDateTokens( format: string ) {
+	return format.replace( /\[[^[]*\]|\\?(?:D+o?|M+o?)/g, ( token ) => {
+		if ( token === 'D' ) {
+			return 'DD';
+		}
+		return token === 'M' ? 'MM' : token;
+	} );
+}
+
+/**
+ * Returns the translated Moment.js format for typing a date, like "DD/MM/YYYY".
+ * Some translations aren't Moment.js formats (e.g. "MM/DD/RRRR"), so fall back
+ * to "MM/DD/YYYY" unless the translation formats and parses a date back to itself.
+ *
+ * @return {string} Moment.js date format for date inputs.
+ */
+export function getShortDateFormat() {
+	const format = padShortDateTokens(
+		/* translators: Moment.js date format for typed dates. Keep the DD, MM and YYYY tokens. */
+		__( 'MM/DD/YYYY', 'woocommerce' )
+	);
+	// Localized tokens ("L", "l", "LT", ...) round-trip, but loadLocaleData()
+	// would then define "L" in terms of itself.
+	if ( /[Ll]/.test( format.replace( /\[[^[]*\]|\\./g, '' ) ) ) {
+		return defaultShortDateFormat;
+	}
+	// Created per call so month names format and parse in the current locale.
+	const checkDate = moment( '2001-02-03', isoDateFormat );
+	const parsed = moment( checkDate.format( format ), format, true );
+	return parsed.isSame( checkDate, 'day' ) ? format : defaultShortDateFormat;
+}
+
 /**
  * Gutenberg's moment instance is loaded with i18n values, which are
  * PHP date formats, ie 'LLL: "F j, Y g:i a"'. Override those with translations
@@ -1269,7 +1311,7 @@ export function loadLocaleData( {
 	if ( moment.locale() !== 'en' ) {
 		moment.updateLocale( userLocale, {
 			longDateFormat: {
-				L: __( 'MM/DD/YYYY', 'woocommerce' ),
+				L: getShortDateFormat(),
 				LL: __( 'MMMM D, YYYY', 'woocommerce' ),
 				LLL: __( 'D MMMM YYYY LT', 'woocommerce' ),
 				LLLL: __( 'dddd, D MMMM YYYY LT', 'woocommerce' ),
@@ -1352,6 +1394,25 @@ export function isLeapYear( year: number ) {
 }
 
 /**
+ * Get the calendar year of a date string, or NaN if the date is invalid.
+ *
+ * Date-only ISO strings (YYYY, YYYY-MM, YYYY-MM-DD) are parsed as UTC
+ * midnight, so getFullYear() returns the previous year west of UTC on Jan 1.
+ * For those, use the year as written.
+ *
+ * @param {string} date Date string.
+ * @return {number} The year.
+ */
+function getYear( date: string ) {
+	const parsed = new Date( date );
+	if ( isNaN( parsed.getTime() ) ) {
+		return NaN;
+	}
+	const dateOnly = /^(\d{4})(?:-\d{2}(?:-\d{2})?)?$/.exec( date );
+	return dateOnly ? Number( dateOnly[ 1 ] ) : parsed.getFullYear();
+}
+
+/**
  * Checks whether a date range contains leap year.
  *
  * @param {string} startDate Start date
@@ -1359,9 +1420,8 @@ export function isLeapYear( year: number ) {
  * @return {boolean} True if date range contains a leap year
  */
 export function containsLeapYear( startDate: string, endDate: string ) {
-	// Parse the input dates to get the years
-	const startYear = new Date( startDate ).getFullYear();
-	const endYear = new Date( endDate ).getFullYear();
+	const startYear = getYear( startDate );
+	const endYear = getYear( endDate );
 
 	if ( ! isNaN( startYear ) && ! isNaN( endYear ) ) {
 		// Check each year in the range

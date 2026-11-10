@@ -142,8 +142,7 @@
 	margin-right: $gap * 0.5;
 }
 
-.wc-block-components-review-list-item__product
-	+ .wc-block-components-review-list-item__author {
+.wc-block-components-review-list-item__product + .wc-block-components-review-list-item__author {
 	font-weight: normal;
 	order: 4;
 }
@@ -152,9 +151,7 @@
 	order: 5;
 }
 
-.wc-block-components-review-list-item__product
-	+ .wc-block-components-review-list-item__author
-	+ .wc-block-components-review-list-item__published-date {
+.wc-block-components-review-list-item__product + .wc-block-components-review-list-item__author + .wc-block-components-review-list-item__published-date {
 	padding-left: $gap * 0.5;
 	position: relative;
 
@@ -172,11 +169,8 @@
 	}
 }
 
-.wc-block-components-review-list-item__author:first-child
-	+ .wc-block-components-review-list-item__published-date,
-.wc-block-components-review-list-item__rating
-	+ .wc-block-components-review-list-item__author
-	+ .wc-block-components-review-list-item__published-date {
+.wc-block-components-review-list-item__author:first-child + .wc-block-components-review-list-item__published-date,
+.wc-block-components-review-list-item__rating + .wc-block-components-review-list-item__author + .wc-block-components-review-list-item__published-date {
 	&::before {
 		display: none;
 	}

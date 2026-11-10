@@ -10,6 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 
 /**
@@ -61,12 +62,13 @@ class WC_Download_Handler {
 		$downloads  = $product ? $product->get_downloads() : array();
 		$data_store = WC_Data_Store::load( 'customer-download' );
 
-		$key = empty( $_GET['key'] ) ? '' : sanitize_text_field( wp_unslash( $_GET['key'] ) );
+		$key       = empty( $_GET['key'] ) ? '' : sanitize_text_field( wp_unslash( $_GET['key'] ) );
+		$order_key = empty( $_GET['order'] ) ? '' : wc_clean( wp_unslash( $_GET['order'] ) );
 
 		if (
 			! $product
 			|| empty( $key )
-			|| empty( $_GET['order'] )
+			|| empty( $order_key )
 			|| ! isset( $downloads[ $key ] )
 			|| ! $downloads[ $key ]->get_enabled()
 		) {
@@ -78,7 +80,7 @@ class WC_Download_Handler {
 			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
 		}
 
-		$order_id = wc_get_order_id_by_order_key( wc_clean( wp_unslash( $_GET['order'] ) ) );
+		$order_id = wc_get_order_id_by_order_key( $order_key );
 		$order    = wc_get_order( $order_id );
 
 		if ( isset( $_GET['email'] ) ) {
@@ -95,10 +97,16 @@ class WC_Download_Handler {
 			}
 		}
 
+		$user_email = sanitize_email( str_replace( ' ', '+', $email_address ) );
+
+		if ( empty( $user_email ) ) {
+			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
+		}
+
 		$download_ids = $data_store->get_downloads(
 			array(
-				'user_email'  => sanitize_email( str_replace( ' ', '+', $email_address ) ),
-				'order_key'   => wc_clean( wp_unslash( $_GET['order'] ) ),
+				'user_email'  => $user_email,
+				'order_key'   => $order_key,
 				'product_id'  => $product_id,
 				'download_id' => wc_clean( preg_replace( '/\s+/', ' ', wp_unslash( $_GET['key'] ) ) ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The key is matched against the product's download list above and wc_clean() normalizes it before the lookup.
 				'orderby'     => 'downloads_remaining',
@@ -563,7 +571,7 @@ class WC_Download_Handler {
 				);
 				self::download_file_redirect( $file_path );
 			} else {
-				self::download_error( __( 'File not found', 'woocommerce' ) );
+				self::download_error( __( 'File not found', 'woocommerce' ), '', 404 );
 			}
 		}
 
@@ -771,7 +779,7 @@ class WC_Download_Handler {
 
 		if ( isset( $download_range['is_range_request'] ) && true === $download_range['is_range_request'] ) {
 			if ( false === $download_range['is_range_valid'] ) {
-				header( 'HTTP/1.1 416 Requested Range Not Satisfiable' );
+				status_header( 416 );
 				header( 'Content-Range: bytes 0-' . ( $file_size - 1 ) . '/' . $file_size );
 				exit;
 			}
@@ -780,7 +788,7 @@ class WC_Download_Handler {
 			$end    = $download_range['start'] + $download_range['length'] - 1;
 			$length = $download_range['length'];
 
-			header( 'HTTP/1.1 206 Partial Content' );
+			status_header( 206 );
 			header( "Accept-Ranges: 0-$file_size" );
 			header( "Content-Range: bytes $start-$end/$file_size" );
 			header( "Content-Length: $length" );
@@ -807,14 +815,47 @@ class WC_Download_Handler {
 	 * Can prevent errors, for example: transfer closed with 3 bytes remaining to read.
 	 */
 	private static function clean_buffers() {
-		if ( ob_get_level() ) {
-			$levels = ob_get_level();
-			for ( $i = 0; $i < $levels; $i++ ) {
-				@ob_end_clean(); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+		foreach ( array_reverse( ob_get_status( true ) ) as $buffer ) {
+			$flags = $buffer['flags'];
+
+			if ( $flags & PHP_OUTPUT_HANDLER_REMOVABLE ) {
+				ob_end_clean();
+				continue;
 			}
-		} else {
-			@ob_end_clean(); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+
+			// This buffer can't be removed, and the ones below it can't be reached, so the file has to go through them.
+			if ( $flags & PHP_OUTPUT_HANDLER_CLEANABLE ) {
+				ob_clean();
+			} elseif ( $buffer['buffer_used'] > 0 ) {
+				wc_get_logger()->warning(
+					sprintf(
+						/* translators: %1$s: output buffer handler name, %2$d: number of bytes. */
+						__( 'Output buffer "%1$s" cannot be removed or cleaned, so %2$d bytes of earlier output will be sent before the downloaded file.', 'woocommerce' ),
+						$buffer['name'],
+						$buffer['buffer_used']
+					)
+				);
+			}
+
+			return;
 		}
+	}
+
+	/**
+	 * Send the output so far to the web server.
+	 *
+	 * PHP's flush() only pushes its own write buffer, so a remaining output buffer has to be flushed into it first.
+	 * Only call this after file data has been output: some servers send the headers on flush(), and a read that
+	 * fails before any data must still be able to send an error page instead.
+	 */
+	private static function flush_output(): void {
+		$buffer = ob_get_status();
+
+		if ( $buffer && ( $buffer['flags'] & PHP_OUTPUT_HANDLER_FLUSHABLE ) ) {
+			ob_flush();
+		}
+
+		flush();
 	}
 
 	/**
@@ -911,12 +952,11 @@ class WC_Download_Handler {
 				}
 
 				echo $chunk; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Download chunks are raw binary data and must not be HTML-escaped.
-				$output_sent = $output_sent || '' !== $chunk;
-				$p           = @ftell( $handle ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged,WordPress.PHP.NoSilencedErrors.Discouraged
+				$p = @ftell( $handle ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged,WordPress.PHP.NoSilencedErrors.Discouraged
 
-				if ( ob_get_length() ) {
-					ob_flush();
-					flush();
+				if ( '' !== $chunk ) {
+					$output_sent = true;
+					self::flush_output();
 				}
 			}
 		} else {
@@ -929,10 +969,9 @@ class WC_Download_Handler {
 				}
 
 				echo $chunk; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Download chunks are raw binary data and must not be HTML-escaped.
-				$output_sent = $output_sent || '' !== $chunk;
-				if ( ob_get_length() ) {
-					ob_flush();
-					flush();
+				if ( '' !== $chunk ) {
+					$output_sent = true;
+					self::flush_output();
 				}
 			}
 		}
@@ -977,7 +1016,7 @@ class WC_Download_Handler {
 	 * @param string  $title   Error title.
 	 * @param integer $status  Error status.
 	 */
-	private static function download_error( $message, $title = '', $status = 404 ) {
+	private static function download_error( $message, $title = '', $status = 403 ) {
 		/*
 		 * Since we will now render a message instead of serving a download, we should unwind some of the previously set
 		 * headers.
@@ -1005,7 +1044,6 @@ class WC_Download_Handler {
 	 * @param bool                     $defer           If tracking the download should be deferred.
 	 *
 	 * @return void
-	 * @throws Exception If the active version of Action Scheduler is less than 3.6.0.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
@@ -1036,13 +1074,7 @@ class WC_Download_Handler {
 			 */
 			$window = absint( apply_filters( 'woocommerce_partial_download_tracking_window', 30 * MINUTE_IN_SECONDS, $download->get_id() ) );
 
-			// If we do not have Action Scheduler 3.6.0+ (this would be an unexpected scenario) then we cannot
-			// track partial downloads, because we require support for unique actions.
-			if ( version_compare( ActionScheduler_Versions::instance()->latest_version(), '3.6.0', '<' ) ) {
-				throw new Exception( 'Support for unique scheduled actions is not currently available.' );
-			}
-
-			as_schedule_single_action(
+			ActionSchedulerUtil::schedule_single(
 				time() + $window,
 				self::TRACK_DOWNLOAD_CALLBACK,
 				array(
@@ -1061,7 +1093,7 @@ class WC_Download_Handler {
 					'id'       => $download->get_id(),
 					'user_id'  => $user_id,
 					'ip'       => $user_ip_address,
-					'deferred' => $defer ? 'yes' : 'no',
+					'deferred' => wc_bool_to_string( $defer ),
 				)
 			);
 		}

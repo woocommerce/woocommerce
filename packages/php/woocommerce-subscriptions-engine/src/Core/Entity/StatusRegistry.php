@@ -1,10 +1,10 @@
 <?php
 /**
- * StatusRegistry - the set of registered contract and cycle statuses.
+ * StatusRegistry - the set of registered contract, cycle and plan statuses.
  *
  * Statuses are opaque engine data: the engine ships a default set per kind
- * ({@see ContractStatus::get_defaults()}, {@see CycleStatus::get_defaults()}) and
- * extensions may register more. The registry holds slugs only - no labels, no
+ * ({@see ContractStatus::get_defaults()}, {@see CycleStatus::get_defaults()},
+ * {@see PlanStatus::get_defaults()}) and extensions may register more. The registry holds slugs only - no labels, no
  * transitions, no meaning - and is global (not per owner). Registration is the
  * write-path allowlist: entity setters and the cycle status write refuse a slug
  * that is not registered. Stored values outside the registry (for example one
@@ -40,6 +40,11 @@ final class StatusRegistry {
 	public const KIND_CYCLE = 'cycle';
 
 	/**
+	 * Plan status kind.
+	 */
+	public const KIND_PLAN = 'plan';
+
+	/**
 	 * Longest accepted slug (the status columns are `varchar(20)`).
 	 */
 	private const MAX_LENGTH = 20;
@@ -67,7 +72,7 @@ final class StatusRegistry {
 	 * Idempotent: registering a default or an already-registered slug changes
 	 * nothing.
 	 *
-	 * @param string $kind One of {@see self::KIND_CONTRACT} or {@see self::KIND_CYCLE}.
+	 * @param string $kind One of {@see self::KIND_CONTRACT}, {@see self::KIND_CYCLE} or {@see self::KIND_PLAN}.
 	 * @param string $slug Status slug; must satisfy {@see self::is_valid_slug()}.
 	 * @throws InvalidArgumentException When the kind is unknown or the slug is malformed.
 	 */
@@ -95,7 +100,7 @@ final class StatusRegistry {
 	 * Whether `$slug` is a registered status (a default or an extension
 	 * registration) for `$kind`.
 	 *
-	 * @param string $kind One of {@see self::KIND_CONTRACT} or {@see self::KIND_CYCLE}.
+	 * @param string $kind One of {@see self::KIND_CONTRACT}, {@see self::KIND_CYCLE} or {@see self::KIND_PLAN}.
 	 * @param string $slug Status slug.
 	 * @throws InvalidArgumentException When the kind is unknown.
 	 */
@@ -107,14 +112,24 @@ final class StatusRegistry {
 	 * Every registered status for `$kind`: the engine defaults first, then
 	 * extension registrations in registration order.
 	 *
-	 * @param string $kind One of {@see self::KIND_CONTRACT} or {@see self::KIND_CYCLE}.
+	 * @param string $kind One of {@see self::KIND_CONTRACT}, {@see self::KIND_CYCLE} or {@see self::KIND_PLAN}.
 	 * @return array<int, string>
 	 * @throws InvalidArgumentException When the kind is unknown.
 	 */
 	public static function get_all( string $kind ): array {
 		self::assert_known_kind( $kind );
 
-		$defaults = self::KIND_CONTRACT === $kind ? ContractStatus::get_defaults() : CycleStatus::get_defaults();
+		switch ( $kind ) {
+			case self::KIND_CONTRACT:
+				$defaults = ContractStatus::get_defaults();
+				break;
+			case self::KIND_CYCLE:
+				$defaults = CycleStatus::get_defaults();
+				break;
+			default:
+				$defaults = PlanStatus::get_defaults();
+				break;
+		}
 
 		return array_merge( $defaults, self::$registered[ $kind ] ?? array() );
 	}
@@ -146,7 +161,7 @@ final class StatusRegistry {
 	 * @throws InvalidArgumentException When the kind is unknown.
 	 */
 	private static function assert_known_kind( string $kind ): void {
-		if ( self::KIND_CONTRACT !== $kind && self::KIND_CYCLE !== $kind ) {
+		if ( ! in_array( $kind, array( self::KIND_CONTRACT, self::KIND_CYCLE, self::KIND_PLAN ), true ) ) {
 			throw new InvalidArgumentException(
 				sprintf( 'StatusRegistry: unknown status kind "%s".', $kind )
 			);

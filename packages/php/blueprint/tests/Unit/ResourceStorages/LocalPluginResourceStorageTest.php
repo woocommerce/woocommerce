@@ -23,7 +23,7 @@ class LocalPluginResourceStorageTest extends TestCase {
 	 */
 	protected function setUp(): void {
 		parent::setUp();
-		// Setup a temporary directory for testing.
+		// Set up a temporary directory for testing.
 		$this->test_path = sys_get_temp_dir() . '/test_plugins';
 		mkdir( $this->test_path, 0777, true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_mkdir
 		mkdir( "{$this->test_path}/plugins", 0777, true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_mkdir

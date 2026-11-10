@@ -47,7 +47,7 @@ class GenericQuery extends \WC_Object_Query {
 	public function __construct( $args, $name = null ) {
 		$this->name = $name ?? $this->name;
 
-		return parent::__construct( $args ); // phpcs:ignore Universal.CodeAnalysis.ConstructorDestructorReturn.ReturnValueFound
+		parent::__construct( $args );
 	}
 	/**
 	 * Valid fields for Products report.

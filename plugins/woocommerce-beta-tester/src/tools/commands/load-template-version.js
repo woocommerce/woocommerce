@@ -173,7 +173,7 @@ export const LoadTemplateVersion = () => {
 											value: '',
 											label: 'No versions available',
 										},
-								  ]
+									]
 						}
 						onChange={ handleVersionChange }
 						disabled={ isLoadingVersions || versions.length === 0 }

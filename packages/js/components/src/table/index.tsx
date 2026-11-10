@@ -64,7 +64,6 @@ const TableCard: React.FC< TableCardProps > = ( {
 	emptyMessage = undefined,
 	...props
 } ) => {
-	// eslint-disable-next-line no-console
 	const getShowCols = ( _headers: TableCardProps[ 'headers' ] = [] ) => {
 		return _headers
 			.map( ( { key, visible } ) => {
