@@ -76,6 +76,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		$lang_dir = WP_LANG_DIR . '/plugins/';
 		$pack     = $lang_dir . 'woo-test-plugin-fr_FR';
 		wp_mkdir_p( $lang_dir );
+		wp_delete_file( $pack . '.po' );
 		if ( null !== $installed_revision ) {
 			file_put_contents( $pack . '.po', "\"PO-Revision-Date: {$installed_revision}\\n\"\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture.
 		}
