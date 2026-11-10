@@ -6,7 +6,9 @@ Covers correct usage of `_prime_post_caches()` to reduce SQL query counts when l
 
 ### 1. Missing cache priming before iterating post-based objects
 
-**Apply when:** any `array_map` or loop fetches multiple objects by ID using `get_post()`, `wc_get_product()`, `wc_get_order()`, or any function that resolves to a `get_post()` call per item (e.g. a `format_*` helper that calls `get_post()` internally).
+**Apply when:** any `array_map` or loop fetches multiple objects by ID using `get_post()`, `wc_get_product()`, or any function that resolves to a `get_post()` call per item (e.g. a `format_*` helper that calls `get_post()` internally).
+
+**Orders are different.** `_prime_post_caches()` does not load orders stored in the HPOS tables. Replace a `wc_get_order()` loop with `WC_Order_Factory::get_orders( $order_ids )`, which batches the load on either order storage.
 
 **Correct pattern:**
 
@@ -20,7 +22,7 @@ if ( ! empty( $ids ) ) {
 
 The comment `// Prime caches to reduce future queries.` must always sit **inside** the `if` block, directly above the call. Do not place it before the `if`. Place the prime immediately before the loop or `array_map` that consumes the IDs. Exception: if a `do_action` call between the guard and the loop passes the IDs as arguments (e.g. `do_action( 'wc_before_products_starting_sales', $product_ids )`), move the prime before that action so hooked callbacks loading the same objects also benefit from the warmed cache. If the action does not receive the IDs, keep the prime directly above the loop.
 
-`_prime_post_caches()` is a WordPress internal (underscore-prefixed) that has existed since WP 4.1. The minimum supported WordPress version for WooCommerce guarantees its presence — `is_callable( '_prime_post_caches' )` guards are unnecessary and must be removed when encountered. Always wrap in `! empty()` as a readability convention; WordPress short-circuits internally before firing SQL on an empty array, so this is not a correctness requirement. The function issues a single `SELECT wp_posts.* WHERE ID IN (...)` for all non-cached IDs and a single `SELECT` for postmeta — two queries regardless of collection size, not one per ID.
+`_prime_post_caches()` is a WordPress internal (underscore-prefixed) that has existed since WP 3.4. The minimum supported WordPress version for WooCommerce guarantees its presence — `is_callable( '_prime_post_caches' )` guards are unnecessary and must be removed when encountered. Always wrap in `! empty()` as a readability convention; WordPress short-circuits internally before firing SQL on an empty array, so this is not a correctness requirement. The function issues a single `SELECT wp_posts.* WHERE ID IN (...)` for all non-cached IDs, plus batched queries for their postmeta and terms — a fixed number of queries regardless of collection size, not one per ID. Keep the default flags when priming products: `wc_get_product()` reads the `product_type` and `product_visibility` terms as well as post meta, so passing `false` for `$update_term_cache` leaves a per-product term query.
 
 ---
 
@@ -54,7 +56,7 @@ The normalization chain is the same regardless of which API you use to collect I
 
 **Form A — IDs only (no loaded objects):**
 
-Use when you have raw variation IDs and no `WC_Product_Variation` objects yet. Read attachment meta directly from the now-warm postmeta cache. `_product_image_gallery` is stored as a comma-separated string (`"12,34,56"`) — use `explode( ',', ... )`, not `maybe_unserialize`.
+Use when you have raw variation IDs and no `WC_Product_Variation` objects yet, and the render path reads the same raw meta. A variation without its own image falls back to its parent's image in `get_image_id()`; raw `_thumbnail_id` meta does not include that fallback, so use Form B when the render path uses the product getters. Read attachment meta directly from the now-warm postmeta cache. `_product_image_gallery` is stored as a comma-separated string (`"12,34,56"`) — use `explode( ',', ... )`, not `maybe_unserialize`.
 
 ```php
 if ( ! empty( $variation_ids ) ) {
@@ -111,7 +113,7 @@ if ( ! empty( $variations ) ) {
 wc_get_container()->get( \Automattic\WooCommerce\Internal\Utilities\ProductUtil::class )->prime_image_caches( $variations );
 ```
 
-`WC_Product_Variation` extends `WC_Product` so variation collections are accepted directly. Use Form B inline code only when `ProductUtil` is not available in the call context (e.g. a legacy `includes/` file that cannot reach the DI container).
+`WC_Product_Variation` extends `WC_Product` so variation collections are accepted directly. Use Form B inline code only when the helper's scope does not fit, for example when only featured images are rendered.
 
 **Scope priming to attachment IDs your code actually accesses.** Prime attachment posts only when the render path calls `get_post()`, `wp_attachment_is_image()`, `wp_get_attachment_image_src()`, or `get_the_title()` on each ID. Returning IDs as raw integers in a response array (e.g. a REST API `gallery_image_ids` field that passes IDs through without hydrating them) requires no attachment priming — the attachment `wp_posts` rows are never read.
 
@@ -184,7 +186,9 @@ Use `_prime_post_caches()` only when no such native argument exists on the data 
 
 2. **Lazy-load path** — `WC_Abstract_Order::get_items()` primes product post caches on first item load per order (`abstract-wc-order.php`, inside the `if ( ! isset( $this->items[ $group ] ) )` branch for `line_item` type).
 
-By the time an explicit `_prime_post_caches()` runs after collecting IDs from a `get_items()` loop, all product post caches are already warm on both CPT and HPOS backends.
+By the time an explicit `_prime_post_caches()` runs after collecting IDs from a `get_items()` loop, the product post caches for those items are already warm on both CPT and HPOS backends.
+
+**Two gaps to check before deleting a prime:** the lazy-load path primes the variation when an item has one, not its parent product, so code that then loads the parent of each variation still needs a batch; and items added through the `woocommerce_order_get_items` filter were never seen by either mechanism.
 
 **Example**:
 
@@ -205,7 +209,7 @@ if ( ! empty( $product_ids ) ) {
 }
 ```
 
-**Recognition pattern:** any block that (a) loops over orders, (b) calls `get_items()` or `get_items( 'line_item' )` inside that loop, and (c) collects `get_product_id()` / `get_variation_id()` values to feed into a subsequent `_prime_post_caches()` call. The entire collect-and-prime block is dead code and can be deleted.
+**Recognition pattern:** any block that (a) loops over orders, (b) calls `get_items()` or `get_items( 'line_item' )` inside that loop, and (c) collects `get_product_id()` / `get_variation_id()` values to feed into a subsequent `_prime_post_caches()` call. Unless one of the two gaps above applies, the entire collect-and-prime block is dead code and can be deleted.
 
 ---
 
@@ -215,7 +219,7 @@ if ( ! empty( $product_ids ) ) {
 
 **Why it is wrong:** `WP_Query` automatically primes the post, meta, and term caches for every post it loads (controlled by `update_post_meta_cache` and `update_post_term_cache`, both `true` by default). Calling `_prime_post_caches()` afterward is redundant.
 
-Additionally, `WP_Query::query()` returns an array of `WP_Post` objects (when no `fields` argument is set), not integer IDs. `_prime_post_caches()` internally calls `intval()` on each item — `intval( WP_Post )` returns `1`, not the post ID. The function silently misbehaves.
+Additionally, `WP_Query::query()` returns an array of `WP_Post` objects (when no `fields` argument is set), not integer IDs. `_prime_post_caches()` expects integer IDs — passed `WP_Post` objects, it primes nothing.
 
 **Do not add priming here:**
 
@@ -226,7 +230,7 @@ _prime_post_caches( $result );
 $products = array_map( 'wc_get_product', $result );
 ```
 
-Priming is only needed when starting from a raw list of IDs not loaded through `WP_Query` — see pattern 1.
+Priming is only needed when starting from a raw list of IDs — see pattern 1. That includes IDs returned by a `'fields' => 'ids'` query, which primes no caches, and queries that disabled `update_post_meta_cache` or `update_post_term_cache`.
 
 ---
 
@@ -235,5 +239,5 @@ Priming is only needed when starting from a raw list of IDs not loaded through `
 Pass `false` for the `$update_meta_cache` parameter when meta is being handled separately, to avoid double-priming:
 
 ```php
-_prime_post_caches( $order_ids, true, false ); // skip meta priming, include terms
+_prime_post_caches( $post_ids, true, false ); // skip meta priming, include terms
 ```

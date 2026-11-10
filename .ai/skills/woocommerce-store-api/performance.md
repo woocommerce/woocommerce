@@ -9,7 +9,7 @@ Any schema that serialises a **collection** of post-based objects (products, ord
 - `GET /cart` returns N cart line items, each loaded via `wc_get_product()`.
 - Any future route returning a collection of products, orders, or attachment-backed resources — each item loaded individually inside the per-item loop.
 
-Without priming, each per-item lookup hits the database individually — classic N+1.
+Without priming, each per-item lookup hits the database individually — classic N+1. Orders are the exception: under HPOS they are not posts, so batch them with `WC_Order_Factory::get_orders()` instead of `_prime_post_caches()`.
 
 ## Where to apply priming in a Store API route
 
