@@ -1,4 +1,4 @@
 Significance: patch
 Type: fixed
 
-Send the number of products in the cart as a whole number, and leave out the price of a product that has none, in analytics events.
+Count each product once in the products_count analytics property, regardless of quantity, and omit the price property for products without a price.
