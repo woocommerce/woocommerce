@@ -1047,7 +1047,6 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 
 		$price_matches = array( $external->get_id(), $variable->get_id() );
 		sort( $price_matches, SORT_NUMERIC );
-		$this->setExpectedDeprecated( 'wc_get_min_max_price_meta_query()' );
 		$this->assert_product_collection(
 			array_merge(
 				$base_query,
