@@ -681,7 +681,7 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test that an html value type tag (the default) is never touched by the Personalizer.
+	 * Test that an html value type tag (the default) is inserted untouched in the html rendering context.
 	 */
 	public function testHtmlValueTypeIsNotEscaped(): void {
 		$this->tags_registry->register(
@@ -710,10 +710,6 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertSame(
 			'<p><span class="price">10 &euro;</span></p>',
 			$this->personalizer->personalize_content( $content, Personalizer::RENDERING_CONTEXT_HTML )
-		);
-		$this->assertSame(
-			'<p><span class="price">10 &euro;</span></p>',
-			$this->personalizer->personalize_content( $content, Personalizer::RENDERING_CONTEXT_TEXT )
 		);
 		// A tag emitting raw markup, such as a tracking pixel, is inserted verbatim.
 		$this->assertSame(
@@ -952,6 +948,105 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertSame(
 			'<a href="https://shop.example/spring">Link</a>',
 			$this->personalizer->personalize_content( '<a href="http://[test/campaign-url note=&quot;a [2026]&quot;]">Link</a>' )
+		);
+	}
+
+	/**
+	 * Values of html value type tags with markup or entities, and the plain text expected in the text rendering context.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public function htmlValueInTextContextProvider(): array {
+		return array(
+			'anchor'                   => array( '<a href="https://example.com/manage">Manage</a>', '[Manage](https://example.com/manage)' ),
+			'anchor with URL as text'  => array( '<a href="https://example.com">https://example.com</a>', 'https://example.com' ),
+			'strong'                   => array( '<strong>Bold</strong> text', 'Bold text' ),
+			'line break'               => array( 'Line one<br>Line two', "Line one\nLine two" ),
+			'list'                     => array( '<ul><li>One</li><li>Two</li></ul>', "- One\n- Two" ),
+			'entities'                 => array( 'Tom &amp; Jerry&#039;s', "Tom & Jerry's" ),
+			'markup and entities'      => array( '<span class="price">10&nbsp;&euro;</span>', '10 €' ),
+			'URL with encoded query'   => array( 'https://example.com/reset?key=a&amp;login=b', 'https://example.com/reset?key=a&login=b' ),
+			'plain text'               => array( 'Plain value', 'Plain value' ),
+			'bare ampersand'           => array( 'Tom & Jerry', 'Tom & Jerry' ),
+			'less-than sign'           => array( '5 <3 you', '5 <3 you' ),
+			'whitespace in plain text' => array( "  Line one\nLine two ", "  Line one\nLine two " ),
+		);
+	}
+
+	/**
+	 * Test that an html value type tag is converted to plain text in the text rendering context,
+	 * and left untouched when it holds no markup or entities.
+	 *
+	 * @dataProvider htmlValueInTextContextProvider
+	 * @param string $value    The tag value.
+	 * @param string $expected The expected plain text.
+	 */
+	public function testHtmlValueTypeIsConvertedToTextInTextContext( string $value, string $expected ): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'html_value',
+				'test/html-value',
+				'Test',
+				function () use ( $value ) {
+					return $value;
+				}
+			)
+		);
+
+		$this->assertSame(
+			"Value: {$expected}.",
+			$this->personalizer->personalize_content( 'Value: <!--[test/html-value]-->.', Personalizer::RENDERING_CONTEXT_TEXT )
+		);
+		$this->assertSame(
+			"<p>Value: {$value}.</p>",
+			$this->personalizer->personalize_content( '<p>Value: <!--[test/html-value]-->.</p>' )
+		);
+	}
+
+	/**
+	 * Test that an html value type tag in the title is converted to plain text, while the body keeps the markup.
+	 */
+	public function testHtmlValueTypeIsConvertedToTextInTitle(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'order_number',
+				'test/order-number',
+				'Test',
+				function () {
+					return '<strong>#42</strong>';
+				}
+			)
+		);
+
+		$content = '<html><head><title>Order <!--[test/order-number]--></title></head><body><p><!--[test/order-number]--></p></body></html>';
+		$this->assertSame(
+			'<html><head><title>Order #42</title></head><body><p><strong>#42</strong></p></body></html>',
+			$this->personalizer->personalize_content( $content )
+		);
+	}
+
+	/**
+	 * Test that a text value type tag is not converted in the text rendering context.
+	 */
+	public function testTextValueTypeIsNotConvertedInTextContext(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'snippet',
+				'test/snippet',
+				'Test',
+				function () {
+					return 'Use <strong> &amp; <em>';
+				},
+				array(),
+				null,
+				array(),
+				Personalization_Tag::VALUE_TYPE_TEXT
+			)
+		);
+
+		$this->assertSame(
+			'Code: Use <strong> &amp; <em>',
+			$this->personalizer->personalize_content( 'Code: <!--[test/snippet]-->', Personalizer::RENDERING_CONTEXT_TEXT )
 		);
 	}
 

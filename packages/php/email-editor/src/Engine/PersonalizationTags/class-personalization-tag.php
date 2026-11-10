@@ -16,7 +16,9 @@ namespace Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags;
 class Personalization_Tag {
 	/**
 	 * Value type for tags whose callback returns an HTML fragment appropriate to the rendering
-	 * context it receives. The Personalizer inserts the value untouched — the callback owns escaping.
+	 * context it receives. The Personalizer inserts the value untouched — the callback owns escaping —
+	 * except in the text rendering context, where a value with markup or entities is converted to
+	 * plain text (links become "[text](url)", line breaks and list items become lines).
 	 */
 	public const VALUE_TYPE_HTML = 'html';
 

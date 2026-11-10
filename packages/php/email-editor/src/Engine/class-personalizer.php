@@ -13,6 +13,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\HTML_Tag_Processor;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Html2Text;
 
 /**
  * Class for replacing personalization tags with their values in the email content.
@@ -169,7 +170,7 @@ class Personalizer {
 	/**
 	 * Set a callback intercepting each resolved personalization tag value before it is written.
 	 *
-	 * The interceptor receives the resolved value (after any context-driven escaping),
+	 * The interceptor receives the resolved value (after any context-driven escaping or plain-text conversion),
 	 * the raw source text being replaced (the trimmed tag token including arguments,
 	 * the raw data-link-href attribute value, or the tag token found inside a plain href),
 	 * and the rendering context of the replacement site — one of the RENDERING_CONTEXT_HTML,
@@ -257,6 +258,8 @@ class Personalizer {
 				$value = $this->get_tag_value( $tag, $rendering_context, $arguments );
 				if ( self::RENDERING_CONTEXT_HTML === $rendering_context && Personalization_Tag::VALUE_TYPE_TEXT === $tag->get_value_type() ) {
 					$value = esc_html( $value );
+				} elseif ( self::RENDERING_CONTEXT_TEXT === $rendering_context && Personalization_Tag::VALUE_TYPE_HTML === $tag->get_value_type() ) {
+					$value = $this->convert_html_value_to_text( (string) $value );
 				}
 				$value = $this->intercept_value( (string) $value, trim( $modifiable_text ), $rendering_context );
 				$content_processor->replace_token( $value );
@@ -323,6 +326,21 @@ class Personalizer {
 			},
 			$content
 		);
+	}
+
+	/**
+	 * Convert an HTML tag value to plain text the same way the Renderer converts the plain-text body.
+	 * Values without markup or entities are returned untouched, so a bare "&" or "<3" and the
+	 * value's own whitespace survive.
+	 *
+	 * @param string $value The tag value.
+	 * @return string The plain-text value.
+	 */
+	private function convert_html_value_to_text( string $value ): string {
+		if ( ! preg_match( '/<[a-z!\/]|&(?:#\d+|#x[0-9a-f]+|[a-z][a-z0-9]*);/i', $value ) ) {
+			return $value;
+		}
+		return Html2Text::convert( $value, array( 'ignore_errors' => true ) );
 	}
 
 	/**
