@@ -51,6 +51,6 @@ describe( ABILITY, () => {
 		refused(
 			ABILITY,
 			{ id: 999999999, email: 'invoice' },
-			/permission/i
+			/Order 999999999 does not exist/
 		) );
 } );

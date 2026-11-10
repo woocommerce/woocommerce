@@ -1,18 +1,14 @@
 {
 	"name": "woocommerce/product-terms-query",
 	"label": "Query product terms",
-	"description": "Find product categories, tags or brands. Use include to retrieve specific term IDs.",
+	"description": "Find product categories, tags, brands or the terms of a global attribute, such as pa_color. Use include to retrieve specific term IDs.",
 	"input_schema": {
 		"type": "object",
 		"properties": {
 			"taxonomy": {
-				"description": "Product taxonomy to query.",
+				"description": "Product taxonomy to query: product_cat, product_tag, product_brand, or the slug of a global attribute from product-attributes-query.",
 				"type": "string",
-				"enum": [
-					"product_cat",
-					"product_tag",
-					"product_brand"
-				]
+				"pattern": "^(product_cat|product_tag|product_brand|pa_[^\\s]+)$"
 			},
 			"include": {
 				"description": "Limit results to these term IDs. Use one ID to retrieve a single term.",
@@ -56,6 +52,7 @@
 				"default": false
 			},
 			"orderby": {
+				"description": "Defaults to name, or for a pa_* taxonomy to the order set on the attribute.",
 				"type": "string",
 				"enum": [
 					"id",
@@ -65,8 +62,7 @@
 					"term_group",
 					"description",
 					"count"
-				],
-				"default": "name"
+				]
 			},
 			"order": {
 				"type": "string",

@@ -49,5 +49,9 @@ describe( ABILITY, () => {
 		refused( ABILITY, { id }, /note is a required property/ ) );
 
 	test( 'refuses an unknown order', () =>
-		refused( ABILITY, { id: 999999999, note: 'Lost' }, /permission/i ) );
+		refused(
+			ABILITY,
+			{ id: 999999999, note: 'Lost' },
+			/Order 999999999 does not exist/
+		) );
 } );

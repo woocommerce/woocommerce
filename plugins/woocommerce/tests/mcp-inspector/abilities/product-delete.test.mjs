@@ -21,8 +21,8 @@ describe( ABILITY, () => {
 
 	test( 'moves the product to the trash by default', async () => {
 		assert.deepEqual( await execute( ABILITY, { id } ), {
-			deleted: true,
 			id,
+			status: 'trash',
 		} );
 		assert.deepEqual(
 			( await lookUp( id ) ).map( ( { status } ) => status ),
@@ -32,8 +32,8 @@ describe( ABILITY, () => {
 
 	test( 'deletes it for good with force', async () => {
 		assert.deepEqual( await execute( ABILITY, { id, force: true } ), {
-			deleted: true,
 			id,
+			status: 'deleted',
 		} );
 		await refused(
 			'woocommerce/products-query',
@@ -59,28 +59,20 @@ describe( `${ ABILITY } while another product is saved`, () => {
 	} );
 	after( () => seed( 'remove-products', { skus: SKUS } ) );
 
-	test(
-		'reports the trash only when it happened',
-		{
-			todo: 'A save that loses the deadlock still reports success.',
-		},
-		async () => {
-			const [ result ] = await Promise.allSettled( [
-				execute( ABILITY, { id: trashed.id } ),
-				execute( 'woocommerce/product-update', {
-					id: other.id,
-					name: 'MCP renamed at the same time',
-				} ),
-			] );
+	test( 'reports the trash only when it happened', async () => {
+		const [ result ] = await Promise.allSettled( [
+			execute( ABILITY, { id: trashed.id } ),
+			execute( 'woocommerce/product-update', {
+				id: other.id,
+				name: 'MCP renamed at the same time',
+			} ),
+		] );
 
-			if ( result.status === 'fulfilled' ) {
-				assert.deepEqual(
-					( await lookUp( trashed.id ) ).map(
-						( { status } ) => status
-					),
-					[ 'trash' ]
-				);
-			}
+		if ( result.status === 'fulfilled' ) {
+			assert.deepEqual(
+				( await lookUp( trashed.id ) ).map( ( { status } ) => status ),
+				[ 'trash' ]
+			);
 		}
-	);
+	} );
 } );

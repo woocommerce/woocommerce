@@ -98,6 +98,6 @@ describe( ABILITY, () => {
 		refused(
 			ABILITY,
 			{ id: 999999999, customer_note: 'Lost' },
-			/permission/i
+			/Order 999999999 does not exist/
 		) );
 } );

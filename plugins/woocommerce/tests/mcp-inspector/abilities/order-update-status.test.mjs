@@ -62,6 +62,6 @@ describe( ABILITY, () => {
 		refused(
 			ABILITY,
 			{ id: 999999999, status: 'completed' },
-			/permission/i
+			/Order 999999999 does not exist/
 		) );
 } );
