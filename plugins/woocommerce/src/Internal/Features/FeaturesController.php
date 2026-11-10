@@ -756,6 +756,16 @@ class FeaturesController {
 	}
 
 	/**
+	 * Retained for callers that invoke this method directly. It no longer registers features or fires the removed hook.
+	 *
+	 * @deprecated 11.4.0
+	 * @internal
+	 * @return void
+	 */
+	public function register_additional_features() {
+	}
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @internal
