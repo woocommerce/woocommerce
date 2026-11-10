@@ -118,6 +118,41 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox can_serve: pretty permalinks pass unless a file WooCommerce didn't write is in the way; Plain permalinks pass only with a file WooCommerce wrote.
+	 * @testWith ["/%postname%/", null, true]
+	 *           ["/%postname%/", "owned", true]
+	 *           ["/%postname%/", "foreign", false]
+	 *           ["", null, false]
+	 *           ["", "owned", true]
+	 *           ["", "foreign", false]
+	 *           ["", "not json", false]
+	 *
+	 * @param string      $structure Permalink structure.
+	 * @param string|null $file      The static file: written by WooCommerce, by someone else, not JSON, or none.
+	 * @param bool        $expected  Whether the store can serve the profile.
+	 */
+	public function test_can_serve( string $structure, ?string $file, bool $expected ): void {
+		$path = get_temp_dir() . uniqid( 'wc-ucp-' ) . '/.well-known/ucp';
+		add_filter( 'woocommerce_ucp_discovery_file_path', fn() => $path );
+		$this->set_permalink_structure( $structure );
+		if ( null !== $file ) {
+			$contents = array(
+				'owned'    => (string) wp_json_encode( array( 'links' => array( array( 'rel' => UcpDiscovery::LINK_REL ) ) ) ),
+				'foreign'  => (string) wp_json_encode( array( 'links' => array( array( 'rel' => 'self' ) ) ) ),
+				'not json' => 'not json',
+			);
+			wp_mkdir_p( dirname( $path ) );
+			file_put_contents( $path, $contents[ $file ] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		}
+
+		try {
+			$this->assertSame( $expected, UcpDiscovery::can_serve() );
+		} finally {
+			wp_delete_file( $path );
+		}
+	}
+
+	/**
 	 * Run maybe_render() for a request, capturing output and treating wp_send_json()'s exit as an exception.
 	 *
 	 * @param string $matched_rule Value of WP::$matched_rule.

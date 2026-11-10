@@ -25,6 +25,11 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	public const RULE = '^\.well-known/ucp/?$';
 
 	/**
+	 * Rel of the profile link that marks a static discovery file as one WooCommerce wrote.
+	 */
+	public const LINK_REL = 'woocommerce';
+
+	/**
 	 * Register hooks.
 	 */
 	public function register(): void {
@@ -33,20 +38,55 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Whether the store can serve `/.well-known/ucp`: the rewrite rule needs pretty permalinks.
-	 * The agent readiness checks read this too, so they flag a store that can't serve it.
+	 * Whether `/.well-known/ucp` serves WooCommerce's profile: with pretty permalinks, unless a file
+	 * WooCommerce didn't write is in the way of the rewrite rule; with Plain permalinks, only from a
+	 * static file WooCommerce wrote. The agent readiness checks read this.
 	 */
 	public static function can_serve(): bool {
 		global $wp_rewrite;
 
-		return $wp_rewrite->using_permalinks();
+		$path  = self::get_file_path();
+		$file  = is_file( $path );
+		$owned = $file && self::is_owned( $path );
+		return $wp_rewrite->using_permalinks() ? ! $file || $owned : $owned;
 	}
 
 	/**
-	 * Register the rewrite rule and renderer when UCP is enabled and the store can serve the profile.
+	 * Whether the static file was written by WooCommerce. Unreadable or non-JSON files count as not owned.
+	 *
+	 * @param string $path Absolute file path.
+	 * @return bool
+	 */
+	private static function is_owned( string $path ): bool {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$profile = is_file( $path ) ? json_decode( (string) file_get_contents( $path ), true ) : null;
+		$links   = is_array( $profile ) ? ( $profile['links'] ?? null ) : null;
+		return is_array( $links ) && in_array( self::LINK_REL, array_column( $links, 'rel' ), true );
+	}
+
+	/**
+	 * Path of the static discovery file served under Plain permalinks.
+	 *
+	 * @return string
+	 */
+	private static function get_file_path(): string {
+		/**
+		 * Filters the path of the static UCP discovery file.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param string $path Absolute file path.
+		 */
+		return (string) apply_filters( 'woocommerce_ucp_discovery_file_path', ABSPATH . '.well-known/ucp' );
+	}
+
+	/**
+	 * Register the rewrite rule and renderer when UCP is enabled and pretty permalinks are on.
 	 */
 	public function register_feature_hooks(): void {
-		$active = Utils::is_enabled() && self::can_serve();
+		global $wp_rewrite;
+
+		$active = Utils::is_enabled() && $wp_rewrite->using_permalinks();
 
 		if ( $active ) {
 			add_rewrite_rule( self::RULE, 'index.php?' . self::QUERY_VAR . '=1', 'top' );
