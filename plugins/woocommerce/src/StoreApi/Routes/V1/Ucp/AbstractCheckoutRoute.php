@@ -224,9 +224,10 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 			'phone_number'     => 'phone',
 		);
 
-		$changes = array(
+		$billing_address = $this->pick_fields( Utils::json_param( $request, 'billing_address' ), $postal_fields );
+		$changes         = array(
 			'billing'  => array_merge(
-				$this->pick_fields( Utils::json_param( $request, 'billing_address' ), $postal_fields ),
+				$billing_address,
 				$this->pick_fields(
 					Utils::json_param( $request, 'buyer' ),
 					array(
@@ -250,6 +251,7 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 		}
 
 		$customer = WC()->customer;
+		$changes  = $this->share_between_addresses( $changes, $customer, empty( $billing_address ) );
 		$props    = array();
 
 		foreach ( $changes as $type => $fields ) {
@@ -278,6 +280,40 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 		$this->cart_controller->calculate_totals();
 
 		return null;
+	}
+
+	/**
+	 * Let one address supply what the other lacks, as the storefront's "same address for billing" does.
+	 *
+	 * Billing follows a shipping change while the two still match and the request names no billing
+	 * address of its own. A name or phone held by only one address is copied to the other.
+	 *
+	 * @param array{billing: array<string, string>, shipping: array<string, string>} $changes Fields the request changes, per address.
+	 * @param \WC_Customer                                                           $customer The session customer, before the changes.
+	 * @param bool                                                                   $follow Whether billing may follow shipping.
+	 * @return array{billing: array<string, string>, shipping: array<string, string>}
+	 */
+	private function share_between_addresses( array $changes, \WC_Customer $customer, bool $follow ): array {
+		$billing  = $customer->get_billing();
+		$shipping = $customer->get_shipping();
+		$postal   = array_flip( array( 'address_1', 'address_2', 'city', 'state', 'postcode', 'country' ) );
+
+		if ( $follow && array_intersect_key( $billing, $postal ) === array_intersect_key( $shipping, $postal ) ) {
+			$changes['billing'] = array_merge( array_intersect_key( $changes['shipping'], $postal ), $changes['billing'] );
+		}
+
+		$billing  = array_merge( $billing, $changes['billing'] );
+		$shipping = array_merge( $shipping, $changes['shipping'] );
+
+		foreach ( array( 'first_name', 'last_name', 'phone' ) as $key ) {
+			if ( '' === (string) $billing[ $key ] && '' !== (string) $shipping[ $key ] ) {
+				$changes['billing'][ $key ] = (string) $shipping[ $key ];
+			} elseif ( '' === (string) $shipping[ $key ] && '' !== (string) $billing[ $key ] ) {
+				$changes['shipping'][ $key ] = (string) $billing[ $key ];
+			}
+		}
+
+		return $changes;
 	}
 
 	/**

@@ -175,7 +175,12 @@ class UcpCheckout extends ControllerTestCase {
 			'/checkout-sessions',
 			array(
 				'line_items'       => array( $line_item ?? $this->line_item( 0, 1 ) ),
-				'buyer'            => array( 'email' => 'buyer@example.com' ),
+				'buyer'            => array(
+					'email'        => 'buyer@example.com',
+					'first_name'   => 'Ada',
+					'last_name'    => 'Buyer',
+					'phone_number' => '5550100',
+				),
 				'shipping_address' => array(
 					'street_address'   => '1 Main St',
 					'address_locality' => 'San Francisco',
@@ -426,6 +431,92 @@ class UcpCheckout extends ControllerTestCase {
 		$this->assertNotSame( $first['continue_url'], $second['continue_url'] );
 		$this->assertTrue( wc_get_order( $stale )->has_status( OrderStatus::CANCELLED ), 'The order for the old cart must no longer be payable.' );
 		$this->assertTrue( wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) )->has_status( OrderStatus::PENDING ) );
+	}
+
+	/**
+	 * @testdox A shipping address no shipping method serves leaves the checkout incomplete, so no order is handed off.
+	 */
+	public function test_address_without_a_shipping_option_is_not_ready(): void {
+		$zone = new \WC_Shipping_Zone();
+		$zone->set_zone_name( 'UCP US only' );
+		$zone->add_location( 'US', 'country' );
+		$zone->save();
+		$zone->add_shipping_method( 'flat_rate' );
+
+		try {
+			$created = $this->create_ready_checkout();
+			$this->assertSame( 'ready_for_complete', $created['status'], 'A served address picks up the default rate.' );
+
+			$unserved = array(
+				'street_address'   => '1 Front St',
+				'address_locality' => 'Toronto',
+				'address_region'   => 'ON',
+				'postal_code'      => 'M5V 2T6',
+				'address_country'  => 'CA',
+			);
+			$updated  = $this->request( 'PUT', '/checkout-sessions/' . $created['id'], array( 'shipping_address' => $unserved ) )->get_data();
+
+			$this->assertSame( 'incomplete', $updated['status'] );
+			$this->assertContains( '$.shipping_address', array_column( $updated['messages'], 'path' ) );
+
+			$completed = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' )->get_data();
+			$this->assertSame( 'incomplete', $completed['status'] );
+			$this->assertArrayNotHasKey( 'continue_url', $completed );
+		} finally {
+			$zone->delete();
+		}
+	}
+
+	/**
+	 * @testdox Billing follows the shipping address, and a checkout stays incomplete until the buyer's name and phone are known.
+	 */
+	public function test_billing_follows_shipping_and_is_required(): void {
+		$body    = array(
+			'line_items'       => array( $this->line_item( 0, 1 ) ),
+			'buyer'            => array( 'email' => 'buyer@example.com' ),
+			'shipping_address' => array(
+				'street_address'   => '1 Main St',
+				'address_locality' => 'San Francisco',
+				'address_region'   => 'CA',
+				'postal_code'      => '94103',
+				'address_country'  => 'US',
+			),
+		);
+		$created = $this->request( 'POST', '/checkout-sessions', $body )->get_data();
+
+		$this->assertSame( 'incomplete', $created['status'] );
+		$this->assertContains( '$.billing_address', array_column( $created['messages'], 'path' ) );
+
+		$buyer   = array(
+			'first_name'   => 'Ada',
+			'last_name'    => 'Buyer',
+			'phone_number' => '5550100',
+		);
+		$updated = $this->request( 'PUT', '/checkout-sessions/' . $created['id'], array( 'buyer' => $buyer ) )->get_data();
+		$this->assertSame( 'ready_for_complete', $updated['status'] );
+
+		$this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' );
+		$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
+		$this->assertSame( '1 Main St', $order->get_billing_address_1() );
+		$this->assertSame( 'Ada', $order->get_shipping_first_name() );
+	}
+
+	/**
+	 * @testdox Complete refuses an order the Store API checkout validation refuses, and leaves it unpayable.
+	 */
+	public function test_complete_runs_checkout_validation(): void {
+		$refuse = static function ( $order, $errors ) {
+			$errors->add( 'refused', 'Refused by an extension.' );
+		};
+		add_action( 'woocommerce_checkout_validate_order_before_payment', $refuse, 10, 2 );
+
+		$created  = $this->create_ready_checkout();
+		$response = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' )->get_data();
+		remove_action( 'woocommerce_checkout_validate_order_before_payment', $refuse, 10 );
+
+		$this->assertSame( 'VALIDATION_ERROR', $response['messages'][0]['code'] );
+		$this->assertSame( 'Refused by an extension.', $response['messages'][0]['content'] );
+		$this->assertTrue( wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) )->has_status( OrderStatus::CHECKOUT_DRAFT ), 'The order must stay a draft, which the payment page refuses.' );
 	}
 
 	/**

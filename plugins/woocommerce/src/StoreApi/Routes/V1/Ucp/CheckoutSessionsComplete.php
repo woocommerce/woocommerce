@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\CheckoutMapper;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
@@ -103,6 +104,15 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 
 		// Remembered before the hold so a refused hold leaves a draft the next attempt reuses.
 		$this->set_draft_order_id( $order->get_id() );
+
+		try {
+			$this->order_controller->validate_order_before_payment( $order );
+		} catch ( RouteException $e ) {
+			// An order the Store API checkout would refuse must not be, or stay, payable.
+			$this->save_checkout_state( $this->cancel_handed_off_order( $state, __( 'UCP checkout session no longer passes checkout validation.', 'woocommerce' ) ) );
+
+			return $this->ucp_error( 'VALIDATION_ERROR', wp_specialchars_decode( $e->getMessage(), ENT_QUOTES ), 'recoverable', 200 );
+		}
 
 		try {
 			wc_reserve_stock_for_order( $order );

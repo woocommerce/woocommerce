@@ -79,13 +79,20 @@ class CheckoutMapper {
 			$missing['$.buyer.email'] = __( 'A buyer email is required.', 'woocommerce' );
 		}
 
+		$billing_fields = $this->missing_address_fields( (array) ( $cart['billing_address'] ?? array() ) );
+		if ( ! empty( $billing_fields ) ) {
+			/* translators: %s: comma-separated list of address field labels. */
+			$missing['$.billing_address'] = sprintf( __( 'The billing address is missing: %s.', 'woocommerce' ), implode( ', ', $billing_fields ) );
+		}
+
 		if ( ! empty( $cart['needs_shipping'] ) ) {
-			$shipping = (array) ( $cart['shipping_address'] ?? array() );
-			foreach ( array( 'address_1', 'city', 'postcode', 'country' ) as $field ) {
-				if ( '' === (string) ( $shipping[ $field ] ?? '' ) ) {
-					$missing['$.shipping_address'] = __( 'A complete shipping address is required.', 'woocommerce' );
-					break;
-				}
+			$shipping_fields = $this->missing_address_fields( (array) ( $cart['shipping_address'] ?? array() ) );
+
+			if ( ! empty( $shipping_fields ) ) {
+				/* translators: %s: comma-separated list of address field labels. */
+				$missing['$.shipping_address'] = sprintf( __( 'The shipping address is missing: %s.', 'woocommerce' ), implode( ', ', $shipping_fields ) );
+			} elseif ( ! $this->has_shipping_option( $cart ) ) {
+				$missing['$.shipping_address'] = __( 'No shipping option is available for this shipping address.', 'woocommerce' );
 			}
 		}
 
@@ -102,6 +109,49 @@ class CheckoutMapper {
 		}
 
 		return $messages;
+	}
+
+	/**
+	 * Labels of the fields an address lacks, by the rules the Store API checkout validates an order's addresses with.
+	 *
+	 * @param array $address Store API address.
+	 * @return array<string>
+	 */
+	private function missing_address_fields( array $address ): array {
+		$locales = WC()->countries->get_country_locale();
+		$default = is_array( $locales['default'] ?? null ) ? $locales['default'] : WC()->countries->get_default_address_fields();
+		$country = (array) ( $locales[ (string) ( $address['country'] ?? '' ) ] ?? array() );
+		$labels  = array();
+
+		foreach ( $default as $key => $field ) {
+			$field = wp_parse_args( (array) ( $country[ $key ] ?? array() ), (array) $field );
+
+			if ( wc_string_to_bool( $field['required'] ?? false ) && ! wc_string_to_bool( $field['hidden'] ?? false ) && '' === trim( (string) ( $address[ $key ] ?? '' ) ) ) {
+				$labels[] = (string) ( $field['label'] ?? $key );
+			}
+		}
+
+		return $labels;
+	}
+
+	/**
+	 * Whether every shipping package of the cart has a rate selected.
+	 *
+	 * The payment page takes no shipping choice, so an order handed off without one ships for free.
+	 *
+	 * @param array $cart Store API cart response.
+	 * @return bool
+	 */
+	private function has_shipping_option( array $cart ): bool {
+		$packages = (array) ( $cart['shipping_rates'] ?? array() );
+
+		foreach ( $packages as $package ) {
+			if ( ! in_array( true, array_column( (array) ( $package['shipping_rates'] ?? array() ), 'selected' ), true ) ) {
+				return false;
+			}
+		}
+
+		return ! empty( $packages );
 	}
 
 	/**
