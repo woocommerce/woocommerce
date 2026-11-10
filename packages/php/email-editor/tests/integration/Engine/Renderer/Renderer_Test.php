@@ -69,15 +69,10 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$theme_controller_mock->method( 'get_styles' )->willReturn( $styles );
 		$theme_controller_mock->method( 'get_layout_settings' )->willReturn( array( 'contentSize' => '660px' ) );
 
-		// Create a mock for Personalization_Tags_Registry.
-		$personalization_tags_registry_mock = $this->createMock( \Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry::class );
-		$personalization_tags_registry_mock->method( 'get_all' )->willReturn( array() );
-
 		$this->renderer = $this->getServiceWithOverrides(
 			Renderer::class,
 			array(
-				'theme_controller'              => $theme_controller_mock,
-				'personalization_tags_registry' => $personalization_tags_registry_mock,
+				'theme_controller' => $theme_controller_mock,
 			)
 		);
 
@@ -442,27 +437,6 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test that rendering preserves personalization tags.
 	 */
 	public function testItPreservesPersonalizationTags(): void {
-		$registry = new \Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry(
-			$this->di_container->get( \Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger::class )
-		);
-		$registry->register(
-			new \Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag(
-				'Customer Username',
-				'[woocommerce/customer-username]',
-				'Customer',
-				function () {
-					return '';
-				}
-			)
-		);
-
-		$this->renderer = $this->getServiceWithOverrides(
-			Renderer::class,
-			array(
-				'personalization_tags_registry' => $registry,
-			)
-		);
-
 		$this->email_post->post_content = '<!-- wp:paragraph --><p><!--[woocommerce/customer-username]--><!--[woocommerce/customer-username default="john"]--></p><!-- /wp:paragraph -->';
 		wp_update_post(
 			array(
@@ -713,35 +687,13 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	 * fail for an unrelated reason.
 	 */
 	public function testItRestoresMoreThanTenPersonalizationTagsInTextVersion(): void {
-		$registry = new Personalization_Tags_Registry(
-			$this->di_container->get( \Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger::class )
-		);
-
 		$paragraphs = array();
 		$expected   = array();
 		for ( $i = 0; $i < 14; $i++ ) {
-			$token = 'renderer-test/tag-' . $i;
-			$registry->register(
-				new Personalization_Tag(
-					'Renderer Test Tag ' . $i,
-					'[' . $token . ']',
-					'Renderer Test',
-					function () use ( $i ) {
-						return 'value-' . $i;
-					}
-				)
-			);
+			$token        = 'renderer-test/tag-' . $i;
 			$paragraphs[] = '<!-- wp:paragraph --><p>Field ' . $i . ': <!--[' . $token . ']--></p><!-- /wp:paragraph -->';
 			$expected[]   = '<!--[' . $token . ']-->';
 		}
-
-		// The renderer built in setUp() uses a registry mock with no tags, so it preserves nothing.
-		$this->renderer = $this->getServiceWithOverrides(
-			Renderer::class,
-			array(
-				'personalization_tags_registry' => $registry,
-			)
-		);
 
 		// @phpstan-ignore-next-line PHPStan is not aware of the register_block_template function's side effects.
 		register_block_template(
@@ -771,7 +723,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Render the given post content with a registry holding one tag, and return the registry and the text version.
+	 * Render the given post content and return the text version, with a registry holding one tag for the Personalizer.
 	 *
 	 * @param string $content Post content.
 	 * @return array{0: Personalization_Tags_Registry, 1: string}
@@ -790,13 +742,6 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 				}
 			)
 		);
-		$this->renderer = $this->getServiceWithOverrides(
-			Renderer::class,
-			array(
-				'personalization_tags_registry' => $registry,
-			)
-		);
-
 		$templates_registry = \WP_Block_Templates_Registry::get_instance();
 		if ( ! $templates_registry->is_registered( 'renderer-tests//test-email-template-plain-text' ) ) {
 			$templates_registry->register(
@@ -814,8 +759,8 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test that a tag whose plugin did not register it before rendering stays in the text version,
-	 * so it can still be personalized later instead of disappearing.
+	 * Test that the text version keeps the token of a tag that is not registered, so it can still be
+	 * personalized later, when the plugin has registered it, instead of disappearing.
 	 */
 	public function testItKeepsTagsUnknownAtRenderTimeInTextVersion(): void {
 		list( , $text ) = $this->render_with_link_tag( '<!-- wp:paragraph --><p>Hi <!--[other-plugin/first-name]-->, welcome.</p><!-- /wp:paragraph -->' );
@@ -835,5 +780,18 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			'See [My account](https://shop.example/account?a=1&b=2), [Orders](https://shop.example/account?a=1&b=2) or [Returns](https://shop.example/account?a=1&b=2).',
 			$personalizer->personalize_content( $text, Personalizer::RENDERING_CONTEXT_TEXT )
 		);
+	}
+
+	/**
+	 * Test that a link whose URL is a tag never leaves a raw tag in the personalized text version.
+	 */
+	public function testItLeavesNoRawTagInTextVersionLinks(): void {
+		list( $registry, $text ) = $this->render_with_link_tag(
+			'<!-- wp:paragraph --><p>A <a data-link-href="[renderer-test/account-url note=\'x\']">Account</a>, B <a data-link-href="[other-plugin/url]">Orders</a>, C <a href="#" data-link-href="[renderer-test/account-url]"><img src="https://shop.example/logo.png"></a>.</p><!-- /wp:paragraph -->'
+		);
+		$personalizer            = new Personalizer( $registry );
+		$personalized            = $personalizer->personalize_content( $text, Personalizer::RENDERING_CONTEXT_TEXT );
+		$this->assertStringContainsString( 'A [Account](https://shop.example/account?a=1&b=2), B Orders, C .', $personalized );
+		$this->assertStringNotContainsString( '[other-plugin/url]', $personalized );
 	}
 }

@@ -76,8 +76,6 @@ class Renderer {
 	 * @param Theme_Controller              $theme_controller Theme controller.
 	 * @param Personalization_Tags_Registry $personalization_tags_registry Personalization tags registry. No longer used.
 	 * @param Process_Manager               $process_manager Process manager.
-	 *
-	 * @phpstan-ignore constructor.unusedParameter (The registry is no longer needed, but integrators construct the Renderer directly, so the signature stays.)
 	 */
 	public function __construct(
 		Content_Renderer $content_renderer,
@@ -92,6 +90,8 @@ class Renderer {
 		$this->theme_controller = $theme_controller;
 		$this->css_inliner      = $css_inliner;
 		$this->process_manager  = $process_manager;
+		// The registry is no longer needed, but integrators construct the Renderer directly, so the signature stays.
+		unset( $personalization_tags_registry );
 	}
 
 	/**
@@ -258,7 +258,6 @@ class Renderer {
 
 		// Preserve personalization tags by temporarily replacing them with unique placeholders.
 		$template = $this->preserve_personalization_tags( $template );
-		$template = $this->use_link_tags_as_href( $template );
 
 		$result = Html2Text::convert( (string) $template, array( 'ignore_errors' => true ) );
 		if ( ! $result ) {
@@ -269,24 +268,6 @@ class Renderer {
 		$result = $this->restore_personalization_tags( $result );
 
 		return $result;
-	}
-
-	/**
-	 * Copies a link's data-link-href (a tag used as the whole URL) into its href, so the text version
-	 * keeps the tag as the link target and the Personalizer can replace it there.
-	 *
-	 * @param string $template HTML template.
-	 * @return string
-	 */
-	private function use_link_tags_as_href( string $template ): string {
-		$processor = new \WP_HTML_Tag_Processor( $template );
-		while ( $processor->next_tag( array( 'tag_name' => 'a' ) ) ) {
-			$data_link_href = $processor->get_attribute( 'data-link-href' );
-			if ( is_string( $data_link_href ) && '' !== $data_link_href ) {
-				$processor->set_attribute( 'href', $data_link_href );
-			}
-		}
-		return $processor->get_updated_html();
 	}
 
 	/**

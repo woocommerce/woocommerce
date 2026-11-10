@@ -752,6 +752,22 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 			'Type [woocommerce/store-url] or visit [the store](https://example.com).',
 			$this->personalizer->personalize_content( 'Type [woocommerce/store-url] or visit [the store](http://%5Bwoocommerce/store-url%5D).', Personalizer::RENDERING_CONTEXT_TEXT )
 		);
+
+		// A tag value that looks like a link target is inserted as it is, not personalized again.
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Name',
+				'test/name',
+				'Test',
+				function () {
+					return '[x](http://[woocommerce/store-url])';
+				}
+			)
+		);
+		$this->assertSame(
+			'Hi [x](http://[woocommerce/store-url])',
+			$this->personalizer->personalize_content( 'Hi <!--[test/name]-->', Personalizer::RENDERING_CONTEXT_TEXT )
+		);
 	}
 
 	/**

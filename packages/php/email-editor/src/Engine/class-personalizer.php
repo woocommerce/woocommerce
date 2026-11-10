@@ -170,6 +170,9 @@ class Personalizer {
 	/**
 	 * Personalize the content by replacing the personalization tags with their values.
 	 *
+	 * In the text rendering context, tags in "[text](url)" link targets are replaced too, and a tag token
+	 * that cannot be resolved is removed, since the recipient would see it as text.
+	 *
 	 * @param string $content The content to personalize.
 	 * @param string $rendering_context The rendering context of the content — one of the RENDERING_CONTEXT_HTML
 	 *                                  or RENDERING_CONTEXT_TEXT constants. Unknown values fall back to RENDERING_CONTEXT_HTML.
@@ -178,6 +181,11 @@ class Personalizer {
 	public function personalize_content( string $content, string $rendering_context = self::RENDERING_CONTEXT_HTML ): string {
 		if ( ! in_array( $rendering_context, array( self::RENDERING_CONTEXT_HTML, self::RENDERING_CONTEXT_TEXT ), true ) ) {
 			$rendering_context = self::RENDERING_CONTEXT_HTML;
+		}
+
+		// Link targets go first, so tag values inserted below are never scanned for link targets.
+		if ( self::RENDERING_CONTEXT_TEXT === $rendering_context ) {
+			$content = $this->personalize_text_link_targets( $content );
 		}
 
 		$content_processor = new HTML_Tag_Processor( $content );
@@ -239,26 +247,25 @@ class Personalizer {
 		}
 
 		$content_processor->flush_updates();
-		$content = $content_processor->get_updated_html();
-
-		if ( self::RENDERING_CONTEXT_TEXT === $rendering_context ) {
-			$content = $this->personalize_text_link_targets( $content );
-		}
-		return $content;
+		return $content_processor->get_updated_html();
 	}
 
 	/**
-	 * Replace tags in the "[text](url)" link targets that the Renderer's text version contains.
+	 * Replace tags in the "[text](url)" link targets of the Renderer's text version. A link whose whole
+	 * target is a tag that cannot be resolved keeps only its text, so no raw tag reaches the recipient.
 	 *
 	 * @param string $content Plain-text content.
 	 * @return string The content with link targets personalized.
 	 */
 	private function personalize_text_link_targets( string $content ): string {
 		return (string) preg_replace_callback(
-			'/\]\(([^()\s]+)\)/',
+			'/\[([^\[\]]*)\]\((\[[^\]]+\]|[^()\s]+)\)/',
 			function ( array $matches ): string {
-				$url = $this->personalize_href_tokens( $matches[1] );
-				return null === $url ? $matches[0] : '](' . $url . ')';
+				$url = $this->personalize_href_tokens( $matches[2] );
+				if ( null !== $url ) {
+					return '[' . $matches[1] . '](' . $url . ')';
+				}
+				return '[' === $matches[2][0] ? $matches[1] : $matches[0];
 			},
 			$content
 		);

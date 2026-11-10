@@ -62,28 +62,36 @@ class Html2Text_Test extends \Email_Editor_Unit_Test {
 	 */
 	public function html_conversion_provider(): array {
 		return array(
-			'horizontal_rule'     => array(
+			'horizontal_rule'       => array(
 				'Before<hr>After',
 				"Before\n---------------------------------------------------------------\nAfter",
 			),
-			'same_url_link'       => array(
+			'same_url_link'         => array(
 				'<a href="http://example.com">http://example.com</a>',
 				'http://example.com',
 			),
-			'mailto_link'         => array(
+			'mailto_link'           => array(
 				'<a href="mailto:test@example.com">test@example.com</a>',
 				'test@example.com',
 			),
-			'image_without_alt'   => array(
+			'image_without_alt'     => array(
 				'<img src="image.jpg">',
 				'',
 			),
-			'drop_links_option'   => array(
+			'drop_links_option'     => array(
 				'<a href="http://example.com">Click here</a>',
 				'Click here',
 				array( 'drop_links' => true ),
 			),
-			'nested_divs_complex' => array(
+			'tag_link_target'       => array(
+				'<a href="#" data-link-href="[woocommerce/store-url]">Shop</a>',
+				'[Shop]([woocommerce/store-url])',
+			),
+			'tag_link_without_text' => array(
+				'<a href="#" data-link-href="[woocommerce/store-url]"><img src="logo.png"></a>',
+				'',
+			),
+			'nested_divs_complex'   => array(
 				'<div>Outer<div>Middle<div>Inner</div></div></div>',
 				"Outer\nMiddle\nInner",
 			),

@@ -548,6 +548,13 @@ class Html2Text {
 
 				$output = trim( $output );
 
+				// A personalization tag used as the whole URL is kept as the target so it can be personalized
+				// later. A link without text is dropped rather than leaving the bare tag behind.
+				$tag_href = $node instanceof \DOMElement ? $node->getAttribute( 'data-link-href' ) : '';
+				if ( '' !== $tag_href ) {
+					$href = $output ? $tag_href : '';
+				}
+
 				// Remove double [[ ]] s from linking images.
 				if ( '[' === substr( $output, 0, 1 ) && ']' === substr( $output, -1 ) ) {
 					$output = substr( $output, 1, strlen( $output ) - 2 );
