@@ -24,9 +24,5 @@
 
 // Options are keyed by rate, so refreshing rates doesn't replay this.
 .wp-block-woocommerce-checkout-shipping-methods-block .wc-block-components-radio-control__option {
-	@include motion-stagger-index();
-
-	@include motion-safe {
-		animation: wc-fade-up var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive) motion-stagger-delay() backwards;
-	}
+	@include motion-stagger;
 }

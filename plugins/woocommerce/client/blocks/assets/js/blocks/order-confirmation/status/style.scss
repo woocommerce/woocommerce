@@ -52,9 +52,6 @@ $wc-order-confirmation-slots: (
 @each $name, $slot in $wc-order-confirmation-slots {
 	.wc-block-order-confirmation-#{$name}:not(.editor-styles-wrapper *) {
 		--wc-motion-index: #{$slot};
-
-		@include motion-safe {
-			animation: wc-fade-up var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive) motion-stagger-delay() backwards;
-		}
+		@include motion-enter($delay: motion-stagger-delay());
 	}
 }

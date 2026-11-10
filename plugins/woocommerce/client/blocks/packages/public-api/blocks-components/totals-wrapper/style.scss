@@ -27,11 +27,9 @@
 	}
 }
 
-// A row that appears or goes, such as Discount, grows in and collapses, so the rows below move instead of jumping.
-div.wc-block-components-totals-wrapper {
-	@include motion-collapse(wc-totals-row, lg, (padding-block: 0, border-top-width: 0, opacity: 0)) {
-		overflow: clip;
-	}
+// A row that appears or goes, such as Discount, runs as a layout transition; where one can't run, it fades.
+.wc-block-components-totals-wrapper {
+	@include motion-fade-presence;
 }
 
 .wc-block-components-discounts-meta {

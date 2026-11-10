@@ -125,12 +125,8 @@ table.wc-block-cart-items {
 			line-height: 1.4;
 		}
 
-		&.is-disabled {
-			opacity: 0.5;
+		@include motion-dim(".is-disabled") {
 			pointer-events: none;
-			@include motion-safe {
-				transition: opacity var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle);
-			}
 		}
 	}
 
@@ -269,8 +265,6 @@ table.wc-block-cart-items {
 	@include motion-stagger-index();
 
 	> td {
-		@include motion-safe {
-			animation: wc-fade-up var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive) motion-stagger-delay() backwards;
-		}
+		@include motion-enter($delay: motion-stagger-delay());
 	}
 }

@@ -8,26 +8,18 @@
 
 	&.is-animated {
 		.wc-block-components-address-card-wrapper {
-			@include motion-safe {
-				transition: opacity var(--wpds-motion-duration-lg) var(--wpds-motion-easing-expressive);
-			}
+			transition: motion-state(opacity);
 		}
 
 		&.is-editing {
 			// The card overlays the form while it fades out. `step-end` keeps it
 			// visible until the fade finishes, then hides it from assistive tech.
 			.wc-block-components-address-card-wrapper {
-				@include motion-safe {
-					transition:
-						opacity motion-exit(lg) var(--wpds-motion-easing-expressive),
-						visibility motion-exit(lg) step-end;
-				}
+				transition: motion-state(opacity), motion-hold(visibility);
 			}
 
 			.wc-block-components-address-form-wrapper {
-				@include motion-safe {
-					animation: wc-clip-reveal var(--wpds-motion-duration-lg) var(--wpds-motion-easing-expressive);
-				}
+				@include motion-fade-in;
 			}
 		}
 	}

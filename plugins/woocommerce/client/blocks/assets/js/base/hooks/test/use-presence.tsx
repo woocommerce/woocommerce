@@ -8,12 +8,6 @@ import { act, render, screen } from '@testing-library/react';
  */
 import { usePresence } from '../use-presence';
 
-// The Jest matchMedia mock reports reduced motion, under which usePresence never sets a transition.
-jest.mock( '@wordpress/compose', () => ( {
-	...jest.requireActual( '@wordpress/compose' ),
-	useReducedMotion: () => false,
-} ) );
-
 // jsdom doesn't animate, so each `getAnimations()` call returns one animation that the test finishes by hand.
 let pendingFinishes: Array< () => void > = [];
 const finishAnimation = async ( index: number ) => {

@@ -87,9 +87,5 @@
 }
 
 .wp-block-woocommerce-checkout-pickup-options-block .wc-block-components-radio-control__option {
-	@include motion-stagger-index();
-
-	@include motion-safe {
-		animation: wc-fade-up var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive) motion-stagger-delay() backwards;
-	}
+	@include motion-stagger;
 }

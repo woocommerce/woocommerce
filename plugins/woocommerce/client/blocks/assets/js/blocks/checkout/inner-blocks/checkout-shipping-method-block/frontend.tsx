@@ -11,7 +11,7 @@ import {
 } from '@woocommerce/block-data';
 import { useShippingData } from '@woocommerce/base-context/hooks';
 import { hasCollectableRate } from '@woocommerce/base-utils';
-import { usePendingLayoutChange } from '@woocommerce/base-utils/use-pending-layout-change';
+import { usePendingLayoutChange } from '@woocommerce/base-utils/layout-transition';
 import {
 	LOCAL_PICKUP_ENABLED,
 	SHIPPING_METHODS_EXIST,

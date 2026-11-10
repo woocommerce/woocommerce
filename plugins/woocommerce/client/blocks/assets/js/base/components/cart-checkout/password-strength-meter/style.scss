@@ -38,9 +38,7 @@
 			border: 0;
 			height: $gap-smaller;
 			vertical-align: middle;
-			@include motion-safe {
-				transition: background-color var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle);
-			}
+			transition: motion-state(background-color);
 		}
 
 		&:-moz-meter-optimum::-moz-meter-bar,
@@ -52,9 +50,7 @@
 			border: 0;
 			height: $gap-smaller;
 			vertical-align: middle;
-			@include motion-safe {
-				transition: background-color var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle);
-			}
+			transition: motion-state(background-color);
 		}
 	}
 	.wc-block-components-password-strength__result {

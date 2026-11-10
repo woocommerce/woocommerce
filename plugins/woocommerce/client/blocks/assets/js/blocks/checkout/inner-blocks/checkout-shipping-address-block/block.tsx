@@ -17,7 +17,7 @@ import Noninteractive from '@woocommerce/base-components/noninteractive';
 import type { BillingAddress } from '@woocommerce/settings';
 import { getSetting } from '@woocommerce/settings';
 import { emptyAddressFields } from '@woocommerce/base-utils';
-import { usePendingLayoutChange } from '@woocommerce/base-utils/use-pending-layout-change';
+import { usePendingLayoutChange } from '@woocommerce/base-utils/layout-transition';
 import type { CartResponseBillingAddress } from '@woocommerce/types';
 
 /**

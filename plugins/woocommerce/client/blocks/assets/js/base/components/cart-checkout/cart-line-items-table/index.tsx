@@ -11,7 +11,7 @@ import {
 	useRef,
 	useState,
 } from '@wordpress/element';
-import { startLayoutChange } from '@woocommerce/base-utils/use-pending-layout-change';
+import { startLayoutChange } from '@woocommerce/base-utils/layout-transition';
 import type { RefObject } from 'react';
 import { CartLineItemsCartSkeleton } from '@woocommerce/base-components/skeleton/patterns/cart-line-items';
 import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';

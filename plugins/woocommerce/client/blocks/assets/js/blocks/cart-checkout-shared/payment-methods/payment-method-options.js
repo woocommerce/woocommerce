@@ -11,8 +11,10 @@ import { RadioControlAccordion } from '@woocommerce/blocks-components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { getPaymentMethods } from '@woocommerce/blocks-registry';
 import { paymentStore } from '@woocommerce/block-data';
-import { CHECKOUT_SECTIONS } from '@woocommerce/base-utils/layout-transition';
-import { usePendingLayoutChange } from '@woocommerce/base-utils/use-pending-layout-change';
+import {
+	CHECKOUT_SECTIONS,
+	usePendingLayoutChange,
+} from '@woocommerce/base-utils/layout-transition';
 
 /**
  * Internal dependencies

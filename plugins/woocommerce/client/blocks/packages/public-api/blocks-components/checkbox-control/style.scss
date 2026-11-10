@@ -122,26 +122,17 @@
 			display: block;
 			visibility: hidden;
 			opacity: 0;
-			transform: scale($wc-scale-icon-from);
-			// Physical on purpose: the tick isn't mirrored in RTL, so it always draws from its short stroke.
-			clip-path: inset(0 100% 0 0);
+			@include motion-transition($state: opacity, $move: scale, $duration: md, $hold: (visibility, clip-path));
 			@include motion-safe {
-				transition:
-					opacity motion-exit(md) var(--wpds-motion-easing-expressive),
-					transform motion-exit(md) var(--wpds-motion-easing-expressive),
-					visibility motion-exit(md) step-end,
-					clip-path 0s motion-exit(md);
+				scale: $wc-scale-icon-from;
+				// Physical on purpose: the tick isn't mirrored in RTL, so it always draws from its short stroke.
+				clip-path: inset(0 100% 0 0);
 			}
 		}
 
 		&:checked + .wc-block-components-checkbox__mark {
 			clip-path: inset(0);
-			@include motion-safe {
-				transition:
-					opacity var(--wpds-motion-duration-sm) var(--wpds-motion-easing-expressive),
-					transform var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive),
-					clip-path var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive);
-			}
+			@include motion-transition($state: opacity, $move: (scale, clip-path), $duration: md);
 		}
 	}
 }

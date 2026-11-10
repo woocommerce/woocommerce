@@ -68,7 +68,10 @@ export const useTotalsRow = (
 	isShown: ( settledCart: StoreCart ) => boolean
 ) => {
 	const settledCart = useSettledOrderSummaryValue( cart );
-	const row = usePresence( isShown( settledCart ), { data: settledCart } );
+	const row = usePresence( isShown( settledCart ), {
+		data: settledCart,
+		layout: true,
+	} );
 	return {
 		...row.data,
 		wrapperProps: {

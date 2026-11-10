@@ -74,8 +74,8 @@ $component-background-hover: color-mix(in srgb, currentColor 12%, transparent);
 	pointer-events: none;
 	@include motion-safe {
 		animation:
-			wc-shipping-method-indicator-move var(--wpds-motion-duration-lg) var(--wpds-motion-easing-balanced),
-			wc-shipping-method-indicator-stretch var(--wpds-motion-duration-lg) var(--wpds-motion-easing-balanced);
+			wc-shipping-method-indicator-move motion-duration(lg) motion-easing(balanced),
+			wc-shipping-method-indicator-stretch motion-duration(lg) motion-easing(balanced);
 	}
 
 	.has-dark-controls & {

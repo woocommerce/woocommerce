@@ -129,8 +129,7 @@
 		.wc-block-components-checkout-order-summary__content {
 			display: none;
 
-			&.is-open,
-			&.is-exiting {
+			&.is-open {
 				border-bottom: 1px solid $universal-border-light;
 				display: block;
 
@@ -139,19 +138,8 @@
 				}
 			}
 
-			&.is-open {
-				// Restarts on every open, as `display: none` removes the animation.
-				@include motion-safe {
-					animation: wc-clip-reveal var(--wpds-motion-duration-lg) var(--wpds-motion-easing-expressive);
-				}
-			}
-
-			// Held hidden until the content moves to the checkout actions.
-			&.is-exiting {
-				@include motion-safe {
-					animation: wc-clip-conceal motion-exit(lg) var(--wpds-motion-easing-expressive) forwards;
-				}
-			}
+			// Opening runs as a layout transition; where one can't run, the content fades in.
+			@include motion-fade-presence;
 		}
 	}
 }

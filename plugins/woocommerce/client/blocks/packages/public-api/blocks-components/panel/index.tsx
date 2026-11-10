@@ -7,6 +7,7 @@ import { Icon, chevronUp, chevronDown } from '@wordpress/icons';
 import type { ReactNode, ReactElement } from 'react';
 import { Button } from '@ariakit/react';
 import { usePresence } from '@woocommerce/base-hooks';
+import { startLayoutChange } from '@woocommerce/base-utils/layout-transition';
 import deprecated from '@wordpress/deprecated';
 /**
  * Internal dependencies
@@ -68,7 +69,14 @@ const Panel = ( {
 				render={ <div /> }
 				aria-expanded={ isOpen }
 				className="wc-block-components-panel__button"
-				onClick={ () => setIsOpen( ! isOpen ) }
+				// The panel grows into its new state while the content below slides, or animates with classes
+				// where a layout transition can't run.
+				onClick={ () =>
+					startLayoutChange( () => setIsOpen( ! isOpen ), {
+						morph: presence.ref.current,
+						exit: isOpen,
+					} )
+				}
 			>
 				<Icon
 					aria-hidden="true"

@@ -238,39 +238,58 @@ $content-padding-left: calc($gap + 24px + $gap-smaller);
 			}
 		}
 
-		&[aria-disabled="true"],
-		&[disabled] {
+		@include motion-dim('[aria-disabled="true"], [disabled]') {
 			cursor: not-allowed;
-			opacity: 0.5;
-			@include motion-safe {
-				transition: opacity var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle);
-			}
 		}
 	}
 }
 
 .wp-block-woocommerce-cart,
 .wp-block-woocommerce-checkout {
-	.wc-block-components-radio-control .wc-block-components-radio-control__input:checked::before {
-		@include motion-safe {
-			animation: wc-radio-dot-in var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive);
+	// The dot stays drawn while unchecked, hidden, so it fades out as well as in. Its colour holds until the fade ends.
+	// Positioned as trunk's checked dot.
+	.wc-block-components-radio-control .wc-block-components-radio-control__input {
+		&::before {
+			content: "";
+			display: block;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			width: 10px;
+			height: 10px;
+			margin: 0;
+			border-radius: 50%;
+			opacity: 0;
+			translate: -50% -50%;
+			scale: $wc-scale-icon-from;
+			@include motion-transition($state: opacity, $move: scale, $duration: md, $hold: background-color);
+		}
+
+		&:checked::before {
+			opacity: 1;
+			scale: none;
+			// Trunk centres the checked dot with `transform`; this one is centred with `translate`.
+			transform: none;
+			@include motion-transition($state: opacity, $move: scale, $duration: md);
 		}
 	}
 
 	.wc-block-components-radio-control--highlight-checked {
 		.wc-block-components-radio-control__option,
 		.wc-block-components-radio-control-accordion-option {
-			@include motion-safe {
-				transition: box-shadow var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle);
-			}
+			transition: motion-state(box-shadow);
 		}
 	}
-}
 
-@keyframes wc-radio-dot-in {
-	from {
-		opacity: 0;
-		transform: translate(-50%, -50%) scale($wc-scale-icon-from);
+	// Arrowing through options selects each one in turn, so the selection follows at once. A click doesn't match
+	// `:focus-visible` on a radio.
+	.wc-block-components-radio-control:has(input:focus-visible) {
+		.wc-block-components-radio-control__input::before,
+		.wc-block-components-radio-control__option,
+		.wc-block-components-radio-control-accordion-option {
+			transition: none;
+			animation: none;
+		}
 	}
 }
 

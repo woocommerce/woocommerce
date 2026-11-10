@@ -78,9 +78,7 @@
 		text-overflow: ellipsis;
 		max-width: calc(100% - #{$gap + $gap-smaller});
 		cursor: text;
-		@include motion-safe {
-			transition: transform var(--wpds-motion-duration-sm) var(--wpds-motion-easing-balanced);
-		}
+		@include motion-transition($move: transform, $duration: md, $easing: balanced);
 	}
 
 	&.wc-inline-card-element {

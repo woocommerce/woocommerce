@@ -24,10 +24,15 @@ export type OrderSummaryToggle = {
  * then. Assuming the collapsed presentation while unsure keeps the bar
  * operable; the reverse leaves it inert with no other way to see the totals.
  *
+ * @param {Function} applyToggle Applies the shopper's toggle, given the update and whether the summary was open.
  * @return {OrderSummaryToggle} Open state, the measured size, the id the bar
  *                              controls, and the props to spread on the bar.
  */
-export const useOrderSummaryToggle = (): OrderSummaryToggle => {
+export const useOrderSummaryToggle = (
+	applyToggle: ( toggle: () => void, wasOpen: boolean ) => void = (
+		toggle
+	) => toggle()
+): OrderSummaryToggle => {
 	const { hasContainerWidth, isLarge } = useContainerWidthContext();
 	const [ isOpen, setIsOpen ] = useState( false );
 	const ariaControlsId = useId();
@@ -36,7 +41,8 @@ export const useOrderSummaryToggle = (): OrderSummaryToggle => {
 	const toggleProps = ! isLarge
 		? {
 				role: 'button',
-				onClick: () => setIsOpen( ! isOpen ),
+				onClick: () =>
+					applyToggle( () => setIsOpen( ! isOpen ), isOpen ),
 				'aria-expanded': isOpen,
 				'aria-controls': ariaControlsId,
 				tabIndex: 0,
@@ -46,7 +52,7 @@ export const useOrderSummaryToggle = (): OrderSummaryToggle => {
 						// surrounding checkout form. A real button would
 						// suppress both for us.
 						event.preventDefault();
-						setIsOpen( ! isOpen );
+						applyToggle( () => setIsOpen( ! isOpen ), isOpen );
 					}
 				},
 			}

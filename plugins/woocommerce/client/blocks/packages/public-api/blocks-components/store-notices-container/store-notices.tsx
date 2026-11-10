@@ -66,7 +66,8 @@ const NoticesContainer = ( {
 	const notices = usePresenceList(
 		containerRef,
 		Children.toArray( children ) as ReactElement[],
-		( notice ) => String( notice.key )
+		( notice ) => String( notice.key ),
+		{ layout: true }
 	);
 	return (
 		<div ref={ containerRef } className={ className }>

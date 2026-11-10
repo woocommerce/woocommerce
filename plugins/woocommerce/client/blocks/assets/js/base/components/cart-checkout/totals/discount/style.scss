@@ -9,7 +9,7 @@
 .wp-block-woocommerce-checkout {
 	.wc-block-components-totals-discount__coupon-list-item.is-newly-applied {
 		@include motion-safe {
-			animation: wc-totals-discount-coupon-pulse var(--wpds-motion-duration-lg) var(--wpds-motion-easing-balanced);
+			animation: wc-totals-discount-coupon-pulse motion-duration(lg) motion-easing(balanced);
 		}
 	}
 
@@ -17,21 +17,12 @@
 	.wc-block-components-totals-discount__coupon-list-item.is-exiting {
 		pointer-events: none;
 
-		@include motion-safe {
-			animation: wc-totals-discount-coupon-exit motion-exit(md) var(--wpds-motion-easing-expressive) forwards;
-		}
+		@include motion-exit(wc-shrink);
 	}
 }
 
 @keyframes wc-totals-discount-coupon-pulse {
 	50% {
-		transform: scale($wc-scale-pulse-peak);
-	}
-}
-
-@keyframes wc-totals-discount-coupon-exit {
-	to {
-		opacity: 0;
-		transform: scale($wc-scale-icon-from);
+		scale: $wc-scale-pulse-peak;
 	}
 }

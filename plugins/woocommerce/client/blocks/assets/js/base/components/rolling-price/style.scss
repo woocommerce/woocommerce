@@ -2,9 +2,9 @@
 	// Equal-width digits, so the columns don't change width as they roll.
 	font-variant-numeric: tabular-nums;
 	white-space: nowrap;
-	// Each column stacks its digits one line apart and moves by whole lines. A fractional line height lets the
-	// browser round each stacked line differently from the move, so lower digits land a little off; whole pixels
-	// keep every digit in line.
+	// Each column moves up by whole lines, and rests there. With a fractional line height, columns rest different
+	// fractions of a pixel off the pixel grid and their digits can snap to different pixels; whole pixels keep every
+	// digit in line.
 	--wc-rolling-price-line: 1lh;
 
 	@supports (width: round(1.5px, 1px)) {
@@ -45,8 +45,6 @@
 	}
 
 	.wc-block-components-rolling-price:not(.is-static) & {
-		@include motion-safe {
-			transition: transform var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive);
-		}
+		@include motion-transition($move: transform, $duration: md);
 	}
 }

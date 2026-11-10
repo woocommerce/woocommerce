@@ -4,8 +4,8 @@
 		// Sections move to their new positions and sizes, clipped so growing content is revealed (rules 9, 20).
 		// The clip margin keeps focus rings and borders at a section's edge, such as a checkbox's, from being cut off.
 		&::view-transition-group(*) {
-			animation-duration: var(--wpds-motion-duration-lg);
-			animation-timing-function: var(--wpds-motion-easing-balanced);
+			animation-duration: motion-duration(lg);
+			animation-timing-function: motion-easing(balanced);
 			overflow: clip;
 			overflow-clip-margin: 4px;
 		}
@@ -22,24 +22,33 @@
 			animation: none;
 		}
 
-		// Sections that appear or go wipe in step with the slide (rule 17).
+		// Sections that appear wipe in with the slide; ones that go wipe out over the shorter exit time (rules 15, 17).
 		&::view-transition-new(*):only-child {
-			animation: wc-clip-reveal var(--wpds-motion-duration-lg) var(--wpds-motion-easing-balanced);
+			animation:
+				wc-fade-in motion-duration(md) motion-easing(subtle),
+				wc-clip-reveal motion-duration(lg) motion-easing(balanced);
 		}
 
 		&::view-transition-old(*):only-child {
-			animation: wc-clip-conceal var(--wpds-motion-duration-lg) var(--wpds-motion-easing-balanced) forwards;
+			animation:
+				wc-fade-out motion-duration(md) motion-easing(subtle) forwards,
+				wc-clip-conceal motion-duration(md) motion-easing(balanced) forwards;
 			opacity: 1;
 		}
 
 		// The morphing element (an address card growing into its form) crossfades (rules 16, 20).
 		&::view-transition-new(wc-layout-morph) {
-			animation: wc-fade-in var(--wpds-motion-duration-lg) var(--wpds-motion-easing-expressive);
+			animation: wc-fade-in motion-duration(md) motion-easing(subtle);
 		}
 
 		&::view-transition-old(wc-layout-morph) {
-			animation: wc-fade-out motion-exit(lg) var(--wpds-motion-easing-expressive) forwards;
+			animation: wc-fade-out motion-duration(md) motion-easing(subtle) forwards;
 			opacity: 1;
 		}
+	}
+
+	// When everything in the transition closes or goes, the sections move over the exit time too (rule 15).
+	:root:active-view-transition-type(wc-layout-exit)::view-transition-group(*) {
+		animation-duration: motion-duration(md);
 	}
 }

@@ -12,7 +12,7 @@ import type { ShippingAddress } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
 import { ADDRESS_FORM_KEYS } from '@woocommerce/block-settings';
-import { startLayoutChange } from '@woocommerce/base-utils/use-pending-layout-change';
+import { startLayoutChange } from '@woocommerce/base-utils/layout-transition';
 
 /**
  * Internal dependencies
@@ -89,7 +89,7 @@ const CustomerAddress = () => {
 	);
 
 	const handleEditClick = useCallback( () => {
-		// Grow the card into the form where supported; otherwise fall back to the `.is-animated` CSS reveal.
+		// Grow the card into the form where supported; otherwise `.is-animated` crossfades them.
 		if (
 			! startLayoutChange( () => setEditingShippingAddress( true ), {
 				morph: wrapperRef.current,

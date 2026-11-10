@@ -77,7 +77,8 @@
 		border-radius: 20px;
 		right: 0;
 		top: 0;
-		transform: translate(50%, -50%);
+		// `translate`, not `transform`, so it scales in about its own centre.
+		translate: 50% -50%;
 		white-space: nowrap;
 		z-index: 1;
 
@@ -143,22 +144,9 @@
 
 // Checkout items fade up in sequence on mount, each quantity badge one step after its item.
 .wp-block-woocommerce-checkout .wc-block-components-order-summary__content:not(.wc-block-components-skeleton) > .wc-block-components-order-summary-item {
-	@include motion-stagger-index();
-	@include motion-safe {
-		animation: wc-fade-up var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive) motion-stagger-delay() backwards;
-	}
+	@include motion-stagger();
 
 	.wc-block-components-order-summary-item__quantity {
-		@include motion-safe {
-			animation: wc-order-summary-item-quantity-enter var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive) motion-stagger-delay(1) backwards;
-		}
-	}
-}
-
-// Repeats the badge's resting translate so it stays pinned to the image corner while it scales in.
-@keyframes wc-order-summary-item-quantity-enter {
-	from {
-		opacity: 0;
-		transform: translate(50%, -50%) scale($wc-scale-icon-from);
+		@include motion-enter(wc-grow, $delay: motion-stagger-delay(1));
 	}
 }

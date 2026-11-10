@@ -40,16 +40,14 @@
 
 .notice-transition-enter {
 	opacity: 0;
-	transform: translateY(8px);
+	@include motion-safe {
+		translate: 0 8px;
+	}
 }
 .notice-transition-enter.notice-transition-enter-active {
 	opacity: 1;
-	transform: none;
-	@include motion-safe {
-		transition:
-			opacity var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive),
-			transform var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive);
-	}
+	translate: none;
+	@include motion-transition($state: opacity, $move: translate);
 }
 .notice-transition-enter-done {
 	max-height: auto;
@@ -59,11 +57,9 @@
 }
 .notice-transition-exit.notice-transition-exit-active {
 	opacity: 0;
-	transform: translateY(4px);
+	@include motion-transition($state: opacity, $move: translate, $duration: md);
 	@include motion-safe {
-		transition:
-			opacity motion-exit(md) var(--wpds-motion-easing-expressive),
-			transform motion-exit(md) var(--wpds-motion-easing-expressive);
+		translate: 0 4px;
 	}
 }
 .notice-transition-exit-done {

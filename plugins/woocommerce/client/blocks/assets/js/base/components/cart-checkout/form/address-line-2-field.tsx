@@ -4,8 +4,10 @@
 import { ValidatedTextInput } from '@woocommerce/blocks-components';
 import { useState, Fragment, useCallback, useEffect } from '@wordpress/element';
 import { usePrevious } from '@woocommerce/base-hooks';
-import { ADDRESS_FORM_SECTIONS } from '@woocommerce/base-utils/layout-transition';
-import { startLayoutChange } from '@woocommerce/base-utils/use-pending-layout-change';
+import {
+	ADDRESS_FORM_SECTIONS,
+	startLayoutChange,
+} from '@woocommerce/base-utils/layout-transition';
 import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@ariakit/react';
 import { getFieldLabel } from '@woocommerce/blocks-checkout';

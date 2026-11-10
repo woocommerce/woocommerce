@@ -7,8 +7,7 @@ import {
 	useStoreCart,
 	useSettledOrderSummaryValue,
 } from '@woocommerce/base-context/hooks';
-import { usePresence } from '@woocommerce/base-hooks';
-import { useMergeRefs } from '@wordpress/compose';
+import { startLayoutChange } from '@woocommerce/base-utils/layout-transition';
 import { __ } from '@wordpress/i18n';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
 import {
@@ -36,6 +35,13 @@ const FrontendBlock = ( {
 } ): JSX.Element | null => {
 	const { cartTotals, cartIsLoading } =
 		useSettledOrderSummaryValue( useStoreCart() );
+	// The stable content container moves between these hosts without remounting its portal children.
+	const [ inlineHost, setInlineHost ] = useState< HTMLDivElement | null >(
+		null
+	);
+	// The shopper's toggle runs as a layout transition: the content wipes in or out and the checkout below slides.
+	// Where one can't run, opening fades the content in and closing applies at once.
+	const [ isFadingIn, setIsFadingIn ] = useState( false );
 	const {
 		isOpen,
 		hasContainerWidth,
@@ -43,12 +49,15 @@ const FrontendBlock = ( {
 		closeSummary,
 		ariaControlsId,
 		toggleProps,
-	} = useOrderSummaryToggle();
-	const [ titleElement, setTitleElement ] = useState< HTMLDivElement | null >(
-		null
+	} = useOrderSummaryToggle( ( toggle, wasOpen ) =>
+		setIsFadingIn(
+			! startLayoutChange( toggle, {
+				element: () => inlineHost,
+				exit: wasOpen,
+			} )
+		)
 	);
-	// The stable content container moves between these hosts without remounting its portal children.
-	const [ inlineHost, setInlineHost ] = useState< HTMLDivElement | null >(
+	const [ titleElement, setTitleElement ] = useState< HTMLDivElement | null >(
 		null
 	);
 	const [ checkoutActionsHost, setCheckoutActionsHost ] =
@@ -58,8 +67,6 @@ const FrontendBlock = ( {
 		useState< HTMLDivElement | null >( null );
 	const [ isContentReady, setIsContentReady ] = useState( false );
 	const checkoutActionsTopBeforeMove = useRef< number | null >( null );
-	const { transition, ref: presenceRef } = usePresence( isOpen );
-	const inlineHostRef = useMergeRefs( [ setInlineHost, presenceRef ] );
 	const [ contentContainer ] = useState( () => {
 		const container = document.createElement( 'div' );
 		container.className =
@@ -69,12 +76,7 @@ const FrontendBlock = ( {
 
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 	const totalPrice = parseInt( cartTotals.total_price, 10 );
-	// Content stays inline while it animates out, then moves to the checkout actions. Auto-close (which sets
-	// `checkoutActionsTopBeforeMove`) moves content that is already off-screen, so it skips the exit animation.
-	const isClosing =
-		transition === 'exiting' &&
-		checkoutActionsTopBeforeMove.current === null;
-	const showInline = ! hasContainerWidth || isLarge || isOpen || isClosing;
+	const showInline = ! hasContainerWidth || isLarge || isOpen;
 
 	useEffect( () => {
 		if (
@@ -129,7 +131,21 @@ const FrontendBlock = ( {
 
 		if ( destination ) {
 			if ( contentContainer.parentElement !== destination ) {
+				const isMove = contentContainer.parentElement !== null;
 				destination.appendChild( contentContainer );
+				// Moving the content restarts its CSS animations, such as the items' entrance, so skip them to their
+				// end. Looping ones, such as a skeleton's shimmer, carry on.
+				if ( isMove && typeof CSSAnimation !== 'undefined' ) {
+					contentContainer
+						.getAnimations( { subtree: true } )
+						.filter(
+							( animation ) =>
+								animation instanceof CSSAnimation &&
+								animation.effect?.getComputedTiming()
+									.iterations !== Infinity
+						)
+						.forEach( ( animation ) => animation.finish() );
+				}
 			}
 			setIsContentReady( true );
 
@@ -165,7 +181,7 @@ const FrontendBlock = ( {
 					className={ clsx(
 						'wc-block-components-checkout-order-summary__title',
 						{
-							'is-open': isOpen || isClosing,
+							'is-open': isOpen,
 						}
 					) }
 					{ ...toggleProps }
@@ -188,17 +204,15 @@ const FrontendBlock = ( {
 					</span>
 				</div>
 				<div
-					ref={ inlineHostRef }
+					ref={ setInlineHost }
 					className={ clsx(
 						'wc-block-components-checkout-order-summary__content',
 						{
 							'is-open': isOpen,
-							'is-exiting': isClosing,
+							'is-entering': isOpen && isFadingIn,
 						}
 					) }
 					id={ ariaControlsId }
-					// React 18 has no `inert` prop; an empty string sets the attribute.
-					{ ...( isClosing ? { inert: '' } : {} ) }
 				/>
 			</div>
 			<CheckoutOrderSummaryFill>

@@ -26,12 +26,7 @@
 		max-width: calc(100% - #{2 * $gap-small});
 		cursor: text;
 		// Themes and extensions position the label with `top`, so it animates too.
-		@include motion-safe {
-			transition:
-				top var(--wpds-motion-duration-sm) var(--wpds-motion-easing-balanced),
-				transform var(--wpds-motion-duration-sm) var(--wpds-motion-easing-balanced),
-				color var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle);
-		}
+		@include motion-transition($state: color, $move: (top, transform), $duration: md, $easing: balanced);
 
 		.has-dark-controls & {
 			color: $input-placeholder-dark;
@@ -60,9 +55,7 @@
 
 		height: 50px;
 
-		@include motion-safe {
-			transition: border-color var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle);
-		}
+		transition: motion-state(border-color);
 
 		&:focus-within {
 			background-color: $input-background-light;
@@ -95,9 +88,11 @@
 	}
 
 	// We delay the reveal so the mask doesn't sit behind the label while it floats up.
+	// Under reduced motion the label moves at once, so there's nothing to wait for.
 	input[type="date"]::-webkit-datetime-edit {
+		transition: motion-state(opacity);
 		@include motion-safe {
-			transition: opacity var(--wpds-motion-duration-sm) var(--wpds-motion-easing-expressive) var(--wpds-motion-duration-sm);
+			transition-delay: motion-duration(md);
 		}
 	}
 

@@ -16,6 +16,7 @@ import { cartStore, validationStore } from '@woocommerce/block-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { isPackageRateCollectable } from '@woocommerce/base-utils';
 import { onAnimationsFinished } from '@woocommerce/base-utils/on-animations-finished';
+import { isUsingKeyboard } from '@woocommerce/base-utils/layout-transition';
 import { getSetting } from '@woocommerce/settings';
 import { Button } from '@ariakit/react';
 import { shippingAddressHasValidationErrors } from '@woocommerce/block-data/cart/utils';
@@ -197,12 +198,18 @@ const Block = ( {
 		useState< CSSProperties | null >( null );
 
 	// Slide a copy of the selected style from the old option to the new one. It only exists while moving, so the
-	// resting markup is unchanged; with no animation (reduced motion) it's removed before it paints.
+	// resting markup is unchanged; with no animation (reduced motion) it's removed before it paints. Keyboard changes
+	// don't slide. A click can't interrupt the slide: it runs inside the layout transition the change starts, during
+	// which the page ignores clicks.
 	useLayoutEffect( () => {
 		const from = previousChecked.current;
 		previousChecked.current = checked;
 		const container = containerRef.current;
 		if ( ! container || from === checked ) {
+			return;
+		}
+		if ( isUsingKeyboard() ) {
+			setIndicatorStyle( null );
 			return;
 		}
 		// Shipping renders first, then pickup.
@@ -217,8 +224,10 @@ const Block = ( {
 			return;
 		}
 		const containerRect = container.getBoundingClientRect();
-		const offsetX = fromRect.left - toRect.left;
-		const offsetY = fromRect.top - toRect.top;
+		const offsetX =
+			fromRect.left + fromRect.width / 2 - toRect.left - toRect.width / 2;
+		const offsetY =
+			fromRect.top + fromRect.height / 2 - toRect.top - toRect.height / 2;
 		setIndicatorStyle( {
 			left: toRect.left - containerRect.left,
 			top: toRect.top - containerRect.top,

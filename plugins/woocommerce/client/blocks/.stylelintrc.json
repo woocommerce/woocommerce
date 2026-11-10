@@ -32,7 +32,8 @@
 				"assets/js/blocks/{cart,checkout,cart-checkout-shared,order-confirmation}/**/*.scss",
 				"assets/js/base/{components/{button,notice-banner,snackbar-list,loading-mask,rolling-price,cart-checkout,skeleton,quantity-selector},utils}/**/*.scss",
 				"packages/public-api/blocks-components/**/*.scss",
-				"assets/css/abstracts/_mixins.scss"
+				"assets/css/abstracts/_mixins.scss",
+				"assets/css/abstracts/_motion.scss"
 			],
 			"rules": {
 				"woocommerce/motion-safe": true,

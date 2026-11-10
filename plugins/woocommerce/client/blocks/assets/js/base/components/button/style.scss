@@ -5,9 +5,7 @@
 	justify-content: center;
 	text-align: center;
 	position: relative;
-	@include motion-safe {
-		transition: box-shadow var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle);
-	}
+	transition: motion-state(box-shadow);
 
 	&:focus {
 		box-shadow: 0 0 0 2px $studio-blue;
@@ -89,18 +87,16 @@ body:not(.woocommerce-block-theme-has-button-styles)
 .wp-block-woocommerce-checkout {
 	.wc-block-components-button:not(.is-link) {
 		// Replaces any theme `transition` on buttons (Kadence fades colours on hover), so colours fade here too.
-		@include motion-safe {
-			transition:
-				transform var(--wpds-motion-duration-sm) var(--wpds-motion-easing-expressive),
-				box-shadow var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle),
-				background-color var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle),
-				border-color var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle),
-				color var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle),
-				opacity var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle);
-		}
+		@include motion-transition(
+			$state: (box-shadow, background-color, border-color, color, opacity),
+			$move: scale,
+			$duration: sm
+		);
 
 		&:active:not(:disabled):not([aria-disabled="true"]) {
-			transform: scale($wc-scale-press);
+			@include motion-safe {
+				scale: $wc-scale-press;
+			}
 		}
 	}
 }

@@ -88,32 +88,27 @@ This file is part of the WooCommerce Blocks autocomplete. If editing shortcode, 
 	}
 }
 
-// Slides 4px from the field with a quick linear fade, like WPDS dropdowns, and back on exit. Exits use
-// their own keyframes because reusing the entrance's name would not restart a finished animation.
+// Slides 4px from the field with a quicker fade, as WPDS dropdowns do but easing out instead of linear, and back on
+// exit. The list is new each time it opens, so `@starting-style` gives the entrance its start; as everything is a
+// transition, it turns around from where it is if the suggestions come and go while it moves.
 .wc-block-components-address-autocomplete-suggestions {
+	@include motion-transition($state: opacity, $move: translate);
+
+	@starting-style {
+		opacity: 0;
+	}
+
 	@include motion-safe {
-		animation:
-			wc-address-suggestions-slide-in var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive),
-			wc-fade-in var(--wpds-motion-duration-sm) linear;
+		@starting-style {
+			translate: 0 -4px;
+		}
 	}
 
 	&.is-exiting {
+		opacity: 0;
+		@include motion-transition($state: opacity, $move: translate, $duration: md);
 		@include motion-safe {
-			animation:
-				wc-address-suggestions-slide-out motion-exit(md) var(--wpds-motion-easing-expressive) forwards,
-				wc-fade-out motion-exit(sm) linear forwards;
+			translate: 0 -4px;
 		}
-	}
-}
-
-@keyframes wc-address-suggestions-slide-in {
-	from {
-		transform: translateY(-4px);
-	}
-}
-
-@keyframes wc-address-suggestions-slide-out {
-	to {
-		transform: translateY(-4px);
 	}
 }

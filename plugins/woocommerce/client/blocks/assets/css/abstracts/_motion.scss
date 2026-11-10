@@ -1,0 +1,177 @@
+// Motion helpers for the Cart and Checkout blocks (docs/contributors/motion.md). Every helper follows the same split:
+// fades and colour changes (state changes, 200ms, subtle) always run, and movement is added only when the shopper
+// hasn't asked for reduced motion. The shared keyframes are in `assets/css/style.scss`; movement keyframes animate
+// `translate`, `scale` and `clip-path` only, so they combine with a fade and with an element's resting `transform`.
+@use "sass:list";
+@use "sass:selector";
+
+// Woo motion constants with no WPDS token.
+$wc-scale-press: 0.97;
+$wc-scale-pulse-peak: 1.05;
+$wc-scale-icon-from: 0.8;
+$wc-blur-icon: 4px;
+
+@mixin motion-safe() {
+	@media not (prefers-reduced-motion) {
+		@content;
+	}
+}
+
+@function motion-duration($step) {
+	@return var(--wpds-motion-duration-#{$step});
+}
+
+@function motion-easing($name) {
+	@return var(--wpds-motion-easing-#{$name});
+}
+
+// Transitions for state changes (colour, background, border, opacity, focus rings): 200ms, subtle, both ways.
+@function motion-state($properties...) {
+	$list: ();
+	@each $property in $properties {
+		$list: list.append($list, $property motion-duration(md) motion-easing(subtle), $separator: comma);
+	}
+	@return $list;
+}
+
+// Transitions that keep a property's old value until a 200ms fade ends, such as `visibility` while fading out.
+@function motion-hold($properties...) {
+	$list: ();
+	@each $property in $properties {
+		$list: list.append($list, $property motion-duration(md) step-end, $separator: comma);
+	}
+	@return $list;
+}
+
+// Transitions for movement. 300ms (`lg`) for movement in, 200ms (`md`) out or in place, 100ms (`sm`) for the press.
+@function motion-move($properties, $duration: lg, $easing: expressive) {
+	$list: ();
+	@each $property in $properties {
+		$list: list.append($list, $property motion-duration($duration) motion-easing($easing), $separator: comma);
+	}
+	@return $list;
+}
+
+// Transitions $state as a state change and, when motion is allowed, $move as movement over $duration. $hold keeps
+// properties at their old value until the fade ends. Empty lists drop out of the output.
+@mixin motion-transition($state: (), $move: (), $duration: lg, $easing: expressive, $hold: ()) {
+	@if list.length($state) > 0 or list.length($hold) > 0 {
+		transition: motion-state($state...), motion-hold($hold...);
+	}
+	@if list.length($move) > 0 {
+		@include motion-safe {
+			transition: motion-move($move, $duration, $easing), motion-state($state...), motion-hold($hold...);
+		}
+	}
+}
+
+// Dims to $opacity while the element matches $states (such as `".is-disabled"`), fading both ways: the transition
+// sits on the element, not on the state, so it also fades back. @content adds to the dimmed state.
+@mixin motion-dim($states, $opacity: 0.5) {
+	transition: motion-state(opacity);
+
+	@at-root #{selector.append(&, $states)} {
+		opacity: $opacity;
+		@content;
+	}
+}
+
+// Fades content in as it mounts: 200ms, subtle. Allowed under reduced motion.
+@mixin motion-fade-in($delay: null) {
+	animation: wc-fade-in motion-duration(md) motion-easing(subtle) $delay backwards;
+}
+
+// Fades content out and holds it there until it unmounts.
+@mixin motion-fade-out($hold-visible: false) {
+	@if $hold-visible {
+		animation:
+			wc-fade-out motion-duration(md) motion-easing(subtle) forwards,
+			wc-hold-visible motion-duration(md);
+	} @else {
+		animation: wc-fade-out motion-duration(md) motion-easing(subtle) forwards;
+	}
+}
+
+// Content appearing: fades in, and when motion is allowed also plays the movement $keyframes over $duration.
+@mixin motion-enter($keyframes: wc-rise, $duration: lg, $delay: null) {
+	@include motion-fade-in($delay);
+	@include motion-safe {
+		animation:
+			wc-fade-in motion-duration(md) motion-easing(subtle) $delay backwards,
+			$keyframes motion-duration($duration) motion-easing(expressive) $delay backwards;
+	}
+}
+
+// Content going: fades out, and when motion is allowed also plays the movement $keyframes, holding the end until it
+// unmounts. $hold-visible keeps it visible while it fades, for content whose parent hides it at once.
+@mixin motion-exit($keyframes, $hold-visible: false) {
+	$hold: ();
+	@if $hold-visible {
+		$hold: (wc-hold-visible motion-duration(md),);
+	}
+	@include motion-fade-out($hold-visible);
+	@include motion-safe {
+		animation: list.join(
+			(
+				wc-fade-out motion-duration(md) motion-easing(subtle) forwards,
+				$keyframes motion-duration(md) motion-easing(expressive) forwards
+			),
+			$hold,
+			$separator: comma
+		);
+	}
+}
+
+// For a button's loading state: its label fades out, kept visible while it fades as the button hides it, and its
+// spinner grows in (rules 16, 18). The text fill fades rather than the label, as the spinner sits inside the label.
+@mixin motion-spinner-swap() {
+	.wc-block-components-button__text {
+		animation:
+			wc-fade-text-out motion-duration(md) motion-easing(subtle) forwards,
+			wc-hold-visible motion-duration(md);
+	}
+
+	.wc-block-components-spinner {
+		@include motion-enter(wc-grow, md);
+	}
+}
+
+// Fades content in and out while `usePresence` gives it `is-entering` and `is-exiting`. Transitions, so a change of
+// direction part way through turns around from where it is. Content that expands and collapses runs as a layout
+// transition; this is what shows when one can't run.
+@mixin motion-fade-presence() {
+	&.is-entering {
+		transition: motion-state(opacity);
+
+		@starting-style {
+			opacity: 0;
+		}
+	}
+
+	&.is-exiting {
+		opacity: 0;
+		transition: motion-state(opacity);
+	}
+}
+
+// Sets --wc-motion-index on sibling rows; rows past $cap share the last index.
+@mixin motion-stagger-index($cap: 7) {
+	@for $i from 1 to $cap {
+		&:nth-child(#{$i}) {
+			--wc-motion-index: #{$i - 1};
+		}
+	}
+	&:nth-child(n + #{$cap}) {
+		--wc-motion-index: #{$cap - 1};
+	}
+}
+
+@function motion-stagger-delay($extra: 0) {
+	@return calc((var(--wc-motion-index) + #{$extra}) * var(--wpds-motion-duration-xs));
+}
+
+// Sibling rows enter in sequence, 50ms apart (rule 3).
+@mixin motion-stagger($keyframes: wc-rise, $cap: 7) {
+	@include motion-stagger-index($cap);
+	@include motion-enter($keyframes, $delay: motion-stagger-delay());
+}

@@ -12,7 +12,7 @@ import type { AddressFormValues } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
 import { ADDRESS_FORM_KEYS } from '@woocommerce/block-settings';
-import { startLayoutChange } from '@woocommerce/base-utils/use-pending-layout-change';
+import { startLayoutChange } from '@woocommerce/base-utils/layout-transition';
 
 /**
  * Internal dependencies

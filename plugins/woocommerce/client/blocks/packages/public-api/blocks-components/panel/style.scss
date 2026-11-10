@@ -52,58 +52,16 @@
 	}
 }
 
-// The `div` outranks consumers that set `display: flex` on the panel, such as Checkout shipping packages.
-div.wc-block-components-panel {
-	@include motion-collapse(wc-block-components-panel, lg, (grid-template-rows: auto 0fr)) {
-		grid-template-rows: auto 1fr;
-		// Clip only below the panel, where the collapsing content overflows.
-		clip-path: inset(-100vmax -100vmax 0 -100vmax);
-	}
+// Opening and closing runs as a layout transition (see Panel); where one can't run, the content only fades.
+.wc-block-components-panel.is-entering > .wc-block-components-panel__content {
+	transition: motion-state(opacity);
 
-	&.is-entering {
-		> .wc-block-components-panel__content {
-			@include motion-safe {
-				animation: wc-fade-in var(--wpds-motion-duration-lg) var(--wpds-motion-easing-expressive);
-			}
-		}
-
-		// The gap below the button grows and shrinks with the content, so nothing snaps.
-		> .wc-block-components-panel__button {
-			@include motion-safe {
-				animation: wc-block-components-panel-gap-open var(--wpds-motion-duration-lg) var(--wpds-motion-easing-balanced);
-			}
-		}
-	}
-
-	&.is-exiting {
-		> .wc-block-components-panel__content {
-			@include motion-safe {
-				animation: wc-fade-out motion-exit(lg) var(--wpds-motion-easing-expressive) forwards;
-			}
-		}
-
-		> .wc-block-components-panel__button {
-			@include motion-safe {
-				animation: wc-block-components-panel-gap-close motion-exit(lg) var(--wpds-motion-easing-balanced) forwards;
-			}
-		}
+	@starting-style {
+		opacity: 0;
 	}
 }
 
-// Keep the open gap until the content unmounts; low specificity so consumers that remove it still win.
-:where(.wc-block-components-panel.is-exiting) > .wc-block-components-panel__button {
-	margin-block-end: $gap-smaller * 2;
-}
-
-// Animate from or to the button's own gap, so consumers that remove the gap aren't given one.
-@keyframes wc-block-components-panel-gap-open {
-	from {
-		margin-block-end: 0;
-	}
-}
-
-@keyframes wc-block-components-panel-gap-close {
-	to {
-		margin-block-end: 0;
-	}
+.wc-block-components-panel.is-exiting > .wc-block-components-panel__content {
+	opacity: 0;
+	transition: motion-state(opacity);
 }

@@ -16,8 +16,10 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { checkoutStore } from '@woocommerce/block-data';
 import { CONTACT_FORM_KEYS } from '@woocommerce/block-settings';
 import { Form } from '@woocommerce/base-components/cart-checkout';
-import { ADDRESS_FORM_SECTIONS } from '@woocommerce/base-utils/layout-transition';
-import { usePendingLayoutChange } from '@woocommerce/base-utils/use-pending-layout-change';
+import {
+	ADDRESS_FORM_SECTIONS,
+	usePendingLayoutChange,
+} from '@woocommerce/base-utils/layout-transition';
 
 /**
  * Internal dependencies

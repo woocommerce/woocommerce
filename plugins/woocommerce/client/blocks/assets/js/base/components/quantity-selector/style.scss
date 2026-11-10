@@ -100,17 +100,11 @@
 .wp-block-woocommerce-checkout {
 	.wc-block-components-quantity-selector {
 		.wc-block-components-quantity-selector__button {
-			@include motion-safe {
-				transition:
-					opacity var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle),
-					box-shadow var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle);
-			}
+			transition: motion-state(opacity, box-shadow);
 		}
 
 		input.wc-block-components-quantity-selector__input {
-			@include motion-safe {
-				transition: opacity var(--wpds-motion-duration-sm) var(--wpds-motion-easing-subtle);
-			}
+			transition: motion-state(opacity);
 		}
 	}
 }

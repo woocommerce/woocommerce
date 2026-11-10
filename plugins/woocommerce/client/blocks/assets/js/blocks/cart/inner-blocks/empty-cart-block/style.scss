@@ -5,7 +5,5 @@
 
 // The empty state fades up when it replaces the shopper's last item (rule 1).
 .wp-block-woocommerce-empty-cart-block.is-entering {
-	@include motion-safe {
-		animation: wc-fade-up var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive);
-	}
+	@include motion-enter;
 }

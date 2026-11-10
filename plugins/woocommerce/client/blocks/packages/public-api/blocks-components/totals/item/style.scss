@@ -13,9 +13,7 @@
 
 // The value fades in when it replaces its skeleton. It only plays on mount, so in-place changes don't flicker.
 .wc-block-components-totals-item__label + :not(.wc-block-components-skeleton__element) {
-	@include motion-safe {
-		animation: wc-fade-in var(--wpds-motion-duration-md) var(--wpds-motion-easing-subtle);
-	}
+	@include motion-fade-in;
 }
 
 .wc-block-components-totals-item__description {

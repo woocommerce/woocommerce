@@ -16,6 +16,8 @@
 		.wc-block-components-spinner {
 			visibility: visible;
 		}
+
+		@include motion-spinner-swap;
 	}
 }
 .wc-block-cart {

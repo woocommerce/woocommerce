@@ -2,7 +2,9 @@
 	--wc-separator-color: color-mix(in srgb, currentColor 20%, transparent);
 }
 
-// Shared motion keyframes for every block that depends on this stylesheet.
+// Shared motion keyframes for every block that depends on this stylesheet. Fades are separate from movement, so
+// opacity always takes the state-change timing, and movement uses `translate`, `scale` and `clip-path`, which combine
+// with an element's resting `transform`. Use them through the motion mixins.
 @keyframes wc-fade-in {
 	from {
 		opacity: 0;
@@ -15,39 +17,57 @@
 	}
 }
 
-@keyframes wc-fade-up {
-	from {
-		opacity: 0;
-		transform: translateY(4px);
+// Fades text, leaving anything drawn with `color` inside it, such as a spinner, in place.
+@keyframes wc-fade-text-out {
+	to {
+		-webkit-text-fill-color: transparent;
 	}
 }
 
+// Keeps content visible while it fades out after its parent hides it.
+@keyframes wc-hold-visible {
+	from,
+	to {
+		visibility: visible;
+	}
+}
+
+@keyframes wc-rise {
+	from {
+		translate: 0 4px;
+	}
+}
+
+// Clip paths can't interpolate to `none`, so both ends are inset.
 @keyframes wc-clip-reveal {
 	from {
 		clip-path: inset(0 0 100% 0);
-		opacity: 0;
 	}
 	to {
 		clip-path: inset(0);
-		opacity: 1;
 	}
 }
 
 @keyframes wc-clip-conceal {
 	from {
 		clip-path: inset(0);
-		opacity: 1;
 	}
 	to {
 		clip-path: inset(0 0 100% 0);
-		opacity: 0;
 	}
 }
 
-@keyframes wc-icon-in {
+// Icons and small items swap with scale and blur (rule 18).
+@keyframes wc-grow {
 	from {
-		opacity: 0;
-		transform: scale($wc-scale-icon-from);
+		scale: $wc-scale-icon-from;
+		filter: blur($wc-blur-icon);
+	}
+}
+
+@keyframes wc-shrink {
+	to {
+		scale: $wc-scale-icon-from;
 		filter: blur($wc-blur-icon);
 	}
 }

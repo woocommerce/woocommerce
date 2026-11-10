@@ -38,47 +38,17 @@
 			position: absolute;
 			top: 50%;
 			left: 50%;
-			transform: translate(-50%, -50%);
+			// `translate`, not `transform`, so it scales in about its own centre.
+			translate: -50% -50%;
 		}
 	}
 
-	// Label, spinner, and check crossfade with scale and blur (rule 18). The label's parent is hidden while
-	// loading, so its exit keeps it visible as it fades.
-	.wc-block-components-spinner {
-		@include motion-safe {
-			animation: wc-icon-in var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive);
-		}
+	&--loading {
+		@include motion-spinner-swap;
 	}
 
+	// The check that replaces the spinner grows in the same way (rule 18).
 	.wc-block-components-checkout-place-order-button__icon {
-		@include motion-safe {
-			animation: wc-place-order-check-in var(--wpds-motion-duration-md) var(--wpds-motion-easing-expressive);
-		}
-	}
-
-	&--loading .wc-block-components-checkout-place-order-button__text {
-		@include motion-safe {
-			animation: wc-place-order-label-out motion-exit(md) var(--wpds-motion-easing-expressive);
-		}
-	}
-}
-
-@keyframes wc-place-order-check-in {
-	from {
-		opacity: 0;
-		transform: translate(-50%, -50%) scale($wc-scale-icon-from);
-		filter: blur($wc-blur-icon);
-	}
-}
-
-@keyframes wc-place-order-label-out {
-	from {
-		visibility: visible;
-	}
-	to {
-		visibility: visible;
-		opacity: 0;
-		transform: scale($wc-scale-icon-from);
-		filter: blur($wc-blur-icon);
+		@include motion-enter(wc-grow, md);
 	}
 }

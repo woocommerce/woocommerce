@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import { CheckboxControl, Textarea } from '@woocommerce/blocks-components';
-import { usePendingLayoutChange } from '@woocommerce/base-utils/use-pending-layout-change';
+import { usePendingLayoutChange } from '@woocommerce/base-utils/layout-transition';
 
 /**
  * Internal dependencies

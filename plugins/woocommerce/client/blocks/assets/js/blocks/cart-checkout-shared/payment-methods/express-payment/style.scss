@@ -26,9 +26,7 @@ $border-width: 1px;
 
 			// Buttons fade in when they replace their loading skeleton, whose items have no id.
 			&[id^="express-payment-method-"] {
-				@include motion-safe {
-					animation: wc-fade-in var(--wpds-motion-duration-md) var(--wpds-motion-easing-subtle);
-				}
+				@include motion-fade-in;
 			}
 
 			&:focus-within::after,

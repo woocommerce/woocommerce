@@ -31,11 +31,34 @@ declare global {
 	}
 }
 
-// Logs motion that starts in the Cart and Checkout blocks, except looping animations such as the spinner,
-// which keep running under reduced motion on purpose.
+// Logs movement that starts in the Cart and Checkout blocks. Fades and colour changes don't move anything, so they
+// aren't logged: they still play under reduced motion.
 const recordMotion = async ( page: Page ) => {
 	await page.addInitScript( () => {
 		window.wcMotionLog = [];
+		const fadeAnimations = [
+			'wc-fade-in',
+			'wc-fade-out',
+			'wc-fade-text-out',
+			'wc-hold-visible',
+		];
+		const fadeProperties = [
+			'opacity',
+			'visibility',
+			'color',
+			'background-color',
+			'border-color',
+			'border-top-color',
+			'border-right-color',
+			'border-bottom-color',
+			'border-left-color',
+			'outline-color',
+			'box-shadow',
+			'fill',
+			'stroke',
+			'text-decoration-color',
+			'-webkit-text-fill-color',
+		];
 		const isInBlocks = ( target: EventTarget | null ) =>
 			target instanceof Element &&
 			!! target.closest(
@@ -44,16 +67,10 @@ const recordMotion = async ( page: Page ) => {
 		document.addEventListener(
 			'animationstart',
 			( event ) => {
-				const isLooping = ( event.target as Element )
-					.getAnimations()
-					.some(
-						( animation ) =>
-							( animation as CSSAnimation ).animationName ===
-								event.animationName &&
-							animation.effect?.getComputedTiming().iterations ===
-								Infinity
-					);
-				if ( isInBlocks( event.target ) && ! isLooping ) {
+				if (
+					isInBlocks( event.target ) &&
+					! fadeAnimations.includes( event.animationName )
+				) {
 					window.wcMotionLog.push(
 						`animation ${ event.animationName }`
 					);
@@ -64,7 +81,10 @@ const recordMotion = async ( page: Page ) => {
 		document.addEventListener(
 			'transitionrun',
 			( event ) => {
-				if ( isInBlocks( event.target ) ) {
+				if (
+					isInBlocks( event.target ) &&
+					! fadeProperties.includes( event.propertyName )
+				) {
 					window.wcMotionLog.push(
 						`transition ${ event.propertyName }`
 					);
@@ -157,7 +177,7 @@ test.describe( 'Shopper → Cart and Checkout motion', () => {
 		} );
 	} );
 
-	test( 'Nothing animates when the shopper prefers reduced motion', async ( {
+	test( 'Nothing moves when the shopper prefers reduced motion', async ( {
 		page,
 		frontendUtils,
 		checkoutPageObject,

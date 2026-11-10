@@ -18,18 +18,15 @@
 		height: 1em;
 		box-sizing: border-box;
 		transform-origin: 50% 50%;
-		transform: translateZ(0) scale(0.5);
+		// Halfway through a turn, which is what shows when it doesn't turn under reduced motion.
+		transform: rotate(180deg);
 		backface-visibility: hidden;
 		border-radius: 50%;
 		border: 0.2em solid currentColor;
 		border-left-color: transparent;
 		@include spinner-animation();
-		// stylelint-disable-next-line woocommerce/motion-safe -- Loaders keep turning under reduced motion, in steps.
-		animation: spinner__animation 1s infinite
-			cubic-bezier(0.5856, 0.0703, 0.4143, 0.9297);
-
-		@media (prefers-reduced-motion: reduce) {
-			animation: spinner__animation 1.6s infinite steps(8);
+		@include motion-safe {
+			animation: spinner__animation 1s infinite linear;
 		}
 	}
 }
