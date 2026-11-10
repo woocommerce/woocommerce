@@ -2870,14 +2870,20 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should check the permissions of a direct call with a numeric string id or no input, as the MCP adapter sends them.
+	 * @testdox Should prepare a numeric string id or schema default before checking permissions directly.
 	 */
-	public function test_check_permissions_converts_raw_input(): void {
+	public function test_prepare_input_for_direct_permission_checks(): void {
 		$order   = \WC_Helper_Order::create_order();
 		$ability = wp_get_ability( 'woocommerce/orders-query' );
 
-		$this->assertTrue( $ability->check_permissions( array( 'id' => (string) $order->get_id() ) ), 'A numeric string id is converted.' );
-		$this->assertTrue( $ability->check_permissions( null ), 'No input gets the schema default.' );
+		$prepared = $ability->prepare_input( array( 'id' => (string) $order->get_id() ) );
+		$this->assertNotWPError( $prepared );
+		$this->assertSame( $order->get_id(), $prepared['id'] );
+		$this->assertTrue( $ability->check_permissions( $prepared ), 'A numeric string id is converted.' );
+
+		$prepared = $ability->prepare_input();
+		$this->assertNotWPError( $prepared );
+		$this->assertTrue( $ability->check_permissions( $prepared ), 'No input gets the schema default.' );
 	}
 
 	/**

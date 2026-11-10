@@ -14,8 +14,9 @@ defined( 'ABSPATH' ) || exit;
  *
  * WordPress 7.2 prepares the ability input with WP_Ability::prepare_input() before
  * the callbacks run. This class backports that method, so the callbacks get converted
- * input on WordPress 7.0 and 7.1 too. It also prepares the input for callers that
- * call check_permissions() directly.
+ * input on WordPress 7.0 and 7.1 too. Direct permission checks must pass the result
+ * of prepare_input() to check_permissions(). Pass raw input to execute(), which
+ * prepares it before checking permissions.
  *
  * @since 11.4.0
  */
@@ -45,27 +46,6 @@ class Ability extends \WP_Ability {
 	}
 
 	/**
-	 * Prepare the input, then check the permissions.
-	 *
-	 * Some callers, such as older MCP adapter versions, call this method directly with
-	 * raw input. The permission callback then gets the same input as through execute().
-	 * Input that is already prepared passes through unchanged.
-	 *
-	 * @since 11.4.0
-	 *
-	 * @param mixed $input Optional. The raw input provided for the ability. Default `null`.
-	 * @return bool|\WP_Error Whether the ability has the necessary permission, or the input error.
-	 */
-	final public function check_permissions( $input = null ) {
-		$input = $this->prepare_input( $input );
-		if ( is_wp_error( $input ) ) {
-			return $input;
-		}
-
-		return parent::check_permissions( $input );
-	}
-
-	/**
 	 * Normalize, validate and convert the input, the same way WordPress 7.2 does.
 	 *
 	 * @since 11.4.0
@@ -84,7 +64,8 @@ class Ability extends \WP_Ability {
 			return $is_valid;
 		}
 
-		return $this->sanitize_input( $input );
+		// Older Core already sanitizes in normalize_input() before execute() validates.
+		return method_exists( \WP_Ability::class, 'prepare_input' ) ? $this->sanitize_input( $input ) : $input;
 	}
 
 	/**
