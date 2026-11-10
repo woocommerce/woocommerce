@@ -1144,6 +1144,25 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: stage_status on a new order fires woocommerce_order_edit_status after the write, with the ID of the saved order.
+	 */
+	public function test_edit_status_action_gets_the_id_of_a_new_staged_order() {
+		$events   = array();
+		$listener = static function ( $order_id, $status ) use ( &$events ) {
+			$saved    = wc_get_order( $order_id );
+			$events[] = array( $order_id, $status, $saved ? $saved->get_status() : null );
+		};
+		add_action( 'woocommerce_order_edit_status', $listener, 10, 2 );
+
+		$object = new WC_Order();
+		$object->stage_status( OrderStatus::ON_HOLD, '', true );
+		$object->save();
+
+		remove_action( 'woocommerce_order_edit_status', $listener, 10 );
+		$this->assertSame( array( array( $object->get_id(), OrderStatus::ON_HOLD, OrderStatus::ON_HOLD ) ), $events );
+	}
+
+	/**
 	 * Test: a non-manual status change after stage_status cancels the pending woocommerce_order_edit_status, and a repeat of the staged status keeps it.
 	 */
 	public function test_edit_status_action_follows_the_last_status_change() {

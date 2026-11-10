@@ -458,7 +458,16 @@ class WC_Order extends WC_Abstract_Order {
 			);
 
 			if ( $manual_update && $this->staging_status ) {
-				$this->defer_to_save( 'order_edit_status', 'do_action', array( 'woocommerce_order_edit_status', $this->get_id(), $result['to'] ) );
+				$new_status = $result['to'];
+				$this->defer_to_save(
+					'order_edit_status',
+					function () use ( $new_status ): void {
+						/** This action is documented in includes/class-wc-order.php */
+						do_action( 'woocommerce_order_edit_status', $this->get_id(), $new_status ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment -- documented with @since below.
+					},
+					array(),
+					! $this->get_id()
+				);
 			} else {
 				$this->defer_to_save( 'order_edit_status', null );
 			}
@@ -469,7 +478,9 @@ class WC_Order extends WC_Abstract_Order {
 				 * is written, so a listener that reloads the order sees the old row.
 				 * After set_status(), it fires before the paid and completed dates
 				 * are set. After stage_status() or update_status(), it fires from
-				 * save(), with those dates already set on the order object.
+				 * save(), with those dates already set on the order object. For a
+				 * new order, which has no ID before the write, stage_status() leaves
+				 * it to after the write and the status hooks.
 				 *
 				 * @since 3.0.0
 				 * @param int    $order_id Order ID.
@@ -539,8 +550,9 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Set the order status in memory, like set_status(), including the paid and completed dates, but leave
-	 * woocommerce_order_edit_status to the next save(), which fires it before it writes. A later status
-	 * change before that save() replaces the pending action, or cancels it when the change is not manual.
+	 * woocommerce_order_edit_status to the next save(), which fires it before it writes, or after it writes for
+	 * a new order, which has no ID before. A later status change before that save() replaces the pending
+	 * action, or cancels it when the change is not manual.
 	 * update_status() calls this method, then save().
 	 *
 	 * An order class that overrides update_status() with rules of its own must override this method
