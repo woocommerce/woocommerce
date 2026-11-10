@@ -88,6 +88,7 @@ final class UcpDiscovery implements RegisterHooksInterface {
 
 	/**
 	 * Keep the static discovery file in sync on admin screens: write it under plain permalinks, delete it under pretty ones.
+	 * The file only refreshes on admin page loads.
 	 */
 	public function maybe_sync_file(): void {
 		global $wp_rewrite;
