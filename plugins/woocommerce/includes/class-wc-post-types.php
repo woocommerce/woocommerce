@@ -337,19 +337,22 @@ class WC_Post_Types {
 
 		do_action( 'woocommerce_register_post_type' );
 
+		$is_installing_wp = wp_installing();
+		$is_cli           = defined( 'WP_CLI' ) && WP_CLI;
+		$is_admin         = is_admin();
+
 		$permalinks = wc_get_permalink_structure();
 		$supports   = array( 'title', 'editor', 'excerpt', 'thumbnail', 'custom-fields', 'publicize', 'wpcom-markdown' );
-
 		if ( 'yes' === get_option( 'woocommerce_enable_reviews', 'yes' ) ) {
 			$supports[] = 'comments';
 		}
 
-		$shop_page_id      = wc_get_page_id( 'shop' );
 		$theme_support     = wc_current_theme_supports_woocommerce_or_fse();
-		$theme_unavailable = self::wp_cli_skips_active_theme() || wp_installing();
-
+		$theme_unavailable = $is_installing_wp || ( $is_cli && self::wp_cli_skips_active_theme() );
 		if ( self::should_register_product_archive( $theme_support, $theme_unavailable ) ) {
-			$has_archive = $shop_page_id && get_post( $shop_page_id ) ? urldecode( get_page_uri( $shop_page_id ) ) : 'shop';
+			$shop_page_id = wc_get_page_id( 'shop' );
+			$shop_page    = $shop_page_id > 0 ? get_post( $shop_page_id ) : false;
+			$has_archive  = $shop_page ? urldecode( get_page_uri( $shop_page ) ) : 'shop';
 		} else {
 			$has_archive = false;
 		}
@@ -357,7 +360,7 @@ class WC_Post_Types {
 		// If theme support changes, we may need to flush permalinks since some are changed based on this flag.
 		// Skip this check in contexts where themes may not be loaded, which would incorrectly record
 		// theme support as "no" and corrupt rewrite rules on the frontend.
-		if ( ! wp_installing() && ! ( defined( 'WP_CLI' ) && WP_CLI ) && ! wp_doing_cron() ) {
+		if ( ! $is_installing_wp && ! $is_cli && ! wp_doing_cron() ) {
 			$theme_support = $theme_support ? 'yes' : 'no';
 			if ( get_option( 'current_theme_supports_woocommerce' ) !== $theme_support && update_option( 'current_theme_supports_woocommerce', $theme_support ) ) {
 				update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
@@ -465,7 +468,7 @@ class WC_Post_Types {
 					'map_meta_cap'        => true,
 					'publicly_queryable'  => false,
 					'exclude_from_search' => true,
-					'show_in_menu'        => current_user_can( 'edit_others_shop_orders' ) ? 'woocommerce' : true,
+					'show_in_menu'        => ( $is_admin && current_user_can( 'edit_others_shop_orders' ) ) ? 'woocommerce' : true,
 					'hierarchical'        => false,
 					'show_in_nav_menus'   => false,
 					'rewrite'             => false,
@@ -528,7 +531,7 @@ class WC_Post_Types {
 						'map_meta_cap'        => true,
 						'publicly_queryable'  => false,
 						'exclude_from_search' => true,
-						'show_in_menu'        => current_user_can( 'edit_others_shop_orders' ) ? 'woocommerce' : true,
+						'show_in_menu'        => ( $is_admin && current_user_can( 'edit_others_shop_orders' ) ) ? 'woocommerce' : true,
 						'hierarchical'        => false,
 						'rewrite'             => false,
 						'query_var'           => false,

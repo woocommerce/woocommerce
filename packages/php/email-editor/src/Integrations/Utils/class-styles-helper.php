@@ -408,6 +408,17 @@ class Styles_Helper {
 	}
 
 	/**
+	 * Converts a font size to a plain px length that email clients read, flattening clamp().
+	 *
+	 * @param string $font_size Font size, such as 32px, 2rem or clamp(…).
+	 * @return string|null The px length, or null when the value isn't a single readable size.
+	 */
+	public static function get_static_font_size( string $font_size ): ?string {
+		$px = self::convert_to_px( (string) self::clamp_to_static_px( $font_size ), false );
+		return null !== $px && preg_match( '/^\d+(\.\d+)?px$/', $px ) ? $px : null;
+	}
+
+	/**
 	 * Remove the CSS unit from a string.
 	 *
 	 * @param string $input The string to remove the unit from.
