@@ -48,6 +48,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/order-notes-query',
 		'woocommerce/payment-gateways-query',
 		'woocommerce/customers-query',
+		'woocommerce/product-review-update',
+		'woocommerce/product-review-reply',
 	);
 
 	/**
@@ -339,6 +341,16 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'woocommerce/customers-query'        => array(
 				'readonly'    => true,
 				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/product-review-update'    => array(
+				'readonly'    => false,
+				'idempotent'  => true,
+				'destructive' => true,
+			),
+			'woocommerce/product-review-reply'     => array(
+				'readonly'    => false,
+				'idempotent'  => false,
 				'destructive' => false,
 			),
 		);
@@ -1010,6 +1022,20 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'status' => 'processing',
 				),
 			),
+			'product-review-update'  => array(
+				'woocommerce/product-review-update',
+				array(
+					'id'     => 1,
+					'status' => 'approved',
+				),
+			),
+			'product-review-reply'   => array(
+				'woocommerce/product-review-reply',
+				array(
+					'id'      => 1,
+					'content' => 'denied',
+				),
+			),
 			'order-add-note'         => array(
 				'woocommerce/order-add-note',
 				array(
@@ -1596,54 +1622,68 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public function provider_negative_entity_id_inputs(): array {
 		return array(
-			'products-query'      => array(
+			'products-query'        => array(
 				'woocommerce/products-query',
 				array( 'id' => -123 ),
 			),
-			'product-update'      => array(
+			'product-update'        => array(
 				'woocommerce/product-update',
 				array(
 					'id'   => -123,
 					'name' => 'Invalid',
 				),
 			),
-			'product-delete'      => array(
+			'product-delete'        => array(
 				'woocommerce/product-delete',
 				array( 'id' => -123 ),
 			),
-			'orders-query'        => array(
+			'orders-query'          => array(
 				'woocommerce/orders-query',
 				array( 'id' => -123 ),
 			),
-			'order-send-email'    => array(
+			'order-send-email'      => array(
 				'woocommerce/order-send-email',
 				array(
 					'id'    => -123,
 					'email' => 'invoice',
 				),
 			),
-			'order-update'        => array(
+			'order-update'          => array(
 				'woocommerce/order-update',
 				array(
 					'id'       => -123,
 					'shipping' => array( 'city' => 'Invalid' ),
 				),
 			),
-			'order-update-status' => array(
+			'order-update-status'   => array(
 				'woocommerce/order-update-status',
 				array(
 					'id'     => -123,
 					'status' => 'processing',
 				),
 			),
-			'order-add-note'      => array(
+			'product-review-update' => array(
+				'woocommerce/product-review-update',
+				array(
+					'id'     => -123,
+					'status' => 'approved',
+				),
+			),
+			'product-review-reply'  => array(
+				'woocommerce/product-review-reply',
+				array(
+					'id'      => -123,
+					'content' => 'Invalid',
+				),
+			),
+			'order-add-note'        => array(
 				'woocommerce/order-add-note',
 				array(
 					'id'   => -123,
 					'note' => 'Invalid',
 				),
 			),
-			'order-notes-query'   => array(
+			'order-notes-query'     => array(
 				'woocommerce/order-notes-query',
 				array( 'id' => -123 ),
 			),

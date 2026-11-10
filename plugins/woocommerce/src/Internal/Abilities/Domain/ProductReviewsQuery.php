@@ -14,6 +14,8 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Enums\ProductReviewStatus;
+use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductReviewAbilityTrait;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -23,6 +25,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Queries product reviews and rating aggregates.
  */
 class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefinition {
+
+	use ProductReviewAbilityTrait;
 
 	/**
 	 * Get the ability name.
@@ -125,45 +129,11 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 				),
 				'reviews'                  => array(
 					'type'  => 'array',
-					'items' => array(
-						'type'       => 'object',
-						'properties' => array(
-							'id'           => array( 'type' => 'integer' ),
-							'product_id'   => array( 'type' => 'integer' ),
-							'product_name' => array( 'type' => 'string' ),
-							'date_created' => array(
-								'type'   => 'string',
-								'format' => 'date-time',
-							),
-							'rating'       => array( 'type' => 'integer' ),
-							'verified'     => array( 'type' => 'boolean' ),
-							'status'       => array( 'type' => 'string' ),
-							'review'       => array( 'type' => 'string' ),
-						),
-					),
+					'items' => self::get_review_output_schema(),
 				),
 			),
 		);
 	}
-
-	/**
-	 * Moderation statuses mapped to the comment_approved values they cover.
-	 * Null means every status.
-	 */
-	private const STATUSES = array(
-		'approved' => '1',
-		'hold'     => '0',
-		'spam'     => 'spam',
-		'trash'    => 'trash',
-		'all'      => null,
-	);
-
-	private const STATUS_LABELS = array(
-		'1'     => 'approved',
-		'0'     => 'hold',
-		'spam'  => 'spam',
-		'trash' => 'trash',
-	);
 
 	private const DEFAULT_LIMIT = 20;
 
@@ -199,8 +169,8 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 				'status'      => array(
 					'type'        => 'string',
 					'description' => __( 'Review moderation status. "hold" is reviews awaiting moderation.', 'woocommerce' ),
-					'enum'        => array_keys( self::STATUSES ),
-					'default'     => 'approved',
+					'enum'        => array_merge( array_keys( self::get_review_statuses() ), array( 'all' ) ),
+					'default'     => ProductReviewStatus::APPROVED,
 				),
 				'min_rating'  => array(
 					'type'        => 'integer',
@@ -250,7 +220,7 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 	 * @return array|\WP_Error
 	 */
 	public static function execute( array $input = array() ) {
-		$status      = $input['status'] ?? 'approved';
+		$status      = $input['status'] ?? ProductReviewStatus::APPROVED;
 		$product_ids = array_values( array_unique( $input['product_ids'] ?? array() ) );
 		if ( ( $input['min_rating'] ?? 1 ) > ( $input['max_rating'] ?? 5 ) ) {
 			return new \WP_Error( 'woocommerce_ability_product_review_invalid_rating_range', __( 'min_rating must not exceed max_rating.', 'woocommerce' ), array( 'status' => 400 ) );
@@ -275,10 +245,12 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 		$matches            = self::query_reviews( $filters, $page, $per_page );
 		$total              = (int) $matches->found_comments;
 		$reviews            = array();
+		$with_product       = count( $product_ids ) !== 1;
+		$with_status        = 'all' === $status;
 		foreach ( $matches->comments as $comment ) {
 			$comment = get_comment( $comment );
 			if ( $comment ) {
-				$review = self::format_review( $comment, $scope );
+				$review = self::format_review( $comment, $with_product, $with_status );
 				if ( is_wp_error( $review ) ) {
 					return $review;
 				}
@@ -336,7 +308,7 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 			'comment__in'               => $filters['include'],
 			'type__in'                  => array( 'review', 'comment' ),
 			'parent'                    => 0,
-			'status'                    => 'all' === $filters['status'] ? 'any' : ( 'approved' === $filters['status'] ? 'approve' : $filters['status'] ),
+			'status'                    => 'all' === $filters['status'] ? 'any' : ( ProductReviewStatus::APPROVED === $filters['status'] ? 'approve' : $filters['status'] ),
 			'number'                    => $per_page,
 			'offset'                    => ( $page - 1 ) * $per_page,
 			'orderby'                   => array(
@@ -393,34 +365,6 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 	}
 
 	/**
-	 * Format a review without exposing reviewer identity.
-	 *
-	 * @param \WP_Comment $comment Review object.
-	 * @param array       $scope Product and status scope.
-	 * @return array|\WP_Error
-	 */
-	private static function format_review( \WP_Comment $comment, array $scope ) {
-		$review       = array(
-			'id'       => (int) $comment->comment_ID,
-			'rating'   => (int) get_comment_meta( (int) $comment->comment_ID, 'rating', true ),
-			'verified' => (bool) get_comment_meta( (int) $comment->comment_ID, 'verified', true ),
-			'review'   => wp_strip_all_tags( (string) $comment->comment_content ),
-		);
-		$date_created = self::format_date( $comment->comment_date_gmt );
-		if ( null !== $date_created ) {
-			$review['date_created'] = $date_created;
-		}
-		if ( 1 !== count( $scope['product_ids'] ) ) {
-			$review['product_id']   = (int) $comment->comment_post_ID;
-			$review['product_name'] = (string) get_post_field( 'post_title', (int) $comment->comment_post_ID, 'raw' );
-		}
-		if ( 'all' === $scope['status'] ) {
-			$review['status'] = self::STATUS_LABELS[ $comment->comment_approved ] ?? (string) $comment->comment_approved;
-		}
-		return ExtensibleAbilities::add_fields_to_object( $review, 'product_review', $comment );
-	}
-
-	/**
 	 * Aggregate all reviews in the product/status scope, independently of the page filters.
 	 *
 	 * @param array $scope Product and status scope.
@@ -433,7 +377,7 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 			AND c.comment_type IN ( 'review', 'comment', '' )
 			AND ( c.comment_type = 'review' OR cm.meta_value > 0 )";
 		$params   = array();
-		$approved = self::STATUSES[ $scope['status'] ];
+		$approved = self::get_review_statuses()[ $scope['status'] ] ?? null;
 		if ( null !== $approved ) {
 			$where   .= ' AND c.comment_approved = %s';
 			$params[] = $approved;
@@ -495,22 +439,6 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 				'fields'      => 'ids',
 			)
 		);
-	}
-
-	/**
-	 * Render a GMT comment date as UTC, or null when there is no usable date.
-	 *
-	 * Imported and legacy comments can carry '0000-00-00 00:00:00', which
-	 * strtotime() rolls into year -1 rather than rejecting.
-	 *
-	 * @param string|null $date_gmt comment_date_gmt as stored.
-	 * @return string|null
-	 */
-	private static function format_date( ?string $date_gmt ): ?string {
-		$date_gmt  = trim( (string) $date_gmt );
-		$timestamp = '' === $date_gmt ? false : strtotime( $date_gmt . ' UTC' );
-
-		return $timestamp > 0 ? gmdate( 'Y-m-d\TH:i:s\Z', $timestamp ) : null;
 	}
 
 	/**

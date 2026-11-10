@@ -1,0 +1,248 @@
+<?php
+/**
+ * Product review update ability.
+ */
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\Internal\Abilities\Domain;
+
+use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Enums\ProductReviewStatus;
+use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductReviewAbilityTrait;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Moderates a product review. Asking for the status a review already has changes nothing.
+ */
+class ProductReviewUpdate extends AbstractDomainAbility implements AbilityDefinition {
+
+	use ProductReviewAbilityTrait;
+
+	/**
+	 * Get the ability name.
+	 *
+	 * @since 11.4.0
+	 * @return string
+	 */
+	public static function get_name(): string {
+		return 'woocommerce/product-review-update';
+	}
+
+	/**
+	 * Get the ability registration arguments.
+	 *
+	 * @since 11.4.0
+	 * @return array
+	 */
+	public static function get_registration_args(): array {
+		return array(
+			'label'               => __( 'Update product review', 'woocommerce' ),
+			'description'         => __( 'Moderate a product review: approve it, hold it for moderation, mark it as spam or move it to the trash. Requesting the status a review already has changes nothing and returns changed false. Reviewer identity is withheld.', 'woocommerce' ),
+			'category'            => 'woocommerce',
+			'input_schema'        => self::get_input_schema(),
+			'output_schema'       => self::get_output_schema(),
+			'execute_callback'    => array( __CLASS__, 'execute' ),
+			'permission_callback' => array( __CLASS__, 'can_edit_review' ),
+			'meta'                => array(
+				'show_in_rest' => true,
+				'mcp'          => array(
+					'public' => true,
+					'type'   => 'tool',
+				),
+				'annotations'  => array(
+					'readonly'    => false,
+					'idempotent'  => true,
+					'destructive' => true,
+				),
+			),
+		);
+	}
+
+	/**
+	 * Check review edit access. An ID that is not a review passes for users who could edit any review, so they get the not-found error.
+	 *
+	 * @since 11.4.0
+	 * @param mixed $input Ability input.
+	 * @return bool
+	 */
+	public static function can_edit_review( $input = array() ): bool {
+		$review_id = self::get_id_from_input( $input );
+
+		return $review_id > 0 && self::check_review_permission( 'edit', $review_id );
+	}
+
+	/**
+	 * Change the moderation status of a review.
+	 *
+	 * @since 11.4.0
+	 * @param array $input Ability input.
+	 * @return array|\WP_Error
+	 */
+	public static function execute( array $input ) {
+		$review = self::get_review_from_input( $input );
+		if ( is_wp_error( $review ) ) {
+			return $review;
+		}
+
+		$previous = self::get_review_status( $review );
+		$status   = $input['status'];
+
+		if ( ! array_key_exists( $previous, self::get_review_statuses() ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_product_review_status_locked',
+				__( 'The product of this review is in the trash. Restore the product to moderate its reviews.', 'woocommerce' ),
+				array( 'status' => 409 )
+			);
+		}
+
+		$changed = $previous !== $status;
+		if ( $changed ) {
+			$error = self::change_status( $review, $status );
+			if ( null !== $error ) {
+				return $error;
+			}
+		}
+
+		$saved = get_comment( (int) $review->comment_ID );
+		if ( ! $saved instanceof \WP_Comment ) {
+			return new \WP_Error(
+				'woocommerce_ability_product_review_status_failed',
+				__( 'The review status was changed, but the review could not be read back.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		$formatted = self::format_review( $saved, true, true );
+		if ( is_wp_error( $formatted ) ) {
+			return $changed ? ExtensibleAbilities::saved_write_error( $formatted, 'product_review', (int) $saved->comment_ID ) : $formatted;
+		}
+
+		return array(
+			'changed'         => $changed,
+			'previous_status' => $previous,
+			'review'          => $formatted,
+		);
+	}
+
+	/**
+	 * Move a review to a new status. A review leaves the trash or spam through WordPress's untrash and unspam
+	 * first, so the trash metadata is cleared and spam filters such as Akismet learn from the correction.
+	 *
+	 * @param \WP_Comment $review Review.
+	 * @param string      $status Target status.
+	 * @return \WP_Error|null
+	 */
+	private static function change_status( \WP_Comment $review, string $status ): ?\WP_Error {
+		$review_id = (int) $review->comment_ID;
+
+		if ( ProductReviewStatus::TRASH === $status ) {
+			/**
+			 * Filters whether a review can go to the trash. When it cannot, the REST API deletes it permanently instead, which this ability never does.
+			 *
+			 * @since 3.5.0
+			 *
+			 * @param bool        $supports_trash Whether reviews can be trashed.
+			 * @param \WP_Comment $review         Review to trash.
+			 */
+			if ( true !== apply_filters( 'woocommerce_rest_product_review_trashable', ( EMPTY_TRASH_DAYS > 0 ), $review ) ) {
+				return new \WP_Error(
+					'woocommerce_ability_product_review_trash_not_supported',
+					__( 'This site deletes trashed comments immediately, so the review cannot be moved to the trash.', 'woocommerce' ),
+					array( 'status' => 501 )
+				);
+			}
+		}
+
+		$ok      = true;
+		$current = self::get_review_status( $review );
+		if ( ProductReviewStatus::TRASH === $current ) {
+			$ok      = wp_untrash_comment( $review_id );
+			$current = self::get_current_status( $review_id, $current );
+		}
+		// Trashing a spam review keeps it spam on untrash; only a move to another status unspams it.
+		if ( $ok && ProductReviewStatus::SPAM === $current && ! in_array( $status, array( ProductReviewStatus::SPAM, ProductReviewStatus::TRASH ), true ) ) {
+			$ok      = wp_unspam_comment( $review_id );
+			$current = self::get_current_status( $review_id, $current );
+		}
+
+		if ( $ok && $current !== $status ) {
+			switch ( $status ) {
+				case ProductReviewStatus::SPAM:
+					$ok = wp_spam_comment( $review_id );
+					break;
+				case ProductReviewStatus::TRASH:
+					$ok = wp_trash_comment( $review_id );
+					break;
+				default:
+					$ok = wp_set_comment_status( $review_id, ProductReviewStatus::APPROVED === $status ? 'approve' : 'hold', true );
+			}
+		}
+
+		if ( true === $ok ) {
+			return null;
+		}
+
+		return new \WP_Error(
+			'woocommerce_ability_product_review_status_failed',
+			is_wp_error( $ok ) ? $ok->get_error_message() : __( 'Failed to update the review status.', 'woocommerce' ),
+			array( 'status' => 500 )
+		);
+	}
+
+	/**
+	 * Re-read the stored status after WordPress changed it.
+	 *
+	 * @param int    $review_id Review ID.
+	 * @param string $fallback  Status to report when the review cannot be read.
+	 * @return string
+	 */
+	private static function get_current_status( int $review_id, string $fallback ): string {
+		$review = get_comment( $review_id );
+
+		return $review instanceof \WP_Comment ? self::get_review_status( $review ) : $fallback;
+	}
+
+	/**
+	 * Get the input schema.
+	 *
+	 * @return array
+	 */
+	private static function get_input_schema(): array {
+		return array(
+			'type'                 => 'object',
+			'properties'           => array(
+				'id'     => array(
+					'type'        => 'integer',
+					'description' => __( 'Review ID, from the woocommerce/product-reviews-query ability.', 'woocommerce' ),
+					'minimum'     => 1,
+				),
+				'status' => array(
+					'type'        => 'string',
+					'description' => __( 'New moderation status. "hold" puts the review back in the moderation queue.', 'woocommerce' ),
+					'enum'        => array_keys( self::get_review_statuses() ),
+				),
+			),
+			'required'             => array( 'id', 'status' ),
+			'additionalProperties' => false,
+		);
+	}
+
+	/**
+	 * Get the output schema.
+	 *
+	 * @return array
+	 */
+	private static function get_output_schema(): array {
+		return array(
+			'type'       => 'object',
+			'properties' => array(
+				'changed'         => array( 'type' => 'boolean' ),
+				'previous_status' => array( 'type' => 'string' ),
+				'review'          => ExtensibleAbilities::add_fields_schema( self::get_review_output_schema(), 'product_review' ),
+			),
+		);
+	}
+}
