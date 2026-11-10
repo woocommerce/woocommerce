@@ -160,7 +160,7 @@ class Product_Price extends Abstract_Product_Block_Renderer {
 		$prices = array();
 		foreach ( $product->get_children() as $child_id ) {
 			$child = wc_get_product( $child_id );
-			if ( $child && $child->is_visible() && $child->get_price() !== '' ) {
+			if ( $child && 'publish' === $child->get_status() && $child->get_price() !== '' ) {
 				$prices[] = wc_get_price_to_display( $child, array( 'price' => (float) $child->get_price() ) );
 			}
 		}

@@ -180,6 +180,26 @@ class ProductPriceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Counts grouped items that are hidden from the catalog, as the shop does.
+	 */
+	public function test_grouped_product_counts_catalog_hidden_items(): void {
+		$cheap   = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price'      => 5,
+				'price'              => 5,
+				'catalog_visibility' => 'hidden',
+			)
+		);
+		$dear    = WC_Helper_Product::create_simple_product( true, array( 'catalog_visibility' => 'hidden' ) );
+		$grouped = new \WC_Product_Grouped();
+		$grouped->set_children( array( $cheap->get_id(), $dear->get_id() ) );
+		$grouped->save();
+
+		$this->assertSame( '$5.00 — $10.00', $this->text( $this->render( $grouped->get_id() ) ) );
+	}
+
+	/**
 	 * Renders the block for a product.
 	 *
 	 * @param int $product_id Product ID in the block context.
