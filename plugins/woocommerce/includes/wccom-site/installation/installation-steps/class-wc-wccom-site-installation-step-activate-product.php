@@ -54,7 +54,7 @@ class WC_WCCOM_Site_Installation_Step_Activate_Product implements WC_WCCOM_Site_
 	 * @throws WC_REST_WCCOM_Site_Installer_Error If plugin activation failed.
 	 */
 	private function activate_plugin( $product_id ) {
-		// Clear plugins cache used in `WC_Helper::get_local_woo_plugins`.
+		// The product was installed in this request, so rescan instead of using a list cached before that.
 		wp_clean_plugins_cache();
 		$filename = false;
 
@@ -66,7 +66,7 @@ class WC_WCCOM_Site_Installation_Step_Activate_Product implements WC_WCCOM_Site_
 
 		if ( false === $filename ) {
 			$plugins = wp_list_filter(
-				WC_Helper::get_local_woo_plugins(),
+				WC_Helper::get_local_woo_plugins( false ),
 				array(
 					'_product_id' => $product_id,
 				)
@@ -106,7 +106,7 @@ class WC_WCCOM_Site_Installation_Step_Activate_Product implements WC_WCCOM_Site_
 	 * @throws WC_REST_WCCOM_Site_Installer_Error If theme activation failed.
 	 */
 	private function activate_theme( $product_id ) {
-		// Clear plugins cache used in `WC_Helper::get_local_woo_themes`.
+		// The product was installed in this request, so rescan instead of using a list cached before that.
 		wp_clean_themes_cache();
 		$theme_slug = false;
 
@@ -118,7 +118,7 @@ class WC_WCCOM_Site_Installation_Step_Activate_Product implements WC_WCCOM_Site_
 
 		if ( false === $theme_slug ) {
 			$themes = wp_list_filter(
-				WC_Helper::get_local_woo_themes(),
+				WC_Helper::get_local_woo_themes( false ),
 				array(
 					'_product_id' => $product_id,
 				)
