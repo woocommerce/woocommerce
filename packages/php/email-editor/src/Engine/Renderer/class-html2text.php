@@ -625,8 +625,10 @@ class Html2Text {
 			case 'b':
 			case 'strong':
 				// Mark bold text as *text*, keeping the whitespace around it outside the markers.
-				if ( $options['mark_bold'] && '' !== trim( $output ) ) {
-					$output = (string) preg_replace( '/^(\s*)(.*?)(\s*)$/s', '$1*$2*$3', $output );
+				$bold_text = trim( $output );
+				if ( $options['mark_bold'] && '' !== $bold_text ) {
+					$leading = substr( $output, 0, strlen( $output ) - strlen( ltrim( $output ) ) );
+					$output  = $leading . '*' . $bold_text . '*' . substr( $output, strlen( rtrim( $output ) ) );
 				}
 				break;
 
