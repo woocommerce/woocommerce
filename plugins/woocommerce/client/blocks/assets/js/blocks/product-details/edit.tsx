@@ -59,7 +59,6 @@ const Edit = ( {
 	const { hideTabTitle } = attributes;
 	const { isDescendentOfSingleProductTemplate } =
 		useIsDescendentOfSingleProductTemplate();
-	const showUpsellsPlaceholder = isDescendentOfSingleProductTemplate;
 
 	const product = useSelect(
 		( select ) => {
@@ -171,7 +170,7 @@ const Edit = ( {
 		return (
 			<div { ...innerBlocksWrapperProps }>
 				{ children }
-				{ showUpsellsPlaceholder && (
+				{ isDescendentOfSingleProductTemplate && (
 					<UpsellsPlaceholder clientId={ clientId } />
 				) }
 			</div>
@@ -199,7 +198,7 @@ const Edit = ( {
 			<Disabled>
 				<LegacyProductDetailsPreview hideTabTitle={ hideTabTitle } />
 			</Disabled>
-			{ showUpsellsPlaceholder && (
+			{ isDescendentOfSingleProductTemplate && (
 				<UpsellsPlaceholder clientId={ clientId } />
 			) }
 		</div>
