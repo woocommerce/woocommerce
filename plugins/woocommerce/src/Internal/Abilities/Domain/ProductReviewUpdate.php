@@ -195,9 +195,8 @@ class ProductReviewUpdate extends AbstractDomainAbility implements AbilityDefini
 		}
 
 		$data = array( 'status' => 500 );
-		// Leaving trash or spam can succeed before the final move fails, so the review is no longer where it was.
+		// Leaving trash or spam can succeed before the final move fails; retrying the same request finishes the move.
 		if ( $current !== $previous ) {
-			$data['saved']          = true;
 			$data['current_status'] = $current;
 		}
 
