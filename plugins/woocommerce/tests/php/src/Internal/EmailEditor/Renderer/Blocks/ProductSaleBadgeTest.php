@@ -76,22 +76,24 @@ class ProductSaleBadgeTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Places the badge according to its alignment, and on the left for any other value.
-	 * @testWith ["left", "text-align:left;", "margin-right:auto;"]
-	 *           ["center", "text-align:center;", "margin-left:auto;margin-right:auto;"]
-	 *           ["right", "text-align:right;", "margin-left:auto;"]
-	 *           ["justify", "text-align:left;", "margin-right:auto;"]
+	 * @testdox Places the badge and its email cell according to the alignment, and on the default side for any other value.
+	 * @testWith ["left", "text-align:left;", "margin-right:auto;", "left"]
+	 *           ["center", "text-align:center;", "margin-left:auto;margin-right:auto;", "center"]
+	 *           ["right", "text-align:right;", "margin-left:auto;", "right"]
+	 *           ["justify", "text-align:left;", "margin-right:auto;", "left"]
 	 *
 	 * @param string $align      Block alignment.
 	 * @param string $text_align Text alignment of the badge.
 	 * @param string $margins    Margins that position the badge.
+	 * @param string $cell_align Alignment of the email table cell around the badge.
 	 */
-	public function test_badge_follows_alignment( string $align, string $text_align, string $margins ): void {
+	public function test_badge_follows_alignment( string $align, string $text_align, string $margins, string $cell_align ): void {
 		$html = $this->render( $this->product->get_id(), array( 'align' => $align ) );
 
 		$this->assertSame( 1, preg_match( '/<span class="wc-block-components-product-sale-badge__text" style="([^"]*)"/', $html, $matches ) );
 		$this->assertStringContainsString( $text_align, $matches[1] );
 		$this->assertStringEndsWith( 'position:static;' . $margins, $matches[1] );
+		$this->assertMatchesRegularExpression( '/class="email-product-sale-badge-cell"[^>]*align="' . $cell_align . '"/', $html );
 	}
 
 	/**
