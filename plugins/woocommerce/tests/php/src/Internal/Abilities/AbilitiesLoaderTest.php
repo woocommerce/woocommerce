@@ -34,6 +34,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 	private const CANONICAL_ABILITY_IDS = array(
 		'woocommerce/product-terms-query',
+		'woocommerce/product-term-create',
+		'woocommerce/product-term-update',
 		'woocommerce/product-attributes-query',
 		'woocommerce/product-attribute-create',
 		'woocommerce/products-query',
@@ -287,6 +289,16 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => false,
+			),
+			'woocommerce/product-term-create'      => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/product-term-update'      => array(
+				'readonly'    => false,
+				'idempotent'  => true,
+				'destructive' => true,
 			),
 			'woocommerce/product-create'           => array(
 				'readonly'    => false,

@@ -24,8 +24,10 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewReply;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewsQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZonesQuery;
@@ -60,6 +62,8 @@ class AbilitiesLoader {
 		PaymentGatewaysQuery::class,
 		ProductsQuery::class,
 		ProductTermsQuery::class,
+		ProductTermCreate::class,
+		ProductTermUpdate::class,
 		ProductReviewsQuery::class,
 		ProductReviewUpdate::class,
 		ProductReviewReply::class,
