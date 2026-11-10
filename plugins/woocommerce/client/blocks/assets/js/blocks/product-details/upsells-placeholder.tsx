@@ -8,8 +8,7 @@ import {
 } from '@wordpress/blocks';
 import { Button } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
-import { resolveSelect, select, useDispatch, useSelect } from '@wordpress/data';
-import { useState } from '@wordpress/element';
+import { select, useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -21,7 +20,6 @@ const PRODUCT_COLLECTION_BLOCK_NAME = 'woocommerce/product-collection';
 const UPSELLS_MIGRATED_OPTION = 'woocommerce_product_upsells_migrated_to_block';
 
 const UpsellsPlaceholder = ( { clientId }: { clientId: string } ) => {
-	const [ isMigrating, setIsMigrating ] = useState( false );
 	const { insertBlock } = useDispatch( blockEditorStore );
 	const { editEntityRecord } = useDispatch( coreStore );
 	const showPlaceholder = useSelect( ( dataSelect ) => {
@@ -31,7 +29,6 @@ const UpsellsPlaceholder = ( { clientId }: { clientId: string } ) => {
 			hasFinishedResolution,
 		} = dataSelect( coreStore );
 
-		// Fetch the site entity. Until it resolves, the option is unknown.
 		getEntityRecord( 'root', 'site' );
 
 		const hasLoaded = hasFinishedResolution( 'getEntityRecord', [
@@ -52,7 +49,7 @@ const UpsellsPlaceholder = ( { clientId }: { clientId: string } ) => {
 		return site[ UPSELLS_MIGRATED_OPTION ] !== 'yes';
 	}, [] );
 
-	const migrateToBlock = async () => {
+	const migrateToBlock = () => {
 		const blockEditor = select( blockEditorStore );
 		const rootClientId = blockEditor.getBlockRootClientId( clientId ) ?? '';
 		const index = blockEditor.getBlockIndex( clientId, rootClientId );
@@ -62,48 +59,32 @@ const UpsellsPlaceholder = ( { clientId }: { clientId: string } ) => {
 			return;
 		}
 
-		setIsMigrating( true );
-		try {
-			const site = await resolveSelect( coreStore ).getEntityRecord(
-				'root',
-				'site'
-			);
-			if ( ! site ) {
-				return;
-			}
+		editEntityRecord( 'root', 'site', undefined, {
+			[ UPSELLS_MIGRATED_OPTION ]: 'yes',
+		} );
 
-			// Stage the option on the site entity so it persists with the editor Save button.
-			editEntityRecord( 'root', 'site', undefined, {
-				[ UPSELLS_MIGRATED_OPTION ]: 'yes',
-			} );
-
-			const upsellsBlock = createBlock(
-				PRODUCT_COLLECTION_BLOCK_NAME,
-				{
-					...upsellsCollection.attributes,
-					query: {
-						...upsellsCollection.attributes.query,
-						perPage: 5,
-					},
-					displayLayout: {
-						...upsellsCollection.attributes.displayLayout,
-						columns: 5,
-					},
-					...( typeof align === 'string' && align !== ''
-						? { align }
-						: {} ),
-					collection: upsellsCollection.name,
-					hideControls: [ 'inherit' ],
+		const upsellsBlock = createBlock(
+			PRODUCT_COLLECTION_BLOCK_NAME,
+			{
+				...upsellsCollection.attributes,
+				query: {
+					...upsellsCollection.attributes.query,
+					perPage: 5,
 				},
-				createBlocksFromInnerBlocksTemplate(
-					upsellsCollection.innerBlocks
-				)
-			);
+				displayLayout: {
+					...upsellsCollection.attributes.displayLayout,
+					columns: 5,
+				},
+				...( typeof align === 'string' && align !== ''
+					? { align }
+					: {} ),
+				collection: upsellsCollection.name,
+				hideControls: [ 'inherit' ],
+			},
+			createBlocksFromInnerBlocksTemplate( upsellsCollection.innerBlocks )
+		);
 
-			void insertBlock( upsellsBlock, index + 1, rootClientId, true );
-		} finally {
-			setIsMigrating( false );
-		}
+		void insertBlock( upsellsBlock, index + 1, rootClientId, true );
 	};
 
 	if ( ! showPlaceholder ) {
@@ -116,11 +97,7 @@ const UpsellsPlaceholder = ( { clientId }: { clientId: string } ) => {
 				<Button
 					key="migrate"
 					variant="primary"
-					isBusy={ isMigrating }
-					disabled={ isMigrating }
-					onClick={ () => {
-						void migrateToBlock();
-					} }
+					onClick={ migrateToBlock }
 				>
 					{ __( 'Switch to the Upsells block', 'woocommerce' ) }
 				</Button>,
