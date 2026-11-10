@@ -110,39 +110,6 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	}
 
 	/**
-	 * The bound session's checkout state, with the order filled in once the buyer has paid it.
-	 *
-	 * Paying happens in the browser, outside this session, so `completed` is read off the
-	 * order rather than stored. An order that can no longer be paid, such as one the hold-stock
-	 * timer cancelled, drops the hand-off so the status derives again.
-	 *
-	 * @return array<string, mixed>|null Null when the session holds no checkout.
-	 */
-	protected function checkout_state(): ?array {
-		$state = WC()->session ? WC()->session->get( self::CHECKOUT_SESSION_KEY ) : null;
-
-		if ( ! is_array( $state ) ) {
-			return null;
-		}
-
-		$order = empty( $state['order_id'] ) ? null : wc_get_order( (int) $state['order_id'] );
-
-		if ( $order instanceof \WC_Order && $order->is_paid() ) {
-			$state['status'] = CheckoutMapper::STATUS_COMPLETED;
-			$state['order']  = array(
-				'id'            => (string) $order->get_id(),
-				'permalink_url' => $order->get_checkout_order_received_url(),
-			);
-		} elseif ( ! empty( $state['order_id'] ) && ! ( $order instanceof \WC_Order && $order->has_status( array( OrderStatus::PENDING, OrderStatus::FAILED, OrderStatus::ON_HOLD ) ) ) ) {
-			// Status list rather than needs_payment(): that is false for a zero-total order, and
-			// on-hold is a payment the buyer made that the store has yet to confirm.
-			unset( $state['status'], $state['continue_url'], $state['order_id'] );
-		}
-
-		return $state;
-	}
-
-	/**
 	 * Cancel the order handed to the buyer while its payment page would still take it, and forget it.
 	 *
 	 * Once the checkout changes or ends, that order no longer matches it and must not be paid.
@@ -176,16 +143,6 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	protected function save_checkout_state( array $state ): void {
 		unset( $state['order'] );
 		WC()->session->set( self::CHECKOUT_SESSION_KEY, $state );
-	}
-
-	/**
-	 * Whether a checkout is completed or canceled.
-	 *
-	 * @param array<string, mixed> $state Checkout state.
-	 * @return bool
-	 */
-	protected function is_terminal( array $state ): bool {
-		return in_array( $state['status'] ?? '', array( CheckoutMapper::STATUS_COMPLETED, CheckoutMapper::STATUS_CANCELED ), true );
 	}
 
 	/**

@@ -3,11 +3,13 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute as StoreApiCartRoute;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\SessionHandler;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\CartMapper;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\CheckoutMapper;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\IdempotencyClaim;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
@@ -274,10 +276,10 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	}
 
 	/**
-	 * Dispatch the request, refusing a cart that was cancelled or a cart write to a checkout.
+	 * Dispatch the request, refusing a cart that was cancelled or that a checkout owns.
 	 *
-	 * Runs after the session is bound, so one check covers every id-bearing route. A promoted cart
-	 * stays readable, but only the checkout routes change it: they cancel the order handed to the buyer.
+	 * Runs after the session is bound, so one check covers every id-bearing route. A live checkout's
+	 * cart is readable but changed only through the checkout routes, which close the buyer's order.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
@@ -291,7 +293,13 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 				return $this->ucp_not_found();
 			}
 
-			if ( Utils::CAPABILITY_CART === $this->capability() && 'GET' !== $request->get_method() && $this->cart_is_checkout() ) {
+			$checkout = Utils::CAPABILITY_CART === $this->capability() ? $this->checkout_state() : null;
+
+			if ( null !== $checkout && $this->is_terminal( $checkout ) ) {
+				return $this->ucp_not_found();
+			}
+
+			if ( null !== $checkout && 'GET' !== $request->get_method() ) {
 				return $this->ucp_error( 'CONFLICT', __( 'This cart has become a checkout session, which the checkout routes manage.', 'woocommerce' ), 'recoverable', 409, '$.id' );
 			}
 		}
@@ -358,14 +366,46 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	}
 
 	/**
-	 * Whether the bound session's cart was promoted to a checkout.
+	 * The bound session's checkout state, with the order filled in once the buyer has paid it.
 	 *
+	 * Paying happens in the browser, outside this session, so `completed` is read off the
+	 * order rather than stored. An order that can no longer be paid, such as one the hold-stock
+	 * timer cancelled, drops the hand-off so the status derives again.
+	 *
+	 * @return array<string, mixed>|null Null when the session holds no checkout.
+	 */
+	protected function checkout_state(): ?array {
+		$state = WC()->session ? WC()->session->get( self::CHECKOUT_SESSION_KEY ) : null;
+
+		if ( ! is_array( $state ) ) {
+			return null;
+		}
+
+		$order = empty( $state['order_id'] ) ? null : wc_get_order( (int) $state['order_id'] );
+
+		if ( $order instanceof \WC_Order && $order->is_paid() ) {
+			$state['status'] = CheckoutMapper::STATUS_COMPLETED;
+			$state['order']  = array(
+				'id'            => (string) $order->get_id(),
+				'permalink_url' => $order->get_checkout_order_received_url(),
+			);
+		} elseif ( ! empty( $state['order_id'] ) && ! ( $order instanceof \WC_Order && $order->has_status( array( OrderStatus::PENDING, OrderStatus::FAILED, OrderStatus::ON_HOLD ) ) ) ) {
+			// Status list rather than needs_payment(): that is false for a zero-total order, and
+			// on-hold is a payment the buyer made that the store has yet to confirm.
+			unset( $state['status'], $state['continue_url'], $state['order_id'] );
+		}
+
+		return $state;
+	}
+
+	/**
+	 * Whether a checkout is completed or canceled.
+	 *
+	 * @param array<string, mixed> $state Checkout state.
 	 * @return bool
 	 */
-	protected function cart_is_checkout(): bool {
-		$session = WC()->session;
-
-		return $session ? is_array( $session->get( self::CHECKOUT_SESSION_KEY ) ) : false;
+	protected function is_terminal( array $state ): bool {
+		return in_array( $state['status'] ?? '', array( CheckoutMapper::STATUS_COMPLETED, CheckoutMapper::STATUS_CANCELED ), true );
 	}
 
 	/**

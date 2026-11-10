@@ -275,7 +275,7 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox A promoted cart is still read through the cart routes but no longer written, so the handed-off order is not left behind.
+	 * @testdox A promoted cart is read but not written through the cart routes while its checkout is live, and is no longer a cart afterwards.
 	 */
 	public function test_cart_writes_are_refused_once_promoted(): void {
 		$created = $this->create_ready_checkout();
@@ -294,6 +294,16 @@ class UcpCheckout extends ControllerTestCase {
 
 		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::PENDING ) );
 		$this->assertSame( 'requires_escalation', $this->request( 'GET', '/checkout-sessions/' . $created['id'] )->get_data()['status'] );
+
+		// Once the checkout ends the id is no longer a cart, while the checkout keeps reading back with its lines.
+		$this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/cancel' );
+		$gone = $this->request( 'GET', '/carts/' . $created['id'] );
+		$this->assertSame( 200, $gone->get_status() );
+		$this->assertSame( 'error', $gone->get_data()['ucp']['status'] );
+		$this->assertSame( 'not_found', $gone->get_data()['messages'][0]['code'] );
+		$canceled = $this->request( 'GET', '/checkout-sessions/' . $created['id'] )->get_data();
+		$this->assertSame( 'canceled', $canceled['status'] );
+		$this->assertSame( $created['line_items'], $canceled['line_items'] );
 	}
 
 	/**
