@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Pass personalization tag attribute values with apostrophes, quotes, ampersands or square brackets to the tag correctly.
+Pass tag attribute values with quotes, ampersands or brackets correctly; tag callbacks now get them decoded and must escape them.

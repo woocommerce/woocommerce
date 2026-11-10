@@ -30,8 +30,10 @@ class Personalizer {
 	 * A value quoted right after "=" is consumed whole, so a "]" inside it does not end the token, while an
 	 * apostrophe inside an unquoted value (O'Brien) is a plain character. The possessive quantifier stops
 	 * backtracking, which keeps the scan linear.
+	 *
+	 * @internal Shared with the Renderer, which protects tag tokens in the plain-text version; not a public API.
 	 */
-	private const TAG_ARGUMENTS_PATTERN = '(?:\s(?:=(?:"[^"]*"|\'[^\']*\')|[^\]])*+)?';
+	public const TAG_ARGUMENTS_PATTERN = '(?:\s(?:=(?:"[^"]*"|\'[^\']*\')|[^\]])*+)?';
 
 	/**
 	 * Rendering context for HTML content. Tag values are rendered into HTML markup.
