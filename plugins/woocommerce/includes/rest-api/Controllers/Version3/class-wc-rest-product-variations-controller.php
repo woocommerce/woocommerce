@@ -233,12 +233,12 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 
 		// SKU.
 		if ( isset( $request['sku'] ) ) {
-			$variation->set_sku( wc_clean( $request['sku'] ) );
+			$variation->set_sku( sanitize_text_field( $request['sku'] ) );
 		}
 
 		// Unique ID.
 		if ( isset( $request['global_unique_id'] ) ) {
-			$variation->set_global_unique_id( wc_clean( $request['global_unique_id'] ) );
+			$variation->set_global_unique_id( sanitize_text_field( $request['global_unique_id'] ) );
 		}
 
 		// MPN.
