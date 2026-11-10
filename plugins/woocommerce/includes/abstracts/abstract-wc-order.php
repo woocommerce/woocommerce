@@ -1138,7 +1138,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				// Keep the stored status, even one whose plugin is no longer active. Use the stored value so a filter on the displayed status can't decide what is kept.
 				$stored_status = $this->get_status( 'edit' );
 
-				if ( $stored_status && ! in_array( $stored_status, $status_exceptions, true ) ) {
+				if ( $stored_status && ! in_array( $stored_status, array( OrderStatus::AUTO_DRAFT, OrderStatus::DRAFT, OrderStatus::TRASH ), true ) ) {
 					wc_doing_it_wrong(
 						__METHOD__,
 						sprintf(

@@ -3041,6 +3041,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should still fall back to pending, without a warning, when the current status is empty or a special status.
 	 * @testWith ["auto-draft"]
+	 *           ["draft"]
 	 *           ["trash"]
 	 *           [""]
 	 *
