@@ -69,39 +69,42 @@ class SiteLocale {
 			return $slug;
 		}
 
-		self::$is_translating       = true;
-		$locale                     = self::get();
-		$is_site_locale_request     = determine_locale() === $locale;
-		$use_site_locale            = static fn() => $locale;
-		$translation_controller     = WP_Translation_Controller::get_instance();
-		$previous_controller_locale = $translation_controller->get_locale();
-		$previous_translations      = $l10n;
-		$previous_unloaded          = $l10n_unloaded;
-
+		self::$is_translating = true;
 		try {
-			add_filter( 'pre_determine_locale', $use_site_locale, PHP_INT_MAX );
-			add_filter( 'locale', $use_site_locale, PHP_INT_MAX );
+			$locale                     = self::get();
+			$is_site_locale_request     = determine_locale() === $locale;
+			$use_site_locale            = static fn() => $locale;
+			$translation_controller     = WP_Translation_Controller::get_instance();
+			$previous_controller_locale = $translation_controller->get_locale();
+			$previous_translations      = $l10n;
+			$previous_unloaded          = $l10n_unloaded;
 
-			$translated_slug = self::load_and_translate_slug( $slug, $locale );
+			try {
+				add_filter( 'pre_determine_locale', $use_site_locale, PHP_INT_MAX );
+				add_filter( 'locale', $use_site_locale, PHP_INT_MAX );
 
-			if ( false === $translated_slug && $is_site_locale_request ) {
-				// A loader may have supplied a request catalog without registering a translation file.
-				$translated_slug = get_translations_for_domain( 'woocommerce' )->translate( $slug, 'slug' );
+				$translated_slug = self::load_and_translate_slug( $slug, $locale );
+
+				if ( false === $translated_slug && $is_site_locale_request ) {
+					// A loader may have supplied a request catalog without registering a translation file.
+					$translated_slug = get_translations_for_domain( 'woocommerce' )->translate( $slug, 'slug' );
+				}
+
+				$translated_slug = is_string( $translated_slug ) && '' !== $translated_slug ? $translated_slug : $slug;
+
+				// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment -- Both filters are documented in wp-includes/l10n.php.
+				$filtered_slug = apply_filters( 'gettext_with_context', $translated_slug, $slug, 'slug', 'woocommerce' );
+				$filtered_slug = apply_filters( 'gettext_with_context_woocommerce', $filtered_slug, $slug, 'slug', 'woocommerce' );
+				// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment
+			} finally {
+				remove_filter( 'pre_determine_locale', $use_site_locale, PHP_INT_MAX );
+				remove_filter( 'locale', $use_site_locale, PHP_INT_MAX );
+				$translation_controller->set_locale( $previous_controller_locale );
+				// A callback can load other text domains while the site locale is active.
+				$l10n          = $previous_translations; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore all request catalogs, including domains loaded by callbacks.
+				$l10n_unloaded = $previous_unloaded; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the request's just-in-time loading state.
 			}
-
-			$translated_slug = is_string( $translated_slug ) && '' !== $translated_slug ? $translated_slug : $slug;
-
-			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment -- Both filters are documented in wp-includes/l10n.php.
-			$filtered_slug = apply_filters( 'gettext_with_context', $translated_slug, $slug, 'slug', 'woocommerce' );
-			$filtered_slug = apply_filters( 'gettext_with_context_woocommerce', $filtered_slug, $slug, 'slug', 'woocommerce' );
-			// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment
 		} finally {
-			remove_filter( 'pre_determine_locale', $use_site_locale, PHP_INT_MAX );
-			remove_filter( 'locale', $use_site_locale, PHP_INT_MAX );
-			$translation_controller->set_locale( $previous_controller_locale );
-			// A callback can load other text domains while the site locale is active.
-			$l10n                 = $previous_translations; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore all request catalogs, including domains loaded by callbacks.
-			$l10n_unloaded        = $previous_unloaded; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the request's just-in-time loading state.
 			self::$is_translating = false;
 		}
 
