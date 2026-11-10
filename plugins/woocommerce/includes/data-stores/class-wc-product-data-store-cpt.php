@@ -262,8 +262,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				throw new Exception( esc_html( sprintf( __( 'The product with SKU (%1$s) you are trying to insert is already present in the lookup table', 'woocommerce' ), $sku ) ) );
 			}
 
-			// Sync the values generated on insert (status, slug, modified date). Text fields stay as set: WordPress
-			// unslashes them (see #69755) and they come from view-context getters, so syncing them would corrupt later saves.
+			// Sync the values generated on insert (status, slug, modified date). Text fields stay as set: they come from
+			// view-context getters, so syncing them would apply the getter filters twice.
 			$post_object = get_post( $product->get_id() );
 			if ( $post_object instanceof WP_Post ) {
 				$product->set_status( $post_object->post_status );
