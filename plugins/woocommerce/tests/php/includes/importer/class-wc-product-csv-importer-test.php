@@ -85,15 +85,16 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A row with an unresolved link leaves existing relationships intact and does not reserve the SKU.
-	 * @testWith ["grouped_products", "children"]
-	 *           ["upsell_ids", "upsell_ids"]
-	 *           ["cross_sell_ids", "cross_sell_ids"]
+	 * @testdox An update skips an unresolved relationship field and saves the rest of the row.
+	 * @testWith ["grouped_products", "children", "Grouped products"]
+	 *           ["upsell_ids", "upsell_ids", "Upsells"]
+	 *           ["cross_sell_ids", "cross_sell_ids", "Cross-sells"]
 	 *
-	 * @param string $column Mapped CSV column.
+	 * @param string $column   Mapped CSV column.
 	 * @param string $property Product property written by that column.
+	 * @param string $label    Column label shown in the warning.
 	 */
-	public function test_import_preserves_relationships_when_linked_sku_is_unresolved( string $column, string $property ): void {
+	public function test_import_preserves_relationships_when_linked_sku_is_unresolved( string $column, string $property, string $label ): void {
 		$original    = WC_Helper_Product::create_simple_product();
 		$replacement = WC_Helper_Product::create_simple_product();
 		$group       = new WC_Product_Grouped();
@@ -105,19 +106,22 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			. "{$replacement->get_id()},later-sku,\n";
 		$result = $this->import_relationship_updates( $csv );
 
-		$this->assertCount( 1, $result['failed'], 'Only the row that names the unresolved SKU should fail.' );
-		$this->assertSame( 'woocommerce_product_importer_unresolved_relationship_sku', $result['failed'][0]->get_error_code() );
-		$this->assertSame( array( $replacement->get_id() ), $result['updated'] );
+		$this->assertEmpty( $result['failed'] );
+		$this->assertSame( array( $group->get_id(), $replacement->get_id() ), $result['updated'] );
+		$this->assertCount( 1, $result['warnings'] );
+		$this->assertStringContainsString( $label, $result['warnings'][0]->get_error_message() );
+		$this->assertStringContainsString( 'later-sku', $result['warnings'][0]->get_error_message() );
 		$this->assertSame( $replacement->get_id(), wc_get_product_id_by_sku( 'later-sku' ), 'An unresolved link must not take the SKU from the later row.' );
 		$updated_group = wc_get_product( $group->get_id() );
+		$this->assertInstanceOf( WC_Product_Grouped::class, $updated_group );
 		$this->assertSame( array( $original->get_id() ), $updated_group->{ 'get_' . $property }() );
-		$this->assertSame( '', $updated_group->get_sku(), 'The row must fail before saving other changes.' );
+		$this->assertSame( 'group-after-import', $updated_group->get_sku() );
 	}
 
 	/**
-	 * @testdox An update that references a trashed upsell by SKU reports an error and keeps the existing link and price.
+	 * @testdox An update saves a new price and keeps an existing upsell when its SKU is in the trash.
 	 */
-	public function test_import_rejects_update_with_trashed_upsell_sku(): void {
+	public function test_import_updates_price_with_trashed_upsell_sku(): void {
 		$upsell = WC_Helper_Product::create_simple_product( true, array( 'sku' => 'trashed-upsell' ) );
 		$source = WC_Helper_Product::create_simple_product(
 			true,
@@ -129,16 +133,19 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		wp_trash_post( $upsell->get_id() );
 		$this->assertSame( ProductStatus::TRASH, get_post_status( $upsell->get_id() ) );
 
-		$result = $this->import_relationship_updates( "id,regular_price,upsell_ids\n{$source->get_id()},20,trashed-upsell\n" );
+		$cross_sell = WC_Helper_Product::create_simple_product();
+		$result     = $this->import_relationship_updates( "id,regular_price,upsell_ids,cross_sell_ids\n{$source->get_id()},20,trashed-upsell,id:{$cross_sell->get_id()}\n" );
 
-		$this->assertEmpty( $result['updated'] );
-		$this->assertCount( 1, $result['failed'] );
-		$this->assertSame( 'woocommerce_product_importer_unresolved_relationship_sku', $result['failed'][0]->get_error_code() );
+		$this->assertSame( array( $source->get_id() ), $result['updated'] );
+		$this->assertEmpty( $result['failed'] );
+		$this->assertCount( 1, $result['warnings'] );
+		$this->assertStringContainsString( 'trashed-upsell', $result['warnings'][0]->get_error_message() );
 		$this->assertSame( 0, wc_get_product_id_by_sku( 'trashed-upsell' ), 'The import must not create a placeholder for the trashed SKU.' );
 		$updated_source = wc_get_product( $source->get_id() );
 		$this->assertInstanceOf( WC_Product_Simple::class, $updated_source );
 		$this->assertSame( array( $upsell->get_id() ), $updated_source->get_upsell_ids() );
-		$this->assertSame( '10', $updated_source->get_regular_price() );
+		$this->assertSame( array( $cross_sell->get_id() ), $updated_source->get_cross_sell_ids() );
+		$this->assertSame( '20', $updated_source->get_regular_price() );
 	}
 
 	/**
@@ -167,7 +174,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @param string $csv        CSV contents with mapped column names.
 	 * @param int    $batch_size Rows per request, or -1 for an unlimited batch.
-	 * @return array Updated IDs and failed rows.
+	 * @return array Updated IDs, failed rows, and warnings.
 	 */
 	private function import_relationship_updates( string $csv, int $batch_size = -1 ): array {
 		$file = trailingslashit( get_temp_dir() ) . wp_generate_uuid4() . '.csv';
@@ -175,8 +182,9 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		try {
 			$results = array(
-				'updated' => array(),
-				'failed'  => array(),
+				'updated'  => array(),
+				'failed'   => array(),
+				'warnings' => array(),
 			);
 			$args    = array(
 				'parse'            => true,
@@ -189,7 +197,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 				$sut    = new WC_Product_CSV_Importer( $file, $args );
 				$result = $sut->import();
 				foreach ( $results as $key => $items ) {
-					$results[ $key ] = array_merge( $items, $result[ $key ] );
+					$results[ $key ] = array_merge( $items, $result[ $key ] ?? array() );
 				}
 				$this->assertGreaterThan( $args['start_pos'], $sut->get_file_position(), 'Every batch should consume more of the CSV.' );
 				$args['start_pos'] = $sut->get_file_position();

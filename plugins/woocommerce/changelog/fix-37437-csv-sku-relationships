@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix CSV updates that rename linked product SKUs and preserve existing links when a referenced SKU is unavailable.
+Fix CSV updates that rename linked SKUs and warn when an unavailable SKU leaves an optional link field unchanged.

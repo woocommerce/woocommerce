@@ -405,13 +405,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
-	 * Resolve SKUs that were missing when the batch was parsed, before saving any part of the row.
+	 * Retry unresolved SKUs before saving and omit optional fields that still cannot be resolved.
 	 *
 	 * @param array $row           Parsed product data.
 	 * @param array $relationships Pending relationship values keyed by product field.
-	 * @return array|WP_Error Product data or an error if a relationship cannot be resolved.
+	 * @param array $warnings      Warnings for optional fields omitted from this row.
+	 * @return array|WP_Error Product data or an error if the parent SKU cannot be resolved.
 	 */
-	private function resolve_pending_relationships( array $row, array $relationships ) {
+	private function resolve_pending_relationships( array $row, array $relationships, array &$warnings ) {
 		foreach ( $relationships as $field => $value ) {
 			$references = (array) $value;
 			foreach ( $references as $index => $sku ) {
@@ -421,11 +422,26 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 				$id = $this->get_relationship_product_id_by_sku( $sku );
 				if ( ! $id ) {
-					return new WP_Error(
-						'parent_id' === $field ? 'woocommerce_product_importer_variation_parent_not_variable' : 'woocommerce_product_importer_unresolved_relationship_sku',
-						/* translators: %s: SKU of the product referenced by the CSV row. */
-						sprintf( esc_html__( 'No product was found with the SKU "%s".', 'woocommerce' ), esc_html( $sku ) )
+					if ( 'parent_id' === $field ) {
+						return new WP_Error(
+							'woocommerce_product_importer_variation_parent_not_variable',
+							/* translators: %s: SKU of the product referenced by the CSV row. */
+							sprintf( esc_html__( 'No product was found with the SKU "%s".', 'woocommerce' ), esc_html( $sku ) )
+						);
+					}
+
+					$labels     = array(
+						'children'       => __( 'Grouped products', 'woocommerce' ),
+						'upsell_ids'     => __( 'Upsells', 'woocommerce' ),
+						'cross_sell_ids' => __( 'Cross-sells', 'woocommerce' ),
 					);
+					$warnings[] = new WP_Error(
+						'woocommerce_product_importer_unresolved_relationship_sku',
+						/* translators: 1: CSV field name, 2: SKU of the product referenced by the CSV row. */
+						sprintf( esc_html__( 'Skipped the "%1$s" field because no product was found with the SKU "%2$s".', 'woocommerce' ), esc_html( $labels[ $field ] ), esc_html( $sku ) )
+					);
+					unset( $row[ $field ] );
+					continue 2;
 				}
 
 				$references[ $index ] = $id;
@@ -1719,7 +1735,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * update existing is false, and likewise, if updating products, do not
 	 * process rows which do not exist if an ID, SKU, or non-blank Global Unique ID is provided.
 	 *
-	 * @return array
+	 * @return array Import results, with a warnings list when a saved row skipped an optional field.
 	 */
 	public function import() {
 		$this->start_time = time();
@@ -1734,7 +1750,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		);
 
 		foreach ( $this->parsed_data as $parsed_data_key => $parsed_data ) {
-			$relationships = isset( $this->pending_relationships[ $parsed_data_key ] ) ? $this->resolve_pending_relationships( $parsed_data, $this->pending_relationships[ $parsed_data_key ] ) : $parsed_data;
+			$row_warnings  = array();
+			$relationships = isset( $this->pending_relationships[ $parsed_data_key ] ) ? $this->resolve_pending_relationships( $parsed_data, $this->pending_relationships[ $parsed_data_key ], $row_warnings ) : $parsed_data;
 			if ( ! is_wp_error( $relationships ) ) {
 				$parsed_data = $relationships;
 			}
@@ -1857,6 +1874,17 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 					$data['imported_variations'][] = $result['id'];
 			} else {
 				$data['imported'][] = $result['id'];
+			}
+
+			if ( $row_warnings && ! $result instanceof WP_Error ) {
+				$warning_data = array(
+					'row'      => $this->get_row_id( $parsed_data ),
+					'severity' => 'warning',
+				);
+				foreach ( $row_warnings as $warning ) {
+					$warning->add_data( $warning_data );
+					$data['warnings'][] = $warning;
+				}
 			}
 
 			++$index;
