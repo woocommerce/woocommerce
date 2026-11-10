@@ -409,6 +409,26 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Completing again after the cart changed outside the checkout routes cancels the order first handed off.
+	 */
+	public function test_complete_cancels_the_order_a_changed_cart_left_behind(): void {
+		$created = $this->create_ready_checkout();
+		$first   = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' )->get_data();
+		$stale   = (int) WC()->session->get( 'store_api_draft_order' );
+
+		// As POST /wc/store/v1/cart/update-item does with the checkout id as its Cart-Token.
+		$cart = WC()->cart;
+		$cart->set_quantity( (string) array_key_first( $cart->get_cart() ), 2 );
+
+		$second = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' )->get_data();
+
+		$this->assertSame( 'requires_escalation', $second['status'] );
+		$this->assertNotSame( $first['continue_url'], $second['continue_url'] );
+		$this->assertTrue( wc_get_order( $stale )->has_status( OrderStatus::CANCELLED ), 'The order for the old cart must no longer be payable.' );
+		$this->assertTrue( wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) )->has_status( OrderStatus::PENDING ) );
+	}
+
+	/**
 	 * @testdox Complete holds the order's stock, as the payment page trusts a pending order to have.
 	 */
 	public function test_complete_holds_stock(): void {

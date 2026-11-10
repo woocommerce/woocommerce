@@ -77,13 +77,20 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 
 		$checkout_id = $this->route_cart_id( $request );
 		$cart        = $this->cart_item_response();
+		$order       = $this->get_draft_order();
 		unset( $state['status'], $state['continue_url'] );
+
+		// The cart can change behind the checkout, through the Store API or a price edit, and a
+		// new order is then made for it: the one already handed off must not stay payable too.
+		if ( ! empty( $state['order_id'] ) && ( ! $order || $order->get_id() !== (int) $state['order_id'] ) ) {
+			$state = $this->cancel_handed_off_order( $state, __( 'UCP checkout session cart changed after payment was handed off.', 'woocommerce' ) );
+			$this->save_checkout_state( $state );
+		}
 
 		if ( CheckoutMapper::STATUS_READY_FOR_COMPLETE !== ( new CheckoutMapper() )->build_checkout( $cart, $checkout_id, $state )['status'] ) {
 			return $this->checkout_response( $checkout_id, $state, 200, $cart );
 		}
 
-		$order = $this->get_draft_order();
 		if ( $order ) {
 			$this->order_controller->update_order_from_cart( $order );
 		} else {
