@@ -38,16 +38,30 @@ class Coupon_Code_Generator {
 	/**
 	 * Generate a WooCommerce coupon from block attributes.
 	 *
-	 * @param string            $coupon_code       The coupon code (empty if not yet generated).
-	 * @param array             $attrs             Block attributes.
-	 * @param Rendering_Context $rendering_context The rendering context.
+	 * @param mixed $coupon_code       The coupon code (empty if not yet generated).
+	 * @param mixed $attrs             Block attributes.
+	 * @param mixed $rendering_context The rendering context.
 	 * @return string The generated coupon code, or empty string on failure.
 	 */
-	public function generate_coupon( string $coupon_code, array $attrs, Rendering_Context $rendering_context ): string {
-		if ( ! empty( $coupon_code ) ) {
+	public function generate_coupon( $coupon_code, $attrs, $rendering_context ): string {
+		if ( is_string( $coupon_code ) && '' !== $coupon_code ) {
 			return $coupon_code;
 		}
+		if ( ! $rendering_context instanceof Rendering_Context ) {
+			return '';
+		}
 
+		return $this->create_coupon( is_array( $attrs ) ? $attrs : array(), $rendering_context );
+	}
+
+	/**
+	 * Create a coupon from block attributes, or return the placeholder in a preview.
+	 *
+	 * @param array             $attrs             Block attributes.
+	 * @param Rendering_Context $rendering_context The rendering context.
+	 * @return string The coupon code, or empty string on failure.
+	 */
+	private function create_coupon( array $attrs, Rendering_Context $rendering_context ): string {
 		if ( $rendering_context->get( 'is_user_preview' ) ) {
 			return Coupon_Code::COUPON_CODE_PLACEHOLDER;
 		}
