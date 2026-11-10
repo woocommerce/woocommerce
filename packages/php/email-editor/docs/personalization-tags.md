@@ -171,7 +171,7 @@ $registry->register(
 
 Note: the `esc_html()` call does not double-encode existing entities, so a raw text value that itself contains an entity-shaped sequence (e.g. a literal `&amp;`) renders as the decoded character (`&`). Always return genuinely raw text.
 
-The default, `Personalization_Tag::VALUE_TYPE_HTML`, inserts the value untouched in every rendering context — including plain-text output; the callback owns escaping and any per-context differences (in the `text` rendering context it must return raw plain text without markup or entities).
+The default, `Personalization_Tag::VALUE_TYPE_HTML`, inserts the value untouched in the `html` rendering context; the callback owns escaping and any per-context differences. In the `text` rendering context, a value that contains markup or HTML entities is converted to plain text with the same Html2Text conversion the Renderer uses for the plain-text body: links become `[text](url)`, line breaks and list items become lines, and entities are decoded. A value without markup or entities is inserted as it is.
 
 ## Value Interceptor
 
@@ -188,7 +188,7 @@ $previous = $personalizer->set_value_interceptor(
 
 The interceptor receives:
 
--   `$value` — the resolved value, after any context-driven escaping (e.g. `esc_html()` for `VALUE_TYPE_TEXT` tags in HTML content).
+-   `$value` — the resolved value, after any context-driven escaping or plain-text conversion (e.g. `esc_html()` for `VALUE_TYPE_TEXT` tags in HTML content, or the conversion of `VALUE_TYPE_HTML` values in the `text` rendering context).
 -   `$source` — the raw source text being replaced: the trimmed tag token including arguments, the raw `data-link-href` attribute value, or the tag token found inside a plain `href`.
 -   `$rendering_context` — the `RENDERING_CONTEXT_*` constant of the replacement site.
 
