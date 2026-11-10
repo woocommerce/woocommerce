@@ -60,16 +60,25 @@ class ScheduledScan implements RegisterHooksInterface {
 	private AgentReadiness $agent_readiness;
 
 	/**
+	 * Rules from the published rules file.
+	 *
+	 * @var RemoteRules
+	 */
+	private RemoteRules $remote_rules;
+
+	/**
 	 * Initialize dependencies.
 	 *
 	 * @internal
 	 *
 	 * @param FeaturesController $features_controller Features controller.
 	 * @param AgentReadiness     $agent_readiness     Readiness service.
+	 * @param RemoteRules        $remote_rules        Rules from the published rules file.
 	 */
-	final public function init( FeaturesController $features_controller, AgentReadiness $agent_readiness ): void {
+	final public function init( FeaturesController $features_controller, AgentReadiness $agent_readiness, RemoteRules $remote_rules ): void {
 		$this->features_controller = $features_controller;
 		$this->agent_readiness     = $agent_readiness;
+		$this->remote_rules        = $remote_rules;
 	}
 
 	/**
@@ -115,8 +124,8 @@ class ScheduledScan implements RegisterHooksInterface {
 
 	/**
 	 * Whether a requested scan is still waiting to start STALLED_AFTER seconds
-	 * after it was due, and no other action has finished in that time either. A
-	 * queue that is only behind is still running, so its scan stays queued.
+	 * after it was due, and no other action has finished, failed or started in that
+	 * time either. A queue that is only behind is still running, so its scan stays queued.
 	 */
 	public function is_stalled(): bool {
 		if ( ! function_exists( 'as_next_scheduled_action' ) ) {
@@ -127,20 +136,20 @@ class ScheduledScan implements RegisterHooksInterface {
 		if ( ! is_int( $due ) || time() - $due <= self::STALLED_AFTER ) {
 			return false;
 		}
-		$recently_finished = as_get_scheduled_actions(
+		$recently_run = as_get_scheduled_actions(
 			array(
-				'status'           => \ActionScheduler_Store::STATUS_COMPLETE,
+				'status'           => array( \ActionScheduler_Store::STATUS_COMPLETE, \ActionScheduler_Store::STATUS_FAILED, \ActionScheduler_Store::STATUS_RUNNING ),
 				'modified'         => new \DateTime( '@' . ( time() - self::STALLED_AFTER ) ),
 				'modified_compare' => '>=',
 				'per_page'         => 1,
 			),
 			'ids'
 		);
-		return empty( $recently_finished );
+		return empty( $recently_run );
 	}
 
 	/**
-	 * Schedule the next daily run, then run the scan and store the report.
+	 * Schedule the next daily run, fetch the rules file, then run the scan and store the report.
 	 *
 	 * @internal
 	 */
@@ -151,6 +160,7 @@ class ScheduledScan implements RegisterHooksInterface {
 		as_unschedule_all_actions( self::DAILY_HOOK, array(), self::GROUP );
 		as_schedule_single_action( time() + DAY_IN_SECONDS, self::DAILY_HOOK, array(), self::GROUP );
 
+		$this->remote_rules->refresh( array_keys( $this->agent_readiness->get_default_rules() ) );
 		$this->agent_readiness->refresh_report();
 	}
 }
