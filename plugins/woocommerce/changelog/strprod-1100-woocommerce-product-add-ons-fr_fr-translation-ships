@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Prevented malformed translation revision dates from interrupting plugin update checks.
+Fix a fatal error during plugin update checks when an installed translation file has an invalid date.
