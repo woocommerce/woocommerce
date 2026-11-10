@@ -42,13 +42,36 @@
 						"composer.json",
 						"composer.lock",
 						"**/*.php",
-						"phpunit.xml",
+						"phpunit*.xml.dist",
 						".wp-env.json"
 					],
 					"testEnv": {
 						"start": "env:test",
 						"config": {
 							"phpVersion": "8.1",
+							"wpVersion": "latest"
+						}
+					},
+					"events": [
+						"pull_request",
+						"push"
+					]
+				},
+				{
+					"name": "PHP: 7.4 WP: latest",
+					"testType": "unit:php",
+					"command": "test:php:ci",
+					"changes": [
+						"composer.json",
+						"composer.lock",
+						"**/*.php",
+						"phpunit*.xml.dist",
+						".wp-env.json"
+					],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"phpVersion": "7.4",
 							"wpVersion": "latest"
 						}
 					},
