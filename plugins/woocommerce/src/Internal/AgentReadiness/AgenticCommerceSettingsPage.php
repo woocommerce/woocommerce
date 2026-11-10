@@ -116,7 +116,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			array(
 				'title' => __( 'Store policies', 'woocommerce' ),
 				'type'  => 'title',
-				'desc'  => __( 'AI agents share these with shoppers before they buy, so they know your return, shipping and privacy terms up front. Agents link to your pages.', 'woocommerce' ),
+				'desc'  => __( 'Choose the pages AI agents will link shoppers to before they buy, so they know your return, shipping and privacy terms up front.', 'woocommerce' ),
 				'id'    => self::POLICIES_SECTION,
 			),
 			$page_field( AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION, __( 'Refund and returns', 'woocommerce' ) ),

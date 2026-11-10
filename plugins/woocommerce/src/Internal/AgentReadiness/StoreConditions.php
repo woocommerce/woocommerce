@@ -115,21 +115,21 @@ class StoreConditions {
 				AgenticCommerceSettings::PRIVACY_PAGE_OPTION,
 				__( 'Privacy policy page is selected', 'woocommerce' ),
 				__( 'No privacy policy page', 'woocommerce' ),
-				__( 'Agents link shoppers to your privacy policy before they buy.', 'woocommerce' )
+				__( 'Agents will be able to link shoppers to your privacy policy before they buy.', 'woocommerce' )
 			),
 			$policy_page(
 				'terms_page',
 				AgenticCommerceSettings::TERMS_PAGE_OPTION,
 				__( 'Terms and conditions page is selected', 'woocommerce' ),
 				__( 'No terms and conditions page', 'woocommerce' ),
-				__( 'Agents link shoppers to your terms before they buy.', 'woocommerce' )
+				__( 'Agents will be able to link shoppers to your terms before they buy.', 'woocommerce' )
 			),
 			$policy_page(
 				'refund_returns_page',
 				AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION,
 				__( 'Refund and returns page is selected', 'woocommerce' ),
 				__( 'No refund and returns page', 'woocommerce' ),
-				__( 'Agents link shoppers to your return terms before they buy.', 'woocommerce' )
+				__( 'Agents will be able to link shoppers to your return terms before they buy.', 'woocommerce' )
 			),
 			$policy_page(
 				'shipping_policy_page',
