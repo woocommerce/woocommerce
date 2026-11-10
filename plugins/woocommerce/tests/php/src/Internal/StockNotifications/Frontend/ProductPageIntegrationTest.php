@@ -27,20 +27,10 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * REQUEST_URI before the test, restored at teardown.
-	 *
-	 * @var string|null
-	 */
-	private $request_uri_at_setup;
-
-	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-
-		// go_to() sets REQUEST_URI and no base test case puts it back.
-		$this->request_uri_at_setup = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 
 		// The blocks are not registered on `init`, because `init` runs with a classic theme.
 		$this->replace_block_types(
@@ -68,11 +58,6 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		try {
-			if ( null === $this->request_uri_at_setup ) {
-				unset( $_SERVER['REQUEST_URI'] );
-			} else {
-				$_SERVER['REQUEST_URI'] = $this->request_uri_at_setup;
-			}
 			$this->restore_stock_notifications_feature_option();
 		} finally {
 			parent::tearDown();
