@@ -352,11 +352,10 @@ trait Woo_Analytics_Trait {
 			'pt' => $product->get_type(),
 		);
 
-		// get_price() is empty for a product without a price. Kept a string: PHP 7.4 writes
-		// a float into the pixel URL with the locale's decimal separator (19,99).
+		// Only a numeric price is sent: get_price() is '' for a product without one, and a filter can return a label.
 		$price = $product->get_price();
 		if ( is_numeric( $price ) ) {
-			$details['pp'] = $price;
+			$details['pp'] = wc_float_to_string( $price );
 		}
 
 		return $details;
@@ -642,6 +641,7 @@ trait Woo_Analytics_Trait {
 
 	/**
 	 * Get the number of products in an order, counted the same way as get_cart_items_count().
+	 * Unlike WC_Order::get_item_count(), this does not sum quantities.
 	 *
 	 * @param \WC_Order $order Order.
 	 * @return int
