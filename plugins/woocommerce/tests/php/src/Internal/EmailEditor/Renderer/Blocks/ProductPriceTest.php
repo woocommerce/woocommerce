@@ -98,6 +98,40 @@ class ProductPriceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Shows the regular price struck through for a variable product on sale at one price.
+	 */
+	public function test_variable_product_on_sale_at_one_price_shows_both_prices(): void {
+		$product = $this->create_variable_product( array( 20, 20 ), 15 );
+
+		$this->assertMatchesRegularExpression( '/<del[^>]*>.*20\.00.*<\/del><span>.*15\.00.*<\/span>/s', $this->render( $product->get_id() ) );
+	}
+
+	/**
+	 * @testdox Shows no price for a variable product whose variations have no price.
+	 */
+	public function test_variable_product_without_prices_shows_no_price(): void {
+		$product = $this->create_variable_product( array( '', '' ) );
+
+		$this->assertSame( '', $this->text( $this->render( $product->get_id() ) ) );
+	}
+
+	/**
+	 * @testdox Shows one price for a grouped product whose items all cost the same.
+	 */
+	public function test_grouped_product_with_one_price_shows_it_once(): void {
+		$grouped = new \WC_Product_Grouped();
+		$grouped->set_children(
+			array(
+				WC_Helper_Product::create_simple_product()->get_id(),
+				WC_Helper_Product::create_simple_product()->get_id(),
+			)
+		);
+		$grouped->save();
+
+		$this->assertSame( '$10.00', $this->text( $this->render( $grouped->get_id() ) ) );
+	}
+
+	/**
 	 * @testdox Shows the range of child prices for a grouped product.
 	 */
 	public function test_grouped_product_shows_child_price_range(): void {
@@ -152,9 +186,10 @@ class ProductPriceTest extends WC_Unit_Test_Case {
 	/**
 	 * Creates a variable product with one variation per price.
 	 *
-	 * @param int[] $prices Variation prices.
+	 * @param array    $prices     Variation regular prices.
+	 * @param int|null $sale_price Sale price for every variation.
 	 */
-	private function create_variable_product( array $prices ): \WC_Product_Variable {
+	private function create_variable_product( array $prices, ?int $sale_price = null ): \WC_Product_Variable {
 		$attribute = WC_Helper_Product::create_product_attribute_object( 'size', array( 'small', 'large' ) );
 		$product   = new \WC_Product_Variable();
 		$product->set_attributes( array( $attribute ) );
@@ -162,7 +197,11 @@ class ProductPriceTest extends WC_Unit_Test_Case {
 
 		$sizes = array( 'small', 'large' );
 		foreach ( $prices as $index => $price ) {
-			WC_Helper_Product::create_product_variation_object( $product->get_id(), 'SKU-' . $product->get_id() . '-' . $index, $price, array( 'pa_size' => $sizes[ $index ] ) );
+			$variation = WC_Helper_Product::create_product_variation_object( $product->get_id(), 'SKU-' . $product->get_id() . '-' . $index, $price, array( 'pa_size' => $sizes[ $index ] ) );
+			if ( null !== $sale_price ) {
+				$variation->set_sale_price( (string) $sale_price );
+				$variation->save();
+			}
 		}
 		\WC_Product_Variable::sync( $product->get_id() );
 

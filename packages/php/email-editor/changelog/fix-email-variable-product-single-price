@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Show a single price instead of a range for variable products whose variations all cost the same in block emails.
+Show product prices in block emails as the shop does: one price for equal grouped items, sale prices for variable products, none when unpriced.
