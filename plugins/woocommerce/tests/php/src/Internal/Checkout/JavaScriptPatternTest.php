@@ -45,6 +45,10 @@ class JavaScriptPatternTest extends WC_Unit_Test_Case {
 	 *           ["(?-i)"]
 	 *           ["(?R)"]
 	 *           ["(?|a)"]
+	 *           ["(?=a)+"]
+	 *           ["(?=a)*"]
+	 *           ["\\10"]
+	 *           ["[\\1]"]
 	 *
 	 * @param string $pattern The pattern to check.
 	 */
@@ -82,6 +86,9 @@ class JavaScriptPatternTest extends WC_Unit_Test_Case {
 	 *           ["(?i-s:a)"]
 	 *           ["\\cA"]
 	 *           ["\\0"]
+	 *           ["[\\0]"]
+	 *           ["\\10(a)(b)(c)(d)(e)(f)(g)(h)(i)(?<tenth>j)"]
+	 *           ["(?:(?=a))+"]
 	 *
 	 * @param string $pattern The pattern to check.
 	 */

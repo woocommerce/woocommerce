@@ -25,6 +25,7 @@ class ValidationTest extends WP_UnitTestCase {
 	 *           [{"anyOf": [{"not": {"properties": {"pattern": {"pattern": "\\@"}}}}]}, "/anyOf/0/not/properties/pattern/pattern", "JavaScript"]
 	 *           [{"items": {"pattern": "\\@"}}, "/items/pattern", "JavaScript"]
 	 *           [{"items": [{"pattern": "\\@"}]}, "/items/0/pattern", "JavaScript"]
+	 *           [{"patternProperties": {"^[a-z]+\\-$": {"type": "string"}}}, "/patternProperties", "JavaScript"]
 	 *
 	 * @param array  $rules  The invalid schema.
 	 * @param string $path   The expected keyword path.

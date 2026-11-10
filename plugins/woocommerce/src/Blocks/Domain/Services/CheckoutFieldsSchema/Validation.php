@@ -229,7 +229,7 @@ class Validation {
 	}
 
 	/**
-	 * Reports the first `pattern` the browser cannot compile.
+	 * Reports the first `pattern` value or `patternProperties` key the browser cannot compile.
 	 *
 	 * The meta schema only checks that Opis compiles the pattern as PCRE, but the
 	 * checkout block compiles it with AJV as a JavaScript `RegExp` with the `u`
@@ -247,9 +247,16 @@ class Validation {
 
 		foreach ( $rules as $keyword => $value ) {
 			$child_path = $path . '/' . $keyword;
+			$patterns   = [];
 
 			if ( 'pattern' === $keyword && is_string( $value ) ) {
-				$unsupported = JavaScriptPattern::find_unsupported_construct( $value );
+				$patterns[] = $value;
+			} elseif ( 'patternProperties' === $keyword && is_array( $value ) ) {
+				$patterns = array_map( 'strval', array_keys( $value ) );
+			}
+
+			foreach ( $patterns as $pattern ) {
+				$unsupported = JavaScriptPattern::find_unsupported_construct( $pattern );
 
 				if ( null !== $unsupported ) {
 					return new WP_Error(
@@ -257,13 +264,11 @@ class Validation {
 						sprintf(
 							'At "%s": The pattern "%s" is not a valid JavaScript regular expression, %s. Patterns are compiled in the browser with the JavaScript `u` flag, so they must be valid ECMA-262.',
 							rawurldecode( $child_path ),
-							$value,
+							$pattern,
 							$unsupported
 						)
 					);
 				}
-
-				continue;
 			}
 
 			if ( ! is_array( $value ) ) {

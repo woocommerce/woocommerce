@@ -70,6 +70,9 @@ final class JavaScriptPattern {
 		$length           = strlen( $pattern );
 		$in_class         = false;
 		$after_quantifier = false;
+		$group_assertions = array();
+		$capture_count    = 0;
+		$max_reference    = 0;
 
 		for ( $index = 0; $index < $length; $index++ ) {
 			$char = $pattern[ $index ];
@@ -81,7 +84,13 @@ final class JavaScriptPattern {
 					return $result;
 				}
 
-				$index            = self::skip_escape_tail( $pattern, $index + 1, $pattern[ $index + 1 ] );
+				$escape = $pattern[ $index + 1 ];
+				$end    = self::skip_escape_tail( $pattern, $index + 1, $escape );
+				if ( ! $in_class && ctype_digit( $escape ) && '0' !== $escape ) {
+					$max_reference = max( $max_reference, (int) substr( $pattern, $index + 1, $end - $index ) );
+				}
+
+				$index            = $end;
 				$after_quantifier = false;
 				continue;
 			}
@@ -117,6 +126,22 @@ final class JavaScriptPattern {
 					return $result;
 				}
 
+				$prefix       = substr( $pattern, $index + 1, 2 );
+				$is_assertion = in_array( $prefix, array( '?=', '?!' ), true ) || in_array( substr( $pattern, $index + 1, 3 ), array( '?<=', '?<!' ), true );
+				if ( '?' !== ( $pattern[ $index + 1 ] ?? '' ) || ( '?<' === $prefix && ! $is_assertion ) ) {
+					++$capture_count;
+				}
+				$group_assertions[] = $is_assertion;
+
+				$after_quantifier = false;
+				continue;
+			}
+
+			if ( ')' === $char ) {
+				if ( true === array_pop( $group_assertions ) && $index + 1 < $length && self::quantifier_end( $pattern, $index + 1 ) >= 0 ) {
+					return 'a quantified lookaround assertion, which JavaScript does not support';
+				}
+
 				$after_quantifier = false;
 				continue;
 			}
@@ -144,6 +169,11 @@ final class JavaScriptPattern {
 			return 'an unterminated character class';
 		}
 
+		// Forward references are valid, so count all capturing groups before checking them.
+		if ( $max_reference > $capture_count ) {
+			return 'a numeric escape without a matching capture group, which JavaScript does not support';
+		}
+
 		return null;
 	}
 
@@ -165,6 +195,10 @@ final class JavaScriptPattern {
 		$escape = $pattern[ $index + 1 ];
 
 		if ( ctype_digit( $escape ) ) {
+			if ( $in_class && '0' !== $escape ) {
+				return 'a numeric escape inside a character class, which JavaScript does not support';
+			}
+
 			// A leading zero starts an octal escape, which `u` mode drops entirely.
 			if ( '0' === $escape && $index + 2 < $length && ctype_digit( $pattern[ $index + 2 ] ) ) {
 				return 'an octal escape, which JavaScript does not support';
