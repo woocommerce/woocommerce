@@ -28,6 +28,7 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Media_T
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Post_Content;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Post_Template;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Quote;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Separator;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Video;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Social_Link;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Social_Links;
@@ -54,6 +55,7 @@ class Initializer {
 		'core/list-item',
 		'core/paragraph',
 		'core/quote',
+		'core/separator',
 		'core/spacer',
 		'core/social-link',
 		'core/social-links',
@@ -237,6 +239,9 @@ class Initializer {
 				break;
 			case 'core/quote':
 				$renderer = new Quote();
+				break;
+			case 'core/separator':
+				$renderer = new Separator();
 				break;
 			case 'core/social-link':
 				$renderer = new Social_Link();

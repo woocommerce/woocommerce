@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
@@ -2927,6 +2928,26 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$this->assertWPError( $result );
 		$this->assertContains( $product->get_id(), $cleaned );
+	}
+
+	/**
+	 * @testdox Should fail a trash, and keep the product, when a query of the call hits a deadlock.
+	 */
+	public function test_a_deadlock_fails_the_call_and_keeps_the_product(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$this->add_test_action(
+			'trashed_post',
+			static function () {
+				global $wpdb;
+				$wpdb->last_error = 'Deadlock found when trying to get lock; try restarting transaction';
+			}
+		);
+
+		$response = $this->run_ability_response( 'woocommerce/product-delete', array( 'id' => $product->get_id() ) );
+
+		$this->assertSame( 409, $response->get_status() );
+		$this->assertSame( 'woocommerce_transaction_rolled_back', $response->get_data()['code'] );
+		$this->assertSame( ProductStatus::PUBLISH, get_post_status( $product->get_id() ) );
 	}
 
 	/**
