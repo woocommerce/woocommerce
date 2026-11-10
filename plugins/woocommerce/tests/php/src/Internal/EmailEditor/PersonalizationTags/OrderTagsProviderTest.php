@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\EmailEditor\PersonalizationTags;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
+use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use Automattic\WooCommerce\Internal\EmailEditor\PersonalizationTags\OrderTagsProvider;
 use WC_Helper_Order;
 use WC_Unit_Test_Case;
@@ -69,5 +70,19 @@ class OrderTagsProviderTest extends WC_Unit_Test_Case {
 		$tag = $this->registry->get_by_token( '[woocommerce/order-review-url]' );
 
 		$this->assertSame( '', $tag->execute_callback( array() ) );
+	}
+
+	/**
+	 * @testdox The order date tag escapes markup that its format argument produces in HTML.
+	 */
+	public function test_order_date_tag_escapes_markup_from_format(): void {
+		$order        = WC_Helper_Order::create_order();
+		$personalizer = new Personalizer( $this->registry );
+		$personalizer->set_context( array( 'order' => $order ) );
+
+		$html = $personalizer->personalize_content( '<p><!--[woocommerce/order-date format="&lt;\\m\\a\\r\\k&gt;Y&lt;/\\m\\a\\r\\k&gt;"]--></p>' );
+
+		$year = $order->get_date_created()->date_i18n( 'Y' );
+		$this->assertSame( '<p>&lt;mark&gt;' . $year . '&lt;/mark&gt;</p>', $html );
 	}
 }
