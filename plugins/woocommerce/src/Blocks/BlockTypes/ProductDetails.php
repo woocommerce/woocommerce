@@ -73,8 +73,8 @@ class ProductDetails extends AbstractBlock {
 			self::UPSELLS_MIGRATED_OPTION,
 			array(
 				'type'              => 'string',
-				'label'             => __( 'Product upsells in the Product Details block', 'woocommerce' ),
-				'description'       => __( 'Whether product upsells should we displayed in the Product Details block.', 'woocommerce' ),
+				'label'             => __( 'Product upsells migration', 'woocommerce' ),
+				'description'       => __( 'Whether product upsells should be displayed as a separate block and not inside the Product Details block.', 'woocommerce' ),
 				'default'           => 'no',
 				'show_in_rest'      => array(
 					'schema' => array(

@@ -60,7 +60,9 @@ describe( 'UpsellsPlaceholder', () => {
 
 		render( <UpsellsPlaceholder clientId="product-details" /> );
 		fireEvent.click(
-			screen.getByRole( 'button', { name: 'Migrate to block' } )
+			screen.getByRole( 'button', {
+				name: 'Switch to the Upsells block',
+			} )
 		);
 
 		await waitFor( () => {
@@ -93,14 +95,18 @@ describe( 'UpsellsPlaceholder', () => {
 		);
 
 		expect(
-			screen.queryByRole( 'button', { name: 'Migrate to block' } )
+			screen.queryByRole( 'button', {
+				name: 'Switch to the Upsells block',
+			} )
 		).not.toBeInTheDocument();
 
 		mockSite( false, false );
 		rerender( <UpsellsPlaceholder clientId="product-details" /> );
 
 		expect(
-			screen.queryByRole( 'button', { name: 'Migrate to block' } )
+			screen.queryByRole( 'button', {
+				name: 'Switch to the Upsells block',
+			} )
 		).not.toBeInTheDocument();
 	} );
 } );
