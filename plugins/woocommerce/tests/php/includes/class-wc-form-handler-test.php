@@ -921,6 +921,34 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The edit address form gives a Checkout block address field the edited address's default when the copied address has no value.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsFrontend::edit_address_fields()
+	 */
+	public function test_edit_address_form_uses_edited_address_default_for_empty_copied_field(): void {
+		$this->register_checkout_field(
+			array(
+				'id'       => 'test-namespace/gate-code',
+				'label'    => 'Gate code',
+				'location' => 'address',
+			)
+		);
+		add_filter(
+			'woocommerce_get_default_value_for_test-namespace/gate-code',
+			function ( $value, $group ) {
+				return "{$group} default";
+			},
+			10,
+			2
+		);
+		$this->create_customer_with_address( 'billing' );
+
+		$fields = $this->get_edit_address_form_fields( 'shipping', 'billing' );
+
+		$this->assertSame( 'shipping default', $fields['_wc_shipping/test-namespace/gate-code']['value'] ?? null, 'The default should be computed for the shipping address being edited.' );
+	}
+
+	/**
 	 * @testdox save_account_details() saves other account fields when an email-like display name is unchanged.
 	 *
 	 * @covers WC_Form_Handler::save_account_details()
