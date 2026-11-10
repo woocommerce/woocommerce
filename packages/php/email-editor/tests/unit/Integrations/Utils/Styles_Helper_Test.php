@@ -913,4 +913,28 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 		$this->assertSame( '100', Styles_Helper::remove_css_unit( '100%' ) );
 		$this->assertSame( '100', Styles_Helper::remove_css_unit( '100vh' ) );
 	}
+
+	/**
+	 * A font size becomes a plain px length an email can use, or null when it can't.
+	 *
+	 * @dataProvider static_font_size_provider
+	 * @param string      $input Font size.
+	 * @param string|null $expected Static px length, or null.
+	 */
+	public function testItConvertsFontSizeToStaticPx( string $input, ?string $expected ): void {
+		$this->assertSame( $expected, Styles_Helper::get_static_font_size( $input ) );
+	}
+
+	/**
+	 * Font sizes and their static px value.
+	 */
+	public function static_font_size_provider(): array {
+		return array(
+			'px'                 => array( '32px', '32px' ),
+			'rem'                => array( '2rem', '32px' ),
+			'clamp'              => array( 'clamp(20px, 2vw, 40px)', '20px' ),
+			'extra declarations' => array( '16px;display:none;--x:1px', null ),
+			'unknown'            => array( 'large', null ),
+		);
+	}
 }
