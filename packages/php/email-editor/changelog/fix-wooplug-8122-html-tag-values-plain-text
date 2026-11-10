@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show personalization tags that return HTML as plain text in the plain-text email, subject and preheader; links read "[text](url)".
