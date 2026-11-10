@@ -1,3 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Fix unreleased recursion between downloadable file hiding and Real Media Library (#70198).
