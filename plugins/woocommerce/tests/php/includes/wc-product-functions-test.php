@@ -813,6 +813,145 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create a product (regular 50, sale 20) whose scheduled sale boundary has just passed without its event running.
+	 *
+	 * @param string $boundary Which sale boundary has passed: 'start' or 'end'.
+	 * @return int Product ID. Its stored `_price` is stale: 20 after the end, 50 after the start.
+	 */
+	private function create_product_past_sale_boundary( string $boundary ): int {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50 );
+		$product->set_sale_price( 20 );
+		if ( 'end' === $boundary ) {
+			$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) );
+			$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+		} else {
+			$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+			$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + 2 * HOUR_IN_SECONDS ) );
+		}
+		$product->save();
+
+		update_post_meta( $product->get_id(), 'end' === $boundary ? '_sale_price_dates_to' : '_sale_price_dates_from', time() - 5 );
+		clean_post_cache( $product->get_id() );
+
+		return $product->get_id();
+	}
+
+	/**
+	 * @testdox A price set at runtime with set_price() is kept after a scheduled sale boundary passes.
+	 * @testWith ["end", true, "20"]
+	 *           ["end", false, "20"]
+	 *           ["start", true, "50"]
+	 *           ["start", false, "50"]
+	 *
+	 * @param string $boundary      Which sale boundary has passed: 'start' or 'end'.
+	 * @param bool   $event_ran     Whether the boundary's Action Scheduler event has run.
+	 * @param string $runtime_price Price an extension sets at runtime, equal to the price on the other side of the boundary.
+	 */
+	public function test_scheduled_sale_active_price_keeps_runtime_price_after_boundary( string $boundary, bool $event_ran, string $runtime_price ): void {
+		$product_id = $this->create_product_past_sale_boundary( $boundary );
+		if ( $event_ran ) {
+			call_user_func( "wc_handle_product_{$boundary}_scheduled_sale", $product_id );
+		}
+
+		$reread = wc_get_product( $product_id );
+		$reread->set_price( $runtime_price );
+
+		$this->assertEquals( $runtime_price, $reread->get_price(), 'A runtime price, e.g. from a cart pricing extension, must not be replaced by the scheduled sale correction.' );
+	}
+
+	/**
+	 * @testdox The scheduled sale event stores the new price and refreshes the lookup table after the boundary passes.
+	 * @testWith ["end", 50]
+	 *           ["start", 20]
+	 *
+	 * @param string $boundary       Which sale boundary has passed: 'start' or 'end'.
+	 * @param int    $expected_price Price that should be stored once the event runs.
+	 */
+	public function test_scheduled_sale_event_stores_price_after_boundary( string $boundary, int $expected_price ): void {
+		global $wpdb;
+
+		$product_id = $this->create_product_past_sale_boundary( $boundary );
+
+		call_user_func( "wc_handle_product_{$boundary}_scheduled_sale", $product_id );
+
+		$this->assertEquals( $expected_price, get_post_meta( $product_id, '_price', true ), 'The event should store the price, even though the loaded product already has it.' );
+		$this->assertEquals(
+			$expected_price,
+			$wpdb->get_var( $wpdb->prepare( "SELECT min_price FROM {$wpdb->prefix}wc_product_meta_lookup WHERE product_id = %d", $product_id ) ),
+			'The event should refresh the lookup table price.'
+		);
+	}
+
+	/**
+	 * @testdox A stale price set by an extension data store after the core read is corrected.
+	 */
+	public function test_scheduled_sale_active_price_corrects_price_from_extension_data_store(): void {
+		$product_id = $this->create_product_past_sale_boundary( 'end' );
+		update_post_meta( $product_id, '_extension_base_price', '20' );
+
+		// Mirrors Product Bundles, which replaces the price props from its own meta after the core read.
+		$data_store = new class() extends WC_Product_Data_Store_CPT {
+			/**
+			 * Read the core data, then replace the price with the extension's own stored price.
+			 *
+			 * @param WC_Product $product Product object being read.
+			 */
+			protected function read_product_data( &$product ) {
+				parent::read_product_data( $product );
+				$product->set_props( array( 'price' => get_post_meta( $product->get_id(), '_extension_base_price', true ) ) );
+			}
+		};
+		$product    = new WC_Product_Simple();
+		$product->set_id( $product_id );
+		$data_store->read( $product );
+
+		$this->assertEquals( 50, $product->get_price(), 'The ended sale should be corrected to the regular price after the extension sets its price.' );
+	}
+
+	/**
+	 * @testdox The correction follows the sale dates, not a subclass's is_on_sale() override.
+	 */
+	public function test_scheduled_sale_active_price_ignores_is_on_sale_override(): void {
+		$product_id = $this->create_product_past_sale_boundary( 'end' );
+		wc_handle_product_end_scheduled_sale( $product_id );
+
+		// Mirrors Product Bundles, which reports a sale when a bundled item is discounted, whatever the dates say.
+		$product = new class() extends WC_Product_Simple {
+			/**
+			 * Always report a sale.
+			 *
+			 * @param string $context What the value is for.
+			 * @return bool
+			 */
+			public function is_on_sale( $context = 'view' ) {
+				return true;
+			}
+		};
+		$product->set_id( $product_id );
+		WC_Data_Store::load( 'product' )->read( $product );
+
+		$this->assertEquals( 50, $product->get_price(), 'An ended sale should keep the stored regular price.' );
+	}
+
+	/**
+	 * @testdox An empty stored price is left empty when a free scheduled sale has ended.
+	 */
+	public function test_scheduled_sale_active_price_leaves_empty_price_empty(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50 );
+		$product->set_sale_price( 0 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() - 2 * HOUR_IN_SECONDS ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) );
+		$product->save();
+
+		update_post_meta( $product->get_id(), '_price', '' );
+		clean_post_cache( $product->get_id() );
+
+		$this->assertSame( '', wc_get_product( $product->get_id() )->get_price(), 'An empty price must not be turned into the regular price, which would make the product purchasable.' );
+	}
+
+	/**
 	 * @testdox An external product reconciles like a simple product.
 	 */
 	public function test_scheduled_sale_active_price_heals_external_product(): void {
@@ -831,7 +970,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Variations self-heal at read time and need no reconciliation filter.
+	 * @testdox Variations self-heal at read time.
 	 */
 	public function test_scheduled_sale_variation_self_heals_on_read(): void {
 		$parent = new WC_Product_Variable();
@@ -847,11 +986,47 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		$variation->save();
 
 		// The variation data store re-derives the price from is_on_sale() on every read, so a
-		// fresh read after the sale ends already reflects the regular price (no filter needed).
+		// fresh read after the sale ends already reflects the regular price.
 		update_post_meta( $variation->get_id(), '_sale_price_dates_to', time() - 5 );
 		clean_post_cache( $variation->get_id() );
 
-		$this->assertEquals( 50, wc_get_product( $variation->get_id() )->get_price(), 'A freshly read variation reflects the ended sale without the reconciliation filter.' );
+		$this->assertEquals( 50, wc_get_product( $variation->get_id() )->get_price(), 'A freshly read variation reflects the ended sale.' );
+	}
+
+	/**
+	 * @testdox The scheduled sale event stores a variation's new price and syncs its parent after the boundary passes.
+	 * @testWith ["end", 50]
+	 *           ["start", 20]
+	 *
+	 * @param string $boundary       Which sale boundary has passed: 'start' or 'end'.
+	 * @param int    $expected_price Price that should be stored once the event runs.
+	 */
+	public function test_scheduled_sale_event_stores_variation_price_after_boundary( string $boundary, int $expected_price ): void {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Variation parent' );
+		$parent->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $parent->get_id() );
+		$variation->set_regular_price( '50' );
+		$variation->set_sale_price( '20' );
+		if ( 'end' === $boundary ) {
+			$variation->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) );
+			$variation->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+		} else {
+			$variation->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ) );
+			$variation->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + 2 * HOUR_IN_SECONDS ) );
+		}
+		$variation->save();
+		WC_Product_Variable::sync( $parent->get_id() );
+
+		update_post_meta( $variation->get_id(), 'end' === $boundary ? '_sale_price_dates_to' : '_sale_price_dates_from', time() - 5 );
+		clean_post_cache( $variation->get_id() );
+
+		call_user_func( "wc_handle_product_{$boundary}_scheduled_sale", $variation->get_id() );
+
+		$this->assertEquals( $expected_price, get_post_meta( $variation->get_id(), '_price', true ), 'The event should store the variation price, even though the loaded variation already has it.' );
+		$this->assertEquals( $expected_price, get_post_meta( $parent->get_id(), '_price', true ), 'The event should sync the parent price range.' );
 	}
 
 	/**
