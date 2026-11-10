@@ -787,11 +787,15 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	 */
 	public function testItLeavesNoRawTagInTextVersionLinks(): void {
 		list( $registry, $text ) = $this->render_with_link_tag(
-			'<!-- wp:paragraph --><p>A <a data-link-href="[renderer-test/account-url note=\'x\']">Account</a>, B <a data-link-href="[other-plugin/url]">Orders</a>, C <a href="#" data-link-href="[renderer-test/account-url]"><img src="https://shop.example/logo.png"></a>.</p><!-- /wp:paragraph -->'
+			'<!-- wp:paragraph --><p>A <a data-link-href="[renderer-test/account-url note=\'x\']">Account</a>, B <a data-link-href="[other-plugin/url]">Orders</a>, C <a href="#" data-link-href="[renderer-test/account-url]"><img src="https://shop.example/logo.png"></a>, D <a data-link-href="[renderer-test/account-url]">Hi <!--[other-plugin/first-name]--></a>, E <a data-link-href="[renderer-test/account-url]">see [docs]</a>.</p><!-- /wp:paragraph -->'
 		);
-		$personalizer            = new Personalizer( $registry );
-		$personalized            = $personalizer->personalize_content( $text, Personalizer::RENDERING_CONTEXT_TEXT );
-		$this->assertStringContainsString( 'A [Account](https://shop.example/account?a=1&b=2), B Orders, C .', $personalized );
+
+		$personalized = ( new Personalizer( $registry ) )->personalize_content( $text, Personalizer::RENDERING_CONTEXT_TEXT );
+		// Link text with a tag or with brackets must not stop the target from being personalized.
+		$this->assertStringContainsString(
+			'A [Account](https://shop.example/account?a=1&b=2), B [Orders], C , D [Hi ](https://shop.example/account?a=1&b=2), E [see [docs]](https://shop.example/account?a=1&b=2).',
+			$personalized
+		);
 		$this->assertStringNotContainsString( '[other-plugin/url]', $personalized );
 	}
 }

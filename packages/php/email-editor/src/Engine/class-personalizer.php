@@ -170,8 +170,9 @@ class Personalizer {
 	/**
 	 * Personalize the content by replacing the personalization tags with their values.
 	 *
-	 * In the text rendering context, tags in "[text](url)" link targets are replaced too, and a tag token
-	 * that cannot be resolved is removed, since the recipient would see it as text.
+	 * In the text rendering context, tags in "[text](url)" link targets are replaced too. A tag comment that
+	 * cannot be resolved is removed, since the recipient would see it as text, and so is a link target that
+	 * is only such a tag.
 	 *
 	 * @param string $content The content to personalize.
 	 * @param string $rendering_context The rendering context of the content — one of the RENDERING_CONTEXT_HTML
@@ -251,21 +252,22 @@ class Personalizer {
 	}
 
 	/**
-	 * Replace tags in the "[text](url)" link targets of the Renderer's text version. A link whose whole
-	 * target is a tag that cannot be resolved keeps only its text, so no raw tag reaches the recipient.
+	 * Replace tags in the "[text](url)" link targets of the Renderer's text version. Only the "](url)" part
+	 * is matched, so link text with tags or brackets does not matter. A target that is only a tag that
+	 * cannot be resolved is dropped, leaving "[text]", so no raw tag reaches the recipient.
 	 *
 	 * @param string $content Plain-text content.
 	 * @return string The content with link targets personalized.
 	 */
 	private function personalize_text_link_targets( string $content ): string {
 		return (string) preg_replace_callback(
-			'/\[([^\[\]]*)\]\((\[[^\]]+\]|[^()\s]+)\)/',
+			'/\]\((\[[^\]]+\]|[^()\s]+)\)/',
 			function ( array $matches ): string {
-				$url = $this->personalize_href_tokens( $matches[2] );
+				$url = $this->personalize_href_tokens( $matches[1] );
 				if ( null !== $url ) {
-					return '[' . $matches[1] . '](' . $url . ')';
+					return '](' . $url . ')';
 				}
-				return '[' === $matches[2][0] ? $matches[1] : $matches[0];
+				return '[' === $matches[1][0] ? ']' : $matches[0];
 			},
 			$content
 		);
