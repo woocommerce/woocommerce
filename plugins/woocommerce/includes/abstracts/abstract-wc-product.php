@@ -1707,10 +1707,13 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		/**
 		 * Trigger action after saving to the DB.
 		 *
+		 * @since 11.4.0 Added the $changeset parameter.
+		 *
 		 * @param WC_Data          $this The object being saved.
 		 * @param WC_Data_Store_WP $data_store THe data store persisting the data.
+		 * @param array|null       $changeset Props changed by this save, as returned by get_changes() before saving. Null when the product was just created.
 		 */
-		do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
+		do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store, $changeset );
 
 		return $this->get_id();
 	}
