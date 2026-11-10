@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent account activation crashes with extensions that verify customer emails using the legacy one-argument call.
