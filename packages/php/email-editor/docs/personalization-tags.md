@@ -131,6 +131,8 @@ The Personalizer passes the context of each replacement to the tag callback unde
 
 In the text rendering context the Personalizer also replaces tags in the `[text](url)` link targets of the Renderer's plain-text version (in the href rendering context), and removes a tag comment it cannot resolve, because the recipient would see it as text. A link whose whole target is a tag it cannot resolve loses the target and reads `[text]`.
 
+A tag callback that throws gives an empty value. The Personalizer logs the error through the package logger and carries on with the rest of the content.
+
 If the value is a URL *component* rather than a whole URL (e.g. an email address embedded in a query string), `rawurlencode()` it in the callback — the Personalizer cannot tell the difference.
 
 Inspecting the rendering context is optional — a callback that ignores it simply returns the same value for every destination. A tag that serves different content per destination can switch on the key:

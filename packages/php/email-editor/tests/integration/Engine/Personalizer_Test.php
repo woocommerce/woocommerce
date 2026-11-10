@@ -771,6 +771,32 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test that a tag callback that throws leaves its tag empty and is logged, instead of stopping the whole email.
+	 */
+	public function testThrowingCallbackLeavesTagEmptyAndIsLogged(): void {
+		$logger = $this->createMock( Email_Editor_Logger::class );
+		$logger->expects( $this->exactly( 3 ) )->method( 'error' );
+		$personalizer = new Personalizer( $this->tags_registry, $logger );
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'Broken',
+				'test/broken',
+				'Test',
+				function () {
+					throw new \RuntimeException( 'Order not found' );
+				}
+			)
+		);
+
+		$this->assertSame( '<p>Hi !</p>', $personalizer->personalize_content( '<p>Hi <!--[test/broken]-->!</p>' ) );
+		$this->assertSame( 'Hi !', $personalizer->personalize_content( 'Hi <!--[test/broken]-->!', Personalizer::RENDERING_CONTEXT_TEXT ) );
+		$this->assertSame(
+			'<a href="http://[test/broken]">Link</a>',
+			$personalizer->personalize_content( '<a href="http://[test/broken]">Link</a>' )
+		);
+	}
+
+	/**
 	 * Test that the reserved rendering context key cannot be injected via set_context().
 	 */
 	public function testRenderingContextKeyIsReserved(): void {

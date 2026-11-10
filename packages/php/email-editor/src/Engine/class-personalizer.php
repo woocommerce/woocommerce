@@ -9,6 +9,7 @@ declare(strict_types = 1);
 
 namespace Automattic\WooCommerce\EmailEditor\Engine;
 
+use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\HTML_Tag_Processor;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
@@ -80,13 +81,47 @@ class Personalizer {
 	private $value_interceptor = null;
 
 	/**
+	 * Logger for tag callbacks that fail.
+	 *
+	 * @var Email_Editor_Logger|null
+	 */
+	private ?Email_Editor_Logger $logger;
+
+	/**
 	 * Class constructor with required dependencies.
 	 *
 	 * @param Personalization_Tags_Registry $tags_registry Personalization tags registry.
+	 * @param Email_Editor_Logger|null      $logger Logger for tag callbacks that fail.
 	 */
-	public function __construct( Personalization_Tags_Registry $tags_registry ) {
+	public function __construct( Personalization_Tags_Registry $tags_registry, ?Email_Editor_Logger $logger = null ) {
 		$this->tags_registry = $tags_registry;
+		$this->logger        = $logger;
 		$this->context       = array();
+	}
+
+	/**
+	 * Run a tag callback. A callback that throws gives an empty value, so one broken tag does not stop the email.
+	 *
+	 * @param Personalization_Tag   $tag The tag.
+	 * @param string                $rendering_context One of the RENDERING_CONTEXT_* constants.
+	 * @param array<string, string> $arguments The parsed tag arguments.
+	 * @return string The tag value.
+	 */
+	private function get_tag_value( Personalization_Tag $tag, string $rendering_context, array $arguments ): string {
+		try {
+			return $tag->execute_callback( $this->get_callback_context( $rendering_context ), $arguments );
+		} catch ( \Throwable $e ) {
+			if ( $this->logger ) {
+				$this->logger->error(
+					'Personalization tag callback failed',
+					array(
+						'token' => $tag->get_token(),
+						'error' => $e->getMessage(),
+					)
+				);
+			}
+			return '';
+		}
 	}
 
 	/**
@@ -203,7 +238,7 @@ class Personalizer {
 					continue;
 				}
 
-				$value = $tag->execute_callback( $this->get_callback_context( $rendering_context ), $token['arguments'] );
+				$value = $this->get_tag_value( $tag, $rendering_context, $token['arguments'] );
 				if ( self::RENDERING_CONTEXT_HTML === $rendering_context && Personalization_Tag::VALUE_TYPE_TEXT === $tag->get_value_type() ) {
 					$value = esc_html( $value );
 				}
@@ -226,7 +261,7 @@ class Personalizer {
 					continue;
 				}
 
-				$value = $tag->execute_callback( $this->get_callback_context( self::RENDERING_CONTEXT_HREF ), $token['arguments'] );
+				$value = $this->get_tag_value( $tag, self::RENDERING_CONTEXT_HREF, $token['arguments'] );
 				$value = $this->replace_link_href( $href, $tag->get_token(), $value );
 				$value = $this->intercept_value( $value, $href, self::RENDERING_CONTEXT_HREF );
 				if ( '' !== $value ) {
@@ -295,7 +330,7 @@ class Personalizer {
 				continue;
 			}
 
-			$value = $tag->execute_callback( $this->get_callback_context( self::RENDERING_CONTEXT_HREF ), $token['arguments'] );
+			$value = $this->get_tag_value( $tag, self::RENDERING_CONTEXT_HREF, $token['arguments'] );
 			$value = $this->intercept_value( $value, $token_string, self::RENDERING_CONTEXT_HREF );
 			if ( '' !== $value ) {
 				$replacements[ $token_string ] = $value;
