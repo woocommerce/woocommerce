@@ -149,7 +149,8 @@ final class UcpDiscovery implements RegisterHooksInterface {
 
 		$path = $this->get_file_path();
 		if ( $wp_rewrite->using_permalinks() ) {
-			if ( ! is_file( $path ) || $this->is_deletable( $path ) ) {
+			// maybe_sync_file() has already tried to delete it, so a file still here is one the cleanup could not remove.
+			if ( ! is_file( $path ) ) {
 				return;
 			}
 			/* translators: %1$s: discovery file path. */

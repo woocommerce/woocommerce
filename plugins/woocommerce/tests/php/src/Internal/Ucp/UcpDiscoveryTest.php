@@ -170,6 +170,10 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 			chmod( dirname( $this->file ), $mode ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
 		}
 
+		if ( '' !== $structure ) {
+			$this->sut->maybe_sync_file();
+		}
+
 		ob_start();
 		$this->sut->maybe_render_notice();
 		$output = (string) ob_get_clean();
