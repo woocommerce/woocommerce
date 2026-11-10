@@ -1,6 +1,6 @@
 <?php
 /**
- * Email Editor Container class file.
+ * Email Editor Container class file (CI trigger check, do not merge).
  *
  * @package Automattic\WooCommerce\EmailEditor
  */
