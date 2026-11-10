@@ -558,4 +558,41 @@ class SingleProductTemplateCompatibilityTests extends WP_UnitTestCase {
 			$this->assertSame( 1, substr_count( $output, '__SINGLE_PRODUCT_CONTENT__' ), $stage . ': product content should remain present.' );
 		}
 	}
+
+	/**
+	 * @testdox Classic upsells render after Product Details until the store migrates them.
+	 *
+	 * @testWith ["no", 15]
+	 *           ["yes", false]
+	 *
+	 * @param string    $migrated          Stored migration option.
+	 * @param int|false $expected_priority Priority of woocommerce_upsell_display after rendering.
+	 */
+	public function test_classic_upsells_follow_migration_option( string $migrated, $expected_priority ): void {
+		update_option( 'woocommerce_product_upsells_migrated_to_block', $migrated );
+
+		$product_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'product',
+				'post_status' => 'publish',
+			)
+		);
+		$this->go_to( get_permalink( $product_id ) );
+		$this->assertTrue( is_product(), 'The compatibility layer must run in a single-product request.' );
+
+		$sut = new SingleProductTemplateCompatibility();
+		$sut->init();
+		$sut->inject_hooks(
+			'',
+			array(
+				'blockName' => 'woocommerce/product-details',
+			)
+		);
+
+		$this->assertSame(
+			$expected_priority,
+			has_action( 'woocommerce_after_single_product_summary', 'woocommerce_upsell_display' ),
+			'Classic upsells should render with Product Details only before the store migrates them.'
+		);
+	}
 }
