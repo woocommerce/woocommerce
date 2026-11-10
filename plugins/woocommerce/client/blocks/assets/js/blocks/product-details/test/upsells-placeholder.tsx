@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -37,9 +37,6 @@ jest.mock( '@wordpress/data', () => ( {
 		getBlockIndex: () => 1,
 		getBlockAttributes: () => ( { align: 'wide' } ),
 	} ),
-	resolveSelect: () => ( {
-		getEntityRecord: () => Promise.resolve( { id: 1 } ),
-	} ),
 } ) );
 
 const OPTION = 'woocommerce_product_upsells_migrated_to_block';
@@ -55,7 +52,7 @@ function mockSite( site: Record< string, unknown > | false, loaded = true ) {
 }
 
 describe( 'UpsellsPlaceholder', () => {
-	test( 'saves the migration and inserts the Upsells block', async () => {
+	test( 'saves the migration and inserts the Upsells block', () => {
 		mockSite( { [ OPTION ]: 'no' } );
 
 		render( <UpsellsPlaceholder clientId="product-details" /> );
@@ -65,14 +62,12 @@ describe( 'UpsellsPlaceholder', () => {
 			} )
 		);
 
-		await waitFor( () => {
-			expect( mockEditor.editEntityRecord ).toHaveBeenCalledWith(
-				'root',
-				'site',
-				undefined,
-				{ [ OPTION ]: 'yes' }
-			);
-		} );
+		expect( mockEditor.editEntityRecord ).toHaveBeenCalledWith(
+			'root',
+			'site',
+			undefined,
+			{ [ OPTION ]: 'yes' }
+		);
 		expect( mockEditor.insertBlock ).toHaveBeenCalledWith(
 			expect.objectContaining( {
 				name: 'woocommerce/product-collection',
