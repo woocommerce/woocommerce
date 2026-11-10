@@ -61,6 +61,11 @@ final class JavaScriptPattern {
 	private const TAIL_ESCAPES = 'cuxpP';
 
 	/**
+	 * Other letters JavaScript accepts after a backslash in Unicode mode.
+	 */
+	private const JS_ESCAPE_LETTERS = 'bBdDfnrsStvwWk';
+
+	/**
 	 * Returns a description of the first construct `u` mode rejects, or null when it finds none.
 	 *
 	 * @param string $pattern The pattern, as written in a JSON Schema `pattern` keyword.
@@ -218,6 +223,14 @@ final class JavaScriptPattern {
 
 			if ( false !== strpos( self::TAIL_ESCAPES, $escape ) ) {
 				return self::check_escape_tail( $pattern, $index, $escape );
+			}
+
+			if ( 'k' === $escape && '<' !== ( $pattern[ $index + 2 ] ?? '' ) ) {
+				return '\\k without a name in angle brackets, which JavaScript does not support';
+			}
+
+			if ( false === strpos( self::JS_ESCAPE_LETTERS, $escape ) ) {
+				return '\\' . $escape . ', an escape JavaScript does not support';
 			}
 
 			return null;
@@ -448,6 +461,6 @@ final class JavaScriptPattern {
 			return 'a recursion group, which JavaScript does not support';
 		}
 
-		return null;
+		return 'a group syntax that JavaScript does not support';
 	}
 }
