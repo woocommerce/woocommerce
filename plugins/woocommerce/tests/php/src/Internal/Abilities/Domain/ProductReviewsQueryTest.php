@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewsQuery;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Abilities\AbilityResources;
 
 /**
  * Tests review queries through the Abilities API.
@@ -295,8 +296,8 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_extension_fields( string $behavior, string $error_code ): void {
 		$saved = array();
-		foreach ( array( 'resources', 'fields' ) as $name ) {
-			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+		foreach ( array( 'resources', 'fields', 'output_fields' ) as $name ) {
+			$property = new \ReflectionProperty( AbilityResources::class, $name );
 			$property->setAccessible( true );
 			$saved[ $name ] = $property->getValue();
 			$property->setValue( null, array() );
@@ -358,7 +359,7 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 			$this->assertSame( $schema, ProductReviewsQuery::get_registration_args()['output_schema'] );
 		} finally {
 			foreach ( $saved as $name => $value ) {
-				$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+				$property = new \ReflectionProperty( AbilityResources::class, $name );
 				$property->setAccessible( true );
 				$property->setValue( null, $value );
 			}

@@ -9,18 +9,27 @@ namespace Automattic\WooCommerce\Internal\Abilities;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Abilities\AbilityResources;
+use Automattic\WooCommerce\Internal\Abilities\Resources\OrderResource;
+use Automattic\WooCommerce\Internal\Abilities\Resources\ProductResource;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderNotesQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderSendEmail;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\PaymentGatewaysQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductAttributeCreate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductAttributesQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
-use Automattic\WooCommerce\Internal\Abilities\Resources\OrderResource;
-use Automattic\WooCommerce\Internal\Abilities\Resources\ProductResource;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductReviewsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ShippingZonesQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\TaxRatesQuery;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -45,11 +54,20 @@ class AbilitiesLoader {
 		OrdersQuery::class,
 		OrderAddNote::class,
 		OrderNotesQuery::class,
+		OrderSendEmail::class,
+		OrderUpdate::class,
 		OrderUpdateStatus::class,
+		PaymentGatewaysQuery::class,
 		ProductsQuery::class,
+		ProductTermsQuery::class,
+		ProductReviewsQuery::class,
+		ProductAttributesQuery::class,
+		ProductAttributeCreate::class,
 		ProductCreate::class,
 		ProductDelete::class,
 		ProductUpdate::class,
+		ShippingZonesQuery::class,
+		TaxRatesQuery::class,
 	);
 
 	/**
@@ -80,20 +98,13 @@ class AbilitiesLoader {
 	 *
 	 * @since 10.9.0
 	 */
-	final public static function init(): void {
+	final public function init(): void {
 		if ( self::$initialized ) {
 			return;
 		}
 
-		/*
-		 * Register abilities when Abilities API is ready.
-		 * Support both old (pre-6.9) and new (6.9+) action names.
-		 */
 		AbilitiesCategories::init();
-		add_action( 'wp_abilities_api_init', array( __CLASS__, 'register_core_resources' ), 0 );
-		add_action( 'abilities_api_init', array( __CLASS__, 'init_extensions' ), 0 );
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'init_extensions' ), 0 );
-		add_action( 'abilities_api_init', array( __CLASS__, 'register_abilities' ) );
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'register_abilities' ) );
 		add_filter( 'woocommerce_product_data_store_cpt_get_products_query', array( __CLASS__, 'add_extension_query_args' ), 10, 2 );
 		add_filter( 'woocommerce_order_data_store_cpt_get_orders_query', array( __CLASS__, 'add_extension_query_args' ), 10, 2 );
@@ -102,19 +113,25 @@ class AbilitiesLoader {
 	}
 
 	/**
-	 * Register Core's resources and their fields, also while the extensible abilities feature is off.
+	 * Register the resources that Core's abilities format, so extensions can register fields on them.
 	 *
 	 * @internal
 	 *
 	 * @since 11.3.0
 	 */
 	public static function register_core_resources(): void {
-		if ( AbilityResources::is_registered( ProductResource::NAME ) ) {
+		if ( AbilityResources::is_registered( 'order' ) ) {
 			return;
 		}
-		AbilityResources::register_core( array( ProductResource::class, 'register' ), array( OrderResource::class, 'register' ) );
+		AbilityResources::register_core(
+			array( ProductResource::class, 'register' ),
+			array( OrderResource::class, 'register' ),
+			static function () {
+				AbilityResources::register_resource( 'product_term' );
+				AbilityResources::register_resource( 'product_review' );
+			}
+		);
 	}
-
 	/**
 	 * Add the extension filter clauses of a list ability to its WP_Query arguments.
 	 *
@@ -147,12 +164,13 @@ class AbilitiesLoader {
 	 * @since 11.3.0
 	 */
 	public static function init_extensions(): void {
+		self::register_core_resources();
 		if ( did_action( 'woocommerce_extensible_abilities_init' ) || ! ExtensibleAbilities::is_enabled() ) {
 			return;
 		}
 
 		/**
-		 * Fires when extensions can register their resources with AbilityResources.
+		 * Fires when extensions can register their resources with ExtensibleAbilities.
 		 *
 		 * Fires one time, before `woocommerce_extensible_abilities_init`, only when the
 		 * experimental `extensible_abilities` feature is on.
@@ -163,7 +181,7 @@ class AbilitiesLoader {
 		AbilityResources::close_root_fields();
 
 		/**
-		 * Fires when extensions can register their fields, query filters and validators with ExtensibleAbilities.
+		 * Fires when extensions can register their fields with ExtensibleAbilities.
 		 *
 		 * Fires one time, only when the experimental `extensible_abilities` feature is on.
 		 *
@@ -178,16 +196,12 @@ class AbilitiesLoader {
 	 * @since 10.9.0
 	 */
 	public static function register_abilities(): void {
-		if ( ! function_exists( 'wp_register_ability' ) ) {
-			return;
-		}
-
 		foreach ( self::get_ability_definition_classes() as $class_name ) {
 			if ( ! is_string( $class_name ) || ! class_exists( $class_name ) ) {
 				continue;
 			}
 
-			// Core's product write abilities extend ActionableAbility, so WordPress builds them from their own class.
+			// Core's write abilities extend ActionableAbility, so WordPress builds them from their own class.
 			$is_actionable = is_a( $class_name, ActionableAbility::class, true ) && self::is_core_ability_definition_class( $class_name );
 
 			if ( ! $is_actionable && ! is_a( $class_name, AbilityDefinition::class, true ) ) {
@@ -206,8 +220,8 @@ class AbilitiesLoader {
 				continue;
 			}
 
-			if ( function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_name ) ) {
-				$existing_ability = function_exists( 'wp_get_ability' ) ? wp_get_ability( $ability_name ) : null;
+			if ( wp_has_ability( $ability_name ) ) {
+				$existing_ability = wp_get_ability( $ability_name );
 
 				if (
 					$is_core_ability
@@ -217,7 +231,7 @@ class AbilitiesLoader {
 					continue;
 				}
 
-				if ( ! $is_core_ability || ! function_exists( 'wp_unregister_ability' ) ) {
+				if ( ! $is_core_ability ) {
 					continue;
 				}
 
@@ -230,6 +244,8 @@ class AbilitiesLoader {
 			$args = $class_name::get_registration_args();
 			if ( $is_actionable ) {
 				$args['ability_class'] = $class_name;
+			} elseif ( $is_core_ability ) {
+				$args['ability_class'] = Ability::class;
 			}
 
 			$registered_ability = wp_register_ability( $ability_name, $args );

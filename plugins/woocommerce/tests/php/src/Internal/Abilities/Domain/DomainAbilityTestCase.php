@@ -58,7 +58,7 @@ abstract class DomainAbilityTestCase extends \WC_Unit_Test_Case {
 
 		parent::setUp();
 
-		AbilitiesLoader::init();
+		wc_get_container()->get( AbilitiesLoader::class )->init();
 		self::reset_registries();
 		wp_set_current_user( self::$administrator_id );
 	}
@@ -109,15 +109,19 @@ abstract class DomainAbilityTestCase extends \WC_Unit_Test_Case {
 			'woocommerce_extensible_abilities_init',
 			static function () use ( $resource_name, $get_callback, $extra ) {
 				ExtensibleAbilities::register_field(
-					$resource_name,
-					'test-ext',
-					'code',
 					array_merge(
-						array(
-							'schema'       => array( 'type' => array( 'string', 'null' ) ),
-							'get_callback' => $get_callback,
+						array_merge(
+							array(
+								'output_schema' => array( 'type' => 'string' ),
+								'get_callback'  => $get_callback,
+							),
+							$extra
 						),
-						$extra
+						array(
+							'resource'  => $resource_name,
+							'namespace' => 'test-ext',
+							'field'     => 'code',
+						)
 					)
 				);
 			}

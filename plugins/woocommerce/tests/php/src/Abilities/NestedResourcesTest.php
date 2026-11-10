@@ -210,12 +210,16 @@ class NestedResourcesTest extends DomainAbilityTestCase {
 	public function test_nested_resource_with_a_field_list(): void {
 		update_option( 'woocommerce_feature_' . ExtensibleAbilities::FEATURE_ID . '_enabled', 'yes' );
 		ExtensibleAbilities::register_field(
-			'test_customer',
-			'test-ext',
-			'tier',
-			array(
-				'schema'       => array( 'type' => 'string' ),
-				'get_callback' => static fn() => 'gold',
+			array_merge(
+				array(
+					'output_schema' => array( 'type' => 'string' ),
+					'get_callback'  => static fn() => 'gold',
+				),
+				array(
+					'resource'  => 'test_customer',
+					'namespace' => 'test-ext',
+					'field'     => 'tier',
+				)
 			)
 		);
 		AbilityResources::register_field(

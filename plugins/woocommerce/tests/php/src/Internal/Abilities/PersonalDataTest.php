@@ -163,6 +163,40 @@ class PersonalDataTest extends DomainAbilityTestCase {
 	}
 
 	/**
+	 * @testdox Should keep a marked extension field writable while withholding its output.
+	 */
+	public function test_withholding_preserves_extension_writes(): void {
+		$this->add_test_field(
+			'product',
+			static fn( \WC_Product $product ) => $product->get_meta( '_test_personal_value' ),
+			array(
+				'personal_data' => true,
+				'input_schema'  => array( 'type' => 'string' ),
+				'set_callback'  => static function ( \WC_Product $product, string $value ) {
+					$product->update_meta_data( '_test_personal_value', $value );
+				},
+			)
+		);
+		$this->withhold_personal_data();
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$result = $this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'test-ext' => array( 'code' => 'private@example.test' ) ),
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertArrayNotHasKey( 'extensions', $result['product'] );
+		$this->assertSame( 'private@example.test', wc_get_product( $product->get_id() )->get_meta( '_test_personal_value' ) );
+		$ability = wp_get_ability( 'woocommerce/product-update' );
+		$this->assertArrayHasKey( 'code', $ability->get_input_schema()['properties']['extensions']['properties']['test-ext']['properties'] );
+		$this->assertArrayNotHasKey( 'extensions', $ability->get_output_schema()['properties']['product']['properties'] );
+	}
+
+	/**
 	 * Output schema of one order in woocommerce/orders-query.
 	 *
 	 * @return array<string, mixed>
