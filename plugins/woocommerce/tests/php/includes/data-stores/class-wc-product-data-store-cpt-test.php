@@ -1,5 +1,6 @@
 <?php
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 
 /**
@@ -935,11 +936,31 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 */
 	public function malformed_date_arg_provider(): array {
 		return array(
-			'post column, array'       => array( 'date_created', array( '2000-01-01' ) ),
-			'post column, empty array' => array( 'date_created', array() ),
-			'post column, object'      => array( 'date_created', new stdClass() ),
-			'sale date, array'         => array( 'date_on_sale_from', array( '2000-01-01' ) ),
+			'post column, array'  => array( 'date_created', array( '2000-01-01' ) ),
+			'post column, object' => array( 'date_created', new stdClass() ),
+			'sale date, array'    => array( 'date_on_sale_from', array( '2000-01-01' ) ),
 		);
+	}
+
+	/**
+	 * @testdox An empty date array applies no date filter and keeps the other filters, like an unset date arg.
+	 */
+	public function test_empty_date_array_applies_no_date_filter(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_date_created( '2000-01-01T10:00:00' );
+		$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$product->save();
+		WC_Helper_Product::create_simple_product();
+
+		$queried_products = wc_get_products(
+			array(
+				'date_created' => array(),
+				'stock_status' => ProductStockStatus::OUT_OF_STOCK,
+				'return'       => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $product->get_id() ), $queried_products );
 	}
 
 	/**

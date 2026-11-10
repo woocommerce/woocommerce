@@ -2088,6 +2088,26 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An empty date array applies no date filter, like an unset date arg.
+	 */
+	public function test_empty_date_array_applies_no_date_filter(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_date_created( '2000-01-01T10:00:00' );
+		$order->save();
+		$other_order = WC_Helper_Order::create_order();
+
+		$queried_orders = wc_get_orders(
+			array(
+				'date_created' => array(),
+				'return'       => 'ids',
+			)
+		);
+
+		sort( $queried_orders );
+		$this->assertSame( array( $order->get_id(), $other_order->get_id() ), $queried_orders );
+	}
+
+	/**
 	 * Data provider for test_malformed_query_arg_returns_no_orders.
 	 *
 	 * @return array
@@ -2095,7 +2115,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	public function malformed_query_arg_provider(): array {
 		return array(
 			'date, array'               => array( 'date_created', array( '2000-01-01' ) ),
-			'date, empty array'         => array( 'date_created', array() ),
 			'date, object'              => array( 'date_paid', new stdClass() ),
 			'customer, object'          => array( 'customer', new stdClass() ),
 			'customer, object in array' => array( 'customer', array( 1, new stdClass() ) ),
