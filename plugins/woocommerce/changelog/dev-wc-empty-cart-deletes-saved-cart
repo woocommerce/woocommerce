@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-`wc_empty_cart()` now also deletes a logged-in customer's saved cart. Call `WC()->cart->empty_cart( false )` to keep it.

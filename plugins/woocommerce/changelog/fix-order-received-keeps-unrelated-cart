@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Keep a cart that doesn't belong to the order when the classic checkout's order received page loads, as the checkout block does.
