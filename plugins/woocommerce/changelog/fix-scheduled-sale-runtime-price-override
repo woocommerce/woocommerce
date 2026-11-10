@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep product prices set by extensions at runtime instead of replacing them with the scheduled sale or regular price.

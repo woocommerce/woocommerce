@@ -80,6 +80,11 @@ class ScheduledSalePriceReconciler implements RegisterHooksInterface {
 			return $price;
 		}
 
+		// Respect runtime price changes made through set_price().
+		if ( array_key_exists( 'price', $product->get_changes() ) ) {
+			return $price;
+		}
+
 		// Respect third-party prices: if another callback already changed the price away from
 		// the stored value, leave it alone. This is deliberate even for ambient transforms
 		// such as currency conversion: by this priority the price is already transformed, and

@@ -813,6 +813,28 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A runtime price set with set_price() is not overridden after a scheduled sale ends.
+	 */
+	public function test_scheduled_sale_active_price_respects_runtime_set_price_after_sale_ends(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '215' );
+		$product->set_sale_price( '193.50' );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() - 2 * HOUR_IN_SECONDS ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) );
+		$product->save();
+
+		$this->assertEquals( 215, get_post_meta( $product->get_id(), '_price', true ), 'An ended sale should store the regular price.' );
+
+		$product = wc_get_product( $product->get_id() );
+		$this->assertFalse( $product->is_on_sale(), 'The scheduled sale should have ended.' );
+
+		// An extension overrides the price at runtime, e.g. while building the cart.
+		$product->set_price( '193.50' );
+
+		$this->assertEquals( 193.50, $product->get_price(), 'The runtime price should be kept, not reconciled to the regular price (215).' );
+	}
+
+	/**
 	 * @testdox An external product reconciles like a simple product.
 	 */
 	public function test_scheduled_sale_active_price_heals_external_product(): void {
