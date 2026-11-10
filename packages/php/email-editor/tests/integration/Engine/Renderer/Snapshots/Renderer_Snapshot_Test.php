@@ -20,9 +20,9 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer;
  */
 class Renderer_Snapshot_Test extends \Email_Editor_Integration_Test_Case {
 	/**
-	 * Block types that got an email render callback in setUp.
+	 * Block types that got an email render callback in setUp, each with the callback it had before.
 	 *
-	 * @var \WP_Block_Type[]
+	 * @var array<int, array{\WP_Block_Type, mixed}>
 	 */
 	private array $wired_block_types = array();
 
@@ -41,8 +41,8 @@ class Renderer_Snapshot_Test extends \Email_Editor_Integration_Test_Case {
 	 * Clean up after each test.
 	 */
 	public function tearDown(): void {
-		foreach ( $this->wired_block_types as $block_type ) {
-			unset( $block_type->render_email_callback );
+		foreach ( $this->wired_block_types as list( $block_type, $previous_callback ) ) {
+			$this->set_email_callback( $block_type, $previous_callback );
 		}
 		remove_filter( 'woocommerce_email_editor_site_style_sync_enabled', '__return_false' );
 		parent::tearDown();
@@ -108,10 +108,20 @@ class Renderer_Snapshot_Test extends \Email_Editor_Integration_Test_Case {
 		foreach ( \WP_Block_Type_Registry::get_instance()->get_all_registered() as $block_type ) {
 			$settings = $initializer->update_block_settings( array( 'name' => $block_type->name ) );
 			if ( isset( $settings['render_email_callback'] ) ) {
-				$block_type->set_props( array( 'render_email_callback' => $settings['render_email_callback'] ) );
-				$this->wired_block_types[] = $block_type;
+				$this->wired_block_types[] = array( $block_type, get_object_vars( $block_type )['render_email_callback'] ?? null );
+				$this->set_email_callback( $block_type, $settings['render_email_callback'] );
 			}
 		}
+	}
+
+	/**
+	 * Sets only the email render callback of a block type. set_props() would also reset its attributes.
+	 *
+	 * @param \WP_Block_Type $block_type Block type.
+	 * @param mixed          $callback   Email render callback, or null for none.
+	 */
+	private function set_email_callback( \WP_Block_Type $block_type, $callback ): void {
+		$block_type->__set( 'render_email_callback', $callback );
 	}
 
 	/**
