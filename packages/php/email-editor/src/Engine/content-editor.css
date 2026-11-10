@@ -2,12 +2,6 @@
  * Styles for the email editor.
  */
 
-/* The editor's text weight is 300, where the browser's "bolder" gives 400 and looks like normal text. */
-strong,
-b {
-	font-weight: bold;
-}
-
 /*
  * Flex layout used for buttons block for email editor.
  */

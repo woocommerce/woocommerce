@@ -19,6 +19,12 @@ pre {
 	font-family: 'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace;
 }
 
+/* With a light text weight such as 300, the browser's "bolder" gives 400 and looks like normal text. */
+strong,
+b {
+	font-weight: bold;
+}
+
 /* Specific padding for list elements */
 ul.has-background,
 ol.has-background {
