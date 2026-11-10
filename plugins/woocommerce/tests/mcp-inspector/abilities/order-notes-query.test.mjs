@@ -33,5 +33,9 @@ describe( ABILITY, () => {
 	} );
 
 	test( 'refuses an unknown order', () =>
-		refused( ABILITY, { id: 999999999 }, /Order not found/ ) );
+		refused(
+			ABILITY,
+			{ id: 999999999 },
+			/Order 999999999 does not exist/
+		) );
 } );

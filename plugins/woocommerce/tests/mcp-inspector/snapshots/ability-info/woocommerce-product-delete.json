@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/product-delete",
 	"label": "Delete product",
-	"description": "Delete, trash, or restore a product.",
+	"description": "Move a product to the trash, or delete it permanently.",
 	"input_schema": {
 		"type": "object",
 		"properties": {
@@ -23,11 +23,17 @@
 	"output_schema": {
 		"type": "object",
 		"properties": {
-			"deleted": {
-				"type": "boolean"
-			},
 			"id": {
-				"type": "integer"
+				"type": "integer",
+				"description": "ID of the product."
+			},
+			"status": {
+				"type": "string",
+				"enum": [
+					"trash",
+					"deleted"
+				],
+				"description": "What happened to the product. \"trash\": the product was moved to the trash, and can be restored. \"deleted\": the product was permanently deleted, and cannot be restored."
 			}
 		},
 		"additionalProperties": false
