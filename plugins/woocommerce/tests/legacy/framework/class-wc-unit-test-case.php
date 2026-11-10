@@ -64,25 +64,25 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	private $customer_state_at_setup = array();
 
 	/**
-	 * $_SERVER at setUp().
+	 * $_SERVER at setUp(), or null until setUp() saves it.
 	 *
-	 * @var array<string, mixed>
+	 * @var array<string, mixed>|null
 	 */
-	private $server_at_setup = array();
+	private $server_at_setup = null;
 
 	/**
-	 * Constants::$set_constants at setUp().
+	 * Constants::$set_constants at setUp(), or null until setUp() saves it.
 	 *
-	 * @var array<string, mixed>
+	 * @var array<string, mixed>|null
 	 */
-	private $constant_overrides_at_setup = array();
+	private $constant_overrides_at_setup = null;
 
 	/**
-	 * The registered block types at setUp(), by name.
+	 * The registered block types at setUp(), by name, or null until setUp() saves them.
 	 *
-	 * @var array<string, WP_Block_Type>
+	 * @var array<string, WP_Block_Type>|null
 	 */
-	private $block_types_at_setup = array();
+	private $block_types_at_setup = null;
 
 	/**
 	 * Enable synchronous product attribute lookup updates for test fixtures.
@@ -175,6 +175,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 		// Register post types before each test.
 		WC_Post_types::register_post_types();
 		WC_Post_types::register_taxonomies();
+		$this->unregister_stale_attribute_taxonomies();
 
 		CodeHacker::reset_hacks();
 
@@ -191,31 +192,59 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
+	 * Unregister pa_* taxonomies, and drop their $wc_product_attributes entries, once the attribute row is gone.
+	 *
+	 * The per-test rollback deletes the attribute rows a test created but leaves the taxonomies registered,
+	 * and WC_Post_Types::register_taxonomies() does not rebuild them after bootstrap.
+	 */
+	private function unregister_stale_attribute_taxonomies(): void {
+		global $wpdb, $wc_product_attributes;
+
+		// Read the table directly: wc_get_attribute_taxonomies() would fill the attribute cache before the test runs.
+		$attribute_taxonomies = array_map(
+			'wc_attribute_taxonomy_name',
+			$wpdb->get_col( "SELECT attribute_name FROM {$wpdb->prefix}woocommerce_attribute_taxonomies" )
+		);
+
+		// Use the registry keys: a renamed attribute's taxonomy object can keep its old name.
+		foreach ( array_keys( get_taxonomies() ) as $taxonomy ) {
+			if ( 0 === strpos( $taxonomy, 'pa_' ) && ! in_array( $taxonomy, $attribute_taxonomies, true ) ) {
+				unregister_taxonomy( $taxonomy );
+			}
+		}
+
+		$wc_product_attributes = array_intersect_key( (array) $wc_product_attributes, array_flip( $attribute_taxonomies ) );
+	}
+
+	/**
 	 * Tear down test case.
 	 *
-	 * The cart contents, the cart context, the queued notices, the cached country
-	 * locale, and the customer all live on the WC() singletons, which neither the
-	 * per-test database rollback nor the hook restore resets, so clear them here or
-	 * they leak into every later test in the process. The same goes for $_SERVER,
-	 * which WordPress only resets for its own core tests, for Constants overrides,
-	 * and for the block type registry.
+	 * The cart, notices, country locale, loaded shipping methods, and customer live on
+	 * WC() singletons that survive database rollback and hook restoration. Reset them
+	 * along with $_SERVER, Constants overrides, and the block type registry so their
+	 * state does not leak into later tests.
 	 *
 	 * @since 11.1.0
 	 */
 	public function tearDown(): void {
 		try {
+			// PHPUnit runs tearDown() even when a subclass skips the test before calling parent::setUp().
+			// Each restore then finds no saved state and leaves the current one alone.
+			$this->restore_server_superglobal();
+			$this->restore_constant_overrides();
+			$this->restore_block_type_registry();
+
+			// Function and static-method mocks are process-wide. Reset them here so the test
+			// that installs one is the last to see it, including when the next test extends a
+			// WordPress base class that never runs setUp() on this hierarchy.
+			CodeHacker::reset_hacks();
+
 			$this->clear_wc_singleton_state();
 		} finally {
-			try {
-				$this->restore_server_superglobal();
-				$this->restore_constant_overrides();
-				$this->restore_block_type_registry();
-			} finally {
-				// The parent teardown must always run: it rolls back the database
-				// transaction and restores the hooks. Skipping it would poison every
-				// test that runs after this one.
-				parent::tearDown();
-			}
+			// The parent teardown must always run: it rolls back the database
+			// transaction and restores the hooks. Skipping it would poison every
+			// test that runs after this one.
+			parent::tearDown();
 		}
 	}
 
@@ -246,6 +275,14 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			wc_clear_notices();
 		}
 
+		if ( WC()->session instanceof WC_Session ) {
+			// The session row is rolled back but the session object keeps what it loaded, which no longer matches
+			// storage. Make its next save a full write instead of a merge against that stale snapshot.
+			( function () {
+				$this->replace_session_on_save();
+			} )->call( WC()->session );
+		}
+
 		if ( isset( WC()->countries ) ) {
 			// The locale is cached on first read. A test that reads it while a
 			// woocommerce_get_country_locale filter is attached leaves the filtered
@@ -254,9 +291,12 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			WC()->countries->locale = array();
 		}
 
+		// WC_Shipping caches the loaded methods, including any a test's filters or zones added.
+		WC()->shipping()->unregister_shipping_methods();
+
 		if ( $this->customer_at_setup ) {
-			// Tests swap in a customer for another user, or change addresses, tax exemption and
-			// other props through setters, which also leave entries in the change set. Put back
+			// Tests swap in a customer for another user, or change addresses, tax exemption, meta
+			// and other props through setters, which also leave entries in the change set. Put back
 			// the setUp() instance with its exact state, so later tests start from the same one.
 			WC()->customer = $this->customer_at_setup;
 			self::customer_state( $this->customer_at_setup, $this->customer_state_at_setup );
@@ -271,16 +311,21 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * @return array<string, mixed> The state as it was before any write.
 	 */
 	private static function customer_state( WC_Customer $customer, ?array $state = null ): array {
-		$access = function ( ?array $state ): array {
+		// update_meta_data() changes WC_Meta_Data objects in place, so the saved state keeps its own copies.
+		// Null means the meta was never read, and writing it back makes the next read reload it.
+		$copy_meta = static fn ( $meta ) => is_array( $meta ) ? array_map( static fn ( WC_Meta_Data $item ) => clone $item, $meta ) : $meta;
+
+		$access = function ( ?array $state ) use ( $copy_meta ): array {
 			$current = array(
 				'id'                  => $this->id,
 				'data'                => $this->data,
 				'changes'             => $this->changes,
+				'meta_data'           => $copy_meta( $this->meta_data ),
 				'is_vat_exempt'       => $this->is_vat_exempt,
 				'calculated_shipping' => $this->calculated_shipping,
 			);
 			foreach ( (array) $state as $prop => $value ) {
-				$this->$prop = $value;
+				$this->$prop = 'meta_data' === $prop ? $copy_meta( $value ) : $value;
 			}
 			return $current;
 		};
@@ -293,6 +338,10 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * reads the request URI, client IP or user agent would otherwise see the previous test's values.
 	 */
 	protected function restore_server_superglobal(): void {
+		if ( null === $this->server_at_setup ) {
+			return;
+		}
+
 		$_SERVER = $this->server_at_setup;
 	}
 
@@ -301,6 +350,10 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * store, so one a test forgets to clear would otherwise apply to every later test.
 	 */
 	protected function restore_constant_overrides(): void {
+		if ( null === $this->constant_overrides_at_setup ) {
+			return;
+		}
+
 		Constants::$set_constants = $this->constant_overrides_at_setup;
 	}
 
@@ -309,6 +362,10 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * register again the ones it removed. The registry is a singleton that outlives the test.
 	 */
 	protected function restore_block_type_registry(): void {
+		if ( null === $this->block_types_at_setup ) {
+			return;
+		}
+
 		$registry = WP_Block_Type_Registry::get_instance();
 
 		foreach ( $registry->get_all_registered() as $name => $block_type ) {

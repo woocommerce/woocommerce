@@ -11,7 +11,6 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedExtendedTask;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Enums\ProductStatus;
-use Automattic\WooCommerce\Internal\Admin\Onboarding\MarketplaceTaskExperiment;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingIndustries;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
@@ -769,12 +768,9 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 
 		$lists = is_array( $task_list_ids ) && count( $task_list_ids ) > 0 ? TaskLists::get_lists_by_ids( $task_list_ids ) : TaskLists::get_lists();
 
-		$marketplace_task_experiment = wc_get_container()->get( MarketplaceTaskExperiment::class );
-
 		$json = array_map(
-			function ( $list ) use ( $marketplace_task_experiment ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.listFound
-				$marketplace_task_experiment->maybe_move_task_first( $list->sort_tasks() );
-				return $list->get_json();
+			function ( $list ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.listFound
+				return $list->sort_tasks()->get_json();
 			},
 			$lists
 		);
@@ -1004,8 +1000,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		}
 
 		$update = $task_list->unhide();
-		wc_get_container()->get( MarketplaceTaskExperiment::class )->maybe_move_task_first( $task_list );
-		$json = $task_list->get_json();
+		$json   = $task_list->get_json();
 
 		return rest_ensure_response( $json );
 	}

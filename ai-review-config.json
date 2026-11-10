@@ -214,6 +214,23 @@
 			]
 		},
 		{
+			"name": "hook-callback-reentrancy",
+			"file": ".ai/review/guidelines/hook-callback-reentrancy.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php",
+				"plugins/woocommerce/templates/**/*.php",
+				"plugins/woocommerce/woocommerce.php"
+			],
+			"signals": [
+				"add_filter",
+				"add_action"
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
 			"name": "php-loose-type-juggling",
 			"file": ".ai/review/guidelines/php-loose-type-juggling.md",
 			"path": [
@@ -444,6 +461,50 @@
 				"plugins/woocommerce/src/Database/Migrations/**/*.php"
 			],
 			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "order-storage-access",
+			"file": ".ai/review/guidelines/order-storage-access.md",
+			"path": [
+				"plugins/woocommerce/includes/**/*.php",
+				"plugins/woocommerce/src/**/*.php",
+				"plugins/woocommerce/templates/**/*.php"
+			],
+			"signals": [
+				"wp_count_posts",
+				"get_posts(",
+				"WP_Query",
+				"get_post(",
+				"get_post_status",
+				"get_post_meta",
+				"update_post_meta",
+				"delete_post_meta",
+				"$wpdb->posts",
+				"$wpdb->postmeta",
+				"shop_order",
+				"post_status",
+				"post_parent",
+				"'post_date",
+				"'post_modified",
+				"'post_type'",
+				"'orders."
+			],
+			"personas": [
+				"regression"
+			]
+		},
+		{
+			"name": "payment-callbacks",
+			"file": ".ai/review/guidelines/payment-callbacks.md",
+			"path": [
+				"plugins/woocommerce/includes/gateways/**/*.php",
+				"plugins/woocommerce/src/Gateways/**/*.php",
+				"plugins/woocommerce/includes/rest-api/Controllers/Version3/class-wc-rest-paypal-*.php"
+			],
+			"personas": [
+				"security",
 				"regression"
 			]
 		},
@@ -1071,6 +1132,7 @@
 				"plugins/woocommerce/src/Internal/Admin/Settings.php"
 			],
 			"signals": [
+				") =>",
 				"export ",
 				"export default",
 				"createElement",

@@ -42,9 +42,7 @@ describe( 'createCrossSellsProductCollection transform function', () => {
 			...crossSells.attributes.query,
 			perPage: 3,
 		} );
-		expect( transformedBlock.attributes.hideControls ).toEqual(
-			crossSells.attributes.hideControls
-		);
+		expect( transformedBlock.attributes.hideControls ).toEqual( [] );
 	} );
 
 	it( 'creates inner blocks from cross-sells template', () => {

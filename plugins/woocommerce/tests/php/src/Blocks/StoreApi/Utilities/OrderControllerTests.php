@@ -209,6 +209,29 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Existing-order validation removes an invalid coupon line that has not been saved yet.
+	 */
+	public function test_validate_existing_order_before_payment_removes_unsaved_invalid_coupon() {
+		$coupon = CouponHelper::create_coupon( 'unsaved-exhausted', 'publish', array( 'usage_limit' => 1 ) );
+		$coupon->increase_usage_count();
+
+		$order = WC_Helper_Order::create_order();
+		$item  = new \WC_Order_Item_Coupon();
+		$item->set_code( $coupon->get_code() );
+		$order->add_item( $item );
+
+		try {
+			$this->sut->validate_existing_order_before_payment( $order );
+			$this->fail( 'Expected a RouteException for the exhausted coupon.' );
+		} catch ( RouteException $e ) {
+			$this->assertEquals( 409, $e->getCode() );
+		}
+
+		$this->assertEmpty( $order->get_coupon_codes(), 'The coupon line should be removed from the order.' );
+		$this->assertEmpty( wc_get_order( $order->get_id() )->get_coupon_codes(), 'The coupon line should not be saved.' );
+	}
+
+	/**
 	 * test_validate_order_before_payment_invalid_email.
 	 */
 	public function test_validate_order_before_payment_invalid_email() {
@@ -480,6 +503,57 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 			has_filter( $hook ),
 			'create_order_from_cart() must remove its woocommerce_default_order_status filter; the chain must not grow across repeated calls.'
 		);
+	}
+
+	/**
+	 * @testdox update_order_from_cart() keeps the shopper's session choice on the order even when the default payment method filter returns nothing.
+	 */
+	public function test_update_order_from_cart_keeps_the_session_payment_choice_with_a_callback(): void {
+		$order = $this->sync_order_from_cart_with_cod_enabled( 'cod' );
+
+		$this->assertSame( 'cod', $order->get_payment_method() );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() writes the filtered default on the order when the shopper has not chosen a method.
+	 */
+	public function test_update_order_from_cart_writes_the_filtered_default_without_a_session_choice(): void {
+		$order = $this->sync_order_from_cart_with_cod_enabled( null );
+
+		$this->assertSame( '', $order->get_payment_method() );
+	}
+
+	/**
+	 * Sync an order from a one-item cart with COD enabled, the given session choice and a callback that returns nothing.
+	 *
+	 * Gateway instances and the session choice are restored afterwards; the base class does not reset them.
+	 *
+	 * @param string|null $chosen_payment_method What the shopper chose, or null for nothing.
+	 * @return \WC_Order
+	 */
+	private function sync_order_from_cart_with_cod_enabled( ?string $chosen_payment_method ): \WC_Order {
+		$gateways_before         = WC()->payment_gateways()->payment_gateways;
+		$cod_settings            = (array) get_option( 'woocommerce_cod_settings', array() );
+		$cod_settings['enabled'] = 'yes';
+		update_option( 'woocommerce_cod_settings', $cod_settings );
+		WC()->payment_gateways()->init();
+		WC()->session->set( 'chosen_payment_method', $chosen_payment_method );
+		add_filter( 'woocommerce_default_payment_method', '__return_empty_string' );
+
+		try {
+			WC()->cart->empty_cart();
+			WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+			$order = WC_Helper_Order::create_order();
+
+			$this->sut->update_order_from_cart( $order );
+
+			return $order;
+		} finally {
+			WC()->cart->empty_cart();
+			wp_cache_delete( 'woocommerce_cod_settings', 'options' );
+			WC()->payment_gateways()->payment_gateways = $gateways_before;
+			WC()->session->set( 'chosen_payment_method', null );
+		}
 	}
 
 	/**

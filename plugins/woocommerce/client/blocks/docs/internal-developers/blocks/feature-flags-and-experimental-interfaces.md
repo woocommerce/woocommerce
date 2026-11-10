@@ -101,8 +101,11 @@ See the [available SlotFills](https://github.com/woocommerce/woocommerce/blob/tr
 | `experimental__woocommerce_blocks-cart-view-link` | `product` |
 | `experimental__woocommerce_blocks-cart-remove-item` | `product`, `quantity` |
 | `experimental__woocommerce_blocks-cart-set-item-quantity` | `product`, `quantity` |
+| `experimental__woocommerce_blocks-cart-updated` | `storeCart`, `previousStoreCart` |
 | `experimental__woocommerce_blocks-product-view-link` | `product` |
 | `experimental__woocommerce_blocks-product-list-render` | `products`, `listName` |
+
+`experimental__woocommerce_blocks-cart-updated` is emitted by the `wc/store/cart` data store instead of `useStoreEvents`. It fires each time a cart from a Store API response is applied to the store, after cart notices are shown and items that left the cart are no longer marked as pending delete.
 
 Examples:
 
@@ -128,6 +131,16 @@ wp.hooks.addAction(
 	'plugin/namespace',
 	( { product, quantity } ) => {
 		console.log( `${ quantity } of ${ product.name } were removed` );
+	}
+);
+
+wp.hooks.addAction(
+	'experimental__woocommerce_blocks-cart-updated',
+	'plugin/namespace',
+	( { storeCart, previousStoreCart } ) => {
+		console.log(
+			`The cart went from ${ previousStoreCart.itemsCount } to ${ storeCart.itemsCount } items`
+		);
 	}
 );
 

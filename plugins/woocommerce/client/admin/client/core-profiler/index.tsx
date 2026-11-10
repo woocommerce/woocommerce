@@ -10,6 +10,7 @@ import {
 	assertEvent,
 	enqueueActions,
 	DoneActorEvent,
+	ErrorActorEvent,
 	fromCallback,
 	or,
 } from 'xstate5';
@@ -17,6 +18,7 @@ import { useMachine, useSelector } from '@xstate5/react';
 import { useMemo } from '@wordpress/element';
 import { resolveSelect, dispatch } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
+import { addQueryArgs } from '@wordpress/url';
 import {
 	updateQueryString,
 	getQuery,
@@ -46,6 +48,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { findComponentMeta } from '~/utils/xstate/find-component';
+import { getAdminSetting } from '~/utils/admin-settings';
 import { initRemoteLogging } from '~/lib/init-remote-logging';
 import { IntroOptIn } from './pages/IntroOptIn';
 import {
@@ -61,6 +64,7 @@ import {
 } from './pages/BusinessInfo';
 import { BusinessLocation } from './pages/BusinessLocation';
 import { getCountryStateOptions } from './services/country';
+import { getStoreLocationNotSavedQuery } from './utils/store-location-not-saved';
 import { CoreProfilerLoader } from './components/loader/Loader';
 import { Plugins } from './pages/Plugins/Plugins';
 import { NoPermissionsError } from './pages/Plugins/NoPermissions';
@@ -131,6 +135,7 @@ export type CoreProfilerStateMachineContext = {
 	jetpackAuthUrl?: string;
 	currentUserEmail: string | undefined;
 	currentUser?: WCUser;
+	storeLocationNotSaved: boolean;
 };
 
 const getAllowTrackingOption = fromPromise( async () =>
@@ -324,10 +329,90 @@ const handleGeolocation = assign( {
 
 const redirectToWooHome = raise( { type: 'REDIRECT_TO_WOO_HOME' } );
 
-const exitToWooHome = fromPromise( async () => {
-	await dispatch( onboardingStore ).coreProfilerCompleted();
-	window.location.href = getNewPath( {}, '/', {} );
+// Errors the profiler recovers from still go to the console, so support has something to look at.
+const logProfilerError = ( error: unknown ) => {
+	// eslint-disable-next-line no-console
+	console.error( 'WooCommerce Core Profiler:', error );
+};
+
+const logActorError = ( { event }: { event: ErrorActorEvent } ) => {
+	logProfilerError( event.error );
+};
+
+const exitToWooHome = fromPromise(
+	async ( {
+		input,
+	}: {
+		input?: Pick<
+			CoreProfilerStateMachineContext,
+			'storeLocationNotSaved'
+		>;
+	} ) => {
+		// Coming Soon setup is best effort; a failed request must not leave the loader stuck.
+		await dispatch( onboardingStore )
+			.coreProfilerCompleted()
+			.catch( logProfilerError );
+		window.location.href = getNewPath(
+			getStoreLocationNotSavedQuery( !! input?.storeLocationNotSaved ),
+			'/',
+			{}
+		);
+	}
+);
+
+const exitToJetpackAuth = fromPromise( async () => {
+	// Coming Soon setup is best effort, as in exitToWooHome.
+	await dispatch( onboardingStore )
+		.coreProfilerCompleted()
+		.catch( logProfilerError );
+	return await resolveSelect( onboardingStore ).getJetpackAuthUrl( {
+		redirectUrl: getAdminLink( 'admin.php?page=wc-admin' ),
+		from: 'woocommerce-core-profiler',
+	} );
 } );
+
+/**
+ * Thrown when the skip flow cannot save the skipped flag. It also records whether the store location
+ * and currency saved, so the fallback page can tell the merchant to set them.
+ */
+class SkippedFlagNotSavedError extends Error {
+	cause: unknown;
+
+	storeLocationNotSaved: boolean;
+
+	constructor( cause: unknown, storeLocationNotSaved: boolean ) {
+		super( 'The skipped flag for onboarding could not be saved.' );
+		this.cause = cause;
+		this.storeLocationNotSaved = storeLocationNotSaved;
+	}
+}
+
+/**
+ * Saves the skip through a non-REST admin-post request when the REST write fails,
+ * so WooCommerce Home stops redirecting back to the profiler.
+ */
+const redirectToSkipOnboardingFallback = ( {
+	event,
+}: {
+	event: ErrorActorEvent;
+} ) => {
+	logProfilerError( event.error );
+
+	const { skipOnboardingFallbackUrl } = getAdminSetting(
+		'onboarding',
+		{}
+	) as { skipOnboardingFallbackUrl?: unknown };
+	const storeLocationQuery = getStoreLocationNotSavedQuery(
+		event.error instanceof SkippedFlagNotSavedError &&
+			event.error.storeLocationNotSaved
+	);
+
+	window.location.href =
+		typeof skipOnboardingFallbackUrl === 'string' &&
+		skipOnboardingFallbackUrl
+			? addQueryArgs( skipOnboardingFallbackUrl, storeLocationQuery )
+			: getNewPath( storeLocationQuery, '/', {} );
+};
 
 const getPluginNameParam = (
 	pluginsSelected: CoreProfilerStateMachineContext[ 'pluginsSelected' ],
@@ -641,7 +726,27 @@ const skipFlowUpdateBusinessLocation = fromPromise(
 			getCountryCode( context.businessInfo.location ) as string
 		);
 
-		return Promise.all( [ skipped, businessLocation, currencyUpdate ] );
+		// Only the skipped flag is required to leave the profiler; location and currency are best effort.
+		const [ skippedResult, ...storeLocationResults ] =
+			await Promise.allSettled( [
+				skipped,
+				businessLocation,
+				currencyUpdate,
+			] );
+		let storeLocationNotSaved = false;
+		for ( const result of storeLocationResults ) {
+			if ( result.status === 'rejected' ) {
+				logProfilerError( result.reason );
+				storeLocationNotSaved = true;
+			}
+		}
+		if ( skippedResult.status === 'rejected' ) {
+			throw new SkippedFlagNotSavedError(
+				skippedResult.reason,
+				storeLocationNotSaved
+			);
+		}
+		return { storeLocationNotSaved };
 	}
 );
 
@@ -658,7 +763,7 @@ export const preFetchActions = {
 	preFetchJetpackAuthUrl,
 };
 
-const coreProfilerMachineActions = {
+export const coreProfilerMachineActions = {
 	...preFetchActions,
 	...recordTracksActions,
 	handlePlugins,
@@ -678,12 +783,14 @@ const coreProfilerMachineActions = {
 	assignCurrentUserEmail,
 	assignCurrentUser,
 	redirectToWooHome,
+	redirectToSkipOnboardingFallback,
+	logActorError,
 	redirectToJetpackAuthPage,
 	updateLoaderProgressWithPluginInstall,
 	reloadPage,
 };
 
-const coreProfilerMachineActors = {
+export const coreProfilerMachineActors = {
 	preFetchGetPlugins,
 	getAllowTrackingOption,
 	getStoreNameOption,
@@ -704,13 +811,14 @@ const coreProfilerMachineActors = {
 	skipFlowUpdateBusinessLocation,
 	pluginInstallerMachine,
 	exitToWooHome,
+	exitToJetpackAuth,
 };
 export const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
 	initial: 'navigate',
 	types: {} as {
 		context: CoreProfilerStateMachineContext;
-		events: CoreProfilerEvents;
+		events: CoreProfilerEvents | ErrorActorEvent;
 	},
 	invoke: {
 		id: 'browserPopstateHandler',
@@ -722,6 +830,12 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		},
 		REDIRECT_TO_WOO_HOME: {
 			target: '#redirectingToWooHome',
+		},
+		// Background prefetches and writes are spawned without error handlers. Without this,
+		// one failed REST request (for example, when /wp-json/ is not routed) stops the whole profiler.
+		// Invoke-level onError handlers belong to deeper states and still take precedence.
+		'xstate.error.actor.*': {
+			actions: 'logActorError',
 		},
 	},
 	context: {
@@ -746,6 +860,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 		currentUserEmail: undefined,
 		currentUser: undefined,
 		coreProfilerCompletedSteps: {},
+		storeLocationNotSaved: false,
 	} as CoreProfilerStateMachineContext,
 	states: {
 		navigate: {
@@ -924,7 +1039,9 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 									input: ( {
 										event,
 									}: {
-										event: CoreProfilerEvents;
+										event:
+											| CoreProfilerEvents
+											| ErrorActorEvent;
 									} ) => {
 										assertEvent( event, 'INTRO_SKIPPED' );
 										return event.payload;
@@ -1365,6 +1482,19 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								src: 'skipFlowUpdateBusinessLocation',
 								onDone: {
 									target: 'progress20',
+									actions: assign( {
+										storeLocationNotSaved: ( {
+											event,
+										}: {
+											event: DoneActorEvent< {
+												storeLocationNotSaved: boolean;
+											} >;
+										} ) =>
+											event.output.storeLocationNotSaved,
+									} ),
+								},
+								onError: {
+									actions: 'redirectToSkipOnboardingFallback',
 								},
 							},
 						},
@@ -1667,24 +1797,18 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 				},
 				sendToJetpackAuthPage: {
 					invoke: {
-						src: fromPromise( async () => {
-							await dispatch(
-								onboardingStore
-							).coreProfilerCompleted();
-							return await resolveSelect(
-								onboardingStore
-							).getJetpackAuthUrl( {
-								redirectUrl: getAdminLink(
-									'admin.php?page=wc-admin'
-								),
-								from: 'woocommerce-core-profiler',
-							} );
-						} ),
+						src: 'exitToJetpackAuth',
 						onDone: {
 							actions: enqueueActions( ( { enqueue, check } ) => {
 								if (
 									check(
-										( { event } ) => event.output.success
+										( {
+											event,
+										}: {
+											event: DoneActorEvent< {
+												success: boolean;
+											} >;
+										} ) => event.output.success
 									)
 								) {
 									enqueue( {
@@ -1775,6 +1899,7 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 			id: 'redirectingToWooHome',
 			invoke: {
 				src: 'exitToWooHome',
+				input: ( { context } ) => context,
 			},
 		},
 	},

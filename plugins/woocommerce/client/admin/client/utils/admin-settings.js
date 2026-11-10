@@ -88,6 +88,7 @@ export const LOCALE = getSetting( 'locale' );
 export const SITE_TITLE = getSetting( 'siteTitle' );
 export const WC_ASSET_URL = getSetting( 'wcAssetUrl' );
 export const ORDER_STATUSES = getAdminSetting( 'orderStatuses' );
+export const PAYMENT_GATEWAYS = getAdminSetting( 'paymentGateways', {} );
 
 /**
  * Sets a value to a property on the settings state.

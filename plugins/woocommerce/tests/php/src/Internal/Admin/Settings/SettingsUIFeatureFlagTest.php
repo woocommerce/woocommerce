@@ -1792,4 +1792,25 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 			remove_action( 'woocommerce_settings_' . $current_tab, $action );
 		}
 	}
+
+	/**
+	 * @testdox Should keep the script handle failure reason in English, whatever the site language.
+	 */
+	public function test_script_handle_failure_reason_is_not_translated(): void {
+		add_filter(
+			'gettext',
+			function ( $translation, $text, $domain ) {
+				return 'woocommerce' === $domain ? 'Übersetzt: ' . $text : $translation;
+			},
+			10,
+			3
+		);
+		$context = SettingsUIRequestContext::for_settings_page( $this->get_settings_ui_test_page_with_script_handles( array( 42 ) ), '' );
+
+		$this->assertSame(
+			'Settings UI script handles could not be resolved: Settings UI script handles must be non-empty strings.',
+			$context->get_script_handles_failure_reason(),
+			'The failure reason feeds a developer notice and should stay in English.'
+		);
+	}
 }

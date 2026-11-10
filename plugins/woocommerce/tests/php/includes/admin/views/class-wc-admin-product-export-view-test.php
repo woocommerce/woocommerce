@@ -38,7 +38,7 @@ class WC_Admin_Product_Export_View_Test extends WC_Unit_Test_Case {
 
 			$this->assertStringContainsString( 'You are about to export 1 product.', $singular_output );
 			$this->assertSame( (string) $first_product->get_id(), $this->get_hidden_product_ids( $singular_output ) );
-			$this->assertSelectedExportStructure( $singular_output );
+			$this->assert_selected_export_structure( $singular_output );
 
 			$plural_output = $this->render_export_view( array( $first_product->get_id(), $second_product->get_id() ) );
 
@@ -47,7 +47,7 @@ class WC_Admin_Product_Export_View_Test extends WC_Unit_Test_Case {
 				$first_product->get_id() . ',' . $second_product->get_id(),
 				$this->get_hidden_product_ids( $plural_output )
 			);
-			$this->assertSelectedExportStructure( $plural_output );
+			$this->assert_selected_export_structure( $plural_output );
 		} finally {
 			foreach ( array_reverse( $product_ids ) as $product_id ) {
 				WC_Helper_Product::delete_product( $product_id );
@@ -73,7 +73,7 @@ class WC_Admin_Product_Export_View_Test extends WC_Unit_Test_Case {
 	 *
 	 * @param string $output Rendered view output.
 	 */
-	private function assertSelectedExportStructure( string $output ): void {
+	private function assert_selected_export_structure( string $output ): void {
 		$this->assertStringContainsString( 'id="selected-product-export-notice"', $output );
 		$this->assertStringContainsString( 'clear your selection', $output );
 		$this->assertStringContainsString( 'containing the selected products', $output );

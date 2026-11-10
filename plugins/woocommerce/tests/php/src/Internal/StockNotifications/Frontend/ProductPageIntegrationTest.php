@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Frontend;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\ProductPageIntegration;
+use Automattic\WooCommerce\Tests\Blocks\Helpers\BlockTypeRegistryTrait;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMocks;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
@@ -15,6 +16,7 @@ use WC_Unit_Test_Case;
  */
 class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 
+	use BlockTypeRegistryTrait;
 	use StockNotificationsFeatureTrait;
 
 	/**
@@ -30,12 +32,15 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		AddToCartWithOptionsMocks::register(
-			'add-to-cart-with-options',
-			'add-to-cart-with-options-quantity-selector',
-			'add-to-cart-with-options-variation-selector',
-			'add-to-cart-with-options-variation-selector-attribute',
-			'add-to-cart-with-options-variation-selector-attribute-name'
+		// The blocks are not registered on `init`, because `init` runs with a classic theme.
+		$this->replace_block_types(
+			AddToCartWithOptionsMocks::get_mock_classes(
+				'add-to-cart-with-options',
+				'add-to-cart-with-options-quantity-selector',
+				'add-to-cart-with-options-variation-selector',
+				'add-to-cart-with-options-variation-selector-attribute',
+				'add-to-cart-with-options-variation-selector-attribute-name'
+			)
 		);
 
 		update_option( 'woocommerce_customer_stock_notifications_allow_signups', 'yes' );
@@ -169,6 +174,28 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 		$markup = ob_get_clean();
 
 		$this->assertStringContainsString( 'wc_bis_form', $markup, 'The Back in Stock form should render when the simple product hook fires from a classic template.' );
+	}
+
+	/**
+	 * @testdox Should send guests back to the product after logging in when an account is required.
+	 */
+	public function test_login_link_returns_guest_to_the_product_when_account_is_required(): void {
+		update_option( 'woocommerce_customer_stock_notifications_require_account', 'yes' );
+		wp_set_current_user( 0 );
+		$product_id = $this->create_and_visit_out_of_stock_simple_product();
+
+		try {
+			ob_start();
+			do_action( 'woocommerce_simple_add_to_cart' );
+			$markup = ob_get_clean();
+		} finally {
+			delete_option( 'woocommerce_customer_stock_notifications_require_account' );
+		}
+
+		$expected_url = add_query_arg( 'redirect_to', rawurlencode( get_permalink( $product_id ) ), wc_get_page_permalink( 'myaccount' ) );
+
+		$this->assertStringContainsString( 'Please <a href="' . esc_url( $expected_url ) . '">log in</a> to sign up for stock notifications.', $markup, 'The login link should return the shopper to the product page after logging in.' );
+		$this->assertStringNotContainsString( 'wc_bis_form', $markup, 'The Back in Stock form should not render for a guest when an account is required.' );
 	}
 
 	/**

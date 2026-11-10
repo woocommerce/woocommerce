@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a payment gateways ability that lists each gateway's name, checkout title, description and enabled state, without credentials.

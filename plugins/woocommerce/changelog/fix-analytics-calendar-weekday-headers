@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix the Analytics date range calendar showing English weekday headers on translated sites.

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add the Separator block to the email editor, with its Default, Wide Line and Dots styles and color.
