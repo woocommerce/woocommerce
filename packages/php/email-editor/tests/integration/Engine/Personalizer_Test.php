@@ -872,6 +872,22 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 			$this->personalizer->personalize_content( '<a href="https://example.com/?c=[test/campaign note=O&#039;Brien]&amp;d=[test/campaign note=\'x\']">Link</a>' )
 		);
 		$this->assertSame( array( 'a [2026]', 'a [2026]', 'O\'Brien', 'x' ), $received );
+
+		// A tag used as the whole URL drops the protocol the editor forces in front of it.
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'campaign_url',
+				'test/campaign-url',
+				'Test',
+				function () {
+					return 'https://shop.example/spring';
+				}
+			)
+		);
+		$this->assertSame(
+			'<a href="https://shop.example/spring">Link</a>',
+			$this->personalizer->personalize_content( '<a href="http://[test/campaign-url note=&quot;a [2026]&quot;]">Link</a>' )
+		);
 	}
 
 	/**
