@@ -167,6 +167,14 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 				true,
 			),
 			'name empty after sanitizing' => array( array( 'name' => '<b></b>' ), 'woocommerce_ability_product_term_name_empty', false ),
+			'slug empty after sanitizing' => array(
+				array(
+					'name' => 'Holidays',
+					'slug' => '!!!',
+				),
+				'woocommerce_ability_product_term_slug_empty',
+				false,
+			),
 			'parent missing'              => array(
 				array(
 					'name'   => 'Holidays',
@@ -403,6 +411,10 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 			'woocommerce_ability_product_term_slug_exists' => array(
 				'id'   => $id,
 				'slug' => 'pants',
+			),
+			'woocommerce_ability_product_term_slug_empty'  => array(
+				'id'   => $id,
+				'slug' => '!!!',
 			),
 			'woocommerce_ability_product_term_parent_loop' => array(
 				'id'     => $parent,

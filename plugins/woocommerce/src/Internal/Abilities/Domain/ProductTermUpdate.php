@@ -102,8 +102,7 @@ class ProductTermUpdate extends AbstractDomainAbility implements AbilityDefiniti
 		}
 
 		$name   = isset( $input['name'] ) ? sanitize_text_field( $input['name'] ) : wp_specialchars_decode( $term->name, ENT_QUOTES );
-		$slug   = isset( $input['slug'] ) ? sanitize_title( $input['slug'] ) : '';
-		$slug   = '' === $slug ? null : $slug;
+		$slug   = isset( $input['slug'] ) ? sanitize_title( $input['slug'] ) : null;
 		$parent = $input['parent'] ?? $term->parent;
 		// Only a new name or parent can collide with a sibling's name.
 		$checked_name = isset( $input['name'] ) || isset( $input['parent'] ) ? $name : null;

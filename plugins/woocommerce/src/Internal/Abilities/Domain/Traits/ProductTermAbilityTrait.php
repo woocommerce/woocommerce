@@ -94,7 +94,7 @@ trait ProductTermAbilityTrait {
 	 *
 	 * @param string      $taxonomy  Taxonomy name.
 	 * @param string|null $name      Term name, sanitized, or null to skip the name checks.
-	 * @param string|null $slug      Term slug, sanitized, or null to let WordPress make one.
+	 * @param string|null $slug      Term slug, sanitized, or null when none was sent.
 	 * @param int         $parent_id Parent term ID.
 	 * @param int         $term_id   ID of the term being updated, or zero for a new term.
 	 * @return \WP_Error|null
@@ -102,6 +102,9 @@ trait ProductTermAbilityTrait {
 	private static function check_term_write( string $taxonomy, ?string $name, ?string $slug, int $parent_id, int $term_id = 0 ): ?\WP_Error {
 		if ( '' === $name ) {
 			return new \WP_Error( 'woocommerce_ability_product_term_name_empty', __( 'The term name is empty.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+		if ( '' === $slug ) {
+			return new \WP_Error( 'woocommerce_ability_product_term_slug_empty', __( 'The term needs a slug with letters or numbers. Send one, or leave slug out to make one from the name.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		if ( $parent_id > 0 ) {

@@ -84,8 +84,7 @@ class ProductTermCreate extends AbstractDomainAbility implements AbilityDefiniti
 		}
 
 		$name   = sanitize_text_field( $input['name'] );
-		$slug   = sanitize_title( $input['slug'] ?? '' );
-		$slug   = '' === $slug ? null : $slug;
+		$slug   = isset( $input['slug'] ) ? sanitize_title( $input['slug'] ) : null;
 		$parent = $input['parent'] ?? 0;
 		$error  = self::check_term_write( $taxonomy, $name, $slug, $parent );
 		if ( $error ) {
