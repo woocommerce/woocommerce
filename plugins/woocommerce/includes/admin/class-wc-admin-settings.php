@@ -261,37 +261,55 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				&& is_string( $field['type'] )
 				// save_fields() hands types with a legacy update action to that action instead of saving them.
 				&& ! has_action( 'woocommerce_update_option_' . sanitize_title( $field['type'] ) )
-				&& preg_match( '/^([^\[\]]+)(?:\[([^\[\]]+)\])?$/', $field_name, $matches )
 			) {
-				$option_name  = $matches[1];
-				$setting_name = null;
-				if ( isset( $matches[2] ) ) {
-					// Resolve the name the way save_fields() does: parse_str() stores 'a.b[c]' under 'a_b'.
-					parse_str( $field_name, $parsed_name );
-					$option_name   = (string) key( $parsed_name );
-					$parsed_option = $parsed_name[ $option_name ] ?? null;
-					if ( ! is_array( $parsed_option ) ) {
-						return self::get_option( $field['id'], $field['default'] );
+				$location = self::resolve_field_name( $field_name );
+				if ( null !== $location ) {
+					list( $option_name, $setting_name ) = $location;
+
+					$stored = get_option( $option_name, null );
+					if ( null !== $setting_name ) {
+						$stored = is_array( $stored ) ? ( $stored[ $setting_name ] ?? null ) : null;
 					}
-					$setting_name = (string) key( $parsed_option );
-				}
 
-				// save_fields() writes a setting name of '0' over the whole option, and update_option() rejects names that trim to '' or '0'.
-				if ( empty( trim( $option_name ) ) || '0' === $setting_name ) {
-					return self::get_option( $field['id'], $field['default'] );
-				}
-
-				$stored = get_option( $option_name, null );
-				if ( null !== $setting_name ) {
-					$stored = is_array( $stored ) ? ( $stored[ $setting_name ] ?? null ) : null;
-				}
-
-				if ( null !== $stored && ! is_object( $stored ) ) {
-					return self::get_option( $field_name, $field['default'] );
+					if ( null !== $stored && ! is_object( $stored ) ) {
+						return self::get_option( $field_name, $field['default'] );
+					}
 				}
 			}
 
 			return self::get_option( $field['id'], $field['default'] );
+		}
+
+		/**
+		 * Get the option and setting name that save_fields() stores a field name under.
+		 *
+		 * @param string $field_name Field name, like 'my_option' or 'my_options[enabled]'.
+		 * @return array{string, string|null}|null Option and setting name, or null when save_fields() can't store the field there.
+		 */
+		private static function resolve_field_name( string $field_name ): ?array {
+			if ( ! preg_match( '/^([^\[\]]+)(?:\[([^\[\]]+)\])?$/', $field_name, $matches ) ) {
+				return null;
+			}
+
+			$option_name  = $matches[1];
+			$setting_name = null;
+			if ( isset( $matches[2] ) ) {
+				// Resolve the name the way save_fields() does: parse_str() stores 'a.b[c]' under 'a_b'.
+				parse_str( $field_name, $parsed_name );
+				$option_name   = (string) key( $parsed_name );
+				$parsed_option = $parsed_name[ $option_name ] ?? null;
+				if ( ! is_array( $parsed_option ) ) {
+					return null;
+				}
+				$setting_name = (string) key( $parsed_option );
+			}
+
+			// save_fields() writes a setting name of '0' over the whole option, and update_option() rejects names that trim to '' or '0'.
+			if ( empty( trim( $option_name ) ) || '0' === $setting_name ) {
+				return null;
+			}
+
+			return array( $option_name, $setting_name );
 		}
 
 		/**
