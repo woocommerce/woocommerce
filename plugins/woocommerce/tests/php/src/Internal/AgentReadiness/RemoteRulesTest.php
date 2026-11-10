@@ -264,7 +264,7 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		unset( $rules['missing_gtin'], $rules['missing_images'] );
 		$ids = array_keys( $rules );
 		sort( $ids );
-		$this->assertSame( array( 'image_too_small', 'missing_brand', 'title_too_long' ), $ids, 'Only the file\'s checks run' );
+		$this->assertSame( array( 'image_alt_text', 'image_too_small', 'missing_brand', 'title_too_long' ), $ids, 'Only the file\'s checks run, and the image alt text check, which has no channels' );
 		$this->assertSame( $defaults['missing_brand']->channels(), $rules['missing_brand'], 'A bad effect runs the bundled channels' );
 		$this->assertSame( $defaults['image_too_small']->channels(), $rules['image_too_small'], 'A bad date runs the bundled channels' );
 		$this->assertSame( array( 'google' ), array_keys( $rules['title_too_long'] ), 'The valid entry still applies' );
@@ -539,7 +539,7 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		);
 		$this->assertTrue( $this->sut->refresh() );
 		$before = $this->agent_readiness()->get_channel_rules();
-		$this->assertSame( array( 'missing_brand' ), array_keys( $before ) );
+		$this->assertSame( array( 'missing_brand', 'image_alt_text' ), array_keys( $before ), 'The image alt text check has no channels, so it always runs' );
 
 		foreach (
 			array(
