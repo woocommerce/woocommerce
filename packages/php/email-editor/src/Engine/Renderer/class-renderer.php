@@ -289,8 +289,9 @@ class Renderer {
 
 		// Match every comment that looks like a personalization tag, registered or not: a plugin may
 		// register its tags only before personalizing, and Html2Text would drop the comment.
+		// A value quoted right after "=" is consumed whole, so a "]" inside it does not end the tag.
 		$template = preg_replace_callback(
-			'/<!--\[[a-zA-Z0-9\-\/]+(?:\s+[^\]]*)?\]-->/',
+			'/<!--\[[a-zA-Z0-9\-\/]+(?:\s(?:=(?:"[^"]*"|\'[^\']*\')|[^\]])*+)?\]-->/',
 			function ( $matches ) use ( &$counter ) {
 				$placeholder = 'PERSONALIZATION_TAG_PLACEHOLDER_' . $counter;
 				$this->personalization_tag_placeholders[ $placeholder ] = $matches[0];

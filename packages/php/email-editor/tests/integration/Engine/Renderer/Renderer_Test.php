@@ -437,7 +437,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test that rendering preserves personalization tags.
 	 */
 	public function testItPreservesPersonalizationTags(): void {
-		$this->email_post->post_content = '<!-- wp:paragraph --><p><!--[woocommerce/customer-username]--><!--[woocommerce/customer-username default="john"]--></p><!-- /wp:paragraph -->';
+		$this->email_post->post_content = '<!-- wp:paragraph --><p><!--[woocommerce/customer-username]--><!--[woocommerce/customer-username default="john"]--><!--[woocommerce/customer-username default="a [2026]"]--></p><!-- /wp:paragraph -->';
 		wp_update_post(
 			array(
 				'ID'           => $this->email_post->ID,
@@ -454,6 +454,8 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( '<!--[woocommerce/customer-username default="john"]-->', $rendered['html'] );
 		$this->assertStringContainsString( '<!--[woocommerce/customer-username]-->', $rendered['text'] );
 		$this->assertStringContainsString( '<!--[woocommerce/customer-username default="john"]-->', $rendered['text'] );
+		// A "]" inside a quoted attribute value must not end the tag early.
+		$this->assertStringContainsString( '<!--[woocommerce/customer-username default="a [2026]"]-->', $rendered['text'] );
 	}
 
 	/**

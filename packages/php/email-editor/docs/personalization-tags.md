@@ -81,7 +81,7 @@ When selected from a modal, the tag is placed into a text block displayed in a s
 
 ## Format
 
-Personalization Tags use HTML comment syntax with a specific format: `<!--[token-name attributes]-->`. The token name follows a namespaced pattern (e.g., `my-plugin/tag-name`) and can include attributes for configuration. This format ensures safe fallback behavior in browsers and provides reliable parsing capabilities.
+Personalization Tags use HTML comment syntax with a specific format: `<!--[token-name attributes]-->`. The token name follows a namespaced pattern (e.g., `my-plugin/tag-name`) and can include attributes for configuration. Attribute values may be quoted with double or single quotes and may contain `]`. HTML entities in values (such as `&#039;`, which `esc_attr()` adds) are decoded before the callback receives them. This format ensures safe fallback behavior in browsers and provides reliable parsing capabilities.
 
 **Example usage in a paragraph block:**
 
