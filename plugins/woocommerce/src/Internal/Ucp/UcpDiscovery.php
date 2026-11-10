@@ -58,8 +58,9 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	 * @return bool
 	 */
 	private static function is_owned( string $path ): bool {
+		// The profile is a few KB; cap the read so a large file someone else put there isn't read whole.
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$profile = is_file( $path ) ? json_decode( (string) file_get_contents( $path ), true ) : null;
+		$profile = is_file( $path ) && is_readable( $path ) ? json_decode( (string) file_get_contents( $path, false, null, 0, 65536 ), true ) : null;
 		$links   = is_array( $profile ) ? ( $profile['links'] ?? null ) : null;
 		return is_array( $links ) && in_array( self::LINK_REL, array_column( $links, 'rel' ), true );
 	}
