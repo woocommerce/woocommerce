@@ -23,13 +23,6 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	const SCHEMA_TYPE = 'ucp-checkout';
 
 	/**
-	 * Session key holding the checkout state: `created_at`, and once set `status`, `continue_url` and `order_id`.
-	 *
-	 * Its presence is what makes a cart session a checkout.
-	 */
-	const CHECKOUT_SESSION_KEY = 'ucp_checkout';
-
-	/**
 	 * The capability this route answers for.
 	 *
 	 * @return string
@@ -67,7 +60,7 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	/**
 	 * Load the state of the checkout the route path names, refusing one that cannot be acted on.
 	 *
-	 * @param bool $for_update Whether the request changes the checkout, which a completed or canceled one refuses.
+	 * @param bool $for_update Whether the request changes the checkout, which a completed, canceled or paid-but-unconfirmed one refuses.
 	 * @return array<string, mixed>|\WP_REST_Response The state, or the 404/409 error response.
 	 */
 	protected function open_checkout( bool $for_update ) {
@@ -77,11 +70,43 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 			return $this->ucp_not_found();
 		}
 
-		if ( $for_update && $this->is_terminal( $state ) ) {
-			return $this->ucp_conflict();
+		if ( $for_update ) {
+			if ( $this->is_terminal( $state ) ) {
+				return $this->ucp_conflict();
+			}
+
+			if ( $this->awaits_confirmation( $state ) ) {
+				return $this->ucp_conflict( __( 'This checkout session is awaiting confirmation of a payment the buyer already made.', 'woocommerce' ) );
+			}
 		}
 
 		return $state;
+	}
+
+	/**
+	 * Whether the handed-off order holds a payment the store has yet to confirm, such as a bank transfer.
+	 *
+	 * The buyer paid in the browser, where the cart would have been emptied; this session was not, so
+	 * it is locked until the store accepts or cancels that payment, or a second order would be made.
+	 *
+	 * @param array<string, mixed> $state Checkout state.
+	 * @return bool
+	 */
+	protected function awaits_confirmation( array $state ): bool {
+		$order = empty( $state['order_id'] ) ? null : wc_get_order( (int) $state['order_id'] );
+
+		return $order instanceof \WC_Order && ! $order->has_status( $this->payable_statuses( $order ) );
+	}
+
+	/**
+	 * The statuses in which the payment page still takes an order, as `WC_Order::needs_payment()` lists them.
+	 *
+	 * @param \WC_Order $order The order.
+	 * @return array<string>
+	 */
+	protected function payable_statuses( \WC_Order $order ): array {
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Core's hook, documented in WC_Order::needs_payment().
+		return (array) apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( OrderStatus::PENDING, OrderStatus::FAILED ), $order );
 	}
 
 	/**
@@ -129,17 +154,12 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	protected function cancel_handed_off_order( array $state, string $note ): array {
 		$order = empty( $state['order_id'] ) ? null : wc_get_order( (int) $state['order_id'] );
 
-		if ( $order instanceof \WC_Order ) {
-			// The payment page's own list, so a failed attempt the buyer could retry is closed too.
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Core's hook, documented in WC_Order::needs_payment().
-			$payable = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( OrderStatus::PENDING, OrderStatus::FAILED ), $order );
+		// The payment page's own list, so a failed attempt the buyer could retry is closed too.
+		if ( $order instanceof \WC_Order && $order->has_status( $this->payable_statuses( $order ) ) ) {
+			$order->update_status( OrderStatus::CANCELLED, $note );
 
-			if ( $order->has_status( $payable ) ) {
-				$order->update_status( OrderStatus::CANCELLED, $note );
-
-				if ( (int) $this->get_draft_order_id() === $order->get_id() ) {
-					$this->set_draft_order_id( 0 );
-				}
+			if ( (int) $this->get_draft_order_id() === $order->get_id() ) {
+				$this->set_draft_order_id( 0 );
 			}
 		}
 
@@ -169,12 +189,17 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	}
 
 	/**
-	 * Build the response refusing a change to a completed or canceled checkout.
+	 * Build the response refusing a change to a checkout in a state that does not take one.
 	 *
+	 * @param string $message Why the change is refused; defaults to the checkout being completed or canceled.
 	 * @return \WP_REST_Response
 	 */
-	protected function ucp_conflict(): \WP_REST_Response {
-		return $this->ucp_error( 'CONFLICT', __( 'This checkout session is already completed or canceled.', 'woocommerce' ), 'unrecoverable', 409, '$.status' );
+	protected function ucp_conflict( string $message = '' ): \WP_REST_Response {
+		if ( '' === $message ) {
+			$message = __( 'This checkout session is already completed or canceled.', 'woocommerce' );
+		}
+
+		return $this->ucp_error( 'CONFLICT', $message, 'unrecoverable', 409, '$.status' );
 	}
 
 	/**

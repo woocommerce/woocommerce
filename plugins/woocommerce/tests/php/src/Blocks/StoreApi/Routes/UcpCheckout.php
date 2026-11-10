@@ -275,6 +275,67 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox A promoted cart is still read through the cart routes but no longer written, so the handed-off order is not left behind.
+	 */
+	public function test_cart_writes_are_refused_once_promoted(): void {
+		$created = $this->create_ready_checkout();
+		$this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' );
+		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
+
+		$read = $this->request( 'GET', '/carts/' . $created['id'] );
+		$this->assertSame( 200, $read->get_status() );
+		$this->assertSame( $created['line_items'], $read->get_data()['line_items'] );
+
+		foreach ( array( array( 'PUT', '', array( 'line_items' => array( $this->line_item( 1, 2 ) ) ) ), array( 'POST', '/cancel', array() ) ) as list( $method, $path, $body ) ) {
+			$response = $this->request( $method, '/carts/' . $created['id'] . $path, $body );
+			$this->assertSame( 409, $response->get_status(), $method . $path );
+			$this->assertContains( 'CONFLICT', array_column( $response->get_data()['messages'], 'code' ), $method . $path );
+		}
+
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::PENDING ) );
+		$this->assertSame( 'requires_escalation', $this->request( 'GET', '/checkout-sessions/' . $created['id'] )->get_data()['status'] );
+	}
+
+	/**
+	 * @testdox A payment awaiting the store's confirmation locks the checkout against completing again, changing and canceling.
+	 */
+	public function test_payment_awaiting_confirmation_locks_the_checkout(): void {
+		$created = $this->create_ready_checkout();
+		$this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' );
+		$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
+		$order->update_status( OrderStatus::ON_HOLD );
+
+		$writes = array(
+			array( 'POST', '/complete', array() ),
+			array( 'PUT', '', array( 'buyer' => array( 'email' => 'other@example.com' ) ) ),
+			array( 'POST', '/cancel', array() ),
+		);
+
+		foreach ( $writes as list( $method, $path, $body ) ) {
+			$response = $this->request( $method, '/checkout-sessions/' . $created['id'] . $path, $body );
+			$this->assertSame( 409, $response->get_status(), $method . $path );
+			$this->assertContains( 'CONFLICT', array_column( $response->get_data()['messages'], 'code' ), $method . $path );
+		}
+
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::ON_HOLD ) );
+		$this->assertCount(
+			1,
+			wc_get_orders(
+				array(
+					'status' => 'any',
+					'return' => 'ids',
+					'limit'  => -1,
+				)
+			),
+			'No second order may be made for a payment already on its way.'
+		);
+		$this->assertSame( 'requires_escalation', $this->request( 'GET', '/checkout-sessions/' . $created['id'] )->get_data()['status'] );
+
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertSame( 'completed', $this->request( 'GET', '/checkout-sessions/' . $created['id'] )->get_data()['status'] );
+	}
+
+	/**
 	 * @testdox A failed payment attempt the buyer could retry is cancelled when the checkout is canceled or changed.
 	 * @dataProvider provider_requests_that_drop_the_hand_off
 	 *

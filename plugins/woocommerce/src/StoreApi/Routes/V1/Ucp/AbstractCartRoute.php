@@ -38,6 +38,13 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	const CANCELLED_SESSION_KEY = 'ucp_cart_cancelled';
 
 	/**
+	 * Session key holding the checkout state: `created_at`, and once set `status`, `continue_url` and `order_id`.
+	 *
+	 * Its presence is what makes a cart session a checkout, so the cart routes read it too.
+	 */
+	const CHECKOUT_SESSION_KEY = 'ucp_checkout';
+
+	/**
 	 * Most lines one request may name.
 	 *
 	 * Each line can cost a product lookup, so an open route needs a ceiling. Matches the
@@ -267,9 +274,10 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	}
 
 	/**
-	 * Dispatch the request, refusing a cart that was cancelled.
+	 * Dispatch the request, refusing a cart that was cancelled or a cart write to a checkout.
 	 *
-	 * Runs after the session is bound, so one check covers every id-bearing route.
+	 * Runs after the session is bound, so one check covers every id-bearing route. A promoted cart
+	 * stays readable, but only the checkout routes change it: they cancel the order handed to the buyer.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 *
@@ -278,8 +286,14 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	protected function get_response_by_request_method( \WP_REST_Request $request ) {
-		if ( '' !== $this->route_cart_id( $request ) && $this->cart_is_cancelled() ) {
-			return $this->ucp_not_found();
+		if ( '' !== $this->route_cart_id( $request ) ) {
+			if ( $this->cart_is_cancelled() ) {
+				return $this->ucp_not_found();
+			}
+
+			if ( Utils::CAPABILITY_CART === $this->capability() && 'GET' !== $request->get_method() && $this->cart_is_checkout() ) {
+				return $this->ucp_error( 'CONFLICT', __( 'This cart has become a checkout session, which the checkout routes manage.', 'woocommerce' ), 'recoverable', 409, '$.id' );
+			}
 		}
 
 		return parent::get_response_by_request_method( $request );
@@ -341,6 +355,17 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		$session = WC()->session;
 
 		return $session ? (bool) $session->get( self::CANCELLED_SESSION_KEY ) : false;
+	}
+
+	/**
+	 * Whether the bound session's cart was promoted to a checkout.
+	 *
+	 * @return bool
+	 */
+	protected function cart_is_checkout(): bool {
+		$session = WC()->session;
+
+		return $session ? is_array( $session->get( self::CHECKOUT_SESSION_KEY ) ) : false;
 	}
 
 	/**
