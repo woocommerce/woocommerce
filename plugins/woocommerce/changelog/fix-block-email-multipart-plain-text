@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Build the plain text part of multipart emails from the block email content when the block email editor is on.
+Show the content edited in the block email editor in the plain text version of multipart emails.

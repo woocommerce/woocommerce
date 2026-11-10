@@ -395,7 +395,8 @@ class WC_Email extends WC_Settings_API {
 		}
 		$mailer->AltBody = $alt_body; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
-		$this->sending = false;
+		$this->block_email_html_content = null;
+		$this->sending                  = false;
 		return $mailer;
 	}
 
