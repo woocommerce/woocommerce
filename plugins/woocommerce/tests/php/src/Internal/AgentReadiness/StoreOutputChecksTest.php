@@ -153,6 +153,80 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Jetpack's sitemap index passes when the child file lists a product, and a child with no product does not.
+	 */
+	public function test_jetpack_sitemap_index(): void {
+		add_filter( 'wp_sitemaps_enabled', '__return_false' );
+		$index = '<sitemapindex><sitemap><loc>' . home_url( '/sitemap-1.xml' ) . '</loc></sitemap></sitemapindex>';
+		$this->serve(
+			array(
+				'/robots.txt'    => array( 200, "User-agent: *\nDisallow:\nSitemap: " . home_url( '/sitemap.xml' ) . "\n" ),
+				'/sitemap.xml'   => array( 200, $index ),
+				'/sitemap-1.xml' => array( 200, '<urlset><url><loc>' . home_url( '/product/beanie/' ) . '</loc></url></urlset>' ),
+			)
+		);
+		$this->assertTrue( $this->results()['sitemap_lists_products'] );
+
+		remove_all_filters( 'pre_http_request' );
+		$this->serve(
+			array(
+				'/robots.txt'        => array( 200, "User-agent: *\nDisallow:\nSitemap: " . home_url( '/sitemap.xml' ) . "\n" ),
+				'/sitemap.xml'       => array( 200, '<sitemapindex><sitemap><loc>https://cdn.example/sitemap.xml</loc></sitemap><sitemap><loc>' . home_url( '/sitemap-1.xml' ) . '</loc></sitemap></sitemapindex>' ),
+				'/sitemap-1.xml'     => array( 200, '<urlset><url><loc>' . home_url( '/about/' ) . '</loc></url></urlset>' ),
+				'/sitemap_index.xml' => array( 404, '' ),
+			)
+		);
+		$this->assertFalse( $this->results()['sitemap_lists_products'] );
+	}
+
+	/**
+	 * @testdox A child index is not opened, and only the first five child sitemaps are loaded.
+	 */
+	public function test_child_sitemaps_capped_at_one_level(): void {
+		add_filter( 'wp_sitemaps_enabled', '__return_false' );
+		$product = '<urlset><url><loc>' . home_url( '/product/beanie/' ) . '</loc></url></urlset>';
+		$this->serve(
+			array(
+				'/robots.txt'          => array( 404, '' ),
+				'/sitemap.xml'         => array( 200, '<sitemapindex><sitemap><loc>' . home_url( '/sitemap-index-1.xml' ) . '</loc></sitemap></sitemapindex>' ),
+				'/sitemap-index-1.xml' => array( 200, '<sitemapindex><sitemap><loc>' . home_url( '/sitemap-1.xml' ) . '</loc></sitemap></sitemapindex>' ),
+				'/sitemap-1.xml'       => array( 200, $product ),
+				'/sitemap_index.xml'   => array( 404, '' ),
+			)
+		);
+		$this->assertFalse( $this->results()['sitemap_lists_products'], 'A nested index is not opened' );
+
+		remove_all_filters( 'pre_http_request' );
+		$locs   = '';
+		$about  = '<urlset><url><loc>' . home_url( '/about/' ) . '</loc></url></urlset>';
+		$served = array(
+			'/robots.txt'        => array( 404, '' ),
+			'/sitemap_index.xml' => array( 404, '' ),
+		);
+		for ( $i = 1; $i <= 6; $i++ ) {
+			$path            = '/child-' . $i . '.xml';
+			$locs           .= '<sitemap><loc>' . home_url( $path ) . '</loc></sitemap>';
+			$served[ $path ] = array( 200, 6 === $i ? $product : $about );
+		}
+		$served['/sitemap.xml'] = array( 200, '<sitemapindex>' . $locs . '</sitemapindex>' );
+		$requested              = array();
+		$this->serve( $served );
+		add_filter(
+			'pre_http_request',
+			static function ( $pre, $args, $url ) use ( &$requested ) {
+				unset( $args );
+				$requested[] = $url;
+				return $pre;
+			},
+			5,
+			3
+		);
+
+		$this->assertFalse( $this->results()['sitemap_lists_products'] );
+		$this->assertNotContains( home_url( '/child-6.xml' ), $requested );
+	}
+
+	/**
 	 * @testdox A sitemap robots.txt lists on another host is skipped, not couldn't check.
 	 */
 	public function test_off_host_listed_sitemap_is_skipped(): void {

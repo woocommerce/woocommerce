@@ -117,8 +117,10 @@ class StoreOutputChecks {
 	}
 
 	/**
-	 * Whether a sitemap the store serves names products. Null when robots.txt
-	 * or one of the candidate sitemaps could not be loaded and none named products.
+	 * Whether a sitemap the store serves names products. An index that does not
+	 * is opened one level: up to five child sitemaps on this host. A child that
+	 * is itself an index is not opened. Null when robots.txt or one of those
+	 * sitemaps could not be loaded and none named products.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 */
@@ -136,15 +138,74 @@ class StoreOutputChecks {
 		}
 		$candidates = array_unique( array_merge( $listed, $defaults ) );
 		$unknown    = null === $robots;
+		$children   = array();
 		foreach ( $candidates as $url ) {
-			$response = $responses->get( $url );
-			if ( null === $response ) {
-				$unknown = true;
-			} elseif ( 200 === $response['status'] && self::names_products( $response['body'] ) ) {
+			$body = $this->sitemap_body( $responses, $url, $unknown );
+			if ( null === $body ) {
+				continue;
+			}
+			if ( self::names_products( $body ) ) {
+				return true;
+			}
+			foreach ( self::index_child_urls( $body ) as $child ) {
+				if ( StoreResponses::is_store_url( $child ) ) {
+					$children[] = $child;
+				}
+			}
+		}
+		foreach ( array_slice( array_values( array_unique( $children ) ), 0, self::MAX_LISTED_SITEMAPS ) as $child ) {
+			$body = $this->sitemap_body( $responses, $child, $unknown );
+			if ( null !== $body && self::names_products( $body ) ) {
 				return true;
 			}
 		}
 		return $unknown ? null : false;
+	}
+
+	/**
+	 * Body of a sitemap response with status 200, or null. A failed request marks the check unknown.
+	 *
+	 * @param StoreResponses $responses Store responses.
+	 * @param string         $url       URL or path.
+	 * @param bool           $unknown   Whether a sitemap could not be loaded. Passed by reference.
+	 * @return string|null
+	 */
+	private function sitemap_body( StoreResponses $responses, string $url, bool &$unknown ): ?string {
+		$response = $responses->get( $url );
+		if ( null === $response ) {
+			$unknown = true;
+			return null;
+		}
+		return 200 === $response['status'] ? $response['body'] : null;
+	}
+
+	/**
+	 * Child sitemap URLs listed in a sitemap index. Empty when the body is not an index.
+	 *
+	 * @param string $xml Sitemap body.
+	 * @return array<int, string>
+	 */
+	private static function index_child_urls( string $xml ): array {
+		if ( false === stripos( $xml, '<sitemapindex' ) ) {
+			return array();
+		}
+		$urls   = array();
+		$offset = 0;
+		$start  = stripos( $xml, '<loc>', $offset );
+		while ( false !== $start ) {
+			$start += strlen( '<loc>' );
+			$end    = stripos( $xml, '</loc>', $start );
+			if ( false === $end ) {
+				break;
+			}
+			$url = trim( str_replace( array( '<![CDATA[', ']]>' ), '', substr( $xml, $start, $end - $start ) ) );
+			if ( '' !== $url ) {
+				$urls[] = $url;
+			}
+			$offset = $end + strlen( '</loc>' );
+			$start  = stripos( $xml, '<loc>', $offset );
+		}
+		return $urls;
 	}
 
 	/**
