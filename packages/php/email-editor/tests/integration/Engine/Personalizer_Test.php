@@ -1345,6 +1345,33 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test that the interceptor receives an html value type tag value already converted to plain text in the text rendering context.
+	 */
+	public function testValueInterceptorReceivesConvertedHtmlValueInTextContext(): void {
+		$this->tags_registry->register(
+			new Personalization_Tag(
+				'manage_link',
+				'test/manage-link',
+				'Test',
+				function () {
+					return '<a href="https://example.com/manage">Manage</a>';
+				}
+			)
+		);
+
+		$received = array();
+		$this->personalizer->set_value_interceptor(
+			function ( string $value ) use ( &$received ): string {
+				$received[] = $value;
+				return $value;
+			}
+		);
+
+		$this->personalizer->personalize_content( '<!--[test/manage-link]-->', Personalizer::RENDERING_CONTEXT_TEXT );
+		$this->assertSame( array( '[Manage](https://example.com/manage)' ), $received );
+	}
+
+	/**
 	 * Test that the interceptor receives the text rendering context for tags inside
 	 * <title> and the html rendering context for tags in the body.
 	 */
