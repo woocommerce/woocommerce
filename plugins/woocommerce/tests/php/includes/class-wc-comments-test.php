@@ -157,6 +157,7 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 	 * @testWith ["action_log"]
 	 *           ["note"]
 	 *           ["order_note"]
+	 *           ["reaction"]
 	 *           ["webhook_delivery"]
 	 *
 	 * @param string $comment_type Comment type that should be excluded from the counts.
