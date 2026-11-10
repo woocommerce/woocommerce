@@ -45,6 +45,18 @@ class CouponCodeGeneratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Handles a non-string code on the filter it registers.
+	 */
+	public function test_registered_filter_accepts_non_string_code(): void {
+		remove_all_filters( 'woocommerce_coupon_code_block_auto_generate' );
+		$this->sut->init();
+
+		$code = apply_filters( 'woocommerce_coupon_code_block_auto_generate', null, array(), $this->context() );
+
+		$this->assertNotSame( 0, wc_get_coupon_id_by_code( $code ) );
+	}
+
+	/**
 	 * @testdox Keeps a numeric code from an earlier filter as a string.
 	 */
 	public function test_keeps_numeric_code(): void {

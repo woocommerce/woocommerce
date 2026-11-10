@@ -36,7 +36,7 @@ class Coupon_Code_Generator {
 	}
 
 	/**
-	 * Filter callback: checks the values another callback may have changed, then generates a coupon.
+	 * Filter callback: checks the types of the filter's arguments, then generates a coupon.
 	 *
 	 * @param mixed $coupon_code       The coupon code (empty if not yet generated).
 	 * @param mixed $attrs             Block attributes.
@@ -44,14 +44,12 @@ class Coupon_Code_Generator {
 	 * @return string The coupon code, or empty string on failure.
 	 */
 	public function filter_coupon_code( $coupon_code, $attrs, $rendering_context ): string {
-		if ( is_scalar( $coupon_code ) && '' !== (string) $coupon_code ) {
-			return (string) $coupon_code;
-		}
+		$coupon_code = is_scalar( $coupon_code ) ? (string) $coupon_code : '';
 		if ( ! $rendering_context instanceof Rendering_Context ) {
-			return '';
+			return $coupon_code;
 		}
 
-		return $this->generate_coupon( '', is_array( $attrs ) ? $attrs : array(), $rendering_context );
+		return $this->generate_coupon( $coupon_code, is_array( $attrs ) ? $attrs : array(), $rendering_context );
 	}
 
 	/**
