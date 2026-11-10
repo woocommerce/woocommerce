@@ -47,7 +47,9 @@
 						".wp-env.json",
 						"src/**/*.css",
 						"src/**/*.json",
-						"tests/**/*.html"
+						"src/**/*.html",
+						"tests/**/*.html",
+						"tests/**/*.txt"
 					],
 					"testEnv": {
 						"start": "env:test",
@@ -73,7 +75,9 @@
 						".wp-env.json",
 						"src/**/*.css",
 						"src/**/*.json",
-						"tests/**/*.html"
+						"src/**/*.html",
+						"tests/**/*.html",
+						"tests/**/*.txt"
 					],
 					"testEnv": {
 						"start": "env:test",

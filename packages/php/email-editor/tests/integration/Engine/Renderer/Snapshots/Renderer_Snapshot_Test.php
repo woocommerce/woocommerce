@@ -16,7 +16,7 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer;
  * inlining that alters other parts of the email shows up in review.
  *
  * After an intended change, run `pnpm test:update-email-snapshots` in the package and review
- * the diff of the `.html` files under `snapshots/`.
+ * the diff of the files under `snapshots/`.
  */
 class Renderer_Snapshot_Test extends \Email_Editor_Integration_Test_Case {
 	/**
@@ -66,8 +66,8 @@ class Renderer_Snapshot_Test extends \Email_Editor_Integration_Test_Case {
 
 		$rendered = $this->di_container->get( Renderer::class )->render( $post, 'Subject', 'Preheader', 'en_US' );
 
-		$this->assertMatchesSnapshot( "{$name}.html", $this->normalize( $rendered['html'] ) );
-		$this->assertMatchesSnapshot( "{$name}.txt", $this->normalize( $rendered['text'] ) );
+		$this->assertMatchesSnapshot( "{$name}.html", $this->normalize_html( $rendered['html'] ) );
+		$this->assertMatchesSnapshot( "{$name}.txt", $this->normalize_text( $rendered['text'] ) );
 	}
 
 	/**
@@ -120,10 +120,18 @@ class Renderer_Snapshot_Test extends \Email_Editor_Integration_Test_Case {
 	 *
 	 * @param string $html Rendered email HTML.
 	 */
-	private function normalize( string $html ): string {
-		$html = str_replace( untrailingslashit( home_url() ), '{{site_url}}', $html );
+	private function normalize_html( string $html ): string {
 		// WordPress names this class with a counter or, in older versions, a hash.
 		$html = (string) preg_replace( '/\bwp-elements-[0-9a-f]+\b/', 'wp-elements-{{id}}', $html );
-		return trim( str_replace( '><', ">\n<", $html ) ) . "\n";
+		return $this->normalize_text( str_replace( '><', ">\n<", $html ) );
+	}
+
+	/**
+	 * Removes the site URL, which differs between test environments.
+	 *
+	 * @param string $text Rendered email output.
+	 */
+	private function normalize_text( string $text ): string {
+		return trim( str_replace( untrailingslashit( home_url() ), '{{site_url}}', $text ) ) . "\n";
 	}
 }
