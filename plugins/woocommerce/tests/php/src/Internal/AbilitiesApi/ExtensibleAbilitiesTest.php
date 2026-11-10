@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
@@ -576,6 +577,49 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		} finally {
 			remove_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_contains_product_filter' ) );
 			remove_all_filters( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
+			$this->toggle_cot_feature_and_usage( $original );
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
+
+	/**
+	 * @testdox Should return only the orders that both a search and an extension's ID filter match, with HPOS and with posts storage.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos Whether HPOS is on.
+	 */
+	public function test_search_intersects_with_order_ids_filter( bool $hpos ): void {
+		$original = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->toggle_cot_feature_and_usage( $hpos );
+		add_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_contains_product_filter' ) );
+
+		try {
+			$coffee = \WC_Helper_Product::create_simple_product();
+			$orders = array();
+			foreach ( array(
+				'jane_coffee' => array( 'Jane', $coffee ),
+				'jane_other'  => array( 'Jane', null ),
+				'john_coffee' => array( 'John', $coffee ),
+			) as $key => list( $first_name, $product ) ) {
+				$order = \WC_Helper_Order::create_order( 0, $product );
+				$order->set_billing_first_name( $first_name );
+				$order->save();
+				$orders[ $key ] = $order->get_id();
+			}
+
+			$result = $this->run_ability(
+				'woocommerce/orders-query',
+				array(
+					'search'  => 'Jane',
+					'filters' => array( 'extensions' => array( 'test-ext' => array( 'contains_product' => $coffee->get_id() ) ) ),
+				)
+			);
+
+			$this->assertSame( array( $orders['jane_coffee'] ), array_column( $result['orders'], 'id' ) );
+		} finally {
+			remove_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_contains_product_filter' ) );
 			$this->toggle_cot_feature_and_usage( $original );
 			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		}
@@ -2372,6 +2416,25 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep backslashes and quotes in the name and descriptions of a created product.
+	 */
+	public function test_product_create_keeps_backslashes_in_post_fields(): void {
+		$created = $this->run_ability(
+			'woocommerce/product-create',
+			array(
+				'name'              => 'Cable 1\\2" it\'s',
+				'description'       => 'Path C:\\temp',
+				'short_description' => 'Short C:\\temp',
+			)
+		);
+		$post    = get_post( $created['product']['id'] );
+
+		$this->assertSame( 'Cable 1\\2" it\'s', $post->post_title, 'The stored name should keep its backslash and quotes.' );
+		$this->assertSame( 'Path C:\\temp', $post->post_content, 'The stored description should keep its backslash.' );
+		$this->assertSame( 'Short C:\\temp', $post->post_excerpt, 'The stored short description should keep its backslash.' );
+	}
+
+	/**
 	 * @testdox Should save nothing when a value is rejected, does not match its schema, or belongs to a read-only field.
 	 */
 	public function test_a_rejected_value_saves_nothing(): void {
@@ -2865,6 +2928,26 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$this->assertWPError( $result );
 		$this->assertContains( $product->get_id(), $cleaned );
+	}
+
+	/**
+	 * @testdox Should fail a trash, and keep the product, when a query of the call hits a deadlock.
+	 */
+	public function test_a_deadlock_fails_the_call_and_keeps_the_product(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$this->add_test_action(
+			'trashed_post',
+			static function () {
+				global $wpdb;
+				$wpdb->last_error = 'Deadlock found when trying to get lock; try restarting transaction';
+			}
+		);
+
+		$response = $this->run_ability_response( 'woocommerce/product-delete', array( 'id' => $product->get_id() ) );
+
+		$this->assertSame( 409, $response->get_status() );
+		$this->assertSame( 'woocommerce_transaction_rolled_back', $response->get_data()['code'] );
+		$this->assertSame( ProductStatus::PUBLISH, get_post_status( $product->get_id() ) );
 	}
 
 	/**

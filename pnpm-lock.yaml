@@ -1131,9 +1131,6 @@ importers:
       react-dom:
         specifier: 18.3.x
         version: 18.3.1(react@18.3.1)
-      redux:
-        specifier: ^4.2.1
-        version: 4.2.1
       rimraf:
         specifier: catalog:tooling
         version: 5.0.5
@@ -2635,6 +2632,9 @@ importers:
       '@woocommerce/e2e-utils-playwright':
         specifier: workspace:*
         version: link:../../packages/js/e2e-utils-playwright
+      '@woocommerce/email-editor-config':
+        specifier: workspace:*
+        version: link:../../packages/php/email-editor
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../tools/eslint-config

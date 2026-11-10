@@ -59,7 +59,7 @@ const PaymentMethods: PaymentMethod[] = [
 	{ name: 'googlepay', src: googlepay },
 	{ name: 'afterpay', src: afterpay, background: '#B2FCE4' },
 	{ name: 'affirm', src: affirm },
-	{ name: 'klarna', src: klarna, background: '#FFB3C7' },
+	{ name: 'klarna', src: klarna, background: '#FFA8CD' },
 	{
 		name: 'cartebancaire',
 		src: cartebancaire,

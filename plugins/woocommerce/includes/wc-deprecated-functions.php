@@ -1403,3 +1403,14 @@ function get_woocommerce_api_url( $path ) {
 add_filter( 'pre_option_woocommerce_api_enabled', function() {
 	return WC()->legacy_rest_api_is_available() ? 'yes' : 'no';
 } );
+
+/**
+ * Legacy noindex output for transactional pages.
+ *
+ * @since 3.2.0
+ * @deprecated 11.4.0 Use wc_page_no_robots() to filter robots directives instead.
+ * @return void
+ */
+function wc_page_noindex() {
+	wc_deprecated_function( __FUNCTION__, '11.4.0', 'wc_page_no_robots' );
+}
