@@ -140,6 +140,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 			'offer newer update'             => array( '2026-01-01 00:00+0000', '2026-02-01 00:00+0000', true ),
 			'keep newer installed pack'      => array( '2026-02-01 00:00+0000', '2026-01-01 00:00+0000', false ),
 			'replace empty installed date'   => array( '', '2026-02-01 00:00+0000', true ),
+			'skip empty remote date'         => array( '2026-01-01 00:00+0000', '', false ),
 			'install without remote date'    => array( null, '', true ),
 			'install with invalid remote'    => array( null, 'invalid', true ),
 		);
