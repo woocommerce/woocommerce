@@ -272,6 +272,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					}
 
 					if ( null !== $stored && ! is_object( $stored ) ) {
+						// Read it again through self::get_option() so it is unslashed the same way as a read by ID.
 						return self::get_option( $field_name, $field['default'] );
 					}
 				}
