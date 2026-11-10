@@ -96,7 +96,6 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		$_REQUEST = $this->original_request;
 
 		wp_set_current_user( 0 );
-		wc_clear_notices();
 		WC()->session = $this->original_session;
 
 		foreach ( $this->registered_checkout_fields as $field_id ) {

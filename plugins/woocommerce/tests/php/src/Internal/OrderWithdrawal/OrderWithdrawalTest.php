@@ -122,7 +122,6 @@ class OrderWithdrawalTest extends WC_Unit_Test_Case {
 		$this->restore_option( self::FEATURE_OPTION, $this->original_feature_option );
 		$this->restore_option( OrderWithdrawalEndpoint::ENDPOINT_OPTION, $this->original_endpoint_option );
 		$this->restore_option( self::FLUSH_QUEUE_OPTION, $this->original_flush_queue_option );
-		wc_clear_notices();
 		$this->clear_order_withdrawal_rate_limits();
 		$this->delete_created_inbox_notes();
 		$this->delete_created_orders();

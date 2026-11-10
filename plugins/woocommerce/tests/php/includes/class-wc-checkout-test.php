@@ -105,7 +105,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
 		delete_option( 'woocommerce_calc_taxes' );
-		WC()->countries->locale = array();
 
 		foreach ( $this->extra_field_filters as $extra_field_filter ) {
 			remove_filter( 'woocommerce_checkout_fields', $extra_field_filter );

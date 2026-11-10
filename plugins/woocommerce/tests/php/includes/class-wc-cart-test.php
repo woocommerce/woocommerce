@@ -37,8 +37,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 
-		WC()->session->set( 'wc_notices', null );
-
 		// The checkout fields may have been built while a test's filters were attached.
 		$this->clear_checkout_fields();
 
