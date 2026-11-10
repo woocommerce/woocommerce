@@ -41,7 +41,7 @@ class ProductTermUpdate extends AbstractDomainAbility implements AbilityDefiniti
 			'description'         => __( 'Change the name, slug, parent or description of a product category, tag, brand or global attribute term. Fields left out keep their value.', 'woocommerce' ),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
-			'output_schema'       => self::get_entity_output_schema( 'term', self::get_product_term_output_schema() ),
+			'output_schema'       => self::get_entity_output_schema( 'term', self::get_written_term_output_schema() ),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_update_term' ),
 			'meta'                => array(

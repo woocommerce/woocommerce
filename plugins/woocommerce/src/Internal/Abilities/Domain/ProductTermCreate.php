@@ -41,7 +41,7 @@ class ProductTermCreate extends AbstractDomainAbility implements AbilityDefiniti
 			'description'         => __( 'Create a product category, tag, brand or a term of a global attribute, such as pa_color. Product writes then assign it by ID.', 'woocommerce' ),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
-			'output_schema'       => self::get_entity_output_schema( 'term', self::get_product_term_output_schema() ),
+			'output_schema'       => self::get_entity_output_schema( 'term', self::get_written_term_output_schema() ),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_create_term' ),
 			'meta'                => array(

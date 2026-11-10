@@ -103,6 +103,20 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should declare the query's term fields in both write schemas, without their descriptions.
+	 */
+	public function test_write_schemas_declare_the_query_fields(): void {
+		$query = ProductTermsQuery::get_registration_args()['output_schema']['properties']['terms']['items']['properties'];
+
+		foreach ( array( ProductTermCreate::get_registration_args(), ProductTermUpdate::get_registration_args() ) as $args ) {
+			$written = $args['output_schema']['properties']['term']['properties'];
+			$this->assertSame( array_keys( $query ), array_keys( $written ) );
+			$this->assertSame( 'object', $written['image']['type'] );
+			$this->assertSame( array(), array_filter( array_column( $written, 'description' ) ), 'No field carries a description.' );
+		}
+	}
+
+	/**
 	 * @testdox Should create a category under a parent with the slug it is given.
 	 */
 	public function test_creates_child_category(): void {

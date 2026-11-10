@@ -185,6 +185,22 @@ trait ProductTermAbilityTrait {
 	}
 
 	/**
+	 * Get the query's term fields without descriptions or the image breakdown.
+	 *
+	 * A write echoes the agent's own input, so those would cost tokens on every request and tell it nothing.
+	 *
+	 * @return array
+	 */
+	private static function get_written_term_output_schema(): array {
+		$schema = self::get_term_schema();
+		foreach ( $schema['properties'] as $field => $property ) {
+			unset( $schema['properties'][ $field ]['description'] );
+		}
+		$schema['properties']['image'] = array( 'type' => 'object' );
+		return ExtensibleAbilities::add_fields_schema( $schema, 'product_term' );
+	}
+
+	/**
 	 * Format a term with the fields of the WooCommerce term reads.
 	 *
 	 * @param \WP_Term $term Term to format.
