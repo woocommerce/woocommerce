@@ -301,6 +301,38 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Review content that must be stored exactly as sent.
+	 *
+	 * @return array
+	 */
+	public function provide_review_content_with_slashes(): array {
+		return array(
+			'quotes'    => array( 'It\'s "great"' ),
+			'backslash' => array( 'Cable 1\\2 inch' ),
+			'mixed'     => array( 'It\'s a 1\\2" cable' ),
+		);
+	}
+
+	/**
+	 * @testdox Updating review content stores quotes and backslashes as sent.
+	 * @dataProvider provide_review_content_with_slashes
+	 *
+	 * @param string $content Review content.
+	 */
+	public function test_update_item_stores_review_content_as_sent( string $content ): void {
+		wp_set_current_user( $this->shop_manager_id );
+		$product_id = ProductHelper::create_simple_product()->get_id();
+		$review_id  = $this->create_review( $product_id, 'First draft.', 5 )->get_data()['id'];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
+		$request->set_body_params( array( 'review' => $content ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( $content, get_comment( $review_id )->comment_content );
+	}
+
+	/**
 	 * @testdox A rating-only edit stores the rating and refreshes aggregates in one product save.
 	 */
 	public function test_update_item_with_only_a_rating_recalculates_aggregates_in_one_product_save() {
@@ -591,6 +623,47 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$destination = wc_get_product( $destination_id );
 		$this->assertEquals( 0, $source->get_average_rating() );
 		$this->assertEquals( 4, $destination->get_average_rating() );
+	}
+
+	/**
+	 * @testdox Creating a review eagerly populates the verified-owner meta at creation time, not lazily during response preparation.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $include_verified Whether to include the verified parameter in the request.
+	 */
+	public function test_create_item_populates_verified_meta( bool $include_verified ): void {
+		$product = ProductHelper::create_simple_product();
+		$order   = OrderHelper::create_order( 0, $product );
+		$order->set_billing_email( 'jane.smith@example.org' );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		// Stub prepare_item_for_response so it cannot backfill the meta as a side effect.
+		$sut = new class() extends WC_REST_Product_Reviews_Controller {
+			public function prepare_item_for_response( $review, $request ) { // phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+				return rest_ensure_response( array( 'id' => (int) $review->comment_ID ) );
+			}
+		};
+
+		$body = array(
+			'product_id'     => $product->get_id(),
+			'review'         => $include_verified ? 'Verified by the caller.' : 'Great product, would buy again.',
+			'reviewer'       => 'Jane Smith',
+			'reviewer_email' => 'jane.smith@example.org',
+			'rating'         => 5,
+		);
+		if ( $include_verified ) {
+			$body['verified'] = true;
+		}
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/reviews' );
+		$request->set_body_params( $body );
+
+		$response = $sut->create_item( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assertSame( '1', get_comment_meta( $response->get_data()['id'], 'verified', true ), 'The verified meta must be populated eagerly at creation time.' );
 	}
 
 	/**

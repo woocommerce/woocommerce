@@ -35,6 +35,15 @@ class PushTokensDataStore {
 	private array $tokens_by_roles_cache = array();
 
 	/**
+	 * Memoized count_tokens() result for this request. The step log puts it on
+	 * every notification's recipients line, and one request can carry thousands
+	 * of notifications.
+	 *
+	 * @var int|null
+	 */
+	private ?int $token_count = null;
+
+	/**
 	 * Memoized has_tokens() result. Null until the first lookup, and reset by create() so a stale false cannot drop a notification.
 	 *
 	 * @var bool|null
@@ -121,7 +130,8 @@ class PushTokensDataStore {
 
 		$push_token->set_id( $id );
 
-		$this->has_tokens = null;
+		$this->has_tokens  = null;
+		$this->token_count = null;
 
 		return $push_token;
 	}
@@ -286,8 +296,127 @@ class PushTokensDataStore {
 
 		// Anything read earlier in this request now includes deleted tokens.
 		$this->tokens_by_roles_cache = array();
+		$this->token_count           = null;
+		$this->has_tokens            = null;
 
 		return $deleted;
+	}
+
+	/**
+	 * Returns the IDs of the push tokens last registered before a cutoff.
+	 *
+	 * Re-registering a device updates its post, so `post_modified_gmt` is the
+	 * last time an app confirmed the token. Oldest first, all in one query.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string $cutoff_gmt A GMT `Y-m-d H:i:s` datetime. Tokens registered at exactly this time are not returned.
+	 * @return int[]
+	 */
+	public function get_stale_token_ids( string $cutoff_gmt ): array {
+		global $wpdb;
+
+		return array_map(
+			'intval',
+			$wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private' AND post_modified_gmt < %s ORDER BY post_modified_gmt ASC, ID ASC",
+					PushToken::POST_TYPE,
+					$cutoff_gmt
+				)
+			)
+		);
+	}
+
+	/**
+	 * Deletes push tokens by ID, one at a time so a failure cannot stop the rest.
+	 *
+	 * IDs that are not push tokens, or no longer exist, are skipped. With a
+	 * cutoff, each token is checked again just before it is deleted, so a device
+	 * that re-registered since the caller selected it is kept.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param int[]       $ids        The push token IDs.
+	 * @param string|null $cutoff_gmt Optional GMT `Y-m-d H:i:s` datetime a token must have been registered before.
+	 * @return array{deleted: int[], failed: int[]} The IDs deleted, and the IDs whose deletion failed.
+	 */
+	public function delete_tokens( array $ids, ?string $cutoff_gmt = null ): array {
+		$result = array(
+			'deleted' => array(),
+			'failed'  => array(),
+		);
+
+		$ids = array_values( array_unique( array_filter( array_map( 'intval', $ids ), fn( int $id ) => $id > 0 ) ) );
+
+		if ( empty( $ids ) ) {
+			return $result;
+		}
+
+		// Prime caches to reduce future queries.
+		_prime_post_caches( $ids, false, false );
+
+		foreach ( $ids as $id ) {
+			if ( ! $this->is_deletable_token( $id, $cutoff_gmt ) ) {
+				continue;
+			}
+
+			try {
+				$deleted = wp_delete_post( $id, true );
+			} catch ( Throwable $e ) {
+				$deleted = false;
+			}
+
+			if ( $deleted ) {
+				$result['deleted'][] = $id;
+				unset( $this->pending_last_sent_at[ $id ] );
+			} else {
+				$result['failed'][] = $id;
+			}
+		}
+
+		// Anything read earlier in this request now includes deleted tokens.
+		$this->tokens_by_roles_cache = array();
+		$this->token_count           = null;
+		$this->has_tokens            = null;
+
+		return $result;
+	}
+
+	/**
+	 * Whether an ID is a push token that may be deleted: it still exists and,
+	 * with a cutoff, was last registered before it.
+	 *
+	 * Read from the database rather than the post cache, so a re-registration
+	 * by another request since the caller selected the ID is seen.
+	 *
+	 * @param int         $id         The post ID.
+	 * @param string|null $cutoff_gmt Optional GMT `Y-m-d H:i:s` datetime the token must have been registered before.
+	 * @return bool
+	 */
+	private function is_deletable_token( int $id, ?string $cutoff_gmt ): bool {
+		global $wpdb;
+
+		if ( null === $cutoff_gmt ) {
+			$found = $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT ID FROM {$wpdb->posts} WHERE ID = %d AND post_type = %s",
+					$id,
+					PushToken::POST_TYPE
+				)
+			);
+		} else {
+			$found = $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT ID FROM {$wpdb->posts} WHERE ID = %d AND post_type = %s AND post_modified_gmt < %s",
+					$id,
+					PushToken::POST_TYPE,
+					$cutoff_gmt
+				)
+			);
+		}
+
+		return null !== $found;
 	}
 
 	/**
@@ -433,6 +562,64 @@ class PushTokensDataStore {
 	}
 
 	/**
+	 * Counts every push token on the store, whatever the owner's role.
+	 *
+	 * Registration requires one of the roles that receive push notifications,
+	 * so no token starts out ineligible. A user can lose the role afterwards
+	 * though, and their token stays, which is the difference between this count
+	 * and what get_tokens_for_roles() returns.
+	 *
+	 * @since 11.3.0
+	 * @return int
+	 */
+	public function count_tokens(): int {
+		if ( null !== $this->token_count ) {
+			return $this->token_count;
+		}
+
+		global $wpdb;
+
+		$this->token_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private'",
+				PushToken::POST_TYPE
+			)
+		);
+
+		return $this->token_count;
+	}
+
+	/**
+	 * Returns the IDs of the push tokens a user owns, most recently registered
+	 * first.
+	 *
+	 * Capped, because the step log read tests every line against every ID
+	 * returned. Re-registering a device updates its post, so ordering by
+	 * modification time keeps the devices still in use and drops the ones
+	 * abandoned longest ago.
+	 *
+	 * @since 11.3.0
+	 * @param int $user_id The user.
+	 * @param int $limit   The most IDs to return.
+	 * @return int[]
+	 */
+	public function get_token_ids_for_user( int $user_id, int $limit = 100 ): array {
+		global $wpdb;
+
+		return array_map(
+			'intval',
+			$wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'private' AND post_author = %d ORDER BY post_modified DESC LIMIT %d",
+					PushToken::POST_TYPE,
+					$user_id,
+					$limit
+				)
+			)
+		);
+	}
+
+	/**
 	 * Returns push tokens belonging to users with the given roles.
 	 *
 	 * When called without pagination parameters, returns all tokens as a
@@ -556,7 +743,7 @@ class PushTokensDataStore {
 				);
 
 				$result['total']       = (int) $count_query->found_posts;
-				$result['total_pages'] = (int) ceil( $result['total'] / $per_page );
+				$result['total_pages'] = (int) ceil( $result['total'] / max( 1, $per_page ) );
 			}
 
 			$this->tokens_by_roles_cache[ $cache_key ] = $result;

@@ -43,7 +43,6 @@ export const Configure = ( {
 				{ generalSettings?.woocommerce_calc_taxes !== 'yes' &&
 					interpolateComponents( {
 						mixedString: __(
-							/*eslint-disable max-len*/
 							'By clicking "Configure" you\'re enabling tax rates and calculations. More info {{link}}here{{/link}}.',
 							'woocommerce'
 						),

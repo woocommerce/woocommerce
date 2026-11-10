@@ -23,10 +23,7 @@ interface Props {
 }
 
 type EmbeddedKycLoadFailureReason =
-	| 'timeout'
-	| 'load_error'
-	| 'bad_session'
-	| 'init_error';
+	'timeout' | 'load_error' | 'bad_session' | 'init_error';
 
 type EmbeddedKycLoadFailure = {
 	reason: EmbeddedKycLoadFailureReason;

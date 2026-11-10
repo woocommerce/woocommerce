@@ -36,7 +36,6 @@ class StockNotificationsTests extends \WC_Unit_Test_Case {
 	 * Clean up after tests.
 	 */
 	public function tearDown(): void {
-		Constants::clear_single_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' );
 		if ( null !== $this->original_db_version ) {
 			update_option( 'woocommerce_db_version', $this->original_db_version );
 			$this->original_db_version = null;

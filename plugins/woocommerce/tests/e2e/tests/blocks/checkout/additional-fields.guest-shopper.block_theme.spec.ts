@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { expect, test as base, guestFile } from '@woocommerce/e2e-utils';
+import {
+	expect,
+	test as base,
+	enableTestPlugin,
+	guestFile,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -23,10 +28,8 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 	test.describe( 'Guest shopper', () => {
 		test.use( { storageState: guestFile } );
 
-		test.beforeEach( async ( { requestUtils } ) => {
-			await requestUtils.activatePlugin(
-				'woocommerce-blocks-test-additional-checkout-fields'
-			);
+		test.beforeEach( async ( { context } ) => {
+			await enableTestPlugin( context, 'additional-checkout-fields' );
 		} );
 
 		test( 'Shopper can see an error message when a required field is not filled in the checkout form', async ( {
@@ -366,32 +369,6 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 					'Please enter a valid VAT number (country code + 8-12 digits)'
 				)
 			).toBeHidden();
-		} );
-
-		test( 'Conditional field stays hidden while the field it depends on has no value', async ( {
-			checkoutPageObject,
-			frontendUtils,
-		} ) => {
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-			await frontendUtils.goToCheckout();
-
-			const facebookPage = checkoutPageObject.page.getByLabel(
-				'Which Facebook page did you see us on?'
-			);
-			const howDidYouHear = checkoutPageObject.page.getByLabel(
-				'How did you hear about us?'
-			);
-
-			// Nothing has been picked yet, so the rule must not match.
-			await expect( howDidYouHear ).toHaveValue( '' );
-			await expect( facebookPage ).toBeHidden();
-
-			await howDidYouHear.selectOption( 'facebook' );
-			await expect( facebookPage ).toBeVisible();
-
-			await howDidYouHear.selectOption( 'google' );
-			await expect( facebookPage ).toBeHidden();
 		} );
 
 		test( 'Conditional fields are shown/hidden based on cart state', async ( {

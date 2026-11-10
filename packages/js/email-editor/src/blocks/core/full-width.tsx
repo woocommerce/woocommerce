@@ -13,8 +13,7 @@ import { addFilterForEmail } from '../../config-tools/filters';
 import { unwrapCompressedPresetStyleVariable } from '../../style-variables';
 
 type SpacingPadding =
-	| string
-	| { top?: string; right?: string; bottom?: string; left?: string };
+	string | { top?: string; right?: string; bottom?: string; left?: string };
 
 // Columns handle their own width, so don't let full-width blocks inside a
 // column break out (the renderer doesn't either).

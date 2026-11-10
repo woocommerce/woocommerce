@@ -10,9 +10,7 @@ import { registerBlockType } from '@wordpress/blocks';
 import { Edit, Save } from './edit';
 import metadata from './block.json';
 
-registerBlockType( 'woocommerce/checkout-order-summary-coupon-form-block', {
-	apiVersion: metadata.apiVersion,
-	title: metadata.title,
+registerBlockType( metadata, {
 	icon: {
 		src: (
 			<Icon

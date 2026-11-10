@@ -151,29 +151,24 @@ export default function Products( props: ProductsProps ) {
 						'woocommerce-marketplace__browse-wp-theme-directory'
 					}
 				>
-					<b key="wp-theme-directory-heading">
-						{ __( 'Didn’t find a theme you like?', 'woocommerce' ) }
-					</b>{ ' ' }
-					<span key="wp-theme-directory-copy">
-						{ createInterpolateElement(
-							__(
-								'Browse the <a>WordPress.org theme directory</a> to discover more.',
-								'woocommerce'
+					{ createInterpolateElement(
+						__(
+							'<b>Didn’t find a theme you like?</b> Browse the <a>WordPress.org theme directory</a> to discover more.',
+							'woocommerce'
+						),
+						{
+							b: <b />,
+							a: (
+								// eslint-disable-next-line jsx-a11y/anchor-has-content
+								<a
+									href={
+										ADMIN_URL +
+										'theme-install.php?search=e-commerce'
+									}
+								/>
 							),
-							{
-								a: (
-									// eslint-disable-next-line jsx-a11y/anchor-has-content
-									<a
-										key="wp-theme-directory"
-										href={
-											ADMIN_URL +
-											'theme-install.php?search=e-commerce'
-										}
-									/>
-								),
-							}
-						) }
-					</span>
+						}
+					) }
 				</div>
 			) }
 			{ ! isLoading && ! hasNoResults && showAllButton && (

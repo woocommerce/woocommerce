@@ -18,7 +18,6 @@ const slotName = '__experimentalOrderLocalPickupPackages';
 const {
 	Fill: ExperimentalOrderLocalPickupPackages,
 	Slot: OrderLocalPickupPackagesSlot,
-	// eslint-disable-next-line @typescript-eslint/naming-convention
 } = createSlotFill( slotName );
 
 interface ExperimentalOrderLocalPickupPackagesProps {

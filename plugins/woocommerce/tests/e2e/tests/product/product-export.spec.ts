@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { readFile } from 'node:fs/promises';
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -68,7 +69,7 @@ const test = baseTest.extend( {
 } );
 
 test.describe( 'Product > Export Selected Products', () => {
-	test( 'preserves multiple selection through export and clear', async ( {
+	test( 'carries a multi-product selection into the export and the generated CSV, then clears it', async ( {
 		page,
 		productsFixture,
 	} ) => {
@@ -98,9 +99,13 @@ test.describe( 'Product > Export Selected Products', () => {
 
 		await test.step( 'Navigate to export page and verify UI elements for multiple products', async () => {
 			await exportButton.click();
-			await expect( page.locator( '.wrap.woocommerce h1' ) ).toHaveText(
-				'Export Products'
-			);
+			await expect(
+				page.getByRole( 'heading', {
+					name: 'Export Products',
+					level: 1,
+					exact: true,
+				} )
+			).toHaveCount( 1 );
 			await expect(
 				page.locator( '#selected-product-export-notice p' )
 			).toContainText(
@@ -125,10 +130,46 @@ test.describe( 'Product > Export Selected Products', () => {
 				page.locator( 'label[for="woocommerce-exporter-category"]' )
 			).toBeHidden();
 			await expect(
-				page.locator( '.woocommerce-exporter header p' )
-			).toHaveText(
-				'This tool allows you to generate and download a CSV file containing the selected products.'
+				page.getByText(
+					'This tool allows you to generate and download a CSV file containing the selected products.',
+					{ exact: true }
+				)
+			).toBeVisible();
+		} );
+
+		await test.step( 'Generate the CSV and verify it holds only the selected products', async () => {
+			const downloadPromise = page.waitForEvent( 'download' );
+			await page.getByRole( 'button', { name: 'Generate CSV' } ).click();
+			const download = await downloadPromise;
+			const csv = await readFile( await download.path(), 'utf8' );
+
+			// Keep only rows that start with an id, so a quoted field holding a
+			// newline cannot be read as a row of its own.
+			const dataRows = csv
+				.trim()
+				.split( '\n' )
+				.slice( 1 )
+				.filter( ( row ) => /^\d+,/.test( row ) );
+			const parentIds = dataRows
+				.map( ( row ) => row.split( ',' ) )
+				.filter(
+					( columns ) =>
+						// The Type column is a quoted list for a variation that
+						// is also virtual or downloadable.
+						! columns[ 1 ]
+							.replace( /^"/, '' )
+							.startsWith( 'variation' )
+				)
+				.map( ( columns ) => columns[ 0 ] );
+
+			expect( parentIds.toSorted() ).toEqual(
+				[
+					String( simpleProduct.id ),
+					String( variableProduct.id ),
+				].toSorted()
 			);
+			expect( csv ).toContain( simpleProduct.name );
+			expect( csv ).toContain( variableProduct.name );
 		} );
 
 		await test.step( 'Clear the selected products', async () => {
@@ -152,10 +193,11 @@ test.describe( 'Product > Export Selected Products', () => {
 				page.locator( 'label[for="woocommerce-exporter-category"]' )
 			).toBeVisible();
 			await expect(
-				page.locator( '.woocommerce-exporter header p' )
-			).toHaveText(
-				'This tool allows you to generate and download a CSV file containing a list of all products.'
-			);
+				page.getByText(
+					'This tool allows you to generate and download a CSV file containing a list of all products.',
+					{ exact: true }
+				)
+			).toBeVisible();
 		} );
 	} );
 } );

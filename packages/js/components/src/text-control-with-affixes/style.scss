@@ -3,11 +3,11 @@
 	flex-direction: row;
 	width: 100%;
 
-	input[type='email'],
-	input[type='password'],
-	input[type='url'],
-	input[type='text'],
-	input[type='number'] {
+	input[type="email"],
+	input[type="password"],
+	input[type="url"],
+	input[type="text"],
+	input[type="number"] {
 		flex-grow: 1;
 		margin: 0;
 
@@ -57,11 +57,11 @@
 	border-right: none;
 	border-radius: 4px 0 0 4px;
 
-	& + input[type='email'],
-	& + input[type='password'],
-	& + input[type='url'],
-	& + input[type='text'],
-	& + input[type='number'] {
+	& + input[type="email"],
+	& + input[type="password"],
+	& + input[type="url"],
+	& + input[type="text"],
+	& + input[type="number"] {
 		&:disabled {
 			border-left-color: $gray-100;
 		}

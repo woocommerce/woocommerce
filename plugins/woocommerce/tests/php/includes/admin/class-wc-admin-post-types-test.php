@@ -64,6 +64,30 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The selected return-policy page has a Pages-list label, even while it is a draft.
+	 */
+	public function test_return_policy_page_display_state(): void {
+		$page_id  = $this->factory->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'draft',
+			)
+		);
+		$other_id = $this->factory->post->create( array( 'post_type' => 'page' ) );
+		update_option( 'woocommerce_refund_returns_page_id', $page_id );
+
+		$this->assertSame(
+			array(
+				'draft'                      => 'Draft',
+				'wc_page_for_refund_returns' => 'Refund and Returns Policy Page',
+			),
+			$this->sut->add_display_post_states( array( 'draft' => 'Draft' ), get_post( $page_id ) ),
+			'The selected draft should retain its status and show the return-policy page label.'
+		);
+		$this->assertSame( array(), $this->sut->add_display_post_states( array(), get_post( $other_id ) ), 'Unrelated pages should not receive the return-policy label.' );
+	}
+
+	/**
 	 * @testdox The CPT Add Order screen leaves insertion to WordPress without redirecting or eagerly saving order metadata.
 	 */
 	public function test_new_order_screen_leaves_creation_to_wordpress(): void {
@@ -311,6 +335,44 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Bulk Edit updates categories and brands, preserving mixed and omitted terms.
+	 *
+	 * @testWith ["product_cat", "category_ids"]
+	 *           ["product_brand", "brand_ids"]
+	 * @param string $taxonomy Product taxonomy.
+	 * @param string $property Product property.
+	 */
+	public function test_bulk_edit_taxonomy_scope( string $taxonomy, string $property ): void {
+		$terms = array();
+		foreach ( array( 'Removed', 'Mixed', 'Omitted', 'Added' ) as $name ) {
+			$terms[] = $this->factory->term->create(
+				array(
+					'taxonomy' => $taxonomy,
+					'name'     => $name,
+				)
+			);
+		}
+		$product = WC_Helper_Product::create_simple_product();
+		$product->{"set_$property"}( array( $terms[0], $terms[1], $terms[2] ) );
+		$product->save();
+
+		$this->bulk_edit(
+			array( $product ),
+			array(
+				'wc_bulk_edit_taxonomies'    => array( $taxonomy => implode( ',', array( $terms[0], $terms[1], $terms[3] ) ) ),
+				'wc_bulk_edit_indeterminate' => array( $taxonomy => array( $terms[1] ) ),
+				'tax_input'                  => array( $taxonomy => array( $terms[3] ) ),
+			)
+		);
+
+		$this->assertEqualsCanonicalizing(
+			array( $terms[1], $terms[2], $terms[3] ),
+			wp_get_object_terms( $product->get_id(), $taxonomy, array( 'fields' => 'ids' ) ),
+			'Category and brand assignments should change, with mixed and omitted terms preserved.'
+		);
+	}
+
+	/**
 	 * @testdox Bulk Edit applies percentage price and stock changes to each edited product.
 	 *
 	 * Deliberately not a "leaves unselected products alone" test. Selection happens in
@@ -460,7 +522,7 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 				'100',
 				'0',
 			),
-			'empty change-to restoration'        => array(
+			'empty change-to clearing'           => array(
 				'100',
 				'80',
 				array(

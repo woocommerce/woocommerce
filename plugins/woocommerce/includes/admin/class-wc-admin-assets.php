@@ -499,6 +499,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_remove_personal_data_notice'  => __( 'This action cannot be reversed. Are you sure you wish to erase personal data from the selected orders?', 'woocommerce' ),
 					'i18n_confirm_delete'               => __( 'Are you sure you wish to delete this item?', 'woocommerce' ),
 					'i18n_global_unique_id_error'       => __( 'Enter only numbers and hyphens (-). The letter X is allowed only as the final ISBN-10 check digit.', 'woocommerce' ),
+					'i18n_commodity_code_error'         => __( 'Enter a commodity code of 6–14 digits. Spaces and punctuation are removed.', 'woocommerce' ),
+					'i18n_customs_description_error'    => __( 'Enter up to 35 characters, without emoji or special symbols such as ™.', 'woocommerce' ),
 					'decimal_point'                     => $decimal,
 					'mon_decimal_point'                 => wc_get_price_decimal_separator(),
 					'ajax_url'                          => admin_url( 'admin-ajax.php' ),
@@ -535,7 +537,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 				$params = array(
 					'strings' => array(
-						'allow_reviews' => esc_js( __( 'Enable reviews', 'woocommerce' ) ),
+						'allow_reviews'           => esc_js( __( 'Enable reviews', 'woocommerce' ) ),
+						'some_products_have_term' => esc_js( __( 'Some selected products have this term', 'woocommerce' ) ),
 					),
 				);
 
@@ -606,7 +609,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			if ( $this->is_order_meta_box_screen( $screen_id ) ) {
 				$default_location = wc_get_customer_default_location();
 
-				wp_enqueue_script( 'wc-admin-order-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-order' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'wc-backbone-modal', 'selectWoo', 'wc-clipboard', 'wp-a11y' ), $version );
+				wp_enqueue_script( 'wc-admin-order-meta-boxes', WC()->plugin_url() . '/assets/js/admin/meta-boxes-order' . $suffix . '.js', array( 'wc-admin-meta-boxes', 'wc-backbone-modal', 'selectWoo', 'wc-clipboard', 'wp-a11y', 'wp-i18n' ), $version );
+				wp_set_script_translations( 'wc-admin-order-meta-boxes', 'woocommerce' );
 				wp_localize_script(
 					'wc-admin-order-meta-boxes',
 					'woocommerce_admin_meta_boxes_order',
@@ -665,6 +669,10 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'remove_shipping_notice'                          => $remove_shipping_notice,
 					'i18n_select_items'                               => __( 'Please select some items.', 'woocommerce' ),
 					'i18n_do_refund'                                  => __( 'Are you sure you wish to process this refund? This action cannot be undone.', 'woocommerce' ),
+					'i18n_restock_enter_quantity'                     => __( 'Enter a quantity above to return items to stock', 'woocommerce' ),
+					'i18n_restock_none'                               => __( 'No items will be restocked', 'woocommerce' ),
+					'i18n_restock_items_not_reduced'                  => __( 'Stock was not reduced for these items', 'woocommerce' ),
+					'i18n_restock_order_not_reduced'                  => __( 'Stock was not reduced for this order', 'woocommerce' ),
 					'i18n_delete_refund'                              => __( 'Are you sure you wish to delete this refund? This action cannot be undone.', 'woocommerce' ),
 					'i18n_delete_tax'                                 => __( 'Are you sure you wish to delete this tax column? This action cannot be undone.', 'woocommerce' ),
 					'i18n_no_title'                                   => __( '(no title)', 'woocommerce' ),
@@ -698,6 +706,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'grant_access_nonce'                              => wp_create_nonce( 'grant-access' ),
 					'revoke_access_nonce'                             => wp_create_nonce( 'revoke-access' ),
 					'add_order_note_nonce'                            => wp_create_nonce( 'add-order-note' ),
+					'get_order_notes_nonce'                           => wp_create_nonce( 'get-order-notes' ),
 					'delete_order_note_nonce'                         => wp_create_nonce( 'delete-order-note' ),
 					'calendar_image'                                  => WC()->plugin_url() . '/assets/images/calendar.png',
 					'post_id'                                         => $this->is_order_meta_box_screen( $screen_id ) && isset( $order_or_post_object ) ? \Automattic\WooCommerce\Utilities\OrderUtil::get_post_or_order_id( $order_or_post_object ) : $post_id,
@@ -719,7 +728,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_order_note_added'                           => __( 'Order note added.', 'woocommerce' ),
 					'i18n_customer_order_note_added'                  => __( 'Order note added and emailed to the customer.', 'woocommerce' ),
 					'i18n_apply_coupon'                               => __( 'Enter a coupon code to apply. Discounts are applied to line totals, before taxes.', 'woocommerce' ),
-					'i18n_add_fee'                                    => __( 'Enter a fixed amount or percentage to apply as a fee.', 'woocommerce' ),
+					'i18n_add_fee'                                    => __( 'Enter a fixed amount or percentage to apply as a fee.', 'woocommerce' ) . ' ' . __( 'Amounts are before tax, and percentages apply to the order items after discounts.', 'woocommerce' ),
 					'i18n_attribute_name_placeholder'                 => __( 'New attribute', 'woocommerce' ),
 					'i18n_product_simple_tip'                         => __( '<b>Simple –</b> covers the vast majority of any products you may sell. Simple products are shipped and have no options. For example, a book.', 'woocommerce' ),
 					'i18n_product_grouped_tip'                        => __( '<b>Grouped –</b> a collection of related products that can be purchased individually and only consist of simple products. For example, a set of six drinking glasses.', 'woocommerce' ),
@@ -727,7 +736,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_product_variable_tip'                       => __( '<b>Variable –</b> a product with variations, each of which may have a different SKU, price, stock option, etc. For example, a t-shirt available in different colors and/or sizes.', 'woocommerce' ),
 					'i18n_product_other_tip'                          => __( 'Product types define available product details and attributes, such as downloadable files and variations. They’re also used for analytics and inventory management.', 'woocommerce' ),
 					'i18n_product_description_tip'                    => __( 'Describe this product. What makes it unique? What are its most important features?', 'woocommerce' ),
-					'i18n_product_short_description_tip'              => __( 'Summarize this product in 1-2 short sentences. We’ll show it at the top of the page.', 'woocommerce' ),
+					'i18n_product_short_description_tip'              => __( 'Summarize this product in 1-2 short sentences.', 'woocommerce' ),
 					'i18n_save_attribute_variation_tip'               => __( 'Make sure you enter the name and values for each attribute.', 'woocommerce' ),
 					/* translators: %1$s: maximum file size */
 					'i18n_product_image_tip'                          => sprintf( __( 'For best results, upload JPEG or PNG files that are 1000 by 1000 pixels or larger. Maximum upload file size: %1$s.', 'woocommerce' ), size_format( wp_max_upload_size() ) ),
