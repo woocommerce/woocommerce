@@ -596,25 +596,21 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		 * 3.0.0 added _billing_address and _shipping_address meta which contains all address data to make this faster.
 		 * This however won't work on older orders unless updated, so search a few others (expand this using the filter if needed).
 		 *
+		 * @since 1.5.6
+		 *
 		 * @var array
 		 */
-		$search_fields = array_values(
-			array_filter(
-				array_map(
-					'wc_clean',
-					(array) apply_filters(
-						'woocommerce_shop_order_search_fields',
-						array(
-							'_billing_address_index',
-							'_shipping_address_index',
-							'_billing_last_name',
-							'_billing_email',
-							'_billing_phone',
-						)
-					)
-				)
+		$search_fields = apply_filters(
+			'woocommerce_shop_order_search_fields',
+			array(
+				'_billing_address_index',
+				'_shipping_address_index',
+				'_billing_last_name',
+				'_billing_email',
+				'_billing_phone',
 			)
 		);
+		$search_fields = array_values( array_filter( array_map( 'wc_clean', (array) $search_fields ) ) );
 		$order_ids     = array();
 
 		if ( is_numeric( $term ) ) {
