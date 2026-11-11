@@ -32,7 +32,7 @@ Use this skill to add motion to WooCommerce blocks (`plugins/woocommerce/client/
 | A detail of a row appears, such as a quantity badge | It settles one step after its row | 6 |
 | A small item goes, such as a chip | It stays in position while it fades and shrinks. Then it unmounts. | 15, 16 |
 | The shopper completes an action, such as a coupon | One pulse, only for the action that the shopper did | 8 |
-| A dropdown opens from a field | It slides from the field. It stays mounted while it closes. It turns around if it opens again. | 2 |
+| A dropdown opens from a field | It slides from the field. It stays mounted, inert, and `aria-hidden` while it closes. It turns around if it opens again. Results that arrive while the shopper types animate, but a key that closes it (Escape, Enter, Tab) removes it immediately. | 2 |
 | A toast or snackbar appears and goes | It rises 8px in and drops 4px out. The script waits for the animation to end. It does not use a fixed timeout. | 1, 15 |
 | A value replaces its loading skeleton | It fades in. It does not roll. | Skeleton reveal |
 | A price changes in place | Its digits roll. Its text stays the plain price for assistive technology. | Price roll |
