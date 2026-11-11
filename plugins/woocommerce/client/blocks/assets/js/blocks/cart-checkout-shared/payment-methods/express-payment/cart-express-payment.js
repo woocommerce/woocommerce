@@ -7,7 +7,6 @@ import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
 import { paymentStore } from '@woocommerce/block-data';
 import { Skeleton } from '@woocommerce/base-components/skeleton';
-import { useSkeletonPhase } from '@woocommerce/base-hooks';
 import clsx from 'clsx';
 
 /**
@@ -49,23 +48,19 @@ const CartExpressPayment = () => {
 		registeredExpressPaymentMethods,
 	} );
 
-	const hasExpressPaymentArea =
-		hasRegisteredExpressPaymentMethods &&
-		! hasNoValidRegisteredExpressPaymentMethods;
-
 	// We show the skeleton when
 	// the express payment method is not active (because they trigger recalculations) and
 	// cart items are being added, updated, or deleted, because it can result in different express payment methods
-	// or when the express payment methods are not initialized.
-	// The skeleton ends with the other skeletons of the loading phase (Skeleton reveal rule).
-	const showSkeleton = useSkeletonPhase(
-		hasExpressPaymentArea &&
-			! isExpressPaymentMethodActive &&
-			( hasPendingItemsOperations ||
-				hasRegisteredNotInitializedExpressPaymentMethods )
-	);
+	// or when the express payment methods are not initialized
+	const showSkeleton =
+		! isExpressPaymentMethodActive &&
+		( hasPendingItemsOperations ||
+			hasRegisteredNotInitializedExpressPaymentMethods );
 
-	if ( ! hasExpressPaymentArea ) {
+	if (
+		! hasRegisteredExpressPaymentMethods ||
+		hasNoValidRegisteredExpressPaymentMethods
+	) {
 		return null;
 	}
 	/*

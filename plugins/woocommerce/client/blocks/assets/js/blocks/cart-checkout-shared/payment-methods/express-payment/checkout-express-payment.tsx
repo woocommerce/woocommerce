@@ -8,7 +8,6 @@ import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import { checkoutStore, paymentStore } from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
 import { Skeleton } from '@woocommerce/base-components/skeleton';
-import { useSkeletonPhase } from '@woocommerce/base-hooks';
 import clsx from 'clsx';
 
 /**
@@ -63,27 +62,10 @@ const CheckoutExpressPayment = () => {
 		registeredExpressPaymentMethods,
 	} );
 
-	const hasExpressPaymentArea =
-		hasRegisteredExpressPaymentMethods &&
-		! hasNoValidRegisteredExpressPaymentMethods;
-
-	// We show the skeleton when
-	// the express payment method is not active (because they trigger recalculations) and
-	// the checkout is calculating, because it can result in different express payment methods
-	// or when the express payment methods are not initialized.
-	// The skeletons end with the other skeletons of the loading phase (Skeleton reveal rule).
-	const showSkeleton = useSkeletonPhase(
-		hasExpressPaymentArea &&
-			! isExpressPaymentMethodActive &&
-			( isCalculating ||
-				hasRegisteredNotInitializedExpressPaymentMethods )
-	);
-	const showTitleSkeleton = useSkeletonPhase(
-		hasExpressPaymentArea &&
-			hasRegisteredNotInitializedExpressPaymentMethods
-	);
-
-	if ( ! hasExpressPaymentArea ) {
+	if (
+		! hasRegisteredExpressPaymentMethods ||
+		hasNoValidRegisteredExpressPaymentMethods
+	) {
 		// Make sure errors are shown in the editor and for admins. For example,
 		// when a payment method fails to register.
 		if ( isEditor || CURRENT_USER_IS_ADMIN ) {
@@ -104,6 +86,14 @@ const CheckoutExpressPayment = () => {
 		isBeforeProcessing ||
 		( isComplete && ! hasError ) ||
 		isExpressPaymentMethodActive;
+
+	// We show the skeleton when
+	// the express payment method is not active (because they trigger recalculations) and
+	// the checkout is calculating, because it can result in different express payment methods
+	// or when the express payment methods are not initialized
+	const showSkeleton =
+		! isExpressPaymentMethodActive &&
+		( isCalculating || hasRegisteredNotInitializedExpressPaymentMethods );
 
 	return (
 		<>
@@ -128,7 +118,7 @@ const CheckoutExpressPayment = () => {
 			>
 				<div className="wc-block-components-express-payment__title-container">
 					<h2 className="wc-block-components-express-payment__title">
-						{ showTitleSkeleton ? (
+						{ hasRegisteredNotInitializedExpressPaymentMethods ? (
 							<Skeleton
 								width="127px"
 								height="20px"
