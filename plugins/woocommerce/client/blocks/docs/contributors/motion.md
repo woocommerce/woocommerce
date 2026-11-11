@@ -109,19 +109,6 @@ Find the change in this table, and use the helpers above.
 
 Real layout means the element's height, padding, and margins change, so theme borders, spacing, and extension markup move with it. Use `transform` for everything else.
 
-## Traps
-
-Each of these traps caused a bug before.
-
-- **Each script bundle has its own copy of a module.** Cart, Checkout, and the shared components package each include `base-utils`, so module state is not shared. Put state that bundles must share on `globalThis`, or on the element.
-- **A cancelled or finished animation is not in progress.** To read the current position of an animation, use only animations with `playState` `running` or `paused`. A finished animation with `fill: forwards` keeps its end state until you cancel it.
-- **Nested size changes conflict.** A box that animates its own height must stop while an element inside it grows or collapses. If not, the change animates two times.
-- **A clip can cut off content.** Clip only the element that changes size, and only while it changes.
-- **Content that arrives after the change can jump.** Examples are shipping rates and totals. Wait until the content is in position before anything moves, or change the height smoothly when it arrives.
-- **A form that goes must stop being a form immediately.** If it stays mounted while it animates out, its validation errors and payment handlers stay registered, and Place order can use them. Animate an inert copy of the form, not the form.
-- **React 18 has no `inert` prop.** To set the attribute, spread `{ inert: '' }`.
-- **Keep the keys of a list stable.** If keys change, entrances play again on each render.
-
 ## Test motion
 
 Unit tests cannot show motion, because Jest has no Web Animations API, layout, or paint. Test motion in a real browser, on pages that use the blocks that you changed. Test at desktop width and phone width, in Chrome first. For motion that JavaScript runs, also test Safari and Firefox.
