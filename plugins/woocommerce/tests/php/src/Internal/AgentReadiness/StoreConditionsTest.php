@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgenticCommerceSettings;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
+use Automattic\WooCommerce\Internal\Ucp\UcpDiscovery;
 use WC_Unit_Test_Case;
 
 /**
@@ -167,18 +168,29 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A /.well-known/ucp file WooCommerce didn't write fails the UCP address check with a fix to remove it.
+	 * @testdox A /.well-known/ucp file in the way fails the UCP address check with the fix for its reason.
+	 * @testWith ["foreign", "Remove the /.well-known/ucp file"]
+	 *           ["outdated", "WooCommerce couldn't update the /.well-known/ucp file"]
+	 *
+	 * @param string $file   Someone else's file, or WooCommerce's file with an old profile.
+	 * @param string $prefix How the fix should start.
 	 */
-	public function test_foreign_ucp_file_fix(): void {
+	public function test_ucp_file_fix( string $file, string $prefix ): void {
 		self::make_store_ready();
 		$path = get_temp_dir() . uniqid( 'wc-ucp-' ) . '/.well-known/ucp';
 		add_filter( 'woocommerce_ucp_discovery_file_path', fn() => $path );
+
+		$profile            = ( new UcpDiscovery() )->get_profile();
+		$profile['links'][] = array( 'rel' => UcpDiscovery::LINK_REL );
+
+		$profile['ucp']['version'] = '1999-01-01';
+
 		wp_mkdir_p( dirname( $path ) );
-		file_put_contents( $path, '{}' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		file_put_contents( $path, 'foreign' === $file ? '{}' : (string) wp_json_encode( $profile ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 
 		try {
 			$this->assertSame( array( 'ucp_discovery' ), $this->sut->failing_required() );
-			$this->assertStringStartsWith( 'Remove the /.well-known/ucp file', $this->ucp_discovery_fix() );
+			$this->assertStringStartsWith( $prefix, $this->ucp_discovery_fix() );
 		} finally {
 			wp_delete_file( $path );
 		}

@@ -167,6 +167,31 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox serve_status counts a file it can't read as in the way, even when it holds WooCommerce's current profile.
+	 */
+	public function test_serve_status_unreadable_file(): void {
+		$path = get_temp_dir() . uniqid( 'wc-ucp-' ) . '/.well-known/ucp';
+		add_filter( 'woocommerce_ucp_discovery_file_path', fn() => $path );
+		$this->set_permalink_structure( '' );
+
+		$profile            = $this->sut->get_profile();
+		$profile['links'][] = array( 'rel' => UcpDiscovery::LINK_REL );
+		wp_mkdir_p( dirname( $path ) );
+		file_put_contents( $path, (string) wp_json_encode( $profile ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		chmod( $path, 0000 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
+
+		try {
+			if ( is_readable( $path ) ) {
+				$this->markTestSkipped( 'The test runs as a user who can read any file (root).' );
+			}
+			$this->assertSame( 'file_in_the_way', UcpDiscovery::serve_status() );
+		} finally {
+			chmod( $path, 0644 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
+			wp_delete_file( $path );
+		}
+	}
+
+	/**
 	 * Run maybe_render() for a request, capturing output and treating wp_send_json()'s exit as an exception.
 	 *
 	 * @param string $matched_rule Value of WP::$matched_rule.
