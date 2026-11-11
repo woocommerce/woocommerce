@@ -784,44 +784,6 @@ class FeaturesController {
 	}
 
 	/**
-	 * Generate the description for the MCP integration feature.
-	 *
-	 * @return string The feature description with conditional permalink warning and documentation link.
-	 */
-	private function get_mcp_integration_description() {
-		$base_description = __( 'Enable WooCommerce MCP (Model Context Protocol) for AI-powered store operations. AI-generated results and actions can be unpredictable - please review before executing in your store.', 'woocommerce' );
-
-		// Check permalink structure requirement.
-		$permalink_structure = get_option( 'permalink_structure' );
-		if ( empty( $permalink_structure ) ) {
-			$permalinks_url    = admin_url( 'options-permalink.php' );
-			$permalink_warning = sprintf(
-				'<br><br><strong>%s:</strong> %s <a href="%s">%s</a>',
-				__( 'Configuration Required', 'woocommerce' ),
-				__( 'WordPress permalinks must be set to anything other than "Plain" for MCP to work.', 'woocommerce' ),
-				$permalinks_url,
-				__( 'Configure Permalinks', 'woocommerce' )
-			);
-			// Add documentation link to permalink warning.
-			$documentation_link = sprintf(
-				' <a href="%s" target="_blank">%s</a>',
-				'https://github.com/woocommerce/woocommerce/blob/trunk/docs/features/mcp/README.md',
-				__( 'Learn more', 'woocommerce' )
-			);
-			return $base_description . $permalink_warning . $documentation_link;
-		}
-
-		// Add documentation link.
-		$documentation_link = sprintf(
-			' <a href="%s" target="_blank">%s</a>',
-			'https://github.com/woocommerce/woocommerce/blob/trunk/docs/features/mcp/README.md',
-			__( 'Learn more', 'woocommerce' )
-		);
-
-		return $base_description . $documentation_link;
-	}
-
-	/**
 	 * Retained for callers that invoke this method directly. It no longer registers features or fires the removed hook.
 	 *
 	 * @deprecated 11.4.0
