@@ -22,6 +22,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Css_Inliner;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Html2Text;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Renderer;
+use Automattic\WooCommerce\EmailEditor\Engine\Send_Preview_Email;
 use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\Templates\Template;
 use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates_Registry;
@@ -157,30 +158,58 @@ class Public_Api_Contract_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test the interfaces MailPoet implements keep exactly their methods. A new method would
-	 * make MailPoet's classes fail to load.
+	 * Test the interfaces MailPoet implements keep exactly their method signatures. A new method,
+	 * or a new parameter or return type, would make MailPoet's classes fail to load.
 	 *
 	 * @dataProvider interface_provider
-	 * @param class-string $interface_name Interface.
-	 * @param string[]     $methods        Its methods.
+	 * @param class-string          $interface_name Interface.
+	 * @param array<string, string> $signatures     Method name => parameters and return type.
 	 */
-	public function testInterfaceMethodsStayTheSame( string $interface_name, array $methods ): void {
-		$actual = array_map( fn( \ReflectionMethod $method ) => $method->getName(), ( new \ReflectionClass( $interface_name ) )->getMethods() );
-		sort( $actual );
-		sort( $methods );
+	public function testInterfaceSignaturesStayTheSame( string $interface_name, array $signatures ): void {
+		$actual = array();
+		foreach ( ( new \ReflectionClass( $interface_name ) )->getMethods() as $method ) {
+			$parameters                   = array_map(
+				fn( \ReflectionParameter $parameter ) => trim( ( $parameter->getType() ?? '' ) . ' $' . $parameter->getName() . ( $parameter->isOptional() ? ' = ?' : '' ) ),
+				$method->getParameters()
+			);
+			$actual[ $method->getName() ] = '(' . implode( ', ', $parameters ) . '): ' . $method->getReturnType();
+		}
+		ksort( $actual );
+		ksort( $signatures );
 
-		$this->assertSame( $methods, $actual );
+		$this->assertSame( $signatures, $actual );
 	}
 
 	/**
 	 * Interfaces MailPoet implements.
 	 *
-	 * @return array<string, array{class-string, string[]}>
+	 * @return array<string, array{class-string, array<string, string>}>
 	 */
 	public function interface_provider(): array {
+		$log = '(string $message, array $context = ?): void';
 		return array(
-			'logger'      => array( Email_Editor_Logger_Interface::class, array( 'alert', 'critical', 'debug', 'emergency', 'error', 'info', 'log', 'notice', 'warning' ) ),
-			'CSS inliner' => array( Css_Inliner::class, array( 'from_html', 'inline_css', 'render' ) ),
+			'logger'      => array(
+				Email_Editor_Logger_Interface::class,
+				array(
+					'alert'     => $log,
+					'critical'  => $log,
+					'debug'     => $log,
+					'emergency' => $log,
+					'error'     => $log,
+					'info'      => $log,
+					'log'       => '(string $level, string $message, array $context = ?): void',
+					'notice'    => $log,
+					'warning'   => $log,
+				),
+			),
+			'CSS inliner' => array(
+				Css_Inliner::class,
+				array(
+					'from_html'  => '(string $unprocessed_html): self',
+					'inline_css' => '(string $css = ?): self',
+					'render'     => '(): string',
+				),
+			),
 		);
 	}
 
@@ -250,6 +279,28 @@ class Public_Api_Contract_Test extends \Email_Editor_Integration_Test_Case {
 
 		$this->assertSame( $templates_registry, $received['woocommerce_email_editor_register_templates'] ?? null );
 		$this->assertSame( $tags_registry, $received['woocommerce_email_editor_register_personalization_tags'] ?? null );
+	}
+
+	/**
+	 * Test a preview email passes its personalization context through the filter MailPoet uses.
+	 */
+	public function testPreviewEmailFiltersItsPersonalizerContext(): void {
+		$seen = null;
+		add_filter(
+			'woocommerce_email_editor_send_preview_email_personalizer_context',
+			function ( $context ) use ( &$seen ) {
+				$seen = $context;
+				return array_merge( $context, array( 'mailpoet_value' => 'set by MailPoet' ) );
+			}
+		);
+		$this->di_container->get( Personalization_Tags_Registry::class )->register(
+			new Personalization_Tag( 'Value', 'mailpoet/value', 'Test', fn( $context ) => $context['mailpoet_value'] ?? '' )
+		);
+
+		$content = $this->di_container->get( Send_Preview_Email::class )->set_personalize_content( '<p><!--[mailpoet/value]--></p>' );
+
+		$this->assertIsArray( $seen );
+		$this->assertSame( '<p>set by MailPoet</p>', $content );
 	}
 
 	/**

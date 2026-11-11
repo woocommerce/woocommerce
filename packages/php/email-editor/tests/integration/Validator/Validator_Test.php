@@ -89,7 +89,14 @@ class Validator_Test extends \Email_Editor_Integration_Test_Case {
 			'numeric string for number'   => array( Builder::number(), '1.5', 'value' ),
 			'string for boolean'          => array( Builder::boolean(), 'true', 'value' ),
 			'null for non-nullable'       => array( Builder::string(), null, 'value' ),
-			'object with a numeric key'   => array( Builder::object(), array( 'a' => 1, 2 ), 'value' ),
+			'object with a numeric key'   => array(
+				Builder::object(),
+				array(
+					'a' => 1,
+					2,
+				),
+				'value',
+			),
 			'nested value names its path' => array( $nested, array( 'a' => array( 1, 'x' ) ), 'value[a][1]' ),
 			'additional property type'    => array( Builder::object()->additionalProperties( Builder::integer() ), array( 'any' => 'x' ), 'value[any]' ),
 			'no matching anyOf'           => array( Builder::any_of( array( Builder::integer(), Builder::boolean() ) ), 'text', 'value' ),
