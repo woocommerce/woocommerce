@@ -3,7 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
-import { Button } from '@wordpress/components';
+import { Button, ExternalLink } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import interpolateComponents from '@automattic/interpolate-components';
 import PropTypes from 'prop-types';
@@ -12,7 +12,6 @@ import { withDispatch, withSelect } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { getSetting, getAdminLink } from '@woocommerce/settings';
 import { Link } from '@woocommerce/components';
-import { Link as UiLink } from '@wordpress/ui';
 
 /**
  * Internal dependencies
@@ -488,17 +487,17 @@ export class ShippingBanner extends Component {
 									),
 									components: {
 										tosLink: (
-											<UiLink
+											<ExternalLink
 												href="https://automattic.com/tos"
-												rel="noopener noreferrer"
-												openInNewTab
+												target="_blank"
+												type="external"
 											/>
 										),
 										wcsLink: (
-											<UiLink
+											<ExternalLink
 												href="https://woocommerce.com/products/shipping/?utm_medium=product"
-												rel="noopener noreferrer"
-												openInNewTab
+												target="_blank"
+												type="external"
 												onClick={
 													this
 														.woocommerceServiceLinkClicked
