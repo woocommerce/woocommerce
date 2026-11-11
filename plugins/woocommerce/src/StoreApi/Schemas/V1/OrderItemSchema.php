@@ -218,6 +218,10 @@ class OrderItemSchema extends ItemSchema {
 			if ( $product instanceof \WC_Product_Variation ) {
 				$product_properties['variation'] = $this->get_variation_data_from_order_item( $order_item, $product );
 			}
+		} else {
+			// Keep running the content filters on the empty defaults, as before.
+			$product_properties['short_description'] = wc_format_content( '' );
+			$product_properties['description']       = wc_format_content( '' );
 		}
 
 		return [
