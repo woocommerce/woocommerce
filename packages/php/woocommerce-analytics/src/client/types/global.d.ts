@@ -20,6 +20,8 @@ declare global {
 		wp_has_consent?: ( type: string ) => boolean;
 		waitfor_consent_hook?: string;
 		wp_consent_type?: string;
+		consent_api?: { cookie_prefix: string };
+		consent_api_get_cookie?: ( name: string ) => string;
 	}
 }
 

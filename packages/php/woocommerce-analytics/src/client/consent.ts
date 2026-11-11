@@ -46,9 +46,30 @@ export class ConsentManager {
 			return true;
 		}
 
+		// Without a consent type, which some banners set only on the first visit, wp_has_consent() ignores a stored deny.
+		if ( this.getStoredStatisticsChoice() === 'deny' ) {
+			debug( 'Statistics consent denied in the consent cookie' );
+			return false;
+		}
+
 		const hasConsent = window.wp_has_consent!( WP_CONSENT_API_STATISTICS_TYPE );
 		debug( 'Analytics consent status:', hasConsent );
 		return hasConsent;
+	}
+
+	/**
+	 * Get the shopper's statistics choice stored by the WP Consent API: `allow`, `deny`, or empty when none is stored.
+	 *
+	 * @return The stored choice
+	 */
+	private getStoredStatisticsChoice(): string {
+		if ( typeof window.consent_api_get_cookie !== 'function' || ! window.consent_api ) {
+			return '';
+		}
+
+		return window.consent_api_get_cookie(
+			window.consent_api.cookie_prefix + '_' + WP_CONSENT_API_STATISTICS_TYPE
+		);
 	}
 
 	/**

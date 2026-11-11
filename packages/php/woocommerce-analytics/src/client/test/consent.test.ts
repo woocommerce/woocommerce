@@ -121,3 +121,52 @@ describe( 'ConsentManager with a delayed WP Consent API script', () => {
 		expect( callback ).toHaveBeenCalledTimes( 1 );
 	} );
 } );
+
+describe( 'ConsentManager.hasAnalyticsConsent with a stored statistics choice', () => {
+	let storedChoice: string;
+
+	beforeEach( () => {
+		storedChoice = '';
+		// Like the WP Consent API without a consent type: every category is granted.
+		window.wp_has_consent = () => true;
+		window.consent_api = { cookie_prefix: 'wp_consent' };
+		window.consent_api_get_cookie = name => ( name === 'wp_consent_statistics' ? storedChoice : '' );
+	} );
+
+	afterEach( () => {
+		delete window.wp_has_consent;
+		delete window.consent_api;
+		delete window.consent_api_get_cookie;
+	} );
+
+	it( 'reports no consent when the shopper denied statistics, even though wp_has_consent() grants it', () => {
+		storedChoice = 'deny';
+
+		expect( new ConsentManager().hasAnalyticsConsent() ).toBe( false );
+	} );
+
+	it( 'reads the stored choice under the consent cookie prefix', () => {
+		window.consent_api = { cookie_prefix: 'custom' };
+		window.consent_api_get_cookie = name => ( name === 'custom_statistics' ? 'deny' : '' );
+
+		expect( new ConsentManager().hasAnalyticsConsent() ).toBe( false );
+	} );
+
+	it( 'leaves the decision to wp_has_consent() when the shopper allowed statistics', () => {
+		storedChoice = 'allow';
+		window.wp_has_consent = () => false;
+
+		expect( new ConsentManager().hasAnalyticsConsent() ).toBe( false );
+	} );
+
+	it( 'reports consent when no choice is stored and wp_has_consent() grants it', () => {
+		expect( new ConsentManager().hasAnalyticsConsent() ).toBe( true );
+	} );
+
+	it( 'leaves the decision to wp_has_consent() when the cookie reader is not available', () => {
+		delete window.consent_api_get_cookie;
+		storedChoice = 'deny';
+
+		expect( new ConsentManager().hasAnalyticsConsent() ).toBe( true );
+	} );
+} );
