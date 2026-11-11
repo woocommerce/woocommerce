@@ -187,8 +187,8 @@ class PaymentGatewayUpdate extends AbstractDomainAbility implements AbilityDefin
 			);
 		}
 
-		// The schema's minLength runs before sanitizing, which can empty a whitespace or markup-only title.
-		if ( '' === trim( $value ) ) {
+		// minLength runs before sanitizing. Stripping the raw title also drops script and style contents, which kses keeps as text.
+		if ( '' === trim( wp_strip_all_tags( $title ) ) || '' === trim( wp_strip_all_tags( $value ) ) ) {
 			return new \WP_Error(
 				'woocommerce_ability_payment_gateway_title_invalid',
 				__( 'The title is empty once markup and whitespace are removed. Send a title with visible text.', 'woocommerce' ),
