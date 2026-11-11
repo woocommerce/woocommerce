@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection;
 
+use WP_Block;
 use WP_Query;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Utilities\ArrayUtil;

@@ -64,7 +64,16 @@ class CartItemsByKey extends AbstractCartRoute {
 				'methods'             => \WP_REST_Server::EDITABLE,
 				'callback'            => array( $this, 'get_response' ),
 				'permission_callback' => '__return_true',
-				'args'                => $this->schema->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
+				'args'                => array_merge(
+					$this->schema->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
+					[
+						// Manually add quantity so it gets validated.
+						'quantity' => [
+							'description' => __( 'New quantity of the item in the cart.', 'woocommerce' ),
+							'type'        => 'number',
+						],
+					]
+				),
 			],
 			[
 				'methods'             => \WP_REST_Server::DELETABLE,

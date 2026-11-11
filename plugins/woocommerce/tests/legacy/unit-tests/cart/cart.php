@@ -13,15 +13,6 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 	/**
-	 * tearDown.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-
-		WC()->customer->set_is_vat_exempt( false );
-	}
-
-	/**
 	 * Test whether totals are correct when discount is applied.
 	 */
 	public function test_cart_total_with_discount_and_taxes() {

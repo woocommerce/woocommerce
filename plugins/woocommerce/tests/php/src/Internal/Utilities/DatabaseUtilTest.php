@@ -159,4 +159,29 @@ class DatabaseUtilTest extends \WC_Unit_Test_Case {
 			$this->assertEquals( $expected, $this->sut->sanitise_boolean_fts_search_term( $term ) );
 		}
 	}
+
+	/**
+	 * @testdox delete_transients_by_prefix() deletes the value and timeout rows of transients whose name starts with a prefix, and ignores empty prefixes.
+	 */
+	public function test_delete_transients_by_prefix(): void {
+		global $wpdb;
+
+		set_transient( 'wc_test_one_1', 'deleted', DAY_IN_SECONDS );
+		set_transient( 'wc_test_two_abc', 'deleted', DAY_IN_SECONDS );
+		set_transient( 'wc_testXone_1', 'kept, as the underscores in a prefix are not wildcards', DAY_IN_SECONDS );
+		set_transient( 'wc_test_three_1', 'kept', DAY_IN_SECONDS );
+
+		$this->sut->delete_transients_by_prefix( array( 'wc_test_one_', '', 'wc_test_two_' ) );
+
+		$this->assertEqualsCanonicalizing(
+			array(
+				'_transient_wc_testXone_1',
+				'_transient_timeout_wc_testXone_1',
+				'_transient_wc_test_three_1',
+				'_transient_timeout_wc_test_three_1',
+			),
+			$wpdb->get_col( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s", '%' . $wpdb->esc_like( 'wc_test' ) . '%' ) ),
+			'Only the transients starting with a given prefix should be deleted'
+		);
+	}
 }

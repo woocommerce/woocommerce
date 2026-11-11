@@ -24,6 +24,19 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The CSV importer automatically maps the MPN column.
+	 */
+	public function test_mpn_csv_header_mapping(): void {
+		$sut    = new WC_Product_CSV_Importer_Controller();
+		$method = new ReflectionMethod( $sut, 'auto_map_columns' );
+		$method->setAccessible( true );
+
+		$mapping = $method->invoke( $sut, array( 'ID', 'MPN' ), false );
+
+		$this->assertSame( 'mpn', $mapping['MPN'] );
+	}
+
+	/**
 	 * Tests that the automatic mapping is case insensitive so that columns can be matched more easily.
 	 */
 	public function test_that_auto_mapping_is_case_insensitive() {
@@ -61,6 +74,41 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 			),
 			$columns
 		);
+	}
+
+	/**
+	 * @testdox Should map exported global unique ID headers in English and translated stores.
+	 * @testWith ["en_US", "GTIN, UPC, EAN, or ISBN"]
+	 *           ["es_ES", "GTIN, UPC, EAN o ISBN"]
+	 *           ["es_ES", "GTIN, UPC, EAN, or ISBN"]
+	 *
+	 * @param string $locale Store locale.
+	 * @param string $header CSV column header.
+	 */
+	public function test_auto_mapping_global_unique_id( string $locale, string $header ): void {
+		wp_set_current_user( 0 );
+		add_filter(
+			'locale',
+			static function () use ( $locale ) {
+				return $locale;
+			}
+		);
+		add_filter(
+			'gettext_woocommerce',
+			static function ( $translation, $text ) use ( $locale ) {
+				return 'es_ES' === $locale && 'GTIN, UPC, EAN, or ISBN' === $text ? 'GTIN, UPC, EAN o ISBN' : $translation;
+			},
+			10,
+			2
+		);
+
+		$sut = new WC_Product_CSV_Importer_Controller();
+		// Mappings are included once, but the test framework restores hooks between datasets.
+		add_filter( 'woocommerce_csv_product_import_mapping_default_columns', 'wc_importer_default_english_mappings', 100 );
+		$method = new ReflectionMethod( WC_Product_CSV_Importer_Controller::class, 'auto_map_columns' );
+		$method->setAccessible( true );
+
+		$this->assertSame( array( 'global_unique_id' ), $method->invoke( $sut, array( $header ) ), 'The exported identifier column should be selected for import.' );
 	}
 
 	/**
@@ -698,5 +746,89 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 			$this->assertArrayHasKey( $property, $options, 'Merchants should be able to map each customs field manually.' );
 		}
 		$this->assertSame( 'Commodity code (HS code)', $options['customs_commodity_code'], 'The commodity code option should match the export label.' );
+	}
+
+	/**
+	 * Path to the sample CSV used by the server-path tests.
+	 *
+	 * @return string
+	 */
+	private function sample_csv(): string {
+		return WC_Unit_Tests_Bootstrap::instance()->plugin_dir . '/tests/php/includes/importer/sample.csv';
+	}
+
+	/**
+	 * Test importing a file located in the uploads directory by entering a path
+	 * relative to the uploads directory (e.g. on hosts where wp-content lives
+	 * outside of ABSPATH).
+	 *
+	 * @return void
+	 */
+	public function test_server_file_in_uploads_dir() {
+		$upload_dir = wp_get_upload_dir();
+		$file       = trailingslashit( $upload_dir['basedir'] ) . 'sample-53676.csv';
+		self::file_copy( $this->sample_csv(), $file );
+
+		$_POST['file_url'] = 'sample-53676.csv';
+		$import_controller = new WC_Product_CSV_Importer_Controller();
+		try {
+			$this->assertEquals( $file, $import_controller->handle_upload() );
+		} finally {
+			wp_delete_file( $file );
+		}
+	}
+
+	/**
+	 * Test importing a file by entering its absolute path.
+	 *
+	 * @return void
+	 */
+	public function test_server_file_absolute_path() {
+		$upload_dir = wp_get_upload_dir();
+		$file       = trailingslashit( $upload_dir['basedir'] ) . 'sample-53676-absolute.csv';
+		self::file_copy( $this->sample_csv(), $file );
+
+		$_POST['file_url'] = $file;
+		$import_controller = new WC_Product_CSV_Importer_Controller();
+		try {
+			$this->assertEquals( $file, $import_controller->handle_upload() );
+		} finally {
+			wp_delete_file( $file );
+		}
+	}
+
+	/**
+	 * Test that an absolute path outside of ABSPATH and the uploads directory is rejected.
+	 *
+	 * @return void
+	 */
+	public function test_server_file_absolute_path_outside_allowed_locations() {
+		$file = sys_get_temp_dir() . '/sample-53676-outside.csv';
+		self::file_copy( $this->sample_csv(), $file );
+
+		$_POST['file_url'] = $file;
+		$import_controller = new WC_Product_CSV_Importer_Controller();
+		try {
+			$import_result = $import_controller->handle_upload();
+
+			$this->assertTrue( is_wp_error( $import_result ) );
+			$this->assertEquals( 'woocommerce_product_csv_importer_upload_invalid_file', $import_result->get_error_code() );
+		} finally {
+			wp_delete_file( $file );
+		}
+	}
+
+	/**
+	 * Test that a non-string file_url value is treated as empty rather than resolved.
+	 *
+	 * @return void
+	 */
+	public function test_server_file_non_string_file_url() {
+		$_POST['file_url'] = array( 'sample.csv' );
+		$import_controller = new WC_Product_CSV_Importer_Controller();
+		$import_result     = $import_controller->handle_upload();
+
+		$this->assertTrue( is_wp_error( $import_result ) );
+		$this->assertEquals( 'woocommerce_product_csv_importer_upload_invalid_file', $import_result->get_error_code() );
 	}
 }

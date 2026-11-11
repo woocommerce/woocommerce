@@ -58,11 +58,16 @@ export function* getCollection( namespace, resourceName, query, ids ) {
 			yield apiFetchWithHeadersControl( { path: route + queryString } );
 
 		if ( headers && headers.get && headers.has( 'last-modified' ) ) {
+			// The header is an HTTP-date. A value that cannot be parsed gives
+			// NaN and is ignored.
+			const lastModified = Math.floor(
+				Date.parse( headers.get( 'last-modified' ) ) / 1000
+			);
 			// Do any invalidation before the collection is received to prevent
 			// this query running again.
-			yield invalidateModifiedCollection(
-				parseInt( headers.get( 'last-modified' ), 10 )
-			);
+			if ( lastModified ) {
+				yield invalidateModifiedCollection( lastModified );
+			}
 		}
 
 		yield receiveCollection( namespace, resourceName, queryString, ids, {

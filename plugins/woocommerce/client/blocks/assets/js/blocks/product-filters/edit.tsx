@@ -20,6 +20,7 @@ import { Icon, close } from '@wordpress/icons';
 import { useState } from '@wordpress/element';
 import { filterThreeLines } from '@woocommerce/icons';
 import { getSetting } from '@woocommerce/settings';
+import { usePreviewMode } from '@woocommerce/base-hooks';
 import clsx from 'clsx';
 
 /**
@@ -53,7 +54,7 @@ const TEMPLATE: InnerBlockTemplate[] = [
 
 export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 	const { attributes, setAttributes } = props;
-	const { isPreview } = attributes;
+	const isPreviewMode = usePreviewMode();
 	const overlayMode = getOverlayMode( attributes );
 	const hasOverlay = overlayMode !== 'off';
 	const overlayPosition =
@@ -93,7 +94,7 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 
 	let filtersContent: JSX.Element;
 
-	if ( isPreview ) {
+	if ( isPreviewMode ) {
 		filtersContent = (
 			<div className="wc-block-product-filters__overlay-content">
 				<InnerBlocks templateLock={ false } template={ TEMPLATE } />
@@ -112,10 +113,7 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 
 				<div className="wc-block-product-filters__overlay">
 					<div className="wc-block-product-filters__overlay-wrapper">
-						<div
-							className="wc-block-product-filters__overlay-dialog"
-							role="dialog"
-						>
+						<section className="wc-block-product-filters__overlay-dialog">
 							<header className="wc-block-product-filters__overlay-header">
 								<button
 									className="wc-block-product-filters__close-overlay"
@@ -140,7 +138,7 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 									</span>
 								</button>
 							</footer>
-						</div>
+						</section>
 					</div>
 				</div>
 			</>

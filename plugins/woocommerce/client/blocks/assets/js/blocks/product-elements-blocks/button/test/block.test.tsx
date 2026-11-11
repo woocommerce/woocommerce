@@ -96,6 +96,12 @@ describe( 'AddToCartButton', () => {
 		expect( link ).toHaveAttribute( 'href', '/cart/' );
 		expect( link ).toHaveAttribute( 'rel', 'nofollow' );
 	} );
+
+	it( 'passes the notice context to the add to cart hook', () => {
+		renderButton( { noticeContext: 'wc/cart' } );
+
+		expect( useStoreAddToCart ).toHaveBeenCalledWith( 1, 'wc/cart' );
+	} );
 } );
 
 describe( 'Product Button spacing', () => {

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Keep block data- attributes working for the rest of a request when another plugin errors while an email is being built.

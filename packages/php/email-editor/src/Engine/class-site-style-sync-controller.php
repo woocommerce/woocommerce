@@ -434,42 +434,67 @@ class Site_Style_Sync_Controller {
 
 		// Map common web fonts to email-safe alternatives.
 		$font_map = array(
-			'helvetica' => $email_safe_fonts['arial'], // Arial fallback.
-			'times'     => $email_safe_fonts['georgia'], // Georgia fallback.
-			'courier'   => $email_safe_fonts['courier-new'], // Courier New.
-			'trebuchet' => $email_safe_fonts['trebuchet-ms'],
+			'helvetica'     => $email_safe_fonts['arial'], // Arial fallback.
+			'times'         => $email_safe_fonts['georgia'], // Georgia fallback.
+			'courier'       => $email_safe_fonts['courier-new'], // Courier New.
+			'trebuchet'     => $email_safe_fonts['trebuchet-ms'],
+			// Generic families, so serif and monospace fonts don't all turn into Arial.
+			// `fantasy` has no email-safe match, so it falls through to Arial.
+			'serif'         => $email_safe_fonts['georgia'],
+			'ui-serif'      => $email_safe_fonts['georgia'],
+			'monospace'     => $email_safe_fonts['courier-new'],
+			'ui-monospace'  => $email_safe_fonts['courier-new'],
+			'cursive'       => $email_safe_fonts['comic-sans-ms'],
+			'sans-serif'    => $email_safe_fonts['arial'],
+			'ui-sans-serif' => $email_safe_fonts['arial'],
+			'system-ui'     => $email_safe_fonts['arial'],
 		);
 
 		$email_safe_fonts = array_merge( $email_safe_fonts, $font_map );
 
 		$get_font_family = function ( $font_name ) use ( $email_safe_fonts ) {
-			$font_name_lower = strtolower( $font_name );
-
 			// First check for match in the email-safe slug.
-			if ( isset( $email_safe_fonts[ $font_name_lower ] ) ) {
-				return $email_safe_fonts[ $font_name_lower ];
+			if ( isset( $email_safe_fonts[ $font_name ] ) ) {
+				return $email_safe_fonts[ $font_name ];
 			}
 
-			// If no match in the slug, check for match in the font family name.
-			foreach ( $email_safe_fonts as $safe_font_slug => $safe_font ) {
-				if ( stripos( $safe_font, $font_name_lower ) !== false ) {
+			// If no match in the slug, look for the same family name in a stack.
+			// Whole names only: a substring match finds "serif" inside Arial's "sans-serif".
+			foreach ( $email_safe_fonts as $safe_font ) {
+				if ( in_array( $font_name, $this->get_font_names( $safe_font ), true ) ) {
 					return $safe_font;
 				}
 			}
 			return null;
 		};
 
-		// Check if it's already an email-safe font.
-		$font_family_array = explode( ',', $font_family );
-		$first_font        = trim( $font_family_array[0] );
-		$first_font        = trim( $first_font, "\"'" );
-		$safe_font_family  = $get_font_family( $first_font );
-		if ( $safe_font_family ) {
-			return $safe_font_family;
+		// Walk the stack as CSS would: the first email-safe font or generic family wins.
+		foreach ( $this->get_font_names( $font_family ) as $font_name ) {
+			$safe_font_family = $get_font_family( $font_name );
+			if ( $safe_font_family ) {
+				return $safe_font_family;
+			}
 		}
 
 		// Default to arial font if no match found.
 		return $email_safe_fonts['arial'];
+	}
+
+	/**
+	 * Split a CSS font-family stack into lowercase family names without quotes.
+	 *
+	 * @param string $font_family CSS font-family value.
+	 * @return string[] Family names in stack order.
+	 */
+	private function get_font_names( string $font_family ): array {
+		$names = array();
+		foreach ( explode( ',', $font_family ) as $name ) {
+			$name = strtolower( trim( trim( $name ), "\"'" ) );
+			if ( '' !== $name ) {
+				$names[] = $name;
+			}
+		}
+		return $names;
 	}
 
 	/**
