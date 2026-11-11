@@ -34,6 +34,15 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Clears the feature definitions registered on the container's controller during tests.
+	 */
+	public function tearDown(): void {
+		$this->reset_container_resolutions();
+
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox `get_all_active_valid_plugins` gets the active plugins *that actually exist* and returns them
 	 *          as a list of absolute file paths.
 	 *
