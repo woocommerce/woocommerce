@@ -191,11 +191,17 @@ add_action(
 
 					wc_load_cart();
 					WC()->cart->get_cart();
+					WC()->cart->calculate_totals();
 
-					return array(
-						'items_count' => WC()->cart->get_cart_contents_count(),
-						'total'       => WC()->cart->get_total( 'edit' ),
+					$response = new WP_REST_Response(
+						array(
+							'items_count' => WC()->cart->get_cart_contents_count(),
+							'total'       => WC()->cart->get_total( 'edit' ),
+						)
 					);
+					$response->header( 'Cache-Control', 'no-store, private' );
+
+					return $response;
 				},
 			)
 		);
@@ -203,7 +209,9 @@ add_action(
 );
 ```
 
-`wc_load_cart()` sets up the session and an empty cart. It doesn't read the cart items, so call `WC()->cart->get_cart()` next, which loads the items and totals from the session. After that, other cart methods such as `get_cart_contents()` and `get_total()` return the customer's cart.
+`wc_load_cart()` sets up the session and an empty cart. It doesn't read the cart items, so call `WC()->cart->get_cart()` next, which loads the items and totals from the session. Then call `calculate_totals()`, because the stored totals can be out of date, for example when a product in the cart was deleted. After that, other cart methods such as `get_cart_contents()` and `get_total()` return the customer's cart.
+
+The response is different for every customer, so the example sends `Cache-Control: no-store, private`. WordPress only sends no-cache headers for logged-in users, and a page cache could otherwise serve one guest's cart to another.
 
 The session is read from the customer's cookies, so call the route from the browser with `credentials: 'same-origin'`. Also send an `X-WP-Nonce` header created with `wp_create_nonce( 'wp_rest' )`. WordPress handles the nonce in two ways:
 
