@@ -21,11 +21,11 @@ use InvalidArgumentException;
  *   `register_getters()`.
  *
  * The derived getters are mirrored in the JS store
- * (client/blocks/assets/js/base/stores/woocommerce/products.ts) so that
+ * (client/blocks/assets/js/base/stores/products.ts) so that
  * directive bindings like `state.productInContext.sku` resolve during
  * server-side rendering as well as on the client.
  *
- * See client/blocks/assets/js/base/stores/woocommerce/README.md for the
+ * See client/blocks/assets/js/base/stores/README.md for the
  * full model and consumer examples.
  *
  * This is an experimental API and may change in future versions.
@@ -93,7 +93,7 @@ class ProductsStore {
 	 * Register the derived-state getters once.
 	 *
 	 * These closures mirror the JS getters in
-	 * client/blocks/assets/js/base/stores/woocommerce/products.ts so that
+	 * client/blocks/assets/js/base/stores/products.ts so that
 	 * directives referencing state.mainProductInContext /
 	 * state.productVariationInContext / state.productInContext resolve
 	 * during SSR. Because they read from
