@@ -99,7 +99,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 
 		$report = $this->sut->get_report();
 
-		$this->assertSame( array( 'generated_at', 'products', 'hidden_from_catalog', 'unsupported_types', 'store_checks', 'declared', 'channels', 'checks', 'truncated', 'sales' ), array_keys( $report ) );
+		$this->assertSame( array( 'generated_at', 'products', 'available', 'hidden_from_catalog', 'unsupported_types', 'store_checks', 'declared', 'channels', 'checks', 'truncated', 'sales' ), array_keys( $report ) );
 		$this->assertFalse( $report['truncated'] );
 		$this->assertSame( array( 'id', 'ok', 'blocks', 'group', 'level', 'name', 'label', 'why', 'fix', 'fix_url' ), array_keys( $report['store_checks'][0] ) );
 		$this->assertSame( array( 'chatgpt', 'google', 'copilot' ), array_keys( $report['channels'] ) );
@@ -384,6 +384,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 2, $report['products'], 'Only the shown simple product and the shop-only one are checked' );
 		$this->assertSame( 2, $report['hidden_from_catalog'], 'Hidden and search-only products are counted apart' );
+		$this->assertSame( 2, $report['available'], 'The catalog agents can see: the same products as checked when under the limit' );
 		$this->assertSame( 2, $report['unsupported_types'], 'External and the subscription are counted apart' );
 		$this->assertSame( 2, $report['channels']['chatgpt']['listable'] + $report['channels']['chatgpt']['not_listable'] );
 		$this->assertNotContains( 'hidden_from_catalog', array_column( $report['checks'], 'id' ) );

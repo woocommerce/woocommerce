@@ -73,6 +73,13 @@ class ProductScan {
 	private int $hidden_from_catalog = 0;
 
 	/**
+	 * Published products agents can see, the scan's catalog. More than it checks when it stops at PRODUCT_LIMIT.
+	 *
+	 * @var int
+	 */
+	private int $available = 0;
+
+	/**
 	 * Published products of a type agents don't support yet.
 	 *
 	 * @var int
@@ -149,6 +156,7 @@ class ProductScan {
 		$this->statuses            = array();
 		$this->truncated           = false;
 		$this->hidden_from_catalog = self::count_published( self::count_query( self::COUNT_HIDDEN ) );
+		$this->available           = self::count_published( self::count_query( self::COUNT_AVAILABLE ) );
 		$this->unsupported_types   = self::count_published( self::count_query( self::COUNT_UNSUPPORTED ) );
 
 		$flush_runtime_cache = wp_cache_supports( 'flush_runtime' );
@@ -355,6 +363,13 @@ class ProductScan {
 	 */
 	public function products(): int {
 		return $this->products;
+	}
+
+	/**
+	 * Published products agents can see, including any past PRODUCT_LIMIT.
+	 */
+	public function available(): int {
+		return $this->available;
 	}
 
 	/**

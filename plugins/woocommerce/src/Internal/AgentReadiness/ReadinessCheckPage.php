@@ -58,6 +58,14 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 	);
 
 	/**
+	 * Scanned checks left out while a setup step with the same cause fails, so it shows once: WordPress
+	 * prints noindex while "Discourage search engines" is on.
+	 */
+	private const SAME_CAUSE = array(
+		'no_noindex_directives' => 'search_visible',
+	);
+
+	/**
 	 * Badge intents of the design system, by the badge class the PHP pages use.
 	 */
 	private const INTENTS = array(
@@ -243,10 +251,15 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		} elseif ( $pending ) {
 			$message = __( 'Checking your store.', 'woocommerce' );
 		}
-		$truncated = null !== $report && ! empty( $report['truncated'] )
-			/* translators: %s: number of products checked. */
-			? sprintf( __( 'Checked your %s most recently changed products.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ) )
-			: null;
+		$truncated = null;
+		if ( null !== $report && ! empty( $report['truncated'] ) ) {
+			$available = (int) ( $report['available'] ?? 0 );
+			$truncated = $available > ProductScan::PRODUCT_LIMIT
+				/* translators: 1: number of products checked, 2: number of products in the store. */
+				? sprintf( __( 'Checked your %1$s most recently changed products of %2$s.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ), number_format_i18n( $available ) )
+				/* translators: %s: number of products checked. Reports from before the total was stored. */
+				: sprintf( __( 'Checked your %s most recently changed products.', 'woocommerce' ), number_format_i18n( ProductScan::PRODUCT_LIMIT ) );
+		}
 		return array(
 			'title'        => __( 'Sales readiness', 'woocommerce' ),
 			'description'  => __( 'See how AI assistants see your store, and what to improve.', 'woocommerce' ),
@@ -302,7 +315,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		}
 		return array(
 			'title'  => __( 'AI shopping', 'woocommerce' ),
-			'badge'  => ! $enabled || 'off' === $badge[0] ? null : self::badge_data( $badge ),
+			'badge'  => ! $set_up || 'off' === $badge[0] ? null : self::badge_data( $badge ),
 			'text'   => $text,
 			'button' => array(
 				'href' => AgenticCommerceSettings::url( AgenticCommerceSettings::SHOPPING_SECTION ),
@@ -425,12 +438,16 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 		$scanned = array_slice( $this->agent_readiness->get_store_checks( $report, $checks ), count( $checks ) );
 		$results = array_column( $scanned, 'ok', 'id' );
 		$setup   = array_filter( $checks, static fn( array $check ): bool => 'ucp_on' !== $check['id'] );
+		$steps   = array_column( $checks, 'ok', 'id' );
 		return array_merge(
 			self::setup_order( $setup ),
 			array_filter(
 				$scanned,
-				static function ( array $check ) use ( $results ): bool {
+				static function ( array $check ) use ( $results, $steps ): bool {
 					if ( ! empty( $check['pending'] ) || ( ! UcpUtils::is_enabled() && 'ucp' === $check['blocks'] ) ) {
+						return false;
+					}
+					if ( false === ( $steps[ self::SAME_CAUSE[ $check['id'] ] ?? '' ] ?? null ) ) {
 						return false;
 					}
 					$needs = self::CHECK_NEEDS[ $check['id'] ] ?? null;
@@ -981,7 +998,7 @@ class ReadinessCheckPage implements RegisterHooksInterface {
 				'id'       => $id,
 				'title'    => $group[0],
 				'badge'    => self::badge_data( self::group_badge( $group[1] ) ),
-				'note'     => 'access' === $id && ! UcpUtils::is_enabled() ? __( 'Agent shopping is off, so the UCP checks don\'t run.', 'woocommerce' ) : null,
+				'note'     => 'access' === $id && ! UcpUtils::is_enabled() ? __( 'AI shopping is off, so the UCP checks don\'t run.', 'woocommerce' ) : null,
 				'channels' => array(),
 				'rows'     => self::check_rows( array_values( array_diff_key( $group[1], $folded ) ), $launched ),
 				'folded'   => self::check_rows( array_values( $folded ), $launched ),

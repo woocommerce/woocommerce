@@ -102,6 +102,10 @@ class ReportAbility implements AbilityDefinition {
 							'type'        => 'integer',
 							'description' => __( 'Published simple and variable products checked.', 'woocommerce' ),
 						),
+						'available'           => array(
+							'type'        => 'integer',
+							'description' => __( 'Published products agents can see, including any past the check\'s limit.', 'woocommerce' ),
+						),
 						'hidden_from_catalog' => array(
 							'type'        => 'integer',
 							'description' => __( 'Products not checked because the merchant hid them from the shop catalog.', 'woocommerce' ),

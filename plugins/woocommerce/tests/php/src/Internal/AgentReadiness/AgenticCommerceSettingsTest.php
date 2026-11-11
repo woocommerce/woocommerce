@@ -172,6 +172,11 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$html = $this->render_page();
 
 		$this->assertStringContainsString( '<span>Available to AI assistants</span> <strong>1</strong> <a href="', $html );
+		$stored              = get_option( AgentReadiness::REPORT_OPTION );
+		$stored['products']  = ProductScan::PRODUCT_LIMIT;
+		$stored['available'] = 8400;
+		update_option( AgentReadiness::REPORT_OPTION, $stored );
+		$this->assertStringContainsString( '<span>Available to AI assistants</span> <strong>8,400</strong> <a href="', $this->render_page(), 'The whole catalog, like the other two, not only the products the scan stopped at' );
 		$this->assertMatchesRegularExpression( '#<span>Product type not supported yet <span[^>]*woocommerce-help-tip[^>]*AI assistants can find these products, but shoppers can.{1,7}t buy them through an assistant yet\.[^>]*></span></span> <strong>1</strong>#', $html, 'The tip says what not supported means' );
 		$this->assertStringContainsString( 'agent_readiness=' . ProductScan::COUNT_UNSUPPORTED . '">View products</a>', $html, 'Each count links to its products' );
 		$this->assertMatchesRegularExpression( '#<h2>Setup checklist</h2>\s*<p>Finish \d+ required steps? to get your store ready for AI shopping\.</p>#', $html, 'The checklist counts the required steps first, even with UCP off' );
@@ -224,6 +229,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			'optional steps left' => array( 'optional_left', 'yes', '#^AI assistants can shop your store\. 1 step left\.$#', 'Active', 'Manage', '#<p>Your store is ready for AI shopping\. You have 1 optional step left\.</p>#' ),
 			'all steps done'      => array( 'every_step', 'yes', '#^AI assistants can shop your store\.$#', 'Active', 'Manage', '#<p>Your store is ready for AI shopping\.</p>#' ),
 			'turned off'          => array( 'every_step', 'no', '#^AI shopping is off\.$#', null, 'Manage', '#<p>Your store is ready for AI shopping\. Turn it on to let AI assistants find your products\.</p>#' ),
+			'off, steps left'     => array( 'coming_soon', 'no', '#^AI shopping is off\.$#', 'Needs attention', 'Manage', '#<p>Finish \d+ required steps? to get your store ready for AI shopping\.</p>#' ),
 		);
 	}
 
@@ -458,7 +464,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			array_column( $view['sections'], 'title' ),
 			'Products come before Can shoppers buy through AI assistants?'
 		);
-		$this->assertSame( 'Agent shopping is off, so the UCP checks don\'t run.', $sections['access']['note'], 'UCP is off in this test' );
+		$this->assertSame( 'AI shopping is off, so the UCP checks don\'t run.', $sections['access']['note'], 'UCP is off in this test' );
 		$this->assertSame(
 			array(
 				'intent' => 'low',
@@ -867,7 +873,15 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		update_option( AgentReadiness::REPORT_OPTION, $stored );
 		$this->assertSame(
 			sprintf( 'Checked your %s most recently changed products.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
-			$this->view()['checked_note']
+			$this->view()['checked_note'],
+			'A report without the total keeps the short note'
+		);
+		$stored['available'] = 8400;
+		update_option( AgentReadiness::REPORT_OPTION, $stored );
+		$this->assertSame(
+			sprintf( 'Checked your %s most recently changed products of 8,400.', number_format_i18n( ProductScan::PRODUCT_LIMIT ) ),
+			$this->view()['checked_note'],
+			'With the total from the same scan'
 		);
 	}
 
@@ -1335,6 +1349,40 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 			$this->save_hidden = ! empty( $GLOBALS['hide_save_button'] );
 			unset( $GLOBALS['hide_save_button'] );
 		}
+	}
+
+	/**
+	 * @testdox With "Discourage search engines" on, the noindex it prints is one issue: the setup step, not also the scanned check.
+	 */
+	public function test_noindex_from_discourage_search_engines_shows_once(): void {
+		$this->make_every_step_pass();
+		update_option( 'blog_public', '0' );
+		update_option(
+			AgentReadiness::REPORT_OPTION,
+			array(
+				'generated_at' => gmdate( 'c' ),
+				'store_checks' => array(
+					array(
+						'id'      => 'no_noindex_directives',
+						'ok'      => false,
+						'blocks'  => 'listing',
+						'group'   => 'access',
+						'name'    => 'noindex name',
+						'label'   => 'noindex label',
+						'why'     => '',
+						'fix'     => '',
+						'fix_url' => '',
+					),
+				),
+			)
+		);
+
+		$titles = array_column( $this->view()['fix_first']['items'], 'title' );
+		$this->assertSame( array( 'Let search engines index your store' ), $titles );
+
+		update_option( 'blog_public', '1' );
+		$this->assertCount( 1, $this->view()['fix_first']['items'], 'A noindex from elsewhere, such as an SEO plugin, still shows' );
+		$this->assertNotContains( 'Let search engines index your store', array_column( $this->view()['fix_first']['items'], 'title' ) );
 	}
 
 	/**

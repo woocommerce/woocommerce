@@ -214,7 +214,7 @@ class AgentReadiness {
 	/**
 	 * Run every check over the catalog.
 	 *
-	 * @return array{generated_at:string,products:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,sales:array{days:int,orders:int}|null}
+	 * @return array{generated_at:string,products:int,available:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,sales:array{days:int,orders:int}|null}
 	 */
 	public function get_report(): array {
 		return $this->build_report();
@@ -224,7 +224,7 @@ class AgentReadiness {
 	 * Run every check over the catalog.
 	 *
 	 * @param callable|null $on_tested Called with each product id and its failures.
-	 * @return array{generated_at:string,products:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,sales:array{days:int,orders:int}|null,shared_gtins?:array<int,string>}
+	 * @return array{generated_at:string,products:int,available:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,sales:array{days:int,orders:int}|null,shared_gtins?:array<int,string>}
 	 */
 	private function build_report( ?callable $on_tested = null ): array {
 		// Rebuild the rules and the scan for each report: a long-running process may have fetched a new rules file or changed GTINs since.
@@ -264,6 +264,7 @@ class AgentReadiness {
 		$report = array(
 			'generated_at'        => gmdate( 'c' ),
 			'products'            => $scan->products(),
+			'available'           => $scan->available(),
 			'hidden_from_catalog' => $scan->hidden_from_catalog(),
 			'unsupported_types'   => $scan->unsupported_types(),
 			'store_checks'        => array_merge( $this->store_conditions->all(), $this->store_output_checks->all( $responses ) ),
