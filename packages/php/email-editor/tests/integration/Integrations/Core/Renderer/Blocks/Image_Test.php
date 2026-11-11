@@ -495,4 +495,23 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 		// Note: esc_attr() encodes single quotes as &#039;.
 		$this->assertStringContainsString( 'data-link-href="[trackable-link url=&#039;test&#039;]"', $rendered );
 	}
+
+	/**
+	 * Test that only attributes useful in an email stay on the image.
+	 */
+	public function testItRemovesWebOnlyAttributesFromImage(): void {
+		$image_content = '<figure class="wp-block-image"><img class="wp-image-1" src="https://test.com/image.jpg?a=1&b=2" alt="Alt" title="Title" width="640" height="320" loading="lazy" decoding="async" fetchpriority="low" srcset="https://test.com/image.jpg 1000w" sizes="(max-width: 640px) 100vw, 640px" data-id="1" style="aspect-ratio:2;object-fit:cover"/></figure>';
+
+		$rendered = $this->image_renderer->render( $image_content, $this->parsed_image, $this->rendering_context );
+
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'img' ) ) );
+		$this->assertEqualsCanonicalizing(
+			array( 'src', 'alt', 'title', 'width', 'height', 'style' ),
+			$html->get_attribute_names_with_prefix( '' )
+		);
+		$this->assertSame( 'https://test.com/image.jpg?a=1&b=2', $html->get_attribute( 'src' ) );
+		$this->assertStringContainsString( 'object-fit:cover', (string) $html->get_attribute( 'style' ) );
+		$this->assertStringContainsString( 'aspect-ratio:2', (string) $html->get_attribute( 'style' ) );
+	}
 }

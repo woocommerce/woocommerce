@@ -361,7 +361,7 @@ class SubmissionHandler {
 
 			// Core recounts an approved comment before writing its meta, so recount once the rating is stored.
 			if ( 'approved' === $comment_status ) {
-				WC_Comments::clear_transients( $review_post_id );
+				\WC_Comments::maybe_update_product_average_rating( $review_post_id );
 			}
 
 			$result['comment_id'] = (int) $comment_id;

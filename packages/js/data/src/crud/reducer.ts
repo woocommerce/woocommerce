@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { Reducer } from 'redux';
-
-/**
  * Internal dependencies
  */
 import { Actions } from './actions';
@@ -15,7 +10,7 @@ import {
 } from './utils';
 import { getTotalCountResourceName } from '../utils';
 import { TYPES } from './action-types';
-import type { IdType, Item, ItemQuery } from './types';
+import type { AnyAction, IdType, Item, ItemQuery } from './types';
 
 export type Data = Record< IdType, Item >;
 export type ResourceState = {
@@ -32,18 +27,21 @@ export type ResourceState = {
 };
 
 export const createReducer = (
-	additionalReducer?: Reducer< ResourceState >
+	additionalReducer?: (
+		state: ResourceState | undefined,
+		action: AnyAction
+	) => ResourceState
 ) => {
-	const reducer: Reducer< ResourceState, Actions > = (
-		state = {
+	const reducer = (
+		state: ResourceState = {
 			items: {},
 			data: {},
 			itemsCount: {},
 			errors: {},
 			requesting: {},
 		},
-		payload
-	) => {
+		payload: Actions
+	): ResourceState => {
 		const itemData = state.data || {};
 
 		if ( payload && 'type' in payload ) {

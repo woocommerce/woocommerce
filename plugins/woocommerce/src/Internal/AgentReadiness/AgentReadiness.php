@@ -26,9 +26,9 @@ class AgentReadiness {
 	public const PRODUCT_IDS_LIMIT = 10;
 
 	/**
-	 * Transient holding the last report.
+	 * Option holding the last report, kept until the next scan replaces it.
 	 */
-	public const REPORT_TRANSIENT = 'woocommerce_agent_readiness_report';
+	public const REPORT_OPTION = 'woocommerce_agent_readiness_report';
 
 	/**
 	 * Store-wide conditions.
@@ -36,6 +36,13 @@ class AgentReadiness {
 	 * @var StoreConditions
 	 */
 	private StoreConditions $store_conditions;
+
+	/**
+	 * Rules from the published rules file.
+	 *
+	 * @var RemoteRules
+	 */
+	private RemoteRules $remote_rules;
 
 	/**
 	 * Scan reused for single-product checks, so its shared GTIN lookup runs once per request.
@@ -57,9 +64,11 @@ class AgentReadiness {
 	 * @internal
 	 *
 	 * @param StoreConditions $store_conditions Store-wide conditions.
+	 * @param RemoteRules     $remote_rules     Rules from the published rules file.
 	 */
-	final public function init( StoreConditions $store_conditions ): void {
+	final public function init( StoreConditions $store_conditions, RemoteRules $remote_rules ): void {
 		$this->store_conditions = $store_conditions;
+		$this->remote_rules     = $remote_rules;
 	}
 
 	/**
@@ -92,16 +101,29 @@ class AgentReadiness {
 	}
 
 	/**
-	 * Field and effect per channel for each check, after the
-	 * woocommerce_agent_readiness_rules filter. A check whose id is missing
-	 * from the filtered array does not run.
+	 * Field and effect per channel for each check that runs. With a stored
+	 * rules file, the file is the list: an id it leaves out does not run, an
+	 * id code does not know is dropped, and an id whose entry is malformed
+	 * runs with its bundled channels. With no file, the bundled checks
+	 * run. The woocommerce_agent_readiness_rules filter runs last, and a check
+	 * whose id is missing from the filtered array does not run.
 	 *
 	 * @return array<string, array<string, array{field:string,effect:string}>>
 	 */
 	public function get_channel_rules(): array {
-		$defaults = array();
+		$bundled = array();
 		foreach ( $this->get_default_rules() as $id => $rule ) {
-			$defaults[ $id ] = $rule->channels();
+			$bundled[ $id ] = $rule->channels();
+		}
+		if ( $this->remote_rules->has_stored_file() ) {
+			$from_file = array();
+			foreach ( $this->sanitize_channel_rules( $this->remote_rules->channel_rules(), $bundled ) as $id => $channels ) {
+				$from_file[ $id ] = array() !== $channels ? $channels : $bundled[ $id ];
+			}
+			// A file with no check this code can run does not turn the bundled checks off.
+			$defaults = array() !== $from_file ? $from_file : $bundled;
+		} else {
+			$defaults = $bundled;
 		}
 
 		/**
@@ -110,7 +132,8 @@ class AgentReadiness {
 		 * Keys are check ids; values map a channel id (chatgpt, google, copilot)
 		 * to the feed field the check tests there and its effect: not_listable
 		 * when the channel's spec requires the field, gaps when the product
-		 * lists with a gap. Remove a check id to stop that check running.
+		 * lists with a gap. Remove a check id to stop that check running. Add
+		 * back an id the rules file left out to run that bundled check.
 		 *
 		 * @since 11.4.0
 		 *
@@ -118,8 +141,7 @@ class AgentReadiness {
 		 */
 		$filtered = apply_filters( 'woocommerce_agent_readiness_rules', $defaults );
 
-		// A check left with no valid channel doesn't run, as if the filter had removed it.
-		return is_array( $filtered ) ? array_filter( $this->sanitize_channel_rules( $filtered, $defaults ) ) : $defaults;
+		return is_array( $filtered ) ? $this->without_empty( $this->sanitize_channel_rules( $filtered, $bundled ) ) : $defaults;
 	}
 
 	/**
@@ -139,11 +161,12 @@ class AgentReadiness {
 			}
 			$rules[ $id ] = array();
 			foreach ( $rule_channels as $channel => $spec ) {
-				if ( ! isset( $channels[ $channel ] ) || ! is_array( $spec ) || ! in_array( $spec['effect'] ?? null, $effects, true ) ) {
+				$field = is_array( $spec ) ? ( $spec['field'] ?? null ) : null;
+				if ( ! isset( $channels[ $channel ] ) || ! is_string( $field ) || ! in_array( $spec['effect'] ?? null, $effects, true ) ) {
 					continue;
 				}
 				$rules[ $id ][ $channel ] = array(
-					'field'  => (string) ( $spec['field'] ?? '' ),
+					'field'  => $field,
 					'effect' => $spec['effect'],
 				);
 			}
@@ -152,12 +175,27 @@ class AgentReadiness {
 	}
 
 	/**
+	 * Drop checks left with no valid channel.
+	 *
+	 * @param array<string, array<string, array{field:string,effect:string}>> $rules Channel map by check id.
+	 * @return array<string, array<string, array{field:string,effect:string}>>
+	 */
+	private function without_empty( array $rules ): array {
+		return array_filter(
+			$rules,
+			static function ( array $channels ): bool {
+				return array() !== $channels;
+			}
+		);
+	}
+
+	/**
 	 * Run every check over the catalog.
 	 *
 	 * @return array{generated_at:string,products:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool}
 	 */
 	public function get_report(): array {
-		// Rebuild the rules and the scan for each report: a long-running process may have changed the rules or GTINs since.
+		// Rebuild the rules and the scan for each report: a long-running process may have fetched a new rules file or changed GTINs since.
 		$this->active_rules = null;
 		$this->product_scan = null;
 		$active             = $this->get_active_rules();
@@ -200,18 +238,18 @@ class AgentReadiness {
 	 * @return array<string, mixed>|null
 	 */
 	public function get_cached_report(): ?array {
-		$report = get_transient( self::REPORT_TRANSIENT );
+		$report = get_option( self::REPORT_OPTION );
 		return is_array( $report ) ? $report : null;
 	}
 
 	/**
-	 * Run the report and store it for an hour.
+	 * Run the report and store it. Not autoloaded: only the readiness screens read it.
 	 *
 	 * @return array<string, mixed>
 	 */
 	public function refresh_report(): array {
 		$report = $this->get_report();
-		set_transient( self::REPORT_TRANSIENT, $report, HOUR_IN_SECONDS );
+		update_option( self::REPORT_OPTION, $report, false );
 		return $report;
 	}
 

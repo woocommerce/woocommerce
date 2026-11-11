@@ -8,6 +8,47 @@ declare( strict_types = 1 );
  */
 class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 	/**
+	 * @testdox Cart links preselect taxonomy variations with non-Latin term slugs.
+	 * @testWith ["color", "Κόκκινο"]
+	 *           ["χρώμα", "Κόκκινο"]
+	 *           ["color", "Red"]
+	 * @param string $attribute_name Attribute name.
+	 * @param string $term_name Term name.
+	 */
+	public function test_variation_dropdown_preselects_attribute_from_permalink( string $attribute_name, string $term_name ): void {
+		$attribute = WC_Helper_Product::create_product_attribute_object( $attribute_name, array( $term_name ) );
+		$product   = new WC_Product_Variable();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+		$term = $attribute->get_terms()[0];
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( sanitize_title( $attribute->get_name() ) => $term->slug ) );
+		$variation->save();
+
+		$previous_request = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserve request state for the test.
+		parse_str( wp_parse_url( $variation->get_permalink(), PHP_URL_QUERY ), $query );
+		$_REQUEST = wp_slash( $query ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Simulate following the variation permalink.
+		ob_start();
+		try {
+			wc_dropdown_variation_attribute_options(
+				array(
+					'product'   => $product,
+					'attribute' => $attribute->get_name(),
+					'options'   => array( $term->slug ),
+				)
+			);
+			$html = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+			$_REQUEST = $previous_request;
+		}
+
+		$this->assertMatchesRegularExpression( '/value="' . preg_quote( $term->slug, '/' ) . '"\s+selected=/', $html, 'The linked variation must be selected in the dropdown.' );
+	}
+
+	/**
 	 * Render the loop add-to-cart template for a product.
 	 *
 	 * @param WC_Product $test_product Product to render.
