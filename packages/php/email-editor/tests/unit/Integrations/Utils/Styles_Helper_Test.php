@@ -180,7 +180,7 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 			'keyword'                    => array( 'white', true ),
 			'keyword, mixed case'        => array( 'currentColor', true ),
 
-			// Twenty Twenty-Five's accent-6.
+			// Twenty Twenty-Five’s accent-6.
 			'color-mix'                  => array( 'color-mix(in srgb, currentColor 20%, transparent)', false ),
 			'light-dark'                 => array( 'light-dark(#ffffff, #000000)', false ),
 			'preset variable'            => array( 'var(--wp--preset--color--base)', false ),

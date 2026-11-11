@@ -177,7 +177,7 @@ class Site_Style_Sync_Controller {
 	private function sync_settings_data( array $site_settings ): array {
 		$email_settings = array();
 
-		// Sync color palette, without the colors email clients can't render.
+		// Sync color palette, without the colors email clients can’t render.
 		if ( isset( $site_settings['color']['palette'] ) ) {
 			$email_settings['color']['palette'] = array_values(
 				array_filter(
@@ -251,7 +251,7 @@ class Site_Style_Sync_Controller {
 	/**
 	 * Convert site color styles to email format
 	 *
-	 * Returns nothing when email clients can't render one of the colors, so the email theme's own
+	 * Returns nothing when email clients can’t render one of the colors, so the email theme’s own
 	 * text and background apply together. One site color on the other default can be unreadable.
 	 *
 	 * @param array $color_styles Site color styles.

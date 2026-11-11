@@ -163,7 +163,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 	}
 
 	/**
-	 * Test a palette color email clients can't render is not synced.
+	 * Test a palette color email clients can’t render is not synced.
 	 *
 	 * Twenty Twenty-Five defines `accent-6` as color-mix(). It comes first here because the synced
 	 * palette has to stay a list: WP_Theme_JSON reads one without a first entry as a set of origins.
@@ -210,9 +210,9 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 	}
 
 	/**
-	 * Test site colors email clients can't render are not synced, so the email theme's own apply.
+	 * Test site colors email clients can’t render are not synced, so the email theme’s own apply.
 	 *
-	 * Text and background go together: a site text color on the email theme's background, or the
+	 * Text and background go together: a site text color on the email theme’s background, or the
 	 * other way round, can be unreadable.
 	 */
 	public function test_sync_site_styles_leaves_out_style_colors_email_clients_cannot_render(): void {

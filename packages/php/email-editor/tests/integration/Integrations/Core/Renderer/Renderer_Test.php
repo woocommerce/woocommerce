@@ -288,7 +288,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test a site palette color email clients can't render is left out of the sent email.
+	 * Test a site palette color email clients can’t render is left out of the sent email.
 	 *
 	 * Twenty Twenty-Five defines `accent-6` as color-mix(). A block reaches a palette color by its
 	 * slug, by its `has-*` class and by its preset variable, so the test checks the final HTML
