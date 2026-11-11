@@ -545,9 +545,9 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Complete finishes a checkout with nothing to pay, which the payment page would refuse.
+	 * @testdox Complete refuses a checkout with nothing to pay, which the payment page would not take, and makes no order.
 	 */
-	public function test_complete_finishes_a_free_checkout(): void {
+	public function test_complete_refuses_a_free_checkout(): void {
 		$product = \WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -564,9 +564,8 @@ class UcpCheckout extends ControllerTestCase {
 
 		$data = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' )->get_data();
 
-		$this->assertSame( 'completed', $data['status'] );
-		$this->assertArrayNotHasKey( 'continue_url', $data );
-		$this->assertTrue( wc_get_order( (int) $data['order']['id'] )->is_paid() );
+		$this->assertSame( 'payment_not_required', $data['messages'][0]['code'] );
+		$this->assertEmpty( WC()->session->get( 'store_api_draft_order' ) );
 	}
 
 	/**

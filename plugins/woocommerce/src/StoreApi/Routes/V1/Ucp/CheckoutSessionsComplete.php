@@ -61,7 +61,7 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 	 * order, the Store API draft order of this session, and `continue_url` is its payment page.
 	 * Stock is held for the order first, as the Store API checkout does, because the payment
 	 * page trusts a pending order's stock to be held and checks nothing itself.
-	 * An order with nothing to pay skips the hand-off and completes at once.
+	 * A cart with nothing to pay is refused: these routes complete no order, and the payment page takes no such order.
 	 * A checkout that is not ready yet is returned as it is, with messages naming what is missing.
 	 *
 	 * @param \WP_REST_Request $request Request object.
@@ -97,6 +97,10 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 			$state = $this->cancel_handed_off_order( $state, __( 'UCP checkout session is no longer ready to complete.', 'woocommerce' ) );
 
 			return $this->checkout_response( $checkout_id, $this->checkout_state() ?? $state, 200, $cart );
+		}
+
+		if ( ! $this->cart_controller->get_cart_instance()->needs_payment() ) {
+			return $this->ucp_error( 'payment_not_required', __( 'This checkout has nothing to pay, so it cannot be handed off for payment. It must be made on the store itself.', 'woocommerce' ), 'unrecoverable', 200 );
 		}
 
 		if ( $order ) {
@@ -143,12 +147,6 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Store API hook, documented in Routes\V1\Checkout.
 		do_action( 'woocommerce_store_api_checkout_order_processed', $order );
-
-		// Nothing to pay, as for a free or fully discounted cart: the payment page refuses such an
-		// order, so it is completed here, as the Store API checkout does.
-		if ( $order->has_status( OrderStatus::PENDING ) && ! $order->needs_payment() ) {
-			$order->payment_complete();
-		}
 
 		$state = array_merge(
 			$state,
