@@ -225,17 +225,13 @@ class ShippingRates extends Component {
 	}
 
 	getFormattedRate( value ) {
-		const { formatDecimalString } = this.context;
-		const currencyString = formatDecimalString( value );
-		if ( ! value.length || ! currencyString.length ) {
-			return formatDecimalString( 0 );
-		}
-
-		return formatDecimalString( value );
+		const { precision } = this.context.getCurrencyConfig();
+		const number = parseFloat( value );
+		// Shipping rates are entered and sent to the API with a dot decimal separator.
+		return ( Number.isNaN( number ) ? 0 : number ).toFixed( precision );
 	}
 
 	getInitialValues() {
-		const { formatDecimalString } = this.context;
 		const values = {};
 
 		this.props.shippingZones.forEach( ( zone ) => {
@@ -245,7 +241,7 @@ class ShippingRates extends Component {
 					? this.getFormattedRate(
 							shippingMethods[ 0 ].settings.cost.value
 						)
-					: formatDecimalString( 0 );
+					: this.getFormattedRate( '0' );
 			values[ `${ zone.id }_rate` ] = rate;
 
 			if ( shippingMethods.length && shippingMethods[ 0 ].enabled ) {

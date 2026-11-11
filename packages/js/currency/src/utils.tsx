@@ -242,11 +242,11 @@ const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 		},
 
 		/**
-		 * Get the string representation of a floating point number to the precision used by the current currency.
-		 * This is different from `formatAmount` by not returning the currency symbol.
+		 * Get the string representation of a number using the current currency's precision and decimal separator.
+		 * This is different from `formatAmount` by not returning the currency symbol or thousands separators.
 		 *
 		 * @param {number|string} number A floating point number (or integer), or string that converts to a number
-		 * @return {string}               The original number rounded to a decimal point
+		 * @return {string}               The number rounded to the currency precision.
 		 */
 		formatDecimalString( number: number | string ) {
 			if ( typeof number !== 'number' ) {
@@ -255,8 +255,8 @@ const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 			if ( Number.isNaN( number ) ) {
 				return '';
 			}
-			const { precision } = currency;
-			return number.toFixed( precision );
+			const { precision, decimalSeparator } = currency;
+			return number.toFixed( precision ).replace( '.', decimalSeparator );
 		},
 
 		/**
