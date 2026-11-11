@@ -2152,7 +2152,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			const priorImplementation =
 				triggerAddedToCartEventMock.getMockImplementation();
 			const realTriggerAddedToCartEvent =
-				jest.requireActual< typeof import('../legacy-events') >(
+				jest.requireActual< typeof import( '../legacy-events' ) >(
 					'../legacy-events'
 				).triggerAddedToCartEvent;
 			triggerAddedToCartEventMock.mockImplementation(
