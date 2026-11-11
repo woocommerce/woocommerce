@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the address suggestions in Checkout open when the first results appear, instead of closing them right away.
