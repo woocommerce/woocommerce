@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
  * modified first, tests each against every rule once and tallies product
  * statuses per channel. Stops after PRODUCT_LIMIT products so the scan stays
  * inside one request. Products hidden from the shop catalog are the merchant's
- * choice and other product types are not supported by agents yet, so both are
+ * choice and agents can't buy other product types through UCP yet, so both are
  * counted, not checked.
  *
  * @since 11.4.0
@@ -25,16 +25,38 @@ class ProductScan {
 
 	public const SUPPORTED_TYPES = array( 'simple', 'variable' );
 
+	/**
+	 * Published products of a supported type that shoppers can find in the catalog: the ones agents see.
+	 */
+	public const COUNT_AVAILABLE = 'available';
+
+	/**
+	 * Published products of a supported type with Catalog visibility set to Hidden or Search results only.
+	 */
+	public const COUNT_HIDDEN = 'hidden';
+
+	/**
+	 * Published products of a type agents can't sell yet.
+	 */
+	public const COUNT_UNSUPPORTED = 'unsupported';
+
 	public const NOT_LISTABLE = 'not_listable';
 	public const WITH_GAPS    = 'with_gaps';
 	public const COMPLETE     = 'complete';
 
 	/**
-	 * Count and product ids per rule id.
+	 * Count, product ids and the failing products' sales per rule id.
 	 *
-	 * @var array<string, array{count:int,product_ids:array<int,int>}>
+	 * @var array<string, array{count:int,product_ids:array<int,int>,sales:float}>
 	 */
 	private array $results = array();
+
+	/**
+	 * Net sales by product id, from ProductSales, or empty when none were given.
+	 *
+	 * @var array<int, float>
+	 */
+	private array $sales = array();
 
 	/**
 	 * Products tested.
@@ -120,26 +142,14 @@ class ProductScan {
 			array(
 				'count'       => 0,
 				'product_ids' => array(),
+				'sales'       => 0.0,
 			)
 		);
 		$this->products            = 0;
 		$this->statuses            = array();
 		$this->truncated           = false;
-		$this->hidden_from_catalog = self::count_published( array( self::supported_type_query(), self::catalog_query( 'IN' ) ) );
-		$this->unsupported_types   = self::count_published(
-			array(
-				array(
-					'taxonomy' => 'product_type',
-					'field'    => 'slug',
-					'terms'    => self::SUPPORTED_TYPES,
-					'operator' => 'NOT IN',
-				),
-				array(
-					'taxonomy' => 'product_type',
-					'operator' => 'EXISTS',
-				),
-			)
-		);
+		$this->hidden_from_catalog = self::count_published( self::count_query( self::COUNT_HIDDEN ) );
+		$this->unsupported_types   = self::count_published( self::count_query( self::COUNT_UNSUPPORTED ) );
 
 		$flush_runtime_cache = wp_cache_supports( 'flush_runtime' );
 		$page                = 1;
@@ -156,10 +166,7 @@ class ProductScan {
 						'ID'       => 'DESC',
 					),
 					'no_found_rows'  => true,
-					'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-						self::supported_type_query(),
-						self::catalog_query( 'NOT IN' ),
-					),
+					'tax_query'      => self::count_query( self::COUNT_AVAILABLE ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 				)
 			);
 
@@ -188,6 +195,30 @@ class ProductScan {
 			}
 			++$page;
 		} while ( self::BATCH_SIZE === $batch_count );
+	}
+
+	/**
+	 * The tax query behind a product count, so the Products list a count links to shows the same products.
+	 *
+	 * @param string $count COUNT_AVAILABLE, COUNT_HIDDEN or COUNT_UNSUPPORTED.
+	 * @return array<int, array<string|int, mixed>>
+	 */
+	public static function count_query( string $count ): array {
+		if ( self::COUNT_UNSUPPORTED === $count ) {
+			return array(
+				array(
+					'taxonomy' => 'product_type',
+					'field'    => 'slug',
+					'terms'    => self::SUPPORTED_TYPES,
+					'operator' => 'NOT IN',
+				),
+				array(
+					'taxonomy' => 'product_type',
+					'operator' => 'EXISTS',
+				),
+			);
+		}
+		return array( self::supported_type_query(), self::catalog_query( self::COUNT_HIDDEN === $count ? 'IN' : 'NOT IN' ) );
 	}
 
 	/**
@@ -297,16 +328,26 @@ class ProductScan {
 	}
 
 	/**
-	 * Count and product ids for one rule.
+	 * Count, product ids and the failing products' sales for one rule.
 	 *
 	 * @param string $rule_id Rule id.
-	 * @return array{count:int,product_ids:array<int,int>}
+	 * @return array{count:int,product_ids:array<int,int>,sales:float}
 	 */
 	public function result( string $rule_id ): array {
 		return $this->results[ $rule_id ] ?? array(
 			'count'       => 0,
 			'product_ids' => array(),
+			'sales'       => 0.0,
 		);
+	}
+
+	/**
+	 * Sales to add up per rule over the next evaluate(): each failing product adds its own.
+	 *
+	 * @param array<int, float> $by_product Net sales by product id.
+	 */
+	public function use_sales( array $by_product ): void {
+		$this->sales = $by_product;
 	}
 
 	/**
@@ -509,6 +550,7 @@ class ProductScan {
 		foreach ( array_keys( $failures ) as $id ) {
 			$result = $this->result( $id );
 			++$result['count'];
+			$result['sales'] += $this->sales[ $product->get_id() ] ?? 0.0;
 			if ( count( $result['product_ids'] ) < $ids_limit ) {
 				$result['product_ids'][] = $product->get_id();
 			}

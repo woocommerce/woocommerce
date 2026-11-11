@@ -59,6 +59,13 @@ class AgentReadiness {
 	private RemoteRules $remote_rules;
 
 	/**
+	 * Product sales from Analytics.
+	 *
+	 * @var ProductSales
+	 */
+	private ProductSales $product_sales;
+
+	/**
 	 * Scan reused for single-product checks, with the shared GTINs the last stored scan found.
 	 *
 	 * @var ProductScan|null
@@ -81,8 +88,10 @@ class AgentReadiness {
 	 * @param StoreOutputChecks $store_output_checks Store checks that read what the store returns.
 	 * @param RemoteRules       $remote_rules        Rules from the published rules file.
 	 * @param DeclaredToAgents  $declared_to_agents  What the store declares to agents.
+	 * @param ProductSales      $product_sales       Product sales from Analytics.
 	 */
-	final public function init( StoreConditions $store_conditions, StoreOutputChecks $store_output_checks, RemoteRules $remote_rules, DeclaredToAgents $declared_to_agents ): void {
+	final public function init( StoreConditions $store_conditions, StoreOutputChecks $store_output_checks, RemoteRules $remote_rules, DeclaredToAgents $declared_to_agents, ProductSales $product_sales ): void {
+		$this->product_sales       = $product_sales;
 		$this->store_conditions    = $store_conditions;
 		$this->store_output_checks = $store_output_checks;
 		$this->declared_to_agents  = $declared_to_agents;
@@ -205,7 +214,7 @@ class AgentReadiness {
 	/**
 	 * Run every check over the catalog.
 	 *
-	 * @return array{generated_at:string,products:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool}
+	 * @return array{generated_at:string,products:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,sales:array{days:int,orders:int}|null}
 	 */
 	public function get_report(): array {
 		return $this->build_report();
@@ -215,7 +224,7 @@ class AgentReadiness {
 	 * Run every check over the catalog.
 	 *
 	 * @param callable|null $on_tested Called with each product id and its failures.
-	 * @return array{generated_at:string,products:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,shared_gtins?:array<int,string>}
+	 * @return array{generated_at:string,products:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,declared:array<int,array{id:string,name:string,found:bool|null}>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool,sales:array{days:int,orders:int}|null,shared_gtins?:array<int,string>}
 	 */
 	private function build_report( ?callable $on_tested = null ): array {
 		// Rebuild the rules and the scan for each report: a long-running process may have fetched a new rules file or changed GTINs since.
@@ -225,7 +234,12 @@ class AgentReadiness {
 		$rules              = $active['rules'];
 		$channel_rules      = $active['channel_rules'];
 
-		$scan = new ProductScan();
+		$sales  = $this->product_sales->last_days();
+		$scan   = new ProductScan();
+		$ranked = null !== $sales && $sales['orders'] >= ProductSales::MIN_ORDERS && $sales['total'] > 0;
+		if ( $ranked ) {
+			$scan->use_sales( $sales['by_product'] );
+		}
 		$scan->evaluate( $rules, $channel_rules, self::PRODUCT_IDS_LIMIT, $on_tested );
 
 		$checks = array();
@@ -239,6 +253,8 @@ class AgentReadiness {
 				'channels'    => $channel_rules[ $id ],
 				'count'       => $result['count'],
 				'product_ids' => $result['product_ids'],
+				// Share of the store's sales on the products that fail; null without enough sales to compare.
+				'sales_share' => $ranked ? round( min( 1.0, max( 0.0, $result['sales'] / $sales['total'] ) ), 4 ) : null,
 				'fix_url'     => admin_url( 'edit.php?post_type=product' ),
 			);
 		}
@@ -255,6 +271,11 @@ class AgentReadiness {
 			'channels'            => $scan->channel_totals(),
 			'checks'              => $checks,
 			'truncated'           => $scan->truncated(),
+			// How sales shares were measured: null while Analytics is off.
+			'sales'               => null === $sales ? null : array(
+				'days'   => $sales['days'],
+				'orders' => $sales['orders'],
+			),
 		);
 		if ( null !== $on_tested && null !== $scan->shared_gtins() ) {
 			// Stored for checks of one product, so a save doesn't read every published product.
@@ -308,8 +329,13 @@ class AgentReadiness {
 			if ( ! is_array( $check ) || ! isset( $check['id'] ) ) {
 				continue;
 			}
-			$id                                        = (string) $check['id'];
-			$report['checks'][ $index ]['count']       = $counts[ $id ] ?? 0;
+			$id    = (string) $check['id'];
+			$count = $counts[ $id ] ?? 0;
+			if ( (int) ( $check['count'] ?? 0 ) !== $count ) {
+				// The share was measured on the products that failed at the scan; it no longer matches.
+				$report['checks'][ $index ]['sales_share'] = null;
+			}
+			$report['checks'][ $index ]['count']       = $count;
 			$report['checks'][ $index ]['product_ids'] = array_values(
 				array_filter(
 					(array) ( $check['product_ids'] ?? array() ),

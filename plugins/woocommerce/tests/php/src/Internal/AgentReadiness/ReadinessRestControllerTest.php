@@ -61,6 +61,27 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox GET view gives the Sales readiness page and the AI tools Overview what they show, as text and badges.
+	 */
+	public function test_get_view(): void {
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/view' ) );
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertSame( 'Not checked yet', $data['last_checked'] );
+		$this->assertSame( 'Run check', $data['run']['label'] );
+		$this->assertNull( $data['fix_first'] );
+		$this->assertSame( array(), $data['sections'] );
+		$this->assertSame( 'AI shopping', $data['overview']['shopping']['title'] );
+		$this->assertStringContainsString( 'path=/sales-readiness', $data['overview']['view_all']['href'] );
+
+		wc_get_container()->get( AgentReadiness::class )->refresh_report();
+		$data = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/view' ) )->get_data();
+		$this->assertSame( 'Check again', $data['run']['label'] );
+		$this->assertSame( array( 'access', 'find', 'understand', 'products', 'buy' ), array_column( $data['sections'], 'id' ) );
+		$this->assertArrayHasKey( 'intent', $data['sections'][0]['badge'] );
+	}
+
+	/**
 	 * @testdox GET reads setup checks now, so a setting changed after the scan shows its current state.
 	 */
 	public function test_get_reads_store_checks_now(): void {
@@ -111,6 +132,7 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 403, $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness' ) )->get_status() );
 		$this->assertSame( 403, $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v3/agent-readiness/scan' ) )->get_status() );
+		$this->assertSame( 403, $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/agent-readiness/view' ) )->get_status() );
 		$this->assertFalse( as_has_scheduled_action( ScheduledScan::RUN_NOW_HOOK ) );
 	}
 

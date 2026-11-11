@@ -108,7 +108,7 @@ class ReportAbility implements AbilityDefinition {
 						),
 						'unsupported_types'   => array(
 							'type'        => 'integer',
-							'description' => __( 'Products not checked because agents don\'t support their type yet.', 'woocommerce' ),
+							'description' => __( 'Products not checked because agents can\'t buy their type through UCP yet.', 'woocommerce' ),
 						),
 						'store_checks'        => array(
 							'type'  => 'array',
@@ -182,6 +182,10 @@ class ReportAbility implements AbilityDefinition {
 										'description' => __( 'Up to 10 failing products, most recently modified first.', 'woocommerce' ),
 										'items'       => array( 'type' => 'integer' ),
 									),
+									'sales_share' => array(
+										'type'        => array( 'number', 'null' ),
+										'description' => __( 'Share of the store\'s net sales, from 0 to 1, on the products that fail this check, over the period in sales. Null when Analytics is off or the period has fewer than 20 orders, too few to rank by.', 'woocommerce' ),
+									),
 									'fix_url'     => array( 'type' => 'string' ),
 								),
 							),
@@ -199,6 +203,14 @@ class ReportAbility implements AbilityDefinition {
 							),
 						),
 						'truncated'           => array( 'type' => 'boolean' ),
+						'sales'               => array(
+							'type'        => array( 'object', 'null' ),
+							'description' => __( 'The sales the shares compare: the last days, from Analytics, and how many orders. Null while Analytics is off.', 'woocommerce' ),
+							'properties'  => array(
+								'days'   => array( 'type' => 'integer' ),
+								'orders' => array( 'type' => 'integer' ),
+							),
+						),
 					),
 				),
 				'scan_pending' => array(

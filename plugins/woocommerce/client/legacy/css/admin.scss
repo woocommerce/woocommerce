@@ -9729,9 +9729,49 @@ body.woocommerce-settings-payments-section_legacy {
 	}
 }
 
-// Settings > Agentic commerce.
+// Settings > AI tools.
+// White panel under a grey tab strip, as on the Payments tab (settings-payments-body.scss).
+body.woocommerce_page_wc-settings.woocommerce-settings-agentic-commerce-tab {
+
+	.nav-tab-wrapper {
+		background-color: #f0f0f1;
+	}
+
+	#wpcontent {
+		display: flex;
+		flex-direction: column;
+	}
+
+	#wpbody,
+	#mainform {
+		background-color: #fff;
+	}
+
+	#wpbody {
+		flex: 1;
+	}
+}
+
+.wc-agentic-commerce-breadcrumb {
+	font-size: 14px;
+
+	a {
+		color: #1d2327;
+	}
+
+	[aria-hidden="true"] {
+		margin-inline: 4px;
+		color: #a7aaad;
+	}
+
+	[aria-current="page"] {
+		font-weight: 600;
+	}
+}
+
 .wc-agentic-commerce {
 	max-inline-size: 720px;
+	margin-inline: auto;
 
 	h2,
 	h3 {
@@ -9787,27 +9827,21 @@ body.woocommerce-settings-payments-section_legacy {
 		color: #50575e;
 	}
 
-	.wc-agentic-commerce-card--split {
-		display: grid;
-		grid-template-columns: 2fr 1fr;
-
-		> div {
-			padding: 24px;
-		}
-
-		> div + div {
-			border-inline-start: 1px solid #f0f0f1;
-		}
-
-		h3 {
-			margin-block-end: 8px;
-			font-size: 11px;
-			text-transform: uppercase;
-		}
+	.wc-agentic-commerce-card__actions {
+		padding-block: 8px 24px;
 	}
 
-	.wc-agentic-commerce-placeholder p {
-		color: #757575;
+	.wc-agentic-commerce-card__header + .wc-agentic-commerce-card__body {
+		padding-block-start: 0;
+	}
+
+	.wc-agentic-commerce-address {
+		display: flex;
+		gap: 8px;
+
+		input {
+			flex: 1;
+		}
 	}
 
 	.wc-agentic-commerce-policies .form-table {
@@ -9834,6 +9868,23 @@ body.woocommerce-settings-payments-section_legacy {
 			inline-size: 100%;
 			min-inline-size: 0 !important;
 		}
+
+		// A Status or Sales readiness link opens the page on the field it names.
+		:target {
+			scroll-margin-block-start: 120px;
+		}
+
+		tr:has(:target) {
+			outline: 2px solid var(--wp-admin-theme-color, #2271b1);
+			outline-offset: 4px;
+			border-radius: 2px;
+		}
+	}
+
+	.wc-agentic-commerce-steps {
+		margin-block: 0;
+		padding-inline-start: 42px;
+		list-style: disc;
 	}
 }
 
@@ -9875,6 +9926,35 @@ body.woocommerce-settings-payments-section_legacy {
 	}
 }
 
+.wc-agentic-commerce-header {
+	margin-block: 16px 20px;
+	padding-block-end: 16px;
+	border-block-end: 1px solid #dcdcde;
+
+	p {
+		margin: 4px 0 0;
+		color: #757575;
+	}
+}
+
+.wc-agentic-commerce-toolbar {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 16px;
+
+	> p {
+		margin: 0;
+		color: #50575e;
+	}
+}
+
+.wc-agentic-commerce-toolbar__action {
+	flex: none;
+	text-align: end;
+	max-inline-size: 320px;
+}
+
 .wc-agentic-commerce-counts {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
@@ -9893,79 +9973,46 @@ body.woocommerce-settings-payments-section_legacy {
 		border-inline-start: 1px solid #f0f0f1;
 	}
 
+	li > span {
+		color: #757575;
+		font-size: 11px;
+		font-weight: 500;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+	}
+
 	strong {
 		font-size: 1.6em;
 		font-weight: 400;
 		line-height: 1.2;
 	}
-}
 
-.wc-agentic-commerce-group {
-
-	ul {
+	p {
 		margin: 0;
+		color: #50575e;
 	}
 
-	&__title {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		margin: 0;
-		padding: 10px 24px;
-		font-size: 13px;
-		background: #f6f7f7;
-		border-block: 1px solid #f0f0f1;
-	}
-
-	&--done summary {
-		cursor: pointer;
-	}
-}
-
-.wc-agentic-commerce-count {
-	padding: 0 6px;
-	border-radius: 8px;
-	background: #dcdcde;
-	font-size: 11px;
-}
-
-.wc-agentic-commerce-check {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-	margin: 0;
-	padding: 12px 24px;
-	border-block-end: 1px solid #f0f0f1;
-
-	&__text {
-		flex: 1;
-		font-weight: 600;
-	}
-
-	&__icon {
-		inline-size: 18px;
-		block-size: 18px;
-		border: 2px solid #a7aaad;
-		border-radius: 50%;
-	}
-
-	&--required &__icon {
-		border-color: #b26200;
-	}
-
-	&--done .dashicons {
-		color: $green;
+	p strong {
+		color: #1d2327;
 	}
 }
 
 .wc-agentic-commerce-badge {
 	display: inline-block;
+	flex: none;
 	white-space: nowrap;
-	padding: 0 8px;
-	border-radius: 2px;
-	font-weight: 600;
+	padding: 2px 8px;
+	border: 1px solid transparent;
+	border-radius: 4px;
+	font-size: 12px;
+	line-height: 1.5;
 	background: #f0f0f1;
 	color: #1d2327;
+
+	&--info {
+		background: #fff;
+		border-color: #dcdcde;
+	}
 
 	&--pass {
 		background: #edfaef;
@@ -9978,45 +10025,148 @@ body.woocommerce-settings-payments-section_legacy {
 	}
 
 	&--check {
-		background: #fcf9e8;
-		color: #8a6100;
+		background: #f9e2a1;
+		color: #1d2327;
 	}
 }
 
-.wc-agentic-commerce-card__section {
-	padding: 16px 24px 24px;
-	border-block-start: 1px solid #f0f0f1;
-
-	h3 {
-		margin-block-end: 8px;
-	}
-}
-
-.wc-agentic-commerce-channels {
-	margin-block-end: 16px;
-}
-
-.wc-agentic-commerce-summary {
-	max-inline-size: 900px;
+.wc-agentic-commerce-results {
+	margin: 0;
 
 	li {
-		display: flex;
-		justify-content: space-between;
-		padding: 8px 12px;
 		margin: 0;
-		background: #fff;
-		border: 1px solid #dcdcde;
-		border-block-end-width: 0;
+		padding: 12px 24px;
+		border-block-start: 1px solid #f0f0f1;
+	}
 
-		&:last-child {
-			border-block-end-width: 1px;
+	p {
+		margin: 0 0 4px;
+	}
+}
+
+.wc-agentic-commerce-results {
+	margin-block-start: 8px;
+
+	li:first-child {
+		border-block-start-color: #dcdcde;
+	}
+}
+
+.wc-agentic-commerce-results li {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.wc-agentic-commerce-items {
+	margin: 0 24px;
+}
+
+.wc-agentic-commerce-item {
+	display: flex;
+	gap: 12px;
+	margin: 0;
+	padding: 12px 0;
+	border-block-end: 1px solid #f0f0f1;
+
+	p {
+		margin: 0 0 2px;
+	}
+
+	&__title {
+		font-weight: 600;
+
+		.wc-agentic-commerce-badge {
+			margin-inline-start: 8px;
+			font-weight: 400;
+		}
+	}
+
+	&__icon {
+		flex: none;
+		inline-size: 14px;
+		block-size: 14px;
+		margin-block-start: 2px;
+		border: 2px dashed #a7aaad;
+		border-radius: 50%;
+	}
+
+	&--required &__icon {
+		border-color: #b26200;
+	}
+
+	&--off &__icon {
+		border-style: solid;
+		border-color: #dcdcde;
+	}
+
+	&--pass &__icon {
+		border: 0;
+
+		&::before {
+			content: "\2713";
+			color: $green;
+			font-weight: 600;
 		}
 	}
 }
 
-.wc-agentic-commerce-checks + details,
-.wc-agentic-commerce-checks ~ h4 {
-	margin-block-start: 12px;
+.wc-agentic-commerce-steps {
+
+	.wc-agentic-commerce-item__title a {
+		color: inherit;
+		text-decoration: none;
+
+		&::after {
+			content: "\203A";
+			position: absolute;
+			inset-inline-end: 0;
+			color: #50575e;
+		}
+	}
+
+	.wc-agentic-commerce-item {
+		position: relative;
+	}
+}
+
+.wc-agentic-commerce-more {
+	padding: 12px 24px 20px;
+
+	> summary {
+		color: var(--wp-admin-theme-color, #2271b1);
+		font-weight: 600;
+		cursor: pointer;
+		list-style: none;
+
+		&::-webkit-details-marker {
+			display: none;
+		}
+	}
+
+	> .wc-agentic-commerce-items {
+		margin: 8px 0 0;
+	}
+
+	.wc-agentic-commerce-more__hide,
+	&[open] .wc-agentic-commerce-more__show {
+		display: none;
+	}
+
+	&[open] .wc-agentic-commerce-more__hide {
+		display: inline;
+	}
+
+	&--js[open] > summary {
+		display: none;
+	}
+
+	.wc-agentic-commerce-more__close {
+		margin-block-start: 8px;
+		color: var(--wp-admin-theme-color, #2271b1);
+		font-weight: 600;
+		text-decoration: none;
+	}
 }
 
 .wc-agentic-commerce-ucp-switch {

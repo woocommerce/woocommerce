@@ -9,7 +9,7 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Adds the WooCommerce > Settings > Agentic commerce tab while the
+ * Adds the WooCommerce > Settings > AI tools tab while the
  * agent_readiness feature is enabled, and names the options it saves.
  *
  * @since 11.4.0
@@ -19,6 +19,11 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	public const FEATURE_ID = 'agent_readiness';
 
 	public const TAB = 'agentic-commerce';
+
+	/**
+	 * The AI shopping section of the tab, which the landing page's Manage button opens.
+	 */
+	public const SHOPPING_SECTION = 'shopping';
 
 	public const PRIVACY_PAGE_OPTION = 'wp_page_for_privacy_policy';
 
@@ -57,18 +62,11 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	private AgentReadiness $agent_readiness;
 
 	/**
-	 * UCP switch.
+	 * Sales readiness.
 	 *
-	 * @var UcpSwitch
+	 * @var ReadinessCheckPage
 	 */
-	private UcpSwitch $ucp_switch;
-
-	/**
-	 * Background scan.
-	 *
-	 * @var ScheduledScan
-	 */
-	private ScheduledScan $scheduled_scan;
+	private ReadinessCheckPage $readiness_page;
 
 	/**
 	 * Initialize dependencies.
@@ -78,15 +76,22 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	 * @param FeaturesController $features_controller Features controller.
 	 * @param StoreConditions    $store_conditions    Store conditions.
 	 * @param AgentReadiness     $agent_readiness     Readiness service.
-	 * @param UcpSwitch          $ucp_switch          UCP switch.
-	 * @param ScheduledScan      $scheduled_scan      Background scan.
+	 * @param ReadinessCheckPage $readiness_page      Sales readiness.
 	 */
-	final public function init( FeaturesController $features_controller, StoreConditions $store_conditions, AgentReadiness $agent_readiness, UcpSwitch $ucp_switch, ScheduledScan $scheduled_scan ): void {
+	final public function init( FeaturesController $features_controller, StoreConditions $store_conditions, AgentReadiness $agent_readiness, ReadinessCheckPage $readiness_page ): void {
 		$this->features_controller = $features_controller;
 		$this->store_conditions    = $store_conditions;
 		$this->agent_readiness     = $agent_readiness;
-		$this->ucp_switch          = $ucp_switch;
-		$this->scheduled_scan      = $scheduled_scan;
+		$this->readiness_page      = $readiness_page;
+	}
+
+	/**
+	 * Link to the AI tools tab: its landing page, or a section of it.
+	 *
+	 * @param string $section Section id, or '' for the landing page.
+	 */
+	public static function url( string $section = '' ): string {
+		return admin_url( 'admin.php?page=wc-settings&tab=' . self::TAB . ( '' === $section ? '' : '&section=' . $section ) );
 	}
 
 	/**
@@ -106,10 +111,28 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 			return;
 		}
 		add_filter( 'woocommerce_get_settings_pages', array( $this, 'handle_woocommerce_get_settings_pages' ) );
+		add_filter( 'admin_body_class', array( $this, 'handle_admin_body_class' ), 20 );
 	}
 
 	/**
-	 * Add the Agentic commerce page to the settings pages.
+	 * Mark the AI tools tab on the body, so its panel can be white like the Payments tab.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $classes Body classes.
+	 * @return mixed
+	 */
+	public function handle_admin_body_class( $classes ) {
+		global $current_tab;
+
+		if ( ! is_string( $classes ) || self::TAB !== $current_tab ) {
+			return $classes;
+		}
+		return "$classes woocommerce-settings-agentic-commerce-tab";
+	}
+
+	/**
+	 * Add the AI tools tab to the settings pages.
 	 *
 	 * @internal
 	 *
@@ -120,7 +143,7 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 		if ( ! is_array( $pages ) || ! class_exists( \WC_Settings_Page::class, false ) ) {
 			return $pages;
 		}
-		$pages[] = new AgenticCommerceSettingsPage( $this->store_conditions, $this->agent_readiness, $this->ucp_switch, $this->scheduled_scan );
+		$pages[] = new AgenticCommerceSettingsPage( $this->store_conditions, $this->agent_readiness, $this->readiness_page );
 		return $pages;
 	}
 }

@@ -1,0 +1,205 @@
+// Sales readiness page and the AI tools Overview. Tokens from the design system; the build injects their fallbacks.
+
+// The page header (admin-ui Page) runs edge to edge: drop wc-admin's margin and gutter around the page.
+.woocommerce-admin-page__sales-readiness {
+	.woocommerce-layout__primary {
+		margin: 0;
+	}
+
+	.woocommerce-layout__main {
+		padding: 0;
+	}
+}
+
+.wc-sales-readiness {
+	--wc-sr-muted: var(--wpds-color-foreground-content-neutral-weak);
+	--wc-sr-stroke: var(--wpds-color-stroke-surface-neutral-weak);
+	--wc-sr-link: var(--wpds-color-foreground-interactive-brand);
+
+	color: var(--wpds-color-foreground-content-neutral);
+
+	&__content {
+		box-sizing: border-box;
+		width: 100%;
+		max-width: 720px;
+		margin: 0 auto;
+		display: flex;
+		flex-direction: column;
+		gap: var(--wpds-dimension-gap-lg);
+		padding: var(--wpds-dimension-padding-2xl) var(--wpds-dimension-padding-lg);
+	}
+
+	&__muted {
+		color: var(--wc-sr-muted);
+	}
+
+	// AI tools Overview: centered in the settings panel, like the Sales readiness content.
+	&--overview {
+		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		gap: var(--wpds-dimension-gap-lg);
+		max-width: 720px;
+		margin: 0 auto;
+		padding-block: var(--wpds-dimension-padding-3xl);
+	}
+}
+
+.wc-sales-readiness-card {
+	&__head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--wpds-dimension-gap-md);
+		width: 100%;
+	}
+
+	&__actions {
+		margin-block-start: var(--wpds-dimension-gap-lg);
+	}
+
+	.wc-sales-readiness-list + .wc-sales-readiness-fold,
+	.wc-sales-readiness-channels + .wc-sales-readiness-list {
+		border-block-start: 1px solid var(--wc-sr-stroke);
+	}
+}
+
+.wc-sales-readiness-overview__heading {
+	display: block;
+	font-weight: 600;
+	margin-block-start: var(--wpds-dimension-gap-md);
+}
+
+.wc-sales-readiness-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+
+	&__group {
+		margin: 0;
+	}
+
+	> .wc-sales-readiness-row + .wc-sales-readiness-row {
+		border-block-start: 1px solid var(--wc-sr-stroke);
+	}
+}
+
+.wc-sales-readiness-tier {
+	display: block;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--wc-sr-muted);
+	padding: var(--wpds-dimension-padding-lg) 0 var(--wpds-dimension-padding-xs);
+	border-block-start: 1px solid var(--wc-sr-stroke);
+
+	.wc-sales-readiness-list__group:first-child > & {
+		border-block-start: 0;
+		padding-block-start: var(--wpds-dimension-padding-md);
+	}
+}
+
+.wc-sales-readiness-row {
+	display: flex;
+	gap: var(--wpds-dimension-gap-md);
+	padding: var(--wpds-dimension-padding-md) 0;
+	margin: 0;
+
+	&__marker {
+		flex: 0 0 auto;
+		width: 20px;
+		height: 20px;
+		margin-block-start: 1px;
+		border: 1.5px dashed var(--wpds-color-stroke-surface-neutral);
+		border-radius: 50%;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
+
+		&--done {
+			border: 0;
+			color: var(--wpds-color-foreground-content-success);
+		}
+	}
+
+	&__body {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	&__head {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: var(--wpds-dimension-gap-md);
+	}
+
+	&__title {
+		font-weight: 500;
+
+		&--done {
+			color: var(--wc-sr-muted);
+			font-weight: 400;
+		}
+	}
+
+	&__link {
+		margin-block-start: var(--wpds-dimension-gap-xs);
+	}
+}
+
+.wc-sales-readiness-channels {
+	list-style: none;
+	margin: 0 0 var(--wpds-dimension-gap-sm);
+	padding: var(--wpds-dimension-padding-xs) 0 var(--wpds-dimension-padding-lg);
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+	gap: var(--wpds-dimension-gap-lg);
+
+	li {
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	&__name {
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--wc-sr-muted);
+	}
+
+	&__count {
+		font-size: 20px;
+		font-weight: 500;
+	}
+}
+
+.wc-sales-readiness-fold {
+	padding-block-start: var(--wpds-dimension-padding-sm);
+}
+
+.wc-sales-readiness-checked {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--wpds-dimension-gap-lg);
+
+	> div {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	&__status .components-spinner {
+		margin: 0;
+	}
+
+	&__intro {
+		display: block;
+		margin-block-end: var(--wpds-dimension-gap-md);
+	}
+}
