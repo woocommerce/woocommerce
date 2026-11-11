@@ -34,7 +34,6 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 		parent::setUp();
 		FulfillmentsHelper::enable_fulfillments();
 		$this->manager = wc_get_container()->get( FulfillmentsManager::class );
-		$this->manager->register();
 	}
 
 	/**

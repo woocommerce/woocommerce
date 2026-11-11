@@ -45,7 +45,6 @@ class FulfillmentsRefundTest extends \WC_Unit_Test_Case {
 		FulfillmentsHelper::enable_fulfillments();
 		$this->data_store = wc_get_container()->get( FulfillmentsDataStore::class );
 		$this->manager    = wc_get_container()->get( FulfillmentsManager::class );
-		$this->manager->register();
 	}
 
 	/**

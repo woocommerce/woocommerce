@@ -34,7 +34,8 @@ class FulfillmentsHelper {
 	 * Turn the fulfillments feature on for the current test and register its hooks.
 	 *
 	 * Call it from setUp(), after parent::setUp(): the test transaction rolls back the option and the
-	 * base tear-down removes the hooks. The tables must already exist (see create_tables()).
+	 * base tear-down removes the hooks. The shipping provider taxonomy it registers stays for the rest
+	 * of the process. The tables must already exist (see create_tables()).
 	 *
 	 * @return void
 	 */

@@ -43,7 +43,6 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		parent::setUp();
 		FulfillmentsHelper::enable_fulfillments();
 		$this->renderer = wc_get_container()->get( FulfillmentsRenderer::class );
-		$this->renderer->register();
 	}
 
 	/**
