@@ -59,28 +59,39 @@ export const UpsellsDowngradeNotice = ( {
 
 	const handleClick = () => {
 		const blockEditor = select( blockEditorStore );
+
+		// replaceBlock does not check removal locks, so guard both paths here.
+		if ( ! blockEditor.canRemoveBlock( clientId ) ) {
+			return;
+		}
+
 		const hasProductDetailsBlock = !! findBlock( {
 			blocks: blockEditor.getBlocks(),
 			findCondition: ( block ) =>
 				block.name === PRODUCT_DETAILS_BLOCK_NAME,
 		} );
 
-		editEntityRecord( 'root', 'site', undefined, {
-			[ UPSELLS_MIGRATED_OPTION ]: 'no',
-		} );
-
 		if ( hasProductDetailsBlock ) {
 			void removeBlock( clientId );
+		} else {
+			const align = blockEditor.getBlockAttributes( clientId )?.align;
+			const productDetailsBlock = createBlock(
+				PRODUCT_DETAILS_BLOCK_NAME,
+				typeof align === 'string' && align !== '' ? { align } : {}
+			);
+
+			void replaceBlock( clientId, productDetailsBlock );
+		}
+
+		// removeBlock can leave the block in place, for example when a removal
+		// prompt stops it. Record the downgrade only after this block is gone.
+		if ( blockEditor.getBlock( clientId ) ) {
 			return;
 		}
 
-		const align = blockEditor.getBlockAttributes( clientId )?.align;
-		const productDetailsBlock = createBlock(
-			PRODUCT_DETAILS_BLOCK_NAME,
-			typeof align === 'string' && align !== '' ? { align } : {}
-		);
-
-		void replaceBlock( clientId, productDetailsBlock );
+		editEntityRecord( 'root', 'site', undefined, {
+			[ UPSELLS_MIGRATED_OPTION ]: 'no',
+		} );
 	};
 
 	return (
