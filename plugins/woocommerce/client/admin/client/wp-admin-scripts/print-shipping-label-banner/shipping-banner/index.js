@@ -3,7 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
-import { Button, ExternalLink } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import interpolateComponents from '@automattic/interpolate-components';
 import PropTypes from 'prop-types';
@@ -12,6 +12,7 @@ import { withDispatch, withSelect } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { getSetting, getAdminLink } from '@woocommerce/settings';
 import { Link } from '@woocommerce/components';
+import { Link as UiLink } from '@wordpress/ui';
 
 /**
  * Internal dependencies
@@ -124,7 +125,7 @@ export class ShippingBanner extends Component {
 				} );
 				return;
 			}
-		} catch ( error ) {
+		} catch {
 			this.setState( {
 				setupErrorReason: setupErrorTypes.INSTALL,
 				wcsSetupError: true,
@@ -145,7 +146,7 @@ export class ShippingBanner extends Component {
 				} );
 				return;
 			}
-		} catch ( error ) {
+		} catch {
 			this.setState( {
 				setupErrorReason: setupErrorTypes.ACTIVATE,
 				wcsSetupError: true,
@@ -487,17 +488,17 @@ export class ShippingBanner extends Component {
 									),
 									components: {
 										tosLink: (
-											<ExternalLink
+											<UiLink
 												href="https://automattic.com/tos"
-												target="_blank"
-												type="external"
+												rel="noopener noreferrer"
+												openInNewTab
 											/>
 										),
 										wcsLink: (
-											<ExternalLink
+											<UiLink
 												href="https://woocommerce.com/products/shipping/?utm_medium=product"
-												target="_blank"
-												type="external"
+												rel="noopener noreferrer"
+												openInNewTab
 												onClick={
 													this
 														.woocommerceServiceLinkClicked
