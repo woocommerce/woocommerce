@@ -42,7 +42,7 @@ class SiteHealth {
 	/**
 	 * Minimum metadata rows per order before the table size check can recommend investigation.
 	 */
-	private const ORDER_META_ROWS_PER_ORDER_THRESHOLD = 1000;
+	private const ORDER_META_ROWS_PER_ORDER_THRESHOLD = 200;
 
 	/**
 	 * Class instance.

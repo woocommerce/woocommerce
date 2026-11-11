@@ -109,9 +109,10 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Order metadata table size check uses both the absolute and per-order limits.
 	 * @testWith [0, 1000000, "recommended"]
-	 *           [1000, 1000000, "recommended"]
+	 *           [5000, 1000000, "recommended"]
+	 *           [5000, 4000000, "recommended"]
 	 *           [1, 999999, "good"]
-	 *           [1001, 1000000, "good"]
+	 *           [5001, 1000000, "good"]
 	 *           [0, 0, "good"]
 	 *
 	 * @param int    $order_rows     Estimated rows in the orders table.
