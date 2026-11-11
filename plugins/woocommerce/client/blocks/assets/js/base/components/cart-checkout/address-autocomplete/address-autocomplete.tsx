@@ -458,6 +458,15 @@ export const AddressAutocomplete = ( {
 	const handleBlur = () => {
 		// Use a small delay to allow clicks on suggestions to register
 		setTimeout( () => {
+			// The field blurs and focuses again when the observer above re-adds it, which happens when the first
+			// results arrive. Keep the list open if the field has focus again.
+			const inputElement = inputRef.current?.inputRef?.current;
+			if (
+				inputElement &&
+				inputElement.ownerDocument.activeElement === inputElement
+			) {
+				return;
+			}
 			setSuggestions( [] );
 			setSelectedSuggestion( -1 );
 		}, 200 );
