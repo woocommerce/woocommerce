@@ -3408,7 +3408,8 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$data = $importer->import();
 		wp_delete_file( $csv_file );
 
-		$this->assertCount( 2, $data['imported'], 'Both the parent and the variation should be imported.' );
+		$this->assertCount( 1, $data['imported'], 'The parent should be imported.' );
+		$this->assertCount( 1, $data['imported_variations'], 'The variation should be imported.' );
 		$parent_id = wc_get_product_id_by_sku( 'used-for-variations-parent-29903' );
 		$this->assertTrue( $this->get_color_attribute( $parent_id )->get_variation(), 'A variation that uses the attribute needs it enabled for variations.' );
 
