@@ -275,7 +275,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 						$coupon->set_code( $coupon_code );
 						break;
 					case 'description' :
-						$coupon->set_description( wp_filter_post_kses( $value ) );
+						$coupon->set_description( wp_kses_post( $value ) );
 						break;
 					case 'expiry_date' :
 						$coupon->set_date_expires( $value );

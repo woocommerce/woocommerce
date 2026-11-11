@@ -27,6 +27,8 @@ export type Subscription = {
 	active: boolean;
 	local: SubscriptionLocal;
 	has_updates: boolean;
+	/** Whether this site's PHP meets the available update's `requires_php`. */
+	update_requires_php_met: boolean;
 	version: string;
 	subscription_installed: boolean;
 	subscription_available: boolean;

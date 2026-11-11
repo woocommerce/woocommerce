@@ -81,10 +81,11 @@ test.describe(
 				'<!-- wp:paragraph --><p>OLD BLOCK B</p><!-- /wp:paragraph -->' +
 				'<!-- wp:paragraph --><p>OLD BLOCK C</p><!-- /wp:paragraph -->';
 
-			const customized = oldHtml.replace(
-				'OLD BLOCK A',
-				'MERCHANT EDITED A'
-			);
+			// Two merchant edits, so the drawer offers a choice per conflict, and one
+			// block the merchant leaves alone.
+			const customized = oldHtml
+				.replace( 'OLD BLOCK A', 'MERCHANT EDITED A' )
+				.replace( 'OLD BLOCK B', 'MERCHANT EDITED B' );
 
 			const newCanonical =
 				'<!-- wp:paragraph --><p>NEW CORE A</p><!-- /wp:paragraph -->' +
@@ -139,11 +140,13 @@ test.describe(
 				drawer.getByRole( 'heading', { name: /needs your attention/i } )
 			).toBeVisible( { timeout: 15000 } );
 
-			const firstRadioGroup = drawer
-				.getByRole( 'radiogroup', {
-					name: /choose which version to apply/i,
-				} )
-				.first();
+			const radioGroups = drawer.getByRole( 'radiogroup', {
+				name: /choose which version to apply/i,
+			} );
+			await expect( radioGroups ).toHaveCount( 2 );
+
+			const firstRadioGroup = radioGroups.first();
+			const secondRadioGroup = radioGroups.nth( 1 );
 			await expect(
 				firstRadioGroup.getByRole( 'radio', { name: /keep yours/i } )
 			).toHaveAttribute( 'aria-checked', 'true' );
@@ -154,13 +157,18 @@ test.describe(
 				firstRadioGroup.getByRole( 'radio', { name: /use core/i } )
 			).toHaveAttribute( 'aria-checked', 'true' );
 
-			// B and C were changed by core only. Assert the drawer's promise about
-			// them before applying, so the claim and the result stay tied together.
+			// The second conflict stays on keep-yours, so Apply has to honour both
+			// choices rather than one of them.
+			await expect(
+				secondRadioGroup.getByRole( 'radio', { name: /keep yours/i } )
+			).toHaveAttribute( 'aria-checked', 'true' );
+
+			// C was changed by core only, so the drawer promises to apply its update.
 			await expect(
 				drawer.getByText(
 					/your version was unchanged, so the update will apply/i
 				)
-			).toHaveCount( 2 );
+			).toHaveCount( 1 );
 
 			await drawer.getByRole( 'button', { name: /^apply/i } ).click();
 			await expect( drawer ).toBeHidden( { timeout: 15000 } );
@@ -169,7 +177,8 @@ test.describe(
 			expect( content ).toContain( 'NEW CORE A' );
 			expect( content ).not.toContain( 'MERCHANT EDITED A' );
 
-			expect( content ).toContain( 'NEW CORE B' );
+			expect( content ).toContain( 'MERCHANT EDITED B' );
+			expect( content ).not.toContain( 'NEW CORE B' );
 			expect( content ).toContain( 'NEW CORE C' );
 			expect( content ).not.toContain( 'OLD BLOCK B' );
 			expect( content ).not.toContain( 'OLD BLOCK C' );

@@ -142,11 +142,17 @@ abstract class AbstractBlock {
 	 */
 	protected function initialize() {
 		if ( empty( $this->block_name ) ) {
-			_doing_it_wrong( __METHOD__, esc_html__( 'Block name is required.', 'woocommerce' ), '4.5.0' );
+			_doing_it_wrong( __METHOD__, esc_html( 'Block name is required.' ), '4.5.0' );
 			return false;
 		}
+
 		$this->integration_registry->initialize( $this->block_name . '_block' );
-		$this->register_block_type();
+
+		// Performance note: if the block is lazily loadable, it's type has been already registered.
+		if ( ! \WP_Block_Type_Registry::get_instance()->is_registered( $this->get_full_block_name() ) ) {
+			$this->register_block_type();
+		}
+
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 	}
 
@@ -156,7 +162,8 @@ abstract class AbstractBlock {
 	 * This registers the scripts; it does not enqueue them.
 	 */
 	protected function register_block_type_assets() {
-		$editor_script = $this->get_block_type_editor_script();
+		// Skip on frontend: WordPress core gates editor script enqueuing on is_admin() (wp-includes/script-loader.php).
+		$editor_script = is_admin() ? $this->get_block_type_editor_script() : null;
 		if ( is_array( $editor_script ) ) {
 			$this->register_editor_script_asset( $editor_script );
 		}
@@ -189,7 +196,7 @@ abstract class AbstractBlock {
 			$this->add_script_dependencies( $handle, $dependencies );
 		} else {
 			$data     = $this->asset_api->get_script_data( $path );
-			$has_i18n = in_array( 'wp-i18n', $data['dependencies'], true );
+			$has_i18n = ! empty( $data['dependencies'] ) && in_array( 'wp-i18n', $data['dependencies'], true );
 
 			$this->asset_api->register_script(
 				$handle,
@@ -214,7 +221,7 @@ abstract class AbstractBlock {
 			$this->integration_registry->get_all_registered_script_handles()
 		);
 		$data         = $this->asset_api->get_script_data( $path );
-		$has_i18n     = in_array( 'wp-i18n', $data['dependencies'], true );
+		$has_i18n     = ! empty( $data['dependencies'] ) && in_array( 'wp-i18n', $data['dependencies'], true );
 
 		$this->asset_api->register_script(
 			$handle,

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show the tax price display suffix after choosing a variation, even when all variations cost the same.

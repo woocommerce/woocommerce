@@ -13,7 +13,6 @@ test.describe( 'Test the order confirmation template', () => {
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
-		await editor.transformIntoBlocks();
 		await expect(
 			editor.canvas.getByText(
 				'Thank you. Your order has been received.'

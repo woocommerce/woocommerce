@@ -8,13 +8,13 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Admin\Features\Blueprint;
 
 use Automattic\WooCommerce\Admin\Features\Blueprint\RestApi;
+use WC_Unit_Test_Case;
 use WP_REST_Request;
-use WP_Test_REST_TestCase;
 
 /**
  * Unit tests for RestApi class.
  */
-class RestApiTest extends WP_Test_REST_TestCase {
+class RestApiTest extends WC_Unit_Test_Case {
 	/**
 	 * @var RestApi
 	 */
@@ -77,6 +77,7 @@ class RestApiTest extends WP_Test_REST_TestCase {
 	 * Clean up after each test.
 	 */
 	public function tearDown(): void {
+		$this->clear_rest_server();
 		parent::tearDown();
 		// Clean up global state.
 		unset( $_FILES['file'] );
@@ -87,6 +88,59 @@ class RestApiTest extends WP_Test_REST_TestCase {
 		}
 
 		remove_all_filters( 'pre_option_woocommerce_coming_soon' );
+	}
+
+	/**
+	 * @testdox Should report import eligibility only for users who may import.
+	 * @testWith ["administrator", true]
+	 *           ["shop_manager", false]
+	 * @param string $role User role.
+	 * @param bool   $expected Whether the user may import.
+	 */
+	public function test_import_allowed_respects_permissions( string $role, bool $expected ): void {
+		$user_id = $this->factory->user->create( array( 'role' => $role ) );
+		wp_set_current_user( $user_id );
+		update_option( 'woocommerce_coming_soon', 'yes' );
+		if ( is_multisite() && $expected ) {
+			grant_super_admin( $user_id );
+		}
+
+		try {
+			$server   = $this->create_rest_server_with_routes( array( array( $this->rest_api, 'register_routes' ) ) );
+			$response = $server->dispatch( new WP_REST_Request( 'GET', '/wc-admin/blueprint/import-allowed' ) );
+
+			$this->assertSame( 200, $response->get_status() );
+			$this->assertSame( $expected, $response->get_data()['import_allowed'] );
+			update_option( 'woocommerce_coming_soon', 'no' );
+			$this->assertFalse( $this->rest_api->get_import_allowed()->get_data()['import_allowed'] );
+		} finally {
+			if ( is_multisite() && $expected ) {
+				revoke_super_admin( $user_id );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should deny a multisite subsite administrator and allow a network super administrator.
+	 * @group ms-required
+	 */
+	public function test_import_allowed_requires_multisite_super_admin(): void {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'Requires multisite.' );
+		}
+		update_option( 'woocommerce_coming_soon', 'yes' );
+
+		$this->assertFalse( is_super_admin( $this->user ) );
+		$this->assertWPError( $this->rest_api->check_import_permission() );
+		$this->assertFalse( $this->rest_api->get_import_allowed()->get_data()['import_allowed'] );
+
+		grant_super_admin( $this->user );
+		try {
+			$this->assertTrue( $this->rest_api->check_import_permission() );
+			$this->assertTrue( $this->rest_api->get_import_allowed()->get_data()['import_allowed'] );
+		} finally {
+			revoke_super_admin( $this->user );
+		}
 	}
 
 	/**

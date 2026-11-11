@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Store the default Cart page cross-sells heading as a block pattern reference so it follows the site language instead of the install language.

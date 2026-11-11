@@ -1,0 +1,3 @@
+Significance: patch
+Type: changed
+Comment: Centralize existing build, lint and test tooling versions in pnpm catalogs; no production change.

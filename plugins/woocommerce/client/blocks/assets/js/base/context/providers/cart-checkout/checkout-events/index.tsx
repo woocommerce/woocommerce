@@ -13,8 +13,9 @@ import {
 } from '@wordpress/element';
 import { usePrevious } from '@woocommerce/base-hooks';
 import deprecated from '@wordpress/deprecated';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch, useRegistry, useSelect } from '@wordpress/data';
 import {
+	cartStore,
 	checkoutStore,
 	paymentStore,
 	validationStore,
@@ -122,6 +123,7 @@ export const CheckoutEventsProvider = ( {
 	const registeredMethods = getExpressPaymentMethods();
 
 	const { isEditor } = useEditorContext();
+	const registry = useRegistry();
 
 	const {
 		__internalUpdateAvailablePaymentMethods,
@@ -138,12 +140,17 @@ export const CheckoutEventsProvider = ( {
 	// Update the payment method store when paymentMethods or expressPaymentMethods changes.
 	// Ensure this happens in the editor even if paymentMethods is empty. This won't happen instantly when the objects
 	// are updated, but on the next re-render.
+	// On the storefront, skip the check until the cart has loaded: the cart store runs it as soon as the cart arrives,
+	// and checking against the empty default cart would show "no payment methods" until that run finishes.
 	useEffect( () => {
-		if (
-			! isEditor &&
-			Object.keys( paymentMethods ).length === 0 &&
-			Object.keys( expressPaymentMethods ).length === 0
-		) {
+		const hasRegisteredMethods =
+			Object.keys( paymentMethods ).length > 0 ||
+			Object.keys( expressPaymentMethods ).length > 0;
+		const hasCartLoaded = registry
+			.select( cartStore )
+			.hasFinishedResolution( 'getCartData' );
+
+		if ( ! isEditor && ( ! hasRegisteredMethods || ! hasCartLoaded ) ) {
 			return;
 		}
 		void __internalUpdateAvailablePaymentMethods();
@@ -151,6 +158,7 @@ export const CheckoutEventsProvider = ( {
 		isEditor,
 		paymentMethods,
 		expressPaymentMethods,
+		registry,
 		__internalUpdateAvailablePaymentMethods,
 	] );
 

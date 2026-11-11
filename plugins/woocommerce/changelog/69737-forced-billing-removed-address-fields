@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Charge shipping at the classic checkout when shipping is forced to billing and the store removed billing address fields.
