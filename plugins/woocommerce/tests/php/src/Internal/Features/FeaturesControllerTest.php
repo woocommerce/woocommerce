@@ -161,6 +161,10 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$features_property->setAccessible( true );
 		$features_property->setValue( $sut, array() );
 
+		$initialized_property = $reflection_class->getProperty( 'initialized_feature_definitions' );
+		$initialized_property->setAccessible( true );
+		$initialized_property->setValue( $sut, true );
+
 		$compat_property = $reflection_class->getProperty( 'compatibility_info_by_feature' );
 		$compat_property->setAccessible( true );
 		$compat_property->setValue( $sut, array() );
@@ -221,6 +225,21 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * @testdox Built-in features load on the first list query even if a custom feature was registered earlier.
+	 */
+	public function test_early_feature_registration_does_not_skip_builtin_definitions(): void {
+		$controller = new FeaturesController();
+		$controller->init( wc_get_container()->get( LegacyProxy::class ), $this->fake_plugin_util );
+		$controller->add_feature_definition( 'early_feature', 'Early feature', array( 'default_plugin_compatibility' => 'compatible' ) );
+
+		$features = $controller->get_features( true );
+
+		$this->assertArrayHasKey( 'early_feature', $features, 'The early registration should remain available.' );
+		$this->assertSame( 'Early feature', $features['early_feature']['name'] );
+		$this->assertArrayHasKey( 'analytics', $features, 'Built-in features should still load on the first query.' );
 	}
 
 	/**
@@ -290,6 +309,10 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$features_property = $reflection_class->getProperty( 'features' );
 		$features_property->setAccessible( true );
 		$features_property->setValue( $this->sut, array() );
+
+		$initialized_property = $reflection_class->getProperty( 'initialized_feature_definitions' );
+		$initialized_property->setAccessible( true );
+		$initialized_property->setValue( $this->sut, false );
 
 		$compat_property = $reflection_class->getProperty( 'compatibility_info_by_feature' );
 		$compat_property->setAccessible( true );

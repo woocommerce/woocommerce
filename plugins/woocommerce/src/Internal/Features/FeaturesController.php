@@ -112,6 +112,13 @@ class FeaturesController {
 	private bool $registered_additional_features_via_class_calls = false;
 
 	/**
+	 * Flag indicating if hardcoded feature definitions have been initialized.
+	 *
+	 * @var bool
+	 */
+	private bool $initialized_feature_definitions = false;
+
+	/**
 	 * Flag indicating if hardcoded feature definitions are currently being initialized.
 	 *
 	 * @var bool
@@ -280,7 +287,7 @@ class FeaturesController {
 			return;
 		}
 
-		if ( ! empty( $this->features ) ) {
+		if ( $this->initialized_feature_definitions ) {
 			return;
 		}
 
@@ -288,6 +295,7 @@ class FeaturesController {
 
 		try {
 			$this->init_feature_definitions();
+			$this->initialized_feature_definitions = true;
 		} finally {
 			$this->initializing_feature_definitions = false;
 		}
