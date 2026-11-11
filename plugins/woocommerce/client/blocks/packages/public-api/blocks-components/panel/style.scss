@@ -26,6 +26,9 @@
 		margin-bottom: $gap-smaller * 2;
 	}
 
+	// The gap under the button opens and closes with the content.
+	@include motion-transition($move: margin-bottom, $easing: balanced);
+
 	&,
 	&:hover,
 	&:focus,
@@ -50,18 +53,4 @@
 	&[hidden] {
 		display: none;
 	}
-}
-
-// Opening and closing runs as a layout transition (see Panel); where one can't run, the content only fades.
-.wc-block-components-panel.is-entering > .wc-block-components-panel__content {
-	transition: motion-state(opacity);
-
-	@starting-style {
-		opacity: 0;
-	}
-}
-
-.wc-block-components-panel.is-exiting > .wc-block-components-panel__content {
-	opacity: 0;
-	transition: motion-state(opacity);
 }

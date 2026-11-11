@@ -139,21 +139,6 @@ $wc-blur-icon: 4px;
 // Fades content in and out while `usePresence` gives it `is-entering` and `is-exiting`. Transitions, so a change of
 // direction part way through turns around from where it is. Content that expands and collapses runs as a layout
 // transition; this is what shows when one can't run.
-@mixin motion-fade-presence() {
-	&.is-entering {
-		transition: motion-state(opacity);
-
-		@starting-style {
-			opacity: 0;
-		}
-	}
-
-	&.is-exiting {
-		opacity: 0;
-		transition: motion-state(opacity);
-	}
-}
-
 // Sets --wc-motion-index on sibling rows; rows past $cap share the last index.
 @mixin motion-stagger-index($cap: 7) {
 	@for $i from 1 to $cap {
@@ -174,4 +159,10 @@ $wc-blur-icon: 4px;
 @mixin motion-stagger($keyframes: wc-rise, $cap: 7) {
 	@include motion-stagger-index($cap);
 	@include motion-enter($keyframes, $delay: motion-stagger-delay());
+
+	// Rows inside a section that's entering as a whole, or being swapped in, arrive with it instead of staggering in
+	// after it (see `quietInnerEntrances()`).
+	:where([data-wc-entering], [data-wc-swapping]) & {
+		animation: none;
+	}
 }

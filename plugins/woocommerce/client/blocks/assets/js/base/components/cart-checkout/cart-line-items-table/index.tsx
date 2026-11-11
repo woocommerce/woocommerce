@@ -4,14 +4,7 @@
 import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { CartResponseItem } from '@woocommerce/types';
-import {
-	createRef,
-	useEffect,
-	useLayoutEffect,
-	useRef,
-	useState,
-} from '@wordpress/element';
-import { startLayoutChange } from '@woocommerce/base-utils/layout-transition';
+import { createRef, useEffect, useRef } from '@wordpress/element';
 import type { RefObject } from 'react';
 import { CartLineItemsCartSkeleton } from '@woocommerce/base-components/skeleton/patterns/cart-line-items';
 import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';
@@ -20,6 +13,7 @@ import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed
  * Internal dependencies
  */
 import CartLineItemRow from './cart-line-item-row';
+import { useRowRemovalMotion } from './use-row-removal-motion';
 import './style.scss';
 
 interface CartLineItemsTableProps {
@@ -36,45 +30,17 @@ const setRefs = ( lineItems: CartResponseItem[] ) => {
 	return refs;
 };
 
-// Cart rows and the blocks after the line items, such as cross-sells, so they slide up when a row leaves.
-const CART_SECTIONS =
-	'.wc-block-cart-items__row, .wp-block-woocommerce-cart-items-block > :not(.wp-block-woocommerce-cart-line-items-block)';
-
-/**
- * Shows `lineItems`, but applies removals inside a layout transition, so the removed row wipes out and the rows
- * below slide up. Changes arriving before the transition applies are folded into it.
- */
-const useLineItemsWithLayoutTransition = ( lineItems: CartResponseItem[] ) => {
-	const [ displayedItems, setDisplayedItems ] = useState( lineItems );
-	const latestItems = useRef( lineItems );
-	latestItems.current = lineItems;
-	const keys = lineItems.map( ( { key } ) => key );
-	const isRemoving = displayedItems.some(
-		( { key } ) => ! keys.includes( key )
-	);
-	if ( ! isRemoving && displayedItems !== lineItems ) {
-		setDisplayedItems( lineItems );
-	}
-
-	useLayoutEffect( () => {
-		if ( isRemoving ) {
-			startLayoutChange( () => setDisplayedItems( latestItems.current ), {
-				sections: CART_SECTIONS,
-			} );
-		}
-	}, [ isRemoving ] );
-
-	return displayedItems;
-};
-
 const CartLineItemsTable = ( {
-	lineItems: currentLineItems = [],
+	lineItems = [],
 	isLoading = false,
 	className,
 }: CartLineItemsTableProps ): JSX.Element => {
-	const lineItems = useLineItemsWithLayoutTransition( currentLineItems );
 	const tableRef = useRef< HTMLTableElement | null >( null );
 	const rowRefs = useRef( setRefs( lineItems ) );
+	useRowRemovalMotion(
+		tableRef,
+		lineItems.map( ( { key } ) => key )
+	);
 	useEffect( () => {
 		rowRefs.current = setRefs( lineItems );
 	}, [ lineItems ] );

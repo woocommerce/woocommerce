@@ -11,13 +11,19 @@ import {
 } from '@woocommerce/block-data';
 import { useShippingData } from '@woocommerce/base-context/hooks';
 import { hasCollectableRate } from '@woocommerce/base-utils';
-import { usePendingLayoutChange } from '@woocommerce/base-utils/layout-transition';
 import {
 	LOCAL_PICKUP_ENABLED,
 	SHIPPING_METHODS_EXIST,
 	SHIPPING_ENABLED,
 } from '@woocommerce/block-settings';
 import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
+import { useLayoutEffect, useRef } from '@wordpress/element';
+import { isUsingKeyboard } from '@woocommerce/base-utils/input-modality';
+import {
+	captureSwap,
+	playSwap,
+	type SwapSnapshot,
+} from '@woocommerce/base-utils/swap-sections';
 
 /**
  * Internal dependencies
@@ -58,8 +64,16 @@ const FrontendBlock = ( {
 	const { setPrefersCollection } = useDispatch( checkoutStoreDescriptor );
 	const { selectShippingRate } = useDispatch( cartStore );
 	const { needsShipping, isCollectable, shippingRates } = useShippingData();
-	const [ pendingMethod, withLayoutChange ] =
-		usePendingLayoutChange< string >();
+
+	// Switching swaps the sections below as one movement, which moves the way the selection did (see `playSwap`).
+	// Keyboard changes apply at once.
+	const swap = useRef< SwapSnapshot | null >( null );
+	useLayoutEffect( () => {
+		if ( swap.current ) {
+			playSwap( swap.current );
+			swap.current = null;
+		}
+	}, [ prefersCollection ] );
 
 	// Note that display logic is also found in plugins/woocommerce/client/blocks/assets/js/blocks/checkout/inner-blocks/register-components.ts
 	// where the block is not registered if the conditions are not met.
@@ -74,6 +88,24 @@ const FrontendBlock = ( {
 	}
 
 	const onChange = ( method: string ) => {
+		const step = document.getElementById( 'shipping-method' );
+		// Ship renders first, then Pickup.
+		const [ ship, pickup ] = Array.from(
+			step?.querySelectorAll(
+				'.wc-block-checkout__shipping-method-option'
+			) ?? []
+		).map( ( option ) => {
+			const rect = option.getBoundingClientRect();
+			return rect.left + rect.width / 2;
+		} );
+		const towardPickup = Math.sign( ( pickup ?? 0 ) - ( ship ?? 0 ) ) || 1;
+		swap.current =
+			isUsingKeyboard() || ( method === 'pickup' ) === prefersCollection
+				? null
+				: captureSwap(
+						step?.parentElement ?? null,
+						method === 'pickup' ? towardPickup : -towardPickup
+					);
 		if ( method === 'pickup' ) {
 			void setPrefersCollection( true );
 		} else {
@@ -107,11 +139,8 @@ const FrontendBlock = ( {
 			showStepNumber={ showFormStepNumbers }
 		>
 			<Block
-				checked={
-					pendingMethod ??
-					( prefersCollection ? 'pickup' : 'shipping' )
-				}
-				onChange={ withLayoutChange( onChange ) }
+				checked={ prefersCollection ? 'pickup' : 'shipping' }
+				onChange={ onChange }
 				showPrice={ showPrice }
 				showIcon={ showIcon }
 				localPickupText={ localPickupText }

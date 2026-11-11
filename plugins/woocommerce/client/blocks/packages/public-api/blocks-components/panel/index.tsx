@@ -7,7 +7,6 @@ import { Icon, chevronUp, chevronDown } from '@wordpress/icons';
 import type { ReactNode, ReactElement } from 'react';
 import { Button } from '@ariakit/react';
 import { usePresence } from '@woocommerce/base-hooks';
-import { startLayoutChange } from '@woocommerce/base-utils/layout-transition';
 import deprecated from '@wordpress/deprecated';
 /**
  * Internal dependencies
@@ -45,7 +44,10 @@ const Panel = ( {
 		[ isOpen, setIsOpen ] = state;
 	}
 
-	const presence = usePresence( isOpen );
+	// The content grows in under the button as the content below makes room, and collapses back when closed.
+	const presence = usePresence( isOpen, {
+		collapse: ':scope > .wc-block-components-panel__content',
+	} );
 
 	if ( titleTag ) {
 		deprecated( "Panel component's titleTag prop", {
@@ -69,14 +71,7 @@ const Panel = ( {
 				render={ <div /> }
 				aria-expanded={ isOpen }
 				className="wc-block-components-panel__button"
-				// The panel grows into its new state while the content below slides, or animates with classes
-				// where a layout transition can't run.
-				onClick={ () =>
-					startLayoutChange( () => setIsOpen( ! isOpen ), {
-						morph: presence.ref.current,
-						exit: isOpen,
-					} )
-				}
+				onClick={ () => setIsOpen( ! isOpen ) }
 			>
 				<Icon
 					aria-hidden="true"

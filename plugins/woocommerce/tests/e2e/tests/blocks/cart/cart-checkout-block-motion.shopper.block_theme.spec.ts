@@ -92,14 +92,25 @@ const recordMotion = async ( page: Page ) => {
 			},
 			true
 		);
-		const startViewTransition =
-			document.startViewTransition?.bind( document );
-		if ( startViewTransition ) {
-			document.startViewTransition = ( ...args ) => {
-				window.wcMotionLog.push( 'view transition' );
-				return startViewTransition( ...args );
-			};
-		}
+		// Layout changes, such as a section growing in, run as script animations of its size.
+		const animate = Element.prototype.animate;
+		Element.prototype.animate = function ( keyframes, options ) {
+			const properties = (
+				Array.isArray( keyframes ) ? keyframes : [ keyframes ?? {} ]
+			).flatMap( ( keyframe ) => Object.keys( keyframe ?? {} ) );
+			const moves = properties.filter(
+				( property ) =>
+					! [ 'offset', 'easing', 'composite', 'opacity' ].includes(
+						property
+					)
+			);
+			if ( isInBlocks( this ) && moves.length ) {
+				window.wcMotionLog.push(
+					`script ${ [ ...new Set( moves ) ].join( ',' ) }`
+				);
+			}
+			return animate.call( this, keyframes, options );
+		};
 	} );
 };
 
@@ -168,7 +179,7 @@ test.describe( 'Shopper → Cart and Checkout motion', () => {
 
 			// Confirms the log sees motion, so the reduced motion test below can't pass by logging nothing.
 			expect( motion.cart ).not.toEqual( [] );
-			expect( motion.checkout ).toContain( 'view transition' );
+			expect( motion.checkout ).not.toEqual( [] );
 
 			await checkoutPageObject.placeOrder();
 			await expect(

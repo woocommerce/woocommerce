@@ -16,7 +16,7 @@ import { cartStore, validationStore } from '@woocommerce/block-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { isPackageRateCollectable } from '@woocommerce/base-utils';
 import { onAnimationsFinished } from '@woocommerce/base-utils/on-animations-finished';
-import { isUsingKeyboard } from '@woocommerce/base-utils/layout-transition';
+import { isUsingKeyboard } from '@woocommerce/base-utils/input-modality';
 import { getSetting } from '@woocommerce/settings';
 import { Button } from '@ariakit/react';
 import { shippingAddressHasValidationErrors } from '@woocommerce/block-data/cart/utils';
@@ -196,11 +196,12 @@ const Block = ( {
 	const previousChecked = useRef( checked );
 	const [ indicatorStyle, setIndicatorStyle ] =
 		useState< CSSProperties | null >( null );
+	// Remounts the indicator for each move, so its slide restarts.
+	const moveCount = useRef( 0 );
 
 	// Slide a copy of the selected style from the old option to the new one. It only exists while moving, so the
 	// resting markup is unchanged; with no animation (reduced motion) it's removed before it paints. Keyboard changes
-	// don't slide. A click can't interrupt the slide: it runs inside the layout transition the change starts, during
-	// which the page ignores clicks.
+	// don't slide. A click part way through slides back from where the indicator is.
 	useLayoutEffect( () => {
 		const from = previousChecked.current;
 		previousChecked.current = checked;
@@ -216,8 +217,9 @@ const Block = ( {
 		const options = container.querySelectorAll(
 			'.wc-block-checkout__shipping-method-option'
 		);
-		const fromRect =
-			options[ from === 'pickup' ? 1 : 0 ]?.getBoundingClientRect();
+		const fromRect = (
+			indicatorRef.current ?? options[ from === 'pickup' ? 1 : 0 ]
+		)?.getBoundingClientRect();
 		const toRect =
 			options[ checked === 'pickup' ? 1 : 0 ]?.getBoundingClientRect();
 		if ( ! fromRect || ! toRect ) {
@@ -228,6 +230,7 @@ const Block = ( {
 			fromRect.left + fromRect.width / 2 - toRect.left - toRect.width / 2;
 		const offsetY =
 			fromRect.top + fromRect.height / 2 - toRect.top - toRect.height / 2;
+		moveCount.current++;
 		setIndicatorStyle( {
 			left: toRect.left - containerRect.left,
 			top: toRect.top - containerRect.top,
@@ -262,6 +265,7 @@ const Block = ( {
 		>
 			{ indicatorStyle && (
 				<span
+					key={ moveCount.current }
 					ref={ indicatorRef }
 					aria-hidden="true"
 					className="wc-block-checkout__shipping-method-indicator"

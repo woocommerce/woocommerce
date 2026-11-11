@@ -7,6 +7,11 @@
 	&:empty {
 		margin: 0;
 	}
+	// The spacing around the list opens as the first notice grows in and closes after the last collapses.
+	.wp-block-woocommerce-cart &,
+	.wp-block-woocommerce-checkout & {
+		@include motion-transition($move: margin-block, $easing: balanced);
+	}
 	.wc-block-components-notices__notice {
 		margin: 0;
 		display: flex;

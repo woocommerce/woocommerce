@@ -3,7 +3,8 @@
 	align-items: stretch;
 	align-content: flex-start;
 	color: $gray-800;
-	padding: $gap !important;
+	// Scaled as the notice grows in and collapses (see `--wc-collapse-scale`).
+	padding: calc(#{$gap} * var(--wc-collapse-scale, 1)) !important;
 	gap: $gap-small;
 	margin: $gap 0;
 	border: 1px solid $gray-800;
@@ -180,12 +181,4 @@
 // To fix notice banner width for all block themes.
 .woocommerce.wc-block-store-notices.alignwide {
 	max-width: var(--wp--style--global--wide-size);
-}
-
-// Notices run as a layout transition as they appear and go; where one can't run, they fade.
-.wp-block-woocommerce-cart,
-.wp-block-woocommerce-checkout {
-	.wc-block-components-notice-banner {
-		@include motion-fade-presence;
-	}
 }

@@ -70,7 +70,7 @@ export const useTotalsRow = (
 	const settledCart = useSettledOrderSummaryValue( cart );
 	const row = usePresence( isShown( settledCart ), {
 		data: settledCart,
-		layout: true,
+		collapse: true,
 	} );
 	return {
 		...row.data,

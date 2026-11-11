@@ -7,7 +7,12 @@ import {
 	useStoreCart,
 	useSettledOrderSummaryValue,
 } from '@woocommerce/base-context/hooks';
-import { startLayoutChange } from '@woocommerce/base-utils/layout-transition';
+import {
+	collapseIn,
+	collapseOut,
+	resetCollapse,
+} from '@woocommerce/base-utils/collapse';
+import { onAnimationsFinished } from '@woocommerce/base-utils/on-animations-finished';
 import { __ } from '@wordpress/i18n';
 import { Icon, chevronDown, chevronUp } from '@wordpress/icons';
 import {
@@ -39,9 +44,6 @@ const FrontendBlock = ( {
 	const [ inlineHost, setInlineHost ] = useState< HTMLDivElement | null >(
 		null
 	);
-	// The shopper's toggle runs as a layout transition: the content wipes in or out and the checkout below slides.
-	// Where one can't run, opening fades the content in and closing applies at once.
-	const [ isFadingIn, setIsFadingIn ] = useState( false );
 	const {
 		isOpen,
 		hasContainerWidth,
@@ -49,14 +51,7 @@ const FrontendBlock = ( {
 		closeSummary,
 		ariaControlsId,
 		toggleProps,
-	} = useOrderSummaryToggle( ( toggle, wasOpen ) =>
-		setIsFadingIn(
-			! startLayoutChange( toggle, {
-				element: () => inlineHost,
-				exit: wasOpen,
-			} )
-		)
-	);
+	} = useOrderSummaryToggle();
 	const [ titleElement, setTitleElement ] = useState< HTMLDivElement | null >(
 		null
 	);
@@ -74,9 +69,25 @@ const FrontendBlock = ( {
 		return container;
 	} );
 
+	// The shopper's toggle grows the content in, or collapses it, as the checkout below moves with it. Closing
+	// because they scrolled past the summary applies at once, as its scroll correction expects.
+	const [ shownOpen, setShownOpen ] = useState( isOpen );
+	const [ isClosing, setIsClosing ] = useState( false );
+	const isOpening = useRef( false );
+	const isToggleShown = hasContainerWidth && ! isLarge;
+	if ( isOpen !== shownOpen ) {
+		setShownOpen( isOpen );
+		isOpening.current = isOpen && isToggleShown;
+		setIsClosing(
+			! isOpen &&
+				isToggleShown &&
+				checkoutActionsTopBeforeMove.current === null
+		);
+	}
+
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 	const totalPrice = parseInt( cartTotals.total_price, 10 );
-	const showInline = ! hasContainerWidth || isLarge || isOpen;
+	const showInline = ! isToggleShown || isOpen || isClosing;
 
 	useEffect( () => {
 		if (
@@ -169,6 +180,30 @@ const FrontendBlock = ( {
 		showInline,
 	] );
 
+	// After the effect above has moved the content in.
+	useLayoutEffect( () => {
+		if ( isOpen && isOpening.current ) {
+			isOpening.current = false;
+			collapseIn( inlineHost );
+		}
+	}, [ inlineHost, isOpen ] );
+
+	useLayoutEffect( () => {
+		if ( ! inlineHost ) {
+			return;
+		}
+		if ( ! isClosing ) {
+			// Once the content has moved out, so the container isn't left collapsed for when it shows inline again,
+			// such as on a wider screen.
+			if ( ! isOpen ) {
+				resetCollapse( inlineHost );
+			}
+			return;
+		}
+		collapseOut( inlineHost );
+		return onAnimationsFinished( inlineHost, () => setIsClosing( false ) );
+	}, [ inlineHost, isClosing, isOpen ] );
+
 	useLayoutEffect( () => {
 		return () => contentContainer.remove();
 	}, [ contentContainer ] );
@@ -208,11 +243,12 @@ const FrontendBlock = ( {
 					className={ clsx(
 						'wc-block-components-checkout-order-summary__content',
 						{
-							'is-open': isOpen,
-							'is-entering': isOpen && isFadingIn,
+							'is-open': isOpen || isClosing,
 						}
 					) }
 					id={ ariaControlsId }
+					// React 18 has no `inert` prop; an empty string sets the attribute.
+					{ ...( isClosing ? { inert: '' } : {} ) }
 				/>
 			</div>
 			<CheckoutOrderSummaryFill>

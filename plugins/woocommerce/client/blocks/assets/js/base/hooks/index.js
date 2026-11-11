@@ -14,3 +14,5 @@ export * from './use-query-loop-product-context-validation';
 export * from './use-preview-mode';
 export * from './use-presence';
 export * from './use-presence-list';
+export * from './use-section-collapse';
+export * from './use-height-change-motion';

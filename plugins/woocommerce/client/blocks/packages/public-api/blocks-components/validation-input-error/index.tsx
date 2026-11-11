@@ -47,7 +47,7 @@ export const ValidationInputError = ( {
 	const presence = usePresence( !! errorMessage, {
 		data: errorMessage,
 		enterOnMount: true,
-		layout: true,
+		collapse: true,
 	} );
 	if ( ! presence.isPresent ) {
 		return null;

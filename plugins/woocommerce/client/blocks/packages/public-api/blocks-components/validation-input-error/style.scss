@@ -30,11 +30,3 @@
 .wc-block-components-select + .wc-block-components-validation-error {
 	margin-bottom: $gap-large;
 }
-
-// The error runs as a layout transition as it appears and goes; where one can't run, it fades.
-.wp-block-woocommerce-cart,
-.wp-block-woocommerce-checkout {
-	.wc-block-components-validation-error {
-		@include motion-fade-presence;
-	}
-}

@@ -67,7 +67,7 @@ const NoticesContainer = ( {
 		containerRef,
 		Children.toArray( children ) as ReactElement[],
 		( notice ) => String( notice.key ),
-		{ layout: true }
+		{ collapse: true }
 	);
 	return (
 		<div ref={ containerRef } className={ className }>

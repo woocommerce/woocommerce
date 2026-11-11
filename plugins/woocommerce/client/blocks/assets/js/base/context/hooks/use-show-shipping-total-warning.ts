@@ -50,19 +50,24 @@ export const useShowShippingTotalWarning = () => {
 		}
 
 		// There is a mismatch between the method the user chose (pickup or shipping) and the currently selected rate.
+		// Switching from Pickup to Ship mismatches for a moment, until the shipping options that mount select a rate,
+		// so the notice waits a task: if a rate is being selected by then, this effect re-runs and cancels it, instead
+		// of the notice flashing in and out and moving the order summary below it.
 		if ( hasMismatch && ! isShowingNotice ) {
-			createInfoNotice(
-				__(
-					'Totals will be recalculated when a valid shipping method is selected.',
-					'woocommerce'
-				),
-				{
-					id: 'wc-blocks-totals-shipping-warning',
-					isDismissible: false,
-					context,
-				}
+			const timeout = window.setTimeout( () =>
+				createInfoNotice(
+					__(
+						'Totals will be recalculated when a valid shipping method is selected.',
+						'woocommerce'
+					),
+					{
+						id: 'wc-blocks-totals-shipping-warning',
+						isDismissible: false,
+						context,
+					}
+				)
 			);
-			return;
+			return () => window.clearTimeout( timeout );
 		}
 
 		// Don't show the notice if they have selected local pickup, or if they have selected a valid regular shipping rate.

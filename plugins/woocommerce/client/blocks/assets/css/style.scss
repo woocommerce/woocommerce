@@ -1,5 +1,21 @@
 :root {
 	--wc-separator-color: color-mix(in srgb, currentColor 20%, transparent);
+	// Timings for the motion that JavaScript runs (`base-utils/collapse`), so the WPDS tokens stay their one source.
+	--wc-motion-duration-move-in: #{motion-duration(lg)};
+	--wc-motion-duration-move-out: #{motion-duration(md)};
+	--wc-motion-duration-fade: #{motion-duration(md)};
+	--wc-motion-duration-quick: #{motion-duration(sm)};
+	--wc-motion-easing-move: #{motion-easing(balanced)};
+	--wc-motion-easing-fade: #{motion-easing(subtle)};
+	--wc-motion-easing-slide: #{motion-easing(expressive)};
+}
+
+// Goes from 0 to 1 as `collapseIn` grows an element, and back as `collapseOut` collapses it, for spacing set with
+// `!important`, which animations can't override: `padding: calc(#{$gap} * var(--wc-collapse-scale)) !important`.
+@property --wc-collapse-scale {
+	syntax: "<number>";
+	inherits: false;
+	initial-value: 1;
 }
 
 // Shared motion keyframes for every block that depends on this stylesheet. Fades are separate from movement, so
@@ -35,25 +51,6 @@
 @keyframes wc-rise {
 	from {
 		translate: 0 4px;
-	}
-}
-
-// Clip paths can't interpolate to `none`, so both ends are inset.
-@keyframes wc-clip-reveal {
-	from {
-		clip-path: inset(0 0 100% 0);
-	}
-	to {
-		clip-path: inset(0);
-	}
-}
-
-@keyframes wc-clip-conceal {
-	from {
-		clip-path: inset(0);
-	}
-	to {
-		clip-path: inset(0 0 100% 0);
 	}
 }
 

@@ -17,7 +17,6 @@ import Noninteractive from '@woocommerce/base-components/noninteractive';
 import type { BillingAddress } from '@woocommerce/settings';
 import { getSetting } from '@woocommerce/settings';
 import { emptyAddressFields } from '@woocommerce/base-utils';
-import { usePendingLayoutChange } from '@woocommerce/base-utils/layout-transition';
 import type { CartResponseBillingAddress } from '@woocommerce/types';
 
 /**
@@ -37,8 +36,6 @@ const Block = (): JSX.Element => {
 	} = useCheckoutAddress();
 	const { isEditor } = useEditorContext();
 	const isGuest = getSetting( 'currentUserId' ) === 0;
-	const [ pendingChecked, withLayoutChange ] =
-		usePendingLayoutChange< boolean >();
 
 	// Syncs the billing address with the shipping address.
 	const syncBillingWithShipping = () => {
@@ -102,8 +99,8 @@ const Block = (): JSX.Element => {
 			<CheckboxControl
 				className="wc-block-checkout__use-address-for-billing"
 				label={ __( 'Use same address for billing', 'woocommerce' ) }
-				checked={ pendingChecked ?? useShippingAsBilling }
-				onChange={ withLayoutChange( ( checked: boolean ) => {
+				checked={ useShippingAsBilling }
+				onChange={ ( checked: boolean ) => {
 					setUseShippingAsBilling( checked );
 					if ( checked ) {
 						syncBillingWithShipping();
@@ -111,7 +108,7 @@ const Block = (): JSX.Element => {
 						setEditingBillingAddress( true );
 						clearBillingAddress( billingAddress );
 					}
-				} ) }
+				} }
 			/>
 		</>
 	);

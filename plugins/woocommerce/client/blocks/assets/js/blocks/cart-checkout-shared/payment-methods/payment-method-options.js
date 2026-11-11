@@ -11,10 +11,6 @@ import { RadioControlAccordion } from '@woocommerce/blocks-components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { getPaymentMethods } from '@woocommerce/blocks-registry';
 import { paymentStore } from '@woocommerce/block-data';
-import {
-	CHECKOUT_SECTIONS,
-	usePendingLayoutChange,
-} from '@woocommerce/base-utils/layout-transition';
 
 /**
  * Internal dependencies
@@ -48,9 +44,6 @@ const PaymentMethodOptions = () => {
 	const { removeNotice } = useDispatch( 'core/notices' );
 	const { dispatchCheckoutEvent } = useStoreEvents();
 	const { isEditor } = useEditorContext();
-	const [ pendingMethod, withLayoutChange ] = usePendingLayoutChange(
-		`${ CHECKOUT_SECTIONS }, .wc-block-checkout__payment-method .wc-block-components-radio-control-accordion-option`
-	);
 
 	const options = Object.keys( availablePaymentMethods ).map( ( name ) => {
 		const { edit, content, label, supports } = paymentMethods[ name ];
@@ -90,15 +83,12 @@ const PaymentMethodOptions = () => {
 		]
 	);
 
-	const selected = activeSavedToken ? null : activePaymentMethod;
-
 	return isExpressPaymentMethodActive ? null : (
 		<RadioControlAccordion
 			highlightChecked={ true }
 			id={ 'wc-payment-method-options' }
-			selected={ pendingMethod ?? selected }
-			openValue={ selected }
-			onChange={ withLayoutChange( onChange ) }
+			selected={ activeSavedToken ? null : activePaymentMethod }
+			onChange={ onChange }
 			options={ options }
 		/>
 	);

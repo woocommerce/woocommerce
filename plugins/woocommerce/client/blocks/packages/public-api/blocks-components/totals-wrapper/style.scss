@@ -27,11 +27,6 @@
 	}
 }
 
-// A row that appears or goes, such as Discount, runs as a layout transition; where one can't run, it fades.
-.wc-block-components-totals-wrapper {
-	@include motion-fade-presence;
-}
-
 .wc-block-components-discounts-meta {
 	.wc-block-components-totals-wrapper {
 		&:first-child {

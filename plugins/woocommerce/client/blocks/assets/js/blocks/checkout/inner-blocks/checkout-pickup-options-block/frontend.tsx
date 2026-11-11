@@ -4,6 +4,7 @@
 import clsx from 'clsx';
 import { withFilteredAttributes } from '@woocommerce/shared-hocs';
 import { FormStep } from '@woocommerce/blocks-components';
+import { useSectionCollapse } from '@woocommerce/base-hooks';
 import { useSelect } from '@wordpress/data';
 import { checkoutStore as checkoutStoreDescriptor } from '@woocommerce/block-data';
 import { LOCAL_PICKUP_ENABLED } from '@woocommerce/block-settings';
@@ -38,6 +39,12 @@ const FrontendBlock = ( {
 	);
 
 	const { showFormStepNumbers } = useCheckoutBlockContext();
+
+	useSectionCollapse(
+		prefersCollection && LOCAL_PICKUP_ENABLED,
+		() => document.getElementById( 'pickup-options' ),
+		{ easeHeight: true }
+	);
 
 	if ( ! prefersCollection || ! LOCAL_PICKUP_ENABLED ) {
 		return null;

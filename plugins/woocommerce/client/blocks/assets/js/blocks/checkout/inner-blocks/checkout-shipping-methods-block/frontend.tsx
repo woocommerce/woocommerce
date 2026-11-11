@@ -4,6 +4,7 @@
 import clsx from 'clsx';
 import { withFilteredAttributes } from '@woocommerce/shared-hocs';
 import { FormStep } from '@woocommerce/blocks-components';
+import { useSectionCollapse } from '@woocommerce/base-hooks';
 import { useCheckoutAddress } from '@woocommerce/base-context/hooks';
 import { useSelect } from '@wordpress/data';
 import { checkoutStore } from '@woocommerce/block-data';
@@ -31,6 +32,12 @@ const FrontendBlock = ( {
 		select( checkoutStore ).isProcessing()
 	);
 	const { showShippingMethods } = useCheckoutAddress();
+
+	useSectionCollapse(
+		showShippingMethods,
+		() => document.getElementById( 'shipping-option' ),
+		{ easeHeight: true }
+	);
 
 	if ( ! showShippingMethods ) {
 		return null;

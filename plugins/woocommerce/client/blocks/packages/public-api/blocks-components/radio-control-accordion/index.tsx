@@ -4,6 +4,7 @@
 import clsx from 'clsx';
 import { withInstanceId } from '@wordpress/compose';
 import { useMemo } from '@wordpress/element';
+import { useSectionCollapse } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -23,8 +24,6 @@ export interface RadioControlAccordionProps {
 		content: JSX.Element;
 	} >;
 	selected: string | null;
-	// Which option's content is open, if not `selected`: e.g. the previous value while a layout transition applies.
-	openValue?: string | null;
 	// Should the selected option be highlighted with a border?
 	highlightChecked?: boolean;
 }
@@ -34,7 +33,6 @@ const RadioControlAccordion = ( {
 	instanceId,
 	id,
 	selected,
-	openValue,
 	onChange,
 	options = [],
 	highlightChecked = false,
@@ -45,6 +43,12 @@ const RadioControlAccordion = ( {
 		return options.findIndex( ( option ) => option.value === selected );
 	}, [ options, selected ] );
 
+	// The selected option's content grows in as the last one's collapses.
+	useSectionCollapse( selected, () =>
+		document.getElementById(
+			`radio-control-${ radioControlId }-${ selected }__content`
+		)
+	);
 	if ( ! options.length ) {
 		return null;
 	}
@@ -68,10 +72,6 @@ const RadioControlAccordion = ( {
 				const hasOptionContent =
 					typeof option === 'object' && 'content' in option;
 				const checked = option.value === selected;
-				const isOpen =
-					openValue === undefined
-						? checked
-						: option.value === openValue;
 				const name = `radio-control-${ radioControlId }`;
 				return (
 					<div
@@ -95,7 +95,7 @@ const RadioControlAccordion = ( {
 								}
 							} }
 						/>
-						{ hasOptionContent && isOpen && (
+						{ hasOptionContent && checked && (
 							<div
 								id={ `${ name }-${ option.value }__content` }
 								className={ clsx(

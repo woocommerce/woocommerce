@@ -4,6 +4,7 @@
 import clsx from 'clsx';
 import { withFilteredAttributes } from '@woocommerce/shared-hocs';
 import { FormStep } from '@woocommerce/blocks-components';
+import { useSectionCollapse } from '@woocommerce/base-hooks';
 import {
 	useCheckoutAddress,
 	useShippingData,
@@ -41,6 +42,12 @@ const FrontendBlock = ( {
 		useCheckoutAddress();
 
 	const { hasSelectedLocalPickup } = useShippingData();
+
+	useSectionCollapse(
+		showBillingFields || useBillingAsShipping,
+		() => document.getElementById( 'billing-fields' ),
+		{ easeHeight: true }
+	);
 
 	if ( ! showBillingFields && ! useBillingAsShipping ) {
 		return null;

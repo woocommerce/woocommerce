@@ -1,3 +1,9 @@
+// Cart and Checkout buttons get the same corners as their fields and panels. The rule has no specificity, so a radius
+// the theme gives buttons (`styles.elements.button.border.radius`) still wins.
+:where(.wp-block-woocommerce-cart, .wp-block-woocommerce-checkout) :where(.wc-block-components-button:not(.is-link)) {
+	border-radius: $universal-border-radius;
+}
+
 .wc-block-components-button:not(.is-link) {
 	align-items: center;
 	display: inline-flex;

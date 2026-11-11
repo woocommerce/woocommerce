@@ -3,11 +3,7 @@
  */
 import { ValidatedTextInput } from '@woocommerce/blocks-components';
 import { useState, Fragment, useCallback, useEffect } from '@wordpress/element';
-import { usePrevious } from '@woocommerce/base-hooks';
-import {
-	ADDRESS_FORM_SECTIONS,
-	startLayoutChange,
-} from '@woocommerce/base-utils/layout-transition';
+import { usePrevious, useSectionCollapse } from '@woocommerce/base-hooks';
 import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@ariakit/react';
 import { getFieldLabel } from '@woocommerce/blocks-checkout';
@@ -47,6 +43,22 @@ const AddressLine2Field = ( {
 		[ onChange ]
 	);
 
+	// The field grows in as the "+ Add" link collapses. Both have the field's id: the link's hidden input while the
+	// field is hidden.
+	const getInput = () =>
+		props?.id ? document.getElementById( props.id ) : null;
+	useSectionCollapse(
+		isFieldVisible,
+		() =>
+			getInput()?.closest(
+				'.wc-block-components-address-form__address_2'
+			) ?? null
+	);
+	useSectionCollapse(
+		! isFieldVisible,
+		() => getInput()?.previousElementSibling ?? null
+	);
+
 	// Rerender if value changes to anything non-empty.
 	useEffect( () => {
 		if ( value ) {
@@ -74,12 +86,7 @@ const AddressLine2Field = ( {
 						className={
 							'wc-block-components-address-form__address_2-toggle'
 						}
-						onClick={ () =>
-							startLayoutChange(
-								() => setIsFieldVisible( true ),
-								{ sections: ADDRESS_FORM_SECTIONS }
-							)
-						}
+						onClick={ () => setIsFieldVisible( true ) }
 					>
 						{ sprintf(
 							// translators: %s: address 2 field label.
