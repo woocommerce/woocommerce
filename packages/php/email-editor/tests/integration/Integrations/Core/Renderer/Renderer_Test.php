@@ -291,7 +291,8 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test a site palette color email clients can't render is left out of the sent email.
 	 *
 	 * Twenty Twenty-Five defines `accent-6` as color-mix(). A block reaches a palette color by its
-	 * slug and by its `has-*` class, so the test checks the final HTML rather than one lookup.
+	 * slug, by its `has-*` class and by its preset variable, so the test checks the final HTML
+	 * rather than one lookup.
 	 */
 	public function testItLeavesOutSitePaletteColorsEmailClientsCannotRender(): void {
 		add_filter(
@@ -325,6 +326,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			array(
 				'post_content' => '<!-- wp:paragraph {"textColor":"accent-6"} --><p class="text-test has-accent-6-color has-text-color">Text</p><!-- /wp:paragraph -->
 				<!-- wp:paragraph {"backgroundColor":"accent-6"} --><p class="background-test has-accent-6-background-color has-background">Background</p><!-- /wp:paragraph -->
+				<!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"var:preset|color|accent-6"}}}}} --><p class="has-link-color"><a class="link-test" href="https://example.com">Link</a></p><!-- /wp:paragraph -->
 				<!-- wp:paragraph {"textColor":"accent-1"} --><p class="control-test has-accent-1-color has-text-color">Control</p><!-- /wp:paragraph -->',
 			)
 		);
@@ -337,6 +339,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringNotContainsString( 'color-mix', $rendered['html'], 'A color email clients cannot render should not be sent.' );
 		$this->assertStringNotContainsString( 'color', $this->extractBlockStyle( $rendered['html'], 'text-test', 'p' ), 'The text should keep the surrounding color.' );
 		$this->assertStringNotContainsString( 'background', $this->extractBlockStyle( $rendered['html'], 'background-test', 'td' ), 'The block should keep the surrounding background.' );
+		$this->assertStringNotContainsString( 'color', $this->extractBlockStyle( $rendered['html'], 'link-test', 'a' ), 'The link should not point at a color the email does not have.' );
 		$this->assertStringContainsString( 'color: #ffee58', $this->extractBlockStyle( $rendered['html'], 'control-test', 'p' ), 'A hex palette color should still be inlined.' );
 	}
 

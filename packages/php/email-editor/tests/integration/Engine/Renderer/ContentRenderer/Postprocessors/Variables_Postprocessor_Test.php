@@ -54,4 +54,18 @@ class Variables_Postprocessor_Test extends \Email_Editor_Unit_Test {
 		$result = $this->postprocessor->postprocess( $html );
 		$this->assertEquals( '<div style="padding:10px;margin:20px"><p style="color:white;padding-left:10px;">Helloo I have padding var(--wp--preset--spacing--10); </p></div>', $result );
 	}
+
+	/**
+	 * Test it leaves out a declaration whose preset the theme does not define.
+	 *
+	 * No email client can resolve such a variable, so the declaration is one the client would drop.
+	 */
+	public function testItLeavesOutDeclarationsWithUndefinedPresets(): void {
+		$this->theme_controller_mock->method( 'get_variables_values_map' )->willReturn(
+			array( '--wp--preset--spacing--10' => '10px' )
+		);
+		$html   = '<a style="text-decoration: none; color: var(--wp--preset--color--accent-6); padding: var(--wp--preset--spacing--10)">Link</a><p style="color:var(--wp--preset--color--accent-6)">I mention var(--wp--preset--color--accent-6);</p>';
+		$result = $this->postprocessor->postprocess( $html );
+		$this->assertSame( '<a style="text-decoration: none; padding: 10px">Link</a><p style="">I mention var(--wp--preset--color--accent-6);</p>', $result );
+	}
 }

@@ -49,6 +49,9 @@ class Variables_Postprocessor implements Postprocessor {
 			$replacements[ $var_pattern ] = $value;
 		}
 
+		// Runs last. No email client can resolve a preset the theme doesn't define, so its declaration goes.
+		$replacements['/[^;]*var\(--wp--preset--[^;]*;?/i'] = '';
+
 		// We want to replace the CSS variables only in the style attributes to avoid replacing the actual content.
 		$processor = new \WP_HTML_Tag_Processor( $html );
 
