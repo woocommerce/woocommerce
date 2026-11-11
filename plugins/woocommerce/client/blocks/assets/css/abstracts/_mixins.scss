@@ -4,6 +4,8 @@
 @use "sass:meta";
 @use "sass:string";
 
+@import "motion";
+
 $fontSizes: (
 	"smaller": 0.75,
 	"small": 0.875,
@@ -55,12 +57,6 @@ $fontSizes: (
 @mixin spinner-animation() {
 	@keyframes spinner__animation {
 		0% {
-			animation-timing-function: cubic-bezier(
-				0.5856,
-				0.0703,
-				0.4143,
-				0.9297
-			);
 			transform: rotate(0deg);
 		}
 		100% {
@@ -119,11 +115,10 @@ $fontSizes: (
 		);
 		transform: translateX(-100%);
 		@include loading-animation();
-		animation: loading__animation 1.5s ease-in-out infinite;
-	}
 
-	@media screen and (prefers-reduced-motion: reduce) {
-		animation: none;
+		@include motion-safe {
+			animation: loading__animation 1.5s ease-in-out infinite;
+		}
 	}
 }
 
@@ -366,10 +361,8 @@ $fontSizes: (
 			color-mix(in srgb, currentColor 5%, transparent) 50%,
 			transparent 100%
 		);
-		animation: wc-skeleton-shimmer 1.25s infinite;
-
-		@media (prefers-reduced-motion: reduce) {
-			animation: none;
+		@include motion-safe {
+			animation: wc-skeleton-shimmer 1.25s infinite;
 		}
 	}
 
@@ -381,18 +374,10 @@ $fontSizes: (
 }
 
 @mixin skeleton-animation-fade() {
-	transition: background-color 0.2s ease;
+	transition: motion-state(background-color);
 
 	&::after {
-		transition: background-color 0.2s ease;
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		transition: background-color 0.2s ease;
-
-		&::after {
-			transition: background-color 0.2s ease;
-		}
+		transition: motion-state(background-color);
 	}
 }
 
