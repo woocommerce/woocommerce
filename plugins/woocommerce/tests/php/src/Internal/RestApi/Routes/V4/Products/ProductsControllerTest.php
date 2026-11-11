@@ -204,7 +204,7 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	/**
 	 * Get all expected fields.
 	 *
-	 * @param bool $with_cogs_enabled Ture to get the fields expected when the Cost of Goods Sold feature is enabled.
+	 * @param bool $with_cogs_enabled True to get the fields expected when the Cost of Goods Sold feature is enabled.
 	 */
 	public function get_expected_response_fields( bool $with_cogs_enabled ) {
 		$fields = array(
@@ -297,7 +297,7 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	 * @testWith [true]
 	 *           [false]
 	 *
-	 * @param bool $with_cogs_enabled Ture test with the Cost of Goods Sold feature enabled.
+	 * @param bool $with_cogs_enabled True test with the Cost of Goods Sold feature enabled.
 	 */
 	public function test_product_api_get_all_fields( bool $with_cogs_enabled ) {
 		if ( $with_cogs_enabled ) {
@@ -341,7 +341,7 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	 * @testWith [true]
 	 *           [false]
 	 *
-	 * @param bool $with_cogs_enabled Ture test with the Cost of Goods Sold feature enabled.
+	 * @param bool $with_cogs_enabled True test with the Cost of Goods Sold feature enabled.
 	 */
 	public function test_products_get_each_field_one_by_one( bool $with_cogs_enabled ) {
 		if ( $with_cogs_enabled ) {
@@ -1739,6 +1739,57 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The on_sale parameter combines with include and exclude.
+	 */
+	public function test_products_filter_by_on_sale_with_include_and_exclude(): void {
+		$on_sale_product   = WC_Helper_Product::create_simple_product( true, array( 'sale_price' => 5 ) );
+		$excluded_product  = WC_Helper_Product::create_simple_product( true, array( 'sale_price' => 5 ) );
+		$regular_product   = WC_Helper_Product::create_simple_product();
+		$included_products = array( $on_sale_product->get_id(), $regular_product->get_id() );
+
+		delete_transient( 'wc_products_onsale' );
+
+		$cases = array(
+			'on_sale=true with include'  => array(
+				'params'   => array(
+					'on_sale' => true,
+					'include' => $included_products,
+				),
+				'expected' => array( $on_sale_product->get_id() ),
+			),
+			'on_sale=false with include' => array(
+				'params'   => array(
+					'on_sale' => false,
+					'include' => $included_products,
+				),
+				'expected' => array( $regular_product->get_id() ),
+			),
+			'on_sale=true with exclude'  => array(
+				'params'   => array(
+					'on_sale' => true,
+					'exclude' => array( $excluded_product->get_id() ),
+				),
+				'expected' => array( $on_sale_product->get_id() ),
+			),
+		);
+
+		foreach ( $cases as $name => $case ) {
+			$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
+			$request->set_query_params( $case['params'] );
+
+			$response = $this->server->dispatch( $request );
+
+			$this->assertEquals( 200, $response->get_status(), $name );
+			$this->assertEquals( $case['expected'], wp_list_pluck( $response->get_data(), 'id' ), $name );
+		}
+
+		WC_Helper_Product::delete_product( $on_sale_product->get_id() );
+		WC_Helper_Product::delete_product( $excluded_product->get_id() );
+		WC_Helper_Product::delete_product( $regular_product->get_id() );
+		delete_transient( 'wc_products_onsale' );
+	}
+
+	/**
 	 * Create one product of each parent product type for type-filter tests.
 	 */
 	private function create_products_for_type_filtering(): void {
@@ -2035,6 +2086,22 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 		$duplicated_product = wc_get_product( $response_data['id'] );
 		$this->assertEquals( $product->get_name() . ' (Copy)', $duplicated_product->get_name() );
 		$this->assertEquals( ProductStatus::DRAFT, $duplicated_product->get_status() );
+	}
+
+	/**
+	 * @testdox Duplicating a product using a variation ID and a type param returns an error response instead of a fatal error.
+	 */
+	public function test_duplicate_with_variation_id_and_type_returns_error_response(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variation_id     = $variable_product->get_children()[0];
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/products/' . $variation_id . '/duplicate' );
+		$request->set_body_params( array( 'type' => 'simple' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 404, $response->get_status(), 'Variations should be handled by the variations endpoint.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'] );
 	}
 
 	/**
@@ -2887,5 +2954,49 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'purchase_note', $data, 'Shop manager should see purchase note' );
 		$this->assertArrayHasKey( 'cost_of_goods_sold', $data, 'Shop manager should see COGS data' );
 		$this->assertArrayHasKey( 'meta_data', $data, 'Shop manager should see meta data' );
+	}
+
+	/**
+	 * @testdox Creating and updating a product keeps backslashes and quotes in its name and descriptions.
+	 */
+	public function test_create_and_update_product_keep_backslashes_in_post_fields(): void {
+		$fields         = array(
+			'name'              => 'Cable 1\\2" it\'s',
+			'description'       => 'Path C:\\temp',
+			'short_description' => 'Short C:\\temp',
+		);
+		$updated_fields = array(
+			'name'              => 'Cable 3\\4" it\'s',
+			'description'       => 'Path D:\\temp',
+			'short_description' => 'Short D:\\temp',
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/products' );
+		$request->set_body_params( $fields );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assert_post_fields_keep_backslashes( $response->get_data(), $fields );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/products/' . $response->get_data()['id'] );
+		$request->set_body_params( $updated_fields );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assert_post_fields_keep_backslashes( $response->get_data(), $updated_fields );
+	}
+
+	/**
+	 * Assert a product response and its stored post keep the given name and descriptions.
+	 *
+	 * @param array $data   Product response data.
+	 * @param array $fields Expected name, description and short description.
+	 */
+	private function assert_post_fields_keep_backslashes( array $data, array $fields ): void {
+		$post = get_post( $data['id'] );
+		$this->assertSame( $fields['name'], $data['name'], 'The response name should keep its backslash and quotes.' );
+		$this->assertSame( $fields['name'], $post->post_title, 'The stored name should keep its backslash and quotes.' );
+		$this->assertSame( $fields['description'], $post->post_content, 'The stored description should keep its backslash.' );
+		$this->assertSame( $fields['short_description'], $post->post_excerpt, 'The stored short description should keep its backslash.' );
 	}
 }

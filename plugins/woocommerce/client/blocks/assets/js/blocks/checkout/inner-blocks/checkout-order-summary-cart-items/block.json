@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/checkout-order-summary-cart-items-block",
-	"version": "1.0.0",
 	"title": "Cart Items",
 	"description": "Shows cart items.",
 	"category": "woocommerce",

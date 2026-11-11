@@ -50,6 +50,13 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 	protected $products;
 
 	/**
+	 * Additional field values on the customer before the test, restored at teardown.
+	 *
+	 * @var array<string, mixed>
+	 */
+	private $previous_customer_field_values = array();
+
+	/**
 	 * Create immutable catalog rows shared by all test methods.
 	 */
 	public static function wpSetUpBeforeClass(): void {
@@ -100,6 +107,7 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 	 */
 	protected function setUp(): void {
 		parent::setUp();
+		$this->previous_customer_field_values = $this->get_customer_additional_field_values();
 		update_option( 'woocommerce_checkout_phone_field', 'optional' );
 		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 
@@ -131,7 +139,62 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 		remove_all_actions( 'doing_it_wrong_run' );
 		remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 		$this->unregister_fields();
+		$this->restore_customer_additional_field_values();
 		parent::tearDown();
+	}
+
+	/**
+	 * Put the customer's additional field values back to what they were before the test.
+	 *
+	 * `WC()->customer` is built once for the whole process, so the values one test saves stay
+	 * readable by the next one and decide what a conditional rule sees. Restoring them in memory
+	 * is enough: the customer is read back from the session, which this teardown destroys.
+	 */
+	private function restore_customer_additional_field_values() {
+		$customer = WC()->customer;
+
+		if ( ! $customer ) {
+			return;
+		}
+
+		foreach ( array_diff_key( $this->get_customer_additional_field_values(), $this->previous_customer_field_values ) as $key => $value ) {
+			$customer->delete_meta_data( $key );
+		}
+
+		foreach ( $this->previous_customer_field_values as $key => $value ) {
+			$customer->update_meta_data( $key, $value );
+		}
+	}
+
+	/**
+	 * Get the additional field values saved on the customer, keyed by meta key.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function get_customer_additional_field_values(): array {
+		$customer = WC()->customer;
+		$values   = array();
+
+		if ( ! $customer ) {
+			return $values;
+		}
+
+		$prefixes = array(
+			CheckoutFields::BILLING_FIELDS_PREFIX,
+			CheckoutFields::SHIPPING_FIELDS_PREFIX,
+			CheckoutFields::OTHER_FIELDS_PREFIX,
+		);
+
+		foreach ( $customer->get_meta_data() as $meta ) {
+			foreach ( $prefixes as $prefix ) {
+				if ( 0 === strpos( (string) $meta->key, $prefix ) ) {
+					$values[ $meta->key ] = $meta->value;
+					break;
+				}
+			}
+		}
+
+		return $values;
 	}
 
 	/**
@@ -627,7 +690,7 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * Ensure an error is triggered when a field is registered with an invalid type (text, select, checkbox).
+	 * Ensure an error is triggered when a field is registered with an invalid type (text, select, checkbox, date).
 	 */
 	public function test_invalid_type_in_registration() {
 		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
@@ -641,7 +704,7 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 						'Unable to register field with id: "%s". Registering a field with type "%s" is not supported. The supported types are: %s.',
 						$id,
 						'invalid',
-						implode( ', ', array( 'text', 'select', 'checkbox' ) )
+						implode( ', ', array( 'text', 'select', 'checkbox', 'date' ) )
 					)
 				),
 			)
@@ -1437,6 +1500,95 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 
 		// Ensures the field isn't registered.
 		$this->assertFalse( $this->controller->is_field( $id ), \sprintf( '%s is still registered', $id ) );
+	}
+
+	/**
+	 * @testdox Date fields reject invalid dates before persistence and accept clean optional values.
+	 *
+	 * @testWith ["cart/update-customer", "billing", "2026-02-31", 400]
+	 *           ["cart/update-customer", "shipping", "2026-02-29", 400]
+	 *           ["cart/update-customer", "billing", "not-a-date", 400]
+	 *           ["cart/update-customer", "billing", "0", 400]
+	 *           ["cart/update-customer", "billing", "2024-02-29", 200]
+	 *           ["cart/update-customer", "shipping", " 2026-08-26 ", 200]
+	 *           ["cart/update-customer", "billing", "", 200]
+	 *           ["cart/update-customer", "billing", null, 200]
+	 *           ["checkout", "billing", "2026-02-31", 400]
+	 *           ["checkout", "shipping", "2026-02-29", 400]
+	 *           ["checkout", "billing", " 2026-08-26 ", 200]
+	 *           ["checkout", "shipping", "", 200]
+	 *           ["checkout", "contact", "2026-02-31", 400]
+	 *           ["checkout", "order", "2026-02-29", 400]
+	 *           ["checkout", "contact", " 2026-08-26 ", 200]
+	 *           ["checkout", "order", " 2026-08-26 ", 200]
+	 *
+	 * @param string      $route           Store API route.
+	 * @param string      $location        Field location or address group.
+	 * @param string|null $value           Submitted date, or null to omit the field.
+	 * @param int         $expected_status Expected response status.
+	 */
+	public function test_date_field_validation_before_persistence( string $route, string $location, ?string $value, int $expected_status ): void {
+		$this->unregister_fields();
+		$id         = 'test/delivery-date';
+		$is_address = in_array( $location, array( 'billing', 'shipping' ), true );
+		$group      = $is_address ? $location : 'other';
+		$param      = $is_address ? $location . '_address' : 'additional_fields';
+
+		$callback_calls = 0;
+
+		woocommerce_register_additional_checkout_field(
+			array(
+				'id'                => $id,
+				'label'             => 'Delivery date',
+				'location'          => $is_address ? 'address' : $location,
+				'type'              => 'date',
+				'validate_callback' => static function () use ( &$callback_calls ) {
+					++$callback_calls;
+					return true;
+				},
+			)
+		);
+		$this->controller->persist_field_for_customer( $id, '2026-08-01', WC()->customer, $group );
+
+		$address = array(
+			'first_name' => 'Jane',
+			'last_name'  => 'Doe',
+			'address_1'  => '123 Main Street',
+			'city'       => 'New York',
+			'state'      => 'NY',
+			'postcode'   => '10001',
+			'country'    => 'US',
+		);
+		$params  = array(
+			'billing_address'   => array_merge( $address, array( 'email' => 'jane@example.com' ) ),
+			'shipping_address'  => $address,
+			'payment_method'    => WC_Gateway_BACS::ID,
+			'additional_fields' => array(),
+		);
+		if ( null !== $value ) {
+			$params[ $param ][ $id ] = $value;
+		}
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/' . $route );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params( $params );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( $expected_status, $response->get_status(), wp_json_encode( $data ) );
+		if ( 'cart/update-customer' === $route ) {
+			$this->assertSame( 0, $callback_calls, 'Address type validation must not add calls to extension callbacks.' );
+		}
+		if ( 400 === $expected_status ) {
+			$this->assertSame( 'rest_invalid_param', $data['code'] );
+			$this->assertStringContainsString( 'Delivery date', wp_json_encode( $data['data']['details'] ) );
+			$this->assertSame( '2026-08-01', $this->controller->get_field_from_object( $id, WC()->customer, $group ) );
+			return;
+		}
+
+		$object   = 'checkout' === $route ? wc_get_order( $data['order_id'] ) : WC()->customer;
+		$expected = null === $value ? '2026-08-01' : trim( $value );
+		$this->assertSame( $expected, $this->controller->get_field_from_object( $id, $object, $group ) );
 	}
 
 	/**
@@ -2607,11 +2759,11 @@ class AdditionalFields extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * Test for errors when providing the wrong validation rules schema.
+	 * @testdox Invalid validation schemas report the keyword and its allowed values.
 	 */
 	public function test_invalid_validation_rules_schema() {
 		$this->setExpectedIncorrectUsage( 'woocommerce_register_additional_checkout_field' );
-		$doing_it_wrong_mocker = $this->add_doing_it_wrong_error_mocker( 'woocommerce_register_additional_checkout_field', 'Unable to register field with id: "namespace/test-id". validation: The properties must match schema: {properties}' );
+		$doing_it_wrong_mocker = $this->add_doing_it_wrong_error_mocker( 'woocommerce_register_additional_checkout_field', 'Unable to register field with id: "namespace/test-id". validation: At "/type": The value must be one of: "array", "boolean", "integer", "null", "number", "object", "string"; The data (string) must match the type: array.' );
 		\woocommerce_register_additional_checkout_field(
 			array(
 				'id'         => 'namespace/test-id',

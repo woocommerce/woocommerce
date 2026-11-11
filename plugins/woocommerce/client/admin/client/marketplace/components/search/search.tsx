@@ -63,9 +63,15 @@ function Search(): React.JSX.Element {
 		}
 	};
 
-	const onClose = () => {
-		setSearchTerm( '' );
-		runSearch( '' );
+	// SearchControl only shows its reset button while the field has text,
+	// and reset empties the field through onChange. When a search is active,
+	// emptying the field also clears the results.
+	const onChange = ( value: string ) => {
+		setSearchTerm( value );
+
+		if ( value === '' && query.term ) {
+			runSearch( '' );
+		}
 	};
 
 	const onFocus = () => {
@@ -80,9 +86,8 @@ function Search(): React.JSX.Element {
 			label={ searchPlaceholder }
 			placeholder={ searchPlaceholder }
 			value={ searchTerm }
-			onChange={ setSearchTerm }
+			onChange={ onChange }
 			onKeyUp={ handleKeyUp }
-			onClose={ onClose }
 			onFocus={ onFocus }
 			className="woocommerce-marketplace__search"
 		/>

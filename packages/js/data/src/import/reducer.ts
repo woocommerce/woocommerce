@@ -1,9 +1,8 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import moment from 'moment';
-import type { Reducer } from 'redux';
+import { getShortDateFormat } from '@woocommerce/date';
 
 /**
  * Internal dependencies
@@ -12,21 +11,21 @@ import TYPES from './action-types';
 import { ImportState } from './types';
 import { Action } from './actions';
 
-const reducer: Reducer< ImportState, Action > = (
-	state = {
+const reducer = (
+	state: ImportState = {
 		activeImport: false,
 		importStatus: {},
 		importTotals: {},
 		errors: {},
 		lastImportStartTimestamp: 0,
 		period: {
-			date: moment().format( __( 'MM/DD/YYYY', 'woocommerce' ) ),
+			date: moment().format( getShortDateFormat() ),
 			label: 'all',
 		},
 		skipPrevious: true,
 	},
-	action
-) => {
+	action: Action
+): ImportState => {
 	switch ( action.type ) {
 		case TYPES.SET_IMPORT_STARTED:
 			const { activeImport } = action;

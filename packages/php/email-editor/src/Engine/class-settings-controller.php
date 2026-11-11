@@ -66,9 +66,11 @@ class Settings_Controller {
 		$settings['allowedIframeStyleHandles'] = $this->allowed_iframe_style_handles;
 		$editor_content_styles                 = file_get_contents( __DIR__ . '/content-editor.css' );
 		$shares_content_styles                 = file_get_contents( __DIR__ . '/content-shared.css' );
+		$rich_text_comment_styles              = file_get_contents( __DIR__ . '/rich-text-comment.css' );
 		$settings['styles']                    = array(
 			array( 'css' => $editor_content_styles ),
 			array( 'css' => $shares_content_styles ),
+			array( 'css' => $rich_text_comment_styles ),
 		);
 
 		$settings['autosaveInterval'] = 60;
@@ -183,10 +185,12 @@ class Settings_Controller {
 	}
 
 	/**
-	 * Translate slug to color.
+	 * Translate a color slug to the color the palette gives it.
 	 *
-	 * @param string $color_slug Color slug.
-	 * @return string
+	 * {@see Theme_Controller::translate_slug_to_color()}.
+	 *
+	 * @param string $color_slug Color slug, or a literal color.
+	 * @return string The color value, or an empty string for a slug the palette does not define.
 	 */
 	public function translate_slug_to_color( string $color_slug ): string {
 		return $this->theme_controller->translate_slug_to_color( $color_slug );
@@ -205,6 +209,7 @@ class Settings_Controller {
 			'wp-block-library-css',
 			'wp-block-editor-content-css',
 			'wp-edit-blocks-css',
+			'wp-base-styles-css', // Admin color scheme variables.
 		);
 
 		foreach ( \WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {

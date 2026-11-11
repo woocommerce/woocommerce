@@ -89,6 +89,15 @@ const changeTextInput = ( input: HTMLInputElement, value: string ) => {
 	);
 };
 
+const changeSelect = ( select: HTMLSelectElement, values: string[] ) => {
+	Array.from( select.options ).forEach( ( option ) => {
+		option.selected = values.includes( option.value );
+	} );
+	select.dispatchEvent(
+		new Event( 'change', { bubbles: true, cancelable: true } )
+	);
+};
+
 const getUnsavedChangesActionButton = ( label: string ): HTMLButtonElement => {
 	const button = Array.from(
 		document.body.querySelectorAll< HTMLButtonElement >(
@@ -151,21 +160,12 @@ describe( 'settings HTML rendering', () => {
 			<SettingsUIPage schema={ schema } />
 		);
 
+		expect( container.querySelector( '.wc-settings-ui' ) ).not.toBeNull();
 		expect(
-			container.querySelector( '.wc-settings-ui__section' )
+			container.querySelector( '.dataforms-layouts__wrapper' )
 		).not.toBeNull();
 		expect(
 			container.querySelector( '.wc-settings-ui__section-card' )
-		).not.toBeNull();
-		expect(
-			container.querySelector( '.wc-settings-ui__section-fields' )
-		).not.toBeNull();
-		expect( container.querySelector( '.wc-settings-ui__row' ) ).toBeNull();
-		expect(
-			container.querySelector( '.wc-settings-ui__group-panel' )
-		).toBeNull();
-		expect(
-			container.querySelector( '.wc-settings-ui__group-header' )
 		).toBeNull();
 		expect( container.textContent ).toContain( 'General settings' );
 		expect( container.textContent ).toContain( 'Test field' );
@@ -212,8 +212,8 @@ describe( 'settings HTML rendering', () => {
 		);
 
 		expect( container.textContent ).toContain( 'Default section field' );
-		expect( DefaultSectionField.mock.calls[ 0 ][ 0 ].context.section ).toBe(
-			''
+		expect( DefaultSectionField.mock.calls[ 0 ][ 0 ].field.id ).toBe(
+			'test_field'
 		);
 
 		act( () => root.unmount() );
@@ -363,7 +363,7 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
-	it( 'sanitizes native field descriptions before rendering', () => {
+	it( 'sanitizes field descriptions before rendering', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',
 			title: 'Test page',
@@ -394,7 +394,7 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
-	it( 'hides fields with unmet native visibility rules', () => {
+	it( 'hides fields with unmet schema visibility rules', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',
 			title: 'Test page',
@@ -435,6 +435,106 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
+	it.each( [ '_self', '_SELF', '_Self' ] )(
+		'prompts before navigation with target "%s" while settings are dirty',
+		( target ) => {
+			const schema = createSingleFieldSchema(
+				{ id: 'name', label: 'Name', type: 'text', value: 'Initial' },
+				{
+					save: { adapter: 'form_post' },
+					shell: {
+						navigation: [
+							{ id: 'next', label: 'Next', href: '#next' },
+						],
+					},
+				}
+			);
+			const { container, root } = renderElement(
+				<SettingsUIPage schema={ schema } />
+			);
+			try {
+				const input = container.querySelector( 'input' )!;
+				const link = container.querySelector( 'a' )!;
+				link.target = target;
+				act( () => changeTextInput( input, 'Changed' ) );
+				let intercepted: boolean | undefined;
+				link.addEventListener( 'click', ( event ) => {
+					intercepted = event.defaultPrevented;
+					event.preventDefault();
+				} );
+				act( () => link.click() );
+				expect( intercepted ).toBe( true );
+				expect(
+					document.querySelector(
+						'.wc-settings-ui__unsaved-changes-modal'
+					)
+				).not.toBeNull();
+			} finally {
+				act( () => root.unmount() );
+				container.remove();
+			}
+		}
+	);
+
+	it.each( [ '', 'settings.csv' ] )(
+		'allows a download with attribute "%s" while settings are dirty',
+		( download ) => {
+			const schema = createSingleFieldSchema(
+				{ id: 'name', label: 'Name', type: 'text', value: 'Initial' },
+				{
+					save: { adapter: 'form_post' },
+					shell: {
+						navigation: [
+							{ id: 'export', label: 'Export', href: '#export' },
+						],
+					},
+				}
+			);
+			const { container, root } = renderElement(
+				<SettingsUIPage schema={ schema } />
+			);
+			const input = container.querySelector(
+				'input:not([type="hidden"])'
+			);
+			if ( ! ( input instanceof window.HTMLInputElement ) ) {
+				throw new Error( 'Expected an editable input.' );
+			}
+			const link = container.querySelector( 'a' )!;
+			link.setAttribute( 'download', download );
+			act( () => changeTextInput( input, 'Changed' ) );
+
+			const click = new window.MouseEvent( 'click', {
+				bubbles: true,
+				cancelable: true,
+				button: 0,
+			} );
+			let intercepted: boolean | undefined;
+			link.addEventListener(
+				'click',
+				( event ) => {
+					intercepted = event.defaultPrevented;
+					event.preventDefault();
+				},
+				{ once: true }
+			);
+			act( () => {
+				link.dispatchEvent( click );
+			} );
+			expect( intercepted ).toBe( false );
+			expect(
+				document.querySelector(
+					'.wc-settings-ui__unsaved-changes-modal'
+				)
+			).toBeNull();
+			const unload = new Event( 'beforeunload', { cancelable: true } );
+			window.dispatchEvent( unload );
+			expect( unload.defaultPrevented ).toBe( true );
+
+			act( () => root.unmount() );
+			container.remove();
+		}
+	);
+
 	it( 'prompts before navigating away with unsaved changes', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',
@@ -469,7 +569,7 @@ describe( 'settings HTML rendering', () => {
 			<SettingsUIPage schema={ schema } />
 		);
 
-		const input = container.querySelector( 'input[type="text"]' );
+		const input = container.querySelector( 'input:not([type="hidden"])' );
 		const link = container.querySelector(
 			'a[href="https://example.com/next"]'
 		);
@@ -547,7 +647,9 @@ describe( 'settings HTML rendering', () => {
 		form.insertBefore( sectionLinks, container );
 
 		try {
-			const input = container.querySelector( 'input[type="text"]' );
+			const input = container.querySelector(
+				'input:not([type="hidden"])'
+			);
 			const link = sectionLinks.querySelector( 'a' );
 
 			expect( input ).toBeInstanceOf( HTMLInputElement );
@@ -576,7 +678,7 @@ describe( 'settings HTML rendering', () => {
 		}
 	} );
 
-	it( 'submits form-post saves with the pending destination', () => {
+	it( 'submits form-post saves without clearing another unload handler', () => {
 		const requestSubmit = jest
 			.spyOn( HTMLFormElement.prototype, 'requestSubmit' )
 			.mockImplementation( () => undefined );
@@ -614,8 +716,14 @@ describe( 'settings HTML rendering', () => {
 			<SettingsUIPage schema={ schema } />
 		);
 
+		const previousBeforeUnload = window.onbeforeunload;
+		const otherBeforeUnload = jest.fn();
+		window.onbeforeunload = otherBeforeUnload;
+
 		try {
-			const input = container.querySelector( 'input[type="text"]' );
+			const input = container.querySelector(
+				'input:not([type="hidden"])'
+			);
 			const link = container.querySelector(
 				'a[href="https://example.com/next"]'
 			);
@@ -661,7 +769,15 @@ describe( 'settings HTML rendering', () => {
 			expect( requestSubmit ).toHaveBeenCalledWith(
 				container.querySelector( '.woocommerce-save-button' )
 			);
+			expect( window.onbeforeunload ).toBe( otherBeforeUnload );
+			const beforeUnloadEvent = new Event( 'beforeunload', {
+				cancelable: true,
+			} );
+			window.dispatchEvent( beforeUnloadEvent );
+			expect( otherBeforeUnload ).toHaveBeenCalledTimes( 1 );
+			expect( beforeUnloadEvent.defaultPrevented ).toBe( false );
 		} finally {
+			window.onbeforeunload = previousBeforeUnload;
 			act( () => root.unmount() );
 			form.remove();
 			requestSubmit.mockRestore();
@@ -713,7 +829,7 @@ describe( 'settings HTML rendering', () => {
 			<SettingsUIPage schema={ schema } />
 		);
 
-		const input = container.querySelector( 'input[type="text"]' );
+		const input = container.querySelector( 'input:not([type="hidden"])' );
 		const link = container.querySelector(
 			'a[href="https://example.com/next"]'
 		);
@@ -817,7 +933,7 @@ describe( 'settings HTML rendering', () => {
 			<SettingsUIPage schema={ schema } />
 		);
 
-		const input = container.querySelector( 'input[type="text"]' );
+		const input = container.querySelector( 'input:not([type="hidden"])' );
 		const link = container.querySelector(
 			'a[href="https://example.com/next"]'
 		);
@@ -876,6 +992,364 @@ describe( 'settings HTML rendering', () => {
 		container.remove();
 	} );
 
+	it( 'routes registered control edits into the page values', () => {
+		registerSettingsExtension( {
+			scope: { page: 'test-page' },
+			components: {
+				'test/custom-field': ( { data, field, onChange } ) => (
+					<button
+						onClick={ () =>
+							onChange( { [ field.id ]: 'clicked' } )
+						}
+					>
+						{ `Custom control: ${ String(
+							data[ field.id ] ?? ''
+						) }` }
+					</button>
+				),
+			},
+		} );
+
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'text',
+							value: 'initial',
+							component: 'test/custom-field',
+						},
+					],
+				},
+			},
+		};
+
+		const { container, form, root } = renderElementInMainForm(
+			<SettingsUIPage schema={ schema } />
+		);
+
+		try {
+			expect( container.textContent ).toContain(
+				'Custom control: initial'
+			);
+
+			act( () => {
+				container.querySelector( 'button' )?.click();
+			} );
+
+			expect( container.textContent ).toContain(
+				'Custom control: clicked'
+			);
+			expect(
+				form.querySelector( 'input[name="test_field"]' )
+			).toHaveAttribute( 'value', 'clicked' );
+		} finally {
+			act( () => root.unmount() );
+			form.remove();
+		}
+	} );
+
+	it( 'excludes unknown control fields from custom save payloads', async () => {
+		const saveHandler = jest.fn().mockResolvedValue( undefined );
+		registerSettingsExtension( {
+			scope: { page: 'test-page' },
+			components: {
+				'test/custom-field': ( { field, onChange } ) => (
+					<button
+						type="button"
+						onClick={ () =>
+							onChange( {
+								[ field.id ]: 'changed',
+								unknown: 'stray',
+							} )
+						}
+					>
+						Change fields
+					</button>
+				),
+			},
+			saveHandlers: { 'test/save': saveHandler },
+		} );
+		const schema = createSingleFieldSchema(
+			{
+				id: 'name',
+				label: 'Name',
+				type: 'text',
+				value: 'initial',
+				component: 'test/custom-field',
+			},
+			{ save: { adapter: 'custom', handler: 'test/save' } }
+		);
+		const { container, root } = renderElement(
+			<SettingsUIPage schema={ schema } />
+		);
+		try {
+			act( () => container.querySelector( 'button' )!.click() );
+			const saveButton = container.querySelector(
+				'.woocommerce-save-button'
+			);
+			if ( ! ( saveButton instanceof window.HTMLButtonElement ) ) {
+				throw new Error( 'Expected a save button.' );
+			}
+			await act( async () => {
+				saveButton.click();
+			} );
+			expect( saveHandler ).toHaveBeenCalledTimes( 1 );
+			expect( saveHandler.mock.calls[ 0 ][ 0 ] ).toEqual(
+				expect.objectContaining( {
+					values: { name: 'changed' },
+					changedValues: { name: 'changed' },
+					dirtyFields: [ 'name' ],
+				} )
+			);
+		} finally {
+			act( () => root.unmount() );
+			container.remove();
+		}
+	} );
+
+	it.each( [ 'number', 'integer', 'datetime-local' ] )(
+		'keeps a cleared %s field canonical as null',
+		( fieldType ) => {
+			registerSettingsExtension( {
+				scope: { page: 'test-page' },
+				components: {
+					'test/clear-field': ( { data, field, onChange } ) => (
+						<button
+							type="button"
+							onClick={ () =>
+								onChange( { [ field.id ]: undefined } )
+							}
+						>
+							{ data[ field.id ] === null
+								? 'Canonical null'
+								: 'Clear value' }
+						</button>
+					),
+				},
+			} );
+
+			const schema = createSingleFieldSchema(
+				{
+					id: 'test_field',
+					label: 'Test field',
+					type: fieldType,
+					value:
+						fieldType === 'datetime-local'
+							? '2026-01-01T12:00:00Z'
+							: 1,
+					component: 'test/clear-field',
+				},
+				{ save: { adapter: 'form_post' } }
+			);
+			const { container, form, root } = renderElementInMainForm(
+				<SettingsUIPage schema={ schema } />
+			);
+
+			try {
+				act( () => container.querySelector( 'button' )?.click() );
+
+				expect( container.textContent ).toContain( 'Canonical null' );
+				expect(
+					form
+						.querySelector(
+							'input[type="hidden"][name="test_field"]'
+						)
+						?.getAttribute( 'value' )
+				).toBe( '' );
+			} finally {
+				act( () => root.unmount() );
+				form.remove();
+			}
+		}
+	);
+
+	it( 'serializes edits from built-in controls into the form-post hidden inputs', () => {
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'flag',
+							label: 'Flag',
+							type: 'checkbox',
+							value: false,
+						},
+						{
+							id: 'unit',
+							label: 'Unit',
+							type: 'select',
+							value: 'kg',
+							options: [
+								{ label: 'kg', value: 'kg' },
+								{ label: 'lbs', value: 'lbs' },
+							],
+						},
+						{
+							id: 'amount',
+							label: 'Amount',
+							type: 'number',
+							value: '1',
+						},
+						{
+							id: 'countries',
+							label: 'Countries',
+							type: 'array',
+							value: [ 'FR' ],
+							options: [
+								{ label: 'France', value: 'FR' },
+								{ label: 'Spain', value: 'ES' },
+							],
+						},
+					],
+				},
+			},
+		};
+
+		const { container, form, root } = renderElementInMainForm(
+			<SettingsUIPage schema={ schema } />
+		);
+		const hiddenValues = ( name: string ) =>
+			Array.from(
+				form.querySelectorAll< HTMLInputElement >(
+					`input[type="hidden"][name="${ name }"]`
+				)
+			).map( ( input ) => input.value );
+
+		try {
+			expect( hiddenValues( 'flag' ) ).toEqual( [ 'no' ] );
+			expect( hiddenValues( 'unit' ) ).toEqual( [ 'kg' ] );
+			expect( hiddenValues( 'amount' ) ).toEqual( [ '1' ] );
+			expect( hiddenValues( 'countries[]' ) ).toEqual( [ 'FR' ] );
+
+			const checkbox = container.querySelector< HTMLInputElement >(
+				'input[type="checkbox"]'
+			);
+			const selects =
+				container.querySelectorAll< HTMLSelectElement >( 'select' );
+			const number = container.querySelector< HTMLInputElement >(
+				'input[type="number"]'
+			);
+			if ( ! checkbox || selects.length !== 2 || ! number ) {
+				throw new Error( 'Expected one control per built-in type.' );
+			}
+
+			act( () => checkbox.click() );
+			act( () => changeSelect( selects[ 0 ], [ 'lbs' ] ) );
+			act( () => changeTextInput( number, '5' ) );
+			act( () => changeSelect( selects[ 1 ], [ 'FR', 'ES' ] ) );
+
+			expect( hiddenValues( 'flag' ) ).toEqual( [ 'yes' ] );
+			expect( hiddenValues( 'unit' ) ).toEqual( [ 'lbs' ] );
+			expect( hiddenValues( 'amount' ) ).toEqual( [ '5' ] );
+			expect( hiddenValues( 'countries[]' ) ).toEqual( [ 'FR', 'ES' ] );
+
+			act( () => changeTextInput( number, '' ) );
+			expect( hiddenValues( 'amount' ) ).toEqual( [ '' ] );
+		} finally {
+			act( () => root.unmount() );
+			form.remove();
+		}
+	} );
+
+	it( 'fails closed when a declared component is not registered', () => {
+		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
+		jest.spyOn( console, 'error' ).mockImplementation( () => undefined );
+
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'text',
+							component: 'test/missing-component',
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIErrorBoundary>
+				<SettingsUIPage schema={ schema } />
+			</SettingsUIErrorBoundary>
+		);
+
+		expect( container.textContent ).toContain(
+			'Something went wrong while rendering this settings page.'
+		);
+		expect( container.querySelector( 'input' ) ).toBeNull();
+		expect(
+			container.querySelector( '.woocommerce-save-button' )
+		).toBeNull();
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
+	it( 'fails closed when no renderer resolves for a field type', () => {
+		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
+		jest.spyOn( console, 'error' ).mockImplementation( () => undefined );
+
+		const schema: SettingsUISchema = {
+			id: 'test-page',
+			title: 'Test page',
+			section: 'default',
+			save: { adapter: 'form_post' },
+			groups: {
+				general: {
+					id: 'general',
+					fields: [
+						{
+							id: 'test_field',
+							label: 'Test field',
+							type: 'extension_defined',
+							options: [ { label: 'One', value: 'one' } ],
+						},
+					],
+				},
+			},
+		};
+
+		const { container, root } = renderElement(
+			<SettingsUIErrorBoundary>
+				<SettingsUIPage schema={ schema } />
+			</SettingsUIErrorBoundary>
+		);
+
+		// A type nothing can draw has to be as loud as a missing component,
+		// rather than dropping the field beside a live Save button.
+		expect( container.textContent ).toContain(
+			'Something went wrong while rendering this settings page.'
+		);
+		expect( container.querySelector( 'select' ) ).toBeNull();
+		expect(
+			container.querySelector( '.woocommerce-save-button' )
+		).toBeNull();
+
+		act( () => root.unmount() );
+		container.remove();
+	} );
+
 	it( 'sanitizes info fields and group descriptions before rendering', () => {
 		const schema: SettingsUISchema = {
 			id: 'test-page',
@@ -903,8 +1377,24 @@ describe( 'settings HTML rendering', () => {
 			<SettingsUIPage schema={ schema } />
 		);
 
-		expect( container.textContent ).toContain( 'Info field' );
-		expectUnsafeMarkupRemoved( container );
+		// DataForm paints the label for a read-only field, so the info
+		// renderer must not repeat it.
+		expect(
+			( container.textContent ?? '' ).split( 'Info field' )
+		).toHaveLength( 2 );
+
+		// The info description keeps sanitized markup while the group
+		// description and the DataForm field label render as plain text.
+		const strongTexts = Array.from(
+			container.querySelectorAll( 'strong' )
+		).map( ( el ) => el.textContent );
+		expect( strongTexts ).toEqual( [ 'Safe' ] );
+		expect( container.querySelector( 'script' ) ).toBeNull();
+		expect( container.querySelector( 'img' ) ).toBeNull();
+		expect( container.querySelector( 'iframe' ) ).toBeNull();
+		expect( container.innerHTML ).not.toContain( 'onerror' );
+		expect( container.innerHTML ).not.toContain( 'onclick' );
+		expect( container.innerHTML ).not.toContain( 'javascript:' );
 
 		act( () => root.unmount() );
 		container.remove();

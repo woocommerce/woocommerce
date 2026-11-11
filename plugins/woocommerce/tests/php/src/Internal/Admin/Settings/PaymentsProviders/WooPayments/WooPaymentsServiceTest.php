@@ -892,6 +892,31 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			->expects( $this->any() )
 			->method( 'is_connection_owner' )
 			->willReturn( $wpcom_connection['is_connection_owner'] );
+		// Reading the onboarding details must never register the store with WPCOM.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->never() )
+			->method( 'try_registration' );
+		// Until the store is registered, the step offers the `authorize` action instead of an authorization URL.
+		if ( ! $wpcom_connection['is_store_connected'] ) {
+			$expected_steps[1]['actions'] = array(
+				'start'     => array(
+					'type' => WooPaymentsService::ACTION_TYPE_REST,
+					'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/start' ),
+				),
+				'authorize' => array(
+					'type' => WooPaymentsService::ACTION_TYPE_REST,
+					'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' ),
+				),
+				'check'     => array(
+					'type' => WooPaymentsService::ACTION_TYPE_REST,
+					'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/check' ),
+				),
+				'clean'     => array(
+					'type' => WooPaymentsService::ACTION_TYPE_REST,
+					'href' => rest_url( $rest_path . 'step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/clean' ),
+				),
+			);
+		}
 		// If the status is completed, we expect only the general actions.
 		if ( WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED === $expected_step_statuses[ WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION ] ) {
 			$expected_steps[1]['actions'] = array(
@@ -2453,6 +2478,36 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertSame( $expected_status, $result );
+	}
+
+	/**
+	 * @testdox Serialized NOX profile strings are ignored without instantiating objects.
+	 */
+	public function test_get_onboarding_step_status_ignores_serialized_profile_string(): void {
+		NoxProfileObjectInstantiationProbe::$was_unserialized = false;
+
+		$serialized_profile = maybe_serialize(
+			array(
+				'probe' => new NoxProfileObjectInstantiationProbe(),
+			)
+		);
+
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) use ( $serialized_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return $serialized_profile;
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		$status = $this->sut->get_onboarding_step_status( WooPaymentsService::ONBOARDING_STEP_PAYMENT_METHODS, 'US' );
+
+		$this->assertSame( WooPaymentsService::ONBOARDING_STEP_STATUS_NOT_STARTED, $status );
+		$this->assertFalse( NoxProfileObjectInstantiationProbe::$was_unserialized, 'Serialized NOX profile strings must not instantiate objects.' );
 	}
 
 	/**
@@ -10583,9 +10638,11 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			->expects( $this->any() )
 			->method( 'is_connected' )
 			->willReturn( false );
+		// The preload runs in the background, so the attempt is not forced.
 		$this->mock_wpcom_connection_manager
 			->expects( $this->once() )
 			->method( 'try_registration' )
+			->with( true, false )
 			->willReturn( $expected_wpcom_registration_result );
 
 		// Arrange the onboarding locked DB option.

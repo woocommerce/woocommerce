@@ -4,7 +4,7 @@
 	background: $studio-white;
 	border: 1px solid $table-border;
 	border-top: 0;
-	@include breakpoint( '<782px' ) {
+	@include breakpoint( "<782px" ) {
 		margin-left: -16px;
 		margin-right: -16px;
 		margin-bottom: $gap-small;
@@ -67,7 +67,7 @@
 	min-height: 50px;
 	padding: 0 $gap;
 
-	@include breakpoint( '<960px' ) {
+	@include breakpoint( "<960px" ) {
 		width: 100%;
 		order: 1;
 		margin-left: 0;
@@ -85,7 +85,7 @@
 			display: none;
 		}
 
-		&:not(:disabled):not([aria-disabled='true']):focus {
+		&:not(:disabled):not([aria-disabled="true"]):focus {
 			@include button-style__focus-active();
 
 			& ~ .components-input-control__backdrop {
@@ -120,7 +120,7 @@
 	}
 }
 
-@include breakpoint( '<960px' ) {
+@include breakpoint( "<960px" ) {
 	.woocommerce-summary + .woocommerce-chart {
 		.woocommerce-chart__title {
 			display: none;

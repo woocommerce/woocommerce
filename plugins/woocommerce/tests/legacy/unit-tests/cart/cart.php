@@ -13,15 +13,6 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 	/**
-	 * tearDown.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-
-		WC()->customer->set_is_vat_exempt( false );
-	}
-
-	/**
 	 * Test whether totals are correct when discount is applied.
 	 */
 	public function test_cart_total_with_discount_and_taxes() {
@@ -1792,9 +1783,9 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * test_add_invidual_use_coupon.
+	 * test_add_individual_use_coupon.
 	 */
-	public function test_add_invidual_use_coupon() {
+	public function test_add_individual_use_coupon() {
 		$iu_coupon = WC_Helper_Coupon::create_coupon( 'code1' );
 		$iu_coupon->set_individual_use( true );
 		$iu_coupon->save();
@@ -1898,9 +1889,9 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * test_cart_object_istantiation.
+	 * test_cart_object_instantiation.
 	 */
-	public function test_cart_object_istantiation() {
+	public function test_cart_object_instantiation() {
 		$cart = new WC_Cart();
 		$this->assertInstanceOf( 'WC_Cart', $cart );
 	}

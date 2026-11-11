@@ -129,7 +129,7 @@ describe( 'Product Details block', () => {
 		).not.toContain( 'style=' );
 	} );
 
-	describe( 'Single Product block', () => {
+	describe( 'editor integration', () => {
 		const server = setupServer(
 			http.get( '/wc-admin/options', ( { request } ) => {
 				const url = new URL( request.url );
@@ -184,12 +184,27 @@ describe( 'Product Details block', () => {
 		} );
 
 		afterEach( () => {
+			server.resetHandlers();
 			( useSelect as jest.Mock ).mockClear();
 		} );
 
 		afterAll( () => {
 			server.close();
 			jest.restoreAllMocks();
+		} );
+
+		test( 'should populate a freshly inserted block with the Product Description placeholder', async () => {
+			await initializeEditor( {
+				name: 'woocommerce/product-details',
+				attributes: {},
+			} );
+
+			expect(
+				await screen.findByText(
+					'This block displays the product description. When viewing a product page, the description content will automatically appear here.',
+					{ exact: true }
+				)
+			).toBeVisible();
 		} );
 
 		test( 'should render product specifications when product is selected', async () => {
@@ -230,7 +245,6 @@ describe( 'Product Details block', () => {
 		} );
 
 		test( 'should auto-remove block when product has no specifications', async () => {
-			server.resetHandlers();
 			server.use(
 				http.get( '/wc/store/v1/products/*', () =>
 					HttpResponse.json( productWithoutSpecifications )

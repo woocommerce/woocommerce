@@ -2,6 +2,9 @@
 	"extends": "../../tsconfig.base.json",
 	"references": [
 		{
+			"path": "admin-screens"
+		},
+		{
 			"path": "client/admin"
 		},
 		{

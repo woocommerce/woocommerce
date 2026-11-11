@@ -50,7 +50,7 @@ class HistoricalDataLayout extends Component {
 							<span className="woocommerce-setting__help">
 								{ __(
 									'This tool populates historical analytics data by processing customers ' +
-										'and orders created prior to activating WooCommerce Admin.',
+										'and orders created before Analytics started recording data.',
 									'woocommerce'
 								) }
 							</span>
@@ -147,11 +147,11 @@ export default withSelect( ( select, props ) => {
 
 	const hasImportFinished = Boolean(
 		inProgress &&
-			! cacheNeedsClearing &&
-			isImporting === false &&
-			( customersTotal > 0 || ordersTotal > 0 ) &&
-			customersProgress === customersTotal &&
-			ordersProgress === ordersTotal
+		! cacheNeedsClearing &&
+		isImporting === false &&
+		( customersTotal > 0 || ordersTotal > 0 ) &&
+		customersProgress === customersTotal &&
+		ordersProgress === ordersTotal
 	);
 
 	let response = {

@@ -63,7 +63,7 @@ export const SortableItem = ( {
 			onDrop={ ( event ) => event.preventDefault() }
 			ref={ ref }
 			tabIndex={ isSelected ? 0 : -1 }
-			// eslint-disable-next-line jsx-a11y/aria-props
+
 			aria-description={ __(
 				'Press spacebar to reorder',
 				'woocommerce'

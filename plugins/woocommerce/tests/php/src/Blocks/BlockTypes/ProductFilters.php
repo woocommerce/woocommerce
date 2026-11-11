@@ -13,7 +13,12 @@ use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
 /**
  * Tests for the ProductFilters block type.
  */
-class ProductFilters extends \WP_UnitTestCase {
+class ProductFilters extends \WC_Unit_Test_Case {
+
+	/**
+	 * Test-only filter block name.
+	 */
+	private const TEST_FILTER_BLOCK = 'woocommerce/test-product-filter-empty-state';
 
 	/**
 	 * Instance of the Product Filters block under test.
@@ -37,11 +42,74 @@ class ProductFilters extends \WP_UnitTestCase {
 	private $canonical_method;
 
 	/**
+	 * Reflection method used to invoke the protected render method.
+	 *
+	 * @var \ReflectionMethod
+	 */
+	private $render_method;
+
+	/**
+	 * @testdox Local filter counts preserve saved taxonomy restrictions, including empty collections.
+	 */
+	public function test_nested_local_filters_preserve_saved_taxonomy_and_empty_collection(): void {
+		$red  = self::factory()->term->create(
+			array(
+				'taxonomy' => 'product_cat',
+				'name'     => 'Local red',
+				'slug'     => 'local-red',
+			)
+		);
+		$blue = self::factory()->term->create(
+			array(
+				'taxonomy' => 'product_cat',
+				'name'     => 'Local blue',
+				'slug'     => 'local-blue',
+			)
+		);
+		foreach ( array( 10, 30, 40 ) as $price ) {
+			$product = \WC_Helper_Product::create_simple_product();
+			$product->set_regular_price( (string) $price );
+			$product->set_category_ids( array( 40 === $price ? $blue : $red ) );
+			$product->save();
+		}
+		$attributes = array(
+			'queryId' => 0,
+			'query'   => array(
+				'isProductCollectionBlock' => true,
+				'postType'                 => 'product',
+				'inherit'                  => false,
+				'perPage'                  => 10,
+				'taxQuery'                 => array( 'product_cat' => array( $red ) ),
+			),
+		);
+		$markup     = '<!-- wp:woocommerce/product-collection ' . wp_json_encode( $attributes ) . ' --><div class="wp-block-woocommerce-product-collection">'
+			. '<!-- wp:woocommerce/product-filters --><div class="wp-block-woocommerce-product-filters">'
+			. '<!-- wp:woocommerce/product-filter-taxonomy {"taxonomy":"product_cat","showCounts":true} --><div>'
+			. '<!-- wp:woocommerce/product-filter-checkbox-list --><div class="wc-block-product-filter-checkbox-list"></div><!-- /wp:woocommerce/product-filter-checkbox-list -->'
+			. '</div><!-- /wp:woocommerce/product-filter-taxonomy --></div><!-- /wp:woocommerce/product-filters -->'
+			. '<!-- wp:woocommerce/product-template --><!-- wp:post-title /--><!-- /wp:woocommerce/product-template -->'
+			. '</div><!-- /wp:woocommerce/product-collection -->';
+
+		$_SERVER['REQUEST_URI'] = '/?wcp-0-categories=local-blue&wcp-0-min_price=20&min_price=999';
+		$html                   = do_blocks( $markup );
+		$this->assertStringContainsString( 'wp-block-woocommerce-product-collection', $html );
+		$this->assertStringNotContainsString( 'wp-block-post-title', $html );
+		$this->assertStringContainsString( 'aria-label="Local red"', $html );
+		$this->assertStringNotContainsString( 'aria-label="Local blue"', $html );
+		$this->assertStringContainsString( 'data-wp-text="context.item.count">1</span>', $html );
+
+		$_SERVER['REQUEST_URI'] = '/?wcp-0-categories=local-red&min_price=999';
+		$html                   = do_blocks( $markup );
+		$this->assertStringContainsString( 'wp-block-post-title', $html );
+		$this->assertStringContainsString( 'data-wp-text="context.item.count">2</span>', $html );
+	}
+
+	/**
 	 * Set up the test subject and dependencies.
 	 *
 	 * @return void
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
 		$asset_api            = Package::container()->get( Api::class );
@@ -58,6 +126,33 @@ class ProductFilters extends \WP_UnitTestCase {
 
 		$this->canonical_method = new \ReflectionMethod( ProductFiltersBlock::class, 'get_canonical_url_no_pagination' );
 		$this->canonical_method->setAccessible( true );
+
+		$this->render_method = new \ReflectionMethod( ProductFiltersBlock::class, 'render' );
+		$this->render_method->setAccessible( true );
+
+		register_block_type(
+			self::TEST_FILTER_BLOCK,
+			array(
+				'api_version'     => 3,
+				'uses_context'    => array( 'productFiltersKey' ),
+				'attributes'      => array(
+					'empty' => array(
+						'type'    => 'boolean',
+						'default' => true,
+					),
+				),
+				'render_callback' => static function ( $attributes, $content, $block ) {
+					$product_filters_key = $block->context['productFiltersKey'] ?? '';
+					if ( is_string( $product_filters_key ) && '' !== $product_filters_key ) {
+						$state = wp_interactivity_state( 'woocommerce/product-filters' );
+						$state['filterEmptyStates'][ $product_filters_key ][] = (bool) $attributes['empty'];
+						wp_interactivity_state( 'woocommerce/product-filters', $state );
+					}
+
+					return '<div class="test-product-filter"></div>';
+				},
+			)
+		);
 	}
 
 	/**
@@ -65,12 +160,13 @@ class ProductFilters extends \WP_UnitTestCase {
 	 *
 	 * @return void
 	 */
-	protected function tearDown(): void {
+	public function tearDown(): void {
 		foreach ( array_reverse( $this->registered_filters ) as $filter ) {
 			remove_filter( $filter['hook'], $filter['callback'], $filter['priority'] );
 		}
 
 		$this->registered_filters = [];
+
 		parent::tearDown();
 	}
 
@@ -101,6 +197,98 @@ class ProductFilters extends \WP_UnitTestCase {
 	 */
 	private function invoke_canonical_url_helper( array $filter_params ): string {
 		return (string) $this->canonical_method->invoke( $this->product_filters, $filter_params );
+	}
+
+	/**
+	 * Render Product Filters with test filter states.
+	 *
+	 * @param bool[] $empty_states Empty-state value for each test filter.
+	 * @return string Rendered Product Filters markup.
+	 */
+	private function render_with_filter_states( array $empty_states ): string {
+		$inner_blocks = array_map(
+			static function ( $is_empty ) {
+				return array(
+					'blockName'    => self::TEST_FILTER_BLOCK,
+					'attrs'        => array( 'empty' => $is_empty ),
+					'innerBlocks'  => array(),
+					'innerHTML'    => '',
+					'innerContent' => array(),
+				);
+			},
+			$empty_states
+		);
+
+		$parsed_block = array(
+			'blockName'    => 'woocommerce/product-filters',
+			'attrs'        => array(),
+			'innerBlocks'  => $inner_blocks,
+			'innerHTML'    => '',
+			'innerContent' => array(),
+		);
+		$block        = new \WP_Block( $parsed_block, array() );
+
+		return (string) $this->render_method->invoke( $this->product_filters, array(), '', $block );
+	}
+
+	/**
+	 * @testdox All participating filters being empty marks the wrapper as empty.
+	 *
+	 * @return void
+	 */
+	public function test_wrapper_has_empty_class_when_all_filters_are_empty(): void {
+		$output = $this->render_with_filter_states( array( true, true ) );
+
+		$this->assertStringContainsString( 'wc-block-product-filters--empty', $output );
+	}
+
+	/**
+	 * @testdox One visible filter keeps the wrapper out of the empty state in either order.
+	 *
+	 * @param bool[] $empty_states Empty-state value for each test filter.
+	 * @return void
+	 *
+	 * @testWith [[true, false]]
+	 *           [[false, true]]
+	 */
+	public function test_wrapper_has_no_empty_class_when_one_filter_has_options( array $empty_states ): void {
+		$output = $this->render_with_filter_states( $empty_states );
+
+		$this->assertStringNotContainsString( 'wc-block-product-filters--empty', $output );
+	}
+
+	/**
+	 * @testdox Empty state is scoped independently for identical and different Product Filters wrappers.
+	 *
+	 * @return void
+	 */
+	public function test_empty_state_is_scoped_per_wrapper(): void {
+		$previous_states        = wp_interactivity_state( 'woocommerce/product-filters' )['filterEmptyStates'] ?? array();
+		$empty_output           = $this->render_with_filter_states( array( true ) );
+		$duplicate_empty_output = $this->render_with_filter_states( array( true ) );
+		$visible_output         = $this->render_with_filter_states( array( false ) );
+
+		$this->assertStringContainsString( 'wc-block-product-filters--empty', $empty_output );
+		$this->assertStringContainsString( 'wc-block-product-filters--empty', $duplicate_empty_output );
+		$this->assertStringNotContainsString( 'wc-block-product-filters--empty', $visible_output );
+
+		$current_states = wp_interactivity_state( 'woocommerce/product-filters' )['filterEmptyStates'];
+		$wrapper_states = array_diff_key( $current_states, $previous_states );
+		$this->assertCount( 3, $wrapper_states );
+		foreach ( $wrapper_states as $empty_states ) {
+			$this->assertCount( 1, $empty_states );
+		}
+	}
+
+	/**
+	 * @testdox A wrapper with no participating filters is not marked empty.
+	 *
+	 * @return void
+	 */
+	public function test_wrapper_without_participating_filters_is_not_empty(): void {
+		$output = $this->render_with_filter_states( array() );
+
+		$this->assertStringNotContainsString( 'wc-block-product-filters--empty', $output );
 	}
 
 	/**

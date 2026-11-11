@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prioritize product title matches in default admin searches while preserving broad matches and explicit sorting.

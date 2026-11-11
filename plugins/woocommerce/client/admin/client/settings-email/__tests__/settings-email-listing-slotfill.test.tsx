@@ -80,6 +80,7 @@ jest.mock( '@woocommerce/settings', () => ( {
 const baseEmail: EmailType = {
 	id: 'new-order',
 	post_id: '123',
+	block_editor_supported: true,
 	file_template_preview_url: null,
 	title: 'New order',
 	description: '',
@@ -110,7 +111,7 @@ describe( 'EmailListingFill — list-page Tracks instrumentation', () => {
 		window.sessionStorage.clear();
 	} );
 
-	it( 'fires one block_email_list_viewed on mount with eligible_count and total_count', () => {
+	it( 'fires one block_email_list_viewed on mount with eligible_count and total_count', async () => {
 		render(
 			<EmailListingFill
 				emailTypes={ [ baseEmail, eligibleEmail ] }
@@ -118,6 +119,7 @@ describe( 'EmailListingFill — list-page Tracks instrumentation', () => {
 				emailTemplateId={ null }
 			/>
 		);
+		await screen.findByTestId( 'listview' );
 
 		expect( recordEventMock ).toHaveBeenCalledTimes( 1 );
 		expect( recordEventMock ).toHaveBeenCalledWith(
@@ -130,7 +132,7 @@ describe( 'EmailListingFill — list-page Tracks instrumentation', () => {
 		);
 	} );
 
-	it( 'dedups within a session: a second mount in the same tab does not refire', () => {
+	it( 'dedups within a session: a second mount in the same tab does not refire', async () => {
 		const { unmount } = render(
 			<EmailListingFill
 				emailTypes={ [ eligibleEmail ] }
@@ -138,6 +140,7 @@ describe( 'EmailListingFill — list-page Tracks instrumentation', () => {
 				emailTemplateId={ null }
 			/>
 		);
+		await screen.findByTestId( 'listview' );
 		unmount();
 		render(
 			<EmailListingFill
@@ -146,11 +149,12 @@ describe( 'EmailListingFill — list-page Tracks instrumentation', () => {
 				emailTemplateId={ null }
 			/>
 		);
+		await screen.findByTestId( 'listview' );
 
 		expect( recordEventMock ).toHaveBeenCalledTimes( 1 );
 	} );
 
-	it( 'still fires when sessionStorage is unavailable (privacy-mode fallback)', () => {
+	it( 'still fires when sessionStorage is unavailable (privacy-mode fallback)', async () => {
 		const setItemSpy = jest
 			.spyOn( window.sessionStorage.__proto__, 'setItem' )
 			.mockImplementation( () => {
@@ -165,6 +169,7 @@ describe( 'EmailListingFill — list-page Tracks instrumentation', () => {
 					emailTemplateId={ null }
 				/>
 			);
+			await screen.findByTestId( 'listview' );
 
 			expect( recordEventMock ).toHaveBeenCalledTimes( 1 );
 		} finally {
@@ -172,7 +177,7 @@ describe( 'EmailListingFill — list-page Tracks instrumentation', () => {
 		}
 	} );
 
-	it( 'reports eligible_count=0 when no rows are eligible', () => {
+	it( 'reports eligible_count=0 when no rows are eligible', async () => {
 		render(
 			<EmailListingFill
 				emailTypes={ [ baseEmail, baseEmail ] }
@@ -180,6 +185,7 @@ describe( 'EmailListingFill — list-page Tracks instrumentation', () => {
 				emailTemplateId={ null }
 			/>
 		);
+		await screen.findByTestId( 'listview' );
 
 		expect( recordEventMock ).toHaveBeenCalledWith(
 			'block_email_list_viewed',

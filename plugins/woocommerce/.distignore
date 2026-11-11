@@ -10,6 +10,7 @@
 /node_modules/
 /patches/
 /playwright-report/
+/admin-screens/
 /storybook/
 /tests/
 /test-results/
@@ -52,4 +53,3 @@ webpack.config.js
 phpstan.neon
 phpstan-baseline.neon
 /php-stubs/
-/bin/api-builder/

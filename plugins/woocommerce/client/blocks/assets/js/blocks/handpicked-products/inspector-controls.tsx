@@ -39,7 +39,7 @@ export const HandpickedProductsInspectorControls = (
 							? __(
 									'Buttons are aligned vertically.',
 									'woocommerce'
-							  )
+								)
 							: __( 'Buttons follow content.', 'woocommerce' )
 					}
 					checked={ alignButtons }

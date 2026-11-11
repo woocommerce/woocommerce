@@ -23,6 +23,7 @@ export const useShippingData = (): ShippingData => {
 		needsShipping,
 		hasCalculatedShipping,
 		isLoadingRates,
+		isShippingRatesStale,
 		isCollectable,
 		isSelectingRate,
 	} = useSelect( ( select ) => {
@@ -33,6 +34,7 @@ export const useShippingData = (): ShippingData => {
 			needsShipping: store.getNeedsShipping(),
 			hasCalculatedShipping: store.getHasCalculatedShipping(),
 			isLoadingRates: store.isAddressFieldsForShippingRatesUpdating(),
+			isShippingRatesStale: store.isShippingRatesStale(),
 			isCollectable: rates.every(
 				( { shipping_rates: packageShippingRates } ) =>
 					packageShippingRates.find( ( { method_id: methodId } ) =>
@@ -122,6 +124,7 @@ export const useShippingData = (): ShippingData => {
 		needsShipping,
 		hasCalculatedShipping,
 		isLoadingRates,
+		isShippingRatesStale,
 		isCollectable,
 		hasSelectedLocalPickup,
 	};

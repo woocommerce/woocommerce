@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove direct Redux type imports so the published TypeScript types resolve without a Redux dependency.

@@ -8,6 +8,10 @@ import { previewCart } from '@woocommerce/resource-previews';
  * Internal dependencies
  */
 import OrderSummary from '../index';
+import { textContentMatcher } from '../../../../../../../tests/utils/find-by-text';
+
+// The screen reader label repeats the price, so only the visible one is queried.
+const visibleOnly = { ignore: 'script, style, .screen-reader-text' };
 
 jest.mock( '@woocommerce/base-context', () => ( {
 	...jest.requireActual( '@woocommerce/base-context' ),
@@ -41,7 +45,9 @@ describe( 'Order Summary', () => {
 			/>
 		);
 
-		expect( screen.getByText( '16€' ) ).toBeTruthy();
+		expect(
+			screen.getByText( textContentMatcher( '16€' ), visibleOnly )
+		).toBeInTheDocument();
 	} );
 
 	it( 'renders correct cart line subtotal when product price is 0', async () => {
@@ -68,6 +74,44 @@ describe( 'Order Summary', () => {
 			/>
 		);
 
-		expect( screen.getByText( '$0.00' ) ).toBeTruthy();
+		expect(
+			screen.getByText( textContentMatcher( '$0.00' ), visibleOnly )
+		).toBeInTheDocument();
+	} );
+
+	it( 'renders the product name as plain text in the screen reader price', () => {
+		render(
+			<OrderSummary
+				cartItems={ [
+					{
+						...previewCart.items[ 0 ],
+						name: 'Salt &#038; Grandma&#8217;s <em>Jam</em>',
+					},
+				] }
+			/>
+		);
+
+		expect(
+			screen.getByText(
+				'Total price for 2 Salt & Grandma’s Jam items: $20.00'
+			)
+		).toBeInTheDocument();
+	} );
+
+	it( 'keeps encoded angle brackets in the screen reader product name', () => {
+		render(
+			<OrderSummary
+				cartItems={ [
+					{
+						...previewCart.items[ 0 ],
+						name: 'Shirt &lt;XL&gt;',
+					},
+				] }
+			/>
+		);
+
+		expect(
+			screen.getByText( 'Total price for 2 Shirt <XL> items: $20.00' )
+		).toBeInTheDocument();
 	} );
 } );

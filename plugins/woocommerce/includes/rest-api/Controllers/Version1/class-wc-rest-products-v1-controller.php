@@ -338,7 +338,10 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 	 * @return string
 	 */
 	protected function get_attribute_taxonomy_label( $name ) {
-		$tax    = get_taxonomy( $name );
+		$tax = get_taxonomy( $name );
+		if ( ! $tax ) {
+			return wc_attribute_taxonomy_slug( $name );
+		}
 		$labels = get_taxonomy_labels( $tax );
 
 		return $labels->singular_name;
@@ -694,17 +697,17 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 
 		// Post title.
 		if ( isset( $request['name'] ) ) {
-			$product->set_name( wp_filter_post_kses( $request['name'] ) );
+			$product->set_name( wp_kses_post( $request['name'] ) );
 		}
 
 		// Post content.
 		if ( isset( $request['description'] ) ) {
-			$product->set_description( wp_filter_post_kses( $request['description'] ) );
+			$product->set_description( wp_kses_post( $request['description'] ) );
 		}
 
 		// Post excerpt.
 		if ( isset( $request['short_description'] ) ) {
-			$product->set_short_description( wp_filter_post_kses( $request['short_description'] ) );
+			$product->set_short_description( wp_kses_post( $request['short_description'] ) );
 		}
 
 		// Post status.
@@ -860,6 +863,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 
 			foreach ( $images as $image ) {
 				$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
+				$is_new_upload = false;
 
 				if ( 0 === $attachment_id && isset( $image['src'] ) ) {
 					$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
@@ -873,9 +877,14 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 					}
 
 					$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $product->get_id() );
+					$is_new_upload = true;
 				}
 
 				if ( ! wp_attachment_is_image( $attachment_id ) ) {
+					if ( $is_new_upload && $attachment_id > 0 ) {
+						wp_delete_attachment( $attachment_id, true );
+					}
+
 					throw new WC_REST_Exception( 'woocommerce_product_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 );
 				}
 

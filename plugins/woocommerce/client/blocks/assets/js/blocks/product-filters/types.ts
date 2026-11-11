@@ -31,11 +31,14 @@ export type ActiveFilterItem = {
 	type: string;
 	value: string;
 	attributeQueryType?: 'and' | 'or';
+	label?: string;
 	activeLabel: string;
 };
 
 export type ProductFiltersContext = {
 	isOverlayOpened: boolean;
+	queryId?: number;
+	openButtonRef?: HTMLElement | null;
 	params: Record< string, string >;
 	activeFilters: ActiveFilterItem[];
 	items?: FilterOptionItem[];
@@ -51,10 +54,12 @@ export type ProductFiltersContext = {
 // ----------------------------------------
 // Block props
 // ----------------------------------------
+export type OverlayMode = 'off' | 'mobile' | 'always';
+
 export type BlockAttributes = {
 	productId?: string;
-	isPreview: boolean;
-	showFilterDrawer?: boolean;
+	overlayMode?: OverlayMode;
+	overlayPosition?: 'left' | 'right';
 };
 
 export type EditProps = BlockEditProps< BlockAttributes >;

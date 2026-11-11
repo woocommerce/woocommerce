@@ -31,6 +31,10 @@ Consult the `woocommerce-backend-dev` skill for detailed standards. Using these 
 - ❌ **Missing docblocks** - Required for all hooks and methods ([code-entities.md](../woocommerce-backend-dev/code-entities.md))
 - ❌ **Verbose docblocks** - Keep concise, one line is ideal ([code-entities.md](../woocommerce-backend-dev/code-entities.md))
 
+**Hooks:**
+
+- ❌ **Callbacks that can recurse** - A callback on a frequently run hook that reads filtered data (meta, options, permalinks, capabilities) without a re-entrancy guard ([hooks.md](../woocommerce-backend-dev/hooks.md#recursion-through-other-plugins-callbacks))
+
 **Data Integrity:**
 
 - ❌ **Missing validation** - Must verify state before deletion/modification ([data-integrity.md](../woocommerce-backend-dev/data-integrity.md))
@@ -40,6 +44,7 @@ Consult the `woocommerce-backend-dev` skill for detailed standards. Using these 
 - ❌ **Using `$instance` in tests** - Must use `$sut` variable name ([unit-tests.md](../woocommerce-backend-dev/unit-tests.md))
 - ❌ **Missing `@testdox`** - Required in test method docblocks ([unit-tests.md](../woocommerce-backend-dev/unit-tests.md))
 - ❌ **Test file naming** - Must follow convention for `includes/` vs `src/` ([unit-tests.md](../woocommerce-backend-dev/unit-tests.md))
+- ❌ **Cleanup that duplicates the base lifecycle** - Identify the test's base class before requesting post-assertion fixture deletion or state restoration; flag cleanup already covered by its transaction or teardown ([unit-tests.md](../woocommerce-backend-dev/unit-tests.md#fixture-lifecycle-and-cleanup))
 
 ### Frontend JS/TS Code
 

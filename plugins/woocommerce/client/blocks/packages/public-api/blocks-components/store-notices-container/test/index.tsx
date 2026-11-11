@@ -3,7 +3,7 @@
  */
 import { store as noticesStore } from '@wordpress/notices';
 import { dispatch, select } from '@wordpress/data';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -212,6 +212,171 @@ describe( 'StoreNoticesContainer', () => {
 				select( noticesStore ).getNotices( 'test-context' ).length === 0
 			);
 		} );
+	} );
+
+	it( 'Renders a single notice with the same list markup as multiple notices', async () => {
+		dispatch( noticesStore ).createErrorNotice( 'Single list error', {
+			id: 'single-list-error',
+			context: 'test-context',
+		} );
+		const { container, rerender } = render(
+			<StoreNoticesContainer context="test-context" />
+		);
+		const singleList = container.querySelectorAll(
+			'.wc-block-components-notice-banner__list'
+		);
+		expect( singleList ).toHaveLength( 1 );
+		expect( singleList[ 0 ].getAttribute( 'role' ) ).toBe( 'list' );
+		expect( singleList[ 0 ].querySelectorAll( 'li' ) ).toHaveLength( 1 );
+		expect(
+			screen.getAllByText(
+				/Please fix the following error before continuing/i
+			).length
+		).toBeGreaterThan( 0 );
+
+		await act( () =>
+			dispatch( noticesStore ).createErrorNotice( 'Second list error', {
+				id: 'second-list-error',
+				context: 'test-context',
+			} )
+		);
+		rerender( <StoreNoticesContainer context="test-context" /> );
+
+		const multipleList = container.querySelectorAll(
+			'.wc-block-components-notice-banner__list'
+		);
+		expect( multipleList ).toHaveLength( 1 );
+		expect( multipleList[ 0 ].querySelectorAll( 'li' ) ).toHaveLength( 2 );
+		expect(
+			screen.getAllByText(
+				/Please fix the following errors before continuing/i
+			).length
+		).toBeGreaterThan( 0 );
+
+		// Clean up notices.
+		await act( () =>
+			dispatch( noticesStore ).removeNotice(
+				'single-list-error',
+				'test-context'
+			)
+		);
+		await act( () =>
+			dispatch( noticesStore ).removeNotice(
+				'second-list-error',
+				'test-context'
+			)
+		);
+	} );
+
+	it( 'Exposes the notice id as data-id on each list item', async () => {
+		// The classic notice templates put the notice id on the li via
+		// wc_get_notice_data_attr(), and Store API errors use their error code as
+		// the notice id. Keep the same hook here so scripts and themes can target
+		// an individual notice.
+		dispatch( noticesStore ).createErrorNotice( 'First data-id error', {
+			id: 'woocommerce_rest_cart_coupon_error',
+			context: 'test-context',
+		} );
+		dispatch( noticesStore ).createErrorNotice( 'Second data-id error', {
+			id: 'woocommerce_rest_invalid_postcode',
+			context: 'test-context',
+		} );
+		const { container } = render(
+			<StoreNoticesContainer context="test-context" />
+		);
+
+		expect(
+			[ ...container.querySelectorAll( 'li' ) ].map( ( item ) =>
+				item.getAttribute( 'data-id' )
+			)
+		).toEqual( [
+			'woocommerce_rest_cart_coupon_error',
+			'woocommerce_rest_invalid_postcode',
+		] );
+
+		// Clean up notices.
+		await act( () =>
+			dispatch( noticesStore ).removeNotice(
+				'woocommerce_rest_cart_coupon_error',
+				'test-context'
+			)
+		);
+		await act( () =>
+			dispatch( noticesStore ).removeNotice(
+				'woocommerce_rest_invalid_postcode',
+				'test-context'
+			)
+		);
+	} );
+
+	it( 'Renders a non-dismissible notice with the same list markup, without a summary', async () => {
+		dispatch( noticesStore ).createErrorNotice(
+			'Non-dismissible list error',
+			{
+				id: 'non-dismissible-list-error',
+				context: 'test-context',
+				isDismissible: false,
+			}
+		);
+		const { container } = render(
+			<StoreNoticesContainer context="test-context" />
+		);
+
+		const lists = within( container ).getAllByRole( 'list' );
+		expect( lists ).toHaveLength( 1 );
+		expect( within( lists[ 0 ] ).getAllByRole( 'listitem' ) ).toHaveLength(
+			1
+		);
+		expect( lists[ 0 ] ).toHaveClass(
+			'wc-block-components-notice-banner__list'
+		);
+		// Each non-dismissible notice is its own banner, so it carries no summary.
+		expect(
+			container.querySelector(
+				'.wc-block-components-notice-banner__summary'
+			)
+		).toBeNull();
+
+		// Clean up notices.
+		await act( () =>
+			dispatch( noticesStore ).removeNotice(
+				'non-dismissible-list-error',
+				'test-context'
+			)
+		);
+	} );
+
+	it( 'Renders non-error notices with the same list markup, without a summary', async () => {
+		dispatch( noticesStore ).createSuccessNotice( 'Coupon applied', {
+			id: 'success-list-notice',
+			context: 'test-context',
+		} );
+		const { container } = render(
+			<StoreNoticesContainer context="test-context" />
+		);
+
+		const lists = within( container ).getAllByRole( 'list' );
+		expect( lists ).toHaveLength( 1 );
+		expect( within( lists[ 0 ] ).getAllByRole( 'listitem' ) ).toHaveLength(
+			1
+		);
+		expect( lists[ 0 ] ).toHaveClass(
+			'wc-block-components-notice-banner__list'
+		);
+		// The summary is only rendered for the error status.
+		expect(
+			container.querySelector(
+				'.wc-block-components-notice-banner__summary'
+			)
+		).toBeNull();
+
+		// Clean up notices.
+		await act( () =>
+			dispatch( noticesStore ).removeNotice(
+				'success-list-notice',
+				'test-context'
+			)
+		);
 	} );
 
 	it( 'Combine same notices from several contexts', async () => {

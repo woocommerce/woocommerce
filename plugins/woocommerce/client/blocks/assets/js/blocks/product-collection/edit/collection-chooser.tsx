@@ -57,7 +57,7 @@ export const applyCollection = (
 					createBlocksFromInnerBlocksTemplate(
 						collection.innerBlocks
 					)
-			  );
+				);
 
 	replaceBlock( clientId, newBlock );
 };

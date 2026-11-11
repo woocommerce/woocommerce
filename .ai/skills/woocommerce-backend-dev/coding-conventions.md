@@ -45,6 +45,26 @@ if ( $order->is_draft() ) {
 - Explaining what code does (code should be self-explanatory)
 - Restating the obvious
 
+Keep docblocks short and plain. See `AGENTS.md` ("Comments and Docblocks") for the full rule.
+
+**Avoid - Intricate phrasing:**
+
+```php
+/**
+ * Facilitates the orchestration of the underlying reconciliation
+ * process by which order totals are ultimately synchronized with
+ * their corresponding line item aggregates.
+ */
+```
+
+**Prefer - Plain and short:**
+
+```php
+/**
+ * Recalculate the order total from its line items.
+ */
+```
+
 ## WordPress Coding Standards
 
 Follow [WordPress Coding Standards](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/php/):

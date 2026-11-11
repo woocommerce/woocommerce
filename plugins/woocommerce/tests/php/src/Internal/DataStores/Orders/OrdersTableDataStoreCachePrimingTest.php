@@ -19,6 +19,13 @@ class OrdersTableDataStoreCachePrimingTest extends \HposTestCase {
 	use HPOSToggleTrait;
 
 	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::setup_cot_tables();
+	}
+
+	/**
 	 * The System Under Test.
 	 *
 	 * @var OrdersTableDataStore
@@ -40,9 +47,10 @@ class OrdersTableDataStoreCachePrimingTest extends \HposTestCase {
 
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 
-		$this->setup_cot();
-		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 		$this->toggle_cot_feature_and_usage( true );
+		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
 
 		$container = wc_get_container();
 		$container->reset_all_resolved();

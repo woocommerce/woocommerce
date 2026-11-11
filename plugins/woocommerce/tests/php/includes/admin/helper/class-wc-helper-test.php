@@ -9,11 +9,20 @@ use Automattic\Jetpack\Constants;
 class WC_Helper_Test extends \WC_Unit_Test_Case {
 
 	/**
+	 * $_GET as it was before the test, since the WordPress test case doesn't restore it.
+	 *
+	 * @var array
+	 */
+	private $original_get = array();
+
+	/**
 	 * Set up before each test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->original_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->cleanup_helper_transients();
+		WC_Helper::flush_local_woo_products_cache();
 	}
 
 	/**
@@ -21,8 +30,61 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->cleanup_helper_transients();
-		unset( $_GET['page'] );
+		$this->cleanup_auto_update_state();
+		$_GET = $this->original_get;
 		parent::tearDown();
+	}
+
+	/**
+	 * Clean up the state the auto-update tests stand in.
+	 */
+	private function cleanup_auto_update_state(): void {
+		delete_site_option( 'auto_update_plugins' );
+		delete_site_option( 'auto_update_themes' );
+		delete_site_transient( 'update_themes' );
+		wp_cache_delete( 'plugins', 'plugins' );
+		wp_set_current_user( 0 );
+		remove_all_filters( 'auto_update_plugin' );
+		remove_all_filters( 'plugins_auto_update_enabled' );
+		remove_all_filters( 'themes_auto_update_enabled' );
+		remove_all_filters( 'auto_update_theme' );
+	}
+
+	/**
+	 * Stand in a plugin list, which get_plugins() reads from the 'plugins' cache group, and log in
+	 * a user who may update plugins.
+	 *
+	 * @return void
+	 */
+	private function prepare_auto_update_env(): void {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+		// The test suite runs with background updates switched off; these tests are about what the
+		// screen reports on a site where the feature is available.
+		add_filter( 'plugins_auto_update_enabled', '__return_true' );
+		add_filter( 'themes_auto_update_enabled', '__return_true' );
+
+		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$admin    = new WP_User( $admin_id );
+		$admin->add_cap( 'update_plugins' );
+		wp_set_current_user( $admin_id );
+
+		wp_cache_set(
+			'plugins',
+			array(
+				'' => array(
+					'test-woo-extension/test-woo-extension.php' => array(
+						'Name'    => 'Test Woo Extension',
+						'Version' => '1.0.0',
+						// Empty, as it is for a WooCommerce.com product distributed through
+						// WordPress.org. The key itself has to be present or get_local_woo_plugins()
+						// discards this stand-in and re-reads the real plugin list.
+						'Woo'     => '',
+					),
+				),
+			),
+			'plugins'
+		);
 	}
 
 	/**
@@ -30,10 +92,13 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	 */
 	private function cleanup_helper_transients(): void {
 		delete_transient( '_woocommerce_helper_subscriptions' );
+		delete_transient( '_woocommerce_helper_updates' );
 		delete_transient( '_woocommerce_helper_product_usage_notice_rules' );
 		delete_transient( '_woocommerce_helper_notices' );
 		delete_transient( '_woocommerce_helper_connection_data' );
 		delete_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS );
+		delete_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK );
+		delete_transient( '_woocommerce_helper_subscriptions_api_error' );
 	}
 
 	/**
@@ -113,6 +178,19 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox has_cached_subscriptions is true only while a subscription list is cached.
+	 */
+	public function test_has_cached_subscriptions_reflects_the_transient(): void {
+		$this->assertFalse( WC_Helper::has_cached_subscriptions(), 'No transient means no cached list.' );
+
+		set_transient( '_woocommerce_helper_subscriptions', 'corrupted_string_data', HOUR_IN_SECONDS );
+		$this->assertFalse( WC_Helper::has_cached_subscriptions(), 'A corrupted transient is not a usable list.' );
+
+		set_transient( '_woocommerce_helper_subscriptions', array(), HOUR_IN_SECONDS );
+		$this->assertTrue( WC_Helper::has_cached_subscriptions(), 'An empty list is still a cached list.' );
+	}
+
+	/**
 	 * @testdox get_subscriptions should return valid cached array without modification.
 	 */
 	public function test_get_subscriptions_returns_valid_cached_array(): void {
@@ -145,19 +223,17 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	 * @testdox get_subscriptions should filter malformed API entries before caching them.
 	 */
 	public function test_get_subscriptions_filters_malformed_api_entries(): void {
-		$response_data         = $this->get_mixed_subscription_data();
-		$previous_auth         = WC_Helper_Options::get( 'auth', array() );
-		$previous_log          = WC_Helper::$log;
-		$had_wp_debug_override = array_key_exists( 'WP_DEBUG', Constants::$set_constants );
-		$previous_wp_debug     = Constants::$set_constants['WP_DEBUG'] ?? null;
-		$filtered_count        = count( $response_data ) - count( $this->get_valid_subscription_data() );
-		$http_mock             = static function () use ( $response_data ) {
+		$response_data  = $this->get_mixed_subscription_data();
+		$previous_auth  = WC_Helper_Options::get( 'auth', array() );
+		$previous_log   = WC_Helper::$log;
+		$filtered_count = count( $response_data ) - count( $this->get_valid_subscription_data() );
+		$http_mock      = static function () use ( $response_data ) {
 			return array(
 				'response' => array( 'code' => 200 ),
 				'body'     => wp_json_encode( $response_data ),
 			);
 		};
-		$logger                = $this->createMock( WC_Logger_Interface::class );
+		$logger         = $this->createMock( WC_Logger_Interface::class );
 		$logger->expects( $this->once() )
 			->method( 'log' )
 			->with(
@@ -185,11 +261,6 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 			remove_filter( 'pre_http_request', $http_mock );
 			WC_Helper_Options::update( 'auth', $previous_auth );
 			WC_Helper::$log = $previous_log;
-			if ( $had_wp_debug_override ) {
-				Constants::set_constant( 'WP_DEBUG', $previous_wp_debug );
-			} else {
-				Constants::clear_single_constant( 'WP_DEBUG' );
-			}
 		}
 
 		$this->assertSame( $this->get_valid_subscription_data(), $result, 'Only valid API subscriptions should be returned unchanged' );
@@ -289,6 +360,278 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		$this->assertFalse(
 			get_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS ),
 			'Only a 429 should record a backoff window'
+		);
+	}
+
+	/**
+	 * @testdox get_subscriptions labels the request with the screen it comes from.
+	 * @testWith ["/wp-admin/admin-ajax.php", "woocommerce_load_status_widget", "dashboard-widget"]
+	 *           ["/wp-admin/admin-ajax.php", "heartbeat", "heartbeat-api"]
+	 *           ["/wp-admin/admin.php?page=wc-admin", "", "inbox-notes"]
+	 *
+	 * @param string $request_uri The request URI.
+	 * @param string $action      The ajax action, if any.
+	 * @param string $expected    The source label the request should carry.
+	 */
+	public function test_get_subscriptions_labels_the_request_source( string $request_uri, string $action, string $expected ): void {
+		$_SERVER['REQUEST_URI'] = $request_uri;
+		if ( '' !== $action ) {
+			$_REQUEST['action'] = $action;
+		}
+		$requested_url = '';
+		$capture       = static function ( $preempt, $args, $url ) use ( &$requested_url ) {
+			$requested_url = $url;
+			return $preempt;
+		};
+		add_filter( 'pre_http_request', $capture, 9, 3 );
+
+		try {
+			$this->fetch_subscriptions_with_response(
+				array(
+					'response' => array( 'code' => 200 ),
+					'body'     => '[]',
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', $capture, 9 );
+			unset( $_REQUEST['action'] );
+		}
+
+		parse_str( (string) wp_parse_url( $requested_url, PHP_URL_QUERY ), $query );
+
+		$this->assertSame( $expected, $query['source'] ?? '', 'The source label is what WooCommerce.com attributes the request to.' );
+	}
+
+	/**
+	 * Run get_subscriptions() against a mocked Helper API response.
+	 *
+	 * @param array|WP_Error $response    The response pre_http_request should return.
+	 * @param bool           $reset_error Whether to clear any recorded API error first.
+	 *                                    Pass false to measure what the fetch itself
+	 *                                    does to an error recorded by an earlier call.
+	 * @return array The value get_subscriptions() returned.
+	 */
+	private function fetch_subscriptions_with_response( $response, bool $reset_error = true ): array {
+		$previous_auth = WC_Helper_Options::get( 'auth', array() );
+		$previous_log  = WC_Helper::$log;
+		$http_mock     = static function () use ( $response ) {
+			return $response;
+		};
+
+		WC_Helper::$log = $this->createMock( WC_Logger_Interface::class );
+
+		// Install the mock before touching `auth`. Updating that option fires
+		// hooks that call the Helper API themselves, and an unmocked call there
+		// caches an empty list, which the measured fetch would then return
+		// straight from cache without ever exercising the response under test.
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			WC_Helper_Options::update(
+				'auth',
+				array(
+					'access_token'        => 'test-token',
+					'access_token_secret' => 'test-secret',
+					// A real connection always carries this, and the subscription
+					// notes that run after a successful fetch dereference it.
+					'site_id'             => 1,
+				)
+			);
+
+			// Whatever those hooks recorded, start the measured call from a clean
+			// slate so the assertions describe this response and nothing else.
+			delete_transient( '_woocommerce_helper_subscriptions' );
+			if ( $reset_error ) {
+				delete_transient( '_woocommerce_helper_subscriptions_api_error' );
+			}
+			WC_Helper_API_Backoff::clear( WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS );
+
+			return WC_Helper::get_subscriptions();
+		} finally {
+			// Restore `auth` while the mock is still installed, so the hooks it
+			// fires stay off the network.
+			WC_Helper_Options::update( 'auth', $previous_auth );
+			remove_filter( 'pre_http_request', $http_mock );
+			WC_Helper::$log = $previous_log;
+		}
+	}
+
+	/**
+	 * A rate-limited Helper API response.
+	 *
+	 * @return array
+	 */
+	private function get_rate_limited_response(): array {
+		return array(
+			// 300 rather than 60: human_time_diff() drops from minutes to seconds
+			// below MINUTE_IN_SECONDS, and get_api_error() recomputes the window
+			// live against the clock, so a boundary value reads back as
+			// "59 seconds" whenever a second elapses between recording the
+			// failure and reading it.
+			'headers'  => array( 'retry-after' => '300' ),
+			'response' => array(
+				'code'    => 429,
+				'message' => 'Too Many Requests',
+			),
+			'body'     => '{"code":"wccom_rest_limit_reached","data":{"status":429}}',
+		);
+	}
+
+	/**
+	 * @testdox get_api_error should return no error when nothing has failed.
+	 */
+	public function test_get_api_error_returns_null_without_a_recorded_failure(): void {
+		$this->assertNull(
+			WC_Helper::get_api_error(),
+			'No error should be reported before any Helper API call has failed'
+		);
+	}
+
+	/**
+	 * @testdox get_api_error should report the rate-limit message after a 429.
+	 */
+	public function test_get_api_error_reports_rate_limit_message_after_429(): void {
+		$result = $this->fetch_subscriptions_with_response( $this->get_rate_limited_response() );
+
+		$this->assertSame( array(), $result, 'A rate-limited response should yield no subscriptions' );
+
+		$error = WC_Helper::get_api_error();
+
+		$this->assertNotNull( $error, 'A 429 should record a surfaceable error' );
+		$this->assertSame( 429, $error['code'], 'The recorded error should carry the HTTP status' );
+		$this->assertSame(
+			'You have exceeded the request limit. Please try again in 5 minutes.',
+			$error['message'],
+			'A 429 should name the wait rather than say "a few minutes"'
+		);
+		$this->assertEqualsWithDelta(
+			300,
+			$error['retry_after'],
+			5,
+			'The Retry-After window should be reported'
+		);
+	}
+
+	/**
+	 * The generic "a few minutes" copy understates a window that the server can
+	 * set to hours, which is the case this replaces.
+	 *
+	 * @testdox get_api_error should report a multi-hour rate-limit window in hours.
+	 */
+	public function test_get_api_error_reports_a_long_rate_limit_window_in_hours(): void {
+		$response                           = $this->get_rate_limited_response();
+		$response['headers']['retry-after'] = (string) ( 3 * HOUR_IN_SECONDS );
+
+		$this->fetch_subscriptions_with_response( $response );
+
+		$error = WC_Helper::get_api_error();
+
+		$this->assertNotNull( $error, 'A 429 should record a surfaceable error' );
+		$this->assertSame(
+			'You have exceeded the request limit. Please try again in 3 hours.',
+			$error['message'],
+			'A multi-hour window should be stated in hours, not as "a few minutes"'
+		);
+	}
+
+	/**
+	 * get_message_for_response_code() only has copy for 429 and 403. Rebuilding
+	 * from the status for anything else replaces real guidance — the reconnect
+	 * instructions carried by a 401, for instance — with a bare status code.
+	 *
+	 * @testdox get_api_error should keep the recorded message for statuses with no specific copy.
+	 */
+	public function test_get_api_error_keeps_the_recorded_message_without_specific_copy(): void {
+		$actionable = 'Authentication failed. Please try again after a few minutes. If the issue persists, disconnect your store from WooCommerce.com and reconnect.';
+
+		$this->fetch_subscriptions_with_response( new WP_Error( 'authentication', $actionable, 401 ) );
+
+		$error = WC_Helper::get_api_error();
+
+		$this->assertNotNull( $error, 'A transport-level failure should record a surfaceable error' );
+		$this->assertSame( 401, $error['code'], 'The recorded error should carry the status' );
+		$this->assertSame(
+			$actionable,
+			$error['message'],
+			'The reconnect guidance should survive rather than becoming a bare status code'
+		);
+	}
+
+	/**
+	 * A failure with no HTTP status carries raw wp_remote_request text, which is
+	 * untranslated developer detail. The merchant gets guidance aimed at their own
+	 * server instead, since that is the likelier end of a failed connection.
+	 *
+	 * @testdox get_api_error should replace raw transport detail with merchant-facing guidance.
+	 */
+	public function test_get_api_error_replaces_raw_transport_detail(): void {
+		$raw = 'cURL error 28: Operation timed out after 10001 milliseconds with 0 bytes received';
+
+		$this->fetch_subscriptions_with_response( new WP_Error( 'http_request_failed', $raw ) );
+
+		$error = WC_Helper::get_api_error();
+
+		$this->assertNotNull( $error, 'A transport failure should record a surfaceable error' );
+		$this->assertSame( 0, $error['code'], 'A transport failure carries no HTTP status' );
+		$this->assertStringNotContainsString(
+			'cURL',
+			$error['message'],
+			'Raw transport detail should never reach the merchant'
+		);
+		$this->assertSame(
+			'Your store could not connect to WooCommerce.com. Please try again after a few minutes. If the issue persists, check whether your server can make outgoing requests.',
+			$error['message'],
+			'A transport failure should point at the store\'s own connectivity'
+		);
+	}
+
+	/**
+	 * A 429 suppresses further requests for the whole backoff window. The error has
+	 * to outlive the request that received it, or the screen silently reverts to
+	 * looking like an empty account while requests are still being held back.
+	 *
+	 * @testdox get_api_error should keep reporting a 429 for the whole backoff window.
+	 */
+	public function test_api_error_persists_across_the_backoff_window(): void {
+		$this->fetch_subscriptions_with_response( $this->get_rate_limited_response() );
+
+		// A second call short-circuits on the backoff and never reaches the API,
+		// so nothing new is recorded — the first record has to still be there.
+		$second_result = WC_Helper::get_subscriptions();
+
+		$this->assertSame( array(), $second_result, 'A backed-off call should yield no subscriptions' );
+		$this->assertTrue(
+			WC_Helper_API_Backoff::is_rate_limited( WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS ),
+			'The backoff window should still be open'
+		);
+
+		$error = WC_Helper::get_api_error();
+
+		$this->assertNotNull( $error, 'The error should survive for as long as requests are suppressed' );
+		$this->assertSame( 429, $error['code'], 'The persisted error should still be the rate limit' );
+	}
+
+	/**
+	 * @testdox get_api_error should stop reporting once a fetch succeeds.
+	 */
+	public function test_api_error_is_cleared_after_a_successful_fetch(): void {
+		$this->fetch_subscriptions_with_response( $this->get_rate_limited_response() );
+
+		$this->assertNotNull( WC_Helper::get_api_error(), 'Precondition: an error is recorded' );
+
+		// Keep the recorded error in place, so what clears it is the successful
+		// fetch rather than the harness resetting state ahead of the call.
+		$this->fetch_subscriptions_with_response(
+			array(
+				'response' => array( 'code' => 200 ),
+				'body'     => wp_json_encode( $this->get_valid_subscription_data() ),
+			),
+			false
+		);
+
+		$this->assertNull(
+			WC_Helper::get_api_error(),
+			'A successful fetch should clear the recorded error'
 		);
 	}
 
@@ -545,6 +888,44 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The local Woo plugin list is cached for the request until a caller asks for a rescan.
+	 */
+	public function test_get_local_woo_plugins_is_cached_until_a_rescan_is_requested(): void {
+		$first  = array(
+			'first-woo-plugin/first-woo-plugin.php' => array(
+				'Name'    => 'First',
+				'Version' => '1.0.0',
+				'Woo'     => '111:aaa',
+			),
+		);
+		$second = array(
+			'second-woo-plugin/second-woo-plugin.php' => array(
+				'Name'    => 'Second',
+				'Version' => '1.0.0',
+				'Woo'     => '222:bbb',
+			),
+		);
+
+		wp_cache_set( 'plugins', array( '' => $first ), 'plugins' );
+		$this->assertSame( array_keys( $first ), array_keys( WC_Helper::get_local_woo_plugins() ) );
+
+		// A plugin installed after the first scan is invisible to cached calls.
+		wp_cache_set( 'plugins', array( '' => $first + $second ), 'plugins' );
+		$this->assertSame( array_keys( $first ), array_keys( WC_Helper::get_local_woo_plugins() ) );
+
+		// Asking for a rescan returns the new list and refreshes the cache for later callers.
+		$this->assertSame( array_keys( $first + $second ), array_keys( WC_Helper::get_local_woo_plugins( false ) ) );
+		$this->assertSame( array_keys( $first + $second ), array_keys( WC_Helper::get_local_woo_plugins() ) );
+
+		// Flushing drops the cache, so the next default call scans again.
+		wp_cache_set( 'plugins', array( '' => $second ), 'plugins' );
+		WC_Helper::flush_local_woo_products_cache();
+		$this->assertSame( array_keys( $second ), array_keys( WC_Helper::get_local_woo_plugins() ) );
+
+		wp_clean_plugins_cache( false );
+	}
+
+	/**
 	 * Invoke the private static WC_Helper::get_subscriptions_url().
 	 *
 	 * @return string
@@ -576,5 +957,582 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 			'admin.php?page=wc-admin&tab=my-subscriptions&path=%2Fextensions',
 			$this->get_subscriptions_url()
 		);
+	}
+
+	/**
+	 * @testdox Auto-update data reports off for a plugin absent from the auto_update_plugins option.
+	 */
+	public function test_plugin_auto_update_data_reports_off_by_default(): void {
+		$this->prepare_auto_update_env();
+
+		$data = WC_Helper::get_plugin_auto_update_data( 'test-woo-extension/test-woo-extension.php' );
+
+		$this->assertFalse( $data['auto_update'], 'A plugin not listed in the option does not auto-update.' );
+		$this->assertTrue( $data['auto_update_manageable'], 'An administrator on single site can turn it on.' );
+	}
+
+	/**
+	 * @testdox Auto-update data reports on for a plugin listed in the auto_update_plugins option.
+	 */
+	public function test_plugin_auto_update_data_reports_on_when_listed(): void {
+		$this->prepare_auto_update_env();
+		update_site_option( 'auto_update_plugins', array( 'test-woo-extension/test-woo-extension.php' ) );
+
+		$data = WC_Helper::get_plugin_auto_update_data( 'test-woo-extension/test-woo-extension.php' );
+
+		$this->assertTrue( $data['auto_update'] );
+	}
+
+	/**
+	 * @testdox A forced auto-update state is reported but not offered as an action.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $forced The state the auto_update_plugin filter forces.
+	 */
+	public function test_plugin_auto_update_data_reports_forced_state_without_an_action( bool $forced ): void {
+		$this->prepare_auto_update_env();
+		add_filter(
+			'auto_update_plugin',
+			function () use ( $forced ) {
+				return $forced;
+			}
+		);
+
+		$data = WC_Helper::get_plugin_auto_update_data( 'test-woo-extension/test-woo-extension.php' );
+
+		$this->assertSame( $forced, $data['auto_update'], 'The forced state is what actually happens.' );
+		$this->assertFalse( $data['auto_update_manageable'], 'A forced state cannot be changed from here.' );
+	}
+
+	/**
+	 * @testdox The site-wide switch leaves the plugin's own setting alone but blocks changing it.
+	 */
+	public function test_plugin_auto_update_data_follows_the_site_wide_switch(): void {
+		$this->prepare_auto_update_env();
+		update_site_option( 'auto_update_plugins', array( 'test-woo-extension/test-woo-extension.php' ) );
+		add_filter( 'plugins_auto_update_enabled', '__return_false' );
+
+		$data = WC_Helper::get_plugin_auto_update_data( 'test-woo-extension/test-woo-extension.php' );
+
+		$this->assertTrue( $data['auto_update'], "The plugin's own setting is untouched; the screen reports the site-wide block separately." );
+		$this->assertFalse( $data['auto_update_manageable'], 'There is nothing to toggle while the feature is off site-wide.' );
+	}
+
+	/**
+	 * @testdox Auto-updates are not manageable without the update_plugins capability.
+	 */
+	public function test_plugin_auto_update_data_requires_the_update_plugins_capability(): void {
+		$this->prepare_auto_update_env();
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+
+		$data = WC_Helper::get_plugin_auto_update_data( 'test-woo-extension/test-woo-extension.php' );
+
+		$this->assertFalse( $data['auto_update_manageable'] );
+	}
+
+	/**
+	 * @testdox Enabling auto-updates writes the plugin into the auto_update_plugins option.
+	 */
+	public function test_set_subscription_auto_update_enables(): void {
+		$this->prepare_auto_update_env();
+		$this->set_subscription_for_local_plugin();
+
+		WC_Helper::set_subscription_auto_update( 'test-key', true );
+
+		$this->assertSame(
+			array( 'test-woo-extension/test-woo-extension.php' ),
+			(array) get_site_option( 'auto_update_plugins' )
+		);
+	}
+
+	/**
+	 * @testdox Disabling auto-updates removes the plugin from the auto_update_plugins option.
+	 */
+	public function test_set_subscription_auto_update_disables(): void {
+		$this->prepare_auto_update_env();
+		$this->set_subscription_for_local_plugin();
+		update_site_option( 'auto_update_plugins', array( 'test-woo-extension/test-woo-extension.php', 'other/other.php' ) );
+
+		WC_Helper::set_subscription_auto_update( 'test-key', false );
+
+		$this->assertSame( array(), (array) get_site_option( 'auto_update_plugins' ), 'Plugins no longer installed are dropped too.' );
+	}
+
+	/**
+	 * @testdox Setting auto-updates is refused when the state cannot be changed from here.
+	 */
+	public function test_set_subscription_auto_update_refuses_a_forced_state(): void {
+		$this->prepare_auto_update_env();
+		$this->set_subscription_for_local_plugin();
+		add_filter( 'auto_update_plugin', '__return_false' );
+
+		$this->expectException( Exception::class );
+
+		WC_Helper::set_subscription_auto_update( 'test-key', true );
+	}
+
+	/**
+	 * @testdox Auto-updates can be set for a product distributed through WordPress.org.
+	 */
+	public function test_set_subscription_auto_update_handles_a_wporg_product(): void {
+		$this->prepare_auto_update_env();
+		$this->set_subscription_for_local_plugin();
+
+		// The fixture plugin carries no Woo header, which is what a WordPress.org build looks like.
+		WC_Helper::set_subscription_auto_update( 'test-key', true );
+
+		$this->assertContains(
+			'test-woo-extension/test-woo-extension.php',
+			(array) get_site_option( 'auto_update_plugins' ),
+			'Resolution has to go through the same local data the row is built from.'
+		);
+	}
+
+	/**
+	 * @testdox Subscription list data reports whether the site's PHP meets the available update's requirement.
+	 */
+	public function test_subscription_list_data_reports_whether_update_requires_php_is_met(): void {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		wp_cache_set(
+			'plugins',
+			array(
+				'' => array(
+					'needs-new-php/needs-new-php.php' => array(
+						'Name'    => 'Needs New PHP',
+						'Version' => '1.0.0',
+						'Woo'     => '900101:abc',
+					),
+					'any-php/any-php.php'             => array(
+						'Name'    => 'Any PHP',
+						'Version' => '1.0.0',
+						'Woo'     => '900102:def',
+					),
+				),
+			),
+			'plugins'
+		);
+		WC_Helper::flush_local_woo_products_cache();
+		delete_transient( '_woocommerce_helper_updates' );
+
+		$subscription = array(
+			'product_key'  => '',
+			'product_name' => '',
+			'connections'  => array(),
+			'expires'      => 0,
+			'expired'      => false,
+		);
+		set_transient(
+			'_woocommerce_helper_subscriptions',
+			array(
+				array_merge(
+					$subscription,
+					array(
+						'product_id' => 900101,
+						'zip_slug'   => 'needs-new-php',
+					)
+				),
+				array_merge(
+					$subscription,
+					array(
+						'product_id' => 900102,
+						'zip_slug'   => 'any-php',
+					)
+				),
+			),
+			HOUR_IN_SECONDS
+		);
+
+		$http_mock = static function ( $preempt, $args, $url ) {
+			if ( false === strpos( $url, 'update-check' ) ) {
+				return new WP_Error( 'test', 'Mocked error' );
+			}
+
+			return array(
+				'response' => array( 'code' => 200 ),
+				'body'     => wp_json_encode(
+					array(
+						900101 => array(
+							'version'      => '2.0.0',
+							'requires_php' => '99.0',
+						),
+						900102 => array(
+							'version'      => '2.0.0',
+							'requires_php' => array( '99.0' ),
+						),
+					)
+				),
+			);
+		};
+		add_filter( 'pre_http_request', $http_mock, 10, 3 );
+
+		try {
+			$result = array_column( WC_Helper::get_subscription_list_data(), null, 'product_id' );
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$this->assertTrue( $result[900101]['has_update'] );
+		$this->assertFalse( $result[900101]['update_requires_php_met'], 'An update needing a newer PHP than this site runs is not installable.' );
+		$this->assertTrue( $result[900102]['has_update'] );
+		$this->assertTrue( $result[900102]['update_requires_php_met'], 'A malformed PHP requirement does not block the update.' );
+	}
+
+	/**
+	 * @testdox Local data reports whether the installed copy carries a Woo header.
+	 */
+	public function test_local_data_reports_where_updates_come_from(): void {
+		$this->prepare_auto_update_env();
+
+		$plugins = wp_cache_get( 'plugins', 'plugins' );
+
+		$plugins['']['wccom-extension/wccom-extension.php'] = array(
+			'Name'    => 'WooCommerce.com Extension',
+			'Version' => '1.0.0',
+			'Woo'     => '456:abcdef',
+		);
+		wp_cache_set( 'plugins', $plugins, 'plugins' );
+
+		// The fixture plugin has an empty Woo header, as a WordPress.org build does.
+		$wporg = WC_Helper::get_subscription_local_data( array( 'zip_slug' => 'test-woo-extension' ) );
+		$wccom = WC_Helper::get_subscription_local_data( array( 'zip_slug' => 'wccom-extension' ) );
+		$none  = WC_Helper::get_subscription_local_data( array( 'zip_slug' => 'not-installed' ) );
+
+		$this->assertFalse( $wporg['updates_from_wccom'], 'Without a Woo header, core updates the plugin from WordPress.org.' );
+		$this->assertTrue( $wccom['updates_from_wccom'] );
+		$this->assertFalse( $none['updates_from_wccom'] );
+	}
+
+	/**
+	 * @testdox Auto-update data for a theme reads the auto_update_themes option.
+	 */
+	public function test_theme_auto_update_data_reads_the_theme_option(): void {
+		$this->prepare_auto_update_env();
+		$stylesheet = get_stylesheet();
+
+		$off = WC_Helper::get_theme_auto_update_data( $stylesheet );
+		update_site_option( 'auto_update_themes', array( $stylesheet ) );
+		$on = WC_Helper::get_theme_auto_update_data( $stylesheet );
+
+		$this->assertFalse( $off['auto_update'], 'A theme not listed in the option does not auto-update.' );
+		$this->assertTrue( $on['auto_update'] );
+		$this->assertTrue( $on['auto_update_manageable'], 'An administrator on single site can change it.' );
+	}
+
+	/**
+	 * @testdox The auto_update_theme filter receives the installed version when the theme has no update entry.
+	 */
+	public function test_theme_auto_update_filter_receives_the_installed_version(): void {
+		$this->prepare_auto_update_env();
+		$stylesheet = get_stylesheet();
+		$version    = wp_get_theme( $stylesheet )->get( 'Version' );
+		$seen       = null;
+
+		// Blocks only when the payload carries the installed version, as core's fallback does.
+		add_filter(
+			'auto_update_theme',
+			function ( $update, $item ) use ( &$seen, $version ) {
+				$seen = $item;
+				return $item->new_version === $version ? false : $update;
+			},
+			10,
+			2
+		);
+
+		$data = WC_Helper::get_theme_auto_update_data( $stylesheet );
+
+		$this->assertSame( $version, $seen->new_version, 'The fallback carries the same fields core passes.' );
+		$this->assertFalse( $data['auto_update_manageable'], 'The filter could decide on that field, so the state is forced.' );
+	}
+
+	/**
+	 * @testdox The auto_update_theme filter receives the update offer when the theme has one.
+	 */
+	public function test_theme_auto_update_filter_receives_the_update_offer(): void {
+		$this->prepare_auto_update_env();
+		$stylesheet = get_stylesheet();
+		$seen       = null;
+
+		set_site_transient(
+			'update_themes',
+			(object) array(
+				'response' => array(
+					$stylesheet => array(
+						'theme'       => $stylesheet,
+						'new_version' => '99.0.0',
+						'package'     => 'https://example.com/theme.zip',
+					),
+				),
+			)
+		);
+		add_filter(
+			'auto_update_theme',
+			function ( $update, $item ) use ( &$seen ) {
+				$seen = $item;
+				return $update;
+			},
+			10,
+			2
+		);
+
+		WC_Helper::get_theme_auto_update_data( $stylesheet );
+
+		$this->assertSame( '99.0.0', $seen->new_version );
+		$this->assertSame( 'https://example.com/theme.zip', $seen->package );
+	}
+
+	/**
+	 * @testdox Theme auto-updates are not manageable without the update_themes capability.
+	 */
+	public function test_theme_auto_update_data_requires_the_update_themes_capability(): void {
+		$this->prepare_auto_update_env();
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+
+		$data = WC_Helper::get_theme_auto_update_data( get_stylesheet() );
+
+		$this->assertFalse( $data['auto_update_manageable'] );
+	}
+
+	/**
+	 * @testdox Enabling auto-updates for a theme writes the stylesheet into auto_update_themes.
+	 */
+	public function test_set_subscription_auto_update_enables_a_theme(): void {
+		$this->prepare_auto_update_env();
+		$stylesheet = get_stylesheet();
+		$this->set_subscription_for_local_theme( $stylesheet );
+
+		WC_Helper::set_subscription_auto_update( 'test-theme-key', true );
+
+		$this->assertContains(
+			$stylesheet,
+			(array) get_site_option( 'auto_update_themes' ),
+			'Themes are keyed by stylesheet, not by a file path.'
+		);
+	}
+
+	/**
+	 * @testdox Disabling auto-updates for a theme removes the stylesheet from auto_update_themes.
+	 */
+	public function test_set_subscription_auto_update_disables_a_theme(): void {
+		$this->prepare_auto_update_env();
+		$stylesheet = get_stylesheet();
+		$this->set_subscription_for_local_theme( $stylesheet );
+		update_site_option( 'auto_update_themes', array( $stylesheet ) );
+
+		WC_Helper::set_subscription_auto_update( 'test-theme-key', false );
+
+		$this->assertNotContains( $stylesheet, (array) get_site_option( 'auto_update_themes' ) );
+	}
+
+	/**
+	 * Stand in a subscription whose product is the active theme.
+	 *
+	 * @param string $stylesheet Directory name of the theme.
+	 * @return void
+	 */
+	private function set_subscription_for_local_theme( string $stylesheet ): void {
+		set_transient(
+			'_woocommerce_helper_subscriptions',
+			array(
+				array(
+					'product_key'  => 'test-theme-key',
+					'product_id'   => 456,
+					'product_name' => 'Test Theme',
+					'zip_slug'     => $stylesheet,
+					'connections'  => array(),
+					'expired'      => false,
+					'expiring'     => false,
+					'lifetime'     => false,
+					'autorenew'    => true,
+					'expires'      => time() + DAY_IN_SECONDS,
+				),
+			),
+			HOUR_IN_SECONDS
+		);
+	}
+
+	/**
+	 * @testdox Setting auto-updates is refused for an unknown subscription.
+	 */
+	public function test_set_subscription_auto_update_refuses_an_unknown_subscription(): void {
+		$this->prepare_auto_update_env();
+		$this->set_subscription_for_local_plugin();
+
+		$this->expectException( Exception::class );
+
+		WC_Helper::set_subscription_auto_update( 'no-such-key', true );
+	}
+
+	/**
+	 * Stand in a subscription whose product is the plugin prepare_auto_update_env() installs.
+	 *
+	 * @return void
+	 */
+	private function set_subscription_for_local_plugin(): void {
+		set_transient(
+			'_woocommerce_helper_subscriptions',
+			array(
+				array(
+					'product_key'  => 'test-key',
+					'product_id'   => 123,
+					'product_name' => 'Test Woo Extension',
+					'zip_slug'     => 'test-woo-extension',
+					'connections'  => array(),
+					'expired'      => false,
+					'expiring'     => false,
+					'lifetime'     => false,
+					'autorenew'    => true,
+					'expires'      => time() + DAY_IN_SECONDS,
+				),
+			),
+			HOUR_IN_SECONDS
+		);
+	}
+
+	/**
+	 * @testdox Connecting the site should clear an update-check backoff so the first authenticated check runs.
+	 */
+	public function test_update_auth_option_clears_update_check_backoff(): void {
+		$previous_auth = WC_Helper_Options::get( 'auth', array() );
+		WC_Helper_API_Backoff::record( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, 15 * MINUTE_IN_SECONDS );
+
+		$http_mock = static function () {
+			return array(
+				'response' => array(
+					'code'    => 200,
+					'message' => 'OK',
+				),
+				'body'     => '{"name":"Test","email":"test@example.com"}',
+			);
+		};
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			WC_Helper::update_auth_option( 'token', 'secret', 123, home_url() );
+		} finally {
+			WC_Helper_Options::update( 'auth', $previous_auth );
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$this->assertFalse(
+			WC_Helper_API_Backoff::is_rate_limited( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK ),
+			'Connecting should clear the update-check backoff'
+		);
+	}
+
+	/**
+	 * @testdox validate_funnel_id should keep 1 to 64 letters, digits, dashes and underscores, and drop anything else.
+	 *
+	 * @testWith ["0a5b6c1e-2d3f-4a5b-8c9d-0e1f2a3b4c5d", "0a5b6c1e-2d3f-4a5b-8c9d-0e1f2a3b4c5d"]
+	 *           ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]
+	 *           ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", ""]
+	 *           ["", ""]
+	 *           ["id with spaces", ""]
+	 *           ["valid-id\n", ""]
+	 *           [["valid-id"], ""]
+	 *
+	 * @param mixed  $funnel_id Candidate id.
+	 * @param string $expected  Expected return value.
+	 */
+	public function test_validate_funnel_id( $funnel_id, string $expected ): void {
+		$this->assertSame( $expected, WC_Helper_API::validate_funnel_id( $funnel_id ) );
+	}
+
+	/**
+	 * @testdox Starting a connection should put one new funnel id in the redirect URI and pass the same id to the connect start hook.
+	 */
+	public function test_connect_puts_funnel_id_in_redirect_uri_and_hook(): void {
+		$_GET = array(
+			'page'              => 'wc-addons',
+			'section'           => 'helper',
+			'wc-helper-connect' => '1',
+			'wc-helper-nonce'   => wp_create_nonce( 'connect' ),
+		);
+
+		$request_token_redirect_uri = null;
+		$http_mock                  = static function ( $preempt, $args, $url ) use ( &$request_token_redirect_uri ) {
+			if ( false !== strpos( $url, 'oauth/request_token' ) ) {
+				$request_token_redirect_uri = $args['body']['redirect_uri'];
+			}
+			return array(
+				'response' => array( 'code' => 200 ),
+				'body'     => wp_json_encode( 'test-secret' ),
+			);
+		};
+		add_filter( 'pre_http_request', $http_mock, 10, 3 );
+
+		$hook_funnel_id = null;
+		$hook_spy       = static function ( $funnel_id ) use ( &$hook_funnel_id ) {
+			$hook_funnel_id = $funnel_id;
+		};
+		add_action( 'woocommerce_helper_connect_start', $hook_spy );
+
+		$authorize_url = null;
+		$redirect_stop = static function ( $location ) {
+			throw new \RuntimeException( $location ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		};
+		add_filter( 'wp_redirect', $redirect_stop );
+
+		try {
+			WC_Helper::current_screen( (object) array( 'id' => 'woocommerce_page_wc-addons' ) );
+		} catch ( \RuntimeException $e ) {
+			$authorize_url = $e->getMessage();
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock, 10 );
+			remove_action( 'woocommerce_helper_connect_start', $hook_spy );
+			remove_filter( 'wp_redirect', $redirect_stop );
+		}
+
+		$this->assertTrue( wp_is_uuid( (string) $hook_funnel_id, 4 ), 'The hook should receive a UUID v4 funnel id' );
+
+		wp_parse_str( (string) wp_parse_url( (string) $request_token_redirect_uri, PHP_URL_QUERY ), $request_token_args );
+		$this->assertSame( $hook_funnel_id, $request_token_args['funnel_id'] ?? null, 'The redirect URI sent to request_token should carry the funnel id' );
+
+		wp_parse_str( (string) wp_parse_url( (string) $authorize_url, PHP_URL_QUERY ), $authorize_args );
+		$this->assertSame( $request_token_redirect_uri, $authorize_args['redirect_uri'] ?? null, 'The authorize URL should carry the same redirect URI' );
+		$this->assertArrayNotHasKey( 'funnel_id', $authorize_args, 'The funnel id should travel only inside the redirect URI' );
+	}
+
+	/**
+	 * @testdox Returning from WooCommerce.com should send a valid funnel id in the access token request, and none when it is invalid or missing.
+	 *
+	 * @testWith ["0a5b6c1e-2d3f-4a5b-8c9d-0e1f2a3b4c5d", "0a5b6c1e-2d3f-4a5b-8c9d-0e1f2a3b4c5d"]
+	 *           ["not valid!", null]
+	 *           [null, null]
+	 *
+	 * @param string|null $funnel_id Funnel id in the return URL, null when the URL has none.
+	 * @param string|null $expected  Funnel id expected in the request body, null when absent.
+	 */
+	public function test_return_sends_funnel_id_in_access_token_request( ?string $funnel_id, ?string $expected ): void {
+		$_GET = array(
+			'page'             => 'wc-addons',
+			'section'          => 'helper',
+			'wc-helper-return' => '1',
+			'wc-helper-nonce'  => wp_create_nonce( 'connect' ),
+			'request_token'    => 'test-request-token',
+		);
+		if ( null !== $funnel_id ) {
+			$_GET['funnel_id'] = $funnel_id;
+		}
+
+		$access_token_body = null;
+		$http_mock         = static function ( $preempt, $args, $url ) use ( &$access_token_body ) {
+			if ( false !== strpos( $url, 'oauth/access_token' ) ) {
+				$access_token_body = $args['body'];
+			}
+			return array( 'response' => array( 'code' => 500 ) );
+		};
+		add_filter( 'pre_http_request', $http_mock, 10, 3 );
+
+		try {
+			WC_Helper::current_screen( (object) array( 'id' => 'woocommerce_page_wc-addons' ) );
+			$this->fail( 'A failed access token request should stop the return handler' );
+		} catch ( WPDieException $e ) {
+			$this->assertIsArray( $access_token_body, 'The access token request should have been sent' );
+			$this->assertSame( $expected, $access_token_body['funnel_id'] ?? null );
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock, 10 );
+		}
 	}
 }

@@ -1,7 +1,7 @@
 {
 	"generatedFrom": {
 		"package": "postcode-validator",
-		"version": "3.10.22"
+		"version": "3.9.2"
 	},
 	"rules": {
 		"AT": {
@@ -30,7 +30,8 @@
 			"pattern": "(?:0[1-9]|[1-9][0-9])[0-9]{3}"
 		},
 		"DK": {
-			"pattern": "(?:DK-)?(?:[1-24-9]\\d{3}|3[0-8]\\d{2})"
+			"pattern": "(?:DK[- ]?)?(?:[1-24-9]\\d{3}|3[0-8]\\d{2})",
+			"flags": "i"
 		},
 		"EE": {
 			"pattern": "\\d{5}"

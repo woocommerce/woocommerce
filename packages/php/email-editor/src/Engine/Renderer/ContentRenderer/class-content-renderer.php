@@ -155,6 +155,19 @@ class Content_Renderer {
 	}
 
 	/**
+	 * Typography support callbacks that turn font sizes into fluid clamp() values: core's, and the
+	 * Gutenberg plugin's, which replaces core's when the plugin is active.
+	 */
+	private const TYPOGRAPHY_SUPPORT_CALLBACKS = array( 'wp_render_typography_support', 'gutenberg_render_typography_support' );
+
+	/**
+	 * Priorities of the typography support callbacks removed for email rendering, by callback name.
+	 *
+	 * @var array<string, int>
+	 */
+	private array $removed_typography_support = array();
+
+	/**
 	 * Initialize the content renderer
 	 *
 	 * @return void
@@ -162,6 +175,16 @@ class Content_Renderer {
 	private function initialize() {
 		add_filter( 'render_block', array( $this, 'render_block' ), 10, 2 );
 		add_filter( 'block_parser_class', array( $this, 'block_parser' ) );
+
+		// Typography support turns font sizes into fluid clamp() values, which many email clients
+		// can’t read. Keep the static sizes while the email renders.
+		foreach ( self::TYPOGRAPHY_SUPPORT_CALLBACKS as $callback ) {
+			$priority = has_filter( 'render_block', $callback );
+			if ( false !== $priority ) {
+				remove_filter( 'render_block', $callback, $priority );
+				$this->removed_typography_support[ $callback ] = $priority;
+			}
+		}
 		add_filter( 'woocommerce_email_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
 
 		// Swap core/post-content render callback for email rendering.
@@ -239,10 +262,25 @@ class Content_Renderer {
 		$this->set_template_globals( $post, $template );
 		$this->initialize();
 		try {
+			/**
+			 * Fires when rendering an email's content is about to start.
+			 *
+			 * @since 2.9.2
+			 */
 			do_action( 'woocommerce_email_editor_render_start' );
 			$rendered_html = get_the_block_template_html();
 		} finally {
 			$this->reset();
+			/**
+			 * Fires when rendering an email's content has finished, whether it succeeded or threw.
+			 *
+			 * Counterpart of woocommerce_email_editor_render_start, for integrations that change global state
+			 * for the render, such as hooked filters, and have to put it back afterwards. The renderer has
+			 * already been reset when it fires, so a callback must not throw and must not expect render state.
+			 *
+			 * @since 2.18.0
+			 */
+			do_action( 'woocommerce_email_editor_render_end' );
 		}
 
 		return array(
@@ -539,6 +577,12 @@ class Content_Renderer {
 	private function reset(): void {
 		remove_filter( 'render_block', array( $this, 'render_block' ) );
 		remove_filter( 'block_parser_class', array( $this, 'block_parser' ) );
+		foreach ( $this->removed_typography_support as $callback => $priority ) {
+			if ( is_callable( $callback ) ) {
+				add_filter( 'render_block', $callback, $priority, 2 );
+			}
+		}
+		$this->removed_typography_support = array();
 		remove_filter( 'woocommerce_email_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
 
 		$this->post_content_width = null;
@@ -660,7 +704,7 @@ class Content_Renderer {
 		 * Layout CSS assumes the top level block will have a single DIV wrapper with children. Since our blocks use tables,
 		 * we need to adjust this to look for children in the TD element. This may requires more advanced replacement but
 		 * this works in the current version of Gutenberg.
-		 * Example rule we're targetting: .wp-container-core-group-is-layout-1.wp-container-core-group-is-layout-1 > *
+		 * Example rule we're targeting: .wp-container-core-group-is-layout-1.wp-container-core-group-is-layout-1 > *
 		 */
 		$block_support_styles = preg_replace(
 			'/group-is-layout-(\d+) >/',
@@ -669,7 +713,9 @@ class Content_Renderer {
 		);
 
 		$styles .= $block_support_styles;
+		$styles  = wp_strip_all_tags( (string) apply_filters( 'woocommerce_email_content_renderer_styles', $styles, $post ) );
 
-		return wp_strip_all_tags( (string) apply_filters( 'woocommerce_email_content_renderer_styles', $styles, $post ) );
+		// Normalize after the filter, so styles that integrations add here are inlined too.
+		return Css_Selector_Normalizer::normalize( $styles );
 	}
 }
