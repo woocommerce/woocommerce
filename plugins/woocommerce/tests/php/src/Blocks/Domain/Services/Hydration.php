@@ -158,7 +158,5 @@ class Hydration extends \WC_Unit_Test_Case {
 			has_filter( 'woocommerce_store_api_disable_nonce_check', array( $this->sut, 'disable_nonce_check_callback' ) ),
 			'Hydration must re-enable the nonce check even when dispatching throws.'
 		);
-
-		wc_clear_notices();
 	}
 }

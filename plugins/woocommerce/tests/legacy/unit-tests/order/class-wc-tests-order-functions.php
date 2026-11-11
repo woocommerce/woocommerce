@@ -1805,6 +1805,75 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Refunding a product variation revokes its customer download permissions.
+	 * @see https://github.com/woocommerce/woocommerce/issues/69452
+	 */
+	public function test_wc_create_refund_revokes_variation_download_permissions() {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variation_ids    = $variable_product->get_children();
+		$variation_id     = $variation_ids[0];
+		$variation        = wc_get_product( $variation_id );
+		$variation->set_downloadable( true );
+		$variation->save();
+
+		$order = new WC_Order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+		$item->set_quantity( 1 );
+		$item->set_subtotal( 10 );
+		$item->set_total( 10 );
+		$order->add_item( $item );
+		$order->calculate_totals();
+		$order->save();
+
+		// Add customer download permission for the variation.
+		$download = new WC_Customer_Download();
+		$download->set_user_id( 1 );
+		$download->set_order_id( $order->get_id() );
+		$download->set_product_id( $variation->get_id() );
+		$download->set_download_id( wp_generate_uuid4() );
+		$download->save();
+
+		$download_data_store = WC_Data_Store::load( 'customer-download' );
+		$initial_downloads   = $download_data_store->get_downloads(
+			array(
+				'order_id'   => $order->get_id(),
+				'product_id' => $variation->get_id(),
+			)
+		);
+		$this->assertCount( 1, $initial_downloads, 'Download permission should exist prior to refund.' );
+
+		$item_id = $item->get_id();
+
+		$refund = wc_create_refund(
+			array(
+				'amount'     => 10,
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 1,
+						'refund_total' => 10,
+						'refund_tax'   => array( 1 => 0 ),
+					),
+				),
+			)
+		);
+
+		$this->assertNotWPError( $refund, 'Refund should be created successfully.' );
+
+		$remaining_downloads = $download_data_store->get_downloads(
+			array(
+				'order_id'   => $order->get_id(),
+				'product_id' => $variation->get_id(),
+			)
+		);
+		$this->assertEmpty(
+			$remaining_downloads,
+			'Download permissions for a refunded variation must be revoked.'
+		);
+	}
+
+	/**
 	 * Test wc_sanitize_order_id().
 	 */
 	public function test_wc_sanitize_order_id() {
