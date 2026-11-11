@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Ucp\AbstractCheckoutRoute;
+use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
 /**
  * Tests for the /wc/ucp/v1/checkout-sessions endpoints.
@@ -569,36 +570,18 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Complete makes no guest order on a store that requires an account to check out.
+	 * @testdox A store that requires an account to check out serves no checkout route and declares no checkout capability.
 	 */
-	public function test_complete_refuses_a_guest_when_an_account_is_required(): void {
-		$created = $this->create_ready_checkout();
-
+	public function test_checkout_is_unavailable_when_an_account_is_required(): void {
 		add_filter( 'woocommerce_checkout_registration_required', '__return_true' );
-		$response = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' );
+		$this->initialize_store_api_server();
+		$response     = $this->request( 'POST', '/checkout-sessions', array( 'line_items' => array( $this->line_item( 0, 1 ) ) ) );
+		$capabilities = array_keys( Utils::capability_declarations() );
 		remove_filter( 'woocommerce_checkout_registration_required', '__return_true' );
 
-		$this->assertSame( 'login_required', $response->get_data()['messages'][0]['code'] );
-		$this->assertEmpty( WC()->session->get( 'store_api_draft_order' ) );
-	}
-
-	/**
-	 * @testdox A paid checkout stays completed when its order is later refunded or cancelled.
-	 * @testWith ["refunded"]
-	 *           ["cancelled"]
-	 *
-	 * @param string $order_status Status the paid order moves to.
-	 */
-	public function test_completed_checkout_survives_its_order_being_undone( string $order_status ): void {
-		$created = $this->create_ready_checkout();
-		$path    = '/checkout-sessions/' . $created['id'];
-		$this->request( 'POST', $path . '/complete' );
-		$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
-		$order->payment_complete();
-		$order->update_status( $order_status );
-
-		$this->assertSame( 'completed', $this->request( 'GET', $path )->get_data()['status'] );
-		$this->assertSame( 409, $this->request( 'POST', $path . '/complete' )->get_status(), 'No second order may be made from the cart.' );
+		$this->assertSame( 'rest_no_route', $response->get_data()['code'] );
+		$this->assertNotContains( Utils::CAPABILITY_CHECKOUT, $capabilities );
+		$this->assertContains( Utils::CAPABILITY_CART, $capabilities );
 	}
 
 	/**

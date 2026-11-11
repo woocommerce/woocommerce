@@ -77,14 +77,6 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 			return $state;
 		}
 
-		// These routes create no account, so a store that requires one takes no guest order here.
-		if ( WC()->checkout()->is_registration_required() && ! is_user_logged_in() ) {
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Core's hook, documented in Routes\V1\Checkout.
-			$message = (string) apply_filters( 'woocommerce_checkout_must_be_logged_in_message', __( 'You must be logged in to checkout.', 'woocommerce' ) );
-
-			return $this->ucp_error( 'login_required', $message, 'unrecoverable', 200 );
-		}
-
 		$checkout_id = $this->route_cart_id( $request );
 		$cart        = $this->cart_item_response();
 		$order       = $this->get_draft_order();

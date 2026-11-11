@@ -49,6 +49,17 @@ class Utils {
 	}
 
 	/**
+	 * Whether the checkout routes are served.
+	 *
+	 * They take guest orders only and create no account, so a store that requires one serves none of them.
+	 *
+	 * @return bool
+	 */
+	public static function is_checkout_enabled(): bool {
+		return ! WC()->checkout()->is_registration_required();
+	}
+
+	/**
 	 * Build the `ucp` envelope every UCP response carries.
 	 *
 	 * UCP requires `capabilities` to name only the capability relevant to the
@@ -69,12 +80,12 @@ class Utils {
 	}
 
 	/**
-	 * Spec and schema references for every capability these routes serve, keyed by capability name.
+	 * Spec and schema references for every capability the store serves, keyed by capability name.
 	 *
 	 * @return array
 	 */
 	public static function capability_declarations(): array {
-		return array(
+		$declarations = array(
 			self::CAPABILITY_CATALOG_SEARCH => array(
 				'version' => self::VERSION,
 				'spec'    => 'https://ucp.dev/' . self::VERSION . '/specification/catalog/search',
@@ -96,6 +107,12 @@ class Utils {
 				'schema'  => 'https://ucp.dev/' . self::VERSION . '/schemas/shopping/checkout.json',
 			),
 		);
+
+		if ( ! self::is_checkout_enabled() ) {
+			unset( $declarations[ self::CAPABILITY_CHECKOUT ] );
+		}
+
+		return $declarations;
 	}
 
 	/**
