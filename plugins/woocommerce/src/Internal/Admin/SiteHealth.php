@@ -570,9 +570,13 @@ class SiteHealth {
 	private function get_hpos_table_statistics(): ?array {
 		global $wpdb;
 
+		$tables     = array(
+			'order_rows' => OrdersTableDataStore::get_orders_table_name(),
+			'meta_rows'  => OrdersTableDataStore::get_meta_table_name(),
+		);
 		$row_counts = array();
 
-		foreach ( array( OrdersTableDataStore::get_orders_table_name(), OrdersTableDataStore::get_meta_table_name() ) as $table ) {
+		foreach ( $tables as $key => $table ) {
 			// LIKE limits the lookup to the named table, unlike WHERE, which reads every table in the schema on MySQL 5.7 and MariaDB.
 			// Naming the table also lets a database drop-in route the query to the server that holds it. The name is not passed
 			// through esc_like() because drop-ins would then read it with a leftover backslash (see WordPress core ticket #57149).
@@ -592,12 +596,12 @@ class SiteHealth {
 				return null;
 			}
 
-			$row_counts[] = (int) $status['Rows'];
+			$row_counts[ $key ] = (int) $status['Rows'];
 		}
 
 		return array(
-			'order_rows' => $row_counts[0],
-			'meta_rows'  => $row_counts[1],
+			'order_rows' => $row_counts['order_rows'],
+			'meta_rows'  => $row_counts['meta_rows'],
 		);
 	}
 
