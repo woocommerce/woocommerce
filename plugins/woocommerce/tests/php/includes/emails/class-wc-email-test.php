@@ -40,6 +40,27 @@ class WC_Email_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox With the block email editor, the subject keeps text after a "<" that does not start a tag and decodes entities.
+	 */
+	public function test_block_editor_subject_keeps_text_after_less_than_sign(): void {
+		$features_controller = wc_get_container()->get( FeaturesController::class );
+		$was_enabled         = $features_controller->feature_is_enabled( 'block_email_editor' );
+		$features_controller->change_feature_enable( 'block_email_editor', true );
+		$email  = new WC_Email_Customer_Processing_Order();
+		$filter = function () {
+			return '<strong>I <3 Shoes</strong> &amp; more';
+		};
+		add_filter( 'woocommerce_email_subject_' . $email->id, $filter );
+
+		try {
+			$this->assertSame( 'I <3 Shoes & more', $email->get_subject() );
+		} finally {
+			remove_filter( 'woocommerce_email_subject_' . $email->id, $filter );
+			$features_controller->change_feature_enable( 'block_email_editor', $was_enabled );
+		}
+	}
+
+	/**
 	 * @testdox Emails that do not support Cc/Bcc hide the fields and ignore stored or directly set values.
 	 */
 	public function test_cc_bcc_are_ignored_when_email_does_not_support_them(): void {
