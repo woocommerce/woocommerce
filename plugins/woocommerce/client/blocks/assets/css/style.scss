@@ -2,9 +2,9 @@
 	--wc-separator-color: color-mix(in srgb, currentColor 20%, transparent);
 }
 
-// Shared motion keyframes for every block that depends on this stylesheet. Fades are separate from movement, so
-// opacity always takes the state-change timing, and movement uses `translate`, `scale` and `filter`, which combine
-// with an element's resting `transform`. Use them through the motion mixins.
+// Shared motion keyframes. Use them through the motion mixins. Fades and movement are separate keyframes, so opacity
+// always uses the state change timing. Movement uses `translate`, `scale`, and `filter`, so it combines with the
+// resting `transform` of an element.
 @keyframes wc-fade-in {
 	from {
 		opacity: 0;
@@ -17,14 +17,14 @@
 	}
 }
 
-// Fades text, leaving anything drawn with `color` inside it, such as a spinner, in place.
+// Fades the text only. A spinner inside it, drawn with `color`, stays visible.
 @keyframes wc-fade-text-out {
 	to {
 		-webkit-text-fill-color: transparent;
 	}
 }
 
-// Keeps content visible while it fades out after its parent hides it.
+// Keeps content visible while it fades out, after its parent hides it.
 @keyframes wc-hold-visible {
 	from,
 	to {

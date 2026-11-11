@@ -12,8 +12,8 @@
 		}
 
 		&.is-editing {
-			// The card overlays the form while it fades out. `step-end` keeps it
-			// visible until the fade finishes, then hides it from assistive tech.
+			// The card covers the form while it fades out. `step-end` keeps it
+			// visible until the fade ends. Then it hides it from assistive technology.
 			.wc-block-components-address-card-wrapper {
 				transition: motion-state(opacity), motion-hold(visibility);
 			}

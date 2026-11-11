@@ -1,126 +1,154 @@
 # Motion
 
-Motion in WooCommerce blocks follows the rules below. It started with the Cart and Checkout blocks, so most examples come from them. It builds on the [WordPress Design System](https://github.com/WordPress/gutenberg/tree/trunk/packages/theme) (WPDS): the same tokens, and the same way of handling reduced motion, plus a few Woo rules where WPDS doesn't cover something.
+This guide gives the rules for motion in WooCommerce blocks. Motion started in the Cart and Checkout blocks, so most examples come from them.
+
+The rules use the [WordPress Design System](https://github.com/WordPress/gutenberg/tree/trunk/packages/theme) (WPDS) motion tokens and its approach to reduced motion. Woo rules fill the gaps that WPDS does not cover.
+
+This guide uses these terms:
+
+- **Movement**: a change to position, size, or the visible area of an element.
+- **State change**: a change to color, background, border color, opacity, or a focus ring.
+- **Reduced motion**: the `prefers-reduced-motion: reduce` setting.
 
 ## Tokens
 
-Use tokens for every duration and easing. Don't write raw values, and don't write a fallback inside `var()`: the build adds one, so they also work on the storefront, where the WPDS stylesheet isn't loaded.
+Use a token for every duration and easing. Do not write raw values. Do not write a fallback inside `var()`: the build adds it, so that the storefront works without the WPDS stylesheet.
 
 | Token | Value | Use |
 |-------|-------|-----|
-| `--wpds-motion-duration-xs` | 50ms | Stagger steps, and a detail settling after its parent. |
+| `--wpds-motion-duration-xs` | 50ms | Stagger steps. A detail that settles after its parent. |
 | `--wpds-motion-duration-sm` | 100ms | The button press only. |
 | `--wpds-motion-duration-md` | 200ms | State changes, small changes in place, and exits. |
-| `--wpds-motion-duration-lg` | 300ms | Movement in: slides, wipes, reveals, expanding, layout changes, and the success pulse. |
-| `--wpds-motion-easing-expressive` | `cubic-bezier(0.25, 0, 0, 1)` | Entrances, exits, and press feedback. |
-| `--wpds-motion-easing-balanced` | `cubic-bezier(0.4, 0, 0.2, 1)` | Movement between two on-screen positions, resizing, and the pulse. |
-| `--wpds-motion-easing-subtle` | `cubic-bezier(0.15, 0, 0.15, 1)` | Colour, background, opacity, and focus ring changes. |
+| `--wpds-motion-duration-lg` | 300ms | Movement in, and the success pulse. |
+| `--wpds-motion-easing-expressive` | `cubic-bezier(0.25, 0, 0, 1)` | Entrances, exits, and the press. |
+| `--wpds-motion-easing-balanced` | `cubic-bezier(0.4, 0, 0.2, 1)` | Movement between two positions on screen, size changes, and the pulse. |
+| `--wpds-motion-easing-subtle` | `cubic-bezier(0.15, 0, 0.15, 1)` | State changes. |
 
-Woo constants for what WPDS doesn't cover are SCSS variables in `assets/css/abstracts/_motion.scss`: `$wc-scale-press`, `$wc-scale-pulse-peak`, `$wc-scale-icon-from`, and `$wc-blur-icon`.
+`assets/css/abstracts/_motion.scss` has Woo constants for values that WPDS does not have: `$wc-scale-press`, `$wc-scale-pulse-peak`, `$wc-scale-icon-from`, and `$wc-blur-icon`.
 
 ## Durations
 
-Three speeds cover almost everything. Changes under 200ms are too quick to notice unless something visibly changes size, so only the press uses 100ms.
-
 | What | In | Out | Examples |
 |------|----|-----|----------|
-| **Movement**: position, size, or visible area changes | `lg` 300ms | `md` 200ms | Slides, wipes, expanding and collapsing, layout changes, dropdowns, rows fading up, notices, snackbars, the Ship/Pickup indicator |
-| **State changes**: colour, outline, background, opacity | `md` 200ms | `md` 200ms | Button hover and focus, selected options, dims while loading, field border and label, values replacing skeletons |
-| **Small changes in place** | `md` 200ms | `md` 200ms | Checkbox tick, radio dot, icon and spinner swaps, price rolls |
-| **Press feedback** | `sm` 100ms | `sm` 100ms | The button press scale, which is visible at any speed |
+| Movement | `lg` 300ms | `md` 200ms | Content that rises in, expands, or collapses. Dropdowns, notices, snackbars. |
+| State change | `md` 200ms | `md` 200ms | Button hover and focus, selected options, dims, field borders, values that replace skeletons. |
+| Small change in place | `md` 200ms | `md` 200ms | Checkbox tick, radio dot, icon and spinner swaps, price rolls. |
+| Press | `sm` 100ms | `sm` 100ms | The button press scale. |
 
-Stagger rows by `xs` (50ms). The success pulse takes `lg`. Constant motion keeps its own speed: the spinner turns once a second. Opacity is always a state change: content that rises, wipes, or grows in fades over 200ms while it moves over 300ms, and a reduced-motion fade takes 200ms.
+A change of less than 200ms is too fast to see, unless an element changes size. For this reason, only the press uses 100ms.
+
+- Stagger rows by `xs` (50ms).
+- The success pulse takes `lg`.
+- Constant motion keeps its own speed. The spinner turns once each second.
+- Opacity always uses the state change timing. When content moves in over 300ms, it fades in over 200ms.
 
 ## Helpers
 
-Write motion with the helpers in `assets/css/abstracts/_motion.scss`, available in every blocks stylesheet, rather than `transition` and `animation` by hand. Each one follows the reduced motion policy below: the fade or colour change is written once and always runs, and movement is added inside `motion-safe`.
+Use the helpers in `assets/css/abstracts/_motion.scss`. Do not write `transition` or `animation` values by hand. All blocks stylesheets can use the helpers.
 
-| Helper | For | Example |
+Each helper applies the reduced motion rules. It writes the state change one time, and it always runs. It adds the movement inside `motion-safe`.
+
+| Helper | Use | Example |
 |--------|-----|---------|
-| `transition: motion-state( … )` | State changes: 200ms, subtle | `transition: motion-state( opacity, box-shadow );` |
-| `@include motion-transition( $state, $move, $duration, $easing, $hold )` | A transition that fades and moves; `$move` runs over `$duration` (`lg` by default) only when motion is allowed | `@include motion-transition( $state: opacity, $move: translate );` |
-| `motion-hold( … )` | Keeps a property, such as `visibility`, at its old value until a fade ends | `transition: motion-state( opacity ), motion-hold( visibility );` |
-| `@include motion-enter( $keyframes, $duration, $delay )` | Content appearing: fades in, and plays `$keyframes` (`wc-rise` by default) when motion is allowed | `@include motion-enter( wc-grow, md );` |
-| `@include motion-exit( $keyframes )` | Content going: fades out over 200ms, and plays `$keyframes`; holds the end until it unmounts | `@include motion-exit( wc-shrink );` |
-| `@include motion-stagger( $keyframes )` | Sibling rows entering 50ms apart | `@include motion-stagger;` |
-| `@include motion-fade-in` / `motion-fade-out` | Fades with no movement, such as a value replacing its skeleton | |
-| `@include motion-dim( $states, $opacity )` | Dims while a state matches, such as `".is-disabled"`, fading back too | Cart rows, disabled radios |
-| `@include motion-spinner-swap` | A button's loading state: the label fades out and the spinner grows in | Place order, coupon Apply, Proceed to checkout |
-| `@include motion-safe { … }` | Movement the helpers don't cover, such as the Ship/Pickup indicator | |
+| `transition: motion-state( … )` | A state change: 200ms, subtle. | `transition: motion-state( opacity, box-shadow );` |
+| `@include motion-transition( $state, $move, $duration, $easing, $hold )` | A transition with a state change and movement. `$move` runs over `$duration` (default `lg`), only when motion is allowed. | `@include motion-transition( $state: opacity, $move: translate );` |
+| `motion-hold( … )` | Keeps a property, such as `visibility`, at its old value until a fade ends. | `transition: motion-state( opacity ), motion-hold( visibility );` |
+| `@include motion-enter( $keyframes, $duration, $delay )` | Content that appears. It fades in, and plays `$keyframes` (default `wc-rise`) when motion is allowed. | `@include motion-enter( wc-grow, md );` |
+| `@include motion-exit( $keyframes )` | Content that goes. It fades out over 200ms and plays `$keyframes`. It keeps the end state until it unmounts. | `@include motion-exit( wc-shrink );` |
+| `@include motion-stagger( $keyframes )` | Sibling rows that enter 50ms apart. | `@include motion-stagger;` |
+| `@include motion-fade-in` / `motion-fade-out` | A fade with no movement, such as a value that replaces its skeleton. | |
+| `@include motion-dim( $states )` | Dims the element while `$states` matches, such as `".is-disabled"`. It fades both ways. | Cart rows, disabled radios |
+| `@include motion-spinner-swap` | A button that loads. The label fades out and the spinner grows in. | Place order, coupon Apply, Proceed to checkout |
+| `@include motion-safe { … }` | Movement that the other helpers do not cover. | |
 
-`motion-duration( lg )` and `motion-easing( balanced )` return tokens, and `motion-stagger-index()` with `motion-stagger-delay()` stagger rows by hand.
+`motion-duration( lg )` and `motion-easing( balanced )` return tokens. To stagger rows by hand, use `motion-stagger-index()` and `motion-stagger-delay()`.
 
-Shared keyframes live in `assets/css/style.scss`. `wc-fade-in`, `wc-fade-out`, `wc-fade-text-out` and `wc-hold-visible` only fade or hold. The movement keyframes, `wc-rise`, `wc-grow` and `wc-shrink`, animate `translate`, `scale` and `filter`, never `opacity` or `transform`. They combine with a fade, and with an element's resting `transform`. Position an element that grows or shrinks in with `translate` rather than `transform`, so it scales about its own centre.
+`assets/css/style.scss` has the shared keyframes:
 
-Prefer `@starting-style` with transitions for an entrance when the element is new to the page and what it animates exists at rest, such as a dropdown: everything is then a transition, which turns around by itself. It also applies when an element goes from `display: none` to shown. Use keyframes when the motion only exists while animating, such as a row rising in.
+- `wc-fade-in`, `wc-fade-out`, `wc-fade-text-out`, and `wc-hold-visible` only fade or hold.
+- `wc-rise`, `wc-grow`, and `wc-shrink` move. They animate `translate`, `scale`, and `filter`. They never animate `opacity` or `transform`, so they combine with a fade and with the resting `transform` of an element.
 
-Motion that changes the layout runs in JavaScript, because it measures sizes. It takes its timings from the same tokens, and finishes straight away when nothing is animating, and in Jest. Its helpers are listed here as they're added.
+Position an element that grows or shrinks with `translate`, not `transform`. Then it scales from its center.
+
+Use `@starting-style` with transitions for an element that is new on the page, such as a dropdown. Then all of its motion is a transition, and a transition turns around by itself. This also applies to an element that changes from `display: none` to visible. Use keyframes for motion that only exists while it animates, such as a row that rises in.
+
+Motion that changes the layout runs in JavaScript, because it must measure sizes. It uses the same tokens. It ends immediately when nothing animates, and in Jest. This section lists its helpers when they are added.
 
 ## Reduced motion
 
-Reduced motion means nothing moves, not that nothing changes: fades and colour changes still play, because they show what changed without moving anything. Movement (anything with `transform`, `translate`, `scale`, `clip-path`, or a size change) runs only for shoppers who haven't asked for reduced motion, inside `@include motion-safe` (`@media not (prefers-reduced-motion)`), with resting values outside it. The helpers do this for you.
+With reduced motion, nothing moves, but changes are still visible. Fades and color changes still run, because they show what changed.
 
-- A transition that only fades or changes colour (`opacity`, colours, `box-shadow` focus rings) runs outside `motion-safe`. `motion-transition` writes the fade-only list outside and adds the movement inside.
-- Content appearing or going fades in or out: `motion-enter` and `motion-exit` write the fade outside `motion-safe` and add the movement inside it.
-- Movement that only adds feel (press scale, success pulse, the Ship/Pickup indicator, price rolls, content moving to make room) has no reduced variant.
-- The spinner shows still, half way through a turn, and the skeleton shimmer stops.
+Movement runs only inside `@include motion-safe` (`@media not (prefers-reduced-motion)`). Put the resting values outside it. Movement includes `transform`, `translate`, `scale`, `clip-path`, and size changes. The helpers do this for you.
 
-Stylelint checks this (`woocommerce/motion-safe`), and that durations use tokens and transitions never use `all`, in the stylesheets of blocks that have adopted motion (Cart and Checkout so far) and the components they share. It accepts `motion-state()`, `motion-hold()`, and the fade and hold keyframes outside `motion-safe`. When a block adopts motion, add its stylesheets to the `overrides` `files` list in `.stylelintrc.json`.
+- A state change runs outside `motion-safe`. `motion-transition` writes the state change outside and adds the movement inside.
+- Content that appears or goes still fades. `motion-enter` and `motion-exit` write the fade outside `motion-safe` and add the movement inside.
+- Movement that only adds feel has no reduced version. Examples are the press scale, the success pulse, and price rolls.
+- The spinner stops halfway through a turn. The skeleton shimmer stops.
+
+The `woocommerce/motion-safe` stylelint rule checks this. Another rule checks that durations use tokens and that transitions do not use `all`. These rules apply to the blocks that use motion (Cart and Checkout) and to the components they share. The rule allows `motion-state()`, `motion-hold()`, and the fade and hold keyframes outside `motion-safe`. When a block starts to use motion, add its stylesheets to the `overrides` `files` list in `.stylelintrc.json`.
 
 ## General rules
 
-- Animate `transform`, `opacity`, `filter`, and `clip-path`. Never animate layout properties, except as listed in Exceptions.
-- Colour, background, border colour, opacity, and `box-shadow` focus rings may transition over `--wpds-motion-duration-md` with `--wpds-motion-easing-subtle`. WPDS uses 100ms, which is too quick to see.
-- Don't use `linear` easing, even where WPDS does: it makes UI motion feel mechanical. Use one of the easing tokens. The exception is constant motion, such as the spinner's turn and the skeleton shimmer, which is what `linear` is for.
-- List the properties you transition.
-- Scope new effects to the block that uses them, such as `.wp-block-woocommerce-cart`, so they don't reach blocks that haven't adopted motion.
-- Components in `packages/public-api/blocks-components` are public: add optional props only, keep class names themes may target, and note any change to their markup or styles in the PR.
-- **Animate what the shopper did.** A click or tap animates. Content that loads with the page, or a section that renders into place as data arrives, appears at once. Changes that loading causes later, such as a totals row, notice or error, can animate.
-- **Interrupted motion turns around.** When something changes direction part way through, such as a panel closed while it's still opening, it continues from where it is. Transitions do this on their own; motion run from JavaScript reads where it had got to and continues from there. Nothing blocks clicks while it animates.
-- **Keyboard changes apply at once.** Changes made with the keyboard, such as arrowing through options, are repeated quickly, so sections the shopper shows, hides or swaps, and the Ship/Pickup indicator, skip after keyboard input, and a radio group's highlight and dot change at once while one of its options has keyboard focus.
-- **Leave nothing behind.** Once motion settles, the page is as it would be without motion: no extra elements, inline styles, attributes or held animations.
-- **Rest on whole pixels.** Anything that stays transformed at rest, such as a rolling price's digit columns, moves in whole-pixel steps (`round(1lh, 1px)`), and no animation keeps its end value applied except on content that's about to unmount. Fractional resting positions leave digits and edges visibly off on some screens.
+- Animate `transform`, `opacity`, `filter`, and `clip-path`. Do not animate layout properties, except for the items in [Exceptions](#exceptions).
+- State changes use `--wpds-motion-duration-md` with `--wpds-motion-easing-subtle`. WPDS uses 100ms, which is too fast to see.
+- Do not use `linear` easing. It makes motion look mechanical. Constant motion is the only exception, such as the spinner turn and the skeleton shimmer.
+- List the properties that you transition.
+- Scope new effects to the block that uses them, such as `.wp-block-woocommerce-cart`. Then they do not change blocks that do not use motion.
+- Components in `packages/public-api/blocks-components` are public. Add only optional props. Keep the class names that themes can use. Write each change to their markup or styles in the PR description.
+- **Animate what the shopper does.** A click or a tap animates. Content that loads with the page appears immediately. A section that renders when data arrives appears immediately. A later change that loading causes can animate, such as a totals row, a notice, or an error.
+- **Keyboard changes apply immediately.** A shopper can press keys quickly, for example to move through options. After a key press, sections that show, hide, or swap do not animate, and selection indicators do not slide. While an option in a radio group has keyboard focus, its highlight and dot change immediately.
+- **Interrupted motion turns around.** When the direction changes during motion, the motion continues from its current position. For example, a panel can close while it opens. Transitions do this automatically. JavaScript motion reads the current position and continues from it.
+- **Nothing blocks.** Clicks and typing work while motion runs.
+- **Leave nothing behind.** When motion ends, the page is the same as without motion. Remove all extra elements, inline styles, attributes, and held animations.
+- **Rest on whole pixels.** An element that stays transformed at rest must move in whole-pixel steps (`round(1lh, 1px)`). An example is the digit column of a rolling price. Only content that will unmount can keep the end state of an animation. On some screens, fractional positions make digits and edges look out of line.
 
 ## Rules
 
-The numbers match the original motion rules, which code comments cite.
+The numbers match the original motion rules. Code comments use these numbers. Some numbers are not used.
 
 **1. Entrances ease out** with `--wpds-motion-easing-expressive`.
 
-**2. Dropdowns follow WPDS, without the linear fade:** slide 4px from the trigger over `lg` expressive, fade in over `md` expressive, and slide back over `md` to close.
+**2. Dropdowns follow WPDS, without the linear fade.** They slide 4px from the trigger over `lg` expressive, and fade in over `md` expressive. They slide back over `md` to close.
 
-**3. Stagger list rows by 50ms** with `motion-stagger-delay()`, capped at 7 rows. Rows inside a section that's entering as a whole, such as pickup locations as Pickup swaps in or shipping options in a growing section, arrive with it instead: `motion-stagger` turns off under `data-wc-entering` and `data-wc-swapping`.
+**3. Stagger list rows by 50ms** with `motion-stagger-delay()`. Stop at 7 rows. When a section enters as one unit, its rows enter with it and do not stagger. `motion-stagger` stops inside an element that has `data-wc-entering` or `data-wc-swapping`.
 
 **4. Buttons scale to `$wc-scale-press` while pressed**, over `sm`.
 
-**5. Moving indicators stretch about 12% along their path, keeping their area**, then settle.
+**5. A moving indicator stretches about 12% along its path, and keeps its area.** Then it settles.
 
-**6. Secondary details settle one `xs` step after their parent**, with `motion-stagger-delay(1)`.
+**6. A detail settles one `xs` step after its parent**, with `motion-stagger-delay(1)`.
 
-**8. Pulse once to confirm success**, 1 → `$wc-scale-pulse-peak` → 1, over `lg` balanced. Never loop it.
+**8. Pulse one time to confirm success**: 1 → `$wc-scale-pulse-peak` → 1, over `lg` balanced. Do not loop it.
 
-**9. On-screen moves use `--wpds-motion-easing-balanced`.**
+**9. Movement between two positions on screen uses `--wpds-motion-easing-balanced`.**
 
-**13. No bounce**, apart from the success pulse.
+**13. No bounce**, except the success pulse.
 
-**15. Exits are shorter than entrances**: movement that enters over `lg` leaves over `md`, with its own keyframes. State and in-place changes take `md` both ways.
+**15. Exits are shorter than entrances.** Movement that enters over `lg` exits over `md`, with its own keyframes. State changes and small changes in place take `md` both ways.
 
-**16. Overlap old and new states.** Never exit, pause, then enter.
+**16. Overlap the old and new states.** Do not exit, pause, and then enter.
 
-**17. Make room by moving what's below.** Content that appears grows from nothing as everything after it moves down, and content that goes collapses as everything after it moves up, borders included, instead of appearing or vanishing in place.
+**17. Make space by moving the content below.** Content that appears grows from nothing, and the content after it moves down. Content that goes collapses, and the content after it moves up. Borders move with the content.
 
 **18. Swap icons with scale, opacity, and blur** (`$wc-scale-icon-from`, `$wc-blur-icon`).
 
-**20. Animate the same object between views**, such as an address card becoming its form, instead of swapping in a different element.
+**20. Animate the same element between views.** For example, an address card becomes its form. Do not swap in a different element.
 
-**21. One change, one movement (Woo rule).** When a choice swaps a group of sections, such as Ship/Pickup, the group changes as one: its height changes once, so everything below moves once, in one direction. The old sections fade out over `sm` while moving 24px the way the selection moved, and the new ones fade in over `md` after them, sliding in from the other side over `lg` expressive, so all the motion follows the shopper's choice. Every section from the first that changes to the last moves with the group, including one in both states that sits between them, such as a billing address, so nothing stays still in the middle of the slide. Sections after the group hold their old places until the old sections have faded, so content that loads in the meantime, such as pickup locations, is in place before anything moves; then they slide straight to their new places. Under reduced motion the sections only fade; after a key press the change applies at once.
+**21. One change, one movement (Woo rule).** When a choice swaps a group of sections, such as Ship or Pickup, the group changes as one unit:
 
-**Price roll (Woo rule).** A price that changes in place rolls its digits over `md` expressive. Prices that change together, such as a line total and its "Save" badge, roll from the same data, so they move at the same time. Prices don't roll while the cart first loads.
+- Its height changes one time, so the content below moves one time, in one direction.
+- The old sections fade out over `sm` and move 24px in the direction of the selection.
+- After they fade, the new sections fade in over `md`. They slide in from the other side over `lg` expressive.
+- The group includes all sections from the first changed section to the last. This includes a section between them that is in both states, such as a billing address.
+- The sections after the group stay in their old positions until the old sections have faded. Content that loads during this time, such as pickup locations, is then in position before anything moves. Then the sections after the group slide to their new positions.
+- With reduced motion, the sections only fade. After a key press, the change applies immediately.
 
-**Skeleton reveal (Woo rule).** A price or list that comes back from a loading skeleton, such as the cart totals, fades in over `md` subtle. It doesn't roll: the old value isn't on screen to roll from. All skeletons in a loading phase end together, and totals rows that appear or go and the summary bar's total wait for that moment, so everything changes at once. Cart line totals don't wait: while a new quantity saves, they show the unit price times that quantity, unless the item's pricing isn't linear.
+**Price roll (Woo rule).** When a price changes in place, its digits roll over `md` expressive. Prices that change together roll at the same time, such as a line total and its "Save" badge. Prices do not roll while the cart loads for the first time.
+
+**Skeleton reveal (Woo rule).** A value or list that replaces a loading skeleton fades in over `md` subtle. It does not roll, because the old value is not on screen. All skeletons in one loading phase end together. Totals rows that appear or go, and the total in the summary bar, wait for that moment. Then everything changes at once. Cart line totals do not wait: while a new quantity saves, they show the unit price multiplied by the quantity. If the pricing of the item is not linear, the line total waits for the server.
 
 ## Exceptions
 
-- **Content that makes room animates its size**: panels, the mobile order summary, totals rows, notices, field errors, the sections the shopper shows or swaps, and the cart's height as a row goes. It's real layout, so themes' borders, spacing and extension markup move with it, and it turns around when interrupted. Same-document view transitions were tried for this and dropped: they block clicks while they run, can't turn around, and distort bordered boxes. It runs for 300ms in and 200ms out, on small areas; cart rows can't change size, so they slide with `transform` instead.
-- **Outline focus rings stay instant:** a transparent outline would show in Windows high contrast mode.
+- **Content that makes space animates its size.** Examples are panels, notices, field errors, totals rows, and sections that the shopper shows or swaps. This is real layout, so theme borders, spacing, and extension markup move with it, and it turns around when interrupted. It runs for 300ms in and 200ms out. Table rows cannot change height, so they slide with `transform`. Same-document view transitions were tested for this and removed: they block clicks, they cannot turn around, and they distort boxes that have borders.
+- **Outline focus rings change immediately.** A transparent outline shows in Windows high contrast mode.
 - **Floating labels animate `top`**, because themes and extensions position them with `top`.
