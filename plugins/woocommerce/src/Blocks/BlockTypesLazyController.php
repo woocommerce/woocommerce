@@ -262,7 +262,7 @@ final class BlockTypesLazyController {
 	 */
 	private function get_add_to_cart_with_options_blocks(): array {
 		$list = array(
-			'add-to-cart-with-options-quantity-selector' => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\QuantitySelector::class,
+			'add-to-cart-with-options-quantity-selector'  => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\QuantitySelector::class,
 			'add-to-cart-with-options-variation-description' => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationDescription::class,
 			'add-to-cart-with-options-variation-selector' => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelector::class,
 			'add-to-cart-with-options-variation-selector-attribute-name' => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelectorAttributeName::class,
