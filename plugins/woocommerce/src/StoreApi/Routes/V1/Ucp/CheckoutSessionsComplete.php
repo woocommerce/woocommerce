@@ -105,6 +105,9 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 		// Remembered before the hold so a refused hold leaves a draft the next attempt reuses.
 		$this->set_draft_order_id( $order->get_id() );
 
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Store API hook, documented in Routes\V1\Checkout.
+		do_action( 'woocommerce_store_api_checkout_update_order_meta', $order );
+
 		try {
 			$this->order_controller->validate_order_before_payment( $order );
 		} catch ( RouteException $e ) {
@@ -126,6 +129,9 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Store API hook, documented in Routes\V1\Checkout.
+		do_action( 'woocommerce_store_api_checkout_order_processed', $order );
+
 		$state = array_merge(
 			$state,
 			array(
@@ -136,6 +142,6 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 		);
 		$this->save_checkout_state( $state );
 
-		return $this->checkout_response( $checkout_id, $state, 200, $cart );
+		return $this->checkout_response( $checkout_id, $this->checkout_state() ?? $state, 200, $cart );
 	}
 }

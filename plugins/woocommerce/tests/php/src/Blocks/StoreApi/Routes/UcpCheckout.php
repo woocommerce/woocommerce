@@ -520,6 +520,31 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Complete fires the Store API checkout actions, and reports an order a callback paid as completed.
+	 */
+	public function test_complete_fires_the_store_api_checkout_actions(): void {
+		$seen = array();
+		$meta = static function ( $order ) use ( &$seen ) {
+			$seen[] = 'meta:' . $order->get_status();
+		};
+		$pay  = static function ( $order ) use ( &$seen ) {
+			$seen[] = 'processed:' . $order->get_status();
+			$order->payment_complete();
+		};
+		add_action( 'woocommerce_store_api_checkout_update_order_meta', $meta );
+		add_action( 'woocommerce_store_api_checkout_order_processed', $pay );
+
+		$created = $this->create_ready_checkout();
+		$data    = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' )->get_data();
+		remove_action( 'woocommerce_store_api_checkout_update_order_meta', $meta );
+		remove_action( 'woocommerce_store_api_checkout_order_processed', $pay );
+
+		$this->assertSame( array( 'meta:checkout-draft', 'processed:pending' ), $seen );
+		$this->assertSame( 'completed', $data['status'] );
+		$this->assertArrayNotHasKey( 'continue_url', $data );
+	}
+
+	/**
 	 * @testdox Complete holds the order's stock, as the payment page trusts a pending order to have.
 	 */
 	public function test_complete_holds_stock(): void {
