@@ -106,7 +106,7 @@ class RemoteLogger extends \WC_Log_Handler {
 		}
 
 		if ( isset( $context['tags'] ) && is_array( $context['tags'] ) ) {
-			$log_data['tags'] = array_merge( $log_data['tags'], $context['tags'] );
+			$log_data['tags'] = array_merge( $log_data['tags'], $this->sanitize_array( $context['tags'] ) );
 			unset( $context['tags'] );
 		}
 
@@ -120,7 +120,7 @@ class RemoteLogger extends \WC_Log_Handler {
 		unset( $context['remote-logging'] );
 
 		// Merge the extra attributes with the remaining context since we can't send arbitrary fields to Logstash.
-		$log_data['extra'] = array_merge( $extra_attrs, $context );
+		$log_data['extra'] = $this->sanitize_array( array_merge( $extra_attrs, $context ) );
 
 		/**
 		 * Filters the formatted log data before sending it to the remote logging service.
@@ -443,6 +443,25 @@ class RemoteLogger extends \WC_Log_Handler {
 		 * @param string $content The original content.
 		 */
 		return apply_filters( 'woocommerce_remote_logger_sanitized_content', $sanitized, $content );
+	}
+
+	/**
+	 * Sanitize the string values of an array, including nested arrays.
+	 *
+	 * Returns a new array, so values the caller passed by reference are not changed.
+	 *
+	 * @param array $data The array to sanitize.
+	 *
+	 * @return array The sanitized array.
+	 */
+	private function sanitize_array( array $data ): array {
+		$sanitized = array();
+
+		foreach ( $data as $key => $value ) {
+			$sanitized[ $key ] = is_array( $value ) ? $this->sanitize_array( $value ) : $this->sanitize( $value );
+		}
+
+		return $sanitized;
 	}
 
 	/**

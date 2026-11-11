@@ -268,6 +268,54 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 
 
 		/**
+		 * @testdox get_formatted_log sanitizes string values in extra, nested arrays and remaining context.
+		 */
+		public function test_get_formatted_log_sanitizes_extra_context(): void {
+			$formatted_log = $this->sut->get_formatted_log(
+				'error',
+				'Test error message',
+				array(
+					'extra'    => array(
+						'email'  => 'Contact john@example.com',
+						'nested' => array( 'file' => ABSPATH . 'wp-content/file.php' ),
+						'count'  => 5,
+					),
+					'customer' => 'jane@example.com',
+				)
+			);
+
+			$extra = $formatted_log['extra'];
+			$this->assertSame( 'Contact [redacted_email]', $extra['email'], 'Extra values should be sanitized' );
+			$this->assertSame( './wp-content/file.php', $extra['nested']['file'], 'Nested extra values should be sanitized' );
+			$this->assertSame( 5, $extra['count'], 'Non-string values should be left unchanged' );
+			$this->assertSame( '[redacted_email]', $extra['customer'], 'Remaining context values should be sanitized' );
+		}
+
+		/**
+		 * @testdox get_formatted_log does not change values the caller passed by reference.
+		 */
+		public function test_get_formatted_log_keeps_referenced_context_values(): void {
+			$email   = 'john@example.com';
+			$context = array( 'extra' => array( 'nested' => array( 'email' => &$email ) ) );
+
+			$formatted_log = $this->sut->get_formatted_log( 'error', 'Test error message', $context );
+
+			$this->assertSame( '[redacted_email]', $formatted_log['extra']['nested']['email'], 'The logged value should be sanitized' );
+			$this->assertSame( 'john@example.com', $email, 'The caller variable should be left unchanged' );
+		}
+
+		/**
+		 * @testdox get_formatted_log sanitizes tags from the context but not the default tags.
+		 */
+		public function test_get_formatted_log_sanitizes_context_tags_only(): void {
+			add_filter( 'woocommerce_remote_logger_sanitized_content', 'strtoupper' );
+
+			$formatted_log = $this->sut->get_formatted_log( 'error', 'Test error message', array( 'tags' => array( 'john@example.com' ) ) );
+
+			$this->assertSame( array( 'woocommerce', 'php', '[REDACTED_EMAIL]' ), $formatted_log['tags'] );
+		}
+
+		/**
 		 * @testdox get_formatted_log method correctly sanitizes request URI
 		 */
 		public function test_get_formatted_log_sanitizes_request_uri() {
