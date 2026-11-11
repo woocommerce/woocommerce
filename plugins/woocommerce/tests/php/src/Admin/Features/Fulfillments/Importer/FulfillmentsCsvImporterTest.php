@@ -4,20 +4,13 @@ namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Importer;
 
 require_once __DIR__ . '/FulfillmentsCsvReadTracker.php';
 
-use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\FulfillmentsCsvImporter;
+use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 
 /**
  * Tests for the Fulfillments CSV importer service.
  */
 class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
-
-	/**
-	 * Original value of the fulfillments feature flag.
-	 *
-	 * @var mixed
-	 */
-	private static $original_fulfillments_flag;
 
 	/**
 	 * Paths to temporary CSV files created by tests; cleaned up in tearDown.
@@ -27,30 +20,22 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	private array $temp_files = array();
 
 	/**
-	 * Bootstrap the fulfillments feature for the test run.
+	 * Register the CSV read tracker and create the fulfillments tables.
 	 */
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
 		if ( ! in_array( 'wcimp', stream_get_wrappers(), true ) ) {
 			stream_wrapper_register( 'wcimp', FulfillmentsCsvReadTracker::class );
 		}
-		self::$original_fulfillments_flag = get_option( 'woocommerce_feature_fulfillments_enabled' );
-		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		$controller = wc_get_container()->get( FulfillmentsController::class );
-		$controller->register();
-		$controller->initialize_fulfillments();
+		FulfillmentsHelper::create_tables();
 	}
 
 	/**
-	 * Restore the original feature flag value.
+	 * Turn the fulfillments feature on for each test.
 	 */
-	public static function tearDownAfterClass(): void {
-		if ( false === self::$original_fulfillments_flag ) {
-			delete_option( 'woocommerce_feature_fulfillments_enabled' );
-		} else {
-			update_option( 'woocommerce_feature_fulfillments_enabled', self::$original_fulfillments_flag );
-		}
-		parent::tearDownAfterClass();
+	public function setUp(): void {
+		parent::setUp();
+		FulfillmentsHelper::enable_fulfillments();
 	}
 
 	/**

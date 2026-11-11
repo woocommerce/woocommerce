@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsSettings;
+use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 use WC_Order;
 use WC_Order_Item_Product;
 use WC_Unit_Test_Case;
@@ -16,34 +17,19 @@ use WC_Unit_Test_Case;
 class FulfillmentsSettingsTest extends WC_Unit_Test_Case {
 
 	/**
-	 * Original value of the fulfillments feature flag.
-	 *
-	 * @var mixed
-	 */
-	private static $original_fulfillments_flag;
-
-	/**
 	 * Set up the test environment.
 	 */
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
-		self::$original_fulfillments_flag = get_option( 'woocommerce_feature_fulfillments_enabled' );
-		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		$controller = wc_get_container()->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );
-		$controller->register();
-		$controller->initialize_fulfillments();
+		FulfillmentsHelper::create_tables();
 	}
 
 	/**
-	 * Tear down the test environment.
+	 * Turn the fulfillments feature on for each test.
 	 */
-	public static function tearDownAfterClass(): void {
-		if ( false === self::$original_fulfillments_flag ) {
-			delete_option( 'woocommerce_feature_fulfillments_enabled' );
-		} else {
-			update_option( 'woocommerce_feature_fulfillments_enabled', self::$original_fulfillments_flag );
-		}
-		parent::tearDownAfterClass();
+	public function setUp(): void {
+		parent::setUp();
+		FulfillmentsHelper::enable_fulfillments();
 	}
 
 	/**
