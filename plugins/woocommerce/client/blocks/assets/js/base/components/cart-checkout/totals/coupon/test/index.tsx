@@ -4,7 +4,11 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { dispatch, select } from '@wordpress/data';
-import { checkoutStore, validationStore } from '@woocommerce/block-data';
+import { validationStore } from '@woocommerce/block-data';
+import {
+	checkoutEventsEmitter,
+	CHECKOUT_EVENTS,
+} from '@woocommerce/blocks-checkout-events';
 
 /**
  * Internal dependencies
@@ -169,7 +173,7 @@ describe( 'TotalsCoupon', () => {
 			expect( screen.queryByRole( 'alert' ) ).not.toBeInTheDocument();
 		} );
 
-		it( 'clears the message when the checkout leaves the idle state', async () => {
+		it( 'clears the message when the checkout is validated', async () => {
 			const user = userEvent.setup();
 			const mockOnSubmit = jest
 				.fn()
@@ -193,18 +197,18 @@ describe( 'TotalsCoupon', () => {
 			} );
 			expect( await screen.findByRole( 'alert' ) ).toBeInTheDocument();
 
-			// Placing the order moves the checkout out of idle.
-			act( () => {
-				dispatch( checkoutStore ).__internalSetProcessing();
+			// Place Order and a payment method's own button both validate the
+			// checkout through this event.
+			let responses: unknown[] = [];
+			await act( async () => {
+				responses = await checkoutEventsEmitter.emit(
+					CHECKOUT_EVENTS.CHECKOUT_VALIDATION
+				);
 			} );
 
-			await waitFor( () => {
-				expect( screen.queryByRole( 'alert' ) ).not.toBeInTheDocument();
-			} );
-
-			act( () => {
-				dispatch( checkoutStore ).__internalSetIdle();
-			} );
+			expect( screen.queryByRole( 'alert' ) ).not.toBeInTheDocument();
+			// The observer never fails validation.
+			expect( responses ).toEqual( [] );
 		} );
 
 		it( 'keeps the message when the panel is closed and opened again', async () => {

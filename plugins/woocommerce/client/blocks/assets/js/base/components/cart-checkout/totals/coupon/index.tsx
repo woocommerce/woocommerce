@@ -12,8 +12,9 @@ import {
 	Panel,
 	Spinner,
 } from '@woocommerce/blocks-components';
-import { useDispatch, useSelect } from '@wordpress/data';
-import { checkoutStore, validationStore } from '@woocommerce/block-data';
+import { useDispatch } from '@wordpress/data';
+import { validationStore } from '@woocommerce/block-data';
+import { checkoutEvents } from '@woocommerce/blocks-checkout-events';
 import type { MouseEvent, MouseEventHandler } from 'react';
 
 /**
@@ -55,10 +56,6 @@ export const TotalsCoupon = ( {
 	const errorId = `wc-block-components-totals-coupon__error-${ instanceId }`;
 	const inputRef = useRef< HTMLInputElement >( null );
 	const { clearValidationError } = useDispatch( validationStore );
-	const isCheckoutIdle = useSelect(
-		( select ) => select( checkoutStore ).isIdle(),
-		[]
-	);
 	const hasError = errorMessage !== '';
 
 	useEffect( () => {
@@ -67,13 +64,17 @@ export const TotalsCoupon = ( {
 		}
 	}, [ isCouponFormVisible ] );
 
-	// The message only concerns this form. Drop it once the shopper places the
-	// order so a later checkout error does not read as a coupon problem.
-	useEffect( () => {
-		if ( ! isCheckoutIdle ) {
-			setErrorMessage( '' );
-		}
-	}, [ isCheckoutIdle ] );
+	// The message only concerns this form. Drop it whenever the checkout is
+	// validated, so a checkout error never reads as a coupon problem and the
+	// scroll to the first error never lands on the coupon input.
+	useEffect(
+		() =>
+			checkoutEvents.onCheckoutValidation( () => {
+				setErrorMessage( '' );
+				return true;
+			} ),
+		[]
+	);
 
 	const handleCouponSubmit: MouseEventHandler< HTMLButtonElement > = (
 		e: MouseEvent< HTMLButtonElement >
