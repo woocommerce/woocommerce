@@ -11,7 +11,6 @@ declare( strict_types = 1 );
  * WC_Admin_Test
  */
 class WC_Admin_Test extends WC_Unit_Test_Case {
-	use \Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 
 	/**
 	 * System under test.
@@ -285,50 +284,6 @@ class WC_Admin_Test extends WC_Unit_Test_Case {
 			$this->assertSame( false, $received, 'The prevent-admin-access filter should receive false for an exempt request.' );
 		} finally {
 			remove_filter( 'woocommerce_prevent_admin_access', $callback );
-		}
-	}
-
-	/**
-	 * @testdox Only the Orders export download served from HPOS skips the admin output buffer.
-	 * @testWith ["shop_order", false, 0]
-	 *           ["shop_order", true, 1]
-	 *           ["post", false, 1]
-	 *           ["all", false, 1]
-	 *
-	 * @param string $content        The requested export content.
-	 * @param bool   $sync_enabled   Whether compatibility mode is on.
-	 * @param int    $expected_delta Expected change in the output buffer level.
-	 */
-	public function test_buffer_skips_only_hpos_order_export_downloads( string $content, bool $sync_enabled, int $expected_delta ): void {
-		$pagenow = $GLOBALS['pagenow'] ?? null;
-		$get     = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Restored after the test.
-		$level   = ob_get_level();
-
-		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order_custom_table_if_not_exist();
-		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
-		$this->toggle_cot_authoritative( true );
-		if ( $sync_enabled ) {
-			$this->enable_cot_sync();
-		} else {
-			$this->disable_cot_sync();
-		}
-
-		try {
-			$GLOBALS['pagenow'] = 'export.php'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-			$_GET               = array(
-				'download' => 'true',
-				'content'  => $content,
-			);
-
-			$this->sut->buffer();
-			$this->assertSame( $level + $expected_delta, ob_get_level(), "Unexpected output buffer level for the {$content} export download." );
-		} finally {
-			while ( ob_get_level() > $level ) {
-				ob_end_clean();
-			}
-			$GLOBALS['pagenow'] = $pagenow; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-			$_GET               = $get;
-			$this->clean_up_cot_setup();
 		}
 	}
 

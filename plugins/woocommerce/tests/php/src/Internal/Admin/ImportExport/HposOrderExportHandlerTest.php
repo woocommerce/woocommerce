@@ -214,6 +214,65 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Exports the stored currency and billing email when loading the order rejects them.
+	 */
+	public function test_exports_stored_values_rejected_on_load(): void {
+		$order = $this->create_order();
+		$order->set_billing_email( 'customer@example.com' );
+		$order->save();
+
+		global $wpdb;
+		$wpdb->update(
+			OrdersTableDataStore::get_orders_table_name(),
+			array(
+				'currency'      => 'XYZ',
+				'billing_email' => 'not-an-email',
+			),
+			array( 'id' => $order->get_id() )
+		);
+		$wpdb->update(
+			OrdersTableDataStore::get_addresses_table_name(),
+			array( 'email' => 'not-an-email' ),
+			array(
+				'order_id'     => $order->get_id(),
+				'address_type' => 'billing',
+			)
+		);
+		wp_cache_flush();
+
+		$loaded = wc_get_order( $order->get_id() );
+		$this->assertSame( '', $loaded->get_currency( 'edit' ), 'Loading the order should drop the unknown currency.' );
+		$this->assertSame( '', $loaded->get_billing_email( 'edit' ), 'Loading the order should drop the invalid billing email.' );
+
+		$xpath = $this->export();
+
+		$this->assertSame( 'XYZ', $xpath->evaluate( 'string(/rss/channel/item/wp:postmeta[wp:meta_key = "_order_currency"]/wp:meta_value)' ) );
+		$this->assertSame( 'not-an-email', $xpath->evaluate( 'string(/rss/channel/item/wp:postmeta[wp:meta_key = "_billing_email"]/wp:meta_value)' ) );
+	}
+
+	/**
+	 * @testdox Exports the terms assigned to orders as WXR categories.
+	 */
+	public function test_exports_order_terms(): void {
+		register_taxonomy( 'order_export_tag', 'shop_order' );
+
+		try {
+			$order = $this->create_order();
+			$term  = wp_insert_term( 'VIP & Co', 'order_export_tag', array( 'slug' => 'vip' ) );
+			wp_set_object_terms( $order->get_id(), array( $term['term_id'] ), 'order_export_tag' );
+
+			$xpath = $this->export();
+
+			$category = '/rss/channel/item/category[@domain = "order_export_tag"]';
+			$this->assertSame( 1.0, $xpath->evaluate( "count($category)" ) );
+			$this->assertSame( 'vip', $xpath->evaluate( "string($category/@nicename)" ) );
+			$this->assertSame( get_term( $term['term_id'] )->name, $xpath->evaluate( "string($category)" ), 'The export should keep the stored term name, as the WordPress exporter does.' );
+		} finally {
+			unregister_taxonomy( 'order_export_tag' );
+		}
+	}
+
+	/**
 	 * Create a fixture order.
 	 *
 	 * @param string $status The order status.

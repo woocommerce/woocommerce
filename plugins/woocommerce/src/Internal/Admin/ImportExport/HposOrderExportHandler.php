@@ -119,6 +119,9 @@ class HposOrderExportHandler {
 		$filtered_filename = apply_filters( 'export_wp_filename', $filename, $sitename, $date ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment -- WordPress core filter.
 		$filename          = is_string( $filtered_filename ) && '' !== $filtered_filename ? $filtered_filename : $filename;
 
+		// Stream instead of holding the export in memory, and keep earlier output out of the file.
+		self::clean_buffers();
+
 		nocache_headers();
 		header( 'Content-Type: text/xml; charset=UTF-8' );
 		header( 'Content-Disposition: attachment; filename="' . sanitize_file_name( $filename ) . '"' );
@@ -164,18 +167,20 @@ class HposOrderExportHandler {
 		/** This action is documented in wp-includes/feed-rss2.php. */
 		do_action( 'rss2_head' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment -- WordPress core action.
 
-		$table   = OrdersTableDataStore::get_orders_table_name();
-		$last_id = 0;
+		$table      = OrdersTableDataStore::get_orders_table_name();
+		$last_id    = 0;
+		$taxonomies = get_object_taxonomies( 'shop_order' );
 
 		// Bound the scan at the newest ID when the export starts.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- The table name comes from the order data store.
 		$max_id = (int) $wpdb->get_var( "SELECT MAX(id) FROM $table" );
 		while ( $last_id < $max_id ) {
-			// Select the stored status and total so unregistered statuses and the stored total precision survive export.
+			// Select stored values that loading an order can change or drop: unregistered statuses, the total's precision,
+			// and a currency or billing email that its setter now rejects.
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Stream IDs and statuses in primary key order.
 			$batch = $wpdb->get_results(
 				$wpdb->prepare(
-					"SELECT id, status, total_amount FROM $table WHERE id > %d AND id <= %d AND type = %s AND status <> %s ORDER BY id LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table name comes from the order data store.
+					"SELECT id, status, total_amount, currency, billing_email FROM $table WHERE id > %d AND id <= %d AND type = %s AND status <> %s ORDER BY id LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The table name comes from the order data store.
 					$last_id,
 					$max_id,
 					'shop_order',
@@ -191,21 +196,17 @@ class HposOrderExportHandler {
 			$order_ids = array_map( 'intval', array_keys( $batch ) );
 			$last_id   = (int) array_key_last( $batch );
 
-			try {
-				$orders = WC_Order_Factory::get_orders( $order_ids );
-			} catch ( \Exception $exception ) {
-				// An order may have been deleted after its ID was selected.
-				$orders = array_map( 'wc_get_order', $order_ids );
-			}
-
+			// Skip orders deleted after their ID was selected.
+			$orders                    = WC_Order_Factory::get_orders( $order_ids, true );
 			$order_meta                = $this->meta_store->get_meta_data_for_object_ids( $order_ids );
 			list( $notes, $note_meta ) = self::get_notes( $order_ids );
+			$terms                     = self::get_terms( $order_ids, $taxonomies );
 			foreach ( $orders as $order ) {
 				if ( ! $order instanceof WC_Order || 'shop_order' !== $order->get_type() ) {
 					continue;
 				}
 				$id = $order->get_id();
-				$this->export_order_to_xml( $order, $batch[ $id ]->status, (string) ( $batch[ $id ]->total_amount ?? '' ), $order_meta[ $id ] ?? array(), $notes[ $id ] ?? array(), $note_meta );
+				$this->export_order_to_xml( $order, $batch[ $id ], $order_meta[ $id ] ?? array(), $terms[ $id ] ?? array(), $notes[ $id ] ?? array(), $note_meta );
 			}
 
 			// Also frees memory on object caches that cannot flush their runtime cache.
@@ -255,16 +256,48 @@ class HposOrderExportHandler {
 	}
 
 	/**
+	 * Read the terms assigned to the orders, as the WordPress exporter does for each post.
+	 *
+	 * @param int[]    $order_ids The orders in the batch.
+	 * @param string[] $taxonomies The taxonomies registered for orders.
+	 * @return array<int, \WP_Term[]>
+	 */
+	private static function get_terms( array $order_ids, array $taxonomies ): array {
+		if ( ! $taxonomies ) {
+			return array();
+		}
+
+		$terms = wp_get_object_terms(
+			$order_ids,
+			$taxonomies,
+			array(
+				'fields'                 => 'all_with_object_id',
+				'update_term_meta_cache' => false,
+			)
+		);
+		if ( ! is_array( $terms ) ) {
+			return array();
+		}
+
+		$terms_by_order = array();
+		foreach ( $terms as $term ) {
+			// The all_with_object_id field adds object_id to each term.
+			$terms_by_order[ (int) $term->object_id ][] = $term; // @phpstan-ignore property.notFound
+		}
+		return $terms_by_order;
+	}
+
+	/**
 	 * Write one order as a WXR item.
 	 *
 	 * @param WC_Order                $order The order.
-	 * @param string                  $status The stored status.
-	 * @param string                  $stored_total The stored order total.
+	 * @param \stdClass               $stored The stored status, total, currency and billing email.
 	 * @param \stdClass[]             $meta_rows Raw HPOS metadata.
+	 * @param \WP_Term[]              $terms Terms assigned to this order.
 	 * @param \stdClass[]             $notes Comments on this order.
 	 * @param array<int, \stdClass[]> $note_meta Raw metadata by comment ID.
 	 */
-	private function export_order_to_xml( WC_Order $order, string $status, string $stored_total, array $meta_rows, array $notes, array $note_meta ): void {
+	private function export_order_to_xml( WC_Order $order, \stdClass $stored, array $meta_rows, array $terms, array $notes, array $note_meta ): void {
 		$order_id     = $order->get_id();
 		$date_created = $order->get_date_created( 'edit' );
 		$date_updated = $order->get_date_modified( 'edit' ) ?? $date_created;
@@ -298,7 +331,7 @@ class HposOrderExportHandler {
 				'wp:comment_status'    => 'closed',
 				'wp:ping_status'       => 'closed',
 				'wp:post_name'         => 'order-' . $order_id,
-				'wp:status'            => $status,
+				'wp:status'            => $stored->status,
 				'wp:post_parent'       => $order->get_parent_id( 'edit' ),
 				'wp:menu_order'        => 0,
 				'wp:post_type'         => 'shop_order',
@@ -308,7 +341,12 @@ class HposOrderExportHandler {
 		);
 		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment, WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
-		$core_meta = self::get_core_meta( $order, $stored_total );
+		foreach ( $terms as $term ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escape_xml_text() escapes XML text.
+			printf( "<category domain=\"%s\" nicename=\"%s\">%s</category>\n", esc_attr( $term->taxonomy ), esc_attr( $term->slug ), self::escape_xml_text( $term->name ) );
+		}
+
+		$core_meta = self::get_core_meta( $order, $stored );
 		foreach ( $core_meta as $key => $value ) {
 			self::write_post_meta( $order_id, $key, (string) maybe_serialize( $value ) );
 		}
@@ -354,14 +392,17 @@ class HposOrderExportHandler {
 	/**
 	 * Project HPOS order properties onto the keys used by legacy order posts.
 	 *
-	 * @param WC_Order $order The order.
-	 * @param string   $stored_total The stored order total.
+	 * @param WC_Order  $order The order.
+	 * @param \stdClass $stored The stored total, currency and billing email.
 	 * @return array
 	 */
-	private static function get_core_meta( WC_Order $order, string $stored_total ): array {
-		$data = $order->get_base_data();
-		$meta = array(
-			'_order_currency'       => $data['currency'],
+	private static function get_core_meta( WC_Order $order, \stdClass $stored ): array {
+		$data            = $order->get_base_data();
+		$stored_total    = (string) ( $stored->total_amount ?? '' );
+		$stored_currency = (string) ( $stored->currency ?? '' );
+		$stored_email    = (string) ( $stored->billing_email ?? '' );
+		$meta            = array(
+			'_order_currency'       => '' !== $stored_currency ? $stored_currency : $data['currency'],
 			'_order_version'        => $data['version'],
 			// Loading an order rounds its total to the current price decimals, so keep the stored value when they differ.
 			'_order_total'          => (float) $stored_total === (float) $data['total'] ? $data['total'] : wc_format_decimal( $stored_total, false, true ),
@@ -385,6 +426,9 @@ class HposOrderExportHandler {
 			foreach ( $data[ $address_type ] as $key => $value ) {
 				$meta[ '_' . $address_type . '_' . $key ] = $value;
 			}
+		}
+		if ( '' !== $stored_email ) {
+			$meta['_billing_email'] = $stored_email;
 		}
 
 		return $meta;
@@ -439,9 +483,36 @@ class HposOrderExportHandler {
 	 */
 	private static function write_fields( array $fields ): void {
 		foreach ( $fields as $tag => $value ) {
-			$text = is_scalar( $value ) ? (string) $value : '';
-			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- htmlspecialchars escapes XML text, including CDATA delimiters and invalid code points.
-			printf( "<%1\$s>%2\$s</%1\$s>\n", esc_attr( $tag ), str_replace( "\r", '&#13;', htmlspecialchars( $text, ENT_XML1 | ENT_NOQUOTES | ENT_SUBSTITUTE | ENT_DISALLOWED, 'UTF-8' ) ) );
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escape_xml_text() escapes XML text.
+			printf( "<%1\$s>%2\$s</%1\$s>\n", esc_attr( $tag ), self::escape_xml_text( is_scalar( $value ) ? (string) $value : '' ) );
+		}
+	}
+
+	/**
+	 * Escape XML text, including CDATA delimiters and invalid code points.
+	 *
+	 * @param string $text The text.
+	 * @return string
+	 */
+	private static function escape_xml_text( string $text ): string {
+		return str_replace( "\r", '&#13;', htmlspecialchars( $text, ENT_XML1 | ENT_NOQUOTES | ENT_SUBSTITUTE | ENT_DISALLOWED, 'UTF-8' ) );
+	}
+
+	/**
+	 * Remove the output buffers opened earlier in the request, as WC_Download_Handler does for downloads.
+	 */
+	private static function clean_buffers(): void {
+		foreach ( array_reverse( ob_get_status( true ) ) as $buffer ) {
+			if ( $buffer['flags'] & PHP_OUTPUT_HANDLER_REMOVABLE ) {
+				ob_end_clean();
+				continue;
+			}
+
+			// The buffers below this one can't be reached.
+			if ( $buffer['flags'] & PHP_OUTPUT_HANDLER_CLEANABLE ) {
+				ob_clean();
+			}
+			return;
 		}
 	}
 }
