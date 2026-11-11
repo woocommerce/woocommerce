@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 
+use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\Ability;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesCategories;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
@@ -997,7 +998,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_permission_refusal_provider_covers_every_canonical_ability(): void {
 		$classes = ( new \ReflectionClassConstant( AbilitiesLoader::class, 'CORE_ABILITY_DEFINITION_CLASSES' ) )->getValue();
-		$core    = array_map( static fn( string $class_name ): string => $class_name::get_name(), $classes );
+		$core    = array_map(
+			static fn( string $class_name ): string => is_a( $class_name, ActionableAbility::class, true ) ? $class_name::ABILITY_NAME : $class_name::get_name(),
+			$classes
+		);
 		$covered = array_column( $this->provider_canonical_abilities_with_minimal_input(), 0 );
 
 		$this->assertEqualsCanonicalizing( $core, self::CANONICAL_ABILITY_IDS, 'CANONICAL_ABILITY_IDS should list every Core ability.' );
