@@ -3,6 +3,7 @@
  */
 import { useSelect } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
+import { usePresence } from '@woocommerce/base-hooks';
 import { Icon, cautionFilled } from '@wordpress/icons';
 
 /**
@@ -34,18 +35,38 @@ export const ValidationInputError = ( {
 	);
 
 	if ( ! errorMessage || typeof errorMessage !== 'string' ) {
-		if ( validationError?.message && ! validationError?.hidden ) {
-			errorMessage = validationError.message;
-		} else {
-			return null;
-		}
+		errorMessage =
+			validationError?.message && ! validationError?.hidden
+				? validationError.message
+				: '';
+	}
+
+	// The error grows in and collapses out, so the content below moves with it. Errors that the page shows before the
+	// shopper interacts, such as for invalid saved data, appear immediately.
+	const presence = usePresence( errorMessage || null, {
+		animate: navigator.userActivation?.hasBeenActive !== false,
+		collapse: true,
+	} );
+
+	if ( ! presence.value ) {
+		return null;
 	}
 
 	return (
-		<div className="wc-block-components-validation-error" role="alert">
-			<p id={ validationErrorId }>
+		<div
+			ref={ presence.ref }
+			className="wc-block-components-validation-error"
+			role="alert"
+			// The error is already gone for the shopper while it collapses. React 18 has no `inert` prop.
+			{ ...( presence.isExiting && { inert: '', 'aria-hidden': true } ) }
+		>
+			<p
+				// A new paragraph when the error comes back during its collapse, so the alert announces it again.
+				key={ presence.isExiting ? 'exiting' : 'present' }
+				id={ presence.isExiting ? undefined : validationErrorId }
+			>
 				<Icon icon={ cautionFilled } />
-				<span>{ errorMessage }</span>
+				<span>{ presence.value }</span>
 			</p>
 		</div>
 	);

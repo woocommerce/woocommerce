@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Field errors in the Cart and Checkout blocks now grow in and collapse out smoothly, so the content below no longer jumps.
