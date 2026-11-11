@@ -169,7 +169,7 @@ class ProductReviewUpdate extends AbstractDomainAbility implements AbilityDefini
 			 * @since 3.5.0
 			 *
 			 * @param bool        $supports_trash Whether reviews can be trashed.
-			 * @param \WP_Comment $review         Review to trash.
+			 * @param \WP_Comment $review         Review, or reply to a review, to trash.
 			 */
 			$trashable = true === apply_filters( 'woocommerce_rest_product_review_trashable', ( EMPTY_TRASH_DAYS > 0 ), $review );
 

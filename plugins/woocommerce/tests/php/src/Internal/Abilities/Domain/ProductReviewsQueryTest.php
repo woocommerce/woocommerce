@@ -405,26 +405,31 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'unknown_product_ids', $result );
 	}
 	/**
-	 * @testdox Should count approved and held direct replies, so an agent can skip answered reviews.
+	 * @testdox Should count approved and held direct replies from store staff, so an agent can skip reviews the store answered.
 	 */
-	public function test_reply_counts(): void {
+	public function test_store_reply_counts(): void {
 		$product  = \WC_Helper_Product::create_simple_product()->get_id();
+		$staff    = get_current_user_id();
+		$customer = self::factory()->user->create( array( 'role' => 'customer' ) );
 		$answered = $this->review( $product, 1 );
 		$open     = $this->review( $product, 2 );
-		$reply    = function ( int $review_id, string $approved ) use ( $product ): int {
+		$reply    = function ( int $review_id, string $approved, int $user_id ) use ( $product ): int {
 			return self::factory()->comment->create(
 				array(
 					'comment_post_ID'  => $product,
 					'comment_parent'   => $review_id,
 					'comment_approved' => $approved,
+					'user_id'          => $user_id,
 				)
 			);
 		};
-		$approved = $reply( $answered, '1' );
-		$reply( $answered, '0' );
-		$reply( $answered, 'spam' );
-		$reply( $approved, '1' );
-		$reply( $open, 'trash' );
+		$approved = $reply( $answered, '1', $staff );
+		$reply( $answered, '0', $staff );
+		$reply( $answered, 'spam', $staff );
+		$reply( $approved, '1', $staff );
+		$reply( $open, 'trash', $staff );
+		$reply( $open, '1', $customer );
+		$reply( $open, '1', 0 );
 
 		$result = $this->sut->execute( array( 'product_ids' => array( $product ) ) );
 
@@ -433,8 +438,8 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 				$open     => 0,
 				$answered => 2,
 			),
-			array_column( $result['reviews'], 'reply_count', 'id' ),
-			'Spam, trashed and nested replies do not count.'
+			array_column( $result['reviews'], 'store_reply_count', 'id' ),
+			'Customer, guest, spam, trashed and nested replies do not count.'
 		);
 	}
 

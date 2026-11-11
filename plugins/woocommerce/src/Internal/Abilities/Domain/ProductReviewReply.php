@@ -39,7 +39,7 @@ class ProductReviewReply extends AbstractDomainAbility implements AbilityDefinit
 	public static function get_registration_args(): array {
 		return array(
 			'label'               => __( 'Reply to product review', 'woocommerce' ),
-			'description'         => __( 'Publish a reply to an approved product review, as the current user and under their display name. Approve a held review with woocommerce/product-review-update first. Check the review\'s reply_count first, so it is not answered twice. A reply can be held or trashed with woocommerce/product-review-update. Replies to replies are not supported.', 'woocommerce' ),
+			'description'         => __( 'Publish a reply to an approved product review, as the current user and under their display name. Approve a held review with woocommerce/product-review-update first. Check the review\'s store_reply_count first, so the store does not answer it twice. A reply can be held or trashed with woocommerce/product-review-update. Replies to replies are not supported.', 'woocommerce' ),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
 			'output_schema'       => self::get_reply_output_schema(),
