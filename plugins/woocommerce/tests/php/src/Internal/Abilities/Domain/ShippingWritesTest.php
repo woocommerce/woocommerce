@@ -411,6 +411,41 @@ class ShippingWritesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse every shipping write while shipping is turned off, and save nothing.
+	 */
+	public function test_refuses_writes_while_shipping_is_disabled(): void {
+		$instance_id = ( new \WC_Shipping_Zone( 0 ) )->add_shipping_method( 'flat_rate' );
+		$zone_count  = count( \WC_Shipping_Zones::get_zones() );
+		update_option( 'woocommerce_ship_to_countries', 'disabled' );
+
+		$results = array(
+			$this->run_ability( 'woocommerce/shipping-zone-create', array( 'name' => 'Refused' ) ),
+			$this->run_ability(
+				'woocommerce/shipping-zone-method-create',
+				array(
+					'zone_id'   => 0,
+					'method_id' => 'free_shipping',
+				)
+			),
+			$this->run_ability(
+				'woocommerce/shipping-zone-method-update',
+				array(
+					'instance_id' => $instance_id,
+					'settings'    => array( 'cost' => '9' ),
+				)
+			),
+		);
+
+		foreach ( $results as $result ) {
+			$this->assertWPError( $result );
+			$this->assertSame( 'woocommerce_ability_shipping_disabled', $result->get_error_code() );
+		}
+		$this->assertCount( $zone_count, \WC_Shipping_Zones::get_zones(), 'No zone should be created.' );
+		$this->assertCount( 1, ( new \WC_Shipping_Zone( 0 ) )->get_shipping_methods(), 'No method should be added.' );
+		$this->assertFalse( get_option( "woocommerce_flat_rate_{$instance_id}_settings" ), 'The flat rate settings should stay untouched.' );
+	}
+
+	/**
 	 * @testdox Should let a shop manager write shipping, and refuse a user who cannot manage WooCommerce.
 	 */
 	public function test_requires_settings_permission(): void {

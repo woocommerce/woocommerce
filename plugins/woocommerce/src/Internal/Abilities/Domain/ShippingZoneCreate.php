@@ -107,6 +107,11 @@ class ShippingZoneCreate extends AbstractDomainAbility implements AbilityDefinit
 	 * @since 11.4.0
 	 */
 	public static function execute( array $input ) {
+		$disabled = self::get_shipping_disabled_error();
+		if ( null !== $disabled ) {
+			return $disabled;
+		}
+
 		$name = sanitize_text_field( $input['name'] );
 		if ( '' === $name ) {
 			return new \WP_Error( 'woocommerce_ability_shipping_zone_name_empty', __( 'The zone name is empty.', 'woocommerce' ), array( 'status' => 400 ) );

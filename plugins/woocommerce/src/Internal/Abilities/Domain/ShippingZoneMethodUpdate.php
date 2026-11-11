@@ -83,6 +83,11 @@ class ShippingZoneMethodUpdate extends AbstractDomainAbility implements AbilityD
 	 * @since 11.4.0
 	 */
 	public static function execute( array $input ) {
+		$disabled = self::get_shipping_disabled_error();
+		if ( null !== $disabled ) {
+			return $disabled;
+		}
+
 		$instance_id = $input['instance_id'];
 		$method      = \WC_Shipping_Zones::get_shipping_method( $instance_id );
 		$zone        = $method ? \WC_Shipping_Zones::get_zone_by( 'instance_id', $instance_id ) : false;
