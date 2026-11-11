@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Improve permission checks for some order-related REST API endpoints.
