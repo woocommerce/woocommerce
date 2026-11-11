@@ -25,9 +25,9 @@ From `plugins/woocommerce/client/blocks`:
 
 After each interaction, wait about 1.3 seconds, then check that nothing is left behind inside `.wp-block-woocommerce-cart` and `.wp-block-woocommerce-checkout`:
 
-- no `[data-wc-swapping]`, `[data-wc-entering]` or `[data-wc-swap-holding]`,
-- no inert, `aria-hidden` copies of removed content,
-- no inline `overflow: clip`, `translate`, `box-sizing: border-box` or `position: relative` left by a helper,
+- no attributes your motion set while it ran, such as `[data-wc-entering]` or `[data-wc-swapping]`,
+- no stand-in copies of removed content,
+- no inline styles your motion added (for example `overflow`, `height`, `translate` or `position`),
 - no running finite animations, and no finished script animations with `fill: forwards` (except on content about to unmount),
 - no page errors (listen for `error` and `unhandledrejection`, including "ResizeObserver loop" errors).
 
