@@ -67,6 +67,80 @@ class AbilityResourcesTest extends DomainAbilityTestCase {
 	}
 
 	/**
+	 * @testdox Should identify a failing root field and keep its exception text in developer diagnostics.
+	 * @testWith ["Exception"]
+	 *           ["Error"]
+	 * @param string $exception_class Throwable class.
+	 */
+	public function test_root_callback_failures_keep_context_without_exception_text( string $exception_class ): void {
+		$this->setExpectedIncorrectUsage( AbilityResources::class . '::register_field' );
+		$this->register_resources( 'ticket' );
+		AbilityResources::register_field(
+			'ticket',
+			'code',
+			array(
+				'schema'       => array( 'type' => 'string' ),
+				'get_callback' => static function () use ( $exception_class ) {
+					throw new $exception_class( 'Raw callback sentinel' );
+				},
+			)
+		);
+		$diagnostics = array();
+		add_action(
+			'doing_it_wrong_run',
+			static function ( $function_name, $message ) use ( &$diagnostics ) {
+				if ( AbilityResources::class . '::register_field' === $function_name ) {
+					$diagnostics[] = $message;
+				}
+			},
+			10,
+			2
+		);
+
+		$output = AbilityResources::output_data( 'ticket', array() );
+
+		$this->assertWPError( $output );
+		$this->assertSame( 'woocommerce_ability_extension_failed', $output->get_error_code() );
+		$this->assertSame( 'Reading the "code" field of the ticket failed.', $output->get_error_message() );
+		$this->assertSame(
+			array(
+				'status'   => 500,
+				'resource' => 'ticket',
+				'field'    => 'code',
+			),
+			$output->get_error_data()
+		);
+		$this->assertStringNotContainsString( 'Raw callback sentinel', wp_json_encode( $output ) );
+		$this->assertCount( 1, $diagnostics );
+		$this->assertStringContainsString( 'Reading the "code" field of the ticket failed. Raw callback sentinel', $diagnostics[0] );
+	}
+
+	/**
+	 * @testdox Should preserve a deliberate root callback error and its useful details.
+	 */
+	public function test_root_callback_errors_are_preserved(): void {
+		$this->register_resources( 'ticket' );
+		$error = new \WP_Error(
+			'ticket_unavailable',
+			'Choose another ticket.',
+			array(
+				'status' => 409,
+				'retry'  => false,
+			)
+		);
+		AbilityResources::register_field(
+			'ticket',
+			'code',
+			array(
+				'schema'       => array( 'type' => 'string' ),
+				'get_callback' => static fn() => $error,
+			)
+		);
+
+		$this->assertSame( $error, AbilityResources::output_data( 'ticket', array() ) );
+	}
+
+	/**
 	 * @testdox Should refuse a root field that an extension adds to a Core resource, or after the init action.
 	 */
 	public function test_root_fields_on_resources_of_others_are_refused(): void {

@@ -338,7 +338,27 @@ class AbilityResources {
 		$resolving[]   = $resource_name;
 		$output        = array();
 		foreach ( self::get_output_fields( $args ) as $field => $field_args ) {
-			$value = self::format_value( $field_args['schema'], call_user_func( $field_args['get_callback'], $subject ), $resolving );
+			try {
+				$value = call_user_func( $field_args['get_callback'], $subject );
+			} catch ( \Throwable $exception ) {
+				$message = sprintf(
+					/* translators: 1: Field name. 2: Resource, such as product. */
+					__( 'Reading the "%1$s" field of the %2$s failed.', 'woocommerce' ),
+					$field,
+					$resource_name
+				);
+				wc_doing_it_wrong( __CLASS__ . '::register_field', $message . ' ' . $exception->getMessage(), '11.4.0' );
+				return new \WP_Error(
+					'woocommerce_ability_extension_failed',
+					$message,
+					array(
+						'status'   => 500,
+						'resource' => $resource_name,
+						'field'    => $field,
+					)
+				);
+			}
+			$value = self::format_value( $field_args['schema'], $value, $resolving );
 			if ( is_wp_error( $value ) ) {
 				return $value;
 			}
