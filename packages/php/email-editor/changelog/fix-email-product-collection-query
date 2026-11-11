@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Show the same products in block email product collections as in the shop: no hidden products, current sales only, exclusions applied.
+In block email product collections, hide catalog-hidden products, apply exclusions to picked products, and use current sales.

@@ -172,6 +172,111 @@ class ProductCollectionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Keeps the on-sale filter on an upsells collection.
+	 */
+	public function test_on_sale_filter_applies_to_upsells(): void {
+		$sale = $this->create_product( 'Upsell on sale', array( 'sale_price' => 5 ) );
+		$full = $this->create_product( 'Upsell full price' );
+		$main = $this->create_product( 'Main', array( 'upsell_ids' => array( $sale->get_id(), $full->get_id() ) ) );
+		delete_transient( 'wc_products_onsale' );
+
+		$names = $this->rendered_names(
+			array(
+				'productReference'  => $main->get_id(),
+				'woocommerceOnSale' => true,
+			),
+			'woocommerce/product-collection/upsells'
+		);
+
+		$this->assertSame( array( 'Upsell on sale' ), $names );
+	}
+
+	/**
+	 * @testdox Shows every product in the recipient's cart, also ones hidden from the catalog.
+	 */
+	public function test_cart_contents_include_catalog_hidden_products(): void {
+		$visible = $this->create_product( 'Visible in cart' );
+		$hidden  = $this->create_product( 'Search-only in cart', array( 'catalog_visibility' => 'search' ) );
+		$user_id = $this->factory->user->create( array( 'user_email' => 'shopper@example.com' ) );
+		update_user_meta(
+			$user_id,
+			'_woocommerce_persistent_cart_' . get_current_blog_id(),
+			array(
+				'cart' => array(
+					'a' => array( 'product_id' => $visible->get_id() ),
+					'b' => array( 'product_id' => $hidden->get_id() ),
+				),
+			)
+		);
+
+		$names = $this->rendered_names( array(), 'woocommerce/product-collection/cart-contents', array( 'recipient_email' => 'shopper@example.com' ) );
+		sort( $names );
+
+		$this->assertSame( array( 'Search-only in cart', 'Visible in cart' ), $names );
+	}
+
+	/**
+	 * @testdox Filters by category, in both forms the block stores, and by attribute.
+	 */
+	public function test_category_and_attribute_filters(): void {
+		$category = wp_insert_term( 'Shirts', 'product_cat' );
+		$shirt    = $this->create_product( 'Shirt', array( 'category_ids' => array( $category['term_id'] ) ) );
+		$this->create_product( 'Mug' );
+		$attribute = WC_Helper_Product::create_attribute( 'colour', array( 'red', 'blue' ) );
+		wp_set_object_terms( $shirt->get_id(), array( 'red' ), $attribute['attribute_taxonomy'] );
+
+		$this->assertSame( array( 'Shirt' ), $this->rendered_names( array( 'taxQuery' => array( 'product_cat' => array( $category['term_id'] ) ) ) ), 'Taxonomy map' );
+		$this->assertSame(
+			array( 'Shirt' ),
+			$this->rendered_names(
+				array(
+					'taxQuery' => array(
+						array(
+							'taxonomy' => 'product_cat',
+							'field'    => 'term_id',
+							'terms'    => array( $category['term_id'] ),
+						),
+					),
+				)
+			),
+			'Clause list'
+		);
+		$this->assertSame(
+			array( 'Shirt' ),
+			$this->rendered_names(
+				array(
+					'woocommerceAttributes' => array(
+						array(
+							'taxonomy' => $attribute['attribute_taxonomy'],
+							'termId'   => $attribute['term_ids'][0],
+						),
+					),
+				)
+			),
+			'Attribute'
+		);
+	}
+
+	/**
+	 * @testdox Skips the number of products set as the offset.
+	 */
+	public function test_offset_skips_products(): void {
+		$ids = array();
+		foreach ( array( 'First', 'Second', 'Third' ) as $name ) {
+			$ids[] = $this->create_product( $name )->get_id();
+		}
+
+		$names = $this->rendered_names(
+			array(
+				'woocommerceHandPickedProducts' => $ids,
+				'offset'                        => 1,
+			)
+		);
+
+		$this->assertSame( array( 'Second', 'Third' ), $names );
+	}
+
+	/**
 	 * @testdox Fills the last row with an empty cell in a two-column grid with an odd product count.
 	 */
 	public function test_two_columns_with_odd_product_count(): void {
