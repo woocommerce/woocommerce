@@ -346,7 +346,7 @@ class Image extends Abstract_Block_Renderer {
 				$block_width = (string) $parsed_block['attrs']['width'];
 				$width       = Styles_Helper::parse_value( $block_width );
 				// A percentage can't be scaled against, and a fixed height is the author's choice.
-				if ( ! $has_fixed_height && ! str_contains( $block_width, '%' ) ) {
+				if ( ! $has_fixed_height && strpos( $block_width, '%' ) === false ) {
 					$this->scale_height_attribute( $html, $width );
 				}
 				/* @phpstan-ignore-next-line Wrong annotation for parameter in WP. */
