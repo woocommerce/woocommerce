@@ -416,6 +416,7 @@ test.describe( `${ blockData.name } Block (variation attributes)`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		cleanup,
 	} ) => {
 		// The API returns the ampersand as "&amp;", so this also checks that
 		// the variation branch of the table decodes it.
@@ -435,35 +436,35 @@ test.describe( `${ blockData.name } Block (variation attributes)`, () => {
 			/Created product (\d+)/
 		)?.[ 1 ];
 		expect( productId ).toBeDefined();
-		try {
-			const variationOutput = await wpCLI(
-				`wc product_variation create --user=1 "${ productId }" --regular_price="10" --attributes='${ JSON.stringify(
-					[ { name: 'Shade', option: 'Red & Blue' } ]
-				) }'`
-			);
-			const variationId = variationOutput.stdout.match(
-				/Created product_variation (\d+)/
-			)?.[ 1 ];
-
-			// Add the variation through the classic add-to-cart URL, since the
-			// product page form is not what this test covers.
-			await page.goto(
-				`/?add-to-cart=${ productId }&variation_id=${ variationId }`
-			);
-			await frontendUtils.goToShop();
-			await miniCartUtils.openMiniCart();
-
-			const dialog = page.getByRole( 'dialog' );
-			await expect(
-				dialog.locator( '.wc-block-components-product-details__name' )
-			).toContainText( [ 'Shade' ] );
-			await expect(
-				dialog.locator( '.wc-block-components-product-details__value' )
-			).toContainText( [ 'Red & Blue' ] );
-		} finally {
+		cleanup( async () => {
 			await wpCLI(
 				`wc product delete ${ productId } --force=true --user=1`
 			);
-		}
+		} );
+
+		const variationOutput = await wpCLI(
+			`wc product_variation create --user=1 "${ productId }" --regular_price="10" --attributes='${ JSON.stringify(
+				[ { name: 'Shade', option: 'Red & Blue' } ]
+			) }'`
+		);
+		const variationId = variationOutput.stdout.match(
+			/Created product_variation (\d+)/
+		)?.[ 1 ];
+
+		// Add the variation through the classic add-to-cart URL, since the
+		// product page form is not what this test covers.
+		await page.goto(
+			`/?add-to-cart=${ productId }&variation_id=${ variationId }`
+		);
+		await frontendUtils.goToShop();
+		await miniCartUtils.openMiniCart();
+
+		const dialog = page.getByRole( 'dialog' );
+		await expect(
+			dialog.locator( '.wc-block-components-product-details__name' )
+		).toContainText( [ 'Shade' ] );
+		await expect(
+			dialog.locator( '.wc-block-components-product-details__value' )
+		).toContainText( [ 'Red & Blue' ] );
 	} );
 } );
