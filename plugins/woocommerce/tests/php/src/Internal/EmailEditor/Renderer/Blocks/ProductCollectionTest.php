@@ -192,9 +192,9 @@ class ProductCollectionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Shows every product in the recipient's cart, also ones hidden from the catalog.
+	 * @testdox Leaves products hidden from the catalog out of the recipient's cart, as the shop's cart block does.
 	 */
-	public function test_cart_contents_include_catalog_hidden_products(): void {
+	public function test_cart_contents_leave_out_catalog_hidden_products(): void {
 		$visible = $this->create_product( 'Visible in cart' );
 		$hidden  = $this->create_product( 'Search-only in cart', array( 'catalog_visibility' => 'search' ) );
 		$user_id = $this->factory->user->create( array( 'user_email' => 'shopper@example.com' ) );
@@ -210,9 +210,8 @@ class ProductCollectionTest extends WC_Unit_Test_Case {
 		);
 
 		$names = $this->rendered_names( array(), 'woocommerce/product-collection/cart-contents', array( 'recipient_email' => 'shopper@example.com' ) );
-		sort( $names );
 
-		$this->assertSame( array( 'Search-only in cart', 'Visible in cart' ), $names );
+		$this->assertSame( array( 'Visible in cart' ), $names );
 	}
 
 	/**
