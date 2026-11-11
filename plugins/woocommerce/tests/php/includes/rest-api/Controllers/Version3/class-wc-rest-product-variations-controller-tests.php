@@ -1635,6 +1635,55 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A zero or negative variation attribute term ID is rejected and keeps the saved selection.
+	 * @testWith [0]
+	 *           [-1]
+	 *
+	 * @param int $sign Multiplier applied to a real term ID: 0 posts 0, -1 posts the negated ID.
+	 */
+	public function test_batch_update_variation_rejects_non_positive_attribute_term_id( int $sign ): void {
+		list( $attribute, $first_term_id, $second_term_id ) = $this->create_attribute_with_duplicate_term_names();
+		$taxonomy = $attribute['attribute_taxonomy'];
+
+		$product_attribute = new WC_Product_Attribute();
+		$product_attribute->set_id( $attribute['attribute_id'] );
+		$product_attribute->set_name( $taxonomy );
+		$product_attribute->set_options( array( $first_term_id, $second_term_id ) );
+		$product_attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_attributes( array( $product_attribute ) );
+		$product->save();
+
+		$selected_slug = get_term( $second_term_id )->slug;
+		$variation     = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( $taxonomy => $selected_slug ) );
+		$variation->save();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations/batch' );
+		$request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'         => $variation->get_id(),
+						'attributes' => array(
+							array(
+								'id'      => $attribute['attribute_id'],
+								'term_id' => $sign * $first_term_id,
+							),
+						),
+					),
+				),
+			)
+		);
+		$data = $this->server->dispatch( $request )->get_data();
+
+		$this->assertSame( 'woocommerce_rest_invalid_attribute_term_id', $data['update'][0]['error']['code'] ?? null, 'The term ID should be rejected.' );
+		$this->assertSame( $selected_slug, wc_get_product( $variation->get_id() )->get_attributes()[ $taxonomy ], 'The saved selection should not change.' );
+	}
+
+	/**
 	 * Creates a global attribute with two terms that share the name "Green" but have different slugs.
 	 *
 	 * @return array{0: array, 1: int, 2: int} Attribute data, first term ID, second term ID.
