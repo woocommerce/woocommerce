@@ -204,7 +204,14 @@ class ProductReviewUpdateTest extends \WC_Unit_Test_Case {
 		);
 		$this->assertTrue( $result['changed'], 'A legacy comment with a rating is a review.' );
 
-		foreach ( array( $plain, $reply, $post, 99999999 ) as $id ) {
+		$elsewhere = self::factory()->comment->create(
+			array(
+				'comment_post_ID' => self::factory()->post->create(),
+				'comment_parent'  => $this->review( 'approved' ),
+			)
+		);
+
+		foreach ( array( $plain, $post, $elsewhere, 99999999 ) as $id ) {
 			$result = $this->sut->execute(
 				array(
 					'id'     => $id,

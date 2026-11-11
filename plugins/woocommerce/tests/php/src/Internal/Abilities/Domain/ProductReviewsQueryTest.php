@@ -430,17 +430,19 @@ class ProductReviewsQueryTest extends \WC_Unit_Test_Case {
 		$reply( $open, 'trash', $staff );
 		$reply( $open, '1', $customer );
 		$reply( $open, '1', 0 );
+		self::factory()->comment->create(
+			array(
+				'comment_post_ID' => self::factory()->post->create(),
+				'comment_parent'  => $open,
+				'user_id'         => $staff,
+			)
+		);
 
 		$result = $this->sut->execute( array( 'product_ids' => array( $product ) ) );
+		$counts = array_column( $result['reviews'], 'store_reply_count', 'id' );
 
-		$this->assertSame(
-			array(
-				$open     => 0,
-				$answered => 2,
-			),
-			array_column( $result['reviews'], 'store_reply_count', 'id' ),
-			'Customer, guest, spam, trashed and nested replies do not count.'
-		);
+		$this->assertSame( 2, $counts[ $answered ] ?? null, 'Spam and nested replies do not count.' );
+		$this->assertSame( 0, $counts[ $open ] ?? null, 'Customer, guest, trashed and other posts\' replies do not count.' );
 	}
 
 	/**

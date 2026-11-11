@@ -65,15 +65,19 @@ trait ProductReviewAbilityTrait {
 	}
 
 	/**
-	 * Load a direct reply to a review. Deeper replies do not count.
+	 * Load a direct reply to a review, on the review's own product. Deeper replies do not count.
 	 *
 	 * @param int $reply_id Comment ID.
 	 * @return \WP_Comment|null
 	 */
 	protected static function get_review_reply( int $reply_id ): ?\WP_Comment {
 		$comment = get_comment( $reply_id );
+		if ( ! $comment instanceof \WP_Comment || 0 === (int) $comment->comment_parent ) {
+			return null;
+		}
 
-		if ( ! $comment instanceof \WP_Comment || 0 === (int) $comment->comment_parent || null === self::get_review( (int) $comment->comment_parent ) ) {
+		$review = self::get_review( (int) $comment->comment_parent );
+		if ( null === $review || $review->comment_post_ID !== $comment->comment_post_ID ) {
 			return null;
 		}
 
@@ -95,12 +99,24 @@ trait ProductReviewAbilityTrait {
 		}
 
 		$placeholders = implode( ',', array_fill( 0, count( $review_ids ), '%d' ) );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $placeholders holds only %d placeholders.
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT comment_parent, user_id, COUNT(*) AS replies FROM {$wpdb->comments} WHERE comment_parent IN ( {$placeholders} ) AND user_id > 0 AND comment_approved IN ( '0', '1' ) GROUP BY comment_parent, user_id", $review_ids ) );
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $placeholders holds only %d placeholders.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT reply.comment_parent, reply.user_id, COUNT(*) AS replies
+				FROM {$wpdb->comments} reply
+				INNER JOIN {$wpdb->comments} review ON review.comment_ID = reply.comment_parent AND review.comment_post_ID = reply.comment_post_ID
+				WHERE reply.comment_parent IN ( {$placeholders} ) AND reply.user_id > 0 AND reply.comment_approved IN ( '0', '1' )
+				GROUP BY reply.comment_parent, reply.user_id",
+				$review_ids
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$rows = (array) $rows;
+		cache_users( array_unique( array_map( 'intval', wp_list_pluck( $rows, 'user_id' ) ) ) );
 
 		$counts   = array();
 		$is_staff = array();
-		foreach ( (array) $rows as $row ) {
+		foreach ( $rows as $row ) {
 			$user_id = (int) $row->user_id;
 			if ( ! isset( $is_staff[ $user_id ] ) ) {
 				$is_staff[ $user_id ] = user_can( $user_id, 'edit_products' );

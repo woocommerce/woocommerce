@@ -114,6 +114,42 @@ class ProductReviewReplyTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not leave a top-level comment behind when the review is moderated during the reply.
+	 */
+	public function test_review_moderated_during_reply(): void {
+		$review = $this->review();
+		add_filter(
+			'preprocess_comment',
+			function ( $commentdata ) use ( $review ) {
+				wp_trash_comment( $review );
+				return $commentdata;
+			}
+		);
+
+		$result = $this->sut->execute(
+			array(
+				'id'      => $review,
+				'content' => 'Thanks!',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_product_review_not_approved', $result->get_error_code() );
+		$this->assertSame(
+			0,
+			(int) get_comments(
+				array(
+					'post_id' => $this->product_id,
+					'user_id' => get_current_user_id(),
+					'status'  => 'all',
+					'count'   => true,
+				)
+			),
+			'The orphaned reply should be removed.'
+		);
+	}
+
+	/**
 	 * @testdox Should pass on WordPress's duplicate check with its status.
 	 */
 	public function test_duplicate_reply(): void {
