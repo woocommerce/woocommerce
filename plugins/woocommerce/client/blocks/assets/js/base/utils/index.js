@@ -22,3 +22,4 @@ export * from './when-animations-end';
 export * from './animate-collapse';
 export * from './input-modality';
 export * from './swap-sections';
+export * from './get-optimistic-line-total';
