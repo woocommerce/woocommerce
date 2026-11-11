@@ -85,6 +85,14 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 		// new order is then made for it: the one already handed off must not stay payable too.
 		if ( ! empty( $state['order_id'] ) && ( ! $order || $order->get_id() !== (int) $state['order_id'] ) ) {
 			$state = $this->cancel_handed_off_order( $state, __( 'UCP checkout session cart changed after payment was handed off.', 'woocommerce' ) );
+
+			// Kept, so paid since this request began: refuse as if it had arrived a moment later.
+			if ( ! empty( $state['order_id'] ) ) {
+				$refusal = $this->open_checkout( true );
+
+				return $refusal instanceof \WP_REST_Response ? $refusal : $this->ucp_conflict();
+			}
+
 			$this->save_checkout_state( $state );
 		}
 

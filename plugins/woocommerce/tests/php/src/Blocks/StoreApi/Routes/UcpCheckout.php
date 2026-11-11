@@ -340,6 +340,31 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Completing a changed cart makes no second order when the first is paid while the request is under way.
+	 */
+	public function test_complete_stops_for_an_order_paid_mid_request(): void {
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$this->request( 'POST', $path . '/complete' );
+		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
+		WC()->cart->set_quantity( (string) array_key_first( WC()->cart->get_cart() ), 2 );
+
+		// Fires while the cart response is built, after the checkout was found open.
+		$pay = static function ( $ids ) use ( $order_id ) {
+			wc_get_order( $order_id )->update_status( OrderStatus::PROCESSING );
+
+			return $ids;
+		};
+		add_filter( 'woocommerce_cart_crosssell_ids', $pay );
+		$response = $this->request( 'POST', $path . '/complete' );
+		remove_filter( 'woocommerce_cart_crosssell_ids', $pay );
+
+		$this->assertSame( 409, $response->get_status() );
+		$this->assertSame( $order_id, (int) WC()->session->get( 'ucp_checkout' )['order_id'] );
+		$this->assertSame( (string) $order_id, $this->request( 'GET', $path )->get_data()['order']['id'] );
+	}
+
+	/**
 	 * @testdox A promoted cart is read but not written through the cart routes while its checkout is live, and is no longer a cart afterwards.
 	 */
 	public function test_cart_writes_are_refused_once_promoted(): void {
