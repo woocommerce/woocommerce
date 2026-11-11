@@ -116,13 +116,18 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	 *
 	 * @param array<string, mixed> $state Checkout state.
 	 * @param string               $note Order note explaining the cancellation.
-	 * @return array<string, mixed> The state without `order_id` and `fingerprint`.
+	 * @return array<string, mixed> The state without `order_id` and `fingerprint`, or unchanged when the order was paid meanwhile.
 	 */
 	protected function cancel_handed_off_order( array $state, string $note ): array {
 		$order = empty( $state['order_id'] ) ? null : wc_get_order( (int) $state['order_id'] );
 
-		// The payment page's own list, so a failed attempt the buyer could retry is closed too.
-		if ( $order instanceof \WC_Order && $order->has_status( $this->payable_statuses( $order ) ) ) {
+		if ( $order instanceof \WC_Order ) {
+			// Paid since the request began: the checkout keeps its order, which the next read reports.
+			if ( ! $order->has_status( $this->payable_statuses( $order ) ) ) {
+				return $state;
+			}
+
+			// The payment page's own list, so a failed attempt the buyer could retry is closed too.
 			$order->update_status( OrderStatus::CANCELLED, $note );
 
 			if ( (int) $this->get_draft_order_id() === $order->get_id() ) {

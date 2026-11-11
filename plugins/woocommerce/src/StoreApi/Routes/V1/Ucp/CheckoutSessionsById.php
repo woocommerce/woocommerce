@@ -116,6 +116,7 @@ class CheckoutSessionsById extends AbstractCheckoutRoute {
 			$this->save_checkout_state( $state );
 		}
 
-		return $error ?? $this->checkout_response( $this->route_cart_id( $request ), $state );
+		// Read again, so an order paid while this request ran is reported as completed.
+		return $error ?? $this->checkout_response( $this->route_cart_id( $request ), $this->checkout_state() ?? $state );
 	}
 }
