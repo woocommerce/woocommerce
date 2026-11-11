@@ -34,7 +34,7 @@ Our [JavaScript Build System](javascript-build-system.md) guide offers a detaile
 
 ### [Motion](motion.md)
 
-The [Motion](motion.md) guide lists the motion tokens and the rules for animation in the Cart and Checkout blocks, including how reduced motion is handled.
+The [Motion](motion.md) guide lists the motion tokens and the rules for animation in WooCommerce blocks, including how reduced motion is handled.
 
 ### [CSS Build System](css-build-system.md)
 

@@ -1,11 +1,11 @@
 ---
-name: woocommerce-cart-checkout-motion
-description: Add or review motion (transitions, animations, layout changes) in the WooCommerce Cart and Checkout blocks and the components they share. Use when animating a component, choosing timings or easing, handling reduced motion, or fixing motion that jumps, flickers or blocks.
+name: woocommerce-blocks-motion
+description: Add or review motion (transitions, animations, layout changes) in WooCommerce blocks and the components they share. Use when animating a component, choosing timings or easing, handling reduced motion, or fixing motion that jumps, flickers or blocks.
 ---
 
-# Cart and Checkout motion
+# WooCommerce blocks motion
 
-Use this skill to add motion to the Cart and Checkout blocks (`plugins/woocommerce/client/blocks`) and the shared components they render, or to review motion someone else added. The Mini-Cart is out of scope.
+Use this skill to add motion to WooCommerce blocks (`plugins/woocommerce/client/blocks`) and the shared components they render, or to review motion someone else added. Motion started in the Cart and Checkout blocks, so most examples come from there, but the rules, techniques and traps apply to any block.
 
 The rules live in `plugins/woocommerce/client/blocks/docs/contributors/motion.md`. Read that first: it's the source of truth for tokens, durations, reduced motion and the numbered rules, which code comments cite (for example "rule 17"). This skill is the how: which technique fits which change, the constraints a solution has to meet, the traps to avoid, and how to prove it works.
 
@@ -102,7 +102,7 @@ Opacity always runs on the 200ms state timing, even when the movement takes 300m
 
 ## Traps (each one cost a bug before)
 
-- **Every script bundle gets its own copy of a module.** Cart, Checkout and the shared components package each bundle `base-utils`, so module-level state is duplicated. State that has to be shared between bundles lives on `globalThis`.
+- **Every script bundle gets its own copy of a module.** Blocks such as Cart and Checkout, and the shared components package, each bundle `base-utils`, so module-level state is duplicated. State that has to be shared between bundles lives on `globalThis`.
 - **Cancelled and finished animations are not "in progress".** When reading where an animation got to, only count `playState` `running` or `paused`. A finished animation with `fill: forwards` keeps its end state applied until it's cancelled, which can leave an element collapsed long after it should have reset.
 - **Starting a size animation inside a `ResizeObserver` callback** resizes the element again in the same frame, and the browser reports a "ResizeObserver loop" error. Start it from somewhere that runs before layout, such as a `MutationObserver` callback.
 - **Nested motion fights.** A box that eases its own height must stand back while something inside it is growing or collapsing, or the two animate the same change twice. Only motion that changes size counts; fades, slides and price rolls don't.
@@ -118,14 +118,14 @@ Opacity always runs on the 200ms state timing, even when the movement takes 300m
 
 ## Scope and compatibility
 
-- Scope new CSS to `.wp-block-woocommerce-cart` and `.wp-block-woocommerce-checkout`, or to a component class those blocks render. Shared components (`packages/public-api/blocks-components`) are public: changes to their props, classes or DOM need a backwards-compatibility note in the PR.
+- Scope new CSS to the block that uses it (for example `.wp-block-woocommerce-cart`), or to a component class that block renders, so motion doesn't reach blocks that haven't adopted it. Shared components (`packages/public-api/blocks-components`) are public: changes to their props, classes or DOM need a backwards-compatibility note in the PR.
 - Never add a required prop to a public component; add optional ones. Keep class names that themes may target.
 - Transitions list their properties; never `transition: all`.
 - Position things that scale with `translate`, not `transform`, so a theme's resting `transform` still applies.
 
 ## Stylelint
 
-`woocommerce/motion-safe` (in `bin/stylelint-plugins/motion.js`) and the `declaration-property-value-disallowed-list` override in `.stylelintrc.json` check the Cart and Checkout stylesheets and the components they share: movement must be inside `motion-safe` or a motion mixin, durations must be tokens, and `transition: all` is rejected. When you bring a new directory under motion, add it to the override's `files` list.
+`woocommerce/motion-safe` (in `bin/stylelint-plugins/motion.js`) and the `declaration-property-value-disallowed-list` override in `.stylelintrc.json` check the stylesheets of blocks that have adopted motion (Cart and Checkout so far) and the components they share: movement must be inside `motion-safe` or a motion mixin, durations must be tokens, and `transition: all` is rejected. When you bring a new block or directory under motion, add it to the override's `files` list.
 
 ## Checklist before finishing
 
