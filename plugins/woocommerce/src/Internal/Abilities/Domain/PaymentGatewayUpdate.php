@@ -204,6 +204,10 @@ class PaymentGatewayUpdate extends AbstractDomainAbility implements AbilityDefin
 	 * position, the way a drag and drop on the payments settings page does, so
 	 * suggestions and offline methods in the map keep their place.
 	 *
+	 * Offline methods always follow the offline group entry, so an offline method
+	 * only moves within that block, and any other gateway lands just before or
+	 * just after it.
+	 *
 	 * @param PaymentsProviders  $providers Payment providers.
 	 * @param array<int, string> $ids       Gateway IDs in checkout order.
 	 * @param string             $id        Gateway to move.
@@ -211,8 +215,19 @@ class PaymentGatewayUpdate extends AbstractDomainAbility implements AbilityDefin
 	 * @return int The saved position, which can differ when offline methods stay grouped.
 	 */
 	private static function move_in_checkout_order( PaymentsProviders $providers, array $ids, string $id, int $position ): int {
-		$target    = $ids[ $position ];
 		$order_map = $providers->get_order_map();
+		$offline   = array_keys( array_filter( $ids, array( $providers, 'is_offline_payment_method' ) ) );
+
+		if ( $offline && $providers->is_offline_payment_method( $id ) ) {
+			$position = max( min( $offline ), min( $position, max( $offline ) ) );
+		}
+
+		$target = $ids[ $position ];
+
+		if ( $offline && $target !== $id && $providers->is_offline_payment_method( $target ) && ! $providers->is_offline_payment_method( $id ) ) {
+			$moving_up = $position < (int) array_search( $id, $ids, true );
+			$target    = $moving_up ? PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP : $ids[ max( $offline ) ];
+		}
 
 		if ( $target !== $id && isset( $order_map[ $target ] ) ) {
 			$order_map = PaymentsSettingsUtils::order_map_apply_mappings( $order_map, array( $id => $order_map[ $target ] ) );
