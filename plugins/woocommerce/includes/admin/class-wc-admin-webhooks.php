@@ -161,6 +161,21 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
+	 * Get the URL of the webhooks list page, with optional query arguments.
+	 *
+	 * Pass false as an argument's value to leave it out of the URL: add_query_arg() drops
+	 * false arguments, but keeps empty strings and renders them as a bare "key=".
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array $args Query arguments to add to the URL.
+	 * @return string
+	 */
+	public static function get_list_url( $args = array() ) {
+		return add_query_arg( $args, admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks' ) );
+	}
+
+	/**
 	 * Bulk delete.
 	 *
 	 * @param array $webhooks List of webhooks IDs.
@@ -172,17 +187,15 @@ class WC_Admin_Webhooks {
 		}
 
 		$qty = count( $webhooks );
-		// add_query_arg() drops false arguments but keeps empty ones, so use false when no filter is set.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$status = ! empty( $_GET['status'] ) ? sanitize_text_field( wp_unslash( $_GET['status'] ) ) : false;
 
 		wp_safe_redirect(
-			add_query_arg(
+			self::get_list_url(
 				array(
 					'status'  => $status,
 					'deleted' => $qty,
-				),
-				admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks' )
+				)
 			)
 		);
 		exit();
