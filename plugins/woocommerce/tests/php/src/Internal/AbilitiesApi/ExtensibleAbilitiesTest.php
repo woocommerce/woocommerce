@@ -1124,7 +1124,13 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	public function test_a_resource_name_of_only_digits_is_refused(): void {
 		$this->setExpectedIncorrectUsage( \Automattic\WooCommerce\Abilities\AbilityResources::class . '::register_resource' );
 
-		ExtensibleAbilities::register_resource( '42' );
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_resources_init',
+			static function () {
+				ExtensibleAbilities::register_resource( '42' );
+			}
+		);
+		do_action( 'woocommerce_extensible_abilities_resources_init' );
 
 		$resources = new \ReflectionProperty( \Automattic\WooCommerce\Abilities\AbilityResources::class, 'resources' );
 		$resources->setAccessible( true );
