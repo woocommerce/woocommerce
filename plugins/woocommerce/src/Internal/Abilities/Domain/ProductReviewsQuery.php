@@ -50,7 +50,7 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 
 		return array(
 			'label'               => __( 'Query product reviews', 'woocommerce' ),
-			'description'         => __( 'Read product reviews, ratings and moderation status. Search matches review text only, never reviewer identity. Summary and per-product ranking cover all reviews in the requested product/status scope, ignoring search, rating range and include. Unrated reviews have rating zero and do not affect averages. Ranking is worst first; above 200 products it keeps the 100 worst and 100 best rated. Text searches omit the ranking. Requested products without reviews and unknown product IDs are reported separately. Reviewer identity is withheld.', 'woocommerce' ),
+			'description'         => __( 'Read product reviews, ratings and moderation status. Search matches review text only, never reviewer identity. Summary and per-product ranking cover all reviews in the requested product/status scope, ignoring search, rating range and include. Unrated reviews have rating zero and do not affect averages. Ranking is worst first; above 200 products it keeps the 100 worst and 100 best rated. Text searches omit the ranking. Requested products without reviews and unknown product IDs are reported separately. store_reply_count counts replies from store staff only, so a review with only customer replies has 0. Reviewer identity is withheld.', 'woocommerce' ),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
 			'output_schema'       => $output_schema,
