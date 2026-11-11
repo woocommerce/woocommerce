@@ -25,9 +25,11 @@ p {
 	margin: 0;
 }
 
+/* pre-wrap alone breaks at spaces, so a long identifier or URL in a code or verse block would still widen the email */
 pre {
 	margin: 0;
 	white-space: pre-wrap;
+	word-break: break-word;
 }
 
 h1,
