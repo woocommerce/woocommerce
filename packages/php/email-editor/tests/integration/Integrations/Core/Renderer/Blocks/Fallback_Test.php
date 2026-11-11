@@ -36,6 +36,13 @@ class Fallback_Test extends \Email_Editor_Integration_Test_Case {
 			new Rendering_Context( new \WP_Theme_JSON() )
 		);
 
-		$this->assertMatchesRegularExpression( '/<td[^>]*align="' . $expected . '"[^>]*>\s*<div>Content<\/div>/', $rendered );
+		// The content cell is the only table cell with an align attribute.
+		$processor = new \WP_HTML_Tag_Processor( $rendered );
+		$align     = null;
+		while ( null === $align && $processor->next_tag( array( 'tag_name' => 'td' ) ) ) {
+			$align = $processor->get_attribute( 'align' );
+		}
+		$this->assertSame( $expected, $align );
+		$this->assertStringContainsString( '<div>Content</div>', $rendered );
 	}
 }

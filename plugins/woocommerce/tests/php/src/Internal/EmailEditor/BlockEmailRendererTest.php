@@ -538,7 +538,7 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 	public function testItPassesRecipientAndOrderCustomerToBlocks(): void {
 		$this->skip_if_unsupported_environment();
 		$customer_id          = $this->factory()->user->create();
-		$order                = \WC_Helper_Order::create_order( $customer_id );
+		$order                = wc_create_order( array( 'customer_id' => $customer_id ) );
 		$wc_mail_mock         = $this->create_test_email_mock( 'not-an-email, buyer@test.com, other@test.com' );
 		$wc_mail_mock->object = $order;
 		$seen_context         = null;
@@ -562,7 +562,9 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 	 */
 	public function testItFallsBackAndCleansUpWhenRenderingFails(): void {
 		$this->skip_if_unsupported_environment();
-		$throw = function () {
+		$thrown = false;
+		$throw  = function () use ( &$thrown ) {
+			$thrown = true;
 			throw new \RuntimeException( 'Render failed.' );
 		};
 		add_filter( 'woocommerce_email_editor_rendering_email_context', $throw, 20 );
@@ -570,6 +572,7 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 
 		$rendered_email = $this->block_email_renderer->maybe_render_block_email( $this->create_test_email_mock( 'customer@test.com' ) );
 
+		$this->assertTrue( $thrown, 'The render should reach the failing filter.' );
 		$this->assertNull( $rendered_email );
 		$this->assertCount( $filters_before, $GLOBALS['wp_filter']['woocommerce_email_editor_rendering_email_context']->callbacks[10] ?? array() );
 	}

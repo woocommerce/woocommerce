@@ -343,8 +343,15 @@ class ProductCollectionTest extends WC_Unit_Test_Case {
 	 * @param string $html Rendered HTML.
 	 */
 	private function names_in( string $html ): array {
-		preg_match_all( '/<h\d[^>]*>(?:<a[^>]*>)?(.*?)(?:<\/a>)?<\/h\d>/', $html, $matches );
-		return array_map( 'html_entity_decode', $matches[1] );
+		$document = new \DOMDocument();
+		libxml_use_internal_errors( true );
+		$document->loadHTML( '<?xml encoding="utf-8"?>' . $html );
+		libxml_clear_errors();
+		$names = array();
+		foreach ( ( new \DOMXPath( $document ) )->query( '//h1|//h2|//h3|//h4|//h5|//h6' ) as $heading ) {
+			$names[] = trim( html_entity_decode( wp_strip_all_tags( (string) $document->saveHTML( $heading ) ) ) );
+		}
+		return $names;
 	}
 
 	/**
