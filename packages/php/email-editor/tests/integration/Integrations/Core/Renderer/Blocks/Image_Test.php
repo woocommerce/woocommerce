@@ -123,6 +123,36 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test a caption saved without core's caption class still gets it.
+	 *
+	 * Image captions saved before WordPress 6.2 carry no class, and the email's caption styles key off
+	 * that class, so without it a saved caption color never reaches them.
+	 */
+	public function testItAddsTheCaptionClassToACaptionSavedWithoutIt(): void {
+		$image_content             = str_replace( '</figure>', '<figcaption>Caption</figcaption></figure>', $this->image_content );
+		$parsed_image              = $this->parsed_image;
+		$parsed_image['innerHTML'] = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertStringContainsString( '<span class="wp-element-caption">Caption</span>', $rendered );
+	}
+
+	/**
+	 * Test it keeps a caption's existing classes and does not repeat the caption class.
+	 */
+	public function testItKeepsExistingCaptionClasses(): void {
+		$image_content             = str_replace( '</figure>', '<figcaption class="custom-caption wp-element-caption">Caption</figcaption></figure>', $this->image_content );
+		$parsed_image              = $this->parsed_image;
+		$parsed_image['innerHTML'] = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertStringContainsString( '<span class="custom-caption wp-element-caption">Caption</span>', $rendered );
+		$this->assertSame( 1, substr_count( $rendered, 'wp-element-caption' ) );
+	}
+
+	/**
 	 * Test it renders image alignment
 	 */
 	public function testItRendersImageAlignment(): void {
@@ -464,5 +494,24 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 
 		// Note: esc_attr() encodes single quotes as &#039;.
 		$this->assertStringContainsString( 'data-link-href="[trackable-link url=&#039;test&#039;]"', $rendered );
+	}
+
+	/**
+	 * Test that only attributes useful in an email stay on the image.
+	 */
+	public function testItRemovesWebOnlyAttributesFromImage(): void {
+		$image_content = '<figure class="wp-block-image"><img class="wp-image-1" src="https://test.com/image.jpg?a=1&b=2" alt="Alt" title="Title" width="640" height="320" loading="lazy" decoding="async" fetchpriority="low" srcset="https://test.com/image.jpg 1000w" sizes="(max-width: 640px) 100vw, 640px" data-id="1" style="aspect-ratio:2;object-fit:cover"/></figure>';
+
+		$rendered = $this->image_renderer->render( $image_content, $this->parsed_image, $this->rendering_context );
+
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'img' ) ) );
+		$this->assertEqualsCanonicalizing(
+			array( 'src', 'alt', 'title', 'width', 'height', 'style' ),
+			$html->get_attribute_names_with_prefix( '' )
+		);
+		$this->assertSame( 'https://test.com/image.jpg?a=1&b=2', $html->get_attribute( 'src' ) );
+		$this->assertStringContainsString( 'object-fit:cover', (string) $html->get_attribute( 'style' ) );
+		$this->assertStringContainsString( 'aspect-ratio:2', (string) $html->get_attribute( 'style' ) );
 	}
 }

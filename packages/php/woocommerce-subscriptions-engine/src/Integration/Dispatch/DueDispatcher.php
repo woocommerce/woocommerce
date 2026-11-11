@@ -4,12 +4,12 @@
  *
  * One recurring Action Scheduler job scans for contracts whose `next_payment_gmt` has
  * passed and whose owner registered a `contract_due_handler` ({@see ConsumerRegistry}),
- * claims each one, and calls the owner's handler. Only contracts whose schedule the engine
+ * locks each one, and calls the owner's handler with the lock. Only contracts whose schedule the engine
  * keeps (`schedule_source` `subscriptions_engine`) are dispatched; a gateway or extension
  * that keeps its own schedule triggers its own renewals. The engine decides nothing about
  * what a due contract means: renewing, skipping or clearing the due moment is the owner's call.
  * A handler is expected to move or clear the due moment; one that does not is notified
- * again after the claim expires, behind contracts not yet notified.
+ * again by a later or overlapping tick, behind contracts locked less recently.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Dispatch
  */
@@ -21,6 +21,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Dispatch;
 use DateTimeImmutable;
 use DateTimeZone;
 use Throwable;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership\ConsumerRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
@@ -43,13 +44,9 @@ final class DueDispatcher {
 	public const GROUP = 'woocommerce_subscriptions_engine';
 
 	/**
-	 * How long a dispatch claim hides a notified contract from later scans, in seconds,
-	 * measured on the database clock. Moving or clearing `next_payment_gmt` releases the
-	 * claim early; re-saving the same moment does not. A handler that leaves the due moment
-	 * in place is notified again once the claim expires, behind contracts not yet notified
-	 * for their current due moment.
+	 * Operation label of the lock the dispatcher takes for a due notification.
 	 */
-	public const CLAIM_TTL_SECONDS = 900;
+	public const LOCK_OPERATION = 'engine_due_dispatch';
 
 	/**
 	 * Scan cadence, in seconds (every 10 minutes).
@@ -78,7 +75,7 @@ final class DueDispatcher {
 	private const SCHEDULE_RECHECK_SECONDS = 3600;
 
 	/**
-	 * Repository used to scan, claim and read due contracts.
+	 * Repository used to scan, lock and read due contracts.
 	 *
 	 * @var ContractRepository
 	 */
@@ -128,8 +125,8 @@ final class DueDispatcher {
 		}
 
 		if ( ! self::is_scheduled() ) {
-			// `$unique = true` is a best-effort dedup; the per-contract claim keeps a
-			// duplicate recurring action from notifying a contract twice.
+			// `$unique = true` is a best-effort dedup; the per-contract lock keeps a duplicate
+			// recurring action from notifying a contract while another run holds it.
 			as_schedule_recurring_action( time() + self::INTERVAL_SECONDS, self::INTERVAL_SECONDS, self::HOOK, array(), self::GROUP, true );
 		}
 
@@ -161,16 +158,16 @@ final class DueDispatcher {
 	}
 
 	/**
-	 * Notify the owners of up to `$limit` due contracts.
-	 *
-	 * Each due contract is claimed first (a lost claim is skipped), then its owner's handler is
-	 * called with the contract view and `array( 'due_at' => DateTimeImmutable )`. A throwing
-	 * handler is logged and keeps its claim, so one contract never stalls the batch.
+	 * Notify the owners of up to `$limit` due contracts. Each is locked on the due moment the
+	 * scan read (a lost lock is skipped), read, and passed to its handler with `due_at` and the
+	 * `lock`, released when the handler returns. A throwing handler keeps its lock until expiry;
+	 * failures are logged per contract and never stall the batch.
 	 *
 	 * @param DateTimeImmutable|null $now   The scan moment; defaults to now (UTC).
 	 * @param int                    $limit Maximum due contracts this tick; non-positive is a no-op.
-	 * @return int The number of contracts whose handler returned without throwing; lost
-	 *             claims, missing contracts or handlers, and throwing handlers are not counted.
+	 * @return int The number of contracts whose handler returned without throwing (a failed
+	 *             release afterwards still counts); lost locks, missing contracts or handlers,
+	 *             failed locks or reads, and throwing handlers are not counted.
 	 */
 	public function run_batch( ?DateTimeImmutable $now = null, int $limit = self::BATCH_SIZE ): int {
 		if ( $limit < 1 ) {
@@ -197,14 +194,30 @@ final class DueDispatcher {
 		foreach ( $due_rows as $row ) {
 			$contract_id = $row['id'];
 
-			if ( ! $this->contracts->claim_contract( $contract_id, $row['next_payment_gmt'], self::CLAIM_TTL_SECONDS ) ) {
-				++$skipped;
+			try {
+				$lock = $this->contracts->acquire_lock( $contract_id, self::LOCK_OPERATION, array( 'next_payment_gmt' => $row['next_payment_gmt'] ) );
+				if ( null === $lock ) {
+					++$skipped;
+					continue;
+				}
+			} catch ( Throwable $e ) {
+				++$failed;
+				$this->log_failure( $contract_id, 'could not be locked', $e );
 				continue;
 			}
 
-			$contract = $this->contracts->find( $contract_id );
-			$handler  = ConsumerRegistry::get_contract_due_handler( $row['extension_slug'] );
+			try {
+				$contract = $this->contracts->find( $contract_id );
+			} catch ( Throwable $e ) {
+				++$failed;
+				$this->log_failure( $contract_id, 'could not be read', $e );
+				$this->release( $lock );
+				continue;
+			}
+
+			$handler = ConsumerRegistry::get_contract_due_handler( $row['extension_slug'] );
 			if ( null === $contract || null === $handler ) {
+				$this->release( $lock );
 				++$skipped;
 				continue;
 			}
@@ -212,19 +225,20 @@ final class DueDispatcher {
 			try {
 				$handler(
 					ContractView::from_contract( $contract, true ),
-					array( 'due_at' => new DateTimeImmutable( $row['next_payment_gmt'], $utc ) )
-				);
-				++$notified;
-			} catch ( Throwable $e ) {
-				++$failed;
-				wc_get_logger()->error(
-					sprintf( 'DueDispatcher::run_batch(): the due handler for contract %d threw: %s', $contract_id, $e->getMessage() ),
 					array(
-						'source'      => self::LOG_SOURCE,
-						'contract_id' => $contract_id,
+						'due_at' => new DateTimeImmutable( $row['next_payment_gmt'], $utc ),
+						'lock'   => $lock,
 					)
 				);
+			} catch ( Throwable $e ) {
+				// The lock is kept until it expires: the contract stays closed while its state is unknown.
+				++$failed;
+				$this->log_failure( $contract_id, 'threw in its due handler', $e );
+				continue;
 			}
+
+			++$notified;
+			$this->release( $lock );
 		}
 
 		if ( array() !== $due_rows ) {
@@ -235,5 +249,43 @@ final class DueDispatcher {
 		}
 
 		return $notified;
+	}
+
+	/**
+	 * Release a dispatch lock in its own try block: a failed release is logged and the lock
+	 * expires on its own, without failing the notification or the batch.
+	 *
+	 * @param ContractLock $lock The dispatch lock.
+	 */
+	private function release( ContractLock $lock ): void {
+		try {
+			$this->contracts->release_lock( $lock );
+		} catch ( Throwable $e ) {
+			wc_get_logger()->warning(
+				sprintf( 'DueDispatcher::run_batch(): failed to release the due lock on contract %d; it expires on its own. %s', $lock->get_contract_id(), $e->getMessage() ),
+				array(
+					'source'      => self::LOG_SOURCE,
+					'contract_id' => $lock->get_contract_id(),
+					'stage'       => 'release',
+				)
+			);
+		}
+	}
+
+	/**
+	 * Log a contract that failed this tick.
+	 *
+	 * @param int       $contract_id Contract id.
+	 * @param string    $what        What went wrong, e.g. "could not be read".
+	 * @param Throwable $e           The failure.
+	 */
+	private function log_failure( int $contract_id, string $what, Throwable $e ): void {
+		wc_get_logger()->error(
+			sprintf( 'DueDispatcher::run_batch(): contract %d %s: %s', $contract_id, $what, $e->getMessage() ),
+			array(
+				'source'      => self::LOG_SOURCE,
+				'contract_id' => $contract_id,
+			)
+		);
 	}
 }

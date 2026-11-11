@@ -289,7 +289,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 		} elseif ( is_float( $value ) ) {
 			$value_placeholder = '%f';
 		} else {
-			wc_doing_it_wrong( __METHOD__, __( 'Unsupported argument type provided as value.', 'woocommerce' ), '7.0' );
+			wc_doing_it_wrong( __METHOD__, 'Unsupported argument type provided as value.', '7.0' );
 			// The `prepare` further down would fail if the placeholder was missing, so skip download log removal.
 			return;
 		}
@@ -459,7 +459,12 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 		}
 
 		if ( $args['download_id'] ) {
-			$query[] = $wpdb->prepare( 'AND download_id = %s', $args['download_id'] );
+			// Keep the indexed lookup while requiring an exact match before ordering and limiting the results.
+			$query[] = $wpdb->prepare(
+				'AND download_id = %s AND CAST(download_id AS BINARY) = CAST(%s AS BINARY)',
+				$args['download_id'],
+				$args['download_id']
+			);
 		}
 
 		$orderby     = in_array( $args['orderby'], $valid_fields, true ) ? $args['orderby'] : 'permission_id';

@@ -43,7 +43,7 @@ final class CycleView {
 	private $kind;
 
 	/**
-	 * Position in the chain.
+	 * Position in the chain, from 1.
 	 *
 	 * @var int
 	 */
@@ -158,7 +158,7 @@ final class CycleView {
 	}
 
 	/**
-	 * Position in the chain.
+	 * Position in the chain, from 1.
 	 */
 	public function get_sequence_no(): int {
 		return $this->sequence_no;

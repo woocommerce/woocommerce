@@ -19,7 +19,7 @@ use WP_Query;
  *
  * @group query-building
  */
-class QueryBuilder extends \WP_UnitTestCase {
+class QueryBuilder extends \WC_Unit_Test_Case {
 	/**
 	 * This variable holds our Product Query object.
 	 *
@@ -28,9 +28,47 @@ class QueryBuilder extends \WP_UnitTestCase {
 	private $block_instance;
 
 	/**
+	 * @testdox Should filter only the requested collection within its saved product selection.
+	 * @testWith [0, false]
+	 *           [17, true]
+	 * @param int  $query_id Collection ID.
+	 * @param bool $legacy_filterable Previously saved filterable value.
+	 */
+	public function test_local_filter_products( int $query_id, bool $legacy_filterable ): void {
+		$products = array();
+		foreach ( array( '10.25', '15.28', '5' ) as $price ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_regular_price( $price );
+			$product->save();
+			$products[] = $product->get_id();
+		}
+		try {
+			$_SERVER['REQUEST_URI'] = '/?min_price=999&wcp-' . $query_id . '-max_price=10.28&wcp-28-min_price=15';
+			set_query_var( 'min_price', '999' );
+			$block                                 = Utils::get_base_parsed_block();
+			$block['attrs']['queryId']             = $query_id;
+			$block['attrs']['query']['inherit']    = false;
+			$block['attrs']['query']['filterable'] = $legacy_filterable;
+			$block['attrs']['query']['woocommerceHandPickedProducts'] = array_slice( $products, 0, 2 );
+			$query = Utils::initialize_merged_query( $this->block_instance, $block );
+			$this->assertSame( array( $products[0] ), wp_list_pluck( ( new WP_Query( $query ) )->posts, 'ID' ) );
+
+			$block['attrs']['queryId'] = 28;
+			$query                     = Utils::initialize_merged_query( $this->block_instance, $block );
+			$this->assertSame( array( $products[1] ), wp_list_pluck( ( new WP_Query( $query ) )->posts, 'ID' ) );
+
+			$_SERVER['REQUEST_URI'] = '/?min_price=999';
+			$query                  = Utils::initialize_merged_query( $this->block_instance, $block );
+			$this->assertEqualsCanonicalizing( array_slice( $products, 0, 2 ), wp_list_pluck( ( new WP_Query( $query ) )->posts, 'ID' ) );
+		} finally {
+			set_query_var( 'min_price', '' );
+		}
+	}
+
+	/**
 	 * Initiate the mock object.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 		$this->block_instance = new ProductCollectionMock();
 	}

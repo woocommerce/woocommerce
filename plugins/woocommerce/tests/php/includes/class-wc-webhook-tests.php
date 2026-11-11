@@ -3,12 +3,44 @@
  * Tests for WC_Webhook class.
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Tests for WC_Webhook class.
  */
 class WC_Webhook_Test extends WC_Unit_Test_Case {
+	use HPOSToggleTrait;
+
+	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::setup_cot_tables();
+	}
+
+	/**
+	 * Whether HPOS was in use before a test changed the order storage, or null if it did not.
+	 *
+	 * @var bool|null
+	 */
+	private $prev_hpos_enabled = null;
+
+	/**
+	 * Restore the order storage a test switched with use_order_storage().
+	 */
+	public function tearDown(): void {
+		try {
+			if ( null !== $this->prev_hpos_enabled ) {
+				$this->toggle_cot_authoritative( $this->prev_hpos_enabled );
+				$this->prev_hpos_enabled = null;
+			}
+		} finally {
+			parent::tearDown();
+		}
+	}
 
 	/**
 	 * @testdox Check that post-action validation uses the affected post ID.
@@ -406,6 +438,70 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Order updated webhooks are not delivered while the order is a checkout draft.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_enabled Whether orders are stored in the HPOS tables.
+	 */
+	public function test_order_updated_webhook_skips_checkout_draft_orders( bool $hpos_enabled ): void {
+		$this->use_order_storage( $hpos_enabled );
+		$order = new WC_Order();
+		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+		$updated_ids = array();
+		$created_ids = array();
+		$this->record_deliveries( $this->create_active_webhook( 'order.updated' ), $updated_ids );
+		$this->record_deliveries( $this->create_active_webhook( 'order.created' ), $created_ids );
+
+		$order->set_billing_email( 'customer@example.com' );
+		$order->save();
+		$order->update_status( OrderStatus::PENDING );
+
+		$this->assertSame( array(), $updated_ids, 'Saving a checkout draft should not deliver order.updated' );
+		$this->assertSame( array( $order->get_id() ), $created_ids, 'Leaving checkout draft should deliver order.created' );
+	}
+
+	/**
+	 * @testdox Order updated webhooks skipped for a checkout draft are still delivered once the order leaves draft.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_enabled Whether orders are stored in the HPOS tables.
+	 */
+	public function test_order_updated_webhook_delivers_after_checkout_draft( bool $hpos_enabled ): void {
+		$this->use_order_storage( $hpos_enabled );
+		$order = new WC_Order();
+		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+		$updated_ids = array();
+		$this->record_deliveries( $this->create_active_webhook( 'order.updated' ), $updated_ids );
+
+		$order->set_billing_email( 'draft@example.com' );
+		$order->save();
+		$order->update_status( OrderStatus::PENDING );
+		$order->set_billing_email( 'customer@example.com' );
+		$order->save();
+
+		$this->assertSame( array( $order->get_id() ), $updated_ids, 'The first save after leaving draft should deliver order.updated once' );
+	}
+
+	/**
+	 * Store orders in the HPOS tables or in posts for the current test.
+	 *
+	 * @param bool $hpos_enabled Whether orders are stored in the HPOS tables.
+	 */
+	private function use_order_storage( bool $hpos_enabled ): void {
+		if ( null === $this->prev_hpos_enabled ) {
+			$this->prev_hpos_enabled = OrderUtil::custom_orders_table_usage_is_enabled();
+		}
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->toggle_cot_authoritative( $hpos_enabled );
+	}
+
+	/**
 	 * Enqueue a webhook and record the resource IDs it would deliver, without sending them.
 	 *
 	 * @param WC_Webhook   $webhook       Webhook to enqueue.
@@ -424,6 +520,58 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 			2
 		);
 		$webhook->enqueue();
+	}
+
+	/**
+	 * @testdox Deleting a refund delivers an order.updated webhook with the parent order payload.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_on_or_off True to test with HPOS on, false to test with HPOS off.
+	 */
+	public function test_refund_deletion_delivers_order_updated_webhook( bool $hpos_on_or_off ): void {
+		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+		$this->toggle_cot_authoritative( $hpos_on_or_off );
+
+		$order  = WC_Helper_Order::create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id'       => $order->get_id(),
+				'amount'         => 1,
+				'refund_payment' => false,
+			)
+		);
+
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund, 'The refund fixture should be created.' );
+		$refund_id = $refund->get_id();
+
+		$payloads = array();
+		$webhook  = $this->create_active_webhook( 'order.updated' );
+		$webhook->set_user_id( 1 );
+
+		remove_action( 'woocommerce_webhook_process_delivery', 'wc_webhook_process_delivery', 10 );
+		add_action(
+			'woocommerce_webhook_process_delivery',
+			function ( $delivering_webhook, $arg ) use ( $webhook, &$payloads ) {
+				if ( $webhook === $delivering_webhook ) {
+					$payloads[] = $delivering_webhook->build_payload( $arg );
+				}
+			},
+			10,
+			2
+		);
+		$webhook->enqueue();
+
+		$refund->delete( true );
+
+		$this->assertCount( 1, $payloads, 'The refund deletion should queue one webhook payload.' );
+		$this->assertArrayNotHasKey( 'code', $payloads[0], 'The payload should not contain a REST API error.' );
+		$this->assertArrayHasKey( 'id', $payloads[0] );
+		$this->assertSame( $order->get_id(), $payloads[0]['id'], 'The payload should represent the parent order.' );
+		$this->assertArrayHasKey( 'refunds', $payloads[0] );
+		$this->assertNotContains( $refund_id, wp_list_pluck( $payloads[0]['refunds'], 'id' ), 'The payload should not contain the deleted refund.' );
 	}
 
 	/**
@@ -546,6 +694,86 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A successful delivery clears the pending ping, so no ping follows it.
+	 */
+	public function test_successful_delivery_clears_pending_ping(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$webhook = $this->create_active_webhook( 'product.updated' );
+		$webhook->set_user_id( 1 );
+		$webhook->save();
+
+		$requests = array();
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args ) use ( &$requests ) {
+				$is_ping    = 0 === strpos( (string) $args['body'], 'webhook_id=' );
+				$requests[] = $is_ping ? 'ping' : 'delivery';
+
+				// Like an endpoint that verifies signatures: the unsigned ping is rejected, the delivery accepted.
+				return $this->mock_http_response( $is_ping ? 401 : 200 );
+			},
+			10,
+			2
+		);
+
+		$webhook->deliver( $product->get_id() );
+
+		$this->assertSame( array( 'delivery' ), $requests, 'A successful delivery should not be followed by a ping.' );
+		$this->assertFalse( wc_get_webhook( $webhook->get_id() )->get_pending_delivery(), 'A successful delivery should clear the pending ping.' );
+	}
+
+	/**
+	 * @testdox The ping counts any 2xx response as success, like deliveries do.
+	 *
+	 * @testWith [200, true]
+	 *           [202, true]
+	 *           [204, true]
+	 *           [302, false]
+	 *           [401, false]
+	 *           [500, false]
+	 *
+	 * @param int  $response_code  HTTP status code the delivery URL answers with.
+	 * @param bool $expect_success Whether the ping should succeed.
+	 */
+	public function test_ping_succeeds_on_any_2xx_response( int $response_code, bool $expect_success ): void {
+		$webhook = $this->create_active_webhook( 'product.updated' );
+		$webhook->save();
+
+		add_filter(
+			'pre_http_request',
+			function () use ( $response_code ) {
+				return $this->mock_http_response( $response_code );
+			}
+		);
+
+		$result = $webhook->deliver_ping();
+
+		if ( $expect_success ) {
+			$this->assertTrue( $result, "A ping answered with {$response_code} should succeed." );
+		} else {
+			$this->assertInstanceOf( WP_Error::class, $result, "A ping answered with {$response_code} should fail with an error." );
+		}
+		$this->assertSame( ! $expect_success, wc_get_webhook( $webhook->get_id() )->get_pending_delivery(), 'Only a successful ping should clear the pending ping.' );
+	}
+
+	/**
+	 * Build a pre_http_request response with the given status code.
+	 *
+	 * @param int $response_code HTTP status code.
+	 * @return array
+	 */
+	private function mock_http_response( int $response_code ): array {
+		return array(
+			'response' => array(
+				'code'    => $response_code,
+				'message' => get_status_header_desc( $response_code ),
+			),
+			'headers'  => array(),
+			'body'     => '',
+		);
+	}
+
+	/**
 	 * @testDox The woocommerce_webhook_enable_delivery_log filter toggles delivery logging without affecting failure tracking.
 	 */
 	public function test_delivery_logging_respects_enable_delivery_log_filter() {
@@ -623,4 +851,214 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_logger_log_message', $log_spy, 10 );
 	}
 
+	/**
+	 * @testdox A class that overrides the saving delivery methods keeps working through them, and the stage methods refuse it.
+	 */
+	public function test_stage_delivery_methods_refuse_a_class_that_has_not_adopted_them() {
+		// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
+		$webhook = new class() extends WC_Webhook {
+			public function log_delivery( $delivery_id, $request, $response, $duration ) {
+				parent::log_delivery( $delivery_id, $request, $response, $duration );
+			}
+			public function deliver_ping() {
+				return parent::deliver_ping();
+			}
+		};
+		// phpcs:enable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 0 );
+		$webhook->save();
+
+		// Saving an active webhook with a pending delivery pings its URL; answer locally.
+		$this->http_responder = fn() => $this->mock_http_response( 200 );
+
+		$response = array(
+			'response' => array(
+				'code'    => 500,
+				'message' => 'Internal Server Error',
+			),
+			'headers'  => array(),
+			'body'     => '',
+		);
+		$request  = array(
+			'method'     => 'POST',
+			'headers'    => array(),
+			'body'       => '',
+			'user-agent' => 'test',
+		);
+		$webhook->log_delivery( 'delivery', $request, $response, 0.1 );
+		$this->assertSame( 1, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
+
+		$http = static fn() => array(
+			'response' => array(
+				'code'    => 200,
+				'message' => 'OK',
+			),
+			'headers'  => array(),
+			'body'     => '',
+		);
+		add_filter( 'pre_http_request', $http );
+		$this->assertTrue( $webhook->deliver_ping() );
+		remove_filter( 'pre_http_request', $http );
+
+		$calls = array(
+			'stage_delivery_result' => array( 500 ),
+			'stage_delivery_ping'   => array(),
+		);
+		foreach ( $calls as $stage_method => $args ) {
+			try {
+				$webhook->$stage_method( ...$args );
+				$this->fail( $stage_method . ' did not refuse the class.' );
+			} catch ( WC_Data_Exception $e ) {
+				$this->assertSame( 'woocommerce_data_staging_unsupported', $e->getErrorCode() );
+				$this->assertStringContainsString( $stage_method . '()', $e->getMessage() );
+			}
+		}
+	}
+
+	/**
+	 * @testdox stage_delivery_result() counts a failure in memory, and the next save writes it.
+	 */
+	public function test_stage_delivery_result_changes_the_webhook_in_memory_only() {
+		$webhook = new WC_Webhook();
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 0 );
+		$webhook->save();
+
+		// Saving an active webhook with a pending delivery pings its URL; answer locally.
+		$this->http_responder = fn() => $this->mock_http_response( 200 );
+
+		$webhook->stage_delivery_result( 500 );
+		$this->assertSame( 1, $webhook->get_failure_count() );
+		$this->assertSame( 0, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
+
+		$webhook->save();
+		$this->assertSame( 1, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
+
+		$webhook->stage_delivery_result( 200 );
+		$webhook->save();
+		$this->assertSame( 0, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
+	}
+
+	/**
+	 * @testdox stage_delivery_result() leaves the disabled action to the next save, which fires it after the write.
+	 */
+	public function test_stage_delivery_result_fires_the_disabled_action_after_the_write() {
+		$webhook = new WC_Webhook();
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 6 );
+		$webhook->save();
+
+		$statuses = array();
+		$listener = static function ( $webhook_id ) use ( &$statuses ) {
+			$statuses[] = wc_get_webhook( $webhook_id )->get_status();
+		};
+		add_action( 'woocommerce_webhook_disabled_due_delivery_failures', $listener );
+
+		$webhook->stage_delivery_result( 500 );
+		$this->assertSame( 'disabled', $webhook->get_status() );
+		$this->assertSame( array(), $statuses );
+
+		$webhook->save();
+		$webhook->save();
+
+		remove_action( 'woocommerce_webhook_disabled_due_delivery_failures', $listener );
+		$this->assertSame( array( 'disabled' ), $statuses );
+	}
+
+	/**
+	 * @testdox log_delivery() after a staged disable fires the disabled action once.
+	 */
+	public function test_log_delivery_after_a_staged_disable_fires_the_disabled_action_once() {
+		$webhook = $this->create_failing_webhook();
+		$fired   = did_action( 'woocommerce_webhook_disabled_due_delivery_failures' );
+
+		$webhook->stage_delivery_result( 500 );
+		$webhook->log_delivery( 1, $this->delivery_request(), new WP_Error( 'http_request_failed', 'Failed' ), 0.1 );
+		$webhook->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_webhook_disabled_due_delivery_failures' ) - $fired );
+	}
+
+	/**
+	 * @testdox save() does not fire the disabled action when a status change replaced the staged disable.
+	 */
+	public function test_save_skips_the_disabled_action_when_the_webhook_is_active_again() {
+		$webhook = $this->create_failing_webhook();
+		$fired   = did_action( 'woocommerce_webhook_disabled_due_delivery_failures' );
+
+		$this->http_responder = fn() => $this->mock_http_response( 200 );
+
+		$webhook->stage_delivery_result( 500 );
+		$webhook->set_status( 'active' );
+		$webhook->save();
+
+		$this->assertSame( 0, did_action( 'woocommerce_webhook_disabled_due_delivery_failures' ) - $fired );
+	}
+
+	/**
+	 * Create a saved, active webhook that the next failed delivery disables.
+	 *
+	 * @return WC_Webhook
+	 */
+	private function create_failing_webhook(): WC_Webhook {
+		$webhook = new WC_Webhook();
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 6 );
+		$webhook->save();
+
+		return $webhook;
+	}
+
+	/**
+	 * Build the request array that log_delivery() reads.
+	 *
+	 * @return array
+	 */
+	private function delivery_request(): array {
+		return array(
+			'method'     => 'POST',
+			'user-agent' => 'WooCommerce',
+			'headers'    => array(),
+			'body'       => '',
+		);
+	}
+
+	/**
+	 * @testdox log_delivery() fires the disabled action right away, before it saves.
+	 */
+	public function test_log_delivery_fires_the_disabled_action_once() {
+		$webhook = new WC_Webhook();
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 6 );
+		$webhook->save();
+		$fired = did_action( 'woocommerce_webhook_disabled_due_delivery_failures' );
+
+		$request = array(
+			'method'     => 'POST',
+			'user-agent' => 'WooCommerce',
+			'headers'    => array(),
+			'body'       => '',
+		);
+		$webhook->log_delivery( 1, $request, new WP_Error( 'http_request_failed', 'Failed' ), 0.1 );
+		$webhook->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_webhook_disabled_due_delivery_failures' ) - $fired );
+		$this->assertSame( 'disabled', wc_get_webhook( $webhook->get_id() )->get_status() );
+	}
 }

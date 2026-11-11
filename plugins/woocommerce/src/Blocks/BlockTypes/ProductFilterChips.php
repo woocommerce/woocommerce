@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 
 /**
@@ -31,7 +32,7 @@ final class ProductFilterChips extends AbstractBlock {
 		parent::enqueue_data( $attributes );
 
 		if ( is_admin() ) {
-			$this->asset_data_registry->add( 'globalStylesColors', wp_get_global_styles( array( 'color' ) ) );
+			$this->asset_data_registry->add( 'globalStylesColors', StyleAttributesUtils::get_global_styles( array( 'color' ) ) );
 		}
 	}
 
@@ -82,9 +83,9 @@ final class ProductFilterChips extends AbstractBlock {
 		);
 
 		$wrapper_attributes = array(
-			'data-wp-interactive'  => 'woocommerce/product-filter-chips',
-			'data-wp-init--colors' => 'callbacks.initColors',
-			'data-wp-context'      => (string) wp_json_encode(
+			'data-wp-interactive'   => 'woocommerce/product-filter-chips',
+			'data-wp-init---colors' => 'callbacks.initColors',
+			'data-wp-context'       => (string) wp_json_encode(
 				array(
 					'storeNamespace' => $store_namespace,
 					'displayLimit'   => $display_limit,
@@ -92,7 +93,7 @@ final class ProductFilterChips extends AbstractBlock {
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			),
-			'class'                => esc_attr( $classes ),
+			'class'                 => esc_attr( $classes ),
 		);
 
 		if ( ! empty( $style ) ) {

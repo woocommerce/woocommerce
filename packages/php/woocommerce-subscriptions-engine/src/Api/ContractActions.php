@@ -10,7 +10,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Api;
 
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Rest\ContractActionRegistry;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\ArgumentValidator;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\ArgumentFilter;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -53,7 +53,7 @@ final class ContractActions {
 	 *                                             `is_available`: `callable( ContractView $contract ): bool`, default always.
 	 */
 	public static function register( string $extension_slug, string $action, array $args ): void {
-		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::REGISTRATION_KEYS, 'argument' );
+		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::REGISTRATION_KEYS, 'argument' );
 		$callback      = $filtered_args['callback'] ?? null;
 		$permission    = $filtered_args['permission'] ?? null;
 		$description   = $filtered_args['description'] ?? '';

@@ -1,0 +1,150 @@
+{
+  "$comment": "Contract between `gh local-ci` (publisher) and the receipt lookup action in ci.yml (consumer). CI reads this file from trunk; a PR that changes it gets a full CI run. Who may publish is the allowlist compiled into gh local-ci, not this file.",
+  "version": 1,
+  "host": "github.com",
+  "repository": "woocommerce/woocommerce",
+  "app": { "clientId": "Iv23lix7ORqAqQLsB13K", "appId": 4830646 },
+  "baseBranch": "trunk",
+  "receiptPrefix": "local-ci/v1: ",
+
+  "enabled": true,
+
+  "plan": {
+    "$comment": "The same planner CI runs (ci.yml → pnpm utils ci-jobs) with the same inputs: a diff from the merge base (CI uses gh pr diff) and the pull_request event filter. GITHUB_ACTIONS=true makes it write its matrix to GITHUB_OUTPUT. fields.path is projectPath, the project's directory from the repository root, so gh local-ci can skip a rule's prepare when only files inside the tested projects changed.",
+    "command": [ "sh", "-c", "GITHUB_ACTIONS=true GITHUB_OUTPUT={out} pnpm utils ci-jobs --base-ref {mergeBase} --event pull_request" ],
+    "output": "github-output",
+    "fields": { "name": "name", "project": "projectName", "command": "command", "type": "testType", "path": "projectPath" },
+    "all": {
+      "$comment": "The same planner with no diff, for gh local-ci setup to warm every project a rule could test. Without --base-ref the planner treats every project as changed.",
+      "command": [ "sh", "-c", "GITHUB_ACTIONS=true GITHUB_OUTPUT={out} pnpm utils ci-jobs --event pull_request" ]
+    }
+  },
+
+  "eligible": [
+    {
+      "id": "js-unit",
+      "type": "unit",
+      "namePrefix": "JavaScript",
+      "sampleRate": 10,
+      "prepare": {
+        "$comment": "Mirrors setup-woocommerce-monorepo with install='<project>...' and build-type=dependencies. Re-validate and update mirrors.sha256 when that action changes.",
+        "env": { "CI": "true", "GITHUB_ACTIONS": "true", "BROWSERSLIST_IGNORE_OLD_DATA": "true" },
+        "clean": [ "plugins/woocommerce/assets/client/blocks" ],
+        "steps": [
+          [ "pnpm", "install", "{projects:--filter=%s...}", "--frozen-lockfile" ],
+          [ "pnpm", "--if-present", "--workspace-concurrency=Infinity", "--stream", "{projects:--filter=%s^...}", "/^build:project:.*$/" ]
+        ],
+        "mirrors": {
+          "action": ".github/actions/setup-woocommerce-monorepo/action.yml",
+          "sha256": "9aa17d624c6b2f4e5666763e9354b424c5c988f1b6e506d26ca8df40ad9c0fa0"
+        }
+      },
+      "$comment": "Every test:js is jest, which defaults to cores-1 workers per invocation. gh local-ci sizes {workers} for the machine it runs on, from a budget the jobs share; on a Mac with more than one core tier, from the fastest tier only. A fixed 4 per job oversubscribed an M5 Max's 6 fast cores: the seven jest jobs of one diff took 83 s, against 65 to 73 s sized by the tool.",
+      "run": [ "pnpm", "--filter={project}", "{command}", "--maxWorkers={workers}" ]
+    },
+    {
+      "id": "js-build",
+      "type": "unit",
+      "namePrefix": "JS build and typecheck",
+      "sampleRate": 10,
+      "prepare": {
+        "$comment": "Mirrors setup-woocommerce-monorepo with install='<project>...' and build-type=dependencies.",
+        "env": { "CI": "true", "GITHUB_ACTIONS": "true", "BROWSERSLIST_IGNORE_OLD_DATA": "true" },
+        "clean": [ "plugins/woocommerce/assets/client/blocks" ],
+        "steps": [
+          [ "pnpm", "install", "{projects:--filter=%s...}", "--frozen-lockfile" ],
+          [ "pnpm", "--if-present", "--workspace-concurrency=Infinity", "--stream", "{projects:--filter=%s^...}", "/^build:project:.*$/" ]
+        ],
+        "mirrors": {
+          "action": ".github/actions/setup-woocommerce-monorepo/action.yml",
+          "sha256": "9aa17d624c6b2f4e5666763e9354b424c5c988f1b6e506d26ca8df40ad9c0fa0"
+        }
+      },
+      "run": [ "pnpm", "--filter={project}", "{command}" ]
+    },
+    {
+      "id": "phpstan",
+      "$comment": "CI skips setup-php for build-type=dependencies, so PHPStan runs on the runner's PHP 8.3 whatever the job name says; the name's version picks the neon config. run-phpstan.sh installs into and then deletes tasks/phpstan/vendor, so one project's two PHPStan jobs run in turn.",
+      "type": "unit",
+      "namePrefix": "PHPStan: ",
+      "image": "php8.3",
+      "serial": "phpstan-{project}",
+      "sampleRate": 10,
+      "prepare": {
+        "$comment": "Mirrors setup-woocommerce-monorepo with install='<project>...' and build-type=dependencies.",
+        "env": { "CI": "true", "GITHUB_ACTIONS": "true", "BROWSERSLIST_IGNORE_OLD_DATA": "true" },
+        "clean": [ "plugins/woocommerce/assets/client/blocks" ],
+        "steps": [
+          [ "pnpm", "install", "{projects:--filter=%s...}", "--frozen-lockfile" ],
+          [ "pnpm", "--if-present", "--workspace-concurrency=Infinity", "--stream", "{projects:--filter=%s^...}", "/^build:project:.*$/" ]
+        ],
+        "mirrors": {
+          "action": ".github/actions/setup-woocommerce-monorepo/action.yml",
+          "sha256": "9aa17d624c6b2f4e5666763e9354b424c5c988f1b6e506d26ca8df40ad9c0fa0"
+        }
+      },
+      "run": [ "pnpm", "--filter={project}", "{command}" ]
+    },
+    {
+      "id": "php-unit",
+      "$comment": "PHPUnit without wp-env. The test job installs PHP 7.4 for every unit:php job (setup-woocommerce-monorepo's default), so this runs on 7.4 whatever the job name says. gh local-ci runs a rule that names an image only with --docker, so a receipt for it never comes from the host's PHP. Jobs with a test environment have [WP ...] in their names: the core plugin's are the php-cells rule's, and the rest are left to CI.",
+      "type": "unit:php",
+      "namePrefix": "PHP: 8.1 ",
+      "exclude": [ "[WP " ],
+      "image": "php7.4",
+      "sampleRate": 10,
+      "prepare": {
+        "$comment": "Mirrors setup-woocommerce-monorepo with install='<project>...' and build-type=backend.",
+        "env": { "CI": "true", "GITHUB_ACTIONS": "true", "BROWSERSLIST_IGNORE_OLD_DATA": "true" },
+        "steps": [
+          [ "pnpm", "install", "{projects:--filter=%s...}", "--frozen-lockfile" ],
+          [ "pnpm", "--filter=@woocommerce/admin-library", "build:project:feature-config" ]
+        ],
+        "mirrors": {
+          "action": ".github/actions/setup-woocommerce-monorepo/action.yml",
+          "sha256": "9aa17d624c6b2f4e5666763e9354b424c5c988f1b6e506d26ca8df40ad9c0fa0"
+        }
+      },
+      "run": [ "pnpm", "--filter={project}", "{command}" ]
+    },
+    {
+      "id": "php-cells",
+      "$comment": "Core plugin PHP cells only; grow `exclude` when packages/php/* gain unit:php jobs. The driver resolves each cell's PHP and WordPress versions from the planner itself. Opt-in: four cells run one after another, about 25 min. Native runs only: each cell starts wp-env, which needs a Docker daemon that a --docker container does not have.",
+      "type": "unit:php",
+      "exclude": [
+        "WP: pre-release",
+        "@woocommerce/blueprint",
+        "@woocommerce/email-editor-config",
+        "@automattic/woocommerce-subscriptions-engine",
+        "@automattic/woocommerce-analytics"
+      ],
+      "serial": "wp-env",
+      "enabledByDefault": false,
+      "sampleRate": 10,
+      "prepare": {
+        "$comment": "Ports 92xx so the worktree's wp-env cells never collide with cells started from the developer's checkout.",
+        "env": { "TEST_PHP_CI_PORT_BASE": "92" }
+      },
+      "run": [ "bash", "bin/test-php-ci.sh", "--cell", "{name}" ]
+    }
+  ],
+
+  "docker": {
+    "$comment": "For run --docker. gh local-ci builds each image from .github/local-ci/php.Dockerfile as committed, and rebuilds it only when that directory or its args change. The default image is PHP 8.3 with Composer and Node, as on the ubuntu-24.04 runner, because pnpm install runs composer install in the postinstall of plugins/woocommerce, the beta tester and four PHP packages. The pnpm store lives on the per-clone HOME volume, so no mounts are needed.",
+    "build": { "context": ".github/local-ci", "dockerfile": "php.Dockerfile", "args": { "PHP_IMAGE": "php:8.3-cli-bookworm@sha256:cdb77e306d6bb99db40e513fbe036ecc6c53b575cbcb7e581387845fef26d755" } },
+    "images": {
+      "php8.3": { "build": { "context": ".github/local-ci", "dockerfile": "php.Dockerfile", "args": { "PHP_IMAGE": "php:8.3-cli-bookworm@sha256:cdb77e306d6bb99db40e513fbe036ecc6c53b575cbcb7e581387845fef26d755" } } },
+      "php7.4": { "build": { "context": ".github/local-ci", "dockerfile": "php.Dockerfile", "args": { "PHP_IMAGE": "php:7.4-cli-bullseye@sha256:620a6b9f4d4feef2210026172570465e9d0c1de79766418d3affd09190a7fda5" } } }
+    }
+  },
+
+  "lockfile": "pnpm-lock.yaml",
+
+  "toolchain": [
+    {
+      "$comment": "CI's Node: setup-woocommerce-monorepo runs setup-node with node-version-file .nvmrc. Locally every job runs through pnpm, which uses useNodeVersion from pnpm-workspace.yaml whatever node is on PATH, so the check asks pnpm, not PATH. pnpm is not checked: action-setup reads it from packageManager in package.json, and expectFrom takes a file that holds only the version. Nor is PHP: the PHPStan and PHP 8.1 rules run only under --docker, where the image is the toolchain, and each PHP cell runs on wp-env's PHP.",
+      "run": "pnpm exec node -v",
+      "expectFrom": ".nvmrc"
+    }
+  ]
+}

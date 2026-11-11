@@ -113,7 +113,7 @@ class Settings {
 				'type'     => 'checkbox',
 				'value'    => $this->logging_is_enabled() ? 'yes' : 'no',
 				'default'  => self::DEFAULTS['logging_enabled'] ? 'yes' : 'no',
-				'autoload' => false,
+				'autoload' => true,
 			),
 			'default_handler'       => array(),
 			'retention_period_days' => array(),

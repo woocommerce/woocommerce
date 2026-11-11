@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Migrate Product Collection filtering to the shared Product Filters QueryClauses implementation.

@@ -33,13 +33,6 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 	private $backup_wc;
 
 	/**
-	 * Customer shipping address before the test, restored at teardown.
-	 *
-	 * @var array<string, string>
-	 */
-	private $previous_shipping_address = array();
-
-	/**
 	 * Initialize the registry instance.
 	 *
 	 * @return void
@@ -75,8 +68,6 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 			Package::container()->get( Api::class ),
 			Package::container()->get( AssetDataRegistry::class )
 		);
-		// WC()->customer outlives the test, so keep its location to restore at teardown.
-		$this->previous_shipping_address = WC()->customer->get_shipping( 'edit' );
 		WC()->customer->set_shipping_postcode( '' );
 		WC()->customer->set_shipping_city( '' );
 		WC()->customer->set_shipping_state( '' );
@@ -94,9 +85,6 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 		try {
 			$woocommerce = $this->backup_wc;
 			WC()->session->set( 'chosen_shipping_methods', null );
-			foreach ( $this->previous_shipping_address as $key => $value ) {
-				WC()->customer->{"set_shipping_{$key}"}( $value );
-			}
 			// A test may null WC()->shipping, which leaves a dynamic property on the WC singleton.
 			unset( WC()->shipping );
 		} finally {
@@ -334,6 +322,7 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 	public function test_filter_taxable_address_returns_chosen_pickup_location_address(): void {
 		$this->save_pickup_locations();
 		WC()->session->set( 'chosen_shipping_methods', array( 'pickup_location:1' ) );
+		WC()->session->set( 'previous_shipping_methods', array( array( 'pickup_location:1' ) ) );
 
 		$this->assertSame(
 			array( 'US', 'NY', '10001', 'New York' ),
@@ -361,6 +350,7 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 			)
 		);
 		WC()->session->set( 'chosen_shipping_methods', array( 'pickup_location:0' ) );
+		WC()->session->set( 'previous_shipping_methods', array( array( 'pickup_location:0' ) ) );
 
 		$this->assertSame(
 			array( 'FR', '', '75001', 'Paris' ),

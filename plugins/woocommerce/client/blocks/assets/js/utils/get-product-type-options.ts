@@ -6,7 +6,7 @@ import { getSetting } from '@woocommerce/settings';
 /**
  * Internal dependencies
  */
-import type { ProductTypeProps } from '../shared/stores/product-type-template-state';
+import type { ProductTypeProps } from '../shared/stores/product-type-template-state/types';
 
 const productTypes = getSetting< Record< string, string > >(
 	'productTypes',

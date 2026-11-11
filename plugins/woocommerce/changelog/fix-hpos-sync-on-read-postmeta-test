@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Make the HPOS sync-on-read postmeta test independent of reads during fixture setup.
+

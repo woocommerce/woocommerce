@@ -49,6 +49,16 @@ jest.mock( '@woocommerce/utils', () => ( {
 	isSiteEditorPage: jest.fn().mockReturnValue( true ),
 } ) );
 
+// US has a state list to pick from. GB does not, so its state is typed into a text input.
+jest.mock( '@woocommerce/block-settings', () => ( {
+	...jest.requireActual( '@woocommerce/block-settings' ),
+	__esModule: true,
+	STATES: {
+		US: { NY: 'New York', TX: 'Texas' },
+		GB: {},
+	},
+} ) );
+
 // Mocking processErrorResponse because we don't actually care about processing the error response, we just don't want
 // pushChanges to throw an error.
 jest.mock( '../../utils', () => ( {
@@ -656,7 +666,7 @@ describe( 'pushChanges', () => {
 		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 1 );
 	} );
 
-	it( 'Waits for the debounce when a field other than the country changes', () => {
+	it( 'Waits for the debounce when a field other than the country or state changes', () => {
 		jest.useFakeTimers();
 		updateCustomerDataMock.mockClear();
 		getCustomerDataMock.mockReturnValue( {
@@ -687,6 +697,76 @@ describe( 'pushChanges', () => {
 
 		pushChanges();
 
+		expect( updateCustomerDataMock ).not.toHaveBeenCalled();
+
+		jest.advanceTimersByTime( 1500 );
+
+		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 1 );
+
+		jest.useRealTimers();
+	} );
+
+	it( 'Pushes a state change straight away instead of waiting out the debounce', () => {
+		updateCustomerDataMock.mockClear();
+		getCustomerDataMock.mockReturnValue( {
+			billingAddress: {
+				first_name: 'John',
+				last_name: 'Doe',
+				address_1: '123 Main St',
+				address_2: '',
+				city: 'New York',
+				state: 'NY',
+				postcode: '10001',
+				country: 'US',
+				email: 'john.doe@mail.com',
+				phone: '555-555-5555',
+			},
+			shippingAddress: {
+				first_name: 'John',
+				last_name: 'Doe',
+				address_1: '123 Main St',
+				address_2: '',
+				city: 'Houston',
+				state: 'TX',
+				postcode: '10001',
+				country: 'US',
+				phone: '555-555-5555',
+			},
+		} );
+
+		// Picking a state from the list is not typing, so the shopper should not wait for the debounce.
+		pushChanges();
+
+		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'Waits for the debounce when the state is typed rather than picked from a list', async () => {
+		jest.useFakeTimers();
+		const shippingAddress = {
+			...initialShippingAddress,
+			city: 'London',
+			state: '',
+			postcode: 'SW1A 2AA',
+			country: 'GB',
+		};
+		getCustomerDataMock.mockReturnValue( {
+			billingAddress: { ...initialBillingAddress },
+			shippingAddress,
+		} );
+
+		// The country change is pushed straight away.
+		pushChanges();
+		await Promise.resolve();
+		updateCustomerDataMock.mockClear();
+
+		getCustomerDataMock.mockReturnValue( {
+			billingAddress: { ...initialBillingAddress },
+			shippingAddress: { ...shippingAddress, state: 'Greater Lon' },
+		} );
+
+		pushChanges();
+
+		// Pushing every keystroke would send each partial county to the server.
 		expect( updateCustomerDataMock ).not.toHaveBeenCalled();
 
 		jest.advanceTimersByTime( 1500 );
@@ -802,9 +882,9 @@ describe( 'pushChanges', () => {
 		// Pushes do not overlap, so the country change waits for the running one.
 		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 1 );
 
+		// It is sent as soon as the running push finishes, without waiting out the debounce.
 		resolveFirstPush();
 		await Promise.resolve();
-		jest.advanceTimersByTime( 1500 );
 
 		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 2 );
 		expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
@@ -813,9 +893,13 @@ describe( 'pushChanges', () => {
 			true // because the shipping rate impacting field was changed
 		);
 
+		// The scheduled run finds nothing left to send, so the change is not sent twice.
+		jest.advanceTimersByTime( 1500 );
+		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 2 );
+
 		jest.useRealTimers();
 	} );
-	it( 'Keeps a scheduled push when a field is blurred while a push is running', async () => {
+	it( 'Sends a field blurred while a push is running as soon as that push finishes', async () => {
 		jest.useFakeTimers();
 		updateCustomerDataMock.mockClear();
 
@@ -856,14 +940,13 @@ describe( 'pushChanges', () => {
 
 		pushChanges();
 
-		// Blurring the field flushes, which must not cancel the push scheduled above.
+		// Blurring the field flushes; pushes do not overlap, so it waits for the running one.
 		flushChanges();
 
 		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 1 );
 
 		resolveFirstPush();
 		await Promise.resolve();
-		jest.advanceTimersByTime( 1500 );
 
 		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 2 );
 		expect( updateCustomerDataMock ).toHaveBeenLastCalledWith(
@@ -871,6 +954,9 @@ describe( 'pushChanges', () => {
 			true,
 			true // because the shipping rate impacting field was changed
 		);
+
+		jest.advanceTimersByTime( 1500 );
+		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 2 );
 
 		jest.useRealTimers();
 	} );
