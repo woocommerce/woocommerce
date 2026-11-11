@@ -54,6 +54,26 @@ describe( 'useReadinessView', () => {
 		expect( viewCalls() ).toBe( 4 );
 	} );
 
+	it( 'uses a view that came with the page without loading it again', async () => {
+		const initial = view( false, 'Check again' ) as never;
+		const { result } = renderHook( () => useReadinessView( initial ) );
+		await act( async () => jest.advanceTimersByTime( POLL_MS ) );
+		expect( result.current.view ).toBe( initial );
+		expect( viewCalls() ).toBe( 0 );
+	} );
+
+	it( 'polls a pending view that came with the page until the check finishes', async () => {
+		mockFetch.mockImplementation( async () =>
+			view( false, 'Check again' )
+		);
+		const { result } = renderHook( () =>
+			useReadinessView( view( true ) as never )
+		);
+		await act( async () => jest.advanceTimersByTime( POLL_MS ) );
+		expect( result.current.view?.run.label ).toBe( 'Check again' );
+		expect( viewCalls() ).toBe( 1 );
+	} );
+
 	it( 'does not poll when nothing is pending', async () => {
 		mockFetch.mockImplementation( async () => view( false ) );
 		renderHook( () => useReadinessView() );

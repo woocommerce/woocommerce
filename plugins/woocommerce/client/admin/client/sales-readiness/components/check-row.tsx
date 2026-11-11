@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
-import { Badge, Link, Text } from '@wordpress/ui';
-import { Icon, check } from '@wordpress/icons';
+import { Badge, Icon, Link, Stack, Text, VisuallyHidden } from '@wordpress/ui';
+import { check } from '@wordpress/icons';
+import { Path, SVG } from '@wordpress/primitives';
 import { __ } from '@wordpress/i18n';
 import type { ReactNode } from 'react';
 
@@ -23,66 +24,83 @@ export const RowLink = ( { link }: { link: ViewLink } ) =>
 		</Text>
 	);
 
+// The swatch icon, a dashed circle, from the WordPress icons package from version 18 on.
+// This package pins an older version that doesn't have it.
+const dashedCircle = (
+	<SVG
+		xmlns="http://www.w3.org/2000/svg"
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		strokeWidth="1.5"
+	>
+		<Path d="M11.0537 4.81202C11.6819 4.72933 12.3181 4.72933 12.9463 4.81202M14.7744 5.30187C15.3598 5.54434 15.9109 5.86249 16.4135 6.24819M17.7518 7.58648C18.1375 8.08914 18.4557 8.64019 18.6981 9.22555M19.188 11.0537C19.2707 11.6819 19.2707 12.3181 19.188 12.9463M18.6981 14.7744C18.4557 15.3598 18.1375 15.9109 17.7518 16.4135M16.4135 17.7518C15.9109 18.1375 15.3598 18.4557 14.7744 18.6981M12.9463 19.188C12.3181 19.2707 11.6819 19.2707 11.0537 19.188M9.22555 18.6981C8.64019 18.4557 8.08914 18.1375 7.58648 17.7518M6.24819 16.4135C5.86249 15.9109 5.54434 15.3598 5.30187 14.7744M4.81202 12.9463C4.72933 12.3181 4.72933 11.6819 4.81202 11.0537M5.30187 9.22555C5.54434 8.64019 5.86249 8.08914 6.24819 7.58648M7.58648 6.24819C8.08914 5.86249 8.64019 5.54434 9.22555 5.30187" />
+	</SVG>
+);
+
 /**
  * The marker before a row: a dashed circle for something to do, a check for something passed.
  */
 export const RowMarker = ( { done }: { done: boolean } ) => (
-	<span
+	<Icon
+		icon={ done ? check : dashedCircle }
+		size={ 24 }
 		className={
-			'wc-sales-readiness-row__marker' +
-			( done ? ' wc-sales-readiness-row__marker--done' : '' )
+			done
+				? 'wc-sales-readiness-row__marker wc-sales-readiness-row__marker--done'
+				: 'wc-sales-readiness-row__marker'
 		}
-		aria-hidden="true"
-	>
-		{ done && <Icon icon={ check } size={ 20 } /> }
-	</span>
+	/>
 );
 
 interface RowProps {
 	done?: boolean;
 	title: string;
 	badge?: ViewBadge | null;
+	/** Where to fix it, at the end of the row. */
+	action?: ReactNode;
 	children?: ReactNode;
 	srState?: string;
 }
 
 /**
- * A row's frame: marker, title with its badge, then whatever goes under the title.
+ * A row's frame: marker, title with its badge, whatever goes under the title, then the action.
  */
 export const Row = ( {
 	done = false,
 	title,
 	badge,
+	action,
 	children,
 	srState,
 }: RowProps ) => (
-	<li className="wc-sales-readiness-row">
+	<Stack
+		direction="row"
+		gap="sm"
+		align="flex-start"
+		render={ <li /> }
+		className="wc-sales-readiness-row"
+	>
 		<RowMarker done={ done } />
-		<div className="wc-sales-readiness-row__body">
-			<div className="wc-sales-readiness-row__head">
-				<Text
-					variant="body-md"
-					className={
-						'wc-sales-readiness-row__title' +
-						( done ? ' wc-sales-readiness-row__title--done' : '' )
-					}
-				>
-					{ srState && (
-						<span className="screen-reader-text">{ srState } </span>
-					) }
-					{ title }
-				</Text>
+		<Stack direction="column" className="wc-sales-readiness-row__body">
+			<Text variant="body-md" className="wc-sales-readiness-row__title">
+				{ srState && <VisuallyHidden>{ srState } </VisuallyHidden> }
+				{ title }
 				{ badge && (
 					<Badge intent={ badge.intent }>{ badge.text }</Badge>
 				) }
-			</div>
+			</Text>
 			{ children }
-		</div>
-	</li>
+		</Stack>
+		{ action && (
+			<div className="wc-sales-readiness-row__action">{ action }</div>
+		) }
+	</Stack>
 );
 
 /**
- * One check: its state, what it affects, why it matters, what to do and where.
+ * One check. Failing: what to do, why it matters and what was found, the fix line when there is
+ * one, and where to fix it. Passed: its title and why it matters.
  */
 export const CheckRow = ( { row }: { row: CheckRowData } ) => {
 	const states: Record< CheckRowData[ 'state' ], string > = {
@@ -96,40 +114,24 @@ export const CheckRow = ( { row }: { row: CheckRowData } ) => {
 			done={ row.state === 'pass' }
 			title={ row.title }
 			srState={ states[ row.state ] }
-			badge={
-				row.state === 'required'
-					? {
-							intent: 'medium',
-							text: __( 'Required', 'woocommerce' ),
-						}
-					: null
-			}
+			badge={ row.badge }
+			action={ row.link && <RowLink link={ row.link } /> }
 		>
-			{ row.affects && (
+			{ row.text && (
 				<Text variant="body-sm" className="wc-sales-readiness__muted">
-					<strong>{ __( 'Affects:', 'woocommerce' ) }</strong>{ ' ' }
-					{ row.affects.replace( /^[^:]*:\s*/, '' ) }
+					{ row.text }
 				</Text>
 			) }
-			{ row.lines.map( ( line ) => (
-				<Text
-					key={ line }
-					variant="body-sm"
-					className="wc-sales-readiness__muted"
-				>
-					{ line }
+			{ row.fix && (
+				<Text variant="body-sm" className="wc-sales-readiness-row__fix">
+					{ row.fix }
 				</Text>
-			) ) }
+			) }
 			{ row.seen_at && (
 				<Text variant="body-sm" className="wc-sales-readiness__muted">
 					{ __( 'Seen on:', 'woocommerce' ) }{ ' ' }
 					<Link href={ row.seen_at.href }>{ row.seen_at.text }</Link>
 				</Text>
-			) }
-			{ row.link && (
-				<div className="wc-sales-readiness-row__link">
-					<RowLink link={ row.link } />
-				</div>
 			) }
 		</Row>
 	);

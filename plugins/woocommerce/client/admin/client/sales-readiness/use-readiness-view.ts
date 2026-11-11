@@ -27,9 +27,10 @@ export const POLL_FOR_MS = 10 * 60 * 1000;
  * Loads the view, and queues a check: the scan runs in the background, so after
  * queuing it the view is read again for the pending message, and then every
  * POLL_MS while the check is pending, so the results replace it when it finishes.
+ * A view that came with the page is used as is, without loading it again.
  */
-export function useReadinessView() {
-	const [ view, setView ] = useState< ReadinessView | null >( null );
+export function useReadinessView( initialView: ReadinessView | null = null ) {
+	const [ view, setView ] = useState< ReadinessView | null >( initialView );
 	const [ error, setError ] = useState< string | null >( null );
 	const [ running, setRunning ] = useState( false );
 	const pendingSince = useRef< number | null >( null );
@@ -48,8 +49,11 @@ export function useReadinessView() {
 		}
 	}, [] );
 
+	const preloaded = useRef( initialView !== null );
 	useEffect( () => {
-		void load();
+		if ( ! preloaded.current ) {
+			void load();
+		}
 	}, [ load ] );
 
 	useEffect( () => {

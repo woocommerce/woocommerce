@@ -21,10 +21,14 @@ export type RowState = 'open' | 'required' | 'unknown' | 'pass';
 
 export interface CheckRow {
 	state: RowState;
+	/** What to do while the check fails, its passing title once it passes. */
 	title: string;
-	/** "Affects: …", or ''. */
-	affects: string;
-	lines: string[];
+	/** Required, or Likely conflict. */
+	badge: ViewBadge | null;
+	/** Why it matters, and what the check found while it fails. */
+	text: string;
+	/** What to do, or '' when there is nothing more specific than the title. */
+	fix: string;
 	link: ViewLink | null;
 	seen_at: ViewLink | null;
 }

@@ -9816,15 +9816,9 @@ body.woocommerce_page_wc-settings.woocommerce-settings-agentic-commerce-tab {
 		}
 	}
 
-	.wc-agentic-commerce-card__body,
-	.wc-agentic-commerce-card__footer {
+	.wc-agentic-commerce-card__body {
 		margin: 0;
 		padding: 16px 24px;
-	}
-
-	.wc-agentic-commerce-card__footer {
-		border-block-start: 1px solid #f0f0f1;
-		color: #50575e;
 	}
 
 	.wc-agentic-commerce-card__actions {
@@ -10017,11 +10011,6 @@ body.woocommerce_page_wc-settings.woocommerce-settings-agentic-commerce-tab {
 	&--pass {
 		background: #edfaef;
 		color: $green;
-	}
-
-	&--fix {
-		background: #fcf0e1;
-		color: #8a4d00;
 	}
 
 	&--check {

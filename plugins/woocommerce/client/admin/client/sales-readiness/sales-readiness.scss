@@ -21,7 +21,8 @@
 	&__content {
 		box-sizing: border-box;
 		width: 100%;
-		max-width: 720px;
+		// Cards are 632px wide, as in the design.
+		max-width: calc(632px + 2 * var(--wpds-dimension-padding-lg));
 		margin: 0 auto;
 		display: flex;
 		flex-direction: column;
@@ -39,13 +40,20 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--wpds-dimension-gap-lg);
-		max-width: 720px;
+		max-width: 632px;
 		margin: 0 auto;
-		padding-block: var(--wpds-dimension-padding-3xl);
+		// The settings form already leaves a gap under the tabs.
+		padding-block: 0 var(--wpds-dimension-padding-3xl);
 	}
 }
 
 .wc-sales-readiness-card {
+	border-color: var(--wpds-color-stroke-surface-neutral);
+
+	&__title {
+		font-weight: 600;
+	}
+
 	&__head {
 		display: flex;
 		align-items: center;
@@ -55,7 +63,7 @@
 	}
 
 	&__actions {
-		margin-block-start: var(--wpds-dimension-gap-lg);
+		margin-block-start: var(--wpds-dimension-gap-md);
 	}
 
 	.wc-sales-readiness-list + .wc-sales-readiness-fold,
@@ -67,7 +75,7 @@
 .wc-sales-readiness-overview__heading {
 	display: block;
 	font-weight: 600;
-	margin-block-start: var(--wpds-dimension-gap-md);
+	margin-block-start: var(--wpds-dimension-padding-xl);
 }
 
 .wc-sales-readiness-list {
@@ -79,75 +87,72 @@
 		margin: 0;
 	}
 
-	> .wc-sales-readiness-row + .wc-sales-readiness-row {
-		border-block-start: 1px solid var(--wc-sr-stroke);
+	// A line under every row but the list's last. In Fix first each item is its own group.
+	> .wc-sales-readiness-row:not(:last-child),
+	> .wc-sales-readiness-list__group:not(:last-child) .wc-sales-readiness-row {
+		border-block-end: 1px solid var(--wc-sr-stroke);
 	}
+}
+
+// 24px above Fix first's list, plus the first tier's 8px. Padding, so the margins don't collapse.
+.wc-sales-readiness-list:has(.wc-sales-readiness-tier) {
+	padding-block-start: var(--wpds-dimension-gap-xl);
 }
 
 .wc-sales-readiness-tier {
 	display: block;
-	text-transform: uppercase;
-	letter-spacing: 0.04em;
-	color: var(--wc-sr-muted);
-	padding: var(--wpds-dimension-padding-lg) 0 var(--wpds-dimension-padding-xs);
-	border-block-start: 1px solid var(--wc-sr-stroke);
+	padding: 0;
+	margin: var(--wpds-dimension-gap-lg) 0;
 
 	.wc-sales-readiness-list__group:first-child > & {
-		border-block-start: 0;
-		padding-block-start: var(--wpds-dimension-padding-md);
+		margin-block-start: var(--wpds-dimension-gap-sm);
 	}
 }
 
+// The tier's margin is the space above the first row under it.
+.wc-sales-readiness-tier + .wc-sales-readiness-list > .wc-sales-readiness-row {
+	padding-block-start: 0;
+}
+
 .wc-sales-readiness-row {
-	display: flex;
-	gap: var(--wpds-dimension-gap-md);
-	padding: var(--wpds-dimension-padding-md) 0;
+	padding: var(--wpds-dimension-padding-lg) 0;
 	margin: 0;
 
 	&__marker {
 		flex: 0 0 auto;
-		width: 20px;
-		height: 20px;
-		margin-block-start: 1px;
-		border: 1.5px dashed var(--wpds-color-stroke-surface-neutral);
-		border-radius: 50%;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		box-sizing: border-box;
+		color: var(--wc-sr-muted);
 
 		&--done {
-			border: 0;
-			color: var(--wpds-color-foreground-content-success);
+			fill: var(--wpds-color-foreground-content-neutral);
 		}
 	}
 
 	&__body {
 		flex: 1;
 		min-width: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
+		gap: var(--wpds-dimension-gap-xs);
 	}
 
-	&__head {
-		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-		gap: var(--wpds-dimension-gap-md);
-	}
-
+	// body-md at 14px, as in the design; the scale has no 14px step.
 	&__title {
+		display: inline-flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--wpds-dimension-gap-sm);
+		font-size: 14px;
 		font-weight: 500;
-
-		&--done {
-			color: var(--wc-sr-muted);
-			font-weight: 400;
-		}
 	}
 
-	&__link {
-		margin-block-start: var(--wpds-dimension-gap-xs);
+	// The fix line reads as an instruction, so it keeps the text color.
+	&__fix {
+		color: var(--wpds-color-foreground-content-neutral);
+	}
+
+	// 24px from the text, with the row's own 8px gap.
+	&__action {
+		flex: none;
+		margin-inline-start: var(--wpds-dimension-gap-lg);
+		line-height: var(--wpds-typography-line-height-sm);
 	}
 }
 

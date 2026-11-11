@@ -45,6 +45,7 @@ export const CheckedCard = ( { view, running, onRun }: CheckedCardProps ) => (
 				</div>
 				<Button
 					variant="secondary"
+					size="compact"
 					disabled={ view.run.pending || running }
 					isBusy={ running }
 					onClick={ onRun }

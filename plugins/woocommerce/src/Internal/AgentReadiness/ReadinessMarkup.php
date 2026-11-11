@@ -42,20 +42,12 @@ trait ReadinessMarkup {
 	}
 
 	/**
-	 * A setup step's badge: Pass once done, otherwise Fix for a required step and Check for a recommended one.
+	 * The badge on a setup step AI assistants can't shop the store without.
 	 *
-	 * @param array{ok:bool|null,level:string} $check Store condition.
 	 * @return string Badge HTML.
 	 */
-	private static function step_badge( array $check ): string {
-		if ( true === $check['ok'] ) {
-			$badge = array( 'pass', __( 'Pass', 'woocommerce' ) );
-		} elseif ( StoreConditions::LEVEL_REQUIRED === $check['level'] ) {
-			$badge = array( 'fix', __( 'Fix', 'woocommerce' ) );
-		} else {
-			$badge = array( 'check', __( 'Check', 'woocommerce' ) );
-		}
-		return '<mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--' . esc_attr( $badge[0] ) . '">' . esc_html( $badge[1] ) . '</mark>';
+	private static function required_badge(): string {
+		return '<mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--check">' . esc_html__( 'Required', 'woocommerce' ) . '</mark>';
 	}
 
 	/**
@@ -80,27 +72,30 @@ trait ReadinessMarkup {
 	 */
 	private static function check_action( array $check ): array {
 		$policies = array(
-			'privacy_page'         => array( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, __( 'Publish your privacy policy page', 'woocommerce' ), __( 'Choose a privacy policy page', 'woocommerce' ) ),
-			'terms_page'           => array( AgenticCommerceSettings::TERMS_PAGE_OPTION, __( 'Publish your terms and conditions page', 'woocommerce' ), __( 'Choose a terms and conditions page', 'woocommerce' ) ),
-			'refund_returns_page'  => array( AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION, __( 'Publish your refund and returns policy page', 'woocommerce' ), __( 'Choose a refund and returns policy page', 'woocommerce' ) ),
-			'shipping_policy_page' => array( AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION, __( 'Publish your shipping policy page', 'woocommerce' ), __( 'Choose a shipping policy page', 'woocommerce' ) ),
+			'privacy_page'         => array( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, __( 'Publish your privacy policy page', 'woocommerce' ), __( 'Choose a privacy policy page', 'woocommerce' ), __( 'Shoppers can read how you handle their information before they buy.', 'woocommerce' ) ),
+			'terms_page'           => array( AgenticCommerceSettings::TERMS_PAGE_OPTION, __( 'Publish your terms and conditions page', 'woocommerce' ), __( 'Choose a terms and conditions page', 'woocommerce' ), __( 'Terms and conditions set out what shoppers agree to when they place an order.', 'woocommerce' ) ),
+			'refund_returns_page'  => array( AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION, __( 'Publish your refund and returns policy page', 'woocommerce' ), __( 'Choose a refund and returns policy page', 'woocommerce' ), __( 'AI assistants link to it so customers can read it before they buy.', 'woocommerce' ) ),
+			'shipping_policy_page' => array( AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION, __( 'Publish your shipping policy page', 'woocommerce' ), __( 'Choose a shipping policy page', 'woocommerce' ), __( 'AI assistants share it so shoppers can check how and when you deliver before they buy.', 'woocommerce' ) ),
 		);
 		if ( isset( $policies[ $check['id'] ] ) ) {
-			$page_id = (int) get_option( $policies[ $check['id'] ][0] );
+			$policy  = $policies[ $check['id'] ];
+			$page_id = (int) get_option( $policy[0] );
 			$edit    = $page_id > 0 && get_post( $page_id ) && 'publish' !== get_post_status( $page_id ) ? (string) get_edit_post_link( $page_id, 'raw' ) : '';
 			return '' !== $edit
-				? array( $policies[ $check['id'] ][1], __( 'It\'s still a draft. AI assistants only link to published pages.', 'woocommerce' ), $edit )
-				: array( $policies[ $check['id'] ][2], $check['why'], $check['fix_url'] );
+				? array( $policy[1], __( 'It\'s still a draft. AI assistants only link to published pages.', 'woocommerce' ), $edit )
+				: array( $policy[2], $policy[3], $check['fix_url'] );
 		}
 		$actions = array(
-			'launched'       => __( 'Take your store out of coming soon mode', 'woocommerce' ),
-			'https'          => __( 'Move your store to HTTPS', 'woocommerce' ),
-			'search_visible' => __( 'Let search engines index your store', 'woocommerce' ),
-			'guest_checkout' => __( 'Allow guest checkout', 'woocommerce' ),
-			'order_emails'   => __( 'Turn on order confirmation emails', 'woocommerce' ),
-			'payment_method' => __( 'Turn on a payment method', 'woocommerce' ),
+			'launched'       => array( __( 'Make your store live', 'woocommerce' ), __( 'AI assistants can only find your products when your store is live.', 'woocommerce' ) ),
+			'https'          => array( __( 'Use a secure connection (HTTPS)', 'woocommerce' ), __( 'AI assistants only connect to stores with a secure connection.', 'woocommerce' ) ),
+			'search_visible' => array( __( 'Let search engines index your store', 'woocommerce' ), __( 'AI assistants use search engines to find stores and products.', 'woocommerce' ) ),
+			'guest_checkout' => array( __( 'Allow guest checkout', 'woocommerce' ), __( 'Guest checkout lets shoppers from AI assistants pay without creating an account.', 'woocommerce' ) ),
+			'order_emails'   => array( __( 'Turn on order confirmation emails', 'woocommerce' ), __( 'An email lets customers know their order went through.', 'woocommerce' ) ),
+			'payment_method' => array( __( 'Set up payments', 'woocommerce' ), __( 'A payment method is needed so shoppers can pay on your checkout.', 'woocommerce' ) ),
 		);
-		return array( $actions[ $check['id'] ] ?? ( $check['label'] ?? '' ), $check['why'], $check['fix_url'] );
+		$action  = $actions[ $check['id'] ] ?? array( $check['label'] ?? '', $check['why'] );
+		// Site Health says how to move to HTTPS, and offers to do it where the host allows.
+		return array( $action[0], $action[1], 'https' === $check['id'] ? admin_url( 'site-health.php' ) : $check['fix_url'] );
 	}
 
 	/**

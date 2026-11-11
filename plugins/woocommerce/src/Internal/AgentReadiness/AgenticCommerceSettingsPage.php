@@ -171,18 +171,29 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 
 		$this->enqueue_script();
 
-		echo '<div class="wc-agentic-commerce">';
 		if ( AgenticCommerceSettings::SHOPPING_SECTION !== $current_section ) {
 			// Cards only; nothing here saves with Save changes.
 			$GLOBALS['hide_save_button'] = true;
-			// The Overview is React: the settings-embed script mounts it here with wc/v3/agent-readiness/view.
-			echo '<div id="wc-agent-readiness-overview" class="wc-agent-readiness-overview"></div>';
-			echo '</div>';
+			// The Overview is React: the settings-embed script mounts it here. The view comes with the page, so the
+			// cards draw without waiting for wc/v3/agent-readiness/view.
+			printf(
+				'<div class="wc-agentic-commerce"><div id="wc-agent-readiness-overview" class="wc-agent-readiness-overview" data-view="%s"></div></div>',
+				esc_attr( (string) wp_json_encode( $this->readiness_page->view() ) )
+			);
 			return;
 		}
+		// The page header, with the breadcrumb as the page title, in place of the settings tabs: settings-embed
+		// moves the breadcrumb into the WooCommerce header and removes this root, which shows until it does.
 		// Not a nav element: the settings form styles those as its tab bar.
-		echo '<div class="wc-agentic-commerce-header"><div class="wc-agentic-commerce-breadcrumb" role="navigation" aria-label="' . esc_attr__( 'Breadcrumb', 'woocommerce' ) . '"><a href="' . esc_url( AgenticCommerceSettings::url() ) . '">' . esc_html( $this->label ) . '</a> <span aria-hidden="true">/</span> <span aria-current="page">' . esc_html__( 'AI shopping', 'woocommerce' ) . '</span></div>';
-		echo '<p>' . esc_html__( 'Let AI shopping assistants find your products, build a cart, and send shoppers to your checkout to pay. Uses the Universal Commerce Protocol (UCP).', 'woocommerce' ) . '</p></div>';
+		printf(
+			'<div id="wc-agentic-commerce-header" class="wc-agentic-commerce-header" data-parent-label="%1$s" data-parent-url="%2$s" data-title="%3$s" data-description="%4$s"><div class="wc-agentic-commerce-breadcrumb" role="navigation" aria-label="%5$s"><a href="%2$s">%1$s</a> <span aria-hidden="true">/</span> <span aria-current="page">%3$s</span></div><p>%4$s</p></div>',
+			esc_attr( $this->label ),
+			esc_url( AgenticCommerceSettings::url() ),
+			esc_attr__( 'AI shopping', 'woocommerce' ),
+			esc_attr__( 'Control how AI assistants shop your store.', 'woocommerce' ),
+			esc_attr__( 'Breadcrumbs', 'woocommerce' )
+		);
+		echo '<div class="wc-agentic-commerce">';
 		$this->render_switch( $checks );
 		$this->render_visibility( $report );
 		$this->render_status( $checks, $report );
@@ -248,7 +259,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		$cards = array(
 			array( __( 'Available to AI assistants', 'woocommerce' ), (int) ( $report['products'] ?? 0 ), '', ProductScan::COUNT_AVAILABLE ),
 			array( __( 'Hidden from your catalog', 'woocommerce' ), (int) ( $report['hidden_from_catalog'] ?? 0 ), __( 'Products with Catalog visibility set to Hidden or Search results only. They\'re hidden from customers too.', 'woocommerce' ), ProductScan::COUNT_HIDDEN ),
-			array( __( 'Product type not supported yet', 'woocommerce' ), (int) ( $report['unsupported_types'] ?? 0 ), '', ProductScan::COUNT_UNSUPPORTED ),
+			array( __( 'Product type not supported yet', 'woocommerce' ), (int) ( $report['unsupported_types'] ?? 0 ), __( 'AI assistants can find these products, but shoppers can\'t buy them through an assistant yet. This includes grouped, external, subscription, booking and bundle products.', 'woocommerce' ), ProductScan::COUNT_UNSUPPORTED ),
 		);
 
 		echo '<ul class="wc-agentic-commerce-counts">';
@@ -263,7 +274,6 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			);
 		}
 		echo '</ul>';
-		echo '<p class="wc-agentic-commerce-card__footer description">' . esc_html__( 'Supported now: simple and variable products. AI assistants can find grouped, external/affiliate, subscription, booking and bundle products, but can\'t buy them through your store yet.', 'woocommerce' ) . '</p>';
 		echo '</div>';
 	}
 
@@ -302,7 +312,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
-	 * The Status card: a badge, then the open setup checks in one list, required ones first and
+	 * The Setup checklist: how many steps are left, then the open setup checks in one list, required ones first and
 	 * marked Required. Each says why it matters and links to where to fix it. Completed checks fold
 	 * behind "Show N completed steps". UCP itself is the switch, so it is not listed.
 	 *
@@ -313,25 +323,22 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		$done     = array_filter( $checks, static fn( array $check ): bool => 'ucp_on' !== $check['id'] && $check['ok'] );
 		$open     = ReadinessCheckPage::open_steps( $checks );
 		$required = count( array_filter( $open, static fn( array $check ): bool => StoreConditions::LEVEL_REQUIRED === $check['level'] ) );
-		$badge    = $this->readiness_page->shopping_badge( $checks );
 		if ( $required > 0 ) {
 			/* translators: %d: number of failing required setup steps. */
-			$summary = sprintf( _n( '%d required step to fix so AI assistants can shop your store.', '%d required steps to fix so AI assistants can shop your store.', $required, 'woocommerce' ), $required );
+			$summary = sprintf( _n( 'Finish %d required step to get your store ready for AI shopping.', 'Finish %d required steps to get your store ready for AI shopping.', $required, 'woocommerce' ), $required );
 		} elseif ( array() !== $open ) {
 			/* translators: %d: number of open setup steps. */
-			$summary = sprintf( _n( '%d step left.', '%d steps left.', count( $open ), 'woocommerce' ), count( $open ) );
+			$summary = sprintf( _n( 'Your store is ready for AI shopping. You have %d optional step left.', 'Your store is ready for AI shopping. You have %d optional steps left.', count( $open ), 'woocommerce' ), count( $open ) );
+		} elseif ( UcpUtils::is_enabled() ) {
+			$summary = __( 'Your store is ready for AI shopping.', 'woocommerce' );
 		} else {
-			$summary = __( 'Everything AI assistants need is set up.', 'woocommerce' );
+			$summary = __( 'Your store is ready for AI shopping. Turn it on to let AI assistants find your products.', 'woocommerce' );
 		}
 		?>
 		<div class="wc-agentic-commerce-card wc-agentic-commerce-status-card" id="wc-agentic-commerce-status">
 			<div class="wc-agentic-commerce-card__header">
-				<div class="wc-agentic-commerce-card__header--split">
-					<h2><?php esc_html_e( 'Status', 'woocommerce' ); ?></h2>
-					<mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--<?php echo esc_attr( $badge[0] ); ?>"><?php echo esc_html( $badge[1] ); ?></mark>
-				</div>
-				<p><?php esc_html_e( 'Checks that your store is ready for AI assistants. Fix anything marked "Fix" so AI assistants can shop your store; items marked "Check" are recommended.', 'woocommerce' ); ?></p>
-				<p><strong><?php echo esc_html( $summary ); ?></strong></p>
+				<h2><?php esc_html_e( 'Setup checklist', 'woocommerce' ); ?></h2>
+				<p><?php echo esc_html( $summary ); ?></p>
 			</div>
 			<?php
 			if ( array() !== $open ) {
@@ -340,7 +347,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 					$action   = self::check_action( $check );
 					$required = StoreConditions::LEVEL_REQUIRED === $check['level'];
 					$title    = '' === $action[2] ? esc_html( $action[0] ) : '<a href="' . esc_url( $action[2] ) . '">' . esc_html( $action[0] ) . '</a>';
-					self::render_item( $required ? 'required' : 'open', $title . ' ' . self::step_badge( $check ), array( esc_html( $action[1] ) ) );
+					self::render_item( $required ? 'required' : 'open', $title . ( $required ? ' ' . self::required_badge() : '' ), array( esc_html( $action[1] ) ) );
 				}
 				echo '</ul>';
 			}
@@ -349,7 +356,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 				self::open_more( sprintf( _n( 'Show %d completed step', 'Show %d completed steps', count( $done ), 'woocommerce' ), count( $done ) ) );
 				echo '<ul class="wc-agentic-commerce-items">';
 				foreach ( $done as $check ) {
-					self::render_item( 'pass', esc_html( $check['name'] ) . ' ' . self::step_badge( $check ), array() );
+					self::render_item( 'pass', esc_html( $check['name'] ), array() );
 				}
 				echo '</ul></details>';
 			}

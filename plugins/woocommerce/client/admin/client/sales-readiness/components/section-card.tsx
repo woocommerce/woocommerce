@@ -3,7 +3,7 @@
  */
 import { useState } from '@wordpress/element';
 import type { ReactNode } from 'react';
-import { Badge, Card, Text } from '@wordpress/ui';
+import { Badge, Card, Collapsible, Text } from '@wordpress/ui';
 import { Button } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 
@@ -14,7 +14,7 @@ import type { Declared, Section } from '../types';
 import { CheckRow, Row } from './check-row';
 
 /**
- * "Show N more checks" / "Hide" with what it folds.
+ * "Show N more checks" under what it folds, "Hide" once open.
  */
 export const Fold = ( {
 	label,
@@ -25,16 +25,18 @@ export const Fold = ( {
 } ) => {
 	const [ open, setOpen ] = useState( false );
 	return (
-		<div className="wc-sales-readiness-fold">
-			<Button
-				variant="link"
-				aria-expanded={ open }
-				onClick={ () => setOpen( ! open ) }
+		<Collapsible.Root
+			open={ open }
+			onOpenChange={ setOpen }
+			className="wc-sales-readiness-fold"
+		>
+			<Collapsible.Panel>{ children }</Collapsible.Panel>
+			<Collapsible.Trigger
+				render={ <Button variant="tertiary" size="compact" /> }
 			>
 				{ open ? __( 'Hide', 'woocommerce' ) : label }
-			</Button>
-			{ open && children }
-		</div>
+			</Collapsible.Trigger>
+		</Collapsible.Root>
 	);
 };
 
@@ -49,7 +51,9 @@ export const SectionCard = ( { section }: { section: Section } ) => (
 	>
 		<Card.Header>
 			<div className="wc-sales-readiness-card__head">
-				<Card.Title>{ section.title }</Card.Title>
+				<Card.Title className="wc-sales-readiness-card__title">
+					{ section.title }
+				</Card.Title>
 				<Badge intent={ section.badge.intent }>
 					{ section.badge.text }
 				</Badge>
@@ -126,7 +130,9 @@ export const DeclaredCard = ( { declared }: { declared: Declared } ) => (
 		id="wc-sales-readiness-declared"
 	>
 		<Card.Header>
-			<Card.Title>{ declared.title }</Card.Title>
+			<Card.Title className="wc-sales-readiness-card__title">
+				{ declared.title }
+			</Card.Title>
 		</Card.Header>
 		<Card.Content>
 			<Text variant="body-md">{ declared.text }</Text>
