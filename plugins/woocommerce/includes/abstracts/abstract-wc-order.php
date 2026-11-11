@@ -2561,20 +2561,20 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$unsaved_item  = $item_id ? null : $this->get_unsaved_coupon_item( $coupon_code );
 				$reuse_unsaved = null !== $unsaved_item;
 
-				if ( $reuse_unsaved ) {
-					$coupon_item = $unsaved_item;
-				} elseif ( ! $item_id ) {
-					$coupon_item = new WC_Order_Item_Coupon();
-					$coupon_item->set_code( $coupon_code );
-
-					// Add coupon data.
-					$coupon_id = wc_get_coupon_id_by_code( $coupon_code );
-					$coupon    = new WC_Coupon( $coupon_id );
-
-					$coupon_info = $coupon->get_short_info();
-					$coupon_item->add_meta_data( 'coupon_info', $coupon_info );
-				} else {
+				if ( $item_id ) {
 					$coupon_item = $this->get_item( $item_id, false );
+				} else {
+					$coupon_item = $unsaved_item;
+					if ( ! $coupon_item ) {
+						$coupon_item = new WC_Order_Item_Coupon();
+						$coupon_item->set_code( $coupon_code );
+					}
+
+					// Store the coupon definition so recalculation still works if the coupon is deleted later.
+					if ( ! $coupon_item->meta_exists( 'coupon_info' ) && ! $coupon_item->meta_exists( 'coupon_data' ) ) {
+						$coupon = new WC_Coupon( wc_get_coupon_id_by_code( $coupon_code ) );
+						$coupon_item->add_meta_data( 'coupon_info', $coupon->get_short_info() );
+					}
 				}
 
 				$discount_tax = 0;
