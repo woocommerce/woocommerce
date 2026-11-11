@@ -105,7 +105,7 @@ const UpsellsPlaceholder = ( { clientId }: { clientId: string } ) => {
 			className="wc-block-components-actions wc-block-product-details__upsells-placeholder"
 		>
 			{ __(
-				'The Product Details block automatically displays product upsells. If you want more customization options, switch to the Upsells block.',
+				'The Product Details block automatically displays product upsells. If you want more customization options, switch to the Upsells block. You can switch back to the classic upsells display at any time.',
 				'woocommerce'
 			) }
 		</Warning>

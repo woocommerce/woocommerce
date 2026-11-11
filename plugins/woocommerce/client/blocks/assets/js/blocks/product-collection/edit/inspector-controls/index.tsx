@@ -51,6 +51,7 @@ import ProductsPerPageControl from './products-per-page-control';
 import DefaultQueryProductsPerPageControl from './default-query-products-per-page-control';
 import OffsetControl from './offset-control';
 import MaxPagesToShowControl from './max-pages-to-show-control';
+import { UpsellsDowngradeNotice } from './upsells-downgrade-notice';
 
 const prepareShouldShowFilter =
 	( hideControls: FilterName[] ) => ( filter: FilterName ) => {
@@ -181,6 +182,9 @@ const ProductCollectionInspectorControls = (
 
 	return (
 		<InspectorControls>
+			{ collection === CoreCollectionNames.UPSELLS && (
+				<UpsellsDowngradeNotice clientId={ clientId } />
+			) }
 			<LinkedProductControl
 				query={ props.attributes.query }
 				setAttributes={ props.setAttributes }
