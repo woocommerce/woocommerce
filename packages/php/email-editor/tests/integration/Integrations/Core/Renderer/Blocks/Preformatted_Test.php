@@ -61,6 +61,7 @@ class Preformatted_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( "first line\n\tindented  line</pre>", $html );
 		$style = $this->get_pre_element( $html )->getAttribute( 'style' );
 		$this->assertStringContainsString( 'white-space: pre-wrap', $style );
+		$this->assertStringContainsString( 'word-break: break-word', $style );
 		$this->assertStringContainsString( 'margin: 0', $style );
 		$this->assertStringContainsString( 'font-family:', $style );
 		$this->assertStringContainsString( 'monospace', $style );

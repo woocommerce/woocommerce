@@ -738,6 +738,41 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test every cell wraps long unbreakable words, so a wide cell can't widen the email.
+	 */
+	public function testItWrapsLongWordsInCells(): void {
+		$long_word = 'EACMP_BREAKING_UNRECOVERABLE_INVARIANT_WITH_A_NAME_FAR_WIDER_THAN_THE_EMAIL';
+		$table     = '
+		<figure class="wp-block-table">
+			<table>
+				<thead>
+					<tr>
+						<th>' . $long_word . '</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>' . $long_word . '</td>
+					</tr>
+				</tbody>
+			</table>
+		</figure>
+		';
+
+		$parsed_table              = $this->parsed_table;
+		$parsed_table['innerHTML'] = $table;
+
+		$rendered = $this->table_renderer->render( $table, $parsed_table, $this->rendering_context );
+
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'TH' ) ) );
+		$this->assertStringContainsString( 'word-break: break-word;', (string) $html->get_attribute( 'style' ) );
+
+		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'TD' ) ) );
+		$this->assertStringContainsString( 'word-break: break-word;', (string) $html->get_attribute( 'style' ) );
+	}
+
+	/**
 	 * Test it does not apply fixed layout when class is not present
 	 */
 	public function testItDoesNotApplyFixedLayoutWithoutClass(): void {

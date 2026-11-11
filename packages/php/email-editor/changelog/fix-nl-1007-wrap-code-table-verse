@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Wrap long lines in code, verse and table blocks so they no longer make an email scroll sideways.
