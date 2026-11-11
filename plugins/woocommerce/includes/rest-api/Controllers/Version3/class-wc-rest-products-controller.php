@@ -930,7 +930,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 						// Term IDs identify terms exactly, even when several terms share a name.
 						$values = array_map( 'absint', $attribute['term_ids'] );
 						foreach ( $values as $term_id ) {
-							$term = get_term( $term_id, $attribute_name );
+							$term = get_term( $term_id, wc_attribute_taxonomy_name_by_id( $attribute_id ) );
 							if ( ! $term instanceof WP_Term ) {
 								/* translators: %d: term ID */
 								throw new WC_REST_Exception( 'woocommerce_rest_invalid_attribute_term_id', esc_html( sprintf( __( '#%d is not a term of this attribute.', 'woocommerce' ), $term_id ) ), 400 );
