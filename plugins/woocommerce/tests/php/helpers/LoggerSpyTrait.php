@@ -30,14 +30,17 @@ trait LoggerSpyTrait {
 	private $spy_logger;
 
 	/**
-	 * Set up the spy logger.
+	 * Set up the spy logger once the base set-up has run.
 	 *
-	 * This method is called automatically before each test via the @before annotation.
+	 * WordPress snapshots the hooks in its first set_up() of the process and restores that snapshot
+	 * after every test. Adding the filter after it keeps the spy out of the snapshot, so the
+	 * restore removes it, while it is still in place for the rest of the test's own setUp().
 	 *
-	 * @before
 	 * @return void
 	 */
-	protected function set_up_spy_logger(): void {
+	public function set_up() {
+		parent::set_up();
+
 		$this->captured_logs = array();
 		$this->spy_logger    = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
 
@@ -66,19 +69,6 @@ trait LoggerSpyTrait {
 		}
 
 		add_filter( 'woocommerce_logging_class', array( $this, 'get_spy_logger' ) );
-	}
-
-	/**
-	 * Tear down the spy logger.
-	 *
-	 * This method is called automatically after each test via the @after annotation.
-	 *
-	 * @after
-	 * @return void
-	 */
-	protected function tear_down_spy_logger(): void {
-		remove_filter( 'woocommerce_logging_class', array( $this, 'get_spy_logger' ) );
-		$this->captured_logs = array();
 	}
 
 	/**
