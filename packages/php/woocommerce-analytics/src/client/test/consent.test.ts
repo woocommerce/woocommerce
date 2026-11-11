@@ -152,7 +152,13 @@ describe( 'ConsentManager.hasAnalyticsConsent with a stored statistics choice', 
 		expect( new ConsentManager().hasAnalyticsConsent() ).toBe( false );
 	} );
 
-	it( 'leaves the decision to wp_has_consent() when the shopper allowed statistics', () => {
+	it( 'reports consent when the shopper allowed statistics and wp_has_consent() grants it', () => {
+		storedChoice = 'allow';
+
+		expect( new ConsentManager().hasAnalyticsConsent() ).toBe( true );
+	} );
+
+	it( 'reports no consent when the shopper allowed statistics but wp_has_consent() refuses it', () => {
 		storedChoice = 'allow';
 		window.wp_has_consent = () => false;
 

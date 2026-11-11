@@ -104,9 +104,9 @@ class Proxy_Speed_Module_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Test that the stored deny is read under a filtered consent cookie prefix.
+	 * Test that the stored deny is read under a consent cookie prefix filtered by an MU-plugin that loads before the module.
 	 */
-	public function test_falls_through_under_a_filtered_consent_cookie_prefix(): void {
+	public function test_falls_through_under_a_prefix_filtered_by_an_earlier_mu_plugin(): void {
 		$this->make_proxy_request();
 		add_filter( 'wp_consent_cookie_prefix', fn() => 'custom' );
 		$_COOKIE['custom_statistics'] = 'deny';
