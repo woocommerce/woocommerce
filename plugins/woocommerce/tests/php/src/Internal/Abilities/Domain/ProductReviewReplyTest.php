@@ -127,6 +127,7 @@ class ProductReviewReplyTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( 'woocommerce_ability_product_review_reply_failed', $result->get_error_code() );
 		$this->assertSame( 409, $result->get_error_data()['status'] );
+		$this->assertStringNotContainsString( '&#', $result->get_error_message(), 'The message should be plain text.' );
 	}
 
 	/**

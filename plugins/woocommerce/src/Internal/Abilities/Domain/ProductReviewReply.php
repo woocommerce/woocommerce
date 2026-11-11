@@ -131,7 +131,8 @@ class ProductReviewReply extends AbstractDomainAbility implements AbilityDefinit
 
 			return new \WP_Error(
 				'woocommerce_ability_product_review_reply_failed',
-				is_wp_error( $reply_id ) ? $reply_id->get_error_message() : __( 'Failed to add the reply.', 'woocommerce' ),
+				// WordPress escapes these messages for HTML; the agent reads plain text.
+				is_wp_error( $reply_id ) ? html_entity_decode( $reply_id->get_error_message(), ENT_QUOTES, 'UTF-8' ) : __( 'Failed to add the reply.', 'woocommerce' ),
 				array( 'status' => is_int( $data ) ? $data : 500 )
 			);
 		}
