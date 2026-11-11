@@ -225,7 +225,7 @@ class OrderUpdateTest extends WC_Unit_Test_Case {
 		$this->assertSame( $variation->get_id(), $added[1]->get_variation_id() );
 		$this->assertSame( 1, $added[1]->get_quantity() );
 		$this->assertEqualsCanonicalizing( array_keys( $order->get_items() ), array_column( $result['order']['line_items'], 'id' ), 'The output should carry the IDs of the added lines.' );
-		$this->assertSame( wc_format_decimal( 40 + 14 + (float) $variation->get_price() + 10, 2 ), $order->get_total() );
+		$this->assertSame( '74.00', $order->get_total() );
 	}
 
 	/**
