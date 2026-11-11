@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Safely display customer names in order customer search results.
