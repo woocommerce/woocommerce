@@ -1290,9 +1290,18 @@ class WC_Discounts {
 		$coupons_to_keep = apply_filters( 'woocommerce_apply_individual_use_coupon', array(), $individual_use_coupon, $other_applied_codes );
 
 		foreach ( (array) $coupons_to_keep as $keep_code ) {
-			if ( wc_is_same_coupon( (string) $keep_code, $coupon_code ) ) {
+			if ( ! wc_is_same_coupon( (string) $keep_code, $coupon_code ) ) {
+				continue;
+			}
+
+			// Retained ordinary coupons stay. If a retained coupon later becomes
+			// individual-use, fall through so woocommerce_apply_with_individual_use_coupon
+			// decides — same as apply_coupon() when an existing IU coupon is present.
+			if ( ! $coupon->get_individual_use() ) {
 				return true;
 			}
+
+			break;
 		}
 
 		/**
