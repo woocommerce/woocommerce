@@ -338,6 +338,9 @@ class UcpCheckout extends ControllerTestCase {
 		$updated = $this->request( 'PUT', $path, array( 'line_items' => array( $this->line_item( 1, 1 ) ) ) )->get_data();
 		remove_action( 'woocommerce_add_to_cart', $pay );
 		$this->assertSame( $expected, $updated['status'] );
+		if ( 'completed' === $expected ) {
+			$this->assertSame( (string) self::$product_ids[0], $updated['line_items'][0]['item']['id'], 'A paid checkout lists what was paid for, not the late change.' );
+		}
 
 		$this->assertSame( $expected, $this->request( 'GET', $path )->get_data()['status'] );
 		$this->assertSame( $order_id, (int) WC()->session->get( 'ucp_checkout' )['order_id'] );
@@ -366,6 +369,44 @@ class UcpCheckout extends ControllerTestCase {
 		$this->assertSame( 409, $response->get_status() );
 		$this->assertSame( $order_id, (int) WC()->session->get( 'ucp_checkout' )['order_id'] );
 		$this->assertSame( (string) $order_id, $this->request( 'GET', $path )->get_data()['order']['id'] );
+	}
+
+	/**
+	 * @testdox A paid checkout reads from its order, whatever happens to the product afterwards.
+	 */
+	public function test_completed_checkout_reads_from_the_order(): void {
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 1,
+				'regular_price'  => 10,
+				'price'          => 10,
+			)
+		);
+		$created = $this->create_ready_checkout(
+			array(
+				'item'     => array( 'id' => (string) $product->get_id() ),
+				'quantity' => 1,
+			)
+		);
+		$path    = '/checkout-sessions/' . $created['id'];
+		$this->request( 'POST', $path . '/complete' );
+
+		// Paying takes the last unit; the price is raised afterwards.
+		wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) )->payment_complete();
+		$product = wc_get_product( $product->get_id() );
+		$product->set_regular_price( '25' );
+		$product->save();
+		$this->simulate_new_request( $created['id'] );
+
+		$paid = $this->request( 'GET', $path )->get_data();
+
+		$this->assertSame( 'completed', $paid['status'] );
+		$this->assertSame( $created['totals'], $paid['totals'] );
+		$this->assertSame( $created['line_items'][0]['item'], $paid['line_items'][0]['item'] );
+		$this->assertSame( $created['line_items'][0]['totals'], $paid['line_items'][0]['totals'] );
+		$this->assertArrayNotHasKey( 'messages', $paid, 'The buyer\'s own purchase must not read as a stock problem.' );
 	}
 
 	/**

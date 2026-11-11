@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Ucp;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\OrderSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\CheckoutMapper;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils;
 
@@ -199,6 +200,8 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	/**
 	 * Build a successful checkout response.
 	 *
+	 * A paid checkout is read from its order: the cart session lives on and follows later price and stock changes.
+	 *
 	 * @param string               $checkout_id Checkout identifier.
 	 * @param array<string, mixed> $state Checkout state.
 	 * @param int                  $http_status HTTP status.
@@ -206,6 +209,12 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function checkout_response( string $checkout_id, array $state, int $http_status = 200, ?array $cart = null ): \WP_REST_Response {
+		$order = empty( $state['order']['id'] ) ? null : wc_get_order( (int) $state['order']['id'] );
+
+		if ( $order instanceof \WC_Order ) {
+			$cart = $this->order_as_cart( $order );
+		}
+
 		return new \WP_REST_Response(
 			array_merge(
 				array( 'ucp' => $this->ucp_metadata( 'success' ) ),
@@ -213,6 +222,47 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 			),
 			$http_status
 		);
+	}
+
+	/**
+	 * Build the Store API order response in the shape of a cart response, for the mappers to read.
+	 *
+	 * The order schema differs from the cart's where an order line is not a cart line: its ids,
+	 * its name, and a price that is the product's current one rather than the one paid.
+	 *
+	 * @param \WC_Order $order The paid order.
+	 * @return array
+	 */
+	private function order_as_cart( \WC_Order $order ): array {
+		$cart     = (array) json_decode( (string) wp_json_encode( $this->schema_controller->get( OrderSchema::IDENTIFIER )->get_item_response( $order ) ), true );
+		$with_tax = 'incl' === get_option( 'woocommerce_tax_display_cart' );
+
+		foreach ( array_values( $order->get_items() ) as $index => $item ) {
+			if ( ! $item instanceof \WC_Order_Item_Product || ! isset( $cart['items'][ $index ] ) ) {
+				continue;
+			}
+
+			$line     = $cart['items'][ $index ];
+			$product  = $item->get_product();
+			$subtotal = (int) $line['totals']['line_subtotal'] + ( $with_tax ? (int) $line['totals']['line_subtotal_tax'] : 0 );
+
+			$line['id']              = $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id();
+			$line['key']             = (string) $item->get_id();
+			$line['prices']['price'] = (int) round( $subtotal / max( 1, (int) $item->get_quantity() ) );
+
+			// An order line's name already holds the attributes the mapper appends from `variation`.
+			if ( ! empty( $line['variation'] ) && $product instanceof \WC_Product ) {
+				$line['name'] = $product->get_title();
+			}
+
+			$cart['items'][ $index ] = $line;
+		}
+
+		// A cart's `total_items` is the subtotal before discounts; an order's is the sum after them.
+		$cart['totals']['total_items'] = $cart['totals']['subtotal'];
+		$cart['errors']                = array();
+
+		return $cart;
 	}
 
 	/**

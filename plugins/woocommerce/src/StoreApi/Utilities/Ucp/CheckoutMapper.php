@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\StoreApi\Utilities\Ucp;
  * Maps a Store API cart response and the checkout state kept beside it onto the UCP checkout shape.
  *
  * Line items, totals, expiry and cart messages come from {@see CartMapper}, so a checkout prices
- * exactly like the cart it was promoted from.
+ * exactly like the cart it was promoted from. A paid checkout is handed its order in that shape.
  */
 class CheckoutMapper {
 	const STATUS_INCOMPLETE          = 'incomplete';
@@ -26,7 +26,7 @@ class CheckoutMapper {
 	 */
 	public function build_checkout( array $cart, string $checkout_id, array $state ): array {
 		$payload  = ( new CartMapper() )->build_cart( $cart, $checkout_id );
-		$missing  = $this->missing_requirements( $cart );
+		$missing  = empty( $state['order'] ) ? $this->missing_requirements( $cart ) : array();
 		$messages = array_merge( $payload['messages'] ?? array(), $missing );
 		$status   = (string) ( $state['status'] ?? '' );
 
