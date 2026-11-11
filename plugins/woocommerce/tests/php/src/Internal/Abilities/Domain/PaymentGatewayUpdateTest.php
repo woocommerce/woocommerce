@@ -307,6 +307,73 @@ class PaymentGatewayUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report the saved position when an offline method is sent above a non-offline gateway.
+	 */
+	public function test_reports_the_saved_position_when_an_offline_method_moves_above_an_online_gateway(): void {
+		$this->register_online_gateway();
+
+		$result = $this->run_ability(
+			'woocommerce/payment-gateway-update',
+			array(
+				'id'    => 'bacs',
+				'order' => 0,
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$after = $this->get_saved_positions();
+		$this->assertSame( $after['bacs'], $result['payment_gateway']['order'], 'The response should give the position checkout uses.' );
+		$this->assert_offline_methods_stay_grouped( $after );
+	}
+
+	/**
+	 * @testdox Should report the saved position when a non-offline gateway is sent into the offline methods.
+	 */
+	public function test_reports_the_saved_position_when_an_online_gateway_moves_into_the_offline_methods(): void {
+		$this->register_online_gateway();
+		$before = $this->get_saved_positions();
+
+		$result = $this->run_ability(
+			'woocommerce/payment-gateway-update',
+			array(
+				'id'    => 'online_test_gateway',
+				'order' => $before['cheque'],
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$after = $this->get_saved_positions();
+		$this->assertSame( $after['online_test_gateway'], $result['payment_gateway']['order'], 'The response should give the position checkout uses.' );
+		$this->assert_offline_methods_stay_grouped( $after );
+	}
+
+	/**
+	 * @testdox Should refuse a title that is empty once markup and whitespace are removed, and keep the saved title.
+	 *
+	 * @testWith ["   "]
+	 *           ["<b></b>"]
+	 *           ["<script>alert(1)</script>"]
+	 *
+	 * @param string $title Title without visible text.
+	 */
+	public function test_refuses_a_title_without_visible_text( string $title ): void {
+		update_option( 'woocommerce_cheque_settings', array( 'title' => 'Check payments' ) );
+		self::reload_payment_gateways();
+
+		$result = $this->run_ability(
+			'woocommerce/payment-gateway-update',
+			array(
+				'id'    => 'cheque',
+				'title' => $title,
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_payment_gateway_title_invalid', $result->get_error_code() );
+		$this->assertSame( 'Check payments', get_option( 'woocommerce_cheque_settings' )['title'] );
+	}
+
+	/**
 	 * @testdox Should return a not-found error for an unknown gateway ID.
 	 */
 	public function test_returns_not_found_for_an_unknown_gateway(): void {
@@ -361,6 +428,54 @@ class PaymentGatewayUpdateTest extends \WC_Unit_Test_Case {
 		$this->assertNotNull( $ability, "Ability {$name} should be registered." );
 
 		return $ability->execute( $input );
+	}
+
+	/**
+	 * Register a gateway outside the offline methods group. The base teardown removes the filter.
+	 */
+	private function register_online_gateway(): void {
+		$gateway = new class() extends \WC_Payment_Gateway {
+			/**
+			 * A connected gateway that is not an offline method.
+			 */
+			public function __construct() {
+				$this->id           = 'online_test_gateway';
+				$this->method_title = 'Online';
+				$this->title        = 'Online';
+				$this->enabled      = 'yes';
+			}
+		};
+		add_filter(
+			'woocommerce_payment_gateways',
+			static function ( $gateways ) use ( $gateway ) {
+				$gateways[] = $gateway;
+				return $gateways;
+			}
+		);
+		self::reload_payment_gateways();
+	}
+
+	/**
+	 * Positions as the next request's query reports them.
+	 *
+	 * @return array<string, int>
+	 */
+	private function get_saved_positions(): array {
+		self::reload_payment_gateways();
+
+		return array_column( $this->run_ability( 'woocommerce/payment-gateways-query' )['gateways'], 'order', 'id' );
+	}
+
+	/**
+	 * Assert the loaded offline methods sit next to each other in the checkout order.
+	 *
+	 * @param array<string, int> $positions Positions keyed by gateway ID.
+	 */
+	private function assert_offline_methods_stay_grouped( array $positions ): void {
+		$offline = array_values( array_intersect_key( $positions, array_flip( array( 'bacs', 'cheque', 'cod' ) ) ) );
+
+		$this->assertCount( 3, $offline, 'The test site should load all three offline methods.' );
+		$this->assertSame( count( $offline ) - 1, max( $offline ) - min( $offline ), 'Offline methods should stay grouped.' );
 	}
 
 	/**
