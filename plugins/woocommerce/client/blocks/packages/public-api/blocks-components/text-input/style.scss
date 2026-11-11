@@ -25,7 +25,7 @@
 		text-overflow: ellipsis;
 		max-width: calc(100% - #{2 * $gap-small});
 		cursor: text;
-		// Themes and extensions position the label with `top`, so it animates too.
+		// Themes and extensions position the label with `top`, so `top` also animates.
 		@include motion-transition($state: color, $move: (top, transform), $duration: md, $easing: balanced);
 
 		.has-dark-controls & {
@@ -86,7 +86,7 @@
 	}
 
 	// We delay the reveal so the mask doesn't sit behind the label while it floats up.
-	// Under reduced motion the label moves at once, so there's nothing to wait for.
+	// With reduced motion, the label moves immediately, so there is no delay.
 	input[type="date"]::-webkit-datetime-edit {
 		transition: motion-state(opacity);
 		@include motion-safe {

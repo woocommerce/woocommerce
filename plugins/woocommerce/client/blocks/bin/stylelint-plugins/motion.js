@@ -1,8 +1,8 @@
 /**
- * `woocommerce/motion-safe`: `transition*` and `animation*` declarations (other than `none`) must sit inside
- * `@include motion-safe`, a `prefers-reduced-motion` media query, or `@keyframes`. Transitions that only fade or
- * change colour (including `motion-state()` and `motion-hold()`), and the shared fade animations, may run anywhere,
- * as they don't move anything. See docs/contributors/motion.md.
+ * `woocommerce/motion-safe`: a `transition*` or `animation*` declaration (other than `none`) must be inside
+ * `@include motion-safe` or `@keyframes`. Transitions that only fade or change color, including `motion-state()` and
+ * `motion-hold()`, and the shared fade animations, can be anywhere, because they do not move anything.
+ * See docs/contributors/motion.md.
  */
 const stylelint = require( 'stylelint' );
 
@@ -15,7 +15,7 @@ const ruleName = 'woocommerce/motion-safe';
 
 const messages = ruleMessages( ruleName, {
 	rejected: ( prop ) =>
-		`Use a motion mixin, or wrap "${ prop }" in \`@include motion-safe { … }\`, so it respects reduced motion. Only transitions of opacity and colours may run outside it.`,
+		`Use a motion mixin, or put "${ prop }" in \`@include motion-safe { … }\`, so that it obeys reduced motion. Only transitions of opacity and colors can be outside it.`,
 } );
 
 const FADE_PROPERTIES = new Set( [
@@ -41,7 +41,7 @@ const FADE_PROPERTIES = new Set( [
 	'-webkit-text-fill-color',
 ] );
 
-// Splits a comma-separated value, ignoring commas inside parentheses such as `cubic-bezier( … )`.
+// Splits a comma-separated value. Commas inside parentheses, such as in `cubic-bezier( … )`, do not split it.
 const splitList = ( value ) => {
 	const items = [ '' ];
 	let depth = 0;
@@ -70,7 +70,7 @@ const FADE_KEYFRAMES = new Set( [
 // Helpers from `_motion.scss` that only return fade, colour, or hold transitions.
 const FADE_FUNCTIONS = [ 'motion-state(', 'motion-hold(' ];
 
-// A `transition` or `transition-property` that only fades or changes colour, or an `animation` that only fades.
+// A `transition` or `transition-property` that only fades or changes color, or an `animation` that only fades.
 const isFadeOnly = ( prop, value ) => {
 	if ( prop === 'animation' || prop === 'animation-name' ) {
 		return splitList( value ).every( ( item ) =>
@@ -87,11 +87,11 @@ const isFadeOnly = ( prop, value ) => {
 	);
 };
 
+// `@media … prefers-reduced-motion` is not a guard: it can also match `reduce`. Use `motion-safe`.
 const isGuard = ( { type, name, params } ) =>
 	type === 'atrule' &&
 	( name.endsWith( 'keyframes' ) ||
-		( name === 'include' && params.startsWith( 'motion-safe' ) ) ||
-		( name === 'media' && params.includes( 'prefers-reduced-motion' ) ) );
+		( name === 'include' && params.startsWith( 'motion-safe' ) ) );
 
 const ruleFunction = ( primary ) => ( root, result ) => {
 	if (
