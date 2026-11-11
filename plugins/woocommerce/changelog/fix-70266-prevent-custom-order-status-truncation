@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Prevent custom order status truncation by warning on overlength registered statuses and guarding order status updates against exceeding the 20-character database limit.
+Enforce 20-character database limit on order statuses across all creation and update paths, safely falling back to pending for new orders, preserving status on existing orders, and having update_status() return false when overlength statuses cannot be applied.

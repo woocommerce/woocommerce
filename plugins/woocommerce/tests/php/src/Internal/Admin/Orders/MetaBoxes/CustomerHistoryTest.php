@@ -298,9 +298,6 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	private function create_orders_with_long_custom_status(): array {
 		global $wpdb;
 
-		// Core warns when registering a status longer than the 20-char column.
-		$this->setExpectedIncorrectUsage( 'wc_get_order_statuses' );
-
 		$long_status = 'competition-completed';
 		register_post_status( 'wc-' . $long_status, array( 'public' => true ) );
 		$this->add_long_status_callback = function ( $statuses ) use ( $long_status ) {

@@ -1137,26 +1137,28 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$status_exceptions = array( OrderStatus::AUTO_DRAFT, OrderStatus::TRASH );
 
 		// If setting the status, ensure it's set to a valid status.
-		if ( true === $this->object_read ) {
-			if ( strlen( 'wc-' . $new_status ) > 20 ) {
-				wc_doing_it_wrong(
-					__METHOD__,
-					sprintf(
-						'Order status "%1$s" exceeds the maximum storage limit of %2$d characters and cannot be stored.',
-						esc_html( $new_status ),
-						20
-					),
-					'11.4.0'
-				);
+		if ( strlen( 'wc-' . $new_status ) > 20 ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					/* translators: 1: order status, 2: max characters */
+					__( 'Order status "%1$s" exceeds the maximum storage limit of %2$d characters and cannot be stored.', 'woocommerce' ),
+					esc_html( $new_status ),
+					20
+				),
+				'11.4.0'
+			);
 
-				$stored_status = $this->get_status( 'edit' );
-				if ( $stored_status && ! in_array( $stored_status, $status_exceptions, true ) && strlen( 'wc-' . $stored_status ) <= 20 ) {
-					$new_status = $stored_status;
-					$old_status = $stored_status;
-				} else {
-					$new_status = OrderStatus::PENDING;
-				}
-			} elseif (
+			$stored_status = $this->get_status( 'edit' );
+			if ( $this->get_id() && $stored_status && ! in_array( $stored_status, $status_exceptions, true ) && strlen( 'wc-' . $stored_status ) <= 20 ) {
+				$new_status = $stored_status;
+				$old_status = $stored_status;
+			} else {
+				$new_status = OrderStatus::PENDING;
+			}
+		} elseif ( true === $this->object_read ) {
+			// Only allow valid new status.
+			if (
 				! in_array( 'wc-' . $new_status, $this->get_valid_statuses(), true )
 				&& ! in_array( $new_status, $status_exceptions, true )
 			) {
