@@ -975,6 +975,15 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should give every canonical ability an input in the permission refusal provider.
+	 */
+	public function test_permission_refusal_provider_covers_every_canonical_ability(): void {
+		$covered = array_column( $this->provider_canonical_abilities_with_minimal_input(), 0 );
+
+		$this->assertEqualsCanonicalizing( self::CANONICAL_ABILITY_IDS, $covered );
+	}
+
+	/**
 	 * Provides ability IDs and minimal valid-shape input for cap negative-path tests.
 	 *
 	 * @return array<string, array{0: string, 1: array}>
@@ -982,14 +991,20 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function provider_canonical_abilities_with_minimal_input(): array {
 		// Valid-shape input only — permission check should fire before execute.
 		return array(
-			'product-term-create'    => array(
+			'product-terms-query'      => array(
+				'woocommerce/product-terms-query',
+				array(
+					'taxonomy' => 'product_cat',
+				),
+			),
+			'product-term-create'      => array(
 				'woocommerce/product-term-create',
 				array(
 					'taxonomy' => 'product_cat',
 					'name'     => 'Forbidden',
 				),
 			),
-			'product-term-update'    => array(
+			'product-term-update'      => array(
 				'woocommerce/product-term-update',
 				array(
 					'taxonomy' => 'product_cat',
@@ -997,90 +1012,100 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'name'     => 'Forbidden',
 				),
 			),
-			'products-query'         => array(
+			'product-attributes-query' => array(
+				'woocommerce/product-attributes-query',
+				array(),
+			),
+			'product-attribute-create' => array(
+				'woocommerce/product-attribute-create',
+				array(
+					'name' => 'Forbidden',
+				),
+			),
+			'products-query'           => array(
 				'woocommerce/products-query',
 				array(
 					'id' => 1,
 				),
 			),
-			'product-create'         => array(
+			'product-create'           => array(
 				'woocommerce/product-create',
 				array(
 					'name' => 'Forbidden',
 				),
 			),
-			'product-update'         => array(
+			'product-update'           => array(
 				'woocommerce/product-update',
 				array(
 					'id'   => 1,
 					'name' => 'Forbidden',
 				),
 			),
-			'product-delete'         => array(
+			'product-delete'           => array(
 				'woocommerce/product-delete',
 				array(
 					'id' => 1,
 				),
 			),
-			'orders-query'           => array(
+			'orders-query'             => array(
 				'woocommerce/orders-query',
 				array(
 					'id' => 1,
 				),
 			),
-			'order-send-email'       => array(
+			'order-send-email'         => array(
 				'woocommerce/order-send-email',
 				array(
 					'id'    => 1,
 					'email' => 'invoice',
 				),
 			),
-			'order-update'           => array(
+			'order-update'             => array(
 				'woocommerce/order-update',
 				array(
 					'id'       => 1,
 					'shipping' => array( 'city' => 'Denied' ),
 				),
 			),
-			'order-update-status'    => array(
+			'order-update-status'      => array(
 				'woocommerce/order-update-status',
 				array(
 					'id'     => 1,
 					'status' => 'processing',
 				),
 			),
-			'product-review-update'  => array(
+			'product-review-update'    => array(
 				'woocommerce/product-review-update',
 				array(
 					'id'     => 1,
 					'status' => 'approved',
 				),
 			),
-			'product-review-reply'   => array(
+			'product-review-reply'     => array(
 				'woocommerce/product-review-reply',
 				array(
 					'id'      => 1,
 					'content' => 'denied',
 				),
 			),
-			'order-add-note'         => array(
+			'order-add-note'           => array(
 				'woocommerce/order-add-note',
 				array(
 					'id'   => 1,
 					'note' => 'denied',
 				),
 			),
-			'order-notes-query'      => array(
+			'order-notes-query'        => array(
 				'woocommerce/order-notes-query',
 				array(
 					'id' => 1,
 				),
 			),
-			'payment-gateways-query' => array(
+			'payment-gateways-query'   => array(
 				'woocommerce/payment-gateways-query',
 				array(),
 			),
-			'customers-query'        => array(
+			'customers-query'          => array(
 				'woocommerce/customers-query',
 				array(),
 			),
