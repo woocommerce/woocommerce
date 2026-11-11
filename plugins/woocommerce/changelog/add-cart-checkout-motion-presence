@@ -1,4 +1,4 @@
 Significance: patch
 Type: tweak
 
-Animate the address suggestions in Checkout and the snackbar notices in Cart as they appear and go away.
+Animate Checkout address suggestions and Cart snackbars, and keep address suggestions open when the first results appear.
