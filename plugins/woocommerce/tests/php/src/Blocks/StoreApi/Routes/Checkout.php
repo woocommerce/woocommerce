@@ -2811,6 +2811,69 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Existing order payment should check the shipping country against the order's shipping line, with an empty cart.
+	 *
+	 * @dataProvider provide_pay_for_order_shipping_methods
+	 *
+	 * @param string $method_id       Method id of the order's shipping line.
+	 * @param bool   $expect_rejected Whether the shipping country should be rejected.
+	 */
+	public function test_checkout_order_rejects_shipping_country_the_store_does_not_ship_to( string $method_id, bool $expect_rejected ) {
+		update_option( 'woocommerce_ship_to_countries', 'specific' );
+		update_option( 'woocommerce_specific_ship_to_countries', array( 'US' ) );
+		wc_empty_cart();
+
+		// A merchant-created order with no address yet, so the shopper fills in the first one.
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_billing_address( array_fill_keys( array( 'city', 'state', 'postcode', 'country' ), '' ) );
+		foreach ( $order->get_shipping_methods() as $shipping_line ) {
+			$shipping_line->set_method_id( $method_id );
+			$shipping_line->save();
+		}
+		$order->save();
+
+		$response = $this->dispatch_pay_for_order_request(
+			$order,
+			array(
+				'city'     => 'WooCity',
+				'state'    => 'NY',
+				'postcode' => '12345',
+				'country'  => 'US',
+			),
+			array(
+				'address_1' => 'Hauptstr. 1',
+				'city'      => 'Berlin',
+				'state'     => '',
+				'postcode'  => '10115',
+				'country'   => 'DE',
+			)
+		);
+
+		$stored_order = wc_get_order( $order->get_id() );
+		if ( $expect_rejected ) {
+			$this->assertEquals( 400, $response->get_status() );
+			$this->assertEquals( 'woocommerce_rest_invalid_address_country', $response->get_data()['code'] );
+			$this->assertEquals( OrderStatus::PENDING, $stored_order->get_status() );
+			$this->assertEquals( '', $stored_order->get_shipping_country() );
+		} else {
+			$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+			$this->assertEquals( 'DE', $stored_order->get_shipping_country() );
+		}
+	}
+
+	/**
+	 * Shipping methods on a pay-for-order order and whether a country the store does not ship to should be rejected.
+	 *
+	 * @return array<string, array{0: string, 1: bool}>
+	 */
+	public function provide_pay_for_order_shipping_methods(): array {
+		return array(
+			'flat rate'       => array( 'flat_rate', true ),
+			'pickup location' => array( 'pickup_location', false ),
+		);
+	}
+
+	/**
 	 * Returns a destination in a different shipping zone and tax location to the fixture's US address.
 	 *
 	 * @return array

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Store API: stop pay for order from accepting a shipping address in a country the store does not ship to.
