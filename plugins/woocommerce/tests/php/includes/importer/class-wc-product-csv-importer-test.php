@@ -3377,4 +3377,42 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->import_row_with_used_for_variations_column( $product->get_id() . ',variable,,Shirt,Color,"Red, Blue",1,0' );
 		$this->assertFalse( $this->get_color_attribute( $product->get_id() )->get_variation(), 'A 0 should turn the setting off.' );
 	}
+
+	/**
+	 * @testdox A variation row in the same file turns "Used for variations" back on, even when the parent row sets 0.
+	 */
+	public function test_import_variation_row_enables_used_for_variations_on_parent(): void {
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-used-for-variations-with-variation.csv';
+		$csv      = "Type,SKU,Parent,Name,Attribute 1 name,Attribute 1 value(s),Attribute 1 visible,Attribute 1 used for variations,Attribute 1 global\n"
+			. "variable,used-for-variations-parent-29903,,Shirt,Color,\"Red, Blue\",1,0,0\n"
+			. "variation,used-for-variations-child-29903,used-for-variations-parent-29903,Shirt - Red,Color,Red,,,0\n";
+		file_put_contents( $csv_file, $csv ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'   => true,
+				'mapping' => array(
+					'Type'                            => 'type',
+					'SKU'                             => 'sku',
+					'Parent'                          => 'parent_id',
+					'Name'                            => 'name',
+					'Attribute 1 name'                => 'attributes:name1',
+					'Attribute 1 value(s)'            => 'attributes:value1',
+					'Attribute 1 visible'             => 'attributes:visible1',
+					'Attribute 1 used for variations' => 'attributes:variation1',
+					'Attribute 1 global'              => 'attributes:taxonomy1',
+				),
+			)
+		);
+		$data = $importer->import();
+		wp_delete_file( $csv_file );
+
+		$this->assertCount( 2, $data['imported'], 'Both the parent and the variation should be imported.' );
+		$parent_id = wc_get_product_id_by_sku( 'used-for-variations-parent-29903' );
+		$this->assertTrue( $this->get_color_attribute( $parent_id )->get_variation(), 'A variation that uses the attribute needs it enabled for variations.' );
+
+		$variation = wc_get_product( wc_get_product_id_by_sku( 'used-for-variations-child-29903' ) );
+		$this->assertSame( 'Red', $variation->get_attribute( 'color' ) );
+	}
 }

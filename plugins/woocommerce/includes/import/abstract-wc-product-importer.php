@@ -672,6 +672,9 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Get variation parent attributes and set "is_variation".
 	 *
+	 * A variation row that uses an attribute turns "Used for variations" on for it, even when the parent row
+	 * set it to 0, because a variation can only use attributes that are enabled for variations.
+	 *
 	 * @param  array      $attributes Attributes list.
 	 * @param  WC_Product $parent     Parent product data.
 	 * @return array
