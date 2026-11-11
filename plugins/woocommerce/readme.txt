@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 11.3.0 2026-XX-XX =
+= 11.3.0 2026-11-11 =
 
 **WooCommerce**
 
@@ -391,6 +391,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Keep coupon codes with special characters working on WordPress 7.2, show `&` correctly in the coupon editor, and fix a critical error with some codes containing `<`. [#70683](https://github.com/woocommerce/woocommerce/pull/70683)
 * Fix - Exclude block editor note reactions from the cached comment counts. [#70795](https://github.com/woocommerce/woocommerce/pull/70795)
 * Fix - Prevent account activation crashes with extensions that verify customer emails using the legacy one-argument call. [#70808](https://github.com/woocommerce/woocommerce/pull/70808)
+* Fix - Prevent invalid add-to-cart shortcodes from clearing the surrounding product context. [#70853](https://github.com/woocommerce/woocommerce/pull/70853)
 * Add - Add ActionableAbility to the experimental extensible abilities feature. With it on, product create and product update accept extension fields under extensions.<namespace>.<field>, and save Core and extension fields one time. [#69681](https://github.com/woocommerce/woocommerce/pull/69681)
 * Add - Add a location filter to the Analytics Taxes report, narrowing the report, its summary and its export to a country or a state. [#68839](https://github.com/woocommerce/woocommerce/pull/68839)
 * Add - Add an admin notice about the upcoming PHP 8.1 requirement in WooCommerce 11.6 for stores running an older PHP version. [#69094](https://github.com/woocommerce/woocommerce/pull/69094)
