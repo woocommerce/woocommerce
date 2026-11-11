@@ -39,6 +39,9 @@
 				"css": "&.has-text-align-right { border-width: 0 1px 0 0; } &.has-text-align-center { border-width: 0; border-inline: 0; padding-inline: 0; }",
 				"variations": {}
 			},
+			"core/separator": {
+				"css": "color: inherit; background-clip: padding-box; &:not(.is-style-wide):not(.is-style-dots) { width: 100px; margin-inline: auto !important; } &.is-style-dots::before { letter-spacing: min(2em, calc((240px - 3em) / 4)); padding-left: min(2em, calc((240px - 3em) / 4)); }"
+			},
 			"core/table": {
 				"spacing": {
 					"margin": {

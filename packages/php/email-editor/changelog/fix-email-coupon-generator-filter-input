@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent block emails with a coupon from failing or showing a wrong code when another plugin changes the coupon code filter value.

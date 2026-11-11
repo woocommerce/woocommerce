@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add the woocommerce/order-update ability for addresses, customer note, product lines and shipping lines, and the woocommerce/order-send-email ability to send an order email to the customer again.

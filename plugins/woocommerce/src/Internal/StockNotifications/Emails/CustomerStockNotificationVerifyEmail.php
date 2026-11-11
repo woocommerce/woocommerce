@@ -180,7 +180,7 @@ class CustomerStockNotificationVerifyEmail extends WC_Email {
 						'email_link_action_key' => $verification_key,
 						'notification_id'       => $notification->get_id(),
 					),
-					get_option( 'siteurl' )
+					home_url( '/' )
 				)
 			),
 		);

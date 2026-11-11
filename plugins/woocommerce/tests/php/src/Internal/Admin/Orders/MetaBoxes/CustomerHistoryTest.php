@@ -8,9 +8,13 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersSta
 use Automattic\WooCommerce\Admin\Overrides\Order as AdminOrder;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomerHistory;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use DOMDocument;
+use DOMXPath;
 use WC_Helper_Order;
+use WC_Order;
 use WC_Unit_Test_Case;
 
 /**
@@ -486,6 +490,392 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should total and average each currency separately for a customer with orders in more than one currency (HPOS).
+	 *
+	 * @testWith ["registered"]
+	 *           ["guest"]
+	 *
+	 * @param string $customer_type Whether the orders belong to a registered customer or a guest.
+	 */
+	public function test_mixed_currency_orders_are_totalled_per_currency( string $customer_type ): void {
+		update_option( 'woocommerce_currency', 'EUR' );
+		$customer_id   = 'registered' === $customer_type ? $this->factory->user->create() : 0;
+		$billing_email = 'mixed-currencies@example.com';
+
+		$order = $this->create_completed_order( $customer_id, 'GBP', 36.00, $billing_email );
+		$this->create_completed_order( $customer_id, 'EUR', 41.90, $billing_email );
+		$this->create_completed_order( $customer_id, 'EUR', 10.00, $billing_email );
+		$this->create_completed_order( $customer_id, 'AUD', 20.00, $billing_email );
+
+		$output = $this->render_customer_history( $order );
+
+		$this->assertSame( '4', self::get_text( $output, 'order-attribution-total-orders' ), 'Should count the orders in every currency' );
+		$this->assertStringNotContainsString( '107.90', $output, 'Amounts in different currencies should not be added together' );
+		$this->assertSame(
+			array(
+				'EUR' => array(
+					'amount' => '€51.90',
+					'code'   => 'EUR',
+					'orders' => '(2 orders)',
+				),
+				'AUD' => array(
+					'amount' => '$20.00',
+					'code'   => 'AUD',
+					'orders' => '(1 order)',
+				),
+				'GBP' => array(
+					'amount' => '£36.00',
+					'code'   => 'GBP',
+					'orders' => '(1 order)',
+				),
+			),
+			self::get_currency_rows( $output, 'order-attribution-total-spend' ),
+			'Should show one total per currency with its own order count, store currency first and the rest by code'
+		);
+		$this->assertSame(
+			array(
+				'EUR' => array(
+					'amount' => '€25.95',
+					'code'   => 'EUR',
+					'orders' => '',
+				),
+				'AUD' => array(
+					'amount' => '$20.00',
+					'code'   => 'AUD',
+					'orders' => '',
+				),
+				'GBP' => array(
+					'amount' => '£36.00',
+					'code'   => 'GBP',
+					'orders' => '',
+				),
+			),
+			self::get_currency_rows( $output, 'order-attribution-average-order-value' ),
+			'Should divide each currency total by the number of orders in that currency'
+		);
+		$this->assertStringContainsString( 'Orders in different currencies are totaled separately.', $output, 'The total revenue tooltip should explain the separate totals' );
+	}
+
+	/**
+	 * @testdox Should deduct a refund only from the total of the currency the refunded order was placed in (HPOS).
+	 */
+	public function test_refund_reduces_only_its_own_currency_total(): void {
+		update_option( 'woocommerce_currency', 'EUR' );
+		$customer_id = $this->factory->user->create();
+
+		$order         = $this->create_completed_order( $customer_id, 'EUR', 100.00 );
+		$foreign_order = $this->create_completed_order( $customer_id, 'GBP', 50.00 );
+
+		wc_create_refund(
+			array(
+				'order_id' => $foreign_order->get_id(),
+				'amount'   => 20.00,
+			)
+		);
+
+		$rows = self::get_currency_rows( $this->render_customer_history( $order ), 'order-attribution-total-spend' );
+
+		$this->assertSame( '€100.00', $rows['EUR']['amount'] ?? null, 'A refund in another currency should leave the store currency total untouched' );
+		$this->assertSame( '£30.00', $rows['GBP']['amount'] ?? null, 'The refund should come off the total of its own currency' );
+	}
+
+	/**
+	 * @testdox Should keep passing the single total and average to template overrides that only read the original arguments (HPOS).
+	 */
+	public function test_legacy_template_override_receives_single_total_and_average(): void {
+		update_option( 'woocommerce_currency', 'EUR' );
+		$customer_id = $this->factory->user->create();
+
+		$order = $this->create_completed_order( $customer_id, 'EUR', 41.90 );
+		$this->create_completed_order( $customer_id, 'EUR', 10.00 );
+		$this->create_completed_order( $customer_id, 'GBP', 36.00 );
+
+		// A theme override written for the 10.8.0 template reads only these four variables.
+		$legacy_template = (string) wp_tempnam( 'customer-history' );
+		file_put_contents( $legacy_template, '<?php echo esc_html( "orders={$orders_count};total=" . wc_format_decimal( $total_spend, 2 ) . ";average=" . wc_format_decimal( $avg_order_value, 2 ) . ";tooltip=" . ( "" === $tooltip ? "no" : "yes" ) );' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture.
+
+		$use_legacy_template = function ( $template, $template_name ) use ( $legacy_template ) {
+			return 'order/customer-history.php' === $template_name ? $legacy_template : $template;
+		};
+		add_filter( 'wc_get_template', $use_legacy_template, 10, 2 );
+
+		try {
+			$output = $this->render_customer_history( $order );
+		} finally {
+			unlink( $legacy_template ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- Test fixture.
+		}
+
+		$this->assertSame( 'orders=3;total=87.90;average=29.30;tooltip=yes', $output, 'An existing template override should keep receiving the values it received before per-currency totals were added' );
+	}
+
+	/**
+	 * @testdox Should render a single total when the bundled template is loaded with only the original arguments.
+	 */
+	public function test_bundled_template_renders_single_total_from_original_arguments(): void {
+		update_option( 'woocommerce_currency', 'EUR' );
+
+		ob_start();
+		try {
+			wc_get_template(
+				'order/customer-history.php',
+				array(
+					'orders_count'    => 2,
+					'total_spend'     => 100.0,
+					'avg_order_value' => 50.0,
+					'tooltip'         => 'Tooltip text',
+				)
+			);
+		} finally {
+			$output = (string) ob_get_clean();
+		}
+
+		$this->assertSame( '2', self::get_text( $output, 'order-attribution-total-orders' ), 'Should show the order count it was given' );
+		$this->assertSame( '€100.00', self::get_text( $output, 'order-attribution-total-spend' ), 'Should show the single total it was given' );
+		$this->assertSame( '€50.00', self::get_text( $output, 'order-attribution-average-order-value' ), 'Should show the single average it was given' );
+		$this->assertStringNotContainsString( 'data-currency', $output, 'Should not list currencies it was not given' );
+	}
+
+	/**
+	 * @testdox Should count orders whose stored currency is missing, or is the store currency in another letter case or with spaces, towards the store currency total (HPOS).
+	 *
+	 * @testWith [null]
+	 *           [""]
+	 *           ["eur"]
+	 *           ["EUR "]
+	 *
+	 * @param string|null $stored_currency The currency value stored on one of the orders.
+	 */
+	public function test_orders_with_a_missing_or_loosely_stored_store_currency_are_totalled_together( ?string $stored_currency ): void {
+		update_option( 'woocommerce_currency', 'EUR' );
+		$customer_id = $this->factory->user->create();
+
+		// The loosely stored order comes first, so a database that groups it with the clean one reports its spelling.
+		$this->overwrite_stored_currency( $this->create_completed_order( $customer_id, 'EUR', 10.00 ), $stored_currency );
+		$order = $this->create_completed_order( $customer_id, 'EUR', 40.00 );
+		$this->create_completed_order( $customer_id, 'GBP', 36.00 );
+
+		$output = $this->render_customer_history( $order );
+
+		$this->assertSame( '3', self::get_text( $output, 'order-attribution-total-orders' ), 'Every order should still be counted' );
+		$this->assertSame(
+			array(
+				'EUR' => array(
+					'amount' => '€50.00',
+					'code'   => 'EUR',
+					'orders' => '(2 orders)',
+				),
+				'GBP' => array(
+					'amount' => '£36.00',
+					'code'   => 'GBP',
+					'orders' => '(1 order)',
+				),
+			),
+			self::get_currency_rows( $output, 'order-attribution-total-spend' ),
+			'The order should be added to the store currency total instead of being dropped or listed on its own'
+		);
+	}
+
+	/**
+	 * @testdox Should count orders in a currency code that is not three letters long (HPOS).
+	 */
+	public function test_orders_in_a_four_letter_currency_code_are_counted(): void {
+		update_option( 'woocommerce_currency', 'EUR' );
+		$customer_id = $this->factory->user->create();
+
+		$order = $this->create_completed_order( $customer_id, 'EUR', 40.00 );
+		// Extensions can register codes of up to 10 characters. The registered list is cached
+		// for the request, so the code is written straight to the order instead.
+		$this->overwrite_stored_currency( $this->create_completed_order( $customer_id, 'EUR', 25.00 ), 'USDT' );
+
+		$output = $this->render_customer_history( $order );
+
+		$this->assertSame( '2', self::get_text( $output, 'order-attribution-total-orders' ), 'An order in a four-letter currency should still be counted' );
+		$this->assertSame(
+			array(
+				'EUR'  => array(
+					'amount' => '€40.00',
+					'code'   => 'EUR',
+					'orders' => '(1 order)',
+				),
+				'USDT' => array(
+					'amount' => '25.00',
+					'code'   => 'USDT',
+					'orders' => '(1 order)',
+				),
+			),
+			self::get_currency_rows( $output, 'order-attribution-total-spend' ),
+			'An order in a four-letter currency should get its own total'
+		);
+	}
+
+	/**
+	 * @testdox Should show the total and average in the order currency when all of a customer's orders are in a currency other than the store currency (HPOS).
+	 */
+	public function test_customer_with_only_a_foreign_currency_shows_that_currency(): void {
+		update_option( 'woocommerce_currency', 'EUR' );
+		$customer_id = $this->factory->user->create();
+
+		$order = $this->create_completed_order( $customer_id, 'GBP', 36.00 );
+
+		$output       = $this->render_customer_history( $order );
+		$expected_row = array(
+			'GBP' => array(
+				'amount' => '£36.00',
+				'code'   => 'GBP',
+				'orders' => '',
+			),
+		);
+
+		$this->assertSame( $expected_row, self::get_currency_rows( $output, 'order-attribution-total-spend' ), 'The total should be shown in the order currency and labelled with its code' );
+		$this->assertSame( $expected_row, self::get_currency_rows( $output, 'order-attribution-average-order-value' ), 'The average should be shown in the order currency and labelled with its code' );
+		$this->assertStringNotContainsString( 'Orders in different currencies are totaled separately.', $output, 'A customer with one currency should keep the original tooltip' );
+	}
+
+	/**
+	 * @testdox Should keep the single-total markup for a customer whose orders are all in the store currency (HPOS).
+	 */
+	public function test_store_currency_customer_keeps_single_total_markup(): void {
+		update_option( 'woocommerce_currency', 'EUR' );
+		$customer_id = $this->factory->user->create();
+
+		$order = $this->create_completed_order( $customer_id, 'EUR', 25.00 );
+
+		$output = $this->render_customer_history( $order );
+		$xpath  = self::get_xpath( $output );
+
+		$children = array();
+		foreach ( $xpath->query( '//div[' . self::has_class( 'customer-history' ) . ']/*' ) as $child ) {
+			$children[] = trim( $xpath->evaluate( 'name()', $child ) . '.' . $child->getAttribute( 'class' ), '.' );
+		}
+
+		$this->assertSame(
+			array(
+				'h4',
+				'span.order-attribution-total-orders',
+				'h4',
+				'span.order-attribution-total-spend',
+				'h4',
+				'span.order-attribution-average-order-value',
+			),
+			$children,
+			'Markup for a customer with only store currency orders should stay as it was before per-currency totals were added'
+		);
+		$this->assertSame( '€25.00', self::get_text( $output, 'order-attribution-total-spend' ), 'Should show the single total without a currency code' );
+		$this->assertStringNotContainsString( 'data-currency', $output, 'A customer with only store currency orders should not get per-currency rows' );
+		$this->assertStringNotContainsString( 'Orders in different currencies are totaled separately.', $output, 'A customer with one currency should keep the original tooltip' );
+	}
+
+	/**
+	 * Creates a completed order with the given currency and total.
+	 *
+	 * @param int    $customer_id   The customer user ID, or 0 for a guest.
+	 * @param string $currency      The order currency code.
+	 * @param float  $total         The order total.
+	 * @param string $billing_email Optional billing email, which is what guest orders are matched on.
+	 * @return WC_Order The saved order.
+	 */
+	private function create_completed_order( int $customer_id, string $currency, float $total, string $billing_email = '' ): WC_Order {
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_currency( $currency );
+		$order->set_total( $total );
+		if ( '' !== $billing_email ) {
+			$order->set_billing_email( $billing_email );
+		}
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Replaces the currency stored for an order, bypassing the validation in WC_Order::set_currency().
+	 *
+	 * @param WC_Order    $order    The order to change.
+	 * @param string|null $currency The value to store in the currency column.
+	 */
+	private function overwrite_stored_currency( WC_Order $order, ?string $currency ): void {
+		global $wpdb;
+
+		$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'currency' => $currency ), array( 'id' => $order->get_id() ) );
+	}
+
+	/**
+	 * Renders the customer history meta box for an order.
+	 *
+	 * @param WC_Order $order The order being viewed.
+	 * @return string The rendered HTML.
+	 */
+	private function render_customer_history( WC_Order $order ): string {
+		ob_start();
+		try {
+			$this->sut->output( $order );
+		} finally {
+			$output = (string) ob_get_clean();
+		}
+
+		return $output;
+	}
+
+	/**
+	 * Returns the visible text of the first element with the given class.
+	 *
+	 * @param string $output        The rendered meta box HTML.
+	 * @param string $element_class The class of the element to read.
+	 * @return string The element text with surrounding and repeated whitespace removed.
+	 */
+	private static function get_text( string $output, string $element_class ): string {
+		return self::get_xpath( $output )->evaluate( 'normalize-space(//*[' . self::has_class( $element_class ) . '])' );
+	}
+
+	/**
+	 * Returns the per-currency rows that hold an amount with the given class, keyed by currency code.
+	 *
+	 * @param string $output       The rendered meta box HTML.
+	 * @param string $amount_class The class of the amount element, e.g. 'order-attribution-total-spend'.
+	 * @return array<string, array{amount: string, code: string, orders: string}> Visible text of each row, in display order.
+	 */
+	private static function get_currency_rows( string $output, string $amount_class ): array {
+		$xpath = self::get_xpath( $output );
+		$rows  = array();
+
+		foreach ( $xpath->query( '//*[@data-currency][.//*[' . self::has_class( $amount_class ) . ']]' ) as $row ) {
+			$rows[ $row->getAttribute( 'data-currency' ) ] = array(
+				'amount' => $xpath->evaluate( 'normalize-space(.//*[' . self::has_class( $amount_class ) . '])', $row ),
+				'code'   => $xpath->evaluate( 'normalize-space(.//*[' . self::has_class( 'order-attribution-currency-code' ) . '])', $row ),
+				'orders' => $xpath->evaluate( 'normalize-space(.//*[' . self::has_class( 'order-attribution-currency-orders' ) . '])', $row ),
+			);
+		}
+
+		return $rows;
+	}
+
+	/**
+	 * Returns an XPath condition that matches elements carrying the given class.
+	 *
+	 * @param string $element_class The class to match.
+	 * @return string The XPath condition.
+	 */
+	private static function has_class( string $element_class ): string {
+		return 'contains(concat(" ", normalize-space(@class), " "), " ' . $element_class . ' ")';
+	}
+
+	/**
+	 * Parses rendered meta box HTML for XPath queries.
+	 *
+	 * @param string $output The rendered meta box HTML.
+	 * @return DOMXPath XPath for the parsed HTML.
+	 */
+	private static function get_xpath( string $output ): DOMXPath {
+		$document       = new DOMDocument();
+		$previous_state = libxml_use_internal_errors( true );
+		$document->loadHTML( '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>' . $output . '</body></html>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_state );
+
+		return new DOMXPath( $document );
+	}
+
+	/**
 	 * @testdox Tooltip should list default excluded statuses (pending payment, failed, cancelled).
 	 */
 	public function test_tooltip_shows_default_excluded_statuses(): void {
@@ -705,6 +1095,28 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'order-attribution-total-orders', $output, 'Should render the metabox template' );
 		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output, 'Should show 1 order from analytics data' );
 		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*100\.00/', $output, 'Should show total spend of 100' );
+	}
+
+	/**
+	 * @testdox CPT fallback should keep showing a single total, because the analytics tables hold no per-currency totals.
+	 */
+	public function test_cpt_fallback_keeps_single_total(): void {
+		$this->use_cpt_orders();
+		update_option( 'woocommerce_currency', 'EUR' );
+
+		\WC_Helper_Reports::reset_stats_dbs();
+		AdminOrder::add_filters();
+
+		$customer_id = $this->factory->user->create();
+		$order       = $this->create_completed_order( $customer_id, 'EUR', 100.00 );
+		OrdersStatsDataStore::sync_order( $order->get_id() );
+
+		$output = $this->render_customer_history( wc_get_order( $order->get_id() ) );
+
+		$this->assertSame( '1', self::get_text( $output, 'order-attribution-total-orders' ), 'Should show the order count from analytics data' );
+		$this->assertSame( '€100.00', self::get_text( $output, 'order-attribution-total-spend' ), 'Should show the single total from analytics data' );
+		$this->assertSame( '€100.00', self::get_text( $output, 'order-attribution-average-order-value' ), 'Should show the single average from analytics data' );
+		$this->assertStringNotContainsString( 'data-currency', $output, 'Legacy order storage should not get per-currency rows' );
 	}
 
 	/**

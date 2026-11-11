@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show bold text as bold in the email editor and in sent emails when the email uses a light text weight.

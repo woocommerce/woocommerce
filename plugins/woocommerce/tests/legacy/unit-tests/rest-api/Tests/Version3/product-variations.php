@@ -66,7 +66,8 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$variations = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $variations ) );
-		$this->assertEquals( 'DUMMY SKU VARIABLE SMALL', $variations[0]['sku'] );
+		// Both variations have menu_order 0, so the newer one (LARGE) comes first, as in the admin variations list.
+		$this->assertEquals( 'DUMMY SKU VARIABLE LARGE', $variations[0]['sku'] );
 		$this->assertEquals( 'size', $variations[0]['attributes'][0]['name'] );
 	}
 
@@ -388,7 +389,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test variation schema.
+	 * @testdox The variation schema includes MPN.
 	 *
 	 * @since 3.5.0
 	 */
@@ -400,7 +401,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 45, count( $properties ) );
+		$this->assertEquals( 46, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'date_created', $properties );
 		$this->assertArrayHasKey( 'date_modified', $properties );
@@ -408,6 +409,7 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'permalink', $properties );
 		$this->assertArrayHasKey( 'sku', $properties );
 		$this->assertArrayHasKey( 'global_unique_id', $properties );
+		$this->assertArrayHasKey( 'mpn', $properties );
 		$this->assertArrayHasKey( 'price', $properties );
 		$this->assertArrayHasKey( 'regular_price', $properties );
 		$this->assertArrayHasKey( 'sale_price', $properties );

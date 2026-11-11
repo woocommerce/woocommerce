@@ -11,6 +11,8 @@ WooCommerce (WC) 2.6+ is fully integrated with the WordPress [REST](http://en.wi
 
 The current WP REST API integration version is `v3` which takes a first-order position in endpoints.
 
+When WooPayments is active, it adds payment-specific endpoints under `/wp-json/wc/v3/payments/`. See the [WooPayments REST API reference](https://automattic.github.io/woocommerce-payments/) for transactions, authorizations, and payouts. Some monetary fields in these endpoints use integer minor units, unlike WooCommerce core's decimal-string values.
+
 ## Requirements
 
 To use the REST API you must be using:
