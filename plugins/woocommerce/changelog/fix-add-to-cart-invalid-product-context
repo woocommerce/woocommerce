@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent invalid add-to-cart shortcodes from clearing the surrounding product context.
