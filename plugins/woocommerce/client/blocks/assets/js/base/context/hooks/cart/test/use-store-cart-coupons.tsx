@@ -624,7 +624,9 @@ describe( 'useStoreCartCoupons hook API integration', () => {
 			await act( async () => {
 				await expect(
 					result.current.applyCoupon( 'NETWORK_FAIL' )
-				).rejects.toThrow();
+				).rejects.toThrow(
+					'Could not get a valid response from the server.'
+				);
 			} );
 			expect( select( validationStore ).hasValidationErrors() ).toBe(
 				false
