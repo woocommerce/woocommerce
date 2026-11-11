@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Orders;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Orders\OrderActionsRestController;
 use WC_Helper_Order;
 use WC_Unit_Test_Case;
@@ -805,6 +806,45 @@ class OrderActionsRestControllerTest extends WC_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 403, $response->get_status() );
+	}
+
+	/**
+	 * A customer who authored the order's post must still be refused on every action route.
+	 */
+	public function test_order_author_customer_is_denied_on_all_actions() {
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+		$this->set_order_post_author( $order->get_id(), $this->user['customer'] );
+
+		wp_set_current_user( $this->user['customer'] );
+		$this->assertTrue(
+			current_user_can( 'read_shop_order', $order->get_id() ), // phpcs:ignore WordPress.WP.Capabilities.Unknown -- shop_order meta cap, not in the sniff's core list.
+			'Fixture must model an order the author can read.'
+		);
+
+		$routes = array(
+			array( 'GET', '/actions/email_templates' ),
+			array( 'POST', '/actions/send_email' ),
+			array( 'POST', '/actions/send_order_details' ),
+		);
+
+		foreach ( $routes as list( $method, $suffix ) ) {
+			$response = $this->server->dispatch( new WP_REST_Request( $method, '/wc/v3/orders/' . $order->get_id() . $suffix ) );
+			$this->assertEquals( 403, $response->get_status(), "$method $suffix should be forbidden for the order author." );
+		}
+	}
+
+	/**
+	 * Record a user as the author of an order's underlying post.
+	 *
+	 * @param int $order_id The order ID.
+	 * @param int $user_id  The user to record as the post author.
+	 */
+	private function set_order_post_author( int $order_id, int $user_id ): void {
+		global $wpdb;
+		$wpdb->update( $wpdb->posts, array( 'post_author' => $user_id ), array( 'ID' => $order_id ) );
+		clean_post_cache( $order_id );
 	}
 
 	/**
