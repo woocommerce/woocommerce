@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\StoreApi\Formatters;
 use Automattic\WooCommerce\Enums\CurrencyPosition;
 use Automattic\WooCommerce\Internal\Utilities\CurrencySymbol;
 use Automattic\WooCommerce\Internal\Utilities\PriceSeparators;
+use Automattic\WooCommerce\Currency\ActiveCurrency;
 
 /**
  * Currency Formatter.
@@ -19,8 +20,9 @@ class CurrencyFormatter implements FormatterInterface {
 	 * @return array
 	 */
 	public function format( $value, array $options = [] ) {
+		$currency = ActiveCurrency::get() ?? get_woocommerce_currency();
 		$position = CurrencySymbol::get_position();
-		$symbol   = CurrencySymbol::get_symbol();
+		$symbol   = CurrencySymbol::get_symbol( $currency );
 		$prefix   = '';
 		$suffix   = '';
 
@@ -42,7 +44,7 @@ class CurrencyFormatter implements FormatterInterface {
 		return array_merge(
 			(array) $value,
 			[
-				'currency_code'               => get_woocommerce_currency(),
+				'currency_code'               => $currency,
 				'currency_symbol'             => $symbol,
 				'currency_minor_unit'         => wc_get_price_decimals(),
 				'currency_decimal_separator'  => PriceSeparators::get_decimal(),

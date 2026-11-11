@@ -345,6 +345,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return $this->get_id();
 		}
 
+		// WC_Order::save() already announces order.save for this order around this call.
+		$active_currency_scope = $this === \Automattic\WooCommerce\Currency\ActiveCurrency::get_subject_of( 'order.save' )
+			? null
+			: \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order.save', $this );
+
 		$persisted             = false;
 		$this->last_save_error = null;
 
@@ -427,6 +432,20 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		foreach ( $chain as $saving_method => $stage_method ) {
 			$this->refuse_unstaged_override( $saving_method, $stage_method );
 		}
+	}
+
+	/**
+	 * Run a stage_*() method for its saving method with this order's currency active, so the no-argument
+	 * formatting and rounding functions use the order's currency while the operation runs.
+	 *
+	 * @since 11.4.0
+	 * @param callable $stage Callback that calls the stage method.
+	 * @return mixed What the stage method returns.
+	 */
+	protected function write_through( callable $stage ) {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency() );
+
+		return parent::write_through( $stage );
 	}
 
 	/**
@@ -1363,6 +1382,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return void
 	 */
 	public function stage_order_items_removal( $type = null ) {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order.stage_order_items_removal', $this );
+
 		$this->refuse_unstaged_override( 'remove_order_items', 'stage_order_items_removal' );
 
 		// Guard against extension code passing non-string values. Anything not
@@ -1946,6 +1967,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return true|WP_Error True if applied, error if not.
 	 */
 	public function apply_coupon( $raw_coupon ) {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order.apply_coupon', $this );
+
 		return $this->write_through(
 			function () use ( $raw_coupon ) {
 				return $this->stage_coupon( $raw_coupon );
@@ -1963,6 +1986,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return true|WP_Error True if applied, error if not.
 	 */
 	public function stage_coupon( $raw_coupon ) {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order.stage_coupon', $this );
+
 		$this->refuse_unstaged_override( 'apply_coupon', 'stage_coupon' );
 		$this->refuse_unstaged_chain( 'recalculate_coupons' );
 
@@ -2140,6 +2165,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return true|WP_Error True if applied, error if not.
 	 */
 	public function apply_coupon_using_edited_totals( $raw_coupon ) {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order.apply_coupon_using_edited_totals', $this );
+
 		// With coupons already applied the subtotal/total difference also contains their
 		// discounts and the manual portion cannot be separated out, so it is left alone.
 		$original_subtotals = empty( $this->get_items( 'coupon' ) ) ? $this->sync_subtotals_with_manually_edited_totals() : array();
@@ -2263,6 +2290,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return bool True if the coupon was removed, false otherwise.
 	 */
 	public function stage_coupon_removal( $code ) {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order.stage_coupon_removal', $this );
+
 		$this->refuse_unstaged_override( 'remove_coupon', 'stage_coupon_removal' );
 		$this->refuse_unstaged_chain( 'recalculate_coupons' );
 
@@ -2396,6 +2425,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return void
 	 */
 	public function recalculate_coupons() {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order.recalculate_coupons', $this );
+
 		$this->write_through(
 			function () {
 				$this->stage_recalculated_coupons();
@@ -2411,6 +2442,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return void
 	 */
 	public function stage_recalculated_coupons() {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order.stage_recalculated_coupons', $this );
+
 		$this->refuse_unstaged_override( 'recalculate_coupons', 'stage_recalculated_coupons' );
 		$this->refuse_unstaged_chain( 'calculate_totals' );
 
@@ -2484,13 +2517,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	private function get_temporary_coupon( WC_Order_Item_Coupon $coupon_item ): WC_Coupon {
 		$coupon_object = new WC_Coupon();
-
 		// Since WooCommerce 8.7 a succinct 'coupon_info' line item meta entry is created
 		// whenever a coupon is applied to an order. Previously a more verbose 'coupon_data' was created.
 
 		$coupon_info = $coupon_item->get_meta( 'coupon_info', true );
 		if ( $coupon_info ) {
 			$coupon_object->set_short_info( $coupon_info );
+			// Amounts in `coupon_info` are in the order currency; legacy `coupon_data` amounts are in the store currency ('').
+			$coupon_object->set_amount_currency( (string) $this->get_currency() );
 			return $coupon_object;
 		}
 
@@ -2658,6 +2692,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return WC_Order_Item_Product The item, saved only when add_product() runs this method.
 	 */
 	public function stage_product_item( $product, $qty = 1, $args = array() ) {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order.stage_product_item', $this );
+
 		$this->refuse_unstaged_override( 'add_product', 'stage_product_item' );
 
 		if ( $product ) {
@@ -2805,6 +2841,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return void
 	 */
 	public function stage_shipping_total() {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order.stage_shipping_total', $this );
+
 		$this->refuse_unstaged_override( 'calculate_shipping', 'stage_shipping_total' );
 
 		$shipping_total = 0;
@@ -2966,6 +3004,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return void
 	 */
 	public function stage_taxes( $args = array() ) {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order.stage_taxes', $this );
+
 		$this->refuse_unstaged_override( 'calculate_taxes', 'stage_taxes' );
 		$this->refuse_unstaged_chain( 'update_taxes' );
 
@@ -3048,6 +3088,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return void
 	 */
 	public function stage_tax_items() {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order.stage_tax_items', $this );
+
 		$this->refuse_unstaged_override( 'update_taxes', 'stage_tax_items' );
 
 		$cart_taxes     = array();
@@ -3161,6 +3203,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float calculated grand total.
 	 */
 	public function calculate_totals( $and_taxes = true ) {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order.calculate_totals', $this );
+
 		return $this->write_through(
 			function () use ( $and_taxes ) {
 				return $this->stage_totals( $and_taxes );
@@ -3182,6 +3226,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float calculated grand total.
 	 */
 	public function stage_totals( $and_taxes = true ) {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $this->get_currency(), 'order.stage_totals', $this );
+
 		$this->refuse_unstaged_override( 'calculate_totals', 'stage_totals' );
 		if ( $and_taxes ) {
 			$this->refuse_unstaged_chain( 'calculate_taxes' );

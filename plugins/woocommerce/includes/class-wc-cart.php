@@ -40,6 +40,13 @@ class WC_Cart extends WC_Legacy_Cart {
 	public $cart_context = 'shortcode';
 
 	/**
+	 * Currency the cart totals are calculated in, or null to use the shopper currency.
+	 *
+	 * @var string|null
+	 */
+	private $currency = null;
+
+	/**
 	 * How many show_shipping() calls are reading the shipping address fields, so a field filter that recalculates the totals cannot nest the reads without limit.
 	 *
 	 * @var int
@@ -1192,6 +1199,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return string|bool $cart_item_key
 	 */
 	public function add_to_cart( $product_id = 0, $quantity = 1, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( $this->get_currency(), 'cart.add_to_cart', $this );
+
 		try {
 			$product_id   = absint( $product_id );
 			$variation_id = absint( $variation_id );
@@ -1611,6 +1620,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function calculate_totals() {
 		$this->reset_totals();
 
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( $this->get_currency(), 'cart.calculate_totals', $this );
+
 		if ( $this->is_empty() ) {
 			$this->session->set_session();
 			return;
@@ -1758,23 +1769,27 @@ class WC_Cart extends WC_Legacy_Cart {
 		$shipping_packages = apply_filters(
 			'woocommerce_cart_shipping_packages',
 			array(
-				array(
-					'contents'        => $this->get_items_needing_shipping(),
-					'contents_cost'   => array_sum( wp_list_pluck( $this->get_items_needing_shipping(), 'line_total' ) ),
-					'applied_coupons' => $this->get_applied_coupons(),
-					'user'            => array(
-						'ID' => get_current_user_id(),
+				array_merge(
+					array(
+						'contents'        => $this->get_items_needing_shipping(),
+						'contents_cost'   => array_sum( wp_list_pluck( $this->get_items_needing_shipping(), 'line_total' ) ),
+						'applied_coupons' => $this->get_applied_coupons(),
+						'user'            => array(
+							'ID' => get_current_user_id(),
+						),
+						'destination'     => array(
+							'country'   => $this->get_customer()->get_shipping_country(),
+							'state'     => $this->get_customer()->get_shipping_state(),
+							'postcode'  => $this->get_customer()->get_shipping_postcode(),
+							'city'      => $this->get_customer()->get_shipping_city(),
+							'address'   => $this->get_customer()->get_shipping_address(), // This is an alias of address_1, provided for backwards compatibility.
+							'address_1' => $this->get_customer()->get_shipping_address_1(),
+							'address_2' => $this->get_customer()->get_shipping_address_2(),
+						),
+						'cart_subtotal'   => $this->get_displayed_subtotal(),
 					),
-					'destination'     => array(
-						'country'   => $this->get_customer()->get_shipping_country(),
-						'state'     => $this->get_customer()->get_shipping_state(),
-						'postcode'  => $this->get_customer()->get_shipping_postcode(),
-						'city'      => $this->get_customer()->get_shipping_city(),
-						'address'   => $this->get_customer()->get_shipping_address(), // This is an alias of address_1, provided for backwards compatibility.
-						'address_1' => $this->get_customer()->get_shipping_address_1(),
-						'address_2' => $this->get_customer()->get_shipping_address_2(),
-					),
-					'cart_subtotal'   => $this->get_displayed_subtotal(),
+					// Only added when the cart is not in the store currency, so packages are unchanged by default.
+					$this->get_currency() !== get_option( 'woocommerce_currency' ) ? array( 'currency' => $this->get_currency() ) : array()
 				),
 			)
 		);
@@ -2410,6 +2425,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return string formatted price
 	 */
 	public function get_product_price( $product ) {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( '', 'cart.product_subtotal', $this );
 		if ( $this->display_prices_including_tax() ) {
 			$product_price = wc_get_price_including_tax( $product );
 		} else {
@@ -2430,6 +2446,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return string formatted price
 	 */
 	public function get_product_subtotal( $product, $quantity ) {
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( '', 'cart.product_subtotal', $this );
 		$price = $product->get_price();
 
 		if ( $product->is_taxable() ) {
@@ -2550,6 +2567,28 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
+	 * Get the currency the cart totals are calculated in. Defaults to the shopper currency.
+	 *
+	 * @since 11.4.0
+	 * @return string
+	 */
+	public function get_currency() {
+		return $this->currency ?? get_woocommerce_currency();
+	}
+
+	/**
+	 * Set the currency the cart totals are calculated in. An empty value restores the shopper currency. Totals are not
+	 * recalculated; call calculate_totals() afterwards.
+	 *
+	 * @since 11.4.0
+	 * @param string $currency Currency code, or an empty string.
+	 * @return void
+	 */
+	public function set_currency( $currency ) {
+		$this->currency = '' === (string) $currency ? null : (string) $currency;
+	}
+
+	/**
 	 * Returns the hash based on cart contents.
 	 *
 	 * @since 3.6.0
@@ -2557,7 +2596,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_cart_hash() {
 		$cart_session = $this->session->get_cart_for_session();
-		$hash         = $cart_session ? md5( wp_json_encode( $cart_session ) . $this->get_total( 'edit' ) ) : '';
+		$hash         = $cart_session ? md5( wp_json_encode( $cart_session ) . $this->get_total( 'edit' ) . $this->get_currency() ) : '';
 		$hash         = apply_filters_deprecated( 'woocommerce_add_to_cart_hash', array( $hash, $cart_session ), '3.6.0', 'woocommerce_cart_hash' );
 
 		return apply_filters( 'woocommerce_cart_hash', $hash, $cart_session );

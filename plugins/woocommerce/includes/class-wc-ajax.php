@@ -2955,8 +2955,10 @@ class WC_AJAX {
 		}
 
 		$order_id               = isset( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
-		$refund_amount          = isset( $_POST['refund_amount'] ) ? wc_format_decimal( sanitize_text_field( wp_unslash( $_POST['refund_amount'] ) ), wc_get_price_decimals() ) : 0;
-		$refunded_amount        = isset( $_POST['refunded_amount'] ) ? wc_format_decimal( sanitize_text_field( wp_unslash( $_POST['refunded_amount'] ) ), wc_get_price_decimals() ) : 0;
+		$order                  = wc_get_order( $order_id );
+		$decimals               = \Automattic\WooCommerce\Currency\ActiveCurrency::run( $order ? (string) $order->get_currency() : '', 'wc_get_price_decimals', 'order.refund_ajax', $order ?: null );
+		$refund_amount          = isset( $_POST['refund_amount'] ) ? wc_format_decimal( sanitize_text_field( wp_unslash( $_POST['refund_amount'] ) ), $decimals ) : 0;
+		$refunded_amount        = isset( $_POST['refunded_amount'] ) ? wc_format_decimal( sanitize_text_field( wp_unslash( $_POST['refunded_amount'] ) ), $decimals ) : 0;
 		$refund_reason          = isset( $_POST['refund_reason'] ) ? sanitize_text_field( wp_unslash( $_POST['refund_reason'] ) ) : '';
 		$line_item_qtys         = isset( $_POST['line_item_qtys'] ) ? json_decode( sanitize_text_field( wp_unslash( $_POST['line_item_qtys'] ) ), true ) : array();
 		$line_item_totals       = isset( $_POST['line_item_totals'] ) ? json_decode( sanitize_text_field( wp_unslash( $_POST['line_item_totals'] ) ), true ) : array();
@@ -2967,19 +2969,17 @@ class WC_AJAX {
 		$response               = array();
 
 		try {
-			$order = wc_get_order( $order_id );
-
 			if ( ! $order instanceof WC_Order ) {
 				throw new Exception( __( 'Invalid order ID.', 'woocommerce' ) );
 			}
 
-			$max_refund = wc_format_decimal( $order->get_total() - $order->get_total_refunded(), wc_get_price_decimals() );
+			$max_refund = wc_format_decimal( $order->get_total() - $order->get_total_refunded(), $decimals );
 
-			if ( ( ! $refund_amount && ( wc_format_decimal( 0, wc_get_price_decimals() ) !== $refund_amount ) ) || $max_refund < $refund_amount || 0 > $refund_amount ) {
+			if ( ( ! $refund_amount && ( wc_format_decimal( 0, $decimals ) !== $refund_amount ) ) || $max_refund < $refund_amount || 0 > $refund_amount ) {
 				throw new Exception( __( 'Invalid refund amount', 'woocommerce' ) );
 			}
 
-			if ( wc_format_decimal( $order->get_total_refunded(), wc_get_price_decimals() ) !== $refunded_amount ) {
+			if ( wc_format_decimal( $order->get_total_refunded(), $decimals ) !== $refunded_amount ) {
 				throw new Exception( __( 'Error processing refund. Please try again.', 'woocommerce' ) );
 			}
 

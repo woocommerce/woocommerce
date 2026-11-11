@@ -22,6 +22,13 @@ require_once __DIR__ . '/legacy/class-wc-legacy-coupon.php';
 class WC_Coupon extends WC_Legacy_Coupon {
 
 	/**
+	 * Currency of the amount, or empty for the store currency. Not saved.
+	 *
+	 * @var string
+	 */
+	private $amount_currency = '';
+
+	/**
 	 * Data array, with defaults.
 	 *
 	 * @since 3.0.0
@@ -486,6 +493,26 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 */
 	public function get_virtual( $context = 'view' ) {
 		return (bool) $this->get_prop( 'virtual', $context );
+	}
+
+	/**
+	 * Get the currency of the coupon amount. An empty string means the store currency.
+	 *
+	 * @return string
+	 */
+	public function get_amount_currency(): string {
+		return $this->amount_currency;
+	}
+
+	/**
+	 * Set the currency of the coupon amount. Not saved; used for coupons rebuilt from order data.
+	 *
+	 * @internal
+	 * @param string $currency Currency code, or an empty string for the store currency.
+	 * @return void
+	 */
+	public function set_amount_currency( string $currency ): void {
+		$this->amount_currency = $currency;
 	}
 
 	/**

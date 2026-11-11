@@ -123,6 +123,11 @@ final class WC_Cart_Session {
 
 		$update_cart_session = false; // Flag to indicate the stored cart should be updated.
 		$order_again         = false; // Flag to indicate whether this is a re-order.
+
+		// The stored totals were calculated in another currency when the shopper currency has changed since.
+		$stored_currency  = WC()->session->get( 'cart_currency', null );
+		$currency_changed = is_string( $stored_currency ) && '' !== $stored_currency && $stored_currency !== $this->cart->get_currency();
+
 		$cart                = WC()->session->get( 'cart', null );
 		$merge_saved_cart    = (bool) get_user_meta( get_current_user_id(), '_woocommerce_load_saved_cart_after_login', true );
 
@@ -300,7 +305,7 @@ final class WC_Cart_Session {
 		 */
 		do_action( 'woocommerce_cart_loaded_from_session', $this->cart );
 
-		if ( $update_cart_session || is_null( WC()->session->get( 'cart_totals', null ) ) ) {
+		if ( $update_cart_session || $currency_changed || is_null( WC()->session->get( 'cart_totals', null ) ) ) {
 			$cart_for_session = $this->get_cart_for_session();
 			WC()->session->set( 'cart', empty( $cart_for_session ) ? null : $cart_for_session );
 			$this->cart->calculate_totals();
@@ -481,6 +486,7 @@ final class WC_Cart_Session {
 		 */
 		$wc_session->set( 'cart_totals', empty( $cart ) ? null : $this->cart->get_totals() );
 		$wc_session->set( 'cart', empty( $cart ) ? null : $cart );
+		$wc_session->set( 'cart_currency', empty( $cart ) ? null : $this->cart->get_currency() );
 		$wc_session->set( 'applied_coupons', empty( $applied_coupons ) ? null : $applied_coupons );
 		$wc_session->set( 'coupon_discount_totals', empty( $coupon_discount_totals ) ? null : $coupon_discount_totals );
 		$wc_session->set( 'coupon_discount_tax_totals', empty( $coupon_discount_tax_totals ) ? null : $coupon_discount_tax_totals );
@@ -499,8 +505,11 @@ final class WC_Cart_Session {
 		 * Fires when cart is updated.
 		 *
 		 * @since 3.2.0
+		 * @since 11.4.0 Passes the cart as an argument.
+		 *
+		 * @param WC_Cart $cart The cart object.
 		 */
-		do_action( 'woocommerce_cart_updated' );
+		do_action( 'woocommerce_cart_updated', $this->cart );
 	}
 
 	/**

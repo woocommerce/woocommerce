@@ -109,6 +109,40 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Temporary coupons rebuilt from `coupon_info` use the order currency, those from legacy `coupon_data` the store currency.
+	 */
+	public function test_recalculate_coupons_temporary_coupon_amount_currency(): void {
+		$captured = array();
+		$callback = static function ( $coupon_object ) use ( &$captured ) {
+			$captured[] = $coupon_object->get_amount_currency();
+			return $coupon_object;
+		};
+		add_filter( 'woocommerce_order_recalculate_coupons_coupon_object', $callback );
+
+		try {
+			foreach ( array( 'coupon_info', 'coupon_data' ) as $meta_key ) {
+				$order = WC_Helper_Order::create_order();
+				$order->set_currency( 'EUR' );
+				$item = new WC_Order_Item_Coupon();
+				$item->set_code( 'missing_coupon_' . $meta_key );
+				$item->set_discount( 5 );
+				if ( 'coupon_info' === $meta_key ) {
+					$item->add_meta_data( 'coupon_info', wp_json_encode( array( 0, 'missing_coupon_coupon_info', 10, 'fixed_cart' ) ) );
+				} else {
+					$item->add_meta_data( 'coupon_data', array( 'amount' => '10', 'discount_type' => 'fixed_cart' ) );
+				}
+				$order->add_item( $item );
+				$order->save();
+				$order->recalculate_coupons();
+			}
+		} finally {
+			remove_filter( 'woocommerce_order_recalculate_coupons_coupon_object', $callback );
+		}
+
+		$this->assertSame( array( 'EUR', '' ), $captured );
+	}
+
+	/**
 	 * @testdox Order and refund defaults capture the store tax mode without pending changes.
 	 * @dataProvider provide_order_tax_defaults
 	 *

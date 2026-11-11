@@ -1537,6 +1537,7 @@ function wc_get_product_term_ids( $product_id, $taxonomy ) {
  * @return float|string Price with tax included, or an empty string if price calculation failed.
  */
 function wc_get_price_including_tax( $product, $args = array() ) {
+	$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( '', 'product.price_for_display', $product );
 	$args = wp_parse_args(
 		$args,
 		array(
@@ -1624,6 +1625,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
  * @return float|string Price with tax excluded, or an empty string if price calculation failed.
  */
 function wc_get_price_excluding_tax( $product, $args = array() ) {
+	$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( '', 'product.price_for_display', $product );
 	if ( ! ( $product instanceof WC_Product ) ) {
 		return '';
 	}
@@ -1707,6 +1709,7 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
  * @return float
  */
 function wc_get_price_to_display( $product, $args = array() ) {
+	$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( '', 'product.price_for_display', $product );
 	$args = wp_parse_args(
 		$args,
 		array(

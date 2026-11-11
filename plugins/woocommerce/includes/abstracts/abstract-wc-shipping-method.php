@@ -254,6 +254,9 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @return array
 	 */
 	public function get_rates_for_package( $package ) {
+		// Methods compute rates in the store currency. Multi-currency plugins convert them when add_rate() is called.
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) get_option( 'woocommerce_currency' ), 'shipping.rates', $this );
+
 		$this->rates = array();
 		if ( $this->is_available( $package ) && ( empty( $package['ship_via'] ) || in_array( $this->id, $package['ship_via'] ) ) ) {
 			$this->calculate_shipping( $package );

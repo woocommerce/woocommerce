@@ -122,6 +122,13 @@ final class WooCommerce {
 	private $wp_admin_settings_registrars = array();
 
 	/**
+	 * Request context type announced by the woocommerce_request_context action, or null before it fires.
+	 *
+	 * @var string|null
+	 */
+	private $request_context = null;
+
+	/**
 	 * Product factory instance.
 	 *
 	 * @var WC_Product_Factory
@@ -1028,6 +1035,40 @@ final class WooCommerce {
 	}
 
 	/**
+	 * Get the type of the current request, as announced by the woocommerce_request_context action.
+	 *
+	 * @since 11.4.0
+	 * @return string|null One of store_api, rest, cron, ajax, admin or frontend. Null before the action fires.
+	 */
+	public function get_request_context() {
+		return $this->request_context;
+	}
+
+	/**
+	 * Classify the current request. Checks run in priority order: Store API, REST, cron, AJAX, admin, then frontend.
+	 *
+	 * @return string
+	 */
+	private function determine_request_context(): string {
+		if ( $this->is_store_api_request() ) {
+			return 'store_api';
+		}
+		if ( $this->is_rest_api_request() ) {
+			return 'rest';
+		}
+		if ( wp_doing_cron() ) {
+			return 'cron';
+		}
+		if ( wp_doing_ajax() ) {
+			return 'ajax';
+		}
+		if ( is_admin() ) {
+			return 'admin';
+		}
+		return 'frontend';
+	}
+
+	/**
 	 * Init WooCommerce when WordPress Initialises.
 	 *
 	 * @return void
@@ -1052,6 +1093,17 @@ final class WooCommerce {
 		$this->structured_data                     = new WC_Structured_Data();
 		$this->deprecated_hook_handlers['actions'] = new WC_Deprecated_Action_Hooks();
 		$this->deprecated_hook_handlers['filters'] = new WC_Deprecated_Filter_Hooks();
+
+		$this->request_context = $this->determine_request_context();
+
+		/**
+		 * Fires once the type of the current request is known, before the cart is loaded.
+		 *
+		 * @since 11.4.0
+		 * @param string $type           Request type: store_api, rest, cron, ajax, admin or frontend.
+		 * @param bool   $has_cart_token Whether the request sent a non-empty Cart-Token header.
+		 */
+		do_action( 'woocommerce_request_context', $this->request_context, '' !== \Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils::get_request_cart_token() ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 		// Classes/actions loaded for the frontend and for ajax requests.
 		if ( $this->is_request( 'frontend' ) ) {

@@ -521,7 +521,7 @@ function wc_is_stock_amount_integer() {
  * @return string
  */
 function get_woocommerce_price_format() {
-	$currency_pos = get_option( 'woocommerce_currency_pos' );
+	$currency_pos = \Automattic\WooCommerce\Internal\Utilities\PriceFormat::get_position();
 	$format       = '%1$s%2$s';
 
 	switch ( $currency_pos ) {
@@ -539,7 +539,7 @@ function get_woocommerce_price_format() {
 			break;
 	}
 
-	return apply_filters( 'woocommerce_price_format', $format, $currency_pos );
+	return apply_filters( 'woocommerce_price_format', $format, $currency_pos, ...\Automattic\WooCommerce\Currency\ActiveCurrency::formatting_args() );
 }
 
 /**
@@ -549,7 +549,7 @@ function get_woocommerce_price_format() {
  * @return string
  */
 function wc_get_price_thousand_separator() {
-	return stripslashes( apply_filters( 'wc_get_price_thousand_separator', get_option( 'woocommerce_price_thousand_sep' ) ) );
+	return stripslashes( apply_filters( 'wc_get_price_thousand_separator', get_option( 'woocommerce_price_thousand_sep' ), ...\Automattic\WooCommerce\Currency\ActiveCurrency::formatting_args() ) );
 }
 
 /**
@@ -559,7 +559,7 @@ function wc_get_price_thousand_separator() {
  * @return string
  */
 function wc_get_price_decimal_separator() {
-	$separator = apply_filters( 'wc_get_price_decimal_separator', get_option( 'woocommerce_price_decimal_sep' ) );
+	$separator = apply_filters( 'wc_get_price_decimal_separator', get_option( 'woocommerce_price_decimal_sep' ), ...\Automattic\WooCommerce\Currency\ActiveCurrency::formatting_args() );
 	return $separator ? stripslashes( $separator ) : '.';
 }
 
@@ -570,7 +570,7 @@ function wc_get_price_decimal_separator() {
  * @return int
  */
 function wc_get_price_decimals() {
-	return absint( apply_filters( 'wc_get_price_decimals', get_option( 'woocommerce_price_num_decimals', 2 ) ) );
+	return absint( apply_filters( 'wc_get_price_decimals', get_option( 'woocommerce_price_num_decimals', 2 ), ...\Automattic\WooCommerce\Currency\ActiveCurrency::formatting_args() ) );
 }
 
 /**
@@ -599,19 +599,33 @@ function wc_get_price_decimals() {
  * @return string
  */
 function wc_price( $price, $args = array() ) {
-	$args = apply_filters(
-		'wc_price_args',
-		wp_parse_args(
-			$args,
-			array(
-				'ex_tax_label'       => false,
-				'currency'           => '',
+	$currency_code = is_array( $args ) && ! empty( $args['currency'] ) ? (string) $args['currency'] : '';
+	$lookups       = \Automattic\WooCommerce\Currency\ActiveCurrency::run(
+		$currency_code,
+		static function () {
+			return array(
 				'decimal_separator'  => wc_get_price_decimal_separator(),
 				'thousand_separator' => wc_get_price_thousand_separator(),
 				'decimals'           => wc_get_price_decimals(),
 				'price_format'       => get_woocommerce_price_format(),
-				'in_span'            => true,
-				'aria-hidden'        => false,
+			);
+		},
+		'price.format'
+	);
+	$args          = apply_filters(
+		'wc_price_args',
+		wp_parse_args(
+			$args,
+			array_merge(
+				array(
+					'ex_tax_label' => false,
+					'currency'     => '',
+				),
+				$lookups,
+				array(
+					'in_span'     => true,
+					'aria-hidden' => false,
+				)
 			)
 		)
 	);

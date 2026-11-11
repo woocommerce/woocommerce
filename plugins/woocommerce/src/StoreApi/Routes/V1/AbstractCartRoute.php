@@ -203,6 +203,14 @@ abstract class AbstractCartRoute extends AbstractRoute {
 			throw new \RuntimeException( 'The cart is unavailable after its session failed to load.' );
 		}
 
+		/**
+		 * Fires before the cart session is loaded for a Store API cart route request.
+		 *
+		 * @since 11.4.0
+		 * @param \WP_REST_Request $request Request object.
+		 */
+		do_action( 'woocommerce_store_api_before_load_cart_session', $request );
+
 		try {
 			if ( $this->has_cart_token( $request ) ) {
 				// Overrides the core session class.

@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+PoC: track the active currency, request context and currency operations in core. Not for merge.

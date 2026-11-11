@@ -82,7 +82,10 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 		include_once WC()->plugin_path() . '/includes/libraries/class-wc-eval-math.php';
 
-		// Allow 3rd parties to process shipping cost arguments.
+		// Allow 3rd parties to process shipping cost arguments. The currency describes the `cost` value.
+		if ( is_array( $args ) && ! isset( $args['currency'] ) ) {
+			$args['currency'] = get_option( 'woocommerce_currency' );
+		}
 		$args           = apply_filters( 'woocommerce_evaluate_shipping_cost_args', $args, $sum, $this );
 		$locale         = localeconv();
 		$decimals       = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'], ',' );
@@ -201,9 +204,10 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			$rate['cost'] = $this->evaluate_cost(
 				$cost,
 				array(
-					'qty'    => $this->get_package_item_qty( $package ),
-					'cost'   => $package['contents_cost'],
-					'weight' => $this->get_weight_placeholder()->get_for_package( $package ),
+					'qty'      => $this->get_package_item_qty( $package ),
+					'cost'     => $package['contents_cost'],
+					'currency' => $package['currency'] ?? get_option( 'woocommerce_currency' ),
+					'weight'   => $this->get_weight_placeholder()->get_for_package( $package ),
 				)
 			);
 		}
@@ -228,9 +232,10 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				$class_cost = $this->evaluate_cost(
 					$class_cost_string,
 					array(
-						'qty'    => array_sum( wp_list_pluck( $products, 'quantity' ) ),
-						'cost'   => array_sum( wp_list_pluck( $products, 'line_total' ) ),
-						'weight' => $this->get_weight_placeholder()->get_for_items( $products ),
+						'qty'      => array_sum( wp_list_pluck( $products, 'quantity' ) ),
+						'cost'     => array_sum( wp_list_pluck( $products, 'line_total' ) ),
+						'currency' => $package['currency'] ?? get_option( 'woocommerce_currency' ),
+						'weight'   => $this->get_weight_placeholder()->get_for_items( $products ),
 					)
 				);
 
