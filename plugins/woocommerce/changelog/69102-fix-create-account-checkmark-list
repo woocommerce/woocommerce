@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Show checkmarks in the order confirmation Create Account list with every theme, not only Twenty Twenty-Four and Twenty Twenty-Five.
+Stop adding the theme-specific checkmark list style to the order confirmation Create Account list, so it shows as a plain list in every theme.
