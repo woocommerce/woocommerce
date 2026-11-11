@@ -32,6 +32,10 @@ The [Block Script Assets](block-assets.md) document elucidates how Block Script 
 
 Our [JavaScript Build System](javascript-build-system.md) guide offers a detailed explanation of how JavaScript files are built. This is a crucial read for understanding the behind-the-scenes operations of your code.
 
+### [Motion](motion.md)
+
+The [Motion](motion.md) guide lists the motion tokens and the rules for animation in the Cart and Checkout blocks, including how reduced motion is handled.
+
 ### [CSS Build System](css-build-system.md)
 
 Last but not least, to get an insight into how CSS is built, refer to the [CSS Build System](css-build-system.md) guide. A firm grasp of this will ensure your CSS files meet the standards and quality expected.
