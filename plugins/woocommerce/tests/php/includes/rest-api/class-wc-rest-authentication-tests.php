@@ -299,7 +299,6 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 			$this->assertEquals( 1, $this->sut->authenticate( false ), 'The same key must authenticate once WordPress is dispatching the request as REST.' );
 		} finally {
 			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'consumer_key' => wc_api_hash( $consumer_key ) ) );
-			unset( $_SERVER['HTTPS'], $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] );
 		}
 	}
 
@@ -592,9 +591,6 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 	public function test_reject_out_of_scope_route_rejects_method_override_to_foreign_route(): void {
 		global $wp;
 
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Saved and restored verbatim, never output or stored.
-		$original_method = $_SERVER['REQUEST_METHOD'] ?? null;
-
 		// The scope check ignores the HTTP method, including a '_method' override in the query string,
 		// and only compares the resolved route to the one the URI names. A resolved route the URI never
 		// named is rejected either way.
@@ -604,18 +600,10 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->authenticate_as( 1 );
 
-		try {
-			$result = $this->sut->reject_out_of_scope_route( null );
+		$result = $this->sut->reject_out_of_scope_route( null );
 
-			$this->assertWPError( $result, 'A method override must not let a key reach a route the URI never named.' );
-			$this->assertSame( 'woocommerce_rest_authentication_error', $result->get_error_code() );
-		} finally {
-			if ( null === $original_method ) {
-				unset( $_SERVER['REQUEST_METHOD'] );
-			} else {
-				$_SERVER['REQUEST_METHOD'] = $original_method;
-			}
-		}
+		$this->assertWPError( $result, 'A method override must not let a key reach a route the URI never named.' );
+		$this->assertSame( 'woocommerce_rest_authentication_error', $result->get_error_code() );
 	}
 
 	/**
@@ -659,7 +647,6 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 			$this->assertSame( 401, $result->get_error_data()['status'] );
 		} finally {
 			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'consumer_key' => wc_api_hash( $consumer_key ) ) );
-			unset( $_SERVER['HTTPS'], $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] );
 			wp_set_current_user( 0 );
 		}
 	}
@@ -707,7 +694,6 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 			$this->assertTrue( $authenticated, 'The fallback must still authenticate a genuine WooCommerce route.' );
 		} finally {
 			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'consumer_key' => wc_api_hash( $consumer_key ) ) );
-			unset( $_SERVER['HTTPS'], $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] );
 			wp_set_current_user( 0 );
 		}
 	}
@@ -758,7 +744,6 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 		} finally {
 			remove_filter( 'rest_authentication_errors', '__return_true', 5 );
 			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'consumer_key' => wc_api_hash( $consumer_key ) ) );
-			unset( $_SERVER['HTTPS'], $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] );
 			wp_set_current_user( 0 );
 		}
 	}
@@ -814,7 +799,6 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 		} finally {
 			$wp_rest_application_password_status = $original_status;
 			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'consumer_key' => wc_api_hash( $consumer_key ) ) );
-			unset( $_SERVER['HTTPS'], $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'] );
 			wp_set_current_user( 0 );
 		}
 	}
