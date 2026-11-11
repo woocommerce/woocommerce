@@ -303,8 +303,7 @@ class FeaturesController {
 
 	/**
 	 * Initialize the hardcoded feature definitions array.
-	 * This doesn't include features whose definition comes from another class. These are initialized directly in get_feature_definitions
-	 *   to avoid circular calls in the dependency injection container.
+	 * This doesn't include features whose definition comes from another class. These are initialized directly in get_feature_definitions to avoid circular calls in the dependency injection container.
 	 */
 	private function init_feature_definitions(): void {
 		$alpha_feature_testing_is_enabled = Constants::is_true( 'WOOCOMMERCE_ENABLE_ALPHA_FEATURE_TESTING' );
