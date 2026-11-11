@@ -178,7 +178,7 @@ class PaymentGatewayUpdate extends AbstractDomainAbility implements AbilityDefin
 
 		try {
 			// get_field_value() expects slashed form data.
-			return (string) $gateway->get_field_value( 'title', $field, array( $gateway->get_field_key( 'title' ) => wp_slash( $title ) ) );
+			$value = (string) $gateway->get_field_value( 'title', $field, array( $gateway->get_field_key( 'title' ) => wp_slash( $title ) ) );
 		} catch ( \Exception $e ) {
 			return new \WP_Error(
 				'woocommerce_ability_payment_gateway_title_invalid',
@@ -186,6 +186,17 @@ class PaymentGatewayUpdate extends AbstractDomainAbility implements AbilityDefin
 				array( 'status' => 400 )
 			);
 		}
+
+		// The schema's minLength runs before sanitizing, which can empty a whitespace or markup-only title.
+		if ( '' === trim( $value ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_payment_gateway_title_invalid',
+				__( 'The title is empty once markup and whitespace are removed. Send a title with visible text.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		return $value;
 	}
 
 	/**
