@@ -884,13 +884,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 *
 	 * @param string $value Field value.
 	 *
-	 * @return string|null
+	 * @return string|null Null for an invalid date, an empty string for an empty value.
 	 */
 	public function parse_date_on_sale_to_field( $value ) {
 		$parsed = $this->parse_datetime_field( $value );
 
-		if ( null === $parsed ) {
-			return null;
+		// Null for an invalid date, or an empty string that clears the date.
+		if ( null === $parsed || '' === $parsed ) {
+			return $parsed;
 		}
 
 		// date_parse() reports hour=0 for "Monday, January 26, 2099", so strip the weekday before probing.

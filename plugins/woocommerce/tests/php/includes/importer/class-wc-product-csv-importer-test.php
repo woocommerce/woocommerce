@@ -1981,13 +1981,13 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Empty / invalid "date on sale to" values are returned as null.
+	 * @testdox An empty "date on sale to" value is returned as an empty string, so it clears the date, and an invalid one as null.
 	 */
 	public function test_parse_date_on_sale_to_field_empty_and_invalid() {
 		$csv_file = __DIR__ . '/sample.csv';
 		$importer = new WC_Product_CSV_Importer( $csv_file );
 
-		$this->assertNull( $importer->parse_date_on_sale_to_field( '' ) );
+		$this->assertSame( '', $importer->parse_date_on_sale_to_field( '' ) );
 		$this->assertNull( $importer->parse_date_on_sale_to_field( 'not-a-date' ) );
 	}
 
