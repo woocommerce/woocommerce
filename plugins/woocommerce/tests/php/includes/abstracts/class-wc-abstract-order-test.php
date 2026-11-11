@@ -2946,6 +2946,47 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 	/**
 	 * @dataProvider order_storage_provider
+	 * @testdox Updating an existing order in an exception status to a status exceeding storage limit preserves exception status.
+	 *
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_updating_existing_order_in_exception_status_preserves_status( bool $hpos_enabled ): void {
+		$prev_hpos = OrderUtil::custom_orders_table_usage_is_enabled();
+		OrderHelper::toggle_cot_feature_and_usage( $hpos_enabled );
+
+		try {
+			// 'wc-' + 23 characters = 26, well over the 20-character storage limit.
+			$too_long_status = 'awaiting-carrier-pickup';
+			$this->register_custom_order_status( $too_long_status );
+
+			foreach ( array( OrderStatus::TRASH, OrderStatus::AUTO_DRAFT ) as $exception_status ) {
+				$order = WC_Helper_Order::create_order();
+				$order->set_status( $exception_status );
+				$order->save();
+
+				$this->assertSame( $exception_status, $order->get_status() );
+
+				// Direct set_status() should preserve the exception status and warn.
+				$this->setExpectedIncorrectUsage( 'WC_Abstract_Order::set_status' );
+				$order->set_status( $too_long_status );
+				$this->assertSame( $exception_status, $order->get_status() );
+				$order->save();
+				$this->assertSame( $exception_status, wc_get_order( $order->get_id() )->get_status() );
+
+				// update_status() should return false, warn, and preserve the exception status.
+				$this->setExpectedIncorrectUsage( 'WC_Abstract_Order::set_status' );
+				$result = $order->update_status( $too_long_status );
+				$this->assertFalse( $result, 'update_status() must return false when the requested status could not be applied.' );
+				$this->assertSame( $exception_status, $order->get_status() );
+				$this->assertSame( $exception_status, wc_get_order( $order->get_id() )->get_status() );
+			}
+		} finally {
+			OrderHelper::toggle_cot_feature_and_usage( $prev_hpos );
+		}
+	}
+
+	/**
+	 * @dataProvider order_storage_provider
 	 * @testdox Updating an existing order to a status exceeding storage limit preserves status, warns, and update_status() returns false.
 	 *
 	 * @param bool $hpos_enabled Whether HPOS is enabled.

@@ -579,10 +579,14 @@ class WC_Order extends WC_Abstract_Order {
 			return false;
 		}
 
+		$status_accepted = false;
+
 		try {
 			$this->write_through(
-				function () use ( $new_status, $note, $manual ) {
-					return $this->stage_status( $new_status, $note, $manual );
+				function () use ( $new_status, $note, $manual, &$status_accepted ) {
+					$transition      = $this->stage_status( $new_status, $note, $manual );
+					$status_accepted = ( $transition['to'] ?? '' ) === OrderUtil::remove_status_prefix( (string) $new_status );
+					return $transition;
 				}
 			);
 			$this->save();
@@ -607,7 +611,7 @@ class WC_Order extends WC_Abstract_Order {
 			return false;
 		}
 
-		return $this->get_status() === OrderUtil::remove_status_prefix( (string) $new_status );
+		return $status_accepted;
 	}
 
 	/**

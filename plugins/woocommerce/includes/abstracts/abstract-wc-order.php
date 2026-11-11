@@ -1150,7 +1150,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			);
 
 			$stored_status = $this->get_status( 'edit' );
-			if ( $this->get_id() && $stored_status && ! in_array( $stored_status, $status_exceptions, true ) && strlen( 'wc-' . $stored_status ) <= 20 ) {
+			if ( $this->get_id() && $stored_status && strlen( 'wc-' . $stored_status ) <= 20 ) {
 				$new_status = $stored_status;
 				$old_status = $stored_status;
 			} else {
