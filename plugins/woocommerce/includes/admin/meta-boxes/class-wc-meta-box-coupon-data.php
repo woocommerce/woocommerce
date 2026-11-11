@@ -396,7 +396,7 @@ class WC_Meta_Box_Coupon_Data {
 		}
 
 		if ( '' === trim( $coupon_code ) ) {
-			WC_Admin_Meta_Boxes::add_error( __( 'Coupon code is required. Coupons without a code are saved as drafts.', 'woocommerce' ) );
+			WC_Admin_Meta_Boxes::add_error( __( 'A coupon code is required before the coupon can be published.', 'woocommerce' ) );
 		}
 
 		$coupon->save();

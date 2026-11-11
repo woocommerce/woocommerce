@@ -93,7 +93,7 @@ class WC_Meta_Box_Coupon_Data_Test extends WC_Unit_Test_Case {
 
 		WC_Meta_Box_Coupon_Data::save( $post_id, $post );
 
-		$this->assertContains( 'Coupon code is required. Coupons without a code are saved as drafts.', WC_Admin_Meta_Boxes::$meta_box_errors );
+		$this->assertContains( 'A coupon code is required before the coupon can be published.', WC_Admin_Meta_Boxes::$meta_box_errors );
 		$this->assertSame( 'draft', get_post_status( $post_id ) );
 	}
 
