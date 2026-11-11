@@ -12,7 +12,6 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
  * It's responsible to render the attribute name.
  */
 class VariationSelectorAttributeName extends AbstractBlock {
-
 	use EnableBlockJsonAssetsTrait;
 
 	/**
