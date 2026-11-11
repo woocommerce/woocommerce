@@ -102,7 +102,7 @@ class WooCommerceAnalyticsProxySpeed {
 	/**
 	 * Check if the shopper denied statistics consent, as recorded in the WP Consent API consent cookie.
 	 *
-	 * Mirrors Consent_Manager's check, but only a prefix filter added by an earlier MU-plugin is registered this early.
+	 * Unlike Consent_Manager, this reads the cookie whatever the consent type, which is not known yet. Only a prefix filter added by an earlier MU-plugin applies this early.
 	 *
 	 * @return bool
 	 */
