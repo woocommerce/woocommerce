@@ -10,7 +10,7 @@ $wc-scale-pulse-peak: 1.05;
 $wc-scale-icon-from: 0.8;
 $wc-blur-icon: 4px;
 
-// Rows after this number share the last stagger step (rule 3).
+// Rows after this number share the last stagger step, so long lists do not wait.
 $wc-stagger-cap: 7;
 
 @mixin motion-safe() {
@@ -106,7 +106,7 @@ $wc-stagger-cap: 7;
 	}
 }
 
-// A button that loads (rules 16, 18). The label text fades out, and the spinner grows in. The spinner is inside the
+// A button that loads. The label text fades out, and the spinner grows in. The spinner is inside the
 // label, so only the text fill fades, and the label stays visible until the fade ends.
 @mixin motion-spinner-swap() {
 	.wc-block-components-button__text {
@@ -137,7 +137,7 @@ $wc-stagger-cap: 7;
 	@return calc((var(--wc-motion-index) + #{$extra}) * var(--wpds-motion-duration-xs));
 }
 
-// Sibling rows enter in sequence, 50ms apart (rule 3).
+// Sibling rows enter in sequence, 50ms apart.
 @mixin motion-stagger($keyframes: wc-rise) {
 	@include motion-stagger-index;
 	@include motion-enter($keyframes, $delay: motion-stagger-delay());
