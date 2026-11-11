@@ -72,7 +72,12 @@ Position an element that grows or shrinks with `translate`, not `transform`. The
 
 Use `@starting-style` with transitions for an element that is new on the page, such as a dropdown. Then all of its motion is a transition, and a transition turns around by itself. This also applies to an element that changes from `display: none` to visible. Use keyframes for motion that only exists while it animates, such as a row that rises in.
 
-Motion that changes the layout runs in JavaScript, because it must measure sizes. JavaScript helpers use the same tokens. They end immediately when nothing animates, and in Jest. This section lists the JavaScript helpers when they are added.
+Motion that changes the layout runs in JavaScript, because it must measure sizes. JavaScript helpers use the same tokens. They end immediately when nothing animates, and in Jest.
+
+| Helper | Use | Example |
+|--------|-----|---------|
+| `whenAnimationsEnd( element, callback )` (`@woocommerce/base-utils`) | Runs `callback` when the transitions and animations of `element` end, instead of after a fixed timeout. It ignores finished, cancelled, and looping animations, and waits again if a transition turns around. It returns a function that cancels the callback. | `addEndListener={ ( done ) => whenAnimationsEnd( ref.current, done ) }` on a `CSSTransition` in the snackbar list |
+| `usePresence( value, { exit } )` (`@woocommerce/base-hooks`) | Keeps content mounted while it animates out. Pass the content, or `null` to remove it. It returns `{ value, isExiting, ref }`: render `value`, style the exit on `isExiting`, and put `ref` on the element that animates. If content arrives again first, the exit turns around. Pass `exit: false` to remove the content immediately, for example after a key press. | The address autocomplete suggestions |
 
 ## Reduced motion
 

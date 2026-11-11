@@ -70,6 +70,8 @@ Each of these traps caused a bug before.
 - **When DOM moves to a different parent, its CSS animations start again.** After the move, finish the animations that are not loops.
 - **A notice can show for one frame during a state change.** It moves the content around it, and the motion makes this easy to see. Fix the cause: create the notice only after the state is stable. Do not animate the notice.
 - **Jest has no Web Animations API, layout, or `ResizeObserver`.** In Jest, each helper must end immediately and must not throw an error.
+- **`react-transition-group` uses `findDOMNode` without `nodeRef`.** React deprecates it, and the warning fails Jest tests in StrictMode. Give each `CSSTransition` a `nodeRef`, and wait for the animations in `addEndListener`.
+- **A fake animation in Jest must change its `playState` when it finishes.** If not, a helper that waits for animations that are in progress waits forever, and the test does not end.
 
 ## Checklist
 
