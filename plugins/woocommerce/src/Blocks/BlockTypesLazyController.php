@@ -266,10 +266,10 @@ final class BlockTypesLazyController {
 			'add-to-cart-with-options-variation-description'             => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationDescription::class,
 			'add-to-cart-with-options-variation-selector'                => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelector::class,
 			'add-to-cart-with-options-variation-selector-attribute-name' => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelectorAttributeName::class,
-			'add-to-cart-with-options-grouped-product-selector'         => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\GroupedProductSelector::class,
-			'add-to-cart-with-options-grouped-product-item'             => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\GroupedProductItem::class,
-			'add-to-cart-with-options-grouped-product-item-selector'    => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\GroupedProductItemSelector::class,
-			'add-to-cart-with-options-grouped-product-item-label'       => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\GroupedProductItemLabel::class,
+			'add-to-cart-with-options-grouped-product-selector'          => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\GroupedProductSelector::class,
+			'add-to-cart-with-options-grouped-product-item'              => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\GroupedProductItem::class,
+			'add-to-cart-with-options-grouped-product-item-selector'     => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\GroupedProductItemSelector::class,
+			'add-to-cart-with-options-grouped-product-item-label'        => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\GroupedProductItemLabel::class,
 		);
 		if ( ! is_admin() ) {
 			// AddToCartWithOptions: overrides enqueue_data() with editor-visible product types and template part IDs, hence load eager in admin.
