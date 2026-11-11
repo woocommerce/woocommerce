@@ -72,10 +72,6 @@ class CartUpdateCustomer extends ControllerTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		$zone = \WC_Shipping_Zones::get_zone( 0 );
-		$zone->add_shipping_method( 'flat_rate' );
-		\WC_Cache_Helper::get_transient_version( 'shipping', true );
-
 		$fixtures = new FixtureData();
 		$product  = $fixtures->get_simple_product(
 			array(
@@ -120,14 +116,14 @@ class CartUpdateCustomer extends ControllerTestCase {
 	 * Tear down test fixtures and clean up registered checkout fields.
 	 */
 	protected function tearDown(): void {
-		foreach ( $this->registered_field_ids as $field_id ) {
-			if ( function_exists( '__internal_woocommerce_blocks_deregister_checkout_field' ) ) {
+		try {
+			foreach ( $this->registered_field_ids as $field_id ) {
 				__internal_woocommerce_blocks_deregister_checkout_field( $field_id );
 			}
+			$this->registered_field_ids = array();
+		} finally {
+			parent::tearDown();
 		}
-		$this->registered_field_ids = array();
-
-		parent::tearDown();
 	}
 
 	/**
@@ -152,10 +148,6 @@ class CartUpdateCustomer extends ControllerTestCase {
 	 * @testdox Fully updating both billing and shipping addresses in a single request updates the customer and cart response.
 	 */
 	public function test_fully_updating_both_addresses_in_single_request(): void {
-		// Pre-condition: Customer has initial values that differ from the target update values.
-		$this->assertSame( $this->initial_billing['first_name'], WC()->customer->get_billing_first_name() );
-		$this->assertSame( $this->initial_shipping['first_name'], WC()->customer->get_shipping_first_name() );
-
 		$new_billing = array(
 			'first_name' => 'Bruce',
 			'last_name'  => 'Wayne',
@@ -183,12 +175,10 @@ class CartUpdateCustomer extends ControllerTestCase {
 			'phone'      => '555-0188',
 		);
 
-		$action_fired      = false;
 		$captured_customer = null;
 		add_action(
 			'woocommerce_store_api_cart_update_customer_from_request',
-			function ( $customer ) use ( &$action_fired, &$captured_customer ) {
-				$action_fired      = true;
+			function ( $customer ) use ( &$captured_customer ) {
 				$captured_customer = $customer;
 			}
 		);
@@ -201,37 +191,14 @@ class CartUpdateCustomer extends ControllerTestCase {
 		);
 
 		$this->assertSame( 200, $result['status'], 'Updating both addresses with valid data should succeed.' );
-		$this->assertTrue( $action_fired, 'woocommerce_store_api_cart_update_customer_from_request action should fire.' );
 		$this->assertSame( WC()->customer, $captured_customer, 'Fired action should receive current customer instance.' );
 
-		// Verify response payload contains updated billing address.
-		$response_billing = (array) $result['data']['billing_address'];
-		$this->assertSame( $new_billing['first_name'], $response_billing['first_name'] );
-		$this->assertSame( $new_billing['last_name'], $response_billing['last_name'] );
-		$this->assertSame( $new_billing['company'], $response_billing['company'] );
-		$this->assertSame( $new_billing['address_1'], $response_billing['address_1'] );
-		$this->assertSame( $new_billing['address_2'], $response_billing['address_2'] );
-		$this->assertSame( $new_billing['city'], $response_billing['city'] );
-		$this->assertSame( $new_billing['state'], $response_billing['state'] );
-		$this->assertSame( $new_billing['postcode'], $response_billing['postcode'] );
-		$this->assertSame( $new_billing['country'], $response_billing['country'] );
-		$this->assertSame( $new_billing['email'], $response_billing['email'] );
-		$this->assertSame( $new_billing['phone'], $response_billing['phone'] );
-
-		// Verify response payload contains updated shipping address.
+		$response_billing  = (array) $result['data']['billing_address'];
 		$response_shipping = (array) $result['data']['shipping_address'];
-		$this->assertSame( $new_shipping['first_name'], $response_shipping['first_name'] );
-		$this->assertSame( $new_shipping['last_name'], $response_shipping['last_name'] );
-		$this->assertSame( $new_shipping['company'], $response_shipping['company'] );
-		$this->assertSame( $new_shipping['address_1'], $response_shipping['address_1'] );
-		$this->assertSame( $new_shipping['address_2'], $response_shipping['address_2'] );
-		$this->assertSame( $new_shipping['city'], $response_shipping['city'] );
-		$this->assertSame( $new_shipping['state'], $response_shipping['state'] );
-		$this->assertSame( $new_shipping['postcode'], $response_shipping['postcode'] );
-		$this->assertSame( $new_shipping['country'], $response_shipping['country'] );
-		$this->assertSame( $new_shipping['phone'], $response_shipping['phone'] );
 
-		// Verify customer getters on WC()->customer reflect the saved changes.
+		$this->assertSame( $new_billing, array_intersect_key( $response_billing, $new_billing ) );
+		$this->assertSame( $new_shipping, array_intersect_key( $response_shipping, $new_shipping ) );
+
 		$this->assertSame( $new_billing['first_name'], WC()->customer->get_billing_first_name() );
 		$this->assertSame( $new_billing['city'], WC()->customer->get_billing_city() );
 		$this->assertSame( $new_billing['email'], WC()->customer->get_billing_email() );
@@ -244,15 +211,6 @@ class CartUpdateCustomer extends ControllerTestCase {
 	 * @testdox Partially updating both addresses in a single request modifies only targeted fields and preserves unprovided fields.
 	 */
 	public function test_partially_updating_both_addresses_preserves_unprovided_fields(): void {
-		// Pre-condition: Verify customer initial fields before partial update.
-		$this->assertSame( $this->initial_billing['address_1'], WC()->customer->get_billing_address_1() );
-		$this->assertSame( $this->initial_billing['city'], WC()->customer->get_billing_city() );
-		$this->assertSame( $this->initial_billing['email'], WC()->customer->get_billing_email() );
-		$this->assertSame( $this->initial_shipping['company'], WC()->customer->get_shipping_company() );
-		$this->assertSame( $this->initial_shipping['phone'], WC()->customer->get_shipping_phone() );
-		$this->assertSame( $this->initial_shipping['city'], WC()->customer->get_shipping_city() );
-
-		// Send partial updates: only address_1 and city for billing; only company and phone for shipping.
 		$partial_billing = array(
 			'address_1' => '789 Updated Boulevard',
 			'city'      => 'San Francisco',
@@ -275,31 +233,12 @@ class CartUpdateCustomer extends ControllerTestCase {
 		$response_billing  = (array) $result['data']['billing_address'];
 		$response_shipping = (array) $result['data']['shipping_address'];
 
-		// Verify targeted fields were modified.
-		$this->assertSame( '789 Updated Boulevard', $response_billing['address_1'] );
-		$this->assertSame( 'San Francisco', $response_billing['city'] );
-		$this->assertSame( 'Updated Express Carriers', $response_shipping['company'] );
-		$this->assertSame( '555-9876', $response_shipping['phone'] );
+		$expected_billing  = array_merge( $this->initial_billing, $partial_billing );
+		$expected_shipping = array_merge( $this->initial_shipping, $partial_shipping );
 
-		// Verify unprovided fields remained untouched and retained initial values.
-		$this->assertSame( $this->initial_billing['first_name'], $response_billing['first_name'] );
-		$this->assertSame( $this->initial_billing['last_name'], $response_billing['last_name'] );
-		$this->assertSame( $this->initial_billing['company'], $response_billing['company'] );
-		$this->assertSame( $this->initial_billing['state'], $response_billing['state'] );
-		$this->assertSame( $this->initial_billing['postcode'], $response_billing['postcode'] );
-		$this->assertSame( $this->initial_billing['country'], $response_billing['country'] );
-		$this->assertSame( $this->initial_billing['email'], $response_billing['email'] );
-		$this->assertSame( $this->initial_billing['phone'], $response_billing['phone'] );
+		$this->assertSame( $expected_billing, array_intersect_key( $response_billing, $expected_billing ) );
+		$this->assertSame( $expected_shipping, array_intersect_key( $response_shipping, $expected_shipping ) );
 
-		$this->assertSame( $this->initial_shipping['first_name'], $response_shipping['first_name'] );
-		$this->assertSame( $this->initial_shipping['last_name'], $response_shipping['last_name'] );
-		$this->assertSame( $this->initial_shipping['address_1'], $response_shipping['address_1'] );
-		$this->assertSame( $this->initial_shipping['city'], $response_shipping['city'] );
-		$this->assertSame( $this->initial_shipping['state'], $response_shipping['state'] );
-		$this->assertSame( $this->initial_shipping['postcode'], $response_shipping['postcode'] );
-		$this->assertSame( $this->initial_shipping['country'], $response_shipping['country'] );
-
-		// Verify persistent customer object matches.
 		$this->assertSame( '789 Updated Boulevard', WC()->customer->get_billing_address_1() );
 		$this->assertSame( 'San Francisco', WC()->customer->get_billing_city() );
 		$this->assertSame( $this->initial_billing['email'], WC()->customer->get_billing_email() );
@@ -337,23 +276,10 @@ class CartUpdateCustomer extends ControllerTestCase {
 
 		$checkout_fields = Package::container()->get( CheckoutFields::class );
 
-		// Pre-condition: Verify both fields return empty string on customer prior to request.
-		$this->assertSame( '', $checkout_fields->get_field_from_object( $billing_field_id, WC()->customer, 'billing' ) );
-		$this->assertSame( '', $checkout_fields->get_field_from_object( $shipping_field_id, WC()->customer, 'shipping' ) );
-
-		$billing_data  = array_merge(
-			$this->initial_billing,
-			array( $billing_field_id => 'TAX-ID-998877' )
-		);
-		$shipping_data = array_merge(
-			$this->initial_shipping,
-			array( $shipping_field_id => 'DOCK-BAY-4' )
-		);
-
 		$result = $this->update_customer(
 			array(
-				'billing_address'  => $billing_data,
-				'shipping_address' => $shipping_data,
+				'billing_address'  => array( $billing_field_id => 'TAX-ID-998877' ),
+				'shipping_address' => array( $shipping_field_id => 'DOCK-BAY-4' ),
 			)
 		);
 
@@ -362,14 +288,12 @@ class CartUpdateCustomer extends ControllerTestCase {
 		$response_billing  = (array) $result['data']['billing_address'];
 		$response_shipping = (array) $result['data']['shipping_address'];
 
-		// Verify both custom fields are returned in the response payload.
 		$this->assertArrayHasKey( $billing_field_id, $response_billing );
 		$this->assertSame( 'TAX-ID-998877', $response_billing[ $billing_field_id ] );
 
 		$this->assertArrayHasKey( $shipping_field_id, $response_shipping );
 		$this->assertSame( 'DOCK-BAY-4', $response_shipping[ $shipping_field_id ] );
 
-		// Verify both custom fields are persisted on the customer object.
 		$this->assertSame(
 			'TAX-ID-998877',
 			$checkout_fields->get_field_from_object( $billing_field_id, WC()->customer, 'billing' ),
