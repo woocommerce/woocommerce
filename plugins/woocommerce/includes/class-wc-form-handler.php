@@ -414,7 +414,26 @@ class WC_Form_Handler {
 			return '';
 		}
 
+		$source_country = ( new WC_Customer( get_current_user_id() ) )->{"get_{$source_type}_country"}( 'edit' );
+
+		if ( ! self::is_copy_address_country_allowed( $address_type, $source_country ) ) {
+			return '';
+		}
+
 		return $source_type;
+	}
+
+	/**
+	 * Check that a copied address's country is available for the address type it is copied into.
+	 *
+	 * @param string $target_type Address type being filled.
+	 * @param string $country     Country code of the copied address.
+	 * @return bool
+	 */
+	private static function is_copy_address_country_allowed( string $target_type, string $country ): bool {
+		$countries = 'shipping' === $target_type ? WC()->countries->get_shipping_countries() : WC()->countries->get_allowed_countries();
+
+		return array_key_exists( $country, $countries );
 	}
 
 	/**
@@ -495,11 +514,10 @@ class WC_Form_Handler {
 			exit;
 		}
 
-		$customer         = new WC_Customer( $user_id );
-		$source_country   = 'billing' === $source_type ? $customer->get_billing_country( 'edit' ) : $customer->get_shipping_country( 'edit' );
-		$target_countries = 'shipping' === $target_type ? WC()->countries->get_shipping_countries() : WC()->countries->get_allowed_countries();
+		$customer       = new WC_Customer( $user_id );
+		$source_country = 'billing' === $source_type ? $customer->get_billing_country( 'edit' ) : $customer->get_shipping_country( 'edit' );
 
-		if ( ! array_key_exists( $source_country, $target_countries ) ) {
+		if ( ! self::is_copy_address_country_allowed( $target_type, $source_country ) ) {
 			wc_add_notice( __( 'This address uses a country that is not available for the other address type. Please add the address manually.', 'woocommerce' ), 'error' );
 			wp_safe_redirect( $redirect_url );
 			exit;

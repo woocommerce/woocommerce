@@ -948,6 +948,25 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The edit address form isn't filled from the other address when its country isn't available for the edited address type.
+	 *
+	 * @covers WC_Form_Handler::get_copy_address_form_source()
+	 */
+	public function test_edit_address_form_is_not_filled_from_country_not_available(): void {
+		$this->create_customer_with_address( 'billing' );
+		add_filter(
+			'woocommerce_countries_shipping_countries',
+			function () {
+				return array( 'CA' => 'Canada' );
+			}
+		);
+
+		$fields = $this->get_edit_address_form_fields( 'shipping', 'billing' );
+
+		$this->assertSame( '', $fields['shipping_address_1']['value'] ?? null, 'A billing address in a country the store does not ship to should not fill the shipping form.' );
+	}
+
+	/**
 	 * @testdox The edit address form fills Checkout block address fields from the other address after a refused copy.
 	 *
 	 * @covers \Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsFrontend::edit_address_fields()
