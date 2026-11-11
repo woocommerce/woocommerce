@@ -273,8 +273,8 @@ final class BlockTypesLazyController {
 		);
 		if ( ! is_admin() ) {
 			// AddToCartWithOptions: overrides enqueue_data() with editor-visible product types and template part IDs, hence load eager in admin.
-			$list['add-to-cart-with-options'] = \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\AddToCartWithOptions::class;
 			// VariationSelectorAttribute: overrides enqueue_data() with editor-visible visual attributes flag, hence load eager in admin.
+			$list['add-to-cart-with-options']                              = \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\AddToCartWithOptions::class;
 			$list['add-to-cart-with-options-variation-selector-attribute'] = \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelectorAttribute::class;
 		}
 
