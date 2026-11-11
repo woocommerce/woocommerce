@@ -344,6 +344,68 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test site colors that point at a palette color still reach the sent email.
+	 *
+	 * A palette color can name another one, and a site style can name one of core’s colors, as the
+	 * button text of Twenty Twenty-Four’s Fossil style does.
+	 */
+	public function testItKeepsSiteColorsThatPointAtAPaletteColor(): void {
+		add_filter(
+			'woocommerce_email_editor_site_theme',
+			static function () {
+				return new \WP_Theme_JSON(
+					array(
+						'version'  => 3,
+						'settings' => array(
+							'color' => array(
+								'palette' => array(
+									array(
+										'slug'  => 'contrast',
+										'name'  => 'Contrast',
+										'color' => '#111111',
+									),
+									array(
+										'slug'  => 'primary',
+										'name'  => 'Primary',
+										'color' => 'var(--wp--preset--color--contrast)',
+									),
+								),
+							),
+						),
+						'styles'   => array(
+							'elements' => array(
+								'button' => array(
+									'color' => array(
+										'text'       => 'var(--wp--preset--color--white)',
+										'background' => '#65574e',
+									),
+								),
+							),
+						),
+					),
+					'theme'
+				);
+			}
+		);
+		$email_post_id = $this->factory->post->create(
+			array(
+				'post_content' => '<!-- wp:paragraph {"textColor":"primary"} --><p class="alias-test has-primary-color has-text-color">Text</p><!-- /wp:paragraph -->
+				<!-- wp:button --><div class="wp-block-button button-test"><a class="wp-block-button__link wp-element-button">Button</a></div><!-- /wp:button -->',
+			)
+		);
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( WP_Post::class, $email_post );
+
+		$rendered = $this->renderer->render( $email_post, 'Subject', '', 'en' );
+
+		$this->assertStringContainsString( 'color: #111111', $this->extractBlockStyle( $rendered['html'], 'alias-test', 'p' ) );
+		$button_style = $this->extractBlockStyle( $rendered['html'], 'button-test', 'td' );
+		$this->assertStringContainsString( 'background-color: #65574e', $button_style );
+		$this->assertStringContainsString( 'color: #ffffff', $button_style );
+	}
+
+	/**
 	 * Extracts the HTML of a block
 	 *
 	 * @param string $html HTML content.

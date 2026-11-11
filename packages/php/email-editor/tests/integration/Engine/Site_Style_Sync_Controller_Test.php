@@ -185,6 +185,11 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 								'color' => '#ffee58',
 								'name'  => 'Accent 1',
 							),
+							array(
+								'slug'  => 'primary',
+								'color' => 'var(--wp--preset--color--accent-1)',
+								'name'  => 'Primary',
+							),
 						),
 					),
 				),
@@ -200,13 +205,19 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 					'color' => '#ffee58',
 					'name'  => 'Accent 1',
 				),
+				array(
+					'slug'  => 'primary',
+					'color' => 'var(--wp--preset--color--accent-1)',
+					'name'  => 'Primary',
+				),
 			),
-			$synced_data['settings']['color']['palette']
+			$synced_data['settings']['color']['palette'],
+			'A color that points at another palette color is kept: the renderer resolves it.'
 		);
 
 		$synced_theme = $this->controller->get_theme();
 		$this->assertInstanceOf( WP_Theme_JSON::class, $synced_theme );
-		$this->assertSame( array( 'accent-1' ), array_column( $synced_theme->get_settings()['color']['palette']['theme'], 'slug' ) );
+		$this->assertSame( array( 'accent-1', 'primary' ), array_column( $synced_theme->get_settings()['color']['palette']['theme'], 'slug' ) );
 	}
 
 	/**
@@ -225,12 +236,40 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 						'background' => 'light-dark(#ffffff, #000000)',
 					),
 					'elements' => array(
-						'link'    => array( 'color' => array( 'text' => 'var(--wp--preset--color--undefined)' ) ),
 						'heading' => array( 'color' => array( 'text' => 'color-mix(in srgb, #ff0000 85%, #000000)' ) ),
-						'button'  => array(
+						'link'    => array( 'color' => array( 'text' => '#0000ff' ) ),
+					),
+				),
+			)
+		);
+
+		$synced_styles = $this->controller->sync_site_styles()['styles'];
+
+		$this->assertSame( array(), $synced_styles['color'], 'A text color is not synced without its background.' );
+		$this->assertSame( array(), $synced_styles['elements']['heading']['color'] );
+		$this->assertSame( array( 'text' => '#0000ff' ), $synced_styles['elements']['link']['color'], 'A color email clients can render is still synced.' );
+	}
+
+	/**
+	 * Test site colors that point at a palette color are synced as they are.
+	 *
+	 * The site theme can’t resolve a reference to one of core’s colors, and the renderer does it
+	 * later. Twenty Twenty-Four’s Fossil style sets its button text this way.
+	 */
+	public function test_sync_site_styles_keeps_style_colors_that_point_at_a_palette_color(): void {
+		$this->use_site_theme(
+			array(
+				'version' => 3,
+				'styles'  => array(
+					'color'    => array(
+						'text'       => 'var:preset|color|black',
+						'background' => 'var:preset|color|pale-pink',
+					),
+					'elements' => array(
+						'button' => array(
 							'color' => array(
-								'text'       => '#ffffff',
-								'background' => '#0000ff',
+								'text'       => 'var(--wp--preset--color--white)',
+								'background' => '#65574e',
 							),
 						),
 					),
@@ -240,16 +279,20 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 
 		$synced_styles = $this->controller->sync_site_styles()['styles'];
 
-		$this->assertSame( array(), $synced_styles['color'], 'A text color is not synced without its background.' );
-		$this->assertSame( array(), $synced_styles['elements']['link']['color'] );
-		$this->assertSame( array(), $synced_styles['elements']['heading']['color'] );
+		// WP_Theme_JSON rewrites the `var:preset|` form as a CSS variable.
 		$this->assertSame(
 			array(
-				'background' => '#0000ff',
-				'text'       => '#ffffff',
+				'background' => 'var(--wp--preset--color--pale-pink)',
+				'text'       => 'var(--wp--preset--color--black)',
 			),
-			$synced_styles['elements']['button']['color'],
-			'Colors email clients can render are still synced.'
+			$synced_styles['color']
+		);
+		$this->assertSame(
+			array(
+				'background' => '#65574e',
+				'text'       => 'var(--wp--preset--color--white)',
+			),
+			$synced_styles['elements']['button']['color']
 		);
 	}
 
