@@ -105,6 +105,30 @@ $wc-stagger-cap: 7;
 	}
 }
 
+// The timing for `animateCollapse` in base-utils. The space grows over `lg` and collapses over
+// `md`. The element always fades. With reduced motion, the space opens immediately, and closes after the fade.
+@mixin motion-collapse() {
+	$size: height, padding-top, padding-bottom, margin-top, margin-bottom;
+
+	&[data-wc-collapse] {
+		@include motion-transition($state: opacity, $move: $size, $easing: balanced);
+
+		@include motion-safe {
+			// Clip only the edge that moves, so that focus rings at the top and sides still show.
+			clip-path: inset(-100vw -100vw 0);
+		}
+	}
+
+	&[data-wc-collapse="out"] {
+		// Without the clip, content that loses its space covers the content below. Thus the space waits for the fade.
+		transition: motion-state(opacity), motion-hold($size...);
+
+		@include motion-safe {
+			transition: motion-move($size, md, balanced), motion-state(opacity);
+		}
+	}
+}
+
 // Sets --wc-motion-index on sibling rows. Rows after $wc-stagger-cap share the last index. `--wc-motion-index` is
 // registered as an integer in `assets/css/style.scss`, so `sibling-index()` counts the row, not the child that reads
 // it. Browsers without `sibling-index()` use `nth-child`. The `@supports` tests use a literal time, not `var()`.

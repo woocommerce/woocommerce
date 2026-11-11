@@ -19,3 +19,4 @@ export * from './pick';
 export * from './get-inline-styles';
 export * from './use-return-focus';
 export * from './when-animations-end';
+export * from './animate-collapse';
