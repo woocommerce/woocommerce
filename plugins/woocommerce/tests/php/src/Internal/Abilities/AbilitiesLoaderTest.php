@@ -52,6 +52,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/customers-query',
 		'woocommerce/product-review-update',
 		'woocommerce/product-review-reply',
+		'woocommerce/product-reviews-query',
+		'woocommerce/shipping-zones-query',
+		'woocommerce/tax-rates-query',
 	);
 
 	/**
@@ -276,6 +279,21 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_canonical_ability_annotations_match_intent(): void {
 		$expectations = array(
 			'woocommerce/products-query'           => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/product-reviews-query'    => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/shipping-zones-query'     => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/tax-rates-query'          => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
@@ -978,9 +996,12 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should give every canonical ability an input in the permission refusal provider.
 	 */
 	public function test_permission_refusal_provider_covers_every_canonical_ability(): void {
+		$classes = ( new \ReflectionClassConstant( AbilitiesLoader::class, 'CORE_ABILITY_DEFINITION_CLASSES' ) )->getValue();
+		$core    = array_map( static fn( string $class_name ): string => $class_name::get_name(), $classes );
 		$covered = array_column( $this->provider_canonical_abilities_with_minimal_input(), 0 );
 
-		$this->assertEqualsCanonicalizing( self::CANONICAL_ABILITY_IDS, $covered );
+		$this->assertEqualsCanonicalizing( $core, self::CANONICAL_ABILITY_IDS, 'CANONICAL_ABILITY_IDS should list every Core ability.' );
+		$this->assertEqualsCanonicalizing( $core, $covered, 'The permission refusal provider should cover every Core ability.' );
 	}
 
 	/**
@@ -1107,6 +1128,18 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			),
 			'customers-query'          => array(
 				'woocommerce/customers-query',
+				array(),
+			),
+			'product-reviews-query'    => array(
+				'woocommerce/product-reviews-query',
+				array(),
+			),
+			'shipping-zones-query'     => array(
+				'woocommerce/shipping-zones-query',
+				array(),
+			),
+			'tax-rates-query'          => array(
+				'woocommerce/tax-rates-query',
 				array(),
 			),
 		);
