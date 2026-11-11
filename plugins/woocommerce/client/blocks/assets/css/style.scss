@@ -38,7 +38,7 @@
 	}
 }
 
-// Icons and small items swap with scale and blur (rule 18).
+// Icons and small items grow in with scale and blur.
 @keyframes wc-grow {
 	from {
 		scale: $wc-scale-icon-from;
