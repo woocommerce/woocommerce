@@ -122,13 +122,7 @@ describe( 'RollingPrice', () => {
 		expect( roll ).toHaveAttribute( 'dir', 'ltr' );
 		expect(
 			container.querySelector( '.screen-reader-text' )
-		).toHaveTextContent( '1.000,00' );
-		// The currency symbol keeps its own markup outside the roll.
-		expect(
-			container.querySelector(
-				'.wc-block-components-formatted-money-amount__currency-symbol'
-			)
-		).toHaveTextContent( 'ر.س' );
+		).toHaveTextContent( '1.000,00 ر.س' );
 
 		const columns = Array.from(
 			container.querySelectorAll< HTMLElement >( columnSelector )

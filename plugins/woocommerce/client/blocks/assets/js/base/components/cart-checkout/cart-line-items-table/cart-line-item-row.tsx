@@ -190,8 +190,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 		if ( getSetting( 'displayCartPricesIncludingTax', false ) ) {
 			lineSubtotal += parseInt( totals.line_subtotal_tax, 10 );
 		}
-		// Cart line totals do not wait for the server (Skeleton reveal rule): while a new quantity saves, the total is
-		// the unit price multiplied by the quantity, if the pricing of the item is linear.
+		// While a new quantity saves, show the line total for it straight away when the item's pricing is linear.
 		const lineTotal = getOptimisticLineTotal( {
 			unitPrice: parseInt( prices.raw_prices.price, 10 ),
 			precision: prices.raw_prices.precision,

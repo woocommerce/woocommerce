@@ -13,4 +13,3 @@ export * from './use-schema-parser';
 export * from './use-query-loop-product-context-validation';
 export * from './use-preview-mode';
 export * from './use-presence';
-export * from './use-skeleton-phase';

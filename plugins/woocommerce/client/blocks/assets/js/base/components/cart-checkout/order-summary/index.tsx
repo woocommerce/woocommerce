@@ -3,13 +3,13 @@
  */
 import {
 	useContainerWidthContext,
+	useSettledOrderSummaryValue,
 	useStoreCart,
 } from '@woocommerce/base-context';
 import type { CartItem } from '@woocommerce/types';
 import clsx from 'clsx';
 import { CartLineItemsCheckoutSkeleton } from '@woocommerce/base-components/skeleton/patterns/cart-line-items';
 import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';
-import { useSkeletonPhaseValue } from '@woocommerce/base-hooks';
 /**
  * Internal dependencies
  */
@@ -28,9 +28,8 @@ const OrderSummary = ( {
 	const { isLarge } = useContainerWidthContext();
 	const { cartIsLoading, hasPendingItemsOperations } = useStoreCart();
 	const showSkeleton = cartIsLoading || hasPendingItemsOperations;
-	// Skeleton reveal rule: while other skeletons show, the items keep their old data, and they change when the
-	// skeletons end.
-	const items = useSkeletonPhaseValue( cartItems );
+	// The item prices change when the totals skeletons end, not before (Skeleton reveal rule).
+	const items = useSettledOrderSummaryValue( cartItems );
 
 	return (
 		<DelayedContentWithSkeleton
