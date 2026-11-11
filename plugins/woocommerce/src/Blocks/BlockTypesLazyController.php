@@ -156,7 +156,7 @@ final class BlockTypesLazyController {
 			'filled-cart-block'                    => \Automattic\WooCommerce\Blocks\BlockTypes\FilledCartBlock::class,
 		);
 		if ( ! is_admin() ) {
-			// ProceedToCheckoutBlock: overrides enqueue_data() with editor-visible checkout page URL, hence load eager in admin.
+			// ProceedToCheckoutBlock: overrides enqueue_data() with editor-visible checkout page URL, hence load eagerly in admin.
 			$list['proceed-to-checkout-block'] = \Automattic\WooCommerce\Blocks\BlockTypes\ProceedToCheckoutBlock::class;
 		}
 
@@ -215,7 +215,7 @@ final class BlockTypesLazyController {
 			'mini-cart-title-label-block'         => \Automattic\WooCommerce\Blocks\BlockTypes\MiniCartTitleLabelBlock::class,
 		);
 		if ( ! is_admin() ) {
-			// MiniCartFooterBlock: overrides enqueue_data() with editor-visible footer description, hence load eager in admin.
+			// MiniCartFooterBlock: overrides enqueue_data() with editor-visible footer description, hence load eagerly in admin.
 			$list['mini-cart-footer-block'] = \Automattic\WooCommerce\Blocks\BlockTypes\MiniCartFooterBlock::class;
 		}
 
@@ -241,10 +241,10 @@ final class BlockTypesLazyController {
 			'order-confirmation-additional-fields'      => \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\AdditionalFields::class,
 		);
 		if ( ! is_admin() ) {
-			// BillingAddress: overrides enqueue_data() with editor-visible additional address fields, hence load eager in admin.
-			// ShippingAddress: overrides enqueue_data() with editor-visible additional address fields, hence load eager in admin.
-			// DownloadsWrapper: overrides enqueue_data() with editor-visible downloadable products flag, hence load eager in admin.
-			// AdditionalFieldsWrapper: overrides enqueue_data() with editor-visible additional fields data, hence load eager in admin.
+			// BillingAddress: overrides enqueue_data() with editor-visible additional address fields, hence load eagerly in admin.
+			// ShippingAddress: overrides enqueue_data() with editor-visible additional address fields, hence load eagerly in admin.
+			// DownloadsWrapper: overrides enqueue_data() with editor-visible downloadable products flag, hence load eagerly in admin.
+			// AdditionalFieldsWrapper: overrides enqueue_data() with editor-visible additional fields data, hence load eagerly in admin.
 			$list['order-confirmation-billing-address']           = \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\BillingAddress::class;
 			$list['order-confirmation-shipping-address']          = \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\ShippingAddress::class;
 			$list['order-confirmation-downloads-wrapper']         = \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\DownloadsWrapper::class;
