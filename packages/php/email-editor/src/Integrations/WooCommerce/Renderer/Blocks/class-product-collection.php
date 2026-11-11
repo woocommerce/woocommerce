@@ -342,16 +342,21 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 			}
 		}
 
-		// Handle on-sale products.
+		// Handle on-sale products the way the shop does: the sale must be running now, and variable
+		// products count when one of their variations is on sale.
 		$is_on_sale = $query_attrs['woocommerceOnSale'] ?? false;
 		if ( 'woocommerce/product-collection/on-sale' === $collection || $is_on_sale ) {
-			$query_args['meta_query'][] = array(
-				'relation' => 'OR',
-				array(
-					'key'     => '_sale_price',
-					'value'   => '',
-					'compare' => '!=',
-				),
+			$query_args['post__in'] = $this->restrict_post_ids( $query_args['post__in'] ?? null, wc_get_product_ids_on_sale() );
+		}
+
+		// Leave out products hidden from the shop catalog, as the shop's Product Collection does.
+		$visibility_terms = wc_get_product_visibility_term_ids();
+		if ( ! empty( $visibility_terms['exclude-from-catalog'] ) ) {
+			$query_args['tax_query'][] = array(
+				'taxonomy' => 'product_visibility',
+				'field'    => 'term_taxonomy_id',
+				'terms'    => array( (int) $visibility_terms['exclude-from-catalog'] ),
+				'operator' => 'NOT IN',
 			);
 		}
 
@@ -383,6 +388,14 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 			$query_args['post__in'] = $product_ids_to_include;
 		}
 
+		// WP_Query ignores post__not_in when post__in is set, so remove the exclusions from the list.
+		if ( ! empty( $query_args['post__in'] ) && ! empty( $query_args['post__not_in'] ) ) {
+			$query_args['post__in'] = array_values( array_diff( $query_args['post__in'], $query_args['post__not_in'] ) );
+			if ( empty( $query_args['post__in'] ) ) {
+				$query_args['post__in'] = array( 0 );
+			}
+		}
+
 		// Set tax_query relation if multiple tax queries.
 		if ( count( $query_args['tax_query'] ) > 1 ) {
 			$query_args['tax_query']['relation'] = 'AND';
@@ -393,6 +406,19 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 		return $wp_query;
 	}
 
+
+	/**
+	 * Limit a post__in list to the allowed IDs.
+	 *
+	 * @param array|null $current_ids Current post__in list, or null when there is none.
+	 * @param array      $allowed_ids IDs the query may return.
+	 * @return array
+	 */
+	private function restrict_post_ids( ?array $current_ids, array $allowed_ids ): array {
+		$ids = null === $current_ids ? $allowed_ids : array_values( array_intersect( $current_ids, $allowed_ids ) );
+		// An empty post__in means "no restriction" to WP_Query, so use 0 to match no product.
+		return empty( $ids ) ? array( 0 ) : array_map( 'intval', $ids );
+	}
 
 	/**
 	 * Check if all stock statuses are selected (meaning no filtering needed).
