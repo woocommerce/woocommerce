@@ -200,8 +200,8 @@ class OrderDeleteTest extends WC_Unit_Test_Case {
 
 		try {
 			$refused = wp_get_ability( 'woocommerce/order-delete' )->execute( array( 'id' => $order->get_id() ) );
-			get_userdata( $manager )->add_cap( 'delete_others_shop_test_customs' );
-			get_userdata( $manager )->add_cap( 'delete_published_shop_test_customs' );
+			wp_get_current_user()->add_cap( 'delete_others_shop_test_customs' );
+			wp_get_current_user()->add_cap( 'delete_published_shop_test_customs' );
 			$trashed = $this->execute( array( 'id' => $order->get_id() ) );
 		} finally {
 			unset( $wc_order_types['shop_test_custom'] );
