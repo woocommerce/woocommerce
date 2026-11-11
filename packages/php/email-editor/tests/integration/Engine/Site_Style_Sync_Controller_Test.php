@@ -190,6 +190,17 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 								'color' => 'var(--wp--preset--color--accent-1)',
 								'name'  => 'Primary',
 							),
+							// Only a plain reference to a palette color is kept. The email has no other variables.
+							array(
+								'slug'  => 'brand',
+								'color' => 'var(--wp--custom--brand)',
+								'name'  => 'Brand',
+							),
+							array(
+								'slug'  => 'tint',
+								'color' => 'color-mix(in srgb, var(--wp--preset--color--accent-1) 20%, transparent)',
+								'name'  => 'Tint',
+							),
 						),
 					),
 				),
@@ -237,6 +248,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 					),
 					'elements' => array(
 						'heading' => array( 'color' => array( 'text' => 'color-mix(in srgb, #ff0000 85%, #000000)' ) ),
+						'button'  => array( 'color' => array( 'text' => 'var(--wp--custom--brand)' ) ),
 						'link'    => array( 'color' => array( 'text' => '#0000ff' ) ),
 					),
 				),
@@ -247,6 +259,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 
 		$this->assertSame( array(), $synced_styles['color'], 'A text color is not synced without its background.' );
 		$this->assertSame( array(), $synced_styles['elements']['heading']['color'] );
+		$this->assertSame( array(), $synced_styles['elements']['button']['color'], 'A variable that is not a palette color is not synced.' );
 		$this->assertSame( array( 'text' => '#0000ff' ), $synced_styles['elements']['link']['color'], 'A color email clients can render is still synced.' );
 	}
 
