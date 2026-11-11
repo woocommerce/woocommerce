@@ -595,15 +595,20 @@ class Image extends Abstract_Block_Renderer {
 	}
 
 	/**
-	 * Cleanup image HTML.
+	 * Keep only the image attributes that are useful in an email.
+	 *
+	 * The inline style stays as saved, because it carries the block's crop (aspect-ratio and object-fit).
 	 *
 	 * @param string $content_html Content HTML.
 	 */
 	private function cleanup_image_html( string $content_html ): string {
 		$html = new \WP_HTML_Tag_Processor( $content_html );
 		if ( $html->next_tag( array( 'tag_name' => 'img' ) ) ) {
-			$html->remove_attribute( 'srcset' );
-			$html->remove_attribute( 'class' );
+			foreach ( $html->get_attribute_names_with_prefix( '' ) ?? array() as $attribute_name ) {
+				if ( ! in_array( $attribute_name, array( 'src', 'alt', 'title', 'width', 'height', 'style' ), true ) ) {
+					$html->remove_attribute( $attribute_name );
+				}
+			}
 		}
 		return $html->get_updated_html();
 	}

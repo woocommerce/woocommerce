@@ -9,6 +9,7 @@ declare(strict_types = 1);
 
 namespace Automattic\WooCommerce\EmailEditor\Engine;
 
+use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\HTML_Tag_Processor;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
@@ -80,13 +81,47 @@ class Personalizer {
 	private $value_interceptor = null;
 
 	/**
+	 * Logger for tag callbacks that fail.
+	 *
+	 * @var Email_Editor_Logger|null
+	 */
+	private ?Email_Editor_Logger $logger;
+
+	/**
 	 * Class constructor with required dependencies.
 	 *
 	 * @param Personalization_Tags_Registry $tags_registry Personalization tags registry.
+	 * @param Email_Editor_Logger|null      $logger Logger for tag callbacks that fail.
 	 */
-	public function __construct( Personalization_Tags_Registry $tags_registry ) {
+	public function __construct( Personalization_Tags_Registry $tags_registry, ?Email_Editor_Logger $logger = null ) {
 		$this->tags_registry = $tags_registry;
+		$this->logger        = $logger;
 		$this->context       = array();
+	}
+
+	/**
+	 * Run a tag callback. A callback that throws gives an empty value, so one broken tag does not stop the email.
+	 *
+	 * @param Personalization_Tag   $tag The tag.
+	 * @param string                $rendering_context One of the RENDERING_CONTEXT_* constants.
+	 * @param array<string, string> $arguments The parsed tag arguments.
+	 * @return string The tag value.
+	 */
+	private function get_tag_value( Personalization_Tag $tag, string $rendering_context, array $arguments ): string {
+		try {
+			return $tag->execute_callback( $this->get_callback_context( $rendering_context ), $arguments );
+		} catch ( \Throwable $e ) {
+			if ( $this->logger ) {
+				$this->logger->error(
+					'Personalization tag callback failed',
+					array(
+						'token' => $tag->get_token(),
+						'error' => $e->getMessage(),
+					)
+				);
+			}
+			return '';
+		}
 	}
 
 	/**
@@ -170,6 +205,10 @@ class Personalizer {
 	/**
 	 * Personalize the content by replacing the personalization tags with their values.
 	 *
+	 * In the text rendering context, tags in "[text](url)" link targets are replaced too. A tag comment that
+	 * cannot be resolved is removed, since the recipient would see it as text, and so is a link target that
+	 * is only such a tag.
+	 *
 	 * @param string $content The content to personalize.
 	 * @param string $rendering_context The rendering context of the content — one of the RENDERING_CONTEXT_HTML
 	 *                                  or RENDERING_CONTEXT_TEXT constants. Unknown values fall back to RENDERING_CONTEXT_HTML.
@@ -180,6 +219,11 @@ class Personalizer {
 			$rendering_context = self::RENDERING_CONTEXT_HTML;
 		}
 
+		// Link targets go first, so tag values inserted below are never scanned for link targets.
+		if ( self::RENDERING_CONTEXT_TEXT === $rendering_context ) {
+			$content = $this->personalize_text_link_targets( $content );
+		}
+
 		$content_processor = new HTML_Tag_Processor( $content );
 		while ( $content_processor->next_token() ) {
 			if ( $content_processor->get_token_type() === '#comment' ) {
@@ -187,10 +231,14 @@ class Personalizer {
 				$token           = $this->parse_token( $modifiable_text );
 				$tag             = $this->tags_registry->get_by_token( $token['token'] );
 				if ( ! $tag ) {
+					// In plain text the comment would be shown to the recipient, so an unresolved tag is removed.
+					if ( self::RENDERING_CONTEXT_TEXT === $rendering_context && '' !== $token['token'] ) {
+						$content_processor->replace_token( '' );
+					}
 					continue;
 				}
 
-				$value = $tag->execute_callback( $this->get_callback_context( $rendering_context ), $token['arguments'] );
+				$value = $this->get_tag_value( $tag, $rendering_context, $token['arguments'] );
 				if ( self::RENDERING_CONTEXT_HTML === $rendering_context && Personalization_Tag::VALUE_TYPE_TEXT === $tag->get_value_type() ) {
 					$value = esc_html( $value );
 				}
@@ -213,7 +261,7 @@ class Personalizer {
 					continue;
 				}
 
-				$value = $tag->execute_callback( $this->get_callback_context( self::RENDERING_CONTEXT_HREF ), $token['arguments'] );
+				$value = $this->get_tag_value( $tag, self::RENDERING_CONTEXT_HREF, $token['arguments'] );
 				$value = $this->replace_link_href( $href, $tag->get_token(), $value );
 				$value = $this->intercept_value( $value, $href, self::RENDERING_CONTEXT_HREF );
 				if ( '' !== $value ) {
@@ -239,6 +287,29 @@ class Personalizer {
 	}
 
 	/**
+	 * Replace tags in the "[text](url)" link targets of the Renderer's text version. Only the "](url)" part
+	 * is matched, so link text with tags or brackets does not matter; the URL may hold one level of "(…)".
+	 * A target that is only a tag that cannot be resolved is dropped, leaving "[text]", so no raw tag
+	 * reaches the recipient.
+	 *
+	 * @param string $content Plain-text content.
+	 * @return string The content with link targets personalized.
+	 */
+	private function personalize_text_link_targets( string $content ): string {
+		return (string) preg_replace_callback(
+			'/\]\((\[[^\]]+\]|(?:[^()\s]++|\([^()\s]*\))++)\)/',
+			function ( array $matches ): string {
+				$url = $this->personalize_href_tokens( $matches[1] );
+				if ( null !== $url ) {
+					return '](' . $url . ')';
+				}
+				return '[' === $matches[1][0] ? ']' : $matches[0];
+			},
+			$content
+		);
+	}
+
+	/**
 	 * Replace personalization tag tokens embedded in a link URL.
 	 *
 	 * @param string $href The href attribute value.
@@ -260,7 +331,7 @@ class Personalizer {
 				continue;
 			}
 
-			$value = $tag->execute_callback( $this->get_callback_context( self::RENDERING_CONTEXT_HREF ), $token['arguments'] );
+			$value = $this->get_tag_value( $tag, self::RENDERING_CONTEXT_HREF, $token['arguments'] );
 			$value = $this->intercept_value( $value, $token_string, self::RENDERING_CONTEXT_HREF );
 			if ( '' !== $value ) {
 				$replacements[ $token_string ] = $value;

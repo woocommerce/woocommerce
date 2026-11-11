@@ -25,6 +25,24 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	);
 
 	/**
+	 * Shipping fields the get_value tests copy from billing and read back, without the 'shipping_' prefix.
+	 */
+	private const PREFILLED_SHIPPING_FIELDS = array( 'first_name', 'country', 'state', 'postcode', 'city', 'address_1', 'address_2' );
+
+	/**
+	 * A shipping address in New York for Jane, saved to the account.
+	 */
+	private const SAVED_SHIPPING_ADDRESS = array(
+		'shipping_first_name' => 'Jane',
+		'shipping_country'    => 'US',
+		'shipping_state'      => 'NY',
+		'shipping_postcode'   => '11201',
+		'shipping_city'       => 'Brooklyn',
+		'shipping_address_1'  => '2 Shipping Avenue',
+		'shipping_address_2'  => 'Apt 2',
+	);
+
+	/**
 	 * @var object The system under test.
 	 */
 	private $sut;
@@ -38,16 +56,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @var WC_Session|null The session the test base installed, put back after a test swapped in a real handler.
 	 */
 	private $original_session;
-
-	/**
-	 * @var WC_Customer|null The customer the test base installed, put back after a test ran a full checkout into a fresh one.
-	 */
-	private $original_session_customer;
-
-	/**
-	 * @var array The customer's location and VAT exemption before each test, restored on tear down.
-	 */
-	private $original_customer = array();
 
 	/**
 	 * Runs before each test.
@@ -88,9 +96,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		WC()->cart->empty_cart();
 
-		$customer                = WC()->customer;
-		$this->original_customer = array( $customer->get_billing_country(), $customer->get_billing_state(), $customer->get_shipping_country(), $customer->get_shipping_state(), $customer->get_is_vat_exempt() );
-
 		add_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
 	}
 
@@ -100,7 +105,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
 		delete_option( 'woocommerce_calc_taxes' );
-		WC()->countries->locale = array();
 
 		foreach ( $this->extra_field_filters as $extra_field_filter ) {
 			remove_filter( 'woocommerce_checkout_fields', $extra_field_filter );
@@ -109,16 +113,12 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->extra_field_filters = array();
 
 		if ( $this->original_session ) {
-			WC()->session                    = $this->original_session;
-			WC()->customer                   = $this->original_session_customer;
-			$this->original_session          = null;
-			$this->original_session_customer = null;
+			WC()->session           = $this->original_session;
+			$this->original_session = null;
 		}
 
-		$customer = WC()->customer;
-		$customer->set_billing_location( $this->original_customer[0], $this->original_customer[1] );
-		$customer->set_shipping_location( $this->original_customer[2], $this->original_customer[3] );
-		$customer->set_is_vat_exempt( $this->original_customer[4] );
+		wp_set_current_user( 0 );
+		WC()->session->set( 'customer', null );
 		WC_Helper_Shipping::delete_simple_flat_rate();
 
 		parent::tearDown();
@@ -265,30 +265,24 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		wp_set_current_user( $customer_id );
 		WC()->session->init();
 
-		$original_customer = WC()->customer;
-		WC()->customer     = new WC_Customer( $customer_id, true );
+		WC()->customer = new WC_Customer( $customer_id, true );
+		WC()->customer->set_is_vat_exempt( true );
+		WC()->customer->save();
 
-		try {
-			WC()->customer->set_is_vat_exempt( true );
-			WC()->customer->save();
+		$this->sut->process_customer(
+			array(
+				'billing_first_name' => 'Classic',
+				'billing_address_1'  => '456 Classic Road',
+				'billing_email'      => 'classic-vat-exempt@example.com',
+			)
+		);
 
-			$this->sut->process_customer(
-				array(
-					'billing_first_name' => 'Classic',
-					'billing_address_1'  => '456 Classic Road',
-					'billing_email'      => 'classic-vat-exempt@example.com',
-				)
-			);
+		// The session customer is saved on shutdown in a real request.
+		WC()->customer->save();
 
-			// The session customer is saved on shutdown in a real request.
-			WC()->customer->save();
-
-			$reloaded_customer = new WC_Customer( $customer_id, true );
-			$this->assertTrue( $reloaded_customer->get_is_vat_exempt(), 'VAT exemption should survive the account save so a retry is not charged tax.' );
-			$this->assertSame( '456 Classic Road', $reloaded_customer->get_billing_address_1(), 'The address should come from the saved account.' );
-		} finally {
-			WC()->customer = $original_customer;
-		}
+		$reloaded_customer = new WC_Customer( $customer_id, true );
+		$this->assertTrue( $reloaded_customer->get_is_vat_exempt(), 'VAT exemption should survive the account save so a retry is not charged tax.' );
+		$this->assertSame( '456 Classic Road', $reloaded_customer->get_billing_address_1(), 'The address should come from the saved account.' );
 	}
 
 	/**
@@ -572,8 +566,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * country rules, so this also pins that no country is assumed when the customer can't supply one.
 	 */
 	public function test_validate_posted_data_does_not_throw_without_a_customer_object() {
-		$original_customer = WC()->customer;
-
 		WC()->customer = null;
 
 		$data = array(
@@ -583,11 +575,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		$errors = new WP_Error();
 
-		try {
-			$this->sut->validate_posted_data( $data, $errors );
-		} finally {
-			WC()->customer = $original_customer;
-		}
+		$this->sut->validate_posted_data( $data, $errors );
 
 		$this->assertEmpty(
 			$errors->get_error_message( 'billing_postcode_validation' ),
@@ -599,8 +587,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @testdox 'validate_posted_data' prefers the posted country over the one stored on the customer.
 	 */
 	public function test_validate_posted_data_prefers_the_posted_country() {
-		$original_billing_country = WC()->customer->get_billing_country();
-
 		WC()->customer->set_billing_country( 'GB' );
 
 		$data = array(
@@ -611,11 +597,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		$errors = new WP_Error();
 
-		try {
-			$this->sut->validate_posted_data( $data, $errors );
-		} finally {
-			WC()->customer->set_billing_country( $original_billing_country );
-		}
+		$this->sut->validate_posted_data( $data, $errors );
 
 		$this->assertEmpty(
 			$errors->get_error_message( 'billing_postcode_validation' ),
@@ -638,9 +620,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	public function test_validate_posted_data_falls_back_to_the_customer_country( $fieldset_key, $customer_country, $expect_error ) {
 		add_filter( 'woocommerce_cart_needs_shipping_address', '__return_true' );
 
-		$original_billing_country  = WC()->customer->get_billing_country();
-		$original_shipping_country = WC()->customer->get_shipping_country();
-
 		WC()->customer->set_billing_country( $customer_country );
 		WC()->customer->set_shipping_country( $customer_country );
 
@@ -655,8 +634,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		try {
 			$this->sut->validate_posted_data( $data, $errors );
 		} finally {
-			WC()->customer->set_billing_country( $original_billing_country );
-			WC()->customer->set_shipping_country( $original_shipping_country );
 			remove_filter( 'woocommerce_cart_needs_shipping_address', '__return_true' );
 		}
 
@@ -889,6 +866,264 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'update_session' keeps only posted shipping rates that are listed for their package key.
+	 */
+	public function test_update_session_ignores_posted_shipping_rates_that_are_not_listed(): void {
+		WC_Helper_Shipping::create_simple_flat_rate( 8 );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
+		$_POST         = array(
+			'billing_first_name' => 'Test',
+			'billing_last_name'  => 'Shopper',
+			'billing_phone'      => '5555555555',
+			'billing_email'      => 'shopper@example.com',
+			'billing_country'    => 'US',
+			'billing_state'      => 'NY',
+			'billing_postcode'   => '10001',
+			'billing_city'       => 'New York',
+			'billing_address_1'  => '1 Main St',
+			'shipping_method'    => array(
+				0       => 'local_pickup',
+				'extra' => 'local_pickup',
+			),
+			'payment_method'     => 'cod',
+		);
+
+		try {
+			$this->sut->update_session( $this->sut->get_posted_data() );
+		} finally {
+			$_POST = $original_post;
+			WC_Helper_Shipping::delete_simple_flat_rate();
+		}
+
+		$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
+
+		$this->assertArrayNotHasKey( 'extra', $chosen_methods, 'A posted choice for a key with no listed rates must not be saved.' );
+		$this->assertSame( 'legacy_flat_rate', $chosen_methods[0], 'A posted rate that is not listed must not replace the listed rate.' );
+	}
+
+	/**
+	 * @testdox 'update_session' taxes the posted shipping rate at the posted address when a pickup rate was chosen before and the item taxes do not change with the address.
+	 */
+	public function test_update_session_taxes_posted_shipping_rate_at_posted_address(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_based_on', 'shipping' );
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_shipping_tax_class', '' );
+
+		foreach ( array( array( 'US', 'CA', '10.0000', 'CA tax' ), array( 'GB', '', '20.0000', 'GB tax' ) ) as list( $country, $state, $rate, $name ) ) {
+			WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country'  => $country,
+					'tax_rate_state'    => $state,
+					'tax_rate'          => $rate,
+					'tax_rate_name'     => $name,
+					'tax_rate_priority' => '1',
+					'tax_rate_compound' => '0',
+					'tax_rate_shipping' => '1',
+					'tax_rate_order'    => '1',
+					'tax_rate_class'    => '',
+				)
+			);
+		}
+
+		$base_zone = new WC_Shipping_Zone();
+		$base_zone->set_zone_name( 'Store base' );
+		$base_zone->save();
+		$base_zone->add_location( 'US:CA', 'state' );
+		$base_zone->save();
+		$pickup_id = $base_zone->add_shipping_method( 'local_pickup' );
+
+		$delivery_zone = new WC_Shipping_Zone();
+		$delivery_zone->set_zone_name( 'Delivery' );
+		$delivery_zone->save();
+		$delivery_zone->add_location( 'GB', 'country' );
+		$delivery_zone->save();
+		$flat_rate_id = $delivery_zone->add_shipping_method( 'flat_rate' );
+		update_option(
+			"woocommerce_flat_rate_{$flat_rate_id}_settings",
+			array(
+				'title'      => 'Flat rate',
+				'tax_status' => 'taxable',
+				'cost'       => '5',
+			)
+		);
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'tax_status' => 'none' ) );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->customer->set_is_vat_exempt( false );
+		WC()->customer->set_billing_location( 'US', 'CA', '90001', 'Los Angeles' );
+		WC()->customer->set_shipping_location( 'US', 'CA', '90001', 'Los Angeles' );
+		WC()->cart->calculate_totals();
+		WC()->session->set( 'chosen_shipping_methods', array( "local_pickup:{$pickup_id}" ) );
+		WC()->cart->calculate_totals();
+
+		$this->assertSame( array( "local_pickup:{$pickup_id}" ), WC()->session->get( 'chosen_shipping_methods' ), 'The pickup rate must be the chosen rate at the store address.' );
+
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
+		$_POST         = array(
+			'billing_first_name' => 'Test',
+			'billing_last_name'  => 'Shopper',
+			'billing_phone'      => '5555555555',
+			'billing_email'      => 'shopper@example.com',
+			'billing_country'    => 'GB',
+			'billing_postcode'   => 'SW1A 1AA',
+			'billing_city'       => 'London',
+			'billing_address_1'  => '1 Main St',
+			'shipping_method'    => array( "flat_rate:{$flat_rate_id}" ),
+			'payment_method'     => 'cod',
+		);
+
+		try {
+			$this->sut->update_session( $this->sut->get_posted_data() );
+		} finally {
+			$_POST = $original_post;
+		}
+
+		$this->assertSame( array( "flat_rate:{$flat_rate_id}" ), WC()->session->get( 'chosen_shipping_methods' ), 'The posted rate must be the chosen rate.' );
+		$this->assertSame( 5.0, (float) WC()->cart->get_shipping_total(), 'The cart must be charged the posted rate.' );
+		$this->assertSame( 1.0, (float) WC()->cart->get_shipping_tax(), 'The shipping tax must be the tax of the posted address.' );
+	}
+
+	/**
+	 * @testdox 'process_customer' keeps the posted shipping rate, taxed at the posted address, when the checkout creates an account.
+	 *
+	 * @testWith ["GB", "", "SW1A 1AA", "London", 5.0, 1.0]
+	 *           ["US", "CA", "90001", "Los Angeles", 7.0, 0.7]
+	 *
+	 * @param string $country               Posted billing country.
+	 * @param string $state                 Posted billing state.
+	 * @param string $postcode              Posted billing postcode.
+	 * @param string $city                  Posted billing city.
+	 * @param float  $expected_shipping     Cost of the posted flat rate.
+	 * @param float  $expected_shipping_tax Tax of the posted flat rate at the posted address.
+	 */
+	public function test_process_customer_keeps_posted_shipping_rate_when_creating_an_account( string $country, string $state, string $postcode, string $city, float $expected_shipping, float $expected_shipping_tax ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_based_on', 'shipping' );
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_shipping_tax_class', '' );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
+
+		foreach ( array( array( 'US', 'CA', '10.0000', 'CA tax' ), array( 'GB', '', '20.0000', 'GB tax' ) ) as list( $rate_country, $rate_state, $rate, $name ) ) {
+			WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country'  => $rate_country,
+					'tax_rate_state'    => $rate_state,
+					'tax_rate'          => $rate,
+					'tax_rate_name'     => $name,
+					'tax_rate_priority' => '1',
+					'tax_rate_compound' => '0',
+					'tax_rate_shipping' => '1',
+					'tax_rate_order'    => '1',
+					'tax_rate_class'    => '',
+				)
+			);
+		}
+
+		$base_zone = new WC_Shipping_Zone();
+		$base_zone->set_zone_name( 'Store base' );
+		$base_zone->save();
+		$base_zone->add_location( 'US:CA', 'state' );
+		$base_zone->save();
+		$pickup_id = $base_zone->add_shipping_method( 'local_pickup' );
+
+		$delivery_zone = new WC_Shipping_Zone();
+		$delivery_zone->set_zone_name( 'Delivery' );
+		$delivery_zone->save();
+		$delivery_zone->add_location( 'GB', 'country' );
+		$delivery_zone->save();
+
+		$flat_rate_ids   = array(
+			'US' => $base_zone->add_shipping_method( 'flat_rate' ),
+			'GB' => $delivery_zone->add_shipping_method( 'flat_rate' ),
+		);
+		$flat_rate_costs = array(
+			'US' => '7',
+			'GB' => '5',
+		);
+		foreach ( $flat_rate_costs as $zone_country => $cost ) {
+			update_option(
+				"woocommerce_flat_rate_{$flat_rate_ids[ $zone_country ]}_settings",
+				array(
+					'title'      => 'Flat rate',
+					'tax_status' => 'taxable',
+					'cost'       => $cost,
+				)
+			);
+		}
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+
+		// Keep the session cookie in $_COOKIE, where the login reads it, instead of sending a header.
+		$cookie_name  = '';
+		$store_cookie = function ( $enabled, $name, $value ) use ( &$cookie_name ) {
+			$cookie_name             = $name;
+			$_COOKIE[ $cookie_name ] = $value;
+			return false;
+		};
+
+		$posted_rate      = "flat_rate:{$flat_rate_ids[ $country ]}";
+		$original_session = WC()->session;
+		$original_post    = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
+
+		try {
+			wp_set_current_user( 0 );
+			add_filter( 'woocommerce_set_cookie_enabled', $store_cookie, 10, 3 );
+			WC()->session = new WC_Session_Handler();
+			WC()->session->init_session_cookie();
+			WC()->session->set_customer_session_cookie( true );
+
+			$product = WC_Helper_Product::create_simple_product( true, array( 'tax_status' => 'none' ) );
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+			WC()->customer->set_is_vat_exempt( false );
+			WC()->customer->set_billing_location( 'US', 'CA', '90001', 'Los Angeles' );
+			WC()->customer->set_shipping_location( 'US', 'CA', '90001', 'Los Angeles' );
+			WC()->cart->calculate_totals();
+			WC()->session->set( 'chosen_shipping_methods', array( "local_pickup:{$pickup_id}" ) );
+			WC()->cart->calculate_totals();
+			WC()->session->save_data();
+
+			$this->assertSame( array( "local_pickup:{$pickup_id}" ), WC()->session->get( 'chosen_shipping_methods' ), 'The pickup rate must be the chosen rate at the store address.' );
+
+			$_POST = array(
+				'billing_first_name' => 'Test',
+				'billing_last_name'  => 'Shopper',
+				'billing_phone'      => '5555555555',
+				'billing_email'      => 'new-shopper@example.com',
+				'billing_country'    => $country,
+				'billing_state'      => $state,
+				'billing_postcode'   => $postcode,
+				'billing_city'       => $city,
+				'billing_address_1'  => '1 Main St',
+				'shipping_method'    => array( $posted_rate ),
+				'payment_method'     => 'cod',
+				'createaccount'      => '1',
+			);
+
+			$data = $this->sut->get_posted_data();
+			$this->sut->update_session( $data );
+			$this->sut->process_customer( $data );
+
+			$this->assertTrue( is_user_logged_in(), 'The checkout must create the account and log the customer in.' );
+			$this->assertSame( array( $posted_rate ), WC()->session->get( 'chosen_shipping_methods' ), 'The posted rate must still be the chosen rate after the login.' );
+			$this->assertSame( $expected_shipping, (float) WC()->cart->get_shipping_total(), 'The cart must be charged the posted rate.' );
+			$this->assertSame( $expected_shipping_tax, (float) WC()->cart->get_shipping_tax(), 'The shipping tax must be the tax of the posted address.' );
+		} finally {
+			remove_filter( 'woocommerce_set_cookie_enabled', $store_cookie, 10 );
+			if ( '' !== $cookie_name ) {
+				unset( $_COOKIE[ $cookie_name ] );
+			}
+			wp_set_current_user( 0 );
+			WC()->session = $original_session;
+			$_POST        = $original_post;
+		}
+	}
+
+	/**
 	 * @testdox 'validate_checkout' still accepts an order when a plugin deliberately turns off shipping calculation.
 	 */
 	public function test_validate_checkout_accepts_order_when_shipping_calculation_is_turned_off_by_filter(): void {
@@ -928,12 +1163,128 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	public function test_get_value_no_error_on_null_customer() {
 		$sut = WC_Checkout::instance();
 
-		$orig_customer = WC()->customer;
 		WC()->customer = null;
 
 		$this->assertNull( $sut->get_value( 'billing_country' ) );
+	}
 
-		WC()->customer = $orig_customer;
+	/**
+	 * Log in a customer named John with a billing address in California, and make them the session customer.
+	 *
+	 * @param array $saved_shipping Shipping props to save to the account.
+	 */
+	private function log_in_customer( array $saved_shipping ): void {
+		$customer = new WC_Customer( $this->factory->user->create( array( 'role' => 'customer' ) ) );
+		$customer->set_props(
+			array(
+				'billing_first_name' => 'John',
+				'billing_country'    => 'US',
+				'billing_state'      => 'CA',
+				'billing_postcode'   => '94103',
+				'billing_city'       => 'San Francisco',
+				'billing_address_1'  => '1 Billing Street',
+				'billing_address_2'  => 'Apt 1',
+			) + $saved_shipping
+		);
+		$customer->save();
+
+		wp_set_current_user( $customer->get_id() );
+		WC()->customer = new WC_Customer( $customer->get_id(), true );
+	}
+
+	/**
+	 * Copy the billing details over the session's shipping ones, as checkout does while "Ship to a different address?"
+	 * is unticked: checkout.js posts the billing address as the shipping one on every update, and submitting the form
+	 * copies the name too, even when validation then fails.
+	 */
+	private function copy_billing_to_shipping_in_session(): void {
+		foreach ( self::PREFILLED_SHIPPING_FIELDS as $field ) {
+			WC()->customer->{"set_shipping_$field"}( WC()->customer->{"get_billing_$field"}( 'edit' ) );
+		}
+
+		WC()->customer->save();
+	}
+
+	/**
+	 * Get the values checkout prefills the shipping fields with.
+	 *
+	 * @return array Values keyed by field name without the 'shipping_' prefix.
+	 */
+	private function get_shipping_prefill(): array {
+		$prefill = array();
+
+		foreach ( self::PREFILLED_SHIPPING_FIELDS as $field ) {
+			$prefill[ $field ] = $this->sut->get_value( "shipping_$field" );
+		}
+
+		return $prefill;
+	}
+
+	/**
+	 * @testdox 'get_value' prefills the saved shipping address when the session only holds the billing copy.
+	 */
+	public function test_get_value_prefills_saved_shipping_address_over_billing_copy(): void {
+		$this->log_in_customer( self::SAVED_SHIPPING_ADDRESS );
+		WC()->customer->set_billing_company( 'Session Company' );
+		$this->copy_billing_to_shipping_in_session();
+
+		$this->assertSame(
+			array(
+				'first_name' => 'Jane',
+				'country'    => 'US',
+				'state'      => 'NY',
+				'postcode'   => '11201',
+				'city'       => 'Brooklyn',
+				'address_1'  => '2 Shipping Avenue',
+				'address_2'  => 'Apt 2',
+			),
+			$this->get_shipping_prefill()
+		);
+		$this->assertSame( 'Session Company', $this->sut->get_value( 'billing_company' ), 'Billing fields should still come from the session.' );
+	}
+
+	/**
+	 * @testdox 'get_value' keeps a shipping address the customer entered during the session.
+	 */
+	public function test_get_value_keeps_shipping_address_entered_in_session(): void {
+		$this->log_in_customer( self::SAVED_SHIPPING_ADDRESS );
+		// What the cart shipping calculator stores for a customer with a billing name. It clears the street lines.
+		WC()->customer->set_shipping_location( 'US', 'WA', '98101', 'Seattle' );
+		WC()->customer->save();
+
+		$this->assertSame(
+			array(
+				'first_name' => 'Jane',
+				'country'    => 'US',
+				'state'      => 'WA',
+				'postcode'   => '98101',
+				'city'       => 'Seattle',
+				'address_1'  => null,
+				'address_2'  => null,
+			),
+			$this->get_shipping_prefill()
+		);
+	}
+
+	/**
+	 * @testdox 'get_value' keeps the billing copy when the customer has no saved shipping address.
+	 */
+	public function test_get_value_keeps_billing_copy_without_saved_shipping_address(): void {
+		$this->log_in_customer( array( 'shipping_first_name' => 'Jane' ) );
+		$this->copy_billing_to_shipping_in_session();
+
+		$this->assertSame(
+			array(
+				'first_name' => 'John',
+				'country'    => 'US',
+				'state'      => 'CA',
+				'postcode'   => '94103',
+				'city'       => 'San Francisco',
+				'address_1'  => '1 Billing Street',
+				'address_2'  => 'Apt 1',
+			),
+			$this->get_shipping_prefill()
+		);
 	}
 
 	/**
@@ -980,6 +1331,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @testdox Resuming a pending order with an unchanged cart keeps its item IDs.
 	 */
 	public function test_create_order_resume_keeps_item_ids_when_cart_is_unchanged(): void {
+		$this->assertNotFalse(
+			has_action( 'woocommerce_new_order_item', array( WC()->deprecated_hook_handlers['actions'], 'maybe_handle_deprecated_hook' ) ),
+			'The core legacy hook forwarder must not prevent item reuse.'
+		);
 		$order_id        = $this->create_order_with_line_item_and_fee();
 		$before          = $this->get_order_item_ids_by_type( $order_id );
 		$line_item_calls = did_action( 'woocommerce_checkout_create_order_line_item' );
@@ -995,7 +1350,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Resuming a pending order whose $item_type cart section changed replaces only those items, and fires woocommerce_remove_order_items once for them.
+	 * @testdox Resuming a pending order whose $item_type cart section changed replaces only those items.
 	 * @testWith ["fee"]
 	 *           ["shipping"]
 	 *           ["tax"]
@@ -1008,20 +1363,11 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$before   = $this->get_order_item_ids_by_type( $order_id );
 		$this->change_cart_section( $order_id, $item_type );
 		$line_item_calls = did_action( 'woocommerce_checkout_create_order_line_item' );
-		$removed_types   = array();
-		add_action(
-			'woocommerce_remove_order_items',
-			function ( $order, $type ) use ( &$removed_types ) {
-				unset( $order );
-				$removed_types[] = $type;
-			},
-			10,
-			2
-		);
+		$removal_calls   = did_action( 'woocommerce_remove_order_items' );
 
 		$this->resume_order( $order_id );
 
-		$this->assertSame( array( $item_type ), $removed_types, 'Only the changed type should be removed, once.' );
+		$this->assertSame( $removal_calls + 1, did_action( 'woocommerce_remove_order_items' ), 'Only the changed type should be removed, once.' );
 		$this->assert_items_replaced( $before, $this->get_order_item_ids_by_type( $order_id ), array( $item_type ) );
 		$this->assertSame( $line_item_calls, did_action( 'woocommerce_checkout_create_order_line_item' ), 'Kept line items should not be created again.' );
 		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) wc_get_order( $order_id )->get_total(), 'The order total should match the cart.' );
@@ -1381,6 +1727,221 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Resuming an order rebuilds every item when $hook has a callback, even if the callback does not change items.
+	 * @testWith ["woocommerce_checkout_create_order_line_item"]
+	 *           ["woocommerce_checkout_create_order_fee_item"]
+	 *           ["woocommerce_checkout_create_order_shipping_item"]
+	 *           ["woocommerce_checkout_create_order_tax_item"]
+	 *           ["woocommerce_checkout_create_order_coupon_item"]
+	 *           ["woocommerce_checkout_create_order_line_item_object"]
+	 *           ["woocommerce_new_order_item"]
+	 *
+	 * @param string $hook The creation hook to register after the first checkout.
+	 */
+	public function test_create_order_resume_rebuilds_items_with_creation_callbacks( string $hook ): void {
+		$order_id = $this->create_order_with_shipping_taxes_and_coupon();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$calls    = 0;
+		add_filter(
+			$hook,
+			function ( $value ) use ( &$calls ) {
+				++$calls;
+				return $value;
+			},
+			0
+		);
+		add_filter( 'woocommerce_checkout_keep_order_items_on_resume', '__return_true' );
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id ) );
+		$after = $this->get_order_item_ids_by_type( $order_id );
+		$this->assert_items_replaced( $before, $after, array_keys( $before ) );
+		$this->assertGreaterThan( 0, $calls, 'The newly registered callback must run on retry.' );
+
+		$calls = 0;
+		$this->assertSame( $order_id, $this->resume_order( $order_id ) );
+		$this->assert_items_replaced( $after, $this->get_order_item_ids_by_type( $order_id ), array_keys( $after ) );
+		$this->assertGreaterThan( 0, $calls, 'The callback must also run on subsequent retries.' );
+		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) wc_get_order( $order_id )->get_total() );
+	}
+
+	/**
+	 * @testdox Resuming an order calls $hook once for all items when it has a callback.
+	 * @testWith ["woocommerce_remove_order_items"]
+	 *           ["woocommerce_removed_order_items"]
+	 *
+	 * @param string $hook The removal hook.
+	 */
+	public function test_create_order_resume_rebuilds_items_with_removal_callbacks( string $hook ): void {
+		$order_id = $this->create_order_with_shipping_taxes_and_coupon();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$types    = array();
+		add_action(
+			$hook,
+			function ( $order, $type ) use ( &$types ) {
+				$types[] = $type;
+			},
+			10,
+			2
+		);
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id ) );
+
+		$this->assertSame( array( null ), $types, 'The removal callback must receive the original whole-order call.' );
+		$this->assert_items_replaced( $before, $this->get_order_item_ids_by_type( $order_id ), array_keys( $before ) );
+	}
+
+	/**
+	 * @testdox Resuming an order rebuilds items when the core forwarder has a listener on $hook.
+	 * @testWith ["woocommerce_order_add_shipping"]
+	 *           ["woocommerce_order_add_coupon"]
+	 *           ["woocommerce_order_add_tax"]
+	 *           ["woocommerce_order_add_fee"]
+	 *           ["woocommerce_add_shipping_order_item"]
+	 *           ["woocommerce_add_order_item_meta"]
+	 *           ["woocommerce_add_order_fee_meta"]
+	 *
+	 * @param string $hook The deprecated creation hook.
+	 */
+	public function test_create_order_resume_rebuilds_items_with_legacy_callbacks( string $hook ): void {
+		$this->setExpectedDeprecated( $hook );
+		$order_id = $this->create_order_with_shipping_taxes_and_coupon();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$calls    = 0;
+		add_action(
+			$hook,
+			function () use ( &$calls ) {
+				++$calls;
+			}
+		);
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id ) );
+
+		$this->assertGreaterThan( 0, $calls, 'The core forwarder must call the legacy listener on retry.' );
+		$this->assert_items_replaced( $before, $this->get_order_item_ids_by_type( $order_id ), array_keys( $before ) );
+	}
+
+	/**
+	 * @testdox Resuming an order refreshes derived item data through $hook, including a callback that initially writes nothing.
+	 * @testWith ["woocommerce_checkout_create_order_line_item", "old@example.com"]
+	 *           ["woocommerce_checkout_create_order_line_item", ""]
+	 *           ["woocommerce_checkout_create_order_line_item_object", "old@example.com"]
+	 *
+	 * @param string $hook The item creation hook.
+	 * @param string $email The billing email on the first checkout.
+	 */
+	public function test_create_order_resume_refreshes_item_data_from_order( string $hook, string $email ): void {
+		add_filter(
+			$hook,
+			function ( $item, $cart_item_key, $values, $order ) {
+				if ( '' !== $order->get_billing_email() ) {
+					$item->add_meta_data( '_recipient', $order->get_billing_email(), true );
+				}
+				return $item;
+			},
+			10,
+			4
+		);
+		$order_id = $this->create_order_with_line_item_and_fee( array( 'billing_email' => $email ) );
+		$items    = wc_get_order( $order_id )->get_items();
+		$this->assertSame( $email, current( $items )->get_meta( '_recipient' ) );
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id, array( 'billing_email' => 'new@example.com' ) ) );
+		$items = wc_get_order( $order_id )->get_items();
+
+		$this->assertSame( 'new@example.com', current( $items )->get_meta( '_recipient' ) );
+	}
+
+	/**
+	 * @testdox Resuming an order refreshes item metadata written directly to the database during item creation.
+	 */
+	public function test_create_order_resume_refreshes_item_data_written_during_save(): void {
+		add_action(
+			'woocommerce_new_order_item',
+			function ( $item_id, $item, $order_id ) {
+				wc_update_order_item_meta( $item_id, '_recipient', wc_get_order( $order_id )->get_billing_email() );
+			},
+			10,
+			3
+		);
+		$order_id = $this->create_order_with_line_item_and_fee( array( 'billing_email' => 'old@example.com' ) );
+		$items    = wc_get_order( $order_id )->get_items();
+		$this->assertSame( 'old@example.com', current( $items )->get_meta( '_recipient' ) );
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id, array( 'billing_email' => 'new@example.com' ) ) );
+		$items = wc_get_order( $order_id )->get_items();
+
+		$this->assertSame( 'new@example.com', current( $items )->get_meta( '_recipient' ) );
+	}
+
+	/**
+	 * @testdox Resuming an order keeps item IDs after its item creation callback is removed.
+	 */
+	public function test_create_order_resume_keeps_items_after_callback_is_removed(): void {
+		add_action( 'woocommerce_checkout_create_order_line_item', '__return_null' );
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		remove_action( 'woocommerce_checkout_create_order_line_item', '__return_null' );
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id ) );
+
+		$this->assertSame( $before, $this->get_order_item_ids_by_type( $order_id ) );
+	}
+
+	/**
+	 * @testdox Resuming a failed order detects item callbacks registered by $hook during the retry.
+	 * @testWith ["woocommerce_resume_order"]
+	 *           ["woocommerce_checkout_keep_order_items_on_resume"]
+	 *
+	 * @param string $hook The hook that registers the item callback.
+	 */
+	public function test_create_order_resume_detects_callbacks_registered_during_retry( string $hook ): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$order    = wc_get_order( $order_id );
+		$order->set_status( OrderStatus::FAILED );
+		$order->save();
+		$before = $this->get_order_item_ids_by_type( $order_id );
+		add_filter(
+			$hook,
+			function ( $value ) {
+				add_action( 'woocommerce_checkout_create_order_line_item', '__return_null' );
+				return $value;
+			}
+		);
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id ) );
+
+		$this->assert_items_replaced( $before, $this->get_order_item_ids_by_type( $order_id ), array_keys( $before ) );
+	}
+
+	/**
+	 * @testdox Resuming an order treats an overridden legacy forwarder as an extension callback.
+	 */
+	public function test_create_order_resume_rebuilds_items_with_custom_legacy_forwarder(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$handler  = new class() extends WC_Deprecated_Action_Hooks {
+			/**
+			 * Number of callback invocations.
+			 *
+			 * @var int
+			 */
+			public $calls = 0;
+
+			/**
+			 * Record invocations instead of forwarding legacy hooks.
+			 */
+			public function maybe_handle_deprecated_hook() {
+				++$this->calls;
+			}
+		};
+
+		$this->assertSame( $order_id, $this->resume_order( $order_id ) );
+
+		$this->assertGreaterThan( 0, $handler->calls );
+		$this->assert_items_replaced( $before, $this->get_order_item_ids_by_type( $order_id ), array_keys( $before ) );
+	}
+
+	/**
 	 * @testdox Resuming a pending order replaces line items that no longer match the cart, even when the cart hash still matches.
 	 */
 	public function test_create_order_resume_replaces_line_items_when_cart_hash_misses_a_quantity_change(): void {
@@ -1455,9 +2016,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Creates an order from a cart with one product and one fee.
 	 *
+	 * @param array $data Posted checkout data to add.
 	 * @return int The order ID.
 	 */
-	private function create_order_with_line_item_and_fee(): int {
+	private function create_order_with_line_item_and_fee( array $data = array() ): int {
 		$product = WC_Helper_Product::create_simple_product();
 		add_action(
 			'woocommerce_cart_calculate_fees',
@@ -1468,7 +2030,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 		WC()->cart->calculate_totals();
 
-		$order_id = $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+		$order_id = $this->sut->create_order( array_merge( array( 'payment_method' => WC_Gateway_BACS::ID ), $data ) );
 		$this->assertIsInt( $order_id );
 
 		return $order_id;
@@ -1695,14 +2257,15 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Runs checkout again with the order set as awaiting payment, as when a shopper retries a failed payment.
 	 *
-	 * @param int $order_id The order awaiting payment.
+	 * @param int   $order_id The order awaiting payment.
+	 * @param array $data     Posted checkout data to add.
 	 * @return int|WP_Error The order ID returned by create_order().
 	 */
-	private function resume_order( int $order_id ) {
+	private function resume_order( int $order_id, array $data = array() ) {
 		$original = WC()->session->get( 'order_awaiting_payment' );
 		WC()->session->set( 'order_awaiting_payment', $order_id );
 		try {
-			return $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+			return $this->sut->create_order( array_merge( array( 'payment_method' => WC_Gateway_BACS::ID ), $data ) );
 		} finally {
 			WC()->session->set( 'order_awaiting_payment', $original );
 		}
@@ -2386,11 +2949,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Swap the test base's in-memory session for a real handler, which is what process_order_payment() needs (it calls save_data()).
 	 *
-	 * The customer is swapped too, because a full checkout writes the posted address into it and nothing else resets that singleton.
+	 * The customer is swapped for a fresh one too, because a full checkout writes the posted address into it.
 	 */
 	private function use_real_session(): void {
-		$this->original_session          = WC()->session;
-		$this->original_session_customer = WC()->customer;
+		$this->original_session = WC()->session;
 
 		WC()->session = new WC_Session_Handler();
 		WC()->session->init();

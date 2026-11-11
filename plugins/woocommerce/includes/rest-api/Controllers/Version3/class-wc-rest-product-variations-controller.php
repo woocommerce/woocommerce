@@ -216,6 +216,10 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			$variation = new WC_Product_Variation();
 		}
 
+		if ( ! $variation instanceof WC_Product_Variation ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
 		$variation->set_parent_id( absint( $request['product_id'] ) );
 
 		foreach ( $customs as $property => $value ) {
@@ -238,7 +242,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		}
 
 		// MPN.
-		if ( $variation instanceof WC_Product && isset( $request['mpn'] ) ) {
+		if ( isset( $request['mpn'] ) ) {
 			$variation->set_mpn( sanitize_text_field( $request['mpn'] ) );
 		}
 
@@ -425,7 +429,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 
 				if ( $parent_attributes[ $attribute_name ]->is_taxonomy() ) {
 					// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
-					$term = get_term_by( 'name', $attribute_value, $attribute_name );
+					$term = get_term_by( 'name', $attribute_value, $parent_attributes[ $attribute_name ]->get_name() );
 
 					if ( $term && ! is_wp_error( $term ) ) {
 						$attribute_value = $term->slug;
@@ -516,6 +520,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 */
 	protected function set_variation_image( $variation, $image ) {
 		$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
+		$is_new_upload = false;
 
 		if ( 0 === $attachment_id ) {
 			if ( isset( $image['src'] ) ) {
@@ -537,6 +542,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				}
 
 				$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $variation->get_id() );
+				$is_new_upload = true;
 			} else {
 				$variation->set_image_id( '' );
 				return $variation;
@@ -544,6 +550,10 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		}
 
 		if ( ! wp_attachment_is_image( $attachment_id ) ) {
+			if ( $is_new_upload && $attachment_id > 0 ) {
+				wp_delete_attachment( $attachment_id, true );
+			}
+
 			/* translators: %s: attachment ID */
 			throw new WC_REST_Exception( 'woocommerce_variation_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 );
 		}
