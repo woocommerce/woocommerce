@@ -481,7 +481,7 @@ export const AddressAutocomplete = ( {
 	// The list stays mounted while it slides back to the field.
 	const presence = usePresence(
 		searchValue.length >= 3 && suggestions.length > 0 ? suggestions : null,
-		{ exit: ! isClosedByKey }
+		{ animate: ! isClosedByKey }
 	);
 
 	return (

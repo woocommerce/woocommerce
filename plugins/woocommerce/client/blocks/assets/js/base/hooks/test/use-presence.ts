@@ -2,17 +2,24 @@
  * External dependencies
  */
 import { act, renderHook } from '@testing-library/react';
+import { animateCollapse } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
  */
 import { usePresence } from '../use-presence';
 
-type Props = { value: string[] | null; exit?: boolean };
+jest.mock( '@woocommerce/base-utils', () => ( {
+	...jest.requireActual( '@woocommerce/base-utils' ),
+	animateCollapse: jest.fn(),
+} ) );
+
+type Props = { value: string[] | null; animate?: boolean; collapse?: boolean };
 
 const renderUsePresence = ( initialProps: Props ) =>
 	renderHook(
-		( { value, exit = true }: Props ) => usePresence( value, { exit } ),
+		( { value, animate = true, collapse = false }: Props ) =>
+			usePresence( value, { animate, collapse } ),
 		{ initialProps }
 	);
 
@@ -83,12 +90,65 @@ describe( 'usePresence', () => {
 		expect( result.current.value ).toBe( reopened );
 	} );
 
-	it( 'removes the value immediately when exit is false', () => {
+	it( 'removes the value immediately when animate is false', () => {
 		const { result, rerender } = renderUsePresence( { value: open } );
 		result.current.ref.current = createAnimatingElement().element;
 
-		rerender( { value: null, exit: false } );
+		rerender( { value: null, animate: false } );
 		expect( result.current.value ).toBeNull();
 		expect( result.current.isExiting ).toBe( false );
+	} );
+
+	describe( 'with collapse', () => {
+		beforeEach( () => jest.mocked( animateCollapse ).mockClear() );
+
+		it( 'does not grow a value that is there on the first render', () => {
+			renderUsePresence( { value: open, collapse: true } );
+			expect( animateCollapse ).not.toHaveBeenCalled();
+		} );
+
+		it( 'grows the element when a value arrives and collapses it when it goes', async () => {
+			const { result, rerender } = renderUsePresence( {
+				value: null,
+				collapse: true,
+			} );
+			const { element, finish } = createAnimatingElement();
+			result.current.ref.current = element;
+
+			rerender( { value: open, collapse: true } );
+			expect( animateCollapse ).toHaveBeenLastCalledWith(
+				element,
+				true,
+				true
+			);
+
+			rerender( { value: null, collapse: true } );
+			expect( animateCollapse ).toHaveBeenLastCalledWith(
+				element,
+				false
+			);
+			expect( result.current.isExiting ).toBe( true );
+
+			await act( async () => finish() );
+			expect( result.current.value ).toBeNull();
+		} );
+
+		it( 'stops the collapse without a grow when the value returns with animate false', () => {
+			const { result, rerender } = renderUsePresence( {
+				value: open,
+				collapse: true,
+			} );
+			const { element } = createAnimatingElement();
+			result.current.ref.current = element;
+
+			rerender( { value: null, collapse: true } );
+			rerender( { value: open, animate: false, collapse: true } );
+			expect( animateCollapse ).toHaveBeenLastCalledWith(
+				element,
+				true,
+				false
+			);
+			expect( result.current.isExiting ).toBe( false );
+		} );
 	} );
 } );
