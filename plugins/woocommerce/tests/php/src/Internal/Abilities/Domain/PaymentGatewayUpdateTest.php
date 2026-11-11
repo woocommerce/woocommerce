@@ -261,88 +261,83 @@ class PaymentGatewayUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should move a gateway to a checkout position, and report the position the query then shows.
+	 * @testdox Should move a gateway to the first and the last checkout position, and report the position the query then shows.
 	 */
 	public function test_moves_a_gateway_in_the_checkout_order(): void {
-		$before = array_column( $this->run_ability( 'woocommerce/payment-gateways-query' )['gateways'], 'id' );
-		$last   = end( $before );
+		$this->register_online_gateway();
+		$last = count( $this->get_saved_positions() ) - 1;
 
-		$result = $this->run_ability(
-			'woocommerce/payment-gateway-update',
-			array(
-				'id'    => $last,
-				'order' => 0,
-			)
-		);
+		$result = $this->move_gateway( 'online_test_gateway', 0 );
+		$after  = $this->get_saved_positions();
+		$this->assertSame( 0, $after['online_test_gateway'], 'The gateway should move first.' );
+		$this->assertSame( 0, $result['payment_gateway']['order'] );
 
-		$this->assertNotWPError( $result );
-
-		self::reload_payment_gateways();
-		$after = array_column( $this->run_ability( 'woocommerce/payment-gateways-query' )['gateways'], 'order', 'id' );
-
-		$this->assertSame( $after[ $last ], $result['payment_gateway']['order'], 'The response should give the saved position.' );
-		$this->assertLessThan( count( $before ) - 1, $after[ $last ], 'The gateway should have moved up.' );
+		$result = $this->move_gateway( 'online_test_gateway', $last );
+		$after  = $this->get_saved_positions();
+		$this->assertSame( $last, $after['online_test_gateway'], 'The gateway should move last.' );
+		$this->assertSame( $last, $result['payment_gateway']['order'] );
 	}
 
 	/**
 	 * @testdox Should move a gateway last when the position is past the end.
 	 */
 	public function test_moves_a_gateway_last_for_a_position_past_the_end(): void {
-		$before = array_column( $this->run_ability( 'woocommerce/payment-gateways-query' )['gateways'], 'id' );
-		$first  = $before[0];
+		$this->register_online_gateway();
+		$this->move_gateway( 'online_test_gateway', 0 );
 
-		$result = $this->run_ability(
-			'woocommerce/payment-gateway-update',
-			array(
-				'id'    => $first,
-				'order' => 99,
-			)
-		);
+		$result = $this->move_gateway( 'online_test_gateway', 99 );
 
-		$this->assertNotWPError( $result );
-		self::reload_payment_gateways();
-		$after = array_column( $this->run_ability( 'woocommerce/payment-gateways-query' )['gateways'], 'order', 'id' );
-		$this->assertGreaterThan( 0, $after[ $first ] );
-		$this->assertSame( $after[ $first ], $result['payment_gateway']['order'] );
+		$after = $this->get_saved_positions();
+		$this->assertSame( count( $after ) - 1, $after['online_test_gateway'] );
+		$this->assertSame( $after['online_test_gateway'], $result['payment_gateway']['order'] );
 	}
 
 	/**
-	 * @testdox Should report the saved position when an offline method is sent above a non-offline gateway.
+	 * @testdox Should keep an offline method inside the offline methods when it is sent above a non-offline gateway.
 	 */
-	public function test_reports_the_saved_position_when_an_offline_method_moves_above_an_online_gateway(): void {
+	public function test_keeps_an_offline_method_inside_the_offline_methods(): void {
 		$this->register_online_gateway();
+		$this->move_gateway( 'online_test_gateway', 0 );
+		$this->move_gateway( 'bacs', 99 );
 
-		$result = $this->run_ability(
-			'woocommerce/payment-gateway-update',
-			array(
-				'id'    => 'bacs',
-				'order' => 0,
-			)
-		);
+		$result = $this->move_gateway( 'bacs', 0 );
 
-		$this->assertNotWPError( $result );
 		$after = $this->get_saved_positions();
+		$this->assertSame( 0, $after['online_test_gateway'], 'The non-offline gateway should stay first.' );
+		$this->assertSame( $this->get_offline_positions( $after )[0], $after['bacs'], 'The offline method should move to the top of the offline methods.' );
 		$this->assertSame( $after['bacs'], $result['payment_gateway']['order'], 'The response should give the position checkout uses.' );
 		$this->assert_offline_methods_stay_grouped( $after );
 	}
 
 	/**
-	 * @testdox Should report the saved position when a non-offline gateway is sent into the offline methods.
+	 * @testdox Should place a non-offline gateway just after the offline methods when it is moved down into them.
 	 */
-	public function test_reports_the_saved_position_when_an_online_gateway_moves_into_the_offline_methods(): void {
+	public function test_places_a_gateway_moved_down_into_the_offline_methods_after_them(): void {
 		$this->register_online_gateway();
+		$this->move_gateway( 'online_test_gateway', 0 );
 		$before = $this->get_saved_positions();
 
-		$result = $this->run_ability(
-			'woocommerce/payment-gateway-update',
-			array(
-				'id'    => 'online_test_gateway',
-				'order' => $before['cheque'],
-			)
-		);
+		$result = $this->move_gateway( 'online_test_gateway', $before['cheque'] );
 
-		$this->assertNotWPError( $result );
+		$after   = $this->get_saved_positions();
+		$offline = $this->get_offline_positions( $after );
+		$this->assertSame( end( $offline ) + 1, $after['online_test_gateway'] );
+		$this->assertSame( $after['online_test_gateway'], $result['payment_gateway']['order'], 'The response should give the position checkout uses.' );
+		$this->assert_offline_methods_stay_grouped( $after );
+	}
+
+	/**
+	 * @testdox Should place a non-offline gateway just before the offline methods when it is moved up into them.
+	 */
+	public function test_places_a_gateway_moved_up_into_the_offline_methods_before_them(): void {
+		$this->register_online_gateway();
+		$this->move_gateway( 'online_test_gateway', 99 );
+		$before = $this->get_saved_positions();
+
+		$result = $this->move_gateway( 'online_test_gateway', $before['cheque'] );
+
 		$after = $this->get_saved_positions();
+		$this->assertSame( $this->get_offline_positions( $after )[0] - 1, $after['online_test_gateway'] );
 		$this->assertSame( $after['online_test_gateway'], $result['payment_gateway']['order'], 'The response should give the position checkout uses.' );
 		$this->assert_offline_methods_stay_grouped( $after );
 	}
@@ -467,15 +462,49 @@ class PaymentGatewayUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Move a gateway and fail the test if the ability refuses.
+	 *
+	 * @param string $id    Gateway ID.
+	 * @param int    $order Target position.
+	 * @return array
+	 */
+	private function move_gateway( string $id, int $order ): array {
+		$result = $this->run_ability(
+			'woocommerce/payment-gateway-update',
+			array(
+				'id'    => $id,
+				'order' => $order,
+			)
+		);
+		$this->assertNotWPError( $result );
+		self::reload_payment_gateways();
+
+		return $result;
+	}
+
+	/**
+	 * Sorted positions of the three Core offline methods.
+	 *
+	 * @param array<string, int> $positions Positions keyed by gateway ID.
+	 * @return array<int, int>
+	 */
+	private function get_offline_positions( array $positions ): array {
+		$offline = array_values( array_intersect_key( $positions, array_flip( array( 'bacs', 'cheque', 'cod' ) ) ) );
+		sort( $offline );
+
+		return $offline;
+	}
+
+	/**
 	 * Assert the loaded offline methods sit next to each other in the checkout order.
 	 *
 	 * @param array<string, int> $positions Positions keyed by gateway ID.
 	 */
 	private function assert_offline_methods_stay_grouped( array $positions ): void {
-		$offline = array_values( array_intersect_key( $positions, array_flip( array( 'bacs', 'cheque', 'cod' ) ) ) );
+		$offline = $this->get_offline_positions( $positions );
 
 		$this->assertCount( 3, $offline, 'The test site should load all three offline methods.' );
-		$this->assertSame( count( $offline ) - 1, max( $offline ) - min( $offline ), 'Offline methods should stay grouped.' );
+		$this->assertSame( count( $offline ) - 1, end( $offline ) - $offline[0], 'Offline methods should stay grouped.' );
 	}
 
 	/**
