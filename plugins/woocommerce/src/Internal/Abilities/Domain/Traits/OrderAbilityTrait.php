@@ -355,6 +355,20 @@ trait OrderAbilityTrait {
 	}
 
 	/**
+	 * Check order delete access for an ability input payload.
+	 *
+	 * @param mixed $input Ability input.
+	 * @return bool
+	 *
+	 * @since 11.4.0
+	 */
+	public static function can_delete_order( $input = array() ): bool {
+		$order_id = self::get_id_from_input( $input );
+
+		return $order_id > 0 && self::check_order_permission( $order_id, 'delete' );
+	}
+
+	/**
 	 * Check a permission against the actual type of an order. An order whose
 	 * type the abilities do not support fails. An ID that wc_get_order() has no
 	 * order class for passes for users who could act on any order, so they get
@@ -368,7 +382,7 @@ trait OrderAbilityTrait {
 		$class_names = \WC_Order_Factory::get_class_names_for_order_ids( array( $order_id ) );
 
 		if ( empty( $class_names[ $order_id ] ) ) {
-			return (bool) wc_rest_check_post_permissions( 'shop_order', 'edit' === $context ? 'batch' : $context );
+			return (bool) wc_rest_check_post_permissions( 'shop_order', 'read' === $context ? 'read' : 'batch' );
 		}
 
 		$type = OrderUtil::get_order_type( $order_id );
