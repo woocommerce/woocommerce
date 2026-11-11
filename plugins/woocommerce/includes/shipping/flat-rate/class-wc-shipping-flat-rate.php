@@ -82,10 +82,7 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 		include_once WC()->plugin_path() . '/includes/libraries/class-wc-eval-math.php';
 
-		// Allow 3rd parties to process shipping cost arguments. The currency describes the `cost` value.
-		if ( is_array( $args ) && ! isset( $args['currency'] ) ) {
-			$args['currency'] = get_option( 'woocommerce_currency' );
-		}
+		// Allow 3rd parties to process shipping cost arguments.
 		$args           = apply_filters( 'woocommerce_evaluate_shipping_cost_args', $args, $sum, $this );
 		$locale         = localeconv();
 		$decimals       = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'], ',' );

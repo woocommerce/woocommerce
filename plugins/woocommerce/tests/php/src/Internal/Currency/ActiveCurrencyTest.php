@@ -86,39 +86,70 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * The active currency is set only inside run().
+	 * Read the innermost operation name of the active scopes, or null when none names one.
+	 *
+	 * @return string|null
+	 */
+	public static function current_operation(): ?string {
+		$entry = self::innermost_operation_entry();
+		return $entry ? $entry['operation'] : null;
+	}
+
+	/**
+	 * Read the subject of the innermost scope that names an operation, or null when there is none.
+	 *
+	 * @return object|null
+	 */
+	public static function current_subject(): ?object {
+		$entry = self::innermost_operation_entry();
+		return $entry ? $entry['subject'] : null;
+	}
+
+	/**
+	 * Find the innermost stack entry that names an operation.
+	 *
+	 * @return array|null
+	 */
+	private static function innermost_operation_entry(): ?array {
+		$property = new \ReflectionProperty( ActiveCurrency::class, 'stack' );
+		$property->setAccessible( true );
+		foreach ( array_reverse( $property->getValue() ) as $entry ) {
+			if ( null !== $entry['operation'] ) {
+				return $entry;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * The active currency is set only while the scope is held.
 	 *
 	 * @return void
 	 */
-	public function test_run_activates_the_currency_only_inside_the_callback(): void {
+	public function test_scope_activates_the_currency_only_while_held(): void {
 		$this->assertNull( ActiveCurrency::get() );
 
-		$seen = ActiveCurrency::run(
-			'JPY',
-			function () {
-				return ActiveCurrency::get();
-			}
-		);
+		$scope = ActiveCurrency::scope( 'JPY' );
+		$seen  = ActiveCurrency::get();
+		$scope->release();
 
 		$this->assertSame( 'JPY', $seen );
 		$this->assertNull( ActiveCurrency::get() );
 	}
 
 	/**
-	 * run() restores the previous state when the callback throws.
+	 * A held scope is released when an exception unwinds the function that opened it.
 	 *
 	 * @return void
 	 */
-	public function test_run_restores_the_active_currency_when_the_callback_throws(): void {
+	public function test_scope_is_released_when_the_function_throws(): void {
 		$this->expectException( \RuntimeException::class );
 
 		try {
-			ActiveCurrency::run(
-				'JPY',
-				function () {
-					throw new \RuntimeException( 'Failed.' );
-				}
-			);
+			( function () {
+				$scope = ActiveCurrency::scope( 'JPY' );
+				throw new \RuntimeException( 'Failed.' );
+			} )();
 		} finally {
 			$this->assertNull( ActiveCurrency::get() );
 		}
@@ -226,12 +257,6 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( '.', (string) $reloaded->get_discount_total() );
 		$this->assertStringNotContainsString( '.', (string) $reloaded->get_total() );
 		$this->assertNull( ActiveCurrency::get() );
-
-		$staged = new \WC_Order( $order->get_id() );
-		$staged->stage_recalculated_coupons();
-
-		$this->assertStringNotContainsString( '.', (string) $staged->get_discount_total() );
-		$this->assertNull( ActiveCurrency::get() );
 	}
 
 	/**
@@ -255,22 +280,6 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * A direct stage_*() call on a JPY order sees JPY decimals, not the store default.
-	 *
-	 * @return void
-	 */
-	public function test_direct_stage_call_uses_the_order_currency(): void {
-		$order = $this->create_order( 'JPY' );
-		add_action( 'woocommerce_order_before_calculate_taxes', array( $this, 'record_decimals_before_taxes' ) );
-
-		$order->stage_taxes();
-
-		remove_action( 'woocommerce_order_before_calculate_taxes', array( $this, 'record_decimals_before_taxes' ) );
-		$this->assertSame( 0, $this->decimals_seen_before_totals );
-		$this->assertNull( ActiveCurrency::get() );
-	}
-
-	/**
 	 * The symbol position filter gets the active currency while an order operation runs and no extra argument otherwise.
 	 *
 	 * @return void
@@ -287,12 +296,9 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 			PHP_INT_MAX
 		);
 
-		ActiveCurrency::run(
-			'JPY',
-			function () {
-				return \Automattic\WooCommerce\Internal\Utilities\PriceFormat::get_position();
-			}
-		);
+		$scope = ActiveCurrency::scope( 'JPY' );
+		\Automattic\WooCommerce\Internal\Utilities\PriceFormat::get_position();
+		$scope->release();
 		\Automattic\WooCommerce\Internal\Utilities\PriceFormat::get_position();
 
 		remove_all_filters( 'wc_get_currency_position' );
@@ -421,22 +427,22 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 	public function test_nested_scopes_report_the_innermost_operation_and_subject(): void {
 		$outer = new \stdClass();
 
-		$outer_scope = ActiveCurrency::scope( 'JPY', 'order.calculate_totals', $outer );
-		$this->assertSame( 'order.calculate_totals', ActiveCurrency::get_operation() );
-		$this->assertSame( $outer, ActiveCurrency::get_subject() );
+		$outer_scope = ActiveCurrency::scope( 'JPY', 'order', $outer );
+		$this->assertSame( 'order', self::current_operation() );
+		$this->assertSame( $outer, self::current_subject() );
 
-		$inner_scope = ActiveCurrency::scope( 'EUR', 'shipping.package' );
-		$this->assertSame( 'shipping.package', ActiveCurrency::get_operation() );
-		$this->assertNull( ActiveCurrency::get_subject() );
+		$inner_scope = ActiveCurrency::scope( 'EUR', 'my-plugin.package' );
+		$this->assertSame( 'my-plugin.package', self::current_operation() );
+		$this->assertNull( self::current_subject() );
 		$this->assertSame( 'EUR', ActiveCurrency::get() );
 
 		$inner_scope = null;
-		$this->assertSame( 'order.calculate_totals', ActiveCurrency::get_operation() );
-		$this->assertSame( $outer, ActiveCurrency::get_subject() );
+		$this->assertSame( 'order', self::current_operation() );
+		$this->assertSame( $outer, self::current_subject() );
 
 		$outer_scope = null;
-		$this->assertNull( ActiveCurrency::get_operation() );
-		$this->assertNull( ActiveCurrency::get_subject() );
+		$this->assertNull( self::current_operation() );
+		$this->assertNull( self::current_subject() );
 		$this->assertNull( ActiveCurrency::get() );
 	}
 
@@ -453,7 +459,7 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 
 		$this->assertTrue( ActiveCurrency::is_in_operation( 'cart.add_to_cart' ) );
 		$this->assertTrue( ActiveCurrency::is_in_operation( 'cart.calculate_totals' ) );
-		$this->assertFalse( ActiveCurrency::is_in_operation( 'order.save' ) );
+		$this->assertFalse( ActiveCurrency::is_in_operation( 'order' ) );
 
 		$inner_scope = null;
 		$outer_scope = null;
@@ -471,12 +477,12 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 
 		$outer_scope  = ActiveCurrency::scope( '', 'shipping.rates', $outer_method );
 		$middle_scope = ActiveCurrency::scope( '', 'shipping.rates', $method );
-		$helper_scope = ActiveCurrency::scope( '', 'price.format' );
+		$helper_scope = ActiveCurrency::scope( '', 'my-plugin.helper' );
 
-		$this->assertSame( 'price.format', ActiveCurrency::get_operation() );
-		$this->assertNull( ActiveCurrency::get_subject() );
+		$this->assertSame( 'my-plugin.helper', self::current_operation() );
+		$this->assertNull( self::current_subject() );
 		$this->assertSame( $method, ActiveCurrency::get_subject_of( 'shipping.rates' ) );
-		$this->assertNull( ActiveCurrency::get_subject_of( 'order.save' ) );
+		$this->assertNull( ActiveCurrency::get_subject_of( 'order' ) );
 
 		$helper_scope = null;
 		$middle_scope = null;
@@ -484,29 +490,6 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 
 		$outer_scope = null;
 		$this->assertNull( ActiveCurrency::get_subject_of( 'shipping.rates' ) );
-	}
-
-	/**
-	 * is_in_operation_prefix() matches operation families at any depth, and only whole-name prefixes.
-	 *
-	 * @return void
-	 */
-	public function test_is_in_operation_prefix_matches_outer_operations(): void {
-		$order = new \stdClass();
-
-		$this->assertFalse( ActiveCurrency::is_in_operation_prefix( 'order.' ) );
-
-		$outer_scope  = ActiveCurrency::scope( 'EUR', 'order.apply_coupon', $order );
-		$helper_scope = ActiveCurrency::scope( '', 'product.price_for_display' );
-
-		$this->assertTrue( ActiveCurrency::is_in_operation_prefix( 'order.' ) );
-		$this->assertTrue( ActiveCurrency::is_in_operation_prefix( 'product.' ) );
-		$this->assertFalse( ActiveCurrency::is_in_operation_prefix( 'cart.' ) );
-		$this->assertFalse( ActiveCurrency::is_in_operation_prefix( '' ) );
-
-		$helper_scope = null;
-		$outer_scope  = null;
-		$this->assertFalse( ActiveCurrency::is_in_operation_prefix( 'order.' ) );
 	}
 
 	/**
@@ -520,7 +503,7 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 
 		$subjects = array();
 		$probe    = function () use ( &$subjects ) {
-			$subjects[] = ActiveCurrency::get_subject_of( 'order.save' );
+			$subjects[] = ActiveCurrency::get_subject_of( 'order' );
 		};
 		add_action( 'woocommerce_before_order_object_save', $probe );
 
@@ -529,7 +512,7 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 		remove_action( 'woocommerce_before_order_object_save', $probe );
 		$this->assertNotEmpty( $subjects );
 		$this->assertSame( $order, $subjects[0] );
-		$this->assertNull( ActiveCurrency::get_subject_of( 'order.save' ) );
+		$this->assertNull( ActiveCurrency::get_subject_of( 'order' ) );
 		$order->delete( true );
 	}
 
@@ -541,13 +524,13 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 	public function test_empty_code_scope_inherits_currency_and_keeps_operation(): void {
 		$order = new \stdClass();
 
-		$outer_scope = ActiveCurrency::scope( 'JPY', 'order.save', $order );
-		$empty_scope = ActiveCurrency::scope( '', 'price.format' );
+		$outer_scope = ActiveCurrency::scope( 'JPY', 'order', $order );
+		$empty_scope = ActiveCurrency::scope( '', 'my-plugin.helper' );
 
 		$this->assertSame( 'JPY', ActiveCurrency::get() );
-		$this->assertSame( 'price.format', ActiveCurrency::get_operation() );
-		$this->assertNull( ActiveCurrency::get_subject() );
-		$this->assertTrue( ActiveCurrency::is_in_operation( 'order.save' ) );
+		$this->assertSame( 'my-plugin.helper', self::current_operation() );
+		$this->assertNull( self::current_subject() );
+		$this->assertTrue( ActiveCurrency::is_in_operation( 'order' ) );
 
 		$empty_scope = null;
 		$outer_scope = null;
@@ -566,8 +549,8 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 		$seen     = array();
 		$callback = function () use ( &$seen ) {
 			$seen = array(
-				'operation'   => ActiveCurrency::get_operation(),
-				'subject'     => ActiveCurrency::get_subject(),
+				'operation'   => self::current_operation(),
+				'subject'     => self::current_subject(),
 				'in_add_cart' => ActiveCurrency::is_in_operation( 'cart.add_to_cart' ),
 			);
 		};
@@ -580,7 +563,7 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( $seen['in_add_cart'] );
 		$this->assertSame( 'cart.add_to_cart', $seen['operation'] );
 		$this->assertSame( WC()->cart, $seen['subject'] );
-		$this->assertNull( ActiveCurrency::get_operation() );
+		$this->assertNull( self::current_operation() );
 	}
 
 	/**
@@ -600,8 +583,8 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 			}
 
 			public function calculate_shipping( $package = array() ) {
-				$this->seen_operation = ActiveCurrency::get_operation();
-				$this->seen_subject   = ActiveCurrency::get_subject();
+				$this->seen_operation = ActiveCurrencyTest::current_operation();
+				$this->seen_subject   = ActiveCurrencyTest::current_subject();
 			}
 		};
 
@@ -613,7 +596,7 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( 'shipping.rates', $method->seen_operation );
 		$this->assertSame( $method, $method->seen_subject );
-		$this->assertNull( ActiveCurrency::get_operation() );
+		$this->assertNull( self::current_operation() );
 	}
 
 	/**
@@ -626,7 +609,7 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 		$seen  = null;
 
 		$callback = function () use ( &$seen ) {
-			$seen = ActiveCurrency::is_in_operation( 'order.calculate_totals' );
+			$seen = ActiveCurrency::is_in_operation( 'order' );
 		};
 		add_action( 'woocommerce_order_before_calculate_totals', $callback );
 
@@ -634,7 +617,7 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 
 		remove_action( 'woocommerce_order_before_calculate_totals', $callback );
 		$this->assertTrue( $seen );
-		$this->assertNull( ActiveCurrency::get_operation() );
+		$this->assertNull( self::current_operation() );
 	}
 
 	/**
@@ -643,21 +626,21 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_third_party_scope_is_readable_and_nests_inside_a_core_operation(): void {
-		$core_scope   = ActiveCurrency::scope( 'JPY', 'order.calculate_totals' );
+		$core_scope   = ActiveCurrency::scope( 'JPY', 'order' );
 		$subject      = new \stdClass();
 		$plugin_scope = ActiveCurrency::scope( 'EUR', 'woocommerce-bookings.calculate_booking_cost', $subject );
 
 		$this->assertSame( 'EUR', ActiveCurrency::get() );
-		$this->assertSame( 'woocommerce-bookings.calculate_booking_cost', ActiveCurrency::get_operation() );
-		$this->assertSame( $subject, ActiveCurrency::get_subject() );
-		$this->assertTrue( ActiveCurrency::is_in_operation( 'order.calculate_totals' ) );
+		$this->assertSame( 'woocommerce-bookings.calculate_booking_cost', self::current_operation() );
+		$this->assertSame( $subject, self::current_subject() );
+		$this->assertTrue( ActiveCurrency::is_in_operation( 'order' ) );
 		$this->assertTrue( ActiveCurrency::is_in_operation( 'woocommerce-bookings.calculate_booking_cost' ) );
 
 		$plugin_scope->release();
 
 		$this->assertSame( 'JPY', ActiveCurrency::get() );
-		$this->assertSame( 'order.calculate_totals', ActiveCurrency::get_operation() );
-		$this->assertNull( ActiveCurrency::get_subject() );
+		$this->assertSame( 'order', self::current_operation() );
+		$this->assertNull( self::current_subject() );
 		$this->assertFalse( ActiveCurrency::is_in_operation( 'woocommerce-bookings.calculate_booking_cost' ) );
 
 		$core_scope->release();
@@ -682,7 +665,7 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 		unset( $first );
 
 		$this->assertSame( 'EUR', ActiveCurrency::get() );
-		$this->assertSame( 'my-plugin.second', ActiveCurrency::get_operation() );
+		$this->assertSame( 'my-plugin.second', self::current_operation() );
 
 		$second->release();
 		$this->assertNull( ActiveCurrency::get() );
@@ -707,14 +690,14 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 		unset( $inner );
 
 		$this->assertSame( 'USD', ActiveCurrency::get() );
-		$this->assertSame( 'my-plugin.other', ActiveCurrency::get_operation() );
+		$this->assertSame( 'my-plugin.other', self::current_operation() );
 		$this->assertTrue( ActiveCurrency::is_in_operation( 'my-plugin.later' ) );
 
 		$other->release();
 		$later->release();
 
 		$this->assertNull( ActiveCurrency::get() );
-		$this->assertNull( ActiveCurrency::get_operation() );
+		$this->assertNull( self::current_operation() );
 	}
 
 	/**
@@ -728,7 +711,7 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 		$scope = ActiveCurrency::scope( 'JPY', 'Bad Name!' );
 
 		$this->assertSame( 'JPY', ActiveCurrency::get() );
-		$this->assertNull( ActiveCurrency::get_operation() );
+		$this->assertNull( self::current_operation() );
 
 		$scope->release();
 		$this->assertNull( ActiveCurrency::get() );
@@ -778,7 +761,7 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 		$cart    = WC()->cart;
 		$seen    = array();
 		$probe   = function ( $value ) use ( &$seen ) {
-			$seen[] = array( ActiveCurrency::get_operation(), ActiveCurrency::get_subject() );
+			$seen[] = array( self::current_operation(), self::current_subject() );
 			return $value;
 		};
 		add_filter( 'woocommerce_product_get_price', $probe );
@@ -788,7 +771,7 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_product_get_price', $probe );
 		$this->assertContains( 'cart.product_subtotal', array_column( $seen, 0 ) );
 		$this->assertSame( $cart, $seen[0][1] );
-		$this->assertNull( ActiveCurrency::get_operation() );
+		$this->assertNull( self::current_operation() );
 	}
 
 	/**

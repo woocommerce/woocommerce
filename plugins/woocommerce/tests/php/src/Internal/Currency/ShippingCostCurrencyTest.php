@@ -157,7 +157,7 @@ class ShippingCostCurrencyTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * The cost arguments filter receives the currency of the cost value, defaulting to the store currency.
+	 * The cost arguments filter receives the currency of the cost value.
 	 *
 	 * @return void
 	 */
@@ -185,17 +185,6 @@ class ShippingCostCurrencyTest extends \WC_Unit_Test_Case {
 			)
 		);
 		$this->assertSame( self::CART_CURRENCY, $received['currency'] );
-
-		$evaluate_cost->invoke(
-			$method,
-			'10',
-			array(
-				'qty'    => 1,
-				'cost'   => 1,
-				'weight' => 0,
-			)
-		);
-		$this->assertSame( get_option( 'woocommerce_currency' ), $received['currency'] );
 
 		remove_all_filters( 'woocommerce_evaluate_shipping_cost_args' );
 	}

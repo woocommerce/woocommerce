@@ -591,7 +591,7 @@ function wc_create_refund( $args = array() ) {
 			throw new Exception( __( 'Invalid order ID.', 'woocommerce' ) );
 		}
 
-		$refund_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $order->get_currency(), 'refund.create', $order );
+		$refund_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) $order->get_currency(), 'order', $order );
 
 		$remaining_refund_amount     = $order->get_remaining_refund_amount();
 		$remaining_refund_items      = $order->get_remaining_refund_items();

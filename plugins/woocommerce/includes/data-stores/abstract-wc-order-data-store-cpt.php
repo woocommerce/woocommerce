@@ -157,7 +157,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		}
 
 		// Keep the order currency active for the whole read, including the legacy discount fix below.
-		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) get_post_meta( $order->get_id(), '_order_currency', true ), 'order.load', $order );
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) get_post_meta( $order->get_id(), '_order_currency', true ), 'order', $order );
 
 		$this->set_order_props(
 			$order,

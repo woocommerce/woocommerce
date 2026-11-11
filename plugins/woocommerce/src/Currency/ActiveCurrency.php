@@ -32,24 +32,20 @@ defined( 'ABSPATH' ) || exit;
  *     }
  *
  * Operation names:
- * - Core names are unprefixed and listed below: `cart.*`, `order.*`, `shipping.*`, `refund.*`, `store_api.*`, `price.format`,
- *   `admin.*`.
+ * - Core names are unprefixed and listed below.
  * - Extensions use `<plugin-slug>.<operation>`, for example `woocommerce-bookings.calculate_booking_cost`.
  * - Names may contain lowercase letters, digits, underscores, hyphens and dots. Other names are rejected with
  *   wc_doing_it_wrong() and the scope is created without an operation.
  * - An empty currency inherits the nearest outer currency, so an operation can be named without changing the currency.
+ * - A scope may have no operation. Core opens such scopes to format a price (wc_price()), build a Store API order
+ *   response and calculate shipping for a package.
  *
  * Core operations:
  * - `cart.add_to_cart` (subject: the cart)
  * - `cart.calculate_totals` (subject: the cart)
- * - `shipping.package` (subject: null)
  * - `shipping.rates` (subject: the shipping method instance)
- * - `order.save`, `order.load`, `order.calculate_totals`, `order.apply_coupon`, `order.recalculate_coupons` and
- *   `order.stage_*` (the order method that runs; subject: the order)
- * - `refund.create` (subject: the order)
- * - `order.refund_ajax` (subject: the order)
- * - `store_api.order_response` (subject: the order)
- * - `price.format` (subject: null)
+ * - `order` (subject: the order, or the parent order of a refund) is active while an order is loaded or saved, its
+ *   totals, taxes, coupons or items are calculated, a refund is created, or the admin refund request runs.
  * - `product.price_for_display` (subject: the product) is active while wc_get_price_including_tax(),
  *   wc_get_price_excluding_tax() and wc_get_price_to_display() compute a price for display. Use it to tell display
  *   prices from totals, for example `is_in_operation( 'product.price_for_display' )` inside a
@@ -93,34 +89,6 @@ class ActiveCurrency {
 	}
 
 	/**
-	 * Get the operation that is running, or null when none is.
-	 *
-	 * Returns the innermost operation. Scopes without an operation are skipped, so this is the operation that was
-	 * started, not a helper it runs inside. See the class docblock for the names.
-	 *
-	 * @return string|null The operation name, or null when none is active.
-	 */
-	public static function get_operation(): ?string {
-		$entry = self::innermost_operation_entry();
-
-		return null === $entry ? null : $entry['operation'];
-	}
-
-	/**
-	 * Get the object the running operation acts on, or null when there is none.
-	 *
-	 * The subject belongs to the same scope as get_operation(). For example, inside `shipping.rates` it is the
-	 * shipping method instance.
-	 *
-	 * @return object|null The subject, or null when the operation has none or no operation is active.
-	 */
-	public static function get_subject(): ?object {
-		$entry = self::innermost_operation_entry();
-
-		return null === $entry ? null : $entry['subject'];
-	}
-
-	/**
 	 * Check whether an operation is running at any depth, so code nested inside it also matches.
 	 *
 	 * For example, `cart.add_to_cart` is still active inside the calculate_totals call it makes.
@@ -141,7 +109,7 @@ class ActiveCurrency {
 	/**
 	 * Get the subject of the nearest operation with the given name, at any depth.
 	 *
-	 * Unlike get_subject(), helper scopes such as `price.format` that run inside the operation do not hide it.
+	 * Helper scopes that run inside the operation, such as the one wc_price() opens, do not hide it.
 	 *
 	 * @since 11.4.0
 	 * @param string $operation Operation name, as listed in the class docblock.
@@ -155,30 +123,6 @@ class ActiveCurrency {
 		}
 
 		return null;
-	}
-
-	/**
-	 * Check whether any active operation, at any depth, has a name starting with the given prefix.
-	 *
-	 * For example, `is_in_operation_prefix( 'order.' )` matches `order.save`, `order.apply_coupon` and the other order
-	 * operations, even when a helper scope such as `price.format` is innermost.
-	 *
-	 * @since 11.4.0
-	 * @param string $prefix Operation name prefix, such as `order.`.
-	 * @return bool True when an active scope has an operation starting with the prefix.
-	 */
-	public static function is_in_operation_prefix( string $prefix ): bool {
-		if ( '' === $prefix ) {
-			return false;
-		}
-
-		foreach ( self::$stack as $entry ) {
-			if ( null !== $entry['operation'] && 0 === strpos( $entry['operation'], $prefix ) ) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**
@@ -219,28 +163,6 @@ class ActiveCurrency {
 	}
 
 	/**
-	 * Call a function with a currency and optional operation active. The previous state is restored afterwards, even
-	 * when the function throws.
-	 *
-	 * An empty code calls the function without changing the active currency, so it inherits any outer one.
-	 *
-	 * @param string      $code      Currency code, or an empty string.
-	 * @param callable    $callback  Function to call.
-	 * @param string|null $operation Operation name, as listed in the class docblock, or null.
-	 * @param object|null $subject   Object the operation acts on, or null.
-	 * @return mixed What $callback returns.
-	 */
-	public static function run( string $code, callable $callback, ?string $operation = null, ?object $subject = null ) {
-		$scope = self::scope( $code, $operation, $subject );
-
-		try {
-			return $callback();
-		} finally {
-			$scope->release();
-		}
-	}
-
-	/**
 	 * Remove the entry at $index and everything pushed after it, but only if that slot still holds the scope $id.
 	 *
 	 * A scope released after an outer one already removed its slot does nothing, so it cannot remove entries that
@@ -277,20 +199,5 @@ class ActiveCurrency {
 	 */
 	private static function is_valid_operation( string $operation ): bool {
 		return 1 === preg_match( '/^[a-z0-9][a-z0-9_.-]*\z/', $operation );
-	}
-
-	/**
-	 * Find the innermost scope that names an operation.
-	 *
-	 * @return array{id: int, currency: string, operation: ?string, subject: ?object}|null The entry, or null when none.
-	 */
-	private static function innermost_operation_entry(): ?array {
-		foreach ( array_reverse( self::$stack ) as $entry ) {
-			if ( null !== $entry['operation'] ) {
-				return $entry;
-			}
-		}
-
-		return null;
 	}
 }

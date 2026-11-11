@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Utilities;
 
+use Automattic\WooCommerce\Currency\ActiveCurrency;
 use Automattic\WooCommerce\Enums\CurrencyPosition;
 
 /**
@@ -16,15 +17,14 @@ use Automattic\WooCommerce\Enums\CurrencyPosition;
 class CurrencySymbol {
 
 	/**
-	 * Get a currency symbol with HTML entities decoded.
+	 * Get the active currency symbol, or the store's when no currency is active, with HTML entities decoded.
 	 *
 	 * ENT_HTML5 matches how browsers parse the entity in HTML output, as in PriceSeparators.
 	 *
-	 * @param string $currency Currency code. Defaults to the store currency.
 	 * @return string
 	 */
-	public static function get_symbol( string $currency = '' ): string {
-		return html_entity_decode( get_woocommerce_currency_symbol( $currency ), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5 );
+	public static function get_symbol(): string {
+		return html_entity_decode( get_woocommerce_currency_symbol( ActiveCurrency::get() ?? get_woocommerce_currency() ), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5 );
 	}
 
 	/**

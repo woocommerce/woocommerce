@@ -1520,7 +1520,7 @@ WHERE
 		$order->set_id( $order_id );
 		$filtered_meta_data = $this->filter_raw_meta_data( $order, $order_data->meta_data );
 		$order->init_meta_data( $filtered_meta_data );
-		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) ( $order_data->currency ?? '' ), 'order.load', $order );
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( (string) ( $order_data->currency ?? '' ), 'order', $order );
 		$this->set_order_props_from_data( $order, $order_data );
 		$order->set_object_read( true );
 		unset( $active_currency_scope );

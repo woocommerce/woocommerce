@@ -22,7 +22,7 @@ class CurrencyFormatter implements FormatterInterface {
 	public function format( $value, array $options = [] ) {
 		$currency = ActiveCurrency::get() ?? get_woocommerce_currency();
 		$position = CurrencySymbol::get_position();
-		$symbol   = CurrencySymbol::get_symbol( $currency );
+		$symbol   = CurrencySymbol::get_symbol();
 		$prefix   = '';
 		$suffix   = '';
 

@@ -599,33 +599,21 @@ function wc_get_price_decimals() {
  * @return string
  */
 function wc_price( $price, $args = array() ) {
-	$currency_code = is_array( $args ) && ! empty( $args['currency'] ) ? (string) $args['currency'] : '';
-	$lookups       = \Automattic\WooCommerce\Currency\ActiveCurrency::run(
-		$currency_code,
-		static function () {
-			return array(
+	$price_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( is_array( $args ) && ! empty( $args['currency'] ) ? (string) $args['currency'] : '' );
+
+	$args = apply_filters(
+		'wc_price_args',
+		wp_parse_args(
+			$args,
+			array(
+				'ex_tax_label'       => false,
+				'currency'           => '',
 				'decimal_separator'  => wc_get_price_decimal_separator(),
 				'thousand_separator' => wc_get_price_thousand_separator(),
 				'decimals'           => wc_get_price_decimals(),
 				'price_format'       => get_woocommerce_price_format(),
-			);
-		},
-		'price.format'
-	);
-	$args          = apply_filters(
-		'wc_price_args',
-		wp_parse_args(
-			$args,
-			array_merge(
-				array(
-					'ex_tax_label' => false,
-					'currency'     => '',
-				),
-				$lookups,
-				array(
-					'in_span'     => true,
-					'aria-hidden' => false,
-				)
+				'in_span'            => true,
+				'aria-hidden'        => false,
 			)
 		)
 	);

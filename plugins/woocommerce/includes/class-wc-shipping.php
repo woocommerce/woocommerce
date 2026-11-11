@@ -317,7 +317,7 @@ class WC_Shipping {
 		$package['rates'] = array();
 
 		// Rates are calculated in the package currency, which is absent when the cart uses the store currency.
-		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( $package['currency'] ?? get_option( 'woocommerce_currency' ), 'shipping.package' );
+		$active_currency_scope = \Automattic\WooCommerce\Currency\ActiveCurrency::scope( $package['currency'] ?? get_option( 'woocommerce_currency' ) );
 
 		// If the package is not shippable, e.g. trying to ship to an invalid country, do not calculate rates. We can return
 		// local pickup rates here however since those are not shipped.
