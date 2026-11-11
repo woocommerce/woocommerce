@@ -13,7 +13,7 @@ Use this skill to add motion to WooCommerce blocks (`plugins/woocommerce/client/
 
 1. **Describe the change.** Write one sentence: what changes on screen, and what causes it. The cause is the shopper, a key press, or data that loads.
 2. **Select the technique** from the table below. Read the rules that it gives.
-3. **Use the existing helpers** from the Helpers section of `motion.md`. If no helper does the technique, write one. Put it in `assets/js/base/utils`, or in `assets/js/base/hooks` for a React hook. Make sure that it obeys the rules and avoids the traps below. Add it to the Helpers section of `motion.md`.
+3. **Use the existing helpers** from the Helpers section of `motion.md`. If no helper does the technique, write one. Put it in `assets/js/base/utils`, or in `assets/js/base/hooks` for a React hook. Make it as small as the technique needs. Make sure that it obeys the rules and avoids the traps below. Add it to the Helpers section of `motion.md`.
 4. **Do the edge cases:** reduced motion, keyboard input, interruption, content that loads late, and changes that occur at the same time.
 5. **Test in a real browser** with `references/verification.md`. Then run stylelint, ESLint, Jest, and the build.
 6. **Write comments that tell why, not what.** Give the rule number.
@@ -33,7 +33,7 @@ Use this skill to add motion to WooCommerce blocks (`plugins/woocommerce/client/
 | A small item goes, such as a chip | It stays in position while it fades and shrinks. Then it unmounts. | 15, 16 |
 | The shopper completes an action, such as a coupon | One pulse, only for the action that the shopper did | 8 |
 | A dropdown opens from a field | It slides from the field. It stays mounted while it closes. It turns around if it opens again. | 2 |
-| A toast or snackbar appears and goes | It rises in and drops out. The script waits for the animation to end. It does not use a fixed timeout. | 1, 15 |
+| A toast or snackbar appears and goes | It rises 8px in and drops 4px out. The script waits for the animation to end. It does not use a fixed timeout. | 1, 15 |
 | A value replaces its loading skeleton | It fades in. It does not roll. | Skeleton reveal |
 | A price changes in place | Its digits roll. Its text stays the plain price for assistive technology. | Price roll |
 | Many skeletons are part of one update | They end together. The values change at that moment. | Skeleton reveal |
@@ -45,6 +45,12 @@ Use this skill to add motion to WooCommerce blocks (`plugins/woocommerce/client/
 | The selection moves to a different option | The selected style slides to the new option, and stretches along its path | 5, 9 |
 | A table row goes | It fades in its position, the rows below slide up, and the container height changes smoothly | 17, Exceptions |
 | A bar opens or closes, such as the mobile order summary | Its content grows and collapses. If it closes because the shopper scrolls past it, it closes immediately. | 17 |
+
+## Keep the change small
+
+- Change only what the motion needs. Do not rewrite how a component works, and do not add, remove, or replace dependencies. If the component already has a mechanism that can carry the motion, use it. For example, `react-transition-group` can end a transition when the animation ends, with `addEndListener`.
+- Do not add wrapper elements to the markup of a shared component. Themes and extensions can target that markup. Put the ref or class on an element that exists, or add an optional prop.
+- Do not change `pnpm-lock.yaml` or `package.json` in a motion change.
 
 ## Traps
 
