@@ -514,6 +514,12 @@ class WC_Form_Handler {
 			// Read stored values, so getter filters are not saved into the other address.
 			$value = is_callable( array( $customer, $getter ) ) ? $customer->{$getter}( 'edit' ) : $customer->get_meta( $source_key, true, 'edit' );
 
+			// Keep what the target address already has, such as a billing email or phone, when the copied address has none.
+			if ( '' === $value ) {
+				$target_getter = "get_{$target_key}";
+				$value         = is_callable( array( $customer, $target_getter ) ) ? $customer->{$target_getter}( 'edit' ) : $customer->get_meta( $target_key, true, 'edit' );
+			}
+
 			// Shipping has no email field, so fall back to the account email like the edit address form does.
 			if ( 'billing_email' === $target_key && ! $value ) {
 				$value = $customer->get_email( 'edit' );
@@ -544,7 +550,8 @@ class WC_Form_Handler {
 		$field_values    = array();
 
 		foreach ( array_keys( $checkout_fields->get_fields_for_location( 'address' ) ) as $field_key ) {
-			$field_values[ $field_key ] = $checkout_fields->get_field_from_object( $field_key, $customer, $source_type, false );
+			$value                      = $checkout_fields->get_field_from_object( $field_key, $customer, $source_type, false );
+			$field_values[ $field_key ] = '' === $value ? $checkout_fields->get_field_from_object( $field_key, $customer, $target_type, false ) : $value;
 		}
 
 		// Validate the additional fields against the target address, like the edit address form does.

@@ -246,6 +246,11 @@ class WC_Shortcode_My_Account {
 
 			$value = get_user_meta( get_current_user_id(), $meta_key, true );
 
+			// Keep what the edited address already has, such as a billing email or phone, when the copied address has none.
+			if ( '' === $value && $meta_key !== $key ) {
+				$value = get_user_meta( get_current_user_id(), $key, true );
+			}
+
 			if ( ! $value ) {
 				switch ( $key ) {
 					case 'billing_email':

@@ -592,6 +592,27 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox copy_address() keeps the billing email and phone already saved on an empty billing address when the shipping address has none.
+	 *
+	 * @covers WC_Form_Handler::copy_address()
+	 */
+	public function test_copy_address_keeps_target_email_and_phone(): void {
+		$customer = $this->create_customer_with_address( 'shipping' );
+		$customer->set_shipping_phone( '' );
+		$customer->set_billing_email( 'invoices@example.test' );
+		$customer->set_billing_phone( '4155550199' );
+		$customer->save();
+
+		$this->prepare_copy_address_request( 'billing' );
+		$this->dispatch_copy_address_expecting_redirect();
+
+		$saved = new WC_Customer( $customer->get_id() );
+		$this->assertSame( '456 Madison Avenue', $saved->get_billing_address_1(), 'The shipping address should be copied.' );
+		$this->assertSame( 'invoices@example.test', $saved->get_billing_email(), 'The saved billing email should not be replaced by the account email.' );
+		$this->assertSame( '4155550199', $saved->get_billing_phone(), 'The saved billing phone should not be cleared.' );
+	}
+
+	/**
 	 * @testdox copy_address() leaves an address that is already set up untouched.
 	 *
 	 * @covers WC_Form_Handler::copy_address()
@@ -804,6 +825,30 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox copy_address() keeps a Checkout block address field already saved on the empty target address when the copied address has no value.
+	 *
+	 * @covers WC_Form_Handler::copy_address()
+	 */
+	public function test_copy_address_keeps_target_additional_checkout_field(): void {
+		$this->register_checkout_field(
+			array(
+				'id'       => 'test-namespace/gate-code',
+				'label'    => 'Gate code',
+				'location' => 'address',
+			)
+		);
+		$customer        = $this->create_customer_with_address( 'billing' );
+		$checkout_fields = Package::container()->get( CheckoutFields::class );
+		$checkout_fields->persist_field_for_customer( 'test-namespace/gate-code', '5678', $customer, 'shipping' );
+		$customer->save();
+
+		$this->prepare_copy_address_request( 'shipping' );
+		$this->dispatch_copy_address_expecting_redirect();
+
+		$this->assertSame( '5678', $checkout_fields->get_field_from_object( 'test-namespace/gate-code', new WC_Customer( $customer->get_id() ), 'shipping' ), 'The saved shipping gate code should not be cleared.' );
+	}
+
+	/**
 	 * @testdox copy_address() refuses to copy when a required Checkout block address field is empty.
 	 *
 	 * @covers WC_Form_Handler::copy_address()
@@ -845,6 +890,25 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 		$this->assertSame( '', $fields['billing_phone']['value'] ?? null, 'The missing phone should stay empty for the customer to fill in.' );
 		$this->assertSame( 'copy-address-customer@example.test', $fields['billing_email']['value'] ?? null, 'The email should fall back to the account email.' );
 		$this->assertSame( '', ( new WC_Customer( $customer->get_id() ) )->get_billing_address_1(), 'Filling the form should not save the billing address.' );
+	}
+
+	/**
+	 * @testdox The edit address form keeps the billing email and phone already saved on an empty billing address when the shipping address has none.
+	 *
+	 * @covers WC_Shortcode_My_Account::edit_address()
+	 */
+	public function test_edit_address_form_keeps_edited_address_email_and_phone(): void {
+		$customer = $this->create_customer_with_address( 'shipping' );
+		$customer->set_shipping_phone( '' );
+		$customer->set_billing_email( 'invoices@example.test' );
+		$customer->set_billing_phone( '4155550199' );
+		$customer->save();
+
+		$fields = $this->get_edit_address_form_fields( 'billing', 'shipping' );
+
+		$this->assertSame( '456 Madison Avenue', $fields['billing_address_1']['value'] ?? null, 'The form should be filled from the shipping address.' );
+		$this->assertSame( 'invoices@example.test', $fields['billing_email']['value'] ?? null, 'The saved billing email should be shown, not the account email.' );
+		$this->assertSame( '4155550199', $fields['billing_phone']['value'] ?? null, 'The saved billing phone should be shown.' );
 	}
 
 	/**
