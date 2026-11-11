@@ -9,21 +9,6 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
 
 	/**
-	 * The default URI.
-	 *
-	 * @var string
-	 */
-	private static $default_uri;
-
-	/**
-	 * Store the default URI.
-	 */
-	public static function setUpBeforeClass(): void {
-		parent::setUpBeforeClass();
-		self::$default_uri = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-	}
-
-	/**
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
@@ -31,14 +16,6 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->disable_cogs_feature();
 		remove_all_filters( 'woocommerce_load_cogs_value' );
 		remove_all_filters( 'woocommerce_save_cogs_value' );
-	}
-
-	/**
-	 * Restore the default URI.
-	 */
-	public static function tearDownAfterClass(): void {
-		parent::tearDownAfterClass();
-		$_SERVER['REQUEST_URI'] = self::$default_uri;
 	}
 
 	/**
@@ -80,13 +57,15 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 *
 	 * @param string $name   Product name.
 	 * @param string $status Post status.
+	 * @param array  $props  Extra product props, such as sku or description.
 	 * @return WC_Product_Simple The saved product.
 	 */
-	private function create_search_test_product( string $name, string $status = 'publish' ): WC_Product_Simple {
+	private function create_search_test_product( string $name, string $status = 'publish', array $props = array() ): WC_Product_Simple {
 		$product = new WC_Product_Simple();
 		$product->set_name( $name );
 		$product->set_status( $status );
 		$product->set_regular_price( '10' );
+		$product->set_props( $props );
 		$product->save();
 
 		return $product;
@@ -344,6 +323,107 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertFalse( current_user_can( 'edit_private_products' ), 'Granting read access should leave the user unable to edit private products' );
 
 		$this->assertContains( $product->get_id(), $data_store->search_products( 'Searchable private product', '', false, false ), 'Private product should be returned to users who can read private products but not edit them' );
+	}
+
+	/**
+	 * @testdox Limited search should keep SKU matches when more description-only matches sort ahead of them by title.
+	 */
+	public function test_search_products_limit_keeps_sku_matches_over_description_matches(): void {
+		for ( $i = 1; $i <= 5; $i++ ) {
+			$this->create_search_test_product(
+				"Aaa Filler Card {$i}",
+				'publish',
+				array(
+					'sku'         => "FILLER-{$i}",
+					'description' => 'A greeting card featuring a rose motif.',
+				)
+			);
+		}
+
+		$parent = WC_Helper_Product::create_variation_product();
+		$parent->set_name( 'Rose Oil' );
+		$parent->set_sku( 'ROSO' );
+		$parent->save();
+
+		list( $exact_sku_variation_id, $prefix_sku_variation_id ) = $parent->get_children();
+
+		$exact_sku_variation = wc_get_product( $exact_sku_variation_id );
+		$exact_sku_variation->set_sku( 'ROS' );
+		$exact_sku_variation->save();
+		$prefix_sku_variation = wc_get_product( $prefix_sku_variation_id );
+		$prefix_sku_variation->set_sku( 'ROS4' );
+		$prefix_sku_variation->save();
+
+		$results = WC_Data_Store::load( 'product' )->search_products( 'ROS', '', true, false, 5 );
+
+		$this->assertContains( $parent->get_id(), $results, 'Variable product with a matching SKU should be returned' );
+		$this->assertContains( $exact_sku_variation_id, $results, 'Variation with an exact SKU match should be returned' );
+		$this->assertContains( $prefix_sku_variation_id, $results, 'Variation with a matching SKU prefix should be returned' );
+	}
+
+	/**
+	 * @testdox Search should rank SKU matches, then title matches, ahead of description-only matches.
+	 */
+	public function test_search_products_ranks_results_by_relevance(): void {
+		$products = array();
+		foreach (
+			array(
+				'description' => array( 'Aaa bulb', 'BULB-1', 'Fits any lamp.' ),
+				'contains'    => array( 'Floor lamp', 'FLOOR-1', '' ),
+				'title_start' => array( 'Lamp shade', 'SHADE-1', '' ),
+				'sku_start'   => array( 'Table light', 'LAMP-2', '' ),
+				'sku_exact'   => array( 'Desk lamp', 'LAMP', '' ),
+			) as $key => list( $name, $sku, $description )
+		) {
+			$products[ $key ] = $this->create_search_test_product(
+				$name,
+				'publish',
+				array(
+					'sku'         => $sku,
+					'description' => $description,
+				)
+			)->get_id();
+		}
+
+		// Simple products report a parent ID of 0, which search_products() appends after the matches.
+		$results = array_values( array_filter( WC_Data_Store::load( 'product' )->search_products( 'lamp', '', false, false ) ) );
+
+		$this->assertSame(
+			array( $products['sku_exact'], $products['sku_start'], $products['title_start'], $products['contains'], $products['description'] ),
+			$results,
+			'Results should be ordered by exact SKU, SKU prefix, title prefix, title match, then other matches'
+		);
+	}
+
+	/**
+	 * @testdox Search for $term should rank the exact SKU match ahead of title matches.
+	 *
+	 * @testWith ["\"lamp\"", "LAMP", "Lamp shade"]
+	 *           ["AB+12", "AB+12", "AB 12 holder"]
+	 *
+	 * @param string $term             Search term, as typed.
+	 * @param string $sku              SKU that exactly matches the term.
+	 * @param string $title_match_name Name of a product that only matches by title.
+	 */
+	public function test_search_products_ranks_exact_sku_first_for_quoted_and_split_terms( string $term, string $sku, string $title_match_name ): void {
+		$title_match = $this->create_search_test_product( $title_match_name );
+		$exact_sku   = $this->create_search_test_product( 'Zzz item', 'publish', array( 'sku' => $sku ) );
+
+		$results = WC_Data_Store::load( 'product' )->search_products( $term, '', false, false );
+
+		$this->assertSame( array( $exact_sku->get_id(), $title_match->get_id() ), array_values( array_filter( $results ) ), 'The exact SKU match should rank first' );
+	}
+
+	/**
+	 * @testdox Limited search should keep a GTIN match when a description-only match sorts ahead of it by title.
+	 */
+	public function test_search_products_limit_keeps_gtin_matches_over_description_matches(): void {
+		$this->create_search_test_product( 'Aaa barcode list', 'publish', array( 'description' => 'Replaces 4006381333931.' ) );
+		$product = $this->create_search_test_product( 'Pencil', 'publish', array( 'global_unique_id' => '4006381333931' ) );
+
+		$results = WC_Data_Store::load( 'product' )->search_products( '4006381333931', '', false, false, 1 );
+
+		$this->assertContains( $product->get_id(), $results, 'Product with an exact GTIN match should be returned' );
 	}
 
 	/**
@@ -754,5 +834,124 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertSame( '20.000000', get_post_meta( $product_id, 'total_sales', true ) );
 		$store->update_product_sales( $product_id, 30.5, 'set' );
 		$this->assertSame( '30.500000', get_post_meta( $product_id, 'total_sales', true ) );
+	}
+
+	/**
+	 * @testdox Default attributes stored as a single object should load as empty, not as the object's class name.
+	 */
+	public function test_read_product_data_ignores_default_attributes_stored_as_an_object(): void {
+		$product = new WC_Product_Variable();
+		$product->save();
+		update_post_meta( $product->get_id(), '_default_attributes', new ObjectInstantiationProbe() );
+
+		$product = new WC_Product_Variable( $product->get_id() );
+
+		$this->assertSame( array(), $product->get_default_attributes() );
+	}
+
+	/**
+	 * @testdox Reading a product should not create objects from serialized product meta.
+	 */
+	public function test_read_product_data_does_not_unserialize_objects(): void {
+		ObjectInstantiationProbe::$was_unserialized = false;
+		$product                                    = new WC_Product_Variable();
+		$product->save();
+		update_post_meta(
+			$product->get_id(),
+			'_default_attributes',
+			array(
+				'probe' => new ObjectInstantiationProbe(),
+				'size'  => 'small',
+			)
+		);
+
+		$product = new WC_Product_Variable( $product->get_id() );
+
+		$this->assertFalse( ObjectInstantiationProbe::$was_unserialized, 'Stored product meta must not instantiate objects' );
+		$this->assertSame( array( 'size' => 'small' ), $product->get_default_attributes(), 'Scalar default attributes should still load' );
+	}
+
+	/**
+	 * @testdox Creating and updating a product keeps backslashes and quotes in its name and descriptions.
+	 */
+	public function test_create_and_update_keep_backslashes_in_post_fields(): void {
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Cable 1\\2" it\'s' );
+		$product->set_description( 'Path C:\\temp' );
+		$product->set_short_description( 'Short C:\\temp' );
+		$product->save();
+
+		$post = get_post( $product->get_id() );
+		$this->assertSame( 'Cable 1\\2" it\'s', $post->post_title, 'The created name should keep its backslash and quotes.' );
+		$this->assertSame( 'Path C:\\temp', $post->post_content, 'The created description should keep its backslash.' );
+		$this->assertSame( 'Short C:\\temp', $post->post_excerpt, 'The created short description should keep its backslash.' );
+
+		$product->set_name( 'Cable 3\\4" it\'s' );
+		$product->set_description( 'Path D:\\temp' );
+		$product->set_short_description( 'Short D:\\temp' );
+		$product->save();
+
+		$post = get_post( $product->get_id() );
+		$this->assertSame( 'Cable 3\\4" it\'s', $post->post_title, 'The updated name should keep its backslash and quotes.' );
+		$this->assertSame( 'Path D:\\temp', $post->post_content, 'The updated description should keep its backslash.' );
+		$this->assertSame( 'Short D:\\temp', $post->post_excerpt, 'The updated short description should keep its backslash.' );
+	}
+
+	/**
+	 * Values in already-slashed form, as extensions pass them after wp_filter_post_kses() or from $_POST.
+	 *
+	 * @return array<string, array{0: string, 1: string}>
+	 */
+	public function provider_already_slashed_post_fields(): array {
+		return array(
+			'output of wp_filter_post_kses()' => array( 'Men\\\'s 12\\" shirt', 'Men\'s 12" shirt' ),
+			'slashed twice'                   => array( 'Men\\\\\\\'s shirt', 'Men\\\'s shirt' ),
+		);
+	}
+
+	/**
+	 * @testdox Saving a product keeps the existing behavior for values that are already slashed.
+	 * @dataProvider provider_already_slashed_post_fields
+	 *
+	 * @param string $value    Value passed to the setters.
+	 * @param string $expected Stored value.
+	 */
+	public function test_save_unslashes_already_slashed_post_fields( string $value, string $expected ): void {
+		$product = new WC_Product_Simple();
+		$product->set_name( $value );
+		$product->set_description( $value );
+		$product->save();
+
+		$post = get_post( $product->get_id() );
+		$this->assertSame( $expected, $post->post_title, 'A created name in slashed form should be unslashed.' );
+		$this->assertSame( $expected, $post->post_content, 'A created description in slashed form should be unslashed.' );
+
+		$product->set_name( 'Renamed' );
+		$product->save();
+		$product->set_name( $value );
+		$product->set_short_description( $value );
+		$product->save();
+
+		$post = get_post( $product->get_id() );
+		$this->assertSame( $expected, $post->post_title, 'An updated name in slashed form should be unslashed.' );
+		$this->assertSame( $expected, $post->post_excerpt, 'An updated short description in slashed form should be unslashed.' );
+	}
+
+	/**
+	 * @testdox A woocommerce_new_product_data callback that slashes its values keeps working.
+	 */
+	public function test_create_unslashes_values_slashed_by_new_product_data_filter(): void {
+		add_filter(
+			'woocommerce_new_product_data',
+			function ( $data ) {
+				$data['post_title'] = wp_slash( 'Men\'s 1\\2 inch' );
+				return $data;
+			}
+		);
+
+		$product = new WC_Product_Simple();
+		$product->save();
+
+		$this->assertSame( 'Men\'s 1\\2 inch', get_post( $product->get_id() )->post_title );
 	}
 }

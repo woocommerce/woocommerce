@@ -310,28 +310,28 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		if ( isset( $request['before'] ) ) {
 			$date_query[] = array(
 				'column' => $use_gmt ? 'post_date_gmt' : 'post_date',
-				'before' => $request['before'],
+				'before' => $use_gmt ? self::to_gmt_date_query_value( $request['before'] ) : $request['before'],
 			);
 		}
 
 		if ( isset( $request['after'] ) ) {
 			$date_query[] = array(
 				'column' => $use_gmt ? 'post_date_gmt' : 'post_date',
-				'after'  => $request['after'],
+				'after'  => $use_gmt ? self::to_gmt_date_query_value( $request['after'] ) : $request['after'],
 			);
 		}
 
 		if ( isset( $request['modified_before'] ) ) {
 			$date_query[] = array(
 				'column' => $use_gmt ? 'post_modified_gmt' : 'post_modified',
-				'before' => $request['modified_before'],
+				'before' => $use_gmt ? self::to_gmt_date_query_value( $request['modified_before'] ) : $request['modified_before'],
 			);
 		}
 
 		if ( isset( $request['modified_after'] ) ) {
 			$date_query[] = array(
 				'column' => $use_gmt ? 'post_modified_gmt' : 'post_modified',
-				'after'  => $request['modified_after'],
+				'after'  => $use_gmt ? self::to_gmt_date_query_value( $request['modified_after'] ) : $request['modified_after'],
 			);
 		}
 
@@ -355,6 +355,26 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		$args = apply_filters( "woocommerce_rest_{$this->post_type}_object_query", $args, $request );
 
 		return $this->prepare_items_query( $args, $request );
+	}
+
+	/**
+	 * Convert a REST date that names its own UTC offset to the UTC 'Y-m-d H:i:s' form that GMT date columns store.
+	 *
+	 * WP_Date_Query re-expresses offset dates in the site timezone even when the column is GMT, shifting them by the site offset.
+	 * Dates without an offset and values that can't be parsed are returned unchanged.
+	 *
+	 * @param mixed $date The date, usually an RFC 3339 string from a REST request.
+	 * @return mixed The equivalent UTC date string, or the original value.
+	 */
+	private static function to_gmt_date_query_value( $date ) {
+		// Same offset check as rest_get_date_with_gmt(), so values without one stay byte-identical.
+		if ( ! is_string( $date ) || ! preg_match( '#(Z|[+-]\d{2}(:\d{2})?)$#', $date ) ) {
+			return $date;
+		}
+
+		$dates = rest_get_date_with_gmt( $date, true );
+
+		return null === $dates ? $date : $dates[1];
 	}
 
 	/**
@@ -703,7 +723,7 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		 * Core's posts controller passes the post type object as the second argument. This controller has
 		 * always passed the post type slug there, so the object is passed as a third argument instead.
 		 *
-		 * @since 11.3.0 Added the `$post_type_object` argument.
+		 * @since 11.4.0 Added the `$post_type_object` argument.
 		 *
 		 * @param array             $query_params     JSON Schema-formatted collection parameters.
 		 * @param string            $post_type        Post type slug.

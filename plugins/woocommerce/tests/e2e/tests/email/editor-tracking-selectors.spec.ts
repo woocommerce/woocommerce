@@ -64,14 +64,14 @@ test.describe(
 					'.editor-document-tools__inserter-toggle'
 				)
 			).toBeVisible();
-			// Check Email tab in the sidebar
+			// Check Email and Block tabs in the sidebar.
+			// Mirrors the email editor telemetry selector: WP 7.2 tabs have no
+			// `data-tab-id`, WP 7.0 tabs have no `role="tab"`.
 			await expect(
-				editorLocator.locator( '[data-tab-id="edit-post/block"]' )
-			).toBeVisible();
-			// Check Block tab in the sidebar
-			await expect(
-				editorLocator.locator( '[data-tab-id="edit-post/document"]' )
-			).toBeVisible();
+				editorLocator.locator(
+					'.editor-sidebar__panel-tabs [data-tab-id], .editor-sidebar__panel-tabs [role="tab"]'
+				)
+			).toHaveCount( 2 );
 			// Check preview dropdown toggle
 			await expect(
 				editorLocator.locator( '.editor-preview-dropdown__toggle' )
@@ -97,7 +97,7 @@ test.describe(
 			// Check more menu toggle selector
 			await expect(
 				editorLocator.locator(
-					'.components-dropdown-menu__toggle[aria-label="Options"]'
+					'.editor-header__settings button[aria-label="Options"]'
 				)
 			).toBeVisible();
 
@@ -140,18 +140,13 @@ test.describe(
 			await page.keyboard.press( 'Escape' );
 
 			// Check header block tools toggle button
-			// Enable header block tools
-			await editorLocator
-				.locator(
-					'.components-dropdown-menu__toggle[aria-label="Options"]'
-				)
-				.click();
-			// Check header preview dropdown preview in new tab selected
-			// Click header preview dropdown preview in new tab
-			await page
-				.locator( '.components-popover' )
-				.getByText( 'Top toolbar' )
-				.click();
+			// Enable header block tools. WP 7.2 moved "Top toolbar" into the
+			// Options > Appearance submenu, so set the preference directly.
+			await page.evaluate( () =>
+				window.wp.data
+					.dispatch( 'core/preferences' )
+					.set( 'core', 'fixedToolbar', true )
+			);
 			// Click canvas to select a block to make top toolbar visible
 			await page
 				.frameLocator( 'iframe[name="editor-canvas"]' )

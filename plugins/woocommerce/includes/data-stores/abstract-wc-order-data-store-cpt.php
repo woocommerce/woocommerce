@@ -31,6 +31,13 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	protected $meta_type = 'post';
 
 	/**
+	 * IDs of orders currently being permanently deleted, keyed by order ID.
+	 *
+	 * @var array<int, true>
+	 */
+	protected static $orders_being_deleted = array();
+
+	/**
 	 * Data stored in meta keys, but not considered "meta" for an order.
 	 *
 	 * @since 3.0.0
@@ -284,30 +291,35 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		$do_filters = ! $args['suppress_filters'];
 
 		if ( $args['force_delete'] ) {
-			if ( $do_filters ) {
-				/**
-				 * Fires immediately before an order is deleted from the database.
-				 *
-				 * @since 8.0.0
-				 *
-				 * @param int      $order_id ID of the order about to be deleted.
-				 * @param WC_Order $order    Instance of the order that is about to be deleted.
-				 */
-				do_action( 'woocommerce_before_delete_order', $id, $order );
-			}
+			self::$orders_being_deleted[ $id ] = true;
+			try {
+				if ( $do_filters ) {
+					/**
+					 * Fires immediately before an order is deleted from the database.
+					 *
+					 * @since 8.0.0
+					 *
+					 * @param int      $order_id ID of the order about to be deleted.
+					 * @param WC_Order $order    Instance of the order that is about to be deleted.
+					 */
+					do_action( 'woocommerce_before_delete_order', $id, $order );
+				}
 
-			wp_delete_post( $id );
-			$order->set_id( 0 );
+				wp_delete_post( $id );
+				$order->set_id( 0 );
 
-			if ( $do_filters ) {
-				/**
-				 * Fires immediately after an order is deleted.
-				 *
-				 * @since 2.7.0
-				 *
-				 * @param int $order_id ID of the order that has been deleted.
-				 */
-				do_action( 'woocommerce_delete_order', $id );
+				if ( $do_filters ) {
+					/**
+					 * Fires immediately after an order is deleted.
+					 *
+					 * @since 2.7.0
+					 *
+					 * @param int $order_id ID of the order that has been deleted.
+					 */
+					do_action( 'woocommerce_delete_order', $id );
+				}
+			} finally {
+				unset( self::$orders_being_deleted[ $id ] );
 			}
 		} else {
 			if ( $do_filters ) {
@@ -451,7 +463,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				'cart_tax'           => $meta_data['_order_tax'][0] ?? '',
 				'total'              => $meta_data['_order_total'][0] ?? '',
 				'version'            => $meta_data['_order_version'][0] ?? '',
-				'prices_include_tax' => metadata_exists( 'post', $id, '_prices_include_tax' ) ? 'yes' === $prices_include_tax : 'yes' === get_option( 'woocommerce_prices_include_tax' ),
+				'prices_include_tax' => metadata_exists( 'post', $id, '_prices_include_tax' ) ? 'yes' === $prices_include_tax : wc_prices_include_tax(),
 			)
 		);
 
@@ -862,14 +874,27 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		$ids_placeholders = implode( ', ', array_fill( 0, count( $sanitized_ids ), '%d' ) );
 
-		$result = $wpdb->query(
+		// Only delete meta of items that belong to this order.
+		$owned_ids = $wpdb->get_col(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $ids_placeholders is generated above.
-				"DELETE itemmeta FROM {$wpdb->prefix}woocommerce_order_itemmeta as itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items as items WHERE itemmeta.order_item_id = items.order_item_id AND items.order_id = %d AND items.order_item_id IN ($ids_placeholders)",
+				"SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_id IN ($ids_placeholders)",
 				array_merge( array( $order->get_id() ), $sanitized_ids )
 			)
 		);
-		if ( false === $result ) {
+		if ( '' !== $wpdb->last_error ) {
+			wc_get_logger()->error(
+				'Failed to read order item IDs for deletion.',
+				array(
+					'source'   => 'order-data-store',
+					'order_id' => $order->get_id(),
+					'error'    => $wpdb->last_error,
+				)
+			);
+			throw new Exception( esc_html__( 'Unable to delete order item metadata.', 'woocommerce' ) );
+		}
+
+		if ( false === $this->delete_order_item_meta( $owned_ids ) ) {
 			wc_get_logger()->error(
 				'Failed to delete order item metadata.',
 				array(
@@ -922,14 +947,41 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		}
 
 		if ( ! empty( $type ) ) {
-			$wpdb->query( $wpdb->prepare( "DELETE itemmeta FROM {$wpdb->prefix}woocommerce_order_itemmeta as itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items as items WHERE itemmeta.order_item_id = items.order_item_id AND items.order_id = %d AND items.order_item_type = %s", $order_id, $type ) );
+			$this->delete_order_item_meta( $wpdb->get_col( $wpdb->prepare( "SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s", $order_id, $type ) ) );
 			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d AND order_item_type = %s", $order_id, $type ) );
 		} else {
-			$wpdb->query( $wpdb->prepare( "DELETE itemmeta FROM {$wpdb->prefix}woocommerce_order_itemmeta as itemmeta INNER JOIN {$wpdb->prefix}woocommerce_order_items as items WHERE itemmeta.order_item_id = items.order_item_id and items.order_id = %d", $order_id ) );
+			$this->delete_order_item_meta( $wpdb->get_col( $wpdb->prepare( "SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order_id ) ) );
 			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order_id ) );
 		}
 
 		$this->clear_caches( $order );
+	}
+
+	/**
+	 * Delete the metadata of the given order items.
+	 *
+	 * Uses a single-table DELETE because the SQLite database integration used by Studio and Playground can't run a multi-table one.
+	 *
+	 * @param int[] $item_ids Order item IDs.
+	 * @return int|bool Number of deleted rows, true when there was nothing to delete, or false on failure.
+	 */
+	private function delete_order_item_meta( array $item_ids ) {
+		global $wpdb;
+
+		$item_ids = array_map( 'intval', $item_ids );
+		if ( empty( $item_ids ) ) {
+			return true;
+		}
+
+		$placeholders = implode( ', ', array_fill( 0, count( $item_ids ), '%d' ) );
+
+		return $wpdb->query(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $placeholders is generated above.
+				"DELETE FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id IN ($placeholders)",
+				$item_ids
+			)
+		);
 	}
 
 	/**

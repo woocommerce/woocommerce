@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Tests\Blocks\Utils\WC_Product_Custom;
+use Automattic\WooCommerce\Tests\Blocks\Helpers\BlockTypeRegistryTrait;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMocks;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
@@ -14,15 +15,17 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
 /**
  * Tests for the AddToCartWithOptions block type
  */
-class AddToCartWithOptions extends \WP_UnitTestCase {
+class AddToCartWithOptions extends \WC_Unit_Test_Case {
+	use BlockTypeRegistryTrait;
 
 	/**
 	 * Initiate the mock object.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
-		AddToCartWithOptionsMocks::register_all();
+		// The blocks are not registered on `init`, because `init` runs with a classic theme.
+		$this->replace_block_types( AddToCartWithOptionsMocks::get_mock_classes() );
 	}
 
 	/**
@@ -727,7 +730,6 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			$markup = do_blocks( $block );
 			$this->assertStringNotContainsString( $marker, $markup, 'The Add to Wishlist Button is not injected when the wishlist feature is disabled.' );
 		} finally {
-			$registry->unregister( 'woocommerce/add-to-wishlist-button' );
 			$features->change_feature_enable( 'product_wishlist', $original );
 		}
 	}

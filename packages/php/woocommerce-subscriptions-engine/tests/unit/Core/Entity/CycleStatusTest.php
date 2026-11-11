@@ -9,15 +9,18 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Core\Entity;
 
-use DomainException;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
+use Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\AssertsInvalidInput;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus
  */
 class CycleStatusTest extends TestCase {
+
+	use AssertsInvalidInput;
 
 	protected function tearDown(): void {
 		StatusRegistry::reset();
@@ -46,24 +49,6 @@ class CycleStatusTest extends TestCase {
 		$this->assertFalse( CycleStatus::is_registered( 'nonsense' ) );
 	}
 
-	public function test_billed_and_cancelled_are_terminal(): void {
-		$this->assertTrue( CycleStatus::is_terminal( CycleStatus::BILLED ) );
-		$this->assertTrue( CycleStatus::is_terminal( CycleStatus::CANCELLED ) );
-	}
-
-	public function test_pending_processing_and_failed_are_not_terminal(): void {
-		$this->assertFalse( CycleStatus::is_terminal( CycleStatus::PENDING ) );
-		$this->assertFalse( CycleStatus::is_terminal( CycleStatus::PROCESSING ) );
-		$this->assertFalse( CycleStatus::is_terminal( CycleStatus::FAILED ) );
-	}
-
-	public function test_unknown_and_extension_registered_statuses_are_not_terminal(): void {
-		StatusRegistry::register( StatusRegistry::KIND_CYCLE, 'disputed' );
-
-		$this->assertFalse( CycleStatus::is_terminal( 'disputed' ) );
-		$this->assertFalse( CycleStatus::is_terminal( 'legacy-x' ) );
-	}
-
 	public function test_constructor_wraps_a_default_status(): void {
 		$this->assertSame( CycleStatus::PENDING, ( new CycleStatus( CycleStatus::PENDING ) )->get_value() );
 	}
@@ -82,9 +67,13 @@ class CycleStatusTest extends TestCase {
 	 * @param string $slug Malformed slug.
 	 */
 	public function test_constructor_rejects_a_malformed_slug( string $slug ): void {
-		$this->expectException( DomainException::class );
-
-		new CycleStatus( $slug );
+		$this->assert_invalid_input(
+			static function () use ( $slug ): void {
+				new CycleStatus( $slug );
+			},
+			ValidationErrorCode::INVALID_VALUE,
+			'status'
+		);
 	}
 
 	/**
@@ -124,11 +113,6 @@ class CycleStatusTest extends TestCase {
 
 		StatusRegistry::register( StatusRegistry::KIND_CYCLE, 'disputed' );
 		$this->assertTrue( CycleStatus::is_registered( 'disputed' ) );
-	}
-
-	public function test_equals_compares_by_value(): void {
-		$this->assertTrue( ( new CycleStatus( CycleStatus::PENDING ) )->equals( new CycleStatus( CycleStatus::PENDING ) ) );
-		$this->assertFalse( ( new CycleStatus( CycleStatus::PENDING ) )->equals( new CycleStatus( CycleStatus::BILLED ) ) );
 	}
 
 	public function test_the_retired_transition_api_and_factories_are_gone(): void {
