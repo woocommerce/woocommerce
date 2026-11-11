@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { noticeContexts, useStoreCart } from '@woocommerce/base-context';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
-import { checkoutStore, paymentStore } from '@woocommerce/block-data';
+import { paymentStore } from '@woocommerce/block-data';
 import { Skeleton } from '@woocommerce/base-components/skeleton';
 import clsx from 'clsx';
 
@@ -20,7 +20,6 @@ const CartExpressPayment = () => {
 	const {
 		availableExpressPaymentMethods = {},
 		expressPaymentMethodsInitialized,
-		isCalculating,
 		isExpressPaymentMethodActive,
 		registeredExpressPaymentMethods = {},
 	} = useSelect( ( select ) => {
@@ -30,7 +29,6 @@ const CartExpressPayment = () => {
 				payment.getAvailableExpressPaymentMethods(),
 			expressPaymentMethodsInitialized:
 				payment.expressPaymentMethodsInitialized(),
-			isCalculating: select( checkoutStore ).isCalculating(),
 			isExpressPaymentMethodActive:
 				payment.isExpressPaymentMethodActive(),
 			registeredExpressPaymentMethods:
@@ -53,13 +51,10 @@ const CartExpressPayment = () => {
 	// We show the skeleton when
 	// the express payment method is not active (because they trigger recalculations) and
 	// cart items are being added, updated, or deleted, because it can result in different express payment methods
-	// or when the express payment methods are not initialized.
-	// `isCalculating` starts the skeleton when the quantity changes, with the totals skeletons, instead of when the
-	// request starts after the quantity input's delay (Skeleton reveal rule).
+	// or when the express payment methods are not initialized
 	const showSkeleton =
 		! isExpressPaymentMethodActive &&
-		( isCalculating ||
-			hasPendingItemsOperations ||
+		( hasPendingItemsOperations ||
 			hasRegisteredNotInitializedExpressPaymentMethods );
 
 	if (

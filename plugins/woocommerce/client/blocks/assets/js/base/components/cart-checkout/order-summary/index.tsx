@@ -3,7 +3,6 @@
  */
 import {
 	useContainerWidthContext,
-	useSettledOrderSummaryValue,
 	useStoreCart,
 } from '@woocommerce/base-context';
 import type { CartItem } from '@woocommerce/types';
@@ -28,14 +27,14 @@ const OrderSummary = ( {
 	const { isLarge } = useContainerWidthContext();
 	const { cartIsLoading, hasPendingItemsOperations } = useStoreCart();
 	const showSkeleton = cartIsLoading || hasPendingItemsOperations;
-	// The item prices change when the totals skeletons end, not before (Skeleton reveal rule).
-	const items = useSettledOrderSummaryValue( cartItems );
 
 	return (
 		<DelayedContentWithSkeleton
 			isLoading={ showSkeleton }
 			skeleton={
-				<CartLineItemsCheckoutSkeleton rows={ items?.length || 2 } />
+				<CartLineItemsCheckoutSkeleton
+					rows={ cartItems?.length || 2 }
+				/>
 			}
 		>
 			<div
@@ -44,7 +43,7 @@ const OrderSummary = ( {
 				} ) }
 			>
 				<div className="wc-block-components-order-summary__content">
-					{ items.map( ( cartItem ) => {
+					{ cartItems.map( ( cartItem ) => {
 						return (
 							<OrderSummaryItem
 								disableProductDescriptions={

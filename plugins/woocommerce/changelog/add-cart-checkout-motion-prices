@@ -1,4 +1,4 @@
 Significance: patch
 Type: tweak
 
-Roll changed prices in Cart and Checkout, update line totals as quantities change, and end loading placeholders together.
+Roll changed prices in Cart and Checkout, and update line totals as quantities change.
