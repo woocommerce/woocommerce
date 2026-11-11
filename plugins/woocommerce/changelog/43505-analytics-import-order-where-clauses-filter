@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a filter that lets extensions exclude orders, such as marketplace child orders, from Analytics imports.

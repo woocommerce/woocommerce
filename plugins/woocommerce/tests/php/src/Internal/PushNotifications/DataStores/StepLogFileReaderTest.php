@@ -56,8 +56,6 @@ class StepLogFileReaderTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		try {
-			Constants::clear_single_constant( 'WC_LOG_DIR_CUSTOM' );
-			Constants::clear_single_constant( 'WC_LOG_DIR' );
 			FilesystemUtil::get_wp_filesystem_direct()->rmdir( $this->log_directory, true );
 		} finally {
 			parent::tearDown();

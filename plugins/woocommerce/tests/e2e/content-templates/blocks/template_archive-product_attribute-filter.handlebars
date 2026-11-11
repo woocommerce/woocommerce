@@ -18,10 +18,21 @@
 <!-- /wp:heading --></div>
 <!-- /wp:group -->
 
+{{#if dropdown}}
+{{#> wp-block blockName='woocommerce/dropdown' attributes=dropdownAttributes }}{{/ wp-block }}
+{{else}}
 <!-- wp:woocommerce/product-filter-checkbox-list {"lock":{"remove":true}} -->
 <div class="wp-block-woocommerce-product-filter-checkbox-list wc-block-product-filter-checkbox-list"></div>
-<!-- /wp:woocommerce/product-filter-checkbox-list --></div>
+<!-- /wp:woocommerce/product-filter-checkbox-list -->
+{{/if}}
+</div>
 {{/ wp-block }}
+
+{{#if taxonomy}}
+<!-- wp:woocommerce/product-filter-taxonomy {"taxonomy":"product_cat","displayStyle":"woocommerce/dropdown"} -->
+<div class="wp-block-woocommerce-product-filter-taxonomy"><!-- wp:woocommerce/dropdown /--></div>
+<!-- /wp:woocommerce/product-filter-taxonomy -->
+{{/if}}
 
 </div>
 <!-- /wp:woocommerce/product-filters -->

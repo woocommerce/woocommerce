@@ -6,6 +6,8 @@ import { __ } from '@wordpress/i18n';
 import { Button, Notice } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { decodeEntities } from '@wordpress/html-entities';
+import { speak } from '@wordpress/a11y';
 
 /**
  * Internal dependencies
@@ -20,11 +22,15 @@ export const JetpackStep: React.FC = () => {
 		useOnboardingContext();
 	const [ isConnectButtonLoading, setIsConnectButtonLoading ] =
 		useState( false );
+	const [ authorizeError, setAuthorizeError ] = useState< string | null >(
+		null
+	);
 
 	return (
 		<>
 			<WooPaymentsStepHeader onClose={ closeModal } />
-			{ currentStep?.errors && currentStep.errors.length > 0 && (
+			{ ( authorizeError ||
+				( currentStep?.errors && currentStep.errors.length > 0 ) ) && (
 				<Notice
 					status="error"
 					isDismissible={ false }
@@ -35,7 +41,8 @@ export const JetpackStep: React.FC = () => {
 					{ ...{ role: 'alert' } }
 				>
 					<p>
-						{ currentStep.errors[ 0 ]?.message ||
+						{ authorizeError ||
+							currentStep?.errors?.[ 0 ]?.message ||
 							__(
 								'Something went wrong. Please try again.',
 								'woocommerce'
@@ -59,6 +66,7 @@ export const JetpackStep: React.FC = () => {
 						className="settings-payments-onboarding-modal__step--content-jetpack-button"
 						isBusy={ isConnectButtonLoading }
 						disabled={ isConnectButtonLoading }
+						accessibleWhenDisabled
 						onClick={ () => {
 							setIsConnectButtonLoading( true );
 
@@ -85,9 +93,47 @@ export const JetpackStep: React.FC = () => {
 								}
 							);
 
-							// Redirect to the WordPress.com connection authorization URL.
-							window.location.href =
-								currentStep?.actions?.auth?.href ?? '';
+							const authorizeUrl =
+								currentStep?.actions?.authorize?.href;
+							if ( ! authorizeUrl ) {
+								// Redirect to the WordPress.com connection authorization URL.
+								window.location.href =
+									currentStep?.actions?.auth?.href ?? '';
+								return;
+							}
+
+							// The store is not registered with WordPress.com yet: register it,
+							// then redirect to the authorization URL the backend returns.
+							setAuthorizeError( null );
+							speak(
+								__(
+									'Connecting to WordPress.com. Please wait.',
+									'woocommerce'
+								),
+								'polite'
+							);
+							apiFetch< { url: string } >( {
+								url: authorizeUrl,
+								method: 'POST',
+								data: {
+									source: sessionEntryPoint,
+								},
+							} )
+								.then( ( response ) => {
+									window.location.href = response.url;
+								} )
+								.catch( ( error ) => {
+									setAuthorizeError(
+										decodeEntities(
+											error?.message ||
+												__(
+													'Something went wrong. Please try again.',
+													'woocommerce'
+												)
+										)
+									);
+									setIsConnectButtonLoading( false );
+								} );
 						} }
 					>
 						{ __( 'Connect', 'woocommerce' ) }

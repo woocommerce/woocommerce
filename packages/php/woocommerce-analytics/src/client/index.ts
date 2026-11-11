@@ -5,10 +5,11 @@
  */
 import './public-path';
 import { consentManager } from './consent';
+import { clearTrackingCookies } from './tracking-cookies';
 import { activateTrackingScript } from './tracking-script';
 
 /**
- * Start tracking. Safe to call again, and s.js sends the events analytics queues in `window._wca` whenever it arrives.
+ * Start tracking. Safe to call again. Without proxy tracking, s.js sends the events analytics queues in `window._wca` whenever it arrives.
  */
 function startTracking() {
 	activateTrackingScript();
@@ -24,12 +25,23 @@ jQuery( () => {
 	consentManager.addConsentChangeListener( ( hasConsent: boolean ) => {
 		if ( hasConsent ) {
 			startTracking();
+		} else {
+			clearTrackingCookies();
+			// Until s.js loads, events wait in this array, and s.js sends them when it arrives.
+			if ( Array.isArray( window._wca ) ) {
+				window._wca.length = 0;
+			}
 		}
 	} );
 
-	consentManager.waitForConsentType( () => {
-		if ( consentManager.hasAnalyticsConsent() ) {
-			startTracking();
-		}
-	} );
+	consentManager.waitForConsentApi( () =>
+		consentManager.waitForConsentType( () => {
+			if ( consentManager.hasAnalyticsConsent() ) {
+				startTracking();
+			} else {
+				// Consent may have been withdrawn on a page without analytics, after an earlier visit set these.
+				clearTrackingCookies();
+			}
+		} )
+	);
 } );

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Announce the updated product count to screen readers after filtering, sorting, or changing pages.

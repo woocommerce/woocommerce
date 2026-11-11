@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Stop listing deleted plugins in the system status report and REST API for up to an hour after they are removed.

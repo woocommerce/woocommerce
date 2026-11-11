@@ -13,21 +13,24 @@ use Automattic\WooCommerce\Admin\Notes\Note;
 class WC_Admin_Tests_Notes_Note extends WC_Unit_Test_Case {
 
 	/**
-	 * Tests a note can be created with timestamp.
+	 * Tests a new note's created date is the time it was saved, read back in UTC whatever the
+	 * site timezone. The data store stamps the date during save(), so the check is a range: a
+	 * single time() read can fall in the second before.
 	 */
-	public function test_note_correctly_sets_created_date_with_timestamp() {
-		$timestamp     = time();
-		$datetime      = new WC_DateTime( "@{$timestamp}", new DateTimeZone( 'UTC' ) );
-		$expected_date = $datetime->format( 'Y-m-d H:i:s' );
+	public function test_new_note_created_date_is_the_save_time_in_utc() {
+		update_option( 'timezone_string', 'America/Los_Angeles' );
 
 		$note = new Note();
 		$note->set_title( 'test1' );
-		$note->set_date_created( $timestamp );
+
+		$before_save = time();
 		$note->save();
+		$after_save = time();
 
 		$note         = new Note( $note->get_id() );
-		$date_created = $note->get_date_created()->format( 'Y-m-d H:i:s' );
-		$this->assertEquals( $expected_date, $date_created );
+		$date_created = $note->get_date_created()->getTimestamp();
+		$this->assertGreaterThanOrEqual( $before_save, $date_created );
+		$this->assertLessThanOrEqual( $after_save, $date_created );
 	}
 
 	/**

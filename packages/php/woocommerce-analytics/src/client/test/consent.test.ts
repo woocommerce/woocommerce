@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { afterEach, describe, expect, it, jest } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 
 /**
  * Internal dependencies
@@ -55,6 +55,68 @@ describe( 'ConsentManager.waitForConsentType', () => {
 		window.wp_consent_type = 'optin';
 		document.dispatchEvent( new CustomEvent( 'wp_consent_type_defined' ) );
 		document.dispatchEvent( new CustomEvent( 'wp_consent_type_defined' ) );
+
+		expect( callback ).toHaveBeenCalledTimes( 1 );
+	} );
+} );
+
+describe( 'ConsentManager with a delayed WP Consent API script', () => {
+	beforeEach( () => {
+		jest.useFakeTimers();
+		window.wcAnalytics = {
+			trackEndpoint: '',
+			eventQueue: [],
+			commonProps: {},
+			features: {},
+			pages: {},
+			assets_url: '',
+			consentManaged: true,
+		};
+	} );
+
+	afterEach( () => {
+		jest.useRealTimers();
+		delete window.wcAnalytics;
+		delete window.wp_has_consent;
+	} );
+
+	it( 'reports no consent until the script loads', () => {
+		expect( new ConsentManager().hasAnalyticsConsent() ).toBe( false );
+	} );
+
+	it( 'reports consent when no consent plugin decides', () => {
+		window.wcAnalytics!.consentManaged = false;
+
+		expect( new ConsentManager().hasAnalyticsConsent() ).toBe( true );
+	} );
+
+	it( 'waits for the script to load', () => {
+		const callback = jest.fn();
+
+		new ConsentManager().waitForConsentApi( callback );
+		jest.runOnlyPendingTimers();
+		expect( callback ).not.toHaveBeenCalled();
+
+		window.wp_has_consent = () => false;
+		jest.runOnlyPendingTimers();
+
+		expect( callback ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'runs right away once the script has loaded', () => {
+		window.wp_has_consent = () => false;
+		const callback = jest.fn();
+
+		new ConsentManager().waitForConsentApi( callback );
+
+		expect( callback ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'runs right away when no consent plugin decides', () => {
+		window.wcAnalytics!.consentManaged = false;
+		const callback = jest.fn();
+
+		new ConsentManager().waitForConsentApi( callback );
 
 		expect( callback ).toHaveBeenCalledTimes( 1 );
 	} );

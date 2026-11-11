@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Re-enable autoloading for options marked auto-loadable in v10.5.0.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Fix unreleased session merge dropping unchanged keys when the row was deleted mid-request (#69559).
+
