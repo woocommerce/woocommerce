@@ -15,6 +15,16 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
  */
 class OrderControllerTests extends \WC_Unit_Test_Case {
 	/**
+	 * Shipping address fields in a country a US-only store does not ship to.
+	 */
+	private const GERMAN_SHIPPING_ADDRESS = array(
+		'country'  => 'DE',
+		'state'    => '',
+		'city'     => 'Berlin',
+		'postcode' => '10115',
+	);
+
+	/**
 	 * The system under test.
 	 *
 	 * @var OrderController
@@ -378,17 +388,70 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		$order->set_shipping_country( 'Invalid' );
 		$order->save();
 
-		// validate_addresses() inspects the selected shipping rates from the global cart's
-		// packages even for existing orders, so the cart must contain the shippable product
-		// for the shipping country check to run.
-		/** @var \WC_Order_Item_Product $item */
-		$array = $order->get_items();
-		$item  = reset( $array );
-		$this->assertInstanceOf( \WC_Order_Item_Product::class, $item );
-
-		WC()->cart->add_to_cart( $item->get_product()->get_id() );
-
 		$this->sut->validate_existing_order_before_payment( $order );
+	}
+
+	/**
+	 * @testdox Existing-order validation decides local pickup from the order's shipping lines, not from the cart.
+	 *
+	 * @dataProvider provide_order_shipping_lines
+	 *
+	 * @param string[] $method_ids      Method ids of the shipping lines on the order.
+	 * @param bool     $expect_rejected Whether the shipping country should be rejected.
+	 */
+	public function test_validate_existing_order_shipping_country_uses_order_shipping_lines( array $method_ids, bool $expect_rejected ): void {
+		$order = $this->create_order_for_us_only_store( $method_ids, self::GERMAN_SHIPPING_ADDRESS );
+
+		if ( $expect_rejected ) {
+			$this->expectException( RouteException::class );
+			$this->expectExceptionMessage( 'Sorry, we do not ship orders to the provided country (Germany)' );
+		}
+
+		$this->assertNull( $this->sut->validate_existing_order_before_payment( $order ) );
+	}
+
+	/**
+	 * Shipping lines on an order and whether a country the store does not ship to should be rejected.
+	 *
+	 * @return array<string, array{0: string[], 1: bool}>
+	 */
+	public function provide_order_shipping_lines(): array {
+		return array(
+			'flat rate'                  => array( array( 'flat_rate' ), true ),
+			'no shipping line'           => array( array(), true ),
+			'local pickup and flat rate' => array( array( 'local_pickup', 'flat_rate' ), true ),
+			'local pickup'               => array( array( 'local_pickup' ), false ),
+			'pickup location'            => array( array( 'pickup_location' ), false ),
+			'legacy local pickup'        => array( array( 'legacy_local_pickup' ), false ),
+		);
+	}
+
+	/**
+	 * @testdox Validating an existing order before an update rejects a shipping country the store does not ship to.
+	 */
+	public function test_validate_existing_order_before_update_rejects_shipping_country_the_store_does_not_ship_to(): void {
+		$order = $this->create_order_for_us_only_store( array( 'flat_rate' ), self::GERMAN_SHIPPING_ADDRESS );
+
+		$this->expectException( RouteException::class );
+		$this->expectExceptionMessage( 'Sorry, we do not ship orders to the provided country (Germany)' );
+
+		$this->sut->validate_existing_order_before_update( $order );
+	}
+
+	/**
+	 * @testdox Updating an existing order's addresses rejects a shipping country the store does not ship to.
+	 */
+	public function test_update_existing_order_addresses_rejects_shipping_country_the_store_does_not_ship_to(): void {
+		$order = $this->create_order_for_us_only_store( array( 'flat_rate' ) );
+
+		$this->expectException( RouteException::class );
+		$this->expectExceptionMessage( 'Sorry, we do not ship orders to the provided country (Germany)' );
+
+		$this->sut->update_existing_order_addresses(
+			$order,
+			$order->get_address( 'billing' ),
+			array_merge( $order->get_address( 'shipping' ), self::GERMAN_SHIPPING_ADDRESS )
+		);
 	}
 
 	/**
@@ -652,6 +715,32 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 		$this->set_shipping_address( $order );
 		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Creates a saved order that needs shipping, for a store that only ships to the US and has an empty cart.
+	 *
+	 * @param string[]             $method_ids       Method ids of the shipping lines on the order.
+	 * @param array<string,string> $shipping_address Shipping address fields to override on the order.
+	 * @return \WC_Order
+	 */
+	private function create_order_for_us_only_store( array $method_ids, array $shipping_address = array() ): \WC_Order {
+		update_option( 'woocommerce_ship_to_countries', 'specific' );
+		update_option( 'woocommerce_specific_ship_to_countries', array( 'US' ) );
+		WC()->cart->empty_cart();
+
+		$order = WC_Helper_Order::create_order();
+		$order->remove_order_items( 'shipping' );
+		foreach ( $method_ids as $method_id ) {
+			$shipping_line = new \WC_Order_Item_Shipping();
+			$shipping_line->set_method_id( $method_id );
+			$order->add_item( $shipping_line );
+		}
+		$this->set_shipping_address( $order, $shipping_address );
+		$order->save();
+		$this->assertTrue( $order->needs_shipping(), 'The order must need shipping for the country check to apply.' );
 
 		return $order;
 	}
