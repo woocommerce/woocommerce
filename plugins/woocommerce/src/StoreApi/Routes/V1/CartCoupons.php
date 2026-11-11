@@ -106,7 +106,7 @@ class CartCoupons extends AbstractCartRoute {
 			throw new RouteException( 'woocommerce_rest_cart_coupon_disabled', __( 'Coupons are disabled.', 'woocommerce' ), 404 );
 		}
 
-		$coupon_code = wc_format_coupon_code( wp_unslash( $request['code'] ) );
+		$coupon_code = wc_format_coupon_code( $request['code'] );
 
 		try {
 			$this->cart_controller->apply_coupon( $coupon_code );

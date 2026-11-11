@@ -284,10 +284,11 @@ class CartController {
 	 *
 	 * Shared by the cart routes that add items so they apply the same filters and actions.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 * @throws RouteException Exception if invalid data is detected.
 	 *
 	 * @param \WP_REST_Request $request Request object with id, quantity and variation.
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 * @return string Cart item key.
 	 */
 	public function add_to_cart_from_request( \WP_REST_Request $request ) {
@@ -303,7 +304,8 @@ class CartController {
 		 *
 		 * @since 8.8.0
 		 *
-		 * @param array $add_to_cart_data An array of cart item data.
+		 * @param array            $add_to_cart_data An array of cart item data.
+		 * @param \WP_REST_Request $request          The request object.
 		 * @return array
 		 */
 		$add_to_cart_data = apply_filters(
@@ -343,13 +345,13 @@ class CartController {
 	 *
 	 * Shared by the cart routes that update item quantities so they behave the same way.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 * @throws RouteException Exception if invalid data is detected.
 	 *
 	 * @param string    $item_id  Cart item id.
 	 * @param int|float $quantity Requested quantity.
 	 */
-	public function update_cart_item_quantity_from_request( $item_id, $quantity ) {
+	public function update_cart_item_quantity_from_request( $item_id, $quantity ): void {
 		$cart         = $this->get_cart_instance();
 		$cart_item    = $cart->get_cart_item( $item_id );
 		$old_quantity = wc_stock_amount( $cart_item['quantity'] ?? 0 );

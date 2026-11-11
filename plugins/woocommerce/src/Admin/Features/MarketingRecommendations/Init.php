@@ -138,7 +138,7 @@ class Init extends RemoteSpecsEngine {
 	 *
 	 * Plugins without categories count as "marketing".
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 * @param string $category Category slug, such as "marketing" or "coupons".
 	 * @return array
 	 */
