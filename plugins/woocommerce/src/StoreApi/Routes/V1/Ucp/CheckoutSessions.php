@@ -101,14 +101,14 @@ class CheckoutSessions extends AbstractCheckoutRoute {
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		$checkout_id = $this->route_cart_id( $request );
-		$state       = null;
 
 		if ( '' !== $checkout_id ) {
 			// The cart is the source of truth, so `line_items` is ignored; an update can change it.
 			$state = $this->checkout_state();
 
-			if ( null !== $state && $this->is_terminal( $state ) ) {
-				return $this->ucp_conflict();
+			if ( null !== $state ) {
+				// UCP's idempotent conversion: a cart that already is a checkout is returned as it stands, the body ignored.
+				return $this->is_terminal( $state ) ? $this->ucp_conflict() : $this->existing_checkout_response( $request, $checkout_id, $state );
 			}
 
 			if ( $this->cart_controller->get_cart_instance()->is_empty() ) {
@@ -140,9 +140,38 @@ class CheckoutSessions extends AbstractCheckoutRoute {
 			return $error;
 		}
 
-		$state = $state ?? array( 'created_at' => time() );
+		$state = array( 'created_at' => time() );
 		$this->save_checkout_state( $state );
 
 		return $this->checkout_response( $checkout_id, $state, 201 );
+	}
+
+	/**
+	 * Return a checkout that already exists, warning when the request tried to change it.
+	 *
+	 * @param \WP_REST_Request     $request Request object.
+	 * @param string               $checkout_id Checkout identifier.
+	 * @param array<string, mixed> $state Checkout state.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @return \WP_REST_Response
+	 */
+	private function existing_checkout_response( \WP_REST_Request $request, string $checkout_id, array $state ): \WP_REST_Response {
+		$response = $this->checkout_response( $checkout_id, $state );
+
+		if ( ! empty( array_diff_key( (array) $request->get_json_params(), array( 'cart_id' => true ) ) ) ) {
+			$data               = (array) $response->get_data();
+			$data['messages'][] = array(
+				'type'         => 'warning',
+				'code'         => 'FIELDS_IGNORED',
+				'content'      => __( 'This cart already is a checkout session, so it was returned unchanged and the other fields were ignored. Update the checkout session to change it.', 'woocommerce' ),
+				'path'         => '$',
+				'content_type' => 'plain',
+			);
+			$response->set_data( $data );
+		}
+
+		return $response;
 	}
 }

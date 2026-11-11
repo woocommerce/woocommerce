@@ -545,6 +545,30 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Creating again from a cart that already is a checkout returns that checkout and changes nothing.
+	 */
+	public function test_create_from_an_existing_checkout_returns_it_unchanged(): void {
+		$created   = $this->create_ready_checkout();
+		$completed = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' )->get_data();
+
+		$body     = array(
+			'cart_id'          => $created['id'],
+			'shipping_address' => array( 'address_locality' => 'Oakland' ),
+		);
+		$response = $this->request( 'POST', '/checkout-sessions', $body );
+
+		$data = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $completed['continue_url'], $data['continue_url'] );
+		$this->assertSame( 'San Francisco', WC()->customer->get_shipping_city() );
+		$this->assertContains( 'FIELDS_IGNORED', array_column( $data['messages'], 'code' ), 'The agent must learn its address was not applied.' );
+
+		$plain = $this->request( 'POST', '/checkout-sessions', array( 'cart_id' => $created['id'] ) )->get_data();
+		$this->assertEquals( $completed, $plain, 'A bare repeat has nothing ignored to warn about.' );
+	}
+
+	/**
 	 * @testdox Complete holds the order's stock, as the payment page trusts a pending order to have.
 	 */
 	public function test_complete_holds_stock(): void {
