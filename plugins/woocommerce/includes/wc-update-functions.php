@@ -2374,7 +2374,7 @@ function wc_update_500_fix_product_review_count() {
 		$current_review_count = intval( $product_data['meta_value'] );
 
 		if ( intval( $actual_review_counts[ $product_id ] ) !== $current_review_count ) {
-			WC_Comments::clear_transients( $product_id );
+			WC_Comments::maybe_update_product_average_rating( $product_id );
 		}
 	}
 

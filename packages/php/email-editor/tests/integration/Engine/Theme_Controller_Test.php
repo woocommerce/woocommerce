@@ -16,6 +16,13 @@ use Automattic\WooCommerce\EmailEditor\Engine\User_Theme;
  */
 class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	/**
+	 * Theme that was active before the test.
+	 *
+	 * @var string
+	 */
+	private string $previous_theme = '';
+
+	/**
 	 * Theme controller instance
 	 *
 	 * @var Theme_Controller
@@ -29,6 +36,7 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 		parent::setUp();
 
 		// Switch theme for easier testing theme colors.
+		$this->previous_theme = get_stylesheet();
 		switch_theme( 'twentytwentyfour' );
 
 		// Crete a custom user theme post.
@@ -55,6 +63,15 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 		add_filter( 'woocommerce_email_editor_site_style_sync_enabled', '__return_false' );
 
 		$this->theme_controller = $this->di_container->get( Theme_Controller::class );
+	}
+
+	/**
+	 * Switch back to the theme from before the test. Switching also clears WordPress's
+	 * cached theme styles, which the database rollback does not reset.
+	 */
+	public function tearDown(): void {
+		switch_theme( $this->previous_theme );
+		parent::tearDown();
 	}
 
 	/**

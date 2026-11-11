@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Queries product categories, tags and brands.
+ * Queries product categories, tags, brands and the terms of global attributes.
  */
 class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefinition {
 
@@ -42,7 +42,7 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 
 		return array(
 			'label'               => __( 'Query product terms', 'woocommerce' ),
-			'description'         => __( 'Find product categories, tags or brands. Use include to retrieve specific term IDs.', 'woocommerce' ),
+			'description'         => __( 'Find product categories, tags, brands or the terms of a global attribute, such as pa_color. Use include to retrieve specific term IDs.', 'woocommerce' ),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
 			'output_schema'       => $output_schema,
@@ -72,8 +72,11 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 	 */
 	public static function can_query_terms( $input = array() ): bool {
 		$taxonomy = $input['taxonomy'];
-		return taxonomy_exists( $taxonomy )
-			&& wc_rest_check_product_term_permissions( $taxonomy, 'read' );
+		if ( ! taxonomy_exists( $taxonomy ) ) {
+			// Let execute() tell a store manager that the attribute does not exist, rather than refuse access.
+			return wc_rest_check_manager_permissions( 'attributes', 'read' );
+		}
+		return wc_rest_check_product_term_permissions( $taxonomy, 'read' );
 	}
 
 	/**
@@ -84,14 +87,27 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 	 * @return array|\WP_Error
 	 */
 	public static function execute( array $input ) {
+		if ( ! taxonomy_exists( $input['taxonomy'] ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_product_term_taxonomy_unknown',
+				/* translators: %s: taxonomy name. */
+				sprintf( __( 'The taxonomy "%s" does not exist. Use product-attributes-query to list the global attributes.', 'woocommerce' ), $input['taxonomy'] ),
+				array( 'status' => 404 )
+			);
+		}
+
 		$page     = $input['page'] ?? 1;
 		$per_page = $input['per_page'] ?? 10;
-		$args     = array_merge(
-			array(
-				'hide_empty' => false,
-				'orderby'    => 'name',
-				'order'      => 'asc',
-			),
+		$defaults = array(
+			'hide_empty' => false,
+			'order'      => 'asc',
+		);
+		// Without an orderby, WooCommerce sorts attribute terms in the order set on the attribute.
+		if ( ! taxonomy_is_product_attribute( $input['taxonomy'] ) ) {
+			$defaults['orderby'] = 'name';
+		}
+		$args = array_merge(
+			$defaults,
 			array_intersect_key( $input, array_flip( array( 'taxonomy', 'include', 'exclude', 'search', 'slug', 'parent', 'hide_empty', 'orderby', 'order' ) ) )
 		);
 		if ( isset( $input['slug'] ) ) {
@@ -107,7 +123,9 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 			$args['object_ids'] = array( $input['product'] );
 		}
 
+		add_filter( 'terms_clauses', array( __CLASS__, 'add_id_tiebreak' ), PHP_INT_MAX );
 		$terms = get_terms( $args );
+		remove_filter( 'terms_clauses', array( __CLASS__, 'add_id_tiebreak' ), PHP_INT_MAX );
 		if ( is_wp_error( $terms ) ) {
 			return $terms;
 		}
@@ -146,6 +164,27 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 	}
 
 	/**
+	 * End the sort on the term ID, so terms that tie on the sort field keep one order
+	 * across pages. Runs last, so other terms_clauses callbacks can't drop it.
+	 *
+	 * @internal
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array $clauses Term query clauses.
+	 * @return array
+	 */
+	public static function add_id_tiebreak( $clauses ) {
+		if ( ! is_array( $clauses ) || empty( $clauses['orderby'] ) || ! is_string( $clauses['orderby'] ) ) {
+			return $clauses;
+		}
+
+		$clauses['orderby'] .= ' ' . ( $clauses['order'] ?? '' ) . ', t.term_id';
+
+		return $clauses;
+	}
+
+	/**
 	 * Format a term with the fields of the WooCommerce term reads.
 	 *
 	 * @param \WP_Term $term Term to format.
@@ -159,7 +198,9 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 			'description' => $term->description,
 			'count'       => $term->count,
 		);
-		if ( 'product_tag' !== $term->taxonomy ) {
+		if ( taxonomy_is_product_attribute( $term->taxonomy ) ) {
+			$output['menu_order'] = (int) get_term_meta( $term->term_id, 'order', true );
+		} elseif ( 'product_tag' !== $term->taxonomy ) {
 			$output['parent']     = $term->parent;
 			$display              = get_term_meta( $term->term_id, 'display_type', true );
 			$output['display']    = $display ? $display : 'default';
@@ -206,9 +247,9 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 			'type'                 => 'object',
 			'properties'           => array(
 				'taxonomy'   => array(
-					'description' => __( 'Product taxonomy to query.', 'woocommerce' ),
+					'description' => __( 'Product taxonomy to query: product_cat, product_tag, product_brand, or the slug of a global attribute from product-attributes-query.', 'woocommerce' ),
 					'type'        => 'string',
-					'enum'        => array( 'product_cat', 'product_tag', 'product_brand' ),
+					'pattern'     => '^(product_cat|product_tag|product_brand|pa_[^\\s]+)$',
 				),
 				'include'    => array(
 					'description' => __( 'Limit results to these term IDs. Use one ID to retrieve a single term.', 'woocommerce' ),
@@ -248,9 +289,9 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 					'default' => false,
 				),
 				'orderby'    => array(
-					'type'    => 'string',
-					'enum'    => array( 'id', 'include', 'name', 'slug', 'term_group', 'description', 'count' ),
-					'default' => 'name',
+					'description' => __( 'Defaults to name, or for a pa_* taxonomy to the order set on the attribute.', 'woocommerce' ),
+					'type'        => 'string',
+					'enum'        => array( 'id', 'include', 'name', 'slug', 'term_group', 'description', 'count' ),
 				),
 				'order'      => array(
 					'type'    => 'string',

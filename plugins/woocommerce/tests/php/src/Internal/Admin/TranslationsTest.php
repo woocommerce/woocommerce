@@ -131,6 +131,96 @@ class TranslationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Writes a chunk translation JSON file in a user-generated format: `wp i18n make-json`
+	 * keeps strings under "messages", Loco Translate under the text domain.
+	 *
+	 * @param string $md5_name   Fake md5 part of the filename.
+	 * @param string $source     Source file path stored in the JSON.
+	 * @param string $domain_key Key the messages are stored under in locale_data.
+	 * @param array  $messages   Translation messages.
+	 */
+	private function create_user_chunk_json( $md5_name, $source, $domain_key, $messages ) {
+		$data = array(
+			'translation-revision-date' => '2026-01-01 00:00:00+0000',
+			'generator'                 => 'WP-CLI/2.12.0',
+			'source'                    => $source,
+			'domain'                    => $domain_key,
+			'locale_data'               => array(
+				$domain_key => array_merge(
+					array(
+						'' => array(
+							'domain' => $domain_key,
+							'lang'   => 'de',
+						),
+					),
+					$messages
+				),
+			),
+		);
+
+		$path = $this->lang_dir . 'woocommerce-de_DE-' . $md5_name . '.json';
+		file_put_contents( $path, wp_json_encode( $data ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		$this->created_files[] = $path;
+	}
+
+	/**
+	 * Builds the combined translation file and returns its decoded contents.
+	 *
+	 * @return array Combined translation data.
+	 */
+	private function build_combined_file(): array {
+		if ( ! function_exists( 'get_filesystem_method' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		\WP_Filesystem();
+		$build = new \ReflectionMethod( Translations::class, 'build_and_save_translations' );
+		$build->setAccessible( true );
+		$build->invoke( $this->sut, $this->lang_dir, 'woocommerce', 'de_DE' );
+
+		return json_decode( file_get_contents( $this->lang_dir . 'woocommerce-de_DE-' . WC_ADMIN_APP . '.json' ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+	}
+
+	/**
+	 * Key combinations of the two user-generated files, in the order they are read.
+	 *
+	 * @return array[]
+	 */
+	public function user_chunk_key_provider(): array {
+		return array(
+			'make-json, make-json' => array( 'messages', 'messages' ),
+			'Loco, make-json'      => array( 'woocommerce', 'messages' ),
+			'make-json, Loco'      => array( 'messages', 'woocommerce' ),
+		);
+	}
+
+	/**
+	 * @testdox Should combine user-generated chunk files whichever key each one uses.
+	 * @dataProvider user_chunk_key_provider
+	 *
+	 * @param string $first_key  Key used by the file read first.
+	 * @param string $second_key Key used by the file read second.
+	 */
+	public function test_combines_user_generated_chunks( string $first_key, string $second_key ): void {
+		$this->create_user_chunk_json(
+			'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+			WC_ADMIN_DIST_JS_FOLDER . 'app/index.js',
+			$first_key,
+			array( 'Show' => array( 'Anzeigen' ) )
+		);
+		$this->create_user_chunk_json(
+			'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+			WC_ADMIN_DIST_JS_FOLDER . 'chunks/analytics-report-products.js',
+			$second_key,
+			array( 'Compare Products' => array( 'Produkte vergleichen' ) )
+		);
+
+		$messages = $this->build_combined_file()['locale_data'][ $first_key ];
+
+		$this->assertSame( array( 'Anzeigen' ), $messages['Show'], 'Strings from the first file should be kept' );
+		$this->assertSame( array( 'Produkte vergleichen' ), $messages['Compare Products'], 'Strings from the second file should be merged in' );
+	}
+
+	/**
 	 * @testdox Should leave the translation file untouched for other script handles.
 	 */
 	public function test_ignores_other_script_handles(): void {

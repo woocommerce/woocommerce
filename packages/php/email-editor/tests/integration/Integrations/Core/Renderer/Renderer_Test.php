@@ -36,6 +36,13 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	private $renderer;
 
 	/**
+	 * Block types replaced in setUp.
+	 *
+	 * @var array<\WP_Block_Type|false>
+	 */
+	private array $original_block_types = array();
+
+	/**
 	 * Set up before each test
 	 */
 	public function setUp(): void {
@@ -50,16 +57,31 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		foreach ( self::USED_CORE_BLOCKS as $block ) {
 			$block_type = \WP_Block_Type_Registry::get_instance()->get_registered( $block );
 			$this->assertInstanceOf( \WP_Block_Type::class, $block_type );
-			$settings = array(
+			$settings                     = array(
 				'title'    => $block_type->title,
 				'name'     => $block_type->name,
 				'category' => $block_type->category,
 				'supports' => $block_type->supports ?? array(),
 			);
-			\WP_Block_Type_Registry::get_instance()->unregister( $block );
-			$settings = $initializer->update_block_settings( $settings );
+			$this->original_block_types[] = \WP_Block_Type_Registry::get_instance()->unregister( $block );
+			$settings                     = $initializer->update_block_settings( $settings );
 			register_block_type( $block, $settings );
 		}
+	}
+
+	/**
+	 * Put back the block types replaced in setUp, so later tests see the real ones.
+	 */
+	public function tearDown(): void {
+		$registry = \WP_Block_Type_Registry::get_instance();
+		foreach ( $this->original_block_types as $block_type ) {
+			if ( $block_type instanceof \WP_Block_Type ) {
+				$registry->unregister( $block_type->name );
+				$registry->register( $block_type );
+			}
+		}
+		$this->original_block_types = array();
+		parent::tearDown();
 	}
 
 	/**

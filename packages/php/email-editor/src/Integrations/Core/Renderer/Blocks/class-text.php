@@ -14,7 +14,7 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
 /**
- * This renderer covers both core/paragraph, core/heading and core/site-title blocks.
+ * This renderer covers the core/paragraph, core/heading, core/preformatted and core/site-title blocks.
  */
 class Text extends Abstract_Block_Renderer {
 	/**
@@ -71,6 +71,14 @@ class Text extends Abstract_Block_Renderer {
 		if ( empty( $block_styles['declarations']['color'] ) ) {
 			$email_styles               = $rendering_context->get_theme_styles();
 			$additional_styles['color'] = $parsed_block['email_attrs']['color'] ?? $email_styles['color']['text'] ?? '#000000'; // Fallback for the text color.
+		}
+
+		// Use the font size inherited from a parent block (e.g. a Group) when the block sets none.
+		if ( empty( $block_styles['declarations']['font-size'] ) && is_string( $parsed_block['email_attrs']['font-size'] ?? null ) ) {
+			$inherited_font_size = Styles_Helper::get_static_font_size( $parsed_block['email_attrs']['font-size'] );
+			if ( null !== $inherited_font_size ) {
+				$additional_styles['font-size'] = $inherited_font_size;
+			}
 		}
 
 		$additional_styles['text-align'] = $rendering_context->get_default_text_align();

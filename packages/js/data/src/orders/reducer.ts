@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { Reducer } from 'redux';
-
-/**
  * Internal dependencies
  */
 import TYPES from './action-types';
@@ -23,15 +18,15 @@ export type OrdersState = {
 	data: Record< number, PartialOrder >;
 };
 
-const reducer: Reducer< OrdersState, Actions > = (
-	state = {
+const reducer = (
+	state: OrdersState = {
 		orders: {},
 		ordersCount: {},
 		errors: {},
 		data: {},
 	},
-	payload
-) => {
+	payload: Actions
+): OrdersState => {
 	if ( payload && 'type' in payload ) {
 		switch ( payload.type ) {
 			case TYPES.GET_ORDER_SUCCESS:

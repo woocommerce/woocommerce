@@ -64,11 +64,6 @@ class Checkout extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 
-		// A test registers a CheckoutMock block type, and the block type registry outlives a test.
-		if ( \WP_Block_Type_Registry::get_instance()->is_registered( 'woocommerce/checkout-mock' ) ) {
-			\WP_Block_Type_Registry::get_instance()->unregister( 'woocommerce/checkout-mock' );
-		}
-
 		// A test sets an admin screen so is_admin() is true.
 		unset( $GLOBALS['current_screen'] );
 	}
