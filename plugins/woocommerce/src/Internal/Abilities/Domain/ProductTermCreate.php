@@ -123,13 +123,16 @@ class ProductTermCreate extends AbstractDomainAbility implements AbilityDefiniti
 	 * @return array
 	 */
 	private static function get_input_schema(): array {
+		$properties                        = self::get_term_write_properties();
+		$properties['slug']['description'] = __( 'Defaults to one made from the name.', 'woocommerce' );
+
 		return array(
 			'type'                 => 'object',
 			'properties'           => array_merge(
 				array(
 					'taxonomy' => self::get_taxonomy_input_schema( __( 'Product taxonomy: product_cat, product_tag, product_brand, or the slug of a global attribute from product-attributes-query.', 'woocommerce' ) ),
 				),
-				self::get_term_write_properties()
+				$properties
 			),
 			'required'             => array( 'taxonomy', 'name' ),
 			'additionalProperties' => false,

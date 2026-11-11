@@ -112,9 +112,12 @@ class ProductTermUpdate extends AbstractDomainAbility implements AbilityDefiniti
 			return $error;
 		}
 
-		$args = array( 'parent' => $parent );
+		$args = array();
 		if ( isset( $input['name'] ) ) {
 			$args['name'] = $name;
+		}
+		if ( isset( $input['parent'] ) ) {
+			$args['parent'] = $parent;
 		}
 		if ( null !== $slug ) {
 			$args['slug'] = $slug;

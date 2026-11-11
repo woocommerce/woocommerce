@@ -73,9 +73,8 @@ trait ProductTermAbilityTrait {
 				'minLength' => 1,
 			),
 			'slug'        => array(
-				'description' => __( 'Defaults to one made from the name.', 'woocommerce' ),
-				'type'        => 'string',
-				'minLength'   => 1,
+				'type'      => 'string',
+				'minLength' => 1,
 			),
 			'parent'      => array(
 				'description' => __( 'Parent term ID, for categories and brands only. Zero makes a top-level term.', 'woocommerce' ),
