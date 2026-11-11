@@ -219,8 +219,8 @@ class CartSelectShippingRate extends ControllerTestCase {
 	public function test_changing_shipping_rate_updates_cart_totals_and_fires_action(): void {
 		$second = 'flat_rate:' . $this->instances[1];
 
-		$this->assertSame( '5.00', WC()->cart->get_shipping_total() );
-		$this->assertSame( '15.00', WC()->cart->get_total( 'edit' ) );
+		$this->assertSame( 5.0, (float) WC()->cart->get_shipping_total() );
+		$this->assertSame( 15.0, (float) WC()->cart->get_total( 'edit' ) );
 
 		$action_fired        = false;
 		$captured_package_id = null;
