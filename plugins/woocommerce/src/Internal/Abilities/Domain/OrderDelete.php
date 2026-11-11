@@ -180,7 +180,7 @@ class OrderDelete extends ActionableAbility {
 	}
 
 	/**
-	 * Delete or trash the order. The data store removes or trashes its refunds with it.
+	 * Delete or trash the order. A forced delete removes its refunds too.
 	 *
 	 * @param \WC_Order $subject Order to delete.
 	 * @return null|\WP_Error

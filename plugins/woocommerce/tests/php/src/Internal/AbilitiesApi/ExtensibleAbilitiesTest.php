@@ -3247,6 +3247,65 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should restore a trashed or deleted order and its refund when a sync refuses, with HPOS and with posts storage, with and without sync.
+	 * @testWith [true, false]
+	 *           [true, true]
+	 *           [false, false]
+	 *           [false, true]
+	 *
+	 * @param bool $hpos Whether HPOS is on.
+	 * @param bool $sync Whether HPOS and posts storage sync.
+	 */
+	public function test_a_sync_refusal_restores_a_removed_order( bool $hpos, bool $sync ): void {
+		$original = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->toggle_cot_feature_and_usage( $hpos );
+		if ( $sync ) {
+			$this->enable_cot_sync();
+		} else {
+			$this->disable_cot_sync();
+		}
+
+		try {
+			$order  = \WC_Helper_Order::create_order();
+			$status = $order->get_status();
+			$refund = wc_create_refund(
+				array(
+					'order_id' => $order->get_id(),
+					'amount'   => 1,
+				)
+			);
+			$this->register_sync(
+				'order',
+				'test-ext',
+				static fn() => new \WP_Error( 'test_ledger_down', 'Ledger is down.' )
+			);
+			$this->reset_registries();
+			AbilitiesLoader::init_extensions();
+
+			$trash = $this->run_ability_response( 'woocommerce/order-delete', array( 'id' => $order->get_id() ) );
+			$after = wc_get_order( $order->get_id() );
+			$force = $this->run_ability_response(
+				'woocommerce/order-delete',
+				array(
+					'id'    => $order->get_id(),
+					'force' => true,
+				)
+			);
+
+			$this->assertSame( 400, $trash->get_status() );
+			$this->assertSame( $status, $after->get_status(), 'A refused trash should leave the order out of the trash.' );
+			$this->assertSame( 400, $force->get_status() );
+			$this->assertInstanceOf( \WC_Order::class, wc_get_order( $order->get_id() ), 'A refused delete should keep the order.' );
+			$this->assertInstanceOf( \WC_Order_Refund::class, wc_get_order( $refund->get_id() ), 'A refused delete should keep the refund.' );
+		} finally {
+			remove_all_filters( 'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
+			$this->toggle_cot_feature_and_usage( $original );
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		}
+	}
+
+	/**
 	 * @testdox Should return the stored slug from product-create, for the product and its variations.
 	 */
 	public function test_product_create_returns_the_stored_slug(): void {

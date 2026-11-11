@@ -157,8 +157,12 @@ class OrderDeleteTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should report a failure when another plugin stops the delete.
+	 *
+	 * @dataProvider storage_modes
+	 * @param bool $hpos Whether to use the custom orders table.
 	 */
-	public function test_reports_a_delete_that_did_not_happen(): void {
+	public function test_reports_a_delete_that_did_not_happen( bool $hpos ): void {
+		$this->use_storage( $hpos );
 		$order = OrderHelper::create_order();
 		add_filter( 'woocommerce_pre_delete_order', '__return_false' );
 
