@@ -83,7 +83,7 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 			array(
 				'taxonomy'    => $taxonomy,
 				'name'        => 'Tom & Jerry',
-				'description' => 'Cartoon <em>classics</em><script>x</script>',
+				'description' => 'Cartoon <em onclick="x()">classics</em>',
 			)
 		);
 
@@ -91,7 +91,7 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 		$term = $result['term'];
 		$this->assertSame( 'Tom & Jerry', $term['name'] );
 		$this->assertSame( 'tom-jerry', $term['slug'] );
-		$this->assertSame( 'Cartoon <em>classics</em>x', $term['description'] );
+		$this->assertSame( 'Cartoon <em>classics</em>', $term['description'] );
 		$this->assertSame( 0, $term['count'] );
 		$query = ( new Ability( ProductTermsQuery::get_name(), ProductTermsQuery::get_registration_args() ) )->execute(
 			array(
