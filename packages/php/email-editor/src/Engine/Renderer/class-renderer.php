@@ -262,8 +262,9 @@ class Renderer {
 		$result = Html2Text::convert(
 			(string) $template,
 			array(
-				'ignore_errors' => true,
-				'mark_bold'     => true,
+				'ignore_errors'    => true,
+				'mark_bold'        => true,
+				'tag_link_targets' => true,
 			)
 		);
 		if ( ! $result ) {

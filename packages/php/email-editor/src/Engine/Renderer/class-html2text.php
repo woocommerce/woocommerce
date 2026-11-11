@@ -35,10 +35,11 @@ class Html2Text {
 	 */
 	public static function default_options(): array {
 		return array(
-			'ignore_errors' => false,
-			'drop_links'    => false,
-			'char_set'      => 'auto',
-			'mark_bold'     => false,
+			'ignore_errors'    => false,
+			'drop_links'       => false,
+			'char_set'         => 'auto',
+			'mark_bold'        => false,
+			'tag_link_targets' => false,
 		);
 	}
 
@@ -549,9 +550,9 @@ class Html2Text {
 
 				$output = trim( $output );
 
-				// A personalization tag used as the whole URL is kept as the target so it can be personalized
-				// later. A link without text is dropped rather than leaving the bare tag behind.
-				$tag_href = $node instanceof \DOMElement ? $node->getAttribute( 'data-link-href' ) : '';
+				// With tag_link_targets, a personalization tag used as the whole URL is kept as the target so it can
+				// be personalized later. A link without text is dropped rather than leaving the bare tag behind.
+				$tag_href = $options['tag_link_targets'] && $node instanceof \DOMElement ? $node->getAttribute( 'data-link-href' ) : '';
 				if ( '' !== $tag_href ) {
 					$href = $output ? $tag_href : '';
 				}
