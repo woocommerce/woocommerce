@@ -46,6 +46,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/orders-query',
 		'woocommerce/order-send-email',
 		'woocommerce/order-create',
+		'woocommerce/order-delete',
 		'woocommerce/order-update',
 		'woocommerce/order-update-status',
 		'woocommerce/order-add-note',
@@ -349,6 +350,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => false,
+			),
+			'woocommerce/order-delete'             => array(
+				'readonly'    => false,
+				'idempotent'  => true,
+				'destructive' => true,
 			),
 			'woocommerce/order-update'             => array(
 				'readonly'    => false,
@@ -1099,6 +1105,12 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'woocommerce/order-create',
 				array( 'line_items' => array( array( 'product_id' => 1 ) ) ),
 			),
+			'order-delete'             => array(
+				'woocommerce/order-delete',
+				array(
+					'id' => 1,
+				),
+			),
 			'order-update'             => array(
 				'woocommerce/order-update',
 				array(
@@ -1274,6 +1286,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'woocommerce/order-send-email'    => array(
 				'id'    => $order->get_id(),
 				'email' => 'invoice',
+			),
+			'woocommerce/order-delete'        => array(
+				'id' => $order->get_id(),
 			),
 			'woocommerce/order-update'        => array(
 				'id'       => $order->get_id(),
@@ -1452,6 +1467,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'woocommerce/order-send-email'    => array(
 				'id'    => $order_id,
 				'email' => 'invoice',
+			),
+			'woocommerce/order-delete'        => array(
+				'id' => $order_id,
 			),
 			'woocommerce/order-update'        => array(
 				'id'       => $order_id,
@@ -1807,6 +1825,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'id'    => -123,
 					'email' => 'invoice',
 				),
+			),
+			'order-delete'          => array(
+				'woocommerce/order-delete',
+				array( 'id' => -123 ),
 			),
 			'order-update'          => array(
 				'woocommerce/order-update',

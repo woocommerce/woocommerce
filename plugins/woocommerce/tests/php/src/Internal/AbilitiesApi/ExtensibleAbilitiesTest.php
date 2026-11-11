@@ -3177,6 +3177,76 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should let an order validator refuse a trash and a permanent delete, and give the syncs the removed order.
+	 */
+	public function test_a_validator_can_refuse_deleting_an_order(): void {
+		$order    = \WC_Helper_Order::create_order();
+		$order_id = $order->get_id();
+		$refuse   = true;
+		$seen     = array();
+		$synced   = array();
+		$this->register_validator(
+			'order',
+			'test-ext',
+			static function ( \WC_Order $order, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse ) {
+				$seen[] = array( $order->get_id(), $ability->get_name(), $context['deleting'] );
+				return $refuse ? new \WP_Error( 'test_cancel_first', 'Cancel it first.' ) : null;
+			}
+		);
+		$this->register_sync(
+			'order',
+			'test-ext',
+			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$synced ) {
+				unset( $ability );
+				$synced[] = array(
+					count( $saved ),
+					array_map( static fn( \WC_Order $order ) => $order->get_id(), $context['trashed'] ),
+					array_map( static fn( \WC_Order $order ) => $order->get_id(), $context['deleted'] ),
+				);
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+
+		$refused_trash  = $this->run_ability_response( 'woocommerce/order-delete', array( 'id' => $order_id ) );
+		$refused_delete = $this->run_ability_response(
+			'woocommerce/order-delete',
+			array(
+				'id'    => $order_id,
+				'force' => true,
+			)
+		);
+		$after_refusals = wc_get_order( $order_id )->get_status();
+		$refuse         = false;
+		$trashed        = $this->run_ability( 'woocommerce/order-delete', array( 'id' => $order_id ) );
+		$deleted        = $this->run_ability(
+			'woocommerce/order-delete',
+			array(
+				'id'    => $order_id,
+				'force' => true,
+			)
+		);
+
+		foreach ( array( $refused_trash, $refused_delete ) as $refused ) {
+			$this->assertSame( 400, $refused->get_status() );
+			$this->assertSame( 'test-ext:test_cancel_first', $refused->get_data()['code'] );
+		}
+		$this->assertNotSame( 'trash', $after_refusals, 'A refused call should leave the order where it was.' );
+		$this->assertSame( array( $order_id, 'woocommerce/order-delete', true ), $seen[0] );
+		$this->assertSame( 'trash', $trashed['status'] );
+		$this->assertSame( 'deleted', $deleted['status'] );
+		$this->assertFalse( wc_get_order( $order_id ) );
+		$this->assertSame(
+			array(
+				array( 0, array( $order_id ), array() ),
+				array( 0, array(), array( $order_id ) ),
+			),
+			$synced,
+			'The syncs should see the removed order, with its ID, and no saved object.'
+		);
+	}
+
+	/**
 	 * @testdox Should return the stored slug from product-create, for the product and its variations.
 	 */
 	public function test_product_create_returns_the_stored_slug(): void {
