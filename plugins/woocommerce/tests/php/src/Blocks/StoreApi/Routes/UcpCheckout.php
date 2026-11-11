@@ -569,6 +569,20 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Complete makes no guest order on a store that requires an account to check out.
+	 */
+	public function test_complete_refuses_a_guest_when_an_account_is_required(): void {
+		$created = $this->create_ready_checkout();
+
+		add_filter( 'woocommerce_checkout_registration_required', '__return_true' );
+		$response = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' );
+		remove_filter( 'woocommerce_checkout_registration_required', '__return_true' );
+
+		$this->assertSame( 'login_required', $response->get_data()['messages'][0]['code'] );
+		$this->assertEmpty( WC()->session->get( 'store_api_draft_order' ) );
+	}
+
+	/**
 	 * @testdox Completing again after the cart changed outside the checkout routes cancels the order first handed off.
 	 */
 	public function test_complete_cancels_the_order_a_changed_cart_left_behind(): void {
