@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Fragment } from '@wordpress/element';
+import { Fragment, useLayoutEffect, useRef } from '@wordpress/element';
 import { useEffectOnce } from 'usehooks-ts';
 import {
 	useCheckoutAddress,
@@ -16,7 +16,11 @@ import {
 import Noninteractive from '@woocommerce/base-components/noninteractive';
 import type { BillingAddress } from '@woocommerce/settings';
 import { getSetting } from '@woocommerce/settings';
-import { emptyAddressFields } from '@woocommerce/base-utils';
+import {
+	animateCollapse,
+	collapseCopy,
+	emptyAddressFields,
+} from '@woocommerce/base-utils';
 import type { CartResponseBillingAddress } from '@woocommerce/types';
 
 /**
@@ -85,6 +89,21 @@ const Block = (): JSX.Element => {
 		}
 	} );
 
+	// Whether the last change of the checkbox grows or collapses the billing section. A key press and page load apply
+	// immediately.
+	const animateBillingRef = useRef( false );
+	const checkboxRef = useRef< HTMLInputElement >( null );
+	useLayoutEffect( () => {
+		if ( ! useShippingAsBilling ) {
+			animateCollapse(
+				document.getElementById( 'billing-fields' ),
+				true,
+				animateBillingRef.current
+			);
+		}
+		animateBillingRef.current = false;
+	}, [ useShippingAsBilling ] );
+
 	const WrapperComponent = isEditor ? Noninteractive : Fragment;
 	const noticeContext = useShippingAsBilling
 		? [ noticeContexts.SHIPPING_ADDRESS, noticeContexts.BILLING_ADDRESS ]
@@ -97,10 +116,20 @@ const Block = (): JSX.Element => {
 				<CustomerAddress />
 			</WrapperComponent>
 			<CheckboxControl
+				ref={ checkboxRef }
 				className="wc-block-checkout__use-address-for-billing"
 				label={ __( 'Use same address for billing', 'woocommerce' ) }
 				checked={ useShippingAsBilling }
 				onChange={ ( checked: boolean ) => {
+					// A key press leaves focus visible on the checkbox. A click does not.
+					animateBillingRef.current =
+						! checkboxRef.current?.matches( ':focus-visible' );
+					// The billing form unmounts at once, so that its fields stop counting. A copy collapses instead.
+					if ( checked && animateBillingRef.current ) {
+						collapseCopy(
+							document.getElementById( 'billing-fields' )
+						);
+					}
 					setUseShippingAsBilling( checked );
 					if ( checked ) {
 						syncBillingWithShipping();
