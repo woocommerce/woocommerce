@@ -551,7 +551,7 @@ class SiteHealth {
 						? __( 'The database did not return row estimates for the order tables, so WooCommerce could not check the order metadata table size.', 'woocommerce' )
 						: sprintf(
 							/* translators: 1: Estimated number of order metadata rows. 2: Estimated number of order rows. */
-							__( 'The estimated row counts are %1$s for the order metadata table and %2$s for the orders table. These are estimates and may be out of date. Excess order metadata can slow down checkout and order management. Ask your hosting provider or support team to investigate before deleting data.', 'woocommerce' ),
+							__( 'The row counts are %1$s for the order metadata table and %2$s for the orders table. These are estimates and may be out of date. Excess order metadata can slow down checkout and order management. Ask your hosting provider or support team to investigate before deleting data.', 'woocommerce' ),
 							number_format_i18n( $context['meta_rows'] ),
 							number_format_i18n( $context['order_rows'] )
 						),
