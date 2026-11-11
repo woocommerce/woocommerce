@@ -1,6 +1,6 @@
 # Motion
 
-Motion in the Cart and Checkout blocks follows the rules below. It builds on the [WordPress Design System](https://github.com/WordPress/gutenberg/tree/trunk/packages/theme) (WPDS): the same tokens, and the same way of handling reduced motion, plus a few Woo rules where WPDS doesn't cover something.
+Motion in WooCommerce blocks follows the rules below. It started with the Cart and Checkout blocks, so most examples come from them. It builds on the [WordPress Design System](https://github.com/WordPress/gutenberg/tree/trunk/packages/theme) (WPDS): the same tokens, and the same way of handling reduced motion, plus a few Woo rules where WPDS doesn't cover something.
 
 ## Tokens
 
@@ -65,7 +65,7 @@ Reduced motion means nothing moves, not that nothing changes: fades and colour c
 - Movement that only adds feel (press scale, success pulse, the Ship/Pickup indicator, price rolls, content moving to make room) has no reduced variant.
 - The spinner shows still, half way through a turn, and the skeleton shimmer stops.
 
-Stylelint checks this (`woocommerce/motion-safe`), and that durations use tokens and transitions never use `all`, in the Cart and Checkout stylesheets and the components they share. It accepts `motion-state()`, `motion-hold()`, and the fade and hold keyframes outside `motion-safe`.
+Stylelint checks this (`woocommerce/motion-safe`), and that durations use tokens and transitions never use `all`, in the stylesheets of blocks that have adopted motion (Cart and Checkout so far) and the components they share. It accepts `motion-state()`, `motion-hold()`, and the fade and hold keyframes outside `motion-safe`.
 
 ## General rules
 
@@ -73,7 +73,7 @@ Stylelint checks this (`woocommerce/motion-safe`), and that durations use tokens
 - Colour, background, border colour, opacity, and `box-shadow` focus rings may transition over `--wpds-motion-duration-md` with `--wpds-motion-easing-subtle`. WPDS uses 100ms, which is too quick to see.
 - Don't use `linear` easing, even where WPDS does: it makes UI motion feel mechanical. Use one of the easing tokens. The exception is constant motion, such as the spinner's turn and the skeleton shimmer, which is what `linear` is for.
 - List the properties you transition.
-- Scope new effects to `.wp-block-woocommerce-cart` and `.wp-block-woocommerce-checkout`.
+- Scope new effects to the block that uses them, such as `.wp-block-woocommerce-cart`, so they don't reach blocks that haven't adopted motion.
 - **Interrupted motion turns around.** When something changes direction part way through, such as a panel closed while it's still opening, it continues from where it is. Transitions do this on their own; motion run from JavaScript reads where it had got to and continues from there. Nothing blocks clicks while it animates.
 - **Keyboard changes apply at once.** Changes made with the keyboard, such as arrowing through options, are repeated quickly, so sections the shopper shows, hides or swaps, and the Ship/Pickup indicator, skip after keyboard input, and a radio group's highlight and dot change at once while one of its options has keyboard focus.
 - **Rest on whole pixels.** Anything that stays transformed at rest, such as a rolling price's digit columns, moves in whole-pixel steps (`round(1lh, 1px)`), and no animation keeps its end value applied except on content that's about to unmount. Fractional resting positions leave digits and edges visibly off on some screens.

@@ -1,6 +1,6 @@
 # Verifying motion
 
-Unit tests can't show motion: Jest has no Web Animations API, layout or paint. Prove motion in a real browser, on a store with the block Cart and Checkout pages, several simple products, a coupon, Free shipping and Flat rate, Local pickup, and a tax rate that applies to only some addresses. Use desktop (1440px) and phone (390px) widths. Chrome is the baseline; Safari and Firefox are worth a pass for anything scripted.
+Unit tests can't show motion: Jest has no Web Animations API, layout or paint. Prove motion in a real browser, on pages that use the blocks you changed. For Cart and Checkout, use a store with the block Cart and Checkout pages, several simple products, a coupon, Free shipping and Flat rate, Local pickup, and a tax rate that applies to only some addresses. Use desktop (1440px) and phone (390px) widths. Chrome is the baseline; Safari and Firefox are worth a pass for anything scripted.
 
 ## Static checks
 
@@ -23,7 +23,7 @@ From `plugins/woocommerce/client/blocks`:
 
 ## The settled check
 
-After each interaction, wait about 1.3 seconds, then check that nothing is left behind inside `.wp-block-woocommerce-cart` and `.wp-block-woocommerce-checkout`:
+After each interaction, wait about 1.3 seconds, then check that nothing is left behind inside the blocks you changed (for example `.wp-block-woocommerce-cart`):
 
 - no attributes your motion set while it ran, such as `[data-wc-entering]` or `[data-wc-swapping]`,
 - no stand-in copies of removed content,
