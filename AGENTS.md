@@ -30,7 +30,6 @@ The `.ai/skills/` directory contains procedural HOW-TO instructions:
 - **`woocommerce-markdown`** - Markdown writing and editing guidelines
 - **`woocommerce-git-commit`** - Commit changes with conventional messages and smart grouping
 - **`woocommerce-git-draft-pr`** - Create draft PRs with proper template, changelog, and milestone handling
-- **`woocommerce-blocks-motion`** - Adding or reviewing motion in WooCommerce blocks and the components they share
 - **`woocommerce-email-editor`** - Email editor development setup and Mailpit configuration
 - **`woocommerce-performance`** - Performance guardrails. **Invoke when writing or reviewing PHP code.**
 
@@ -302,6 +301,10 @@ pnpm --filter=@woocommerce/theme-cli validate --all
 See [the theme CLI README](tools/theme-cli/README.md) and the selected theme's README for setup details. Validation lints CSS, Markdown, and JavaScript with wp-scripts, then runs the official WordPress Theme Check command in a separate Docker environment.
 
 ## Block Development
+
+### Motion
+
+Before adding or changing motion (transitions, animations, layout changes) in blocks or the components they share, read the [Motion guide](plugins/woocommerce/client/blocks/docs/contributors/motion.md). It has the tokens, rules, techniques, traps, and how to test motion.
 
 ### Block Styling
 
