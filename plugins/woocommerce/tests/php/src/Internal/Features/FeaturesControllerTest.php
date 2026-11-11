@@ -185,6 +185,15 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The removed feature registration method emits a deprecation notice.
+	 */
+	public function test_register_additional_features_is_deprecated(): void {
+		$this->setExpectedDeprecated( FeaturesController::class . '::register_additional_features' );
+
+		$this->sut->register_additional_features();
+	}
+
+	/**
 	 * @testdox 'get_features' returns existing non-experimental features without enabling information if requested to do so.
 	 */
 	public function test_get_features_not_including_experimental_not_including_values() {

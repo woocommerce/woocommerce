@@ -791,6 +791,7 @@ class FeaturesController {
 	 * @return void
 	 */
 	public function register_additional_features() {
+		wc_deprecated_function( __METHOD__, '11.4.0' );
 	}
 
 	/**
