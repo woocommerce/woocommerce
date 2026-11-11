@@ -790,16 +790,6 @@ class CartController {
 			}
 		}
 
-		$conflicting_coupon = $this->get_cart_instance()->get_conflicting_individual_use_coupon();
-		if ( $conflicting_coupon ) {
-			$errors[] = new WP_Error(
-				'woocommerce_rest_cart_coupon_error',
-				wp_strip_all_tags(
-					$conflicting_coupon->get_coupon_error( \WC_Coupon::E_WC_COUPON_ALREADY_APPLIED_INDIV_USE_ONLY )
-				)
-			);
-		}
-
 		if ( ! empty( $errors ) ) {
 
 			$error = new WP_Error();

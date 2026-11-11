@@ -436,9 +436,9 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Store API cart validation rejects individual-use conflicts left in a saved cart.
+	 * @testdox Store API cart validation removes individual-use conflicts left in a saved cart.
 	 */
-	public function test_validate_cart_coupons_blocks_individual_use_after_setting_change(): void {
+	public function test_validate_cart_coupons_removes_individual_use_conflict_after_setting_change(): void {
 		$fixtures = new FixtureData();
 		$product  = $fixtures->get_simple_product(
 			array(
@@ -465,10 +465,10 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 			$this->fail( 'Expected InvalidCartException for an individual-use coupon conflict.' );
 		} catch ( \Automattic\WooCommerce\StoreApi\Exceptions\InvalidCartException $exception ) {
 			$this->assertSame( 'woocommerce_coupons_error', $exception->getErrorCode() );
-			$this->assertStringContainsString( 'combo1', $exception->getError()->get_error_message() );
+			$this->assertStringContainsString( 'store-api-combo2', $exception->getError()->get_error_message() );
 		}
 
-		$this->assertCount( 2, wc()->cart->get_applied_coupons() );
+		$this->assertSame( array( 'store-api-combo1' ), array_values( wc()->cart->get_applied_coupons() ) );
 		wc()->cart->empty_cart();
 	}
 
@@ -505,7 +505,6 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 		$controller = new CartController();
 		$controller->validate_cart_coupons();
 
-		$this->assertNull( wc()->cart->get_conflicting_individual_use_coupon() );
 		$this->assertCount( 2, wc()->cart->get_applied_coupons() );
 
 		remove_filter( 'woocommerce_apply_individual_use_coupon', $retain_filter );

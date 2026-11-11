@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Block checkout when a saved cart holds a conflicting individual-use coupon combination, while leaving the codes applied so the shopper can remove them.
+Revalidate individual-use coupon conflicts via WC_Discounts::is_coupon_valid so cart and Store API checks remove conflicting codes the same way as expired coupons.
