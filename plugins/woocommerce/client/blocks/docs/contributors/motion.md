@@ -65,7 +65,7 @@ Reduced motion means nothing moves, not that nothing changes: fades and colour c
 - Movement that only adds feel (press scale, success pulse, the Ship/Pickup indicator, price rolls, content moving to make room) has no reduced variant.
 - The spinner shows still, half way through a turn, and the skeleton shimmer stops.
 
-Stylelint checks this (`woocommerce/motion-safe`), and that durations use tokens and transitions never use `all`, in the stylesheets of blocks that have adopted motion (Cart and Checkout so far) and the components they share. It accepts `motion-state()`, `motion-hold()`, and the fade and hold keyframes outside `motion-safe`.
+Stylelint checks this (`woocommerce/motion-safe`), and that durations use tokens and transitions never use `all`, in the stylesheets of blocks that have adopted motion (Cart and Checkout so far) and the components they share. It accepts `motion-state()`, `motion-hold()`, and the fade and hold keyframes outside `motion-safe`. When a block adopts motion, add its stylesheets to the `overrides` `files` list in `.stylelintrc.json`.
 
 ## General rules
 
@@ -74,8 +74,11 @@ Stylelint checks this (`woocommerce/motion-safe`), and that durations use tokens
 - Don't use `linear` easing, even where WPDS does: it makes UI motion feel mechanical. Use one of the easing tokens. The exception is constant motion, such as the spinner's turn and the skeleton shimmer, which is what `linear` is for.
 - List the properties you transition.
 - Scope new effects to the block that uses them, such as `.wp-block-woocommerce-cart`, so they don't reach blocks that haven't adopted motion.
+- Components in `packages/public-api/blocks-components` are public: add optional props only, keep class names themes may target, and note any change to their markup or styles in the PR.
+- **Animate what the shopper did.** A click or tap animates. Content that loads with the page, or a section that renders into place as data arrives, appears at once. Changes that loading causes later, such as a totals row, notice or error, can animate.
 - **Interrupted motion turns around.** When something changes direction part way through, such as a panel closed while it's still opening, it continues from where it is. Transitions do this on their own; motion run from JavaScript reads where it had got to and continues from there. Nothing blocks clicks while it animates.
 - **Keyboard changes apply at once.** Changes made with the keyboard, such as arrowing through options, are repeated quickly, so sections the shopper shows, hides or swaps, and the Ship/Pickup indicator, skip after keyboard input, and a radio group's highlight and dot change at once while one of its options has keyboard focus.
+- **Leave nothing behind.** Once motion settles, the page is as it would be without motion: no extra elements, inline styles, attributes or held animations.
 - **Rest on whole pixels.** Anything that stays transformed at rest, such as a rolling price's digit columns, moves in whole-pixel steps (`round(1lh, 1px)`), and no animation keeps its end value applied except on content that's about to unmount. Fractional resting positions leave digits and edges visibly off on some screens.
 
 ## Rules
@@ -118,6 +121,6 @@ The numbers match the original motion rules, which code comments cite.
 
 ## Exceptions
 
-- **Content that makes room animates its size**: panels, the mobile order summary, totals rows, notices, field errors, the sections the shopper shows or swaps, and the cart's height as a row goes. It's real layout, so themes' borders, spacing and extension markup move with it, and it turns around when interrupted. It runs for 300ms in and 200ms out, on small areas; cart rows can't change size, so they slide with `transform` instead.
+- **Content that makes room animates its size**: panels, the mobile order summary, totals rows, notices, field errors, the sections the shopper shows or swaps, and the cart's height as a row goes. It's real layout, so themes' borders, spacing and extension markup move with it, and it turns around when interrupted. Same-document view transitions were tried for this and dropped: they block clicks while they run, can't turn around, and distort bordered boxes. It runs for 300ms in and 200ms out, on small areas; cart rows can't change size, so they slide with `transform` instead.
 - **Outline focus rings stay instant:** a transparent outline would show in Windows high contrast mode.
 - **Floating labels animate `top`**, because themes and extensions position them with `top`.
