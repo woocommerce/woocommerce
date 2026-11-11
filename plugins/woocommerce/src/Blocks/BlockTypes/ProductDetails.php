@@ -96,7 +96,7 @@ class ProductDetails extends AbstractBlock {
 	 *
 	 * @internal
 	 */
-	public function register_upsell_migration_setting(): void {
+	public function register_upsell_migration_setting() {
 		register_setting(
 			'options',
 			self::UPSELLS_MIGRATED_OPTION,
