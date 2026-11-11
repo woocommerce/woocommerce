@@ -108,34 +108,14 @@ class CheckoutSessionsById extends AbstractCheckoutRoute {
 			return $state;
 		}
 
-		$before = $this->hand_off_fingerprint();
-		$error  = $this->update_line_items( $request ) ?? $this->update_customer( $request );
+		$error = $this->update_line_items( $request ) ?? $this->update_customer( $request );
 
-		if ( $this->hand_off_fingerprint() !== $before ) {
+		if ( ( $state['fingerprint'] ?? '' ) !== $this->hand_off_fingerprint() ) {
 			$state = $this->cancel_handed_off_order( $state, __( 'UCP checkout session changed after payment was handed off.', 'woocommerce' ) );
 			unset( $state['status'], $state['continue_url'] );
 			$this->save_checkout_state( $state );
 		}
 
 		return $error ?? $this->checkout_response( $this->route_cart_id( $request ), $state );
-	}
-
-	/**
-	 * Fingerprint what a handed-off order was built from: cart contents and total, addresses and shipping choice.
-	 *
-	 * @return string
-	 */
-	private function hand_off_fingerprint(): string {
-		return hash(
-			'sha256',
-			(string) wp_json_encode(
-				array(
-					$this->cart_controller->get_cart_instance()->get_cart_hash(),
-					WC()->customer->get_billing(),
-					WC()->customer->get_shipping(),
-					WC()->session->get( 'chosen_shipping_methods' ),
-				)
-			)
-		);
 	}
 }

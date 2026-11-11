@@ -40,7 +40,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	const CANCELLED_SESSION_KEY = 'ucp_cart_cancelled';
 
 	/**
-	 * Session key holding the checkout state: `created_at`, and once set `status`, `continue_url` and `order_id`.
+	 * Session key holding the checkout state: `created_at`, and once set `status`, `continue_url`, `order_id` and `fingerprint`.
 	 *
 	 * Its presence is what makes a cart session a checkout, so the cart routes read it too.
 	 */

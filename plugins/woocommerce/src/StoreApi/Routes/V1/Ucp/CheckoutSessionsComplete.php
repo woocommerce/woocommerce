@@ -144,6 +144,7 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 				'status'       => CheckoutMapper::STATUS_REQUIRES_ESCALATION,
 				'continue_url' => $order->get_checkout_payment_url(),
 				'order_id'     => $order->get_id(),
+				'fingerprint'  => $this->hand_off_fingerprint(),
 			)
 		);
 		$this->save_checkout_state( $state );

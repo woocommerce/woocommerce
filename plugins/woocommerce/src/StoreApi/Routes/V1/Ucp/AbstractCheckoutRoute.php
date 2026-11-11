@@ -116,7 +116,7 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	 *
 	 * @param array<string, mixed> $state Checkout state.
 	 * @param string               $note Order note explaining the cancellation.
-	 * @return array<string, mixed> The state without `order_id`.
+	 * @return array<string, mixed> The state without `order_id` and `fingerprint`.
 	 */
 	protected function cancel_handed_off_order( array $state, string $note ): array {
 		$order = empty( $state['order_id'] ) ? null : wc_get_order( (int) $state['order_id'] );
@@ -130,9 +130,28 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 			}
 		}
 
-		unset( $state['order_id'] );
+		unset( $state['order_id'], $state['fingerprint'] );
 
 		return $state;
+	}
+
+	/**
+	 * Fingerprint what a handed-off order is built from: cart contents and total, addresses and shipping choice.
+	 *
+	 * @return string
+	 */
+	protected function hand_off_fingerprint(): string {
+		return hash(
+			'sha256',
+			(string) wp_json_encode(
+				array(
+					$this->cart_controller->get_cart_instance()->get_cart_hash(),
+					WC()->customer->get_billing(),
+					WC()->customer->get_shipping(),
+					WC()->session->get( 'chosen_shipping_methods' ),
+				)
+			)
+		);
 	}
 
 	/**

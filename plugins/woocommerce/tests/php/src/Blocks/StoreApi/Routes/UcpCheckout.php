@@ -289,6 +289,7 @@ class UcpCheckout extends ControllerTestCase {
 		$order_id  = (int) WC()->session->get( 'store_api_draft_order' );
 
 		foreach ( array( array(), array( 'line_items' => array( $this->line_item( 0, 1 ) ) ) ) as $body ) {
+			$this->simulate_new_request( $created['id'] );
 			$same = $this->request( 'PUT', $path, $body )->get_data();
 			$this->assertSame( $completed['continue_url'], $same['continue_url'] ?? null );
 			$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::PENDING ) );
@@ -306,6 +307,14 @@ class UcpCheckout extends ControllerTestCase {
 		$this->assertSame( 400, $refused->get_status() );
 		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::CANCELLED ), 'The lines changed, so the order for the old ones must not stay payable.' );
 		$this->assertArrayNotHasKey( 'continue_url', $this->request( 'GET', $path )->get_data() );
+
+		// A cart changed through the Store API after a hand-off makes it stale before the update arrives.
+		$this->request( 'POST', $path . '/complete' );
+		$stale = (int) WC()->session->get( 'store_api_draft_order' );
+		WC()->cart->set_quantity( (string) array_key_first( WC()->cart->get_cart() ), 3 );
+
+		$this->assertArrayNotHasKey( 'continue_url', $this->request( 'PUT', $path, array() )->get_data() );
+		$this->assertTrue( wc_get_order( $stale )->has_status( OrderStatus::CANCELLED ) );
 	}
 
 	/**
