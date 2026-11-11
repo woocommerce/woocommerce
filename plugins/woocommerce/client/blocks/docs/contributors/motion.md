@@ -1,6 +1,6 @@
 # Motion
 
-This guide gives the rules for motion in WooCommerce blocks. Motion started in the Cart and Checkout blocks, so most examples come from them.
+This guide gives the rules for motion in WooCommerce blocks, how to add motion, and how to test it. Motion started in the Cart and Checkout blocks, so most examples come from them.
 
 The rules use the [WordPress Design System](https://github.com/WordPress/gutenberg/tree/trunk/packages/theme) (WPDS) motion tokens and its approach to reduced motion. Woo rules fill the gaps that WPDS does not cover.
 
@@ -152,3 +152,121 @@ The numbers match the original motion rules. Code comments use these numbers. So
 - **Content that makes space animates its size.** Examples are panels, notices, field errors, totals rows, and sections that the shopper shows or swaps. This is real layout, so theme borders, spacing, and extension markup move with it, and it turns around when interrupted. It runs for 300ms in and 200ms out. Table rows cannot change height, so they slide with `transform`. Same-document view transitions were tested for this and removed: they block clicks, they cannot turn around, and they distort boxes that have borders.
 - **Outline focus rings change immediately.** A transparent outline shows in Windows high contrast mode.
 - **Floating labels animate `top`**, because themes and extensions position them with `top`.
+
+## Add motion
+
+1. Write one sentence that describes the change: what changes on screen, and what causes it. The cause is the shopper, a key press, or data that loads.
+2. Select the technique from the table below, and read the rules that it gives.
+3. Use the helpers in the Helpers section. If no helper does the technique, write a small one in `assets/js/base/utils`, or in `assets/js/base/hooks` for a React hook. Add it to the Helpers section.
+4. Do the edge cases: reduced motion, keyboard input, interruption, content that loads late, and changes that occur at the same time.
+5. Test in a real browser (see Test motion). Write comments that tell why, not what, and give the rule number.
+
+### Techniques
+
+| Change | Technique | Rules |
+|---|---|---|
+| Color, background, border color, opacity, or focus ring | A state change transition, both ways | Durations |
+| An element dims while it is busy or disabled | Opacity decreases to half, and fades both ways | Durations |
+| The shopper presses a button | The button scales down a little while pressed | 4 |
+| A button shows a spinner while busy | The label fades out, and the spinner grows in | 18 |
+| A small icon, dot, or tick changes | It scales up from a smaller size and fades in. Icons also blur. | 18 |
+| Content appears in place, such as an empty state | It rises in and fades in | 1 |
+| The rows of a list appear | The same rise, staggered | 3 |
+| A detail of a row appears, such as a quantity badge | It settles one step after its row | 6 |
+| A small item goes, such as a chip | It stays in position while it fades and shrinks. Then it unmounts. | 15, 16 |
+| The shopper completes an action, such as a coupon | One pulse, only for the action that the shopper did | 8 |
+| A dropdown opens from a field | It slides from the field. It stays mounted while it closes. It turns around if it opens again. | 2 |
+| A toast or snackbar appears and goes | It rises 8px in and drops 4px out. The script waits for the animation to end. It does not use a fixed timeout. | 1, 15 |
+| A value replaces its loading skeleton | It fades in. It does not roll. | Skeleton reveal |
+| A price changes in place | Its digits roll. Its text stays the plain price for assistive technology. | Price roll |
+| Many skeletons are part of one update | They end together. The values change at that moment. | Skeleton reveal |
+| Content appears or goes and must move the content below, such as a panel, notice, field error, or totals row | It grows and collapses in the real layout. It stays mounted while it goes. | 17, Exceptions |
+| The shopper shows or hides a section, such as an address or payment fields | The new section grows in, and the old section collapses. A form that goes must stop being a form immediately (see Traps). | 17 |
+| The content of a box changes size later, such as a list that loads | The height of the box changes smoothly to the new size | 17 |
+| An element becomes a different view of itself, such as an address card that becomes its form | The two views crossfade while the height of the box changes smoothly | 20 |
+| A choice swaps a group of sections, such as Ship or Pickup | One change, one movement | 21 |
+| The selection moves to a different option | The selected style slides to the new option, and stretches along its path | 5, 9 |
+| A table row goes | It fades in its position, the rows below slide up, and the container height changes smoothly | 17, Exceptions |
+| A bar opens or closes, such as the mobile order summary | Its content grows and collapses. If it closes because the shopper scrolls past it, it closes immediately. | 17 |
+
+### Keep the change small
+
+- Change only what the motion needs. Do not rewrite how a component works, and do not add, remove, or replace dependencies. If the component already has a mechanism that can carry the motion, use it. For example, `react-transition-group` can end a transition when the animation ends, with `addEndListener`.
+- Do not add wrapper elements to the markup of a shared component. Themes and extensions can target that markup. Put the ref or class on an element that exists, or add an optional prop.
+- Do not change `pnpm-lock.yaml` or `package.json` in a motion change.
+
+### Traps
+
+Each of these traps caused a bug before.
+
+- **Each script bundle has its own copy of a module.** Cart, Checkout, and the shared components package each include `base-utils`. Thus, module state is not shared. Put state that bundles must share on `globalThis`.
+- **A cancelled or finished animation is not in progress.** To read the current position of an animation, use only animations with `playState` `running` or `paused`. A finished animation with `fill: forwards` keeps its end state until you cancel it. This can keep an element collapsed.
+- **Do not start a size animation in a `ResizeObserver` callback.** The animation changes the size again in the same frame, and the browser shows a "ResizeObserver loop" error. Start it before layout, for example in a `MutationObserver` callback.
+- **Nested motion can conflict.** A box that changes its own height must stop while an element inside it grows or collapses. If not, the change animates two times. Only motion that changes size counts. Fades, slides, and price rolls do not count.
+- **A clip can cut off content.** Clip only the element that changes size, and only while it changes. If a parent is clipped while its height changes at a different speed from its children, the clip cuts off the children. The Place order button once disappeared because of this.
+- **Content that arrives after the change can jump.** Examples are shipping rates, pickup locations, and totals. If a clip uncovers it, it looks like it grows. Wait until the content is in position before anything moves, or change the height of the box smoothly when the content arrives.
+- **Chrome can show a blank area for some frames** when an element inside it animates during a view transition.
+- **An animation cannot change `!important` spacing.** Use a registered custom property (`@property`) for the spacing, and animate the property.
+- **A form that goes must stop being a form immediately.** If it stays mounted while it animates out, its validation errors and payment handlers stay registered. Then Place order can use them. Animate a copy of the form, not the form. The copy must be inert and `aria-hidden`. It must not have `id`, `name`, or `for` attributes. Its iframes must be blank, because a copied payment iframe loads again. It must not have attributes that start entrances, because it then plays them again.
+- **React 18 has no `inert` prop.** To set the attribute, spread `{ inert: '' }`.
+- **Keep the keys of a list stable.** If keys change, entrances play again on each render.
+- **When DOM moves to a different parent, its CSS animations start again.** After the move, finish the animations that are not loops.
+- **A notice can show for one frame during a state change.** It moves the content around it, and the motion makes this easy to see. Fix the cause: create the notice only after the state is stable. Do not animate the notice.
+- **Jest has no Web Animations API, layout, or `ResizeObserver`.** In Jest, each helper must end immediately and must not throw an error.
+
+## Test motion
+
+Unit tests cannot show motion, because Jest has no Web Animations API, layout, or paint. Test motion in a real browser, on pages that use the blocks that you changed.
+
+For Cart and Checkout, use a store with:
+
+- the block Cart and Checkout pages,
+- some simple products and a coupon,
+- Free shipping, Flat rate, and Local pickup,
+- a tax rate that applies to only some addresses.
+
+Test at desktop width (1440px) and phone width (390px). Use Chrome first. For motion that JavaScript runs, also test Safari and Firefox.
+
+### Static checks
+
+From `plugins/woocommerce/client/blocks`, run:
+
+- `npx stylelint "assets/**/*.scss" "packages/**/*.scss"`. This includes the motion rule.
+- `npx eslint <changed files>`.
+- `npx tsc --noEmit -p tsconfig.json`. The project has type errors in other files, so look only at the files that you changed.
+- `pnpm test:js`. Each helper must do nothing in Jest.
+
+From the repository root, run `pnpm --filter=@woocommerce/block-library build`. Make sure that the compiled CSS keeps the token fallbacks, for example `var(--wpds-motion-duration-md, .2s)`.
+
+### Watch the motion
+
+- **Slow it down.** Use the Animations panel in DevTools at 10% or 25%. Or record a screencast (CDP `Page.startScreencast`) and look at each frame.
+- **Measure positions in each frame.** Inside `requestAnimationFrame`, schedule `setTimeout( …, 0 )`, and read the position of the element in it. This reads the painted state. A read directly in `requestAnimationFrame` can show a layout that never paints. Look for:
+    - content below a change that moves in two directions, such as down and then up. This means two movements.
+    - the largest change between two frames. A jump is a change that is much larger than the changes near it.
+    - an important element, such as Place order, that moves out of its expected area.
+- **Record each animation that starts.** Wrap `Element.prototype.animate`, and listen for `animationstart` and `transitionrun` in the capture phase. Record the target, the properties, and the duration. This shows two helpers that animate one element, and animations that do not start.
+- **Use painted frames to find a flicker.** If an element disappears for a moment, record a screencast. Look for the pixels of the element in each frame. A position check cannot find a frame that paints blank.
+
+### The settled check
+
+After each interaction, wait approximately 1.3 seconds. Then make sure that the blocks you changed (for example `.wp-block-woocommerce-cart`) have:
+
+- no attributes that your motion added, such as `[data-wc-entering]` or `[data-wc-swapping]`,
+- no copies of content that went,
+- no inline styles that your motion added, for example `overflow`, `height`, `translate`, or `position`,
+- no running animations that are not loops,
+- no finished script animations with `fill: forwards`, except on content that will unmount,
+- no page errors. Listen for `error` and `unhandledrejection`, and for "ResizeObserver loop" errors.
+
+### Scenarios
+
+Do these tests for each area that you changed. Do them at desktop width, at phone width, and at phone width with `prefers-reduced-motion: reduce`.
+
+- **Change and reverse.** Do the interaction. Then do the reverse.
+- **Interruption.** Reverse the interaction 80–150ms after it starts. The motion must turn around from its current position.
+- **Keyboard.** Go to the control with Tab. Use Space, Enter, or the arrow keys. The change must apply immediately.
+- **Late content.** Content that loads after the change, such as rates, pickup locations, or totals, must not jump. It must be in position before the motion, or ease in.
+- **Changes together.** Do a change that also updates the totals. For example, switch between Ship and Pickup with a tax rate that applies to only one of them. Look at the order summary and the Place order button during both updates.
+- **Resize.** Close an element at phone width. Then make the window wider. No element must stay collapsed.
+- **Complete an order.** Place an order after the tests. Motion must not leave a field invalid, a payment method stuck, or a button that does not work.

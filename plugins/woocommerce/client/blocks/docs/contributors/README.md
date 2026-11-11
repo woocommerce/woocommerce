@@ -34,7 +34,7 @@ Our [JavaScript Build System](javascript-build-system.md) guide offers a detaile
 
 ### [Motion](motion.md)
 
-The [Motion](motion.md) guide gives the motion tokens, the rules for animation in WooCommerce blocks, and the rules for reduced motion.
+The [Motion](motion.md) guide gives the motion tokens, the rules for animation in WooCommerce blocks, the rules for reduced motion, and how to add and test motion.
 
 ### [CSS Build System](css-build-system.md)
 
