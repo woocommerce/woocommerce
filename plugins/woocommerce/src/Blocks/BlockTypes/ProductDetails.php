@@ -95,6 +95,7 @@ class ProductDetails extends AbstractBlock {
 	 * @since 11.4.0
 	 *
 	 * @internal
+	 * @return void
 	 */
 	public function register_upsell_migration_setting() {
 		register_setting(
