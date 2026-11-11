@@ -17,6 +17,7 @@ import {
  * Internal dependencies
  */
 import { useTracksLocation } from '../../tracks-utils';
+import { useIsDescendentOfSingleProductTemplate } from '../../../product-elements-blocks/shared/use-is-descendent-of-single-product-template';
 import {
 	ProductCollectionContentProps,
 	CoreFilterNames,
@@ -84,6 +85,8 @@ const ProductCollectionInspectorControls = (
 	const isArchiveTemplate =
 		tracksLocation === 'product-catalog' ||
 		tracksLocation === 'product-archive';
+	const { isDescendentOfSingleProductTemplate } =
+		useIsDescendentOfSingleProductTemplate();
 
 	// Carousel layout influences the visibility and behavior of some controls.
 	const isCarouselLayout = displayLayout?.type === LayoutOptions.CAROUSEL;
@@ -183,7 +186,8 @@ const ProductCollectionInspectorControls = (
 
 	return (
 		<InspectorControls>
-			{ collection === CoreCollectionNames.UPSELLS &&
+			{ isDescendentOfSingleProductTemplate &&
+				collection === CoreCollectionNames.UPSELLS &&
 				showProductUpsellsMigrationUI && (
 					<UpsellsDowngradeNotice clientId={ clientId } />
 				) }
