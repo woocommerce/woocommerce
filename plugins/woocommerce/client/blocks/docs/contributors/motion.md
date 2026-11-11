@@ -52,9 +52,9 @@ Write motion with the helpers in `assets/css/abstracts/_motion.scss`, available 
 
 Shared keyframes live in `assets/css/style.scss`. `wc-fade-in`, `wc-fade-out`, `wc-fade-text-out` and `wc-hold-visible` only fade or hold. The movement keyframes, `wc-rise`, `wc-grow` and `wc-shrink`, animate `translate`, `scale` and `filter`, never `opacity` or `transform`. They combine with a fade, and with an element's resting `transform`. Position an element that grows or shrinks in with `translate` rather than `transform`, so it scales about its own centre.
 
-Prefer `@starting-style` with transitions for an entrance when the element is new to the page and what it animates exists at rest, as for the address suggestions: everything is then a transition, which turns around by itself. It also applies when an element goes from `display: none` to shown. Use keyframes when the motion only exists while animating, such as a row rising in.
+Prefer `@starting-style` with transitions for an entrance when the element is new to the page and what it animates exists at rest, such as a dropdown: everything is then a transition, which turns around by itself. It also applies when an element goes from `display: none` to shown. Use keyframes when the motion only exists while animating, such as a row rising in.
 
-Motion that changes the layout runs in JavaScript, because it measures sizes; the [motion skill](../../../../../../.ai/skills/woocommerce-cart-checkout-motion/SKILL.md) describes those helpers. They take their timings from the same tokens, and finish straight away when nothing is animating, and in Jest.
+Motion that changes the layout runs in JavaScript, because it measures sizes. It takes its timings from the same tokens, and finishes straight away when nothing is animating, and in Jest. Its helpers are listed here as they're added.
 
 ## Reduced motion
 
