@@ -43,7 +43,7 @@ $language_attributes = trim( $language_attributes . ' dir="' . esc_attr( $render
 			<tbody>
 			<tr>
 				<td class="email_preheader" height="1">
-				<?php echo esc_html( wp_strip_all_tags( $pre_header ) ); ?>
+				<?php echo esc_html( \Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper::get_plain_text( $pre_header ) ); ?>
 				</td>
 			</tr>
 			<tr>
