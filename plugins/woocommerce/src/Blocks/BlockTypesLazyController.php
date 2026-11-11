@@ -67,7 +67,7 @@ final class BlockTypesLazyController {
 
 		foreach ( $inner_block_groups as $blocks_group ) {
 			foreach ( $blocks_group as $block_name => $block_class ) {
-				if ( isset( $whitelisted[ $block_class ] ) ) {
+				if ( isset( $whitelisted[ $block_class ] ) && false === has_action( "woocommerce_blocks_{$block_name}_block_registration" ) ) {
 					$registered_block_type = register_block_type_from_metadata(
 						$this->asset_api->generate_block_metadata_path( $block_name, 'inner-blocks/' ),
 						array(
