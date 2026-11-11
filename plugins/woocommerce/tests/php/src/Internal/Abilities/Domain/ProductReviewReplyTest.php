@@ -182,7 +182,13 @@ class ProductReviewReplyTest extends \WC_Unit_Test_Case {
 		$data = $result->get_error_data();
 		$this->assertSame( 500, $data['status'] );
 		$this->assertTrue( $data['saved'] );
-		$this->assertInstanceOf( \WP_Comment::class, get_comment( $data['id'] ), 'The stray comment should still exist.' );
+		$stray = get_comment( $data['id'] );
+		$this->assertInstanceOf( \WP_Comment::class, $stray, 'The stray comment should still exist.' );
+		$this->assertNotSame( $review, $data['id'], 'The error should name the reply, not the review.' );
+		$this->assertSame( 'Thanks!', $stray->comment_content );
+		$this->assertSame( get_current_user_id(), (int) $stray->user_id );
+		$this->assertSame( $this->product_id, (int) $stray->comment_post_ID );
+		$this->assertSame( '0', $stray->comment_parent, 'WordPress made the reply a top-level comment.' );
 		$this->assertStringContainsString( (string) $data['id'], $result->get_error_message(), 'MCP clients only see the message.' );
 	}
 
