@@ -359,11 +359,6 @@
       "count": 1
     }
   },
-  "client/wp-admin-scripts/print-shipping-label-banner/shipping-banner/index.js": {
-    "@wordpress/use-recommended-components": {
-      "count": 1
-    }
-  },
   "client/wp-admin-scripts/woo-product-usage-notice/modal.js": {
     "@wordpress/use-recommended-components": {
       "count": 5
