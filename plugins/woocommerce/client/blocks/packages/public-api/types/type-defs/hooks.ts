@@ -35,7 +35,7 @@ export interface StoreCartCoupon {
 	 * Resolves `true` once the coupon is applied. Rejects with an `Error` whose
 	 * message can be shown to the shopper when the coupon is not applied.
 	 */
-	applyCoupon: ( coupon: string ) => Promise< boolean >;
+	applyCoupon: ( coupon: string ) => Promise< true >;
 	removeCoupon: ( coupon: string ) => Promise< boolean >;
 	isApplyingCoupon: boolean;
 	isRemovingCoupon: boolean;

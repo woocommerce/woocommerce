@@ -39,7 +39,7 @@ export interface TotalsCouponProps {
 	 * Submit handler. Resolves when the coupon was applied. Rejects with an
 	 * Error whose message is shown under the input when it was not.
 	 */
-	onSubmit?: ( couponValue: string ) => Promise< boolean > | undefined;
+	onSubmit?: ( couponValue: string ) => Promise< unknown > | undefined;
 }
 
 export const TotalsCoupon = ( {

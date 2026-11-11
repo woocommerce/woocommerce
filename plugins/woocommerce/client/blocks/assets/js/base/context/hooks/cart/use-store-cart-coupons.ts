@@ -81,7 +81,7 @@ export const useStoreCartCoupons = ( context = '' ): StoreCartCoupon => {
 							}
 						);
 					}
-					return Promise.resolve( true );
+					return true as const;
 				} )
 				.catch( ( error ) => {
 					throw new Error(
