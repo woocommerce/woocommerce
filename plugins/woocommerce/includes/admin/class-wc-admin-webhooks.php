@@ -163,8 +163,7 @@ class WC_Admin_Webhooks {
 	/**
 	 * Get the URL of the webhooks list page, with optional query arguments.
 	 *
-	 * Pass false as an argument's value to leave it out of the URL: add_query_arg() drops
-	 * false arguments, but keeps empty strings and renders them as a bare "key=".
+	 * Pass false to omit an argument; empty strings keep the key.
 	 *
 	 * @since 11.4.0
 	 *
