@@ -12,7 +12,6 @@ use WP_Block;
  * Block type for Variation Selector in the Add to Cart + Options block.
  */
 class VariationSelectorAttribute extends AbstractBlock {
-
 	use EnableBlockJsonAssetsTrait;
 
 	/**

@@ -11,7 +11,6 @@ use Automattic\WooCommerce\Enums\ProductType;
  * Block type for grouped product selector in add to cart with options.
  */
 class GroupedProductSelector extends AbstractBlock {
-
 	use EnableBlockJsonAssetsTrait;
 
 	/**

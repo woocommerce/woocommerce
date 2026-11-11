@@ -67,7 +67,7 @@ final class BlockTypesLazyController {
 
 		foreach ( $inner_block_groups as $blocks_group ) {
 			foreach ( $blocks_group as $block_name => $block_class ) {
-				if ( isset( $whitelisted[ $block_class ] ) ) {
+				if ( isset( $whitelisted[ $block_class ] ) && false === has_action( "woocommerce_blocks_{$block_name}_block_registration" ) ) {
 					$registered_block_type = register_block_type_from_metadata(
 						$this->asset_api->generate_block_metadata_path( $block_name, 'inner-blocks/' ),
 						array(
@@ -86,10 +86,11 @@ final class BlockTypesLazyController {
 		$is_admin     = is_admin();
 		$block_groups = array(
 			$this->get_order_confirmation_blocks(),
+			$this->get_add_to_cart_with_options_blocks(),
 		);
 		foreach ( $block_groups as $blocks_group ) {
 			foreach ( $blocks_group as $block_name => $block_class ) {
-				if ( isset( $whitelisted[ $block_class ] ) ) {
+				if ( isset( $whitelisted[ $block_class ] ) && false === has_action( "woocommerce_blocks_{$block_name}_block_registration" ) ) {
 					if ( ! $unified_editor_assets && $is_admin ) {
 						$this->asset_api->register_script( 'wc-' . $block_name . '-block', $this->asset_api->get_block_asset_build_path( $block_name ), array( 'wc-blocks' ) );
 					}
@@ -249,6 +250,32 @@ final class BlockTypesLazyController {
 			$list['order-confirmation-shipping-address']          = \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\ShippingAddress::class;
 			$list['order-confirmation-downloads-wrapper']         = \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\DownloadsWrapper::class;
 			$list['order-confirmation-additional-fields-wrapper'] = \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\AdditionalFieldsWrapper::class;
+		}
+
+		return $list;
+	}
+
+	/**
+	 * Side effect free and stateless add to cart with options blocks.
+	 *
+	 * @return array<string,string>
+	 */
+	private function get_add_to_cart_with_options_blocks(): array {
+		$list = array(
+			'add-to-cart-with-options-quantity-selector'  => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\QuantitySelector::class,
+			'add-to-cart-with-options-variation-description' => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationDescription::class,
+			'add-to-cart-with-options-variation-selector' => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelector::class,
+			'add-to-cart-with-options-variation-selector-attribute-name' => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelectorAttributeName::class,
+			'add-to-cart-with-options-grouped-product-selector' => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\GroupedProductSelector::class,
+			'add-to-cart-with-options-grouped-product-item' => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\GroupedProductItem::class,
+			'add-to-cart-with-options-grouped-product-item-selector' => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\GroupedProductItemSelector::class,
+			'add-to-cart-with-options-grouped-product-item-label' => \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\GroupedProductItemLabel::class,
+		);
+		if ( ! is_admin() ) {
+			// AddToCartWithOptions: overrides enqueue_data() with editor-visible product types and template part IDs, hence load eager in admin.
+			// VariationSelectorAttribute: overrides enqueue_data() with editor-visible visual attributes flag, hence load eager in admin.
+			$list['add-to-cart-with-options']                              = \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\AddToCartWithOptions::class;
+			$list['add-to-cart-with-options-variation-selector-attribute'] = \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelectorAttribute::class;
 		}
 
 		return $list;
