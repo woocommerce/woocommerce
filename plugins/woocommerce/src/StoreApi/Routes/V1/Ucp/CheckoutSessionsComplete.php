@@ -61,6 +61,7 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 	 * order, the Store API draft order of this session, and `continue_url` is its payment page.
 	 * Stock is held for the order first, as the Store API checkout does, because the payment
 	 * page trusts a pending order's stock to be held and checks nothing itself.
+	 * An order with nothing to pay skips the hand-off and completes at once.
 	 * A checkout that is not ready yet is returned as it is, with messages naming what is missing.
 	 *
 	 * @param \WP_REST_Request $request Request object.
@@ -142,6 +143,12 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Store API hook, documented in Routes\V1\Checkout.
 		do_action( 'woocommerce_store_api_checkout_order_processed', $order );
+
+		// Nothing to pay, as for a free or fully discounted cart: the payment page refuses such an
+		// order, so it is completed here, as the Store API checkout does.
+		if ( $order->has_status( OrderStatus::PENDING ) && ! $order->needs_payment() ) {
+			$order->payment_complete();
+		}
 
 		$state = array_merge(
 			$state,

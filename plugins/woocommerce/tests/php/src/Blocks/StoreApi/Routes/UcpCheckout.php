@@ -544,6 +544,31 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Complete finishes a checkout with nothing to pay, which the payment page would refuse.
+	 */
+	public function test_complete_finishes_a_free_checkout(): void {
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => 0,
+				'price'         => 0,
+			)
+		);
+		$created = $this->create_ready_checkout(
+			array(
+				'item'     => array( 'id' => (string) $product->get_id() ),
+				'quantity' => 1,
+			)
+		);
+
+		$data = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' )->get_data();
+
+		$this->assertSame( 'completed', $data['status'] );
+		$this->assertArrayNotHasKey( 'continue_url', $data );
+		$this->assertTrue( wc_get_order( (int) $data['order']['id'] )->is_paid() );
+	}
+
+	/**
 	 * @testdox Completing again after the cart changed outside the checkout routes cancels the order first handed off.
 	 */
 	public function test_complete_cancels_the_order_a_changed_cart_left_behind(): void {
