@@ -121,6 +121,8 @@ const serialRunSpecs = [
 	// Activates a custom-gateway test plugin globally, which would surface its extra
 	// payment button on every other worker's checkout.
 	'**/tests/checkout/checkout-shortcode-custom-place-order-button.spec.ts',
+	// Changes site visibility and the active plugins while checking llms.txt.
+	'**/tests/llms-txt/*.spec.ts',
 	// Mutate the global onboarding profile/options, site-visibility options and
 	// the active theme.
 	'**/tests/onboarding/**/*.spec.ts',
