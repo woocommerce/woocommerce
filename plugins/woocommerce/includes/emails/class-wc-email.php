@@ -364,7 +364,7 @@ class WC_Email extends WC_Settings_API {
 		add_action( 'phpmailer_init', array( $this, 'handle_multipart' ) );
 		add_action( 'woocommerce_update_options_email_' . $this->id, array( $this, 'process_admin_options' ) );
 
-		// Use priority 1 to ensure our skip classes are added before lazy loading plugins process the images.
+		// Use priority 1 to ensure our attribute changes are applied before lazy loading plugins process the images.
 		add_filter( 'wp_get_attachment_image_attributes', array( $this, 'prevent_lazy_loading_on_attachment' ), 1, 1 );
 	}
 
@@ -1861,7 +1861,7 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
-	 * Prevent lazy loading on attachment images in email context by adding skip classes.
+	 * Prevent lazy loading on attachment images in email context by removing web-only attributes and adding skip classes.
 	 * This is hooked into the wp_get_attachment_image_attributes filter.
 	 *
 	 * @param array $attributes The image attributes array.
@@ -1872,6 +1872,9 @@ class WC_Email extends WC_Settings_API {
 		if ( ! $this->sending ) {
 			return $attributes;
 		}
+
+		// Apple Mail does not load images marked loading="lazy", and the others do nothing in email.
+		unset( $attributes['loading'], $attributes['decoding'], $attributes['fetchpriority'], $attributes['srcset'], $attributes['sizes'] );
 
 		// Skip classes to prevent lazy loading plugins from applying lazy loading.
 		// These are the most common skip classes used by popular lazy loading plugins.
