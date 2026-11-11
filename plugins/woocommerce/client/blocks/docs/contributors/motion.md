@@ -145,7 +145,7 @@ The numbers match the original motion rules. Code comments use these numbers. So
 
 **Price roll (Woo rule).** When a price changes in place, its digits roll over `md` expressive. Prices that change together roll at the same time, such as a line total and its "Save" badge. Prices do not roll while the cart loads for the first time.
 
-**Skeleton reveal (Woo rule).** A value or list that replaces a loading skeleton fades in over `md` subtle. It does not roll, because the old value is not on screen. All skeletons in one loading phase end together. Totals rows that appear or go, and the total in the summary bar, wait for that moment. Then everything changes at once. Cart line totals do not wait: while a new quantity saves, they show the unit price multiplied by the quantity. If the pricing of the item is not linear, the line total waits for the server.
+**Skeleton reveal (Woo rule).** A value or list that replaces a loading skeleton fades in over `md` subtle. It does not roll, because the old value is not on screen. All skeletons in one loading phase end together. Totals rows that appear or go, and the total in the summary bar, wait for that moment. Then everything changes at once.
 
 ## Exceptions
 
