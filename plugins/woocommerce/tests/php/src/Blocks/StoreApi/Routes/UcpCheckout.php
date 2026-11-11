@@ -318,25 +318,29 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox An order paid while an update is under way stays the checkout's order.
+	 * @testdox An order paid, or put on hold, while an update is under way stays the checkout's order.
+	 * @testWith ["processing", "completed"]
+	 *           ["on-hold", "requires_escalation"]
+	 *
+	 * @param string $order_status Status the order moves to mid-request.
+	 * @param string $expected     Checkout status afterwards.
 	 */
-	public function test_update_keeps_an_order_paid_mid_request(): void {
+	public function test_update_keeps_an_order_paid_mid_request( string $order_status, string $expected ): void {
 		$created = $this->create_ready_checkout();
 		$path    = '/checkout-sessions/' . $created['id'];
 		$this->request( 'POST', $path . '/complete' );
 		$order_id = (int) WC()->session->get( 'store_api_draft_order' );
 
-		$pay = static function () use ( $order_id ) {
-			wc_get_order( $order_id )->update_status( OrderStatus::PROCESSING );
+		$pay = static function () use ( $order_id, $order_status ) {
+			wc_get_order( $order_id )->update_status( $order_status );
 		};
 		add_action( 'woocommerce_add_to_cart', $pay );
 		$updated = $this->request( 'PUT', $path, array( 'line_items' => array( $this->line_item( 1, 1 ) ) ) )->get_data();
 		remove_action( 'woocommerce_add_to_cart', $pay );
-		$this->assertSame( 'completed', $updated['status'] );
+		$this->assertSame( $expected, $updated['status'] );
 
-		$read = $this->request( 'GET', $path )->get_data();
-		$this->assertSame( 'completed', $read['status'] );
-		$this->assertSame( (string) $order_id, $read['order']['id'] );
+		$this->assertSame( $expected, $this->request( 'GET', $path )->get_data()['status'] );
+		$this->assertSame( $order_id, (int) WC()->session->get( 'ucp_checkout' )['order_id'] );
 	}
 
 	/**

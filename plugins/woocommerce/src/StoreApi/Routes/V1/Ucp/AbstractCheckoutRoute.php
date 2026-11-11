@@ -110,19 +110,20 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 	}
 
 	/**
-	 * Cancel the order handed to the buyer while its payment page would still take it, and forget it.
+	 * Cancel the order handed to the buyer while its payment page would still take it, and forget the hand-off.
 	 *
 	 * Once the checkout changes or ends, that order no longer matches it and must not be paid.
+	 * The state is saved without the hand-off, unless the order was paid meanwhile and stays.
 	 *
 	 * @param array<string, mixed> $state Checkout state.
 	 * @param string               $note Order note explaining the cancellation.
-	 * @return array<string, mixed> The state without `order_id` and `fingerprint`, or unchanged when the order was paid meanwhile.
+	 * @return array<string, mixed> The state without the hand-off, or unchanged, `order_id` included, when the order was paid meanwhile.
 	 */
 	protected function cancel_handed_off_order( array $state, string $note ): array {
 		$order = empty( $state['order_id'] ) ? null : wc_get_order( (int) $state['order_id'] );
 
 		if ( $order instanceof \WC_Order ) {
-			// Paid since the request began: the checkout keeps its order, which the next read reports.
+			// Paid, or put on hold, since the request began: the checkout keeps its order and hand-off.
 			if ( ! $order->has_status( $this->payable_statuses( $order ) ) ) {
 				return $state;
 			}
@@ -135,9 +136,21 @@ abstract class AbstractCheckoutRoute extends AbstractCartRoute {
 			}
 		}
 
-		unset( $state['order_id'], $state['fingerprint'] );
+		unset( $state['order_id'], $state['fingerprint'], $state['status'], $state['continue_url'] );
+		$this->save_checkout_state( $state );
 
 		return $state;
+	}
+
+	/**
+	 * Refuse a request whose order was paid, or put on hold, while it ran, as if it had arrived a moment later.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	protected function refuse_kept_order(): \WP_REST_Response {
+		$refusal = $this->open_checkout( true );
+
+		return $refusal instanceof \WP_REST_Response ? $refusal : $this->ucp_conflict();
 	}
 
 	/**

@@ -70,7 +70,11 @@ class CheckoutSessionsCancel extends AbstractCheckoutRoute {
 		}
 
 		$state = $this->cancel_handed_off_order( $state, __( 'UCP checkout session canceled.', 'woocommerce' ) );
-		unset( $state['continue_url'] );
+
+		if ( ! empty( $state['order_id'] ) ) {
+			return $this->refuse_kept_order();
+		}
+
 		$state['status'] = CheckoutMapper::STATUS_CANCELED;
 		$this->save_checkout_state( $state );
 

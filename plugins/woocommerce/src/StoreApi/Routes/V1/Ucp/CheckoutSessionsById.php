@@ -112,11 +112,9 @@ class CheckoutSessionsById extends AbstractCheckoutRoute {
 
 		if ( ( $state['fingerprint'] ?? '' ) !== $this->hand_off_fingerprint() ) {
 			$state = $this->cancel_handed_off_order( $state, __( 'UCP checkout session changed after payment was handed off.', 'woocommerce' ) );
-			unset( $state['status'], $state['continue_url'] );
-			$this->save_checkout_state( $state );
 		}
 
-		// Read again, so an order paid while this request ran is reported as completed.
+		// Read again, so an order paid while this request ran is reported as it now stands.
 		return $error ?? $this->checkout_response( $this->route_cart_id( $request ), $this->checkout_state() ?? $state );
 	}
 }

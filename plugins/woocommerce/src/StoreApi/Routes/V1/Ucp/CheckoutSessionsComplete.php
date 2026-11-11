@@ -86,22 +86,16 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 		if ( ! empty( $state['order_id'] ) && ( ! $order || $order->get_id() !== (int) $state['order_id'] ) ) {
 			$state = $this->cancel_handed_off_order( $state, __( 'UCP checkout session cart changed after payment was handed off.', 'woocommerce' ) );
 
-			// Kept, so paid since this request began: refuse as if it had arrived a moment later.
 			if ( ! empty( $state['order_id'] ) ) {
-				$refusal = $this->open_checkout( true );
-
-				return $refusal instanceof \WP_REST_Response ? $refusal : $this->ucp_conflict();
+				return $this->refuse_kept_order();
 			}
-
-			$this->save_checkout_state( $state );
 		}
 
 		if ( CheckoutMapper::STATUS_READY_FOR_COMPLETE !== ( new CheckoutMapper() )->build_checkout( $cart, $checkout_id, $state )['status'] ) {
 			// An order handed off while the checkout was ready, for stock since taken say, must not stay payable.
 			$state = $this->cancel_handed_off_order( $state, __( 'UCP checkout session is no longer ready to complete.', 'woocommerce' ) );
-			$this->save_checkout_state( $state );
 
-			return $this->checkout_response( $checkout_id, $state, 200, $cart );
+			return $this->checkout_response( $checkout_id, $this->checkout_state() ?? $state, 200, $cart );
 		}
 
 		if ( $order ) {
@@ -124,7 +118,7 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 			$this->order_controller->validate_order_before_payment( $order );
 		} catch ( RouteException $e ) {
 			// An order the Store API checkout would refuse must not be, or stay, payable.
-			$this->save_checkout_state( $this->cancel_handed_off_order( $state, __( 'UCP checkout session no longer passes checkout validation.', 'woocommerce' ) ) );
+			$this->cancel_handed_off_order( $state, __( 'UCP checkout session no longer passes checkout validation.', 'woocommerce' ) );
 
 			return $this->ucp_error( 'VALIDATION_ERROR', wp_specialchars_decode( $e->getMessage(), ENT_QUOTES ), 'recoverable', 200 );
 		}
@@ -134,7 +128,7 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 		} catch ( ReserveStockException $e ) {
 			// The hold failed on stock another checkout took since the cart was last checked. A draft
 			// stays one, which the payment page refuses; an order handed off earlier is closed.
-			$this->save_checkout_state( $this->cancel_handed_off_order( $state, __( 'UCP checkout session stock could no longer be held.', 'woocommerce' ) ) );
+			$this->cancel_handed_off_order( $state, __( 'UCP checkout session stock could no longer be held.', 'woocommerce' ) );
 
 			return $this->ucp_error( Utils::cart_error_code( (string) $e->getErrorCode() ), wp_specialchars_decode( $e->getMessage(), ENT_QUOTES ), 'recoverable', 200, '$.line_items' );
 		}
