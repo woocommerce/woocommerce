@@ -44,7 +44,7 @@ class Personalizer {
 
 	/**
 	 * Rendering context for plain-text content (e.g., email subject, preheader, plain-text body).
-	 * Tag values must be raw text without HTML entities or markup.
+	 * Text-typed tags return raw text; values of HTML-typed tags are converted to plain text.
 	 */
 	public const RENDERING_CONTEXT_TEXT = 'text';
 
@@ -340,6 +340,8 @@ class Personalizer {
 		if ( ! preg_match( '/<[a-z!\/]|&(?:#\d+|#x[0-9a-f]+|[a-z][a-z0-9]*);/i', $value ) ) {
 			return $value;
 		}
+		// Encode a "<" that does not start a tag, or older libxml versions drop the text after it.
+		$value = (string) preg_replace( '/<(?![a-z!\/])/i', '&lt;', $value );
 		return Html2Text::convert( $value, array( 'ignore_errors' => true ) );
 	}
 

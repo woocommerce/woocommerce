@@ -958,18 +958,20 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 	 */
 	public function htmlValueInTextContextProvider(): array {
 		return array(
-			'anchor'                   => array( '<a href="https://example.com/manage">Manage</a>', '[Manage](https://example.com/manage)' ),
-			'anchor with URL as text'  => array( '<a href="https://example.com">https://example.com</a>', 'https://example.com' ),
-			'strong'                   => array( '<strong>Bold</strong> text', 'Bold text' ),
-			'line break'               => array( 'Line one<br>Line two', "Line one\nLine two" ),
-			'list'                     => array( '<ul><li>One</li><li>Two</li></ul>', "- One\n- Two" ),
-			'entities'                 => array( 'Tom &amp; Jerry&#039;s', "Tom & Jerry's" ),
-			'markup and entities'      => array( '<span class="price">10&nbsp;&euro;</span>', '10 €' ),
-			'URL with encoded query'   => array( 'https://example.com/reset?key=a&amp;login=b', 'https://example.com/reset?key=a&login=b' ),
-			'plain text'               => array( 'Plain value', 'Plain value' ),
-			'bare ampersand'           => array( 'Tom & Jerry', 'Tom & Jerry' ),
-			'less-than sign'           => array( '5 <3 you', '5 <3 you' ),
-			'whitespace in plain text' => array( "  Line one\nLine two ", "  Line one\nLine two " ),
+			'anchor'                    => array( '<a href="https://example.com/manage">Manage</a>', '[Manage](https://example.com/manage)' ),
+			'anchor with URL as text'   => array( '<a href="https://example.com">https://example.com</a>', 'https://example.com' ),
+			'strong'                    => array( '<strong>Bold</strong> text', 'Bold text' ),
+			'line break'                => array( 'Line one<br>Line two', "Line one\nLine two" ),
+			'list'                      => array( '<ul><li>One</li><li>Two</li></ul>', "- One\n- Two" ),
+			'entities'                  => array( 'Tom &amp; Jerry&#039;s', "Tom & Jerry's" ),
+			'markup and entities'       => array( '<span class="price">10&nbsp;&euro;</span>', '10 €' ),
+			'URL with encoded query'    => array( 'https://example.com/reset?key=a&amp;login=b', 'https://example.com/reset?key=a&login=b' ),
+			'plain text'                => array( 'Plain value', 'Plain value' ),
+			'bare ampersand'            => array( 'Tom & Jerry', 'Tom & Jerry' ),
+			'less-than sign'            => array( '5 <3 you', '5 <3 you' ),
+			'whitespace in plain text'  => array( "  Line one\nLine two ", "  Line one\nLine two " ),
+			'entity and bare less-than' => array( 'Tom &amp; Jerry <3 you', 'Tom & Jerry <3 you' ),
+			'markup and bare less-than' => array( '<em>a</em> < b', 'a < b' ),
 		);
 	}
 
