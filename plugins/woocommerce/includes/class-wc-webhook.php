@@ -134,7 +134,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @param int $user_id User ID.
 	 * @param int $blog_id ID of the site the user was removed from.
 	 */
-	public function process_user_removed_from_blog( $user_id, $blog_id ) {
+	public function process_user_removed_from_blog( $user_id, $blog_id ): void {
 		// WordPress passes 0 when the caller omits the site ID, meaning the current site.
 		$blog_id = 0 === (int) $blog_id ? get_current_blog_id() : (int) $blog_id;
 
