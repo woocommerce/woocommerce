@@ -65,6 +65,48 @@ trait ProductReviewAbilityTrait {
 	}
 
 	/**
+	 * Load a direct reply to a review. Deeper replies do not count.
+	 *
+	 * @param int $reply_id Comment ID.
+	 * @return \WP_Comment|null
+	 */
+	protected static function get_review_reply( int $reply_id ): ?\WP_Comment {
+		$comment = get_comment( $reply_id );
+
+		if ( ! $comment instanceof \WP_Comment || 0 === (int) $comment->comment_parent || null === self::get_review( (int) $comment->comment_parent ) ) {
+			return null;
+		}
+
+		return $comment;
+	}
+
+	/**
+	 * Count the approved and held direct replies of each review, in one query.
+	 *
+	 * @param int[] $review_ids Review IDs.
+	 * @return array<int, int> Reply count by review ID; reviews without replies are absent.
+	 */
+	protected static function get_reply_counts( array $review_ids ): array {
+		global $wpdb;
+
+		$review_ids = array_values( array_filter( array_map( 'intval', $review_ids ) ) );
+		if ( ! $review_ids ) {
+			return array();
+		}
+
+		$placeholders = implode( ',', array_fill( 0, count( $review_ids ), '%d' ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $placeholders holds only %d placeholders.
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT comment_parent, COUNT(*) AS replies FROM {$wpdb->comments} WHERE comment_parent IN ( {$placeholders} ) AND comment_approved IN ( '0', '1' ) GROUP BY comment_parent", $review_ids ) );
+
+		$counts = array();
+		foreach ( (array) $rows as $row ) {
+			$counts[ (int) $row->comment_parent ] = (int) $row->replies;
+		}
+
+		return $counts;
+	}
+
+	/**
 	 * Load the review that the input `id` names.
 	 *
 	 * @param array $input Ability input.
@@ -126,6 +168,10 @@ trait ProductReviewAbilityTrait {
 				'verified'     => array( 'type' => 'boolean' ),
 				'status'       => array( 'type' => 'string' ),
 				'review'       => array( 'type' => 'string' ),
+				'reply_count'  => array(
+					'type'        => 'integer',
+					'description' => __( 'Approved and held replies to the review.', 'woocommerce' ),
+				),
 			),
 		);
 	}
@@ -136,14 +182,17 @@ trait ProductReviewAbilityTrait {
 	 * @param \WP_Comment $comment      Review.
 	 * @param bool        $with_product Whether to include the product ID and name.
 	 * @param bool        $with_status  Whether to include the moderation status.
+	 * @param int|null    $reply_count  Reply count when already known; null looks it up.
 	 * @return array|\WP_Error
 	 */
-	protected static function format_review( \WP_Comment $comment, bool $with_product, bool $with_status ) {
+	protected static function format_review( \WP_Comment $comment, bool $with_product, bool $with_status, ?int $reply_count = null ) {
+		$review_id    = (int) $comment->comment_ID;
 		$review       = array(
-			'id'       => (int) $comment->comment_ID,
-			'rating'   => (int) get_comment_meta( (int) $comment->comment_ID, 'rating', true ),
-			'verified' => (bool) get_comment_meta( (int) $comment->comment_ID, 'verified', true ),
-			'review'   => wp_strip_all_tags( (string) $comment->comment_content ),
+			'id'          => $review_id,
+			'rating'      => (int) get_comment_meta( $review_id, 'rating', true ),
+			'verified'    => (bool) get_comment_meta( $review_id, 'verified', true ),
+			'review'      => wp_strip_all_tags( (string) $comment->comment_content ),
+			'reply_count' => $reply_count ?? ( self::get_reply_counts( array( $review_id ) )[ $review_id ] ?? 0 ),
 		);
 		$date_created = self::format_comment_date( $comment->comment_date_gmt );
 		if ( null !== $date_created ) {
@@ -157,6 +206,48 @@ trait ProductReviewAbilityTrait {
 			$review['status'] = self::get_review_status( $comment );
 		}
 		return ExtensibleAbilities::add_fields_to_object( $review, 'product_review', $comment );
+	}
+
+	/**
+	 * Schema of a reply as the review abilities output it. A reply held for moderation has the status `hold`.
+	 *
+	 * @return array
+	 */
+	protected static function get_reply_output_schema(): array {
+		return array(
+			'type'       => 'object',
+			'properties' => array(
+				'id'           => array( 'type' => 'integer' ),
+				'review_id'    => array( 'type' => 'integer' ),
+				'status'       => array( 'type' => 'string' ),
+				'date_created' => array(
+					'type'   => 'string',
+					'format' => 'date-time',
+				),
+				'reply'        => array( 'type' => 'string' ),
+			),
+		);
+	}
+
+	/**
+	 * Format a direct reply to a review.
+	 *
+	 * @param \WP_Comment $reply Reply.
+	 * @return array
+	 */
+	protected static function format_reply( \WP_Comment $reply ): array {
+		$output       = array(
+			'id'        => (int) $reply->comment_ID,
+			'review_id' => (int) $reply->comment_parent,
+			'status'    => self::get_review_status( $reply ),
+			'reply'     => wp_strip_all_tags( (string) $reply->comment_content ),
+		);
+		$date_created = self::format_comment_date( $reply->comment_date_gmt );
+		if ( null !== $date_created ) {
+			$output['date_created'] = $date_created;
+		}
+
+		return $output;
 	}
 
 	/**

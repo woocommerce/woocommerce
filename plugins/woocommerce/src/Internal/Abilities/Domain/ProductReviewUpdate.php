@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductReviewAbility
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Moderates a product review. Asking for the status a review already has changes nothing.
+ * Moderates a product review or a direct reply to one. Asking for the status it already has changes nothing.
  */
 class ProductReviewUpdate extends AbstractDomainAbility implements AbilityDefinition {
 
@@ -40,7 +40,7 @@ class ProductReviewUpdate extends AbstractDomainAbility implements AbilityDefini
 	public static function get_registration_args(): array {
 		return array(
 			'label'               => __( 'Update product review', 'woocommerce' ),
-			'description'         => __( 'Moderate a product review: approve it, hold it for moderation, mark it as spam or move it to the trash. Requesting the status a review already has changes nothing and returns changed false. Reviewer identity is withheld.', 'woocommerce' ),
+			'description'         => __( 'Moderate a product review, or a reply to one: approve it, hold it for moderation (shown as Pending in wp-admin), mark it as spam or move it to the trash. Moderate for spam, abuse or off-topic content, never to hide negative reviews. Requesting the status a review already has changes nothing and returns changed false. Reviewer identity is withheld.', 'woocommerce' ),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
 			'output_schema'       => self::get_output_schema(),
@@ -63,16 +63,25 @@ class ProductReviewUpdate extends AbstractDomainAbility implements AbilityDefini
 	}
 
 	/**
-	 * Check review edit access. An ID that is not a review passes for users who could edit any review, so they get the not-found error.
+	 * Check review edit access. A reply needs edit access to its review and the right to edit the reply itself.
+	 * An ID that is neither passes for users who could edit any review, so they get the not-found error.
 	 *
 	 * @since 11.4.0
 	 * @param mixed $input Ability input.
 	 * @return bool
 	 */
 	public static function can_edit_review( $input = array() ): bool {
-		$review_id = self::get_id_from_input( $input );
+		$id = self::get_id_from_input( $input );
+		if ( $id <= 0 ) {
+			return false;
+		}
 
-		return $review_id > 0 && self::check_review_permission( 'edit', $review_id );
+		$reply = self::get_review_reply( $id );
+		if ( null === $reply ) {
+			return self::check_review_permission( 'edit', $id );
+		}
+
+		return self::check_review_permission( 'edit', (int) $reply->comment_parent ) && current_user_can( 'edit_comment', $id );
 	}
 
 	/**
@@ -83,7 +92,8 @@ class ProductReviewUpdate extends AbstractDomainAbility implements AbilityDefini
 	 * @return array|\WP_Error
 	 */
 	public static function execute( array $input ) {
-		$review = self::get_review_from_input( $input );
+		$reply  = self::get_review_reply( $input['id'] );
+		$review = $reply ?? self::get_review_from_input( $input );
 		if ( is_wp_error( $review ) ) {
 			return $review;
 		}
@@ -118,6 +128,14 @@ class ProductReviewUpdate extends AbstractDomainAbility implements AbilityDefini
 					? __( 'The review status was changed, but the review could not be read back.', 'woocommerce' )
 					: __( 'The review could not be read back.', 'woocommerce' ),
 				array( 'status' => 500 )
+			);
+		}
+
+		if ( null !== $reply ) {
+			return array(
+				'changed'         => $changed,
+				'previous_status' => $previous,
+				'reply'           => self::format_reply( $saved ),
 			);
 		}
 
@@ -232,7 +250,7 @@ class ProductReviewUpdate extends AbstractDomainAbility implements AbilityDefini
 			'properties'           => array(
 				'id'     => array(
 					'type'        => 'integer',
-					'description' => __( 'Review ID, from the woocommerce/product-reviews-query ability.', 'woocommerce' ),
+					'description' => __( 'Review ID from the woocommerce/product-reviews-query ability, or the ID of a reply to a review.', 'woocommerce' ),
 					'minimum'     => 1,
 				),
 				'status' => array(
@@ -258,6 +276,7 @@ class ProductReviewUpdate extends AbstractDomainAbility implements AbilityDefini
 				'changed'         => array( 'type' => 'boolean' ),
 				'previous_status' => array( 'type' => 'string' ),
 				'review'          => ExtensibleAbilities::add_fields_schema( self::get_review_output_schema(), 'product_review' ),
+				'reply'           => self::get_reply_output_schema(),
 			),
 		);
 	}

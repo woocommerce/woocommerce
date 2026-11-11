@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductReviewAbility
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Replies to an approved product review as the current user, the way the admin reviews screen does.
+ * Replies to an approved product review as the current user. Unlike wp-admin's "Approve and reply", a held review is refused, so approving stays a separate step.
  */
 class ProductReviewReply extends AbstractDomainAbility implements AbilityDefinition {
 
@@ -39,10 +39,10 @@ class ProductReviewReply extends AbstractDomainAbility implements AbilityDefinit
 	public static function get_registration_args(): array {
 		return array(
 			'label'               => __( 'Reply to product review', 'woocommerce' ),
-			'description'         => __( 'Publish a reply to an approved product review, as the current user. Approve a held review with woocommerce/product-review-update first. Replies to replies are not supported.', 'woocommerce' ),
+			'description'         => __( 'Publish a reply to an approved product review, as the current user and under their display name. Approve a held review with woocommerce/product-review-update first. Check the review\'s reply_count first, so it is not answered twice. A reply can be held or trashed with woocommerce/product-review-update. Replies to replies are not supported.', 'woocommerce' ),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
-			'output_schema'       => self::get_output_schema(),
+			'output_schema'       => self::get_reply_output_schema(),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_reply_to_review' ),
 			'meta'                => array(
@@ -149,18 +149,7 @@ class ProductReviewReply extends AbstractDomainAbility implements AbilityDefinit
 			);
 		}
 
-		$output       = array(
-			'id'        => (int) $reply->comment_ID,
-			'review_id' => (int) $review->comment_ID,
-			'status'    => self::get_review_status( $reply ),
-			'reply'     => wp_strip_all_tags( (string) $reply->comment_content ),
-		);
-		$date_created = self::format_comment_date( $reply->comment_date_gmt );
-		if ( null !== $date_created ) {
-			$output['date_created'] = $date_created;
-		}
-
-		return $output;
+		return self::format_reply( $reply );
 	}
 
 	/**
@@ -179,34 +168,13 @@ class ProductReviewReply extends AbstractDomainAbility implements AbilityDefinit
 				),
 				'content' => array(
 					'type'        => 'string',
-					'description' => __( 'Reply text, shown publicly under the review. Safe HTML is allowed.', 'woocommerce' ),
+					'description' => __( 'Reply text, shown publicly under the review. Plain text or safe HTML; Markdown is not rendered.', 'woocommerce' ),
 					'minLength'   => 1,
 					'pattern'     => '\S',
 				),
 			),
 			'required'             => array( 'id', 'content' ),
 			'additionalProperties' => false,
-		);
-	}
-
-	/**
-	 * Get the output schema. A reply held for moderation has the status `hold`.
-	 *
-	 * @return array
-	 */
-	private static function get_output_schema(): array {
-		return array(
-			'type'       => 'object',
-			'properties' => array(
-				'id'           => array( 'type' => 'integer' ),
-				'review_id'    => array( 'type' => 'integer' ),
-				'status'       => array( 'type' => 'string' ),
-				'date_created' => array(
-					'type'   => 'string',
-					'format' => 'date-time',
-				),
-				'reply'        => array( 'type' => 'string' ),
-			),
 		);
 	}
 }

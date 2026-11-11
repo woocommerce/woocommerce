@@ -296,6 +296,71 @@ class ProductReviewUpdateTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should moderate a direct reply to a review, but not a reply to a reply.
+	 */
+	public function test_moderates_replies(): void {
+		$review = $this->review( 'approved' );
+		$reply  = self::factory()->comment->create(
+			array(
+				'comment_post_ID'  => $this->product_id,
+				'comment_parent'   => $review,
+				'comment_approved' => '1',
+				'comment_content'  => 'Thanks!',
+				'user_id'          => get_current_user_id(),
+			)
+		);
+		$nested = self::factory()->comment->create(
+			array(
+				'comment_post_ID' => $this->product_id,
+				'comment_parent'  => $reply,
+			)
+		);
+
+		$result = $this->sut->execute(
+			array(
+				'id'     => $reply,
+				'status' => 'trash',
+			)
+		);
+
+		$this->assertIsArray( $result );
+		$this->assertTrue( $result['changed'] );
+		$this->assertSame( 'approved', $result['previous_status'] );
+		$this->assertSame( $review, $result['reply']['review_id'] );
+		$this->assertSame( 'trash', $result['reply']['status'] );
+		$this->assertArrayNotHasKey( 'review', $result );
+		$this->assertSame( 'trash', get_comment( $reply )->comment_approved );
+
+		$result = $this->sut->execute(
+			array(
+				'id'     => $nested,
+				'status' => 'trash',
+			)
+		);
+		$this->assertSame( 'woocommerce_ability_product_review_not_found', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should require review edit access for replies too.
+	 */
+	public function test_reply_permissions(): void {
+		$reply = self::factory()->comment->create(
+			array(
+				'comment_post_ID' => $this->product_id,
+				'comment_parent'  => $this->review( 'approved' ),
+			)
+		);
+		$input = array(
+			'id'     => $reply,
+			'status' => 'hold',
+		);
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'editor' ) ) );
+		$this->assertSame( 'ability_invalid_permissions', $this->sut->execute( $input )->get_error_code(), 'moderate_comments alone is not enough.' );
+		$this->assertSame( '1', get_comment( $reply )->comment_approved );
+	}
+
+	/**
 	 * @testdox Should not return reviewer identity.
 	 */
 	public function test_withholds_reviewer_identity(): void {
