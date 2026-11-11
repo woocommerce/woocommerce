@@ -490,14 +490,12 @@ export class ShippingBanner extends Component {
 										tosLink: (
 											<UILink
 												href="https://automattic.com/tos/"
-												rel="noopener noreferrer"
 												openInNewTab
 											/>
 										),
 										wcsLink: (
 											<UILink
 												href="https://woocommerce.com/products/shipping/?utm_medium=product"
-												rel="noopener noreferrer"
 												openInNewTab
 												onClick={
 													this

@@ -73,7 +73,7 @@ export default {
 			a3: (
 				// eslint-disable-next-line jsx-a11y/anchor-has-content
 				<a
-					href="https://automattic.com/tos/#woopay"
+					href="https://automattic.com/tos/#ecommerce-services"
 					target="_blank"
 					rel="noopener noreferrer"
 				/>
