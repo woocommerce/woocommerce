@@ -15,6 +15,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect, useState, useRef } from '@wordpress/element';
 import { AddressFormType, getSettingWithCoercion } from '@woocommerce/settings';
 import { useCheckoutAddress } from '@woocommerce/base-context';
+import { usePresence } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -321,6 +322,10 @@ export const AddressAutocomplete = ( {
 		};
 	}, [] );
 
+	// Keyboard changes apply immediately, so a list that a key closes does not animate out. Typing sets this back,
+	// because a list that typing opens can close with a click or a blur.
+	const [ isClosedByKey, setIsClosedByKey ] = useState( false );
+
 	const addressChangeHandler = ( value: string ) => {
 		props.onChange( value );
 
@@ -344,6 +349,7 @@ export const AddressAutocomplete = ( {
 		// inputType or :-webkit-autofill.
 		if ( userIsTypingRef.current ) {
 			setSearchValue( value );
+			setIsClosedByKey( false );
 		}
 	};
 
@@ -379,6 +385,7 @@ export const AddressAutocomplete = ( {
 						addressType
 					];
 				if ( provider ) {
+					setIsClosedByKey( true );
 					setIsSettingAddress( true );
 					// Immediately suppress search to prevent any change events from triggering search
 					suppressSearchTimeoutRef.current = setTimeout( () => {
@@ -408,8 +415,12 @@ export const AddressAutocomplete = ( {
 				}
 			}
 		} else if ( event.key === 'Escape' ) {
+			setIsClosedByKey( true );
 			setSuggestions( [] );
 			setSelectedSuggestion( -1 );
+		} else if ( event.key === 'Tab' ) {
+			// Tab moves focus away, and the blur closes the list.
+			setIsClosedByKey( true );
 		}
 	};
 
@@ -458,6 +469,12 @@ export const AddressAutocomplete = ( {
 			? `suggestion-item-${ addressType }-${ selectedSuggestion }`
 			: undefined;
 
+	// The list stays mounted while it slides back to the field (rule 2).
+	const presence = usePresence(
+		searchValue.length >= 3 && suggestions.length > 0 ? suggestions : null,
+		{ exit: ! isClosedByKey }
+	);
+
 	return (
 		<div className="wc-block-components-address-autocomplete-container">
 			<ValidatedTextInput
@@ -484,13 +501,15 @@ export const AddressAutocomplete = ( {
 					) : null
 				}
 			/>
-			{ searchValue.length >= 3 && suggestions.length > 0 ? (
+			{ presence.value ? (
 				<Suggestions
 					selectedSuggestion={ selectedSuggestion }
-					suggestions={ suggestions }
+					suggestions={ presence.value }
 					branding={ activeProviderBranding }
 					addressType={ addressType }
 					onSuggestionClick={ handleSuggestionClick }
+					isExiting={ presence.isExiting }
+					containerRef={ presence.ref }
 				/>
 			) : null }
 		</div>
