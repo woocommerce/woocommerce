@@ -478,7 +478,7 @@ export const AddressAutocomplete = ( {
 			? `suggestion-item-${ addressType }-${ selectedSuggestion }`
 			: undefined;
 
-	// The list stays mounted while it slides back to the field (rule 2).
+	// The list stays mounted while it slides back to the field.
 	const presence = usePresence(
 		searchValue.length >= 3 && suggestions.length > 0 ? suggestions : null,
 		{ exit: ! isClosedByKey }

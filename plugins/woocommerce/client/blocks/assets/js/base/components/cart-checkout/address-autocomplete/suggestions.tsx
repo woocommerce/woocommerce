@@ -75,7 +75,7 @@ export const Suggestions = ( {
 	selectedSuggestion: number;
 	addressType: string;
 	onSuggestionClick: ( suggestionId: string ) => void;
-	// The list stays mounted while it animates out after it closes (rule 2).
+	// The list stays mounted while it animates out after it closes.
 	isExiting?: boolean;
 	containerRef?: React.Ref< HTMLDivElement >;
 } ) => {

@@ -5,7 +5,7 @@ import { useLayoutEffect, useRef, useState } from '@wordpress/element';
 import { whenAnimationsEnd } from '@woocommerce/base-utils';
 
 /**
- * Keeps content mounted while it animates out, such as a dropdown that closes (rules 2, 15).
+ * Keeps content mounted while it animates out, such as a dropdown that closes.
  *
  * Pass the content to show, or `null` to remove it. When it becomes `null`, the hook keeps returning the last content
  * with `isExiting` set, until the animations of `ref` end. Style the exit on `isExiting`. If new content arrives first,
