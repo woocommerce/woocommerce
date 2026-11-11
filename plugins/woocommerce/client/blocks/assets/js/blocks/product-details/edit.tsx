@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { productsStore } from '@woocommerce/data';
+import { getSetting } from '@woocommerce/settings';
 import { useEffect, useMemo } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
@@ -59,6 +60,9 @@ const Edit = ( {
 	const { hideTabTitle } = attributes;
 	const { isDescendentOfSingleProductTemplate } =
 		useIsDescendentOfSingleProductTemplate();
+	const showUpsellsPlaceholder =
+		isDescendentOfSingleProductTemplate &&
+		getSetting< boolean >( 'showProductUpsellsMigrationUI', true );
 
 	const product = useSelect(
 		( select ) => {
@@ -170,7 +174,7 @@ const Edit = ( {
 		return (
 			<div { ...innerBlocksWrapperProps }>
 				{ children }
-				{ isDescendentOfSingleProductTemplate && (
+				{ showUpsellsPlaceholder && (
 					<UpsellsPlaceholder clientId={ clientId } />
 				) }
 			</div>
@@ -198,7 +202,7 @@ const Edit = ( {
 			<Disabled>
 				<LegacyProductDetailsPreview hideTabTitle={ hideTabTitle } />
 			</Disabled>
-			{ isDescendentOfSingleProductTemplate && (
+			{ showUpsellsPlaceholder && (
 				<UpsellsPlaceholder clientId={ clientId } />
 			) }
 		</div>

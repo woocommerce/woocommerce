@@ -61,6 +61,35 @@ class ProductDetails extends AbstractBlock {
 	}
 
 	/**
+	 * Data passed through from server to client for block.
+	 *
+	 * @param array $attributes Any attributes that currently are available from the block.
+	 */
+	protected function enqueue_data( array $attributes = array() ): void {
+		parent::enqueue_data( $attributes );
+
+		if ( $this->asset_data_registry->exists( 'showProductUpsellsMigrationUI' ) ) {
+			return;
+		}
+
+		/**
+		 * Filters whether the editor shows the controls for switching product upsells between the classic display and the Upsells block.
+		 *
+		 * Themes that remove classic upsells with `remove_action( 'woocommerce_after_single_product_summary', 'woocommerce_upsell_display', 15 )` can return false so those controls stay hidden.
+		 *
+		 * @hook woocommerce_show_product_upsells_migration_ui
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param bool $enabled Whether the controls are shown. Default true.
+		 * @return bool Whether the controls are shown.
+		 */
+		$enabled = (bool) apply_filters( 'woocommerce_show_product_upsells_migration_ui', true );
+
+		$this->asset_data_registry->add( 'showProductUpsellsMigrationUI', $enabled );
+	}
+
+	/**
 	 * Register the option that records an upsells migration.
 	 *
 	 * @since 11.4.0

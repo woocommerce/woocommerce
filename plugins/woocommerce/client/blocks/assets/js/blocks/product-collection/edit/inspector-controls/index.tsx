@@ -5,6 +5,7 @@ import { InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 import { useIsEmailEditor } from '@woocommerce/email-editor';
+import { getSetting } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
 import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -63,6 +64,10 @@ const ProductCollectionInspectorControls = (
 	const { attributes, context, setAttributes, clientId } = props;
 	const { query, hideControls, dimensions, displayLayout, collection } =
 		attributes;
+	const showProductUpsellsMigrationUI = getSetting< boolean >(
+		'showProductUpsellsMigrationUI',
+		true
+	);
 
 	const tracksLocation = useTracksLocation( context.templateSlug );
 	const trackInteraction = ( filter: FilterName ) =>
@@ -178,9 +183,10 @@ const ProductCollectionInspectorControls = (
 
 	return (
 		<InspectorControls>
-			{ collection === CoreCollectionNames.UPSELLS && (
-				<UpsellsDowngradeNotice clientId={ clientId } />
-			) }
+			{ collection === CoreCollectionNames.UPSELLS &&
+				showProductUpsellsMigrationUI && (
+					<UpsellsDowngradeNotice clientId={ clientId } />
+				) }
 			<LinkedProductControl
 				query={ props.attributes.query }
 				setAttributes={ props.setAttributes }

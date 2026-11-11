@@ -173,9 +173,6 @@ if ( ! function_exists( 'purple_remove_upsells' ) ) :
 	/**
 	 * Remove upsells from product description.
 	 *
-	 * @todo This can be removed once the minimum supported WooCommerce version
-	 * in Purple is 11.4.0 or higher.
-	 *
 	 * @internal
 	 * @since purple 1.0
 	 *
@@ -189,20 +186,19 @@ endif;
 
 add_action( 'init', 'purple_remove_upsells' );
 
-if ( ! function_exists( 'purple_disable_upsells_migrated_option' ) ) :
+if ( ! function_exists( 'purple_show_upsells_migration_ui' ) ) :
 	/**
-	 * Marks the upsells migration as done, given that the Purple Single Product
-	 * template already includes the Upsells block.
+	 * Hides the editor controls for switching between classic upsells and the Upsells block.
 	 *
 	 * @internal
 	 * @since purple 1.0.4
 	 *
-	 * @return string
+	 * @return bool
 	 */
-	function purple_disable_upsells_migrated_option(): string {
-		return 'yes';
+	function purple_show_upsells_migration_ui(): bool {
+		return false;
 	}
 
 endif;
 
-add_filter( 'pre_option_woocommerce_product_upsells_migrated_to_block', 'purple_disable_upsells_migrated_option' );
+add_filter( 'woocommerce_show_product_upsells_migration_ui', 'purple_show_upsells_migration_ui' );
