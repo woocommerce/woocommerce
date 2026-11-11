@@ -2349,21 +2349,10 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * Data provider for test_checkout_local_pickup_tax_status.
-	 *
-	 * @return array[]
-	 */
-	public function local_pickup_tax_status_provider(): array {
-		return array(
-			'not taxable' => array( 'none', 0.0, 38.0 ),
-			'taxable'     => array( 'taxable', 0.5, 38.5 ),
-		);
-	}
-
-	/**
 	 * @testdox Checkout charges local pickup tax only when local pickup is taxable ($tax_status).
 	 *
-	 * @dataProvider local_pickup_tax_status_provider
+	 * @testWith ["none", 0.0, 38.0]
+	 *           ["taxable", 0.5, 38.5]
 	 * @param string $tax_status            Local pickup tax status.
 	 * @param float  $expected_shipping_tax Expected tax on the 5.00 pickup cost at 10%.
 	 * @param float  $expected_total        Expected order total: 30.00 of items, 3.00 item tax, 5.00 pickup, and the pickup tax.

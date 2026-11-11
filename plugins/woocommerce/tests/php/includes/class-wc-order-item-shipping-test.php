@@ -16,6 +16,28 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 class WC_Order_Item_Shipping_Test extends WC_Unit_Test_Case {
 
 	/**
+	 * Filter that makes local pickup taxable, if a test added one.
+	 *
+	 * @var callable|null
+	 */
+	private $make_pickup_taxable = null;
+
+	/**
+	 * Restore the shipping methods a test registered by hand.
+	 */
+	public function tearDown(): void {
+		try {
+			if ( $this->make_pickup_taxable ) {
+				remove_filter( 'woocommerce_shipping_pickup_location_option', $this->make_pickup_taxable, 10 );
+				$this->make_pickup_taxable = null;
+			}
+			WC()->shipping()->load_shipping_methods();
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
 	 * @testdox set_taxes handles valid array format correctly.
 	 */
 	public function test_set_taxes_with_valid_array_format() {
@@ -366,12 +388,13 @@ class WC_Order_Item_Shipping_Test extends WC_Unit_Test_Case {
 				'tax_class' => '',
 			)
 		);
-		$this->assertEquals( 0, $item->get_total_tax() );
+		$this->assertEqualsWithDelta( 0.0, (float) $item->get_total_tax(), 0.001 );
+		$this->assertNotSame( '', $item->get_total_tax(), 'The pickup line should carry a calculated tax total.' );
 
-		$make_taxable = function ( $value, $key ) {
+		$this->make_pickup_taxable = function ( $value, $key ) {
 			return 'tax_status' === $key ? ProductTaxStatus::TAXABLE : $value;
 		};
-		add_filter( 'woocommerce_shipping_pickup_location_option', $make_taxable, 10, 2 );
+		add_filter( 'woocommerce_shipping_pickup_location_option', $this->make_pickup_taxable, 10, 2 );
 		WC()->shipping()->register_shipping_method( new PickupLocation() );
 		$this->assertSame( ProductTaxStatus::TAXABLE, $item->get_tax_status(), 'A filtered tax status should be used, as it is at checkout.' );
 		$item->calculate_taxes(
@@ -383,9 +406,6 @@ class WC_Order_Item_Shipping_Test extends WC_Unit_Test_Case {
 				'tax_class' => '',
 			)
 		);
-		$this->assertEquals( 0.5, $item->get_total_tax() );
-
-		remove_filter( 'woocommerce_shipping_pickup_location_option', $make_taxable, 10 );
-		WC()->shipping()->load_shipping_methods();
+		$this->assertEqualsWithDelta( 0.5, (float) $item->get_total_tax(), 0.001 );
 	}
 }
