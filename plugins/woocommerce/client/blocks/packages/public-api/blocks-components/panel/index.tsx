@@ -50,10 +50,10 @@ const Panel = ( {
 		} );
 	}
 
-	// The open state that the last key press on the button set. A key press applies immediately (keyboard rule).
+	// The open state that the last key press on the button set. A key press applies immediately.
 	const keyStateRef = useRef< boolean | null >( null );
 	const animate = keyStateRef.current !== isOpen;
-	// The content grows and collapses, so the content below moves with it (rule 17).
+	// The content grows and collapses, so the content below moves with it.
 	const content = usePresence( isOpen || null, { animate, collapse: true } );
 
 	return (
