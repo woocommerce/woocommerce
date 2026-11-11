@@ -1,5 +1,5 @@
-// After a key press that moves through options (such as arrowing through radios), callers skip these, so the change
-// applies at once: see `wasRecentPointerInput()`.
+// Motion that changes the layout, so it runs in script: it measures sizes, which CSS can't animate to or from. Each
+// helper does nothing where the browser can't animate, and under reduced motion only fades or applies at once.
 
 // The space a box takes up in the flow, animated together so what follows moves with it, borders included.
 const BOX = [

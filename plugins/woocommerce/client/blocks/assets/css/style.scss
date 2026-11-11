@@ -19,7 +19,7 @@
 }
 
 // Shared motion keyframes for every block that depends on this stylesheet. Fades are separate from movement, so
-// opacity always takes the state-change timing, and movement uses `translate`, `scale` and `clip-path`, which combine
+// opacity always takes the state-change timing, and movement uses `translate`, `scale` and `filter`, which combine
 // with an element's resting `transform`. Use them through the motion mixins.
 @keyframes wc-fade-in {
 	from {

@@ -20,7 +20,7 @@ Woo constants for what WPDS doesn't cover are SCSS variables in `assets/css/abst
 
 ## Durations
 
-Three speeds cover almost everything. Changes under 200ms are too quick to notice unless something visibly changes size, so only the press uses 100ms. Try them in the durations demo on the comparison site.
+Three speeds cover almost everything. Changes under 200ms are too quick to notice unless something visibly changes size, so only the press uses 100ms.
 
 | What | In | Out | Examples |
 |------|----|-----|----------|
@@ -41,7 +41,7 @@ Write motion with the helpers in `assets/css/abstracts/_motion.scss`, available 
 | `@include motion-transition( $state, $move, $duration, $easing, $hold )` | A transition that fades and moves; `$move` runs over `$duration` (`lg` by default) only when motion is allowed | `@include motion-transition( $state: opacity, $move: translate );` |
 | `motion-hold( … )` | Keeps a property, such as `visibility`, at its old value until a fade ends | `transition: motion-state( opacity ), motion-hold( visibility );` |
 | `@include motion-enter( $keyframes, $duration, $delay )` | Content appearing: fades in, and plays `$keyframes` (`wc-rise` by default) when motion is allowed | `@include motion-enter( wc-grow, md );` |
-| `@include motion-exit( $keyframes, $hold-visible )` | Content going: fades out over 200ms, and plays `$keyframes`; holds the end until it unmounts | `@include motion-exit( wc-shrink );` |
+| `@include motion-exit( $keyframes )` | Content going: fades out over 200ms, and plays `$keyframes`; holds the end until it unmounts | `@include motion-exit( wc-shrink );` |
 | `@include motion-stagger( $keyframes )` | Sibling rows entering 50ms apart | `@include motion-stagger;` |
 | `@include motion-fade-in` / `motion-fade-out` | Fades with no movement, such as a value replacing its skeleton | |
 | `@include motion-dim( $states, $opacity )` | Dims while a state matches, such as `".is-disabled"`, fading back too | Cart rows, disabled radios |
@@ -52,7 +52,7 @@ Write motion with the helpers in `assets/css/abstracts/_motion.scss`, available 
 
 Shared keyframes live in `assets/css/style.scss`. `wc-fade-in`, `wc-fade-out`, `wc-fade-text-out` and `wc-hold-visible` only fade or hold. The movement keyframes, `wc-rise`, `wc-grow` and `wc-shrink`, animate `translate`, `scale` and `filter`, never `opacity` or `transform`. They combine with a fade, and with an element's resting `transform`. Position an element that grows or shrinks in with `translate` rather than `transform`, so it scales about its own centre.
 
-Prefer `@starting-style` with transitions for an entrance when the element is new to the page and what it animates exists at rest, as for the address suggestions: everything is then a transition, which turns around by itself. It also applies when an element goes from `display: none` to shown, as for the mobile order summary. Use keyframes when the motion only exists while animating, such as a row rising in.
+Prefer `@starting-style` with transitions for an entrance when the element is new to the page and what it animates exists at rest, as for the address suggestions: everything is then a transition, which turns around by itself. It also applies when an element goes from `display: none` to shown. Use keyframes when the motion only exists while animating, such as a row rising in.
 
 Motion that changes the layout runs in JavaScript (`@woocommerce/base-utils/collapse`), because it measures sizes. It takes its timings from custom properties on the root in `style.scss` (`--wc-motion-duration-move-in` and the rest), which hold the tokens, so the tokens stay the one source. Everything else waits for the element's own animations:
 

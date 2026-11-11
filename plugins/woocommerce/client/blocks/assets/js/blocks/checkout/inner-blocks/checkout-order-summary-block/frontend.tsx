@@ -40,10 +40,6 @@ const FrontendBlock = ( {
 } ): JSX.Element | null => {
 	const { cartTotals, cartIsLoading } =
 		useSettledOrderSummaryValue( useStoreCart() );
-	// The stable content container moves between these hosts without remounting its portal children.
-	const [ inlineHost, setInlineHost ] = useState< HTMLDivElement | null >(
-		null
-	);
 	const {
 		isOpen,
 		hasContainerWidth,
@@ -53,6 +49,10 @@ const FrontendBlock = ( {
 		toggleProps,
 	} = useOrderSummaryToggle();
 	const [ titleElement, setTitleElement ] = useState< HTMLDivElement | null >(
+		null
+	);
+	// The stable content container moves between these hosts without remounting its portal children.
+	const [ inlineHost, setInlineHost ] = useState< HTMLDivElement | null >(
 		null
 	);
 	const [ checkoutActionsHost, setCheckoutActionsHost ] =
@@ -180,15 +180,13 @@ const FrontendBlock = ( {
 		showInline,
 	] );
 
-	// After the effect above has moved the content in.
+	// After the effect above has moved the content in or out.
 	useLayoutEffect( () => {
 		if ( isOpen && isOpening.current ) {
 			isOpening.current = false;
 			collapseIn( inlineHost );
+			return;
 		}
-	}, [ inlineHost, isOpen ] );
-
-	useLayoutEffect( () => {
 		if ( ! inlineHost ) {
 			return;
 		}

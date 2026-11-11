@@ -16,7 +16,7 @@ const isSizeProperty = ( property: string ) =>
 	( property.startsWith( 'border' ) && property.endsWith( 'idth' ) );
 
 // Whether an animation changes sizes, such as the collapse helpers or a panel button's margin transition. Fades,
-// slides and CSS keyframes, such as a price roll, don't.
+// slides, CSS keyframe animations, and transitions of `transform` such as a price roll, don't.
 const changesSize = ( animation: Animation ) => {
 	if ( animation instanceof CSSAnimation ) {
 		return false;

@@ -5,6 +5,7 @@ import { useLayoutEffect, useRef } from '@wordpress/element';
 import {
 	animateHeightChange,
 	fadeAway,
+	inertCopy,
 	slideFrom,
 } from '@woocommerce/base-utils/collapse';
 import type { RefObject } from 'react';
@@ -39,15 +40,16 @@ const takeSnapshot = (
 		)
 		.forEach( ( row ) => {
 			const rect = row.getBoundingClientRect();
+			const top = rect.top + window.scrollY;
 			rows.set( row.dataset.cartItemKey as string, {
 				row,
-				top: rect.top + window.scrollY,
+				top,
 				left: rect.left + window.scrollX,
 				cellWidths: Array.from( row.cells ).map(
 					( cell ) => cell.getBoundingClientRect().width
 				),
 			} );
-			tops.set( row, rect.top + window.scrollY );
+			tops.set( row, top );
 		} );
 	cart?.querySelectorAll(
 		'.wp-block-woocommerce-cart-items-block > :not(table), .wp-block-woocommerce-cart-totals-block'
@@ -68,11 +70,9 @@ const fadeOutCopy = (
 ) => {
 	const shell = table.cloneNode( false ) as HTMLTableElement;
 	const body = document.createElement( 'tbody' );
-	const copy = row.cloneNode( true ) as HTMLTableRowElement;
+	const copy = inertCopy( row ) as HTMLTableRowElement;
+	// Without its key, the copy doesn't replay the rows' entrance.
 	copy.removeAttribute( 'data-cart-item-key' );
-	copy.querySelectorAll( '[id]' ).forEach( ( node ) =>
-		node.removeAttribute( 'id' )
-	);
 	Array.from( copy.cells ).forEach( ( cell, index ) => {
 		cell.style.width = `${ cellWidths[ index ] ?? 0 }px`;
 	} );

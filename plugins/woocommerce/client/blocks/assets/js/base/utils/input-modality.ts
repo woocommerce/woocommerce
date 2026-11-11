@@ -24,9 +24,12 @@ if ( typeof document !== 'undefined' ) {
 
 export const isUsingKeyboard = () => isKeyboardInput;
 
+// How long after a click or tap a change still counts as the shopper's.
+const RECENT_POINTER_MS = 1000;
+
 /**
- * Whether the shopper pressed a pointer within `within` milliseconds, so a change now is most likely theirs (such
- * as clicking Pickup) rather than one that loading data makes, which shouldn't animate on page load.
+ * Whether the shopper pressed a pointer just now, so a change is most likely theirs (such as clicking Pickup) rather
+ * than one that loading data makes, which shouldn't animate on page load.
  */
-export const wasRecentPointerInput = ( within = 1000 ) =>
-	! isKeyboardInput && performance.now() - lastPointerAt < within;
+export const wasRecentPointerInput = () =>
+	! isKeyboardInput && performance.now() - lastPointerAt < RECENT_POINTER_MS;

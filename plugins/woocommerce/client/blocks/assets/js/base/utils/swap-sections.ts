@@ -222,8 +222,7 @@ export const playSwap = ( snapshot: SwapSnapshot ) => {
 	};
 	if ( ! isReduced ) {
 		container.setAttribute( HOLDING, '' );
-		hold();
-		frame = requestAnimationFrame( keepHolding );
+		keepHolding();
 	}
 
 	const finish = () => {
