@@ -163,6 +163,7 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 		$order->add_meta_data( 'label', 'A' );
 		$order->add_meta_data( 'label', 'B' );
 		$order->add_meta_data( '_export_skip', 'secret' );
+		$order->add_meta_data( 'gift_message', array( 'text' => "Line 1\r\nLine 2" ) );
 		$order->save();
 
 		global $wpdb;
@@ -203,6 +204,7 @@ class HposOrderExportHandlerTest extends WC_Unit_Test_Case {
 		$this->assertSame( 2.0, $xpath->evaluate( 'count(wp:postmeta[wp:meta_key = "label"])', $item ) );
 		$this->assertSame( 0.0, $xpath->evaluate( 'count(wp:postmeta[wp:meta_key = "_customer_user"] | .//wp:meta_key[. = "_export_skip"])', $item ) );
 		$this->assertSame( 0.0, $xpath->evaluate( 'count(wp:postmeta[wp:meta_value = "Value without a key"])', $item ) );
+		$this->assertSame( array( 'text' => "Line 1\r\nLine 2" ), maybe_unserialize( $xpath->evaluate( 'string(wp:postmeta[wp:meta_key = "gift_message"]/wp:meta_value)', $item ) ), 'A lost carriage return breaks the serialized string length.' );
 
 		$note = $xpath->query( 'wp:comment[wp:commentmeta/wp:meta_key = "123"]', $item )->item( 0 );
 		$this->assertNotNull( $note );

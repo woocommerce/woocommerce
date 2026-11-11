@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStoreMeta;
+use Automattic\WooCommerce\Internal\ProductFeed\Utils\MemoryManager;
 use WC_Order;
 use WC_Order_Factory;
 
@@ -55,6 +56,13 @@ class HposOrderExportHandler {
 	private OrderCache $order_cache;
 
 	/**
+	 * Frees the in-memory caches between batches.
+	 *
+	 * @var MemoryManager
+	 */
+	private MemoryManager $memory_manager;
+
+	/**
 	 * Register the export hook.
 	 */
 	public function __construct() {
@@ -70,12 +78,14 @@ class HposOrderExportHandler {
 	 * @param DataSynchronizer            $synchronizer The order data synchronizer.
 	 * @param OrdersTableDataStoreMeta    $meta_store The HPOS meta data store.
 	 * @param OrderCache                  $order_cache The order object cache.
+	 * @param MemoryManager               $memory_manager Frees the in-memory caches between batches.
 	 */
-	final public function init( CustomOrdersTableController $controller, DataSynchronizer $synchronizer, OrdersTableDataStoreMeta $meta_store, OrderCache $order_cache ): void {
-		$this->controller   = $controller;
-		$this->synchronizer = $synchronizer;
-		$this->meta_store   = $meta_store;
-		$this->order_cache  = $order_cache;
+	final public function init( CustomOrdersTableController $controller, DataSynchronizer $synchronizer, OrdersTableDataStoreMeta $meta_store, OrderCache $order_cache, MemoryManager $memory_manager ): void {
+		$this->controller     = $controller;
+		$this->synchronizer   = $synchronizer;
+		$this->meta_store     = $meta_store;
+		$this->order_cache    = $order_cache;
+		$this->memory_manager = $memory_manager;
 	}
 
 	/**
@@ -198,9 +208,8 @@ class HposOrderExportHandler {
 				$this->export_order_to_xml( $order, $batch[ $id ]->status, (string) ( $batch[ $id ]->total_amount ?? '' ), $order_meta[ $id ] ?? array(), $notes[ $id ] ?? array(), $note_meta );
 			}
 
-			if ( wp_cache_supports( 'flush_runtime' ) ) {
-				wp_cache_flush_runtime();
-			}
+			// Also frees memory on object caches that cannot flush their runtime cache.
+			$this->memory_manager->flush_caches();
 		}
 
 		echo "</channel>\n</rss>\n";
@@ -423,13 +432,16 @@ class HposOrderExportHandler {
 	/**
 	 * Write XML text elements, treating even CDATA delimiters in data as literal text.
 	 *
+	 * Carriage returns are written as character references, because XML parsers drop literal ones
+	 * and that breaks the string lengths in serialized values.
+	 *
 	 * @param array $fields Element names and values.
 	 */
 	private static function write_fields( array $fields ): void {
 		foreach ( $fields as $tag => $value ) {
 			$text = is_scalar( $value ) ? (string) $value : '';
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- htmlspecialchars escapes XML text, including CDATA delimiters and invalid code points.
-			printf( "<%1\$s>%2\$s</%1\$s>\n", esc_attr( $tag ), htmlspecialchars( $text, ENT_XML1 | ENT_NOQUOTES | ENT_SUBSTITUTE | ENT_DISALLOWED, 'UTF-8' ) );
+			printf( "<%1\$s>%2\$s</%1\$s>\n", esc_attr( $tag ), str_replace( "\r", '&#13;', htmlspecialchars( $text, ENT_XML1 | ENT_NOQUOTES | ENT_SUBSTITUTE | ENT_DISALLOWED, 'UTF-8' ) ) );
 		}
 	}
 }
