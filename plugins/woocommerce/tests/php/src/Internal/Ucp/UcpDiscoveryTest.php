@@ -162,7 +162,7 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 		try {
 			$this->assertSame( $expected, UcpDiscovery::serve_status() );
 		} finally {
-			wp_delete_file( $path );
+			self::remove_ucp_file( $path );
 		}
 	}
 
@@ -187,7 +187,7 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 			$this->assertSame( 'file_in_the_way', UcpDiscovery::serve_status() );
 		} finally {
 			chmod( $path, 0644 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
-			wp_delete_file( $path );
+			self::remove_ucp_file( $path );
 		}
 	}
 
@@ -246,5 +246,19 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_maybe_render_ignores_other_requests( string $matched_rule, string $query_var ): void {
 		$this->assertNull( $this->render( $matched_rule, $query_var ) );
+	}
+
+	/**
+	 * Delete a test discovery file and the two folders created for it.
+	 *
+	 * @param string $path File path under a `wc-ucp-*` temp folder.
+	 */
+	private static function remove_ucp_file( string $path ): void {
+		wp_delete_file( $path );
+		foreach ( array( dirname( $path ), dirname( $path, 2 ) ) as $dir ) {
+			if ( is_dir( $dir ) ) {
+				rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+			}
+		}
 	}
 }

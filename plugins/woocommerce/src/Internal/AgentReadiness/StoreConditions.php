@@ -175,7 +175,7 @@ class StoreConditions {
 		$fixes = array(
 			'no_file'         => __( 'Choose a permalink structure other than Plain under Settings > Permalinks.', 'woocommerce' ),
 			'file_in_the_way' => __( 'Remove the /.well-known/ucp file that WooCommerce didn\'t write from your WordPress folder. If permalinks are Plain, also choose another structure under Settings > Permalinks.', 'woocommerce' ),
-			'file_outdated'   => __( 'WooCommerce couldn\'t update the /.well-known/ucp file. Make it writable by the web server, check the free disk space, then reload this page.', 'woocommerce' ),
+			'file_outdated'   => __( 'The /.well-known/ucp file in your WordPress folder has an old profile. Delete it, and if permalinks are Plain, choose another structure under Settings > Permalinks.', 'woocommerce' ),
 		);
 		return array(
 			'id'      => 'ucp_discovery',

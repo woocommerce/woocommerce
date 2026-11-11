@@ -168,9 +168,9 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A /.well-known/ucp file in the way fails the UCP address check with the fix for its reason.
+	 * @testdox A /.well-known/ucp file in the way fails the UCP address check with the fix for its reason, and deleting it passes the check.
 	 * @testWith ["foreign", "Remove the /.well-known/ucp file"]
-	 *           ["outdated", "WooCommerce couldn't update the /.well-known/ucp file"]
+	 *           ["outdated", "The /.well-known/ucp file in your WordPress folder has an old profile"]
 	 *
 	 * @param string $file   Someone else's file, or WooCommerce's file with an old profile.
 	 * @param string $prefix How the fix should start.
@@ -191,8 +191,12 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 		try {
 			$this->assertSame( array( 'ucp_discovery' ), $this->sut->failing_required() );
 			$this->assertStringStartsWith( $prefix, $this->ucp_discovery_fix() );
-		} finally {
+
+			// Following the fix passes the check: with the file gone and pretty permalinks, nothing is in the way.
 			wp_delete_file( $path );
+			$this->assertSame( array(), $this->sut->failing_required() );
+		} finally {
+			self::remove_ucp_file( $path );
 		}
 	}
 
@@ -224,6 +228,20 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 		);
 		foreach ( array( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, AgenticCommerceSettings::TERMS_PAGE_OPTION, AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION ) as $option ) {
 			update_option( $option, $page );
+		}
+	}
+
+	/**
+	 * Delete a test discovery file and the two folders created for it.
+	 *
+	 * @param string $path File path under a `wc-ucp-*` temp folder.
+	 */
+	private static function remove_ucp_file( string $path ): void {
+		wp_delete_file( $path );
+		foreach ( array( dirname( $path ), dirname( $path, 2 ) ) as $dir ) {
+			if ( is_dir( $dir ) ) {
+				rmdir( $dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+			}
 		}
 	}
 }
