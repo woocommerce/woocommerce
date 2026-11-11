@@ -3022,6 +3022,38 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A batch update does not remove a fee line sent with a non-numeric quantity.
+	 */
+	public function test_batch_update_keeps_fee_line_with_non_numeric_quantity(): void {
+		$order = WC_Helper_Order::create_order();
+		$fee   = new WC_Order_Item_Fee();
+		$fee->set_name( 'Handling' );
+		$fee->set_total( '5' );
+		$order->add_item( $fee );
+		$order->save();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/batch' );
+		$request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'        => $order->get_id(),
+						'fee_lines' => array(
+							array(
+								'id'       => $fee->get_id(),
+								'quantity' => 'invalid',
+							),
+						),
+					),
+				),
+			)
+		);
+		$this->server->dispatch( $request );
+
+		$this->assertNotFalse( wc_get_order( $order->get_id() )->get_item( $fee->get_id() ), 'The fee line should not be removed.' );
+	}
+
+	/**
 	 * @testdox A whole line item quantity reaches order preparation as an integer, also on stores that allow decimal quantities.
 	 * @testWith [false]
 	 *           [true]
