@@ -280,6 +280,35 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox An update that changes nothing keeps the hand-off, and one refused after changing the lines drops it.
+	 */
+	public function test_update_drops_the_hand_off_only_for_a_change(): void {
+		$created   = $this->create_ready_checkout();
+		$path      = '/checkout-sessions/' . $created['id'];
+		$completed = $this->request( 'POST', $path . '/complete' )->get_data();
+		$order_id  = (int) WC()->session->get( 'store_api_draft_order' );
+
+		foreach ( array( array(), array( 'line_items' => array( $this->line_item( 0, 1 ) ) ) ) as $body ) {
+			$same = $this->request( 'PUT', $path, $body )->get_data();
+			$this->assertSame( $completed['continue_url'], $same['continue_url'] ?? null );
+			$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::PENDING ) );
+		}
+
+		$refused = $this->request(
+			'PUT',
+			$path,
+			array(
+				'line_items'       => array( $this->line_item( 1, 2 ) ),
+				'shipping_address' => array( 'address_country' => 'ZZ' ),
+			)
+		);
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::CANCELLED ), 'The lines changed, so the order for the old ones must not stay payable.' );
+		$this->assertArrayNotHasKey( 'continue_url', $this->request( 'GET', $path )->get_data() );
+	}
+
+	/**
 	 * @testdox A promoted cart is read but not written through the cart routes while its checkout is live, and is no longer a cart afterwards.
 	 */
 	public function test_cart_writes_are_refused_once_promoted(): void {
