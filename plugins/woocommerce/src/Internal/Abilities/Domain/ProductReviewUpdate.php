@@ -52,9 +52,10 @@ class ProductReviewUpdate extends AbstractDomainAbility implements AbilityDefini
 					'public' => true,
 					'type'   => 'tool',
 				),
+				// Not idempotent: the Abilities API run endpoint demands DELETE for destructive idempotent abilities.
 				'annotations'  => array(
 					'readonly'    => false,
-					'idempotent'  => true,
+					'idempotent'  => false,
 					'destructive' => true,
 				),
 			),
