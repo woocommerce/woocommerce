@@ -34,11 +34,11 @@
 		&::-webkit-meter-suboptimum-value {
 			background: none;
 			background-color: currentColor;
-			transition: 0.2s ease;
 			border-radius: calc($gap-smaller / 2);
 			border: 0;
 			height: $gap-smaller;
 			vertical-align: middle;
+			transition: motion-state(background-color);
 		}
 
 		&:-moz-meter-optimum::-moz-meter-bar,
@@ -46,11 +46,11 @@
 		&:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 			background: none;
 			background-color: currentColor;
-			transition: 0.2s ease;
 			border-radius: calc($gap-smaller / 2);
 			border: 0;
 			height: $gap-smaller;
 			vertical-align: middle;
+			transition: motion-state(background-color);
 		}
 	}
 	.wc-block-components-password-strength__result {
