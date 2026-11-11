@@ -305,6 +305,42 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		}
 
 		/**
+		 * @testdox get_formatted_log stops sanitizing at the maximum depth when the context references itself.
+		 */
+		public function test_get_formatted_log_handles_self_referencing_context(): void {
+			$extra         = array( 'email' => 'john@example.com' );
+			$extra['self'] = &$extra;
+
+			$formatted_log = $this->sut->get_formatted_log( 'error', 'Test error message', array( 'extra' => $extra ) );
+
+			$this->assertSame( '[redacted_email]', $formatted_log['extra']['self']['email'], 'Values within the depth limit should be sanitized' );
+
+			$level = $formatted_log['extra'];
+			while ( is_array( $level['self'] ) ) {
+				$level = $level['self'];
+			}
+			$this->assertSame( '[max_depth_reached]', $level['self'], 'Arrays past the depth limit should be replaced with a placeholder' );
+		}
+
+		/**
+		 * @testdox get_formatted_log stops sanitizing at the maximum item count when the context references itself many times.
+		 */
+		public function test_get_formatted_log_handles_context_with_many_self_references(): void {
+			$extra = array( 'email' => 'john@example.com' );
+			for ( $i = 1; $i <= 4; $i++ ) {
+				$extra[ 'self' . $i ] = &$extra;
+			}
+
+			$formatted_log = $this->sut->get_formatted_log( 'error', 'Test error message', array( 'extra' => $extra ) );
+
+			$this->assertSame( '[redacted_email]', $formatted_log['extra']['email'], 'Values within the limits should be sanitized' );
+
+			$encoded = wp_json_encode( $formatted_log['extra'] );
+			$this->assertIsString( $encoded, 'The sanitized context should be JSON encodable' );
+			$this->assertStringContainsString( '[max_items_reached]', $encoded, 'Values past the item limit should be replaced with a placeholder' );
+		}
+
+		/**
 		 * @testdox get_formatted_log sanitizes tags from the context but not the default tags.
 		 */
 		public function test_get_formatted_log_sanitizes_context_tags_only(): void {

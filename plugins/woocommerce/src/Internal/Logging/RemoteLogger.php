@@ -35,6 +35,16 @@ class RemoteLogger extends \WC_Log_Handler {
 	private const THIRD_PARTY_CHECK_SOURCES = array( 'fatal-errors', 'store-api' );
 
 	/**
+	 * How many levels of nested arrays in the log context are sanitized. Deeper arrays are replaced with a placeholder.
+	 */
+	private const MAX_SANITIZE_DEPTH = 10;
+
+	/**
+	 * How many values in the log context are sanitized in total. Values past the limit are replaced with a placeholder.
+	 */
+	private const MAX_SANITIZE_ITEMS = 1000;
+
+	/**
 	 * Handle a log entry.
 	 *
 	 * @param int    $timestamp Log timestamp.
@@ -449,16 +459,30 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * Sanitize the string values of an array, including nested arrays.
 	 *
 	 * Returns a new array, so values the caller passed by reference are not changed.
+	 * Arrays nested deeper than MAX_SANITIZE_DEPTH, and values past MAX_SANITIZE_ITEMS in total, are replaced with a placeholder, so an array that references itself can't recurse forever or exhaust memory.
 	 *
-	 * @param array $data The array to sanitize.
+	 * @param array $data  The array to sanitize.
+	 * @param int   $depth The nesting level of $data.
+	 * @param int   $count How many values have been sanitized so far, shared across the recursion.
 	 *
 	 * @return array The sanitized array.
 	 */
-	private function sanitize_array( array $data ): array {
+	private function sanitize_array( array $data, int $depth = 0, int &$count = 0 ): array {
 		$sanitized = array();
 
 		foreach ( $data as $key => $value ) {
-			$sanitized[ $key ] = is_array( $value ) ? $this->sanitize_array( $value ) : $this->sanitize( $value );
+			if ( ++$count > self::MAX_SANITIZE_ITEMS ) {
+				$sanitized[ $key ] = '[max_items_reached]';
+				break;
+			}
+
+			if ( ! is_array( $value ) ) {
+				$sanitized[ $key ] = $this->sanitize( $value );
+			} elseif ( $depth < self::MAX_SANITIZE_DEPTH ) {
+				$sanitized[ $key ] = $this->sanitize_array( $value, $depth + 1, $count );
+			} else {
+				$sanitized[ $key ] = '[max_depth_reached]';
+			}
 		}
 
 		return $sanitized;
