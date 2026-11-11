@@ -142,7 +142,8 @@ class ProductReviewReply extends AbstractDomainAbility implements AbilityDefinit
 			if ( ! wp_delete_comment( (int) $reply_id, true ) ) {
 				return new \WP_Error(
 					'woocommerce_ability_product_review_reply_failed',
-					__( 'The review was moderated while the reply was being added, and the reply was saved as a separate comment that could not be removed.', 'woocommerce' ),
+					/* translators: %d: comment ID. */
+					sprintf( __( 'The review was moderated while the reply was being added, and the reply was saved as a separate comment %d that could not be removed.', 'woocommerce' ), (int) $reply_id ),
 					array(
 						'status' => 500,
 						'saved'  => true,
@@ -161,7 +162,8 @@ class ProductReviewReply extends AbstractDomainAbility implements AbilityDefinit
 		if ( ! $reply instanceof \WP_Comment ) {
 			return new \WP_Error(
 				'woocommerce_ability_product_review_reply_failed',
-				__( 'The reply was added, but it could not be read back.', 'woocommerce' ),
+				/* translators: %d: reply ID. */
+				sprintf( __( 'Reply %d was added, but it could not be read back.', 'woocommerce' ), (int) $reply_id ),
 				array(
 					'status' => 500,
 					'saved'  => true,

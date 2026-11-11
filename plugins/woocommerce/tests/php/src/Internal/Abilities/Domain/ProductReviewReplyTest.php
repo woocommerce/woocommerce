@@ -150,6 +150,43 @@ class ProductReviewReplyTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report the stray comment as saved when it cannot be removed.
+	 */
+	public function test_stray_comment_that_cannot_be_removed(): void {
+		global $wpdb;
+
+		$review = $this->review();
+		add_filter(
+			'preprocess_comment',
+			function ( $commentdata ) use ( $review ) {
+				wp_trash_comment( $review );
+				return $commentdata;
+			}
+		);
+		add_filter(
+			'query',
+			function ( $query ) use ( $wpdb ) {
+				return 0 === strpos( $query, "DELETE FROM `{$wpdb->comments}`" ) ? "DELETE FROM `{$wpdb->comments}` WHERE 1 = 0" : $query;
+			}
+		);
+
+		$result = $this->sut->execute(
+			array(
+				'id'      => $review,
+				'content' => 'Thanks!',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_ability_product_review_reply_failed', $result->get_error_code() );
+		$data = $result->get_error_data();
+		$this->assertSame( 500, $data['status'] );
+		$this->assertTrue( $data['saved'] );
+		$this->assertInstanceOf( \WP_Comment::class, get_comment( $data['id'] ), 'The stray comment should still exist.' );
+		$this->assertStringContainsString( (string) $data['id'], $result->get_error_message(), 'MCP clients only see the message.' );
+	}
+
+	/**
 	 * @testdox Should pass on WordPress's duplicate check with its status.
 	 */
 	public function test_duplicate_reply(): void {
