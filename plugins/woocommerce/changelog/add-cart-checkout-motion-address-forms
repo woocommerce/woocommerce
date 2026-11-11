@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Checkout address forms now grow and collapse smoothly when the billing address, an address form, or the apartment field is shown.

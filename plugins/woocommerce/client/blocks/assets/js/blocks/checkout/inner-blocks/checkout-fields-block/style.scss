@@ -98,3 +98,11 @@
 		text-decoration: underline;
 	}
 }
+
+// The billing section and the address line 2 field grow in, and the billing section collapses out.
+:where(.wp-block-woocommerce-checkout) {
+	.wc-block-checkout__billing-fields,
+	.wc-block-components-address-form__address_2 {
+		@include motion-collapse;
+	}
+}
