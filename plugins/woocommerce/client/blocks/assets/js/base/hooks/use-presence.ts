@@ -15,7 +15,7 @@ import { animateCollapse, whenAnimationsEnd } from '@woocommerce/base-utils';
  * @param value            The content to show, or `null` when there is none.
  * @param options
  * @param options.animate  Set to `false` to apply the change immediately, for example after a key press.
- * @param options.collapse Set to `true` to grow `ref` when content arrives and collapse it when it goes (rule 17).
+ * @param options.collapse Set to `true` to grow `ref` when content arrives and collapse it when it goes.
  *                         Content that is there on the first render does not grow.
  * @return The content to render, whether it is exiting, and the ref for the element that animates.
  */

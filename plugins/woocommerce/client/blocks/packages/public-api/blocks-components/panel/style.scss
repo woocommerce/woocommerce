@@ -52,9 +52,9 @@
 	}
 }
 
-// Only the blocks that use motion animate the panel (General rules).
+// Only the blocks that use motion animate the panel.
 :where(.wp-block-woocommerce-cart, .wp-block-woocommerce-checkout) {
-	// The gap under the button opens and closes with the content, at the same speed (rule 17).
+	// The gap under the button opens and closes with the content, at the same speed.
 	.wc-block-components-panel__button {
 		@include motion-transition($move: margin-bottom, $easing: balanced);
 
@@ -63,7 +63,7 @@
 			@include motion-transition($move: margin-bottom, $duration: md, $easing: balanced);
 		}
 
-		// A key press applies immediately (keyboard rule), as the content does.
+		// A key press applies immediately, as the content does.
 		&[data-wc-instant] {
 			transition: none;
 		}

@@ -47,8 +47,8 @@ const reset = ( element: HTMLElement ) => {
 };
 
 /**
- * Grows an element open or collapses it shut in the real layout, so the content below moves with it (rule 17,
- * Exceptions). The element also fades. Give the element the `motion-collapse` mixin, which sets the timing and the
+ * Grows an element open or collapses it shut in the real layout, so the content below moves with it. The
+ * element also fades. Give the element the `motion-collapse` mixin, which sets the timing and the
  * reduced motion rules. The element must not have its own inline styles for the properties that change.
  *
  * Call it before paint: after the element mounts to grow it, or when it starts to go to collapse it. If the element

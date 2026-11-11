@@ -81,6 +81,7 @@ Use the helpers in `assets/css/abstracts/_motion.scss`. Do not write `transition
 | `@include motion-fade-in` / `motion-fade-out` | A fade with no movement. | |
 | `@include motion-dim( $states )` | Dims the element while `$states` matches, such as `".is-disabled"`. | Cart rows, disabled radios |
 | `@include motion-spinner-swap` | A button that loads. The label fades out and the spinner grows in. | Place order, coupon Apply |
+| `@include motion-collapse` | The timing for `animateCollapse`. The content grows over 300ms and collapses over 200ms, and fades. With reduced motion, it only fades. | `Panel` content |
 | `@include motion-safe { … }` | Movement that the other helpers do not cover. | |
 
 `assets/css/style.scss` has the shared keyframes. `wc-fade-in` and `wc-fade-out` only fade. `wc-rise`, `wc-grow`, and `wc-shrink` move with `translate`, `scale`, and `filter`, so they combine with a fade and with the resting `transform` of an element.
@@ -92,7 +93,8 @@ Motion that changes the layout runs in JavaScript, because it must measure sizes
 | Helper | Use |
 |--------|-----|
 | `whenAnimationsEnd( element, callback )` (`@woocommerce/base-utils`) | Runs `callback` when the animations of `element` end, instead of after a fixed timeout. It waits again if a transition turns around. It returns a function that cancels the callback. |
-| `usePresence( value, { exit } )` (`@woocommerce/base-hooks`) | Keeps content mounted while it animates out. Pass the content, or `null` to remove it. It returns `{ value, isExiting, ref }`. Put `ref` on the element that animates. Pass `exit: false` to remove the content immediately, for example after a key press. |
+| `usePresence( value, { animate, collapse } )` (`@woocommerce/base-hooks`) | Keeps content mounted while it animates out. Pass the content, or `null` to remove it. It returns `{ value, isExiting, ref }`. Put `ref` on the element that animates. Pass `collapse: true` to grow and collapse `ref` in the real layout. Pass `animate: false` to apply the change immediately, for example after a key press. |
+| `animateCollapse( element, isOpen, animate )` (`@woocommerce/base-utils`) | Grows `element` open or collapses it shut in the real layout, and turns around if it still moves. Give `element` the `motion-collapse` mixin. Use it through `usePresence`. |
 
 ## Techniques
 
