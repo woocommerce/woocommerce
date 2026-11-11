@@ -12,7 +12,14 @@
 		}
 	},
 	"ancestor": [ "woocommerce/product-filters" ],
-	"usesContext": [ "query", "filterParams" ],
+	"usesContext": [
+		"query",
+		"queryId",
+		"collection",
+		"productCollectionLocation",
+		"filterParams",
+		"productFiltersKey"
+	],
 	"attributes": {
 		"className": {
 			"type": "string",
@@ -25,10 +32,6 @@
 		"minRating": {
 			"type": "string",
 			"default": "0"
-		},
-		"isPreview": {
-			"type": "boolean",
-			"default": false
 		}
 	},
 	"textdomain": "woocommerce",

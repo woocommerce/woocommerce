@@ -25,25 +25,18 @@ import {
 	type QueryControlProps,
 } from '../../types';
 import { DEFAULT_QUERY } from '../../constants';
-import {
-	getDefaultValueOfInherit,
-	getDefaultValueOfFilterable,
-} from '../../utils';
+import { getDefaultValueOfInherit } from '../../utils';
 
 const label = __( 'Query type', 'woocommerce' );
 const defaultOptionLabel = __( 'Default', 'woocommerce' );
 const customOptionLabel = __( 'Custom', 'woocommerce' );
 
 const defaultInheritHelpText = __(
-	'Display products based on the current template and allow shoppers to filter.',
-	'woocommerce'
-);
-const defaultFilterableHelpText = __(
-	'Show products based on specific criteria and allow shoppers to filter.',
+	'Display products based on the current template.',
 	'woocommerce'
 );
 const customHelpText = __(
-	'Show a list of products based on fixed criteria.',
+	'Show products based on specific criteria.',
 	'woocommerce'
 );
 
@@ -114,53 +107,4 @@ const InheritQueryControl = ( {
 	);
 };
 
-const FilterableControl = ( {
-	setQueryAttribute,
-	trackInteraction,
-	query,
-}: QueryControlProps ) => {
-	const filterable = query?.filterable;
-
-	const defaultValue = useMemo( () => getDefaultValueOfFilterable(), [] );
-
-	return (
-		<ToolsPanelItem
-			label={ label }
-			hasValue={ () => filterable !== defaultValue }
-			isShownByDefault
-			onDeselect={ () => {
-				setQueryAttribute( {
-					filterable: defaultValue,
-				} );
-				trackInteraction( CoreFilterNames.FILTERABLE );
-			} }
-		>
-			<ToggleGroupControl
-				__next40pxDefaultSize
-				__nextHasNoMarginBottom
-				className="wc-block-product-collection__inherit-query-control"
-				isBlock
-				label={ label }
-				help={ filterable ? defaultFilterableHelpText : customHelpText }
-				value={ !! filterable ? 'default' : 'custom' }
-				onChange={ ( value: 'default' | 'custom' ) => {
-					setQueryAttribute( {
-						filterable: value === 'default',
-					} );
-					trackInteraction( CoreFilterNames.FILTERABLE );
-				} }
-			>
-				<ToggleGroupControlOption
-					value="default"
-					label={ defaultOptionLabel }
-				/>
-				<ToggleGroupControlOption
-					value="custom"
-					label={ customOptionLabel }
-				/>
-			</ToggleGroupControl>
-		</ToolsPanelItem>
-	);
-};
-
-export { FilterableControl, InheritQueryControl };
+export { InheritQueryControl };

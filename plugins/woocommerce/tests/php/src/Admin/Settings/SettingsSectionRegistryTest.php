@@ -1073,4 +1073,37 @@ class SettingsSectionRegistryTest extends WC_Unit_Test_Case {
 
 		return $previous_settings;
 	}
+
+	/**
+	 * @testdox Should report a gateway collision in English, whatever the site language.
+	 */
+	public function test_gateway_collision_notice_is_not_translated(): void {
+		$this->setExpectedIncorrectUsage( SettingsSectionRegistry::class . '::register' );
+		add_filter(
+			'gettext',
+			function ( $translation, $text, $domain ) {
+				return 'woocommerce' === $domain ? 'Übersetzt: ' . $text : $translation;
+			},
+			10,
+			3
+		);
+		$messages = array();
+		add_action(
+			'doing_it_wrong_run',
+			function ( $function_name, $message ) use ( &$messages ) {
+				$messages[ $function_name ] = $message;
+			},
+			10,
+			2
+		);
+
+		SettingsSectionRegistry::get_instance()->register( $this->get_registered_section( 'bacs' ) );
+
+		$this->assertArrayHasKey( SettingsSectionRegistry::class . '::register', $messages, 'The collision should raise a notice.' );
+		$this->assertStringStartsWith(
+			'The settings section &quot;checkout/bacs&quot; conflicts with an existing payment gateway section.',
+			$messages[ SettingsSectionRegistry::class . '::register' ],
+			'The notice should be the escaped English message.'
+		);
+	}
 }

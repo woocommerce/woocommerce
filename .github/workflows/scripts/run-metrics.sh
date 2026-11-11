@@ -63,9 +63,12 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	if test -n "$(find $ARTIFACTS_PATH -maxdepth 1 -name "*_${BASE_SHA}_*" -print -quit)"; then
 		title "Skipping benchmarking baseline as benchmarking results already available under $ARTIFACTS_PATH"
 	else
-		title "##[group]Checkout baseline"
-		git fetch --no-tags --quiet --unshallow origin trunk
-		echo '##[endgroup]'
+		# PRs already fetched their baseline above; push runs obtain the fixed older baseline here.
+		if [ "$GITHUB_EVENT_NAME" == "push" ]; then
+			title "##[group]Checkout baseline"
+			git fetch --no-tags --quiet --unshallow origin trunk
+			echo '##[endgroup]'
+		fi
 
 		title "##[group]Building baseline"
 		( git -c core.hooksPath=/dev/null checkout --quiet $BASE_SHA > /dev/null || git reset --hard $BASE_SHA ) && echo 'On' $(git rev-parse HEAD)

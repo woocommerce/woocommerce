@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { test, expect, getPostIdBySlug, wpCLI } from '@woocommerce/e2e-utils';
+import { test, expect } from '@woocommerce/e2e-utils';
+
+/**
+ * Internal dependencies
+ */
+import { setFilterValue } from '../../../utils/filters';
 
 const blockData = {
 	slug: 'woocommerce/single-product',
@@ -9,15 +14,23 @@ const blockData = {
 };
 
 test.describe( `${ blockData.slug } Block`, () => {
+	test.beforeEach( async ( { page } ) => {
+		await page.goto( `/product/${ blockData.productSlug }/` );
+
+		await expect(
+			page.locator( '.wc-block-components-product-rating' )
+		).toBeVisible();
+	} );
+
 	test( 'Product Rating block is not visible if ratings are disabled for product', async ( {
 		page,
 	} ) => {
-		await test.step( `Disable reviews for ${ blockData.productSlug }`, async () => {
-			const productId = await getPostIdBySlug( blockData.productSlug );
-			await wpCLI( `post update ${ productId } --comment_status=closed` );
-		} );
-
-		await page.goto( `/product/${ blockData.productSlug }/` );
+		await setFilterValue(
+			page,
+			'woocommerce_product_get_reviews_allowed',
+			false
+		);
+		await page.reload();
 
 		await expect(
 			page.locator( '.wc-block-components-product-rating' )
@@ -25,22 +38,14 @@ test.describe( `${ blockData.slug } Block`, () => {
 	} );
 
 	test( 'Product Rating block is not visible if ratings are disabled globally in the store', async ( {
-		admin,
 		page,
 	} ) => {
-		await test.step( `Disable reviews in the store`, async () => {
-			await page.goto(
-				'/wp-admin/admin.php?page=wc-settings&tab=products'
-			);
-			await admin.page
-				.getByRole( 'checkbox', {
-					name: 'Enable product reviews',
-				} )
-				.uncheck();
-			await page.getByRole( 'button', { name: 'Save changes' } ).click();
-		} );
-
-		await page.goto( `/product/${ blockData.productSlug }/` );
+		await setFilterValue(
+			page,
+			'pre_option_woocommerce_enable_reviews',
+			'no'
+		);
+		await page.reload();
 
 		await expect(
 			page.locator( '.wc-block-components-product-rating' )

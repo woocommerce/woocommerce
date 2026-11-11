@@ -6,6 +6,7 @@ import {
 	ProductDataContextProvider,
 } from '@woocommerce/shared-context';
 import { ProductResponseItem } from '@woocommerce/types';
+import { noticeContexts } from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
@@ -60,7 +61,7 @@ const CartCrossSellsProduct = ( {
 						/>
 						<ProductPrice />
 					</div>
-					<ProductButton />
+					<ProductButton noticeContext={ noticeContexts.CART } />
 				</ProductDataContextProvider>
 			</InnerBlockLayoutContextProvider>
 		</div>

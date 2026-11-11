@@ -86,8 +86,19 @@ class Renderer {
 			100,
 			1
 		);
+		add_filter(
+			'render_block_woocommerce/product-filters',
+			function ( $html, $parsed_block, $instance ) {
+				if ( $instance->context['query']['isProductCollectionBlock'] ?? false ) {
+					$this->render_state['has_filters'] = ! empty( $html );
+				}
+				return $html;
+			},
+			10,
+			3
+		);
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
-		add_filter( 'render_block_context', array( $this, 'extend_context_for_inner_blocks' ), 11, 2 );
+		add_filter( 'render_block_context', array( $this, 'handle_render_block_context' ), 11, 3 );
 	}
 
 	/**
@@ -179,7 +190,7 @@ class Renderer {
 	 * @return bool
 	 */
 	private function should_prevent_render() {
-		return ! $this->render_state['has_results'] && ! $this->render_state['has_no_results_block'];
+		return ! $this->render_state['has_results'] && ! $this->render_state['has_no_results_block'] && empty( $this->render_state['has_filters'] );
 	}
 
 	/**
@@ -403,6 +414,33 @@ class Renderer {
 	}
 
 	/**
+	 * Extend context only for Product Collection blocks and their descendants.
+	 *
+	 * @since 11.3.0
+	 * @internal
+	 *
+	 * @param array          $context      The block context.
+	 * @param array          $parsed_block The parsed block being rendered.
+	 * @param \WP_Block|null $parent_block The parent block instance, or null for a top-level block.
+	 * @return array
+	 */
+	public function handle_render_block_context( $context, $parsed_block, $parent_block = null ) {
+		$block_name = $parsed_block['blockName'] ?? '';
+
+		if (
+			'woocommerce/product-collection' !== $block_name &&
+			(
+				! $parent_block instanceof \WP_Block ||
+				( 'woocommerce/product-collection' !== $parent_block->name && ( ! isset( $parent_block->context['isProductCollectionInnerBlock'] ) || true !== ( $parent_block->context['isProductCollectionInnerBlock'] ) ) )
+			)
+		) {
+			return $context;
+		}
+
+		return $this->extend_context_for_inner_blocks( $context, $parsed_block );
+	}
+
+	/**
 	 * Provides the location context to each inner block of the product collection block.
 	 * Hint: Only blocks using the 'query' context will be affected.
 	 *
@@ -431,7 +469,8 @@ class Renderer {
 	 */
 	public function extend_context_for_inner_blocks( $context, $parsed_block = array() ) {
 		// Add iapi/provider to inner blocks so they can run this store's Interactivity API actions.
-		$context['iapi/provider'] = 'woocommerce/product-collection';
+		$context['iapi/provider']                 = 'woocommerce/product-collection';
+		$context['isProductCollectionInnerBlock'] = true;
 
 		$block_name = $parsed_block['blockName'] ?? '';
 
@@ -446,6 +485,11 @@ class Renderer {
 		// Target only product collection's inner blocks that use the 'query' context.
 		if ( ! isset( $context['query'] ) || ! isset( $context['query']['isProductCollectionBlock'] ) || ! $context['query']['isProductCollectionBlock'] ) {
 			return $context;
+		}
+
+		if ( 'woocommerce/product-filters' === $block_name && ( $context['query']['inherit'] ?? false ) ) {
+			// A null override also clears the saved ID when WordPress refreshes available context.
+			$context['queryId'] = null;
 		}
 
 		// Check parent block contexts (in order of specificity).

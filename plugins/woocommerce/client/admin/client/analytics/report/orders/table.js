@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Component, Fragment } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import { map } from 'lodash';
 import { Date, Link, OrderStatus, ViewMoreList } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
@@ -14,10 +14,14 @@ import { CurrencyContext } from '@woocommerce/currency';
  * Internal dependencies
  */
 import ReportTable from '../../components/report-table';
-import { getAdminSetting } from '~/utils/admin-settings';
+import { getAdminSetting, PAYMENT_GATEWAYS } from '~/utils/admin-settings';
 
 const capitalizeFirstLetter = ( expr ) =>
 	expr.charAt( 0 ).toUpperCase() + expr.slice( 1 );
+
+// Gateways that are no longer installed keep the id stored on the order.
+const getPaymentMethodTitle = ( paymentMethod ) =>
+	PAYMENT_GATEWAYS[ paymentMethod ] || paymentMethod || '';
 
 class OrdersReportTable extends Component {
 	constructor() {
@@ -98,6 +102,12 @@ class OrdersReportTable extends Component {
 				required: false,
 				isSortable: false,
 			},
+			{
+				label: __( 'Payment method', 'woocommerce' ),
+				key: 'payment_method',
+				required: false,
+				isSortable: false,
+			},
 		];
 	}
 
@@ -131,6 +141,7 @@ class OrdersReportTable extends Component {
 				parent_id: parentId,
 				status,
 				customer_type: customerType,
+				payment_method: paymentMethod,
 			} = row;
 			const extendedInfo = row.extended_info || {};
 			const { coupons, customer, products } = extendedInfo;
@@ -252,6 +263,10 @@ class OrdersReportTable extends Component {
 					display: extendedInfo.attribution.origin,
 					value: extendedInfo.attribution.origin,
 				},
+				{
+					display: getPaymentMethodTitle( paymentMethod ),
+					value: getPaymentMethodTitle( paymentMethod ),
+				},
 			];
 		} );
 	}
@@ -315,13 +330,17 @@ class OrdersReportTable extends Component {
 	}
 
 	renderList( visibleItems, popoverItems ) {
+		const links = this.renderLinks( visibleItems );
+		// Without a badge, keep the link as the cell's only child so the table's
+		// `a:only-child` rule still stretches it across the cell.
+		if ( popoverItems.length <= 1 ) {
+			return links;
+		}
 		return (
-			<Fragment>
-				{ this.renderLinks( visibleItems ) }
-				{ popoverItems.length > 1 && (
-					<ViewMoreList items={ this.renderLinks( popoverItems ) } />
-				) }
-			</Fragment>
+			<div className="woocommerce-analytics__inline-list">
+				{ links }
+				<ViewMoreList items={ this.renderLinks( popoverItems ) } />
+			</div>
 		);
 	}
 
