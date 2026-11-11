@@ -52,12 +52,12 @@
 }
 
 .wc-block-components-notice-snackbar {
-	// Rule 1: a new snackbar rises in over `lg` and fades in over `md`.
+	// A new snackbar rises in over `lg` and fades in over `md`.
 	&.notice-transition-enter {
 		@include motion-enter(wc-snackbar-rise);
 	}
 
-	// Rule 15: it goes faster than it came, over `md`, and keeps its end state until it unmounts.
+	// It goes faster than it came, over `md`, and keeps its end state until it unmounts.
 	&.notice-transition-exit {
 		@include motion-exit(wc-snackbar-drop);
 	}

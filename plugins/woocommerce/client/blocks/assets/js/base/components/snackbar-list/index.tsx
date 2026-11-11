@@ -60,7 +60,7 @@ const SnackbarList = ( {
 							key={ 'snackbar-' + notice.id }
 							nodeRef={ snackbarRef }
 							// The stylesheet sets the timing and handles reduced motion, so the script waits for the
-							// animation to end instead of a fixed timeout (rules 1, 15).
+							// animation to end instead of a fixed timeout.
 							addEndListener={ ( done: () => void ) =>
 								whenAnimationsEnd( snackbarRef.current, done )
 							}
