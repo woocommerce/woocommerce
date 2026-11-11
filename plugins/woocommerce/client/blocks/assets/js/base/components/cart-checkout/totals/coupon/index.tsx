@@ -12,8 +12,8 @@ import {
 	Panel,
 	Spinner,
 } from '@woocommerce/blocks-components';
-import { useSelect } from '@wordpress/data';
-import { checkoutStore } from '@woocommerce/block-data';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { checkoutStore, validationStore } from '@woocommerce/block-data';
 import type { MouseEvent, MouseEventHandler } from 'react';
 
 /**
@@ -54,6 +54,7 @@ export const TotalsCoupon = ( {
 	const textInputId = `wc-block-components-totals-coupon__input-${ instanceId }`;
 	const errorId = `wc-block-components-totals-coupon__error-${ instanceId }`;
 	const inputRef = useRef< HTMLInputElement >( null );
+	const { clearValidationError } = useDispatch( validationStore );
 	const isCheckoutIdle = useSelect(
 		( select ) => select( checkoutStore ).isIdle(),
 		[]
@@ -126,6 +127,10 @@ export const TotalsCoupon = ( {
 							aria-invalid={ hasError }
 							onChange={ ( newCouponValue ) => {
 								setErrorMessage( '' );
+								// An extension can still set a `coupon` validation error,
+								// which blocks checkout but shows nowhere. Editing the
+								// code clears it, as it did before.
+								void clearValidationError( 'coupon' );
 								setCouponValue( newCouponValue );
 							} }
 							ref={ inputRef }

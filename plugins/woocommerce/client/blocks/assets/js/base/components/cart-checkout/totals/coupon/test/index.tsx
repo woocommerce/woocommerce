@@ -3,8 +3,8 @@
  */
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { dispatch } from '@wordpress/data';
-import { checkoutStore } from '@woocommerce/block-data';
+import { dispatch, select } from '@wordpress/data';
+import { checkoutStore, validationStore } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -15,6 +15,12 @@ const ERROR_ID = 'wc-block-components-totals-coupon__error-coupon';
 
 describe( 'TotalsCoupon', () => {
 	describe( 'Rejected coupons', () => {
+		afterEach( () => {
+			act( () => {
+				dispatch( validationStore ).clearValidationErrors();
+			} );
+		} );
+
 		it( 'shows the message from a rejected submit', async () => {
 			const user = userEvent.setup();
 			const message =
@@ -98,6 +104,30 @@ describe( 'TotalsCoupon', () => {
 			expect( screen.queryByRole( 'alert' ) ).not.toBeInTheDocument();
 			expect( couponInput ).toHaveAttribute( 'aria-invalid', 'false' );
 			expect( couponInput ).not.toHaveAttribute( 'aria-describedby' );
+		} );
+
+		it( 'clears a coupon validation error set by an extension when the code is edited', async () => {
+			const user = userEvent.setup();
+			act( () => {
+				dispatch( validationStore ).setValidationErrors( {
+					coupon: {
+						message: 'Log in to use this coupon.',
+						hidden: false,
+					},
+				} );
+			} );
+
+			render(
+				<TotalsCoupon instanceId="coupon" displayCouponForm={ true } />
+			);
+
+			await act( async () => {
+				await user.type( screen.getByLabelText( 'Enter code' ), 'a' );
+			} );
+
+			expect(
+				select( validationStore ).getValidationError( 'coupon' )
+			).toBeUndefined();
 		} );
 
 		it( 'clears the message when a later submit succeeds', async () => {
