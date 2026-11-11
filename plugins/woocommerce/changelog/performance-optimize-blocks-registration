@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Introduce lazy block registration for inner blocks.
