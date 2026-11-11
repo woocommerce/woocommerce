@@ -658,6 +658,62 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Completing again cancels the order already handed off when its stock can no longer be held.
+	 * @dataProvider provider_when_the_rival_takes_the_stock
+	 *
+	 * @param bool $mid_request Whether the rival takes the unit during the second complete rather than before it.
+	 */
+	public function test_complete_again_cancels_an_order_it_cannot_hold_stock_for( bool $mid_request ): void {
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 1,
+			)
+		);
+		$created = $this->create_ready_checkout(
+			array(
+				'item'     => array( 'id' => (string) $product->get_id() ),
+				'quantity' => 1,
+			)
+		);
+		$this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' );
+		$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
+
+		// The hold lapses and a rival takes the unit.
+		wc_release_stock_for_order( $order );
+		$rival = wc_create_order();
+		$rival->add_product( $product, 1 );
+		$rival->save();
+		$hold_rival = static function () use ( $rival, &$hold_rival ) {
+			remove_action( 'woocommerce_order_before_calculate_totals', $hold_rival );
+			wc_reserve_stock_for_order( $rival );
+		};
+		if ( $mid_request ) {
+			add_action( 'woocommerce_order_before_calculate_totals', $hold_rival );
+		} else {
+			$hold_rival();
+		}
+		$response = $this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' );
+
+		$this->assertContains( 'out_of_stock', array_column( $response->get_data()['messages'], 'code' ) );
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::CANCELLED ) );
+		$this->assertArrayNotHasKey( 'continue_url', $this->request( 'GET', '/checkout-sessions/' . $created['id'] )->get_data() );
+	}
+
+	/**
+	 * When the rival order takes the stock, relative to the second complete.
+	 *
+	 * @return array<string, array{bool}>
+	 */
+	public function provider_when_the_rival_takes_the_stock(): array {
+		return array(
+			'before the request' => array( false ),
+			'during the request' => array( true ),
+		);
+	}
+
+	/**
 	 * @testdox Stock that ran short after the cart was built is reported, not absorbed by lowering the quantity.
 	 */
 	public function test_stock_shortfall_is_reported_not_absorbed(): void {

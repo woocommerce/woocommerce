@@ -89,6 +89,10 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 		}
 
 		if ( CheckoutMapper::STATUS_READY_FOR_COMPLETE !== ( new CheckoutMapper() )->build_checkout( $cart, $checkout_id, $state )['status'] ) {
+			// An order handed off while the checkout was ready, for stock since taken say, must not stay payable.
+			$state = $this->cancel_handed_off_order( $state, __( 'UCP checkout session is no longer ready to complete.', 'woocommerce' ) );
+			$this->save_checkout_state( $state );
+
 			return $this->checkout_response( $checkout_id, $state, 200, $cart );
 		}
 
@@ -120,8 +124,10 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 		try {
 			wc_reserve_stock_for_order( $order );
 		} catch ( ReserveStockException $e ) {
-			// The hold failed on stock another checkout took since the cart was last checked, so
-			// the order stays a draft, which the payment page refuses, and the agent re-reads the cart.
+			// The hold failed on stock another checkout took since the cart was last checked. A draft
+			// stays one, which the payment page refuses; an order handed off earlier is closed.
+			$this->save_checkout_state( $this->cancel_handed_off_order( $state, __( 'UCP checkout session stock could no longer be held.', 'woocommerce' ) ) );
+
 			return $this->ucp_error( Utils::cart_error_code( (string) $e->getErrorCode() ), wp_specialchars_decode( $e->getMessage(), ENT_QUOTES ), 'recoverable', 200, '$.line_items' );
 		}
 
