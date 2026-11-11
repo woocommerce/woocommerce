@@ -49,6 +49,23 @@ trait ShippingZoneAbilityTrait {
 	}
 
 	/**
+	 * Get the error for a write while shipping is turned off, when checkout would offer none of what it saves.
+	 *
+	 * @return \WP_Error|null
+	 */
+	private static function get_shipping_disabled_error(): ?\WP_Error {
+		if ( wc_shipping_enabled() ) {
+			return null;
+		}
+
+		return new \WP_Error(
+			'woocommerce_ability_shipping_disabled',
+			__( 'Shipping is turned off, so checkout would offer no shipping method. Turn it on under WooCommerce > Settings > General > Shipping location(s) first.', 'woocommerce' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	/**
 	 * Format a zone for ability output.
 	 *
 	 * @param \WC_Shipping_Zone $zone Zone.

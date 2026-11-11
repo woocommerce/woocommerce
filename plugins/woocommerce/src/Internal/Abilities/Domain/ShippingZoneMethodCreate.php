@@ -16,6 +16,7 @@ defined( 'ABSPATH' ) || exit;
  * Adds a flat rate, free shipping or local pickup method to a zone.
  *
  * A method is a table row plus an option, not a WC_Data object, so a failed settings write removes the method again instead of rolling back.
+ * Listeners then see woocommerce_shipping_zone_method_added and, right after, woocommerce_shipping_zone_method_deleted.
  */
 class ShippingZoneMethodCreate extends AbstractDomainAbility implements AbilityDefinition {
 
@@ -89,6 +90,11 @@ class ShippingZoneMethodCreate extends AbstractDomainAbility implements AbilityD
 	 * @since 11.4.0
 	 */
 	public static function execute( array $input ) {
+		$disabled = self::get_shipping_disabled_error();
+		if ( null !== $disabled ) {
+			return $disabled;
+		}
+
 		$zone = self::get_zone_or_error( $input['zone_id'] );
 		if ( is_wp_error( $zone ) ) {
 			return $zone;
