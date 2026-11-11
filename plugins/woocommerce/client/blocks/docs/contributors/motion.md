@@ -72,7 +72,7 @@ Position an element that grows or shrinks with `translate`, not `transform`. The
 
 Use `@starting-style` with transitions for an element that is new on the page, such as a dropdown. Then all of its motion is a transition, and a transition turns around by itself. This also applies to an element that changes from `display: none` to visible. Use keyframes for motion that only exists while it animates, such as a row that rises in.
 
-Motion that changes the layout runs in JavaScript, because it must measure sizes. It uses the same tokens. It ends immediately when nothing animates, and in Jest. This section lists its helpers when they are added.
+Motion that changes the layout runs in JavaScript, because it must measure sizes. JavaScript helpers use the same tokens. They end immediately when nothing animates, and in Jest. This section lists the JavaScript helpers when they are added.
 
 ## Reduced motion
 
@@ -93,7 +93,7 @@ The `woocommerce/motion-safe` stylelint rule checks this. Another rule checks th
 - State changes use `--wpds-motion-duration-md` with `--wpds-motion-easing-subtle`. WPDS uses 100ms, which is too fast to see.
 - Do not use `linear` easing. It makes motion look mechanical. Constant motion is the only exception, such as the spinner turn and the skeleton shimmer.
 - List the properties that you transition.
-- Scope new effects to the block that uses them, such as `.wp-block-woocommerce-cart`. Then they do not change blocks that do not use motion.
+- Scope new effects to the block that uses them, such as `.wp-block-woocommerce-cart`. Then they do not change blocks that do not use motion. A shared component that already has its own motion, such as snackbars, can replace that motion everywhere it renders.
 - Components in `packages/public-api/blocks-components` are public. Add only optional props. Keep the class names that themes can use. Write each change to their markup or styles in the PR description.
 - **Animate what the shopper does.** A click or a tap animates. Content that loads with the page appears immediately. A section that renders when data arrives appears immediately. A later change that loading causes can animate, such as a totals row, a notice, or an error.
 - **Keyboard changes apply immediately.** A shopper can press keys quickly, for example to move through options. After a key press, sections that show, hide, or swap do not animate, and selection indicators do not slide. While an option in a radio group has keyboard focus, its highlight and dot change immediately.
@@ -108,7 +108,7 @@ The numbers match the original motion rules. Code comments use these numbers. So
 
 **1. Entrances ease out** with `--wpds-motion-easing-expressive`.
 
-**2. Dropdowns follow WPDS, without the linear fade.** They slide 4px from the trigger over `lg` expressive, and fade in over `md` expressive. They slide back over `md` to close.
+**2. Dropdowns follow WPDS, without the linear fade.** They slide 4px from the trigger over `lg` expressive, and fade in over `md`. They slide back over `md` to close.
 
 **3. Stagger list rows by 50ms** with `motion-stagger-delay()`. Stop at 7 rows. When a section enters as one unit, its rows enter with it and do not stagger. `motion-stagger` stops inside an element that has `data-wc-entering` or `data-wc-swapping`.
 
