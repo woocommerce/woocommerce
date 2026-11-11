@@ -12,9 +12,9 @@ The Cart, Checkout, and Mini-Cart blocks are composed of modular inner blocks. T
 
 WooCommerce combines three mechanisms to manage inner block structure in the block and site editors:
 
-1. **Block-level `attributes.lock` defaults** — Each inner block defines default `{ remove, move }` flags in its attributes (`block.json` or `attributes.ts`/`attributes.tsx`). When `remove: true`, the block cannot be deleted; when `move: true`, it cannot be reordered.
+1. **Block-level `attributes.lock` defaults** — Inner blocks can either declare explicit default `{ remove, move }` flags in their attributes (`block.json` or `attributes.ts`/`attributes.tsx`) or leave `attributes.lock` unset. When `remove: true`, the block cannot be deleted; when `move: true`, it cannot be reordered. Explicit `false` defaults (`remove: false`, `move: false`) override a parent container's `templateLock`, whereas an unset `lock` attribute inherits parent `templateLock` behavior.
 2. **Core lock UI (`supports.lock`)** — Most essential blocks set `"lock": false` under `supports` so merchants cannot unlock and delete critical checkout steps from the toolbar or List View. Optional blocks keep `"lock"` enabled (the WordPress default `true`), allowing merchants to lock or unlock them freely.
-3. **Container `templateLock` and `useForcedLayout`** — Top-level containers (`woocommerce/cart`, `woocommerce/filled-cart-block`, `woocommerce/checkout`, `woocommerce/filled-mini-cart-contents-block`) use `templateLock="insert"` (or `templateLock="all"` on `woocommerce/mini-cart-title-block`). Containers using `useForcedLayout` (such as `woocommerce/cart-items-block`, `woocommerce/checkout-fields-block`, `woocommerce/checkout-totals-block`, and `woocommerce/mini-cart-contents`) automatically re-insert required core blocks and registered third-party inner blocks if they are missing from the layout.
+3. **Container `templateLock` and `useForcedLayout`** — Top-level containers (`woocommerce/cart`, `woocommerce/filled-cart-block`, `woocommerce/checkout`, `woocommerce/filled-mini-cart-contents-block`) use `templateLock="insert"` (or `templateLock="all"` on `woocommerce/mini-cart-title-block`). Containers using `useForcedLayout` (such as `woocommerce/cart-items-block`, `woocommerce/checkout-fields-block`, `woocommerce/checkout-totals-block`, and `woocommerce/mini-cart-contents`) automatically re-insert required core blocks and registered third-party inner blocks that declare `remove: true` in their lock defaults (`getMissingBlocks` / `isBlockLocked`) if they are missing from the layout; registered inner blocks without `remove: true` are not automatically restored after removal.
 
 ## Why critical blocks are locked
 
@@ -22,7 +22,7 @@ Locking prevents merchants or theme edits from accidentally breaking required st
 
 - **Preventing broken checkout or cart flows** — Deleting blocks such as Line Items, Contact Information, Shipping/Billing Address, Payment Options, or Actions would stop shoppers from entering required details or completing an order.
 - **Protecting Mini-Cart template parts** — `woocommerce/mini-cart-contents` is locked (`remove: true`, `move: true`, `supports.lock: false`) inside Site Editor Mini-Cart template parts because removing or unlocking the top-level contents wrapper breaks the slide-out drawer UI.
-- **Preserving third-party extensibility** — `useForcedLayout` guarantees that required core blocks and extension-registered inner blocks (`area` / `parent` integrations) stay present in their target sections.
+- **Preserving third-party extensibility** — `useForcedLayout` keeps required core blocks and extension-registered inner blocks (`area` / `parent` integrations) whose registered lock defaults specify `remove: true` present in their target sections; registered extension blocks without `remove: true` are not automatically re-inserted if removed.
 
 > If you want to allow extra WordPress or custom blocks inside Cart and Checkout areas, see [Inner block types](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/additional-cart-checkout-inner-block-types/).
 
@@ -32,10 +32,10 @@ Locking prevents merchants or theme edits from accidentally breaking required st
 
 | Block name | Title | Default `lock` (`remove` / `move`) | User can toggle lock (`supports.lock`) | Reason |
 | --- | --- | --- | --- | --- |
-| `woocommerce/cart-accepted-payment-methods-block` | Accepted Payment Methods | Unlocked (`false` / `false`) | Yes | Optional payment method icon badges |
-| `woocommerce/cart-order-summary-heading-block` | Heading | Unlocked (`false` / `false`) | Yes | Optional section heading inside Order Summary |
-| `woocommerce/cart-order-summary-coupon-form-block` | Coupon Form | Unlocked (`false` / `false`) | Yes | Optional for stores that do not offer or want inline coupon entry |
-| `woocommerce/cart-cross-sells-block` | Cart Cross-Sells | Unlocked (`false` / `false`) | Yes | Optional legacy cross-sells container (its inner `woocommerce/cart-cross-sells-products-block` is locked; default templates use `woocommerce/product-collection`) |
+| `woocommerce/cart-accepted-payment-methods-block` | Accepted Payment Methods | Unset (inherits parent lock if any) | Yes | Optional payment method icon badges |
+| `woocommerce/cart-order-summary-heading-block` | Heading | `remove: false`, `move: false` | Yes | Optional section heading inside Order Summary |
+| `woocommerce/cart-order-summary-coupon-form-block` | Coupon Form | `remove: false`, `move: false` | Yes | Optional for stores that do not offer or want inline coupon entry |
+| `woocommerce/cart-cross-sells-block` | Cart Cross-Sells | Unset (inherits parent lock if any) | Yes | Optional legacy cross-sells container (its inner `woocommerce/cart-cross-sells-products-block` is locked; default templates use `woocommerce/product-collection`) |
 
 ### Non-removable or fully locked
 
@@ -65,8 +65,8 @@ Locking prevents merchants or theme edits from accidentally breaking required st
 | --- | --- | --- | --- | --- |
 | `woocommerce/checkout-order-summary-coupon-form-block` | Coupon Form | `remove: false`, `move: false` | Yes | Optional coupon form in Order Summary |
 | `woocommerce/checkout-order-note-block` | Order Note | `remove: false`, `move: true` | Yes | Removable if customer notes are not needed; fixed position unless unlocked |
-| `woocommerce/checkout-terms-block` | Terms and Conditions | Unlocked (`false` / `false`) | Yes | Hidden from inserter on new checkouts; replaced by settings on the Actions block |
-| `woocommerce/checkout-additional-information-block` | Additional information | `remove: true`, `move: false` | Yes | Non-removable by default, movable within Checkout Fields |
+| `woocommerce/checkout-terms-block` | Terms and Conditions | Unset (inherits parent lock if any) | Yes | Hidden from inserter on new checkouts; replaced by settings on the Actions block |
+| `woocommerce/checkout-additional-information-block` | Additional information | `remove: true`, `move: false` | Yes | Non-removable by default, movable within Checkout Fields. If unlocked and removed, `useForcedLayout` can re-insert it because its registered default is `remove: true`. |
 
 ### Structural, non-removable, or fully locked
 
