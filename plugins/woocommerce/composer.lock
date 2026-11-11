@@ -1226,11 +1226,11 @@
         },
         {
             "name": "woocommerce/email-editor",
-            "version": "2.19.0",
+            "version": "2.20.0",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/email-editor",
-                "reference": "d56c5aa62e559efd687c523e1d665b6c39ba23ea"
+                "reference": "db0bd8a8e184aa4e9e7494887d6a7dc652b3797c"
             },
             "require": {
                 "php": ">=7.4"
@@ -5551,5 +5551,5 @@
     "platform-overrides": {
         "php": "7.4"
     },
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.11.0"
 }
