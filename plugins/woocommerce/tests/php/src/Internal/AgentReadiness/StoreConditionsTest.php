@@ -163,6 +163,35 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 		$wp_rewrite->set_permalink_structure( '' );
 
 		$this->assertSame( array( 'ucp_discovery' ), $this->sut->failing_required() );
+		$this->assertStringContainsString( 'Settings > Permalinks', $this->ucp_discovery_fix() );
+	}
+
+	/**
+	 * @testdox A /.well-known/ucp file WooCommerce didn't write fails the UCP address check with a fix to remove it.
+	 */
+	public function test_foreign_ucp_file_fix(): void {
+		self::make_store_ready();
+		$path = get_temp_dir() . uniqid( 'wc-ucp-' ) . '/.well-known/ucp';
+		add_filter( 'woocommerce_ucp_discovery_file_path', fn() => $path );
+		wp_mkdir_p( dirname( $path ) );
+		file_put_contents( $path, '{}' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+
+		try {
+			$this->assertSame( array( 'ucp_discovery' ), $this->sut->failing_required() );
+			$this->assertStringStartsWith( 'Remove the /.well-known/ucp file', $this->ucp_discovery_fix() );
+		} finally {
+			wp_delete_file( $path );
+		}
+	}
+
+	/**
+	 * The fix text the UCP address check shows now.
+	 *
+	 * @return string
+	 */
+	private function ucp_discovery_fix(): string {
+		$checks = array_column( $this->sut->all(), null, 'id' );
+		return $checks['ucp_discovery']['fix'];
 	}
 
 	/**

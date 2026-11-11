@@ -118,35 +118,49 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox can_serve: pretty permalinks pass unless a file WooCommerce didn't write is in the way; Plain permalinks pass only with a file WooCommerce wrote.
-	 * @testWith ["/%postname%/", null, true]
-	 *           ["/%postname%/", "owned", true]
-	 *           ["/%postname%/", "foreign", false]
-	 *           ["", null, false]
-	 *           ["", "owned", true]
-	 *           ["", "foreign", false]
-	 *           ["", "not json", false]
+	 * @testdox serve_status reads the permalink setting and the static file: no file is fine with pretty permalinks and missing with Plain; a file must be WooCommerce's and current.
+	 * @testWith ["/%postname%/", null, "ok"]
+	 *           ["/%postname%/", "current", "ok"]
+	 *           ["/%postname%/", "foreign", "file_in_the_way"]
+	 *           ["/%postname%/", "outdated", "file_outdated"]
+	 *           ["", null, "no_file"]
+	 *           ["", "current", "ok"]
+	 *           ["", "current, other formatting", "ok"]
+	 *           ["", "foreign", "file_in_the_way"]
+	 *           ["", "not json", "file_in_the_way"]
+	 *           ["", "cut short", "file_in_the_way"]
+	 *           ["", "outdated", "file_outdated"]
 	 *
 	 * @param string      $structure Permalink structure.
-	 * @param string|null $file      The static file: written by WooCommerce, by someone else, not JSON, or none.
-	 * @param bool        $expected  Whether the store can serve the profile.
+	 * @param string|null $file      The static file, or null for none.
+	 * @param string      $expected  Expected status.
 	 */
-	public function test_can_serve( string $structure, ?string $file, bool $expected ): void {
+	public function test_serve_status( string $structure, ?string $file, string $expected ): void {
 		$path = get_temp_dir() . uniqid( 'wc-ucp-' ) . '/.well-known/ucp';
 		add_filter( 'woocommerce_ucp_discovery_file_path', fn() => $path );
 		$this->set_permalink_structure( $structure );
 		if ( null !== $file ) {
+			$ours            = $this->sut->get_profile();
+			$ours['links'][] = array( 'rel' => UcpDiscovery::LINK_REL );
+			$old             = $ours;
+
+			$old['ucp']['services']['dev.ucp.shopping'][0]['endpoint'] = 'http://old.example/wp-json/wc/ucp/v1';
+
+			$current  = (string) wp_json_encode( $ours, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
 			$contents = array(
-				'owned'    => (string) wp_json_encode( array( 'links' => array( array( 'rel' => UcpDiscovery::LINK_REL ) ) ) ),
-				'foreign'  => (string) wp_json_encode( array( 'links' => array( array( 'rel' => 'self' ) ) ) ),
-				'not json' => 'not json',
+				'current'                   => $current,
+				'current, other formatting' => (string) wp_json_encode( $ours ),
+				'foreign'                   => (string) wp_json_encode( $this->sut->get_profile() ),
+				'outdated'                  => (string) wp_json_encode( $old ),
+				'not json'                  => 'not json',
+				'cut short'                 => substr( $current, 0, (int) ( strlen( $current ) / 2 ) ),
 			);
 			wp_mkdir_p( dirname( $path ) );
 			file_put_contents( $path, $contents[ $file ] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 		}
 
 		try {
-			$this->assertSame( $expected, UcpDiscovery::can_serve() );
+			$this->assertSame( $expected, UcpDiscovery::serve_status() );
 		} finally {
 			wp_delete_file( $path );
 		}
