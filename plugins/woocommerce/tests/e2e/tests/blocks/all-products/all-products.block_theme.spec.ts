@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
+import { randomUUID } from 'crypto';
 import {
-	BLOCK_THEME_SLUG,
 	expect,
 	getProductAttributeIds,
 	PostCompiler,
@@ -29,31 +29,56 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 		editor,
 		admin,
 		page,
+		requestUtils,
 	} ) => {
-		const templatePath = 'header';
-		await admin.visitSiteEditor( {
-			postId: `${ BLOCK_THEME_SLUG }//${ templatePath }`,
-			postType: 'wp_template_part',
-			canvas: 'edit',
+		// WordPress uses `single-post-<slug>` for this post only. It has no
+		// header, so the page has no Mini-Cart block.
+		const postSlug = `all-products-no-header-${ randomUUID() }`;
+		const template = await requestUtils.createTemplate( 'wp_template', {
+			slug: `single-post-${ postSlug }`,
+			title: 'All Products without header',
+			content: '<!-- wp:post-content /-->',
 		} );
+		let postId: number | undefined;
 
-		await editor.setContent( '' );
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
+		try {
+			const post = await requestUtils.rest< { id: number } >( {
+				method: 'POST',
+				path: 'wp/v2/posts',
+				data: {
+					title: 'All Products without Mini-Cart',
+					slug: postSlug,
+					status: 'draft',
+				},
+			} );
+			postId = post.id;
 
-		await admin.createNewPost();
-		await editor.insertBlock( { name: BLOCK_NAME } );
-		await editor.publishAndVisitPost();
-		await page.waitForResponse(
-			( response ) =>
-				response.url().includes( 'wp-json/wc/store/v1/products' ) &&
-				response.status() === 200
-		);
+			await admin.editPost( post.id );
+			await editor.insertBlock( { name: BLOCK_NAME } );
+			await editor.publishAndVisitPost();
+			await page.waitForResponse(
+				( response ) =>
+					response.url().includes( 'wp-json/wc/store/v1/products' ) &&
+					response.status() === 200
+			);
 
-		await expect(
-			page.locator( '.wc-block-grid__product.wc-block-layout' )
-		).toHaveCount( 9 );
+			await expect(
+				page.locator( '[data-block-name="woocommerce/mini-cart"]' )
+			).toHaveCount( 0 );
+			await expect(
+				page.locator( '.wc-block-grid__product.wc-block-layout' )
+			).toHaveCount( 9 );
+		} finally {
+			await Promise.allSettled( [
+				postId &&
+					requestUtils.rest( {
+						method: 'DELETE',
+						path: `wp/v2/posts/${ postId }`,
+						params: { force: true },
+					} ),
+				requestUtils.revertTemplate( 'wp_template', template.id ),
+			] );
+		}
 	} );
 
 	// Regression coverage for legacy filter markup:
@@ -92,11 +117,21 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 		const outOfStockCheckbox = page.getByRole( 'checkbox', {
 			name: 'Out of Stock',
 		} );
+		await expect(
+			products.getByText( 'Album', { exact: true } )
+		).toBeVisible();
 		await expect( outOfStockCheckbox ).toBeVisible();
 		await outOfStockCheckbox.click();
 
 		await expect( page ).toHaveURL( /filter_stock_status=outofstock/ );
-		await expect( products ).toHaveCount( 1 );
+		// Other specs can add out-of-stock products, so check the sample one
+		// is listed and an in-stock one is gone instead of an exact count.
+		await expect(
+			products.getByText( 'T-Shirt with Logo', { exact: true } )
+		).toBeVisible();
+		await expect(
+			products.getByText( 'Album', { exact: true } )
+		).toHaveCount( 0 );
 		await expect(
 			page.getByRole( 'heading', { name: 'Active filters' } )
 		).toBeVisible();

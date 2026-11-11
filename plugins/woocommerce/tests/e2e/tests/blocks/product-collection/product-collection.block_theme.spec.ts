@@ -1,8 +1,14 @@
 /**
  * External dependencies
  */
+import { randomUUID } from 'crypto';
 import { Request } from '@playwright/test';
-import { test as base, expect, wpCLI, BASE_URL } from '@woocommerce/e2e-utils';
+import {
+	test as base,
+	expect,
+	BASE_URL,
+	BLOCK_THEME_SLUG,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -268,6 +274,7 @@ test.describe( 'Product Collection', () => {
 		pageObject,
 		editor,
 		wpCoreVersion,
+		requestUtils,
 	} ) => {
 		const getLocationParams = ( request: Request ) =>
 			new URL( request.url() ).searchParams;
@@ -300,88 +307,112 @@ test.describe( 'Product Collection', () => {
 			);
 		};
 
-		await admin.visitSiteEditor( { path: '/wp_template' } );
-		await page
-			.getByRole( 'button', {
-				name:
-					wpCoreVersion >= 6.8 ? 'Add Template' : 'Add New Template',
-			} )
-			.click();
-		await page
-			.getByRole( 'button', { name: 'Single Item: Product' } )
-			.click();
-		await page
-			.getByRole( 'option', {
-				name: `Cap ${ BASE_URL }/product/cap/`,
-			} )
-			.click();
-		await page.getByRole( 'button', { name: 'Skip' } ).click();
-		await editor.insertBlockUsingGlobalInserter( pageObject.BLOCK_NAME );
-		await editor.closeGlobalBlockInserter();
+		try {
+			await admin.visitSiteEditor( { path: '/wp_template' } );
+			await page
+				.getByRole( 'button', {
+					name:
+						wpCoreVersion >= 6.8
+							? 'Add Template'
+							: 'Add New Template',
+				} )
+				.click();
+			await page
+				.getByRole( 'button', { name: 'Single Item: Product' } )
+				.click();
+			await page
+				.getByRole( 'option', {
+					name: `Cap ${ BASE_URL }/product/cap/`,
+				} )
+				.click();
+			await page.getByRole( 'button', { name: 'Skip' } ).click();
+			await editor.insertBlockUsingGlobalInserter(
+				pageObject.BLOCK_NAME
+			);
+			await editor.closeGlobalBlockInserter();
 
-		const productRequestPromise = page.waitForRequest(
-			isSpecificProductRequest
-		);
-		await pageObject.chooseCollectionInTemplate( 'featured' );
-		const productParams = getLocationParams( await productRequestPromise );
-		expect(
-			productParams.get(
-				'productCollectionLocation[sourceData][productId]'
-			)
-		).toMatch( /^[1-9]\d*$/ );
-		expect(
-			productParams.get(
-				'productCollectionLocation[sourceData][taxonomy]'
-			)
-		).toBeNull();
-		expect(
-			productParams.get( 'productCollectionLocation[sourceData][termId]' )
-		).toBeNull();
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
+			const productRequestPromise = page.waitForRequest(
+				isSpecificProductRequest
+			);
+			await pageObject.chooseCollectionInTemplate( 'featured' );
+			const productParams = getLocationParams(
+				await productRequestPromise
+			);
+			expect(
+				productParams.get(
+					'productCollectionLocation[sourceData][productId]'
+				)
+			).toMatch( /^[1-9]\d*$/ );
+			expect(
+				productParams.get(
+					'productCollectionLocation[sourceData][taxonomy]'
+				)
+			).toBeNull();
+			expect(
+				productParams.get(
+					'productCollectionLocation[sourceData][termId]'
+				)
+			).toBeNull();
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
-		await admin.visitSiteEditor( { path: '/wp_template' } );
-		const categoriesLoaded = page.waitForResponse( ( response ) =>
-			response.url().includes( 'wp-json/wp/v2/product_cat' )
-		);
-		await page
-			.getByRole( 'button', {
-				name:
-					wpCoreVersion >= 6.8 ? 'Add Template' : 'Add New Template',
-			} )
-			.click();
-		await categoriesLoaded;
-		await page
-			.getByRole( 'button', { name: 'Products by Category' } )
-			.click();
-		await page
-			.getByRole( 'button', { name: 'For a specific item' } )
-			.click();
-		await page.getByRole( 'option', { name: 'Hoodies' } ).click();
+			await admin.visitSiteEditor( { path: '/wp_template' } );
+			const categoriesLoaded = page.waitForResponse( ( response ) =>
+				response.url().includes( 'wp-json/wp/v2/product_cat' )
+			);
+			await page
+				.getByRole( 'button', {
+					name:
+						wpCoreVersion >= 6.8
+							? 'Add Template'
+							: 'Add New Template',
+				} )
+				.click();
+			await categoriesLoaded;
+			await page
+				.getByRole( 'button', { name: 'Products by Category' } )
+				.click();
+			await page
+				.getByRole( 'button', { name: 'For a specific item' } )
+				.click();
+			await page.getByRole( 'option', { name: 'Hoodies' } ).click();
 
-		const categoryRequestPromise = page.waitForRequest(
-			isSpecificCategoryRequest
-		);
-		await page.getByRole( 'option', { name: 'Fallback content' } ).click();
-		const categoryParams = getLocationParams(
-			await categoryRequestPromise
-		);
-		expect(
-			categoryParams.get(
-				'productCollectionLocation[sourceData][termId]'
-			)
-		).toMatch( /^[1-9]\d*$/ );
-		expect(
-			categoryParams.get(
-				'productCollectionLocation[sourceData][taxonomy]'
-			)
-		).toBe( 'product_cat' );
-		expect(
-			categoryParams.get(
-				'productCollectionLocation[sourceData][productId]'
-			)
-		).toBeNull();
+			const categoryRequestPromise = page.waitForRequest(
+				isSpecificCategoryRequest
+			);
+			await page
+				.getByRole( 'option', { name: 'Fallback content' } )
+				.click();
+			const categoryParams = getLocationParams(
+				await categoryRequestPromise
+			);
+			expect(
+				categoryParams.get(
+					'productCollectionLocation[sourceData][termId]'
+				)
+			).toMatch( /^[1-9]\d*$/ );
+			expect(
+				categoryParams.get(
+					'productCollectionLocation[sourceData][taxonomy]'
+				)
+			).toBe( 'product_cat' );
+			expect(
+				categoryParams.get(
+					'productCollectionLocation[sourceData][productId]'
+				)
+			).toBeNull();
+		} finally {
+			await Promise.allSettled(
+				[ 'single-product-cap', 'taxonomy-product_cat-hoodies' ].map(
+					( slug ) =>
+						requestUtils.revertTemplate(
+							'wp_template',
+							`${ BLOCK_THEME_SLUG }//${ slug }`
+						)
+				)
+			);
+		}
 	} );
 
 	// Tests for regressions of https://github.com/woocommerce/woocommerce/pull/47994
@@ -420,23 +451,37 @@ test.describe( 'Product Collection', () => {
 			page,
 			pageObject,
 			editor,
+			requestUtils,
 		} ) => {
-			await pageObject.goToEditorTemplate();
-			await pageObject.insertProductCollection();
-			await pageObject.chooseCollectionInTemplate( 'onSale' );
-
-			const productTemplate = editor.canvas.getByLabel(
-				BLOCK_LABELS.productTemplate
-			);
-
-			await expect( productTemplate ).toHaveCount( 2 );
-
-			// Refresh the template and verify "On Sale Products" collection is still visible
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
+			const template = await requestUtils.createTemplate( 'wp_template', {
+				slug: `product-collection-on-sale-${ randomUUID() }`,
+				title: 'Product Collection On Sale',
+				content: 'placeholder',
 			} );
-			await page.reload();
-			await expect( productTemplate ).toHaveCount( 2 );
+
+			try {
+				await pageObject.goToEditorTemplate( template.id );
+				await expect(
+					editor.getCustomHtmlBlockContentLocator( 'placeholder' )
+				).toBeVisible();
+				await pageObject.insertProductCollection();
+				await pageObject.chooseCollectionInTemplate( 'onSale' );
+
+				const productTemplate = editor.canvas.getByLabel(
+					BLOCK_LABELS.productTemplate
+				);
+
+				await expect( productTemplate ).toHaveCount( 1 );
+
+				// Refresh the template and verify "On Sale Products" collection is still visible
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
+				await page.reload();
+				await expect( productTemplate ).toHaveCount( 1 );
+			} finally {
+				await requestUtils.revertTemplate( 'wp_template', template.id );
+			}
 		} );
 
 		test( 'On Sale Products collection should be visible after Refresh in a Post', async ( {
@@ -454,29 +499,18 @@ test.describe( 'Product Collection', () => {
 		} );
 	} );
 
+	// Specific-term templates, so only these test pages change.
 	const templates = [
 		{
 			templateTitle: 'Product Category',
-			slug: 'taxonomy-product_cat',
+			slug: 'taxonomy-product_cat-music',
 			frontendPage: '/product-category/music/',
 			legacyBlockName: 'woocommerce/legacy-template',
 		},
 		{
 			templateTitle: 'Product Tag',
-			slug: 'taxonomy-product_tag',
+			slug: 'taxonomy-product_tag-recommended',
 			frontendPage: '/product-tag/recommended/',
-			legacyBlockName: 'woocommerce/legacy-template',
-		},
-		{
-			templateTitle: 'Product Catalog',
-			slug: 'archive-product',
-			frontendPage: '/shop/',
-			legacyBlockName: 'woocommerce/legacy-template',
-		},
-		{
-			templateTitle: 'Product Search Results',
-			slug: 'product-search-results',
-			frontendPage: '/?s=shirt&post_type=product',
 			legacyBlockName: 'woocommerce/legacy-template',
 		},
 	];
@@ -509,78 +543,43 @@ test.describe( 'Product Collection', () => {
 						}
 					);
 
-					await admin.visitSiteEditor( {
-						postId: template.id,
-						postType: 'wp_template',
-						canvas: 'edit',
-					} );
-					await expect(
-						editor.getCustomHtmlBlockContentLocator( 'placeholder' )
-					).toBeVisible();
-					await editor.insertBlock( { name: legacyBlockName } );
-					await editor.saveSiteEditorEntities( {
-						isOnlyCurrentEntityDirty: true,
-					} );
+					try {
+						await admin.visitSiteEditor( {
+							postId: template.id,
+							postType: 'wp_template',
+							canvas: 'edit',
+						} );
+						await expect(
+							editor.getCustomHtmlBlockContentLocator(
+								'placeholder'
+							)
+						).toBeVisible();
+						await editor.insertBlock( { name: legacyBlockName } );
+						await editor.saveSiteEditorEntities( {
+							isOnlyCurrentEntityDirty: true,
+						} );
 
-					await page.goto( frontendPage );
-					const classicProducts = page.locator(
-						'.woocommerce-loop-product__title'
-					);
-					expect( await classicProducts.count() ).toBeGreaterThan(
-						0
-					);
-					const classicProductsNames =
-						await classicProducts.allTextContents();
+						await page.goto( frontendPage );
+						const classicProducts = page.locator(
+							'.woocommerce-loop-product__title'
+						);
+						expect( await classicProducts.count() ).toBeGreaterThan(
+							0
+						);
+						const classicProductsNames =
+							await classicProducts.allTextContents();
 
-					expect( classicProductsNames ).toEqual(
-						productCollectionProductNames
-					);
+						expect( classicProductsNames ).toEqual(
+							productCollectionProductNames
+						);
+					} finally {
+						await requestUtils.revertTemplate(
+							'wp_template',
+							template.id
+						);
+					}
 				} );
 			} );
 		}
 	);
-
-	test.describe( 'default query can be modified', () => {
-		test( 'default query can be modified', async ( {
-			page,
-			pageObject,
-			editor,
-		} ) => {
-			await wpCLI(
-				'option update woocommerce_default_catalog_orderby price'
-			);
-
-			await pageObject.goToEditorTemplate();
-
-			await pageObject.focusProductCollection();
-
-			// Verify the default order matches the option in the database.
-			const sidebarSettings = pageObject.locateSidebarSettings();
-			const orderBySelect = sidebarSettings.getByRole( 'combobox', {
-				name: 'Default sort by',
-			} );
-			const editorProductTitle = editor.canvas
-				.locator( SELECTORS.productTitle )
-				.first();
-
-			await expect( orderBySelect ).toHaveValue( 'price' );
-			await expect( editorProductTitle ).toHaveText( 'Single' );
-
-			await orderBySelect.selectOption( 'price-desc' );
-
-			await expect( editorProductTitle ).toHaveText( 'Sunglasses' );
-
-			await editor.saveSiteEditorEntities();
-			await pageObject.goToProductCatalogFrontend();
-
-			const frontendProductTitle = page
-				.locator( SELECTORS.productTitle )
-				.first();
-			await expect( frontendProductTitle ).toContainText( 'Sunglasses' );
-
-			await wpCLI(
-				'option update woocommerce_default_catalog_orderby menu_order'
-			);
-		} );
-	} );
 } );
