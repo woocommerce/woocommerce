@@ -583,6 +583,25 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox A paid checkout stays completed when its order is later refunded or cancelled.
+	 * @testWith ["refunded"]
+	 *           ["cancelled"]
+	 *
+	 * @param string $order_status Status the paid order moves to.
+	 */
+	public function test_completed_checkout_survives_its_order_being_undone( string $order_status ): void {
+		$created = $this->create_ready_checkout();
+		$path    = '/checkout-sessions/' . $created['id'];
+		$this->request( 'POST', $path . '/complete' );
+		$order = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
+		$order->payment_complete();
+		$order->update_status( $order_status );
+
+		$this->assertSame( 'completed', $this->request( 'GET', $path )->get_data()['status'] );
+		$this->assertSame( 409, $this->request( 'POST', $path . '/complete' )->get_status(), 'No second order may be made from the cart.' );
+	}
+
+	/**
 	 * @testdox Completing again after the cart changed outside the checkout routes cancels the order first handed off.
 	 */
 	public function test_complete_cancels_the_order_a_changed_cart_left_behind(): void {

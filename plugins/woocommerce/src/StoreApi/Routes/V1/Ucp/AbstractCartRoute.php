@@ -383,7 +383,8 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 
 		$order = empty( $state['order_id'] ) ? null : wc_get_order( (int) $state['order_id'] );
 
-		if ( $order instanceof \WC_Order && $order->is_paid() ) {
+		// Paid once is completed for good: a later refund or cancellation must not reopen the checkout.
+		if ( $order instanceof \WC_Order && ( $order->is_paid() || $order->get_date_paid() || $order->has_status( OrderStatus::REFUNDED ) ) ) {
 			$state['status'] = CheckoutMapper::STATUS_COMPLETED;
 			$state['order']  = array(
 				'id'            => (string) $order->get_id(),
