@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep an existing /.well-known/ucp file that WooCommerce did not create, instead of overwriting or deleting it.

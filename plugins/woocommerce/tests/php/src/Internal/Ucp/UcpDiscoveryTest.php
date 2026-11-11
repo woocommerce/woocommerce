@@ -133,6 +133,33 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A stale file WooCommerce wrote is rewritten and removed; a file it did not write is never touched.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $owned Whether the existing file carries the WooCommerce marker.
+	 */
+	public function test_sync_file_only_touches_owned_file( bool $owned ): void {
+		$stale = (string) wp_json_encode( array( 'links' => array( array( 'rel' => $owned ? UcpDiscovery::LINK_REL : 'other' ) ) ) );
+		wp_mkdir_p( dirname( $this->file ) );
+		// phpcs:disable WordPress.WP.AlternativeFunctions
+		file_put_contents( $this->file, $stale );
+
+		$this->set_permalink_structure( '' );
+		$this->sut->maybe_sync_file();
+		$this->assertSame( ! $owned, file_get_contents( $this->file ) === $stale );
+
+		$this->sut->maybe_flush_rewrite_rules( Utils::FEATURE_ID, false );
+		$this->assertSame( ! $owned, is_file( $this->file ) );
+
+		file_put_contents( $this->file, $stale );
+		$this->set_permalink_structure( '/%postname%/' );
+		$this->sut->maybe_sync_file();
+		$this->assertSame( ! $owned, is_file( $this->file ) );
+		// phpcs:enable WordPress.WP.AlternativeFunctions
+	}
+
+	/**
 	 * @testdox The static file is not written for ajax requests or users who cannot manage the store.
 	 * @testWith [true, "administrator"]
 	 *           [false, "subscriber"]
@@ -152,21 +179,24 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox The notice shows when the endpoint is unreachable under plain permalinks or shadowed by an undeletable file under pretty ones.
-	 * @testWith ["", null, true]
-	 *           ["", 493, false]
-	 *           ["/%postname%/", 365, true]
-	 *           ["/%postname%/", 493, false]
-	 *           ["/%postname%/", null, false]
+	 * @testWith ["", null, true, true]
+	 *           ["", 493, true, false]
+	 *           ["/%postname%/", 365, true, true]
+	 *           ["/%postname%/", 493, true, false]
+	 *           ["/%postname%/", null, true, false]
+	 *           ["/%postname%/", 493, false, true]
+	 *           ["", 493, false, true]
 	 *
 	 * @param string   $structure Permalink structure.
 	 * @param int|null $mode      Mode of the static file's directory, or null when the file is missing.
+	 * @param bool     $owned     Whether the static file carries the WooCommerce marker.
 	 * @param bool     $expected  Whether the notice should show.
 	 */
-	public function test_notice( string $structure, ?int $mode, bool $expected ): void {
+	public function test_notice( string $structure, ?int $mode, bool $owned, bool $expected ): void {
 		$this->set_permalink_structure( $structure );
 		if ( null !== $mode ) {
 			wp_mkdir_p( dirname( $this->file ) );
-			file_put_contents( $this->file, '{}' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			file_put_contents( $this->file, $owned ? '{"links":[{"rel":"woocommerce"}]}' : '{}' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 			chmod( dirname( $this->file ), $mode ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_chmod
 		}
 

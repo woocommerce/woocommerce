@@ -25,6 +25,16 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	public const RULE = '^\.well-known/ucp/?$';
 
 	/**
+	 * Rel of the profile link identifying WooCommerce; also marks the static file as one WooCommerce wrote.
+	 */
+	public const LINK_REL = 'woocommerce';
+
+	/**
+	 * Href of the WooCommerce profile link.
+	 */
+	private const LINK_HREF = 'https://developer.woocommerce.com/docs/';
+
+	/**
 	 * Whether this request's write of the static file failed or came up short.
 	 *
 	 * @var bool
@@ -95,10 +105,11 @@ final class UcpDiscovery implements RegisterHooksInterface {
 
 	/**
 	 * Remove the static discovery file, which the web server would otherwise keep serving without WooCommerce.
+	 * Files WooCommerce did not write are left alone.
 	 */
 	public function delete_file(): void {
 		$path = $this->get_file_path();
-		if ( $this->is_deletable( $path ) ) {
+		if ( $this->is_deletable( $path ) && $this->is_owned( $path ) ) {
 			wp_delete_file( $path );
 		}
 	}
@@ -126,6 +137,10 @@ final class UcpDiscovery implements RegisterHooksInterface {
 		}
 
 		$path = $this->get_file_path();
+		if ( is_file( $path ) && ! $this->is_owned( $path ) ) {
+			return;
+		}
+
 		// phpcs:disable WordPress.WP.AlternativeFunctions
 		$content  = (string) wp_json_encode( $this->get_profile(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
 		$dir      = dirname( $path );
@@ -147,17 +162,22 @@ final class UcpDiscovery implements RegisterHooksInterface {
 			return;
 		}
 
-		$path = $this->get_file_path();
-		if ( $wp_rewrite->using_permalinks() ) {
+		$path   = $this->get_file_path();
+		$exists = is_file( $path );
+		// Checked first: a truncated file no longer carries the ownership marker.
+		if ( $this->write_failed ) {
+			/* translators: %1$s: discovery file path. */
+			$message = __( 'The UCP discovery file %1$s could not be written completely, so /.well-known/ucp may return an invalid profile. Check the available disk space on the server.', 'woocommerce' );
+		} elseif ( $exists && ! $this->is_owned( $path ) ) {
+			/* translators: %1$s: discovery file path. */
+			$message = __( 'A %1$s file not created by WooCommerce is overriding the UCP discovery endpoint served by WooCommerce.', 'woocommerce' );
+		} elseif ( $wp_rewrite->using_permalinks() ) {
 			// maybe_sync_file() has already tried to delete it, so a file still here is one the cleanup could not remove.
-			if ( ! is_file( $path ) ) {
+			if ( ! $exists ) {
 				return;
 			}
 			/* translators: %1$s: discovery file path. */
 			$message = __( 'A static %1$s file is overriding the UCP discovery endpoint. Delete it or make its directory writable by the web server.', 'woocommerce' );
-		} elseif ( $this->write_failed ) {
-			/* translators: %1$s: discovery file path. */
-			$message = __( 'The UCP discovery file %1$s could not be written completely, so /.well-known/ucp may return an invalid profile. Check the available disk space on the server.', 'woocommerce' );
 		} else {
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable
 			if ( is_multisite() || is_writable( $path ) ) {
@@ -183,6 +203,19 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	private function is_deletable( string $path ): bool {
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable
 		return is_file( $path ) && is_writable( dirname( $path ) );
+	}
+
+	/**
+	 * Whether the static file was written by WooCommerce. Unreadable or non-JSON files count as not owned.
+	 *
+	 * @param string $path Absolute file path.
+	 * @return bool
+	 */
+	private function is_owned( string $path ): bool {
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$profile = is_file( $path ) ? json_decode( (string) file_get_contents( $path ), true ) : null;
+		$links   = $profile['links'] ?? null;
+		return is_array( $links ) && in_array( self::LINK_REL, array_column( $links, 'rel' ), true );
 	}
 
 	/**
@@ -265,6 +298,10 @@ final class UcpDiscovery implements RegisterHooksInterface {
 				array(
 					'rel'  => 'self',
 					'href' => home_url( '/.well-known/ucp' ),
+				),
+				array(
+					'rel'  => self::LINK_REL,
+					'href' => self::LINK_HREF,
 				),
 			),
 		);
