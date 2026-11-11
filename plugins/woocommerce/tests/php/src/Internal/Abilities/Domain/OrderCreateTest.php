@@ -101,7 +101,7 @@ class OrderCreateTest extends WC_Unit_Test_Case {
 		$this->assertSame( 3, $lines[0]->get_quantity() );
 		$this->assertSame( $variation->get_id(), $lines[1]->get_variation_id() );
 		$this->assertCount( 1, $order->get_shipping_methods() );
-		$this->assertSame( wc_format_decimal( 30 + (float) $variation->get_price() + 5, 2 ), $order->get_total() );
+		$this->assertSame( '45.00', $order->get_total() );
 		$this->assertEqualsCanonicalizing( array_keys( $order->get_items() ), array_column( $result['order']['line_items'], 'id' ) );
 		$this->assertSame( 7, wc_get_product( $simple->get_id() )->get_stock_quantity(), 'A paid status should reduce the stock once.' );
 		$this->assertSame( $paid + 1, did_action( 'woocommerce_order_status_pending_to_processing' ), 'The order should move from pending, which sends the order emails.' );
@@ -216,6 +216,31 @@ class OrderCreateTest extends WC_Unit_Test_Case {
 			$error->get_error_codes()
 		);
 		$this->assertEqualsCanonicalizing( $before, $this->get_order_ids() );
+	}
+
+	/**
+	 * @testdox Should return the saved order, not changes that a listener made in memory after the only save, with the feature on.
+	 */
+	public function test_returns_the_saved_order(): void {
+		$this->set_feature( true );
+		$product = WC_Helper_Product::create_simple_product();
+		add_action(
+			'woocommerce_after_order_object_save',
+			static function ( \WC_Order $order ): void {
+				$order->set_billing_email( 'unsaved@example.com' );
+			}
+		);
+
+		$result = $this->execute(
+			array(
+				'billing'    => array( 'email' => 'ana@example.com' ),
+				'line_items' => array( array( 'product_id' => $product->get_id() ) ),
+			)
+		);
+
+		$this->assertSame( 'ana@example.com', $result['order']['billing_email'] );
+		$this->assertArrayHasKey( 'date_modified', $result['order'] );
+		$this->assertCount( 1, $result['order']['line_items'] );
 	}
 
 	/**
