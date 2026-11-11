@@ -550,13 +550,6 @@ class Html2Text {
 
 				$output = trim( $output );
 
-				// With tag_link_targets, a personalization tag used as the whole URL is kept as the target so it can
-				// be personalized later. A link without text is dropped rather than leaving the bare tag behind.
-				$tag_href = $options['tag_link_targets'] && $node instanceof \DOMElement ? $node->getAttribute( 'data-link-href' ) : '';
-				if ( '' !== $tag_href ) {
-					$href = $output ? $tag_href : '';
-				}
-
 				// Remove double [[ ]] s from linking images.
 				if ( '[' === substr( $output, 0, 1 ) && ']' === substr( $output, -1 ) ) {
 					$output = substr( $output, 1, strlen( $output ) - 2 );
@@ -570,6 +563,14 @@ class Html2Text {
 				// If there is no link text, but a title attr.
 				if ( ! $output && $node instanceof \DOMElement && $node->getAttribute( 'title' ) ) {
 					$output = $node->getAttribute( 'title' );
+				}
+
+				// With tag_link_targets, a personalization tag used as the whole URL is kept as the target so it can
+				// be personalized later. A link still without text after the title fallback above is dropped rather
+				// than leaving the bare tag behind.
+				$tag_href = $options['tag_link_targets'] && $node instanceof \DOMElement ? $node->getAttribute( 'data-link-href' ) : '';
+				if ( '' !== $tag_href ) {
+					$href = $output ? $tag_href : '';
 				}
 
 				if ( ! $href ) {

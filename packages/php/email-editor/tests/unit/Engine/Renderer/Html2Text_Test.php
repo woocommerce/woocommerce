@@ -102,6 +102,11 @@ class Html2Text_Test extends \Email_Editor_Unit_Test {
 				'',
 				array( 'tag_link_targets' => true ),
 			),
+			'tag_link_with_title_label'   => array(
+				'<a title="Shop" data-link-href="[woocommerce/store-url]"><img src="logo.png"></a>',
+				'[Shop]([woocommerce/store-url])',
+				array( 'tag_link_targets' => true ),
+			),
 			'tag_link_ignored_by_default' => array(
 				'<a href="#" data-link-href="[woocommerce/store-url]">Shop</a> and <a data-link-href="[other/x]">here</a>',
 				'[Shop](#) and here',
