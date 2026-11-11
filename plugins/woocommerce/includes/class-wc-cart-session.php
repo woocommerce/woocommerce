@@ -630,10 +630,10 @@ final class WC_Cart_Session {
 	 * against attribute names instead missed multibyte and long global attribute names.
 	 *
 	 * @param WC_Product_Variation  $variation Ordered variation.
-	 * @param WC_Order_Item_Product $item      Order item.
+	 * @param WC_Order_Item         $item      Order item.
 	 * @return array
 	 */
-	private function get_order_again_variation_attributes( WC_Product_Variation $variation, WC_Order_Item_Product $item ): array {
+	private function get_order_again_variation_attributes( WC_Product_Variation $variation, WC_Order_Item $item ): array {
 		$attributes = array();
 
 		foreach ( $variation->get_variation_attributes() as $attribute_key => $value ) {
