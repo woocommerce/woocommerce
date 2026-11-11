@@ -37,7 +37,9 @@ class FulfillmentsPrivacyTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		FulfillmentsHelper::enable_fulfillments();
+		// Only the flag, not enable_fulfillments(): it would hook the container's FulfillmentsPrivacy
+		// too, and the end-to-end tests would pass on those hooks instead of the ones $this->sut adds.
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
 		$this->sut = new FulfillmentsPrivacy();
 	}
 
