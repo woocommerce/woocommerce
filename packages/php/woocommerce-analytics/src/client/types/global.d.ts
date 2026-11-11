@@ -13,6 +13,7 @@ declare global {
 			breadcrumbs?: string[];
 			assets_url: string;
 			consentManaged?: boolean;
+			statisticsConsentCookie?: string;
 		};
 		_wca?: {
 			push: ( props: Record< string, unknown > ) => void;
@@ -20,8 +21,6 @@ declare global {
 		wp_has_consent?: ( type: string ) => boolean;
 		waitfor_consent_hook?: string;
 		wp_consent_type?: string;
-		consent_api?: { cookie_prefix: string };
-		consent_api_get_cookie?: ( name: string ) => string;
 	}
 }
 

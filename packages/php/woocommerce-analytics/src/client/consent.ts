@@ -41,15 +41,15 @@ export class ConsentManager {
 			return false;
 		}
 
-		if ( ! this.isWpConsentApiAvailable() ) {
-			debug( 'WP Consent API not available, defaulting to true for backward compatibility' );
-			return true;
-		}
-
-		// Without a consent type, which some banners set only on the first visit, wp_has_consent() ignores a stored deny.
+		// Read before the script check, since a delay-JS plugin can hold the script back. Without a consent type, wp_has_consent() also ignores it.
 		if ( this.getStoredStatisticsChoice() === 'deny' ) {
 			debug( 'Statistics consent denied in the consent cookie' );
 			return false;
+		}
+
+		if ( ! this.isWpConsentApiAvailable() ) {
+			debug( 'WP Consent API not available, defaulting to true for backward compatibility' );
+			return true;
 		}
 
 		const hasConsent = window.wp_has_consent!( WP_CONSENT_API_STATISTICS_TYPE );
@@ -63,13 +63,14 @@ export class ConsentManager {
 	 * @return The stored choice
 	 */
 	private getStoredStatisticsChoice(): string {
-		if ( typeof window.consent_api_get_cookie !== 'function' || ! window.consent_api ) {
+		const name = window.wcAnalytics?.statisticsConsentCookie;
+		if ( ! name ) {
 			return '';
 		}
 
-		return window.consent_api_get_cookie(
-			window.consent_api.cookie_prefix + '_' + WP_CONSENT_API_STATISTICS_TYPE
-		);
+		// Like the WP Consent API's own reader, the first cookie with this name wins.
+		const cookie = document.cookie.split( '; ' ).find( entry => entry.startsWith( `${ name }=` ) );
+		return cookie ? cookie.slice( name.length + 1 ) : '';
 	}
 
 	/**
@@ -130,9 +131,12 @@ export class ConsentManager {
 	 * Initialize the consent change listener if not already done
 	 */
 	private initializeConsentListener(): void {
+		// The statistics cookie name is only set with the WP Consent API active, whose script may load later.
 		if (
 			this.isListenerInitialized ||
-			( ! this.isWpConsentApiAvailable() && ! this.isWaitingForConsentApi() )
+			( ! this.isWpConsentApiAvailable() &&
+				! this.isWaitingForConsentApi() &&
+				! window.wcAnalytics?.statisticsConsentCookie )
 		) {
 			return;
 		}

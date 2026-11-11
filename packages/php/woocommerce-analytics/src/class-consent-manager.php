@@ -73,18 +73,33 @@ class Consent_Manager {
 	}
 
 	/**
+	 * Get the name of the WP Consent API cookie that stores the shopper's statistics choice, or an empty string without the WP Consent API.
+	 *
+	 * @since 0.18.2
+	 *
+	 * @return string
+	 */
+	public static function get_statistics_consent_cookie_name() {
+		if ( ! self::is_consent_api_active() ) {
+			return '';
+		}
+
+		$prefix = apply_filters( 'wp_consent_cookie_prefix', 'wp_consent' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Reads a WP Consent API filter.
+		if ( ! is_string( $prefix ) ) {
+			return '';
+		}
+
+		return $prefix . '_' . self::WP_CONSENT_API_STATISTICS_TYPE;
+	}
+
+	/**
 	 * Check if the shopper denied statistics consent, as recorded in the WP Consent API consent cookie.
 	 *
 	 * @return bool
 	 */
 	private static function is_statistics_consent_denied() {
-		$prefix = apply_filters( 'wp_consent_cookie_prefix', 'wp_consent' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Reads a WP Consent API filter.
-		if ( ! is_string( $prefix ) ) {
-			return false;
-		}
+		$cookie_name = self::get_statistics_consent_cookie_name();
 
-		$cookie_name = $prefix . '_' . self::WP_CONSENT_API_STATISTICS_TYPE;
-
-		return isset( $_COOKIE[ $cookie_name ] ) && 'deny' === $_COOKIE[ $cookie_name ];
+		return '' !== $cookie_name && isset( $_COOKIE[ $cookie_name ] ) && 'deny' === $_COOKIE[ $cookie_name ];
 	}
 }
