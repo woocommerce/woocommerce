@@ -14,7 +14,6 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
-use Automattic\WooCommerce\Enums\ProductReviewStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductReviewAbilityTrait;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -170,7 +169,7 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 					'type'        => 'string',
 					'description' => __( 'Review moderation status. "hold" is reviews awaiting moderation.', 'woocommerce' ),
 					'enum'        => array_merge( array_keys( self::get_review_statuses() ), array( 'all' ) ),
-					'default'     => ProductReviewStatus::APPROVED,
+					'default'     => 'approved',
 				),
 				'min_rating'  => array(
 					'type'        => 'integer',
@@ -220,7 +219,7 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 	 * @return array|\WP_Error
 	 */
 	public static function execute( array $input = array() ) {
-		$status      = $input['status'] ?? ProductReviewStatus::APPROVED;
+		$status      = $input['status'] ?? 'approved';
 		$product_ids = array_values( array_unique( $input['product_ids'] ?? array() ) );
 		if ( ( $input['min_rating'] ?? 1 ) > ( $input['max_rating'] ?? 5 ) ) {
 			return new \WP_Error( 'woocommerce_ability_product_review_invalid_rating_range', __( 'min_rating must not exceed max_rating.', 'woocommerce' ), array( 'status' => 400 ) );
@@ -309,7 +308,7 @@ class ProductReviewsQuery extends AbstractDomainAbility implements AbilityDefini
 			'comment__in'               => $filters['include'],
 			'type__in'                  => array( 'review', 'comment' ),
 			'parent'                    => 0,
-			'status'                    => 'all' === $filters['status'] ? 'any' : ( ProductReviewStatus::APPROVED === $filters['status'] ? 'approve' : $filters['status'] ),
+			'status'                    => 'all' === $filters['status'] ? 'any' : ( 'approved' === $filters['status'] ? 'approve' : $filters['status'] ),
 			'number'                    => $per_page,
 			'offset'                    => ( $page - 1 ) * $per_page,
 			'orderby'                   => array(

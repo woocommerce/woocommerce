@@ -8,7 +8,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain\Traits;
 
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
-use Automattic\WooCommerce\Enums\ProductReviewStatus;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -24,10 +23,10 @@ trait ProductReviewAbilityTrait {
 	 */
 	protected static function get_review_statuses(): array {
 		return array(
-			ProductReviewStatus::APPROVED => '1',
-			ProductReviewStatus::HOLD     => '0',
-			ProductReviewStatus::SPAM     => 'spam',
-			ProductReviewStatus::TRASH    => 'trash',
+			'approved' => '1',
+			'hold'     => '0',
+			'spam'     => 'spam',
+			'trash'    => 'trash',
 		);
 	}
 

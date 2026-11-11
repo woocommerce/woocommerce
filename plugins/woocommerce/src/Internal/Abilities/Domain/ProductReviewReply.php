@@ -8,7 +8,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
-use Automattic\WooCommerce\Enums\ProductReviewStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductReviewAbilityTrait;
 
 defined( 'ABSPATH' ) || exit;
@@ -92,7 +91,7 @@ class ProductReviewReply extends AbstractDomainAbility implements AbilityDefinit
 			return $review;
 		}
 
-		if ( ProductReviewStatus::APPROVED !== self::get_review_status( $review ) ) {
+		if ( 'approved' !== self::get_review_status( $review ) ) {
 			return new \WP_Error(
 				'woocommerce_ability_product_review_not_approved',
 				__( 'Only approved reviews can get a reply. Approve the review with the woocommerce/product-review-update ability first.', 'woocommerce' ),

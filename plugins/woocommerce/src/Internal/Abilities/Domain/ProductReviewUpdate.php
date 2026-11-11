@@ -9,7 +9,6 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
-use Automattic\WooCommerce\Enums\ProductReviewStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductReviewAbilityTrait;
 
 defined( 'ABSPATH' ) || exit;
@@ -162,7 +161,7 @@ class ProductReviewUpdate extends AbstractDomainAbility implements AbilityDefini
 	private static function change_status( \WP_Comment $review, string $status ): ?\WP_Error {
 		$review_id = (int) $review->comment_ID;
 
-		if ( ProductReviewStatus::TRASH === $status ) {
+		if ( 'trash' === $status ) {
 			/**
 			 * Filters whether a review can go to the trash. When it cannot, the REST API deletes it permanently instead, which this ability never does.
 			 *
@@ -186,26 +185,26 @@ class ProductReviewUpdate extends AbstractDomainAbility implements AbilityDefini
 		$ok       = true;
 		$previous = self::get_review_status( $review );
 		$current  = $previous;
-		if ( ProductReviewStatus::TRASH === $current ) {
+		if ( 'trash' === $current ) {
 			$ok      = wp_untrash_comment( $review_id );
 			$current = self::get_current_status( $review_id, $current );
 		}
 		// Trashing a spam review keeps it spam on untrash; only a move to another status unspams it.
-		if ( $ok && ProductReviewStatus::SPAM === $current && ! in_array( $status, array( ProductReviewStatus::SPAM, ProductReviewStatus::TRASH ), true ) ) {
+		if ( $ok && 'spam' === $current && ! in_array( $status, array( 'spam', 'trash' ), true ) ) {
 			$ok      = wp_unspam_comment( $review_id );
 			$current = self::get_current_status( $review_id, $current );
 		}
 
 		if ( $ok && $current !== $status ) {
 			switch ( $status ) {
-				case ProductReviewStatus::SPAM:
+				case 'spam':
 					$ok = wp_spam_comment( $review_id );
 					break;
-				case ProductReviewStatus::TRASH:
+				case 'trash':
 					$ok = wp_trash_comment( $review_id );
 					break;
 				default:
-					$ok = wp_set_comment_status( $review_id, ProductReviewStatus::APPROVED === $status ? 'approve' : 'hold', true );
+					$ok = wp_set_comment_status( $review_id, 'approved' === $status ? 'approve' : 'hold', true );
 			}
 		}
 
