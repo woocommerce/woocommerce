@@ -111,6 +111,9 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 		// Remembered before the hold so a refused hold leaves a draft the next attempt reuses.
 		$this->set_draft_order_id( $order->get_id() );
 
+		// Taken before the hooks below run, so a cart one of them changes no longer matches the order.
+		$fingerprint = $this->hand_off_fingerprint();
+
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Store API hook, documented in Routes\V1\Checkout.
 		do_action( 'woocommerce_store_api_checkout_update_order_meta', $order );
 
@@ -146,7 +149,7 @@ class CheckoutSessionsComplete extends AbstractCheckoutRoute {
 				'status'       => CheckoutMapper::STATUS_REQUIRES_ESCALATION,
 				'continue_url' => $order->get_checkout_payment_url(),
 				'order_id'     => $order->get_id(),
-				'fingerprint'  => $this->hand_off_fingerprint(),
+				'fingerprint'  => $fingerprint,
 			)
 		);
 		$this->save_checkout_state( $state );

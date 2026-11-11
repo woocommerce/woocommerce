@@ -675,6 +675,23 @@ class UcpCheckout extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox A cart changed by a checkout action no longer matches the order handed off, so the next update drops it.
+	 */
+	public function test_cart_changed_by_a_checkout_action_makes_the_hand_off_stale(): void {
+		$change = static function () {
+			WC()->cart->set_quantity( (string) array_key_first( WC()->cart->get_cart() ), 2 );
+		};
+		add_action( 'woocommerce_store_api_checkout_order_processed', $change );
+		$created = $this->create_ready_checkout();
+		$this->request( 'POST', '/checkout-sessions/' . $created['id'] . '/complete' );
+		remove_action( 'woocommerce_store_api_checkout_order_processed', $change );
+		$order_id = (int) WC()->session->get( 'ucp_checkout' )['order_id'];
+
+		$this->assertArrayNotHasKey( 'continue_url', $this->request( 'PUT', '/checkout-sessions/' . $created['id'], array() )->get_data() );
+		$this->assertTrue( wc_get_order( $order_id )->has_status( OrderStatus::CANCELLED ) );
+	}
+
+	/**
 	 * @testdox Creating again from a cart that already is a checkout returns that checkout and changes nothing.
 	 */
 	public function test_create_from_an_existing_checkout_returns_it_unchanged(): void {
