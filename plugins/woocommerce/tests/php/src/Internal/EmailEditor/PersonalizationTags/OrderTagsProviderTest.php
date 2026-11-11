@@ -76,13 +76,14 @@ class OrderTagsProviderTest extends WC_Unit_Test_Case {
 	 * @testdox The order date tag escapes markup that its format argument produces in HTML.
 	 */
 	public function test_order_date_tag_escapes_markup_from_format(): void {
-		$order        = WC_Helper_Order::create_order();
+		$order = WC_Helper_Order::create_order();
+		$order->set_date_created( '2024-03-15 10:00:00' );
+		$order->save();
 		$personalizer = new Personalizer( $this->registry );
 		$personalizer->set_context( array( 'order' => $order ) );
 
 		$html = $personalizer->personalize_content( '<p><!--[woocommerce/order-date format="&lt;\\m\\a\\r\\k&gt;Y&lt;/\\m\\a\\r\\k&gt;"]--></p>' );
 
-		$year = $order->get_date_created()->date_i18n( 'Y' );
-		$this->assertSame( '<p>&lt;mark&gt;' . $year . '&lt;/mark&gt;</p>', $html );
+		$this->assertSame( '<p>&lt;mark&gt;2024&lt;/mark&gt;</p>', $html );
 	}
 }
