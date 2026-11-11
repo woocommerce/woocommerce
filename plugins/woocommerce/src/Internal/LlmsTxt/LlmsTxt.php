@@ -15,13 +15,22 @@ use Automattic\WooCommerce\StoreApi\Utilities\Ucp\Utils as UcpUtils;
 final class LlmsTxt implements RegisterHooksInterface {
 
 	/**
+	 * The template selected before other template filters run.
+	 *
+	 * @var string|null
+	 */
+	private $original_template;
+
+	/**
 	 * Register the fallback after other providers have handled the request.
 	 *
 	 * @since 11.4.0
 	 */
 	public function register(): void {
 		add_filter( 'redirect_canonical', array( $this, 'filter_canonical_redirect' ) );
-		add_action( 'template_redirect', array( $this, 'maybe_render' ), PHP_INT_MAX );
+		add_filter( 'exit_on_http_head', array( $this, 'filter_exit_on_http_head' ) );
+		add_filter( 'template_include', array( $this, 'remember_template' ), PHP_INT_MIN );
+		add_filter( 'template_include', array( $this, 'maybe_render' ), PHP_INT_MAX );
 	}
 
 	/**
@@ -37,10 +46,21 @@ final class LlmsTxt implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Report local file and routing checks for llms.txt after init.
+	 * Let HEAD requests reach template selection for the fallback.
 	 *
-	 * Status is disabled, physical_file, other_provider, woocommerce, or unknown.
-	 * Handlers without a registered route cannot be detected here.
+	 * @internal
+	 * @param bool $should_exit Whether WordPress should exit early.
+	 * @return bool
+	 */
+	public function filter_exit_on_http_head( $should_exit ) {
+		return $this->should_render() ? false : $should_exit;
+	}
+
+	/**
+	 * Report local file checks for llms.txt after init.
+	 *
+	 * Status is disabled, physical_file, or unknown. Check the public URL to
+	 * determine which provider actually responds.
 	 *
 	 * @since 11.4.0
 	 *
@@ -54,14 +74,10 @@ final class LlmsTxt implements RegisterHooksInterface {
 			);
 		}
 
-		$status            = 'woocommerce';
+		$status            = 'unknown';
 		$has_physical_file = $this->has_physical_file();
 		if ( true === $has_physical_file ) {
 			$status = 'physical_file';
-		} elseif ( $this->has_route() ) {
-			$status = 'other_provider';
-		} elseif ( null === $has_physical_file ) {
-			$status = 'unknown';
 		}
 
 		return array(
@@ -71,13 +87,27 @@ final class LlmsTxt implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Remember the template selected before other filters run.
+	 *
+	 * @internal
+	 * @param string $template Selected template.
+	 * @return string
+	 */
+	public function remember_template( $template ) {
+		$this->original_template = $template;
+		return $template;
+	}
+
+	/**
 	 * Serve an unclaimed request after other providers have had a chance to respond.
 	 *
 	 * @internal
+	 * @param string $template Selected template.
+	 * @return string
 	 */
-	public function maybe_render(): void {
-		if ( ! $this->should_render() ) {
-			return;
+	public function maybe_render( $template ) {
+		if ( '' === $template || $template !== $this->original_template || ! $this->should_render() ) {
+			return $template;
 		}
 
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
@@ -139,7 +169,7 @@ final class LlmsTxt implements RegisterHooksInterface {
 	private function has_route(): bool {
 		global $wp_rewrite;
 
-		if ( isset( $wp_rewrite ) ) {
+		if ( isset( $wp_rewrite ) && $wp_rewrite->using_permalinks() ) {
 			$rules = $wp_rewrite->extra_rules_top + $wp_rewrite->extra_rules + $wp_rewrite->non_wp_rules;
 			foreach ( array_keys( $rules ) as $rule ) {
 				if ( preg_match( '#^' . $rule . '#', 'llms.txt' ) ) {
@@ -174,7 +204,7 @@ final class LlmsTxt implements RegisterHooksInterface {
 		if ( is_multisite() && trim( (string) wp_parse_url( home_url(), PHP_URL_PATH ), '/' ) !== '' ) {
 			return null;
 		}
-		if ( ! isset( $_SERVER['SCRIPT_FILENAME'] ) && untrailingslashit( home_url() ) !== untrailingslashit( site_url() ) ) {
+		if ( untrailingslashit( home_url() ) !== untrailingslashit( site_url() ) ) {
 			return null;
 		}
 		if ( ! function_exists( 'get_home_path' ) ) {
