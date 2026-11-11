@@ -210,7 +210,7 @@ The session is read from the customer's cookies, so call the route from the brow
 * If the nonce is invalid, WordPress rejects the request with a `rest_cookie_invalid_nonce` error before your callbacks run.
 * If no nonce is sent, WordPress runs the request as a guest, even when the customer is logged in. Loading the cart as a guest would discard the customer's session, so the example's permission callback rejects a request that has a logged-in cookie but no nonce. Guests don't need a nonce.
 
-The Store API `Nonce` header and [Cart Tokens](/docs/apis/store-api/cart-tokens) only work on Store API routes.
+The Store API `Nonce` and `Cart-Token` headers only work on Store API routes. A guest [Cart Token](/docs/apis/store-api/cart-tokens) passed in the `session` query parameter is still honored, because `wc_load_cart()` checks for it on any request.
 
 Pass the route URL and the initial nonce to your script from PHP, so the URL works on any install layout:
 
