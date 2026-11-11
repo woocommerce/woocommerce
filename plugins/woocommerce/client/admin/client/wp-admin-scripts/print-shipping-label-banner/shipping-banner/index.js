@@ -3,7 +3,8 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
-import { Button, ExternalLink } from '@wordpress/components';
+import { Button } from '@wordpress/components';
+import { Link as UILink } from '@wordpress/ui';
 import { compose } from '@wordpress/compose';
 import interpolateComponents from '@automattic/interpolate-components';
 import PropTypes from 'prop-types';
@@ -124,7 +125,7 @@ export class ShippingBanner extends Component {
 				} );
 				return;
 			}
-		} catch ( error ) {
+		} catch {
 			this.setState( {
 				setupErrorReason: setupErrorTypes.INSTALL,
 				wcsSetupError: true,
@@ -145,7 +146,7 @@ export class ShippingBanner extends Component {
 				} );
 				return;
 			}
-		} catch ( error ) {
+		} catch {
 			this.setState( {
 				setupErrorReason: setupErrorTypes.ACTIVATE,
 				wcsSetupError: true,
@@ -487,17 +488,15 @@ export class ShippingBanner extends Component {
 									),
 									components: {
 										tosLink: (
-											<ExternalLink
-												href="https://wordpress.com/tos"
-												target="_blank"
-												type="external"
+											<UILink
+												href="https://automattic.com/tos/"
+												openInNewTab
 											/>
 										),
 										wcsLink: (
-											<ExternalLink
+											<UILink
 												href="https://woocommerce.com/products/shipping/?utm_medium=product"
-												target="_blank"
-												type="external"
+												openInNewTab
 												onClick={
 													this
 														.woocommerceServiceLinkClicked
