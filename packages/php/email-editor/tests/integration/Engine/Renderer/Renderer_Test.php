@@ -799,6 +799,15 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			$personalized
 		);
 		$this->assertStringNotContainsString( '[other-plugin/url]', $personalized );
+
+		// A "]" inside a quoted argument does not end the link target early.
+		list( $registry, $text ) = $this->render_with_link_tag(
+			'<!-- wp:paragraph --><p>F <a data-link-href="[renderer-test/account-url note=\'a]b\']">Account</a>.</p><!-- /wp:paragraph -->'
+		);
+		$this->assertStringContainsString(
+			'F [Account](https://shop.example/account?a=1&b=2).',
+			( new Personalizer( $registry ) )->personalize_content( $text, Personalizer::RENDERING_CONTEXT_TEXT )
+		);
 	}
 
 	/**

@@ -308,7 +308,7 @@ class Personalizer {
 	 */
 	private function personalize_text_link_targets( string $content ): string {
 		return (string) preg_replace_callback(
-			'/\]\((\[[^\]]+\]|(?:[^()\s]++|\([^()\s]*\))++)\)/',
+			'/\]\((\[' . self::TAG_NAME_PATTERN . self::TAG_ARGUMENTS_PATTERN . '\]|(?:[^()\s]++|\([^()\s]*\))++)\)/',
 			function ( array $matches ): string {
 				$url = $this->personalize_href_tokens( $matches[1] );
 				if ( null !== $url ) {
