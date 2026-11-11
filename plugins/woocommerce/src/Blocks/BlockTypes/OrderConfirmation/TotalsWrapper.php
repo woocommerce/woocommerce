@@ -2,10 +2,13 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 
+use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
+
 /**
  * TotalsWrapper class.
  */
 class TotalsWrapper extends AbstractOrderConfirmationBlock {
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.
@@ -27,14 +30,5 @@ class TotalsWrapper extends AbstractOrderConfirmationBlock {
 			return '';
 		}
 		return $content;
-	}
-
-	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_style() {
-		return null;
 	}
 }

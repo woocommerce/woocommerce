@@ -60,6 +60,10 @@
 			"default": "wide"
 		}
 	},
+	"style": [
+		"wc-blocks-style",
+		"file:../order-confirmation-shipping-address.css"
+	],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

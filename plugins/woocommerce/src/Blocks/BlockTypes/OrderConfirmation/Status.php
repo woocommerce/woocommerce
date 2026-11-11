@@ -2,12 +2,14 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 
+use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
  * Status class.
  */
 class Status extends AbstractOrderConfirmationBlock {
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.
