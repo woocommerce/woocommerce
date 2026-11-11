@@ -189,6 +189,14 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 				'woocommerce_ability_product_term_slug_empty',
 				false,
 			),
+			'slug zero'                   => array(
+				array(
+					'name' => 'Holidays',
+					'slug' => '0',
+				),
+				'woocommerce_ability_product_term_slug_empty',
+				false,
+			),
 			'parent missing'              => array(
 				array(
 					'name'   => 'Holidays',
@@ -361,6 +369,45 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep backslashes in a term's name and description on create and update.
+	 */
+	public function test_keeps_backslashes(): void {
+		$created = $this->create(
+			array(
+				'taxonomy'    => 'product_tag',
+				'name'        => 'C:\\Temp',
+				'description' => 'Path C:\\Temp',
+			)
+		);
+		$this->assertIsArray( $created );
+		$this->assertSame( 'C:\\Temp', $created['term']['name'] );
+		$this->assertSame( 'Path C:\\Temp', $created['term']['description'] );
+
+		$id      = $created['term']['id'];
+		$updated = $this->update(
+			array(
+				'taxonomy'    => 'product_tag',
+				'id'          => $id,
+				'description' => 'Path D:\\Data',
+			)
+		);
+		$this->assertIsArray( $updated );
+		$this->assertSame( 'C:\\Temp', $updated['term']['name'] );
+		$this->assertSame( 'Path D:\\Data', $updated['term']['description'] );
+
+		$renamed = $this->update(
+			array(
+				'taxonomy' => 'product_tag',
+				'id'       => $id,
+				'name'     => 'D:\\Data',
+			)
+		);
+		$this->assertIsArray( $renamed );
+		$this->assertSame( 'D:\\Data', $renamed['term']['name'] );
+		$this->assertSame( 'Path D:\\Data', $renamed['term']['description'] );
+	}
+
+	/**
 	 * @testdox Should change the description of a tag whose name another tag already uses.
 	 */
 	public function test_updates_description_of_a_duplicate_name(): void {
@@ -428,7 +475,7 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 			),
 			'woocommerce_ability_product_term_slug_empty'  => array(
 				'id'   => $id,
-				'slug' => '!!!',
+				'slug' => '0',
 			),
 			'woocommerce_ability_product_term_parent_loop' => array(
 				'id'     => $parent,
@@ -539,6 +586,61 @@ class ProductTermWritesTest extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertArrayNotHasKey( 'extensions', $plain['term'] );
+	}
+
+	/**
+	 * @testdox Should name the saved term in the error when a write saves and an extension field value then fails its schema.
+	 */
+	public function test_write_that_saves_before_a_field_fails_names_the_saved_term(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		$id = self::factory()->term->create( array( 'taxonomy' => 'product_tag' ) );
+		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'yes' );
+		add_action( 'woocommerce_extensible_abilities_resources_init', array( AbilitiesLoader::class, 'register_core_resources' ), 0 );
+		do_action( 'woocommerce_extensible_abilities_resources_init' );
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'      => 'product_term',
+						'namespace'     => 'invalid-ext',
+						'field'         => 'bad',
+						'output_schema' => array( 'type' => 'integer' ),
+						'get_callback'  => static fn() => 'many',
+					)
+				);
+			}
+		);
+		do_action( 'woocommerce_extensible_abilities_init' );
+
+		$created = $this->create(
+			array(
+				'taxonomy' => 'product_tag',
+				'name'     => 'Sale',
+			)
+		);
+		$updated = $this->update(
+			array(
+				'taxonomy' => 'product_tag',
+				'id'       => $id,
+				'name'     => 'Clearance',
+			)
+		);
+
+		$created_term = get_term_by( 'name', 'Sale', 'product_tag' );
+		$this->assertInstanceOf( \WP_Term::class, $created_term );
+		$results = array(
+			$created_term->term_id => $created,
+			$id                    => $updated,
+		);
+		foreach ( $results as $term_id => $result ) {
+			$this->assertWPError( $result );
+			$this->assertSame( 'woocommerce_ability_field_output_invalid', $result->get_error_code() );
+			$this->assertStringContainsString( 'The change is saved on the product_term ' . $term_id . ',', $result->get_error_message() );
+			$this->assertTrue( $result->get_error_data()['saved'] );
+			$this->assertSame( $term_id, $result->get_error_data()['id'] );
+		}
+		$this->assertSame( 'Clearance', get_term( $id, 'product_tag' )->name );
 	}
 
 	/**

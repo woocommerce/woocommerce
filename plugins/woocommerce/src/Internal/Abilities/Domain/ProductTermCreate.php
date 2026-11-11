@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductTermAbilityTrait;
 
 defined( 'ABSPATH' ) || exit;
@@ -98,7 +99,7 @@ class ProductTermCreate extends AbstractDomainAbility implements AbilityDefiniti
 		if ( null !== $slug ) {
 			$args['slug'] = $slug;
 		}
-		$ids = wp_insert_term( $name, $taxonomy, $args );
+		$ids = wp_insert_term( wp_slash( $name ), $taxonomy, wp_slash( $args ) );
 		if ( is_wp_error( $ids ) ) {
 			return new \WP_Error( 'woocommerce_ability_product_term_create_failed', $ids->get_error_message(), array( 'status' => 500 ) );
 		}
@@ -110,7 +111,7 @@ class ProductTermCreate extends AbstractDomainAbility implements AbilityDefiniti
 
 		$output = self::format_term( $term );
 		if ( is_wp_error( $output ) ) {
-			return $output;
+			return ExtensibleAbilities::saved_write_error( $output, 'product_term', $term->term_id );
 		}
 
 		return array( 'term' => $output );

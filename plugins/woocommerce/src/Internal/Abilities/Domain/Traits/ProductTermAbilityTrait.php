@@ -103,8 +103,9 @@ trait ProductTermAbilityTrait {
 		if ( '' === $name ) {
 			return new \WP_Error( 'woocommerce_ability_product_term_name_empty', __( 'The term name is empty.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
-		if ( '' === $slug ) {
-			return new \WP_Error( 'woocommerce_ability_product_term_slug_empty', __( 'The term needs a slug with letters or numbers. Send one, or leave slug out to make one from the name.', 'woocommerce' ), array( 'status' => 400 ) );
+		// WordPress treats a "0" slug as missing and generates one from the name instead.
+		if ( '' === $slug || '0' === $slug ) {
+			return new \WP_Error( 'woocommerce_ability_product_term_slug_empty', __( 'The term needs a slug with letters or numbers, other than "0". Send one, or leave slug out to make one from the name.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		if ( $parent_id > 0 ) {

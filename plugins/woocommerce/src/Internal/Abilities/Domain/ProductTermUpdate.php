@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductTermAbilityTrait;
 
 defined( 'ABSPATH' ) || exit;
@@ -111,17 +112,17 @@ class ProductTermUpdate extends AbstractDomainAbility implements AbilityDefiniti
 			return $error;
 		}
 
-		$args = array(
-			'name'   => $name,
-			'parent' => $parent,
-		);
+		$args = array( 'parent' => $parent );
+		if ( isset( $input['name'] ) ) {
+			$args['name'] = $name;
+		}
 		if ( null !== $slug ) {
 			$args['slug'] = $slug;
 		}
 		if ( isset( $input['description'] ) ) {
 			$args['description'] = wp_kses_post( $input['description'] );
 		}
-		$result = wp_update_term( $term->term_id, $taxonomy, $args );
+		$result = wp_update_term( $term->term_id, $taxonomy, wp_slash( $args ) );
 		if ( is_wp_error( $result ) ) {
 			return new \WP_Error( 'woocommerce_ability_product_term_update_failed', $result->get_error_message(), array( 'status' => 500 ) );
 		}
@@ -133,7 +134,7 @@ class ProductTermUpdate extends AbstractDomainAbility implements AbilityDefiniti
 
 		$output = self::format_term( $term );
 		if ( is_wp_error( $output ) ) {
-			return $output;
+			return ExtensibleAbilities::saved_write_error( $output, 'product_term', $term->term_id );
 		}
 
 		return array( 'term' => $output );

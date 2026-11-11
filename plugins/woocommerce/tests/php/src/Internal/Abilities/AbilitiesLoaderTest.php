@@ -982,6 +982,21 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function provider_canonical_abilities_with_minimal_input(): array {
 		// Valid-shape input only — permission check should fire before execute.
 		return array(
+			'product-term-create'    => array(
+				'woocommerce/product-term-create',
+				array(
+					'taxonomy' => 'product_cat',
+					'name'     => 'Forbidden',
+				),
+			),
+			'product-term-update'    => array(
+				'woocommerce/product-term-update',
+				array(
+					'taxonomy' => 'product_cat',
+					'id'       => 1,
+					'name'     => 'Forbidden',
+				),
+			),
 			'products-query'         => array(
 				'woocommerce/products-query',
 				array(
