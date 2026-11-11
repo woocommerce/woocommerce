@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductDescriptionUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\ProductItemTrait;
 
 /**
@@ -193,8 +194,8 @@ class OrderItemSchema extends ItemSchema {
 		];
 
 		if ( is_a( $product, 'WC_Product' ) ) {
-			$product_properties['short_description']  = $product->get_short_description();
-			$product_properties['description']        = $product->get_description();
+			$product_properties['short_description']  = ProductDescriptionUtils::guarded_format( $product, array( $product, 'get_short_description' ) );
+			$product_properties['description']        = ProductDescriptionUtils::guarded_format( $product, array( $product, 'get_description' ) );
 			$product_properties['sku']                = $product->get_sku();
 			$product_properties['permalink']          = $product->get_permalink();
 			$product_properties['catalog_visibility'] = $product->get_catalog_visibility();
