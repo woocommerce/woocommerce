@@ -5,7 +5,7 @@ import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import { Children, cloneElement } from '@wordpress/element';
 // It is very important to export this directly from the build module to avoid introducing side-effects
 // from importing the index of the @wordpress/components package.
-// eslint-disable-next-line -- When adding comments to imports it breaks the external/internal dependencies lint.
+
 import {
 	createSlotFill as baseCreateSlotFill,
 	useSlot,
@@ -92,7 +92,6 @@ export const createSlotFill = ( slotName: string, onError = null ) => {
 	 * @param {string}         props.className Class name to be used on slot.
 	 * @param {Object}         props.fillProps Props to be passed to fills.
 	 * @param {Element|string} props.as        Element used to render the slot, defaults to div.
-	 *
 	 */
 	const Slot = ( props: object ) => (
 		<BaseSlot { ...props } bubblesVirtually />

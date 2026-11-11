@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Fragment } from '@wordpress/element';
+import { Fragment, cloneElement, isValidElement } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { PLACEHOLDER_IMG_SRC, getSetting } from '@woocommerce/settings';
@@ -12,7 +12,7 @@ import {
 import { useStyleProps } from '@woocommerce/base-hooks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
 import { useStoreEvents } from '@woocommerce/base-context/hooks';
-import type { HTMLAttributes } from 'react';
+import type { CSSProperties, HTMLAttributes } from 'react';
 import { decodeEntities } from '@wordpress/html-entities';
 import { isEmpty, ProductResponseItem } from '@woocommerce/types';
 import { ProductEntityResponse } from '@woocommerce/entities';
@@ -33,6 +33,38 @@ const buildStyles = ( props: Partial< ImageProps > ) => {
 		objectFit: scale,
 		aspectRatio,
 	};
+};
+
+/**
+ * Unset sides are omitted on purpose: assigning them as undefined clears a
+ * shorthand `padding` value when React writes the style.
+ */
+const getDefinedPaddingStyles = ( {
+	padding,
+	paddingTop,
+	paddingRight,
+	paddingBottom,
+	paddingLeft,
+}: CSSProperties ): CSSProperties => {
+	const paddingStyles: CSSProperties = {};
+
+	if ( padding !== undefined ) {
+		paddingStyles.padding = padding;
+	}
+	if ( paddingTop !== undefined ) {
+		paddingStyles.paddingTop = paddingTop;
+	}
+	if ( paddingRight !== undefined ) {
+		paddingStyles.paddingRight = paddingRight;
+	}
+	if ( paddingBottom !== undefined ) {
+		paddingStyles.paddingBottom = paddingBottom;
+	}
+	if ( paddingLeft !== undefined ) {
+		paddingStyles.paddingLeft = paddingLeft;
+	}
+
+	return paddingStyles;
 };
 
 const chooseImage = ( product: ProductResponseItem, imageId?: number ) => {
@@ -170,6 +202,28 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	} = props;
 
 	const styleProps = useStyleProps( props );
+	const {
+		padding,
+		paddingTop,
+		paddingRight,
+		paddingBottom,
+		paddingLeft,
+		...imageStyle
+	} = styleProps.style;
+	const innerBlocks = isValidElement< { style?: CSSProperties } >( children )
+		? cloneElement( children, {
+				style: {
+					...children.props.style,
+					...getDefinedPaddingStyles( {
+						padding,
+						paddingTop,
+						paddingRight,
+						paddingBottom,
+						paddingLeft,
+					} ),
+				},
+			} )
+		: children;
 	const { parentClassName } = useInnerBlockLayoutContext();
 	const { product, isLoading } = useProductDataContext( {
 		isAdmin,
@@ -213,11 +267,11 @@ export const Block = ( props: Props ): JSX.Element | null => {
 						},
 						styleProps.className
 					) }
-					style={ styleProps.style }
+					style={ imageStyle }
 				>
 					<ImagePlaceholder style={ imageStyles } />
 				</div>
-				{ children }
+				{ innerBlocks }
 			</>
 		);
 	}
@@ -231,7 +285,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	const ParentComponent = showProductLink ? 'a' : Fragment;
 	const anchorLabel = product?.name
 		? // translators: %s is the product name.
-		  sprintf( __( 'Link to %s', 'woocommerce' ), product.name )
+			sprintf( __( 'Link to %s', 'woocommerce' ), product.name )
 		: '';
 	const anchorProps = {
 		href: showProductLink ? product?.permalink : undefined,
@@ -258,7 +312,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 					},
 					styleProps.className
 				) }
-				style={ styleProps.style }
+				style={ imageStyle }
 			>
 				{ /* For backwards compatibility in All Products blocks. */ }
 				{ displayLegacySaleBadge( props ) && (
@@ -281,7 +335,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 					/>
 				</ParentComponent>
 			</div>
-			{ children }
+			{ innerBlocks }
 		</>
 	);
 };

@@ -48,7 +48,9 @@ type ChipsStore = {
 };
 
 function getParentStore( storeNamespace?: string ) {
-	if ( ! storeNamespace ) return undefined;
+	if ( ! storeNamespace ) {
+		return undefined;
+	}
 	return store<
 		SelectableItemsParentStore< { visual?: VisualAttributeTerm } >
 	>( storeNamespace );
@@ -101,7 +103,9 @@ const { state }: ChipsStore = store< ChipsStore >(
 					getContext< ChipsContext >();
 				const parentItems =
 					getParentStore( storeNamespace )?.state?.selectableItems;
-				if ( ! Array.isArray( parentItems ) ) return [];
+				if ( ! Array.isArray( parentItems ) ) {
+					return [];
+				}
 				const normalizedDisplayLimit =
 					normalizeDisplayLimit( displayLimit );
 				return parentItems.map( ( item, index ) => ( {
@@ -126,7 +130,9 @@ const { state }: ChipsStore = store< ChipsStore >(
 		actions: {
 			toggle() {
 				const item = getCurrentItem();
-				if ( ! item ) return;
+				if ( ! item ) {
+					return;
+				}
 				const { storeNamespace } = getContext< ChipsContext >();
 				getParentStore( storeNamespace )?.actions?.toggle?.( item );
 			},

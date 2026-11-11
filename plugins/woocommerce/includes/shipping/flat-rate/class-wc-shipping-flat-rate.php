@@ -140,6 +140,14 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 			'fee'
 		);
 
+		// Merchants type these in the store's number format, so read its decimal separator as a dot.
+		$atts = array_map(
+			function ( $value ) {
+				return str_replace( wc_get_price_decimal_separator(), '.', (string) $value );
+			},
+			$atts
+		);
+
 		$calculated_fee = 0;
 
 		if ( $atts['percent'] ) {

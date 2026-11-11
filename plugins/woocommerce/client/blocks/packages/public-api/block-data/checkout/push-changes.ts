@@ -89,11 +89,6 @@ const updateCheckoutData = (): void => {
 		activePaymentMethod: paymentStore.getActivePaymentMethod(),
 	};
 
-	// Don't push changes if the active payment method is empty
-	if ( newCheckoutData.activePaymentMethod === '' ) {
-		localState.doingPush = false;
-		return;
-	}
 	// Figure out which additional fields have changed and only send those to the server
 	const changedFields = Object.keys( newCheckoutData.additionalFields )
 		.filter( ( key ) => {
@@ -148,9 +143,11 @@ const updateCheckoutData = (): void => {
 		requestData.order_notes = newCheckoutData.orderNotes;
 	}
 
+	// With no method selected there is nothing to send; the server treats a missing payment_method as no change.
 	if (
+		newCheckoutData.activePaymentMethod !== '' &&
 		newCheckoutData.activePaymentMethod !==
-		localState.checkoutData.activePaymentMethod
+			localState.checkoutData.activePaymentMethod
 	) {
 		requestData.payment_method = newCheckoutData.activePaymentMethod;
 	}

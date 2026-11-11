@@ -14,6 +14,7 @@ import { CountryStateOption } from '../services/country';
 import { Heading } from '../components/heading/heading';
 import { Navigation } from '../components/navigation/navigation';
 import { GeolocationCountrySelect } from '../components/geolocation-country-select/geolocation-country-select';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 export const BusinessLocation = ( {
 	sendEvent,
@@ -33,6 +34,10 @@ export const BusinessLocation = ( {
 	} );
 
 	const inputLabel = __( 'Select country/region', 'woocommerce' );
+	// Only preloaded for users who can open Site Health.
+	const { siteHealthUrl } = getAdminSetting( 'onboarding', {} ) as {
+		siteHealthUrl?: string;
+	};
 
 	return (
 		<div
@@ -109,6 +114,27 @@ export const BusinessLocation = ( {
 								),
 							}
 						) }
+						<p>
+							{ siteHealthUrl
+								? createInterpolateElement(
+										__(
+											'If this keeps happening, your site’s REST API may be blocked. <siteHealthLink>Check Site Health</siteHealthLink> for details.',
+											'woocommerce'
+										),
+										{
+											siteHealthLink: (
+												<Button
+													variant="link"
+													href={ siteHealthUrl }
+												/>
+											),
+										}
+									)
+								: __(
+										'If this keeps happening, ask your hosting provider to check that your site’s REST API is working.',
+										'woocommerce'
+									) }
+						</p>
 					</Notice>
 				) }
 				<div className="woocommerce-profiler-button-container woocommerce-profiler-go-to-mystore__button-container">

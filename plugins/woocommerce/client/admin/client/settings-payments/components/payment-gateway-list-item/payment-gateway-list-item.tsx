@@ -7,7 +7,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { PaymentGatewayProvider } from '@woocommerce/data';
 import { Tooltip } from '@wordpress/components';
 import { createInterpolateElement } from '@wordpress/element';
-import { Link } from '@woocommerce/components';
+import { Link } from '@wordpress/ui';
 
 /**
  * Internal dependencies
@@ -63,7 +63,7 @@ export const PaymentGatewayListItem = ( {
 
 	// Default to onboarding supported to avoid blocking the user, but only when onboarding exists.
 	const isOnboardingSupported = gateway.onboarding
-		? gateway.onboarding.state?.supported ?? true
+		? ( gateway.onboarding.state?.supported ?? true )
 		: true;
 
 	// If the account is not connected or the onboarding is not started, or not completed then the gateway needs onboarding.
@@ -180,9 +180,8 @@ export const PaymentGatewayListItem = ( {
 												a: (
 													<Link
 														href="https://woocommerce.com/document/woocommerce-store-editing/customizing-cart-and-checkout/#incompatible-extensions"
-														target="_blank"
-														rel="noreferrer"
-														type="external"
+														rel="noopener noreferrer"
+														openInNewTab
 													>
 														{ null }
 													</Link>
@@ -225,7 +224,7 @@ export const PaymentGatewayListItem = ( {
 					</span>
 					<span
 						className="woocommerce-list__item-content"
-						// eslint-disable-next-line react/no-danger -- This string is sanitized by the PaymentGateway class.
+
 						dangerouslySetInnerHTML={ sanitizeHTML(
 							decodeEntities( gateway.description )
 						) }

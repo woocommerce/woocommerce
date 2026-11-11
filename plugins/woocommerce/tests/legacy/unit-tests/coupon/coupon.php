@@ -25,15 +25,6 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Cleans up after the test class.
-	 */
-	public function tearDown(): void {
-		WC()->cart->remove_coupons();
-
-		parent::tearDown();
-	}
-
-	/**
 	 * Test the code/id differentiation of the coupon constructor.
 	 *
 	 * @since 3.2
@@ -301,10 +292,9 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 			)
 		);
 
-		// We need this to have the calculate_totals() method calculate totals.
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			define( 'WOOCOMMERCE_CHECKOUT', true );
-		}
+		// We need this to have the calculate_totals() method calculate totals. Set it through
+		// Constants rather than define(), which would stay defined for every later test.
+		\Automattic\Jetpack\Constants::set_constant( 'WOOCOMMERCE_CHECKOUT', true );
 
 		// Add 2 products and coupon to cart.
 		WC()->cart->add_to_cart( $product->get_id(), 2 );

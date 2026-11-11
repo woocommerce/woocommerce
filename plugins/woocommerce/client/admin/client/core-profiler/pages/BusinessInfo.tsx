@@ -161,7 +161,7 @@ export const BusinessInfo = ( {
 			? industryChoices.find(
 					( choice ) =>
 						choice.key === industryFromOnboardingProfile[ 0 ]
-			  )
+				)
 			: undefined
 	);
 

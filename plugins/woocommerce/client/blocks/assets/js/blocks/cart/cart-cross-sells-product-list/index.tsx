@@ -19,7 +19,9 @@ const CartCrossSellsProductList = ( {
 	columns,
 }: CrossSellsProductListProps ): JSX.Element => {
 	const crossSellsProducts = products.map( ( product, i ) => {
-		if ( i >= columns ) return null;
+		if ( i >= columns ) {
+			return null;
+		}
 
 		return (
 			<CartCrossSellsProduct

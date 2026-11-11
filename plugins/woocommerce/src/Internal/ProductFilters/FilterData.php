@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFilters;
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 use WC_Cache_Helper;
@@ -57,6 +59,8 @@ class FilterData {
 	 * @return object
 	 */
 	public function get_filtered_price( array $query_vars ) {
+		$query_vars = $this->get_query_vars_with_default_post_status( $query_vars );
+
 		/**
 		 * Allows offloading the filter data to external services like Elasticsearch.
 		 *
@@ -132,6 +136,8 @@ class FilterData {
 	 * @return array status=>count pairs.
 	 */
 	public function get_stock_status_counts( array $query_vars, array $statuses ) {
+		$query_vars = $this->get_query_vars_with_default_post_status( $query_vars );
+
 		/**
 		 * Filter the data. @see get_filtered_price() for full documentation.
 		 */
@@ -197,6 +203,8 @@ class FilterData {
 	 * @return array rating=>count pairs.
 	 */
 	public function get_rating_counts( array $query_vars ) {
+		$query_vars = $this->get_query_vars_with_default_post_status( $query_vars );
+
 		/**
 		 * Filter the data. @see get_filtered_price() for full documentation.
 		 */
@@ -257,6 +265,8 @@ class FilterData {
 	 * @return array termId=>count pairs.
 	 */
 	public function get_attribute_counts( array $query_vars, string $attribute_to_count ) {
+		$query_vars = $this->get_query_vars_with_default_post_status( $query_vars );
+
 		/**
 		 * Filter the data. @see get_filtered_price() for full documentation.
 		 */
@@ -266,8 +276,18 @@ class FilterData {
 			return $pre_filter_counts;
 		}
 
-		$transient_key = $this->get_transient_key( $query_vars, 'attribute', array( 'taxonomy' => $attribute_to_count ) );
-		$cached_data   = $this->get_cache( $transient_key );
+		$use_lookup_table  = 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' );
+		$hide_out_of_stock = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' );
+		$transient_key     = $this->get_transient_key(
+			$query_vars,
+			'attribute',
+			array(
+				'taxonomy'          => $attribute_to_count,
+				'use_lookup_table'  => $use_lookup_table,
+				'hide_out_of_stock' => $hide_out_of_stock,
+			)
+		);
+		$cached_data       = $this->get_cache( $transient_key );
 
 		if ( ! empty( $cached_data ) ) {
 			return $cached_data;
@@ -279,18 +299,29 @@ class FilterData {
 		if ( $product_ids ) {
 			global $wpdb;
 
-			// Optimization note: We evaluated using wc_product_attributes_lookup but decided against it, as removing
-			// the posts table join in the query below produced better benchmarking results and required minimal changes.
-			$taxonomy_escaped    = esc_sql( wc_sanitize_taxonomy_name( $attribute_to_count ) );
-			$attribute_count_sql = "
-				SELECT COUNT( DISTINCT term_relationships.object_id ) as term_count, terms.term_id as term_count_id
-				FROM {$wpdb->term_relationships} AS term_relationships
-				INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
-				INNER JOIN {$wpdb->terms} AS terms USING( term_id )
-				WHERE term_relationships.object_id IN ( {$product_ids} )
-				AND term_taxonomy.taxonomy = '{$taxonomy_escaped}'
-				GROUP BY terms.term_id
-			";
+			$taxonomy_escaped = esc_sql( wc_sanitize_taxonomy_name( $attribute_to_count ) );
+			if ( $use_lookup_table ) {
+				$lookup_table        = wc_get_container()->get( LookupDataStore::class )->get_lookup_table_name();
+				$in_stock_clause     = $hide_out_of_stock ? ' AND in_stock = 1' : '';
+				$attribute_count_sql = "
+					SELECT COUNT( DISTINCT product_or_parent_id ) as term_count, term_id as term_count_id
+					FROM {$lookup_table}
+					WHERE product_or_parent_id IN ( {$product_ids} )
+					AND taxonomy = '{$taxonomy_escaped}'
+					{$in_stock_clause}
+					GROUP BY term_id
+				";
+			} else {
+				$attribute_count_sql = "
+					SELECT COUNT( DISTINCT term_relationships.object_id ) as term_count, terms.term_id as term_count_id
+					FROM {$wpdb->term_relationships} AS term_relationships
+					INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
+					INNER JOIN {$wpdb->terms} AS terms USING( term_id )
+					WHERE term_relationships.object_id IN ( {$product_ids} )
+					AND term_taxonomy.taxonomy = '{$taxonomy_escaped}'
+					GROUP BY terms.term_id
+				";
+			}
 
 			/**
 			 * We can't use $wpdb->prepare() here because using %s with
@@ -323,6 +354,8 @@ class FilterData {
 	 * @return array termId=>count pairs.
 	 */
 	public function get_taxonomy_counts( array $query_vars, string $taxonomy_to_count ) {
+		$query_vars = $this->get_query_vars_with_default_post_status( $query_vars );
+
 		/**
 		 * Filter the data. @see get_filtered_price() for full documentation.
 		 *
@@ -481,6 +514,24 @@ class FilterData {
 	}
 
 	/**
+	 * Make default visibility explicit before generating SQL or shared cache keys.
+	 *
+	 * @param array $query_vars The WP_Query arguments.
+	 * @return array Query arguments with an explicit post status.
+	 */
+	private function get_query_vars_with_default_post_status( array $query_vars ): array {
+		if ( empty( $query_vars['post_status'] ) ) {
+			$post_statuses = get_post_stati( array( 'public' => true ) );
+			if ( current_user_can( 'read_private_products' ) ) {
+				$post_statuses = array_merge( $post_statuses, get_post_stati( array( 'private' => true ) ) );
+			}
+			$query_vars['post_status'] = array_values( $post_statuses );
+		}
+
+		return $query_vars;
+	}
+
+	/**
 	 * Get filter data transient key.
 	 *
 	 * @param array  $query_vars   The query arguments to calculate the filter data.
@@ -494,6 +545,7 @@ class FilterData {
 			md5(
 				wp_json_encode(
 					array(
+						'generator'   => get_class( $this->query_clauses ),
 						'query_vars'  => $this->normalize_query_vars( $query_vars ),
 						'params'      => $this->get_params_for_cache(),
 						'extra'       => $extra,
@@ -523,7 +575,7 @@ class FilterData {
 	 */
 	private function normalize_query_vars( array $query_vars ): array {
 		// Taxonomy filter params are treated as unordered sets. Read from Params so that names
-		// changed through the woocommerce_product_filter_taxonomy_params filter stay normalised.
+		// changed through the woocommerce_product_filter_params filter stay normalised.
 		$taxonomy_set_params = array_values( $this->params->get_param( 'taxonomy' ) );
 
 		ksort( $query_vars );
@@ -666,6 +718,7 @@ class FilterData {
 		$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . md5(
 			wp_json_encode(
 				array(
+					'generator'  => get_class( $this->query_clauses ),
 					'query_vars' => $this->normalize_query_vars( $query_vars ),
 					'params'     => $this->get_params_for_cache(),
 				)
@@ -683,6 +736,7 @@ class FilterData {
 		$query_vars['no_found_rows']  = true;
 		$query_vars['posts_per_page'] = -1;
 		$query_vars['fields']         = 'ids';
+		$query_vars['orderby']        = 'none';
 		$query                        = new \WP_Query();
 
 		$query->query( $query_vars );

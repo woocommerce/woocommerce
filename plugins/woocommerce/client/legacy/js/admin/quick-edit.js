@@ -1,6 +1,70 @@
 /*global inlineEditPost, woocommerce_admin, woocommerce_quick_edit */
 jQuery(
 	function( $ ) {
+		function init_bulk_edit_taxonomies() {
+			const bulk_row = $( '#bulk-edit.inline-editor' );
+			const checkedProducts = $( '#the-list .check-column input[name="post[]"]:checked' );
+			if ( ! bulk_row.length || ! checkedProducts.length ) {
+				return;
+			}
+
+			[ 'product_cat', 'product_brand' ].forEach( function( taxonomy ) {
+				const list = $( 'ul.' + taxonomy + '-checklist', bulk_row );
+				const checkboxes = list.find( 'input[type="checkbox"]' );
+				if ( ! checkboxes.length ) {
+					return;
+				}
+
+				const taxonomy_field = 'wc_bulk_edit_taxonomies[' + taxonomy + ']';
+				const mixed_field = 'wc_bulk_edit_indeterminate[' + taxonomy + '][]';
+				list.find( 'input[name="' + taxonomy_field + '"], input[name="' + mixed_field + '"]' ).remove();
+				checkboxes.prop( 'checked', false ).prop( 'indeterminate', false ).removeAttr( 'aria-label' );
+
+				const categories = {};
+				let has_data = true;
+				checkedProducts.each( function() {
+					const id = $( this ).val();
+					const terms = $( '#' + taxonomy + '_' + id );
+					if ( ! terms.length ) {
+						has_data = false;
+						return;
+					}
+					const checked = terms.text().split( ',' );
+					checked.map( function( cid ) {
+						categories[ cid ] || ( categories[ cid ] = 0 );
+						categories[ cid ]++;
+					} );
+				} );
+				if ( ! has_data ) {
+					return;
+				}
+
+				checkboxes.each( function() {
+					if ( categories[ $( this ).val() ] == checkedProducts.length ) {
+						$( this ).prop( 'checked', true );
+					} else if ( categories[ $( this ).val() ] > 0 ) {
+						$( this ).prop( 'indeterminate', true );
+						if ( ! $( this ).parent().find( 'input[name="' + mixed_field + '"]' ).length ) {
+							const label = $( this ).parent().text();
+							$( this ).after( '<input type="hidden" name="' + mixed_field + '" value="' + $( this ).val() + '">' )
+								.attr( 'aria-label', label.trim() + ': ' + woocommerce_quick_edit.strings.some_products_have_term );
+						}
+					}
+				} );
+
+				$( 'input[name="tax_input[' + taxonomy + '][]"]:indeterminate', bulk_row ).on( 'change', function() {
+					$( this ).removeAttr( 'aria-label' ).parent().find( 'input[name="' + mixed_field + '"]' ).remove();
+				} );
+
+				$( '.inline-edit-save button', bulk_row ).on( 'click', function() {
+					checkboxes.prop( 'indeterminate', false );
+				} );
+
+				const seen = checkboxes.map( function() { return $( this ).val(); } ).get().join( ',' );
+				checkboxes.first().after( '<input type="hidden" name="' + taxonomy_field + '" value="' + seen + '">' );
+			} );
+		}
+
 		function init_sale_datepickers( $row ) {
 			if ( ! $.fn.datepicker ) {
 				return;
@@ -79,10 +143,10 @@ jQuery(
 				setTimeout( function() {
 					init_sale_datepickers( $( '#edit-' + post_id ) );
 				}, 0 );
-				$( 'input[name="_weight"]', '.inline-edit-row' ).val( weight );
-				$( 'input[name="_length"]', '.inline-edit-row' ).val( length );
-				$( 'input[name="_width"]', '.inline-edit-row' ).val( width );
-				$( 'input[name="_height"]', '.inline-edit-row' ).val( height );
+				$( 'input[name="_weight"]', '.inline-edit-row' ).val( weight.replace( '.', woocommerce_admin.decimal_point ) );
+				$( 'input[name="_length"]', '.inline-edit-row' ).val( length.replace( '.', woocommerce_admin.decimal_point ) );
+				$( 'input[name="_width"]', '.inline-edit-row' ).val( width.replace( '.', woocommerce_admin.decimal_point ) );
+				$( 'input[name="_height"]', '.inline-edit-row' ).val( height.replace( '.', woocommerce_admin.decimal_point ) );
 
 				$( 'select[name="_shipping_class"] option:selected', '.inline-edit-row' ).attr( 'selected', false ).trigger( 'change' );
 				$( 'select[name="_shipping_class"] option[value="' + shipping_class + '"]' ).attr( 'selected', 'selected' )
@@ -179,6 +243,7 @@ jQuery(
 				$( 'input.text', '.inline-edit-row' ).val( '' );
 				$( '#woocommerce-fields' ).find( 'select' ).prop( 'selectedIndex', 0 );
 				$( '#woocommerce-fields-bulk' ).find( '.inline-edit-group .change-input' ).hide();
+				init_bulk_edit_taxonomies();
 			}
 		);
 

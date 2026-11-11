@@ -268,7 +268,7 @@ class SingleProduct extends \WP_UnitTestCase {
 
 <!-- wp:column -->
 <div class="wp-block-column">
-<!-- wp:post-title {"isLink":true,"__woocommerceNamespace":"woocommerce/product-query/product-title"} /-->
+<!-- wp:post-title {"isLink":true,"__woocommerceNamespace":"woocommerce/product-title"} /-->
 
 <!-- wp:woocommerce/product-rating /-->
 

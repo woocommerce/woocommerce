@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Utilities\ShippingUtil;
 use WC_Customer;
 use WC_Shipping_Rate;
 
@@ -446,21 +447,27 @@ class ShippingController {
 			return $address;
 		}
 		// We only need to select from the first package, since pickup_location only supports a single package.
-		$chosen_method          = current( WC()->session->get( 'chosen_shipping_methods', array() ) ) ?? '';
+		// The first entry is used only when its rate was listed for the cart.
+		$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+		$first_key      = is_array( $chosen_methods ) && ! empty( $chosen_methods ) ? array_key_first( $chosen_methods ) : null;
+		$listed_methods = null !== $first_key ? ShippingUtil::filter_chosen_shipping_methods( $chosen_methods ) : array();
+		$chosen_method  = null !== $first_key && isset( $listed_methods[ $first_key ] ) ? (string) $listed_methods[ $first_key ] : '';
+
 		$chosen_method_id       = explode( ':', $chosen_method )[0];
 		$chosen_method_instance = explode( ':', $chosen_method )[1] ?? 0;
 
+		// Only pickup_location rates should get their address from the saved settings, local_pickup has another filter, and third party pickup locations should have their own filter and logic for the address as well.
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in WC_Abstract_Order::get_tax_location().
-		if ( $chosen_method_id && true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) && in_array( $chosen_method_id, LocalPickupUtils::get_local_pickup_method_ids(), true ) ) {
+		if ( 'pickup_location' === $chosen_method_id && true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) ) {
 			$pickup_locations = get_option( 'pickup_location_pickup_locations', array() );
 			$pickup_location  = $pickup_locations[ $chosen_method_instance ] ?? array();
 
 			if ( isset( $pickup_location['address'], $pickup_location['address']['country'] ) && ! empty( $pickup_location['address']['country'] ) ) {
 				$address = array(
-					$pickup_locations[ $chosen_method_instance ]['address']['country'],
-					$pickup_locations[ $chosen_method_instance ]['address']['state'],
-					$pickup_locations[ $chosen_method_instance ]['address']['postcode'],
-					$pickup_locations[ $chosen_method_instance ]['address']['city'],
+					$pickup_location['address']['country'],
+					$pickup_location['address']['state'] ?? '',
+					$pickup_location['address']['postcode'] ?? '',
+					$pickup_location['address']['city'] ?? '',
 				);
 			}
 		}

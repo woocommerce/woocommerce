@@ -43,7 +43,7 @@ class ProductRatingTest extends WC_Unit_Test_Case {
 
 			$product->set_reviews_allowed( $product_reviews_allowed );
 			$product->save();
-			\WC_Comments::clear_transients( $product->get_id() );
+			\WC_Comments::maybe_update_product_average_rating( $product->get_id() );
 			clean_post_cache( $product->get_id() );
 
 			$product = wc_get_product( $product->get_id() );

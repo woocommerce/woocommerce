@@ -95,6 +95,29 @@ class REST_Controller {
 
 		register_rest_route(
 			self::NAMESPACE,
+			'/sync-enabled-emails',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'sync_enabled_emails' ),
+				'permission_callback' => array( self::class, 'require_admin' ),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/merchant-edited-blocks/(?P<post_id>\d+)',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'merchant_edited_blocks' ),
+				'permission_callback' => array( self::class, 'require_admin' ),
+				'args'                => array(
+					'post_id' => array( 'sanitize_callback' => 'absint' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
 			'/seed-bulk',
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
@@ -279,6 +302,68 @@ class REST_Controller {
 			array(
 				'post_id' => $post_id,
 				'meta'    => get_post_meta( $post_id ),
+			),
+			200
+		);
+	}
+
+	/**
+	 * List the email IDs enrolled in template sync, so a test can cover every shipped template.
+	 *
+	 * @param WP_REST_Request $request The REST request (unused).
+	 * @return WP_REST_Response
+	 */
+	public function sync_enabled_emails( WP_REST_Request $request ): WP_REST_Response {
+		unset( $request );
+
+		$registry = \Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncRegistry::get_sync_enabled_emails();
+
+		return new WP_REST_Response( array( 'email_ids' => array_map( 'strval', array_keys( $registry ) ) ), 200 );
+	}
+
+	/**
+	 * Run the change summary's own "did the merchant edit this block?" rule on a post,
+	 * comparing its content with the stored base render block by block. Lets a test
+	 * assert that a save the merchant made no edits in leaves every block untouched.
+	 *
+	 * @param WP_REST_Request $request The REST request. Expects `post_id` route parameter.
+	 * @return WP_REST_Response
+	 */
+	public function merchant_edited_blocks( WP_REST_Request $request ): WP_REST_Response {
+		$post_id = (int) $request->get_param( 'post_id' );
+		$post    = get_post( $post_id );
+
+		if ( ! $post ) {
+			return new WP_REST_Response( array( 'error' => "Post {$post_id} not found" ), 404 );
+		}
+
+		$summary = \Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateChangeSummary::class;
+		$base    = (string) get_post_meta( $post_id, \Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, true );
+
+		$base_records = $summary::flatten_blocks( parse_blocks( $base ) );
+		$post_records = $summary::flatten_blocks( parse_blocks( (string) $post->post_content ) );
+
+		$edited = array();
+		foreach ( $base_records as $i => $base_record ) {
+			$post_record = $post_records[ $i ] ?? null;
+			if ( null !== $post_record && ! $summary::merchant_changed( $base_record, $post_record ) ) {
+				continue;
+			}
+			$edited[] = array(
+				'index'          => $i,
+				'block'          => $base_record['name'],
+				'text'           => $base_record['inner_text'],
+				'attrs_changed'  => null === $post_record || $base_record['attrs_hash'] !== $post_record['attrs_hash'],
+				'markup_changed' => null === $post_record || $base_record['inner_html_hash'] !== $post_record['inner_html_hash'],
+			);
+		}
+
+		return new WP_REST_Response(
+			array(
+				'post_id'     => $post_id,
+				'base_blocks' => count( $base_records ),
+				'post_blocks' => count( $post_records ),
+				'edited'      => $edited,
 			),
 			200
 		);

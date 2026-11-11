@@ -471,9 +471,10 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		}
 
 		update_comment_meta( $review_id, 'rating', ! empty( $request['rating'] ) ? $request['rating'] : '0' );
-
 		if ( isset( $request['verified'] ) && ! empty( $request['verified'] ) ) {
 			update_comment_meta( $review_id, 'verified', $request['verified'] );
+		} else {
+			wc_review_is_from_verified_owner( $review_id );
 		}
 
 		$review = get_comment( $review_id );
@@ -486,7 +487,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		 * review can change the aggregates.
 		 */
 		if ( ! empty( $request['rating'] ) && $review instanceof WP_Comment && '1' === $review->comment_approved ) {
-			WC_Comments::clear_transients( (int) $review->comment_post_ID );
+			WC_Comments::maybe_update_product_average_rating( (int) $review->comment_post_ID );
 		}
 
 		/**
@@ -948,7 +949,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
-						'sanitize_callback' => 'wp_filter_post_kses',
+						'sanitize_callback' => 'wp_kses_post',
 					),
 				),
 				'rating'           => array(

@@ -1,10 +1,15 @@
 /**
  * External dependencies
  */
-import { act, screen, waitFor } from '@testing-library/react';
+import {
+	act,
+	screen,
+	waitFor,
+	getAllByRole,
+	getByLabelText,
+} from '@testing-library/react';
 import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 import { type BlockAttributes } from '@wordpress/blocks';
-import { getAllByRole, getByLabelText } from '@testing-library/dom';
 import { userEvent } from '@testing-library/user-event';
 import { previewCart } from '@woocommerce/resource-previews';
 import { dispatch } from '@wordpress/data';
@@ -29,9 +34,12 @@ import '../../product-elements-blocks/title/index';
 import '../../product-template/index.tsx';
 import '../../product-collection/index.tsx';
 
-async function setup( attributes: BlockAttributes ) {
+async function setup(
+	attributes: BlockAttributes,
+	options: { useSubRegistry?: boolean } = {}
+) {
 	const testBlock = [ { name: 'woocommerce/cart', attributes } ];
-	return initializeEditor( testBlock );
+	return initializeEditor( testBlock, {}, options );
 }
 
 describe( 'Cart block editor integration', () => {
@@ -65,11 +73,9 @@ describe( 'Cart block editor integration', () => {
 		} );
 	} );
 
-	// Skipped: wp-6.8's block-editor rendering pipeline no longer renders
-	// inner blocks in Jest's jsdom environment. Gutenberg tests block
-	// rendering via Playwright E2E; these should be migrated similarly.
-	it.skip( 'inner blocks can be added/removed by filters', async () => {
+	it( 'inner blocks can be added/removed by filters', async () => {
 		await setup( {} );
+		await selectBlock( /^Block: Filled Cart$/i );
 
 		// Verify Cart block is properly initialized in the editor.
 		await waitFor( () => {
@@ -201,12 +207,9 @@ describe( 'Cart block editor integration', () => {
 		} );
 	} );
 
-	// Skipped: wp-6.8's block-editor rendering pipeline no longer renders
-	// inner blocks in Jest's jsdom environment. Gutenberg tests block
-	// rendering via Playwright E2E; these should be migrated similarly.
-	it.skip( 'can convert to Empty Cart block', async () => {
-		// Setup the cart block with default attributes (filled cart view)
-		await setup( {} );
+	it( 'can convert to Empty Cart block', async () => {
+		// The view switcher uses global data selectors and actions.
+		await setup( {}, { useSubRegistry: false } );
 
 		// Verify Cart block is properly initialized in the editor
 		expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeVisible();
@@ -217,9 +220,8 @@ describe( 'Cart block editor integration', () => {
 		const emptyCartBlock = screen.getByLabelText( /Block: Empty Cart/i );
 
 		expect( filledCartBlock ).toBeVisible();
-		expect( filledCartBlock ).not.toHaveAttribute( 'hidden' );
 		expect( emptyCartBlock ).toBeInTheDocument();
-		expect( emptyCartBlock ).toHaveAttribute( 'hidden' );
+		expect( emptyCartBlock ).not.toBeVisible();
 
 		await waitFor( () => {
 			expect(
@@ -235,7 +237,7 @@ describe( 'Cart block editor integration', () => {
 			await userEvent.click( selectParentBlockButton );
 		} );
 
-		const switchViewButton = screen.getByRole( 'button', {
+		let switchViewButton = screen.getByRole( 'button', {
 			name: /Switch view/i,
 		} );
 
@@ -256,10 +258,13 @@ describe( 'Cart block editor integration', () => {
 		expect(
 			screen.getByLabelText( /^Block: Empty Cart$/i )
 		).toBeInTheDocument();
-		expect( emptyCartBlock ).toHaveAttribute( 'hidden', '' );
-		expect( emptyCartBlock ).toHaveAttribute( 'hidden' );
+		expect( emptyCartBlock ).toBeVisible();
+		expect( filledCartBlock ).not.toBeVisible();
 
 		// Go back to filled cart
+		switchViewButton = screen.getByRole( 'button', {
+			name: /Switch view/i,
+		} );
 		await act( async () => {
 			await userEvent.click( switchViewButton );
 		} );
@@ -274,7 +279,7 @@ describe( 'Cart block editor integration', () => {
 			await userEvent.click( filledCartButton );
 		} );
 
-		expect( emptyCartBlock ).toHaveAttribute( 'hidden' );
-		expect( filledCartBlock ).not.toHaveAttribute( 'hidden' );
+		expect( emptyCartBlock ).not.toBeVisible();
+		expect( filledCartBlock ).toBeVisible();
 	} );
 } );

@@ -34,10 +34,10 @@
         gap: 0 0;
         grid-auto-flow: row;
         grid-template-areas:
-        'Ref-A Ref-B Ref-B Ref-B Ref-D'
-        'Ref-A Ref-B Ref-B Ref-B Ref-D'
-        'Ref-A Ref-C Ref-C Ref-C Ref-D'
-        'Ref-A Ref-C Ref-C Ref-C Ref-D';
+        "Ref-A Ref-B Ref-B Ref-B Ref-D"
+        "Ref-A Ref-B Ref-B Ref-B Ref-D"
+        "Ref-A Ref-C Ref-C Ref-C Ref-D"
+        "Ref-A Ref-C Ref-C Ref-C Ref-D";
     }
 
     .storybook__tourkit-references-a,
@@ -52,22 +52,22 @@
     }
 
     .storybook__tourkit-references-a {
-        background-color: silver;
+        background-color: #c0c0c0;
         grid-area: Ref-A;
     }
 
     .storybook__tourkit-references-b {
-        background-color: orange;
+        background-color: #ffa500;
         grid-area: Ref-B;
     }
 
     .storybook__tourkit-references-c {
-        background-color: palevioletred;
+        background-color: #db7093;
         grid-area: Ref-C;
     }
 
     .storybook__tourkit-references-d {
-        background-color: gainsboro;
+        background-color: #dcdcdc;
         grid-area: Ref-D;
     }
 }

@@ -852,6 +852,8 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 
 	/**
 	 * Test wc_transaction_query function.
+	 *
+	 * @ddlInTransaction Starting and committing a transaction is the subject; the cleanup is committed too.
 	 */
 	public function test_wc_transaction_query() {
 		global $wpdb;
@@ -897,13 +899,6 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		wc_transaction_query( 'commit', true );
 		$col = $wpdb->get_col( "SElECT option_value FROM {$wpdb->prefix}options WHERE option_name = 'transaction_test'" );
 		$this->assertEquals( '0', $col[0] );
-
-		$wpdb->delete(
-			$wpdb->prefix . 'options',
-			array(
-				'option_name' => 'transaction_test',
-			)
-		);
 	}
 
 	/**

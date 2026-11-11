@@ -192,7 +192,7 @@ export const QRLoginNumberMatchStep = ( {
 							/* translators: %d: seconds remaining before the challenge expires. */
 							__( 'Expires in %ds', 'woocommerce' ),
 							secondsRemaining
-					  ) }
+						) }
 			</p>
 
 			{ errorMessage && (

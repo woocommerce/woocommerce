@@ -1,7 +1,8 @@
 <?php
 /**
  * Contract - the stable identity of a subscription and the live source of truth
- * for its current state. Enforces lifecycle transitions through {@see ContractStatus}.
+ * for its current state. Status writes must name a registered status ({@see ContractStatus});
+ * the entity enforces no transition rules between them.
  *
  * Being the live source of truth (mutable), it holds the live schedule
  * (`next_payment_gmt`), the latest snapshot references (`plan_snapshot_id` /
@@ -12,10 +13,10 @@
  *
  * It holds no cycle graph in memory (cycles are fetched on demand), and a chain is
  * just the pair `(contract_id, kind)` with its counters derived from the cycle rows.
- * `origin_order_id` is nullable (a manual contract has none; for a checkout contract
- * it equals cycle 1's `order_id`). Timestamps are GMT strings; money totals are
- * decimal-safe strings on the storage scale; the payment instrument is exposed as an
- * {@see InstrumentRef}.
+ * `origin_order_id` is an optional extension fact. Customer, currency, selling plan and
+ * start are optional until the extension supplies them; a new contract defaults to
+ * `draft`. Timestamps are GMT strings; money totals are decimal-safe strings on the
+ * storage scale; the payment instrument is exposed as a {@see PaymentInstrumentRef}.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Core\Entity
  */
@@ -24,10 +25,11 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
 
-use DomainException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\MoneyScale;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\InstrumentRef;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PaymentInstrumentRef;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 
 defined( 'ABSPATH' ) || exit;
@@ -40,11 +42,28 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Contract {
 
-	public const SCHEDULE_SOURCE_PRIMITIVE = 'primitive';
-	public const SCHEDULE_SOURCE_GATEWAY   = 'gateway';
+	/**
+	 * Schedule source for a contract whose payment schedule the engine keeps
+	 * (through its due moment). The only source the engine dispatches.
+	 */
+	public const SCHEDULE_SOURCE_ENGINE = 'subscriptions_engine';
 
 	public const ADDRESS_BILLING  = 'billing';
 	public const ADDRESS_SHIPPING = 'shipping';
+
+	/**
+	 * Fields of a line-item row.
+	 *
+	 * @var array<int, string>
+	 */
+	public const ITEM_FIELDS = array( 'item_name', 'item_type', 'product_id', 'variation_id', 'quantity', 'subtotal', 'total', 'taxes' );
+
+	/**
+	 * Fields of an address.
+	 *
+	 * @var array<int, string>
+	 */
+	public const ADDRESS_FIELDS = array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'state', 'postcode', 'country', 'email', 'phone' );
 
 	/**
 	 * Contract id, or null before it is persisted.
@@ -61,29 +80,28 @@ final class Contract {
 	private $status;
 
 	/**
-	 * Owning customer id.
+	 * Owning customer id, or null.
 	 *
-	 * @var int
+	 * @var int|null
 	 */
 	private $customer_id;
 
 	/**
-	 * ISO-4217 currency code, locked at creation.
+	 * ISO-4217 currency code, or null.
 	 *
-	 * @var string
+	 * @var string|null
 	 */
 	private $currency;
 
 	/**
-	 * Foreign key to the selling plan.
+	 * Selling plan id, or null.
 	 *
-	 * @var int
+	 * @var int|null
 	 */
 	private $selling_plan_id;
 
 	/**
-	 * Origin order id, or null for a manual contract. Equals cycle 1's `order_id`
-	 * for a checkout contract.
+	 * Origin order id, or null when the extension recorded none.
 	 *
 	 * @var int|null
 	 */
@@ -118,15 +136,15 @@ final class Contract {
 	private $payment_token_id;
 
 	/**
-	 * When the contract goes (or went) active. GMT string.
+	 * When the contract goes (or went) active, or null. GMT string.
 	 *
-	 * @var string
+	 * @var string|null
 	 */
 	private $start_gmt;
 
 	/**
-	 * Live schedule: when the next renewal fires, or null. GMT string. The due scan
-	 * keys on this; a billing cycle freezes its period from it.
+	 * The next due moment, or null. GMT string. The due dispatcher notifies the owner
+	 * once it has passed; what happens then is the owner's decision.
 	 *
 	 * @var string|null
 	 */
@@ -213,11 +231,28 @@ final class Contract {
 	private $end_gmt;
 
 	/**
-	 * Who runs renewals: 'primitive' (this engine) or 'gateway'.
+	 * Who keeps the payment schedule: 'subscriptions_engine' (the engine, through its
+	 * due moment) or the slug of a gateway or extension that keeps its own schedule
+	 * and triggers its own renewals. The engine dispatches only 'subscriptions_engine'.
 	 *
 	 * @var string
 	 */
 	private $schedule_source;
+
+	/**
+	 * The extension's create-only idempotency key, or null. Unique per extension slug.
+	 *
+	 * @var string|null
+	 */
+	private $creation_key;
+
+	/**
+	 * Read-only lock state, or null when no lock is live. Hydrated from the repository's
+	 * computed `lock_live` flag (the database clock decides liveness); never the token.
+	 *
+	 * @var array{locked_until_gmt: string, operation: string}|null
+	 */
+	private $lock_state;
 
 	/**
 	 * Line items, each a plain associative array matching the items table shape.
@@ -234,69 +269,99 @@ final class Contract {
 	private $addresses;
 
 	/**
-	 * Contract meta as key => value.
-	 *
-	 * @var array<string, string>
-	 */
-	private $meta;
-
-	/**
 	 * Use {@see self::create()} or {@see self::from_storage()}. Coerces each attribute
 	 * to its property type; unknown keys are ignored, missing keys take the default.
 	 *
 	 * @param array<string, mixed> $data Raw attributes keyed by property name.
 	 */
 	private function __construct( array $data ) {
-		$this->id                   = ScalarCoercion::coerce_nullable_int( $data['id'] ?? null );
-		$this->status               = ScalarCoercion::coerce_string( $data['status'] ?? null, ContractStatus::ACTIVE );
-		$this->customer_id          = ScalarCoercion::coerce_int( $data['customer_id'] ?? null );
-		$this->currency             = ScalarCoercion::coerce_string( $data['currency'] ?? null );
-		$this->selling_plan_id      = ScalarCoercion::coerce_int( $data['selling_plan_id'] ?? null );
-		$this->origin_order_id      = ScalarCoercion::coerce_nullable_int( $data['origin_order_id'] ?? null );
-		$this->extension_slug       = ScalarCoercion::coerce_nullable_string( $data['extension_slug'] ?? null );
-		$this->payment_method       = ScalarCoercion::coerce_nullable_string( $data['payment_method'] ?? null );
-		$this->payment_method_title = ScalarCoercion::coerce_nullable_string( $data['payment_method_title'] ?? null );
-		$this->payment_token_id     = ScalarCoercion::coerce_nullable_int( $data['payment_token_id'] ?? null );
-		$this->start_gmt            = ScalarCoercion::coerce_string( $data['start_gmt'] ?? null );
-		$this->next_payment_gmt     = ScalarCoercion::coerce_nullable_string( $data['next_payment_gmt'] ?? null );
-		$this->plan_snapshot_id     = ScalarCoercion::coerce_nullable_int( $data['plan_snapshot_id'] ?? null );
-		$this->items_snapshot_id    = ScalarCoercion::coerce_nullable_int( $data['items_snapshot_id'] ?? null );
+		$this->id                   = Coercion::coerce_nullable_int( $data['id'] ?? null );
+		$this->status               = Coercion::coerce_string( $data['status'] ?? null, ContractStatus::DRAFT );
+		$this->customer_id          = Coercion::coerce_nullable_int( $data['customer_id'] ?? null );
+		$this->currency             = Coercion::coerce_nullable_string( $data['currency'] ?? null );
+		$this->selling_plan_id      = Coercion::coerce_nullable_int( $data['selling_plan_id'] ?? null );
+		$this->origin_order_id      = Coercion::coerce_nullable_int( $data['origin_order_id'] ?? null );
+		$this->extension_slug       = Coercion::coerce_nullable_string( $data['extension_slug'] ?? null );
+		$this->payment_method       = Coercion::coerce_nullable_string( $data['payment_method'] ?? null );
+		$this->payment_method_title = Coercion::coerce_nullable_string( $data['payment_method_title'] ?? null );
+		$this->payment_token_id     = Coercion::coerce_nullable_int( $data['payment_token_id'] ?? null );
+		$this->start_gmt            = Coercion::coerce_nullable_string( $data['start_gmt'] ?? null );
+		$this->next_payment_gmt     = Coercion::coerce_nullable_string( $data['next_payment_gmt'] ?? null );
+		$this->plan_snapshot_id     = Coercion::coerce_nullable_int( $data['plan_snapshot_id'] ?? null );
+		$this->items_snapshot_id    = Coercion::coerce_nullable_int( $data['items_snapshot_id'] ?? null );
 		$this->billing_total        = MoneyScale::normalize_money( $data['billing_total'] ?? '0' );
 		$this->discount_total       = MoneyScale::normalize_money( $data['discount_total'] ?? '0' );
 		$this->shipping_total       = MoneyScale::normalize_money( $data['shipping_total'] ?? '0' );
 		$this->tax_total            = MoneyScale::normalize_money( $data['tax_total'] ?? '0' );
-		$this->last_payment_gmt     = ScalarCoercion::coerce_nullable_string( $data['last_payment_gmt'] ?? null );
-		$this->last_attempt_gmt     = ScalarCoercion::coerce_nullable_string( $data['last_attempt_gmt'] ?? null );
-		$this->trial_end_gmt        = ScalarCoercion::coerce_nullable_string( $data['trial_end_gmt'] ?? null );
-		$this->end_gmt              = ScalarCoercion::coerce_nullable_string( $data['end_gmt'] ?? null );
-		$this->schedule_source      = ScalarCoercion::coerce_string( $data['schedule_source'] ?? null, self::SCHEDULE_SOURCE_PRIMITIVE );
-		$this->items                = self::coerce_item_rows( $data['items'] ?? null );
-		$this->addresses            = self::coerce_address_map( $data['addresses'] ?? null );
-		$this->meta                 = self::coerce_meta_map( $data['meta'] ?? null );
+		$this->last_payment_gmt     = Coercion::coerce_nullable_string( $data['last_payment_gmt'] ?? null );
+		$this->last_attempt_gmt     = Coercion::coerce_nullable_string( $data['last_attempt_gmt'] ?? null );
+		$this->trial_end_gmt        = Coercion::coerce_nullable_string( $data['trial_end_gmt'] ?? null );
+		$this->end_gmt              = Coercion::coerce_nullable_string( $data['end_gmt'] ?? null );
+		$this->schedule_source      = Coercion::coerce_string( $data['schedule_source'] ?? null, self::SCHEDULE_SOURCE_ENGINE );
+		$this->creation_key         = Coercion::coerce_nullable_string( $data['creation_key'] ?? null );
+		$this->lock_state           = self::lock_state_from( $data );
+		$this->items                = Coercion::coerce_list_of_arrays( $data['items'] ?? null );
+		$this->addresses            = Coercion::coerce_map_of_arrays( $data['addresses'] ?? null );
 		$this->plan_snapshot        = ( $data['plan_snapshot'] ?? null ) instanceof PlanSnapshot ? $data['plan_snapshot'] : null;
 	}
 
 	/**
-	 * Build a new, unsaved contract.
+	 * Build a new, unsaved contract. `extension_slug` is required; `creation_key` is an
+	 * optional idempotency key of 1-100 characters, trimmed of surrounding whitespace. Every
+	 * invalid attribute is reported in one exception.
 	 *
 	 * @param array<string, mixed> $args Contract attributes.
-	 * @throws DomainException If the contract attributes are not valid.
+	 * @throws InvalidInputException If the contract attributes are not valid.
 	 */
 	public static function create( array $args ): self {
-		// A new contract is always unsaved; never adopt a caller-supplied id.
-		unset( $args['id'] );
+		// A new contract is always unsaved and unlocked; never adopt a caller-supplied id or lock.
+		unset( $args['id'], $args['lock_live'], $args['locked_until_gmt'], $args['lock_operation'] );
+
+		// The key column ignores trailing spaces when comparing, so they never tell keys apart.
+		if ( isset( $args['creation_key'] ) && is_string( $args['creation_key'] ) ) {
+			$args['creation_key'] = trim( $args['creation_key'] );
+		}
+
+		$creation_key_error = self::get_creation_key_error( $args['creation_key'] ?? null );
+		if ( null !== $creation_key_error ) {
+			unset( $args['creation_key'] );
+		}
 
 		$contract = new self( $args );
 
-		if ( ! ContractStatus::is_valid( $contract->status ) ) {
-			throw new DomainException( sprintf( 'Contract: invalid status "%s".', $contract->status ) );
-		}
-
-		if ( ! in_array( $contract->schedule_source, array( self::SCHEDULE_SOURCE_PRIMITIVE, self::SCHEDULE_SOURCE_GATEWAY ), true ) ) {
-			throw new DomainException( sprintf( 'Contract: invalid schedule source "%s".', $contract->schedule_source ) );
+		$errors = array_filter(
+			array(
+				$creation_key_error,
+				self::get_status_error( $contract->status ),
+				self::get_extension_slug_error( $contract->extension_slug ),
+				self::get_schedule_source_error( $contract->schedule_source ),
+				$contract->get_money_currency_error(),
+			)
+		);
+		if ( array() !== $errors ) {
+			throw InvalidInputException::from_errors( array_values( $errors ) );
 		}
 
 		return $contract;
+	}
+
+	/**
+	 * The error for money without a currency, or null: a contract with no currency must have
+	 * every total at zero. Cross-field, so callers that change several fields check it once
+	 * after the last change. Checked against the state the caller holds; the contract lock serializes facade writers.
+	 */
+	public function get_money_currency_error(): ?InvalidInputException {
+		if ( null !== $this->currency ) {
+			return null;
+		}
+
+		foreach ( array( $this->billing_total, $this->discount_total, $this->shipping_total, $this->tax_total ) as $total ) {
+			if ( 0.0 !== (float) $total ) {
+				return new InvalidInputException( ValidationErrorCode::REQUIRED, 'currency', 'Contract: money totals require a currency.' );
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -304,22 +369,20 @@ final class Contract {
 	 *
 	 * The frozen plan terms ride second, ahead of the child rows: a contract without
 	 * its plan is pretty pointless, so the snapshot is hydrated on the same footing as
-	 * items / addresses / meta rather than through a separate mutation step.
+	 * items / addresses rather than through a separate mutation step.
 	 *
 	 * @param array<string, mixed>                $row           Contract row.
 	 * @param PlanSnapshot|null                   $plan_snapshot Frozen plan terms for the row's `plan_snapshot_id`, or null.
 	 * @param array<int, array<string, mixed>>    $items         Item rows.
 	 * @param array<string, array<string, mixed>> $addresses     Address rows keyed by type.
-	 * @param array<string, string>               $meta          Meta as key => value.
 	 */
-	public static function from_storage( array $row, ?PlanSnapshot $plan_snapshot = null, array $items = array(), array $addresses = array(), array $meta = array() ): self {
+	public static function from_storage( array $row, ?PlanSnapshot $plan_snapshot = null, array $items = array(), array $addresses = array() ): self {
 		$contract = new self(
 			array_merge(
 				$row,
 				array(
 					'items'     => $items,
 					'addresses' => $addresses,
-					'meta'      => $meta,
 				)
 			)
 		);
@@ -355,40 +418,74 @@ final class Contract {
 	}
 
 	/**
-	 * Transition the contract to a new status.
+	 * Set the contract status.
 	 *
-	 * @param string $status Target status.
-	 * @throws DomainException If the transition is not allowed by ContractStatus.
+	 * Any registered status may follow any other: the engine enforces no
+	 * transition table (flows own their preconditions). Setting the current
+	 * status is a no-op, so a hydrated unregistered status survives it.
+	 *
+	 * @param string $status Target status; must be registered.
+	 * @throws InvalidInputException If `$status` is not a registered contract status.
 	 */
 	public function set_status( string $status ): void {
 		if ( $status === $this->status ) {
 			return;
 		}
 
-		ContractStatus::assert_transition_allowed( $this->status, $status );
+		$error = self::get_status_error( $status );
+		if ( null !== $error ) {
+			throw $error;
+		}
 
 		$this->status = $status;
 	}
 
 	/**
-	 * Owning customer id.
+	 * Owning customer id, or null.
 	 */
-	public function get_customer_id(): int {
+	public function get_customer_id(): ?int {
 		return $this->customer_id;
 	}
 
 	/**
-	 * ISO-4217 currency code.
+	 * Set the owning customer id.
+	 *
+	 * @param int|null $customer_id Customer id, or null.
 	 */
-	public function get_currency(): string {
+	public function set_customer_id( ?int $customer_id ): void {
+		$this->customer_id = $customer_id;
+	}
+
+	/**
+	 * ISO-4217 currency code, or null.
+	 */
+	public function get_currency(): ?string {
 		return $this->currency;
 	}
 
 	/**
-	 * Foreign key to the selling plan.
+	 * Set the ISO-4217 currency code.
+	 *
+	 * @param string|null $currency Currency code, or null.
 	 */
-	public function get_selling_plan_id(): int {
+	public function set_currency( ?string $currency ): void {
+		$this->currency = $currency;
+	}
+
+	/**
+	 * Selling plan id, or null.
+	 */
+	public function get_selling_plan_id(): ?int {
 		return $this->selling_plan_id;
+	}
+
+	/**
+	 * Set the selling plan id.
+	 *
+	 * @param int|null $selling_plan_id Selling plan id, or null.
+	 */
+	public function set_selling_plan_id( ?int $selling_plan_id ): void {
+		$this->selling_plan_id = $selling_plan_id;
 	}
 
 	/**
@@ -396,6 +493,15 @@ final class Contract {
 	 */
 	public function get_origin_order_id(): ?int {
 		return $this->origin_order_id;
+	}
+
+	/**
+	 * Set the origin order id.
+	 *
+	 * @param int|null $origin_order_id Order id, or null.
+	 */
+	public function set_origin_order_id( ?int $origin_order_id ): void {
+		$this->origin_order_id = $origin_order_id;
 	}
 
 	/**
@@ -408,30 +514,30 @@ final class Contract {
 	/**
 	 * The payment instrument as an immutable reference.
 	 */
-	public function get_payment_instrument(): InstrumentRef {
-		return new InstrumentRef( $this->payment_token_id, $this->payment_method, $this->payment_method_title );
+	public function get_payment_instrument(): PaymentInstrumentRef {
+		return new PaymentInstrumentRef( $this->payment_token_id, $this->payment_method, $this->payment_method_title );
 	}
 
 	/**
 	 * Set the payment instrument from an immutable reference.
 	 *
-	 * @param InstrumentRef $instrument Payment instrument reference.
+	 * @param PaymentInstrumentRef $instrument Payment instrument reference.
 	 */
-	public function set_payment_instrument( InstrumentRef $instrument ): void {
+	public function set_payment_instrument( PaymentInstrumentRef $instrument ): void {
 		$this->payment_token_id     = $instrument->get_token_id();
 		$this->payment_method       = $instrument->get_gateway();
 		$this->payment_method_title = $instrument->get_title();
 	}
 
 	/**
-	 * Next renewal attempt, or null.
+	 * The next due moment, or null.
 	 */
 	public function get_next_payment_gmt(): ?string {
 		return $this->next_payment_gmt;
 	}
 
 	/**
-	 * Set the live schedule (when the next renewal fires).
+	 * Set the next due moment.
 	 *
 	 * @param string|null $next_payment_gmt GMT string or null.
 	 */
@@ -618,17 +724,62 @@ final class Contract {
 	}
 
 	/**
-	 * Start timestamp (GMT string).
+	 * Start timestamp (GMT string), or null.
 	 */
-	public function get_start_gmt(): string {
+	public function get_start_gmt(): ?string {
 		return $this->start_gmt;
 	}
 
 	/**
-	 * Who runs renewals: 'primitive' or 'gateway'.
+	 * Set the start timestamp.
+	 *
+	 * @param string|null $start_gmt GMT string or null.
+	 */
+	public function set_start_gmt( ?string $start_gmt ): void {
+		$this->start_gmt = $start_gmt;
+	}
+
+	/**
+	 * Who keeps the payment schedule: 'subscriptions_engine' or the slug of the
+	 * gateway or extension that keeps its own.
 	 */
 	public function get_schedule_source(): string {
 		return $this->schedule_source;
+	}
+
+	/**
+	 * Set who keeps the payment schedule.
+	 *
+	 * @param string $schedule_source 'subscriptions_engine' or the slug of the gateway or
+	 *                                extension that keeps its own schedule.
+	 * @throws InvalidInputException If `$schedule_source` is not a valid slug.
+	 */
+	public function set_schedule_source( string $schedule_source ): void {
+		$error = self::get_schedule_source_error( $schedule_source );
+		if ( null !== $error ) {
+			throw $error;
+		}
+
+		$this->schedule_source = $schedule_source;
+	}
+
+	/**
+	 * The live lock's expiry (GMT string) and operation label, or null when the contract
+	 * is not locked. Read-only, as of the read; the token is never part of the entity.
+	 *
+	 * @return array{locked_until_gmt: string, operation: string}|null
+	 */
+	public function get_lock_state(): ?array {
+		return $this->lock_state;
+	}
+
+	/**
+	 * Forget the lock state read with the row, once the lock it reported has been released.
+	 *
+	 * @internal Used by the contracts facade after its internal lock.
+	 */
+	public function clear_lock_state(): void {
+		$this->lock_state = null;
 	}
 
 	/**
@@ -641,6 +792,15 @@ final class Contract {
 	}
 
 	/**
+	 * Replace the line items.
+	 *
+	 * @param array<int|string, mixed> $items Item rows; non-array elements are skipped.
+	 */
+	public function set_items( array $items ): void {
+		$this->items = Coercion::coerce_list_of_arrays( $items );
+	}
+
+	/**
 	 * Addresses keyed by type.
 	 *
 	 * @return array<string, array<string, mixed>>
@@ -650,18 +810,18 @@ final class Contract {
 	}
 
 	/**
-	 * Contract meta as key => value.
+	 * Replace the addresses.
 	 *
-	 * @return array<string, string>
+	 * @param array<int|string, mixed> $addresses Address rows keyed by type; non-array elements are skipped.
 	 */
-	public function get_meta(): array {
-		return $this->meta;
+	public function set_addresses( array $addresses ): void {
+		$this->addresses = Coercion::coerce_map_of_arrays( $addresses );
 	}
 
 	/**
 	 * Serialize the contract row (excluding generated id/timestamps).
 	 *
-	 * @return array<string, mixed>
+	 * @return array<string, int|string|null>
 	 */
 	public function to_storage(): array {
 		return array(
@@ -687,86 +847,99 @@ final class Contract {
 			'trial_end_gmt'        => $this->trial_end_gmt,
 			'end_gmt'              => $this->end_gmt,
 			'schedule_source'      => $this->schedule_source,
+			'creation_key'         => $this->creation_key,
 		);
 	}
 
 	/**
-	 * Shape a caller-supplied value into the line-item row list. A non-array yields
-	 * no items; non-array elements are skipped.
+	 * Build the read-only lock state from a stored row: only when the row's computed
+	 * `lock_live` flag is truthy and both the expiry and the operation are present.
 	 *
-	 * @param mixed $value Caller-supplied items.
-	 * @return array<int, array<string, mixed>>
+	 * @param array<string, mixed> $data Raw attributes.
+	 * @return array{locked_until_gmt: string, operation: string}|null
 	 */
-	private static function coerce_item_rows( $value ): array {
-		if ( ! is_array( $value ) ) {
-			return array();
+	private static function lock_state_from( array $data ): ?array {
+		$locked_until_gmt = Coercion::coerce_nullable_string( $data['locked_until_gmt'] ?? null );
+		$operation        = Coercion::coerce_nullable_string( $data['lock_operation'] ?? null );
+
+		if ( empty( $data['lock_live'] ) || null === $locked_until_gmt || null === $operation ) {
+			return null;
 		}
 
-		$rows = array();
-		foreach ( $value as $row ) {
-			if ( is_array( $row ) ) {
-				$rows[] = self::coerce_string_keyed( $row );
-			}
-		}
-
-		return $rows;
+		return array(
+			'locked_until_gmt' => $locked_until_gmt,
+			'operation'        => $operation,
+		);
 	}
 
 	/**
-	 * Shape a caller-supplied value into the addresses map keyed by type. A non-array
-	 * yields an empty map; non-array elements are skipped.
+	 * The error for a creation key that is not null or a string of 1-100 characters, or null.
 	 *
-	 * @param mixed $value Caller-supplied addresses.
-	 * @return array<string, array<string, mixed>>
+	 * @param mixed $creation_key Creation key to check.
 	 */
-	private static function coerce_address_map( $value ): array {
-		if ( ! is_array( $value ) ) {
-			return array();
+	private static function get_creation_key_error( $creation_key ): ?InvalidInputException {
+		if ( null === $creation_key ) {
+			return null;
 		}
 
-		$map = array();
-		foreach ( $value as $type => $address ) {
-			if ( is_array( $address ) ) {
-				$map[ (string) $type ] = self::coerce_string_keyed( $address );
-			}
+		if ( ! is_string( $creation_key ) ) {
+			return new InvalidInputException( ValidationErrorCode::INVALID_TYPE, 'creation_key', 'Contract: creation_key must be a string.', array( 'type' => 'string' ) );
 		}
 
-		return $map;
+		if ( '' === $creation_key || mb_strlen( $creation_key ) > 100 ) {
+			return new InvalidInputException( ValidationErrorCode::INVALID_VALUE, 'creation_key', 'Contract: creation_key must be 1-100 characters.' );
+		}
+
+		return null;
 	}
 
 	/**
-	 * Shape a caller-supplied value into the meta map (string => string). A non-array
-	 * yields an empty map.
+	 * The error for a status that is not a registered contract status, or null.
 	 *
-	 * @param mixed $value Caller-supplied meta.
-	 * @return array<string, string>
+	 * @param string $status Status to check.
 	 */
-	private static function coerce_meta_map( $value ): array {
-		if ( ! is_array( $value ) ) {
-			return array();
+	private static function get_status_error( string $status ): ?InvalidInputException {
+		if ( ! ContractStatus::is_registered( $status ) ) {
+			return new InvalidInputException(
+				ValidationErrorCode::NOT_REGISTERED,
+				'status',
+				sprintf( 'Contract: status "%s" is not registered.', $status ),
+				array( 'value' => $status )
+			);
 		}
 
-		$map = array();
-		foreach ( $value as $key => $meta_value ) {
-			$map[ (string) $key ] = ScalarCoercion::coerce_string( $meta_value );
-		}
-
-		return $map;
+		return null;
 	}
 
 	/**
-	 * Re-key an array as a string-keyed map, recovering the `array<string, mixed>`
-	 * row shape from an otherwise `int|string`-keyed array.
+	 * The error for a missing or empty owning extension slug, or null.
 	 *
-	 * @param array<int|string, mixed> $value Array to re-key.
-	 * @return array<string, mixed>
+	 * @param string|null $extension_slug Extension slug to check.
 	 */
-	private static function coerce_string_keyed( array $value ): array {
-		$result = array();
-		foreach ( $value as $key => $entry ) {
-			$result[ (string) $key ] = $entry;
+	private static function get_extension_slug_error( ?string $extension_slug ): ?InvalidInputException {
+		if ( null === $extension_slug || '' === $extension_slug ) {
+			return new InvalidInputException( ValidationErrorCode::REQUIRED, 'extension_slug', 'Contract: extension_slug is required and must be a non-empty string.' );
 		}
 
-		return $result;
+		return null;
+	}
+
+	/**
+	 * The error for a schedule source that is not a slug of 1-64 lowercase letters, digits,
+	 * underscores or hyphens (the column is VARCHAR(64), wide enough for extension and
+	 * gateway slugs), or null.
+	 *
+	 * @param string $schedule_source Schedule source to check.
+	 */
+	private static function get_schedule_source_error( string $schedule_source ): ?InvalidInputException {
+		if ( 1 !== preg_match( '/^[a-z0-9_-]{1,64}$/D', $schedule_source ) ) {
+			return new InvalidInputException(
+				ValidationErrorCode::INVALID_VALUE,
+				'schedule_source',
+				sprintf( 'Contract: invalid schedule source "%s".', $schedule_source )
+			);
+		}
+
+		return null;
 	}
 }

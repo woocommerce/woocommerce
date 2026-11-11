@@ -107,7 +107,7 @@ interface TestJobEnv {
 interface TestJobReport {
 	resultsBlobName: string;
 	resultsPath: string;
-	allure: boolean;
+	publish: boolean;
 }
 
 /**
@@ -378,7 +378,7 @@ async function createJobsForProject(
 		dependencyInfos.push( {
 			name: dependency.name,
 			changedFiles:
-				changes === true ? [] : changes[ dependency.name ] ?? [],
+				changes === true ? [] : ( changes[ dependency.name ] ?? [] ),
 			spawnsJobs:
 				dependencyJobs.test.length + dependencyJobs.lint.length > 0,
 		} );

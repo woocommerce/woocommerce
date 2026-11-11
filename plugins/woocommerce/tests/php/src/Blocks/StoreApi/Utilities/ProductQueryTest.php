@@ -281,6 +281,189 @@ class ProductQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * on_sale=true combined with include must intersect: only the included products that are on sale.
+	 */
+	public function test_on_sale_true_intersects_with_include(): void {
+		set_transient( 'wc_products_onsale', array( 55, 66, 77 ) );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'on_sale', true );
+		$request->set_param( 'include', array( 55, 101 ) );
+
+		$args = $this->product_query->prepare_objects_query( $request );
+
+		$this->assertEqualsCanonicalizing( array( 55 ), $args['post__in'] );
+	}
+
+	/**
+	 * on_sale=true with an include list that contains no on-sale products must return nothing, not the include list.
+	 */
+	public function test_on_sale_true_is_not_ignored_when_include_has_no_on_sale_products(): void {
+		set_transient( 'wc_products_onsale', array( 55, 66 ) );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'on_sale', true );
+		$request->set_param( 'include', array( 101, 102 ) );
+
+		$args = $this->product_query->prepare_objects_query( $request );
+
+		$this->assertSame( array( 0 ), $args['post__in'] );
+	}
+
+	/**
+	 * on_sale=false combined with exclude must merge: exclude the explicit list plus every on-sale product.
+	 */
+	public function test_on_sale_false_merges_on_sale_ids_into_exclude(): void {
+		set_transient( 'wc_products_onsale', array( 55, 66 ) );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'on_sale', false );
+		$request->set_param( 'exclude', array( 99 ) );
+
+		$args = $this->product_query->prepare_objects_query( $request );
+
+		$this->assertEqualsCanonicalizing( array( 99, 55, 66 ), $args['post__not_in'] );
+	}
+
+	/**
+	 * on_sale=false combined with include must remove the on-sale products from post__in, because WP_Query ignores post__not_in when post__in is set.
+	 */
+	public function test_on_sale_false_removes_on_sale_products_from_include(): void {
+		set_transient( 'wc_products_onsale', array( 55, 66 ) );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'on_sale', false );
+		$request->set_param( 'include', array( 55, 101 ) );
+
+		$args = $this->product_query->prepare_objects_query( $request );
+
+		$this->assertSame( array( 101 ), $args['post__in'] );
+	}
+
+	/**
+	 * on_sale=true combined with exclude must remove the excluded products from post__in.
+	 */
+	public function test_on_sale_true_removes_excluded_products(): void {
+		set_transient( 'wc_products_onsale', array( 55, 66, 77 ) );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'on_sale', true );
+		$request->set_param( 'exclude', array( 66 ) );
+
+		$args = $this->product_query->prepare_objects_query( $request );
+
+		$this->assertEqualsCanonicalizing( array( 55, 77 ), $args['post__in'] );
+	}
+
+	/**
+	 * The related filter must return no products when none of the included products are related, not every product.
+	 */
+	public function test_related_filter_with_empty_intersection_returns_no_products(): void {
+		$fixtures = new FixtureData();
+		$anchor   = $fixtures->get_simple_product( array( 'name' => 'Related anchor' ) );
+
+		$callback = static function () {
+			return array( 55, 66 );
+		};
+		add_filter( 'woocommerce_related_products', $callback );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'related', $anchor->get_id() );
+		$request->set_param( 'include', array( 101 ) );
+
+		$args = $this->product_query->prepare_objects_query( $request );
+
+		remove_filter( 'woocommerce_related_products', $callback );
+
+		$this->assertSame( array( 0 ), $args['post__in'] );
+	}
+
+	/**
+	 * @testdox Taxonomy filters work for product taxonomies that are also registered for other post types.
+	 */
+	public function test_taxonomy_filter_supports_taxonomy_registered_for_multiple_object_types(): void {
+		$taxonomy = 'test_multi_object_tax';
+		register_taxonomy( $taxonomy, array( 'product', 'product_variation' ) );
+
+		try {
+			$fixtures      = new FixtureData();
+			$alpha_product = $fixtures->get_simple_product( array( 'name' => 'Alpha product' ) );
+			$beta_product  = $fixtures->get_simple_product( array( 'name' => 'Beta product' ) );
+			wp_set_object_terms( $alpha_product->get_id(), 'alpha', $taxonomy );
+			wp_set_object_terms( $beta_product->get_id(), 'beta', $taxonomy );
+
+			$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+			$request->set_param( 'include', array( $alpha_product->get_id(), $beta_product->get_id() ) );
+			$request->set_param( '_unstable_tax_' . $taxonomy, array( 'alpha' ) );
+
+			$results = $this->product_query->get_results( $request );
+		} finally {
+			unregister_taxonomy( $taxonomy );
+		}
+
+		$this->assertSame( array( $alpha_product->get_id() ), $results['results'], 'Only the product assigned the requested term should be returned.' );
+	}
+
+	/**
+	 * @testdox Taxonomy filters on variations use terms for taxonomies that are registered for variations.
+	 */
+	public function test_variation_taxonomy_filter_supports_taxonomy_registered_for_variations(): void {
+		$taxonomy = 'test_multi_object_tax';
+		register_taxonomy( $taxonomy, array( 'product', 'product_variation' ) );
+
+		try {
+			$fixtures        = new FixtureData();
+			$parent_product  = $fixtures->get_variable_product( array() );
+			$alpha_variation = $fixtures->get_variation_product( $parent_product->get_id() );
+			$beta_variation  = $fixtures->get_variation_product( $parent_product->get_id() );
+			wp_set_object_terms( $alpha_variation->get_id(), 'alpha', $taxonomy );
+			wp_set_object_terms( $beta_variation->get_id(), 'beta', $taxonomy );
+
+			$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+			$request->set_param( 'type', 'variation' );
+			$request->set_param( 'include', array( $alpha_variation->get_id(), $beta_variation->get_id() ) );
+			$request->set_param( '_unstable_tax_' . $taxonomy, array( 'alpha' ) );
+
+			$results = $this->product_query->get_results( $request );
+		} finally {
+			unregister_taxonomy( $taxonomy );
+		}
+
+		$this->assertSame( array( $alpha_variation->get_id() ), $results['results'], 'Only the variation assigned the requested term should be returned.' );
+	}
+
+	/**
+	 * @testdox Attribute filters on variations use attribute meta even when the attribute taxonomy is registered for variations.
+	 */
+	public function test_variation_attribute_filter_uses_meta_when_attribute_is_registered_for_variations(): void {
+		$fixtures  = new FixtureData();
+		$attribute = $fixtures->get_product_attribute( 'variation-registered', array( 'red', 'blue' ) );
+		$taxonomy  = $attribute['attribute_taxonomy'];
+		register_taxonomy_for_object_type( $taxonomy, 'product_variation' );
+
+		$parent_product = $fixtures->get_variable_product( array(), array( $attribute ) );
+		$red_variation  = $fixtures->get_variation_product( $parent_product->get_id(), array( $taxonomy => 'red' ) );
+		$blue_variation = $fixtures->get_variation_product( $parent_product->get_id(), array( $taxonomy => 'blue' ) );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'type', 'variation' );
+		$request->set_param( 'include', array( $red_variation->get_id(), $blue_variation->get_id() ) );
+		$request->set_param(
+			'attributes',
+			array(
+				array(
+					'attribute' => $taxonomy,
+					'slug'      => array( 'red' ),
+				),
+			)
+		);
+
+		$results = $this->product_query->get_results( $request );
+
+		$this->assertSame( array( $red_variation->get_id() ), $results['results'], 'Only the variation with the requested attribute value should be returned.' );
+	}
+
+	/**
 	 * Get product IDs matched by a Store API slug filter.
 	 *
 	 * @param string $slug_filter Slug filter value.

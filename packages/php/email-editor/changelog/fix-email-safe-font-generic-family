@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show serif, monospace and cursive site fonts in emails as Georgia, Courier New and Comic Sans MS instead of Arial, and stop the Tahoma, Verdana and Arvo fonts falling back to the mail app's default font.

@@ -385,6 +385,8 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 			'order_tax',
 			'shipping_tax',
 			'taxable_amount',
+			'order_taxable_amount',
+			'shipping_taxable_amount',
 			'orders_count',
 		);
 
@@ -406,7 +408,7 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 11, count( $properties ) );
+		$this->assertEquals( 13, count( $properties ) );
 		$this->assertArrayHasKey( 'tax_rate_id', $properties );
 		$this->assertArrayHasKey( 'name', $properties );
 		$this->assertArrayHasKey( 'tax_rate', $properties );
@@ -417,6 +419,8 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'order_tax', $properties );
 		$this->assertArrayHasKey( 'shipping_tax', $properties );
 		$this->assertArrayHasKey( 'taxable_amount', $properties );
+		$this->assertArrayHasKey( 'order_taxable_amount', $properties );
+		$this->assertArrayHasKey( 'shipping_taxable_amount', $properties );
 		$this->assertArrayHasKey( 'orders_count', $properties );
 	}
 

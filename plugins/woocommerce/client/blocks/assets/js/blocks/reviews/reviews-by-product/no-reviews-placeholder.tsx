@@ -48,7 +48,7 @@ const NoReviewsPlaceholder = ( {
 			? __(
 					'No reviews are visible with the current offset. Reduce the offset to display reviews.',
 					'woocommerce'
-			  )
+				)
 			: undefined;
 
 	if ( ! content ) {

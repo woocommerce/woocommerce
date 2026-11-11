@@ -319,7 +319,8 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 			return new WP_Error( 'rest_product_review_failed_create', __( 'Creating product review failed.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
-		update_comment_meta( $product_review_id, 'rating', ( ! empty( $request['rating'] ) ? $request['rating'] : '0' ) );
+		update_comment_meta( $product_review_id, 'rating', ! empty( $request['rating'] ) ? $request['rating'] : '0' );
+		wc_review_is_from_verified_owner( $product_review_id );
 
 		$product_review = get_comment( $product_review_id );
 
@@ -332,7 +333,7 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		 * a rest_pre_insert_product_review callback can send the review to a different one.
 		 */
 		if ( ! empty( $request['rating'] ) && $product_review instanceof WP_Comment && '1' === $product_review->comment_approved ) {
-			WC_Comments::clear_transients( (int) $product_review->comment_post_ID );
+			WC_Comments::maybe_update_product_average_rating( (int) $product_review->comment_post_ID );
 		}
 
 		$this->update_additional_fields_for_object( $product_review, $request );
@@ -398,8 +399,9 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		/*
 		 * Zero means no comment-table row changed; false is the actual update failure. A rating-only
 		 * request legitimately returns zero while still storing comment_meta and refreshing counts.
+		 * wp_update_comment() expects slashed data, like wp_insert_comment() in create_item().
 		 */
-		$updated = wp_update_comment( $prepared_review );
+		$updated = wp_update_comment( wp_slash( $prepared_review ) );
 		if ( false === $updated ) {
 			return new WP_Error( 'rest_product_review_failed_edit', __( 'Updating product review failed.', 'woocommerce' ), array( 'status' => 500 ) );
 		}

@@ -357,4 +357,69 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			'A subclass reading the deprecated property must keep seeing the historical accumulated list after saves.'
 		);
 	}
+
+	/**
+	 * @testdox Should update coupon with empty post_date_gmt without error and without pinning date_created.
+	 */
+	public function test_update_coupon_with_empty_post_date_gmt(): void {
+		global $wpdb;
+
+		$coupon    = $this->create_settled_coupon();
+		$coupon_id = $coupon->get_id();
+
+		// Simulate empty post_date_gmt as found in unpublished or draft posts.
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_status'   => 'draft',
+				'post_date_gmt' => '0000-00-00 00:00:00',
+			),
+			array( 'ID' => $coupon_id )
+		);
+		clean_post_cache( $coupon_id );
+
+		$coupon = new WC_Coupon( $coupon_id );
+		$this->assertNull( $coupon->get_date_created( 'edit' ) );
+
+		$coupon->set_description( 'Updated description' );
+		$coupon->save();
+
+		$reloaded_coupon = new WC_Coupon( $coupon_id );
+		$this->assertNull( $reloaded_coupon->get_date_created( 'edit' ) );
+		$this->assertSame( 'Updated description', $reloaded_coupon->get_description() );
+	}
+
+	/**
+	 * @testdox Creating and updating a coupon keeps backslashes and quotes in its code and description.
+	 */
+	public function test_create_and_update_keep_backslashes_in_post_fields(): void {
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'save\\10' );
+		$coupon->set_description( 'Path C:\\temp, it\'s "quoted"' );
+		$coupon->save();
+
+		$post = get_post( $coupon->get_id() );
+		$this->assertSame( 'save\\10', $post->post_title, 'The created code should keep its backslash.' );
+		$this->assertSame( 'Path C:\\temp, it\'s "quoted"', $post->post_excerpt, 'The created description should keep its backslash and quotes.' );
+
+		$coupon->set_code( 'save\\20' );
+		$coupon->set_description( 'Path D:\\temp, it\'s "quoted"' );
+		$coupon->save();
+
+		$post = get_post( $coupon->get_id() );
+		$this->assertSame( 'save\\20', $post->post_title, 'The updated code should keep its backslash.' );
+		$this->assertSame( 'Path D:\\temp, it\'s "quoted"', $post->post_excerpt, 'The updated description should keep its backslash and quotes.' );
+	}
+
+	/**
+	 * @testdox Saving a coupon keeps the existing behavior for a description that is already slashed.
+	 */
+	public function test_save_unslashes_already_slashed_description(): void {
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'slashed-description' );
+		$coupon->set_description( wp_filter_post_kses( 'It\'s 12" off' ) );
+		$coupon->save();
+
+		$this->assertSame( 'It\'s 12" off', get_post( $coupon->get_id() )->post_excerpt );
+	}
 }

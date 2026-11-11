@@ -3,7 +3,8 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
-import { Button, ExternalLink } from '@wordpress/components';
+import { Button } from '@wordpress/components';
+import { Link as UILink } from '@wordpress/ui';
 import { compose } from '@wordpress/compose';
 import interpolateComponents from '@automattic/interpolate-components';
 import PropTypes from 'prop-types';
@@ -102,7 +103,12 @@ export class ShippingBanner extends Component {
 
 	async installAndActivatePlugins( pluginSlug ) {
 		// Avoid double activating.
-		const { installPlugins, activatePlugins, isRequesting } = this.props;
+		const {
+			installPlugins,
+			activatePlugins,
+			isRequesting,
+			isWcstCompatible,
+		} = this.props;
 		if ( isRequesting ) {
 			this.setState( { isShippingLabelButtonBusy: false } );
 			return false;
@@ -119,7 +125,7 @@ export class ShippingBanner extends Component {
 				} );
 				return;
 			}
-		} catch ( error ) {
+		} catch {
 			this.setState( {
 				setupErrorReason: setupErrorTypes.INSTALL,
 				wcsSetupError: true,
@@ -140,7 +146,7 @@ export class ShippingBanner extends Component {
 				} );
 				return;
 			}
-		} catch ( error ) {
+		} catch {
 			this.setState( {
 				setupErrorReason: setupErrorTypes.ACTIVATE,
 				wcsSetupError: true,
@@ -148,6 +154,20 @@ export class ShippingBanner extends Component {
 				infoMessage: null,
 			} );
 			return;
+		}
+
+		if ( isWcstCompatible ) {
+			try {
+				await acceptWcsTos();
+			} catch {
+				this.setState( {
+					setupErrorReason: setupErrorTypes.SETUP,
+					wcsSetupError: true,
+					isShippingLabelButtonBusy: false,
+					infoMessage: null,
+				} );
+				return;
+			}
 		}
 
 		this.setState( {
@@ -448,7 +468,10 @@ export class ShippingBanner extends Component {
 					<img
 						className="wc-admin-shipping-banner-illustration"
 						src={ wcAssetUrl + 'images/shippingillustration.svg' }
-						alt={ __( 'Shipping ', 'woocommerce' ) }
+						alt={
+							// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
+							__( 'Shipping ', 'woocommerce' )
+						}
 					/>
 					<div className="wc-admin-shipping-banner-blob">
 						<h3>{ headline }</h3>
@@ -465,17 +488,15 @@ export class ShippingBanner extends Component {
 									),
 									components: {
 										tosLink: (
-											<ExternalLink
-												href="https://wordpress.com/tos"
-												target="_blank"
-												type="external"
+											<UILink
+												href="https://automattic.com/tos/"
+												openInNewTab
 											/>
 										),
 										wcsLink: (
-											<ExternalLink
+											<UILink
 												href="https://woocommerce.com/products/shipping/?utm_medium=product"
-												target="_blank"
-												type="external"
+												openInNewTab
 												onClick={
 													this
 														.woocommerceServiceLinkClicked
@@ -549,11 +570,11 @@ export default compose(
 			? __(
 					'Print discounted shipping labels with a click, now with the dedicated plugin!',
 					'woocommerce'
-			  )
+				)
 			: __(
 					'Print discounted shipping labels with a click.',
 					'woocommerce'
-			  );
+				);
 		return {
 			isRequesting,
 			isJetpackConnected: isJetpackConnected(),

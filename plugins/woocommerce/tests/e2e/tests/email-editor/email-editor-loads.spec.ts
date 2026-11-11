@@ -13,8 +13,11 @@ import {
 	disableEmailEditor,
 	enableEmailEditor,
 } from './helpers/enable-email-editor-feature';
-import { accessTheEmailEditor } from '../../utils/email';
+import { accessTheEmailEditor, openEmailPostInEditor } from '../../utils/email';
 import { setOption } from '../../utils/options';
+
+// WP 7.2 renamed "Preview in new tab" to "Preview" with an "(opens in a new tab)" icon label.
+const PREVIEW_IN_NEW_TAB = /^Preview (in new tab|\(opens in a new tab\))$/;
 
 test.describe(
 	'WooCommerce Email Editor Core',
@@ -33,9 +36,16 @@ test.describe(
 		};
 
 		const accessAndTrackEmailPost = async ( page: Page ) => {
+			const [ knownPostId ] = emailPostIds;
 			let postId: string | null = null;
 			try {
-				await accessTheEmailEditor( page, 'New order' );
+				// The settings page is slow, so only the first test in a worker opens
+				// the editor through it. The lock keeps the post in place until afterAll.
+				if ( knownPostId ) {
+					await openEmailPostInEditor( page, knownPostId );
+				} else {
+					await accessTheEmailEditor( page, 'New order' );
+				}
 			} finally {
 				postId = captureEmailPostId( page );
 			}
@@ -124,7 +134,7 @@ test.describe(
 			const [ newPage ] = await Promise.all( [
 				page.waitForEvent( 'popup' ), // Waits for the new tab to open
 				page
-					.getByRole( 'menuitem', { name: 'Preview in new tab' } )
+					.getByRole( 'menuitem', { name: PREVIEW_IN_NEW_TAB } )
 					.click(),
 			] );
 			try {
@@ -233,7 +243,7 @@ test.describe(
 				.click();
 			const page1Promise = page.waitForEvent( 'popup' );
 			await page
-				.getByRole( 'menuitem', { name: 'Preview in new tab' } )
+				.getByRole( 'menuitem', { name: PREVIEW_IN_NEW_TAB } )
 				.click();
 			const page1 = await page1Promise;
 			try {

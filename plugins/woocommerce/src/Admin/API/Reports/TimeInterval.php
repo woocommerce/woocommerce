@@ -30,7 +30,7 @@ class TimeInterval {
 	 * Converts local datetime to GMT/UTC time.
 	 *
 	 * @param string $datetime_string String representation of local datetime.
-	 * @return DateTime
+	 * @return \DateTime
 	 */
 	public static function convert_local_datetime_to_gmt( $datetime_string ) {
 		$datetime = new \DateTime( $datetime_string, new \DateTimeZone( wc_timezone_string() ) );
@@ -41,7 +41,7 @@ class TimeInterval {
 	/**
 	 * Returns default 'before' parameter for the reports.
 	 *
-	 * @return DateTime
+	 * @return \DateTime
 	 */
 	public static function default_before() {
 		$datetime = new \WC_DateTime();
@@ -57,7 +57,7 @@ class TimeInterval {
 	/**
 	 * Returns default 'after' parameter for the reports.
 	 *
-	 * @return DateTime
+	 * @return \DateTime
 	 */
 	public static function default_after() {
 		$now       = time();
@@ -111,8 +111,8 @@ class TimeInterval {
 	/**
 	 * Returns quarter for the DateTime.
 	 *
-	 * @param DateTime $datetime Local date & time.
-	 * @return int|null
+	 * @param \DateTime $datetime Local date & time.
+	 * @return int
 	 */
 	public static function quarter( $datetime ) {
 		switch ( (int) $datetime->format( 'm' ) ) {
@@ -134,7 +134,6 @@ class TimeInterval {
 				return 4;
 
 		}
-		return null;
 	}
 
 	/**
@@ -143,8 +142,8 @@ class TimeInterval {
 	 * The first week of the year is considered to be the week containing January 1.
 	 * The second week starts on the next $first_day_of_week.
 	 *
-	 * @param DateTime $datetime          Local date for which the week number is to be calculated.
-	 * @param int      $first_day_of_week 0 for Sunday to 6 for Saturday.
+	 * @param \DateTime $datetime          Local date for which the week number is to be calculated.
+	 * @param int       $first_day_of_week 0 for Sunday to 6 for Saturday.
 	 * @return int
 	 */
 	public static function simple_week_number( $datetime, $first_day_of_week ) {
@@ -161,8 +160,8 @@ class TimeInterval {
 	 *
 	 * @see TimeInterval::simple_week_number()
 	 *
-	 * @param DateTime $datetime          Local date for which the week number is to be calculated.
-	 * @param int      $first_day_of_week 0 for Sunday to 6 for Saturday.
+	 * @param \DateTime $datetime          Local date for which the week number is to be calculated.
+	 * @param int       $first_day_of_week 0 for Sunday to 6 for Saturday.
 	 * @return int
 	 */
 	public static function week_number( $datetime, $first_day_of_week ) {
@@ -177,8 +176,8 @@ class TimeInterval {
 	/**
 	 * Returns time interval id for the DateTime.
 	 *
-	 * @param string   $time_interval Time interval type (week, day, etc).
-	 * @param DateTime $datetime      Date & time.
+	 * @param string    $time_interval Time interval type (week, day, etc).
+	 * @param \DateTime $datetime      Date & time.
 	 * @return string
 	 */
 	public static function time_interval_id( $time_interval, $datetime ) {
@@ -208,9 +207,9 @@ class TimeInterval {
 	/**
 	 * Calculates number of time intervals between two dates, closed interval on both sides.
 	 *
-	 * @param DateTime $start_datetime Start date & time.
-	 * @param DateTime $end_datetime End date & time.
-	 * @param string   $interval Time interval increment, e.g. hour, day, week.
+	 * @param \DateTime $start_datetime Start date & time.
+	 * @param \DateTime $end_datetime End date & time.
+	 * @param string    $interval Time interval increment, e.g. hour, day, week.
 	 *
 	 * @return int
 	 */
@@ -272,9 +271,9 @@ class TimeInterval {
 	/**
 	 * Returns a new DateTime object representing the next hour start/previous hour end if reversed.
 	 *
-	 * @param DateTime $datetime Date and time.
-	 * @param bool     $reversed Going backwards in time instead of forward.
-	 * @return DateTime
+	 * @param \DateTime $datetime Date and time.
+	 * @param bool      $reversed Going backwards in time instead of forward.
+	 * @return \DateTime
 	 */
 	public static function next_hour_start( $datetime, $reversed = false ) {
 		$hour_increment         = $reversed ? 0 : 1;
@@ -295,9 +294,9 @@ class TimeInterval {
 	/**
 	 * Returns a new DateTime object representing the next day start, or previous day end if reversed.
 	 *
-	 * @param DateTime $datetime Date and time.
-	 * @param bool     $reversed Going backwards in time instead of forward.
-	 * @return DateTime
+	 * @param \DateTime $datetime Date and time.
+	 * @param bool      $reversed Going backwards in time instead of forward.
+	 * @return \DateTime
 	 */
 	public static function next_day_start( $datetime, $reversed = false ) {
 		$oneday       = new \DateInterval( 'P1D' );
@@ -321,9 +320,9 @@ class TimeInterval {
 	 * The previous week end is the last day of the previous week at 23:59:59.
 	 * The start day is determined by the "start_of_week" wp_option.
 	 *
-	 * @param DateTime $datetime Date and time.
-	 * @param bool     $reversed Going backwards in time instead of forward.
-	 * @return DateTime
+	 * @param \DateTime $datetime Date and time.
+	 * @param bool      $reversed Going backwards in time instead of forward.
+	 * @return \DateTime
 	 */
 	public static function next_week_start( $datetime, $reversed = false ) {
 		$seven_days = new \DateInterval( 'P7D' );
@@ -348,9 +347,9 @@ class TimeInterval {
 	/**
 	 * Returns a new DateTime object representing the next month start, or previous month end if reversed.
 	 *
-	 * @param DateTime $datetime Date and time.
-	 * @param bool     $reversed Going backwards in time instead of forward.
-	 * @return DateTime
+	 * @param \DateTime $datetime Date and time.
+	 * @param bool      $reversed Going backwards in time instead of forward.
+	 * @return \DateTime
 	 */
 	public static function next_month_start( $datetime, $reversed = false ) {
 		$month_increment = 1;
@@ -378,9 +377,9 @@ class TimeInterval {
 	/**
 	 * Returns a new DateTime object representing the next quarter start, or previous quarter end if reversed.
 	 *
-	 * @param DateTime $datetime Date and time.
-	 * @param bool     $reversed Going backwards in time instead of forward.
-	 * @return DateTime
+	 * @param \DateTime $datetime Date and time.
+	 * @param bool      $reversed Going backwards in time instead of forward.
+	 * @return \DateTime
 	 */
 	public static function next_quarter_start( $datetime, $reversed = false ) {
 		$year  = $datetime->format( 'Y' );
@@ -438,9 +437,9 @@ class TimeInterval {
 	/**
 	 * Return a new DateTime object representing the next year start, or previous year end if reversed.
 	 *
-	 * @param DateTime $datetime Date and time.
-	 * @param bool     $reversed Going backwards in time instead of forward.
-	 * @return DateTime
+	 * @param \DateTime $datetime Date and time.
+	 * @param bool      $reversed Going backwards in time instead of forward.
+	 * @return \DateTime
 	 */
 	public static function next_year_start( $datetime, $reversed = false ) {
 		$year_increment = 1;
@@ -466,10 +465,10 @@ class TimeInterval {
 	 *
 	 * E.g. for current DateTime, beginning of next day, week, quarter, etc.
 	 *
-	 * @param DateTime $datetime      Date and time.
-	 * @param string   $time_interval Time interval, e.g. week, day, hour.
-	 * @param bool     $reversed Going backwards in time instead of forward.
-	 * @return DateTime
+	 * @param \DateTime $datetime      Date and time.
+	 * @param string    $time_interval Time interval, e.g. week, day, hour.
+	 * @param bool      $reversed Going backwards in time instead of forward.
+	 * @return \DateTime
 	 */
 	public static function iterate( $datetime, $time_interval, $reversed = false ) {
 		return call_user_func( array( __CLASS__, "next_{$time_interval}_start" ), $datetime, $reversed );
@@ -644,7 +643,7 @@ class TimeInterval {
 	 * modified in place by the date calculations.
 	 *
 	 * @param string         $timeframe Timeframe to use.  One of: last_week|last_month|last_quarter|last_6_months|last_year.
-	 * @param \DateTime|null $current_date DateTime of current date to compare.
+	 * @param \DateTime|null $current_date \DateTime of current date to compare.
 	 * @return array|false Array of start and end dates, or false for an unknown timeframe.
 	 */
 	public static function get_timeframe_dates( $timeframe, $current_date = null ) {
