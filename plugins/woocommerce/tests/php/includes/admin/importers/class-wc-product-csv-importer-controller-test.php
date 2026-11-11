@@ -598,7 +598,7 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 			unset( $_REQUEST['_wpnonce'] );
 		}
 
-		$this->assertStringContainsString( 'Some relationship fields were skipped', $html );
+		$this->assertStringContainsString( 'Some linked product fields were skipped', $html );
 		$this->assertStringContainsString( 'View import log', $html );
 		$this->assertStringContainsString( 'First update, ID ' . $first->get_id(), $html );
 		$this->assertStringContainsString( 'missing-upsell', $html );

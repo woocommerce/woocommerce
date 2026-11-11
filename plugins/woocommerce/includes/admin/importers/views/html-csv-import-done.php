@@ -57,7 +57,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		foreach ( $errors as $entry ) {
 			$error_data = $entry instanceof WP_Error ? $entry->get_error_data() : null;
 			if ( is_array( $error_data ) && 'warning' === ( $error_data['severity'] ?? '' ) ) {
-				$results[] = __( 'Some relationship fields were skipped', 'woocommerce' );
+				$results[] = __( 'Some linked product fields were skipped', 'woocommerce' );
 				break;
 			}
 		}
