@@ -10,7 +10,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Patch - Support WordPress 7.2: return to the email list after trashing an email and keep editor telemetry working. [#70140]
 -   Minor - Convert personalization tags typed into the Preformatted block in the email editor. [#70784]
 -   Minor - Keep the Separator block styles (Default, Wide Line, Dots) in the email editor. [#70573]
--   Patch - Rename a test title to match what the test asserts [#68887]
 
 ## [2.5.1](https://www.npmjs.com/package/@woocommerce/email-editor/v/2.5.1) - 2026-10-22 
 
