@@ -2979,8 +2979,102 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertSame( 400, $response->get_status() );
-		$this->assertSame( 'woocommerce_rest_invalid_quantity', $response->get_data()['code'] );
+		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'], 'The schema should reject a fractional quantity on a whole-quantity store.' );
 		$this->assertEquals( $original_quantity, wc_get_order( $order->get_id() )->get_item( $item->get_id() )->get_quantity() );
+	}
+
+	/**
+	 * @testdox A batch update with an invalid line item quantity is rejected and leaves the item unchanged.
+	 * @testWith ["invalid"]
+	 *           [false]
+	 *           [1.5]
+	 *
+	 * @param mixed $quantity Posted quantity.
+	 */
+	public function test_batch_update_rejects_invalid_line_item_quantity( $quantity ): void {
+		$order             = WC_Helper_Order::create_order();
+		$items             = $order->get_items();
+		$item              = reset( $items );
+		$original_quantity = $item->get_quantity();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/batch' );
+		$request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'         => $order->get_id(),
+						'line_items' => array(
+							array(
+								'id'       => $item->get_id(),
+								'quantity' => $quantity,
+							),
+						),
+					),
+				),
+			)
+		);
+		$data = $this->server->dispatch( $request )->get_data();
+
+		$this->assertSame( 'woocommerce_rest_invalid_quantity', $data['update'][0]['error']['code'] ?? null, 'The batch item should be rejected.' );
+		$saved_item = wc_get_order( $order->get_id() )->get_item( $item->get_id() );
+		$this->assertNotFalse( $saved_item, 'The line item should not be removed.' );
+		$this->assertEquals( $original_quantity, $saved_item->get_quantity() );
+	}
+
+	/**
+	 * @testdox A whole line item quantity reaches order preparation as an integer, also on stores that allow decimal quantities.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $allow_decimals Whether the store allows decimal quantities.
+	 */
+	public function test_whole_line_item_quantity_is_sanitized_to_integer( bool $allow_decimals ): void {
+		if ( $allow_decimals ) {
+			remove_filter( 'woocommerce_stock_amount', 'intval' );
+			add_filter( 'woocommerce_stock_amount', 'floatval' );
+		}
+		$order = WC_Helper_Order::create_order();
+		$items = $order->get_items();
+		$item  = reset( $items );
+
+		$received = array();
+		add_filter(
+			'woocommerce_rest_pre_insert_shop_order_object',
+			function ( $order_object, $request ) use ( &$received ) {
+				$received = wp_list_pluck( $request['line_items'], 'quantity' );
+				return $order_object;
+			},
+			10,
+			2
+		);
+
+		$line_items = array(
+			array(
+				'id'       => $item->get_id(),
+				'quantity' => 2,
+			),
+		);
+		if ( $allow_decimals ) {
+			$line_items[] = array(
+				'product_id' => WC_Helper_Product::create_simple_product()->get_id(),
+				'quantity'   => 1.5,
+			);
+		}
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params( array( 'line_items' => $line_items ) );
+		$status = $this->server->dispatch( $request )->get_status();
+
+		if ( $allow_decimals ) {
+			remove_filter( 'woocommerce_stock_amount', 'floatval' );
+			add_filter( 'woocommerce_stock_amount', 'intval' );
+		}
+
+		$this->assertSame( 200, $status );
+		$this->assertSame( 2, $received[0], 'Subclasses that compare quantities strictly need whole numbers as integers.' );
+		if ( $allow_decimals ) {
+			$this->assertSame( 1.5, $received[1], 'Fractional quantities should stay numbers.' );
+		}
 	}
 
 	/**

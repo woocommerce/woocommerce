@@ -745,11 +745,29 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 				continue;
 			}
 
+			// Batch requests skip schema validation, so a non-numeric value must not be cast to 0 and remove the item.
+			if ( ! is_numeric( $item['quantity'] ) ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_quantity', esc_html__( 'Quantity must be a number.', 'woocommerce' ), 400 );
+			}
+
 			$quantity = (float) $item['quantity'];
 			if ( (float) wc_stock_amount( $quantity ) !== round( $quantity, WC_ROUNDING_PRECISION ) ) {
 				throw new WC_REST_Exception( 'woocommerce_rest_invalid_quantity', esc_html__( 'Quantity must be a whole number unless the store allows decimal quantities.', 'woocommerce' ), 400 );
 			}
 		}
+	}
+
+	/**
+	 * Schema type for line item quantities.
+	 *
+	 * Whole-quantity stores keep `integer`. Stores that allow decimal quantities also accept `number`,
+	 * listed second so whole numbers are still sanitized to integers for subclasses that compare `0 === $quantity`.
+	 *
+	 * @since 11.4.0
+	 * @return string|string[]
+	 */
+	private function get_line_item_quantity_schema_type() {
+		return 1.5 === (float) wc_stock_amount( 1.5 ) ? array( 'integer', 'number' ) : 'integer';
 	}
 
 	/**
@@ -1649,7 +1667,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 							),
 							'quantity'         => array(
 								'description' => __( 'Quantity ordered.', 'woocommerce' ),
-								'type'        => 'number',
+								'type'        => $this->get_line_item_quantity_schema_type(),
 								'context'     => array( 'view', 'edit' ),
 							),
 							'tax_class'        => array(
