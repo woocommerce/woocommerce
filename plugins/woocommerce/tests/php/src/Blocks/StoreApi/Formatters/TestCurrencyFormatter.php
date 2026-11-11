@@ -49,4 +49,23 @@ class TestCurrencyFormatter extends \WP_UnitTestCase {
 		$this->assertSame( "\u{00A0}", $value['currency_thousand_separator'] );
 		$this->assertSame( ',', $value['currency_decimal_separator'] );
 	}
+
+	/**
+	 * @testdox Currency prefix and suffix follow the filtered price format.
+	 */
+	public function test_format_uses_filtered_price_format() {
+		update_option( 'woocommerce_currency_pos', 'left' );
+		add_filter(
+			'woocommerce_price_format',
+			function () {
+				return '%2$s&nbsp;%1$s';
+			}
+		);
+
+		$value  = $this->mock_formatter->format( [] );
+		$symbol = $value['currency_symbol'];
+
+		$this->assertSame( '', $value['currency_prefix'], 'A right-positioned price format should not add a prefix' );
+		$this->assertSame( ' ' . $symbol, $value['currency_suffix'], 'A right-positioned price format should add a spaced suffix' );
+	}
 }

@@ -25,6 +25,7 @@ const singletonWpModules = [
 	'@wordpress/patterns',
 	'@wordpress/rich-text',
 	'@wordpress/notices',
+	'@wordpress/preferences',
 ];
 
 const wpSingletonMapper = singletonWpModules.reduce( ( acc, mod ) => {

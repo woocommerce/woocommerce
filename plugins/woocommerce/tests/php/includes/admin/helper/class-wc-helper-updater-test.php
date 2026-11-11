@@ -64,6 +64,89 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests translation updates with malformed installed or remote revision dates.
+	 *
+	 * @dataProvider translation_revision_dates
+	 * @param string|null $installed_revision Date in the installed PO file, or null when the locale is not installed.
+	 * @param string      $remote_revision    Date reported by the update service.
+	 * @param bool        $expect_update      Whether the update should be offered.
+	 */
+	public function test_translation_update_revision_dates( ?string $installed_revision, string $remote_revision, bool $expect_update ): void {
+		$plugin   = $this->mock_local_woo_plugin();
+		$lang_dir = WP_LANG_DIR . '/plugins/';
+		$pack     = $lang_dir . 'woo-test-plugin-fr_FR';
+		wp_mkdir_p( $lang_dir );
+		wp_delete_file( $pack . '.po' );
+		if ( null !== $installed_revision ) {
+			file_put_contents( $pack . '.po', "\"PO-Revision-Date: {$installed_revision}\\n\"\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture.
+		}
+
+		$files   = static fn( $files, $path ) => $lang_dir === $path ? array( $pack . '.mo' ) : $files;
+		$active  = static fn() => array( $plugin );
+		$locales = static fn() => array( 'fr_FR' );
+		$opt_in  = static fn() => true;
+		$mock    = static function ( $response, $args, $url ) use ( $remote_revision ) {
+			if ( 'https://translate.wordpress.com/api/translations-updates/woocommerce' !== $url ) {
+				return $response;
+			}
+			return array(
+				'response' => array( 'code' => 200 ),
+				'body'     => wp_json_encode(
+					array(
+						'data' => array(
+							'woo-test-plugin' => array(
+								array(
+									'wp_locale'     => 'fr_FR',
+									'last_modified' => $remote_revision,
+									'version'       => '1.0.0',
+									'package'       => 'https://example.test/fr_FR.zip',
+								),
+							),
+						),
+					)
+				),
+			);
+		};
+
+		add_filter( 'pre_get_language_files_from_path', $files, 10, 2 );
+		add_filter( 'pre_option_active_plugins', $active );
+		add_filter( 'plugins_update_check_locales', $locales );
+		add_filter( 'woocommerce_translations_updates_for_woo-test-plugin', $opt_in );
+		add_filter( 'pre_http_request', $mock, 10, 3 );
+
+		try {
+			$this->assertSame( $installed_revision, wp_get_installed_translations( 'plugins' )['woo-test-plugin']['fr_FR']['PO-Revision-Date'] ?? null );
+			$updates = WC_Helper_Updater::get_translations_update_data();
+			$this->assertSame( $expect_update ? array( 'fr_FR' ) : array(), array_column( $updates, 'language' ) );
+		} finally {
+			remove_filter( 'pre_get_language_files_from_path', $files );
+			remove_filter( 'pre_option_active_plugins', $active );
+			remove_filter( 'plugins_update_check_locales', $locales );
+			remove_filter( 'woocommerce_translations_updates_for_woo-test-plugin', $opt_in );
+			remove_filter( 'pre_http_request', $mock );
+			wp_delete_file( $pack . '.po' );
+		}
+	}
+
+	/**
+	 * Supplies installed and remote translation revision dates.
+	 *
+	 * @return array
+	 */
+	public function translation_revision_dates(): array {
+		return array(
+			'replace invalid installed date' => array( '2018-MO-DA HO:MI+ZONE', '2026-02-01 00:00+0000', true ),
+			'skip invalid remote date'       => array( '2026-01-01 00:00+0000', 'invalid', false ),
+			'offer newer update'             => array( '2026-01-01 00:00+0000', '2026-02-01 00:00+0000', true ),
+			'keep newer installed pack'      => array( '2026-02-01 00:00+0000', '2026-01-01 00:00+0000', false ),
+			'replace empty installed date'   => array( '', '2026-02-01 00:00+0000', true ),
+			'skip empty remote date'         => array( '2026-01-01 00:00+0000', '', false ),
+			'install without remote date'    => array( null, '', true ),
+			'install with invalid remote'    => array( null, 'invalid', true ),
+		);
+	}
+
+	/**
 	 * Unregister and delete the fixture theme, when one was created.
 	 */
 	private function cleanup_theme_fixture() {
@@ -271,6 +354,58 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Cached update data should be reused only while its presigned package links are still valid.
+	 *
+	 * @testWith [10, 0]
+	 *           [11.5, 1]
+	 *
+	 * @param float $age_in_hours      How long ago the cached update check was made.
+	 * @param int   $expected_requests How many update-check requests are expected.
+	 */
+	public function test_update_check_reuses_cache_only_within_package_link_lifetime( float $age_in_hours, int $expected_requests ): void {
+		$payload = array(
+			123 => array(
+				'product_id' => 123,
+				'file_id'    => 'abc123',
+			),
+		);
+
+		ksort( $payload );
+
+		set_transient(
+			'_woocommerce_helper_updates',
+			array(
+				'hash'     => md5( wp_json_encode( $payload ) ),
+				'updated'  => time() - (int) ( $age_in_hours * HOUR_IN_SECONDS ),
+				'products' => array( 123 => array( 'version' => '1.2.3' ) ),
+				'errors'   => array(),
+			),
+			WEEK_IN_SECONDS
+		);
+
+		$requests  = 0;
+		$http_mock = static function () use ( &$requests ) {
+			++$requests;
+			return array(
+				'response' => array(
+					'code'    => 200,
+					'message' => 'OK',
+				),
+				'body'     => wp_json_encode( array( 123 => array( 'version' => '1.3.0' ) ) ),
+			);
+		};
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			$this->call_update_check( $payload );
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$this->assertSame( $expected_requests, $requests );
+	}
+
+	/**
 	 * @testdox A rate-limited update check should keep the cached products instead of caching the empty result.
 	 */
 	public function test_update_check_preserves_cache_when_rate_limited(): void {
@@ -401,6 +536,60 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 1, $requests, 'A check inside the backoff window should not call the API, even after the installed version changed' );
 		$this->assertGreaterThan( time(), $backoff_until, 'A failed check should record a backoff window' );
 		$this->assertLessThanOrEqual( time() + 15 * MINUTE_IN_SECONDS, $backoff_until, 'The backoff after a failed check should be short' );
+	}
+
+	/**
+	 * @testdox A failed update check should keep the forced auto-update only while the cached data is fresh, as the flag and the package links come from the same response.
+	 *
+	 * @testWith [10, true]
+	 *           [11.5, false]
+	 *
+	 * @param float $age_in_hours       How long ago the cached update check was made.
+	 * @param bool  $expect_autoupdate Whether the forced auto-update is expected to be kept.
+	 */
+	public function test_update_check_failure_keeps_forced_autoupdate_only_while_cache_is_fresh( float $age_in_hours, bool $expect_autoupdate ): void {
+		$payload = array(
+			123 => array(
+				'product_id' => 123,
+				'file_id'    => 'abc123',
+			),
+		);
+
+		ksort( $payload );
+
+		set_transient(
+			'_woocommerce_helper_updates',
+			array(
+				'hash'     => md5( wp_json_encode( $payload ) ),
+				'updated'  => time() - (int) ( $age_in_hours * HOUR_IN_SECONDS ),
+				'products' => array(
+					123 => array(
+						'version'    => '1.2.3',
+						'autoupdate' => true,
+					),
+				),
+				'errors'   => array(),
+			),
+			WEEK_IN_SECONDS
+		);
+
+		$http_mock = static function () {
+			return new WP_Error( 'http_request_failed', 'cURL error 28: Operation timed out' );
+		};
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			$result = $this->call_update_check( $payload );
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$expected = array( 123 => array( 'version' => '1.2.3' ) );
+		if ( $expect_autoupdate ) {
+			$expected[123]['autoupdate'] = true;
+		}
+
+		$this->assertSame( $expected, $result );
 	}
 
 	/**
@@ -976,6 +1165,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 * @testdox Connect notice is skipped when Core already renders an update row for the plugin.
 	 */
 	public function test_connect_notice_is_skipped_when_core_renders_an_update_row(): void {
+		$this->mock_plugin_row_update_check();
 		$this->prepare_plugins_screen();
 
 		$transient                                     = new stdClass();
@@ -1064,6 +1254,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 * @testdox Purchase notice links to the product page when the connected account holds no subscription.
 	 */
 	public function test_purchase_notice_renders_without_a_subscription(): void {
+		$this->mock_plugin_row_update_check();
 		$this->prepare_plugins_screen();
 		$this->set_subscriptions( array() );
 
@@ -1655,6 +1846,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 * @testdox Subscription notice is skipped when Core already renders an update row for the plugin.
 	 */
 	public function test_subscription_notice_is_skipped_when_core_renders_an_update_row(): void {
+		$this->mock_plugin_row_update_check();
 		$this->prepare_plugins_screen();
 		$this->set_subscriptions( array() );
 
@@ -2308,6 +2500,22 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Keep fixture transient writes from contacting the public update service.
+	 */
+	private function mock_plugin_row_update_check(): void {
+		$this->http_responder = static function ( $request, $url ) {
+			if ( 'POST' !== ( $request['method'] ?? '' ) || 'https://woocommerce.com/wp-json/helper/1.0/update-check-public' !== $url ) {
+				return false;
+			}
+
+			return array(
+				'response' => array( 'code' => 200 ),
+				'body'     => wp_json_encode( array() ),
+			);
+		};
+	}
+
+	/**
 	 * Mock WC_Helper_API response for testing.
 	 *
 	 * @param false|array|WP_Error $preempt A preemptive return value of an HTTP request.
@@ -2331,5 +2539,245 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 			),
 			'body'     => wp_json_encode( $this->mocked_updates ),
 		);
+	}
+
+	/**
+	 * @testdox Plugins without a subscription lists an active Woo plugin the account holds no subscription for.
+	 */
+	public function test_plugins_without_subscription_lists_unsubscribed_plugin(): void {
+		$plugin_file = $this->mock_active_woo_plugin();
+		$this->set_connected_subscriptions( array( $this->subscription( array( 'product_id' => 999 ) ) ) );
+
+		$plugins = WC_Helper_Updater::get_plugins_without_subscription();
+
+		$this->assertSame( array( $plugin_file ), array_keys( $plugins ), 'A plugin with no subscription for its product should be listed.' );
+	}
+
+	/**
+	 * @testdox Plugins without a subscription skips a plugin the account holds any subscription for, even an expired one.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $expired Whether the subscription has expired.
+	 */
+	public function test_plugins_without_subscription_skips_subscribed_plugin( bool $expired ): void {
+		$this->mock_active_woo_plugin();
+		$this->set_connected_subscriptions( array( $this->subscription( array( 'expired' => $expired ) ) ) );
+
+		$this->assertSame( array(), WC_Helper_Updater::get_plugins_without_subscription(), 'A plugin with a subscription should not be listed.' );
+	}
+
+	/**
+	 * @testdox Plugins without a subscription skips inactive plugins.
+	 */
+	public function test_plugins_without_subscription_skips_inactive_plugin(): void {
+		$this->mock_local_woo_plugin();
+		update_option( 'active_plugins', array() );
+		$this->set_connected_subscriptions( array() );
+
+		$this->assertSame( array(), WC_Helper_Updater::get_plugins_without_subscription(), 'An inactive plugin should not be listed.' );
+	}
+
+	/**
+	 * @testdox Plugins without a subscription skips the Woo Update Manager.
+	 */
+	public function test_plugins_without_subscription_skips_update_manager(): void {
+		$plugin_file = WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_PLUGIN_MAIN_FILE;
+		wp_cache_set(
+			'plugins',
+			array(
+				'' => array(
+					$plugin_file => array(
+						'Name'    => 'WooCommerce.com Update Manager',
+						'Version' => '1.0.0',
+						'Woo'     => '18734002369816:abc123',
+					),
+				),
+			),
+			'plugins'
+		);
+		update_option( 'active_plugins', array( $plugin_file ) );
+		$this->set_connected_subscriptions( array() );
+
+		$this->assertSame( array(), WC_Helper_Updater::get_plugins_without_subscription(), 'The Update Manager delivers updates and should never be listed.' );
+	}
+
+	/**
+	 * @testdox Plugins without a subscription lists every active Woo plugin when the store is not connected.
+	 */
+	public function test_plugins_without_subscription_lists_all_when_disconnected(): void {
+		$plugin_file = $this->mock_active_woo_plugin();
+		$this->set_subscriptions( array( $this->subscription() ) );
+
+		$plugins = WC_Helper_Updater::get_plugins_without_subscription();
+
+		$this->assertSame( array( $plugin_file ), array_keys( $plugins ), 'A store that is not connected has no subscription for any extension.' );
+	}
+
+	/**
+	 * @testdox Plugins without a subscription is null while a connected store's last subscriptions fetch is failing.
+	 * @testWith [429]
+	 *           [500]
+	 *
+	 * @param int $code HTTP status of the failed fetch.
+	 */
+	public function test_plugins_without_subscription_is_null_while_the_api_is_failing( int $code ): void {
+		$this->mock_active_woo_plugin();
+		$this->set_connected_subscriptions( array() );
+		set_transient(
+			'_woocommerce_helper_subscriptions_api_error',
+			array(
+				'code'    => $code,
+				'message' => 'Error',
+			),
+			HOUR_IN_SECONDS
+		);
+
+		$this->assertNull( WC_Helper_Updater::get_plugins_without_subscription(), 'An empty list after a failed fetch is not proof that no subscription exists.' );
+	}
+
+	/**
+	 * @testdox Plugins without a subscription is empty when no Woo plugin is active, even while the API is failing.
+	 */
+	public function test_plugins_without_subscription_is_empty_without_active_plugins_while_the_api_is_failing(): void {
+		$this->mock_local_woo_plugin();
+		update_option( 'active_plugins', array() );
+		$this->set_connected_subscriptions( array() );
+		set_transient(
+			'_woocommerce_helper_subscriptions_api_error',
+			array(
+				'code'    => 429,
+				'message' => 'Error',
+			),
+			HOUR_IN_SECONDS
+		);
+
+		$this->assertSame( array(), WC_Helper_Updater::get_plugins_without_subscription(), 'With no active plugin to check, the empty list does not depend on the API.' );
+	}
+
+	/**
+	 * @testdox Plugins without a subscription is null when fetching is not allowed and the list isn't cached.
+	 */
+	public function test_plugins_without_subscription_is_null_without_cache_when_fetching_is_not_allowed(): void {
+		$this->mock_active_woo_plugin();
+		WC_Helper_Options::update(
+			'auth',
+			array(
+				'site_id'             => 45,
+				'access_token'        => 'token',
+				'access_token_secret' => 'secret',
+			)
+		);
+		delete_transient( '_woocommerce_helper_subscriptions' );
+		$fail = function () {
+			$this->fail( 'No request should be made when fetching is not allowed.' );
+		};
+		add_filter( 'pre_http_request', $fail );
+
+		try {
+			$this->assertNull( WC_Helper_Updater::get_plugins_without_subscription( false ), 'Without the list the answer is unknown.' );
+		} finally {
+			remove_filter( 'pre_http_request', $fail );
+		}
+	}
+
+	/**
+	 * @testdox Plugins without a subscription reads the cached list when fetching is not allowed.
+	 */
+	public function test_plugins_without_subscription_reads_the_cache_when_fetching_is_not_allowed(): void {
+		$plugin_file = $this->mock_active_woo_plugin();
+		$this->set_connected_subscriptions( array() );
+
+		$plugins = WC_Helper_Updater::get_plugins_without_subscription( false );
+
+		$this->assertSame( array( $plugin_file ), array_keys( $plugins ), 'A cached list answers without a request.' );
+	}
+
+	/**
+	 * Makes WC_Helper::get_local_woo_plugins() report a single active Woo plugin.
+	 *
+	 * @return string The plugin file name.
+	 */
+	private function mock_active_woo_plugin(): string {
+		$plugin_file = $this->mock_local_woo_plugin();
+		update_option( 'active_plugins', array( $plugin_file ) );
+
+		return $plugin_file;
+	}
+
+	/**
+	 * Stand in a subscriptions payload for a store connected to WooCommerce.com.
+	 *
+	 * @param array $subscriptions Subscription records.
+	 * @return void
+	 */
+	private function set_connected_subscriptions( array $subscriptions ): void {
+		$this->set_subscriptions( $subscriptions );
+		WC_Helper_Options::update(
+			'auth',
+			array(
+				'site_id'      => 45,
+				'access_token' => 'token',
+			)
+		);
+	}
+
+	/**
+	 * @testdox The plugin row asks for a download on a local store connected to production WooCommerce.com, and for a one-click install otherwise.
+	 *
+	 * @testWith ["http://localhost:8888", "https://woocommerce.com/wp-json/helper/1.0", "upload it to update"]
+	 *           ["http://localhost:8888", "https://woocommerce.test/wp-json/helper/1.0", "Install WooCommerce.com Update Manager"]
+	 *
+	 * @param string $home     Store home URL.
+	 * @param string $api_base Helper API base URL.
+	 * @param string $expected Text the plugin row should contain.
+	 */
+	public function test_plugin_row_message_offers_download_on_manual_install( string $home, string $api_base, string $expected ): void {
+		if ( WC_Woo_Update_Manager_Plugin::is_plugin_installed() ) {
+			$this->markTestSkipped( 'The Update Manager is installed in this environment.' );
+		}
+
+		$output = $this->with_store_urls(
+			$home,
+			$api_base,
+			static function () {
+				ob_start();
+				WC_Helper_Updater::add_install_marketplace_plugin_message( array(), (object) array( 'package' => '' ) );
+				return ob_get_clean();
+			}
+		);
+
+		$this->assertStringContainsString( $expected, $output );
+	}
+
+	/**
+	 * Run a callback with the given home URL and Helper API base.
+	 *
+	 * @param string   $home     Store home URL.
+	 * @param string   $api_base Helper API base URL.
+	 * @param callable $callback Code to run.
+	 * @return mixed The callback's return value.
+	 */
+	private function with_store_urls( string $home, string $api_base, callable $callback ) {
+		// wp-env defines WP_HOME, so the home option alone doesn't change home_url().
+		add_filter(
+			'home_url',
+			static function () use ( $home ) {
+				return $home;
+			}
+		);
+		$api_base_filter = static function () use ( $api_base ) {
+			return $api_base;
+		};
+		add_filter( 'woocommerce_helper_api_base', $api_base_filter );
+		WC_Helper_API::load();
+
+		try {
+			return $callback();
+		} finally {
+			// The static API base outlives the hook restore, so reload it without the test's filter.
+			remove_filter( 'woocommerce_helper_api_base', $api_base_filter );
+			WC_Helper_API::load();
+		}
 	}
 }

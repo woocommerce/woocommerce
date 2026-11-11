@@ -70,6 +70,11 @@ export type MutationQueueConfig< TState = unknown, TMeta = unknown > = {
 	 * individual requests' own settlement.
 	 */
 	onCycleSettled?: ( settled: Array< CycleSettledEntry< TMeta > > ) => void;
+	/**
+	 * Called with `true` when the first request of a cycle is submitted, and with `false` once the cycle has settled,
+	 * so callers can show that an update is in progress. Exceptions are caught and logged.
+	 */
+	onProcessingChange?: ( isProcessing: boolean ) => void;
 };
 
 type TrackedRequest< TMeta = unknown > = {
@@ -113,6 +118,15 @@ export function createMutationQueue< TState, TMeta = unknown >(
 
 	let microtaskScheduled = false;
 	let isProcessing = false;
+
+	function notifyProcessingChange() {
+		try {
+			config.onProcessingChange?.( isProcessing );
+		} catch ( error ) {
+			// eslint-disable-next-line no-console
+			console.error( error );
+		}
+	}
 	let idleResolvers: Array< () => void > = [];
 	let nextId = 0;
 
@@ -145,6 +159,7 @@ export function createMutationQueue< TState, TMeta = unknown >(
 		}
 
 		isProcessing = false;
+		notifyProcessingChange();
 
 		// Notify idle waiters.
 		const resolvers = idleResolvers;
@@ -304,6 +319,7 @@ export function createMutationQueue< TState, TMeta = unknown >(
 			if ( ! isProcessing ) {
 				snapshot = takeSnapshot();
 				isProcessing = true;
+				notifyProcessingChange();
 			}
 
 			// Deep-clone the body at submission time so that later optimistic

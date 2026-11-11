@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Build classic assets when starting the watcher; development tooling only.

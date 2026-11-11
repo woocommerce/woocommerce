@@ -31,6 +31,15 @@ final class NotificationCancellationSource {
 	public const SYSTEM = 'system';
 
 	/**
+	 * Privacy cancellation source, set when a personal data erasure request anonymizes the notification.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @var string
+	 */
+	public const PRIVACY = 'privacy';
+
+	/**
 	 * Get valid cancellation sources.
 	 *
 	 * @return string[]
@@ -40,6 +49,7 @@ final class NotificationCancellationSource {
 			self::ADMIN,
 			self::USER,
 			self::SYSTEM,
+			self::PRIVACY,
 		);
 	}
 }

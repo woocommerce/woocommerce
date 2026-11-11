@@ -99,8 +99,9 @@ class Api {
 	 * @return string The cache buster value to use for the given file.
 	 */
 	protected function get_file_version( $file ) {
-		if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG && file_exists( $this->package->get_path() . $file ) ) {
-			return filemtime( $this->package->get_path( trim( $file, '/' ) ) );
+		if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
+			$mtime = @filemtime( $this->package->get_path( $file ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- performance optimization
+			return $mtime ? (string) $mtime : $this->wc_version;
 		}
 		return $this->wc_version;
 	}
@@ -260,10 +261,11 @@ class Api {
 		}
 
 		// Return asset details as well as the requested dependencies array.
+		$script_dependencies = $this->script_data[ $relative_src ]['dependencies'];
 		return [
 			'src'          => $this->script_data[ $relative_src ]['src'],
 			'version'      => $this->script_data[ $relative_src ]['version'],
-			'dependencies' => array_merge( $this->script_data[ $relative_src ]['dependencies'], $dependencies ),
+			'dependencies' => ! empty( $dependencies ) ? array_merge( $script_dependencies, $dependencies ) : $script_dependencies,
 		];
 	}
 
@@ -316,9 +318,7 @@ class Api {
 		$script_dependencies = apply_filters( 'woocommerce_blocks_register_script_dependencies', $script_data['dependencies'], $handle );
 
 		wp_register_script( $handle, $script_data['src'], $script_dependencies, $script_data['version'], true );
-
-		if ( $has_i18n && function_exists( 'wp_set_script_translations' ) ) {
-			wp_set_script_translations( $handle, 'woocommerce', $this->package->get_path( 'languages' ) );
+		if ( $has_i18n ) {
 			wp_set_script_translations( $handle, 'woocommerce', $this->package->get_path( 'i18n/languages' ) );
 		}
 	}
