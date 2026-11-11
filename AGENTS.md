@@ -30,6 +30,7 @@ The `.ai/skills/` directory contains procedural HOW-TO instructions:
 - **`woocommerce-markdown`** - Markdown writing and editing guidelines
 - **`woocommerce-git-commit`** - Commit changes with conventional messages and smart grouping
 - **`woocommerce-git-draft-pr`** - Create draft PRs with proper template, changelog, and milestone handling
+- **`woocommerce-cart-checkout-motion`** - Adding or reviewing motion in the Cart and Checkout blocks and the components they share
 - **`woocommerce-email-editor`** - Email editor development setup and Mailpit configuration
 - **`woocommerce-performance`** - Performance guardrails. **Invoke when writing or reviewing PHP code.**
 
