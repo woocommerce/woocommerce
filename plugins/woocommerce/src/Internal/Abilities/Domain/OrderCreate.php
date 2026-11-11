@@ -176,8 +176,9 @@ class OrderCreate extends ActionableAbility {
 			$this->stage_line_totals( $subject, ! empty( $input['line_items'] ) );
 		}
 
+		// Not a manual change, as in REST and wc_create_order(): a new order has no ID for woocommerce_order_edit_status.
 		if ( ExtensibleAbilities::is_enabled() && $subject->get_status() !== $this->status ) {
-			$subject->stage_status( $this->status, '', true );
+			$subject->stage_status( $this->status );
 		}
 
 		return null;
@@ -211,7 +212,7 @@ class OrderCreate extends ActionableAbility {
 		}
 
 		// The error rolls back the pending order that parent::save() wrote.
-		return $subject->update_status( $this->status, '', true ) ? null : new \WP_Error(
+		return $subject->update_status( $this->status ) ? null : new \WP_Error(
 			'woocommerce_order_status_update_failed',
 			__( 'The order was not created, because its status could not be set.', 'woocommerce' ),
 			array( 'status' => 500 )

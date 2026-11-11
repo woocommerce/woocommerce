@@ -54,6 +54,7 @@ class OrderCreateTest extends WC_Unit_Test_Case {
 		);
 		$variation = wc_get_product( WC_Helper_Product::create_variation_product()->get_children()[0] );
 		$paid      = did_action( 'woocommerce_order_status_pending_to_processing' );
+		$edits     = did_action( 'woocommerce_order_edit_status' );
 
 		$result = $this->execute(
 			array(
@@ -104,6 +105,7 @@ class OrderCreateTest extends WC_Unit_Test_Case {
 		$this->assertEqualsCanonicalizing( array_keys( $order->get_items() ), array_column( $result['order']['line_items'], 'id' ) );
 		$this->assertSame( 7, wc_get_product( $simple->get_id() )->get_stock_quantity(), 'A paid status should reduce the stock once.' );
 		$this->assertSame( $paid + 1, did_action( 'woocommerce_order_status_pending_to_processing' ), 'The order should move from pending, which sends the order emails.' );
+		$this->assertSame( $edits, did_action( 'woocommerce_order_edit_status' ), 'Creating an order is not a manual status change.' );
 	}
 
 	/**
