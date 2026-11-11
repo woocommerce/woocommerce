@@ -223,7 +223,7 @@ const test = base.extend<
 		} );
 
 		const results = await Promise.allSettled(
-			callbacks.map( ( callback ) => callback() )
+			callbacks.map( ( callback ) => Promise.resolve().then( callback ) )
 		);
 		for ( const result of results ) {
 			if ( result.status === 'rejected' ) {
