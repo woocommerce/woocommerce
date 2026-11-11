@@ -22,8 +22,6 @@ export interface NoticeBannerProps {
 	spokenMessage?: string | React.ReactNode;
 	status: 'success' | 'error' | 'info' | 'warning' | 'default';
 	summary?: string;
-	// A ref to the banner element, for example so that a transition can wait for its animations.
-	containerRef?: React.Ref< HTMLDivElement >;
 }
 
 /**
@@ -40,7 +38,6 @@ const NoticeBanner = ( {
 	isDismissible = true,
 	politeness = getDefaultPoliteness( status ),
 	summary,
-	containerRef,
 }: NoticeBannerProps ) => {
 	useSpokenMessage( spokenMessage, politeness );
 
@@ -56,7 +53,6 @@ const NoticeBanner = ( {
 
 	return (
 		<div
-			ref={ containerRef }
 			role={
 				status === 'error' ||
 				status === 'warning' ||

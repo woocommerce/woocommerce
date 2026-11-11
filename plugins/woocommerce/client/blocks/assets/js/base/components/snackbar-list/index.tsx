@@ -3,8 +3,8 @@
  */
 import clsx from 'clsx';
 import type { NoticeType } from '@woocommerce/types';
-import { createRef, useRef, type RefObject } from '@wordpress/element';
-import { whenAnimationsEnd } from '@woocommerce/base-utils';
+import { useReducedMotion } from '@wordpress/compose';
+import { useRef } from '@wordpress/element';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 /**
@@ -31,10 +31,7 @@ const SnackbarList = ( {
 	onRemove = () => void 0,
 }: SnackbarListProps ): JSX.Element => {
 	const listRef = useRef< HTMLDivElement | null >( null );
-	// One ref for each snackbar, so that its transition can find it without `findDOMNode`, which React deprecates.
-	const snackbarRefs = useRef(
-		new Map< string, RefObject< HTMLDivElement > >()
-	);
+	const isReducedMotion = useReducedMotion();
 
 	const removeNotice = ( notice: NoticeType ) => () =>
 		onRemove( notice?.id || '' );
@@ -48,39 +45,42 @@ const SnackbarList = ( {
 			tabIndex={ -1 }
 			ref={ listRef }
 		>
-			<TransitionGroup>
-				{ notices.map( ( notice ) => {
+			{ isReducedMotion ? (
+				notices.map( ( notice ) => {
 					const { content, ...restNotice } = notice;
-					const snackbarRef =
-						snackbarRefs.current.get( notice.id ) ??
-						createRef< HTMLDivElement >();
-					snackbarRefs.current.set( notice.id, snackbarRef );
 					return (
-						<CSSTransition
-							key={ 'snackbar-' + notice.id }
-							nodeRef={ snackbarRef }
-							// The stylesheet sets the timing and handles reduced motion, so the script waits for the
-							// animation to end instead of a fixed timeout.
-							addEndListener={ ( done: () => void ) =>
-								whenAnimationsEnd( snackbarRef.current, done )
-							}
-							onExited={ () =>
-								snackbarRefs.current.delete( notice.id )
-							}
-							classNames="notice-transition"
+						<Snackbar
+							{ ...restNotice }
+							onRemove={ removeNotice( notice ) }
+							listRef={ listRef }
+							key={ notice.id }
 						>
-							<Snackbar
-								{ ...restNotice }
-								onRemove={ removeNotice( notice ) }
-								listRef={ listRef }
-								containerRef={ snackbarRef }
-							>
-								{ content }
-							</Snackbar>
-						</CSSTransition>
+							{ notice.content }
+						</Snackbar>
 					);
-				} ) }
-			</TransitionGroup>
+				} )
+			) : (
+				<TransitionGroup>
+					{ notices.map( ( notice ) => {
+						const { content, ...restNotice } = notice;
+						return (
+							<CSSTransition
+								key={ 'snackbar-' + notice.id }
+								timeout={ 500 }
+								classNames="notice-transition"
+							>
+								<Snackbar
+									{ ...restNotice }
+									onRemove={ removeNotice( notice ) }
+									listRef={ listRef }
+								>
+									{ content }
+								</Snackbar>
+							</CSSTransition>
+						);
+					} ) }
+				</TransitionGroup>
+			) }
 		</div>
 	);
 };
