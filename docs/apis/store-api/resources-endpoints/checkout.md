@@ -251,7 +251,9 @@ curl --header "Nonce: 12345" --request POST https://example-store.com/wp-json/wc
 
 There are many payment gateways available for merchants to use, and each one will be expecting different `payment_data`. We cannot comprehensively list all expected requests for all payment gateways, and we would recommend reaching out to the authors of the payment gateway plugins you're working with for further information.
 
-An example of the payment data sent to the Checkout endpoint by current versions of the [WooCommerce Stripe Payment Gateway](https://wordpress.org/plugins/woocommerce-gateway-stripe/) is shown below. The gateway creates a [Stripe PaymentMethod](https://docs.stripe.com/api/payment_methods) in the browser with Stripe.js and sends its ID. The PaymentIntent is created and confirmed on the server when the order is processed, so you don't send a PaymentIntent yourself. The older `stripe_source` key used Stripe's deprecated Sources API.
+The example below shows the payment data the [WooCommerce Stripe Payment Gateway](https://wordpress.org/plugins/woocommerce-gateway-stripe/) sends for a card payment. Other Stripe payment methods send different data, and the gateway may change it between releases, so check [the gateway source](https://github.com/woocommerce/woocommerce-gateway-stripe) for the current implementation.
+
+For cards, the gateway creates a [Stripe PaymentMethod](https://docs.stripe.com/api/payment_methods) in the browser with Stripe.js and sends its ID. The PaymentIntent is created and confirmed on the server when the order is processed, so you don't send a PaymentIntent yourself. The older `stripe_source` key used Stripe's deprecated Sources API.
 
 ```json
 {

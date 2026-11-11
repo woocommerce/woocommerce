@@ -604,7 +604,7 @@ POST /cart/update-customer
 Send the addresses as a JSON body. Only the fields you include are updated, with one exception: if the cart doesn't need shipping and you omit `shipping_address`, the shipping address is set to the billing address.
 
 ```sh
-curl --header "Nonce: 12345" --header "Content-Type: application/json" --request POST https://example-store.com/wp-json/wc/store/v1/cart/update-customer   --data '{
+curl --header "Nonce: 12345" --header "Content-Type: application/json" --request POST https://example-store.com/wp-json/wc/store/v1/cart/update-customer --data '{
     "billing_address": {
       "first_name": "Jane",
       "last_name": "Doe",
