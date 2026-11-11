@@ -521,7 +521,7 @@ function wc_is_stock_amount_integer() {
  * @return string
  */
 function get_woocommerce_price_format() {
-	$currency_pos = \Automattic\WooCommerce\Internal\Utilities\PriceFormat::get_position();
+	$currency_pos = get_option( 'woocommerce_currency_pos' );
 	$format       = '%1$s%2$s';
 
 	switch ( $currency_pos ) {

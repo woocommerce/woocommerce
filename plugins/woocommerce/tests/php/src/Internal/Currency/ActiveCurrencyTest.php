@@ -280,28 +280,28 @@ class ActiveCurrencyTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * The symbol position filter gets the active currency while an order operation runs and no extra argument otherwise.
+	 * The price format filter gets the active currency while a scope is open and no extra argument otherwise.
 	 *
 	 * @return void
 	 */
-	public function test_position_filter_receives_the_active_currency(): void {
+	public function test_price_format_filter_receives_the_active_currency(): void {
 		$received = array();
 		add_filter(
-			'wc_get_currency_position',
-			function ( $position, ...$args ) use ( &$received ) {
+			'woocommerce_price_format',
+			function ( $format, $position, ...$args ) use ( &$received ) {
 				$received[] = $args;
-				return $position;
+				return $format;
 			},
 			10,
 			PHP_INT_MAX
 		);
 
 		$scope = ActiveCurrency::scope( 'JPY' );
-		\Automattic\WooCommerce\Internal\Utilities\PriceFormat::get_position();
+		get_woocommerce_price_format();
 		$scope->release();
-		\Automattic\WooCommerce\Internal\Utilities\PriceFormat::get_position();
+		get_woocommerce_price_format();
 
-		remove_all_filters( 'wc_get_currency_position' );
+		remove_all_filters( 'woocommerce_price_format' );
 		$this->assertSame( array( array( 'JPY' ), array() ), $received );
 	}
 
