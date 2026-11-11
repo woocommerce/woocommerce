@@ -735,7 +735,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @param mixed $line_items Posted line items.
 	 * @throws WC_REST_Exception When a quantity is invalid.
 	 */
-	protected function validate_line_item_quantities( $line_items ) {
+	protected function validate_line_item_quantities( $line_items ): void {
 		if ( ! is_array( $line_items ) ) {
 			return;
 		}
