@@ -18481,13 +18481,7 @@ parameters:
 			path: includes/emails/class-wc-email.php
 
 		-
-			message: '#^Access to property \$AltBody on an unknown class PHPMailer\.$#'
-			identifier: class.notFound
-			count: 4
-			path: includes/emails/class-wc-email.php
-
-		-
-			message: '#^Action callback returns PHPMailer but should not return anything\.$#'
+			message: '#^Action callback returns PHPMailer\\PHPMailer\\PHPMailer but should not return anything\.$#'
 			identifier: return.void
 			count: 1
 			path: includes/emails/class-wc-email.php
@@ -18525,12 +18519,6 @@ parameters:
 		-
 			message: '#^Method WC_Email\:\:get_option_or_transient\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/emails/class-wc-email.php
-
-		-
-			message: '#^Method WC_Email\:\:handle_multipart\(\) has invalid return type PHPMailer\.$#'
-			identifier: class.notFound
 			count: 1
 			path: includes/emails/class-wc-email.php
 
@@ -18628,12 +18616,6 @@ parameters:
 			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(string\)\: bool\)\|null, ''is_email'' given\.$#'
 			identifier: argument.type
 			count: 3
-			path: includes/emails/class-wc-email.php
-
-		-
-			message: '#^Parameter \$mailer of method WC_Email\:\:handle_multipart\(\) has invalid type PHPMailer\.$#'
-			identifier: class.notFound
-			count: 1
 			path: includes/emails/class-wc-email.php
 
 		-

@@ -361,7 +361,7 @@ class Html2Text {
 			// Replace whitespace characters with a space (equivalent to \s).
 			if ( $in_pre ) {
 				// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-				$text = "\n" . trim( self::render_text( $node->wholeText ), "\n\r\t " ) . "\n";
+				$text = self::render_text( $node->wholeText );
 
 				// Remove trailing whitespace only.
 				$result = preg_replace( "/[ \t]*\n/im", "\n", $text );
@@ -418,9 +418,13 @@ class Html2Text {
 			case 'h6':
 			case 'ol':
 			case 'ul':
-			case 'pre':
 				// Add two newlines.
 				$output = "\n\n";
+				break;
+
+			case 'pre':
+				// Add two newlines. The second is armored like newlines inside pre, to keep the first line's indentation.
+				$output = "\n\r";
 				break;
 
 			case 'td':
@@ -535,8 +539,8 @@ class Html2Text {
 				break;
 
 			case 'br':
-				// Add one line.
-				$output .= "\n";
+				// Add one line. Inside pre it is armored like other newlines, to keep the next line's indentation.
+				$output .= $in_pre ? "\r" : "\n";
 				break;
 
 			case 'div':
