@@ -137,40 +137,6 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 	private $subscriber_id;
 
 	/**
-	 * Original value of $_SERVER['HTTPS'] (if any) before each test.
-	 *
-	 * @var string|null
-	 */
-	private $original_https;
-
-	/**
-	 * Original value of $_SERVER['SERVER_PORT'] (if any) before each test.
-	 *
-	 * Captured alongside HTTPS because `is_ssl()` returns true when
-	 * SERVER_PORT === '443', regardless of the HTTPS header.
-	 *
-	 * @var string|null
-	 */
-	private $original_server_port;
-
-	/**
-	 * Original value of $_SERVER['HTTP_X_FORWARDED_PROTO'] (if any) before each test.
-	 *
-	 * Some hosts and reverse-proxy plugins use this header to derive scheme,
-	 * so we normalize it across tests to keep `is_ssl()` deterministic.
-	 *
-	 * @var string|null
-	 */
-	private $original_http_x_forwarded_proto;
-
-	/**
-	 * Original value of $_SERVER['REMOTE_ADDR'] (if any) before each test.
-	 *
-	 * @var string|null
-	 */
-	private $original_remote_addr;
-
-	/**
 	 * Filters registered via force_site_url() so tearDown() can remove them.
 	 *
 	 * @var array<int, callable>
@@ -204,14 +170,6 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 		$this->shop_manager_id = self::$fixture_shop_manager_id;
 		$this->subscriber_id   = self::$fixture_subscriber_id;
 
-		// Remember existing $_SERVER values so we can restore them in tearDown.
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Unit-test fixture: values are captured for restoration only, never used for processing.
-		$this->original_https                  = isset( $_SERVER['HTTPS'] ) ? (string) $_SERVER['HTTPS'] : null;
-		$this->original_server_port            = isset( $_SERVER['SERVER_PORT'] ) ? (string) $_SERVER['SERVER_PORT'] : null;
-		$this->original_http_x_forwarded_proto = isset( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) ? (string) $_SERVER['HTTP_X_FORWARDED_PROTO'] : null;
-		$this->original_remote_addr            = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : null;
-		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
 		// Default to HTTPS on for most tests; disable explicitly where needed.
 		$this->force_https( true );
 
@@ -238,33 +196,6 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 
 		// Clear any QR login data the tests may have written.
 		$this->delete_all_qr_login_data();
-
-		// Restore $_SERVER state.
-		if ( null === $this->original_https ) {
-			unset( $_SERVER['HTTPS'] );
-		} else {
-			$_SERVER['HTTPS'] = $this->original_https;
-		}
-
-		if ( null === $this->original_server_port ) {
-			unset( $_SERVER['SERVER_PORT'] );
-		} else {
-			$_SERVER['SERVER_PORT'] = $this->original_server_port;
-		}
-
-		if ( null === $this->original_http_x_forwarded_proto ) {
-			unset( $_SERVER['HTTP_X_FORWARDED_PROTO'] );
-		} else {
-			$_SERVER['HTTP_X_FORWARDED_PROTO'] = $this->original_http_x_forwarded_proto;
-		}
-
-		if ( null === $this->original_remote_addr ) {
-			unset( $_SERVER['REMOTE_ADDR'] );
-		} else {
-			$_SERVER['REMOTE_ADDR'] = $this->original_remote_addr;
-		}
-
-		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
 
 		// Remove any pre_option_siteurl filters force_site_url() registered.
 		foreach ( $this->site_url_filters as $priority => $filter ) {
@@ -1763,6 +1694,42 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The WordPress application password email is skipped only for the QR login password.
+	 */
+	public function test_exchange_token_skips_wordpress_application_password_email_only_for_its_password(): void {
+		// A site forcing WordPress's email on at a later priority must not override the skip.
+		add_filter( 'wp_send_application_password_created_email', '__return_true', 20 );
+
+		$decisions = array();
+		$listener  = static function ( $user_id, $new_item ) use ( &$decisions ) {
+			$user       = get_userdata( $user_id );
+			$other_item = array_merge( $new_item, array( 'app_id' => 'another-app' ) );
+			$decisions  = array(
+				'qr'    => apply_filters( 'wp_send_application_password_created_email', true, $user, $new_item ),
+				'other' => apply_filters( 'wp_send_application_password_created_email', true, $user, $other_item ),
+				'item'  => $new_item,
+			);
+		};
+		add_action( 'wp_create_application_password', $listener, 10, 2 );
+
+		$prep = $this->prepare_exchange_token(
+			array(
+				'os'    => 'iOS',
+				'model' => 'iPhone 15',
+			)
+		);
+
+		$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertFalse( $decisions['qr'], 'The WordPress email should be skipped for the QR login password, even when a site forces it on.' );
+		$this->assertTrue( $decisions['other'], 'Other application passwords should keep WordPress email behavior.' );
+		$this->assertTrue(
+			apply_filters( 'wp_send_application_password_created_email', true, get_userdata( $this->admin_id ), $decisions['item'] ),
+			'The temporary skip filter should be removed after the exchange.'
+		);
+	}
+
+	/**
 	 * @testdox The sign-in notification email can be suppressed via the woocommerce_qr_login_should_send_signin_email filter.
 	 */
 	public function test_sign_in_notification_email_can_be_suppressed_via_filter(): void {
@@ -1780,15 +1747,88 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 			$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 			$this->assertSame( 200, $response->get_status() );
 
-			$this->assertCount(
-				0,
-				$capture['captures'],
-				'Filter returning false must suppress the email send entirely.'
-			);
+			foreach ( $capture['captures'] as $mail ) {
+				$this->assertStringContainsString(
+					'Application Password Created',
+					(string) $mail['subject'],
+					'Filter returning false must suppress WooCommerce\'s email; only WordPress\'s own email may be sent.'
+				);
+			}
 		} finally {
 			remove_filter( 'woocommerce_qr_login_should_send_signin_email', $suppress );
 			$capture['remove']();
 		}//end try
+	}
+
+	/**
+	 * @testdox When the WooCommerce email is disabled, WordPress's application password email is sent unless the site has turned it off.
+	 * @dataProvider wp_application_password_email_fallback_provider
+	 * @requires function wp_application_password_created_notification
+	 *
+	 * @param callable $site_setup           Applies the site's WordPress email configuration.
+	 * @param int      $expected_email_count Number of emails the exchange should send.
+	 */
+	public function test_wordpress_application_password_email_is_used_when_sign_in_email_is_disabled( callable $site_setup, int $expected_email_count ): void {
+		$site_setup();
+		add_filter( 'woocommerce_qr_login_should_send_signin_email', '__return_false' );
+
+		$capture                      = $this->capture_wp_mail();
+		$application_password         = array();
+		$capture_application_password = static function ( $user_id, $new_item ) use ( &$application_password ) {
+			unset( $user_id );
+			$application_password = $new_item;
+		};
+		add_action( 'wp_create_application_password', $capture_application_password, 1, 2 );
+
+		$prep = $this->prepare_exchange_token(
+			array(
+				'os'    => 'iOS',
+				'model' => 'iPhone 15',
+			)
+		);
+
+		$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertCount( $expected_email_count, $capture['captures'] );
+
+		if ( 1 === $expected_email_count ) {
+			$mail = $capture['captures'][0];
+			$this->assertSame( get_userdata( $this->admin_id )->user_email, $mail['to'] );
+			$this->assertStringContainsString( 'Application Password Created', (string) $mail['subject'] );
+			$this->assertStringContainsString( $application_password['name'], (string) $mail['message'] );
+		}
+	}
+
+	/**
+	 * Provide site configurations for the WordPress application password email fallback.
+	 *
+	 * @return array<string, array{callable, int}>
+	 */
+	public static function wp_application_password_email_fallback_provider(): array {
+		return array(
+			'WordPress email is enabled'              => array(
+				static function () {},
+				1,
+			),
+			'WordPress email action is removed'       => array(
+				static function () {
+					remove_action( 'wp_create_application_password', 'wp_application_password_created_notification' );
+				},
+				0,
+			),
+			'WordPress email is disabled by a filter' => array(
+				static function () {
+					add_filter( 'wp_send_application_password_created_email', '__return_false' );
+				},
+				0,
+			),
+			'WordPress email is forced on at a later priority' => array(
+				static function () {
+					add_filter( 'wp_send_application_password_created_email', '__return_true', 20 );
+				},
+				1,
+			),
+		);
 	}
 
 	/**
