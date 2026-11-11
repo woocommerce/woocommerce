@@ -390,6 +390,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$email_post_id = $this->factory->post->create(
 			array(
 				'post_content' => '<!-- wp:paragraph {"textColor":"primary"} --><p class="alias-test has-primary-color has-text-color">Text</p><!-- /wp:paragraph -->
+				<!-- wp:paragraph {"style":{"elements":{"link":{"color":{"text":"var:preset|color|primary"}}}}} --><p class="has-link-color"><a class="alias-link-test" href="https://example.com">Link</a></p><!-- /wp:paragraph -->
 				<!-- wp:button --><div class="wp-block-button button-test"><a class="wp-block-button__link wp-element-button">Button</a></div><!-- /wp:button -->',
 			)
 		);
@@ -400,6 +401,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$rendered = $this->renderer->render( $email_post, 'Subject', '', 'en' );
 
 		$this->assertStringContainsString( 'color: #111111', $this->extractBlockStyle( $rendered['html'], 'alias-test', 'p' ) );
+		$this->assertStringContainsString( 'color: #111111', $this->extractBlockStyle( $rendered['html'], 'alias-link-test', 'a' ), 'A link color that points at the alias should resolve too.' );
 		$button_style = $this->extractBlockStyle( $rendered['html'], 'button-test', 'td' );
 		$this->assertStringContainsString( 'background-color: #65574e', $button_style );
 		$this->assertStringContainsString( 'color: #ffffff', $button_style );

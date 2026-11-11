@@ -68,4 +68,23 @@ class Variables_Postprocessor_Test extends \Email_Editor_Unit_Test {
 		$result = $this->postprocessor->postprocess( $html );
 		$this->assertSame( '<a style="text-decoration: none; padding: 10px">Link</a><p style="">I mention var(--wp--preset--color--accent-6);</p>', $result );
 	}
+
+	/**
+	 * Test it resolves a preset whose value points at another preset, whatever their order.
+	 *
+	 * A palette color can name another palette color. The target is listed first here, so one
+	 * pass over the variables leaves the reference behind.
+	 */
+	public function testItResolvesAPresetThatPointsAtAnotherPreset(): void {
+		$this->theme_controller_mock->method( 'get_variables_values_map' )->willReturn(
+			array(
+				'--wp--preset--color--contrast' => '#111111',
+				'--wp--preset--color--primary'  => 'var(--wp--preset--color--contrast)',
+				'--wp--preset--color--brand'    => 'var(--wp--preset--color--accent-6)',
+			)
+		);
+		$html   = '<a style="color: var(--wp--preset--color--primary)">Resolved</a><a style="margin: 0; color: var(--wp--preset--color--brand)">Points at nothing</a>';
+		$result = $this->postprocessor->postprocess( $html );
+		$this->assertSame( '<a style="color: #111111">Resolved</a><a style="margin: 0;">Points at nothing</a>', $result );
+	}
 }

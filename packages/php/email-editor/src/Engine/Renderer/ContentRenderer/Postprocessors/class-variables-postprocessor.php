@@ -49,9 +49,6 @@ class Variables_Postprocessor implements Postprocessor {
 			$replacements[ $var_pattern ] = $value;
 		}
 
-		// Runs last. No email client can resolve a preset the theme doesn’t define, so its declaration goes.
-		$replacements['/[^;]*var\(--wp--preset--[^;]*;?/i'] = '';
-
 		// We want to replace the CSS variables only in the style attributes to avoid replacing the actual content.
 		$processor = new \WP_HTML_Tag_Processor( $html );
 
@@ -59,8 +56,17 @@ class Variables_Postprocessor implements Postprocessor {
 			$style = $processor->get_attribute( 'style' );
 
 			if ( null !== $style && true !== $style ) {
-				// Replace CSS variables with their values.
-				$processed_style = preg_replace( array_keys( $replacements ), array_values( $replacements ), $style );
+				// Replace CSS variables with their values. A value can point at another variable,
+				// and one pass only resolves it when that variable comes later in the map.
+				$processed_style = $style;
+				for ( $pass = 0; $pass < 3 && null !== $processed_style; $pass++ ) {
+					$processed_style = preg_replace( array_keys( $replacements ), array_values( $replacements ), $processed_style );
+				}
+
+				// No email client can resolve a preset the theme does not define, so its declaration goes.
+				if ( null !== $processed_style ) {
+					$processed_style = preg_replace( '/[^;]*var\(--wp--preset--[^;]*;?/i', '', $processed_style );
+				}
 
 				if ( null !== $processed_style ) {
 					$processor->set_attribute( 'style', $processed_style );
