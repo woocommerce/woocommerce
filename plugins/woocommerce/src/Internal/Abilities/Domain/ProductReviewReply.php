@@ -139,7 +139,17 @@ class ProductReviewReply extends AbstractDomainAbility implements AbilityDefinit
 		$reply = get_comment( (int) $reply_id );
 		// wp_new_comment() turns the reply into a top-level comment when the review left approved or held meanwhile.
 		if ( $reply instanceof \WP_Comment && (int) $reply->comment_parent !== (int) $review->comment_ID ) {
-			wp_delete_comment( (int) $reply_id, true );
+			if ( ! wp_delete_comment( (int) $reply_id, true ) ) {
+				return new \WP_Error(
+					'woocommerce_ability_product_review_reply_failed',
+					__( 'The review was moderated while the reply was being added, and the reply was saved as a separate comment that could not be removed.', 'woocommerce' ),
+					array(
+						'status' => 500,
+						'saved'  => true,
+						'id'     => (int) $reply_id,
+					)
+				);
+			}
 
 			return new \WP_Error(
 				'woocommerce_ability_product_review_not_approved',
