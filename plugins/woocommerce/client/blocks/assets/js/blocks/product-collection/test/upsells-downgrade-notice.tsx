@@ -19,6 +19,8 @@ const mockEditor = {
 const mockBlockEditor = {
 	getBlocks: jest.fn( (): Partial< BlockInstance >[] => [] ),
 	getBlockAttributes: jest.fn( () => ( {} ) ),
+	getBlock: jest.fn( (): { clientId: string } | null => null ),
+	canRemoveBlock: jest.fn( (): boolean => true ),
 };
 
 jest.mock( '@wordpress/block-editor', () => ( {
@@ -59,6 +61,10 @@ describe( 'UpsellsDowngradeNotice', () => {
 		mockBlockEditor.getBlocks.mockReset();
 		mockBlockEditor.getBlockAttributes.mockReset();
 		mockBlockEditor.getBlockAttributes.mockReturnValue( {} );
+		mockBlockEditor.getBlock.mockReset();
+		mockBlockEditor.getBlock.mockReturnValue( null );
+		mockBlockEditor.canRemoveBlock.mockReset();
+		mockBlockEditor.canRemoveBlock.mockReturnValue( true );
 		mockSite( { [ OPTION ]: 'yes' } );
 	} );
 
@@ -82,14 +88,14 @@ describe( 'UpsellsDowngradeNotice', () => {
 			} )
 		);
 
+		expect( mockEditor.removeBlock ).toHaveBeenCalledWith(
+			'upsells-block'
+		);
 		expect( mockEditor.editEntityRecord ).toHaveBeenCalledWith(
 			'root',
 			'site',
 			undefined,
 			{ [ OPTION ]: 'no' }
-		);
-		expect( mockEditor.removeBlock ).toHaveBeenCalledWith(
-			'upsells-block'
 		);
 		expect( mockEditor.replaceBlock ).not.toHaveBeenCalled();
 	} );
@@ -110,18 +116,18 @@ describe( 'UpsellsDowngradeNotice', () => {
 			} )
 		);
 
-		expect( mockEditor.editEntityRecord ).toHaveBeenCalledWith(
-			'root',
-			'site',
-			undefined,
-			{ [ OPTION ]: 'no' }
-		);
 		expect( mockEditor.replaceBlock ).toHaveBeenCalledWith(
 			'upsells-block',
 			{
 				name: 'woocommerce/product-details',
 				attributes: { align: 'full' },
 			}
+		);
+		expect( mockEditor.editEntityRecord ).toHaveBeenCalledWith(
+			'root',
+			'site',
+			undefined,
+			{ [ OPTION ]: 'no' }
 		);
 		expect( mockEditor.removeBlock ).not.toHaveBeenCalled();
 	} );
