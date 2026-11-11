@@ -177,9 +177,16 @@ class Site_Style_Sync_Controller {
 	private function sync_settings_data( array $site_settings ): array {
 		$email_settings = array();
 
-		// Sync color palette.
+		// Sync color palette, without the colors email clients can't render.
 		if ( isset( $site_settings['color']['palette'] ) ) {
-			$email_settings['color']['palette'] = $site_settings['color']['palette'];
+			$email_settings['color']['palette'] = array_values(
+				array_filter(
+					$site_settings['color']['palette'],
+					function ( $preset ) {
+						return Styles_Helper::is_email_safe_color( $preset['color'] ?? null );
+					}
+				)
+			);
 		}
 
 		return $email_settings;
@@ -244,6 +251,9 @@ class Site_Style_Sync_Controller {
 	/**
 	 * Convert site color styles to email format
 	 *
+	 * Returns nothing when email clients can't render one of the colors, so the email theme's own
+	 * text and background apply together. One site color on the other default can be unreadable.
+	 *
 	 * @param array $color_styles Site color styles.
 	 * @return array Email-compatible color styles.
 	 */
@@ -252,6 +262,12 @@ class Site_Style_Sync_Controller {
 
 		$this->resolve_and_assign( $color_styles, 'background', $email_colors );
 		$this->resolve_and_assign( $color_styles, 'text', $email_colors );
+
+		foreach ( $email_colors as $color ) {
+			if ( ! Styles_Helper::is_email_safe_color( $color ) ) {
+				return array();
+			}
+		}
 
 		return $email_colors;
 	}

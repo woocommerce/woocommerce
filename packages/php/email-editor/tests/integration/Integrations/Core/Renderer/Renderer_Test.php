@@ -288,6 +288,59 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test a site palette color email clients can't render is left out of the sent email.
+	 *
+	 * Twenty Twenty-Five defines `accent-6` as color-mix(). A block reaches a palette color by its
+	 * slug and by its `has-*` class, so the test checks the final HTML rather than one lookup.
+	 */
+	public function testItLeavesOutSitePaletteColorsEmailClientsCannotRender(): void {
+		add_filter(
+			'woocommerce_email_editor_site_theme',
+			static function () {
+				return new \WP_Theme_JSON(
+					array(
+						'version'  => 3,
+						'settings' => array(
+							'color' => array(
+								'palette' => array(
+									array(
+										'slug'  => 'accent-6',
+										'name'  => 'Accent 6',
+										'color' => 'color-mix(in srgb, currentColor 20%, transparent)',
+									),
+									array(
+										'slug'  => 'accent-1',
+										'name'  => 'Accent 1',
+										'color' => '#ffee58',
+									),
+								),
+							),
+						),
+					),
+					'theme'
+				);
+			}
+		);
+		$email_post_id = $this->factory->post->create(
+			array(
+				'post_content' => '<!-- wp:paragraph {"textColor":"accent-6"} --><p class="text-test has-accent-6-color has-text-color">Text</p><!-- /wp:paragraph -->
+				<!-- wp:paragraph {"backgroundColor":"accent-6"} --><p class="background-test has-accent-6-background-color has-background">Background</p><!-- /wp:paragraph -->
+				<!-- wp:paragraph {"textColor":"accent-1"} --><p class="control-test has-accent-1-color has-text-color">Control</p><!-- /wp:paragraph -->',
+			)
+		);
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( WP_Post::class, $email_post );
+
+		$rendered = $this->renderer->render( $email_post, 'Subject', '', 'en' );
+
+		$this->assertStringNotContainsString( 'color-mix', $rendered['html'], 'A color email clients cannot render should not be sent.' );
+		$this->assertStringNotContainsString( 'color', $this->extractBlockStyle( $rendered['html'], 'text-test', 'p' ), 'The text should keep the surrounding color.' );
+		$this->assertStringNotContainsString( 'background', $this->extractBlockStyle( $rendered['html'], 'background-test', 'td' ), 'The block should keep the surrounding background.' );
+		$this->assertStringContainsString( 'color: #ffee58', $this->extractBlockStyle( $rendered['html'], 'control-test', 'p' ), 'A hex palette color should still be inlined.' );
+	}
+
+	/**
 	 * Extracts the HTML of a block
 	 *
 	 * @param string $html HTML content.
