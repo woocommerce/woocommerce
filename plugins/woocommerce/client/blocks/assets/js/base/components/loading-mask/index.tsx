@@ -32,8 +32,9 @@ const LoadingMask = ( {
 			} ) }
 		>
 			{ isLoading && showSpinner && <Spinner /> }
+			{ /* The content class stays when loading ends, so the dim fades out too. The children class keeps its old meaning. */ }
 			<div
-				className={ clsx( {
+				className={ clsx( 'wc-block-components-loading-mask__content', {
 					'wc-block-components-loading-mask__children': isLoading,
 				} ) }
 				aria-hidden={ isLoading }

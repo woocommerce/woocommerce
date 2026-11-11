@@ -3,6 +3,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
+import { RollingPrice } from '@woocommerce/base-components/rolling-price';
 import clsx from 'clsx';
 import { formatPrice } from '@woocommerce/price-format';
 import { createInterpolateElement } from '@wordpress/element';
@@ -119,6 +120,10 @@ interface SalePriceProps {
 	 * The new price during the sale
 	 */
 	price: number | string | undefined;
+	/**
+	 * Whether the digits roll when a price changes in place
+	 */
+	rollOnChange?: boolean | undefined;
 }
 
 const SalePrice = ( {
@@ -129,7 +134,10 @@ const SalePrice = ( {
 	priceClassName,
 	priceStyle,
 	price,
+	rollOnChange,
 }: SalePriceProps ) => {
+	const Amount = rollOnChange ? RollingPrice : FormattedMonetaryAmount;
+
 	return (
 		<>
 			<span className="screen-reader-text">
@@ -145,10 +153,7 @@ const SalePrice = ( {
 				style={ regularPriceStyle }
 				translate="no"
 			>
-				<FormattedMonetaryAmount
-					currency={ currency }
-					value={ regularPrice }
-				/>
+				<Amount currency={ currency } value={ regularPrice } />
 			</del>
 			<span className="screen-reader-text">
 				{ __( 'Discounted price:', 'woocommerce' ) }
@@ -162,10 +167,7 @@ const SalePrice = ( {
 				style={ priceStyle }
 				translate="no"
 			>
-				<FormattedMonetaryAmount
-					currency={ currency }
-					value={ price }
-				/>
+				<Amount currency={ currency } value={ price } />
 			</ins>
 		</>
 	);
@@ -238,6 +240,11 @@ export interface ProductPriceProps {
 	 * Custom styles to apply to the price wrapper.
 	 */
 	style?: React.CSSProperties | undefined;
+	/**
+	 * Whether the digits roll when a price changes in place, such as a line total in the cart. Only for prices that
+	 * render after the cart loads, because the first load must not roll.
+	 */
+	rollOnChange?: boolean | undefined;
 }
 
 const ProductPrice = ( {
@@ -254,6 +261,7 @@ const ProductPrice = ( {
 	regularPriceClassName,
 	regularPriceStyle,
 	style,
+	rollOnChange = false,
 }: ProductPriceProps ): JSX.Element => {
 	const wrapperClassName = clsx(
 		className,
@@ -295,6 +303,7 @@ const ProductPrice = ( {
 				regularPrice={ regularPrice }
 				regularPriceClassName={ regularPriceClassName }
 				regularPriceStyle={ regularPriceStyle }
+				rollOnChange={ rollOnChange }
 			/>
 		);
 	} else if ( minPrice !== undefined && maxPrice !== undefined ) {
@@ -308,8 +317,10 @@ const ProductPrice = ( {
 			/>
 		);
 	} else if ( price || price === 0 ) {
+		// Price roll rule: prices that change in place roll their digits.
+		const Amount = rollOnChange ? RollingPrice : FormattedMonetaryAmount;
 		priceComponent = (
-			<FormattedMonetaryAmount
+			<Amount
 				className={ clsx(
 					'wc-block-components-product-price__value',
 					priceClassName

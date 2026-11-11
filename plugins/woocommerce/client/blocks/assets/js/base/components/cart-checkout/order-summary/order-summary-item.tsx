@@ -238,6 +238,7 @@ const OrderSummaryItem = ( {
 					permalink={ permalink }
 					disabledTagName="h3"
 				/>
+				{ /* Price roll rule: the item prices roll when they change in place, such as when tax changes. */ }
 				<div className="wc-block-cart-item__prices">
 					<ProductPrice
 						currency={ priceCurrency }
@@ -247,6 +248,7 @@ const OrderSummaryItem = ( {
 						priceClassName="wc-block-components-order-summary-item__individual-price"
 						regularPriceClassName="wc-block-components-order-summary-item__regular-individual-price"
 						format={ subtotalPriceFormat }
+						rollOnChange
 					/>
 				</div>
 				{ showBackorderBadge && <ProductBackorderBadge /> }
@@ -264,6 +266,7 @@ const OrderSummaryItem = ( {
 						currency={ totalsCurrency }
 						format={ productPriceFormat }
 						price={ subtotalPrice }
+						rollOnChange
 					/>
 					<ProductSaleBadge
 						currency={ priceCurrency }

@@ -14,7 +14,8 @@ import {
 	useState,
 } from '@wordpress/element';
 import clsx from 'clsx';
-import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
+import { RollingPrice } from '@woocommerce/base-components/rolling-price';
+import { useSkeletonPhaseValue } from '@woocommerce/base-hooks';
 /**
  * Internal dependencies
  */
@@ -29,7 +30,7 @@ const FrontendBlock = ( {
 	children: JSX.Element | JSX.Element[];
 	className?: string;
 } ): JSX.Element | null => {
-	const { cartTotals } = useStoreCart();
+	const { cartTotals, cartIsLoading } = useStoreCart();
 	const {
 		isOpen,
 		hasContainerWidth,
@@ -60,7 +61,10 @@ const FrontendBlock = ( {
 	} );
 
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
-	const totalPrice = parseInt( cartTotals.total_price, 10 );
+	// Skeleton reveal rule: the total in the summary bar changes when the totals skeletons end, not before.
+	const totalPrice = useSkeletonPhaseValue(
+		parseInt( cartTotals.total_price, 10 )
+	);
 	const showInline = ! hasContainerWidth || isLarge || isOpen;
 
 	useEffect( () => {
@@ -164,10 +168,12 @@ const FrontendBlock = ( {
 					>
 						{ __( 'Order summary', 'woocommerce' ) }
 					</p>
-					<FormattedMonetaryAmount
+					{ /* Price roll rule: the total rolls when it changes, but not when the cart first loads. */ }
+					<RollingPrice
 						currency={ totalsCurrency }
 						value={ totalPrice }
 						className="wc-block-components-checkout-order-summary__title-price"
+						canRoll={ ! cartIsLoading }
 					/>
 					<span className="wc-block-components-checkout-order-summary__title-icon">
 						<Icon icon={ isOpen ? chevronUp : chevronDown } />

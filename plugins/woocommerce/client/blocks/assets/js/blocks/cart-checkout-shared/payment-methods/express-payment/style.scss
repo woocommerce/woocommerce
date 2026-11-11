@@ -11,6 +11,13 @@ $border-width: 1px;
 		margin: 0;
 		overflow: hidden;
 		text-align: center;
+
+		// Skeleton reveal: the buttons fade in when they replace their skeleton. The skeleton list has the same class,
+		// so it is left out.
+		&:not(:has(.wc-block-components-skeleton__element)) {
+			@include motion-fade-in;
+		}
+
 		> div,
 		> li {
 			margin: 0;

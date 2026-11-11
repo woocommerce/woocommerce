@@ -1,3 +1,8 @@
+// The dim fades both ways. The content wrapper keeps this class when loading ends, so the transition also runs then.
+.wc-block-components-loading-mask__content {
+	transition: motion-state(opacity);
+}
+
 .wc-block-components-loading-mask {
 	position: relative;
 	min-height: 18px + $gap;

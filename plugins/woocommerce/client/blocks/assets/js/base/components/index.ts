@@ -23,6 +23,7 @@ export { default as ProductRating } from './product-rating';
 export { default as QuantitySelector } from './quantity-selector';
 export * from './read-more';
 export * from './reviews';
+export * from './rolling-price';
 export * from './select';
 export * from './sidebar-layout';
 export * from './skeleton';

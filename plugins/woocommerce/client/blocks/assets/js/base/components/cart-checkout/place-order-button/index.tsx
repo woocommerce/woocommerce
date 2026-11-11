@@ -9,10 +9,8 @@ import {
 } from '@woocommerce/base-context/hooks';
 import Button from '@woocommerce/base-components/button';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
-import {
-	FormattedMonetaryAmount,
-	Spinner,
-} from '@woocommerce/blocks-components';
+import { Spinner } from '@woocommerce/blocks-components';
+import { RollingPrice } from '@woocommerce/base-components/rolling-price';
 import { useValidateCheckout } from '@woocommerce/blocks-checkout';
 import type { CustomPlaceOrderButtonComponent } from '@woocommerce/types';
 import { useEditorContext } from '@woocommerce/base-context';
@@ -128,11 +126,13 @@ const PlaceOrderButton = ( {
 						</style>
 						<div className="wc-block-components-checkout-place-order-button__separator" />
 						<div className="wc-block-components-checkout-place-order-button__price">
-							<FormattedMonetaryAmount
+							{ /* Price roll rule: the total rolls when it changes, but not when the cart first loads. */ }
+							<RollingPrice
 								value={ cartTotals.total_price }
 								currency={ getCurrencyFromPriceResponse(
 									cartTotals
 								) }
+								canRoll={ ! cartIsLoading }
 							/>
 						</div>
 					</>

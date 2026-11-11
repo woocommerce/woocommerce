@@ -3,7 +3,7 @@
  */
 import { createInterpolateElement } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
+import { RollingPrice } from '@woocommerce/base-components/rolling-price';
 import type { Currency } from '@woocommerce/price-format';
 
 /**
@@ -48,11 +48,9 @@ const ProductSaleBadge = ( {
 	return (
 		<ProductBadge className="wc-block-components-sale-badge">
 			{ createInterpolateElement( formattedMessage, {
+				// Price roll rule: the saving rolls together with its line total.
 				price: (
-					<FormattedMonetaryAmount
-						currency={ currency }
-						value={ saleAmount }
-					/>
+					<RollingPrice currency={ currency } value={ saleAmount } />
 				),
 			} ) }
 		</ProductBadge>

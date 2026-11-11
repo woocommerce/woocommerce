@@ -50,6 +50,7 @@ Use this skill to add motion to WooCommerce blocks (`plugins/woocommerce/client/
 
 - Change only what the motion needs. Do not rewrite how a component works, and do not add, remove, or replace dependencies. If the component already has a mechanism that can carry the motion, use it. For example, `react-transition-group` can end a transition when the animation ends, with `addEndListener`.
 - Do not add wrapper elements to the markup of a shared component. Themes and extensions can target that markup. Put the ref or class on an element that exists, or add an optional prop.
+- Do not change when an existing class applies. Themes can select it. If the motion needs a class that is always there, add a new class.
 - Do not change `pnpm-lock.yaml` or `package.json` in a motion change.
 
 ## Traps
@@ -72,6 +73,7 @@ Each of these traps caused a bug before.
 - **Jest has no Web Animations API, layout, or `ResizeObserver`.** In Jest, each helper must end immediately and must not throw an error.
 - **`react-transition-group` uses `findDOMNode` without `nodeRef`.** React deprecates it, and the warning fails Jest tests in StrictMode. Give each `CSSTransition` a `nodeRef`, and wait for the animations in `addEndListener`.
 - **A fake animation in Jest must change its `playState` when it finishes.** If not, a helper that waits for animations that are in progress waits forever, and the test does not end.
+- **Do not set state during render in a component that reads a shared store with `useSyncExternalStore`.** The update from the store can be lost, and the component stays in its old state. This kept the express payment buttons as skeletons. Keep the value in a ref instead.
 
 ## Checklist
 

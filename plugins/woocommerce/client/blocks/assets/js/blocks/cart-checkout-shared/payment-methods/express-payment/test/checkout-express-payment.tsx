@@ -52,6 +52,11 @@ jest.mock( '../../express-payment-methods', () =>
 	) )
 );
 
+// The shared skeleton phase has its own tests. Here a skeleton shows exactly while it loads.
+jest.mock( '@woocommerce/base-hooks', () => ( {
+	useSkeletonPhase: ( isLoading: boolean ) => isLoading,
+} ) );
+
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
 	useSelect: jest.fn(),

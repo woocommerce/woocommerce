@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { useState, useEffect } from '@wordpress/element';
-import { useReducedMotion } from '@wordpress/compose';
+import { useSkeletonPhase } from '@woocommerce/base-hooks';
 import type { ReactNode } from 'react';
 
 export interface DelayedContentWithSkeletonProps {
@@ -23,47 +22,15 @@ export interface DelayedContentWithSkeletonProps {
 }
 
 /**
- * Component that ensures skeleton children are displayed for a minimum duration
- * to prevent jarring quick flashes when content loads fast
+ * Shows a skeleton while content loads. All skeletons of one loading phase end together, after a short minimum time
+ * that prevents a flash (Skeleton reveal rule, see `useSkeletonPhase`).
  */
 export const DelayedContentWithSkeleton = ( {
 	children,
 	isLoading,
 	skeleton,
 }: DelayedContentWithSkeletonProps ): JSX.Element => {
-	const disableMotion = useReducedMotion();
-	const [ showSkeleton, setShowSkeleton ] = useState( isLoading );
-	const [ startTime, setStartTime ] = useState< number | null >( null );
-
-	useEffect( () => {
-		// If motion is disabled, just sync with isLoading state
-		if ( disableMotion ) {
-			setShowSkeleton( isLoading );
-			return;
-		}
-
-		// For motion-enabled, use the delay logic
-		const MIN_DISPLAY_TIME = 2000;
-		let timer: ReturnType< typeof setTimeout >;
-
-		if ( isLoading ) {
-			setShowSkeleton( true );
-			setStartTime( Date.now() );
-		} else if ( startTime ) {
-			const elapsed = Date.now() - startTime;
-			const remainingTime = Math.max( 0, MIN_DISPLAY_TIME - elapsed );
-			timer = setTimeout( () => {
-				setShowSkeleton( false );
-				setStartTime( null );
-			}, remainingTime );
-		}
-
-		return () => {
-			if ( timer ) {
-				clearTimeout( timer );
-			}
-		};
-	}, [ isLoading, startTime, disableMotion ] );
+	const showSkeleton = useSkeletonPhase( isLoading );
 
 	return <>{ showSkeleton ? skeleton : children }</>;
 };

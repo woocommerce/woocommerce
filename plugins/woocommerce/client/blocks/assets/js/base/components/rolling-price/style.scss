@@ -1,0 +1,39 @@
+// Price roll (Woo rule). This markup exists only while a price rolls. At rest the price is plain text again, so no
+// digit stays transformed.
+.wc-block-components-rolling-price {
+	// Plain digits do not wrap, but a row of inline blocks can.
+	white-space: nowrap;
+}
+
+.wc-block-components-rolling-price__digit {
+	display: inline-block;
+	position: relative;
+	// The hidden digit keeps the width and baseline of the new price. The clip shows one digit of the column, and it
+	// does not clip at the sides, so a wider digit that rolls past is not cut.
+	visibility: hidden;
+	clip-path: inset(0 -1ch);
+}
+
+.wc-block-components-rolling-price__column {
+	position: absolute;
+	inset: 0 0 auto;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	visibility: visible;
+	// Each digit is one line high, so a step of 10% of the column moves it by one digit.
+	translate: 0 calc(var(--wc-roll-to) * -10%);
+	@include motion-transition($move: translate, $duration: md);
+
+	// A digit that appears with the roll starts from the old digit. Price rolls have no reduced motion version, so
+	// with reduced motion the new digit shows at once.
+	@include motion-safe {
+		@starting-style {
+			translate: 0 calc(var(--wc-roll-from) * -10%);
+		}
+	}
+
+	> span {
+		display: block;
+	}
+}

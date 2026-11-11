@@ -24,7 +24,10 @@ import type { CartItem } from '@woocommerce/types';
 import { isBoolean, Currency } from '@woocommerce/types';
 import { getSetting, getSettingWithCoercion } from '@woocommerce/settings';
 import { Icon, trash } from '@wordpress/icons';
-import { calculateSaleAmount } from '@woocommerce/base-utils';
+import {
+	calculateSaleAmount,
+	getOptimisticLineTotal,
+} from '@woocommerce/base-utils';
 import { dinero, transformScale, toSnapshot, type Dinero } from 'dinero.js';
 import { USD } from 'dinero.js/currencies'; // USD is used as a placeholder currency for arithmetic; actual formatting is handled elsewhere.
 
@@ -115,6 +118,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 				line_subtotal_tax: '0',
 			},
 			extensions,
+			quantity: savedQuantity = 1,
 		} = lineItem;
 
 		const { quantity, setItemQuantity, removeItem, isPendingDelete } =
@@ -186,10 +190,15 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 		if ( getSetting( 'displayCartPricesIncludingTax', false ) ) {
 			lineSubtotal += parseInt( totals.line_subtotal_tax, 10 );
 		}
-		const subtotalPrice = dinero( {
-			amount: lineSubtotal,
-			currency: USD,
-			scale: totalsCurrency.minorUnit,
+		// Cart line totals do not wait for the server (Skeleton reveal rule): while a new quantity saves, the total is
+		// the unit price multiplied by the quantity, if the pricing of the item is linear.
+		const lineTotal = getOptimisticLineTotal( {
+			unitPrice: parseInt( prices.raw_prices.price, 10 ),
+			precision: prices.raw_prices.precision,
+			minorUnit: totalsCurrency.minorUnit,
+			savedQuantity,
+			savedLineTotal: lineSubtotal,
+			quantity,
 		} );
 
 		const firstImage = images.length ? images[ 0 ] : {};
@@ -425,10 +434,12 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 				</td>
 				<td className="wc-block-cart-item__total">
 					<div className="wc-block-cart-item__total-price-and-sale-badge-wrapper">
+						{ /* Price roll rule: the line total and its saving roll together. */ }
 						<ProductPrice
 							currency={ totalsCurrency }
 							format={ productPriceFormat }
-							price={ toSnapshot( subtotalPrice ).amount }
+							price={ lineTotal }
+							rollOnChange
 						/>
 
 						<ProductSaleBadge

@@ -52,6 +52,7 @@ Do these tests for each area that you changed. Do them at desktop width, at phon
 - **Keyboard.** Go to the control with Tab. Use Space, Enter, or the arrow keys. The change must apply immediately.
 - **Late content.** Content that loads after the change, such as rates, pickup locations, or totals, must not jump. It must be in position before the motion, or ease in.
 - **First time and smallest input.** Open the element for the first time on the page, with the smallest input that opens it. For example, type exactly three characters in a field that searches after three. Then wait without input for 1 second. The element must stay open. Motion makes an existing open-then-close flicker easy to see. Fix the cause, not the motion.
+- **First change after the page loads.** Load the page, wait, and do one change. Motion that must not run during the first load, such as a price roll, must run for this change. Also make sure that every area that loads, such as the express payment buttons, shows its content and not a skeleton.
 - **Changes together.** Do a change that also updates the totals. For example, switch between Ship and Pickup with a tax rate that applies to only one of them. Look at the order summary and the Place order button during both updates.
 - **Resize.** Close an element at phone width. Then make the window wider. No element must stay collapsed.
 - **Complete an order.** Place an order after the tests. Motion must not leave a field invalid, a payment method stuck, or a button that does not work.

@@ -3,6 +3,12 @@
 }
 
 .wc-block-checkout__payment-method {
+	// Skeleton reveal: the payment method options fade in when they replace their skeleton. Radio controls inside a
+	// payment method are left out, because they appear with the payment method.
+	.wc-block-components-radio-control:not(.wc-block-components-radio-control-accordion-content *) {
+		@include motion-fade-in;
+	}
+
 	.wc-block-components-radio-control__option::after {
 		content: none;
 	}

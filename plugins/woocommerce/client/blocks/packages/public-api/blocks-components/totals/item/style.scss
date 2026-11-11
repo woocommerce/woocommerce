@@ -11,6 +11,11 @@
 	flex-grow: 1;
 }
 
+// Skeleton reveal: a value fades in when it replaces its skeleton. Only Cart and Checkout show totals skeletons.
+:where(.wp-block-woocommerce-cart, .wp-block-woocommerce-checkout) .wc-block-components-totals-item__value {
+	@include motion-fade-in;
+}
+
 .wc-block-components-totals-item__description {
 	@include font-x-small-locked;
 	width: 100%;

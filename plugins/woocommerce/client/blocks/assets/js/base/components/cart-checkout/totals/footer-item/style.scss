@@ -20,6 +20,11 @@
 		.wc-block-components-skeleton__element {
 			margin-left: 0.5em;
 		}
+
+		// Skeleton reveal: the tax amount fades in when it replaces its skeleton.
+		.wc-block-components-totals-footer-item-tax-value {
+			@include motion-fade-in;
+		}
 	}
 
 	.wc-block-components-totals-footer-item-shipping {

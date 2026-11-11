@@ -33,6 +33,10 @@ export interface FormattedMonetaryAmountProps extends Omit<
 	// component composes; a price rendered this way loses the currency symbol
 	// isolation. Prefer wrapping the component over using this.
 	renderText?: NonNullable< NumericFormatProps[ 'renderText' ] >;
+	// Renders the amount without its sign and currency symbol, for example to
+	// roll its digits. The rest of the price keeps its markup. Only used when
+	// the price renders as text and `renderText` is not set.
+	renderAmount?: ( amount: string ) => ReactNode;
 }
 
 /**
@@ -132,15 +136,18 @@ const createStructuredPriceRenderer =
 		prefix,
 		suffix,
 		getInputRef,
+		renderAmount,
 	}: {
 		prefix: string;
 		suffix: string;
 		getInputRef?: NumericFormatProps[ 'getInputRef' ] | undefined;
+		renderAmount?: ( ( amount: string ) => ReactNode ) | undefined;
 	} ): NonNullable< NumericFormatProps[ 'renderText' ] > =>
 	( formattedValue, spanProps ) => {
 		// `wc_price()` puts the negative sign inside the `<bdi>`, ahead of the
 		// symbol, so split it off the amount.
 		const isNegative = formattedValue.startsWith( '-' );
+		const amount = isNegative ? formattedValue.slice( 1 ) : formattedValue;
 
 		return (
 			<span
@@ -150,7 +157,7 @@ const createStructuredPriceRenderer =
 				<bdi>
 					{ isNegative ? '-' : '' }
 					{ renderIsolatedSymbol( prefix ) }
-					{ isNegative ? formattedValue.slice( 1 ) : formattedValue }
+					{ renderAmount ? renderAmount( amount ) : amount }
 					{ renderIsolatedSymbol( suffix ) }
 				</bdi>
 			</span>
@@ -170,6 +177,7 @@ const FormattedMonetaryAmount = ( {
 	currency: rawCurrency = SITE_CURRENCY,
 	onValueChange,
 	displayType = 'text',
+	renderAmount,
 	...props
 }: FormattedMonetaryAmountProps ): ReactElement | null => {
 	// Merge currency configuration with site currency.
@@ -223,6 +231,7 @@ const FormattedMonetaryAmount = ( {
 			prefix: decodedPrefix,
 			suffix: decodedSuffix,
 			getInputRef: props.getInputRef,
+			renderAmount,
 		} );
 	}
 
