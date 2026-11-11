@@ -394,6 +394,15 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				unset( $data['cogs_value'] );
 			}
 
+			// A sale that already ended keeps its sale price. Clearing the expired end date would put that price back on sale.
+			if ( $updating && isset( $data['date_on_sale_to'] ) && '' === $data['date_on_sale_to'] ) {
+				$sale_ends = $object->get_date_on_sale_to( 'edit' );
+				$old_price = $object->get_sale_price( 'edit' );
+				if ( $sale_ends && $sale_ends->getTimestamp() <= time() && ( ! isset( $data['sale_price'] ) || (string) $data['sale_price'] === (string) $old_price ) ) {
+					$data['sale_price'] = '';
+				}
+			}
+
 			$result = $object->set_props( array_intersect_key( $data, array_flip( $object->get_data_keys() ) ) );
 
 			if ( is_wp_error( $result ) ) {

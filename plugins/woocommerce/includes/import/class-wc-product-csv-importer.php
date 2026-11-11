@@ -849,7 +849,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 */
 	public function parse_datetime_field( $value ) {
 		// An empty cell clears the date. set_props() skips null values, so return an empty string instead.
-		if ( '' === trim( (string) $value ) ) {
+		// Spreadsheets often leave a non-breaking space in a cell that looks empty.
+		if ( '' === trim( str_replace( "\xc2\xa0", ' ', (string) $value ) ) ) {
 			return '';
 		}
 

@@ -3307,13 +3307,38 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$product->set_date_on_sale_to( '2099-02-01' );
 		$product->save();
 
+		$original_start = $product->get_date_on_sale_from( 'edit' )->getTimestamp();
+
 		$this->import_sale_dates_row( $product->get_id() . ',not-a-date,' );
 		$product = wc_get_product( $product->get_id() );
-		$this->assertNotNull( $product->get_date_on_sale_from( 'edit' ), 'An invalid date should leave the start date unchanged.' );
+		$this->assertSame( $original_start, $product->get_date_on_sale_from( 'edit' )->getTimestamp(), 'An invalid date should leave the start date unchanged.' );
 		$this->assertNull( $product->get_date_on_sale_to( 'edit' ), 'An empty cell should clear the end date.' );
 
 		$this->import_sale_dates_row( $product->get_id() . ', ,' );
 		$this->assertNull( wc_get_product( $product->get_id() )->get_date_on_sale_from( 'edit' ), 'A blank cell should clear the start date.' );
+	}
+
+	/**
+	 * @testdox Clearing the end date of a sale that already ended also clears the leftover sale price.
+	 * @testWith ["2020-02-01", ""]
+	 *           ["2099-02-01", "5"]
+	 *
+	 * @param string $sale_ends           Stored sale end date.
+	 * @param string $expected_sale_price Sale price after the import.
+	 */
+	public function test_import_clearing_sale_end_date_clears_expired_sale_price( string $sale_ends, string $expected_sale_price ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10 );
+		$product->set_sale_price( 5 );
+		$product->set_date_on_sale_from( '2020-01-01' );
+		$product->set_date_on_sale_to( $sale_ends );
+		$product->save();
+
+		$this->import_sale_dates_row( $product->get_id() . ',,' );
+
+		$product = wc_get_product( $product->get_id() );
+		$this->assertNull( $product->get_date_on_sale_to( 'edit' ), 'The empty cell should clear the end date.' );
+		$this->assertSame( $expected_sale_price, $product->get_sale_price( 'edit' ), 'Only an expired sale price should be cleared.' );
 	}
 
 	/**
@@ -3324,6 +3349,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( '', $importer->parse_datetime_field( '' ) );
 		$this->assertSame( '', $importer->parse_datetime_field( '  ' ) );
+		$this->assertSame( '', $importer->parse_datetime_field( " \xc2\xa0 " ), 'A cell with only non-breaking spaces is blank.' );
 		$this->assertNull( $importer->parse_datetime_field( 'not-a-date' ) );
 		$this->assertSame( '2099-01-26', $importer->parse_datetime_field( '2099-01-26' ) );
 	}
