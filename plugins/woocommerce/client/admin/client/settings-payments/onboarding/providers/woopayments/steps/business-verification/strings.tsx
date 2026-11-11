@@ -9,7 +9,7 @@ const documentationUrls = {
 	tos: 'https://automattic.com/tos/',
 	signUpLink:
 		'https://woocommerce.com/document/woopayments/startup-guide/#sign-up-process',
-	merchantTerms: 'https://automattic.com/tos/#more-woopay-specifically',
+	merchantTerms: 'https://automattic.com/tos/#ecommerce-services',
 	privacyPolicy: 'https://automattic.com/privacy/',
 };
 
