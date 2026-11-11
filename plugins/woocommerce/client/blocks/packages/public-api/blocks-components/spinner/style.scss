@@ -18,7 +18,7 @@
 		height: 1em;
 		box-sizing: border-box;
 		transform-origin: 50% 50%;
-		// Halfway through a turn, which is what shows when it doesn't turn under reduced motion.
+		// Halfway through a turn. With reduced motion, the spinner stops in this position.
 		transform: rotate(180deg);
 		backface-visibility: hidden;
 		border-radius: 50%;

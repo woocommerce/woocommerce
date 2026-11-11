@@ -1,75 +1,77 @@
 ---
 name: woocommerce-blocks-motion
-description: Add or review motion (transitions, animations, layout changes) in WooCommerce blocks and the components they share. Use when animating a component, choosing timings or easing, handling reduced motion, or fixing motion that jumps, flickers or blocks.
+description: Add or review motion (transitions, animations, layout changes) in WooCommerce blocks and the components they share. Use when you animate a component, choose timings or easing, handle reduced motion, or fix motion that jumps, flickers, or blocks.
 ---
 
 # WooCommerce blocks motion
 
-Use this skill to add motion to WooCommerce blocks (`plugins/woocommerce/client/blocks`) and the shared components they render, or to review motion someone else added.
+Use this skill to add motion to WooCommerce blocks (`plugins/woocommerce/client/blocks`) and the components they share. Also use it to review motion.
 
-**Read `plugins/woocommerce/client/blocks/docs/contributors/motion.md` first, all of it.** It holds the rules: tokens, durations, the helpers, reduced motion, the general rules, the numbered rules that code comments cite (for example "rule 17"), and the exceptions. This skill doesn't repeat them. It adds the workflow, which technique fits which change, the traps that have caused bugs, and how to prove motion works.
+**First, read all of `plugins/woocommerce/client/blocks/docs/contributors/motion.md`.** It has the rules: tokens, durations, helpers, reduced motion, general rules, numbered rules, and exceptions. This skill does not repeat the rules. It gives the workflow, the technique for each type of change, the traps, and the checks.
 
 ## Workflow
 
-1. **Name the change.** Write one sentence for what changes on screen and what triggers it: the shopper, a key press, or data loading (see "Animate what the shopper did" in `motion.md`).
-2. **Pick the technique** from the table below, and read the rules it cites.
-3. **Use what exists.** Use the helpers in the Helpers section of `motion.md`. When none covers the technique, write one in `assets/js/base/utils` (or `assets/js/base/hooks` for a React hook) that follows the rules and avoids the traps below, so the next component can reuse it, and add it to that Helpers section.
-4. **Handle the edges:** reduced motion, keyboard input, interruption, content that loads late, and several things changing at once.
-5. **Verify in a real browser** (`references/verification.md`), then run stylelint, ESLint, Jest and the build.
-6. **Write it down.** Comments say why, citing the rule number, not what.
+1. **Describe the change.** Write one sentence: what changes on screen, and what causes it. The cause is the shopper, a key press, or data that loads.
+2. **Select the technique** from the table below. Read the rules that it gives.
+3. **Use the existing helpers** from the Helpers section of `motion.md`. If no helper does the technique, write one. Put it in `assets/js/base/utils`, or in `assets/js/base/hooks` for a React hook. Make sure that it obeys the rules and avoids the traps below. Add it to the Helpers section of `motion.md`.
+4. **Do the edge cases:** reduced motion, keyboard input, interruption, content that loads late, and changes that occur at the same time.
+5. **Test in a real browser** with `references/verification.md`. Then run stylelint, ESLint, Jest, and the build.
+6. **Write comments that tell why, not what.** Give the rule number.
 
 ## Techniques
 
-| What changes | Technique | Rules |
+| Change | Technique | Rules |
 |---|---|---|
-| Colour, background, border colour, opacity, focus ring | A state-change transition, both ways | Durations; General rules |
-| Something dims while busy or disabled | Opacity down to half, fading both ways | Durations |
-| A button is pressed | A slight scale down while held | 4 |
-| A button shows a spinner while busy | The label fades out as the spinner grows in | 18 |
-| A small icon, dot or tick changes | Scale up from slightly smaller with a fade; icons add blur | 18 |
-| Content mounts in place, such as an empty state | Rise in while fading in | 1 |
-| A list's rows mount | The same rise, staggered | 3 |
-| A detail belongs to a row, such as a quantity badge | It settles a step after its row | 6 |
-| A small item is removed, such as a chip | It stays in place while it fades and shrinks, then unmounts | 15, 16 |
-| Success is confirmed, only for what the shopper just did | One pulse | 8 |
-| A dropdown opens from a field | It slides from the field; it stays mounted while closing and turns around if reopened | 2 |
-| A toast or snackbar | It rises in and drops out; script waits for the animation, not a fixed timeout | 1, 15 |
-| A value replaces its loading skeleton | A fade, never a roll | Skeleton reveal |
-| A price changes in place | Its digits roll; its text stays the plain price for assistive tech | Price roll |
-| Several skeletons belong to one update | They end together, and what they reveal changes at that moment | Skeleton reveal |
-| Content appears or goes and should push what's below, such as a panel, notice, field error or totals row | It grows and collapses in the real layout; it stays mounted while leaving | 17; Exceptions |
-| A section the shopper shows or hides, such as an address or payment fields | The new one grows in and the old one collapses; a form that leaves stops being a form at once (see Traps) | 17 |
-| A box's content changes size later, such as a list that loads | The box's height eases to its new size | 17 |
-| One element becomes another view of itself, such as an address card becoming its form | The views crossfade while the box's height eases | 20 |
-| A choice swaps several sections, such as Ship / Pickup | One change, one movement | 21 |
-| A selection moves between options | The selected style slides to the new option, stretching along its path | 5, 9 |
-| A table row is removed | It fades where it was while the rows below slide up, and the container's height eases | 17; Exceptions |
-| A collapsible bar opens or closes, such as the mobile order summary | Its content grows and collapses; closing because the shopper scrolled past applies at once | 17 |
+| Color, background, border color, opacity, or focus ring | A state change transition, both ways | Durations |
+| An element dims while it is busy or disabled | Opacity decreases to half, and fades both ways | Durations |
+| The shopper presses a button | The button scales down a little while pressed | 4 |
+| A button shows a spinner while busy | The label fades out, and the spinner grows in | 18 |
+| A small icon, dot, or tick changes | It scales up from a smaller size and fades in. Icons also blur. | 18 |
+| Content appears in place, such as an empty state | It rises in and fades in | 1 |
+| The rows of a list appear | The same rise, staggered | 3 |
+| A detail of a row appears, such as a quantity badge | It settles one step after its row | 6 |
+| A small item goes, such as a chip | It stays in position while it fades and shrinks. Then it unmounts. | 15, 16 |
+| The shopper completes an action, such as a coupon | One pulse, only for the action that the shopper did | 8 |
+| A dropdown opens from a field | It slides from the field. It stays mounted while it closes. It turns around if it opens again. | 2 |
+| A toast or snackbar appears and goes | It rises in and drops out. The script waits for the animation to end. It does not use a fixed timeout. | 1, 15 |
+| A value replaces its loading skeleton | It fades in. It does not roll. | Skeleton reveal |
+| A price changes in place | Its digits roll. Its text stays the plain price for assistive technology. | Price roll |
+| Many skeletons are part of one update | They end together. The values change at that moment. | Skeleton reveal |
+| Content appears or goes and must move the content below, such as a panel, notice, field error, or totals row | It grows and collapses in the real layout. It stays mounted while it goes. | 17, Exceptions |
+| The shopper shows or hides a section, such as an address or payment fields | The new section grows in, and the old section collapses. A form that goes must stop being a form immediately (see Traps). | 17 |
+| The content of a box changes size later, such as a list that loads | The height of the box changes smoothly to the new size | 17 |
+| An element becomes a different view of itself, such as an address card that becomes its form | The two views crossfade while the height of the box changes smoothly | 20 |
+| A choice swaps a group of sections, such as Ship or Pickup | One change, one movement | 21 |
+| The selection moves to a different option | The selected style slides to the new option, and stretches along its path | 5, 9 |
+| A table row goes | It fades in its position, the rows below slide up, and the container height changes smoothly | 17, Exceptions |
+| A bar opens or closes, such as the mobile order summary | Its content grows and collapses. If it closes because the shopper scrolls past it, it closes immediately. | 17 |
 
-## Traps (each one has caused a bug)
+## Traps
 
-- **Every script bundle gets its own copy of a module.** Blocks such as Cart and Checkout, and the shared components package, each bundle `base-utils`, so module-level state is duplicated. State that has to be shared between bundles lives on `globalThis`.
-- **Cancelled and finished animations are not "in progress".** When reading where an animation got to, only count `playState` `running` or `paused`. A finished animation with `fill: forwards` keeps its end state applied until it's cancelled, which can leave an element collapsed long after it should have reset.
-- **Starting a size animation inside a `ResizeObserver` callback** resizes the element again in the same frame, and the browser reports a "ResizeObserver loop" error. Start it from somewhere that runs before layout, such as a `MutationObserver` callback.
-- **Nested motion fights.** A box that eases its own height must stand back while something inside it is growing or collapsing, or the two animate the same change twice. Only motion that changes size counts; fades, slides and price rolls don't.
-- **Clipping cuts things off.** Clip only while a size animates, and only the element that animates. A parent clipped while its height eases on a different timing from its children's movement cuts them off: the Place order button once vanished this way.
-- **Content that arrives after the change** (rates, pickup locations, totals) jumps, or looks like it's growing as a clip uncovers it. Either wait until it's in place before moving anything, or ease the box's height when it arrives.
-- **Chrome can blank a region for frames** while something inside it animates during a snapshot-based (view) transition.
-- **`!important` spacing can't be animated.** Animations can't override it. Drive it from a registered custom property (`@property`) that the animation can change.
-- **A removed form must stop being a form at once.** If it stays mounted while it animates out, its validation errors and payment handlers stay registered, and Place order can hit them. Animate a stand-in instead. The stand-in must be inert and `aria-hidden`, without `id`, `name` or `for`, and with blank iframes (a copied payment iframe would load again). It also must not keep attributes that trigger entrances, or it replays them.
-- **React 18 has no `inert` prop.** Spread `{ inert: '' }` to set the attribute.
-- **Keyed lists:** keep keys stable, or entrances replay on every render.
-- **Moving DOM between hosts restarts CSS animations** on it. Finish finite ones after the move.
-- **A notice that flashes** for a frame during a state change moves everything around it, and the motion makes that visible. Fix the flash at its source (defer creating the notice until the state settles) rather than animating it.
-- **Jest has no Web Animations API, layout or `ResizeObserver`.** Every helper must finish at once there and not throw.
+Each of these traps caused a bug before.
 
-## Checklist before finishing
+- **Each script bundle has its own copy of a module.** Cart, Checkout, and the shared components package each include `base-utils`. Thus, module state is not shared. Put state that bundles must share on `globalThis`.
+- **A cancelled or finished animation is not in progress.** To read the current position of an animation, use only animations with `playState` `running` or `paused`. A finished animation with `fill: forwards` keeps its end state until you cancel it. This can keep an element collapsed.
+- **Do not start a size animation in a `ResizeObserver` callback.** The animation changes the size again in the same frame, and the browser shows a "ResizeObserver loop" error. Start it before layout, for example in a `MutationObserver` callback.
+- **Nested motion can conflict.** A box that changes its own height must stop while an element inside it grows or collapses. If not, the change animates two times. Only motion that changes size counts. Fades, slides, and price rolls do not count.
+- **A clip can cut off content.** Clip only the element that changes size, and only while it changes. If a parent is clipped while its height changes at a different speed from its children, the clip cuts off the children. The Place order button once disappeared because of this.
+- **Content that arrives after the change can jump.** Examples are shipping rates, pickup locations, and totals. If a clip uncovers it, it looks like it grows. Wait until the content is in position before anything moves, or change the height of the box smoothly when the content arrives.
+- **Chrome can show a blank area for some frames** when an element inside it animates during a view transition.
+- **An animation cannot change `!important` spacing.** Use a registered custom property (`@property`) for the spacing, and animate the property.
+- **A form that goes must stop being a form immediately.** If it stays mounted while it animates out, its validation errors and payment handlers stay registered. Then Place order can use them. Animate a copy of the form, not the form. The copy must be inert and `aria-hidden`. It must not have `id`, `name`, or `for` attributes. Its iframes must be blank, because a copied payment iframe loads again. It must not have attributes that start entrances, because it then plays them again.
+- **React 18 has no `inert` prop.** To set the attribute, spread `{ inert: '' }`.
+- **Keep the keys of a list stable.** If keys change, entrances play again on each render.
+- **When DOM moves to a different parent, its CSS animations start again.** After the move, finish the animations that are not loops.
+- **A notice can show for one frame during a state change.** It moves the content around it, and the motion makes this easy to see. Fix the cause: create the notice only after the state is stable. Do not animate the notice.
+- **Jest has no Web Animations API, layout, or `ResizeObserver`.** In Jest, each helper must end immediately and must not throw an error.
 
-- [ ] The technique matches the table, and timings and easing follow `motion.md`.
-- [ ] Reduced motion: nothing moves; fades still run; nothing is left half-hidden.
-- [ ] Keyboard: the change applies at once.
-- [ ] Interrupting it (clicking again part way) turns it around without a jump.
-- [ ] Nothing is left behind after it settles (`references/verification.md`).
-- [ ] Content below moves smoothly, in one direction, and nothing it holds (such as Place order) disappears for a frame.
-- [ ] Stylelint, ESLint, Jest and the build pass.
-- [ ] A new helper is listed in the Helpers section of `motion.md`.
+## Checklist
+
+- [ ] The technique matches the table. Timings and easing obey `motion.md`.
+- [ ] Reduced motion: nothing moves, fades still run, and no element stays partly hidden.
+- [ ] Keyboard: the change applies immediately.
+- [ ] Interruption: a second click during the motion turns it around without a jump.
+- [ ] Nothing stays after the motion ends (see `references/verification.md`).
+- [ ] The content below moves smoothly and in one direction. No element in it, such as Place order, disappears for a frame.
+- [ ] Stylelint, ESLint, Jest, and the build pass.
+- [ ] Each new helper is in the Helpers section of `motion.md`.
