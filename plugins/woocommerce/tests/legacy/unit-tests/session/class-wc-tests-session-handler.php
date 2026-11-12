@@ -319,6 +319,77 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A session cloned from a ?session= token keeps only the sharer's cart and applied coupons.
+	 *
+	 * @testWith [0]
+	 *           [1]
+	 *
+	 * @param int $recipient_user_id User ID of the shopper who opens the link; 0 for a guest.
+	 */
+	public function test_clone_session_from_token_keeps_only_cart_and_coupons( int $recipient_user_id ) {
+		global $wpdb;
+
+		$sharer_session_id   = 't_' . wc_rand_hash( '', 30 );
+		$cart                = maybe_serialize( array( 'item_key' => array( 'product_id' => 123 ) ) );
+		$applied_coupons     = maybe_serialize( array( 'shared10' ) );
+		$sharer_session_data = array(
+			'cart'                    => $cart,
+			'applied_coupons'         => $applied_coupons,
+			'customer'                => maybe_serialize( array( 'email' => 'sharer@example.com' ) ),
+			'store_api_draft_order'   => 101,
+			'order_awaiting_payment'  => 102,
+			'store_api_customer_note' => 'Sharer note',
+			'chosen_payment_method'   => 'bacs',
+			'extension_session_data'  => maybe_serialize( array( 'secret' => 'sharer' ) ),
+		);
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_sessions',
+			array(
+				'session_key'    => $sharer_session_id,
+				'session_value'  => maybe_serialize( $sharer_session_data ),
+				'session_expiry' => time() + DAY_IN_SECONDS,
+			),
+			array( '%s', '%s', '%d' )
+		);
+
+		wp_set_current_user( $recipient_user_id );
+		$_GET['session'] = CartTokenUtils::get_cart_token( $sharer_session_id );
+		add_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+
+		try {
+			$sut = new WC_Session_Handler();
+			$sut->init();
+		} finally {
+			unset( $_GET['session'] );
+			remove_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+			wp_set_current_user( 0 );
+		}
+
+		$this->assertNotSame( $sharer_session_id, $sut->get_customer_id(), 'The recipient gets a session of their own.' );
+
+		// Read the stored row directly: get_session_data() would return the copy save_data() just cached.
+		$stored_session_data = maybe_unserialize(
+			$wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT session_value FROM {$wpdb->prefix}woocommerce_sessions WHERE session_key = %s",
+					$sut->get_customer_id()
+				)
+			)
+		);
+
+		$this->assertEquals(
+			array(
+				'cart'                 => $cart,
+				'applied_coupons'      => $applied_coupons,
+				'previous_customer_id' => $sharer_session_id,
+			),
+			$stored_session_data,
+			'Only the cart, applied coupons and source session ID are stored for the recipient.'
+		);
+	}
+
+	/**
 	 * Test that method destroys session when all conditions are met.
 	 */
 	public function test_destroy_session_if_empty_should_destroy_session_when_all_conditions_met() {
