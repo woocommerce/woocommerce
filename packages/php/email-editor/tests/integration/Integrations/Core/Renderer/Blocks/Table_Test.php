@@ -793,18 +793,29 @@ class Table_Test extends \Email_Editor_Integration_Test_Case {
 
 		$rendered = $this->table_renderer->render( $table, $parsed_table, $this->rendering_context );
 
-		// Five columns, each with 8px of padding either side, against the 612px content width.
 		preg_match_all( '/min-width: (\\d+)em;/', $rendered, $matches );
 		$this->assertCount( 10, $matches[1], 'Every cell should carry the floor.' );
 
-		$columns  = 5;
-		$floor_px = (int) $matches[1][0] * 16;
-		$padding  = 16;
+		// A 390px phone, less the email's 24px of root padding either side, leaves 342px. Measure
+		// against that rather than the 612px desktop width, which is wide enough to accept a floor
+		// that overflows a phone.
+		$columns      = 5;
+		$mobile_width = 342;
+		$width        = static function ( int $em ) use ( $columns ): int {
+			// Each cell adds 8px of padding either side, and collapsed borders add one per column
+			// plus one.
+			return $columns * ( $em * 16 + 16 ) + $columns + 1;
+		};
+
 		$this->assertLessThanOrEqual(
-			612,
-			$columns * ( $floor_px + $padding ),
-			'The floor must leave a table of short columns inside the content width.'
+			$mobile_width,
+			$width( (int) $matches[1][0] ),
+			'The floor must leave a table of short columns inside the width a phone gives it.'
 		);
+
+		// The floor this replaced cleared the desktop width and still overflowed a phone, which is
+		// what makes the limit above worth asserting.
+		$this->assertGreaterThan( $mobile_width, $width( 4 ) );
 	}
 
 	/**
