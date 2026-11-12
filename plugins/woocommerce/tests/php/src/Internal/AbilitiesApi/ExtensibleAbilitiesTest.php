@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
@@ -5759,6 +5760,36 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	private function add_test_action( string $hook, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
 		add_action( $hook, $callback, $priority, $accepted_args );
 		$this->test_actions[] = array( $hook, $callback, $priority );
+	}
+
+	/**
+	 * @testdox Should show an order_refund validator the refund before it is saved, and save nothing when it refuses.
+	 */
+	public function test_refund_validator_sees_unsaved_refund(): void {
+		$seen = array();
+		$this->register_validator(
+			'order_refund',
+			'test-ext',
+			static function ( \WC_Order_Refund $refund ) use ( &$seen ) {
+				$seen[] = array( $refund->get_id(), $refund->get_amount() );
+				return new \WP_Error( 'test_refund_refused', 'No refunds today.' );
+			}
+		);
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		$response = $this->run_ability_response(
+			'woocommerce/order-refund-create',
+			array(
+				'id'     => $order->get_id(),
+				'amount' => '5',
+			)
+		);
+
+		$this->assertSame( array( array( 0, '5' ) ), $seen, 'The validator should run once, on a refund with no ID yet.' );
+		$this->assertSame( 'test-ext:test_refund_refused', $response->get_data()['code'] ?? null );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
 	}
 
 	/**

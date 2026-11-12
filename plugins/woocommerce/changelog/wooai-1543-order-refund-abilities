@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Let AI agents list an order's refunds and refund an order, manually or through the payment gateway, with a dry run first.
