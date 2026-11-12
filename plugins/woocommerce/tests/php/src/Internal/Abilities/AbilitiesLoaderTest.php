@@ -1152,7 +1152,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should grant access when woocommerce_rest_check_permissions returns a truthy non-boolean, as REST does.
+	 * @testdox Should grant a subscriber access when woocommerce_rest_check_permissions returns a truthy non-boolean, as REST does.
 	 *
 	 * @dataProvider provider_abilities_checking_rest_permissions
 	 *
@@ -1160,6 +1160,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @param array  $input      Input that reaches the REST permission check.
 	 */
 	public function test_abilities_accept_truthy_rest_permission( string $ability_id, array $input ): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'subscriber' ) ) );
 		add_filter( 'woocommerce_rest_check_permissions', fn() => 1 );
 
 		$this->assertTrue( wp_get_ability( $ability_id )->check_permissions( $input ) );
@@ -1178,6 +1179,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'orders-query by type'           => array( 'woocommerce/orders-query', array() ),
 			'orders-query by missing order'  => array( 'woocommerce/orders-query', $missing_id ),
 			'payment-gateways-query'         => array( 'woocommerce/payment-gateways-query', array() ),
+			'customers-query'                => array( 'woocommerce/customers-query', array() ),
 			'shipping-zones-query'           => array( 'woocommerce/shipping-zones-query', array() ),
 			'tax-rates-query'                => array( 'woocommerce/tax-rates-query', array() ),
 			'product-attributes-query'       => array( 'woocommerce/product-attributes-query', array() ),
