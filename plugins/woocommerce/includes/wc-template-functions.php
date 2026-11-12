@@ -1470,7 +1470,7 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 		}
 
 		$defaults = array(
-			'quantity'              => 1,
+			'quantity'              => $product->is_sold_individually() ? 1 : max( 1, $product->get_min_purchase_quantity() ),
 			'class'                 => implode(
 				' ',
 				array_filter(

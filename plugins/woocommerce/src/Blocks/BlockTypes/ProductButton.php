@@ -153,7 +153,7 @@ class ProductButton extends AbstractBlock {
 		$args = apply_filters(
 			'woocommerce_loop_add_to_cart_args',
 			array(
-				'quantity'   => 1,
+				'quantity'   => $is_descendant_of_add_to_cart_form || $product->is_sold_individually() ? 1 : max( 1, $product->get_min_purchase_quantity() ),
 				'class'      => $html_classes,
 				'attributes' => array_merge(
 					$attributes,

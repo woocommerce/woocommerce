@@ -221,6 +221,60 @@ class ProductButton extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Product Button adds and announces the minimum quantity with or without AJAX.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $ajax_enabled Whether AJAX add to cart is enabled.
+	 */
+	public function test_product_button_uses_minimum_purchase_quantity( bool $ajax_enabled ): void {
+		update_option( 'woocommerce_enable_ajax_add_to_cart', $ajax_enabled ? 'yes' : 'no' );
+		$product = WC_Helper_Product::create_simple_product();
+		$filter  = static function () {
+			return 10;
+		};
+
+		add_filter( 'woocommerce_quantity_input_min', $filter );
+		try {
+			$markup = $this->render_product_button( $product );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $filter );
+		}
+
+		$this->assertSame( 10, $this->get_quantity_to_add( $markup ), 'The button context should use the minimum purchase quantity.' );
+		$this->assertStringContainsString( '>Add 10 to cart</span>', $markup, 'The button should disclose the quantity being added.' );
+		$processor = new \WP_HTML_Tag_Processor( $markup );
+		$this->assertTrue( $processor->next_tag( $ajax_enabled ? 'button' : 'a' ), 'The product button should be rendered.' );
+		$this->assertStringContainsString( 'Add 10 to cart', $processor->get_attribute( 'aria-label' ), 'The accessible name should include the visible button text.' );
+		if ( ! $ajax_enabled ) {
+			parse_str( wp_parse_url( $processor->get_attribute( 'href' ), PHP_URL_QUERY ), $query );
+			$this->assertSame( '10', $query['quantity'] ?? null, 'The non-AJAX link should add the minimum quantity.' );
+		}
+	}
+
+	/**
+	 * @testdox Product Button still adds one item for sold-individually products when a global minimum is filtered.
+	 */
+	public function test_product_button_minimum_respects_sold_individually(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sold_individually( true );
+		$product->save();
+		$filter = static function () {
+			return 10;
+		};
+
+		add_filter( 'woocommerce_quantity_input_min', $filter );
+		try {
+			$markup = $this->render_product_button( $product );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $filter );
+		}
+
+		$this->assertSame( 1, $this->get_quantity_to_add( $markup ), 'Sold-individually products should still add one item.' );
+		$this->assertStringContainsString( '>Add to cart</span>', $markup, 'The button should not promise a bulk quantity for sold-individually products.' );
+	}
+
+	/**
 	 * @testdox woocommerce_loop_add_to_cart_args sets the Product Button quantity.
 	 */
 	public function test_loop_add_to_cart_args_sets_initial_quantity(): void {

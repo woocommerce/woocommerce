@@ -52,9 +52,10 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 	 * Render the loop add-to-cart template for a product.
 	 *
 	 * @param WC_Product $test_product Product to render.
+	 * @param array      $args Arguments for the loop button.
 	 * @return string Rendered template markup.
 	 */
-	private function render_loop_add_to_cart( WC_Product $test_product ): string {
+	private function render_loop_add_to_cart( WC_Product $test_product, array $args = array() ): string {
 		global $product;
 
 		$previous_product = $product;
@@ -63,7 +64,7 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 
 		ob_start();
 		try {
-			woocommerce_template_loop_add_to_cart();
+			woocommerce_template_loop_add_to_cart( $args );
 
 			return (string) ob_get_clean();
 		} finally {
@@ -291,6 +292,113 @@ class WC_Template_Functions_Tests extends \WC_Unit_Test_Case {
 		$markup  = $this->render_loop_add_to_cart( $product );
 
 		$this->assertStringContainsString( 'rel="nofollow"', $markup );
+	}
+
+	/**
+	 * @testdox Loop buttons use and announce the minimum quantity without changing sold-individually products.
+	 * @testWith [1, false, 1]
+	 *           [10, false, 10]
+	 *           [0, false, 1]
+	 *           [10, true, 1]
+	 *
+	 * @param int  $minimum Minimum purchase quantity.
+	 * @param bool $sold_individually Whether the product is sold individually.
+	 * @param int  $expected_quantity Expected quantity added by the button.
+	 */
+	public function test_loop_button_uses_minimum_purchase_quantity( int $minimum, bool $sold_individually, int $expected_quantity ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sold_individually( $sold_individually );
+		$filter = static function () use ( $minimum ) {
+			return $minimum;
+		};
+
+		add_filter( 'woocommerce_quantity_input_min', $filter );
+		try {
+			$markup = $this->render_loop_add_to_cart( $product );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $filter );
+		}
+
+		$processor = new WP_HTML_Tag_Processor( $markup );
+		$this->assertTrue( $processor->next_tag( 'a' ), 'The loop button should be rendered.' );
+		$this->assertSame( (string) $expected_quantity, $processor->get_attribute( 'data-quantity' ), 'AJAX should add the minimum quantity.' );
+		parse_str( wp_parse_url( $processor->get_attribute( 'href' ), PHP_URL_QUERY ), $query );
+		$this->assertSame( (string) $product->get_id(), $query['add-to-cart'], 'The link should add the correct product.' );
+		$this->assertSame( (string) $expected_quantity, $query['quantity'] ?? '1', 'Non-AJAX requests should add the same quantity as AJAX.' );
+
+		$expected_text = $expected_quantity > 1 ? 'Add ' . $expected_quantity . ' to cart' : 'Add to cart';
+		$this->assertStringContainsString( '>' . $expected_text . '</a>', $markup, 'The button should disclose how many items will be added.' );
+		$this->assertStringContainsString( $expected_text, $processor->get_attribute( 'aria-label' ), 'The accessible name should include the visible button text.' );
+	}
+
+	/**
+	 * @testdox Loop button quantity arguments and filters can still override the default minimum.
+	 */
+	public function test_loop_button_preserves_quantity_overrides(): void {
+		$product        = WC_Helper_Product::create_simple_product();
+		$minimum_filter = static function () {
+			return 10;
+		};
+		$args_filter    = static function ( $args ) {
+			$args['quantity'] = 30;
+			return $args;
+		};
+
+		add_filter( 'woocommerce_quantity_input_min', $minimum_filter );
+		try {
+			$markup = $this->render_loop_add_to_cart( $product, array( 'quantity' => 20 ) );
+			$this->assertStringContainsString( 'data-quantity="20"', $markup, 'Explicit quantity arguments should be preserved.' );
+
+			add_filter( 'woocommerce_loop_add_to_cart_args', $args_filter );
+			$markup = $this->render_loop_add_to_cart( $product );
+			$this->assertStringContainsString( 'data-quantity="30"', $markup, 'Extensions should still be able to override the quantity.' );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $minimum_filter );
+			remove_filter( 'woocommerce_loop_add_to_cart_args', $args_filter );
+		}
+	}
+
+	/**
+	 * @testdox Add-to-cart URLs do not inherit another product's minimum quantity from the current request.
+	 */
+	public function test_loop_button_does_not_inherit_request_quantity(): void {
+		$product      = WC_Helper_Product::create_simple_product();
+		$previous_uri = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Preserve the original request URI for restoration.
+
+		$_SERVER['REQUEST_URI'] = '/shop/?quantity=10';
+		try {
+			$url = $product->add_to_cart_url();
+		} finally {
+			if ( null === $previous_uri ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = $previous_uri;
+			}
+		}
+
+		parse_str( wp_parse_url( $url, PHP_URL_QUERY ), $query );
+		$this->assertArrayNotHasKey( 'quantity', $query, 'An ordinary product should not inherit a previous bulk quantity.' );
+	}
+
+	/**
+	 * @testdox Minimum quantities do not change links or labels for unavailable products.
+	 */
+	public function test_loop_button_minimum_does_not_change_unavailable_products(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( '' );
+		$filter = static function () {
+			return 10;
+		};
+
+		add_filter( 'woocommerce_quantity_input_min', $filter );
+		try {
+			$markup = $this->render_loop_add_to_cart( $product );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_min', $filter );
+		}
+
+		$this->assertStringContainsString( 'href="' . esc_url( $product->get_permalink() ) . '"', $markup, 'Unavailable products should link to their product page.' );
+		$this->assertStringContainsString( '>Read more</a>', $markup, 'Unavailable products should retain their label.' );
 	}
 
 	/**
