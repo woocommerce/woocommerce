@@ -83,8 +83,109 @@ const checkIfButtonsDisabled = (
 };
 
 /**
- * Scrolls the carousel by 90% of the container width and updates
- * the isDisabledPrevious and isDisabledNext context values.
+ * Column classes exist for 1 through 6. Keep this in sync with the carousel
+ * widths in product-template/style.scss.
+ */
+const MAX_FIXED_CAROUSEL_COLUMNS = 6;
+
+/**
+ * Chosen carousel column count, when the block saved one.
+ * Undefined keeps the responsive carousel scroll distance.
+ */
+function getFixedCarouselColumns(
+	productTemplate: HTMLElement
+): number | undefined {
+	if (
+		! productTemplate.classList.contains(
+			'is-product-collection-layout-carousel'
+		)
+	) {
+		return undefined;
+	}
+
+	for ( let columns = 1; columns <= MAX_FIXED_CAROUSEL_COLUMNS; columns++ ) {
+		if ( productTemplate.classList.contains( `columns-${ columns }` ) ) {
+			return columns;
+		}
+	}
+
+	return undefined;
+}
+
+/**
+ * Distance from the start of one product to the start of the next.
+ */
+function getProductStride( productTemplate: HTMLElement ): number | undefined {
+	const product = productTemplate.querySelector( '.wc-block-product' );
+	if ( ! product ) {
+		return undefined;
+	}
+
+	const width = product.getBoundingClientRect().width;
+	if ( ! Number.isFinite( width ) || width <= 0 ) {
+		return undefined;
+	}
+
+	const gap = Number.parseFloat(
+		window.getComputedStyle( productTemplate ).columnGap
+	);
+
+	return width + ( Number.isFinite( gap ) ? gap : 0 );
+}
+
+/**
+ * Products fully inside the carousel. A responsive carousel uses this as the
+ * page size so a narrower screen does not skip products.
+ */
+function getFullyVisibleProductCount( productTemplate: HTMLElement ): number {
+	const templateRect = productTemplate.getBoundingClientRect();
+	const products = productTemplate.querySelectorAll( '.wc-block-product' );
+	let count = 0;
+
+	products.forEach( ( product ) => {
+		const rect = product.getBoundingClientRect();
+		if (
+			rect.width > 0 &&
+			rect.left >= templateRect.left - 1 &&
+			rect.right <= templateRect.right + 1
+		) {
+			count++;
+		}
+	} );
+
+	return count;
+}
+
+/**
+ * How far one press of a carousel button should scroll.
+ * A chosen column count moves by that many products, or by however many are
+ * currently visible when the responsive toggle is on. Otherwise it scrolls
+ * 90% of the container, matching the responsive carousel.
+ */
+function getCarouselScrollDistance(
+	productTemplate: HTMLElement,
+	containerWidth: number | undefined
+): number {
+	const columns = getFixedCarouselColumns( productTemplate );
+	const stride = columns ? getProductStride( productTemplate ) : undefined;
+
+	if ( columns && stride ) {
+		const visibleCount = productTemplate.classList.contains(
+			'is-shrink-columns'
+		)
+			? getFullyVisibleProductCount( productTemplate )
+			: columns;
+		const pageSize = Math.min( columns, Math.max( 1, visibleCount ) );
+
+		return pageSize * stride;
+	}
+
+	return containerWidth ? 0.9 * containerWidth : 400;
+}
+
+/**
+ * Scrolls the carousel and updates the isDisabledPrevious and
+ * isDisabledNext context values.
  *
  * @param direction - The direction to scroll.
  */
@@ -102,11 +203,10 @@ const scrollCarousel = ( direction: 'left' | 'right' ) => {
 		return;
 	}
 
-	const productCollectionWidth = productCollection?.clientWidth;
-	// Arbitrary value to scroll the carousel by 90% of the container width.
-	const scrollBy = productCollectionWidth
-		? 0.9 * productCollectionWidth
-		: 400;
+	const scrollBy = getCarouselScrollDistance(
+		productTemplate,
+		productCollection?.clientWidth
+	);
 
 	const multiplier = isRTL() ? -1 : 1;
 

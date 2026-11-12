@@ -96,7 +96,6 @@ const ProductCollectionInspectorControls = (
 	const showDefaultOrderControl = ! showCustomQueryControls;
 	const showOffsetControl =
 		showCustomQueryControls && shouldShowFilter( CoreFilterNames.OFFSET );
-	const showColumnsControl = ! isCarouselLayout;
 	const showMaxPagesToShowControl =
 		showCustomQueryControls &&
 		! isCarouselLayout &&
@@ -228,15 +227,13 @@ const ProductCollectionInspectorControls = (
 						carouselVariant={ isCarouselLayout }
 					/>
 				) }
-				{ showColumnsControl && (
-					<ColumnsControl
-						{ ...displayControlProps }
-						{ ...( isEmailEditor && {
-							maxColumns: 2,
-							hideResponsiveToggle: true,
-						} ) }
-					/>
-				) }
+				<ColumnsControl
+					{ ...displayControlProps }
+					{ ...( isEmailEditor && {
+						maxColumns: 2,
+						hideResponsiveToggle: true,
+					} ) }
+				/>
 				{ ! isEmailEditor && showOffsetControl && (
 					<OffsetControl { ...queryControlProps } />
 				) }
