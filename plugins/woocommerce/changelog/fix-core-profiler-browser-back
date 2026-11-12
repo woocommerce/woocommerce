@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore setup forms instead of stuck loading screens when using the browser Back button after store setup.
