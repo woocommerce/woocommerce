@@ -47,6 +47,7 @@
 	.woocommerce-personalization-tags-modal-menu {
 		div[role="group"] {
 			display: flex;
+			flex-wrap: wrap;
 		}
 
 		.woocommerce-personalization-tags-modal-menu-item-active {
