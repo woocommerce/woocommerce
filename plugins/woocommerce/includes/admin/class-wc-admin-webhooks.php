@@ -64,26 +64,12 @@ class WC_Admin_Webhooks {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$status = ! empty( $_POST['webhook_status'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_status'] ) ) : 'disabled';
-		$topic  = '';
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( ! empty( $_POST['webhook_topic'] ) ) {
-			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$selection = sanitize_text_field( wp_unslash( $_POST['webhook_topic'] ) );
-			if ( 'action' === $selection ) {
-				// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				$event = isset( $_POST['webhook_action_event'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_action_event'] ) ) : '';
-				$topic = 'action.' . $event;
-			} else {
-				$parts = explode( '.', $selection, 3 );
-				$topic = $parts[0] . '.' . ( $parts[1] ?? '' );
-			}
-		}
+		$topic  = $this->get_submitted_topic();
 
 		// Inactive webhooks can be saved before a topic is selected.
 		if ( ( '' !== $topic || 'active' === $status ) && ! wc_is_webhook_valid_topic( $topic ) ) {
 			$error = __( 'Webhook topic unknown. Please select a valid topic.', 'woocommerce' );
-			wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks&edit-webhook=' . $webhook->get_id() . '&error=' . rawurlencode( $error ) ) );
-			exit();
+			$this->redirect_to_webhook_editor( $webhook->get_id(), array( 'error' => $error ) );
 		}
 
 		// Name.
@@ -141,14 +127,51 @@ class WC_Admin_Webhooks {
 			$result = $webhook->deliver_ping();
 
 			if ( is_wp_error( $result ) ) {
-				// Redirect to webhook edit page to avoid settings save actions.
-				wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks&edit-webhook=' . $webhook->get_id() . '&error=' . rawurlencode( $result->get_error_message() ) ) );
-				exit();
+				$this->redirect_to_webhook_editor( $webhook->get_id(), array( 'error' => $result->get_error_message() ) );
 			}
 		}
 
-		// Redirect to webhook edit page to avoid settings save actions.
-		wp_safe_redirect( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks&edit-webhook=' . $webhook->get_id() . '&updated=1' ) );
+		$this->redirect_to_webhook_editor( $webhook->get_id(), array( 'updated' => '1' ) );
+	}
+
+	/**
+	 * Read the selected topic from the webhook form.
+	 *
+	 * @return string The topic, or an empty string if no topic was selected.
+	 */
+	private function get_submitted_topic(): string {
+		// phpcs:disable WordPress.Security.NonceVerification -- The save handler checks the nonce before calling this method.
+		if ( empty( $_POST['webhook_topic'] ) ) {
+			return '';
+		}
+
+		$selection = sanitize_text_field( wp_unslash( $_POST['webhook_topic'] ) );
+		if ( 'action' === $selection ) {
+			$event = isset( $_POST['webhook_action_event'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_action_event'] ) ) : '';
+			return 'action.' . $event;
+		}
+		// phpcs:enable WordPress.Security.NonceVerification
+
+		$parts = explode( '.', $selection, 3 );
+		return $parts[0] . '.' . ( $parts[1] ?? '' );
+	}
+
+	/**
+	 * Return to the webhook editor with a notice and end the request.
+	 *
+	 * @param int                   $webhook_id The webhook ID, or zero for the new webhook form.
+	 * @param array<string, string> $notice     The notice to show in the editor.
+	 */
+	private function redirect_to_webhook_editor( int $webhook_id, array $notice ): void {
+		$args = array(
+			'page'         => 'wc-settings',
+			'tab'          => 'advanced',
+			'section'      => 'webhooks',
+			'edit-webhook' => $webhook_id,
+		);
+
+		$path = add_query_arg( $args + array_map( 'rawurlencode', $notice ), 'admin.php' );
+		wp_safe_redirect( admin_url( $path ) );
 		exit();
 	}
 
