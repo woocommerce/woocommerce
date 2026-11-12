@@ -193,6 +193,34 @@ class OrderUpdateTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should accept a shipping total that has no digit before or after the decimal point.
+	 *
+	 * @testWith [".5", "0.50"]
+	 *           ["5.", "5.00"]
+	 *
+	 * @param string $total    Shipping total sent.
+	 * @param string $expected Shipping total saved.
+	 */
+	public function test_accepts_a_shipping_total_without_leading_or_trailing_digits( string $total, string $expected ): void {
+		$order = WC_Helper_Order::create_order();
+		$line  = current( $order->get_shipping_methods() );
+
+		$this->execute(
+			array(
+				'id'             => $order->get_id(),
+				'shipping_lines' => array(
+					array(
+						'id'    => $line->get_id(),
+						'total' => $total,
+					),
+				),
+			)
+		);
+
+		$this->assertSame( $expected, wc_format_decimal( current( wc_get_order( $order->get_id() )->get_shipping_methods() )->get_total(), 2 ) );
+	}
+
+	/**
 	 * @testdox Should add a simple product and a variation, with one as the default quantity, and recalculate the totals.
 	 *
 	 * @dataProvider feature_states

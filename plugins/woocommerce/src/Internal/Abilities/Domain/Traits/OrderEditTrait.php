@@ -234,8 +234,8 @@ trait OrderEditTrait {
 	 * @return null|\WP_Error
 	 */
 	private static function set_shipping_line( \WC_Order $order, array $line ): ?\WP_Error {
-		// wc_format_decimal() drops the exponent of a number such as 1e3, so only a plain decimal keeps its value.
-		if ( isset( $line['total'] ) && 1 !== preg_match( '/^\d+(\.\d+)?$/', $line['total'] ) ) {
+		// wc_format_decimal() drops the exponent of a number such as 1e3, which changes its value.
+		if ( isset( $line['total'] ) && ( ! is_numeric( $line['total'] ) || false !== stripos( $line['total'], 'e' ) || (float) $line['total'] < 0 ) ) {
 			return new \WP_Error(
 				'woocommerce_ability_order_shipping_line_total_invalid',
 				/* translators: %s: shipping total sent by the client. */
