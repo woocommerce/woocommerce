@@ -22,13 +22,6 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * Customer shipping address before the test, restored at teardown.
-	 *
-	 * @var array<string, string>
-	 */
-	private $previous_shipping_address = array();
-
-	/**
 	 * Set up before test.
 	 *
 	 * @return void
@@ -43,9 +36,7 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_checkout_phone_field', 'optional' );
 
 		// The invalid-address tests need a shipping rate, and the flat rate only offers one for a
-		// country the store ships to. The cart ships to WC()->customer, which outlives a test, so
-		// give it a US/CA location here rather than depend on the address it arrives with.
-		$this->previous_shipping_address = WC()->customer->get_shipping( 'edit' );
+		// country the store ships to. The cart ships to WC()->customer, so give it a US/CA location.
 		WC()->customer->set_shipping_location( 'US', 'CA' );
 
 		$this->sut = new class() extends OrderController {
@@ -60,19 +51,6 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 				parent::validate_address_fields( $order, $address_type, $errors );
 			}
 		};
-	}
-
-	/**
-	 * Put back the customer shipping location that setUp() replaced.
-	 */
-	public function tearDown(): void {
-		try {
-			foreach ( $this->previous_shipping_address as $key => $value ) {
-				WC()->customer->{"set_shipping_{$key}"}( $value );
-			}
-		} finally {
-			parent::tearDown();
-		}
 	}
 
 	/**
@@ -228,6 +206,29 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 
 		$this->assertEmpty( $order->get_coupon_codes() );
 		$this->assertEquals( 1, ( new \WC_Coupon( 'draft-global' ) )->get_usage_count(), 'usage_count must not be decremented for a draft that never recorded it' );
+	}
+
+	/**
+	 * @testdox Existing-order validation removes an invalid coupon line that has not been saved yet.
+	 */
+	public function test_validate_existing_order_before_payment_removes_unsaved_invalid_coupon() {
+		$coupon = CouponHelper::create_coupon( 'unsaved-exhausted', 'publish', array( 'usage_limit' => 1 ) );
+		$coupon->increase_usage_count();
+
+		$order = WC_Helper_Order::create_order();
+		$item  = new \WC_Order_Item_Coupon();
+		$item->set_code( $coupon->get_code() );
+		$order->add_item( $item );
+
+		try {
+			$this->sut->validate_existing_order_before_payment( $order );
+			$this->fail( 'Expected a RouteException for the exhausted coupon.' );
+		} catch ( RouteException $e ) {
+			$this->assertEquals( 409, $e->getCode() );
+		}
+
+		$this->assertEmpty( $order->get_coupon_codes(), 'The coupon line should be removed from the order.' );
+		$this->assertEmpty( wc_get_order( $order->get_id() )->get_coupon_codes(), 'The coupon line should not be saved.' );
 	}
 
 	/**
@@ -502,6 +503,92 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 			has_filter( $hook ),
 			'create_order_from_cart() must remove its woocommerce_default_order_status filter; the chain must not grow across repeated calls.'
 		);
+	}
+
+	/**
+	 * @testdox update_order_from_cart() keeps the shopper's session choice on the order even when the default payment method filter returns nothing.
+	 */
+	public function test_update_order_from_cart_keeps_the_session_payment_choice_with_a_callback(): void {
+		$order = $this->sync_order_from_cart_with_cod_enabled( 'cod' );
+
+		$this->assertSame( 'cod', $order->get_payment_method() );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() sets the payment method title alongside the id, matching the gateway's own title.
+	 */
+	public function test_update_order_from_cart_sets_payment_method_title_with_the_session_choice(): void {
+		$order = $this->sync_order_from_cart_with_cod_enabled( 'cod' );
+
+		$this->assertSame( WC()->payment_gateways()->payment_gateways()['cod']->get_title(), $order->get_payment_method_title() );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() writes the filtered default on the order when the shopper has not chosen a method.
+	 */
+	public function test_update_order_from_cart_writes_the_filtered_default_without_a_session_choice(): void {
+		$order = $this->sync_order_from_cart_with_cod_enabled( null );
+
+		$this->assertSame( '', $order->get_payment_method() );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() still pairs the title with the id when the chosen gateway is registered but disabled.
+	 */
+	public function test_update_order_from_cart_sets_payment_method_title_for_a_disabled_registered_gateway(): void {
+		$bacs                = WC()->payment_gateways()->payment_gateways()['bacs'];
+		$bacs_enabled_before = $bacs->enabled;
+		$bacs->enabled       = 'no';
+		WC()->session->set( 'chosen_payment_method', 'bacs' );
+
+		try {
+			WC()->cart->empty_cart();
+			WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+			$order = WC_Helper_Order::create_order();
+			$order->set_payment_method_title( 'Stale Title' );
+
+			$this->sut->update_order_from_cart( $order );
+
+			$this->assertSame( 'bacs', $order->get_payment_method() );
+			$this->assertSame( $bacs->get_title(), $order->get_payment_method_title() );
+		} finally {
+			WC()->cart->empty_cart();
+			$bacs->enabled = $bacs_enabled_before;
+			WC()->session->set( 'chosen_payment_method', null );
+		}
+	}
+
+	/**
+	 * Sync an order from a one-item cart with COD enabled, the given session choice and a callback that returns nothing.
+	 *
+	 * Gateway instances and the session choice are restored afterwards; the base class does not reset them.
+	 *
+	 * @param string|null $chosen_payment_method What the shopper chose, or null for nothing.
+	 * @return \WC_Order
+	 */
+	private function sync_order_from_cart_with_cod_enabled( ?string $chosen_payment_method ): \WC_Order {
+		$gateways_before         = WC()->payment_gateways()->payment_gateways;
+		$cod_settings            = (array) get_option( 'woocommerce_cod_settings', array() );
+		$cod_settings['enabled'] = 'yes';
+		update_option( 'woocommerce_cod_settings', $cod_settings );
+		WC()->payment_gateways()->init();
+		WC()->session->set( 'chosen_payment_method', $chosen_payment_method );
+		add_filter( 'woocommerce_default_payment_method', '__return_empty_string' );
+
+		try {
+			WC()->cart->empty_cart();
+			WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+			$order = WC_Helper_Order::create_order();
+
+			$this->sut->update_order_from_cart( $order );
+
+			return $order;
+		} finally {
+			WC()->cart->empty_cart();
+			wp_cache_delete( 'woocommerce_cod_settings', 'options' );
+			WC()->payment_gateways()->payment_gateways = $gateways_before;
+			WC()->session->set( 'chosen_payment_method', null );
+		}
 	}
 
 	/**

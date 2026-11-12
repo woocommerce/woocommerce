@@ -27,6 +27,7 @@ const optionMatcher = (
 const StateInput = ( {
 	className,
 	id,
+	errorId,
 	states,
 	country,
 	label,
@@ -95,6 +96,7 @@ const StateInput = ( {
 				options={ options }
 				label={ label || '' }
 				id={ id }
+				errorId={ errorId }
 				onChange={ onChangeState }
 				value={ value }
 				autoComplete={ autoComplete }
@@ -107,6 +109,7 @@ const StateInput = ( {
 		<ValidatedTextInput
 			className={ className }
 			id={ id }
+			errorId={ errorId }
 			label={ label }
 			onChange={ onChangeState }
 			autoComplete={ autoComplete }

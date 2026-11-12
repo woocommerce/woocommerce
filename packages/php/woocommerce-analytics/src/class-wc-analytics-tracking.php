@@ -534,7 +534,7 @@ class WC_Analytics_Tracking {
 		$all_properties = array_merge( $properties, $required_properties );
 
 		foreach ( $all_properties as $key => $value ) {
-			$all_properties[ $key ] = self::flatten_property_value( $value );
+			$all_properties[ $key ] = Pixel_Builder::flatten_property_value( $value );
 		}
 
 		return $all_properties;
@@ -692,45 +692,18 @@ class WC_Analytics_Tracking {
 	}
 
 	/**
-	 * Reduce one property value to the string that goes into the pixel URL.
-	 *
-	 * The payload budget uses this same conversion to measure array values accurately.
-	 *
-	 * @since 0.18.0
-	 *
-	 * @param mixed $value Property value.
-	 * @return mixed The scalar it serializes to; non-array values are returned as-is.
-	 */
-	private static function flatten_property_value( $value ) {
-		if ( ! is_array( $value ) ) {
-			return $value;
-		}
-
-		if ( empty( $value ) ) {
-			return '';
-		}
-
-		// Not URL-encoded here: http_build_query() in Pixel_Builder encodes the whole URL, so encoding twice stores `%2F` in Tracks.
-		if ( array_keys( $value ) === range( 0, count( $value ) - 1 ) ) {
-			return implode( ',', $value );
-		}
-
-		return wp_json_encode( $value, JSON_UNESCAPED_SLASHES );
-	}
-
-	/**
 	 * Bytes one value contributes to the pixel URL.
 	 *
 	 * @since 0.18.0
 	 *
 	 * @param mixed $value Already-capped client value.
-	 * @return int Byte count after `flatten_property_value()` and the encoding
+	 * @return int Byte count after `Pixel_Builder::flatten_property_value()` and the encoding
 	 *             `http_build_query()` applies on top of it.
 	 */
 	private static function measure_client_value( $value ) {
 		// Match http_build_query()'s RFC1738 encoding.
 		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.urlencode_urlencode -- Deliberate: mirrors http_build_query()'s RFC1738 encoding so the budget measures the bytes the finished URL carries.
-		return strlen( urlencode( (string) self::flatten_property_value( $value ) ) );
+		return strlen( urlencode( (string) Pixel_Builder::flatten_property_value( $value ) ) );
 	}
 
 	/**

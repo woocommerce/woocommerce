@@ -286,10 +286,6 @@ class RestApi {
 			);
 		}
 
-		if ( false === get_transient( 'blueprint_import_session_' . $session_token ) ) {
-			set_transient( 'blueprint_import_session_' . $session_token, true, 10 * MINUTE_IN_SECONDS );
-		}
-
 		// Get the raw body size.
 		$body_size = strlen( $request->get_body() );
 		if ( $body_size > $this->get_max_file_size() ) {
@@ -312,6 +308,11 @@ class RestApi {
 		$step_definition = json_decode( wp_json_encode( $request->get_param( 'step_definition' ) ) );
 		$step_importer   = new ImportStep( $step_definition );
 		$result          = $step_importer->import();
+
+		// Import steps can flush the object cache, so store the session after they finish.
+		if ( false === get_transient( 'blueprint_import_session_' . $session_token ) ) {
+			set_transient( 'blueprint_import_session_' . $session_token, true, 10 * MINUTE_IN_SECONDS );
+		}
 
 		$response = new \WP_REST_Response(
 			array(
@@ -354,7 +355,7 @@ class RestApi {
 	 * @return \WP_REST_Response
 	 */
 	public function get_import_allowed() {
-		$can_import = $this->can_import_blueprint();
+		$can_import = true === $this->check_import_permission() && $this->can_import_blueprint();
 
 		return rest_ensure_response(
 			array(

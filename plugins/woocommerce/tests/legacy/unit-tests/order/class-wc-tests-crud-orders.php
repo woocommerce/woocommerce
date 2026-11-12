@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Internal\Utilities\StagedMethod;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
@@ -1092,6 +1093,1215 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->save();
 		$this->assertTrue( $object->update_status( OrderStatus::ON_HOLD ) );
 		$this->assertEquals( OrderStatus::ON_HOLD, $object->get_status() );
+	}
+
+	/**
+	 * Test: woocommerce_order_edit_status fires once for a manual change. set_status fires it right away, stage_status on the next save.
+	 */
+	public function test_edit_status_action_fires_once_for_a_manual_change() {
+		$object = new WC_Order();
+		$object->save();
+		$fired = did_action( 'woocommerce_order_edit_status' );
+
+		$this->assertTrue( $object->update_status( OrderStatus::ON_HOLD, '', true ) );
+		$this->assertSame( 1, did_action( 'woocommerce_order_edit_status' ) - $fired );
+		$this->assertSame( OrderStatus::ON_HOLD, wc_get_order( $object->get_id() )->get_status() );
+
+		$object->set_status( OrderStatus::PROCESSING, '', true );
+		$this->assertSame( 2, did_action( 'woocommerce_order_edit_status' ) - $fired );
+		$object->save();
+
+		$object->stage_status( OrderStatus::COMPLETED, '', true );
+		$this->assertSame( 2, did_action( 'woocommerce_order_edit_status' ) - $fired );
+		$object->save();
+		$this->assertSame( 3, did_action( 'woocommerce_order_edit_status' ) - $fired );
+		$this->assertSame( OrderStatus::COMPLETED, wc_get_order( $object->get_id() )->get_status() );
+	}
+
+	/**
+	 * Test: two stage_status calls before one save fire woocommerce_order_edit_status once, with the last status, and set_status after stage_status fires it once.
+	 */
+	public function test_edit_status_action_fires_once_for_the_last_staged_status() {
+		$statuses = array();
+		$listener = static function ( $order_id, $status ) use ( &$statuses ) {
+			$statuses[] = $status;
+		};
+		add_action( 'woocommerce_order_edit_status', $listener, 10, 2 );
+
+		$object = new WC_Order();
+		$object->save();
+		$object->stage_status( OrderStatus::ON_HOLD, '', true );
+		$object->stage_status( OrderStatus::PROCESSING, '', true );
+		$object->save();
+
+		$object->stage_status( OrderStatus::ON_HOLD, '', true );
+		$object->set_status( OrderStatus::COMPLETED, '', true );
+		$object->save();
+
+		remove_action( 'woocommerce_order_edit_status', $listener, 10 );
+		$this->assertSame( array( OrderStatus::PROCESSING, OrderStatus::COMPLETED ), $statuses );
+		$this->assertSame( OrderStatus::COMPLETED, wc_get_order( $object->get_id() )->get_status() );
+	}
+
+	/**
+	 * Test: a non-manual status change after stage_status cancels the pending woocommerce_order_edit_status, and a repeat of the staged status keeps it.
+	 */
+	public function test_edit_status_action_follows_the_last_status_change() {
+		$statuses = array();
+		$listener = static function ( $order_id, $status ) use ( &$statuses ) {
+			$statuses[] = $status;
+		};
+		add_action( 'woocommerce_order_edit_status', $listener, 10, 2 );
+
+		$object = new WC_Order();
+		$object->save();
+		$object->stage_status( OrderStatus::COMPLETED, '', true );
+		$object->set_status( OrderStatus::ON_HOLD );
+		$object->save();
+		$persisted = wc_get_order( $object->get_id() )->get_status();
+		$canceled  = $statuses;
+
+		$object->stage_status( OrderStatus::PROCESSING, '', true );
+		$object->stage_status( OrderStatus::COMPLETED );
+		$object->save();
+		$canceled_by_stage = $statuses;
+
+		$object->stage_status( OrderStatus::ON_HOLD, '', true );
+		$object->set_status( OrderStatus::ON_HOLD );
+		$object->save();
+
+		remove_action( 'woocommerce_order_edit_status', $listener, 10 );
+		$this->assertSame( OrderStatus::ON_HOLD, $persisted );
+		$this->assertEmpty( $canceled );
+		$this->assertEmpty( $canceled_by_stage );
+		$this->assertSame( array( OrderStatus::ON_HOLD ), $statuses );
+	}
+
+	/**
+	 * Test: stage_payment_complete changes the order in memory, and the next save writes it, adds the note and fires woocommerce_payment_complete.
+	 */
+	public function test_stage_payment_complete_changes_the_order_in_memory_only() {
+		$object = new WC_Order();
+		$object->save();
+		$fired = did_action( 'woocommerce_payment_complete' );
+		$pre   = did_action( 'woocommerce_pre_payment_complete' );
+		$notes = count( wc_get_order_notes( array( 'order_id' => $object->get_id() ) ) );
+		WC()->session->set( 'order_awaiting_payment', $object->get_id() );
+
+		$this->assertTrue( $object->stage_payment_complete( '12345' ) );
+		$this->assertSame( 0, did_action( 'woocommerce_pre_payment_complete' ) - $pre );
+		$this->assertSame( $object->get_id(), WC()->session->get( 'order_awaiting_payment' ) );
+		$this->assertSame( OrderStatus::COMPLETED, $object->get_status() );
+		$this->assertSame( '12345', $object->get_transaction_id() );
+		$this->assertNotNull( $object->get_date_paid( 'edit' ) );
+
+		$stored = wc_get_order( $object->get_id() );
+		$this->assertSame( OrderStatus::PENDING, $stored->get_status() );
+		$this->assertSame( '', $stored->get_transaction_id() );
+		$this->assertSame( 0, did_action( 'woocommerce_payment_complete' ) - $fired );
+		$this->assertCount( $notes, wc_get_order_notes( array( 'order_id' => $object->get_id() ) ) );
+
+		$object->save();
+		$this->assertSame( 1, did_action( 'woocommerce_pre_payment_complete' ) - $pre );
+		$this->assertFalse( WC()->session->get( 'order_awaiting_payment' ) );
+		$this->assertSame( OrderStatus::COMPLETED, wc_get_order( $object->get_id() )->get_status() );
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $fired );
+		$this->assertCount( $notes + 1, wc_get_order_notes( array( 'order_id' => $object->get_id() ) ) );
+
+		$object->save();
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $fired );
+	}
+
+	/**
+	 * Test: stage_payment_complete leaves nothing to the next save when the order status is not one that payment can complete.
+	 */
+	public function test_stage_payment_complete_leaves_nothing_to_save_for_a_status_payment_cannot_complete() {
+		$object = new WC_Order();
+		$object->set_status( OrderStatus::COMPLETED );
+		$object->save();
+		$pre = did_action( 'woocommerce_pre_payment_complete' );
+		WC()->session->set( 'order_awaiting_payment', $object->get_id() );
+
+		$this->assertFalse( $object->stage_payment_complete( '12345' ) );
+		$object->save();
+
+		$this->assertSame( 0, did_action( 'woocommerce_pre_payment_complete' ) - $pre );
+		$this->assertSame( $object->get_id(), WC()->session->get( 'order_awaiting_payment' ) );
+	}
+
+	/**
+	 * Test: a second stage_payment_complete that the status refuses keeps the pre-payment hook that the first one left to the save.
+	 */
+	public function test_refused_second_stage_payment_complete_keeps_the_staged_pre_payment_hook() {
+		$object = new WC_Order();
+		$object->save();
+		$pre   = did_action( 'woocommerce_pre_payment_complete' );
+		$fired = did_action( 'woocommerce_payment_complete' );
+		WC()->session->set( 'order_awaiting_payment', $object->get_id() );
+
+		$this->assertTrue( $object->stage_payment_complete( '12345' ) );
+		$this->assertFalse( $object->stage_payment_complete( '67890' ) );
+		$object->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_pre_payment_complete' ) - $pre );
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $fired );
+		$this->assertFalse( WC()->session->get( 'order_awaiting_payment' ) );
+	}
+
+	/**
+	 * Test: payment_complete after stage_payment_complete replaces the staged pre-payment hook, so the hook fires once.
+	 */
+	public function test_payment_complete_after_stage_payment_complete_fires_the_pre_payment_hook_once() {
+		$object = new WC_Order();
+		$object->save();
+		$pre = did_action( 'woocommerce_pre_payment_complete' );
+
+		$this->assertTrue( $object->stage_payment_complete( '12345' ) );
+		$object->payment_complete( '67890' );
+		$object->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_pre_payment_complete' ) - $pre );
+	}
+
+	/**
+	 * Test: stage_payment_complete does not change an order that is not saved yet.
+	 */
+	public function test_stage_payment_complete_refuses_an_unsaved_order() {
+		$object = new WC_Order();
+		$fired  = did_action( 'woocommerce_payment_complete' );
+
+		$this->assertFalse( $object->stage_payment_complete( '12345' ) );
+		$object->save();
+
+		$this->assertSame( 0, did_action( 'woocommerce_payment_complete' ) - $fired );
+		$this->assertNull( wc_get_order( $object->get_id() )->get_date_paid( 'edit' ) );
+	}
+
+	/**
+	 * Test: payment_complete fires woocommerce_payment_complete once, after the write, and does not save an order whose status payment cannot complete.
+	 */
+	public function test_payment_complete_fires_its_action_after_the_write() {
+		$statuses = array();
+		$listener = static function ( $order_id, $transaction_id ) use ( &$statuses ) {
+			$statuses[] = array( wc_get_order( $order_id )->get_status(), $transaction_id );
+		};
+		add_action( 'woocommerce_payment_complete', $listener, 10, 2 );
+
+		$object = new WC_Order();
+		$object->save();
+		$this->assertTrue( $object->payment_complete( '12345' ) );
+
+		$updates = did_action( 'woocommerce_update_order' );
+		$skipped = did_action( 'woocommerce_payment_complete_order_status_completed' );
+		$this->assertTrue( $object->payment_complete( '67890' ) );
+
+		remove_action( 'woocommerce_payment_complete', $listener, 10 );
+		$this->assertSame( array( array( OrderStatus::COMPLETED, '12345' ) ), $statuses );
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete_order_status_completed' ) - $skipped );
+		$this->assertSame( $updates, did_action( 'woocommerce_update_order' ) );
+		$this->assertSame( '12345', wc_get_order( $object->get_id() )->get_transaction_id() );
+	}
+
+	/**
+	 * Test: stage_product_item adds an unsaved line item to the order, and the next save writes it.
+	 */
+	public function test_stage_product_item_adds_an_unsaved_item() {
+		$product = WC_Helper_Product::create_simple_product();
+		$object  = new WC_Order();
+		$object->save();
+
+		$item = $object->stage_product_item( $product, 2 );
+		$this->assertInstanceOf( WC_Order_Item_Product::class, $item );
+		$this->assertSame( 0, $item->get_id() );
+		$this->assertSame( 2, $item->get_quantity() );
+		$this->assertSame( array( $item ), array_values( $object->get_items() ) );
+		$this->assertCount( 0, wc_get_order( $object->get_id() )->get_items() );
+
+		$object->save();
+		$this->assertGreaterThan( 0, $item->get_id() );
+		$this->assertSame( array( $item->get_id() ), array_keys( wc_get_order( $object->get_id() )->get_items() ) );
+	}
+
+	/**
+	 * Test: add_product saves the item right away and keys it by its ID, as before.
+	 */
+	public function test_add_product_saves_the_item() {
+		$product = WC_Helper_Product::create_simple_product();
+		$object  = new WC_Order();
+		$object->save();
+
+		$item_id = $object->add_product( $product, 3 );
+		$this->assertGreaterThan( 0, $item_id );
+		$this->assertSame( array( $item_id ), array_keys( $object->get_items() ) );
+		$this->assertSame( array( $item_id ), array_keys( wc_get_order( $object->get_id() )->get_items() ) );
+		$this->assertSame( 3, $object->get_item( $item_id )->get_quantity() );
+	}
+
+	/**
+	 * Test: stage_order_note saves nothing until save, then exactly one note exists.
+	 */
+	public function test_stage_order_note_adds_the_note_on_save() {
+		$order = new WC_Order();
+		$order->save();
+		$notes = count( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ) );
+
+		$order->stage_order_note( 'Staged note.' );
+		$this->assertCount( $notes, wc_get_order_notes( array( 'order_id' => $order->get_id() ) ) );
+
+		$order->save();
+		$found = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$this->assertCount( $notes + 1, $found );
+		$this->assertSame( 'Staged note.', current( $found )->content );
+
+		$order->save();
+		$this->assertCount( $notes + 1, wc_get_order_notes( array( 'order_id' => $order->get_id() ) ) );
+	}
+
+	/**
+	 * Save the order while a listener makes the write fail.
+	 *
+	 * @param WC_Order $order Order to save.
+	 */
+	private function save_with_failed_write( WC_Order $order ): void {
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				$order->save();
+			}
+		);
+		$this->assertInstanceOf( Exception::class, $order->get_last_save_error() );
+	}
+
+	/**
+	 * @testdox A staged coupon is counted once when a save after a failed write succeeds.
+	 */
+	public function test_staged_coupon_is_counted_after_a_failed_write_is_retried(): void {
+		$order = WC_Helper_Order::create_order();
+		$this->create_fixed_cart_coupon( 'staged-retry' );
+
+		$order->stage_coupon( 'staged-retry' );
+		$this->save_with_failed_write( $order );
+		$this->assertSame( 0, ( new WC_Coupon( 'staged-retry' ) )->get_usage_count() );
+
+		$order->save();
+		$order->save();
+		$this->assertSame( 1, ( new WC_Coupon( 'staged-retry' ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox A staged note is added once when a save after a failed write succeeds.
+	 */
+	public function test_staged_order_note_is_added_after_a_failed_write_is_retried(): void {
+		$order = new WC_Order();
+		$order->save();
+
+		$order->stage_order_note( 'Staged note.' );
+		$this->save_with_failed_write( $order );
+		$order->save();
+		$order->save();
+
+		$found = array_filter(
+			wc_get_order_notes( array( 'order_id' => $order->get_id() ) ),
+			static function ( $note ) {
+				return 'Staged note.' === $note->content;
+			}
+		);
+		$this->assertCount( 1, $found );
+	}
+
+	/**
+	 * @testdox A staged payment fires woocommerce_payment_complete once, when a save after a failed write succeeds.
+	 */
+	public function test_staged_payment_complete_fires_after_a_failed_write_is_retried(): void {
+		$order = new WC_Order();
+		$order->save();
+		$fired = did_action( 'woocommerce_payment_complete' );
+
+		$this->assertTrue( $order->stage_payment_complete( '12345' ) );
+		$this->save_with_failed_write( $order );
+		$this->assertSame( 0, did_action( 'woocommerce_payment_complete' ) - $fired );
+
+		$order->save();
+		$order->save();
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $fired );
+	}
+
+	/**
+	 * @testdox A status change fires its hooks once, when a save after a failed write succeeds.
+	 */
+	public function test_status_transition_fires_after_a_failed_write_is_retried(): void {
+		$order = new WC_Order();
+		$order->save();
+		$changed    = did_action( 'woocommerce_order_status_changed' );
+		$transition = did_action( 'woocommerce_order_status_pending_to_processing' );
+
+		$order->set_status( OrderStatus::PROCESSING );
+		$this->save_with_failed_write( $order );
+		$this->assertSame( 0, did_action( 'woocommerce_order_status_changed' ) - $changed );
+		$this->assertSame( 0, did_action( 'woocommerce_order_status_pending_to_processing' ) - $transition );
+
+		$order->save();
+		$order->save();
+		$this->assertSame( 1, did_action( 'woocommerce_order_status_changed' ) - $changed );
+		$this->assertSame( 1, did_action( 'woocommerce_order_status_pending_to_processing' ) - $transition );
+	}
+
+	/**
+	 * Run a callback while a listener makes every order write fail.
+	 *
+	 * @param callable $callback Callback to run.
+	 * @return mixed What the callback returns.
+	 */
+	private function with_failed_writes( callable $callback ) {
+		$fail = static function () {
+			throw new Exception( 'Disk full.' );
+		};
+		add_action( 'woocommerce_before_order_object_save', $fail );
+		try {
+			return $callback();
+		} finally {
+			remove_action( 'woocommerce_before_order_object_save', $fail );
+		}
+	}
+
+	/**
+	 * @testdox payment_complete() returns false and fires no payment or status hook when the order write fails.
+	 */
+	public function test_payment_complete_stops_when_the_write_fails(): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid    = did_action( 'woocommerce_payment_complete' );
+		$changed = did_action( 'woocommerce_order_status_changed' );
+
+		$result = $this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+
+		$this->assertFalse( $result );
+		$this->assertSame( 0, did_action( 'woocommerce_payment_complete' ) - $paid );
+		$this->assertSame( 0, did_action( 'woocommerce_order_status_changed' ) - $changed );
+		$stored = wc_get_order( $order->get_id() );
+		$this->assertSame( OrderStatus::PENDING, $stored->get_status() );
+		$this->assertNull( $stored->get_date_paid() );
+	}
+
+	/**
+	 * @testdox A failed payment_complete() write adds one error note and no payment note.
+	 */
+	public function test_payment_complete_adds_one_error_note_when_the_write_fails(): void {
+		$order = new WC_Order();
+		$order->save();
+
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), 'content' );
+		$this->assertCount( 1, $notes );
+		$this->assertStringContainsString( 'Disk full.', $notes[0] );
+	}
+
+	/**
+	 * @testdox The retry after a failed payment_complete() fires woocommerce_payment_complete when the note listener throws.
+	 */
+	public function test_payment_complete_retry_fires_its_action_when_the_note_listener_throws(): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid = did_action( 'woocommerce_payment_complete' );
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+		$throw = static function () {
+			throw new Exception( 'Note listener failed.' );
+		};
+		add_action( 'woocommerce_order_note_added', $throw );
+
+		try {
+			$order->save();
+		} finally {
+			remove_action( 'woocommerce_order_note_added', $throw );
+		}
+
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $paid );
+	}
+
+	/**
+	 * @testdox The retry after a failed payment_complete() fires its action when the status moved to another paid status.
+	 */
+	public function test_payment_complete_retry_fires_its_action_after_a_move_to_another_paid_status(): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid = did_action( 'woocommerce_payment_complete' );
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+		$this->assertSame( OrderStatus::COMPLETED, $order->get_status() );
+
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $paid );
+	}
+
+	/**
+	 * @testdox The retry after a failed payment_complete() logs a throwing payment listener and keeps the other callbacks.
+	 */
+	public function test_payment_complete_retry_logs_a_throwing_payment_listener(): void {
+		$order = new WC_Order();
+		$order->save();
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+		$order->stage_order_note( 'Staged after the failed call.' );
+		$throw = static function () {
+			throw new Exception( 'Payment listener failed.' );
+		};
+		add_action( 'woocommerce_payment_complete', $throw );
+
+		try {
+			$order->save();
+		} finally {
+			remove_action( 'woocommerce_payment_complete', $throw );
+		}
+
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), 'content' );
+		$this->assertContains( 'Payment complete event failed. Payment listener failed.', $notes );
+		$this->assertContains( 'Staged after the failed call.', $notes );
+		$this->assertSame( OrderStatus::COMPLETED, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox payment_complete() still fires woocommerce_payment_complete when adding the payment note throws.
+	 */
+	public function test_payment_complete_fires_its_action_when_the_payment_note_throws(): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid  = did_action( 'woocommerce_payment_complete' );
+		$throw = static function ( $comment_id ) {
+			if ( 'Payment complete.' === get_comment( $comment_id )->comment_content ) {
+				throw new Exception( 'Note listener failed.' );
+			}
+		};
+		add_action( 'woocommerce_order_note_added', $throw );
+
+		$result = $order->payment_complete( '12345' );
+
+		remove_action( 'woocommerce_order_note_added', $throw );
+		$this->assertTrue( $result );
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $paid );
+		$this->assertSame( OrderStatus::COMPLETED, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox woocommerce_payment_complete fires once, when a save after a failed payment_complete() succeeds.
+	 */
+	public function test_payment_complete_fires_its_hook_after_a_failed_write_is_retried(): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid = did_action( 'woocommerce_payment_complete' );
+
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+		$order->save();
+		$order->save();
+
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $paid );
+		$this->assertSame( OrderStatus::COMPLETED, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox A payment_complete() retry after a failed write fires its payment hook and note once.
+	 */
+	public function test_payment_complete_retry_after_a_failed_write_reports_the_payment_once(): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid = did_action( 'woocommerce_payment_complete' );
+
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+		$order->set_status( OrderStatus::PENDING );
+		$this->assertTrue( $order->payment_complete( '12345' ) );
+
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $paid );
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), 'content' );
+		$this->assertCount( 1, array_keys( $notes, 'Payment complete.', true ) );
+	}
+
+	/**
+	 * @testdox A payment_complete() retry after a failed staged payment adds only the note of the retry.
+	 */
+	public function test_payment_complete_retry_after_a_failed_staged_payment_adds_one_note(): void {
+		$order = new WC_Order();
+		$order->set_payment_method_title( 'Cheque' );
+		$order->save();
+
+		$order->stage_payment_complete( 'first' );
+		$this->with_failed_writes( array( $order, 'save' ) );
+		$order->set_status( OrderStatus::PENDING );
+		$this->assertTrue( $order->payment_complete( 'second' ) );
+
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), 'content' );
+		$this->assertNotContains( 'Payment via Cheque (first).', $notes );
+		$this->assertCount( 1, array_keys( $notes, 'Payment via Cheque (second).', true ) );
+	}
+
+	/**
+	 * @testdox payment_complete() adds no payment note when the order write fails.
+	 */
+	public function test_payment_complete_adds_no_payment_note_when_the_write_fails(): void {
+		$order = new WC_Order();
+		$order->save();
+
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+
+		$notes = wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ), 'content' );
+		$this->assertNotContains( 'Payment complete.', $notes );
+	}
+
+	/**
+	 * @testdox A save after a failed payment_complete() fires no payment hook when the status changed in between.
+	 */
+	public function test_payment_complete_drops_its_hook_when_the_status_changes_after_a_failed_write(): void {
+		$order = new WC_Order();
+		$order->save();
+		$paid = did_action( 'woocommerce_payment_complete' );
+
+		$this->with_failed_writes(
+			static function () use ( $order ) {
+				return $order->payment_complete( '12345' );
+			}
+		);
+		$order->set_status( OrderStatus::FAILED );
+		$order->save();
+
+		$this->assertSame( 0, did_action( 'woocommerce_payment_complete' ) - $paid );
+		$this->assertSame( OrderStatus::FAILED, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox update_taxes() does not write the tax items when the order write fails.
+	 */
+	public function test_update_taxes_does_not_write_tax_items_when_the_write_fails(): void {
+		$rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country' => '',
+				'tax_rate'         => '10.0000',
+				'tax_rate_name'    => 'TAX',
+				'tax_rate_order'   => '1',
+			)
+		);
+		$order   = new WC_Order();
+		$product = new WC_Order_Item_Product();
+		$product->set_taxes(
+			array(
+				'total'    => array( $rate_id => '1' ),
+				'subtotal' => array( $rate_id => '1' ),
+			)
+		);
+		$order->add_item( $product );
+		$order->update_taxes();
+		$tax_item = current( $order->get_taxes() );
+		$this->assertSame( 1.0, (float) $tax_item->get_tax_total() );
+
+		$product->set_taxes(
+			array(
+				'total'    => array( $rate_id => '2' ),
+				'subtotal' => array( $rate_id => '2' ),
+			)
+		);
+		$this->with_failed_writes( array( $order, 'update_taxes' ) );
+
+		$this->assertSame( 1.0, (float) ( new WC_Order_Item_Tax( $tax_item->get_id() ) )->get_tax_total() );
+	}
+
+	/**
+	 * Test: a staged note is not added when the order write fails.
+	 */
+	public function test_stage_order_note_is_skipped_when_the_write_fails() {
+		$order = new WC_Order();
+		$order->save();
+		$notes = count( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ) );
+		$fail  = static function () {
+			throw new Exception( 'Disk full.' );
+		};
+
+		$order->stage_order_note( 'Staged note.' );
+		add_action( 'woocommerce_before_order_object_save', $fail );
+		try {
+			$order->save();
+		} finally {
+			remove_action( 'woocommerce_before_order_object_save', $fail );
+		}
+
+		$this->assertInstanceOf( Exception::class, $order->get_last_save_error() );
+		$found = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$this->assertCount( $notes + 1, $found, 'Only the error note of the failed save is added.' );
+		$this->assertStringNotContainsString( 'Staged note.', current( $found )->content );
+	}
+
+	/**
+	 * Test: stage_totals fires woocommerce_order_after_calculate_totals on the next save, right before the write, and a change made by the listener is written.
+	 */
+	public function test_staged_after_calculate_totals_fires_on_save() {
+		$order    = WC_Helper_Order::create_order();
+		$calls    = array();
+		$listener = static function ( $and_taxes, $listened_order, $staged ) use ( &$calls ) {
+			$calls[] = $staged;
+			$listened_order->set_total( 99 );
+		};
+		add_action( 'woocommerce_order_after_calculate_totals', $listener, 10, 3 );
+
+		$order->stage_totals( false );
+		$this->assertSame( array(), $calls );
+
+		$order->save();
+		$this->assertSame( array( true ), $calls );
+		$this->assertEquals( 99, wc_get_order( $order->get_id() )->get_total() );
+
+		$order->calculate_totals( false );
+		remove_action( 'woocommerce_order_after_calculate_totals', $listener, 10 );
+		$this->assertSame( array( true, false ), $calls );
+	}
+
+	/**
+	 * Test: a saving method that runs after its stage method replaces the staged entry, so the next save does not
+	 * fire woocommerce_order_after_calculate_totals again.
+	 */
+	public function test_saving_method_after_its_stage_method_replaces_the_staged_entry() {
+		$order    = WC_Helper_Order::create_order();
+		$calls    = array();
+		$listener = static function ( $and_taxes, $listened_order, $staged ) use ( &$calls ) {
+			$calls[] = $staged;
+		};
+		add_action( 'woocommerce_order_after_calculate_totals', $listener, 10, 3 );
+
+		$order->stage_totals( false );
+		$order->calculate_totals( false );
+		$order->save();
+		remove_action( 'woocommerce_order_after_calculate_totals', $listener, 10 );
+
+		$this->assertSame( array( false ), $calls );
+	}
+
+	/**
+	 * Test: a clone starts without the staged callbacks, so saving the clone and then the original fires
+	 * woocommerce_order_after_calculate_totals once, for the original.
+	 */
+	public function test_clone_does_not_copy_staged_callbacks() {
+		$order    = WC_Helper_Order::create_order();
+		$orders   = array();
+		$listener = static function ( $and_taxes, $listened_order ) use ( &$orders ) {
+			$orders[] = $listened_order;
+		};
+		add_action( 'woocommerce_order_after_calculate_totals', $listener, 10, 2 );
+
+		$order->stage_totals( false );
+		$copy = clone $order;
+		$copy->save();
+		$order->save();
+		remove_action( 'woocommerce_order_after_calculate_totals', $listener, 10 );
+
+		$this->assertSame( array( $order ), $orders );
+	}
+
+	/**
+	 * Test: stage_coupon() refuses a class that overrides only calculate_totals() before it fires
+	 * woocommerce_order_applied_coupon or adds the coupon.
+	 */
+	public function test_stage_coupon_refuses_an_unadopted_twin_of_its_chain_before_any_change() {
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'chain' );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
+		$order = new class() extends WC_Order {
+			public function calculate_totals( $and_taxes = true ) {
+				return parent::calculate_totals( $and_taxes );
+			}
+		};
+		// phpcs:enable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
+		$order->add_product( WC_Helper_Product::create_simple_product(), 1 );
+		$order->calculate_totals();
+
+		$fired = did_action( 'woocommerce_order_applied_coupon' );
+		try {
+			$order->stage_coupon( 'chain' );
+			$this->fail( 'stage_coupon did not refuse the class.' );
+		} catch ( WC_Data_Exception $e ) {
+			$this->assertStringContainsString( 'stage_totals()', $e->getMessage() );
+		}
+
+		$this->assertSame( 0, did_action( 'woocommerce_order_applied_coupon' ) - $fired );
+		$this->assertCount( 0, $order->get_items( 'coupon' ) );
+	}
+
+	/**
+	 * Test: a woocommerce_order_after_calculate_totals listener that calls a saving method saves the order from
+	 * inside the save of stage_totals(). The action fires once, and the listener's taxes and total are written.
+	 */
+	public function test_staged_after_calculate_totals_listener_can_call_a_saving_method() {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'TAX',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+		$order    = WC_Helper_Order::create_order();
+		$calls    = 0;
+		$listener = static function ( $and_taxes, $listened_order ) use ( &$calls ) {
+			++$calls;
+			$listened_order->update_taxes();
+			$listened_order->set_total( 123 );
+		};
+		add_action( 'woocommerce_order_after_calculate_totals', $listener, 10, 2 );
+
+		$order->stage_totals( true );
+		$this->assertSame( 0, $calls );
+
+		$order->save();
+		remove_action( 'woocommerce_order_after_calculate_totals', $listener, 10 );
+		$this->assertSame( 1, $calls );
+
+		$saved = wc_get_order( $order->get_id() );
+		$this->assertEquals( 123, $saved->get_total() );
+		$taxes = $saved->get_taxes();
+		$this->assertCount( 1, $taxes );
+		$this->assertGreaterThan( 0, current( $taxes )->get_id() );
+		$this->assertGreaterThan( 0, (float) $saved->get_cart_tax() );
+	}
+
+	/**
+	 * Test: the saving methods save as many times as before, so hooks see saved items, and their stage twins save nothing.
+	 */
+	public function test_saving_methods_keep_their_saves() {
+		$order  = WC_Helper_Order::create_order();
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'saves' );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$count       = 0;
+		$count_saves = static function ( $saved ) use ( $order, &$count ) {
+			if ( $saved === $order ) {
+				++$count;
+			}
+		};
+		add_action( 'woocommerce_after_order_object_save', $count_saves );
+		$saves = static function () use ( &$count ) {
+			return $count;
+		};
+
+		$before = $saves();
+		$order->calculate_totals( true );
+		$this->assertSame( 2, $saves() - $before );
+
+		$before = $saves();
+		$order->calculate_totals( false );
+		$this->assertSame( 1, $saves() - $before );
+
+		$before = $saves();
+		$order->apply_coupon( 'saves' );
+		$this->assertSame( 3, $saves() - $before );
+
+		$item_ids = array();
+		$listener = static function ( $and_taxes, $listened_order ) use ( &$item_ids ) {
+			$item_ids = array_keys( $listened_order->get_items( 'coupon' ) );
+		};
+		add_action( 'woocommerce_order_after_calculate_totals', $listener, 10, 2 );
+		$order->calculate_totals( true );
+		remove_action( 'woocommerce_order_after_calculate_totals', $listener, 10 );
+		$this->assertCount( 1, $item_ids );
+		$this->assertIsInt( $item_ids[0] );
+
+		$before = $saves();
+		$order->stage_totals( true );
+		$order->stage_coupon_removal( 'saves' );
+		remove_action( 'woocommerce_after_order_object_save', $count_saves );
+		$this->assertSame( 0, $saves() - $before );
+	}
+
+	/**
+	 * Test: stage_totals recalculates the totals in memory and saves nothing until the next save.
+	 */
+	public function test_stage_totals_saves_nothing() {
+		$order    = WC_Helper_Order::create_order();
+		$shipping = current( $order->get_items( 'shipping' ) );
+		$shipping->set_total( 20 );
+
+		$this->assertEquals( 60, $order->stage_totals( false ) );
+		$this->assertEquals( 50, wc_get_order( $order->get_id() )->get_total() );
+
+		$order->save();
+		$this->assertEquals( 60, wc_get_order( $order->get_id() )->get_total() );
+	}
+
+	/**
+	 * Test: stage_coupon and stage_coupon_removal change the order in memory, and the next save writes the order and fires the removed coupon action.
+	 */
+	public function test_stage_coupon_and_removal_write_on_save() {
+		$order  = WC_Helper_Order::create_order();
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'staged' );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$this->assertTrue( $order->stage_coupon( 'staged' ) );
+		$this->assertEquals( 40, $order->get_total() );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_items( 'coupon' ) );
+		$this->assertEquals( 50, wc_get_order( $order->get_id() )->get_total() );
+
+		$order->save();
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_items( 'coupon' ) );
+		$this->assertEquals( 40, wc_get_order( $order->get_id() )->get_total() );
+
+		$removed = did_action( 'woocommerce_order_removed_coupon' );
+		$this->assertTrue( $order->stage_coupon_removal( 'staged' ) );
+		$this->assertEquals( 50, $order->get_total() );
+		$this->assertSame( 0, did_action( 'woocommerce_order_removed_coupon' ) - $removed );
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_items( 'coupon' ) );
+
+		$order->save();
+		$this->assertSame( 1, did_action( 'woocommerce_order_removed_coupon' ) - $removed );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_items( 'coupon' ) );
+		$this->assertEquals( 50, wc_get_order( $order->get_id() )->get_total() );
+	}
+
+	/**
+	 * Create and save a fixed cart coupon.
+	 *
+	 * @param string $code        Coupon code.
+	 * @param int    $usage_count Usage count to start with.
+	 * @return WC_Coupon
+	 */
+	private function create_fixed_cart_coupon( string $code, int $usage_count = 0 ): WC_Coupon {
+		$coupon = new WC_Coupon();
+		$coupon->set_code( $code );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 1 );
+		$coupon->set_usage_count( $usage_count );
+		$coupon->save();
+
+		return $coupon;
+	}
+
+	/**
+	 * @testdox Two staged coupons are counted once each when the order is saved.
+	 */
+	public function test_staged_coupons_are_counted_once_each(): void {
+		$order = WC_Helper_Order::create_order();
+		$this->create_fixed_cart_coupon( 'staged-a' );
+		$this->create_fixed_cart_coupon( 'staged-b' );
+
+		$order->stage_coupon( 'staged-a' );
+		$order->stage_coupon( 'staged-b' );
+		$order->save();
+
+		$this->assertSame( 1, ( new WC_Coupon( 'staged-a' ) )->get_usage_count() );
+		$this->assertSame( 1, ( new WC_Coupon( 'staged-b' ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox A coupon that apply_coupon() adds after a staged coupon is counted once.
+	 */
+	public function test_coupon_applied_after_a_staged_coupon_is_counted_once(): void {
+		$order = WC_Helper_Order::create_order();
+		$this->create_fixed_cart_coupon( 'staged-first' );
+		$this->create_fixed_cart_coupon( 'applied-second' );
+
+		$order->stage_coupon( 'staged-first' );
+		$order->apply_coupon( 'applied-second' );
+
+		$this->assertSame( 1, ( new WC_Coupon( 'staged-first' ) )->get_usage_count() );
+		$this->assertSame( 1, ( new WC_Coupon( 'applied-second' ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox A staged coupon is counted once when payment_complete() saves the order.
+	 */
+	public function test_staged_coupon_is_counted_once_on_payment_complete(): void {
+		$order = WC_Helper_Order::create_order();
+		$this->create_fixed_cart_coupon( 'staged-paid' );
+
+		$order->stage_coupon( 'staged-paid' );
+		$order->payment_complete();
+
+		$this->assertSame( 1, ( new WC_Coupon( 'staged-paid' ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox A staged coupon is counted on an order that already recorded its coupon usage.
+	 */
+	public function test_staged_coupon_is_counted_on_a_recorded_order(): void {
+		$order = WC_Helper_Order::create_order();
+		$this->create_fixed_cart_coupon( 'recorded' );
+		$this->create_fixed_cart_coupon( 'staged-late' );
+		$order->apply_coupon( 'recorded' );
+
+		$order->stage_coupon( 'staged-late' );
+		$order->save();
+
+		$this->assertSame( 1, ( new WC_Coupon( 'recorded' ) )->get_usage_count() );
+		$this->assertSame( 1, ( new WC_Coupon( 'staged-late' ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox A coupon that apply_coupon() adds after the staged removal of the only recorded coupon is counted once.
+	 */
+	public function test_coupon_applied_after_staged_removal_of_recorded_coupon_is_counted_once(): void {
+		$order = WC_Helper_Order::create_order();
+		$this->create_fixed_cart_coupon( 'recorded-removed' );
+		$this->create_fixed_cart_coupon( 'applied-replacement' );
+		$order->apply_coupon( 'recorded-removed' );
+
+		$order->stage_coupon_removal( 'recorded-removed' );
+		$order->apply_coupon( 'applied-replacement' );
+
+		$this->assertSame( 0, ( new WC_Coupon( 'recorded-removed' ) )->get_usage_count() );
+		$this->assertSame( 1, ( new WC_Coupon( 'applied-replacement' ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox A coupon staged after the staged removal of the only recorded coupon is counted once on save.
+	 */
+	public function test_coupon_staged_after_staged_removal_of_recorded_coupon_is_counted_once(): void {
+		$order = WC_Helper_Order::create_order();
+		$this->create_fixed_cart_coupon( 'recorded-replaced' );
+		$this->create_fixed_cart_coupon( 'staged-replacement' );
+		$order->apply_coupon( 'recorded-replaced' );
+
+		$order->stage_coupon_removal( 'recorded-replaced' );
+		$order->stage_coupon( 'staged-replacement' );
+		$order->save();
+
+		$this->assertSame( 0, ( new WC_Coupon( 'recorded-replaced' ) )->get_usage_count() );
+		$this->assertSame( 1, ( new WC_Coupon( 'staged-replacement' ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Removing a staged coupon before the save leaves no usage of that coupon on the order.
+	 */
+	public function test_removing_a_staged_coupon_leaves_no_usage(): void {
+		$order = WC_Helper_Order::create_order();
+		$kept  = $this->create_fixed_cart_coupon( 'kept' );
+		$this->create_fixed_cart_coupon( 'staged-removed', 1 );
+		$order->apply_coupon( 'kept' );
+
+		$order->stage_coupon( 'staged-removed' );
+		$order->stage_coupon_removal( 'staged-removed' );
+		$order->save();
+
+		$this->assertSame( 1, ( new WC_Coupon( 'kept' ) )->get_usage_count() );
+		$this->assertSame( 1, ( new WC_Coupon( 'staged-removed' ) )->get_usage_count() );
+		$this->assertSame( array( $kept->get_id() ), array_keys( wc_get_order( $order->get_id() )->get_meta( '_coupon_usage_identities' ) ) );
+	}
+
+	/**
+	 * @testdox A staged product item that the order removes before the save is not written.
+	 */
+	public function test_staged_product_item_removed_before_save_is_not_written(): void {
+		$order = new WC_Order();
+		$order->save();
+
+		$order->stage_product_item( WC_Helper_Product::create_simple_product() );
+		$order->stage_order_items_removal( 'line_item' );
+		$order->save();
+
+		$this->assertCount( 0, $order->get_items() );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_items() );
+	}
+
+	/**
+	 * Build an order of a class that overrides the saving methods without overriding their stage_*() methods.
+	 *
+	 * @return WC_Order
+	 */
+	private function get_order_that_has_not_adopted_stage_methods() {
+		// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
+		$object = new class() extends WC_Order {
+			public function update_status( $new_status, $note = '', $manual = false ) {
+				return parent::update_status( $new_status, $note, $manual );
+			}
+			public function payment_complete( $transaction_id = '' ) {
+				return parent::payment_complete( $transaction_id );
+			}
+			public function add_product( $product, $qty = 1, $args = array() ) {
+				return parent::add_product( $product, $qty, $args );
+			}
+			public function calculate_totals( $and_taxes = true ) {
+				return parent::calculate_totals( $and_taxes );
+			}
+			public function apply_coupon( $raw_coupon ) {
+				return parent::apply_coupon( $raw_coupon );
+			}
+			public function remove_coupon( $code ) {
+				return parent::remove_coupon( $code );
+			}
+			public function recalculate_coupons() {
+				parent::recalculate_coupons();
+			}
+			public function calculate_shipping() {
+				return parent::calculate_shipping();
+			}
+			public function calculate_taxes( $args = array() ) {
+				parent::calculate_taxes( $args );
+			}
+			public function update_taxes() {
+				parent::update_taxes();
+			}
+			public function remove_order_items( $type = null ) {
+				parent::remove_order_items( $type );
+			}
+		};
+		// phpcs:enable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
+		$object->save();
+
+		return $object;
+	}
+
+	/**
+	 * Test: a class that overrides the saving methods and has not adopted the stage methods keeps working through the saving methods.
+	 */
+	public function test_saving_methods_work_on_a_class_that_has_not_adopted_stage_methods() {
+		$object = $this->get_order_that_has_not_adopted_stage_methods();
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'unadopted' );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 1 );
+		$coupon->save();
+
+		$item_id = $object->add_product( WC_Helper_Product::create_simple_product(), 2 );
+		$this->assertGreaterThan( 0, $item_id );
+		$this->assertTrue( $object->apply_coupon( 'unadopted' ) );
+		$this->assertCount( 1, $object->get_items( 'coupon' ) );
+		$this->assertTrue( $object->remove_coupon( 'unadopted' ) );
+		$object->recalculate_coupons();
+		$object->calculate_shipping();
+		$object->calculate_taxes();
+		$object->update_taxes();
+		$this->assertEquals( 20, $object->calculate_totals() );
+		$this->assertTrue( $object->update_status( OrderStatus::ON_HOLD, '', true ) );
+		$this->assertTrue( $object->payment_complete( '12345' ) );
+		$object->remove_order_items( 'line_item' );
+		$object->save();
+
+		$stored = wc_get_order( $object->get_id() );
+		$this->assertSame( '12345', $stored->get_transaction_id() );
+		$this->assertCount( 0, $stored->get_items() );
+	}
+
+	/**
+	 * Test: a direct call of a stage method refuses a class that overrides its saving method without overriding the stage method.
+	 */
+	public function test_stage_methods_refuse_a_class_that_has_not_adopted_them() {
+		$calls = array(
+			'stage_status'               => array( OrderStatus::ON_HOLD, '', true ),
+			'stage_payment_complete'     => array( '12345' ),
+			'stage_product_item'         => array( WC_Helper_Product::create_simple_product() ),
+			'stage_totals'               => array(),
+			'stage_coupon'               => array( 'missing' ),
+			'stage_coupon_removal'       => array( 'missing' ),
+			'stage_recalculated_coupons' => array(),
+			'stage_shipping_total'       => array(),
+			'stage_taxes'                => array(),
+			'stage_tax_items'            => array(),
+			'stage_order_items_removal'  => array(),
+		);
+
+		foreach ( $calls as $stage_method => $args ) {
+			$object = $this->get_order_that_has_not_adopted_stage_methods();
+			try {
+				$object->$stage_method( ...$args );
+				$this->fail( $stage_method . ' did not refuse the class.' );
+			} catch ( WC_Data_Exception $e ) {
+				$this->assertSame( 'woocommerce_data_staging_unsupported', $e->getErrorCode(), $stage_method );
+				$this->assertStringContainsString( $stage_method . '()', $e->getMessage() );
+				$this->assertSame( OrderStatus::PENDING, $object->get_status(), $stage_method );
+			}
+		}
+	}
+
+	/**
+	 * Test: no stage method refuses Core's own order classes, and each stage method runs on a plain order.
+	 */
+	public function test_stage_methods_do_not_refuse_core_order_classes() {
+		$pairs = array(
+			'remove_order_items'  => 'stage_order_items_removal',
+			'apply_coupon'        => 'stage_coupon',
+			'remove_coupon'       => 'stage_coupon_removal',
+			'recalculate_coupons' => 'stage_recalculated_coupons',
+			'add_product'         => 'stage_product_item',
+			'calculate_shipping'  => 'stage_shipping_total',
+			'calculate_taxes'     => 'stage_taxes',
+			'update_taxes'        => 'stage_tax_items',
+			'calculate_totals'    => 'stage_totals',
+		);
+		foreach ( $pairs as $method => $stage_method ) {
+			$this->assertNull( StagedMethod::unstaged_class( new WC_Order(), $method, $stage_method ), $stage_method );
+			$this->assertNull( StagedMethod::unstaged_class( new WC_Order_Refund(), $method, $stage_method ), $stage_method );
+		}
+		$this->assertNull( StagedMethod::unstaged_class( new WC_Order(), 'update_status', 'stage_status' ) );
+		$this->assertNull( StagedMethod::unstaged_class( new WC_Order(), 'payment_complete', 'stage_payment_complete' ) );
+	}
+
+	/**
+	 * Test: update_status fires woocommerce_order_edit_status before it writes and after the paid and completed dates are set, and set_status fires it before those dates are set.
+	 */
+	public function test_edit_status_action_fires_before_the_write() {
+		$events   = array();
+		$object   = null;
+		$listener = static function ( $order_id ) use ( &$events, &$object ) {
+			$events[] = array(
+				wc_get_order( $order_id )->get_status(),
+				null === $object->get_date_paid( 'edit' ),
+				null === $object->get_date_completed( 'edit' ),
+			);
+		};
+		add_action( 'woocommerce_order_edit_status', $listener );
+
+		$object = new WC_Order();
+		$object->save();
+		$object->update_status( OrderStatus::COMPLETED, '', true );
+
+		$object = new WC_Order();
+		$object->save();
+		$object->set_status( OrderStatus::COMPLETED, '', true );
+		$set = array( null !== $object->get_date_paid( 'edit' ), null !== $object->get_date_completed( 'edit' ) );
+
+		remove_action( 'woocommerce_order_edit_status', $listener );
+		$this->assertSame( array( OrderStatus::PENDING, false, false ), $events[0] );
+		$this->assertSame( array( OrderStatus::PENDING, true, true ), $events[1] );
+		$this->assertSame( array( true, true ), $set );
 	}
 
 	/**
