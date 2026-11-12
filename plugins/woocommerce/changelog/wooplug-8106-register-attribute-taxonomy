@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-New product attributes now work right away in the same request, and the same attribute can no longer be created twice.
+Fix new product attributes rejecting values added right after creation, and stop duplicate attributes from being saved.
