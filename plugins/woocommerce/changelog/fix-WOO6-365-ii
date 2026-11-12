@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Verify there aren't more specific variations when adding a variation to cart
+Stop a later variation from being added when an earlier variation already matches the selected options.

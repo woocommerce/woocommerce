@@ -1,6 +1,6 @@
 <?php
 /**
- * Variation specificity checks for add to cart.
+ * Checks whether an earlier variation already matches an add to cart selection.
  *
  * @package WooCommerce\Internal\ProductVariations
  */
@@ -15,18 +15,18 @@ use WC_Product_Variation;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Detects when an earlier variation matches a selection more specifically.
+ * Detects when an earlier variation already matches the attributes being added.
  *
  * @internal
  *
  * @since 11.4.0
  */
-class VariationSpecificity {
+class EarlierVariationMatch {
 
 	/**
-	 * Whether an earlier available variation matches this selection with fewer "any" attributes.
+	 * Whether an earlier available variation matches this selection.
 	 *
-	 * Disabled and unpriced variations are ignored. Out-of-stock variations are ignored when out-of-stock products are hidden from the catalog.
+	 * Fully specified variations return false, so they can still be added by their own ID. Disabled and unpriced variations are ignored. Out-of-stock variations are ignored when out-of-stock products are hidden from the catalog.
 	 *
 	 * @since 11.4.0
 	 *
@@ -34,7 +34,7 @@ class VariationSpecificity {
 	 * @param array<string, mixed> $selected_attributes Selected add-to-cart attribute values.
 	 * @return bool
 	 */
-	public function has_more_specific_match( WC_Product_Variation $variation, array $selected_attributes ): bool {
+	public function has_earlier_match( WC_Product_Variation $variation, array $selected_attributes ): bool {
 		$current_any_count = count( array_keys( $variation->get_attributes( 'edit' ), '', true ) );
 		if ( 0 === $current_any_count ) {
 			return false;
@@ -76,13 +76,8 @@ class VariationSpecificity {
 				continue;
 			}
 
-			$attributes = $earlier->get_attributes( 'edit' );
-			if ( count( array_keys( $attributes, '', true ) ) >= $current_any_count ) {
-				continue;
-			}
-
 			$matches = true;
-			foreach ( $attributes as $name => $value ) {
+			foreach ( $earlier->get_attributes( 'edit' ) as $name => $value ) {
 				$value = (string) $value;
 				if ( '' !== $value && ( $selected[ $name ] ?? null ) !== $value ) {
 					$matches = false;
