@@ -163,25 +163,26 @@ class StoreResponses {
 
 	/**
 	 * The newest published product of a type the report checks that is in the shop catalog, or null when there is none.
-	 * Password protected products are skipped, since their page shows a form instead of the product. A product with
+	 * Password protected products are left out, since their page shows a form instead of the product. A product with
 	 * a price comes first, so one unfinished product doesn't decide a check for the whole store; only the five newest
-	 * are looked at.
+	 * of the others are looked at.
 	 */
 	public function product(): ?\WC_Product {
 		if ( null === $this->product ) {
 			$this->product = false;
 			$products      = wc_get_products(
 				array(
-					'status'     => ProductStatus::PUBLISH,
-					'visibility' => CatalogVisibility::CATALOG,
-					'type'       => ProductScan::SUPPORTED_TYPES,
-					'limit'      => 5,
-					'orderby'    => 'date',
-					'order'      => 'DESC',
+					'status'       => ProductStatus::PUBLISH,
+					'visibility'   => CatalogVisibility::CATALOG,
+					'type'         => ProductScan::SUPPORTED_TYPES,
+					'has_password' => false,
+					'limit'        => 5,
+					'orderby'      => 'date',
+					'order'        => 'DESC',
 				)
 			);
 			foreach ( is_array( $products ) ? $products : array() as $product ) {
-				if ( ! $product instanceof \WC_Product || '' !== $product->get_post_password() ) {
+				if ( ! $product instanceof \WC_Product ) {
 					continue;
 				}
 				if ( false === $this->product ) {
@@ -250,6 +251,11 @@ class StoreResponses {
 			}
 			$response = $this->request( $url );
 			if ( null === $response ) {
+				// When the home page can't be reached, other URLs would fail the same way, so a scan
+				// of a store that can't reach itself waits for one timeout, not one per URL.
+				if ( untrailingslashit( $asked ) === untrailingslashit( home_url( '/' ) ) ) {
+					$this->reachable = false;
+				}
 				return null;
 			}
 			$location = $response['headers']['location'] ?? '';
@@ -288,12 +294,6 @@ class StoreResponses {
 			)
 		);
 		if ( is_wp_error( $response ) ) {
-			// When the home page can't be reached, other URLs would fail the same way, so a scan
-			// of a store that can't reach itself waits for one timeout, not one per URL. Only the
-			// plain GET counts: a Markdown or POST request can fail where the page itself loads.
-			if ( array() === $args && untrailingslashit( $url ) === untrailingslashit( home_url( '/' ) ) ) {
-				$this->reachable = false;
-			}
 			return null;
 		}
 		$headers = array();

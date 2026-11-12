@@ -789,14 +789,19 @@ class StoreOutputChecks {
 	}
 
 	/**
-	 * Whether a test passes on the home page and the product page, of those that loaded.
-	 * Null when neither loaded.
+	 * Whether a test passes on the home page and the product page. Null when either didn't load;
+	 * a store with no product to check is judged on its home page.
 	 *
 	 * @param StoreResponses $responses Store responses.
 	 * @param callable       $test      Test, given the HTML and the response headers.
 	 */
 	private function on_pages( StoreResponses $responses, callable $test ): ?bool {
-		return self::on_loaded( array( $responses->home_page(), $responses->product_page() ), $test );
+		$home    = $responses->home_page();
+		$product = $responses->product_page();
+		if ( null === $home || ( null === $product && null !== $responses->product() ) ) {
+			return null;
+		}
+		return self::on_loaded( array( $home, $product ), $test );
 	}
 
 	/**
@@ -867,6 +872,7 @@ class StoreOutputChecks {
 			return $has;
 		}
 		// Links with a query string are skipped: one such as ?add-to-cart=12 would act on the store.
+		$links   = array_map( static fn( string $link ): string => explode( '#', $link, 2 )[0], $links );
 		$links   = array_filter( $links, static fn( string $link ): bool => $responses->is_store_url( $link ) && ! str_contains( $link, '?' ) );
 		$links   = array_slice( array_values( array_unique( $links ) ), 0, self::MAX_LLMS_TXT_LINKS );
 		$unknown = false;
@@ -931,7 +937,8 @@ class StoreOutputChecks {
 				}
 				// The amount as the store prints it, with its separators and filters, without the currency symbol.
 				$amount = PageMarkup::text( wc_price( wc_get_price_to_display( $product ) ) );
-				$amount = trim( (string) preg_replace( '/[^\d.,\x{00A0}\x{2009}\x{202F}\' ]/u', '', $amount ) );
+				$amount = (string) preg_replace( '/[^\d.,\x{00A0}\x{2009}\x{202F}\' ]/u', '', $amount );
+				$amount = (string) preg_replace( '/^\D+|\D+$/u', '', $amount );
 				if ( '' === $amount ) {
 					return false;
 				}
@@ -1069,7 +1076,8 @@ class StoreOutputChecks {
 	}
 
 	/**
-	 * Whether a JSON-LD price is a number, or text that contains one (`10.00`, `10,00`, `10.00 USD`).
+	 * Whether a JSON-LD price is a number, or text that is one with an optional currency symbol or code
+	 * (`10.00`, `10,00`, `$10`, `10,00 kr.`, `10.00 USD`). Text such as `call 555` is not.
 	 *
 	 * @param mixed $value Price value.
 	 */
@@ -1080,8 +1088,9 @@ class StoreOutputChecks {
 		if ( ! is_string( $value ) ) {
 			return false;
 		}
-		$normalized = str_replace( array( ',', ' ', "\u{00A0}" ), array( '.', '', '' ), $value );
-		return 1 === preg_match( '/-?\d+(?:\.\d+)?/', $normalized );
+		$currency   = '(?:\p{Sc}|\p{L}{1,3}\.?)?';
+		$normalized = (string) preg_replace( '/[\s\x{00A0}\x{2009}\x{202F}]+/u', '', $value );
+		return 1 === preg_match( '/^' . $currency . '-?\d(?:[\d.,\']*\d)?' . $currency . '$/u', $normalized );
 	}
 
 	/**

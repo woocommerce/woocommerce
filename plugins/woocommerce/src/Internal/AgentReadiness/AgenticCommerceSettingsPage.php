@@ -316,7 +316,11 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 * @param array<string, mixed> $report Stored report.
 	 */
 	private function render_product_checks( array $report ): void {
-		$channels = is_array( $report['channels'] ?? null ) ? $report['channels'] : array();
+		$channels = array_filter( is_array( $report['channels'] ?? null ) ? $report['channels'] : array(), 'is_array' );
+		$channels = array_map(
+			static fn( array $channel ): array => $channel + array_fill_keys( array( 'url', 'name', 'spec', 'listable', 'not_listable', 'with_gaps', 'complete' ), '' ),
+			$channels
+		);
 		$failing  = array_filter(
 			is_array( $report['checks'] ?? null ) ? $report['checks'] : array(),
 			static fn( $check ): bool => is_array( $check ) && (int) ( $check['count'] ?? 0 ) > 0

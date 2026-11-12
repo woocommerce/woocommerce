@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
+use Automattic\WooCommerce\Internal\AgentReadiness\JsonLd;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreOutputChecks;
 use WC_Helper_Product;
 use WC_Structured_Data;
@@ -731,6 +732,29 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		$no_price['offers']['price'] = '10.00 USD';
 		$this->serve( array( $path => array( 200, self::page_with( array( $no_price ) ) ) ) );
 		$this->assertSame( array( true, true, true ), $this->product_results(), 'A price with a currency code counts' );
+
+		foreach ( array( '$10.00', '€10', '10,00 kr.', "10\u{202F}000.00" ) as $text ) {
+			remove_all_filters( 'pre_http_request' );
+			$no_price['offers']['price'] = $text;
+			$this->serve( array( $path => array( 200, self::page_with( array( $no_price ) ) ) ) );
+			$this->assertSame( array( true, true, true ), $this->product_results(), "A price with a symbol or spaces counts: $text" );
+		}
+
+		foreach ( array( 'call 555', 'Free 2 day' ) as $text ) {
+			remove_all_filters( 'pre_http_request' );
+			$no_price['offers']['price'] = $text;
+			$this->serve( array( $path => array( 200, self::page_with( array( $no_price ) ) ) ) );
+			$this->assertSame( array( true, true, false ), $this->product_results(), "Text with a number in it is not a price: $text" );
+		}
+	}
+
+	/**
+	 * @testdox JSON-LD is read from a script whose type attribute names it, also when another attribute holds a >; a data-type attribute does not count.
+	 */
+	public function test_jsonld_script_tag(): void {
+		$block = '{"@type":"Product","name":"Mug"}';
+		$this->assertCount( 1, JsonLd::items( '<script data-x="a>b" type="application/ld+json">' . $block . '</script>', 'Product' ) );
+		$this->assertCount( 0, JsonLd::items( '<script data-type="application/ld+json">' . $block . '</script>', 'Product' ) );
 	}
 
 	/**
@@ -758,15 +782,15 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		$open->set_date_created( time() - HOUR_IN_SECONDS );
 		$open->set_image_id( self::factory()->attachment->create_object( array( 'file' => 'image.jpg' ) ) );
 		$open->save();
-		$locked = WC_Helper_Product::create_simple_product();
-		$locked->set_post_password( 'secret' );
-		$locked->save();
-		$this->serve(
-			array(
-				self::path_of( $open )   => array( 200, self::page_with( array( self::core_product_jsonld( $open ) ) ) ),
-				self::path_of( $locked ) => array( 200, self::page_with( array() ) ),
-			)
-		);
+		$responses = array( self::path_of( $open ) => array( 200, self::page_with( array( self::core_product_jsonld( $open ) ) ) ) );
+		// More locked products than the five newest that are looked at.
+		for ( $i = 0; $i < 6; $i++ ) {
+			$locked = WC_Helper_Product::create_simple_product();
+			$locked->set_post_password( 'secret' );
+			$locked->save();
+			$responses[ self::path_of( $locked ) ] = array( 200, self::page_with( array() ) );
+		}
+		$this->serve( $responses );
 
 		$this->assertSame( array( true, true, true ), $this->product_results() );
 	}

@@ -197,6 +197,11 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertContains( '/llms.txt', $this->requested );
 		$this->assertTrue( $this->results()['open_graph_tags'], 'A slow link does not stop the other checks' );
 
+		$responses['/llms.txt'] = array( 200, "# Shop\n" . implode( '', array_map( static fn( int $i ): string => "- [Part $i](" . home_url( "/about/#part-$i" ) . ")\n", range( 1, 5 ) ) ) . '- [Old](' . home_url( '/old/' ) . ")\n" );
+		$responses['/old/']     = array( 404, '' );
+		$this->serve( $responses );
+		$this->assertFalse( $this->results()['llms_txt_links_resolve'], 'Links to anchors on one page are one link' );
+
 		$responses['/old/'] = array( 403, 'Blocked' );
 		$this->serve( $responses );
 		$this->assertNull( $this->results()['llms_txt_links_resolve'], 'A firewall refusing the store its own page is not a broken link' );
@@ -251,18 +256,45 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox When the home page times out, nothing else is loaded and every served check is couldn't check; with only the home page, the page checks read it alone.
+	 * @testdox A price with a currency symbol after it that ends in a period (10,00 kr.) is found in the page.
+	 */
+	public function test_price_with_symbol_ending_in_period(): void {
+		update_option( 'woocommerce_currency', 'DKK' );
+		update_option( 'woocommerce_currency_pos', 'right_space' );
+		update_option( 'woocommerce_price_decimal_sep', ',' );
+		update_option( 'woocommerce_price_thousand_sep', '.' );
+		$responses                          = $this->good_store();
+		$responses[ $this->product_path() ] = array( 200, self::page( '', '<h1>Blue &amp; Gold Mug</h1><p class="price">10,00&nbsp;kr.</p>' ) );
+		$this->serve( $responses );
+
+		$this->assertTrue( $this->results()['content_in_raw_html'] );
+	}
+
+	/**
+	 * @testdox When the home page times out, also after a redirect, nothing else is loaded and every served check is couldn't check. A product page that doesn't load leaves the page checks couldn't check; with no product, they read the home page alone.
 	 */
 	public function test_couldnt_check(): void {
 		$this->serve( array( '/' => null ) );
 		$this->assertSame( array_fill_keys( self::SERVED_CHECKS, null ), $this->results() );
 		$this->assertSame( array( '/' ), $this->requested, 'Nothing else is requested when the home page times out' );
 
+		$this->serve(
+			array(
+				'/'    => array( 301, '', array( 'location' => home_url( '/en/' ) ) ),
+				'/en/' => null,
+			)
+		);
+		$this->assertSame( array_fill_keys( self::SERVED_CHECKS, null ), $this->results() );
+		$this->assertSame( array( '/', '/en/' ), $this->requested, 'Nothing else is requested when the redirected home page times out' );
+
 		$this->serve( array( '/' => $this->good_store()['/'] ) );
 		$results = $this->results();
-		$this->assertTrue( $results['open_graph_tags'] );
+		$this->assertNull( $results['open_graph_tags'], 'The product page did not load' );
 		$this->assertNull( $results['canonical_url'] );
 		$this->assertNull( $results['content_in_raw_html'] );
+
+		$this->product->delete( true );
+		$this->assertTrue( $this->results()['open_graph_tags'], 'With no product, the home page alone' );
 	}
 
 	/**
