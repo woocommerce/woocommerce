@@ -81,8 +81,9 @@ export function parseCsvRecords( text: string, delimiter: string ): string[][] {
 	return records;
 }
 
-// Mirrors WC_CSV_Exporter::escape_data(): a leading trigger character can run
-// as a formula when the file is opened in a spreadsheet.
+// A leading trigger character can run as a formula when the file is opened in
+// a spreadsheet. Unlike WC_CSV_Exporter::escape_data(), numeric text such as
+// `-12.5` is left alone, so negative numbers stay numbers.
 const ACTIVE_CONTENT_TRIGGERS = [ '=', '+', '-', '@', '\t', '\r' ];
 
 function escapeCsvField( value: string, delimiter: string ): string {
@@ -127,17 +128,33 @@ export function buildFailedRowsCsv(
 	const header =
 		records.find( ( record ) => ! isBlankRecord( record ) ) ?? [];
 
-	const out: string[][] = [
-		[ ...header, __( 'Import error', 'woocommerce' ) ],
-	];
-	failedRows.forEach( ( row ) => {
-		// Physical index, including blank records. A missing index means the
-		// report names a row the file does not have.
-		const record = records[ row.row - 1 ] ?? [
+	// Physical index, including blank records. A missing index means the
+	// report names a row the file does not have.
+	const failedRecords = failedRows.map( ( row ) => ( {
+		record: records[ row.row - 1 ] ?? [
 			__( '(original row unavailable)', 'woocommerce' ),
-		];
-		out.push( [ ...record, row.message ] );
-	} );
+		],
+		message: row.message,
+	} ) );
+
+	// Pad every record to the widest one so the reason always lands in the
+	// "Import error" column, also for rows shorter or wider than the header.
+	const width = Math.max(
+		header.length,
+		...failedRecords.map( ( { record } ) => record.length )
+	);
+	const pad = ( record: string[] ): string[] => [
+		...record,
+		...Array< string >( width - record.length ).fill( '' ),
+	];
+
+	const out: string[][] = [
+		[ ...pad( header ), __( 'Import error', 'woocommerce' ) ],
+		...failedRecords.map( ( { record, message } ) => [
+			...pad( record ),
+			message,
+		] ),
+	];
 
 	return out
 		.map( ( record ) =>

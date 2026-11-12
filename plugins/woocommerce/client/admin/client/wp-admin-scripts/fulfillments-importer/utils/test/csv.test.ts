@@ -134,13 +134,49 @@ describe( 'buildFailedRowsCsv', () => {
 		const csv = buildFailedRowsCsv( file, ',', failed );
 
 		expect( csv ).toContain( `"'=HYPERLINK(""http://evil"")"` );
-		// Negative numbers stay untouched, like WC_CSV_Exporter::escape_data().
+		// Negative numbers stay untouched. WC_CSV_Exporter::escape_data() would
+		// prefix this one, since fgetcsv() hands it a string.
 		const numeric = buildFailedRowsCsv(
 			'order,amount\n1,x\n9,-12.5\n',
 			',',
 			failed
 		);
 		expect( numeric ).toContain( '9,-12.5,' );
+	} );
+
+	it( 'pads a row shorter than the header so the reason stays in its column', () => {
+		const shortFailed: ImporterRowResult[] = [
+			{
+				row: 3,
+				status: 'failed',
+				code: 'missing_provider',
+				message: 'Shipment provider is required',
+				order_number: '1002',
+			},
+		];
+		const csv = buildFailedRowsCsv(
+			'order_number,tracking_number,shipment_provider,tracking_url\n1001,TRK-1,ups,\n1002,TRK-2\n',
+			',',
+			shortFailed
+		);
+
+		expect( csv.split( '\r\n' ) ).toEqual( [
+			'order_number,tracking_number,shipment_provider,tracking_url,Import error',
+			'1002,TRK-2,,,Shipment provider is required',
+		] );
+	} );
+
+	it( 'widens the header when a row has more cells than the header', () => {
+		const csv = buildFailedRowsCsv(
+			'order,tracking\n1,T-1\n9,T-2,extra\n',
+			',',
+			failed
+		);
+
+		expect( csv.split( '\r\n' ) ).toEqual( [
+			'order,tracking,,Import error',
+			'9,T-2,extra,"Order not found for order number ""9""."',
+		] );
 	} );
 
 	it( 'marks rows whose original record cannot be found', () => {
