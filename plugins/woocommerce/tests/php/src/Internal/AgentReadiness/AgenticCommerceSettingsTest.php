@@ -27,6 +27,8 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		// Report tests stay offline: store output checks would load the test site's pages.
+		StoreOutputChecksTest::block_requests();
 		include_once WC_ABSPATH . 'includes/admin/class-wc-admin-settings.php';
 		include_once WC_ABSPATH . 'includes/admin/settings/class-wc-settings-page.php';
 		set_current_screen( 'dashboard' );

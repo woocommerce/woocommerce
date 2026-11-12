@@ -165,7 +165,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 *
 	 * @param array<string, mixed>|null    $report Stored report.
 	 * @param array<int, array{id:string}> $live   Store conditions read now.
-	 * @return array<int, array{id:string,level:string,ok:bool|null,name:string,fix_url:string}>
+	 * @return array<int, array{id:string,level:string,ok:bool|null,name:string,fix:string,fix_url:string}>
 	 */
 	private static function scanned_checks( ?array $report, array $live ): array {
 		$live_ids = array_column( $live, 'id' );
@@ -179,6 +179,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 				'level'   => StoreConditions::LEVEL_RECOMMENDED,
 				'ok'      => isset( $check['ok'] ) ? (bool) $check['ok'] : null,
 				'name'    => (string) $check['name'],
+				'fix'     => (string) ( $check['fix'] ?? '' ),
 				'fix_url' => (string) ( $check['fix_url'] ?? '' ),
 			);
 		}
@@ -418,8 +419,8 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 * Agent readiness: the checks the last scan ran on what the store returns. They never
 	 * affect the switch, so they sit apart from the setup checks in Status.
 	 *
-	 * @param array<int, array{id:string,level:string,ok:bool|null,name:string,fix_url:string}> $checks   Scanned checks.
-	 * @param bool                                                                              $launched Whether the store is launched.
+	 * @param array<int, array{id:string,level:string,ok:bool|null,name:string,fix:string,fix_url:string}> $checks   Scanned checks.
+	 * @param bool                                                                                         $launched Whether the store is launched.
 	 */
 	private function render_readiness( array $checks, bool $launched ): void {
 		?>
@@ -447,7 +448,9 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 							<span class="wc-agentic-commerce-check__text"><?php echo esc_html( $check['name'] ); ?></span>
 							<?php if ( null === $check['ok'] ) : ?>
 								<span class="description"><?php echo $launched ? esc_html__( 'Your store could not load its own page. The next check tries again.', 'woocommerce' ) : esc_html__( 'Launch your store to run this check.', 'woocommerce' ); ?></span>
-							<?php elseif ( ! $check['ok'] && '' !== $check['fix_url'] ) : ?>
+							<?php elseif ( ! $check['ok'] && '' === $check['fix_url'] ) : ?>
+								<span class="description"><?php echo esc_html( $check['fix'] ); ?></span>
+							<?php elseif ( ! $check['ok'] ) : ?>
 								<a class="button" href="<?php echo esc_url( $check['fix_url'] ); ?>"><?php echo str_starts_with( $check['fix_url'], admin_url() ) ? esc_html__( 'Open settings', 'woocommerce' ) : esc_html__( 'Learn how', 'woocommerce' ); ?></a>
 							<?php endif; ?>
 						</li>

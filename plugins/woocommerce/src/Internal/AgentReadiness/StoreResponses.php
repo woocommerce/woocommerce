@@ -102,6 +102,22 @@ class StoreResponses {
 	}
 
 	/**
+	 * Whether a path or URL is on the store's host. Paths from the home URL are;
+	 * a //host/path reference is not, since a sitemap location must be a full URL.
+	 * Used so a robots.txt Sitemap line on another host is skipped, not treated
+	 * as a failed load of the store's own pages.
+	 *
+	 * @param string $url URL or path.
+	 */
+	public static function is_store_url( string $url ): bool {
+		if ( str_starts_with( $url, '/' ) ) {
+			return ! str_starts_with( $url, '//' );
+		}
+		$store = self::origin( home_url() );
+		return null !== $store && self::origin( $url ) === $store;
+	}
+
+	/**
 	 * Host and port of an http(s) URL, or null for any other scheme. The port is
 	 * only the one written in the URL, so moving from http to https on the
 	 * default ports stays on the store, while another port on the same host does not.
