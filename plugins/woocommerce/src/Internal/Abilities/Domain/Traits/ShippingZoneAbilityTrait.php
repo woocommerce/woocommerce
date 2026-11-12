@@ -193,6 +193,10 @@ trait ShippingZoneAbilityTrait {
 			);
 		}
 
+		if ( isset( $settings['min_amount'] ) && (float) wc_format_decimal( $settings['min_amount'] ) < 0 ) {
+			return new \WP_Error( 'woocommerce_ability_shipping_method_setting_invalid', __( 'The minimum order amount cannot be negative.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
 		// Free shipping ignores the minimum unless it is required, and an agent that sets one means it to apply.
 		if ( 'free_shipping' === $method->id && isset( $settings['min_amount'] ) && ! isset( $settings['requires'] ) && '' === (string) $method->get_option( 'requires' ) ) {
 			$settings['requires'] = 'min_amount';
