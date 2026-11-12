@@ -894,6 +894,39 @@ class StoreOutputChecks {
 	}
 
 	/**
+	 * Whether a served llms.txt holds WooCommerce's guidance, as WooCommerce's own file does.
+	 *
+	 * @param string $body    Served llms.txt.
+	 * @param string $section Guidance WooCommerce adds, '' when it adds none.
+	 */
+	public static function has_llms_txt_guidance( string $body, string $section ): bool {
+		$section = trim( $section );
+		return '' !== $section && str_contains( $body, $section );
+	}
+
+	/**
+	 * WooCommerce's llms.txt status: disabled, physical_file or unknown, with the guidance it adds.
+	 * Null when this WooCommerce has no llms.txt fallback, or it fails.
+	 *
+	 * @return array{status:string,section:string}|null
+	 */
+	public static function core_llms_txt_status(): ?array {
+		// Not in every WooCommerce version yet, so the class is named by string.
+		$class = 'Automattic\\WooCommerce\\Internal\\LlmsTxt\\LlmsTxt';
+		if ( ! class_exists( $class ) ) {
+			return null;
+		}
+		try {
+			$llms_txt = new $class();
+			$status   = is_object( $llms_txt ) && method_exists( $llms_txt, 'get_status' ) ? $llms_txt->get_status() : null;
+		} catch ( \Throwable $e ) {
+			wc_get_logger()->warning( 'Agent readiness could not read the llms.txt status: ' . $e->getMessage(), array( 'source' => 'agent-readiness' ) );
+			return null;
+		}
+		return is_array( $status ) && is_string( $status['status'] ?? null ) && is_string( $status['section'] ?? null ) ? $status : null;
+	}
+
+	/**
 	 * Whether the first few links in llms.txt to the store's own pages open. Links to other sites
 	 * aren't loaded. Null when one couldn't be loaded and none was broken.
 	 *

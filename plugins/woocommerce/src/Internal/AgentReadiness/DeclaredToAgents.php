@@ -60,7 +60,39 @@ class DeclaredToAgents {
 				'found' => $line[1],
 			);
 		}
+		$status = $this->llms_txt_status();
+		// In a subdirectory WooCommerce serves llms.txt under the home path, not at the host root read here.
+		if ( null !== $status && '' !== trim( $status['section'] ) && '' === trim( (string) wp_parse_url( home_url(), PHP_URL_PATH ), '/' ) ) {
+			$items[] = array(
+				'id'    => 'llms-txt-woocommerce-guidance',
+				'name'  => __( 'WooCommerce’s store guidance in llms.txt (Store API, UCP, policies)', 'woocommerce' ),
+				'found' => self::has_guidance( $responses, $status['section'] ),
+			);
+		}
 		return $items;
+	}
+
+	/**
+	 * WooCommerce's llms.txt status, null without its llms.txt fallback (woocommerce #70741).
+	 *
+	 * @return array{status:string,section:string}|null
+	 */
+	protected function llms_txt_status(): ?array {
+		return StoreOutputChecks::core_llms_txt_status();
+	}
+
+	/**
+	 * Whether the served llms.txt, from WooCommerce or any other provider, holds WooCommerce's guidance.
+	 *
+	 * @param StoreResponses $responses Responses of the scan.
+	 * @param string         $section   Guidance WooCommerce adds.
+	 */
+	private static function has_guidance( StoreResponses $responses, string $section ): ?bool {
+		$served = self::file_served( $responses, '/llms.txt' );
+		if ( true !== $served ) {
+			return $served;
+		}
+		return StoreOutputChecks::has_llms_txt_guidance( (string) ( $responses->get( StoreOutputChecks::host_root( '/llms.txt' ) )['body'] ?? '' ), $section );
 	}
 
 	/**
