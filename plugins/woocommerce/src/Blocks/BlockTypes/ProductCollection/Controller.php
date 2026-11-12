@@ -15,6 +15,11 @@ class Controller extends AbstractBlock {
 	use EnableBlockJsonAssetsTrait;
 
 	/**
+	 * Option that holds how many products each shop and category page shows on block themes.
+	 */
+	private const PRODUCTS_PER_PAGE_OPTION = 'woocommerce_catalog_products_per_page';
+
+	/**
 	 * Block name.
 	 *
 	 * @var string
@@ -70,6 +75,11 @@ class Controller extends AbstractBlock {
 			2
 		);
 
+		// Add the filter only after a value is saved. The Customizer hides "Rows per page" while this filter is in use.
+		if ( wp_is_block_theme() && false !== get_option( self::PRODUCTS_PER_PAGE_OPTION ) ) {
+			add_filter( 'loop_shop_per_page', array( $this, 'handle_loop_shop_per_page' ), 20, 1 );
+		}
+
 		// Register the backend settings so they can be used in the editor.
 		add_action( 'rest_api_init', array( $this, 'register_settings' ) );
 
@@ -84,6 +94,26 @@ class Controller extends AbstractBlock {
 		add_filter( 'render_block_data', array( $this, 'disable_enhanced_pagination' ), 10, 1 );
 
 		$this->register_core_collections_and_set_handler_store();
+	}
+
+	/**
+	 * Use the saved products per page on shop and category pages.
+	 *
+	 * In wp-admin it keeps the store default, so the editor shows that number until a value is saved.
+	 *
+	 * @internal
+	 * @since 11.4.0
+	 *
+	 * @param int $per_page Products per page from the store settings or another filter.
+	 * @return int
+	 */
+	public function handle_loop_shop_per_page( $per_page ) {
+		$value = get_option( self::PRODUCTS_PER_PAGE_OPTION );
+		if ( is_admin() || ! is_numeric( $value ) || (int) $value < 1 || (int) $value > 100 ) {
+			return $per_page;
+		}
+
+		return (int) $value;
 	}
 
 	/**
@@ -254,6 +284,25 @@ class Controller extends AbstractBlock {
 					),
 				),
 				'default'      => 'menu_order',
+			)
+		);
+
+		register_setting(
+			'options',
+			self::PRODUCTS_PER_PAGE_OPTION,
+			array(
+				'type'              => 'integer',
+				'description'       => __( 'How many products to show on each shop and category page.', 'woocommerce' ),
+				'label'             => __( 'Products per page', 'woocommerce' ),
+				'sanitize_callback' => 'absint',
+				'show_in_rest'      => array(
+					'name'   => self::PRODUCTS_PER_PAGE_OPTION,
+					'schema' => array(
+						'type'    => 'integer',
+						'minimum' => 1,
+						'maximum' => 100,
+					),
+				),
 			)
 		);
 	}

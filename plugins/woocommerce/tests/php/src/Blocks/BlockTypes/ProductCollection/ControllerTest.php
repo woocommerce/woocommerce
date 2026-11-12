@@ -74,6 +74,45 @@ class ControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should use the saved products per page only when it is between 1 and 100.
+	 * @testWith [null, 16]
+	 *           [24, 24]
+	 *           [0, 16]
+	 *           [101, 16]
+	 *
+	 * @param int|null $stored   Saved option value, or null when nothing is saved.
+	 * @param int      $expected Expected products per page.
+	 */
+	public function test_loop_shop_per_page_uses_store_wide_value( ?int $stored, int $expected ): void {
+		if ( null !== $stored ) {
+			update_option( 'woocommerce_catalog_products_per_page', $stored );
+		}
+
+		$this->assertSame( $expected, $this->sut->handle_loop_shop_per_page( 16 ) );
+	}
+
+	/**
+	 * @testdox Should save products per page as a site setting, refuse values above 100, and delete it on reset.
+	 */
+	public function test_products_per_page_setting_is_editable_through_rest(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$this->sut->register_settings();
+
+		$request = new \WP_REST_Request( 'POST', '/wp/v2/settings' );
+		$request->set_body_params( array( 'woocommerce_catalog_products_per_page' => 24 ) );
+		$response = rest_do_request( $request );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 24, (int) get_option( 'woocommerce_catalog_products_per_page' ) );
+
+		$request->set_body_params( array( 'woocommerce_catalog_products_per_page' => 101 ) );
+		$this->assertSame( 400, rest_do_request( $request )->get_status(), 'The settings endpoint refuses values above 100.' );
+
+		$request->set_body_params( array( 'woocommerce_catalog_products_per_page' => null ) );
+		rest_do_request( $request );
+		$this->assertFalse( get_option( 'woocommerce_catalog_products_per_page' ), 'Sending null deletes the option, so the store default comes back.' );
+	}
+
+	/**
 	 * @testdox Should add the viewed-product action to a linked Product Collection title.
 	 */
 	public function test_adds_view_product_directive_to_linked_product_title(): void {
