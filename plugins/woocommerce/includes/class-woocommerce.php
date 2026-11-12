@@ -55,7 +55,6 @@ use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\CustomerEmailVerification;
-use Automattic\WooCommerce\Internal\Tax\CartPricingContext;
 use Automattic\WooCommerce\StoreApi\Utilities\Ucp\IdempotencyStore;
 use Automattic\WooCommerce\Internal\StructuredData\OpenGraph;
 use Automattic\WooCommerce\Internal\SearchEngineVisibility;
@@ -427,7 +426,6 @@ final class WooCommerce {
 		$container->get( ChequeSettings::class );
 		$container->get( SettingsScreen::class );
 		$container->get( AbilitiesTracking::class );
-		$container->get( CartPricingContext::class );
 		$container->get( OpenGraph::class );
 		$container->get( SearchEngineVisibility::class );
 		$container->get( MenuIcons::class );

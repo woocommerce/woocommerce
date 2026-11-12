@@ -2,7 +2,6 @@
 namespace Automattic\WooCommerce\Blocks\Domain\Services;
 
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
-use Automattic\WooCommerce\Internal\Tax\CartPricingContext;
 use Automattic\WooCommerce\StoreApi\RoutesController;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\StoreApi;
@@ -179,45 +178,37 @@ class Hydration {
 			return false;
 		}
 
-		$cart_pricing_context = wc_get_container()->get( CartPricingContext::class );
-		$cart_pricing_context->start_dispatch( $request, $handler );
+		/**
+		 * Similar to WP core's `rest_dispatch_request` filter, this allows plugin to override hydrating the request.
+		 * Allows backward compatibility with the `rest_dispatch_request` filter by providing the same arguments.
+		 *
+		 * @since 8.9.0
+		 *
+		 * @param mixed            $hydration_result Result of the hydration. If not null, this will be used as the response.
+		 * @param WP_REST_Request  $request          Request used to generate the response.
+		 * @param string           $path             Request path matched for the request..
+		 * @param array            $handler          Route handler used for the request.
+		 */
+		$hydration_result = apply_filters( 'woocommerce_hydration_dispatch_request', null, $request, $path, $handler );
 
-		// End the dispatch even when a callback throws, so a cart route context cannot leak into the rest of the page.
-		try {
-			/**
-			 * Similar to WP core's `rest_dispatch_request` filter, this allows plugin to override hydrating the request.
-			 * Allows backward compatibility with the `rest_dispatch_request` filter by providing the same arguments.
-			 *
-			 * @since 8.9.0
-			 *
-			 * @param mixed            $hydration_result Result of the hydration. If not null, this will be used as the response.
-			 * @param WP_REST_Request  $request          Request used to generate the response.
-			 * @param string           $path             Request path matched for the request..
-			 * @param array            $handler          Route handler used for the request.
-			 */
-			$hydration_result = apply_filters( 'woocommerce_hydration_dispatch_request', null, $request, $path, $handler );
-
-			if ( null !== $hydration_result ) {
-				$response = $hydration_result;
-			} else {
-				$response = call_user_func_array( $handler['callback'], array( $request ) );
-			}
-
-			/**
-			 * Similar to WP core's `rest_request_after_callbacks` filter, this allows to modify the response after it has been generated.
-			 * Allows backward compatibility with the `rest_request_after_callbacks` filter by providing the same arguments.
-			 *
-			 * @since 8.9.0
-			 *
-			 * @param WP_REST_Response|WP_HTTP_Response|WP_Error|mixed $response Result to send to the client.
-			 *                                                                   Usually a WP_REST_Response or WP_Error.
-			 * @param array                                            $handler  Route handler used for the request.
-			 * @param WP_REST_Request                                  $request  Request used to generate the response.
-			 */
-			$response = apply_filters( 'woocommerce_hydration_request_after_callbacks', $response, $handler, $request );
-		} finally {
-			$cart_pricing_context->end_dispatch( $request );
+		if ( null !== $hydration_result ) {
+			$response = $hydration_result;
+		} else {
+			$response = call_user_func_array( $handler['callback'], array( $request ) );
 		}
+
+		/**
+		 * Similar to WP core's `rest_request_after_callbacks` filter, this allows to modify the response after it has been generated.
+		 * Allows backward compatibility with the `rest_request_after_callbacks` filter by providing the same arguments.
+		 *
+		 * @since 8.9.0
+		 *
+		 * @param WP_REST_Response|WP_HTTP_Response|WP_Error|mixed $response Result to send to the client.
+		 *                                                                   Usually a WP_REST_Response or WP_Error.
+		 * @param array                                            $handler  Route handler used for the request.
+		 * @param WP_REST_Request                                  $request  Request used to generate the response.
+		 */
+		$response = apply_filters( 'woocommerce_hydration_request_after_callbacks', $response, $handler, $request );
 
 		return $response;
 	}

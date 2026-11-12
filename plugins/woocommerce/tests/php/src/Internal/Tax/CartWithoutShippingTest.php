@@ -4,23 +4,14 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Tax;
 
-use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
-use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 use Automattic\WooCommerce\Enums\TaxBasedOn;
 use Automattic\WooCommerce\Internal\Tax\BaseLocationTaxEstimate;
-use Automattic\WooCommerce\Internal\Tax\CartPricingContext;
 use Automattic\WooCommerce\Internal\Tax\CartWithoutShipping;
-use Automattic\WooCommerce\StoreApi\StoreApi;
 
 /**
  * Tests for the CartWithoutShipping class.
- *
- * Besides the fallback rules, these tests check the tax results for cart totals, mini-cart renders, hydrated cart
- * requests and cross-sells. CartPricingContextTest covers how nested and failed work is unwound.
  */
 class CartWithoutShippingTest extends \WC_Unit_Test_Case {
-
-	use StoreApiRouteTestTrait;
 
 	/**
 	 * The System Under Test.
@@ -49,12 +40,8 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		// Fresh instances, so state left by earlier tests cannot leak in; WC_Customer and Blocks hydration resolve them from the container.
-		$cart_pricing_context = new CartPricingContext();
-		$cart_pricing_context->init();
+		// A fresh instance, so state left by earlier tests cannot leak in; WC_Customer resolves it from the container.
 		$this->sut = new CartWithoutShipping();
-		$this->sut->init( $cart_pricing_context );
-		wc_get_container()->replace( CartPricingContext::class, $cart_pricing_context );
 		wc_get_container()->replace( CartWithoutShipping::class, $this->sut );
 		$this->customer = new \WC_Customer();
 		$this->customer->set_billing_location( 'GB', 'LND', 'SW1A 1AA', 'London' );
@@ -79,7 +66,6 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 		try {
 			WC()->customer = $this->original_customer;
 			$this->reset_container_replacements();
-			$this->clear_rest_server();
 		} finally {
 			parent::tearDown();
 		}
@@ -94,7 +80,6 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_does_not_use_billing_address_when_tax_is_not_based_on_shipping( string $tax_based_on ): void {
 		$this->add_product_to_cart( true );
-		$this->set_checkout_context();
 		update_option( 'woocommerce_tax_based_on', $tax_based_on );
 
 		$this->assertFalse( $this->sut->should_use_billing_address( $this->customer ), 'The billing address should not be used when tax is not based on shipping.' );
@@ -117,7 +102,6 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_uses_billing_address_when_tax_location_setting_is_missing(): void {
 		$this->add_product_to_cart( true );
-		$this->set_checkout_context();
 		delete_option( 'woocommerce_tax_based_on' );
 
 		$this->assertTrue( $this->sut->should_use_billing_address( $this->customer ), 'A missing setting should behave like the shipping default.' );
@@ -130,7 +114,6 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 		$this->add_product_to_cart( true );
 		WC()->session->set( 'chosen_shipping_methods', array( 'local_pickup:1' ) );
 		WC()->session->set( 'previous_shipping_methods', array( array( 'local_pickup:1' ) ) );
-		$this->set_checkout_context();
 
 		$result = $this->customer->get_taxable_address();
 
@@ -145,7 +128,6 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	public function test_keeps_local_pickup_location_when_filter_is_applied_without_customer(): void {
 		$this->add_product_to_cart( true );
 		$this->choose_local_pickup_in_us();
-		$this->set_checkout_context();
 		// Its callback requires the customer argument, which this one-argument call leaves out.
 		$this->remove_base_location_tax_estimate_callback();
 
@@ -159,11 +141,27 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	 * @testdox Leaves the taxable address unchanged when the cart is empty.
 	 */
 	public function test_leaves_address_unchanged_for_empty_cart(): void {
-		$this->set_checkout_context();
-
 		$result = $this->customer->get_taxable_address();
 
 		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $result, 'An empty cart should use the configured shipping address.' );
+	}
+
+	/**
+	 * @testdox Does not read the cart before wp_loaded.
+	 */
+	public function test_does_not_read_cart_before_wp_loaded(): void {
+		global $wp_actions;
+		$this->add_product_to_cart( true );
+		$wp_loaded_count = $wp_actions['wp_loaded'];
+		unset( $wp_actions['wp_loaded'] );
+
+		try {
+			$result = $this->sut->should_use_billing_address( $this->customer );
+		} finally {
+			$wp_actions['wp_loaded'] = $wp_loaded_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restores the counter unset above.
+		}
+
+		$this->assertFalse( $result, 'The billing address should not be used before the cart can be read.' );
 	}
 
 	/**
@@ -172,7 +170,6 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	public function test_uses_billing_address_for_cart_without_shipping(): void {
 		$this->add_product_to_cart( true );
 		$this->add_product_to_cart( true );
-		$this->set_checkout_context();
 
 		$result = $this->customer->get_taxable_address();
 
@@ -180,215 +177,24 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Prices classic cart cross-sells using shipping tax while the cart uses billing tax.
+	 * @testdox Prices a product with billing tax while the cart has nothing to ship, and with shipping tax once a shippable item is added.
 	 */
-	public function test_classic_cart_cross_sell_uses_catalog_tax(): void {
-		$cross_sell = $this->set_up_cross_sell_tax_fixture();
-		add_filter( 'woocommerce_is_cart', '__return_true' );
-
-		// Render the template directly: woocommerce_cross_sell_display() skips rendering when is_checkout() is true,
-		// and legacy tests define WOOCOMMERCE_CHECKOUT for the rest of the process.
-		$markup = wc_get_template_html( 'cart/cross-sells.php', array( 'cross_sells' => array( $cross_sell ) ) );
-
-		$this->assertStringContainsString( wc_price( 110 ), $markup, 'The physical cross-sell should use shipping tax.' );
-		$this->assertStringNotContainsString( wc_price( 127 ), $markup, 'The cross-sell should not use billing tax.' );
-		$this->assertSame( array( 'HU', '', '', '' ), $this->customer->get_taxable_address(), 'The cart should use the billing address again once the cross-sells are rendered.' );
-		WC()->cart->calculate_totals();
-		$this->assertEquals( 2.7, WC()->cart->get_cart_contents_tax(), 'The virtual cart item should still use billing tax.' );
-	}
-
-	/**
-	 * @testdox Prices block cart cross-sells using the shipping address and other product collections using the billing address.
-	 *
-	 * @testWith ["woocommerce/product-collection/cross-sells", false]
-	 *           ["woocommerce/product-collection/upsells", true]
-	 *
-	 * @param string $collection      Product Collection collection.
-	 * @param bool   $expected_billing Whether the billing address is expected while the collection renders.
-	 */
-	public function test_block_cart_cross_sells_use_catalog_address( string $collection, bool $expected_billing ): void {
-		$this->add_product_to_cart( true );
-		add_filter( 'woocommerce_is_cart', '__return_true' );
-
-		$during_render = null;
-		add_filter(
-			'render_block_context',
-			function ( $context ) use ( &$during_render ) {
-				$during_render = $this->customer->get_taxable_address();
-				return $context;
-			}
-		);
-
-		render_block(
-			array(
-				'blockName'    => 'woocommerce/product-collection',
-				'attrs'        => array( 'collection' => $collection ),
-				'innerBlocks'  => array(),
-				'innerHTML'    => '',
-				'innerContent' => array(),
-			)
-		);
-
-		$billing  = array( 'GB', 'LND', 'SW1A 1AA', 'London' );
-		$shipping = array( 'US', 'CA', '90210', 'Beverly Hills' );
-		$this->assertSame( $expected_billing ? $billing : $shipping, $during_render, 'The collection should be priced using the expected address.' );
-		$this->assertSame( $billing, $this->customer->get_taxable_address(), 'The cart should use the billing address again once the collection is rendered.' );
-	}
-
-	/**
-	 * @testdox Keeps an outer catalog pricing scope open when a cross-sells block renders without pre_render_block.
-	 */
-	public function test_block_cart_cross_sells_render_without_pre_render_keeps_outer_catalog_scope(): void {
-		$this->add_product_to_cart( true );
-		add_filter( 'woocommerce_is_cart', '__return_true' );
-		$shipping = array( 'US', 'CA', '90210', 'Beverly Hills' );
-
-		$after_render = null;
-		wc_get_container()->get( CartPricingContext::class )->with_catalog_pricing(
-			function () use ( &$after_render ) {
-				// WP_Block::render() fires render_block_{name} without pre_render_block for a top-level block.
-				$block = new \WP_Block(
-					array(
-						'blockName'    => 'woocommerce/product-collection',
-						'attrs'        => array( 'collection' => 'woocommerce/product-collection/cross-sells' ),
-						'innerBlocks'  => array(),
-						'innerHTML'    => '',
-						'innerContent' => array(),
-					)
-				);
-				$block->render();
-				$after_render = $this->customer->get_taxable_address();
-			}
-		);
-
-		$this->assertSame( $shipping, $after_render, 'The outer catalog pricing scope should still apply after the block render.' );
-		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $this->customer->get_taxable_address(), 'The cart should use the billing address once the outer scope ends.' );
-	}
-
-	/**
-	 * @testdox Leaves no catalog pricing scope open when another filter short-circuits the cross-sells block render.
-	 */
-	public function test_block_cart_cross_sells_short_circuited_render_opens_no_scope(): void {
-		$this->add_product_to_cart( true );
-		add_filter( 'woocommerce_is_cart', '__return_true' );
-		add_filter( 'pre_render_block', static fn() => '<p>short-circuit</p>', 10, 0 );
-
-		render_block(
-			array(
-				'blockName'    => 'woocommerce/product-collection',
-				'attrs'        => array( 'collection' => 'woocommerce/product-collection/cross-sells' ),
-				'innerBlocks'  => array(),
-				'innerHTML'    => '',
-				'innerContent' => array(),
-			)
-		);
-
-		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $this->customer->get_taxable_address(), 'A skipped render should not leave catalog pricing on for the cart.' );
-	}
-
-	/**
-	 * @testdox Prices Store API cross-sells using shipping tax while virtual cart items use billing tax.
-	 */
-	public function test_store_api_cross_sell_uses_catalog_tax(): void {
-		$cross_sell = $this->set_up_cross_sell_tax_fixture();
-		$result     = null;
-
-		$this->dispatch_test_route(
-			'/wc/store/v1/products',
-			function ( $request ) use ( &$result ) {
-				unset( $request ); // Avoid parameter not used PHPCS errors.
-				StoreApi::container();
-				$hydration = new Hydration( $this->createMock( AssetDataRegistry::class ) );
-				$result    = $hydration->get_rest_api_response_data( '/wc/store/v1/cart' );
-				return rest_ensure_response( array( 'ok' => true ) );
-			}
-		);
-
-		$this->assertSame( '1270', $result['body']['items'][0]['prices']->price, 'The virtual cart item should use billing tax.' );
-		$this->assertSame( $cross_sell->get_id(), $result['body']['cross_sells'][0]['id'], 'The expected cross-sell should appear in the cart response.' );
-		$this->assertSame( '11000', $result['body']['cross_sells'][0]['prices']->price, 'The physical cross-sell should use shipping tax.' );
-	}
-
-	/**
-	 * @testdox Uses the billing address for cart totals calculated outside the cart and checkout.
-	 */
-	public function test_uses_billing_address_for_cart_totals_outside_cart_and_checkout(): void {
+	public function test_displayed_price_follows_the_cart(): void {
 		$this->create_tax_rate( 'GB', '20.0000' );
+		$this->create_tax_rate( 'US', '10.0000' );
+		update_option( 'woocommerce_tax_display_shop', 'incl' );
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->set_regular_price( 100 );
+		$product->save();
+
 		$this->add_product_to_cart( true );
-		$total_tax     = null;
-		$after_address = null;
+		$price_with_virtual_cart = wc_get_price_to_display( $product );
+		$this->add_product_to_cart( false );
+		$price_with_shippable_cart = wc_get_price_to_display( $product );
 
-		$this->dispatch_test_route(
-			'/wc/store/v1/products',
-			function ( $request ) use ( &$total_tax, &$after_address ) {
-				unset( $request ); // Avoid parameter not used PHPCS errors.
-				WC()->cart->calculate_totals();
-				$total_tax     = WC()->cart->get_total_tax();
-				$after_address = $this->customer->get_taxable_address();
-				return rest_ensure_response( array( 'ok' => true ) );
-			}
-		);
-
-		$this->assertEquals( 2.0, $total_tax, 'Cart totals should include the billing country tax.' );
-		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $after_address, 'The shipping address should be used again once totals are calculated.' );
-	}
-
-	/**
-	 * @testdox Uses the billing address for mini-cart prices rendered outside the cart and checkout.
-	 */
-	public function test_uses_billing_address_for_mini_cart_outside_cart_and_checkout(): void {
-		$this->create_tax_rate( 'GB', '20.0000' );
-		$this->add_product_to_cart( true );
-		update_option( 'woocommerce_tax_display_cart', 'incl' );
-		$mini_cart     = '';
-		$after_address = null;
-
-		$this->dispatch_test_route(
-			'/wc/store/v1/products',
-			function ( $request ) use ( &$mini_cart, &$after_address ) {
-				unset( $request ); // Avoid parameter not used PHPCS errors.
-				ob_start();
-				woocommerce_mini_cart();
-				$mini_cart     = (string) ob_get_clean();
-				$after_address = $this->customer->get_taxable_address();
-				return rest_ensure_response( array( 'ok' => true ) );
-			}
-		);
-
-		$this->assertStringContainsString( '<span class="quantity">1 &times; ' . wc_price( 12 ) . '</span>', $mini_cart, 'Mini-cart line prices should include the billing country tax.' );
-		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $after_address, 'The shipping address should be used again once the mini-cart is rendered.' );
-	}
-
-	/**
-	 * @testdox Uses the billing address for a cart request loaded through Blocks hydration.
-	 *
-	 * The non-cart Store API request models a render outside the cart and checkout: is_checkout()
-	 * is unreliable in CI because legacy tests define the WOOCOMMERCE_CHECKOUT constant for the rest of the process.
-	 */
-	public function test_uses_billing_address_for_cart_loaded_through_hydration(): void {
-		$this->create_tax_rate( 'GB', '20.0000' );
-		$this->add_product_to_cart( true );
-		update_option( 'woocommerce_tax_display_cart', 'incl' );
-		$item_price    = null;
-		$after_address = null;
-
-		$this->dispatch_test_route(
-			'/wc/store/v1/products',
-			function ( $request ) use ( &$item_price, &$after_address ) {
-				unset( $request ); // Avoid parameter not used PHPCS errors.
-				StoreApi::container();
-				$hydration = new Hydration( $this->createMock( AssetDataRegistry::class ) );
-				$result    = $hydration->get_rest_api_response_data( '/wc/store/v1/cart' );
-
-				$item_price    = $result['body']['items'][0]['prices']->price ?? null;
-				$after_address = $this->customer->get_taxable_address();
-				return rest_ensure_response( array( 'ok' => true ) );
-			}
-		);
-
-		// Store API prices are strings in the currency's minor unit: 12.00 becomes '1200'.
-		$this->assertSame( '1200', $item_price, 'A hydrated cart item price should include the billing country tax.' );
-		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $after_address, 'The shipping address should be used again once hydration is done.' );
+		$this->assertEquals( 120, $price_with_virtual_cart, 'The price should include billing tax while nothing in the cart ships.' );
+		$this->assertEquals( 110, $price_with_shippable_cart, 'The price should include shipping tax once the cart has a shippable item.' );
 	}
 
 	/**
@@ -403,7 +209,6 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	public function test_follows_cart_needs_shipping( bool $virtual, callable $override, bool $expected_billing ): void {
 		$this->add_product_to_cart( $virtual );
 		$override();
-		$this->set_checkout_context();
 
 		$result = $this->customer->get_taxable_address();
 
@@ -462,7 +267,6 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	public function test_leaves_address_unchanged_for_mixed_cart(): void {
 		$this->add_product_to_cart( true );
 		$this->add_product_to_cart( false );
-		$this->set_checkout_context();
 
 		$result = $this->customer->get_taxable_address();
 
@@ -474,7 +278,6 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_does_not_recurse_when_needs_shipping_callback_resolves_taxable_address(): void {
 		$this->add_product_to_cart( true );
-		$this->set_checkout_context();
 
 		// WC_Cart::needs_shipping() only checks products when a shipping method exists, so count nesting rather than calls.
 		$depth          = 0;
@@ -509,7 +312,6 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_later_taxable_address_callback_sees_and_overrides_billing_address(): void {
 		$this->add_product_to_cart( true );
-		$this->set_checkout_context();
 		$received_address = null;
 		$base_address     = array( 'DE', 'BE', '10115', 'Berlin' );
 		$callback         = function ( $address ) use ( &$received_address, $base_address ) {
@@ -529,7 +331,6 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_keeps_shipping_address_when_opt_out_filter_returns_false(): void {
 		$this->add_product_to_cart( true );
-		$this->set_checkout_context();
 		$received_args = array();
 		$callback      = function ( $use_billing, $customer, $cart ) use ( &$received_args ) {
 			$received_args = array(
@@ -563,7 +364,6 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	public function test_opt_out_filter_cannot_enable_billing_address_for_cart_needing_shipping(): void {
 		$this->add_product_to_cart( true );
 		$this->add_product_to_cart( false );
-		$this->set_checkout_context();
 		add_filter( 'woocommerce_apply_billing_tax_for_cart_without_shipping', '__return_true' );
 
 		$result = $this->customer->get_taxable_address();
@@ -576,7 +376,6 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_leaves_address_unchanged_for_customer_who_does_not_own_cart(): void {
 		$this->add_product_to_cart( true );
-		$this->set_checkout_context();
 		$other_customer = new \WC_Customer();
 		$other_customer->set_billing_location( 'DE', 'BE', '10115', 'Berlin' );
 		$other_customer->set_shipping_location( 'FR', 'IDF', '75001', 'Paris' );
@@ -592,7 +391,6 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	public function test_leaves_address_unchanged_when_billing_country_is_empty(): void {
 		$this->add_product_to_cart( true );
 		$this->customer->set_billing_location( '', 'LND', 'SW1A 1AA', 'London' );
-		$this->set_checkout_context();
 
 		$result = $this->customer->get_taxable_address();
 
@@ -608,7 +406,6 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	public function test_uses_billing_address_when_local_pickup_is_left_in_session(): void {
 		$this->add_product_to_cart( true );
 		$this->choose_local_pickup_in_us();
-		$this->set_checkout_context();
 
 		$result = $this->customer->get_taxable_address();
 
@@ -625,7 +422,6 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 		$this->add_product_to_cart( true );
 		$shippable_item_key = $this->add_product_to_cart( false );
 		$this->choose_local_pickup_in_us();
-		$this->set_checkout_context();
 
 		WC()->cart->remove_cart_item( $shippable_item_key );
 
@@ -642,7 +438,6 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 		$this->create_tax_rate( 'US', '10.0000', '90001' );
 		$this->add_product_to_cart( false );
 		$this->choose_local_pickup_in_us();
-		$this->set_checkout_context();
 
 		$taxable_address = $this->customer->get_taxable_address();
 		WC()->cart->calculate_totals();
@@ -650,32 +445,6 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 		$this->assertSame( array( 'US', 'CA', '90001', 'Los Angeles' ), $taxable_address, 'A cart product that needs shipping should keep the local pickup location as the taxable address.' );
 		// Shipping methods left enabled by other tests can add shipping tax, so check the item tax only.
 		$this->assertEquals( 1.0, WC()->cart->get_cart_contents_tax(), 'Cart item tax should use the local pickup location rate.' );
-	}
-
-	/**
-	 * Set up a virtual cart item with a physical cross-sell and different billing and shipping tax rates.
-	 *
-	 * @return \WC_Product Physical cross-sell product.
-	 */
-	private function set_up_cross_sell_tax_fixture(): \WC_Product {
-		$this->customer->set_billing_location( 'HU', '', '', '' );
-		$this->create_tax_rate( 'HU', '27.0000' );
-		$this->create_tax_rate( 'US', '10.0000' );
-		update_option( 'woocommerce_tax_display_shop', 'incl' );
-		update_option( 'woocommerce_tax_display_cart', 'incl' );
-
-		$cross_sell = \WC_Helper_Product::create_simple_product();
-		$cross_sell->set_price( 100 );
-		$cross_sell->set_regular_price( 100 );
-		$cross_sell->save();
-
-		$cart_product = \WC_Helper_Product::create_simple_product();
-		$cart_product->set_virtual( true );
-		$cart_product->set_cross_sell_ids( array( $cross_sell->get_id() ) );
-		$cart_product->save();
-		WC()->cart->add_to_cart( $cart_product->get_id() );
-
-		return $cross_sell;
 	}
 
 	/**
@@ -757,12 +526,5 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 		if ( '' !== $postcode ) {
 			\WC_Tax::_update_tax_rate_postcodes( $tax_rate_id, $postcode );
 		}
-	}
-
-	/**
-	 * Set the request context to checkout.
-	 */
-	private function set_checkout_context(): void {
-		add_filter( 'woocommerce_is_checkout', '__return_true' );
 	}
 }

@@ -15,31 +15,11 @@ use Automattic\WooCommerce\Enums\TaxBasedOn;
 class CartWithoutShipping {
 
 	/**
-	 * Tracks whether the cart is being priced, as opposed to catalog prices.
-	 *
-	 * @var CartPricingContext
-	 */
-	private $cart_pricing_context;
-
-	/**
 	 * Whether the cart shipping check is running, so re-entrant calls from needs_shipping filter callbacks are skipped.
 	 *
 	 * @var bool
 	 */
 	private $is_checking_shipping = false;
-
-	/**
-	 * Set up the cart pricing context.
-	 *
-	 * @since 11.4.0
-	 *
-	 * @internal
-	 *
-	 * @param CartPricingContext $cart_pricing_context Tracks whether the cart is being priced.
-	 */
-	final public function init( CartPricingContext $cart_pricing_context ): void {
-		$this->cart_pricing_context = $cart_pricing_context;
-	}
 
 	/**
 	 * Determine whether the customer's billing address should be used for tax because tax is based on shipping and no product in their cart needs shipping.
@@ -58,12 +38,13 @@ class CartWithoutShipping {
 			return false;
 		}
 
-		$cart = WC()->cart;
-		if ( ! $cart instanceof \WC_Cart || $cart->get_customer() !== $customer ) {
+		// The cart exists from init, but reading it before wp_loaded is flagged as doing it wrong and loads the session early.
+		if ( ! did_action( 'wp_loaded' ) ) {
 			return false;
 		}
 
-		if ( ! $this->cart_pricing_context->is_active() ) {
+		$cart = WC()->cart;
+		if ( ! $cart instanceof \WC_Cart || $cart->get_customer() !== $customer ) {
 			return false;
 		}
 
